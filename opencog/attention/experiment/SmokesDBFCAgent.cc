@@ -116,8 +116,8 @@ void SmokesDBFCAgent::run()
     std::cerr << "CYCLE:" << cogserver().getCycleCount() << std::endl;
 
     if (first_run) {
-        //Pull some atoms to the AF set
-        // Select a random source from the atomspace to start with FC.
+        // Pull some atoms to the AF set
+        // and select a random source from the pulled set for starting FC with.
         HandleSeq hs;
         _atomspace.get_handles_by_type(std::back_inserter(hs), ATOM, true);
 
@@ -229,7 +229,7 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
                   << "\n";
         auto it = dist_surprisingness_friends.begin();
         // Consider the first top_k values as surprising. After we have enough
-        // data only consider those who have higher value of the lbound of the
+        // data only consider those who have higher value than the lbound of the
         // top_k as surprising.
         unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_friends.size();
 
@@ -252,7 +252,7 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
                   << "\n";
         auto it = dist_surprisingness_smokes.begin();
         // Consider the first top_k values as surprising. After we have enough
-        // data only consider those who have higher value of the lbound of the
+        // data only consider those who have higher value than the lbound of the
         // top_k as surprising.
         unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_smokes.size();
 
