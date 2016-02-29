@@ -95,13 +95,8 @@
 	; sense, then attach that sense to the current-action anchor.
 	(cog-bind obj-semantics-rule-1-ao)
 
-(display
 	(cog-bind obj-semantic-model-rule-1)
-)
-(display
 	(cog-bind obj-semantic-model-rule-2)
-)
-
 
 	; Perform the action, and print a reply.
 	(let* ((act-do-do (cog-bind action-rule-ao))

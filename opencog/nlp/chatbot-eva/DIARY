@@ -1003,3 +1003,134 @@ MultiSpaceUTest
 
 
 LambdaLink does not have subst but its easy ... 
+
+global_python_initialize(
+
+static std::mutex pythr;
+std::lock_guard<std::mutex> lock(pythr);
+
+xecute_strin
+
+apply_script
+
+CogServerUTest
+
+PythonModuleUTest
+
+PyObject * atomspace_py_object(AtomSpace *);
+---
+PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
+
+call_user_function
+
+pyModule = this->module_for_function(moduleFunction, functionName);
+
+pyDict = PyModule_GetDict(pyModule);
+PyObject* pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+Py_INCREF(pyUserFunc); // ???
+
+// Make sure the function is callable.
+    if (!PyCallable_Check(pyUserFunc)) {
+}
+
+
+pyReturnValue = PyObject_CallObject(pyUserFunc, pyAtomspace);
+
+pyError = PyErr_Occurred();
+    if (pyError) {
+
+
+Py_DECREF(pyAtomSpace);
+Py_DECREF(pyUserFunc);
+
+
+(python-eval "import os\ndef foo():\n    os.listdir('.')\n")
+(python-eval "foo()\n")
+(python-eval "def foo(aspace):\n    return aspace\n\n")
+(python-eval "dbg('asdfasdf')\n")
+
+(use-modules (opencog) (opencog python))
+(python-eval "
+def dbg(sv):
+    fu=open('/tmp/fff', 'a+')
+    print >>fu, sv
+    fu.close()
+")
+
+(python-eval "
+from opencog.atomspace import AtomSpace, TruthValue
+from opencog.type_constructors import *
+from opencog.atomspace import types
+
+def foo(asp):
+    dbg(str(asp))
+    # set_type_ctor_atomspace(asp)
+    TV = TruthValue(0.42, 0.69)
+    dbg(str(TV))
+    A = asp.add_node(types.ConceptNode, 'Apple', TV)
+    dbg(str(A))
+    # ConceptNode('Apple', TV)
+")
+(python-call-with-as "foo" (cog-atomspace))
+(cog-node 'ConceptNode "Apple")
+
+
+
+__pyx_pf_7opencog_9atomspace_9AtomSpace_10add_node (
+    __pyx_v_tv=0x7fffe2879110, __pyx_v_atom_name=<optimized out>,
+__pyx_v_t=7, 
+    __pyx_v_self=0x7fffe28790f0)
+at
+/home/linas/src/novamente/src/atomspace-git/build/opencog/cython/opencog/atomspace.cpp:4445
+
+is correct but 
+
+  0x00007fffedf25807 in opencog::AtomSpace::add_node (this=0x0,
+t=t@entry=7, 
+    name=..., async=async@entry=false)
+    at
+/home/linas/src/novamente/src/atomspace-git/opencog/atomspace/AtomSpace.cc:167
+
+is wrong
+
+oh, its using the pointer as self ...
+__pyx_v_self->atomspace->add_node
+
+AtomSpace_factory
+cython/opencog/atomspace_details.pyx":331
+
+
+eval_scheme_h
+opencog/PyScheme.h
+
+(use-modules (opencog) (opencog python))
+(python-eval "
+def dbg(sv):
+    fu=open('/tmp/fff', 'a+')
+    print >>fu, sv
+    fu.close()
+")
+
+(python-eval "
+from opencog.scheme_wrapper import scheme_eval_as
+from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import types
+
+asp = scheme_eval_as('(cog-atomspace)')
+dbg(str(asp))
+# set_type_ctor_atomspace(asp)
+TV = TruthValue(0.554, 0.2269)
+dbg(str(TV))
+A = asp.add_node(types.ConceptNode, 'Apple', TV)
+dbg(str(A))
+# ConceptNode('Apple', TV)
+")
+(cog-node 'ConceptNode "Apple")
+
+
+
+==============================================================
+
+(load "run-chatbot.scm")
+(process-query 'luser "Look left!")
+(process-query 'luser "where are you looking?")
