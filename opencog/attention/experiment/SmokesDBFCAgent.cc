@@ -92,9 +92,11 @@ SmokesDBFCAgent::SmokesDBFCAgent(CogServer& cs) :
 
     _eval = new SchemeEval(&_atomspace);
     load_scm_files_from_config(_atomspace);
+    smokes_logger = new Logger(loggername);
     rule_base = _atomspace.get_node(CONCEPT_NODE, "SMOKES_RB");
     std::cout << "RULE_bASE:\n";
     std::cout << rule_base->toShortString() << "\n";
+
 }
 
 SmokesDBFCAgent::~SmokesDBFCAgent()
@@ -111,13 +113,13 @@ void SmokesDBFCAgent::run()
                           _atomspace.add_node(PREDICATE_NODE, "smokes"),
                           _atomspace.add_node(PREDICATE_NODE, "cancer") };
 
-    std::cout << "CYCLE:" << cogserver().getCycleCount() << std::endl;
+    std::cerr << "CYCLE:" << cogserver().getCycleCount() << std::endl;
 
     if (first_run) {
         //Pull some atoms to the AF set
         // Select a random source from the atomspace to start with FC.
         HandleSeq hs;
-        _atomspace.get_handles_by_type(hs, ATOM);
+        _atomspace.get_handles_by_type(std::back_inserter(hs), ATOM, true);
 
         if (hs.empty()) {
             std::cout << "EMPTY ATOMSPACE\n";
@@ -142,7 +144,7 @@ void SmokesDBFCAgent::run()
         }
 
         //Stimulate source and focus set
-        std::cout << "STIMULATING SOURCE FOR PULLING IT IN TO AF\n";
+        std::cerr << "STIMULATING SOURCE FOR PULLING IT IN TO AF\n";
         for (Handle& h : af_set) {
             stimulateAtom(h,
                           _atomspace.get_attentional_focus_boundary() + 10);
@@ -160,7 +162,7 @@ void SmokesDBFCAgent::run()
         af_set.erase(std::remove_if(af_set.begin(), af_set.end(), [](Handle& h) {
             return classserver().isA(h->getType(),HEBBIAN_LINK);
         }),
-                   af_set.begin());
+                   af_set.end());
         if (af_set.empty()) {
             std::cout << "COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.\n";
             return;
@@ -169,29 +171,43 @@ void SmokesDBFCAgent::run()
     }
 
     // Do one step forward chaining.
+    std::cerr << "FCing" << std::endl;
     ForwardChainer fc(_atomspace, rule_base, source, { af_set });
     fc.do_step();
-    std::cout << "FORWARD CHAINER STEPPED\n\t";
+    std::cerr << "FORWARD CHAINER STEPPED\n\t";
 
+    UnorderedHandleSet fc_result = fc.get_chaining_result();
+    std::cerr << "Found " << fc_result.size() << " results.\n";
+    for (const Handle& h : fc_result)
+        std::cerr << "\t" << h->toShortString() << "\n";
 
     // Stimulate surprising unique results.
     HandleSeq unique;
-    HandleSeq fc_result = fc.get_chaining_result();
-    std::cout << "Found " << fc_result.size() << " results.\n";
-    for (const Handle& h : fc_result)
-        std::cout << "\t" << h->toShortString() << "\n";
-    std::sort(fc_result.begin(), fc_result.end());
+    std::set<Handle> temp(fc_result.begin(), fc_result.end());
     //Inference_result doesn't need to be sorted since set is ordered.
-    std::set_difference(inference_result.begin(), inference_result.end(),
-                        fc_result.begin(), fc_result.end(),
-                        std::back_inserter(unique));
-    std::cout << "\tFound " << unique.size() << " unique inferences.\n\t";
+    if (not inference_result.empty()) {
+        /* std::set_difference(inference_result.begin(), inference_result.end(),
+         temp.begin(), temp.end(),
+         std::back_inserter(unique));
+         */
+        for (const Handle& h : temp) {
+            if (std::find(inference_result.begin(), inference_result.end(), h) == inference_result.end())
+                unique.push_back(h);
+        }
+    } else {
+        unique = HandleSeq(temp.begin(), temp.end());
+    }
+
+    std::cerr << "\tFound " << unique.size() << " unique inferences.\n\t";
 
     for (Handle& h : unique) {
         if (is_surprising(h)) {
             //xxx not sure what amount of stimulus should be provided.
-            std::cout << h->toShortString() << "\nWAS A SURPRISING RESULT\n";
-            stimulateAtom(h, _atomspace.get_attentional_focus_boundary() + 10);
+            auto stimval = _atomspace.get_attentional_focus_boundary() + 10;
+            std::cerr
+                    << "Providing stimulus bc its surprising. stimulus amount="
+                    << stimval << "\n";
+            stimulateAtom(h, stimval);
         }
         inference_result.insert(h);
     }
@@ -202,39 +218,56 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
 {
 
     strength_t mean_tv = 0.0f;
+    bool val = false;
     if (is_friendship_reln(h)) {
         mean_tv = friends_mean();
+        std::cerr << "Mean TV of friends reln: " << mean_tv << std::endl;
+        // Calculate the Jensen Shanon distance bn mean_tv and h's tv
+        float mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
+                               (h->getTruthValue())->getMean(), 100, 100);
+        std::cerr << "JSD_VAL between result and the above mean= " << mi
+                  << "\n";
+        auto it = dist_surprisingness_friends.begin();
+        // Consider the first top_k values as surprising. After we have enough
+        // data only consider those who have higher value of the lbound of the
+        // top_k as surprising.
+        unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_friends.size();
+
+        if (top_k > dist_surprisingness_friends.size() or mi
+                >= *std::next(it, top_k)) {
+            dist_surprisingness_friends.insert(mi);
+            val = true;
+        } else {
+            dist_surprisingness_friends.insert(mi);
+            val = false;
+        }
+
     } else if (is_smokes_reln(h)) {
         mean_tv = smokes_mean();
-    }
-    // Calculate the Jensen Shanon distance bn mean_tv and h's tv
-    float mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
-                           (h->getTruthValue())->getMean(), 100, 100);
-    auto it = dist_surprisingness.begin();
-    int top_k = (K_PERCENTILE / 100) * dist_surprisingness.size();
+        std::cerr << "Mean TV of smokes reln is: " << mean_tv << std::endl;
+        // Calculate the Jensen Shanon distance bn mean_tv and h's tv
+        float mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
+                               (h->getTruthValue())->getMean(), 100, 100);
+        std::cerr << "JSD_VAL between result and the above mean= " << mi
+                  << "\n";
+        auto it = dist_surprisingness_smokes.begin();
+        // Consider the first top_k values as surprising. After we have enough
+        // data only consider those who have higher value of the lbound of the
+        // top_k as surprising.
+        unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_smokes.size();
 
-    // Consider the first top_k values as surprising. After we have enough
-    // data only consider those who have higher value of the lbound of the
-    // top_k as surprising.
-    std::cout << "Surprising result list:\n";
-    for (const auto& i : dist_surprisingness)
-        std::cout << i << ", ";
-    std::cout << "\n" << h->toShortString() << "\n\t JSD_VAL=" << mi << "\n";
-
-    bool val;
-    if (top_k > dist_surprisingness.size()) {
-        dist_surprisingness.insert(mi);
-        val = true;
-    } else if (mi >= *std::next(it, top_k)) {
-        dist_surprisingness.insert(mi);
-        val = true;
-    } else {
-        dist_surprisingness.insert(mi);
-        val = false;
+        if (top_k > dist_surprisingness_smokes.size() or mi
+                >= *std::next(it, top_k)) {
+            dist_surprisingness_smokes.insert(mi);
+            val = true;
+        } else {
+            dist_surprisingness_smokes.insert(mi);
+            val = false;
+        }
     }
 
-    std::cout << "Found to be " << (val ? "surprising" : "not surprising")
-              << "\n";
+    std::cerr << "Result Found to be "
+              << (val ? "surprising" : "not surprising") << "\n";
     return val;
 }
 
