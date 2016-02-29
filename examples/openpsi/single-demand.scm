@@ -33,36 +33,55 @@
 (psi-goal-selector-set! (psi-goal-selector-maximize .65))
 
 (define (psi-example-step)
-; NOTE: 1. This function is for simplifying runs.
-;       2. The `display` and `format` commands are only used for presentation
-;          purposes.
+"
+  - This function is for simplifying runs and testing.
+  - Returns a list of outputs. Use `show-psi-example-step-output` function
+    instead.
+"
+    (list
+        (psi-get-demands-all)
+        (ure-rbs-rules (psi-asp))
+        (psi-current-goal)
+        (psi-select-random-goal)
+        (psi-select-action-rules)
+        (ure-rbs-rules (psi-asp))
+        (psi-step)
+    )
+)
 
+(define (show-psi-example-step-output output)
+"
+  - This function is for simplifying runs and testing
+  - The `display` and `format` commands are only used for presentation purposes.
+  - Displays the elements of `output` with explanations.
+"
     (display "Start------------------------\n")
     ; Startup state
-    (format #t "* Initial state of demands =\n~a\n" (psi-get-demands-all))
-    (format #t "* Initial actions in asp =\n~a\n" (ure-rbs-rules (psi-asp)))
-    (format #t "* Initial goal =\n~a\n" (psi-current-goal))
+    (format #t "* Initial state of demands =\n~a\n" (list-ref output 0))
+    (format #t "* Initial actions in asp =\n~a\n" (list-ref output 1))
+    (format #t "* Initial goal =\n~a\n" (list-ref output 2))
 
     ; Select goal randomly.
     ; NOTE: 1. You can define how goal should be selected. Remeber to set
     ;          conditions to return back to default.
     ;       2. The threshold is lower than the default  energy value defined above.
-    (format #t "* Goal selection result =\n~a\n" (psi-select-random-goal))
+    (format #t "* Goal selection result =\n~a\n" (list-ref output 3))
 
     ; Select actions
     ; NOTE: You can define how actions should be selected. Just remember to
     ; define what happens when goal switches to default.
-    (format #t "* Action selection result =\n~a\n" (psi-select-action-rules))
+    (format #t "* Action selection result =\n~a\n" (list-ref output 4))
 
     ; The number and types of actions in the asp should have changed, depending
     ; on the state of the atomspace.
-    (format #t "* Final actions in asp =\n~a\n"  (ure-rbs-rules (psi-asp)))
+    (format #t "* Final actions in asp =\n~a\n" (list-ref output 5))
 
     ; Single step through the asp resulting in all the actions being run once.
-    (format #t "* Result of steping through the asp =\n~a\n" (psi-step))
+    (format #t "* Result of steping through the asp =\n~a\n"
+        (list-ref output 6))
     (display "End------------------------\n")
 )
 
-; Running `(psi-example-step)` will result in switching between one goal-state
-; to another. Observer the change in the strength of
-; (ConceptNode "OpenPsi: Energy")
+; - Running `(show-psi-example-step-output (psi-example-step))` will result in
+;   switching between one goal-state and displaying the results.
+; - Observer the change in the strength of (ConceptNode "OpenPsi: Energy").

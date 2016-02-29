@@ -1,4 +1,4 @@
-;Copyright (C) 2016 OpenCog Foundation
+; Copyright (C) 2016 OpenCog Foundation
 
 ; Define an OpenPsi-Demand called Energy
 
@@ -43,7 +43,7 @@
 ; --------------------------------------------------------------
 ; For test_psi_get_demands
 (define (test-select-all)
-    ; using psi-get-demands b/c it is just wrapper
+    ; Using psi-get-demands b/c it is just a wrapper.
     (psi-get-demands-all)
 )
 
