@@ -28,6 +28,15 @@
 ;    (cog-evaluate! (Put (DefinedPredicate "Show expression")
 ;         (ListLink (Concept "happy") (Number 6) (Number 0.3))))
 ;
+; As of right now, there is nothing to "orchestrate" here, since each
+; animation fades out pretty quickly (the "duration" seems to be
+; ignored!?) and its very unlikely that we'll get conflicting
+; expression directives at a rate of more than one every few seconds.
+; So basically, we accept all directives, and show them immedaitely.
+;
+; If we wanted to rate-limit this, then make a copy of "change-template"
+; and edit it to provide a minimum elapsed time predicate.
+;
 (DefineLink
 	(DefinedPredicate "Show expression")
 	(LambdaLink
