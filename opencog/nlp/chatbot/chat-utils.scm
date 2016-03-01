@@ -36,12 +36,15 @@
 "
     (define (cog-delete-parent a-link)
         ; Many rules return a ListLink of results that they
-        ; generated. Some rules return singletons.  If A-LINK
-        ; is a ListLink, then delete it and return a list of
-        ; its contents, else return a list holding A-LINK.
+        ; generated. Some rules return singletons. And the
+        ; Forward Chainer uses a SetLink to wrap all these
+        ; results. So if A-LINK is a SetLink or a ListLink,
+        ; then delete it and return a list of its contents,
+        ; else return a list holding A-LINK.
         ;
         ; XXX maybe this should be part of the ure module??
-        (if (equal? 'ListLink (cog-type a-link))
+        (if (or (equal? 'ListLink (cog-type a-link))
+                (equal? 'SetLink (cog-type a-link)))
             (let ((returned-list (cog-outgoing-set a-link)))
                     (cog-delete a-link)
                     returned-list)
