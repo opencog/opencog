@@ -26,7 +26,7 @@
 ;
 ; Example usage:
 ;    (cog-evaluate! (Put (DefinedPredicate "Show expression")
-;         (ListLink (Concept "happy") (Number 6) (Number 0.3))))
+;         (ListLink (Concept "happy") (Number 6) (Number 0.6))))
 ;
 ; As of right now, there is nothing to "orchestrate" here, since each
 ; animation fades out pretty quickly (the "duration" seems to be

@@ -56,9 +56,9 @@
 
 (emo-expr-spec "bored"    "bored"         0.7 0.4 0.7 10 15)
 (emo-expr-spec "bored"    "sad"           0.1 0.4 0.6 10 15)
-(emo-expr-spec "bored"    "happy"         0.2 0.4 0.6 10 15)
+(emo-expr-spec "bored"    "amused"        0.2 0.7 1.0 10 15)
 
-(emo-expr-spec "sleep"    "happy"         1.0  0.4 0.45 5 15)
+(emo-expr-spec "sleep"    "amused"        1.0  0.8 1.0 5 15)
 
 (emo-expr-spec "wake-up"  "surprised"     0.45 0.4 0.6 5 15)
 (emo-expr-spec "wake-up"  "happy"         0.2  0.6 0.7 5 15)
@@ -68,6 +68,23 @@
 (emo-expr-spec "neutral-speech"  "happy"         0.2  0.1 0.3 4 8)
 (emo-expr-spec "neutral-speech"  "comprehending" 0.4  0.5 0.8 4 8)
 (emo-expr-spec "neutral-speech"  "engaged"       0.4  0.5 0.8 4 8)
+
+; Used for imperatives, i.e. when she is verbally told to do something.
+; Thus, we list all of them here. The probability column is ignored.
+; The strength has to be 0.6 or more, or else blender doesn't play the
+; animation.
+(emo-expr-spec "imperative"  "afraid"        1  0.4 0.6 6 12)
+(emo-expr-spec "imperative"  "amused"        1  0.9 1.0 6 12)
+(emo-expr-spec "imperative"  "bored"         1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "comprehending" 1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "confused"      1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "engaged"       1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "happy"         1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "irritated"     1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "recoil"        1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "sad"           1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "surprised"     1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "worry"         1  0.6 0.9 6 12)
 
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
