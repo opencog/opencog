@@ -170,6 +170,9 @@
 ; recycle the above (I tried) because DefinedSchema mis-behaves
 ; in various irritating ways, so we duplicate the above using
 ; ConceptNode, instead.
+;
+; XXX Remove this -- the self-model should be in the
+; ros-behavior-scripting modules.
 
 ; Knowledge about spatial directions. Pair up words and physical
 ; directions.
@@ -297,8 +300,8 @@
 	))
 
 ; -----
-; Grounding of facial expressions by animations in the Eva blender model:
-; happy, sad, confused, etc. See below for full list.
+; Grounding of words for facial expressions by animations in the Eva
+; blender model: happy, sad, confused, etc. See below for full list.
 
 ; XXX a bunch of verb synonyms -- handled manually. These should be
 ; automated via synonymous phrase support. Total hack, needs fixing.
@@ -524,13 +527,15 @@
 ;--------------------------------------------------------------------
 ; Duplicate of the above, except that this is for use in controlling
 ; the self-model, rather than the physical motors.
+;
+; XXX Remove this -- this si supposed to ba a part of the action
+; orchestrateor, i.e. the self model is about what the orchestrator
+; actually did, not what it was told to do.
 
-(ReferenceLink (WordNode "express")
-	(AnchorNode "*-facial-expression-*"))
+(Reference (Word "express") (Anchor "*-facial-expression-*"))
 
 ; Model (self-awareness) syntactic category of facial expression verbs
-(InheritanceLink (AnchorNode "*-facial-expression-*")
-	(ConceptNode "model-expression"))
+(Inheritance (Anchor "*-facial-expression-*") (Concept "model-expression"))
 
 ; Syntactic structure of self-model facial-expression imperatives.
 (EvaluationLink
@@ -538,5 +543,68 @@
 	(ListLink
 		(ConceptNode "model-expression")
 		(ConceptNode "schema-express")))
+
+;--------------------------------------------------------------------
+; Support for gestures (shake, nod, blink) as oposed to emotial
+; expressions.
+;
+; rostopic echo /blender_api/available_gestures
+; data: ['all', 'amused', 'blink', 'blink-micro', 'blink-relaxed',
+; 'blink-sleepy', 'nod-1', 'nod-2', 'nod-3', 'shake-2', 'shake-3',
+; 'thoughtful', 'yawn-1']
+;
+;--------------------------------------------------------------------
+; Gesture expression semantics (groundings) for robot control
+;
+; The ListLink provides the arguments to the
+; (DefinedPredicate "Do show gesture")
+; The `gesture class` lines up with the config parameter `imperative`
+; in the cfg-eva.scm file, which is used to control the strength and
+; speed of the gesture (randomly chosen)
+(DefineLink
+	(DefinedSchema "nod-1")
+	(ListLink
+		(Concept "imperative") ; gesture class
+		(Concept "nod-1")      ; blender animation name.
+	))
+
+(DefineLink
+	(DefinedSchema "shake-2")
+	(ListLink
+		(Concept "imperative") ; gesture class
+		(Concept "shake-2")    ; blender animation name.
+	))
+
+(DefineLink
+	(DefinedSchema "yawn-1")
+	(ListLink
+		(Concept "imperative") ; gesture class
+		(Concept "yawn-1")     ; blender animation name.
+	))
+
+; -----
+; Grounding of words for facial gestures by animations in the Eva
+; blender model: blink, nod, shake, etc. See below for full list.
+
+(ReferenceLink (WordNode "nod")        (DefinedSchema "nod-1"))
+(ReferenceLink (WordNode "shake")      (DefinedSchema "shake-2"))
+(ReferenceLink (WordNode "yawn")       (DefinedSchema "yawn-1"))
+
+; -----
+; Syntactic category of robot-control facial gesture imperative
+(InheritanceLink (DefinedPredicate "Do show gesture")
+	(ConceptNode "pred-gesture"))
+
+;
+(InheritanceLink (DefinedSchema "nod-1")    (Concept "schema-gesture"))
+(InheritanceLink (DefinedSchema "shake-2")  (Concept "schema-gesture"))
+(InheritanceLink (DefinedSchema "yawn-1")   (Concept "schema-gesture"))
+
+; Syntactic structure of robot-control facial-gesture imperatives.
+(EvaluationLink
+	(Predicate "gesture-action")
+	(ListLink
+		(Concept "pred-gesture")
+		(Concept "schema-gesture")))
 
 ;--------------------------------------------------------------------
