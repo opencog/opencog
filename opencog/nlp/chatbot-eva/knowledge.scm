@@ -334,6 +334,7 @@
 (ReferenceLink (WordNode "smile")  (DefinedSchema "happy"))
 (ReferenceLink (WordNode "frown")  (DefinedSchema "sad"))
 (ReferenceLink (WordNode "recoil") (DefinedSchema "recoil"))
+(ReferenceLink (WordNode "worry")  (DefinedSchema "worry"))
 
 ; XXX FIXME ... the list below isduplicted twice, once as adjectives
 ; and once as nouns.  This is partly because relex normalization is
