@@ -292,8 +292,11 @@
 
 ; Currently supported facial animations on the Eva blender model.
 ; These must be *exactly* as named; these are sent directly to the
-; ROS beldner API: ; happy, comprehending, engaged, bored, irritated
-; sad, confused, recoil, surprised
+; ROS beldner API:
+; rostopic echo /blender_api/available_emotion_states
+; ['irritated', 'happy', 'recoil', 'surprised', 'sad', 'confused',
+;  'worry', 'bored', 'engaged', 'amused', 'comprehending', 'afraid']
+
 
 ; Groundings
 (ReferenceLink (WordNode "smile")  (DefinedSchema "happy"))
@@ -301,24 +304,32 @@
 (ReferenceLink (WordNode "recoil") (DefinedSchema "recoil"))
 
 ; Look happy! -- adjectives
-(ReferenceLink (WordNode "happy")        (DefinedSchema "happy"))
-(ReferenceLink (WordNode "sad")          (DefinedSchema "sad"))
-(ReferenceLink (WordNode "comprehending")(DefinedSchema "comprehending"))
-(ReferenceLink (WordNode "engaged")      (DefinedSchema "engaged"))
+(ReferenceLink (WordNode "afraid")       (DefinedSchema "afraid"))
+(ReferenceLink (WordNode "amused")       (DefinedSchema "amused"))
 (ReferenceLink (WordNode "bored")        (DefinedSchema "bored"))
-(ReferenceLink (WordNode "irritated")    (DefinedSchema "irritated"))
+(ReferenceLink (WordNode "comprehending")(DefinedSchema "comprehending"))
 (ReferenceLink (WordNode "confused")     (DefinedSchema "confused"))
+(ReferenceLink (WordNode "disgusted")    (DefinedSchema "recoil"))
+(ReferenceLink (WordNode "engaged")      (DefinedSchema "engaged"))
+(ReferenceLink (WordNode "happy")        (DefinedSchema "happy"))
+(ReferenceLink (WordNode "irritated")    (DefinedSchema "irritated"))
+(ReferenceLink (WordNode "sad")          (DefinedSchema "sad"))
 (ReferenceLink (WordNode "surprised")    (DefinedSchema "surprised"))
+(ReferenceLink (WordNode "worried")      (DefinedSchema "worry"))
 
 ; Show happiness! -- nouns
-(ReferenceLink (WordNode "happiness")    (DefinedSchema "happy"))
-(ReferenceLink (WordNode "sadness")      (DefinedSchema "sad"))
-(ReferenceLink (WordNode "comprehension")(DefinedSchema "comprehending"))
-(ReferenceLink (WordNode "engagement")   (DefinedSchema "engaged"))
+(ReferenceLink (WordNode "amusement")    (DefinedSchema "amused"))
 (ReferenceLink (WordNode "boredom")      (DefinedSchema "bored"))
-(ReferenceLink (WordNode "irritation")   (DefinedSchema "irritated"))
 (ReferenceLink (WordNode "confusion")    (DefinedSchema "confused"))
+(ReferenceLink (WordNode "comprehension")(DefinedSchema "comprehending"))
+(ReferenceLink (WordNode "disgust")      (DefinedSchema "recoil"))
+(ReferenceLink (WordNode "engagement")   (DefinedSchema "engaged"))
+(ReferenceLink (WordNode "fear")         (DefinedSchema "afraid"))
+(ReferenceLink (WordNode "happiness")    (DefinedSchema "happy"))
+(ReferenceLink (WordNode "irritation")   (DefinedSchema "irritated"))
+(ReferenceLink (WordNode "sadness")      (DefinedSchema "sad"))
 (ReferenceLink (WordNode "surprise")     (DefinedSchema "surprised"))
+(ReferenceLink (WordNode "worry")        (DefinedSchema "worry"))
 
 ; -----
 ; Syntactic category of robot-control facial expression imperative
