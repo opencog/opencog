@@ -160,6 +160,21 @@
 ; (emo-gest-spec "chat-neg-think" "think-browsDown.003"  0.8 0.5 0.7 1 1 0.3 0.5)
 (emo-gest-spec "chat-neg-think" "noop"                 0.2 0   0   1 1 0   0  )
 
+; Used for imperatives, i.e. when she is verbally told to do something.
+; Thus, we list all of them here. The probability column is ignored.
+(emo-gest-spec "imperative"   "amused"        0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink-micro"   0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink-relaxed" 0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink-sleepy"  0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-1"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-2"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-3"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "shake-2"       0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "shake-3"       0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "thoughtful"    0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "yawn-1"        0.1 0.6 0.9 1 1 1 1)
+
 ; --------------------------------------------------------
 ; Dice-roll.  Probability of performing some action as the result of
 ;    some event.
