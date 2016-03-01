@@ -566,6 +566,13 @@
 ; in the cfg-eva.scm file, which is used to control the strength and
 ; speed of the gesture (randomly chosen)
 (DefineLink
+	(DefinedSchema "blink")
+	(ListLink
+		(Concept "imperative") ; gesture class
+		(Concept "blink")      ; blender animation name.
+	))
+
+(DefineLink
 	(DefinedSchema "nod-1")
 	(ListLink
 		(Concept "imperative") ; gesture class
@@ -590,6 +597,7 @@
 ; Grounding of words for facial gestures by animations in the Eva
 ; blender model: blink, nod, shake, etc. See below for full list.
 
+(ReferenceLink (WordNode "blink")      (DefinedSchema "blink"))
 (ReferenceLink (WordNode "nod")        (DefinedSchema "nod-1"))
 (ReferenceLink (WordNode "shake")      (DefinedSchema "shake-2"))
 (ReferenceLink (WordNode "yawn")       (DefinedSchema "yawn-1"))
@@ -605,6 +613,7 @@
 	(ConceptNode "pred-gesture"))
 
 ;
+(InheritanceLink (DefinedSchema "blink")    (Concept "schema-gesture"))
 (InheritanceLink (DefinedSchema "nod-1")    (Concept "schema-gesture"))
 (InheritanceLink (DefinedSchema "shake-2")  (Concept "schema-gesture"))
 (InheritanceLink (DefinedSchema "yawn-1")   (Concept "schema-gesture"))
