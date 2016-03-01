@@ -61,7 +61,7 @@
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
 			(var-decl "$parse" "ParseNode")
-			(var-decl "$interp" "InterpretationNode")
+			; (var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
 			(var-decl "$direct-inst" "WordInstanceNode")
 			(var-decl "$direction" "WordNode")
@@ -69,7 +69,7 @@
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
-			(interp-of-parse "$interp" "$parse")
+			; (interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
 			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
 			(word-pos "$verb-inst" "verb")
@@ -96,7 +96,7 @@
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
 			(var-decl "$parse" "ParseNode")
-			(var-decl "$interp" "InterpretationNode")
+			; (var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
 			(var-decl "$prep-inst" "WordInstanceNode")
 			(var-decl "$direct-inst" "WordInstanceNode")
@@ -105,7 +105,7 @@
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
-			(interp-of-parse "$interp" "$parse")
+			; (interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
 			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
 			(word-pos "$verb-inst" "verb")
@@ -143,7 +143,7 @@
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
 			(var-decl "$parse" "ParseNode")
-			(var-decl "$interp" "InterpretationNode")
+			; (var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
 			(var-decl "$verb" "WordNode")
 			DECL
@@ -153,7 +153,7 @@
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
-			(interp-of-parse "$interp" "$parse")
+			; (interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
 			(word-lemma "$verb-inst" "$verb")
 			VERB-LIST
@@ -226,13 +226,13 @@
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
 			(var-decl "$parse" "ParseNode")
-			(var-decl "$interp" "InterpretationNode")
+			; (var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
 		)
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
-			(interp-of-parse "$interp" "$parse")
+			; (interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
 			(word-pos "$verb-inst" "verb")
 			(verb-tense "$verb-inst" "imperative")
@@ -254,7 +254,7 @@
 	(imperative-express-verb-template (WordNode "recoil")))
 
 ; A bunch of synonymous verbs for adjectival commands: "be happy",
-; "act sad", "llok afraid", etc.
+; "act sad", "look afraid", etc.
 (define show-rule-1
 	(imperative-object-rule-template
 		; VERB-LIST

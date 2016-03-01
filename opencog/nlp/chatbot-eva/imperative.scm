@@ -75,7 +75,9 @@
   Process imperative IMP, which should be a SentenceNode.
 "
 	; Make the current sentence visible to everyone.
+(display
 	(StateLink current-sentence imp)
+)
 
 	; Apply rules that analyze sentences -- if the current sentence
 	; is an imperative of some sort, it will pick it apart into a
