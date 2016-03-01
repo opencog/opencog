@@ -34,14 +34,16 @@
 
   SENT must be a SentenceNode.
 "
-    (define (cog-delete-parent a-link)
+    (define (cog-delete-parent a-link is-from-fc)
         ; Many rules return a ListLink of results that they
-        ; generated. Some rules return singletons.  If A-LINK
-        ; is a ListLink, then delete it and return a list of
+        ; generated. Some rules return singletons. And the
+        ; Forward Chainer uses a SetLink to wrap all these
+        ; results. So if A-LINK is a ListLink or is directly
+        ; from the FC, then delete it and return a list of
         ; its contents, else return a list holding A-LINK.
         ;
         ; XXX maybe this should be part of the ure module??
-        (if (equal? 'ListLink (cog-type a-link))
+        (if (or (equal? 'ListLink (cog-type a-link)) is-from-fc)
             (let ((returned-list (cog-outgoing-set a-link)))
                     (cog-delete a-link)
                     returned-list)
@@ -58,9 +60,9 @@
         (define focus-set
             (SetLink (parse-get-relex-outputs parse-node) interp-link))
         (define outputs
-            (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set)))
+            (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set) #t))
 
-        (append-map cog-delete-parent outputs)
+        (append-map (lambda (o) (cog-delete-parent o #f)) outputs)
     )
 
     (define (interpret parse-node)
