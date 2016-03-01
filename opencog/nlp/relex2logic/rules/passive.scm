@@ -17,7 +17,7 @@
 		(AndLink
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$obj" "$a-parse")
-			(InheritanceLink
+			(TenseLink
 				(VariableNode "$verb")
 				(VariableNode "$tense")
 			)
