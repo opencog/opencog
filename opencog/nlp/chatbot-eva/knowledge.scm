@@ -181,21 +181,20 @@
 (ReferenceLink (WordNode "ahead")    (Concept "forward"))
 
 ; Syntactic category of schema. Used for contextual understanding.
-(InheritanceLink (Concept "upward")     (ConceptNode "concept-direction"))
-(InheritanceLink (Concept "downward")   (ConceptNode "concept-direction"))
-(InheritanceLink (Concept "rightwards") (ConceptNode "concept-direction"))
-(InheritanceLink (Concept "leftwards")  (ConceptNode "concept-direction"))
-(InheritanceLink (Concept "forward")    (ConceptNode "concept-direction"))
+(Inheritance (Concept "upward")     (Concept "concept-direction"))
+(Inheritance (Concept "downward")   (Concept "concept-direction"))
+(Inheritance (Concept "rightwards") (Concept "concept-direction"))
+(Inheritance (Concept "leftwards")  (Concept "concept-direction"))
+(Inheritance (Concept "forward")    (Concept "concept-direction"))
 
 ; Model (self-awareness) knowledge about imperative verbs.
 (ReferenceLink (WordNode "look") (AnchorNode "*-gaze-direction-*"))
+(ReferenceLink (WordNode "face") (AnchorNode "*-head-direction-*"))
 (ReferenceLink (WordNode "turn") (AnchorNode "*-head-direction-*"))
 
 ; Model (self-awareness) syntactic category of head-pose verbs
-(InheritanceLink (AnchorNode "*-gaze-direction-*")
-	(ConceptNode "model-direction"))
-(InheritanceLink (AnchorNode "*-head-direction-*")
-	(ConceptNode "model-direction"))
+(Inheritance (Anchor "*-gaze-direction-*") (Concept "model-direction"))
+(Inheritance (Anchor "*-head-direction-*") (Concept "model-direction"))
 
 ; Specifies the syntactic structure for self-model (self-awareness).
 (EvaluationLink
@@ -303,6 +302,8 @@
 
 ; XXX a bunch of verb synonyms -- handled manually. These should be
 ; automated via synonymous phrase support. Total hack, needs fixing.
+; Each verb here must also be handled by a corresponding rule in the
+; `imperative-rules.scm` file.
 ;
 ; "express" is used with "Smile!", "Frown!", etc.
 (ReferenceLink (WordNode "dramatize") (DefinedPredicate "Do show expression"))
@@ -313,6 +314,7 @@
 (ReferenceLink (WordNode "impersonate")(DefinedPredicate "Do show expression"))
 (ReferenceLink (WordNode "mime")    (DefinedPredicate "Do show expression"))
 (ReferenceLink (WordNode "mimic")   (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "portray") (DefinedPredicate "Do show expression"))
 (ReferenceLink (WordNode "pretend") (DefinedPredicate "Do show expression"))
 (ReferenceLink (WordNode "show")    (DefinedPredicate "Do show expression"))
 ; "look" is used with "Look happy!"
@@ -320,7 +322,6 @@
 (ReferenceLink (WordNode "be")      (DefinedPredicate "Do show expression"))
 (ReferenceLink (WordNode "look")    (DefinedPredicate "Do show expression"))
 (ReferenceLink (WordNode "play")    (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "portray") (DefinedPredicate "Do show expression"))
 
 ; Currently supported facial animations on the Eva blender model.
 ; These must be *exactly* as named; these are sent directly to the
@@ -336,7 +337,7 @@
 (ReferenceLink (WordNode "recoil") (DefinedSchema "recoil"))
 (ReferenceLink (WordNode "worry")  (DefinedSchema "worry"))
 
-; XXX FIXME ... the list below isduplicted twice, once as adjectives
+; XXX FIXME ... the list below is duplicated twice, once as adjectives
 ; and once as nouns.  This is partly because relex normalization is
 ; not being correctly used, and/or R2L in its current form is not
 ; quite usable for this (it's too fragile, among other things).
@@ -356,9 +357,11 @@
 (ReferenceLink (WordNode "happy")        (DefinedSchema "happy"))
 (ReferenceLink (WordNode "interested")   (DefinedSchema "engaged"))
 (ReferenceLink (WordNode "irritated")    (DefinedSchema "irritated"))
+(ReferenceLink (WordNode "joyful")       (DefinedSchema "happy"))
 (ReferenceLink (WordNode "knowing")      (DefinedSchema "comprehending"))
 (ReferenceLink (WordNode "knowlegable")  (DefinedSchema "comprehending"))
 (ReferenceLink (WordNode "sad")          (DefinedSchema "sad"))
+(ReferenceLink (WordNode "scared")       (DefinedSchema "afraid"))
 (ReferenceLink (WordNode "surprised")    (DefinedSchema "surprised"))
 (ReferenceLink (WordNode "worried")      (DefinedSchema "worry"))
 
