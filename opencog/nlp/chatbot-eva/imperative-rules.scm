@@ -221,13 +221,14 @@
 ;--------------------------------------------------------------------
 
 ; Handle verbal expression imperatives, e.g. Smile! Frown!
-(define (imperative-express-verb-template VERB-WORD)
+(define (imperative-express-verb-template VERB-LIST)
 	(BindLink
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
 			(var-decl "$parse" "ParseNode")
 			; (var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
+			(var-decl "$verb" "WordNode")
 		)
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
@@ -236,22 +237,28 @@
 			(word-in-parse   "$verb-inst" "$parse")
 			(word-pos "$verb-inst" "verb")
 			(verb-tense "$verb-inst" "imperative")
-			(LemmaLink (VariableNode "$verb-inst") VERB-WORD)
+			(word-lemma "$verb-inst" "$verb")
+			VERB-LIST
 		)
 		(State current-imperative
 			(ActionLink
 				(WordNode "express") ;; SchemaNode, the verb.
-				(ListLink VERB-WORD)
+				(ListLink (Variable "$verb"))
 		))
 	)
 )
 
-(define smile-rule
-	(imperative-express-verb-template (WordNode "smile")))
-(define frown-rule
-	(imperative-express-verb-template (WordNode "frown")))
-(define recoil-rule
-	(imperative-express-verb-template (WordNode "recoil")))
+(define single-word-imperative-rule
+	(imperative-express-verb-template
+		(OrLink
+			(Equal (Variable "$verb") (WordNode "blink"))
+			(Equal (Variable "$verb") (WordNode "frown"))
+			(Equal (Variable "$verb") (WordNode "nod"))
+			(Equal (Variable "$verb") (WordNode "recoil"))
+			(Equal (Variable "$verb") (WordNode "shake"))
+			(Equal (Variable "$verb") (WordNode "smile"))
+			(Equal (Variable "$verb") (WordNode "yawn"))
+		)))
 
 ; A bunch of synonymous verbs for adjectival commands: "be happy",
 ; "act sad", "look afraid", etc.

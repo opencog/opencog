@@ -1002,7 +1002,7 @@ MultiSpaceUTest
 (cog-incoming-set   (DefinedPredicate "Show expression"))
 
 
-LambdaLink does not have subst but its easy ... 
+LambdaLink does not have subst but its easy ...
 
 global_python_initialize(
 
@@ -1078,15 +1078,15 @@ def foo(asp):
 
 __pyx_pf_7opencog_9atomspace_9AtomSpace_10add_node (
     __pyx_v_tv=0x7fffe2879110, __pyx_v_atom_name=<optimized out>,
-__pyx_v_t=7, 
+__pyx_v_t=7,
     __pyx_v_self=0x7fffe28790f0)
 at
 /home/linas/src/novamente/src/atomspace-git/build/opencog/cython/opencog/atomspace.cpp:4445
 
-is correct but 
+is correct but
 
   0x00007fffedf25807 in opencog::AtomSpace::add_node (this=0x0,
-t=t@entry=7, 
+t=t@entry=7,
     name=..., async=async@entry=false)
     at
 /home/linas/src/novamente/src/atomspace-git/opencog/atomspace/AtomSpace.cc:167
@@ -1143,7 +1143,7 @@ where-look-rule
 orchestrate first, then model.
 (DefinedPredicate "Gaze at point")
 
-afraid amused recoil worry 
+afraid amused recoil worry
 
 How about Yawn
 
@@ -1156,3 +1156,10 @@ Yawn, shake nod
 blink thoughtful
 
  go to sleep
+
+be -- tense is missing ...
+   (TenseLink (VariableNode verb-inst)
+      (DefinedLinguisticConceptNode tense)))
+
+Relex TENSE_COPULA was broken. Now fixed
+
