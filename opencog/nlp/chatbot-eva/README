@@ -345,9 +345,9 @@ Imperatives:
    Eva, express boredom
    Eva, show happiness!
 
-(Other expressions include comprehension, engagement, boredom,
-irritation, confusion, surprise and recoil.  This is the current
-hard-coded list of animations in the blender model.)
+(Full list: `afraid amused bored comprehending confused engaged happy
+irritated recoil sad surprised worry`.  This is the current hard-coded
+list of animations in the blender model.)
 
 Self-awareness questions:
 

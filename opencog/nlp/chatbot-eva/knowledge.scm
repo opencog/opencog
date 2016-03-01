@@ -320,6 +320,10 @@
 (ReferenceLink (WordNode "frown")  (DefinedSchema "sad"))
 (ReferenceLink (WordNode "recoil") (DefinedSchema "recoil"))
 
+; XXX FIXME ... the list below isduplicted twice, once as adjectives
+; and once as nouns.  This is partly because relex normalization is
+; not being correctly used, and/or R2L in its current form is not
+; quite usable for this (it's too fragile, among other things).
 ; Look happy! -- adjectives
 (ReferenceLink (WordNode "afraid")       (DefinedSchema "afraid"))
 (ReferenceLink (WordNode "amused")       (DefinedSchema "amused"))
