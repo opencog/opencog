@@ -34,10 +34,9 @@
 ; Load the behavior trees.
 (use-modules (opencog eva-behavior))
 
-; Load the Sophia personality configuration.
+; Load the Eva personality configuration.
 ; (display %load-path)
 (add-to-load-path "../src")
-(load-from-path "cfg-tools.scm")
 (load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.

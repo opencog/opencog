@@ -53,7 +53,6 @@ except:
 ; Load the Sophia personality configuration.
 ; (display %load-path)
 (add-to-load-path "../src")
-(load-from-path "cfg-tools.scm")
 (load-from-path "cfg-sophia.scm") ;;; <<<=== See, its Sophia here!
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.
