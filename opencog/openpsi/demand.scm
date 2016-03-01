@@ -506,47 +506,6 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-select-action-rules demand-node gpn)
-"
-  Select the action-rules that should be added to the active-schema-pool
-  depending on the present goal, by using the plan choosen by the
-  GroundedPredicateNode.
-
-  demand-node:
-    - A ConceptNode that represents a demand
-
-  gpn:
-   - GroundedPredicateNode that refers to a function that checks the
-     action-rules for constraints.
-"
-    ;TODO: I think the planner is kind of a behavior tree genrator (assuming
-    ; there is no change of a preset plan) .URE's random selection policy
-    ; isn't being used now thus each plan is in effect a single action choosen,
-    ; this has to be improved but is good for starters.
-
-    ; Check arguments
-    (if (not (equal? (cog-type gpn) 'GroundedPredicateNode))
-        (error "Expected GroundedPredicateNode got: " gpn))
-
-    (cog-outgoing-set (cog-execute!
-        (GetLink
-             (TypedVariableLink
-                 (VariableNode "x")
-                 (DefinedSchemaNode "Node"))
-             (AndLink
-                 (EvaluationLink
-                     gpn
-                     (ListLink  (VariableNode "x")))
-                 (MemberLink
-                     (VariableNode "x")
-                     demand-node)
-                 (InheritanceLink
-                     (VariableNode "x")
-                     (ConceptNode "opencog: action"))))
-    ))
-)
-
-; --------------------------------------------------------------
 (define-public (psi-current-effect-type)
 "
   This returns a string of the type of effect that the current-goal has.
