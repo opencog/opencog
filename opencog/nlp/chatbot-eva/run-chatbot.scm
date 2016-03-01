@@ -12,6 +12,10 @@
 ; Load the robot model, from opencog/ros-behavior-scripting
 (use-modules (opencog eva-behavior))
 
+; Load the Eva personality.
+; (display %load-path)
+(load-from-path "opencog/eva-behavior/cfg-eva.scm")
+
 (start-cogserver "../../lib/opencog-chatbot.conf")
 
 ; XXX remove the below when we get a chance.
