@@ -469,6 +469,9 @@
                      (ListLink
                         (VariableNode "x")
                         demand-node))
+                 (MemberLink
+                     (VariableNode "x")
+                     demand-node)
                  (InheritanceLink
                      (VariableNode "x")
                      (ConceptNode "opencog: action"))))
