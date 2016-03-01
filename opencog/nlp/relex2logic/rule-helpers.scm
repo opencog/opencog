@@ -657,8 +657,7 @@
 	; Names of things (AN links) will get concatenated by Relex,
 	; leaving some of the words that make up the name without a lemma.
 	; Ignore those.
-	(if (equal? "" word)
-		(ListLink)
+	(if (not (equal? "" word))
 		(ListLink
 			(Inheritance (Concept word_instance) (Concept word))
 			(r2l-wordinst-concept word_instance)
