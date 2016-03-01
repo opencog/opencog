@@ -38,9 +38,9 @@
         ; Many rules return a ListLink of results that they
         ; generated. Some rules return singletons. And the
         ; Forward Chainer uses a SetLink to wrap all these
-        ; results. So if A-LINK is a SetLink or a ListLink,
-        ; then delete it and return a list of its contents,
-        ; else return a list holding A-LINK.
+        ; results. So if A-LINK is a ListLink or is directly
+        ; from the FC, then delete it and return a list of
+        ; its contents, else return a list holding A-LINK.
         ;
         ; XXX maybe this should be part of the ure module??
         (if (or (equal? 'ListLink (cog-type a-link)) is-from-fc)
