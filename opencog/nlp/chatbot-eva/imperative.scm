@@ -82,8 +82,6 @@
 	; simplfied form, and glue the simplified from to an anchor.
 	(cog-bind look-rule-1)
 	(cog-bind look-rule-2)
-	(cog-bind turn-rule-3)
-	(cog-bind turn-rule-4)
 	(cog-bind smile-rule)
 	(cog-bind frown-rule)
 	(cog-bind recoil-rule)
