@@ -9,6 +9,9 @@
 (use-modules (opencog nlp))
 (use-modules (opencog nlp chatbot-eva))
 
+; Load the robot model, from opencog/ros-behavior-scripting
+(use-modules (opencog eva-behavior))
+
 (start-cogserver "../../lib/opencog-chatbot.conf")
 
 ; XXX remove the below when we get a chance.
