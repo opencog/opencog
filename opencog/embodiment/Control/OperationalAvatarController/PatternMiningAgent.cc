@@ -113,12 +113,12 @@ void PatternMiningAgent::init()
 
 void PatternMiningAgent::testMinePatternsOnQuery()
 {
-    sleep (100);
-    string keyword = "chest";
+    sleep (60);
+    string keyword = "open:with";
     cout << "PatternMiningAgent: testMinePatternsOnQuery for keyword: " << keyword << std::endl;
-    Handle keywordNode = pai->getAtomSpace().addNode(opencog::CONCEPT_NODE,keyword);
+    Handle keywordNode = pai->getAtomSpace().addNode(opencog::PREDICATE_NODE,keyword);
 
-    this->patternMiner->mineRelatedPatternsOnQueryByANode(keywordNode,3, pai);
+    this->patternMiner->mineRelatedPatternsOnQueryByANode(keywordNode,4, pai);
 
 }
 

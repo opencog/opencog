@@ -80,6 +80,9 @@ namespace PatternMining
  {
  private:
 
+     // debug
+     bool startPrintDebug;
+
      static PatternMiner* instance;
 
      HTree* htree;

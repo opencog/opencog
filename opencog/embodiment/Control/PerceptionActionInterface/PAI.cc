@@ -3992,9 +3992,10 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     if (propertyLink != Handle::UNDEFINED)
         entityRelatedLinks.push_back(propertyLink);
 
-    propertyLink = addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
-    if (propertyLink != Handle::UNDEFINED)
-        entityRelatedLinks.push_back(propertyLink);
+    // test mine patterns on query
+//    propertyLink = addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
+//    if (propertyLink != Handle::UNDEFINED)
+//        entityRelatedLinks.push_back(propertyLink);
 
 //  addPropertyPredicate(std::string("is_drinkable"), objectNode, isDrinkable, true);
 //  addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);

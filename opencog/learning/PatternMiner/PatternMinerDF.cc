@@ -361,9 +361,23 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
     unsigned int gram = inputLinks.size();
 
 //    // debug
-//    string inputLinksStr = "";
-//    for (Handle h : inputLinks)
-//        inputLinksStr += _fromAtomSpace->atomAsString(h);
+    if (startPrintDebug)
+    {
+        string inputLinksStr = "";
+        for (Handle h : inputLinks)
+            inputLinksStr += _fromAtomSpace->atomAsString(h);
+
+        cout << "extractAPatternFromGivenVarCombination: \n" << inputLinksStr << "\n varibales are:\n";
+
+        map<Handle,Handle>::const_iterator varIter = patternVarMap.begin();
+        for (; varIter != patternVarMap.end(); varIter ++)
+        {
+            cout << _fromAtomSpace->getName(varIter->first) << " ";
+        }
+        cout << std::endl << std::endl;
+
+    }
+
 
 
     if ( shouldNotBeVars.size() > 0)
@@ -592,7 +606,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     unsigned int n_max = newValueToVarMap.size();
     unsigned int n_limit= valueToVarMap.size()/2.0f - lastGramTotalVarNum;
-    n_limit ++;
+    n_limit += 3;
 
     // sometimes there is only one variable in a link, lik:
 //    (DuringLink
@@ -759,6 +773,24 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     else
                     {
                         // Type 2: extended from a const by turning it into a variable
+
+                        // debug
+
+                        if ( (cur_pattern_gram == 3) && (_fromAtomSpace->getName(extendNode).find("chest") != string::npos)  )
+                        {
+
+                            string keyString = unifiedPatternToKeyString(thisGramHTreeNode->pattern);
+                            std::size_t colorPos = keyString.find("color");
+                            if (colorPos != string::npos)
+                            {
+                                if (keyString.substr(colorPos + 5, keyString.size() - colorPos - 5).find("color") != string::npos)
+                                {
+                                   int xxxxx = 0;
+                                   startPrintDebug = true;
+                                }
+                            }
+
+                        }
                         isNewExtendedFromVar = false;
                     }
 
@@ -783,6 +815,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 
                         string extendedHandleStr = _fromAtomSpace->atomAsString(extendedHandle);
+
+                        if (startPrintDebug && (extendedHandleStr.find("open:target") != string::npos))
+                        {
+                            int yyyyy= 0;
+                        }
 
                         if (isInHandleSeq(extendedHandle, inputLinks))
                             continue;

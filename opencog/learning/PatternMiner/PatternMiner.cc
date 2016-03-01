@@ -2181,6 +2181,8 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
 
     PatternMiner::instance = this;
 
+    startPrintDebug = false;
+
     std::cout<<"Debug: PatternMiner init finished! " + toString(THREAD_NUM) + " threads used!" << std::endl;
 }
 
