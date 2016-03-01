@@ -207,88 +207,105 @@
 ;--------------------------------------------------------------------
 ;--------------------------------------------------------------------
 ; Emotional expression semantics (groundings) for robot control
+;
+; The ListLink provides the arguments to the
+; (DefinedPredicate "Do show expression")
+; The `expression class` lines up with the config parameter `imperative`
+; in the cfg-eva.scm file, which is used to control the strength and
+; duration of the expression (randomly chosen)
 (DefineLink
-	(DefinedSchema "happy")
+	(DefinedSchema "afraid")
 	(ListLink
-		(Concept "happy")    ; blender animation name.
-		(Number 4)           ; duration, seconds
-		(Number 0.3)         ; intensity
+		(Concept "imperative") ; expression class
+		(Concept "afraid")     ; blender animation name.
 	))
 
 (DefineLink
-	(DefinedSchema "sad")
+	(DefinedSchema "amused")
 	(ListLink
-		(Concept "sad")      ; blender animation name.
-		(Number 4)           ; duration, seconds
-		(Number 0.3)         ; intensity
-	))
-
-(DefineLink
-	(DefinedSchema "comprehending")
-	(ListLink
-		(Concept "comprehending") ; blender animation name.
-		(Number 4)           ; duration, seconds
-		(Number 0.3)         ; intensity
-	))
-
-(DefineLink
-	(DefinedSchema "engaged")
-	(ListLink
-		(Concept "engaged")  ; blender animation name.
-		(Number 4)           ; duration, seconds
-		(Number 0.3)         ; intensity
+		(Concept "imperative") ; expression class
+		(Concept "amused")     ; blender animation name.
 	))
 
 (DefineLink
 	(DefinedSchema "bored")
 	(ListLink
-		(Concept "bored")    ; blender animation name.
-		(Number 4)           ; duration, seconds
-		(Number 0.3)         ; intensity
+		(Concept "imperative") ; expression class
+		(Concept "bored")      ; blender animation name.
 	))
 
 (DefineLink
-	(DefinedSchema "irritated")
+	(DefinedSchema "comprehending")
 	(ListLink
-		(Concept "irritated") ; blender animation name.
-		(Number 4)           ; duration, seconds
-		(Number 0.3)         ; intensity
+		(Concept "imperative") ; expression class
+		(Concept "comprehending") ; blender animation name.
 	))
 
 (DefineLink
 	(DefinedSchema "confused")
 	(ListLink
-		(Concept "confused") ; blender animation name.
-		(Number 4)           ; duration, seconds
-		(Number 0.3)         ; intensity
+		(Concept "imperative") ; expression class
+		(Concept "confused")   ; blender animation name.
+	))
+
+(DefineLink
+	(DefinedSchema "engaged")
+	(ListLink
+		(Concept "imperative") ; expression class
+		(Concept "engaged")    ; blender animation name.
+	))
+
+(DefineLink
+	(DefinedSchema "happy")
+	(ListLink
+		(Concept "imperative") ; expression class
+		(Concept "happy")      ; blender animation name.
+	))
+
+(DefineLink
+	(DefinedSchema "irritated")
+	(ListLink
+		(Concept "imperative") ; expression class
+		(Concept "irritated")  ; blender animation name.
 	))
 
 (DefineLink
 	(DefinedSchema "recoil")
 	(ListLink
-		(Concept "recoil")   ; blender animation name.
-		(Number 4)           ; duration, seconds
-		(Number 0.3)         ; intensity
+		(Concept "imperative") ; expression class
+		(Concept "recoil")     ; blender animation name.
+	))
+
+(DefineLink
+	(DefinedSchema "sad")
+	(ListLink
+		(Concept "imperative") ; expression class
+		(Concept "sad")        ; blender animation name.
 	))
 
 (DefineLink
 	(DefinedSchema "surprised")
 	(ListLink
-		(Concept "surprised") ; blender animation name.
-		(Number 4)           ; duration, seconds
-		(Number 0.3)         ; intensity
+		(Concept "imperative") ; expression class
+		(Concept "surprised")  ; blender animation name.
+	))
+
+(DefineLink
+	(DefinedSchema "worry")
+	(ListLink
+		(Concept "imperative") ; expression class
+		(Concept "worry")      ; blender animation name.
 	))
 
 ; -----
 ; Grounding of facial expressions by animations in the Eva blender model:
-; happy, comprehending, engaged, bored, irritated
-; sad, confused, recoil, surprised
+; happy, sad, confused, etc. See below for full list.
 
 ; "express" is used with "Smile!", "Frown!", etc.
-(ReferenceLink (WordNode "express") (DefinedPredicate "Show expression"))
-(ReferenceLink (WordNode "show") (DefinedPredicate "Show expression"))
+(ReferenceLink (WordNode "express") (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "show") (DefinedPredicate "Do show expression"))
 ; "look" is used with "Look happy!"
-(ReferenceLink (WordNode "look") (DefinedPredicate "Show expression"))
+(ReferenceLink (WordNode "look") (DefinedPredicate "Do show expression"))
 
 ; Currently supported facial animations on the Eva blender model.
 ; These must be *exactly* as named; these are sent directly to the
@@ -333,19 +350,22 @@
 
 ; -----
 ; Syntactic category of robot-control facial expression imperative
-(InheritanceLink (DefinedPredicate "Show expression")
+(InheritanceLink (DefinedPredicate "Do show expression")
 	(ConceptNode "pred-express"))
 
 ; Syntactic category of robot-control facial-expression schema.
-(InheritanceLink (DefinedSchema "happy")     (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "sad")       (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "comprehending") (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "engaged")   (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "afraid")    (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "amused")    (ConceptNode "schema-express"))
 (InheritanceLink (DefinedSchema "bored")     (ConceptNode "schema-express"))
-(InheritanceLink (DefinedSchema "irritated") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "comprehending") (ConceptNode "schema-express"))
 (InheritanceLink (DefinedSchema "confused")  (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "engaged")   (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "happy")     (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "irritated") (ConceptNode "schema-express"))
 (InheritanceLink (DefinedSchema "recoil")    (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "sad")       (ConceptNode "schema-express"))
 (InheritanceLink (DefinedSchema "surprised") (ConceptNode "schema-express"))
+(InheritanceLink (DefinedSchema "worry")     (ConceptNode "schema-express"))
 
 ; Syntactic structure of robot-control facial-expression imperatives.
 (EvaluationLink
