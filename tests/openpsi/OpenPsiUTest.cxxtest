@@ -96,7 +96,7 @@ public:
         _as->clear();
 
         // Load function definition to be tested and populate the atomspace
-        _scm->eval("(load-from-path \"openpsi/demand.scm\")");
+        _scm->eval("(load-from-path \"openpsi/active-schema-pool.scm\")");
         CHKERR
         _scm->eval("(load \"" OPENPSI_TEST_PATH "/action-rules.scm\")");
         CHKERR

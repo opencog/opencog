@@ -19,12 +19,12 @@
 
 ; --------------------------------------------------------------
 ; For test_psi_get_action_rules
-(define (test-def) (psi-get-action-rules energy "Default"))
+(define (test-def) (psi-get-action-rules-typed energy "Default"))
 (define (test-def-result)
     (SetLink (DefinedSchemaNode "OpenPsi: Energy-action-rule-Default"))
 )
 
-(define (test-inc) (psi-get-action-rules energy "Increase"))
+(define (test-inc) (psi-get-action-rules-typed energy "Increase"))
 (define (test-inc-result)
     (SetLink
       (DefinedSchemaNode "OpenPsi: Energy-action-rule-maximize-10")
@@ -32,7 +32,7 @@
     )
 )
 
-(define (test-dec) (psi-get-action-rules energy "Decrease"))
+(define (test-dec) (psi-get-action-rules-typed energy "Decrease"))
 (define (test-dec-result)
     (SetLink
       (DefinedSchemaNode "OpenPsi: Energy-action-rule-minimize-6")
