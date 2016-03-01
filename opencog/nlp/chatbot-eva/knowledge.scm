@@ -301,11 +301,26 @@
 ; Grounding of facial expressions by animations in the Eva blender model:
 ; happy, sad, confused, etc. See below for full list.
 
+; XXX a bunch of verb synonyms -- handled manually. These should be
+; automated via synonymous phrase support. Total hack, needs fixing.
+;
 ; "express" is used with "Smile!", "Frown!", etc.
+(ReferenceLink (WordNode "dramatize") (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "emote")   (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "enact")   (DefinedPredicate "Do show expression"))
 (ReferenceLink (WordNode "express") (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "show") (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "feign")   (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "impersonate")(DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "mime")    (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "mimic")   (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "pretend") (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "show")    (DefinedPredicate "Do show expression"))
 ; "look" is used with "Look happy!"
-(ReferenceLink (WordNode "look") (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "act")     (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "be")      (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "look")    (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "play")    (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "portray") (DefinedPredicate "Do show expression"))
 
 ; Currently supported facial animations on the Eva blender model.
 ; These must be *exactly* as named; these are sent directly to the
@@ -324,21 +339,30 @@
 ; and once as nouns.  This is partly because relex normalization is
 ; not being correctly used, and/or R2L in its current form is not
 ; quite usable for this (it's too fragile, among other things).
+;
+; Also: this list contains some synonyms; not a lot, but a few.
+; See need proper synonym support.
+;
 ; Look happy! -- adjectives
 (ReferenceLink (WordNode "afraid")       (DefinedSchema "afraid"))
 (ReferenceLink (WordNode "amused")       (DefinedSchema "amused"))
 (ReferenceLink (WordNode "bored")        (DefinedSchema "bored"))
 (ReferenceLink (WordNode "comprehending")(DefinedSchema "comprehending"))
+(ReferenceLink (WordNode "comprehensive")(DefinedSchema "comprehending"))
 (ReferenceLink (WordNode "confused")     (DefinedSchema "confused"))
 (ReferenceLink (WordNode "disgusted")    (DefinedSchema "recoil"))
 (ReferenceLink (WordNode "engaged")      (DefinedSchema "engaged"))
 (ReferenceLink (WordNode "happy")        (DefinedSchema "happy"))
+(ReferenceLink (WordNode "interested")   (DefinedSchema "engaged"))
 (ReferenceLink (WordNode "irritated")    (DefinedSchema "irritated"))
+(ReferenceLink (WordNode "knowing")      (DefinedSchema "comprehending"))
+(ReferenceLink (WordNode "knowlegable")  (DefinedSchema "comprehending"))
 (ReferenceLink (WordNode "sad")          (DefinedSchema "sad"))
 (ReferenceLink (WordNode "surprised")    (DefinedSchema "surprised"))
 (ReferenceLink (WordNode "worried")      (DefinedSchema "worry"))
 
 ; Show happiness! -- nouns
+; Feign amusement!
 (ReferenceLink (WordNode "amusement")    (DefinedSchema "amused"))
 (ReferenceLink (WordNode "boredom")      (DefinedSchema "bored"))
 (ReferenceLink (WordNode "confusion")    (DefinedSchema "confused"))
@@ -347,6 +371,7 @@
 (ReferenceLink (WordNode "engagement")   (DefinedSchema "engaged"))
 (ReferenceLink (WordNode "fear")         (DefinedSchema "afraid"))
 (ReferenceLink (WordNode "happiness")    (DefinedSchema "happy"))
+(ReferenceLink (WordNode "interest")     (DefinedSchema "engaged"))
 (ReferenceLink (WordNode "irritation")   (DefinedSchema "irritated"))
 (ReferenceLink (WordNode "sadness")      (DefinedSchema "sad"))
 (ReferenceLink (WordNode "surprise")     (DefinedSchema "surprised"))
@@ -358,6 +383,7 @@
 	(ConceptNode "pred-express"))
 
 ; Syntactic category of robot-control facial-expression schema.
+; There are 12 of these in the current blender model.
 (InheritanceLink (DefinedSchema "afraid")    (ConceptNode "schema-express"))
 (InheritanceLink (DefinedSchema "amused")    (ConceptNode "schema-express"))
 (InheritanceLink (DefinedSchema "bored")     (ConceptNode "schema-express"))
