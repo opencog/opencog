@@ -75,16 +75,17 @@
   Process imperative IMP, which should be a SentenceNode.
 "
 	; Make the current sentence visible to everyone.
-(display
 	(StateLink current-sentence imp)
-)
 
 	; Apply rules that analyze sentences -- if the current sentence
 	; is an imperative of some sort, it will pick it apart into a
 	; simplfied form, and glue the simplified from to an anchor.
 	(cog-bind look-rule-1)
 	(cog-bind look-rule-2)
-	(cog-bind single-word-imperative-rule)
+	(cog-bind single-word-express-rule)
+(display
+	(cog-bind single-word-gesture-rule)
+)
 	(cog-bind show-rule-1)
 	(cog-bind show-rule-2)
 
@@ -100,7 +101,7 @@
 	(let* ((act-do-do (cog-bind action-rule-ao))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-		; (display act-do-do) (newline)
+		(display act-do-do) (newline)
 
 		; Evaluate can throw if we give it bad args. Which happens during
 		; development. So report any errors.

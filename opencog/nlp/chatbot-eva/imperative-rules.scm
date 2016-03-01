@@ -221,7 +221,7 @@
 ;--------------------------------------------------------------------
 
 ; Handle verbal expression imperatives, e.g. Smile! Frown!
-(define (imperative-express-verb-template VERB-LIST)
+(define (imperative-action-template ACTION-VERB VERB-LIST)
 	(BindLink
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
@@ -242,21 +242,28 @@
 		)
 		(State current-imperative
 			(ActionLink
-				(WordNode "express") ;; SchemaNode, the verb.
+				ACTION-VERB
 				(ListLink (Variable "$verb"))
 		))
 	)
 )
 
-(define single-word-imperative-rule
-	(imperative-express-verb-template
+(define single-word-express-rule
+	(imperative-action-template
+		(WordNode "express") ;; SchemaNode, the verb.
+		(OrLink
+			(Equal (Variable "$verb") (WordNode "frown"))
+			(Equal (Variable "$verb") (WordNode "recoil"))
+			(Equal (Variable "$verb") (WordNode "smile"))
+		)))
+
+(define single-word-gesture-rule
+	(imperative-action-template
+		(WordNode "gesture") ;; SchemaNode, the verb.
 		(OrLink
 			(Equal (Variable "$verb") (WordNode "blink"))
-			(Equal (Variable "$verb") (WordNode "frown"))
 			(Equal (Variable "$verb") (WordNode "nod"))
-			(Equal (Variable "$verb") (WordNode "recoil"))
 			(Equal (Variable "$verb") (WordNode "shake"))
-			(Equal (Variable "$verb") (WordNode "smile"))
 			(Equal (Variable "$verb") (WordNode "yawn"))
 		)))
 
