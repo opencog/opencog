@@ -250,7 +250,7 @@
 
 (define single-word-express-rule
 	(imperative-action-template
-		(WordNode "express") ;; SchemaNode, the verb.
+		(WordNode "express-action") ;; SchemaNode, the verb.
 		(OrLink
 			(Equal (Variable "$verb") (WordNode "frown"))
 			(Equal (Variable "$verb") (WordNode "recoil"))
@@ -259,7 +259,7 @@
 
 (define single-word-gesture-rule
 	(imperative-action-template
-		(WordNode "gesture") ;; SchemaNode, the verb.
+		(WordNode "gesture-action") ;; converted to a SchemaNode, the verb.
 		(OrLink
 			(Equal (Variable "$verb") (WordNode "blink"))
 			(Equal (Variable "$verb") (WordNode "nod"))

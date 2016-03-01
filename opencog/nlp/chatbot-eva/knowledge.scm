@@ -308,7 +308,11 @@
 ; Each verb here must also be handled by a corresponding rule in the
 ; `imperative-rules.scm` file.
 ;
-; "express" is used with "Smile!", "Frown!", etc.
+; `express-action` is used with "Smile!", "Frown!", etc.
+; It lines up with `single-word-express-rule` and must be a WordNode
+; so that `obj-semantics-template` works correctly.
+(ReferenceLink (Word "express-action") (DefinedPredicate "Do show expression"))
+
 (ReferenceLink (WordNode "dramatize") (DefinedPredicate "Do show expression"))
 (ReferenceLink (WordNode "emote")   (DefinedPredicate "Do show expression"))
 (ReferenceLink (WordNode "enact")   (DefinedPredicate "Do show expression"))
@@ -592,6 +596,11 @@
 
 ; -----
 ; Syntactic category of robot-control facial gesture imperative
+; The (WordNode "gesture-action") is not really a "word"; it must
+; be identical to the "word" in `single-word-gesture-rule` and it
+; must be a WordNode to make `obj-semantics-template` happy.
+(ReferenceLink (Word "gesture-action") (DefinedPredicate "Do show gesture"))
+
 (InheritanceLink (DefinedPredicate "Do show gesture")
 	(ConceptNode "pred-gesture"))
 
