@@ -80,11 +80,11 @@
 (emo-expr-spec "imperative"  "confused"      1  0.6 0.9 6 12)
 (emo-expr-spec "imperative"  "engaged"       1  0.6 0.9 6 12)
 (emo-expr-spec "imperative"  "happy"         1  0.6 0.9 6 12)
-(emo-expr-spec "imperative"  "irritated"     1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "irritated"     1  0.7 1.0 6 12)
 (emo-expr-spec "imperative"  "recoil"        1  0.6 0.9 6 12)
 (emo-expr-spec "imperative"  "sad"           1  0.6 0.9 6 12)
 (emo-expr-spec "imperative"  "surprised"     1  0.6 0.9 6 12)
-(emo-expr-spec "imperative"  "worry"         1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "worry"         1  0.7 1.0 6 12)
 
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
