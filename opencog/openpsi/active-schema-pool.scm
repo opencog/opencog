@@ -287,7 +287,7 @@
 
     (cog-execute!
         (PutLink
-            (psi-goal-selector-pattern)
+            (psi-action-rule-selector-pattern)
             dpn)
     )
 )
@@ -340,9 +340,9 @@
 
   dpn:
   - DefinedPredicateNode that represents the evaluatable term that will filter
-    action-rules. The evaluatable term should take a single DefinedSchemaNode and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
-    The VariableNodes in the evaluatable term must be named
-    `(VariableNode \"x\")`.
+    action-rules. The evaluatable term should take a single DefinedSchemaNode
+    and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
+    The VariableNodes in the term must be named `(VariableNode \"x\")`.
 
   demand-node:
     - A ConceptNode that represents a demand, from which action-rules
@@ -422,9 +422,11 @@
     ; action-types, as this function is used by psi-update-asp.
     ; Could there be a reason one would want to change the default action-rule
     ; at runtime?
-    (append
-        (cog-outgoing-set (psi-get-action-rules-typed demand-node "Increase"))
-        (cog-outgoing-set (psi-get-action-rules-typed demand-node "Decrease"))
+    (append-map
+        (lambda (x)
+            (cog-outgoing-set (psi-get-action-rules-typed demand-node x))
+        )
+        (psi-action-types)
     )
 )
 
@@ -443,7 +445,6 @@
 "
   Selects all actions of current effect type and update the psi-asp.
 "
-    ;TODO Use psi-select-action-rules, and port as much as possible to atomese.
     (let ((goal (psi-current-goal))
           (effect-type (psi-current-effect-type))
           (asp (psi-asp)))
