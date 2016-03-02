@@ -361,10 +361,14 @@
 ; Some, like "disorientation", need to couple confusion with eye and
 ; head movements. (i.e. the "search empty room" behavior tree)
 ;
+; "amused is commented out, because we want to use the amused gesture,
+; instead of the amuased expression. The gesture is stronger, quirkier,
+; and more interesting to look at.
+;
 ; Look happy! -- adjectives
 (ReferenceLink (WordNode "afraid")       (DefinedSchema "afraid"))
 (ReferenceLink (WordNode "amazed")       (DefinedSchema "surprised"))
-(ReferenceLink (WordNode "amused")       (DefinedSchema "amused"))
+; (ReferenceLink (WordNode "amused")       (DefinedSchema "amused"))
 (ReferenceLink (WordNode "angered")      (DefinedSchema "irritated"))
 (ReferenceLink (WordNode "angry")        (DefinedSchema "irritated"))
 (ReferenceLink (WordNode "anguished")    (DefinedSchema "worry"))
@@ -376,7 +380,7 @@
 (ReferenceLink (WordNode "bored")        (DefinedSchema "bored"))
 (ReferenceLink (WordNode "bothered")     (DefinedSchema "irritated"))
 (ReferenceLink (WordNode "chagrined")    (DefinedSchema "confused"))
-(ReferenceLink (WordNode "charmed")      (DefinedSchema "amused"))
+; (ReferenceLink (WordNode "charmed")      (DefinedSchema "amused"))
 (ReferenceLink (WordNode "cheered")      (DefinedSchema "amused"))
 (ReferenceLink (WordNode "cheerful")     (DefinedSchema "happy"))
 (ReferenceLink (WordNode "comprehending")(DefinedSchema "comprehending"))
@@ -447,7 +451,7 @@
 ; Feign amusement!
 (ReferenceLink (WordNode "affection")    (DefinedSchema "engaged"))
 (ReferenceLink (WordNode "amazement")    (DefinedSchema "surprised"))
-(ReferenceLink (WordNode "amusement")    (DefinedSchema "amused"))
+; (ReferenceLink (WordNode "amusement")    (DefinedSchema "amused"))
 (ReferenceLink (WordNode "anguish")      (DefinedSchema "worry"))
 (ReferenceLink (WordNode "antipathy")    (DefinedSchema "recoil"))
 (ReferenceLink (WordNode "anxiousness")  (DefinedSchema "worry"))
@@ -566,6 +570,13 @@
 ; in the cfg-eva.scm file, which is used to control the strength and
 ; speed of the gesture (randomly chosen)
 (DefineLink
+	(DefinedSchema "amused-gest")
+	(ListLink
+		(Concept "imperative") ; gesture class
+		(Concept "amused")     ; blender animation name.
+	))
+
+(DefineLink
 	(DefinedSchema "blink")
 	(ListLink
 		(Concept "imperative") ; gesture class
@@ -587,6 +598,13 @@
 	))
 
 (DefineLink
+	(DefinedSchema "thoughtful")
+	(ListLink
+		(Concept "imperative") ; gesture class
+		(Concept "thoughtful") ; blender animation name.
+	))
+
+(DefineLink
 	(DefinedSchema "yawn-1")
 	(ListLink
 		(Concept "imperative") ; gesture class
@@ -597,9 +615,14 @@
 ; Grounding of words for facial gestures by animations in the Eva
 ; blender model: blink, nod, shake, etc. See below for full list.
 
+(ReferenceLink (WordNode "amused")     (DefinedSchema "amused-gest"))
+(ReferenceLink (WordNode "amusement")  (DefinedSchema "amused-gest"))
+(ReferenceLink (WordNode "bob")        (DefinedSchema "nod-1"))
 (ReferenceLink (WordNode "blink")      (DefinedSchema "blink"))
+(ReferenceLink (WordNode "charmed")    (DefinedSchema "amused-gest"))
 (ReferenceLink (WordNode "nod")        (DefinedSchema "nod-1"))
 (ReferenceLink (WordNode "shake")      (DefinedSchema "shake-2"))
+(ReferenceLink (WordNode "thoughtful") (DefinedSchema "thoughtful"))
 (ReferenceLink (WordNode "yawn")       (DefinedSchema "yawn-1"))
 
 ; -----
@@ -607,16 +630,21 @@
 ; The (WordNode "gesture-action") is not really a "word"; it must
 ; be identical to the "word" in `single-word-gesture-rule` and it
 ; must be a WordNode to make `obj-semantics-template` happy.
+;
+; Other verbs: "Look thoughtful"
 (ReferenceLink (Word "gesture-action") (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "look")           (DefinedPredicate "Do show gesture"))
 
 (InheritanceLink (DefinedPredicate "Do show gesture")
 	(ConceptNode "pred-gesture"))
 
 ;
-(InheritanceLink (DefinedSchema "blink")    (Concept "schema-gesture"))
-(InheritanceLink (DefinedSchema "nod-1")    (Concept "schema-gesture"))
-(InheritanceLink (DefinedSchema "shake-2")  (Concept "schema-gesture"))
-(InheritanceLink (DefinedSchema "yawn-1")   (Concept "schema-gesture"))
+(InheritanceLink (DefinedSchema "amused-gest")(Concept "schema-gesture"))
+(InheritanceLink (DefinedSchema "blink")      (Concept "schema-gesture"))
+(InheritanceLink (DefinedSchema "nod-1")      (Concept "schema-gesture"))
+(InheritanceLink (DefinedSchema "shake-2")    (Concept "schema-gesture"))
+(InheritanceLink (DefinedSchema "thoughtful") (Concept "schema-gesture"))
+(InheritanceLink (DefinedSchema "yawn-1")     (Concept "schema-gesture"))
 
 ; Syntactic structure of robot-control facial-gesture imperatives.
 (EvaluationLink
