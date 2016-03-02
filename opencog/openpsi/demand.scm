@@ -54,7 +54,8 @@
   dpn:
   - DefinedPredicateNode that represents the evaluatable term that will filter
     demands. The evaluatable term should take a single demand-ConceptNode and
-    return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
+    return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`. The
+    term should have atleast `demand-var` for a VariableNode.
     (Optionaly the argument could be a TrueLink for returning all the demands
     defined)
 "
