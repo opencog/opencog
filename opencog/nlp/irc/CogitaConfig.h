@@ -38,8 +38,10 @@ namespace chatbot {
 /**
  * Configuration class for Cogita
  */
-class CogitaConfig {
+class CogitaConfig
+{
     void createAttnVector();
+    static const char* helpOutput;
 public:
     std::string ircNetwork;
     std::vector<std::string> ircChannels;
@@ -47,7 +49,6 @@ public:
     std::string vstring;
     std::string nick;
     std::vector<std::string> attn;
-    static const std::string helpOutput;
 
     CogitaConfig();
 

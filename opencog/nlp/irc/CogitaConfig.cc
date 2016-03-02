@@ -54,11 +54,11 @@ CogitaConfig::CogitaConfig() :
     }
 }
 
-const std::string CogitaConfig::helpOutput =
+const char * CogitaConfig::helpOutput =
     " Cogita - An OpenCog chatbot. \n"
     " ======\n"
     " Usage: \n"
-    " -n,--nick \tSet bot nick.\n"
+    " -n,--nick \tSet bot nick. (default: %s)\n"
     " -s,--server \tIRC server to connect to.\n"
     " -p,--port \tPort of IRC server to connect to.\n"
     " -c,--channels \tComma separated list of channels (without preceding #) to join\n"
@@ -66,7 +66,13 @@ const std::string CogitaConfig::helpOutput =
     " -v,--version \tPrint version information.\n"
     " \n";
 
-void CogitaConfig::printHelp() { cout << helpOutput; }
+void CogitaConfig::printHelp()
+{
+#define BUFSZ 8190
+    char buff[BUFSZ];
+    snprintf(buff, BUFSZ, helpOutput, nick.c_str());
+    cout << buff;
+}
 
 void CogitaConfig::printVersion() { cout << COGITA_VSTRING << endl; }
 
