@@ -39,6 +39,7 @@ namespace chatbot {
 #define DEFAULT_SERVER "irc.freenode.net"
 #define DEFAULT_PORT 6667
 #define DEFAULT_NICK "cogita-bot"
+#define DEFAULT_NAME "La Cogita OpenCog chatbot"
 #define DEFAULT_CHANNELS { "#opencog", 0 }
 #define VERSION "1.0.1"
 #define VSTRING "La Cogita OpenCog (http://opencog.org) IRC chatbot version "  VERSION
@@ -54,6 +55,7 @@ CogitaConfig::CogitaConfig() :
     ircNetwork(DEFAULT_SERVER),
     ircPort(DEFAULT_PORT),
     irc_nick(DEFAULT_NICK),
+    irc_name(DEFAULT_NAME),
     dry_run(false),
     cog_addr(DEFAULT_COG_IP),
     cog_port(DEFAULT_COG_PORT)
@@ -77,6 +79,7 @@ const char * CogitaConfig::helpOutput =
     " ======\n"
     " Usage: \n"
     " -n,--nick      Set bot nick. (default: %s)\n"
+    " -f,--name      Set bot full name. (default: %s)\n"
     " -s,--server    IRC server to connect to. (default: %s)\n"
     " -p,--port      Port of IRC server to connect to. (default: %d)\n"
     " -c,--channel   Channel (without #) to join (default: %s)\n"
@@ -90,8 +93,9 @@ void CogitaConfig::printHelp()
 {
 #define BUFSZ 8190
     char buff[BUFSZ];
-    snprintf(buff, BUFSZ, helpOutput, irc_nick.c_str(), ircNetwork.c_str(),
-             ircPort, ircChannels[0].c_str(), cog_addr.c_str(), cog_port);
+    snprintf(buff, BUFSZ, helpOutput, irc_nick.c_str(),
+             irc_name.c_str(), ircNetwork.c_str(), ircPort,
+             ircChannels[0].c_str(), cog_addr.c_str(), cog_port);
     cout << buff;
 }
 
@@ -100,11 +104,12 @@ void CogitaConfig::printVersion() { cout << VSTRING << endl; }
 int CogitaConfig::parseOptions(int argc, char* argv[])
 {
     int c = 0;
-    static const char *optString =
-        "n:s:p:c:o:t:dvh";
+    static const char *optString = "n:f:s:p:c:o:t:dvh";
 
-    static const struct option longOptions[] = {
+    static const struct option longOptions[] =
+    {
         {"nick", required_argument, 0, 'n'},
+        {"name", required_argument, 0, 'f'},
         {"server", required_argument, 0, 's'},
         {"port", required_argument, 0, 's'},
         {"channel", required_argument, 0, 'c'},
@@ -116,11 +121,12 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
         {0, 0, 0, 0}
     };
 
-    while (1) {
+    while (1)
+    {
         int optionIndex = 0;
         string channelsTemp;
         StringTokenizer st;
-        c = getopt_long (argc, argv, optString, longOptions, &optionIndex);
+        c = getopt_long(argc, argv, optString, longOptions, &optionIndex);
 
         /* Detect end of options */
         if (c == -1) break;
@@ -129,6 +135,9 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
         case 'n':
             irc_nick = string(optarg);
             createAttnVector();
+            break;
+        case 'f':
+            irc_name = string(optarg);
             break;
         case 's':
             ircNetwork = string(optarg);
