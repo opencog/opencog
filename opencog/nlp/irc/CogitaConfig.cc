@@ -91,7 +91,7 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
 {
     int c = 0;
     static const char *optString =
-        "n:s:p:c:vh";
+        "n:s:p:c:dvh";
 
     static const struct option longOptions[] = {
         {"nick", required_argument, 0, 'n'},

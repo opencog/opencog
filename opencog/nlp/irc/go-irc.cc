@@ -314,6 +314,10 @@ int main (int argc, char * argv[])
 	// connection, just log in again.
 	while (true)
 	{
+		printf("Joining network=%s port=%d nick=%s user=%s\n",
+			cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login);
+		if (cc.dry_run) exit(0);
+
 		// The login-name, nick, etc. are there only to make it look
 		// pretty on IRC ident.
 		conn.start(cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login,
