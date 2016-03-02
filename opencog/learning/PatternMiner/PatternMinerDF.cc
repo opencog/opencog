@@ -360,23 +360,23 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
     bool skip = false;
     unsigned int gram = inputLinks.size();
 
-//    // debug
-    if (startPrintDebug)
-    {
-        string inputLinksStr = "";
-        for (Handle h : inputLinks)
-            inputLinksStr += _fromAtomSpace->atomAsString(h);
+////    // debug
+//    if (startPrintDebug)
+//    {
+//        string inputLinksStr = "";
+//        for (Handle h : inputLinks)
+//            inputLinksStr += _fromAtomSpace->atomAsString(h);
 
-        cout << "extractAPatternFromGivenVarCombination: \n" << inputLinksStr << "\n varibales are:\n";
+//        cout << "extractAPatternFromGivenVarCombination: \n" << inputLinksStr << "\n varibales are:\n";
 
-        map<Handle,Handle>::const_iterator varIter = patternVarMap.begin();
-        for (; varIter != patternVarMap.end(); varIter ++)
-        {
-            cout << _fromAtomSpace->getName(varIter->first) << " ";
-        }
-        cout << std::endl << std::endl;
+//        map<Handle,Handle>::const_iterator varIter = patternVarMap.begin();
+//        for (; varIter != patternVarMap.end(); varIter ++)
+//        {
+//            cout << _fromAtomSpace->getName(varIter->first) << " ";
+//        }
+//        cout << std::endl << std::endl;
 
-    }
+//    }
 
 
 
@@ -584,8 +584,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
         map<Handle,Handle>::iterator valueToVarIt = valueToVarMap.begin();
         for(; valueToVarIt != valueToVarMap.end(); valueToVarIt ++)
         {
-            if (lastGramValueToVarMap.find(valueToVarIt->first) == lastGramValueToVarMap.end())
-                newValueToVarMap.insert( std::pair<Handle,Handle>(valueToVarIt->first,valueToVarIt->second));
+            if (valueToVarIt->first != extendedNode)
+            {
+                if (lastGramPatternVarMap.find(valueToVarIt->first) == lastGramPatternVarMap.end())
+                    newValueToVarMap.insert( std::pair<Handle,Handle>(valueToVarIt->first,valueToVarIt->second));
+            }
         }
     }
 
@@ -606,7 +609,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
     unsigned int n_max = newValueToVarMap.size();
     unsigned int n_limit= valueToVarMap.size()/2.0f - lastGramTotalVarNum;
-    n_limit += 3;
+    n_limit += 2;
 
     // sometimes there is only one variable in a link, lik:
 //    (DuringLink
@@ -739,7 +742,6 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     continue;
                 }
 
-
                 // Extend one more gram from lastGramHTreeNode to get its superpatterns
                 // There are two different super patterns: extended from a variable, and extended from a const by turning it into a variable:
                 unsigned int nodeIndex = 0;
@@ -775,22 +777,22 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         // Type 2: extended from a const by turning it into a variable
 
                         // debug
+//                        if ( (cur_pattern_gram == 3) && (_fromAtomSpace->getName(extendNode).find("chest") != string::npos)  )
+//                        {
 
-                        if ( (cur_pattern_gram == 3) && (_fromAtomSpace->getName(extendNode).find("chest") != string::npos)  )
-                        {
+//                            string keyString = unifiedPatternToKeyString(thisGramHTreeNode->pattern);
+//                            std::size_t colorPos = keyString.find("color");
+//                            if (colorPos != string::npos)
+//                            {
+//                                if (keyString.substr(colorPos + 5, keyString.size() - colorPos - 5).find("color") != string::npos)
+//                                {
+//                                   int xxxxx = 0;
+//                                   startPrintDebug = true;
+//                                }
+//                            }
 
-                            string keyString = unifiedPatternToKeyString(thisGramHTreeNode->pattern);
-                            std::size_t colorPos = keyString.find("color");
-                            if (colorPos != string::npos)
-                            {
-                                if (keyString.substr(colorPos + 5, keyString.size() - colorPos - 5).find("color") != string::npos)
-                                {
-                                   int xxxxx = 0;
-                                   startPrintDebug = true;
-                                }
-                            }
+//                        }
 
-                        }
                         isNewExtendedFromVar = false;
                     }
 
