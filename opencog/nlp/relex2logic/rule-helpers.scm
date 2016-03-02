@@ -641,6 +641,11 @@
 				(r2l-wordinst-concept instance)
 				(InheritanceLink (VariableNode var_name) (ConceptNode concept)))
 		)
+
+		; XXX Just to avoid getting the `#<Invalid handle>` error
+		; TODO Need to add more to the list (e.g. "the") to cover all cases
+		; or update the below to generate something reasonable
+		(else (ListLink))
 	)
 )
 
@@ -654,17 +659,12 @@
 	(define word (cog-name lemma))
 	(define word_instance (cog-name word-inst))
 
-	; Names of things (AN links) will get concatenated by Relex,
-	; leaving some of the words that make up the name without a lemma.
-	; Ignore those.
-	(if (not (equal? "" word))
-		(ListLink
-			(Inheritance (Concept word_instance) (Concept word))
-			(r2l-wordinst-concept word_instance)
-			(Evaluation
-				(DefinedLinguisticPredicateNode "definite")
-				(ListLink (Concept word_instance)))
-		)
+	(ListLink
+		(Inheritance (Concept word_instance) (Concept word))
+		(r2l-wordinst-concept word_instance)
+		(Evaluation
+			(DefinedLinguisticPredicateNode "definite")
+			(ListLink (Concept word_instance)))
 	)
 )
 
