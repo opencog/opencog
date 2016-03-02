@@ -141,8 +141,8 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	// Reply to request for chat client version
 	if ((0x1 == start[0]) && !strncmp (&start[1], "VERSION", 7))
 	{
-		printf ("VERSION: %s\n", cc.vstring.c_str());
-		conn->privmsg (msg_target, cc.vstring.c_str());
+		printf ("VERSION: %s\n", cc.version_string.c_str());
+		conn->privmsg (msg_target, cc.version_string.c_str());
 		return 0;
 	}
 

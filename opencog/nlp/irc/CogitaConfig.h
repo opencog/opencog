@@ -35,13 +35,17 @@ class CogitaConfig
     void createAttnVector();
     static const char* helpOutput;
 public:
+    std::string version_string;
+
     std::string ircNetwork;
     std::vector<std::string> ircChannels;
     int ircPort;
-    std::string vstring;
     std::string nick;
     std::vector<std::string> attn;
     bool dry_run;
+
+    std::string cog_addr; // OpenCog cogserver IP address.
+    int cog_port;         // OpenCog cogserver port number.
 
     CogitaConfig();
 

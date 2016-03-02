@@ -45,10 +45,18 @@ namespace chatbot {
 #define DEFAULT_ATTN { "cogita-bot", "cogita", "cog", 0 }
 #define DEFAULT_ATTN_SUFFIXES { ",", ":", 0 }
 
+#define DEFAULT_COG_IP "127.0.0.1"
+#define DEFAULT_COG_PORT 17004
+
 
 CogitaConfig::CogitaConfig() :
-    ircNetwork(DEFAULT_SERVER), ircPort(DEFAULT_PORT),
-    vstring(VSTRING), nick(DEFAULT_NICK), dry_run(false)
+    version_string(VSTRING),
+    ircNetwork(DEFAULT_SERVER),
+    ircPort(DEFAULT_PORT),
+    nick(DEFAULT_NICK),
+    dry_run(false),
+    cog_addr(DEFAULT_COG_IP),
+    cog_port(DEFAULT_COG_PORT)
 {
     const char* defaultAttns[] = DEFAULT_ATTN;
     const char* defaultSuffixes[] = DEFAULT_ATTN_SUFFIXES;
@@ -72,6 +80,8 @@ const char * CogitaConfig::helpOutput =
     " -s,--server \tIRC server to connect to. (default: %s)\n"
     " -p,--port \tPort of IRC server to connect to. (default: %d)\n"
     " -c,--channel \tChannel (without #) to join (default: %s)\n"
+    " -o,--cogserver \tCogserver to use (default: %s)\n"
+    " -t,--cog-port \tCogserver port number (default: %d)\n"
     " -d,--dry-run \tPrint settings and quit.\n"
     " -v,--version \tPrint version information.\n"
     " \n";
@@ -91,13 +101,15 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
 {
     int c = 0;
     static const char *optString =
-        "n:s:p:c:dvh";
+        "n:s:p:c:o:t:dvh";
 
     static const struct option longOptions[] = {
         {"nick", required_argument, 0, 'n'},
         {"server", required_argument, 0, 's'},
         {"port", required_argument, 0, 's'},
         {"channel", required_argument, 0, 'c'},
+        {"cogserver", required_argument, 0, 'o'},
+        {"cog-port", required_argument, 0, 't'},
         {"dry-run", 0, 0, 'd'},
         {"version", 0, 0, 'v'},
         {"help", 0, 0, '?'},
@@ -121,8 +133,14 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
         case 's':
             ircNetwork = string(optarg);
             break;
+        case 'o':
+            cog_addr = string(optarg);
+            break;
         case 'p':
             ircPort = atoi(optarg);
+            break;
+        case 't':
+            cog_port = atoi(optarg);
             break;
         case 'c':
             ircChannels.clear();
