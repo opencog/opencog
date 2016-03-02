@@ -64,6 +64,9 @@ int end_of_motd(const char* params, irc_reply_data* ird, void* data)
 	printf("chatbot got motd nick=%s ident=%s host=%s target=%s\n",
 		ird->nick, ird->ident, ird->host, ird->target);
 
+	// Quit hard, if dry-run.
+	if (cc.dry_run) exit(0);
+
 	sleep(1);
 	conn->join (cc.ircChannels[0].c_str());
 	printf("chatbot sent channel join %s\n", cc.ircChannels[0].c_str());
@@ -316,7 +319,6 @@ int main (int argc, char * argv[])
 	{
 		printf("Joining network=%s port=%d nick=%s user=%s\n",
 			cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login);
-		if (cc.dry_run) exit(0);
 
 		// The login-name, nick, etc. are there only to make it look
 		// pretty on IRC ident.
