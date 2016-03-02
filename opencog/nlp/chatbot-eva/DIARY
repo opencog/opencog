@@ -1168,3 +1168,7 @@ Relex TENSE_COPULA was broken. Now fixed
 (use-modules (opencog exec))
 (cog-evaluate! (Evaluation (DefinedPredicate "Do show gesture")
 	(ListLink (Concept "imperative") (Concept "nod-1"))))
+
+pretend you are happy
+
+blink three times.

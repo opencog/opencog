@@ -344,10 +344,17 @@ Imperatives:
    Look bored
    Eva, express boredom
    Eva, show happiness!
+	Feign amusement
+   Dramatize loathing
+	Portray puzzlement
+	Shake your head
+	Blink!
+	Yawn!
 
-(Full list: `afraid amused bored comprehending confused disgust engaged
-happy irritated sad surprised worry`.  This is the current hard-coded
-list of animations in the blender model.)
+The blender model contains a dozen emotion-expression animations, such
+as fear, disgust, boredom, smiling, surprise and a half-dozen gestures,
+including nodding, blinking and yawning.  Assorted synonmyous verbs and
+adjectives should trigger these.
 
 Self-awareness questions:
 

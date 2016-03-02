@@ -622,7 +622,10 @@
 (ReferenceLink (WordNode "charmed")    (DefinedSchema "amused-gest"))
 (ReferenceLink (WordNode "nod")        (DefinedSchema "nod-1"))
 (ReferenceLink (WordNode "shake")      (DefinedSchema "shake-2"))
+(ReferenceLink (WordNode "thinking")   (DefinedSchema "thoughtful"))
+(ReferenceLink (WordNode "thought")    (DefinedSchema "thoughtful"))
 (ReferenceLink (WordNode "thoughtful") (DefinedSchema "thoughtful"))
+(ReferenceLink (WordNode "thoughtfulness") (DefinedSchema "thoughtful"))
 (ReferenceLink (WordNode "yawn")       (DefinedSchema "yawn-1"))
 
 ; -----
@@ -633,7 +636,24 @@
 ;
 ; Other verbs: "Look thoughtful"
 (ReferenceLink (Word "gesture-action") (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "act")            (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "be")             (DefinedPredicate "Do show gesture"))
 (ReferenceLink (Word "look")           (DefinedPredicate "Do show gesture"))
+
+; These are more-or-less the same verbs as before, but coupled to
+; gestures, so that "feign thoughtfulness" and "mime amusement" work
+; for the gestures.
+(ReferenceLink (Word "dramatize")   (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "emote")       (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "enact")       (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "express")     (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "feign")       (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "impersonate") (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "mime")        (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "mimic")       (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "portray")     (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "pretend")     (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "show")        (DefinedPredicate "Do show gesture"))
 
 (InheritanceLink (DefinedPredicate "Do show gesture")
 	(ConceptNode "pred-gesture"))
