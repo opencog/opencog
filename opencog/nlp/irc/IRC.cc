@@ -204,7 +204,7 @@ int IRC::start(const char* server, int port, const char* nick,
 	cur_nick=new char[strlen(nick)+1];
 	strcpy(cur_nick, nick);
 
-	fprintf(dataout, "PASS %s\r\n", pass);
+	if (0 != pass[0]) fprintf(dataout, "PASS %s\r\n", pass);
 	fprintf(dataout, "NICK %s\r\n", nick);
 	fprintf(dataout, "USER %s * 0 :%s\r\n", user, name);
 	fflush(dataout);		
