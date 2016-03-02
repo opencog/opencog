@@ -312,6 +312,7 @@ int main (int argc, char * argv[])
 	conn.hook_irc_command("KICK", &got_kick);
 
 	const char *login = getlogin();
+	if (nullptr == login) login = "no-controlling-tty";
 
 	// Loop forever. When the IRC network burps and closes our
 	// connection, just log in again.
