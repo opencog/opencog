@@ -27,14 +27,6 @@
 namespace opencog {
 namespace chatbot {
 
-#define COGITA_DEFAULT_SERVER "irc.freenode.net"
-#define COGITA_DEFAULT_PORT 6667
-#define COGITA_DEFAULT_NICK "cogita-bot"
-#define COGITA_DEFAULT_CHANNELS { "#opencog", 0 }
-#define COGITA_VSTRING "La Cogita OpenCog (http://opencog.org) IRC chatbot version 1.0"
-#define COGITA_DEFAULT_ATTN { "cogita-bot", "cogita", "cog", 0 }
-#define COGITA_DEFAULT_ATTN_SUFFIXES { ",", ":", 0 }
-
 /**
  * Configuration class for Cogita
  */

@@ -36,13 +36,23 @@ using namespace std;
 namespace opencog {
 namespace chatbot {
 
+#define DEFAULT_SERVER "irc.freenode.net"
+#define DEFAULT_PORT 6667
+#define DEFAULT_NICK "cogita-bot"
+#define DEFAULT_CHANNELS { "#opencog", 0 }
+#define VERSION "1.0.1"
+#define VSTRING "La Cogita OpenCog (http://opencog.org) IRC chatbot version "  VERSION
+#define DEFAULT_ATTN { "cogita-bot", "cogita", "cog", 0 }
+#define DEFAULT_ATTN_SUFFIXES { ",", ":", 0 }
+
+
 CogitaConfig::CogitaConfig() :
-    ircNetwork(COGITA_DEFAULT_SERVER), ircPort(COGITA_DEFAULT_PORT),
-    vstring(COGITA_VSTRING), nick(COGITA_DEFAULT_NICK)
+    ircNetwork(DEFAULT_SERVER), ircPort(DEFAULT_PORT),
+    vstring(VSTRING), nick(DEFAULT_NICK)
 {
-    const char* defaultAttns[] = COGITA_DEFAULT_ATTN;
-    const char* defaultSuffixes[] = COGITA_DEFAULT_ATTN_SUFFIXES;
-    const char* defaultChannels[] = COGITA_DEFAULT_CHANNELS;
+    const char* defaultAttns[] = DEFAULT_ATTN;
+    const char* defaultSuffixes[] = DEFAULT_ATTN_SUFFIXES;
+    const char* defaultChannels[] = DEFAULT_CHANNELS;
     for (int i = 0; defaultAttns[i]; i++) {
         for (int i = 0; defaultSuffixes[i]; i++) {
             attn.push_back(string(defaultAttns[i]) +
@@ -74,7 +84,7 @@ void CogitaConfig::printHelp()
     cout << buff;
 }
 
-void CogitaConfig::printVersion() { cout << COGITA_VSTRING << endl; }
+void CogitaConfig::printVersion() { cout << VSTRING << endl; }
 
 int CogitaConfig::parseOptions(int argc, char* argv[])
 {
@@ -141,7 +151,7 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
 
 void CogitaConfig::createAttnVector()
 {
-    const char* defaultSuffixes[] = COGITA_DEFAULT_ATTN_SUFFIXES;
+    const char* defaultSuffixes[] = DEFAULT_ATTN_SUFFIXES;
     attn.clear();
     for (int i = 0; defaultSuffixes[i]; i++) {
         attn.push_back(nick + string(defaultSuffixes[i]));
