@@ -92,9 +92,11 @@
 ))
 
 ; See description above.
-(define obj-semantics-rule-1
+; Verb uses DefinedPredicateNode so that groundings are run through the
+; action orchestrator.
+(define obj-semantics-rule-1-ao
 	(obj-semantics-template
-		(var-decl "$verb-ground" "GroundedPredicateNode") ; VERB-GND-DECL
+		(var-decl "$verb-ground" "DefinedPredicateNode")  ; VERB-GND-DECL
 		(var-decl "$obj-ground"  "DefinedSchemaNode")     ; OBJ-GND-DECL
 
 		; We only "suggest" this as one possible action.  A later stage

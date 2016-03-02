@@ -1,5 +1,6 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
+(use-modules (opencog))
 (use-modules (opencog rule-engine))
 
 (load-from-path "openpsi/demand.scm")
@@ -8,7 +9,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-asp)
 "
-  Create the active-schema-pool as a URE rulebase and return the ConceptNode
+  Create the active-schema-pool as a URE rulebase and return the node
   representing it.
 "
     (let ((asp (ConceptNode (string-append (psi-prefix-str) "asp"))))
@@ -18,7 +19,7 @@
         ; Load all default actions because they should always run. If they
         ; aren't always.
         (if (null? (ure-rbs-rules asp))
-            (map (lambda (x) (MemberLink x asp)) (psi-get-actions-default)))
+            (map (lambda (x) (MemberLink x asp)) (psi-get-action-rules-default)))
 
         asp
     )
@@ -34,41 +35,38 @@
   Returns a list of results from the step.
 "
     ;TODO: Move logic to atomese, so as to simply life for everyone.
-    (let* ((asp (psi-asp))
-         (result (cog-fc (SetLink) asp (SetLink)))
-         (result-list (cog-outgoing-set result)))
-
-         (cog-delete result)
-         result-list
+    (let* ((asp (psi-asp)))
+        (cog-fc (SetLink) asp (SetLink))
     )
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-update-asp asp actions)
+(define-public (psi-update-asp asp action-rules)
 "
   It modifies the member action-rules of OpenPsi's active-schema-pool(asp),
-  by removing all actions that are members of the known demand rule-bases,
-  with the exception of default-actions, from the asp and replaces them by the
-  list of actions passed.
+  by removing all action-rules that are members of all the known demand
+  rule-bases, with the exception of default-actions, from the asp and replaces
+  them by the list of actions passed.
 
-  If the action list passed is empty the asp isn't modified, because the policy
-  is that no change occurs without it being explicitly specified. This doesn't
-  and must not check to what goal is selected.
+  If the action-rule list passed is empty the asp isn't modified, because the
+  policy is that no change occurs without it being explicitly specified. This
+  doesn't and must not check what goal is selected.
 
   asp:
-  - The ConceptNode for the active-schema-pool.
+  - The node for the active-schema-pool.
 
-  actions:
-  - A list of actions nodes. The nodes are the alias nodes for the actions.
+  action-rules:
+  - A list of action-rule nodes. The nodes are the alias nodes for the
+    action-rules.
 "
     (define (remove-node node) (cog-delete-recursive (MemberLink node asp)))
     (define (add-node node) (begin (MemberLink node asp) node))
 
     (let* ((current-actions (ure-rbs-rules asp))
-           (actions-to-keep (psi-get-actions-default))
+           (actions-to-keep (psi-get-action-rules-default))
            (actions-to-add
-                (lset-difference equal? actions current-actions))
-           (final-asp (lset-union equal? actions-to-keep actions)))
+                (lset-difference equal? action-rules current-actions))
+           (final-asp (lset-union equal? actions-to-keep action-rules)))
 
            ; Remove actions except those that should be kept and those that
            ; are to be added.
@@ -86,69 +84,375 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-set-goal demand effect)
+(define (psi-goal-selector-pattern)
 "
-  Set goal for the action-selector.
+  This returns the StateLink that is used for specifying the goal selecting
+  evaluatable term.
 
-  demand:
-  - The demand choosen to be a goal.
-
-  effect:
-  - The kind of effect the actions should have for being selected by the
-    action-selector.
+  A StateLink is used instead of an InheritanceLink because there could only
+  be one active goal-selector at a time eventhough there could be multiple
+  possible goal-selectors. And this enables dynamically changing the
+  goal-selector through learning.
 "
-    (define (choose-demand)
-        (if (null? demand)
-            ; XXX Remeber to deal with the defaults when moving to
-            ; psi-select-goal.
-            (random-select (psi-get-demands))
-            demand))
-
-    (let ((z-demand (choose-demand)))
-        (StateLink
-            (Node (string-append (psi-prefix-str) "action-on-demand"))
-            (ListLink
-                (ConceptNode (string-append (psi-prefix-str) effect))
-                z-demand))
-
-        z-demand
+    (StateLink
+        (ConceptNode (string-append (psi-prefix-str) "goal-selector"))
+        (VariableNode "$dpn")
     )
 )
 
 ; --------------------------------------------------------------
-(define (psi-goal-random-maximize threshold)
+(define (psi-goal-selector-set! dpn)
 "
-  Sets the goal by randomly selecting a demand for maximization, should its demand-value below the given threshold.
+  Sets the given DefinedPredicateNode to be used for selecting goals.
 
-  threshold:
-  - The boundary demand-value below which a demand will be choosen.
+  dpn:
+  - The DefinedPredicateNode that represents the evaluatable-term used for
+    selecting demand to be a goal.
 "
+    ; Check arguments
+    (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
+        (error "Expected DefinedPredicateNode got: " dpn))
+    (cog-execute!
+        (PutLink
+            (psi-goal-selector-pattern)
+            dpn)
+    )
+)
 
-    (define (select-demand x) (< (tv-mean (cog-tv x)) threshold))
-    (let* ((demand (random-select (filter select-demand (psi-get-demands)))))
+; --------------------------------------------------------------
+(define (psi-add-goal-selector eval-term effect-type name)
+"
+  Returns the DefinedPredicateNode that represents the evaluatable term
+  after defining it as an opencog goal-selector.
 
-        ; If there are no demands that satisfy the condition then choose one
-        (if (null? demand)
-            (psi-set-goal demand "Default")
-            (psi-set-goal demand "Increase")
+  eval-term:
+  - An evaluatable term.
+
+  effect-type:
+  - A string that describes the effect the particualr action would have on
+    the demand value. See `(psi-action-types)` for available options.
+
+  name:
+  -  A string for naming the goal selector. `OpenPsi: goal-selector-`
+     will be prefixed to the name.
+"
+    ; Check arguments
+    (if (not (string? name))
+        (error "Expected third argument to be a string, got: " name))
+    (if (not (member effect-type (psi-action-types)))
+        (error (string-append "Expected second argument to be one of the "
+            "action types listed when running `(psi-action-types)`, got: ")
+            effect-type))
+
+    ; TODO: Add checks to ensure the eval-term argument is actually evaluatable
+    (let* ((z-name (string-append (psi-prefix-str) "goal-selector-" name))
+           (goal-selector-dpn (DefinedPredicateNode z-name)))
+        ; This must be first so as to check if a DefinedPredicateNode of the
+        ; same name is already defined.
+        (DefineLink goal-selector-dpn eval-term)
+
+        (EvaluationLink
+            (PredicateNode "selects-for-effect-type")
+            (ListLink
+                goal-selector-dpn
+                (ConceptNode (string-append (psi-prefix-str) effect-type))))
+
+        goal-selector-dpn
+    )
+)
+
+; --------------------------------------------------------------
+(define (psi-goal-selector-effect-type dpn)
+"
+  Returns a node representing the effect type of the given goal-selector.
+
+  dpn:
+  - The DefinedPredicateNode that represents the evaluatable-term used for
+    selecting demand to be a goal.
+"
+    ; Check arguments
+    (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
+        (error "Expected DefinedPredicateNode got: " dpn))
+
+    ; See https://github.com/opencog/atomspace/issues/646 why this doesn't
+    ; work
+    ;(GetLink
+    ;    (TypedVariableLink
+    ;        (VariableNode "$effect")
+    ;        (TypeNode "ConceptNode"))
+    ;        (EvaluationLink
+    ;            (PredicateNode "selects-for-effect-type")
+    ;            (ListLink
+    ;                (QuoteLink dpn)
+    ;                (VariableNode "$effect")))
+    ;)
+
+    ; NOTE: Assuming the dpn isn't part of any other similar pattern.
+    (car (cog-chase-link 'ListLink 'ConceptNode dpn))
+)
+
+; --------------------------------------------------------------
+(define (psi-select-random-goal)
+"
+  Returns the StateLink representing the goal. Goal are defined as demands
+  choosen for either increase or decrease in their demand values. For example,
+
+   (StateLink
+       (Node (string-append (psi-prefix-str) \"action-on-demand\"))
+       (ListLink
+           (ConceptNode (string-append (psi-prefix-str) \"Increase\"))
+           (ConceptNode (string-append (psi-prefix-str) \"Energy\"))))
+  or
+
+   (StateLink
+       (Node (string-append (psi-prefix-str) \"action-on-demand\"))
+       (ListLink
+           (ConceptNode (string-append (psi-prefix-str) \"Decrease\"))
+           (ConceptNode (string-append (psi-prefix-str) \"Energy\"))))
+
+  The StateLink(aka goal) is the means for signaling what type of actions
+  should be selected.
+"
+    (define (set-goal a-demand effect-type)
+       (StateLink
+           (Node (string-append (psi-prefix-str) "action-on-demand"))
+           (ListLink effect-type a-demand))
+    )
+
+    (define (get-goal-selector)
+        (let ((goal-selector (cog-outgoing-set (cog-execute!
+                    (GetLink (psi-goal-selector-pattern))))))
+            (if (null? goal-selector)
+                (error "A goal-selector hasn't been set for OpenPsi.")
+                (car goal-selector)
+            )
+        )
+    )
+
+    (let* ((goal-selector (get-goal-selector))
+           (demands (psi-get-demands goal-selector))
+           (effect (psi-goal-selector-effect-type goal-selector)))
+
+       ; If there are no demands that satisfy the condition then choose one
+        (if (null? (cog-outgoing-set demands))
+            (set-goal
+                (cog-execute! (RandomChoiceLink (psi-get-demands-all)))
+                (ConceptNode (string-append (psi-prefix-str) "Default")))
+            (set-goal (cog-execute! (RandomChoiceLink demands)) effect)
         )
     )
 )
 
 ; --------------------------------------------------------------
-(define (psi-action-select)
+(define (psi-goal-selector-maximize threshold)
+"
+  Sets the goal by randomly selecting a demand for maximization, should its demand-value be below the given threshold.
+
+  threshold:
+  - The boundary of the demand-value below which a demand will be chosen.
+"
+    (psi-add-goal-selector
+        (psi-demand-value-term< threshold) "Increase" "maximize")
+)
+
+; --------------------------------------------------------------
+(define (psi-action-rule-selector-pattern)
+"
+  This returns the StateLink that is used for specifying the action selecting
+  evaluatable term.
+
+  A StateLink is used instead of an InheritanceLink because there could only
+  be one active action-rule-selector at a time eventhough there could be
+  multiple possible action-rule-selectors. And this enables dynamically
+  changing the action-rule-selector through learning.
+"
+    (StateLink
+        (ConceptNode (string-append (psi-prefix-str) "action-rule-selector"))
+        (VariableNode "$dpn")
+    )
+)
+
+; --------------------------------------------------------------
+(define (psi-action-rule-selector-set! dpn)
+"
+  Sets the given DefinedPredicateNode to be used for selecting action-rule.
+
+  dpn:
+  - The DefinedPredicateNode that represents the evaluatable-term used for
+    selecting the action-rules that should be part of the asp.
+"
+    ; Check arguments
+    (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
+        (error "Expected DefinedPredicateNode got: " dpn))
+
+    (cog-execute!
+        (PutLink
+            (psi-goal-selector-pattern)
+            dpn)
+    )
+)
+
+
+; --------------------------------------------------------------
+(define (psi-add-action-rule-selector eval-term name)
+"
+  Returns the DefinedPredicateNode that represents the evaluatable term
+  after defining it as an opencog goal-selector.
+
+  eval-term:
+  - An evaluatable term.
+
+  name:
+  -  A string for naming the action-rule-selector. The name will be prefixed
+     by the following string `OpenPsi: action-rule-selector-`.
+"
+    ; Check arguments
+    (if (not (string? name))
+        (error "Expected second argument to be a string, got: " name))
+
+    ; TODO: Add checks to ensure the eval-term argument is actually evaluatable
+    (let* ((z-name (string-append
+                        (psi-prefix-str) " action-rule-selector-" name))
+           (selector-dpn (cog-node 'DefinedPredicateNode z-name)))
+       (if (null? selector-dpn)
+           (begin
+               (set! selector-dpn (DefinedPredicateNode z-name))
+               (DefineLink selector-dpn eval-term)
+
+                (EvaluationLink
+                    (PredicateNode "rule-selector-for")
+                    (ListLink selector-dpn (psi-asp)))
+
+                selector-dpn
+           )
+           ; NOTE: Assuming that it is highly unlikely that the same
+           ; the node wouldn't be used for another purpose.
+           selector-dpn
+       )
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-action-rules dpn demand-node)
+"
+  Returns a list containing the DefinedSchemaNode atoms that name the
+  action-rules for the given demand-node.
+
+  dpn:
+  - DefinedPredicateNode that represents the evaluatable term that will filter
+    action-rules. The evaluatable term should take a single DefinedSchemaNode and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
+    The VariableNodes in the evaluatable term must be named
+    `(VariableNode \"x\")`.
+
+  demand-node:
+    - A ConceptNode that represents a demand, from which action-rules
+"
+    ; Check arguments
+    (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
+        (error "Expected DefinedPredicateNode got: " dpn))
+
+    (cog-execute!
+        (GetLink
+             (TypedVariableLink
+                 (VariableNode "x")
+                 (TypeNode "DefinedSchemaNode"))
+             (AndLink
+                 dpn
+                 (MemberLink
+                     (VariableNode "x")
+                     demand-node)
+                 (InheritanceLink
+                     (VariableNode "x")
+                     (ConceptNode "opencog: action"))))
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-action-rules-typed-term demand-node effect-type)
+"
+  Returns evaluatable-term used to choose certain typed action-rules.
+"
+    (PresentLink
+        (EvaluationLink
+            (PredicateNode (string-append (psi-prefix-str) effect-type))
+            (ListLink (VariableNode "x") demand-node)))
+)
+
+(define-public (psi-get-action-rules-typed demand-node effect-type)
+"
+  Returns a SetLink containing the DefinedSchemaNode atoms that name the
+  action-rules for the given demand-node.
+
+  demand-node:
+  - A ConceptNode that represents a demand.
+
+  effect-type:
+  - A string that describes the effect the particualr action would have on
+  the demand value. See `(psi-action-types)` for available options.
+"
+    ; Check arguments
+    (if (not (member effect-type (psi-action-types)))
+        (error (string-append "Expected fourth argument to be one of the "
+            "action types listed when running `(psi-action-types)`, got: ")
+            effect-type))
+
+
+    ; Adds the action-rule selector and uses it to get the action-rules
+    (psi-get-action-rules
+        (psi-add-action-rule-selector
+            (psi-action-rules-typed-term demand-node effect-type)
+            (string-append
+                (psi-suffix-str (cog-name demand-node))
+                "-" effect-type )
+        )
+        demand-node)
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-action-rules-all demand-node)
+"
+  Returns a list containing the DefinedSchemaNode atoms that name the
+  action-rules for the given demand-node, with the exeception of the Default
+  action.
+
+  demand-node:
+    - A ConceptNode that represents a demand.
+"
+    ; NOTE: Not using (ure-rbs-rules demand-node) so as to not include 'Default'
+    ; action-types, as this function is used by psi-update-asp.
+    ; Could there be a reason one would want to change the default action-rule
+    ; at runtime?
+    (append
+        (cog-outgoing-set (psi-get-action-rules-typed demand-node "Increase"))
+        (cog-outgoing-set (psi-get-action-rules-typed demand-node "Decrease"))
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-action-rules-default)
+"
+  Returns the default actions for all the defined demands
+"
+    (append-map
+        (lambda (x) (cog-outgoing-set (psi-get-action-rules-typed x "Default")))
+        (cog-outgoing-set (psi-get-demands-all)))
+)
+
+; --------------------------------------------------------------
+(define (psi-select-action-rules)
 "
   Selects all actions of current effect type and update the psi-asp.
 "
-    ;TODO Use psi-select-actions, and port as much as possible to atomese.
+    ;TODO Use psi-select-action-rules, and port as much as possible to atomese.
     (let ((goal (psi-current-goal))
           (effect-type (psi-current-effect-type))
           (asp (psi-asp)))
 
         ; If default effect-type then add only the default actions.
         (if (equal? effect-type "Default")
-            (psi-update-asp  asp (psi-get-actions-default))
-            (psi-update-asp  asp (psi-get-actions goal effect-type))
+            (psi-update-asp  asp (psi-get-action-rules-default))
+            (psi-update-asp asp (cog-outgoing-set
+                    (psi-get-action-rules-typed goal effect-type)))
         )
     )
 )

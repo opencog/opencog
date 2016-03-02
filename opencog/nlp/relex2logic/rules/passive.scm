@@ -11,11 +11,13 @@
 		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$tense" "DefinedLinguisticConceptNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$obj" "WordInstanceNode")
 		)
 		(AndLink
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$obj" "$a-parse")
-			(InheritanceLink
+			(TenseLink
 				(VariableNode "$verb")
 				(VariableNode "$tense")
 			)

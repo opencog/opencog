@@ -21,12 +21,14 @@
 	(define ans (self-wh-query query))
 	(cond
 		((not (equal? '() ans)) (string-join (car ans)))
-		(else (let
-			; get-fuzzy-answers provided by (opencog nlp fuzzy)
-			((temp (get-fuzzy-answers query)))
-			(cond
-				((equal? '() temp) "Sorry, I don't know the answer.")
-				(else (string-join (car temp)))))
+		(else
+			(display "Looking for a fuzzy answer.")
+			(let
+				; get-fuzzy-answers provided by (opencog nlp fuzzy)
+				((reply-words (get-fuzzy-answers query)))
+				(cond
+					((equal? '() reply-words) "Sorry, I don't know the answer.")
+					(else (string-join (car reply-words)))))
 		)
 	)
 )

@@ -61,7 +61,7 @@
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
 			(var-decl "$parse" "ParseNode")
-			(var-decl "$interp" "InterpretationNode")
+			; (var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
 			(var-decl "$direct-inst" "WordInstanceNode")
 			(var-decl "$direction" "WordNode")
@@ -69,7 +69,7 @@
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
-			(interp-of-parse "$interp" "$parse")
+			; (interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
 			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
 			(word-pos "$verb-inst" "verb")
@@ -96,7 +96,7 @@
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
 			(var-decl "$parse" "ParseNode")
-			(var-decl "$interp" "InterpretationNode")
+			; (var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
 			(var-decl "$prep-inst" "WordInstanceNode")
 			(var-decl "$direct-inst" "WordInstanceNode")
@@ -105,7 +105,7 @@
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
-			(interp-of-parse "$interp" "$parse")
+			; (interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
 			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
 			(word-pos "$verb-inst" "verb")
@@ -138,13 +138,14 @@
 ; This boilerplate is merely trying to ensure that all the words we
 ; look at are from the same sentence.  Surely, there must be an easier
 ; way to ensure connectivity?
-(define (imperative-object-rule-template VERB-WORD DECL LINKS)
+(define (imperative-object-rule-template VERB-LIST DECL LINKS)
 	(BindLink
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
 			(var-decl "$parse" "ParseNode")
-			(var-decl "$interp" "InterpretationNode")
+			; (var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
+			(var-decl "$verb" "WordNode")
 			DECL
 			(var-decl "$obj-inst" "WordInstanceNode")
 			(var-decl "$object" "WordNode")
@@ -152,9 +153,10 @@
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
-			(interp-of-parse "$interp" "$parse")
+			; (interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
-			(LemmaLink (VariableNode "$verb-inst") VERB-WORD)
+			(word-lemma "$verb-inst" "$verb")
+			VERB-LIST
 			(word-pos "$verb-inst" "verb")
 			(verb-tense "$verb-inst" "imperative")
 			; Specific LG linkage
@@ -163,16 +165,22 @@
 		)
 		(State current-imperative
 			(ActionLink
-				VERB-WORD
+				(Variable "$verb")
 				(ListLink (Variable "$object"))
 		))
 	)
 )
 
 ; Re-implementation of look-rule-1 and 2, using the shorter template.
+; Handles sentences such as "Turn left", "Look up" and also "look happy"
 (define look-rule-1
 	(imperative-object-rule-template
-		(WordNode "look")  ; VERB-WORD
+		; VERB-LIST
+		(OrLink
+			(Equal (Variable "$verb") (WordNode "face"))
+			(Equal (Variable "$verb") (WordNode "look"))
+			(Equal (Variable "$verb") (WordNode "turn"))
+		)
 		'()                ; DECL
 		(ChoiceLink        ; LINKS
 			(lg-link "MVa" "$verb-inst" "$obj-inst")
@@ -180,11 +188,18 @@
 			(lg-link "Pa" "$verb-inst" "$obj-inst"))
 	))
 
+; Handles directional sentences with "to", such as "turn to the left".
 (define look-rule-2
 	(imperative-object-rule-template
-		(WordNode "look")                           ; VERB-WORD
+		; VERB-LIST
+		(OrLink
+			(Equal (Variable "$verb") (WordNode "face"))
+			(Equal (Variable "$verb") (WordNode "look"))
+			(Equal (Variable "$verb") (WordNode "turn"))
+		)
 		(var-decl "$prep-inst" "WordInstanceNode")  ; DECL
-		(list ; turn --MVp-> to --Ju-> object    ; LINKS
+		; "turn to the left
+		(list ; turn --MVp-> to --Ju-> object       ; LINKS
 			(lg-link "MVp" "$verb-inst" "$prep-inst")
 			(ChoiceLink
 				(lg-link "Js" "$prep-inst" "$obj-inst")
@@ -192,81 +207,101 @@
 		)
 	))
 
-; Same as look-rule-1 and look-rule-2 but with verb "turn"
-(define turn-rule-3
-	(imperative-object-rule-template
-		(WordNode "turn")  ; VERB-WORD
-		'()                ; DECL
-		(ChoiceLink        ; LINKS
-			(lg-link "MVa" "$verb-inst" "$obj-inst")
-			(lg-link "Pa" "$verb-inst" "$obj-inst"))
-	))
-
-(define turn-rule-4
-	(imperative-object-rule-template
-		(WordNode "turn")                           ; VERB-WORD
-		(var-decl "$prep-inst" "WordInstanceNode")  ; DECL
-		(list ; turn --MVp-> to --Ju-> object    ; LINKS
-			(lg-link "MVp" "$verb-inst" "$prep-inst")
-			(ChoiceLink
-				(lg-link "Js" "$prep-inst" "$obj-inst")
-				(lg-link "Ju" "$prep-inst" "$obj-inst"))
-		)
-	))
-
-; Design notes:
+; XXX TODO Design notes:
 ; Rather than hand-crafting a bunch of rules like the above, we should
-; do two things:
+; do three things:
+;
 ; (1) implement fuzzy matching, so that anything vaguely close to the
 ;     desired imperative will get matched.
-; (2) implement automated learning of new rules, and refinement of
+; (2) implement synonymous phrases, rather than listing syonymous verbs
+;     explicitly
+; (3) implement automated learning of new rules, and refinement of
 ;     existing rules.
 
 ;--------------------------------------------------------------------
 
 ; Handle verbal expression imperatives, e.g. Smile! Frown!
-(define (imperative-express-verb-template VERB-WORD)
+(define (imperative-action-template ACTION-VERB VERB-LIST)
 	(BindLink
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
 			(var-decl "$parse" "ParseNode")
-			(var-decl "$interp" "InterpretationNode")
+			; (var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
+			(var-decl "$verb" "WordNode")
 		)
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
-			(interp-of-parse "$interp" "$parse")
+			; (interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
 			(word-pos "$verb-inst" "verb")
 			(verb-tense "$verb-inst" "imperative")
-			(LemmaLink (VariableNode "$verb-inst") VERB-WORD)
+			(word-lemma "$verb-inst" "$verb")
+			VERB-LIST
 		)
 		(State current-imperative
 			(ActionLink
-				(WordNode "express") ;; SchemaNode, the verb.
-				(ListLink VERB-WORD)
+				ACTION-VERB
+				(ListLink (Variable "$verb"))
 		))
 	)
 )
 
-(define smile-rule
-	(imperative-express-verb-template (WordNode "smile")))
-(define frown-rule
-	(imperative-express-verb-template (WordNode "frown")))
-(define recoil-rule
-	(imperative-express-verb-template (WordNode "recoil")))
+(define single-word-express-rule
+	(imperative-action-template
+		(WordNode "express-action") ;; SchemaNode, the verb.
+		(OrLink
+			(Equal (Variable "$verb") (WordNode "frown"))
+			(Equal (Variable "$verb") (WordNode "recoil"))
+			(Equal (Variable "$verb") (WordNode "smile"))
+		)))
 
+(define single-word-gesture-rule
+	(imperative-action-template
+		(WordNode "gesture-action") ;; converted to a SchemaNode, the verb.
+		(OrLink
+			(Equal (Variable "$verb") (WordNode "blink"))
+			(Equal (Variable "$verb") (WordNode "nod"))
+			(Equal (Variable "$verb") (WordNode "shake"))
+			(Equal (Variable "$verb") (WordNode "yawn"))
+		)))
+
+; A bunch of synonymous verbs for adjectival commands: "be happy",
+; "act sad", "look afraid", etc.
 (define show-rule-1
 	(imperative-object-rule-template
-		(WordNode "show")         ; VERB-WORD
-		'()                       ; DECL
-		(lg-link "Ou" "$verb-inst" "$obj-inst") ; LINKS
+		; VERB-LIST
+		(OrLink
+			(Equal (Variable "$verb") (WordNode "act"))
+			(Equal (Variable "$verb") (WordNode "be"))
+			(Equal (Variable "$verb") (WordNode "look"))
+			(Equal (Variable "$verb") (WordNode "play"))
+		)
+		'()                ; DECL
+		(ChoiceLink        ; LINKS
+			(lg-link "MVa" "$verb-inst" "$obj-inst")
+			(lg-link "MVp" "$verb-inst" "$obj-inst")
+			(lg-link "Pa" "$verb-inst" "$obj-inst"))
 	))
 
+; Direct-object impeatives: "feign happiness", "mimic fear",
+; "portray confusion", etc.
 (define show-rule-2
 	(imperative-object-rule-template
-		(WordNode "express")      ; VERB-WORD
+		(OrLink
+			(Equal (Variable "$verb") (WordNode "dramatize"))
+			(Equal (Variable "$verb") (WordNode "emote"))
+			(Equal (Variable "$verb") (WordNode "enact"))
+			(Equal (Variable "$verb") (WordNode "express"))
+			(Equal (Variable "$verb") (WordNode "feign"))
+			(Equal (Variable "$verb") (WordNode "impersonate"))
+			(Equal (Variable "$verb") (WordNode "mime"))
+			(Equal (Variable "$verb") (WordNode "mimic"))
+			(Equal (Variable "$verb") (WordNode "portray"))
+			(Equal (Variable "$verb") (WordNode "pretend"))
+			(Equal (Variable "$verb") (WordNode "show"))
+		)
 		'()                       ; DECL
 		(lg-link "Ou" "$verb-inst" "$obj-inst") ; LINKS
 	))

@@ -109,6 +109,12 @@ bool Fuzzy::try_match(const Handle& soln)
     if (soln->getType() != rtn_type)
         return true;
 
+    // Check if we have seen the exact same one before
+    if (std::find(solns_seen.begin(), solns_seen.end(), soln) != solns_seen.end())
+        return false;
+
+    solns_seen.insert(soln);
+
     HandleSeq soln_nodes;
     get_all_nodes(soln, soln_nodes);
 

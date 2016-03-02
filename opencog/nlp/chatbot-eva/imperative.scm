@@ -49,14 +49,15 @@
 ; Action schema
 ; This is wrong, but a hack for now.
 
-(define action-rule-1
+; action-rule-ao uses the Action Orchestrator (in orchestrate.scm)
+(define action-rule-ao
 	(BindLink
 		(VariableList
 			(TypedVariable
 				(Variable "$action")
 				(Signature
 					(EvaluationLink
-						(Type "GroundedPredicateNode")
+						(Type "DefinedPredicateNode")
 						(Type "ListLink"))))
 		)
 		(AndLink
@@ -81,29 +82,21 @@
 	; simplfied form, and glue the simplified from to an anchor.
 	(cog-bind look-rule-1)
 	(cog-bind look-rule-2)
-	(cog-bind turn-rule-3)
-	(cog-bind turn-rule-4)
-	(cog-bind smile-rule)
-	(cog-bind frown-rule)
-	(cog-bind recoil-rule)
+	(cog-bind single-word-express-rule)
+	(cog-bind single-word-gesture-rule)
 	(cog-bind show-rule-1)
 	(cog-bind show-rule-2)
 
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
-	(cog-bind obj-semantics-rule-1)
+	(cog-bind obj-semantics-rule-1-ao)
 
-(display
 	(cog-bind obj-semantic-model-rule-1)
-)
-(display
 	(cog-bind obj-semantic-model-rule-2)
-)
-
 
 	; Perform the action, and print a reply.
-	(let* ((act-do-do (cog-bind action-rule-1))
+	(let* ((act-do-do (cog-bind action-rule-ao))
 			(action-list (cog-outgoing-set act-do-do))
 		)
 		; (display act-do-do) (newline)

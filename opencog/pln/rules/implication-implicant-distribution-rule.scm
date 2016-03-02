@@ -51,9 +51,7 @@
     (cog-set-tv!
      (ImplicationLink
         P
-        (AndLink
-           P
-           Q))
+        (cog-new-flattened-link 'AndLink P Q))
      (cog-tv impl))))
 
 ;; Name the rule

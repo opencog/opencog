@@ -50,15 +50,25 @@ DECLARE_MODULE(PythonModule);
 
 Agent* PythonAgentFactory::create(CogServer& cs) const
 {
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     logger().info() << "Creating python agent " << _pySrcModuleName << "." << _pyClassName;
     PyMindAgent* pma = new PyMindAgent(cs, _pySrcModuleName, _pyClassName);
+
+    PyGILState_Release(gstate);
     return pma;
 }
 
 Request* PythonRequestFactory::create(CogServer& cs) const
 {
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     logger().info() << "Creating python request " << _pySrcModuleName << "." << _pyClassName;
     PyRequest* pma = new PyRequest(cs, _pySrcModuleName, _pyClassName, _cci);
+
+    PyGILState_Release(gstate);
     return pma;
 }
 
@@ -73,6 +83,10 @@ static bool already_loaded = false;
 PythonModule::~PythonModule()
 {
     logger().info("[PythonModule] destructor");
+
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     unregisterAgentsAndRequests();
     do_load_py_unregister();
 
@@ -80,6 +94,8 @@ PythonModule::~PythonModule()
     for (PythonRequestFactory* rf : _requestFactories) delete rf;
 
     already_loaded = false;
+
+    PyGILState_Release(gstate);
 }
 
 bool PythonModule::unregisterAgentsAndRequests()
@@ -113,10 +129,14 @@ void PythonModule::init()
                     "Python not initialized, missing global_python_init()");
     }
 
+    PyGILState_STATE gstate;
+    gstate = PyGILState_Ensure();
+
     // Many python libraries (e.g. ROS) expect sys.argv to be set. So,
     // avoid the error print, and let them know who we are.
     static const char *argv0 = "cogserver";
     PySys_SetArgv(1, (char **) &argv0);
+
 
     // NOTE: Even though the Cython docs do not say that you need to call this
     // more than once, you need to call the import functions in each separate
@@ -138,6 +158,8 @@ void PythonModule::init()
 
     if (config().has("PYTHON_PRELOAD")) preloadModules();
     do_load_py_register();
+
+    PyGILState_Release(gstate);
 }
 
 bool PythonModule::preloadModules()
@@ -156,7 +178,8 @@ bool PythonModule::preloadModules()
     return true;
 }
 
-/// do_load_py -- load python code, given a file name. (Implements the loadpy command)
+/// do_load_py -- load python code, given a file name. (Implements the
+/// loadpy command)
 ///
 /// It is expected that the file contains a python module. The module
 /// should implement either a mind-agent, or it should contain a 'request'
@@ -227,7 +250,8 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
             bool is_shell = thingsInModule.req_is_shell[i];
 
             // CogServer commands in Python
-            // Register request with cogserver using dotted name: module.RequestName
+            // Register request with cogserver using dotted name:
+            // module.RequestName
             std::string dottedName = moduleName + "." + s;
             // register the agent with a custom factory that knows how to
             PythonRequestFactory* fact =

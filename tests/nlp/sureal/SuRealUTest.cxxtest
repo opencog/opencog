@@ -92,9 +92,12 @@ void SuRealUTest::setUp(void)
 
     config().set("SCM_PRELOAD",
                  "opencog/scm/core_types.scm,"
+                 "opencog/scm/atom-types.scm,"
                  "opencog/scm/utilities.scm,"
                  "opencog/nlp/types/nlp_types.scm,"
+                 "opencog/nlp/scm/nlp.scm,"
                  "opencog/nlp/scm/nlp-utils.scm,"
+                 "opencog/nlp/relex2logic/relex2logic.scm,"
                  "opencog/nlp/relex2logic/r2l-utilities.scm,"
                  "opencog/nlp/sureal/surface-realization.scm");
     cogserver().loadSCMModules();
