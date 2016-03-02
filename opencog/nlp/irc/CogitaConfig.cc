@@ -76,14 +76,14 @@ const char * CogitaConfig::helpOutput =
     " Cogita - An OpenCog IRC chatbot, version " VERSION "\n"
     " ======\n"
     " Usage: \n"
-    " -n,--nick \tSet bot nick. (default: %s)\n"
-    " -s,--server \tIRC server to connect to. (default: %s)\n"
-    " -p,--port \tPort of IRC server to connect to. (default: %d)\n"
-    " -c,--channel \tChannel (without #) to join (default: %s)\n"
-    " -o,--cogserver \tCogserver to use (default: %s)\n"
-    " -t,--cog-port \tCogserver port number (default: %d)\n"
-    " -d,--dry-run \tPrint settings and quit.\n"
-    " -v,--version \tPrint version information.\n"
+    " -n,--nick      Set bot nick. (default: %s)\n"
+    " -s,--server    IRC server to connect to. (default: %s)\n"
+    " -p,--port      Port of IRC server to connect to. (default: %d)\n"
+    " -c,--channel   Channel (without #) to join (default: %s)\n"
+    " -o,--cogserver Cogserver to use (default: %s)\n"
+    " -t,--cog-port  Cogserver port number (default: %d)\n"
+    " -d,--dry-run   Print settings and quit.\n"
+    " -v,--version   Print version information.\n"
     " \n";
 
 void CogitaConfig::printHelp()
@@ -91,7 +91,7 @@ void CogitaConfig::printHelp()
 #define BUFSZ 8190
     char buff[BUFSZ];
     snprintf(buff, BUFSZ, helpOutput, nick.c_str(), ircNetwork.c_str(),
-             ircPort, ircChannels[0].c_str());
+             ircPort, ircChannels[0].c_str(), cog_addr.c_str(), cog_port);
     cout << buff;
 }
 
