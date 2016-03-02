@@ -59,10 +59,9 @@ const char * CogitaConfig::helpOutput =
     " ======\n"
     " Usage: \n"
     " -n,--nick \tSet bot nick. (default: %s)\n"
-    " -s,--server \tIRC server to connect to.\n"
-    " -p,--port \tPort of IRC server to connect to.\n"
-    " -c,--channels \tComma separated list of channels (without preceding #) to join\n"
-    "               \t(only single channel support implemented).\n"
+    " -s,--server \tIRC server to connect to. (default: %s)\n"
+    " -p,--port \tPort of IRC server to connect to. (default: %d)\n"
+    " -c,--channel \tChannel (without #) to join (default: %s)\n"
     " -v,--version \tPrint version information.\n"
     " \n";
 
@@ -70,7 +69,8 @@ void CogitaConfig::printHelp()
 {
 #define BUFSZ 8190
     char buff[BUFSZ];
-    snprintf(buff, BUFSZ, helpOutput, nick.c_str());
+    snprintf(buff, BUFSZ, helpOutput, nick.c_str(), ircNetwork.c_str(),
+             ircPort, ircChannels[0].c_str());
     cout << buff;
 }
 
@@ -86,7 +86,7 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
         {"nick", required_argument, 0, 'n'},
         {"server", required_argument, 0, 's'},
         {"port", required_argument, 0, 's'},
-        {"channels", required_argument, 0, 'c'},
+        {"channel", required_argument, 0, 'c'},
         {"version", 0, 0, 'v'},
         {"help", 0, 0, '?'},
         {0, 0, 0, 0}
