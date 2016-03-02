@@ -490,7 +490,7 @@ scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
 ...
 ```
 
-### (11) - Turn equivalence between `\x take(x, treatment-1)` and `take-treatment-1` into implications
+### (11) - Turn equivalences such as between `\x take(x, treatment-1)` and `take-treatment-1` into implications
 
 ```scheme
 scheme@(guile-user)> (cog-bind equivalence-to-double-implication-rule)
