@@ -10,12 +10,11 @@
 
 (use-modules (srfi srfi-1)   ; needed for delete-duplicates
              (ice-9 threads) ; needed for par-map
-             (ice-9 rdelim) (ice-9 regex) (ice-9 receive)
-             (opencog)
-             (opencog nlp)
+             (ice-9 rdelim) (ice-9 regex) (ice-9 receive))
+(use-modules (opencog))
+(use-modules (opencog nlp)
              (opencog nlp lg-dict)
-             (opencog nlp relex2logic)
-)
+             (opencog nlp relex2logic))
 
 ; ---------------------------------------------------------------------
 ; Creates a single list  made of the elements of lists within it with the exception
