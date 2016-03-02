@@ -440,6 +440,22 @@
 )
 
 ; --------------------------------------------------------------
+(define (psi-action-rule-type dsn)
+"
+  Returns the action-effect-type of the action-rule.
+
+  dsn:
+  - A DefinedSchemaNode that is an alias of an action-rule.
+"
+    ; FIXME; assumes there will only be one EvalutaionLink that types
+    ; the action-rule. Maybe it is best if DefineLink or DefineType
+    ; be used ????
+    (car (map
+        (lambda (x) (psi-suffix-str (cog-name (car (cog-outgoing-set x)))))
+         (cog-get-pred dsn 'PredicateNode)))
+)
+
+; --------------------------------------------------------------
 (define-public (psi-current-effect-type)
 "
   This returns a string of the type of effect that the current-goal has.
