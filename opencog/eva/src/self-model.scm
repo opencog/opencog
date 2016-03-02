@@ -158,7 +158,7 @@
 )
 
 ; "interaction" -- record the start time of an interaction.
-; defines (DefinedSchema "set-interaction-timestamp") etc.
+; defines (DefinedSchema "set interaction timestamp") etc.
 (timestamp-template "interaction")
 
 ; "expression" -- time when a new expression started being shown.

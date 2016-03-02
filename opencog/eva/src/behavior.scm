@@ -380,7 +380,7 @@ except NameError:
 		(SequentialOr
 			(Not (DefinedPredicate "Time to change gaze"))
 			(SequentialAnd
-				(Evaluation (GroundedPredicate "py:look_at_point")
+				(Evaluation (DefinedPredicate "Look at point")
 					(ListLink ;; three numbers: x,y,z
 						(Number 1)
 						(RandomNumber

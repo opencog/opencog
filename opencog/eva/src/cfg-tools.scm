@@ -24,7 +24,7 @@
 
 ; Shorthand utility, takes probability, intensity min and max, duration min
 ; and max.
-(define (emo-expr-spec emo-state expression
+(define-public (emo-expr-spec emo-state expression
 		prob int-min int-max dur-min dur-max)
 	(emo-expr-set emo-state expression)
 	(emo-expr-map emo-state expression "probability" prob)
@@ -51,7 +51,7 @@
 
 ; Shorthand utility, takes probability, intensity min and max, duration min
 ; and max, repeat min and max.
-(define (emo-gest-spec emo-state gesture prob
+(define-public (emo-gest-spec emo-state gesture prob
 		int-min int-max rep-min rep-max spd-min spd-max)
 	(emo-gest-set emo-state gesture)
 	(emo-gest-map emo-state gesture "gest probability" prob)
@@ -78,7 +78,7 @@
 ;
 ; line 588 -- dice_roll("glance_new_face") etc.
 
-(define (dice-roll action probability)
+(define-public (dice-roll action probability)
 	(define prob-name (string-append action " probability"))
 	(State (Schema prob-name) (Number probability))
 	(DefineLink

@@ -1,13 +1,17 @@
 ;
 ; btree.scm
 ;
-; Sophia behavior tree (for the Sophia belnder model animations).
+; Sophia behavior tree (for the Sophia blender model animations).
 ;
-; Defines a set of behaviors that express Sophia's personality. The
-; currently-defined behaviors include acknowledging new people who enter
-; the room, rotating attention between multiple occupants of the room,
-; falling asleep when bored (i.e. the room is empty), and acting
+; Runs a set of defined behaviors that express Sophia's personality.
+;
+; The currently-defined behaviors include acknowledging new people who
+; enter the room, rotating attention between multiple occupants of the
+; room, falling asleep when bored (i.e. the room is empty), and acting
 ; surprised when someone leaves unexpectedly.
+;
+; The behaviors defined here are integrated with the chatbot in an
+; ad-hoc way, with no real coordination between chat and behavior.
 ;
 ; HOWTO:
 ; Run the main loop:
@@ -49,7 +53,6 @@ except:
 ; Load the Sophia personality configuration.
 ; (display %load-path)
 (add-to-load-path "../src")
-(load-from-path "cfg-tools.scm")
 (load-from-path "cfg-sophia.scm") ;;; <<<=== See, its Sophia here!
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.

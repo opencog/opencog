@@ -9,5 +9,6 @@
 (use-modules (opencog eva-model))
 
 ; Load various parts....
+(load "eva-behavior/cfg-tools.scm")
 (load "eva-behavior/express.scm")
 (load "eva-behavior/behavior.scm")

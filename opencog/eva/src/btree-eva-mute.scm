@@ -1,10 +1,12 @@
 ;
-; btree-eva.scm
+; btree-eva-mute.scm
 ;
 ; Eva behavior tree (for the Eva blender model animations).
 ;
 ; Runs a set of defined behaviors that express Eva's personality.
-; This version integrates the OpenCog chatbot.
+; This is the "mute" (silent) version; it does not involve OpenCog
+; chatbot (it does use the ad-hoc chotbot coordination with external
+; chatbots)
 ;
 ; The currently-defined behaviors include acknowledging new people who
 ; enter the room, rotating attention between multiple occupants of the
@@ -44,29 +46,12 @@
 (define (run) (behavior-tree-run))
 (define (halt) (behavior-tree-halt))
 
-; ---------------------------------------------------------
-; Load the chat modules.
-;
-(use-modules (opencog nlp))
-(use-modules (opencog nlp chatbot-eva))
-
-; XXX remove the below when we get a chance.
-; Must load the rulebase before running eva; see bug
-; https://github.com/opencog/opencog/issues/2021 for details
-; XXX fixme -- we should not need to load either relex2logic or
-; the rules right here, since the code in this module does not depend
-; directly on thes.
-(use-modules (opencog nlp relex2logic))
-(load-r2l-rulebase)
-
-; ---------------------------------------------------------
 ; Run the hacky garbage collection loop.
 (run-behavior-tree-gc)
 
 ; Silence the output.
-*unspecified*
+(TrueLink)
 
 ;; Actually set it running, by default.
-;; Actually, don't, just right now.
-; (all-threads)  ; print out the curent threads.
-; (run)
+(all-threads)  ; print out the curent threads.
+(run)
