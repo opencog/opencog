@@ -40,6 +40,7 @@ namespace chatbot {
 #define DEFAULT_PORT 6667
 #define DEFAULT_NICK "cogita-bot"
 #define DEFAULT_NAME "La Cogita OpenCog chatbot"
+#define DEFAULT_PASS ""
 #define DEFAULT_CHANNELS { "#opencog", 0 }
 #define VERSION "1.0.1"
 #define VSTRING "La Cogita OpenCog (http://opencog.org) IRC chatbot version "  VERSION
@@ -56,6 +57,7 @@ CogitaConfig::CogitaConfig() :
     ircPort(DEFAULT_PORT),
     irc_nick(DEFAULT_NICK),
     irc_name(DEFAULT_NAME),
+    irc_pass(DEFAULT_PASS),
     dry_run(false),
     cog_addr(DEFAULT_COG_IP),
     cog_port(DEFAULT_COG_PORT)
@@ -80,6 +82,7 @@ const char * CogitaConfig::helpOutput =
     " Usage: \n"
     " -n,--nick      Set bot nick. (default: %s)\n"
     " -f,--name      Set bot full name. (default: %s)\n"
+    " -w,--pass      Set bot password. (default: %s)\n"
     " -s,--server    IRC server to connect to. (default: %s)\n"
     " -p,--port      Port of IRC server to connect to. (default: %d)\n"
     " -c,--channel   Channel (without #) to join (default: %s)\n"
@@ -91,11 +94,13 @@ const char * CogitaConfig::helpOutput =
 
 void CogitaConfig::printHelp()
 {
+    const char* pass = irc_pass.c_str();
+    if (0 == pass[0]) pass = "(no password)";
 #define BUFSZ 8190
     char buff[BUFSZ];
     snprintf(buff, BUFSZ, helpOutput, irc_nick.c_str(),
-             irc_name.c_str(), ircNetwork.c_str(), ircPort,
-             ircChannels[0].c_str(), cog_addr.c_str(), cog_port);
+             irc_name.c_str(), pass, ircNetwork.c_str(),
+             ircPort, ircChannels[0].c_str(), cog_addr.c_str(), cog_port);
     cout << buff;
 }
 
@@ -104,12 +109,13 @@ void CogitaConfig::printVersion() { cout << VSTRING << endl; }
 int CogitaConfig::parseOptions(int argc, char* argv[])
 {
     int c = 0;
-    static const char *optString = "n:f:s:p:c:o:t:dvh";
+    static const char *optString = "n:f:w:s:p:c:o:t:dvh";
 
     static const struct option longOptions[] =
     {
         {"nick", required_argument, 0, 'n'},
         {"name", required_argument, 0, 'f'},
+        {"pass", required_argument, 0, 'w'},
         {"server", required_argument, 0, 's'},
         {"port", required_argument, 0, 's'},
         {"channel", required_argument, 0, 'c'},
@@ -138,6 +144,9 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
             break;
         case 'f':
             irc_name = string(optarg);
+            break;
+        case 'w':
+            irc_pass = string(optarg);
             break;
         case 's':
             ircNetwork = string(optarg);

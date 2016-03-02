@@ -321,7 +321,7 @@ int main (int argc, char * argv[])
 		// The login-name, nick, etc. are there only to make it look
 		// pretty on IRC ident.
 		conn.start(cc.ircNetwork.c_str(), cc.ircPort, cc.irc_nick.c_str(),
-		           login, cc.irc_name.c_str(), "asdf");
+		           login, cc.irc_name.c_str(), cc.irc_pass.c_str());
 
 		conn.message_loop();
 

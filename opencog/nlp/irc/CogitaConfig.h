@@ -42,6 +42,7 @@ public:
     int ircPort;
     std::string irc_nick;
     std::string irc_name;
+    std::string irc_pass;
     std::vector<std::string> attn;
     bool dry_run;
 
