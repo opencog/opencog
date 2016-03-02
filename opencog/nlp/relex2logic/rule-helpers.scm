@@ -641,6 +641,11 @@
 				(r2l-wordinst-concept instance)
 				(InheritanceLink (VariableNode var_name) (ConceptNode concept)))
 		)
+
+		; XXX Just to avoid getting the `#<Invalid handle>` error
+		; TODO Need to add more to the list (e.g. "the") to cover all cases
+		; or update the below to generate something reasonable
+		(else (ListLink))
 	)
 )
 
