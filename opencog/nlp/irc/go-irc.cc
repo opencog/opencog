@@ -293,20 +293,17 @@ int got_kick(const char* params, irc_reply_data* ird, void* data)
 }
 
 /**
- * @todo allow command line options via tclap http://tclap.sourceforge.net/ -
- * package libtclap-dev in Ubuntu.
- * However, its probably more portable to use plain-old getopt,
- * or maybe getopt_long, lets keep the dependency list minimal.
- * @todo use Config class to store defaults, and retrieve opencog.conf vars.
+ * Run the IRC chatbot.
  */
 int main (int argc, char * argv[])
 {
-	whirr_sock_setup();
-
-	IRC conn;
-
 	if (cc.parseOptions(argc,argv)) return 0;
 
+	// Set up connection to the cogserver.
+	whirr_sock_setup();
+
+	// Connect to the IRC network.
+	IRC conn;
 	conn.hook_irc_command("376", &end_of_motd);
 	conn.hook_irc_command("PRIVMSG", &got_privmsg);
 	conn.hook_irc_command("KICK", &got_kick);
