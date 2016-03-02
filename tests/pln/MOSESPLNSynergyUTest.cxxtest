@@ -34,6 +34,8 @@
 
 using namespace opencog;
 
+#define al as.add_link
+#define an as.add_node
 #define gl as.get_link
 #define gn as.get_node
 
@@ -131,15 +133,18 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_fc()
 	//              "examples/moses-pln-synergy/scm/pln-config.scm");
 	// load_scm_files_from_config(as);
 
-	// Handle hsource = eval.eval_h("if-X-takes-Y-and-Y-contains-Z-then-X-takes-Z");
+	// Handle hsources =
+	// 	al(SET_LINK,
+	// 	   eval.eval_h("if-X-takes-Y-and-Y-contains-Z-then-X-takes-Z"),
+	// 	   eval.eval_h("being-well-hydrated-tends-to-speed-up-injury-recovery"));
 	// Handle rbs = eval.eval_h("pln-rbs");
 	// HandleSeq focus_set = {};
-	// ForwardChainer fc(as, rbs, hsource, focus_set);
+	// ForwardChainer fc(as, rbs, hsources, focus_set);
     // fc.do_chain();
-    // HandleSeq result = fc.get_chaining_result();
+    // UnorderedHandleSet result = fc.get_chaining_result();
 
 	// // Query the TV of the inference target, which should be
-	// // 
+	// //
 	// // (ImplicationLink (stv 0.60357851 0.69999999)
 	// //    (OrLink
 	// //       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
