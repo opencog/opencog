@@ -41,6 +41,7 @@ public:
     std::string vstring;
     std::string nick;
     std::vector<std::string> attn;
+    bool dry_run;
 
     CogitaConfig();
 

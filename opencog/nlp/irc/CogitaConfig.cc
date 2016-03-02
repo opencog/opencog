@@ -48,7 +48,7 @@ namespace chatbot {
 
 CogitaConfig::CogitaConfig() :
     ircNetwork(DEFAULT_SERVER), ircPort(DEFAULT_PORT),
-    vstring(VSTRING), nick(DEFAULT_NICK)
+    vstring(VSTRING), nick(DEFAULT_NICK), dry_run(false)
 {
     const char* defaultAttns[] = DEFAULT_ATTN;
     const char* defaultSuffixes[] = DEFAULT_ATTN_SUFFIXES;
@@ -65,13 +65,14 @@ CogitaConfig::CogitaConfig() :
 }
 
 const char * CogitaConfig::helpOutput =
-    " Cogita - An OpenCog chatbot. \n"
+    " Cogita - An OpenCog IRC chatbot, version " VERSION "\n"
     " ======\n"
     " Usage: \n"
     " -n,--nick \tSet bot nick. (default: %s)\n"
     " -s,--server \tIRC server to connect to. (default: %s)\n"
     " -p,--port \tPort of IRC server to connect to. (default: %d)\n"
     " -c,--channel \tChannel (without #) to join (default: %s)\n"
+    " -d,--dry-run \tPrint settings and quit.\n"
     " -v,--version \tPrint version information.\n"
     " \n";
 
@@ -97,6 +98,7 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
         {"server", required_argument, 0, 's'},
         {"port", required_argument, 0, 's'},
         {"channel", required_argument, 0, 'c'},
+        {"dry-run", 0, 0, 'd'},
         {"version", 0, 0, 'v'},
         {"help", 0, 0, '?'},
         {0, 0, 0, 0}
@@ -109,8 +111,7 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
         c = getopt_long (argc, argv, optString, longOptions, &optionIndex);
 
         /* Detect end of options */
-        if (c == -1)
-            break;
+        if (c == -1) break;
 
         switch (c) {
         case 'n':
@@ -134,6 +135,7 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
                 ircChannels.push_back("#" + channel);
             }
             break;
+        case 'd': dry_run = true; break;
         case 'v':
             printVersion();
             return 1;
