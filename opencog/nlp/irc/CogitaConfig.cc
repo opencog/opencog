@@ -53,7 +53,7 @@ CogitaConfig::CogitaConfig() :
     version_string(VSTRING),
     ircNetwork(DEFAULT_SERVER),
     ircPort(DEFAULT_PORT),
-    nick(DEFAULT_NICK),
+    irc_nick(DEFAULT_NICK),
     dry_run(false),
     cog_addr(DEFAULT_COG_IP),
     cog_port(DEFAULT_COG_PORT)
@@ -90,7 +90,7 @@ void CogitaConfig::printHelp()
 {
 #define BUFSZ 8190
     char buff[BUFSZ];
-    snprintf(buff, BUFSZ, helpOutput, nick.c_str(), ircNetwork.c_str(),
+    snprintf(buff, BUFSZ, helpOutput, irc_nick.c_str(), ircNetwork.c_str(),
              ircPort, ircChannels[0].c_str(), cog_addr.c_str(), cog_port);
     cout << buff;
 }
@@ -127,7 +127,7 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
 
         switch (c) {
         case 'n':
-            nick = string(optarg);
+            irc_nick = string(optarg);
             createAttnVector();
             break;
         case 's':
@@ -174,7 +174,7 @@ void CogitaConfig::createAttnVector()
     const char* defaultSuffixes[] = DEFAULT_ATTN_SUFFIXES;
     attn.clear();
     for (int i = 0; defaultSuffixes[i]; i++) {
-        attn.push_back(nick + string(defaultSuffixes[i]));
+        attn.push_back(irc_nick + string(defaultSuffixes[i]));
     }
 }
 

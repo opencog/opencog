@@ -40,7 +40,8 @@ public:
     std::string ircNetwork;
     std::vector<std::string> ircChannels;
     int ircPort;
-    std::string nick;
+    std::string irc_nick;
+    std::string irc_name;
     std::vector<std::string> attn;
     bool dry_run;
 

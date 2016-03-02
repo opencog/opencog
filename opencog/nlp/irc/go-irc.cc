@@ -105,10 +105,10 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 	const char * start = NULL;
 	int priv = 0;
-	if (!strcmp (ird->target, cc.nick.c_str())) {priv = 1; start = params+1; }
+	if (!strcmp (ird->target, cc.irc_nick.c_str())) {priv = 1; start = params+1; }
 
-	if (!strncmp (&params[1], cc.nick.c_str(), cc.nick.size())) {
-		start = params+1 + cc.nick.size();
+	if (!strncmp (&params[1], cc.irc_nick.c_str(), cc.irc_nick.size())) {
+		start = params+1 + cc.irc_nick.size();
 		start = strchr(start, ':');
 		if (start) start ++;
 	} else if (!strncmp (params, ":cog-sh:", 8)) {
@@ -316,11 +316,11 @@ int main (int argc, char * argv[])
 	while (true)
 	{
 		printf("Joining network=%s port=%d nick=%s user=%s\n",
-			cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login);
+			cc.ircNetwork.c_str(), cc.ircPort, cc.irc_nick.c_str(), login);
 
 		// The login-name, nick, etc. are there only to make it look
 		// pretty on IRC ident.
-		conn.start(cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login,
+		conn.start(cc.ircNetwork.c_str(), cc.ircPort, cc.irc_nick.c_str(), login,
 		           "La Cogita OpenCog chatbot", "asdf");
 
 		conn.message_loop();
