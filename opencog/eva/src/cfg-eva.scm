@@ -172,7 +172,7 @@
 (emo-gest-spec "imperative"   "nod-3"         0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "shake-2"       0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "shake-3"       0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "thoughtful"    0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "thoughtful"    0.1 0.2 0.4 1 1 1 1)
 (emo-gest-spec "imperative"   "yawn-1"        0.1 0.6 0.9 1 1 1 1)
 
 ; --------------------------------------------------------
