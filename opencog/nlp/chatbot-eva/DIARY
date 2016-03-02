@@ -1147,8 +1147,6 @@ afraid amused recoil worry
 
 How about Yawn
 
-pretend to be happy
-
 
 Yawn blink nod shake
 
@@ -1169,6 +1167,7 @@ Relex TENSE_COPULA was broken. Now fixed
 (cog-evaluate! (Evaluation (DefinedPredicate "Do show gesture")
 	(ListLink (Concept "imperative") (Concept "nod-1"))))
 
-pretend you are happy
 
+pretend you are happy
+pretend to be happy
 blink three times.
