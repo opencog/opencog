@@ -329,6 +329,8 @@ int main (int argc, char * argv[])
 			argv[0]);
 
 		conn.disconnect();
+
+		sleep(20);
 	}
 
 	return 1;
