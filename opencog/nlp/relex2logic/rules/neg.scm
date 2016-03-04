@@ -3,29 +3,29 @@
 
 
 (define neg
-    (BindLink
-        (VariableList
+	(BindLink
+		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$pred" "WordInstanceNode")
-        )
-        (AndLink
+		)
+		(AndLink
 			(word-in-parse "$pred" "$a-parse")
-            (InheritanceLink
-                (VariableNode "$pred")
-                (DefinedLinguisticConceptNode "negative")
-            )
-        )
-        (ExecutionOutputLink
-           (GroundedSchemaNode "scm: pre-neg-rule")
-              (ListLink
-                 (VariableNode "$pred")
-            )
-        )
-    )
+			(InheritanceLink
+				(VariableNode "$pred")
+				(DefinedLinguisticConceptNode "negative")
+			)
+		)
+		(ExecutionOutputLink
+		   (GroundedSchemaNode "scm: pre-neg-rule")
+			  (ListLink
+				 (VariableNode "$pred")
+			)
+		)
+	)
 )
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-neg-rule pred)
-    (negative-rule (cog-name (word-inst-get-lemma pred)) (cog-name pred))
+	(negative-rule (cog-name (word-inst-get-lemma pred)) (cog-name pred))
 )
