@@ -259,7 +259,9 @@ except NameError:
 	(SequentialOr
 		(NotLink (Equal (SetLink soma-bored)
 			(Get (State soma-state (Variable "$x")))))
-		(True (Put (State soma-state (Variable "$x")) soma-awake))))
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-awake))
+	))
 
 ;; Check to see if a new face has become visible.
 ;; line 386 -- someone_arrived()
@@ -403,6 +405,11 @@ except NameError:
 (DefineLink
 	(DefinedPredicate "Go to sleep")
 	(SequentialAnd
+		; Proceed wwith the sleep animation only if the state
+		; change was approved.
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-sleeping))
+
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Go to sleep.")
 				(Minus (TimeLink) (DefinedSchema "get bored timestamp"))))
@@ -416,7 +423,6 @@ except NameError:
 
 		; Finally, play the go-to-sleep animation.
 		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
-		(True (Put (State soma-state (VariableNode "$x")) soma-sleeping))
 	))
 
 ; line 537 -- Continue To Sleep
@@ -471,7 +477,8 @@ except NameError:
 				(Get (State soma-state (Variable "$x"))))
 
 			(SequentialAnd
-				(True (Put (State soma-state (Variable "$x")) soma-bored))
+				(Evaluation (DefinedPredicate "Request Set Soma State")
+					(ListLink bhv-source soma-bored))
 
 				(True (DefinedSchema "set bored timestamp"))
 
