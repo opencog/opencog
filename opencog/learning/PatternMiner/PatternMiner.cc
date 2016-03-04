@@ -935,7 +935,8 @@ void PatternMiner::OutPutCorpusToFile(AtomSpace* _corpusAtomSpace)
 
     for (Handle link : allLinks)
     {
-        resultFile << _corpusAtomSpace->atomAsString(link) << endl;
+        if (_corpusAtomSpace->getType(link) != LIST_LINK)
+            resultFile << _corpusAtomSpace->atomAsString(link) << endl;
     }
 
     resultFile.close();

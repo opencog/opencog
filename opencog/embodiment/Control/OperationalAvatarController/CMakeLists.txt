@@ -23,8 +23,8 @@ ADD_LIBRARY (oac SHARED
 	LearningAgentModeHandler
 	PlanningHeaderFiles
 	Strips
+        Inquery
 	OCPlanner
-	Inquery
 	OCPlanningAgent
 	PatternMiningAgent
 )

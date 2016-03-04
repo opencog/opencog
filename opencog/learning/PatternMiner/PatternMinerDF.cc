@@ -818,10 +818,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                         string extendedHandleStr = _fromAtomSpace->atomAsString(extendedHandle);
 
-                        if (startPrintDebug && (extendedHandleStr.find("open:target") != string::npos))
-                        {
-                            int yyyyy= 0;
-                        }
+//                        // debug
+//                        if (startPrintDebug && (extendedHandleStr.find("open:target") != string::npos))
+//                        {
+//                            int yyyyy= 0;
+//                        }
 
                         if (isInHandleSeq(extendedHandle, inputLinks))
                             continue;

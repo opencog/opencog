@@ -33,7 +33,7 @@
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/embodiment/WorldWrapper/PAIWorldWrapper.h>
-
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/learning/PatternMiner/PatternMiner.h>
 
@@ -46,11 +46,13 @@
 #include <sys/time.h>
 #include "OAC.h"
 
+
 using namespace opencog::oac;
 using namespace opencog::PatternMining;
 using namespace std;
 
 RuleNode OCPlanner::goalRuleNode = RuleNode();
+
 
 string RuleNode::getDepthOfRuleNode()
 {
@@ -2613,7 +2615,7 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
 
 Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
 {
-    // Step 1: find out what kind of object the state ower is in this subgoal
+    // Step 1: find out what kind of object the state ower is in this subgoal         
     vector<ParamValue> stateOwnerList = curSubgoalNode->state->stateOwnerList;
 
     if (stateOwnerList.size() < 1)
@@ -2621,11 +2623,22 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
 
     Handle stateOwnerHanlde = Handle::UNDEFINED;
 
-//    stateOwnerHanlde = getStateOwnerHandle(stateOwnerList[0]);
+    stateOwnerHanlde = Inquery::getStateOwnerHandle(stateOwnerList[0]);
 
-//    if (stateOwnerHanlde == Handle::UNDEFINED)
-//        return 0;
+    if (stateOwnerHanlde == Handle::UNDEFINED)
+        return 0;
 
+    // Find the dominant feature of this object: usually its "class"
+    Handle classNode = AtomSpaceUtil::getPredicateValueNode(*atomSpace, "class", stateOwnerHanlde);
+    if (classNode == Handle::UNDEFINED)
+        return 0;
+
+    // Step 2: Find if there are any existing examples for the objects of same class that achieved this goal state
+    // Step 2.1 Find all the other objects of the same class
+    HandleSeq nonFirstOutgoings;
+    nonFirstOutgoings.push_back(classNode);
+    HandleSeq objsOfSameClass = AtomSpaceUtil::getNodesByEvaluationLink(*atomSpace, "class", nonFirstOutgoings);
+    // Step 2.2 Find out if any objects among objsOfSameClass has a state change into goal value for the goal state
 
 
 }
