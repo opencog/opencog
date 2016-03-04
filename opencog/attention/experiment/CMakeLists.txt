@@ -24,6 +24,7 @@ IF (TBB_FOUND)
 		SentenceGenStimulateAgent	
 		ArtificialStimulatorAgent
 		SmokesDBFCAgent
+		Globals.cc
 	)
 	
 	TARGET_LINK_LIBRARIES(dynamicsexpsetupmodule

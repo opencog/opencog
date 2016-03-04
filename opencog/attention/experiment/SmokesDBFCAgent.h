@@ -67,9 +67,6 @@ private:
 
     float smokes_mean();
 
-    void save(const string& filename, const HandleSeq& seq, const string& header);
-
-
 public:
     SmokesDBFCAgent(CogServer& cs);
     virtual ~SmokesDBFCAgent();
@@ -88,11 +85,6 @@ public:
     void run();
 
     bool is_surprising(const Handle& h);
-
-    bool is_friendship_reln(const Handle& h);
-    bool is_smokes_reln(const Handle& h);
-    bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match);
-    bool exists_in(const Handle& hlink, const Handle& h) const;
 };
 
 #endif

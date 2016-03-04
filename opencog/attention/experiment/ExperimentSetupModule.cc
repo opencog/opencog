@@ -27,15 +27,15 @@
 
 #include "ArtificialStimulatorAgent.h"
 #include "ExperimentSetupModule.h"
-#include "Globals.h"
 
 using namespace opencog;
 using namespace opencog::ECANExperiment;
 
 DECLARE_MODULE(ExperimentSetupModule);
 
-std::map<Handle, std::vector<ExperimentSetupModule::AValues>> ExperimentSetupModule::_av_data;
-std::map<Handle, std::vector<ExperimentSetupModule::HebTValues>> ExperimentSetupModule::_hebtv_data;
+std::map<Handle, std::vector<AValues>> ExperimentSetupModule::_av_data;
+std::map<Handle, std::vector<TValues>> ExperimentSetupModule::_hebtv_data;
+std::map<Handle, std::vector<TValues>>  ExperimentSetupModule::_hascancer_tv_data;
 
 ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
         Module(cs), _cs(cs)
@@ -72,10 +72,12 @@ void ExperimentSetupModule::AVChangedCBListener(const Handle& h,
 }
 
 void ExperimentSetupModule::TVChangedCBListener(const Handle& h,
-                                                const TruthValuePtr& av_old,
+                                                const TruthValuePtr& tv_old,
                                                 const TruthValuePtr& tv_new)
 {
-    if (h->getType() == ASYMMETRIC_HEBBIAN_LINK) {
+    const Type t = h->getType();
+    // For the experiment that aims at checking the sanity of the ECAN system.
+    if (t == ASYMMETRIC_HEBBIAN_LINK) {
         HandleSeq outg = LinkCast(h)->getOutgoingSet();
         assert(outg.size() == 2);
         auto end = hspecial_word_nodes.end();
@@ -83,10 +85,16 @@ void ExperimentSetupModule::TVChangedCBListener(const Handle& h,
         if (hspecial_word_nodes.find(outg[0]) != end and hspecial_word_nodes.find(
                 outg[1])
                                                          != end) {
-            HebTValues hebtvv(tv_new->getMean(), tv_new->getConfidence(),
+            TValues hebtvv(tv_new->getMean(), tv_new->getConfidence(),
                               _cs.getCycleCount());
             _hebtv_data[h].push_back(hebtvv);
         }
+    }
+    // For the smokes FC experiment ( i.e Attention guided inference experiment with tuffy smokes database)
+    else if (t == EVALUATION_LINK and is_cancer_reln(h)) {
+        TValues hebtvv(tv_new->getMean(), tv_new->getConfidence(),
+                       _cs.getCycleCount());
+        _hascancer_tv_data[h].push_back(hebtvv);
     }
 
 }
@@ -265,20 +273,20 @@ std::string ExperimentSetupModule::dump_ecan_data(std::string what_to_dump,
         return sstream.str();
     };
 
-    auto hebprint = [=]() {
+    auto tvprint = [=](const std::map<Handle, std::vector<TValues>>& tvs) {
         std::stringstream sstream;
-        for (const auto & p : _hebtv_data) {
-            for (const HebTValues& hebtv : p.second) {
+        for (const auto & p : tvs) {
+            for (const TValues& hebtv : p.second) {
                 sstream << std::to_string(p.first.value()) << ","
-                << std::to_string(hebtv._strength) << ","
-                << std::to_string(hebtv._confidence) << ","
-                << std::to_string(hebtv._cycle) << "\n";
+                << hebtv._strength << ","
+                << hebtv._confidence << ","
+                << hebtv._cycle<< "\n";
             }
         }
         return sstream.str();
     };
 
-    if (what_to_dump == "av" or what_to_dump == "all") {
+    if (what_to_dump == "av") {
         std::ofstream outf(file_name + "-sw.data",
                            std::ofstream::out | std::ofstream::trunc);
         //Print ecan  values of special word nodes
@@ -296,16 +304,25 @@ std::string ExperimentSetupModule::dump_ecan_data(std::string what_to_dump,
                + file_name + "-snw.data" + ".\n";
     }
 
-    if (what_to_dump == "heb" or what_to_dump == "all") {
+    else if (what_to_dump == "heb") {
         std::ofstream outf(file_name + "-hebtv.data",
                            std::ofstream::out | std::ofstream::trunc);
         //Print ecan  values of special word nodes
-        outf << hebprint();
+        outf << tvprint(_hebtv_data);
         outf.flush();
         outf.close();
         return "Hebbian TV dumped in to " + file_name + ".\n";
     }
 
+    else if (what_to_dump == "smokes") {
+            std::ofstream outf(file_name + "-hascancer.data",
+                               std::ofstream::out | std::ofstream::trunc);
+            //Print ecan  values of special word nodes
+            outf << tvprint(_hascancer_tv_data);
+            outf.flush();
+            outf.close();
+            return "HasCancer TV dumped in to " + file_name + ".\n";
+        }
     return "";
 }
 
