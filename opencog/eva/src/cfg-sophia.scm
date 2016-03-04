@@ -15,15 +15,6 @@
 ; expressions to display for that emotional state, as well as the
 ; intensities and durations.
 ;
-; To view the available expressions, do this:
-; rostopic echo /blender_api/available_emotion_states
-; ['irritated', 'happy', 'recoil', 'surprised', 'sad', 'confused',
-;  'worry', 'bored', 'engaged', 'amused', 'comprehending', 'afraid']
-;
-; Cheat sheet: to display just one of these:
-; (cog-evaluate! (Evaluation  (DefinedPredicate "Show expression")
-;      (ListLink (Concept "worry") (Number 5) (Number 1))))
-;
 ; Columns (in order) are:
 ; * expression (emotion) class
 ; * blender emotion animation name
@@ -32,6 +23,15 @@
 ; * max intensity of expression
 ; * min duration of expression
 ; * max duration of expression
+;
+; To view the available expressions, do this:
+; rostopic echo /blender_api/available_emotion_states
+; ['irritated', 'happy', 'recoil', 'surprised', 'sad', 'confused',
+;  'worry', 'bored', 'engaged', 'amused', 'comprehending', 'afraid']
+;
+; Cheat sheet: to display just one of these:
+; (cog-evaluate! (Evaluation  (DefinedPredicate "Show expression")
+;      (ListLink (Concept "worry") (Number 5) (Number 1))))
 
 ; Translation of behavior.cfg line 9 ff
 (emo-expr-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
@@ -83,12 +83,6 @@
 ; gestures to display for that emotional state, as well as the
 ; intensities and durations.
 ;
-; rostopic echo /blender_api/available_gestures
-;
-; Cheat sheet:
-; (cog-evaluate! (Evaluation  (DefinedPredicate "Show gesture")
-;    (ListLink (Concept "thoughtful") (Number 0.2) (Number 2) (Number 0.8))))
-;
 ; Columns (in order) are:
 ; * expression (emotion) class
 ; * blender gesture animation name
@@ -103,7 +97,13 @@
 ; The "noop" gesture is a special no-operation gesture; if selected,
 ; then nothing is done. This allows gestures to be generated only some
 ; of the time; the "noop" is what is "done" the rest of the time.
-
+;
+; rostopic echo /blender_api/available_gestures
+;
+; Cheat sheet:
+; (cog-evaluate! (Evaluation  (DefinedPredicate "Show gesture")
+;    (ListLink (Concept "thoughtful") (Number 0.2) (Number 2) (Number 0.8))))
+;
 ; Translation of behavior.cfg line 75 ff
 (emo-gest-spec "positive" "nod-1"  0.1 0.6 0.9 1 1 0.5 0.8)
 (emo-gest-spec "positive" "nod-2"  0.1 0.2 0.4 1 1 0.8 0.9)
