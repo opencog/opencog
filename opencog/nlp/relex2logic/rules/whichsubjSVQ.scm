@@ -19,10 +19,7 @@
 			(dependency "_subj" "$verb" "$subj")
 			(AbsentLink (dependency "_obj" "$verb" "$obj"))
 			(dependency "_det" "$subj" "$qVar")
-			(InheritanceLink
-				(VariableNode "$qVar")
-				(DefinedLinguisticConceptNode "which")
-			)
+			(word-feat "$qVar" "which")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-whichsubjSVQ-rule")

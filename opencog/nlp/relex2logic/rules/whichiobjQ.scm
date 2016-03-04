@@ -23,10 +23,7 @@
 			(word-in-parse "$iobj" "$a-parse")
 			(dependency "_iobj" "$verb" "$iobj")
 			(dependency "_det" "$iobj" "$qVar")
-			(InheritanceLink
-				(VariableNode "$qVar")
-				(DefinedLinguisticConceptNode "which")
-			)
+			(word-feat "$qVar" "which")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-whichiobjQ-rule")

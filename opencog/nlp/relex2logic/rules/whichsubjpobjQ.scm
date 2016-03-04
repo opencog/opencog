@@ -19,10 +19,7 @@
 			(dependency "_predadj" "$subj" "$prep")
 			(dependency "_pobj" "$prep" "$pobj")
 			(dependency "_det" "$subj" "$qVar")
-		(InheritanceLink
-			(VariableNode "$qVar")
-			(DefinedLinguisticConceptNode "which")
-		)
+			(word-feat "$qVar" "which")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-whichsubjpobjQ-rule")

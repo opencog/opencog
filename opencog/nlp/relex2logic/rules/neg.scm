@@ -10,10 +10,7 @@
 		)
 		(AndLink
 			(word-in-parse "$pred" "$a-parse")
-			(InheritanceLink
-				(VariableNode "$pred")
-				(DefinedLinguisticConceptNode "negative")
-			)
+			(word-feat "$pred" "negative")
 		)
 		(ExecutionOutputLink
 		   (GroundedSchemaNode "scm: pre-neg-rule")

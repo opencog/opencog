@@ -20,10 +20,7 @@
 			(dependency "_obj" "$prep" "$pobj")
 			(dependency "_advmod" "$be" "$prep")
 			(dependency "_det" "$pobj" "$qVar")
-			(InheritanceLink
-				(VariableNode "$qVar")
-				(DefinedLinguisticConceptNode "which")
-			)
+			(word-feat "$qVar" "which")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-whichpobjQ-rule")
