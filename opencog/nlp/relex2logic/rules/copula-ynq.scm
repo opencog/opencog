@@ -18,10 +18,7 @@
 				(VariableNode "$verb")
 				(WordNode "be")
 			)
-			(InheritanceLink
-				(VariableNode "$verb")
-				(DefinedLinguisticConceptNode "truth-query")
-			)
+			(word-feat "$verb" "truth-query")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-copula-ynq-rule")
