@@ -14,10 +14,7 @@
 			(word-in-parse "$obj" "$a-parse")
 			(dependency "_subj" "$verb" "$subj")
 			(dependency "_obj" "$verb" "$obj")
-			(LemmaLink
-				(VariableNode "$verb")
-				(WordNode "be")
-			)
+			(Lemma (Variable "$verb") (Word "be"))
 			(word-feat "$verb" "truth-query")
 		)
 		(ExecutionOutputLink

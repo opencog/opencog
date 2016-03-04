@@ -19,10 +19,7 @@
 			(word-in-parse "$Z" "$a-parse")
 			(dependency "_subj" "$Y" "$X")
 			(dependency "_obj" "$Y" "$Z")
-			(LemmaLink
-				(VariableNode "$Y")
-				(WordNode "be")
-			)
+			(Lemma (Variable "$Y") (Word "be"))
 			(word-lemma "$X" "$subj-lemma")
 			(word-lemma "$Z" "$obj-lemma")
 		)

@@ -19,10 +19,7 @@
 			(ChoiceLink
 				(AndLink
 					(dependency "_subj" "$verb" "$subj")
-					(LemmaLink
-						(VariableNode "$verb")
-						(WordNode "be")
-					)
+					(Lemma (Variable "$verb") (Word "be"))
 				)
 				(dependency "_predadj" "$verb" "$subj")
 				(dependency "_psubj" "$subj" "$verb")

@@ -16,10 +16,7 @@
 			(word-in-parse "$qVar" "$a-parse")
 			(dependency "_%how" "$verb" "$qVar")
 			(dependency "_subj" "$verb" "$subj")
-			(LemmaLink
-				(WordInstanceNode "$verb")
-				(WordNode "be")
-			)
+			(Lemma (Variable "$verb") (Word "be"))
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-howpredadj1-q-rule")
