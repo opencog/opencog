@@ -974,8 +974,10 @@
 ;
 ; Example: "Why do you live?", "Why do you like terrible music?"
 ;
-(define (why-rule verb verb_instance)
-	(let ((var_name (choose-var-name)))
+(define (why-rule lemma verb-inst)
+	(let ((verb (cog-name lemma))
+			(verb_instance (cog-name verb-inst))
+			(var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-Predicate verb_instance)
