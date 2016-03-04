@@ -1,6 +1,6 @@
 Following rules are not implemented:
 prepadj.scm
-demdat.scm
+demdet.scm
 whichobjSVIOQ.scm
 whichpobjQ-rule
 whichsubjpobjQ-rule
