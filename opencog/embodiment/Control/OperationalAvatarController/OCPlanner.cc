@@ -2629,16 +2629,22 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
         return 0;
 
     // Find the dominant feature of this object: usually its "class"
-    Handle classNode = AtomSpaceUtil::getPredicateValueNode(*atomSpace, "class", stateOwnerHanlde);
-    if (classNode == Handle::UNDEFINED)
+    Handle classValueNode = AtomSpaceUtil::getPredicateValueNode(*atomSpace, "class", stateOwnerHanlde);
+    if (classValueNode == Handle::UNDEFINED)
         return 0;
 
     // Step 2: Find if there are any existing examples for the objects of same class that achieved this goal state
-    // Step 2.1 Find all the other objects of the same class
-    HandleSeq nonFirstOutgoings;
-    nonFirstOutgoings.push_back(classNode);
-    HandleSeq objsOfSameClass = AtomSpaceUtil::getNodesByEvaluationLink(*atomSpace, "class", nonFirstOutgoings);
-    // Step 2.2 Find out if any objects among objsOfSameClass has a state change into goal value for the goal state
+    Handle stateGoalValueHandle;
+    HandleSeq stateGoalValueHandles = Inquery::generateNodeForGroundedParamValue(&(curSubgoalNode->state->getParamValue()));
+    if (stateGoalValueHandles.size() != 1)
+        return 0;
+
+    stateGoalValueHandle = stateGoalValueHandles[0];
+    HandleSeq stateChangeActorLinks = Inquery::findAllGivenStateChangeActorPredicateLink(classValueNode, curSubgoalNode->state->name(),stateGoalValueHandle);
+
+    // Step 3: Find the actions did to the objects found in step 2 just before the state change
+
+
 
 
 }
