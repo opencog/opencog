@@ -93,6 +93,13 @@ except NameError:
 	(stv 1 1))
 
 ; --------------------------------------------------------
+;
+; This will be used to tag the name of the module making the request.
+; Everything in ths module is the behavior tree, so that is what we
+; call it.
+(define bhv-source (Concept "Behavior Tree"))
+
+; --------------------------------------------------------
 
 ; Start interacting with a new face picked randomly from the crowd.
 (DefineLink
@@ -426,13 +433,15 @@ except NameError:
 (DefineLink
 	(DefinedPredicate "Wake up")
 	(SequentialAnd
+		; Request change soma state to being awake. Proceed only if
+		; the request is accepted.
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-awake))
+
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Wake up!")
 				(Minus (TimeLink) (DefinedSchema "get sleep timestamp"))))
 		(TrueLink (DefinedSchema "set bored timestamp"))
-
-		; Change soma state to being awake.
-		(True (Put (State soma-state (Variable "$x")) soma-awake))
 
 		; Run the wake animation.
 		(Evaluation (GroundedPredicate "py:do_wake_up") (ListLink))
