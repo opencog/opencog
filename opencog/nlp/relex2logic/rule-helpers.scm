@@ -994,8 +994,10 @@
 ;
 ; Example "Why are you such a fool?" etc.
 ;
-(define (whycop-Q-rule subj_concept subj_instance)
-	(let ((var_name (choose-var-name)))
+(define (whycop-Q-rule subj-lemma subj-inst)
+	(let ((subj_concept (cog-name subj-lemma)
+			(subj_instance (cog-name subj-inst)
+			(var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
