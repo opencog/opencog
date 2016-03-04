@@ -21,10 +21,7 @@
 			(dependency "_obj" "$verb" "$obj")
 			(dependency "_iobj" "$verb" "$iobj")
 			(dependency "_det" "$obj" "$qVar")
-			(InheritanceLink
-				(VariableNode "$qVar")
-				(DefinedLinguisticConceptNode "which")
-			)
+			(word-feat "$qVar" "which")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-whichobjSVIOQ-rule")

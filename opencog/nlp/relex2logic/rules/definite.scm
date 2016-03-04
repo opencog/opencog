@@ -22,10 +22,7 @@
 		(AndLink
 			(word-in-parse "$noun" "$a-parse")
 			(word-lemma "$noun" "$lemma")
-			(InheritanceLink
-				(VariableNode "$noun")
-				(DefinedLinguisticConceptNode "definite")
-			)
+			(word-feat "$noun" "definite")
 			(EvaluationLink
 				(GroundedPredicateNode "scm: check-name")
 				(ListLink

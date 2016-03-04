@@ -11,10 +11,7 @@
 		)
 		(AndLink
 			(word-in-parse "$verb" "$a-parse")
-			(InheritanceLink
-				(VariableNode "$verb")
-				(DefinedLinguisticConceptNode "truth-query")
-			)
+			(word-feat "$verb" "truth-query")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-pred-ynq-rule")

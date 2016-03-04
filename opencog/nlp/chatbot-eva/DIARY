@@ -1171,3 +1171,16 @@ Relex TENSE_COPULA was broken. Now fixed
 pretend you are happy
 pretend to be happy
 blink three times.
+
+purge-hypergraph
+
+
+chatbot got motd nick=wolfe.freenode.net ident= host= target=
+
+bork
+ird->nick, ird->ident, ird->host, ird->target
+irc_reply_data
+
+todo: AO to get source of the command.
+todo: random expresion context is really part of self-model.
+
