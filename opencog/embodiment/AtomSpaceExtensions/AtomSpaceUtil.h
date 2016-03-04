@@ -498,11 +498,12 @@ public:
      * @param b The handle of the second object (optional). If this handle is
      *        not informed then a unary predicate is assumed
      */
-    static Handle getPredicateValueNode(const AtomSpace &atomSpace,
+    static Handle getPredicateValueNode(AtomSpace &atomSpace,
                                  std::string predicateName,
                                  Handle a,
                                  Handle b = Handle::UNDEFINED,
                                  Handle c = Handle::UNDEFINED);
+
 
     /**
      * Return the mean value of the given predicate, with its objects

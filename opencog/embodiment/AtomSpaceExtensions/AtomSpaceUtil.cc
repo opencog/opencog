@@ -622,6 +622,29 @@ throw(opencog::NotFoundException)
 
 }
 
+Handle AtomSpaceUtil::getPredicateValueNode(AtomSpace &atomSpace,
+                             std::string predicateName,
+                             Handle a,
+                             Handle b,
+                             Handle c)
+{
+    Handle evalLink = getLatestEvaluationLink(atomSpace, predicateName, a, b, c);
+
+    Handle listLink = atomSpace.getOutgoing(evalLink, 1);
+
+    int valueNodeIndex = 1;
+
+    if (b != Handle::UNDEFINED)
+        valueNodeIndex = 2;
+
+    if (c != Handle::UNDEFINED)
+        valueNodeIndex = 3;
+
+    Handle valueHandle = atomSpace.getOutgoing(listLink, valueNodeIndex);
+
+    return valueHandle;
+
+}
 
 float AtomSpaceUtil::getPredicateValue(AtomSpace &atomSpace,
                                        std::string predicateName,
