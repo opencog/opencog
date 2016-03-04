@@ -14,6 +14,8 @@
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/Factory.h>
 
+#include "Globals.h"
+
 
 namespace opencog {
 
@@ -34,40 +36,6 @@ static std::string ECAN_EXP_AGENTS = "opencog::SimpleHebbianUpdatingAgent\n"
 
 class ExperimentSetupModule: public Module {
 private:
-    struct AValues {
-        AttentionValue::sti_t _sti;
-        AttentionValue::lti_t _lti;
-        AttentionValue::vlti_t _vlti;
-        long _cycle;
-
-        AValues() :
-                _sti(0), _lti(0),_vlti(0), _cycle(0)
-        {
-        }
-
-        AValues(AttentionValue::sti_t sti, AttentionValue::lti_t lti,
-                  AttentionValue::vlti_t vlti, long cycle) :
-                _sti(sti), _lti(lti), _vlti(vlti), _cycle(cycle)
-        {
-        }
-    };
-
-    struct HebTValues {
-        strength_t _strength;
-        confidence_t _confidence;
-        long _cycle;
-
-        HebTValues() :
-                _strength(0.0), _confidence(0.0), _cycle(0)
-        {
-        }
-
-        HebTValues(strength_t strength, confidence_t confidence, long cycle) :
-                _strength(strength), _confidence(confidence), _cycle(cycle)
-        {
-        }
-    };
-
     AgentPtr _forgetting_agentptr;
     AgentPtr _hebbianupdating_agentptr;
     AgentPtr _importanceupdating_agentptr;
@@ -87,7 +55,8 @@ private:
     SchemeEval * _scmeval;
 
     static std::map<Handle, std::vector<AValues>> _av_data;
-    static std::map<Handle, std::vector<HebTValues>> _hebtv_data;
+    static std::map<Handle, std::vector<TValues>> _hebtv_data;
+    static std::map<Handle, std::vector<TValues>> _hascancer_tv_data;
 
     boost::signals2::connection _AVChangedSignalConnection,_TVChangedSignalConnection;
 
@@ -142,7 +111,7 @@ private:
     //Dump all STI,LTI changes recorded till now to a file.
     DECLARE_CMD_REQUEST(ExperimentSetupModule, "dump", do_dump_data,
             "Dumps ECAN time series data to file\n",
-            "Usage: dump [av|heb] [FILE_NAME]\n"
+            "Usage: dump [av|heb|smokes] [FILE_NAME]\n"
             "Dump time serise ECAN data\n",
             false, true)
 
