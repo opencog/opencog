@@ -7,22 +7,19 @@
 		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$pred" "WordInstanceNode")
+			(var-decl "$pred-lemma" "WordNode")
 		)
 		(AndLink
 			(word-in-parse "$pred" "$a-parse")
+			(word-lemma  "$pred" "$pred-lemma")
 			(word-feat "$pred" "negative")
 		)
 		(ExecutionOutputLink
-		   (GroundedSchemaNode "scm: pre-neg-rule")
-			  (ListLink
-				 (VariableNode "$pred")
+		   (GroundedSchemaNode "scm: negative-rule")
+			(ListLink
+				(VariableNode "$pred-lemma")
+				(VariableNode "$pred")
 			)
 		)
 	)
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-neg-rule pred)
-	(negative-rule (cog-name (word-inst-get-lemma pred)) (cog-name pred))
 )

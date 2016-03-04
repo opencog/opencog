@@ -649,7 +649,9 @@
 	)
 )
 
-(define (negative-rule verb instance)
+(define (negative-rule lemma verb-inst)
+	(define verb (cog-name lemma))
+	(define instance (cog-name verb-inst))
 	(ListLink
 		(r2l-wordinst-Predicate instance)
 		(ImplicationLink (PredicateNode instance) (NotLink (PredicateNode verb))))
