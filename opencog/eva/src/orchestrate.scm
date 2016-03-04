@@ -126,6 +126,9 @@
 ;
 ; Currently, this always honors all requests.
 ; Currently, the requestor is ignored.
+;
+; Some future version may deny change requests, depending on the
+; request source or on other factors.
 
 (DefineLink
 	(DefinedPredicate "Request Set Soma State")
@@ -134,6 +137,25 @@
 			(Variable "$requestor")
 			(Variable "$state"))
 		(True (State soma-state (Variable "$state")))
+	))
+
+; -------------------------------------------------------------
+; Request to change the emotion state.
+; Takes two arguments: the requestor, and the proposed state.
+;
+; Currently, this always honors all requests.
+; Currently, the requestor is ignored.
+;
+; Some future version may deny change requests, depending on the
+; request source or on other factors.
+
+(DefineLink
+	(DefinedPredicate "Request Set Emotion State")
+	(LambdaLink
+		(VariableList
+			(Variable "$requestor")
+			(Variable "$state"))
+		(True (State emotion-state (Variable "$state")))
 	))
 
 ; -------------------------------------------------------------
