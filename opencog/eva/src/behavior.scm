@@ -414,7 +414,7 @@ except NameError:
 	(SequentialAnd
 		; Proceed only if we are allowed to.
 		(Put (DefinedPredicate "Request Set Emotion State")
-			(ListLink bhv-source (ConceptNode "sleep")))
+			(ListLink bhv-source (ConceptNode "sleepy")))
 
 		; Proceed with the sleep animation only if the state
 		; change was approved.
@@ -428,9 +428,9 @@ except NameError:
 
 		; First, show some yawns ...
 		(Put (DefinedPredicate "Show random expression")
-			(Concept "sleep"))
+			(Concept "sleepy"))
 		(Put (DefinedPredicate "Show random gesture")
-			(Concept "sleep"))
+			(Concept "sleepy"))
 
 		; Finally, play the go-to-sleep animation.
 		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))

@@ -49,7 +49,7 @@
 (emo-expr-spec "bored"    "sad"           0.1 0.1 0.3 10 15)
 (emo-expr-spec "bored"    "happy"         0.2 0.1 0.3 10 15)
 
-(emo-expr-spec "sleep"    "happy"         1.0  0.0 0.1 5 15)
+(emo-expr-spec "sleepy"   "happy"         1.0  0.0 0.1 5 15)
 
 (emo-expr-spec "wake-up"  "surprised"     0.45 0.2 0.6 5 15)
 (emo-expr-spec "wake-up"  "happy"         0.2  0.5 0.7 5 15)
@@ -114,7 +114,7 @@
 (emo-gest-spec "bored"   "yawn-1"  0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "bored"   "noop"    0.9 0   0   1 1 1 1)
 
-(emo-gest-spec "sleep"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
+(emo-gest-spec "sleepy"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
 
 (emo-gest-spec "wake-up" "shake-2"  0.4 0.7 1.0 1 1 0.7 0.8)
 (emo-gest-spec "wake-up" "shake-3"  0.3 0.6 1.0 1 1 0.7 0.8)
