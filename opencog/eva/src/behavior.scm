@@ -181,13 +181,16 @@ except NameError:
 ; ------------------------------------------------------
 ;; Sequence - if there were no people in the room, then look at the
 ;; new arrival.
-;; line 391 -- owyl.sequence
+;;
 ;; (cog-evaluate! (DefinedPredicateNode "Was Empty Sequence"))
 (DefineLink
 	(DefinedPredicate "Was Empty Sequence")
 	(SequentialAnd
-		;; line 392
 		(DefinedPredicateNode "was room empty?")
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "new-arrival")))
+
 		(TrueLink (DefinedSchemaNode "interact with new person"))
 		(TrueLink (DefinedSchemaNode "look at person"))
 		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
@@ -372,6 +375,10 @@ except NameError:
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "bored")))
+
 		; Pick a bored expression, gesture
 		(SequentialOr
 			(Not (DefinedPredicate "Time to change expression"))
@@ -405,7 +412,11 @@ except NameError:
 (DefineLink
 	(DefinedPredicate "Go to sleep")
 	(SequentialAnd
-		; Proceed wwith the sleep animation only if the state
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "sleep")))
+
+		; Proceed with the sleep animation only if the state
 		; change was approved.
 		(Evaluation (DefinedPredicate "Request Set Soma State")
 			(ListLink bhv-source soma-sleeping))
@@ -443,6 +454,10 @@ except NameError:
 		; the request is accepted.
 		(Evaluation (DefinedPredicate "Request Set Soma State")
 			(ListLink bhv-source soma-awake))
+
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "wake-up")))
 
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Wake up!")
