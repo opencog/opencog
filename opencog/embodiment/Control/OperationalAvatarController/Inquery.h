@@ -94,8 +94,8 @@ public:
     /*static vector<ParamValue> inqueryStandableNearbyAccessablePosition(const vector<ParamValue>& stateOwnerList);*/
     static vector<ParamValue> inqueryUnderPosition(const vector<ParamValue>& stateOwnerList);// get the position just under the input pos
 
-    static HandleSeq findAllGivenStateChangeActorPredicateLink(Handle classValueNode, string stateName,
-                                                            Handle stateNewValNode, Hanlde stateOldValueNode = Handle::UNDEFINED);
+    static HandleSeq findAllGivenStateChangesAndLatestRelatedActions(Handle classValueNode, string stateName, Handle stateNewValNode,
+                                                               Handle stateOldValueNode = opencog::Handle::UNDEFINED);
 
 
 

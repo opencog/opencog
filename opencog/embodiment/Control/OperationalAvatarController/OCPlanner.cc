@@ -2633,19 +2633,15 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
     if (classValueNode == Handle::UNDEFINED)
         return 0;
 
-    // Step 2: Find if there are any existing examples for the objects of same class that achieved this goal state
+    // Step 2: Find if there are any existing examples for the objects of same class that achieved this goal state,
+    //         and the latest related actions before the state changes
     Handle stateGoalValueHandle;
-    HandleSeq stateGoalValueHandles = Inquery::generateNodeForGroundedParamValue(&(curSubgoalNode->state->getParamValue()));
+    HandleSeq stateGoalValueHandles = Inquery::generateNodeForGroundedParamValue(&(curSubgoalNode->state->stateVariable->getValue()));
     if (stateGoalValueHandles.size() != 1)
         return 0;
 
     stateGoalValueHandle = stateGoalValueHandles[0];
-    HandleSeq stateChangeActorLinks = Inquery::findAllGivenStateChangeActorPredicateLink(classValueNode, curSubgoalNode->state->name(),stateGoalValueHandle);
-
-    // Step 3: Find the actions did to the objects found in step 2 just before the state change
-
-
-
+    HandleSeq lastestActions = Inquery::findAllGivenStateChangesAndLatestRelatedActions(classValueNode, curSubgoalNode->state->name(),stateGoalValueHandle);
 
 }
 

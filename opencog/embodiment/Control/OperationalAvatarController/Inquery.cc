@@ -28,6 +28,7 @@
 #include <opencog/util/StringManipulator.h>
 #include <opencog/spacetime/SpaceTime.h>
 #include <opencog/spacetime/SpaceServer.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Entity3D.h>
 #include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
@@ -826,19 +827,30 @@ vector<ParamValue> Inquery::inqueryStandableNearbyAccessablePosition(const vecto
 //        (ConceptNode "false") ; [1194]
 //      ) ; [3908]
 //    ) ; [3909]
-// return all the found state change action instance actorEvalLinks
-HandleSeq Inquery::findAllGivenStateChangeActorPredicateLink(Handle classValueNode, string stateName,
-                                                        Handle stateNewValNode, Hanlde stateOldValueNode)
+//    (EvaluationLink (stv 1.000000 1.000000)
+//      (PredicateNode "target") ; [2601]
+//      (ListLink (stv 1.000000 1.000000)
+//        (ConceptNode "$var_previous_action") ; [3902]
+//        (ObjectNode "$var_actor") ; [1578]
+//      ) ; [3904]
+//    ) ; [3905]
+
+HandleSeq Inquery::findAllGivenStateChangesAndLatestRelatedActions(Handle classValueNode, string stateName,
+                                                        Handle stateNewValNode, Handle stateOldValueNode)
 {
 
     // Create BindLink used by pattern matcher
     HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
 
     // Add the variable nodes
-    Handle hVariableActorNode = atomSpace.addNode(VARIABLE_NODE, "$var_actor");
-    Handle hVariableInstanceNode = atomSpace.addNode(VARIABLE_NODE, "$var_instance");
+    Handle hVariableActorNode = atomSpace->addNode(VARIABLE_NODE, "$var_actor");
+    Handle hVariableStateChangeNode = atomSpace->addNode(VARIABLE_NODE, "$var_state_change");
+    Handle hVariablePreviousActionNode = atomSpace->addNode(VARIABLE_NODE, "$var_previous_action");
+
     variableNodes.push_back(hVariableActorNode);
-    variableNodes.push_back(hVariableInstanceNode);
+    variableNodes.push_back(hVariableStateChangeNode);
+    variableNodes.push_back(hVariablePreviousActionNode);
+
     Handle hVariablesListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,variableNodes);
 
     TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
@@ -862,7 +874,7 @@ HandleSeq Inquery::findAllGivenStateChangeActorPredicateLink(Handle classValueNo
     //        (ObjectNode "$var_actor") ; [1578]
     //      ) ; [3904]
     //    ) ; [3905]
-    Handle actorEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:actor", hVariableInstanceNode, hVariableActorNode, tv);
+    Handle actorEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:actor", hVariableStateChangeNode, hVariableActorNode, tv);
     andLinkOutgoings.push_back(actorEvalLink);
 
     // Create EvaluationLink for state_change:stateName predicate
@@ -874,7 +886,7 @@ HandleSeq Inquery::findAllGivenStateChangeActorPredicateLink(Handle classValueNo
     //      ) ; [3906]
     //    ) ; [3907]
     Handle stateNameValHande = AtomSpaceUtil::addNode(*atomSpace, CONCEPT_NODE, stateName);
-    Handle stateNameEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:stateName", hVariableInstanceNode, stateNameValHande, tv);
+    Handle stateNameEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:stateName", hVariableStateChangeNode, stateNameValHande, tv);
     andLinkOutgoings.push_back(stateNameEvalLink);
 
     // Create EvaluationLink for state_change:NewValue predicate
@@ -885,7 +897,7 @@ HandleSeq Inquery::findAllGivenStateChangeActorPredicateLink(Handle classValueNo
     //        (ConceptNode "stateNewValNode") ; [1190]
     //      ) ; [3910]
     //    ) ; [3911]
-    Handle newStateValEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:NewValue", hVariableInstanceNode, stateNewValNode, tv);
+    Handle newStateValEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:NewValue", hVariableStateChangeNode, stateNewValNode, tv);
     andLinkOutgoings.push_back(newStateValEvalLink);
 
     if (stateOldValueNode != Handle::UNDEFINED)
@@ -898,30 +910,77 @@ HandleSeq Inquery::findAllGivenStateChangeActorPredicateLink(Handle classValueNo
         //        (ConceptNode "stateOldValueNode") ; [1194]
         //      ) ; [3908]
         //    ) ; [3909]
-        Handle oldStateValEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:OldValue", hVariableInstanceNode, stateOldValueNode, tv);
+        Handle oldStateValEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:OldValue", hVariableStateChangeNode, stateOldValueNode, tv);
         andLinkOutgoings.push_back(oldStateValEvalLink);
     }
 
+    // Create EvaluationLink for target predicate of previous action
+    //    (EvaluationLink (stv 1.000000 1.000000)
+    //      (PredicateNode "target") ; [2601]
+    //      (ListLink (stv 1.000000 1.000000)
+    //        (ConceptNode "$var_previous_action") ; [3902]
+    //        (ObjectNode "$var_actor") ; [1578]
+    //      ) ; [3904]
+    //    ) ; [3905]
+    Handle previousActionTargetEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "target", hVariablePreviousActionNode, hVariableActorNode, tv);
+    andLinkOutgoings.push_back(previousActionTargetEvalLink);
+
+    // Each result contains the state change node and the previous action node
+    HandleSeq resultListOutgoings;
+    resultListOutgoings.push_back(hVariableStateChangeNode);
+    resultListOutgoings.push_back(hVariablePreviousActionNode);
+    Handle queryResultLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,resultListOutgoings);
+
     Handle hAndLink = AtomSpaceUtil::addLink(*atomSpace,AND_LINK,andLinkOutgoings);
     implicationLinkOutgoings.push_back(hAndLink);
-    implicationLinkOutgoings.push_back(actorEvalLink);
+    implicationLinkOutgoings.push_back(queryResultLink);
 
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+    Handle hImplicationLink = atomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings);
 
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+    Handle hBindLink = atomSpace->addLink(BIND_LINK, bindLinkOutgoings);
 
     // Run pattern matcher
-    Handle hResultListLink = bindlink(&atomSpace, hBindLink);
+    Handle hResultListLink = bindlink(atomSpace, hBindLink);
 
     // Get result
     // Note: Don't forget remove the hResultListLink
-    std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink);
-    atomSpace.removeAtom(hResultListLink);
+    std::vector<Handle> resultSet = atomSpace->getOutgoing(hResultListLink);
+    atomSpace->removeAtom(hResultListLink);
 
-    return resultSet;
+    // sort out the result and make it into map <state_change_node, vector <previous_action> >
+    std::map < Handle, std::vector<Handle> > resultMap;
+    for (Handle listLink : resultSet)
+    {
+        HandleSeq stateChangeAndPreviousAction = atomSpace->getOutgoing(listLink);
+        if ( resultMap.find(stateChangeAndPreviousAction[0]) == resultMap.end())
+        {
+            std::vector<Handle> previousActionList;
+            previousActionList.push_back(stateChangeAndPreviousAction[1]);
+            resultMap.insert(std::pair<Handle, std::vector<Handle> >(stateChangeAndPreviousAction[0], previousActionList));
+        }
+        else
+        {
+            resultMap[stateChangeAndPreviousAction[0]].push_back(stateChangeAndPreviousAction[1]);
+        }
+    }
+
+    // for each state change node, find the lastest previous action
+    HandleSeq lastestActionNodes;
+    std::map < Handle, std::vector<Handle> >::iterator resultIter;
+    for (resultIter = resultMap.begin(); resultIter != resultMap.end(); resultIter ++)
+    {
+        Handle lastestActionNode = AtomSpaceUtil::getLatestHandle(*atomSpace, resultIter->second);
+        lastestActionNodes.push_back(lastestActionNode);
+    }
+
+
+    return lastestActionNodes;
 }
+
+
+
 
 vector<ParamValue> Inquery::inqueryUnderPosition(const vector<ParamValue>& stateOwnerList)
 {
