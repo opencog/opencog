@@ -997,8 +997,8 @@
 ; Example "Why are you such a fool?" etc.
 ;
 (define (whycop-Q-rule subj-lemma subj-inst)
-	(let ((subj_concept (cog-name subj-lemma)
-			(subj_instance (cog-name subj-inst)
+	(let ((subj_concept (cog-name subj-lemma))
+			(subj_instance (cog-name subj-inst))
 			(var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
@@ -1013,6 +1013,7 @@
 		)
 	)
 )
+
 ;------------------------------------------------------
 ; How adverbial (manner) questions
 ;------------------------------------------------------
