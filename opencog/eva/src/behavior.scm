@@ -10,12 +10,14 @@
 ; surprised when someone leaves unexpectedly.
 ;
 ; HOWTO:
+; ------
 ; Run the main loop:
 ;    (behavior-tree-run)
 ; Pause the main loop:
 ;    (behavior-tree-halt)
 ;
 ; Unit testing:
+; -------------
 ; The various predicates below can be manually unit tested by manually
 ; adding and removing new visible faces, and then manually invoking the
 ; various rules. See faces.scm for utilities.
@@ -43,6 +45,55 @@
 ; Unit test chatbot:
 ;    (State chat-state chat-start) ; to simulate having it talk.
 ;    (State chat-state chat-stop)  ; to signal that talking has stopped.
+;
+; --------------------------------------------------------
+; Character engine notes
+; The character engine is an older incarnation of this code, predating
+; the owyl behavior trees.  The below are notes abouit some of the
+; things it did, and where to look for equivalents here.
+;
+; 1) Room-state transtions
+; -- no faces present for a while
+;     (cog-evalute! (DefinedPredicateNode "Search for attention"))
+; -- no-face just transitioned to one-face
+;     (cog-evaluate! (DefinedPredicateNode "Was Empty Sequence"))
+; -- no-face just transitioned to multiple-faces
+; -- one-face just transitioned to no-face
+; -- one-face just transitioned to multiple-faces
+; -- one face present for a while
+; -- multiple faces present for a while
+; -- multiple-faces just transitioned to one-face
+; -- multiple-faces just transitioned to no-face
+;
+; 2) Interactions depend on whether person is known or not.
+;
+; -- it's a familiar face
+; -- it's a familiar face to whom the robot has already been introduced
+; -- it's an unfamiliar face
+;
+; 3) Familiar-face interactions
+;
+; -- prior emotions when interacting with that face were positive
+; -- prior emotions when interacting with that face were negative
+; -- prior emotions when interacting with that face were neutral
+;
+; 4) Introduction sequence
+;    If the robot is talking to someone with whom it has not previously
+;    been introduced, it can enter into a short procedure aimed at
+;    gathering the person's name...
+;
+; 5) Adhoc animation patterns
+;
+; -- changing a subject (maybe the AIML can send a signal indicating
+;    when the subject is being changed?)
+; -- asking a question of the user
+; -- starting to talk after a period of being silent
+; -- ending an interaction with one guy before shifting attention to
+;    another guy
+; -- starting an interaction with a new guy after shifting attention
+;    from another guy
+;
+; --------------------------------------------------------
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 
