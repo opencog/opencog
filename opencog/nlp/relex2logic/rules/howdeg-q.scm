@@ -12,10 +12,7 @@
 			(word-in-parse "$qVar" "$a-parse")
 			(word-in-parse "$pred" "$a-parse")
 			(dependency "_%howdeg" "$pred" "$qVar")
-			(InheritanceLink
-				(VariableNode "$qVar")
-				(DefinedLinguisticConceptNode "how_much")
-			)
+			(word-feat "$qVar" "how_much")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-howdeg-q-rule")

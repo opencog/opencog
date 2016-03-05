@@ -4,43 +4,40 @@
 
 
 (define whichsubjpobjQ
-    (BindLink
-        (VariableList
+	(BindLink
+		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$subj" "WordInstanceNode")
 			(var-decl "$prep" "WordInstanceNode")
 			(var-decl "$pobj" "WordInstanceNode")
 			(var-decl "$qVar" "WordInstanceNode")
-        )
-        (AndLink
+		)
+		(AndLink
 			(word-in-parse "$subj" "$a-parse")
 			(word-in-parse "$prep" "$a-parse")
 			(word-in-parse "$pobj" "$a-parse")
 			(dependency "_predadj" "$subj" "$prep")
 			(dependency "_pobj" "$prep" "$pobj")
 			(dependency "_det" "$subj" "$qVar")
-		(InheritanceLink
-			(VariableNode "$qVar")
-			(DefinedLinguisticConceptNode "which")
+			(word-feat "$qVar" "which")
 		)
-        )
-        (ExecutionOutputLink
-       	   (GroundedSchemaNode "scm: pre-whichsubjpobjQ-rule")
-       	      (ListLink
-       	         (VariableNode "$subj")
-       	         (VariableNode "$prep")
-       	         (VariableNode "$pobj")
-            )
-        )
-    )
+		(ExecutionOutputLink
+			(GroundedSchemaNode "scm: pre-whichsubjpobjQ-rule")
+			(ListLink
+				(VariableNode "$subj")
+				(VariableNode "$prep")
+				(VariableNode "$pobj")
+			)
+		)
+	)
 )
 
 ;; XXX FIXME: define whichsubjpobjQ-rule
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
 (define (pre-whichsubjpobjQ-rule subj prep pobj)
-    (whichsubjpobjQ-rule (cog-name (word-inst-get-lemma  pobj)) (cog-name pobj)
-              (cog-name (word-inst-get-lemma prep)) (cog-name prep)
-              (cog-name (word-inst-get-lemma subj)) (cog-name subj)
-    )
+	(whichsubjpobjQ-rule (cog-name (word-inst-get-lemma  pobj)) (cog-name pobj)
+			  (cog-name (word-inst-get-lemma prep)) (cog-name prep)
+			  (cog-name (word-inst-get-lemma subj)) (cog-name subj)
+	)
 )

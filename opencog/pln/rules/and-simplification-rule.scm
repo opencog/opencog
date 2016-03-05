@@ -1,11 +1,10 @@
 ; =====================================================================
 ; AndSimplificationRule
 ;
-; AndLink 
-;    A
-;    AndLink
-;       B
-;	C
+; A
+; AndLink
+;    B
+;    C
 ; |-
 ; AndLink
 ;    A
@@ -51,5 +50,6 @@
     (stv sAABC cAABC)))
 
 ; Name the rule
-(define and-simplification-rule-name (DefinedSchemaNode "and-simplification-rule"))
+(define and-simplification-rule-name
+  (DefinedSchemaNode "and-simplification-rule"))
 (DefineLink and-simplification-rule-name and-simplification-rule)

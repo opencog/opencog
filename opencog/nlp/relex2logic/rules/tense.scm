@@ -10,10 +10,7 @@
 		(AndLink
 			(word-in-parse "$verb" "$a-parse")
 			(word-lemma "$verb" "$lemma")
-			(PartOfSpeechLink
-				(VariableNode "$verb")
-				(DefinedLinguisticConceptNode "verb")
-			)
+			(word-pos "$verb" "verb")
 			(TenseLink
 				(VariableNode "$verb")
 				(VariableNode "$tense")

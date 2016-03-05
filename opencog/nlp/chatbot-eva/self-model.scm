@@ -14,18 +14,11 @@
 ; This is meant to be exemplary: there also needs to be a model of
 ; Eva's environment (including the people that she sees in that
 ; environment), so that she can also talk about that.
-
 ;--------------------------------------------------------------------
 
-(define neutral-gaze (Concept "forward"))
+; The primary physical self-model is in the ros-behavior-scripting
+; github repo. Use that.
 
-; Global state for head and eye-position self-awareness.
-(StateLink (AnchorNode "*-head-direction-*") neutral-gaze)
-(StateLink (AnchorNode "*-gaze-direction-*") neutral-gaze)
-
-; Global state for current facial expression
-(define neutral-expression (Concept "neutral"))
-(StateLink (AnchorNode "*-facial-expression-*") neutral-expression)
-
+(use-modules (opencog eva-model))
 
 ;--------------------------------------------------------------------

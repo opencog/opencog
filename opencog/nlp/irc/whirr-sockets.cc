@@ -18,12 +18,18 @@
 #include <unistd.h>
 
 #include "whirr-sockets.h"
+#include "CogitaConfig.h"
+
+using namespace opencog::chatbot;
+extern CogitaConfig cc;
 
 // #define SERVER_HOST "10.70.70.10"
-#define SERVER_HOST "127.0.0.1"
 // #define SERVER_HOST "9.3.190.175"
+// #define SERVER_HOST "127.0.0.1"
+#define SERVER_HOST (cc.cog_addr.c_str())
 
-#define SERVER_PORT 17004
+// #define SERVER_PORT 17004
+#define SERVER_PORT (cc.cog_port)
 
 struct sockaddr_in global_server_addr;
 
