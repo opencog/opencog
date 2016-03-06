@@ -2644,7 +2644,8 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
     HandleSeq lastestActions = Inquery::findAllGivenStateChangesAndLatestRelatedActions(classValueNode, curSubgoalNode->state->name(),stateGoalValueHandle);
 
     // Found out what's the main type of actions in lastestActions
-    std::map<Handle, int> actionTypeToCountMap;
+    //  map <ActionType, InstancesOfThisType>
+    std::map<Handle, HandleSeq> actionTypeToInstancesMap;
     for (Handle actionHandle : lastestActions)
     {
         HandleSeq actionTypeHandleSeq = AtomSpaceUtil::getInheritanceLinks(*atomSpace, actionHandle);
@@ -2656,32 +2657,42 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
         if (actionTypeHandle == Handle::UNDEFINED)
             continue;
 
-        if (actionTypeToCountMap.find (actionTypeHandle) != actionTypeToCountMap.end())
+        if (actionTypeToInstancesMap.find (actionTypeHandle) != actionTypeToInstancesMap.end())
         {
-            actionTypeToCountMap[actionTypeHandle] ++;
+            (actionTypeToInstancesMap[actionTypeHandle]).push_back(actionHandle);
         }
         else
         {
-            actionTypeToCountMap.insert(std::pair<Handle, int> (actionTypeHandle, 1));
+            HandleSeq actionInstances;
+            actionInstances.push_back(actionHandle);
+            actionTypeToInstancesMap.insert(std::pair<Handle, HandleSeq> (actionTypeHandle, actionInstances));
         }
     }
 
+
     // find the action type with highest count
     Handle highestActionTypeHandle = Handle::UNDEFINED;
-    if (actionTypeToCountMap.size () == 0)
+    HandleSeq highestActionInstances;
+
+    if (actionTypeToInstancesMap.size () == 0)
         return 0;
-    else if (actionTypeToCountMap.size () == 1)
-        highestActionTypeHandle = (actionTypeToCountMap.begin())->first;
+    else if (actionTypeToInstancesMap.size () == 1)
+    {
+        highestActionTypeHandle = (actionTypeToInstancesMap.begin())->first;
+        highestActionInstances = (actionTypeToInstancesMap.begin())->second;
+    }
     else
     {
         int highestCount = 0;
-        std::map<Handle, int>::iterator actionTypeIter;
-        for (actionTypeIter = actionTypeToCountMap.begin(); actionTypeIter != actionTypeToCountMap.end(); actionTypeIter ++)
+
+        std::map<Handle, HandleSeq>::iterator actionTypeIter;
+        for (actionTypeIter = actionTypeToInstancesMap.begin(); actionTypeIter != actionTypeToInstancesMap.end(); actionTypeIter ++)
         {
-            if (actionTypeIter->second > highestCount)
+            if ((actionTypeIter->second).size() > highestCount)
             {
-                highestCount = actionTypeIter->second;
+                highestCount = (actionTypeIter->second).size();
                 highestActionTypeHandle = actionTypeIter->first;
+                highestActionInstances = actionTypeIter->second;
             }
         }
 
@@ -2689,7 +2700,50 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
             return 0;
     }
 
-    // Step 3: using pattern miner to find out what kind of parameters required for this action
+    // Step 3: Find out what kind of parameters required for this action
+
+
+    // Find all the other parameters except actor and target
+    // e.g.
+    //    (EvaluationLink (stv 1.000000 1.000000)
+    //      (PredicateNode "open:with") ; [3461]
+    //      (ListLink (stv 1.000000 1.000000)
+    //        (ConceptNode "open_10") ; [3879]
+    //        (ObjectNode "id_key10696") ; [1331]
+    //      ) ; [3885]
+    //    ) ; [3886]
+    for (Handle actionInstanceHandle : highestActionInstances)
+    {
+
+
+    }
+
+
+    // use pattern miner to mine relations from this parameter node
+    // e.g.  a target can be opened with a tool of same color
+    //    (EvaluationLink )
+    //      (PredicateNode color)
+    //      (ListLink )
+    //        (VariableNode $var_1)
+    //        (VariableNode $var_2)
+
+    //    (EvaluationLink )
+    //      (PredicateNode color)
+    //      (ListLink )
+    //        (VariableNode $var_3)
+    //        (VariableNode $var_2)
+
+    //    (EvaluationLink )
+    //      (PredicateNode open:target)
+    //      (ListLink )
+    //        (VariableNode $var_4)
+    //        (VariableNode $var_3)
+
+    //    (EvaluationLink )
+    //      (PredicateNode open:with)
+    //      (ListLink )
+    //        (VariableNode $var_4)
+    //        (VariableNode $var_1)
 
 }
 
