@@ -1092,24 +1092,24 @@ Handle PAI::processAgentActionParameter(DOMElement* paramElement,
     // Add this parameter node into AtomSpace
     // the predicate node name is ActionName:PamaterName, e.g.: kick:Force
 
-    Handle paraPredicateNode = AtomSpaceUtil::addNode(atomSpace,
-                                                      PREDICATE_NODE,
-                                                      paramName, true);
+//    Handle paraPredicateNode = AtomSpaceUtil::addNode(atomSpace,
+//                                                      PREDICATE_NODE,
+//                                                      paramName, true);
 
-    std::string thisParaPredStr = actionNameStr + ":" + paramName;
+//    std::string thisParaPredStr = actionNameStr + ":" + paramName;
     Handle thisParaPredicateNode = AtomSpaceUtil::addNode(atomSpace,
                                                           PREDICATE_NODE,
-                                                          thisParaPredStr.c_str(),
+                                                          paramName,
                                                           true);
 
 
-    // e.g.: "kick:Force" is a kind of  "Force"
-    HandleSeq inheritanceLinkOutgoing;
-    inheritanceLinkOutgoing.push_back(thisParaPredicateNode);
-    inheritanceLinkOutgoing.push_back(paraPredicateNode);
-    Handle inherLink =  AtomSpaceUtil::addLink(atomSpace,
-                                               INHERITANCE_LINK,
-                                               inheritanceLinkOutgoing);
+//    // e.g.: "kick:Force" is a kind of  "Force"
+//    HandleSeq inheritanceLinkOutgoing;
+//    inheritanceLinkOutgoing.push_back(thisParaPredicateNode);
+//    inheritanceLinkOutgoing.push_back(paraPredicateNode);
+//    Handle inherLink =  AtomSpaceUtil::addLink(atomSpace,
+//                                               INHERITANCE_LINK,
+//                                               inheritanceLinkOutgoing);
     // actionConcernedHandles.push_back(inherLink);
 
     // e.g.: the kick:Force of kick2454 is 300.0
@@ -1338,34 +1338,34 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     std::vector<Handle> actionHandles;
 
     //-------------------------------Begin-------the actor of the action-----Begin------------------------------------------------
-    // Add the conceptnode: actor of action into AtomSpace
-    Handle actionActorPredicateNode = AtomSpaceUtil::addNode(atomSpace,
-                                                             PREDICATE_NODE,
-                                                             ACTION_ACTOR_NAME,
-                                                             true);
+//    // Add the conceptnode: actor of action into AtomSpace
+//    Handle actionActorPredicateNode = AtomSpaceUtil::addNode(atomSpace,
+//                                                             PREDICATE_NODE,
+//                                                             ACTION_ACTOR_NAME,
+//                                                             true);
 
     // the predicate node name is ActionName:PamaterName, e.g.: kick:Actor
-    std::string actorStr = nameStr + ":" + ACTION_ACTOR_NAME;
+//    std::string actorStr = nameStr + ":" + ACTION_ACTOR_NAME;
     Handle actorPredicateNode = AtomSpaceUtil::addNode(atomSpace,
                                                        PREDICATE_NODE,
-                                                       actorStr.c_str() , true);
+                                                       ACTION_ACTOR_NAME , true);
 
-    // e.g.: "kick:Actor" is a kind of  "Actor"
-    HandleSeq ActorInheritanceLinkOutgoing;
-    ActorInheritanceLinkOutgoing.push_back(actorPredicateNode);
-    ActorInheritanceLinkOutgoing.push_back(actionActorPredicateNode);
+//    // e.g.: "kick:Actor" is a kind of  "Actor"
+//    HandleSeq ActorInheritanceLinkOutgoing;
+//    ActorInheritanceLinkOutgoing.push_back(actorPredicateNode);
+//    ActorInheritanceLinkOutgoing.push_back(actionActorPredicateNode);
 
-    Handle inherLink2 = atomSpace.getHandle(INHERITANCE_LINK, ActorInheritanceLinkOutgoing);
-    bool inherLink2AlreadyExist = false;
-    if (inherLink2 != Handle::UNDEFINED)
-        inherLink2AlreadyExist = true;
+//    Handle inherLink2 = atomSpace.getHandle(INHERITANCE_LINK, ActorInheritanceLinkOutgoing);
+//    bool inherLink2AlreadyExist = false;
+//    if (inherLink2 != Handle::UNDEFINED)
+//        inherLink2AlreadyExist = true;
 
-    inherLink2 = AtomSpaceUtil::addLink(atomSpace,
-                                               INHERITANCE_LINK,
-                                               ActorInheritanceLinkOutgoing);
+//    inherLink2 = AtomSpaceUtil::addLink(atomSpace,
+//                                               INHERITANCE_LINK,
+//                                               ActorInheritanceLinkOutgoing);
 
-    if (! inherLink2AlreadyExist)
-        actionConcernedHandles.push_back(inherLink2);
+//    if (! inherLink2AlreadyExist)
+//        actionConcernedHandles.push_back(inherLink2);
     //actionFrameElements.push_back(inherLink2);
 
     // e.g.: the kick:Actor of kick2454 is npc145
