@@ -2643,6 +2643,54 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
     stateGoalValueHandle = stateGoalValueHandles[0];
     HandleSeq lastestActions = Inquery::findAllGivenStateChangesAndLatestRelatedActions(classValueNode, curSubgoalNode->state->name(),stateGoalValueHandle);
 
+    // Found out what's the main type of actions in lastestActions
+    std::map<Handle, int> actionTypeToCountMap;
+    for (Handle actionHandle : lastestActions)
+    {
+        HandleSeq actionTypeHandleSeq = AtomSpaceUtil::getInheritanceLinks(*atomSpace, actionHandle);
+        if (actionTypeHandleSeq.size() != 0)
+            continue;
+
+        Handle actionTypeHandle = actionTypeHandleSeq[0];
+
+        if (actionTypeHandle == Handle::UNDEFINED)
+            continue;
+
+        if (actionTypeToCountMap.find (actionTypeHandle) != actionTypeToCountMap.end())
+        {
+            actionTypeToCountMap[actionTypeHandle] ++;
+        }
+        else
+        {
+            actionTypeToCountMap.insert(std::pair<Handle, int> (actionTypeHandle, 1));
+        }
+    }
+
+    // find the action type with highest count
+    Handle highestActionTypeHandle = Handle::UNDEFINED;
+    if (actionTypeToCountMap.size () == 0)
+        return 0;
+    else if (actionTypeToCountMap.size () == 1)
+        highestActionTypeHandle = (actionTypeToCountMap.begin())->first;
+    else
+    {
+        int highestCount = 0;
+        std::map<Handle, int>::iterator actionTypeIter;
+        for (actionTypeIter = actionTypeToCountMap.begin(); actionTypeIter != actionTypeToCountMap.end(); actionTypeIter ++)
+        {
+            if (actionTypeIter->second > highestCount)
+            {
+                highestCount = actionTypeIter->second;
+                highestActionTypeHandle = actionTypeIter->first;
+            }
+        }
+
+        if (highestActionTypeHandle == Handle::UNDEFINED)
+            return 0;
+    }
+
+    // Step 3: using pattern miner to find out what kind of parameters required for this action
+
 }
 
 void OCPlanner::reBindStateNode(StateNode* stateNode, ParamGroundedMapInARule& newBindings)
