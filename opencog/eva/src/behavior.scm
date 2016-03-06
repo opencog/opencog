@@ -108,12 +108,25 @@
 ; (python-eval
 ;    "import sys\nsys.path.insert(0, '/usr/local/share/opencog/python')\n")
 ;
+; If roscore is not running, then the load will hang. Thus, to avoid the
+; hang, we test to see if we can talk to roscore. If we cannot, then load
+; only the debug interfaces.
+;
 (python-eval "
-execfile('atomic.py')
 try:
-    do_wake_up()
-except NameError:
-    execfile('/usr/local/share/opencog/python/atomic.py')
+    # Throw an exception if roscore is not running.
+    rosgraph.Master('/rostopic').getPid()
+    execfile('atomic.py')
+    try:
+        ros_is_running()
+    except NameError:
+        execfile('/usr/local/share/opencog/python/atomic.py')
+except:
+    execfile('atomic-dbg.py')
+    try:
+        ros_is_running()
+    except NameError:
+        execfile('/usr/local/share/opencog/python/atomic-dbg.py')
 ")
 
 (use-modules (opencog eva-model))

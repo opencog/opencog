@@ -245,3 +245,5 @@
 (DefineLink (DefinedSchema "blink chat slow var")  (Number 0.12))
 
 ; --------------------------------------------------------
+; Silence the output.
+*unspecified*
