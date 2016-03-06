@@ -715,8 +715,9 @@ except NameError:
 (define-public (idle-loop)  ; public only because its in a GPN
 	(set! loop-count (+ loop-count 1))
 
-	(if (eq? 0 (modulo loop-count 30))
-		(format #t "Main loop: ~a\n" loop-count))
+	; Print loop count to the screen.
+	; (if (eq? 0 (modulo loop-count 30))
+	;	(format #t "Main loop: ~a\n" loop-count))
 
 	; Pause for one-tenth of a second... 101 millisecs
 	(usleep 101000)
