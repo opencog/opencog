@@ -21,7 +21,9 @@
 ;      (PutLink (DefinedSchemaNode "Pick random expression")
 ;         (ConceptNode "positive")))
 ;
-; This will pick out one of the "positive" emotions (defined above).
+; This will pick out one of the "positive" emotions (defined in the
+; previously-loaded `cfg-*.scm` file) and return it, as a `Concept`.
+; For example: `(ConceptNode "comprehending")`
 ;
 (DefineLink
 	(DefinedSchema "Pick random expression")
@@ -89,7 +91,9 @@
 ;    (cog-execute!
 ;        (PutLink (DefinedSchemaNode "get random intensity")
 ;            (ListLink (ConceptNode "positive") (ConceptNode "engaged"))))
-; will return an intensity level for the positive-egaged expression.
+;
+; will return an intensity level for the `positive-engaged` expression.
+; It returns a `NumberNode`.
 (DefineLink
 	(DefinedSchemaNode "get random intensity")
 	(pick-value-in-range "intensity-min" "intensity-max"))
@@ -112,7 +116,7 @@
 	(DefinedSchemaNode "get random speed")
 	(pick-value-in-range "speed-min" "speed-max"))
 
-; Show a expression from a given emotional class. Sends the expression
+; Show an expression from a given emotional class. Sends the expression
 ; to the action orchestrator for display.  The intensity and duration
 ; of the expression is picked randomly from the configuration
 ; parameters for the emotion-expression class.
@@ -179,9 +183,9 @@
 ;    (cog-evaluate!
 ;       (PutLink (DefinedPredicateNode "Show random expression")
 ;          (ConceptNode "positive")))
+;
 ; will pick one of the "positive" emotions, and send it off to ROS.
 ;
-;; line 305 -- pick_random_expression()
 (DefineLink
 	(DefinedPredicateNode "Show random expression")
 	(LambdaLink
@@ -197,7 +201,6 @@
 	))
 
 ;; Like the above, but for gestures
-;; line 334 -- pick_random_gesture()
 (DefineLink
 	(DefinedPredicateNode "Show random gesture")
 	(LambdaLink
@@ -214,7 +217,7 @@
 
 ; --------------------------------------------------------
 ; Show facial expressions and gestures suitable for a given emotional
-; state. These are radom selectors, picking some expression randomly
+; state. These are random selectors, picking some expression randomly
 ; from a meu of choices, ad displaying it.
 
 ;; Pick random expression, and display it.

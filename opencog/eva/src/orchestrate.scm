@@ -20,6 +20,14 @@
 ; "please smile for me", while the behavior tree might be issuing
 ; a frown expression. (Not clear which should have precedence).
 ;
+; All requests need to include the name of the subsystem making the
+; request. This name is currently ignored, but it is planned that
+; it will be used to determine priority, and/or to block requests
+; from certain sources.
+;
+; -------------------------------------------------------------
+
+
 ; -------------------------------------------------------------
 ; Request a display of a facial expression (smile, frown, etc.)
 ; The expression name should be one of the supported blender animations.
@@ -114,5 +122,43 @@
 			(EvaluationLink (GroundedPredicate "py:gaze_at_point")
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
+
+; -------------------------------------------------------------
+; Request to change the soma state.
+; Takes two arguments: the requestor, and the proposed state.
+;
+; Currently, this always honors all requests.
+; Currently, the requestor is ignored.
+;
+; Some future version may deny change requests, depending on the
+; request source or on other factors.
+
+(DefineLink
+	(DefinedPredicate "Request Set Soma State")
+	(LambdaLink
+		(VariableList
+			(Variable "$requestor")
+			(Variable "$state"))
+		(True (State soma-state (Variable "$state")))
+	))
+
+; -------------------------------------------------------------
+; Request to change the emotion state.
+; Takes two arguments: the requestor, and the proposed state.
+;
+; Currently, this always honors all requests.
+; Currently, the requestor is ignored.
+;
+; Some future version may deny change requests, depending on the
+; request source or on other factors.
+
+(DefineLink
+	(DefinedPredicate "Request Set Emotion State")
+	(LambdaLink
+		(VariableList
+			(Variable "$requestor")
+			(Variable "$state"))
+		(True (State emotion-state (Variable "$state")))
+	))
 
 ; -------------------------------------------------------------

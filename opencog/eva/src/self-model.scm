@@ -51,6 +51,15 @@
 ;; Assume Eva is sleeping at first
 (StateLink soma-state soma-sleeping)
 
+; -----------
+; The "emotional state" of the robot.  Corresponds to states declared
+; in the `cfg-*.scm` file.
+(define-public emotion-state (AnchorNode "Emotion State"))
+(define-public emotion-neutral (ConceptNode "neutral"))
+
+(StateLink emotion-state emotion-neutral)
+
+; -----------
 ;; Currently, interaction-state will be linked to the face-id of
 ;; person with whom interaction is taking place. (current_face_target in owyl)
 (define-public interaction-state (AnchorNode "Interaction State"))

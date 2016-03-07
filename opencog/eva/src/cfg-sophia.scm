@@ -14,7 +14,7 @@
 ; (for example, happy, bored, excited) this specifies a range of
 ; expressions to display for that emotional state, as well as the
 ; intensities and durations.
-
+;
 ; Columns (in order) are:
 ; * expression (emotion) class
 ; * blender emotion animation name
@@ -23,6 +23,15 @@
 ; * max intensity of expression
 ; * min duration of expression
 ; * max duration of expression
+;
+; To view the available expressions, do this:
+; rostopic echo /blender_api/available_emotion_states
+; ['irritated', 'happy', 'recoil', 'surprised', 'sad', 'confused',
+;  'worry', 'bored', 'engaged', 'amused', 'comprehending', 'afraid']
+;
+; Cheat sheet: to display just one of these:
+; (cog-evaluate! (Evaluation  (DefinedPredicate "Show expression")
+;      (ListLink (Concept "worry") (Number 5) (Number 1))))
 
 ; Translation of behavior.cfg line 9 ff
 (emo-expr-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
@@ -40,7 +49,7 @@
 (emo-expr-spec "bored"    "sad"           0.1 0.1 0.3 10 15)
 (emo-expr-spec "bored"    "happy"         0.2 0.1 0.3 10 15)
 
-(emo-expr-spec "sleep"    "happy"         1.0  0.0 0.1 5 15)
+(emo-expr-spec "sleepy"   "happy"         1.0  0.0 0.1 5 15)
 
 (emo-expr-spec "wake-up"  "surprised"     0.45 0.2 0.6 5 15)
 (emo-expr-spec "wake-up"  "happy"         0.2  0.5 0.7 5 15)
@@ -50,6 +59,23 @@
 (emo-expr-spec "neutral-speech"  "happy"         0.2  0.1 0.3 4 8)
 (emo-expr-spec "neutral-speech"  "comprehending" 0.4  0.5 0.8 4 8)
 (emo-expr-spec "neutral-speech"  "engaged"       0.4  0.5 0.8 4 8)
+
+; Used for imperatives, i.e. when she is verbally told to do something.
+; Thus, we list all of them here. The probability column is ignored.
+; The strength has to be 0.6 or more, or else blender doesn't play the
+; animation.
+(emo-expr-spec "imperative"  "afraid"        1  0.4 0.6 6 12)
+(emo-expr-spec "imperative"  "amused"        1  0.9 1.0 6 12)
+(emo-expr-spec "imperative"  "bored"         1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "comprehending" 1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "confused"      1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "engaged"       1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "happy"         1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "irritated"     1  0.7 1.0 6 12)
+(emo-expr-spec "imperative"  "recoil"        1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "sad"           1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "surprised"     1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "worry"         1  0.7 1.0 6 12)
 
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
@@ -71,7 +97,13 @@
 ; The "noop" gesture is a special no-operation gesture; if selected,
 ; then nothing is done. This allows gestures to be generated only some
 ; of the time; the "noop" is what is "done" the rest of the time.
-
+;
+; rostopic echo /blender_api/available_gestures
+;
+; Cheat sheet:
+; (cog-evaluate! (Evaluation  (DefinedPredicate "Show gesture")
+;    (ListLink (Concept "thoughtful") (Number 0.2) (Number 2) (Number 0.8))))
+;
 ; Translation of behavior.cfg line 75 ff
 (emo-gest-spec "positive" "nod-1"  0.1 0.6 0.9 1 1 0.5 0.8)
 (emo-gest-spec "positive" "nod-2"  0.1 0.2 0.4 1 1 0.8 0.9)
@@ -82,7 +114,7 @@
 (emo-gest-spec "bored"   "yawn-1"  0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "bored"   "noop"    0.9 0   0   1 1 1 1)
 
-(emo-gest-spec "sleep"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
+(emo-gest-spec "sleepy"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
 
 (emo-gest-spec "wake-up" "shake-2"  0.4 0.7 1.0 1 1 0.7 0.8)
 (emo-gest-spec "wake-up" "shake-3"  0.3 0.6 1.0 1 1 0.7 0.8)
@@ -107,6 +139,21 @@
 
 (emo-gest-spec "chat-neg-think" "think-browsDown.003"  0.8 0.5 0.7 1 1 0.3 0.5)
 (emo-gest-spec "chat-neg-think" "noop"                 0.2 0   0   1 1 0   0  )
+
+; Used for imperatives, i.e. when she is verbally told to do something.
+; Thus, we list all of them here. The probability column is ignored.
+(emo-gest-spec "imperative"   "amused"        0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink-micro"   0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink-relaxed" 0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink-sleepy"  0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-1"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-2"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-3"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "shake-2"       0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "shake-3"       0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "thoughtful"    0.1 0.2 0.4 1 1 1 1)
+(emo-gest-spec "imperative"   "yawn-1"        0.1 0.6 0.9 1 1 1 1)
 
 ; --------------------------------------------------------
 ; Dice-roll.  Probability of performing some action as the result of

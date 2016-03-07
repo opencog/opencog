@@ -10,12 +10,14 @@
 ; surprised when someone leaves unexpectedly.
 ;
 ; HOWTO:
+; ------
 ; Run the main loop:
 ;    (behavior-tree-run)
 ; Pause the main loop:
 ;    (behavior-tree-halt)
 ;
 ; Unit testing:
+; -------------
 ; The various predicates below can be manually unit tested by manually
 ; adding and removing new visible faces, and then manually invoking the
 ; various rules. See faces.scm for utilities.
@@ -43,6 +45,55 @@
 ; Unit test chatbot:
 ;    (State chat-state chat-start) ; to simulate having it talk.
 ;    (State chat-state chat-stop)  ; to signal that talking has stopped.
+;
+; --------------------------------------------------------
+; Character engine notes
+; The character engine is an older incarnation of this code, predating
+; the owyl behavior trees.  The below are notes abouit some of the
+; things it did, and where to look for equivalents here.
+;
+; 1) Room-state transtions
+; -- no faces present for a while
+;     (cog-evalute! (DefinedPredicateNode "Search for attention"))
+; -- no-face just transitioned to one-face
+;     (cog-evaluate! (DefinedPredicateNode "Was Empty Sequence"))
+; -- no-face just transitioned to multiple-faces
+; -- one-face just transitioned to no-face
+; -- one-face just transitioned to multiple-faces
+; -- one face present for a while
+; -- multiple faces present for a while
+; -- multiple-faces just transitioned to one-face
+; -- multiple-faces just transitioned to no-face
+;
+; 2) Interactions depend on whether person is known or not.
+;
+; -- it's a familiar face
+; -- it's a familiar face to whom the robot has already been introduced
+; -- it's an unfamiliar face
+;
+; 3) Familiar-face interactions
+;
+; -- prior emotions when interacting with that face were positive
+; -- prior emotions when interacting with that face were negative
+; -- prior emotions when interacting with that face were neutral
+;
+; 4) Introduction sequence
+;    If the robot is talking to someone with whom it has not previously
+;    been introduced, it can enter into a short procedure aimed at
+;    gathering the person's name...
+;
+; 5) Adhoc animation patterns
+;
+; -- changing a subject (maybe the AIML can send a signal indicating
+;    when the subject is being changed?)
+; -- asking a question of the user
+; -- starting to talk after a period of being silent
+; -- ending an interaction with one guy before shifting attention to
+;    another guy
+; -- starting an interaction with a new guy after shifting attention
+;    from another guy
+;
+; --------------------------------------------------------
 
 (add-to-load-path "/usr/local/share/opencog/scm")
 
@@ -57,12 +108,26 @@
 ; (python-eval
 ;    "import sys\nsys.path.insert(0, '/usr/local/share/opencog/python')\n")
 ;
+; If roscore is not running, then the load will hang. Thus, to avoid the
+; hang, we test to see if we can talk to roscore. If we cannot, then load
+; only the debug interfaces.
+;
 (python-eval "
-execfile('atomic.py')
+import rosgraph
 try:
-    do_wake_up()
-except NameError:
-    execfile('/usr/local/share/opencog/python/atomic.py')
+    # Throw an exception if roscore is not running.
+    rosgraph.Master('/rostopic').getPid()
+    execfile('atomic.py')
+    try:
+        ros_is_running()
+    except NameError:
+        execfile('/usr/local/share/opencog/python/atomic.py')
+except:
+    execfile('atomic-dbg.py')
+    try:
+        ros_is_running()
+    except NameError:
+        execfile('/usr/local/share/opencog/python/atomic-dbg.py')
 ")
 
 (use-modules (opencog eva-model))
@@ -91,6 +156,13 @@ except NameError:
 	(display (cog-name time))
 	(display " seconds\n")
 	(stv 1 1))
+
+; --------------------------------------------------------
+;
+; This will be used to tag the name of the module making the request.
+; Everything in ths module is the behavior tree, so that is what we
+; call it.
+(define bhv-source (Concept "Behavior Tree"))
 
 ; --------------------------------------------------------
 
@@ -174,13 +246,16 @@ except NameError:
 ; ------------------------------------------------------
 ;; Sequence - if there were no people in the room, then look at the
 ;; new arrival.
-;; line 391 -- owyl.sequence
+;;
 ;; (cog-evaluate! (DefinedPredicateNode "Was Empty Sequence"))
 (DefineLink
 	(DefinedPredicate "Was Empty Sequence")
 	(SequentialAnd
-		;; line 392
 		(DefinedPredicateNode "was room empty?")
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "new-arrival")))
+
 		(TrueLink (DefinedSchemaNode "interact with new person"))
 		(TrueLink (DefinedSchemaNode "look at person"))
 		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
@@ -252,7 +327,9 @@ except NameError:
 	(SequentialOr
 		(NotLink (Equal (SetLink soma-bored)
 			(Get (State soma-state (Variable "$x")))))
-		(True (Put (State soma-state (Variable "$x")) soma-awake))))
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-awake))
+	))
 
 ;; Check to see if a new face has become visible.
 ;; line 386 -- someone_arrived()
@@ -363,6 +440,10 @@ except NameError:
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "bored")))
+
 		; Pick a bored expression, gesture
 		(SequentialOr
 			(Not (DefinedPredicate "Time to change expression"))
@@ -396,6 +477,15 @@ except NameError:
 (DefineLink
 	(DefinedPredicate "Go to sleep")
 	(SequentialAnd
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "sleepy")))
+
+		; Proceed with the sleep animation only if the state
+		; change was approved.
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-sleeping))
+
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Go to sleep.")
 				(Minus (TimeLink) (DefinedSchema "get bored timestamp"))))
@@ -403,13 +493,12 @@ except NameError:
 
 		; First, show some yawns ...
 		(Put (DefinedPredicate "Show random expression")
-			(Concept "sleep"))
+			(Concept "sleepy"))
 		(Put (DefinedPredicate "Show random gesture")
-			(Concept "sleep"))
+			(Concept "sleepy"))
 
 		; Finally, play the go-to-sleep animation.
 		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
-		(True (Put (State soma-state (VariableNode "$x")) soma-sleeping))
 	))
 
 ; line 537 -- Continue To Sleep
@@ -426,13 +515,19 @@ except NameError:
 (DefineLink
 	(DefinedPredicate "Wake up")
 	(SequentialAnd
+		; Request change soma state to being awake. Proceed only if
+		; the request is accepted.
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-awake))
+
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "wake-up")))
+
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Wake up!")
 				(Minus (TimeLink) (DefinedSchema "get sleep timestamp"))))
 		(TrueLink (DefinedSchema "set bored timestamp"))
-
-		; Change soma state to being awake.
-		(True (Put (State soma-state (Variable "$x")) soma-awake))
 
 		; Run the wake animation.
 		(Evaluation (GroundedPredicate "py:do_wake_up") (ListLink))
@@ -462,7 +557,8 @@ except NameError:
 				(Get (State soma-state (Variable "$x"))))
 
 			(SequentialAnd
-				(True (Put (State soma-state (Variable "$x")) soma-bored))
+				(Evaluation (DefinedPredicate "Request Set Soma State")
+					(ListLink bhv-source soma-bored))
 
 				(True (DefinedSchema "set bored timestamp"))
 
@@ -633,8 +729,9 @@ except NameError:
 (define-public (idle-loop)  ; public only because its in a GPN
 	(set! loop-count (+ loop-count 1))
 
-	(if (eq? 0 (modulo loop-count 30))
-		(format #t "Main loop: ~a\n" loop-count))
+	; Print loop count to the screen.
+	; (if (eq? 0 (modulo loop-count 30))
+	;	(format #t "Main loop: ~a\n" loop-count))
 
 	; Pause for one-tenth of a second... 101 millisecs
 	(usleep 101000)
