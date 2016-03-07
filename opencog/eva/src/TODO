@@ -1,0 +1,48 @@
+
+
+hack on D Dmaris -- btree branch
+
+* listen to tts_en ros message for string and input to OC chat
+
+-- btree makes chatbot not talk if it knows the answer.
+
+-- behaviors:
+
+do NOT change expression while chatbot is talking
+use the lipsync topic  ?  no ...
+/eva/speech_events   start stop   string
+
+
+if she hears: look at me: change who she is looking at.
+
+if chatbot has not heard anything for a minute then say something
+(but only if people are visible.)
+say something like "why are you ignoring me?"
+set aiml topic to bored, and thell aiml to say something.
+no -- sent a special sentence to chatbot, which responds.
+
+topic is /chatbot_speech 
+
+action orchestrator -- listen to topic and block expressions/gestures
+if pupeteering ... but its easier to cut off at python EvaControl level.
+Vytas will do that.
+
+sent to chatbot : xyzzy message of what happened.
+
+
+listen to a sequence of behaviors and run them, but only if no other 
+stuff is coming
+
+
+
+send a start , stop and resume pervromance message to some ros topic.
+the timeline performer will do the performance.
+/performances
+
+/public_ws/perforamnces/src/runner.py
+
+
+
+
+
+
