@@ -2683,7 +2683,7 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
     }
     else
     {
-        int highestCount = 0;
+        unsigned int highestCount = 0;
 
         std::map<Handle, HandleSeq>::iterator actionTypeIter;
         for (actionTypeIter = actionTypeToInstancesMap.begin(); actionTypeIter != actionTypeToInstancesMap.end(); actionTypeIter ++)
@@ -2706,20 +2706,45 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
     // Find all the other parameters except actor and target
     // e.g.
     //    (EvaluationLink (stv 1.000000 1.000000)
-    //      (PredicateNode "open:with") ; [3461]
+    //      (PredicateNode "with") ; [3461]
     //      (ListLink (stv 1.000000 1.000000)
     //        (ConceptNode "open_10") ; [3879]
     //        (ObjectNode "id_key10696") ; [1331]
     //      ) ; [3885]
     //    ) ; [3886]
+
+    //   map <paramName, its instance evaluationlinks>
+    std::map <string, HandleSeq> paramNameToParamEvalLinks;
     for (Handle actionInstanceHandle : highestActionInstances)
     {
+        HandleSeq evalFirstOutgoings;
+        evalFirstOutgoings.push_back(actionInstanceHandle);
+        HandleSeq actionParamEvalLinks = AtomSpaceUtil::getEvaluationLinksWithoutPredicate(*atomSpace, evalFirstOutgoings);
 
+        for (Handle ParamEvalLink : actionParamEvalLinks)
+        {
+            Handle paramNameNode = atomSpace->getOutgoing(ParamEvalLink, 0);
+            string paramName = atomSpace->getName(paramNameNode);
+
+            if ((paramName  == "actor") || ( paramName == "target"))
+                continue;
+
+            if (paramNameToParamEvalLinks.find (paramName) != paramNameToParamEvalLinks.end())
+            {
+                (paramNameToParamEvalLinks[(paramNameNode)]).push_back(ParamEvalLink);
+            }
+            else
+            {
+                HandleSeq ParamEvalLinks;
+                ParamEvalLinks.push_back(ParamEvalLink);
+                paramNameToParamEvalLinks.insert(std::pair<Handle, HandleSeq>(paramName, ParamEvalLinks));
+            }
+        }
 
     }
 
 
-    // use pattern miner to mine relations from this parameter node
+    // For each parameter, use pattern miner to mine relations from this parameter node, to find out the rule to bind the parameter
     // e.g.  a target can be opened with a tool of same color
     //    (EvaluationLink )
     //      (PredicateNode color)
