@@ -51,6 +51,14 @@ logger = logging.getLogger('hr.OpenCog_Eva')
 #
 class EvaControl():
 
+	# Control flags
+	C_EXPRESSION = 1
+	C_GESTURE = 2
+	C_SOMA = 4
+	C_SACCADE = 8
+	C_EYES = 16
+	C_FACE = 32
+
 	def step(self):
 		print "step once"
 		return not rospy.is_shutdown()
@@ -66,7 +74,7 @@ class EvaControl():
 	# ----------------------------------------------------------
 	# Wrapper for emotional expressions
 	def expression(self, name, intensity, duration):
-		if 'noop' == name :
+		if 'noop' == name or (not self.control_mode & self.C_EXPRESSION):
 			return
 		# Create the message
 		exp = EmotionState()
@@ -79,7 +87,7 @@ class EvaControl():
 
 	# Wrapper for Soma state expressions
 	def soma_state(self, name, intensity, rate, ease_in=0.0):
-		if 'noop' == name :
+		if 'noop' == name or (not self.control_mode & self.C_SOMA):
 			return
 		# Create the message
 		soma = SomaState()
@@ -93,7 +101,7 @@ class EvaControl():
 
 	# Wrapper for gestures
 	def gesture(self, name, intensity, repeat, speed):
-		if 'noop' == name :
+		if 'noop' == name or (not self.control_mode & self.C_GESTURE):
 			return
 		# Create the message
 		ges = SetGesture()
@@ -113,6 +121,8 @@ class EvaControl():
 	def look_at(self, face_id):
 		# Can get called 10x/second, don't print.
 		# print "----- Looking at face: " + str(face_id)
+		if not self.control_mode & self.C_EYES:
+			return
 		self.look_at_pub.publish(face_id)
 
 	def gaze_at(self, face_id):
@@ -156,7 +166,8 @@ class EvaControl():
 	# Explore-the-room saccade when not conversing.
 	# ??? Is this exploring the room, or someone's face? I'm confused.
 	def explore_saccade(self):
-
+		if not self.control_mode & self.C_SACCADE:
+			return
 		# Switch to conversational (micro) saccade parameters
 		msg = SaccadeCycle()
 		msg.mean =  1.6          # saccade_explore_interval_mean
@@ -174,7 +185,8 @@ class EvaControl():
 
 	# Used during conversation to study face being looked at.
 	def conversational_saccade(self):
-
+		if not self.control_mode & self.C_SACCADE:
+			return
 		# Switch to conversational (micro) saccade parameters
 		msg = SaccadeCycle()
 		msg.mean =  0.42         # saccade_micro_interval_mean
@@ -257,6 +269,8 @@ class EvaControl():
 				self.gaze_at(0)
 				self.running = False
 
+	def behavior_control_callback(self, data):
+		self.control_mode = data.data
 
 	def __init__(self):
 
@@ -319,6 +333,13 @@ class EvaControl():
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
 
+		rospy.Subscriber("/behavior_control", Int32, \
+			self.behavior_control_callback)
+
+
 		rospy.Subscriber("/behavior_switch", String, \
 			self.behavior_switch_callback)
+
+		# Full control by default
+		self.control_mode = 255
 		self.running = True
