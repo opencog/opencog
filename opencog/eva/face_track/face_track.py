@@ -69,6 +69,10 @@ class Face:
 #
 class FaceTrack:
 
+	# Control flags. Ideally FaceTrack should publish targets using ros_commo EvaControl class.
+	C_EYES = 16
+	C_FACE = 32
+
 	def __init__(self):
 
 		rospy.init_node("OpenCog_Facetracker")
@@ -146,6 +150,10 @@ class FaceTrack:
 		self.tf_listener = tf.TransformListener(False, \
 		                        rospy.Duration(self.RECENT_INTERVAL))
 
+		rospy.Subscriber("/behavior_control", Int32, \
+			self.behavior_control_callback)
+		# Control Eeys and face by default
+		self.control_mode = 255
 	# ---------------------------------------------------------------
 	# Public API. Use these to get things done.
 
@@ -159,7 +167,8 @@ class FaceTrack:
 			trg.x = 1.0
 			trg.y = 0.0
 			trg.z = 0.0
-			self.gaze_pub.publish(trg)
+			if self.control_mode & self.C_EYES:
+				self.gaze_pub.publish(trg)
 
 		self.last_lookat = 0
 		if faceid not in self.visible_faces :
@@ -182,7 +191,8 @@ class FaceTrack:
 			trg.x = 1.0
 			trg.y = 0.0
 			trg.z = 0.0
-			self.look_pub.publish(trg)
+			if self.control_mode & self.C_FACE:
+				self.look_pub.publish(trg)
 
 		self.last_lookat = 0
 		if faceid not in self.visible_faces :
@@ -266,7 +276,8 @@ class FaceTrack:
 				# Find latest position known
 				try:
 					trg = self.face_target(self.glance_at)
-					self.gaze_pub.publish(trg)
+					if self.control_mode & self.C_EYES:
+						self.gaze_pub.publish(trg)
 				except:
 					logger.info("Error: no face to glance at!")
 					self.glance_at = 0
@@ -289,7 +300,8 @@ class FaceTrack:
 					if not self.gaze_at in self.visible_faces:
 						raise Exception("Face not visible")
 					trg = self.face_target(self.gaze_at)
-					self.gaze_pub.publish(trg)
+					if self.control_mode & self.C_EYES:
+						self.gaze_pub.publish(trg)
 
 				except tf.LookupException as lex:
 					logger.info("Warning: TF has forgotten about face id:" +
@@ -309,7 +321,8 @@ class FaceTrack:
 					if not self.look_at in self.visible_faces:
 						raise Exception("Face not visible")
 					trg = self.face_target(self.look_at)
-					self.look_pub.publish(trg)
+					if self.control_mode & self.C_FACE:
+						self.look_pub.publish(trg)
 
 				except tf.LookupException as lex:
 					logger.info("Warning: TF has forgotten about face id: " +
@@ -379,3 +392,6 @@ class FaceTrack:
 		t.y = trans[1]
 		t.z = trans[2]
 		return t
+
+	def behavior_control_callback(self, data):
+		self.control_mode = data.data
