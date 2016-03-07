@@ -113,6 +113,7 @@
 ; only the debug interfaces.
 ;
 (python-eval "
+import rosgraph
 try:
     # Throw an exception if roscore is not running.
     rosgraph.Master('/rostopic').getPid()
