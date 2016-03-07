@@ -248,6 +248,8 @@ public:
 
     static std::vector<Handle> getEvaluationLinks(AtomSpace &atomSpace, string predicate, HandleSeq &hfirstOutgoings);
 
+    static std::vector<Handle> getEvaluationLinksWithoutPredicate(AtomSpace &atomSpace, HandleSeq &hfirstOutgoings);
+
     /**
      * Returns witin timestamps vector all EvaluationLinks for a given predicate
      * node. Optionally it's possible to specify temporal and search criterion on

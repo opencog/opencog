@@ -1024,6 +1024,63 @@ std::vector<Handle> AtomSpaceUtil::getEvaluationLinks(AtomSpace &atomSpace, stri
     return resultSet;
 }
 
+std::vector<Handle> AtomSpaceUtil::getEvaluationLinksWithoutPredicate(AtomSpace &atomSpace, HandleSeq &hfirstOutgoings)
+{
+    // Create BindLink used by pattern matcher
+    std::vector<Handle> implicationLinkOutgoings, variableNodes , bindLinkOutgoings;
+
+    Handle hPredicateVarNode = atomSpace.addNode(VARIABLE_NODE, "$var_predicate");
+    Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any");
+
+    variableNodes.push_back(hPredicateVarNode);
+    variableNodes.push_back(hVariableNode);
+
+    Handle hVariablesListLink = atomSpace.addLink(LIST_LINK,variableNodes);
+
+    HandleSeq predicateListLinkOutgoings;
+
+    for (Handle h : hfirstOutgoings)
+    {
+        predicateListLinkOutgoings.push_back(h);
+    }
+
+    predicateListLinkOutgoings.push_back(hVariableNode);
+
+    Handle predicateListLink = atomSpace.addLink(LIST_LINK, predicateListLinkOutgoings);
+
+    HandleSeq evalLinkOutgoings;
+    evalLinkOutgoings.push_back(hPredicateVarNode);
+    evalLinkOutgoings.push_back(predicateListLink);
+    Handle hEvalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoings);
+
+    implicationLinkOutgoings.push_back(hEvalLink);
+
+    // return the EvaluationLinks
+    implicationLinkOutgoings.push_back(hEvalLink);
+
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+
+    bindLinkOutgoings.push_back(hVariablesListLink);
+    bindLinkOutgoings.push_back(hImplicationLink);
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+
+//            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
+
+
+    // Run pattern matcher
+    Handle hResultListLink = bindlink(&atomSpace, hBindLink);
+
+    // Get result
+    // Note: Don't forget remove the hResultListLink, otherwise some scheme script
+    //       may fail to remove the inheritanceLink when necessary.
+    //       Because the inheritanceLink would have an incoming (i.e. hResultListLink here),
+    //       which would make cog-delete scheme function fail.
+    std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink);
+    atomSpace.removeAtom(hResultListLink);
+
+    return resultSet;
+}
+
 std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace, string predicate, HandleSeq &hNonFirstOutgoings)
 {
     // Create BindLink used by pattern matcher
