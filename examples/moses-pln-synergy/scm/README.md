@@ -4,7 +4,7 @@ Simple demo showing how PLN reasoning can be used to overcome the
 uncertainties resulting from the low number of samples during
 learning.
 
-There 3 ways for carrying the inference
+There are 3 ways for carrying the inference
 
 1. using the pattern matcher in a step-by-step fashion, see Subsection
    `Pattern Matcher`
