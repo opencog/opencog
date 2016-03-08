@@ -286,17 +286,8 @@ class EvaControl():
 		else:
 			self.puta.affect_negative()
 
-		# XXX FIXME why are we using an animation message for this?
-		# Can't we just use a std_msgs/String ?
-		exp = EmotionState()
-		# publish so that chatbot publishes response to tts if in wait_emo
-		exp.name = emo.data
-		exp.magnitude = 0.8
-		# use zero for duration, tts can compute if needed
-		exp.duration.secs = 4.0
-		exp.duration.nsecs = 0
-		rospy.logwarn('publishing affect to chatbot '+exp.name)
-		self.affect_pub.publish(exp)
+		rospy.logwarn('publishing affect to chatbot ' + emo.data)
+		self.affect_pub.publish(emo.data)
 
 	# Turn behaviors on and off.
 	# Do not to clean visible faces as these can still be added/removed
@@ -369,7 +360,7 @@ class EvaControl():
 		# Tell the chatbot what sort of affect to apply during
 		# TTS vocalization.
 		self.affect_pub = rospy.Publisher("chatbot_affect_express",
-		                                   EmotionState, queue_size=1)
+		                                  String, queue_size=1)
 
 		# Emotional content of words spoken to the robot.
 		rospy.Subscriber("chatbot_affect_perceive", String,
