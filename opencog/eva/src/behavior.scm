@@ -611,11 +611,9 @@ except:
 		; ... then switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:conversational_saccade")
 				(ListLink))
-		; ... and show one random gesture from "listening" set.
-		; XXX huh?? Why the listening set? Why not the talking set?
-		; XXX there is no talking set...
+		; ... and show one random gesture from "conversing" set.
 		(Put (DefinedPredicate "Show random gesture")
-			(ConceptNode "listening"))
+			(ConceptNode "conversing"))
 		; ... and also, sometimes, the "chatbot_positive_nod"
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "chat-positive-nod"))
@@ -712,7 +710,7 @@ except:
 			(ListLink (Node "--- Finished talking")))
 	))
 
-; Things to do, if the chattbot is listening.
+; Things to do, if the chatbot is listening.
 (DefineLink
 	(DefinedPredicate "Speech listening?")
 	(SequentialAnd

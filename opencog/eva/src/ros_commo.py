@@ -37,19 +37,27 @@ from blender_api_msgs.msg import SomaState
 from put_atoms import PutAtoms
 logger = logging.getLogger('hr.OpenCog_Eva')
 
-# ROS node for controlling the Eva blender model. Control messages
-# include turning, looking, smiling, frowning and so on.
+# ROS interfaces for the Atomese (OpenCog) Behavior Tree. Publishes
+# ROS messages for animation control (smiling, frowning), and subscribes
+# to STT/TTS and chatbot messages.
 #
 # This is meant to be a convenience wrapper, allowing Eva to be
 # controlled from OpenCog Atomese.  Although it probably works as
 # a stand-alone ROS node, it was not designed to be used that way.
+# In particular, the python interpreter built into the atomspace
+# will be runnig this code.
 #
-# It is meant only for control of expressions and gestures, and not
-# for sensory (vision, audio) input.  Thus, it does not subscribe to
-# any sensory messages.  It does listen to a few topics:
+# It currently handles both control messages (publishing of expression
+# and gesture animations), as well as some sensory input (mostly
+# STT, TTS and chatbot interactions).  Visual servoing for face tracking
+# is done by a stand-alone ROS node, in the face_tracker directory.
+#
+# This does listen to several topics that are used to turn behaviors on
+# and off:
 #
 # `/behavior_switch`, which is used to start and stop the the behavior
 #      tree.
+#
 # `/behavior_control`, which is used to enable/disable the publication
 #      of classes of expression/gesture messages.
 #
@@ -273,21 +281,13 @@ class EvaControl():
 		rospy.loginfo('chatbot perceived emo class =' + emo.data)
 		if emo.data == "happy":
 			# behavior tree will use these predicates
-			self.puta.chatbot_affect_happy()
+			self.puta.affect_happy()
 
 		else:
-			self.puta.chatbot_affect_negative()
+			self.puta.affect_negative()
 
-		# XXX FIXME this so totally does not belong here.
-		exp = EmotionState()
-		# publish so that chatbot publishes response to tts if in wait_emo
-		exp.name = emo.data
-		exp.magnitude = 0.8
-		# use zero for duration, tts can compute if needed
-		exp.duration.secs = 4.0
-		exp.duration.nsecs = 0
-		rospy.logwarn('publishing affect to chatbot '+exp.name)
-		self.affect_pub.publish(exp)
+		rospy.logwarn('publishing affect to chatbot ' + emo.data)
+		self.affect_pub.publish(emo.data)
 
 	# Turn behaviors on and off.
 	# Do not to clean visible faces as these can still be added/removed
@@ -357,6 +357,11 @@ class EvaControl():
 		# ----------------
 		rospy.logwarn("setting up chatbot affect perceive and express links")
 
+		# Tell the chatbot what sort of affect to apply during
+		# TTS vocalization.
+		self.affect_pub = rospy.Publisher("chatbot_affect_express",
+		                                  String, queue_size=1)
+
 		# Emotional content of words spoken to the robot.
 		rospy.Subscriber("chatbot_affect_perceive", String,
 			self.language_affect_perceive_cb)
@@ -368,9 +373,7 @@ class EvaControl():
 		# or finished vocalizing.
 		rospy.Subscriber("chat_events", String, self.chat_event_cb)
 
-		self.affect_pub = rospy.Publisher("chatbot_affect_express",
-		                                   EmotionState, queue_size=1)
-
+		# ----------------
 		# Boolean flag, turn the behavior tree on and off (set it running,
 		# or stop it)
 		rospy.Subscriber("/behavior_switch", String, \
