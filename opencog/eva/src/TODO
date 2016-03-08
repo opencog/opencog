@@ -1,16 +1,16 @@
 
 
-hack on D Dmaris -- btree branch
-
-* listen to tts_en ros message for string and input to OC chat
+* listen to tts_en ros message for string and pass it on to process_query
+  for  OC chat
 
 -- btree makes chatbot not talk if it knows the answer.
+   silence chatbot by saying no affect publ
 
 -- behaviors:
 
-do NOT change expression while chatbot is talking
-use the lipsync topic  ?  no ...
-/eva/speech_events   start stop   string
+* do NOT change expression while chatbot is talking
+   use the lipsync topic  ?  no ...
+   /eva/speech_events   start stop   string
 
 
 if she hears: look at me: change who she is looking at.

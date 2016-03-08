@@ -44,14 +44,20 @@ logger = logging.getLogger('hr.OpenCog_Eva')
 # controlled from OpenCog Atomese.  Although it probably works as
 # a stand-alone ROS node, it was not designed to be used that way.
 #
-# It is meant only for control, and not for sensory (vision, audo)
-# input.  Thus, it does not subscribe to any sensory messages.
-# It does listen to one topic, `/behavior_switch`, which is used to
-# start and stop the the behavior tree.
+# It is meant only for control of expressions and gestures, and not
+# for sensory (vision, audio) input.  Thus, it does not subscribe to
+# any sensory messages.  It does listen to a few topics:
+#
+# `/behavior_switch`, which is used to start and stop the the behavior
+#      tree.
+# `/behavior_control`, which is used to enable/disable the publication
+#      of classes of expression/gesture messages.
 #
 class EvaControl():
 
-	# Control flags
+	# Control bitflags. Bit-wise anded with control_mode. If the bit
+	# is set, then the corresponding ROS message is emitted, else it
+	# is not.
 	C_EXPRESSION = 1
 	C_GESTURE = 2
 	C_SOMA = 4
@@ -281,6 +287,7 @@ class EvaControl():
 				self.gaze_at(0)
 				self.running = False
 
+	# Data is a bit-flag that enables/disables publication of messages.
 	def behavior_control_callback(self, data):
 		self.control_mode = data.data
 
@@ -345,12 +352,15 @@ class EvaControl():
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
 
-		rospy.Subscriber("/behavior_control", Int32, \
-			self.behavior_control_callback)
-
-
+		# Boolean flag, turn the behavior tree on and off (set it running,
+		# or stop it)
 		rospy.Subscriber("/behavior_switch", String, \
 			self.behavior_switch_callback)
+
+		# Bit-flag to enable/disable publication of various classes of
+		# expressions and gestures.
+		rospy.Subscriber("/behavior_control", Int32, \
+			self.behavior_control_callback)
 
 		# Full control by default
 		self.control_mode = 255
