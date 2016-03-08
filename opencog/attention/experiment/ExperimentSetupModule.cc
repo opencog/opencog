@@ -54,6 +54,9 @@ ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
     _AVChangedSignalConnection = _as->TVChangedSignal(
             boost::bind(&ExperimentSetupModule::TVChangedCBListener, this, _1,
                         _2, _3));
+
+    _AtomAddedSignalConnection = _as->addAtomSignal(
+            boost::bind(&ExperimentSetupModule::AtomAddedCBListener, this, _1));
 }
 
 ExperimentSetupModule::~ExperimentSetupModule()
@@ -97,6 +100,15 @@ void ExperimentSetupModule::TVChangedCBListener(const Handle& h,
         _hascancer_tv_data[h].push_back(hebtvv);
     }
 
+}
+
+void ExperimentSetupModule::AtomAddedCBListener(const Handle& h)
+{
+    if (h->getType() == EVALUATION_LINK and is_cancer_reln(h)) {
+        TruthValuePtr tv = h->getTruthValue();
+        TValues tvs(tv->getMean(), tv->getConfidence(), _cs.getCycleCount());
+        _hascancer_tv_data[h].push_back(tvs);
+    }
 }
 
 void ExperimentSetupModule::registerAgentRequests()

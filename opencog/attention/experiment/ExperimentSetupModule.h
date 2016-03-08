@@ -58,13 +58,15 @@ private:
     static std::map<Handle, std::vector<TValues>> _hebtv_data;
     static std::map<Handle, std::vector<TValues>> _hascancer_tv_data;
 
-    boost::signals2::connection _AVChangedSignalConnection,_TVChangedSignalConnection;
+    boost::signals2::connection _AVChangedSignalConnection,_TVChangedSignalConnection,_AtomAddedSignalConnection;
 
     void AVChangedCBListener(const Handle& h, const AttentionValuePtr& av_old,
                              const AttentionValuePtr& av_new);
 
     void TVChangedCBListener(const Handle& h, const TruthValuePtr& av_old,
                              const TruthValuePtr& tv_new);
+
+    void AtomAddedCBListener(const Handle& h);
 
     //Start stop ECAN agents commands
     DECLARE_CMD_REQUEST(ExperimentSetupModule, "ecan-load", do_ecan_load,

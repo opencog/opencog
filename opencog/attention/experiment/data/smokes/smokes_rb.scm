@@ -29,7 +29,13 @@
                    (VariableNode "$X")
                    (TypeNode "ConceptNode"))
 )
- (EvaluationLink
+(EvaluationLink
+        smokes
+        (ListLink
+            (VariableNode "$X")))
+
+(ImplicationLink
+(EvaluationLink
         smokes
         (ListLink
             (VariableNode "$X")))
@@ -37,6 +43,7 @@
         cancer
         (ListLink
             (VariableNode "$X")))
+)
 ))
 
 ; Associate a name to the rule
@@ -117,3 +124,39 @@
   smokes-rule-friends-name
   smokes-rule-friends)
 
+
+#!
+; Version #1
+(ImplicationLink (stv 0.6225 1.0)
+    (EvaluationLink
+        smokes
+        (ListLink
+            (VariableNode "$X1")))
+    (EvaluationLink
+        cancer
+        (ListLink
+            (VariableNode "$X1"))))
+
+;; In the case that X and Y are friends, if X smokes then so does Y.
+;; ForAll(x,y) Friends(x,y) -> (Smokes(x) <-> Smokes(y))
+; MLN Rule Weight: 0.4
+; Approximate probability: 0.5987
+
+; Version #3
+(ImplicationLink (stv 0.5987 1.0)
+    (EvaluationLink
+        friends
+        (ListLink
+            (VariableNode "$X2")
+            (VariableNode "$Y2")))
+    (ImplicationLink
+        (EvaluationLink
+            smokes
+            (ListLink
+                (VariableNode "$X2")))
+        (EvaluationLink
+            smokes
+            (ListLink
+                (VariableNode "$Y2")))))
+
+!#
