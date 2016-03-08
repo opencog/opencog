@@ -86,8 +86,8 @@
 ; when it has stopped talking, and what emotions we should display,
 ; so that it's consistent with the speech emotions.
 
-; Chat state. Is the robot talking, or not, right now?
-; NB the python code uses these defines!
+; Chat state. Is the robot talking (vocalizing), or not, right now?
+; NB the python code in put_atoms.py uses these defines!
 (define-public chat-state (AnchorNode "Chat State"))
 (define-public chat-listen (ConceptNode "Listening"))
 (define-public chat-talk   (ConceptNode "Talking"))

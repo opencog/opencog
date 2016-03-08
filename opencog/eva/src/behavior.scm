@@ -218,7 +218,6 @@ except:
 
 
 ;; Interact with the curent face target.
-;; line 762, interact_with_face_target()
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
 (DefineLink
 	(DefinedPredicate "Interact with face")
@@ -344,7 +343,6 @@ except:
 	))
 
 ;; Check to see if someone left.
-;; line 422 -- someone_left()
 (DefineLink
 	(DefinedPredicateNode "Someone left")
 	(SequentialAndLink
