@@ -251,17 +251,23 @@ class EvaControl():
 		if random.random() < blink_probability:
 			self.gesture('blink', 1.0, 1, 1.0)
 
-	# The perceived emotional content of speech in the message.
+	# The perceived emotional content of words spoken to the robot.
+	# That is, were people being rude to the robot? Polite to it? Angry
+	# with it?  We subscribe; there may be multiple publishers of this
+	# message: it might be supplied by some linguistic-processing module,
+	# or it might be supplied by an AIML-derived chatbot.
+	#
 	# emo is of type std_msgs/String
-	def chatbot_affect_perceive_cb(self, emo):
+	def language_affect_perceive_cb(self, emo):
 		rospy.loginfo('chatbot perceived emo class =' + emo.data)
 		if emo.data == "happy":
-                        # behavior tree will use these predicates
+			# behavior tree will use these predicates
 			self.puta.chatbot_affect_happy()
-			
-			
+
 		else:
 			self.puta.chatbot_affect_negative()
+
+		# XXX FIXME this so toptally does not belong here.
 		exp = EmotionState()
 		# publish so that chatbot publishes response to tts if in wait_emo
 		exp.name = emo.data
@@ -299,28 +305,15 @@ class EvaControl():
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
 
+		# ----------------
+		# Get the available animations
 		rospy.Subscriber("/blender_api/available_emotion_states",
 		       AvailableEmotionStates, self.get_emotion_states_cb)
 
 		rospy.Subscriber("/blender_api/available_gestures",
 		       AvailableGestures, self.get_gestures_cb)
 
-		# Emotional content that the chatbot perceived i.e. did it hear
-		# (or reply with) angry words, polite words, etc?
-		# Currently chatbot supplies string rather than specific
-		# EmotionState with timing, allowing that to be handled here where
-		# timings have been tuned.
-		rospy.logwarn("setting up chatbot affect perceive and express links")
-		rospy.Subscriber("chatbot_affect_perceive", String,
-			self.chatbot_affect_perceive_cb)
-
-		# Chatbot can request blinks correlated with hearing and speaking.
-		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
-
-		# Handle messages from incoming speech to simulate listening
-		# engagement.
-		rospy.Subscriber("chat_events", String, self.chat_event_cb)
-
+		# Send out facial expressions and gestures.
 		self.emotion_pub = rospy.Publisher("/blender_api/set_emotion_state",
 		                                   EmotionState, queue_size=1)
 		self.gesture_pub = rospy.Publisher("/blender_api/set_gesture",
@@ -332,9 +325,7 @@ class EvaControl():
 		self.saccade_pub = rospy.Publisher("/blender_api/set_saccade",
 		                                   SaccadeCycle, queue_size=1)
 
-		self.affect_pub = rospy.Publisher("chatbot_affect_express",
-		                                   EmotionState, queue_size=1)
-
+		# ----------------
 		# XYZ coordinates of where to turn and look.
 		self.turn_pub = rospy.Publisher("/blender_api/set_face_target",
 			Target, queue_size=1)
@@ -351,6 +342,23 @@ class EvaControl():
 
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
+
+		# ----------------
+		rospy.logwarn("setting up chatbot affect perceive and express links")
+
+		# Emotional content of words spoken to the robot.
+		rospy.Subscriber("chatbot_affect_perceive", String,
+			self.language_affect_perceive_cb)
+
+		# Chatbot can request blinks correlated with hearing and speaking.
+		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
+
+		# Handle messages from incoming speech to simulate listening
+		# engagement.
+		rospy.Subscriber("chat_events", String, self.chat_event_cb)
+
+		self.affect_pub = rospy.Publisher("chatbot_affect_express",
+		                                   EmotionState, queue_size=1)
 
 		# Boolean flag, turn the behavior tree on and off (set it running,
 		# or stop it)
