@@ -627,12 +627,15 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
 
 ActionPlanID OCPlanner::doPlanningForGivenGoal(opencog::CogServer * server, PatternMiner* _patternMiner)
 {
+
     // need to translate the psi demanding goal Handle into vector<State*>
     vector<State*> goal,knownStates;
 
     State* goalState = new State("is_open",ActionParamType::BOOLEAN(),STATE_EQUAL_TO,SV_TRUE);
 
-    ParamValue blackChestEntity = Entity("id_chest13442","object");
+    OAC* oac = dynamic_cast<OAC*>(server);
+
+    ParamValue blackChestEntity = Entity(oac->pai->curGoalObjectID,"object");
 
     goalState->addOwner(blackChestEntity);
 

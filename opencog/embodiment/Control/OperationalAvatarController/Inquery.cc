@@ -942,6 +942,7 @@ HandleSeq Inquery::findAllGivenStateChangesAndLatestRelatedActions(Handle classV
     Handle hBindLink = atomSpace->addLink(BIND_LINK, bindLinkOutgoings);
 
     // Run pattern matcher
+    cout << "\nfindAllGivenStateChangesAndLatestRelatedActions: bindLink = \n " << hBindLink << std::endl;
     Handle hResultListLink = bindlink(atomSpace, hBindLink);
 
     // Get result

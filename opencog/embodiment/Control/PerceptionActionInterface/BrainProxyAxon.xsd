@@ -525,6 +525,7 @@
         </xsd:documentation>
     </xsd:annotation>
     <xsd:complexType name="StartPlanningFromClientSignalType">
+        <xsd:attribute name="object-id" type="xsd:string" use="required"/>
         <xsd:attribute name="timestamp" type="xsd:string" use="required"/>
     </xsd:complexType>
 

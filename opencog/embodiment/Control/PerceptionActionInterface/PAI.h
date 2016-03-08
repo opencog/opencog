@@ -93,6 +93,8 @@ public:
     vector<Handle> perceptionWaitingForPatternMiner;
     std::mutex waitingToFeedToPatternMinerLock;
 
+    string curGoalObjectID;
+
 private:
 
     /**

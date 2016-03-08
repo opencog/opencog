@@ -4562,6 +4562,16 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, Hand
 
 void PAI::processStartPlanningFromClientSignalType(DOMElement* element)
 {
+    XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
+    // getting timestamp attribute value
+    XMLString::transcode(OBJECT_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* objectIDChar = XMLString::transcode(element->getAttribute(tag));
+
+    string objectID(objectIDChar);
+    curGoalObjectID = objectID;
+
+    XMLString::release(&objectIDChar);
+
     hasStartPlanningFromClientSignal = true;
     printf("\nReceived singal from the client to start planning!\n");
 
