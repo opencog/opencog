@@ -52,6 +52,8 @@ class PutAtoms:
 		self.atomspace = scheme_eval_as('(cog-atomspace)')
 
 		# Needed for the public define of chat-state, chat-start, etc.
+		# XXX Except that this doesn't actually make chat-state visible?
+		# WTF? But use-modules in btree.scm does work... strange.
 		scheme_eval(self.atomspace, "(use-modules (opencog eva-model))")
 
 	# Let atomspace know that vocalization has started or ended.
@@ -61,12 +63,12 @@ class PutAtoms:
 	def vocalization_ended(self):
 		scheme_eval_h(self.atomspace, "(State chat-state chat-stop)")
 
-	# Put a marker in the StomSpace to indicate that the robot is
-	# happy, enthsed about what its saying.
-	def chatbot_affect_happy(self):
+	# Indicate that the robot heard freindly speech
+	def affect_happy(self):
 		scheme_eval_h(self.atomspace, "(State chat-affect chat-happy)")
 
-	def chatbot_affect_negative(self):
+	# Indicate that the robot heard negative speech
+	def affect_negative(self):
 		scheme_eval_h(self.atomspace, "(State chat-affect chat-negative)")
 
 	# Start or stop the behavior tree.

@@ -123,6 +123,10 @@
 ; Chat affect. Is the robot happy about what its saying?
 ; Right now, there are only two affects: happy and not happy.
 ; NB the python code uses these defines!
+; XXX FIXME: Note also: we currently fail to distinguish the affect
+; that was perceived, from our own state. There is a ROS message that
+; informs us about what the perceived affect was: it sets this state.
+;
 (define chat-affect (AnchorNode "Chat Affect"))
 (define chat-happy (ConceptNode "Happy"))
 (define chat-negative (ConceptNode "Negative"))

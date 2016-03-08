@@ -281,10 +281,10 @@ class EvaControl():
 		rospy.loginfo('chatbot perceived emo class =' + emo.data)
 		if emo.data == "happy":
 			# behavior tree will use these predicates
-			self.puta.chatbot_affect_happy()
+			self.puta.affect_happy()
 
 		else:
-			self.puta.chatbot_affect_negative()
+			self.puta.affect_negative()
 
 		# XXX FIXME why are we using an animation message for this?
 		# Can't we just use a std_msgs/String ?
