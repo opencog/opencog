@@ -60,13 +60,14 @@ def glance_at_face(face_id_node):
 
 def look_at_face(face_id_node):
 	now = time.time()
-	if now - prev_time > 3 :
-		prev_time = now
+	if now - look_at_face.prev_time > 3 :
+		look_at_face.prev_time = now
 		face_id = int(float(face_id_node.name))
 		print "(Eva looks at face id", face_id, ")"
 
 	# evl.look_at(face_id)
 	return TruthValue(1, 1)
+
 look_at_face.prev_time = 0
 
 def gaze_at_face(face_id_node):
