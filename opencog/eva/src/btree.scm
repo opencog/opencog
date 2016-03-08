@@ -48,6 +48,7 @@ except:
 ")
 
 ; Load the behavior trees.
+(use-modules (opencog eva-model))   ; needed for defines in put_atoms.py
 (use-modules (opencog eva-behavior))
 
 ; Load the Sophia personality configuration.

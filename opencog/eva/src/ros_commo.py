@@ -244,6 +244,9 @@ class EvaControl():
 			self.puta.vocalization_ended()
 			rospy.loginfo("webui ending speech")
 
+		else:
+			rospy.logerror("unknown chat_events message: " + chat_event.data)
+
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):
 
