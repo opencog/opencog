@@ -51,13 +51,12 @@ class PutAtoms:
 		# Get the atomspace that the scheme is using at just this moment.
 		self.atomspace = scheme_eval_as('(cog-atomspace)')
 
-	# Put a marker in the AtomSpace to indicate that the robot is
-	# talking now.
-	def chatbot_speech_start(self):
-		scheme_eval_h(self.atomspace, "(State chat-state chat-talk)")
+	# Let atomspace know that vocalization has started or ended.
+	def vocalization_started(self):
+		scheme_eval_h(self.atomspace, "(State chat-state chat-start)")
 
-	def chatbot_speech_stop(self):
-		scheme_eval_h(self.atomspace, "(State chat-state chat-listen)")
+	def vocalization_ended(self):
+		scheme_eval_h(self.atomspace, "(State chat-state chat-stop)")
 
 	# Put a marker in the StomSpace to indicate that the robot is
 	# happy, enthsed about what its saying.
@@ -67,7 +66,7 @@ class PutAtoms:
 	def chatbot_affect_negative(self):
 		scheme_eval_h(self.atomspace, "(State chat-affect chat-negative)")
 
-	# manages the behavior trees state
+	# Start or stop the behavior tree.
 	def btree_stop(self):
 		scheme_eval_h(self.atomspace, "(halt)")
 

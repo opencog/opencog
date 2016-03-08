@@ -86,12 +86,17 @@
 ; when it has stopped talking, and what emotions we should display,
 ; so that it's consistent with the speech emotions.
 
-; Chat state. Is the robot talking, or not, right now?
-; NB the python code uses these defines!
+; Chat state. Is the robot talking (vocalizing), or not, right now?
+; NB the python code in put_atoms.py uses these defines!
+; This is a state-machine, valid transitions are:
+; listening -> started talking
+; started talking -> talking
+; talking -> stoped talking
+; stopped talking -> listening.
 (define-public chat-state (AnchorNode "Chat State"))
 (define-public chat-listen (ConceptNode "Listening"))
-(define-public chat-talk   (ConceptNode "Talking"))
 (define-public chat-start  (ConceptNode "Start Talking"))
+(define-public chat-talk   (ConceptNode "Talking"))
 (define-public chat-stop   (ConceptNode "Stop Talking"))
 (StateLink chat-state chat-stop)
 
@@ -445,14 +450,19 @@
 ;; ------
 ;;
 ;; Return true if interacting with someone.
-;; line 650, is_interacting_with_someone
+;; This is a compound predicate: we are interacting if the interaction
+;; state is set, or if the TTS system/chatbot is still vocalizing.
 ;; (cog-evaluate! (DefinedPredicateNode "is interacting with someone?"))
 (DefineLink
 	(DefinedPredicate "is interacting with someone?")
-	(NotLink (Equal
-		(SetLink no-interaction)
-		(Get (State interaction-state (Variable "$x"))))
-	))
+	(OrLink
+		; true if talking not listening.
+		(NotLink (DefinedPredicate "chatbot is listening"))
+		; true if not not-interacting.
+		(NotLink (Equal
+			(SetLink no-interaction)
+			(Get (State interaction-state (Variable "$x"))))
+	)))
 
 
 ;; Return true if someone requests interaction.  This person will

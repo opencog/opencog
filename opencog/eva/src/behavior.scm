@@ -60,6 +60,8 @@
 ; -- no-face just transitioned to multiple-faces
 ; -- one-face just transitioned to no-face
 ; -- one-face just transitioned to multiple-faces
+;      (DefinedPredicate "Respond to new arrival")
+;      (DefinedPredicateNode "Interacting Sequence")
 ; -- one face present for a while
 ; -- multiple faces present for a while
 ; -- multiple-faces just transitioned to one-face
@@ -218,7 +220,6 @@ except:
 
 
 ;; Interact with the curent face target.
-;; line 762, interact_with_face_target()
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
 (DefineLink
 	(DefinedPredicate "Interact with face")
@@ -281,7 +282,8 @@ except:
 			(ListLink (Node "--- Looking at requested face")))
 	))
 
-;; line 399 -- Sequence - Currently interacting with someone
+;; Sequence - Currently interacting with someone when a new person
+;  becomes visible.
 ; (cog-evaluate! (DefinedPredicateNode "Interacting Sequence"))
 (DefineLink
 	(DefinedPredicateNode "Interacting Sequence")
@@ -344,7 +346,6 @@ except:
 	))
 
 ;; Check to see if someone left.
-;; line 422 -- someone_left()
 (DefineLink
 	(DefinedPredicateNode "Someone left")
 	(SequentialAndLink
@@ -385,23 +386,22 @@ except:
 		(DefinedPredicateNode "Update room state")
 	))
 
-;; Collection of things to while interacting with people
-;; Evalutes to true if there is an ongoing interaction with
+;; Collection of things to do while interacting with people.
+;; Evaluates to true if there is an ongoing interaction with
 ;; someone.
-;; line 457 -- interact_with_people()
 (DefineLink
 	(DefinedPredicate "Interact with people")
-	(SequentialAnd ; line 458
+	(SequentialAnd
 		; True, if there is anyone visible.
-		(DefinedPredicate "Someone visible") ; line 459
+		(DefinedPredicate "Someone visible")
 		; This sequential-or is true if we're not interacting with anyone,
 		; or if there are several people and its time to change up.
-		(SequentialOr ; line 460
-			; ##### Start A New Interaction #####
-			(SequentialAnd ; line 462
-				(SequentialOr ; line 463
+		(SequentialOr
+			; Start a new interaction, but only if not currently interacting.
+			(SequentialAnd
+				(SequentialOr
 					(Not (DefinedPredicate "is interacting with someone?"))
-					(SequentialAnd ; line 465
+					(SequentialAnd
 						(DefinedPredicate "More than one face visible")
 						(DefinedPredicate "Time to change interaction")))
 				; Select a new face target
@@ -409,26 +409,26 @@ except:
 				(DefinedPredicate "Interact with face"))
 
 			; ##### Glance At Other Faces & Continue With The Last Interaction
-			(SequentialAnd ; line 476
+			(SequentialAnd
 				; Gets called 10x/second; don't print.
 				;(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 				;	(ListLink (Node "--- Continue interaction")))
-				(SequentialOr  ; line 478
-					(SequentialAnd ; line 479
+				(SequentialOr
+					(SequentialAnd
 						(DefinedPredicate "More than one face visible")
 						(DefinedPredicate "dice-roll: group interaction")
 						(DefinedPredicate "glance at random face"))
-					(True)) ; line 485
+					(True))
 				(DefinedPredicateNode "Interact with face")
-				(SequentialOr  ; line 488
-					(SequentialAnd ; line 489
+				(SequentialOr
+					(SequentialAnd
 						(DefinedPredicateNode "dice-roll: face study")
 ; XXX incomplete!  need the face study saccade stuff...
 ; I am confused ... has this been superceeded by the ROS-saccades,
 ; or is this still means to be used?
 						(False)
 					)
-					(True))  ; line 493
+					(True))
 			))
 	))
 
@@ -436,7 +436,6 @@ except:
 ; Empty-room behaviors. We either search for attention, or we sleep,
 ; or we wake up.
 
-; line 898 -- search_for_attention.
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
@@ -473,7 +472,6 @@ except:
 	))
 
 ; Call once, to fall asleep.
-; line 941 -- go_to_sleep
 (DefineLink
 	(DefinedPredicate "Go to sleep")
 	(SequentialAnd
@@ -501,7 +499,7 @@ except:
 		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
 	))
 
-; line 537 -- Continue To Sleep
+; Continue To Sleep
 (DefineLink
 	(DefinedPredicateNode "Continue sleeping")
 	(SequentialAndLink
@@ -511,7 +509,6 @@ except:
 	))
 
 ; Wake-up sequence
-; line 957 -- wake_up()
 (DefineLink
 	(DefinedPredicate "Wake up")
 	(SequentialAnd
@@ -542,7 +539,6 @@ except:
 ;; Collection of things to do if nothing is happening (no faces
 ;; are visibile)
 ;; Go to sleep after a while, and wake up every now and then.
-;; line 507 -- nothing_is_happening()
 (DefineLink
 	(DefinedPredicate "Nothing is happening")
 	(SequentialAnd  ; line 508
@@ -601,17 +597,19 @@ except:
 ;; ------------------------------------------------------------------
 ;; Chat-related behaviors.
 
-; Things to do, if the chatbot started talking.
+; Things to do, if TTS vocalization just started.
 (DefineLink
 	; owyl "chatbot_speech_start()" method
 	(DefinedPredicate "Speech started?")
 	(SequentialAnd
-		; If the chatbot started talking ...
+		; If the TTS vocalization started (chatbot started talking) ...
 		(DefinedPredicate "chatbot started talking")
 		; ... then switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:conversational_saccade")
 				(ListLink))
 		; ... and show one random gesture from "listening" set.
+		; XXX huh?? Why the listening set? Why not the talking set?
+		; XXX there is no talking set...
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "listening"))
 		; ... and also, sometimes, the "chatbot_positive_nod"
@@ -717,7 +715,7 @@ except:
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot is listening")
 
-		; No-op. The current owyl tree does nothing here.
+		; No-op.  What should we do here?
 		(TrueLink)
 	))
 
