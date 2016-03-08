@@ -13,7 +13,7 @@
    /eva/speech_events   start stop   string
 
 
-if she hears: look at me: change who she is looking at.
+ * if she hears: "look at me": change who she is looking at.
 
 if chatbot has not heard anything for a minute then say something
 (but only if people are visible.)

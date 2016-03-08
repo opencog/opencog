@@ -226,14 +226,18 @@ class EvaControl():
 	def get_emotion_states_cb(self, msg):
 		print("Available Emotion States:" + str(msg.data))
 
+	# ----------------------------------------------------------
+	# Notification from text-to-speech (TTS) module, that it has
+	# started, or stopped vocalizing.  This message might be published
+	# by either the TTS module itself, or by some external chatbot.
 	def chat_event_cb(self,chat_event):
 		rospy.loginfo('chat_event, type ' + chat_event.data)
 		if chat_event.data == "speechstart":
 			rospy.loginfo("webui starting speech")
-			self.puta.chatbot_speech_start()
+			self.puta.vocalization_started()
 
 		elif chat_event.data == "speechend":
-			self.puta.chatbot_speech_end()
+			self.puta.vocalization_ended()
 			rospy.loginfo("webui ending speech")
 
 	# Chatbot requests blink.
@@ -267,7 +271,7 @@ class EvaControl():
 		else:
 			self.puta.chatbot_affect_negative()
 
-		# XXX FIXME this so toptally does not belong here.
+		# XXX FIXME this so totally does not belong here.
 		exp = EmotionState()
 		# publish so that chatbot publishes response to tts if in wait_emo
 		exp.name = emo.data
@@ -276,7 +280,7 @@ class EvaControl():
 		exp.duration.secs = 4.0
 		exp.duration.nsecs = 0
 		rospy.logwarn('publishing affect to chatbot '+exp.name)
-		self.affect_pub.publish(exp)	
+		self.affect_pub.publish(exp)
 
 	# Turn behaviors on and off.
 	# Do not to clean visible faces as these can still be added/removed

@@ -51,12 +51,12 @@ class PutAtoms:
 		# Get the atomspace that the scheme is using at just this moment.
 		self.atomspace = scheme_eval_as('(cog-atomspace)')
 
-	# Put a marker in the AtomSpace to indicate that the robot is
-	# talking now.
-	def chatbot_speech_start(self):
+	# Put a marker in the AtomSpace to indicate that vocalization
+	# has started, or has stopped.
+	def vocalization_started(self):
 		scheme_eval_h(self.atomspace, "(State chat-state chat-talk)")
 
-	def chatbot_speech_stop(self):
+	def vocalization_ended(self):
 		scheme_eval_h(self.atomspace, "(State chat-state chat-listen)")
 
 	# Put a marker in the StomSpace to indicate that the robot is
