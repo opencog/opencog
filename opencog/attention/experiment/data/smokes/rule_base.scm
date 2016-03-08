@@ -10,19 +10,23 @@
    pln-rule-modus-ponens-name
    (ConceptNode "SMOKES_RB")
 )
+
 (MemberLink (stv 1 1)
    pln-rule-deduction-name
    (ConceptNode "SMOKES_RB")
 )
 
+
 (MemberLink (stv 1 1)
    smokes-rule-smokes-name
    (ConceptNode "SMOKES_RB")
 )
+
 (MemberLink (stv 1 1)
    smokes-rule-has-cancer-name
    (ConceptNode "SMOKES_RB")
 )
+
 (MemberLink (stv 1 1)
    smokes-rule-friends-name
    (ConceptNode "SMOKES_RB")

@@ -223,8 +223,13 @@ void SmokesDBFCAgent::run()
 
 }
 
-bool SmokesDBFCAgent::is_surprising(const Handle& h)
+bool SmokesDBFCAgent::is_surprising(const Handle& hx)
 {
+    Handle h;
+    if(hx->getType() == IMPLICATION_LINK){
+        h = LinkCast(hx)->getOutgoingSet()[1];
+    }
+    else h = hx;
 
     strength_t mean_tv = 0.0f;
     bool val = false;
@@ -244,9 +249,10 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
         // Consider the first top_k values as surprising. After we have enough
         // data only consider those who have higher value than the lbound of the
         // top_k as surprising.
-        unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_friends.size();
+        //unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_friends.size();
+        unsigned int top_k = K_PERCENTILE;
 
-        if (top_k > dist_surprisingness_friends.size() or mi
+        if (top_k >= dist_surprisingness_friends.size() or mi
                 >= *std::next(it, top_k)) {
             dist_surprisingness_friends.insert(mi);
             val = true;
@@ -271,9 +277,10 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
         // Consider the first top_k values as surprising. After we have enough
         // data only consider those who have higher value than the lbound of the
         // top_k as surprising.
-        unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_smokes.size();
+        //unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_smokes.size();
+        unsigned int top_k = K_PERCENTILE;
 
-        if (top_k > dist_surprisingness_smokes.size() or mi
+        if (top_k >= dist_surprisingness_smokes.size() or mi
                 >= *std::next(it, top_k)) {
             dist_surprisingness_smokes.insert(mi);
             val = true;
@@ -281,6 +288,12 @@ bool SmokesDBFCAgent::is_surprising(const Handle& h)
             dist_surprisingness_smokes.insert(mi);
             val = false;
         }
+    }
+
+    // If it contains has_cancer predicate, let it be surprising.
+
+    else if(exists_in(h, _atomspace.add_node(PREDICATE_NODE,"cancer"))){
+        val = true;
     }
 
     std::cerr << "Result Found to be "
