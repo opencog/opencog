@@ -323,7 +323,7 @@ class FaceTrack:
 					trg = self.face_target(self.look_at)
 					if self.control_mode & self.C_FACE:
 						self.look_pub.publish(trg)
-
+						self.gaze_pub.publish(trg)
 				except tf.LookupException as lex:
 					logger.info("Warning: TF has forgotten about face id: " +
 						str(self.look_at))
