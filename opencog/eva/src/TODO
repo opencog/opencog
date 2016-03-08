@@ -20,9 +20,10 @@ no -- sent a special sentence to chatbot, which responds.
 
 topic is /heard_text
 
-
 listen to a sequence of behaviors and run them, but only if no other
 stuff is coming
+
+Revert to normal behaviors when done conversing.
 
 ----
 send a start , stop and resume performance message to some ros topic.
@@ -34,10 +35,6 @@ the timeline performer will do the performance.
 
 New bugs:
 ---------
-* When the chatbot starts talking, it picks a getsture from the
-  "listening" set. This is wrong, it should pick one from the
-  "talking" set.  However, no "talking" set is defined...
-
 * When listening, there are no defined behaviors... See
   (DefinedPredicate "Speech listening?")
 
