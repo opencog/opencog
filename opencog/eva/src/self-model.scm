@@ -450,14 +450,19 @@
 ;; ------
 ;;
 ;; Return true if interacting with someone.
-;; line 650, is_interacting_with_someone
+;; This is a compound predicate: we are interacting if the interaction
+;; state is set, or if the TTS system/chatbot is still vocalizing.
 ;; (cog-evaluate! (DefinedPredicateNode "is interacting with someone?"))
 (DefineLink
 	(DefinedPredicate "is interacting with someone?")
-	(NotLink (Equal
-		(SetLink no-interaction)
-		(Get (State interaction-state (Variable "$x"))))
-	))
+	(OrLink
+		; true if talking not listening.
+		(NotLink (DefinedPredicate "chatbot is listening"))
+		; true if not not-interacting.
+		(NotLink (Equal
+			(SetLink no-interaction)
+			(Get (State interaction-state (Variable "$x"))))
+	)))
 
 
 ;; Return true if someone requests interaction.  This person will

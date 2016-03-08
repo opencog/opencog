@@ -397,7 +397,7 @@ except:
 		; This sequential-or is true if we're not interacting with anyone,
 		; or if there are several people and its time to change up.
 		(SequentialOr
-			; ##### Start A New Interaction #####
+			; Start a new interaction, but only if not currently interacting.
 			(SequentialAnd
 				(SequentialOr
 					(Not (DefinedPredicate "is interacting with someone?"))
