@@ -17,11 +17,11 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from opencog.scheme_wrapper import scheme_eval_h, scheme_eval_as
+from opencog.scheme_wrapper import scheme_eval, scheme_eval_h, scheme_eval_as
 
 # Simple API to isolate opencog atoms and imports from the ROS code,
 # so that we don't hack both ROS and Opencog in the same module.
-# Why? Not sure, seems like a good idea.
+# Why? Not sure, seemed like a good idea at the time.
 #
 # How to unit-test:
 # -----------------
@@ -50,6 +50,9 @@ class PutAtoms:
 	def __init__(self):
 		# Get the atomspace that the scheme is using at just this moment.
 		self.atomspace = scheme_eval_as('(cog-atomspace)')
+
+		# Needed for the public define of chat-state, chat-start, etc.
+		scheme_eval(self.atomspace, "(use-modules (opencog eva-model))")
 
 	# Let atomspace know that vocalization has started or ended.
 	def vocalization_started(self):
