@@ -60,6 +60,8 @@
 ; -- no-face just transitioned to multiple-faces
 ; -- one-face just transitioned to no-face
 ; -- one-face just transitioned to multiple-faces
+;      (DefinedPredicate "Respond to new arrival")
+;      (DefinedPredicateNode "Interacting Sequence")
 ; -- one face present for a while
 ; -- multiple faces present for a while
 ; -- multiple-faces just transitioned to one-face
@@ -280,7 +282,8 @@ except:
 			(ListLink (Node "--- Looking at requested face")))
 	))
 
-;; line 399 -- Sequence - Currently interacting with someone
+;; Sequence - Currently interacting with someone when a new person
+;  becomes visible.
 ; (cog-evaluate! (DefinedPredicateNode "Interacting Sequence"))
 (DefineLink
 	(DefinedPredicateNode "Interacting Sequence")
@@ -383,23 +386,22 @@ except:
 		(DefinedPredicateNode "Update room state")
 	))
 
-;; Collection of things to while interacting with people
+;; Collection of things to do while interacting with people.
 ;; Evalutes to true if there is an ongoing interaction with
 ;; someone.
-;; line 457 -- interact_with_people()
 (DefineLink
 	(DefinedPredicate "Interact with people")
-	(SequentialAnd ; line 458
+	(SequentialAnd
 		; True, if there is anyone visible.
-		(DefinedPredicate "Someone visible") ; line 459
+		(DefinedPredicate "Someone visible")
 		; This sequential-or is true if we're not interacting with anyone,
 		; or if there are several people and its time to change up.
-		(SequentialOr ; line 460
+		(SequentialOr
 			; ##### Start A New Interaction #####
-			(SequentialAnd ; line 462
-				(SequentialOr ; line 463
+			(SequentialAnd
+				(SequentialOr
 					(Not (DefinedPredicate "is interacting with someone?"))
-					(SequentialAnd ; line 465
+					(SequentialAnd
 						(DefinedPredicate "More than one face visible")
 						(DefinedPredicate "Time to change interaction")))
 				; Select a new face target
@@ -407,26 +409,26 @@ except:
 				(DefinedPredicate "Interact with face"))
 
 			; ##### Glance At Other Faces & Continue With The Last Interaction
-			(SequentialAnd ; line 476
+			(SequentialAnd
 				; Gets called 10x/second; don't print.
 				;(EvaluationLink (GroundedPredicateNode "scm: print-msg")
 				;	(ListLink (Node "--- Continue interaction")))
-				(SequentialOr  ; line 478
-					(SequentialAnd ; line 479
+				(SequentialOr
+					(SequentialAnd
 						(DefinedPredicate "More than one face visible")
 						(DefinedPredicate "dice-roll: group interaction")
 						(DefinedPredicate "glance at random face"))
-					(True)) ; line 485
+					(True))
 				(DefinedPredicateNode "Interact with face")
-				(SequentialOr  ; line 488
-					(SequentialAnd ; line 489
+				(SequentialOr
+					(SequentialAnd
 						(DefinedPredicateNode "dice-roll: face study")
 ; XXX incomplete!  need the face study saccade stuff...
 ; I am confused ... has this been superceeded by the ROS-saccades,
 ; or is this still means to be used?
 						(False)
 					)
-					(True))  ; line 493
+					(True))
 			))
 	))
 
