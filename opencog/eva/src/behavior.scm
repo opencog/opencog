@@ -387,7 +387,7 @@ except:
 	))
 
 ;; Collection of things to do while interacting with people.
-;; Evalutes to true if there is an ongoing interaction with
+;; Evaluates to true if there is an ongoing interaction with
 ;; someone.
 (DefineLink
 	(DefinedPredicate "Interact with people")
@@ -436,7 +436,6 @@ except:
 ; Empty-room behaviors. We either search for attention, or we sleep,
 ; or we wake up.
 
-; line 898 -- search_for_attention.
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
@@ -473,7 +472,6 @@ except:
 	))
 
 ; Call once, to fall asleep.
-; line 941 -- go_to_sleep
 (DefineLink
 	(DefinedPredicate "Go to sleep")
 	(SequentialAnd
@@ -501,7 +499,7 @@ except:
 		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
 	))
 
-; line 537 -- Continue To Sleep
+; Continue To Sleep
 (DefineLink
 	(DefinedPredicateNode "Continue sleeping")
 	(SequentialAndLink
@@ -511,7 +509,6 @@ except:
 	))
 
 ; Wake-up sequence
-; line 957 -- wake_up()
 (DefineLink
 	(DefinedPredicate "Wake up")
 	(SequentialAnd
@@ -542,7 +539,6 @@ except:
 ;; Collection of things to do if nothing is happening (no faces
 ;; are visibile)
 ;; Go to sleep after a while, and wake up every now and then.
-;; line 507 -- nothing_is_happening()
 (DefineLink
 	(DefinedPredicate "Nothing is happening")
 	(SequentialAnd  ; line 508
@@ -601,17 +597,19 @@ except:
 ;; ------------------------------------------------------------------
 ;; Chat-related behaviors.
 
-; Things to do, if the chatbot started talking.
+; Things to do, if TTS vocalization just started.
 (DefineLink
 	; owyl "chatbot_speech_start()" method
 	(DefinedPredicate "Speech started?")
 	(SequentialAnd
-		; If the chatbot started talking ...
+		; If the TTS vocalization started (chatbot started talking) ...
 		(DefinedPredicate "chatbot started talking")
 		; ... then switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:conversational_saccade")
 				(ListLink))
 		; ... and show one random gesture from "listening" set.
+		; XXX huh?? Why the listening set? Why not the talking set?
+		; XXX there is no talking set...
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "listening"))
 		; ... and also, sometimes, the "chatbot_positive_nod"
@@ -717,7 +715,7 @@ except:
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot is listening")
 
-		; No-op. The current owyl tree does nothing here.
+		; No-op.  What should we do here?
 		(TrueLink)
 	))
 

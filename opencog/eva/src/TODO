@@ -1,16 +1,13 @@
 
 
-* listen to tts_en ros message for string and pass it on to process_query
-  for  OC chat
+* in order for OC to hear, it should listen to tts_en ros message
+  for NL text string, and pass it on to process_query.
 
 -- btree makes chatbot not talk if it knows the answer.
    silence chatbot by saying no affect publ
+   Huh? I guess chatbost doesn't talk if no affect is published?
 
 -- behaviors:
-
-* do NOT change expression while chatbot is talking
-   use the lipsync topic  ?  no ...
-   /eva/speech_events   start stop   string
 
 
  * if she hears: "look at me": change who she is looking at.
@@ -18,31 +15,35 @@
 if chatbot has not heard anything for a minute then say something
 (but only if people are visible.)
 say something like "why are you ignoring me?"
-set aiml topic to bored, and thell aiml to say something.
+set aiml topic to bored, and tell aiml to say something.
 no -- sent a special sentence to chatbot, which responds.
 
-topic is /chatbot_speech 
-
-action orchestrator -- listen to topic and block expressions/gestures
-if pupeteering ... but its easier to cut off at python EvaControl level.
-Vytas will do that.
+topic is /chatbot_speech
 
 sent to chatbot : xyzzy message of what happened.
 
-
-listen to a sequence of behaviors and run them, but only if no other 
+listen to a sequence of behaviors and run them, but only if no other
 stuff is coming
 
-
-
-send a start , stop and resume pervromance message to some ros topic.
+----
+send a start , stop and resume performance message to some ros topic.
 the timeline performer will do the performance.
 /performances
 
-/public_ws/perforamnces/src/runner.py
+/public_ws/performances/src/runner.py
 
 
+New bugs:
+---------
+* When the chatbot starts talking, it picks a getsture from the
+  "listening" set. This is wrong, it should pick one from the
+  "talking" set.  However, no "talking" set is defined...
 
+* When listening, there are no defined behaviors... See
+  (DefinedPredicate "Speech listening?")
 
+* Vytas says: do NOT change expression while chatbot is talking
+  However, the behavior tree was defined to pick expressions
+  from a set, when the chatbot is talking, so WTF should I do here?
 
-
+*
