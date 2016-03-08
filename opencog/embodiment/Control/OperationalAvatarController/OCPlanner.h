@@ -349,6 +349,8 @@ protected:
 
      ActionPlanID planID;
 
+     PAI* pai;
+
      unsigned long curtimeStamp;
 
      SpaceServer::SpaceMap* curMap;

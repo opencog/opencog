@@ -344,7 +344,7 @@ namespace PatternMining
      void runEvaluatePatternTaskForEmbodiment();
 
      void mineRelatedPatternsOnQueryByANode(Handle keywordNode, unsigned int _max_gram, pai::PAI *_pai);
-     void mineRelatedPatternsOnQueryByLinks_OR(HandleSeq keyLinks, unsigned int _max_gram, pai::PAI *_pai);
+     void mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, unsigned int _max_gram, pai::PAI *_pai);
 
      void feedEmbodimentLinksToObservingAtomSpace (HandleSeq &_newLinks);
 

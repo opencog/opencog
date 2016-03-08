@@ -698,7 +698,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     int ruleNodeCount = 0;
 
-    curtimeStamp = oac->getPAI().getLatestSimWorldTimestamp();
+    pai = oac->pai;
+
+    curtimeStamp = pai->getLatestSimWorldTimestamp();
 
     curMap = &(spaceServer().getLatestMap());
 
@@ -1649,7 +1651,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         if (planID == "")
         {
-            planID = oac->getPAI().createActionPlan();
+            planID = pai->createActionPlan();
         }
 
         // ground the parameter according to the current bindings
@@ -1722,7 +1724,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             startPos = backwardStepMap->getObjectLocation(actor->id);
 
-            opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(),*backwardStepMap,startPos,targetPos,planID,includesLastStep);
+            opencog::world::PAIWorldWrapper::createNavigationPlanAction(*pai,*backwardStepMap,startPos,targetPos,planID,includesLastStep);
 
         }
         else
@@ -1752,7 +1754,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             }
 
-            oac->getPAI().addAction(planID, action);
+            pai->addAction(planID, action);
 
         }
 
@@ -2702,7 +2704,6 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
 
     // Step 3: Find out what kind of parameters required for this action
 
-
     // Find all the other parameters except actor and target
     // e.g.
     //    (EvaluationLink (stv 1.000000 1.000000)
@@ -2731,18 +2732,17 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
 
             if (paramNameToParamEvalLinks.find (paramName) != paramNameToParamEvalLinks.end())
             {
-                (paramNameToParamEvalLinks[(paramNameNode)]).push_back(ParamEvalLink);
+                (paramNameToParamEvalLinks[paramName]).push_back(ParamEvalLink);
             }
             else
             {
                 HandleSeq ParamEvalLinks;
                 ParamEvalLinks.push_back(ParamEvalLink);
-                paramNameToParamEvalLinks.insert(std::pair<Handle, HandleSeq>(paramName, ParamEvalLinks));
+                paramNameToParamEvalLinks.insert(std::pair<string, HandleSeq>(paramName, ParamEvalLinks));
             }
         }
 
     }
-
 
     // For each parameter, use pattern miner to mine relations from this parameter node, to find out the rule to bind the parameter
     // e.g.  a target can be opened with a tool of same color
@@ -2769,6 +2769,12 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
     //      (ListLink )
     //        (VariableNode $var_4)
     //        (VariableNode $var_1)
+    std::map <string, HandleSeq>::iterator paramMapIter = paramNameToParamEvalLinks.begin();
+    for (; paramMapIter != paramNameToParamEvalLinks.end(); paramMapIter ++ )
+    {
+        HandleSeq& paramEvalLinks = paramMapIter->second;
+        patternMiner->mineRelatedPatternsOnQueryByLinks_OR(paramEvalLinks, 4, pai);
+    }
 
 }
 

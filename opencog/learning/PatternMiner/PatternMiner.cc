@@ -2666,7 +2666,7 @@ void PatternMiner::mineRelatedPatternsOnQueryByANode(Handle keywordNode, unsigne
 // start from keyLinks, only mine patterns connecting to any of links in keyLinks
 // keyLinks are in observingAtomSpace.
 // It's a one time mining, just mine from the current observingAtomSpace. After return result, throw away the result and any middle data.
-void PatternMiner::mineRelatedPatternsOnQueryByLinks_OR(HandleSeq keyLinks, unsigned int _max_gram, pai::PAI* _pai)
+void PatternMiner::mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, unsigned int _max_gram, pai::PAI* _pai)
 {
     MAX_GRAM = _max_gram;
 
