@@ -42,6 +42,7 @@
 		<xsd:element name="state-info" type="oc:StateInfoType" minOccurs="1" maxOccurs="1"/>
 		<xsd:element name="block-structure-signal" type="oc:BlockStructureSignalType" minOccurs="1" maxOccurs="1"/>
 		<xsd:element name="finished-first-time-percept-terrian-signal" type="oc:FinishedFirstTimePerceptTerrianSignalType" minOccurs="1" maxOccurs="1"/>
+                <xsd:element name="start-planning-from-client-signal" type="oc:StartPlanningFromClientSignalType" minOccurs="1" maxOccurs="1"/>
             </xsd:choice>
         </xsd:sequence>
         <xsd:attribute name="request-id" type="xsd:string" use="optional"/>
@@ -512,6 +513,19 @@
     </xsd:annotation>
     <xsd:complexType name="FinishedFirstTimePerceptTerrianSignalType">
 	<xsd:attribute name="timestamp" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+
+    <!-- start-planning-from-client-signal -->
+    <xsd:element name="start-planning-from-client-signal" type="oc:StartPlanningFromClientSignalType"/>
+
+    <xsd:annotation>
+        <xsd:documentation>
+        Notification of starting planning from the client
+        </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexType name="StartPlanningFromClientSignalType">
+        <xsd:attribute name="timestamp" type="xsd:string" use="required"/>
     </xsd:complexType>
 
 

@@ -150,7 +150,7 @@ void OCPlanningAgent::run()
 
     if (! startPlanning)
     {
-        if ( ( oac->getPAI().hasFinishFistTimeWorldPercetption())
+        if ( ( oac->getPAI().HasStartPlanningFromClientSignal())
              // && ( oac->getPsiDemandUpdaterAgent().get()->getHasPsiDemandUpdaterForTheFirstTime())
             )
         {

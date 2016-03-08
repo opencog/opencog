@@ -148,8 +148,8 @@ void PatternMiningAgent::run()
 
     patternMiner->initDataStructure();
 
-    std::thread testMinePatternsOnQueryThread = std::thread([this]{this->testMinePatternsOnQuery();});
-    testMinePatternsOnQueryThread.detach();
+//    std::thread testMinePatternsOnQueryThread = std::thread([this]{this->testMinePatternsOnQuery();});
+//    testMinePatternsOnQueryThread.detach();
 
 }
 

@@ -105,6 +105,8 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 
     isFirstPerceptTerrian = false;
 
+    hasStartPlanningFromClientSignal = false;
+
     blockNum = 0;
 
     // Set up the xml parser
@@ -804,6 +806,18 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d finished-first-time-percept-terrian-signal done", list->getLength());
+
+
+    // getting <start-planning-from-client-signal> elements from the XML message
+    XMLString::transcode(START_PLANNING_FROM_CLIENT_SIGNAL_ELEMENT,
+                         tag, PAIUtils::MAX_TAG_LENGTH);
+    list = doc->getElementsByTagName(tag);
+
+    for (unsigned int i = 0; i < list->getLength(); i++) {
+        processStartPlanningFromClientSignalType((DOMElement *)list->item(i));
+    }
+    if (list->getLength() > 0)
+        logger().debug("PAI - Processing %d start-planning-from-client-signal done", list->getLength());
 }
 
 void PAI::processAvatarSignal(DOMElement * element)
@@ -4545,6 +4559,14 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, Hand
     }
 
 }
+
+void PAI::processStartPlanningFromClientSignalType(DOMElement* element)
+{
+    hasStartPlanningFromClientSignal = true;
+    printf("\nReceived singal from the client to start planning!\n");
+
+}
+
 
 void PAI::processBlockStructureSignal(DOMElement* element)
 {

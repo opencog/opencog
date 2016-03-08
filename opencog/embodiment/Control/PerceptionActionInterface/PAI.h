@@ -183,6 +183,8 @@ private:
 
     int perceptTerrianBeginTime;
 
+    bool hasStartPlanningFromClientSignal;
+
     bool ENABLE_COLLECT_PERCEPTION_TO_OBSERVING_ATOMSPACE;
 
     int blockNum;
@@ -458,6 +460,13 @@ public:
         return (! isFirstPerceptTerrian) ;
     }
 
+    bool HasStartPlanningFromClientSignal() const
+    {
+        return hasStartPlanningFromClientSignal;
+    }
+
+
+
 private:
 
     /**
@@ -547,6 +556,9 @@ private:
     void processBlockStructureSignal(DOMElement* element);
 
     void processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, HandleSeq &toUpdateHandles);
+
+    void processStartPlanningFromClientSignalType(DOMElement* element);
+
 
 
     /**

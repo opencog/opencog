@@ -59,6 +59,7 @@
 #define STATE_VALUE_ELEMENT         "state-value"
 #define BLOCK_STRUCTURE_SIGNAL_ELEMENT    "block-structure-signal"
 #define FINISHED_FIRST_TIME_PERCEPT_TERRIAN_SIGNAL_ELEMENT    "finished-first-time-percept-terrian-signal"
+#define START_PLANNING_FROM_CLIENT_SIGNAL_ELEMENT "start-planning-from-client-signal"
 
 #define SINGLE_ACTION_COMMAND_ELEMENT     "single-action-command"
 
