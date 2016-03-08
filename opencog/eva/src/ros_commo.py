@@ -230,7 +230,11 @@ class EvaControl():
 	# Notification from text-to-speech (TTS) module, that it has
 	# started, or stopped vocalizing.  This message might be published
 	# by either the TTS module itself, or by some external chatbot.
-	def chat_event_cb(self,chat_event):
+	#
+	# Unit test by saying
+	#    rostopic pub --once chat_events std_msgs/String speechstart
+	#    rostopic pub --once chat_events std_msgs/String speechend
+	def chat_event_cb(self, chat_event):
 		rospy.loginfo('chat_event, type ' + chat_event.data)
 		if chat_event.data == "speechstart":
 			rospy.loginfo("webui starting speech")
@@ -357,8 +361,8 @@ class EvaControl():
 		# Chatbot can request blinks correlated with hearing and speaking.
 		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
 
-		# Handle messages from incoming speech to simulate listening
-		# engagement.
+		# Receive messages tht indicate that TTS (or chatbot) has started
+		# or finished vocalizing.
 		rospy.Subscriber("chat_events", String, self.chat_event_cb)
 
 		self.affect_pub = rospy.Publisher("chatbot_affect_express",

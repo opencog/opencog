@@ -596,6 +596,10 @@ except:
 
 ;; ------------------------------------------------------------------
 ;; Chat-related behaviors.
+;;
+;; These can be unit-tested by saying
+;;    rostopic pub --once chat_events std_msgs/String speechstart
+;;    rostopic pub --once chat_events std_msgs/String speechend
 
 ; Things to do, if TTS vocalization just started.
 (DefineLink
