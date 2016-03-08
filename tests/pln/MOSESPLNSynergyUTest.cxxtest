@@ -123,6 +123,8 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 	TS_ASSERT(target->getTruthValue()->operator==(expected_tv));
 }
 
+// This takes too long (3 to 4 days), disabled until it gets severely
+// optimized
 void MOSESPLNSynergyUTest::test_moses_pln_synergy_fc()
 {
 	// logger().debug("BEGIN TEST: %s", __FUNCTION__);
