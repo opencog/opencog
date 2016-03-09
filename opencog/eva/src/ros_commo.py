@@ -235,6 +235,14 @@ class EvaControl():
 		print("Available Emotion States:" + str(msg.data))
 
 	# ----------------------------------------------------------
+
+	# The text that the STT module heard.
+	# Unit test by saying
+	#   rostopic pub --once perceived_text std_msgs/String "Look afraid!"
+	#
+	def language_perceived_text_cb(self, text_heard):
+		self.puta.perceived_text(text_heard.data)
+
 	# Notification from text-to-speech (TTS) module, that it has
 	# started, or stopped vocalizing.  This message might be published
 	# by either the TTS module itself, or by some external chatbot.
@@ -361,6 +369,10 @@ class EvaControl():
 		# TTS vocalization.
 		self.affect_pub = rospy.Publisher("chatbot_affect_express",
 		                                  String, queue_size=1)
+
+		# String text of what the robot heard (from TTS)
+		rospy.Subscriber("perceived_text", String,
+			self.language_perceived_text_cb)
 
 		# Emotional content of words spoken to the robot.
 		rospy.Subscriber("chatbot_affect_perceive", String,

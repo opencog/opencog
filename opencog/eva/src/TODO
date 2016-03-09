@@ -19,7 +19,7 @@ say something like "why are you ignoring me?"
 set aiml topic to bored, and tell aiml to say something.
 no -- sent a special sentence to chatbot, which responds.
 
-topic is /heard_text
+* For chatbot, use something other than proces-query
 
 listen to a sequence of behaviors and run them, but only if no other
 stuff is coming
@@ -47,3 +47,5 @@ New bugs:
 * Kino requests: send to chatbot : xyzzy message of what happened.
   Clarify ... cause you can subscribe to ROS messages for emotions,
   and for /camera/face_event yourself...
+
+* What's the topic for hearing?
