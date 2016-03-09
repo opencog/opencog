@@ -73,8 +73,11 @@ class PutAtoms:
 
 	# Pass the text that STT heard into opencog.
 	# XXX procees-query is not really the best API, here.
+	# Must run in a new thread, else it deadlocks in python, since
+	# the text processing results in python calls.
 	def perceived_text(self, text):
-		scheme_eval(self.atomspace, '(process-query "luser" "' + text + '")')
+		scheme_eval(self.atomspace,
+			'(call-with-new-thread (lambda () (process-query "luser" "' + text + '")))')
 
 	# Start or stop the behavior tree.
 	def btree_stop(self):
