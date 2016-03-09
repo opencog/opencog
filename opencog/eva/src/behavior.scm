@@ -110,16 +110,14 @@
 (DefineLink
 	(DefinedPredicate "Interact with face")
 	(SequentialAnd
-		;; Look at the interaction face - line 765
+		;; Look at the interaction face
 		(True (DefinedSchema "look at person"))
 
 		;; Show random expressions only if NOT talking
-		; aka "do_pub_emotions=False" in the new owyl tree.
 		(SequentialOr
 			(Not (DefinedPredicate "chatbot is listening"))
 			(SequentialAnd
 
-				;; line 768
 				(SequentialOrLink
 					(NotLink (DefinedPredicateNode "Time to change expression"))
 					(DefinedPredicateNode "Show positive expression")
@@ -191,7 +189,7 @@
 		(DefinedPredicate "Was Empty Sequence")
 		(DefinedPredicate "Interacting Sequence")
 		(Evaluation (GroundedPredicate "scm: print-msg")
-			(ListLink (Node "--- Ignoring new person"))) ; line 406
+			(ListLink (Node "--- Ignoring new person")))
 		(True)
 	))
 
@@ -209,15 +207,13 @@
 ;; can make us narcoleptic.
 (DefineLink
 	(DefinedPredicate "If bored then alert")
-	(SequentialOr
-		(NotLink 
-			(DefinedPredicate "Is bored?")
+	(SequentialAnd
+		(DefinedPredicate "Is bored?")
 		(Evaluation (DefinedPredicate "Request Set Soma State")
 			(ListLink bhv-source soma-awake))
 	))
 
 ;; Check to see if a new face has become visible.
-;; line 386 -- someone_arrived()
 (DefineLink
 	(DefinedPredicate "New arrival sequence")
 	(SequentialAnd
@@ -424,7 +420,7 @@
 ;; Go to sleep after a while, and wake up every now and then.
 (DefineLink
 	(DefinedPredicate "Nothing is happening")
-	(SequentialAnd  ; line 508
+	(SequentialAnd
 
 		; If we are not bored already, and we are not sleeping,
 		; then we are bored now...
@@ -460,9 +456,9 @@
 					(DefinedPredicate "Search for attention")
 				))
 			; ##### Is Sleeping #####
-			(SequentialOr  ; line 528
+			(SequentialOr
 				; ##### Wake Up #####
-				(SequentialAnd  ; line 530
+				(SequentialAnd
 					; Did we sleep for long enough?
 					(DefinedPredicate "Time to wake up")
 					(DefinedPredicate "Wake up")
