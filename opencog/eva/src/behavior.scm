@@ -96,130 +96,16 @@
 ;    from another guy
 ;
 ; --------------------------------------------------------
-
-(add-to-load-path "/usr/local/share/opencog/scm")
-
-(use-modules (opencog) (opencog query) (opencog exec))
-(use-modules (opencog atom-types))
-(use-modules (opencog python))
-
-; Try loading the python code from this directory;
-; else go for the install directory. This is kind-of hacky;
-; is there a nicer way to load stuff?
-;
-; (python-eval
-;    "import sys\nsys.path.insert(0, '/usr/local/share/opencog/python')\n")
-;
-; If roscore is not running, then the load will hang. Thus, to avoid the
-; hang, we test to see if we can talk to roscore. If we cannot, then load
-; only the debug interfaces.
-;
-(python-eval "
-import rosgraph
-try:
-    # Throw an exception if roscore is not running.
-    rosgraph.Master('/rostopic').getPid()
-    execfile('atomic.py')
-    try:
-        ros_is_running()
-    except NameError:
-        execfile('/usr/local/share/opencog/python/atomic.py')
-except:
-    execfile('atomic-dbg.py')
-    try:
-        ros_is_running()
-    except NameError:
-        execfile('/usr/local/share/opencog/python/atomic-dbg.py')
-")
-
-(use-modules (opencog eva-model))
-
-; --------------------------------------------------------
-; Some debug prints.
-; The are define-public, because otherwise the
-; `(GroundedPredicate "scm: print-msg")` won't work.
-
-(define-public (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
-(define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
-
-; Print message, and print the current interaction face-id
-(define-public (print-msg-face node)
-	(display (cog-name node))
-	(display " with face id: ")
-	(display (cog-name (car (cog-outgoing-set (cog-execute!
-			(DefinedSchemaNode "Current interaction target"))))))
-	(newline)
-	(stv 1 1))
-
-; Print message, then print elapsed time
-(define-public (print-msg-time node time)
-	(display (cog-name node))
-	(display " Elapsed: ")
-	(display (cog-name time))
-	(display " seconds\n")
-	(stv 1 1))
-
-; --------------------------------------------------------
 ;
 ; This will be used to tag the name of the module making the request.
 ; Everything in ths module is the behavior tree, so that is what we
 ; call it.
 (define bhv-source (Concept "Behavior Tree"))
 
-; --------------------------------------------------------
-
-; Start interacting with a new face picked randomly from the crowd.
-(DefineLink
-	(DefinedPredicateNode "Start new interaction")
-	(SequentialAndLink
-		; First, pick a face at random...
-		(TrueLink (PutLink
-			(StateLink interaction-state (VariableNode "$face-id"))
-			(DefinedSchemaNode "Select random face")))
-		; Record a timestamp
-		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
-		; Diagnostic print
-		(Evaluation (GroundedPredicate "scm: print-msg-face")
-			(ListLink (Node "--- Start new interaction")))
-	))
-
-;; ------
-
-;; line 809 + line 483 -- glance_at(id="current_glance_target")
-(DefineLink
-	(DefinedPredicateNode "glance at random face")
-	(SequentialAndLink
-		(DefinedPredicateNode "Select random glance target")
-		(TrueLink (PutLink
-			(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
-				(ListLink (VariableNode "$face")))
-			(GetLink (StateLink glance-state (VariableNode "$face-id")))
-		))))
-
-;; line 818 -- glance_at_new_face()
-(DefineLink
-	(DefinedSchema "glance at new person")
-	(Put
-		(Evaluation (GroundedPredicate "py:glance_at_face")
-			(ListLink (Variable "$face")))
-		; If more than one new arrival, pick one randomly.
-		(RandomChoice (DefinedSchema "New arrivals"))
-	))
-
-;; line 827 -- glance_at_lost_face()
-(DefineLink
-	(DefinedSchemaNode "glance at lost face")
-	(PutLink
-		(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
-			(ListLink (VariableNode "$face")))
-		(DefinedSchemaNode "New departures")))
-
-
 ; ------------------------------------------------------
 ; More complex interaction sequences.
 
-
-;; Interact with the curent face target.
+;; Interact with the current face target.
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
 (DefineLink
 	(DefinedPredicate "Interact with face")
@@ -252,15 +138,15 @@ except:
 (DefineLink
 	(DefinedPredicate "Was Empty Sequence")
 	(SequentialAnd
-		(DefinedPredicateNode "was room empty?")
+		(DefinedPredicate "was room empty?")
 		; Proceed only if we are allowed to.
 		(Put (DefinedPredicate "Request Set Emotion State")
-			(ListLink bhv-source (ConceptNode "new-arrival")))
+			(ListLink bhv-source (Concept "new-arrival")))
 
-		(TrueLink (DefinedSchemaNode "interact with new person"))
-		(TrueLink (DefinedSchemaNode "look at person"))
-		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
-		(PutLink (DefinedPredicateNode "Show random expression")
+		(TrueLink (DefinedSchema "interact with new person"))
+		(TrueLink (DefinedSchema "look at person"))
+		(TrueLink (DefinedSchema "set interaction timestamp"))
+		(PutLink (DefinedPredicate "Show random expression")
 			(ConceptNode "new-arrival"))
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Look at newly arrived person")))
@@ -296,7 +182,6 @@ except:
 	))
 
 ;; Respond to a new face becoming visible.
-;; line 389 -- Selector
 ;
 ;; XXX TODO -- need to also do line 590, if interacting for a while
 ;; this alters probability of glance...
@@ -311,13 +196,11 @@ except:
 	))
 
 ;; ##### If Interruption && Sleeping -> Wake Up #####
-;; line 545
 (DefineLink
 	(DefinedPredicate "If sleeping then wake")
 	(SequentialOr
 		(SequentialAnd
-			(Equal (SetLink soma-sleeping)
-				(Get (State soma-state (Variable "$x"))))
+			(DefinedPredicate "Is sleeping?")
 			(DefinedPredicateNode "Wake up"))
 		(True)))
 
@@ -327,8 +210,8 @@ except:
 (DefineLink
 	(DefinedPredicate "If bored then alert")
 	(SequentialOr
-		(NotLink (Equal (SetLink soma-bored)
-			(Get (State soma-state (Variable "$x")))))
+		(NotLink 
+			(DefinedPredicate "Is bored?")
 		(Evaluation (DefinedPredicate "Request Set Soma State")
 			(ListLink bhv-source soma-awake))
 	))
@@ -546,11 +429,8 @@ except:
 		; If we are not bored already, and we are not sleeping,
 		; then we are bored now...
 		(SequentialOr
-			(Equal (SetLink soma-bored)
-				(Get (State soma-state (Variable "$x"))))
-
-			(Equal (SetLink soma-sleeping)
-				(Get (State soma-state (Variable "$x"))))
+			(DefinedPredicate "Is bored?")
+			(DefinedPredicate "Is sleeping?")
 
 			(SequentialAnd
 				(Evaluation (DefinedPredicate "Request Set Soma State")
@@ -563,16 +443,15 @@ except:
 					(ListLink (Node "--- Bored! nothing is happening!")))
 			))
 
-		(SequentialOr  ; line 509
+		(SequentialOr
 			; ##### Is Not Sleeping #####
-			(SequentialAnd ; line 511
+			(SequentialAnd
 				; Proceed only if not sleeping ...
-				(Not (Equal (SetLink soma-sleeping)
-					(Get (State soma-state (Variable "$x")))))
+				(Not (DefinedPredicate "Is sleeping?"))
 
-				(SequentialOr  ; line 513
+				(SequentialOr
 					; ##### Go To Sleep #####
-					(SequentialAnd  ; line 515
+					(SequentialAnd
 						(DefinedPredicate "Bored too long")
 						(DefinedPredicate "Go to sleep"))
 
@@ -722,23 +601,7 @@ except:
 	))
 
 ;; ------------------------------------------------------------------
-;; Main loop diagnostics
-;; line 988 - idle_spin()
-(define loop-count 0)
-(define do-run-loop #t)
-(define-public (idle-loop)  ; public only because its in a GPN
-	(set! loop-count (+ loop-count 1))
-
-	; Print loop count to the screen.
-	; (if (eq? 0 (modulo loop-count 30))
-	;	(format #t "Main loop: ~a\n" loop-count))
-
-	; Pause for one-tenth of a second... 101 millisecs
-	(usleep 101000)
-	(if do-run-loop (stv 1 1) (stv 0 1)))
-
 ;; Main loop. Uses tail recursion optimization to form the loop.
-;; line 556 -- build_tree()
 (DefineLink
 	(DefinedPredicate "main loop")
 	(SatisfactionLink
@@ -761,47 +624,14 @@ except:
 				; (DefinedPredicate "Speech listening?") ; no-op
 				(True)
 			)
-			(Evaluation
-				(GroundedPredicate "scm:idle-loop") (ListLink))
-			(Evaluation
-				(GroundedPredicate "py:ros_is_running") (ListLink))
+
+			; If ROS is dead, or the continue flag not set, then stop
+			; running the behavior loop.
+			(DefinedPredicate "Continue running loop?")
+			(DefinedPredicate "ROS is running?")
 
 			;; Call self -- tail-recurse.
 			(DefinedPredicate "main loop")
 		)))
 
-;; line 297 -- self.tree.next()
-(define-public (behavior-tree-run)
-"
- behavior-tree-run
-
- Run the Eva behavior tree main loop (in a new thread),
- Call (behavior-tree-halt) to exit the loop.
-"
-	(set! do-run-loop #t)
-	(call-with-new-thread
-		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
-
-(define-public (behavior-tree-halt)
-"
- behavior-tree-halt
-
- Tell the Eva behavior tree main loop thread to exit.
-"
-(set! do-run-loop #f))
-
-; ----------------------------------------------------------------------
-; Sigh. Perform manual garbage collection. This really should be
-; automated. XXX TODO. (Can we get ECAN to do this for us?)
-(define-public (run-behavior-tree-gc)
-	(define (free-stuff)
-		(sleep 1)
-		(cog-map-type (lambda (a) (cog-delete a) #f) 'SetLink)
-		(cog-map-type (lambda (a) (cog-delete a) #f) 'ListLink)
-		(cog-map-type (lambda (a) (cog-delete a) #f) 'NumberNode)
-		(cog-map-type (lambda (a) (cog-delete a) #f) 'ConceptNode)
-		(free-stuff)
-	)
-	(call-with-new-thread free-stuff)
-)
 ; ----------------------------------------------------------------------
