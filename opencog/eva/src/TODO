@@ -4,8 +4,9 @@
   for NL text string, and pass it on to process_query.
 
 -- btree makes chatbot not talk if it knows the answer.
-   silence chatbot by saying no affect publ
+   silence chatbot by saying no affect publish
    Huh? I guess chatbost doesn't talk if no affect is published?
+	That's right, but its short-circuited right now.
 
 -- behaviors:
 
@@ -38,19 +39,10 @@ New bugs:
 * When listening, there are no defined behaviors... See
   (DefinedPredicate "Speech listening?")
 
-* Vytas says: do NOT change expression while chatbot is talking
-  However, the behavior tree was defined to pick expressions
-  from a set, when the chatbot is talking, so WTF should I do here?
-  See the (DefinedPredicate "Speech ongoing?") for current actions.
-
 * If she thinks she is talking, but the room clears out, then
   what?  Is it guaranteed that vocalizatino will stop after a while,
   or should she force-reset?  .. Probably should force reset, to
   pick up those animations?
-
-* chatbot_affect_express is using animation messages, would be better
-  if it used std_msgs/String instead!! The animation message format
-  will be changing.
 
 * Kino requests: send to chatbot : xyzzy message of what happened.
   Clarify ... cause you can subscribe to ROS messages for emotions,
