@@ -158,6 +158,24 @@ except:
 "
 	(set! do-run-loop #f))
 
+
+(define-public (behavior-tree-running?)
+"
+ behavior-tree-running?
+
+ Return #t if the behavior tree is running, else return false.
+"
+	do-run-loop)
+
+(define-public (behavior-tree-loop-count)
+"
+ behavior-tree-loop-count
+
+ Return the loop-count of the behavior tree.
+"
+	loop-count)
+
+
 (define loop-count 0)
 (define-public (continue-running-loop)  ; public only because its in a GPN
 	(set! loop-count (+ loop-count 1))
