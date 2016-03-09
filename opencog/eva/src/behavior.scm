@@ -156,8 +156,8 @@
 	(DefinedPredicate "Interaction requested")
 	(SequentialAnd
 		(DefinedPredicate "Someone requests interaction?")
-		(DefinedPredicate "If sleeping then wake")
-		(DefinedPredicate "If bored then alert")
+		(True (DefinedPredicate "If sleeping then wake"))
+		(True (DefinedPredicate "If bored then alert"))
 		(True (DefinedSchema "interact with requested person"))
 		(True (DefinedSchema "clear requested face"))
 		(True (DefinedSchema "look at person"))
@@ -193,33 +193,34 @@
 		(True)
 	))
 
-;; ##### If Interruption && Sleeping -> Wake Up #####
+;; Return false if not sleeping.
+;; Return true if we were sleeping, adn we woke up.
 (DefineLink
 	(DefinedPredicate "If sleeping then wake")
-	(SequentialOr
-		(SequentialAnd
-			(DefinedPredicate "Is sleeping?")
-			(DefinedPredicateNode "Wake up"))
-		(True)))
+	(SequentialAnd
+		(DefinedPredicate "Is sleeping?")
+		(DefinedPredicate "Wake up")))
 
 ;; If soma state was bored, change state to alert.
 ;; If we don't do this, then being bored while also talking
 ;; can make us narcoleptic.
+;;
+;; Return false if not bored.
+;; Return true if we were bored, adn we woke up.
 (DefineLink
 	(DefinedPredicate "If bored then alert")
 	(SequentialAnd
 		(DefinedPredicate "Is bored?")
 		(Evaluation (DefinedPredicate "Request Set Soma State")
-			(ListLink bhv-source soma-awake))
-	))
+			(ListLink bhv-source soma-awake))))
 
 ;; Check to see if a new face has become visible.
 (DefineLink
 	(DefinedPredicate "New arrival sequence")
 	(SequentialAnd
 		(DefinedPredicate "Did someone arrive?")
-		(DefinedPredicate "If sleeping then wake")
-		(DefinedPredicate "If bored then alert")
+		(True (DefinedPredicate "If sleeping then wake"))
+		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "Respond to new arrival")
 		(DefinedPredicate "Update status")
 	))
