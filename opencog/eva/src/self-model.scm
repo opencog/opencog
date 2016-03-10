@@ -552,16 +552,22 @@
 ; ------------------------------------------------------
 
 (DefineLink
-	(DefinedSchema "interact with new person")
-	(Put (State interaction-state (Variable "$x"))
-		; If more than one new arrival, pick one randomly.
-		(RandomChoice (DefinedSchema "New arrivals"))))
+	(DefinedPredicate "interact with new person")
+	(SequentialAnd
+		(True (Put (State interaction-state (Variable "$x"))
+			; If more than one new arrival, pick one randomly.
+			(RandomChoice (DefinedSchema "New arrivals"))))
+		(TrueLink (DefinedSchema "set interaction timestamp"))
+	))
 
 ;; Set current-interaction face to the requested face
 (DefineLink
-	(DefinedSchema "interact with requested person")
-	(Put (State interaction-state (Variable "$face-id"))
-		(Get (State request-interaction-state (Variable "$x")))))
+	(DefinedPredicate "interact with requested person")
+	(SequentialAnd
+		(True (Put (State interaction-state (Variable "$face-id"))
+			(Get (State request-interaction-state (Variable "$x")))))
+		(TrueLink (DefinedSchema "set interaction timestamp"))
+	))
 
 (DefineLink
 	(DefinedSchema "clear requested face")

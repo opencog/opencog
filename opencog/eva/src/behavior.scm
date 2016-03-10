@@ -129,39 +129,39 @@
 	))
 
 ; ------------------------------------------------------
-;; Sequence - if there were no people in the room, then look at the
-;; new arrival.
+;; Was Empty Sequence - if there were no people in the room, then
+;; look at the new arrival.
 ;;
 ;; (cog-evaluate! (DefinedPredicateNode "Was Empty Sequence"))
 (DefineLink
 	(DefinedPredicate "Was Empty Sequence")
 	(SequentialAnd
 		(DefinedPredicate "was room empty?")
-		; Proceed only if we are allowed to.
+		; Record a new emotional state (for self-awareness)
+		; XXX FIXME this should be a prt of "Show random expression"
+		; below ...
 		(Put (DefinedPredicate "Request Set Emotion State")
 			(ListLink bhv-source (Concept "new-arrival")))
 
-		(TrueLink (DefinedSchema "interact with new person"))
+		(DefinedPredicate "interact with new person")
 		(TrueLink (DefinedSchema "look at person"))
-		(TrueLink (DefinedSchema "set interaction timestamp"))
 		(PutLink (DefinedPredicate "Show random expression")
 			(ConceptNode "new-arrival"))
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Look at newly arrived person")))
 	))
 
-;; If interaction is requested, then interact wwith that person.
-;; Make sure we look at that person and restart the interaction timer.
+;; If interaction is requested, then interact with that specific person.
+;; Make sure we look at that person ...
 (DefineLink
 	(DefinedPredicate "Interaction requested")
 	(SequentialAnd
 		(DefinedPredicate "Someone requests interaction?")
 		(True (DefinedPredicate "If sleeping then wake"))
 		(True (DefinedPredicate "If bored then alert"))
-		(True (DefinedSchema "interact with requested person"))
+		(DefinedPredicate "interact with requested person")
 		(True (DefinedSchema "clear requested face"))
 		(True (DefinedSchema "look at person"))
-		(True (DefinedSchema "set interaction timestamp"))
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Looking at requested face")))
 	))
