@@ -374,15 +374,6 @@
 		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
 	))
 
-; Continue To Sleep
-(DefineLink
-	(DefinedPredicateNode "Continue sleeping")
-	(SequentialAndLink
-		(TrueLink (DefinedSchemaNode "set bored timestamp"))
-		;(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-		;	(ListLink (Node "--- Continue sleeping.")))
-	))
-
 ; Wake-up sequence
 (DefineLink
 	(DefinedPredicate "Wake up")
@@ -399,6 +390,9 @@
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Wake up!")
 				(Minus (TimeLink) (DefinedSchema "get sleep timestamp"))))
+
+		; Reset the bored timestamp, as otherwise we'll fall asleep
+		; immediately (cause we're bored).
 		(TrueLink (DefinedSchema "set bored timestamp"))
 
 		; Run the wake animation.
@@ -466,7 +460,12 @@
 					(DefinedPredicate "Wake up")
 				)
 				; ##### Continue To Sleep #####
-				(DefinedPredicate "Continue sleeping")
+				; Currently, a no-op...
+				(SequentialAndLink
+					(TrueLink)
+					;(Evaluation (GroundedPredicate "scm: print-msg")
+					;	(ListLink (Node "--- Continue sleeping.")))
+				)
 			)
 		)
 ))
