@@ -144,9 +144,11 @@
 			(ListLink bhv-source (Concept "new-arrival")))
 
 		(DefinedPredicate "interact with new person")
-		(TrueLink (DefinedSchema "look at person"))
-		(PutLink (DefinedPredicate "Show random expression")
+		(True (DefinedSchema "look at person"))
+		(Put (DefinedPredicate "Show random expression")
 			(ConceptNode "new-arrival"))
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Look at new arrival"))
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Look at newly arrived person")))
 	))
@@ -161,6 +163,8 @@
 		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "interact with requested person")
 		(True (DefinedSchema "look at person"))
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Look at requested face"))
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Looking at requested face")))
 	))
@@ -229,6 +233,8 @@
 	(DefinedPredicate "Someone left")
 	(SequentialAnd
 		(DefinedPredicate "Did someone leave?")
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Someone left"))
 		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "--- Someone left")))
 		(SequentialOr
@@ -277,6 +283,8 @@
 				(DefinedPredicate "Silent too long")
 				(Evaluation (GroundedPredicate "scm: print-msg")
 					(ListLink (Node "--- Everyone is ignoring me!!!")))
+				(Put (DefinedPredicate "Publish behavior")
+					(Concept "Sound of crickets"))
 				(True (DefinedSchema "set heard-something timestamp"))
 			)
 			(True)
@@ -285,7 +293,8 @@
 		; This sequential-or is true if we're not interacting with anyone,
 		; or if there are several people and its time to change up.
 		(SequentialOr
-			; Start a new interaction, but only if not currently interacting.
+			; Start a new interaction, if we've been interacting with
+			; someone for too long.
 			(SequentialAnd
 				(SequentialOr
 					(Not (DefinedPredicate "is interacting with someone?"))
@@ -294,7 +303,10 @@
 						(DefinedPredicate "Time to change interaction")))
 				; Select a new face target, interact with it.
 				(DefinedPredicate "Change interaction")
-				(DefinedPredicate "Interact with face"))
+				(DefinedPredicate "Interact with face")
+				(Put (DefinedPredicate "Publish behavior")
+					(Concept "Interact with someone else"))
+			)
 
 			; ##### Glance At Other Faces & Continue With The Last Interaction
 			(SequentialAnd
@@ -330,6 +342,9 @@
 		; Proceed only if we are allowed to.
 		(Put (DefinedPredicate "Request Set Emotion State")
 			(ListLink bhv-source (ConceptNode "bored")))
+
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Searching for attention"))
 
 		; Pick a bored expression, gesture
 		(SequentialOr
@@ -377,6 +392,9 @@
 				(Minus (TimeLink) (DefinedSchema "get bored timestamp"))))
 		(True (DefinedSchema "set sleep timestamp"))
 
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Falling asleep"))
+
 		; First, show some yawns ...
 		(Put (DefinedPredicate "Show random expression")
 			(Concept "sleepy"))
@@ -403,6 +421,9 @@
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Wake up!")
 				(Minus (TimeLink) (DefinedSchema "get sleep timestamp"))))
+
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Waking up"))
 
 		; Reset the bored timestamp, as otherwise we'll fall asleep
 		; immediately (cause we're bored).
@@ -438,6 +459,9 @@
 					(ListLink bhv-source soma-bored))
 
 				(True (DefinedSchema "set bored timestamp"))
+
+				(Put (DefinedPredicate "Publish behavior")
+					(Concept "This is boring"))
 
 				; ... print output.
 				(Evaluation (GroundedPredicate "scm: print-msg")

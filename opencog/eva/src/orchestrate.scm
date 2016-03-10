@@ -127,7 +127,7 @@
 ; Publish the current behavior.
 ; Cheap hack to allow external ROS nodes to know what we are doing.
 ; The string name of the node is sent directly as a ROS String message
-; to the "chatbot_behavior" topic.
+; to the "robot_behavior" topic.
 ;
 ; Example usage:
 ;    (cog-evaluate! (Put (DefinedPredicate "Publish behavior")

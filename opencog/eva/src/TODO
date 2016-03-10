@@ -17,12 +17,7 @@
 
  * Get the look-at command to disengage eye-tracking.
 
- * if chatbot has not heard anything for a minute then say something
-   (but only if people are visible.)
-	Publish this as a contol message to some special topic...
-   Kino will listen for this and author a special response.
-
-* For chatbot, use something other than proces-query
+* For chatbot, use something other than process-query
 
 * Be able to run performances, such as these:
    /public_ws/performances/src/runner.py

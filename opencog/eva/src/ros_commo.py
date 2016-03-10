@@ -387,7 +387,7 @@ class EvaControl():
 		rospy.logwarn("setting up chatbot affect perceive and express links")
 
 		# Publish cues to the chatbot, letting it know what we are doing.
-		self.behavior_pub = rospy.Publisher("chatbot_behavior",
+		self.behavior_pub = rospy.Publisher("robot_behavior",
 		                                  String, queue_size=1)
 
 		# Tell the chatbot what sort of affect to apply during
