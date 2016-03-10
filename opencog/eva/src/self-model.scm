@@ -545,6 +545,9 @@
 	(SequentialAndLink
 		(EvaluationLink (GroundedPredicateNode "py:look_at_face")
 			(ListLink neutral-face))
+		(TrueLink (PutLink
+			(StateLink eye-contact-state (VariableNode "$face-id"))
+			no-interaction))
 	))
 
 ; ------------------------------------------------------

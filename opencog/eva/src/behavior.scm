@@ -234,17 +234,13 @@
 			(ListLink (Node "--- Someone left")))
 		(SequentialOrLink
 			; Were we interacting with the person who left? If so,
-			; look frustrated, return to neutral. Oh, and clear the
-			; interaction target, too.
+			; look frustrated, return head position to neutral.
 			(SequentialAndLink
 				(EqualLink
 					(DefinedSchemaNode "New departures")
 					(GetLink (StateLink eye-contact-state (VariableNode "$x"))))
 				(DefinedPredicateNode "Show frustrated expression")
 				(DefinedPredicateNode "return to neutral")
-				(TrueLink (PutLink
-					(StateLink interaction-state (VariableNode "$face-id"))
-					no-interaction))
 			)
 			;; Were we interacting with someone else?  If so, then
 			;; maybe glance at the location of the person who left.
