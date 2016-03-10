@@ -73,23 +73,6 @@ except:
 
 ; --------------------------------------------------------
 
-; Start interacting with a new face picked randomly from the crowd.
-(DefineLink
-	(DefinedPredicateNode "Start new interaction")
-	(SequentialAndLink
-		; First, pick a face at random...
-		(TrueLink (PutLink
-			(StateLink interaction-state (VariableNode "$face-id"))
-			(DefinedSchemaNode "Select random face")))
-		; Record a timestamp
-		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
-		; Diagnostic print
-		(Evaluation (GroundedPredicate "scm: print-msg-face")
-			(ListLink (Node "--- Start new interaction")))
-	))
-
-;; ------
-
 ;; Select a face at random, and glance at it.
 (DefineLink
 	(DefinedPredicateNode "glance at random face")

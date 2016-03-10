@@ -25,7 +25,7 @@
 ; Basic examples:
 ;    Manually insert a face: (make-new-face id)
 ;    Remove a face: (remove-face id)
-;    Etc.: (show-room-state) (show-interaction-state) (show-visible-faces)
+;    Etc.: (show-room-state) (show-eye-contact-state) (show-visible-faces)
 ;
 ; Manually unit test the new-arrival sequence.  You can do this without
 ; an attached camera; she won't track the face location, but should respond.
@@ -33,7 +33,7 @@
 ;    (cog-evaluate! (DefinedPredicateNode "New arrival sequence"))
 ;    (show-acked-faces)
 ;    (show-room-state)
-;    (show-interaction-state)
+;    (show-eye-contact-state)
 ;    (cog-evaluate! (DefinedPredicateNode "Interact with people"))
 ;
 ; Unit test the main interaction loop:
@@ -239,7 +239,7 @@
 			(SequentialAndLink
 				(EqualLink
 					(DefinedSchemaNode "New departures")
-					(GetLink (StateLink interaction-state (VariableNode "$x"))))
+					(GetLink (StateLink eye-contact-state (VariableNode "$x"))))
 				(DefinedPredicateNode "Show frustrated expression")
 				(DefinedPredicateNode "return to neutral")
 				(TrueLink (PutLink

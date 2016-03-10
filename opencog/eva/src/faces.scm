@@ -76,9 +76,9 @@
 	(car (cog-chase-link 'StateLink 'ConceptNode room-state)))
 
 
-(define (show-interaction-state)
-	(define interaction-state (AnchorNode "Interaction State"))
-	(car (cog-chase-link 'StateLink 'ConceptNode interaction-state)))
+(define (show-eye-contact-state)
+	(define e-c-state (AnchorNode "Eye Contact State"))
+	(car (cog-chase-link 'StateLink 'ConceptNode e-c-state)))
 
 
 ; define-public because `unit-test.scm` uses it.
