@@ -55,16 +55,15 @@ Design overview
   ad-hoc.  Grep for `(DefinedPredicate "Publish behavior")` to see
   these.  A random sampling includes:
 
- ** `"Searching for attention"` -- Room is empty, can't see anyone.
- ** `"This is boring"` -- No one is visible, no sound, we are bored.
- ** `"Sound of crickets"` -- Haven't heard anything for a while.
- ** `"Falling asleep"` -- Bored too long, no one visible, no sound.
- ** `"Waking up"` -- Saw someone, heard something, slept too long.
- ** `"Look at new arrival"` -- Look at newly-arrived person.
- ** `"Look at requested face"` -- Handle WebGUI request.
- ** `"Someone left"` -- Previously visible face no longer visible.
- ** `"Interact with someone else" -- Change the focus of attention.
-
+   + `"Searching for attention"` -- Room is empty, can't see anyone.
+   + `"This is boring"` -- No one is visible, no sound, we are bored.
+   + `"Sound of crickets"` -- Haven't heard anything for a while.
+   + `"Falling asleep"` -- Bored too long, no one visible, no sound.
+   + `"Waking up"` -- Saw someone, heard something, slept too long.
+   + `"Look at new arrival"` -- Look at newly-arrived person.
+   + `"Look at requested face"` -- Handle WebGUI request.
+   + `"Someone left"` -- Previously visible face no longer visible.
+   + `"Interact with someone else" -- Change the focus of attention.
 
 * XXX The code currently has a large variety of conficting and poor
   design choices in it -- its in a state of morphing from "OK so-so code"
