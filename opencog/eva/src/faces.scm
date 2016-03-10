@@ -1,5 +1,7 @@
 ;
 ; Assorted utilities for supporting face tracking
+; XXX most of face-tracking is now in self-model.scm
+; Perhaps this file is not needed any more? XXX FIXME
 ;
 (add-to-load-path "/usr/local/share/opencog/scm")
 

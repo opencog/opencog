@@ -2,6 +2,10 @@
 -- If behavior tree is halted, return her to a valid state upon
    resumption.
 
+-- "Request Set Emo" just sets the emo state, but does not perform
+   ... should it perform an animation, too??
+   ... should all future animations pick from that set??
+
 -- btree makes chatbot not talk if it knows the answer.
    silence chatbot by saying no affect publish
    Huh? I guess chatbost doesn't talk if no affect is published?
