@@ -1,4 +1,7 @@
 
+-- If behavior tree is halted, return her to a valid state upon
+   resumption.
+
 -- btree makes chatbot not talk if it knows the answer.
    silence chatbot by saying no affect publish
    Huh? I guess chatbost doesn't talk if no affect is published?
