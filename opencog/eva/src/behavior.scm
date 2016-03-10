@@ -343,19 +343,18 @@
 		(Put (DefinedPredicate "Request Set Emotion State")
 			(ListLink bhv-source (ConceptNode "bored")))
 
-		; Tell ROS that we are looking for attention, ... but not too
-		; often. Piggy-back on "Time to change expression" to rate-limit
-		; the message.
-		(SequentialOr
-			(Not (DefinedPredicate "Time to change expression"))
-			(Put (DefinedPredicate "Publish behavior")
-				(Concept "Searching for attention")))
-
 		; Pick a bored expression, gesture
 		(SequentialOr
 			(Not (DefinedPredicate "Time to change expression"))
+
+			; Tell ROS that we are looking for attention, ... but not
+			; too often. Piggy-back on "Time to change expression" to
+			; rate-limit the message.
+			(False (Put (DefinedPredicate "Publish behavior")
+				(Concept "Searching for attention")))
 			(PutLink (DefinedPredicateNode "Show random expression")
-				(ConceptNode "bored")))
+				(ConceptNode "bored"))
+		)
 		(SequentialOr
 			(Not (DefinedPredicate "Time to make gesture"))
 			(PutLink (DefinedPredicateNode "Show random gesture")
