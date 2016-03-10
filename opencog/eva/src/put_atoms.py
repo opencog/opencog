@@ -54,6 +54,7 @@ class PutAtoms:
 		# Needed for the public define of chat-state, chat-start, etc.
 		# XXX Except that this doesn't actually make chat-state visible?
 		# WTF? But use-modules in btree.scm does work... strange.
+		scheme_eval(self.atomspace, "(use-modules (opencog exec))")
 		scheme_eval(self.atomspace, "(use-modules (opencog eva-model))")
 
 	# Let atomspace know that vocalization has started or ended.

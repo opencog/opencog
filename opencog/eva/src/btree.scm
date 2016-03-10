@@ -48,6 +48,7 @@ except:
 ")
 
 ; Load the behavior trees.
+(use-modules (opencog exec))        ; needed for cog-evaluate! in put_atoms.py
 (use-modules (opencog eva-model))   ; needed for defines in put_atoms.py
 (use-modules (opencog eva-behavior))
 
