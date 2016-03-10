@@ -193,7 +193,7 @@
 	))
 
 ;; Return false if not sleeping.
-;; Return true if we were sleeping, adn we woke up.
+;; Return true if we were sleeping, and we woke up.
 (DefineLink
 	(DefinedPredicate "If sleeping then wake")
 	(SequentialAnd
@@ -201,11 +201,11 @@
 		(DefinedPredicate "Wake up")))
 
 ;; If soma state was bored, change state to alert.
-;; If we don't do this, then being bored while also talking
-;; can make us narcoleptic.
+;; If we don't do this, then we risk being bored while also talking,
+;; which will make us fall asleep if bored too long (narcoleptic).
 ;;
 ;; Return false if not bored.
-;; Return true if we were bored, adn we woke up.
+;; Return true if we were bored, and we woke up.
 (DefineLink
 	(DefinedPredicate "If bored then alert")
 	(SequentialAnd
@@ -419,10 +419,11 @@
 	(SequentialAnd
 
 		; If we are not bored already, and we are not sleeping,
-		; then we are bored now...
+		; and we didn't hear any noises, then we are bored now...
 		(SequentialOr
 			(DefinedPredicate "Is bored?")
 			(DefinedPredicate "Is sleeping?")
+			(DefinedPredicate "Heard Something?")
 
 			(SequentialAnd
 				(Evaluation (DefinedPredicate "Request Set Soma State")
@@ -436,7 +437,7 @@
 			))
 
 		(SequentialOr
-			; ##### Is Not Sleeping #####
+			; If we're not sleeping yet, then fall asleep
 			(SequentialAnd
 				; Proceed only if not sleeping ...
 				(Not (DefinedPredicate "Is sleeping?"))
@@ -451,12 +452,15 @@
 					; If we didn't fall asleep above, then search for attention.
 					(DefinedPredicate "Search for attention")
 				))
-			; ##### Is Sleeping #####
+			; If we are sleeping, then maybe its time to wake?
 			(SequentialOr
-				; ##### Wake Up #####
+				; Maybe its time to wake up ...
 				(SequentialAnd
-					; Did we sleep for long enough?
-					(DefinedPredicate "Time to wake up")
+					(SequentialOr
+						; Did we sleep for long enough?
+						(DefinedPredicate "Time to wake up")
+						(DefinedPredicate "Heard Something?")
+					)
 					(DefinedPredicate "Wake up")
 				)
 				; ##### Continue To Sleep #####

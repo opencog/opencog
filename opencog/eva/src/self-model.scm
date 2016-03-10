@@ -176,6 +176,12 @@
 	(stv 1 1)
 )
 
+(define heard-something (Anchor "Heard Something Recently"))
+(define heard-nothing (SentenceNode ""))
+(State heard-something heard-nothing)
+
+;; Process text that was "heard" (e.g. from the STT module)
+;; This is a function call, with one argument: a SentenceNode.
 (DefineLink
 	(DefinedPredicate "heard text")
 	(LambdaLink
@@ -186,10 +192,25 @@
 
 			; Set timestamp for when something was last heard.
 			(TrueLink (DefinedSchemaNode "set heard-something timestamp"))
+
+			; "heard-something" is used to wake her up, if sleeping.
+			(TrueLink (Put
+					(State heard-something (Variable "$noise"))
+					(Variable "$text")))
 		)
 	)
 )
 
+;; Return true if something was heard (recently).
+;; This can be used only once: it clears the state immediately, so
+;; if asked a second time, nothing was heard.
+(DefineLink
+	(DefinedPredicate "Heard Something?")
+	(SequentialAnd
+		(NotLink (Equal (SetLink heard-nothing)
+			(Get (State heard-something (Variable "$x")))))
+		(True (Put (State heard-something (Variable "$x")) heard-nothing))
+	))
 
 ; --------------------------------------------------------
 ; Time-stamp-related stuff.
