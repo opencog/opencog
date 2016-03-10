@@ -37,6 +37,9 @@
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
 
+; XXX the below does not really belong here; where does it belong?
+(use-modules (opencog nlp chatbot-eva)) ; Needed for process-query
+
 ; ------------------------------------------------------
 ; State variables
 ; XXX FIXME There are a bunch of define-publics in here, they probably
@@ -50,6 +53,18 @@
 
 ;; Assume Eva is sleeping at first
 (StateLink soma-state soma-sleeping)
+
+;; True if sleeping, else false.
+(DefineLink
+	(DefinedPredicate "Is sleeping?")
+	(Equal (SetLink soma-sleeping)
+		(Get (State soma-state (Variable "$x")))))
+
+;; True if bored, else false
+(DefineLink
+	(DefinedPredicate "Is bored?")
+	(Equal (SetLink soma-bored)
+		(Get (State soma-state (Variable "$x")))))
 
 ; -----------
 ; The "emotional state" of the robot.  Corresponds to states declared
@@ -145,6 +160,38 @@
 		(Get (State chat-affect (Variable "$x")))))
 
 ; --------------------------------------------------------
+; Speech-to-text (STT) relaed stuff.
+; If the STT system hears soemthing, it sends us the text string.
+; Handle it here.
+
+; XXX the below does not really belong here; where does it belong?
+; Pass the text that STT heard into the OpenCog chatbot.
+; XXX procees-query is not really the best API, here.
+; Must run in a new thread, else it deadlocks in python,
+; since the text processing results in python calls.
+(define-public (dispatch-text txt)
+	(call-with-new-thread
+		(lambda () (process-query "luser" (cog-name txt)))
+	)
+	(stv 1 1)
+)
+
+(DefineLink
+	(DefinedPredicate "heard text")
+	(LambdaLink
+		(Variable "$text")
+		(SequentialAnd
+			(Evaluation (GroundedPredicate "scm: dispatch-text")
+				(ListLink (Variable "$text")))
+
+			; Set timestamp for when something was last heard.
+			(TrueLink (DefinedSchemaNode "set heard-something timestamp"))
+		)
+	)
+)
+
+
+; --------------------------------------------------------
 ; Time-stamp-related stuff.
 
 ;; Define setters and getters for timestamps. Perhaps this should
@@ -191,6 +238,9 @@
 
 ; "attn-search" -- when Eva started searching for attention.
 (timestamp-template "attn-search")
+
+; "heard-something" -- when Eva heard a sentence from STT.
+(timestamp-template "heard-something")
 
 ; Define a predicate that evaluates to true or false, if it is time
 ; to do something. PRED-NAME is the name given to the predicate,

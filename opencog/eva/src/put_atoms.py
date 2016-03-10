@@ -54,6 +54,7 @@ class PutAtoms:
 		# Needed for the public define of chat-state, chat-start, etc.
 		# XXX Except that this doesn't actually make chat-state visible?
 		# WTF? But use-modules in btree.scm does work... strange.
+		scheme_eval(self.atomspace, "(use-modules (opencog exec))")
 		scheme_eval(self.atomspace, "(use-modules (opencog eva-model))")
 
 	# Let atomspace know that vocalization has started or ended.
@@ -72,16 +73,15 @@ class PutAtoms:
 		scheme_eval_h(self.atomspace, "(State chat-affect chat-negative)")
 
 	# Pass the text that STT heard into opencog.
-	# XXX procees-query is not really the best API, here.
-	# Must run in a new thread, else it deadlocks in python, since
-	# the text processing results in python calls.
+	# Rather than setting state, we're going to trigger a script, here.
 	def perceived_text(self, text):
 		scheme_eval(self.atomspace,
-			'(call-with-new-thread (lambda () (process-query "luser" "' + text + '")))')
+			'(cog-evaluate! (PutLink (DefinedPredicate "heard text")' +
+			' (SentenceNode "' + text + '")))')
 
 	# Start or stop the behavior tree.
 	def btree_stop(self):
-		scheme_eval_h(self.atomspace, "(halt)")
+		scheme_eval(self.atomspace, "(behavior-tree-halt)")
 
 	def btree_run(self):
-		scheme_eval_h(self.atomspace, "(run)")
+		scheme_eval(self.atomspace, "(behavior-tree-run)")

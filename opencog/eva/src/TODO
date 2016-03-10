@@ -1,8 +1,4 @@
 
-
-* in order for OC to hear, it should listen to tts_en ros message
-  for NL text string, and pass it on to process_query.
-
 -- btree makes chatbot not talk if it knows the answer.
    silence chatbot by saying no affect publish
    Huh? I guess chatbost doesn't talk if no affect is published?
@@ -10,28 +6,25 @@
 
 -- behaviors:
 
-
  * if she hears: "look at me": change who she is looking at.
 
-if chatbot has not heard anything for a minute then say something
-(but only if people are visible.)
-say something like "why are you ignoring me?"
-set aiml topic to bored, and tell aiml to say something.
-no -- sent a special sentence to chatbot, which responds.
+ * Get the look-at messages to actually work right.
+
+ * if chatbot has not heard anything for a minute then say something
+   (but only if people are visible.)
+	Publish this as a contol message to some special topic...
+   Kino will listen for this and author a special response.
 
 * For chatbot, use something other than proces-query
 
-listen to a sequence of behaviors and run them, but only if no other
-stuff is coming
+* Be able to run performances, such as these:
+   /public_ws/performances/src/runner.py
 
-Revert to normal behaviors when done conversing.
+* listen to a sequence of behaviors (from the runner, above)
+  and run them, but only if no other stuff is coming. Listen
+  on what topic?
 
-----
-send a start , stop and resume performance message to some ros topic.
-the timeline performer will do the performance.
-/performances
-
-/public_ws/performances/src/runner.py
+* Revert to normal behaviors when done conversing.
 
 
 New bugs:
@@ -43,9 +36,3 @@ New bugs:
   what?  Is it guaranteed that vocalizatino will stop after a while,
   or should she force-reset?  .. Probably should force reset, to
   pick up those animations?
-
-* Kino requests: send to chatbot : xyzzy message of what happened.
-  Clarify ... cause you can subscribe to ROS messages for emotions,
-  and for /camera/face_event yourself...
-
-* What's the topic for hearing?
