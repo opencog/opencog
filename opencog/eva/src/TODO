@@ -15,7 +15,7 @@
 
  * if she hears: "look at me": change who she is looking at.
 
- * Get the look-at messages to actually work right.
+ * Get the look-at command to disengage eye-tracking.
 
  * if chatbot has not heard anything for a minute then say something
    (but only if people are visible.)
@@ -40,6 +40,6 @@ New bugs:
   (DefinedPredicate "Speech listening?")
 
 * If she thinks she is talking, but the room clears out, then
-  what?  Is it guaranteed that vocalizatino will stop after a while,
+  what?  Is it guaranteed that vocalization will stop after a while,
   or should she force-reset?  .. Probably should force reset, to
   pick up those animations?

@@ -411,9 +411,10 @@
 			(Concept "wake-up"))
 	))
 
-;; Collection of things to do if nothing is happening (no faces
-;; are visibile)
-;; Go to sleep after a while, and wake up every now and then.
+;; Collection of things to do if nothing is happening (i.e. if no faces
+;; are visible).
+;; -- Go to sleep if we've been bored for too long.
+;; -- Wake up if we've slept too long, or if we heard noises (speech)
 (DefineLink
 	(DefinedPredicate "Nothing is happening")
 	(SequentialAnd
@@ -452,6 +453,7 @@
 					; If we didn't fall asleep above, then search for attention.
 					(DefinedPredicate "Search for attention")
 				))
+
 			; If we are sleeping, then maybe its time to wake?
 			(SequentialOr
 				; Maybe its time to wake up ...
