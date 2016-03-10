@@ -191,10 +191,10 @@
 				(ListLink (Variable "$text")))
 
 			; Set timestamp for when something was last heard.
-			(TrueLink (DefinedSchemaNode "set heard-something timestamp"))
+			(True (DefinedSchema "set heard-something timestamp"))
 
 			; "heard-sound" is used to wake her up, if sleeping.
-			(TrueLink (Put
+			(True (Put
 					(State heard-sound (Variable "$noise"))
 					(Variable "$text")))
 		)

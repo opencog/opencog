@@ -169,12 +169,12 @@
 ;  becomes visible.
 ; (cog-evaluate! (DefinedPredicateNode "Interacting Sequence"))
 (DefineLink
-	(DefinedPredicateNode "Interacting Sequence")
-	(SequentialAndLink
-		(DefinedPredicateNode "is interacting with someone?")
-		(DefinedPredicateNode "dice-roll: glance new face")
-		(TrueLink (DefinedSchemaNode "glance at new person"))
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+	(DefinedPredicate "Interacting Sequence")
+	(SequentialAnd
+		(DefinedPredicate "is interacting with someone?")
+		(DefinedPredicate "dice-roll: glance new face")
+		(True (DefinedSchema "glance at new person"))
+		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "--- Glance at new person")))
 	))
 
@@ -269,6 +269,19 @@
 	(SequentialAnd
 		; True, if there is anyone visible.
 		(DefinedPredicate "Someone visible")
+
+		; Say something, if no one else has said anything in a while.
+		; i.e. if are being ignored, then say something.
+		(SequentialOr
+			(SequentialAnd
+				(DefinedPredicate "Silent too long")
+				(Evaluation (GroundedPredicate "scm: print-msg")
+					(ListLink (Node "--- Everyone is ignoring me!!!")))
+				(True (DefinedSchema "set heard-something timestamp"))
+			)
+			(True)
+		)
+
 		; This sequential-or is true if we're not interacting with anyone,
 		; or if there are several people and its time to change up.
 		(SequentialOr
@@ -286,7 +299,7 @@
 			; ##### Glance At Other Faces & Continue With The Last Interaction
 			(SequentialAnd
 				; Gets called 10x/second; don't print.
-				;(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+				;(Evaluation (GroundedPredicate "scm: print-msg")
 				;	(ListLink (Node "--- Continue interaction")))
 				(SequentialOr
 					(SequentialAnd
