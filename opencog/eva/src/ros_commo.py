@@ -37,7 +37,8 @@ from blender_api_msgs.msg import SomaState
 # i.e. create a stub if its not defined.
 try:
 	from chatbot.msg import ChatMessage
-except ImportError:
+# except ImportError:
+except NameError:
 	class ChatMessage:
 		def __init__(self):
 			self.utterance = ''
