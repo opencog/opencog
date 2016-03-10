@@ -124,6 +124,25 @@
 		)))
 
 ; -------------------------------------------------------------
+; Publish the current behavior.
+; Cheap hack to allow external ROS nodes to know what we are doing.
+; The string name of the node is sent directly as a ROS String message
+; to the "robot_behavior" topic.
+;
+; Example usage:
+;    (cog-evaluate! (Put (DefinedPredicate "Publish behavior")
+;         (ListLink (Concept "foobar joke"))))
+;
+(DefineLink
+	(DefinedPredicate "Publish behavior")
+	(LambdaLink
+		(VariableList (Variable "$bhv"))
+		;; Send it off to ROS to actually do it.
+		(EvaluationLink (GroundedPredicate "py:publish_behavior")
+			(ListLink (Variable "$bhv")))
+		))
+
+; -------------------------------------------------------------
 ; Request to change the soma state.
 ; Takes two arguments: the requestor, and the proposed state.
 ;

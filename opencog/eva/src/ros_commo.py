@@ -182,6 +182,14 @@ class EvaControl():
 		self.turn_pub.publish(trg)
 
 	# ----------------------------------------------------------
+
+	# Tell the world what we are up to. This is so that other
+	# subsystems can listen in on what we are doing.
+	def publish_behavior(self, event):
+		print "----- Behavior pub: " + event
+		self.behavior_pub.publish(event)
+
+	# ----------------------------------------------------------
 	# Wrapper for saccade generator.
 	# This is setup entirely in python, and not in the AtomSpace,
 	# as, at this time, there are no knobs worth twiddling.
@@ -378,6 +386,10 @@ class EvaControl():
 		# ----------------
 		rospy.logwarn("setting up chatbot affect perceive and express links")
 
+		# Publish cues to the chatbot, letting it know what we are doing.
+		self.behavior_pub = rospy.Publisher("robot_behavior",
+		                                  String, queue_size=1)
+
 		# Tell the chatbot what sort of affect to apply during
 		# TTS vocalization.
 		self.affect_pub = rospy.Publisher("chatbot_affect_express",
@@ -416,3 +428,5 @@ class EvaControl():
 		# Full control by default
 		self.control_mode = 255
 		self.running = True
+
+# ----------------------------------------------------------------

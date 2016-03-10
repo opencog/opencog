@@ -75,12 +75,12 @@
 (StateLink emotion-state emotion-neutral)
 
 ; -----------
-;; Currently, interaction-state will be linked to the face-id of
-;; person with whom interaction is taking place. (current_face_target in owyl)
-(define-public interaction-state (AnchorNode "Interaction State"))
+;; The eye-contact-state will be linked to the face-id of
+;; person with whom we are making eye-contact with.
+(define-public eye-contact-state (AnchorNode "Eye Contact State"))
 (define-public no-interaction (ConceptNode "none"))
 
-(StateLink interaction-state no-interaction)
+(StateLink eye-contact-state no-interaction)
 
 ; The face to glance at.
 (define-public glance-state (AnchorNode "Glance State"))
@@ -88,8 +88,8 @@
 
 ;; Linked to face-id that needs immediate interaction.
 ;; Currently it is set from ROS
-(define request-interaction-state (AnchorNode "Request Interaction"))
-(StateLink request-interaction-state no-interaction)
+(define request-eye-contact-state (AnchorNode "Request Interaction"))
+(StateLink request-eye-contact-state no-interaction)
 
 ;; The "look at neutral position" face. Used to tell the eye/head
 ;; movemet subsystem to move to a neutral position.
@@ -176,6 +176,12 @@
 	(stv 1 1)
 )
 
+(define heard-sound (Anchor "Heard Something Recently"))
+(define heard-nothing (SentenceNode ""))
+(State heard-sound heard-nothing)
+
+;; Process text that was "heard" (e.g. from the STT module)
+;; This is a function call, with one argument: a SentenceNode.
 (DefineLink
 	(DefinedPredicate "heard text")
 	(LambdaLink
@@ -185,10 +191,26 @@
 				(ListLink (Variable "$text")))
 
 			; Set timestamp for when something was last heard.
-			(TrueLink (DefinedSchemaNode "set heard-something timestamp"))
+			(True (DefinedSchema "set heard-something timestamp"))
+
+			; "heard-sound" is used to wake her up, if sleeping.
+			(True (Put
+					(State heard-sound (Variable "$noise"))
+					(Variable "$text")))
 		)
 	)
 )
+
+;; Return true if something was heard (recently).
+;; This can be used only once: it clears the state immediately, so
+;; if asked a second time, nothing was heard.
+(DefineLink
+	(DefinedPredicate "Heard Something?")
+	(SequentialAnd
+		(NotLink (Equal (SetLink heard-nothing)
+			(Get (State heard-sound (Variable "$x")))))
+		(True (Put (State heard-sound (Variable "$x")) heard-nothing))
+	))
 
 
 ; --------------------------------------------------------
@@ -196,7 +218,6 @@
 
 ;; Define setters and getters for timestamps. Perhaps this should
 ;; be replaced by the timeserver??
-;; line 757, record_start_time
 
 (define (timestamp-template name)
 
@@ -241,98 +262,6 @@
 
 ; "heard-something" -- when Eva heard a sentence from STT.
 (timestamp-template "heard-something")
-
-; Define a predicate that evaluates to true or false, if it is time
-; to do something. PRED-NAME is the name given to the predicate,
-; TS-NAME is the name given to the timestamp that holds the start-time;
-; MIN-NAME and MAX-NAME are the string names of the configurable
-; min and max bounds for the time interval.  So, if the elapsed time
-; since the timestamp is less than MIN, then return false; if the
-; elapsed time is greater than MAX then return true; else return a
-; with increasing random liklihood.
-;
-; To compute the likelihood correctly, we have to compute the
-; integral since the last time that this check was made. Thus,
-; if we are calling this predicate 10 times a second, the probability
-; of a transition will be failry small; but if we call it once a second,
-; the probability will be ten times greater... computing even this
-; simple integral in atomese is painful. Yuck. But we have to do it.
-(define (change-template pred-name ts-name min-name max-name)
-	(define get-ts (string-append "get " ts-name " timestamp"))
-	(define prev-ts (string-append "previous-" ts-name "-call"))
-	(define delta-ts (string-append "delta-" ts-name "-time"))
-	(DefineLink
-		(DefinedPredicate pred-name)
-		(SequentialOr
-			; If elapsed time greater than max, then true.
-			(GreaterThan
-				; Minus computes number of seconds since interaction start.
-				(Minus (TimeLink) (DefinedSchema get-ts))
-				(Get (State (Schema max-name) (Variable "$max")))
-			)
-			(SequentialAnd
-				; Delta is the time since the last check.
-				(True (Put (State (Schema delta-ts) (Variable "$x"))
-						(Minus (TimeLink)
-							(Get (State (Schema prev-ts) (Variable "$p"))))))
-				; Update time of last check to now. Must record this
-				; timestamp before the min-time rejection, below.
-				(True (Put (State (Schema prev-ts) (Variable "$x")) (TimeLink)))
-
-				; If elapsed time less than min, then false.
-				(GreaterThan
-					; Minus computes number of seconds since interaction start.
-					(Minus (TimeLink) (DefinedSchema get-ts))
-					(Get (State (Schema min-name) (Variable "$min")))
-				)
-
-				; Compute integral: how long since last check?
-				; Perform a pro-rated coin flip. If it is only a very short
-				; time since we were last called, it is very unlikely that
-				; well the random number will come up heads.  But if its
-				; been a long time, then very likely the coin will come up
-				; heads.
-				(GreaterThan
-					(Get (State (Schema delta-ts) (Variable "$delta")))
-					; Random number in the configured range.
-					(RandomNumber
-						(Number 0)
-						(Minus
-							(Get (State (Schema max-name) (Variable "$max")))
-							(Get (State (Schema min-name) (Variable "$min")))))
-				)
-			)
-	)))
-
-; Return true if it is time to interact with someone else.
-;; line 697 -- is_time_to_change_face_target()
-(change-template "Time to change interaction" "interaction"
-	"time_to_change_face_target_min" "time_to_change_face_target_max")
-
-; Return true if we've been sleeping for long enough (i.e. longer than
-; the time_to_wake_up parameter).
-; line 707 -- is_time_to_wake_up()
-(change-template "Time to wake up" "sleep"
-	"time_sleeping_min" "time_sleeping_max")
-
-; Return true if we've been bored for a long time (i.e. longer than
-; the time_bored_to_sleep parameter).
-; line 611 -- bored_since, sleep probability.
-(change-template "Bored too long" "bored"
-	"time_boredom_min" "time_boredom_max")
-
-;; Evaluate to true, if an expression should be shown.
-;; (if it is OK to show a new expression). Prevents system from
-;; showing new facial expressions too frequently.
-;; line 933, should_show_expression()
-(change-template "Time to change expression" "expression"
-	"time_since_last_expr_min" "time_since_last_expr_max")
-
-(change-template "Time to make gesture" "gesture"
-	"time_since_last_gesture_min" "time_since_last_gesture_max")
-
-(change-template "Time to change gaze" "attn-search"
-	"time_search_attn_min" "time_search_attn_max")
 
 ; --------------------------------------------------------
 ; Some debug prints.
@@ -379,7 +308,7 @@
 ;; aka "current_face_target" in Owyl.
 (DefineLink
 	(DefinedSchemaNode "Current interaction target")
-	(GetLink (StateLink interaction-state (VariableNode "$x"))))
+	(GetLink (StateLink eye-contact-state (VariableNode "$x"))))
 
 ;; Return true if some face has is no longer visible (has left the room)
 ;; We detect this by looking for "acked" faces tat are not also visible.
@@ -470,7 +399,7 @@
 				(DefinedSchemaNode "Select random face")))
 		(EqualLink
 			(GetLink (StateLink glance-state (VariableNode "$face-id")))
-			(GetLink (StateLink interaction-state (VariableNode "$face-id")))
+			(GetLink (StateLink eye-contact-state (VariableNode "$face-id")))
 		)
 		(DefinedPredicateNode "More than one face visible")
 		(DefinedPredicateNode "Select random glance target")
@@ -478,16 +407,19 @@
 
 ;; Update the room empty/full status; update the list of acknowledged
 ;; faces.
-;; line 973 -- clear_new_face_target()
 (DefineLink
 	(DefinedPredicate "Update status")
 	(SequentialAnd
 		(DefinedPredicate "Update room state")
+		; If there was more than one face that recently arrived, then
+		; we assume that this face was selected as the eye-contact
+		; target.  We convert this to an "acked" face.  Other
+		; newly-arrived faces stay "newly arrived" (and non-acked)
+		; until ... until they are eye-contacted.
 		(True (Put
 				(Evaluation (Predicate "acked face")
 						(ListLink (Variable "$face-id")))
-				; If more than one new arrival, pick one randomly.
-				(RandomChoice (DefinedSchema "New arrivals"))))
+				(Get (State eye-contact-state (Variable "$x")))))
 	))
 
 ;; Remove the lost faces from "acked face" (so that "acked face" accurately
@@ -515,7 +447,7 @@
 		; true if not not-interacting.
 		(NotLink (Equal
 			(SetLink no-interaction)
-			(Get (State interaction-state (Variable "$x"))))
+			(Get (State eye-contact-state (Variable "$x"))))
 	)))
 
 
@@ -525,47 +457,80 @@
 	(DefinedPredicate "Someone requests interaction?")
 	(NotLink (Equal
 		(SetLink no-interaction)
-		(Get (State request-interaction-state (Variable "$x"))))
+		(Get (State request-eye-contact-state (Variable "$x"))))
 	))
 
 
 ;; Send ROS message to look at the person we are interacting with.
-;; line 742, assign_face_target
 (DefineLink
 	(DefinedSchema "look at person")
 	(Put
 		(Evaluation (GroundedPredicate "py:look_at_face")
 			(ListLink (Variable "$face")))
-		(Get (State interaction-state (Variable "$x")))
+		(Get (State eye-contact-state (Variable "$x")))
 	))
 
 ;; Move to a neutral head position. Right now, this just issues a
 ;; look-at command; it could do more (e.g. halt the chatbot.)
-;; line 845, return_to_neutral_position
 (DefineLink
 	(DefinedPredicateNode "return to neutral")
 	(SequentialAndLink
 		(EvaluationLink (GroundedPredicateNode "py:look_at_face")
 			(ListLink neutral-face))
+		(TrueLink (PutLink
+			(StateLink eye-contact-state (VariableNode "$face-id"))
+			no-interaction))
 	))
 
 ; ------------------------------------------------------
 
+;; Change the eye-contact target to a face picked randomly from the
+;; crowd. (Caution: this might randomly pick the existing face...)
+;;
+;; This only sets the eye-contact state variable; this does NOT
+;; actually cause the robot to look at them.  Use the schema
+;; (DefinedSchema "look at person") to make it look.
 (DefineLink
-	(DefinedSchema "interact with new person")
-	(Put (State interaction-state (Variable "$x"))
-		; If more than one new arrival, pick one randomly.
-		(RandomChoice (DefinedSchema "New arrivals"))))
+	(DefinedPredicateNode "Change interaction")
+	(SequentialAndLink
+		; First, pick a face at random...
+		(TrueLink (PutLink
+			(StateLink eye-contact-state (VariableNode "$face-id"))
+			(DefinedSchemaNode "Select random face")))
+		; Record a timestamp
+		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
+		; Diagnostic print
+		(Evaluation (GroundedPredicate "scm: print-msg-face")
+			(ListLink (Node "--- Start new interaction")))
+	))
 
-;; Set current-interaction face to the requested face
+;; Start interacting with a newly-visible face.
+;;
+;; This only sets the eye-contact state variable; this does NOT
+;; actually cause the robot to look at them.  Use the schema
+;; (DefinedSchema "look at person") to make it look.
 (DefineLink
-	(DefinedSchema "interact with requested person")
-	(Put (State interaction-state (Variable "$face-id"))
-		(Get (State request-interaction-state (Variable "$x")))))
+	(DefinedPredicate "interact with new person")
+	(SequentialAnd
+		(True (Put (State eye-contact-state (Variable "$x"))
+			; If more than one new arrival, pick one randomly.
+			(RandomChoice (DefinedSchema "New arrivals"))))
+		(TrueLink (DefinedSchema "set interaction timestamp"))
+	))
 
+;; Set eye-contact face to the requested face.
+;;
+;; This only sets the eye-contact state variable; this does NOT
+;; actually cause the robot to look at them.  Use the schema
+;; (DefinedSchema "look at person") to make it look.
 (DefineLink
-	(DefinedSchema "clear requested face")
-	(Put (State request-interaction-state (Variable "$face-id"))
-		no-interaction))
+	(DefinedPredicate "interact with requested person")
+	(SequentialAnd
+		(True (Put (State eye-contact-state (Variable "$face-id"))
+			(Get (State request-eye-contact-state (Variable "$x")))))
+		(True (Put (State request-eye-contact-state (Variable "$face-id"))
+			no-interaction))
+		(True (DefinedSchema "set interaction timestamp"))
+	))
 
 ;; ------------------------------------------------------------------
