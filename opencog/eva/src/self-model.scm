@@ -552,13 +552,14 @@
 
 ; ------------------------------------------------------
 
-;; Start interacting with a face picked randomly from the crowd.
+;; Change the eye-contact target to a face picked randomly from the
+;; crowd. (Caution: this might randomly pick the existing face...)
 ;;
 ;; This only sets the eye-contact state variable; this does NOT
 ;; actually cause the robot to look at them.  Use the schema
 ;; (DefinedSchema "look at person") to make it look.
 (DefineLink
-	(DefinedPredicateNode "Start new interaction")
+	(DefinedPredicateNode "Change interaction")
 	(SequentialAndLink
 		; First, pick a face at random...
 		(TrueLink (PutLink

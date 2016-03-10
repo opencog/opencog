@@ -279,8 +279,8 @@
 					(SequentialAnd
 						(DefinedPredicate "More than one face visible")
 						(DefinedPredicate "Time to change interaction")))
-				; Select a new face target
-				(DefinedPredicate "Start new interaction")
+				; Select a new face target, interact with it.
+				(DefinedPredicate "Change interaction")
 				(DefinedPredicate "Interact with face"))
 
 			; ##### Glance At Other Faces & Continue With The Last Interaction
