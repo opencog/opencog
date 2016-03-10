@@ -74,9 +74,9 @@ class PutAtoms:
 	# Pass the text that STT heard into opencog.
 	# Rather than setting state, we're going to trigger a script, here.
 	def perceived_text(self, text):
-		scheme_eval_tv(self.atomspace,
+		scheme_eval(self.atomspace,
 			'(PutLink (DefinedPredicate "heard text")' +
-			' (SentenceNode "' + text + '"))'
+			' (SentenceNode "' + text + '"))')
 
 	# Start or stop the behavior tree.
 	def btree_stop(self):
