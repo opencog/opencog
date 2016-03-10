@@ -374,7 +374,7 @@
 							(DefinedSchema "gaze right max")
 							(DefinedSchema "gaze left max"))
 						(Number 0)))
-				(TrueLink (DefinedSchemaNode "set attn-search timestamp"))
+				(True (DefinedSchema "set attn-search timestamp"))
 			))
 	))
 
@@ -431,7 +431,7 @@
 
 		; Reset the bored timestamp, as otherwise we'll fall asleep
 		; immediately (cause we're bored).
-		(TrueLink (DefinedSchema "set bored timestamp"))
+		(True (DefinedSchema "set bored timestamp"))
 
 		; Run the wake animation.
 		(Evaluation (GroundedPredicate "py:do_wake_up") (ListLink))
