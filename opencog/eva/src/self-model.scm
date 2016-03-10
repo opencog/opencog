@@ -145,6 +145,34 @@
 		(Get (State chat-affect (Variable "$x")))))
 
 ; --------------------------------------------------------
+; Speech-to-text (STT) relaed stuff.
+; If the STT system hears soemthing, it sends us the text string.
+; Handle it here.
+
+; Pass the text that STT heard into the OpenCog chatbot.
+; XXX procees-query is not really the best API, here.
+; Must run in a new thread, else it deadlocks in python,
+; since the text processing results in python calls.
+(public-define (dispatch-text txt)
+	(call-with-new-thread
+		(lambda () (process-query "luser" (cog-name txt)))
+	)
+	(stv 1 1)
+)
+
+(DefineLink
+	(DefinedPredicate "heard text")
+	(LambdaLink
+		(Variable "$text")
+		(SequentialAnd
+			(Evaluation (GroundedPredicate "scm: dispatch-text")
+				(ListLink (Variable "$text")))
+		)
+	)
+)
+
+
+; --------------------------------------------------------
 ; Time-stamp-related stuff.
 
 ;; Define setters and getters for timestamps. Perhaps this should

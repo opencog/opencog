@@ -202,16 +202,16 @@
 
 ;; Like the above, but for gestures
 (DefineLink
-	(DefinedPredicateNode "Show random gesture")
+	(DefinedPredicate "Show random gesture")
 	(LambdaLink
-		(VariableNode "$emo")
-		(PutLink
-			(DefinedPredicateNode "Do show gesture")
+		(Variable "$emo")
+		(Put
+			(DefinedPredicate "Do show gesture")
 			(ListLink
-				(VariableNode "$emo")
-				(PutLink
-					(DefinedSchemaNode "Pick random gesture")
-					(VariableNode "$emo"))
+				(Variable "$emo")
+				(Put
+					(DefinedSchema "Pick random gesture")
+					(Variable "$emo"))
 			))
 	))
 

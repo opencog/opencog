@@ -72,12 +72,11 @@ class PutAtoms:
 		scheme_eval_h(self.atomspace, "(State chat-affect chat-negative)")
 
 	# Pass the text that STT heard into opencog.
-	# XXX procees-query is not really the best API, here.
-	# Must run in a new thread, else it deadlocks in python, since
-	# the text processing results in python calls.
+	# Rather than setting state, we're going to trigger a script, here.
 	def perceived_text(self, text):
 		scheme_eval(self.atomspace,
-			'(call-with-new-thread (lambda () (process-query "luser" "' + text + '")))')
+			'(cog-evaluate! (PutLink (DefinedPredicate "heard text")' +
+			' (Sentence "' + text + ")))'
 
 	# Start or stop the behavior tree.
 	def btree_stop(self):
