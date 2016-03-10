@@ -76,7 +76,7 @@ class PutAtoms:
 	def perceived_text(self, text):
 		scheme_eval(self.atomspace,
 			'(cog-evaluate! (PutLink (DefinedPredicate "heard text")' +
-			' (Sentence "' + text + ")))'
+			' (SentenceNode "' + text + ")))'
 
 	# Start or stop the behavior tree.
 	def btree_stop(self):

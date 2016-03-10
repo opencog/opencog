@@ -169,7 +169,7 @@
 ; XXX procees-query is not really the best API, here.
 ; Must run in a new thread, else it deadlocks in python,
 ; since the text processing results in python calls.
-(public-define (dispatch-text txt)
+(define-public (dispatch-text txt)
 	(call-with-new-thread
 		(lambda () (process-query "luser" (cog-name txt)))
 	)
