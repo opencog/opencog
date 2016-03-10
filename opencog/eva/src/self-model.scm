@@ -552,7 +552,11 @@
 
 ; ------------------------------------------------------
 
-; Start interacting with a new face picked randomly from the crowd.
+;; Start interacting with a face picked randomly from the crowd.
+;;
+;; This only sets the eye-contact state variable; this does NOT
+;; actually cause the robot to look at them.  Use the schema
+;; (DefinedSchema "look at person") to make it look.
 (DefineLink
 	(DefinedPredicateNode "Start new interaction")
 	(SequentialAndLink
@@ -567,6 +571,11 @@
 			(ListLink (Node "--- Start new interaction")))
 	))
 
+;; Start interacting with a newly-visible face.
+;;
+;; This only sets the eye-contact state variable; this does NOT
+;; actually cause the robot to look at them.  Use the schema
+;; (DefinedSchema "look at person") to make it look.
 (DefineLink
 	(DefinedPredicate "interact with new person")
 	(SequentialAnd
@@ -576,18 +585,19 @@
 		(TrueLink (DefinedSchema "set interaction timestamp"))
 	))
 
-;; Set current-interaction face to the requested face
+;; Set eye-contact face to the requested face.
+;;
+;; This only sets the eye-contact state variable; this does NOT
+;; actually cause the robot to look at them.  Use the schema
+;; (DefinedSchema "look at person") to make it look.
 (DefineLink
 	(DefinedPredicate "interact with requested person")
 	(SequentialAnd
 		(True (Put (State eye-contact-state (Variable "$face-id"))
 			(Get (State request-eye-contact-state (Variable "$x")))))
-		(TrueLink (DefinedSchema "set interaction timestamp"))
+		(True (Put (State request-eye-contact-state (Variable "$face-id"))
+			no-interaction))
+		(True (DefinedSchema "set interaction timestamp"))
 	))
-
-(DefineLink
-	(DefinedSchema "clear requested face")
-	(Put (State request-eye-contact-state (Variable "$face-id"))
-		no-interaction))
 
 ;; ------------------------------------------------------------------

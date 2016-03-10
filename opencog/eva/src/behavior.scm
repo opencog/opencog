@@ -160,7 +160,6 @@
 		(True (DefinedPredicate "If sleeping then wake"))
 		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "interact with requested person")
-		(True (DefinedSchema "clear requested face"))
 		(True (DefinedSchema "look at person"))
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Looking at requested face")))
