@@ -212,12 +212,12 @@
 		(True (Put (State heard-something (Variable "$x")) heard-nothing))
 	))
 
+
 ; --------------------------------------------------------
 ; Time-stamp-related stuff.
 
 ;; Define setters and getters for timestamps. Perhaps this should
 ;; be replaced by the timeserver??
-;; line 757, record_start_time
 
 (define (timestamp-template name)
 
@@ -262,98 +262,6 @@
 
 ; "heard-something" -- when Eva heard a sentence from STT.
 (timestamp-template "heard-something")
-
-; Define a predicate that evaluates to true or false, if it is time
-; to do something. PRED-NAME is the name given to the predicate,
-; TS-NAME is the name given to the timestamp that holds the start-time;
-; MIN-NAME and MAX-NAME are the string names of the configurable
-; min and max bounds for the time interval.  So, if the elapsed time
-; since the timestamp is less than MIN, then return false; if the
-; elapsed time is greater than MAX then return true; else return a
-; with increasing random liklihood.
-;
-; To compute the likelihood correctly, we have to compute the
-; integral since the last time that this check was made. Thus,
-; if we are calling this predicate 10 times a second, the probability
-; of a transition will be failry small; but if we call it once a second,
-; the probability will be ten times greater... computing even this
-; simple integral in atomese is painful. Yuck. But we have to do it.
-(define (change-template pred-name ts-name min-name max-name)
-	(define get-ts (string-append "get " ts-name " timestamp"))
-	(define prev-ts (string-append "previous-" ts-name "-call"))
-	(define delta-ts (string-append "delta-" ts-name "-time"))
-	(DefineLink
-		(DefinedPredicate pred-name)
-		(SequentialOr
-			; If elapsed time greater than max, then true.
-			(GreaterThan
-				; Minus computes number of seconds since interaction start.
-				(Minus (TimeLink) (DefinedSchema get-ts))
-				(Get (State (Schema max-name) (Variable "$max")))
-			)
-			(SequentialAnd
-				; Delta is the time since the last check.
-				(True (Put (State (Schema delta-ts) (Variable "$x"))
-						(Minus (TimeLink)
-							(Get (State (Schema prev-ts) (Variable "$p"))))))
-				; Update time of last check to now. Must record this
-				; timestamp before the min-time rejection, below.
-				(True (Put (State (Schema prev-ts) (Variable "$x")) (TimeLink)))
-
-				; If elapsed time less than min, then false.
-				(GreaterThan
-					; Minus computes number of seconds since interaction start.
-					(Minus (TimeLink) (DefinedSchema get-ts))
-					(Get (State (Schema min-name) (Variable "$min")))
-				)
-
-				; Compute integral: how long since last check?
-				; Perform a pro-rated coin flip. If it is only a very short
-				; time since we were last called, it is very unlikely that
-				; well the random number will come up heads.  But if its
-				; been a long time, then very likely the coin will come up
-				; heads.
-				(GreaterThan
-					(Get (State (Schema delta-ts) (Variable "$delta")))
-					; Random number in the configured range.
-					(RandomNumber
-						(Number 0)
-						(Minus
-							(Get (State (Schema max-name) (Variable "$max")))
-							(Get (State (Schema min-name) (Variable "$min")))))
-				)
-			)
-	)))
-
-; Return true if it is time to interact with someone else.
-;; line 697 -- is_time_to_change_face_target()
-(change-template "Time to change interaction" "interaction"
-	"time_to_change_face_target_min" "time_to_change_face_target_max")
-
-; Return true if we've been sleeping for long enough (i.e. longer than
-; the time_to_wake_up parameter).
-; line 707 -- is_time_to_wake_up()
-(change-template "Time to wake up" "sleep"
-	"time_sleeping_min" "time_sleeping_max")
-
-; Return true if we've been bored for a long time (i.e. longer than
-; the time_bored_to_sleep parameter).
-; line 611 -- bored_since, sleep probability.
-(change-template "Bored too long" "bored"
-	"time_boredom_min" "time_boredom_max")
-
-;; Evaluate to true, if an expression should be shown.
-;; (if it is OK to show a new expression). Prevents system from
-;; showing new facial expressions too frequently.
-;; line 933, should_show_expression()
-(change-template "Time to change expression" "expression"
-	"time_since_last_expr_min" "time_since_last_expr_max")
-
-(change-template "Time to make gesture" "gesture"
-	"time_since_last_gesture_min" "time_since_last_gesture_max")
-
-(change-template "Time to change gaze" "attn-search"
-	"time_search_attn_min" "time_search_attn_max")
 
 ; --------------------------------------------------------
 ; Some debug prints.
