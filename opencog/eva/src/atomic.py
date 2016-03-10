@@ -95,6 +95,11 @@ def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):
 	evl.gesture(gesture, intensity, repeat, speed)
 	return TruthValue(1, 1)
 
+def publish_behavior(event):
+	# print "(Behavior event:", event, ")"
+	evl.publish_behavior(event)
+	return TruthValue(1, 1)
+
 def explore_saccade():
 	# print "Python: Explore Saccade"
 	evl.explore_saccade()

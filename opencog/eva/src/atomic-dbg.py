@@ -147,6 +147,10 @@ def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):
 		", repeat: ", repeat, ", speed: ", speed, ")"
 	return TruthValue(1, 1)
 
+def publish_behavior(event):
+	print "(Behavior event:", event, ")"
+	return TruthValue(1, 1)
+
 def explore_saccade():
 	print "(Eva switches to explore saccade)"
 	# evl.explore_saccade()
