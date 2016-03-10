@@ -35,14 +35,13 @@ from blender_api_msgs.msg import SomaState
 
 # Not everything has this message; don't break if it's missing.
 # i.e. create a stub if its not defined.
-try:
-	from chatbot.msg import ChatMessage
-# except ImportError:
-except NameError:
-	class ChatMessage:
-		def __init__(self):
-			self.utterance = ''
-			self.confidence = 0
+#try:
+#	from chatbot.msg import ChatMessage
+#except (NameError, ImportError):
+#	class ChatMessage:
+#		def __init__(self):
+#			self.utterance = ''
+#			self.confidence = 0
 
 from put_atoms import PutAtoms
 logger = logging.getLogger('hr.OpenCog_Eva')
@@ -389,8 +388,8 @@ class EvaControl():
 			self.language_perceived_text_cb)
 
 		# Chat infrastructure text.
-		rospy.Subscriber("chatbot_speech", chatbot/ChatMessage,
-			self.chat_perceived_text_cb)
+		#rospy.Subscriber("chatbot_speech", chatbot/ChatMessage,
+		#	self.chat_perceived_text_cb)
 
 		# Emotional content of words spoken to the robot.
 		rospy.Subscriber("chatbot_affect_perceive", String,
