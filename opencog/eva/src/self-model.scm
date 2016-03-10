@@ -478,16 +478,19 @@
 
 ;; Update the room empty/full status; update the list of acknowledged
 ;; faces.
-;; line 973 -- clear_new_face_target()
 (DefineLink
 	(DefinedPredicate "Update status")
 	(SequentialAnd
 		(DefinedPredicate "Update room state")
+		; If there was more than one face that recently arrived, then
+		; we assume that this face was selected as the eye-contact
+		; target.  We convert this to an "acked" face.  Other
+		; newly-arrived faces stay "newly arrived" (and non-acked)
+		; until ... until they are eye-contacted.
 		(True (Put
 				(Evaluation (Predicate "acked face")
 						(ListLink (Variable "$face-id")))
-				; If more than one new arrival, pick one randomly.
-				(RandomChoice (DefinedSchema "New arrivals"))))
+				(Get (State eye-contact-state (Variable "$x")))))
 	))
 
 ;; Remove the lost faces from "acked face" (so that "acked face" accurately
