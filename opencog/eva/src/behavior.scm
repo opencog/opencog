@@ -226,39 +226,39 @@
 
 ;; Check to see if someone left.
 (DefineLink
-	(DefinedPredicateNode "Someone left")
-	(SequentialAndLink
-		(DefinedPredicateNode "Did someone leave?")
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+	(DefinedPredicate "Someone left")
+	(SequentialAnd
+		(DefinedPredicate "Did someone leave?")
+		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "--- Someone left")))
-		(SequentialOrLink
+		(SequentialOr
 			; Were we interacting with the person who left? If so,
 			; look frustrated, return head position to neutral.
-			(SequentialAndLink
-				(EqualLink
-					(DefinedSchemaNode "New departures")
-					(GetLink (StateLink eye-contact-state (VariableNode "$x"))))
-				(DefinedPredicateNode "Show frustrated expression")
-				(DefinedPredicateNode "return to neutral")
+			(SequentialAnd
+				(Equal
+					(DefinedSchema "New departures")
+					(Get (State eye-contact-state (Variable "$x"))))
+				(DefinedPredicate "Show frustrated expression")
+				(DefinedPredicate "return to neutral")
 			)
 			;; Were we interacting with someone else?  If so, then
 			;; maybe glance at the location of the person who left.
-			(SequentialAndLink
-				(DefinedPredicateNode "is interacting with someone?")
-				(SequentialOrLink
-					(NotLink (DefinedPredicateNode "dice-roll: glance lost face"))
-					(FalseLink (DefinedSchemaNode "glance at lost face"))
-					(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(SequentialAnd
+				(DefinedPredicate "is interacting with someone?")
+				(SequentialOr
+					(NotLink (DefinedPredicate "dice-roll: glance lost face"))
+					(FalseLink (DefinedSchema "glance at lost face"))
+					(Evaluation (GroundedPredicate "scm: print-msg")
 						(ListLink (Node "--- Glance at lost face"))))
 				(TrueLink)
 			)
-			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(Evaluation (GroundedPredicate "scm: print-msg")
 				(ListLink (Node "--- Ignoring lost face")))
 			(TrueLink)
 		)
 		;; Clear the lost face target
-		(DefinedPredicateNode "Clear lost face")
-		(DefinedPredicateNode "Update room state")
+		(DefinedPredicate "Clear lost face")
+		(DefinedPredicate "Update room state")
 	))
 
 ;; Collection of things to do while interacting with people.
