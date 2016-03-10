@@ -163,16 +163,17 @@
 
 ; Used for imperatives, i.e. when she is verbally told to do something.
 ; Thus, we list all of them here. The probability column is ignored.
+; The shake and nod gestures are very weak, for some reason.
 (emo-gest-spec "imperative"   "amused"        0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "blink"         0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "blink-micro"   0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "blink-relaxed" 0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "blink-sleepy"  0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "nod-1"         0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "nod-2"         0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "nod-3"         0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "shake-2"       0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "shake-3"       0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-1"         0.1 0.8 1.0 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-2"         0.1 0.8 1.0 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-3"         0.1 0.8 1.0 1 1 1 1)
+(emo-gest-spec "imperative"   "shake-2"       0.1 0.8 1.0 1 1 1 1)
+(emo-gest-spec "imperative"   "shake-3"       0.1 0.8 1.0 1 1 1 1)
 (emo-gest-spec "imperative"   "thoughtful"    0.1 0.2 0.4 1 1 1 1)
 (emo-gest-spec "imperative"   "yawn-1"        0.1 0.6 0.9 1 1 1 1)
 
@@ -181,7 +182,7 @@
 ;    some event.
 
 ; Probability of looking at someone who entered the room.
-(dice-roll "glance new face"   0.5) ; line 590 -- glance_probability_for_new_faces
+(dice-roll "glance new face"   0.5)
 
 ; Probability of looking at spot where someone was last seen.
 (dice-roll "glance lost face"  0.5) ; -- glance_probability_for_lost_faces
