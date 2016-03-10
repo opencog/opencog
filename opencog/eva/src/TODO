@@ -26,12 +26,8 @@ stuff is coming
 
 Revert to normal behaviors when done conversing.
 
-----
-send a start , stop and resume performance message to some ros topic.
-the timeline performer will do the performance.
-/performances
-
-/public_ws/performances/src/runner.py
+* Be able to run performances, such as these:
+   /public_ws/performances/src/runner.py
 
 
 New bugs:
@@ -47,5 +43,3 @@ New bugs:
 * Kino requests: send to chatbot : xyzzy message of what happened.
   Clarify ... cause you can subscribe to ROS messages for emotions,
   and for /camera/face_event yourself...
-
-* What's the topic for hearing?
