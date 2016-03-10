@@ -193,6 +193,10 @@ except:
 (change-template "Bored too long" "bored"
 	"time_boredom_min" "time_boredom_max")
 
+; Return true, if we have not heard anything in a while.
+(change-template "Silent too long" "heard-something"
+	"silence_min" "silence_max")
+
 ;; Evaluate to true, if an expression should be shown.
 ;; (if it is OK to show a new expression). Prevents system from
 ;; showing new facial expressions too frequently.

@@ -202,6 +202,10 @@
 (State (Schema "time_since_last_expr_min") (Number 6.0))
 (State (Schema "time_since_last_expr_max") (Number 10.0))
 
+; If no one has said anything after 40-80 seconds, say something.
+(State (Schema "silence_min") (Number 40))
+(State (Schema "silence_max") (Number 80))
+
 ; Sleep at least 25 seconds ... at most 160
 (State (Schema "time_sleeping_min") (Number 25))
 (State (Schema "time_sleeping_max") (Number 160))
