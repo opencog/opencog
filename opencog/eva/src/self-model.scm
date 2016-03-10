@@ -54,6 +54,18 @@
 ;; Assume Eva is sleeping at first
 (StateLink soma-state soma-sleeping)
 
+;; True if sleeping, else false.
+(DefineLink
+	(DefinedPredicate "Is sleeping?")
+	(Equal (SetLink soma-sleeping)
+		(Get (State soma-state (Variable "$x")))))
+
+;; True if bored, else false
+(DefineLink
+	(DefinedPredicate "Is bored?")
+	(Equal (SetLink soma-bored)
+		(Get (State soma-state (Variable "$x")))))
+
 ; -----------
 ; The "emotional state" of the robot.  Corresponds to states declared
 ; in the `cfg-*.scm` file.
