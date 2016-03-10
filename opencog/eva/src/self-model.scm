@@ -37,6 +37,9 @@
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
 
+; XXX the below does not really belong here; where does it belong?
+(use-modules (opencog nlp chatbot-eva)) ; Needed for process-query
+
 ; ------------------------------------------------------
 ; State variables
 ; XXX FIXME There are a bunch of define-publics in here, they probably
@@ -149,6 +152,7 @@
 ; If the STT system hears soemthing, it sends us the text string.
 ; Handle it here.
 
+; XXX the below does not really belong here; where does it belong?
 ; Pass the text that STT heard into the OpenCog chatbot.
 ; XXX procees-query is not really the best API, here.
 ; Must run in a new thread, else it deadlocks in python,
@@ -167,6 +171,9 @@
 		(SequentialAnd
 			(Evaluation (GroundedPredicate "scm: dispatch-text")
 				(ListLink (Variable "$text")))
+
+			; Set timestamp for when something was last heard.
+			(TrueLink (DefinedSchemaNode "set heard-something timestamp"))
 		)
 	)
 )
@@ -219,6 +226,9 @@
 
 ; "attn-search" -- when Eva started searching for attention.
 (timestamp-template "attn-search")
+
+; "heard-something" -- when Eva heard a sentence from STT.
+(timestamp-template "heard-something")
 
 ; Define a predicate that evaluates to true or false, if it is time
 ; to do something. PRED-NAME is the name given to the predicate,
