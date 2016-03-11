@@ -479,41 +479,45 @@
 
 ; --------------------------------------------------------
 ; Glancing at people.
+(DefineLink
+	(DefinedPredicate "glance and ack")
+	(LambdaLink
+		(Variable "$face")
+		(SequentialAndLink
+			(Evaluation (GroundedPredicate "py:glance_at_face")
+				(ListLink (Variable "$face")))
+			;; Mark it as acked, othwerwise, we'll keep glancing there,
+			(Evaluation (Predicate "acked face")
+				(ListLink (Variable "$face")))
+		)))
 
 ;; Select a face at random, and glance at it.
 (DefineLink
 	(DefinedPredicateNode "glance at random face")
 	(SequentialAndLink
-		(DefinedPredicateNode "Select random glance target")
-		(True (Put
-			(Evaluation (GroundedPredicate "py:glance_at_face")
-				(ListLink (VariableNode "$face")))
+		(DefinedPredicate "Select random glance target")
+		(Put
+			(DefinedPredicate "glance and ack")
 			(GetLink (StateLink glance-state (VariableNode "$face-id")))
-		))
-		;; Mark it as acked, othwerwise, we'll keep glancing there,
-		(True (Put
-				(Evaluation (Predicate "acked face")
-						(ListLink (Variable "$face-id")))
-			(GetLink (StateLink glance-state (VariableNode "$face-id")))
-		))
+		)
 	))
 
 ;; Glance at one of the newly-arrived faces.
+;; If more than one new arrival, pick one randomly.
 (DefineLink
 	(DefinedSchema "glance at new person")
 	(Put
-		(Evaluation (GroundedPredicate "py:glance_at_face")
-			(ListLink (Variable "$face")))
-		; If more than one new arrival, pick one randomly.
+		(DefinedPredicate "glance and ack")
 		(RandomChoice (DefinedSchema "New arrivals"))
 	))
 
-;; Glance at the last known location of a face that is no longer visible
+;; Glance at the last known location of a face that is no longer
+;; visible.
 (DefineLink
-	(DefinedSchemaNode "glance at lost face")
-	(PutLink
-		(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
-			(ListLink (VariableNode "$face")))
+	(DefinedSchema "glance at lost face")
+	(Put
+		(Evaluation (GroundedPredicateNode "py:glance_at_face")
+			(ListLink (Variable "$face")))
 		(DefinedSchemaNode "New departures")))
 
 ; ------------------------------------------------------
