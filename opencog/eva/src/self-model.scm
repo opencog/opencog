@@ -315,6 +315,7 @@
 (DefineLink
 	(DefinedPredicateNode "Did someone leave?")
 	(SatisfactionLink
+		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
 		(AndLink
 			; If someone was previously acked...
 			(PresentLink (EvaluationLink (PredicateNode "acked face")
@@ -326,15 +327,16 @@
 
 ;; Return list of recetly departed individuals
 (DefineLink
-	(DefinedSchemaNode "New departures")
-	(GetLink
+	(DefinedSchema "New departures")
+	(Get
+		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
 		(AndLink
 			; If someone was previously acked...
-			(PresentLink (EvaluationLink (PredicateNode "acked face")
-					(ListLink (VariableNode "$face-id"))))
+			(PresentLink (Evaluation (Predicate "acked face")
+					(ListLink (Variable "$face-id"))))
 			; But is no loger visible...
-			(AbsentLink (EvaluationLink (PredicateNode "visible face")
-					(ListLink (VariableNode "$face-id"))))
+			(AbsentLink (Evaluation (Predicate "visible face")
+					(List (Variable "$face-id"))))
 	)))
 
 ;;
@@ -493,8 +495,8 @@
 
 ;; Select a face at random, and glance at it.
 (DefineLink
-	(DefinedPredicateNode "glance at random face")
-	(SequentialAndLink
+	(DefinedPredicate "glance at random face")
+	(SequentialAnd
 		(DefinedPredicate "Select random glance target")
 		(Put
 			(DefinedPredicate "glance and ack")
@@ -518,7 +520,7 @@
 	(Put
 		(Evaluation (GroundedPredicateNode "py:glance_at_face")
 			(ListLink (Variable "$face")))
-		(DefinedSchemaNode "New departures")))
+		(DefinedSchema "New departures")))
 
 ; ------------------------------------------------------
 
