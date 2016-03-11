@@ -71,38 +71,6 @@ except:
 	(display " seconds\n")
 	(stv 1 1))
 
-; --------------------------------------------------------
-
-;; Select a face at random, and glance at it.
-(DefineLink
-	(DefinedPredicateNode "glance at random face")
-	(SequentialAndLink
-		(DefinedPredicateNode "Select random glance target")
-		(TrueLink (PutLink
-			(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
-				(ListLink (VariableNode "$face")))
-			(GetLink (StateLink glance-state (VariableNode "$face-id")))
-		))))
-
-;; Glance at one of the newly-arrived faces.
-(DefineLink
-	(DefinedSchema "glance at new person")
-	(Put
-		(Evaluation (GroundedPredicate "py:glance_at_face")
-			(ListLink (Variable "$face")))
-		; If more than one new arrival, pick one randomly.
-		(RandomChoice (DefinedSchema "New arrivals"))
-	))
-
-;; Glance at the last known location of a face that is no longer visible
-(DefineLink
-	(DefinedSchemaNode "glance at lost face")
-	(PutLink
-		(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
-			(ListLink (VariableNode "$face")))
-		(DefinedSchemaNode "New departures")))
-
-
 ;; ------------------------------------------------------------------
 ;; Personality-related timeouts.
 ;;
