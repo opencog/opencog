@@ -95,8 +95,14 @@
 ;; movemet subsystem to move to a neutral position.
 (define neutral-face (ConceptNode "0"))
 
+;; The person she is interacting with.
+;; Not the same as eye-contact state, because she may have been
+;; told to look the other way (i.e. break off eye contact)
+(define-public interaction-state (AnchorNode "Interaction State"))
+(StateLink interaction-state no-interaction)
+
 ; --------------------------------------------------------
-; Chatbot-related stuff.  In the curent design, the chatbot talks
+; Chatbot-related stuff.  In the current design, the chatbot talks
 ; whenever it feels like it; we are simply told when it is talking
 ; when it has stopped talking, and what emotions we should display,
 ; so that it's consistent with the speech emotions.
@@ -305,10 +311,9 @@
 	)))
 
 ;; Return the person with whom we are currently interacting.
-;; aka "current_face_target" in Owyl.
 (DefineLink
 	(DefinedSchemaNode "Current interaction target")
-	(GetLink (StateLink eye-contact-state (VariableNode "$x"))))
+	(GetLink (StateLink interaction-state (VariableNode "$x"))))
 
 ;; Return true if some face has is no longer visible (has left the room)
 ;; We detect this by looking for "acked" faces tat are not also visible.
@@ -390,7 +395,7 @@
 	)))
 
 ;; Randomly glance at someone (who we are not currently making
-;; eye-constact with)
+;; eye-contact with)
 (DefineLink
 	(DefinedPredicate "Select random glance target")
 	(SequentialAnd
@@ -445,10 +450,10 @@
 	(OrLink
 		; true if talking not listening.
 		(NotLink (DefinedPredicate "chatbot is listening"))
-		; true if not not-interacting.
+		; true if not not-making eye-contact.
 		(NotLink (Equal
 			(SetLink no-interaction)
-			(Get (State eye-contact-state (Variable "$x"))))
+			(Get (State interaction-state (Variable "$x"))))
 	)))
 
 
@@ -471,8 +476,9 @@
 		(Get (State eye-contact-state (Variable "$x")))
 	))
 
-;; Move to a neutral head position. Right now, this just issues a
-;; look-at command; it could do more (e.g. halt the chatbot.)
+;; Move to a neutral head position.
+;; This clears the interaction and eye-contact state,
+;; and turns head to face forward.
 (DefineLink
 	(DefinedPredicate "return to neutral")
 	(SequentialAnd
@@ -480,6 +486,9 @@
 			(ListLink neutral-face))
 		(True (Put
 			(State eye-contact-state (Variable "$face-id"))
+			no-interaction))
+		(True (Put
+			(State interaction-state (Variable "$face-id"))
 			no-interaction))
 	))
 
@@ -523,10 +532,27 @@
 	(DefinedSchema "glance at lost face")
 	(Put
 		(Evaluation (GroundedPredicateNode "py:glance_at_face")
-			(ListLink (Variable "$face")))
+			(ListLink (Variable "$face-id")))
 		(DefinedSchema "New departures")))
 
 ; ------------------------------------------------------
+
+; Set the interaction target
+(DefineLink
+	(DefinedPredicate "Set interaction target")
+	(LambdaLink
+		(Variable "$face-id")
+		(SequentialAnd
+
+			; Set the eye-contact state.
+			(True (StateLink eye-contact-state (VariableNode "$face-id")))
+
+			; Set the interaction state too...
+			(True (StateLink interaction-state (VariableNode "$face-id")))
+
+			; Record a timestamp
+			(True (DefinedSchema "set interaction timestamp"))
+		)))
 
 ;; Change the eye-contact target to a face picked randomly from the
 ;; crowd. (Caution: this might randomly pick the existing face...)
@@ -537,12 +563,11 @@
 (DefineLink
 	(DefinedPredicate "Change interaction")
 	(SequentialAnd
-		; First, pick a face at random...
+		; Pick a face at random...
 		(True (Put
-			(StateLink eye-contact-state (VariableNode "$face-id"))
+			(DefinedPredicate "Set interaction target")
 			(DefinedSchema "Select random face")))
-		; Record a timestamp
-		(True (DefinedSchema "set interaction timestamp"))
+
 		; Diagnostic print
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Start new interaction")))
@@ -555,12 +580,10 @@
 ;; (DefinedSchema "look at person") to make it look.
 (DefineLink
 	(DefinedPredicate "interact with new person")
-	(SequentialAnd
-		(True (Put (State eye-contact-state (Variable "$x"))
-			; If more than one new arrival, pick one randomly.
-			(RandomChoice (DefinedSchema "New arrivals"))))
-		(TrueLink (DefinedSchema "set interaction timestamp"))
-	))
+	(True (Put (DefinedPredicate "Set interaction target")
+		; If more than one new arrival, pick one randomly.
+		(RandomChoice (DefinedSchema "New arrivals"))))
+)
 
 ;; Set eye-contact face to the requested face.
 ;;
@@ -570,11 +593,11 @@
 (DefineLink
 	(DefinedPredicate "interact with requested person")
 	(SequentialAnd
-		(True (Put (State eye-contact-state (Variable "$face-id"))
+		(True (Put (DefinedPredicate "Set interaction target")
 			(Get (State request-eye-contact-state (Variable "$x")))))
+		; Now, clear the request.
 		(True (Put (State request-eye-contact-state (Variable "$face-id"))
 			no-interaction))
-		(True (DefinedSchema "set interaction timestamp"))
 	))
 
 ;; ------------------------------------------------------------------
