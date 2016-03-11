@@ -343,6 +343,15 @@
 		(Put (DefinedPredicate "Request Set Emotion State")
 			(ListLink bhv-source (ConceptNode "bored")))
 
+		; If the room is empty, but we hear people talking ...
+		(True (SequentialAnd
+			(DefinedPredicate "Heard Something?")
+			(Put (DefinedPredicate "Publish behavior")
+				(Concept "Who is there?"))
+			; Well, we are not bored, if we hear strange noises.
+			(True (DefinedSchema "set bored timestamp"))
+		))
+
 		; Pick a bored expression, gesture
 		(SequentialOr
 			(Not (DefinedPredicate "Time to change expression"))
@@ -460,8 +469,13 @@
 		(SequentialOr
 			(DefinedPredicate "Is bored?")
 			(DefinedPredicate "Is sleeping?")
-			(DefinedPredicate "Heard Something?")
-
+			(SequentialAnd
+				(DefinedPredicate "Heard Something?")
+				(True (Put (DefinedPredicate "Publish behavior")
+					(Concept "What was that sound?")))
+				; We are not bored, if we are hearing strange noises.
+				(True (DefinedSchema "set bored timestamp"))
+			)
 			(SequentialAnd
 				(Evaluation (DefinedPredicate "Request Set Soma State")
 					(ListLink bhv-source soma-bored))
@@ -500,7 +514,13 @@
 					(SequentialOr
 						; Did we sleep for long enough?
 						(DefinedPredicate "Time to wake up")
-						(DefinedPredicate "Heard Something?")
+						(SequentialAnd
+							(DefinedPredicate "Heard Something?")
+							(True (Put (DefinedPredicate "Publish behavior")
+								(Concept "What was that sound?")))
+							; We are not bored, if we are hearing strange noises.
+							(True (DefinedSchema "set bored timestamp"))
+						)
 					)
 					(DefinedPredicate "Wake up")
 				)
