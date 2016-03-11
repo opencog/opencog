@@ -27,6 +27,7 @@
 (add-to-load-path "/usr/local/share/opencog/scm")
 
 (use-modules (opencog))
+(use-modules (opencog query))  ; XXX work-around relex2logic bug
 
 ; Start the cogsserver.  It is used by the face-tracker to poke data
 ; into the atomspace.
@@ -48,6 +49,8 @@ except:
 ")
 
 ; Load the behavior trees.
+(use-modules (opencog exec))        ; needed for cog-evaluate! in put_atoms.py
+(use-modules (opencog eva-model))   ; needed for defines in put_atoms.py
 (use-modules (opencog eva-behavior))
 
 ; Load the Sophia personality configuration.
@@ -59,6 +62,23 @@ except:
 ;; The main loop runs in its own thread.
 (define (run) (behavior-tree-run))
 (define (halt) (behavior-tree-halt))
+
+; ---------------------------------------------------------
+; Load the chat modules.
+;
+(use-modules (opencog nlp))
+(use-modules (opencog nlp chatbot-eva))
+
+; XXX remove the below when we get a chance.
+; Must load the rulebase before running eva; see bug
+; https://github.com/opencog/opencog/issues/2021 for details
+; XXX fixme -- we should not need to load either relex2logic or
+; the rules right here, since the code in this module does not depend
+; directly on thes.
+(use-modules (opencog nlp relex2logic))
+(load-r2l-rulebase)
+
+; ---------------------------------------------------------
 
 ; Run the hacky garbage collection loop.
 (run-behavior-tree-gc)

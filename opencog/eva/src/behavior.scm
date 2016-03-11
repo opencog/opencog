@@ -10,12 +10,14 @@
 ; surprised when someone leaves unexpectedly.
 ;
 ; HOWTO:
+; ------
 ; Run the main loop:
 ;    (behavior-tree-run)
 ; Pause the main loop:
 ;    (behavior-tree-halt)
 ;
 ; Unit testing:
+; -------------
 ; The various predicates below can be manually unit tested by manually
 ; adding and removing new visible faces, and then manually invoking the
 ; various rules. See faces.scm for utilities.
@@ -23,7 +25,7 @@
 ; Basic examples:
 ;    Manually insert a face: (make-new-face id)
 ;    Remove a face: (remove-face id)
-;    Etc.: (show-room-state) (show-interaction-state) (show-visible-faces)
+;    Etc.: (show-room-state) (show-eye-contact-state) (show-visible-faces)
 ;
 ; Manually unit test the new-arrival sequence.  You can do this without
 ; an attached camera; she won't track the face location, but should respond.
@@ -31,7 +33,7 @@
 ;    (cog-evaluate! (DefinedPredicateNode "New arrival sequence"))
 ;    (show-acked-faces)
 ;    (show-room-state)
-;    (show-interaction-state)
+;    (show-eye-contact-state)
 ;    (cog-evaluate! (DefinedPredicateNode "Interact with people"))
 ;
 ; Unit test the main interaction loop:
@@ -43,124 +45,79 @@
 ; Unit test chatbot:
 ;    (State chat-state chat-start) ; to simulate having it talk.
 ;    (State chat-state chat-stop)  ; to signal that talking has stopped.
-
-(add-to-load-path "/usr/local/share/opencog/scm")
-
-(use-modules (opencog) (opencog query) (opencog exec))
-(use-modules (opencog atom-types))
-(use-modules (opencog python))
-
-; Try loading the python code from this directory;
-; else go for the install directory. This is kind-of hacky;
-; is there a nicer way to load stuff?
 ;
-; (python-eval
-;    "import sys\nsys.path.insert(0, '/usr/local/share/opencog/python')\n")
+; --------------------------------------------------------
+; Character engine notes
+; The character engine is an older incarnation of this code, predating
+; the owyl behavior trees.  The below are notes abouit some of the
+; things it did, and where to look for equivalents here.
 ;
-(python-eval "
-execfile('atomic.py')
-try:
-    do_wake_up()
-except NameError:
-    execfile('/usr/local/share/opencog/python/atomic.py')
-")
-
-(use-modules (opencog eva-model))
-
+; 1) Room-state transtions
+; -- no faces present for a while
+;     (cog-evalute! (DefinedPredicateNode "Search for attention"))
+; -- no-face just transitioned to one-face
+;     (cog-evaluate! (DefinedPredicateNode "Was Empty Sequence"))
+; -- no-face just transitioned to multiple-faces
+; -- one-face just transitioned to no-face
+; -- one-face just transitioned to multiple-faces
+;      (DefinedPredicate "Respond to new arrival")
+;      (DefinedPredicateNode "Interacting Sequence")
+; -- one face present for a while
+; -- multiple faces present for a while
+; -- multiple-faces just transitioned to one-face
+; -- multiple-faces just transitioned to no-face
+;
+; 2) Interactions depend on whether person is known or not.
+;
+; -- it's a familiar face
+; -- it's a familiar face to whom the robot has already been introduced
+; -- it's an unfamiliar face
+;
+; 3) Familiar-face interactions
+;
+; -- prior emotions when interacting with that face were positive
+; -- prior emotions when interacting with that face were negative
+; -- prior emotions when interacting with that face were neutral
+;
+; 4) Introduction sequence
+;    If the robot is talking to someone with whom it has not previously
+;    been introduced, it can enter into a short procedure aimed at
+;    gathering the person's name...
+;
+; 5) Adhoc animation patterns
+;
+; -- changing a subject (maybe the AIML can send a signal indicating
+;    when the subject is being changed?)
+; -- asking a question of the user
+; -- starting to talk after a period of being silent
+; -- ending an interaction with one guy before shifting attention to
+;    another guy
+; -- starting an interaction with a new guy after shifting attention
+;    from another guy
+;
 ; --------------------------------------------------------
-; Some debug prints.
-; The are define-public, because otherwise the
-; `(GroundedPredicate "scm: print-msg")` won't work.
-
-(define-public (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
-(define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
-
-; Print message, and print the current interaction face-id
-(define-public (print-msg-face node)
-	(display (cog-name node))
-	(display " with face id: ")
-	(display (cog-name (car (cog-outgoing-set (cog-execute!
-			(DefinedSchemaNode "Current interaction target"))))))
-	(newline)
-	(stv 1 1))
-
-; Print message, then print elapsed time
-(define-public (print-msg-time node time)
-	(display (cog-name node))
-	(display " Elapsed: ")
-	(display (cog-name time))
-	(display " seconds\n")
-	(stv 1 1))
-
-; --------------------------------------------------------
-
-; Start interacting with a new face picked randomly from the crowd.
-(DefineLink
-	(DefinedPredicateNode "Start new interaction")
-	(SequentialAndLink
-		; First, pick a face at random...
-		(TrueLink (PutLink
-			(StateLink interaction-state (VariableNode "$face-id"))
-			(DefinedSchemaNode "Select random face")))
-		; Record a timestamp
-		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
-		; Diagnostic print
-		(Evaluation (GroundedPredicate "scm: print-msg-face")
-			(ListLink (Node "--- Start new interaction")))
-	))
-
-;; ------
-
-;; line 809 + line 483 -- glance_at(id="current_glance_target")
-(DefineLink
-	(DefinedPredicateNode "glance at random face")
-	(SequentialAndLink
-		(DefinedPredicateNode "Select random glance target")
-		(TrueLink (PutLink
-			(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
-				(ListLink (VariableNode "$face")))
-			(GetLink (StateLink glance-state (VariableNode "$face-id")))
-		))))
-
-;; line 818 -- glance_at_new_face()
-(DefineLink
-	(DefinedSchema "glance at new person")
-	(Put
-		(Evaluation (GroundedPredicate "py:glance_at_face")
-			(ListLink (Variable "$face")))
-		; If more than one new arrival, pick one randomly.
-		(RandomChoice (DefinedSchema "New arrivals"))
-	))
-
-;; line 827 -- glance_at_lost_face()
-(DefineLink
-	(DefinedSchemaNode "glance at lost face")
-	(PutLink
-		(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
-			(ListLink (VariableNode "$face")))
-		(DefinedSchemaNode "New departures")))
-
+;
+; This will be used to tag the name of the module making the request.
+; Everything in ths module is the behavior tree, so that is what we
+; call it.
+(define bhv-source (Concept "Behavior Tree"))
 
 ; ------------------------------------------------------
 ; More complex interaction sequences.
 
-
-;; Interact with the curent face target.
-;; line 762, interact_with_face_target()
+;; Interact with the current face target.
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
 (DefineLink
 	(DefinedPredicate "Interact with face")
 	(SequentialAnd
-		;; Look at the interaction face - line 765
-		(True (DefinedSchema "look at person"))
+		;; Look at the interaction face
+		(DefinedPredicate "look at person")
 
 		;; Show random expressions only if NOT talking
-		; aka "do_pub_emotions=False" in the new owyl tree.
 		(SequentialOr
 			(Not (DefinedPredicate "chatbot is listening"))
 			(SequentialAnd
 
-				;; line 768
 				(SequentialOrLink
 					(NotLink (DefinedPredicateNode "Time to change expression"))
 					(DefinedPredicateNode "Show positive expression")
@@ -172,54 +129,60 @@ except NameError:
 	))
 
 ; ------------------------------------------------------
-;; Sequence - if there were no people in the room, then look at the
-;; new arrival.
-;; line 391 -- owyl.sequence
+;; Was Empty Sequence - if there were no people in the room, then
+;; look at the new arrival.
+;;
 ;; (cog-evaluate! (DefinedPredicateNode "Was Empty Sequence"))
 (DefineLink
 	(DefinedPredicate "Was Empty Sequence")
 	(SequentialAnd
-		;; line 392
-		(DefinedPredicateNode "was room empty?")
-		(TrueLink (DefinedSchemaNode "interact with new person"))
-		(TrueLink (DefinedSchemaNode "look at person"))
-		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
-		(PutLink (DefinedPredicateNode "Show random expression")
+		(DefinedPredicate "was room empty?")
+		; Record a new emotional state (for self-awareness)
+		; XXX FIXME this should be a prt of "Show random expression"
+		; below ...
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (Concept "new-arrival")))
+
+		(DefinedPredicate "interact with new person")
+		(DefinedPredicate "look at person")
+		(Put (DefinedPredicate "Show random expression")
 			(ConceptNode "new-arrival"))
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Look at new arrival"))
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Look at newly arrived person")))
 	))
 
-;; If interaction is requested, then interact wwith that person.
-;; Make sure we look at that person and restart the interaction timer.
+;; If interaction is requested, then interact with that specific person.
+;; Make sure we look at that person ...
 (DefineLink
 	(DefinedPredicate "Interaction requested")
 	(SequentialAnd
 		(DefinedPredicate "Someone requests interaction?")
-		(DefinedPredicate "If sleeping then wake")
-		(DefinedPredicate "If bored then alert")
-		(True (DefinedSchema "interact with requested person"))
-		(True (DefinedSchema "clear requested face"))
-		(True (DefinedSchema "look at person"))
-		(True (DefinedSchema "set interaction timestamp"))
+		(True (DefinedPredicate "If sleeping then wake"))
+		(True (DefinedPredicate "If bored then alert"))
+		(DefinedPredicate "interact with requested person")
+		(DefinedPredicate "look at person")
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Look at requested face"))
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Looking at requested face")))
 	))
 
-;; line 399 -- Sequence - Currently interacting with someone
+;; Sequence - Currently interacting with someone when a new person
+;  becomes visible.
 ; (cog-evaluate! (DefinedPredicateNode "Interacting Sequence"))
 (DefineLink
-	(DefinedPredicateNode "Interacting Sequence")
-	(SequentialAndLink
-		(DefinedPredicateNode "is interacting with someone?")
-		(DefinedPredicateNode "dice-roll: glance new face")
-		(TrueLink (DefinedSchemaNode "glance at new person"))
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+	(DefinedPredicate "Interacting Sequence")
+	(SequentialAnd
+		(DefinedPredicate "Is interacting with someone?")
+		(DefinedPredicate "dice-roll: glance new face")
+		(True (DefinedSchema "glance at new person"))
+		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "--- Glance at new person")))
 	))
 
 ;; Respond to a new face becoming visible.
-;; line 389 -- Selector
 ;
 ;; XXX TODO -- need to also do line 590, if interacting for a while
 ;; this alters probability of glance...
@@ -229,145 +192,180 @@ except NameError:
 		(DefinedPredicate "Was Empty Sequence")
 		(DefinedPredicate "Interacting Sequence")
 		(Evaluation (GroundedPredicate "scm: print-msg")
-			(ListLink (Node "--- Ignoring new person"))) ; line 406
+			(ListLink (Node "--- Ignoring new person")))
 		(True)
 	))
 
-;; ##### If Interruption && Sleeping -> Wake Up #####
-;; line 545
+;; Return false if not sleeping.
+;; Return true if we were sleeping, and we woke up.
 (DefineLink
 	(DefinedPredicate "If sleeping then wake")
-	(SequentialOr
-		(SequentialAnd
-			(Equal (SetLink soma-sleeping)
-				(Get (State soma-state (Variable "$x"))))
-			(DefinedPredicateNode "Wake up"))
-		(True)))
+	(SequentialAnd
+		(DefinedPredicate "Is sleeping?")
+		(DefinedPredicate "Wake up")))
 
 ;; If soma state was bored, change state to alert.
-;; If we don't do this, then being bored while also talking
-;; can make us narcoleptic.
+;; If we don't do this, then we risk being bored while also talking,
+;; which will make us fall asleep if bored too long (narcoleptic).
+;;
+;; Return false if not bored.
+;; Return true if we were bored, and we woke up.
 (DefineLink
 	(DefinedPredicate "If bored then alert")
-	(SequentialOr
-		(NotLink (Equal (SetLink soma-bored)
-			(Get (State soma-state (Variable "$x")))))
-		(True (Put (State soma-state (Variable "$x")) soma-awake))))
+	(SequentialAnd
+		(DefinedPredicate "Is bored?")
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-awake))))
 
 ;; Check to see if a new face has become visible.
-;; line 386 -- someone_arrived()
 (DefineLink
 	(DefinedPredicate "New arrival sequence")
 	(SequentialAnd
 		(DefinedPredicate "Did someone arrive?")
-		(DefinedPredicate "If sleeping then wake")
-		(DefinedPredicate "If bored then alert")
+		(True (DefinedPredicate "If sleeping then wake"))
+		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "Respond to new arrival")
 		(DefinedPredicate "Update status")
 	))
 
 ;; Check to see if someone left.
-;; line 422 -- someone_left()
 (DefineLink
-	(DefinedPredicateNode "Someone left")
-	(SequentialAndLink
-		(DefinedPredicateNode "Did someone leave?")
-		(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+	(DefinedPredicate "Someone left")
+	(SequentialAnd
+		(DefinedPredicate "Did someone leave?")
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Someone left"))
+		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "--- Someone left")))
-		(SequentialOrLink
+		(SequentialOr
 			; Were we interacting with the person who left? If so,
-			; look frustrated, return to neutral. Oh, and clear the
-			; interaction target, too.
-			(SequentialAndLink
-				(EqualLink
-					(DefinedSchemaNode "New departures")
-					(GetLink (StateLink interaction-state (VariableNode "$x"))))
-				(DefinedPredicateNode "Show frustrated expression")
-				(DefinedPredicateNode "return to neutral")
-				(TrueLink (PutLink
-					(StateLink interaction-state (VariableNode "$face-id"))
-					no-interaction))
+			; look frustrated, return head position to neutral.
+			(SequentialAnd
+				(Equal
+					(DefinedSchema "New departures")
+					(Get (State eye-contact-state (Variable "$x"))))
+				(DefinedPredicate "Show frustrated expression")
+				(DefinedPredicate "return to neutral")
 			)
 			;; Were we interacting with someone else?  If so, then
 			;; maybe glance at the location of the person who left.
-			(SequentialAndLink
-				(DefinedPredicateNode "is interacting with someone?")
-				(SequentialOrLink
-					(NotLink (DefinedPredicateNode "dice-roll: glance lost face"))
-					(FalseLink (DefinedSchemaNode "glance at lost face"))
-					(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(SequentialAnd
+				(DefinedPredicate "Is interacting with someone?")
+				(SequentialOr
+					(NotLink (DefinedPredicate "dice-roll: glance lost face"))
+					(FalseLink (DefinedSchema "glance at lost face"))
+					(Evaluation (GroundedPredicate "scm: print-msg")
 						(ListLink (Node "--- Glance at lost face"))))
 				(TrueLink)
 			)
-			(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+			(Evaluation (GroundedPredicate "scm: print-msg")
 				(ListLink (Node "--- Ignoring lost face")))
 			(TrueLink)
 		)
 		;; Clear the lost face target
-		(DefinedPredicateNode "Clear lost face")
-		(DefinedPredicateNode "Update room state")
+		(DefinedPredicate "Clear lost face")
+		(DefinedPredicate "Update room state")
 	))
 
-;; Collection of things to while interacting with people
-;; Evalutes to true if there is an ongoing interaction with
+;; Collection of things to do while interacting with people.
+;; Evaluates to true if there is an ongoing interaction with
 ;; someone.
-;; line 457 -- interact_with_people()
 (DefineLink
 	(DefinedPredicate "Interact with people")
-	(SequentialAnd ; line 458
+	(SequentialAnd
 		; True, if there is anyone visible.
-		(DefinedPredicate "Someone visible") ; line 459
+		(DefinedPredicate "Someone visible")
+
+		; Say something, if no one else has said anything in a while.
+		; i.e. if are being ignored, then say something.
+		(SequentialOr
+			(SequentialAnd
+				(DefinedPredicate "Silent too long")
+				(Evaluation (GroundedPredicate "scm: print-msg")
+					(ListLink (Node "--- Everyone is ignoring me!!!")))
+				(Put (DefinedPredicate "Publish behavior")
+					(Concept "Sound of crickets"))
+				(True (DefinedSchema "set heard-something timestamp"))
+			)
+			(True)
+		)
+
 		; This sequential-or is true if we're not interacting with anyone,
 		; or if there are several people and its time to change up.
-		(SequentialOr ; line 460
-			; ##### Start A New Interaction #####
-			(SequentialAnd ; line 462
-				(SequentialOr ; line 463
-					(Not (DefinedPredicate "is interacting with someone?"))
-					(SequentialAnd ; line 465
+		(SequentialOr
+			; Start a new interaction, if we've been interacting with
+			; someone for too long.
+			(SequentialAnd
+				(SequentialOr
+					(Not (DefinedPredicate "Is interacting with someone?"))
+					(SequentialAnd
 						(DefinedPredicate "More than one face visible")
 						(DefinedPredicate "Time to change interaction")))
-				; Select a new face target
-				(DefinedPredicate "Start new interaction")
-				(DefinedPredicate "Interact with face"))
+				; Select a new face target, interact with it.
+				(DefinedPredicate "Change interaction")
+				(DefinedPredicate "Interact with face")
+				(Put (DefinedPredicate "Publish behavior")
+					(Concept "Interact with someone else"))
+			)
 
 			; ##### Glance At Other Faces & Continue With The Last Interaction
-			(SequentialAnd ; line 476
+			(SequentialAnd
 				; Gets called 10x/second; don't print.
-				;(EvaluationLink (GroundedPredicateNode "scm: print-msg")
+				;(Evaluation (GroundedPredicate "scm: print-msg")
 				;	(ListLink (Node "--- Continue interaction")))
-				(SequentialOr  ; line 478
-					(SequentialAnd ; line 479
+				(SequentialOr
+					(SequentialAnd
 						(DefinedPredicate "More than one face visible")
 						(DefinedPredicate "dice-roll: group interaction")
 						(DefinedPredicate "glance at random face"))
-					(True)) ; line 485
+					(True))
 				(DefinedPredicateNode "Interact with face")
-				(SequentialOr  ; line 488
-					(SequentialAnd ; line 489
+				(SequentialOr
+					(SequentialAnd
 						(DefinedPredicateNode "dice-roll: face study")
 ; XXX incomplete!  need the face study saccade stuff...
 ; I am confused ... has this been superceeded by the ROS-saccades,
 ; or is this still means to be used?
 						(False)
 					)
-					(True))  ; line 493
-			))
+					(True))
+			)
+			(DefinedPredicate "Is interacting with someone?")
+		)
 	))
 
 ; ------------------------------------------------------
 ; Empty-room behaviors. We either search for attention, or we sleep,
 ; or we wake up.
 
-; line 898 -- search_for_attention.
 (DefineLink
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "bored")))
+
+		; If the room is empty, but we hear people talking ...
+		(True (SequentialAnd
+			(DefinedPredicate "Heard Something?")
+			(Put (DefinedPredicate "Publish behavior")
+				(Concept "Who is there?"))
+			; Well, we are not bored, if we hear strange noises.
+			(True (DefinedSchema "set bored timestamp"))
+		))
+
 		; Pick a bored expression, gesture
 		(SequentialOr
 			(Not (DefinedPredicate "Time to change expression"))
+
+			; Tell ROS that we are looking for attention, ... but not
+			; too often. Piggy-back on "Time to change expression" to
+			; rate-limit the message.
+			(False (Put (DefinedPredicate "Publish behavior")
+				(Concept "Searching for attention")))
 			(PutLink (DefinedPredicateNode "Show random expression")
-				(ConceptNode "bored")))
+				(ConceptNode "bored"))
+		)
 		(SequentialOr
 			(Not (DefinedPredicate "Time to make gesture"))
 			(PutLink (DefinedPredicateNode "Show random gesture")
@@ -387,52 +385,68 @@ except NameError:
 							(DefinedSchema "gaze right max")
 							(DefinedSchema "gaze left max"))
 						(Number 0)))
-				(TrueLink (DefinedSchemaNode "set attn-search timestamp"))
+				(True (DefinedSchema "set attn-search timestamp"))
 			))
 	))
 
 ; Call once, to fall asleep.
-; line 941 -- go_to_sleep
 (DefineLink
 	(DefinedPredicate "Go to sleep")
 	(SequentialAnd
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "sleepy")))
+
+		; Proceed with the sleep animation only if the state
+		; change was approved.
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-sleeping))
+
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Go to sleep.")
 				(Minus (TimeLink) (DefinedSchema "get bored timestamp"))))
 		(True (DefinedSchema "set sleep timestamp"))
 
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Falling asleep"))
+
 		; First, show some yawns ...
 		(Put (DefinedPredicate "Show random expression")
-			(Concept "sleep"))
+			(Concept "sleepy"))
 		(Put (DefinedPredicate "Show random gesture")
-			(Concept "sleep"))
+			(Concept "sleepy"))
 
 		; Finally, play the go-to-sleep animation.
 		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
-		(True (Put (State soma-state (VariableNode "$x")) soma-sleeping))
-	))
-
-; line 537 -- Continue To Sleep
-(DefineLink
-	(DefinedPredicateNode "Continue sleeping")
-	(SequentialAndLink
-		(TrueLink (DefinedSchemaNode "set bored timestamp"))
-		;(EvaluationLink (GroundedPredicateNode "scm: print-msg")
-		;	(ListLink (Node "--- Continue sleeping.")))
 	))
 
 ; Wake-up sequence
-; line 957 -- wake_up()
 (DefineLink
 	(DefinedPredicate "Wake up")
 	(SequentialAnd
+		; Request change soma state to being awake. Proceed only if
+		; the request is accepted.
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-awake))
+
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Emotion State")
+			(ListLink bhv-source (ConceptNode "wake-up")))
+
 		(Evaluation (GroundedPredicate "scm: print-msg-time")
 			(ListLink (Node "--- Wake up!")
 				(Minus (TimeLink) (DefinedSchema "get sleep timestamp"))))
-		(TrueLink (DefinedSchema "set bored timestamp"))
 
-		; Change soma state to being awake.
-		(True (Put (State soma-state (Variable "$x")) soma-awake))
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Waking up"))
+
+		; Reset the bored timestamp, as otherwise we'll fall asleep
+		; immediately (cause we're bored).
+		(True (DefinedSchema "set bored timestamp"))
+
+		; Reset the "heard something" state and timestamp.
+		(True (DefinedPredicate "Heard Something?"))
+		(True (DefinedSchema "set heard-something timestamp"))
 
 		; Run the wake animation.
 		(Evaluation (GroundedPredicate "py:do_wake_up") (ListLink))
@@ -444,43 +458,49 @@ except NameError:
 			(Concept "wake-up"))
 	))
 
-;; Collection of things to do if nothing is happening (no faces
-;; are visibile)
-;; Go to sleep after a while, and wake up every now and then.
-;; line 507 -- nothing_is_happening()
+;; Collection of things to do if nothing is happening (i.e. if no faces
+;; are visible).
+;; -- Go to sleep if we've been bored for too long.
+;; -- Wake up if we've slept too long, or if we heard noises (speech)
 (DefineLink
 	(DefinedPredicate "Nothing is happening")
-	(SequentialAnd  ; line 508
+	(SequentialAnd
 
 		; If we are not bored already, and we are not sleeping,
-		; then we are bored now...
+		; and we didn't hear any noises, then we are bored now...
 		(SequentialOr
-			(Equal (SetLink soma-bored)
-				(Get (State soma-state (Variable "$x"))))
-
-			(Equal (SetLink soma-sleeping)
-				(Get (State soma-state (Variable "$x"))))
-
+			(DefinedPredicate "Is bored?")
+			(DefinedPredicate "Is sleeping?")
 			(SequentialAnd
-				(True (Put (State soma-state (Variable "$x")) soma-bored))
+				(DefinedPredicate "Heard Something?")
+				(True (Put (DefinedPredicate "Publish behavior")
+					(Concept "What was that sound?")))
+				; We are not bored, if we are hearing strange noises.
+				(True (DefinedSchema "set bored timestamp"))
+			)
+			(SequentialAnd
+				(Evaluation (DefinedPredicate "Request Set Soma State")
+					(ListLink bhv-source soma-bored))
 
 				(True (DefinedSchema "set bored timestamp"))
+
+				(Put (DefinedPredicate "Publish behavior")
+					(Concept "This is boring"))
 
 				; ... print output.
 				(Evaluation (GroundedPredicate "scm: print-msg")
 					(ListLink (Node "--- Bored! nothing is happening!")))
 			))
 
-		(SequentialOr  ; line 509
-			; ##### Is Not Sleeping #####
-			(SequentialAnd ; line 511
+		(SequentialOr
+			; If we're not sleeping yet, then fall asleep
+			(SequentialAnd
 				; Proceed only if not sleeping ...
-				(Not (Equal (SetLink soma-sleeping)
-					(Get (State soma-state (Variable "$x")))))
+				(Not (DefinedPredicate "Is sleeping?"))
 
-				(SequentialOr  ; line 513
+				(SequentialOr
 					; ##### Go To Sleep #####
-					(SequentialAnd  ; line 515
+					(SequentialAnd
 						(DefinedPredicate "Bored too long")
 						(DefinedPredicate "Go to sleep"))
 
@@ -488,36 +508,55 @@ except NameError:
 					; If we didn't fall asleep above, then search for attention.
 					(DefinedPredicate "Search for attention")
 				))
-			; ##### Is Sleeping #####
-			(SequentialOr  ; line 528
-				; ##### Wake Up #####
-				(SequentialAnd  ; line 530
-					; Did we sleep for long enough?
-					(DefinedPredicate "Time to wake up")
+
+			; If we are sleeping, then maybe its time to wake?
+			(SequentialOr
+				; Maybe its time to wake up ...
+				(SequentialAnd
+					(SequentialOr
+						; Did we sleep for long enough?
+						(DefinedPredicate "Time to wake up")
+						(SequentialAnd
+							(DefinedPredicate "Heard Something?")
+							(True (Put (DefinedPredicate "Publish behavior")
+								(Concept "What was that sound?")))
+							; We are not bored, if we are hearing strange noises.
+							(True (DefinedSchema "set bored timestamp"))
+						)
+					)
 					(DefinedPredicate "Wake up")
 				)
 				; ##### Continue To Sleep #####
-				(DefinedPredicate "Continue sleeping")
+				; Currently, a no-op...
+				(SequentialAndLink
+					(TrueLink)
+					;(Evaluation (GroundedPredicate "scm: print-msg")
+					;	(ListLink (Node "--- Continue sleeping.")))
+				)
 			)
 		)
 ))
 
 ;; ------------------------------------------------------------------
 ;; Chat-related behaviors.
+;;
+;; These can be unit-tested by saying
+;;    rostopic pub --once chat_events std_msgs/String speechstart
+;;    rostopic pub --once chat_events std_msgs/String speechend
 
-; Things to do, if the chatbot started talking.
+; Things to do, if TTS vocalization just started.
 (DefineLink
 	; owyl "chatbot_speech_start()" method
 	(DefinedPredicate "Speech started?")
 	(SequentialAnd
-		; If the chatbot started talking ...
+		; If the TTS vocalization started (chatbot started talking) ...
 		(DefinedPredicate "chatbot started talking")
 		; ... then switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:conversational_saccade")
 				(ListLink))
-		; ... and show one random gesture from "listening" set.
+		; ... and show one random gesture from "conversing" set.
 		(Put (DefinedPredicate "Show random gesture")
-			(ConceptNode "listening"))
+			(ConceptNode "conversing"))
 		; ... and also, sometimes, the "chatbot_positive_nod"
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "chat-positive-nod"))
@@ -614,34 +653,19 @@ except NameError:
 			(ListLink (Node "--- Finished talking")))
 	))
 
-; Things to do, if the chattbot is listening.
+; Things to do, if the chatbot is listening.
 (DefineLink
 	(DefinedPredicate "Speech listening?")
 	(SequentialAnd
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot is listening")
 
-		; No-op. The current owyl tree does nothing here.
+		; No-op.  What should we do here?
 		(TrueLink)
 	))
 
 ;; ------------------------------------------------------------------
-;; Main loop diagnostics
-;; line 988 - idle_spin()
-(define loop-count 0)
-(define do-run-loop #t)
-(define-public (idle-loop)  ; public only because its in a GPN
-	(set! loop-count (+ loop-count 1))
-
-	(if (eq? 0 (modulo loop-count 30))
-		(format #t "Main loop: ~a\n" loop-count))
-
-	; Pause for one-tenth of a second... 101 millisecs
-	(usleep 101000)
-	(if do-run-loop (stv 1 1) (stv 0 1)))
-
 ;; Main loop. Uses tail recursion optimization to form the loop.
-;; line 556 -- build_tree()
 (DefineLink
 	(DefinedPredicate "main loop")
 	(SatisfactionLink
@@ -664,47 +688,14 @@ except NameError:
 				; (DefinedPredicate "Speech listening?") ; no-op
 				(True)
 			)
-			(Evaluation
-				(GroundedPredicate "scm:idle-loop") (ListLink))
-			(Evaluation
-				(GroundedPredicate "py:ros_is_running") (ListLink))
+
+			; If ROS is dead, or the continue flag not set, then stop
+			; running the behavior loop.
+			(DefinedPredicate "Continue running loop?")
+			(DefinedPredicate "ROS is running?")
 
 			;; Call self -- tail-recurse.
 			(DefinedPredicate "main loop")
 		)))
 
-;; line 297 -- self.tree.next()
-(define-public (behavior-tree-run)
-"
- behavior-tree-run
-
- Run the Eva behavior tree main loop (in a new thread),
- Call (behavior-tree-halt) to exit the loop.
-"
-	(set! do-run-loop #t)
-	(call-with-new-thread
-		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
-
-(define-public (behavior-tree-halt)
-"
- behavior-tree-halt
-
- Tell the Eva behavior tree main loop thread to exit.
-"
-(set! do-run-loop #f))
-
-; ----------------------------------------------------------------------
-; Sigh. Perform manual garbage collection. This really should be
-; automated. XXX TODO. (Can we get ECAN to do this for us?)
-(define-public (run-behavior-tree-gc)
-	(define (free-stuff)
-		(sleep 1)
-		(cog-map-type (lambda (a) (cog-delete a) #f) 'SetLink)
-		(cog-map-type (lambda (a) (cog-delete a) #f) 'ListLink)
-		(cog-map-type (lambda (a) (cog-delete a) #f) 'NumberNode)
-		(cog-map-type (lambda (a) (cog-delete a) #f) 'ConceptNode)
-		(free-stuff)
-	)
-	(call-with-new-thread free-stuff)
-)
 ; ----------------------------------------------------------------------

@@ -14,7 +14,7 @@
 ; (for example, happy, bored, excited) this specifies a range of
 ; expressions to display for that emotional state, as well as the
 ; intensities and durations.
-
+;
 ; Columns (in order) are:
 ; * expression (emotion) class
 ; * blender emotion animation name
@@ -23,8 +23,16 @@
 ; * max intensity of expression
 ; * min duration of expression
 ; * max duration of expression
+;
+; To view the available expressions, do this:
+; rostopic echo /blender_api/available_emotion_states
+; ['irritated', 'happy', 'recoil', 'surprised', 'sad', 'confused',
+;  'worry', 'bored', 'engaged', 'amused', 'comprehending', 'afraid']
+;
+; Cheat sheet: to display just one of these:
+; (cog-evaluate! (Evaluation  (DefinedPredicate "Show expression")
+;      (ListLink (Concept "worry") (Number 5) (Number 1))))
 
-; Translation of behavior.cfg line 9 ff
 (emo-expr-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
 
 ; Used when chatbot is not happy; also, when someone leaves.
@@ -40,7 +48,7 @@
 (emo-expr-spec "bored"    "sad"           0.1 0.1 0.3 10 15)
 (emo-expr-spec "bored"    "happy"         0.2 0.1 0.3 10 15)
 
-(emo-expr-spec "sleep"    "happy"         1.0  0.0 0.1 5 15)
+(emo-expr-spec "sleepy"   "happy"         1.0  0.0 0.1 5 15)
 
 (emo-expr-spec "wake-up"  "surprised"     0.45 0.2 0.6 5 15)
 (emo-expr-spec "wake-up"  "happy"         0.2  0.5 0.7 5 15)
@@ -50,6 +58,23 @@
 (emo-expr-spec "neutral-speech"  "happy"         0.2  0.1 0.3 4 8)
 (emo-expr-spec "neutral-speech"  "comprehending" 0.4  0.5 0.8 4 8)
 (emo-expr-spec "neutral-speech"  "engaged"       0.4  0.5 0.8 4 8)
+
+; Used for imperatives, i.e. when she is verbally told to do something.
+; Thus, we list all of them here. The probability column is ignored.
+; The strength has to be 0.6 or more, or else blender doesn't play the
+; animation.
+(emo-expr-spec "imperative"  "afraid"        1  0.4 0.6 6 12)
+(emo-expr-spec "imperative"  "amused"        1  0.9 1.0 6 12)
+(emo-expr-spec "imperative"  "bored"         1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "comprehending" 1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "confused"      1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "engaged"       1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "happy"         1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "irritated"     1  0.7 1.0 6 12)
+(emo-expr-spec "imperative"  "recoil"        1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "sad"           1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "surprised"     1  0.6 0.9 6 12)
+(emo-expr-spec "imperative"  "worry"         1  0.7 1.0 6 12)
 
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
@@ -71,8 +96,13 @@
 ; The "noop" gesture is a special no-operation gesture; if selected,
 ; then nothing is done. This allows gestures to be generated only some
 ; of the time; the "noop" is what is "done" the rest of the time.
-
-; Translation of behavior.cfg line 75 ff
+;
+; rostopic echo /blender_api/available_gestures
+;
+; Cheat sheet:
+; (cog-evaluate! (Evaluation  (DefinedPredicate "Show gesture")
+;    (ListLink (Concept "thoughtful") (Number 0.2) (Number 2) (Number 0.8))))
+;
 (emo-gest-spec "positive" "nod-1"  0.1 0.6 0.9 1 1 0.5 0.8)
 (emo-gest-spec "positive" "nod-2"  0.1 0.2 0.4 1 1 0.8 0.9)
 (emo-gest-spec "positive" "noop"   0.8 0   0   1 1 0   0)
@@ -82,52 +112,64 @@
 (emo-gest-spec "bored"   "yawn-1"  0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "bored"   "noop"    0.9 0   0   1 1 1 1)
 
-(emo-gest-spec "sleep"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
+(emo-gest-spec "sleepy"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
 
 (emo-gest-spec "wake-up" "shake-2"  0.4 0.7 1.0 1 1 0.7 0.8)
 (emo-gest-spec "wake-up" "shake-3"  0.3 0.6 1.0 1 1 0.7 0.8)
 (emo-gest-spec "wake-up" "blink"    0.3 0.8 1.0 2 4 0.9 1.0)
 
-; New beavior.cfg line 120 "listening_gestures"
-(emo-gest-spec "listening" "think-browsUp.001"  0.4 0.7 1.0 1 1 0.6 0.8)
-(emo-gest-spec "listening" "think-browsUp.003"  0.3 0.6 1.0 1 1 0.6 0.8)
-(emo-gest-spec "listening" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
+; Gestures to use during conversations.
+; Note that the gesture strengths are reduced from normal.
+(emo-gest-spec "conversing" "think-browsUp.001"  0.4 0.7 1.0 1 1 0.6 0.8)
+(emo-gest-spec "conversing" "think-browsUp.003"  0.3 0.6 1.0 1 1 0.6 0.8)
+(emo-gest-spec "conversing" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
 
-; New behavior.cfg line 149
 (emo-gest-spec "chat-positive-nod" "nod-6"  0.5 0.8 0.9 1 1 0.2 0.4)
 (emo-gest-spec "chat-positive-nod" "noop"   0.5 0   0   1 1 0   0)
 
 (emo-gest-spec "chat-negative-shake" "shake-3"  0.9 0.9 0.9 1 1 0.4 0.7)
 (emo-gest-spec "chat-negative-shake" "noop"     0.1 0   0   1 1 0   0  )
 
-; line 160 plus lines 1351ff of new general_behavior.py
-; aka stuff for "chatbot_positive_reply_think"
 (emo-gest-spec "chat-pos-think" "think-browsUp"  0.8 0.5 0.7 1 1 0.3 0.5)
 (emo-gest-spec "chat-pos-think" "noop"           0.2 0   0   1 1 0   0  )
 
 (emo-gest-spec "chat-neg-think" "think-browsDown.003"  0.8 0.5 0.7 1 1 0.3 0.5)
 (emo-gest-spec "chat-neg-think" "noop"                 0.2 0   0   1 1 0   0  )
 
+; Used for imperatives, i.e. when she is verbally told to do something.
+; Thus, we list all of them here. The probability column is ignored.
+(emo-gest-spec "imperative"   "amused"        0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink-micro"   0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink-relaxed" 0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "blink-sleepy"  0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-1"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-2"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-3"         0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "shake-2"       0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "shake-3"       0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "thoughtful"    0.1 0.2 0.4 1 1 1 1)
+(emo-gest-spec "imperative"   "yawn-1"        0.1 0.6 0.9 1 1 1 1)
+
 ; --------------------------------------------------------
 ; Dice-roll.  Probability of performing some action as the result of
 ;    some event.
 
 ; Probability of looking at someone who entered the room.
-(dice-roll "glance new face"   0.5) ; line 590 -- glance_probability_for_new_faces
+(dice-roll "glance new face"   0.5)
 
 ; Probability of looking at spot where someone was last seen.
-(dice-roll "glance lost face"  0.5) ; -- glance_probability_for_lost_faces
+(dice-roll "glance lost face"  0.5)
 
-(dice-roll "group interaction" 0.7) ; line 599 -- glance_probability
+(dice-roll "group interaction" 0.7)
 
 ; Probability of performing the face-study saccade.
-(dice-roll "face study" 0.2) ; line 122 -- face_study_probabilities
+(dice-roll "face study" 0.2)
 
 ; --------------------------------------------------------
 ; Time-related conf paramters
 
 ; All numbers are in seconds.
-; line 115 of behavior.cfg - time_to_change_face_target_min
 (State (Schema "time_to_change_face_target_min") (Number 8))
 (State (Schema "time_to_change_face_target_max") (Number 10))
 
@@ -137,9 +179,12 @@
 (State (Schema "time_since_last_gesture_max") (Number 10))
 
 ; Specify how long to hold off between making facial expressions.
-; line 4 default_emotion_duration is 1 second but that's nuts.
 (State (Schema "time_since_last_expr_min") (Number 6.0))
 (State (Schema "time_since_last_expr_max") (Number 10.0))
+
+; If no one has said anything after 40-80 seconds, say something.
+(State (Schema "silence_min") (Number 40))
+(State (Schema "silence_max") (Number 80))
 
 ; Sleep at least 25 seconds ... at most 160
 (State (Schema "time_sleeping_min") (Number 25))
@@ -152,7 +197,6 @@
 
 ; How long to look in one direction, before changing gaze,
 ; when searching for atention in an empty room.
-; line 134 -- search_for_attention_duration_min
 (State (Schema "time_search_attn_min") (Number 1.0))
 (State (Schema "time_search_attn_max") (Number 4.0))
 

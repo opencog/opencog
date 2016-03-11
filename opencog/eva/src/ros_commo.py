@@ -33,25 +33,48 @@ from blender_api_msgs.msg import BlinkCycle
 from blender_api_msgs.msg import SaccadeCycle
 from blender_api_msgs.msg import SomaState
 
+# Not everything has this message; don't break if it's missing.
+# i.e. create a stub if its not defined.
+#try:
+#	from chatbot.msg import ChatMessage
+#except (NameError, ImportError):
+#	class ChatMessage:
+#		def __init__(self):
+#			self.utterance = ''
+#			self.confidence = 0
 
 from put_atoms import PutAtoms
 logger = logging.getLogger('hr.OpenCog_Eva')
 
-# ROS node for controlling the Eva blender model. Control messages
-# include turning, looking, smiling, frowning and so on.
+# ROS interfaces for the Atomese (OpenCog) Behavior Tree. Publishes
+# ROS messages for animation control (smiling, frowning), and subscribes
+# to STT/TTS and chatbot messages.
 #
 # This is meant to be a convenience wrapper, allowing Eva to be
 # controlled from OpenCog Atomese.  Although it probably works as
 # a stand-alone ROS node, it was not designed to be used that way.
+# In particular, the python interpreter built into the atomspace
+# will be runnig this code.
 #
-# It is meant only for control, and not for sensory (vision, audo)
-# input.  Thus, it does not subscribe to any sensory messages.
-# It does listen to one topic, `/behavior_switch`, which is used to
-# start and stop the the behavior tree.
+# It currently handles both control messages (publishing of expression
+# and gesture animations), as well as some sensory input (mostly
+# STT, TTS and chatbot interactions).  Visual servoing for face tracking
+# is done by a stand-alone ROS node, in the face_tracker directory.
+#
+# This does listen to several topics that are used to turn behaviors on
+# and off:
+#
+# `/behavior_switch`, which is used to start and stop the the behavior
+#      tree.
+#
+# `/behavior_control`, which is used to enable/disable the publication
+#      of classes of expression/gesture messages.
 #
 class EvaControl():
 
-	# Control flags
+	# Control bitflags. Bit-wise anded with control_mode. If the bit
+	# is set, then the corresponding ROS message is emitted, else it
+	# is not.
 	C_EXPRESSION = 1
 	C_GESTURE = 2
 	C_SOMA = 4
@@ -159,6 +182,14 @@ class EvaControl():
 		self.turn_pub.publish(trg)
 
 	# ----------------------------------------------------------
+
+	# Tell the world what we are up to. This is so that other
+	# subsystems can listen in on what we are doing.
+	def publish_behavior(self, event):
+		print "----- Behavior pub: " + event
+		self.behavior_pub.publish(event)
+
+	# ----------------------------------------------------------
 	# Wrapper for saccade generator.
 	# This is setup entirely in python, and not in the AtomSpace,
 	# as, at this time, there are no knobs worth twiddling.
@@ -220,15 +251,38 @@ class EvaControl():
 	def get_emotion_states_cb(self, msg):
 		print("Available Emotion States:" + str(msg.data))
 
-	def chat_event_cb(self,chat_event):
+	# ----------------------------------------------------------
+
+	# The text that the STT module heard.
+	# Unit test by saying
+	#   rostopic pub --once perceived_text std_msgs/String "Look afraid!"
+	#
+	def language_perceived_text_cb(self, text_heard):
+		self.puta.perceived_text(text_heard.data)
+
+	def chat_perceived_text_cb(self, chat_heard):
+		if chat_heard.confidence >= 50:
+			self.puta.perceived_text(chat_heard.utterance)
+
+	# Notification from text-to-speech (TTS) module, that it has
+	# started, or stopped vocalizing.  This message might be published
+	# by either the TTS module itself, or by some external chatbot.
+	#
+	# Unit test by saying
+	#    rostopic pub --once chat_events std_msgs/String speechstart
+	#    rostopic pub --once chat_events std_msgs/String speechend
+	def chat_event_cb(self, chat_event):
 		rospy.loginfo('chat_event, type ' + chat_event.data)
 		if chat_event.data == "speechstart":
 			rospy.loginfo("webui starting speech")
-			self.puta.chatbot_speech_start()
+			self.puta.vocalization_started()
 
 		elif chat_event.data == "speechend":
-			self.puta.chatbot_speech_end()
+			self.puta.vocalization_ended()
 			rospy.loginfo("webui ending speech")
+
+		else:
+			rospy.logerror("unknown chat_events message: " + chat_event.data)
 
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):
@@ -245,14 +299,24 @@ class EvaControl():
 		if random.random() < blink_probability:
 			self.gesture('blink', 1.0, 1, 1.0)
 
-	# The perceived emotional content of speech in the message.
+	# The perceived emotional content of words spoken to the robot.
+	# That is, were people being rude to the robot? Polite to it? Angry
+	# with it?  We subscribe; there may be multiple publishers of this
+	# message: it might be supplied by some linguistic-processing module,
+	# or it might be supplied by an AIML-derived chatbot.
+	#
 	# emo is of type std_msgs/String
-	def chatbot_affect_perceive_cb(self, emo):
+	def language_affect_perceive_cb(self, emo):
 		rospy.loginfo('chatbot perceived emo class =' + emo.data)
 		if emo.data == "happy":
-			self.puta.chatbot_affect_happy()
+			# behavior tree will use these predicates
+			self.puta.affect_happy()
+
 		else:
-			self.puta.chatbot_affect_negative()
+			self.puta.affect_negative()
+
+		rospy.logwarn('publishing affect to chatbot ' + emo.data)
+		self.affect_pub.publish(emo.data)
 
 	# Turn behaviors on and off.
 	# Do not to clean visible faces as these can still be added/removed
@@ -269,6 +333,7 @@ class EvaControl():
 				self.gaze_at(0)
 				self.running = False
 
+	# Data is a bit-flag that enables/disables publication of messages.
 	def behavior_control_callback(self, data):
 		self.control_mode = data.data
 
@@ -280,28 +345,15 @@ class EvaControl():
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
 
+		# ----------------
+		# Get the available animations
 		rospy.Subscriber("/blender_api/available_emotion_states",
 		       AvailableEmotionStates, self.get_emotion_states_cb)
 
 		rospy.Subscriber("/blender_api/available_gestures",
 		       AvailableGestures, self.get_gestures_cb)
 
-		# Emotional content that the chatbot perceived i.e. did it hear
-		# (or reply with) angry words, polite words, etc?
-		# Currently chatbot supplies string rather than specific
-		# EmotionState with timing, allowing that to be handled here where
-		# timings have been tuned.
-		rospy.logwarn("setting up chatbot affect perceive and express links")
-		rospy.Subscriber("chatbot_affect_perceive", String,
-			self.chatbot_affect_perceive_cb)
-
-		# Chatbot can request blinks correlated with hearing and speaking.
-		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
-
-		# Handle messages from incoming speech to simulate listening
-		# engagement.
-		rospy.Subscriber("chat_events", String, self.chat_event_cb)
-
+		# Send out facial expressions and gestures.
 		self.emotion_pub = rospy.Publisher("/blender_api/set_emotion_state",
 		                                   EmotionState, queue_size=1)
 		self.gesture_pub = rospy.Publisher("/blender_api/set_gesture",
@@ -313,9 +365,7 @@ class EvaControl():
 		self.saccade_pub = rospy.Publisher("/blender_api/set_saccade",
 		                                   SaccadeCycle, queue_size=1)
 
-		self.affect_pub = rospy.Publisher("chatbot_affect_express",
-		                                   EmotionState, queue_size=1)
-
+		# ----------------
 		# XYZ coordinates of where to turn and look.
 		self.turn_pub = rospy.Publisher("/blender_api/set_face_target",
 			Target, queue_size=1)
@@ -333,13 +383,50 @@ class EvaControl():
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
 
-		rospy.Subscriber("/behavior_control", Int32, \
-			self.behavior_control_callback)
+		# ----------------
+		rospy.logwarn("setting up chatbot affect perceive and express links")
 
+		# Publish cues to the chatbot, letting it know what we are doing.
+		self.behavior_pub = rospy.Publisher("robot_behavior",
+		                                  String, queue_size=1)
 
+		# Tell the chatbot what sort of affect to apply during
+		# TTS vocalization.
+		self.affect_pub = rospy.Publisher("chatbot_affect_express",
+		                                  String, queue_size=1)
+
+		# String text of what the robot heard (from TTS)
+		rospy.Subscriber("perceived_text", String,
+			self.language_perceived_text_cb)
+
+		# Chat infrastructure text.
+		#rospy.Subscriber("chatbot_speech", chatbot/ChatMessage,
+		#	self.chat_perceived_text_cb)
+
+		# Emotional content of words spoken to the robot.
+		rospy.Subscriber("chatbot_affect_perceive", String,
+			self.language_affect_perceive_cb)
+
+		# Chatbot can request blinks correlated with hearing and speaking.
+		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
+
+		# Receive messages tht indicate that TTS (or chatbot) has started
+		# or finished vocalizing.
+		rospy.Subscriber("chat_events", String, self.chat_event_cb)
+
+		# ----------------
+		# Boolean flag, turn the behavior tree on and off (set it running,
+		# or stop it)
 		rospy.Subscriber("/behavior_switch", String, \
 			self.behavior_switch_callback)
+
+		# Bit-flag to enable/disable publication of various classes of
+		# expressions and gestures.
+		rospy.Subscriber("/behavior_control", Int32, \
+			self.behavior_control_callback)
 
 		# Full control by default
 		self.control_mode = 255
 		self.running = True
+
+# ----------------------------------------------------------------

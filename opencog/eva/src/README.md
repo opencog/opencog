@@ -49,9 +49,27 @@ Design overview
   ```
   See `face_track/README.md` for details.
 
+* Various behavior labels are published to the `robot_behavior` ROS
+  topic, so that other ROS nodes can know what we are doing.  The
+  published messages are just strings, and they are rather totally
+  ad-hoc.  Grep for `(DefinedPredicate "Publish behavior")` to see
+  these.  A random sampling includes:
+
+    + `"Searching for attention"` -- Room is empty, can't see anyone.
+    + `"This is boring"` -- No one is visible, no sound, we are bored.
+    + `"Sound of crickets"` -- Haven't heard anything for a while.
+    + `"Falling asleep"` -- Bored too long, no one visible, no sound.
+    + `"Waking up"` -- Saw someone, heard something, slept too long.
+    + `"Look at new arrival"` -- Look at newly-arrived person.
+    + `"Look at requested face"` -- Handle WebGUI request.
+    + `"Someone left"` -- Previously visible face no longer visible.
+    + `"Interact with someone else" -- Change the focus of attention.
+    + `"Who is there?" -- no one visible, but heard sound.
+    + `"What was that sound?" -- Woken up by some sound.
+
 * XXX The code currently has a large variety of conficting and poor
   design choices in it -- its in a state of morphing from "OK so-so code"
-  to "slightly better than before".  As a result of this hacking, varius
+  to "slightly better than before".  As a result of this hacking, various
   parts are being re-designed,  and bits of old, poor design still
   infest the code, and new featues are incomplete and half-working.
   It will be a good, long while before the code here settles down.
@@ -155,4 +173,6 @@ A list of random ideas.
 * "Search for attention" is a state, need to record that in a state
   variable. Ditto for "Interact with people"
 
-  (DefinedPredicateNode "is interacting with someone?")
+  (DefinedPredicateNode "Is interacting with someone?")
+
+  Everythig emitted to ROS is a state.... look for teh behavior pubs.

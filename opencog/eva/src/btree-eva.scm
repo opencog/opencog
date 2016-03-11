@@ -25,6 +25,7 @@
 (add-to-load-path "/usr/local/share/opencog/scm")
 
 (use-modules (opencog))
+(use-modules (opencog query))  ; XXX work-around relex2logic bug
 
 ; Start the cogsserver.  It is used by the face-tracker to poke data
 ; into the atomspace.
@@ -32,6 +33,8 @@
 (start-cogserver "../scripts/opencog.conf")
 
 ; Load the behavior trees.
+(use-modules (opencog exec))        ; needed for cog-evaluate! in put_atoms.py
+(use-modules (opencog eva-model))   ; needed for defines in put_atoms.py
 (use-modules (opencog eva-behavior))
 
 ; Load the Eva personality configuration.
