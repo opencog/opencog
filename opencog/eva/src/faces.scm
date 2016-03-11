@@ -79,8 +79,8 @@
 
 
 (define (show-eye-contact-state)
-	(define e-c-state (AnchorNode "Eye Contact State"))
-	(car (cog-chase-link 'StateLink 'ConceptNode e-c-state)))
+	(define e-c-state (Anchor "Eye Contact State"))
+	(car (cog-chase-link 'StateLink 'NumberNode e-c-state)))
 
 
 ; define-public because `unit-test.scm` uses it.

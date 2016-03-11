@@ -124,6 +124,34 @@
 		)))
 
 ; -------------------------------------------------------------
+; As above, but (momentarily) break eye contact, first.
+; Otherwise, the behavior tree forces eye contact to be continueally
+; running, and the turn-look command is promptly over-ridden.
+; XXX FIXME, this is still broken during search for attention.
+
+(DefineLink
+	(DefinedPredicate "Look command")
+	(LambdaLink
+		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
+		(SequentialAndLink
+			(DefinedPredicate "break eye contact")
+			(EvaluationLink (DefinedPredicate "Gaze at point")
+				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+			(EvaluationLink (DefinedPredicate "Look at point")
+				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+		)))
+
+(DefineLink
+	(DefinedPredicate "Gaze command")
+	(LambdaLink
+		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
+		(SequentialAndLink
+			(DefinedPredicate "break eye contact")
+			(EvaluationLink (DefinedPredicate "Gaze at point")
+				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+		)))
+
+; -------------------------------------------------------------
 ; Publish the current behavior.
 ; Cheap hack to allow external ROS nodes to know what we are doing.
 ; The string name of the node is sent directly as a ROS String message

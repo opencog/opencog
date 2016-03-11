@@ -111,7 +111,7 @@
 	(DefinedPredicate "Interact with face")
 	(SequentialAnd
 		;; Look at the interaction face
-		(True (DefinedSchema "look at person"))
+		(DefinedPredicate "look at person")
 
 		;; Show random expressions only if NOT talking
 		(SequentialOr
@@ -144,7 +144,7 @@
 			(ListLink bhv-source (Concept "new-arrival")))
 
 		(DefinedPredicate "interact with new person")
-		(True (DefinedSchema "look at person"))
+		(DefinedPredicate "look at person")
 		(Put (DefinedPredicate "Show random expression")
 			(ConceptNode "new-arrival"))
 		(Put (DefinedPredicate "Publish behavior")
@@ -162,7 +162,7 @@
 		(True (DefinedPredicate "If sleeping then wake"))
 		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "interact with requested person")
-		(True (DefinedSchema "look at person"))
+		(DefinedPredicate "look at person")
 		(Put (DefinedPredicate "Publish behavior")
 			(Concept "Look at requested face"))
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
@@ -175,7 +175,7 @@
 (DefineLink
 	(DefinedPredicate "Interacting Sequence")
 	(SequentialAnd
-		(DefinedPredicate "is interacting with someone?")
+		(DefinedPredicate "Is interacting with someone?")
 		(DefinedPredicate "dice-roll: glance new face")
 		(True (DefinedSchema "glance at new person"))
 		(Evaluation (GroundedPredicate "scm: print-msg")
@@ -250,7 +250,7 @@
 			;; Were we interacting with someone else?  If so, then
 			;; maybe glance at the location of the person who left.
 			(SequentialAnd
-				(DefinedPredicate "is interacting with someone?")
+				(DefinedPredicate "Is interacting with someone?")
 				(SequentialOr
 					(NotLink (DefinedPredicate "dice-roll: glance lost face"))
 					(FalseLink (DefinedSchema "glance at lost face"))
@@ -297,7 +297,7 @@
 			; someone for too long.
 			(SequentialAnd
 				(SequentialOr
-					(Not (DefinedPredicate "is interacting with someone?"))
+					(Not (DefinedPredicate "Is interacting with someone?"))
 					(SequentialAnd
 						(DefinedPredicate "More than one face visible")
 						(DefinedPredicate "Time to change interaction")))
@@ -329,7 +329,9 @@
 						(False)
 					)
 					(True))
-			))
+			)
+			(DefinedPredicate "Is interacting with someone?")
+		)
 	))
 
 ; ------------------------------------------------------
