@@ -178,7 +178,7 @@ void SmokesDBFCAgent::run()
 
     // Do one step forward chaining.
     std::cerr << "FCing" << std::endl;
-    ForwardChainer fc(_atomspace, rule_base, source, { af_set });
+    ForwardChainer fc(_atomspace, rule_base, source, { af_set }, opencog::source_selection_mode::STI);
     fc.do_step();
     std::cerr << "FORWARD CHAINER STEPPED\n\t";
 
