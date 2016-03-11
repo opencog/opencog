@@ -77,6 +77,9 @@
 ; -----------
 ;; The eye-contact-state will be linked to the face-id of
 ;; person with whom we are making eye-contact with.
+;; This is usually the same as the interaction-state, but not always:
+;; If told to look away, she will break eye-contact but not break
+;; interaction.
 (define-public eye-contact-state (AnchorNode "Eye Contact State"))
 (define-public no-interaction (ConceptNode "none"))
 
@@ -475,6 +478,20 @@
 			(ListLink (Variable "$face")))
 		(Get (State eye-contact-state (Variable "$x")))
 	))
+
+;; Break eye contact; this does not change the interaction state.
+(DefineLink
+	(DefinedPredicate "break eye contact")
+	(True (Put (State eye-contact-state (Variable "$face-id"))
+		no-interaction))
+)
+
+;; Make eye-contact with the interaction target.
+(DefineLink
+	(DefinedPredicate "make eye contact")
+	(True (Put (State eye-contact-state (Variable "$face-id"))
+		(Get (State interaction-state (Variable "$x"))) ))
+)
 
 ;; Move to a neutral head position.
 ;; This clears the interaction and eye-contact state,
