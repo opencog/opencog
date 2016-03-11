@@ -329,7 +329,9 @@
 						(False)
 					)
 					(True))
-			))
+			)
+			(DefinedPredicate "Is interacting with someone?")
+		)
 	))
 
 ; ------------------------------------------------------
