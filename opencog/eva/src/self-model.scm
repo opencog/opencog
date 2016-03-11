@@ -480,10 +480,10 @@
 		(NotLink (Equal
 			(Get (State eye-contact-state (Variable "$x")))
 			(SetLink no-interaction)))
-		(Put
+		(True (Put
 			(Evaluation (GroundedPredicate "py:look_at_face")
 				(ListLink (Variable "$face")))
-			(Get (State eye-contact-state (Variable "$x"))))
+			(Get (State eye-contact-state (Variable "$x")))))
 	))
 
 ;; Break eye contact; this does not change the interaction state.
