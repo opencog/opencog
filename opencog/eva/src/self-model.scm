@@ -276,8 +276,8 @@
 ;;
 ;; Return true if a new face has become visible.
 ;; A "new  face" is one that is visible (in the atomspace) but
-;; has not yet been acked.
-;; line 631, is_someone_arrived()
+;; has not yet been acked.  Acking usually occurs when we make
+;; eye-contact with them.
 (DefineLink
 	(DefinedPredicateNode "Did someone arrive?")
 	(SatisfactionLink
@@ -312,7 +312,6 @@
 
 ;; Return true if some face has is no longer visible (has left the room)
 ;; We detect this by looking for "acked" faces tat are not also visible.
-;; line 641, is_someone_left()
 (DefineLink
 	(DefinedPredicateNode "Did someone leave?")
 	(SatisfactionLink
@@ -344,7 +343,6 @@
 ;; Note that the room state is updated only when "Update room state"
 ;; is called, so faces may be visible, but the room marked as empty.
 ;; Think "level trigger" instead of "edge trigger".
-;; line 665, were_no_people_in_the_scene
 (DefineLink
 	(DefinedPredicateNode "was room empty?")
 	(EqualLink
@@ -354,7 +352,6 @@
 
 ;; Is there someone present?  We check for acked faces.
 ;; The someone-arrived code converts newly-visible faces to acked faces.
-;; line 683 is_face_target().
 (DefineLink
 	(DefinedPredicateNode "Someone visible")
 	(SatisfactionLink
@@ -364,7 +361,6 @@
 		)))
 
 ;; Return the number of visible faces
-;; line 690 -- is_more_than_one_face_target()
 (DefineLink
 	(DefinedSchemaNode "Num visible faces")
 	(ArityLink
@@ -380,7 +376,6 @@
 
 
 ;; Randomly select a face out of the crowd.
-;; line 747 -- select_a_face_target() and also
 (DefineLink
 	(DefinedSchemaNode "Select random face")
 	(RandomChoiceLink (GetLink
@@ -388,7 +383,8 @@
 			(ListLink (VariableNode "$face-id")))
 	)))
 
-;; line 752 -- select_a_glance_target()
+;; Randomly glance at someone (who we are not currently making
+;; eye-constact with)
 (DefineLink
 	(DefinedPredicateNode "Select random glance target")
 	(SequentialAndLink
@@ -424,7 +420,6 @@
 
 ;; Remove the lost faces from "acked face" (so that "acked face" accurately
 ;; reflects the visible faces)
-;; line 980 -- clear_lost_face_target()
 (DefineLink
 	(DefinedPredicateNode "Clear lost face")
 	(TrueLink (PutLink
