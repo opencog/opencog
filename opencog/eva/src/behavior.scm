@@ -111,7 +111,7 @@
 	(DefinedPredicate "Interact with face")
 	(SequentialAnd
 		;; Look at the interaction face
-		(True (DefinedSchema "look at person"))
+		(DefinedPredicate "look at person")
 
 		;; Show random expressions only if NOT talking
 		(SequentialOr
@@ -144,7 +144,7 @@
 			(ListLink bhv-source (Concept "new-arrival")))
 
 		(DefinedPredicate "interact with new person")
-		(True (DefinedSchema "look at person"))
+		(DefinedPredicate "look at person")
 		(Put (DefinedPredicate "Show random expression")
 			(ConceptNode "new-arrival"))
 		(Put (DefinedPredicate "Publish behavior")
@@ -162,7 +162,7 @@
 		(True (DefinedPredicate "If sleeping then wake"))
 		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "interact with requested person")
-		(True (DefinedSchema "look at person"))
+		(DefinedPredicate "look at person")
 		(Put (DefinedPredicate "Publish behavior")
 			(Concept "Look at requested face"))
 		(Evaluation (GroundedPredicate "scm: print-msg-face")

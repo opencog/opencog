@@ -95,7 +95,7 @@
 (StateLink request-eye-contact-state no-interaction)
 
 ;; The "look at neutral position" face. Used to tell the eye/head
-;; movemet subsystem to move to a neutral position.
+;; movement subsystem to move to a neutral position.
 (define neutral-face (ConceptNode "0"))
 
 ;; The person she is interacting with.
@@ -315,8 +315,8 @@
 
 ;; Return the person with whom we are currently interacting.
 (DefineLink
-	(DefinedSchemaNode "Current interaction target")
-	(GetLink (StateLink interaction-state (VariableNode "$x"))))
+	(DefinedSchema "Current interaction target")
+	(Get (State interaction-state (Variable "$x"))))
 
 ;; Return true if some face has is no longer visible (has left the room)
 ;; We detect this by looking for "acked" faces tat are not also visible.
@@ -470,13 +470,20 @@
 	))
 
 
-;; Send ROS message to look at the person we are interacting with.
+;; Send ROS message to actually make eye-contact with the person
+;; we should be making eye-contact with.
 (DefineLink
-	(DefinedSchema "look at person")
-	(Put
-		(Evaluation (GroundedPredicate "py:look_at_face")
-			(ListLink (Variable "$face")))
-		(Get (State eye-contact-state (Variable "$x")))
+	(DefinedPredicate "look at person")
+	(SequentialAnd
+		;; Issue the look-at command, only if there is someone to
+		;; make eye conact with.
+		(NotLink (Equal
+			(Get (State eye-contact-state (Variable "$x")))
+			(SetLink no-interaction)))
+		(Put
+			(Evaluation (GroundedPredicate "py:look_at_face")
+				(ListLink (Variable "$face")))
+			(Get (State eye-contact-state (Variable "$x"))))
 	))
 
 ;; Break eye contact; this does not change the interaction state.
