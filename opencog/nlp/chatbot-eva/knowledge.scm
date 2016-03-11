@@ -134,13 +134,13 @@
 (InheritanceLink (DefinedSchema "forwards")   (ConceptNode "schema-direction"))
 
 ; Physical (motor control) knowledge about imperative verbs.
-(ReferenceLink (WordNode "look") (DefinedPredicate "Gaze at point"))
-(ReferenceLink (WordNode "turn") (DefinedPredicate "Look at point"))
+(ReferenceLink (WordNode "look") (DefinedPredicate "Gaze command"))
+(ReferenceLink (WordNode "turn") (DefinedPredicate "Look command"))
 
 ; Syntactic category of imperative verbs.
-(InheritanceLink (DefinedPredicate "Gaze at point")
+(InheritanceLink (DefinedPredicate "Gaze command")
 	(ConceptNode "pred-direction"))
-(InheritanceLink (DefinedPredicate "Look at point")
+(InheritanceLink (DefinedPredicate "Look command")
 	(ConceptNode "pred-direction"))
 
 ; Allowed syntactic structure of action-knowledge --
