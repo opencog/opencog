@@ -433,6 +433,10 @@
 		; immediately (cause we're bored).
 		(True (DefinedSchema "set bored timestamp"))
 
+		; Reset the "heard something" state and timestamp.
+		(True (DefinedPredicate "Heard Something?"))
+		(True (DefinedSchema "set heard-something timestamp"))
+
 		; Run the wake animation.
 		(Evaluation (GroundedPredicate "py:do_wake_up") (ListLink))
 
