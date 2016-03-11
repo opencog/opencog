@@ -315,6 +315,7 @@
 (DefineLink
 	(DefinedPredicateNode "Did someone leave?")
 	(SatisfactionLink
+		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
 		(AndLink
 			; If someone was previously acked...
 			(PresentLink (EvaluationLink (PredicateNode "acked face")
@@ -326,15 +327,16 @@
 
 ;; Return list of recetly departed individuals
 (DefineLink
-	(DefinedSchemaNode "New departures")
-	(GetLink
+	(DefinedSchema "New departures")
+	(Get
+		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
 		(AndLink
 			; If someone was previously acked...
-			(PresentLink (EvaluationLink (PredicateNode "acked face")
-					(ListLink (VariableNode "$face-id"))))
+			(PresentLink (Evaluation (Predicate "acked face")
+					(ListLink (Variable "$face-id"))))
 			; But is no loger visible...
-			(AbsentLink (EvaluationLink (PredicateNode "visible face")
-					(ListLink (VariableNode "$face-id"))))
+			(AbsentLink (Evaluation (Predicate "visible face")
+					(List (Variable "$face-id"))))
 	)))
 
 ;;
@@ -355,6 +357,7 @@
 (DefineLink
 	(DefinedPredicateNode "Someone visible")
 	(SatisfactionLink
+		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
 		(PresentLink
 			(EvaluationLink (PredicateNode "acked face")
 					(ListLink (VariableNode "$face-id")))
@@ -362,10 +365,12 @@
 
 ;; Return the number of visible faces
 (DefineLink
-	(DefinedSchemaNode "Num visible faces")
-	(ArityLink
-		(GetLink (EvaluationLink (PredicateNode "acked face")
-			(ListLink (VariableNode "$face-id"))))))
+	(DefinedSchema "Num visible faces")
+	(Arity
+		(Get
+			(TypedVariable (Variable "$face-id") (Type "NumberNode"))
+			(Evaluation (Predicate "acked face")
+				(ListLink (Variable "$face-id"))))))
 
 ; True if more than one face is visible.
 (DefineLink
@@ -377,17 +382,18 @@
 
 ;; Randomly select a face out of the crowd.
 (DefineLink
-	(DefinedSchemaNode "Select random face")
-	(RandomChoiceLink (GetLink
-		(EvaluationLink (PredicateNode "acked face")
-			(ListLink (VariableNode "$face-id")))
+	(DefinedSchema "Select random face")
+	(RandomChoice (Get
+		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
+		(Evaluation (Predicate "acked face")
+			(ListLink (Variable "$face-id")))
 	)))
 
 ;; Randomly glance at someone (who we are not currently making
 ;; eye-constact with)
 (DefineLink
-	(DefinedPredicateNode "Select random glance target")
-	(SequentialAndLink
+	(DefinedPredicate "Select random glance target")
+	(SequentialAnd
 		; Recursive loop, keep picking, while the current glance target
 		; is the same as the current interaction target.
 		(TrueLink
@@ -482,19 +488,19 @@
 (DefineLink
 	(DefinedPredicate "glance and ack")
 	(LambdaLink
-		(Variable "$face")
+		(Variable "$face-id")
 		(SequentialAndLink
 			(Evaluation (GroundedPredicate "py:glance_at_face")
-				(ListLink (Variable "$face")))
+				(ListLink (Variable "$face-id")))
 			;; Mark it as acked, othwerwise, we'll keep glancing there,
 			(Evaluation (Predicate "acked face")
-				(ListLink (Variable "$face")))
+				(ListLink (Variable "$face-id")))
 		)))
 
 ;; Select a face at random, and glance at it.
 (DefineLink
-	(DefinedPredicateNode "glance at random face")
-	(SequentialAndLink
+	(DefinedPredicate "glance at random face")
+	(SequentialAnd
 		(DefinedPredicate "Select random glance target")
 		(Put
 			(DefinedPredicate "glance and ack")
@@ -518,7 +524,7 @@
 	(Put
 		(Evaluation (GroundedPredicateNode "py:glance_at_face")
 			(ListLink (Variable "$face")))
-		(DefinedSchemaNode "New departures")))
+		(DefinedSchema "New departures")))
 
 ; ------------------------------------------------------
 
