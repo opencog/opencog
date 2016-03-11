@@ -357,6 +357,7 @@
 (DefineLink
 	(DefinedPredicateNode "Someone visible")
 	(SatisfactionLink
+		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
 		(PresentLink
 			(EvaluationLink (PredicateNode "acked face")
 					(ListLink (VariableNode "$face-id")))
@@ -364,10 +365,12 @@
 
 ;; Return the number of visible faces
 (DefineLink
-	(DefinedSchemaNode "Num visible faces")
-	(ArityLink
-		(GetLink (EvaluationLink (PredicateNode "acked face")
-			(ListLink (VariableNode "$face-id"))))))
+	(DefinedSchema "Num visible faces")
+	(Arity
+		(Get
+			(TypedVariable (Variable "$face-id") (Type "NumberNode"))
+			(Evaluation (Predicate "acked face")
+				(ListLink (Variable "$face-id"))))))
 
 ; True if more than one face is visible.
 (DefineLink
@@ -379,17 +382,18 @@
 
 ;; Randomly select a face out of the crowd.
 (DefineLink
-	(DefinedSchemaNode "Select random face")
-	(RandomChoiceLink (GetLink
-		(EvaluationLink (PredicateNode "acked face")
-			(ListLink (VariableNode "$face-id")))
+	(DefinedSchema "Select random face")
+	(RandomChoice (Get
+		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
+		(Evaluation (Predicate "acked face")
+			(ListLink (Variable "$face-id")))
 	)))
 
 ;; Randomly glance at someone (who we are not currently making
 ;; eye-constact with)
 (DefineLink
-	(DefinedPredicateNode "Select random glance target")
-	(SequentialAndLink
+	(DefinedPredicate "Select random glance target")
+	(SequentialAnd
 		; Recursive loop, keep picking, while the current glance target
 		; is the same as the current interaction target.
 		(TrueLink
