@@ -8,7 +8,7 @@
 ; Example:
 ; User says to robot, "When I say 'Eddie is a stud' then you laugh."
 
-(use-modules (opencog query))
+(use-modules (opencog) (opencog query) (opencog exec))
 
 ; load kino's atomese string match code
 (load "../aiml2oc/aiml2oc_guile/code/OpenCogAimlReply1.scm")
@@ -59,8 +59,33 @@
 ;-----------------------------------------------------------------
 ; AIML-style string matching to behavior condition
 
+
 (define (get-tree-with-condition stimulus)
-    (findQueryPatterns (cleanText (string-upcase (string-trim-both stimulus))))
+    ; TODO: For now just using a single result, but we should handle multiple
+    ;       returned results.
+    ; TODO: Allow for variable words
+
+    (let* ((cleaned-text
+                (string-trim-both (cleanText (string-upcase stimulus))))
+           (results (findQueryPatterns cleaned-text)))
+          ; just return the first result in the set for now
+          ;(list-ref (cog-outgoing-set results 0))
+        (display "results:\n") (display results)
+        (if (> (length (cog-outgoing-set results)) 0)
+	        (gar results)
+	        #f
+	    )
+    )
+)
+
+(define (execute-behavior-with-stimulus stimulus)
+    (define btree (get-tree-with-condition stimulus))
+    (if btree
+        (begin
+            (display "doing cog-eval on:\n") (display (gdr btree))
+            (cog-evaluate! (gdr btree)))
+        #f
+    )
 )
 
 ;-----------------------------------------------------------------
@@ -77,3 +102,6 @@
     (display)
 )
 
+;-----------------------------------------------------------------
+; NOTES
+; Why not use cog-bind to get the behavior tree rather than cog-recognize?
