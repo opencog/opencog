@@ -474,12 +474,12 @@
 ;; Move to a neutral head position. Right now, this just issues a
 ;; look-at command; it could do more (e.g. halt the chatbot.)
 (DefineLink
-	(DefinedPredicateNode "return to neutral")
-	(SequentialAndLink
-		(EvaluationLink (GroundedPredicateNode "py:look_at_face")
+	(DefinedPredicate "return to neutral")
+	(SequentialAnd
+		(Evaluation (GroundedPredicate "py:look_at_face")
 			(ListLink neutral-face))
-		(TrueLink (PutLink
-			(StateLink eye-contact-state (VariableNode "$face-id"))
+		(True (Put
+			(State eye-contact-state (Variable "$face-id"))
 			no-interaction))
 	))
 
