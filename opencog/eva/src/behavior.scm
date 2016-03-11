@@ -175,7 +175,7 @@
 (DefineLink
 	(DefinedPredicate "Interacting Sequence")
 	(SequentialAnd
-		(DefinedPredicate "is interacting with someone?")
+		(DefinedPredicate "Is interacting with someone?")
 		(DefinedPredicate "dice-roll: glance new face")
 		(True (DefinedSchema "glance at new person"))
 		(Evaluation (GroundedPredicate "scm: print-msg")
@@ -250,7 +250,7 @@
 			;; Were we interacting with someone else?  If so, then
 			;; maybe glance at the location of the person who left.
 			(SequentialAnd
-				(DefinedPredicate "is interacting with someone?")
+				(DefinedPredicate "Is interacting with someone?")
 				(SequentialOr
 					(NotLink (DefinedPredicate "dice-roll: glance lost face"))
 					(FalseLink (DefinedSchema "glance at lost face"))
@@ -297,7 +297,7 @@
 			; someone for too long.
 			(SequentialAnd
 				(SequentialOr
-					(Not (DefinedPredicate "is interacting with someone?"))
+					(Not (DefinedPredicate "Is interacting with someone?"))
 					(SequentialAnd
 						(DefinedPredicate "More than one face visible")
 						(DefinedPredicate "Time to change interaction")))

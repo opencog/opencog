@@ -173,4 +173,6 @@ A list of random ideas.
 * "Search for attention" is a state, need to record that in a state
   variable. Ditto for "Interact with people"
 
-  (DefinedPredicateNode "is interacting with someone?")
+  (DefinedPredicateNode "Is interacting with someone?")
+
+  Everythig emitted to ROS is a state.... look for teh behavior pubs.

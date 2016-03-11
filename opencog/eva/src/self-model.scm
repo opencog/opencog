@@ -439,9 +439,9 @@
 ;; Return true if interacting with someone.
 ;; This is a compound predicate: we are interacting if the interaction
 ;; state is set, or if the TTS system/chatbot is still vocalizing.
-;; (cog-evaluate! (DefinedPredicateNode "is interacting with someone?"))
+;; (cog-evaluate! (DefinedPredicateNode "Is interacting with someone?"))
 (DefineLink
-	(DefinedPredicate "is interacting with someone?")
+	(DefinedPredicate "Is interacting with someone?")
 	(OrLink
 		; true if talking not listening.
 		(NotLink (DefinedPredicate "chatbot is listening"))
@@ -535,14 +535,14 @@
 ;; actually cause the robot to look at them.  Use the schema
 ;; (DefinedSchema "look at person") to make it look.
 (DefineLink
-	(DefinedPredicateNode "Change interaction")
-	(SequentialAndLink
+	(DefinedPredicate "Change interaction")
+	(SequentialAnd
 		; First, pick a face at random...
-		(TrueLink (PutLink
+		(True (Put
 			(StateLink eye-contact-state (VariableNode "$face-id"))
-			(DefinedSchemaNode "Select random face")))
+			(DefinedSchema "Select random face")))
 		; Record a timestamp
-		(TrueLink (DefinedSchemaNode "set interaction timestamp"))
+		(True (DefinedSchema "set interaction timestamp"))
 		; Diagnostic print
 		(Evaluation (GroundedPredicate "scm: print-msg-face")
 			(ListLink (Node "--- Start new interaction")))
