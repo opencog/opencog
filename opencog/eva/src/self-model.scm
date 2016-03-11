@@ -485,11 +485,18 @@
 	(DefinedPredicateNode "glance at random face")
 	(SequentialAndLink
 		(DefinedPredicateNode "Select random glance target")
-		(TrueLink (PutLink
-			(EvaluationLink (GroundedPredicateNode "py:glance_at_face")
+		(True (Put
+			(Evaluation (GroundedPredicate "py:glance_at_face")
 				(ListLink (VariableNode "$face")))
 			(GetLink (StateLink glance-state (VariableNode "$face-id")))
-		))))
+		))
+		;; Mark it as acked, othwerwise, we'll keep glancing there,
+		(True (Put
+				(Evaluation (Predicate "acked face")
+						(ListLink (Variable "$face-id")))
+			(GetLink (StateLink glance-state (VariableNode "$face-id")))
+		))
+	))
 
 ;; Glance at one of the newly-arrived faces.
 (DefineLink
