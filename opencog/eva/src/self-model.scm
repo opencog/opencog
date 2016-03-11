@@ -488,13 +488,13 @@
 (DefineLink
 	(DefinedPredicate "glance and ack")
 	(LambdaLink
-		(Variable "$face")
+		(Variable "$face-id")
 		(SequentialAndLink
 			(Evaluation (GroundedPredicate "py:glance_at_face")
-				(ListLink (Variable "$face")))
+				(ListLink (Variable "$face-id")))
 			;; Mark it as acked, othwerwise, we'll keep glancing there,
 			(Evaluation (Predicate "acked face")
-				(ListLink (Variable "$face")))
+				(ListLink (Variable "$face-id")))
 		)))
 
 ;; Select a face at random, and glance at it.
