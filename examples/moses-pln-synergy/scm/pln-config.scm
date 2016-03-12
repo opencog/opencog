@@ -44,7 +44,7 @@
 ;;;;;;;;;;;;;;;;
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
-(define pln-rules-dir "../opencog/pln/rules/")
+(define pln-rules-dir "../../opencog/pln/rules/")
 (define (append-rule-dir basename) (string-append pln-rules-dir basename))
 (define rule-basenames
   (list "implication-instantiation-rule.scm"
