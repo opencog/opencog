@@ -19,9 +19,11 @@
 (use-modules (opencog))
 (use-modules (opencog rule-engine))
 
+;XXX This is bad and broken and wrong; one should not try to bypass the
+; scheme module system like this, its just asking for carpet burns.
 (load-from-path "utilities.scm")
 (load-from-path "av-tv.scm")
-(load-from-path "rule-engine-utils.scm")
+(load-from-path "opencog/rule-engine/rule-engine-utils.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Define PLN rule-based system ;;
@@ -42,7 +44,7 @@
 ;;;;;;;;;;;;;;;;
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
-(define pln-rules-dir "../../../opencog/pln/rules/")
+(define pln-rules-dir "../opencog/pln/rules/")
 (define (append-rule-dir basename) (string-append pln-rules-dir basename))
 (define rule-basenames
   (list "implication-instantiation-rule.scm"
