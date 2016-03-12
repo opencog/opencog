@@ -180,7 +180,8 @@
 ; since the text processing results in python calls.
 (define-public (dispatch-text txt)
 	(call-with-new-thread
-		(lambda () (process-query "luser" (cog-name txt)))
+		; (lambda () (process-query "luser" (cog-name txt)))
+		(lambda () (grounded-talk "luser" (cog-name txt)))
 	)
 	(stv 1 1)
 )
