@@ -51,7 +51,6 @@
 ; Load the chat modules.
 ;
 (use-modules (opencog nlp))
-(use-modules (opencog nlp chatbot-eva))
 
 ; XXX remove the below when we get a chance.
 ; Must load the rulebase before running eva; see bug
@@ -59,8 +58,10 @@
 ; XXX fixme -- we should not need to load either relex2logic or
 ; the rules right here, since the code in this module does not depend
 ; directly on thes.
-(use-modules (opencog nlp relex2logic))
+; (use-modules (opencog nlp relex2logic))
 ; (load-r2l-rulebase)
+
+(use-modules (opencog nlp chatbot-eva))
 
 ; ---------------------------------------------------------
 ; Run the hacky garbage collection loop.
