@@ -77,7 +77,7 @@
 ; the rules right here, since the code in this module does not depend
 ; directly on thes.
 (use-modules (opencog nlp relex2logic))
-(load-r2l-rulebase)
+; (load-r2l-rulebase)
 
 ; ---------------------------------------------------------
 
