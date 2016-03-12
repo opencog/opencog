@@ -8,12 +8,58 @@
 ; Example:
 ; User says to robot, "When I say 'Eddie is a stud' then you laugh."
 
-(use-modules (opencog) (opencog query) (opencog exec))
+; TODO: probably can take out eva-behavior when express.scm is moved out
+(use-modules (opencog) (opencog query) (opencog exec) (opencog eva-model)
+    (opencog eva-behavior))
 
 ; load kino's atomese string match code
 (load "../aiml2oc/aiml2oc_guile/code/OpenCogAimlReply1.scm")
 
-(clear)
+; load config file for eva
+(load-from-path "opencog/eva-behavior/cfg-eva.scm")
+
+;-----------------------------------------------------------------
+; The main training tree
+(BindLink
+    (ListLink
+        (ConceptNode "WHEN")
+        (ConceptNode "I")
+        (ConceptNode "SAY")
+        (GlobNode "$stimulus")
+        ;(ConceptNode "THEN")
+        ;(ConceptNode "YOU")
+        ;(GlobNode "$response")
+    )
+    (Evaluation
+  	    (GroundedPredicateNode "scm:create-behavior-tree")
+      	(ListLink
+            (GlobNode "$stimulus")
+            (GlobNode "$response"))))
+
+
+
+;-----------------------------------------------------------------
+; Define behavior actions
+
+; happy
+(DefineLink
+    (DefinedPredicateNode "be happy")
+    (EvaluationLink
+        (DefinedPredicateNode "Do show expression")
+        (ListLink
+          (ConceptNode "imperative")
+          (ConceptNode "happy"))))
+; yawn
+(DefineLink
+    (DefinedPredicateNode "yawn")
+    (EvaluationLink
+        (PredicateNode "express-action")
+        (ListLink
+            (ConceptNode "pred-express")
+            (DefinedSchema "yawn-1"))))
+
+
+
 
 ;-----------------------------------------------------------------
 ; Behavior Trees
@@ -25,22 +71,18 @@
         (ConceptNode "ARE")
         (ConceptNode "BEAUTIFUL")
     )
-    (EvaluationLink
-  	    (PredicateNode "express-action")
-      	(ListLink
-  	    	(ConceptNode "pred-express")
-  		    (DefinedSchema "happy")))
-
-    ; or should it be:
-    ;(EvaluationLink
-    ;      (DefinedPredicateNode "Do show expression")
-    ;      (ListLink
-    ;         (ConceptNode "imperative")
-    ;        (ConceptNode "happy" (ptv 1 0 1))
-    ;     )
-    ;   )
-
+    (DefinedPredicateNode "be happy")
 )
+
+(BindLink
+    (ListLink
+        (ConceptNode "YOU")
+        (ConceptNode "ARE")
+        (GlobNode "$blah")
+        (ConceptNode "BEAUTIFUL")
+    )
+    (DefinedPredicateNode "be happy"))
+
 
 (BindLink
   (ListLink
@@ -48,28 +90,23 @@
     (ConceptNode "YOU")
     (ConceptNode "BORED")
   )
-  (EvaluationLink
-  	(PredicateNode "express-action")
-  	(ListLink
-  		(ConceptNode "pred-express")
-  		(DefinedSchema "yawn-1")))
+  (DefinedPredicateNode "yawn")
 )
 
 
 ;-----------------------------------------------------------------
-; AIML-style string matching to behavior condition
+; Execute behavior based on string stimulus using AIML-style string matching
 
-
-(define (get-tree-with-condition stimulus)
+; Retrieve atomspace behavior tree(s) with antecedent that contains atomese
+; representation of the input string.
+(define (get-tree-with-antecedent input-str)
     ; TODO: For now just using a single result, but we should handle multiple
     ;       returned results.
     ; TODO: Allow for variable words
 
     (let* ((cleaned-text
-                (string-trim-both (cleanText (string-upcase stimulus))))
+                (string-trim-both (cleanText (string-upcase input-str))))
            (results (findQueryPatterns cleaned-text)))
-          ; just return the first result in the set for now
-          ;(list-ref (cog-outgoing-set results 0))
         (display "results:\n") (display results)
         (if (> (length (cog-outgoing-set results)) 0)
 	        (gar results)
@@ -78,8 +115,10 @@
     )
 )
 
-(define (execute-behavior-with-stimulus stimulus)
-    (define btree (get-tree-with-condition stimulus))
+
+; Executes a behavior tree based on a stimulus input string.
+(define (execute-behavior-with-stimulus input-str)
+    (define btree (get-tree-with-antecedent input-str))
     (if btree
         (begin
             (display "doing cog-eval on:\n") (display (gdr btree))
@@ -95,11 +134,12 @@
 
 
 ;-----------------------------------------------------------------
-(define (create-behavior-tree stimulus response)
-    ; this is where the new behavior tree will be dynamically create - coming
-    ; back to this after getting the execution of AIML-style string matching
-    ; of imperative stimulus working
-    (display)
+(define (create-behavior-tree input-str stimulus response)
+    ; create new behavior rule with text input stimulus and behavior response
+    (display "create-behavior-tree ")(display stimulus)(display " ")
+        (display response)(newline)
+
+    (stv 1 1)
 )
 
 ;-----------------------------------------------------------------
