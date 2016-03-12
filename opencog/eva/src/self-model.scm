@@ -37,8 +37,11 @@
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
 
-; XXX the below does not really belong here; where does it belong?
-(use-modules (opencog nlp chatbot-eva)) ; Needed for process-query
+; XXX the nlp chatbot-eva does not really belong here; where does it belong?
+; We need process-query, but this load-modules results in a circular
+; dependency.
+; (use-modules (opencog nlp chatbot-eva)) ; Needed for process-query
+
 
 ; ------------------------------------------------------
 ; State variables
@@ -626,3 +629,4 @@
 	))
 
 ;; ------------------------------------------------------------------
+*unspecified*  ; Make the load be silent
