@@ -60,6 +60,11 @@
 ; Taxonomic is-a relations are done with an InheritanceLink
 ; Syntactic structure is encoded with an EvaluationLink.
 ;--------------------------------------------------------------------
+;
+; (DefinedPredicate "Do show expression") is defined in eva-behavior,
+; so we have to import that...
+(use-modules (opencog eva-behavior))
+;--------------------------------------------------------------------
 ; Global knowledge about spatial directions.  The coordinate system
 ; is specific to the HR robot head.  Distance in meters, the origin
 ; of the system is behind the eyes, middle of head.  "forward" is the
