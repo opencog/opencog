@@ -18,6 +18,8 @@
 	(load "relex2logic/rule-helpers.scm")
 	(load "relex2logic/loader/load-rules.scm")  ; XXX
 	(load "relex2logic/loader/gen-r2l-en-rulebase.scm")
+
+	*unspecified*  ; no return value, avoids printing gunk.
 )
 
 ; XXX TODO FIXME Currently, the statement below fails to have the
