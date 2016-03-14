@@ -82,25 +82,11 @@ void SuRealUTest::setUp(void)
     _evaluator->eval("(setlocale LC_CTYPE \"\")");
     _evaluator->clear_pending();
 
-    // Load the required data
-    config().set("MODULES",
-                 "opencog/nlp/types/libnlp-types.so,"
-                 "opencog/cogserver/modules/libLGDictModule.so,"
-                 "opencog/cogserver/modules/libSuRealModule.so");
-
-    cogserver().loadModules();
-
-    config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm,"
-                 "opencog/scm/atom-types.scm,"
-                 "opencog/scm/utilities.scm,"
-                 "opencog/nlp/types/nlp_types.scm,"
-                 "opencog/nlp/scm/nlp.scm,"
-                 "opencog/nlp/scm/nlp-utils.scm,"
-                 "opencog/nlp/relex2logic/relex2logic.scm,"
-                 "opencog/nlp/relex2logic/r2l-utilities.scm,"
-                 "opencog/nlp/sureal/surface-realization.scm");
-    cogserver().loadSCMModules();
+    _evaluator->eval("(use-modules (opencog atom-types))");
+    _evaluator->eval("(use-modules (opencog nlp))");
+    _evaluator->eval("(use-modules (opencog nlp lg-dict))");
+    _evaluator->eval("(use-modules (opencog nlp relex2logic))");
+    _evaluator->eval("(use-modules (opencog nlp sureal))");
 }
 
 void SuRealUTest::tearDown(void)
