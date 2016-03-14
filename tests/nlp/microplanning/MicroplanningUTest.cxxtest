@@ -75,9 +75,6 @@ void MicroplanningUTest::setUp(void)
     _evaluator->eval("(setlocale LC_CTYPE \"\")");
     _evaluator->eval("(add-to-load-path \".\")");
     _evaluator->eval("(add-to-load-path \"../../..\")");
-    _evaluator->eval("(add-to-load-path \"../opencog/scm\")");
-    _evaluator->eval("(add-to-load-path \"../opencog/nlp\")");
-    _evaluator->eval("(add-to-load-path \"../opencog/nlp/microplanning\")");
     _evaluator->clear_pending();
 
     _evaluator->eval("(use-modules (opencog atom-types))");
