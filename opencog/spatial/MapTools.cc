@@ -87,7 +87,7 @@ int MapTools::runLocalMode( const std::string& fileName )
         explorer.wait( );
         
     } catch ( const opencog::StandardException& ex ) {
-        std::cerr << "Error: " << ex.getMessage( ) << std::endl;
+        std::cerr << "Error: " << ex.get_message( ) << std::endl;
         return 1;
     } // catch  
 

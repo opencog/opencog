@@ -13,9 +13,14 @@
 			(interp-of-parse "$interp" "$parse")
 			(word-in-parse "$wall-inst" "$parse")
 
-			(ReferenceLink
-				(VariableNode "$wall-inst")
-				(WordNode "###LEFT-WALL###")
+			; Comma: for example, "Eva, what are you doing?"
+			(ChoiceLink
+				(ReferenceLink
+					(VariableNode "$wall-inst")
+					(WordNode "###LEFT-WALL###"))
+				(ReferenceLink
+					(VariableNode "$wall-inst")
+					(WordNode ","))
 			)
 
 			;; If left wall is linked with any of Wq, Ws, Wj or Ww

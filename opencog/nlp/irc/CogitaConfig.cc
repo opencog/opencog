@@ -36,13 +36,35 @@ using namespace std;
 namespace opencog {
 namespace chatbot {
 
+#define DEFAULT_SERVER "irc.freenode.net"
+#define DEFAULT_PORT 6667
+#define DEFAULT_NICK "cogita-bot"
+#define DEFAULT_NAME "La Cogita OpenCog chatbot"
+#define DEFAULT_PASS ""
+#define DEFAULT_CHANNELS { "#opencog", 0 }
+#define VERSION "1.0.1"
+#define VSTRING "La Cogita OpenCog (http://opencog.org) IRC chatbot version "  VERSION
+#define DEFAULT_ATTN { "cogita-bot", "cogita", "cog", 0 }
+#define DEFAULT_ATTN_SUFFIXES { ",", ":", 0 }
+
+#define DEFAULT_COG_IP "127.0.0.1"
+#define DEFAULT_COG_PORT 17004
+
+
 CogitaConfig::CogitaConfig() :
-    ircNetwork(COGITA_DEFAULT_SERVER), ircPort(COGITA_DEFAULT_PORT),
-    vstring(COGITA_VSTRING), nick(COGITA_DEFAULT_NICK)
+    version_string(VSTRING),
+    ircNetwork(DEFAULT_SERVER),
+    ircPort(DEFAULT_PORT),
+    irc_nick(DEFAULT_NICK),
+    irc_name(DEFAULT_NAME),
+    irc_pass(DEFAULT_PASS),
+    dry_run(false),
+    cog_addr(DEFAULT_COG_IP),
+    cog_port(DEFAULT_COG_PORT)
 {
-    const char* defaultAttns[] = COGITA_DEFAULT_ATTN;
-    const char* defaultSuffixes[] = COGITA_DEFAULT_ATTN_SUFFIXES;
-    const char* defaultChannels[] = COGITA_DEFAULT_CHANNELS;
+    const char* defaultAttns[] = DEFAULT_ATTN;
+    const char* defaultSuffixes[] = DEFAULT_ATTN_SUFFIXES;
+    const char* defaultChannels[] = DEFAULT_CHANNELS;
     for (int i = 0; defaultAttns[i]; i++) {
         for (int i = 0; defaultSuffixes[i]; i++) {
             attn.push_back(string(defaultAttns[i]) +
@@ -54,70 +76,102 @@ CogitaConfig::CogitaConfig() :
     }
 }
 
-const std::string CogitaConfig::helpOutput =
-    " Cogita - An OpenCog chatbot. \n"
+const char * CogitaConfig::helpOutput =
+    " Cogita - An OpenCog IRC chatbot, version " VERSION "\n"
     " ======\n"
     " Usage: \n"
-    " -n,--nick \tSet bot nick.\n"
-    " -s,--server \tIRC server to connect to.\n"
-    " -p,--port \tPort of IRC server to connect to.\n"
-    " -c,--channels \tComma separated list of channels (without preceding #) to join\n"
-    "               \t(only single channel support implemented).\n"
-    " -v,--version \tPrint version information.\n"
+    " -n,--nick      Set bot nick. (default: %s)\n"
+    " -f,--name      Set bot full name. (default: %s)\n"
+    " -w,--pass      Set bot password. (default: %s)\n"
+    " -s,--server    IRC server to connect to. (default: %s)\n"
+    " -p,--port      Port of IRC server to connect to. (default: %d)\n"
+    " -c,--channel   Channel (without #) to join (default: %s)\n"
+    " -o,--cogserver Cogserver to use (default: %s)\n"
+    " -t,--cog-port  Cogserver port number (default: %d)\n"
+    " -d,--dry-run   Print settings and quit.\n"
+    " -v,--version   Print version information.\n"
     " \n";
 
-void CogitaConfig::printHelp() { cout << helpOutput; }
+void CogitaConfig::printHelp()
+{
+    const char* pass = irc_pass.c_str();
+    if (0 == pass[0]) pass = "(no password)";
+#define BUFSZ 8190
+    char buff[BUFSZ];
+    snprintf(buff, BUFSZ, helpOutput, irc_nick.c_str(),
+             irc_name.c_str(), pass, ircNetwork.c_str(),
+             ircPort, ircChannels[0].c_str(), cog_addr.c_str(), cog_port);
+    cout << buff;
+}
 
-void CogitaConfig::printVersion() { cout << COGITA_VSTRING << endl; }
+void CogitaConfig::printVersion() { cout << VSTRING << endl; }
 
 int CogitaConfig::parseOptions(int argc, char* argv[])
 {
     int c = 0;
-    static const char *optString =
-        "n:s:p:c:vh";
+    static const char *optString = "n:f:w:s:p:c:o:t:dvh";
 
-    static const struct option longOptions[] = {
+    static const struct option longOptions[] =
+    {
         {"nick", required_argument, 0, 'n'},
+        {"name", required_argument, 0, 'f'},
+        {"pass", required_argument, 0, 'w'},
         {"server", required_argument, 0, 's'},
         {"port", required_argument, 0, 's'},
-        {"channels", required_argument, 0, 'c'},
+        {"channel", required_argument, 0, 'c'},
+        {"cogserver", required_argument, 0, 'o'},
+        {"cog-port", required_argument, 0, 't'},
+        {"dry-run", 0, 0, 'd'},
         {"version", 0, 0, 'v'},
         {"help", 0, 0, '?'},
         {0, 0, 0, 0}
     };
 
-    while (1) {
+    while (1)
+    {
         int optionIndex = 0;
         string channelsTemp;
         StringTokenizer st;
-        c = getopt_long (argc, argv, optString, longOptions, &optionIndex);
+        c = getopt_long(argc, argv, optString, longOptions, &optionIndex);
 
         /* Detect end of options */
-        if (c == -1)
-            break;
+        if (c == -1) break;
 
         switch (c) {
         case 'n':
-            nick = string(optarg);
+            irc_nick = string(optarg);
             createAttnVector();
+            break;
+        case 'f':
+            irc_name = string(optarg);
+            break;
+        case 'w':
+            irc_pass = string(optarg);
             break;
         case 's':
             ircNetwork = string(optarg);
             break;
+        case 'o':
+            cog_addr = string(optarg);
+            break;
         case 'p':
             ircPort = atoi(optarg);
+            break;
+        case 't':
+            cog_port = atoi(optarg);
             break;
         case 'c':
             ircChannels.clear();
             channelsTemp = optarg;
-            st.setString(channelsTemp);
-            st.setDelimiter(string(","));
-            for (string channel = st.nextToken();
+            st.set_string(channelsTemp);
+            st.set_delimiter(string(","));
+            for (string channel = st.next_token();
                     channel.size() > 0;
-                    channel = st.nextToken()) {
+                    channel = st.next_token()) {
                 ircChannels.push_back("#" + channel);
             }
             break;
+        case 'd': dry_run = true; break;
         case 'v':
             printVersion();
             return 1;
@@ -135,10 +189,10 @@ int CogitaConfig::parseOptions(int argc, char* argv[])
 
 void CogitaConfig::createAttnVector()
 {
-    const char* defaultSuffixes[] = COGITA_DEFAULT_ATTN_SUFFIXES;
+    const char* defaultSuffixes[] = DEFAULT_ATTN_SUFFIXES;
     attn.clear();
     for (int i = 0; defaultSuffixes[i]; i++) {
-        attn.push_back(nick + string(defaultSuffixes[i]));
+        attn.push_back(irc_nick + string(defaultSuffixes[i]));
     }
 }
 

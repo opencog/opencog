@@ -8,6 +8,14 @@
 ;  (use-modules (rnrs io ports))
 ;  (use-modules (ice-9 rdelim))
 
+(use-modules (srfi srfi-1)   ; needed for delete-duplicates
+             (ice-9 threads) ; needed for par-map
+             (ice-9 rdelim) (ice-9 regex) (ice-9 receive))
+(use-modules (opencog))
+(use-modules (opencog nlp)
+             (opencog nlp lg-dict)
+             (opencog nlp relex2logic))
+
 ; ---------------------------------------------------------------------
 ; Creates a single list  made of the elements of lists within it with the exception
 ; of empty-lists.
@@ -104,7 +112,20 @@
                 (if (null? (r2l-get-word-inst n))
                     (if (null? (r2l-get-word n))
                         #f
-                        (r2l-get-word n)
+                        (begin
+                            (if (equal? (cog-type n) 'PredicateNode)
+                                (map
+                                    (lambda (p)
+                                        (if (> (length (word-inst-get-word p)) 0)
+                                            ; TODO: There could be too many... skip if seen before?
+                                            (lg-get-dict-entry (WordNode (word-inst-get-word-str p)))
+                                        )
+                                    )
+                                    (cog-chase-link 'LemmaLink 'WordInstanceNode (r2l-get-word n))
+                                )
+                            )
+                            (r2l-get-word n)
+                        )
                     )
                     (car (word-inst-get-word (r2l-get-word-inst n)))
                 )

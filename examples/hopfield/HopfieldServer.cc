@@ -231,11 +231,11 @@ void HopfieldServer::init(int width, int height, int numLinks)
     forgetAgent = createAgent<ForgettingAgent>(true);
 
     if (options->verboseLevel) {
-        importUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
+        importUpdateAgent->getLogger()->set_print_to_stdout_flag (true);
         if (hebUpdateAgent) {
-            hebUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
+            hebUpdateAgent->getLogger()->set_print_to_stdout_flag (true);
         } else {
-            storkeyAgent->getLogger()->setPrintToStdoutFlag (true);
+            storkeyAgent->getLogger()->set_print_to_stdout_flag (true);
         }
 //! @todo make all attention modules use their own logger object or upgrade
 //! logging system to allow hierarchical logs.
@@ -244,37 +244,37 @@ void HopfieldServer::init(int width, int height, int numLinks)
 //        spreadAgent->getLogger()->setPrintToStdoutFlag (true);
 
 #endif
-        imprintAgent->getLogger()->setPrintToStdoutFlag (true);
-        forgetAgent->getLogger()->setPrintToStdoutFlag (true);
+        imprintAgent->getLogger()->set_print_to_stdout_flag (true);
+        forgetAgent->getLogger()->set_print_to_stdout_flag (true);
     }
     switch (options->verboseLevel) {
     case 1:
-        importUpdateAgent->getLogger()->setLevel (Logger::INFO);
-        forgetAgent->getLogger()->setLevel (Logger::INFO);
-        if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::INFO);
-        else storkeyAgent->getLogger()->setLevel (Logger::INFO);
-        imprintAgent->getLogger()->setLevel (Logger::INFO);
+        importUpdateAgent->getLogger()->set_level (Logger::INFO);
+        forgetAgent->getLogger()->set_level (Logger::INFO);
+        if (hebUpdateAgent) hebUpdateAgent->getLogger()->set_level (Logger::INFO);
+        else storkeyAgent->getLogger()->set_level (Logger::INFO);
+        imprintAgent->getLogger()->set_level (Logger::INFO);
         break;
     case 2:
-        importUpdateAgent->getLogger()->setLevel (Logger::DEBUG);
-        forgetAgent->getLogger()->setLevel (Logger::DEBUG);
-        if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::DEBUG);
-        else storkeyAgent->getLogger()->setLevel (Logger::DEBUG);
-        imprintAgent->getLogger()->setLevel (Logger::INFO);
+        importUpdateAgent->getLogger()->set_level (Logger::DEBUG);
+        forgetAgent->getLogger()->set_level (Logger::DEBUG);
+        if (hebUpdateAgent) hebUpdateAgent->getLogger()->set_level (Logger::DEBUG);
+        else storkeyAgent->getLogger()->set_level (Logger::DEBUG);
+        imprintAgent->getLogger()->set_level (Logger::INFO);
         break;
     case 3:
-        importUpdateAgent->getLogger()->setLevel (Logger::FINE);
-        forgetAgent->getLogger()->setLevel (Logger::FINE);
-        if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::FINE);
-        else storkeyAgent->getLogger()->setLevel (Logger::FINE);
-        imprintAgent->getLogger()->setLevel (Logger::INFO);
+        importUpdateAgent->getLogger()->set_level (Logger::FINE);
+        forgetAgent->getLogger()->set_level (Logger::FINE);
+        if (hebUpdateAgent) hebUpdateAgent->getLogger()->set_level (Logger::FINE);
+        else storkeyAgent->getLogger()->set_level (Logger::FINE);
+        imprintAgent->getLogger()->set_level (Logger::INFO);
         break;
     default:
-        importUpdateAgent->getLogger()->setLevel (Logger::WARN);
-        forgetAgent->getLogger()->setLevel (Logger::WARN);
-        if (hebUpdateAgent) hebUpdateAgent->getLogger()->setLevel (Logger::WARN);
-        else storkeyAgent->getLogger()->setLevel (Logger::WARN);
-        imprintAgent->getLogger()->setLevel (Logger::INFO);
+        importUpdateAgent->getLogger()->set_level (Logger::WARN);
+        forgetAgent->getLogger()->set_level (Logger::WARN);
+        if (hebUpdateAgent) hebUpdateAgent->getLogger()->set_level (Logger::WARN);
+        else storkeyAgent->getLogger()->set_level (Logger::WARN);
+        imprintAgent->getLogger()->set_level (Logger::INFO);
     }
 
     if (hebUpdateAgent)
@@ -647,7 +647,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
             updateKeyNodeLinks(keyNodeHandle);
         }
         // avoid calculating energy if it won't be displayed
-        if (logger().isFineEnabled()) {
+        if (logger().is_fine_enabled()) {
             logger().fine("---Imprint:Energy %f.", totalEnergy());
         }
 

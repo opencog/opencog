@@ -119,8 +119,8 @@ void opencog::spatial::populateRandom(spatial::LocalSpaceMap2D& lsm,
             center_x = gaussian_rand<unsigned>(prob_center.first, std_dev, rng),
             center_y = gaussian_rand<unsigned>(prob_center.second, std_dev, rng),
             center_z = gaussian_rand<unsigned>(prob_center.second, std_dev, rng),
-            radius_y = 1 + static_cast<unsigned>(30 * rng.randDoubleOneExcluded()),
-            radius_x = 1 + static_cast<unsigned>(20 * rng.randDoubleOneExcluded());
+            radius_y = 1 + static_cast<unsigned>(30 * rng.randdouble_one_excluded()),
+            radius_x = 1 + static_cast<unsigned>(20 * rng.randdouble_one_excluded());
 
         spatial::ObjectMetaData metaData;
         metaData.centerX = center_x;

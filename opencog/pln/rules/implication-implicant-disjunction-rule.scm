@@ -48,7 +48,7 @@
         (GroundedSchemaNode "scm: implication-implicant-disjunction-formula")
         (ListLink
            (ImplicationLink
-              (OrLink
+              (cog-new-flattened-link 'OrLink
                  (VariableNode "$A")
                  (VariableNode "$B")
               )

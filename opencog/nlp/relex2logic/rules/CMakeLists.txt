@@ -40,8 +40,8 @@ ADD_GUILE_MODULE (
 	TOBE.scm
 	todo1.scm
 	todo2.scm
+	todo3.scm
 	todo5.scm
-	to-do-rule-3.scm
 	truthquery.scm
 	when-cop-q.scm
 	when-q.scm

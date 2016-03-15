@@ -64,6 +64,9 @@ int end_of_motd(const char* params, irc_reply_data* ird, void* data)
 	printf("chatbot got motd nick=%s ident=%s host=%s target=%s\n",
 		ird->nick, ird->ident, ird->host, ird->target);
 
+	// Quit hard, if dry-run.
+	if (cc.dry_run) exit(0);
+
 	sleep(1);
 	conn->join (cc.ircChannels[0].c_str());
 	printf("chatbot sent channel join %s\n", cc.ircChannels[0].c_str());
@@ -102,10 +105,10 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 
 	const char * start = NULL;
 	int priv = 0;
-	if (!strcmp (ird->target, cc.nick.c_str())) {priv = 1; start = params+1; }
+	if (!strcmp (ird->target, cc.irc_nick.c_str())) {priv = 1; start = params+1; }
 
-	if (!strncmp (&params[1], cc.nick.c_str(), cc.nick.size())) {
-		start = params+1 + cc.nick.size();
+	if (!strncmp (&params[1], cc.irc_nick.c_str(), cc.irc_nick.size())) {
+		start = params+1 + cc.irc_nick.size();
 		start = strchr(start, ':');
 		if (start) start ++;
 	} else if (!strncmp (params, ":cog-sh:", 8)) {
@@ -138,8 +141,8 @@ int got_privmsg(const char* params, irc_reply_data* ird, void* data)
 	// Reply to request for chat client version
 	if ((0x1 == start[0]) && !strncmp (&start[1], "VERSION", 7))
 	{
-		printf ("VERSION: %s\n", cc.vstring.c_str());
-		conn->privmsg (msg_target, cc.vstring.c_str());
+		printf ("VERSION: %s\n", cc.version_string.c_str());
+		conn->privmsg (msg_target, cc.version_string.c_str());
 		return 0;
 	}
 
@@ -290,39 +293,44 @@ int got_kick(const char* params, irc_reply_data* ird, void* data)
 }
 
 /**
- * @todo allow command line options via tclap http://tclap.sourceforge.net/ -
- * package libtclap-dev in Ubuntu.
- * However, its probably more portable to use plain-old getopt,
- * or maybe getopt_long, lets keep the dependency list minimal.
- * @todo use Config class to store defaults, and retrieve opencog.conf vars.
+ * Run the IRC chatbot.
  */
 int main (int argc, char * argv[])
 {
-	whirr_sock_setup();
-
-	IRC conn;
-
 	if (cc.parseOptions(argc,argv)) return 0;
 
+	// Set up connection to the cogserver.
+	whirr_sock_setup();
+
+	// Connect to the IRC network.
+	IRC conn;
 	conn.hook_irc_command("376", &end_of_motd);
 	conn.hook_irc_command("PRIVMSG", &got_privmsg);
 	conn.hook_irc_command("KICK", &got_kick);
 
 	const char *login = getlogin();
+	if (nullptr == login) login = "no-controlling-tty";
 
 	// Loop forever. When the IRC network burps and closes our
 	// connection, just log in again.
 	while (true)
 	{
+		printf("Joining network=%s port=%d nick=%s user=%s\n",
+			cc.ircNetwork.c_str(), cc.ircPort, cc.irc_nick.c_str(), login);
+
 		// The login-name, nick, etc. are there only to make it look
 		// pretty on IRC ident.
-		conn.start (cc.ircNetwork.c_str(), cc.ircPort, cc.nick.c_str(), login,
-		            "La Cogita OpenCog chatbot", "asdf");
+		conn.start(cc.ircNetwork.c_str(), cc.ircPort, cc.irc_nick.c_str(),
+		           login, cc.irc_name.c_str(), cc.irc_pass.c_str());
 
 		conn.message_loop();
 
 		fprintf(stderr, "%s: Fatal Error: Remote side closed socket\n",
 			argv[0]);
+
+		conn.disconnect();
+
+		sleep(20);
 	}
 
 	return 1;

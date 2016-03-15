@@ -60,22 +60,22 @@ private:
 public:
 
     PythonModuleUTest() {
-        logger().setLevel(Logger::DEBUG);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
 
         // Load special config file for the test
         string configFile = PROJECT_BINARY_DIR"/tests/cython/pymodule.conf";
         try {
             config().load(configFile.c_str(), false);
         } catch (RuntimeException &e) {
-            std::cerr << e.getMessage() << std::endl;
+            std::cerr << e.get_message() << std::endl;
             exit(1);
         }
         // setup global logger
-        logger().setFilename(config()["LOG_FILE"]);
-        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-        logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
-        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+        logger().set_filename(config()["LOG_FILE"]);
+        logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
+        logger().set_backtrace_level(Logger::get_level_from_string(config()["BACK_TRACE_LOG_LEVEL"]));
+        logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
 
         // set cycle duration to a smaller value so that this test do not take too long.
         config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
@@ -89,7 +89,7 @@ public:
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
 	    // erase the log file if no assertions failed
 	    if (!CxxTest::TestTracker::tracker().suiteFailed())
-            std::remove(logger().getFilename().c_str());
+            std::remove(logger().get_filename().c_str());
         cogserver.unloadModule("opencog::PythonModule");
     }
 

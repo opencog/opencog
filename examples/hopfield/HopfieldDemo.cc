@@ -57,22 +57,22 @@ int main(int argc, char *argv[])
     (static_cast<HopfieldServer&>(server())).init(-1, -1, -1);
 
     /* setup logging */
-    logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+    logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
     switch (o->verboseLevel) {
     case 1:
-        logger().setLevel(Logger::INFO);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::INFO);
+        logger().set_print_to_stdout_flag(true);
         break;
     case 2:
-        logger().setLevel(Logger::DEBUG);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
         break;
     case 3:
-        logger().setLevel(Logger::FINE);
-        logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::FINE);
+        logger().set_print_to_stdout_flag(true);
         break;
     default:
-        logger().setLevel(Logger::WARN);
+        logger().set_level(Logger::WARN);
     }
 
     if (o->showConfigFlag) {

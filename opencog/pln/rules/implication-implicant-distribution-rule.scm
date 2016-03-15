@@ -51,7 +51,11 @@
     (cog-set-tv!
      (ImplicationLink
         P
-        (AndLink
-           P
-           Q))
+        (cog-new-flattened-link 'AndLink P Q))
      (cog-tv impl))))
+
+;; Name the rule
+(define implication-implicant-distribution-rule-name
+  (DefinedSchemaNode "implication-implicant-distribution-rule"))
+(DefineLink implication-implicant-distribution-rule-name
+  implication-implicant-distribution-rule)

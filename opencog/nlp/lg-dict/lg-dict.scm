@@ -16,7 +16,7 @@
   lg-similar? - Check if two words' LG entries intersect
 "
 	(define (get-set w)
- 		(define roots (filter (lambda (l) (equal? (cog-type l) 'LgWordCset)) (cog-incoming-set w)))
+ 		(define roots (filter (lambda (l) (equal? (cog-type l) 'LgDisjunct)) (cog-incoming-set w)))
 		(map cog-get-partner roots (circular-list w))
 	)
 

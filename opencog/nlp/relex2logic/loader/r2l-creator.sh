@@ -1,4 +1,7 @@
 #!/bin/bash
+
+This is broken/wrong ...
+
 rm gen-r2l-en-rulebase.scm
 cd ..
 echo "(InheritanceLink (stv 1 1) (ConceptNode \"R2L-en-RuleBase\") (ConceptNode \"RuleBase\"))">>"loader/gen-r2l-en-rulebase.scm"

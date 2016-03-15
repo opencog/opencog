@@ -60,3 +60,9 @@
          (wrap_with_lambda (lambda (junctor) (LambdaLink SV junctor)))
          (wrapped_junctors (map wrap_with_lambda junctors)))
     (cog-set-tv! (apply AndLink wrapped_junctors) (cog-tv Lamb))))
+
+;; Name the rule
+(define and-lambda-distribution-rule-name
+  (DefinedSchemaNode "and-lambda-distribution-rule"))
+(DefineLink and-lambda-distribution-rule-name
+  and-lambda-distribution-rule)

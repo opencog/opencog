@@ -48,9 +48,6 @@ IRC::IRC()
 	hooks=0;
 	chan_users=0;
 	connected=false;
-	sentnick=false;
-	sentpass=false;
-	sentuser=false;
 	cur_nick=0;
 }
 
@@ -207,7 +204,7 @@ int IRC::start(const char* server, int port, const char* nick,
 	cur_nick=new char[strlen(nick)+1];
 	strcpy(cur_nick, nick);
 
-	fprintf(dataout, "PASS %s\r\n", pass);
+	if (0 != pass[0]) fprintf(dataout, "PASS %s\r\n", pass);
 	fprintf(dataout, "NICK %s\r\n", nick);
 	fprintf(dataout, "USER %s * 0 :%s\r\n", user, name);
 	fflush(dataout);		
@@ -249,7 +246,7 @@ int IRC::message_loop()
 	char buffer[1024];
 	int ret_len;
 
-	if (!connected)
+	if (not connected)
 	{
 		printf("Not connected!\n");
 		return 1;
@@ -898,7 +895,7 @@ int IRC::mode(const char* modes)
 
 int IRC::nick(const char* newnick)
 {
-	if (!connected)
+	if (not connected)
 		return 1;
 	fprintf(dataout, "NICK %s\r\n", newnick);
 	return fflush(dataout);

@@ -34,6 +34,10 @@ WORD_NODE <- NODE
 ANY_NODE <- NODE    // Explicit wildcard node, used for counting.
 REFERENCE_LINK <- ORDERED_LINK
 
+// Imperative command. See chatbot-eva for details.
+// Kind-of-like ExecutionLink, except more like ExecutionOutputLink
+ACTION_LINK <- ORDERED_LINK
+
 // Custom atoms to identify documents, sentences, word instances.
 // These are emitted by RelEx and are used to input text into OpenCog.
 DOCUMENT_NODE <- CONCEPT_NODE
@@ -147,6 +151,7 @@ LG_OR  <- OR_LINK     // Exclusive-OR, completely disjunctive.
 // In the case of WordInstanceNode, it should always be a
 // LgAnd disjunct used in the corresponding sentence.
 LG_WORD_CSET <- LIST_LINK
+LG_DISJUNCT <- LIST_LINK
 
 // For LG link instance of a specific parse of a sentence
 // LgLinkInstanceNode will be an instance of LinkGrammarRelationshipNode

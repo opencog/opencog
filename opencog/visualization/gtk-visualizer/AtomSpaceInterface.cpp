@@ -352,8 +352,7 @@ string AtomSpaceInterface::PostToCogServer(string queryString,string postBody)
 
 	boost::system::error_code error;
 	boost::asio::read(socket, response, boost::asio::transfer_at_least(1), error);
-	istream response_stream(&response);
-	cout<<response_stream<<endl;
+	cout<<&response<<endl;
 	string ret="";
 /*
 	boost::asio::read_until(socket, response, "\r\n");

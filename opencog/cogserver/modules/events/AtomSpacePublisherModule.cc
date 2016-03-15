@@ -75,16 +75,16 @@ void AtomSpacePublisherModule::run()
 AtomSpacePublisherModule::~AtomSpacePublisherModule()
 {
     logger().info("Terminating AtomSpacePublisherModule.");
-    
+
     disableSignals();
-    
+
     // Shut down the ZeroMQ proxy loop
     message_t message;
     message.type = "CONTROL";
     message.payload = "TERMINATE";
-    queue.push(message); 
+    queue.push(message);
     context->close();
-    
+
     do_publisherEnableSignals_unregister();
     do_publisherDisableSignals_unregister();
 }
@@ -162,7 +162,7 @@ void AtomSpacePublisherModule::proxy()
 {
     zmq::socket_t pub(*context, ZMQ_PUB);
     pub.setsockopt(ZMQ_SNDHWM, &HWM, sizeof(HWM));
-    
+
     std::string zmq_event_port = config().get("ZMQ_EVENT_PORT");
     bool zmq_use_public_ip = config().get_bool("ZMQ_EVENT_USE_PUBLIC_IP");
     std::string zmq_ip;
@@ -175,11 +175,11 @@ void AtomSpacePublisherModule::proxy()
         zmq_ip = "*";
     }
 
-    try 
+    try
     {
         pub.bind(("tcp://" + zmq_ip + ":" + zmq_event_port).c_str());
-    } 
-    catch (zmq::error_t error) 
+    }
+    catch (zmq::error_t error)
     {
         std::cout << "ZeroMQ error: " << error.what() << std::endl;
         return;
@@ -193,12 +193,12 @@ void AtomSpacePublisherModule::proxy()
     {
         message_t message;
         queue.pop(message);
-        
+
         if (message.type == "CONTROL")
         {
             if (message.payload == "TERMINATE")
             {
-                active = false; 
+                active = false;
             }
         }
         else
@@ -209,17 +209,17 @@ void AtomSpacePublisherModule::proxy()
     }
 }
 
-void AtomSpacePublisherModule::sendMessage(std::string messageType, 
+void AtomSpacePublisherModule::sendMessage(std::string messageType,
                                            std::string payload)
-{   
+{
     message_t message;
     message.type = messageType;
     message.payload = payload;
-    queue.push(message); 
+    queue.push(message);
 }
-    
+
 void AtomSpacePublisherModule::atomAddSignal(Handle h)
-{   
+{
     tbb_enqueue_lambda([=] {
        sendMessage("add", atomMessage(atomToJSON(h)));
     });
@@ -237,8 +237,8 @@ void AtomSpacePublisherModule::AVChangedSignal(const Handle& h,
                                                const AttentionValuePtr& av_new)
 {
     tbb_enqueue_lambda([=] {
-        sendMessage("avChanged", avMessage(atomToJSON(h), 
-                                           avToJSON(av_old), 
+        sendMessage("avChanged", avMessage(atomToJSON(h),
+                                           avToJSON(av_old),
                                            avToJSON(av_new)));
     });
 }
@@ -248,7 +248,7 @@ void AtomSpacePublisherModule::TVChangedSignal(const Handle& h,
                                                const TruthValuePtr& tv_new)
 {
     tbb_enqueue_lambda([=] {
-        sendMessage("tvChanged", tvMessage(atomToJSON(h), 
+        sendMessage("tvChanged", tvMessage(atomToJSON(h),
                                            tvToJSON(tv_old),
                                            tvToJSON(tv_new)));
     });
@@ -259,7 +259,7 @@ void AtomSpacePublisherModule::addAFSignal(const Handle& h,
                                            const AttentionValuePtr& av_new)
 {
     tbb_enqueue_lambda([=] {
-        sendMessage("addAF", avMessage(atomToJSON(h), 
+        sendMessage("addAF", avMessage(atomToJSON(h),
                                        avToJSON(av_old),
                                        avToJSON(av_new)));
     });
@@ -268,9 +268,9 @@ void AtomSpacePublisherModule::addAFSignal(const Handle& h,
 void AtomSpacePublisherModule::removeAFSignal(const Handle& h,
                                               const AttentionValuePtr& av_old,
                                               const AttentionValuePtr& av_new)
-{  
+{
     tbb_enqueue_lambda([=] {
-        sendMessage("removeAF", avMessage(atomToJSON(h), 
+        sendMessage("removeAF", avMessage(atomToJSON(h),
                                           avToJSON(av_old),
                                           avToJSON(av_new)));
     });
@@ -308,10 +308,12 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
     }
 
     // Outgoing set
-    HandleSeq outgoingHandles = h->getOutgoingSet();
     Array outgoing;
-    for (uint i = 0; i < outgoingHandles.size(); i++) {
-        outgoing.push_back(std::to_string(outgoingHandles[i].value()));
+    if (h->isLink()) {
+        HandleSeq outgoingHandles = h->getOutgoingSet();
+        for (uint i = 0; i < outgoingHandles.size(); i++) {
+            outgoing.push_back(std::to_string(outgoingHandles[i].value()));
+        }
     }
 
     Object json;
@@ -322,7 +324,7 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
     json.push_back(Pair("truthvalue", jsonTV));
     json.push_back(Pair("outgoing", outgoing));
     json.push_back(Pair("incoming", incoming));
-    
+
     return json;
 }
 
@@ -392,6 +394,7 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
             break;
         }
 
+        case GENERIC_TRUTH_VALUE:
         case NULL_TRUTH_VALUE:
         case NUMBER_OF_TRUTH_VALUE_TYPES: {
             break;

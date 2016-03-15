@@ -3,33 +3,35 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; If X takes Y and Y contains Z, then X takes Z
-(ImplicationLink (stv 1 1)
-   (VariableList
-      (TypedVariableLink
-         (VariableNode "$X")
-         (TypeNode "ConceptNode"))
-      (TypedVariableLink
-         (VariableNode "$Y")
-         (TypeNode "ConceptNode"))
-      (TypedVariableLink
-         (VariableNode "$Z")
-         (TypeNode "ConceptNode")))
-   (AndLink
+(define if-X-takes-Y-and-Y-contains-Z-then-X-takes-Z
+   (ImplicationLink (stv 1 1)
+      (VariableList
+         (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode"))
+         (TypedVariableLink
+            (VariableNode "$Y")
+            (TypeNode "ConceptNode"))
+         (TypedVariableLink
+            (VariableNode "$Z")
+            (TypeNode "ConceptNode")))
+      (AndLink
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (VariableNode "$Y")))
+         (EvaluationLink
+            (PredicateNode "contain")
+            (ListLink
+               (VariableNode "$Y")
+               (VariableNode "$Z"))))
       (EvaluationLink
          (PredicateNode "take")
          (ListLink
             (VariableNode "$X")
-            (VariableNode "$Y")))
-      (EvaluationLink
-         (PredicateNode "contain")
-         (ListLink
-            (VariableNode "$Y")
             (VariableNode "$Z"))))
-   (EvaluationLink
-      (PredicateNode "take")
-      (ListLink
-         (VariableNode "$X")
-         (VariableNode "$Z"))))
+   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Background knowledge about John ;;
@@ -52,34 +54,37 @@
 (PredicateNode "take-compound-A" (stv 0.2 0.8))
 
 ;; take-treatment-1(X) is equivalent to take(X, treatment-1)
-(EquivalenceLink (stv 1 1)
-   (PredicateNode "take-treatment-1")
-   (LambdaLink
-      (TypedVariableLink
-         (VariableNode "$X")
-         (TypeNode "ConceptNode"))
-      (EvaluationLink
-         (PredicateNode "take")
-         (ListLink
+(define take-treatment-1-X-is-equivalent-to-take-X-treatment-1
+   (EquivalenceLink (stv 1 1)
+      (PredicateNode "take-treatment-1")
+      (LambdaLink
+         (TypedVariableLink
             (VariableNode "$X")
-            (ConceptNode "treatment-1")
+            (TypeNode "ConceptNode"))
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "treatment-1")
+            )
          )
       )
    )
 )
-
 ;; take-compound-A(X) is equivalent to take(X, compound-A)
-(EquivalenceLink (stv 1 1)
-   (PredicateNode "take-compound-A")
-   (LambdaLink
-      (TypedVariableLink
-         (VariableNode "$X")
-         (TypeNode "ConceptNode"))
-      (EvaluationLink
-         (PredicateNode "take")
-         (ListLink
+(define take-compound-A-X-is-equivalent-to-take-X-compound-A
+   (EquivalenceLink (stv 1 1)
+      (PredicateNode "take-compound-A")
+      (LambdaLink
+         (TypedVariableLink
             (VariableNode "$X")
-            (ConceptNode "compound-A")
+            (TypeNode "ConceptNode"))
+         (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+               (VariableNode "$X")
+               (ConceptNode "compound-A")
+            )
          )
       )
    )
@@ -171,16 +176,17 @@
 )
 
 ;; Being well hydrated tends to speed up injury recovery
-(ImplicationLink (stv 0.7 0.7)
-   (TypedVariableLink
-      (VariableNode "$X")
-      (TypeNode "PredicateNode"))
-   (MemberLink
-      (VariableNode "$X")
-      (ConceptNode "injury-recovery-speed-predicates"))
-   (ImplicationLink
-      (PredicateNode "is-well-hydrated")
-      (VariableNode "$X")))
+(define being-well-hydrated-tends-to-speed-up-injury-recovery
+   (ImplicationLink (stv 0.7 0.7)
+      (TypedVariableLink
+         (VariableNode "$X")
+         (TypeNode "PredicateNode"))
+      (MemberLink
+         (VariableNode "$X")
+         (ConceptNode "injury-recovery-speed-predicates"))
+      (ImplicationLink
+         (PredicateNode "is-well-hydrated")
+         (VariableNode "$X"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Background knowledge about the target feature ;;

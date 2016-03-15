@@ -45,18 +45,18 @@ public:
         }
         catch (RuntimeException &e)
         {
-            std::cerr << e.getMessage() << std::endl;
+            std::cerr << e.get_message() << std::endl;
         }
-        logger().setFilename(config()["LOG_FILE"]);
-        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+        logger().set_filename(config()["LOG_FILE"]);
+        logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
+        logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
     }
 
     ~MicroplanningUTest()
     {
         // erase the log file if no assertions failed
         if (!CxxTest::TestTracker::tracker().suiteFailed())
-            std::remove(logger().getFilename().c_str());
+            std::remove(logger().get_filename().c_str());
     }
 
     void setUp(void);
@@ -90,9 +90,11 @@ void MicroplanningUTest::setUp(void)
                  "opencog/scm/core_types.scm,"
                  "opencog/scm/utilities.scm,"
                  "opencog/scm/debug-trace.scm,"
-                 "opencog/scm/opencog/atom-types.scm,"
+                 "opencog/scm/atom-types.scm,"
+                 "opencog/nlp/scm/nlp.scm,"
                  "opencog/nlp/types/nlp_types.scm,"
                  "opencog/nlp/scm/nlp-utils.scm,"
+                 "opencog/nlp/relex2logic/relex2logic.scm,"
                  "opencog/nlp/relex2logic/r2l-utilities.scm,"
                  "opencog/nlp/relex2logic/loader/load-rules.scm,"
                  "opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm,"
