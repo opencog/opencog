@@ -25,31 +25,32 @@
 ; * max duration of expression
 
 ; Translation of behavior.cfg line 9 ff
-(emo-expr-spec "new-arrival" "surprised"  1.0 0.2 0.4 10 15)
+(emo-expr-spec "new-arrival" "happy"  1.0 0.4 1.0 3 8)
 
 ; Used when chatbot is not happy; also, when someone leaves.
-(emo-expr-spec "frustrated" "confused"    0.4 0.4 0.6 3 7)
-(emo-expr-spec "frustrated" "recoil"      0.3 0.4 0.6 3 7)
-(emo-expr-spec "frustrated" "surprised"   0.3 0.1 0.2 3 7)
+(emo-expr-spec "frustrated" "confused"    0.4 0.4 0.6 1 4)
+(emo-expr-spec "frustrated" "worry"    0.6 0.4 0.6 2 4)
 
-(emo-expr-spec "positive" "happy"         0.2 0.6 0.8 10 15)
-(emo-expr-spec "positive" "comprehending" 0.3 0.5 0.8 10 15)
-(emo-expr-spec "positive" "engaged"       0.4 0.5 0.8 10 15)
 
-(emo-expr-spec "bored"    "bored"         0.7 0.4 0.7 10 15)
-(emo-expr-spec "bored"    "sad"           0.1 0.1 0.3 10 15)
-(emo-expr-spec "bored"    "happy"         0.2 0.1 0.3 10 15)
+(emo-expr-spec "positive" "happy"         0.4 0.6 0.8 2 6)
+(emo-expr-spec "positive" "comprehending" 0.15 0.5 0.8 1 6)
+(emo-expr-spec "positive" "amused"        0.3 0.5 0.8 3 6)
+(emo-expr-spec "positive" "confused"      0.15 0.5 0.8 3 6)
 
-(emo-expr-spec "sleep"    "happy"         1.0  0.0 0.1 5 15)
+(emo-expr-spec "bored"    "bored"         0.7 0.4 0.7 3 6)
+(emo-expr-spec "bored"    "sad"           0.1 0.1 0.3 3 6)
+(emo-expr-spec "bored"    "confused"      0.2 0.1 0.3 2 4)
 
-(emo-expr-spec "wake-up"  "surprised"     0.45 0.2 0.6 5 15)
-(emo-expr-spec "wake-up"  "happy"         0.2  0.5 0.7 5 15)
-(emo-expr-spec "wake-up"  "irritated"     0.6  0.1 0.4 1  4)
+(emo-expr-spec "sleep"    "happy"         1.0  0.0 0.5 5 8)
+
+(emo-expr-spec "wake-up"  "surprised"     0.3 0.2 0.6 1 4)
+(emo-expr-spec "wake-up"  "happy"         0.6  0.5 0.7 3 6)
+(emo-expr-spec "wake-up"  "irritated"     0.1  0.1 0.4 1  3)
 
 ; Used when chatbot is happy
-(emo-expr-spec "neutral-speech"  "happy"         0.2  0.1 0.3 4 8)
-(emo-expr-spec "neutral-speech"  "comprehending" 0.4  0.5 0.8 4 8)
-(emo-expr-spec "neutral-speech"  "engaged"       0.4  0.5 0.8 4 8)
+(emo-expr-spec "neutral-speech"  "happy"         0.4  0.6 1.0 4 8)
+(emo-expr-spec "neutral-speech"  "comprehending" 0.3  0.5 0.9 2 5)
+(emo-expr-spec "neutral-speech"  "engaged"       0.3  0.5 0.9 2 6)
 
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
@@ -73,9 +74,9 @@
 ; of the time; the "noop" is what is "done" the rest of the time.
 
 ; Translation of behavior.cfg line 75 ff
-(emo-gest-spec "positive" "nod-1"  0.1 0.6 0.9 1 1 0.5 0.8)
-(emo-gest-spec "positive" "nod-2"  0.1 0.2 0.4 1 1 0.8 0.9)
-(emo-gest-spec "positive" "noop"   0.8 0   0   1 1 0   0)
+(emo-gest-spec "positive" "nod-4"  0.1 0.4 0.9 1 1 0.5 0.8)
+(emo-gest-spec "positive" "nod-1"  0.3 0.2 0.4 1 1 0.8 0.9)
+(emo-gest-spec "positive" "noop"   0.6 0   0   1 1 0   0)
 
 ; If bored, then 1/10th of the time, yawn.
 ; Rest of the time, don't do anything.
@@ -142,13 +143,13 @@
 (State (Schema "time_since_last_expr_max") (Number 10.0))
 
 ; Sleep at least 25 seconds ... at most 160
-(State (Schema "time_sleeping_min") (Number 25))
-(State (Schema "time_sleeping_max") (Number 160))
+(State (Schema "time_sleeping_min") (Number 1))
+(State (Schema "time_sleeping_max") (Number 5))
 
 ; After 25 seconds of boredom, maybe fall asleep.
 ; Fall asleep for sure after 125 seconds.
-(State (Schema "time_boredom_min") (Number 25))
-(State (Schema "time_boredom_max") (Number 125))
+(State (Schema "time_boredom_min") (Number 3))
+(State (Schema "time_boredom_max") (Number 4))
 
 ; How long to look in one direction, before changing gaze,
 ; when searching for atention in an empty room.

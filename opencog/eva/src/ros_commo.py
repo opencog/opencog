@@ -56,12 +56,10 @@ class EvaControl():
 		return not rospy.is_shutdown()
 
 	def go_sleep(self):
-		self.soma_state('sleep', 1, 1, 3)
-		self.soma_state('normal.001', 0, 1, 0)
+		self.soma_state('normal', 0.1, 1, 3)
 
 	def wake_up(self):
-		self.soma_state('sleep', 0, 1, 0)
-		self.soma_state('normal.001', 0.1, 1, 3)
+		self.soma_state('normal', 0.1, 1, 3)
 
 	# ----------------------------------------------------------
 	# Wrapper for emotional expressions
