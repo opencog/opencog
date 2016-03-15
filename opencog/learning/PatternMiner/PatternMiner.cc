@@ -2660,13 +2660,33 @@ void PatternMiner::mineRelatedPatternsOnQueryByANode(Handle keywordNode, unsigne
     mineRelatedPatternsOnQueryByLinks_OR(keyLinks, _max_gram, _pai);
 }
 
+// keywordNode is in originalAtomSpace, need to translate it in observingAtomSpace first
+void PatternMiner::mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, unsigned int _max_gram, pai::PAI* _pai)
+{
+
+    HandleSeq keyLinksInObservingAtomSpace;
+
+    for (Handle h : keyLinks)
+    {
+        HandleSeq _OutgoingLinks, outVariableNodes;
+
+        swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, h, _OutgoingLinks, outVariableNodes);
+        Handle _link = observingAtomSpace->getLink(originalAtomSpace->getType(h), _OutgoingLinks);
+        keyLinksInObservingAtomSpace.push_back(_link);
+
+    }
+
+    mineRelatedPatternsOnQueryByLinks_OR(keyLinksInObservingAtomSpace, _max_gram, _pai);
+}
+
+
 
 
 
 // start from keyLinks, only mine patterns connecting to any of links in keyLinks
 // keyLinks are in observingAtomSpace.
 // It's a one time mining, just mine from the current observingAtomSpace. After return result, throw away the result and any middle data.
-void PatternMiner::mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, unsigned int _max_gram, pai::PAI* _pai)
+void PatternMiner::_mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, unsigned int _max_gram, pai::PAI* _pai)
 {
     MAX_GRAM = _max_gram;
 

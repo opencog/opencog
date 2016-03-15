@@ -2705,6 +2705,8 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
             return 0;
     }
 
+    cout << "highestActionType in previous actions: " << atomSpace->atomAsString(highestActionTypeHandle) << std::endl;
+
     // Step 3: Find out what kind of parameters required for this action
 
     // Find all the other parameters except actor and target
@@ -2775,9 +2777,21 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
     std::map <string, HandleSeq>::iterator paramMapIter = paramNameToParamEvalLinks.begin();
     for (; paramMapIter != paramNameToParamEvalLinks.end(); paramMapIter ++ )
     {
+
         HandleSeq& paramEvalLinks = paramMapIter->second;
+        cout << "Start mining patterns on query related to this parameter: " << paramMapIter->first << " for these EvaluationLinks." << std::endl;
+        for (Handle ph : paramEvalLinks)
+        {
+            cout << atomSpace->atomAsString(ph) << std::endl;
+        }
+
         patternMiner->mineRelatedPatternsOnQueryByLinks_OR(paramEvalLinks, 4, pai);
+
+        cout << "Finished mining patterns on query related to this parameter: " << paramMapIter->first << std::endl;
+
     }
+
+
 
 }
 

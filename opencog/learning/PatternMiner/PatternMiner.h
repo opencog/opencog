@@ -365,6 +365,8 @@ namespace PatternMining
 
      void growPatternsDepthFirstTaskForEmbodiment();
 
+     void _mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, unsigned int _max_gram, pai::PAI *_pai);
+
         /////////////////////////////------End for embodiment ----/////////////////////////////
   };
 

@@ -800,28 +800,28 @@ vector<ParamValue> Inquery::inqueryStandableNearbyAccessablePosition(const vecto
 //      ) ; [1579]
 //    ) ; [1580]
 //    (EvaluationLink (stv 1.000000 1.000000)
-//      (PredicateNode "state_change:actor") ; [2601]
+//      (PredicateNode "actor") ; [2601]
 //      (ListLink (stv 1.000000 1.000000)
 //        (ConceptNode "$var_instance") ; [3902]
 //        (ObjectNode "$var_actor") ; [1578]
 //      ) ; [3904]
 //    ) ; [3905]
 //    (EvaluationLink (stv 1.000000 1.000000)
-//      (PredicateNode "state_change:stateName") ; [2605]
+//      (PredicateNode "stateName") ; [2605]
 //      (ListLink (stv 1.000000 1.000000)
 //        (ConceptNode "$var_instance") ; [3902]
 //        (ConceptNode "is_open") ; [3559]
 //      ) ; [3906]
 //    ) ; [3907]
 //    (EvaluationLink (stv 1.000000 1.000000)
-//      (PredicateNode "state_change:NewValue") ; [2612]
+//      (PredicateNode "NewValue") ; [2612]
 //      (ListLink (stv 1.000000 1.000000)
 //        (ConceptNode "$var_instance") ; [3902]
 //        (ConceptNode "true") ; [1190]
 //      ) ; [3910]
 //    ) ; [3911]
 //    (EvaluationLink (stv 1.000000 1.000000)
-//      (PredicateNode "state_change:OldValue") ; [2609]
+//      (PredicateNode "OldValue") ; [2609]
 //      (ListLink (stv 1.000000 1.000000)
 //        (ConceptNode "$var_instance") ; [3902]
 //        (ConceptNode "false") ; [1194]
@@ -866,51 +866,51 @@ HandleSeq Inquery::findAllGivenStateChangesAndLatestRelatedActions(Handle classV
     Handle classEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "class", hVariableActorNode, classValueNode, tv);
     andLinkOutgoings.push_back(classEvalLink);
 
-    // Create EvaluationLink for state_change:actor predicate
+    // Create EvaluationLink for actor predicate
     //    (EvaluationLink (stv 1.000000 1.000000)
-    //      (PredicateNode "state_change:actor") ; [2601]
+    //      (PredicateNode "actor") ; [2601]
     //      (ListLink (stv 1.000000 1.000000)
     //        (ConceptNode "$var_instance") ; [3902]
     //        (ObjectNode "$var_actor") ; [1578]
     //      ) ; [3904]
     //    ) ; [3905]
-    Handle actorEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:actor", hVariableStateChangeNode, hVariableActorNode, tv);
+    Handle actorEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "actor", hVariableStateChangeNode, hVariableActorNode, tv);
     andLinkOutgoings.push_back(actorEvalLink);
 
-    // Create EvaluationLink for state_change:stateName predicate
+    // Create EvaluationLink for stateName predicate
     //    (EvaluationLink (stv 1.000000 1.000000)
-    //      (PredicateNode "state_change:stateName") ; [2605]
+    //      (PredicateNode "stateName") ; [2605]
     //      (ListLink (stv 1.000000 1.000000)
     //        (ConceptNode "$var_instance") ; [3902]
     //        (ConceptNode "stateNameValHande") ; [3559]
     //      ) ; [3906]
     //    ) ; [3907]
     Handle stateNameValHande = AtomSpaceUtil::addNode(*atomSpace, CONCEPT_NODE, stateName);
-    Handle stateNameEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:stateName", hVariableStateChangeNode, stateNameValHande, tv);
+    Handle stateNameEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "stateName", hVariableStateChangeNode, stateNameValHande, tv);
     andLinkOutgoings.push_back(stateNameEvalLink);
 
-    // Create EvaluationLink for state_change:NewValue predicate
+    // Create EvaluationLink for NewValue predicate
     //    (EvaluationLink (stv 1.000000 1.000000)
-    //      (PredicateNode "state_change:NewValue") ; [2612]
+    //      (PredicateNode "NewValue") ; [2612]
     //      (ListLink (stv 1.000000 1.000000)
     //        (ConceptNode "$var_instance") ; [3902]
     //        (ConceptNode "stateNewValNode") ; [1190]
     //      ) ; [3910]
     //    ) ; [3911]
-    Handle newStateValEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:NewValue", hVariableStateChangeNode, stateNewValNode, tv);
+    Handle newStateValEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "NewValue", hVariableStateChangeNode, stateNewValNode, tv);
     andLinkOutgoings.push_back(newStateValEvalLink);
 
     if (stateOldValueNode != Handle::UNDEFINED)
     {
-        // Create EvaluationLink for state_change:OldValue predicate
+        // Create EvaluationLink for OldValue predicate
         //    (EvaluationLink (stv 1.000000 1.000000)
-        //      (PredicateNode "state_change:OldValue") ; [2609]
+        //      (PredicateNode "OldValue") ; [2609]
         //      (ListLink (stv 1.000000 1.000000)
         //        (ConceptNode "$var_instance") ; [3902]
         //        (ConceptNode "stateOldValueNode") ; [1194]
         //      ) ; [3908]
         //    ) ; [3909]
-        Handle oldStateValEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "state_change:OldValue", hVariableStateChangeNode, stateOldValueNode, tv);
+        Handle oldStateValEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "OldValue", hVariableStateChangeNode, stateOldValueNode, tv);
         andLinkOutgoings.push_back(oldStateValEvalLink);
     }
 
@@ -942,8 +942,11 @@ HandleSeq Inquery::findAllGivenStateChangesAndLatestRelatedActions(Handle classV
     Handle hBindLink = atomSpace->addLink(BIND_LINK, bindLinkOutgoings);
 
     // Run pattern matcher
-    cout << "\nfindAllGivenStateChangesAndLatestRelatedActions: bindLink = \n " << hBindLink << std::endl;
+    cout << "\nfindAllGivenStateChangesAndLatestRelatedActions: bindLink = \n " << atomSpace->atomAsString(hBindLink) << std::endl;
+
     Handle hResultListLink = bindlink(atomSpace, hBindLink);
+
+    cout << "\nfindAllGivenStateChangesAndLatestRelatedActions: hResultListLink = \n " << atomSpace->atomAsString(hResultListLink) << std::endl;
 
     // Get result
     // Note: Don't forget remove the hResultListLink
@@ -974,6 +977,7 @@ HandleSeq Inquery::findAllGivenStateChangesAndLatestRelatedActions(Handle classV
     {
         Handle lastestActionNode = AtomSpaceUtil::getLatestHandle(*atomSpace, resultIter->second);
         lastestActionNodes.push_back(lastestActionNode);
+        cout << "\nThe lastest previous action for " << atomSpace->atomAsString(resultIter->first) << "is " << atomSpace->atomAsString(lastestActionNode) << std::endl;
     }
 
 
