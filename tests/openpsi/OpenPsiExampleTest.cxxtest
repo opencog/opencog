@@ -91,7 +91,7 @@ public:
                     "scm/config.scm,"
                     "scm/repl-shell.scm,"
                     "scm/av-tv.scm,"
-                    "scm/rule-engine-utils.scm");
+                    "scm/opencog/rule-engine/rule-engine-utils.scm");
 
         load_scm_files_from_config(*_as);
         _as->clear();
