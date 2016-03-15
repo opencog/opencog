@@ -58,6 +58,8 @@ This version can be run in IRC only, or even at the guile prompt,
 without requiring a full hookup to the blender head.  It just prints
 (in parenthetical English) the actions that would be performed.
 
+ * `git clone https://github.com/opencog/ros-behavior-scripting`
+   and `sudo make install` This is needed for the action orchestrator!
  * make install -- This step is important!
  * Start the relex server on port 4444
  * Start the cogita IRC bot
@@ -96,11 +98,17 @@ is relatively "easy": a single word, verb or noun, is associated with a
 single action or item. The first serious challenge comes with modifiers:
 adjectives and adverbs.
 
-Sentences have a syntactic structure, and it is very tempting to try to
-"normalize" these structures, flatten them in some way, and work with
-the flattened representations.  I feel that such an effort is doomed in
-the end: language has structure for a reason, and one ignores that
-structure at one's own peril.
+Several aproaches are possible. We (currently) reject the simplest and
+easiest one, which is to use simple string-matching to extract verbs
+and actions from strings of words (sentences).  Although this can be
+a very effective way to cobble together a clever-seeming chatbot, it
+does not give insight into the general problem of learning and
+intelligence. Thus, its avoided here, and a more complex path is taken.
+
+The more complex path passes all language through a parser, to extract
+syntactic information from the sentence; the pattern matching is then
+performed at the syntactic level.  language has structure for a reason,
+and one ignores that structure at one's own peril.
 
 The question then becomes: how to ground complex structure? The answer
 that I propose here is use a set of refinements of understanding: what,
@@ -215,9 +223,33 @@ need to be sorted into subsets that are self-consistent with each other.
 I guess this is a glimmer of an action orchestrater.
 
 
+Action Orchestrator
+-------------------
+Although the above example shows a python call "py: some_action",
+the actual action passes through the "action orchestrator", before
+getting to the robot.  The action orchestrator acts as a multiplexer,
+combining actions from multiple sources, and not just the chatbot.
+That is, other behavior trees and OpenPsi controllers may also be
+vying to express some action; the action orchestrator resolves these.
+
+The action orchestrator is implenented in the guthub
+`opencog/ros-behavior-tree` repository, and is loaded as a scheme
+module `(use-modules (opencog eva-behavior))`
+
+
+Environment Awarenes and Self Awareness
+---------------------------------------
+The `(use-modules (opencog eva-behavior))` contains rudiemntary models
+of the immediate environment (visible human faces) and a model of self
+(maintained after the action orchestroator has resolved any conflicts).
+
+Code to allow question-answering against this grounded knowledge is in
+development.
+
+
 Current defacto implementation
 ------------------------------
-This is how the code is currently organized. It may or may not match
+Here is how the code is currently organized. It may or may not match
 what other parts of this readme file say.
 
 * imperative.scm -- end-to-end pipeline, converting sentence to action.
@@ -240,6 +272,10 @@ synonymous to "show happiness" (which the chatbot does understand).
 Also -- right now "show happiness" and "express happiness" are both
 hard-coded; we would like to have "demonstrate" as a synonym for
 either of these.
+
+Currently, there are a larg number of synonymous verbs and adjectives
+hard-coded in `knowledge.scm`. These should be replaced by a proper
+synonymous-phrase system.
 
 
 Eloquent self-expression (with synonymous phrases)
@@ -264,8 +300,6 @@ input into sureal already has to have the correct tense, noun-number,
 etc. already specified. This severely limits expressiveness, and makes
 it difficult to formulate a good reply.  (XXX This is being fixed by
 Man Hin right now).
-
-
 
 
 Modifiers
@@ -299,6 +333,10 @@ Generalizations: for example, look-rule-1 explicitly looks for the verb
 stage, so that any synonym of "look" is sufficient.  Even more: any
 synonymous command should be enough, not just on the word level, but
 generally.
+
+"Keep smiling" needs to relaunch the smile animation every second or
+so, because it fades away.  Thus, we need some temporal thread to keep
+this going.
 
 
 Bugs
@@ -338,11 +376,18 @@ Imperatives:
    Look bored
    Eva, express boredom
    Eva, show happiness!
+	Feign amusement
+   Dramatize loathing
+	Portray puzzlement
+	Shake your head
+	Blink!
+	Yawn!
 
-(Other expressions include comprehension, engagement, boredom,
-irritation, confusion, surprise and recoil.  This is the current
-hard-coded list of animations in the blender model.)
+The blender model contains a dozen emotion-expression animations, such
+as fear, disgust, boredom, smiling, surprise and a half-dozen gestures,
+including nodding, blinking and yawning.  Assorted synonmyous verbs and
+adjectives should trigger these.
 
 Self-awareness questions:
 
-   Where are you looking?
+   Where are you looking?   XXX this got broken, and the fix is hard.

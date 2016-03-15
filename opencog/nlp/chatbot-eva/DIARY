@@ -926,12 +926,12 @@ Where are you looking?
     +----->WV---->+----Pg*b---+     |
     +---Wq--+--Qw-+SIpx+      |     |
     |       |     |    |      |     |
-LEFT-WALL where are.v you looking.v ? 
+LEFT-WALL where are.v you looking.v ?
 
-(sureal (Set 
+(sureal (Set
    (Evaluation (Predicate "looking") (ListLink (Concept "up")))))
 
-(sureal (Set 
+(sureal (Set
    (Evaluation (Predicate "looking") (ListLink (Concept "I")))
    (InheritanceLink
       (SatisfyingSet (Predicate "looking")) (Concept "up"))
@@ -941,8 +941,246 @@ LEFT-WALL where are.v you looking.v ?
 (use-modules (opencog nlp fuzzy))
 
 (get-r2l-set-of-sent (car (nlp-parse "I am looking up")))
+(get-r2l-set-of-sent (car (nlp-parse "I am looking rightward")))
+
+:adv
 
 (use-modules (opencog exec))
 (cog-execute!
    (StateLink (AnchorNode "*-gaze-direction-*"))
+
+==============================================================
+
+std::pair<std::__detail::_Node_iterator<opencog::Atom*,
+pencog::FixedIntegerIndex::size() const [20]
+
+tomTable.cc:    if (typeIndex.size() != 0) return false;
+mTable.cc:    if (importanceIndex.size() != 0) return false;
+
+getNumAtomsOfType
+_as->get_num_atoms_of_type
+
+_size_by_type
+oresize should take an arg
+
+classserver().getNumberOfClasses() in the resize() method
+Also in the ctor too.
+
+Fix the stupid subtype miterator
+getSize()
+
+Simplify the TypeIndex iterator
+
+is currtype even used ????
+
+ maintain counts for num nodes, links
+
+isize++
+_size_by_type[atom->_type] ++
+size_t new_size = classserver().getNumberOfClasses();
++    _size_by_type.resize(new_size);
+
+Also: do NOT use NodeIndex::size() anywhere
+
+getNumNodes
+
+MultiSpaceUTest
+
+(python-eval "print 'ooooooooooooooooooolas'\nprint 'bar'")
+(python-eval "try:\n    do_wake_up()\nexcept NameError:\n    print 'ooooooooooooooooooolas'\n")
+
+==============================================================
+
+(use-modules (opencog exec))
+(cog-evaluate! (DefinedPredicate "chatbot is happy"))
+(cog-evaluate! (Put (DefinedPredicate "Show expression")
+   (ListLink (Concept "happy") (Number 6) (Number 0.3))))
+
+(process-query 'luser "Look left!")
+(process-query 'luser "Smile!")
+
+(cog-incoming-set   (DefinedPredicate "Show expression"))
+
+
+LambdaLink does not have subst but its easy ...
+
+global_python_initialize(
+
+static std::mutex pythr;
+std::lock_guard<std::mutex> lock(pythr);
+
+xecute_strin
+
+apply_script
+
+CogServerUTest
+
+PythonModuleUTest
+
+PyObject * atomspace_py_object(AtomSpace *);
+---
+PyObject* pyAtomSpace = this->atomspace_py_object(_atomspace);
+
+call_user_function
+
+pyModule = this->module_for_function(moduleFunction, functionName);
+
+pyDict = PyModule_GetDict(pyModule);
+PyObject* pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+Py_INCREF(pyUserFunc); // ???
+
+// Make sure the function is callable.
+    if (!PyCallable_Check(pyUserFunc)) {
+}
+
+
+pyReturnValue = PyObject_CallObject(pyUserFunc, pyAtomspace);
+
+pyError = PyErr_Occurred();
+    if (pyError) {
+
+
+Py_DECREF(pyAtomSpace);
+Py_DECREF(pyUserFunc);
+
+
+(python-eval "import os\ndef foo():\n    os.listdir('.')\n")
+(python-eval "foo()\n")
+(python-eval "def foo(aspace):\n    return aspace\n\n")
+(python-eval "dbg('asdfasdf')\n")
+
+(use-modules (opencog) (opencog python))
+(python-eval "
+def dbg(sv):
+    fu=open('/tmp/fff', 'a+')
+    print >>fu, sv
+    fu.close()
+")
+
+(python-eval "
+from opencog.atomspace import AtomSpace, TruthValue
+from opencog.type_constructors import *
+from opencog.atomspace import types
+
+def foo(asp):
+    dbg(str(asp))
+    # set_type_ctor_atomspace(asp)
+    TV = TruthValue(0.42, 0.69)
+    dbg(str(TV))
+    A = asp.add_node(types.ConceptNode, 'Apple', TV)
+    dbg(str(A))
+    # ConceptNode('Apple', TV)
+")
+(python-call-with-as "foo" (cog-atomspace))
+(cog-node 'ConceptNode "Apple")
+
+
+
+__pyx_pf_7opencog_9atomspace_9AtomSpace_10add_node (
+    __pyx_v_tv=0x7fffe2879110, __pyx_v_atom_name=<optimized out>,
+__pyx_v_t=7,
+    __pyx_v_self=0x7fffe28790f0)
+at
+/home/linas/src/novamente/src/atomspace-git/build/opencog/cython/opencog/atomspace.cpp:4445
+
+is correct but
+
+  0x00007fffedf25807 in opencog::AtomSpace::add_node (this=0x0,
+t=t@entry=7,
+    name=..., async=async@entry=false)
+    at
+/home/linas/src/novamente/src/atomspace-git/opencog/atomspace/AtomSpace.cc:167
+
+is wrong
+
+oh, its using the pointer as self ...
+__pyx_v_self->atomspace->add_node
+
+AtomSpace_factory
+cython/opencog/atomspace_details.pyx":331
+
+
+eval_scheme_h
+opencog/PyScheme.h
+
+(use-modules (opencog) (opencog python))
+(python-eval "
+def dbg(sv):
+    fu=open('/tmp/fff', 'a+')
+    print >>fu, sv
+    fu.close()
+")
+
+(python-eval "
+from opencog.scheme_wrapper import scheme_eval_as
+from opencog.atomspace import AtomSpace, TruthValue
+from opencog.atomspace import types
+
+asp = scheme_eval_as('(cog-atomspace)')
+dbg(str(asp))
+# set_type_ctor_atomspace(asp)
+TV = TruthValue(0.554, 0.2269)
+dbg(str(TV))
+A = asp.add_node(types.ConceptNode, 'Apple', TV)
+dbg(str(A))
+# ConceptNode('Apple', TV)
+")
+(cog-node 'ConceptNode "Apple")
+
+
+
+==============================================================
+
+(load "run-chatbot.scm")
+(process-query 'luser "Look left!")
+(process-query 'luser "where are you looking?")
+
+wh_query_process
+
+self-wh-query
+where-look-rule
+
+orchestrate first, then model.
+(DefinedPredicate "Gaze at point")
+
+afraid amused recoil worry
+
+How about Yawn
+
+
+Yawn blink nod shake
+
+Yawn, shake nod
+blink thoughtful
+
+ go to sleep
+
+be -- tense is missing ...
+   (TenseLink (VariableNode verb-inst)
+      (DefinedLinguisticConceptNode tense)))
+
+Relex TENSE_COPULA was broken. Now fixed
+
+================================================
+
+(use-modules (opencog exec))
+(cog-evaluate! (Evaluation (DefinedPredicate "Do show gesture")
+	(ListLink (Concept "imperative") (Concept "nod-1"))))
+
+
+pretend you are happy
+pretend to be happy
+blink three times.
+
+purge-hypergraph
+
+
+chatbot got motd nick=wolfe.freenode.net ident= host= target=
+
+bork
+ird->nick, ird->ident, ird->host, ird->target
+irc_reply_data
+
+todo: AO to get source of the command.
+todo: random expresion context is really part of self-model.
 

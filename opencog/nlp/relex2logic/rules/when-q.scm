@@ -15,10 +15,7 @@
 			(word-in-parse "$qVar" "$a-parse")
 			(dependency "_%atTime" "$verb" "$qVar")
 			(AbsentLink
-				(LemmaLink
-					(VariableNode "$verb")
-					(WordNode "be")
-				)
+				(Lemma (Variable "$verb") (Word "be"))
 			)
 		)
 		(ExecutionOutputLink

@@ -1,9 +1,7 @@
-;check the tense if it is passive
+; check the tense if it is passive
+; XXX Fix relex so that we don't have to make such string searches!
 (define (check-tense tense)
-	(if (string-contains (cog-name tense) "passive")
-		(begin (stv 1 1))
-		(begin (stv 0 1))
-	)
+	(if (string-contains (cog-name tense) "passive") (stv 1 1) (stv 0 1))
 )
 
 (define passive
@@ -11,15 +9,17 @@
 		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$tense" "DefinedLinguisticConceptNode")
+			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$obj" "WordInstanceNode")
 		)
 		(AndLink
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$obj" "$a-parse")
-			(InheritanceLink
+			(dependency "_obj" "$verb" "$obj")
+			(TenseLink
 				(VariableNode "$verb")
 				(VariableNode "$tense")
 			)
-			(dependency "_obj" "$verb" "$obj")
 			(EvaluationLink
 				(GroundedPredicateNode "scm: check-tense")
 				(ListLink

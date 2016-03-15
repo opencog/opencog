@@ -16,10 +16,7 @@
 			(word-in-parse "$subj" "$a-parse")
 			(dependency "_%atTime" "$verb" "$qVar")
 			(dependency "_subj" "$verb" "$subj")
-			(LemmaLink
-				(VariableNode "$verb")
-				(WordNode "be")
-			)
+			(Lemma (Variable "$verb") (Word "be"))
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-when-cop-q-rule")

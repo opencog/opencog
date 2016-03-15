@@ -14,14 +14,8 @@
 			(word-in-parse "$obj" "$a-parse")
 			(dependency "_subj" "$verb" "$subj")
 			(dependency "_obj" "$verb" "$obj")
-			(LemmaLink
-				(VariableNode "$verb")
-				(WordNode "be")
-			)
-			(InheritanceLink
-				(VariableNode "$verb")
-				(DefinedLinguisticConceptNode "truth-query")
-			)
+			(Lemma (Variable "$verb") (Word "be"))
+			(word-feat "$verb" "truth-query")
 		)
 		(ExecutionOutputLink
 			(GroundedSchemaNode "scm: pre-copula-ynq-rule")
