@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2016, Mandeep Singh Bhatia, OpenCog Foundation
  * All rights reserved.
- * License: New BSD
+ * License: AGPL
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -30,32 +30,30 @@
  */
  
 //TestAtomOcTree.cpp
-#include "assert.h"
-#include "TimeSpaceAtom.h"
+#include <cxxtest/TestSuite.h>
+#include "AtomOcTree.h"
 
 using namespace std;
 using namespace octomap;
 
 
-void print_query_info(point3d query, aHandle ato) {
-  if (ato != UndefinedHandle) {
-    cout << "occupancy probability at " << query << ":\t " << ato<< endl;
+void print_query_info(point3d query, OcTreeNode* node) 
+{
+  if (node != NULL) {
+	  int i=(static_cast<AtomOcTreeNode*>(node))->getData();
+    cout << "occupancy probability at " << query << ":\t " << node->getOccupancy() << ";\t "<<i<< endl;
   }
   else 
     cout << "occupancy probability at " << query << ":\t is unknown" << endl;    
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
 
   cout << endl;
   cout << "generating example map" << endl;
 
-  double hi[4]={0.1,0.1,0.1,0.1};//0.2 failed
-  vector<double> res(hi,hi+4);
-  TimeSpaceAtom tsa(3,res);  // create empty tree with resolution 0.1
-  time_pt t1=std::chrono::system_clock::now();
-  duration_c dd=std::chrono::seconds(10);
-  tsa.CreateNewTimeUnit(t1,dd);
+  AtomOcTree tree (0.1);  // create empty tree with resolution 0.1
 
 
   // insert some measurements of occupied cells
@@ -64,98 +62,43 @@ int main(int argc, char** argv) {
     for (int y=-20; y<20; y++) {
       for (int z=-20; z<20; z++) {
         point3d endpoint ((float) x*0.05f, (float) y*0.05f, (float) z*0.05f);
-        assert(tsa.PutAtomAtCurrentTime(1,endpoint,21));
-        //tree.updateNode(endpoint, true); // integrate 'occupied' measurement
-        //tree.setNodeData(endpoint, 21);//if omitted prune value of 0 is assigned?
+        tree.updateNode(endpoint, true); // integrate 'occupied' measurement
+        tree.setNodeData(endpoint, 21);//if omitted prune value of 0 is assigned?
       }
     }
   }
-/*//removal is probabilistic
-  for (int x=-20; x<20; x++) {
-    for (int y=-20; y<20; y++) {
-      for (int z=-20; z<20; z++) {
-        point3d endpoint ((float) x*0.05f, (float) y*0.05f, (float) z*0.05f);
-        assert(tsa.RemoveAtomAtTime(t1,1,endpoint));
-        //tree.updateNode(endpoint, true); // integrate 'occupied' measurement
-        //tree.setNodeData(endpoint, 21);//if omitted prune value of 0 is assigned?
-      }
-    }
-  }
-*/
+
   // insert some measurements of free cells
-// Need to put something to delete atom
+
   for (int x=-30; x<30; x++) {
     for (int y=-30; y<30; y++) {
       for (int z=-30; z<30; z++) {
         point3d endpoint ((float) x*0.02f-1.0f, (float) y*0.02f-1.0f, (float) z*0.02f-1.0f);
-        tsa.RemoveAtomAtCurrentTime(1,endpoint);
-        //tree.updateNode(endpoint, false);  // integrate 'free' measurement
+        tree.updateNode(endpoint, false);  // integrate 'free' measurement
       }
     }
   }
 
   cout << endl;
   cout << "performing some queries:" << endl;
-  aHandle result;
+  
   point3d query (0., 0., 0.);
-//tsa.RemoveAtomAtCurrentTime(1,query);  
-  tsa.GetAtomCurrentTime(1,query,result);
+  OcTreeNode* result = tree.search (query);
   print_query_info(query, result);
-
+  TS_ASSERT_DIFFERS(result,null);
+  TS_ASSERT_EQUALS((static_cast<AtomOcTreeNode*>(result))->getData(),21);
+  
   query = point3d(-1.,-1.,-1.);
-  tsa.GetAtomCurrentTime(1,query,result);
+  result = tree.search (query);
   print_query_info(query, result);
+  //TS_ASSERT_EQUALS(result,0);
 
   query = point3d(100.,1.,1.);
-  tsa.GetAtomCurrentTime(1,query,result);
+  result = tree.search (query);
   print_query_info(query, result);
+  TS_ASSERT_EQUALS(result,null);
 
-  cout<<"at time:";
-  query = point3d(0., 0., 0.);
-  tsa.GetAtomAtTime(t1,1,query,result);
-  print_query_info(query, result);
-  
-  cout<<"get times at location:";
-  TimeList tl=tsa.GetTimesOfAtomOccurenceAtLocation(1,query,21);
-  cout<<tl.size()<<endl;
 
-  cout<<"get times in Map:";
-  tl=tsa.GetTimesOfAtomOccurenceInMap(1,21);
-  cout<<tl.size()<<endl;
-  
-  cout<<"get locations at current time:";
-  point3d_list pl=tsa.GetLocationsOfAtomOccurenceNow(1,21);
-  cout<<pl.size()<<endl;
-/*
-  cout<<"get locations at time:";
-  pl=tsa.GetLocationsOfAtomOccurenceAtTime(t1,1,21);
-  cout<<pl.size()<<endl;
-*/
-  cout<<"removing atom=21"<<endl;
-  tsa.RemoveAtom(21);
-  query = point3d(0., 0., 0.);
-  tsa.GetAtomCurrentTime(1,query,result);
-  print_query_info(query, result);
-  
-  cout<<"get locations at time:";
-  pl=tsa.GetLocationsOfAtomOccurenceAtTime(t1,1,21);
-  cout<<pl.size()<<endl;
-
-  cout<<"adding units.."<<endl;
-  assert(tsa.CreateNewTimeUnit(t1+dd,dd));
-  assert(tsa.CreateNewTimeUnit(t1+dd+dd,dd));
-  assert(tsa.CreateNewTimeUnit(t1+dd+dd+dd,dd));
-  
-  cout<<"get locations at time:";
-  pl=tsa.GetLocationsOfAtomOccurenceAtTime(t1,1,21);
-  cout<<pl.size()<<endl;
-/*
-  cout<<"removing atom=21"<<endl;
-  tsa.RemoveAtom(21);
-  query = point3d(0., 0., 0.);
-  tsa.GetAtomCurrentTime(1,query,result);
-  print_query_info(query, result);
-*/
   cout << endl;
   /*
   tree.writeBinary("simple_tree.bt");

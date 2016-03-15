@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2016, Mandeep Singh Bhatia, OpenCog Foundation
  * All rights reserved.
- * License: New BSD
+ * License: AGPL
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -45,15 +45,18 @@ namespace octomap {
 
     AtomOcTreeNode(const AtomOcTreeNode& rhs) : OcTreeNode(rhs), dat(rhs.dat) {}
 
-    bool operator==(const AtomOcTreeNode& rhs) const{
+    bool operator==(const AtomOcTreeNode& rhs) const
+    {
       return (rhs.value == value && rhs.dat == dat);
     }
     
     // children
-    inline AtomOcTreeNode* getChild(unsigned int i) {
+    inline AtomOcTreeNode* getChild(unsigned int i) 
+    {
       return static_cast<AtomOcTreeNode*> (OcTreeNode::getChild(i));
     }
-    inline const AtomOcTreeNode* getChild(unsigned int i) const {
+    inline const AtomOcTreeNode* getChild(unsigned int i) const 
+    {
       return static_cast<const AtomOcTreeNode*> (OcTreeNode::getChild(i));
     }
 

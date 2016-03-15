@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2016, Mandeep Singh Bhatia, OpenCog Foundation
  * All rights reserved.
- * License: New BSD
+ * License: AGPL
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -58,11 +58,13 @@ struct time_unit{
 	time_pt t; duration_c duration;
 	map<int,AtomOcTree> map_tree;
 	time_unit(time_pt tp,duration_c d):t(tp),duration(d){}
-	bool operator==(time_pt tp){
+	bool operator==(time_pt tp)
+	{
 		return (tp>=t && tp<=t+duration);
 	}
 	//>,< not needed as only == search happens although created buffer should always be sorted, just simplifies a bit over search speed cost
-	bool has_map(int handle){
+	bool has_map(int handle)
+	{
 		auto it=map_tree.find(handle);
 		return !(it==map_tree.end());
 	}
@@ -74,7 +76,8 @@ class TimeSpaceAtom{
 	unsigned int GetMapCount();
 	bool GetMapResolution(const int handle,double& res);
 	bool GetCurrentTimeRange(time_pt& time_p,duration_c& duration);
-	bool IsTimePointInRange(const time_pt& time_to_check,const time_pt& t,const duration_c& duration){
+	bool IsTimePointInRange(const time_pt& time_to_check,const time_pt& t,const duration_c& duration)
+	{
 		return (time_to_check>=t && time_to_check<t+duration);
 	}
 	bool CreateNewTimeUnit(const time_pt time_p,const duration_c duration);

@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2016, Mandeep Singh Bhatia, OpenCog Foundation
  * All rights reserved.
- * License: New BSD
+ * License: AGPL
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -35,7 +35,8 @@ namespace octomap {
 
 
   // node implementation  --------------------------------------
-  std::ostream& AtomOcTreeNode::writeValue (std::ostream &s) const {
+  std::ostream& AtomOcTreeNode::writeValue (std::ostream &s) const 
+  {
     // 1 bit for each children; 0: empty, 1: allocated
     std::bitset<8> children;
     for (unsigned int i=0; i<8; i++) {
@@ -55,7 +56,8 @@ namespace octomap {
     return s;
   }
 
-  std::istream& AtomOcTreeNode::readValue (std::istream &s) {
+  std::istream& AtomOcTreeNode::readValue (std::istream &s) 
+  {
     // read node data
     char children_char;
     s.read((char*) &value, sizeof(value)); // occupancy
@@ -73,7 +75,8 @@ namespace octomap {
     return s;
   }
   // pruning ============= mandeep: change dat here when pruned, depending on type of dat
-  bool AtomOcTreeNode::pruneNode() {
+  bool AtomOcTreeNode::pruneNode() 
+  {
     // checks for equal occupancy only, dat ignored
     if (!this->collapsible()) return false;
     // set occupancy value 
@@ -90,7 +93,8 @@ namespace octomap {
     return true;
   }
 
-  void AtomOcTreeNode::expandNode() {
+  void AtomOcTreeNode::expandNode() 
+  {
     assert(!this->hasChildren());
     for (unsigned int k=0; k<8; k++) {
       this->createChild(k);

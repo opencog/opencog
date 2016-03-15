@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2016, Mandeep Singh Bhatia, OpenCog Foundation
  * All rights reserved.
- * License: New BSD
+ * License: AGPL
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -54,7 +54,8 @@ namespace octomap {
     // set node dat at given key or coordinate. Replaces previous dat.
     AtomOcTreeNode* setNodeData(const OcTreeKey& key, const aHandle& r);
 
-    AtomOcTreeNode* setNodeData(const point3d& xyz, const aHandle& r) {
+    AtomOcTreeNode* setNodeData(const point3d& xyz, const aHandle& r) 
+    {
       OcTreeKey key;
       if (!this->coordToKeyChecked(xyz, key)) return NULL;
       return setNodeData(key,r);
@@ -76,7 +77,8 @@ namespace octomap {
      
     class StaticMemberInitializer{
        public:
-         StaticMemberInitializer() {
+         StaticMemberInitializer() 
+         {
            AtomOcTree* tree = new AtomOcTree(0.1);
            AbstractOcTree::registerTreeType(tree);
          }

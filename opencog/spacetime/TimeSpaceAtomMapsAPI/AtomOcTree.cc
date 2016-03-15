@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2016, Mandeep Singh Bhatia, OpenCog Foundation
  * All rights reserved.
- * License: New BSD
+ * License: AGPL
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -33,12 +33,14 @@
 namespace octomap {
   // tree implementation  --------------------------------------
   AtomOcTree::AtomOcTree(double resolution)
-  : OccupancyOcTreeBase< AtomOcTreeNode >(resolution) {
+  : OccupancyOcTreeBase< AtomOcTreeNode >(resolution) 
+  {
     atomOcTreeMemberInit.ensureLinking();
   }
 
   AtomOcTreeNode* AtomOcTree::setNodeData(const OcTreeKey& key, 
-                                             const aHandle& r){
+                                             const aHandle& r)
+  {
     AtomOcTreeNode *n = search(key);
     if (n != 0) {
       n->setData(r);//setColor 
