@@ -17,27 +17,24 @@
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$pred" "WordInstanceNode")
 			(var-decl "$comp" "WordInstanceNode")
+			(var-decl "$pred-lemma" "WordNode")
+			(var-decl "$comp-lemma" "WordNode")
 		)
 		(AndLink
 			(word-in-parse "$pred" "$a-parse")
 			(word-in-parse "$comp" "$a-parse")
+			(word-lemma "$pred" "$pred-lemma")
+			(word-lemma "$comp" "$comp-lemma")
 			(dependency "_rep" "$pred" "$comp")
 		)
 		(ExecutionOutputLink
-	   	(GroundedSchemaNode "scm: rep-rule")
-	  		(ListLink
-	  			(VariableNode "$comp")
+			(GroundedSchemaNode "scm: rep-rule")
+			(ListLink
+				(VariableNode "$comp-lemma")
+				(VariableNode "$comp")
+				(VariableNode "$pred-lemma")
 				(VariableNode "$pred")
 			)
 		)
-	)
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-rep-rule comp pred)
-	(rep-rule
-		(cog-name (word-inst-get-lemma comp)) (cog-name comp)
-		(cog-name (word-inst-get-lemma  pred)) (cog-name pred)
 	)
 )

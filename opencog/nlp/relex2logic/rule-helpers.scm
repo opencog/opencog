@@ -1428,7 +1428,11 @@
 	)
 )
 
-(define-public (rep-rule comp_concept comp_instance pred_concept pred_instance)
+(define-public (rep-rule comp_word comp_inst pred_word pred_inst)
+	(define comp_concept (cog-name comp_word))
+	(define comp_instance (cog-name comp_inst))
+	(define pred_concept (cog-name pred_word))
+	(define pred_instance (cog-name pred_inst))
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
