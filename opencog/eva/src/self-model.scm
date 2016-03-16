@@ -37,12 +37,6 @@
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
 
-; XXX the nlp chatbot-eva does not really belong here; where does it belong?
-; We need process-query, but this load-modules results in a circular
-; dependency.
-; (use-modules (opencog nlp chatbot-eva)) ; Needed for process-query
-
-
 ; ------------------------------------------------------
 ; State variables
 ; XXX FIXME There are a bunch of define-publics in here, they probably
@@ -172,22 +166,9 @@
 		(Get (State chat-affect (Variable "$x")))))
 
 ; --------------------------------------------------------
-; Speech-to-text (STT) relaed stuff.
-; If the STT system hears soemthing, it sends us the text string.
+; Speech-to-text (STT) related stuff.
+; If the STT system hears something, it sends us the text string.
 ; Handle it here.
-
-; XXX the below does not really belong here; where does it belong?
-; Pass the text that STT heard into the OpenCog chatbot.
-; XXX procees-query is not really the best API, here.
-; Must run in a new thread, else it deadlocks in python,
-; since the text processing results in python calls.
-(define-public (dispatch-text txt)
-	(call-with-new-thread
-		; (lambda () (process-query "luser" (cog-name txt)))
-		(lambda () (grounded-talk "luser" (cog-name txt)))
-	)
-	(stv 1 1)
-)
 
 (define heard-sound (Anchor "Heard Something Recently"))
 (define heard-nothing (SentenceNode ""))
