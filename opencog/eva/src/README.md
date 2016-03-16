@@ -67,6 +67,14 @@ Design overview
     + `"Who is there?" -- no one visible, but heard sound.
     + `"What was that sound?" -- Woken up by some sound.
 
+* You can talk to her by using ROS messages. Some examples:
+```
+    rostopic pub --once perceived_text std_msgs/String "Pretend you're happy!"
+    rostopic pub --once perceived_text std_msgs/String "look sad"
+    rostopic pub --once perceived_text std_msgs/String "Emote saddness"
+```
+
+
 * XXX The code currently has a large variety of conficting and poor
   design choices in it -- its in a state of morphing from "OK so-so code"
   to "slightly better than before".  As a result of this hacking, various
