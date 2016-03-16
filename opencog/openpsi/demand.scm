@@ -456,6 +456,13 @@
     ; FIXME; assumes there will only be one EvalutaionLink that types
     ; the action-rule. Maybe it is best if DefineLink or DefineType
     ; be used ????
+
+    ; Check arguments
+    (if (or (not (cog-node? dsn))
+            (not (equal? 'DefinedSchemaNode (cog-type dsn))))
+        (error "In procedure psi-action-rule-type:"
+               " Expected a DefinedSchemaNode got: " dsn))
+
     (car (map
         (lambda (x) (psi-suffix-str (cog-name (car (cog-outgoing-set x)))))
          (cog-get-pred dsn 'PredicateNode)))
