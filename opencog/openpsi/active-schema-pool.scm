@@ -325,8 +325,8 @@
 
                 selector-dpn
            )
-           ; NOTE: Assuming that it is highly unlikely that the same
-           ; the node wouldn't be used for another purpose.
+           ; NOTE: Assuming that it is highly unlikely that the same node
+           ;  wouldn't be used for another purpose.
            selector-dpn
        )
     )
