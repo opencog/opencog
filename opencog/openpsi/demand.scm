@@ -168,8 +168,14 @@
   - The atom that is being checked to see if it is the Node that represents
     a demand type.
 "
-    (define demand-names (map cog-name (cog-outgoing-set (psi-get-demands-all))))
-    (if (and (member (cog-name atom) demand-names)
+    (define (demand-names)
+        (map cog-name (cog-outgoing-set (psi-get-demands-all))))
+
+    ; Check arguments
+    (if (not (cog-node? atom))
+        (error "In procedure psi-demand?: Expected a Node got: " atom))
+
+    (if (and (member (cog-name atom) (demand-names))
              (equal? (cog-type atom) 'ConceptNode))
         (stv 1 1)
         (stv 0 1)
