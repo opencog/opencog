@@ -348,8 +348,13 @@
     - A ConceptNode that represents a demand, from which action-rules
 "
     ; Check arguments
+    (define err-template "In procedure psi-get-action-rules: ")
     (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
-        (error "Expected DefinedPredicateNode got: " dpn))
+        (error err-template "Expected DefinedPredicateNode got: " dpn))
+    (if (not (cog-node? demand-node))
+        (error err-template "Expected a Node got: " demand-node))
+    (if (equal? (stv 0 1) (psi-demand? demand-node))
+        (error err-template "Expected OpenPsi demand node got: " demand-node))
 
     (cog-execute!
         (GetLink
