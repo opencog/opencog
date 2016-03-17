@@ -38,7 +38,7 @@
 )
 
 
-(define (pre-passive-rule verb obj)
+(define-public (pre-passive-rule verb obj)
 	(passive-rule2
 		(cog-name (word-inst-get-lemma verb)) (cog-name verb)
 		(cog-name (word-inst-get-lemma obj)) (cog-name obj)
