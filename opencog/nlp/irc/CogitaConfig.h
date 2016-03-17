@@ -27,27 +27,27 @@
 namespace opencog {
 namespace chatbot {
 
-#define COGITA_DEFAULT_SERVER "irc.freenode.net"
-#define COGITA_DEFAULT_PORT 6667
-#define COGITA_DEFAULT_NICK "cogita-bot"
-#define COGITA_DEFAULT_CHANNELS { "#opencog", 0 }
-#define COGITA_VSTRING "La Cogita OpenCog (http://opencog.org) IRC chatbot version 1.0"
-#define COGITA_DEFAULT_ATTN { "cogita-bot", "cogita", "cog", 0 }
-#define COGITA_DEFAULT_ATTN_SUFFIXES { ",", ":", 0 }
-
 /**
  * Configuration class for Cogita
  */
-class CogitaConfig {
+class CogitaConfig
+{
     void createAttnVector();
+    static const char* helpOutput;
 public:
+    std::string version_string;
+
     std::string ircNetwork;
     std::vector<std::string> ircChannels;
     int ircPort;
-    std::string vstring;
-    std::string nick;
+    std::string irc_nick;
+    std::string irc_name;
+    std::string irc_pass;
     std::vector<std::string> attn;
-    static const std::string helpOutput;
+    bool dry_run;
+
+    std::string cog_addr; // OpenCog cogserver IP address.
+    int cog_port;         // OpenCog cogserver port number.
 
     CogitaConfig();
 

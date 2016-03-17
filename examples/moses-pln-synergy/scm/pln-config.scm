@@ -19,9 +19,11 @@
 (use-modules (opencog))
 (use-modules (opencog rule-engine))
 
+;XXX This is bad and broken and wrong; one should not try to bypass the
+; scheme module system like this, its just asking for carpet burns.
 (load-from-path "utilities.scm")
 (load-from-path "av-tv.scm")
-(load-from-path "rule-engine-utils.scm")
+(load-from-path "opencog/rule-engine/rule-engine-utils.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Define PLN rule-based system ;;
@@ -88,7 +90,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 2000)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 1000000)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)

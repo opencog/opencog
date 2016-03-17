@@ -1,0 +1,149 @@
+/*
+ * @file tests/planning/OpenPsiExampleTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+using namespace opencog;
+
+#define OPENPSI_TEST_PATH PROJECT_SOURCE_DIR "/tests/openpsi"
+#define OPENPSI_EXAMPLE_PATH PROJECT_SOURCE_DIR  "/examples/openpsi"
+#define CHKERR \
+    TSM_ASSERT("Caught scm error during eval", \
+        (false == _scm->eval_error()));
+
+class OpenPsiExampleTest : public CxxTest::TestSuite
+{
+private:
+    AtomSpace* _as;
+    SchemeEval* _scm;
+
+public:
+    OpenPsiExampleTest(): _as(NULL), _scm(NULL)
+    {
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_level_flag(true);
+        logger().set_print_to_stdout_flag(true);
+    }
+
+    ~OpenPsiExampleTest()
+    {
+        delete _as;
+        delete _scm;
+
+        // Erase the log file if no assertions failed
+        if(!CxxTest::TestTracker::tracker().suiteFailed())
+            std::remove(logger().get_filename().c_str());
+    }
+
+    void setUp()
+    {
+        // The scheme environment is reset between each test.
+        _as = new AtomSpace();
+        _scm = new SchemeEval(_as);
+
+        // Configure scheme load-paths that are common for all tests.
+        _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+        CHKERR
+        _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR  "\")");
+        CHKERR
+        _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR
+                   "/opencog/scm\")");
+        CHKERR
+        // TODO: Replace with use-modules when openpsi is modularized
+        _scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR  "/opencog\")");
+        CHKERR
+
+        // This is a copy of development.conf SCM_PRELOAD section after
+        // removing files not associated with scheme  modules that are not
+        // in use.
+        config().set("SCM_PRELOAD",
+                    "scm/opencog.scm,"
+                    "scm/core_types.scm,"
+                    "scm/core-docs.scm,"
+                    "scm/utilities.scm,"
+                    "scm/apply.scm,"
+                    "scm/file-utils.scm,"
+                    "scm/config.scm,"
+                    "scm/repl-shell.scm,"
+                    "scm/av-tv.scm,"
+                    "scm/opencog/rule-engine/rule-engine-utils.scm");
+
+        load_scm_files_from_config(*_as);
+        _as->clear();
+    }
+
+    void tearDown()
+    {
+        _as = nullptr;
+        _scm = nullptr;
+    }
+
+    // This is a helper function for running the example tests
+    //
+    // @param times Number of steps to take
+    void run_test(int times)
+    {
+        auto step_num =  std::to_string(times);
+
+        // Make a step
+        _scm->eval("(define test (psi-example-step))");
+        CHKERR
+
+        // Check the step output
+        auto scm_assert_results = _scm->eval(
+            "(equal? test (step-"  + step_num + "-result))");
+        TSM_ASSERT("For result list, expected true on step " + step_num, \
+            scm_assert_results == "#t\n");
+
+        // Check demand values
+        auto scm_assert_dv = _scm->eval(
+            "(equal? (eg-demand-values (list-ref test 6))  (step-"
+             + std::to_string(times) + "-dv))");
+        TSM_ASSERT("For demand-value list, expected true on step " + step_num, \
+            scm_assert_dv == "#t\n");
+    }
+
+    void test_single_demand_example()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Load example file and it's output record file.
+        _scm->eval("(load \"" OPENPSI_EXAMPLE_PATH "/single-demand.scm\")");
+        CHKERR
+        _scm->eval("(load \"" OPENPSI_TEST_PATH
+            "/single-demand-eg-outputs.scm\")");
+        CHKERR
+
+        // Run the checks
+        for(auto i = 1; i <= 7 ; i++) {
+            run_test(i);
+        }
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
+};

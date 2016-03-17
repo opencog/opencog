@@ -7,30 +7,24 @@
 		(VariableList
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$verb" "WordInstanceNode")
+			(var-decl "$verb-lemma" "WordNode")
 			(var-decl "$qVar" "WordInstanceNode")
 		)
 		(AndLink
 			(word-in-parse "$verb" "$a-parse")
 			(word-in-parse "$qVar" "$a-parse")
 			(dependency "_%because" "$verb" "$qVar")
+			(word-lemma "$verb" "$verb-lemma")
 			(AbsentLink
-				(LemmaLink
-					(VariableNode "$verb")
-					(WordNode "be")
-				)
+				(Lemma (Variable "$verb") (Word "be"))
 			)
 		)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-why-q-rule")
+			(GroundedSchemaNode "scm: why-rule")
 			(ListLink
+				(VariableNode "$verb-lemma")
 				(VariableNode "$verb")
 			)
 		)
 	)
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define (pre-why-q-rule verb)
-	(why-rule (cog-name (word-inst-get-lemma verb)) (cog-name verb))
 )

@@ -24,10 +24,7 @@
 			(word-in-parse "$obj" "$a-parse")
 			(word-in-parse "$iobj" "$a-parse")
 			(word-in-parse "$to" "$a-parse")
-			(LemmaLink
-				(VariableNode "$to")
-				(WordNode "to")
-			)
+			(Lemma (Variable "$to") (Word "to"))
 			(dependency "_subj" "$subj" "$verb")
 			(dependency "_obj" "$obj" "$verb")
 			(dependency "_pobj" "$iobj" "$to")

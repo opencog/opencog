@@ -5,7 +5,7 @@ microplanner's output.  The microplanner also uses SuReal to determine
 whether a chunk (a set of atoms) can be translated into a sentence;
 thus, these two projects are dependent on each other.
 
-Sureal requires Link Grammar, RelEx, and RelEx2Logic outputs.
+Sureal requires Link Grammar (LG), RelEx, and RelEx2Logic outputs.
 
 The main function is `sureal` which takes in a `SetLink` and returns a
 sentence.
@@ -94,8 +94,8 @@ links of the style:
 
 ```
 
-are generated.  They contain all the information of the LG connectors
-used for a particalar word of a particalar sentence.
+are generated.  They contain all the information the LG connectors
+used for a particular word of a particular sentence.
 
 Given a new `SetLink` as input, SuReal matches each atom in the link to
 the structure inside the old sentences.  In addition, for each node that
@@ -130,7 +130,7 @@ to link the two words in the sentence.
    )
 )
 ```
-The `LgLinkInstanceLink` further explain the `EvaluationLink` by
+The `LgLinkInstanceLink` further explains the `EvaluationLink` by
 indicating what the original LG connector is.  For example, "the" is
 using "D+" to connect with "Ds**c-" of "man".
 
