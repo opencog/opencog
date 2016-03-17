@@ -105,10 +105,9 @@ cdef class EntityRecorder:
     def __cinit__(self):
         pass
 
-    def __init__(self, long addr, AtomSpace atomspace):
+    def __init__(self, long addr):
         self.c_entity_recorder = <cEntityRecorder*> PyLong_AsVoidPtr(addr)
-        self.atomspace = atomspace
-
+ 
     def __dealloc__(self):
         #SpaceServer will handle this
         pass
@@ -127,6 +126,9 @@ cdef class EntityRecorder:
 
     def remove_none_block_entity(self, Atom atom):
         self.c_entity_recorder.removeNoneBlockEntity(deref((<Atom>atom).handle))
+
+    def get_self_agent_entity(self):
+        return Atom(self.c_entity_recorder.getSelfAgentEntity().value(),self.atomspace)    
 
     def update_none_block_entity_location(self, Atom atom, pos, timestamp):
         assert len(pos) == 3
