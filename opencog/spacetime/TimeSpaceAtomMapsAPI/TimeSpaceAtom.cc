@@ -38,7 +38,7 @@ TimeSpaceAtom::TimeSpaceAtom(unsigned int num_time_units,vector<double>map_res_m
 {
 	map_count=map_res_meters.size();//if zero throw exception
 	int i=0;
-	for_each(map_res_meters.begin(),map_res_meters.end(),[&](auto resolution){i++;map_res[i]=resolution;});
+	for_each(map_res_meters.begin(),map_res_meters.end(),[&](double resolution){i++;map_res[i]=resolution;});
 }
 
 unsigned int TimeSpaceAtom::GetMapCount()
@@ -76,7 +76,7 @@ bool TimeSpaceAtom::CreateNewTimeUnit(const time_pt time_p,const duration_c dura
 	time_circle.push_back(temp);
 	int i=time_circle.capacity()-1;
 	if (time_circle.size()<time_circle.capacity()) i=time_circle.size()-1;
-	for_each( map_res.begin(),map_res.end(),[&](auto handle){
+	for_each( map_res.begin(),map_res.end(),[&](pair<int,double> handle){
 		time_circle[i].map_tree[handle.first].setResolution(handle.second);
 		}
 	);

@@ -34,10 +34,10 @@
 
 #include <iostream>
 #include <octomap/OcTreeNode.h>
-
+#include <opencog/atomspace/AtomSpace.h>
 namespace octomap {
-  typedef int aHandle;
-  const aHandle UndefinedHandle=0;
+  typedef opencog::Handle aHandle;
+  const aHandle UndefinedHandle=opencog::Handle::UNDEFINED;
   // node definition
   class AtomOcTreeNode : public OcTreeNode {    
   public:
