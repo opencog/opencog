@@ -449,6 +449,8 @@ OCPlanner::OCPlanner(AtomSpace *_atomspace, string _selfID, string _selfType, bo
 
     atomSpace = _atomspace;
 
+    patternMiner = NULL;
+
     selfEntityParamValue = Entity(_selfID,_selfType);
 
     ENABLE_MINING_RULES = _ENABLE_MINING_RULES;
@@ -2653,8 +2655,8 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
     std::map<Handle, HandleSeq> actionTypeToInstancesMap;
     for (Handle actionHandle : lastestActions)
     {
-        HandleSeq actionTypeHandleSeq = AtomSpaceUtil::getInheritanceLinks(*atomSpace, actionHandle);
-        if (actionTypeHandleSeq.size() != 0)
+        HandleSeq actionTypeHandleSeq = AtomSpaceUtil::getSecondOutgoingFromInheritanceLinks(*atomSpace, actionHandle);
+        if (actionTypeHandleSeq.size() == 0)
             continue;
 
         Handle actionTypeHandle = actionTypeHandleSeq[0];
@@ -2779,7 +2781,7 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
     {
 
         HandleSeq& paramEvalLinks = paramMapIter->second;
-        cout << "Start mining patterns on query related to this parameter: " << paramMapIter->first << " for these EvaluationLinks." << std::endl;
+        cout << "Start mining patterns on query related to this parameter: " << paramMapIter->first << " , for these EvaluationLinks." << std::endl;
         for (Handle ph : paramEvalLinks)
         {
             cout << atomSpace->atomAsString(ph) << std::endl;

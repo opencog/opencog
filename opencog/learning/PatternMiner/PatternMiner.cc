@@ -2676,7 +2676,7 @@ void PatternMiner::mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, uns
 
     }
 
-    mineRelatedPatternsOnQueryByLinks_OR(keyLinksInObservingAtomSpace, _max_gram, _pai);
+    _mineRelatedPatternsOnQueryByLinks_OR(keyLinksInObservingAtomSpace, _max_gram, _pai);
 }
 
 

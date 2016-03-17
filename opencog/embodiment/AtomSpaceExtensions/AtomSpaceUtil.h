@@ -243,6 +243,8 @@ public:
     // get all the nodes from InheritanceLinks, given the SecondOutgoing
     static std::vector<Handle> getNodesByInheritanceLink(AtomSpace &atomSpace, Handle &hSecondOutgoing);
 
+    static  std::vector<Handle> getSecondOutgoingFromInheritanceLinks(AtomSpace & atomSpace, Handle hFirstOutgoing);
+
     // get all the nodes from EvaluationLinks, given the PredicateNode,and the second,third...outgoings of the listLink if any
     static std::vector<Handle> getNodesByEvaluationLink(AtomSpace &atomSpace, string predicate, HandleSeq& hNonFirstOutgoings);
 
