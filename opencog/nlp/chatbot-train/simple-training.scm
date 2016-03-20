@@ -20,6 +20,13 @@
 ; load config file for chatbot (eva)
 (load-from-path "opencog/eva-behavior/cfg-eva.scm")
 
+(load "behavior-defs.scm")
+(load "behavior-rules.scm")
+
+; TODO: multiple globnode values are not matching
+; TODO: are "leftover" listified strings being left in the atomspace?
+
+
 ;-----------------------------------------------------------------
 ; The main training rule template for natural language training 
 (define training-rule
@@ -31,7 +38,7 @@
             (ConceptNode "I")
             (ConceptNode "SAY")
             (GlobNode "$stimulus")
-            (ConceptNode "THEN")
+            ;(ConceptNode "THEN")
             (ConceptNode "YOU")
             (GlobNode "$response")
         )
@@ -43,77 +50,89 @@
 
 
 
-;-----------------------------------------------------------------
-; Define behavior actions
-; This should go in a behavior-actions.scm file
-
-; happy
-(DefineLink
-    (DefinedPredicateNode "be happy")
-    (EvaluationLink
-        (DefinedPredicateNode "Do show expression")
-        (ListLink
-          (ConceptNode "imperative")
-          (ConceptNode "happy"))))
-; yawn
-(DefineLink
-    (DefinedPredicateNode "yawn")
-    (EvaluationLink
-        (DefinedPredicateNode "Do show gesture")
-        (ListLink
-            (ConceptNode "imperative")
-            (ConceptNode "yawn-1"))))
 
 
 
 
 ;-----------------------------------------------------------------
-; Behavior Trees
-; TODO: these should go in a behavior-rules.scm file
+; Execution of behaviors based on string stimulus using AIML-style string
+; matching.
 
-(BindLink
-    (ListLink
-        (ConceptNode "YOU")
-        (ConceptNode "ARE")
-        (ConceptNode "BEAUTIFUL")
+; TODO: below not working with multiple words in the glob
+
+; This is the main function that controls execution of a behavior rule based on
+; a stimulus input string, if there is a match with a rule conditional.
+; TODO; implment passing the grounded variables in the rule when evaluating it
+(define (execute-behavior-with-stimulus input-str)
+    (define rule)
+    (define bind-results)
+    (define eval-results)
+    (define as-orig)
+    (define temp-rule)
+    (define consequent)
+	;(cog-push-atomspace)
+	(define cleaned-text (clean-text input-str))
+    ;(set! rule (get-tree-with-antecedent input-str))
+    (set! rule (get-tree-with-antecedent cleaned-text))
+    (if rule
+        (begin
+            (display "rule: ")(display rule)(newline)
+            ;(display "doing cog-eval on:\n") (display (gdr rule))
+            ;(cog-evaluate! (gdr rule))
+
+            ; Need to figure out here how to unify the variables in the rule
+            ; without binding the previous phrase matches that have happened
+            ; Create and set a temp atomspace
+            (set! as-orig (cog-set-atomspace! (cog-new-atomspace)))
+            ; Add the rule and the listified input to the new atomspace
+            (set! temp-rule
+                (cog-new-link 'BindLink (cog-outgoing-set rule)))
+            ;(display "temp-rule: ") (display temp-rule)(newline)
+            (cog-new-link 'ListLink (cog-outgoing-set
+                (mapConceptualizeString cleaned-text)))
+            ;(display "********************  (prt) **********************\n")
+            ;(prt)
+            ;(display "********************  prt end ********************\n")
+
+            ; Now unify the rule and listified string in the temp atomspace
+            (set! bind-results (cog-bind temp-rule))
+            ;(display "cog-bind temp-rule: ")(display bind-results)(newline)
+
+            ; Now switch back to the orig atomspace and evaluate the
+            ; behavior rule conssequence.
+            (cog-set-atomspace! as-orig)
+            ;(display (cog-atomspace))(newline)
+
+            (set! consequent (gar bind-results))
+
+            ; Need to get the equiv consequent atom of the temp atomspace bind
+            ; result from the orig atomspace -- ugh, this is hacky.
+            (if (cog-node? consequent)
+                (set! consequent (cog-node
+                    (cog-type consequent) (cog-name consequent))))
+
+            (cog-evaluate! consequent)
+            ;(cog-evaluate! (gar (cog-bind rule)))
+        )
+        #f
     )
-    (DefinedPredicateNode "be happy")
+	;(cog-pop-atomspace)
 )
 
-(BindLink
-    (ListLink
-        (ConceptNode "YOU")
-        (ConceptNode "ARE")
-        (GlobNode "$blah")
-        (ConceptNode "BEAUTIFUL")
-    )
-    (DefinedPredicateNode "be happy"))
-
-
-(BindLink
-  (ListLink
-    (ConceptNode "ARE")
-    (ConceptNode "YOU")
-    (ConceptNode "BORED")
-  )
-  (DefinedPredicateNode "yawn")
-)
-
-
-;-----------------------------------------------------------------
-; Execute behavior based on string stimulus using AIML-style string matching
-
-; Retrieve atomspace behavior tree(s) with antecedent that contains atomese
+; Retrieve atomspace behavior rule with antecedent that contains atomese
 ; representation of the input string.
-(define (get-tree-with-antecedent input-str)
+;(define (get-tree-with-antecedent input-str)
+(define (get-tree-with-antecedent cleaned-text)
     ; TODO: For now just using a single result, but we should handle multiple
     ;       returned results.
     ; TODO: Allow for variable words
-
-    (let* ((cleaned-text
-                (string-trim-both (cleanText (string-upcase input-str))))
+	; TODO: Match on multiple conditions (ie using OR)
+    (let* (
+    ;        (cleaned-text
+    ;            ;(string-trim-both (cleanText (string-upcase input-str))))
+    ;            (clean-text input-str))
            (results (findQueryPatterns cleaned-text)))
-        (display "results:\n") (display results)
+        ;(display "results:\n") (display results)
         (if (> (length (cog-outgoing-set results)) 0)
 	        (gar results)
 	        #f
@@ -121,32 +140,8 @@
     )
 )
 
-
-; TODO: below not working with multiple words in the glob
-
-; Executes a behavior tree based on a stimulus input string.
-; TODO; implment passing the grounded variables in the rule when evaluating it
-(define (execute-behavior-with-stimulus input-str)
-    (define rule (get-tree-with-antecedent input-str))
-    (if rule
-        (begin
-                (display "doing cog-eval on:\n") (display (gdr rule))
-                ;(cog-evaluate! (gdr rule))
-                (cog-evaluate! (gar (cog-bind rule)))
-        )
-        #f
-    )
-)
-
-
-        ;(if (equal? rule training-rule)
-            ; This is a hack until implementing version that passes the
-            ; the grounded var values to all behavior rules when evaluating
-            ;(create-new-brule-hack input-str)
-            ;(begin
-
-                ;(cog-execute! rule)
-            ;)
+(define (clean-text input-str)
+    (string-trim-both (cleanText (string-upcase input-str))))
 
 ; shortcut method
 (define (say input-str)
@@ -170,9 +165,11 @@
     ; create new behavior rule with text input stimulus and behavior response
     (define new-rule)
     (define atomese-string)
-    (display "\ncreate-behavior-tree \n    stimulus: ")(display stimulus)
+    (display "\n(create-behavior-rule) \n    stimulus: ")(display stimulus)
         (display "    response: ")(display response)(newline)
     ;(set! atomese-string (string-to-atomese stimulus))
+
+    ; TODO: we should check first make sure the response is a pre-defined behavior
 	(set! new-rule
     	(BindLink
     	    (ListLink
@@ -190,8 +187,14 @@
 ; Utils
 ; TODO: move to util file
 
+; shortcuts
+(define (incoming atom) (cog-incoming-set atom))
+(define (prt) (cog-prt-atomspace))
 
 
+;-----------------------------------------------------------------
+; For testing
+(define w (Concept "WHEN"))
 
 
 ;-----------------------------------------------------------------
