@@ -61,7 +61,7 @@ public:
     }
 
     bool createChild(unsigned int i) {
-        if (children == NULL) allocChildren();
+        if (children == nullptr) allocChildren();
         children[i] = new AtomOcTreeNode();
         return true;
     }

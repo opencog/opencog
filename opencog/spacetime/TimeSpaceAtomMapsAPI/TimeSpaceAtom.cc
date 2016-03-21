@@ -150,7 +150,7 @@ TimeSpaceAtom::GetAtomCurrentTime(const int map_handle,
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
     assert(time_circle[i].has_map(map_handle));
     OcTreeNode* result = time_circle[i].map_tree[map_handle].search(location);
-    if (result == NULL) {
+    if (result == nullptr) {
         ato = UndefinedHandle;
         return false;
     }
@@ -170,7 +170,7 @@ TimeSpaceAtom::GetAtomAtTime(const time_pt& time_p, const int map_handle,
     if (it == std::end(time_circle))return false;
     assert(it->has_map(map_handle));
     OcTreeNode* result = it->map_tree[map_handle].search(location);
-    if (result == NULL) {
+    if (result == nullptr) {
         ato = UndefinedHandle;
         return false;
     }
@@ -192,7 +192,7 @@ TimeSpaceAtom::GetTimesOfAtomOccurenceAtLocation(const int map_handle,
             continue;
         }
         OcTreeNode* result = tu->map_tree[map_handle].search(location);
-        if (result == NULL) {
+        if (result == nullptr) {
             cout << "null ret by search" << endl;
             continue;
         }

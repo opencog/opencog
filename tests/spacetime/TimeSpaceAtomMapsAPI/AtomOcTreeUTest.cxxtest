@@ -55,7 +55,7 @@ public:
 
     void print_query_info(point3d query, OcTreeNode* node)
     {
-        if (node != NULL) {
+        if (node != nullptr) {
             aHandle i=(static_cast<AtomOcTreeNode*>(node))->getData();
             cout << "occupancy probability at " << query << ":\t " << node->getOccupancy() << ";"<< endl;
         }
@@ -100,7 +100,7 @@ public:
         point3d query (0., 0., 0.);
         OcTreeNode* result = tree.search (query);
         print_query_info(query, result);
-        TS_ASSERT_DIFFERS(result,(OcTreeNode*)NULL);
+        TS_ASSERT_DIFFERS(result,(OcTreeNode*)nullptr);
         TS_ASSERT_EQUALS((static_cast<AtomOcTreeNode*>(result))->getData(),testHandle);
 
         query = point3d(-1.,-1.,-1.);
@@ -111,7 +111,7 @@ public:
         query = point3d(100.,1.,1.);
         result = tree.search (query);
         print_query_info(query, result);
-        TS_ASSERT_EQUALS(result,(OcTreeNode*)NULL);
+        TS_ASSERT_EQUALS(result,(OcTreeNode*)nullptr);
 
 
         cout << endl;

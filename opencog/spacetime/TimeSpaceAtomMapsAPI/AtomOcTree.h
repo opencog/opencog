@@ -62,7 +62,7 @@ public:
 
     AtomOcTreeNode* setNodeData(const point3d& xyz, const aHandle& r){
         OcTreeKey key;
-        if (!this->coordToKeyChecked(xyz, key)) return NULL;
+        if (!this->coordToKeyChecked(xyz, key)) return nullptr;
         return setNodeData(key, r);
     }
     // update inner nodes, sets dat to average child dat
