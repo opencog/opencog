@@ -1,5 +1,7 @@
 ;
 ; Assorted utilities for supporting face tracking
+; XXX most of face-tracking is now in self-model.scm
+; Perhaps this file is not needed any more? XXX FIXME
 ;
 (add-to-load-path "/usr/local/share/opencog/scm")
 
@@ -76,9 +78,9 @@
 	(car (cog-chase-link 'StateLink 'ConceptNode room-state)))
 
 
-(define (show-interaction-state)
-	(define interaction-state (AnchorNode "Interaction State"))
-	(car (cog-chase-link 'StateLink 'ConceptNode interaction-state)))
+(define (show-eye-contact-state)
+	(define e-c-state (Anchor "Eye Contact State"))
+	(car (cog-chase-link 'StateLink 'NumberNode e-c-state)))
 
 
 ; define-public because `unit-test.scm` uses it.

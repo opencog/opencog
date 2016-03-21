@@ -36,8 +36,6 @@
 ; (cog-evaluate! (Evaluation  (DefinedPredicate "Show expression")
 ;      (ListLink (Concept "worry") (Number 5) (Number 1))))
 
-; Translation of behavior.cfg line 9 ff
-;
 ; The animations are weird: if the time is too short, then no animation
 ; plays, unless it is very strong (0.6 and stronger). The weaker
 ; strengths work, but only if the duration is long.  Strengths below
@@ -58,7 +56,7 @@
 (emo-expr-spec "bored"    "sad"           0.1 0.4 0.6 10 15)
 (emo-expr-spec "bored"    "amused"        0.2 0.7 1.0 10 15)
 
-(emo-expr-spec "sleep"    "amused"        1.0  0.8 1.0 5 15)
+(emo-expr-spec "sleepy"   "amused"        1.0  0.8 1.0 5 15)
 
 (emo-expr-spec "wake-up"  "surprised"     0.45 0.4 0.6 5 15)
 (emo-expr-spec "wake-up"  "happy"         0.2  0.6 0.7 5 15)
@@ -116,7 +114,6 @@
 ; (cog-evaluate! (Evaluation  (DefinedPredicate "Show gesture")
 ;    (ListLink (Concept "thoughtful") (Number 0.2) (Number 2) (Number 0.8))))
 
-; Translation of behavior.cfg line 75 ff
 (emo-gest-spec "positive" "nod-1"  0.1 0.6 0.9 1 1 0.5 0.8)
 (emo-gest-spec "positive" "nod-2"  0.1 0.2 0.4 1 1 0.8 0.9)
 (emo-gest-spec "positive" "noop"   0.8 0   0   1 1 0   0)
@@ -126,29 +123,27 @@
 (emo-gest-spec "bored"   "yawn-1"  0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "bored"   "noop"    0.9 0   0   1 1 1 1)
 
-(emo-gest-spec "sleep"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
+(emo-gest-spec "sleepy"  "blink-sleepy"  1 0.7 1.0 1 1 1 1)
 
 (emo-gest-spec "wake-up" "shake-2"  0.4 0.7 1.0 1 1 0.7 0.8)
 (emo-gest-spec "wake-up" "shake-3"  0.3 0.6 1.0 1 1 0.7 0.8)
 (emo-gest-spec "wake-up" "blink"    0.3 0.8 1.0 2 4 0.9 1.0)
 
-; New beavior.cfg line 120 "listening_gestures"
-; "thoughtfule is very pronounced, so keep it light.
-(emo-gest-spec "listening" "thoughtful"  1.0 0.2 0.4 1 1 0.2 0.6)
+; Gestures to use during conversations.
+; Note that the gesture strengths are reduced from normal.
+; "thoughtful" is very pronounced, so keep it light.
+(emo-gest-spec "conversing" "thoughtful"  1.0 0.2 0.4 1 1 0.2 0.6)
 ; none-such animations
-; (emo-gest-spec "listening" "think-browsUp.001"  0.4 0.7 1.0 1 1 0.6 0.8)
-; (emo-gest-spec "listening" "think-browsUp.003"  0.3 0.6 1.0 1 1 0.6 0.8)
-; (emo-gest-spec "listening" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
+; (emo-gest-spec "conversing" "think-browsUp.001"  0.4 0.7 1.0 1 1 0.6 0.8)
+; (emo-gest-spec "conversing" "think-browsUp.003"  0.3 0.6 1.0 1 1 0.6 0.8)
+; (emo-gest-spec "conversing" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
 
-; New behavior.cfg line 149
 (emo-gest-spec "chat-positive-nod" "nod-3"  0.5 0.8 0.9 2 2 0.2 0.4)
 (emo-gest-spec "chat-positive-nod" "noop"   0.5 0   0   1 1 0   0)
 
 (emo-gest-spec "chat-negative-shake" "shake-3"  0.9 0.9 0.9 1 1 0.4 0.7)
 (emo-gest-spec "chat-negative-shake" "noop"     0.1 0   0   1 1 0   0  )
 
-; line 160 plus lines 1351ff of new general_behavior.py
-; aka stuff for "chatbot_positive_reply_think"
 (emo-gest-spec "chat-pos-think" "thoughtful"  0.8 0.2 0.4 1 1 0.2 0.6)
 ; This animation doesn't exist ...
 ; (emo-gest-spec "chat-pos-think" "think-browsUp"  0.8 0.5 0.7 1 1 0.3 0.5)
@@ -162,16 +157,17 @@
 
 ; Used for imperatives, i.e. when she is verbally told to do something.
 ; Thus, we list all of them here. The probability column is ignored.
+; The shake and nod gestures are very weak, for some reason.
 (emo-gest-spec "imperative"   "amused"        0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "blink"         0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "blink-micro"   0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "blink-relaxed" 0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "blink-sleepy"  0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "nod-1"         0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "nod-2"         0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "nod-3"         0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "shake-2"       0.1 0.6 0.9 1 1 1 1)
-(emo-gest-spec "imperative"   "shake-3"       0.1 0.6 0.9 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-1"         0.1 0.8 1.0 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-2"         0.1 0.8 1.0 1 1 1 1)
+(emo-gest-spec "imperative"   "nod-3"         0.1 0.8 1.0 1 1 1 1)
+(emo-gest-spec "imperative"   "shake-2"       0.1 0.8 1.0 1 1 1 1)
+(emo-gest-spec "imperative"   "shake-3"       0.1 0.8 1.0 1 1 1 1)
 (emo-gest-spec "imperative"   "thoughtful"    0.1 0.2 0.4 1 1 1 1)
 (emo-gest-spec "imperative"   "yawn-1"        0.1 0.6 0.9 1 1 1 1)
 
@@ -180,21 +176,20 @@
 ;    some event.
 
 ; Probability of looking at someone who entered the room.
-(dice-roll "glance new face"   0.5) ; line 590 -- glance_probability_for_new_faces
+(dice-roll "glance new face"   0.5)
 
 ; Probability of looking at spot where someone was last seen.
-(dice-roll "glance lost face"  0.5) ; -- glance_probability_for_lost_faces
+(dice-roll "glance lost face"  0.5)
 
-(dice-roll "group interaction" 0.7) ; line 599 -- glance_probability
+(dice-roll "group interaction" 0.7)
 
 ; Probability of performing the face-study saccade.
-(dice-roll "face study" 0.2) ; line 122 -- face_study_probabilities
+(dice-roll "face study" 0.2)
 
 ; --------------------------------------------------------
 ; Time-related conf paramters
 
 ; All numbers are in seconds.
-; line 115 of behavior.cfg - time_to_change_face_target_min
 (State (Schema "time_to_change_face_target_min") (Number 8))
 (State (Schema "time_to_change_face_target_max") (Number 10))
 
@@ -204,9 +199,12 @@
 (State (Schema "time_since_last_gesture_max") (Number 10))
 
 ; Specify how long to hold off between making facial expressions.
-; line 4 default_emotion_duration is 1 second but that's nuts.
 (State (Schema "time_since_last_expr_min") (Number 6.0))
 (State (Schema "time_since_last_expr_max") (Number 10.0))
+
+; If no one has said anything after 40-80 seconds, say something.
+(State (Schema "silence_min") (Number 40))
+(State (Schema "silence_max") (Number 80))
 
 ; Sleep at least 25 seconds ... at most 160
 (State (Schema "time_sleeping_min") (Number 25))
@@ -219,7 +217,6 @@
 
 ; How long to look in one direction, before changing gaze,
 ; when searching for atention in an empty room.
-; line 134 -- search_for_attention_duration_min
 (State (Schema "time_search_attn_min") (Number 1.0))
 (State (Schema "time_search_attn_max") (Number 4.0))
 
@@ -245,3 +242,5 @@
 (DefineLink (DefinedSchema "blink chat slow var")  (Number 0.12))
 
 ; --------------------------------------------------------
+; Silence the output.
+*unspecified*

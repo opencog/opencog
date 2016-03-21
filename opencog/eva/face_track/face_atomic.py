@@ -72,6 +72,6 @@ class FaceAtomic:
 	# This bypasses the normal "new face is visible" sequence, and
 	# immediately shifts Eva's attention to this face.
 	def set_tracked_face(self, faceid):
-		face = '(StateLink request-interaction-state (NumberNode "' + \
+		face = '(StateLink request-eye-contact-state (NumberNode "' + \
 		       str(faceid) + '"))'
 		return face

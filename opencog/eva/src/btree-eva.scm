@@ -25,6 +25,7 @@
 (add-to-load-path "/usr/local/share/opencog/scm")
 
 (use-modules (opencog))
+(use-modules (opencog query))  ; XXX work-around relex2logic bug
 
 ; Start the cogsserver.  It is used by the face-tracker to poke data
 ; into the atomspace.
@@ -32,6 +33,8 @@
 (start-cogserver "../scripts/opencog.conf")
 
 ; Load the behavior trees.
+(use-modules (opencog exec))        ; needed for cog-evaluate! in put_atoms.py
+(use-modules (opencog eva-model))   ; needed for defines in put_atoms.py
 (use-modules (opencog eva-behavior))
 
 ; Load the Eva personality configuration.
@@ -50,14 +53,25 @@
 (use-modules (opencog nlp))
 (use-modules (opencog nlp chatbot-eva))
 
-; XXX remove the below when we get a chance.
-; Must load the rulebase before running eva; see bug
-; https://github.com/opencog/opencog/issues/2021 for details
-; XXX fixme -- we should not need to load either relex2logic or
-; the rules right here, since the code in this module does not depend
-; directly on thes.
+; Work-around to weird bug: must load relex2logic at the top level.
 (use-modules (opencog nlp relex2logic))
-(load-r2l-rulebase)
+
+; Work-around to circular dependency: define `dispatch-text` at the
+; top level of the guile executation environment.
+(define-public (dispatch-text txt)
+"
+  dispatch-text TEXT
+
+  Pass the TEXT that STT heard into the OpenCog chatbot.
+"
+   (call-with-new-thread
+		; Must run in a new thread, else it deadlocks in python,
+		; since the text processing results in python calls.
+      ; (lambda () (process-query "luser" (cog-name txt)))
+      (lambda () (grounded-talk "luser" (cog-name txt)))
+   )
+   (stv 1 1)
+)
 
 ; ---------------------------------------------------------
 ; Run the hacky garbage collection loop.

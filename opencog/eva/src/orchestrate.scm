@@ -20,6 +20,14 @@
 ; "please smile for me", while the behavior tree might be issuing
 ; a frown expression. (Not clear which should have precedence).
 ;
+; All requests need to include the name of the subsystem making the
+; request. This name is currently ignored, but it is planned that
+; it will be used to determine priority, and/or to block requests
+; from certain sources.
+;
+; -------------------------------------------------------------
+
+
 ; -------------------------------------------------------------
 ; Request a display of a facial expression (smile, frown, etc.)
 ; The expression name should be one of the supported blender animations.
@@ -116,3 +124,89 @@
 		)))
 
 ; -------------------------------------------------------------
+; As above, but (momentarily) break eye contact, first.
+; Otherwise, the behavior tree forces eye contact to be continueally
+; running, and the turn-look command is promptly over-ridden.
+; XXX FIXME, this is still broken during search for attention.
+
+(DefineLink
+	(DefinedPredicate "Look command")
+	(LambdaLink
+		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
+		(SequentialAndLink
+			(DefinedPredicate "break eye contact")
+			(EvaluationLink (DefinedPredicate "Gaze at point")
+				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+			(EvaluationLink (DefinedPredicate "Look at point")
+				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+		)))
+
+(DefineLink
+	(DefinedPredicate "Gaze command")
+	(LambdaLink
+		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
+		(SequentialAndLink
+			(DefinedPredicate "break eye contact")
+			(EvaluationLink (DefinedPredicate "Gaze at point")
+				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+		)))
+
+; -------------------------------------------------------------
+; Publish the current behavior.
+; Cheap hack to allow external ROS nodes to know what we are doing.
+; The string name of the node is sent directly as a ROS String message
+; to the "robot_behavior" topic.
+;
+; Example usage:
+;    (cog-evaluate! (Put (DefinedPredicate "Publish behavior")
+;         (ListLink (Concept "foobar joke"))))
+;
+(DefineLink
+	(DefinedPredicate "Publish behavior")
+	(LambdaLink
+		(VariableList (Variable "$bhv"))
+		;; Send it off to ROS to actually do it.
+		(EvaluationLink (GroundedPredicate "py:publish_behavior")
+			(ListLink (Variable "$bhv")))
+		))
+
+; -------------------------------------------------------------
+; Request to change the soma state.
+; Takes two arguments: the requestor, and the proposed state.
+;
+; Currently, this always honors all requests.
+; Currently, the requestor is ignored.
+;
+; Some future version may deny change requests, depending on the
+; request source or on other factors.
+
+(DefineLink
+	(DefinedPredicate "Request Set Soma State")
+	(LambdaLink
+		(VariableList
+			(Variable "$requestor")
+			(Variable "$state"))
+		(True (State soma-state (Variable "$state")))
+	))
+
+; -------------------------------------------------------------
+; Request to change the emotion state.
+; Takes two arguments: the requestor, and the proposed state.
+;
+; Currently, this always honors all requests.
+; Currently, the requestor is ignored.
+;
+; Some future version may deny change requests, depending on the
+; request source or on other factors.
+
+(DefineLink
+	(DefinedPredicate "Request Set Emotion State")
+	(LambdaLink
+		(VariableList
+			(Variable "$requestor")
+			(Variable "$state"))
+		(True (State emotion-state (Variable "$state")))
+	))
+
+; -------------------------------------------------------------
+*unspecified*  ; Make the load be silent

@@ -17,11 +17,11 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from opencog.scheme_wrapper import scheme_eval_h, scheme_eval_as
+from opencog.scheme_wrapper import scheme_eval, scheme_eval_h, scheme_eval_as
 
 # Simple API to isolate opencog atoms and imports from the ROS code,
 # so that we don't hack both ROS and Opencog in the same module.
-# Why? Not sure, seems like a good idea.
+# Why? Not sure, seemed like a good idea at the time.
 #
 # How to unit-test:
 # -----------------
@@ -51,25 +51,37 @@ class PutAtoms:
 		# Get the atomspace that the scheme is using at just this moment.
 		self.atomspace = scheme_eval_as('(cog-atomspace)')
 
-	# Put a marker in the AtomSpace to indicate that the robot is
-	# talking now.
-	def chatbot_speech_start(self):
-		scheme_eval_h(self.atomspace, "(State chat-state chat-talk)")
+		# Needed for the public define of chat-state, chat-start, etc.
+		# XXX Except that this doesn't actually make chat-state visible?
+		# WTF? But use-modules in btree.scm does work... strange.
+		scheme_eval(self.atomspace, "(use-modules (opencog exec))")
+		scheme_eval(self.atomspace, "(use-modules (opencog eva-model))")
 
-	def chatbot_speech_stop(self):
-		scheme_eval_h(self.atomspace, "(State chat-state chat-listen)")
+	# Let atomspace know that vocalization has started or ended.
+	def vocalization_started(self):
+		scheme_eval_h(self.atomspace, "(State chat-state chat-start)")
 
-	# Put a marker in the StomSpace to indicate that the robot is
-	# happy, enthsed about what its saying.
-	def chatbot_affect_happy(self):
+	def vocalization_ended(self):
+		scheme_eval_h(self.atomspace, "(State chat-state chat-stop)")
+
+	# Indicate that the robot heard freindly speech
+	def affect_happy(self):
 		scheme_eval_h(self.atomspace, "(State chat-affect chat-happy)")
 
-	def chatbot_affect_negative(self):
+	# Indicate that the robot heard negative speech
+	def affect_negative(self):
 		scheme_eval_h(self.atomspace, "(State chat-affect chat-negative)")
 
-	# manages the behavior trees state
+	# Pass the text that STT heard into opencog.
+	# Rather than setting state, we're going to trigger a script, here.
+	def perceived_text(self, text):
+		scheme_eval(self.atomspace,
+			'(cog-evaluate! (PutLink (DefinedPredicate "heard text")' +
+			' (SentenceNode "' + text + '")))')
+
+	# Start or stop the behavior tree.
 	def btree_stop(self):
-		scheme_eval_h(self.atomspace, "(halt)")
+		scheme_eval(self.atomspace, "(behavior-tree-halt)")
 
 	def btree_run(self):
-		scheme_eval_h(self.atomspace, "(run)")
+		scheme_eval(self.atomspace, "(behavior-tree-run)")

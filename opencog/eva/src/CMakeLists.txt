@@ -9,6 +9,7 @@ INSTALL (FILES
 INSTALL (FILES
 	behavior.scm
 	express.scm
+	primitives.scm
 	cfg-tools.scm
 	cfg-eva.scm
 	cfg-sophia.scm
