@@ -43,24 +43,29 @@ const aHandle UndefinedHandle = opencog::Handle::UNDEFINED;
 class AtomOcTreeNode : public OcTreeNode
 {
 public:
-    AtomOcTreeNode() : OcTreeNode(), dat(0) {} //dat gets default value from prunning
+    AtomOcTreeNode() : OcTreeNode(), dat(0)
+    {} //dat gets default value from prunning
 
     AtomOcTreeNode(const AtomOcTreeNode& rhs) : OcTreeNode(rhs), dat(rhs.dat)
     {}
 
-    bool operator==(const AtomOcTreeNode& rhs) const {
+    bool operator==(const AtomOcTreeNode& rhs) const
+    {
         return (rhs.value == value && rhs.dat == dat);
     }
 
     // children
-    inline AtomOcTreeNode* getChild(unsigned int i) {
+    inline AtomOcTreeNode* getChild(unsigned int i)
+    {
         return static_cast<AtomOcTreeNode*> (OcTreeNode::getChild(i));
     }
-    inline const AtomOcTreeNode* getChild(unsigned int i) const {
+    inline const AtomOcTreeNode* getChild(unsigned int i) const
+    {
         return static_cast<const AtomOcTreeNode*> (OcTreeNode::getChild(i));
     }
 
-    bool createChild(unsigned int i) {
+    bool createChild(unsigned int i)
+    {
         if (children == nullptr) allocChildren();
         children[i] = new AtomOcTreeNode();
         return true;
@@ -69,14 +74,17 @@ public:
     bool pruneNode();
     void expandNode();
 
-    inline aHandle getData() const {
+    inline aHandle getData() const
+    {
         return dat;
     }
-    inline void  setData(aHandle c) {
+    inline void  setData(aHandle c)
+    {
         this->dat = c;
     }
 
-    aHandle& getData() {
+    aHandle& getData()
+    {
         return dat;
     }
 

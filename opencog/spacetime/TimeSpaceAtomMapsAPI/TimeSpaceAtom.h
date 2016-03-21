@@ -54,15 +54,19 @@ typedef std::chrono::system_clock::duration duration_c;
 typedef list<time_pt> TimeList;
 
 //data structures
-struct time_unit {
+struct time_unit
+{
     time_pt t; duration_c duration;
     map<int, AtomOcTree> map_tree;
-    time_unit(time_pt tp, duration_c d): t(tp), duration(d) {}
-    bool operator==(time_pt tp) {
+    time_unit(time_pt tp, duration_c d): t(tp), duration(d)
+    {}
+    bool operator==(time_pt tp)
+    {
         return (tp >= t && tp <= t + duration);
     }
     //>,< not needed as only == search happens although created buffer should always be sorted, just simplifies a bit over search speed cost
-    bool has_map(int handle) {
+    bool has_map(int handle)
+    {
         auto it = map_tree.find(handle);
         return !(it == map_tree.end());
     }
@@ -76,7 +80,8 @@ public:
     bool GetMapResolution(const int handle, double& res);
     bool GetCurrentTimeRange(time_pt& time_p, duration_c& duration);
     bool IsTimePointInRange(const time_pt& time_to_check, const time_pt& t,
-                            const duration_c& duration) {
+                            const duration_c& duration)
+    {
         return (time_to_check >= t && time_to_check < t + duration);
     }
     bool CreateNewTimeUnit(const time_pt time_p, const duration_c duration);

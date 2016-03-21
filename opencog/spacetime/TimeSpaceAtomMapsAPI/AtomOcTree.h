@@ -49,18 +49,21 @@ public:
 
     /// virtual constructor: creates a new object of same type
     /// (Covariant return type requires an up-to-date compiler)
-    AtomOcTree* create() const{
+    AtomOcTree *create() const
+    {
         return new AtomOcTree(resolution);    //changed to this->resolution else templates cause problems
     }
 
-    std::string getTreeType() const{
+    std::string getTreeType() const
+    {
         return "AtomOcTree";
     }
 
     // set node dat at given key or coordinate. Replaces previous dat.
     AtomOcTreeNode* setNodeData(const OcTreeKey& key, const aHandle& r);
 
-    AtomOcTreeNode* setNodeData(const point3d& xyz, const aHandle& r){
+    AtomOcTreeNode* setNodeData(const point3d& xyz, const aHandle& r)
+    {
         OcTreeKey key;
         if (!this->coordToKeyChecked(xyz, key)) return nullptr;
         return setNodeData(key, r);
@@ -83,7 +86,8 @@ protected:
     class StaticMemberInitializer
     {
     public:
-        StaticMemberInitializer(){
+        StaticMemberInitializer()
+        {
             AtomOcTree* tree = new AtomOcTree(0.1);
             AbstractOcTree::registerTreeType(tree);
         }
