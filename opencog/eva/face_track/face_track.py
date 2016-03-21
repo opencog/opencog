@@ -72,6 +72,8 @@ class FaceTrack:
 	# Control flags. Ideally FaceTrack should publish targets using ros_commo EvaControl class.
 	C_EYES = 16
 	C_FACE = 32
+	# Facetracking will be disabled if neither of those flags are set
+	C_FACE_TRACKING = C_FACE | C_EYES
 
 	def __init__(self):
 
@@ -356,6 +358,8 @@ class FaceTrack:
 	# the face_loc_cb accomplishes the same thing. So maybe should
 	# remove this someday.
 	def face_event_cb(self, data):
+		if not self.control_mode & self.C_FACE_TRACKING:
+			return
 		if data.face_event == self.EVENT_NEW_FACE:
 			self.add_face(data.face_id)
 
@@ -370,6 +374,8 @@ class FaceTrack:
 	# we also use this as the main update loop, and drive all look-at
 	# actions from here.
 	def face_loc_cb(self, data):
+		if not self.control_mode & self.C_FACE_TRACKING:
+			return
 		for face in data.faces:
 			fid = face.id
 			loc = face.point
@@ -394,4 +400,11 @@ class FaceTrack:
 		return t
 
 	def behavior_control_callback(self, data):
+		# Were there facetracking enabled
+		facetracking = self.control_mode & self.C_FACE_TRACKING
 		self.control_mode = data.data
+		print("New Control mode %i" % self.control_mode )
+		if facetracking > 0 and self.control_mode & self.C_FACE_TRACKING == 0:
+			# Need to clear faces:
+			for face in self.visible_faces[:]:
+				self.remove_face(face)
