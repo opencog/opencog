@@ -26,7 +26,7 @@ Automated Program Learning
 * Read about [MOSES](http://wiki.opencog.org/w/MOSES).
 
 ##### Example
-* Use MOSES to run [moses-example.py](https://github.com/opencog/opencog/blob/master/opencog/python/moses/moses-example.py) experiment from Python in the PyCharm IDE.
+* Use MOSES to run [moses.py](https://github.com/opencog/moses/blob/master/examples/moses.py) example experiment from Python in the PyCharm IDE.
 
 ##### How Cython is used to expose C++ functionality in Python
 * Open [pymoses.pyx](https://github.com/opencog/opencog/blob/master/opencog/cython/opencog/pymoses.pyx) in PyCharm. 
