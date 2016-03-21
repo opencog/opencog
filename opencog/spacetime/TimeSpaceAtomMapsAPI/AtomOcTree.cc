@@ -28,26 +28,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
- 
-#include "AtomOcTree.h"
-namespace octomap {
-  // tree implementation  --------------------------------------
-  AtomOcTree::AtomOcTree(double resolution)
-  : OccupancyOcTreeBase< AtomOcTreeNode >(resolution) 
-  {
-    atomOcTreeMemberInit.ensureLinking();
-  }
 
-  AtomOcTreeNode* AtomOcTree::setNodeData(const OcTreeKey& key, 
-                                             const aHandle& r)
-  {
+#include "AtomOcTree.h"
+namespace octomap
+{
+// tree implementation  --------------------------------------
+AtomOcTree::AtomOcTree(double resolution)
+    : OccupancyOcTreeBase< AtomOcTreeNode >(resolution)
+{
+    atomOcTreeMemberInit.ensureLinking();
+}
+
+AtomOcTreeNode*
+AtomOcTree::setNodeData(const OcTreeKey& key, const aHandle& r)
+{
     AtomOcTreeNode *n = search(key);
     if (n != 0) {
-      n->setData(r);//setColor 
+        n->setData(r);//setColor
     }
     return n;
-  }
-/* This may not be required ..  
+}
+/* This may not be required ..
   template <class T>
   void AtomOcTree<T>::updateInnerOccupancy() {
     this->updateInnerOccupancyRecurs(this->root, 0);
@@ -75,7 +76,7 @@ namespace octomap {
   }
 */
 
-  //typedef int aHandle;
-  AtomOcTree::StaticMemberInitializer AtomOcTree::atomOcTreeMemberInit;
+//typedef int aHandle;
+AtomOcTree::StaticMemberInitializer AtomOcTree::atomOcTreeMemberInit;
 
 } // end namespace
