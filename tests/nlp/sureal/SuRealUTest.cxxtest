@@ -82,11 +82,15 @@ void SuRealUTest::setUp(void)
     _evaluator->eval("(setlocale LC_CTYPE \"\")");
     _evaluator->clear_pending();
 
+    _evaluator->eval("(use-modules (opencog))");
+    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
+    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm\")");
     _evaluator->eval("(use-modules (opencog atom-types))");
     _evaluator->eval("(use-modules (opencog nlp))");
     _evaluator->eval("(use-modules (opencog nlp lg-dict))");
     _evaluator->eval("(use-modules (opencog nlp relex2logic))");
     _evaluator->eval("(use-modules (opencog nlp sureal))");
+    _evaluator->clear_pending();
 }
 
 void SuRealUTest::tearDown(void)
@@ -107,11 +111,11 @@ void SuRealUTest::test_basic(void)
     // - He runs.
 
     // add the needed WordNode not yet in the testing atomspace
-    _evaluator->eval(R"( (WordNode "she") )");
-    _evaluator->eval(R"( (WordNode "feeds") )");
+    _evaluator->eval_h(R"( (WordNode "she") )");
+    _evaluator->eval_h(R"( (WordNode "eats") )");
 
     // test sureal with short sentence
-    _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "feeds") (ListLink (ConceptNode "she")))))) )");
+    _evaluator->eval(R"( (define s-result (sureal (SetLink (EvaluationLink (PredicateNode "eats") (ListLink (ConceptNode "she")))))) )");
     bool eval_err = _evaluator->eval_error();
     _evaluator->clear_pending();
     TSM_ASSERT("Failed to run sureal!", !eval_err);
