@@ -105,9 +105,10 @@ cdef class EntityRecorder:
     def __cinit__(self):
         pass
 
-    def __init__(self, long addr):
+    def __init__(self, long addr, AtomSpace atomspace):
         self.c_entity_recorder = <cEntityRecorder*> PyLong_AsVoidPtr(addr)
- 
+        self.atomspace = atomspace
+
     def __dealloc__(self):
         #SpaceServer will handle this
         pass
