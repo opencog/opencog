@@ -61,6 +61,12 @@
 (emo-expr-spec "neutral-speech"  "comprehending" 0.3  0.5 0.9 2 5)
 (emo-expr-spec "neutral-speech"  "engaged"       0.3  0.5 0.9 2 6)
 
+; Used when listening
+(emo-expr-spec "neutral-listen"  "happy"         0.4  0.6 1.0 4 8)
+(emo-expr-spec "neutral-listen"  "comprehending" 0.3  0.5 0.9 2 5)
+(emo-expr-spec "neutral-listen"  "engaged"       0.3  0.5 0.9 2 6)
+
+
 ; Used for imperatives, i.e. when she is verbally told to do something.
 ; Thus, we list all of them here. The probability column is ignored.
 ; The strength has to be 0.6 or more, or else blender doesn't play the

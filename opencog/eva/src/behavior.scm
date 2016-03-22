@@ -668,7 +668,32 @@
 				(DefinedSchema "blink normal var")))
 
 		; ... and switch state to "listening"
-		(True (Put (State chat-state (Variable "$x")) chat-listen))
+		(True (Put (State chat-state (Variable "$x")) chat-idle))
+
+		; ... and print some tracing output
+		(Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Finished talking")))
+	))
+
+; Things to do, if stopped listening.
+(DefineLink
+	(DefinedPredicate "Listening ended?")
+	(SequentialAnd
+		; If the chatbot stopped talking ...
+		(DefinedPredicate "chatbot stopped listening")
+
+		; ... then switch back to exploration saccade ...
+		(Evaluation (GroundedPredicate "py:explore_saccade")
+			(ListLink))
+
+		; ... switch to normal blink rate...
+		(Evaluation (GroundedPredicate "py:blink_rate")
+			(ListLink
+				(DefinedSchema "blink normal mean")
+				(DefinedSchema "blink normal var")))
+
+		; ... and switch state to "idle"
+		(True (Put (State chat-state (Variable "$x")) chat-idle))
 
 		; ... and print some tracing output
 		(Evaluation (GroundedPredicate "scm: print-msg")
@@ -681,7 +706,23 @@
 	(SequentialAnd
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot is listening")
+        ; ... show one of the neutral-speech expressions
+        (SequentialOr
+            (Not (DefinedPredicate "Time to change expression"))
+            (Put (DefinedPredicateNode "Show random expression")
+                (ConceptNode "neutral-listen")))
 
+        ; ... nod slowly ...
+        (SequentialOr
+            (Not (DefinedPredicate "Time to make gesture"))
+            (SequentialAnd
+                (Put (DefinedPredicate "Show random gesture")
+                    (ConceptNode "chat-positive-nod"))
+
+                ; ... raise eyebrows ...
+                (Put (DefinedPredicate "Show random gesture")
+                    (ConceptNode "chat-pos-think"))
+        ))
 		; No-op.  What should we do here?
 		(TrueLink)
 	))

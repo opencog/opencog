@@ -129,7 +129,9 @@
 (define-public chat-start  (ConceptNode "Start Talking"))
 (define-public chat-talk   (ConceptNode "Talking"))
 (define-public chat-stop   (ConceptNode "Stop Talking"))
-(StateLink chat-state chat-stop)
+(define-public chat-idle   (ConceptNode "Chat inactive"))
+; Wait for speech events to trigger speech behaviors
+(StateLink chat-state chat-idle)
 
 (DefineLink
 	(DefinedPredicate "chatbot started talking")
