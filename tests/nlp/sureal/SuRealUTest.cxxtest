@@ -120,7 +120,7 @@ void SuRealUTest::test_basic(void)
     _evaluator->clear_pending();
     TSM_ASSERT("Failed to run sureal!", !eval_err);
 
-    std::string result = _evaluator->eval(R"( (equal? s-result (list (list "she" "feeds" "."))) )");
+    std::string result = _evaluator->eval(R"( (equal? s-result (list (list "she" "eats" "."))) )");
     TSM_ASSERT("Failed on basic short sentence sureal!", result == "#t\n");
 
     logger().debug("END TEST: %s", __FUNCTION__);
