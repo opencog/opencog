@@ -199,15 +199,15 @@ class EvaControl():
 			return
 		# Switch to conversational (micro) saccade parameters
 		msg = SaccadeCycle()
-		msg.mean =  1.6          # saccade_explore_interval_mean
-		msg.variation = 0.11     # saccade_explore_interval_var
-		msg.paint_scale = 0.70   # saccade_explore_paint_scale
+		msg.mean =  2.45         # saccade_explore_interval_mean
+		msg.variation = 0.9    # saccade_explore_interval_var
+		msg.paint_scale = 4   # saccade_explore_paint_scale
 		# From study face, maybe better default should be defined for
 		# explore
-		msg.eye_size = 16.0      # saccade_study_face_eye_size
-		msg.eye_distance = 27.0  # saccade_study_face_eye_distance
-		msg.mouth_width = 7.0    # saccade_study_face_mouth_width
-		msg.mouth_height = 18.0  # saccade_study_face_mouth_height
+		msg.eye_size = 15      # saccade_study_face_eye_size
+		msg.eye_distance = 100  # saccade_study_face_eye_distance
+		msg.mouth_width = 90    # saccade_study_face_mouth_width
+		msg.mouth_height = 27  # saccade_study_face_mouth_height
 		msg.weight_eyes = 0.4    # saccade_study_face_weight_eyes
 		msg.weight_mouth = 0.6   # saccade_study_face_weight_mouth
 		self.saccade_pub.publish(msg)
@@ -218,14 +218,14 @@ class EvaControl():
 			return
 		# Switch to conversational (micro) saccade parameters
 		msg = SaccadeCycle()
-		msg.mean =  0.42         # saccade_micro_interval_mean
-		msg.variation = 0.10     # saccade_micro_interval_var
-		msg.paint_scale = 0.40   # saccade_micro_paint_scale
+		msg.mean =  0.8         # saccade_micro_interval_mean
+		msg.variation = 0.8     # saccade_micro_interval_var
+		msg.paint_scale = 3   # saccade_micro_paint_scale
 		#
-		msg.eye_size = 16.0      # saccade_study_face_eye_size
-		msg.eye_distance = 27.0  # saccade_study_face_eye_distance
-		msg.mouth_width = 7.0    # saccade_study_face_mouth_width
-		msg.mouth_height = 18.0  # saccade_study_face_mouth_height
+		msg.eye_size = 11.5      # saccade_study_face_eye_size
+		msg.eye_distance = 100 # saccade_study_face_eye_distance
+		msg.mouth_width = 90    # saccade_study_face_mouth_width
+		msg.mouth_height = 5  # saccade_study_face_mouth_height
 		msg.weight_eyes = 0.4    # saccade_study_face_weight_eyes
 		msg.weight_mouth = 0.6   # saccade_study_face_weight_mouth
 		self.saccade_pub.publish(msg)
@@ -236,16 +236,16 @@ class EvaControl():
 			return
 		# Switch to conversational (micro) saccade parameters
 		msg = SaccadeCycle()
-		msg.mean =  0.42         # saccade_micro_interval_mean
-		msg.variation = 0.10     # saccade_micro_interval_var
-		msg.paint_scale = 0.40   # saccade_micro_paint_scale
+		msg.mean =  2.2         # saccade_micro_interval_mean
+		msg.variation = 0.6      # saccade_micro_interval_var
+		msg.paint_scale = 1      # saccade_micro_paint_scale
 		#
-		msg.eye_size = 16.0      # saccade_study_face_eye_size
-		msg.eye_distance = 27.0  # saccade_study_face_eye_distance
-		msg.mouth_width = 7.0    # saccade_study_face_mouth_width
-		msg.mouth_height = 18.0  # saccade_study_face_mouth_height
-		msg.weight_eyes = 0.4    # saccade_study_face_weight_eyes
-		msg.weight_mouth = 0.6   # saccade_study_face_weight_mouth
+		msg.eye_size = 11        # saccade_study_face_eye_size
+		msg.eye_distance = 80    # saccade_study_face_eye_distance
+		msg.mouth_width = 50     # saccade_study_face_mouth_width
+		msg.mouth_height = 13.0  # saccade_study_face_mouth_height
+		msg.weight_eyes = 0.5    # saccade_study_face_weight_eyes
+		msg.weight_mouth = 0.5   # saccade_study_face_weight_mouth
 		self.saccade_pub.publish(msg)
 
 
