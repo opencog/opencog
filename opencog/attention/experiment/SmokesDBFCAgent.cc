@@ -33,7 +33,6 @@
 #include "Globals.h"
 #include "SmokesDBFCAgent.h"
 
-
 using namespace opencog;
 using namespace opencog::ECANExperiment;
 
@@ -92,6 +91,7 @@ SmokesDBFCAgent::SmokesDBFCAgent(CogServer& cs) :
                  "/usr/local/share/opencog/scm/utilities.scm, "
                  "/usr/local/share/opencog/scm/av-tv.scm, "
                  "opencog/attention/experiment/data/smokes/smokes_db.scm, "
+                 "opencog/attention/experiment/data/noise.scm, "
                  "opencog/attention/experiment/data/smokes/rule_base.scm");
 
     _eval = new SchemeEval(&_atomspace);
@@ -131,54 +131,74 @@ void SmokesDBFCAgent::run()
         }
         // Choose a random source  and focus set from the AS with the ff type constraints.
         // We are looking for atoms containing smokes,friends,cancer atoms so filter em out.
-        std::cerr << "---------Pushed the following atoms to the AF set-----------\n";
+        // std::cerr << "---------Pushed the following atoms to the AF set-----------\n";
         for (Handle& h : hs) {
             //Choose associated atoms as focu_set
             for (const Handle& t : targets) {
-                if (exists_in(h, t)
-                    and not opencog::contains_atomtype( h, VARIABLE_NODE)
-                    and not classserver().isA(h->getType(),HEBBIAN_LINK)){
-                           std::cerr << h->toShortString() << "\n";
-                          af_set.push_back(h);
+                if (exists_in(h, t) and not opencog::contains_atomtype(
+                        h, VARIABLE_NODE)
+                    and not classserver().isA(h->getType(), HEBBIAN_LINK)) {
+                    // std::cerr << h->toShortString() << "\n";
+                    af_set.push_back(h);
                 }
             }
         }
 
         if (af_set.empty()) {
-            std::cout << "COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.\n";
+            std::cerr
+                    << "******COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.********\n";
+            save("smokes-fc-resulut.data", HandleSeq { }, "\n******COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.********\n");
             return;
         }
 
         //Stimulate source and focus set
-        std::cerr << "STIMULATING SOURCE FOR PULLING IT IN TO AF\n";
+        int size = af_set.size();
+        //std::cerr << "STIMULATING SOURCE FOR PULLING IT IN TO AF with amount " << 10/log10(size) << "\n";
+        save("smokes-fc-resulut.data", HandleSeq { }, "INTERESTING_ATOMS_SIZE=" +std::to_string(size));
+        //+"INITIAL-STIMULUS PROVIDED (10/1og10(SIZE)) = "+ std::to_string( 10 / log10(size)) );
         for (Handle& h : af_set) {
-            stimulateAtom(h,
-                          _atomspace.get_attentional_focus_boundary() + 10);
+            //stimulateAtom(h, /*_atomspace.get_attentional_focus_boundary() +*/10 / log10(size));
+            auto stim = 5.0f / pow(3, is_surprising(h).second);
+            save("smokes-fc-resulut.data", HandleSeq { }, "stimulating atom " + h->toShortString() + " with amount "  + std::to_string(stim) );
+            stimulateAtom(h, stim);
         }
 
         source = rand_element(af_set);
 
         first_run = false;
+
+        return; // We have to let the stimulus get converted to STI by the next running ECAN agent.
     }
 
     else {
         af_set.clear();
-        _atomspace.get_handle_set_in_attentional_focus(std::back_inserter(af_set));
+        _atomspace.get_handle_set_in_attentional_focus(
+                std::back_inserter(af_set));
         // Remove Hebbian links from focus set.
-        af_set.erase(std::remove_if(af_set.begin(), af_set.end(), [](Handle& h) {
-            return classserver().isA(h->getType(),HEBBIAN_LINK);
-        }),
-                   af_set.end());
+        af_set.erase(
+                std::remove_if(af_set.begin(), af_set.end(), [](Handle& h) {
+                    return classserver().isA(h->getType(),HEBBIAN_LINK);
+                }),
+                af_set.end());
         if (af_set.empty()) {
-            std::cout << "COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.\n";
+            std::cerr
+                    << "***********COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.**************\n";
+            save("smokes-fc-resulut.data", HandleSeq { }, "\n******COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.********\n");
             return;
         }
         source = rand_element(af_set);
     }
 
+    std::cerr << "--------------AF CONTENT AT CYCLE: "
+              << cogserver().getCycleCount() << "-----------------\n";
+    for (const Handle& h : af_set)
+        std::cerr << h->toString() << "\n";
+
     // Do one step forward chaining.
-    std::cerr << "FCing" << std::endl;
-    ForwardChainer fc(_atomspace, rule_base, source, { af_set }, opencog::source_selection_mode::STI);
+    std::cerr << "------------FCing-------------" << std::endl;
+
+    ForwardChainer fc(_atomspace, rule_base, source, { af_set },
+                      opencog::source_selection_mode::STI);
     fc.do_step();
     std::cerr << "FORWARD CHAINER STEPPED\n\t";
 
@@ -192,10 +212,7 @@ void SmokesDBFCAgent::run()
     std::set<Handle> temp(fc_result.begin(), fc_result.end());
     //Inference_result doesn't need to be sorted since set is ordered.
     if (not inference_result.empty()) {
-        /* std::set_difference(inference_result.begin(), inference_result.end(),
-         temp.begin(), temp.end(),
-         std::back_inserter(unique));
-         */
+
         for (const Handle& h : temp) {
             if (std::find(inference_result.begin(), inference_result.end(), h) == inference_result.end())
                 unique.push_back(h);
@@ -206,44 +223,47 @@ void SmokesDBFCAgent::run()
 
     std::cerr << "\tFound " << unique.size() << " unique inferences.\n\t";
 
+    save("smokes-fc-resulut.data",
+         HandleSeq { },
+         "\n***FORWARD CHAINING RESULT***\ncycle=" + std::to_string(
+                 cogserver().getCycleCount())
+         + " smokers mean_tv=" + std::to_string(smokes_mean())
+         + " friendship mean_tv=" + std::to_string(friends_mean()) + "\nFound "
+         + std::to_string(unique.size()) + "unique inferences.\n");
+
     for (Handle& h : unique) {
-        save("smokes-fc-resulut.data",HandleSeq {},"\ncycle="+std::to_string(cogserver().getCycleCount())+
-             " smokers mean_tv="+std::to_string(smokes_mean())+" friendship mean_tv="+std::to_string(friends_mean()));
-        save("smokes-fc-resulut.data", HandleSeq { h }, "FC_RESLUT");
-        if (is_surprising(h)) {
-            //xxx not sure what amount of stimulus should be provided.
-            auto stimval = _atomspace.get_attentional_focus_boundary() + 10;
-            std::cerr
-                    << "Providing stimulus bc its surprising. stimulus amount="
-                    << stimval << "\n";
-            stimulateAtom(h, stimval);
-        }
+            auto stim = 5.0f / pow(3, is_surprising(h).second);
+            save("smokes-fc-resulut.data", HandleSeq {h}, "provided stimulus amount "  + std::to_string(stim) + "\n");
+            stimulateAtom(h, stim);
+       // }
         inference_result.insert(h);
     }
 
 }
 
-bool SmokesDBFCAgent::is_surprising(const Handle& hx)
+std::pair<bool,float> SmokesDBFCAgent::is_surprising(const Handle& hx)
 {
     Handle h;
-    if(hx->getType() == IMPLICATION_LINK){
+    if (hx->getType() == IMPLICATION_LINK) {
         h = LinkCast(hx)->getOutgoingSet()[1];
-    }
-    else h = hx;
+    } else
+        h = hx;
 
     strength_t mean_tv = 0.0f;
     bool val = false;
+    float mi = 0.0f;
+    save("smokes-fc-resulut.data", HandleSeq { },"\n");
     if (is_friendship_reln(h)) {
         mean_tv = friends_mean();
-        std::cerr << "Mean TV of friends reln: " << mean_tv << std::endl;
+        //std::cerr << "Mean TV of friends reln: " << mean_tv << std::endl;
         // Calculate the Jensen Shanon distance bn mean_tv and h's tv
-        float mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
+        mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
                                (h->getTruthValue())->getMean(), 100, 100);
 
         // Logging
-        std::cerr << "JSD_VAL between result and the above mean= " << mi
-                  << "\n";
-        save("smokes-fc-resulut.data",HandleSeq{},"JSD_VAL="+std::to_string(mi));
+        //std::cerr << "JSD_VAL between result and the above mean= " << mi      << "\n";
+        save("smokes-fc-resulut.data", HandleSeq { },
+                    "JSD_VAL(10, "+std::to_string(mean_tv)+"100, 10, "+std::to_string((h->getTruthValue())->getMean())+", 100, 100) = " + std::to_string(mi));
 
         auto it = dist_surprisingness_friends.begin();
         // Consider the first top_k values as surprising. After we have enough
@@ -263,15 +283,15 @@ bool SmokesDBFCAgent::is_surprising(const Handle& hx)
 
     } else if (is_smokes_reln(h)) {
         mean_tv = smokes_mean();
-        std::cerr << "Mean TV of smokes reln is: " << mean_tv << std::endl;
+        //std::cerr << "Mean TV of smokes reln is: " << mean_tv << std::endl;
         // Calculate the Jensen Shanon distance bn mean_tv and h's tv
-        float mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
+        mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
                                (h->getTruthValue())->getMean(), 100, 100);
 
         // Logging
-        std::cerr << "JSD_VAL between result and the above mean= " << mi
-                  << "\n";
-        save("smokes-fc-resulut.data",HandleSeq{},"JSD_VAL="+std::to_string(mi));
+        // std::cerr << "JSD_VAL between result and the above mean= " << mi << "\n";
+        save("smokes-fc-resulut.data", HandleSeq { },
+             "JSD_VAL(10,"+std::to_string(mean_tv)+"100,10,"+std::to_string((h->getTruthValue())->getMean())+",100,100) = " + std::to_string(mi));
 
         auto it = dist_surprisingness_smokes.begin();
         // Consider the first top_k values as surprising. After we have enough
@@ -292,13 +312,13 @@ bool SmokesDBFCAgent::is_surprising(const Handle& hx)
 
     // If it contains has_cancer predicate, let it be surprising.
 
-    else if(exists_in(h, _atomspace.add_node(PREDICATE_NODE,"cancer"))){
+    else if (exists_in(h, _atomspace.add_node(PREDICATE_NODE, "cancer"))) {
+        save("smokes-fc-resulut.data", HandleSeq { },"\n");
         val = true;
     }
 
-    std::cerr << "Result Found to be "
-              << (val ? "surprising" : "not surprising") << "\n";
-    save("smokes-fc-resulut.data",HandleSeq{},(val ? "surprising" : "not surprising"));
+    //std::cerr << "Result Found to be " << (val ? "surprising" : "not surprising") << "\n";
+    //save("smokes-fc-resulut.data", HandleSeq { },(val ? "surprising" : "not surprising"));
 
-    return val;
+    return std::make_pair(val,mi);
 }

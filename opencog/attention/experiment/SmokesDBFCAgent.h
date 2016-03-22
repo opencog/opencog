@@ -22,6 +22,7 @@
 #include <opencog/attention/experiment/tv-toolbox/TVToolBoxCInterface_stub.h>
 
 #include <algorithm>
+#include <utility>
 
 using namespace opencog;
 
@@ -84,7 +85,7 @@ public:
 
     void run();
 
-    bool is_surprising(const Handle& h);
+    std::pair<bool,float> is_surprising(const Handle& h);
 };
 
 #endif
