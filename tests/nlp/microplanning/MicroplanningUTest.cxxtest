@@ -100,7 +100,6 @@ void MicroplanningUTest::setUp(void)
     _evaluator->eval("(use-modules (opencog nlp sureal))");
 
     config().set("SCM_PRELOAD",
-                 "opencog/nlp/sureal/surface-realization.scm,"
                  "tests/nlp/microplanning/r2l-atomspace.scm,"
                  "tests/nlp/microplanning/test-atomspace.scm,"
                  "tests/nlp/microplanning/test-results.scm");
@@ -126,7 +125,8 @@ void MicroplanningUTest::test_declarative(void)
     std::string result = _evaluator->eval("(equal? m-result (declarative-without-anaphora))");
     TSM_ASSERT("Failed to generate the correct result without anaphora!", result == "#t\n");
 
-    _evaluator->eval("(define m-result (microplanning test-declarative-sal \"declarative\"))");
+    std::string mres = _evaluator->eval("(define m-result (microplanning test-declarative-sal \"declarative\"))");
+    printf("test_declarative m-result=%s\n", mres.c_str());
     eval_err = _evaluator->eval_error();
     _evaluator->clear_pending();
     TSM_ASSERT("Failed to run microplanning with anaphora!", !eval_err);
