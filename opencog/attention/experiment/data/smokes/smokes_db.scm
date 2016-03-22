@@ -24,6 +24,9 @@
 ;;; --------------------------------------------------------------------------
 ;;; evidence.db
 
+;(EvaluationLink (stv 0.4 1.0) (PredicateNode "friends") (ListLink (ConceptNode (stv 1.0 1.0) "RandFriend-d172ed2a")(ConceptNode (stv 1.0 1.0) "RandFriend-8845c5d3")))
+;(EvaluationLink (stv 0.4 1.0) (PredicateNode "friends") (ListLink (ConceptNode (stv 1.0 1.0) "RandFriend-73e25b6c")(ConceptNode (stv 1.0 1.0) "RandFriend-3e059c94")))
+
 ; Anna and Bob are friends.
 (EvaluationLink (stv 1.0 1.0)
     friends
