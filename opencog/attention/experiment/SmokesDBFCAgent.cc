@@ -41,19 +41,31 @@ float SmokesDBFCAgent::friends_mean()
     Handle friends_predicate = _atomspace.add_node(PREDICATE_NODE, "friends");
     Handle var_1 = _atomspace.add_node(VARIABLE_NODE, "$A");
     Handle var_2 = _atomspace.add_node(VARIABLE_NODE, "$B");
+   /* Handle varlist =
+            _eval->eval_h(
+                    R"(VariableList
+                    (TypedVariableLink
+                       (VariableNode "$A")
+                       (TypeNode "ConceptNode"))
+                     (TypedVariableLink
+                       (VariableNode "$B")
+                       (TypeNode "ConceptNode"))
+                       )");*/
     Handle friend_list = _atomspace.add_link(LIST_LINK, { var_1, var_2 });
     Handle eval_link = _atomspace.add_link(EVALUATION_LINK, { friends_predicate,
                                                               friend_list });
-    Handle bind_link = _atomspace.add_link(BIND_LINK, { eval_link, eval_link });
+    Handle bind_link = _atomspace.add_link(BIND_LINK, {eval_link, eval_link });
 
     //BindLinkPtr bptr = BindLinkCast(bind_link);
     Handle friends = satisfying_set(&_atomspace, bind_link);
-
     strength_t tv_sum = 0.0f;
-    int count = 0;
+    float count = 0.0f;
     for (const Handle& h : LinkCast(friends)->getOutgoingSet()) {
+        if(not opencog::contains_atomtype(
+                        h, VARIABLE_NODE)){
         tv_sum += (h->getTruthValue())->getMean();
         count++;
+        }
     }
 
     return (tv_sum / count);
@@ -63,23 +75,35 @@ float SmokesDBFCAgent::smokes_mean()
 {
     Handle smokes_predicate = _atomspace.add_node(PREDICATE_NODE, "smokes");
     Handle var = _atomspace.add_node(VARIABLE_NODE, "$A");
+    /*Handle varlist =
+            _eval->eval_h(
+                    R"(VariableList
+                        (TypedVariableLink
+                           (VariableNode "$A")
+                           (TypeNode "ConceptNode")) )");*/
+
     Handle smokes_list = _atomspace.add_link(LIST_LINK, HandleSeq { var });
     Handle eval_link = _atomspace.add_link(EVALUATION_LINK, { smokes_predicate,
                                                               smokes_list });
-    Handle bind_link = _atomspace.add_link(BIND_LINK, { eval_link, eval_link });
+    Handle bind_link = _atomspace.add_link(BIND_LINK, {eval_link,
+                                                        eval_link });
 
     //BindLinkPtr bptr = BindLinkCast(bind_link);
-    Handle friends = satisfying_set(&_atomspace, bind_link);
+    Handle smokers = satisfying_set(&_atomspace, bind_link);
 
     remove_hypergraph(_atomspace, bind_link);
 
     strength_t tv_sum = 0.0f;
-    int count = 0;
-    for (const Handle& h : LinkCast(friends)->getOutgoingSet()) {
+    int count = 0.0f;
+
+    for (const Handle& h : LinkCast(smokers)->getOutgoingSet()) {
+        if(not opencog::contains_atomtype(
+                h, VARIABLE_NODE)){
         tv_sum += (h->getTruthValue())->getMean();
         count++;
+        }
     }
-
+    save("smokes-fc-resulut.data", HandleSeq { }, "Smoker's count " + std::to_string(count) + " and tv_sum " +std::to_string(tv_sum)+"\n");
     return (tv_sum / count);
 }
 
