@@ -723,10 +723,29 @@
                 (Put (DefinedPredicate "Show random gesture")
                     (ConceptNode "chat-pos-think"))
         ))
-		; No-op.  What should we do here?
 		(TrueLink)
 	))
+(DefineLink
+	(DefinedPredicate "Keep alive")
+	(SequentialAnd
+		; If the chatbot stopped talking ...
+        (SequentialOr
+            (Not (DefinedPredicate "Time to change expression"))
+            (Put (DefinedPredicateNode "Show random expression")
+                (ConceptNode "neutral-listen")))
 
+        ; ... nod slowly ...
+        (SequentialOr
+            (Not (DefinedPredicate "Time to make gesture"))
+            (SequentialAnd
+                (Put (DefinedPredicate "Show random gesture")
+                    (ConceptNode "chat-positive-nod"))
+                ; ... raise eyebrows ...
+                (Put (DefinedPredicate "Show random gesture")
+                    (ConceptNode "chat-pos-think"))
+        ))
+		(TrueLink)
+	))
 ;; ------------------------------------------------------------------
 ;; Main loop. Uses tail recursion optimization to form the loop.
 (DefineLink
@@ -745,6 +764,7 @@
 			;; XXX FIXME chatbot is disengaged from everything else.
 			;; The room can be empty, the head is bored or even asleep,
 			;; but the chatbot is still smiling and yabbering.
+			;; If interaction is turned-off need keep alive gestures
 			(SequentialOr
 				(DefinedPredicate "Speech started?")
 				(DefinedPredicate "Speech ongoing?")
@@ -752,7 +772,10 @@
 				(DefinedPredicate "Listening started?")
 				(DefinedPredicate "Listening?")
 				(DefinedPredicate "Listening ended?")
-				; (DefinedPredicate "Speech listening?") ; no-op
+				(SequentialAnd
+				    (DefinedPredicate "Skip Interaction?")
+				    (DefinedPredicate "Keep alive")
+				)
 				(True)
 			)
 
