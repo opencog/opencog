@@ -34,7 +34,7 @@
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-amod-rule noun adj)
+(define-public (pre-amod-rule noun adj)
     (amod-rule (cog-name (word-inst-get-lemma  noun)) (cog-name noun)
               (cog-name (word-inst-get-lemma  adj)) (cog-name adj)
     )

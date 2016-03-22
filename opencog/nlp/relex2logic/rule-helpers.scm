@@ -713,7 +713,11 @@
 		))
 )
 
-(define-public (nn-rule n1 n1_instance n2 n2_instance)
+(define-public (nn-rule n1-lemma n1-inst n2-lemma n2-inst)
+	(define n1 (cog-name n1-lemma))
+	(define n1_instance (cog-name n1-inst ))
+	(define n2 (cog-name n2-lemma))
+	(define n2_instance (cog-name n2-inst ))
 ; XXX FIXME these two are not returned ???
 	(r2l-wordinst-concept n1_instance)
 	(r2l-wordinst-concept n2_instance)
@@ -1428,7 +1432,11 @@
 	)
 )
 
-(define-public (rep-rule comp_concept comp_instance pred_concept pred_instance)
+(define-public (rep-rule comp_word comp_inst pred_word pred_inst)
+	(define comp_concept (cog-name comp_word))
+	(define comp_instance (cog-name comp_inst))
+	(define pred_concept (cog-name pred_word))
+	(define pred_instance (cog-name pred_inst))
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
