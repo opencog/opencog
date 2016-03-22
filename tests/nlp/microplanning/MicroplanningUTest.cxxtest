@@ -73,9 +73,12 @@ void MicroplanningUTest::setUp(void)
 
     // need this for loading LG dictionary
     _evaluator->eval("(setlocale LC_CTYPE \"\")");
-    _evaluator->eval("(add-to-load-path \".\")");
-    _evaluator->eval("(add-to-load-path \"../../..\")");
     _evaluator->clear_pending();
+
+    _evaluator->eval("(use-modules (opencog))");
+
+    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
+    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm/\")");
 
     _evaluator->eval("(use-modules (opencog atom-types))");
     _evaluator->eval("(use-modules (opencog nlp))");
