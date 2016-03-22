@@ -104,6 +104,8 @@ bool opencog::ECANExperiment::is_friendship_reln(const Handle& h)
     Handle friend_list = as.add_link(LIST_LINK, HandleSeq { var_1, var_2 });
     Handle eval_link = as.add_link(EVALUATION_LINK, { friends_predicate,
                                                       friend_list });
+    as.add_atom(eval_link);
+
     if (are_similar(h, eval_link, true))
         return true;
     else
@@ -120,6 +122,8 @@ bool opencog::ECANExperiment::is_smokes_reln(const Handle& h)
     Handle smokes_list = as.add_link(LIST_LINK, HandleSeq { var_1 });
     Handle eval_link = as.add_link(EVALUATION_LINK, { smokes_predicate,
                                                       smokes_list });
+    as.add_atom(eval_link);
+
     if (are_similar(h, eval_link, true))
         return true;
     else
@@ -135,6 +139,8 @@ bool opencog::ECANExperiment::is_cancer_reln(const Handle& h)
     Handle list = as.add_link(LIST_LINK, HandleSeq { var_1 });
     Handle eval_link = as.add_link(EVALUATION_LINK, { cancer_predicate,
                                                       list });
+    as.add_atom(eval_link);
+
     if (are_similar(h, eval_link, true))
         return true;
     else
