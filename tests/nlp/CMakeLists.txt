@@ -1,8 +1,8 @@
 IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
-	# ADD_SUBDIRECTORY (sureal)
+	ADD_SUBDIRECTORY (sureal)
 
 	# microplanning depends on sureal, so should test after it
-	# ADD_SUBDIRECTORY (microplanning)
+	ADD_SUBDIRECTORY (microplanning)
 ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 IF (HAVE_VITERBI)
