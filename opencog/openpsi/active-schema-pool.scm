@@ -446,25 +446,6 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-select-action-rules)
-"
-  Selects all actions of current effect type and update the psi-asp.
-"
-    (let ((goal (psi-current-goal))
-          (effect-type (psi-current-effect-type))
-          (asp (psi-asp)))
-
-        ; If default effect-type then add only the default actions.
-        (if (equal? effect-type "Default")
-            (psi-update-asp  asp (psi-get-action-rules-default))
-            (psi-update-asp asp (cog-outgoing-set
-                    (psi-get-action-rules-typed goal effect-type)))
-        )
-    )
-)
-
-
-; --------------------------------------------------------------
 (define (psi-action-rule-selector-current-typed)
 "
   Returns the DefinedPredicateNode that represent the evaluatable term, that
@@ -498,43 +479,27 @@
     )
 )
 
-(define (psi-select-action-2)
+(define (psi-select-action-rules)
 "
   Selects all actions of current effect type and update the psi-asp.
 "
-; NOTE
-; For testing Add an action-slector
-;(define a-dpn (psi-action-rule-selector-current-typed))
-;(psi-action-rule-selector-set! a-dpn)
-;(define (inc) ; test goal
-;    (StateLink
-;       (Node "OpenPsi: action-on-demand")
-;       (ListLink
-;          (ConceptNode "OpenPsi: Increase")
-;          (ConceptNode "OpenPsi: Energy" (stv 0.66960984 0.99999982))
-;       )
-;    )
-;)
-; (inc)
-;
     (define (get-as) ; get the action-rule-selctor
-        (car (cog-outgoing-set (cog-execute!
+        (cog-outgoing-set (cog-execute!
             (GetLink (psi-action-rule-selector-pattern)))))
-    )
 
     (let ((goal (psi-current-goal))
           (effect-type (psi-current-effect-type))
           (action-selector (get-as))
           (asp (psi-asp)))
-        ; If default effect-type then add only the default actions.
         (cond
             ((null? action-selector)
-                (error "In procedure psi-select-action-2: "
+                (error "In procedure psi-select-action-rules: "
                        "action-selector is not set."))
             ((equal? effect-type "Default")
+            ; If default effect-type then add only the default actions.
                 (psi-update-asp  asp (psi-get-action-rules-default)))
             (else (psi-update-asp asp (cog-outgoing-set
-                    (psi-get-action-rules action-selector goal))))
+                    (psi-get-action-rules (car action-selector) goal))))
         )
     )
 )
