@@ -32,8 +32,8 @@
 //TimeSpaceAtom.cpp
 #include "TimeSpaceAtom.h"
 //#include "octomap/OcTreeKey.h"
-#include <assert.h>
-
+//#include <assert.h>
+#include "opencog/util/oc_assert.h"
 TimeSpaceAtom::TimeSpaceAtom(unsigned int num_time_units,
                              vector<double>map_res_meters):
     time_circle(num_time_units), created_once(false)
@@ -103,11 +103,11 @@ TimeSpaceAtom::PutAtomAtCurrentTime(const int map_handle,
                                     const aHandle& ato)
 {
     //if (!created_once)return false;
-    assert(created_once);
+    OC_ASSERT(created_once);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
     //if (!time_circle[i].has_map(handle)) return false;//may assert too
-    assert(time_circle[i].has_map(map_handle));
+    OC_ASSERT(time_circle[i].has_map(map_handle));
     time_circle[i].map_tree[map_handle].updateNode(location, true);
     time_circle[i].map_tree[map_handle].setNodeData(location, ato);
     return true;
@@ -117,10 +117,10 @@ bool
 TimeSpaceAtom::RemoveAtomAtCurrentTime(const int map_handle,
                                        const point3d location)
 {
-    assert(created_once);
+    OC_ASSERT(created_once);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-    assert(time_circle[i].has_map(map_handle));
+    OC_ASSERT(time_circle[i].has_map(map_handle));
     //time_circle[i].map_tree[map_handle].setNodeData(location,UndefinedHandle);
     time_circle[i].map_tree[map_handle].updateNode(location, false);
     return true;
@@ -130,10 +130,10 @@ bool
 TimeSpaceAtom::RemoveAtomAtTime(time_pt tp, const int map_handle,
                                 const point3d location)
 {
-    assert(created_once);
+    OC_ASSERT(created_once);
     auto it = std::find(std::begin(time_circle), std::end(time_circle), tp); //time_circle.begin(),time_circle.end()
     if (it == std::end(time_circle))return false;
-    assert(it->has_map(map_handle));
+    OC_ASSERT(it->has_map(map_handle));
     //it->map_tree[map_handle].setNodeData(location,UndefinedHandle);
     it->map_tree[map_handle].updateNode(location, false);
     return true;
@@ -145,10 +145,10 @@ TimeSpaceAtom::GetAtomCurrentTime(const int map_handle,
                                   const point3d location, aHandle& ato)
 {
     //
-    assert(created_once);
+    OC_ASSERT(created_once);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-    assert(time_circle[i].has_map(map_handle));
+    OC_ASSERT(time_circle[i].has_map(map_handle));
     OcTreeNode* result = time_circle[i].map_tree[map_handle].search(location);
     if (result == nullptr) {
         ato = UndefinedHandle;
@@ -164,11 +164,11 @@ TimeSpaceAtom::GetAtomAtTime(const time_pt& time_p, const int map_handle,
                              const point3d location, aHandle& ato)
 {
     //
-    assert(created_once);
+    OC_ASSERT(created_once);
     //find time in time circle time unit
     auto it = std::find(std::begin(time_circle), std::end(time_circle), time_p); //time_circle.begin(),time_circle.end()
     if (it == std::end(time_circle))return false;
-    assert(it->has_map(map_handle));
+    OC_ASSERT(it->has_map(map_handle));
     OcTreeNode* result = it->map_tree[map_handle].search(location);
     if (result == nullptr) {
         ato = UndefinedHandle;
@@ -238,12 +238,12 @@ TimeSpaceAtom::GetLocationsOfAtomOccurenceNow(const int map_handle,
                                               const aHandle& ato)
 {
     //
-    assert(created_once);
+    OC_ASSERT(created_once);
     point3d_list pl;
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity())
         i = time_circle.size() - 1;
-    assert(time_circle[i].has_map(map_handle));
+    OC_ASSERT(time_circle[i].has_map(map_handle));
     for(AtomOcTree::tree_iterator it =
         time_circle[i].map_tree[map_handle].begin_tree(),
         end = time_circle[i].map_tree[map_handle].end_tree();
@@ -261,13 +261,13 @@ TimeSpaceAtom::GetLocationsOfAtomOccurenceAtTime(const time_pt& time_p,
                                                  const aHandle& ato)
 {
     //
-    assert(created_once);
+    OC_ASSERT(created_once);
     point3d_list pl;
     auto it = std::find(std::begin(time_circle),
                         std::end(time_circle),
                         time_p); //time_circle.begin(),time_circle.end()
     if (it == std::end(time_circle))return point3d_list();
-    assert(it->has_map(map_handle));//map handles not added dynamically, just during construction. assert in case user put wrong one
+    OC_ASSERT(it->has_map(map_handle));//map handles not added dynamically, just during construction. assert in case user put wrong one
     for(AtomOcTree::tree_iterator ita =
         it->map_tree[map_handle].begin_tree(),
         end = it->map_tree[map_handle].end_tree();

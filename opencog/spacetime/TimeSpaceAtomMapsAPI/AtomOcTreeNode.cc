@@ -30,6 +30,7 @@
  */
 
 #include "AtomOcTreeNode.h"
+#include "opencog/util/oc_assert.h"
 
 namespace octomap
 {
@@ -100,7 +101,7 @@ AtomOcTreeNode::pruneNode()
 void
 AtomOcTreeNode::expandNode()
 {
-    assert(!this->hasChildren());
+    OC_ASSERT(!this->hasChildren());
     for (unsigned int k = 0; k < 8; k++) {
         this->createChild(k);
         this->children[k]->setValue(value);
