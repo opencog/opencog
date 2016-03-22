@@ -570,7 +570,7 @@
 
 ; Currently used for scripted behaviors while STT doesnt publish accurate events.
 (DefineLink
-	(DefinedPredicate "Listen started?")
+	(DefinedPredicate "Listening started?")
 	(SequentialAnd
 		(DefinedPredicate "chatbot started listening")
 		; ... then switch to face-study saccade ...
@@ -702,7 +702,7 @@
 
 ; Things to do, if the chatbot is listening.
 (DefineLink
-	(DefinedPredicate "Speech listening?")
+	(DefinedPredicate "Listening?")
 	(SequentialAnd
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot is listening")
@@ -749,6 +749,9 @@
 				(DefinedPredicate "Speech started?")
 				(DefinedPredicate "Speech ongoing?")
 				(DefinedPredicate "Speech ended?")
+				(DefinedPredicate "Listening started?")
+				(DefinedPredicate "Listening?")
+				(DefinedPredicate "Listening ended?")
 				; (DefinedPredicate "Speech listening?") ; no-op
 				(True)
 			)

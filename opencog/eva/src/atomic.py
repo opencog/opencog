@@ -110,6 +110,11 @@ def conversational_saccade():
 	evl.conversational_saccade()
 	return TruthValue(1, 1)
 
+def listening_saccade():
+	# print "Python: Listening Saccade"
+	evl.listening_saccade()
+	return TruthValue(1, 1)
+
 def blink_rate(mean_node, var_node):
 	mean = float(mean_node.name)
 	var  = float(var_node.name)
