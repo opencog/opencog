@@ -568,6 +568,28 @@
 			(ListLink (Node "--- Start talking")))
 ))
 
+; Currently used for scripted behaviors while STT doesnt publish accurate events.
+(DefineLink
+	(DefinedPredicate "Listen started?")
+	(SequentialAnd
+		(DefinedPredicate "chatbot started listening")
+		; ... then switch to face-study saccade ...
+		(Evaluation (GroundedPredicate "py:listening_saccade")
+				(ListLink))
+		; ... and show one random gesture from "conversing" set.
+		(Put (DefinedPredicate "Show random gesture")
+			(ConceptNode "listening"))
+		; ... and also, sometimes, the "chatbot_positive_nod"
+		(Put (DefinedPredicate "Show random gesture")
+			(ConceptNode "chat-positive-nod"))
+		; ... and switch state to "listen"
+		(True (Put (State chat-state (Variable "$x")) chat-listen))
+
+		; ... print output.
+		(Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Start Listen")))
+))
+
 ;; Things to do, if the chatbot is currently talking.
 (DefineLink
 	(DefinedPredicate "Speech ongoing?")
@@ -671,6 +693,7 @@
 	(SatisfactionLink
 		(SequentialAnd
 			(SequentialOr
+			    (DefinedPredicate "Skip Interaction?")
 				(DefinedPredicate "Interaction requested")
 				(DefinedPredicate "New arrival sequence")
 				(DefinedPredicate "Someone left")
