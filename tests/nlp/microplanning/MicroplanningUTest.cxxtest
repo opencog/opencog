@@ -73,38 +73,27 @@ void MicroplanningUTest::setUp(void)
 
     // need this for loading LG dictionary
     _evaluator->eval("(setlocale LC_CTYPE \"\")");
-    _evaluator->eval("(add-to-load-path \".\")");
-    _evaluator->eval("(add-to-load-path \"../../..\")");
-    _evaluator->eval("(add-to-load-path \"../opencog/scm\")");
-    _evaluator->eval("(add-to-load-path \"../opencog/nlp\")");
-    _evaluator->eval("(add-to-load-path \"../opencog/nlp/microplanning\")");
     _evaluator->clear_pending();
 
-    // Load the required data
-    config().set("MODULES",
-                 "opencog/nlp/types/libnlp-types.so,"
-                 "opencog/cogserver/modules/libLGDictModule.so,"
-                 "opencog/cogserver/modules/libSuRealModule.so");
+    _evaluator->eval("(use-modules (opencog))");
+
+    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
+    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm/\")");
+
+    _evaluator->eval("(use-modules (opencog atom-types))");
+    _evaluator->eval("(use-modules (opencog nlp))");
+    _evaluator->eval("(use-modules (opencog nlp lg-dict))");
+    _evaluator->eval("(use-modules (opencog nlp microplanning))");
+    _evaluator->eval("(use-modules (opencog nlp relex2logic))");
+    _evaluator->eval("(use-modules (opencog nlp sureal))");
 
     config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm,"
-                 "opencog/scm/utilities.scm,"
-                 "opencog/scm/debug-trace.scm,"
-                 "opencog/scm/atom-types.scm,"
-                 "opencog/nlp/scm/nlp.scm,"
-                 "opencog/nlp/types/nlp_types.scm,"
-                 "opencog/nlp/scm/nlp-utils.scm,"
-                 "opencog/nlp/relex2logic/relex2logic.scm,"
-                 "opencog/nlp/relex2logic/r2l-utilities.scm,"
-                 "opencog/nlp/relex2logic/loader/load-rules.scm,"
-                 "opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm,"
                  "opencog/nlp/sureal/surface-realization.scm,"
-                 "opencog/nlp/microplanning/main.scm,"
+
                  "tests/nlp/microplanning/r2l-atomspace.scm,"
                  "tests/nlp/microplanning/test-atomspace.scm,"
                  "tests/nlp/microplanning/test-results.scm");
 
-    cogserver().loadModules();
     cogserver().loadSCMModules();
 }
 
