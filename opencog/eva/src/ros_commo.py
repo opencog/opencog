@@ -274,9 +274,11 @@ class EvaControl():
 	#   rostopic pub --once perceived_text std_msgs/String "Look afraid!"
 	#
 	def language_perceived_text_cb(self, text_heard):
+		return
 		self.puta.perceived_text(text_heard.data)
 
 	def chat_perceived_text_cb(self, chat_heard):
+		return
 		if chat_heard.confidence >= 50:
 			self.puta.perceived_text(chat_heard.utterance)
 
