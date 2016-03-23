@@ -29,12 +29,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-//time_space_atom.cpp
+//TimeSpaceAtom.cpp
 #include "TimeSpaceAtom.h"
 //#include "octomap/OcTreeKey.h"
 //#include <assert.h>
 #include "opencog/util/oc_assert.h"
-time_space_atom::time_space_atom(unsigned int num_time_units,
+TimeSpaceAtom::TimeSpaceAtom(unsigned int num_time_units,
                              vector<double>map_res_meters):
     time_circle(num_time_units), created_once(false)
 {
@@ -47,13 +47,13 @@ time_space_atom::time_space_atom(unsigned int num_time_units,
 }
 
 unsigned int
-time_space_atom::get_map_count()
+TimeSpaceAtom::get_map_count()
 {
     return map_count;
 }
 
 bool
-time_space_atom::get_map_resolution(const int handle, double& res)
+TimeSpaceAtom::get_map_resolution(const int handle, double& res)
 {
     auto it = map_res.find(handle);
     if (it == map_res.end()) return false;
@@ -62,7 +62,7 @@ time_space_atom::get_map_resolution(const int handle, double& res)
 }
 
 bool
-time_space_atom::get_current_time_range(time_pt& time_p, duration_c& duration)
+TimeSpaceAtom::get_current_time_range(time_pt& time_p, duration_c& duration)
 {
     if (time_circle.size() < 1) return false;
     time_p = curr_time;
@@ -71,7 +71,7 @@ time_space_atom::get_current_time_range(time_pt& time_p, duration_c& duration)
 }
 
 bool
-time_space_atom::create_new_time_unit(const time_pt time_p,
+TimeSpaceAtom::create_new_time_unit(const time_pt time_p,
                                  const duration_c duration)
 {
     //ideally greater than check should be done
@@ -82,7 +82,7 @@ time_space_atom::create_new_time_unit(const time_pt time_p,
         }
     }
 
-    time_unit temp(time_p, duration);
+    TimeUnit temp(time_p, duration);
     time_circle.push_back(temp);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
@@ -98,7 +98,7 @@ time_space_atom::create_new_time_unit(const time_pt time_p,
 }
 
 bool
-time_space_atom::put_atom_at_current_time(const int map_handle,
+TimeSpaceAtom::put_atom_at_current_time(const int map_handle,
                                     const point3d location,
                                     const aHandle& ato)
 {
@@ -114,7 +114,7 @@ time_space_atom::put_atom_at_current_time(const int map_handle,
 }
 
 bool
-time_space_atom::remove_atom_at_current_time(const int map_handle,
+TimeSpaceAtom::remove_atom_at_current_time(const int map_handle,
                                        const point3d location)
 {
     OC_ASSERT(created_once);
@@ -127,7 +127,7 @@ time_space_atom::remove_atom_at_current_time(const int map_handle,
 }
 
 bool
-time_space_atom::remove_atom_at_time(time_pt tp, const int map_handle,
+TimeSpaceAtom::remove_atom_at_time(time_pt tp, const int map_handle,
                                 const point3d location)
 {
     OC_ASSERT(created_once);
@@ -141,7 +141,7 @@ time_space_atom::remove_atom_at_time(time_pt tp, const int map_handle,
 
 
 bool
-time_space_atom::get_atom_current_time(const int map_handle,
+TimeSpaceAtom::get_atom_current_time(const int map_handle,
                                   const point3d location, aHandle& ato)
 {
     //
@@ -160,7 +160,7 @@ time_space_atom::get_atom_current_time(const int map_handle,
 }
 
 bool
-time_space_atom::get_atom_at_time(const time_pt& time_p, const int map_handle,
+TimeSpaceAtom::get_atom_at_time(const time_pt& time_p, const int map_handle,
                              const point3d location, aHandle& ato)
 {
     //
@@ -180,7 +180,7 @@ time_space_atom::get_atom_at_time(const time_pt& time_p, const int map_handle,
 }//ok
 
 time_list
-time_space_atom::get_times_of_atom_occurence_at_location(const int map_handle,
+TimeSpaceAtom::get_times_of_atom_occurence_at_location(const int map_handle,
                                                  const point3d location,
                                                  const aHandle& ato)
 {
@@ -207,7 +207,7 @@ time_space_atom::get_times_of_atom_occurence_at_location(const int map_handle,
 }//ok time_circle.begin is causing problem
 
 time_list
-time_space_atom::get_times_of_atom_occurence_in_map(int map_handle, const aHandle& ato)
+TimeSpaceAtom::get_times_of_atom_occurence_in_map(int map_handle, const aHandle& ato)
 {
     //
     time_list tl;
@@ -234,7 +234,7 @@ time_space_atom::get_times_of_atom_occurence_in_map(int map_handle, const aHandl
 }//ok
 
 point3d_list
-time_space_atom::get_locations_of_atom_occurence_now(const int map_handle,
+TimeSpaceAtom::get_locations_of_atom_occurence_now(const int map_handle,
                                               const aHandle& ato)
 {
     //
@@ -256,7 +256,7 @@ time_space_atom::get_locations_of_atom_occurence_now(const int map_handle,
 }//ok
 
 point3d_list
-time_space_atom::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
+TimeSpaceAtom::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
                                                  const int map_handle,
                                                  const aHandle& ato)
 {
@@ -280,7 +280,7 @@ time_space_atom::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
 }//ok
 
 void
-time_space_atom::remove_atom(const aHandle& ato)
+TimeSpaceAtom::remove_atom(const aHandle& ato)
 {
     //remove all occurences of atom in all maps at all times
     point3d_list pl;

@@ -68,7 +68,7 @@ public:
 
         double hi[4]={0.1,0.1,0.1,0.1};//0.2 failed
         vector<double> res(hi,hi+4);
-        time_space_atom tsa(3,res);  // create empty tree with resolution 0.1
+        TimeSpaceAtom tsa(3,res);  // create empty tree with resolution 0.1
         time_pt t1=std::chrono::system_clock::now();
         duration_c dd=std::chrono::seconds(10);
         tsa.create_new_time_unit(t1,dd);

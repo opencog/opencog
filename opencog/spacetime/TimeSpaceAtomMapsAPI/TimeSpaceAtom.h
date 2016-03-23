@@ -29,14 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// time_space_atom.h
+// TimeSpaceAtom.h
 // make cicular buffer of struct of time+octomap array holding atom values
 // api to put time space atom
 // api to query time space for atom
 // api to search and delete all atom occurences
 
-#ifndef TIME_SPACE_ATOM_H
-#define TIME_SPACE_ATOM_H
+#ifndef TimeSpaceAtom_H
+#define TimeSpaceAtom_H
 #include <iostream>
 #include <boost/circular_buffer.hpp>
 #include <list>
@@ -54,11 +54,11 @@ typedef std::chrono::system_clock::duration duration_c;
 typedef list<time_pt> time_list;
 
 //data structures
-struct time_unit
+struct TimeUnit
 {
     time_pt t; duration_c duration;
     map<int, AtomOcTree> map_tree;
-    time_unit(time_pt tp, duration_c d): t(tp), duration(d)
+    TimeUnit(time_pt tp, duration_c d): t(tp), duration(d)
     {}
     bool operator==(time_pt tp)
     {
@@ -72,7 +72,7 @@ struct time_unit
     }
 };
 
-class time_space_atom
+class TimeSpaceAtom
 {
 public:
     //API
@@ -109,12 +109,12 @@ public:
 
 public:
     //constructor
-    time_space_atom(unsigned int num_time_units, vector<double>map_res_meters);
+    TimeSpaceAtom(unsigned int num_time_units, vector<double>map_res_meters);
 private:
     unsigned int map_count;
     //each map may have translation rotation (orientation) co-ordinates managed by user
     map<int, double>map_res; //resolution of maps
-    boost::circular_buffer<time_unit> time_circle;
+    boost::circular_buffer<TimeUnit> time_circle;
     time_pt curr_time; duration_c curr_duration;
     bool created_once;
 };
