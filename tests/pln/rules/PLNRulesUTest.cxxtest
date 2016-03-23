@@ -78,12 +78,6 @@ void PLNRulesUTest::tearDown()
 
 void PLNRulesUTest::setUp()
 {
-	config().set("SCM_PRELOAD",
-	             "opencog/scm/core_types.scm, "
-	             "opencog/scm/utilities.scm, "
-	             "opencog/scm/av-tv.scm, "
-	             "opencog/scm/opencog/query.scm");
-
 	load_scm_files_from_config(as);
 
 	eval.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");

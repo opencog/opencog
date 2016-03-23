@@ -1,6 +1,6 @@
 ; check the tense if it is passive
 ; XXX Fix relex so that we don't have to make such string searches!
-(define (check-tense tense)
+(define-public (check-tense tense)
 	(if (string-contains (cog-name tense) "passive") (stv 1 1) (stv 0 1))
 )
 
@@ -38,7 +38,7 @@
 )
 
 
-(define (pre-passive-rule verb obj)
+(define-public (pre-passive-rule verb obj)
 	(passive-rule2
 		(cog-name (word-inst-get-lemma verb)) (cog-name verb)
 		(cog-name (word-inst-get-lemma obj)) (cog-name obj)

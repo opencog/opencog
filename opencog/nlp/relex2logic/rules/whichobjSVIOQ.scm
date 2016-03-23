@@ -37,7 +37,7 @@
 ;;ToDo: XXX FIXME define whichobjSVIOQ
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-whichobjSVIOQ-rule subj verb obj iobj)
+(define-public (pre-whichobjSVIOQ-rule subj verb obj iobj)
 	(whichobjSVIOQ-rule (cog-name (word-inst-get-lemma  obj)) (cog-name obj)
 			  (cog-name (word-inst-get-lemma verb)) (cog-name verb)
 			  (cog-name (word-inst-get-lemma subj)) (cog-name subj)

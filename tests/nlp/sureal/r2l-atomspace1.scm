@@ -330,3 +330,6 @@
       (LgConnDirNode "-")
    )
 )
+
+; Be silent after the load (avoid printing a confusing message)
+*unspecified*
