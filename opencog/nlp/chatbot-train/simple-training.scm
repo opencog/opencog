@@ -30,7 +30,6 @@
 ;-----------------------------------------------------------------
 ; The main training rule template for natural language training 
 (define training-rule
-;(DefineLink
 ;    (DefinedType "training rule")
     (BindLink
         (ListLink
@@ -45,8 +44,8 @@
         (Evaluation
             (GroundedPredicateNode "scm:create-behavior-rule")
             (ListLink
-                (GlobNode "$stimulus")
-                (GlobNode "$response")))))
+                (List (GlobNode "$stimulus"))
+                (List (GlobNode "$response"))))))
 
 
 
@@ -172,10 +171,8 @@
     ; TODO: we should check first make sure the response is a pre-defined behavior
 	(set! new-rule
     	(BindLink
-    	    (ListLink
-    			stimulus
-    	    )
-			(DefinedPredicateNode  (string-downcase (cog-name response)))
+    		stimulus
+			(DefinedPredicateNode  (string-downcase (cog-name (list-ref (cog-outgoing-set response) 0))))
 		)
 	)
 	(display new-rule)
