@@ -37,7 +37,8 @@ $ moses \
 To run the demo using the forward chainer load the following script
 
 ```
-moses-pln-synergy-fc.scm
+$ guile
+scheme@(guile-user)> (load "moses-pln-synergy-fc.scm")
 ```
 
 in guile. It will load the model, the background knowledge, the PLN
@@ -267,7 +268,7 @@ $5 = (SetLink
 )
 ```
 
-##### (5) - Build the tautology that if X takes treatment-1, then treatment-1 contains compound-A
+##### (5) - Build the tautology using (4) that if X takes treatment-1, then treatment-1 contains compound-A
 
 Semi-formally
 ```
