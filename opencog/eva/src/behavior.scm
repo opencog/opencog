@@ -115,7 +115,7 @@
 
 		;; Show random expressions only if NOT talking
 		(SequentialOr
-			(Not (DefinedPredicate "chatbot is listening"))
+			;(Not (DefinedPredicate "chatbot is listening"))
 			(SequentialAnd
 
 				(SequentialOrLink
@@ -278,17 +278,17 @@
 
 		; Say something, if no one else has said anything in a while.
 		; i.e. if are being ignored, then say something.
-		(SequentialOr
-			(SequentialAnd
-				(DefinedPredicate "Silent too long")
-				(Evaluation (GroundedPredicate "scm: print-msg")
-					(ListLink (Node "--- Everyone is ignoring me!!!")))
-				(Put (DefinedPredicate "Publish behavior")
-					(Concept "Sound of crickets"))
-				(True (DefinedSchema "set heard-something timestamp"))
-			)
-			(True)
-		)
+;		(SequentialOr
+;			(SequentialAnd
+;				(DefinedPredicate "Silent too long")0
+;				(Evaluation (GroundedPredicate "scm: print-msg")
+;					(ListLink (Node "--- Everyone is ignoring me!!!")))
+;				(Put (DefinedPredicate "Publish behavior")
+;					(Concept "Sound of crickets"))
+;				(True (DefinedSchema "set heard-something timestamp"))
+;			)
+;			(True)
+;		)
 
 		; This sequential-or is true if we're not interacting with anyone,
 		; or if there are several people and its time to change up.
@@ -411,8 +411,6 @@
 			(Concept "Falling asleep"))
 
 		; First, show some yawns ...
-		(Put (DefinedPredicate "Show random expression")
-			(Concept "sleepy"))
 		(Put (DefinedPredicate "Show random gesture")
 			(Concept "sleepy"))
 

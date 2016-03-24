@@ -177,10 +177,17 @@
 ; (cog-evaluate! (Evaluation  (DefinedPredicate "Show gesture")
 ;    (ListLink (Concept "thoughtful") (Number 0.2) (Number 2) (Number 0.8))))
 ;
-(emo-gest-spec "positive" "nod-4"  0.1 0.4 0.9 1 1 0.5 0.8)
-(emo-gest-spec "positive" "nod-1"  0.3 0.2 0.4 1 1 0.8 0.9)
-(emo-gest-spec "positive" "noop"   0.6 0   0   1 1 0   0)
-
+(emo-gest-spec "positive" "think-browsUp"        0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-browsUp.001"    0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-browsUp.002"    0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-browsUp.003"    0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-L"              0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-L.001"          0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-L.UP"           0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-R"              0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-R.001"          0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-R.UP"           0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-UP"             0.02 0.5 0.9 1 1 0.6 1.1)
 ; If bored, then 1/10th of the time, yawn.
 ; Rest of the time, don't do anything.
 (emo-gest-spec "bored"   "yawn-1"  0.1 0.6 0.9 1 1 1 1)
@@ -280,9 +287,6 @@
 (emo-gest-spec "gest-keep-alive-look" "noop"              0.5  0   0   1 1 0   0  )
 
 
-
-
-told to do something.
 ; Thus, we list all of them here. The probability colu
 
 
