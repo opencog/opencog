@@ -63,6 +63,8 @@ public:
     virtual ~AttentionModule();
     virtual void init();
 
+    void startAgents();
+
 }; // class
 
 /** @}*/

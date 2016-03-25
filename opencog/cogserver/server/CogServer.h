@@ -298,7 +298,8 @@ public:
         return std::dynamic_pointer_cast<T>(createAgent(T::info().id, start));
     }
 
-    /** Adds agent 'a' to the list of scheduled agents. */
+    /** Adds agent 'a' to the list of scheduled agents.
+     *  or runs it in its own thread*/
     virtual void startAgent(AgentPtr a, bool dedicated_thread = false,
         const std::string &thread_name = "");
 

@@ -63,3 +63,17 @@ AttentionModule::~AttentionModule()
 void AttentionModule::init()
 {
 }
+
+//void AttentionModule::startAgents()
+//{
+//    logger().debug("[AttentionModule] enter destructor");
+//    _cogserver.startAgent(ForgettingAgent::info().id);
+//    _cogserver.startAgent(HebbianUpdatingAgent::info().id);
+//    _cogserver.startAgent(ImportanceSpreadingAgent::info().id);
+//#ifdef HAVE_GSL
+//    _cogserver.startAgent(ImportanceDiffusionAgent::info().id);
+//#endif
+//    _cogserver.startAgent(ImportanceUpdatingAgent::info().id);
+//    _cogserver.startAgent(SimpleImportanceDiffusionAgent::info().id);
+//    logger().debug("[AttentionModule] exit destructor");
+//}

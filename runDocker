@@ -1,0 +1,2 @@
+
+sudo docker run -v $PWD:/opencog -e PYTHONPATH=/usr/local/share/opencog/python:/opencog/opencog/python/:/opencog/build/opencog/cython:/opencog/opencog/nlp/anaphora -it opencog/opencog-dev:cli
