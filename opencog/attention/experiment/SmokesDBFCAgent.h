@@ -85,7 +85,7 @@ public:
 
     void run();
 
-    std::pair<bool,float> is_surprising(const Handle& h);
+    float surprisingness_value(const Handle& h);
 };
 
 #endif

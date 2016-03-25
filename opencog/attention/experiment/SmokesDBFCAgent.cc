@@ -56,8 +56,8 @@ float SmokesDBFCAgent::friends_mean()
                                                               friend_list });
     Handle bind_link = _atomspace.add_link(BIND_LINK, {eval_link, eval_link });
 
-    //BindLinkPtr bptr = BindLinkCast(bind_link);
-    Handle friends = satisfying_set(&_atomspace, bind_link);
+    //Handle friends = satisfying_set(&_atomspace, bind_link);
+    Handle friends = bindlink(&_atomspace, bind_link);
     strength_t tv_sum = 0.0f;
     float count = 0.0f;
     for (const Handle& h : LinkCast(friends)->getOutgoingSet()) {
@@ -88,9 +88,9 @@ float SmokesDBFCAgent::smokes_mean()
     Handle bind_link = _atomspace.add_link(BIND_LINK, {eval_link,
                                                         eval_link });
 
-    //BindLinkPtr bptr = BindLinkCast(bind_link);
-    Handle smokers = satisfying_set(&_atomspace, bind_link);
 
+    //Handle smokers = satisfying_set(&_atomspace, bind_link);
+    Handle smokers = bindlink(&_atomspace, bind_link);
     remove_hypergraph(_atomspace, bind_link);
 
     strength_t tv_sum = 0.0f;
@@ -103,7 +103,7 @@ float SmokesDBFCAgent::smokes_mean()
         count++;
         }
     }
-    save("smokes-fc-resulut.data", HandleSeq { }, "Smoker's count " + std::to_string(count) + " and tv_sum " +std::to_string(tv_sum)+"\n");
+
     return (tv_sum / count);
 }
 
@@ -182,7 +182,7 @@ void SmokesDBFCAgent::run()
         //+"INITIAL-STIMULUS PROVIDED (10/1og10(SIZE)) = "+ std::to_string( 10 / log10(size)) );
         for (Handle& h : af_set) {
             //stimulateAtom(h, /*_atomspace.get_attentional_focus_boundary() +*/10 / log10(size));
-            auto stim = 5.0f / pow(3, is_surprising(h).second);
+            auto stim = 5.0f / pow(3, surprisingness_value(h));
             save("smokes-fc-resulut.data", HandleSeq { }, "stimulating atom " + h->toShortString() + " with amount "  + std::to_string(stim) );
             stimulateAtom(h, stim);
         }
@@ -256,7 +256,7 @@ void SmokesDBFCAgent::run()
          + std::to_string(unique.size()) + "unique inferences.\n");
 
     for (Handle& h : unique) {
-            auto stim = 5.0f / pow(3, is_surprising(h).second);
+            auto stim = 5.0f / pow(3, surprisingness_value(h));
             save("smokes-fc-resulut.data", HandleSeq {h}, "provided stimulus amount "  + std::to_string(stim) + "\n");
             stimulateAtom(h, stim);
        // }
@@ -265,7 +265,7 @@ void SmokesDBFCAgent::run()
 
 }
 
-std::pair<bool,float> SmokesDBFCAgent::is_surprising(const Handle& hx)
+float SmokesDBFCAgent::surprisingness_value(const Handle& hx)
 {
     Handle h;
     if (hx->getType() == IMPLICATION_LINK) {
@@ -276,66 +276,40 @@ std::pair<bool,float> SmokesDBFCAgent::is_surprising(const Handle& hx)
     strength_t mean_tv = 0.0f;
     bool val = false;
     float mi = 0.0f;
-    save("smokes-fc-resulut.data", HandleSeq { },"\n");
+    save("smokes-fc-resulut.data", HandleSeq { }, "\n");
     if (is_friendship_reln(h)) {
         mean_tv = friends_mean();
         //std::cerr << "Mean TV of friends reln: " << mean_tv << std::endl;
         // Calculate the Jensen Shanon distance bn mean_tv and h's tv
-        mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
-                               (h->getTruthValue())->getMean(), 100, 100);
+        mi = sqrtJsdC_hs(10, mean_tv, 100, 10, (h->getTruthValue())->getMean(),
+                         100, 100);
 
         // Logging
         //std::cerr << "JSD_VAL between result and the above mean= " << mi      << "\n";
-        save("smokes-fc-resulut.data", HandleSeq { },
-                    "JSD_VAL(10, "+std::to_string(mean_tv)+"100, 10, "+std::to_string((h->getTruthValue())->getMean())+", 100, 100) = " + std::to_string(mi));
+        save("smokes-fc-resulut.data",
+             HandleSeq { },
+             "JSD_VAL(10, " + std::to_string(mean_tv) + "100, 10, "
+             + std::to_string((h->getTruthValue())->getMean())
+             + ", 100, 100) = " + std::to_string(mi));
 
-        auto it = dist_surprisingness_friends.begin();
-        // Consider the first top_k values as surprising. After we have enough
-        // data only consider those who have higher value than the lbound of the
-        // top_k as surprising.
-        //unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_friends.size();
-        unsigned int top_k = K_PERCENTILE;
+} else if (is_smokes_reln(h)) {
+    mean_tv = smokes_mean();
+    //std::cerr << "Mean TV of smokes reln is: " << mean_tv << std::endl;
+    // Calculate the Jensen Shanon distance bn mean_tv and h's tv
+    mi = sqrtJsdC_hs(10, mean_tv, 100, 10, (h->getTruthValue())->getMean(), 100,
+                     100);
 
-        if (top_k >= dist_surprisingness_friends.size() or mi
-                >= *std::next(it, top_k)) {
-            dist_surprisingness_friends.insert(mi);
-            val = true;
-        } else {
-            dist_surprisingness_friends.insert(mi);
-            val = false;
-        }
+    // Logging
+    // std::cerr << "JSD_VAL between result and the above mean= " << mi << "\n";
+    save("smokes-fc-resulut.data",
+         HandleSeq { },
+         "JSD_VAL(10," + std::to_string(mean_tv) + "100,10,"
+         + std::to_string((h->getTruthValue())->getMean()) + ",100,100) = "
+         + std::to_string(mi));
 
-    } else if (is_smokes_reln(h)) {
-        mean_tv = smokes_mean();
-        //std::cerr << "Mean TV of smokes reln is: " << mean_tv << std::endl;
-        // Calculate the Jensen Shanon distance bn mean_tv and h's tv
-        mi = sqrtJsdC_hs(10, mean_tv, 100, 10,
-                               (h->getTruthValue())->getMean(), 100, 100);
-
-        // Logging
-        // std::cerr << "JSD_VAL between result and the above mean= " << mi << "\n";
-        save("smokes-fc-resulut.data", HandleSeq { },
-             "JSD_VAL(10,"+std::to_string(mean_tv)+"100,10,"+std::to_string((h->getTruthValue())->getMean())+",100,100) = " + std::to_string(mi));
-
-        auto it = dist_surprisingness_smokes.begin();
-        // Consider the first top_k values as surprising. After we have enough
-        // data only consider those who have higher value than the lbound of the
-        // top_k as surprising.
-        //unsigned int top_k = (K_PERCENTILE / 100) * dist_surprisingness_smokes.size();
-        unsigned int top_k = K_PERCENTILE;
-
-        if (top_k >= dist_surprisingness_smokes.size() or mi
-                >= *std::next(it, top_k)) {
-            dist_surprisingness_smokes.insert(mi);
-            val = true;
-        } else {
-            dist_surprisingness_smokes.insert(mi);
-            val = false;
-        }
-    }
+}
 
     // If it contains has_cancer predicate, let it be surprising.
-
     else if (exists_in(h, _atomspace.add_node(PREDICATE_NODE, "cancer"))) {
         save("smokes-fc-resulut.data", HandleSeq { },"\n");
         val = true;
@@ -344,5 +318,5 @@ std::pair<bool,float> SmokesDBFCAgent::is_surprising(const Handle& hx)
     //std::cerr << "Result Found to be " << (val ? "surprising" : "not surprising") << "\n";
     //save("smokes-fc-resulut.data", HandleSeq { },(val ? "surprising" : "not surprising"));
 
-    return std::make_pair(val,mi);
+    return val;
 }
