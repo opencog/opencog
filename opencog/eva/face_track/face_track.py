@@ -409,5 +409,5 @@ class FaceTrack:
 			# Need to clear faces:
 			for face in self.visible_faces[:]:
 				self.remove_face(face)
-		elif self.control_mode & self.C_FACE_TRACKING == 0:
+		elif self.control_mode & self.C_FACE_TRACKING > 0:
 			self.atomo.update_ft_state_to_atomspace(True)
