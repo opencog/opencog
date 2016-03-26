@@ -81,6 +81,5 @@
 *unspecified*
 
 ;; Actually set it running, by default.
-;; Actually, don't, just right now.
-; (all-threads)  ; print out the curent threads.
-; (run)
+(all-threads)  ; print out the curent threads.
+(run)
