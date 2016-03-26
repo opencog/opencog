@@ -42,7 +42,8 @@
 ; XXX FIXME There are a bunch of define-publics in here, they probably
 ; should not be; they're needed only by the behavior module.
 
-; Soma: awake, agitated, excited, tired, manic, depressed
+; Soma: awake, agitated, excited, tired, manic, depressed, in-pain.
+; See, however, "affects", below.
 (define-public soma-state (AnchorNode "Soma State"))
 (define-public soma-sleeping (ConceptNode "Sleeping"))
 (define-public soma-awake (ConceptNode "Awake"))
@@ -66,10 +67,94 @@
 ; -----------
 ; The "emotional state" of the robot.  Corresponds to states declared
 ; in the `cfg-*.scm` file.
+;
+; XXX this should be renamed "current facial expression", see below.
 (define-public emotion-state (AnchorNode "Emotion State"))
 (define-public emotion-neutral (ConceptNode "neutral"))
 
 (StateLink emotion-state emotion-neutral)
+
+; Per mailing list: Donald Nathanson's book "Pride and Shame" names
+; nine basic affects. These form a substrate to emotional experience.
+;
+; See review:
+; http://www.secthoughts.com/Misc%20Essays/Shame%20and%20Personality.pdf
+; Richard Ostrofsky  "Affect Theory, Shame and the Logic of Personality"
+;   (January, 2003)
+;
+; "Affect is biology, emotion is biography".
+; "Affects are sensed."
+; "A feeling is one or more affects that attain consciousness."
+; "An emotion is a bundle of feelings, given a (cultural) label."
+; "Affects are transient, feelings may linger".
+; "A mood is a set of chronically triggered feelings."
+;   (mood is to feeling what climate is to weather)
+; "A drive is body-specific need (e.g.) oxygen, water, food, sex."
+; "Personality is a collection of behavior-scripts in response to
+;    affects."
+;
+; The affects are:
+; * Interest-excitement
+;   (Brow creases. Eyes focus narrowly and track. Mouth may open.
+;   Head may turn to listen.  Body posture is rapt attention.)
+;
+; * Enjoyment-joy/contentment
+;   (Opposite and complementary to interest affect. Relief or
+;   release from tension. Satisfaction.)
+;
+; * Surprise-startle
+;   (Eyebrows lift; eyes open wide and blink; mouth opens. Rapid
+;   in-breath, out-breath with lips protruded, vocal exclamation.)
+;
+; * Distress-anguish
+;   (Crying infant: loud bawl or rhythmic sobbing, arched or knit
+;   eyebrows, mouth slightly open , tears)
+;
+; * Anger-rage
+;   (Red face, narrowed eyes, muscle groups of the jaw, face and body
+;   in isometric tension, quivering with anger, deep, rapid breathing)
+;
+; * Fear-terror
+;   (Fixed stare with eyes frozen open, a face that is pale, cold and
+;   sweaty, and hairs standing up.  Fear was evolved to punish self
+;   for getting into trouble, prompting retreat to safety, dissuading
+;   self from trying that again.)
+;
+; * Dis-smell (something smells bad, is not edible)
+;   (Upper lip wrinkles, head is pulled back, whole body withdraws,
+;   head thrust forward, ready to vomit.)
+;
+; * Disgust, disdain, contempt (similar to dis-smell)
+;   (Head tilted back, upper lip wrinkled, squinting down the nose.)
+;
+; * Shame-humiliation (variants: shy, bashful, inhibited, embarrassed,
+;   humbled, humiliated, chagrined, disgraced, dishonoured, mortified)
+;   "any time desire outruns fulfilment"
+;   (Eyes and face averted and downcast, eyelids lower, loss of muscle
+;   tone in the face and neck.)
+;   All other negative affects are tuyrned outside, this one turns in.
+;
+; Quote Ostrofsky:
+; "Affect gives charge of significance to each situation, directing
+; attention to it and making it salient, noticeable, and requiring of
+; classification. Second, affect discriminates and classifies like and
+; unlike situations, since those that trigger differing affects will be
+; experienced as significantly different. Finally, affect can be
+; triggered by memory, and so it can modify memories retroactively."
+;
+; Affect processing phases:
+; 1) The trigger, the affect itself, the physiological response.
+; 2) Association to precedent (search through script library)
+; 3) Choice of script for present situation (or cration of random
+;     variant by splicing several older scripts)
+; 4) Current emotion, activity patterned by the selected script.
+; 5) Check for success or failure, log resulting new script.
+; 6) Analyze scripts for rigidity, harmfulness, inappropriateness.
+;    Deconstruct, criticize, reconstruct. (employ psychotherapy).
+;
+; Step 5 provides the needed learning mechanism.
+; Step 6 is performed off-line, via analytic reasoning.
+;
 
 ; -----------
 ;; The eye-contact-state will be linked to the face-id of
@@ -522,7 +607,7 @@
 		(DefinedPredicate "Select random glance target")
 		(Put
 			(DefinedPredicate "glance and ack")
-			(GetLink (StateLink glance-state (VariableNode "$face-id")))
+			(Get (State glance-state (Variable "$face-id")))
 		)
 	))
 
