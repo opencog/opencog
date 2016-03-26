@@ -4,7 +4,7 @@ Human Face Visual Servoing/Tracking
 
 This is implements a quick-n-dirty ROS node to keep track of the
 human faces visible in a scene.  It receives face-enter/leave events
-from the webcam + pi_vision subsystem, as well as the current face
+from the webcam + `pi_vision` subsystem, as well as the current face
 locations, in cooperation with the ROS tf2 position database, which
 actually holds the actual 3D positions of the visible faces.
 
@@ -25,6 +25,13 @@ Running
 Just start `main.py` in a terminal.  This does not have any of the
 pretty ROS rosrun, config, setup.py stuff in it yet.  Its a quick hack.
 
+TODO
+----
+Maybe the `pi_vision` subsystem should be replaced by this:
+http://wiki.ros.org/face_detection_tracking
+https://github.com/phil333/face_detection
+http://www.phil.lu/?page_id=328
+
 Design discussion
 -----------------
 This is a stand-alone ROS node only because of a simple, stupid reason:
@@ -32,7 +39,7 @@ it implements a form of imprecise visual servoing: when told to look
 at a face, it will cause Eva to actively track that face as it moves
 around in the scene.  This update needs to be done continuously, i.e. at
 least 3-5 times a second, and this behavior is currently too
-real-time-ish, to difficult to bother with in the AtomSpace. Currently.
+real-time-ish, too fiddly to bother with in the AtomSpace. Currently.
 This may change in the future, as we get beyond the prototyping stage.
 
 For sending messages to opencog, there are two design choices:
