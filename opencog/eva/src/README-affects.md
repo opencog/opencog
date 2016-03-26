@@ -9,7 +9,7 @@ social repertoire.
 
 The core ideas are inspired by work from Donald Nathanson and his book
 "Pride and Shame". This book names nine basic affects. These form a
-substrate to emotional experience.  The book si reviewed by Richard
+substrate to emotional experience.  The book is reviewed by Richard
 Ostrofsky  "Affect Theory, Shame and the Logic of Personality" (January,
 2003)
 http://www.secthoughts.com/Misc%20Essays/Shame%20and%20Personality.pdf
@@ -27,9 +27,9 @@ http://www.secthoughts.com/Misc%20Essays/Shame%20and%20Personality.pdf
 * "Personality is a collection of behavior-scripts in response to
    affects."
 
-=The Nine Afffects
+=The Nine Affects
 The below is a very short summary, focusing almost entirely on the
-associated facial expressins.  Whatto do with these is given iin a later
+associated facial expressions.  What to do with these is given in a later
 section.
 
 The affects are:
@@ -68,11 +68,11 @@ The affects are:
   (Head tilted back, upper lip wrinkled, squinting down the nose.)
 
 * Shame-humiliation (variants: shy, bashful, inhibited, embarrassed,
-  humbled, humiliated, chagrined, disgraced, dishonoured, mortified)
+  humbled, humiliated, chagrined, disgraced, dishonored, mortified)
   "any time desire outruns fulfilment"
   (Eyes and face averted and downcast, eyelids lower, loss of muscle
   tone in the face and neck.)
-  All other negative affects are tuyrned outside, this one turns in.
+  All other negative affects are turned outside, this one turns in.
 
 =Affect Processing Outline
 
@@ -111,14 +111,14 @@ behavior-tree snippet plays out, generating an animation.
 only played a brief reactive animation, lasting a few seconds, maybe
 five at most.  But what to do for the next few minutes?  There's a
 library of previously learned/authored "scripts" to guide behavior.  The
-library is indexed according to the triggereing stimulus and current
+library is indexed according to the triggering stimulus and current
 situation. We search to find one or more scripts that fit.  Currently,
 this library consists of a bunch of hand-authored scripts, here:
 https://github.com/opencog/ros-behavior-scripting/blob/master/src/behavior.scm
 -- this would need to be expanded, and made more flexible.  The
 coupling of "current situation" to "script" needs to be
 revamped/redesigned.  We also need either better SQL management tools,
-or some way of managing(dumping) atomspace contents into a file.
+or some way of managing(dumping) AtomSpace contents into a file.
 
 3) Choice of script for present situation (or creation of random variant
 by splicing several older scripts) If step (2) returns multiple scripts,
@@ -152,7 +152,7 @@ We need a "video chaos" indicator to indicate the general excitement
 level in the room.
 
 How to convert this into a positive/negative signal is unclear ... but
-...doable, and ideally, even learnable. We can get positive/negative
+...doable, and ideally, even learn-able. We can get positive/negative
 affect from the text analysis, and also partly audio analysis.  Learning
 algo needs to stitch together perceptions (audio volume, pitch, noise,
 video chaos, number of people in room, history of chat affect).
@@ -182,7 +182,7 @@ various parts and hook them together.
 =Design issues
 
 The relationship to OpenPsi is completely unclear.  OpenPsi has "drives"
-as one of its input-concepts, and Ostrovsky kind of takes apart the idea
+as one of its input-concepts, and Ostrofsky kind of takes apart the idea
 of "drives" as an out-moded, out-dated psychological idea, clashing or
 inconsistent with "affects".  This clash needs resolution, from Ben or
 Amen to figure out if there is a clash, and/or how affects fit into
@@ -243,9 +243,9 @@ The "knob-turning" and crossover is needed to generate new behaviors,
 when the existing stock is inadequate, when the current situation is not
 understood, and more generally, to power learning of new behaviors.
 
-H) Provide a maintainer-freindly database infrstructure, so that Eva's
+H) Provide a maintainer-friendly database infrastructure, so that Eva's
 memory of learned behaviors can be saved/restored.  This might be doable
-via either the AtomSpace SQL subsystem, enhanced with some freindly
+via either the AtomSpace SQL subsystem, enhanced with some friendly
 tools, or could be a raw (scheme) dump of selected contents of the
 AtomSpace.  Maybe both.
 

@@ -7,9 +7,9 @@ non-alterable animations. When played, they each play out in exactly
 the same way. We need to do several things:
 
 (1) randomize the detailed motor positions during animation play, so
-that no animation is ver repeated quite exactly.
+that no animation is ever repeated quite exactly.
 
-(2) eveluate and memorize particularly good animation sequences (that
+(2) evaluate and memorize particularly good animation sequences (that
 were arrived via part (1) above).
 
 (3) associate verbal tags to the animation sequences, so that verbal
