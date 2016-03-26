@@ -90,6 +90,8 @@
 ; "A mood is a set of chronically triggered feelings."
 ;   (mood is to feeling what climate is to weather)
 ; "A drive is body-specific need (e.g.) oxygen, water, food, sex."
+; "Personality is a collection of behavior-scripts in response to
+;    affects."
 ;
 ; The affects are:
 ; * Interest-excitement
@@ -131,6 +133,28 @@
 ;   (Eyes and face averted and downcast, eyelids lower, loss of muscle
 ;   tone in the face and neck.)
 ;   All other negative affects are tuyrned outside, this one turns in.
+;
+; Quote Ostrofsky:
+; "Affect gives charge of significance to each situation, directing
+; attention to it and making it salient, noticeable, and requiring of
+; classification. Second, affect discriminates and classifies like and
+; unlike situations, since those that trigger differing affects will be
+; experienced as significantly different. Finally, affect can be
+; triggered by memory, and so it can modify memories retroactively."
+;
+; Affect processing phases:
+; 1) The trigger, the affect itself, the physiological response.
+; 2) Association to precedent (search through script library)
+; 3) Choice of script for present situation (or cration of random
+;     variant by splicing several older scripts)
+; 4) Current emotion, activity patterned by the selected script.
+; 5) Check for success or failure, log resulting new script.
+; 6) Analyze scripts for rigidity, harmfulness, inappropriateness.
+;    Deconstruct, criticize, reconstruct. (employ psychotherapy).
+;
+; Step 5 provides the needed learning mechanism.
+; Step 6 is performed off-line, via analytic reasoning.
+;
 
 ; -----------
 ;; The eye-contact-state will be linked to the face-id of
