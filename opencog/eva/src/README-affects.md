@@ -231,7 +231,7 @@ Each script is tagged with state." We can use either the crisp pattern
 matcher to query these, or the fuzzy matcher. Or both. The tagging need
 not be crisp.
 
-    (This requires refactoring [behavior.scm]
+(This requires refactoring [behavior.scm]
 (https://github.com/opencog/ros-behavior-scripting/blob/master/src/behavior.scm)
 in this directory.)
 
