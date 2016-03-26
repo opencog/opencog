@@ -145,7 +145,7 @@
 ; Affect processing phases:
 ; 1) The trigger, the affect itself, the physiological response.
 ; 2) Association to precedent (search through script library)
-; 3) Choice of script for present situation (or cration of random
+; 3) Choice of script for present situation (or creation of random
 ;     variant by splicing several older scripts)
 ; 4) Current emotion, activity patterned by the selected script.
 ; 5) Check for success or failure, log resulting new script.
@@ -155,7 +155,7 @@
 ; Step 5 provides the needed learning mechanism.
 ; Step 6 is performed off-line, via analytic reasoning.
 ;
-
+;
 ; -----------
 ;; The eye-contact-state will be linked to the face-id of
 ;; person with whom we are making eye-contact with.
