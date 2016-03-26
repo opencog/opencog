@@ -179,6 +179,61 @@ various parts and hook them together.
 
 =Task list
 
+To recap: the core requirements/tasks are these:
+
+A) Get audio-power-envelope and other audio signals (voice frequency
+fundamental, rising/falling tone, excitement, pause/silence intervals,
+ambient background noise level) into the AtomSpace. Time-stamped.
+Get video-"chaos" power into AtomSpace, 
+
+B) Add timestamps to the audio/video data, and the affect percepts.  
+Dust off the TimeServer code. Perform memory management, deleting stale
+data.
+
+C) Extend list of animations/poses/gestures (?) to match what's needed
+for the affects. Perhaps we have almost everything we need here? Need to
+try this out.  See also the README-animation.md file.
+
+D) Hand-author additional behavior snippets, to bring them more in line
+with Ostrovsky's description. These would form a core-set of expressive
+animations to work from.
+
+E) Clearly delineate behavior-script triggers from the behaviors
+themselves.  Currently, they are lumped into one "if someone entered
+room, do xyz".  This needs to be converted into a library: "when someone
+enters the room, here is a choice of scripts that could be performed.
+ You can refine your search for scripts by specifying additional state.
+Each script is tagged with state."  We can use either the crisp pattern
+matcher to query these, or the fuzzy matcher.  Or both. The tagging need
+not be crisp.
+
+(This requires refactoring [behavior.scm]
+(https://github.com/opencog/ros-behavior-scripting/blob/master/src/behavior.scm)
+in this directory.)
+
+F) Attach language descriptors to the behaviors as well.  The idea: if
+someone says "Eva, please quiet down and listen!", we could fuzzy-match
+on the word "listen", and put her into the listen-mode.   This is an
+extension of the current verbal commands, which associate verb+object to
+a single blender animation ("look afraid"), and instead associate verb
+or verb-phrase with a behavior tree snippet/script, the same script
+library as in task (E), steps (2)-(3) above.  (The current verbal
+subsystem is located in the [opencog nlp subsystem]
+(https://github.com/opencog/opencog/tree/master/opencog/nlp/chatbot-eva)
+mostly in the imperative.scm, knowledge.scm, imperative-rules.scm files.
+
+G) Dust off the concept blending code, or redesign it from scratch, to
+work more like the MOSES genetic cross-over and "knob-turning" steps.
+The "knob-turning" and crossover is needed to generate new behaviors,
+when the existing stock is inadequate, when the current situation is not
+understood, and more generally, to power learning of new behaviors.
+
+H) Provide a maintainer-freindly database infrstructure, so that Eva's
+memory of learned behaviors can be saved/restored.  This might be doable
+via either the AtomSpace SQL subsystem, enhanced with some freindly
+tools, or could be a raw (scheme) dump of selected contents of the
+AtomSpace.  Maybe both.
+
 The first "obvious" thing is that we do not have explicit animation
 sequences for many of these.  (see full list in the commit).  Right now,
 its not obvious how to get all the animations set up.   There are two
@@ -216,43 +271,3 @@ animations, but could possibly dig deeper into the blender stack, if we
 had an API for it.)
 
 
-
-To recap: the core requirements/tasks are these:
-
-A) get audio-power-envelope and other audio signals into opencog.  Get
-video-"chaos" power into opencog.  
-
-B) add timestamp's to the audio/video data, and the affect percepts.  
-Dust off the TimeServer code. (currently used only by minecraft people,
-may be wonky).
-
-C) extend list of animations/poses/gestures (?) to match what's needed
-for the affects. Perhaps we have almost everything we need here? Need to
-try this out.
-
-D) hand-author additional behavior snippets, to bring them more in line
-with Ostrovsky's description. These would form a core-set of expressive
-animations to work from.
-
-E) Clearly delineate behavior-script triggers from the behaviors
-themselves.  Currently, they are lumped into one "if someone entered
-room, do xyz".  This needs to be converted into a library: "when someone
-enters the room, here is a choice of scripts that could be performed.
- You can refine your search for scripts be specifying additional state.
-Each script is tagged with state."  We can use either the crisp pattern
-matcher to query these, or the fuzzy matcher. 
-
-F) Attach language descriptions to the behaviors as well.  The idea: if
-someone says "Eva, please quiet down and listen!", we could fuzzy-match
-on the word "listen", and put her into the listen-mode.   This is an
-extension of the current verbal commands, which associate verb+object to
-a single blender animation ("look afraid"), and instead associate verb
-or verb-phrase with a behavior tree snippet/script, the same script
-library as in task (E), steps (2)-(3) above.
-
-
-G) moses gen cross concept blend
-
-H) DB stuff
-
-Audo power
