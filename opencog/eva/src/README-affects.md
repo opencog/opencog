@@ -181,28 +181,16 @@ various parts and hook them together.
 
 =Design issues
 
-Next, the question is "great, what do we do with these affects?"  There
-are several approaches, here, also.  (1) integrate them into Amen's
-OpenPsi code.  It is not clear how to do this.  OpenPsi has "drives" as
-one of its input-concepts, and Ostrovsky kind of takes apart the idea of
-"drives" as an out-moded, out-dated psychological idea, clashing or
-inconsistent with "affects". To resolve this clash, I'd need Ben or Amen
-to figure out if there is a clash, and/or how affects fit into OpenPsi.
+The relationship to OpenPsi is completely unclear.  OpenPsi has "drives"
+as one of its input-concepts, and Ostrovsky kind of takes apart the idea
+of "drives" as an out-moded, out-dated psychological idea, clashing or
+inconsistent with "affects".  This clash needs resolution, from Ben or
+Amen to figure out if there is a clash, and/or how affects fit into
+OpenPsi, and also, how the above algo fits into OpenPsi.
 
-Option (2) is to partly/mostly or completely bypass openpsi, and instead
-integrate them with the existing behavior tree, so that they underpin
-the behaviors.  This is exicting, because Ostrovsky sketches the
-algorithm, and what's more, the algorithm has explicit learning stages,
-(which are not as hard as the face-expression learning task above)  and
-what's more: the learning stages integrate directly with the verbal
-acting-direction code that Eddie just barely started hacking on.
- (Currently, the robot can follow simple verbal commands. The verbal
-acting-direction is to string a bunch of these together, and remember
-them, for later performance.  Right now, these just trigger blender
-animations, but could possibly dig deeper into the blender stack, if we
-had an API for it.)
-
-
+One option is to partly/mostly or completely bypass OpenPsi, and instead
+integrate the affect mechanism directly into the existing behavior tree,
+as described above.
 
 =Task list
 
