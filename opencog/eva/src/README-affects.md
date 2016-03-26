@@ -74,7 +74,7 @@ The affects are:
   tone in the face and neck.)
   All other negative affects are tuyrned outside, this one turns in.
 
-=Affect Processing
+=Affect Processing Outline
 
 Quote Ostrofsky:
 "Affect gives charge of significance to each situation, directing
@@ -85,6 +85,7 @@ experienced as significantly different. Finally, affect can be
 triggered by memory, and so it can modify memories retroactively."
 
 Affect processing phases:
+
 1) The trigger, the affect itself, the physiological response.
 2) Association to precedent (search through script library)
 3) Choice of script for present situation (or creation of random
@@ -98,11 +99,85 @@ Step 5 provides the needed learning mechanism.
 
 Step 6 is performed off-line, via analytic reasoning.
 
+=Affect Processing, in detail
+Below are the same steps, but laid out in greater detail.
 
-So: first off the bat: Ostrovsky associates explicit facial expressions
-with the affects: e.g. -- Interest-excitement  (Brow creases. Eyes focus
-narrowly and track. Mouth may open.  Head may turn to listen.  Body
-posture is rapt attention.)
+1) The trigger, the affect itself, the physiological response.  This is
+triggered via external stimulus, just like today, in the behavior tree:
+something is heard via audio or STT or seen via vision processing; some
+behavior-tree snippet plays out, generating an animation.
+
+2) Association to precedent (search through script library).  Step (1)
+only played a brief reactive animation, lasting a few seconds, maybe
+five at most.  But what to do for the next few minutes?  There's a
+library of previously learned/authored "scripts" to guide behavior.  The
+library is indexed according to the triggereing stimulus and current
+situation. We search to find one or more scripts that fit.  Currently,
+this library consists of a bunch of hand-authored scripts, here:
+https://github.com/opencog/ros-behavior-scripting/blob/master/src/behavior.scm
+-- this would need to be expanded, and made more flexible.  The
+coupling of "current situation" to "script" needs to be
+revamped/redesigned.  We also need either better SQL management tools,
+or some way of managing(dumping) atomspace contents into a file.
+
+3) Choice of script for present situation (or creation of random variant
+by splicing several older scripts) If step (2) returns multiple scripts,
+we could try to randomly mash them up.  OpenCog has a "concept blending"
+component, created by prior GSOC student(s), but I have a feeling its too
+broken to use. Maybe not.   We also have experience doing genetic
+crossover in MOSES.  At any rate, we need to either splice together
+scripts, or randomize parts of them.  We've done this before in opencog,
+we've got some scripts, some tech for this; it needs to be dusted off
+and made working again.
+
+4) Current emotion, activity patterned by the selected script.  i.e. run
+that script.  Currently, we only have two such scripts: talking, and
+listening.  These two differ primarily in the number of eye-blinks, the
+breathing rate, and the facial expression choices and strengths.  (These
+two modes were originally created by David DeMaris.)  The proposal here
+is that there would be more modes, besides talking/listening, and that
+some of these modes are randomly cobbled together from steps 2-3 above.
+
+5) Check for success or failure, log resulting new script.  So, some
+3-5 minutes later, the mode has been running for a while.  How are
+things going?  Is there feedback for our chosen behaviors?  How do we
+get feedback?  Some ideas: get an audio-power envelope, add it as
+time-stamped data to the AtomSpace.   I am thinking this can be used
+to check for room ambient noise, e.g. clapping, or general restlessness,
+loud talking, silence (rapt attention? Empty room?).  Video feedback
+might show rapid movement or slow movement or empty room.  We need a
+"video chaos" indicator to indicate the general excitement level in the
+room.
+
+How to convert this into a positive/negative signal is unclear ... but
+...doable, and ideally, even learnable. We can get positive/negative
+affect from the text analysis, and also partly audio analysis.  Learning
+algo needs to stitch together perceptions (audio volume, pitch, noise,
+video chaos, number of people in room, history of chat affect).
+
+6) Analyze scripts for rigidity, harmfulness, inappropriateness.
+Deconstruct, criticize, reconstruct. (employ psychotherapy).  Yes, this
+sounds like a doozey, but this is actually almost doable. I'm still in
+the very early stages of hooking up language to perception, but she's
+now got at least a basic self-model, and has some language attached to
+it.  I plan to expand this in the coming weeks/months, if I am not
+derailed. Eddie's working on a variant of this.  I don't see, right now,
+any particular hurdles preventing introspective chat.  Perhaps I'm
+deluding myself: much of it would be quasi-hard-wired, and there might
+be a combinatoric explosion. However, the fuzzy matcher isn't all that
+bad, and it can certainly gloss over parts that are mis-understood or
+can't be matched up. She may be confused, but ... at least something
+could/should work.
+
+
+=Prognosis
+
+I'm excited. All this is doable. Its a fairly large project, but we've
+already got all the pieces and parts in place; we don't really have to
+invent any kind of new or magic technology; we just have to clean up
+various parts and hook them together.
+
+=Task list
 
 The first "obvious" thing is that we do not have explicit animation
 sequences for many of these.  (see full list in the commit).  Right now,
@@ -139,86 +214,6 @@ acting-direction is to string a bunch of these together, and remember
 them, for later performance.  Right now, these just trigger blender
 animations, but could possibly dig deeper into the blender stack, if we
 had an API for it.)
-
-So, here's my Ostrovsky paraphrase:
-
-1) The trigger, the affect itself, the physiological response.  (This is
-triggered via external stimulus, just like today, in the behavior tree:
-something heard via audio or STT or vision processing; some
-behavior-tree snippet plays out, generating an animation)
-
-2) Association to precedent (search through script library).  Step (1)
-only played a brief reactive animation, lasting a few seconds, maybe
-five at most.  But what to do for the next few minutes?  There's a
-library of previously learned/authored "scripts" to guide behavior.  The
-library is indexed according to the triggereing stimulus and current
-situation. We search to find one or more scripts that fit.  Currently,
-this library consists of a bunch of hand-authored scripts,
-here: https://github.com/opencog/ros-behavior-scripting/blob/master/src/behavior.scm
- -- this would need to be expanded, and made more flexible.  The
-coupling of "current situation" to "script" needs to be
-revamped/redesigned.  We also need either better SQL management tools,
-or some way of managing(dumping) atomspace contents into a file.
-
-3) Choice of script for present situation (or creation of random variant
-by splicing several older scripts) If step (2) returns multiple scripts,
-we could try to randomly mash them up.  OpenCog has a "concept blending"
-component, creted by prior GSOC student(s), but I have a feeling its too
-broken to use. Maybe not.   We also have experience doing genetic
-crossover in MOSES.  At any rate, we need to either splice together
-scripts, or randomize parts of them.  We've done this before in opencog,
-we've got some scripts, some tech for this; it needs to be dusted off
-and made working again.
-
-4) Current emotion, activity patterned by the selected script.  i.e. run
-that script.  Currently, we only have two such scripts: talking, and
-listening.  These two differ primarily in the number of eye-blinks, the
-breathing rate, and the facial expression choices and strengths.  David
-DeMaris knows this well, he set these two modes up.  The proposal here
-is that there would be more modes, besides talking/listening, and that
-some of these modes are randomly cobbled together from steps 2-3 above.
-
-5) Check for success or failure, log resulting new script.  So, some 3-5
-minutes later, the mode has been running for a while.  How's it going?
- How do we get feedback?  I'm told that Wenwei has some microphone
-audio-power-envelope code somewhere.  Right now, that's not being dumped
-into opencog; it should be.  I am thinking this can be used to check for
-room ambient noise, e.g. clapping, or restlessness, loud talking,
-silence.  Video feedback might show rapid movement or slow movement or
-empty room.   We also don't have this being piped into opencog, but we
-really really need this.   How to convert this into a positive/negative
-signal is still a bit uncertain .. but ...doable. We do have
-positive/negative affect from the speech analysis (DeMaris code) I'm
-hoping that we can also do some sort of learning algo to sharpen these
-perceptions togethre (audio volume, pitch, noise, video chaos, numbre of
-people in room, history of chat affect)
-
-6) Analyze scripts for rigidity, harmfulness, inappropriateness.
- Deconstruct, criticize, reconstruct. (employ psychotherapy).  Yes, this
-sounds like a doozey, but this is actually almost doable. I'm still in
-the very early stages of hooking up language to perception, but she's
-now got at least a basic self-model, and has some language attached to
-it.  I plan to expand this in the coming weeks/months, if I am not
-derailed. Eddie's working on a variant of this.  I don't see, right now,
-any particular hurdles preventing introspective chat.  Perhaps I'm
-deluding myself: much of it would be quasi-hard-wired, and there might
-be a combinatoric explosion. However, the fuzzy matcher isn't all that
-bad, and it can certainly gloss over parts that are mis-understood or
-can't be matched up. She may be confused, but ... at least something
-could/should work.
-
-----
-So, now you see why I'm excited and am cc'ing everybody.  All this is
-doable.  Its a fairly large project, but we've already got all the
-pieces and parts in place; we don't really have to invent any kind of
-new or magic technology; we just have to clean up various parts and hook
-them together.
-
-I'm not sure where this project might fit on the grand scheme of
-priorities of things to do, but, given that its within reach and doable,
-that has me excited. 
-
-
 
 
 
@@ -259,3 +254,5 @@ library as in task (E), steps (2)-(3) above.
 G) moses gen cross concept blend
 
 H) DB stuff
+
+Audo power
