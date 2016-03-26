@@ -1,6 +1,8 @@
 
-=Architecture/Design for Affective Behavior
-==March 2016, Linas Vepstas
+Architecture/Design for Affective Behavior
+==========================================
+
+=== March 2016, Linas Vepstas ===
 
 Below follows an explicit proposal of how to implement affects and
 behaviors within the Eva behavior infrastructure. This includes a
@@ -14,7 +16,8 @@ Ostrofsky  "Affect Theory, Shame and the Logic of Personality" (January,
 2003)
 http://www.secthoughts.com/Misc%20Essays/Shame%20and%20Personality.pdf
 
-=Basic Terminology
+Basic Terminology
+-----------------
 
 * "Affect is biology, emotion is biography".
 * "Affects are sensed."
@@ -27,7 +30,8 @@ http://www.secthoughts.com/Misc%20Essays/Shame%20and%20Personality.pdf
 * "Personality is a collection of behavior-scripts in response to
    affects."
 
-=The Nine Affects
+The Nine Affects
+----------------
 The below is a very short summary, focusing almost entirely on the
 associated facial expressions.  What to do with these is given in a later
 section.
@@ -74,7 +78,8 @@ The affects are:
   tone in the face and neck.)
   All other negative affects are turned outside, this one turns in.
 
-=Affect Processing Outline
+Affect Processing Outline
+-------------------------
 
 Quote Ostrofsky:
 "Affect gives charge of significance to each situation, directing
@@ -99,7 +104,8 @@ Step 5 provides the needed learning mechanism.
 
 Step 6 is performed off-line, via analytic reasoning.
 
-=Affect Processing, in detail
+Affect Processing, in detail
+----------------------------
 Below are the same steps, but laid out in greater detail.
 
 1) The trigger, the affect itself, the physiological response. This is
@@ -114,7 +120,8 @@ library of previously learned/authored "scripts" to guide behavior. The
 library is indexed according to the triggering stimulus and current
 situation. We search to find one or more scripts that fit. Currently,
 this library consists of a bunch of hand-authored scripts, here:
-https://github.com/opencog/ros-behavior-scripting/blob/master/src/behavior.scm
+[behavior.scm]
+(https://github.com/opencog/ros-behavior-scripting/blob/master/src/behavior.scm)
 -- this would need to be expanded, and made more flexible. The
 coupling of "current situation" to "script" needs to be
 revamped/redesigned. We also need either better SQL management tools,
@@ -172,14 +179,16 @@ can't be matched up. She may be confused, but ... at least something
 could/should work.
 
 
-=Prognosis
+Prognosis
+---------
 
 I'm excited. All this is doable. Its a fairly large project, but we've
 already got all the pieces and parts in place; we don't really have to
 invent any kind of new or magic technology; we just have to clean up
 various parts and hook them together.
 
-=Design issues
+Design issues
+-------------
 
 The relationship to OpenPsi is completely unclear. OpenPsi has "drives"
 as one of its input-concepts, and Ostrofsky kind of takes apart the idea
@@ -192,8 +201,8 @@ One option is to partly/mostly or completely bypass OpenPsi, and instead
 integrate the affect mechanism directly into the existing behavior tree,
 as described above.
 
-=Task list
-
+Task list
+---------
 To recap: the core requirements/tasks are these:
 
 A) Get audio-power-envelope and other audio signals (voice frequency
@@ -249,5 +258,6 @@ via either the AtomSpace SQL subsystem, enhanced with some friendly
 tools, or could be a raw (scheme) dump of selected contents of the
 AtomSpace.  Maybe both.
 
-=Status
+Status
+------
 Work has not started.
