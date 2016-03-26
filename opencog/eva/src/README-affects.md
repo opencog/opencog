@@ -1,25 +1,39 @@
 
+=Architecture/Design for Affective Behavior
+==March 2016, Linas Vepstas
 
-Per mailing list: Donald Nathanson's book "Pride and Shame" names
-nine basic affects. These form a substrate to emotional experience.
+Below follows an explicit proposal of how to implement affects and
+behaviors within the Eva behavior infrastructure. This includes a
+learning component, through which Eva could expand her emotional and
+social repertoire.
 
-See review:
+The core ideas are inspired by work from Donald Nathanson and his book
+"Pride and Shame". This book names nine basic affects. These form a
+substrate to emotional experience.  The book si reviewed by Richard
+Ostrofsky  "Affect Theory, Shame and the Logic of Personality" (January,
+2003)
 http://www.secthoughts.com/Misc%20Essays/Shame%20and%20Personality.pdf
-Richard Ostrofsky  "Affect Theory, Shame and the Logic of Personality"
-  (January, 2003)
 
-"Affect is biology, emotion is biography".
-"Affects are sensed."
-"A feeling is one or more affects that attain consciousness."
-"An emotion is a bundle of feelings, given a (cultural) label."
-"Affects are transient, feelings may linger".
-"A mood is a set of chronically triggered feelings."
-  (mood is to feeling what climate is to weather)
-"A drive is body-specific need (e.g.) oxygen, water, food, sex."
-"Personality is a collection of behavior-scripts in response to
+=Basic Terminology
+
+* "Affect is biology, emotion is biography".
+* "Affects are sensed."
+* "A feeling is one or more affects that attain consciousness."
+* "An emotion is a bundle of feelings, given a (cultural) label."
+* "Affects are transient, feelings may linger".
+* "A mood is a set of chronically triggered feelings."
+   (mood is to feeling what climate is to weather)
+* "A drive is body-specific need (e.g.) oxygen, water, food, sex."
+* "Personality is a collection of behavior-scripts in response to
    affects."
 
+=The Nine Afffects
+The below is a very short summary, focusing almost entirely on the
+associated facial expressins.  Whatto do with these is given iin a later
+section.
+
 The affects are:
+
 * Interest-excitement
   (Brow creases. Eyes focus narrowly and track. Mouth may open.
   Head may turn to listen.  Body posture is rapt attention.)
@@ -60,6 +74,8 @@ The affects are:
   tone in the face and neck.)
   All other negative affects are tuyrned outside, this one turns in.
 
+=Affect Processing
+
 Quote Ostrofsky:
 "Affect gives charge of significance to each situation, directing
 attention to it and making it salient, noticeable, and requiring of
@@ -79,6 +95,7 @@ Affect processing phases:
    Deconstruct, criticize, reconstruct. (employ psychotherapy).
 
 Step 5 provides the needed learning mechanism.
+
 Step 6 is performed off-line, via analytic reasoning.
 
 
@@ -238,3 +255,7 @@ a single blender animation ("look afraid"), and instead associate verb
 or verb-phrase with a behavior tree snippet/script, the same script
 library as in task (E), steps (2)-(3) above.
 
+
+G) moses gen cross concept blend
+
+H) DB stuff
