@@ -69,9 +69,10 @@ Design overview
 
 * You can talk to her by using ROS messages. Some examples:
 ```
-    rostopic pub --once perceived_text std_msgs/String "Pretend you're happy!"
+    rostopic pub --once perceived_text std_msgs/String "Shake your head!"
     rostopic pub --once perceived_text std_msgs/String "look sad"
     rostopic pub --once perceived_text std_msgs/String "Emote saddness"
+    rostopic pub --once perceived_text std_msgs/String "Turn to the left"
 ```
 
 
