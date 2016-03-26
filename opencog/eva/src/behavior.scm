@@ -16,6 +16,20 @@
 ; Pause the main loop:
 ;    (behavior-tree-halt)
 ;
+; TODO:
+; -----
+; XXX This needs a major redesign, to NOT use behavior trees at the top
+; level, but instead to provide a library of suitable actions that can
+; be searched over, and then performed when a given situation applies.
+; That is, given a certain state vector (typically, a subset of the
+; current state), the library is searched to see if there is a behavior
+; sequence that can be applied to this situation.  If there is no such
+; explicit match, then the fuzzy matcher should be employed to find
+; something that is at least close.  If nothing close is found, then
+; either the concept blending code, or a hack of the MOSES knob-turning
+; and genetic cross-over code should be used to create new quasi-random
+; performance sequences from a bag of likely matches.
+;
 ; Unit testing:
 ; -------------
 ; The various predicates below can be manually unit tested by manually

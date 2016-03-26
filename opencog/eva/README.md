@@ -8,7 +8,9 @@ of a wide range of emotional expressions and facial gestures.
 
 The scripts are written in OpenCog "atomese", with the intent that this
 enables integration with high-level cognitive, emotional and natural
-language-processing functions.
+language-processing functions.  The scripts are in active development;
+new designs and design proposals are actively debated on the mailing
+list.
 
 The robot emulator is a Blender animation rig. It implements a dozen
 facial expressions, another dozen gestures, such as blinking and
@@ -42,18 +44,23 @@ The this time, the code here integrates three subsystems:
    visible in the room. These faces are localized in 3D space, and
    issued a numeric ID.
 
+   (This needs to be replaced by a (much) better visual system.)
+
  * A collection of "behavior tree" scripts that react to people entering
    and leaving the room.  The scripts attempt to interact with the
    people who are visible, by displaying assorted facial expressions.
+
+   (This needs to be replaced by a library of selections, as described
+   in [README-affects.md](README-affects.md).
 
  * A representation model of the robot self and its surroundings (namely,
    the human faces visible in the room). The goal of this model is
    two-fold:
 
-   ** Allow the robot to be self-aware, and engage in natural language
+  **  Allow the robot to be self-aware, and engage in natural language
       dialog about what it is doing.
 
-   ** Enable an "action orchestrater" to manage behaviors coming from
+  ** Enable an "action orchestrater" to manage behaviors coming from
       multiple sources.
 
 Some things it currently doesn't do, but should:
@@ -66,20 +73,33 @@ Some things it currently doesn't do, but should:
    alpha stages.
 
  * Integrate superior face-tracking and face recognition tools.
-   Right now, the face tracker eats too much CPU, and is completely
-   unable to recognize known faces.
+   Right now, the face tracker is completely unable to recognize known
+   faces.
 
- * Have a GUI tools for editing behavior trees. The XXX tool has been
-   suggested as such a tool.
+ * Have a GUI tools for editing behavior trees. This could be
+   accomplised by using the
+   [behavior3js](http://behavior3js.guineashots.com/) tool.
 
- * Integration with OpenPsi behavior system.
+ * Integration with OpenPsi behavior system. However, see also the
+   [affects proposal](README-affects.md), which is almost(?) more
+   important(?)
 
- * Enable a memory, via the OpenCog AtomSpace database.  The goal here
+ * Enable memory, via the OpenCog AtomSpace database.  The goal here
    is to remember people and conversations and feelings, between
-   power-offs and restarts.
+   power-offs and restarts.  This requires changes to this repo,
+   and also writing tools and utilities to simplify the SQL and/or
+   file-dump management.
 
  * Additional sensory systems and sensory inputs.  A perception
-   synthesizer to coordinate all sensory input.
+   synthesizer to coordinate all sensory input. High priority:
+
+  ++ Audio power envelope, fundamental frequency (of voice),
+     rising/falling tone.  Background audio power. Length of silent
+     pauses.  Detection of applause, laughter, load background
+     speech, loug bangs.
+
+  ++ Video-chaos: is there lots of random motion in the visual field,
+     or are things visually settled?
 
  * Have a much more sophisticated model of the world around it,
    including the humans in it. It should also have better model
