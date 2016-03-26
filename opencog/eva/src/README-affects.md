@@ -143,11 +143,13 @@ some of these modes are randomly cobbled together from steps 2-3 above.
 things going?  Is there feedback for our chosen behaviors?  How do we
 get feedback?  Some ideas: get an audio-power envelope, add it as
 time-stamped data to the AtomSpace.   I am thinking this can be used
-to check for room ambient noise, e.g. clapping, or general restlessness,
-loud talking, silence (rapt attention? Empty room?).  Video feedback
-might show rapid movement or slow movement or empty room.  We need a
-"video chaos" indicator to indicate the general excitement level in the
-room.
+to check for room ambient noise, e.g. rapt attention, or general
+restlessness, loud talking, silence (rapt attention? Empty room?).
+Gasps! Laughter!  Applause! Whistles! Loud bang!
+
+Video feedback might show rapid movement or slow movement or empty room.
+We need a "video chaos" indicator to indicate the general excitement
+level in the room.
 
 How to convert this into a positive/negative signal is unclear ... but
 ...doable, and ideally, even learnable. We can get positive/negative
