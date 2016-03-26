@@ -8,14 +8,14 @@ Design overview
 * There are two scheme modules: `eva-model`, which implements a model
   of the external world, and also a self-model of the robot.  This
   module allows the robot to be "aware" of it's surroundings, and to be
-  "self-aware" during speech acts and during reasonsing.  The second
+  "self-aware" during speech acts and during reasoning.  The second
   module is `eva-behavior`, which implements the personality and the
   behaviors.
 
 * The `eva-model` module has several components. The `faces` component
-  models the visibile huan faces in the external environment. The
+  models the visible human faces in the external environment. The
   `orchestrate` component is a "behavior multiplexer", resolving
-  conflicting instructions for the robot to peform some action. The
+  conflicting instructions for the robot to perform some action. The
   `self-model` component implements a model of what the robot is
   supposedly doing right now (so that the robot can be asked, e.g. "Are
   you smiling right now?")
@@ -23,7 +23,7 @@ Design overview
 * The `eva-behavior` module has several components.  The `express`
   component consists of commands to make facial expressions and
   gestures.  The `behavior` component contains the primary, full
-  behavior tree that contols the entire performance.
+  behavior tree that controls the entire performance.
 
 * The OpenCog behaviors interface to ROS by calling the functions in
   `atomic.py`. This file is just a "thin" wrapper around the actual ROS
@@ -32,7 +32,7 @@ Design overview
   stdout. It can be used for a text-only chatbot.
 
 * The behavior tree works with visible faces based on face ID's,
-  and is only interested in the visible faces, and not thier locations.
+  and is only interested in the visible faces, and not their locations.
   It outputs commands such as "look at face ID 42". The actual tracking
   of face locations, ad the visual servoing needed to maintain a
   steady, accurate gaze is in the `face_track` directory.
@@ -40,9 +40,9 @@ Design overview
 * The `face_track` directory contains code for visual servoing: it
   receives ROS messages about human face locations from the webcam
   + pi_vision subsystem.  It calls methods in `face_atomic.py` to
-  poke face-ids (ID numbers) into the atomspace.
+  poke face-ids (ID numbers) into the AtomSpace.
 
-  A new face (for example, faceid 123) is indicated with this message:
+  A new face (for example, face-id 123) is indicated with this message:
   ```
    (EvaluationLink (PredicateNode "visible face")
              (ListLink (NumberNode "123")))
@@ -71,16 +71,16 @@ Design overview
 ```
     rostopic pub --once perceived_text std_msgs/String "Shake your head!"
     rostopic pub --once perceived_text std_msgs/String "look sad"
-    rostopic pub --once perceived_text std_msgs/String "Emote saddness"
+    rostopic pub --once perceived_text std_msgs/String "Emote sadness"
     rostopic pub --once perceived_text std_msgs/String "Turn to the left"
 ```
 
 
-* XXX The code currently has a large variety of conficting and poor
+* XXX The code currently has a large variety of conflicting and poor
   design choices in it -- its in a state of morphing from "OK so-so code"
   to "slightly better than before".  As a result of this hacking, various
   parts are being re-designed,  and bits of old, poor design still
-  infest the code, and new featues are incomplete and half-working.
+  infest the code, and new features are incomplete and half-working.
   It will be a good, long while before the code here settles down.
 
 
@@ -111,7 +111,7 @@ You can get a python command-line from the cogserver, like so:
 ```
 `rlwrap telnet localhost 17020`
 ```
-and then enter the python interpreter by saying `py`.  YOu can get
+and then enter the python interpreter by saying `py`.  You can get
 a scheme interpreter by saying `scm`.  You can telnet multiple times.
 You can also call python from scheme, and scheme from python.
 
@@ -123,7 +123,7 @@ help('opencog')
 
 Face tracking debug
 ===================
-Print all visible faces in the atomspace:
+Print all visible faces in the AtomSpace:
 
 ```
 rlwrap telnet localhost 17020
@@ -134,7 +134,7 @@ rlwrap telnet localhost 17020
 ```
 
 Note that if the room state changes, `(show-room-state)` will show the
-wrong state until after both cog-binds ar performed!
+wrong state until after both cog-binds are performed!
 
 ```
 rostopic pub --once /opencog/glance_at std_msgs/Int32 29
@@ -164,13 +164,13 @@ A list of random ideas.
 * Integrate face recognition.  This not only requires the API, but
   also needs SQL enabled to remember things.
 
-* Use the Timeserver ... The timeserver tracks intervals, so that queries
+* Use the TimeServer ... The TimeServer tracks intervals, so that queries
   can be performed against a time-range.  It might make sense to redesign
-  the timeserver to be native atomese. Anyway, none of the logic in the
+  the TimeServer to be native atomese. Anyway, none of the logic in the
   btree currently needs TimeServer functions.
 
 * However, there is a fair amount of "did a unit of time elapse since
-  event XYZ" logic in the btree.  Its kind-of klunky, and could use
+  event XYZ" logic in the btree.  Its kind-of clunky, and could use
   a better design.
 
 * SatisfactionLink is kind-of not-needed; should be able to directly
@@ -184,4 +184,4 @@ A list of random ideas.
 
   (DefinedPredicateNode "Is interacting with someone?")
 
-  Everythig emitted to ROS is a state.... look for teh behavior pubs.
+  Everything emitted to ROS is a state.... look for the behavior pubs.
