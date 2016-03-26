@@ -2,7 +2,7 @@
 Architecture/Design for Affective Behavior
 ==========================================
 
-=== March 2016, Linas Vepstas ===
+#### March 2016, Linas Vepstas
 
 Below follows an explicit proposal of how to implement affects and
 behaviors within the Eva behavior infrastructure. This includes a
@@ -82,22 +82,22 @@ Affect Processing Outline
 -------------------------
 
 Quote Ostrofsky:
-"Affect gives charge of significance to each situation, directing
+_"Affect gives charge of significance to each situation, directing
 attention to it and making it salient, noticeable, and requiring of
 classification. Second, affect discriminates and classifies like and
 unlike situations, since those that trigger differing affects will be
 experienced as significantly different. Finally, affect can be
-triggered by memory, and so it can modify memories retroactively."
+triggered by memory, and so it can modify memories retroactively."_
 
 Affect processing phases:
 
-1) The trigger, the affect itself, the physiological response.
-2) Association to precedent (search through script library)
-3) Choice of script for present situation (or creation of random
-    variant by splicing several older scripts)
-4) Current emotion, activity patterned by the selected script.
-5) Check for success or failure, log resulting new script.
-6) Analyze scripts for rigidity, harmfulness, inappropriateness.
+1. The trigger, the affect itself, the physiological response.
+2. Association to precedent (search through script library)
+3. Choice of script for present situation (or creation of random
+   variant by splicing several older scripts)
+4. Current emotion, activity patterned by the selected script.
+5. Check for success or failure, log resulting new script.
+6. Analyze scripts for rigidity, harmfulness, inappropriateness.
    Deconstruct, criticize, reconstruct. (employ psychotherapy).
 
 Step 5 provides the needed learning mechanism.
@@ -108,12 +108,12 @@ Affect Processing, in detail
 ----------------------------
 Below are the same steps, but laid out in greater detail.
 
-1) The trigger, the affect itself, the physiological response. This is
+1. The trigger, the affect itself, the physiological response. This is
 triggered via external stimulus, just like today, in the behavior tree:
 something is heard via audio or STT or seen via vision processing; some
 behavior-tree snippet plays out, generating an animation.
 
-2) Association to precedent (search through script library). Step (1)
+2. Association to precedent (search through script library). Step (1)
 only played a brief reactive animation, lasting a few seconds, maybe
 five at most. But what to do for the next few minutes? There's a
 library of previously learned/authored "scripts" to guide behavior. The
@@ -127,7 +127,7 @@ coupling of "current situation" to "script" needs to be
 revamped/redesigned. We also need either better SQL management tools,
 or some way of managing(dumping) AtomSpace contents into a file.
 
-3) Choice of script for present situation (or creation of random variant
+3. Choice of script for present situation (or creation of random variant
 by splicing several older scripts) If step (2) returns multiple scripts,
 we could try to randomly mash them up. OpenCog has a "concept blending"
 component, created by prior GSOC student(s), but I have a feeling its too
@@ -137,7 +137,7 @@ scripts, or randomize parts of them. We've done this before in opencog,
 we've got some scripts, some tech for this; it needs to be dusted off
 and made working again.
 
-4) Current emotion, activity patterned by the selected script. i.e. run
+4. Current emotion, activity patterned by the selected script. i.e. run
 that script. Currently, we only have two such scripts: talking, and
 listening. These two differ primarily in the number of eye-blinks, the
 breathing rate, and the facial expression choices and strengths. (These
@@ -145,7 +145,7 @@ two modes were originally created by David DeMaris.) The proposal here
 is that there would be more modes, besides talking/listening, and that
 some of these modes are randomly cobbled together from steps 2-3 above.
 
-5) Check for success or failure, log resulting new script. So, some
+5. Check for success or failure, log resulting new script. So, some
 3-5 minutes later, the mode has been running for a while. How are
 things going?  Is there feedback for our chosen behaviors? How do we
 get feedback? Some ideas: get an audio-power envelope, add it as
@@ -154,17 +154,17 @@ to check for room ambient noise, e.g. rapt attention, or general
 restlessness, loud talking, silence (rapt attention? Empty room?).
 Gasps! Laughter!  Applause! Whistles! Loud bang!
 
-Video feedback might show rapid movement or slow movement or empty room.
+   Video feedback might show rapid movement or slow movement or empty room.
 We need a "video chaos" indicator to indicate the general excitement
 level in the room.
 
-How to convert this into a positive/negative signal is unclear ... but
+   How to convert this into a positive/negative signal is unclear ... but
 ...doable, and ideally, even learn-able. We can get positive/negative
 affect from the text analysis, and also partly audio analysis.  Learning
 algo needs to stitch together perceptions (audio volume, pitch, noise,
 video chaos, number of people in room, history of chat affect).
 
-6) Analyze scripts for rigidity, harmfulness, inappropriateness.
+6. Analyze scripts for rigidity, harmfulness, inappropriateness.
 Deconstruct, criticize, reconstruct. (employ psychotherapy). Yes, this
 sounds like a doozey, but this is actually almost doable. I'm still in
 the very early stages of hooking up language to perception, but she's

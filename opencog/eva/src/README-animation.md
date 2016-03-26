@@ -2,7 +2,7 @@
 Notes/Proposal for Fine-grained Animation
 =========================================
 
-=== March 2016, Linas Vepstas ===
+#### March 2016, Linas Vepstas
 
 The current animation subsystem suffers from having a fixed set of
 non-alterable animations. When played, they each play out in exactly
