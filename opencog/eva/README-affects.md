@@ -36,6 +36,13 @@ blending" code??).  If the result is good, we memorize it for next
 time. If the result is bad, we add it to our "don't do this next time"
 list.
 
+Its a good idea because:
+1. Learning by conceptual blending.
+2. Not hard to implement.
+3. Modularizes the set of behaviors into classes that make them easier
+   to write/review.
+
+
 Basic Terminology
 -----------------
 
