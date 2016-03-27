@@ -16,6 +16,26 @@ Ostrofsky  ["Affect Theory, Shame and the Logic of Personality"]
 (http://www.secthoughts.com/Misc%20Essays/Shame%20and%20Personality.pdf)
 (January, 2003)
 
+TLDR; Executive Summary
+-----------------------
+The proposal is to make triggers of behavior searchable.  Instead of
+writing behavior rules as "if condition X holds then perform behavior
+Y", one should instead build a library of statements such as "behavior
+Y can be appropriate when condition X holds".  This library can hold
+several possibilities for Y, such as Y1, Y2, ... which might be also
+be preference weighted. 
+
+This library can be searched by the regular pattern-matcher or by the
+fuzzy matcher to retreive the set of candidate behaviors, given
+condition X.
+
+If no exact answer is found for X, and several fuzzy answers are
+available, then a random genetic cross-over or MOSES-style knob-turn
+of the candidates can be attempted (maybe can we use the "conceptual
+blending" code??).  If the result is good, we memorize it for next
+time. If the result is bad, we add it to our "don't do this next time"
+list.
+
 Basic Terminology
 -----------------
 
