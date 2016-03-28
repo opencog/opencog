@@ -117,7 +117,8 @@ void MicroplanningUTest::test_declarative(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    _evaluator->eval("(define m-result (microplanning test-declarative-sal \"declarative\" *default_chunks_option* #f))");
+    std::string mdef = _evaluator->eval("(define m-result (microplanning test-declarative-sal \"declarative\" *default_chunks_option* #f))");
+    printf("test_declarative default m-result=%s\n", mdef.c_str());
     bool eval_err = _evaluator->eval_error();
     _evaluator->clear_pending();
     TSM_ASSERT("Failed to run microplanning without anaphora!", !eval_err);
