@@ -8,7 +8,9 @@
 ; are run before the install step, and these fail when the set-values!
 ; macro is used, below.
 ; (load "helpers.scm")
-(include "helpers.scm")
+; (include "helpers.scm")
+; Aiee!  include fails, when installed, due to the relative paths!
+(include-from-path "opencog/nlp/microplanning/helpers.scm")
 
 ; -----------------------------------------------------------------------
 ; <noun-item> -- A class containing information on a noun
