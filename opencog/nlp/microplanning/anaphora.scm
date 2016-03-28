@@ -7,8 +7,8 @@
 ; a guile bug??  Anyway, for guile-2.1, taken from git, as of March
 ; 2016, saying `load` here fails.  Its tied to the set-values! macro.
 ;
-(include "helpers.scm")
-(load "anaphora-nouns-list.scm")
+(include-from-path "opencog/nlp/microplanning/helpers.scm")
+(load-from-path "opencog/nlp/microplanning/anaphora-nouns-list.scm")
 
 ; =======================================================================
 ; Main anaphora insertion functions
