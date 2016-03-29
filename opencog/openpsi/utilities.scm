@@ -231,7 +231,7 @@
         (if z-match
             (match:suffix z-match)
             (error (string-append "The string argument must have the prefix: "
-                "\"" (psi-prefix-str) "\"") )
+                "\"" (psi-prefix-str) "\". " "Instead got:" a-string) )
         )
     )
 )

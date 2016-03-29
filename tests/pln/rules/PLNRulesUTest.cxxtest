@@ -70,6 +70,7 @@ public:
 	void test_implication_construction();
 	void test_lambda_grounded_construction();
 	void test_equivalence_to_double_implication();
+	void test_implication_and_lambda_factorization();
 };
 
 void PLNRulesUTest::tearDown()
@@ -78,12 +79,6 @@ void PLNRulesUTest::tearDown()
 
 void PLNRulesUTest::setUp()
 {
-	config().set("SCM_PRELOAD",
-	             "opencog/scm/core_types.scm, "
-	             "opencog/scm/utilities.scm, "
-	             "opencog/scm/av-tv.scm, "
-	             "opencog/scm/opencog/query.scm");
-
 	load_scm_files_from_config(as);
 
 	eval.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
@@ -646,6 +641,61 @@ void PLNRulesUTest::test_equivalence_to_double_implication()
 		"    )"
 		"  )"
 		")");
+
+	std::cout << "results = " << results->toString();
+	std::cout << "expected = " << expected->toString();
+
+	TS_ASSERT_EQUALS(results, expected);
+}
+
+/**
+ * TODO: this test will have to be moved to the higher order facts
+ * utest once implemented.
+ */
+void PLNRulesUTest::test_implication_and_lambda_factorization()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as.clear();
+
+	config().set("SCM_PRELOAD",
+	             "tests/pln/rules/simple-lambda.scm, "
+	             "opencog/pln/rules/implication-and-lambda-factorization-rule.scm");
+	load_scm_files_from_config(as);
+
+	// Apply the and rule
+	Handle rule = eval.eval_h("implication-and-lambda-factorization-rule");
+	Handle results = bindlink(&as, rule);
+	Handle expected = eval.eval_h
+		("(SetLink"
+		 "   (ImplicationLink"
+		 "      (AndLink"
+		 "         (LambdaLink"
+		 "            (VariableNode \"$X\")"
+		 "            (AndLink"
+		 "               (EvaluationLink"
+		 "                  (PredicateNode \"P\")"
+		 "                  (VariableNode \"$X\"))"
+		 "               (EvaluationLink"
+		 "                  (PredicateNode \"Q\")"
+		 "                  (VariableNode \"$X\"))))"
+		 "         (LambdaLink"
+		 "            (VariableNode \"$X\")"
+		 "            (EvaluationLink"
+		 "               (PredicateNode \"P\")"
+		 "               (ConceptNode \"A\"))))"
+		 "      (LambdaLink"
+		 "         (VariableNode \"$X\")"
+		 "         (AndLink"
+		 "            (EvaluationLink"
+		 "               (PredicateNode \"P\")"
+		 "               (ConceptNode \"A\"))"
+		 "            (EvaluationLink"
+		 "               (PredicateNode \"P\")"
+		 "               (VariableNode \"$X\"))"
+		 "            (EvaluationLink"
+		 "               (PredicateNode \"Q\")"
+		 "               (VariableNode \"$X\"))))))");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected = " << expected->toString();

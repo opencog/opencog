@@ -1,7 +1,5 @@
 ; Links relex-to-logic output with relex-opencog-output
-; It is temporary until the r2l rules are moved into the URE
-; XXX Huh ???
-
+;
 ; Test sentence : "This is a sentence."
 
 ; modules needed for call-with-input-file and get-string-all
@@ -17,8 +15,8 @@
              (opencog nlp relex2logic))
 
 ; ---------------------------------------------------------------------
-; Creates a single list  made of the elements of lists within it with the exception
-; of empty-lists.
+; Creates a single list  made of the elements of lists within it with
+; the exception of empty-lists.
 (define (list-squash lst member-output)
     (receive (list-lst member-lst) (partition list? lst)
         (if (null? list-lst)

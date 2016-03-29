@@ -32,6 +32,9 @@
 ; Set the goal-selector to be used.
 (psi-goal-selector-set! (psi-goal-selector-maximize .65))
 
+; Set the action-rule-selector to be used.
+(psi-action-rule-selector-set! (psi-action-rule-selector-current-typed))
+
 (define (psi-example-step)
 "
   - This function is for simplifying runs and testing.

@@ -28,7 +28,7 @@ framework.
     value (demand-value) are a member of the rule-base.
   * It must have one default action, during definition, that characterizes
     its behavior(aka change in demand-value) independent of the other actions that could act on it. This default action becomes part of the single default
-    action-rule for the demand.
+    action-rule for the demand. See [this](example
 
 2. Action:
   * An action is an `ExecutionOutputLink` that forms the implicand of a
@@ -49,17 +49,18 @@ framework.
 4. Goal:
   * A goal is a demand chosen for a particular action effect-type. See the
     function `psi-select-random-goal` [here](demand.scm).
-  * For goal-selection, you can choose what the criteria for choosing a goal by
-    defining an evaluatable term using the function `psi-add-goal-selector` and
-    setting it to be the goal-selector using the function
-    `psi-goal-selector-set!`.
+  * For goal-selection, you can choose what the criteria for choosing a goal
+    should be by defining an evaluatable term using the function
+    `psi-add-goal-selector` and setting it to be the goal-selector using the
+    function `psi-goal-selector-set!`.
 
-5. OpenPsi's active-schema-pool:
+5. OpenPsi's active-schema-pool(asp):
   * This is a separate URE rule-base, that is not a demand rule-base. It is
-    comprised of actions of demands that are added to it.
-  * __WIP__ The choice of action-rules (aka action-selection) can be made by specifying
-    a function in a `GroundedPredicateNode` __that takes ??__ and passing it to
-    `psi-action-selector`.
+    comprised of actions of demands that are added to it. The set of
+    action-rules thar are member of this rule-base are choosen at run time.
+  * The choice of action-rules (aka action-selection) to be member of the asp
+    is made by the function `psi-select-action-rules`. You will have to
+    specify the action-selctor by using `psi-action-rule-selector-set!`.
 
 6. Modulator and Feeling representation:
 Coming soon :-)

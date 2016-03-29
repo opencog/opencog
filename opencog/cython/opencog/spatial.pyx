@@ -128,6 +128,9 @@ cdef class EntityRecorder:
     def remove_none_block_entity(self, Atom atom):
         self.c_entity_recorder.removeNoneBlockEntity(deref((<Atom>atom).handle))
 
+    def get_self_agent_entity(self):
+        return Atom(self.c_entity_recorder.getSelfAgentEntity().value(),self.atomspace)    
+
     def update_none_block_entity_location(self, Atom atom, pos, timestamp):
         assert len(pos) == 3
         cdef cBlockVector c_pos = cBlockVector(pos[0], pos[1], pos[2])

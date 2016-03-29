@@ -52,7 +52,7 @@
 	)
 )
 
-(define (pre-conj-rule var1 var2 var3 pos)
+(define-public (pre-conj-rule var1 var2 var3 pos)
   (cond
 	((string=? (cog-name var3) "conj_and")
 		(and-rule (cog-name (word-inst-get-lemma  var1)) (cog-name var1)

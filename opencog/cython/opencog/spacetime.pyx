@@ -45,7 +45,7 @@ cdef class SpaceServer:
 
     def get_entity_recorder(self, Atom atom):
         cdef cHandle c_handle = deref((<Atom>atom).handle)
-        er_instance = EntityRecorder(<long>(&(self.c_space_server.getEntityRecorder(c_handle))))
+        er_instance = EntityRecorder(<long>(&(self.c_space_server.getEntityRecorder(c_handle))), self.atomspace)
         return er_instance
 
     def add_map(self, timestamp, map_name, resolution, time_domain = None):

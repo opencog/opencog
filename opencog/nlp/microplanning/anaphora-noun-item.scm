@@ -2,7 +2,15 @@
 (use-modules (oop goops))
 (use-modules (ice-9 receive))
 
-(load "helpers.scm")
+; Attention: cannot use load, must use include, because the helpers.scm
+; file has a set-values! macro which borks with a load.  Well, it
+; actually works fine, if `helpers.scm` is installed, but the unit tests
+; are run before the install step, and these fail when the set-values!
+; macro is used, below.
+; (load "helpers.scm")
+; (include "helpers.scm")
+; Aiee!  include fails, when installed, due to the relative paths!
+(include-from-path "opencog/nlp/microplanning/helpers.scm")
 
 ; -----------------------------------------------------------------------
 ; <noun-item> -- A class containing information on a noun

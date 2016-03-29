@@ -33,7 +33,7 @@
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-whichobjQ-rule subj verb obj)
+(define-public (pre-whichobjQ-rule subj verb obj)
 	(whichobjQ-rule (cog-name (word-inst-get-lemma  obj)) (cog-name obj)
 			  (cog-name (word-inst-get-lemma  verb)) (cog-name verb)
 			  (cog-name (word-inst-get-lemma subj)) (cog-name subj)
