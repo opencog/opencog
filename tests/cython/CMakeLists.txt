@@ -9,8 +9,6 @@ IF (HAVE_SERVER)
 	ADD_DEPENDENCIES(PythonModuleUTest
 		PythonModule
 	)
-	CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pymodule.conf
-		${PROJECT_BINARY_DIR}/tests/cython/pymodule.conf)
 
 	TARGET_LINK_LIBRARIES(PythonModuleUTest
 		PythonModule
