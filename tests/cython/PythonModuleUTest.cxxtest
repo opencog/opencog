@@ -63,14 +63,6 @@ public:
         logger().set_level(Logger::DEBUG);
         logger().set_print_to_stdout_flag(true);
 
-        // Load special config file for the test
-        string configFile = PROJECT_BINARY_DIR"/tests/cython/pymodule.conf";
-        try {
-            config().load(configFile.c_str(), false);
-        } catch (RuntimeException &e) {
-            std::cerr << e.get_message() << std::endl;
-            exit(1);
-        }
         // setup global logger
         logger().set_filename(config()["LOG_FILE"]);
         logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
