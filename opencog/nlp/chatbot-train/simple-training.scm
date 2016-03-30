@@ -23,45 +23,53 @@
 (load "behavior-defs.scm")
 (load "behavior-rules.scm")
 
-; TODO: multiple globnode values are not matching
-; TODO: are "leftover" listified strings being left in the atomspace?
-
+; TODO: multiple globnode values are not matching (Github issue created #724)
 
 ;-----------------------------------------------------------------
-; The main training rule template for natural language training 
+; The main training rule template for natural language training
+
+; Todo: Or / Choice links not working in antecedant for recongition, so doing a
+; couple different rules for now as a workaround.
+
+; "When I say * you *"
 (define training-rule
-;    (DefinedType "training rule")
     (BindLink
         (ListLink
             (ConceptNode "WHEN")
             (ConceptNode "I")
             (ConceptNode "SAY")
             (GlobNode "$stimulus")
-            ;(ConceptNode "THEN")
             (ConceptNode "YOU")
-            (GlobNode "$response")
-        )
+            (GlobNode "$response"))
         (Evaluation
             (GroundedPredicateNode "scm:create-behavior-rule")
             (ListLink
                 (List (GlobNode "$stimulus"))
                 (List (GlobNode "$response"))))))
 
-
-
-
-
-
+; "When I say * then you *"
+(define training-rule
+    (BindLink
+        (ListLink
+            (ConceptNode "WHEN")
+            (ConceptNode "I")
+            (ConceptNode "SAY")
+            (GlobNode "$stimulus")
+            (ConceptNode "THEN")
+            (ConceptNode "YOU")
+            (GlobNode "$response"))
+        (Evaluation
+            (GroundedPredicateNode "scm:create-behavior-rule")
+            (ListLink
+                (List (GlobNode "$stimulus"))
+                (List (GlobNode "$response"))))))
 
 ;-----------------------------------------------------------------
 ; Execution of behaviors based on string stimulus using AIML-style string
 ; matching.
 
-; TODO: below not working with multiple words in the glob
-
 ; This is the main function that controls execution of a behavior rule based on
 ; a stimulus input string, if there is a match with a rule conditional.
-; TODO; implment passing the grounded variables in the rule when evaluating it
 (define (execute-behavior-with-stimulus input-str)
     (define rule)
     (define bind-results)
@@ -69,29 +77,26 @@
     (define as-orig)
     (define temp-rule)
     (define consequent)
-	;(cog-push-atomspace)
-	(define cleaned-text (clean-text input-str))
+    (define result)
+	(define listified-string (mapConceptualizeString (clean-text input-str)))
+
     ;(set! rule (get-tree-with-antecedent input-str))
-    (set! rule (get-tree-with-antecedent cleaned-text))
+    (set! rule (get-tree-with-antecedent listified-string))
     (if rule
         (begin
             (display "rule: ")(display rule)(newline)
             ;(display "doing cog-eval on:\n") (display (gdr rule))
             ;(cog-evaluate! (gdr rule))
 
-            ; Need to figure out here how to unify the variables in the rule
-            ; without binding the previous phrase matches that have happened
+            ; Need to unify the variables in the rule with the input without
+            ; matching to existing phrases that may be in the atomspace.
             ; Create and set a temp atomspace
             (set! as-orig (cog-set-atomspace! (cog-new-atomspace)))
             ; Add the rule and the listified input to the new atomspace
             (set! temp-rule
                 (cog-new-link 'BindLink (cog-outgoing-set rule)))
             ;(display "temp-rule: ") (display temp-rule)(newline)
-            (cog-new-link 'ListLink (cog-outgoing-set
-                (mapConceptualizeString cleaned-text)))
-            ;(display "********************  (prt) **********************\n")
-            ;(prt)
-            ;(display "********************  prt end ********************\n")
+            (cog-new-link 'ListLink (cog-outgoing-set listified-string))
 
             ; Now unify the rule and listified string in the temp atomspace
             (set! bind-results (cog-bind temp-rule))
@@ -100,8 +105,6 @@
             ; Now switch back to the orig atomspace and evaluate the
             ; behavior rule conssequence.
             (cog-set-atomspace! as-orig)
-            ;(display (cog-atomspace))(newline)
-
             (set! consequent (gar bind-results))
 
             ; Need to get the equiv consequent atom of the temp atomspace bind
@@ -110,27 +113,32 @@
                 (set! consequent (cog-node
                     (cog-type consequent) (cog-name consequent))))
 
-            (cog-evaluate! consequent)
-            ;(cog-evaluate! (gar (cog-bind rule)))
+            (set! result (cog-evaluate! consequent))
         )
-        #f
+        (set! result #f)
     )
-	;(cog-pop-atomspace)
+    ; Remove the temp needed listified string
+    (cog-delete listified-string)
+	result
 )
 
 ; Retrieve atomspace behavior rule with antecedent that contains atomese
 ; representation of the input string.
 ;(define (get-tree-with-antecedent input-str)
-(define (get-tree-with-antecedent cleaned-text)
+(define (get-tree-with-antecedent listified-string)
     ; TODO: For now just using a single result, but we should handle multiple
     ;       returned results.
     ; TODO: Allow for variable words
 	; TODO: Match on multiple conditions (ie using OR)
-    (let* (
-    ;        (cleaned-text
-    ;            ;(string-trim-both (cleanText (string-upcase input-str))))
-    ;            (clean-text input-str))
-           (results (findQueryPatterns cleaned-text)))
+	;create temp child atomspace for temporarily needed atoms
+	(cog-push-atomspace)
+    (let* ((query-pattern (PatternLink
+                               (BindLink
+                                  listified-string
+                                  (VariableNode "$impl"))))
+           (results (cog-recognize query-pattern))
+          )
+        (cog-pop-atomspace)
         ;(display "results:\n") (display results)
         (if (> (length (cog-outgoing-set results)) 0)
 	        (gar results)
@@ -138,6 +146,12 @@
 	    )
     )
 )
+
+
+    ;        (cleaned-text
+    ;            ;(string-trim-both (cleanText (string-upcase input-str))))
+    ;            (clean-text input-str))
+           ;(results (findQueryPatterns cleaned-text))
 
 (define (clean-text input-str)
     (string-trim-both (cleanText (string-upcase input-str))))
@@ -187,6 +201,7 @@
 ; shortcuts
 (define (incoming atom) (cog-incoming-set atom))
 (define (prt) (cog-prt-atomspace))
+(define (root atom) (cog-get-root atom))
 
 
 ;-----------------------------------------------------------------

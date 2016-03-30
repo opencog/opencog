@@ -1,6 +1,31 @@
 ;-----------------------------------------------------------------
 ; Behavior Rules
 
+
+(BindLink
+        (ListLink
+            (ConceptNode "WHEN")
+            (ConceptNode "I")
+            (GlobNode "$blah")
+            (ConceptNode "THEN")
+            (GlobNode "$blah2")
+        )
+        (DefinedPredicateNode "be happy")
+)
+
+
+(BindLink
+    (ListLink
+        (ConceptNode "WHEN")
+        (ConceptNode "THIS")
+        (GlobNode "$blah")
+        (ConceptNode "YOU")
+        (GlobNode "$blah2")
+    )
+    (DefinedPredicateNode "be happy")
+)
+
+
 (BindLink
     (ListLink
         (ConceptNode "YOU")
@@ -20,6 +45,18 @@
         )
         (DefinedPredicateNode "be happy")
 )
+
+(BindLink
+        (ListLink
+            (ConceptNode "YOU")
+            (ConceptNode "ARE")
+            (GlobNode "$blah")
+            (ConceptNode "BEAUTIFUL")
+            (GlobNode "$blah2")
+        )
+        (DefinedPredicateNode "be happy")
+)
+
 
 (BindLink
     (ListLink
