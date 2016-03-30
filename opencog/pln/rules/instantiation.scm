@@ -19,7 +19,7 @@
          (result (cog-execute! query)))
     ;; Select one randomly, but first purge the query to not pollute
     ;; the atomspace
-    (purge-hypergraph query)
+    (extract-hypergraph query)
     (select-rnd-outgoing result)))
 
 ;; Given an atom
@@ -82,5 +82,5 @@
          (result (cog-execute! query)))
     ;; Select one randomly, but first purge the query to not pollute
     ;; the atomspace
-    (purge-hypergraph query)
+    (extract-hypergraph query)
     (select-rnd-outgoing result)))

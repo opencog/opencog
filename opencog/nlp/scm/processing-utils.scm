@@ -27,8 +27,8 @@
 	; Arghh Some bit of asshole code is wrapping the anchor in
 	; a SetLink. Basically, someone somewhere is running a
 	; badly-scoped search pattern.  However, we need this to work,
-	; so break out using cog-purge-recursive not cog-purge.
-	(for-each (lambda (x) (cog-purge-recursive x))
+	; so break out using cog-extract-recursive not cog-extract.
+	(for-each (lambda (x) (cog-extract-recursive x))
 		(cog-incoming-set anchor)
 	)
 )

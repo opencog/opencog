@@ -90,7 +90,7 @@
         (let* ((put (PutLink (LambdaLink TyVs Q) terms))
                (inst (cog-execute! put)))
           ;; Remove the PutLink to not pollute the atomspace
-          (purge-hypergraph put)
+          (extract-hypergraph put)
           (cog-set-tv! inst (cog-tv Impl))))))
 
 ;; Name the rule
@@ -181,8 +181,8 @@
                                  (gar TyVs-remain)
                                  TyVs-remain)))
            ;; Remove the put links to not populate the atomspace
-           (purge-hypergraph P-put)
-           (purge-hypergraph Q-put)
+           (extract-hypergraph P-put)
+           (extract-hypergraph Q-put)
            (if (> TyVs-remain-len 0)
                                         ; If there are some variables
                                         ; left, rebuild the

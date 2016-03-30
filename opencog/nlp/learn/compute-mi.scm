@@ -559,12 +559,12 @@
 
 			; And now ... delete some of the crap we created.
 			; Don't want to pollute the atomspace.
-			(purge-hypergraph left-bind-link)
-			(purge-hypergraph right-bind-link)
-			; Note that cog-purge only goes one level deep, it does not
+			(extract-hypergraph left-bind-link)
+			(extract-hypergraph right-bind-link)
+			; Note that cog-extract only goes one level deep, it does not
 			; recurse; so the below only delete the ListLink at the top.
-			(cog-purge left-list)
-			(cog-purge right-list)
+			(cog-extract left-list)
+			(cog-extract right-list)
 
 			; What the hell, return the two things
 			(list left-star right-star)
@@ -595,7 +595,7 @@
 		)
 		(begin
 			; Now, delete all the crap that we fetched.
-			; OK, we want to do this: (for-each cog-purge relset)
+			; OK, we want to do this: (for-each cog-extract relset)
 			; but we can't, because this would also delete the wildcard
 			; evaluation links. We want to keep those around. So ugly
 			; filter.
@@ -608,12 +608,12 @@
 						(if (zany (gadr evl)) #t (zany (gddr evl)))
 					)
 
-					(if (not (is-any? x)) (cog-purge x))
+					(if (not (is-any? x)) (cog-extract x))
 				)
 				relset
 			)
 
-			(for-each cog-purge inset)
+			(for-each cog-extract inset)
 			result
 		)
 	)
@@ -940,10 +940,10 @@
 
 			; And now ... delete some of the crap we created.
 			; Don't want to pollute the atomspace.
-			(purge-hypergraph left-bind-link)
-			; Note that cog-purge only goes one level deep, it does not
+			(extract-hypergraph left-bind-link)
+			; Note that cog-extract only goes one level deep, it does not
 			; recurse; so the below only delete the ListLink at the top.
-			(cog-purge left-list)
+			(cog-extract left-list)
 		)
 	)
 )
