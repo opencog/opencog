@@ -49,7 +49,7 @@ private:
 
     HandleSeqSeq do_sureal_match(Handle);
 
-    HandleSeqSeq sureal_get_mapping(Handle&, std::vector<std::map<Handle, Handle> >&);
+    HandleSeqSeq sureal_get_mapping(Handle&, std::vector<HandleMap >&);
 
 public:
     SuRealSCM();

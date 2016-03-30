@@ -231,7 +231,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
  * @return           always return false to search for more solutions, unless a
  *                   good enough solution is found
  */
-bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::map<Handle, Handle> &pred_soln)
+bool SuRealPMCB::grounding(const HandleMap &var_soln, const HandleMap &pred_soln)
 {
     logger().debug("[SuReal] grounding a solution");
 
@@ -257,7 +257,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     std::sort(qItprNode.begin(), qItprNode.end());
 
     // try to find a common InterpretationNode to the solutions
-    for (std::map<Handle, Handle>::const_iterator it = ++pred_soln.begin(); it != pred_soln.end(); ++it)
+    for (HandleMap::const_iterator it = ++pred_soln.begin(); it != pred_soln.end(); ++it)
     {
         HandleSeq thisSeq = getInterpretation(it->second);
         std::sort(thisSeq.begin(), thisSeq.end());
@@ -273,7 +273,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         return false;
 
     // shrink var_soln to only contain solution for the variables
-    std::map<Handle, Handle> shrinked_soln;
+    HandleMap shrinked_soln;
 
     for (const auto& kv : var_soln)
     {
@@ -512,7 +512,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             // there could also be multiple solutions for one InterpretationNode,
             // so store them in a vector
             if (m_results.count(n) == 0)
-                m_results[n] = std::vector<std::map<Handle, Handle> >();
+                m_results[n] = std::vector<HandleMap >();
 
             logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
             m_results[n].push_back(shrinked_soln);

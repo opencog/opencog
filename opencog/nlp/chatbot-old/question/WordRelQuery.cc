@@ -335,14 +335,14 @@ printf("duude compare %s to %s\n", sa, sb);
 
 /* ======================================================== */
 
-bool WordRelQuery::solution(std::map<Handle, Handle> &pred_grounding,
-                          std::map<Handle, Handle> &var_grounding)
+bool WordRelQuery::solution(HandleMap &pred_grounding,
+                            HandleMap &var_grounding)
 {
 	// Reject any solution where a variable is solved
 	// by another variable (e.g. if there are multiple
 	// questions in the corpus, and we just happened to
 	// find one of them.)
-	std::map<Handle, Handle>::const_iterator j;
+	HandleMap::const_iterator j;
 	for (j=var_grounding.begin(); j != var_grounding.end(); ++j)
 	{
 		std::pair<Handle, Handle> pv = *j;

@@ -52,9 +52,9 @@ namespace opencog
 // {
 //public:
 //	Skeleton* skeleton;
-//	map<Handle, Handle> bindings; // bindings of the variables map<varaibleName, varaibleValue>
+//	HandleMap bindings; // bindings of the variables map<varaibleName, varaibleValue>
 
-//    Pattern(Skeleton* _skeleton, map<Handle, Handle>& _bindings)
+//    Pattern(Skeleton* _skeleton, HandleMap& _bindings)
 //	{
 //		skeleton = _skeleton;
 //        bindings = _bindings;

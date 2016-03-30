@@ -246,7 +246,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
  * @param mappings   the node-to-node mapping
  * @return           a list-of-list of the above structure
  */
-HandleSeqSeq SuRealSCM::sureal_get_mapping(Handle& h, std::vector<std::map<Handle, Handle> >& mappings)
+HandleSeqSeq SuRealSCM::sureal_get_mapping(Handle& h, std::vector<HandleMap >& mappings)
 {
     logger().debug("[SuReal] %d mapping(s) for %s", mappings.size(), h->toShortString().c_str());
 
@@ -265,7 +265,7 @@ HandleSeqSeq SuRealSCM::sureal_get_mapping(Handle& h, std::vector<std::map<Handl
     // if there are more than one mapping, loop thru them
     for (unsigned i = 1; i < mappings.size(); ++i)
     {
-        std::map<Handle, Handle>& mapping = mappings[i];
+        HandleMap& mapping = mappings[i];
 
         qVars.clear();
 
