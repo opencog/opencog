@@ -21,20 +21,19 @@ Functional Goals
   AIML-style string matching. This is the atom format used currently for AIML 
   representation in OpenCog worked out by Ean and/or Linas. E.g.,
 ```
-    (ListLink
-        (ConceptNode "YOU")
-        (ConceptNode "ARE")
-        (GlobNode "$glob1")
-        (ConceptNode "BEAUTIFUL"))
+	(ListLink
+		(ConceptNode "YOU")
+		(ConceptNode "ARE")
+		(GlobNode "$glob1")
+		(ConceptNode "BEAUTIFUL"))
 ```
-
-* Ability to train behavior responses to simuli dynamically using a pre-defined
+* Ability to train behavior responses to stimuli dynamically using a pre-defined
   template for the command to learn a new behavior rule. Currently the command 
   to do this is "When I say ____________ then you ___________." As a result
   a new behavior rule is created in the atomspace and the response executed
   when the robot hears the specified phrase.
 
-  
+
 Files
 -----
 
