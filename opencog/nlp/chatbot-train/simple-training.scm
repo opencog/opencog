@@ -6,7 +6,10 @@
 ; Starting off with simple, rigid command template to learn new stimulus and
 ; associated response behavior.
 ; Example:
-; User says to robot, "When I say 'Eddie is a stud' then you laugh."
+; Human "When I say 'Are you bored' then you yawn."
+; Bot: "Okay, when you say are you bored, then I will yawn."
+; Human "Are you bored?"
+; Bot: <yawns>
 ;
 ; Requires installation of opencog/ros-behavior-scripting
 
