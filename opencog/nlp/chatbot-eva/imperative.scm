@@ -114,7 +114,7 @@
 		; At this time, a ListLink is used to anchor suggested
 		; actions to the current-action anchor. Wipe these out.
 		(for-each (lambda (x)
-			(cog-delete-recursive (ListLink current-action x)))
+			(cog-extract-recursive (ListLink current-action x)))
 				action-list)
 
 		; XXX replace this by AIML or something.
