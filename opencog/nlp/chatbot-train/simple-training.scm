@@ -10,7 +10,8 @@
 ;
 ; Requires installation of opencog/ros-behavior-scripting
 
-; TODO: probably can take out eva-behavior when express.scm is moved out
+; TODO: probably can take out eva-behavior module when express.scm is moved out
+;       of that module.
 (use-modules (opencog) (opencog query) (opencog exec) (opencog eva-model)
     (opencog eva-behavior))
 
@@ -29,7 +30,8 @@
 ; The main training rule template for natural language training
 
 ; Todo: Or / Choice links not working in antecedant for recongition, so doing a
-; couple different rules for now as a workaround.
+; couple different rules for now as a workaround. Potential solution: also
+; search for OR at top level with cog-recognize
 
 ; "When I say * you *"
 (define training-rule
@@ -85,8 +87,6 @@
     (if rule
         (begin
             (display "rule: ")(display rule)(newline)
-            ;(display "doing cog-eval on:\n") (display (gdr rule))
-            ;(cog-evaluate! (gdr rule))
 
             ; Need to unify the variables in the rule with the input without
             ; matching to existing phrases that may be in the atomspace.
@@ -108,7 +108,8 @@
             (set! consequent (gar bind-results))
 
             ; Need to get the equiv consequent atom of the temp atomspace bind
-            ; result from the orig atomspace -- ugh, this is hacky.
+            ; result from the orig atomspace or else it won't evaluate -- ugh,
+            ; this is hacky.
             (if (cog-node? consequent)
                 (set! consequent (cog-node
                     (cog-type consequent) (cog-name consequent))))
@@ -124,11 +125,9 @@
 
 ; Retrieve atomspace behavior rule with antecedent that contains atomese
 ; representation of the input string.
-;(define (get-tree-with-antecedent input-str)
 (define (get-tree-with-antecedent listified-string)
     ; TODO: For now just using a single result, but we should handle multiple
     ;       returned results.
-    ; TODO: Allow for variable words
 	; TODO: Match on multiple conditions (ie using OR)
 	;create temp child atomspace for temporarily needed atoms
 	(cog-push-atomspace)
@@ -147,20 +146,18 @@
     )
 )
 
-
-    ;        (cleaned-text
-    ;            ;(string-trim-both (cleanText (string-upcase input-str))))
-    ;            (clean-text input-str))
-           ;(results (findQueryPatterns cleaned-text))
-
 (define (clean-text input-str)
     (string-trim-both (cleanText (string-upcase input-str))))
 
-; shortcut method
+; shortcut method to pass input string for processing
 (define (say input-str)
     (execute-behavior-with-stimulus input-str))
 
-
+; Creates "listified" atomese reresentation of input strings in the format:
+;   ListLink
+;     ConceptNode "ANDROID"
+;     ConceptNode "LIVES"
+;     ConceptNode "MATTER"
 (define (string-to-atomese input)
     (define atomese-string)
     (define stim-and-response)
@@ -174,13 +171,13 @@
 
 
 ;-----------------------------------------------------------------
+; Creates new behavior rule in atomese based on a given simulus and response
 (define (create-behavior-rule stimulus response)
     ; create new behavior rule with text input stimulus and behavior response
     (define new-rule)
     (define atomese-string)
     (display "\n(create-behavior-rule) \n    stimulus: ")(display stimulus)
         (display "    response: ")(display response)(newline)
-    ;(set! atomese-string (string-to-atomese stimulus))
 
     ; TODO: we should check first make sure the response is a pre-defined behavior
 	(set! new-rule
@@ -209,39 +206,10 @@
 (define w (Concept "WHEN"))
 
 
-;-----------------------------------------------------------------
-; NOTES
-; Why not use cog-bind to get the behavior tree rather than cog-recognize?
-
-
-
-
-
-
-; This is a hack until implementing version of execute-behavior-with-stimulus
-; that passes the the grounded var values to all behavior rules when evaluating
-(define (create-new-brule-hack input-str)
-    (define atomese-string)
-    (define stim-and-response)
-    (define cleaned-text
-        (string-trim-both (cleanText (string-upcase input-str))))
-    (cog-push-atomspace)
-    ; put the query string into the temp atomspace as word list
-    (set! atomese-string (genQueryPattern cleaned-text))
-    (display "atomese-string: ")(atomese-string)(newline)
-    ;(set! stim-and-response
-    ;    (cog-execute!
-    ;        (GetLink
-    ;            (gdr training-rule))))
-    ;(display "stim-and-response: ")(display stim-and-response)
-
-    (cog-bind training-rule)
-
-    (cog-pop-atomspace)
-)
-
 
 ; TODO: ask linas about these
+; Approach to pull the training rule from the atomspace dynamically rather than
+; relying on the scheme var.
 ; maybe the DefinedType atom is being replaced in the cog-satisfy
 ; TODO: let's try cog-get-partner instead
 ; Check if an atom is the training rule
@@ -252,8 +220,7 @@
                 (DefinedType "training-rule")
                 atom))))
 
-
-(define (training-rule2? atom)
+(define (training-rule2 atom)
     (cog-get
         (GetLink
             (DefineLink
