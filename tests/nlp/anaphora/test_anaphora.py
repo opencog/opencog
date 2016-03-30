@@ -18,8 +18,10 @@ from unittest import TestCase
 
 __VERBOSE__ = False
 
-# Set to True to search for needed .scm files in default IN-SOURCE build location, e.g. to write unit tests in the IDE
-# Set to False to search for needed .scm files based on environment variables PROJECT_SOURCE_DIR and PROJECT_BINARY_DIR
+# Set to True to search for needed .scm files in default IN-SOURCE
+# build location, e.g. to write unit tests in the IDE
+# Set to False to search for needed .scm files based on environment
+# variables PROJECT_SOURCE_DIR and PROJECT_BINARY_DIR
 __DEV_MODE__ = False
 
 class AnaphoraUnitTester(TestCase):
@@ -32,25 +34,7 @@ class AnaphoraUnitTester(TestCase):
         scheme_eval(self.atomspace, "(use-modules (opencog))")
         scheme_eval(self.atomspace, "(use-modules (opencog atom-types))")
         scheme_eval(self.atomspace, "(use-modules (opencog query))")
-
-        data=["opencog/scm/config.scm",
-              "opencog/scm/core_types.scm",
-              "opencog/scm/apply.scm",
-              "opencog/scm/file-utils.scm",
-              "opencog/scm/utilities.scm",
-              "opencog/scm/av-tv.scm",
-              "opencog/nlp/scm/type-definitions.scm",
-              "opencog/nlp/scm/config.scm",
-              "opencog/nlp/scm/file-utils.scm",
-              "opencog/nlp/scm/nlp-utils.scm",
-              "opencog/nlp/scm/disjunct-list.scm",
-              "opencog/nlp/scm/processing-utils.scm",
-              ]
-
-
-        for item in data:
-            status=load_scm(self.atomspace, item)
-            # print "load status=", status, " item=", item
+        scheme_eval(self.atomspace, "(use-modules (opencog nlp))")
 
         self.hobbsAgent=HobbsAgent()
 

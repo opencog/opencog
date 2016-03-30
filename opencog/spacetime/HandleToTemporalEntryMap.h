@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include <opencog/atomutils/HandleMap.h>
+#include <opencog/atomutils/ThreadSafeHandleMap.h>
 #include <opencog/spacetime/TemporalEntry.h>
 
 namespace opencog
@@ -41,7 +41,7 @@ class HandleToTemporalEntryMap
 
 private:
 
-    HandleMap<TemporalEntry*>::MapPtr internalMap;
+    ThreadSafeHandleMap<TemporalEntry*>::MapPtr internalMap;
 
 public:
 
@@ -104,7 +104,7 @@ public:
      *
      * @return An iterator through all keys stored in the hash table.
      */
-    HandleMapIterator<TemporalEntry *> * keys();
+    ThreadSafeHandleMapIterator<TemporalEntry *> * keys();
 
     /**
      * Return a copy of the HandleToTemporalEntryMap.

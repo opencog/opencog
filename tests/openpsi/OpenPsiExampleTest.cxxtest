@@ -78,23 +78,14 @@ public:
         _scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR  "/opencog\")");
         CHKERR
 
-        // This is a copy of development.conf SCM_PRELOAD section after
-        // removing files not associated with scheme  modules that are not
-        // in use.
         config().set("SCM_PRELOAD",
-                    "scm/opencog.scm,"
-                    "scm/core_types.scm,"
-                    "scm/core-docs.scm,"
-                    "scm/utilities.scm,"
-                    "scm/apply.scm,"
-                    "scm/file-utils.scm,"
-                    "scm/config.scm,"
-                    "scm/repl-shell.scm,"
-                    "scm/av-tv.scm,"
-                    "scm/rule-engine-utils.scm");
-
+                    "scm/opencog/rule-engine/rule-engine-utils.scm");
         load_scm_files_from_config(*_as);
+
         _as->clear();
+        _scm->eval("(use-modules (opencog))");
+        _scm->eval("(use-modules (opencog atom-types))");
+        _scm->eval("(use-modules (opencog rule-engine))");
     }
 
     void tearDown()

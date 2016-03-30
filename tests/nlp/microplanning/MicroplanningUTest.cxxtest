@@ -47,6 +47,7 @@ public:
         {
             std::cerr << e.get_message() << std::endl;
         }
+        logger().set_timestamp_flag(false);
         logger().set_filename(config()["LOG_FILE"]);
         logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
         logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
@@ -73,38 +74,36 @@ void MicroplanningUTest::setUp(void)
 
     // need this for loading LG dictionary
     _evaluator->eval("(setlocale LC_CTYPE \"\")");
-    _evaluator->eval("(add-to-load-path \".\")");
-    _evaluator->eval("(add-to-load-path \"../../..\")");
-    _evaluator->eval("(add-to-load-path \"../opencog/scm\")");
-    _evaluator->eval("(add-to-load-path \"../opencog/nlp\")");
-    _evaluator->eval("(add-to-load-path \"../opencog/nlp/microplanning\")");
     _evaluator->clear_pending();
 
-    // Load the required data
-    config().set("MODULES",
-                 "opencog/nlp/types/libnlp-types.so,"
-                 "opencog/cogserver/modules/libLGDictModule.so,"
-                 "opencog/cogserver/modules/libSuRealModule.so");
+    _evaluator->eval("(use-modules (opencog))");
+
+    // Bunch of fucked up library path because circle-jenkins-fucking-ci
+    // is too brain-de-fucking-dead to be able to run unit tests
+    // correctly.  Its a piece of bro-fucking-ken technology.
+    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
+    _evaluator->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm/\")");
+    _evaluator->eval("(setenv \"LTDL_LIBRARY_PATH\" "
+         "\"/usr/local/lib/opencog:/usr/local/lib/opencog/modules:"
+         PROJECT_BINARY_DIR "/opencog/spacetime:"
+         PROJECT_BINARY_DIR "/opencog/attention:"
+         PROJECT_BINARY_DIR "/opencog/embodiment:"
+         PROJECT_BINARY_DIR "/opencog/nlp/sureal:"
+         PROJECT_BINARY_DIR "/opencog/nlp/lg-dict"
+         "\")");
+
+    _evaluator->eval("(use-modules (opencog atom-types))");
+    _evaluator->eval("(use-modules (opencog nlp))");
+    _evaluator->eval("(use-modules (opencog nlp lg-dict))");
+    _evaluator->eval("(use-modules (opencog nlp microplanning))");
+    _evaluator->eval("(use-modules (opencog nlp relex2logic))");
+    _evaluator->eval("(use-modules (opencog nlp sureal))");
 
     config().set("SCM_PRELOAD",
-                 "opencog/scm/core_types.scm,"
-                 "opencog/scm/utilities.scm,"
-                 "opencog/scm/debug-trace.scm,"
-                 "opencog/scm/atom-types.scm,"
-                 "opencog/nlp/scm/nlp.scm,"
-                 "opencog/nlp/types/nlp_types.scm,"
-                 "opencog/nlp/scm/nlp-utils.scm,"
-                 "opencog/nlp/relex2logic/relex2logic.scm,"
-                 "opencog/nlp/relex2logic/r2l-utilities.scm,"
-                 "opencog/nlp/relex2logic/loader/load-rules.scm,"
-                 "opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm,"
-                 "opencog/nlp/sureal/surface-realization.scm,"
-                 "opencog/nlp/microplanning/main.scm,"
                  "tests/nlp/microplanning/r2l-atomspace.scm,"
                  "tests/nlp/microplanning/test-atomspace.scm,"
                  "tests/nlp/microplanning/test-results.scm");
 
-    cogserver().loadModules();
     cogserver().loadSCMModules();
 }
 
@@ -118,15 +117,26 @@ void MicroplanningUTest::test_declarative(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    _evaluator->eval("(define m-result (microplanning test-declarative-sal \"declarative\" *default_chunks_option* #f))");
+    std::string mdef = _evaluator->eval(
+        "(define m-result (microplanning test-declarative-sal \"declarative\" *default_chunks_option* #f))");
+    printf("test_declarative default m-result=%s\n", mdef.c_str());
     bool eval_err = _evaluator->eval_error();
     _evaluator->clear_pending();
     TSM_ASSERT("Failed to run microplanning without anaphora!", !eval_err);
 
-    std::string result = _evaluator->eval("(equal? m-result (declarative-without-anaphora))");
-    TSM_ASSERT("Failed to generate the correct result without anaphora!", result == "#t\n");
+    std::string got = _evaluator->eval("m-result");
+    std::string exp = _evaluator->eval("(declarative-without-anaphora)");
+    printf("got=%s expected=%s\n", got.c_str(), exp.c_str());
 
-    _evaluator->eval("(define m-result (microplanning test-declarative-sal \"declarative\"))");
+    std::string result = _evaluator->eval(
+        "(equal? m-result (declarative-without-anaphora))");
+    printf("equality result=%s\n", result.c_str());
+    TSM_ASSERT("Failed to generate the correct result without anaphora!",
+        result == "#t\n");
+
+    std::string mres = _evaluator->eval(
+        "(define m-result (microplanning test-declarative-sal \"declarative\"))");
+    printf("test_declarative m-result=%s\n", mres.c_str());
     eval_err = _evaluator->eval_error();
     _evaluator->clear_pending();
     TSM_ASSERT("Failed to run microplanning with anaphora!", !eval_err);

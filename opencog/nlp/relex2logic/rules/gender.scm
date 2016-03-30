@@ -5,14 +5,16 @@
 			(var-decl "$a-parse" "ParseNode")
 			(var-decl "$word" "WordInstanceNode")
 			(var-decl "$lemma" "WordNode")
+			(var-decl "$gtype" "DefinedLinguisticConceptNode")
 		)
 		(AndLink
 			(word-in-parse "$word" "$a-parse")
 			(word-lemma "$word" "$lemma")
 			(word-feat "$word" "person")
-			(ChoiceLink
-				(word-feat "$word" "masculine")
-				(word-feat "$word" "feminine")
+			(InheritanceLink (Variable "$word") (Variable "$gtype"))
+			(OrLink
+				(EqualLink (Variable "$gtype") (DefinedLinguisticConceptNode "masculine"))
+				(EqualLink (Variable "$gtype") (DefinedLinguisticConceptNode "feminine"))
 			)
 		)
 		(ExecutionOutputLink

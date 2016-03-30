@@ -69,3 +69,32 @@ IF (HAVE_OCTOMAP)
 		DESTINATION "include/${PROJECT_NAME}/spacetime"
 	)
 ENDIF (HAVE_OCTOMAP)
+
+
+IF (HAVE_OCTOMAP)
+	ADD_LIBRARY (time_space_atom SHARED
+		TimeSpaceAtomMapsAPI/AtomOcTree.cc
+		TimeSpaceAtomMapsAPI/AtomOcTreeNode.cc
+		TimeSpaceAtomMapsAPI/TimeSpaceAtom.cc
+	)
+
+
+	TARGET_LINK_LIBRARIES(time_space_atom
+	${OCTOMAP_LIBRARY}
+	${OCTOMAP_OCTOMATH_LIBRARY})
+	
+	TARGET_LINK_LIBRARIES(time_space_atom
+		${ATOMSPACE_LIBRARIES})
+
+	INSTALL (TARGETS time_space_atom
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
+
+	INSTALL (FILES
+		TimeSpaceAtomMapsAPI/AtomOcTree.h
+		TimeSpaceAtomMapsAPI/AtomOcTreeNode.h
+		TimeSpaceAtomMapsAPI/TimeSpaceAtom.h
+		DESTINATION "include/${PROJECT_NAME}/spacetime"
+	)
+
+ENDIF (HAVE_OCTOMAP)

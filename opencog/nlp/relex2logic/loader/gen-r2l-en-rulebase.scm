@@ -2,13 +2,16 @@
 
 ; NOTE: Temporary Hack around cogservers scheme module loading issue
 ; See https://github.com/opencog/atomspace/issues/508 for details
-(load-from-path "opencog/rule-engine.scm")
+; XXX Except this "hack" utterly, completel broken: since it causes
+; everything to be defined in the rule-egine module, and thus everything
+; become invisble outside the rule-engine module!!
+; (load-from-path "opencog/rule-engine.scm")
 
 ; Load rule files. The order of the load matters
 (load "../rule-utils.scm")
 (load "load-rules.scm")
 
-; Define r2l-rulebase for english.
+; Define r2l-rulebase for English.
 (define-public r2l-rules (ConceptNode "R2L-en-RuleBase"))
 (ure-define-rbs r2l-rules 100)
 

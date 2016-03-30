@@ -52,7 +52,7 @@ TemporalTable::TemporalTable()
 TemporalTable::~TemporalTable()
 {
     //delete(tailHandleMap);
-    HandleMapIterator<TemporalEntry *> *keys = tailHandleMap->keys();
+    ThreadSafeHandleMapIterator<TemporalEntry *> *keys = tailHandleMap->keys();
     while (keys->has_next()) {
         Handle nextKey = keys->next();
         tailHandleMap->remove(nextKey);
@@ -452,12 +452,12 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
         DPRINTF("Removed from handleMap entries! te=%p\n", te);
     }
     handleMap->remove(h);
-    DPRINTF("HandleMap entries removed!\n");
+    DPRINTF("ThreadSafeHandleMap entries removed!\n");
     if (te != NULL) {
-        DPRINTF("te not null -- HandleMap entries will be reinserted!\n");
+        DPRINTF("te not null -- ThreadSafeHandleMap entries will be reinserted!\n");
         // Replace te in the handleMap
         handleMap->add(h, te);
-        DPRINTF("HandleMap entries reinserted!\n");
+        DPRINTF("ThreadSafeHandleMap entries reinserted!\n");
     }
     // If empty temporal list => already removed from handleMap
     for (std::set<Temporal*>::iterator it = toBeDeleted.begin();

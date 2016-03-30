@@ -93,7 +93,7 @@
 ; logic of the rare true subject queries will have to be left to
 ; general intelligence.
 ;
-(define (be-inheritance-rule subj_lemma subj_inst obj_lemma obj_inst)
+(define-public (be-inheritance-rule subj_lemma subj_inst obj_lemma obj_inst)
 	(define subj_concept (cog-name subj_lemma))
 	(define subj_instance (cog-name subj_inst))
 	(define obj_concept (cog-name obj_lemma))
@@ -152,7 +152,7 @@
 ; still doesn't work because the relex output for it is a disaster
 ; and requires LG changes that I haven't gotten to work yet (10-22-14 AN)
 ;
-(define (SVIO-rule subj_lemma subj_inst
+(define-public (SVIO-rule subj_lemma subj_inst
          verb_lemma verb_inst
          obj_lemma obj_inst
          iobj_lemma iobj_inst)
@@ -256,7 +256,7 @@
 ; Object query: 		"What did you say?" "Who do you love?"
 ; Prepositional subject query: 	"What is for dinner?", Who's on first?"
 ;
-(define (SVO-rule subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst)
+(define-public (SVO-rule subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst)
 	(define subj_concept (cog-name subj_lemma))
 	(define subj_instance (cog-name subj_inst))
 	(define verb (cog-name verb_lemma))
@@ -326,7 +326,7 @@
 ;                        "Who is correct?" "What is right?"
 ; Verb query:            "What are you doing?"
 ;
-(define (SV-rule subj-lemma subj-inst verb-lemma verb-inst)
+(define-public (SV-rule subj-lemma subj-inst verb-lemma verb-inst)
 	(define subj_concept  (cog-name subj-lemma))
 	(define subj_instance (cog-name subj-inst))
 	(define verb          (cog-name verb-lemma))
@@ -375,7 +375,7 @@
 ; it only gets called on the second parse. With the verb "looks" not
 ; at all.
 ;
-(define (to-be-rule verb_lemma verb_inst adj_lemma adj_inst subj_lemma subj_inst)
+(define-public (to-be-rule verb_lemma verb_inst adj_lemma adj_inst subj_lemma subj_inst)
 	(define verb (cog-name verb_lemma))
 	(define verb_ins (cog-name verb_inst))
 	(define adj (cog-name adj_lemma))
@@ -402,7 +402,7 @@
 ;
 ; Copula example: "Are you the one?"
 ;
-(define (cop-ynQ-rule subj_concept subj_instance obj_concept obj_instance)
+(define-public (cop-ynQ-rule subj_concept subj_instance obj_concept obj_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
@@ -431,7 +431,7 @@
 ;
 ; NB: this rule also allows the system to handle all intonation-only versions of these questions (i.e. "The book is under the table?" etc.)
 ;
-(define (pred-ynQ-rule predicate_concept predicate_instance)
+(define-public (pred-ynQ-rule predicate_concept predicate_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode predicate_instance) (PredicateNode predicate_concept))
@@ -451,7 +451,7 @@
 ; Prepositional adjectival example: "The man with a powerful voice sang."
 ;
 ; -----------------------------------------------------------------------
-(define (amod-rule concept instance adj adj_instance)
+(define-public (amod-rule concept instance adj adj_instance)
 	(ListLink
 		(InheritanceLink  (ConceptNode adj_instance) (ConceptNode adj))
 		(r2l-wordinst-concept adj_instance)
@@ -460,7 +460,7 @@
 		(InheritanceLink  (ConceptNode instance) (ConceptNode adj_instance))
 ))
 
-(define (advmod-rule verb-node instance-node adv-node adv-instance-node)
+(define-public (advmod-rule verb-node instance-node adv-node adv-instance-node)
 	(define verb (cog-name verb-node))
 	(define instance (cog-name instance-node))
 	(define adv (cog-name adv-node))
@@ -474,7 +474,7 @@
 	)
 )
 
-(define (adverbialpp-rule verb instance prep  prep_instance noun noun_instance)
+(define-public (adverbialpp-rule verb instance prep  prep_instance noun noun_instance)
     (ListLink
     (InheritanceLink  (ConceptNode noun_instance) (ConceptNode noun))
     (ImplicationLink  (PredicateNode instance) (PredicateNode verb))
@@ -492,7 +492,7 @@
 ;-----------------------------------------------------------------------
 ; prepositional phrase rule
 ;-----------------------------------------------------------------------
-(define (pp-rule prep_concept prep_instance noun_concept noun_instance)
+(define-public (pp-rule prep_concept prep_instance noun_concept noun_instance)
 	(ListLink
 		(ImplicationLink (PredicateNode prep_instance) (PredicateNode prep_concept))
 		(InheritanceLink (ConceptNode noun_instance) (ConceptNode noun_concept))
@@ -508,14 +508,14 @@
 ; unary rules
 ; -----------------------------------------------------------------------
 ; XXX this rule is not used anywhere!
-(define (entity-rule word word_instance)
+(define-public (entity-rule word word_instance)
 	(ListLink
 		(InheritanceLink (SpecificEntityNode word_instance) (ConceptNode word)))
 )
 
 ; FIXME: this is bad because in SV, SVO type rules the same word is
 ; ConceptNode instead
-(define (gender-rule lemma word_inst gender)
+(define-public (gender-rule lemma word_inst gender)
 	(define word (cog-name lemma))
 	(define word_instance (cog-name word_inst))
 	(define gender_type (cog-name gender))
@@ -547,7 +547,7 @@
 	)
 )
 
-(define (tense-rule lemma inst tns)
+(define-public (tense-rule lemma inst tns)
 	(define verb (cog-name lemma))
 	(define instance (cog-name inst))
 	(define tense (cog-name tns))
@@ -559,7 +559,7 @@
 	)
 )
 
-(define (quantity-rule noun_concept noun_instance quantifier_concept quantifier_instance)
+(define-public (quantity-rule noun_concept noun_instance quantifier_concept quantifier_instance)
 	(ListLink
 		(InheritanceLink (ConceptNode noun_instance) (ConceptNode noun_concept))
 		(InheritanceLink (ConceptNode quantifier_instance) (ConceptNode quantifier_concept))
@@ -574,7 +574,7 @@
 ; "At what time . . . ", "For what reason . . .", "In what way . . .",
 ; "To what degree . . . ", "At what location . . ."
 ;-----------------------------------------------------------------------------
-(define (q-det-rule noun_concept noun_instance verb verb_instance qtype)
+(define-public (q-det-rule noun_concept noun_instance verb verb_instance qtype)
 	(ListLink (InheritanceLink (VariableNode "$qVar") (ConceptNode noun_concept))
 	(InheritanceLink (ConceptNode noun_instance) (VariableNode "$qVar"))
 	(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -623,7 +623,7 @@
 	))
 )
 
-(define (det-rule noun_lemma noun_inst det_lemma)
+(define-public (det-rule noun_lemma noun_inst det_lemma)
 	(define concept (cog-name noun_lemma))
 	(define instance (cog-name noun_inst))
 	(define determiner (cog-name det_lemma))
@@ -649,7 +649,7 @@
 	)
 )
 
-(define (negative-rule lemma verb-inst)
+(define-public (negative-rule lemma verb-inst)
 	(define verb (cog-name lemma))
 	(define instance (cog-name verb-inst))
 	(ListLink
@@ -657,7 +657,7 @@
 		(ImplicationLink (PredicateNode instance) (NotLink (PredicateNode verb))))
 )
 
-(define (definite-rule lemma word-inst)
+(define-public (definite-rule lemma word-inst)
 	(define word (cog-name lemma))
 	(define word_instance (cog-name word-inst))
 
@@ -671,7 +671,7 @@
 )
 
 ; Example: "Maybe she eats lunch.", "Perhaps she is nice."
-(define (maybe-rule word-node word-instance-node)
+(define-public (maybe-rule word-node word-instance-node)
 	(define word (cog-name word-node))
 	(define word_instance (cog-name word-instance-node))
 	(ListLink
@@ -690,7 +690,7 @@
 ; misc rules
 ; -----------------------------------------------------------------------
 ; XXX this rule is not used anywhere!
-(define (number-rule noun noun_instance num num_instance)
+(define-public (number-rule noun noun_instance num num_instance)
 	(define noun_ins_concept (ConceptNode noun_instance))
 	(ListLink
 		(InheritanceLink noun_ins_concept (ConceptNode noun))
@@ -700,7 +700,7 @@
 )
 
 ; XXX this rule is not used anywhere!
-(define (about-rule verb verb_instance  noun noun_instance)
+(define-public (about-rule verb verb_instance  noun noun_instance)
 	(ListLink
 		(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 		(InheritanceLink (ConceptNode noun_instance) (ConceptNode noun))
@@ -713,7 +713,11 @@
 		))
 )
 
-(define (nn-rule n1 n1_instance n2 n2_instance)
+(define-public (nn-rule n1-lemma n1-inst n2-lemma n2-inst)
+	(define n1 (cog-name n1-lemma))
+	(define n1_instance (cog-name n1-inst ))
+	(define n2 (cog-name n2-lemma))
+	(define n2_instance (cog-name n2-inst ))
 ; XXX FIXME these two are not returned ???
 	(r2l-wordinst-concept n1_instance)
 	(r2l-wordinst-concept n2_instance)
@@ -724,7 +728,7 @@
 	)
 )
 
-(define (possessive-rule noun noun_instance word word_instance)
+(define-public (possessive-rule noun noun_instance word word_instance)
 	(ListLink
 		(InheritanceLink (ConceptNode noun_instance) (ConceptNode noun))
 		(InheritanceLink (ConceptNode word_instance) (ConceptNode word))
@@ -744,7 +748,7 @@
 ;
 ; Example: "She wants to help John."
 ;
-(define (to-do-rule-1
+(define-public (to-do-rule-1
                 verb1_lemma verb1_inst
                 verb2_lemma verb2_inst
                 subj_lemma subj_inst
@@ -784,7 +788,7 @@
 ; Example: "She wants you to help us." -- assigns wrong subject in
 ; second clause. XXX FIXME
 ;
-(define (to-do-rule-2 v1 v1_instance v2 v2_instance s1 s1_instance s2 s2_instance o o_instance)
+(define-public (to-do-rule-2 v1 v1_instance v2 v2_instance s1 s1_instance s2 s2_instance o o_instance)
 	(ListLink
 		(InheritanceLink (ConceptNode s1_instance) (ConceptNode s1))
 		(InheritanceLink (ConceptNode s2_instance) (ConceptNode s2))
@@ -814,7 +818,7 @@
 ; Example: "She is nice to help with the project." -- the scheme output
 ; for this rule is a logical mess
 ;
-(define (to-do-rule-3 adj_lemma adj_inst verb_lemma verb_inst subj_lemma subj_inst)
+(define-public (to-do-rule-3 adj_lemma adj_inst verb_lemma verb_inst subj_lemma subj_inst)
 	(define v1 (cog-name adj_lemma))
 	(define v1_instance (cog-name adj_inst))
 	(define v2 (cog-name verb_lemma))
@@ -841,7 +845,7 @@
 ; What about "She must need to sing?" "She must want to sing?"
 ; -- why is must being treated as a main-verb rather than an auxiliary?
 ;
-(define (to-do-rule-4 v1 v1_instance v2 v2_instance)
+(define-public (to-do-rule-4 v1 v1_instance v2 v2_instance)
 	(ListLink
 		(InheritanceLink (ConceptNode v2_instance) (ConceptNode v2))
 		(ImplicationLink (PredicateNode v1_instance) (PredicateNode v1))
@@ -858,7 +862,7 @@
 ;
 ; Example: "She wants to sing."; verb1 = want, verb2 = sing, subj = she
 ;
-(define (to-do-rule-5
+(define-public (to-do-rule-5
 		verb1-node verb1-instance-node
 		verb2-node verb2-instance-node
 		subj-node subj-instance-node)
@@ -895,7 +899,7 @@
 ;
 ; Examples: "Where do you live?","Where did you eat dinner?" etc.
 ;
-(define (where-rule verb-node verb-instance-node)
+(define-public (where-rule verb-node verb-instance-node)
 	(let ((var_name (choose-var-name))
 			(verb (cog-name verb-node))
 			(verb_instance (cog-name verb-instance-node))
@@ -916,7 +920,7 @@
 ;
 ; Examples: "Where is the party?", "Where will she be happy?" etc.
 ;
-(define (wherecop-Q-rule subj-concept-node subj-instance-node)
+(define-public (wherecop-Q-rule subj-concept-node subj-instance-node)
 	(let ((var_name (choose-var-name))
 			(subj_concept (cog-name subj-concept-node))
 			(subj_instance (cog-name subj-instance-node))
@@ -942,7 +946,7 @@
 ; Example: "When did jazz die?","When did you bake the cake?",
 ; "When did you give him the money?" etc.
 ;
-(define (when-rule verb verb_instance)
+(define-public (when-rule verb verb_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -957,7 +961,7 @@
 ;
 ; Example "When is the party?" etc.
 ;
-(define (whencop-Q-rule subj_concept subj_instance)
+(define-public (whencop-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
@@ -976,7 +980,7 @@
 ;
 ; Example: "Why do you live?", "Why do you like terrible music?"
 ;
-(define (why-rule lemma verb-inst)
+(define-public (why-rule lemma verb-inst)
 	(let ((verb (cog-name lemma))
 			(verb_instance (cog-name verb-inst))
 			(var_name (choose-var-name)))
@@ -996,9 +1000,9 @@
 ;
 ; Example "Why are you such a fool?" etc.
 ;
-(define (whycop-Q-rule subj-lemma subj-inst)
-	(let ((subj_concept (cog-name subj-lemma)
-			(subj_instance (cog-name subj-inst)
+(define-public (whycop-Q-rule subj-lemma subj-inst)
+	(let ((subj_concept (cog-name subj-lemma))
+			(subj_instance (cog-name subj-inst))
 			(var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
@@ -1013,13 +1017,14 @@
 		)
 	)
 )
+
 ;------------------------------------------------------
 ; How adverbial (manner) questions
 ;------------------------------------------------------
 ;
 ; Example: "How did you sleep?" etc.
 ;
-(define (how-rule verb verb_instance)
+(define-public (how-rule verb verb_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1040,7 +1045,7 @@
 ;
 ; Examples: "How was the party?" "How is your food?")
 ;
-(define (howpredadj-Q-rule subj_concept subj_instance)
+(define-public (howpredadj-Q-rule subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
@@ -1059,7 +1064,7 @@
 ; NB: doesn't call rule if there is no noun after "how much" because
 ; relex doesn't give it a quantity dependency relation in that case
 ;
-(define (howquantQ-rule concept instance)
+(define-public (howquantQ-rule concept instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode instance) (ConceptNode concept))
@@ -1074,7 +1079,7 @@
 ;
 ; Example: "How fast does it go?"
 ;
-(define (howdegQ-rule concept instance)
+(define-public (howdegQ-rule concept instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode instance) (ConceptNode concept))
@@ -1103,7 +1108,7 @@
 ;
 ; Example: "Which girl do you like?" "What book are you reading?"
 ;
-(define (whichobjQ-rule obj_concept obj_instance verb verb_instance subj_concept subj_instance)
+(define-public (whichobjQ-rule obj_concept obj_instance verb verb_instance subj_concept subj_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1128,7 +1133,7 @@
 ;
 ; Example: "Which girl likes you?" "What fool said that?"
 ;
-(define (whichsubjSVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
+(define-public (whichsubjSVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1153,7 +1158,7 @@
 ;
 ; Example: "To which address did you send the email?"
 ;
-(define (whichiobjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance iobj_concept iobj_instance)
+(define-public (whichiobjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance iobj_concept iobj_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1181,7 +1186,7 @@
 ;
 ; Example: "Which girl is crazy?"
 ;
-(define (whichpredadjQ-rule subj_concept subj_instance pred_concept pred_instance)
+(define-public (whichpredadjQ-rule subj_concept subj_instance pred_concept pred_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
@@ -1214,7 +1219,7 @@
 ; "All right-handed Canadians write."    -> (all-rule "Canadians@333")
 ;
 ; XXX all-rule is not used anywhere ...
-(define (all-rule noun_instance)
+(define-public (all-rule noun_instance)
 	(ListLink
 		(r2l-wordinst-concept noun_instance)
 		(EvaluationLink
@@ -1232,7 +1237,7 @@
 ; -----------------------------------------------------------------------
 ; Example: "The books were written by Charles Dickens."
 ; XXX this rule is not used anywhere ...
-(define (passive-rule1 verb verb_instance obj obj_instance passive_obj passive_obj_instance)
+(define-public (passive-rule1 verb verb_instance obj obj_instance passive_obj passive_obj_instance)
     (ListLink
 	 (ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
     (InheritanceLink (ConceptNode obj_instance) (ConceptNode obj))
@@ -1250,7 +1255,7 @@
 )
 
 ; Example: "The books are published."
-(define (passive-rule2 verb verb_instance obj obj_instance)
+(define-public (passive-rule2 verb verb_instance obj obj_instance)
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1276,7 +1281,7 @@
 ;         "John and Madison eat the cake."
 ;         " Joan is poor  but  happy."
 
-(define (and-rule var1 var1_instance var2 var2_instance pos)
+(define-public (and-rule var1 var1_instance var2 var2_instance pos)
 
     (cond
     [(equal? pos "verb")
@@ -1307,7 +1312,7 @@
        ))])
 )
 
-(define (but-rule var1 var1_instance var2 var2_instance pos)
+(define-public (but-rule var1 var1_instance var2 var2_instance pos)
     (cond [(equal? pos "verb")
         (ListLink
         (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
@@ -1335,7 +1340,7 @@
         ))])
 )
 
-(define (or-rule var1 var1_instance var2 var2_instance pos)
+(define-public (or-rule var1 var1_instance var2 var2_instance pos)
     (cond [(equal? pos "verb")
         (ListLink
         (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
@@ -1367,7 +1372,7 @@
 ;-----------------------------------------------------------------------
 ; complement clauses
 ;-----------------------------------------------------------------------
-(define (complement-rule comp_concept comp_instance pred_concept pred_instance)
+(define-public (complement-rule comp_concept comp_instance pred_concept pred_instance)
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
@@ -1382,7 +1387,7 @@
 	)
 )
 
-(define (compmod-rule comp_concept comp_instance pred_concept pred_instance)
+(define-public (compmod-rule comp_concept comp_instance pred_concept pred_instance)
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
@@ -1398,7 +1403,7 @@
 	)
 )
 
-(define (because-rule comp_concept comp_instance pred_concept pred_instance)
+(define-public (because-rule comp_concept comp_instance pred_concept pred_instance)
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
@@ -1414,7 +1419,7 @@
 	)
 )
 
-(define (attime-rule comp_concept comp_instance pred_concept pred_instance)
+(define-public (attime-rule comp_concept comp_instance pred_concept pred_instance)
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
@@ -1427,7 +1432,11 @@
 	)
 )
 
-(define (rep-rule comp_concept comp_instance pred_concept pred_instance)
+(define-public (rep-rule comp_word comp_inst pred_word pred_inst)
+	(define comp_concept (cog-name comp_word))
+	(define comp_instance (cog-name comp_inst))
+	(define pred_concept (cog-name pred_word))
+	(define pred_instance (cog-name pred_inst))
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
@@ -1450,22 +1459,22 @@
 ; A that-rule for "object clause", "content clause", "complement clause",
 ; etc, but not "adjective clause"
 ; XXX that-rule is not used anywhere!
-(define (that-rule main main_instance sub sub_instance)
-	(ListLink
-		(ImplicationLink (PredicateNode main_instance) (PredicateNode main))
-		(ImplicationLink (PredicateNode sub_instance) (PredicateNode sub))
-		(r2l-wordinst-Predicate main_instance)
-		(r2l-wordinst-Predicate sub_instance)
-		(EvaluationLink
-			(DefinedLinguisticPredicateNode "that")
-			(ListLink
-				(PredicateNode main_instance)
-				(PredicateNode sub_instance)
-			)
-		)
-	)
-)
-
+;(define (that-rule main main_instance sub sub_instance)
+;	(ListLink
+;		(ImplicationLink (PredicateNode main_instance) (PredicateNode main))
+;		(ImplicationLink (PredicateNode sub_instance) (PredicateNode sub))
+;		(r2l-wordinst-Predicate main_instance)
+;		(r2l-wordinst-Predicate sub_instance)
+;		(EvaluationLink
+;			(DefinedLinguisticPredicateNode "that")
+;			(ListLink
+;				(PredicateNode main_instance)
+;				(PredicateNode sub_instance)
+;			)
+;		)
+;	)
+;)
+;
 ; -----------------------------------------------------------------------
 ; time rules to create time relations
 ; -----------------------------------------------------------------------
@@ -1476,34 +1485,35 @@
 ; Examples: "She went home before I left", "I went after him", "He sleeps
 ; before he is tired"
 ; XXX before-after-rule is not used anywhere!
-(define (before-after-rule $x_instance $y_instance $y_pos $before_or_after)
-    (define y-node
-        (if (or (string=? $y_pos "verb") (string=? $y_pos "adj"))
-            (PredicateNode $y_instance)
-            (ConceptNode $y_instance)
-        )
-    )
-    (ListLink
-        (EvaluationLink
-            (PredicateNode $before_or_after)
-            (ListLink (PredicateNode $x_instance) y-node)
-        )
-    )
-)
-
+;(define (before-after-rule $x_instance $y_instance $y_pos $before_or_after)
+;    (define y-node
+;        (if (or (string=? $y_pos "verb") (string=? $y_pos "adj"))
+;            (PredicateNode $y_instance)
+;            (ConceptNode $y_instance)
+;        )
+;    )
+;    (ListLink
+;        (EvaluationLink
+;            (PredicateNode $before_or_after)
+;            (ListLink (PredicateNode $x_instance) y-node)
+;        )
+;    )
+;)
+;
+; -----------------------------------------------------------------------
 ; Examples: "I had dinner at 6 pm", "I went to sleep at 1 am"
 ; XXX time-rule is not used anywhere!
-(define (time-rule $hour $period $v_instance)
-    (define time-node
-        (if (string=? $period "am")
-            (TimeNode $hour)
-            (TimeNode (number->string (+ (string->number $hour) 12)))
-        )
-    )
-    (ListLink (AtTimeLink time-node (PredicateNode $v_instance)))
-)
-
-
+;(define (time-rule $hour $period $v_instance)
+;    (define time-node
+;        (if (string=? $period "am")
+;            (TimeNode $hour)
+;            (TimeNode (number->string (+ (string->number $hour) 12)))
+;        )
+;    )
+;    (ListLink (AtTimeLink time-node (PredicateNode $v_instance)))
+;)
+;
+;
 ; -----------------------------------------------------------------------
 ; functions without R2L rule, not working, unneeded, etc
 ; -----------------------------------------------------------------------
@@ -1522,24 +1532,25 @@
 ;		(InheritanceLink (ConceptNode w2_instance) (ConceptNode adj_instance))
 ;	))
 ;)
-
+;
+;---------------------------------------------------------------
 ; XXX on-rule is not used anywhere!
-(define (on-rule w1 w1_instance w2 w2_instance)
-	(ListLink
-	(InheritanceLink (ConceptNode w1_instance) (ConceptNode w1))
-	(InheritanceLink (ConceptNode w2_instance) (ConceptNode w2))
-	(r2l-wordinst-concept w1_instance)
-	(r2l-wordinst-concept w2_instance)
-	(EvaluationLink
-		(DefinedLinguisticPredicateNode "on")
-		(ListLink
-			(ConceptNode w1_instance)
-			(ConceptNode w2_instance)
-		)
-	))
-)
-
-
+;(define (on-rule w1 w1_instance w2 w2_instance)
+;	(ListLink
+;	(InheritanceLink (ConceptNode w1_instance) (ConceptNode w1))
+;	(InheritanceLink (ConceptNode w2_instance) (ConceptNode w2))
+;	(r2l-wordinst-concept w1_instance)
+;	(r2l-wordinst-concept w2_instance)
+;	(EvaluationLink
+;		(DefinedLinguisticPredicateNode "on")
+;		(ListLink
+;			(ConceptNode w1_instance)
+;			(ConceptNode w2_instance)
+;		)
+;	))
+;)
+;
+;
 ;
 ;
 ;(define (which-rule antecedent  antecedent_instance  verb  verb_instance)

@@ -29,6 +29,6 @@
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-howpredadj1-q-rule subj)
+(define-public (pre-howpredadj1-q-rule subj)
 	(howpredadj-Q-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj))
 )

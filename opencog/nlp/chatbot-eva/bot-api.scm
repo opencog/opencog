@@ -32,7 +32,9 @@
 		)
 	)
 )
+
 ;--------------------------------------------------------------------
+
 (define-public (process-query user query)
 "
   process-query USER QUERY -- accept user's text and generate a reply.
@@ -81,6 +83,49 @@
         (else
             (display "Sorry, I can't identify the speech act type\n")
             ; XXX Use AIML here to say something snarky.
+        )
+    )))
+
+;--------------------------------------------------------------------
+
+(define-public (grounded-talk user query)
+"
+  grounded-talk USER QUERY -- accept user's text and perform action,
+  or maybe generate a reply (currently broken).
+
+  This is a truncated chatbot interface, for use with the robot.
+  It accepts an utterance (in the form of a text string) and, if it is
+  understood, then the robot performs an action.
+  The USER is the user-name  The QUERY is the string holding what the
+  user said.
+"
+    ; nlp-parse returns (SentenceNode "sentence@45c470a6-29...")
+    (define sent-node (car (nlp-parse query)))
+
+    ; of the utterance.  The response processing will be based on the
+    ; type of the speech act.
+    (let* ((gutr (sentence-get-utterance-type sent-node))
+           (utr (if (equal? '() gutr) '() (car gutr)))
+        )
+    (cond
+        ((equal? utr (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
+            (display "You asked a Truth Query\n")
+            ; (truth_query_process sent-node)
+        )
+        ((equal? utr (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
+            (display "You made an Interrogative SpeechAct\n")
+            ; (wh_query_process sent-node)
+        )
+        ((equal? utr (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+            (display "You made a Declarative SpeechAct\n")
+        )
+        ((equal? utr (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
+            (display "You made a Imperative SpeechAct\n")
+            ; Make the robot do whatever ...
+				(imperative-process sent-node)
+        )
+        (else
+            (display "Sorry, I can't identify the speech act type\n")
         )
     )))
 

@@ -60,6 +60,11 @@
 ; Taxonomic is-a relations are done with an InheritanceLink
 ; Syntactic structure is encoded with an EvaluationLink.
 ;--------------------------------------------------------------------
+;
+; (DefinedPredicate "Do show expression") is defined in eva-behavior,
+; so we have to import that...
+(use-modules (opencog eva-behavior))
+;--------------------------------------------------------------------
 ; Global knowledge about spatial directions.  The coordinate system
 ; is specific to the HR robot head.  Distance in meters, the origin
 ; of the system is behind the eyes, middle of head.  "forward" is the
@@ -134,13 +139,13 @@
 (InheritanceLink (DefinedSchema "forwards")   (ConceptNode "schema-direction"))
 
 ; Physical (motor control) knowledge about imperative verbs.
-(ReferenceLink (WordNode "look") (DefinedPredicate "Gaze at point"))
-(ReferenceLink (WordNode "turn") (DefinedPredicate "Look at point"))
+(ReferenceLink (WordNode "look") (DefinedPredicate "Gaze command"))
+(ReferenceLink (WordNode "turn") (DefinedPredicate "Look command"))
 
 ; Syntactic category of imperative verbs.
-(InheritanceLink (DefinedPredicate "Gaze at point")
+(InheritanceLink (DefinedPredicate "Gaze command")
 	(ConceptNode "pred-direction"))
-(InheritanceLink (DefinedPredicate "Look at point")
+(InheritanceLink (DefinedPredicate "Look command")
 	(ConceptNode "pred-direction"))
 
 ; Allowed syntactic structure of action-knowledge --

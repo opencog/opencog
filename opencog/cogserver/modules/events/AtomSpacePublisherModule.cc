@@ -394,6 +394,7 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
             break;
         }
 
+        case GENERIC_TRUTH_VALUE:
         case NULL_TRUTH_VALUE:
         case NUMBER_OF_TRUTH_VALUE_TYPES: {
             break;

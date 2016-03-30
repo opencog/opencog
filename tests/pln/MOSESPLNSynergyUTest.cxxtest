@@ -78,12 +78,6 @@ void MOSESPLNSynergyUTest::tearDown()
 
 void MOSESPLNSynergyUTest::setUp()
 {
-	config().set("SCM_PRELOAD",
-	             "opencog/scm/core_types.scm, "
-	             "opencog/scm/utilities.scm, "
-	             "opencog/scm/av-tv.scm");
-	load_scm_files_from_config(as);
-
 	eval.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
 
 	eval.eval("(use-modules (opencog))");
@@ -123,6 +117,8 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 	TS_ASSERT(target->getTruthValue()->operator==(expected_tv));
 }
 
+// This takes too long (3 to 4 days), disabled until it gets severely
+// optimized
 void MOSESPLNSynergyUTest::test_moses_pln_synergy_fc()
 {
 	// logger().debug("BEGIN TEST: %s", __FUNCTION__);

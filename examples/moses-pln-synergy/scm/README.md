@@ -4,6 +4,13 @@ Simple demo showing how PLN reasoning can be used to overcome the
 uncertainties resulting from the low number of samples during
 learning.
 
+There are 3 ways for carrying the inference
+
+1. using the pattern matcher in a step-by-step fashion, see Subsection
+   `Pattern Matcher`
+2. using the forward chainer, see Subsection `Forward Chainer`
+3. using the backward chainer, not done yet.
+
 ## Obtain MOSES model
 
 A MOSES has been pre-learned and included in the parent folder
@@ -25,7 +32,48 @@ $ moses \
       --output-format scheme
 ```
 
-## Batch mode
+## Forward Chainer
+
+To run the demo using the forward chainer load the following script
+
+```
+$ guile
+scheme@(guile-user)> (load "moses-pln-synergy-fc.scm")
+```
+
+in guile. It will load the model, the background knowledge, the PLN
+config file and run the inference. Beware that it's gonna take a
+really long time (say 3 to 4 days depending on your hardware) as it
+runs 1M of inference steps, and that each step combines many atoms
+(one source + one rule + all possible other premises).
+
+Once the inference finished you can check that the final target (the
+MOSES model is infered with the correct TV
+
+```scheme
+(ImplicationLink (stv 0.60357851 0.69999999)
+   (OrLink
+      (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
+      (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
+   )
+   (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
+)
+```
+
+to check the TV merely enter that hypergraph without the TVs. You may
+of course check each step detailed in subsection `Step-by-step` below
+as well, similarily by entering them without their TVs.
+
+There are currently no method to query the trace of the inference but
+this will be developed as time goes.
+
+## Backward Chainer
+
+WIP
+
+## Pattern Matcher
+
+### Batch
 
 You may choose to run the inference all at once. For that just load
 `moses-pln-synergy-pm.scm` in guile
@@ -36,10 +84,11 @@ scheme@(guile-user)> (load "moses-pln-synergy-pm.scm")
 ```
 
 Which will load the MOSES model, the background knowledge, the PLN
-configuration for that inference and execute it step by step (by using
-the pattern matcher function `cog-bind`).
+configuration for that inference and execute all steps in a row (by
+using the pattern matcher). If you wish to execute the steps yourself
+read on.
 
-## Step-by-step mode
+### Step-by-step
 
 Alternatively you may run it step by step. First you need to run guile
 and load the models, the background knowledge and the PLN
@@ -52,11 +101,11 @@ scheme@(guile-user)> (load "background-knowledge.scm")
 scheme@(guile-user)> (load "pln-config.scm")
 ```
 
-## Apply rules
+#### Apply rules
 
 Then apply the following rules step by step.
 
-### (1) - Partially instantiate if X takes Y and Y contains Z, then X takes Z, with Y = treatment-1 and Z = compound-A
+##### (1) - Partially instantiate if X takes Y and Y contains Z, then X takes Z, with Y = treatment-1 and Z = compound-A
 
 Semi-formally
 ```
@@ -101,7 +150,7 @@ And search for the following
 ...
 ```
 
-### (2) - Distribute the lambda in the implicant and implicand of (1)
+##### (2) - Distribute the lambda in the implicant and implicand of (1)
 
 Semi-formally
 ```
@@ -152,7 +201,7 @@ scheme@(guile-user)> (cog-bind implication-lambda-distribution-rule)
 ...
 ```
 
-### (3) - Distribute the lambda in the conjunction of the implicant of (2)
+##### (3) - Distribute the lambda in the conjunction of the implicant of (2)
 
 Semi-formally
 ```
@@ -193,7 +242,7 @@ scheme@(guile-user)> (cog-bind and-lambda-distribution-rule)
 ...
 ```
 
-### (4) - Calculate the TV of the constant predicate obtained in (3)
+##### (4) - Calculate the TV of the constant predicate obtained in (3)
 
 Semi-formally
 ```
@@ -219,7 +268,7 @@ $5 = (SetLink
 )
 ```
 
-### (5) - Build the tautology that if X takes treatment-1, then treatment-1 contains compound-A
+##### (5) - Build the tautology using (4) that if X takes treatment-1, then treatment-1 contains compound-A
 
 Semi-formally
 ```
@@ -260,7 +309,7 @@ scheme@(guile-user)> (cog-bind implication-construction-rule)
 ...
 ```
 
-### (6) - Distribute the implicant in the implication (5)
+##### (6) - Distribute the implicant in the implication (5)
 
 Semi-formally
 ```
@@ -317,7 +366,7 @@ scheme@(guile-user)> (cog-bind implication-implicant-distribution-rule)
 ...
 ```
 
-### (7) - Factorize the lambda in the implicand of (6)
+##### (7) - Factorize the lambda in the implicand of (6)
 
 Semi-formally
 ```
@@ -383,7 +432,7 @@ scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
 ...
 ```
 
-### (8) - Using (6) and (7) deduce that if X takes treatment-1 then X takes treatment-1 and treatment-1 contains compound-A
+##### (8) - Using (6) and (7) deduce that if X takes treatment-1 then X takes treatment-1 and treatment-1 contains compound-A
 
 Semi-formally
 ```
@@ -434,7 +483,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (9) - Using (2) and (8) deduce that if X takes treatment-1 then X takes compound-A
+##### (9) - Using (2) and (8) deduce that if X takes treatment-1 then X takes compound-A
 
 Semi-formally
 
@@ -478,7 +527,7 @@ scheme@(guile-user)> ;; (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (10) - Fully instantiate that if a predicate is in the injury-recovery-speed-predicates class, then is-well-hydrated implies it
+##### (10) - Fully instantiate that if a predicate is in the injury-recovery-speed-predicates class, then is-well-hydrated implies it
 
 ```scheme
 scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
@@ -490,7 +539,7 @@ scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
 ...
 ```
 
-### (11) - Turn equivalences such as between `\x take(x, treatment-1)` and `take-treatment-1` into implications
+##### (11) - Turn equivalences such as between `\x take(x, treatment-1)` and `take-treatment-1` into implications
 
 ```scheme
 scheme@(guile-user)> (cog-bind equivalence-to-double-implication-rule)
@@ -531,7 +580,7 @@ scheme@(guile-user)> (cog-bind equivalence-to-double-implication-rule)
 ...
 ```
 
-### (12) - Use (11) and (9) to deduce that take-treatment-1 implies taking compound-A
+##### (12) - Use (11) and (9) to deduce that take-treatment-1 implies taking compound-A
 
 Semi-formally
 ```
@@ -560,7 +609,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (13) - Use (12) and (11) to deduce `take-treatment-1 -> take-compound-A`
+##### (13) - Use (12) and (11) to deduce `take-treatment-1 -> take-compound-A`
 
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
@@ -572,7 +621,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (14) - Use (13) and background knowledge that taking compound-A tends to speed-up recovery of injury alpha to deduce that take-treatment-1 implies recovery-speed-of-injury-alpha
+##### (14) - Use (13) and background knowledge that taking compound-A tends to speed-up recovery of injury alpha to deduce that take-treatment-1 implies recovery-speed-of-injury-alpha
 
 Semi-formally
 ```
@@ -589,7 +638,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (15) - Use (10) and the background knowledge that eating a lot of fruits and vegetables hydrates well to deduce that eat-lost-fruits-vegetables implies recovery-speed-of-injury-alpha
+##### (15) - Use (10) and the background knowledge that eating a lot of fruits and vegetables hydrates well to deduce that eat-lost-fruits-vegetables implies recovery-speed-of-injury-alpha
 
 Semi-formally
 ```
@@ -606,7 +655,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-### (16) - Using (15) and (14) with the implication-implicant-disjunction rule we can infer a new TV for the MOSES model
+##### (16) - Using (15) and (14) with the implication-implicant-disjunction rule we can infer a new TV for the MOSES model
 
 ```
 scheme@(guile-user)> (cog-bind implication-implicant-disjunction-rule)

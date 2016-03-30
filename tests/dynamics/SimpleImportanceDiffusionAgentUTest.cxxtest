@@ -53,12 +53,6 @@ public:
     {        
         this->as = &cogserver().getAtomSpace();
         config().load(NULL,false);
-        config().set("SCM_PRELOAD",
-            "opencog/scm/core_types.scm, "
-            "opencog/scm/utilities.scm");
-    
-        load_scm_files_from_config(*as);
-        
         config().set("MODULES",
             "opencog/attention/libattention.so");
         

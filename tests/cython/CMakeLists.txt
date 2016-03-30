@@ -9,8 +9,6 @@ IF (HAVE_SERVER)
 	ADD_DEPENDENCIES(PythonModuleUTest
 		PythonModule
 	)
-	CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pymodule.conf
-		${PROJECT_BINARY_DIR}/tests/cython/pymodule.conf)
 
 	TARGET_LINK_LIBRARIES(PythonModuleUTest
 		PythonModule
@@ -20,7 +18,7 @@ IF (HAVE_SERVER)
 	)
 	SET_TESTS_PROPERTIES(PythonModuleUTest
 		PROPERTIES ENVIRONMENT
-		"PYTHONPATH=/usr/local/share/opencog/python:${PROJECT_BINARY_DIR}/opencog/cython"
+		"PYTHONPATH=/usr/local/share/opencog/python:${PROJECT_BINARY_DIR}/opencog/cython:${PROJECT_SOURCE_DIR}/tests/cython/agents/"
 	)
 ENDIF (HAVE_SERVER)
 

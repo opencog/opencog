@@ -29,7 +29,7 @@
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-copula-ynq-rule subj obj)
+(define-public (pre-copula-ynq-rule subj obj)
 	(cop-ynQ-rule (cog-name (word-inst-get-lemma subj)) (cog-name subj)
 		(cog-name (word-inst-get-lemma obj)) (cog-name obj)
 	)

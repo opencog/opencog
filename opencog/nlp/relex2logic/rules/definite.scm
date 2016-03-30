@@ -5,7 +5,7 @@
 ; Names of things (AN links) will get concatenated by Relex,
 ; leaving some of the words that make up the name without a lemma.
 ; Ignore those.
-(define (check-name lemma)
+(define-public (check-name lemma)
 	(if (not (equal? "" (cog-name lemma)))
 		(stv 1 1)
 		(stv 0 1)

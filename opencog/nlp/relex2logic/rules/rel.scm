@@ -27,7 +27,7 @@
 
 ; This is function is not needed. It is added so as not to break the existing
 ; r2l pipeline.
-(define (pre-rel-rule rel pred)
+(define-public (pre-rel-rule rel pred)
   (complement-rule (cog-name (word-inst-get-lemma  rel)) (cog-name rel)
                   (cog-name (word-inst-get-lemma  pred)) (cog-name pred)
   )

@@ -287,7 +287,7 @@
 
     (cog-execute!
         (PutLink
-            (psi-goal-selector-pattern)
+            (psi-action-rule-selector-pattern)
             dpn)
     )
 )
@@ -325,8 +325,8 @@
 
                 selector-dpn
            )
-           ; NOTE: Assuming that it is highly unlikely that the same
-           ; the node wouldn't be used for another purpose.
+           ; NOTE: Assuming that it is highly unlikely that the same node
+           ;  wouldn't be used for another purpose.
            selector-dpn
        )
     )
@@ -340,16 +340,21 @@
 
   dpn:
   - DefinedPredicateNode that represents the evaluatable term that will filter
-    action-rules. The evaluatable term should take a single DefinedSchemaNode and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
-    The VariableNodes in the evaluatable term must be named
-    `(VariableNode \"x\")`.
+    action-rules. The evaluatable term should take a single DefinedSchemaNode
+    and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
+    The VariableNodes in the term must be named `(VariableNode \"x\")`.
 
   demand-node:
     - A ConceptNode that represents a demand, from which action-rules
 "
     ; Check arguments
+    (define err-template "In procedure psi-get-action-rules: ")
     (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
-        (error "Expected DefinedPredicateNode got: " dpn))
+        (error err-template "Expected DefinedPredicateNode got: " dpn))
+    (if (not (cog-node? demand-node))
+        (error err-template "Expected a Node got: " demand-node))
+    (if (equal? (stv 0 1) (psi-demand? demand-node))
+        (error err-template "Expected OpenPsi demand node got: " demand-node))
 
     (cog-execute!
         (GetLink
@@ -422,9 +427,11 @@
     ; action-types, as this function is used by psi-update-asp.
     ; Could there be a reason one would want to change the default action-rule
     ; at runtime?
-    (append
-        (cog-outgoing-set (psi-get-action-rules-typed demand-node "Increase"))
-        (cog-outgoing-set (psi-get-action-rules-typed demand-node "Decrease"))
+    (append-map
+        (lambda (x)
+            (cog-outgoing-set (psi-get-action-rules-typed demand-node x))
+        )
+        (psi-action-types)
     )
 )
 
@@ -439,20 +446,60 @@
 )
 
 ; --------------------------------------------------------------
+(define (psi-action-rule-selector-current-typed)
+"
+  Returns the DefinedPredicateNode that represent the evaluatable term, that
+  checks if an action-rule's effect-type is equal to OpenPsi current goal's
+  effect-type, and return True-TruthValue if it is and False-TruthValue if not.
+"
+    (psi-add-action-rule-selector
+        (EvaluationLink
+            (GroundedPredicateNode "scm: psi-action-rule-selectable-type?")
+            (ListLink
+                 (DontExecLink (VariableNode "x"))))
+        "current-effect-type")
+)
+
+(define (psi-action-rule-selectable-type? dsn)
+"
+  Returns True-TruthValue if it is of the current psi-current-effect-type, and
+  False-TruthValue if not.
+
+  dsn:
+  - A DefinedSchemaNode that aliases an action-rule.
+"
+    ; Chech argument
+    (if (not (equal? 'DefinedSchemaNode (cog-type dsn)))
+        (error "In procedure psi-action-rule-selectable-type?: "
+               " Expected DefinedSchemaNode got: " dsn))
+
+    (if (equal? (psi-action-rule-type dsn) (psi-current-effect-type))
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
 (define (psi-select-action-rules)
 "
   Selects all actions of current effect type and update the psi-asp.
 "
-    ;TODO Use psi-select-action-rules, and port as much as possible to atomese.
+    (define (get-as) ; get the action-rule-selctor
+        (cog-outgoing-set (cog-execute!
+            (GetLink (psi-action-rule-selector-pattern)))))
+
     (let ((goal (psi-current-goal))
           (effect-type (psi-current-effect-type))
+          (action-selector (get-as))
           (asp (psi-asp)))
-
-        ; If default effect-type then add only the default actions.
-        (if (equal? effect-type "Default")
-            (psi-update-asp  asp (psi-get-action-rules-default))
-            (psi-update-asp asp (cog-outgoing-set
-                    (psi-get-action-rules-typed goal effect-type)))
+        (cond
+            ((null? action-selector)
+                (error "In procedure psi-select-action-rules: "
+                       "action-selector is not set."))
+            ((equal? effect-type "Default")
+            ; If default effect-type then add only the default actions.
+                (psi-update-asp  asp (psi-get-action-rules-default)))
+            (else (psi-update-asp asp (cog-outgoing-set
+                    (psi-get-action-rules (car action-selector) goal))))
         )
     )
 )
