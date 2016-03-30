@@ -59,7 +59,7 @@
   - A list of action-rule nodes. The nodes are the alias nodes for the
     action-rules.
 "
-    (define (remove-node node) (cog-delete-recursive (MemberLink node asp)))
+    (define (remove-node node) (cog-extract-recursive (MemberLink node asp)))
     (define (add-node node) (begin (MemberLink node asp) node))
 
     (let* ((current-actions (ure-rbs-rules asp))

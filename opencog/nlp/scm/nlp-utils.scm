@@ -722,8 +722,8 @@
          SentenceNode
 "
 	; Purge stuff associated with a single LgLinkInstanceNode
-	(define (purge-link-instance li)
-		(cog-purge-recursive li)
+	(define (extract-link-instance li)
+		(cog-extract-recursive li)
 	)
 
 	; Purge stuff associated with a single word-instance
@@ -736,28 +736,28 @@
 	;               WordInstanceNode
 	;               WordInstanceNode
 	;
-	; and so we have to track those down and purge them.
+	; and so we have to track those down and extract them.
 	; They also appear in WordSequenceLinks:
 	;     WordSequenceLink
 	;         WordInstanceNode
 	;         NumberNode
 	; and so we need to get rid of the NumberNodes too.
 
-	(define (purge-word-instance wi)
+	(define (extract-word-instance wi)
 		(for-each
 			(lambda (x)
-				; purge the NumberNode
+				; extract the NumberNode
 				(if (eq? 'WordSequenceLink (cog-type x))
-					(cog-purge (cadr (cog-outgoing-set x)))
+					(cog-extract (cadr (cog-outgoing-set x)))
 				)
 				(if (eq? 'ListLink (cog-type x))
-					(purge-link-instance
+					(extract-link-instance
 						(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x))
 				)
 			)
 			(cog-incoming-set wi)
 		)
-		(cog-purge-recursive wi)
+		(cog-extract-recursive wi)
 	)
 
 	; Purge, recusively, all of the word-instances in the parse.
@@ -767,19 +767,19 @@
 	;           WordInstanceNode
 	;           ParseNode
 	;
-	(define (purge-parse parse)
+	(define (extract-parse parse)
 		(for-each
 			(lambda (x)
 				(if (eq? 'WordInstanceLink (cog-type x))
-					(purge-word-instance (car (cog-outgoing-set x)))
+					(extract-word-instance (car (cog-outgoing-set x)))
 				)
 			)
 			(cog-incoming-set parse)
 		)
-		(cog-purge-recursive parse)
+		(cog-extract-recursive parse)
 	)
 
-	; For each parse of the sentence, purge the parse
+	; For each parse of the sentence, extract the parse
 	; This is expecting a structure
 	;     ParseLink
 	;         ParseNode     car of the outgoing set
@@ -788,7 +788,7 @@
 		(lambda (x)
 			(if (eq? 'ParseLink (cog-type x))
 				; The car will be a ParseNode
-				(purge-parse (car (cog-outgoing-set x)))
+				(extract-parse (car (cog-outgoing-set x)))
 			)
 		)
 		(cog-incoming-set sent)
@@ -796,7 +796,7 @@
 
 	; This delete will fail if there are still incoming links ...
 	; this is intentional. Its up to the caller to cleanup.
-	(cog-purge sent)
+	(cog-extract sent)
 )
 
 ; ---------------------------------------------------------------------
@@ -820,12 +820,12 @@
 "
 	(let ((n 0))
 	; (define (delit atom) (set! n (+ n 1)) #f)
-	; (define (delit atom) (cog-purge-recursive atom) #f)
-	(define (delit atom) (cog-purge-recursive atom) (set! n (+ n 1)) #f)
+	; (define (delit atom) (cog-extract-recursive atom) #f)
+	(define (delit atom) (cog-extract-recursive atom) (set! n (+ n 1)) #f)
 
-	; (define (delone atom) (cog-purge atom) #f)
-	; (define (delone atom) (cog-purge atom) (set! n (+ n 1)) #f)
-	(define (delone atom) (purge-hypergraph atom) (set! n (+ n 1)) #f)
+	; (define (delone atom) (cog-extract atom) #f)
+	; (define (delone atom) (cog-extract atom) (set! n (+ n 1)) #f)
+	(define (delone atom) (extract-hypergraph atom) (set! n (+ n 1)) #f)
 
 	; Can't delete InheritanceLink, its used to mark wsd completed...
 	; (cog-map-type delone 'InheritanceLink)

@@ -166,13 +166,14 @@
                (results '()))
             (for-each (lambda (s)
                 (let ( (score (string->number (cog-name (cadr (cog-outgoing-set s))))))
-                    (if (>= score max-score)
+                    ; Make sure it can be used to generate a sentence by sureal
+                    (if (and (>= score max-score) (not (equal? (sureal (car (cog-outgoing-set s))) '())))
                         (begin
                             (set! results (append results (list (car (cog-outgoing-set s)))))
                             (set! max-score score))
                         #f)))
             (cog-outgoing-set fset))
-            (cog-purge fset)
+            (cog-extract fset)
             results))
 
     (let* ( ; List of setence types to not consider
