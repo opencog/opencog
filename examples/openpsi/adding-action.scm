@@ -14,6 +14,9 @@
         (ListLink demand-var))
 )
 
+; The node that represents the number of faces.
+; This is a helper function
+(define (faces-node) (ConceptNode "Total number of faces around"))
 
 (define (sociality-behavior demand-node)
 "
@@ -33,13 +36,11 @@
   demand-node:
   - The Node that represents Sociality.
 "
-    ; The node that represents the number of faces.
-    (define faces (ConceptNode "Total number of faces around"))
 
     ; A function to return the number of faces perceived
     (define (num-of-faces)
         (string->number (cog-name (car
-            (cog-chase-link 'StateLink 'NumberNode faces)))))
+            (cog-chase-link 'StateLink 'NumberNode (faces-node))))))
 
     ; Update the strength of the demand-node using 'n/(n+1)' where n is face-num
     ; variable below.
