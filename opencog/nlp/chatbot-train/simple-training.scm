@@ -176,6 +176,7 @@
 ;-----------------------------------------------------------------
 ; Creates new behavior rule in atomese based on a given simulus and response
 (define (create-behavior-rule stimulus response)
+; TODO: Create feedback response that something was learned
     ; create new behavior rule with text input stimulus and behavior response
     (define new-rule)
     (define atomese-string)
