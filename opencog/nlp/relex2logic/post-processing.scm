@@ -268,7 +268,7 @@
 	)
 
 	; delete old rebuilt links
-	(for-each purge-hypergraph clean-links)
+	(for-each extract-hypergraph clean-links)
 
 	results-list
 )
@@ -318,8 +318,8 @@
 		; call helper function to process them
 		(define results-list (append-map helper marker-list))
 		; delete the markers links and the marker itself
-		(for-each purge-hypergraph marker-list)
-		(cog-delete marker)
+		(for-each extract-hypergraph marker-list)
+		(cog-extract marker)
 		; return the results
 		results-list
 	)

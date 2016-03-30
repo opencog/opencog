@@ -313,7 +313,7 @@
     (let* ((set-link (get-psi-goal))
            (result (cog-outgoing-set set-link)))
 
-          (cog-delete set-link)
+          (cog-extract set-link)
           (if (null? result) result  (car result))
     )
 )
@@ -439,7 +439,7 @@
               ((= 0 (length node))
                (create-psi-action-rule))
               (else ; cleanup TODO: Make exaustive
-                  (cog-delete (rule))
+                  (cog-extract (rule))
                   (error "The rule has been defined multiple times"))
         )
     )
@@ -488,7 +488,7 @@
     (let* ((set-link (get-psi-action-type))
           (result (cog-outgoing-set set-link)))
 
-          (cog-delete set-link)
+          (cog-extract set-link)
 
           (if (null? result)
               "Default"
