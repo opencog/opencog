@@ -25,18 +25,18 @@
 #include "HandleToTemporalEntryMap.h"
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atomutils/HandleMap.h>
+#include <opencog/atomutils/ThreadSafeHandleMap.h>
 
 using namespace opencog;
 
 HandleToTemporalEntryMap::HandleToTemporalEntryMap()
 {
-    internalMap = std::make_shared<HandleMap<TemporalEntry*>>();
+    internalMap = std::make_shared<ThreadSafeHandleMap<TemporalEntry*>>();
 }
 
 HandleToTemporalEntryMap::~HandleToTemporalEntryMap()
 {
-    HandleMapIterator<TemporalEntry*>* keys = internalMap->keys();
+    ThreadSafeHandleMapIterator<TemporalEntry*>* keys = internalMap->keys();
     while (keys->has_next()) {
         delete (internalMap->get(keys->next()));
     }
@@ -79,7 +79,7 @@ int HandleToTemporalEntryMap::getSize()
     return internalMap->get_size();
 }
 
-HandleMapIterator<TemporalEntry *> *HandleToTemporalEntryMap::keys()
+ThreadSafeHandleMapIterator<TemporalEntry *> *HandleToTemporalEntryMap::keys()
 {
     return internalMap->keys();
 }
@@ -87,7 +87,7 @@ HandleMapIterator<TemporalEntry *> *HandleToTemporalEntryMap::keys()
 HandleToTemporalEntryMap *HandleToTemporalEntryMap::clone()
 {
     HandleToTemporalEntryMap *ret = new HandleToTemporalEntryMap();
-    HandleMapIterator<TemporalEntry *> *originalKeys = keys();
+    ThreadSafeHandleMapIterator<TemporalEntry *> *originalKeys = keys();
     while (originalKeys->has_next()) {
         Handle nextKey = originalKeys->next();
         ret->add(nextKey, get(nextKey));
@@ -99,7 +99,7 @@ HandleToTemporalEntryMap *HandleToTemporalEntryMap::clone()
 std::string HandleToTemporalEntryMap::toString()
 {
     std::string answer;
-    for (HandleMapIterator<TemporalEntry *> *it = keys(); it->has_next();) {
+    for (ThreadSafeHandleMapIterator<TemporalEntry *> *it = keys(); it->has_next();) {
         Handle key = it->next();
         TemporalEntry* value = get(key);
         /* append key */
