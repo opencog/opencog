@@ -226,6 +226,7 @@ public:
                                               const std::string & demand 
                                              );
 
+
     /**
      * Returns a pointer to the most recent evaluation link. With the
      * given name of the predicateNode link, this method performs a
@@ -572,6 +573,8 @@ public:
     static bool isMovingBtwSpaceMap(const AtomSpace& atomSpace,
                                     const SpaceServer::SpaceMap& sm,
                                     Handle obj);
+
+    static bool isHandleAnEntity(const AtomSpace& atomSpace, Handle h);
 
     /**
      * Get the length, width and height information for a given object, if any.

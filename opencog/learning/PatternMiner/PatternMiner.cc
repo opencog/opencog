@@ -1805,7 +1805,7 @@ void PatternMiner::getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtended
 }
 
 // make sure only input 2~4 gram patterns, calculate nSurprisingness_I and nSurprisingness_II
-void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace)
+void PatternMiner::calculateSurprisingness(HTreeNode* HNode, AtomSpace *_fromAtomSpace, bool onlySurprisingnessI)
 {
 
 //    // debug
@@ -1914,6 +1914,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
         return;
 
 //    std::cout << "=================Debug: calculate II_Surprisingness for pattern: ====================\n";
+    if (onlySurprisingnessI)
+        return;
 
     // II_Surprisingness is to evaluate how easily the frequency of this pattern can be infered from any of  its superpatterns
     // for all its super patterns
@@ -2718,9 +2720,6 @@ void PatternMiner::_mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, un
 
     }
 
-    pai->waitingToFeedToPatternMinerLock.unlock();
-
-
     for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
     {
         // sort by frequency
@@ -2735,6 +2734,39 @@ void PatternMiner::_mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, un
     }
 
     OutPutCorpusToFile(observingAtomSpace);
+
+
+    atomspaceSizeFloat = (float)allLinkNumber;
+    std::cout<<"Debug: PatternMiner: Start Surprisingness_I evaluation...\n";
+
+    for(unsigned int cur_gram = 2; cur_gram <= MAX_GRAM ; cur_gram ++)
+    {
+        if (patternsForGram[cur_gram-1].size() == 0)
+            break;
+
+        cout << "\nCalculating Surprisingness_I for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
+
+        unsigned int total = (patternsForGram[cur_gram-1]).size();
+        for ( unsigned int cur_index = 0; cur_index < total; cur_index ++)
+        {
+            HTreeNode* htreeNode = patternsForGram[cur_gram - 1][cur_index];
+
+            // Evaluate the Surprisingness_I
+            calculateSurprisingness(htreeNode, observingAtomSpace, true);
+        }
+
+        std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
+        std::cout<<"Outputting to file ... ";
+
+        // sort by surprisingness_I first
+        std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
+        OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
+
+    }
+
+    std::cout<< std::endl;
+
+    pai->waitingToFeedToPatternMinerLock.unlock();
 
 }
 

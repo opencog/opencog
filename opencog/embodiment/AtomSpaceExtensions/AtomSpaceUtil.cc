@@ -489,6 +489,23 @@ bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
 }
 
 
+bool AtomSpaceUtil::isHandleAnEntity(const AtomSpace& atomSpace, Handle h)
+{
+    Type handleType = atomSpace.getType(h);
+
+    if ((handleType == OBJECT_NODE) ||
+        (handleType == BLOCK_ENTITY_NODE) ||
+        (handleType == PET_NODE) ||
+        (handleType == AVATAR_NODE) ||
+        (handleType == ACCESSORY_NODE) ||
+        (handleType == STRUCTURE_NODE) ||
+        (handleType == HUMANOID_NODE) ||
+        (handleType == UNKNOWN_OBJECT_NODE))
+        return true;
+    else
+        return false;
+}
+
 
 Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& handles)
 {
@@ -1113,6 +1130,8 @@ std::vector<Handle> AtomSpaceUtil::getEvaluationLinksWithoutPredicate(AtomSpace 
 
     return resultSet;
 }
+
+
 
 std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace, string predicate, HandleSeq &hNonFirstOutgoings)
 {

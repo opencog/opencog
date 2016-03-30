@@ -2789,7 +2789,73 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
 
         patternMiner->mineRelatedPatternsOnQueryByLinks_OR(paramEvalLinks, 4, pai);
 
-        cout << "Finished mining patterns on query related to this parameter: " << paramMapIter->first << std::endl;
+        cout << "Finished mining all patterns on query related to this parameter: " << paramMapIter->first
+             << " Now start to select the best patterns . . ."
+             << std::endl;
+
+        // If the parameter value is an object, two kinds of properties should have higher priority:
+        HandleSeq parmValueHandles;
+        for (Handle evalLink : paramEvalLinks)
+        {
+            Handle listLink = atomSpace->getOutgoing(evalLink, 1);
+            HandleSeq allOutgoingsOfListlink = atomSpace->getOutgoing(listLink);
+            Handle valueNode = allOutgoingsOfListlink[allOutgoingsOfListlink.size()-1];
+            if (valueNode != Handle::UNDEFINED)
+                parmValueHandles.push_back(valueNode);
+        }
+
+        if (! AtomSpaceUtil::isHandleAnEntity(atomSpace, parmValueHandles[0]))
+        {
+            // 1. intrinsic properties: usually do not change much, e.g. material, color, class, edible
+            //    the opposite is external properties: usually changing a lot, e.g. holder, owner.
+            //    Find out what properties are intrinsic / external from the data first.
+
+            //    First find all the properties of this
+            set<string> allProperties;
+            set<string> externalProperties;
+
+            // for the same property , if there is one object changed, it's considered as external properties
+            // e.g.: if there is 5 gates, the default opening state is close; in the corpus,
+            // there is only 1 gate opened later and the other 4 gates are still close, then this state is still a external properties.
+            for (Handle objh : parmValueHandles)
+            {
+                // map<predicateNode, valueNode> for this object
+                set <Handle> predicatesThisObj;
+                HandleSeq objOutgoing;
+                objOutgoing.push_back(objh);
+                HandleSeq allPropertyEvalLinks = AtomSpaceUtil::getEvaluationLinksWithoutPredicate(*atomSpace, objOutgoing);
+                for (Handle evalLink : allPropertyEvalLinks)
+                {
+                    Handle predicateH = atomSpace->getOutgoing(evalLink,0);
+                    string propertyName = atomSpace->getName(predicateH);
+
+                    if (predicatesThisObj.find(predicateH) == predicatesThisObj.end())
+                    {
+                        predicatesThisObj.insert(predicateH);
+
+                        if (allProperties.find(propertyName) == allProperties.end())
+                            allProperties.insert(propertyName);
+                    }
+                    else
+                    {
+                        if (externalProperties.find(propertyName) == externalProperties.end())
+                        {
+                            externalProperties.insert(propertyName);
+                        }
+
+                    }
+                }
+            }
+
+
+            // 2. intrinsic properties which are more special / different compared to other objects of same class
+            //    e.g. there are 4  keys; their common properties are "class is key", "pickupable", "unedible",
+            //    the different properties are color, so color should get higher priority
+
+
+        }
+
+
 
     }
 

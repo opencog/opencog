@@ -296,7 +296,7 @@ namespace PatternMining
 
      unsigned int getCountOfAConnectedPattern(string& connectedPatternKey, HandleSeq& connectedPattern);
 
-     void calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace);
+     void calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAtomSpace, bool onlySurprisingnessI = false);
 
      void getOneMoreGramExtendedLinksFromGivenLeaf(Handle& toBeExtendedLink, Handle& leaf, Handle& varNode,
                                                                  HandleSeq& outPutExtendedPatternLinks, AtomSpace* _fromAtomSpace);

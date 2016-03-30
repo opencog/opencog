@@ -3798,7 +3798,7 @@ Handle PAI::addEntityToAtomSpace(const MapInfo& mapinfo, unsigned long timestamp
 
 Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long timestamp)
 {
-    HandleSeq entityRelatedLinks;
+//    HandleSeq entityRelatedLinks;
 
     std::string internalEntityId;
 
@@ -3819,9 +3819,9 @@ Handle PAI::removeEntityFromAtomSpace(const MapInfo& mapinfo, unsigned long time
 
     Handle propertyLink = addPropertyPredicate(std::string("exist"), objectNode, false, false); //! Update existance predicate
 
-    entityRelatedLinks.push_back(propertyLink);
+//    entityRelatedLinks.push_back(propertyLink);
 
-    addToWaitFeedingQueue(entityRelatedLinks);
+//    addToWaitFeedingQueue(entityRelatedLinks);
 
     // check if the object to be removed is marked as grabbed in
     // AvatarInterface. If so grabbed status should be unset.
@@ -4003,8 +4003,8 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 
     // Add the property predicates in atomspace
     propertyLink = addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate
-    if (propertyLink != Handle::UNDEFINED)
-        entityRelatedLinks.push_back(propertyLink);
+//    if (propertyLink != Handle::UNDEFINED)
+//        entityRelatedLinks.push_back(propertyLink);
 
     // test mine patterns on query
 //    propertyLink = addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
