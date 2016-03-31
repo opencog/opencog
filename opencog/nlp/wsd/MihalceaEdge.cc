@@ -91,10 +91,10 @@ void MihalceaEdge::annotate_parse(const Handle& h)
 	struct timeval start;
 	gettimeofday(&start, NULL);
 #endif
-	std::set<Handle>::const_iterator f;
+	OrderedHandleSet::const_iterator f;
 	for (f = words.begin(); f != words.end(); ++f)
 	{
-		std::set<Handle>::const_iterator s = f;
+		OrderedHandleSet::const_iterator s = f;
 		++s;
 		for (; s != words.end(); ++s)
 		{
@@ -126,7 +126,7 @@ void MihalceaEdge::annotate_parse_pair(const Handle& ha, const Handle& hb)
 {
 	words.clear();
 	foreach_word_instance(ha, &EdgeUtils::look_at_word, (EdgeUtils *) this);
-	std::set<Handle> pa_words = words;
+	OrderedHandleSet pa_words = words;
 	words.clear();
 	foreach_word_instance(hb, &EdgeUtils::look_at_word, (EdgeUtils *) this);
 
@@ -143,10 +143,10 @@ void MihalceaEdge::annotate_parse_pair(const Handle& ha, const Handle& hb)
 	struct timeval start;
 	gettimeofday(&start, NULL);
 #endif
-	std::set<Handle>::const_iterator ia;
+	OrderedHandleSet::const_iterator ia;
 	for (ia = pa_words.begin(); ia != pa_words.end(); ++ia)
 	{
-		std::set<Handle>::const_iterator ib;
+		OrderedHandleSet::const_iterator ib;
 		for (ib = words.begin(); ib != words.end(); ++ib)
 		{
 			annotate_word_pair(*ia, *ib);
@@ -265,7 +265,7 @@ bool MihalceaEdge::sense_of_second_inst(const Handle& second_word_sense_h,
 	if (stv->getMean() < 0.01) return false;
 
 	// Create a link connecting the first pair to the second pair.
-	std::vector<Handle> out;
+	HandleSeq out;
 	out.push_back(first_sense_link);
 	out.push_back(second_sense_link);
 

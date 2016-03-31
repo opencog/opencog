@@ -39,9 +39,9 @@
 using namespace opencog;
 using namespace std;
 
-vector<Handle> createHebbianGraph(AtomSpace* atomSpace, std::string baseName)
+HandleSeq createHebbianGraph(AtomSpace* atomSpace, std::string baseName)
 {
-    vector<Handle> testAtoms;
+    HandleSeq testAtoms;
     int number = 4;
 
     for (int i = 0; i < number; i++) {
@@ -74,11 +74,11 @@ vector<Handle> createHebbianGraph(AtomSpace* atomSpace, std::string baseName)
     return testAtoms;
 }
 
-std::vector<Handle> createCase(bool srcInAF, int srcSTI, bool targInAF,
+HandleSeq createCase(bool srcInAF, int srcSTI, bool targInAF,
         int targSTI, bool inverse, float linkStr, std::string baseName)
 {
     AtomSpace* a = &server().getAtomSpace();
-    vector<Handle> testAtoms;
+    HandleSeq testAtoms;
     std::ostringstream buf1;
     std::ostringstream buf2;
     TruthValuePtr tv1 = SimpleTruthValue::createTV(0.5f, 0.99f);
@@ -116,9 +116,9 @@ std::vector<Handle> createCase(bool srcInAF, int srcSTI, bool targInAF,
 
 void removeAll(AtomSpace* atomSpace)
 {
-    std::vector<Handle> allAtoms;
-    std::vector<Handle>::iterator i;
-    std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
+    HandleSeq allAtoms;
+    HandleSeq::iterator i;
+    std::back_insert_iterator<HandleSeq> outputI(allAtoms);
 
     server().getAtomSpace().get_handles_by_type(outputI, ATOM, true);
 
@@ -134,7 +134,7 @@ private:
     Factory<HebbianUpdatingAgent, Agent> factory;
     HebbianUpdatingAgentPtr agent;
     CogServer& cogserver;
-    std::vector<Handle> atoms;
+    HandleSeq atoms;
 
 public:
 
@@ -179,12 +179,12 @@ public:
     void testRunWithLinkConversion() {
         AtomSpace* a = &cogserver.getAtomSpace();
         agent->convertLinks = true;
-        std::vector<Handle> in_in_norm;
-        std::vector<Handle> in_in_inv;
-        std::vector<Handle> in_out_norm;
-        std::vector<Handle> in_out_inv;
-        std::vector<Handle> out_in_norm;
-        std::vector<Handle> out_in_inv;
+        HandleSeq in_in_norm;
+        HandleSeq in_in_inv;
+        HandleSeq in_out_norm;
+        HandleSeq in_out_inv;
+        HandleSeq out_in_norm;
+        HandleSeq out_in_inv;
         
         in_in_norm = createCase(true, 10, true, 10, false, 0.1, "ininnorm");
         in_in_inv = createCase(true, 10, true, 10, true, 0.1, "inininv");

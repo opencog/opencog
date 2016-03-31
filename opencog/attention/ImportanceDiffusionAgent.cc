@@ -134,18 +134,18 @@ void ImportanceDiffusionAgent::run()
 #define toFloat getMean
 
 int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffusionAtomsMap,
-        std::vector<Handle> links)
+        HandleSeq links)
 {
     int totalDiffusionAtoms = 0;
-    std::vector<Handle>::iterator hi;
+    HandleSeq::iterator hi;
 
 #ifdef DEBUG
     log->fine("Finding atoms involved with STI diffusion and their matrix indices");
 #endif
     for (hi = links.begin(); hi != links.end(); ++hi) {
         // Get all atoms in outgoing set of links
-        std::vector<Handle> targets;
-        std::vector<Handle>::iterator targetItr;
+        HandleSeq targets;
+        HandleSeq::iterator targetItr;
         Handle linkHandle = *hi;
         float val = a->get_TV(linkHandle)->toFloat();
         if (val == 0.0f) {
@@ -206,9 +206,9 @@ void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
 
 void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         int totalDiffusionAtoms, std::map<Handle,int> diffusionAtomsMap,
-        std::vector<Handle> links)
+        HandleSeq links)
 {
-    std::vector<Handle>::iterator hi;
+    HandleSeq::iterator hi;
     // set connectivity matrix size, size is dependent on the number of atoms
     // that are connected by a HebbianLink in some way.
 //    connections = gsl_matrix_alloc(totalDiffusionAtoms, totalDiffusionAtoms);
@@ -221,8 +221,8 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
 
     for (hi=links.begin(); hi != links.end(); ++hi) {
         // Get all atoms in outgoing set of link
-        std::vector<Handle> targets;
-        std::vector<Handle>::iterator targetItr;
+        HandleSeq targets;
+        HandleSeq::iterator targetItr;
 
         std::map<Handle,int>::iterator sourcePosItr;
         std::map<Handle,int>::iterator targetPosItr;
@@ -276,7 +276,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                 }
             }
         } else {
-            std::vector<Handle>::iterator sourceItr;
+            HandleSeq::iterator sourceItr;
             // Add the indices of all targets as sources
             // then go through all pairwise combinations
 #ifdef DEBUG
@@ -353,8 +353,8 @@ void ImportanceDiffusionAgent::spreadImportance()
     std::map<Handle,int> diffusionAtomsMap;
     int totalDiffusionAtoms = 0;
 
-    std::vector<Handle> links;
-    std::back_insert_iterator< std::vector<Handle> > out_hi(links);
+    HandleSeq links;
+    std::back_insert_iterator<HandleSeq> out_hi(links);
 
     log->debug("Begin diffusive importance spread.");
 

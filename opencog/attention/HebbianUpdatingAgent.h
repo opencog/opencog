@@ -65,7 +65,7 @@ protected:
 	 * @todo create a method for working out conjunction between more than
 	 * two atoms.
 	 */
-    float targetConjunction(std::vector<Handle> handles);
+    float targetConjunction(HandleSeq handles);
 
 	/** Transform STI into a normalised STI value between -1 and 1.
 	 *
@@ -80,7 +80,7 @@ protected:
 	 * @param outgoing Vector to rearrange.
 	 * @return rearranged vector.
 	 */
-    std::vector<Handle>& moveSourceToFront(std::vector<Handle> &outgoing);
+    HandleSeq& moveSourceToFront(HandleSeq &outgoing);
 
     /** Set the agent's logger object
      *

@@ -40,7 +40,7 @@ using namespace opencog;
  * @param pAS            the corresponding AtomSpace
  * @param vars           the set of nodes that should be treated as variables
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const std::set<Handle>& vars) :
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const OrderedHandleSet& vars) :
     InitiateSearchCB(pAS),
     DefaultPatternMatchCB(pAS),
     m_as(pAS),
@@ -400,7 +400,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         else shrinked_soln[kv.first] = kv.second;
     }
 
-    std::set<Handle> qSolnSetLinks;
+    OrderedHandleSet qSolnSetLinks;
 
     // get the R2L-SetLinks that are related to these InterpretationNodes
     for (Handle& hItprNode : qItprNode)

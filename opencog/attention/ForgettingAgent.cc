@@ -82,8 +82,8 @@ void ForgettingAgent::run()
 
 void ForgettingAgent::forget(float proportion = 0.10f)
 {
-    std::vector<Handle> atomsVector;
-    std::back_insert_iterator< std::vector<Handle> > output2(atomsVector);
+    HandleSeq atomsVector;
+    std::back_insert_iterator<HandleSeq> output2(atomsVector);
     int count = 0;
     int removalAmount;
 

@@ -73,7 +73,7 @@ void TulipWriter::writeCluster(Handle setLink)
     a.get_handles_by_type(back_inserter(linkHandles), (Type) LINK, true );
 
     // Output setLink as a cluster
-    std::set<Handle> inSet;
+    OrderedHandleSet inSet;
     if (setLink != Handle::UNDEFINED) {
         HandleSeq setLinks = setLink->getOutgoingSet();
         for (Handle h : setLinks) {
@@ -91,7 +91,7 @@ void TulipWriter::writeCluster(Handle setLink)
     myfile << "(cluster 2 \"Not in set\"" << endl;
     myfile << " (nodes ";
     for (Handle h : nodeHandles) {
-        std::set<Handle>::iterator si = inSet.find(h);
+        OrderedHandleSet::iterator si = inSet.find(h);
         if (si == inSet.end()) myfile << h << " ";
     }
     for (Handle h : linkHandles) {
@@ -102,7 +102,7 @@ void TulipWriter::writeCluster(Handle setLink)
     // TODO : also output the appropriate fake edges
 //    myfile << " (edges ";
 //    for (Handle h : linkHandles) {
-//        std::set<Handle>::iterator si = inSet.find(h);
+//        OrderedHandleSet::iterator si = inSet.find(h);
 //        if (si == inSet.end()) {
 //            myfile << h << " ";
 //        }

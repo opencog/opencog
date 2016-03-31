@@ -130,7 +130,7 @@ bool MihalceaLabel::annotate_word_sense(const Handle& word_sense)
 #endif
 
 	// Create a link connecting this word-instance to this word-sense.
-	std::vector<Handle> out;
+	HandleSeq out;
 	out.push_back(word_instance);
 	out.push_back(word_sense);
 
