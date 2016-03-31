@@ -42,10 +42,10 @@ using namespace std;
 #define AV2_LTI 30000
 #define AV3_LTI 700
 
-vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
+HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {
     char buf[256];
-    vector<Handle> testAtoms;
+    HandleSeq testAtoms;
     int baseNameLength;
 
     memset(buf, 0, 256);
@@ -248,7 +248,7 @@ public:
      */
     void testStimulateAtom() {
         stim_t stimValue;
-        vector<Handle> atoms;
+        HandleSeq atoms;
         logger().debug("BEGIN TEST: stimulateAtom");
         CogServer& cogserver = static_cast<CogServer&>(server());
         MyAgentWithDefaultsPtr agent =
@@ -278,7 +278,7 @@ public:
      */
     void testStimulateList() {
         stim_t stimValue;
-        vector<Handle> atoms;
+        HandleSeq atoms;
         logger().debug("BEGIN TEST: stimulateList");
         CogServer& cogserver = static_cast<CogServer&>(server());
         MyAgentWithDefaultsPtr agent = 
@@ -307,7 +307,7 @@ public:
      */
     void testResetStimulus() {
         stim_t stimValue;
-        vector<Handle> atoms;
+        HandleSeq atoms;
         logger().debug("BEGIN TEST: resetStimulus");
         CogServer& cogserver = static_cast<CogServer&>(server());
         MyAgentWithDefaultsPtr agent = 

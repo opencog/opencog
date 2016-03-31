@@ -113,7 +113,7 @@ void PatternMiner::growPatternsDepthFirstTask_old()
         {
             map<HandleSeq, vector<HTreeNode*> > ::iterator it = allLastGramLinksToPatterns.begin();
             map<HandleSeq, vector<HTreeNode*> > allThisGramLinksToPatterns;
-            vector<set<Handle>> newConnectedLinksFoundThisGram;
+            vector<OrderedHandleSet> newConnectedLinksFoundThisGram;
 
             for(; it != allLastGramLinksToPatterns.end(); ++ it)
             {
@@ -294,7 +294,7 @@ void PatternMiner::runPatternMinerDepthFirst()
 
     // release allLinks
     allLinks.clear();
-    (vector<Handle>()).swap(allLinks);
+    (HandleSeq()).swap(allLinks);
 
 //    delete [] cur_DF_ExtractedLinks;
     delete [] threads;
@@ -439,7 +439,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
             {
                 // check if these fact links already been processed before or by other thread
 
-                set<Handle> originalLinksSet(inputLinks.begin(), inputLinks.end());
+                OrderedHandleSet originalLinksSet(inputLinks.begin(), inputLinks.end());
 
                 for (Handle h  : originalLinksSet)
                 {
@@ -847,7 +847,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 // allLastGramHTreeNodes is input, allFactLinksToPatterns is output - the links fact to all its pattern HTreeNodes
 void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance, AtomSpace* _fromAtomSpace, unsigned int gram,
-     vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<set<Handle>>& newConnectedLinksFoundThisGram)
+     vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<OrderedHandleSet>& newConnectedLinksFoundThisGram)
 {
 
     // First, extract all the variable nodes in the instance links
@@ -924,14 +924,14 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
 
             // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
 
-            vector<set<Handle> >::iterator newExtendIt;
-            set<Handle> originalLinksToSet(originalLinks.begin(),originalLinks.end());
+            vector<OrderedHandleSet >::iterator newExtendIt;
+            OrderedHandleSet originalLinksToSet(originalLinks.begin(),originalLinks.end());
             bool alreadyExtracted = false;
 
             // check if these links have been extracted
             for(newExtendIt = newConnectedLinksFoundThisGram.begin(); newExtendIt != newConnectedLinksFoundThisGram.end(); ++newExtendIt)
             {
-                set<Handle>& exitstingLinks = (set<Handle>&)(*newExtendIt);
+                OrderedHandleSet& exitstingLinks = (OrderedHandleSet&)(*newExtendIt);
                 if (exitstingLinks == originalLinksToSet)
                 {
                     alreadyExtracted = true;
@@ -944,7 +944,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
             if (! alreadyExtracted)
             {
                 newConnectedLinksFoundThisGram.push_back(originalLinksToSet);
-//                set<Handle> sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
+//                OrderedHandleSet sharedNodes; // only the current extending shared node is in sharedNodes for Depth first
 //                sharedNodes.insert(extendNode);
                 vector<HTreeNode*> allThisGramHTreeNodes;
                 extractAllPossiblePatternsFromInputLinksDF(originalLinks, (unsigned int)(varIt->second), _fromAtomSpace, allLastGramHTreeNodes, allThisGramHTreeNodes, gram);
@@ -981,7 +981,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
 //       for Depth first: sharedNodes = current shared node
 // sharedNodes have to be variables , should not be const
 // sharedLinkIndex is the index in the inputLinks which contains the shared node
-void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
+void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
                                                               vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram)
 {
     map<Handle,Handle> valueToVarMap;  // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace

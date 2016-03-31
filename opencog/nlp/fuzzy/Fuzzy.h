@@ -61,7 +61,7 @@ class Fuzzy :
         // mainly to avoid returning duplicate solutions
         HandleSeqSeq solns_contents;
 
-        std::set<Handle> solns_seen;
+        OrderedHandleSet solns_seen;
 };
 
 }

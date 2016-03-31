@@ -139,7 +139,7 @@ bool NNAdjust::sense_pair(const Handle& pair_link)
 	if (classserver().isA(t, COSENSE_LINK)) return false;
 
 	// If this link is not linking the first and second sense, skip it.
-	std::vector<Handle> outset = LinkCast(pair_link)->getOutgoingSet();
+	HandleSeq outset = LinkCast(pair_link)->getOutgoingSet();
 	if ((first_sense_link != outset[0]) && 
 	    (first_sense_link != outset[1])) return false;
 
