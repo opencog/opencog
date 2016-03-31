@@ -91,12 +91,12 @@ av_fields = {
 # Atom helpers
 class FormatHandleValue(fields.Raw):
     def format(self, value):
-        return value.value()
+        return value
 
 
 class FormatHandleList(fields.Raw):
     def format(self, values):
-        return [elem.h.value() for elem in values]
+        return [elem.value() for elem in values]
 
 
 class AtomListResponse(object):
@@ -125,7 +125,7 @@ class DeleteAtomResponse(object):
         }
 
 atom_fields = {
-    'handle': FormatHandleValue(attribute='h'),
+    'handle': FormatHandleValue(attribute='uuid'),
     'type': fields.String(attribute='type_name'),
     'name': fields.String,
     'outgoing': FormatHandleList(attribute='out'),

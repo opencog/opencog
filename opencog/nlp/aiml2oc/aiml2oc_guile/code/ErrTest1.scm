@@ -114,7 +114,7 @@
 (define (answerInput input)
  (push-atomspace)
  (pretty-print (generateReply input))
- (cog-delete-recursive (mapConceptualizeString input))
+ (cog-extract-recursive (mapConceptualizeString input))
  (pop-atomspace)
 )
 
@@ -291,5 +291,3 @@
 ;;TEST CASE THREE
 ;; (answerInput "I REMEMBER LAST WEEK")
 ;; Same result as TEST CASE ONE
-
-	

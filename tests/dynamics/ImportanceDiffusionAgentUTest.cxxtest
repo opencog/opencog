@@ -37,9 +37,9 @@
 using namespace std;
 using namespace opencog;
 
-vector<Handle> createHebbianGraph(AtomSpace* atomSpace, std::string baseName)
+HandleSeq createHebbianGraph(AtomSpace* atomSpace, std::string baseName)
 {
-    vector<Handle> testAtoms;
+    HandleSeq testAtoms;
     int number = 4;
 
     for (int i = 0; i < number; i++) {
@@ -74,9 +74,9 @@ vector<Handle> createHebbianGraph(AtomSpace* atomSpace, std::string baseName)
 
 void removeAll(AtomSpace* atomSpace)
 {
-    std::vector<Handle> allAtoms;
-    std::vector<Handle>::iterator i;
-    std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
+    HandleSeq allAtoms;
+    HandleSeq::iterator i;
+    std::back_insert_iterator<HandleSeq> outputI(allAtoms);
 
     server().getAtomSpace().getHandlesByType(outputI, ATOM, true);
 
@@ -92,7 +92,7 @@ private:
     Factory<ImportanceDiffusionAgent, Agent> factory;
     CogServer& cogserver;
     ImportanceDiffusionAgentPtr agent;
-    std::vector<Handle> atoms;
+    HandleSeq atoms;
 
 public:
 

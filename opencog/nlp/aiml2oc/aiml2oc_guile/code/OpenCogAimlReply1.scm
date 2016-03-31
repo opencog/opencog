@@ -131,7 +131,7 @@
 (define (answerInput input)
  (push-atomspace)
  (pretty-print (generateReply input))
- ;;(cog-delete-recursive (mapConceptualizeString input))
+ ;;(cog-extract-recursive (mapConceptualizeString input))
  (pop-atomspace)
 )
 

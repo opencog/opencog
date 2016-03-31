@@ -505,7 +505,7 @@
 	(define say-able (not (null? (sureal temp-set-link))))
 
 	; remove the temporary SetLink
-	(cog-purge temp-set-link)
+	(cog-extract temp-set-link)
 
 	(cond
 		; not long/complex but sayable

@@ -44,7 +44,7 @@ class ListRequest : public Request
 
 protected:
 
-    std::vector<Handle> _handles;
+    HandleSeq _handles;
     std::ostringstream  _error;
 
     void sendOutput(void);

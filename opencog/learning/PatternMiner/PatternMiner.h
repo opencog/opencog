@@ -184,34 +184,34 @@ namespace PatternMining
      //       )
      //    )
      // Return unified ordered Handle vector
-     vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern, unsigned int &unifiedLastLinkIndex);
+     HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int &unifiedLastLinkIndex);
 
-     string unifiedPatternToKeyString(vector<Handle>& inputPattern , const AtomSpace *atomspace = 0);
+     string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = 0);
 
      // this function is called by RebindVariableNames
      void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
 
      // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
-     vector<Handle> RebindVariableNames(vector<Handle>& orderedPattern, map<Handle,Handle>& orderedVarNameMap);
+     HandleSeq RebindVariableNames(HandleSeq& orderedPattern, map<Handle,Handle>& orderedVarNameMap);
 
-     void generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector< vector<int> > &indexes);
+     void generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector< vector<int> > &indexes);
 
      // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
      void generateALinkByChosenVariables(Handle &originalLink, map<Handle,Handle>& valueToVarMap, HandleSeq &outputOutgoings, AtomSpace *_fromAtomSpace);
 
       // valueToVarMap:  the ground value node in the orginal Atomspace to the variable handle in pattenmining Atomspace
      void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap, AtomSpace* _fromAtomSpace);
-     void extractAllNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _fromAtomSpace);
+     void extractAllNodesInLink(Handle link, OrderedHandleSet& allNodes, AtomSpace* _fromAtomSpace);
      void extractAllNodesInLink(Handle link, map<Handle, unsigned int> &allNodes, AtomSpace* _fromAtomSpace, unsigned index); // just find all the nodes in the original atomspace for this link
-     void extractAllVariableNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _atomSpace);
+     void extractAllVariableNodesInLink(Handle link, OrderedHandleSet& allNodes, AtomSpace* _atomSpace);
 
      // if a link contains only variableNodes , no const nodes
      bool onlyContainVariableNodes(Handle link, AtomSpace* _atomSpace);
 
-     void extractAllPossiblePatternsFromInputLinksBF(vector<Handle>& inputLinks,  HTreeNode* parentNode,set<Handle>& sharedNodes, unsigned int gram);
+     void extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLinks,  HTreeNode* parentNode,OrderedHandleSet& sharedNodes, unsigned int gram);
 
      // vector<HTreeNode *> &allHTreeNodes is output all the HTreeNodes found
-     void extractAllPossiblePatternsFromInputLinksDF(vector<Handle>& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
+     void extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLinks,unsigned int sharedLinkIndex, AtomSpace* _fromAtomSpace,
                                                      vector<HTreeNode*>& allLastGramHTreeNodes, vector<HTreeNode*>& allHTreeNodes, unsigned int gram = 1);
 
      void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes);
@@ -226,12 +226,12 @@ namespace PatternMining
 
      HandleSeq swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes, HandleSeq& linksWillBeDel);
 
-     void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes);
+     void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, OrderedHandleSet& allVarNodes);
 
      void extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, map<Handle, unsigned int>& allVarNodes, unsigned index);
 
      void extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance, AtomSpace* _fromAtomSpace, unsigned int gram,
-          vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<set<Handle>>& newConnectedLinksFoundThisGram);
+          vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<OrderedHandleSet>& newConnectedLinksFoundThisGram);
 
      void extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
 
@@ -283,9 +283,9 @@ namespace PatternMining
 
      void removeLinkAndItsAllSubLinks(AtomSpace *_atomspace, Handle link);
 
-     set<Handle> _getAllNonIgnoredLinksForGivenNode(Handle keywordNode, set<Handle>& allSubsetLinks);
+     OrderedHandleSet _getAllNonIgnoredLinksForGivenNode(Handle keywordNode, OrderedHandleSet& allSubsetLinks);
 
-     set<Handle> _extendOneLinkForSubsetCorpus(set<Handle>& allNewLinksLastGram, set<Handle>& allSubsetLinks);
+     OrderedHandleSet _extendOneLinkForSubsetCorpus(OrderedHandleSet& allNewLinksLastGram, OrderedHandleSet& allSubsetLinks);
 
      // will write the subset to a scm file
      void _selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection);

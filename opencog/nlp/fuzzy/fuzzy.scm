@@ -173,7 +173,7 @@
                             (set! max-score score))
                         #f)))
             (cog-outgoing-set fset))
-            (cog-purge fset)
+            (cog-extract fset)
             results))
 
     (let* ( ; List of setence types to not consider
