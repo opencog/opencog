@@ -1393,6 +1393,7 @@
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
 		(r2l-wordinst-Predicate pred_instance)
+		(r2l-wordinst-concept comp_instance)
 		(EvaluationLink
 			(DefinedLinguisticPredicateNode "InManner")
 			(ListLink
@@ -1409,6 +1410,7 @@
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
 		(r2l-wordinst-Predicate pred_instance)
+		(r2l-wordinst-concept comp_instance)
 		(EvaluationLink
 			(DefinedLinguisticPredicateNode "Because")
 			(ListLink
@@ -1425,6 +1427,7 @@
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
 		(r2l-wordinst-Predicate pred_instance)
+		(r2l-wordinst-concept comp_instance)
 		(AtTimeLink
 			(PredicateNode pred_instance)
 			(ConceptNode comp_instance)
@@ -1442,6 +1445,7 @@
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 		(r2l-wordinst-Predicate comp_instance)
 		(r2l-wordinst-Predicate pred_instance)
+		(r2l-wordinst-concept comp_instance)
 		(EvaluationLink
 			(PredicateNode pred_instance)
 			(ListLink
