@@ -85,7 +85,6 @@
     (define result)
 	(define listified-string (mapConceptualizeString (clean-text input-str)))
 
-    ;(set! rule (get-tree-with-antecedent input-str))
     (set! rule (get-tree-with-antecedent listified-string))
     (if rule
         (begin
@@ -172,6 +171,16 @@
 )
 
 
+(define (delistify ll)
+	(define concept-words (cog-outgoing-set ll))
+	(define first (cog-name (list-ref concept-words 0)))
+	(set! concept-words (list-tail concept-words 1))
+	(string-downcase
+		(fold (lambda (new prev) (string-append prev " " (cog-name new)))
+			first
+			concept-words)))
+
+
 
 ;-----------------------------------------------------------------
 ; Creates new behavior rule in atomese based on a given simulus and response
@@ -187,7 +196,7 @@
 	(set! new-rule
     	(BindLink
     		stimulus
-			(DefinedPredicateNode  (string-downcase (cog-name (list-ref (cog-outgoing-set response) 0))))
+			(DefinedPredicateNode  (delistify response))
 		)
 	)
 	(display new-rule)
