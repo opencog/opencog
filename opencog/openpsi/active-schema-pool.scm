@@ -34,7 +34,6 @@
 
   Returns a list of results from the step.
 "
-    ;TODO: Move logic to atomese, so as to simply life for everyone.
     (let* ((asp (psi-asp)))
         (cog-fc (SetLink) asp (SetLink))
     )
@@ -246,7 +245,8 @@
 ; --------------------------------------------------------------
 (define (psi-goal-selector-maximize threshold)
 "
-  Sets the goal by randomly selecting a demand for maximization, should its demand-value be below the given threshold.
+  Sets the goal by randomly selecting a demand for maximization, should its
+  demand-value be below the given threshold.
 
   threshold:
   - The boundary of the demand-value below which a demand will be chosen.
