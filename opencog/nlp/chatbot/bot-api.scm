@@ -34,47 +34,56 @@
   the user-name (currently, the user's IRC nick). The QUERY is the
   string holding what the user said.
 "
-    ; nlp-parse returns (SentenceNode "sentence@45c470a6-29...")
-    (define sent-node (car (nlp-parse query)))
+    (catch #t
+        (lambda ()
+            ; nlp-parse returns (SentenceNode "sentence@45c470a6-29...")
+            (define sent-node (car (nlp-parse query)))
 
-    ;; XXX FIXME -- remove the IRC debug response below.
-    (display "Hello ")
-    (display user)
-    (display ", you said: \"")
-    (display query)
-    (display "\"")
-    (newline)
-    ; Call the `get-utterance-type` function to get the speech act type
-    ; of the utterance.  The response processing will be based on the
-    ; type of the speech act.
-    (let* ((gutr (sentence-get-utterance-type sent-node))
-           (utr (if (equal? '() gutr) '() (car gutr)))
+            ;; XXX FIXME -- remove the IRC debug response below.
+            (display "Hello ")
+            (display user)
+            (display ", you said: \"")
+            (display query)
+            (display "\"")
+            (newline)
+            ; Call the `get-utterance-type` function to get the speech act type
+            ; of the utterance.  The response processing will be based on the
+            ; type of the speech act.
+            (let* ((gutr (sentence-get-utterance-type sent-node))
+                   (utr (if (equal? '() gutr) '() (car gutr)))
+                )
+                (cond
+                    ((equal? utr (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
+                        (display "You asked a Truth Query\n")
+                        ; (truth_query_process sent-node)
+                        (display "I can't process truth query for now\n")
+                    )
+                    ((equal? utr (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
+                        (display "You made an Interrogative SpeechAct\n")
+                        (wh_query_process sent-node)
+                    )
+                    ((equal? utr (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
+                        (display "You made a Declarative SpeechAct\n")
+                        ; XXX Use AIML here to say something snarky.
+                    )
+                    ((equal? utr (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
+                        (display "You made a Imperative SpeechAct\n")
+                        ; Make the robot do whatever ...
+		                    ; (imperative_process sent-node)
+                        ; XXX Use AIML here to say something snarky.
+                    )
+                    (else
+                        (display "Sorry, I can't identify the speech act type\n")
+                        ; XXX Use AIML here to say something snarky.
+                    )
+                )
+            )
         )
-    (cond
-        ((equal? utr (DefinedLinguisticConceptNode "TruthQuerySpeechAct"))
-            (display "You asked a Truth Query\n")
-            ; (truth_query_process sent-node)
-            (display "I can't process truth query for now\n")
+        (lambda (key . parameters)
+            ; (display key) (newline) (display parameters) (newline)
+            (display "Sorry, I don't understand it\n")
         )
-        ((equal? utr (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
-            (display "You made an Interrogative SpeechAct\n")
-            (wh_query_process sent-node)
-        )
-        ((equal? utr (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
-            (display "You made a Declarative SpeechAct\n")
-            ; XXX Use AIML here to say something snarky.
-        )
-        ((equal? utr (DefinedLinguisticConceptNode "ImperativeSpeechAct"))
-            (display "You made a Imperative SpeechAct\n")
-            ; Make the robot do whatever ...
-				; (imperative_process sent-node)
-            ; XXX Use AIML here to say something snarky.
-        )
-        (else
-            (display "Sorry, I can't identify the speech act type\n")
-            ; XXX Use AIML here to say something snarky.
-        )
-    )))
+    ))
 
 ;--------------------------------------------------------------------
 ; not working for now ...
