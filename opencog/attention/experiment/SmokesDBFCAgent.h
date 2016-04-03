@@ -52,21 +52,33 @@ using namespace opencog;
 
 class SmokesDBFCAgent: public Agent {
 private:
-    std::set<Handle> inference_result;
+    HandleSeq inference_result={};
     AtomSpace& _atomspace;
     SchemeEval* _eval;
     Handle rule_base;
     string loggername = "smokeslog.log";
     Logger * smokes_logger;
     // A descending order sorted surprising result list.
-    std::set<float,std::greater<int>> dist_surprisingness_friends;
-    std::set<float,std::greater<int>> dist_surprisingness_smokes;
+    std::set<float, std::greater<int>> dist_surprisingness_friends;
+    std::set<float, std::greater<int>> dist_surprisingness_smokes;
 
     const int K_PERCENTILE = 5;
 
     float friends_mean();
-
     float smokes_mean();
+    float cancer_mean();
+
+    HandleSeq capped_af_set(HandleSeq& afset, int size)
+    {
+        HandleSeq out = afset;
+        //_atomspace.get_handle_set_in_attentional_focus(std::back_inserter(out));
+        auto comparator =
+                [](Handle& h1, Handle& h2) {return h1->getSTI() > h2->getSTI();};
+        std::sort(out.begin(), out.end(), comparator);
+        out.resize(size);
+        std::cerr << "OUTPUT_SIZE: " << out.size() << "\n";
+        return out;
+    }
 
 public:
     SmokesDBFCAgent(CogServer& cs);

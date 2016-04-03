@@ -7,8 +7,21 @@
 (define pln-rule-modus-ponens
     (BindLink
         (VariableList
+        (TypedVariableLink
             (VariableNode "$A")
-            (VariableNode "$B"))
+            (TypeChoice
+                (TypeNode "ConceptNode")
+                (TypeNode "EvaluationLink")
+             )
+         )
+         (TypedVariableLink
+            (VariableNode "$B")
+            (TypeChoice
+                (TypeNode "ConceptNode")
+                (TypeNode "EvaluationLink")
+             )
+         )
+        )
         (AndLink
             (ImplicationLink
                 (VariableNode "$A")
