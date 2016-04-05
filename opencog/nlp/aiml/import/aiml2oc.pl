@@ -53,27 +53,24 @@ open FOUT, ">$intermediateFile";
 foreach my $af (sort @aimlFiles)
 {
 	my $textfile="";
-    my $aimlSrc = "$aimlDir/$af";
+	my $aimlSrc = "$aimlDir/$af";
 	print " \n\n*****  processing $aimlSrc ****\n";
 	# read the entire file in as one string
-	open FILE, "$aimlSrc" or die "Couldn't open file: $!"; 
-	while (<FILE>){
-	 $textfile .= $_;
+	open FILE, "$aimlSrc" or die "Couldn't open file: $!";
+	while (<FILE>) {
+		$textfile .= $_;
 	}
-	close FILE;	
+	close FILE;
 	$textfile .="\n";
 
 
-
-	# goal read AIML into a linear neutral format while preserving relevant semantic info
-	# like the order of pattern side slot filling stars or sets
+	# Goal: read AIML into a linear neutral format while preserving
+	# relevant semantic info, such as the order of pattern side slot
+	# filling stars or sets
 
 	my $topicx = "*";
 
-
-
-
-	# normalize file by removing line feeds and excess spaces
+	# Normalize file by removing line feeds and excess spaces.
 	$textfile =~ s/\r\n/ /gi;
 	$textfile =~ s/\n/ /gi;
 	$textfile =~ s/\r/ /gi;
@@ -82,24 +79,26 @@ foreach my $af (sort @aimlFiles)
 
 	while ($textfile =~ /  /) { $textfile =~ s/  / /gi;}
 
-	# normalize so every category has a pattern/topic/that/template entries
+	# Normalize so that every category has a pattern/topic/that/template
+	# entries.
 	$textfile =~ s/\<\/pattern\> \<template\>/\<\/pattern\> \<that\>*\<\/that\> \<template\>/gi;
 
-	#define where to split for analysis
+	# Define where to split for analysis.
 	$textfile =~ s/<category>/\#\#SPLIT \<category\>/gi;
 	$textfile =~ s/<\/category>/\<\/category\>\#\#SPLIT /gi;
 	$textfile =~ s/<topic /\#\#SPLIT\<topic /gi;
-    $textfile =~ s/<\/topic>/\<\/topic\>\#\#SPLIT /gi;
+	$textfile =~ s/<\/topic>/\<\/topic\>\#\#SPLIT /gi;
 	$textfile =~ s/<aiml/\#\#SPLIT\<aiml/gi;
 	$textfile =~ s/<\/aiml>/\<\/aiml\>\#\#SPLIT /gi;
 
 	my @cats = split(/\#\#SPLIT/,$textfile);
 
-	#it should be one category at a time but it could be on high level topics
+	# It should be one category at a time, but it could be on high-level
+	# topics.
 	foreach my $c (@cats)
 	{
-	#	print FOUT "$c\n";
-		# processing high level topic conditions
+		# print FOUT "$c\n";
+		# Processing high level topic conditions.
 		if ($c =~ /<topic /)
 		{
 			my @t = $c =~ /name=\"(.*?)\"/;
@@ -111,8 +110,8 @@ foreach my $af (sort @aimlFiles)
 			$topicx = "";
 			next;
 		}
-		
-		#processing general categories
+
+		# Processing general categories.
 		if ($c =~ /<category>/)
 		{
 			my $path="";
@@ -129,41 +128,41 @@ foreach my $af (sort @aimlFiles)
 			if( @template == 0) {next;}
 			if (@that == 0) { push(@that,"");}
 			if (@top == 0) { push(@top,"");}
-			
-			# special cases
+
+			# Special cases.
 			#	pattern side <set>{NAME}</set> and <bot name=""/>
 			#
 			if (@pat >0) {$pat[0]=~ s/\<bot name/\<bot_name/gi; }
 			if (@pat >0) {$pat[0]=~ s/\<set> /<set>/gi; }
 			if (@top >0) {$top[0]=~ s/\<set> /<set>/gi; }
 			if (@that >0) {$that[0]=~ s/\<set> /<set>/gi; }#
-			
+
 			if (@pat >0)  {$pat[0]=~ s/ <\/set>/<\/set>/gi; }
 			if (@top >0)  {$top[0]=~ s/ <\/set>/<\/set>/gi; }
 			if (@that >0) {$that[0]=~ s/ <\/set>/<\/set>/gi; }
-			
+
 			my @PWRDS = split(/ /,$pat[0]);
 			my @TWRDS = split(/ /,$that[0]);
 			my @TPWRDS = split(/ /,$top[0]); #
 			my $pstars=0;
 			my $tstars=0;
 			my $topicstars=0;
-			
+
 			print FOUT "CATBEGIN,0\n";
-			
-			#patterns
+
+			# Patterns.
 			print FOUT "PAT,$pat[0]\n";
 			$path .="<input>";
 			foreach my $w (@PWRDS)
 			{
 				$path .="/$w";
-				if ($w eq "*") 
+				if ($w eq "*")
 				{
 					$pstars++;
 					print FOUT "PSTAR,$pstars\n";
 					next;
 				}
-				if ($w eq "_") 
+				if ($w eq "_")
 				{
 					$pstars++;
 					print FOUT "PUSTAR,$pstars\n";
@@ -181,24 +180,24 @@ foreach my $af (sort @aimlFiles)
 					print FOUT "PBOTVAR,$v[0]\n";
 					next;
 				}
-				
+
 				print FOUT "PWRD,$w\n";
 			}
 			print FOUT "PATEND,0\n";
-			
-			#topics
+
+			# Topics
 			print FOUT "TOPIC,$top[0]\n";
 			$path .="/<topic>";
 			foreach my $w (@TPWRDS)
 			{
 				$path .="/$w";
-				if ($w eq "*") 
+				if ($w eq "*")
 				{
 					$topicstars++;
 					print FOUT "TOPICSTAR,$topicstars\n";
 					next;
 				}
-				if ($w eq "_") 
+				if ($w eq "_")
 				{
 					$topicstars++;
 					print FOUT "TOPICUSTAR,$topicstars\n";
@@ -219,20 +218,20 @@ foreach my $af (sort @aimlFiles)
 				print FOUT "TOPICWRD,$w\n";
 			}
 			print FOUT "TOPICEND,0\n";
-			
-			#that
+
+			# That
 			print FOUT "THAT,$that[0]\n"; #
 			$path .="/<that>";
 			foreach my $w (@TWRDS)
 			{
 				$path .="/$w";
-				if ($w eq "*") 
+				if ($w eq "*")
 				{
 					$tstars++;
 					print FOUT "THATSTAR,$tstars\n";
 					next;
 				}
-				if ($w eq "_") 
+				if ($w eq "_")
 				{
 					$tstars++;
 					print FOUT "THATUSTAR,$tstars\n";
@@ -253,26 +252,28 @@ foreach my $af (sort @aimlFiles)
 				print FOUT "THATWRD,$w\n";
 			}
 			print FOUT "THATEND,0\n";
-			
-			#templates
-			# use AIMLIF convention of escaping sequences that are not CSV compliant namely ","-> "#Comma "
+
+			# Templates.
+			# Use AIMLIF convention of escaping sequences that are not CSV
+			# compliant namely ","-> "#Comma "
 			if ( @template > 0)
 			{
 				$template[0] =~ s/\,/\#Comma /gi;
 				$template[0] =~ s/^ //gi;
 				$template[0] =~ s/ $//gi; #
 				print FOUT "PATH,$path\n";
-				
-				#will probably have to expand this a bit
-				# since it requires representing the performative interpretation of XML that AIML assumes
+
+				# Will probably have to expand this a bit,
+				# since it requires representing the performative
+				# interpretation of XML that AIML assumes.
 				if ($template[0] !~ /</) #
 				{
 					print FOUT "TEMPATOMIC,0\n";
 					my @TEMPWRDS = split(/ /,$template[0]); #
 					foreach my $w (@TEMPWRDS)
 					{
-					   if (length($w)>0)
-					   {
+						if (length($w)>0)
+						{
 							print FOUT "TEMPWRD,$w\n";
 						}
 					}
@@ -288,21 +289,20 @@ foreach my $af (sort @aimlFiles)
 			{
 				print FOUT "TEMPLATECODE,$template[0]\n";
 			}
-			
-			
-			
+
 			print FOUT "TEMPLATE,$template[0]\n";
 			print FOUT "CATTEXT,$c\n";
 			print FOUT "CATEND,0\n";
 			print FOUT "\n";
 		}
 
-		
+
 	}
 }
 close(FOUT);
-#pass2
 
+# ------------------------------------------------------------------
+# Second pass
 
 open (FIN,"<$intermediateFile");
 open (FOUT,">$finalFile");
@@ -310,7 +310,7 @@ my $curPath="";
 my %overwriteSpace=();
 my $code = "";
 
-while(my $line =<FIN>)
+while (my $line =<FIN>)
 {
 	chomp($line);
 	if (length($line)<1) {next;}
@@ -318,7 +318,7 @@ while(my $line =<FIN>)
 	my $cmd=$parms[0] || "";
 	my $arg=$parms[1] || "";
 	if (length($cmd)<1) {next;}
-	
+
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
@@ -327,31 +327,31 @@ while(my $line =<FIN>)
 	}
 	if ($cmd eq "PATH")
 	{
-		 $curPath = $arg;
-		 #$code = "";
-		 #print "PATH --> $curPath\n";
+		$curPath = $arg;
+		#$code = "";
+		#print "PATH --> $curPath\n";
 	}
 
 	if ($cmd eq "CATEND")
 	{
-	    $code .= ")\n";     # close category section
+		$code .= ")\n";     # close category section
 
 		if ($overwrite)
 		{
-			# overwrite in a hash space indexed by the current path
+			# Overwrite in a hash space indexed by the current path.
 			$overwriteSpace{$curPath} = $code;
 		}
 		else
 		{
-		 # not merging so just write it out
-		 print FOUT "$code\n";
+			# Not merging, so just write it out.
+			print FOUT "$code\n";
 		}
-		 $code = "";
+		$code = "";
 	}
-	
-	# we are going to have to fix this for the various stars and variables
-	# but it is a start
-	
+
+	# We are going to have to fix this for the various stars and
+	# variables, but it is a start.
+
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
@@ -414,7 +414,7 @@ while(my $line =<FIN>)
 		$code .= "         (VariableNode \"\$topic\")\n";
 		$code .= "      )\n";
 	}
-	
+
 	# THAT
 	if ($cmd eq "THAT")
 	{
@@ -445,12 +445,12 @@ while(my $line =<FIN>)
 	{
 		$code .= "         (VariableNode \"\$that\")\n";
 		$code .= "      )\n";
-	}	
-	
+	}
+
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
-	    $code .= "     )\n";  # close pattern section
+		$code .= "     )\n";  # close pattern section
 
 		$arg =~ s/\"/\'/g;
 
@@ -458,33 +458,32 @@ while(my $line =<FIN>)
 		$code .= "    (PutLink\n";
 		$code .= "       (AnchorNode \"\#reply\")\n";
 		$code .= "       (AIMLCODENode \"$arg\")\n";
-		$code .= "     )\n";
-		
-	}	
+		$code .= "    )\n";
+
+	}
 	if ($cmd eq "TEMPATOMIC")
 	{
-	    $code .= "    )\n";  # close pattern section
-		# the AIML code was just a list of words so just setup for a word sequence
+		$code .= "    )\n";  # close pattern section
+		# The AIML code was just a list of words, so just set up for a
+		#word sequence.
 		$code .= "    (PutLink\n";
 		$code .= "       (AnchorNode \"\#reply\")\n";
 		$code .= "       (WordSequenceLink\n";
-	}	
+	}
 	if ($cmd eq "TEMPWRD")
 	{
-		#just another word in the reply chain
+		# Just another word in the reply chain.
 		$code .= "            (WordNode \"$arg\")\n";
-	}	
+	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
-		#just another word in the reply chain
+		# Just another word in the reply chain.
 		$code .= "        )\n";
 		$code .= "    )\n";
-	}	
-	
-	
+	}
 }
 
-#if merging then sort and write out 
+# If merging, then sort and write out.
 if ($overwrite)
 {
 	foreach my $p (sort keys %overwriteSpace)
@@ -496,25 +495,25 @@ if ($overwrite)
 close(FIN);
 close(FOUT);
 exit;
-=for comment 
+=for comment
 
 original AIML :
 
 <category>
  <pattern>Hello</pattern>
- <template> Hi there. </template> 
+ <template> Hi there. </template>
 </category>
 
 has implied fields of <topic>*</topic>  and <that>*</that>:
 
 <category>
  <pattern>Hello</pattern>
- <topic>*</topic> 
+ <topic>*</topic>
  <that>*</that>
- <template> Hi there. </template> 
+ <template> Hi there. </template>
 </category>
 
-which is translates to an intermediate sequence of 
+which is translates to an intermediate sequence of
 
 CATBEGIN,0
 PAT,Hello
@@ -527,7 +526,7 @@ THAT,*
 THATSTAR,1
 THATEND,0
 PATH,<input>/Hello/<topic>/*/<that>/*
-TEMPLATE, Hi there. 
+TEMPLATE, Hi there.
 CATTEXT, <category> <pattern>Hello</pattern> <topic>*</topic> <that>*</that> <template> Hi there. </template> </category>
 CATEND,0
 
@@ -553,7 +552,7 @@ PatternLink
             WordNode "there"
 ```
 
-Or in more scheme-ish format 
+Or in more scheme-ish format
 
 (PatternLink
    (SequentialAndLink
@@ -580,7 +579,6 @@ Or in more scheme-ish format
         )
     )
 )
-
 
 
 =end comment
