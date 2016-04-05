@@ -42,7 +42,7 @@ private:
     SchemeEval* _scm;
 
 public:
-    OpenPsiUTest(): _as(NULL), _scm(NULL)
+    OpenPsiUTest(): _as(nullptr), _scm(nullptr)
     {
         logger().set_level(Logger::DEBUG);
         logger().set_print_level_flag(true);
@@ -51,6 +51,7 @@ public:
 
     ~OpenPsiUTest()
     {
+        // Clean Up
         delete _as;
         delete _scm;
 

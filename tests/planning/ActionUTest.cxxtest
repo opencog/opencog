@@ -34,13 +34,18 @@
 
 using namespace opencog;
 
+#define PLANNING_TEST_PATH PROJECT_SOURCE_DIR "/tests/planning"
+#define CHKERR \
+    TSM_ASSERT("Caught scm error during eval", \
+        (false == _scm->eval_error()));
+
 class ActionUTest : public CxxTest::TestSuite
 {
 private:
-    AtomSpace _as;
-    SchemeEval _scm;
+    AtomSpace* _as;
+    SchemeEval* _scm;
 public:
-    ActionUTest() : _scm(&_as)
+    ActionUTest(): _as(nullptr), _scm(nullptr)
     {
         logger().set_level(Logger::DEBUG);
         logger().set_print_level_flag(true);
@@ -49,6 +54,10 @@ public:
 
     ~ActionUTest()
     {
+        // Clean Up
+        delete _as;
+        delete _scm;
+
         // Erase the log file if no assertions failed
         if (!CxxTest::TestTracker::tracker().suiteFailed())
             std::remove(logger().get_filename().c_str());
@@ -56,11 +65,23 @@ public:
 
     void setUp()
     {
-        _scm.eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-        _scm.eval("(load-from-path \"opencog.scm\")");
-        _scm.eval("(load-from-path \"rule-engine.scm\")");
+        // The scheme environment is reset between each test.
+        _as = new AtomSpace();
+        _scm = new SchemeEval(_as);
+
+        _scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+        CHKERR
+        _scm->eval("(use-modules (opencog))");
+        CHKERR
+        _scm->eval("(use-modules (opencog rule-engine))");
+        CHKERR
     }
 
+    void tearDown()
+    {
+        _as = nullptr;
+        _scm = nullptr;
+    }
 
     // Why this check? B/c PatternLink api's behavior might change.
     // What is being checked? That the derived rule doesn't have any form of
@@ -69,16 +90,16 @@ public:
     // not exist in the derived rule, which maybe run multiple times during
     // the action-selection/planning/simulation.
     void test_constuctor() {
-        logger().debug("BEGIN TEST: %s", __FUNCTION__);
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-        config().set("SCM_PRELOAD", PROJECT_SOURCE_DIR
-                     "/tests/planning/test-rbs.scm");
-        load_scm_files_from_config(_as);
+        // Load test content
+        _scm->eval("(load \"" PLANNING_TEST_PATH "/test-rbs.scm\")");
+        CHKERR
 
         // Simple BindLink with an AndLink or SequentialAndLink
-        Handle alias = _as.get_node(DEFINED_SCHEMA_NODE, "initial-rule"),
-               rbs = _as.get_node(CONCEPT_NODE, "initial-rbs"),
-               ml = _as.get_link(MEMBER_LINK, HandleSeq {alias, rbs});
+        Handle alias = _as->get_node(DEFINED_SCHEMA_NODE, "initial-rule"),
+               rbs = _as->get_node(CONCEPT_NODE, "initial-rbs"),
+               ml = _as->get_link(MEMBER_LINK, HandleSeq {alias, rbs});
 
         Rule rule(ml);
         Action action(rule);
