@@ -6,7 +6,7 @@ Presently the definition used here are used by OpenPsi.
 
 ### Action selection
 
-1. There are two steps to action selection, they are in no particular order
+1. There are two types to action selection, they are
     * Goal driven action selection
     * Context driven action selection
 
@@ -24,6 +24,6 @@ Presently the definition used here are used by OpenPsi.
    sequence of actions comes close.
 
 #### Notes
-* The choice of which type of action-selection to run could possible driven
-  by an independent agent/planner. In another words, choosing the
-  action selection sequence could be in itself a goal.
+* The choice of which type of action-selection to run could possible be driven
+  by an independent agent/planner. In another words choosing the
+  action selection sequence/mode could be, in itself, a goal.
