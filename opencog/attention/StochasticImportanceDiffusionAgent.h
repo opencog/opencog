@@ -105,8 +105,6 @@ private:
     void makeConnectionMatrix(bmatrix* &connections, int totalDiffusionAtoms,
             std::map<Handle,int> diffusionAtomsMap, std::vector<Handle> links);
 
-    SpreadDecider* spreadDecider;
-
     //! For checking that STI is conserved
     int totalSTI;
 
@@ -131,8 +129,8 @@ public:
     enum { HYPERBOLIC, STEP };
     void setSpreadDecider(int type, float shape = 30);
 
-    ImportanceDiffusionAgent(CogServer&);
-    virtual ~ImportanceDiffusionAgent();
+    StochasticImportanceDiffusionAgent(CogServer&);
+    virtual ~StochasticImportanceDiffusionAgent();
     virtual void run();
 
     /** Return the agent's logger object
@@ -155,7 +153,7 @@ public:
     float getDiffusionThreshold() const;
 }; // class
 
-typedef std::shared_ptr<ImportanceDiffusionAgent> ImportanceDiffusionAgentPtr;
+typedef std::shared_ptr<StochasticImportanceDiffusionAgent> StochasticImportanceDiffusionAgentPtr;
 
 /** @}*/
 } // namespace

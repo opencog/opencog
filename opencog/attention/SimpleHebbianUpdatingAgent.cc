@@ -81,7 +81,7 @@ float SimpleHebbianUpdatingAgent::targetConjunction(HandleSeq handles)
                 TRACE_INFO,
                 "Size of outgoing set of a hebbian link must be 2.");
     }
-
+    //XXX: Should this be normalised to 0->1 Range
     auto normsti_i = a->get_normalised_STI(handles[0]);
     auto normsti_j = a->get_normalised_STI(handles[1]);
     auto conj = std::max(normsti_i * normsti_j, 1.0f);

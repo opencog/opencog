@@ -36,6 +36,7 @@ ADD_LIBRARY(attention SHARED
 	ImportanceDiffusionAgent
 	SimpleImportanceDiffusionAgent
 	ImportanceUpdatingAgent
+    StochasticImportanceDiffusionAgent
 )
 
 ADD_DEPENDENCIES(attention attention-types)
