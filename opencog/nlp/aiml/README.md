@@ -20,9 +20,10 @@ There are two steps to this process: The import of standard AIML markup
 into the AtomSpace, and the application of the imported rules to the
 current speech (text-processing) context.
 
-Map AIML expressions to equivalent atomspace graphs, in such a
-way that the OpenCog pattern matcher can perform all of the same
-funcitions that AIML currently performs.
+The goal of the import step is to map AIML expressions to equivalent
+atomspace graphs, in such a way that the OpenCog pattern matcher can
+perform most or all of the same functions that most AIML interpretors
+perform. The goal is NOT to re-invent an AIML interpreter in OpenCog!
 
 # Lightning reivew of AIML
 Some example sentences.
@@ -119,7 +120,3 @@ There is another approach:
 
 I really really * you, darling.
 I really really love you, darling.
-
-WordInstanceLink
-   WordNode "I"
-   Word
