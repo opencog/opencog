@@ -31,8 +31,7 @@ to load this code.
 
  * parse-rank.scm: Tweak link-grammar parse-ranking scores, based
    on the mutual information contained in word pairs. (Not currently
-   used)
+   used!)
 
- * disjunct-list.scm: Build lists of link-grammar disjuncts. A link-
-   grammar disjunct is a list of connectors that are used to connect
-   a word to the other words in a sentence.
+ * type-definitions.scm: Inheritance (is-A) relations for relex types.
+   Not used anywhere, currently!
