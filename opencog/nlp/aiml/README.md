@@ -6,6 +6,20 @@ AIML in the AtomSpace
 Under development, very incomplete.
 
 # Goal
+Be able to apply AIML rules, in a fashion that is integrated with the
+rest of the OpenCog NLP pipeline.  That is, the AIML rules become just
+one more aspect of linguistic processing.  Of curse, traditional AIML
+completely short-circuits normal linguistic analysis, and simply finds
+some utterance that matches up with an input string of words.  By
+integrating with the NLP pipeline, this potentially allows for the
+creation of more subtle AIML-like rules, making use of linguistic
+information.  It also potentially allows the simulataneous scripting
+of speech and behavior.
+
+There are two steps to this process: The import of standard AIML markup
+into the AtomSpace, and the application of the imported rules to the
+current speech (text-processing) context.
+
 Map AIML expressions to equivalent atomspace graphs, in such a
 way that the OpenCog pattern matcher can perform all of the same
 funcitions that AIML currently performs.
