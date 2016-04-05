@@ -1,8 +1,7 @@
 /*
  * @file tests/planning/ActionTest.cxxtest
- * @author Amen Belayneh <amenbelayneh@gmail.com> November 2015
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015-2016 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -65,7 +64,7 @@ public:
 
     // Why this check? B/c PatternLink api's behavior might change.
     // What is being checked? That the derived rule doesn't have any form of
-    // virtual-terms. This is necessary beacause the derived rule is used
+    // virtual-terms. This is necessary because the derived rule is used
     // during action selection and terms that might have side effect should
     // not exist in the derived rule, which maybe run multiple times during
     // the action-selection/planning/simulation.

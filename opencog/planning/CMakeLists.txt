@@ -1,6 +1,7 @@
 ADD_LIBRARY(planning SHARED
 	Action
 	ActionSelector
+	Utilities
 )
 
 TARGET_LINK_LIBRARIES(planning
