@@ -2793,7 +2793,8 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
              << " Now start to select the best patterns . . ."
              << std::endl;
 
-        // If the parameter value is an object, two kinds of properties should have higher priority:
+        // If the parameter value is an object, distinguishing intrinsic properties should have higher priority:
+
         HandleSeq parmValueHandles;
         for (Handle evalLink : paramEvalLinks)
         {
@@ -2810,16 +2811,27 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
             //    the opposite is external properties: usually changing a lot, e.g. holder, owner.
             //    Find out what properties are intrinsic / external from the data first.
 
-            //    First find all the properties of this
+
+            // 2. find out the distinguishing properties from intrinsic properties which are more easy to tell the differences among individules.
+            //    e.g. there are 4  keys of different colors; their common properties are "class is key", "pickupable", "unedible",
+            //    the different properties are color, so 'color' is a distinguishing property, which should get higher priority
+
+
             set<string> allProperties;
+            set<string> intrinsicProperties;
             set<string> externalProperties;
+            set<string> distinguishingProperties;
+            set<string> distinguishingIntrinsicProperties;
+            map<string, Handle> propertyToValueTmp;
+
+            cout << "The parameter value is an entity; \nFind out all the intrinsic,external and distinguishing properties for this entity...\n";
+
 
             // for the same property , if there is one object changed, it's considered as external properties
             // e.g.: if there is 5 gates, the default opening state is close; in the corpus,
             // there is only 1 gate opened later and the other 4 gates are still close, then this state is still a external properties.
             for (Handle objh : parmValueHandles)
             {
-                // map<predicateNode, valueNode> for this object
                 set <Handle> predicatesThisObj;
                 HandleSeq objOutgoing;
                 objOutgoing.push_back(objh);
@@ -2829,12 +2841,31 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
                     Handle predicateH = atomSpace->getOutgoing(evalLink,0);
                     string propertyName = atomSpace->getName(predicateH);
 
+                    Handle listH = atomSpace->getOutgoing(evalLink,1);
+                    HandleSeq listOutgoings = atomSpace->getOutgoing(listH);
+                    Handle valueH = listOutgoings[listOutgoings.size() - 1];
+
+                    if (allProperties.find(propertyName) == allProperties.end())
+                        allProperties.insert(propertyName);
+
+                    if (propertyToValueTmp.find(propertyName) == propertyToValueTmp.end())
+                    {
+                        propertyToValueTmp.insert(std::pair<string, Handle>(propertyName,valueH));
+                    }
+                    else
+                    {
+                        if (propertyToValueTmp[propertyName] != valueH)
+                        {
+                            if (distinguishingProperties.find(propertyName) == distinguishingProperties.end())
+                                distinguishingProperties.insert(propertyName);
+                        }
+                    }
+
                     if (predicatesThisObj.find(predicateH) == predicatesThisObj.end())
                     {
                         predicatesThisObj.insert(predicateH);
 
-                        if (allProperties.find(propertyName) == allProperties.end())
-                            allProperties.insert(propertyName);
+
                     }
                     else
                     {
@@ -2848,9 +2879,31 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
             }
 
 
-            // 2. intrinsic properties which are more special / different compared to other objects of same class
-            //    e.g. there are 4  keys; their common properties are "class is key", "pickupable", "unedible",
-            //    the different properties are color, so color should get higher priority
+            std::set_difference(allProperties.begin(), allProperties.end(), externalProperties.begin(), externalProperties.end(),
+                                            std::inserter(intrinsicProperties, intrinsicProperties.begin()));
+
+            std::set_difference(distinguishingProperties.begin(), distinguishingProperties.end(), intrinsicProperties.begin(), intrinsicProperties.end(),
+                                            std::inserter(distinguishingIntrinsicProperties, distinguishingIntrinsicProperties.begin()));
+
+
+
+            cout << "\nAll Properties: \n";
+            for (auto i : allProperties) cout << i << ' ';
+
+            cout << "\nIntrinsic Properties: \n";
+            for (auto i : intrinsicProperties) cout << i << ' ';
+
+            cout << "\nExternal Properties: \n";
+            for (auto i : externalProperties) cout << i << ' ';
+
+            cout << "\nDistinguishing Intrinsic Properties: \n";
+            for (auto i : distinguishingIntrinsicProperties) cout << i << ' ';
+
+
+
+
+
+
 
 
         }
