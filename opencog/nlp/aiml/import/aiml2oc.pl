@@ -50,7 +50,7 @@ if ($version)
 
 #$src = 'core65.aiml';
 
-# Conversion is down in a two-pass process.  The first pass flattens
+# Conversion is done in a two-pass process.  The first pass flattens
 # the AIML format into a simplified linear format.  A second pass
 # converts this flattened format into Atomese.
 

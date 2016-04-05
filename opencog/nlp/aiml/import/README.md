@@ -22,51 +22,42 @@ perl aiml2oc.pl --help
 ```
 For aiml files, see https://github.com/jstnhuang/chatbot/tree/master/aiml
 
-
-### Overview of script
-Conversion is down in a two-pass process.  The first pass flattens
+### Overview
+Conversion is done in a two-pass process.  The first pass flattens
 the AIML format into a simplified linear format.  A second pass
 converts this flattened format into Atomese.
 
-It is a simple two-pass script.
+* Pass One : The AIML XML is converted into an intermediate neutral,
+  word based format. The format is a linear sequence of tokens,
+  annotated with their meaning, and optionally any performative code.
+  The AIML 2.0 interpreter uses something similar to this, with
+  its AIMLIF csv based format.
 
-* Pass One : XML to an intermediate neutral, word based format.
-  Linear sequence of tokens annotated with their meaning, and optionally any
-  performative code. The AIML 2.0 interpreter almost has something similar with
-  its AIMLIF csv based format. I would just normalize that format. Of course
-  the format could handled totally in RAM.
+* Pass Two: The linearized format is converted into Atomese.
 
-* Pass Two: From the linear format into Atomese.
-  The only issue of not using an interpreter in generating the intermediate file is one AIML convention allows "last definition loaded is definitive" semantics. Most systems will sort and load the files in alphabetical order, allowing one to "overlay/overwrite" previous definitions. The OpenCog interpreter would have to decide how it wants to handle duplicate definitions. Associated with this is the concept of a "graph path" which would normally be the list of nodes from the root to a leaf in the graph (just like a path in a file system). Each path defines a unique condition for which one or more responses were specified. You could turn each path into its own atom and use that for indexing and editing purposes. You also would define the conflict resolution policy for duplicate paths.
+One issue with conversion is the AIML convention that "the last
+definition loaded is definitive".  Typical AIML systems will sort and
+load AIML files in alphabetical order, so that the later files "overlay"
+or "overwrite" previous definitions. This AIML-to-opencog converter
+makes all defintions visible to OpenCog, and so the OpenCog NLP system
+will have to decide how it wants to handle duplicate definitions.
 
-  One possible reason for having an intermediate format might be handling of
-  <set> tags in patterns. These could either be passed on to OpenCog as either
-  a pointer to a collection concept, the collection list itself, a collection
-  concept with its definition, or various ways of unrolling the defined set in
-  intermediate format using duplicate definitions.
-
-  Working on Pass One can be independent of Pass Two since translating from the
-  intermediate format to Atomese should be straightforward once the Atomese
-  format is defined. You could edit the intermediate format but that would be
-  like editing assembly; definitely doable but probably not what most would
-  consider fun. You could also post the fragments to a database which would
-  allow for search and filter based editing, but that might be energy better
-  spent on a general Atomspace editor/IDE .
+One reason for having an intermediate format is the handling of <set>
+tags in patterns. These could either be passed on to OpenCog as either
+a pointer to a collection concept, the collection list itself, a
+collection concept with its definition, or various ways of unrolling
+the defined set in intermediate format using duplicate definitions.
 
 ### Notes
 
-1. One option is during pass 2 to use the derived path to over write the final
-   output on a last-in-only-out basis. Of course to do so it loses the
-   one-to-one-to-one tracing since it goes through a hash table to capture
-   duplicates. But you can leave it off "--overwrite" for debugging, and turn it
-   on for final output.
+1. To preserve the "last definition loaded is definitive" semantics of
+   AIML file loading, one option is to alter the phase-two code to use
+   the derived path to overwrite the final output on a last-in-only-out
+   basis. Of course, doing this loses the one-to-one-to-one tracing,
+   since it goes through a hash table to capture duplicates. But you can
+   leave off the "--overwrite" flag for debugging, and turn it on for
+   final output.
 
-2. There is probably a better name for the "--overwrite" switch since it's
-   really not really overwriting any output but the categories as they come in.
-   I had it as "--merge" but its not merging the categories but overwriting
-   them. You could have a merge but that's kind of what it does by default,
-   just write out duplicates and let OpenCog sort it out. Maybe "--uselast" ?
-   Then you could have a "--usefirst" and "--userandom" as a conflicting
-   definition strategies. Or "--useLM" to prefer the one category that best
-   matches some language model ( naughty, nice, polite, ...)
-
+2. There is probably a better name for the "--overwrite" switch, since
+   it's really not really overwriting any output, but instead the
+   categories as they come in.
