@@ -13,8 +13,8 @@ my $help;
 my $version;
 my $overwrite;
 my $aimlDir ='.';
-my $intermediateFile = 'pout.txt';
-my $finalFile = 'cogcode.txt';
+my $intermediateFile = 'flat-aiml.txt';
+my $finalFile = 'aiml.scm';
 
 GetOptions(
     'dir=s' => \$aimlDir,
@@ -23,21 +23,23 @@ GetOptions(
     'last-only' => \$overwrite,
     'version' => \$version,
     'intermediate=s' => \$intermediateFile,
-    'final=s' => \$finalFile,
-) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--final <OpenCog file>]\n";
+    'out=s' => \$finalFile,
+) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir
+<AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
 
 if ($help)
 {
 	print "Convert AIML markup files to OpenCog Atomese files.\n";
 	print "\n";
-	print "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--final <OpenCog file>]\n";
+	print "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir
+<AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
 	print "   --debug                 Enable debugging (if any).\n";
 	print "   --help                  Print these helpful comments.\n";
 	print "   --version               Print version, current version '$ver'\n";
 	print "   --last-only             Only the last category is output.\n";
 	print "   --dir <directory>       AIML source directory, default: '$aimlDir'\n";
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
-	print "   --final <file>          OpenCog output file, default is '$finalFile'\n";
+	print "   --out <file>          OpenCog output file, default is '$finalFile'\n";
 	die "\n";
 }
 

@@ -8,7 +8,7 @@ the OpenCog natural language processing infrastructure.
 ### Usage
 Convert all AIML into Atomese:
 ```
-perl aiml2oc.pl --dir ./aimldir --final atomese.scm
+perl aiml2oc.pl --dir ./aimldir --out atomese.scm
 ```
 where, `./aimldir` contains aiml files and `atomese.scm` is the output,
 containing the atomese representation of aiml rules in scheme.
@@ -18,7 +18,7 @@ of a category is taken to be definitive, so that earlier definitions are
 ignored/discarded.  This can be accomplished here, with the
 `--last-only` option, like so:
 ```
-perl aiml2oc.pl --last-only --dir ./aimldir --final atomese.scm
+perl aiml2oc.pl --last-only --dir ./aimldir --out atomese.scm
 ```
 
 For details, run:
