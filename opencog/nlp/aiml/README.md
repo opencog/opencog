@@ -55,5 +55,53 @@ none of the AIML rules to be imported are asking for this kind of
 information.
 
 ## Rule selection
+A typical AIML rule, represented in the AtomSpace, has this form:
+```
+(Bind
+   (List (Concept "I") (Glob "$star") (Concept "you"))
+   (List (Concept "I") (Glob "$star") (Concept "you") (Concept "too")))
+```
+
+To find this rule, we need to search for it.  This can be accomplished
+by saying:
+```
+(cog-execute!
+	(Dual
+		(List (Concept "I") (Concept "love") (Concept "you"))))
+```
+which will fint the above rule (and any other rules) that match this
+pattern.  But first, before we can do this, we must find the current
+sentence and parse in the atomspace.  This can be done by saying:
+```
+(Get
+   (VariableList
+      (TypedVariable (Variable "$sent") (VariableType "SentenceNode"))
+      (TypedVariable (Variable "$parse") (VariableType "ParseNode"))
+      (TypedVariable (Variable "$tok-seq") (VariableType "ListLink"))
+   )
+   (And
+      (State (AnchorNode "*-eva-current-sent-*") (Variable "$sent"))
+      (ParseLink (Variable "$parse") (Variable "$sent"))
+      (Evaluation
+         (PredicateNode "Token Sequence")
+         (Variable "$parse")
+         (Variable "$tok-seq"))
+   ))
+```
+
+Running the above will return the sequence of words that have
+been recently uttered.
 
 ## Rule application
+Having found all of the rules, we now have to run them ... specifically,
+we have to apply them to the current parse.  We can do this in one of
+several ways.  These are:
+
+* Create a NEW bindlink, which mashes together both the search for the
+  current parse, and the AIML rule, and generate the resulting output,
+  which then needs to be routed to the chatbot, to be voiced.
+
+* Since we already know the current parse, we can limit the application
+  of the naive AIML rule to only that parse.  This requires treating the
+  rule as a kind of PutLink, i.e. of applying it only to a specified
+  set.
