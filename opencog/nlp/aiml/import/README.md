@@ -6,15 +6,20 @@ the OpenCog natural language processing infrastructure.
 
 
 ### Usage
+Convert all AIML into Atomese:
 ```
 perl aiml2oc.pl --dir ./aimldir --final atomese.scm
 ```
-or
-```
-perl aiml2oc.pl --overwrite --dir ./aimldir --final atomese.scm
-```
 where, `./aimldir` contains aiml files and `atomese.scm` is the output,
 containing the atomese representation of aiml rules in scheme.
+
+Note that standard AIML semantics is that only the final, last defintion
+of a category is taken to be definitive, so that earlier definitions are
+ignored/discarded.  This can be accomplished here, with the
+`--last-only` option, like so:
+```
+perl aiml2oc.pl --last-only --dir ./aimldir --final atomese.scm
+```
 
 For details, run:
 ```
@@ -38,26 +43,15 @@ converts this flattened format into Atomese.
 One issue with conversion is the AIML convention that "the last
 definition loaded is definitive".  Typical AIML systems will sort and
 load AIML files in alphabetical order, so that the later files "overlay"
-or "overwrite" previous definitions. This AIML-to-opencog converter
-makes all defintions visible to OpenCog, and so the OpenCog NLP system
-will have to decide how it wants to handle duplicate definitions.
+or "overwrite" previous definitions. By default, this AIML-to-opencog
+converter makes all defintions visible to OpenCog, and so the OpenCog
+NLP system can choos to decide how it wants to handle duplicate definitions.
+Alternately, the `--last-only` option can be used to preserve the
+standard AIML semantics, and discard all but the last definitions.
 
-One reason for having an intermediate format is the handling of <set>
+### Design notes
+One reason for having an intermediate format is the handling of `<set>`
 tags in patterns. These could either be passed on to OpenCog as either
 a pointer to a collection concept, the collection list itself, a
 collection concept with its definition, or various ways of unrolling
 the defined set in intermediate format using duplicate definitions.
-
-### Notes
-
-1. To preserve the "last definition loaded is definitive" semantics of
-   AIML file loading, one option is to alter the phase-two code to use
-   the derived path to overwrite the final output on a last-in-only-out
-   basis. Of course, doing this loses the one-to-one-to-one tracing,
-   since it goes through a hash table to capture duplicates. But you can
-   leave off the "--overwrite" flag for debugging, and turn it on for
-   final output.
-
-2. There is probably a better name for the "--overwrite" switch, since
-   it's really not really overwriting any output, but instead the
-   categories as they come in.
