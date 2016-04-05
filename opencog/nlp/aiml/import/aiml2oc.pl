@@ -1,8 +1,13 @@
-#! /usr/local/bin/perl -w
+#! /usr/bin/env perl -w
+#
+# Convert AIML files to OpenCog Atomese.
+#
+# Copyright (c) Kino Coursey 2015
+#
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.000.1a";
+my $ver = "0.0.2";
 my $debug;
 my $help;
 my $version;
@@ -19,17 +24,19 @@ GetOptions(
     'version' => \$version,
     'intermediate=s' => \$intermediateFile,
     'final=s' => \$finalFile,
-) or die "Usage: $0 --debug  --help --version --overwrite --dir <AIML source directory> --intermediate <IMMFile> --final <OpenCog file>\n";
+) or die "Usage: $0 [--debug] [--help] [--version] [--overwrite] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--final <OpenCog file>]\n";
 
 if ($help)
 {
-	print "Usage: $0 --debug  --help --version --overwrite --dir <AIML source directory> --intermediate <IMMFile> --final <OpenCog file>\n";
-	print "   --debug                 enable debugging (if any)\n";
-	print "   --help                  print these helpful comments\n";
-	print "   --version               script version, current version '$ver'\n";
-	print "   --overwrite             last-in-only-out processing of categories\n";
+	print "Convert AIML markup files to OpenCog Atomese files.\n";
+	print "\n";
+	print "Usage: $0 [--debug] [--help] [--version] [--overwrite] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--final <OpenCog file>]\n";
+	print "   --debug                 Enable debugging (if any)\n";
+	print "   --help                  Print these helpful comments\n";
+	print "   --version               Script version, current version '$ver'\n";
+	print "   --overwrite             Last-in-only-out processing of categories\n";
 	print "   --dir <directory>       AIML source directory, default is '$aimlDir'\n";
-	print "   --intermediate <file>   intermediate file, default is '$intermediateFile'\n";
+	print "   --intermediate <file>   Intermediate file, default is '$intermediateFile'\n";
 	print "   --final <file>          OpenCog output file, default is '$finalFile'\n";
 	die "\n";
 }
@@ -43,6 +50,9 @@ if ($version)
 
 #$src = 'core65.aiml';
 
+# Conversion is down in a two-pass process.  The first pass flattens
+# the AIML format into a simplified linear format.  A second pass
+# converts this flattened format into Atomese.
 
 print "\n AIML Source directory = $aimlDir\n";
 opendir(DIR, "$aimlDir");

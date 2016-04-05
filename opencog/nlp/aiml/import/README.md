@@ -1,38 +1,33 @@
+AIML to Atomese Conversion
+--------------------------
+This directory contains a perl script to convert AIML to OpenCog
+Atomese, so that the AIML rules can be integrated into the rest of
+the OpenCog natural language processing infrastructure.
+
+
 ### Usage
-
-`perl aiml2oc.pl --dir ./aimldir --final aiml-in-atomese.scm`
-
+```
+perl aiml2oc.pl --dir ./aimldir --final atomese.scm
+```
 or
-
-`perl aiml2oc.pl --overwrite --dir ./aimldir --final aiml-in-atomese.scm`
-
-where, `./aimldir` contains aiml files & `aiml-in-atomese.scm` is the output
+```
+perl aiml2oc.pl --overwrite --dir ./aimldir --final atomese.scm
+```
+where, `./aimldir` contains aiml files and `atomese.scm` is the output,
 containing the atomese representation of aiml rules in scheme.
 
-For details run:
-
-`perl aiml2oc.pl --help`
-
-For aiml files check https://github.com/jstnhuang/chatbot/tree/master/aiml
-
-### Notes
-1. One option is during pass 2 to use the derived path to over write the final
-   output on a last-in-only-out basis. Of course to do so it loses the
-   one-to-one-to-one tracing since it goes through a hash table to capture
-   duplicates. But you can leave it off "--overwrite" for debugging, and turn it
-   on for final output.
-
-2. There is probably a better name for the "--overwrite" switch since it's
-   really not really overwriting any output but the categories as they come in.
-   I had it as "--merge" but its not merging the categories but overwriting
-   them. You could have a merge but that's kind of what it does by default,
-   just write out duplicates and let OpenCog sort it out. Maybe "--uselast" ?
-   Then you could have a "--usefirst" and "--userandom" as a conflicting
-   definition strategies. Or "--useLM" to prefer the one category that best
-   matches some language model ( naughty, nice, polite, ...)
+For details, run:
+```
+perl aiml2oc.pl --help
+```
+For aiml files, see https://github.com/jstnhuang/chatbot/tree/master/aiml
 
 
 ### Overview of script
+Conversion is down in a two-pass process.  The first pass flattens
+the AIML format into a simplified linear format.  A second pass
+converts this flattened format into Atomese.
+
 It is a simple two-pass script.
 
 * Pass One : XML to an intermediate neutral, word based format.
@@ -57,3 +52,21 @@ It is a simple two-pass script.
   consider fun. You could also post the fragments to a database which would
   allow for search and filter based editing, but that might be energy better
   spent on a general Atomspace editor/IDE .
+
+### Notes
+
+1. One option is during pass 2 to use the derived path to over write the final
+   output on a last-in-only-out basis. Of course to do so it loses the
+   one-to-one-to-one tracing since it goes through a hash table to capture
+   duplicates. But you can leave it off "--overwrite" for debugging, and turn it
+   on for final output.
+
+2. There is probably a better name for the "--overwrite" switch since it's
+   really not really overwriting any output but the categories as they come in.
+   I had it as "--merge" but its not merging the categories but overwriting
+   them. You could have a merge but that's kind of what it does by default,
+   just write out duplicates and let OpenCog sort it out. Maybe "--uselast" ?
+   Then you could have a "--usefirst" and "--userandom" as a conflicting
+   definition strategies. Or "--useLM" to prefer the one category that best
+   matches some language model ( naughty, nice, polite, ...)
+
