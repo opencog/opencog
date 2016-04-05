@@ -43,10 +43,12 @@ HandleSeq opencog::fetch_actions(AtomSpace& as)
     Handle get_link = as.add_link(GET_LINK, typed_var, member_link);
 
     // Fetch atoms satisfying pattern
-    Handle outputs = satisfying_set(&as, get_link);
+    Handle results = satisfying_set(&as, get_link);
+    HandleSeq actions = results->getOutgoingSet();
 
     // Garbage Collection.
     remove_hypergraph(as, get_link);
+    as.remove_atom(results);
 
-    return outputs->getOutgoingSet();
+    return actions;
 }
