@@ -1,19 +1,21 @@
 
-                        Assorted Scheme Scripts
-                        -----------------------
+Generic NLP Utility Scripts
+---------------------------
 
 Assorted generic scripts related to NLP processing. These carry out
 common functions, such as sending off raw text to a parser for parsing,
 getting all of the words in that parse, and their parts-of-speech,
 lemma forms, the RelEx relations they participate in, etc.
 
+## Using
+The code here is probvided as a scheme module.  Just say:
+```
+(use-modules (opencog) (opencog nlp))
+```
+to load this code.
 
-OpenCog scripts
----------------
-The following scripts are meant to run within the OpenCog scheme
-interpreter (as they manipulate OpenCog atoms directly). They can be
-manually loaded with the "load-nlp.sh" shell script, although they
-normally would be automatically loaded with the opencog.conf file.
+
+## Overview
 
  * nlp-utils: Some mini nlp-related utilities, mostly for pointer
    chasing nlp-specific structures, e.g. getting all the parses of
@@ -34,5 +36,3 @@ normally would be automatically loaded with the opencog.conf file.
  * disjunct-list.scm: Build lists of link-grammar disjuncts. A link-
    grammar disjunct is a list of connectors that are used to connect
    a word to the other words in a sentence.
-
-

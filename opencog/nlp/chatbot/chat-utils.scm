@@ -146,7 +146,7 @@
 ; -----------------------------------------------------------------------
 (define-public (nlp-parse plain-text)
 "
-  nlp-parse -- Wrap most of the NLP pipeline in one function.
+  nlp-parse PLAIN-TEXT -- Wrap most of the NLP pipeline in one function.
 
   Call the necessary functions for the full NLP pipeline.
 "

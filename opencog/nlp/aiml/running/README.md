@@ -3,7 +3,7 @@ Running AIML in OpenCog
 
 This directory includes assorted infrastructure for running AIML-style
 rules within OpenCog.  It assumes that AIML data has already been
-imported, using the tools in aiml2oc directory.
+imported, using the tools in `import` directory.
 
 Status
 ------
