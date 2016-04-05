@@ -2805,7 +2805,7 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
                 parmValueHandles.push_back(valueNode);
         }
 
-        if (! AtomSpaceUtil::isHandleAnEntity(atomSpace, parmValueHandles[0]))
+        if (AtomSpaceUtil::isHandleAnEntity(atomSpace, parmValueHandles[0]))
         {
             // 1. intrinsic properties: usually do not change much, e.g. material, color, class, edible
             //    the opposite is external properties: usually changing a lot, e.g. holder, owner.
@@ -2882,36 +2882,35 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
             std::set_difference(allProperties.begin(), allProperties.end(), externalProperties.begin(), externalProperties.end(),
                                             std::inserter(intrinsicProperties, intrinsicProperties.begin()));
 
-            std::set_difference(distinguishingProperties.begin(), distinguishingProperties.end(), intrinsicProperties.begin(), intrinsicProperties.end(),
-                                            std::inserter(distinguishingIntrinsicProperties, distinguishingIntrinsicProperties.begin()));
+            for(string p : distinguishingProperties)
+            {
+                if (intrinsicProperties.find(p) != intrinsicProperties.end())
+                    distinguishingIntrinsicProperties.insert(p);
+            }
 
 
+            cout << "\n\nAll Properties: \n";
+            for (auto i : allProperties) cout << i << ", ";
 
-            cout << "\nAll Properties: \n";
-            for (auto i : allProperties) cout << i << ' ';
+            cout << "\n\nIntrinsic Properties: \n";
+            for (auto i : intrinsicProperties) cout << i << ", ";
 
-            cout << "\nIntrinsic Properties: \n";
-            for (auto i : intrinsicProperties) cout << i << ' ';
+            cout << "\n\nExternal Properties: \n";
+            for (auto i : externalProperties) cout << i << ", ";
 
-            cout << "\nExternal Properties: \n";
-            for (auto i : externalProperties) cout << i << ' ';
+            cout << "\n\nDistinguishing Properties: \n";
+            for (auto i : distinguishingProperties) cout << i << ", ";
 
-            cout << "\nDistinguishing Intrinsic Properties: \n";
-            for (auto i : distinguishingIntrinsicProperties) cout << i << ' ';
+            cout << "\n\nDistinguishing Intrinsic Properties: \n";
+            for (auto i : distinguishingIntrinsicProperties) cout << i << ", ";
 
-
-
-
-
-
+            cout << std::endl;
 
 
         }
 
 
-
     }
-
 
 
 }
