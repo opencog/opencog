@@ -1,4 +1,4 @@
-#! /usr/bin/env perl -w
+#! /usr/bin/env perl
 #
 # Convert AIML files to OpenCog Atomese.
 #
