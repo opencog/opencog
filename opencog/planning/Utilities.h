@@ -1,7 +1,7 @@
 /*
- * @file opencog/planning/ActionSelector.h
+ * @file opencog/planning/Utilities.h
  *
- * Copyright (C) 2015-2016 OpenCog Foundation
+ * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
- #ifndef _OPENCOG_PLANNING_ACTION_SELECTOR_H
- #define _OPENCOG_PLANNING_ACTION_SELECTOR_H
+#ifndef _OPENCOG_PLANNING_UTILITIES_H
+#define _OPENCOG_PLANNING_UTILITIES_H
 
- #include <vector>
-
- #include "Action.h"
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -33,24 +32,16 @@ namespace opencog
  * @{
  */
 
-class ActionSelector
-{
-public:
-    ActionSelector(AtomSpace& as, Handle rbs);
-    ~ActionSelector();
-
-    static const std::string action_rbs_name;
-
-private:
-    AtomSpace& _as;
-
-    std::vector<Action> _actions;
-
-    // Initial rulebase
-    Handle _rbs;
-};
+    /**
+     * Gets the atoms that inherit from (ConceptNode "opencog: action") and
+     *
+     * @param as The atomspace that is to be searched for actions.
+     * @param rbs The rulebase
+     * @return HandleSeq of actions.
+     */
+    HandleSeq fetch_actions(AtomSpace& as);
 
 /** @}*/
 } // namespace opencog
 
- #endif  // _OPENCOG_PLANNING_ACTION_SELECTOR_H
+#endif // _OPENCOG_PLANNING_UTILITIES_H

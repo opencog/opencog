@@ -150,7 +150,8 @@
                 default-action
                 demand-node
                 "Default"
-                "Default")
+                "Default"
+                1)
             ; Each demand is also a rulebase
             (ure-define-rbs demand-node 1)
         )
@@ -341,7 +342,7 @@
 
 ; --------------------------------------------------------------
 (define-public (psi-action-rule vars context action demand-node
-                                effect-type name)
+                                effect-type name weight)
 "
   It associates an action and context in which the action has to be taken
   to an OpenPsi-demand. The action is also a member rule of the demand it
@@ -379,9 +380,12 @@
       the demand value. See `(psi-action-types)` for available options.
 
   name:
-  -  A string for naming the action rule. `OpenPsi: Demand-name-action-rule-`
+  - A string for naming the action rule. `OpenPsi: Demand-name-action-rule-`
      will be prefixed to the name.
 
+  weight:
+  - This is the strength of the MemberLink TruthValue that adds the action-rule
+  to the rulebase of the demand.
 "
     (define rule-name-prefix
         (string-append (cog-name demand-node) "-action-rule-"))
@@ -404,7 +408,7 @@
             action))
 
     (define (create-psi-action-rule)
-        (let ((alias (ure-add-rule demand-node rule-name (rule) 1)))
+        (let ((alias (ure-add-rule demand-node rule-name (rule) weight)))
             (InheritanceLink
                 alias
                 (ConceptNode "opencog: action"))
@@ -428,6 +432,9 @@
         (error (string-append "Expected fourth argument to be one of the "
             "action types listed when running `(psi-action-types)`, got: ")
             effect-type))
+    (if (not (and (< 0 weight) (<= weight 1)))
+        (error (string-append "Expected sixth argument to be 0 < weight <=1,"
+            " got: " weight)))
 
     ; Check if the rule has already been defined as a member of
     ; TODO: this needs improvement not exaustive enough, it isn't considering
@@ -534,7 +541,7 @@
     )
 )
 
-(define-public (psi-action-rule-maximize demand-node rate)
+(define-public (psi-action-rule-maximize demand-node rate weight)
 "
   Creates an action-rule with the effect of increasing the demand-value for the
   given demand.
@@ -546,6 +553,10 @@
   - A number for the percentage of change that a demand-value will be updated
     with, on each step. If an action with the same rate of has been defined
     for the given demand a new action isn't created, but the old one returned.
+
+  weight:
+  - This is the strength of the MemberLink TruthValue that adds the action-rule
+  to the rulebase of the demand.
 "
 
     ; TODO test for retrun of previously defined action-rule when one tries
@@ -560,7 +571,8 @@
         (psi-action-maximize rate)
         demand-node
         "Increase"
-        (string-append "maximize-" (number->string rate)))
+        (string-append "maximize-" (number->string rate))
+        weight)
 )
 
 ; --------------------------------------------------------------
@@ -600,7 +612,7 @@
     )
 )
 
-(define-public (psi-action-rule-minimize demand-node rate)
+(define-public (psi-action-rule-minimize demand-node rate weight)
 "
   Creates an action with the effect of decreasing the demand-value for the
   given demand.
@@ -612,6 +624,10 @@
   - A number for the percentage of change that a demand-value be updated with,
     on each step. If an action with the same rate of has been defined for the
     given demand a new action isn't created, but the old one returned.
+
+  weight:
+  - This is the strength of the MemberLink TruthValue that adds the action-rule
+  to the rulebase of the demand.
 "
 
     (psi-action-rule
@@ -624,7 +640,8 @@
         (psi-action-minimize rate)
         demand-node
         "Decrease"
-        (string-append "minimize-" (number->string rate)))
+        (string-append "minimize-" (number->string rate))
+        weight)
 )
 
 ; --------------------------------------------------------------

@@ -94,7 +94,8 @@ public:
         _scm = nullptr;
     }
 
-    // This is a helper function for running the example tests
+    // This is a helper function for running the example tests for the
+    // examples/openpsi/single-demand.scm example.
     //
     // @param times Number of steps to take
     void run_test(int times)
@@ -119,6 +120,7 @@ public:
             scm_assert_dv == "#t\n");
     }
 
+    // This tests examples/openpsi/single-demand.scm
     void test_single_demand_example()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -131,9 +133,34 @@ public:
         CHKERR
 
         // Run the checks
-        for(auto i = 1; i <= 7 ; i++) {
+        for (auto i = 1; i <= 7 ; i++) {
             run_test(i);
         }
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
+    // This tests examples/openpsi/adding-action.scm
+    void test_adding_action()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+        // Load example file and it's output record file.
+        _scm->eval("(load \"" OPENPSI_EXAMPLE_PATH "/adding-action.scm\")");
+        CHKERR
+        _scm->eval("(load \"" OPENPSI_TEST_PATH
+            "/adding-actions-eg-outputs.scm\")");
+        CHKERR
+
+        // Add state
+        _scm->eval("(init-state)");
+        CHKERR
+
+        // The number of iterations is arbitrary.
+        for (auto i = 0 ; i < 5 ; i++) {
+            auto scm_result = _scm->eval("(inc-faces) (test)") ;
+            CHKERR
+            TSM_ASSERT("Expected true on step " + i, scm_result == "#t\n");
+        }
+
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
