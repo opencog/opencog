@@ -26,8 +26,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/util/Config.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/rule-engine/Rule.h>
 
 #include <opencog/planning/Action.h>
