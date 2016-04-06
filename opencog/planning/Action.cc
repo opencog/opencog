@@ -44,17 +44,17 @@ Action::Action(Rule a_rule) : _rule(a_rule)
 
 void Action::init()
 {
-    if (NULL == _rule.get_forward_handle()) {
+    if (NULL == _rule.get_forward_rule()) {
         throw InvalidParamException(TRACE_INFO, "Bad rule");
     }
 
-    PatternLinkPtr state(PatternLinkCast(_rule.get_forward_handle()));
+    PatternLinkPtr state(PatternLinkCast(_rule.get_forward_rule()));
 
     if (NULL == state) {
         throw InvalidParamException(TRACE_INFO,
             "[Action::init()] Expecting a PatternLink type or ",
             "sub-type for Rule handle, got %s",
-             _rule.get_forward_handle()->toString().c_str());
+             _rule.get_forward_rule()->toString().c_str());
     }
 
     FollowLink fl;
