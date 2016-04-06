@@ -31,7 +31,7 @@ using namespace opencog;
 HandleSeq opencog::fetch_actions(AtomSpace& as)
 {
     // Pattern typing
-    Handle var_type = as.add_node(TYPE_NODE, "ConceptNode"),
+    Handle var_type = as.add_node(TYPE_NODE, "DefinedSchemaNode"),
         var_alias = as.add_node(VARIABLE_NODE, "__ACTION_ALIAS__"),
         typed_var = as.add_link(TYPED_VARIABLE_LINK, var_alias, var_type);
 

@@ -23,6 +23,7 @@
 
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FollowLink.h>
+#include <opencog/planning/Utilities.h>
 
 #include "Action.h"
 
