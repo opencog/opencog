@@ -40,6 +40,17 @@
   Example:
      (relex-parse \"I love you\")
      (token-seq-of-sent (car (get-new-parsed-sentences)))
+
+  will create the following output:
+
+     (Evaluation
+        (PredicateNode \"Token Sequence\")
+        (Parse \"sentence@3e975d3a-588c-400e-a884-e36d5181bb73_parse_0\")
+        (List
+           (Concept \"I\")
+           (Concept \"love\")
+           (Concept \"you\")
+        ))
 "
 	(map token-seq-of-parse (sentence-get-parses SENT))
 )
