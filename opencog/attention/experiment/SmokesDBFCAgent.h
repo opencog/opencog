@@ -20,7 +20,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/attention/experiment/tv-toolbox/TVToolBoxCInterface_stub.h>
-
+#include <opencog/rule-engine/URECommons.h>
+#include <opencog/attention/atom_types.h>
 #include <algorithm>
 #include <utility>
 
@@ -68,16 +69,29 @@ private:
     float smokes_mean();
     float cancer_mean();
 
-    HandleSeq capped_af_set(HandleSeq& afset, int size)
+    Handle select_source(void)
     {
-        HandleSeq out = afset;
-        //_atomspace.get_handle_set_in_attentional_focus(std::back_inserter(out));
-        auto comparator =
-                [](Handle& h1, Handle& h2) {return h1->getSTI() > h2->getSTI();};
-        std::sort(out.begin(), out.end(), comparator);
-        out.resize(size);
-        std::cerr << "OUTPUT_SIZE: " << out.size() << "\n";
-        return out;
+        HandleSeq out;
+        _atomspace.get_handle_set_in_attentional_focus(std::back_inserter(out));
+        std::map<Handle, float> atom_sti_map;
+        for (Handle& h : out) {
+            auto type = h->getType();
+            if (type == ASYMMETRIC_HEBBIAN_LINK || type == HEBBIAN_LINK
+                || type == SYMMETRIC_HEBBIAN_LINK
+                || type == INVERSE_HEBBIAN_LINK
+                || type == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
+                continue;
+            }
+            atom_sti_map[h] = h->getSTI();
+        }
+
+        if (atom_sti_map.size() == 0) {
+            std::cout << "[SmokesDBFCAgent::select_source] Empty source candidate set exiting.\n";
+            throw std::runtime_error("[SmokesDBFCAgent::select_source] Empty source candidate set.");
+        }
+        URECommons urec(_atomspace);
+
+        return urec.tournament_select(atom_sti_map);
     }
 
     void adjust_af_boundary(int cap_size)

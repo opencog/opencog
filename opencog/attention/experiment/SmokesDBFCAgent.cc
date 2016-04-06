@@ -179,7 +179,7 @@ void SmokesDBFCAgent::run()
         if (af_set.empty()) {
             std::cerr
                     << "******COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.********\n";
-            save("smokes-fc-resulut.data",
+            save("smokes-fc-result.data",
                  HandleSeq { },
                  "\n******COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.********\n");
             return;
@@ -187,20 +187,20 @@ void SmokesDBFCAgent::run()
 
         //Stimulate source and focus set
         int size = af_set.size();
-        save("smokes-fc-resulut.data", HandleSeq { },
+        save("smokes-fc-result.data", HandleSeq { },
              "INTERESTING_ATOMS_SIZE=" + std::to_string(size));
 
         for (Handle& h : af_set) {
             auto scaled_stim = 4 * pow(10, surprisingness_value(h)) * surprisingness_value(h);
 
-            save("smokes-fc-resulut.data",
+            save("smokes-fc-result.data",
                  HandleSeq { },
                  "stimulating atom " + h->toShortString() + " with amount "
                  + std::to_string(scaled_stim));
             stimulateAtom(h, scaled_stim);
         }
 
-        source = rand_element(af_set);
+        source = select_source(); // tournament selection by STI
 
         first_run = false;
 
@@ -215,7 +215,7 @@ void SmokesDBFCAgent::run()
 
     // Dynamically set the AF boundary with lbound of the top K STI values
     // K=50
-    adjust_af_boundary(50);
+    adjust_af_boundary(30);
 
      af_set.clear();
     _atomspace.get_handle_set_in_attentional_focus(std::back_inserter(af_set));
@@ -230,12 +230,13 @@ void SmokesDBFCAgent::run()
     for (const Handle& h : af_set)
         std::cerr << h->toString() << "\n";
 
+
     if(af_set.size() == 0 ){
         std::cout << "ATTENTIONAL FOCUS IS OUT OF ATOMS. TERMINATING EXPERIMENT\n";
         throw std::runtime_error( "ATTENTIONAL FOCUS IS OUT OF ATOMS. TERMINATING EXPERIMENT");
     }
 
-    source = rand_element(af_set);
+    source = select_source(); // tournament selection by STI
 
     // Do one step forward chaining.
     std::cerr << "------------FCing-------------" << std::endl;
@@ -244,34 +245,39 @@ void SmokesDBFCAgent::run()
 
     ForwardChainer fc(_atomspace, rule_base, source, HandleSeq { af_set },
                       opencog::source_selection_mode::STI);
-    fc.do_step();
+
+    // Just to compensate for randomness in FC.
+    for(int i=0; i < 5; i++)
+       fc.do_step();
 
     std::cerr << "FORWARD CHAINER STEPPED\n\t";
 
     UnorderedHandleSet temp = fc.get_chaining_result();
     HandleSeq cur_fcresult;
-    std::copy(temp.begin(), temp.end(),std::back_inserter(cur_fcresult));
+    std::copy(temp.begin(), temp.end(), std::back_inserter(cur_fcresult));
 
     // Stimulate surprising unique results.
     HandleSeq unique_set;
     std::cerr << "Found " << cur_fcresult.size() << " results.\n";
     for (const Handle& h : cur_fcresult) {
-        std::cerr << "\t" << h->toShortString() << "\n";
+        auto hinserted = _atomspace.add_atom(h);
+        std::cerr << "\t" << hinserted->toShortString() << "\n";
         bool unique = true;
         for (const Handle& hi : fc_result) {
-            if (h == hi) {
+            if (hinserted == hi) {
                 unique = false;
+                std::cerr << "Not a new inference! \n";
                 break;
             }
         }
         if (unique) {
-            unique_set.push_back(h);
-            fc_result.push_back(h);
+            unique_set.push_back(hinserted);
+            fc_result.push_back(hinserted);
         }
     }
 
     std::cerr << "\tFound " << unique_set.size() << " unique inferences.\n\t";
-    save("smokes-fc-resulut.data",
+    save("smokes-fc-result.data",
          HandleSeq { },
          "\n***FORWARD CHAINING RESULT***\ncycle=" + std::to_string(
                  cogserver().getCycleCount())
@@ -279,13 +285,14 @@ void SmokesDBFCAgent::run()
          + " friendship mean_tv=" + std::to_string(friends_mean()) + "\nFound "
          + std::to_string(unique_set.size()) + "unique inferences.\n");
 
+    // Stimulate surprising unique results.
     for (Handle& h : unique_set) {
         auto scaled_stim = 8 * pow(10, surprisingness_value(h)) * surprisingness_value(h);
         stimulateAtom(h, scaled_stim);
 
         std::cerr << "provided stimulus \n to " << h->getUUID() << " of amount "
         << std::to_string(scaled_stim) + "\n";
-        save("smokes-fc-resulut.data", HandleSeq { h },
+        save("smokes-fc-result.data", HandleSeq { h },
              "provided stimulus amount " + std::to_string(scaled_stim) + "\n");
     }
 
@@ -302,12 +309,12 @@ float SmokesDBFCAgent::surprisingness_value(const Handle& hx)
     strength_t mean_tv = 0.0f;
     bool val = false;
     float mi = 0.0f;
-    save("smokes-fc-resulut.data", HandleSeq { }, "\n");
+    save("smokes-fc-result.data", HandleSeq { }, "\n");
     if (is_friendship_reln(h)) {
         mean_tv = friends_mean();
         mi = sqrtJsdC_hs(10, mean_tv, 100, 10, (h->getTruthValue())->getMean(),
                          100, 100);
-        save("smokes-fc-resulut.data",
+        save("smokes-fc-result.data",
              HandleSeq { },
              "JSD_VAL(10, " + std::to_string(mean_tv) + "100, 10, "
              + std::to_string((h->getTruthValue())->getMean())
@@ -317,7 +324,7 @@ float SmokesDBFCAgent::surprisingness_value(const Handle& hx)
         mean_tv = smokes_mean();
         mi = sqrtJsdC_hs(10, mean_tv, 100, 10, (h->getTruthValue())->getMean(),
                          100, 100);
-        save("smokes-fc-resulut.data",
+        save("smokes-fc-result.data",
              HandleSeq { },
              "JSD_VAL(10," + std::to_string(mean_tv) + "100,10,"
              + std::to_string((h->getTruthValue())->getMean()) + ",100,100) = "
@@ -330,7 +337,7 @@ float SmokesDBFCAgent::surprisingness_value(const Handle& hx)
         mean_tv = cancer_mean();
         mi = sqrtJsdC_hs(10, mean_tv, 100, 10, (h->getTruthValue())->getMean(),
                          100, 100);
-        save("smokes-fc-resulut.data",
+        save("smokes-fc-result.data",
              HandleSeq { },
              "JSD_VAL(10," + std::to_string(mean_tv) + "100,10,"
              + std::to_string((h->getTruthValue())->getMean()) + ",100,100) = "
