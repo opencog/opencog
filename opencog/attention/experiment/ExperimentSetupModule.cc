@@ -174,12 +174,13 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
 std::string ExperimentSetupModule::do_ecan_start(Request *req,
                                                  std::list<std::string> args)
 {
+    _cs.startAgent(_smokes_fc_agentptr);
     //_cs.startAgent(_artificialstimulatoragentptr);
     _cs.startAgent(_forgetting_agentptr);
     _cs.startAgent(_hebbianupdating_agentptr);
     _cs.startAgent(_importanceupdating_agentptr);
     _cs.startAgent(_simpleimportancediffusion_agentptr);
-    _cs.startAgent(_smokes_fc_agentptr);
+
 
     return "The following agents were started:\n" + ECAN_EXP_AGENTS;
 }

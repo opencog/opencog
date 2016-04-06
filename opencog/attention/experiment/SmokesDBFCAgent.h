@@ -52,7 +52,7 @@ using namespace opencog;
 
 class SmokesDBFCAgent: public Agent {
 private:
-    HandleSeq inference_result={};
+    HandleSeq fc_result={};
     AtomSpace& _atomspace;
     SchemeEval* _eval;
     Handle rule_base;
@@ -78,6 +78,27 @@ private:
         out.resize(size);
         std::cerr << "OUTPUT_SIZE: " << out.size() << "\n";
         return out;
+    }
+
+    void adjust_af_boundary(int cap_size)
+    {
+        HandleSeq out;
+        _atomspace.get_handle_set_in_attentional_focus(std::back_inserter(out));
+        if(out.size() == 0)
+            return;
+        auto comparator =
+                [](Handle& h1, Handle& h2) {return h1->getSTI() > h2->getSTI();};
+        std::sort(out.begin(), out.end(), comparator);
+
+        AttentionValue::sti_t afboundary;
+        if (out.size() > (HandleSeq::size_type) cap_size) {
+            afboundary = out[cap_size]->getSTI();
+        } else {
+            afboundary = out[out.size() - 1]->getSTI();
+        }
+        // Set the AF boundary
+        _atomspace.set_attentional_focus_boundary(afboundary);
+
     }
 
 public:

@@ -271,7 +271,7 @@ bool ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
 {
     bool adjustmentMade = false;
 
-    log->debug("Checking STI funds = %d, range=[%d,%d]", a->get_STI_funds(),
+    printf("Checking STI funds = %d, range=[%d,%d] \n", a->get_STI_funds(),
                acceptableLobeSTIRange[0], acceptableLobeSTIRange[1]);
     if (!inRange(a->get_STI_funds(), acceptableLobeSTIRange)) {
         log->debug("Lobe STI funds out of bounds, re-adjusting.");
@@ -280,7 +280,7 @@ bool ImportanceUpdatingAgent::checkAtomSpaceFunds(AtomSpace* a)
         adjustmentMade = true;
     }
 
-    log->debug("Checking LTI funds = %d, range=[%d,%d]", a->get_LTI_funds(),
+    printf("Checking LTI funds = %d, range=[%d,%d] \n", a->get_LTI_funds(),
                acceptableLobeLTIRange[0], acceptableLobeLTIRange[1]);
     if (!inRange(a->get_LTI_funds(), acceptableLobeLTIRange)) {
         log->debug("Lobe LTI funds out of bounds, re-adjusting.");
@@ -323,8 +323,8 @@ void ImportanceUpdatingAgent::randomStimulation(AtomSpace *a, AgentPtr agent)
         }
     }
 
-    log->info("Applied stimulation randomly to %d "
-              "atoms, expected about %d.",
+    printf("Applied stimulation randomly to %d "
+              "atoms, expected about %d.\n",
               actualNum, expectedNum);
 
 }
@@ -348,7 +348,7 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
         afterTax = beforeTax - actualTax;
 
         a->set_STI(handle, afterTax);
-        log->fine("sti %d. Actual tax %d. after tax %d.", beforeTax, actualTax,
+        printf("sti %d. Actual tax %d. after tax %d.\n", beforeTax, actualTax,
                   afterTax);
 
 #ifdef DEBUG        
@@ -358,7 +358,7 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
 #endif
     }
 
-    log->info("AtomSpace STI Funds were %d, now %d. All atoms taxed %f.",
+    printf("AtomSpace STI Funds were %d, now %d. All atoms taxed %f. \n",
               oldTotal, a->get_STI_funds(), taxAmount);
 
 #ifdef DEBUG
@@ -456,8 +456,8 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a, bool gradual)
     else
         STIAtomRent = STITransitionalAtomRent.val;
 
-    log->fine(
-            "STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.",
+    printf(
+            "STIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.\n",
             oldSTIAtomRent, STIAtomRent, focusSize, STIAtomWage,
             totalStimulusSinceReset.recent);
 
@@ -488,8 +488,8 @@ void ImportanceUpdatingAgent::updateLTIRent(AtomSpace* a)
                             (float) LTIAtomWage * (float) totalStimulusSinceReset.recent / (float) focusSize);
     }
 
-    log->fine(
-            "LTIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.",
+    printf(
+            "LTIAtomRent was %d, now %d. Focus size was %.2f. Wage is %d. Total stim was %.2f.\n",
             oldLTIAtomRent, LTIAtomRent, focusSize, LTIAtomWage,
             totalStimulusSinceReset.recent);
 
@@ -507,7 +507,7 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 
     attentionalFocusSize.update(inFocus.size());
 
-    log->fine("attentionalFocusSize = %d, recent = %f",
+    printf("attentionalFocusSize = %d, recent = %f\n",
               attentionalFocusSize.val, attentionalFocusSize.recent);
 
     for (Handle h : inFocus) {
@@ -516,7 +516,7 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
     }
     attentionalFocusNodesSize.update(n);
 
-    log->fine("attentionalFocusNodesSize = %d, recent = %f",
+    printf("attentionalFocusNodesSize = %d, recent = %f\n",
               attentionalFocusNodesSize.val, attentionalFocusNodesSize.recent);
 }
 
@@ -599,7 +599,7 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a,
     }
     a->set_STI(h, current + exchangeAmount);
 
-    log->fine("Atom %s total stim = %d, STI old = %d, new = %d, rent = %d",
+    printf("Atom %s total stim = %d, STI old = %d, new = %d, rent = %d\n",
               a->get_name(h).c_str(), total_stim, current, a->get_STI(h),
               stiRentCharged);
 
@@ -703,7 +703,7 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a,
 
     h->setLTI(current + exchangeAmount);
 
-    log->fine("Atom %s LTI old = %d, new = %d", a->get_name(h).c_str(), current,
+    printf("Atom %s LTI old = %d, new = %d\n", a->get_name(h).c_str(), current,
               h->getAttentionValue()->getLTI());
 }
 
@@ -714,12 +714,12 @@ bool ImportanceUpdatingAgent::enforceSTICap(AtomSpace* a, Handle h)
     current = a->get_STI(h);
     if (current > STICap) {
         a->set_STI(h, STICap);
-        log->fine("Atom STI too high - old = %d, new = %d", current,
+        printf("Atom STI too high - old = %d, new = %d\n", current,
                   a->get_STI(h));
         return true;
     } else if (current < -STICap) {
         a->set_STI(h, -STICap);
-        log->fine("Atom STI too low - old = %d, new = %d", current,
+        printf("Atom STI too low - old = %d, new = %d\n", current,
                   a->get_STI(h));
         return true;
     }
@@ -733,12 +733,12 @@ bool ImportanceUpdatingAgent::enforceLTICap(AtomSpace* a, Handle h)
     current = h->getAttentionValue()->getLTI();
     if (current > LTICap) {
         h->setLTI(LTICap);
-        log->fine("Atom LTI too high - old = %d, new = %d", current,
+        printf("Atom LTI too high - old = %d, new = %d\n", current,
                   a->get_STI(h));
         return true;
     } else if (current < -LTICap) {
         h->setLTI(-LTICap);
-        log->fine("Atom LTI too low - old = %d, new = %d", current,
+        printf("Atom LTI too low - old = %d, new = %d\n", current,
                   a->get_STI(h));
         return true;
     }

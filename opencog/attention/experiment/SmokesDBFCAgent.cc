@@ -162,16 +162,15 @@ void SmokesDBFCAgent::run()
             std::cout << "EMPTY ATOMSPACE\n";
             return;
         }
+
         // Choose a random source  and focus set from the AS with the ff type constraints.
         // We are looking for atoms containing smokes,friends,cancer atoms so filter em out.
-        // std::cerr << "---------Pushed the following atoms to the AF set-----------\n";
         for (Handle& h : hs) {
             //Choose associated atoms as focu_set
             for (const Handle& t : targets) {
                 if (exists_in(h, t) and not opencog::contains_atomtype(
                         h, VARIABLE_NODE)
                     and not classserver().isA(h->getType(), HEBBIAN_LINK)) {
-                    // std::cerr << h->toShortString() << "\n";
                     af_set.push_back(h);
                 }
             }
@@ -188,18 +187,17 @@ void SmokesDBFCAgent::run()
 
         //Stimulate source and focus set
         int size = af_set.size();
-        //std::cerr << "STIMULATING SOURCE FOR PULLING IT IN TO AF with amount " << 10/log10(size) << "\n";
         save("smokes-fc-resulut.data", HandleSeq { },
              "INTERESTING_ATOMS_SIZE=" + std::to_string(size));
 
         for (Handle& h : af_set) {
-            auto scaled_stim = 0.8*pow(10, surprisingness_value(h));
+            auto scaled_stim = 4 * pow(10, surprisingness_value(h)) * surprisingness_value(h);
 
             save("smokes-fc-resulut.data",
                  HandleSeq { },
                  "stimulating atom " + h->toShortString() + " with amount "
                  + std::to_string(scaled_stim));
-            stimulateAtom(h,scaled_stim);
+            stimulateAtom(h, scaled_stim);
         }
 
         source = rand_element(af_set);
@@ -209,36 +207,35 @@ void SmokesDBFCAgent::run()
         return; // We have to let the stimulus get converted to STI by the next running ECAN agent.
     }
 
-    else {
-        af_set.clear();
-        _atomspace.get_handle_set_in_attentional_focus(
-                std::back_inserter(af_set));
-        // Remove Hebbian links from focus set.
-        af_set.erase(
-                std::remove_if(af_set.begin(), af_set.end(), [](Handle& h) {
-                    return classserver().isA(h->getType(),HEBBIAN_LINK);
-                }),
-                af_set.end());
-        if (af_set.empty()) {
-            std::cerr
-                    << "***********COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.**************\n";
-            save("smokes-fc-resulut.data",
-                 HandleSeq { },
-                 "\n******COULDNT FIND A SMOKES OR FRIENDS SOURCE.RETURNING.********\n");
-            return;
-        }
-        //Cap the attentional focus set
-        af_set = capped_af_set(af_set, af_set.size() < 50 ? af_set.size() : 50 ); //ceil(0.3*af_set.size()));
+    auto prev_afb = _atomspace.get_attentional_focus_boundary();
+    HandleSeq temphseq;
+     _atomspace.get_handle_set_in_attentional_focus(
+            std::back_inserter(temphseq));
+     auto prev_afsize = temphseq.size();
 
-        source = rand_element(af_set);
-    }
+    // Dynamically set the AF boundary with lbound of the top K STI values
+    // K=50
+    adjust_af_boundary(50);
 
-    std::cerr << "--------------MODIFIED AF CONTENT AT CYCLE: "
-              << cogserver().getCycleCount() << "---------AF_SIZE: "
-              << af_set.size() << "-------\n";
+     af_set.clear();
+    _atomspace.get_handle_set_in_attentional_focus(std::back_inserter(af_set));
+
+
+    std::cerr << "--ADJUSTED AF CONTENT AT CYCLE: "
+    << cogserver().getCycleCount() << "--AF_SIZE: " << af_set.size()
+    << "--PRE_AF_SIZE: " << prev_afsize <<
+    "--INITAIL_AF_BOUNDARY: " << prev_afb << "--ADJUSTED_AF_BOUNDARY: "
+    << _atomspace.get_attentional_focus_boundary() << "--\n";
 
     for (const Handle& h : af_set)
         std::cerr << h->toString() << "\n";
+
+    if(af_set.size() == 0 ){
+        std::cout << "ATTENTIONAL FOCUS IS OUT OF ATOMS. TERMINATING EXPERIMENT\n";
+        throw std::runtime_error( "ATTENTIONAL FOCUS IS OUT OF ATOMS. TERMINATING EXPERIMENT");
+    }
+
+    source = rand_element(af_set);
 
     // Do one step forward chaining.
     std::cerr << "------------FCing-------------" << std::endl;
@@ -251,35 +248,43 @@ void SmokesDBFCAgent::run()
 
     std::cerr << "FORWARD CHAINER STEPPED\n\t";
 
-    UnorderedHandleSet fc_result = fc.get_chaining_result();
+    UnorderedHandleSet temp = fc.get_chaining_result();
+    HandleSeq cur_fcresult;
+    std::copy(temp.begin(), temp.end(),std::back_inserter(cur_fcresult));
 
     // Stimulate surprising unique results.
-    HandleSeq unique;
-    std::cerr << "Found " << fc_result.size() << " results.\n";
-    for (const Handle& h : fc_result) {
+    HandleSeq unique_set;
+    std::cerr << "Found " << cur_fcresult.size() << " results.\n";
+    for (const Handle& h : cur_fcresult) {
         std::cerr << "\t" << h->toShortString() << "\n";
-        if (std::find(inference_result.begin(), inference_result.end(), h) == inference_result.end())
-        {
-            unique.push_back(h);
-            inference_result.push_back(h);
+        bool unique = true;
+        for (const Handle& hi : fc_result) {
+            if (h == hi) {
+                unique = false;
+                break;
+            }
+        }
+        if (unique) {
+            unique_set.push_back(h);
+            fc_result.push_back(h);
         }
     }
 
-    std::cerr << "\tFound " << unique.size() << " unique inferences.\n\t";
+    std::cerr << "\tFound " << unique_set.size() << " unique inferences.\n\t";
     save("smokes-fc-resulut.data",
          HandleSeq { },
          "\n***FORWARD CHAINING RESULT***\ncycle=" + std::to_string(
                  cogserver().getCycleCount())
          + " smokers mean_tv=" + std::to_string(smokes_mean())
          + " friendship mean_tv=" + std::to_string(friends_mean()) + "\nFound "
-         + std::to_string(unique.size()) + "unique inferences.\n");
+         + std::to_string(unique_set.size()) + "unique inferences.\n");
 
-    for (Handle& h : unique) {
-        auto scaled_stim = 4 * pow(10, surprisingness_value(h));
+    for (Handle& h : unique_set) {
+        auto scaled_stim = 8 * pow(10, surprisingness_value(h)) * surprisingness_value(h);
         stimulateAtom(h, scaled_stim);
 
-        std::cerr << "provided stimulus \n to " << h->getUUID()
-        << " of amount " << std::to_string(scaled_stim) + "\n";
+        std::cerr << "provided stimulus \n to " << h->getUUID() << " of amount "
+        << std::to_string(scaled_stim) + "\n";
         save("smokes-fc-resulut.data", HandleSeq { h },
              "provided stimulus amount " + std::to_string(scaled_stim) + "\n");
     }
