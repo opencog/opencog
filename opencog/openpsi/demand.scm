@@ -1,4 +1,4 @@
-; Copyright (C) 2015 OpenCog Foundation
+; Copyright (C) 2015-2016 OpenCog Foundation
 
 (use-modules (ice-9 threads)) ; For `par-map`
 (use-modules (rnrs sorting)) ; For sorting demands by their values.

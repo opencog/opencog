@@ -1,5 +1,7 @@
 ; Copyright (C) 2015 OpenCog Foundation
 
+(use-modules (srfi srfi-1)) ; For set-difference
+
 (use-modules (opencog))
 (use-modules (opencog rule-engine))
 
