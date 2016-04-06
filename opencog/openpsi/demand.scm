@@ -1,6 +1,5 @@
 ; Copyright (C) 2015-2016 OpenCog Foundation
 
-(use-modules (ice-9 threads)) ; For `par-map`
 (use-modules (rnrs sorting)) ; For sorting demands by their values.
 
 (use-modules (opencog) (opencog exec) (opencog rule-engine))
@@ -283,42 +282,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-current-goal)
-"
-  Returns the demand-ConceptNode that has been choosen for action presently.
-"
-
-    (define (get-psi-goal) (cog-bind
-        (BindLink
-            (VariableList (assoc-ref (psi-demand-pattern) "var"))
-            (AndLink
-                (assoc-ref (psi-demand-pattern) "pat")
-                (StateLink
-                    (Node (string-append (psi-prefix-str) "action-on-demand"))
-                    (ChoiceLink
-                        (ListLink
-                            (ConceptNode
-                                (string-append (psi-prefix-str) "Decrease"))
-                            demand-var)
-                        (ListLink
-                            (ConceptNode
-                                (string-append (psi-prefix-str) "Increase"))
-                            demand-var)))
-                (EvaluationLink ; Act only if their is such a demand.
-                    (GroundedPredicateNode "scm: psi-demand?")
-                    (ListLink
-                        demand-var)))
-            demand-var)
-    ))
-
-    (let* ((set-link (get-psi-goal))
-           (result (cog-outgoing-set set-link)))
-
-          (cog-extract set-link)
-          (if (null? result) result  (car result))
-    )
-)
-
+; Action- rules
 ; --------------------------------------------------------------
 (define-public (psi-action-types)
 "
@@ -476,34 +440,47 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-current-effect-type)
+(define-public (psi-get-action-rules dpn demand-node)
 "
-  This returns a string of the type of effect that the current-goal has.
+  Returns a list containing the DefinedSchemaNode atoms that name the
+  action-rules for the given demand-node.
+
+  dpn:
+  - DefinedPredicateNode that represents the evaluatable term that will filter
+    action-rules. The evaluatable term should take a single DefinedSchemaNode
+    and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
+    The VariableNodes in the term must be named `(VariableNode \"x\")`.
+
+  demand-node:
+    - A ConceptNode that represents a demand, from which action-rules
 "
-   (define (get-psi-action-type) (cog-execute!
+    ; Check arguments
+    (define err-template "In procedure psi-get-action-rules: ")
+    (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
+        (error err-template "Expected DefinedPredicateNode got: " dpn))
+    (if (not (cog-node? demand-node))
+        (error err-template "Expected a Node got: " demand-node))
+    (if (equal? (stv 0 1) (psi-demand? demand-node))
+        (error err-template "Expected OpenPsi demand node got: " demand-node))
+
+    (cog-execute!
         (GetLink
-            (TypedVariableLink
-                (VariableNode "effect-type")
-                (TypeNode "ConceptNode"))
-            (StateLink
-                (Node (string-append (psi-prefix-str) "action-on-demand"))
-                (ListLink
-                    (VariableNode "effect-type")
-                    (psi-current-goal))))
-    ))
-
-    (let* ((set-link (get-psi-action-type))
-          (result (cog-outgoing-set set-link)))
-
-          (cog-extract set-link)
-
-          (if (null? result)
-              "Default"
-              (psi-suffix-str (cog-name (car result)))
-          )
+             (TypedVariableLink
+                 (VariableNode "x")
+                 (TypeNode "DefinedSchemaNode"))
+             (AndLink
+                 dpn
+                 (MemberLink
+                     (VariableNode "x")
+                     demand-node)
+                 (InheritanceLink
+                     (VariableNode "x")
+                     (ConceptNode "opencog: action"))))
     )
 )
 
+; --------------------------------------------------------------
+; Functions to help define standard action-rules
 ; --------------------------------------------------------------
 (define-public (psi-action-maximize rate)
 "
