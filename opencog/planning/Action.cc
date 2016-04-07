@@ -1,8 +1,7 @@
 /*
  * @file opencog/planning/Action.cc
- * @author Amen Belayneh <amenbelayneh@gmail.com> November 2015
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015-2016 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,6 +23,8 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FollowLink.h>
 #include <opencog/planning/Utilities.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 #include "Action.h"
 
@@ -111,4 +112,28 @@ Rule Action::get_rule()
 LinkPtr Action::get_derived_state()
 {
     return _derived_state;
+}
+
+/**
+ * Checks if the action's derived state is satisfiable in the given atomspace.
+ *
+ * @param as An atomspace that provides the state to be used for checking if
+ *           the action's derived context is satifiable.
+ * @return `true` if it is satifiable and `false` if not.
+ */
+ bool Action::is_derived_state_satisfiable(AtomSpace& as)
+ {
+     // Why create a nested atomspace if using 'satifaction_link' function?
+     // -> to be on the safe side as the constructor to this might not be
+     // exhaustive enough in cleaning virutal-terms.
+     AtomSpace* temp_as = new AtomSpace(&as);
+     Handle state_h = temp_as->add_atom(_derived_state);
+
+     if (TruthValue::TRUE_TV() == satisfaction_link(temp_as, state_h)) {
+         delete temp_as;
+         return true;
+     }
+
+     delete temp_as;
+     return false;
 }

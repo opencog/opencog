@@ -1,8 +1,7 @@
 /*
  * @file opencog/planning/Action.h
- * @author Amen Belayneh <amenbelayneh@gmail.com> November 2015
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015-2016 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -40,6 +39,7 @@ public:
 
     Rule get_rule();
     LinkPtr get_derived_state();
+    bool is_derived_state_satisfiable(AtomSpace& as);
 
 private:
     // An action is  a URE rule that inherits from this node.
@@ -47,8 +47,15 @@ private:
 
     Rule _rule;
 
-    // This is used for action-selction. It is equivalent (Since it
-    // doesn't have any of the VIRTUAL_LINKS) to the state being checked.
+
+    /**
+     * It is a SatisfactionLink containing the body of the BindLink, that
+     * forms the action-rule,  after all the VIRTUAL_LINKS are removed.
+     * The VIRTUAL_LINKS are removed because they could have side effects that
+     * changes the state of the atomspace and/or external environment. Using
+     * this atom instead of `_rule` helps in minimizing side-effects during
+     * action-selection/planning/simulation.
+     */
     LinkPtr _derived_state;
 
     // Function for helping construct

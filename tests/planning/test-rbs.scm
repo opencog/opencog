@@ -1,3 +1,5 @@
+; Copyright (C) 2015-2016 OpenCog Foundation
+
 (use-modules (opencog) (opencog rule-engine))
 
 ; Create a rulebase
@@ -59,3 +61,15 @@
 ; (InheritanceLink rule-alias (ConceptNode "breaking-test-node"))
 
 (InheritanceLink rule-alias (ConceptNode "opencog: action"))
+
+
+; Helper function for `test_is_derived_state_satisfiable`
+(define (add-content)
+    (ListLink
+        (NumberNode 1)
+        (NumberNode 2)
+        (PredicateNode "z"))
+    (InheritanceLink
+        (NumberNode 1)
+        (PredicateNode "z"))
+)

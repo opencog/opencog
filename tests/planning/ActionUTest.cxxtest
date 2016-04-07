@@ -94,18 +94,49 @@ public:
         _scm->eval("(load \"" PLANNING_TEST_PATH "/test-rbs.scm\")");
         CHKERR
 
-        // Simple BindLink with an AndLink or SequentialAndLink
+        // Instantiate an action
         Handle alias = _as->get_node(DEFINED_SCHEMA_NODE, "initial-rule"),
                rbs = _as->get_node(CONCEPT_NODE, "initial-rbs"),
                ml = _as->get_link(MEMBER_LINK, HandleSeq {alias, rbs});
-
         Rule rule(ml);
         Action action(rule);
+
+        // Simple BindLink with an AndLink or SequentialAndLink
         PatternLinkPtr p = PatternLinkCast(action.get_derived_state());
 
         if (p == nullptr)
             p = createPatternLink(*action.get_derived_state());
 
-        TS_ASSERT_EQUALS(0, p->get_virtual().size());
+        TSM_ASSERT_EQUALS("Expected no virutal terms", \
+            0, p->get_virtual().size());
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
+    // Checks if the `is_derived_state_satisfiable` method of Action is
+    // behaving as expected in a simple scenario.
+    void test_is_derived_state_satisfiable() {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Load test content
+        _scm->eval("(load \"" PLANNING_TEST_PATH "/test-rbs.scm\")");
+        CHKERR
+
+        // Instantiate an action
+        Handle alias = _as->get_node(DEFINED_SCHEMA_NODE, "initial-rule"),
+               rbs = _as->get_node(CONCEPT_NODE, "initial-rbs"),
+               ml = _as->get_link(MEMBER_LINK, HandleSeq {alias, rbs});
+        Rule rule(ml);
+        Action action(rule);
+
+        TSM_ASSERT_EQUALS("Expected the action-rule to not be satisfiable", \
+            action.is_derived_state_satisfiable(*_as), false);
+
+        _scm->eval("(add-content)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected the action-rule to not be satisfiable", \
+            action.is_derived_state_satisfiable(*_as), true);
+
+        logger().info("END TEST: %s", __FUNCTION__);
     }
 };
