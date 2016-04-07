@@ -1,7 +1,7 @@
 /*
- * @file tests/planning/ActionTest.cxxtest
+ * @file tests/planning/ActionSelectorUTest.cxxtest
  *
- * Copyright (C) 2015-2016 OpenCog Foundation
+ * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 #include <opencog/util/Logger.h>
 
 // Class being tested
-#include <opencog/planning/Action.h>
+#include <opencog/planning/ActionSelector.h>
 
 using namespace opencog;
 
@@ -38,20 +38,20 @@ using namespace opencog;
     TSM_ASSERT("Caught scm error during eval", \
         (false == _scm->eval_error()));
 
-class ActionUTest : public CxxTest::TestSuite
+class ActionSelectorUTest : public CxxTest::TestSuite
 {
 private:
     AtomSpace* _as;
     SchemeEval* _scm;
 public:
-    ActionUTest(): _as(nullptr), _scm(nullptr)
+    ActionSelectorUTest(): _as(nullptr), _scm(nullptr)
     {
         logger().set_level(Logger::DEBUG);
         logger().set_print_level_flag(true);
         logger().set_print_to_stdout_flag(true);
     }
 
-    ~ActionUTest()
+    ~ActionSelectorUTest()
     {
         // Clean Up
         delete _as;
@@ -82,61 +82,20 @@ public:
         _scm = nullptr;
     }
 
-    // Why this check? B/c PatternLink api's behavior might change.
-    // What is being checked? That the derived rule doesn't have any form of
-    // virtual-terms. This is necessary because the derived rule is used
-    // during action selection and terms that might have side effect should
-    // not exist in the derived rule, which maybe run multiple times during
-    // the action-selection/planning/simulation.
-    void test_constuctor() {
+    void test_constuctor()
+    {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
         // Load test content
         _scm->eval("(load \"" PLANNING_TEST_PATH "/test-rbs.scm\")");
         CHKERR
-
-        // Instantiate an action
-        Handle alias = _as->get_node(DEFINED_SCHEMA_NODE, "rule-1"),
-               rbs = _as->get_node(CONCEPT_NODE, "initial-rbs"),
-               ml = _as->get_link(MEMBER_LINK, HandleSeq {alias, rbs});
-        Rule rule(ml);
-        Action action(rule);
-
-        // Simple BindLink with an AndLink or SequentialAndLink
-        PatternLinkPtr p = PatternLinkCast(action.get_derived_state());
-
-        if (p == nullptr)
-            p = createPatternLink(*action.get_derived_state());
-
-        TSM_ASSERT_EQUALS("Expected no virutal terms", \
-            0, p->get_virtual().size());
-
-        logger().info("END TEST: %s", __FUNCTION__);
-    }
-
-    // Checks if the `is_derived_state_satisfiable` method of Action is
-    // behaving as expected in a simple scenario.
-    void test_is_derived_state_satisfiable() {
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        // Load test content
-        _scm->eval("(load \"" PLANNING_TEST_PATH "/test-rbs.scm\")");
+        Handle rbs = _scm->eval_h("initial-rbs") ;
         CHKERR
 
-        // Instantiate an action
-        Handle alias = _as->get_node(DEFINED_SCHEMA_NODE, "rule-1"),
-               rbs = _as->get_node(CONCEPT_NODE, "initial-rbs"),
-               ml = _as->get_link(MEMBER_LINK, HandleSeq {alias, rbs});
-        Rule rule(ml);
-        Action action(rule);
-
-        TSM_ASSERT_EQUALS("Expected the action-rule to not be satisfiable", \
-            action.is_derived_state_satisfiable(*_as), false);
-
-        _scm->eval("(add-content)");
-        CHKERR
-        TSM_ASSERT_EQUALS("Expected the action-rule to not be satisfiable", \
-            action.is_derived_state_satisfiable(*_as), true);
+        // Check if it detects invalid action-rulebases which is a URE
+        // rulebase that has rules that are not action-rules.
+        TS_ASSERT_THROWS({ActionSelector selector(*_as, rbs);},
+            RuntimeException)
 
         logger().info("END TEST: %s", __FUNCTION__);
     }

@@ -34,7 +34,7 @@ ActionSelector::ActionSelector(AtomSpace& as, Handle rbs) : _as(as), _rbs(rbs)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
-            "[ActionSelector] - invalid action rulebase specified!");
+            "[ActionSelector] - Invalid action rulebase specified!");
 
     auto temp_actions(fetch_actions(as));
 
@@ -50,7 +50,9 @@ ActionSelector::ActionSelector(AtomSpace& as, Handle rbs) : _as(as), _rbs(rbs)
             _actions.emplace_back(rule);
         } else {
             throw RuntimeException(TRACE_INFO,
-                "[ActionSelector] - invalid action-rulebase specified!");
+                "[ActionSelector] - Invalid action-rulebase."
+                "This following rule is not an action-rule, is a member : %s.",
+                rule.get_alias()->toString().c_str());
         }
     }
 }
