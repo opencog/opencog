@@ -9,7 +9,6 @@
 
 ; Load various parts....
 (load "nlp/nlp-utils.scm")
-(load "nlp/disjunct-list.scm")
 (load "nlp/processing-utils.scm")
 
 ; Weird ... MUST say `(export)` or no define-publics are visible!

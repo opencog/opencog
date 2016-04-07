@@ -48,7 +48,14 @@
                  (VariableNode "z"))))
 )
 
-(define rule-alias (ure-add-rule initial-rbs "initial-rule" initial-rule 1))
+(define rule-alias
+  (ure-define-add-rule initial-rbs "initial-rule" initial-rule 1))
 
-; Make an action out of a rule.
+; FIXME: Add random inheritance for checking the filtering of multiple
+; inheritance from different atoms. This atom should be added first, so as to
+; break `test_constuctor` test.
+; NOTE: Look into ForeachChaseLink.h for a fix, without needing an atomspace
+; similar to cog-chase-link.
+; (InheritanceLink rule-alias (ConceptNode "breaking-test-node"))
+
 (InheritanceLink rule-alias (ConceptNode "opencog: action"))

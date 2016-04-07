@@ -304,4 +304,3 @@
 ; Loop over all atoms of type SentenceNode, processing
 ; handing them to 'score sentence' for scoring.
 (cog-map-type score-sentence 'SentenceNode)
-
