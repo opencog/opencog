@@ -404,7 +404,7 @@
             action))
 
     (define (create-psi-action-rule)
-        (let ((alias (ure-add-rule demand-node rule-name (rule) 1)))
+        (let ((alias (ure-define-add-rule demand-node rule-name (rule) 1)))
             (InheritanceLink
                 alias
                 (ConceptNode "opencog: action"))
