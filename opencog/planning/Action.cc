@@ -78,8 +78,9 @@ void Action::init()
     if (not (classserver().isA(implicant_type, AND_LINK) or
              classserver().isA(implicant_type, SEQUENTIAL_AND_LINK)))
         throw InvalidParamException(TRACE_INFO,
-            "[Action::init()] Expecting a AndLink/SequentialAndLink type as",
-            "the implicant, got %s", classserver().getTypeName(implicant_type).c_str());
+            "[Action::init()] Expecting a AndLink/SequentialAndLink type as"
+            "the implicant, got %s",
+            classserver().getTypeName(implicant_type).c_str());
 
     auto derived_body = Handle(createLink(implicant_type, state->get_fixed()));
 
