@@ -1,6 +1,5 @@
-; Copyright (C) 2015 OpenCog Foundation
+; Copyright (C) 2015-2016 OpenCog Foundation
 
-(use-modules (ice-9 threads)) ; For `par-map`
 (use-modules (rnrs sorting)) ; For sorting demands by their values.
 
 (use-modules (opencog) (opencog exec) (opencog rule-engine))
@@ -150,7 +149,8 @@
                 default-action
                 demand-node
                 "Default"
-                "Default")
+                "Default"
+                1)
             ; Each demand is also a rulebase
             (ure-define-rbs demand-node 1)
         )
@@ -282,42 +282,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-current-goal)
-"
-  Returns the demand-ConceptNode that has been choosen for action presently.
-"
-
-    (define (get-psi-goal) (cog-bind
-        (BindLink
-            (VariableList (assoc-ref (psi-demand-pattern) "var"))
-            (AndLink
-                (assoc-ref (psi-demand-pattern) "pat")
-                (StateLink
-                    (Node (string-append (psi-prefix-str) "action-on-demand"))
-                    (ChoiceLink
-                        (ListLink
-                            (ConceptNode
-                                (string-append (psi-prefix-str) "Decrease"))
-                            demand-var)
-                        (ListLink
-                            (ConceptNode
-                                (string-append (psi-prefix-str) "Increase"))
-                            demand-var)))
-                (EvaluationLink ; Act only if their is such a demand.
-                    (GroundedPredicateNode "scm: psi-demand?")
-                    (ListLink
-                        demand-var)))
-            demand-var)
-    ))
-
-    (let* ((set-link (get-psi-goal))
-           (result (cog-outgoing-set set-link)))
-
-          (cog-extract set-link)
-          (if (null? result) result  (car result))
-    )
-)
-
+; Action- rules
 ; --------------------------------------------------------------
 (define-public (psi-action-types)
 "
@@ -341,7 +306,7 @@
 
 ; --------------------------------------------------------------
 (define-public (psi-action-rule vars context action demand-node
-                                effect-type name)
+                                effect-type name weight)
 "
   It associates an action and context in which the action has to be taken
   to an OpenPsi-demand. The action is also a member rule of the demand it
@@ -379,9 +344,12 @@
       the demand value. See `(psi-action-types)` for available options.
 
   name:
-  -  A string for naming the action rule. `OpenPsi: Demand-name-action-rule-`
+  - A string for naming the action rule. `OpenPsi: Demand-name-action-rule-`
      will be prefixed to the name.
 
+  weight:
+  - This is the strength of the MemberLink TruthValue that adds the action-rule
+  to the rulebase of the demand.
 "
     (define rule-name-prefix
         (string-append (cog-name demand-node) "-action-rule-"))
@@ -404,7 +372,7 @@
             action))
 
     (define (create-psi-action-rule)
-        (let ((alias (ure-define-add-rule demand-node rule-name (rule) 1)))
+        (let ((alias (ure-define-add-rule demand-node rule-name (rule) weight)))
             (InheritanceLink
                 alias
                 (ConceptNode "opencog: action"))
@@ -428,6 +396,9 @@
         (error (string-append "Expected fourth argument to be one of the "
             "action types listed when running `(psi-action-types)`, got: ")
             effect-type))
+    (if (not (and (< 0 weight) (<= weight 1)))
+        (error (string-append "Expected sixth argument to be 0 < weight <=1,"
+            " got: " weight)))
 
     ; Check if the rule has already been defined as a member of
     ; TODO: this needs improvement not exaustive enough, it isn't considering
@@ -469,34 +440,47 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-current-effect-type)
+(define-public (psi-get-action-rules dpn demand-node)
 "
-  This returns a string of the type of effect that the current-goal has.
+  Returns a list containing the DefinedSchemaNode atoms that name the
+  action-rules for the given demand-node.
+
+  dpn:
+  - DefinedPredicateNode that represents the evaluatable term that will filter
+    action-rules. The evaluatable term should take a single DefinedSchemaNode
+    and return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`.
+    The VariableNodes in the term must be named `(VariableNode \"x\")`.
+
+  demand-node:
+    - A ConceptNode that represents a demand, from which action-rules
 "
-   (define (get-psi-action-type) (cog-execute!
+    ; Check arguments
+    (define err-template "In procedure psi-get-action-rules: ")
+    (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
+        (error err-template "Expected DefinedPredicateNode got: " dpn))
+    (if (not (cog-node? demand-node))
+        (error err-template "Expected a Node got: " demand-node))
+    (if (equal? (stv 0 1) (psi-demand? demand-node))
+        (error err-template "Expected OpenPsi demand node got: " demand-node))
+
+    (cog-execute!
         (GetLink
-            (TypedVariableLink
-                (VariableNode "effect-type")
-                (TypeNode "ConceptNode"))
-            (StateLink
-                (Node (string-append (psi-prefix-str) "action-on-demand"))
-                (ListLink
-                    (VariableNode "effect-type")
-                    (psi-current-goal))))
-    ))
-
-    (let* ((set-link (get-psi-action-type))
-          (result (cog-outgoing-set set-link)))
-
-          (cog-extract set-link)
-
-          (if (null? result)
-              "Default"
-              (psi-suffix-str (cog-name (car result)))
-          )
+             (TypedVariableLink
+                 (VariableNode "x")
+                 (TypeNode "DefinedSchemaNode"))
+             (AndLink
+                 dpn
+                 (MemberLink
+                     (VariableNode "x")
+                     demand-node)
+                 (InheritanceLink
+                     (VariableNode "x")
+                     (ConceptNode "opencog: action"))))
     )
 )
 
+; --------------------------------------------------------------
+; Functions to help define standard action-rules
 ; --------------------------------------------------------------
 (define-public (psi-action-maximize rate)
 "
@@ -534,7 +518,7 @@
     )
 )
 
-(define-public (psi-action-rule-maximize demand-node rate)
+(define-public (psi-action-rule-maximize demand-node rate weight)
 "
   Creates an action-rule with the effect of increasing the demand-value for the
   given demand.
@@ -546,6 +530,10 @@
   - A number for the percentage of change that a demand-value will be updated
     with, on each step. If an action with the same rate of has been defined
     for the given demand a new action isn't created, but the old one returned.
+
+  weight:
+  - This is the strength of the MemberLink TruthValue that adds the action-rule
+  to the rulebase of the demand.
 "
 
     ; TODO test for retrun of previously defined action-rule when one tries
@@ -560,7 +548,8 @@
         (psi-action-maximize rate)
         demand-node
         "Increase"
-        (string-append "maximize-" (number->string rate)))
+        (string-append "maximize-" (number->string rate))
+        weight)
 )
 
 ; --------------------------------------------------------------
@@ -600,7 +589,7 @@
     )
 )
 
-(define-public (psi-action-rule-minimize demand-node rate)
+(define-public (psi-action-rule-minimize demand-node rate weight)
 "
   Creates an action with the effect of decreasing the demand-value for the
   given demand.
@@ -612,6 +601,10 @@
   - A number for the percentage of change that a demand-value be updated with,
     on each step. If an action with the same rate of has been defined for the
     given demand a new action isn't created, but the old one returned.
+
+  weight:
+  - This is the strength of the MemberLink TruthValue that adds the action-rule
+  to the rulebase of the demand.
 "
 
     (psi-action-rule
@@ -624,7 +617,8 @@
         (psi-action-minimize rate)
         demand-node
         "Decrease"
-        (string-append "minimize-" (number->string rate)))
+        (string-append "minimize-" (number->string rate))
+        weight)
 )
 
 ; --------------------------------------------------------------

@@ -10,12 +10,12 @@
 (define energy (psi-demand "Energy" .71 energy-default-action))
 
 ; Add action for increasing the energy-demand.
-(psi-action-rule-maximize energy 10)
-(psi-action-rule-maximize energy 5)
+(psi-action-rule-maximize energy 10 .6)
+(psi-action-rule-maximize energy 5 .3)
 
 ; Add action for decreasing the energy-demand.
-(psi-action-rule-minimize energy 6)
-(psi-action-rule-minimize energy 5)
+(psi-action-rule-minimize energy 6 .6)
+(psi-action-rule-minimize energy 5 .3)
 
 ; --------------------------------------------------------------
 ; For test_psi_get_action_rules
