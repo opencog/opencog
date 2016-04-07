@@ -8,7 +8,7 @@ Starting off with simple, rigid command template to learn new stimulus and
 associated response behavior. 
 
 Example:
-Human "When I say 'Are you bored' then you yawn."  
+Human "When I say 'Are you bored' then yawn."  
 Bot: "Okay, when you say are you bored, then I will yawn."  
 Human "Are you bored?"  
 Bot: \<yawns\>  
@@ -54,8 +54,15 @@ rules.
 End-user Usage
 --------------
 
-Human: When I say \<insert stimulus phrase here\> then you \<insert desired 
-behavior response here\>.
+Current training pattern:
+
+"When I say * then *."
+
+Human: When I say \<insert stimulus phrase here\> then \<insert desired behavior
+response here\>.
+
+Concrete example:
+Human: "When I say do you want a donut then be happy."
 
 The robot should then execute the behavior (or pass a request for the behavior 
 to an action coordinator) when it hears the stimulus phrase.
@@ -67,9 +74,4 @@ The response needs to be a pre-defined behavior with a pre-scripted animation
 
 The current implemented behaviors are . . . (or can be found at . . .)
 
-
-**NOTE:** 
-Currently there is an issue that cog-recongize is not matching Globs (wildcard 
-placeholders) with multiple atoms when there are multiple Globs, so the training 
-is for now limited to using single-word stimulus phrases and behaviors. 
 
