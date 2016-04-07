@@ -22,12 +22,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <opencog/util/Logger.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/rule-engine/Rule.h>
+#include <opencog/util/Logger.h>
 
+// Class being tested
 #include <opencog/planning/Action.h>
 
 using namespace opencog;
