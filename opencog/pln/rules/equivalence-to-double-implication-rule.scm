@@ -52,10 +52,12 @@
 
 (define equivalence-to-double-implication-backward-rule-1
   (Get
+     equivalence-to-double-implication-variables
      equivalence-to-double-implication-backward-body-1))
 
 (define equivalence-to-double-implication-backward-rule-2
   (Get
+     equivalence-to-double-implication-variables
      equivalence-to-double-implication-backward-body-2))
 
 (define equivalence-to-double-implication-rule
