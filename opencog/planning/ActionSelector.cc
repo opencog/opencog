@@ -30,17 +30,6 @@
 
 using namespace opencog;
 
-/**
- * Default action rulebase name.
- */
-
-/**
- * ActionSelector Constructor.
- *
- * @param as Atomspace on which planning is being performed
- * @param rbs handle of the atom defining the rulebase which is the set of all
- *            actions to be selected.
- */
 ActionSelector::ActionSelector(AtomSpace& as, Handle rbs) : _as(as), _rbs(rbs)
 {
     if (Handle::UNDEFINED == rbs)
@@ -52,7 +41,6 @@ ActionSelector::ActionSelector(AtomSpace& as, Handle rbs) : _as(as), _rbs(rbs)
     // Check if a rule is also an action.
     // Just because an atom inherites from (ConceptNode "opencog: action")
     // doesn't make it a valid action-rule. It has to be a valid URE rule also.
-    // NOTE: There is no utiility for checking a pattern
     UREConfigReader temp_rbs(_as, rbs);
     for(auto& rule : temp_rbs.get_rules()) {
         auto result = std::find(temp_actions.begin(), temp_actions.end(),

@@ -25,7 +25,8 @@
 
  #include <vector>
 
- #include "Action.h"
+ #include <opencog/planning/Action.h>
+
 
 namespace opencog
 {
@@ -36,10 +37,15 @@ namespace opencog
 class ActionSelector
 {
 public:
+    /**
+     * ActionSelector Constructor.
+     *
+     * @param as Atomspace on which planning is being performed
+     * @param rbs Handle of the atom defining the rulebase which is the set
+     *            of all actions to be selected.
+     */
     ActionSelector(AtomSpace& as, Handle rbs);
     ~ActionSelector();
-
-    static const std::string action_rbs_name;
 
 private:
     AtomSpace& _as;

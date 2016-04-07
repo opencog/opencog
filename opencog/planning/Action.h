@@ -37,12 +37,30 @@ class Action
 public:
     Action(Rule a_rule);
 
+    /**
+     * @return The rule associated with an action.
+     */
     Rule get_rule();
+
+    /**
+     * @return The derived state associated with an action.
+     */
     LinkPtr get_derived_state();
+
+    /**
+     * Checks if the action's derived state is satisfiable in the given
+     * atomspace.
+     *
+     * @param as An atomspace that provides the state to be used for checking
+     *           if the action's derived context is satisfiable.
+     * @return `true` if it is satisfiable and `false` if not.
+     */
     bool is_derived_state_satisfiable(AtomSpace& as);
 
 private:
-    // An action is  a URE rule that inherits from this node.
+    /**
+     * An action is  a URE rule that inherits from this node.
+     */
     static const NodePtr main_action_node;
 
     Rule _rule;
