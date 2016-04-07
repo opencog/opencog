@@ -372,7 +372,7 @@
             action))
 
     (define (create-psi-action-rule)
-        (let ((alias (ure-add-rule demand-node rule-name (rule) weight)))
+        (let ((alias (ure-define-add-rule demand-node rule-name (rule) weight)))
             (InheritanceLink
                 alias
                 (ConceptNode "opencog: action"))

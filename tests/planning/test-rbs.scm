@@ -48,7 +48,8 @@
                  (VariableNode "z"))))
 )
 
-(define rule-alias (ure-add-rule initial-rbs "initial-rule" initial-rule 1))
+(define rule-alias
+  (ure-define-add-rule initial-rbs "initial-rule" initial-rule 1))
 
 ; FIXME: Add random inheritance for checking the filtering of multiple
 ; inheritance from different atoms. This atom should be added first, so as to

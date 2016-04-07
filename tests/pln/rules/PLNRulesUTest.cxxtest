@@ -25,6 +25,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/rule-engine/Rule.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/query/BindLinkAPI.h>
@@ -626,8 +627,12 @@ void PLNRulesUTest::test_equivalence_to_double_implication()
 	load_scm_files_from_config(as);
 
 	// Apply the and rule
-	Handle rule = eval.eval_h("equivalence-to-double-implication-rule");
-	Handle results = bindlink(&as, rule);
+	Handle rule_alias =
+		eval.eval_h("equivalence-to-double-implication-rule-name"),
+		rbs = as.add_node(CONCEPT_NODE, "dummy rbs"),
+		rule_ml = as.add_link(MEMBER_LINK, rule_alias, rbs);
+	Rule rule(rule_ml);
+	Handle results = bindlink(&as, rule.get_forward_rule());
 	Handle expected = eval.eval_h(
 		"(SetLink"
 		"  (ListLink"
