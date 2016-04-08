@@ -99,4 +99,39 @@ public:
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
+
+    void test_select_by_context()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Load test content
+        _scm->eval("(load \"" PLANNING_TEST_PATH "/test-rbs.scm\")");
+        CHKERR
+        Handle rbs = _scm->eval_h("initial-rbs") ;
+        CHKERR
+
+        // Make rule-2 an action
+        _scm->eval("(convert-to-action-rule rule2-alias)");
+        CHKERR
+        ActionSelector selector(*_as, rbs);
+
+        // There is no groundable content so there mustn't be any selected rule.
+        auto result_1 = selector.select_by_context();
+        TSM_ASSERT_EQUALS("Expected no actions.", result_1.size(), 0);
+
+        // Add groundable content
+        _scm->eval("(add-groundable-content)");
+        CHKERR
+        auto result_2 = selector.select_by_context();
+        TSM_ASSERT_EQUALS("Expected two actions.", result_2.size(), 2);
+
+        // Check that the selected rules doesn't include rule-3
+        auto rule_3_alias =_scm->eval_h("rule3-alias");
+        CHKERR
+        for (auto i : result_2) {
+            TSM_ASSERT_DIFFERS("rule-3 shouldn't be selected", rule_3_alias, i);
+        }
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
 };

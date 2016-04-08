@@ -63,7 +63,7 @@
 
 
 ; Helper function for `ActionUTest::test_is_derived_state_satisfiable`
-(define (add-content)
+(define (add-groundable-content)
     (ListLink
         (NumberNode 1)
         (NumberNode 2)
@@ -71,6 +71,13 @@
     (InheritanceLink
         (NumberNode 1)
         (PredicateNode "z"))
+)
+; Helper function for `ActionSelectorUTest`
+(define (convert-to-action-rule alias)
+"
+  Takes a rule alias and makes it an opencog action.
+"
+    (InheritanceLink alias (ConceptNode "opencog: action"))
 )
 
 ; This rule has the same pattern as `rule-1` so, on context based
@@ -117,10 +124,48 @@
 
 (define rule2-alias (ure-define-add-rule initial-rbs "rule-2" rule-2 1))
 
-; Helper function for `ActionSelectorUTest`
-(define (convert-to-action-rule alias)
-"
-  Takes a rule alias and makes it an opencog action.
-"
-    (InheritanceLink alias (ConceptNode "opencog: action"))
+
+; This rule doesn't match the above two patterns so shouldn't be selected.
+(define rule-3
+    (BindLink
+        (VariableList
+            (TypedVariableLink
+                (VariableNode "x2")
+                (TypeNode "NumberNode"))
+            (TypedVariableLink
+                (VariableNode "y2")
+                (TypeNode "NumberNode"))
+            (TypedVariableLink
+                (VariableNode "z2")
+                (TypeNode "PredicateNode")))
+        (AndLink
+            (ListLink
+                (VariableNode "x2")
+                (VariableNode "y2")
+                (VariableNode "z2")
+                (ConceptNode  "rule-3"))
+            (InheritanceLink
+                (VariableNode "x2")
+                (VariableNode "z2"))
+            ; Virtual-link
+            (EqualLink
+                (VariableNode "x2")
+                (VariableNode "y2"))
+            ; Evaluatable term
+            (EvaluationLink
+                (GroundedPredicateNode "scm: cog-tv")
+                (ListLink
+                    (VariableNode "z2")))
+            ; Function-link
+            (TimesLink
+                (VariableNode "x2")
+                (VariableNode "y2")))
+        (ListLink
+             (SetLink
+                 (VariableNode "x2")
+                 (VariableNode "y2")
+                 (VariableNode "z2"))))
 )
+
+(define rule3-alias (ure-define-add-rule initial-rbs "rule-3" rule-3 1))
+(convert-to-action-rule rule3-alias)

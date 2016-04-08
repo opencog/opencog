@@ -133,7 +133,7 @@ public:
         TSM_ASSERT_EQUALS("Expected the action-rule to not be satisfiable", \
             action.is_derived_state_satisfiable(*_as), false);
 
-        _scm->eval("(add-content)");
+        _scm->eval("(add-groundable-content)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected the action-rule to not be satisfiable", \
             action.is_derived_state_satisfiable(*_as), true);

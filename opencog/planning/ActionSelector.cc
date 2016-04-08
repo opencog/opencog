@@ -51,7 +51,7 @@ ActionSelector::ActionSelector(AtomSpace& as, Handle rbs) : _as(as), _rbs(rbs)
         } else {
             throw RuntimeException(TRACE_INFO,
                 "[ActionSelector] - Invalid action-rulebase."
-                "This following rule is not an action-rule, is a member : %s.",
+                "This following rule is not an action-rule : %s.",
                 rule.get_alias()->toString().c_str());
         }
     }
@@ -59,4 +59,18 @@ ActionSelector::ActionSelector(AtomSpace& as, Handle rbs) : _as(as), _rbs(rbs)
 
 ActionSelector::~ActionSelector()
 {
+}
+
+HandleSeq ActionSelector::select_by_context()
+{
+    HandleSeq result;
+
+    for (auto i : _actions) {
+        if (i.is_derived_state_satisfiable(_as)) {
+            std::cout <<"\n got match";
+            result.push_back(i.get_rule().get_alias());
+        }
+    }
+
+    return result;
 }

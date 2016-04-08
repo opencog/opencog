@@ -47,6 +47,14 @@ public:
     ActionSelector(AtomSpace& as, Handle rbs);
     ~ActionSelector();
 
+    /**
+     * Selects the actions by context
+     *
+     * @returns A vector of Handles of the alias Nodes f the action-rules
+     *          that have satisfiable derived states.
+     */
+    HandleSeq select_by_context();
+
 private:
     AtomSpace& _as;
 
