@@ -50,7 +50,7 @@
                  (VariableNode "z"))))
 )
 
-(define rule1-alias (ure-add-rule initial-rbs "rule-1" rule-1 1))
+(define rule1-alias (ure-define-add-rule initial-rbs "rule-1" rule-1 1))
 
 ; FIXME: Add random inheritance for checking the filtering of multiple
 ; inheritance from different atoms. This atom should be added first, so as to
@@ -115,7 +115,7 @@
                  (VariableNode "z2"))))
 )
 
-(define rule2-alias (ure-add-rule initial-rbs "rule-2" rule-2 1))
+(define rule2-alias (ure-define-add-rule initial-rbs "rule-2" rule-2 1))
 
 ; Helper function for `ActionSelectorUTest`
 (define (convert-to-action-rule alias)
