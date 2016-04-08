@@ -358,12 +358,17 @@ while (my $line = <FIN>)
 
 		if ($have_raw_code)
 		{
-			if ($curr_raw_code =~ /<random>/)
+			if ($curr_raw_code =~ /<random>(.*)<\/random>/)
 			{
-				$code .= "duuuuuuuuuuuuuuuuuuuuuuuuude\n";
-				$code .= $curr_raw_code;
-				$code .= ") ; CATEND\n";     # close category section
-				$rule = $code;
+				my $choices = $1;
+				my @choicelist = split /<li>/, $choices;
+				foreach my $ch (@choicelist)
+				{
+					# $ch =~ s/<\\li>//;
+					$rule .= $code;
+					$rule .= "   (Node \"$ch\")\n";
+					$rule .= "   ) ; CATEND\n\n";     # close category section
+				}
          }
 			$have_raw_code = 0;
 		}
@@ -392,28 +397,28 @@ while (my $line = <FIN>)
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
-		$code .= "     (ListLink\n";
+		$code .= "      (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
 		$arg = lc $arg;
-		$code .= "          (Concept \"$arg\")\n";
+		$code .= "         (Concept \"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
-		$code .= "          (Glob \"\$star\")\n";
+		$code .= "         (Glob \"\$star\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$code .= "          (WordNode \"_\")\n";
+		$code .= "         (WordNode \"_\")\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$code .= "          (BOTVARNode \"$arg\")\n";
+		$code .= "         (BOTVARNode \"$arg\")\n";
 	}
 	if ($cmd eq "PSET")
 	{
-		$code .= "          (ConceptNode \"$arg\") ; Huh?\n";
+		$code .= "         (ConceptNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
@@ -502,7 +507,7 @@ while (my $line = <FIN>)
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
-		$code .= "    ) ;TEMPLATECODE\n";  # close pattern section
+		$code .= "   ) ;TEMPLATECODE\n";  # close pattern section
 
 		$arg =~ s/\"/\'/g;
 
