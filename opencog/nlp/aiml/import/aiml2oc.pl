@@ -344,7 +344,7 @@ while (my $line = <FIN>)
 	if ($cmd eq "CATBEGIN")
 	{
 		$code = "(Implication\n";
-		$code .= "   (AndLink\n";
+		$code .= "   (And\n";
 	}
 	if ($cmd eq "PATH")
 	{
@@ -364,7 +364,9 @@ while (my $line = <FIN>)
 			if ($curr_raw_code =~ /<random>(.*)<\/random>/)
 			{
 				my $choices = $1;
+				$choices =~ s/^\s+//;
 				my @choicelist = split /<li>/, $choices;
+				shift @choicelist;
 				foreach my $ch (@choicelist)
 				{
 					$ch =~ s/<\/li>//;
