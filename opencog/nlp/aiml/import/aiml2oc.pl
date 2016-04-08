@@ -346,7 +346,7 @@ while (my $line =<FIN>)
 
 	if ($cmd eq "CATEND")
 	{
-		$code .= ")\n";     # close category section
+		$code .= ") ; CATEND\n";     # close category section
 
 		if ($overwrite)
 		{
@@ -375,7 +375,7 @@ while (my $line =<FIN>)
 	}
 	if ($cmd eq "PSTAR")
 	{
-		$code .= "         (WordNode \"*\")\n";
+		$code .= "         (GlobNode \"star\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
@@ -391,8 +391,7 @@ while (my $line =<FIN>)
 	}
 	if ($cmd eq "PATEND")
 	{
-		$code .= "         (VariableNode \"\$eol\")\n";
-		$code .= "      )\n";
+		$code .= "      ) ; PATEND\n";
 	}
 
 	#TOPIC
@@ -424,7 +423,7 @@ while (my $line =<FIN>)
 	if ($cmd eq "TOPICEND")
 	{
 		$code .= "         (VariableNode \"\$topic\")\n";
-		$code .= "      )\n";
+		$code .= "      ) ; TOPICEND\n";
 	}
 
 	# THAT
@@ -456,13 +455,13 @@ while (my $line =<FIN>)
 	if ($cmd eq "THATEND")
 	{
 		$code .= "         (VariableNode \"\$that\")\n";
-		$code .= "      )\n";
+		$code .= "      ) ;THATEND\n";
 	}
 
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
-		$code .= "     )\n";  # close pattern section
+		$code .= "    ) ;TEMPLATECODE\n";  # close pattern section
 
 		$arg =~ s/\"/\'/g;
 
@@ -475,7 +474,7 @@ while (my $line =<FIN>)
 	}
 	if ($cmd eq "TEMPATOMIC")
 	{
-		$code .= "    )\n";  # close pattern section
+		$code .= "    ) ;TEMPATOMIC\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
 		$code .= "    (StateLink\n";
@@ -490,8 +489,7 @@ while (my $line =<FIN>)
 	if ($cmd eq "TEMPATOMICEND")
 	{
 		# Just another word in the reply chain.
-		$code .= "        )\n";
-		$code .= "    )\n";
+		# $code .= "        ) ; TEMPATOMICEND\n";
 	}
 }
 
