@@ -322,14 +322,14 @@ my $curPath="";
 my %overwriteSpace=();
 my $code = "";
 
-while (my $line =<FIN>)
+while (my $line = <FIN>)
 {
 	chomp($line);
-	if (length($line)<1) {next;}
-	my @parms=split(/\,/,$line);
-	my $cmd=$parms[0] || "";
-	my $arg=$parms[1] || "";
-	if (length($cmd)<1) {next;}
+	if (length($line) < 1) { next; }
+	my @parms = split(/\,/, $line);
+	my $cmd = $parms[0] || "";
+	my $arg = $parms[1] || "";
+	if (length($cmd) < 1) { next; }
 
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
@@ -377,6 +377,7 @@ while (my $line =<FIN>)
 	}
 	if ($cmd eq "PWRD")
 	{
+		$arg = lc $arg;
 		$code .= "             (Concept \"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
