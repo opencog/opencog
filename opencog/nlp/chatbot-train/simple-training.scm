@@ -6,7 +6,7 @@
 ; Starting off with simple, rigid command template to learn new stimulus and
 ; associated response behavior.
 ; Example:
-; Human "When I say 'Are you bored' then you yawn."
+; Human "When I say 'Are you bored' then yawn."
 ; Bot: "Okay, when you say are you bored, then I will yawn."
 ; Human "Are you bored?"
 ; Bot: <yawns>
@@ -44,7 +44,7 @@
             (ConceptNode "I")
             (ConceptNode "SAY")
             (GlobNode "$stimulus")
-            (ConceptNode "YOU")
+            (ConceptNode "THEN")
             (GlobNode "$response"))
         (Evaluation
             (GroundedPredicateNode "scm:create-behavior-rule")
@@ -52,7 +52,13 @@
                 (List (GlobNode "$stimulus"))
                 (List (GlobNode "$response"))))))
 
+; Removing this for now - need to figure out how to stop the pattern below from
+; matching with the pattern above. Also need to figure out how to deal with the
+; situation of a words in the stimuls also being in the training pattern. E.g.,
+; if the training pattern is "When I say * you *" and then the word "you" gets
+; used in the stimilus.
 ; "When I say * then you *"
+#!
 (define training-rule
     (BindLink
         (ListLink
@@ -68,6 +74,7 @@
             (ListLink
                 (List (GlobNode "$stimulus"))
                 (List (GlobNode "$response"))))))
+!#
 
 ;-----------------------------------------------------------------
 ; Execution of behaviors based on string stimulus using AIML-style string
@@ -85,7 +92,6 @@
     (define result)
 	(define listified-string (mapConceptualizeString (clean-text input-str)))
 
-    ;(set! rule (get-tree-with-antecedent input-str))
     (set! rule (get-tree-with-antecedent listified-string))
     (if rule
         (begin
@@ -172,6 +178,16 @@
 )
 
 
+(define (delistify ll)
+	(define concept-words (cog-outgoing-set ll))
+	(define first (cog-name (list-ref concept-words 0)))
+	(set! concept-words (list-tail concept-words 1))
+	(string-downcase
+		(fold (lambda (new prev) (string-append prev " " (cog-name new)))
+			first
+			concept-words)))
+
+
 
 ;-----------------------------------------------------------------
 ; Creates new behavior rule in atomese based on a given simulus and response
@@ -187,7 +203,7 @@
 	(set! new-rule
     	(BindLink
     		stimulus
-			(DefinedPredicateNode  (string-downcase (cog-name (list-ref (cog-outgoing-set response) 0))))
+			(DefinedPredicateNode  (delistify response))
 		)
 	)
 	(display new-rule)
