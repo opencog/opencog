@@ -1,14 +1,14 @@
 ;; =============================================================================
 ;; EquivalenceToDoubleImplicationRule
 ;;
-;; EquivalenceLink
+;; Equivalence
 ;;    A
 ;;    B
 ;; |-
-;; ImplicationLink
+;; Implication
 ;;    A
 ;;    B
-;; ImplicationLink
+;; Implication
 ;;    B
 ;;    A
 ;;
@@ -16,26 +16,55 @@
 
 (use-modules (opencog logger))
 
+(define equivalence-to-double-implication-variables
+  (VariableList
+     (Variable "$A")
+     (Variable "$B")))
+
+(define equivalence-to-double-implication-forward-body
+  (Equivalence
+     (Variable "$A")
+     (Variable "$B")))
+
+(define equivalence-to-double-implication-backward-body-1
+  (Implication
+     (Variable "$A")
+     (Variable "$B")))
+
+(define equivalence-to-double-implication-backward-body-2
+  (Implication
+     (Variable "$B")
+     (Variable "$A")))
+
+(define equivalence-to-double-implication-rewrite
+  (ExecutionOutput
+     (GroundedSchema "scm: equivalence-to-double-implication-formula")
+        (List
+           equivalence-to-double-implication-backward-body-1
+           equivalence-to-double-implication-backward-body-2
+           equivalence-to-double-implication-forward-body)))
+
+(define equivalence-to-double-implication-forward-rule
+  (Bind
+     equivalence-to-double-implication-variables
+     equivalence-to-double-implication-forward-body
+     equivalence-to-double-implication-rewrite))
+
+(define equivalence-to-double-implication-backward-rule-1
+  (Get
+     equivalence-to-double-implication-variables
+     equivalence-to-double-implication-backward-body-1))
+
+(define equivalence-to-double-implication-backward-rule-2
+  (Get
+     equivalence-to-double-implication-variables
+     equivalence-to-double-implication-backward-body-2))
+
 (define equivalence-to-double-implication-rule
-    (BindLink
-        (VariableList
-            (VariableNode "$A")
-            (VariableNode "$B"))
-        (EquivalenceLink
-            (VariableNode "$A")
-            (VariableNode "$B"))
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: equivalence-to-double-implication-formula")
-            (ListLink
-               (ImplicationLink
-                  (VariableNode "$A")
-                  (VariableNode "$B"))
-               (ImplicationLink
-                  (VariableNode "$B")
-                  (VariableNode "$A"))
-               (EquivalenceLink
-                  (VariableNode "$A")
-                  (VariableNode "$B"))))))
+  (List
+     equivalence-to-double-implication-forward-rule
+     equivalence-to-double-implication-backward-rule-1
+     equivalence-to-double-implication-backward-rule-2))
 
 (define (equivalence-to-double-implication-formula AB BA EQ)
     (cog-set-tv!
@@ -44,7 +73,7 @@
     (cog-set-tv!
        BA
        (equivalence-to-double-implication-side-effect-free-formula BA EQ))
-    (ListLink AB BA))
+    (List AB BA))
 
 (define (equivalence-to-double-implication-side-effect-free-formula AB EQ)
     (let* (
@@ -65,7 +94,7 @@
 
 ;; Name the rule
 (define equivalence-to-double-implication-rule-name
-  (DefinedSchemaNode "equivalence-to-double-implication-rule"))
-(DefineLink
+  (DefinedSchema "equivalence-to-double-implication-rule"))
+(Define
   equivalence-to-double-implication-rule-name
   equivalence-to-double-implication-rule)

@@ -1,8 +1,7 @@
 /*
  * @file opencog/planning/ActionSelector.h
- * @author Amen Belayneh <amenbelayneh@gmail.com> November 2015
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015-2016 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,30 +25,46 @@
 
  #include <vector>
 
- #include "Action.h"
+ #include <opencog/planning/Action.h>
 
 namespace opencog
 {
 /** \addtogroup planning
-* @{
-*/
+ * @{
+ */
 
 class ActionSelector
 {
 public:
+    /**
+     * ActionSelector Constructor.
+     *
+     * @param as Atomspace on which planning is being performed
+     * @param rbs Handle of the atom defining the rulebase which is the set
+     *            of all actions to be selected.
+     */
     ActionSelector(AtomSpace& as, Handle rbs);
-    ~ActionSelector();
 
-    static const std::string action_rbs_name;
+    /**
+     * Selects the actions by context
+     *
+     * @returns A vector of Handles of the alias Nodes f the action-rules
+     *          that have satisfiable derived states.
+     */
+    HandleSeq select_by_context();
+
+    /**
+     * @returns a vector of actions that form the action-rulebase.
+     */
+    vector<Action> get_actions();
 
 private:
     AtomSpace& _as;
 
-    std::vector<Action> _actions;
+    vector<Action> _actions;
 
     // Initial rulebase
     Handle _rbs;
-    HandleSeq fetch_actions();
 };
 
 /** @}*/
