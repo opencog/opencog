@@ -108,7 +108,7 @@ public:
         if (p == nullptr)
             p = createPatternLink(*action.get_derived_state());
 
-        TSM_ASSERT_EQUALS("Expected no virutal terms", \
+        TSM_ASSERT_EQUALS("Expected no virutal terms",
             0, p->get_virtual().size());
 
         logger().info("END TEST: %s", __FUNCTION__);
@@ -130,12 +130,12 @@ public:
         Rule rule(ml);
         Action action(rule);
 
-        TSM_ASSERT_EQUALS("Expected the action-rule to not be satisfiable", \
+        TSM_ASSERT_EQUALS("Expected the action-rule to not be satisfiable",
             action.is_derived_state_satisfiable(*_as), false);
 
         _scm->eval("(add-groundable-content)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected the action-rule to not be satisfiable", \
+        TSM_ASSERT_EQUALS("Expected the action-rule to not be satisfiable",
             action.is_derived_state_satisfiable(*_as), true);
 
         logger().info("END TEST: %s", __FUNCTION__);
