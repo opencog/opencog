@@ -367,30 +367,37 @@ while (my $line =<FIN>)
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
-		$code .= "      (WordSequenceLink\n";
+		$code .= "      (State\n";
+		$code .= "         (Anchor \"*-current-parse-*\")\n";
+		$code .= "         (Variable \"\$parse node\"))\n";
+		$code .= "      (Evaluation\n";
+		$code .= "         (Predicate \"Token Sequence\")\n";
+		$code .= "         (Variable \"\$parse node\")\n";
+		$code .= "         (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
-		$code .= "         (WordNode \"$arg\")\n";
+		$code .= "             (Concept \"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
-		$code .= "         (GlobNode \"star\")\n";
+		$code .= "             (Glob \"\$star\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$code .= "         (WordNode \"_\")\n";
+		$code .= "             (WordNode \"_\")\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$code .= "         (BOTVARNode \"$arg\")\n";
+		$code .= "             (BOTVARNode \"$arg\")\n";
 	}
 	if ($cmd eq "PSET")
 	{
-		$code .= "         (ConceptNode \"$arg\")\n";
+		$code .= "             (ConceptNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
+		$code .= "         )\n";
 		$code .= "      ) ; PATEND\n";
 	}
 
