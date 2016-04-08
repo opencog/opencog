@@ -27,7 +27,6 @@
 
  #include <opencog/planning/Action.h>
 
-
 namespace opencog
 {
 /** \addtogroup planning
@@ -45,7 +44,6 @@ public:
      *            of all actions to be selected.
      */
     ActionSelector(AtomSpace& as, Handle rbs);
-    ~ActionSelector();
 
     /**
      * Selects the actions by context

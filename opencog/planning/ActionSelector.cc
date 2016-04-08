@@ -56,10 +56,6 @@ ActionSelector::ActionSelector(AtomSpace& as, Handle rbs) : _as(as), _rbs(rbs)
     }
 }
 
-ActionSelector::~ActionSelector()
-{
-}
-
 HandleSeq ActionSelector::select_by_context()
 {
     HandleSeq result;
