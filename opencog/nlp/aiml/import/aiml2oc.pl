@@ -334,8 +334,8 @@ while (my $line =<FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$code .= "(PatternLink\n";
-		$code .= "   (SequentialAndLink\n";
+		$code .= "(BindLink\n";
+		$code .= "   (AndLink\n";
 	}
 	if ($cmd eq "PATH")
 	{
@@ -398,7 +398,7 @@ while (my $line =<FIN>)
 	#TOPIC
 	if ($cmd eq "TOPIC")
 	{
-		$code .= "      (ListLink\n";
+		$code .= "      (StateLink\n";
 		$code .= "         (AnchorNode \"\#topic\")\n";
 	}
 	if ($cmd eq "TOPICWRD")
@@ -430,7 +430,7 @@ while (my $line =<FIN>)
 	# THAT
 	if ($cmd eq "THAT")
 	{
-		$code .= "      (ListLink\n";
+		$code .= "      (StateLink\n";
 		$code .= "         (AnchorNode \"\#that\")\n";
 	}
 	if ($cmd eq "THATWRD")
@@ -467,7 +467,7 @@ while (my $line =<FIN>)
 		$arg =~ s/\"/\'/g;
 
 		# just raw AIML code
-		$code .= "    (PutLink\n";
+		$code .= "    (StateLink\n";
 		$code .= "       (AnchorNode \"\#reply\")\n";
 		$code .= "       (AIMLCODENode \"$arg\")\n";
 		$code .= "    )\n";
@@ -478,7 +478,7 @@ while (my $line =<FIN>)
 		$code .= "    )\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
-		$code .= "    (PutLink\n";
+		$code .= "    (StateLink\n";
 		$code .= "       (AnchorNode \"\#reply\")\n";
 		$code .= "       (WordSequenceLink\n";
 	}
@@ -566,24 +566,24 @@ PatternLink
 
 Or in more scheme-ish format
 
-(PatternLink
-   (SequentialAndLink
+(BindLink
+   (AndLink
       (WordSequenceLink
          (WordNode "Hello")
          (VariableNode "$eol")
       )
-      (ListLink
+      (StateLink
          (AnchorNode "#topic")
          (WordNode "*")
          (VariableNode "$topic")
       )
-      (ListLink
+      (StateLink
          (AnchorNode "#that")
          (WordNode "*")
          (VariableNode "$that")
       )
     )
-    (PutLink
+    (StateLink
        (AnchorNode "#reply")
        (WordSequenceLink
             (WordNode "Hi")
