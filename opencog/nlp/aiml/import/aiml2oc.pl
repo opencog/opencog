@@ -364,6 +364,11 @@ while (my $line = <FIN>)
 	# We are going to have to fix this for the various stars and
 	# variables, but it is a start.
 
+	my $have_topic = 0;
+	my $curr_topic = "";
+	my $have_that = 0;
+	my $curr_that = "";
+
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
@@ -405,65 +410,80 @@ while (my $line = <FIN>)
 	#TOPIC
 	if ($cmd eq "TOPIC")
 	{
-		$code .= "      (StateLink\n";
-		$code .= "         (AnchorNode \"\#topic\")\n";
+		$have_topic = 0;
 	}
 	if ($cmd eq "TOPICWRD")
 	{
-		$code .= "         (WordNode \"$arg\")\n";
+		$have_topic = 1;
+		$curr_topic = $arg;
 	}
 	if ($cmd eq "TOPICSTAR")
 	{
-		$code .= "         (WordNode \"*\")\n";
+		$have_topic = 0;
 	}
 	if ($cmd eq "TOPICUSTAR")
 	{
-		$code .= "         (WordNode \"_\")\n";
+		$have_topic = 0;
 	}
 	if ($cmd eq "TOPICBOTVAR")
 	{
-		$code .= "         (BOTVARNode \"$arg\")\n";
+		$code .= "; TOPICBOTVAR $arg\n";
 	}
 	if ($cmd eq "TOPICSET")
 	{
-		$code .= "         (ConceptNode \"$arg\")\n";
+		$have_topic = 1;
+		$curr_topic = $arg;
+		$code .= "; TOPICSET $arg\n";
 	}
 	if ($cmd eq "TOPICEND")
 	{
-		$code .= "         (VariableNode \"\$topic\")\n";
-		$code .= "      ) ; TOPICEND\n";
+		if ($have_topic)
+		{
+			$code .= "      (State\n";
+			$code .= "         (Anchor \"\#topic\")\n";
+			$code .= "         (Concept \"$curr_topic\")\n";
+			$code .= "      )\n";
+		}
+		$have_topic = 0;
 	}
 
 	# THAT
 	if ($cmd eq "THAT")
 	{
-		$code .= "      (StateLink\n";
-		$code .= "         (AnchorNode \"\#that\")\n";
+		$have_that = 0;
 	}
 	if ($cmd eq "THATWRD")
 	{
-		$code .= "         (WordNode \"$arg\")\n";
+		$have_that = 1;
+		$curr_that = $arg;
 	}
 	if ($cmd eq "THATSTAR")
 	{
-		$code .= "         (WordNode \"*\")\n";
+		$have_that = 0;
 	}
 	if ($cmd eq "THATUSTAR")
 	{
-		$code .= "         (WordNode \"_\")\n";
+		$have_that = 0;
 	}
 	if ($cmd eq "THATBOTVAR")
 	{
-		$code .= "         (BOTVARNode \"$arg\")\n";
+		$code .= "; THATBOTVAR $arg\n";
 	}
 	if ($cmd eq "THATSET")
 	{
-		$code .= "         (ConceptNode \"$arg\")\n";
+		$have_that = 1;
+		$curr_that = $arg;
 	}
 	if ($cmd eq "THATEND")
 	{
-		$code .= "         (VariableNode \"\$that\")\n";
-		$code .= "      ) ;THATEND\n";
+		if ($have_that)
+		{
+			$code .= "      (State\n";
+			$code .= "         (Anchor \"\#that\")\n";
+			$code .= "         (Concept \"$curr_that\")\n";
+			$code .= "      )\n";
+		}
+		$have_that = 0;
 	}
 
 	#template
