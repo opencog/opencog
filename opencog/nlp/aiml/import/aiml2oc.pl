@@ -322,6 +322,15 @@ my $curPath="";
 my %overwriteSpace=();
 my $code = "";
 
+my $have_topic = 0;
+my $curr_topic = "";
+
+my $have_that = 0;
+my $curr_that = "";
+
+my $have_raw_code = 0;
+my $curr_raw_code = "";
+
 while (my $line = <FIN>)
 {
 	chomp($line);
@@ -334,7 +343,7 @@ while (my $line = <FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$code .= "(Implication\n";
+		$code = "(Implication\n";
 		$code .= "   (AndLink\n";
 	}
 	if ($cmd eq "PATH")
@@ -345,28 +354,40 @@ while (my $line = <FIN>)
 
 	if ($cmd eq "CATEND")
 	{
-		$code .= ") ; CATEND\n";     # close category section
+		my $rule = "";
+
+		if ($have_raw_code)
+		{
+			if ($curr_raw_code =~ /<random>/)
+			{
+				$code .= "duuuuuuuuuuuuuuuuuuuuuuuuude\n";
+				$code .= $curr_raw_code;
+				$code .= ") ; CATEND\n";     # close category section
+				$rule = $code;
+         }
+			$have_raw_code = 0;
+		}
+		else
+		{
+			$code .= ") ; CATEND\n";     # close category section
+			$rule = $code;
+		}
 
 		if ($overwrite)
 		{
 			# Overwrite in a hash space indexed by the current path.
-			$overwriteSpace{$curPath} = $code;
+			$overwriteSpace{$curPath} = $rule;
 		}
 		else
 		{
 			# Not merging, so just write it out.
-			print FOUT "$code\n";
+			print FOUT "$rule\n";
 		}
 		$code = "";
 	}
 
 	# We are going to have to fix this for the various stars and
 	# variables, but it is a start.
-
-	my $have_topic = 0;
-	my $curr_topic = "";
-	my $have_that = 0;
-	my $curr_that = "";
 
 	# PATTERN
 	if ($cmd eq "PAT")
@@ -485,13 +506,10 @@ while (my $line = <FIN>)
 
 		$arg =~ s/\"/\'/g;
 
-		# just raw AIML code
-		$code .= "    (StateLink\n";
-		$code .= "       (AnchorNode \"\#reply\")\n";
-		$code .= "       (AIMLCODENode \"$arg\")\n";
-		$code .= "    )\n";
-
+		$have_raw_code = 1;
+		$curr_raw_code = $arg;
 	}
+
 	if ($cmd eq "TEMPATOMIC")
 	{
 		$code .= "    ) ;TEMPATOMIC\n";  # close pattern section
