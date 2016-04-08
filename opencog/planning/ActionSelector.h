@@ -55,10 +55,15 @@ public:
      */
     HandleSeq select_by_context();
 
+    /**
+     * @returns a vector of actions that form the action-rulebase.
+     */
+    vector<Action> get_actions();
+
 private:
     AtomSpace& _as;
 
-    std::vector<Action> _actions;
+    vector<Action> _actions;
 
     // Initial rulebase
     Handle _rbs;

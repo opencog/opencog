@@ -97,6 +97,15 @@ public:
         TS_ASSERT_THROWS({ActionSelector selector(*_as, rbs);},
             RuntimeException)
 
+        // Make rule-2 an action
+        _scm->eval("(convert-to-action-rule rule2-alias)");
+        CHKERR
+
+        // Check the number of action rules
+        ActionSelector selector(*_as, rbs) ;
+        TSM_ASSERT_EQUALS("Expected 3 action-rules",
+            3, selector.get_actions().size());
+
         logger().info("END TEST: %s", __FUNCTION__);
     }
 

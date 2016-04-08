@@ -25,7 +25,6 @@
 #include <opencog/planning/Utilities.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 
-
 #include "ActionSelector.h"
 
 using namespace opencog;
@@ -73,4 +72,9 @@ HandleSeq ActionSelector::select_by_context()
     }
 
     return result;
+}
+
+vector<Action> ActionSelector::get_actions()
+{
+    return _actions ;
 }
