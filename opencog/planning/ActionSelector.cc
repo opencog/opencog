@@ -62,7 +62,6 @@ HandleSeq ActionSelector::select_by_context()
 
     for (auto i : _actions) {
         if (i.is_derived_state_satisfiable(_as)) {
-            std::cout <<"\n got match";
             result.push_back(i.get_rule().get_alias());
         }
     }
