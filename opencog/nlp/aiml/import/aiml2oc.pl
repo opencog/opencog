@@ -58,7 +58,7 @@ if ($version)
 
 print "\n AIML Source directory = $aimlDir\n";
 opendir(DIR, "$aimlDir");
-my @aimlFiles = grep(/\.aiml/,readdir(DIR));
+my @aimlFiles = grep(/\.aiml$/, readdir(DIR));
 closedir(DIR);
 
 open FOUT, ">$intermediateFile";
