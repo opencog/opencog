@@ -124,7 +124,7 @@ public:
         CHKERR
         ActionSelector selector(*_as, rbs);
 
-        // There is no groundable content so there mustn't be any selected rule.
+        // There is no groundable content so there musn't be any selected rule.
         auto result_1 = selector.select_by_context();
         TSM_ASSERT_EQUALS("Expected no actions.", result_1.size(), 0);
 
