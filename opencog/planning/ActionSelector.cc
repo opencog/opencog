@@ -25,34 +25,21 @@
 #include <opencog/planning/Utilities.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 
-
 #include "ActionSelector.h"
 
 using namespace opencog;
 
-/**
- * Default action rulebase name.
- */
-
-/**
- * ActionSelector Constructor.
- *
- * @param as Atomspace on which planning is being performed
- * @param rbs handle of the atom defining the rulebase which is the set of all
- *            actions to be selected.
- */
 ActionSelector::ActionSelector(AtomSpace& as, Handle rbs) : _as(as), _rbs(rbs)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
-            "[ActionSelector] - invalid action rulebase specified!");
+            "[ActionSelector] - Invalid action rulebase specified!");
 
     auto temp_actions(fetch_actions(as));
 
     // Check if a rule is also an action.
     // Just because an atom inherites from (ConceptNode "opencog: action")
     // doesn't make it a valid action-rule. It has to be a valid URE rule also.
-    // NOTE: There is no utiility for checking a pattern
     UREConfigReader temp_rbs(_as, rbs);
     for(auto& rule : temp_rbs.get_rules()) {
         auto result = std::find(temp_actions.begin(), temp_actions.end(),
@@ -62,11 +49,27 @@ ActionSelector::ActionSelector(AtomSpace& as, Handle rbs) : _as(as), _rbs(rbs)
             _actions.emplace_back(rule);
         } else {
             throw RuntimeException(TRACE_INFO,
-                "[ActionSelector] - invalid action-rulebase specified!");
+                "[ActionSelector] - Invalid action-rulebase."
+                "This following rule is not an action-rule : %s.",
+                rule.get_alias()->toString().c_str());
         }
     }
 }
 
-ActionSelector::~ActionSelector()
+HandleSeq ActionSelector::select_by_context()
 {
+    HandleSeq result;
+
+    for (auto i : _actions) {
+        if (i.is_derived_state_satisfiable(_as)) {
+            result.push_back(i.get_rule().get_alias());
+        }
+    }
+
+    return result;
+}
+
+vector<Action> ActionSelector::get_actions()
+{
+    return _actions ;
 }
