@@ -2736,38 +2736,101 @@ void PatternMiner::_mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, un
     OutPutCorpusToFile(observingAtomSpace);
 
 
-    atomspaceSizeFloat = (float)allLinkNumber;
-    std::cout<<"Debug: PatternMiner: Start Surprisingness_I evaluation...\n";
+//    atomspaceSizeFloat = (float)allLinkNumber;
+//    std::cout<<"Debug: PatternMiner: Start Surprisingness_I evaluation...\n";
 
-    for(unsigned int cur_gram = 2; cur_gram <= MAX_GRAM ; cur_gram ++)
-    {
-        if (patternsForGram[cur_gram-1].size() == 0)
-            break;
+//    for(unsigned int cur_gram = 2; cur_gram <= MAX_GRAM ; cur_gram ++)
+//    {
+//        if (patternsForGram[cur_gram-1].size() == 0)
+//            break;
 
-        cout << "\nCalculating Surprisingness_I for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
+//        cout << "\nCalculating Surprisingness_I for " << cur_gram << " gram patterns by evaluating " << interestingness_Evaluation_method << std::endl;
 
-        unsigned int total = (patternsForGram[cur_gram-1]).size();
-        for ( unsigned int cur_index = 0; cur_index < total; cur_index ++)
-        {
-            HTreeNode* htreeNode = patternsForGram[cur_gram - 1][cur_index];
+//        unsigned int total = (patternsForGram[cur_gram-1]).size();
+//        for ( unsigned int cur_index = 0; cur_index < total; cur_index ++)
+//        {
+//            HTreeNode* htreeNode = patternsForGram[cur_gram - 1][cur_index];
 
-            // Evaluate the Surprisingness_I
-            calculateSurprisingness(htreeNode, observingAtomSpace, true);
-        }
+//            // Evaluate the Surprisingness_I
+//            calculateSurprisingness(htreeNode, observingAtomSpace, true);
+//        }
 
-        std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
-        std::cout<<"Outputting to file ... ";
+//        std::cout<<"Debug: PatternMiner:  done (gram = " + toString(cur_gram) + ") interestingness evaluation!" + toString((patternsForGram[cur_gram-1]).size()) + " patterns found! ";
+//        std::cout<<"Outputting to file ... ";
 
-        // sort by surprisingness_I first
-        std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
-        OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
+//        // sort by surprisingness_I first
+//        std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeBySurprisingness_I);
+//        OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram,1);
 
-    }
+//    }
 
     std::cout<< std::endl;
 
     pai->waitingToFeedToPatternMinerLock.unlock();
 
+}
+
+
+
+
+HandleSeqSeq PatternMiner::selectPatternsRelatedToPriorProperties(set<string> priorProperties, unsigned int gram)
+{
+//    // properties are all concept node
+//    set <Handle> priorPropertyNodes;
+//    for(string priorPropertyStr : priorProperties)
+//    {
+//        Handle priorPropertyNode = atomSpace->getNode(CONCEPT_NODE, priorPropertyStr);
+//        if (priorPropertyNode != Handle::UNDEFINED)
+//        {
+//            priorPropertyNodes.insert(priorPropertyNode);
+//        }
+//    }
+
+    // multimap <priorty, HTreeNode*>
+    multimap<unsigned int, HTreeNode*> selectedPatterns;
+
+    vector<HTreeNode*> &patternsForThisGram = patternsForGram[gram-1];
+
+    for (HTreeNode* htreeNode : patternsForThisGram)
+    {
+        if (htreeNode->count < 2)
+            continue;
+
+        string patternStr = unifiedPatternToKeyString(htreeNode->pattern);
+        unsigned int priorCount = 0;
+        const char* source = patternStr.c_str();
+
+        for(string priorPropertyStr : priorProperties)
+        {
+            const char* string2find = priorPropertyStr.c_str();
+            const char *ptr, *lastfind = NULL;
+
+            for(ptr=source; (lastfind=strstr(ptr, string2find)); ptr=lastfind+1)
+                priorCount++;
+        }
+
+        if (priorCount > 0)
+        {
+            selectedPatterns.insert(std::pair<unsigned int, HTreeNode*>(priorCount*(htreeNode->count),htreeNode));
+        }
+    }
+
+    HandleSeqSeq returnSelectedPatterns;
+
+    if (selectedPatterns.size() > 0)
+    {
+        cout << "Selected Patterns:\n";
+        multimap<unsigned int, HTreeNode*>::iterator iter = selectedPatterns.begin();
+        for(; iter != selectedPatterns.end(); iter ++)
+        {
+            cout << "Priority count = " << iter->first << "\n";
+            HTreeNode* htreeNode = iter->second;
+            cout << unifiedPatternToKeyString(htreeNode->pattern) << "\n";
+            returnSelectedPatterns.push_back(htreeNode->pattern);
+        }
+    }
+
+    return returnSelectedPatterns;
 }
 
 void PatternMiner::testPatternMatcher1()

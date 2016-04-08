@@ -346,6 +346,8 @@ namespace PatternMining
      void mineRelatedPatternsOnQueryByANode(Handle keywordNode, unsigned int _max_gram, pai::PAI *_pai);
      void mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, unsigned int _max_gram, pai::PAI *_pai);
 
+     HandleSeqSeq selectPatternsRelatedToPriorProperties(set<string> priorProperties, unsigned int gram);
+
      void feedEmbodimentLinksToObservingAtomSpace (HandleSeq &_newLinks);
 
 //     void feedNewLinksToPatternMiner (HandleSeq &_newLinks);

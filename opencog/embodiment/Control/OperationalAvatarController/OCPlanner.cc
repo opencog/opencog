@@ -2787,7 +2787,7 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
             cout << atomSpace->atomAsString(ph) << std::endl;
         }
 
-        patternMiner->mineRelatedPatternsOnQueryByLinks_OR(paramEvalLinks, 4, pai);
+        patternMiner->mineRelatedPatternsOnQueryByLinks_OR(paramEvalLinks,MINE_PATTERN_GRAM , pai);
 
         cout << "Finished mining all patterns on query related to this parameter: " << paramMapIter->first
              << " Now start to select the best patterns . . ."
@@ -2905,6 +2905,29 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
             for (auto i : distinguishingIntrinsicProperties) cout << i << ", ";
 
             cout << std::endl;
+
+            HandleSeqSeq priorPatterns;
+
+            if (distinguishingIntrinsicProperties.size() > 0)
+            {
+                cout << "Selecting the best patterns by distinguishingIntrinsicProperties..."<< std::endl;
+                priorPatterns = patternMiner->selectPatternsRelatedToPriorProperties(distinguishingIntrinsicProperties, MINE_PATTERN_GRAM);
+            }
+            else if (distinguishingProperties.size() > 0)
+            {
+                cout << "Selecting the best patterns by distinguishingProperties..."<< std::endl;
+                priorPatterns = patternMiner->selectPatternsRelatedToPriorProperties(distinguishingProperties, MINE_PATTERN_GRAM);
+            }
+            else if (intrinsicProperties.size() > 0)
+            {
+                cout << "Selecting the best patterns by intrinsicProperties..."<< std::endl;
+                priorPatterns = patternMiner->selectPatternsRelatedToPriorProperties(intrinsicProperties, MINE_PATTERN_GRAM);
+            }
+            else
+            {
+                cout << "There is no distinguishingProperties or intrinsicProperties for this kind of entities, just adopt the patterns with highest frequency..."<< std::endl;
+            }
+
 
 
         }

@@ -51,6 +51,8 @@ using namespace opencog::PatternMining;
 
 namespace opencog { namespace oac {
 
+#define MINE_PATTERN_GRAM 4
+
 class StateNode;
 
 struct UngroundedVariablesInAState
