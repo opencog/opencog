@@ -334,14 +334,13 @@ while (my $line = <FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$code .= "(BindLink\n";
+		$code .= "(Implication\n";
 		$code .= "   (AndLink\n";
 	}
 	if ($cmd eq "PATH")
 	{
 		$curPath = $arg;
-		#$code = "";
-		#print "PATH --> $curPath\n";
+		# $code .= "; PATH --> $curPath\n";
 	}
 
 	if ($cmd eq "CATEND")
@@ -372,38 +371,31 @@ while (my $line = <FIN>)
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
-		$code .= "      (State\n";
-		$code .= "         (Anchor \"*-current-parse-*\")\n";
-		$code .= "         (Variable \"\$parse node\"))\n";
-		$code .= "      (Evaluation\n";
-		$code .= "         (Predicate \"Token Sequence\")\n";
-		$code .= "         (Variable \"\$parse node\")\n";
-		$code .= "         (ListLink\n";
+		$code .= "     (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
 		$arg = lc $arg;
-		$code .= "             (Concept \"$arg\")\n";
+		$code .= "          (Concept \"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
-		$code .= "             (Glob \"\$star\")\n";
+		$code .= "          (Glob \"\$star\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$code .= "             (WordNode \"_\")\n";
+		$code .= "          (WordNode \"_\")\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$code .= "             (BOTVARNode \"$arg\")\n";
+		$code .= "          (BOTVARNode \"$arg\")\n";
 	}
 	if ($cmd eq "PSET")
 	{
-		$code .= "             (ConceptNode \"$arg\") ; Huh?\n";
+		$code .= "          (ConceptNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
-		$code .= "         )\n";
 		$code .= "      ) ; PATEND\n";
 	}
 
