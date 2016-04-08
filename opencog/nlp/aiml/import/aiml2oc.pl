@@ -358,16 +358,20 @@ while (my $line = <FIN>)
 
 		if ($have_raw_code)
 		{
+			# Random sections are handled by duplicating
+			# the rule repeatedly, each time with the same
+			# premise template, but each with a diffrerent output.
 			if ($curr_raw_code =~ /<random>(.*)<\/random>/)
 			{
 				my $choices = $1;
 				my @choicelist = split /<li>/, $choices;
 				foreach my $ch (@choicelist)
 				{
-					# $ch =~ s/<\\li>//;
+					$ch =~ s/<\/li>//;
+					$ch =~ s/\s+$//;
 					$rule .= $code;
 					$rule .= "   (Node \"$ch\")\n";
-					$rule .= "   ) ; CATEND\n\n";     # close category section
+					$rule .= ") ; <random> choice\n\n";     # close category section
 				}
          }
 			$have_raw_code = 0;
