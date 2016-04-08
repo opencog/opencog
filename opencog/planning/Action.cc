@@ -1,8 +1,7 @@
 /*
  * @file opencog/planning/Action.cc
- * @author Amen Belayneh <amenbelayneh@gmail.com> November 2015
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015-2016 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,20 +23,18 @@
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FollowLink.h>
 #include <opencog/planning/Utilities.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 #include "Action.h"
 
 using namespace opencog;
 
-/**
- * Fully abstracted action node name.
- */
+
 const NodePtr Action::main_action_node =
             createNode(CONCEPT_NODE, "opencog: action");
 
-/**
- * Main Constructor
- */
+
 Action::Action(Rule a_rule) : _rule(a_rule)
 {
     init();
@@ -81,8 +78,9 @@ void Action::init()
     if (not (classserver().isA(implicant_type, AND_LINK) or
              classserver().isA(implicant_type, SEQUENTIAL_AND_LINK)))
         throw InvalidParamException(TRACE_INFO,
-            "[Action::init()] Expecting a AndLink/SequentialAndLink type as",
-            "the implicant, got %s", classserver().getTypeName(implicant_type).c_str());
+            "[Action::init()] Expecting a AndLink/SequentialAndLink type as"
+            "the implicant, got %s",
+            classserver().getTypeName(implicant_type).c_str());
 
     auto derived_body = Handle(createLink(implicant_type, state->get_fixed()));
 
@@ -97,18 +95,29 @@ void Action::init()
     }
 }
 
-/**
- * @return The rule associated with an action.
- */
 Rule Action::get_rule()
 {
     return _rule;
 }
 
-/**
- * @return The derived state associated with an action.
- */
 LinkPtr Action::get_derived_state()
 {
     return _derived_state;
+}
+
+bool Action::is_derived_state_satisfiable(AtomSpace& as)
+{
+    // Why create a nested atomspace if using 'satifaction_link' function?
+    // -> to be on the safe side as the constructor to this might not be
+    // exhaustive enough in cleaning virutal-terms.
+    AtomSpace* temp_as = new AtomSpace(&as);
+    Handle state_h = temp_as->add_atom(_derived_state);
+
+    if (TruthValue::TRUE_TV() == satisfaction_link(temp_as, state_h)) {
+        delete temp_as;
+        return true;
+    }
+
+    delete temp_as;
+    return false;
 }
