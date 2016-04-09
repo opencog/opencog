@@ -316,6 +316,10 @@ close(FOUT);
 # ------------------------------------------------------------------
 # Second pass utilities
 
+# What node should we use for output text ???
+# my $textnode = "(TextNode ";
+my $textnode = "(Concept ";
+
 # Handle expressions like <star/> and <star index='2'/> and so on.
 sub process_star
 {
@@ -458,7 +462,7 @@ sub process_aiml_tags
 	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
 	{
 		# FIXME, should be like the loop, below.
-		$tout .= $indent . "(TextNode \"$1\")\n";
+		$tout .= $indent . $textnode . "\"$1\")\n";
 		$tout .= $indent . "(ExecutionOutput\n";
 		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
 		$tout .= $indent . "   (ListLink\n";
@@ -466,7 +470,7 @@ sub process_aiml_tags
 		$tout .= $indent . "   ))\n";
 		if ($3 ne "")
 		{
-			$tout .= $indent . "(TextNode \"$3\")\n";
+			$tout .= $indent . $textnode . "\"$3\")\n";
 		}
 	}
 
@@ -486,7 +490,7 @@ sub process_aiml_tags
 				$t =~ s/\s*$//;
 				if ($t ne "")
 				{
-					$tout .= $indent . "(TextNode \"$t\")\n";
+					$tout .= $indent . $textnode . "\"$t\")\n";
 				}
 			}
 			elsif ($star =~ /\/>(.*)/)
@@ -497,12 +501,12 @@ sub process_aiml_tags
 				$t =~ s/\s*$//;
 				if ($t ne "")
 				{
-					$tout .= $indent . "(TextNode \"$t\")\n";
+					$tout .= $indent . $textnode . "\"$t\")\n";
 				}
 			}
 			elsif ($star ne "")
 			{
-				$tout .= $indent . "(TextNode \"$star\")\n";
+				$tout .= $indent . $textnode . "\"$star\")\n";
 			}
 		}
 	}
@@ -514,7 +518,7 @@ sub process_aiml_tags
 	}
 	else
 	{
-		$tout .= $indent . "(TextNode \"$text\")\n";
+		$tout .= $indent . $textnode . "\"$text\")\n";
 	}
 	$tout;
 }
