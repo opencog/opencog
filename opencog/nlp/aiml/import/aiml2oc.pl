@@ -344,6 +344,9 @@ sub process_aiml_tags
 	my $indent = $_[0];
 	my $text = $_[1];
 
+	# Expand defintion of <sr/>
+	$text =~ s/<sr\/>/<srai><star\/><\/srai>/g;
+
 	$text =~ s/#Comma/,/g;
 	$text =~ s/^\s*//;
 	$text =~ s/\s*$//;
