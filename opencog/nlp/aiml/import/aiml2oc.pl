@@ -514,7 +514,8 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PWRD")
 	{
-		$arg = lc $arg;
+		# Use lower-case ... or not
+		# $arg = lc $arg;
 		$code .= "         (Concept \"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
