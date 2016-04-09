@@ -8,7 +8,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.0.2";
+my $ver = "0.1.0";
 my $debug;
 my $help;
 my $version;
@@ -16,27 +16,29 @@ my $overwrite;
 my $aimlDir ='.';
 my $intermediateFile = 'flat-aiml.txt';
 my $finalFile = 'aiml.scm';
+my $rulebase = "*-AIML-rulebase-*";
 
 GetOptions(
     'dir=s' => \$aimlDir,
     'debug' => \$debug,
     'help' => \$help,
+    'rulebase-name=s' => \$rulebase,
     'last-only' => \$overwrite,
     'version' => \$version,
     'intermediate=s' => \$intermediateFile,
     'out=s' => \$finalFile,
-) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir
+) or die "Usage: $0 [--debug] [--help] [--version] [--rulebase-name] [--last-only] [--dir
 <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
 
 if ($help)
 {
 	print "Convert AIML markup files to OpenCog Atomese files.\n";
 	print "\n";
-	print "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir
-<AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
+	print "Usage: $0 [--debug] [--help] [--version] [--rulebase-name] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
 	print "   --debug                 Enable debugging (if any).\n";
 	print "   --help                  Print these helpful comments.\n";
 	print "   --version               Print version, current version '$ver'\n";
+	print "   --rulebase-name         Specify a name for the ruleset, default '$rulebase'\n";
 	print "   --last-only             Only the last category is output.\n";
 	print "   --dir <directory>       AIML source directory, default: '$aimlDir'\n";
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
@@ -162,6 +164,7 @@ foreach my $af (sort @aimlFiles)
 			my $topicstars=0;
 
 			print FOUT "CATBEGIN,0\n";
+			print FOUT "CATTEXT,$c\n";
 
 			# Patterns.
 			print FOUT "PAT,$pat[0]\n";
@@ -303,7 +306,6 @@ foreach my $af (sort @aimlFiles)
 			}
 
 			print FOUT "TEMPLATE,$template[0]\n";
-			print FOUT "CATTEXT,$c\n";
 			print FOUT "CATEND,0\n";
 			print FOUT "\n";
 		}
@@ -534,6 +536,8 @@ my $curr_that = "";
 my $have_raw_code = 0;
 my $curr_raw_code = "";
 
+my $cattext = "";
+
 my $star_index = 1;
 
 while (my $line = <FIN>)
@@ -554,8 +558,18 @@ while (my $line = <FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$code = "(Implication\n";
-		$code .= "   (And\n";
+		$code = "";
+		$code .= "   (Implication\n";
+		$code .= "      (And\n";
+	}
+	if ($cmd eq "CATTEXT")
+	{
+		$cattext = $line;
+		$cattext =~ s/^CATTEXT,//g;
+		$cattext =~ s/\#Comma/,/g;
+		$cattext =~ s/"/\\"/g;
+		$cattext =~ s/^\s*//g;
+		$cattext =~ s/\s*$//g;
 	}
 	if ($cmd eq "PATH")
 	{
@@ -584,28 +598,47 @@ while (my $line = <FIN>)
 				{
 					$ch =~ s/<\/li>//;
 					$ch =~ s/\s+$//;
+
+					my $name = "random choice $i of $nc: ";
+					$name .= $cattext;
+
+					$rule .= "(MemberLink\n";
+					$rule .= "   (DefinedSchema \"$name\")\n";
+					$rule .= "   (Concept \"$rulebase\"))\n";
+					$rule .= "(DefineLink\n";
+					$rule .= "   (DefinedSchema \"$name\")\n";
 					$rule .= $code;
-					$rule .= "   (ListLink\n";
-					$rule .= &process_aiml_tags("      ", $ch);
-					$rule .= "   )\n";
-					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
+					$rule .= "      (ListLink\n";
+					$rule .= &process_aiml_tags("         ", $ch);
+					$rule .= "      )\n";
+					$rule .= "   )) ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
 				}
          }
 			else
 			{
+				$rule  = "(MemberLink\n";
+				$rule .= "   (DefinedSchema \"$cattext\")\n";
+				$rule .= "   (Concept \"$rulebase\"))\n";
+				$rule .= "(DefineLink\n";
+				$rule .= "   (DefinedSchema \"$cattext\")\n";
 				$rule .= $code;
-				$rule .= "   (ListLink\n";
+				$rule .= "      (ListLink\n";
 				$rule .= &process_aiml_tags("      ", $curr_raw_code);
-				$rule .= "   )\n";
-				$rule .= ")\n\n";  # close category section
+				$rule .= "      )\n";
+				$rule .= "   )\n)\n";  # close category section
 			}
 			$have_raw_code = 0;
 		}
 		else
 		{
+			$rule  = "(MemberLink\n";
+			$rule .= "   (DefinedSchema \"$cattext\")\n";
+			$rule .= "   (Concept \"$rulebase\"))\n";
+			$rule .= "(DefineLink\n";
+			$rule .= "   (DefinedSchema \"$cattext\")\n";
+			$rule .= $code;
 			$code .= ") ; CATEND\n";     # close category section
-			$rule = $code;
 		}
 
 		if ($overwrite)
