@@ -296,7 +296,6 @@ foreach my $af (sort @aimlFiles)
 				{
 					print FOUT "TEMPLATECODE,$template[0]\n";
 				}
-				print FOUT "TEMPATOMICEND,0\n";
 			}
 			else
 			{
@@ -748,19 +747,17 @@ while (my $line = <FIN>)
 		$code .= "    ) ;TEMPATOMIC\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
-		$code .= "    (StateLink\n";
-		$code .= "       (AnchorNode \"\#reply\")\n";
-		$code .= "       (WordSequenceLink\n";
+		$code .= "    (ListLink\n";
 	}
 	if ($cmd eq "TEMPWRD")
 	{
 		# Just another word in the reply chain.
-		$code .= "            (WordNode \"$arg\")\n";
+		$code .= "         (Concept \"$arg\")\n";
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
 		# Just another word in the reply chain.
-		# $code .= "        ) ; TEMPATOMICEND\n";
+		$code .= "    ) ; TEMPATOMICEND\n";
 	}
 }
 
