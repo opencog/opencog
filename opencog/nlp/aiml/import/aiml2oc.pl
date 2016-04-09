@@ -446,7 +446,16 @@ sub process_aiml_tags
 	# Expand defintion of <sr/>
 	$text =~ s/<sr\/>/<srai><star\/><\/srai>/g;
 
+	# Convert mangled commas, from pass 1
 	$text =~ s/#Comma/,/g;
+
+	# Unescape escaped single-quotes.
+	$text =~ s/\\'/'/g;
+
+	# Escape back-slashes
+	$text =~ s/\\/\\\\/g;
+
+	# Trim leading and trailing whtespace.
 	$text =~ s/^\s*//;
 	$text =~ s/\s*$//;
 
@@ -574,9 +583,20 @@ while (my $line = <FIN>)
 		$cattext = $line;
 		$cattext =~ s/^CATTEXT,//g;
 		$cattext =~ s/\#Comma/,/g;
+
+		# Unescape escaped single-quotes.
+		$cattext =~ s/\\'/'/g;
+
+		# Escape back-slashes
+		$cattext =~ s/\\/\\\\/g;
+
+		# Escape double-quotes.
 		$cattext =~ s/"/\\"/g;
+
+		# Trim leading and trailing whitespace
 		$cattext =~ s/^\s*//g;
 		$cattext =~ s/\s*$//g;
+
 	}
 	if ($cmd eq "PATH")
 	{
@@ -797,6 +817,15 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "TEMPWRD")
 	{
+		# Unescape escaped single-quotes.
+		$arg =~ s/\\'/'/g;
+
+		# Escape back-slashes
+		$arg =~ s/\\/\\\\/g;
+
+		# Escape double-quotes.
+		$arg =~ s/"/\\"/g;
+
 		# Just another word in the reply chain.
 		$code .= "            " . $wordnode . "\"$arg\")\n";
 	}
