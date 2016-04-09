@@ -320,6 +320,9 @@ close(FOUT);
 # my $textnode = "(TextNode ";
 my $textnode = "(Concept ";
 
+# my $wordnode = "(Word ";
+my $wordnode = "(Concept ";
+
 # Handle expressions like <star/> and <star index='2'/> and so on.
 sub process_star
 {
@@ -671,7 +674,7 @@ while (my $line = <FIN>)
 	{
 		# Use lower-case ...
 		$arg = lc $arg;
-		$code .= "            (Concept \"$arg\")\n";
+		$code .= "            " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
@@ -680,7 +683,7 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$code .= "            (WordNode \"_\")\n";
+		$code .= "            (GlobbyBlobbyNode \"_\")\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
@@ -688,7 +691,7 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PSET")
 	{
-		$code .= "            (ConceptNode \"$arg\") ; Huh?\n";
+		$code .= "            (XConceptxxNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
@@ -795,7 +798,7 @@ while (my $line = <FIN>)
 	if ($cmd eq "TEMPWRD")
 	{
 		# Just another word in the reply chain.
-		$code .= "            (Concept \"$arg\")\n";
+		$code .= "            " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
