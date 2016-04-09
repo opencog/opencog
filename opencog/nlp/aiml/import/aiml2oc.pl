@@ -845,6 +845,9 @@ if ($overwrite)
 	}
 }
 
+print FOUT "; ---------- end of file ----------\n";
+print FOUT "*unspecified*\n";
+
 close(FIN);
 close(FOUT);
 exit;
