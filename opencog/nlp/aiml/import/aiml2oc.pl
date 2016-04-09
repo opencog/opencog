@@ -400,7 +400,7 @@ sub process_srai
 				$contig =~ s/^\s*//;
 				$contig =~ s/\s*$//;
 				$tout .= $indent . "(ExecutionOutput\n";
-				$tout .= $indent . "   (DefineSchema \"AIML-tag srai\")\n";
+				$tout .= $indent . "   (DefinedSchema \"AIML-tag srai\")\n";
 				$tout .= $indent . "   (ListLink\n";
 				$tout .= &process_aiml_tags("      " . $indent, $contig);
 				$tout .= $indent . "   ))\n";
@@ -450,6 +450,7 @@ sub process_aiml_tags
 	# uses a brute-force approach.
 	if ($text =~ /<srai>/)
 	{
+		$text = lc $text;
 		$tout .= &process_srai($indent, $text);
 	}
 
@@ -458,7 +459,7 @@ sub process_aiml_tags
 		# FIXME, should be like the loop, below.
 		$tout .= $indent . "(TextNode \"$1\")\n";
 		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefineSchema \"AIML-tag person\")\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
 		$tout .= $indent . "   (ListLink\n";
 		$tout .= &process_aiml_tags($indent . "      ", $2);
 		$tout .= $indent . "   ))\n";
