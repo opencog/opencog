@@ -337,34 +337,37 @@ sub process_star
 	$tout;
 }
 
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
 sub process_aiml_tags
 {
-	my $text = $_[0];
+	my $indent = $_[0];
+	my $text = $_[1];
 
 	$text =~ s/#Comma/,/g;
 
 	my $tout = "";
 	if ($text =~ /\s*<srai>(.*)<\/srai>\s*/)
 	{
-		$tout .= "(ExecutionOutput\n";
-		$tout .= "   (DefineSchema \"AIML-tag srai\")\n";
-		$tout .= "   (ListLink\n";
-		$tout .= "      " . &process_aiml_tags($1);
-		$tout .= "   ))\n";
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefineSchema \"AIML-tag srai\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= &process_aiml_tags($indent . "      ", $1);
+		$tout .= $indent . "   ))\n";
 	}
 
 	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
 	{
 		# FIXME, should be like the loop, below.
-		$tout .= "(TextNode \"$1\")\n";
-		$tout .= "(ExecutionOutput\n";
-		$tout .= "   (DefineSchema \"AIML-tag person\")\n";
-		$tout .= "   (ListLink\n";
-		$tout .= "      " . &process_aiml_tags($2);
-		$tout .= "   ))\n";
+		$tout .= $indent . "(TextNode \"$1\")\n";
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefineSchema \"AIML-tag person\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= &process_aiml_tags($indent . "      ", $2);
+		$tout .= $indent . "   ))\n";
 		if ($3 ne "")
 		{
-			$tout .= "(TextNode \"$3\")\n";
+			$tout .= $indent . "(TextNode \"$3\")\n";
 		}
 	}
 
@@ -375,23 +378,23 @@ sub process_aiml_tags
 		{
 			if ($star =~ /index='(\d+)'.*\/>(.*)/)
 			{
-				$tout .= &process_star("<star index='" . $1 . "'\/>") . "\n";
-				$tout .= "(TextNode \"$2\")\n";
+				$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
+				$tout .= $indent . "(TextNode \"$2\")\n";
 			}
 			elsif ($star =~ /\/>(.*)/)
 			{
-				$tout .= &process_star("<star \/>") . "\n";
-				$tout .= "(TextNode \"$1\")\n";
+				$tout .= $indent . &process_star("<star \/>") . "\n";
+				$tout .= $indent . "(TextNode \"$1\")\n";
 			}
 			elsif ($star ne "")
 			{
-				$tout .= "(TextNode \"$star\")\n";
+				$tout .= $indent . "(TextNode \"$star\")\n";
 			}
 		}
 	}
 	else
 	{
-		$tout .= "(TextNode \"$text\")\n";
+		$tout .= $indent . "(TextNode \"$text\")\n";
 	}
 	$tout;
 }
@@ -459,7 +462,7 @@ while (my $line = <FIN>)
 					$ch =~ s/\s+$//;
 					$rule .= $code;
 					$rule .= "   (ListLink\n";
-					$rule .= "      " . &process_aiml_tags($ch);
+					$rule .= &process_aiml_tags("      ", $ch);
 					$rule .= "   )\n";
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
@@ -469,7 +472,7 @@ while (my $line = <FIN>)
 			{
 				$rule .= $code;
 				$rule .= "   (ListLink\n";
-				$rule .= "      " . &process_aiml_tags($curr_raw_code);
+				$rule .= &process_aiml_tags("      ", $curr_raw_code);
 				$rule .= "   )\n";
 				$rule .= ")\n\n";  # close category section
 			}
