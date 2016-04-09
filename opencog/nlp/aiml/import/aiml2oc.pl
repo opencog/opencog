@@ -104,7 +104,7 @@ foreach my $af (sort @aimlFiles)
 	$textfile =~ s/<aiml/\#\#SPLIT\<aiml/gi;
 	$textfile =~ s/<\/aiml>/\<\/aiml\>\#\#SPLIT /gi;
 
-	my @cats = split(/\#\#SPLIT/,$textfile);
+	my @cats = split(/\#\#SPLIT/, $textfile);
 
 	# It should be one category at a time, but it could be on high-level
 	# topics.
@@ -504,6 +504,12 @@ sub process_aiml_tags
 				$tout .= $indent . "(TextNode \"$star\")\n";
 			}
 		}
+	}
+
+	elsif ($text =~ /<!--.*-->/)
+	{
+		# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
+		$tout .= $indent . "; WTF $text\n";
 	}
 	else
 	{
