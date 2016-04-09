@@ -344,19 +344,30 @@ sub process_aiml_tags
 	$text =~ s/#Comma/,/g;
 
 	my $tout = "";
-	if ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
+	if ($text =~ /\s*<srai>(.*)<\/srai>\s*/)
+	{
+		$tout .= "(ExecutionOutput\n";
+		$tout .= "   (DefineSchema \"AIML-tag srai\")\n";
+		$tout .= "   (ListLink\n";
+		$tout .= "      " . &process_aiml_tags($1);
+		$tout .= "   ))\n";
+	}
+
+	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
 	{
 		# FIXME, should be like the loop, below.
 		$tout .= "(TextNode \"$1\")\n";
 		$tout .= "(ExecutionOutput\n";
 		$tout .= "   (DefineSchema \"AIML-tag person\")\n";
 		$tout .= "   (ListLink\n";
-		$tout .= "      " . &process_aiml_tags($2) . "))\n";
+		$tout .= "      " . &process_aiml_tags($2);
+		$tout .= "   ))\n";
 		if ($3 ne "")
 		{
 			$tout .= "(TextNode \"$3\")\n";
 		}
 	}
+
 	elsif ($text =~ /<star/)
 	{
 		my @stars = split /<star/, $text;
@@ -454,10 +465,6 @@ while (my $line = <FIN>)
 					$i = $i + 1;
 				}
          }
-			elsif ($curr_raw_code =~ /<srai/)
-			{
-				$rule .= "; failed to handle  " . $curr_raw_code;
-			}
 			else
 			{
 				$rule .= $code;
