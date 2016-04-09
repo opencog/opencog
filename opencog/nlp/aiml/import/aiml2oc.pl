@@ -307,12 +307,23 @@ foreach my $af (sort @aimlFiles)
 			print FOUT "CATEND,0\n";
 			print FOUT "\n";
 		}
-
-
 	}
 }
 close(FOUT);
 
+# ------------------------------------------------------------------
+# Second pass utilities
+
+sub process_aiml_tags
+{
+	my $text = $_[0];
+	my $tout = "";
+
+	
+	$tout .= "   (TextNode \"$text\")\n";
+	$tout .= ")";
+	$tout;
+}
 # ------------------------------------------------------------------
 # Second pass
 
@@ -372,8 +383,8 @@ while (my $line = <FIN>)
 					$ch =~ s/<\/li>//;
 					$ch =~ s/\s+$//;
 					$rule .= $code;
-					$rule .= "   (Node \"$ch\")\n";
-					$rule .= ") ; <random> choice\n\n";     # close category section
+					$rule .= &process_aiml_tags($ch);
+					$rule .= " ; <random> choice\n\n";  # close category section
 				}
          }
 			$have_raw_code = 0;
