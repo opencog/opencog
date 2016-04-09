@@ -319,9 +319,26 @@ sub process_aiml_tags
 	my $text = $_[0];
 	my $tout = "";
 
-	
-	$tout .= "   (TextNode \"$text\")\n";
-	$tout .= ")";
+	if ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
+	{
+		$tout .= "   (TextNode \"$1\")\n";
+		$tout .= "   (ExecutionOutput\n";
+		$tout .= "      (DefineSchema \"AIML-tag person\")\n";
+		$tout .= "      (ListLink\n";
+		if ($2 =~ /<star\/>/)
+		{
+			$tout .= "          (Glob \"\$star\")))\n";
+		}
+		else
+		{
+			$tout .= "          (AIEEEE! \"$2\")))\n";
+		}
+		$tout .= "   (TextNode \"$3\")\n";
+	}
+	else
+	{
+		$tout .= "   (TextNode \"$text\")\n";
+	}
 	$tout;
 }
 # ------------------------------------------------------------------
@@ -384,7 +401,7 @@ while (my $line = <FIN>)
 					$ch =~ s/\s+$//;
 					$rule .= $code;
 					$rule .= &process_aiml_tags($ch);
-					$rule .= " ; <random> choice\n\n";  # close category section
+					$rule .= ") ; <random> choice\n\n";  # close category section
 				}
          }
 			$have_raw_code = 0;
