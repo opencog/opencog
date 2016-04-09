@@ -345,6 +345,8 @@ sub process_aiml_tags
 	my $text = $_[1];
 
 	$text =~ s/#Comma/,/g;
+	$text =~ s/^\s*//;
+	$text =~ s/\s*$//;
 
 	my $tout = "";
 
@@ -389,20 +391,29 @@ sub process_aiml_tags
 		my @stars = split /<star/, $text;
 		foreach my $star (@stars)
 		{
+			$star =~ s/^\s*//;
+			$star =~ s/\s*$//;
 			if ($star =~ /index='(\d+)'.*\/>(.*)/)
 			{
 				$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
-				if ($2 ne "")
+
+				my $t = $2;
+				$t =~ s/^\s*//;
+				$t =~ s/\s*$//;
+				if ($t ne "")
 				{
-					$tout .= $indent . "(TextNode \"$2\")\n";
+					$tout .= $indent . "(TextNode \"$t\")\n";
 				}
 			}
 			elsif ($star =~ /\/>(.*)/)
 			{
 				$tout .= $indent . &process_star("<star \/>") . "\n";
-				if ($1 ne "")
+				my $t = $1;
+				$t =~ s/^\s*//;
+				$t =~ s/\s*$//;
+				if ($t ne "")
 				{
-					$tout .= $indent . "(TextNode \"$1\")\n";
+					$tout .= $indent . "(TextNode \"$t\")\n";
 				}
 			}
 			elsif ($star ne "")
