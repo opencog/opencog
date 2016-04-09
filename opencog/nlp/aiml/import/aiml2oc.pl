@@ -58,7 +58,7 @@ if ($version)
 
 print "\n AIML Source directory = $aimlDir\n";
 opendir(DIR, "$aimlDir");
-my @aimlFiles = grep(/\.aiml/,readdir(DIR));
+my @aimlFiles = grep(/\.aiml$/, readdir(DIR));
 closedir(DIR);
 
 open FOUT, ">$intermediateFile";
@@ -307,12 +307,73 @@ foreach my $af (sort @aimlFiles)
 			print FOUT "CATEND,0\n";
 			print FOUT "\n";
 		}
-
-
 	}
 }
 close(FOUT);
 
+# ------------------------------------------------------------------
+# Second pass utilities
+
+# Handle expressions like <star/> and <star index='2'/> and so on.
+sub process_star
+{
+	my $text = $_[0];
+	my $tout = "";
+
+	if ($text =~ /<star\/>/)
+	{
+		$tout .= "       (Glob \"\$star-1\")";
+	}
+	elsif ($text =~ /<star index='(\d+)'\/>/)
+	{
+		$tout .= "      (Glob \"\$star-$1\")";
+	}
+	else
+	{
+		$tout .= "      (AIEEEE! \"$text\")";
+	}
+
+	$tout;
+}
+
+sub process_aiml_tags
+{
+	my $text = $_[0];
+
+	$text =~ s/#Comma/,/g;
+
+	my $tout = "";
+	if ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
+	{
+		$tout .= "   (ListLink\n";
+		$tout .= "      (TextNode \"$1\")\n";
+		$tout .= "      (ExecutionOutput\n";
+		$tout .= "         (DefineSchema \"AIML-tag person\")\n";
+		$tout .= "         (ListLink\n";
+		$tout .= "      " . &process_star($2) . "))\n";
+		if ($3 ne "")
+		{
+			$tout .= "      (TextNode \"$3\")\n";
+		}
+		$tout .= "   )\n";
+	}
+	elsif ($text =~ /(.*)<star(.*)>(.*)/)
+	{
+		$tout .= "   (ListLink\n";
+		$tout .= "      (TextNode \"$1\")\n";
+		$tout .= &process_star("<star" . $2 . ">") . "\n";
+		if ($3 ne "")
+		{
+			$tout .= "      (TextNode \"$3\")\n";
+		}
+		$tout .= "   )\n";
+	}
+	else
+	{
+		$tout .= "   (TextNode \"$text\")\n";
+	}
+	$tout;
+}
 # ------------------------------------------------------------------
 # Second pass
 
@@ -322,41 +383,92 @@ my $curPath="";
 my %overwriteSpace=();
 my $code = "";
 
-while (my $line =<FIN>)
+my $have_topic = 0;
+my $curr_topic = "";
+
+my $have_that = 0;
+my $curr_that = "";
+
+my $have_raw_code = 0;
+my $curr_raw_code = "";
+
+my $star_index = 1;
+
+while (my $line = <FIN>)
 {
 	chomp($line);
-	if (length($line)<1) {next;}
-	my @parms=split(/\,/,$line);
-	my $cmd=$parms[0] || "";
-	my $arg=$parms[1] || "";
-	if (length($cmd)<1) {next;}
+	if (length($line) < 1) { next; }
+	my @parms = split(/\,/, $line);
+	my $cmd = $parms[0] || "";
+	my $arg = $parms[1] || "";
+	if (length($cmd) < 1) { next; }
 
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$code .= "(PatternLink\n";
-		$code .= "   (SequentialAndLink\n";
+		$code = "(Implication\n";
+		$code .= "   (And\n";
 	}
 	if ($cmd eq "PATH")
 	{
 		$curPath = $arg;
-		#$code = "";
-		#print "PATH --> $curPath\n";
+		# $code .= "; PATH --> $curPath\n";
 	}
 
 	if ($cmd eq "CATEND")
 	{
-		$code .= ")\n";     # close category section
+		my $rule = "";
+
+		if ($have_raw_code)
+		{
+			# Random sections are handled by duplicating
+			# the rule repeatedly, each time with the same
+			# premise template, but each with a diffrerent output.
+			if ($curr_raw_code =~ /<random>(.*)<\/random>/)
+			{
+				my $choices = $1;
+				$choices =~ s/^\s+//;
+				my @choicelist = split /<li>/, $choices;
+				shift @choicelist;
+				my $i = 1;
+				my $nc = $#choicelist + 1;
+				foreach my $ch (@choicelist)
+				{
+					$ch =~ s/<\/li>//;
+					$ch =~ s/\s+$//;
+					$rule .= $code;
+					$rule .= &process_aiml_tags($ch);
+					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
+					$i = $i + 1;
+				}
+         }
+			elsif ($curr_raw_code =~ /<srai/)
+			{
+				$rule .= "; failed to handle  " . $curr_raw_code;
+			}
+			else
+			{
+				$rule .= $code;
+				$rule .= &process_aiml_tags($curr_raw_code);
+				$rule .= ")\n\n";  # close category section
+			}
+			$have_raw_code = 0;
+		}
+		else
+		{
+			$code .= ") ; CATEND\n";     # close category section
+			$rule = $code;
+		}
 
 		if ($overwrite)
 		{
 			# Overwrite in a hash space indexed by the current path.
-			$overwriteSpace{$curPath} = $code;
+			$overwriteSpace{$curPath} = $rule;
 		}
 		else
 		{
 			# Not merging, so just write it out.
-			print FOUT "$code\n";
+			print FOUT "$rule\n";
 		}
 		$code = "";
 	}
@@ -367,15 +479,18 @@ while (my $line =<FIN>)
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
-		$code .= "      (WordSequenceLink\n";
+		$star_index = 0;
+		$code .= "      (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
-		$code .= "         (WordNode \"$arg\")\n";
+		$arg = lc $arg;
+		$code .= "         (Concept \"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
-		$code .= "         (WordNode \"*\")\n";
+		$star_index = $star_index + 1;
+		$code .= "         (Glob \"\$star-$star_index\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
@@ -387,98 +502,109 @@ while (my $line =<FIN>)
 	}
 	if ($cmd eq "PSET")
 	{
-		$code .= "         (ConceptNode \"$arg\")\n";
+		$code .= "         (ConceptNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
-		$code .= "         (VariableNode \"\$eol\")\n";
-		$code .= "      )\n";
+		$code .= "      ) ; PATEND\n";
 	}
 
 	#TOPIC
 	if ($cmd eq "TOPIC")
 	{
-		$code .= "      (ListLink\n";
-		$code .= "         (AnchorNode \"\#topic\")\n";
+		$have_topic = 0;
 	}
 	if ($cmd eq "TOPICWRD")
 	{
-		$code .= "         (WordNode \"$arg\")\n";
+		$have_topic = 1;
+		$curr_topic = $arg;
 	}
 	if ($cmd eq "TOPICSTAR")
 	{
-		$code .= "         (WordNode \"*\")\n";
+		$have_topic = 0;
 	}
 	if ($cmd eq "TOPICUSTAR")
 	{
-		$code .= "         (WordNode \"_\")\n";
+		$have_topic = 0;
 	}
 	if ($cmd eq "TOPICBOTVAR")
 	{
-		$code .= "         (BOTVARNode \"$arg\")\n";
+		$code .= "; TOPICBOTVAR $arg\n";
 	}
 	if ($cmd eq "TOPICSET")
 	{
-		$code .= "         (ConceptNode \"$arg\")\n";
+		$have_topic = 1;
+		$curr_topic = $arg;
+		$code .= "; TOPICSET $arg\n";
 	}
 	if ($cmd eq "TOPICEND")
 	{
-		$code .= "         (VariableNode \"\$topic\")\n";
-		$code .= "      )\n";
+		if ($have_topic)
+		{
+			$code .= "      (State\n";
+			$code .= "         (Anchor \"\#topic\")\n";
+			$code .= "         (Concept \"$curr_topic\")\n";
+			$code .= "      )\n";
+		}
+		$have_topic = 0;
 	}
 
 	# THAT
 	if ($cmd eq "THAT")
 	{
-		$code .= "      (ListLink\n";
-		$code .= "         (AnchorNode \"\#that\")\n";
+		$have_that = 0;
 	}
 	if ($cmd eq "THATWRD")
 	{
-		$code .= "         (WordNode \"$arg\")\n";
+		$have_that = 1;
+		$curr_that = $arg;
 	}
 	if ($cmd eq "THATSTAR")
 	{
-		$code .= "         (WordNode \"*\")\n";
+		$have_that = 0;
 	}
 	if ($cmd eq "THATUSTAR")
 	{
-		$code .= "         (WordNode \"_\")\n";
+		$have_that = 0;
 	}
 	if ($cmd eq "THATBOTVAR")
 	{
-		$code .= "         (BOTVARNode \"$arg\")\n";
+		$code .= "; THATBOTVAR $arg\n";
 	}
 	if ($cmd eq "THATSET")
 	{
-		$code .= "         (ConceptNode \"$arg\")\n";
+		$have_that = 1;
+		$curr_that = $arg;
 	}
 	if ($cmd eq "THATEND")
 	{
-		$code .= "         (VariableNode \"\$that\")\n";
-		$code .= "      )\n";
+		if ($have_that)
+		{
+			$code .= "      (State\n";
+			$code .= "         (Anchor \"\#that\")\n";
+			$code .= "         (Concept \"$curr_that\")\n";
+			$code .= "      )\n";
+		}
+		$have_that = 0;
 	}
 
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
-		$code .= "     )\n";  # close pattern section
+		$code .= "   ) ;TEMPLATECODE\n";  # close pattern section
 
 		$arg =~ s/\"/\'/g;
 
-		# just raw AIML code
-		$code .= "    (PutLink\n";
-		$code .= "       (AnchorNode \"\#reply\")\n";
-		$code .= "       (AIMLCODENode \"$arg\")\n";
-		$code .= "    )\n";
-
+		$have_raw_code = 1;
+		$curr_raw_code = $arg;
 	}
+
 	if ($cmd eq "TEMPATOMIC")
 	{
-		$code .= "    )\n";  # close pattern section
+		$code .= "    ) ;TEMPATOMIC\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
-		$code .= "    (PutLink\n";
+		$code .= "    (StateLink\n";
 		$code .= "       (AnchorNode \"\#reply\")\n";
 		$code .= "       (WordSequenceLink\n";
 	}
@@ -490,8 +616,7 @@ while (my $line =<FIN>)
 	if ($cmd eq "TEMPATOMICEND")
 	{
 		# Just another word in the reply chain.
-		$code .= "        )\n";
-		$code .= "    )\n";
+		# $code .= "        ) ; TEMPATOMICEND\n";
 	}
 }
 
@@ -566,24 +691,24 @@ PatternLink
 
 Or in more scheme-ish format
 
-(PatternLink
-   (SequentialAndLink
+(BindLink
+   (AndLink
       (WordSequenceLink
          (WordNode "Hello")
          (VariableNode "$eol")
       )
-      (ListLink
+      (StateLink
          (AnchorNode "#topic")
          (WordNode "*")
          (VariableNode "$topic")
       )
-      (ListLink
+      (StateLink
          (AnchorNode "#that")
          (WordNode "*")
          (VariableNode "$that")
       )
     )
-    (PutLink
+    (StateLink
        (AnchorNode "#reply")
        (WordSequenceLink
             (WordNode "Hi")
