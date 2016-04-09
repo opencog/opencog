@@ -314,6 +314,28 @@ close(FOUT);
 # ------------------------------------------------------------------
 # Second pass utilities
 
+# Handle expressions like <star/> and <star index='2'/> and so on.
+sub process_star
+{
+	my $text = $_[0];
+	my $tout = "";
+
+	if ($text =~ /<star\/>/)
+	{
+		$tout .= "       (Glob \"\$star-1\")";
+	}
+	elsif ($text =~ /<star index='(\d+)'\/>/)
+	{
+		$tout .= "      (Glob \"\$star-$1\")";
+	}
+	else
+	{
+		$tout .= "      (AIEEEE! \"$text\")";
+	}
+
+	$tout;
+}
+
 sub process_aiml_tags
 {
 	my $text = $_[0];
@@ -328,14 +350,18 @@ sub process_aiml_tags
 		$tout .= "      (ExecutionOutput\n";
 		$tout .= "         (DefineSchema \"AIML-tag person\")\n";
 		$tout .= "         (ListLink\n";
-		if ($2 =~ /<star\/>/)
+		$tout .= "      " . &process_star($2) . "))\n";
+		if ($3 ne "")
 		{
-			$tout .= "             (Glob \"\$star\")))\n";
+			$tout .= "      (TextNode \"$3\")\n";
 		}
-		else
-		{
-			$tout .= "             (AIEEEE! \"$2\")))\n";
-		}
+		$tout .= "   )\n";
+	}
+	elsif ($text =~ /(.*)<star(.*)>(.*)/)
+	{
+		$tout .= "   (ListLink\n";
+		$tout .= "      (TextNode \"$1\")\n";
+		$tout .= &process_star("<star" . $2 . ">") . "\n";
 		if ($3 ne "")
 		{
 			$tout .= "      (TextNode \"$3\")\n";
@@ -365,6 +391,8 @@ my $curr_that = "";
 
 my $have_raw_code = 0;
 my $curr_raw_code = "";
+
+my $star_index = 1;
 
 while (my $line = <FIN>)
 {
@@ -438,6 +466,7 @@ while (my $line = <FIN>)
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
+		$star_index = 0;
 		$code .= "      (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
@@ -447,7 +476,8 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PSTAR")
 	{
-		$code .= "         (Glob \"\$star\")\n";
+		$star_index = $star_index + 1;
+		$code .= "         (Glob \"\$star-$star_index\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
