@@ -810,10 +810,10 @@ while (my $line = <FIN>)
 
 	if ($cmd eq "TEMPATOMIC")
 	{
-		$code .= "       ) ;TEMPATOMIC\n";  # close pattern section
+		$code .= "      ) ;TEMPATOMIC\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
-		$code .= "       (ListLink\n";
+		$code .= "      (ListLink\n";
 	}
 	if ($cmd eq "TEMPWRD")
 	{
@@ -827,12 +827,12 @@ while (my $line = <FIN>)
 		$arg =~ s/"/\\"/g;
 
 		# Just another word in the reply chain.
-		$code .= "            " . $wordnode . "\"$arg\")\n";
+		$code .= "         " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
 		# Just another word in the reply chain.
-		$code .= "       ) ; TEMPATOMICEND\n";
+		$code .= "      ))) ; TEMPATOMICEND\n";
 	}
 }
 
