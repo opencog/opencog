@@ -55,7 +55,7 @@ Future, not a current part of AIML:
 
 ### Notes
 * Notice that the pattern match of R3 takes precendence over R2.
-* srai == sent the result back through.
+* srai == send the result back through. ("stimulus-response AI")
 * that == what the robot said last time. (just a string)
   A full history of the dialog is kept, it can be refered to ...
   (TBD XXX How ???)
@@ -97,25 +97,29 @@ See `glob.scm` for a simple working example.
 * R1 example.
 
 ```
-PatternLink
+ImplicationLink
    AndLink
-      WordSequenceLink
-         WordNode "Hello"
-         GlobNode "$eol"     # rest of the input line
       ListLink
-         AnchorNode "#that"
-         GlobNode "$that"
-      ListLink
-         AnchorNode "#topic"
-         GlobNode "$topic"
-      PutLink                    # If the above conditions are satisfied
-         AnchorNode "#reply"     # then this PutLink is triggered.
-         WordSequenceLink        # This is the reply.
-            WordNode "Hi"
-            WordNode "there"
+         Concept "Hello"
+         Glob "$eol"     # rest of the input line
+		ListLink
+         WordNode "Hi"
+         WordNode "there"
 ```
 
 There is another approach:
 
 I really really * you, darling.
 I really really love you, darling.
+
+
+# AIML tags
+
+The &lt;person&gt; tag gets converted to
+```
+      (ExecutionOutput
+         (DefineSchema "AIML-tag person")
+         (ListLink
+             (Glob "$star-1")))
+
+```
