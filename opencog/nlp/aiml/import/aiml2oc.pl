@@ -442,6 +442,16 @@ while (my $line = <FIN>)
 					$i = $i + 1;
 				}
          }
+			elsif ($curr_raw_code =~ /<srai/)
+			{
+				$rule .= "; failed to handle  " . $curr_raw_code;
+			}
+			else
+			{
+				$rule .= $code;
+				$rule .= &process_aiml_tags($curr_raw_code);
+				$rule .= ")\n\n";  # close category section
+			}
 			$have_raw_code = 0;
 		}
 		else
