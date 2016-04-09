@@ -347,13 +347,26 @@ sub process_aiml_tags
 	$text =~ s/#Comma/,/g;
 
 	my $tout = "";
-	if ($text =~ /\s*<srai>(.*)<\/srai>\s*/)
+
+	if ($text =~ /<srai/)
 	{
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefineSchema \"AIML-tag srai\")\n";
-		$tout .= $indent . "   (ListLink\n";
-		$tout .= &process_aiml_tags($indent . "      ", $1);
-		$tout .= $indent . "   ))\n";
+		my @srais = split /<srai>/, $text;
+		foreach my $srai (@srais)
+		{
+			# Remove the trailing srai
+			$srai =~ s/<\/srai>//;
+			$srai =~ s/^\s*//;
+			$srai =~ s/\s*$//;
+
+			$srai = lc $srai;
+			if ($srai eq "") { next; }
+
+			$tout .= $indent . "(ExecutionOutput\n";
+			$tout .= $indent . "   (DefineSchema \"AIML-tag srai\")\n";
+			$tout .= $indent . "   (ListLink\n";
+			$tout .= &process_aiml_tags($indent . "      ", $srai);
+			$tout .= $indent . "   ))\n";
+		}
 	}
 
 	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
@@ -514,8 +527,8 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PWRD")
 	{
-		# Use lower-case ... or not
-		# $arg = lc $arg;
+		# Use lower-case ...
+		$arg = lc $arg;
 		$code .= "         (Concept \"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
