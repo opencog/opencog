@@ -430,13 +430,16 @@ while (my $line = <FIN>)
 				$choices =~ s/^\s+//;
 				my @choicelist = split /<li>/, $choices;
 				shift @choicelist;
+				my $i = 1;
+				my $nc = $#choicelist + 1;
 				foreach my $ch (@choicelist)
 				{
 					$ch =~ s/<\/li>//;
 					$ch =~ s/\s+$//;
 					$rule .= $code;
 					$rule .= &process_aiml_tags($ch);
-					$rule .= ") ; <random> choice\n\n";  # close category section
+					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
+					$i = $i + 1;
 				}
          }
 			$have_raw_code = 0;
