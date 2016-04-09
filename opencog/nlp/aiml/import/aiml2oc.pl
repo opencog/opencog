@@ -624,7 +624,7 @@ while (my $line = <FIN>)
 				$rule .= "   (DefinedSchema \"$cattext\")\n";
 				$rule .= $code;
 				$rule .= "      (ListLink\n";
-				$rule .= &process_aiml_tags("      ", $curr_raw_code);
+				$rule .= &process_aiml_tags("         ", $curr_raw_code);
 				$rule .= "      )\n";
 				$rule .= "   )\n)\n";  # close category section
 			}
@@ -661,34 +661,34 @@ while (my $line = <FIN>)
 	if ($cmd eq "PAT")
 	{
 		$star_index = 0;
-		$code .= "      (ListLink\n";
+		$code .= "         (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
 		# Use lower-case ...
 		$arg = lc $arg;
-		$code .= "         (Concept \"$arg\")\n";
+		$code .= "            (Concept \"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
 		$star_index = $star_index + 1;
-		$code .= "         (Glob \"\$star-$star_index\")\n";
+		$code .= "            (Glob \"\$star-$star_index\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$code .= "         (WordNode \"_\")\n";
+		$code .= "            (WordNode \"_\")\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$code .= "         (BOTVARNode \"$arg\")\n";
+		$code .= "            (BOTVARNode \"$arg\")\n";
 	}
 	if ($cmd eq "PSET")
 	{
-		$code .= "         (ConceptNode \"$arg\") ; Huh?\n";
+		$code .= "            (ConceptNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
-		$code .= "      ) ; PATEND\n";
+		$code .= "         ) ; PATEND\n";
 	}
 
 	#TOPIC
@@ -723,10 +723,10 @@ while (my $line = <FIN>)
 	{
 		if ($have_topic)
 		{
-			$code .= "      (State\n";
-			$code .= "         (Anchor \"\#topic\")\n";
-			$code .= "         (Concept \"$curr_topic\")\n";
-			$code .= "      )\n";
+			$code .= "         (State\n";
+			$code .= "            (Anchor \"\#topic\")\n";
+			$code .= "            (Concept \"$curr_topic\")\n";
+			$code .= "         )\n";
 		}
 		$have_topic = 0;
 	}
@@ -762,10 +762,10 @@ while (my $line = <FIN>)
 	{
 		if ($have_that)
 		{
-			$code .= "      (State\n";
-			$code .= "         (Anchor \"\#that\")\n";
-			$code .= "         (Concept \"$curr_that\")\n";
-			$code .= "      )\n";
+			$code .= "         (State\n";
+			$code .= "            (Anchor \"\#that\")\n";
+			$code .= "            (Concept \"$curr_that\")\n";
+			$code .= "         )\n";
 		}
 		$have_that = 0;
 	}
@@ -773,7 +773,7 @@ while (my $line = <FIN>)
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
-		$code .= "   ) ;TEMPLATECODE\n";  # close pattern section
+		$code .= "      ) ;TEMPLATECODE\n";  # close pattern section
 
 		$arg =~ s/\"/\'/g;
 
@@ -783,20 +783,20 @@ while (my $line = <FIN>)
 
 	if ($cmd eq "TEMPATOMIC")
 	{
-		$code .= "    ) ;TEMPATOMIC\n";  # close pattern section
+		$code .= "       ) ;TEMPATOMIC\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
-		$code .= "    (ListLink\n";
+		$code .= "       (ListLink\n";
 	}
 	if ($cmd eq "TEMPWRD")
 	{
 		# Just another word in the reply chain.
-		$code .= "         (Concept \"$arg\")\n";
+		$code .= "            (Concept \"$arg\")\n";
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
 		# Just another word in the reply chain.
-		$code .= "    ) ; TEMPATOMICEND\n";
+		$code .= "       ) ; TEMPATOMICEND\n";
 	}
 }
 
@@ -851,29 +851,9 @@ CATEND,0
 =OpenCog equivalents
 * R1 example.
 ```
-PatternLink
-   SequentailAndLink
-      WordSequenceLink
-         WordNode "Hello"
-         VariableNode "$eol"     # rest of the input line
-      ListLink
-         AnchoreNode "#that"
-         VariableNode "$that"
-      ListLink
-         AnchorNode "#topic"
-         VariableNode "$topic"
-      PutLink                    # if the above conditions are satisfied
-         AnchorNode "#reply"     # then this PutLink is triggered.
-         WordSequenceLink        # This is the reply.
-            WordNode "Hi"
-            WordNode "there"
-```
-
-Or in more scheme-ish format
-
 (BindLink
    (AndLink
-      (WordSequenceLink
+      (ListLink
          (WordNode "Hello")
          (VariableNode "$eol")
       )
