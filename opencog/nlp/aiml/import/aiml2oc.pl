@@ -379,12 +379,18 @@ sub process_aiml_tags
 			if ($star =~ /index='(\d+)'.*\/>(.*)/)
 			{
 				$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
-				$tout .= $indent . "(TextNode \"$2\")\n";
+				if ($2 ne "")
+				{
+					$tout .= $indent . "(TextNode \"$2\")\n";
+				}
 			}
 			elsif ($star =~ /\/>(.*)/)
 			{
 				$tout .= $indent . &process_star("<star \/>") . "\n";
-				$tout .= $indent . "(TextNode \"$1\")\n";
+				if ($1 ne "")
+				{
+					$tout .= $indent . "(TextNode \"$1\")\n";
+				}
 			}
 			elsif ($star ne "")
 			{
