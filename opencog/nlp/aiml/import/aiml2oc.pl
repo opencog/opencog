@@ -545,6 +545,12 @@ while (my $line = <FIN>)
 	my $arg = $parms[1] || "";
 	if (length($cmd) < 1) { next; }
 
+	# Un-do the comma-damage up above.
+	$arg =~ s/#Comma/,/g;
+
+	# esacpe quote marks.
+	$arg =~ s/"/\\"/g;
+
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
