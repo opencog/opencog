@@ -322,15 +322,16 @@ sub process_star
 
 	if ($text =~ /<star\s*\/>/)
 	{
-		$tout .= "      (Glob \"\$star-1\")";
+		$tout .= "(Glob \"\$star-1\")";
 	}
 	elsif ($text =~ /<star\s*index\s*=\s*'(\d+)'\s*\/>/)
 	{
-		$tout .= "      (Glob \"\$star-$1\")";
+		$tout .= "(Glob \"\$star-$1\")";
 	}
 	else
 	{
-		$tout .= "      (AIEEEE! \"$text\")";
+		# Error .. should throw here I guess
+		$tout .= "(AIEEEE! \"$text\")";
 	}
 
 	$tout;
@@ -345,45 +346,41 @@ sub process_aiml_tags
 	my $tout = "";
 	if ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
 	{
+		# FIXME, should be like the loop, below.
+		$tout .= "(TextNode \"$1\")\n";
+		$tout .= "(ExecutionOutput\n";
+		$tout .= "   (DefineSchema \"AIML-tag person\")\n";
 		$tout .= "   (ListLink\n";
-		$tout .= "      (TextNode \"$1\")\n";
-		$tout .= "      (ExecutionOutput\n";
-		$tout .= "         (DefineSchema \"AIML-tag person\")\n";
-		$tout .= "         (ListLink\n";
-		$tout .= "      " . &process_star($2) . "))\n";
+		$tout .= "      " . &process_aiml_tags($2) . "))\n";
 		if ($3 ne "")
 		{
-			$tout .= "      (TextNode \"$3\")\n";
+			$tout .= "(TextNode \"$3\")\n";
 		}
-		$tout .= "   )\n";
 	}
 	elsif ($text =~ /<star/)
 	{
-		# $text =~ /(.*)<star(.*)>(.*)/;
 		my @stars = split /<star/, $text;
-		$tout .= "   (ListLink\n";
 		foreach my $star (@stars)
 		{
 			if ($star =~ /index='(\d+)'.*\/>(.*)/)
 			{
 				$tout .= &process_star("<star index='" . $1 . "'\/>") . "\n";
-				$tout .= "      (TextNode \"$2\")\n";
+				$tout .= "(TextNode \"$2\")\n";
 			}
 			elsif ($star =~ /\/>(.*)/)
 			{
 				$tout .= &process_star("<star \/>") . "\n";
-				$tout .= "      (TextNode \"$1\")\n";
+				$tout .= "(TextNode \"$1\")\n";
 			}
 			elsif ($star ne "")
 			{
-				$tout .= "      (TextNode \"$star\")\n";
+				$tout .= "(TextNode \"$star\")\n";
 			}
 		}
-		$tout .= "   )\n";
 	}
 	else
 	{
-		$tout .= "   (TextNode \"$text\")\n";
+		$tout .= "(TextNode \"$text\")\n";
 	}
 	$tout;
 }
@@ -450,7 +447,9 @@ while (my $line = <FIN>)
 					$ch =~ s/<\/li>//;
 					$ch =~ s/\s+$//;
 					$rule .= $code;
-					$rule .= &process_aiml_tags($ch);
+					$rule .= "   (ListLink\n";
+					$rule .= "      " . &process_aiml_tags($ch);
+					$rule .= "   )\n";
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
 				}
@@ -462,7 +461,9 @@ while (my $line = <FIN>)
 			else
 			{
 				$rule .= $code;
-				$rule .= &process_aiml_tags($curr_raw_code);
+				$rule .= "   (ListLink\n";
+				$rule .= "      " . &process_aiml_tags($curr_raw_code);
+				$rule .= "   )\n";
 				$rule .= ")\n\n";  # close category section
 			}
 			$have_raw_code = 0;
