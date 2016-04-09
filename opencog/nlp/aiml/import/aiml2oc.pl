@@ -320,11 +320,11 @@ sub process_star
 	my $text = $_[0];
 	my $tout = "";
 
-	if ($text =~ /<star\/>/)
+	if ($text =~ /<star\s*\/>/)
 	{
-		$tout .= "       (Glob \"\$star-1\")";
+		$tout .= "      (Glob \"\$star-1\")";
 	}
-	elsif ($text =~ /<star index='(\d+)'\/>/)
+	elsif ($text =~ /<star\s*index\s*=\s*'(\d+)'\s*\/>/)
 	{
 		$tout .= "      (Glob \"\$star-$1\")";
 	}
@@ -357,14 +357,27 @@ sub process_aiml_tags
 		}
 		$tout .= "   )\n";
 	}
-	elsif ($text =~ /(.*)<star(.*)>(.*)/)
+	elsif ($text =~ /<star/)
 	{
+		# $text =~ /(.*)<star(.*)>(.*)/;
+		my @stars = split /<star/, $text;
 		$tout .= "   (ListLink\n";
-		$tout .= "      (TextNode \"$1\")\n";
-		$tout .= &process_star("<star" . $2 . ">") . "\n";
-		if ($3 ne "")
+		foreach my $star (@stars)
 		{
-			$tout .= "      (TextNode \"$3\")\n";
+			if ($star =~ /index='(\d+)'.*\/>(.*)/)
+			{
+				$tout .= &process_star("<star index='" . $1 . "'\/>") . "\n";
+				$tout .= "      (TextNode \"$2\")\n";
+			}
+			elsif ($star =~ /\/>(.*)/)
+			{
+				$tout .= &process_star("<star \/>") . "\n";
+				$tout .= "      (TextNode \"$1\")\n";
+			}
+			elsif ($star ne "")
+			{
+				$tout .= "      (TextNode \"$star\")\n";
+			}
 		}
 		$tout .= "   )\n";
 	}
