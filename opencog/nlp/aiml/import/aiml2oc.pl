@@ -317,8 +317,10 @@ close(FOUT);
 sub process_aiml_tags
 {
 	my $text = $_[0];
-	my $tout = "";
 
+	$text =~ s/#Comma/,/g;
+
+	my $tout = "";
 	if ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
 	{
 		$tout .= "   (ListLink\n";
