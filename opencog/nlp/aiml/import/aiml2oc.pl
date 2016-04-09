@@ -3,6 +3,7 @@
 # Convert AIML files to OpenCog Atomese.
 #
 # Copyright (c) Kino Coursey 2015
+# Copyright (c) Linas Vepstas 2016
 #
 use Getopt::Long qw(GetOptions);
 use strict;
@@ -337,6 +338,96 @@ sub process_star
 	$tout;
 }
 
+sub process_aiml_tags;
+
+# Decode and print nested SRAI tags.  This turns out to be a complicted
+# pain. The problem with srai is that it can be nested, and its hard to
+# use regexes to walk that nesting in a reliable way. (I don't feel like
+# debugging a recursive regex.) So this is implemented as a brute-force
+# string search, where I just count the nesting levels by hand. Even so,
+# this is painfully verbose.
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_srai
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+
+	my $tout = "";
+
+	my $nest = 0;
+
+	# Split on all XML tags.
+	my @tags = split /</, $text;
+	my $contig = shift @tags;
+
+	# Iterate over all the tags.
+	for my $tag (@tags)
+	{
+
+		if ($tag =~ /^srai>(.*)/)
+		{
+			my $srt = $1;
+
+			# Found an srai tag. If the tag nesting level is zero,
+			# then process everything that came before it, (if there
+			# is anything)
+			if ($nest == 0)
+			{
+				$contig =~ s/^\s*//;
+				$contig =~ s/\s*$//;
+				if ($contig ne "")
+				{
+					$tout .= &process_aiml_tags($indent, $contig);
+				}
+				$contig = $srt;  # strip off the starting tag.
+			}
+			else
+			{
+				$contig .= "<" . $tag;
+			}
+			$nest = $nest + 1;
+		}
+		elsif ($tag =~ /^\/srai>(.*)/)
+		{
+			my $post = $1;
+
+			# Found an srai end-tag. If the nest level is 1, then
+			# print out what we've got; else accumulate some more.
+			if ($nest == 1)
+			{
+				$contig =~ s/^\s*//;
+				$contig =~ s/\s*$//;
+				$tout .= $indent . "(ExecutionOutput\n";
+				$tout .= $indent . "   (DefineSchema \"AIML-tag srai\")\n";
+				$tout .= $indent . "   (ListLink\n";
+				$tout .= &process_aiml_tags("      " . $indent, $contig);
+				$tout .= $indent . "   ))\n";
+
+				$contig = $post;
+			}
+			else
+			{
+				$contig .= "<" . $tag;
+			}
+			$nest = $nest - 1;
+		}
+		else
+		{
+			$contig .= "<" . $tag;
+		}
+	}
+
+	$contig =~ s/^\s*//;
+	$contig =~ s/\s*$//;
+	if ($contig ne "")
+	{
+		$tout .= &process_aiml_tags($indent, $contig);
+	}
+	$tout;
+}
+
 # First argument: white-space indentation to insert on each line.
 # Second argument: the actual text to unpack
 sub process_aiml_tags
@@ -353,25 +444,13 @@ sub process_aiml_tags
 
 	my $tout = "";
 
-	if ($text =~ /<srai/)
+	# <srai>'s can be nested, one inside the other.
+	# Maybe this could be solved with a recursive regex, but
+	# I don't feel like debugging that.  So instead, this
+	# uses a brute-force approach.
+	if ($text =~ /<srai>/)
 	{
-		my @srais = split /<srai>/, $text;
-		foreach my $srai (@srais)
-		{
-			# Remove the trailing srai
-			$srai =~ s/<\/srai>//;
-			$srai =~ s/^\s*//;
-			$srai =~ s/\s*$//;
-
-			$srai = lc $srai;
-			if ($srai eq "") { next; }
-
-			$tout .= $indent . "(ExecutionOutput\n";
-			$tout .= $indent . "   (DefineSchema \"AIML-tag srai\")\n";
-			$tout .= $indent . "   (ListLink\n";
-			$tout .= &process_aiml_tags($indent . "      ", $srai);
-			$tout .= $indent . "   ))\n";
-		}
+		$tout .= &process_srai($indent, $text);
 	}
 
 	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
