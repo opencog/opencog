@@ -321,19 +321,24 @@ sub process_aiml_tags
 
 	if ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
 	{
-		$tout .= "   (TextNode \"$1\")\n";
-		$tout .= "   (ExecutionOutput\n";
-		$tout .= "      (DefineSchema \"AIML-tag person\")\n";
-		$tout .= "      (ListLink\n";
+		$tout .= "   (ListLink\n";
+		$tout .= "      (TextNode \"$1\")\n";
+		$tout .= "      (ExecutionOutput\n";
+		$tout .= "         (DefineSchema \"AIML-tag person\")\n";
+		$tout .= "         (ListLink\n";
 		if ($2 =~ /<star\/>/)
 		{
-			$tout .= "          (Glob \"\$star\")))\n";
+			$tout .= "             (Glob \"\$star\")))\n";
 		}
 		else
 		{
-			$tout .= "          (AIEEEE! \"$2\")))\n";
+			$tout .= "             (AIEEEE! \"$2\")))\n";
 		}
-		$tout .= "   (TextNode \"$3\")\n";
+		if ($3 ne "")
+		{
+			$tout .= "      (TextNode \"$3\")\n";
+		}
+		$tout .= "   )\n";
 	}
 	else
 	{
