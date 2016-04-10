@@ -4,14 +4,15 @@ This directory contains a perl script to convert AIML to OpenCog
 Atomese, so that the AIML rules can be integrated into the rest of
 the OpenCog natural language processing infrastructure.
 
-The directoruy `scm-variant` contains a scheme implementation of an
-AIML-to-Atomese converter.  Its discouraged, because its harder to
-maintain than the perl script, which is conceptually simpler and
-cleaner.
+The directory `scm-variant` contains a scheme implementation of an
+AIML-to-Atomese converter.  Its discouraged, because its mis-designed,
+and is harder to maintain than the perl script.
 
-*ATTTENTION* The Atomese format for the AIML rules is in the process of
-being modified and updated!  The code here is *NOT* final, and is
-certain to change during Spring 2016.
+*ATTTENTION* Although the perl script here is correctly designed, and
+it works, generating the proper format, the code here is *MOTHBALLED*.
+The reason for this is that there is no compelling AIML content that
+is in any way useful to the current plans for OpenCog.  I think that
+we've moved past AIML in terms of what we can accomplish.
 
 
 ### Usage

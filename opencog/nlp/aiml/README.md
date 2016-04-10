@@ -2,7 +2,10 @@
 # AIML in the AtomSpace
 
 ## Status
-Under development, very incomplete.
+*ATTTENTION* The code here is *MOTHBALLED*.
+The reason for this is that there is no compelling AIML content that
+is in any way useful to the current plans for OpenCog.  I think that
+we've moved past AIML in terms of what we can accomplish.
 
 ## Goal
 Be able to apply AIML rules, in a fashion that is integrated with the
