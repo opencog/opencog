@@ -2,6 +2,20 @@
 #
 # Convert AIML files to OpenCog Atomese.
 #
+# The perl script converts AIML XML into OpenCog Atomese.  See the
+# bottom for an example of the output format, and a breif discussion
+# about the design choices taken.  This script "works", in that it
+# generates valid Atomese that can actually be imported into the
+# atomspace.
+#
+# As of April 2016, the idea of importing AIML is mothballed: so,
+# although the conversion and import works, the surrounding code
+# to attach the AIML rules into the rest of the OpenCog chat
+# infrastructure has not been created, and probably wont be.  The
+# reason for this is that there is no compelling AIML content that
+# is in any way useful to the current plans for OpenCog.  I think
+# we've moved past AIML in terms of what we can accomplish.
+#
 # Copyright (c) Kino Coursey 2015
 # Copyright (c) Linas Vepstas 2016
 #
@@ -317,11 +331,11 @@ close(FOUT);
 # Second pass utilities
 
 # What node should we use for output text ???
-# my $textnode = "(TextNode ";
-my $textnode = "(Concept ";
+my $textnode = "(TextNode ";
+# my $textnode = "(Concept ";
 
-# my $wordnode = "(Word ";
-my $wordnode = "(Concept ";
+my $wordnode = "(Word ";
+# my $wordnode = "(Concept ";
 
 # Handle expressions like <star/> and <star index='2'/> and so on.
 sub process_star
@@ -890,31 +904,78 @@ CATEND,0
 =OpenCog equivalents
 * R1 example.
 ```
-(BindLink
-   (AndLink
+; Every DefinedSchema must have a globally unique name, and the 
+; original category text is as good a name as any.  Useful for 
+; debugging.  In all other respects, the actual name chosen does 
+; not matter. The MemberLink simply describes the DefinedSchema
+; as belonging to a particular rulebase; in this case, the rulbase
+; is called (Concept "*-AIML-rulebase-*").  The actual name of
+; the rulebase does not matter.
+(MemberLink
+   (DefinedSchema "<category> <pattern>Hello</pattern> <topic>*</topic> <that>*</that> <template> Hi there. </template> </category>")
+   (Concept "*-AIML-rulebase-*"))
+
+; This actually defines the schema. Note that the name used here must be
+; *identical* to that above.  The Implication has two parts: it has a
+; simple if-then form.  Note that a very simple implication is used:
+; a BindLink is NOT used!  This is for a very important reason: it
+; isolates the rule from the actual form that is used to represent
+; sentences in the atomspace.  It is straight-forward to convert the
+; ImplicationLinks into actual patterns that can match the current
+; input text.  The AIML importer does NOT need to make any assumptions
+; about what the cirrent sentence representation is.
+(DefineLink
+   (DefinedSchema "<category> <pattern>Hello</pattern> <topic>*</topic> <that>*</that> <template> Hi there. </template> </category>")
+   (Implication
+      (And
+         (ListLink
+            (Word "hello")
+         )
+      )
       (ListLink
-         (WordNode "Hello")
-         (VariableNode "$eol")
+         (TextNode "Hi there.")
       )
-      (StateLink
-         (AnchorNode "#topic")
-         (WordNode "*")
-         (VariableNode "$topic")
-      )
-      (StateLink
-         (AnchorNode "#that")
-         (WordNode "*")
-         (VariableNode "$that")
-      )
-    )
-    (StateLink
-       (AnchorNode "#reply")
-       (WordSequenceLink
-            (WordNode "Hi")
-            (WordNode "there.")
-        )
-    )
+   )
 )
+```
+
+Another example: a simple SRAI:
+```
+; Notice the general similarity to the above.  The SRAI tag is
+; converted to a DefinedSchema, whose execution is tiggered
+; whenever the rule is run.  Notice also the handling of the
+; star with a multi-word GlobNode.
+;
+; This perl script correctly handles nested SRAI.  It also handles
+; random-choice responses: it splits these into multiple rules, so
+; that they can be more easily merged with other stimulous and chat
+; sources.
+;
+; Other AIML tags are also converted into DefinedSchema; e.g. the
+; <person> tage is converted into (DefinedSchema "AIML-tag person").
+;
+(MemberLink
+   (DefinedSchema "<category>    <pattern>SORRY *</pattern> <template><srai>sorry</srai></template> </category>")
+   (Concept "*-AIML-rulebase-*"))
+(DefineLink
+   (DefinedSchema "<category>    <pattern>SORRY *</pattern> <template><srai>sorry</srai></template> </category>")
+   (Implication
+      (And
+         (ListLink
+            (Word "sorry")
+            (Glob "$star-1")
+         )
+      )
+      (ListLink
+         (ExecutionOutput
+            (DefinedSchema "AIML-tag srai")
+            (ListLink
+               (Text "sorry")
+            ))
+      )
+   )
+)
+```
 
 
 =end comment
