@@ -7,7 +7,10 @@ imported, using the tools in `import` directory.
 
 Status
 ------
-In development, experimental, pre-alpha.
+*ATTTENTION* The code here is *MOTHBALLED*.
+The reason for this is that there is no compelling AIML content that
+is in any way useful to the current plans for OpenCog.  I think that
+we've moved past AIML in terms of what we can accomplish.
 
 
 Design Notes
