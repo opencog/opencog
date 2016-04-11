@@ -122,3 +122,22 @@
 
     (remove psi-action? (get-c&a rule))
 )
+
+(define (psi-get-action rule) ; get the context of an openpsi-rule
+    (define (get-c&a x) ; get context and action list from ImplicationLink
+        (cog-outgoing-set (list-ref (cog-outgoing-set x) 0)))
+
+    (filter psi-action? (get-c&a rule))
+)
+
+(define (psi-satisfiable? rule) ; check if the rule is satisfiable
+    (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
+           (result (cog-evaluate! pattern)))
+          (cog-delete pattern)
+
+          ; FIXME: Regardless of what 'result' is, the following always returns
+          ; '#f'
+          ; (equal? (stv 1 1) result)
+          result
+    )
+)
