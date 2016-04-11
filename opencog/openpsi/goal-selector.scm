@@ -1,6 +1,6 @@
 ; Copyright (C) 2016 OpenCog Foundation
 
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog) (opencog query) (opencog exec))
 
 (load-from-path "openpsi/utilities.scm")
 
