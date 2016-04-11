@@ -104,13 +104,13 @@
         (ConceptNode (string-append (psi-prefix-str) "rule")))
 )
 
-(define (psi-get-actions) ; get openpsi actions
+(define (psi-get-all-actions) ; get openpsi actions
     (cog-outgoing-set (cog-execute! (GetLink
         (MemberLink (VariableNode "x")
         (ConceptNode (string-append (psi-prefix-str) "action")))))))
 
 (define (psi-action? x)
-    (if (member x (psi-get-actions)) #t #f))
+    (if (member x (psi-get-all-actions)) #t #f))
 
 (define (psi-get-rules) ; get all openpsi rules
     (cog-chase-link 'MemberLink 'ImplicationLink
