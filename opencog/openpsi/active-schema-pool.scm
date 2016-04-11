@@ -3,7 +3,7 @@
 (use-modules (ice-9 threads)) ; For `par-map`
 (use-modules (srfi srfi-1)) ; For set-difference
 
-(use-modules (opencog) (opencog rule-engine))
+(use-modules (opencog) (opencog exec) (opencog rule-engine))
 
 (load-from-path "openpsi/action-selector.scm")
 (load-from-path "openpsi/demand.scm")
@@ -84,4 +84,41 @@
            ; Add the actions that are not member of the asp.
            (par-map add-node actions-to-add)
     )
+)
+
+(define (psi-rule context action demand-goal)
+    ; Check arguments
+    (if (not (list? context))
+        (error "Expected first argument to psi-rule to be a list, got: "
+            context))
+
+    ; These memberships are needed for making filtering and searching simpler..
+    ; If GlobNode had worked with GetLink at the time of coding this ,
+    ; that might have been; better,(or not as it might need as much chasing)
+    (MemberLink
+        action
+        (ConceptNode (string-append (psi-prefix-str) "action")))
+
+    (MemberLink
+        (ImplicationLink (AndLink context action) demand-goal)
+        (ConceptNode (string-append (psi-prefix-str) "rule")))
+)
+
+(define (psi-get-actions) ; get openpsi actions
+    (cog-outgoing-set (cog-execute! (GetLink
+        (MemberLink (VariableNode "x")
+        (ConceptNode (string-append (psi-prefix-str) "action")))))))
+
+(define (psi-action? x)
+    (if (member x (psi-get-actions)) #t #f))
+
+(define (psi-get-rules) ; get all openpsi rules
+    (cog-chase-link 'MemberLink 'ImplicationLink
+        (ConceptNode (string-append (psi-prefix-str) "rule"))))
+
+(define (psi-get-context rule) ; get the context of an openpsi-rule
+    (define (get-c&a x) ; get context and action list from ImplicationLink
+        (cog-outgoing-set (list-ref (cog-outgoing-set x) 0)))
+
+    (remove psi-action? (get-c&a rule))
 )
