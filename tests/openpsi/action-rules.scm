@@ -52,3 +52,39 @@
       (ConceptNode "OpenPsi: Energy" (stv 0.710000 1.000000))
     )
 )
+
+; --------------------------------------------------------------
+; Helper function for `OpenPsiUTest::test_psi_satisfiable?`
+(define context-1
+    (list
+       (ListLink
+            (VariableNode "x")
+            (VariableNode "y")
+            (VariableNode "z"))
+        (InheritanceLink
+            (VariableNode "x")
+            (VariableNode "z"))
+        (EqualLink
+            (VariableNode "x")
+            (VariableNode "y"))
+        ))
+
+(define action-1
+    (EvaluationLink
+        (GroundedPredicateNode "scm: cog-tv")
+        (ListLink
+            (VariableNode "z"))))
+
+(define goal-1 (Node "test-demand"))
+
+(define rule-1 (psi-rule context-1 action-1 goal-1 (stv 1 1)))
+
+(define (groundable-content-1)
+    (ListLink
+        (NumberNode 1)
+        (NumberNode 1)
+        (PredicateNode "z"))
+    (InheritanceLink
+        (NumberNode 1)
+        (PredicateNode "z"))
+)

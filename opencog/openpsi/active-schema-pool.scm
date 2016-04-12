@@ -86,11 +86,17 @@
     )
 )
 
-(define (psi-rule context action demand-goal)
+(define (psi-rule context action demand-goal stv)
+    (define (implication)
+        (ImplicationLink stv (AndLink context action) demand-goal))
+
     ; Check arguments
     (if (not (list? context))
         (error "Expected first argument to psi-rule to be a list, got: "
             context))
+    (if (not (cog-tv? stv))
+        (error "Expected fourth argument to psi-rule to be a stv, got: "
+            stv))
 
     ; These memberships are needed for making filtering and searching simpler..
     ; If GlobNode had worked with GetLink at the time of coding this ,
@@ -100,8 +106,10 @@
         (ConceptNode (string-append (psi-prefix-str) "action")))
 
     (MemberLink
-        (ImplicationLink (AndLink context action) demand-goal)
+        (implication)
         (ConceptNode (string-append (psi-prefix-str) "rule")))
+
+    (implication)
 )
 
 (define (psi-get-all-actions) ; get openpsi actions
