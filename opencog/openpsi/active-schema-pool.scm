@@ -120,7 +120,7 @@
 (define (psi-action? x)
     (if (member x (psi-get-all-actions)) #t #f))
 
-(define (psi-get-rules) ; get all openpsi rules
+(define (psi-get-all-rules) ; get all openpsi rules
     (cog-chase-link 'MemberLink 'ImplicationLink
         (ConceptNode (string-append (psi-prefix-str) "rule"))))
 
