@@ -87,6 +87,33 @@
 )
 
 (define (psi-rule context action demand-goal stv)
+"
+  It associates an action and context in which the action has to be taken
+  to a goal that is satisfied when the action is executed. It is structured as
+  as the following `ImplicationLink`,
+
+    (ImplicationLink
+        (AndLink
+            (context)
+            (action))
+        (demand-goal))
+
+  context:
+  - A list containing the terms/clauses that should be met for this action
+    to be taken.
+
+  action:
+  - It should be an atom that can be run by `cog-evaluate!`. That means that
+    it will have to return TRUE_TV or FALSE_TV.
+
+  demand-goal:
+  - It should be an atom that can be run by `cog-evaluate!`. That means that
+  it will have to return TRUE_TV or FALSE_TV. This is basically a formula, on
+  how this rule affects the demands.
+
+  stv:
+  - This is the stv of the ImplicationLink.
+"
     (define (implication)
         (ImplicationLink stv (AndLink context action) demand-goal))
 
@@ -94,6 +121,8 @@
     (if (not (list? context))
         (error "Expected first argument to psi-rule to be a list, got: "
             context))
+    (if (not (cog-atom? action))
+        (error "Expected second argument to psi-rule be an atom, got: " action))
     (if (not (cog-tv? stv))
         (error "Expected fourth argument to psi-rule to be a stv, got: "
             stv))
