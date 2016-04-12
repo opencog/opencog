@@ -2,12 +2,27 @@
 #
 # Convert AIML files to OpenCog Atomese.
 #
+# The perl script converts AIML XML into OpenCog Atomese.  See the
+# bottom for an example of the output format, and a breif discussion
+# about the design choices taken.  This script "works", in that it
+# generates valid Atomese that can actually be imported into the
+# atomspace.
+#
+# As of April 2016, the idea of importing AIML is mothballed: so,
+# although the conversion and import works, the surrounding code
+# to attach the AIML rules into the rest of the OpenCog chat
+# infrastructure has not been created, and probably wont be.  The
+# reason for this is that there is no compelling AIML content that
+# is in any way useful to the current plans for OpenCog.  I think
+# we've moved past AIML in terms of what we can accomplish.
+#
 # Copyright (c) Kino Coursey 2015
+# Copyright (c) Linas Vepstas 2016
 #
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.0.2";
+my $ver = "0.1.0";
 my $debug;
 my $help;
 my $version;
@@ -15,27 +30,29 @@ my $overwrite;
 my $aimlDir ='.';
 my $intermediateFile = 'flat-aiml.txt';
 my $finalFile = 'aiml.scm';
+my $rulebase = "*-AIML-rulebase-*";
 
 GetOptions(
     'dir=s' => \$aimlDir,
     'debug' => \$debug,
     'help' => \$help,
+    'rulebase-name=s' => \$rulebase,
     'last-only' => \$overwrite,
     'version' => \$version,
     'intermediate=s' => \$intermediateFile,
     'out=s' => \$finalFile,
-) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir
+) or die "Usage: $0 [--debug] [--help] [--version] [--rulebase-name] [--last-only] [--dir
 <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
 
 if ($help)
 {
 	print "Convert AIML markup files to OpenCog Atomese files.\n";
 	print "\n";
-	print "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir
-<AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
+	print "Usage: $0 [--debug] [--help] [--version] [--rulebase-name] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
 	print "   --debug                 Enable debugging (if any).\n";
 	print "   --help                  Print these helpful comments.\n";
 	print "   --version               Print version, current version '$ver'\n";
+	print "   --rulebase-name         Specify a name for the ruleset, default '$rulebase'\n";
 	print "   --last-only             Only the last category is output.\n";
 	print "   --dir <directory>       AIML source directory, default: '$aimlDir'\n";
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
@@ -58,7 +75,7 @@ if ($version)
 
 print "\n AIML Source directory = $aimlDir\n";
 opendir(DIR, "$aimlDir");
-my @aimlFiles = grep(/\.aiml/,readdir(DIR));
+my @aimlFiles = grep(/\.aiml$/, readdir(DIR));
 closedir(DIR);
 
 open FOUT, ">$intermediateFile";
@@ -103,7 +120,7 @@ foreach my $af (sort @aimlFiles)
 	$textfile =~ s/<aiml/\#\#SPLIT\<aiml/gi;
 	$textfile =~ s/<\/aiml>/\<\/aiml\>\#\#SPLIT /gi;
 
-	my @cats = split(/\#\#SPLIT/,$textfile);
+	my @cats = split(/\#\#SPLIT/, $textfile);
 
 	# It should be one category at a time, but it could be on high-level
 	# topics.
@@ -161,6 +178,7 @@ foreach my $af (sort @aimlFiles)
 			my $topicstars=0;
 
 			print FOUT "CATBEGIN,0\n";
+			print FOUT "CATTEXT,$c\n";
 
 			# Patterns.
 			print FOUT "PAT,$pat[0]\n";
@@ -295,7 +313,6 @@ foreach my $af (sort @aimlFiles)
 				{
 					print FOUT "TEMPLATECODE,$template[0]\n";
 				}
-				print FOUT "TEMPATOMICEND,0\n";
 			}
 			else
 			{
@@ -303,16 +320,234 @@ foreach my $af (sort @aimlFiles)
 			}
 
 			print FOUT "TEMPLATE,$template[0]\n";
-			print FOUT "CATTEXT,$c\n";
 			print FOUT "CATEND,0\n";
 			print FOUT "\n";
 		}
-
-
 	}
 }
 close(FOUT);
 
+# ------------------------------------------------------------------
+# Second pass utilities
+
+# What node should we use for output text ???
+my $textnode = "(TextNode ";
+# my $textnode = "(Concept ";
+
+my $wordnode = "(Word ";
+# my $wordnode = "(Concept ";
+
+# Handle expressions like <star/> and <star index='2'/> and so on.
+sub process_star
+{
+	my $text = $_[0];
+	my $tout = "";
+
+	if ($text =~ /<star\s*\/>/)
+	{
+		$tout .= "(Glob \"\$star-1\")";
+	}
+	elsif ($text =~ /<star\s*index\s*=\s*'(\d+)'\s*\/>/)
+	{
+		$tout .= "(Glob \"\$star-$1\")";
+	}
+	else
+	{
+		# Error .. should throw here I guess
+		$tout .= "(AIEEEE! \"$text\")";
+	}
+
+	$tout;
+}
+
+sub process_aiml_tags;
+
+# Decode and print nested SRAI tags.  This turns out to be a complicted
+# pain. The problem with srai is that it can be nested, and its hard to
+# use regexes to walk that nesting in a reliable way. (I don't feel like
+# debugging a recursive regex.) So this is implemented as a brute-force
+# string search, where I just count the nesting levels by hand. Even so,
+# this is painfully verbose.
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_srai
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+
+	my $tout = "";
+
+	my $nest = 0;
+
+	# Split on all XML tags.
+	my @tags = split /</, $text;
+	my $contig = shift @tags;
+
+	# Iterate over all the tags.
+	for my $tag (@tags)
+	{
+
+		if ($tag =~ /^srai>(.*)/)
+		{
+			my $srt = $1;
+
+			# Found an srai tag. If the tag nesting level is zero,
+			# then process everything that came before it, (if there
+			# is anything)
+			if ($nest == 0)
+			{
+				$contig =~ s/^\s*//;
+				$contig =~ s/\s*$//;
+				if ($contig ne "")
+				{
+					$tout .= &process_aiml_tags($indent, $contig);
+				}
+				$contig = $srt;  # strip off the starting tag.
+			}
+			else
+			{
+				$contig .= "<" . $tag;
+			}
+			$nest = $nest + 1;
+		}
+		elsif ($tag =~ /^\/srai>(.*)/)
+		{
+			my $post = $1;
+
+			# Found an srai end-tag. If the nest level is 1, then
+			# print out what we've got; else accumulate some more.
+			if ($nest == 1)
+			{
+				$contig =~ s/^\s*//;
+				$contig =~ s/\s*$//;
+				$tout .= $indent . "(ExecutionOutput\n";
+				$tout .= $indent . "   (DefinedSchema \"AIML-tag srai\")\n";
+				$tout .= $indent . "   (ListLink\n";
+				$tout .= &process_aiml_tags("      " . $indent, $contig);
+				$tout .= $indent . "   ))\n";
+
+				$contig = $post;
+			}
+			else
+			{
+				$contig .= "<" . $tag;
+			}
+			$nest = $nest - 1;
+		}
+		else
+		{
+			$contig .= "<" . $tag;
+		}
+	}
+
+	$contig =~ s/^\s*//;
+	$contig =~ s/\s*$//;
+	if ($contig ne "")
+	{
+		$tout .= &process_aiml_tags($indent, $contig);
+	}
+	$tout;
+}
+
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_aiml_tags
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+
+	# Expand defintion of <sr/>
+	$text =~ s/<sr\/>/<srai><star\/><\/srai>/g;
+
+	# Convert mangled commas, from pass 1
+	$text =~ s/#Comma/,/g;
+
+	# Unescape escaped single-quotes.
+	$text =~ s/\\'/'/g;
+
+	# Escape back-slashes
+	$text =~ s/\\/\\\\/g;
+
+	# Trim leading and trailing whtespace.
+	$text =~ s/^\s*//;
+	$text =~ s/\s*$//;
+
+	my $tout = "";
+
+	# <srai>'s can be nested, one inside the other.
+	# Maybe this could be solved with a recursive regex, but
+	# I don't feel like debugging that.  So instead, this
+	# uses a brute-force approach.
+	if ($text =~ /<srai>/)
+	{
+		$text = lc $text;
+		$tout .= &process_srai($indent, $text);
+	}
+
+	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
+	{
+		# FIXME, should be like the loop, below.
+		$tout .= $indent . $textnode . "\"$1\")\n";
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= &process_aiml_tags($indent . "      ", $2);
+		$tout .= $indent . "   ))\n";
+		if ($3 ne "")
+		{
+			$tout .= $indent . $textnode . "\"$3\")\n";
+		}
+	}
+
+	elsif ($text =~ /<star/)
+	{
+		my @stars = split /<star/, $text;
+		foreach my $star (@stars)
+		{
+			$star =~ s/^\s*//;
+			$star =~ s/\s*$//;
+			if ($star =~ /index='(\d+)'.*\/>(.*)/)
+			{
+				$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
+
+				my $t = $2;
+				$t =~ s/^\s*//;
+				$t =~ s/\s*$//;
+				if ($t ne "")
+				{
+					$tout .= $indent . $textnode . "\"$t\")\n";
+				}
+			}
+			elsif ($star =~ /\/>(.*)/)
+			{
+				$tout .= $indent . &process_star("<star \/>") . "\n";
+				my $t = $1;
+				$t =~ s/^\s*//;
+				$t =~ s/\s*$//;
+				if ($t ne "")
+				{
+					$tout .= $indent . $textnode . "\"$t\")\n";
+				}
+			}
+			elsif ($star ne "")
+			{
+				$tout .= $indent . $textnode . "\"$star\")\n";
+			}
+		}
+	}
+
+	elsif ($text =~ /<!--.*-->/)
+	{
+		# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
+		$tout .= $indent . "; WTF $text\n";
+	}
+	else
+	{
+		$tout .= $indent . $textnode . "\"$text\")\n";
+	}
+	$tout;
+}
 # ------------------------------------------------------------------
 # Second pass
 
@@ -322,41 +557,140 @@ my $curPath="";
 my %overwriteSpace=();
 my $code = "";
 
-while (my $line =<FIN>)
+my $have_topic = 0;
+my $curr_topic = "";
+
+my $have_that = 0;
+my $curr_that = "";
+
+my $have_raw_code = 0;
+my $curr_raw_code = "";
+
+my $cattext = "";
+
+my $star_index = 1;
+
+while (my $line = <FIN>)
 {
 	chomp($line);
-	if (length($line)<1) {next;}
-	my @parms=split(/\,/,$line);
-	my $cmd=$parms[0] || "";
-	my $arg=$parms[1] || "";
-	if (length($cmd)<1) {next;}
+	if (length($line) < 1) { next; }
+	my @parms = split(/\,/, $line);
+	my $cmd = $parms[0] || "";
+	my $arg = $parms[1] || "";
+	if (length($cmd) < 1) { next; }
+
+	# Un-do the comma-damage up above.
+	$arg =~ s/#Comma/,/g;
+
+	# esacpe quote marks.
+	$arg =~ s/"/\\"/g;
 
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$code .= "(PatternLink\n";
-		$code .= "   (SequentialAndLink\n";
+		$code = "";
+		$code .= "   (Implication\n";
+		$code .= "      (And\n";
+	}
+	if ($cmd eq "CATTEXT")
+	{
+		$cattext = $line;
+		$cattext =~ s/^CATTEXT,//g;
+		$cattext =~ s/\#Comma/,/g;
+
+		# Unescape escaped single-quotes.
+		$cattext =~ s/\\'/'/g;
+
+		# Escape back-slashes
+		$cattext =~ s/\\/\\\\/g;
+
+		# Escape double-quotes.
+		$cattext =~ s/"/\\"/g;
+
+		# Trim leading and trailing whitespace
+		$cattext =~ s/^\s*//g;
+		$cattext =~ s/\s*$//g;
+
 	}
 	if ($cmd eq "PATH")
 	{
 		$curPath = $arg;
-		#$code = "";
-		#print "PATH --> $curPath\n";
+		# $code .= "; PATH --> $curPath\n";
 	}
 
 	if ($cmd eq "CATEND")
 	{
-		$code .= ")\n";     # close category section
+		my $rule = "";
+
+		if ($have_raw_code)
+		{
+			# Random sections are handled by duplicating
+			# the rule repeatedly, each time with the same
+			# premise template, but each with a diffrerent output.
+			if ($curr_raw_code =~ /<random>(.*)<\/random>/)
+			{
+				my $choices = $1;
+				$choices =~ s/^\s+//;
+				my @choicelist = split /<li>/, $choices;
+				shift @choicelist;
+				my $i = 1;
+				my $nc = $#choicelist + 1;
+				foreach my $ch (@choicelist)
+				{
+					$ch =~ s/<\/li>//;
+					$ch =~ s/\s+$//;
+
+					my $name = "random choice $i of $nc: ";
+					$name .= $cattext;
+
+					$rule .= "(MemberLink\n";
+					$rule .= "   (DefinedSchema \"$name\")\n";
+					$rule .= "   (Concept \"$rulebase\"))\n";
+					$rule .= "(DefineLink\n";
+					$rule .= "   (DefinedSchema \"$name\")\n";
+					$rule .= $code;
+					$rule .= "      (ListLink\n";
+					$rule .= &process_aiml_tags("         ", $ch);
+					$rule .= "      )\n";
+					$rule .= "   )) ; random choice $i of $nc\n\n";  # close category section
+					$i = $i + 1;
+				}
+         }
+			else
+			{
+				$rule  = "(MemberLink\n";
+				$rule .= "   (DefinedSchema \"$cattext\")\n";
+				$rule .= "   (Concept \"$rulebase\"))\n";
+				$rule .= "(DefineLink\n";
+				$rule .= "   (DefinedSchema \"$cattext\")\n";
+				$rule .= $code;
+				$rule .= "      (ListLink\n";
+				$rule .= &process_aiml_tags("         ", $curr_raw_code);
+				$rule .= "      )\n";
+				$rule .= "   )\n)\n";  # close category section
+			}
+			$have_raw_code = 0;
+		}
+		else
+		{
+			$rule  = "(MemberLink\n";
+			$rule .= "   (DefinedSchema \"$cattext\")\n";
+			$rule .= "   (Concept \"$rulebase\"))\n";
+			$rule .= "(DefineLink\n";
+			$rule .= "   (DefinedSchema \"$cattext\")\n";
+			$rule .= $code;
+			$code .= ") ; CATEND\n";     # close category section
+		}
 
 		if ($overwrite)
 		{
 			# Overwrite in a hash space indexed by the current path.
-			$overwriteSpace{$curPath} = $code;
+			$overwriteSpace{$curPath} = $rule;
 		}
 		else
 		{
 			# Not merging, so just write it out.
-			print FOUT "$code\n";
+			print FOUT "$rule\n";
 		}
 		$code = "";
 	}
@@ -367,131 +701,152 @@ while (my $line =<FIN>)
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
-		$code .= "      (WordSequenceLink\n";
+		$star_index = 0;
+		$code .= "         (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
-		$code .= "         (WordNode \"$arg\")\n";
+		# Use lower-case ...
+		$arg = lc $arg;
+		$code .= "            " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
-		$code .= "         (WordNode \"*\")\n";
+		$star_index = $star_index + 1;
+		$code .= "            (Glob \"\$star-$star_index\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$code .= "         (WordNode \"_\")\n";
+		$code .= "            (GlobbyBlobbyNode \"_\")\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$code .= "         (BOTVARNode \"$arg\")\n";
+		$code .= "            (BOTVARNode \"$arg\")\n";
 	}
 	if ($cmd eq "PSET")
 	{
-		$code .= "         (ConceptNode \"$arg\")\n";
+		$code .= "            (XConceptxxNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
-		$code .= "         (VariableNode \"\$eol\")\n";
-		$code .= "      )\n";
+		$code .= "         ) ; PATEND\n";
 	}
 
 	#TOPIC
 	if ($cmd eq "TOPIC")
 	{
-		$code .= "      (ListLink\n";
-		$code .= "         (AnchorNode \"\#topic\")\n";
+		$have_topic = 0;
 	}
 	if ($cmd eq "TOPICWRD")
 	{
-		$code .= "         (WordNode \"$arg\")\n";
+		$have_topic = 1;
+		$curr_topic = $arg;
 	}
 	if ($cmd eq "TOPICSTAR")
 	{
-		$code .= "         (WordNode \"*\")\n";
+		$have_topic = 0;
 	}
 	if ($cmd eq "TOPICUSTAR")
 	{
-		$code .= "         (WordNode \"_\")\n";
+		$have_topic = 0;
 	}
 	if ($cmd eq "TOPICBOTVAR")
 	{
-		$code .= "         (BOTVARNode \"$arg\")\n";
+		$code .= "; TOPICBOTVAR $arg\n";
 	}
 	if ($cmd eq "TOPICSET")
 	{
-		$code .= "         (ConceptNode \"$arg\")\n";
+		$have_topic = 1;
+		$curr_topic = $arg;
+		$code .= "; TOPICSET $arg\n";
 	}
 	if ($cmd eq "TOPICEND")
 	{
-		$code .= "         (VariableNode \"\$topic\")\n";
-		$code .= "      )\n";
+		if ($have_topic)
+		{
+			$code .= "         (State\n";
+			$code .= "            (Anchor \"\#topic\")\n";
+			$code .= "            (Concept \"$curr_topic\")\n";
+			$code .= "         )\n";
+		}
+		$have_topic = 0;
 	}
 
 	# THAT
 	if ($cmd eq "THAT")
 	{
-		$code .= "      (ListLink\n";
-		$code .= "         (AnchorNode \"\#that\")\n";
+		$have_that = 0;
 	}
 	if ($cmd eq "THATWRD")
 	{
-		$code .= "         (WordNode \"$arg\")\n";
+		$have_that = 1;
+		$curr_that = $arg;
 	}
 	if ($cmd eq "THATSTAR")
 	{
-		$code .= "         (WordNode \"*\")\n";
+		$have_that = 0;
 	}
 	if ($cmd eq "THATUSTAR")
 	{
-		$code .= "         (WordNode \"_\")\n";
+		$have_that = 0;
 	}
 	if ($cmd eq "THATBOTVAR")
 	{
-		$code .= "         (BOTVARNode \"$arg\")\n";
+		$code .= "; THATBOTVAR $arg\n";
 	}
 	if ($cmd eq "THATSET")
 	{
-		$code .= "         (ConceptNode \"$arg\")\n";
+		$have_that = 1;
+		$curr_that = $arg;
 	}
 	if ($cmd eq "THATEND")
 	{
-		$code .= "         (VariableNode \"\$that\")\n";
-		$code .= "      )\n";
+		if ($have_that)
+		{
+			$code .= "         (State\n";
+			$code .= "            (Anchor \"\#that\")\n";
+			$code .= "            (Concept \"$curr_that\")\n";
+			$code .= "         )\n";
+		}
+		$have_that = 0;
 	}
 
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
-		$code .= "     )\n";  # close pattern section
+		$code .= "      ) ;TEMPLATECODE\n";  # close pattern section
 
 		$arg =~ s/\"/\'/g;
 
-		# just raw AIML code
-		$code .= "    (PutLink\n";
-		$code .= "       (AnchorNode \"\#reply\")\n";
-		$code .= "       (AIMLCODENode \"$arg\")\n";
-		$code .= "    )\n";
-
+		$have_raw_code = 1;
+		$curr_raw_code = $arg;
 	}
+
 	if ($cmd eq "TEMPATOMIC")
 	{
-		$code .= "    )\n";  # close pattern section
+		$code .= "      ) ;TEMPATOMIC\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
-		$code .= "    (PutLink\n";
-		$code .= "       (AnchorNode \"\#reply\")\n";
-		$code .= "       (WordSequenceLink\n";
+		$code .= "      (ListLink\n";
 	}
 	if ($cmd eq "TEMPWRD")
 	{
+		# Unescape escaped single-quotes.
+		$arg =~ s/\\'/'/g;
+
+		# Escape back-slashes
+		$arg =~ s/\\/\\\\/g;
+
+		# Escape double-quotes.
+		$arg =~ s/"/\\"/g;
+
 		# Just another word in the reply chain.
-		$code .= "            (WordNode \"$arg\")\n";
+		$code .= "         " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
 		# Just another word in the reply chain.
-		$code .= "        )\n";
-		$code .= "    )\n";
+		$code .= "      ))) ; TEMPATOMICEND\n";
 	}
 }
 
@@ -503,6 +858,9 @@ if ($overwrite)
 		print FOUT "$overwriteSpace{$p}\n";
 	}
 }
+
+print FOUT "; ---------- end of file ----------\n";
+print FOUT "*unspecified*\n";
 
 close(FIN);
 close(FOUT);
@@ -546,51 +904,78 @@ CATEND,0
 =OpenCog equivalents
 * R1 example.
 ```
-PatternLink
-   SequentailAndLink
-      WordSequenceLink
-         WordNode "Hello"
-         VariableNode "$eol"     # rest of the input line
-      ListLink
-         AnchoreNode "#that"
-         VariableNode "$that"
-      ListLink
-         AnchorNode "#topic"
-         VariableNode "$topic"
-      PutLink                    # if the above conditions are satisfied
-         AnchorNode "#reply"     # then this PutLink is triggered.
-         WordSequenceLink        # This is the reply.
-            WordNode "Hi"
-            WordNode "there"
+; Every DefinedSchema must have a globally unique name, and the 
+; original category text is as good a name as any.  Useful for 
+; debugging.  In all other respects, the actual name chosen does 
+; not matter. The MemberLink simply describes the DefinedSchema
+; as belonging to a particular rulebase; in this case, the rulbase
+; is called (Concept "*-AIML-rulebase-*").  The actual name of
+; the rulebase does not matter.
+(MemberLink
+   (DefinedSchema "<category> <pattern>Hello</pattern> <topic>*</topic> <that>*</that> <template> Hi there. </template> </category>")
+   (Concept "*-AIML-rulebase-*"))
+
+; This actually defines the schema. Note that the name used here must be
+; *identical* to that above.  The Implication has two parts: it has a
+; simple if-then form.  Note that a very simple implication is used:
+; a BindLink is NOT used!  This is for a very important reason: it
+; isolates the rule from the actual form that is used to represent
+; sentences in the atomspace.  It is straight-forward to convert the
+; ImplicationLinks into actual patterns that can match the current
+; input text.  The AIML importer does NOT need to make any assumptions
+; about what the cirrent sentence representation is.
+(DefineLink
+   (DefinedSchema "<category> <pattern>Hello</pattern> <topic>*</topic> <that>*</that> <template> Hi there. </template> </category>")
+   (Implication
+      (And
+         (ListLink
+            (Word "hello")
+         )
+      )
+      (ListLink
+         (TextNode "Hi there.")
+      )
+   )
+)
 ```
 
-Or in more scheme-ish format
-
-(PatternLink
-   (SequentialAndLink
-      (WordSequenceLink
-         (WordNode "Hello")
-         (VariableNode "$eol")
+Another example: a simple SRAI:
+```
+; Notice the general similarity to the above.  The SRAI tag is
+; converted to a DefinedSchema, whose execution is tiggered
+; whenever the rule is run.  Notice also the handling of the
+; star with a multi-word GlobNode.
+;
+; This perl script correctly handles nested SRAI.  It also handles
+; random-choice responses: it splits these into multiple rules, so
+; that they can be more easily merged with other stimulous and chat
+; sources.
+;
+; Other AIML tags are also converted into DefinedSchema; e.g. the
+; <person> tage is converted into (DefinedSchema "AIML-tag person").
+;
+(MemberLink
+   (DefinedSchema "<category>    <pattern>SORRY *</pattern> <template><srai>sorry</srai></template> </category>")
+   (Concept "*-AIML-rulebase-*"))
+(DefineLink
+   (DefinedSchema "<category>    <pattern>SORRY *</pattern> <template><srai>sorry</srai></template> </category>")
+   (Implication
+      (And
+         (ListLink
+            (Word "sorry")
+            (Glob "$star-1")
+         )
       )
       (ListLink
-         (AnchorNode "#topic")
-         (WordNode "*")
-         (VariableNode "$topic")
+         (ExecutionOutput
+            (DefinedSchema "AIML-tag srai")
+            (ListLink
+               (Text "sorry")
+            ))
       )
-      (ListLink
-         (AnchorNode "#that")
-         (WordNode "*")
-         (VariableNode "$that")
-      )
-    )
-    (PutLink
-       (AnchorNode "#reply")
-       (WordSequenceLink
-            (WordNode "Hi")
-            (WordNode "there.")
-        )
-    )
+   )
 )
+```
 
 
 =end comment
