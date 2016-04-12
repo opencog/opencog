@@ -90,31 +90,31 @@ public:
         _as = nullptr;
         _scm = nullptr;
     }
-
-    void test_psi_get_action_rules()
-    {
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        // Test for `psi-get-action-rules` for the 3 psi-effect-types
-        TSM_ASSERT_EQUALS("Not the expected 'Default' action-rule", \
-            _scm->eval_h("(test-def)"), _scm->eval_h("(test-def-result)"));
-        TSM_ASSERT_EQUALS("Not the expected 'Increase' action-rules", \
-            _scm->eval_h("(test-inc)"), _scm->eval_h("(test-inc-result)"));
-        TSM_ASSERT_EQUALS("Not the expected 'Decrease' action-rules", \
-            _scm->eval_h("(test-dec)"), _scm->eval_h("(test-dec-result)"));
-
-        logger().info("END TEST: %s", __FUNCTION__);
-    }
-
-    void test_psi_get_demands()
-    {
-        logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-        TSM_ASSERT_EQUALS("Not the expected set of openpsi demands", \
-            _scm->eval_h("(test-select-all)"), \
-            _scm->eval_h("(test-select-all-result)"));
-        logger().info("END TEST: %s", __FUNCTION__);
-    }
+    //
+    // void test_psi_get_action_rules()
+    // {
+    //     logger().info("BEGIN TEST: %s", __FUNCTION__);
+    //
+    //     // Test for `psi-get-action-rules` for the 3 psi-effect-types
+    //     TSM_ASSERT_EQUALS("Not the expected 'Default' action-rule",
+    //         _scm->eval_h("(test-def)"), _scm->eval_h("(test-def-result)"));
+    //     TSM_ASSERT_EQUALS("Not the expected 'Increase' action-rules",
+    //         _scm->eval_h("(test-inc)"), _scm->eval_h("(test-inc-result)"));
+    //     TSM_ASSERT_EQUALS("Not the expected 'Decrease' action-rules",
+    //         _scm->eval_h("(test-dec)"), _scm->eval_h("(test-dec-result)"));
+    //
+    //     logger().info("END TEST: %s", __FUNCTION__);
+    // }
+    //
+    // void test_psi_get_demands()
+    // {
+    //     logger().info("BEGIN TEST: %s", __FUNCTION__);
+    //
+    //     TSM_ASSERT_EQUALS("Not the expected set of openpsi demands",
+    //         _scm->eval_h("(test-select-all)"),
+    //         _scm->eval_h("(test-select-all-result)"));
+    //     logger().info("END TEST: %s", __FUNCTION__);
+    // }
 
     // Check that scheme function psi-satisfiable?
     void test_psi_satisfiable()
