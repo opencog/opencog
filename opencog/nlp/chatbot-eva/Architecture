@@ -20,10 +20,66 @@ to do that work.
 General overview
 ----------------
 The general strategy is this:
- * Identify what is being asked (said, perceived)
- * Assemble a set of candidate answers (responses)
- * Seek evidence for or against each answer (each action to be taken)
- * Formulate a reply (perform that action)
+ 1. Identify what is being asked (said, perceived)
+ 2. Assemble a set of candidate answers (responses)
+ 3. Seek evidence for or against each answer (each action to be taken)
+ 4. Formulate a reply (perform that action)
  
+Step 1. is the sensory system. Currently, it is extremely limited: the
+Relex and R2L subsystem, and a face-detector (face tracker).  The
+sensory system needs to be greatly expanded.
 
 
+Appendix A - Expanding sensory input
+------------------------------------
+The sensory ninputs to the system need to be expanded.  Here is a list
+of some relatively easy and useful things that could be done.
+
+ * Sound intensity: is the room noisy and loud, or is it quiet?
+ * Sudden changes: Was there a loud bang/crash just now?
+ * Voices. Are many people talking all at once?
+ * Nature of background noise: is it crowd noise? is it applause?
+   Is it laughter?  Whistling, jeering? Is the audience/crowd
+   whispering?  Did a previsouly noisy room suddenly become still?
+   Time stamps for all such events.
+ * Conversational pauses:  did the speaker/speech come to an end
+   or a pause?  Is speaker saying "umm", "uhh", or other
+   conversational-pause device?
+
+Speech-to-text system needs:
+ * Provide timestamps for words, i.e. to indicate: is speaker talking
+   quickly, slowly?
+ * Is speaker talking quietly or loud?  Shouting?
+ * General affect perception: angry speech? gentle speech? Falling or
+   rising tones?
+ * Sex perception: is speaker male or female?
+
+A rough cut for all of the above is surely not that hard: we don't need
+a hyper-engineered system right now: we need more than zero, for any of
+the above.
+
+Visual system needs:
+ * Identify faces as known or unknown faces
+ * Identify sex of speaker.
+ * Identify children (perhaps from height).
+ * Identify direction that person/people are facing: are they facing
+   us (the camera)? Are they at 3/4ths face? at 1/2 face (looking
+   sideways, turned 90 degrees to us)? turned completely away?
+ * Are they making eye contact?
+ * Are thier lips moving? i.e. visually, might they be talking?
+ * Are there gestures of surprise (lips parting open, suddenly)?
+ * Are the still, or animated? Bouncing with excitement or bored?
+   Even a simple measure of visual flow will do: a general rate of
+   movement, amplitude of movment.
+ * Are we looking at a large crowd?  Is the crowd agitated or still?
+ * Are they moving towards or away from us? Are they crowwing sideways?
+ * Are they sitting or standing?
+
+Some of these things could be easy: just like we listen for audio noise,
+and measure the noise intensity, we could measure "video noise" and
+simply report if there is a lot of movement (lots of pixels changing),
+or only a little, and report when there are big changes in movement.
+Even something as simple as this is more than what we curretnly have.
+
+The End
+-------
