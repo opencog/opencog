@@ -1,0 +1,29 @@
+
+Combined language and animation
+-------------------------------
+
+This document sketches a proposed architecture for combining language
+with sensory perception, memory, reasoning and action. Yes, such a
+combination is a "holy grail" of AGI.  Yes, there must be 1000 other
+proposals for how to do this.  This proposal is very low brow: it
+attempts to describe something that is doable by a small number of
+programmers, in a short period of time, making use of the existing
+OpenCog code base, and, at the same time, result in a system that
+is not a train-wreck of hack, but something that could maybe survive
+and be improved upon in an incremental fashion.
+
+As such, it will touch base with existing source code within OpenCog,
+even if that source code is imperfect or inadequate.  It is up to the
+reader to understand what portions of the code need to be improved, and
+to do that work.
+
+General overview
+----------------
+The general strategy is this:
+ * Identify what is being asked (said, perceived)
+ * Assemble a set of candidate answers (responses)
+ * Seek evidence for or against each answer (each action to be taken)
+ * Formulate a reply (perform that action)
+ 
+
+
