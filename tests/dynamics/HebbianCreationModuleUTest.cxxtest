@@ -82,7 +82,7 @@ public:
         // Set the AttentionalFocusBoundary
         as->set_attentional_focus_boundary(100);
 
-        count_t conf90 = SimpleTruthValue::confidenceToCount(0.90);
+        confidence_t conf90 = 0.90;
 
         // Populate the AtomSpace with the example atoms
         Handle kermit = as->add_node(

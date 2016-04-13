@@ -111,9 +111,10 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 
 	TS_ASSERT_DIFFERS(target, Handle::UNDEFINED);
 
+#define confidenceToCount(x) 800.0 * ((x) / (1.0-(x))
 	strength_t expected_strength = 0.603579;
-	count_t expected_count = SimpleTruthValue::confidenceToCount(0.7);
-	SimpleTruthValue expected_tv(expected_strength, expected_count);
+	confidence_t expected_confidence = 0.7;
+	SimpleTruthValue expected_tv(expected_strength, expected_confidence);
 	TS_ASSERT(target->getTruthValue()->operator==(expected_tv));
 }
 
@@ -158,8 +159,8 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_fc()
 	// TS_ASSERT_DIFFERS(target, Handle::UNDEFINED);
 
 	// strength_t expected_strength = 0.603579;
-	// count_t expected_count = SimpleTruthValue::confidenceToCount(0.7);
-	// SimpleTruthValue expected_tv(expected_strength, expected_count);
+	// conidence_t expected_confidence = 0.7;
+	// SimpleTruthValue expected_tv(expected_strength, expected_confidence);
 	// TS_ASSERT(target->getTruthValue()->operator==(expected_tv));
 	TS_ASSERT(true);
 }

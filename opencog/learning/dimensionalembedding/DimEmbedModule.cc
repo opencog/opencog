@@ -871,8 +871,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double dist = euclidDist(centroid,embedVec);
             //TODO: we should do some normalizing of this probably...
             double strength = sqrt(std::pow(2.0, -dist));
-            TruthValuePtr tv(SimpleTruthValue::createTV(strength,
-                                SimpleTruthValue::confidenceToCount(strength)));
+            TruthValuePtr tv(SimpleTruthValue::createTV(strength, strength));
             Handle hi = as->add_link(INHERITANCE_LINK, *it2, newNode);
             hi->merge(tv);
 
@@ -885,8 +884,7 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             //the link between a clusterNode and an attribute (pivot) is
             //a weighted average of the cluster's members' links to the pivot
             double attrStrength = sqrt(strNumer[i]/strDenom[i]);
-            TruthValuePtr tv(SimpleTruthValue::createTV(attrStrength,
-                                SimpleTruthValue::confidenceToCount(attrStrength)));
+            TruthValuePtr tv(SimpleTruthValue::createTV(attrStrength, attrStrength));
             Handle hi = as->add_link(l, newNode, pivots[i]);
             hi->merge(tv);
         }
@@ -995,8 +993,7 @@ Handle DimEmbedModule::blendNodes(Handle n1,
 
     for (unsigned int i=0; i<numDims; i++) {
         double strength = sqrt(newVec[i]);
-        TruthValuePtr tv(SimpleTruthValue::createTV(strength,
-                            SimpleTruthValue::confidenceToCount(strength)));
+        TruthValuePtr tv(SimpleTruthValue::createTV(strength, strength));
         Handle hi = as->add_link(l, newNode, pivots[i]);
         hi->merge(tv);
     }
