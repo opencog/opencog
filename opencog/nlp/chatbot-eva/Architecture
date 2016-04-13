@@ -100,8 +100,100 @@ and sideline.  A "temporary", "short-term" goal or substitute for (e) is
 (f) allow artists, directors and creatives to alter and script
 behaviors.
 
+Overall design philosophy
+-------------------------
+There is an overall design philosophy that is meant to be adhered to, in
+the implementation of this system.  This philosphy has several parts to
+it:
+
+A) Attempt to describe all possible actions as "rules".  These rules
+   are probably best expressed as ImplicationLinks, with an antecedent
+   that describes the situation in which the rule applies, and a
+   consequent describing what should be done.
+
+B) The set of rules to be applied in any given situation is done by
+   performing a "fuzzy" search, to see how well a given antecedent
+   matches the current state of the system.
+
+C) There should be a graceful fallback, so that if there are no rules
+   that seem to apply to the given situation, then perhaps something
+   more general can be performed/applied.  For example, if some sentence
+   is not completely understood, but some of the words or phrases in
+   it can be understood, then processing continues with those.
+
+D) Point C) suggests that there should almost always be more than one
+   rule that applies to the given situation.  Multiple rules provide
+   choices and alternatives, but also are a challenge in terms of
+   ranking priorities.
+
+E) Point D) raises questions of how to rank rules.  Should fuzzy-overlap
+   be used? Should the PLN TV rules be used? Should total mutal
+   information be maximized?  Should some Bayesian or possibly Markovian
+   (e.g. HMM) model be used?  Some neural-net approahc? Something
+   involving attention allocation? Some combination of the above?
+   The claim here is that such ranking and choosing is an open research
+   topic, and thus commiting to an architecture that forces an answer,
+   or restricts possibilities, is premature.
+
+F) Because there are multiple stages of processing, this implies that
+   the rules obtained via points B) thru E) have to be chained. The
+   current chainer does not obviously provide the needed generality.
+   Thus, it seems that chaining needs to be ad-hoc, for now.
+
+G) Point C) suggests that the rules should be as general as possible,
+   and should avoid focusing on implementation details.  For example,
+   a rule meant to understand a sentence should NOT include a hook
+   to grab the current sentence: instead, the rule should trust that
+   the processing pipeline is feeding it the correct sentence at the
+   correct time.
+
+H) Point G) suggests that the rules should be ImplicationLinks and not
+   BindLinks or GetLinks. Its the job of the rule-driver to convert
+   these "soft, abstract" ImplicationLinks into explicit BindLinks
+   to perform some action.  The rule-driver deals with the specifics
+   of pushing the data through the rules.
+
+More about points C), D), E): For example: maybe some parts of a single
+rule need to be applied strictly, while other parts are very fuzzy. We
+don't currently have a way of defining "strict" and "loose" portions of
+a fuzzy match.  (Note that, in genetics, there are both highly-conserved
+gene sequences, and highly-variable sequences.  Thus, the idea of
+different amounts of fuzziness seems "natural").
+
+Perhaps its better to have multiple classes of rules, where some rules
+demand a very strict or exact match, while others can be very loose and
+fuzzy.  Its not clear how to represent strictness/looseness, or how
+to combine them.  Should strict/loose be treated as a probability? A
+log-probability? Via some PLN-like formulas? Something else?
+
+For the above reasons, I have been shying away from using either
+OpenPsi, or the rule-engine, or anything else besides ad-hoc coding:
+its not yet clear how to best create rules, and how to best combine
+them.
+
+Folded into the above concerns is how to autogenerate or learn new
+rules.
+
+
 The existing code base (March/April 2016)
 -----------------------------------------
+The current code base uses a five-step process to manage verbal
+interactions with the robot.  The stages are:
+
+ 1) Obtain input text, identify and dispatch processing based
+   on speech type -- process-query/grounded-talk in bot-api.scm
+ 2) Dispatch imperatives imperative-process
+
+Design notes:
+ Step 1) is curently done with scheme code, but it could/should
+    use an ImplicationLink to match up the speech-act type to the
+    processing that would be performed.  This would allow a single
+    sentence to be interpreted as possibly several different
+    speech-act types.  More generally, it would fit better into the
+long-term
+    ; plan to do all recogniztion with ImplicationLinks+rule-engine.
+
+ 
 
 
 Appendix A - Expanding sensory input
