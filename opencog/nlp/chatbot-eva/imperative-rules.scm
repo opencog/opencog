@@ -10,7 +10,7 @@
 ; system then compare that simplified form to the grounded knowledge,
 ; and extract meaningful robot actions therefrom.
 ;
-; The intermediate form or "simplificed form" that these rules generate
+; The intermediate form or "simplified form" that these rules generate
 ; is currently rather poorly defined, and subject to change or even
 ; complete overhaul.  The simplified form is used only because it is
 ; too hard to directly match parsed sentences to the grounded knowledge.
@@ -285,7 +285,7 @@
 			(lg-link "Pa" "$verb-inst" "$obj-inst"))
 	))
 
-; Direct-object impeatives: "feign happiness", "mimic fear",
+; Direct-object imperatives: "feign happiness", "mimic fear",
 ; "portray confusion", etc.
 (define show-rule-2
 	(imperative-object-rule-template

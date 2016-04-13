@@ -177,21 +177,80 @@ rules.
 
 The existing code base (March/April 2016)
 -----------------------------------------
-The current code base uses a five-step process to manage verbal
-interactions with the robot.  The stages are:
+The current code base uses a multi-step process to manage verbal
+interactions with the robot.  The stages are given below. Some of the
+code violates design-philosphy point A) above of not being expressed
+as rules.  Where there are rules, they all have been written as
+BindLinks, and not ImplicationLinks.  This means that they are fragile
+and not easily chained or searched-for or selected.  That is, they
+all violate point G) above: too much of the implementation details
+have entered into the rules.  That's bad.
 
- 1) Obtain input text, identify and dispatch processing based
-   on speech type -- process-query/grounded-talk in bot-api.scm
- 2) Dispatch imperatives imperative-process
+Upshot: the existing code is not actually written in the fashion
+recommended above. That's because the "philosophy" wasn't clear at
+the outset.
 
-Design notes:
- Step 1) is curently done with scheme code, but it could/should
-    use an ImplicationLink to match up the speech-act type to the
-    processing that would be performed.  This would allow a single
-    sentence to be interpreted as possibly several different
-    speech-act types.  More generally, it would fit better into the
-long-term
-    ; plan to do all recogniztion with ImplicationLinks+rule-engine.
+The steps are:
+
+ I) Obtain input text, identify and dispatch processing based
+    on speech type -- `process-query` / `grounded-talk` in `bot-api.scm`
+    The dispath-on-speech-act-type should be ImplicationLinks,
+    and not scheme code, as written.
+
+ II) Dispatch imperatives to imperative-process, in `imperative.scm`
+    The rest of this section deals with imperatives only.
+
+ II.a) Converted LG-parsed sentences into an "intermediate form".
+    The intermediate form uses a new custom link type, an `ActionLink`
+    to hold a simplied action-name (i.e. abstracted "verb"), and a
+    and a simplified object of that action (i.e. something that,
+    in the English sentence, as a direct object or maybe a prepositional
+    object, or possibly some adverb).  The `ActionLink` was oinvented
+    only to simplify processing; it should probably be eliminated??
+
+    This conversion stage includes the recognition of synonyms and
+    synonymous phrases. This is currently done in an ad-hoc basis.
+
+    The intermediate form is NOT R2L!! This is an important point!!
+    The R2L representation, as currently implemented, seems
+    insufficient to represent simple conceptual relations.  Part of
+    the problem is that R2L is doing its thing *before* the
+    synonymous-phrase analysis happens. I need a form that captures
+    the intent, *after* synonymous-phrase processing.
+
+    Synonymous-phrase processing trips over philosophy points A)-E)
+    above.  So its extremely ad-hoc right now.
+
+    For example: the current synonymous phrase rules are `look-rule-1`,
+    `look-rule-2`, `single-word-express-rule`, `single-word-gesture-rule`,
+    `show-rule-1`, `show-rule-2` in the file `imperative-rules.scm`.
+
+    These rules search for specific LG link types.  This is an important
+    point!!  I found that the RelEx relations were too garbled and
+    confused to be reliably useful for the extraction of the needed
+    info!  I had gone into this thinking that I would ONLY use R2L,
+    and maybe sometimes fall back to RelEx; instead, I ahd to fall back
+    all the way to LG to get something that was not crazy.
+
+    This is important!! The core problem was synonymy!! Different
+    sentences, that mean almost the same thing, were being converted
+    into wildly-different forms by RelEx and R2L. It was easier to
+    manage synonymy with LG, than with the RelEx dependency relations!
+
+
+ II.b)
+
+
+Lessons learned: Subsystem we don't have, but we need
+-----------------------------------------------------
+The above prototype makes clear that there are many important
+subsystems that are missing in OpenCog.
+
+II.a) make clear: we don't have any go way of dealing with synonymous
+words or phrases.
+
+II.a) makes clear: we need some reasonable "intermediate form" that
+is not R2L.
 
  
 
