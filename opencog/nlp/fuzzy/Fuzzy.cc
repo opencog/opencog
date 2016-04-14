@@ -51,6 +51,34 @@ Fuzzy::~Fuzzy()
 {
 }
 
+static void get_all_words(const Handle& h, HandleSeq& words, HandleSeq& winsts)
+{
+    if (h->isNode())
+    {
+        for (const Handle& wi : get_target_neighbors(h, REFERENCE_LINK))
+        {
+            if (wi->isNode() and h->getName() == wi->getName() and
+                    wi->getType() == WORD_INSTANCE_NODE)
+            {
+                for (const Handle& w : get_target_neighbors(wi, LEMMA_LINK))
+                {
+                    if (w->getType() == WORD_NODE and
+                        std::find(winsts.begin(), winsts.end(), wi) == winsts.end())
+                    {
+                        winsts.emplace_back(wi);
+                        words.emplace_back(w);
+                    }
+                }
+            }
+        }
+
+        return;
+    }
+
+    for (const Handle& o : h->getOutgoingSet())
+        get_all_words(o, words, winsts);
+}
+
 void Fuzzy::start_search(const Handle& trg)
 {
     FuzzyMatchBasic::start_search(trg);
