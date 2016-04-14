@@ -38,12 +38,10 @@ using namespace opencog;
  * @param as  The AtomSpace that we are using
  * @param tt  The type of atoms we are looking for
  * @param ll  A list of atoms that we don't want them to exist in the results
- * @param dd  A flag indicating if duplicate solns should be returned
  */
-Fuzzy::Fuzzy(Type tt, const HandleSeq& ll, bool dd) :
+Fuzzy::Fuzzy(Type tt, const HandleSeq& ll) :
     rtn_type(tt),
-    excl_list(ll),
-    dup_check(dd)
+    excl_list(ll)
 {
 }
 
@@ -237,19 +235,6 @@ bool Fuzzy::try_match(const Handle& soln)
 
     // Also take the size into account
     similarity /= max_size;
-
-    if (dup_check) {
-        // Check the content of the soln to see if we've accepted something similar before
-        soln_nodes.erase(std::remove_if(soln_nodes.begin(), soln_nodes.end(),
-                        [](Handle& h) {
-                            return NodeCast(h)->getName().find("@") != std::string::npos; }),
-                        soln_nodes.end());
-
-        if (std::find(solns_contents.begin(), solns_contents.end(), soln_nodes) != solns_contents.end())
-            return false;
-
-        solns_contents.push_back(soln_nodes);
-    }
 
     // Accept and store the solution
     solns.push_back(std::make_pair(soln, similarity));

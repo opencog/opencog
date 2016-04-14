@@ -35,7 +35,7 @@ class Fuzzy :
     public FuzzyMatchBasic
 {
     public:
-        Fuzzy(Type, const HandleSeq&, bool);
+        Fuzzy(Type, const HandleSeq&);
         virtual ~Fuzzy();
 
     protected:
@@ -51,15 +51,8 @@ class Fuzzy :
         // The atoms that we don't want in the solutions
         HandleSeq excl_list;
 
-        // A flag to decide whether or not to accept duplicate solutions
-        bool dup_check;
-
         // The solutions
         RankedHandleSeq solns;
-
-        // A vector for storing the "contents" of the accepted solutions
-        // mainly to avoid returning duplicate solutions
-        HandleSeqSeq solns_contents;
 
         OrderedHandleSet solns_seen;
 };
