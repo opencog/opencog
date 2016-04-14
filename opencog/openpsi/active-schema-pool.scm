@@ -23,10 +23,15 @@
 "
   The main function that defines the steps to be taken in every cycle.
 "
-
-    (psi-select-rules)
+    (let* ((rules (psi-select-rules)))
+        (map (lambda (x)
+                (cog-execute! (psi-get-action x))
+                (cog-evaluate! (psi-get-goal x)))
+            rules)
+    )
 )
 
+; --------------------------------------------------------------
 (define (psi-rule context action demand-goal stv)
 "
   It associates an action and context in which the action has to be taken
@@ -102,7 +107,16 @@
     (define (get-c&a x) ; get context and action list from ImplicationLink
         (cog-outgoing-set (list-ref (cog-outgoing-set x) 0)))
 
-    (filter psi-action? (get-c&a rule))
+    (car (filter psi-action? (get-c&a rule)))
+)
+
+(define (psi-get-goal rule)
+"
+  Get the goal of an openpsi-rule.
+"
+    ; NOTE: Why this function? -> For consisentency and to accomodate future
+    ; changes
+     (cadr (cog-outgoing-set rule))
 )
 
 (define (psi-satisfiable? rule)
