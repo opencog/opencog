@@ -122,7 +122,9 @@ void Fuzzy::calculate_tfidf(const HandleSeq& words)
 
 void Fuzzy::start_search(const Handle& trg)
 {
-    FuzzyMatchBasic::start_search(trg);
+    target = trg;
+    get_all_words(target, target_words, target_winsts);
+    calculate_tfidf(target_words);
 }
 
 /**
@@ -140,19 +142,6 @@ bool Fuzzy::accept_starter(const Handle& hp)
 
     return (hp->getType() == CONCEPT_NODE or hp->getType() == PREDICATE_NODE)
             and (hp->getName().find("@") == std::string::npos);
-}
-
-static void get_all_nodes(const Handle& h, HandleSeq& node_list)
-{
-   LinkPtr lll(LinkCast(h));
-   if (nullptr == lll)
-   {
-      node_list.emplace_back(h);
-      return;
-   }
-
-   for (const Handle& o : lll->getOutgoingSet())
-      get_all_nodes(o, node_list);
 }
 
 /**
@@ -189,98 +178,99 @@ bool Fuzzy::try_match(const Handle& soln)
         if (is_atom_in_tree(soln, excl))
             return false;
 
-    HandleSeq soln_nodes;
-    get_all_nodes(soln, soln_nodes);
+    HandleSeq soln_words;
+    HandleSeq soln_winsts;
+    get_all_words(soln, soln_words, soln_winsts);
 
-    HandleSeq common_nodes;
-    std::sort(soln_nodes.begin(), soln_nodes.end());
+//     HandleSeq common_nodes;
+//     std::sort(soln_nodes.begin(), soln_nodes.end());
 
-    // Find out how many nodes it has in common with the pattern
-    std::set_intersection(target_nodes.begin(), target_nodes.end(),
-                          soln_nodes.begin(), soln_nodes.end(),
-                          std::back_inserter(common_nodes));
+//     // Find out how many nodes it has in common with the pattern
+//     std::set_intersection(target_nodes.begin(), target_nodes.end(),
+//                           soln_nodes.begin(), soln_nodes.end(),
+//                           std::back_inserter(common_nodes));
 
-    std::sort(common_nodes.begin(), common_nodes.end());
+//     std::sort(common_nodes.begin(), common_nodes.end());
 
-    // Remove duplicate common_nodes
-// XXX  FIXME .. how can there possibly be duplicates ???
-// All target nodes are unique ... !?
-    common_nodes.erase(std::unique(common_nodes.begin(), common_nodes.end()),
-                       common_nodes.end());
+//     // Remove duplicate common_nodes
+// // XXX  FIXME .. how can there possibly be duplicates ???
+// // All target nodes are unique ... !?
+//     common_nodes.erase(std::unique(common_nodes.begin(), common_nodes.end()),
+//                        common_nodes.end());
 
-    double similarity = 0;
+//     double similarity = 0;
 
-    for (const Handle& common_node : common_nodes) {
-        // If both the pattern and the potential solution share some "instance"
-        // node, that probably means the potential solution is a sub-pattern
-        // of the input pattern, or is some related atoms that is generated
-        // with the pattern, which is pretty likely not what we want here
-        if (common_node->getName().find("@") != std::string::npos)
-            return false;
+//     for (const Handle& common_node : common_nodes) {
+//         // If both the pattern and the potential solution share some "instance"
+//         // node, that probably means the potential solution is a sub-pattern
+//         // of the input pattern, or is some related atoms that is generated
+//         // with the pattern, which is pretty likely not what we want here
+//         if (common_node->getName().find("@") != std::string::npos)
+//             return false;
 
-        double weight = 0.25;
+//         double weight = 0.25;
 
-        // Helper function for getting the instance of a ConceptNode or a
-        // PredicateNode from the input pattern.
-        // e.g. Getting (PredicateNode "is@123") from (PredicateNode "be")
-        // or (ConceptNode "cats@123") from (ConceptNode "cat") etc
-        auto find_instance = [&] (Handle n) {
-            if (n->getName().find("@") == std::string::npos)
-                return false;
+//         // Helper function for getting the instance of a ConceptNode or a
+//         // PredicateNode from the input pattern.
+//         // e.g. Getting (PredicateNode "is@123") from (PredicateNode "be")
+//         // or (ConceptNode "cats@123") from (ConceptNode "cat") etc
+//         auto find_instance = [&] (Handle n) {
+//             if (n->getName().find("@") == std::string::npos)
+//                 return false;
 
-            for (const Handle& ll : target->getOutgoingSet()) {
-                if (is_atom_in_tree(ll, common_node) and is_atom_in_tree(ll, n)) {
-                    if ((common_node->getType() == PREDICATE_NODE and
-                         ll->getType() == IMPLICATION_LINK) or
-                        (common_node->getType() == CONCEPT_NODE and
-                         ll->getType() == INHERITANCE_LINK))
-                        return true;
-                }
-            }
+//             for (const Handle& ll : target->getOutgoingSet()) {
+//                 if (is_atom_in_tree(ll, common_node) and is_atom_in_tree(ll, n)) {
+//                     if ((common_node->getType() == PREDICATE_NODE and
+//                          ll->getType() == IMPLICATION_LINK) or
+//                         (common_node->getType() == CONCEPT_NODE and
+//                          ll->getType() == INHERITANCE_LINK))
+//                         return true;
+//                 }
+//             }
 
-            return false;
-        };
+//             return false;
+//         };
 
-        auto inst = std::find_if(target_nodes.begin(), target_nodes.end(), find_instance);
+//         auto inst = std::find_if(target_nodes.begin(), target_nodes.end(), find_instance);
 
-        if (inst != target_nodes.end()) {
-            // Get the WordInstanceNode from the ReferenceLink that connects both
-            // WordInstanceNode and the instance ConceptNode / PredicateNode
-            HandleSeq word_inst = get_target_neighbors(*inst, REFERENCE_LINK);
+//         if (inst != target_nodes.end()) {
+//             // Get the WordInstanceNode from the ReferenceLink that connects both
+//             // WordInstanceNode and the instance ConceptNode / PredicateNode
+//             HandleSeq word_inst = get_target_neighbors(*inst, REFERENCE_LINK);
 
-            if (word_inst.size() > 0) {
-                // Get the DefinedLinguisticRelationshipNode from the EvaluationLink
-                HandleSeq eval_links =
-                    get_predicates(word_inst[0], DEFINED_LINGUISTIC_RELATIONSHIP_NODE);
+//             if (word_inst.size() > 0) {
+//                 // Get the DefinedLinguisticRelationshipNode from the EvaluationLink
+//                 HandleSeq eval_links =
+//                     get_predicates(word_inst[0], DEFINED_LINGUISTIC_RELATIONSHIP_NODE);
 
-                for (const Handle& el : eval_links) {
-                    // Extract the relation
-                    std::string ling_rel = (el->getOutgoingSet()[0])->getName();
+//                 for (const Handle& el : eval_links) {
+//                     // Extract the relation
+//                     std::string ling_rel = (el->getOutgoingSet()[0])->getName();
 
-                    // Assign weights accordingly, subject to change if needed
-                    if (ling_rel.compare("_subj") == 0)
-                        weight += 1.0;
-                    else if (ling_rel.compare("_obj") == 0)
-                        weight += 1.0;
-                    else if (ling_rel.compare("_predadj") == 0)
-                        weight += 1.0;
-                    else
-                        weight += 0.5;
-                }
-            }
-        }
+//                     // Assign weights accordingly, subject to change if needed
+//                     if (ling_rel.compare("_subj") == 0)
+//                         weight += 1.0;
+//                     else if (ling_rel.compare("_obj") == 0)
+//                         weight += 1.0;
+//                     else if (ling_rel.compare("_predadj") == 0)
+//                         weight += 1.0;
+//                     else
+//                         weight += 0.5;
+//                 }
+//             }
+//         }
 
-        similarity += weight;
-        // similarity += (weight / common_node->getIncomingSetSize());
-    }
+//         similarity += weight;
+//         // similarity += (weight / common_node->getIncomingSetSize());
+//     }
 
-    size_t max_size = std::max(target_nodes.size(), soln_nodes.size());
+//     size_t max_size = std::max(target_nodes.size(), soln_nodes.size());
 
-    // Also take the size into account
-    similarity /= max_size;
+//     // Also take the size into account
+//     similarity /= max_size;
 
     // Accept and store the solution
-    solns.push_back(std::make_pair(soln, similarity));
+    // solns.push_back(std::make_pair(soln, similarity));
 
     return true;
 }

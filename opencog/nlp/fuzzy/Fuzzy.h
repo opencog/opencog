@@ -48,6 +48,9 @@ class Fuzzy :
     private:
         AtomSpace* as;
 
+        HandleSeq target_words;
+        HandleSeq target_winsts;
+
         // The type of atom that we want
         Type rtn_type;
 
