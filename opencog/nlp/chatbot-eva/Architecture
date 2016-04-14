@@ -53,11 +53,11 @@ to improve it.
 
 Step 1. is the integrated sensory system, sometimes called the
 "perception synthesizer". Currently, it is extremely limited: the
-Relex and R2L subsystem, and a face-detector (face tracker).  The
+RelEx and R2L subsystem, and a face-detector (face tracker).  The
 sensory system needs to be greatly expanded. See Appendix A for some
 relatively simple/easy things we could do to improve the situation.
 
-Note that R2L provides varying levels of text analsysis: the raw words
+Note that R2L provides varying levels of text analysis: the raw words
 in the sentence, part-of-speech markup, syntactic analysis,
 logic-analysis, identification of a handful of speech acts. It would be
 nice to have sound-level and timing information to go with this (see
@@ -70,7 +70,7 @@ systems, pre-digest it to pull out some basic abstracted elements
 This document will be mostly about steps 2 and 3. Technologies like
 PLN and OpenPsi kick in at this location.
 
-Step 4. is what we've loosely been terming "the action orchestrator"
+Step 4. is what we've loosely been terming "the action orchestrater"
 (AO): a place where a small number of responses are converted into
 actions: for example: raise hand, smile, and say hello. Notice that
 all three of these actions are still "integrated", and have to play
@@ -80,7 +80,7 @@ these get dispatched to be performed.
 Step 5. is the actual performance of movements, animations, speech.
 It includes the text-to-speech subsystem (TTS) and the blender
 animation system.  We have these subsystems currently, they sort-of
-work, they could be improved.  This docuement will mostly ignore
+work, they could be improved.  This document will mostly ignore
 the stuff in step 5.
 
 The goal
@@ -108,7 +108,7 @@ behaviors.
 Overall design philosophy
 -------------------------
 There is an overall design philosophy that is meant to be adhered to, in
-the implementation of this system.  This philosphy has several parts to
+the implementation of this system.  This philosophy has several parts to
 it:
 
 A) Attempt to describe all possible actions as "rules".  These rules
@@ -120,7 +120,7 @@ B) The set of rules to be applied in any given situation is done by
    performing a "fuzzy" search, to see how well a given antecedent
    matches the current state of the system.
 
-C) There should be a graceful fallback, so that if there are no rules
+C) There should be a graceful fall-back, so that if there are no rules
    that seem to apply to the given situation, then perhaps something
    more general can be performed/applied.  For example, if some sentence
    is not completely understood, but some of the words or phrases in
@@ -132,12 +132,12 @@ D) Point C) suggests that there should almost always be more than one
    ranking priorities.
 
 E) Point D) raises questions of how to rank rules.  Should fuzzy-overlap
-   be used? Should the PLN TV rules be used? Should total mutal
+   be used? Should the PLN TV rules be used? Should total mutual
    information be maximized?  Should some Bayesian or possibly Markovian
-   (e.g. HMM) model be used?  Some neural-net approahc? Something
+   (e.g. HMM) model be used?  Some neural-net approach? Something
    involving attention allocation? Some combination of the above?
    The claim here is that such ranking and choosing is an open research
-   topic, and thus commiting to an architecture that forces an answer,
+   topic, and thus committing to an architecture that forces an answer,
    or restricts possibilities, is premature.
 
 F) Because there are multiple stages of processing, this implies that
@@ -176,7 +176,7 @@ OpenPsi, or the rule-engine, or anything else besides ad-hoc coding:
 its not yet clear how to best create rules, and how to best combine
 them.
 
-Folded into the above concerns is how to autogenerate or learn new
+Folded into the above concerns is how to auto-generate or learn new
 rules.
 
 
@@ -184,7 +184,7 @@ The existing code base (March/April 2016)
 -----------------------------------------
 The current code base uses a multi-step process to manage verbal
 interactions with the robot.  The stages are given below. Some of the
-code violates design-philosphy point A) above of not being expressed
+code violates design-philosophy point A) above of not being expressed
 as rules.  Where there are rules, they all have been written as
 BindLinks, and not ImplicationLinks.  This means that they are fragile
 and not easily chained or searched-for or selected.  That is, they
@@ -199,7 +199,7 @@ The steps are:
 
  I) Obtain input text, identify and dispatch processing based
     on speech type -- `process-query` / `grounded-talk` in `bot-api.scm`
-    The dispath-on-speech-act-type should be ImplicationLinks,
+    The dispatch-on-speech-act-type should be ImplicationLinks,
     and not scheme code, as written.
 
  II) Dispatch imperatives to imperative-process, in `imperative.scm`
@@ -207,10 +207,10 @@ The steps are:
 
  II.a) Converted LG-parsed sentences into an "intermediate form".
     The intermediate form uses a new custom link type, an `ActionLink`
-    to hold a simplied action-name (i.e. abstracted "verb"), and a
+    to hold a simplified action-name (i.e. abstracted "verb"), and a
     and a simplified object of that action (i.e. something that,
     in the English sentence, as a direct object or maybe a prepositional
-    object, or possibly some adverb).  The `ActionLink` was oinvented
+    object, or possibly some adverb).  The `ActionLink` was invented
     only to simplify processing; it should probably be eliminated??
 
     This conversion stage includes the recognition of synonyms and
@@ -234,7 +234,7 @@ The steps are:
     point!!  I found that the RelEx relations were too garbled and
     confused to be reliably useful for the extraction of the needed
     info!  I had gone into this thinking that I would ONLY use R2L,
-    and maybe sometimes fall back to RelEx; instead, I ahd to fall back
+    and maybe sometimes fall back to RelEx; instead, I had to fall back
     all the way to LG to get something that was not crazy.
 
     This is important!! The core problem was synonymy!! Different
@@ -270,7 +270,7 @@ The steps are:
     "direction", then the "turn-model" pattern becomes a "grounded
     meaning for the graph".  Thus, the semantic analysis of the
     intermediate form results in the discovery of the "turn-model".
-    This discovery grounds the intrmediate form "look left" to
+    This discovery grounds the intermediate form "look left" to
     specific 3D spatial x,y,z coordinates, and also a specific
     motor-control (animation) predicate (DefinedPredicate "Look
     command") which, if executed, would cause the robot to turn.
@@ -298,7 +298,7 @@ The steps are:
     happens here, as well: in step II.a)
 
  II.c) Convert grounded knowledge into a set of candidate actions
-    (a list of suggestions for actions that culd be performed).
+    (a list of suggestions for actions that could be performed).
     `action-rule-ao` in `imperative.scm`. Currently a hacky stub.
 
     Basically, if semantic analysis resulted in a non-empty set
@@ -309,7 +309,7 @@ The steps are:
     be performed:
     *) Play a blender animation (which will move the robot)
     *) Update the self-model (so that the robot knows what its doing,
-       and is able to remember and talk about whiat it did).
+       and is able to remember and talk about what it did).
     *) Say something.
 
  II.d) Decide what to do. That is, narrow down the list of candidates
@@ -323,13 +323,16 @@ The steps are:
     do it, and *after* action orchestration.   That is, even if stage
     II.d) decides to do something, the AO may block or over-ride it,
     due to some conflict or interlock.  Conflicts and over-rides
-    might occur if commands are issues too rapdily in time (smile and
+    might occur if commands are issues too rapidly in time (smile and
     frown at same time) or if multiple systems are trying to control:
     e.g. if the robot is being puppeteered, but in a semi-autonomous
     puppeteered mode.  Or maybe two different subsystems are each
     making conflicting suggestions.  The use-cases and issues here are
     unclear; what is clear is that updating the self-model too early
     results in bad self-awareness.
+
+    The code for handling this is mostly in the github repo for
+    opencog/ros-behavior-scripting.  It needs to be refactored.
 
 
 Lessons learned: Subsystem we don't have, but we need
@@ -341,7 +344,7 @@ II.a) make clear: we don't have any go way of dealing with synonymous
 words or phrases.  Note also that step II.b) ALSO does synonym
 processing, which is different than the synonymous-phrase processing
 that is done in step II.a).  Synonym handling doesn't fit into a small
-little box: its spread out acreoss multiple components.
+little box: its spread out across multiple components.
 
 II.a) makes clear: we need some reasonable "intermediate form" that
 is not R2L.
@@ -350,9 +353,9 @@ II.b) makes clear: we don't have any sort of agreed-upon system for
 representing ontological knowledge (for example, that "leftwards"
 is-a "direction") or for grounded knowledge (for example, that
 "leftwards" corresponds to (x,y,z)=(1, 0.5, 0) in robot-body coords).
-Knowledge represnetation also has to provide meaning for the abstracted
+Knowledge representation also has to provide meaning for the abstracted
 "intermediate forms", such as "direction-during-verb-followed-by-
-direction-name", or "facial-expression-imperaitve-verb-followed-by-
+direction-name", or "facial-expression-imperative-verb-followed-by-
 name-of-emotion".
 
 What I've constructed there seems simple enough, and adequate for now.
@@ -371,7 +374,7 @@ For example: if the imperative "look to the left" was heard, and
 correctly processed, but the vision system reports that a new face is
 visible on the right.  Should the robot look left, or right?
 
-We don't have any sort of decision-making subsystem speced or designed.
+We don't have any sort of decision-making subsystem spec'ed or designed.
 Its hard to imagine how to spec or design such a system, until we have
 better control over the world-model and the sensory input that drives
 it.  For that, we need more prototyping, just to see what the issues
@@ -381,7 +384,7 @@ are.
 
 Appendix A - Expanding sensory input
 ------------------------------------
-The sensory ninputs to the system need to be expanded.  Here is a list
+The sensory inputs to the system need to be expanded.  Here is a list
 of some relatively easy and useful things that could be done.
 
  * Sound intensity: is the room noisy and loud, or is it quiet?
@@ -389,7 +392,7 @@ of some relatively easy and useful things that could be done.
  * Voices. Are many people talking all at once?
  * Nature of background noise: is it crowd noise? is it applause?
    Is it laughter?  Whistling, jeering? Is the audience/crowd
-   whispering?  Did a previsouly noisy room suddenly become still?
+   whispering?  Did a previously noisy room suddenly become still?
    Time stamps for all such events.
  * Conversational pauses:  did the speaker/speech come to an end
    or a pause?  Is speaker saying "umm", "uhh", or other
@@ -415,20 +418,20 @@ Visual system needs:
    us (the camera)? Are they at 3/4ths face? at 1/2 face (looking
    sideways, turned 90 degrees to us)? turned completely away?
  * Are they making eye contact?
- * Are thier lips moving? i.e. visually, might they be talking?
+ * Are their lips moving? i.e. visually, might they be talking?
  * Are there gestures of surprise (lips parting open, suddenly)?
  * Are the still, or animated? Bouncing with excitement or bored?
    Even a simple measure of visual flow will do: a general rate of
-   movement, amplitude of movment.
+   movement, amplitude of movement.
  * Are we looking at a large crowd?  Is the crowd agitated or still?
- * Are they moving towards or away from us? Are they crowwing sideways?
+ * Are they moving towards or away from us? Are they turning sideways?
  * Are they sitting or standing?
 
 Some of these things could be easy: just like we listen for audio noise,
 and measure the noise intensity, we could measure "video noise" and
 simply report if there is a lot of movement (lots of pixels changing),
 or only a little, and report when there are big changes in movement.
-Even something as simple as this is more than what we curretnly have.
+Even something as simple as this is more than what we currently have.
 
 The End
 -------
