@@ -90,7 +90,7 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
 {
     AtomSpace* as = SchemeSmob::ss_get_env_as("nlp-fuzzy-match");
 
-    Fuzzy fpm(rtn_type, excl_list);
+    Fuzzy fpm(as, rtn_type, excl_list);
 
     // A vector of solutions sorted in descending order of similarity
     RankedHandleSeq solns = fpm.perform_search(pat);

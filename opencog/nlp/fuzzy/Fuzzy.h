@@ -24,6 +24,7 @@
 #ifndef FUZZY_H
 #define FUZZY_H
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomutils/FuzzyMatchBasic.h>
 
 namespace opencog
@@ -35,7 +36,7 @@ class Fuzzy :
     public FuzzyMatchBasic
 {
     public:
-        Fuzzy(Type, const HandleSeq&);
+        Fuzzy(AtomSpace*, Type, const HandleSeq&);
         virtual ~Fuzzy();
 
     protected:
@@ -45,6 +46,8 @@ class Fuzzy :
         virtual RankedHandleSeq finished_search(void);
 
     private:
+        AtomSpace* as;
+
         // The type of atom that we want
         Type rtn_type;
 
@@ -55,6 +58,10 @@ class Fuzzy :
         RankedHandleSeq solns;
 
         OrderedHandleSet solns_seen;
+
+        std::map<UUID, double> tfidf_words;
+
+        void calculate_tfidf(const HandleSeq&);
 };
 
 }

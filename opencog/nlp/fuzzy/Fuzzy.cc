@@ -39,7 +39,8 @@ using namespace opencog;
  * @param tt  The type of atoms we are looking for
  * @param ll  A list of atoms that we don't want them to exist in the results
  */
-Fuzzy::Fuzzy(Type tt, const HandleSeq& ll) :
+Fuzzy::Fuzzy(AtomSpace* a, Type tt, const HandleSeq& ll) :
+    as(a),
     rtn_type(tt),
     excl_list(ll)
 {
@@ -75,6 +76,48 @@ static void get_all_words(const Handle& h, HandleSeq& words, HandleSeq& winsts)
 
     for (const Handle& o : h->getOutgoingSet())
         get_all_words(o, words, winsts);
+}
+
+void Fuzzy::calculate_tfidf(const HandleSeq& words)
+{
+    double min = 0;
+    double max = 0;
+
+    int num_of_words = words.size();
+    size_t num_of_sents = (size_t) as->get_num_atoms_of_type(SENTENCE_NODE);
+
+    for (const Handle& w : words)
+    {
+        if (tfidf_words.count(w.value())) continue;
+
+        int word_cnt = std::count(words.begin(), words.end(), w);
+
+        OrderedHandleSet hs;
+        for (const Handle& l : get_source_neighbors(w, LEMMA_LINK))
+        {
+            for (const Handle& p : get_target_neighbors(l, WORD_INSTANCE_LINK))
+            {
+                const HandleSeq& sent_nodes = get_target_neighbors(p, PARSE_LINK);
+                hs.insert(sent_nodes.begin(), sent_nodes.end());
+            }
+        }
+
+        size_t num_sents_contains_it = hs.size();
+
+        double tf = (double) word_cnt / num_of_words;
+        double idf = log2((double) num_of_sents / num_sents_contains_it);
+        double tfidf = tf * idf;
+
+        tfidf_words[w.value()] = tfidf;
+
+        if (tfidf < min) min = tfidf;
+        if (tfidf > max) max = tfidf;
+    }
+
+    // Normalize the values
+    if (min != max)
+        for (auto i = tfidf_words.begin(); i != tfidf_words.end(); i++)
+            i->second = (i->second - min) / (max - min);
 }
 
 void Fuzzy::start_search(const Handle& trg)
@@ -129,7 +172,8 @@ bool Fuzzy::try_match(const Handle& soln)
 {
     if (target == soln) return false;
 
-    // Check if this is the type of atom that we want
+    // Keep exploring if this is not the type of atom that we want,
+    // until it reaches its root
     if (soln->getType() != rtn_type)
         return true;
 
@@ -139,15 +183,14 @@ bool Fuzzy::try_match(const Handle& soln)
 
     solns_seen.insert(soln);
 
+    // Reject it if it contains any unwanted atoms
+    // TODO: any_atom_in_tree?
+    for (const Handle& excl : excl_list)
+        if (is_atom_in_tree(soln, excl))
+            return false;
+
     HandleSeq soln_nodes;
     get_all_nodes(soln, soln_nodes);
-
-    // Check if it contains any unwanted atoms
-    if (std::any_of(soln_nodes.begin(), soln_nodes.end(),
-        [&](Handle& h) {
-            return std::find(excl_list.begin(), excl_list.end(), h)
-                             != excl_list.end(); }))
-        return false;
 
     HandleSeq common_nodes;
     std::sort(soln_nodes.begin(), soln_nodes.end());
