@@ -1,7 +1,8 @@
 /*
  * FuzzySCM.cc
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015, 2016 OpenCog Foundation
+ * All Rights Reserved
  *
  * Author: Leung Man Hin <https://github.com/leungmanhin>
  *
@@ -113,6 +114,13 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
     return results;
 }
 
+/**
+ * Implement the "nlp-fuzzy-compare" scheme primitive. It calls the nlp fuzzy
+ * matcher to search for estimating how similar two trees are.
+ *
+ * @param h1, h2  The trees being compared
+ * @return        A similarity score
+ */
 Handle FuzzySCM::do_nlp_fuzzy_compare(Handle h1, Handle h2)
 {
     AtomSpace* as = SchemeSmob::ss_get_env_as("nlp-fuzzy-compare");

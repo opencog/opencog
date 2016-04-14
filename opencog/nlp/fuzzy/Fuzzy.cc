@@ -1,7 +1,8 @@
 /*
  * Fuzzy.cc
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015, 2016 OpenCog Foundation
+ * All Rights Reserved
  *
  * Author: Leung Man Hin <https://github.com/leungmanhin>
  *
@@ -35,7 +36,7 @@ using namespace opencog;
 /**
  * The constructor.
  *
- * @param as  The AtomSpace that we are using
+ * @param a   The AtomSpace that we are using
  * @param tt  The type of atoms we are looking for
  * @param ll  A list of atoms that we don't want them to exist in the results
  */
@@ -54,6 +55,17 @@ Fuzzy::~Fuzzy()
 {
 }
 
+/**
+ * Examine a tree and get all the words from it.
+ *
+ * Words are the ones that are connected to their WordInstanceNodes by
+ * ReferenceLinks. Those WordInstanceNodes should also connect to
+ * their lemmas by LemmaLinks.
+ *
+ * @param h       The tree being examined
+ * @param words   A list of WordNodes
+ * @param winsts  A list of WordInstanceNodes
+ */
 static void get_all_words(const Handle& h, HandleSeq& words, HandleSeq& winsts)
 {
     if (h->isNode())
@@ -82,6 +94,12 @@ static void get_all_words(const Handle& h, HandleSeq& words, HandleSeq& winsts)
         get_all_words(o, words, winsts);
 }
 
+/**
+ * Compare two trees and return a similarity score.
+ *
+ * @param h1, h2  The two trees that will be compared
+ * @return        A similarity score between the two trees
+ */
 double Fuzzy::fuzzy_compare(const Handle& h1, const Handle& h2)
 {
     start_search(h1);
@@ -102,18 +120,29 @@ double Fuzzy::fuzzy_compare(const Handle& h1, const Handle& h2)
     return score;
 }
 
+/**
+ * A function intends to reflect how important a word is to a
+ * document in a collection or corpus, which will be used in
+ * the similarity estimation.
+ *
+ * @param words  A list of words (WordNode) of a sentence
+ */
 void Fuzzy::calculate_tfidf(const HandleSeq& words)
 {
     double min = 0;
     double max = 0;
 
+    // No. of words in the sentence
     int num_of_words = words.size();
+
+    // Total no. of sentences in the AtomSpace
     size_t num_of_sents = (size_t) as->get_num_atoms_of_type(SENTENCE_NODE);
 
     for (const Handle& w : words)
     {
         if (tfidf_words.count(w.value())) continue;
 
+        // No. of times this word exists in the sentence
         int word_cnt = std::count(words.begin(), words.end(), w);
 
         OrderedHandleSet hs;
@@ -126,6 +155,7 @@ void Fuzzy::calculate_tfidf(const HandleSeq& words)
             }
         }
 
+        // No. of sentences that contain this word
         size_t num_sents_contains_it = hs.size();
 
         double tf = (double) word_cnt / num_of_words;
@@ -144,6 +174,11 @@ void Fuzzy::calculate_tfidf(const HandleSeq& words)
             i->second = (i->second - min) / (max - min);
 }
 
+/**
+ * Override the start_search() method, to get words instead of nodes.
+ *
+ * @param np  A NodePtr pointing to a node in the pattern
+ */
 void Fuzzy::start_search(const Handle& trg)
 {
     target = trg;
@@ -153,12 +188,13 @@ void Fuzzy::start_search(const Handle& trg)
 
 /**
  * Determine whether or not to accept a node as a starter node for fuzzy
- * pattern matching. By default it doesn't allow variables or instances to
- * be starters, and they should also be either ConceptNodes or PredicateNodes
- * as these type of atoms are likely to be some actual words in sentences.
+ * matching. It accepts nodes that are not instances, as they are unlikely
+ * to lead us to solutions that we want. They should also be either
+ * ConceptNodes or PredicateNodes, as these type of atoms are likely to be
+ * some actual words in sentences.
  *
- * @param np  A NodePtr pointing to a node in the pattern
- * @return    True if the node is accepted, false otherwise
+ * @param hp  The target (input)
+ * @return    True if an atom is accepted, false otherwise
  */
 bool Fuzzy::accept_starter(const Handle& hp)
 {
@@ -170,16 +206,16 @@ bool Fuzzy::accept_starter(const Handle& hp)
 
 /**
  * Determine whether or not to accept a potential solution found by the fuzzy
- * pattern matcher.
+ * matcher. The potential solution has to be of the same type as the rtn_type,
+ * and does not contain any unwanted atoms listed in the excl_list. The score
+ * currently depends on the number of common words they both share (words
+ * connects together by a SimilarityLink will also be considered as "common"
+ * to a certain extent), the "rareness" of the words to all others existing
+ * in the AtomSpace, and the linguistic relations of the words. The accepted
+ * solutions will be stored in the solns vector.
  *
- * The potential solution has to be of the same type as the rtn_type, and
- * does not contain any unwanted atoms listed in the excl_list. To calculate
- * a similarity score, a list of common nodes will be obtained. Different weights
- * will be assigned to those with certain linguistic relations in a sentence.
- * The accepted solutions will be stored in the solns vector.
- *
- * @param pat   The pattern
- * @param soln  The potential solution
+ * @param soln  The potential solution found
+ * @return      True if the potential solution is accepted, false otherwise
  */
 bool Fuzzy::try_match(const Handle& soln)
 {
@@ -190,14 +226,13 @@ bool Fuzzy::try_match(const Handle& soln)
     if (soln->getType() != rtn_type)
         return true;
 
-    // Check if we have seen the exact same one before
+    // Reject if we have seen the exact same one before
     if (std::find(solns_seen.begin(), solns_seen.end(), soln) != solns_seen.end())
         return false;
 
     solns_seen.insert(soln);
 
-    // Reject it if it contains any unwanted atoms
-    // TODO: any_atom_in_tree?
+    // Reject if it contains any unwanted atoms
     for (const Handle& excl : excl_list)
         if (is_atom_in_tree(soln, excl))
             return false;
@@ -222,6 +257,15 @@ bool Fuzzy::try_match(const Handle& soln)
     return true;
 }
 
+/**
+ * A recursive method for finding the highest similarity score between
+ * two trees.
+ *
+ * @param hs1, hs2   The two tree being compared
+ * @param score      The score of the current combination
+ * @param max_score  The highest score among the explored combinations
+ * @param taf        A flag indicating which tree is from the target
+ */
 void Fuzzy::compare(HandleSeq& hs1, HandleSeq& hs2,
                     double score, double& max_score, bool taf)
 {
@@ -252,6 +296,13 @@ void Fuzzy::compare(HandleSeq& hs1, HandleSeq& hs2,
     }
 }
 
+/**
+ * A method for estimating how similar two nodes (words) are.
+ *
+ * @param h1, h2           The two WordNodes being compared
+ * @param target_at_first  A flag indicates whether the h1 is from the target
+ * @return                 A similarity score between the two nodes
+ */
 double Fuzzy::get_score(const Handle& h1, const Handle& h2, bool target_at_first)
 {
     std::pair<UUID, UUID> p(h1.value(), h2.value());
@@ -262,6 +313,8 @@ double Fuzzy::get_score(const Handle& h1, const Handle& h2, bool target_at_first
     double score = 0;
     bool proceed = false;
 
+    // Consider they are the same if two nodes are identical
+    // TODO: Should check the semantic as well
     if (h1 == h2)
     {
         score += NODE_WEIGHT;
@@ -300,8 +353,6 @@ double Fuzzy::get_score(const Handle& h1, const Handle& h2, bool target_at_first
 
         score += tfidf_words[tn.value()] * RARENESS_WEIGHT;
 
-        // TODO: May do the same checking for the soln_winst as well to see
-        // if it matches with the target_winst
         size_t idx = std::find(target_words.begin(), target_words.end(), tn) - target_words.begin();
         Handle& winst = target_winsts[idx];
         HandleSeq evals = get_predicates(winst, DEFINED_LINGUISTIC_RELATIONSHIP_NODE);

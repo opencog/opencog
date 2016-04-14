@@ -1,7 +1,8 @@
 /*
  * FuzzySCM.h
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015, 2016 OpenCog Foundation
+ * All Rights Reserved
  *
  * Author: Leung Man Hin <https://github.com/leungmanhin>
  *

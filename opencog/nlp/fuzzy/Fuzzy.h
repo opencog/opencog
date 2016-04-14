@@ -1,7 +1,8 @@
 /*
  * Fuzzy.h
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2015, 2016 OpenCog Foundation
+ * All Rights Reserved
  *
  * Author: Leung Man Hin <https://github.com/leungmanhin>
  *
@@ -40,6 +41,7 @@ class Fuzzy :
         Fuzzy(AtomSpace*, Type, const HandleSeq&);
         virtual ~Fuzzy();
 
+        // Compare two hypergraphs and return a similarity score
         double fuzzy_compare(const Handle&, const Handle&);
 
     protected:
@@ -49,14 +51,12 @@ class Fuzzy :
         virtual RankedHandleSeq finished_search(void);
 
     private:
+        // For estimating similarity
         double NODE_WEIGHT = 0.5;
         double RARENESS_WEIGHT = 0.2;
         double LINGUISTIC_RELATION_WEIGHT = 0.3;
 
         AtomSpace* as;
-
-        HandleSeq target_words;
-        HandleSeq target_winsts;
 
         // The type of atom that we want
         Type rtn_type;
@@ -64,10 +64,15 @@ class Fuzzy :
         // The atoms that we don't want in the solutions
         HandleSeq excl_list;
 
+        // The target (input)
+        HandleSeq target_words;
+        HandleSeq target_winsts;
+
         // The solutions
         RankedHandleSeq solns;
         OrderedHandleSet solns_seen;
 
+        // Some caches
         std::map<UUID, double> tfidf_words;
         std::map<std::pair<UUID, UUID>, double> scores;
 
