@@ -12,7 +12,8 @@
 ; --------------------------------------------------------------
 (define-public (psi-asp)
 "
-  Returns the ConceptNode that represents the active-schema-pool.
+  Returns the ConceptNode that represents the active-schema-pool(asp). The asp
+  is a set of all the psi-rules.
 "
     (ConceptNode (string-append (psi-prefix-str) "asp"))
 )
@@ -20,15 +21,10 @@
 ; --------------------------------------------------------------
 (define-public (psi-step)
 "
-  The main function that steps OpenPsi active-schema-pool(asp). The asp
-  is a rulebase, that is modified depending on the demand-values, on every
-  cogserver cycle.
-
-  Returns a list of results from the step.
+  The main function that defines the steps to be taken in every cycle.
 "
-    (let* ((asp (psi-asp)))
-        (cog-fc (SetLink) asp (SetLink))
-    )
+
+    (psi-select-rules)
 )
 
 ; --------------------------------------------------------------
@@ -152,14 +148,40 @@
     (filter psi-action? (get-c&a rule))
 )
 
-(define (psi-satisfiable? rule) ; check if the rule is satisfiable
+(define (psi-satisfiable? rule)
+"
+  Check if the rule is satisfiable and return TRUE_TV or FALSE_TV.
+
+  rule:
+  - A psi-rule to be checked if its context is satisfiable.
+"
+    ; NOTE: stv are choosen as the return values so as to make the function
+    ; usable in evaluatable-terms.
     (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
            (result (cog-evaluate! pattern)))
           (cog-delete pattern)
-
-          ; FIXME: Regardless of what 'result' is, the following always returns
-          ; '#f'
-          ; (equal? (stv 1 1) result)
           result
+    )
+)
+
+(define (psi-default-action-selector)
+"
+  Get all psi-rules that are satisfiable
+"
+    (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
+        (psi-get-all-rules))
+)
+
+(define (psi-select-rules)
+"
+  Returns a list of psi-rules that are satisfiable by using the action-selector
+  you defined or the default-action-selector predefined if you haven't defined
+  a different action-selector.
+"
+    (let ((dsn (psi-get-action-selector)))
+        (if (null? dsn)
+            (psi-default-action-selector)
+            (cog-execute! dsn)
+        )
     )
 )

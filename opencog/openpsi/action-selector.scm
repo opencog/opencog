@@ -23,33 +23,32 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-action-selector-set! dpn)
+(define (psi-action-selector-set! dsn)
 "
   Sets the given DefinedPredicateNode to be used for selecting actions.
 
-  dpn:
-  - The DefinedPredicateNode that represents the evaluatable-term used for
-    selecting the action-rules that should be part of the asp.
+  dsn:
+  - The DefinedSchemaNode that represents the executable-term used for
+    selecting the psi-rules that should have their actions and goals executed.
 "
     ; Check arguments
-    (if (not (equal? (cog-type dpn) 'DefinedPredicateNode))
-        (error "Expected DefinedPredicateNode got: " dpn))
+    (if (not (equal? (cog-type dpn) 'DefinedSchemaNode))
+        (error "Expected DefinedSchemaNode got: " dsn))
 
     (cog-execute!
         (PutLink
-            (psi-action-rule-selector-pattern)
-            dpn)
+            (psi-action-selector-pattern)
+            dsn)
     )
 )
 
-
 ; --------------------------------------------------------------
-(define (psi-add-action-selector eval-term name)
+(define (psi-add-action-selector exec-term name)
 "
-  Returns the DefinedPredicateNode that represents the evaluatable term
-  after defining it as an opencog goal-selector.
+  Returns the DefinedSchemaNode that represents the executable term
+  after defining it as an openpsi action-selector.
 
-  eval-term:
+  exec-term:
   - An evaluatable term.
 
   name:
@@ -60,23 +59,31 @@
     (if (not (string? name))
         (error "Expected second argument to be a string, got: " name))
 
-    ; TODO: Add checks to ensure the eval-term argument is actually evaluatable
+    ; TODO: Add checks to ensure the exec-term argument is actually evaluatable
     (let* ((z-name (string-append
                         (psi-prefix-str) " action-selector-" name))
-           (selector-dpn (cog-node 'DefinedPredicateNode z-name)))
+           (selector-dsn (cog-node 'DefinedSchemaNode z-name)))
        (if (null? selector-dpn)
            (begin
-               (set! selector-dpn (DefinedPredicateNode z-name))
-               (DefineLink selector-dpn eval-term)
+               (set! selector-dsn (DefinedSchemaNode z-name))
+               (DefineLink selector-dsn exec-term)
 
                 (EvaluationLink
                     (PredicateNode "action-selector-for")
-                    (ListLink selector-dpn (psi-asp)))
+                    (ListLink selector-dsn (psi-asp)))
 
-                selector-dpn
+                selector-dsn
            )
 
-           selector-dpn
+           selector-dsn
        )
     )
+)
+
+(define (psi-get-action-selector)
+"
+  Get the action-selector.
+"
+    (cog-outgoing-set (cog-execute!
+        (GetLink (psi-action-selector-pattern))))
 )

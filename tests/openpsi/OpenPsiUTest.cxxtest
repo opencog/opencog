@@ -135,4 +135,42 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
+    // Check that scheme function `psi-select-rules`
+    void test_psi_select_rules()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Add the rules
+        auto rule_1 = _scm->eval_h("(rule-1)");
+        CHKERR
+        auto rule_2 = _scm->eval_h("(rule-2)");
+        CHKERR
+
+        // Test 1
+        auto result_1 = _scm->eval("(psi-select-rules)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1);
+
+        // Test 2
+        _scm->eval("(groundable-content-1)");
+        CHKERR
+        auto result_2_1 = _scm->eval("(length (psi-select-rules))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected a single rule", "1\n" , result_2_1);
+
+        auto result_2_2 = _scm->eval_h("(car (psi-select-rules))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected the same psi-rule", rule_1, result_2_2);
+        CHKERR
+
+        // Test 3
+        _scm->eval("(groundable-content-2)");
+        CHKERR
+        auto result_3 = _scm->eval("(length (psi-select-rules))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected a two rules", "2\n" , result_3);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
 };
