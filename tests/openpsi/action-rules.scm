@@ -71,13 +71,18 @@
 
 (define action-1
     (EvaluationLink
-        (GroundedPredicateNode "scm: cog-tv")
-        (ListLink
-            (VariableNode "z"))))
+        (GroundedPredicateNode "scm: act-1")
+        (ListLink)))
 
-(define goal-1 (Node "test-demand"))
+(define (act-1)
+    (ConceptNode "act-1")
+    (stv 1 1)
+)
 
-(define rule-1 (psi-rule context-1 action-1 goal-1 (stv 1 1)))
+
+(define goal-1 (Node "test-1-goal"))
+
+(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1)))
 
 (define (groundable-content-1)
     (ListLink
@@ -87,4 +92,40 @@
     (InheritanceLink
         (NumberNode 1)
         (PredicateNode "z"))
+)
+
+; --------------------------------------------------------------
+(define context-2
+    (list
+       (ListLink
+            (VariableNode "x")
+            (VariableNode "z"))
+        (InheritanceLink
+            (VariableNode "x")
+            (VariableNode "z"))
+        (NotLink (EqualLink
+            (VariableNode "x")
+            (VariableNode "z")))
+        ))
+
+(define action-2
+    (EvaluationLink
+        (GroundedPredicateNode "scm: act-2")
+        (ListLink)))
+
+(define (act-2)
+    (ConceptNode "act-1")
+    (stv 1 1)
+)
+(define goal-2 (Node "test-2-goal"))
+
+(define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1)))
+
+(define (groundable-content-2)
+    (ListLink
+        (NumberNode 1)
+        (NumberNode 2))
+    (InheritanceLink
+        (NumberNode 1)
+        (NumberNode 2))
 )

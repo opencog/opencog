@@ -116,20 +116,20 @@ public:
     //     logger().info("END TEST: %s", __FUNCTION__);
     // }
 
-    // Check that scheme function psi-satisfiable?
+    // Check that scheme function `psi-satisfiable?``
     void test_psi_satisfiable()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
         // Test unsatisfaiability
-        auto result_1 = _scm->eval("(psi-satisfiable? rule-1)");
+        auto result_1 = _scm->eval("(psi-satisfiable? (rule-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1);
 
         // Test satisfaiability
         _scm->eval("(groundable-content-1)");
         CHKERR
-        auto result_2 = _scm->eval("(psi-satisfiable? rule-1)");
+        auto result_2 = _scm->eval("(psi-satisfiable? (rule-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2);
         logger().info("END TEST: %s", __FUNCTION__);
