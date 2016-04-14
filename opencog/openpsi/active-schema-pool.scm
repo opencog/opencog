@@ -7,7 +7,6 @@
 
 (load-from-path "openpsi/action-selector.scm")
 (load-from-path "openpsi/demand.scm")
-(load-from-path "openpsi/goal-selector.scm")
 (load-from-path "openpsi/utilities.scm")
 
 ; --------------------------------------------------------------
