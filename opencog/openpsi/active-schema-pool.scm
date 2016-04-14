@@ -27,49 +27,6 @@
     (psi-select-rules)
 )
 
-; --------------------------------------------------------------
-(define-public (psi-update-asp asp action-rules)
-"
-  It modifies the member action-rules of OpenPsi's active-schema-pool(asp),
-  by removing all action-rules that are members of all the known demand
-  rule-bases, with the exception of default-actions, from the asp and replaces
-  them by the list of actions passed.
-
-  If the action-rule list passed is empty the asp isn't modified, because the
-  policy is that no change occurs without it being explicitly specified. This
-  doesn't and must not check what goal is selected.
-
-  asp:
-  - The node for the active-schema-pool.
-
-  action-rules:
-  - A list of action-rule nodes. The nodes are the alias nodes for the
-    action-rules.
-"
-    (define (remove-node node) (cog-extract-recursive (MemberLink node asp)))
-    (define (add-node node) (begin (MemberLink node asp) node))
-
-    (let* ((current-actions (ure-rbs-rules asp))
-           (actions-to-keep (psi-get-action-rules-default))
-           (actions-to-add
-                (lset-difference equal? action-rules current-actions))
-           (final-asp (lset-union equal? actions-to-keep action-rules)))
-
-           ; Remove actions except those that should be kept and those that
-           ; are to be added.
-           (par-map
-                (lambda (x)
-                    (if (member x final-asp)
-                        x
-                        (remove-node x))
-                )
-                current-actions)
-
-           ; Add the actions that are not member of the asp.
-           (par-map add-node actions-to-add)
-    )
-)
-
 (define (psi-rule context action demand-goal stv)
 "
   It associates an action and context in which the action has to be taken
