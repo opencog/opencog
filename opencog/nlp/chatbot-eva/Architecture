@@ -334,6 +334,28 @@ The steps are:
     The code for handling this is mostly in the github repo for
     opencog/ros-behavior-scripting.  It needs to be refactored.
 
+ III) Question-answering.  A prototype for question-answering was working
+    earlier, but is currently broken, due to the self-model redesign.
+    Question-answering is conceptually similar to the above: very similar,
+    it seems:
+
+ III.a) Just as in II.a, we need a simplified intermediate form to
+    represent what we think was asked.
+
+ III.b) Just like II.b, we need to see if the intermediate form can
+    be matched up to our current knowledge of the world (or of
+    ourselves).  The is, we need a world model roughly of the form
+    `EvaluationLink "visibility-item" "face 42"` that can be matched
+    to the intermediate form of the question "what do you see?"
+    I think that the same general semantic processing and KR that
+    II.b uses would work fine, here as well.
+
+ III.c) Just like II.c. For example, the response to "what do you see?"
+    might generate a long list of things.
+
+ III.d) Just like II.d, of all the things we could say in response
+    to a question, we have to say only one or two.
+
 
 Lessons learned: Subsystem we don't have, but we need
 -----------------------------------------------------
@@ -361,6 +383,18 @@ name-of-emotion".
 What I've constructed there seems simple enough, and adequate for now.
 It will be interesting to see how we can automatically learn new
 knowledge.
+
+II.a) plus II.b) plus II.e) makes clear that we cannot dis-associate
+knowledge, and the way in which we represent knowledge, from the
+subsystems that act on that knowledge, that query that knowledge.
+So, step II.e) is updating the self-model, but the self-model has to
+be in a form such that the question-answering system III.b) can
+access that knowledge.  Thse are all interlocked designs.
+
+III.b) makes it clear that we have an inadequate way of storing sensory
+information.  If someone asks "what do you see?", we need to match the
+intermediate-form of that question to the world-model.  We don't have
+a KR design for the world-model that is queryable.
 
 II.d) we don't have a way of deciding what to do. I thought that maybe
 OpenPsi was this system, but based on what I've seen of OpenPsi, its
