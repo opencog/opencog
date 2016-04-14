@@ -95,12 +95,10 @@ void Fuzzy::start_search(const Handle& trg)
  */
 bool Fuzzy::accept_starter(const Handle& hp)
 {
-    NodePtr np(NodeCast(hp));
-    if (nullptr == np) return false;
+    if (hp->isLink()) return false;
 
-    return
-       (np->getType() == CONCEPT_NODE or np->getType() == PREDICATE_NODE)
-       and (np->getName().find("@") == std::string::npos);
+    return (hp->getType() == CONCEPT_NODE or hp->getType() == PREDICATE_NODE)
+            and (hp->getName().find("@") == std::string::npos);
 }
 
 static void get_all_nodes(const Handle& h, HandleSeq& node_list)
@@ -176,7 +174,7 @@ bool Fuzzy::try_match(const Handle& soln)
         // node, that probably means the potential solution is a sub-pattern
         // of the input pattern, or is some related atoms that is generated
         // with the pattern, which is pretty likely not what we want here
-        if (NodeCast(common_node)->getName().find("@") != std::string::npos)
+        if (common_node->getName().find("@") != std::string::npos)
             return false;
 
         double weight = 0.25;
@@ -186,10 +184,10 @@ bool Fuzzy::try_match(const Handle& soln)
         // e.g. Getting (PredicateNode "is@123") from (PredicateNode "be")
         // or (ConceptNode "cats@123") from (ConceptNode "cat") etc
         auto find_instance = [&] (Handle n) {
-            if (NodeCast(n)->getName().find("@") == std::string::npos)
+            if (n->getName().find("@") == std::string::npos)
                 return false;
 
-            for (const Handle& ll : LinkCast(target)->getOutgoingSet()) {
+            for (const Handle& ll : target->getOutgoingSet()) {
                 if (is_atom_in_tree(ll, common_node) and is_atom_in_tree(ll, n)) {
                     if ((common_node->getType() == PREDICATE_NODE and
                          ll->getType() == IMPLICATION_LINK) or
@@ -216,8 +214,7 @@ bool Fuzzy::try_match(const Handle& soln)
 
                 for (const Handle& el : eval_links) {
                     // Extract the relation
-                    std::string ling_rel =
-                        NodeCast(LinkCast(el)->getOutgoingSet()[0])->getName();
+                    std::string ling_rel = (el->getOutgoingSet()[0])->getName();
 
                     // Assign weights accordingly, subject to change if needed
                     if (ling_rel.compare("_subj") == 0)
