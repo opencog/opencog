@@ -62,7 +62,7 @@
 
     ; TODO: Add checks to ensure the eval-term argument is actually evaluatable
     (let* ((z-name (string-append
-                        (psi-prefix-str) " action-rule-selector-" name))
+                        (psi-prefix-str) " action-selector-" name))
            (selector-dpn (cog-node 'DefinedPredicateNode z-name)))
        (if (null? selector-dpn)
            (begin

@@ -13,20 +13,9 @@
 ; --------------------------------------------------------------
 (define-public (psi-asp)
 "
-  Create the active-schema-pool as a URE rulebase and return the node
-  representing it.
+  Returns the ConceptNode that represents the active-schema-pool.
 "
-    (let ((asp (ConceptNode (string-append (psi-prefix-str) "asp"))))
-
-        (ure-define-rbs asp 1)
-
-        ; Load all default actions because they should always run. If they
-        ; aren't always.
-        (if (null? (ure-rbs-rules asp))
-            (map (lambda (x) (MemberLink x asp)) (psi-get-action-rules-default)))
-
-        asp
-    )
+    (ConceptNode (string-append (psi-prefix-str) "asp"))
 )
 
 ; --------------------------------------------------------------
@@ -134,9 +123,7 @@
         action
         (ConceptNode (string-append (psi-prefix-str) "action")))
 
-    (MemberLink
-        (implication)
-        (ConceptNode (string-append (psi-prefix-str) "rule")))
+    (MemberLink (implication) (psi-asp))
 
     (implication)
 )
@@ -150,8 +137,7 @@
     (if (member x (psi-get-all-actions)) #t #f))
 
 (define (psi-get-all-rules) ; get all openpsi rules
-    (cog-chase-link 'MemberLink 'ImplicationLink
-        (ConceptNode (string-append (psi-prefix-str) "rule"))))
+    (cog-chase-link 'MemberLink 'ImplicationLink (psi-asp)))
 
 (define (psi-get-context rule) ; get the context of an openpsi-rule
     (define (get-c&a x) ; get context and action list from ImplicationLink
