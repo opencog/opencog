@@ -294,6 +294,43 @@ The steps are:
     file `semantics.scm`.  The rules here depend on the knowledge
     representation being wired up just right, in `knowledge.scm`.
 
+    Observe that there is a *second stage* of synonym handling that
+    happens here, as well: in step II.a)
+
+ II.c) Convert grounded knowledge into a set of candidate actions
+    (a list of suggestions for actions that culd be performed).
+    `action-rule-ao` in `imperative.scm`. Currently a hacky stub.
+
+    Basically, if semantic analysis resulted in a non-empty set
+    of things that are understood, then each of these is a candidate
+    for performing an action.
+
+    For a single, given understanding, there are several actions to
+    be performed:
+    *) Play a blender animation (which will move the robot)
+    *) Update the self-model (so that the robot knows what its doing,
+       and is able to remember and talk about whiat it did).
+    *) Say something.
+
+ II.d) Decide what to do. That is, narrow down the list of candidates
+    from the step above.  Currently a stub: all proposed actions are
+    performed. The line of code is a for-loop in `imperative.scm`:
+    `(for-each cog-evaluate! action-list)`
+
+ II.e) Action orchestration and self-modelling.  The update of the
+    self-model must happen only *after* step II.d) above.  That is,
+    we should NOT memorize what we did, until *after* we decided to
+    do it, and *after* action orchestration.   That is, even if stage
+    II.d) decides to do something, the AO may block or over-ride it,
+    due to some conflict or interlock.  Conflicts and over-rides
+    might occur if commands are issues too rapdily in time (smile and
+    frown at same time) or if multiple systems are trying to control:
+    e.g. if the robot is being puppeteered, but in a semi-autonomous
+    puppeteered mode.  Or maybe two different subsystems are each
+    making conflicting suggestions.  The use-cases and issues here are
+    unclear; what is clear is that updating the self-model too early
+    results in bad self-awareness.
+
 
 Lessons learned: Subsystem we don't have, but we need
 -----------------------------------------------------
@@ -301,13 +338,44 @@ The above prototype makes clear that there are many important
 subsystems that are missing in OpenCog.
 
 II.a) make clear: we don't have any go way of dealing with synonymous
-words or phrases.
+words or phrases.  Note also that step II.b) ALSO does synonym
+processing, which is different than the synonymous-phrase processing
+that is done in step II.a).  Synonym handling doesn't fit into a small
+little box: its spread out acreoss multiple components.
 
 II.a) makes clear: we need some reasonable "intermediate form" that
 is not R2L.
 
+II.b) makes clear: we don't have any sort of agreed-upon system for
+representing ontological knowledge (for example, that "leftwards"
+is-a "direction") or for grounded knowledge (for example, that
+"leftwards" corresponds to (x,y,z)=(1, 0.5, 0) in robot-body coords).
+Knowledge represnetation also has to provide meaning for the abstracted
+"intermediate forms", such as "direction-during-verb-followed-by-
+direction-name", or "facial-expression-imperaitve-verb-followed-by-
+name-of-emotion".
 
-no ontology
+What I've constructed there seems simple enough, and adequate for now.
+It will be interesting to see how we can automatically learn new
+knowledge.
+
+II.d) we don't have a way of deciding what to do. I thought that maybe
+OpenPsi was this system, but based on what I've seen of OpenPsi, its
+not clear how to use it to make decisions.  Specifically: make decisions
+based on the current real-world situation, and the mood that the robot
+is in.  For example, if someone is being mean to the robot, the robot
+may choose to ignore all imperatives (i.e. discard the list of actions
+that the NLP subsystem II.a-II.c came up with, and do something else).
+
+For example: if the imperative "look to the left" was heard, and
+correctly processed, but the vision system reports that a new face is
+visible on the right.  Should the robot look left, or right?
+
+We don't have any sort of decision-making subsystem speced or designed.
+Its hard to imagine how to spec or design such a system, until we have
+better control over the world-model and the sensory input that drives
+it.  For that, we need more prototyping, just to see what the issues
+are.
 
 
 
