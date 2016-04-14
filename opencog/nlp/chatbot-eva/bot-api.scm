@@ -91,7 +91,7 @@
 (define-public (grounded-talk user query)
 "
   grounded-talk USER QUERY -- accept user's text and perform action,
-  or maybe generate a reply (currently broken).
+  or maybe generate a reply (replies are currently broken).
 
   This is a truncated chatbot interface, for use with the robot.
   It accepts an utterance (in the form of a text string) and, if it is
@@ -102,8 +102,16 @@
     ; nlp-parse returns (SentenceNode "sentence@45c470a6-29...")
     (define sent-node (car (nlp-parse query)))
 
+    ; Call the `get-utterance-type` function to get the speech act type
     ; of the utterance.  The response processing will be based on the
     ; type of the speech act.
+    ;
+    ; XXX Currently, this dispatch is done via scheme code below. The
+    ; correct design would use an ImplicationLink to match up the
+    ; speech-act type to the processing that would be performed.  This
+    ; would allow a single sentence to be interpreted as possibly several
+    ; different speech-act types.  It would fit better into the long-term
+    ; plan to do all recogniztion with ImplicationLinks+rule-engine.
     (let* ((gutr (sentence-get-utterance-type sent-node))
            (utr (if (equal? '() gutr) '() (car gutr)))
         )

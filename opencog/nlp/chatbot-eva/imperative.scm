@@ -1,7 +1,7 @@
 ;
 ; imperative.scm
 ;
-; Scaffolding for converting English-langauge imperatives into
+; Scaffolding for converting English-language imperatives into
 ; robot actions.  This implements the full end-to-end pipeline,
 ; of converting English sentences to an intermediate form, matching
 ; the intermediate form to a grounded-knowledge base, and then
