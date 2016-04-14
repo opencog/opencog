@@ -182,97 +182,124 @@ bool Fuzzy::try_match(const Handle& soln)
     HandleSeq soln_winsts;
     get_all_words(soln, soln_words, soln_winsts);
 
-//     HandleSeq common_nodes;
-//     std::sort(soln_nodes.begin(), soln_nodes.end());
+    double score = 0;  // Initial value
 
-//     // Find out how many nodes it has in common with the pattern
-//     std::set_intersection(target_nodes.begin(), target_nodes.end(),
-//                           soln_nodes.begin(), soln_nodes.end(),
-//                           std::back_inserter(common_nodes));
+    if (target_words.size() > soln_words.size())
+        compare(soln_words, target_words, 0, score, false);
+    else
+        compare(target_words, soln_words, 0, score, true);
 
-//     std::sort(common_nodes.begin(), common_nodes.end());
-
-//     // Remove duplicate common_nodes
-// // XXX  FIXME .. how can there possibly be duplicates ???
-// // All target nodes are unique ... !?
-//     common_nodes.erase(std::unique(common_nodes.begin(), common_nodes.end()),
-//                        common_nodes.end());
-
-//     double similarity = 0;
-
-//     for (const Handle& common_node : common_nodes) {
-//         // If both the pattern and the potential solution share some "instance"
-//         // node, that probably means the potential solution is a sub-pattern
-//         // of the input pattern, or is some related atoms that is generated
-//         // with the pattern, which is pretty likely not what we want here
-//         if (common_node->getName().find("@") != std::string::npos)
-//             return false;
-
-//         double weight = 0.25;
-
-//         // Helper function for getting the instance of a ConceptNode or a
-//         // PredicateNode from the input pattern.
-//         // e.g. Getting (PredicateNode "is@123") from (PredicateNode "be")
-//         // or (ConceptNode "cats@123") from (ConceptNode "cat") etc
-//         auto find_instance = [&] (Handle n) {
-//             if (n->getName().find("@") == std::string::npos)
-//                 return false;
-
-//             for (const Handle& ll : target->getOutgoingSet()) {
-//                 if (is_atom_in_tree(ll, common_node) and is_atom_in_tree(ll, n)) {
-//                     if ((common_node->getType() == PREDICATE_NODE and
-//                          ll->getType() == IMPLICATION_LINK) or
-//                         (common_node->getType() == CONCEPT_NODE and
-//                          ll->getType() == INHERITANCE_LINK))
-//                         return true;
-//                 }
-//             }
-
-//             return false;
-//         };
-
-//         auto inst = std::find_if(target_nodes.begin(), target_nodes.end(), find_instance);
-
-//         if (inst != target_nodes.end()) {
-//             // Get the WordInstanceNode from the ReferenceLink that connects both
-//             // WordInstanceNode and the instance ConceptNode / PredicateNode
-//             HandleSeq word_inst = get_target_neighbors(*inst, REFERENCE_LINK);
-
-//             if (word_inst.size() > 0) {
-//                 // Get the DefinedLinguisticRelationshipNode from the EvaluationLink
-//                 HandleSeq eval_links =
-//                     get_predicates(word_inst[0], DEFINED_LINGUISTIC_RELATIONSHIP_NODE);
-
-//                 for (const Handle& el : eval_links) {
-//                     // Extract the relation
-//                     std::string ling_rel = (el->getOutgoingSet()[0])->getName();
-
-//                     // Assign weights accordingly, subject to change if needed
-//                     if (ling_rel.compare("_subj") == 0)
-//                         weight += 1.0;
-//                     else if (ling_rel.compare("_obj") == 0)
-//                         weight += 1.0;
-//                     else if (ling_rel.compare("_predadj") == 0)
-//                         weight += 1.0;
-//                     else
-//                         weight += 0.5;
-//                 }
-//             }
-//         }
-
-//         similarity += weight;
-//         // similarity += (weight / common_node->getIncomingSetSize());
-//     }
-
-//     size_t max_size = std::max(target_nodes.size(), soln_nodes.size());
-
-//     // Also take the size into account
-//     similarity /= max_size;
+    score /= std::max(target_words.size(), soln_words.size());
 
     // Accept and store the solution
-    // solns.push_back(std::make_pair(soln, similarity));
+    if (score > 0)
+        solns.push_back(std::make_pair(soln, score));
 
     return true;
+}
+
+void Fuzzy::compare(HandleSeq& hs1, HandleSeq& hs2,
+                    double score, double& max_score, bool taf)
+{
+    if (hs1.size() == 0)
+    {
+        // Only record the highest score it found so far
+        if (score > max_score)
+            max_score = score;
+
+        return;
+    }
+
+    Handle& h1 = hs1[0];
+
+    for (Handle& h2 : hs2)
+    {
+        double s = get_score(h1, h2, taf);
+        score += s;
+
+        HandleSeq hs1_cp = hs1;
+        HandleSeq hs2_cp = hs2;
+        hs1_cp.erase(hs1_cp.begin());
+        hs2_cp.erase(std::find(hs2_cp.begin(), hs2_cp.end(), h2));
+
+        compare(hs1_cp, hs2_cp, score, max_score, taf);
+
+        score -= s;
+    }
+}
+
+double Fuzzy::get_score(const Handle& h1, const Handle& h2, bool target_at_first)
+{
+    std::pair<UUID, UUID> p(h1.value(), h2.value());
+
+    if (scores.find(p) != scores.end())
+        return scores.at(p);
+
+    double score = 0;
+    bool proceed = false;
+
+    if (h1 == h2)
+    {
+        score += NODE_WEIGHT;
+        proceed = true;
+    }
+
+    // If they are different, see if they are connected by a SimilarityLink
+    else
+    {
+        HandleSeq iset;
+
+        // Loop the smaller set...
+        if (h1->getIncomingSetSize() > h2->getIncomingSetSize())
+            h2->getIncomingSet(back_inserter(iset));
+        else h1->getIncomingSet(back_inserter(iset));
+
+        for (const Handle& h : iset)
+        {
+            if (h->getType() != SIMILARITY_LINK) continue;
+
+            if (is_atom_in_tree(h, h1) and is_atom_in_tree(h, h2))
+            {
+                score = h->getTruthValue()->getMean() * NODE_WEIGHT;
+                proceed = true;
+                break;
+            }
+        }
+    }
+
+    if (proceed)
+    {
+        // See which one is from target
+        // This only matters if two nodes are different
+        // but they are connected by a SimilarityLink
+        const Handle& tn = (target_at_first)? h1 : h2;
+
+        score += tfidf_words[tn.value()] * RARENESS_WEIGHT;
+
+        // TODO: May do the same checking for the soln_winst as well to see
+        // if it matches with the target_winst
+        size_t idx = std::find(target_words.begin(), target_words.end(), tn) - target_words.begin();
+        Handle& winst = target_winsts[idx];
+        HandleSeq evals = get_predicates(winst, DEFINED_LINGUISTIC_RELATIONSHIP_NODE);
+
+        for (const Handle& el : evals)
+        {
+            // Extract the relation
+            std::string ling_rel = (el->getOutgoingSet()[0])->getName();
+
+            // Assign weights accordingly, subject to change
+            if (ling_rel.compare("_subj") == 0 or
+                ling_rel.compare("_obj") == 0 or
+                ling_rel.compare("_predadj") == 0)
+            {
+                score += LINGUISTIC_RELATION_WEIGHT;
+                break;
+            }
+        }
+    }
+
+    scores[p] = score;
+    return score;
 }
 
 /**

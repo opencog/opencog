@@ -46,6 +46,10 @@ class Fuzzy :
         virtual RankedHandleSeq finished_search(void);
 
     private:
+        double NODE_WEIGHT = 0.5;
+        double RARENESS_WEIGHT = 0.2;
+        double LINGUISTIC_RELATION_WEIGHT = 0.3;
+
         AtomSpace* as;
 
         HandleSeq target_words;
@@ -59,12 +63,16 @@ class Fuzzy :
 
         // The solutions
         RankedHandleSeq solns;
-
         OrderedHandleSet solns_seen;
 
         std::map<UUID, double> tfidf_words;
+        std::map<std::pair<UUID, UUID>, double> scores;
 
         void calculate_tfidf(const HandleSeq&);
+
+        void compare(HandleSeq&, HandleSeq&, double, double&, bool);
+
+        double get_score(const Handle&, const Handle&, bool);
 };
 
 }
