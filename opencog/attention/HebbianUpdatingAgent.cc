@@ -41,7 +41,7 @@ void HebbianUpdatingAgent::setMean(Handle h, float tc)
 	switch (oldtv->getType())
 	{
 		case SIMPLE_TRUTH_VALUE: {
-			TruthValuePtr newtv(SimpleTruthValue::createTV(tc, oldtv->getCount()));
+			TruthValuePtr newtv(SimpleTruthValue::createTV(tc, oldtv->getConfidence()));
 			h->merge(newtv);
 			break;
 		}
