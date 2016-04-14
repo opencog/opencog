@@ -11,19 +11,17 @@ SET(BUILD_LIB_CMD ${GHC_EXECUTABLE} -dynamic -shared -fPIC -i${CMAKE_CURRENT_SOU
                                     -i${CMAKE_CURRENT_BINARY_DIR}  ${CMAKE_CURRENT_SOURCE_DIR}/TVToolBoxCInterface.hs ${CMAKE_CURRENT_BINARY_DIR}/moduleinit.o
                                     -o libjsd.so -odir ${CMAKE_CURRENT_BINARY_DIR} -hidir ${CMAKE_CURRENT_BINARY_DIR} -optl-Wl,-rpath,${GHC_LIB_DIR} -lHSrts-ghc${GHC_VERSION})
 
-#SET(STACK_BUILD stack build --ghc-options='')
-
-ADD_CUSTOM_TARGET(jsdistancehaskellinterface
-                  COMMAND ${BUILD_MODULE_INIT}
-                  COMMAND ${BUILD_LIB_CMD}
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                  )
+#ADD_CUSTOM_TARGET(jsdistancehaskellinterface
+    #COMMAND ${BUILD_MODULE_INIT}
+    #COMMAND ${BUILD_LIB_CMD}
+    #WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#)
 
 #Not sure regarding the portability of mv command.
 ADD_CUSTOM_TARGET(mvstubheader
-                  COMMAND mv ${CMAKE_CURRENT_SOURCE_DIR}/TVToolBoxCInterface_stub.h ${CMAKE_CURRENT_BINARY_DIR}
-                  DEPENDS jsdistancehaskellinterface
-                  )
+    COMMAND sh build.sh ${CMAKE_CURRENT_BINARY_DIR}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 ENDIF(GHC_FOUND)
 

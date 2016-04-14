@@ -4,9 +4,9 @@
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 IF (TBB_FOUND)
-    
+
     ADD_SUBDIRECTORY(tv-toolbox)
-    
+
 	INCLUDE_DIRECTORIES (
 		${TBB_INCLUDE_DIR}
 		${GHC_LIB_DIR}/include
@@ -21,12 +21,12 @@ IF (TBB_FOUND)
 
 	ADD_LIBRARY(dynamicsexpsetupmodule SHARED
 		ExperimentSetupModule
-		SentenceGenStimulateAgent	
+		SentenceGenStimulateAgent
 		ArtificialStimulatorAgent
 		SmokesDBFCAgent
 		Globals.cc
 	)
-	
+
 	TARGET_LINK_LIBRARIES(dynamicsexpsetupmodule
 		${ATOMSPACE_LIBRARIES}
 		attention
@@ -35,6 +35,6 @@ IF (TBB_FOUND)
 		jsd
 	)
 
-	ADD_DEPENDENCIES(dynamicsexpsetupmodule jsdistancehaskellinterface)
-	
+	ADD_DEPENDENCIES(dynamicsexpsetupmodule mvstubheader)
+
 ENDIF (TBB_FOUND)

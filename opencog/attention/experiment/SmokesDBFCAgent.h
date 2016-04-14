@@ -73,7 +73,7 @@ private:
         HandleSeq out = afset;
         //_atomspace.get_handle_set_in_attentional_focus(std::back_inserter(out));
         auto comparator =
-                [](Handle& h1, Handle& h2) {return h1->getSTI() > h2->getSTI();};
+                [](Handle h1, Handle h2) -> bool {return h1->getSTI() > h2->getSTI();};
         std::sort(out.begin(), out.end(), comparator);
         out.resize(size);
         std::cerr << "OUTPUT_SIZE: " << out.size() << "\n";

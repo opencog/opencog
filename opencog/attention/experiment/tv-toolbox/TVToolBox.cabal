@@ -4,7 +4,6 @@ synopsis:            Initial project template from stack
 description:         Please see README.md
 homepage:            https://github.com/githubuser/TVToolBox#readme
 license:             BSD3
-license-file:        LICENSE
 author:              Author name here
 maintainer:          example@example.com
 copyright:           2016 Author name here
@@ -19,8 +18,11 @@ cabal-version:       >=1.10
 --  build-depends:       base >= 4.7 && < 5
 --  default-language:    Haskell2010
 
-executable TVToolBox-exe
-  main-is:             TVToolBoxCInterface.hs
+--executable TVToolBox-exe
+library
+--main-is:             TVToolBoxCInterface.hs
+  exposed-modules:     TVToolBoxCInterface
+  other-modules:       TVToolBox
   build-depends:       base
                        , multimap
                        , numbers
@@ -30,8 +32,9 @@ executable TVToolBox-exe
                        , text-format-simple
                        , gnuplot
                        , containers
-  ghc-options:         -shared -dynamic -fPIC -threaded -o libjsd.so -optl-Wl,-rpath
+-- -o libjsd.so -optl-Wl,-rpath
   c-sources:           moduleinit.c
+  ghc-options:         -dynamic -shared -fPIC
   extra-libraries:     HSrts-ghc7.10.3
   default-language:    Haskell2010
 

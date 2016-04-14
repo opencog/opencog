@@ -1,4 +1,4 @@
-module TVToolBoxCIntegererface where
+module TVToolBoxCInterface where
 
 import TVToolBox
 
