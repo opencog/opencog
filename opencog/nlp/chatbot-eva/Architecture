@@ -343,9 +343,16 @@ are.
 
 Overall design philosophy
 -------------------------
-There is an overall design philosophy that is meant to be adhered to, in
-the implementation of this system.  This philosophy has several parts to
-it:
+The above prototype made clear that there are several design meta-issues
+that need to be addressed.  The code, as written, is functional. That
+is, it works, and it can be expanded and enhanced and broadened without
+too much trouble. However, it has some serious meta-design issues that
+should be corrected. These meta-issues did not become clear until after
+the prototype was created.  The issues, and a way of resolving them,
+is presented below.  Its presented as a "design philosophy" that should
+be adhered to, in moving forward with the implementation.
+
+This philosophy has several parts to it:
 
 A) Attempt to describe all possible actions as "rules".  These rules
    are probably best expressed as ImplicationLinks, with an antecedent
@@ -354,7 +361,11 @@ A) Attempt to describe all possible actions as "rules".  These rules
 
 B) The set of rules to be applied in any given situation is done by
    performing a "fuzzy" search, to see how well a given antecedent
-   matches the current state of the system.
+   matches the current state of the system.  The DualLink, and the
+   as-yet-partly-implemented FuzzyLink can be used for this.  The
+   existing fuzzy matcher could be used, but the existing fuzzy matcher
+   has some serious design flaws that make it under-powered for anything
+   more than rough prototyping.
 
 C) There should be a graceful fall-back, so that if there are no rules
    that seem to apply to the given situation, then perhaps something
