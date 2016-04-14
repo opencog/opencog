@@ -6,7 +6,7 @@
 (load-from-path "openpsi/utilities.scm")
 
 ; --------------------------------------------------------------
-(define (psi-action-rule-selector-pattern)
+(define (psi-action-selector-pattern)
 "
   This returns the StateLink that is used for specifying the action selecting
   evaluatable term.
@@ -17,15 +17,15 @@
   changing the action-rule-selector through learning.
 "
     (StateLink
-        (ConceptNode (string-append (psi-prefix-str) "action-rule-selector"))
+        (ConceptNode (string-append (psi-prefix-str) "action-selector"))
         (VariableNode "$dpn")
     )
 )
 
 ; --------------------------------------------------------------
-(define (psi-action-rule-selector-set! dpn)
+(define (psi-action-selector-set! dpn)
 "
-  Sets the given DefinedPredicateNode to be used for selecting action-rule.
+  Sets the given DefinedPredicateNode to be used for selecting actions.
 
   dpn:
   - The DefinedPredicateNode that represents the evaluatable-term used for
@@ -44,7 +44,7 @@
 
 
 ; --------------------------------------------------------------
-(define (psi-add-action-rule-selector eval-term name)
+(define (psi-add-action-selector eval-term name)
 "
   Returns the DefinedPredicateNode that represents the evaluatable term
   after defining it as an opencog goal-selector.
@@ -70,13 +70,12 @@
                (DefineLink selector-dpn eval-term)
 
                 (EvaluationLink
-                    (PredicateNode "rule-selector-for")
+                    (PredicateNode "action-selector-for")
                     (ListLink selector-dpn (psi-asp)))
 
                 selector-dpn
            )
-           ; NOTE: Assuming that it is highly unlikely that the same node
-           ;  wouldn't be used for another purpose.
+
            selector-dpn
        )
     )
