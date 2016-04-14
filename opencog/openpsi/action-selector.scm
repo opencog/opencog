@@ -81,29 +81,3 @@
        )
     )
 )
-
-; --------------------------------------------------------------
-(define (psi-select-action-rules)
-"
-  Selects all actions of current effect type and update the psi-asp.
-"
-    (define (get-as) ; get the action-rule-selctor
-        (cog-outgoing-set (cog-execute!
-            (GetLink (psi-action-rule-selector-pattern)))))
-
-    (let ((goal (psi-current-goal))
-          (effect-type (psi-current-effect-type))
-          (action-selector (get-as))
-          (asp (psi-asp)))
-        (cond
-            ((null? action-selector)
-                (error "In procedure psi-select-action-rules: "
-                       "action-selector is not set."))
-            ((equal? effect-type "Default")
-            ; If default effect-type then add only the default actions.
-                (psi-update-asp  asp (psi-get-action-rules-default)))
-            (else (psi-update-asp asp (cog-outgoing-set
-                    (psi-get-action-rules (car action-selector) goal))))
-        )
-    )
-)
