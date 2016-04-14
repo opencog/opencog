@@ -46,6 +46,10 @@ Fuzzy::Fuzzy(AtomSpace* a, Type tt, const HandleSeq& ll) :
 {
 }
 
+Fuzzy::Fuzzy(AtomSpace* a) : as(a)
+{
+}
+
 Fuzzy::~Fuzzy()
 {
 }
@@ -76,6 +80,26 @@ static void get_all_words(const Handle& h, HandleSeq& words, HandleSeq& winsts)
 
     for (const Handle& o : h->getOutgoingSet())
         get_all_words(o, words, winsts);
+}
+
+double Fuzzy::fuzzy_compare(const Handle& h1, const Handle& h2)
+{
+    start_search(h1);
+
+    HandleSeq h2_words;
+    HandleSeq h2_winsts;
+    get_all_words(h2, h2_words, h2_winsts);
+
+    double score = 0;
+
+    if (target_words.size() > h2_words.size())
+        compare(h2_words, target_words, 0, score, false);
+    else
+        compare(target_words, h2_words, 0, score, true);
+
+    score /= std::max(target_words.size(), h2_words.size());
+
+    return score;
 }
 
 void Fuzzy::calculate_tfidf(const HandleSeq& words)

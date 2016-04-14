@@ -73,6 +73,9 @@ void FuzzySCM::init()
 {
     define_scheme_primitive("nlp-fuzzy-match", &FuzzySCM::do_nlp_fuzzy_match,
                             this, "nlp fuzzy");
+
+    define_scheme_primitive("nlp-fuzzy-compare", &FuzzySCM::do_nlp_fuzzy_compare,
+                            this, "nlp fuzzy");
 }
 
 /**
@@ -108,6 +111,17 @@ Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
     Handle results = as->add_link(LIST_LINK, rtn_solns);
 
     return results;
+}
+
+Handle FuzzySCM::do_nlp_fuzzy_compare(Handle h1, Handle h2)
+{
+    AtomSpace* as = SchemeSmob::ss_get_env_as("nlp-fuzzy-compare");
+
+    Fuzzy fpm(as);
+
+    double score = fpm.fuzzy_compare(h1, h2);
+
+    return as->add_node(NUMBER_NODE, std::to_string(score));
 }
 
 void opencog_nlp_fuzzy_init(void)

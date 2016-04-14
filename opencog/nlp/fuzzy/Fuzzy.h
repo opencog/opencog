@@ -36,8 +36,11 @@ class Fuzzy :
     public FuzzyMatchBasic
 {
     public:
+        Fuzzy(AtomSpace*);
         Fuzzy(AtomSpace*, Type, const HandleSeq&);
         virtual ~Fuzzy();
+
+        double fuzzy_compare(const Handle&, const Handle&);
 
     protected:
         virtual void start_search(const Handle&);
