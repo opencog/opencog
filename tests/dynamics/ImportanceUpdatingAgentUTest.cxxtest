@@ -36,10 +36,10 @@
 using namespace opencog;
 using namespace std;
 
-vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
+HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {
     char buf[256];
-    vector<Handle> testAtoms;
+    HandleSeq testAtoms;
     int baseNameLength;
 
     memset(buf,0,256);

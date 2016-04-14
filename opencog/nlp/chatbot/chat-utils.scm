@@ -34,7 +34,7 @@
 
   SENT must be a SentenceNode.
 "
-    (define (cog-delete-parent a-link is-from-fc)
+    (define (cog-extract-parent a-link is-from-fc)
         ; Many rules return a ListLink of results that they
         ; generated. Some rules return singletons. And the
         ; Forward Chainer uses a SetLink to wrap all these
@@ -45,7 +45,7 @@
         ; XXX maybe this should be part of the ure module??
         (if (or (equal? 'ListLink (cog-type a-link)) is-from-fc)
             (let ((returned-list (cog-outgoing-set a-link)))
-                    (cog-delete a-link)
+                    (cog-extract a-link)
                     returned-list)
             (list a-link))
     )
@@ -60,9 +60,9 @@
         (define focus-set
             (SetLink (parse-get-relex-outputs parse-node) interp-link))
         (define outputs
-            (cog-delete-parent (cog-fc (SetLink) r2l-rules focus-set) #t))
+            (cog-extract-parent (cog-fc (SetLink) r2l-rules focus-set) #t))
 
-        (append-map (lambda (o) (cog-delete-parent o #f)) outputs)
+        (append-map (lambda (o) (cog-extract-parent o #f)) outputs)
     )
 
     (define (interpret parse-node)
@@ -146,7 +146,7 @@
 ; -----------------------------------------------------------------------
 (define-public (nlp-parse plain-text)
 "
-  nlp-parse -- Wrap most of the NLP pipeline in one function.
+  nlp-parse PLAIN-TEXT -- Wrap most of the NLP pipeline in one function.
 
   Call the necessary functions for the full NLP pipeline.
 "

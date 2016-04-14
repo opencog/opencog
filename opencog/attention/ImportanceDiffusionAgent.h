@@ -94,7 +94,7 @@ private:
     void setScaledSTI(Handle h, float scaledSTI);
 
     //! Map each atom involved in important diffusion with an index
-    int makeDiffusionAtomsMap(std::map<Handle,int> &i,std::vector<Handle> links);
+    int makeDiffusionAtomsMap(std::map<Handle,int> &i,HandleSeq links);
 
     //! Make vector of original scaled STI values
     void makeSTIVector(bvector* &stiVector, int totalDiffusionAtoms,
@@ -103,7 +103,7 @@ private:
     //! Construct matrix representing HebbianLinks between all atoms
     //! in diffusionAtomsMap.
     void makeConnectionMatrix(bmatrix* &connections, int totalDiffusionAtoms,
-            std::map<Handle,int> diffusionAtomsMap, std::vector<Handle> links);
+            std::map<Handle,int> diffusionAtomsMap, HandleSeq links);
 
     SpreadDecider* spreadDecider;
 

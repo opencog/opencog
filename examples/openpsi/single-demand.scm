@@ -1,4 +1,4 @@
-; Copyright (C) 2015 OpenCog Foundation
+; Copyright (C) 2015,2016 OpenCog Foundation
 ;
 ; Initial steps
 ; 1. ./opencog/cogserver/server/cogserver -c ../lib/development.conf
@@ -21,13 +21,13 @@
 
 ; Populate with some actions that affect the demand.
 ; * Add action for increasing the demand.
-(psi-action-rule-maximize energy 10)
+(psi-action-rule-maximize energy 10 .6)
 
 ; * Add action for decreasing the demand.
 ; NOTE: The rate of minimization is different from the default one above. If
 ; you define with the same rate as the default one above a new one will not
 ; be added as a different effect type.
-(psi-action-rule-minimize energy 6)
+(psi-action-rule-minimize energy 6 .3)
 
 ; Set the goal-selector to be used.
 (psi-goal-selector-set! (psi-goal-selector-maximize .65))

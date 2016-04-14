@@ -43,3 +43,8 @@ be manually loaded with the "load-wsd.sh" shell script.
    paths to data files need to be provided.
 
  * A.scm, E.scm: path to parsed data.
+
+ * disjunct-list.scm: Build lists of link-grammar disjuncts. A link-
+   grammar disjunct is a list of connectors that are used to connect
+   a word to the other words in a sentence. (XXX this file is obsolete,
+   superceded by changes in the RelEx output format).

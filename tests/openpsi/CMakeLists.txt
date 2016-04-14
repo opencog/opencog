@@ -4,4 +4,4 @@ LINK_LIBRARIES(
 )
 
 ADD_CXXTEST(OpenPsiUTest)
-ADD_CXXTEST(OpenPsiExampleTest)
+#ADD_CXXTEST(OpenPsiExampleTest)

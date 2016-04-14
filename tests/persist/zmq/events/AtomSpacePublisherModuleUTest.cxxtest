@@ -33,7 +33,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/types.h>
 #include <opencog/attention/atom_types.h>
@@ -149,8 +148,8 @@ public:
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
         TS_ASSERT_DELTA(ptAtom.get<strength_t>
                         ("truthvalue.details.strength", 0), 2.1, precision);
-        TS_ASSERT_DELTA(ptAtom.get<count_t>
-                        ("truthvalue.details.count", 0), 3.1, precision);
+        TS_ASSERT_DELTA(ptAtom.get<confidence_t>
+                        ("truthvalue.details.confidence", 0), 3.1, precision);
 
         // Receive the event
         address = s_recv (subscriberTVChanged);
@@ -179,20 +178,20 @@ public:
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
         TS_ASSERT_DELTA(ptAtom.get<strength_t>
                         ("truthvalue.details.strength", 0), 5.1, precision);
-        TS_ASSERT_DELTA(ptAtom.get<count_t>
-                        ("truthvalue.details.count", 0), 7.1, precision);
+        TS_ASSERT_DELTA(ptAtom.get<confidence_t>
+                        ("truthvalue.details.confidence", 0), 7.1, precision);
 
         TS_ASSERT(ptTVOld.get<std::string>("type", "") == "simple");
         TS_ASSERT_DELTA(ptTVOld.get<strength_t>
                         ("details.strength", 0), 2.1, precision);
-        TS_ASSERT_DELTA(ptTVOld.get<count_t>
-                        ("details.count", 0), 3.1, precision);
+        TS_ASSERT_DELTA(ptTVOld.get<confidence_t>
+                        ("details.confidence", 0), 3.1, precision);
 
         TS_ASSERT(ptTVNew.get<std::string>("type", "") == "simple");
         TS_ASSERT_DELTA(ptTVNew.get<strength_t>
                         ("details.strength", 0), 5.1, precision);
-        TS_ASSERT_DELTA(ptTVNew.get<count_t>
-                        ("details.count", 0), 7.1, precision);
+        TS_ASSERT_DELTA(ptTVNew.get<confidence_t>
+                        ("details.confidence", 0), 7.1, precision);
 
         // Modify the atom's AttentionValue
         h->setAttentionValue(createAV(30, 50, 0));
@@ -216,8 +215,8 @@ public:
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
         TS_ASSERT_DELTA(ptAtom.get<strength_t>
                         ("truthvalue.details.strength", 0), 5.1, precision);
-        TS_ASSERT_DELTA(ptAtom.get<count_t>
-                        ("truthvalue.details.count", 0), 7.1, precision);
+        TS_ASSERT_DELTA(ptAtom.get<confidence_t>
+                        ("truthvalue.details.confidence", 0), 7.1, precision);
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "30");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "50");
         TS_ASSERT(ptAtom.get<std::string>
@@ -253,8 +252,8 @@ public:
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
         TS_ASSERT_DELTA(ptAtom.get<strength_t>
                         ("truthvalue.details.strength", 0), 5.1, precision);
-        TS_ASSERT_DELTA(ptAtom.get<count_t>
-                        ("truthvalue.details.count", 0), 7.1, precision);
+        TS_ASSERT_DELTA(ptAtom.get<confidence_t>
+                        ("truthvalue.details.confidence", 0), 7.1, precision);
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "1100");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "0");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.vlti", "") == "false");
@@ -289,8 +288,8 @@ public:
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
         TS_ASSERT_DELTA(ptAtom.get<strength_t>
                         ("truthvalue.details.strength", 0), 5.1, precision);
-        TS_ASSERT_DELTA(ptAtom.get<count_t>
-                        ("truthvalue.details.count", 0), 7.1, precision);
+        TS_ASSERT_DELTA(ptAtom.get<confidence_t>
+                        ("truthvalue.details.confidence", 0), 7.1, precision);
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "900");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "0");
         TS_ASSERT(ptAtom.get<std::string>
@@ -318,8 +317,8 @@ public:
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
         TS_ASSERT_DELTA(ptAtom.get<strength_t>
                         ("truthvalue.details.strength", 0), 5.1, precision);
-        TS_ASSERT_DELTA(ptAtom.get<count_t>
-                        ("truthvalue.details.count", 0), 7.1, precision);
+        TS_ASSERT_DELTA(ptAtom.get<confidence_t>
+                        ("truthvalue.details.confidence", 0), 7.1, precision);
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "900");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "0");
 

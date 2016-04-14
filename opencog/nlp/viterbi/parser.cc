@@ -104,7 +104,7 @@ void Parser::initialize_state()
 	// connector set any more, so delete it.  It bugs me that we
 	// need to do this .. it should disappear on its own ...
 	stringstream clean;
-	clean << "(cog-delete (cog-atom " << wall_conset_h << "))";
+	clean << "(cog-extract (cog-atom " << wall_conset_h << "))";
 	_scm_eval->eval(clean);
 
 	// Print out the atomspace contents

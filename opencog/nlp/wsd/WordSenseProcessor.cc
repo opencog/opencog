@@ -95,7 +95,7 @@ void WordSenseProcessor::work_thread(void)
 		wsd->process_document(h);
 
 		// Mark this document as being completed.
-		std::vector<Handle> out;
+		HandleSeq out;
 		out.push_back(h);
 		out.push_back(completion_handle);
 		atom_space->add_link(INHERITANCE_LINK, out);
@@ -143,7 +143,7 @@ bool WordSenseProcessor::do_document(const Handle& h)
 	printf ("WordSenseProcessor found document %d handle=%lx\n", cnt, h.value());
 
 	// Mark this document as being started.
-	std::vector<Handle> out;
+	HandleSeq out;
 	out.push_back(h);
 	out.push_back(start_handle);
 	atom_space->add_link(INHERITANCE_LINK, out);

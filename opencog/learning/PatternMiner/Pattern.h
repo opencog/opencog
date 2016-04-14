@@ -39,12 +39,12 @@ namespace opencog
 // class Skeleton
 // {
 //public:
-//	vector<Handle> skeletonLinks;
+//	HandleSeq skeletonLinks;
 //	Skeleton(){}
-//    Skeleton(vector<Handle>& _skeletonLinks){skeletonLinks = _skeletonLinks;}
+//    Skeleton(HandleSeq& _skeletonLinks){skeletonLinks = _skeletonLinks;}
 
 //    // Make sure the input Links are connected before calling this function
-//    static Skeleton* extractSkeleton(vector<Handle> inputLinks);
+//    static Skeleton* extractSkeleton(HandleSeq inputLinks);
 
 // };
 

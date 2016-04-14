@@ -82,9 +82,9 @@ void ImportanceSpreadingAgent::spreadImportance()
 {
     AttentionValue::sti_t current;
 
-    std::vector<Handle> atoms;
-    std::vector<Handle>::iterator hi;
-    std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
+    HandleSeq atoms;
+    HandleSeq::iterator hi;
+    std::back_insert_iterator<HandleSeq> out_hi(atoms);
 
     a->get_handles_by_type(out_hi, NODE, true);
     log->fine("---------- Spreading importance for atoms with threshold above %d", spreadThreshold);
@@ -141,8 +141,8 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
 {
     float linkWeight;
     float linkDifference = 0.0f;
-    std::vector<Handle> targets;
-    std::vector<Handle>::iterator t;
+    HandleSeq targets;
+    HandleSeq::iterator t;
     AttentionValue::sti_t sourceSTI;
     AttentionValue::sti_t targetSTI;
     
@@ -222,8 +222,8 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     float totalDifference, differenceScaling;
     AttentionValue::sti_t sourceSTI;
 
-    std::vector<Handle> linksVector;
-    std::vector<Handle>::iterator linksVector_i;
+    HandleSeq linksVector;
+    HandleSeq::iterator linksVector_i;
 
     totalDifference = 0.0f;
     differenceScaling = 1.0f;
@@ -260,8 +260,8 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
     for (linksVector_i = linksVector.begin();
             linksVector_i != linksVector.end(); ++linksVector_i) {
         double transferWeight;
-        std::vector<Handle> targets;
-        std::vector<Handle>::iterator t;
+        HandleSeq targets;
+        HandleSeq::iterator t;
         Handle lh = *linksVector_i;
         TruthValuePtr linkTV = a->get_TV(lh);
 

@@ -617,7 +617,7 @@
 			; Delete the links to the recently generated triples,
 			; and then delete the triples themselves.
 			(release-result-triples)
-			(for-each purge-hypergraph trip-list)
+			(for-each extract-hypergraph trip-list)
 		)
 
 		; Delete the sentence, its parses, and the word-instances
@@ -626,7 +626,7 @@
 		; Delete upwards ... this deletes the link to the document,
 		; and also the link to the new-parsed-sentences anchor.
 		; XXX but it leaves a DocumentNode with nothing pointing to it.
-		(cog-delete-recursive sent)
+		(cog-extract-recursive sent)
 	)
 
 	(for-each do-one-sentence (get-new-parsed-sentences))

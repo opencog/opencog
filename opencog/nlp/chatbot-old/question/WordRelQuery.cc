@@ -137,7 +137,7 @@ bool WordRelQuery::is_cncpt(Atom *atom)
 void WordRelQuery::add_to_predicate(Handle ah)
 {
 	/* scan for duplicates, and don't add them */
-	std::vector<Handle>::const_iterator i;
+	HandleSeq::const_iterator i;
 	for (i = normed_predicate.begin();
 	     i != normed_predicate.end(); ++i)
 	{
@@ -150,7 +150,7 @@ void WordRelQuery::add_to_predicate(Handle ah)
 void WordRelQuery::add_to_vars(Handle ah)
 {
 	/* scan for duplicates, and don't add them */
-	std::vector<Handle>::const_iterator i;
+	HandleSeq::const_iterator i;
 	for (i = bound_vars.begin();
 	     i != bound_vars.end(); ++i)
 	{

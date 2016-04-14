@@ -3,7 +3,7 @@ __author__ = 'Cosmo Harrigan'
 from flask import abort, json, current_app, jsonify
 from flask.ext.restful import Resource, reqparse, marshal
 import opencog.cogserver
-from opencog.atomspace import Handle, Atom
+from opencog.atomspace import Atom
 from mappers import *
 from flask.ext.restful.utils import cors
 from flask_restful_swagger import swagger
@@ -296,11 +296,11 @@ class AtomCollectionAPI(Resource):
 
         if id != "":
             try:
-                atom = self.atomspace[Handle(id)]
+                atom = self.atomspace.get_atom_with_uuid(id)
                 atoms = [atom]
             except IndexError:
                 atoms = []
-                # abort(404, 'Handle not found')
+                # abort(404, 'Atom not found')
         else:
             # First, check if there is a valid filter type, and give it
             # precedence if it exists
@@ -522,7 +522,7 @@ the atom. Example:
         # Outgoing set
         if 'outgoing' in data:
             if len(data['outgoing']) > 0:
-                outgoing = [Handle(h) for h in data['outgoing']]
+                outgoing = [Atom(uuid) for uuid in data['outgoing']]
         else:
             outgoing = None
 
@@ -615,7 +615,7 @@ containing the atom.
 	parameters=[
 	    {
 		'name': 'id',
-		'description': '<a href="http://wiki.opencog.org/w/Handle">Atom handle</a>',
+		'description': '<a href="http://wiki.opencog.org/w/Atom">Atom handle</a>',
 		'required': True,
 		'allowMultiple': False,
 		'dataType': 'int',
@@ -661,7 +661,7 @@ containing the atom.
 	responseMessages=[
 	    {'code': 200, 'message': 'Atom truth and/or attention value updated'},
 	    {'code': 400, 'message': 'Invalid type or required parameter type missing'},
-	    {'code': 404, 'message': 'Handle not found'}
+	    {'code': 404, 'message': 'Atom not found'}
 	]
     )
     def put(self, id):
@@ -669,8 +669,8 @@ containing the atom.
         Updates the AttentionValue (STI, LTI, VLTI) or TruthValue of an atom
         """
 
-        if Handle(id) not in self.atomspace:
-            abort(404, 'Handle not found')
+        if Atom(id) not in self.atomspace:
+            abort(404, 'Atom not found')
 
         # Prepare the atom data
         data = reqparse.request.get_json()
@@ -681,13 +681,13 @@ containing the atom.
 
         if 'truthvalue' in data:
             tv = ParseTruthValue.parse(data)
-            self.atomspace.set_tv(h=Handle(id), tv=tv)
+            self.atomspace.set_tv(h=Atom(id), tv=tv)
 
         if 'attentionvalue' in data:
             (sti, lti, vlti) = ParseAttentionValue.parse(data)
-            self.atomspace.set_av(h=Handle(id), sti=sti, lti=lti, vlti=vlti)
+            self.atomspace.set_av(h=Atom(id), sti=sti, lti=lti, vlti=vlti)
 
-        atom = self.atomspace[Handle(id)]
+        atom = self.atomspace.get_atom_with_uuid(id)
         return {'atoms': marshal(atom, atom_fields)}
 
     @swagger.operation(
@@ -710,7 +710,7 @@ Returns a JSON representation of the result, indicating success or failure.
 	parameters=[
 	    {
 		'name': 'id',
-		'description': '<a href="http://wiki.opencog.org/w/Handle">Atom handle</a>',
+		'description': '<a href="http://wiki.opencog.org/w/Atom">Atom handle</a>',
 		'required': True,
 		'allowMultiple': False,
 		'dataType': 'int',
@@ -719,7 +719,7 @@ Returns a JSON representation of the result, indicating success or failure.
 	],
 	responseMessages=[
 	    {'code': 200, 'message': 'Deleted the atom'},
-	    {'code': 404, 'message': 'Handle not found'},
+	    {'code': 404, 'message': 'Atom not found'},
 	]
     )
     def delete(self, id):
@@ -727,10 +727,10 @@ Returns a JSON representation of the result, indicating success or failure.
         Removes an atom from the AtomSpace
         """
 
-        if Handle(id) not in self.atomspace:
-            abort(404, 'Handle not found')
+        if Atom(id) not in self.atomspace:
+            abort(404, 'Atom not found')
         else:
-            atom = self.atomspace[Handle(id)]
+            atom = atomspace.get_atom_with_uuid(id)
 
         status = self.atomspace.remove(atom)
         response = DeleteAtomResponse(id, status)

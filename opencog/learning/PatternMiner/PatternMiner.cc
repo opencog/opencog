@@ -50,7 +50,7 @@ using namespace opencog;
 
 const string PatternMiner::ignoreKeyWords[] = {"this", "that","these","those","it","he", "him", "her", "she" };
 
-void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector < vector<int> >& indexes)
+void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector < vector<int> >& indexes)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
     for (Handle h : outgoingLinks)
@@ -131,10 +131,10 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
 
 }
 
-vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern, map<Handle,Handle>& orderedVarNameMap)
+HandleSeq PatternMiner::RebindVariableNames(HandleSeq& orderedPattern, map<Handle,Handle>& orderedVarNameMap)
 {
 
-    vector<Handle> rebindedPattern;
+    HandleSeq rebindedPattern;
 
     for (Handle link : orderedPattern)
     {
@@ -152,7 +152,7 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern,
 // the input links should be like: only specify the const node, all the variable node name should not be specified:
 // unifiedLastLinkIndex is to return where the last link in the input pattern is now in the ordered pattern
 // because the last link in input pattern is the externed link from last gram pattern
-vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, unsigned int& unifiedLastLinkIndex)
+HandleSeq PatternMiner::UnifyPatternOrder(HandleSeq& inputPattern, unsigned int& unifiedLastLinkIndex)
 {
 
     // Step 1: take away all the variable names, make the pattern into such format string:
@@ -206,7 +206,7 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, uns
     // becasue the strings are put into a map , so they are already sorted.
     // now print the Handles that do not share the same key with other Handles into a vector, left the Handles share the same keys
 
-    vector<Handle> orderedHandles;
+    HandleSeq orderedHandles;
     vector<string> duplicateStrs;
     multimap<string, Handle>::iterator it;
     for(it = nonVarStrToHandleMap.begin(); it != nonVarStrToHandleMap.end();)
@@ -268,13 +268,13 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, uns
     // the second Handle is the renamed ordered variable node in the Pattern Mining Atomspace.
     map<Handle,Handle> orderedVarNameMap;
 
-    vector<Handle> rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap);
+    HandleSeq rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap);
 
     return rebindPattern;
 
 }
 
-string PatternMiner::unifiedPatternToKeyString(vector<Handle>& inputPattern, const AtomSpace *atomspace)
+string PatternMiner::unifiedPatternToKeyString(HandleSeq& inputPattern, const AtomSpace *atomspace)
 {
     if (atomspace == 0)
         atomspace = this->atomSpace;
@@ -417,7 +417,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
     }
 }
 
-void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, set<Handle>& allVarNodes)
+void PatternMiner::extractAllVariableNodesInAnInstanceLink(Handle& instanceLink, Handle& patternLink, OrderedHandleSet& allVarNodes)
 {
 
     HandleSeq ioutgoingLinks = instanceLink->getOutgoingSet();
@@ -499,7 +499,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle, unsigned int>&
     }
 }
 
-void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _fromAtomSpace)
+void PatternMiner::extractAllNodesInLink(Handle link, OrderedHandleSet& allNodes, AtomSpace* _fromAtomSpace)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
 
@@ -519,7 +519,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, set<Handle>& allNodes, Ato
     }
 }
 
-void PatternMiner::extractAllVariableNodesInLink(Handle link, set<Handle>& allNodes, AtomSpace* _atomSpace)
+void PatternMiner::extractAllVariableNodesInLink(Handle link, OrderedHandleSet& allNodes, AtomSpace* _atomSpace)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
 
@@ -666,7 +666,7 @@ void PatternMiner::findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* H
     hImplicationLink->merge(TruthValue::TRUE_TV());
 
     // add variable atoms
-    set<Handle> allVariableNodesInPattern;
+    OrderedHandleSet allVariableNodesInPattern;
     for (unsigned int i = 0; i < HNode->pattern.size(); ++i)
     {
         extractAllVariableNodesInLink(HNode->pattern[i],allVariableNodesInPattern, atomSpace);
@@ -1317,14 +1317,14 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
     if(inputLinks.size() < 2)
         return false;
 
-    set<Handle> allNodesInEachLink[inputLinks.size()];
+    OrderedHandleSet allNodesInEachLink[inputLinks.size()];
 
-    set<Handle> all2ndOutgoingsOfInherlinks;
+    OrderedHandleSet all2ndOutgoingsOfInherlinks;
 
     // map<predicate, set<value> >
-    map<Handle, set<Handle> > predicateToValueOfEvalLinks;
+    map<Handle, OrderedHandleSet > predicateToValueOfEvalLinks;
 
-    set<Handle>  all1stOutgoingsOfEvalLinks;
+    OrderedHandleSet  all1stOutgoingsOfEvalLinks;
 
 
     for (unsigned int i = 0; i < inputLinks.size(); ++i)
@@ -1358,10 +1358,10 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
 
                 if (enable_filter_not_same_var_from_same_predicate)
                 {
-                    map<Handle, set<Handle> >::iterator it = predicateToValueOfEvalLinks.find(predicateNode);
+                    map<Handle, OrderedHandleSet >::iterator it = predicateToValueOfEvalLinks.find(predicateNode);
                     if (it != predicateToValueOfEvalLinks.end())
                     {
-                        set<Handle>& values = (it->second);
+                        OrderedHandleSet& values = (it->second);
                         if (values.find(valueNode) != values.end())
                             return true;
                         else
@@ -1369,9 +1369,9 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
                     }
                     else
                     {
-                        set<Handle> newValues;
+                        OrderedHandleSet newValues;
                         newValues.insert(valueNode);
-                        predicateToValueOfEvalLinks.insert(std::pair<Handle, set<Handle> >(predicateNode,newValues));
+                        predicateToValueOfEvalLinks.insert(std::pair<Handle, OrderedHandleSet >(predicateNode,newValues));
                     }
                 }
 
@@ -1397,7 +1397,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
         else if ((enable_filter_not_all_first_outgoing_const) )
         {
             // if enable_filter_first_outgoing_evallink_should_be_var is true, there is no need to enable this filter below
-            vector<Handle> all1stOutgoingsOfEvalLinksSeq(all1stOutgoingsOfEvalLinks.begin(), all1stOutgoingsOfEvalLinks.end());
+            HandleSeq all1stOutgoingsOfEvalLinksSeq(all1stOutgoingsOfEvalLinks.begin(), all1stOutgoingsOfEvalLinks.end());
             oneOfEachSeqShouldBeVars.push_back(all1stOutgoingsOfEvalLinksSeq);
         }
     }
@@ -1410,7 +1410,7 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
         {
             for (unsigned j = i+1; j < inputLinks.size(); j ++)
             {
-                vector<Handle> commonNodes;
+                HandleSeq commonNodes;
                 // get the common nodes in allNodesInEachLink[i] and allNodesInEachLink[j]
                 std::set_intersection(allNodesInEachLink[i].begin(), allNodesInEachLink[i].end(),
                                       allNodesInEachLink[j].begin(), allNodesInEachLink[j].end(),
@@ -1485,7 +1485,7 @@ bool PatternMiner::splitDisconnectedLinksIntoConnectedGroups(HandleSeq& inputLin
     if(inputLinks.size() < 2)
         return false;
 
-    set<Handle> allNodesInEachLink[inputLinks.size()];
+    OrderedHandleSet allNodesInEachLink[inputLinks.size()];
     for (unsigned int i = 0; i < inputLinks.size(); ++i)
     {
         extractAllVariableNodesInLink(inputLinks[i],allNodesInEachLink[i], atomSpace);
@@ -2841,9 +2841,9 @@ void PatternMiner::testPatternMatcher2()
 
 }
 
-set<Handle> PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, set<Handle>& allSubsetLinks)
+OrderedHandleSet PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode, OrderedHandleSet& allSubsetLinks)
 {
-    set<Handle> newHandles;
+    OrderedHandleSet newHandles;
     HandleSeq incomings;
     keywordNode->getIncomingSet(back_inserter(incomings));
 
@@ -2868,14 +2868,14 @@ set<Handle> PatternMiner::_getAllNonIgnoredLinksForGivenNode(Handle keywordNode,
     return newHandles;
 }
 
-set<Handle> PatternMiner::_extendOneLinkForSubsetCorpus(set<Handle>& allNewLinksLastGram, set<Handle>& allSubsetLinks)
+OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& allNewLinksLastGram, OrderedHandleSet& allSubsetLinks)
 {
-    set<Handle> allNewConnectedLinksThisGram;
+    OrderedHandleSet allNewConnectedLinksThisGram;
     // only extend the links in allNewLinksLastGram. allNewLinksLastGram is a part of allSubsetLinks
     for (Handle link : allNewLinksLastGram)
     {
         // find all nodes in this link
-        set<Handle> allNodes;
+        OrderedHandleSet allNodes;
         extractAllNodesInLink(link, allNodes, originalAtomSpace);
 
         for (Handle neighborNode : allNodes)
@@ -2887,7 +2887,7 @@ set<Handle> PatternMiner::_extendOneLinkForSubsetCorpus(set<Handle>& allNewLinks
             if (isIgnoredContent(content))
                 continue;
 
-            set<Handle> newConnectedLinks;
+            OrderedHandleSet newConnectedLinks;
             newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(neighborNode, allSubsetLinks);
             allNewConnectedLinksThisGram.insert(newConnectedLinks.begin(),newConnectedLinks.end());
             allSubsetLinks.insert(newConnectedLinks.begin(),newConnectedLinks.end());
@@ -2902,14 +2902,14 @@ set<Handle> PatternMiner::_extendOneLinkForSubsetCorpus(set<Handle>& allNewLinks
 void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection)
 {
     std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the following topics:" << std::endl ;
-    set<Handle> allSubsetLinks;
+    OrderedHandleSet allSubsetLinks;
     string topicsStr = "";
 
     for (string keyword : subsetKeywords)
     {
         std::cout << keyword << std::endl;
         Handle keywordNode = originalAtomSpace->add_node(opencog::CONCEPT_NODE,keyword);
-        set<Handle> newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
+        OrderedHandleSet newConnectedLinks = _getAllNonIgnoredLinksForGivenNode(keywordNode, allSubsetLinks);
 
         allSubsetLinks.insert(newConnectedLinks.begin(), newConnectedLinks.end());
         topicsStr += "-";
@@ -2918,7 +2918,7 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
     }
 
     unsigned int order = 0;
-    set<Handle> allNewConnectedLinksThisGram = allSubsetLinks;
+    OrderedHandleSet allNewConnectedLinksThisGram = allSubsetLinks;
 
     while (order < max_connection)
     {

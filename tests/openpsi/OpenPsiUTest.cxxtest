@@ -42,7 +42,7 @@ private:
     SchemeEval* _scm;
 
 public:
-    OpenPsiUTest(): _as(NULL), _scm(NULL)
+    OpenPsiUTest(): _as(nullptr), _scm(nullptr)
     {
         logger().set_level(Logger::DEBUG);
         logger().set_print_level_flag(true);
@@ -51,6 +51,7 @@ public:
 
     ~OpenPsiUTest()
     {
+        // Clean Up
         delete _as;
         delete _scm;
 
@@ -77,24 +78,6 @@ public:
         _scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR  "/opencog\")");
         CHKERR
 
-        // This is a copy of development.conf SCM_PRELOAD section after
-        // removing files not associated with scheme  modules that are not
-        // in use.
-        config().set("SCM_PRELOAD",
-                    "scm/opencog.scm,"
-                    "scm/core_types.scm,"
-                    "scm/core-docs.scm,"
-                    "scm/utilities.scm,"
-                    "scm/apply.scm,"
-                    "scm/file-utils.scm,"
-                    "scm/config.scm,"
-                    "scm/repl-shell.scm,"
-                    "scm/av-tv.scm,"
-                    "scm/rule-engine-utils.scm");
-
-        load_scm_files_from_config(*_as);
-        _as->clear();
-
         // Load function definition to be tested and populate the atomspace
         _scm->eval("(load-from-path \"openpsi/active-schema-pool.scm\")");
         CHKERR
@@ -108,28 +91,60 @@ public:
         _scm = nullptr;
     }
 
-    void test_psi_get_action_rules()
+    // Check that scheme function `psi-satisfiable?``
+    void test_psi_satisfiable()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-        // Test for `psi-get-action-rules` for the 3 psi-effect-types
-        TSM_ASSERT_EQUALS("Not the expected 'Default' action-rule", \
-            _scm->eval_h("(test-def)"), _scm->eval_h("(test-def-result)"));
-        TSM_ASSERT_EQUALS("Not the expected 'Increase' action-rules", \
-            _scm->eval_h("(test-inc)"), _scm->eval_h("(test-inc-result)"));
-        TSM_ASSERT_EQUALS("Not the expected 'Decrease' action-rules", \
-            _scm->eval_h("(test-dec)"), _scm->eval_h("(test-dec-result)"));
+        // Test unsatisfaiability
+        auto result_1 = _scm->eval("(psi-satisfiable? (rule-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1);
 
+        // Test satisfaiability
+        _scm->eval("(groundable-content-1)");
+        CHKERR
+        auto result_2 = _scm->eval("(psi-satisfiable? (rule-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2);
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
-    void test_psi_get_demands()
+    // Check that scheme function `psi-select-rules`
+    void test_psi_select_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-        TSM_ASSERT_EQUALS("Not the expected set of openpsi demands", \
-            _scm->eval_h("(test-select-all)"), \
-            _scm->eval_h("(test-select-all-result)"));
+        // Add the rules
+        auto rule_1 = _scm->eval_h("(rule-1)");
+        CHKERR
+        auto rule_2 = _scm->eval_h("(rule-2)");
+        CHKERR
+
+        // Test 1
+        auto result_1 = _scm->eval("(psi-select-rules)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1);
+
+        // Test 2
+        _scm->eval("(groundable-content-1)");
+        CHKERR
+        auto result_2_1 = _scm->eval("(length (psi-select-rules))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected a single rule", "1\n" , result_2_1);
+
+        auto result_2_2 = _scm->eval_h("(car (psi-select-rules))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected the same psi-rule", rule_1, result_2_2);
+        CHKERR
+
+        // Test 3
+        _scm->eval("(groundable-content-2)");
+        CHKERR
+        auto result_3 = _scm->eval("(length (psi-select-rules))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected a two rules", "2\n" , result_3);
+
         logger().info("END TEST: %s", __FUNCTION__);
     }
 

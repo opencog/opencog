@@ -38,9 +38,9 @@
 using namespace opencog;
 using namespace std;
 
-vector<Handle> createNodes(AtomSpace* atomSpace, std::string baseName, int number)
+HandleSeq createNodes(AtomSpace* atomSpace, std::string baseName, int number)
 {
-    vector<Handle> testAtoms;
+    HandleSeq testAtoms;
 
     for (int i = 0; i < number; i++) {
         std::ostringstream buf;
@@ -54,10 +54,10 @@ vector<Handle> createNodes(AtomSpace* atomSpace, std::string baseName, int numbe
     return testAtoms;
 }
 
-vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
+HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {
     char buf[256];
-    vector<Handle> testAtoms;
+    HandleSeq testAtoms;
     int baseNameLength;
 
     memset(buf,0,256);
@@ -131,7 +131,7 @@ public:
     }
 
     void testPercentForget() {
-        std::vector<Handle> atoms;
+        HandleSeq atoms;
         printf("Testing forgetting based on percentage\n");
 
         agent->forgetPercentage = 0.10;
@@ -194,7 +194,7 @@ public:
     }
 
     void testThresholdForget() {
-        std::vector<Handle> atoms;
+        HandleSeq atoms;
         printf("Testing forgetting based on threshold\n");
 
         agent->forgetPercentage = 1.0f;
@@ -241,7 +241,7 @@ public:
 
     void testBothPercentAndThreshold() {
         int numRemoved = 0;
-        std::vector<Handle> atoms;
+        HandleSeq atoms;
         printf("Testing forgetting based on percentage and threshold\n");
 
         agent->forgetPercentage = 0.10f;
