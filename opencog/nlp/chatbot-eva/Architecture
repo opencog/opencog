@@ -31,6 +31,11 @@ subject to re-appraisal and redesign.
 
 General overview
 ----------------
+If you are bored by generalities, then jump immediately to the section
+titled "The existing code base (March/April 2016)" below.  That's where
+the meat is. After you read that, come back and read the generalities,
+because that is where the meta-meat is.
+
 The general strategy is this:
  0. Raw sensory input.
  1. Identify what is being asked (said, perceived)
@@ -238,7 +243,56 @@ The steps are:
     manage synonymy with LG, than with the RelEx dependency relations!
 
 
- II.b)
+ II.b) Perform "semantic analysis" on the intermediate form. This
+    attempts to match the contents of the intermediate form to one
+    or more bits of "grounded knowledge".
+
+    The current set of atoms representing "grounded knowledge" can be
+    found in `knowledge.scm`.  Knowledge comes in two forms: "grounded
+    meanings" for single words, (single WordNodes) and "grounded
+    meanings" for graphs (Links).
+
+    An example of a "grounded meaning for a word" would be "leftwards"
+    which is attached to an 3D robot-body-relative x,y,z coordinate.
+    This particular "meaning" for "leftwards" is ALSO built into an
+    ontology: "leftwards" is-A "direction".  The ontology is needed
+    because "look left" needs to be disambiguated from "look happy".
+
+    An example of a "grounded meaning for a graph" is "turn-model".
+    The "turn-model" is an EvaluationLink with two parts. The first
+    part has to belong to the the class of turning-movement-actions
+    (abstracted "verbs" that expect a "direction" as an argument).
+    The second part is a "direction" i.e. belongs to the class of
+    "directions" in the ontology.
+
+    So, for example, the word "look" is-A turning-movement-action.
+    If the intermediate form combines this with a word that is-A
+    "direction", then the "turn-model" pattern becomes a "grounded
+    meaning for the graph".  Thus, the semantic analysis of the
+    intermediate form results in the discovery of the "turn-model".
+    This discovery grounds the intrmediate form "look left" to
+    specific 3D spatial x,y,z coordinates, and also a specific
+    motor-control (animation) predicate (DefinedPredicate "Look
+    command") which, if executed, would cause the robot to turn.
+    (as well as other things, such as update the self model. More
+    on execution later.)
+
+    A different example of a "grounded meaning for a graph" is the
+    "express-action".  Its also a two-part EvaluationLink, except
+    that the first slot must belong to the class of verbs having to
+    do with facial expressions or gestures, and the second part is
+    a word naming an expression or gesture.  Note that the word
+    "look" is-A facial-expression-action.
+
+    Thus, the word "look" has two different grounded meanings; one
+    meaning is "turning-movement", and the other is "showing-
+    expression".  The correct meaning cannot be found without looking
+    to see if the intermediate-form-object of the intermediate-form-
+    verb is a direction, or an emotion-gesture name.
+
+    The rules that perform the above semantic analysis are in the
+    file `semantics.scm`.  The rules here depend on the knowledge
+    representation being wired up just right, in `knowledge.scm`.
 
 
 Lessons learned: Subsystem we don't have, but we need
@@ -252,7 +306,9 @@ words or phrases.
 II.a) makes clear: we need some reasonable "intermediate form" that
 is not R2L.
 
- 
+
+no ontology
+
 
 
 Appendix A - Expanding sensory input
