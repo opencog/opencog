@@ -25,14 +25,14 @@
 ; --------------------------------------------------------------
 (define (psi-action-selector-set! dsn)
 "
-  Sets the given DefinedPredicateNode to be used for selecting actions.
+  Sets the given DefinedSchemaNode to be used for selecting actions.
 
   dsn:
   - The DefinedSchemaNode that represents the executable-term used for
     selecting the psi-rules that should have their actions and goals executed.
 "
     ; Check arguments
-    (if (not (equal? (cog-type dpn) 'DefinedSchemaNode))
+    (if (not (equal? (cog-type dsn) 'DefinedSchemaNode))
         (error "Expected DefinedSchemaNode got: " dsn))
 
     (cog-execute!
