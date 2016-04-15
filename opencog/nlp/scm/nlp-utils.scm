@@ -22,6 +22,7 @@
 ; -- sentence-get-parses    Get parses of a sentence.
 ; -- sentence-get-utterance-type  Get the speech act of a sentence.
 ; -- sent-list-get-parses   Get parses of a list of sentences.
+; -- sent-get-words-in-order  Get all words occuring in a sentence in order.
 ; -- parse-get-words        Get all words occuring in a parse.
 ; -- parse-get-words-in-order  Get all words occuring in a parse in order.
 ; -- parse-get-relations    Get all RelEx relations in a parse.
@@ -205,6 +206,16 @@
 
 	; Return act-type
 	act-type
+)
+
+; ---------------------------------------------------------------------
+(define-public (sent-get-words-in-order sent-node)
+"
+  sent-get-words-in-order - Given a sentence, return a list of all words in order
+
+  Given a sentence, return all word instances in order
+"
+	(map parse-get-words-in-order (sentence-get-parses sent-node))
 )
 
 ; ---------------------------------------------------------------------
