@@ -12,7 +12,7 @@
   evaluatable term.
 
   A StateLink is used instead of an InheritanceLink because there could only
-  be one active action-rule-selector at a time eventhough there could be
+  be one active action-rule-selector at a time even though there could be
   multiple possible action-rule-selectors. And this enables dynamically
   changing the action-rule-selector through learning.
 "
@@ -25,20 +25,19 @@
 ; --------------------------------------------------------------
 (define (psi-action-selector-set! dsn)
 "
-  Sets the given DefinedPredicateNode to be used for selecting actions.
+  Sets the given DefinedSchemaNode to be used for selecting actions.
 
   dsn:
   - The DefinedSchemaNode that represents the executable-term used for
     selecting the psi-rules that should have their actions and goals executed.
 "
     ; Check arguments
-    (if (not (equal? (cog-type dpn) 'DefinedSchemaNode))
+    (if (not (equal? (cog-type dsn) 'DefinedSchemaNode))
         (error "Expected DefinedSchemaNode got: " dsn))
 
-    (cog-execute!
-        (PutLink
-            (psi-action-selector-pattern)
-            dsn)
+    (StateLink
+        (ConceptNode (string-append (psi-prefix-str) "action-selector"))
+        dsn
     )
 )
 
