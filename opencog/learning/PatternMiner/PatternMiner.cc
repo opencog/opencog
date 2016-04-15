@@ -2819,14 +2819,24 @@ HandleSeqSeq PatternMiner::selectPatternsRelatedToPriorProperties(set<string> pr
 
     if (selectedPatterns.size() > 0)
     {
-        cout << "Selected Patterns:\n";
-        multimap<unsigned int, HTreeNode*>::iterator iter = selectedPatterns.begin();
-        for(; iter != selectedPatterns.end(); iter ++)
+        int patternNun = 3;
+        if (selectedPatterns.size() < 3)
+            patternNun = selectedPatterns.size();
+
+        cout << "Top Selected Patterns:\n";
+        multimap<unsigned int, HTreeNode*>::iterator iter = selectedPatterns.end();
+        int num = 0;
+        while(true)
         {
-            cout << "Priority count = " << iter->first << "\n";
+            iter --; // Because multimap keys are in a ascending order, the best patterns will be in the end of the map.
+            cout << "Priority weight = " << iter->first << "\n";
             HTreeNode* htreeNode = iter->second;
             cout << unifiedPatternToKeyString(htreeNode->pattern) << "\n";
             returnSelectedPatterns.push_back(htreeNode->pattern);
+            num ++;
+
+            if (num == patternNun)
+                break;
         }
     }
 

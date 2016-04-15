@@ -2620,7 +2620,7 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
 //    }
 //}
 
-Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
+MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
 {
     // Step 1: find out what kind of object the state ower is in this subgoal         
     vector<ParamValue> stateOwnerList = curSubgoalNode->state->stateOwnerList;
@@ -2776,6 +2776,8 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
     //      (ListLink )
     //        (VariableNode $var_4)
     //        (VariableNode $var_1)
+
+    std::map <string, HandleSeq> paramToPattern;
     std::map <string, HandleSeq>::iterator paramMapIter = paramNameToParamEvalLinks.begin();
     for (; paramMapIter != paramNameToParamEvalLinks.end(); paramMapIter ++ )
     {
@@ -2928,12 +2930,19 @@ Rule* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
                 cout << "There is no distinguishingProperties or intrinsicProperties for this kind of entities, just adopt the patterns with highest frequency..."<< std::endl;
             }
 
-
+            // currently we just try to use the top selected pattern
+            HandleSeq topPattern = priorPatterns[0];
+            paramToPattern.insert(std::pair<string, HandleSeq>(paramMapIter->string, topPattern));
 
         }
 
-
     }
+
+    MinedRulePattern* minedRulePattern = new minedRulePattern();
+    minedRulePattern->actionName = atomSpace->getName(highestActionTypeHandle);
+    minedRulePattern->paramToPatttern = paramToPattern;
+
+    return minedRulePattern;
 
 
 }
