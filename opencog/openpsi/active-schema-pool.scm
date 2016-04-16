@@ -188,7 +188,7 @@
 (define-public (psi-run-continue?)  ; public only because its in a GPN
     (set! psi-loop-count (+ psi-loop-count 1))
 
-    ; Pause for 101 millisecs, to kepp the number of loops within a resonable
+    ; Pause for 101 millisecs, to kepp the number of loops within a reasonable
     ; range.    ;
     (usleep 101000)
     (if psi-do-run-loop (stv 1 1) (stv 0 1))
