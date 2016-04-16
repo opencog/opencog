@@ -34,7 +34,7 @@ library
                        , containers
 -- -o libjsd.so -optl-Wl,-rpath
   c-sources:           moduleinit.c
-  ghc-options:         -dynamic -shared -fPIC
+  ghc-options:         -dynamic -shared -fPIC -o libjsd.o
   extra-libraries:     HSrts-ghc7.10.3
   default-language:    Haskell2010
 

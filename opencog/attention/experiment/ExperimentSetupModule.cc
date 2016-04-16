@@ -157,16 +157,16 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
             SimpleImportanceDiffusionAgent::info().id, false);
 
     //Register experiment specific agents. Add more if you have here.
-    if (_cs.registerAgent(ArtificialStimulatorAgent::info().id,
-                          &artificialStimulatorAgentFactory)) {
-        _artificialstimulatoragentptr = _cs.createAgent(
-                ArtificialStimulatorAgent::info().id, false);
-    }
+    //if (_cs.registerAgent(ArtificialStimulatorAgent::info().id,
+    //                      &artificialStimulatorAgentFactory)) {
+    //    _artificialstimulatoragentptr = _cs.createAgent(
+    //            ArtificialStimulatorAgent::info().id, false);
+    //}
 
-    if (_cs.registerAgent(SmokesDBFCAgent::info().id, &smokesFCAgnetFactory)) {
-        _smokes_fc_agentptr = _cs.createAgent(SmokesDBFCAgent::info().id,
-        false);
-    }
+    //if (_cs.registerAgent(SmokesDBFCAgent::info().id, &smokesFCAgnetFactory)) {
+    //  _smokes_fc_agentptr = _cs.createAgent(SmokesDBFCAgent::info().id,
+    //    false);
+    //}
 
     return "Loaded the following agents:\n" + ECAN_EXP_AGENTS;
 }
@@ -179,7 +179,7 @@ std::string ExperimentSetupModule::do_ecan_start(Request *req,
     _cs.startAgent(_hebbianupdating_agentptr);
     _cs.startAgent(_importanceupdating_agentptr);
     _cs.startAgent(_simpleimportancediffusion_agentptr);
-    _cs.startAgent(_smokes_fc_agentptr);
+    //_cs.startAgent(_smokes_fc_agentptr);
 
     return "The following agents were started:\n" + ECAN_EXP_AGENTS;
 }
@@ -192,8 +192,8 @@ std::string ExperimentSetupModule::do_ecan_pause(Request *req,
     _cs.stopAgent(_importanceupdating_agentptr);
     _cs.stopAgent(_simpleimportancediffusion_agentptr);
 
-    _cs.stopAgent(_artificialstimulatoragentptr);
-    _cs.stopAgent(_smokes_fc_agentptr);
+    //_cs.stopAgent(_artificialstimulatoragentptr);
+    //_cs.stopAgent(_smokes_fc_agentptr);
 
     return "The following agents were stopped:\n" + ECAN_EXP_AGENTS;
 }
