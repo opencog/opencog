@@ -28,6 +28,7 @@
                 (cog-execute! (psi-get-action x))
                 (cog-evaluate! (psi-get-goal x)))
             rules)
+        (stv 1 1)
     )
 )
 
@@ -160,4 +161,71 @@
             )
         )
     )
+)
+
+; --------------------------------------------------------------
+; Main loop control
+(define psi-do-run-loop #t)
+
+(define-public (psi-running?)
+"
+  Return #t if the openpsi loop is running, else return #f.
+"
+    psi-do-run-loop
+)
+
+(define psi-loop-count 0)
+
+(define-public (psi-get-loop-count)
+"
+ behavior-tree-loop-count
+
+ Return the loop-count of the behavior tree.
+"
+    psi-loop-count
+)
+
+(define-public (psi-run-continue?)  ; public only because its in a GPN
+    (set! psi-loop-count (+ psi-loop-count 1))
+
+    ; Pause for 101 millisecs, to kepp the number of loops within a resonable
+    ; range.    ;
+    (usleep 101000)
+    (if psi-do-run-loop (stv 1 1) (stv 0 1))
+)
+
+; ----------------------------------------------------------------------
+(define-public (psi-run)
+"
+  Run `psi-step` in a new thread. Call (psi-halt) to exit the loop.
+"
+    (define loop-name (string-append (psi-prefix-str) "loop"))
+    (define (loop-node) (DefinedPredicateNode loop-name))
+    (define (define-psi-loop)
+        (DefineLink
+            (loop-node)
+            (SatisfactionLink
+                (SequentialAnd
+                    (Evaluation
+                        (GroundedPredicate "scm: psi-step")
+                        (ListLink))
+                    (Evaluation
+                        (GroundedPredicate "scm: psi-run-continue?")
+                        (ListLink))
+                    (loop-node)))))
+
+    (if (null? (cog-node 'DefinedPredicateNode loop-name))
+        (define-psi-loop)
+        #f ; Nothing to do already defined
+    )
+    (set! psi-do-run-loop #t)
+    (call-with-new-thread
+        (lambda () (cog-evaluate! (loop-node))))
+)
+
+(define-public (psi-halt)
+"
+  Tell the psi main loop thread to exit.
+"
+    (set! psi-do-run-loop #f)
 )
