@@ -220,20 +220,22 @@
 ; --------------------------------------------------------------
 ; Functions to help define standard action-rules
 ; --------------------------------------------------------------
-(define-public (psi-action-maximize rate)
+(define-public (psi-demand-goal-maximize demand-node rate)
 "
   Returns an ExecutionOutputLink(the action) that increases the demand-value.
   It has an increasing effect on the demand-value.
+
+  demand-node:
+  - A node representing a demand.
 
   rate:
   - A number for the percentage of change that a demand-value will be updated
     with, on each step.
 "
-
-    (ExecutionOutputLink
-        (GroundedSchemaNode "scm: psi-demand-value-maximize")
+    (EvaluationLink
+        (GroundedPredicateNode "scm: psi-demand-value-maximize")
         (ListLink
-            demand-var
+            demand-node
             (NumberNode rate)))
 )
 
@@ -248,63 +250,31 @@
   - A NumberNode for the percentage of change that a demand-value will be
     updated with, on each step.
 "
-
     (let ((strength (tv-mean (cog-tv  demand-node)))
           (conf (tv-conf (cog-tv demand-node)))
           (rate (/ (string->number (cog-name rate-node)) 100)))
         (cog-set-tv! demand-node (stv (+ strength (* strength rate)) conf))
+        (stv 1 1)
     )
 )
 
-(define-public (psi-action-rule-maximize demand-node rate weight)
-"
-  Creates an action-rule with the effect of increasing the demand-value for the
-  given demand.
-
-  demand-node:
-  - The node representing the demand.
-
-  rate:
-  - A number for the percentage of change that a demand-value will be updated
-    with, on each step. If an action with the same rate of has been defined
-    for the given demand a new action isn't created, but the old one returned.
-
-  weight:
-  - This is the strength of the MemberLink TruthValue that adds the action-rule
-  to the rulebase of the demand.
-"
-
-    ; TODO test for retrun of previously defined action-rule when one tries
-    ; a new action-rule of the same rate  for the same demand.
-    (psi-action-rule
-        (assoc-ref (psi-demand-pattern) "var")
-        (list
-            (assoc-ref (psi-demand-pattern) "pat")
-            ; Filter out all other demands
-            (EqualLink demand-var demand-node)
-        )
-        (psi-action-maximize rate)
-        demand-node
-        "Increase"
-        (string-append "maximize-" (number->string rate))
-        weight)
-)
-
 ; --------------------------------------------------------------
-(define-public (psi-action-minimize rate)
+(define-public (psi-demand-goal-minimize demand-node rate)
 "
   Returns an ExecutionOutputLink(the action) that decreases the demand-value.
   It has a decreasing effect on the demand value.
+
+  demand-node:
+  - A node representing a demand.
 
   rate:
   - A number for the percentage of change that a demand-value will be updated
     with, on each step.
 "
-
-    (ExecutionOutputLink
-        (GroundedSchemaNode "scm: psi-demand-value-minimize")
+    (EvaluationLink
+        (GroundedPredicateNode "scm: psi-demand-value-minimize")
         (ListLink
-            demand-var
+            demand-node
             (NumberNode rate)))
 )
 
@@ -319,48 +289,16 @@
   - A NumberNode for the percentage of change that a demand-value will be
     updated with, on each step.
 "
-
     (let ((strength (tv-mean (cog-tv  demand-node)))
           (conf (tv-conf (cog-tv demand-node)))
           (rate (/ (string->number (cog-name rate-node)) 100)))
         (cog-set-tv! demand-node (stv (- strength (* strength rate)) conf))
+        (stv 1 1)
     )
 )
 
-(define-public (psi-action-rule-minimize demand-node rate weight)
-"
-  Creates an action with the effect of decreasing the demand-value for the
-  given demand.
-
-  demand-node:
-  - The node representing the demand.
-
-  rate:
-  - A number for the percentage of change that a demand-value be updated with,
-    on each step. If an action with the same rate of has been defined for the
-    given demand a new action isn't created, but the old one returned.
-
-  weight:
-  - This is the strength of the MemberLink TruthValue that adds the action-rule
-  to the rulebase of the demand.
-"
-
-    (psi-action-rule
-        (assoc-ref (psi-demand-pattern) "var")
-        (list
-            (assoc-ref (psi-demand-pattern) "pat")
-            ; Filter out all other demands
-            (EqualLink demand-var demand-node)
-        )
-        (psi-action-minimize rate)
-        demand-node
-        "Decrease"
-        (string-append "minimize-" (number->string rate))
-        weight)
-)
-
 ; --------------------------------------------------------------
-(define-public (psi-action-keep-range min-value max-value rate)
+(define-public (psi-demand-goal-keep-range demand-node min-value max-value rate)
 "
   Returns an ExecutionOutputLink(the action) that tries to maintain the
   demand-value within the specified range. If the demand-value is within range
@@ -368,6 +306,9 @@
 
   It is mainily to be used as a default effect-type, as it can increase or
   decrease the demand value.
+
+  demand-node:
+  - A node representing a demand.
 
   min-value:
   - A number for the minimum acceptable demand-value.
@@ -389,16 +330,15 @@
        (error "Expected the percentage of change for the demand value "
               "to be > 0, got: " rate))
 
-    (ExecutionOutputLink
-        (GroundedSchemaNode "scm: psi-demand-value-maximize-range")
+    (EvaluationLink
+        (GroundedPredicateNode "scm: psi-demand-value-maximize-range")
         (ListLink
-            demand-var
+            demand-node
             (NumberNode min-value)
             (NumberNode max-value)
             (NumberNode rate)))
 )
 
-; --------------------------------------------------------------
 (define-public (psi-demand-value-maximize-range
                     demand-node min-node max-node rate-node)
 "
@@ -419,7 +359,6 @@
   - A NumberNode for the percentage of change that a demand-value be updated
     with, should it pass the boundaries. Must be greater than zero.
 "
-
     (let ((mean (tv-mean (cog-tv  demand-node)))
           (min-value (string->number (cog-name min-node)))
           (max-value (string->number (cog-name max-node)))
