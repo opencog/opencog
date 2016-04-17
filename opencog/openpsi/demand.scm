@@ -11,7 +11,6 @@
 ; NOTE: Shouldn't be exported to prevent modification.
 (define demand-var (VariableNode "Demand"))
 
-
 ; --------------------------------------------------------------
 (define-public (psi-get-demands dpn)
 "
@@ -26,6 +25,7 @@
     (Optionaly the argument could be a `(TrueLink)` for returning all the
     demands defined)
 "
+
     (define (get-demand) (cog-bind
         (BindLink
             (AndLink
@@ -34,20 +34,18 @@
                     demand-var
                     (ConceptNode (string-append (psi-prefix-str) "Demand")))
                 (EvaluationLink
-                    (PredicateNode (string-append (psi-prefix-str) "initial_value"))
+                    (PredicateNode
+                        (string-append (psi-prefix-str) "initial_value"))
                     (ListLink
                         demand-var
                         (VariableNode "value"))))
-                (VariableNode "demand"))))
+                demand-var)))
 
     ; check arguments
     (if (and (not (equal? (cog-type dpn) 'DefinedPredicateNode))
              (not (equal? (cog-type dpn) 'TrueLink)))
         (error "Expected DefinedPredicateNode or TrueLink got: " dpn))
 
-    ; TODO: 1. deal with multiple returns
-    ;       2. check if the demands have been correctly tagged or maybe add
-    ;          psi-register-goal-selector
     (get-demand)
 )
 
@@ -61,7 +59,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-demand  demand-name initial-value)
+(define-public (psi-demand demand-name initial-value)
 "
   Define an OpenPsi demand, that will have a default behavior defined by the
   the action passed. It returns the demand-node which is a ConceptNode.
@@ -74,6 +72,15 @@
     ConceptNode stv. The confidence of the stv is always 1.
 
 "
+
+    ; Check arguments
+    (if (not (string? demand-name))
+        (error (string-append "In function psi-demand, expected frist argument "
+            "to be a string got: ") demand-name))
+    (if (or (> 0 initial-value) (< 1 initial-value))
+       (error (string-append "In function psi-demand, expected second argument "
+            "the to be within [0, 1] interval, got:") initial-value))
+
     (let* ((demand-str (string-append (psi-prefix-str) demand-name))
            (demand-node (ConceptNode demand-str (stv initial-value 1))))
 
@@ -94,25 +101,25 @@
 )
 ;
 ; --------------------------------------------------------------
-(define-public (psi-demand? atom)
+(define-public (psi-demand? node)
 "
   Checks whether an atom is The node that satisfies the pattern used
   to define an OpenPsi demand. Returns True-TruthValue `(stv 1 1)` if it is
   and False-TruthValue `(stv 0 1)` if it isn't.
 
-  atom:
-  - The atom that is being checked to see if it is the Node that represents
+  node:
+  - The node that is being checked to see if it is a ConceptNode that represents
     a demand type.
 "
     (define (demand-names)
         (map cog-name (cog-outgoing-set (psi-get-demands-all))))
 
     ; Check arguments
-    (if (not (cog-node? atom))
-        (error "In procedure psi-demand?: Expected a Node got: " atom))
+    (if (not (cog-node? node))
+        (error "In function psi-demand?: Expected a Node got: " node))
 
-    (if (and (member (cog-name atom) (demand-names))
-             (equal? (cog-type atom) 'ConceptNode))
+    (if (and (member (cog-name node) (demand-names))
+             (equal? (cog-type node) 'ConceptNode))
         (stv 1 1)
         (stv 0 1)
     )
@@ -321,10 +328,10 @@
     on each step, should it pass the boundaries.
 "
     ; Check arguments
-    (if (or (> min-value max-value) (>= 0 min-value) (<= 1 max-value))
-       (error "Expected the range to be a subset of (0, 1) interval, got: "
-              (string-append "(" (number->string min-value) ", "
-                  (number->string max-value) ")" ))
+    (if (or (> min-value max-value) (> 0 min-value) (< 1 max-value))
+       (error (string-append "In function psi-demand-goal-keep-range expected "
+            "the range to be a subset of [0, 1] interval, got: "
+            "[" (number->string min-value) ", " (number->string max-value) "]"))
     )
     (if (>= 0 rate)
        (error "Expected the percentage of change for the demand value "
@@ -344,7 +351,7 @@
 "
   Increases or decreases the strength of the demand depending on whether it is
   in between the range specified. The range is taken as an open-interval, that
-  must be a subset of (0, 1) interval.
+  must be a subset of [0, 1] interval.
 
   demand-node:
   - The node that represents the demand.
