@@ -44,8 +44,10 @@
         (let ((a-stv (cog-tv x)))
             (* (tv-conf a-stv) (tv-mean a-stv))))
 
-   (fold
-       (lambda (x y) (if (> (weight y) (weight x)) y x))
-       (car atom-list) atom-list
-   )
+    ; Check argument
+    (if (null? atom-list)
+        '()
+       (fold (lambda (x y) (if (> (weight y) (weight x)) y x))
+             (car atom-list) atom-list)
+    )
 )
