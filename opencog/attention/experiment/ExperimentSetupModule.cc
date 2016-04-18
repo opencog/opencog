@@ -16,6 +16,7 @@
 #include <opencog/attention/ImportanceUpdatingAgent.h>
 #include <opencog/attention/SimpleHebbianUpdatingAgent.h>
 #include <opencog/attention/SimpleImportanceDiffusionAgent.h>
+#include <opencog/attention/StochasticImportanceDiffusionAgent.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/attention/experiment/SmokesDBFCAgent.h>
 
@@ -155,13 +156,15 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
             ImportanceUpdatingAgent::info().id, false);
     _simpleimportancediffusion_agentptr = _cs.createAgent(
             SimpleImportanceDiffusionAgent::info().id, false);
+    _stochasticimportancediffusion_agentptr = _cs.createAgent(
+            StochasticImportanceDiffusionAgent::info().id,false);
 
     //Register experiment specific agents. Add more if you have here.
-    //if (_cs.registerAgent(ArtificialStimulatorAgent::info().id,
-    //                      &artificialStimulatorAgentFactory)) {
-    //    _artificialstimulatoragentptr = _cs.createAgent(
-    //            ArtificialStimulatorAgent::info().id, false);
-    //}
+    if (_cs.registerAgent(ArtificialStimulatorAgent::info().id,
+                          &artificialStimulatorAgentFactory)) {
+        _artificialstimulatoragentptr = _cs.createAgent(
+                ArtificialStimulatorAgent::info().id, false);
+    }
 
     //if (_cs.registerAgent(SmokesDBFCAgent::info().id, &smokesFCAgnetFactory)) {
     //  _smokes_fc_agentptr = _cs.createAgent(SmokesDBFCAgent::info().id,
@@ -178,7 +181,8 @@ std::string ExperimentSetupModule::do_ecan_start(Request *req,
     _cs.startAgent(_forgetting_agentptr);
     _cs.startAgent(_hebbianupdating_agentptr);
     _cs.startAgent(_importanceupdating_agentptr);
-    _cs.startAgent(_simpleimportancediffusion_agentptr);
+    //_cs.startAgent(_simpleimportancediffusion_agentptr);
+    _cs.startAgent(_stochasticimportancediffusion_agentptr,true,"sida");
     //_cs.startAgent(_smokes_fc_agentptr);
 
     return "The following agents were started:\n" + ECAN_EXP_AGENTS;
@@ -190,7 +194,8 @@ std::string ExperimentSetupModule::do_ecan_pause(Request *req,
     _cs.stopAgent(_forgetting_agentptr);
     _cs.stopAgent(_hebbianupdating_agentptr);
     _cs.stopAgent(_importanceupdating_agentptr);
-    _cs.stopAgent(_simpleimportancediffusion_agentptr);
+    //_cs.stopAgent(_simpleimportancediffusion_agentptr);
+    _cs.stopAgent(_stochasticimportancediffusion_agentptr);
 
     //_cs.stopAgent(_artificialstimulatoragentptr);
     //_cs.stopAgent(_smokes_fc_agentptr);

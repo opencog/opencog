@@ -22,7 +22,6 @@
  */
 
 #include <time.h>
-#include <math.h>
 
 #include <opencog/util/Config.h>
 #include <opencog/util/platform.h>
@@ -68,6 +67,10 @@ StochasticImportanceDiffusionAgent::StochasticImportanceDiffusionAgent(CogServer
     // Provide a logger
     log = NULL;
     setLogger(new opencog::Logger("StochasticImportanceDiffusionAgent.log", Logger::FINE, true));
+}
+
+StochasticImportanceDiffusionAgent::~StochasticImportanceDiffusionAgent()
+{
 }
 
 void StochasticImportanceDiffusionAgent::setLogger(Logger* _log)
@@ -117,12 +120,18 @@ void StochasticImportanceDiffusionAgent::spreadImportance()
 
     size_t size = links.size();
 
+    if (size == 0)
+        return;
+
     int index = rand() % size;
 
     Handle source = links[index];
 
     HandleSeq targetSet =
             get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
+
+    if (targetSet.size() == 0)
+        return;
 
     float totalAvailableDiffusionAmmount = a->get_STI(source) * maxSpreadPercentage;
 

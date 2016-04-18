@@ -32,6 +32,7 @@
 #include <opencog/attention/ImportanceDiffusionAgent.h>
 #include <opencog/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/attention/ImportanceUpdatingAgent.h>
+#include <opencog/attention/StochasticImportanceDiffusionAgent.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/Module.h>
 
@@ -54,6 +55,7 @@ private:
 #endif
     Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
     Factory<SimpleImportanceDiffusionAgent, Agent> simpleDiffusionFactory;
+    Factory<StochasticImportanceDiffusionAgent, Agent> stochasticDiffusionFactory;
 
 public:
 

@@ -40,6 +40,7 @@ private:
     AgentPtr _hebbianupdating_agentptr;
     AgentPtr _importanceupdating_agentptr;
     AgentPtr _simpleimportancediffusion_agentptr;
+    AgentPtr _stochasticimportancediffusion_agentptr;
 
     AgentPtr _sentencegenstim_agentptr;
     AgentPtr _artificialstimulatoragentptr;

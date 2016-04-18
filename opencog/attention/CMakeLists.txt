@@ -36,9 +36,10 @@ ADD_LIBRARY(attention SHARED
 	SimpleHebbianUpdatingAgent
 	ImportanceSpreadingAgent
 	ImportanceDiffusionAgent
+	ImportanceDiffusionAgent2
+    StochasticImportanceDiffusionAgent
 	SimpleImportanceDiffusionAgent
 	ImportanceUpdatingAgent
-    #StochasticImportanceDiffusionAgent
 )
 
 ADD_DEPENDENCIES(attention attention-types)
@@ -86,6 +87,7 @@ INSTALL (FILES
 	SpreadDecider.h
 	SimpleImportanceDiffusionAgent.h
 	ImportanceUpdatingAgent.h
+    StochasticImportanceDiffusionAgent.h
 	DESTINATION "include/${PROJECT_NAME}/attention"
 )
 

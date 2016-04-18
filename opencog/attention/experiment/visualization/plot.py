@@ -91,22 +91,23 @@ def set_heb_data(file_path, uuids):
 
 
 if __name__ == "__main__":
+    print(sys.argv)
     if len(sys.argv) < 3:
-        print "ERROR: Options are [FILE_PATH] [sti|lti|vlti|hebst] [comma separated uuids]"
+        print("ERROR: Options are [FILE_PATH] [sti|lti|vlti|hebst] [comma separated uuids]")
         exit()
 
     path = sys.argv[1]
     if path == "":
-        print "ERROR: Path to time seris data not provided."
+        print("ERROR: Path to time seris data not provided.")
 
     plot = sys.argv[2]
     if plot == "":
-        print "ERROR: Need plot type.Supported options are:\n\tsti\tlti\tvlti"
+        print("ERROR: Need plot type.Supported options are:\n\tsti\tlti\tvlti")
 
     uuid = []
     uuid_str = sys.argv[3]
     if uuid_str == "" :
-        print "ERROR: Need comma separted uuids to plot."
+        print("ERROR: Need comma separted uuids to plot.")
     else:
         uuids = uuid_str.split(',');
 
@@ -123,7 +124,7 @@ if __name__ == "__main__":
         set_heb_data(path,uuids)
         plot_hebstrength(uuids)
     else:
-        print "ERROR: Unsupported plot type.Supported types are:\n\tsti\tlti\tvlti"
+        print("ERROR: Unsupported plot type.Supported types are:\n\tsti\tlti\tvlti")
 
 
 

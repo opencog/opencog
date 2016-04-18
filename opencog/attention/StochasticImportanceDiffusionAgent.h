@@ -1,5 +1,5 @@
 /*
- * opencog/attention/ImportanceDiffusionAgent.h
+ * opencog/attention/StochasticImportanceDiffusionAgent.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -21,17 +21,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_IMPORTANCE_DIFFUSION_AGENT_H
-#define _OPENCOG_IMPORTANCE_DIFFUSION_AGENT_H
+#ifndef _OPENCOG_STOCHASTIC_IMPORTANCE_DIFFUSION_AGENT_H
+#define _OPENCOG_STOCHASTIC_IMPORTANCE_DIFFUSION_AGENT_H
 
 #include <string>
-
 #include <math.h>
-//#include <gsl/gsl_matrix.h>
-//#include <gsl/gsl_vector.h>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/io.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
@@ -39,9 +33,6 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include "SpreadDecider.h"
-
-typedef boost::numeric::ublas::vector<float> bvector;
-typedef boost::numeric::ublas::compressed_matrix<float> bmatrix;
 
 namespace opencog
 {
@@ -85,26 +76,6 @@ private:
     //! @todo split into sub functions instead of one giant beast.
     void spreadImportance();
 
-    //! print a gsl matrix to stdout
-    void printMatrix(bmatrix *m);
-    //! print a gsl vector to stdout
-    void printVector(bvector *m, float threshold = 1.0f);
-
-    //! Set the STI of h from a scaled 0..1 STI value
-    void setScaledSTI(Handle h, float scaledSTI);
-
-    //! Map each atom involved in important diffusion with an index
-    int makeDiffusionAtomsMap(std::map<Handle,int> &i,std::vector<Handle> links);
-
-    //! Make vector of original scaled STI values
-    void makeSTIVector(bvector* &stiVector, int totalDiffusionAtoms,
-            std::map<Handle,int> diffusionAtomsMap);
-
-    //! Construct matrix representing HebbianLinks between all atoms
-    //! in diffusionAtomsMap.
-    void makeConnectionMatrix(bmatrix* &connections, int totalDiffusionAtoms,
-            std::map<Handle,int> diffusionAtomsMap, std::vector<Handle> links);
-
     //! For checking that STI is conserved
     int totalSTI;
 
@@ -122,7 +93,7 @@ public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
-        static const ClassInfo _ci("opencog::ImportanceDiffusionAgent");
+        static const ClassInfo _ci("opencog::StochasticImportanceDiffusionAgent");
         return _ci;
     }
 
@@ -158,4 +129,4 @@ typedef std::shared_ptr<StochasticImportanceDiffusionAgent> StochasticImportance
 /** @}*/
 } // namespace
 
-#endif // _OPENCOG_IMPORTANCE_DIFFUSION_AGENT_H
+#endif // _OPENCOG_STOCHASTIC_IMPORTANCE_DIFFUSION_AGENT_H

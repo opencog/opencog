@@ -44,6 +44,8 @@ AttentionModule::AttentionModule(CogServer& cs) :
     _cogserver.registerAgent(ImportanceSpreadingAgent::info().id, &spreadingFactory);
     _cogserver.registerAgent(ImportanceUpdatingAgent::info().id,  &updatingFactory);
     _cogserver.registerAgent(SimpleImportanceDiffusionAgent::info().id, &simpleDiffusionFactory);
+    _cogserver.registerAgent(StochasticImportanceDiffusionAgent::info().id,
+            &stochasticDiffusionFactory);
 }
 
 AttentionModule::~AttentionModule()
@@ -57,23 +59,10 @@ AttentionModule::~AttentionModule()
 #endif
     _cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
     _cogserver.unregisterAgent(SimpleImportanceDiffusionAgent::info().id);
+    _cogserver.unregisterAgent(StochasticImportanceDiffusionAgent::info().id);
     logger().debug("[AttentionModule] exit destructor");
 }
 
 void AttentionModule::init()
 {
 }
-
-//void AttentionModule::startAgents()
-//{
-//    logger().debug("[AttentionModule] enter destructor");
-//    _cogserver.startAgent(ForgettingAgent::info().id);
-//    _cogserver.startAgent(HebbianUpdatingAgent::info().id);
-//    _cogserver.startAgent(ImportanceSpreadingAgent::info().id);
-//#ifdef HAVE_GSL
-//    _cogserver.startAgent(ImportanceDiffusionAgent::info().id);
-//#endif
-//    _cogserver.startAgent(ImportanceUpdatingAgent::info().id);
-//    _cogserver.startAgent(SimpleImportanceDiffusionAgent::info().id);
-//    logger().debug("[AttentionModule] exit destructor");
-//}

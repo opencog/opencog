@@ -56,7 +56,6 @@ const ClassInfo& SentenceGenStimulateAgent::info()
 
 void SentenceGenStimulateAgent::run(void)
 {
-    return;
     static int ssize = sent_size;
 
     if (ssize > 0) {
@@ -66,7 +65,7 @@ void SentenceGenStimulateAgent::run(void)
 
     if(_cogserver.getCycleCount() % 50 == 0){
         std::string dir_path = std::string(PROJECT_SOURCE_DIR)
-                + "/opencog/dynamics/experiment/visualization/" + "cycle"
+                + "/opencog/attention/experiment/visualization/" + "cycle"
                 + std::to_string(_cogserver.getCycleCount());
 
         boost::filesystem::path dir(dir_path);
@@ -108,18 +107,18 @@ void SentenceGenStimulateAgent::generate_stimuate_sentence(void)
         //Two random special words from each half
         int sw1 = rand() % (sw_end / 2);
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + special_words[sw1] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + special_words[sw1] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + special_words[sw1] + "@"
+                        "(ConceptNode\"" + special_words[sw1] + "@"
                         + std::to_string(++i) + "\")"));
 
         int sw2 = rand() % (sw_end / 2) + sw_end / 2;
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + special_words[sw2] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + special_words[sw2] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + special_words[sw2] + "@"
+                        "(ConceptNode\"" + special_words[sw2] + "@"
                         + std::to_string(++i) + "\")"));
 
         //Store special word nodes
@@ -129,83 +128,83 @@ void SentenceGenStimulateAgent::generate_stimuate_sentence(void)
         //Four Random non-special words chosen from each quarters
         int rw1 = rand() % (nsw_end / 4);
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + nspecial_words[rw1] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + nspecial_words[rw1] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + nspecial_words[rw1] + "@"
+                        "(ConceptNode\"" + nspecial_words[rw1] + "@"
                         + std::to_string(++i) + "\")"));
 
         int rw2 = rand() % (nsw_end / 4) + nsw_end / 4;
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + nspecial_words[rw2] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + nspecial_words[rw2] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + nspecial_words[rw2] + "@"
+                        "(ConceptNode\"" + nspecial_words[rw2] + "@"
                         + std::to_string(++i) + "\")"));
 
         int rw3 = rand() % (nsw_end / 4) + nsw_end / 2;
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + nspecial_words[rw3] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + nspecial_words[rw3] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + nspecial_words[rw3] + "@"
+                        "(ConceptNode\"" + nspecial_words[rw3] + "@"
                         + std::to_string(++i) + "\")"));
 
         int rw4 = rand() % (nsw_end / 4) + nsw_end * 3 / 4;
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + nspecial_words[rw4] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + nspecial_words[rw4] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + nspecial_words[rw4] + "@"
+                        "(ConceptNode\"" + nspecial_words[rw4] + "@"
                         + std::to_string(++i) + "\")"));
     } else {
         //Six Random non-special words chosen from each quarters
         int rw1 = rand() % (nsw_end / 6);
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + nspecial_words[rw1] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + nspecial_words[rw1] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + nspecial_words[rw1] + "@"
+                        "(ConceptNode\"" + nspecial_words[rw1] + "@"
                         + std::to_string(++i) + "\")"));
 
         int rw2 = rand() % (nsw_end / 6) + nsw_end / 6;
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + nspecial_words[rw2] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + nspecial_words[rw2] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + nspecial_words[rw2] + "@"
+                        "(ConceptNode\"" + nspecial_words[rw2] + "@"
                         + std::to_string(++i) + "\")"));
 
         int rw3 = rand() % (nsw_end / 6) + nsw_end / 3;
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + nspecial_words[rw3] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + nspecial_words[rw3] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + nspecial_words[rw3] + "@"
+                        "(ConceptNode\"" + nspecial_words[rw3] + "@"
                         + std::to_string(++i) + "\")"));
 
         int rw4 = rand() % (nsw_end / 6) + nsw_end  / 2;
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + nspecial_words[rw4] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + nspecial_words[rw4] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + nspecial_words[rw4] + "@"
+                        "(ConceptNode\"" + nspecial_words[rw4] + "@"
                         + std::to_string(++i) + "\")"));
 
         int rw5 = rand() % (nsw_end / 6) + nsw_end * 2 / 3;
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + nspecial_words[rw5] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + nspecial_words[rw5] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + nspecial_words[rw5] + "@"
+                        "(ConceptNode\"" + nspecial_words[rw5] + "@"
                         + std::to_string(++i) + "\")"));
 
         int rw6 = rand() % (nsw_end / 6) + nsw_end * 5/6 ;
         hwords.push_back(
-                _scm_eval->eval_h("(WordNode\"" + nspecial_words[rw6] + "\")"));
+                _scm_eval->eval_h("(ConceptNode\"" + nspecial_words[rw6] + "\")"));
         hword_instances.push_back(
                 _scm_eval->eval_h(
-                        "(WordInstanceNode\"" + nspecial_words[rw6] + "@"
+                        "(ConceptNode\"" + nspecial_words[rw6] + "@"
                         + std::to_string(++i) + "\")"));
     }
     //Should the non special word nodes be removed from the selection list?
