@@ -992,7 +992,21 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 if (ENABLE_MINING_RULES)
                 {
                     cout << "Start to mine related rules from perception. " << std::endl;
-                    Rule* minedNewRule = mineNewRuleForCurrentSubgoal(curStateNode);
+                    MinedRulePattern* minedNewRule = mineNewRuleForCurrentSubgoal(curStateNode);
+
+                    cout << "Trying this new rule...\nAction name: " << minedNewRule->actionName <<"\nNext, try to ground all the parameters for this action..." << std::endl;
+
+                    // next, try to ground all the required parameters for this action
+
+                    map<string, HandleSeq>::iterator paramIt = minedNewRule->paramToPatttern.begin();
+                    for (; paramIt != minedNewRule->paramToPatttern.end(); paramIt ++) // for each param
+                    {
+                        cout << "Grounding parameter: " << paramIt->first << std::endl;
+                        HandleSeq rulePattern = paramIt->second;
+                        // the last link of each returned pattern is the variable ListLink
+                        Handle variableListLink = rulePattern[rulePattern.size() - 1];
+                        rulePattern.pop_back();
+                    }
                 }
                 else
                 {
@@ -2932,13 +2946,14 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
             // currently we just try to use the top selected pattern
             HandleSeq topPattern = priorPatterns[0];
-            paramToPattern.insert(std::pair<string, HandleSeq>(paramMapIter->string, topPattern));
+
+            paramToPattern.insert(std::pair<string, HandleSeq>(paramMapIter->first, topPattern));
 
         }
 
     }
 
-    MinedRulePattern* minedRulePattern = new minedRulePattern();
+    MinedRulePattern* minedRulePattern = new MinedRulePattern();
     minedRulePattern->actionName = atomSpace->getName(highestActionTypeHandle);
     minedRulePattern->paramToPatttern = paramToPattern;
 
