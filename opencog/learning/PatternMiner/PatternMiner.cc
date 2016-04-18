@@ -2771,8 +2771,7 @@ void PatternMiner::_mineRelatedPatternsOnQueryByLinks_OR(HandleSeq& keyLinks, un
 }
 
 
-
-
+// the last link of each returned pattern is the variable ListLink
 HandleSeqSeq PatternMiner::selectPatternsRelatedToPriorProperties(set<string> priorProperties, unsigned int gram)
 {
 //    // properties are all concept node
@@ -2832,7 +2831,14 @@ HandleSeqSeq PatternMiner::selectPatternsRelatedToPriorProperties(set<string> pr
             cout << "Priority weight = " << iter->first << "\n";
             HTreeNode* htreeNode = iter->second;
             cout << unifiedPatternToKeyString(htreeNode->pattern) << "\n";
-            returnSelectedPatterns.push_back(htreeNode->pattern);
+
+            // Translate into the same pattern in the original AtomSpace
+            HandleSeq variableNodes;
+            HandleSeq oPattern = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, htreeNode->pattern, variableNodes);
+            Handle variableListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes);
+            oPattern.push_back(variableListLink);
+
+            returnSelectedPatterns.push_back(oPattern);
             num ++;
 
             if (num == patternNun)
