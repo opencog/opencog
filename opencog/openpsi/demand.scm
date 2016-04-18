@@ -75,10 +75,10 @@
 
     ; Check arguments
     (if (not (string? demand-name))
-        (error (string-append "In function psi-demand, expected frist argument "
+        (error (string-append "In procedure psi-demand, expected frist argument "
             "to be a string got: ") demand-name))
     (if (or (> 0 initial-value) (< 1 initial-value))
-       (error (string-append "In function psi-demand, expected second argument "
+       (error (string-append "In procedure psi-demand, expected second argument "
             "the to be within [0, 1] interval, got:") initial-value))
 
     (let* ((demand-str (string-append (psi-prefix-str) demand-name))
@@ -116,7 +116,7 @@
 
     ; Check arguments
     (if (not (cog-node? node))
-        (error "In function psi-demand?: Expected a Node got: " node))
+        (error "In procedure psi-demand?: Expected a Node got: " node))
 
     (if (and (member (cog-name node) (demand-names))
              (equal? (cog-type node) 'ConceptNode))
@@ -329,7 +329,7 @@
 "
     ; Check arguments
     (if (or (> min-value max-value) (> 0 min-value) (< 1 max-value))
-       (error (string-append "In function psi-demand-goal-keep-range expected "
+       (error (string-append "In procedure psi-demand-goal-keep-range expected "
             "the range to be a subset of [0, 1] interval, got: "
             "[" (number->string min-value) ", " (number->string max-value) "]"))
     )

@@ -10,15 +10,6 @@
 (load-from-path "openpsi/utilities.scm")
 
 ; --------------------------------------------------------------
-(define-public (psi-asp)
-"
-  Returns the ConceptNode that represents the active-schema-pool(asp). The asp
-  is a set of all the psi-rules.
-"
-    (ConceptNode (string-append (psi-prefix-str) "asp"))
-)
-
-; --------------------------------------------------------------
 (define-public (psi-step)
 "
   The main function that defines the steps to be taken in every cycle.
@@ -33,7 +24,7 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-rule context action demand-goal stv)
+(define (psi-rule context action demand-goal a-stv demand-node)
 "
   It associates an action and context in which the action has to be taken
   to a goal that is satisfied when the action is executed. It is structured as
@@ -58,21 +49,32 @@
   it will have to return TRUE_TV or FALSE_TV. This is basically a formula, on
   how this rule affects the demands.
 
-  stv:
+  a-stv:
   - This is the stv of the ImplicationLink.
+
+  demand-node:
+  - The node that represents a demand that this rule affects.
 "
+    (define func-name "psi-rule") ; For use in error reporting
     (define (implication)
-        (ImplicationLink stv (AndLink context action) demand-goal))
+        (ImplicationLink a-stv (AndLink context action) demand-goal))
 
     ; Check arguments
     (if (not (list? context))
-        (error "Expected first argument to psi-rule to be a list, got: "
-            context))
+        (error (string-append "In procedure " func-name ", expected first "
+            "argument to be a list, got:") context))
     (if (not (cog-atom? action))
-        (error "Expected second argument to psi-rule be an atom, got: " action))
-    (if (not (cog-tv? stv))
-        (error "Expected fourth argument to psi-rule to be a stv, got: "
-            stv))
+        (error (string-append "In procedure " func-name ", expected second "
+            "argument to be an atom, got:") action))
+    (if (not (cog-atom? demand-goal))
+        (error (string-append "In procedure " func-name ", expected third "
+            "argument to be an atom, got:") demand-goal))
+    (if (not (cog-tv? a-stv))
+        (error (string-append "In procedure " func-name ", expected fourth "
+            "argument to be a stv, got:") a-stv))
+    (if (not (equal? (stv 1 1) (psi-demand? demand-node)))
+        (error (string-append "In procedure " func-name ", expected fifth "
+            "argument to be a node representing a demand, got:") demand-node))
 
     ; These memberships are needed for making filtering and searching simpler..
     ; If GlobNode had worked with GetLink at the time of coding this ,
@@ -81,7 +83,7 @@
         action
         (ConceptNode (string-append (psi-prefix-str) "action")))
 
-    (MemberLink (implication) (psi-asp))
+    (MemberLink (implication) demand-node)
 
     (implication)
 )
@@ -94,8 +96,8 @@
 (define (psi-action? x)
     (if (member x (psi-get-all-actions)) #t #f))
 
-(define (psi-get-all-rules) ; get all openpsi rules
-    (cog-chase-link 'MemberLink 'ImplicationLink (psi-asp)))
+(define (psi-get-rules demand-node) ; get all openpsi rules
+    (cog-chase-link 'MemberLink 'ImplicationLink demand-node))
 
 (define (psi-get-context rule) ; get the context of an openpsi-rule
     (define (get-c&a x) ; get context and action list from ImplicationLink
@@ -136,12 +138,32 @@
     )
 )
 
-(define (psi-default-action-selector)
-"
-  Get all psi-rules that are satisfiable
-"
+(define (psi-get-satisfiable demand-node)
     (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
-        (psi-get-all-rules))
+        (psi-get-rules demand-node))
+)
+
+(define (psi-default-action-selector a-random-state)
+"
+  Retruns a list of all most weighted and satisfiable psi-rules.
+
+  a-random-state:
+  - A random-state object used as a seed on how psi-rules of a demand, that are
+  satisfiable, are to be choosen.
+"
+    (define (choose-one-rule demand-node)
+        ; Returns an empty list or a list containing a randomly choosen
+        ; satisfiable psi-rule.
+        (let ((rules (most-weighted-atoms (psi-get-satisfiable demand-node))))
+            (if (null? rules)
+                '()
+                (list (list-ref rules (random (length rules) a-random-state)))))
+    )
+
+    (let* ((set-link (psi-get-demands-all))
+           (demands (cog-outgoing-set set-link)))
+       (append-map choose-one-rule demands)
+    )
 )
 
 (define (psi-select-rules)
@@ -152,7 +174,7 @@
 "
     (let ((dsn (psi-get-action-selector)))
         (if (null? dsn)
-            (psi-default-action-selector)
+            (psi-default-action-selector (random-state-from-platform))
             (let ((result (cog-execute! (car dsn))))
                 (if (equal? (cog-type result) 'SetLink)
                     (cog-outgoing-set result)
