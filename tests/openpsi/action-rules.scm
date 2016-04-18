@@ -78,19 +78,22 @@
     (ConceptNode "act-1")
 )
 
+(define demand-1 (psi-demand  "demand-1" .87))
+
 (define goal-1
     (EvaluationLink
         (GroundedPredicateNode "scm: test-update-tv")
         (ListLink
-            (Node "test-1-goal")
+            demand-1
             (NumberNode .5))))
 
 (define (test-update-tv node strength)
-    (cog-set-tv! node (stv (string->number (cog-name strength)) (tv-conf (cog-tv node))))
+    (cog-set-tv! node
+        (stv (string->number (cog-name strength)) (tv-conf (cog-tv node))))
     (stv 1 1)
 )
 
-(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1)))
+(define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) demand-1))
 
 (define (groundable-content-1)
     (ListLink
@@ -125,14 +128,16 @@
     (ConceptNode "act-2")
 )
 
+(define demand-2 (psi-demand  "demand-2" .87))
+
 (define goal-2
     (EvaluationLink
         (GroundedPredicateNode "scm: test-update-tv")
         (ListLink
-            (Node "test-2-goal")
+            demand-2
             (NumberNode .5))))
 
-(define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1)))
+(define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) demand-2))
 
 (define (groundable-content-2)
     (ListLink

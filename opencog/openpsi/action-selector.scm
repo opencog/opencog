@@ -69,7 +69,7 @@
 
                 (EvaluationLink
                     (PredicateNode "action-selector-for")
-                    (ListLink selector-dsn (psi-asp)))
+                    (ListLink selector-dsn psi-prefix-str))
 
                 selector-dsn
            )

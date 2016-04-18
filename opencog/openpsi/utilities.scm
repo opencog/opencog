@@ -3,6 +3,7 @@
 ; Helper functions for OpenPsi
 
 (use-modules (ice-9 regex)) ; For string-match
+(use-modules (srfi srfi-1)) ; For fold, delte-duplicates
 
 ; --------------------------------------------------------------
 (define-public (psi-prefix-str)
@@ -27,5 +28,30 @@
             (error (string-append "The string argument must have the prefix: "
                 "\"" (psi-prefix-str) "\". " "Instead got:" a-string) )
         )
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (most-weighted-atoms atom-list)
+"
+  It returns a list with non-duplicating atoms with the highest weight. If an
+  empty list is passed an empty list is returned. Weight of an atom is the
+  product of the stength and confidence of the atom.
+
+  atom-list:
+  - A list of atoms to be compared.
+"
+    (define (weight x)
+        (let ((a-stv (cog-tv x)))
+            (* (tv-conf a-stv) (tv-mean a-stv))))
+    (define (pick atom lst) ; prev is a list and next
+        (cond
+            ((> (weight (car lst)) (weight atom)) lst)
+            ((= (weight (car lst)) (weight atom)) (append lst (list atom)))
+            (else (list atom))))
+
+    (if (null? atom-list)
+        '()
+       (delete-duplicates (fold pick (list (car atom-list)) atom-list))
     )
 )
