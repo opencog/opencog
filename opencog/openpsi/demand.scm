@@ -4,7 +4,7 @@
 
 (use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
 
-(load-from-path "openpsi/utilities.scm")
+(load "utilities.scm")
 
 ; --------------------------------------------------------------
 ; Name of variables for common functions in this file-scope

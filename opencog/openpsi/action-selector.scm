@@ -2,8 +2,8 @@
 
 (use-modules (opencog) (opencog exec))
 
-(load-from-path "openpsi/demand.scm")
-(load-from-path "openpsi/utilities.scm")
+(load "demand.scm")
+(load "utilities.scm")
 
 ; --------------------------------------------------------------
 (define (psi-action-selector-pattern)
