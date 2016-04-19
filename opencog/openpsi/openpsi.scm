@@ -5,9 +5,9 @@
 
 (use-modules (opencog))
 
-(load "openpsi/action-selector.scm")
-(load "openpsi/demand.scm")
-(load "openpsi/main.scm")
-(load "openpsi/utilities.scm")
+(load-from-path "opencog/openpsi/action-selector.scm")
+(load-from-path "opencog/openpsi/demand.scm")
+(load-from-path "opencog/openpsi/main.scm")
+(load-from-path "opencog/openpsi/utilities.scm")
 
 (export)
