@@ -157,7 +157,9 @@
 ; --------------------------------------------------------------
 (define (psi-default-action-selector a-random-state)
 "
-  Retruns a list of all most weighted and satisfiable psi-rules.
+  Retruns a list of on of the most weighted and satisfiable psi-rules. A single
+  psi-rule is returned so as help avoid mulitple actions of the same effect or
+  type(aka semantic of the action) from being executed.
 
   a-random-state:
   - A random-state object used as a seed on how psi-rules of a demand, that are
@@ -173,8 +175,9 @@
     )
 
     (let* ((set-link (psi-get-demands-all))
-           (demands (cog-outgoing-set set-link)))
-       (append-map choose-one-rule demands)
+           (demands (cog-outgoing-set set-link))
+           (rules (append-map choose-one-rule demands)))
+       (list (list-ref rules (random (length rules) a-random-state)))
     )
 )
 
