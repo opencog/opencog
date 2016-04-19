@@ -46,7 +46,9 @@
 ;; (Evaluation (0.8 0.9)
 ;;   (Predicate "is-honest")
 ;;   (Concept "Bob")
-(cog-bind implication-full-instantiation-rule)
+;;
+;; Actually, no need as it was infered in (1)
+;; (cog-bind implication-full-instantiation-rule)
 
 ;; (3) Infer that Bob is funny. Apply the
 ;; implication-full-instantiation-rule on the implication stating that
@@ -57,7 +59,9 @@
 ;; (Evaluation (0.8 0.9)
 ;;   (Predicate "is-funny")
 ;;   (Concept "Bob")
-(cog-bind implication-full-instantiation-rule)
+;;
+;; Actually, no need as it was infered in (1)
+;; (cog-bind implication-full-instantiation-rule)
 
 ;; (4) Infer that if X is funny, then X is amusing. Apply the
 ;; equivalence-to-double-implication-rule over the equivalence between

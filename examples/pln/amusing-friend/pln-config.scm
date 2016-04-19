@@ -50,7 +50,7 @@
   (list "implication-instantiation-rule.scm"
         "implication-lambda-distribution-rule.scm"
         "equivalence-to-double-implication-rule.scm"
-        "amd-construction-rule.scm"
+        ;; "and-construction-rule.scm"
         )
   )
 (define rule-files (map append-rule-dir rule-basenames))
@@ -65,8 +65,7 @@
   (list (list implication-lambda-distribution-rule-name 1)
         (list implication-full-instantiation-rule-name 1)
         (list equivalence-to-double-implication-rule-name 1)
-        (list implication-implicant-disjunction-rule-name 1)
-        (list and-construction-rule-name 1)
+        ;; (list and-construction-rule-name 1)
         )
   )
 
