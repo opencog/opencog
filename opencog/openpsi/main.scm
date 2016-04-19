@@ -9,24 +9,6 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-(define-public (psi-step)
-"
-  The main function that defines the steps to be taken in every cycle.
-"
-    (let* ((rules (psi-select-rules)))
-        (map (lambda (x)
-                (let* ((action (psi-get-action x))
-                       (goals (append-map (lambda (r)
-                            (cog-chase-link 'ImplicationLink 'EvaluationLink r))
-                            (cog-incoming-set action))))
-                    (cog-execute! action)
-                    (map cog-evaluate! goals)))
-            rules)
-        (stv 1 1)
-    )
-)
-
-; --------------------------------------------------------------
 (define-public (psi-rule context action demand-goal a-stv demand-node)
 "
   It associates an action and context in which the action has to be taken
@@ -92,32 +74,63 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-all-actions) ; get openpsi actions
+(define-public (psi-get-all-actions)
+"
+  Returns a list of all openpsi actions.
+"
     (cog-outgoing-set (cog-execute! (GetLink
         (MemberLink (VariableNode "x")
         (ConceptNode (string-append (psi-prefix-str) "action")))))))
 
 ; --------------------------------------------------------------
-(define (psi-action? x)
-    (if (member x (psi-get-all-actions)) #t #f))
+(define-public (psi-action? atom)
+"
+  Check if the given atom is an atom and return `#t` if it is and `#f` either
+  wise.
+
+  atom:
+  - An atom to be checked whether it is an action or not.
+"
+    (if (member atom (psi-get-all-actions)) #t #f))
 
 ; --------------------------------------------------------------
-(define (psi-get-rules demand-node) ; get all openpsi rules
+(define-public (psi-get-rules demand-node)
+"
+  Returns a list of all psi-rules that are affect the given demand.
+
+  demand-node:
+  - The node that represents the demand.
+"
     (cog-chase-link 'MemberLink 'ImplicationLink demand-node))
 
 ; --------------------------------------------------------------
-(define (psi-get-context rule) ; get the context of an openpsi-rule
-    (define (get-c&a x) ; get context and action list from ImplicationLink
-        (cog-outgoing-set (list-ref (cog-outgoing-set x) 0)))
+(define (get-c&a impl-link)
+"
+  Get context and action list from ImplicationLink.
+"
+    (cog-outgoing-set (list-ref (cog-outgoing-set impl-link) 0))
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-context rule)
+"
+  Get the context of an openpsi-rule.
+
+  rule:
+  - An openpsi-rule.
+"
 
     (remove psi-action? (get-c&a rule))
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-action rule) ; get the context of an openpsi-rule
-    (define (get-c&a x) ; get context and action list from ImplicationLink
-        (cog-outgoing-set (list-ref (cog-outgoing-set x) 0)))
+(define-public (psi-get-action rule)
+"
+  Get the action of an openpsi-rule.
 
+  rule:
+  - An openpsi-rule.
+"
     (car (filter psi-action? (get-c&a rule)))
 )
 
@@ -125,6 +138,9 @@
 (define-public (psi-get-goal rule)
 "
   Get the goal of an openpsi-rule.
+
+  rule:
+  - An openpsi-rule.
 "
     ; NOTE: Why this function? -> For consisentency and to accomodate future
     ; changes
@@ -149,17 +165,24 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-satisfiable demand-node)
+(define-public (psi-get-satisfiable demand-node)
+"
+  Returns a list of psi-rules of the given demand that are satisfiable.
+
+  demand-node:
+  - The node that represents the demand.
+"
     (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
         (psi-get-rules demand-node))
 )
 
 ; --------------------------------------------------------------
-(define (psi-default-action-selector a-random-state)
+(define-public (psi-default-action-selector a-random-state)
 "
-  Retruns a list of on of the most weighted and satisfiable psi-rules. A single
+  Retruns a list of one of the most weighted and satisfiable psi-rules. A single
   psi-rule is returned so as help avoid mulitple actions of the same effect or
-  type(aka semantic of the action) from being executed.
+  type(aka semantic of the action) from being executed. If a satisfiable rule
+  doesn't exist then the empty list is returned.
 
   a-random-state:
   - A random-state object used as a seed on how psi-rules of a demand, that are
@@ -177,12 +200,15 @@
     (let* ((set-link (psi-get-demands-all))
            (demands (cog-outgoing-set set-link))
            (rules (append-map choose-one-rule demands)))
-       (list (list-ref rules (random (length rules) a-random-state)))
+        (if (null? rules)
+            '()
+            (list (list-ref rules (random (length rules) a-random-state)))
+        )
     )
 )
 
 ; --------------------------------------------------------------
-(define (psi-select-rules)
+(define-public (psi-select-rules)
 "
   Returns a list of psi-rules that are satisfiable by using the action-selector
   you defined or the default-action-selector predefined if you haven't defined
@@ -203,6 +229,7 @@
 
 ; --------------------------------------------------------------
 ; Main loop control
+; --------------------------------------------------------------
 (define psi-do-run-loop #t)
 
 (define-public (psi-running?)
@@ -212,6 +239,7 @@
     psi-do-run-loop
 )
 
+; --------------------------------------------------------------
 (define psi-loop-count 0)
 
 (define-public (psi-get-loop-count)
@@ -223,6 +251,7 @@
     psi-loop-count
 )
 
+; --------------------------------------------------------------
 (define-public (psi-run-continue?)  ; public only because its in a GPN
     (set! psi-loop-count (+ psi-loop-count 1))
 
@@ -233,6 +262,24 @@
 )
 
 ; ----------------------------------------------------------------------
+(define-public (psi-step)
+"
+  The main function that defines the steps to be taken in every cycle.
+"
+    (let* ((rules (psi-select-rules)))
+        (map (lambda (x)
+                (let* ((action (psi-get-action x))
+                       (goals (append-map (lambda (r)
+                            (cog-chase-link 'ImplicationLink 'EvaluationLink r))
+                            (cog-incoming-set action))))
+                    (cog-execute! action)
+                    (map cog-evaluate! goals)))
+            rules)
+        (stv 1 1)
+    )
+)
+
+; --------------------------------------------------------------
 (define-public (psi-run)
 "
   Run `psi-step` in a new thread. Call (psi-halt) to exit the loop.
@@ -261,9 +308,10 @@
         (lambda () (cog-evaluate! (loop-node))))
 )
 
+; --------------------------------------------------------------
 (define-public (psi-halt)
 "
-  Tell the psi main loop thread to exit.
+  Tells the psi loop thread, that is started by running `(psi-run)`, to exit.
 "
     (set! psi-do-run-loop #f)
 )
