@@ -99,3 +99,20 @@
         (NumberNode 1)
         (NumberNode 2))
 )
+
+; --------------------------------------------------------------
+(define (rule-3) (psi-rule context-1 action-2 goal-1 (stv 1 1) demand-1))
+
+; Helper functions for `OpenPsiUTest::test_psi_related_goals`
+(define (test_psi_related_goals_1)
+    (equal? goal-1 (car (psi-related-goals action-1)))
+)
+
+(define (test_psi_related_goals_2)
+    (if (and
+            (member goal-1 (psi-related-goals action-2))
+            (member goal-2 (psi-related-goals action-2)))
+        #t
+        #f
+    )
+)
