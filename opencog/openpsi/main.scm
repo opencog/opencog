@@ -9,24 +9,6 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-(define-public (psi-step)
-"
-  The main function that defines the steps to be taken in every cycle.
-"
-    (let* ((rules (psi-select-rules)))
-        (map (lambda (x)
-                (let* ((action (psi-get-action x))
-                       (goals (append-map (lambda (r)
-                            (cog-chase-link 'ImplicationLink 'EvaluationLink r))
-                            (cog-incoming-set action))))
-                    (cog-execute! action)
-                    (map cog-evaluate! goals)))
-            rules)
-        (stv 1 1)
-    )
-)
-
-; --------------------------------------------------------------
 (define-public (psi-rule context action demand-goal a-stv demand-node)
 "
   It associates an action and context in which the action has to be taken
@@ -247,6 +229,7 @@
 
 ; --------------------------------------------------------------
 ; Main loop control
+; --------------------------------------------------------------
 (define psi-do-run-loop #t)
 
 (define-public (psi-running?)
@@ -256,6 +239,7 @@
     psi-do-run-loop
 )
 
+; --------------------------------------------------------------
 (define psi-loop-count 0)
 
 (define-public (psi-get-loop-count)
@@ -267,6 +251,7 @@
     psi-loop-count
 )
 
+; --------------------------------------------------------------
 (define-public (psi-run-continue?)  ; public only because its in a GPN
     (set! psi-loop-count (+ psi-loop-count 1))
 
@@ -277,6 +262,24 @@
 )
 
 ; ----------------------------------------------------------------------
+(define-public (psi-step)
+"
+  The main function that defines the steps to be taken in every cycle.
+"
+    (let* ((rules (psi-select-rules)))
+        (map (lambda (x)
+                (let* ((action (psi-get-action x))
+                       (goals (append-map (lambda (r)
+                            (cog-chase-link 'ImplicationLink 'EvaluationLink r))
+                            (cog-incoming-set action))))
+                    (cog-execute! action)
+                    (map cog-evaluate! goals)))
+            rules)
+        (stv 1 1)
+    )
+)
+
+; --------------------------------------------------------------
 (define-public (psi-run)
 "
   Run `psi-step` in a new thread. Call (psi-halt) to exit the loop.
@@ -305,6 +308,7 @@
         (lambda () (cog-evaluate! (loop-node))))
 )
 
+; --------------------------------------------------------------
 (define-public (psi-halt)
 "
   Tells the psi loop thread, that is started by running `(psi-run)`, to exit.

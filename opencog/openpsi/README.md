@@ -21,14 +21,15 @@ See [here](../../examples/openpsi) for some sample implementations of the
 framework.
 
 ### OpenPsi components
+1. Psi-rule:
+  * A rule is an ImplicationLink 
 1. Demand:
-  * The representation is specified in the function `psi-demand-pattern` and
-    `psi-demand` that is defined [here](demand.scm).
-  * Each Demand is a URE rule-base as well. The action-rules that affect its
-    value (demand-value) are a member of the rule-base.
-  * It must have one default action, during definition, that characterizes
-    its behavior(aka change in demand-value) independent of the other actions that could act on it. This default action becomes part of the single default
-    action-rule for the demand. See [this](example
+  * A demand is one of the intermediate constructs that are used to model
+    emotion/behaviors.
+  * The representation is specified in the function `psi-demand` that is
+    defined [here](demand.scm). Use this function to create a demand.
+  * The demand-value is the stregth of the stv of the ConceptNode. This is used
+    for measurement purposes.
 
 2. Action:
   * An action is an `ExecutionOutputLink` that forms the implicand of a
