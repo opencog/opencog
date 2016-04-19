@@ -44,8 +44,8 @@
             (Variable "$X")
             (Variable "$Y"))))
    (Evaluation
-      (Predicate "will-become-friend")
-      (ListLink
+      (Predicate "will-be-friend")
+      (List
          (Variable "$X")
          (Variable "$Y"))))
 
@@ -110,6 +110,23 @@
       (Variable "$X")))
  
 ;; Being funny is loosely equivalent to being amusing
+;;
+;; This could simply be expressed as
+;;
+;; (Equivalence (stv 0.7 0.9)
+;;   (Predicate "is-funny")
+;;   (Predicate "is-amusing"))
+;;
+;; but due to some current limitation in the type system, specifically
+;; that a Predicate cannot be declared with a certain type, we need to
+;; express that in a more convoluted way.
 (Equivalence (stv 0.7 0.9)
-   (Predicate "is-funny")
-   (Predicate "is-amusing"))
+   (TypedVariable
+      (Variable "$X")
+      (Type "ConceptNode"))
+   (Evaluation
+      (Predicate "is-funny")
+      (Variable "$X"))
+   (Evaluation
+      (Predicate "is-amusing")
+      (Variable "$X")))
