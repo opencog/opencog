@@ -16,14 +16,37 @@ behaviors.
 that is,  the cognitive schematic `Context + Procedure/Actions ==> Goal`
 is similar to `Belief + Intention ==> Desire`.
 
-### Usage
-See [here](../../examples/openpsi) for some sample implementations of the
-framework.
-
 ### OpenPsi components
 1. Psi-rule:
-  * A rule is an ImplicationLink 
-1. Demand:
+  * A rule is an ImplicationLink structured as
+    ```scheme
+            (ImplicationLink
+                (AndLink
+                    (context)
+                    (action))
+                (demand-goal))
+    ```
+    An ImplicationLink was choosen because it allows us to reason and build
+    action plans dealing with uncertainty, using PLN rules.
+  * The function `psi-rule` that is defined [here](main.scm). Is to be used
+    in adding new rules.
+
+2. Context:
+  * These are atoms that should be evaluated to return TRUE_TV/FASLE_TV. Should
+    all the atoms in the context evaluate to TRUE_TV, then only the actions are
+    executed and the goals are evaluated.
+
+3. Action:
+  * An action is an `ExecutionOutputLink` or any atom that could be executed by
+    running `(cog-execute! your-action)`. An action is the means for interacting
+    with the atomspace or other systems.
+
+4. Goal/Demand-goal:
+  * A goal is an `EvaluationLink` or any atom that could be evaluated by
+    running `(cog-evaluate! your-goal)`. A goal is the means for manipulating
+    the demand-values so as to model emotions/feelings.
+
+5. Demand:
   * A demand is one of the intermediate constructs that are used to model
     emotion/behaviors.
   * The representation is specified in the function `psi-demand` that is
@@ -31,38 +54,14 @@ framework.
   * The demand-value is the stregth of the stv of the ConceptNode. This is used
     for measurement purposes.
 
-2. Action:
-  * An action is an `ExecutionOutputLink` that forms the implicand of a
-    BindLink that forms a URE rule. There actions are pre-defined, and they are
-    `psi-action-maximize`, `psi-action-minimize` and `psi-action-keep-range`.
-    See [here](demand.scm) for details on these and for defining your own
-    action behavior
-
-3. Action-rule:
-  * An action-rule is a URE rule for the demand it affects, or is dependent on
-    for being driven. In addition it has additional atoms for the purpose of
-    specifying its effect-type, and that it is an opencog-action. See the
-    function `psi-action-rule` for defining a new action [here](demand.scm).
-  * It can have the effect types listed in `(psi-action-types)`.
-  * Two action-rules are pre-defined, and they are `psi-action-rule-maximize`,
-    and `psi-action-rule-minimize`. See [here](demand.scm).
-
-4. Goal:
-  * A goal is a demand chosen for a particular action effect-type. See the
-    function `psi-select-random-goal` [here](goal-selector.scm).
-  * For goal-selection, you can choose what the criteria for choosing a goal
-    should be by defining an evaluatable term using the function
-    `psi-add-goal-selector` and setting it to be the goal-selector using the
-    function `psi-goal-selector-set!`. See [here](goal-selector.scm).
-
-5. OpenPsi's active-schema-pool(asp):
-  * This is a separate URE rule-base, that is not a demand rule-base. It is
-    comprised of actions of demands that are added to it. The set of
-    action-rules thar are member of this rule-base are choosen at run time.
-  * The choice of action-rules (aka action-selection) to be member of the asp
-    is made by the function `psi-select-action-rules`. You will have to
-    specify the action-selctor by using `psi-action-rule-selector-set!`. For
-    more helper functions on action-selection see [here](action-selector.scm).
-
 6. Modulator and Feeling representation:
-Coming soon :-)
+Coming soon :smile:
+
+### OpenPsi algorithm
+Coming soon :smile:
+
+<!--
+See [here](../../examples/openpsi) for some sample implementations of the
+framework. -->
+### OpenPsi examples
+Coming soon :smile:
