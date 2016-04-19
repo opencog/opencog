@@ -1,8 +1,9 @@
 ; Copyright (C) 2015-2016 OpenCog Foundation
 
 (use-modules (ice-9 threads)) ; For `par-map`
+(use-modules (srfi srfi-1)) ; For `append-map`
 
-(use-modules (opencog) (opencog exec) (opencog rule-engine))
+(use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
 
 (load "action-selector.scm")
 (load "demand.scm")
@@ -23,16 +24,18 @@
 
   context:
   - A list containing the terms/clauses that should be met for this action
-    to be taken.
+    to be taken. These are atoms that should be evaluated to return
+    TRUE_TV/FASLE_TV.
 
   action:
   - It should be an atom that can be run by `cog-evaluate!`. That means that
-    it will have to return TRUE_TV or FALSE_TV.
+    it will have to return TRUE_TV or FALSE_TV. Any atom that could be executed
+    by running `(cog-execute! your-action)`.
 
   demand-goal:
   - It should be an atom that can be run by `cog-evaluate!`. That means that
-  it will have to return TRUE_TV or FALSE_TV. This is basically a formula, on
-  how this rule affects the demands.
+    it will have to return TRUE_TV or FALSE_TV. This is basically a formula, on
+    how this rule affects the demands.
 
   a-stv:
   - This is the stv of the ImplicationLink.
@@ -74,6 +77,40 @@
 )
 
 ; --------------------------------------------------------------
+(define-public (psi-get-rules demand-node)
+"
+  Returns a list of all psi-rules that are affect the given demand.
+
+  demand-node:
+  - The node that represents the demand.
+"
+    (cog-chase-link 'MemberLink 'ImplicationLink demand-node)
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-all-rules)
+"
+  Returns a list of all openpsi rules.
+"
+    (fold append '()
+        (par-map (lambda (x) (cog-chase-link 'MemberLink 'ImplicationLink x))
+            (cog-outgoing-set (psi-get-demands-all))))
+)
+
+; --------------------------------------------------------------
+(define-public (psi-rule? atom)
+"
+  Returns `#t` or `#f` depending on whether the passed argument is a psi-rule
+  or not. An ImplicationLink that is a member on of the demand sets is a
+  psi-rule.
+
+  atom:
+  - An atom passed for checking.
+"
+    (if (member atom (psi-get-all-rules)) #t #f)
+)
+
+; --------------------------------------------------------------
 (define-public (psi-get-all-actions)
 "
   Returns a list of all openpsi actions.
@@ -91,17 +128,8 @@
   atom:
   - An atom to be checked whether it is an action or not.
 "
-    (if (member atom (psi-get-all-actions)) #t #f))
-
-; --------------------------------------------------------------
-(define-public (psi-get-rules demand-node)
-"
-  Returns a list of all psi-rules that are affect the given demand.
-
-  demand-node:
-  - The node that represents the demand.
-"
-    (cog-chase-link 'MemberLink 'ImplicationLink demand-node))
+    (if (member atom (psi-get-all-actions)) #t #f)
+)
 
 ; --------------------------------------------------------------
 (define (get-c&a impl-link)
@@ -119,7 +147,6 @@
   rule:
   - An openpsi-rule.
 "
-
     (remove psi-action? (get-c&a rule))
 )
 
@@ -145,6 +172,23 @@
     ; NOTE: Why this function? -> For consisentency and to accomodate future
     ; changes
      (cadr (cog-outgoing-set rule))
+)
+
+; --------------------------------------------------------------
+(define-public (psi-related-goals action)
+"
+  Return a list of all the goals that are associated by an action. Associated
+  goals are those that are the implicand of the psi-rules that have the given
+  action in the implicant.
+
+  action:
+  - An action that is part of a psi-rule.
+"
+    (let* ((and-links (cog-filter 'AndLink (cog-incoming-set action)))
+           (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
+           (delete-duplicates (map psi-get-goal rules))
+    )
+
 )
 
 ; --------------------------------------------------------------
@@ -269,9 +313,7 @@
     (let* ((rules (psi-select-rules)))
         (map (lambda (x)
                 (let* ((action (psi-get-action x))
-                       (goals (append-map (lambda (r)
-                            (cog-chase-link 'ImplicationLink 'EvaluationLink r))
-                            (cog-incoming-set action))))
+                       (goals (psi-related-goals action)))
                     (cog-execute! action)
                     (map cog-evaluate! goals)))
             rules)

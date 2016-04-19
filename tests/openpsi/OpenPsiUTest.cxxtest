@@ -145,4 +145,22 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
+    // Check that scheme function `psi-related-goals`
+    void test_psi_related_goals()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Add the rules
+        _scm->eval_h("(rule-1) (rule-2) (rule-3)");
+        CHKERR
+
+        auto result_1 = _scm->eval("(test_psi_related_goals_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1);
+        auto result_2 = _scm->eval("(test_psi_related_goals_2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
 };
