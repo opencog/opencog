@@ -90,7 +90,7 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	config().set("SCM_PRELOAD",
-	             "examples/moses-pln-synergy/scm/moses-pln-synergy-pm.scm");
+	             "examples/pln/moses-pln-synergy/scm/moses-pln-synergy-pm.scm");
 	load_scm_files_from_config(as);
 
 	// Query the TV of the inference target, which should be
@@ -125,9 +125,9 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_fc()
 	// logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// config().set("SCM_PRELOAD",
-	//              "examples/moses-pln-synergy/scm/moses-model.scm,"
-	//              "examples/moses-pln-synergy/scm/background-knowledge.scm,"
-	//              "examples/moses-pln-synergy/scm/pln-config.scm");
+	//              "examples/pln/moses-pln-synergy/scm/moses-model.scm,"
+	//              "examples/pln/moses-pln-synergy/scm/background-knowledge.scm,"
+	//              "examples/pln/moses-pln-synergy/scm/pln-config.scm");
 	// load_scm_files_from_config(as);
 
 	// Handle hsources =
