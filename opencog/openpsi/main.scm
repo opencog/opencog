@@ -1,13 +1,12 @@
 ; Copyright (C) 2015-2016 OpenCog Foundation
 
 (use-modules (ice-9 threads)) ; For `par-map`
-(use-modules (srfi srfi-1)) ; For set-difference
 
 (use-modules (opencog) (opencog exec) (opencog rule-engine))
 
-(load-from-path "openpsi/action-selector.scm")
-(load-from-path "openpsi/demand.scm")
-(load-from-path "openpsi/utilities.scm")
+(load "action-selector.scm")
+(load "demand.scm")
+(load "utilities.scm")
 
 ; --------------------------------------------------------------
 (define-public (psi-step)
@@ -28,7 +27,7 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-rule context action demand-goal a-stv demand-node)
+(define-public (psi-rule context action demand-goal a-stv demand-node)
 "
   It associates an action and context in which the action has to be taken
   to a goal that is satisfied when the action is executed. It is structured as
@@ -92,17 +91,21 @@
     (implication)
 )
 
+; --------------------------------------------------------------
 (define (psi-get-all-actions) ; get openpsi actions
     (cog-outgoing-set (cog-execute! (GetLink
         (MemberLink (VariableNode "x")
         (ConceptNode (string-append (psi-prefix-str) "action")))))))
 
+; --------------------------------------------------------------
 (define (psi-action? x)
     (if (member x (psi-get-all-actions)) #t #f))
 
+; --------------------------------------------------------------
 (define (psi-get-rules demand-node) ; get all openpsi rules
     (cog-chase-link 'MemberLink 'ImplicationLink demand-node))
 
+; --------------------------------------------------------------
 (define (psi-get-context rule) ; get the context of an openpsi-rule
     (define (get-c&a x) ; get context and action list from ImplicationLink
         (cog-outgoing-set (list-ref (cog-outgoing-set x) 0)))
@@ -110,6 +113,7 @@
     (remove psi-action? (get-c&a rule))
 )
 
+; --------------------------------------------------------------
 (define (psi-get-action rule) ; get the context of an openpsi-rule
     (define (get-c&a x) ; get context and action list from ImplicationLink
         (cog-outgoing-set (list-ref (cog-outgoing-set x) 0)))
@@ -117,7 +121,8 @@
     (car (filter psi-action? (get-c&a rule)))
 )
 
-(define (psi-get-goal rule)
+; --------------------------------------------------------------
+(define-public (psi-get-goal rule)
 "
   Get the goal of an openpsi-rule.
 "
@@ -126,7 +131,8 @@
      (cadr (cog-outgoing-set rule))
 )
 
-(define (psi-satisfiable? rule)
+; --------------------------------------------------------------
+(define-public (psi-satisfiable? rule)
 "
   Check if the rule is satisfiable and return TRUE_TV or FALSE_TV.
 
@@ -142,14 +148,18 @@
     )
 )
 
+; --------------------------------------------------------------
 (define (psi-get-satisfiable demand-node)
     (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
         (psi-get-rules demand-node))
 )
 
+; --------------------------------------------------------------
 (define (psi-default-action-selector a-random-state)
 "
-  Retruns a list of all most weighted and satisfiable psi-rules.
+  Retruns a list of on of the most weighted and satisfiable psi-rules. A single
+  psi-rule is returned so as help avoid mulitple actions of the same effect or
+  type(aka semantic of the action) from being executed.
 
   a-random-state:
   - A random-state object used as a seed on how psi-rules of a demand, that are
@@ -165,11 +175,13 @@
     )
 
     (let* ((set-link (psi-get-demands-all))
-           (demands (cog-outgoing-set set-link)))
-       (append-map choose-one-rule demands)
+           (demands (cog-outgoing-set set-link))
+           (rules (append-map choose-one-rule demands)))
+       (list (list-ref rules (random (length rules) a-random-state)))
     )
 )
 
+; --------------------------------------------------------------
 (define (psi-select-rules)
 "
   Returns a list of psi-rules that are satisfiable by using the action-selector
