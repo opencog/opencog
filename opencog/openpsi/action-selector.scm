@@ -6,7 +6,7 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-(define (psi-action-selector-pattern)
+(define-public (psi-action-selector-pattern)
 "
   This returns the StateLink that is used for specifying the action selecting
   evaluatable term.
@@ -23,7 +23,7 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-action-selector-set! dsn)
+(define-public (psi-action-selector-set! dsn)
 "
   Sets the given DefinedSchemaNode to be used for selecting actions.
 
@@ -42,7 +42,7 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-add-action-selector exec-term name)
+(define-public (psi-add-action-selector exec-term name)
 "
   Returns the DefinedSchemaNode that represents the executable term
   after defining it as an openpsi action-selector.
@@ -79,9 +79,9 @@
     )
 )
 
-(define (psi-get-action-selector)
+(define-public (psi-get-action-selector)
 "
-  Get the action-selector.
+  Returns a list containing the user-defined action-selector.
 "
     (cog-outgoing-set (cog-execute!
         (GetLink (psi-action-selector-pattern))))

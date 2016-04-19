@@ -74,12 +74,9 @@ public:
         _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR
                    "/opencog/scm\")");
         CHKERR
-        // TODO: Replace with use-modules when openpsi is modularized
-        _scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR  "/opencog\")");
-        CHKERR
 
-        // Load function definition to be tested and populate the atomspace
-        _scm->eval("(load-from-path \"openpsi/active-schema-pool.scm\")");
+        // Load require modules to be tested and populate the atomspace
+        _scm->eval("(use-modules (opencog) (opencog openpsi))");
         CHKERR
         _scm->eval("(load \"" OPENPSI_TEST_PATH "/action-rules.scm\")");
         CHKERR
@@ -143,7 +140,7 @@ public:
         CHKERR
         auto result_3 = _scm->eval("(length (psi-select-rules))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected a two rules", "2\n" , result_3);
+        TSM_ASSERT_EQUALS("Expected a two rules", "1\n" , result_3);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
