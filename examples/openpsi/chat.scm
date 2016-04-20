@@ -106,7 +106,7 @@
 )
 
 (define (say utterance)
-    (display (sent-get-words-in-order utterance))
+    (display (list (map word-inst-get-word-str (cdr (car (sent-get-words-in-order utterance))))))
     (newline)
     (State new-input-utterance no-new-input-utterance)
 )
