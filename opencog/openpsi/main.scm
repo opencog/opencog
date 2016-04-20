@@ -94,7 +94,7 @@
 "
     (fold append '()
         (par-map (lambda (x) (cog-chase-link 'MemberLink 'ImplicationLink x))
-            (cog-outgoing-set (psi-get-demands-all))))
+            (cog-outgoing-set (psi-get-all-demands))))
 )
 
 ; --------------------------------------------------------------
@@ -241,7 +241,7 @@
                 (list (list-ref rules (random (length rules) a-random-state)))))
     )
 
-    (let* ((set-link (psi-get-demands-all))
+    (let* ((set-link (psi-get-all-demands))
            (demands (cog-outgoing-set set-link))
            (rules (append-map choose-one-rule demands)))
         (if (null? rules)

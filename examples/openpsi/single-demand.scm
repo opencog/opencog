@@ -42,7 +42,7 @@
     instead.
 "
     (list
-        (psi-get-demands-all)
+        (psi-get-all-demands)
         (ure-rbs-rules (psi-asp))
         (psi-current-goal)
         (psi-select-random-goal)

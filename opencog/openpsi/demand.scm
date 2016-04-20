@@ -50,7 +50,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-demands-all)
+(define-public (psi-get-all-demands)
 "
   Returns a SetLink containing the nodes that carry the demand-value. The
   strength of their stv is the demand value.
@@ -112,7 +112,7 @@
     a demand type.
 "
     (define (demand-names)
-        (map cog-name (cog-outgoing-set (psi-get-demands-all))))
+        (map cog-name (cog-outgoing-set (psi-get-all-demands))))
 
     ; Check arguments
     (if (not (cog-node? node))
@@ -215,7 +215,7 @@
     (let ((atom-strength (tv-mean (cog-tv atom)))
           (lowest-demand-value (car (list-sort < (delete-duplicates
               (map (lambda (x) (tv-mean (cog-tv x)))
-                   (cog-outgoing-set (psi-get-demands-all)))))))
+                   (cog-outgoing-set (psi-get-all-demands)))))))
          )
          (if (<= atom-strength lowest-demand-value)
             (stv 1 1)
