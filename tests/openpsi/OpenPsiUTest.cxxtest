@@ -88,7 +88,7 @@ public:
         _scm = nullptr;
     }
 
-    // Check that scheme function `psi-satisfiable?``
+    // Check the scheme function `psi-satisfiable?``
     void test_psi_satisfiable()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -107,7 +107,7 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
-    // Check that scheme function `psi-select-rules`
+    // Check the scheme function `psi-select-rules`
     void test_psi_select_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -140,12 +140,12 @@ public:
         CHKERR
         auto result_3 = _scm->eval("(length (psi-select-rules))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected a two rules", "1\n" , result_3);
+        TSM_ASSERT_EQUALS("Expected a one rule", "1\n" , result_3);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
-    // Check that scheme function `psi-related-goals`
+    // Check the scheme function `psi-related-goals`
     void test_psi_related_goals()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
