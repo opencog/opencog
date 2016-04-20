@@ -219,26 +219,52 @@
 ;; Actually, no need as it was infered in (1)
 ;; (cog-bind implication-full-instantiation-rule)
 
-;; (9) Infer that if X is funny, then X is amusing. Apply the
+;; (9) Distribute the scope of the amusing funny equivalence. Apply
+;; equivalence-scope-distribution-rule.
+;;
+;; Result should be:
+;;
+;; (Equivalence (stv 0.7 0.9)
+;;    (Lambda
+;;       (TypedVariable
+;;          (Variable "$X")
+;;          (Type "ConceptNode"))
+;;       (Evaluation
+;;          (Predicate "is-funny")
+;;          (Variable "$X")))
+;;    (Lambda
+;;       (TypedVariable
+;;          (Variable "$X")
+;;          (Type "ConceptNode"))
+;;       (Evaluation
+;;          (Predicate "is-amusing")
+;;          (Variable "$X"))))
+
+;; (10) Infer that if X is funny, then X is amusing. Apply the
 ;; equivalence-to-double-implication-rule over the equivalence between
 ;; is-funny and is-amusing in the kb.
 ;;
 ;; Result should be:
 ;;
-;; (Implication (stv ? ?)
-;;    (TypedVariable
-;;       (Variable "$X")
-;;       (Type "ConceptNode"))
-;;    (Evaluation
-;;       (Predicate "is-funny")
-;;       (Variable "$X"))
-;;    (Evaluation
-;;       (Predicate "is-amusing")
-;;       (Variable "$X")))
+;; (Implication (stv 0.7 0.9)
+;;    (Lambda
+;;       (TypedVariable
+;;          (Variable "$X")
+;;          (Type "ConceptNode"))
+;;       (Evaluation
+;;          (Predicate "is-funny")
+;;          (Variable "$X")))
+;;    (Lambda
+;;       (TypedVariable
+;;          (Variable "$X")
+;;          (Type "ConceptNode"))
+;;       (Evaluation
+;;          (Predicate "is-amusing")
+;;          (Variable "$X"))))
 (cog-bind equivalence-to-double-implication-rule)
 
-;; (10) Infer that Bob is amusing. Apply implication-full-instantiation
-;; on the result of (9).
+;; (11) Infer that Bob is amusing. Apply implication-full-instantiation
+;; on the result of (10).
 ;;
 ;; Result should be:
 ;;
@@ -247,8 +273,8 @@
 ;;   (Concept "Bob"))
 (cog-bind implication-full-instantiation-rule)
 
-;; (11) Infer that Bob will be an amusing and honest friend. Apply the
-;; and-construction-rule over the results of (7), (8) and (10)
+;; (12) Infer that Bob will be an amusing and honest friend. Apply the
+;; and-construction-rule over the results of (7), (8) and (11)
 ;;
 ;; Result should be:
 ;;
