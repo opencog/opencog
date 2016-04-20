@@ -13,7 +13,7 @@
 ;;
 ;; (And
 ;;    (Evaluation
-;;       (Predicate "will-be-friend")
+;;       (Predicate "will-be-friends")
 ;;       (List
 ;;          (Concept "Self")
 ;;          (Concept "Bob"))
@@ -31,7 +31,7 @@
 ;; Result should be:
 ;;
 ;; (Evalution (stv 0.1 0.5)
-;;    (Predicate "will-be-friend")
+;;    (Predicate "will-be-friends")
 ;;    (List
 ;;       (Concept "Self")
 ;;       (Concept "Bob"))
@@ -98,7 +98,7 @@
 ;;
 ;; (And
 ;;    (Evaluation
-;;       (Predicate "will-be-friend")
+;;       (Predicate "will-be-friends")
 ;;       (List
 ;;          (Concept "Self")
 ;;          (Concept "Bob"))

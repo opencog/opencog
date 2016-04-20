@@ -1,8 +1,8 @@
 ;; Kownledge base for the amusing friend demo.
 ;;
 ;; We are dodging a lot of representational issues here. In particular
-;; everything related to spatio-temporal reasoning and so. To be
-;; reified as desired.
+;; everything related to spatio-temporal reasoning. To be reified as
+;; desired.
 
 ;; Bob is a human
 (Inheritance (stv 1 1)
@@ -44,7 +44,59 @@
             (Variable "$X")
             (Variable "$Y"))))
    (Evaluation
-      (Predicate "will-be-friend")
+      (Predicate "will-be-friends")
+      (List
+         (Variable "$X")
+         (Variable "$Y"))))
+
+;; Friends tend to be honest
+(Implication (stv 0.6 0.5)
+   (VariableList
+      (TypedVariable
+         (Variable "$X")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$Y")
+         (Type "ConceptNode")))
+   (Evaluation
+      (Predicate "are-friends")
+      (List
+         (Variable "$X")
+         (Variable "$Y")))
+   (And
+      (Evaluation
+         (Predicate "is-honest")
+         (Variable "$X"))
+      (Evaluation
+         (Predicate "is-honest")
+         (Variable "$Y"))))
+
+;; Friends will remain friends.
+;;
+;; This could simply be expressed as
+;;
+;; (Implication (stv 0.9 0.9)
+;;    (Predicate "are-friends")
+;;    (Predicate "will-be-friends"))
+;;
+;; but due to some current limitation in the type system, specifically
+;; that a Predicate cannot be declared with a certain type, we need to
+;; express that in a more convoluted way.
+(Implication (stv 0.9 0.9)
+   (VariableList
+      (TypedVariable
+         (Variable "$X")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$Y")
+         (Type "ConceptNode")))
+   (Evaluation
+      (Predicate "are-friends")
+      (List
+         (Variable "$X")
+         (Variable "$Y")))
+   (Evaluation
+      (Predicate "will-be-friends")
       (List
          (Variable "$X")
          (Variable "$Y"))))
@@ -114,8 +166,8 @@
 ;; This could simply be expressed as
 ;;
 ;; (Equivalence (stv 0.7 0.9)
-;;   (Predicate "is-funny")
-;;   (Predicate "is-amusing"))
+;;    (Predicate "is-funny")
+;;    (Predicate "is-amusing"))
 ;;
 ;; but due to some current limitation in the type system, specifically
 ;; that a Predicate cannot be declared with a certain type, we need to
