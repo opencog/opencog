@@ -144,10 +144,10 @@
    (And
       (Evaluation
          (Predicate "is-honest")
-         (Variable "$X")))
+         (Variable "$X"))
       (Evaluation
          (Predicate "is-honest")
-         (Variable "$Y")))
+         (Variable "$Y"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Telling the truth ;;
