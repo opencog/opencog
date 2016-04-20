@@ -452,6 +452,7 @@ OCPlanner::OCPlanner(AtomSpace *_atomspace, string _selfID, string _selfType, bo
     patternMiner = NULL;
 
     selfEntityParamValue = Entity(_selfID,_selfType);
+    selfHandle = AtomSpaceUtil::getAgentHandle(*atomSpace,_selfID);
 
     ENABLE_MINING_RULES = _ENABLE_MINING_RULES;
 
@@ -992,20 +993,90 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 if (ENABLE_MINING_RULES)
                 {
                     cout << "Start to mine related rules from perception. " << std::endl;
-                    MinedRulePattern* minedNewRule = mineNewRuleForCurrentSubgoal(curStateNode);
+                    vector<ParamValue> stateOwnerList = curStateNode->state->stateOwnerList;
+
+                    if (stateOwnerList.size() < 1)
+                        return "";
+
+                    Handle stateOwnerHanlde = Handle::UNDEFINED;
+
+                    stateOwnerHanlde = Inquery::getStateOwnerHandle(stateOwnerList[0]);
+
+                    if (stateOwnerHanlde == Handle::UNDEFINED)
+                        return "";
+
+                    MinedRulePattern* minedNewRule = mineNewRuleForCurrentSubgoal(curStateNode, stateOwnerHanlde);
 
                     cout << "Trying this new rule...\nAction name: " << minedNewRule->actionName <<"\nNext, try to ground all the parameters for this action..." << std::endl;
 
                     // next, try to ground all the required parameters for this action
-
-                    map<string, HandleSeq>::iterator paramIt = minedNewRule->paramToPatttern.begin();
-                    for (; paramIt != minedNewRule->paramToPatttern.end(); paramIt ++) // for each param
+                    map<string, MinedParamStruct>::iterator paramIt = minedNewRule->paramToMinedStruct.begin();
+                    for (; paramIt != minedNewRule->paramToMinedStruct.end(); paramIt ++) // for each param
                     {
                         cout << "Grounding parameter: " << paramIt->first << std::endl;
-                        HandleSeq rulePattern = paramIt->second;
+                        MinedParamStruct& minedParamStruct = paramIt->second;
+                        HandleSeq rulePattern = minedParamStruct.paramPrioPattern;
                         // the last link of each returned pattern is the variable ListLink
                         Handle variableListLink = rulePattern[rulePattern.size() - 1];
                         rulePattern.pop_back();
+
+                        // First, try to find the already known variables in the pattern
+                        // e.g.
+//                        (EvaluationLink )
+//                          (PredicateNode color)
+//                          (ListLink )
+//                            (VariableNode $var_1)
+//                            (VariableNode $var_2)
+
+//                        (EvaluationLink )
+//                          (PredicateNode color)
+//                          (ListLink )
+//                            (VariableNode $var_3)
+//                            (VariableNode $var_2)
+
+//                        (EvaluationLink )
+//                          (PredicateNode target)
+//                          (ListLink )
+//                            (VariableNode $var_4)
+//                            (VariableNode $var_3)
+
+//                        (EvaluationLink )
+//                          (PredicateNode with)
+//                          (ListLink )
+//                            (VariableNode $var_4)
+//                            (VariableNode $var_1)
+                        // if there is "target" or "actor" in the pattern, ground them first, because they are known.
+                        map<Handle, Handle> varToValueMap;
+                        for (Handle link : rulePattern)
+                        {
+                            if (atomSpace->getType(link) !=  EVALUATION_LINK)
+                                continue;
+
+                            Handle predicate = atomSpace->getOutgoing(link,0);
+                            string predicateStr = atomSpace->getName(predicate);
+                            if ((predicateStr  == "target") || (predicateStr  == "actor"))
+                            {
+                                Handle elistLink = atomSpace->getOutgoing(link,1);
+                                HandleSeq elistLinkOutgoings = atomSpace->getOutgoing(elistLink);
+                                Handle varH = elistLinkOutgoings[elistLinkOutgoings.size() - 1];
+
+                                if (predicateStr  == "target")
+                                    varToValueMap.insert(std::pair<Handle, Handle>(varH,stateOwnerHanlde));
+                                else // actor
+                                    varToValueMap.insert(std::pair<Handle, Handle>(varH,selfHandle));
+                            }
+
+                        }
+
+                        // added the intrinsic Undistinguishing Property Links to the pattern
+                        // e.g.
+//                        (EvaluationLink )
+//                          (PredicateNode class)
+//                          (ListLink )
+//                            (VariableNode $var_1)
+//                            (VariableNode key)
+
+
                     }
                 }
                 else
@@ -2634,21 +2705,9 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
 //    }
 //}
 
-MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode)
+MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode, Handle stateOwnerHanlde)
 {
     // Step 1: find out what kind of object the state ower is in this subgoal         
-    vector<ParamValue> stateOwnerList = curSubgoalNode->state->stateOwnerList;
-
-    if (stateOwnerList.size() < 1)
-        return 0;
-
-    Handle stateOwnerHanlde = Handle::UNDEFINED;
-
-    stateOwnerHanlde = Inquery::getStateOwnerHandle(stateOwnerList[0]);
-
-    if (stateOwnerHanlde == Handle::UNDEFINED)
-        return 0;
-
     // Find the dominant feature of this object: usually its "class"
     Handle classValueNode = AtomSpaceUtil::getPredicateValueNode(*atomSpace, "class", stateOwnerHanlde);
     if (classValueNode == Handle::UNDEFINED)
@@ -2791,7 +2850,8 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
     //        (VariableNode $var_4)
     //        (VariableNode $var_1)
 
-    std::map <string, HandleSeq> paramToPattern;
+
+    std::map <string, MinedParamStruct> paramToMinedStruct;
     std::map <string, HandleSeq>::iterator paramMapIter = paramNameToParamEvalLinks.begin();
     for (; paramMapIter != paramNameToParamEvalLinks.end(); paramMapIter ++ )
     {
@@ -2831,13 +2891,12 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
             // 2. find out the distinguishing properties from intrinsic properties which are more easy to tell the differences among individules.
             //    e.g. there are 4  keys of different colors; their common properties are "class is key", "pickupable", "unedible",
             //    the different properties are color, so 'color' is a distinguishing property, which should get higher priority
-
-
             set<string> allProperties;
             set<string> intrinsicProperties;
             set<string> externalProperties;
             set<string> distinguishingProperties;
             set<string> distinguishingIntrinsicProperties;
+            set<string> intrinsicUndistinguishingProperties;
             map<string, Handle> propertyToValueTmp;
 
             cout << "The parameter value is an entity; \nFind out all the intrinsic,external and distinguishing properties for this entity...\n";
@@ -2904,6 +2963,9 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                     distinguishingIntrinsicProperties.insert(p);
             }
 
+            std::set_difference(intrinsicProperties.begin(), intrinsicProperties.end(), distinguishingIntrinsicProperties.begin(), distinguishingIntrinsicProperties.end(),
+                                            std::inserter(intrinsicUndistinguishingProperties, intrinsicUndistinguishingProperties.begin()));
+
 
             cout << "\n\nAll Properties: \n";
             for (auto i : allProperties) cout << i << ", ";
@@ -2916,6 +2978,9 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
             cout << "\n\nDistinguishing Properties: \n";
             for (auto i : distinguishingProperties) cout << i << ", ";
+
+            cout << "\n\nIntrinsic Undistinguishing Properties: \n";
+            for (auto i : intrinsicUndistinguishingProperties) cout << i << ", ";
 
             cout << "\n\nDistinguishing Intrinsic Properties: \n";
             for (auto i : distinguishingIntrinsicProperties) cout << i << ", ";
@@ -2944,10 +3009,48 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                 cout << "There is no distinguishingProperties or intrinsicProperties for this kind of entities, just adopt the patterns with highest frequency..."<< std::endl;
             }
 
-            // currently we just try to use the top selected pattern
-            HandleSeq topPattern = priorPatterns[0];
+            MinedParamStruct minedStruct;
 
-            paramToPattern.insert(std::pair<string, HandleSeq>(paramMapIter->first, topPattern));
+            minedStruct.paramPrioPattern =  priorPatterns[0];    // currently we just try to use the top selected pattern
+            // find out which variable in the mined pattern represent the param object
+            Handle paramVar;
+            for (Handle link : minedStruct.paramPrioPattern)
+            {
+                if (atomSpace->getType(link) != EVALUATION_LINK)
+                    continue;
+
+                Handle predicateNode = atomSpace->getOutgoing(link,0);
+                if (atomSpace->getName(predicateNode) == paramMapIter->first)
+                {
+                    Handle listLink = atomSpace->getOutgoing(link,1);
+                    HandleSeq listOutgoings = atomSpace->getOutgoing(listLink);
+                    paramVar = listOutgoings[listOutgoings.size() - 1];
+                    break;
+                }
+            }
+
+            minedStruct.paramObjVar = paramVar;
+
+            HandleSeq intrinsicUndistinguishingPropertyLinks;
+            for (string propertyStr : intrinsicUndistinguishingProperties)
+            {
+                Handle inPredicateNode = atomSpace->getNode(PREDICATE_NODE, propertyStr);
+                HandleSeq outgoingHandles;
+                outgoingHandles.push_back(paramVar);
+                outgoingHandles.push_back(propertyToValueTmp[propertyStr]);
+                Handle inListLink = atomSpace->addLink(LIST_LINK, outgoingHandles);
+                HandleSeq outgoings;
+                outgoings.push_back(inPredicateNode);
+                outgoings.push_back(inListLink);
+                Handle inEvalLink = atomSpace->addLink(EVALUATION_LINK, outgoings);
+                intrinsicUndistinguishingPropertyLinks.push_back(inEvalLink);
+            }
+
+            minedStruct.externalProperties = externalProperties;
+            minedStruct.intrinsicUndistinguishingPropertyLinks = intrinsicUndistinguishingPropertyLinks;
+
+
+            paramToMinedStruct.insert(std::pair<string, MinedParamStruct>(paramMapIter->first, minedStruct));
 
         }
 
@@ -2955,10 +3058,9 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
     MinedRulePattern* minedRulePattern = new MinedRulePattern();
     minedRulePattern->actionName = atomSpace->getName(highestActionTypeHandle);
-    minedRulePattern->paramToPatttern = paramToPattern;
+    minedRulePattern->paramToMinedStruct = paramToMinedStruct;
 
     return minedRulePattern;
-
 
 }
 

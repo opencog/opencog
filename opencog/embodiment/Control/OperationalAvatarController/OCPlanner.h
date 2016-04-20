@@ -316,12 +316,23 @@ struct TmpParamCandidate
    }
 };
 
+struct MinedParamStruct
+{
+    HandleSeq paramPrioPattern;
+    Handle paramObjVar;
+    HandleSeq intrinsicUndistinguishingPropertyLinks;
+    set<string> externalProperties;
+
+};
+
 struct MinedRulePattern
 {
     string actionName;
-    map<string, HandleSeq> paramToPatttern;
+    map<string, MinedParamStruct> paramToMinedStruct;
 
 };
+
+
 
 class OCPlanner
 {
@@ -355,6 +366,8 @@ protected:
      AtomSpace* atomSpace;
 
      ParamValue selfEntityParamValue;
+
+     Handle selfHandle;
 
      ActionPlanID planID;
 
@@ -413,7 +426,7 @@ protected:
 
      void cleanUpEverythingAfterPlanning();
 
-     MinedRulePattern* mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode);
+     MinedRulePattern* mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode, Handle stateOwnerHanlde);
 
 //     // to store the intermediate states which may be produced during planning stepps
 //     // this vector should be clear every time begin a new plan
