@@ -1,5 +1,5 @@
 ; Copyright (C) 2016 OpenCog Foundation
-; This is a basic example of how an OpenPsi driven dialogue system may look like
+; This is a simple example of how an OpenPsi driven dialogue system may look like
 
 ; Steps to run:
 ; 1. (add-to-load-path "/absolute/path/to/opencog/opencog")
@@ -9,10 +9,8 @@
 ; 4. Use (chat) function to talk to it
 ;    e.g. (chat "Are you conscious?")
 
-(add-to-load-path "/opencog/opencog")
-(load-from-path "../opencog/openpsi/main.scm")
-
 ;-------------------------------------------------------------------------------
+; Keep track of the chat-state so that the psi-rules can make use of them
 
 (define chat-rule (ConceptNode "OpenPsi: Chat Rule"))
 (define no-new-input-utterance (ConceptNode "No New Input Utterance"))
@@ -21,18 +19,7 @@
 (define (chat utt) (StateLink new-input-utterance (car (nlp-parse utt))))
 
 ;-------------------------------------------------------------------------------
-; Helper functions
-
-(define (is-chat-rule? rule)
-    (let ((nodes (cog-chase-link 'MemberLink 'ConceptNode rule)))
-        (if (member chat-rule nodes)
-            #t
-            #f
-        ))
-)
-
-;-------------------------------------------------------------------------------
-; Define the demands and their default values
+; Define the demands with their default values
 
 (define sociality (psi-demand "Sociality" .8))
 (define please-user (psi-demand "PleaseUser" .8))
@@ -40,9 +27,16 @@
 (define humor (psi-demand "Humor" .8))
 
 ;-------------------------------------------------------------------------------
-; Define an action selector
+; Define and set an action selector
 
 (define (psi-action-selector-chat)
+    (define (is-chat-rule? rule)
+        (let ((nodes (cog-chase-link 'MemberLink 'ConceptNode rule)))
+            (if (member chat-rule nodes)
+                #t
+                #f
+            ))
+    )
     (let* ((max-score .5)
            (best-match "")
            (satisfied-rules '())
@@ -56,6 +50,10 @@
                         (begin (set! max-score score) (set! best-match r))
                     )
                 )
+                ; For other types of rules, just check if they are satisfiable
+                ; TODO: Ideally for non-chat rules, they should be handled
+                ;       by the default action selector or other acion selectors
+                ;       already defined in the system
                 (if (equal? (stv 1 1) (psi-satisfiable? r))
                     (set! satisfied-rules (append satisfied-rules (list r)))
                 )
@@ -84,7 +82,7 @@
 (psi-action-selector-set! dsn)
 
 ;-------------------------------------------------------------------------------
-; Those grounded Scheme functions for the chatbot
+; Scheme functions that will be called by the rules
 
 (define (check-demand demand value)
     (if (< (tv-mean (cog-tv demand)) (string->number (cog-name value)))
@@ -113,18 +111,8 @@
     (State new-input-utterance no-new-input-utterance)
 )
 
-(define (psi-update-demand-chat-min demand weight)
-    (psi-demand-value-minimize demand weight)
-    (stv 1 1)
-)
-
-(define (psi-update-demand-chat-max demand weight)
-    (psi-demand-value-maximize demand weight)
-    (stv 1 1)
-)
-
 ;-------------------------------------------------------------------------------
-; Add psi-rules
+; Add and tag new psi-rules
 
 ;----------
 ; These rules change the demand values whenever there is an input utterance
@@ -132,14 +120,14 @@
 (psi-rule
     (list (NotLink (EqualLink (SetLink no-new-input-utterance) (GetLink (StateLink new-input-utterance (VariableNode "$x"))))))
     (ListLink)
-    (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-min") (ListLink sociality (NumberNode "40")))
+    (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-minimize") (ListLink sociality (NumberNode "10")))
     (stv 1 1)
     sociality
 )
 (psi-rule
     (list (NotLink (EqualLink (SetLink no-new-input-utterance) (GetLink (StateLink new-input-utterance (VariableNode "$x"))))))
     (ListLink)
-    (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-min") (ListLink please-user (NumberNode "40")))
+    (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-minimize") (ListLink please-user (NumberNode "10")))
     (stv 1 1)
     please-user
 )
@@ -155,7 +143,7 @@
         (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink sociality (NumberNode "0.6")))
               (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
         (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-max") (ListLink sociality (NumberNode "20")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "30")))
         (stv 1 1)
         sociality
     )
@@ -166,7 +154,7 @@
         (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink please-user (NumberNode "0.6")))
               (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
         (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-max") (ListLink please-user (NumberNode "15")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink please-user (NumberNode "20")))
         (stv 1 1)
         please-user
     )
@@ -177,7 +165,7 @@
         (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink humor (NumberNode "0.6")))
               (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
         (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-max") (ListLink humor (NumberNode "30")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink humor (NumberNode "30")))
         (stv 1 1)
         humor
     )
@@ -195,7 +183,7 @@
         (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink sociality (NumberNode "0.6")))
               (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
         (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-max") (ListLink sociality (NumberNode "30")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "30")))
         (stv 1 1)
         sociality
     )
@@ -206,7 +194,7 @@
         (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink please-user (NumberNode "0.6")))
               (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
         (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-max") (ListLink please-user (NumberNode "10")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink please-user (NumberNode "30")))
         (stv 1 1)
         please-user
     )
@@ -217,7 +205,7 @@
         (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink humor (NumberNode "0.6")))
               (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
         (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-max") (ListLink humor (NumberNode "40")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink humor (NumberNode "40")))
         (stv 1 1)
         humor
     )
@@ -235,7 +223,7 @@
         (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink sociality (NumberNode "0.6")))
               (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
         (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-max") (ListLink sociality (NumberNode "20")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "40")))
         (stv 1 1)
         sociality
     )
@@ -246,7 +234,7 @@
         (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink please-user (NumberNode "0.6")))
               (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
         (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-max") (ListLink please-user (NumberNode "15")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink please-user (NumberNode "20")))
         (stv 1 1)
         please-user
     )
@@ -264,7 +252,7 @@
         (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink sociality (NumberNode "0.6")))
               (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
         (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-max") (ListLink sociality (NumberNode "20")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "30")))
         (stv 1 1)
         sociality
     )
@@ -275,13 +263,26 @@
         (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink learn-stuff (NumberNode "0.6")))
               (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
         (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-update-demand-chat-max") (ListLink learn-stuff (NumberNode "35")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink learn-stuff (NumberNode "50")))
         (stv 1 1)
         learn-stuff
     )
     chat-rule
 )
 
+;----------
+; The default reply if there is no matching rule in the system
+
+(MemberLink
+    (psi-rule
+        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink sociality (NumberNode "0.1"))))
+        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink (nlp-parse "Sorry I don't understand.")))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "100")))
+        (stv 1 1)
+        sociality
+    )
+    chat-rule
+)
 ;-------------------------------------------------------------------------------
 ; Run OpenPsi
 
