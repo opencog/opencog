@@ -78,7 +78,7 @@ public:
         // Load require modules to be tested and populate the atomspace
         _scm->eval("(use-modules (opencog) (opencog openpsi))");
         CHKERR
-        _scm->eval("(load \"" OPENPSI_TEST_PATH "/action-rules.scm\")");
+        _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
         CHKERR
     }
 
