@@ -85,7 +85,7 @@ class EvaControl():
 	def step(self):
 		print "step once"
 		return not rospy.is_shutdown()
-
+    # Temporary disable sleeping.
 	def go_sleep(self):
 		# Vytas altered this in commit
 		# 67ba02f75c5f82f4abb3e600711c97f65f007534
@@ -206,15 +206,15 @@ class EvaControl():
 			return
 		# Switch to conversational (micro) saccade parameters
 		msg = SaccadeCycle()
-		msg.mean =  1.6          # saccade_explore_interval_mean
-		msg.variation = 0.11     # saccade_explore_interval_var
-		msg.paint_scale = 0.70   # saccade_explore_paint_scale
+		msg.mean =  2.45         # saccade_explore_interval_mean
+		msg.variation = 0.9    # saccade_explore_interval_var
+		msg.paint_scale = 4   # saccade_explore_paint_scale
 		# From study face, maybe better default should be defined for
 		# explore
-		msg.eye_size = 16.0      # saccade_study_face_eye_size
-		msg.eye_distance = 27.0  # saccade_study_face_eye_distance
-		msg.mouth_width = 7.0    # saccade_study_face_mouth_width
-		msg.mouth_height = 18.0  # saccade_study_face_mouth_height
+		msg.eye_size = 15      # saccade_study_face_eye_size
+		msg.eye_distance = 100  # saccade_study_face_eye_distance
+		msg.mouth_width = 90    # saccade_study_face_mouth_width
+		msg.mouth_height = 27  # saccade_study_face_mouth_height
 		msg.weight_eyes = 0.4    # saccade_study_face_weight_eyes
 		msg.weight_mouth = 0.6   # saccade_study_face_weight_mouth
 		self.saccade_pub.publish(msg)
@@ -225,16 +225,34 @@ class EvaControl():
 			return
 		# Switch to conversational (micro) saccade parameters
 		msg = SaccadeCycle()
-		msg.mean =  0.42         # saccade_micro_interval_mean
-		msg.variation = 0.10     # saccade_micro_interval_var
-		msg.paint_scale = 0.40   # saccade_micro_paint_scale
+		msg.mean =  0.8         # saccade_micro_interval_mean
+		msg.variation = 0.8     # saccade_micro_interval_var
+		msg.paint_scale = 3   # saccade_micro_paint_scale
 		#
-		msg.eye_size = 16.0      # saccade_study_face_eye_size
-		msg.eye_distance = 27.0  # saccade_study_face_eye_distance
-		msg.mouth_width = 7.0    # saccade_study_face_mouth_width
-		msg.mouth_height = 18.0  # saccade_study_face_mouth_height
+		msg.eye_size = 11.5      # saccade_study_face_eye_size
+		msg.eye_distance = 100 # saccade_study_face_eye_distance
+		msg.mouth_width = 90    # saccade_study_face_mouth_width
+		msg.mouth_height = 5  # saccade_study_face_mouth_height
 		msg.weight_eyes = 0.4    # saccade_study_face_weight_eyes
 		msg.weight_mouth = 0.6   # saccade_study_face_weight_mouth
+		self.saccade_pub.publish(msg)
+
+	# Used during conversation to study face being looked at.
+	def listening_saccade(self):
+		if not self.control_mode & self.C_SACCADE:
+			return
+		# Switch to conversational (micro) saccade parameters
+		msg = SaccadeCycle()
+		msg.mean =  2.2         # saccade_micro_interval_mean
+		msg.variation = 0.6      # saccade_micro_interval_var
+		msg.paint_scale = 1      # saccade_micro_paint_scale
+		#
+		msg.eye_size = 11        # saccade_study_face_eye_size
+		msg.eye_distance = 80    # saccade_study_face_eye_distance
+		msg.mouth_width = 50     # saccade_study_face_mouth_width
+		msg.mouth_height = 13.0  # saccade_study_face_mouth_height
+		msg.weight_eyes = 0.5    # saccade_study_face_weight_eyes
+		msg.weight_mouth = 0.5   # saccade_study_face_weight_mouth
 		self.saccade_pub.publish(msg)
 
 
@@ -263,9 +281,11 @@ class EvaControl():
 	#   rostopic pub --once perceived_text std_msgs/String "Look afraid!"
 	#
 	def language_perceived_text_cb(self, text_heard):
+		return
 		self.puta.perceived_text(text_heard.data)
 
 	def chat_perceived_text_cb(self, chat_heard):
+		return
 		if chat_heard.confidence >= 50:
 			self.puta.perceived_text(chat_heard.utterance)
 
@@ -277,17 +297,26 @@ class EvaControl():
 	#    rostopic pub --once chat_events std_msgs/String speechstart
 	#    rostopic pub --once chat_events std_msgs/String speechend
 	def chat_event_cb(self, chat_event):
-		rospy.loginfo('chat_event, type ' + chat_event.data)
-		if chat_event.data == "speechstart":
+		print('chat_event, type ' + chat_event.data)
+		if chat_event.data == "start":
 			rospy.loginfo("webui starting speech")
 			self.puta.vocalization_started()
 
-		elif chat_event.data == "speechend":
+		elif chat_event.data == "stop":
 			self.puta.vocalization_ended()
 			rospy.loginfo("webui ending speech")
 
+		elif chat_event.data == "listen_start":
+			self.puta.listening_started()
+			rospy.loginfo("webui ending speech")
+
+		elif chat_event.data == "listen_stop":
+			self.puta.listening_ended()
+			rospy.loginfo("webui ending speech")
+
+
 		else:
-			rospy.logerror("unknown chat_events message: " + chat_event.data)
+			rospy.logerr("unknown chat_events message: " + chat_event.data)
 
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):
@@ -417,7 +446,7 @@ class EvaControl():
 
 		# Receive messages tht indicate that TTS (or chatbot) has started
 		# or finished vocalizing.
-		rospy.Subscriber("chat_events", String, self.chat_event_cb)
+		rospy.Subscriber("speech_events", String, self.chat_event_cb)
 
 		# ----------------
 		# Boolean flag, turn the behavior tree on and off (set it running,

@@ -75,3 +75,16 @@ class FaceAtomic:
 		face = '(StateLink request-eye-contact-state (NumberNode "' + \
 		       str(faceid) + '"))'
 		return face
+	# Sets facetracking state in atomspace
+	def update_ft_state_to_atomspace(self, ft_enabled):
+		str = self.set_face_tracking_state(ft_enabled)
+		netcat(self.hostname, self.port, str + "\n")
+
+	# Build state string for facetracking state
+	def set_face_tracking_state(self, enabled):
+		if enabled:
+			state = 'on'
+		else:
+			state = 'off'
+		face = '(StateLink face-tracking-state face-tracking-%s)' % state
+		return face
