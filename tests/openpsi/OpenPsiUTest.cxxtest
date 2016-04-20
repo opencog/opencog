@@ -173,7 +173,7 @@ public:
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
         // Test 1:
-        // Test that actions are not executed and goal are not evaluated
+        // Test that actions are not executed and goal are not evaluated.
         _scm->eval("(test_psi_step_1)");
         CHKERR
 
@@ -193,6 +193,28 @@ public:
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "0.87\n", result_1_4);
 
+
+        // Test 2:
+        // Test that actions are taken and goals are evaluated.
+        _scm->eval("(test_psi_step_2)");
+        CHKERR
+
+        // For rule-1
+        auto result_2_1 = _scm->eval("(test_psi_step_2_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "#t\n", result_2_1);
+        auto result_2_2 = _scm->eval("(demand-value demand-1)");
+        CHKERR
+
+        TSM_ASSERT_EQUALS("Expected ()", "0.5\n", result_2_2);
+
+        // For rule-2
+        auto result_2_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_3);
+        auto result_2_4 = _scm->eval("(demand-value demand-2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "0.87\n", result_2_4);
         logger().info("END TEST: %s", __FUNCTION__);
     }
 };

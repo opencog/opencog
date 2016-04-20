@@ -101,7 +101,7 @@
 )
 
 ; --------------------------------------------------------------
-(define (rule-3) (psi-rule context-1 action-2 goal-1 (stv 1 1) demand-1))
+(define (rule-3) (psi-rule context-2 action-2 goal-1 (stv 1 1) demand-1))
 
 ; Helper functions for `OpenPsiUTest::test_psi_related_goals`
 (define (test_psi_related_goals_1)
@@ -124,7 +124,7 @@
     (rule-1)
     (rule-2)
     (rule-3)
-    ; Make one
+    ; Make one step
     (psi-step)
 )
 
@@ -134,3 +134,12 @@
 "
     (/ (round (* 100 (tv-mean (cog-tv demand-node))) ) 100)
 )
+
+(define (test_psi_step_2)
+    ; Load groundalbe contents for satisfying rule-2 only
+    (groundable-content-1)
+    ; Make one step
+    (psi-step)
+)
+
+(define (test_psi_step_2_1) (cog-node? (cog-node 'ConceptNode "act-1")))
