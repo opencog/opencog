@@ -129,7 +129,7 @@
 
 		;; Show random expressions only if NOT talking
 		(SequentialOr
-			(Not (DefinedPredicate "chatbot is listening"))
+			;(Not (DefinedPredicate "chatbot is listening"))
 			(SequentialAnd
 
 				(SequentialOrLink
@@ -292,17 +292,17 @@
 
 		; Say something, if no one else has said anything in a while.
 		; i.e. if are being ignored, then say something.
-		(SequentialOr
-			(SequentialAnd
-				(DefinedPredicate "Silent too long")
-				(Evaluation (GroundedPredicate "scm: print-msg")
-					(ListLink (Node "--- Everyone is ignoring me!!!")))
-				(Put (DefinedPredicate "Publish behavior")
-					(Concept "Sound of crickets"))
-				(True (DefinedSchema "set heard-something timestamp"))
-			)
-			(True)
-		)
+;		(SequentialOr
+;			(SequentialAnd
+;				(DefinedPredicate "Silent too long")0
+;				(Evaluation (GroundedPredicate "scm: print-msg")
+;					(ListLink (Node "--- Everyone is ignoring me!!!")))
+;				(Put (DefinedPredicate "Publish behavior")
+;					(Concept "Sound of crickets"))
+;				(True (DefinedSchema "set heard-something timestamp"))
+;			)
+;			(True)
+;		)
 
 		; This sequential-or is true if we're not interacting with anyone,
 		; or if there are several people and its time to change up.
@@ -425,8 +425,6 @@
 			(Concept "Falling asleep"))
 
 		; First, show some yawns ...
-		(Put (DefinedPredicate "Show random expression")
-			(Concept "sleepy"))
 		(Put (DefinedPredicate "Show random gesture")
 			(Concept "sleepy"))
 
@@ -582,6 +580,28 @@
 			(ListLink (Node "--- Start talking")))
 ))
 
+; Currently used for scripted behaviors while STT doesnt publish accurate events.
+(DefineLink
+	(DefinedPredicate "Listening started?")
+	(SequentialAnd
+		(DefinedPredicate "chatbot started listening")
+		; ... then switch to face-study saccade ...
+		(Evaluation (GroundedPredicate "py:listening_saccade")
+				(ListLink))
+		; ... and show one random gesture from "conversing" set.
+		(Put (DefinedPredicate "Show random gesture")
+			(ConceptNode "listening"))
+		; ... and also, sometimes, the "chatbot_positive_nod"
+		(Put (DefinedPredicate "Show random gesture")
+			(ConceptNode "chat-positive-nod"))
+		; ... and switch state to "listen"
+		(True (Put (State chat-state (Variable "$x")) chat-listen))
+
+		; ... print output.
+		(Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Start Listen")))
+))
+
 ;; Things to do, if the chatbot is currently talking.
 (DefineLink
 	(DefinedPredicate "Speech ongoing?")
@@ -660,7 +680,32 @@
 				(DefinedSchema "blink normal var")))
 
 		; ... and switch state to "listening"
-		(True (Put (State chat-state (Variable "$x")) chat-listen))
+		(True (Put (State chat-state (Variable "$x")) chat-idle))
+
+		; ... and print some tracing output
+		(Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Finished talking")))
+	))
+
+; Things to do, if stopped listening.
+(DefineLink
+	(DefinedPredicate "Listening ended?")
+	(SequentialAnd
+		; If the chatbot stopped talking ...
+		(DefinedPredicate "chatbot stopped listening")
+
+		; ... then switch back to exploration saccade ...
+		(Evaluation (GroundedPredicate "py:explore_saccade")
+			(ListLink))
+
+		; ... switch to normal blink rate...
+		(Evaluation (GroundedPredicate "py:blink_rate")
+			(ListLink
+				(DefinedSchema "blink normal mean")
+				(DefinedSchema "blink normal var")))
+
+		; ... and switch state to "idle"
+		(True (Put (State chat-state (Variable "$x")) chat-idle))
 
 		; ... and print some tracing output
 		(Evaluation (GroundedPredicate "scm: print-msg")
@@ -669,15 +714,50 @@
 
 ; Things to do, if the chatbot is listening.
 (DefineLink
-	(DefinedPredicate "Speech listening?")
+	(DefinedPredicate "Listening?")
 	(SequentialAnd
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot is listening")
+        ; ... show one of the neutral-speech expressions
+        (SequentialOr
+            (Not (DefinedPredicate "Time to change expression"))
+            (Put (DefinedPredicateNode "Show random expression")
+                (ConceptNode "neutral-listen")))
 
-		; No-op.  What should we do here?
+        ; ... nod slowly ...
+        (SequentialOr
+            (Not (DefinedPredicate "Time to make gesture"))
+            (SequentialAnd
+                (Put (DefinedPredicate "Show random gesture")
+                    (ConceptNode "chat-positive-nod"))
+
+                ; ... raise eyebrows ...
+                (Put (DefinedPredicate "Show random gesture")
+                    (ConceptNode "chat-pos-think"))
+        ))
 		(TrueLink)
 	))
+(DefineLink
+	(DefinedPredicate "Keep alive")
+	(SequentialAnd
+		; If the chatbot stopped talking ...
+        (SequentialOr
+            (Not (DefinedPredicate "Time to change expression"))
+            (Put (DefinedPredicateNode "Show random expression")
+                (ConceptNode "neutral-listen")))
 
+        ; ... nod slowly ...
+        (SequentialOr
+            (Not (DefinedPredicate "Time to make gesture"))
+            (SequentialAnd
+                (Put (DefinedPredicate "Show random gesture")
+                    (ConceptNode "chat-positive-nod"))
+                ; ... raise eyebrows ...
+                (Put (DefinedPredicate "Show random gesture")
+                    (ConceptNode "chat-pos-think"))
+        ))
+		(TrueLink)
+	))
 ;; ------------------------------------------------------------------
 ;; Main loop. Uses tail recursion optimization to form the loop.
 (DefineLink
@@ -685,6 +765,7 @@
 	(SatisfactionLink
 		(SequentialAnd
 			(SequentialOr
+			    (DefinedPredicate "Skip Interaction?")
 				(DefinedPredicate "Interaction requested")
 				(DefinedPredicate "New arrival sequence")
 				(DefinedPredicate "Someone left")
@@ -695,11 +776,18 @@
 			;; XXX FIXME chatbot is disengaged from everything else.
 			;; The room can be empty, the head is bored or even asleep,
 			;; but the chatbot is still smiling and yabbering.
+			;; If interaction is turned-off need keep alive gestures
 			(SequentialOr
 				(DefinedPredicate "Speech started?")
 				(DefinedPredicate "Speech ongoing?")
 				(DefinedPredicate "Speech ended?")
-				; (DefinedPredicate "Speech listening?") ; no-op
+				(DefinedPredicate "Listening started?")
+				(DefinedPredicate "Listening?")
+				(DefinedPredicate "Listening ended?")
+				(SequentialAnd
+				    (DefinedPredicate "Skip Interaction?")
+				    (DefinedPredicate "Keep alive")
+				)
 				(True)
 			)
 

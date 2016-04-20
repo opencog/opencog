@@ -64,6 +64,12 @@ class PutAtoms:
 	def vocalization_ended(self):
 		scheme_eval_h(self.atomspace, "(State chat-state chat-stop)")
 
+	def listening_started(self):
+		scheme_eval_h(self.atomspace, "(State chat-state chat-listen-start)")
+
+	def listening_ended(self):
+		scheme_eval_h(self.atomspace, "(State chat-state chat-listen-stop)")
+
 	# Indicate that the robot heard freindly speech
 	def affect_happy(self):
 		scheme_eval_h(self.atomspace, "(State chat-affect chat-happy)")

@@ -26,40 +26,111 @@
 ;
 ; To view the available expressions, do this:
 ; rostopic echo /blender_api/available_emotion_states
-; ['irritated', 'happy', 'recoil', 'surprised', 'sad', 'confused',
-;  'worry', 'bored', 'engaged', 'amused', 'comprehending', 'afraid']
+; ['worry', 'happySurprise', 'happy.001', 'recoil', 'happyDisgust', 'happy',
+; 'surprisedSad', 'surprised', 'sad', 'irritated', 'happy.002', 'fearSuprise',
+; 'fear', 'engaged', 'disgustSurprise', 'disgust.Sad', 'disgust', 'contempt',
+; 'confused', 'comprehending', 'bored', 'awe', 'angrySad', 'angryDisgust',
+; 'angry', 'amused', 'none']
+
 ;
 ; Cheat sheet: to display just one of these:
 ; (cog-evaluate! (Evaluation  (DefinedPredicate "Show expression")
 ;      (ListLink (Concept "worry") (Number 5) (Number 1))))
 
-(emo-expr-spec "new-arrival" "happy"  1.0 0.4 1.0 3 8)
+; new-arrival face tracking
+(emo-expr-spec "new-arrival" "happy"            0.2 0.4 1.0 2 8)
+(emo-expr-spec "new-arrival" "happy.001"        0.2 0.4 1.0 2 8)
+(emo-expr-spec "new-arrival" "happy.002"        0.2 0.4 1.0 2 8)
+(emo-expr-spec "new-arrival" "happySurprise"    0.1 0.4 0.8 2 5)
+(emo-expr-spec "new-arrival" "amused"           0.2 0.5 1.0 2 5)
+(emo-expr-spec "new-arrival" "engaged"          0.1 0.6 1.0 2 8)
 
-; Used when chatbot is not happy; also, when someone leaves.
-(emo-expr-spec "frustrated" "confused"    0.4 0.4 0.6 1 4)
-(emo-expr-spec "frustrated" "worry"    0.6 0.4 0.6 2 4)
+; Used when chatbot is not happy; also, when someone leaves. face tracking
+(emo-expr-spec "frustrated" "confused"          0.1 0.5 1.0 1 4)
+(emo-expr-spec "frustrated" "worry"             0.1 0.4 0.9 2 4)
+(emo-expr-spec "frustrated" "recoil"            0.1 0.5 0.9 2 3)
+(emo-expr-spec "frustrated" "happyDisgust"      0.1 0.5 0.9 2 4)
+(emo-expr-spec "frustrated" "surprisedSad"      0.1 0.5 0.8 2 5)
+(emo-expr-spec "frustrated" "sad"               0.05 0.5 0.8 2 4)
+(emo-expr-spec "frustrated" "irritated"         0.05 0.4 0.8 2 4)
+(emo-expr-spec "frustrated" "disgustSurprise"   0.05 0.4 0.8 2 4)
+(emo-expr-spec "frustrated" "disgust.Sad"       0.1 0.4 0.7 2 4)
+(emo-expr-spec "frustrated" "angry"             0.05 0.3 0.7 2 4)
+(emo-expr-spec "frustrated" "angrySad"          0.1 0.3 0.8 2 4)
+(emo-expr-spec "frustrated" "angryDisgust"      0.1 0.3 0.8 2 4)
+
+; positive face tracking
+(emo-expr-spec "positive" "happy"               0.2 0.6 0.8 2 6)
+(emo-expr-spec "positive" "happy.001"           0.1 0.4 0.7 2 8)
+(emo-expr-spec "positive" "happy.002"           0.1 0.4 1.0 2 8)
+(emo-expr-spec "positive" "comprehending"       0.1 0.5 0.8 1 6)
+(emo-expr-spec "positive" "amused"              0.1 0.5 0.8 3 6)
+(emo-expr-spec "positive" "confused"            0.1 0.5 0.8 3 6)
+(emo-expr-spec "positive" "happySurprise"       0.1 0.4 0.8 2 5)
+(emo-expr-spec "positive" "engaged"             0.1 0.6 1.0 2 8)
+(emo-expr-spec "positive" "surprised"           0.1 0.6 1.0 2 8)
+
+; bored face tracking
+(emo-expr-spec "bored"    "bored"               0.7 0.4 0.7 3 6)
+(emo-expr-spec "bored"    "sad"                 0.1 0.1 0.3 3 6)
+(emo-expr-spec "bored"    "confused"            0.2 0.1 0.3 2 4)
+
+; sleep
+(emo-expr-spec "sleep"    "happy"               1.0  0.0 0.5 5 8)
+
+; wake-up
+(emo-expr-spec "wake-up"  "surprised"           0.3 0.2 0.6 1 4)
+(emo-expr-spec "wake-up"  "happy"               0.6  0.5 0.7 3 6)
+(emo-expr-spec "wake-up"  "irritated"           0.1  0.1 0.4 1  3)
 
 
-(emo-expr-spec "positive" "happy"         0.4 0.6 0.8 2 6)
-(emo-expr-spec "positive" "comprehending" 0.15 0.5 0.8 1 6)
-(emo-expr-spec "positive" "amused"        0.3 0.5 0.8 3 6)
-(emo-expr-spec "positive" "confused"      0.15 0.5 0.8 3 6)
+; NO face tracking -
+; ==================
+; Used when chatbot is happy and NO face tracking
+(emo-expr-spec "neutral-speech"  "happy"              0.2  0.3 0.6 3 8)
+(emo-expr-spec "neutral-speech"  "happy.001"          0.1  0.3 0.6 3 8)
+(emo-expr-spec "neutral-speech"  "happy.002"          0.1  0.3 0.6 3 8)
+(emo-expr-spec "neutral-speech"  "happySurprise"      0.1  0.1 0.6 2 6)
+(emo-expr-spec "neutral-speech"  "surprised"          0.1  0.1 0.5 1 5)
+(emo-expr-spec "neutral-speech"  "comprehending"      0.1  0.7 1.0 4 8)
+(emo-expr-spec "neutral-speech"  "amused"             0.1  0.6 0.8 3 8)
+(emo-expr-spec "neutral-speech"  "confused"           0.1  0.6 1.0 2 8)
+(emo-expr-spec "neutral-speech"  "engaged"            0.1  0.5 1.0 2 6)
 
-(emo-expr-spec "bored"    "bored"         0.7 0.4 0.7 3 6)
-(emo-expr-spec "bored"    "sad"           0.1 0.1 0.3 3 6)
-(emo-expr-spec "bored"    "confused"      0.2 0.1 0.3 2 4)
+; Used when listening and NO face tracking
+(emo-expr-spec "neutral-listen"  "happy"              0.1  0.5 1.0 2 8)
+(emo-expr-spec "neutral-listen"  "happy.001"          0.1  0.5 0.65 2 8)
+(emo-expr-spec "neutral-listen"  "happy.002"          0.1  0.5 0.7 2 8)
+(emo-expr-spec "neutral-listen"  "happySurprise"      0.1  0.2 0.5 2 4)
+(emo-expr-spec "neutral-listen"  "surprised"          0.05 0.3 0.6 2 6)
+(emo-expr-spec "neutral-listen"  "surprisedSad"       0.05 0.3 0.7 2 5)
+(emo-expr-spec "neutral-listen"  "comprehending"      0.1  0.8 1.0 2 5)
+(emo-expr-spec "neutral-listen"  "amused"             0.1  0.4 1.0 2 8)
+(emo-expr-spec "neutral-listen"  "confused"           0.05 0.5 1.0 4 8)
+(emo-expr-spec "neutral-listen"  "engaged"            0.05 0.4 1.0 4 9)
+(emo-expr-spec "neutral-listen"  "fear"               0.05 0.1 0.4 2 4)
+(emo-expr-spec "neutral-listen"  "fearSuprise"        0.05 0.1 0.7 2 4)
+(emo-expr-spec "neutral-listen"  "angrySad"           0.05 0.2 0.6 2 6)
+(emo-expr-spec "neutral-listen"  "sad"                0.05 0.1 0.5 2 6)
 
-(emo-expr-spec "sleep"    "happy"         1.0  0.0 0.5 5 8)
+; Used when neutral keep alive NO face tracking
+(emo-expr-spec "neutral-keep-alive"  "happy"          0.1  0.4 1.0 2 8)
+(emo-expr-spec "neutral-keep-alive"  "happy.001"      0.1  0.3 0.65 2 8)
+(emo-expr-spec "neutral-keep-alive"  "happy.002"      0.1  0.3 0.7 2 8)
+(emo-expr-spec "neutral-keep-alive"  "happySurprised" 0.05 0.2 0.6 2 5)
+(emo-expr-spec "neutral-keep-alive"  "confused"       0.1  0.6 1.0 3 8)
+(emo-expr-spec "neutral-keep-alive"  "engaged"        0.1  0.4 1.0 4 9)
+(emo-expr-spec "neutral-keep-alive"  "amused"         0.1  0.3 1.0 2 5)
+(emo-expr-spec "neutral-keep-alive"  "recoil"         0.1  0.2 0.5 1 4)
+(emo-expr-spec "neutral-keep-alive"  "irritated"      0.05 0.1 0.7 1 4)
+(emo-expr-spec "neutral-keep-alive"  "fearSuprise"    0.05 0.2 0.7 3 6)
+(emo-expr-spec "neutral-keep-alive"  "angry"          0.05 0.1 0.6 1 4)
+(emo-expr-spec "neutral-keep-alive"  "angrySad"       0.05 0.1 0.6 1 5)
+(emo-expr-spec "neutral-keep-alive"  "bored"          0.05 0.1 1.0 3 7)
 
-(emo-expr-spec "wake-up"  "surprised"     0.3 0.2 0.6 1 4)
-(emo-expr-spec "wake-up"  "happy"         0.6  0.5 0.7 3 6)
-(emo-expr-spec "wake-up"  "irritated"     0.1  0.1 0.4 1  3)
 
-; Used when chatbot is happy
-(emo-expr-spec "neutral-speech"  "happy"         0.4  0.6 1.0 4 8)
-(emo-expr-spec "neutral-speech"  "comprehending" 0.3  0.5 0.9 2 5)
-(emo-expr-spec "neutral-speech"  "engaged"       0.3  0.5 0.9 2 6)
-
+; imperative
+; ==========
 ; Used for imperatives, i.e. when she is verbally told to do something.
 ; Thus, we list all of them here. The probability column is ignored.
 ; The strength has to be 0.6 or more, or else blender doesn't play the
@@ -104,10 +175,17 @@
 ; (cog-evaluate! (Evaluation  (DefinedPredicate "Show gesture")
 ;    (ListLink (Concept "thoughtful") (Number 0.2) (Number 2) (Number 0.8))))
 ;
-(emo-gest-spec "positive" "nod-4"  0.1 0.4 0.9 1 1 0.5 0.8)
-(emo-gest-spec "positive" "nod-1"  0.3 0.2 0.4 1 1 0.8 0.9)
-(emo-gest-spec "positive" "noop"   0.6 0   0   1 1 0   0)
-
+(emo-gest-spec "positive" "think-browsUp"        0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-browsUp.001"    0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-browsUp.002"    0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-browsUp.003"    0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-L"              0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-L.001"          0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-L.UP"           0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-R"              0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-R.001"          0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-R.UP"           0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "positive" "think-UP"             0.02 0.5 0.9 1 1 0.6 1.1)
 ; If bored, then 1/10th of the time, yawn.
 ; Rest of the time, don't do anything.
 (emo-gest-spec "bored"   "yawn-1"  0.1 0.6 0.9 1 1 1 1)
@@ -119,8 +197,7 @@
 (emo-gest-spec "wake-up" "shake-3"  0.3 0.6 1.0 1 1 0.7 0.8)
 (emo-gest-spec "wake-up" "blink"    0.3 0.8 1.0 2 4 0.9 1.0)
 
-; Gestures to use during conversations.
-; Note that the gesture strengths are reduced from normal.
+; Gestures to use during speaking.
 (emo-gest-spec "conversing" "think-browsUp.001"  0.4 0.7 1.0 1 1 0.6 0.8)
 (emo-gest-spec "conversing" "think-browsUp.003"  0.3 0.6 1.0 1 1 0.6 0.8)
 (emo-gest-spec "conversing" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
@@ -137,8 +214,81 @@
 (emo-gest-spec "chat-neg-think" "think-browsDown.003"  0.8 0.5 0.7 1 1 0.3 0.5)
 (emo-gest-spec "chat-neg-think" "noop"                 0.2 0   0   1 1 0   0  )
 
-; Used for imperatives, i.e. when she is verbally told to do something.
-; Thus, we list all of them here. The probability column is ignored.
+; Gestures to use during listening.
+(emo-gest-spec "listening" "think-browsUp.001"  0.4 0.7 1.0 1 1 0.6 0.8)
+(emo-gest-spec "listening" "think-browsUp.003"  0.3 0.6 1.0 1 1 0.6 0.8)
+(emo-gest-spec "listening" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
+
+
+
+
+; Gestures keep-alive
+; ===================
+
+; Gestures to use during keep-alive.
+; positive
+; positive + think
+; positive + look
+; negative + think
+
+
+; gestures positive
+(emo-gest-spec "gest-keep-alive-pos" "nod-1"            0.1  0.6 1.0 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos" "nod-2"            0.05 0.6 1.0 1 1 0.4 1.0)
+(emo-gest-spec "gest-keep-alive-pos" "nod-3"            0.1  0.5 1.0 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos" "nod-4"            0.1  0.5 1.0 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos" "nod-5"            0.1  0.5 1.0 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos" "nod-6"            0.05 0.5 1.0 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos" "thoughtful"       0.05 0.4 0.9 1 1 0.4 1.0)
+(emo-gest-spec "gest-keep-alive-pos" "thoughtful.001"   0.05 0.4 0.9 1 1 0.4 1.0)
+(emo-gest-spec "gest-keep-alive-pos" "noop"             0.4  0.0 0.0 1 1 0.0 0.0)
+
+; gestures negative
+(emo-gest-spec "gest-keep-alive-neg" "shake-2"          0.1  0.4 1.0 1 1 0.4 0.9)
+(emo-gest-spec "gest-keep-alive-neg" "shake-3"          0.05 0.4 0.7 1 1 0.4 0.9)
+(emo-gest-spec "gest-keep-alive-neg" "shake-4"          0.05 0.3 0.7 1 1 0.4 0.9)
+(emo-gest-spec "gest-keep-alive-neg" "shake-5"          0.05 0.3 0.7 1 1 0.4 0.9)
+(emo-gest-spec "gest-keep-alive-neg" "shake-6"          0.05 0.3 0.7 1 1 0.4 0.9)
+(emo-gest-spec "gest-keep-alive-neg" "noop"             0.7  0   0   1 1 0   0  )
+
+; gestures think
+(emo-gest-spec "gest-keep-alive-pos-think" "think-browsUp"        0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos-think" "think-browsUp.001"    0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos-think" "think-browsUp.002"    0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos-think" "think-browsUp.003"    0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos-think" "think-L"              0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos-think" "think-L.001"          0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos-think" "think-L.UP"           0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos-think" "think-R"              0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos-think" "think-R.001"          0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos-think" "think-R.UP"           0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-pos-think" "think-UP"             0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-neg-think" "think-browsDown"      0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-neg-think" "think-browsDown.001"  0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-neg-think" "think-browsDown.002"  0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-neg-think" "think-browsDown.003"  0.05 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-neg-think" "think-DWN"            0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-neg-think" "think-R.DWN"          0.02 0.5 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-neg-think" "noop"                 0.42 0   0   1 1 0   0  )
+
+; gestures look
+(emo-gest-spec "gest-keep-alive-look" "look-L"            0.05 0.2 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-look" "look-L.001"        0.05 0.2 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-look" "look-L.002"        0.05 0.2 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-look" "look-R"            0.05 0.2 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-look" "look-R.001"        0.05 0.2 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-look" "look-R.002"        0.05 0.2 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-look" "look-R.UP"         0.05 0.2 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-look" "look-LR"           0.05 0.2 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-look" "look-RL"           0.05 0.2 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-look" "look-L.UP"         0.05 0.2 0.9 1 1 0.6 1.1)
+(emo-gest-spec "gest-keep-alive-look" "noop"              0.5  0   0   1 1 0   0  )
+
+
+; Thus, we list all of them here. The probability colu
+
+
+; Used for imperatives, i.e. when she is verbally mn is ignored.
 (emo-gest-spec "imperative"   "amused"        0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "blink"         0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "blink-micro"   0.1 0.6 0.9 1 1 1 1)

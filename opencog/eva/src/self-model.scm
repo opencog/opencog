@@ -42,6 +42,14 @@
 ; XXX FIXME There are a bunch of define-publics in here, they probably
 ; should not be; they're needed only by the behavior module.
 
+; Face tracking state indicates if we respond to face tracking events.
+; Other than face tracking events there speech events to respond
+(define-public face-tracking-state (AnchorNode "Face Tracking State"))
+(define-public face-tracking-on (ConceptNode "FaceTrackingOn"))
+(define-public face-tracking-off (ConceptNode "FaceTrackingOff"))
+;; Facetracking is enabled by default
+(StateLink face-tracking-state face-tracking-on)
+
 ; Soma: awake, agitated, excited, tired, manic, depressed, in-pain.
 ; See, however, "affects", below.
 (define-public soma-state (AnchorNode "Soma State"))
@@ -120,14 +128,23 @@
 ; stopped talking -> listening.
 (define-public chat-state (AnchorNode "Chat State"))
 (define-public chat-listen (ConceptNode "Listening"))
+(define-public chat-listen-start (ConceptNode "Listening Start"))
+(define-public chat-listen-stop (ConceptNode "Listening Stop"))
 (define-public chat-start  (ConceptNode "Start Talking"))
 (define-public chat-talk   (ConceptNode "Talking"))
 (define-public chat-stop   (ConceptNode "Stop Talking"))
-(StateLink chat-state chat-stop)
+(define-public chat-idle   (ConceptNode "Chat inactive"))
+; Wait for speech events to trigger speech behaviors
+(StateLink chat-state chat-idle)
 
 (DefineLink
 	(DefinedPredicate "chatbot started talking")
 	(Equal (Set chat-start)
+		(Get (State chat-state (Variable "$x")))))
+
+(DefineLink
+	(DefinedPredicate "chatbot started listening")
+	(Equal (Set chat-listen-start)
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
@@ -141,8 +158,18 @@
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
+	(DefinedPredicate "chatbot started listening")
+	(Equal (Set chat-listen-start)
+		(Get (State chat-state (Variable "$x")))))
+
+(DefineLink
 	(DefinedPredicate "chatbot is listening")
 	(Equal (Set chat-listen)
+		(Get (State chat-state (Variable "$x")))))
+
+(DefineLink
+	(DefinedPredicate "chatbot stopped listening")
+	(Equal (Set chat-listen-stop)
 		(Get (State chat-state (Variable "$x")))))
 
 ; Chat affect. Is the robot happy about what its saying?
@@ -452,12 +479,20 @@
 ;; Return true if someone requests interaction.  This person will
 ;; become the new focus of attention.
 (DefineLink
+	(DefinedPredicate "Skip Interaction?")
+	(Equal
+		(SetLink face-tracking-off)
+		(Get (State face-tracking-state (Variable "$x"))))
+	)
+
+;; Return true if someone requests interaction.  This person will
+;; become the new focus of attention.
+(DefineLink
 	(DefinedPredicate "Someone requests interaction?")
 	(NotLink (Equal
 		(SetLink no-interaction)
 		(Get (State request-eye-contact-state (Variable "$x"))))
 	))
-
 
 ;; Send ROS message to actually make eye-contact with the person
 ;; we should be making eye-contact with.
