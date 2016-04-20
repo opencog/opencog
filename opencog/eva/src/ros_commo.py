@@ -87,11 +87,16 @@ class EvaControl():
 		return not rospy.is_shutdown()
 
 	def go_sleep(self):
-		self.soma_state('sleep', 1, 1, 3)
-		self.soma_state('normal', 0, 1, 0)
+		# Vytas altered this in commit
+		# 67ba02f75c5f82f4abb3e600711c97f65f007534
+		# presumably because of conflicts with the current blender model!?
+		# Or perhaps the behavior tree is sleeping too often?
+		# self.soma_state('sleep', 1, 1, 3)
+		# self.soma_state('normal', 0, 1, 0)
+		self.soma_state('normal', 0.1, 1, 3)
 
 	def wake_up(self):
-		self.soma_state('sleep', 0, 1, 0)
+		# self.soma_state('sleep', 0, 1, 0)
 		self.soma_state('normal', 0.1, 1, 3)
 
 	# ----------------------------------------------------------
