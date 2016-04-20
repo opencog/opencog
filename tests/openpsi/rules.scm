@@ -5,8 +5,8 @@
 ; 1. run cmake in the build directory
 ; 2. run  (add-to-load-path "/absolute/path/to/build/opencog/scm")
 ; 3. (use-modules (opencog) (opencog openpsi))
+
 ; --------------------------------------------------------------
-; Helper function for `OpenPsiUTest::test_psi_satisfiable?`
 (define context-1
     (list
        (ListLink
@@ -48,18 +48,19 @@
 (define (rule-1) (psi-rule context-1 action-1 goal-1 (stv 1 1) demand-1))
 
 (define (groundable-content-1)
-    (ListLink
-        (NumberNode 1)
-        (NumberNode 1)
-        (PredicateNode "z"))
-    (InheritanceLink
-        (NumberNode 1)
-        (PredicateNode "z"))
+    (list
+        (ListLink
+            (NumberNode 1)
+            (NumberNode 1)
+            (PredicateNode "z"))
+        (InheritanceLink
+            (NumberNode 1)
+            (PredicateNode "z")))
 )
 
 ; --------------------------------------------------------------
 (define context-2
-    (list
+    (list ; They are in a list so as to simplify removal.
        (ListLink
             (VariableNode "x")
             (VariableNode "z"))
@@ -92,17 +93,18 @@
 (define (rule-2) (psi-rule context-2 action-2 goal-2 (stv 1 1) demand-2))
 
 (define (groundable-content-2)
-    (ListLink
-        (NumberNode 1)
-        (NumberNode 2))
-    (InheritanceLink
-        (NumberNode 1)
-        (NumberNode 2))
+    (list ; They are in a list so as to simplify removal.
+        (ListLink
+            (NumberNode 1)
+            (NumberNode 2))
+        (InheritanceLink
+            (NumberNode 1)
+            (NumberNode 2)))
 )
 
-; --------------------------------------------------------------
-(define (rule-3) (psi-rule context-1 action-2 goal-1 (stv 1 1) demand-1))
+(define (rule-3) (psi-rule context-2 action-2 goal-1 (stv 1 1) demand-1))
 
+; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_related_goals`
 (define (test_psi_related_goals_1)
     (equal? goal-1 (car (psi-related-goals action-1)))
@@ -116,3 +118,44 @@
         #f
     )
 )
+
+; --------------------------------------------------------------
+; Helper functions for `OpenPsiUTest::test_psi_step`
+(define (setup_test_psi_step_1)
+    ; Load rules
+    (rule-1)
+    (rule-2)
+    (rule-3)
+    ; Make one step
+    (psi-step)
+)
+
+(define (demand-value demand-node)
+"
+  Returns the strength of the demand-node to two decimal places.
+"
+    (/ (round (* 100 (tv-mean (cog-tv demand-node))) ) 100)
+)
+
+(define (setup_test_psi_step_2)
+    ; Load groundalbe contents for satisfying rule-2 only
+    (groundable-content-1)
+    ; Make one step
+    (psi-step)
+)
+
+(define (test_psi_step_2_1) (cog-node? (cog-node 'ConceptNode "act-1")))
+
+(define (setup_test_psi_step_3)
+    ; Clean the atomspace so that only rule-2 and rule-3 are selectable
+    (map cog-delete (groundable-content-1))
+    (cog-delete (act-1))
+    ; Change the strength of demand-1 to its initial value
+    (cog-set-tv! demand-1 (stv .87 1))
+    ; Load groundable contents for satisfying rule-2 or rule 3
+    (groundable-content-2)
+    ; Make one step
+    (psi-step)
+)
+
+(define (test_psi_step_3_1) (cog-node? (cog-node 'ConceptNode "act-2")))

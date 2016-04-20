@@ -94,7 +94,7 @@
 "
     (fold append '()
         (par-map (lambda (x) (cog-chase-link 'MemberLink 'ImplicationLink x))
-            (cog-outgoing-set (psi-get-demands-all))))
+            (cog-outgoing-set (psi-get-all-demands))))
 )
 
 ; --------------------------------------------------------------
@@ -209,7 +209,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-satisfiable demand-node)
+(define-public (psi-get-satisfiable-rules demand-node)
 "
   Returns a list of psi-rules of the given demand that are satisfiable.
 
@@ -235,13 +235,14 @@
     (define (choose-one-rule demand-node)
         ; Returns an empty list or a list containing a randomly choosen
         ; satisfiable psi-rule.
-        (let ((rules (most-weighted-atoms (psi-get-satisfiable demand-node))))
+        (let ((rules (most-weighted-atoms
+                        (psi-get-satisfiable-rules demand-node))))
             (if (null? rules)
                 '()
                 (list (list-ref rules (random (length rules) a-random-state)))))
     )
 
-    (let* ((set-link (psi-get-demands-all))
+    (let* ((set-link (psi-get-all-demands))
            (demands (cog-outgoing-set set-link))
            (rules (append-map choose-one-rule demands)))
         (if (null? rules)
