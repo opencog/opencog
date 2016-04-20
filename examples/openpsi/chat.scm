@@ -16,7 +16,7 @@
 (define no-new-input-utterance (ConceptNode "No New Input Utterance"))
 (define new-input-utterance (AnchorNode "New Input Utterance"))
 (StateLink new-input-utterance no-new-input-utterance)
-(define (chat utt) (StateLink new-input-utterance (car (nlp-parse utt))))
+(define (chat utt) (StateLink new-input-utterance (car (nlp-parse utt))) (newline))
 
 ;-------------------------------------------------------------------------------
 ; Define the demands with their default values
