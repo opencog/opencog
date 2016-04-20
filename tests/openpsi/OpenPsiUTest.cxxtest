@@ -135,7 +135,7 @@ public:
         TSM_ASSERT_EQUALS("Expected the same psi-rule", rule_1, result_2_2);
         CHKERR
 
-        // Test 3
+        // Test that only one rule is selected when running in default mode
         _scm->eval("(groundable-content-2)");
         CHKERR
         auto result_3 = _scm->eval("(length (psi-select-rules))");
