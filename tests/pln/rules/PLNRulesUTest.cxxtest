@@ -65,7 +65,7 @@ public:
 	void test_forall_implication_to_higher_order();
 	void test_implication_full_instantiation();
 	void test_implication_partial_instantiation();
-	void test_implication_lambda_distribution();
+	void test_implication_scope_distribution();
 	void test_and_lambda_distribution();
 	void test_implication_implicant_distribution();
 	void test_implication_construction();
@@ -393,10 +393,10 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 }
 
 /**
- * Test implication-partial-instantiation-rule defined in:
- * opencog/pln/rules/implication-instantiation-rule.scm
+ * Test implication-scope-distribution-rule defined in:
+ * opencog/pln/rules/implication-scope-distribution-rule.scm
  */
-void PLNRulesUTest::test_implication_lambda_distribution()
+void PLNRulesUTest::test_implication_scope_distribution()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -404,11 +404,11 @@ void PLNRulesUTest::test_implication_lambda_distribution()
 
 	config().set("SCM_PRELOAD",
 	             "tests/pln/rules/simple-implication.scm, "
-	             "opencog/pln/rules/implication-lambda-distribution-rule.scm");
+	             "opencog/pln/rules/implication-scope-distribution-rule.scm");
 	load_scm_files_from_config(as);
 
 	// Apply the and rule
-	Handle rule = eval.eval_h("implication-lambda-distribution-rule");
+	Handle rule = eval.eval_h("implication-scope-distribution-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
 		("(SetLink"
