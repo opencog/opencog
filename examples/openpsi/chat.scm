@@ -40,7 +40,7 @@
     (let* ((max-score .5)
            (best-match "")
            (satisfied-rules '())
-           (all-demands (cog-outgoing-set (psi-get-demands-all)))
+           (all-demands (cog-outgoing-set (psi-get-all-demands)))
            (all-rules (append-map psi-get-rules all-demands))
           )
         (map (lambda (r)
