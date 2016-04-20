@@ -143,7 +143,7 @@ public:
         CHKERR
         auto result_3 = _scm->eval("(length (psi-select-rules))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected a one rule", "1\n" , result_3);
+        TSM_ASSERT_EQUALS("Expected a single rule", "1\n" , result_3);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
@@ -183,7 +183,7 @@ public:
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_1);
         auto result_1_2 = _scm->eval("(demand-value demand-1)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "0.87\n", result_1_2);
+        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_1_2);
 
         // For rule-2
         auto result_1_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
@@ -191,22 +191,22 @@ public:
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_3);
         auto result_1_4 = _scm->eval("(demand-value demand-2)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "0.87\n", result_1_4);
+        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_1_4);
 
 
         // Test 2:
-        // Test that actions are taken and goals are evaluated.
+        // Test that action-1 is executed, and goal-1 is evaluated.
         _scm->eval("(test_psi_step_2)");
         CHKERR
 
         // For rule-1
         auto result_2_1 = _scm->eval("(test_psi_step_2_1)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "#t\n", result_2_1);
+        TSM_ASSERT_EQUALS("Expected #t", "#t\n", result_2_1);
         auto result_2_2 = _scm->eval("(demand-value demand-1)");
         CHKERR
 
-        TSM_ASSERT_EQUALS("Expected ()", "0.5\n", result_2_2);
+        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_2_2);
 
         // For rule-2
         auto result_2_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
@@ -214,7 +214,31 @@ public:
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_3);
         auto result_2_4 = _scm->eval("(demand-value demand-2)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "0.87\n", result_2_4);
+        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_2_4);
+        logger().info("END TEST: %s", __FUNCTION__);
+
+        // Test 3:
+        // Test that action-2 is executed, and both goal-1 and goal-2 are
+        // evaluated.
+        _scm->eval("(test_psi_step_3)");
+        CHKERR
+
+        // For rule-2 or rule-3
+        auto result_3_1 = _scm->eval("(test_psi_step_3_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "#t\n", result_3_1);
+        auto result_3_2 = _scm->eval("(demand-value demand-2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_2);
+
+        // For rule-1
+        auto result_3_3 = _scm->eval("(test_psi_step_2_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "#f\n", result_3_3);
+        auto result_3_4 = _scm->eval("(demand-value demand-1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_4);
+
         logger().info("END TEST: %s", __FUNCTION__);
     }
 };
