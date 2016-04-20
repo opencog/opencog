@@ -5,8 +5,8 @@
 ; 1. run cmake in the build directory
 ; 2. run  (add-to-load-path "/absolute/path/to/build/opencog/scm")
 ; 3. (use-modules (opencog) (opencog openpsi))
+
 ; --------------------------------------------------------------
-; Helper function for `OpenPsiUTest::test_psi_satisfiable?`
 (define context-1
     (list
        (ListLink
@@ -115,4 +115,22 @@
         #t
         #f
     )
+)
+
+; --------------------------------------------------------------
+; Helper functions for `OpenPsiUTest::test_psi_step`
+(define (test_psi_step_1)
+    ; Load rules
+    (rule-1)
+    (rule-2)
+    (rule-3)
+    ; Make one
+    (psi-step)
+)
+
+(define (demand-value demand-node)
+"
+  Returns the strength of the demand-node to two decimal places.
+"
+    (/ (round (* 100 (tv-mean (cog-tv demand-node))) ) 100)
 )

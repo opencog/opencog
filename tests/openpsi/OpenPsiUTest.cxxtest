@@ -93,11 +93,13 @@ public:
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+        // Test 1:
         // Test unsatisfaiability
         auto result_1 = _scm->eval("(psi-satisfiable? (rule-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1);
 
+        // Test 2:
         // Test satisfaiability
         _scm->eval("(groundable-content-1)");
         CHKERR
@@ -118,12 +120,12 @@ public:
         auto rule_2 = _scm->eval_h("(rule-2)");
         CHKERR
 
-        // Test 1
+        // Test 1:
         auto result_1 = _scm->eval("(psi-select-rules)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1);
 
-        // Test 2
+        // Test 2:
         _scm->eval("(groundable-content-1)");
         CHKERR
         auto result_2_1 = _scm->eval("(length (psi-select-rules))");
@@ -135,6 +137,7 @@ public:
         TSM_ASSERT_EQUALS("Expected the same psi-rule", rule_1, result_2_2);
         CHKERR
 
+        // Test 3:
         // Test that only one rule is selected when running in default mode
         _scm->eval("(groundable-content-2)");
         CHKERR
@@ -160,6 +163,35 @@ public:
         auto result_2 = _scm->eval("(test_psi_related_goals_2)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
+    // Check the scheme function `psi-step`
+    void test_psi_step()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Test 1:
+        // Test that actions are not executed and goal are not evaluated
+        _scm->eval("(test_psi_step_1)");
+        CHKERR
+
+        // For rule-1
+        auto result_1_1 = _scm->eval("(cog-node 'ConceptNode \"act-1\")");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_1);
+        auto result_1_2 = _scm->eval("(demand-value demand-1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "0.87\n", result_1_2);
+
+        // For rule-2
+        auto result_1_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_3);
+        auto result_1_4 = _scm->eval("(demand-value demand-2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "0.87\n", result_1_4);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
