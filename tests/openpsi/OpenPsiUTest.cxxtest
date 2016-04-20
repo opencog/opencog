@@ -158,15 +158,67 @@ public:
         _scm->eval_h("(rule-1) (rule-2) (rule-3)");
         CHKERR
 
+        // Test 1:
         auto result_1 = _scm->eval("(test_psi_related_goals_1)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1);
+
+        // Test 2:
         auto result_2 = _scm->eval("(test_psi_related_goals_2)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
+
+    // Check the scheme function `psi-get-satisfiable-rules`
+    void test_psi_get_satisfiable_rules()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Add the rules and contents
+        _scm->eval_h("(rule-1) (rule-2) (rule-3)");
+        CHKERR
+
+        // Test 1:
+        _scm->eval("(groundable-content-1)");
+        CHKERR
+        auto result_1_1 = _scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_1_1);
+        auto result_1_2 =_scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-2))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `0`", "0\n" , result_1_2);
+
+        // Test 2:
+        _scm->eval("(groundable-content-2)");
+        CHKERR
+        auto result_2_1 = _scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `2`", "2\n" , result_2_1);
+        auto result_2_2 =_scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-2))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_2_2);
+
+        // Test 3:
+        _scm->eval("(map cog-delete (groundable-content-1))");
+        CHKERR
+        auto result_3_1 = _scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_3_1);
+        auto result_3_2 =_scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-2))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_3_2);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
 
     // Check the scheme function `psi-step`
     void test_psi_step()
