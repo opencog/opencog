@@ -138,7 +138,8 @@ public:
         CHKERR
 
         // Test 3:
-        // Test that only one rule is selected when running in default mode
+        // Test that only one rule is selected when running in default mode,
+        // eventhough multiple rules are satisfiable.
         _scm->eval("(groundable-content-2)");
         CHKERR
         auto result_3 = _scm->eval("(length (psi-select-rules))");
@@ -174,7 +175,7 @@ public:
 
         // Test 1:
         // Test that actions are not executed and goal are not evaluated.
-        _scm->eval("(test_psi_step_1)");
+        _scm->eval("(setup_test_psi_step_1)");
         CHKERR
 
         // For rule-1
@@ -196,7 +197,7 @@ public:
 
         // Test 2:
         // Test that action-1 is executed, and goal-1 is evaluated.
-        _scm->eval("(test_psi_step_2)");
+        _scm->eval("(setup_test_psi_step_2)");
         CHKERR
 
         // For rule-1
@@ -220,7 +221,7 @@ public:
         // Test 3:
         // Test that action-2 is executed, and both goal-1 and goal-2 are
         // evaluated.
-        _scm->eval("(test_psi_step_3)");
+        _scm->eval("(setup_test_psi_step_3)");
         CHKERR
 
         // For rule-2 or rule-3

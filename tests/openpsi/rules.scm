@@ -102,9 +102,9 @@
             (NumberNode 2)))
 )
 
-; --------------------------------------------------------------
 (define (rule-3) (psi-rule context-2 action-2 goal-1 (stv 1 1) demand-1))
 
+; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_related_goals`
 (define (test_psi_related_goals_1)
     (equal? goal-1 (car (psi-related-goals action-1)))
@@ -121,7 +121,7 @@
 
 ; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_step`
-(define (test_psi_step_1)
+(define (setup_test_psi_step_1)
     ; Load rules
     (rule-1)
     (rule-2)
@@ -137,7 +137,7 @@
     (/ (round (* 100 (tv-mean (cog-tv demand-node))) ) 100)
 )
 
-(define (test_psi_step_2)
+(define (setup_test_psi_step_2)
     ; Load groundalbe contents for satisfying rule-2 only
     (groundable-content-1)
     ; Make one step
@@ -146,7 +146,7 @@
 
 (define (test_psi_step_2_1) (cog-node? (cog-node 'ConceptNode "act-1")))
 
-(define (test_psi_step_3)
+(define (setup_test_psi_step_3)
     ; Clean the atomspace so that only rule-2 and rule-3 are selectable
     (map cog-delete (groundable-content-1))
     (cog-delete (act-1))
