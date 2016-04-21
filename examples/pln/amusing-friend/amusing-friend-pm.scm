@@ -32,7 +32,7 @@
 ;;
 ;; (Evaluation (0.8 0.9)
 ;;   (Predicate "is-honest")
-;;   (Concept "Bob")
+;;   (Concept "Bob"))
 (cog-bind implication-full-instantiation-rule)
 
 ;; (2) Distribute the scope of the implication that friends tend to be
