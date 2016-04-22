@@ -71,11 +71,12 @@
 ;;             (Variable "$Y"))))
 (cog-bind implication-scope-distribution-rule)
 
-;; (3) Infer the TV of the implicant of (2) using ???
+;; (3) Infer the TV of the implicant of (2) using
+;; lambda-predicate-construction-rule
 ;;
 ;; Result should be:
 ;;
-;; (Lambda (stv ? ?)
+;; (Lambda (stv 1e-5 0.9)
 ;;    (VariableList
 ;;       (TypedVariable
 ;;          (Variable "$X")
@@ -88,13 +89,14 @@
 ;;       (List
 ;;          (Variable "$X")
 ;;          (Variable "$Y"))))
-;; TODO
+(cog-bind lambda-predicate-construction-rule)
 
-;; (4) Infer the TV of the implicand of (2) using ???
+;; (4) Infer the TV of the implicand of (2) using
+;; lambda-predicate-construction-rule
 ;;
 ;; Result should be:
 ;;
-;; (Lambda (stv ? ?)
+;; (Lambda (stv 0.64 0.9)
 ;;    (VariableList
 ;;       (TypedVariable
 ;;          (Variable "$X")
@@ -109,14 +111,14 @@
 ;;       (Evaluation
 ;;          (Predicate "is-honest")
 ;;          (Variable "$Y")))
-;; TODO
+;; For now inside the kb
 
 ;; (5) Infer that honest people are more likely to become
 ;; friends. Apply the inversion rule over (2).
 ;;
 ;; Result should be:
 ;;
-;; (Implication (stv ? ?)
+;; (Implication (stv 0.0001171875 0.5)
 ;;    (Lambda
 ;;       (VariableList
 ;;          (TypedVariable
@@ -145,10 +147,55 @@
 ;;          (List
 ;;             (Variable "$X")
 ;;             (Variable "$Y"))))
-;; TODO: (cog-bind inversion-rule)
+(cog-bind inversion-implication-rule)
 
-;; (6) Infer that honest human acquaintances tend to become
-;; friends. Apply rule ?? on (5)
+;; (6) Distribute the scope of the implication that human
+;; acquaintances tend to become friends in the kb, applying
+;; implication-scope-distribution-rule.
+;;
+;; Result should be:
+;;
+;; (Implication (stv 0.1 0.5)
+;;    (LambdaLink (stv 0.001 0.9)
+;;       (VariableList
+;;          (TypedVariable
+;;             (Variable "$X")
+;;             (Type "ConceptNode"))
+;;          (TypedVariable
+;;             (Variable "$Y")
+;;             (Type "ConceptNode")))
+;;       (And
+;;          (Inheritance
+;;             (Variable "$X")
+;;             (Concept "human"))
+;;          (Inheritance
+;;             (Variable "$Y")
+;;             (Concept "human"))
+;;          (Evaluation
+;;             (Predicate "acquainted")
+;;             (List
+;;                (Variable "$X")
+;;                (Variable "$Y")))))
+;;    (LambdaLink (stv 0.0001 0.9)
+;;       (VariableList
+;;          (TypedVariable
+;;             (Variable "$X")
+;;             (Type "ConceptNode"))
+;;          (TypedVariable
+;;             (Variable "$Y")
+;;             (Type "ConceptNode")))
+;;       (Evaluation
+;;          (Predicate "will-be-friends")
+;;          (List
+;;             (Variable "$X")
+;;             (Variable "$Y")))))
+;;
+;; Actually, no need as it was inferred in (2)
+;; (cog-bind implication-scope-distribution-rule)
+
+;; (7) Infer that honest human acquaintances tend to become friends
+;; (more so than just human acquaintances). Apply rule
+;; implication-implicant-conjunction-rule on (6)
 ;;
 ;; Result should be:
 ;;
@@ -192,10 +239,14 @@
 ;;          (List
 ;;             (Variable "$X")
 ;;             (Variable "$Y"))))
-;; TODO: maybe this requires 2 steps
+;;
+;; TODO: add utest for implication-implicant-conjunction-rule and debug it
+;; (cog-bind implication-implicant-conjunction-rule)
 
-;; (7) Infer that Bob may become a friend. Apply the
-;; implication-full-instantiation-rule on (6).
+;; (8) TODO: factorize lambda in implicant of (7)
+
+;; (9) Infer that Bob may become a friend. Apply the
+;; implication-full-instantiation-rule on (8).
 ;;
 ;; Result should be:
 ;;
@@ -204,9 +255,11 @@
 ;;    (List
 ;;       (Concept "Self")
 ;;       (Concept "Bob")))
-(cog-bind implication-full-instantiation-rule)
+;;
+;; TODO: update the full-instantiation-rule to work on unsugar form
+;; (cog-bind implication-full-instantiation-rule)
 
-;; (8) Infer that Bob is funny. Apply the
+;; (10) Infer that Bob is funny. Apply the
 ;; implication-full-instantiation-rule on the implication stating that
 ;; people telling jokes are funny in the kb.
 ;;
@@ -216,11 +269,11 @@
 ;;   (Predicate "is-funny")
 ;;   (Concept "Bob"))
 ;;
-;; Actually, no need as it was infered in (1)
+;; Actually, no need as it was inferred in (1)
 ;; (cog-bind implication-full-instantiation-rule)
 
-;; (9) Distribute the scope of the amusing funny equivalence. Apply
-;; equivalence-scope-distribution-rule.
+;; (11) Distribute the scope of the amusing funny equivalence from the
+;; kb. Apply equivalence-scope-distribution-rule.
 ;;
 ;; Result should be:
 ;;
@@ -239,10 +292,10 @@
 ;;       (Evaluation
 ;;          (Predicate "is-amusing")
 ;;          (Variable "$X"))))
+;; TODO: implement equivalence-scope-distribution-rule
 
-;; (10) Infer that if X is funny, then X is amusing. Apply the
-;; equivalence-to-double-implication-rule over the equivalence between
-;; is-funny and is-amusing in the kb.
+;; (12) Infer that if X is funny, then X is amusing. Apply the
+;; equivalence-to-double-implication-rule on (11).
 ;;
 ;; Result should be:
 ;;
@@ -263,8 +316,8 @@
 ;;          (Variable "$X"))))
 (cog-bind equivalence-to-double-implication-rule)
 
-;; (11) Infer that Bob is amusing. Apply implication-full-instantiation
-;; on the result of (10).
+;; (13) Infer that Bob is amusing. Apply implication-full-instantiation
+;; on the result of (12).
 ;;
 ;; Result should be:
 ;;
@@ -273,8 +326,8 @@
 ;;   (Concept "Bob"))
 (cog-bind implication-full-instantiation-rule)
 
-;; (12) Infer that Bob will be an amusing and honest friend. Apply the
-;; and-construction-rule over the results of (7), (8) and (11)
+;; (14) Infer that Bob will be an amusing and honest friend. Apply the
+;; and-construction-rule over the results of (9), (10) and (13)
 ;;
 ;; Result should be:
 ;;

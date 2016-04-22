@@ -4,6 +4,59 @@
 ;; everything related to spatio-temporal reasoning. To be reified as
 ;; desired.
 
+;;;;;;;;;;;;;
+;; Honesty ;;
+;;;;;;;;;;;;;
+
+;; Probability of being honest
+(Predicate "is-honest" (stv 0.8 0.9))
+
+;; Probability that two things are honest
+;;
+;; This should be inferred since we don't have the rules to infer that
+;; we put it in the kb for now.
+(Lambda (stv 0.64 0.9)
+   (VariableList
+      (TypedVariable
+         (Variable "$X")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$Y")
+         (Type "ConceptNode")))
+   (And
+      (Evaluation
+         (Predicate "is-honest")
+         (Variable "$X"))
+      (Evaluation
+         (Predicate "is-honest")
+         (Variable "$Y"))))
+
+;;;;;;;;;;;;;;
+;; Humanity ;;
+;;;;;;;;;;;;;;
+
+;; Probability of two human acquaintances
+(Lambda (stv 0.001 0.9)
+   (VariableList
+      (TypedVariable
+         (Variable "$X")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$Y")
+         (Type "ConceptNode")))
+   (And
+      (Inheritance
+         (Variable "$X")
+         (Concept "human"))
+      (Inheritance
+         (Variable "$Y")
+         (Concept "human"))
+      (Evaluation
+         (Predicate "acquainted")
+         (List
+            (Variable "$X")
+            (Variable "$Y")))))
+
 ;;;;;;;;;
 ;; Bob ;;
 ;;;;;;;;;
@@ -128,7 +181,7 @@
          (Variable "$Y"))))
 
 ;; Friends tend to be honest
-(Implication (stv 0.6 0.5)
+(Implication (stv 0.75 0.5)
    (VariableList
       (TypedVariable
          (Variable "$X")
@@ -228,7 +281,7 @@
 ;;;;;;;;;;;;;;;
 
 ;; Bob told Jill the truth about the party
-(Evaluation
+(Evaluation (stv 1 1)
    (Predicate "told-the-truth-about")
    (List
       (Concept "Bob")
@@ -237,7 +290,7 @@
 
 
 ;; Bob told Jim a joke at the party.
-(Evaluation
+(Evaluation (stv 1 1)
    (Predicate "told-a-joke-at")
       (List
          (Concept "Bob")
