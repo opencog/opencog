@@ -57,9 +57,8 @@
          (cAB (cog-stv-confidence AB)))
         (cog-set-tv!
             BA
-            (stv 
-                (/ (* sAB sB) (floor sA)) 
-                (min sA sB sAB)))))
+            (stv (inversion-strength-formula sA sB sAB)
+                 (min cA cB cAB)))))
 
 ;; Name the rules
 (define inversion-inheritance-rule-name
