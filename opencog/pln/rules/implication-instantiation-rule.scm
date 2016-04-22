@@ -168,8 +168,9 @@
                (Qinst-s (* Impl-s Pinst-s))
                (Qinst-c (* Impl-c Pinst-c)))
           ;; Remove the PutLinks to not pollute the atomspace
-          (extract-hypergraph Pput)
-          (extract-hypergraph Qput)
+          ;; TODO: replace this by something more sensible
+          ;; (extract-hypergraph Pput)
+          ;; (extract-hypergraph Qput)
           (cog-set-tv! Qinst (stv Qinst-s Qinst-c))))))
 
 ;; Name the rule
