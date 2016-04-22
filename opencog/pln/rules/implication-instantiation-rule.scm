@@ -111,7 +111,7 @@
 ;; ------------------- + s = ------------------- + ------------------------------
 ;; Sum_{x in X-a} P(x)       Sum_{x in X-a} P(x)       Sum_{x in X-a} P(x)
 ;;
-;;       Now, let's assume that X is infinite, thus
+;;       Now, let's assume that P's and Q's support are infinite, thus
 ;;
 ;;       Sum_{x in X-a} min(P(x), Q(x))   Sum_x min(P(x), Q(x))
 ;;       ------------------------------ = --------------------- = s
@@ -155,22 +155,20 @@
          (Q (caddr Impl-outgoings))
          (terms (select-conditioned-substitution-terms TyVs P)))
     (if (equal? terms (cog-undefined-handle))
-        terms
+        (cog-undefined-handle)
         ;; Substitute the variables by the terms in P and Q. In P to
         ;; get its TV, in Q cause it's the rule output.
         (let* (
                (Pput (PutLink (LambdaLink TyVs P) terms))
-               ;; (Pinst (cog-execute! Pput))
-               (Pinst-s 1);(cog-stv-strength Pinst))
-               (Pinst-c 1);(cog-stv-confidence Pinst))
+               (Pinst (cog-execute! Pput))
+               (Pinst-s (cog-stv-strength Pinst))
+               (Pinst-c (cog-stv-confidence Pinst))
                (Qput (PutLink (LambdaLink TyVs Q) terms))
                (Qinst (cog-execute! Qput))
                (Qinst-s (* Impl-s Pinst-s))
                (Qinst-c (* Impl-c Pinst-c)))
           ;; Remove the PutLinks to not pollute the atomspace
-          ;; (extract-hypergraph Pput)
-          (cog-logger-info "Pput ~a" Pput)
-          (Pinst (cog-execute! Pput))
+          (extract-hypergraph Pput)
           (extract-hypergraph Qput)
           (cog-set-tv! Qinst (stv Qinst-s Qinst-c))))))
 
