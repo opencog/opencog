@@ -147,13 +147,17 @@
 ;;       Proof: look into your heart, it feels right, doesn't it?
 ;;
 (define (implication-full-instantiation-formula Impl)
+  (cog-logger-info "implication-full-instantiation-formula Impl = ~a" Impl)
   (let* ((Impl-outgoings (cog-outgoing-set Impl))
          (Impl-s (cog-stv-strength Impl))
          (Impl-c (cog-stv-confidence Impl))
          (TyVs (car Impl-outgoings))
          (P (cadr Impl-outgoings))
          (Q (caddr Impl-outgoings))
-         (terms (select-conditioned-substitution-terms TyVs P)))
+         (terms (if (= 0 Impl-c) ; don't try to instantiate zero
+                                 ; knowledge implication
+                    (cog-undefined-handle)
+                    (select-conditioned-substitution-terms TyVs P))))
     (if (equal? terms (cog-undefined-handle))
         (cog-undefined-handle)
         ;; Substitute the variables by the terms in P and Q. In P to
@@ -171,7 +175,9 @@
           ;; TODO: replace this by something more sensible
           ;; (extract-hypergraph Pput)
           ;; (extract-hypergraph Qput)
-          (cog-set-tv! Qinst (stv Qinst-s Qinst-c))))))
+          (if (= 0 Qinst-c) ; avoid creating informationless knowledge
+              (cog-undefined-handle)
+              (cog-set-tv! Qinst (stv Qinst-s Qinst-c)))))))
 
 ;; Name the rule
 (define implication-full-instantiation-rule-name
