@@ -195,50 +195,85 @@
 
 ;; (7) Infer that honest human acquaintances tend to become friends
 ;; (more so than just human acquaintances). Apply rule
-;; implication-implicant-conjunction-rule on (6)
+;; implication-implicant-conjunction-rule on (6) and the knowledge
+;; that human acquantances tend to become friend in the kb.
 ;;
 ;; Result should be:
 ;;
-;; (Implication (stv ? ?)
-;;    (Lambda
+;; (ImplicationLink (stv 0.1171875 0.5)
+;;    (AndLink
+;;       (LambdaLink (stv 0.63999999 0.89999998)
+;;          (VariableList
+;;             (TypedVariableLink
+;;                (VariableNode "$X")
+;;                (TypeNode "ConceptNode")
+;;             )
+;;             (TypedVariableLink
+;;                (VariableNode "$Y")
+;;                (TypeNode "ConceptNode")
+;;             )
+;;          )
+;;          (AndLink
+;;             (EvaluationLink
+;;                (PredicateNode "is-honest" (stv 0.80000001 0.89999998))
+;;                (VariableNode "$X")
+;;             )
+;;             (EvaluationLink
+;;                (PredicateNode "is-honest" (stv 0.80000001 0.89999998))
+;;                (VariableNode "$Y")
+;;             )
+;;          )
+;;       )
+;;       (LambdaLink (stv 0.00019999999 0.89999998)
+;;          (VariableList
+;;             (TypedVariableLink
+;;                (VariableNode "$X")
+;;                (TypeNode "ConceptNode")
+;;             )
+;;             (TypedVariableLink
+;;                (VariableNode "$Y")
+;;                (TypeNode "ConceptNode")
+;;             )
+;;          )
+;;          (AndLink
+;;             (InheritanceLink
+;;                (VariableNode "$X")
+;;                (ConceptNode "human")
+;;             )
+;;             (InheritanceLink
+;;                (VariableNode "$Y")
+;;                (ConceptNode "human")
+;;             )
+;;             (EvaluationLink
+;;                (PredicateNode "acquainted")
+;;                (ListLink
+;;                   (VariableNode "$X")
+;;                   (VariableNode "$Y")
+;;                )
+;;             )
+;;          )
+;;       )
+;;    )
+;;    (LambdaLink (stv 9.9999997e-05 0.89999998)
 ;;       (VariableList
-;;          (TypedVariable
-;;             (Variable "$X")
-;;             (Type "ConceptNode"))
-;;          (TypedVariable
-;;             (Variable "$Y")
-;;             (Type "ConceptNode")))
-;;       (And
-;;          (Inheritance
-;;             (Variable "$X")
-;;             (Concept "human"))
-;;          (Inheritance
-;;             (Variable "$Y")
-;;             (Concept "human"))
-;;          (Evaluation
-;;             (Predicate "is-honest")
-;;             (Variable "$X"))
-;;          (Evaluation
-;;             (Predicate "is-honest")
-;;             (Variable "$Y"))
-;;          (Evaluation
-;;             (Predicate "acquainted")
-;;             (List
-;;                (Variable "$X")
-;;                (Variable "$Y"))))
-;;    (Lambda
-;;       (VariableList
-;;          (TypedVariable
-;;             (Variable "$X")
-;;             (Type "ConceptNode"))
-;;          (TypedVariable
-;;             (Variable "$Y")
-;;             (Type "ConceptNode")))
-;;       (Evaluation
-;;          (Predicate "will-be-friends")
-;;          (List
-;;             (Variable "$X")
-;;             (Variable "$Y"))))
+;;          (TypedVariableLink
+;;             (VariableNode "$X")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;          (TypedVariableLink
+;;             (VariableNode "$Y")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;       )
+;;       (EvaluationLink
+;;          (PredicateNode "will-be-friends" (stv 9.9999997e-05 0.89999998))
+;;          (ListLink
+;;             (VariableNode "$X")
+;;             (VariableNode "$Y")
+;;          )
+;;       )
+;;    )
+;; )
 (cog-bind implication-implicant-conjunction-rule)
 
 ;; (8) TODO: factorize lambda in implicant of (7)

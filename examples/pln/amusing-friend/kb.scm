@@ -36,7 +36,7 @@
 ;;;;;;;;;;;;;;
 
 ;; Probability of two human acquaintances
-(Lambda (stv 0.001 0.9)
+(Lambda (stv 0.0002 0.9)
    (VariableList
       (TypedVariable
          (Variable "$X")
