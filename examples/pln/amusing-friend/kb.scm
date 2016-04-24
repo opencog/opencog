@@ -296,3 +296,37 @@
          (Concept "Bob")
          (Concept "Jim")
          (Concept "Party")))
+
+;;;;;;;;;;
+;; Hack ;;
+;;;;;;;;;;
+
+;; Due to the fact the evaluator does not support fuzzy TV semantic we
+;; put the evaluation of a to-be-used instantiated precondition
+;; here. Alternatively we could add PLN rules to evaluate.
+
+(And (stv 1 0.9)
+   (Evaluation
+      (Predicate "is-honest")
+      (Concept "Self")
+   )
+   (Evaluation
+      (Predicate "is-honest")
+      (Concept "Bob")
+   )
+   (Inheritance
+      (Concept "Self")
+      (Concept "human")
+   )
+   (Inheritance
+      (Concept "Bob")
+      (Concept "human")
+   )
+   (Evaluation
+      (Predicate "acquainted")
+      (ListLink
+         (Concept "Self")
+         (Concept "Bob")
+      )
+   )
+)

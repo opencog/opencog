@@ -53,6 +53,10 @@
         "lambda-predicate-construction-rule.scm"
         "inversion-rule.scm"
         "implication-implicant-conjunction-rule.scm"
+        "and-lambda-factorization-double-implication-rule.scm"
+        "deduction-rule.scm"
+        "implication-scope-factorization-rule.scm"
+        "equivalence-scope-distribution-rule.scm"
         ;; "and-construction-rule.scm"
         )
   )
@@ -71,6 +75,10 @@
         (list lambda-predicate-construction-rule-name 1)
         (list inversion-implication-rule-name 1)
         (list implication-implicant-conjunction-rule-name 1)
+        (list and-lambda-factorization-double-implication-rule-name 1)
+        (list deduction-implication-rule-name 1)
+        (list implication-scope-factorization-rule-name 1)
+        (list equivalence-scope-distribution-rule-name 1)
         ;; (list and-construction-rule-name 1)
         )
   )
