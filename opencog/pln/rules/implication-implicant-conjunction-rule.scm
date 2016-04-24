@@ -107,6 +107,9 @@
        (sC (cog-stv-strength C))
        (sAC (cog-stv-strength AC))
        (sBC (cog-stv-strength BC))
+       (cA (cog-stv-confidence A))
+       (cB (cog-stv-confidence B))
+       (cC (cog-stv-confidence C))
        (cAC (cog-stv-confidence AC))
        (cBC (cog-stv-confidence BC)))
     (if
@@ -114,10 +117,12 @@
            (conditional-probability-consistency sA sC sAC)
            (conditional-probability-consistency sB sC sBC))
        ;; Consistency is met build the resulting implication
-       (cog-set-tv!
-          ABC
-          (stv (implication-implicant-conjunction-strength sC sAC sBC)
-               (implication-implicant-conjunction-confidence cAC cBC)))
+       (let ((AnB (gar ABC)))
+         (cog-set-tv! AnB (stv (* sA sB) (min cA cB)))
+         (cog-set-tv!
+            ABC
+            (stv (implication-implicant-conjunction-strength sC sAC sBC)
+                 (implication-implicant-conjunction-confidence cAC cBC))))
        ;; Inconsistent, better not build anything
        (cog-undefined-handle))))
 
