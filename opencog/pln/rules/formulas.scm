@@ -63,25 +63,27 @@
 ;; first place.
 ;; -----------------------------------------------------------------------------
 
+(use-modules (opencog logger))
+
 ; Consistency Conditions
-(define (deduction-smallest-intersection sA sB)
+(define (smallest-intersection-probability sA sB)
   (max (/ (+ sA sB -1) sA) 0))
 
-(define (deduction-largest-intersection sA sB)
+(define (largest-intersection-probability sA sB)
   (min (/ sB sA) 1))
 
-(define (deduction-consistency sA sB sAB)
+(define (conditional-probability-consistency sA sB sAB)
   (and (< 0 sA)
-       (<= (deduction-smallest-intersection sA sB) sAB)
-       (<= sAB (deduction-largest-intersection sA sB))))
+       (<= (smallest-intersection-probability sA sB) sAB)
+       (<= sAB (largest-intersection-probability sA sB))))
 
 ; Main Formula
 
 (define (simple-deduction-strength-formula sA sB sC sAB sBC)
   (if
      (and
-        (deduction-consistency sA sB sAB)
-        (deduction-consistency sB sC sBC))
+        (conditional-probability-consistency sA sB sAB)
+        (conditional-probability-consistency sB sC sBC))
      ;; Preconditions are met
      (if (< 0.99 sB)
         ;; sB tends to 1
@@ -130,8 +132,8 @@
 (define (inversion-consistency sA sB sAB)
   (and (< 0 sA)
        (< 0 sB)
-       (<= (deduction-smallest-intersection sA sB) sAB)
-       (<= sAB (deduction-largest-intersection sA sB))))
+       (<= (smallest-intersection-probability sA sB) sAB)
+       (<= sAB (largest-intersection-probability sA sB))))
 
 (define (inversion-strength-formula sA sB sAB)
   (if (inversion-consistency sA sB sAB)

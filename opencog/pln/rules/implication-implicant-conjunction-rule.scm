@@ -111,8 +111,8 @@
        (cBC (cog-stv-confidence BC)))
     (if
        (and
-           (deduction-consistency sA sC sAC)
-           (deduction-consistency sB sC sBC))
+           (conditional-probability-consistency sA sC sAC)
+           (conditional-probability-consistency sB sC sBC))
        ;; Consistency is met build the resulting implication
        (cog-set-tv!
           ABC
