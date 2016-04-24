@@ -48,17 +48,19 @@
     (gen-inversion-rule SubsetLink))
 
 (define (inversion-formula A B AB BA)
-    (let
+    (let*
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
          (sB (cog-stv-strength B))
          (cB (cog-stv-confidence B))
          (sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB)))
-        (cog-set-tv!
-            BA
-            (stv (inversion-strength-formula sA sB sAB)
-                 (min cA cB cAB)))))
+         (cAB (cog-stv-confidence AB))
+         (cBA (min cA cB cAB)))
+      (if (and (< 0 cBA) ; Try to avoid constructing informationless
+                         ; knowledge
+               (inversion-consistency sA sB sAB))
+          (cog-set-tv! BA (stv (inversion-strength-formula sA sB sAB) cBA))
+          (cog-undefined-handle))))
 
 ;; Name the rules
 (define inversion-inheritance-rule-name
