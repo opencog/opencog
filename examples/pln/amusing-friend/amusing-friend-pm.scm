@@ -239,9 +239,7 @@
 ;;          (List
 ;;             (Variable "$X")
 ;;             (Variable "$Y"))))
-;;
-;; TODO: add utest for implication-implicant-conjunction-rule and debug it
-;; (cog-bind implication-implicant-conjunction-rule)
+(cog-bind implication-implicant-conjunction-rule)
 
 ;; (8) TODO: factorize lambda in implicant of (7)
 
