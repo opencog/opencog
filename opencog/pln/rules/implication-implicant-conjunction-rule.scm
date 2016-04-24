@@ -15,6 +15,8 @@
 ;;    C
 ;;----------------------------------------------------------------------
 
+(load "formulas.scm")
+
 (define implication-implicant-conjunction-variables
   (VariableList
      (TypedVariable
@@ -28,7 +30,7 @@
            (Type "PredicateNode")
            (Type "LambdaLink")))
      (TypedVariable
-        (Variable "$B")
+        (Variable "$C")
         (TypeChoice
            (Type "PredicateNode")
            (Type "LambdaLink")))))
@@ -47,6 +49,8 @@
   (ExecutionOutput
      (GroundedSchema "scm: implication-implicant-conjunction-formula")
      (List
+        (VariableNode "$A")
+        (VariableNode "$B")
         (VariableNode "$C")
         (ImplicationLink
            (VariableNode "$A")
@@ -66,42 +70,62 @@
      implication-implicant-conjunction-body
      implication-implicant-conjunction-rewrite))
 
-(define (implication-implicant-conjunction-formula C AC BC ABC)
-  (cog-set-tv! ABC
-   (implication-implicant-conjunction-side-effect-free-formula C AC BC)))
-
 ;; Computing the strength is based on
 ;;
-;; P(C|A) = P(C,A)/P(A)
-;; P(C|B) = P(C,B)/P(B)
+;;    P(C|A) = P(C,A)/P(A)
+;;    P(C|B) = P(C,B)/P(B)
 ;;
-;; Let's assume that
+;; By Bayes rule
 ;;
-;; P(A,B) = P(A)*P(B)
+;;    P(C|A,B) = P(A,B|C) * P(C) / P(A,B)
+;;
+;; Let's assume that A and B are independent, as well as independent
+;; when conditioned by C, that is
+;;
+;;    P(A,B) = P(A) * P(B)
+;;    P(A,B|C) = P(A|C) * P(B|C)
 ;;
 ;; Thus
 ;;
-;; P(C|A,B) = P(C,A,B)/P(A,B)
-;; = P(C,A,B) / (P(A)*P(B))
+;;    P(C|A,B) = P(A|C) * P(B|C) * P(C) / (P(A) * P(B))
 ;;
-;; Let's assume that P(A,B|C) = P(A|C) * P(B|C), then we can write
+;; By Bayes rule
 ;;
-;; P(A,B,C)/P(C) = P(A,C)/P(C) * P(B,C)/P(C)
-;; P(A,B,C) = P(A,C) * P(B,C) / P(C)
+;;    P(A|C) = P(C|A) * P(A) / P(C)
+;;    P(B|C) = P(C|B) * P(B) / P(C)
 ;;
-;; P(C|A,B) = (P(A,C) * P(B,C) / P(C)) / (P(A)*P(B))
+;; Thus
 ;;
-;; P(C|A,B) = P(C|A)*P(C|B)/P(C)
+;;    P(C|A,B) = P(C|A) * P(C|B) / P(C)
 ;;
-(define (implication-implicant-conjunction-side-effect-free-formula C AC BC)
+;; TODO: there is something weird, if P(C) is tiny then P(C|A,B) goes
+;; above 1, we need to understand why. Meanwhile, we just cap at 1.
+(define (implication-implicant-conjunction-formula A B C AC BC ABC)
   (let* 
-      ((sC (cog-stv-strength C))
+      ((sA (cog-stv-strength A))
+       (sB (cog-stv-strength B))
+       (sC (cog-stv-strength C))
        (sAC (cog-stv-strength AC))
        (sBC (cog-stv-strength BC))
        (cAC (cog-stv-confidence AC))
        (cBC (cog-stv-confidence BC)))
-    (stv (/ (* sAC sBC) sC)
-         (min cAC cBC))))
+    (if
+       (and
+           (deduction-consistency sA sC sAC)
+           (deduction-consistency sB sC sBC))
+       ;; Consistency is met build the resulting implication
+       (cog-set-tv!
+          ABC
+          (stv (implication-implicant-conjunction-strength sC sAC sBC)
+               (implication-implicant-conjunction-confidence cAC cBC)))
+       ;; Inconsistent, better not build anything
+       (cog-undefined-handle))))
+
+(define (implication-implicant-conjunction-strength sC sAC sBC)
+  (min (/ (* sAC sBC) sC) 1))
+
+(define (implication-implicant-conjunction-confidence cAC cBC)
+  (min cAC cBC))
 
 ; Name the rule
 (define implication-implicant-conjunction-rule-name
