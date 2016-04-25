@@ -4,10 +4,11 @@
 ; Steps to run:
 ; 1. (add-to-load-path "/absolute/path/to/opencog/opencog")
 ;    e.g. (add-to-load-path "/opencog/opencog")
-; 2. (load-from-path "../opencog/openpsi/main.scm")
-; 3. (load "../examples/openpsi/chat.scm")
-; 4. Use (chat) function to talk to it
+; 2. (load "../examples/openpsi/chat.scm")
+; 3. Use (chat) function to talk to it
 ;    e.g. (chat "Are you conscious?")
+
+(load-from-path "../opencog/openpsi/main.scm")
 
 ;-------------------------------------------------------------------------------
 ; Keep track of the chat-state so that the psi-rules can make use of them
@@ -38,7 +39,7 @@
             ))
     )
     (let* ((max-score .5)
-           (best-match "")
+           (best-matches '())
            (satisfied-rules '())
            (all-demands (cog-outgoing-set (psi-get-all-demands)))
            (all-rules (append-map psi-get-rules all-demands))
@@ -47,7 +48,10 @@
             (if (is-chat-rule? r)
                 (let ((score (tv-mean (psi-satisfiable? r))))
                     (if (> score max-score)
-                        (begin (set! max-score score) (set! best-match r))
+                        (begin (set! max-score score) (set! best-matches (list r)))
+                    )
+                    (if (= score max-score)
+                        (append! best-matches (list r))
                     )
                 )
                 ; For other types of rules, just check if they are satisfiable
@@ -60,10 +64,10 @@
             ))
         all-rules)
 
-        (if (cog-atom? best-match)
+        (if (> (length best-matches) 0)
             (if (> (length satisfied-rules) 0)
-                (SetLink (append satisfied-rules (list best-match)))
-                best-match
+                (SetLink (append satisfied-rules (list (list-ref best-matches (random (length best-matches))))))
+                (list-ref best-matches (random (length best-matches)))
             )            
             (SetLink satisfied-rules)
         )
