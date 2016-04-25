@@ -88,6 +88,7 @@ void PLNRulesUTest::setUp()
 	eval.eval("(use-modules (opencog))");
 	eval.eval("(use-modules (opencog query))");
 	eval.eval("(use-modules (opencog logger))");
+	eval.eval("(use-modules (srfi srfi-1))");
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
