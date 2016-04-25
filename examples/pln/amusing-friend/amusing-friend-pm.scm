@@ -507,7 +507,10 @@
 ;;       (ConceptNode "Bob")
 ;;    )
 ;; )
-(cog-bind implication-full-instantiation-rule)
+;;
+;; Due to some indeterminism we repeat 10 times to be almost surely
+;; inferred.
+(for-each (lambda (i) (cog-bind implication-full-instantiation-rule)) (iota 10))
 
 ;; (12) Infer that Bob is funny. Apply the
 ;; implication-full-instantiation-rule on the implication stating that
