@@ -31,6 +31,43 @@
          (Predicate "is-honest")
          (Variable "$Y"))))
 
+;; Probability of telling the truth to someone. The probability if
+;; very low cause the probability of telling something to someone is
+;; already very low.
+(Predicate "told-the-truth" (stv 0.00001 0.7))
+
+;; We need also the following. It should normally be wrapped in a
+;; Lambda, but because instantiation. And ultimately this should be
+;; inferred.
+(Evaluation (stv 0.00001 0.7)
+   (Predicate "told-the-truth-about")
+   (List
+      (Variable "$X")
+      (Variable "$Y")
+      (Variable "$Z")))
+
+;; People who told the truth about something are honest
+(Implication (stv 0.95 0.9)
+   (VariableList
+      (TypedVariable
+         (Variable "$X")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$Y")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$Z")
+         (Type "ConceptNode")))
+   (Evaluation
+      (Predicate "told-the-truth-about")
+      (List
+         (Variable "$X")
+         (Variable "$Y")
+         (Variable "$Z")))
+   (Evaluation
+      (Predicate "is-honest")
+      (Variable "$X")))
+
 ;;;;;;;;;;;;;;
 ;; Humanity ;;
 ;;;;;;;;;;;;;;
@@ -206,31 +243,32 @@
 ;; Telling the truth ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 
-;; People who told the truth about something are honest
-(Implication (stv 0.95 0.9)
-   (VariableList
-      (TypedVariable
-         (Variable "$X")
-         (Type "ConceptNode"))
-      (TypedVariable
-         (Variable "$Y")
-         (Type "ConceptNode"))
-      (TypedVariable
-         (Variable "$Z")
-         (Type "ConceptNode")))
-   (Evaluation
-      (Predicate "told-the-truth-about")
-      (List
-         (Variable "$X")
-         (Variable "$Y")
-         (Variable "$Z")))
-   (Evaluation
-      (Predicate "is-honest")
-      (Variable "$X")))
 
 ;;;;;;;;;;;;;;;;;
 ;; Being Funny ;;
 ;;;;;;;;;;;;;;;;;
+
+;; Probability of telling a joke to someone. The probability is
+;; extremely low because the probability of telling anything to
+;; someone is already very low.
+(Predicate "told-a-joke-at" (stv 0.000001 0.6))
+
+;; The following should be wrapped in a Lambda and ultimately
+;; inferred.
+(Evaluation (stv 0.000001 0.6)
+   (Predicate "told-a-joke-at")
+      (List
+         (Variable "$X")
+         (Variable "$Y")
+         (Variable "$Z")))
+
+;; Probability of being funny
+(Predicate "is-funny" (stv 0.69 0.7))
+
+;; Same remark as for Predicate "told-a-joke-at"
+(Evaluation (stv 0.69 0.7)
+   (Predicate "is-funny")
+   (Variable "$X"))
 
 ;; People who told a joke to someone, somewhere, are funny   
 (Implication (stv 0.8 0.9)
@@ -304,8 +342,7 @@
 ;; Due to the fact the evaluator does not support fuzzy TV semantic we
 ;; put the evaluation of a to-be-used instantiated precondition
 ;; here. Alternatively we could add PLN rules to evaluate.
-
-(And (stv 1 0.9)
+(define hack (And (stv 1 0.9)
    (Evaluation
       (Predicate "is-honest")
       (Concept "Self")
@@ -327,6 +364,37 @@
       (ListLink
          (Concept "Self")
          (Concept "Bob")
+      )
+   )
+)
+)
+
+;; Because implication-instantiation occurs on the sugar syntax, the
+;; predicate (which should be wrapped in a Lambda) is not given. Also
+;; of course that predicate should still be evaluated. Here we provide
+;; the adequate TV value of that predicate on the free scope form.
+(AndLink (stv 0.000128 0.89999998)
+   (EvaluationLink
+      (PredicateNode "is-honest")
+      (VariableNode "$X")
+   )
+   (EvaluationLink
+      (PredicateNode "is-honest")
+      (VariableNode "$Y")
+   )
+   (InheritanceLink
+      (VariableNode "$X")
+      (ConceptNode "human")
+   )
+   (InheritanceLink
+      (VariableNode "$Y")
+      (ConceptNode "human")
+   )
+   (EvaluationLink
+      (PredicateNode "acquainted")
+      (ListLink
+         (VariableNode "$X")
+         (VariableNode "$Y")
       )
    )
 )

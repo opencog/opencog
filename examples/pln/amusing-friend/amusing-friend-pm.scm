@@ -500,15 +500,13 @@
 ;;
 ;; Result should be:
 ;;
-;; (EvaluationLink (stv 0.13281251 0.44999999)
+;; (EvaluationLink (stv 0.13281251 0.44994238)
 ;;    (PredicateNode "will-be-friends" (stv 9.9999997e-05 0.89999998))
 ;;    (ListLink
 ;;       (ConceptNode "Self")
 ;;       (ConceptNode "Bob")
 ;;    )
 ;; )
-;;
-;; TODO: debug the fucking shit
 (cog-bind implication-full-instantiation-rule)
 
 ;; (12) Infer that Bob is funny. Apply the
@@ -607,7 +605,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (And (stv 0.13281251 0.44999999)
+;; (And (stv 0.13281251 0.25109974)
 ;;    (Evaluation
 ;;       (Predicate "will-be-friends")
 ;;       (List
