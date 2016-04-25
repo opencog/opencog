@@ -143,7 +143,7 @@
 ;;
 ;;       Let c be the confidence of the implication TV, P(a).c the
 ;;       confidence of the TV of P[V->a], and Q(a).c the confidence of
-;;       the TV of Q[V->a]. Then the Q(a).c is defined as follows
+;;       the TV of Q[V->a]. Q(a).c is calculated as follows
 ;;
 ;;       Q(a).c = c * P(a).c * (1-P.s)
 ;;
@@ -163,6 +163,7 @@
          (TyVs (car Impl-outgoings))
          (P (cadr Impl-outgoings))
          (P-s (cog-stv-strength P))
+         (P-c (cog-stv-confidence P))
          (Q (caddr Impl-outgoings))
          (terms (if (= 0 Impl-c) ; don't try to instantiate zero
                                  ; knowledge implication
@@ -180,7 +181,7 @@
                (Qput (PutLink (LambdaLink TyVs Q) terms))
                (Qinst (cog-execute! Qput))
                (Qinst-s (* Impl-s Pinst-s))
-               (Qinst-c (* Impl-c Pinst-c (- 1 P-s))))
+               (Qinst-c (* Impl-c Pinst-c (if (< 0 P-c ) (- 1 P-s) 1))))
           ;; Remove the PutLinks to not pollute the atomspace
           ;; TODO: replace this by something more sensible
           ;; (extract-hypergraph Pput)
