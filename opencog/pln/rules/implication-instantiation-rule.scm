@@ -82,7 +82,10 @@
 ;;       strength of the TV of P[V->T], and Qs, the strength of the TV of
 ;;       Q[V-T] to calculate. We define the formula as follows
 ;;
-;;       Qs = s*Ps
+;;       Q(a) = s*P(a)
+;;
+;;       where P(a) and Q(a) are respectively the membership strengths
+;;       of a in P and Q.
 ;;
 ;;       Proof: s, the implication strength is, by definition (see PLN
 ;;       book, Section 2.4.1.1, page 29)
@@ -133,26 +136,33 @@
 ;;       because min(P(a), Q(a)) < P(a), thus Q(a) < P(a), which by
 ;;       definition of the min, Q(a) = min(P(a), Q(a)).
 ;;
-;;       So Qs is only determined if s < 1, Qs = s * Ps. However, for
-;;       the sake of continuity, we'll assume that Qs = Ps when s = 1.
+;;       So Q(a) is only determined if s < 1, Q(a) = s * P(a). However, for
+;;       the sake of continuity, we'll assume that Q(a) = P(a) when s = 1.
 ;;
 ;;    Confidence:
 ;;
-;;       Let c be the confidence of the implication TV, Pc the
-;;       confidence of the TV of P[V->T], and Qc the confidence of the
-;;       TV of Q[V->T]. Then the Qc is the product of c and Pc
+;;       Let c be the confidence of the implication TV, P(a).c the
+;;       confidence of the TV of P[V->a], and Q(a).c the confidence of
+;;       the TV of Q[V->a]. Then the Q(a).c is defined as follows
 ;;
-;;       Qc = c*Pc
+;;       Q(a).c = c * P(a).c * (1-P.s)
 ;;
-;;       Proof: look into your heart, it feels right, doesn't it?
+;;       where P.s is the strength of predicate P, the precondition.
+;;
+;;       Informal proof: The c * P(a).c part makes sense
+;;       intuitively. The (1-P.s) is less intuitive, but here is the
+;;       argument for it. The larger P the more elements which are not
+;;       `a` are used to calculate the probability on the
+;;       implication. Anything that isn't `a` is in fact a potential
+;;       distraction toward the true membership of Q(a).
 ;;
 (define (implication-full-instantiation-formula Impl)
-  (cog-logger-info "implication-full-instantiation-formula Impl = ~a" Impl)
   (let* ((Impl-outgoings (cog-outgoing-set Impl))
          (Impl-s (cog-stv-strength Impl))
          (Impl-c (cog-stv-confidence Impl))
          (TyVs (car Impl-outgoings))
          (P (cadr Impl-outgoings))
+         (P-s (cog-stv-strength P))
          (Q (caddr Impl-outgoings))
          (terms (if (= 0 Impl-c) ; don't try to instantiate zero
                                  ; knowledge implication
@@ -170,14 +180,14 @@
                (Qput (PutLink (LambdaLink TyVs Q) terms))
                (Qinst (cog-execute! Qput))
                (Qinst-s (* Impl-s Pinst-s))
-               (Qinst-c (* Impl-c Pinst-c)))
+               (Qinst-c (* Impl-c Pinst-c (- 1 P-s))))
           ;; Remove the PutLinks to not pollute the atomspace
           ;; TODO: replace this by something more sensible
           ;; (extract-hypergraph Pput)
           ;; (extract-hypergraph Qput)
           (if (= 0 Qinst-c) ; avoid creating informationless knowledge
               (cog-undefined-handle)
-              (cog-set-tv! Qinst (stv Qinst-s Qinst-c)))))))
+              (cog-merge-hi-conf-tv! Qinst (stv Qinst-s Qinst-c)))))))
 
 ;; Name the rule
 (define implication-full-instantiation-rule-name
