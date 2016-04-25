@@ -57,7 +57,7 @@
         "deduction-rule.scm"
         "implication-scope-factorization-rule.scm"
         "equivalence-scope-distribution-rule.scm"
-        ;; "and-construction-rule.scm"
+        "and-construction-rule.scm"
         )
   )
 (define rule-files (map append-rule-dir rule-basenames))
@@ -79,7 +79,7 @@
         (list deduction-implication-rule-name 1)
         (list implication-scope-factorization-rule-name 1)
         (list equivalence-scope-distribution-rule-name 1)
-        ;; (list and-construction-rule-name 1)
+        (list and-construction-grounded-evaluation-rule-name 1)
         )
   )
 

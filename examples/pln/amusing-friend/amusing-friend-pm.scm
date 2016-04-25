@@ -76,7 +76,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (Lambda (stv 1e-5 0.9)
+;; (Lambda 9.9999997e-05 0.89999998)
 ;;    (VariableList
 ;;       (TypedVariable
 ;;          (Variable "$X")
@@ -118,7 +118,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (Implication (stv 0.0001171875 0.5)
+;; (Implication (stv 0.00013281251 0.5)
 ;;    (Lambda
 ;;       (VariableList
 ;;          (TypedVariable
@@ -200,8 +200,8 @@
 ;;
 ;; Result should be:
 ;;
-;; (ImplicationLink (stv 0.1171875 0.5)
-;;    (AndLink
+;; (ImplicationLink (stv 0.13281251 0.5)
+;;    (AndLink (stv 0.000128 0.89999998)
 ;;       (LambdaLink (stv 0.63999999 0.89999998)
 ;;          (VariableList
 ;;             (TypedVariableLink
@@ -381,7 +381,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (ImplicationLink (stv 0.1171875 0.5)
+;; (ImplicationLink (stv 0.13281251 0.5)
 ;;    (LambdaLink (stv 0.000128 0.89999998)
 ;;       (VariableList
 ;;          (TypedVariableLink
@@ -449,7 +449,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (ImplicationLink (stv 0.1171875 0.5)
+;; (ImplicationLink (stv 0.13281251 0.5)
 ;;    (VariableList
 ;;       (TypedVariableLink
 ;;          (VariableNode "$X")
@@ -500,14 +500,16 @@
 ;;
 ;; Result should be:
 ;;
-;; (EvaluationLink (stv 0.1171875 0.44999999)
+;; (EvaluationLink (stv 0.13281251 0.44999999)
 ;;    (PredicateNode "will-be-friends" (stv 9.9999997e-05 0.89999998))
 ;;    (ListLink
 ;;       (ConceptNode "Self")
 ;;       (ConceptNode "Bob")
 ;;    )
 ;; )
-(for-each (lambda (i) (cog-bind implication-full-instantiation-rule)) (iota 5))
+;;
+;; TODO: debug the fucking shit
+(cog-bind implication-full-instantiation-rule)
 
 ;; (12) Infer that Bob is funny. Apply the
 ;; implication-full-instantiation-rule on the implication stating that
@@ -549,7 +551,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (Implication (stv 0.7 0.9)
+;; (Implication (stv 0.82352942 0.89999998)
 ;;    (Lambda
 ;;       (TypedVariable
 ;;          (Variable "$X")
@@ -605,16 +607,16 @@
 ;;
 ;; Result should be:
 ;;
-;; (And (stv ? ?)
+;; (And (stv 0.13281251 0.44999999)
 ;;    (Evaluation
 ;;       (Predicate "will-be-friends")
 ;;       (List
 ;;          (Concept "Self")
-;;          (Concept "Bob"))
+;;          (Concept "Bob")))
 ;;    (Evaluation
 ;;       (Predicate "is-amusing")
 ;;       (Concept "Bob"))
 ;;    (Evaluation
 ;;       (Predicate "is-honest")
 ;;       (Concept "Bob")))
-;; TODO (cog-bind and-construction-rule)
+(cog-bind and-construction-grounded-evaluation-rule)

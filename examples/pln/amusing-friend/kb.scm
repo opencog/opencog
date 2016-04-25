@@ -181,7 +181,7 @@
          (Variable "$Y"))))
 
 ;; Friends tend to be honest
-(Implication (stv 0.75 0.5)
+(Implication (stv 0.85 0.5)
    (VariableList
       (TypedVariable
          (Variable "$X")
@@ -207,7 +207,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; People who told the truth about something are honest
-(Implication (stv 0.8 0.9)
+(Implication (stv 0.95 0.9)
    (VariableList
       (TypedVariable
          (Variable "$X")
