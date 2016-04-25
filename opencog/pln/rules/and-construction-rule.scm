@@ -16,6 +16,11 @@
 ;    B
 ;----------------------------------------------------------------------
 
+(use-modules (opencog logger))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Old rule. We keep for now for backward compatibility ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define and-construction-rule
   (BindLink
@@ -63,3 +68,94 @@
 (DefineLink
    and-construction-rule-name
    and-construction-rule)
+
+;;;;;;;;;;;;;;;
+;; New rules ;;
+;;;;;;;;;;;;;;;
+
+;; This one is a temporary hack before deep type checking allows
+;; better rule definition.
+;;
+;; Is only used for and-ing EvaluationLinks without free variable in
+;; them.
+(define and-construction-grounded-evaluation-rule
+  (BindLink
+     (VariableList
+        (TypedVariableLink
+           (VariableNode "$A")
+           (TypeNode "EvaluationLink"))
+        (TypedVariableLink
+           (VariableNode "$B")
+           (TypeNode "EvaluationLink"))
+        (TypedVariableLink
+           (VariableNode "$C")
+           (TypeNode "EvaluationLink")))
+     (AndLink
+        (VariableNode "$A")
+        (VariableNode "$B")
+        (VariableNode "$C")
+        ;; Weird this doesn't work at all. Instead we put this in
+        ;; condition in the formula.
+        (NotLink
+           (EqualLink
+              (VariableNode "$A")
+              (VariableNode "$B")))
+        (NotLink
+           (EqualLink
+              (VariableNode "$B")
+              (VariableNode "$C")))
+        (NotLink
+           (EqualLink
+              (VariableNode "$C")
+              (VariableNode "$A")))
+        (EvaluationLink
+           (GroundedPredicateNode "scm: fully-grounded")
+           (ListLink
+              (VariableNode "$A")))
+        (EvaluationLink
+           (GroundedPredicateNode "scm: fully-grounded")
+           (ListLink
+              (VariableNode "$B")))
+        (EvaluationLink
+           (GroundedPredicateNode "scm: fully-grounded")
+           (ListLink
+              (VariableNode "$C"))))
+     (ExecutionOutputLink
+        (GroundedSchemaNode "scm: and-construction-grounded-evaluation-formula")
+        (ListLink
+           (VariableNode "$A")
+           (VariableNode "$B")
+           (VariableNode "$C")))))
+
+(define (and-construction-grounded-evaluation-formula A B C)
+  (let ((As (cog-stv-strength A))
+        (Bs (cog-stv-strength B))
+        (Cs (cog-stv-strength C))
+        (Ac (cog-stv-confidence A))
+        (Bc (cog-stv-confidence B))
+        (Cc (cog-stv-confidence C)))
+    (cog-set-tv! (And A B C) (stv (min As Bs Cs) (min Ac Bc Cc)))))
+
+;; The following are for checking that an atom (i.e. a sub-hypergraph)
+;; doesn't have free variables.
+;;
+;; TODO this should be replaced by a scheme binding from a C++
+;; function, given how frequent its use should be.
+(define (is-variable atom)
+  (equal? (cog-type atom) 'VariableNode))
+
+(define (rec-fully-grounded atom)
+  (if (cog-node? atom)
+      (not (is-variable atom))
+      (every rec-fully-grounded (cog-outgoing-set atom))))
+
+(define (fully-grounded atom)
+  (if (rec-fully-grounded atom)
+      (stv 1 1)
+      (stv 0 1)))
+
+;; Name the rule
+(define and-construction-grounded-evaluation-rule-name
+  (DefinedSchemaNode "and-construction-grounded-evaluation-rule"))
+(DefineLink and-construction-grounded-evaluation-rule-name
+  and-construction-grounded-evaluation-rule)

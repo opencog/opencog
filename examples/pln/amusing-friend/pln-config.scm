@@ -49,14 +49,15 @@
 (define rule-basenames
   (list "implication-instantiation-rule.scm"
         "implication-scope-distribution-rule.scm"
-        "and-lambda-distribution-rule.scm"
-        "lambda-grounded-construction-rule.scm"
-        "implication-construction-rule.scm"
-        "implication-implicant-distribution-rule.scm"
-        "implication-and-lambda-factorization-rule.scm"
-        "deduction-rule.scm"
         "equivalence-to-double-implication-rule.scm"
-        "implication-implicant-disjunction-rule.scm"
+        "lambda-predicate-construction-rule.scm"
+        "inversion-rule.scm"
+        "implication-implicant-conjunction-rule.scm"
+        "and-lambda-factorization-double-implication-rule.scm"
+        "deduction-rule.scm"
+        "implication-scope-factorization-rule.scm"
+        "equivalence-scope-distribution-rule.scm"
+        "and-construction-rule.scm"
         )
   )
 (define rule-files (map append-rule-dir rule-basenames))
@@ -68,17 +69,17 @@
 
 ; List the rules and their weights.
 (define rules
-  (list (list implication-partial-instantiation-rule-name 1)
-        (list implication-scope-distribution-rule-name 1)
-        (list and-lambda-distribution-rule-name 1)
-        (list lambda-grounded-construction-rule-name 1)
-        (list implication-construction-rule-name 1)
-        (list implication-implicant-distribution-rule-name 1)
-        (list implication-and-lambda-factorization-rule-name 1)
-        (list deduction-implication-rule-name 1)
+  (list (list implication-scope-distribution-rule-name 1)
         (list implication-full-instantiation-rule-name 1)
         (list equivalence-to-double-implication-rule-name 1)
-        (list implication-implicant-disjunction-rule-name 1)
+        (list lambda-predicate-construction-rule-name 1)
+        (list inversion-implication-rule-name 1)
+        (list implication-implicant-conjunction-rule-name 1)
+        (list and-lambda-factorization-double-implication-rule-name 1)
+        (list deduction-implication-rule-name 1)
+        (list implication-scope-factorization-rule-name 1)
+        (list equivalence-scope-distribution-rule-name 1)
+        (list and-construction-grounded-evaluation-rule-name 1)
         )
   )
 
@@ -90,7 +91,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 1000000)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 1000)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)

@@ -1,5 +1,5 @@
 ;; =======================================================================
-;; Implication Lambda Distribution Rule
+;; Implication Scope Distribution Rule
 ;; (TODO add wiki page)
 ;;
 ;; ImplicationLink
@@ -19,7 +19,7 @@
 ;; implicant and implicand bodies.
 ;; -----------------------------------------------------------------------
 
-(define implication-lambda-distribution-variables
+(define implication-scope-distribution-variables
   (VariableList
      (TypedVariableLink
         (VariableNode "$TyVs")
@@ -29,25 +29,25 @@
      (VariableNode "$P")
      (VariableNode "$Q")))
 
-(define implication-lambda-distribution-body
+(define implication-scope-distribution-body
   (ImplicationLink
      (VariableNode "$TyVs")
      (VariableNode "$P")
      (VariableNode "$Q")))
 
-(define implication-lambda-distribution-rewrite
+(define implication-scope-distribution-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: implication-lambda-distribution-formula")
+     (GroundedSchemaNode "scm: implication-scope-distribution-formula")
      (ListLink
-        implication-lambda-distribution-body)))
+        implication-scope-distribution-body)))
 
-(define implication-lambda-distribution-rule
+(define implication-scope-distribution-rule
   (BindLink
-     implication-lambda-distribution-variables
-     implication-lambda-distribution-body
-     implication-lambda-distribution-rewrite))
+     implication-scope-distribution-variables
+     implication-scope-distribution-body
+     implication-scope-distribution-rewrite))
 
-(define (implication-lambda-distribution-formula Impl)
+(define (implication-scope-distribution-formula Impl)
   (let* (
          (Impl-outgoings (cog-outgoing-set Impl))
          (SV (car Impl-outgoings))
@@ -61,7 +61,7 @@
      Impl-tv)))
 
 ;; Name the rule
-(define implication-lambda-distribution-rule-name
-  (DefinedSchemaNode "implication-lambda-distribution-rule"))
-(DefineLink implication-lambda-distribution-rule-name
-  implication-lambda-distribution-rule)
+(define implication-scope-distribution-rule-name
+  (DefinedSchemaNode "implication-scope-distribution-rule"))
+(DefineLink implication-scope-distribution-rule-name
+  implication-scope-distribution-rule)

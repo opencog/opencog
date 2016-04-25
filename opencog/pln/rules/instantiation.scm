@@ -2,6 +2,9 @@
 ;; instantiation rules and implication full and partial instantiation
 ;; rules.
 
+(use-modules (srfi srfi-1))
+(use-modules (opencog logger))
+
 ;; Given an atom
 ;;
 ;; (TypedVariableLink
@@ -69,18 +72,40 @@
          (remain (apply cog-new-link link-type remain-list)))
     (list rnd-atom remain)))
 
+;; Given a VariableNode V and atom A, check that V is free in A.
+(define (is-free-variable-in-atom V A)
+  (if (equal? V A)
+      #t
+      (any (lambda (c) (is-free-variable-in-atom V c)) (cog-outgoing-set A))))
+
+;; Given a TypedVariable V and atom A, check that V is free in A.
+(define (is-free-typed-variable-in-atom TyV A)
+  (is-free-variable-in-atom (gar TyV) A))
+
+;; Given a variable or a variable list, check that all variables are
+;; free in A.
+(define (is-all-typed-variables-free-in-atom TyVs A)
+  (if (equal? (cog-type TyVs) 'VariableList)
+      (every (lambda (TyV) (is-free-typed-variable-in-atom TyV A))
+             (cog-outgoing-set TyVs))
+      (is-free-typed-variable-in-atom TyVs A)))
+
 ;; Given 2 atoms, a list of variables (or a single variable) and a
 ;; condition P, return a random term list (or a single term in case
 ;; there was just a single variable) satisfying the type constraint
 ;; and the condition.
 (define (select-conditioned-substitution-terms TyVs P)
-  (let* (
+  (if (is-all-typed-variables-free-in-atom TyVs P)
+      (let* (
                                         ; Build pattern matcher query
                                         ; for the subtitution terms
-         (query (GetLink TyVs P))
+             (query (GetLink TyVs P))
                                         ; Fetch all possible substitution terms
-         (result (cog-execute! query)))
-    ;; Select one randomly, but first purge the query to not pollute
-    ;; the atomspace
-    (extract-hypergraph query)
-    (select-rnd-outgoing result)))
+             (result (cog-execute! query)))
+        (cog-logger-info "Apparently all variables in scope ~a are free in ~a"
+                         TyVs P)
+        ;; Select one randomly, but first purge the query to not pollute
+        ;; the atomspace
+        (extract-hypergraph query)
+        (select-rnd-outgoing result))
+      (cog-undefined-handle)))
