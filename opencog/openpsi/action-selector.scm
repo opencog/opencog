@@ -62,7 +62,7 @@
     (let* ((z-name (string-append
                         (psi-prefix-str) " action-selector-" name))
            (selector-dsn (cog-node 'DefinedSchemaNode z-name)))
-       (if (null? selector-dpn)
+       (if (null? selector-dsn)
            (begin
                (set! selector-dsn (DefinedSchemaNode z-name))
                (DefineLink selector-dsn exec-term)
