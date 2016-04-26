@@ -48,7 +48,7 @@
   after defining it as an openpsi action-selector.
 
   exec-term:
-  - An evaluatable term.
+  - An executable term.
 
   name:
   -  A string for naming the action-rule-selector. The name will be prefixed
@@ -58,18 +58,18 @@
     (if (not (string? name))
         (error "Expected second argument to be a string, got: " name))
 
-    ; TODO: Add checks to ensure the exec-term argument is actually evaluatable
+    ; TODO: Add checks to ensure the exec-term argument is actually executable
     (let* ((z-name (string-append
-                        (psi-prefix-str) " action-selector-" name))
+                        (psi-prefix-str) "action-selector-" name))
            (selector-dsn (cog-node 'DefinedSchemaNode z-name)))
-       (if (null? selector-dpn)
+       (if (null? selector-dsn)
            (begin
                (set! selector-dsn (DefinedSchemaNode z-name))
                (DefineLink selector-dsn exec-term)
 
                 (EvaluationLink
                     (PredicateNode "action-selector-for")
-                    (ListLink selector-dsn psi-prefix-str))
+                    (ListLink selector-dsn (ConceptNode (psi-prefix-str))))
 
                 selector-dsn
            )
