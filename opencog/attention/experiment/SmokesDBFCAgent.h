@@ -64,6 +64,7 @@ private:
     std::set<float, std::greater<int>> dist_surprisingness_smokes;
 
     const int K_PERCENTILE = 5;
+    int starting_cycle;
 
     float friends_mean();
     float smokes_mean();

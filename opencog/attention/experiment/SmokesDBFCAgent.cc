@@ -60,12 +60,6 @@ float SmokesDBFCAgent::smokes_mean()
 {
     Handle smokes_predicate = _atomspace.add_node(PREDICATE_NODE, "smokes");
     Handle var = _atomspace.add_node(VARIABLE_NODE, "$A");
-    /*Handle varlist =
-     _eval->eval_h(
-     R"(VariableList
-     (TypedVariableLink
-     (VariableNode "$A")
-     (TypeNode "ConceptNode")) )");*/
 
     Handle smokes_list = _atomspace.add_link(LIST_LINK, HandleSeq { var });
     Handle eval_link = _atomspace.add_link(EVALUATION_LINK, { smokes_predicate,
@@ -150,6 +144,7 @@ void SmokesDBFCAgent::run()
                           _atomspace.add_node(PREDICATE_NODE, "smokes"),
                           _atomspace.add_node(PREDICATE_NODE, "cancer") };
 
+    starting_cycle = cogserver().getCycleCount();
     std::cerr << "CYCLE:" << cogserver().getCycleCount() << std::endl;
 
     if (first_run) {
@@ -191,7 +186,8 @@ void SmokesDBFCAgent::run()
              "INTERESTING_ATOMS_SIZE=" + std::to_string(size));
 
         for (Handle& h : af_set) {
-            auto scaled_stim = 4 * pow(10, surprisingness_value(h)) * surprisingness_value(h);
+            auto sv = surprisingness_value(h);
+            auto scaled_stim = 4 * pow(10, sv) * sv;
 
             save("smokes-fc-result.data",
                  HandleSeq { },
@@ -285,10 +281,38 @@ void SmokesDBFCAgent::run()
          + " friendship mean_tv=" + std::to_string(friends_mean()) + "\nFound "
          + std::to_string(unique_set.size()) + "unique inferences.\n");
 
+    auto interesting_atom = [](const Handle& h) {
+        std::vector<string> namelist = {"Anna", "Bob", "Edward", "Frank"};
+        // Looking for
+        // EvaluationLink
+        //    <PredicateNode "smokes">
+        //    <ListLink
+        //       ConceptNode <smoke's name>
+        //     >
+            if(h->getType() == EVALUATION_LINK and h->getOutgoingSet().size() == 2) {
+                HandleSeq outgs = h->getOutgoingSet();
+                if(outgs[0]->getType() == PREDICATE_NODE and NodeCast(outgs[0])->getName() == "cancer") {
+                    string smoker_name = NodeCast(outgs[1]->getOutgoingSet()[0])->getName();
+                    if (std::find(namelist.begin(), namelist.end(), smoker_name) != namelist.end()) {
+                        return smoker_name;
+                    }
+                }
+            }
+            return string();
+        };
+
     // Stimulate surprising unique results.
     for (Handle& h : unique_set) {
-        auto scaled_stim = 8 * pow(10, surprisingness_value(h)) * surprisingness_value(h);
+        auto sv = surprisingness_value(h);
+        auto scaled_stim = 8 * pow(10, sv) * sv;
         stimulateAtom(h, scaled_stim);
+
+        if (not interesting_atom(h).empty()) {
+            save("smokes-fc-result.data",
+                 HandleSeq { h },
+                 "INTERESTING:" + interesting_atom(h) + "," + std::to_string(cogserver().getCycleCount()-starting_cycle)
+                 + "\n");
+        }
 
         std::cerr << "provided stimulus \n to " << h->getUUID() << " of amount "
         << std::to_string(scaled_stim) + "\n";

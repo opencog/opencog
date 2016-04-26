@@ -58,6 +58,6 @@ end
 
     printf "Writing %d random friendship relations to %s \n", ARGV[1].to_i, ARGV[0]
     #	write_to_file(ARGV[0],RandData::create_random_friendship(ARGV[1].to_i))
-    write_to_file(ARGV[0],RandData::create_random_eval_links(ARGV[1].to_i))
+    write_to_file(ARGV[1]+"-smokers-"+(ARGV[1].to_i*5).to_s+"-friendship-"+ARGV[0],RandData::create_random_eval_links(ARGV[1].to_i))
     printf "Done\n"
   end
