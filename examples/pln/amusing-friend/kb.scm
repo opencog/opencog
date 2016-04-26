@@ -47,6 +47,7 @@
       (Variable "$Z")))
 
 ;; People who told the truth about something are honest
+(define people-telling-the-truth-are-honest
 (Implication (stv 0.95 0.9)
    (VariableList
       (TypedVariable
@@ -66,7 +67,7 @@
          (Variable "$Z")))
    (Evaluation
       (Predicate "is-honest")
-      (Variable "$X")))
+      (Variable "$X"))))
 
 ;;;;;;;;;;;;;;
 ;; Humanity ;;
@@ -191,6 +192,7 @@
 
 ;; The probablity of turning acquaintance into friendship between
 ;; humans is 0.1.
+(define human-acquainted-tend-to-become-friends
 (Implication (stv 0.1 0.5)
    (VariableList
       (TypedVariable
@@ -215,9 +217,10 @@
       (Predicate "will-be-friends")
       (List
          (Variable "$X")
-         (Variable "$Y"))))
+         (Variable "$Y")))))
 
 ;; Friends tend to be honest
+(define friends-tend-to-be-honest
 (Implication (stv 0.85 0.5)
    (VariableList
       (TypedVariable
@@ -237,7 +240,7 @@
          (Variable "$X"))
       (Evaluation
          (Predicate "is-honest")
-         (Variable "$Y"))))
+         (Variable "$Y")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Telling the truth ;;
@@ -271,6 +274,7 @@
    (Variable "$X"))
 
 ;; People who told a joke to someone, somewhere, are funny   
+(define people-telling-jokes-are-funny
 (Implication (stv 0.8 0.9)
    (VariableList
       (TypedVariable
@@ -290,7 +294,7 @@
          (Variable "$Z")))
    (Evaluation
       (Predicate "is-funny")
-      (Variable "$X")))
+      (Variable "$X"))))
 
 ;; Being funny is loosely equivalent to being amusing
 ;;
@@ -303,6 +307,7 @@
 ;; but due to some current limitation in the type system, specifically
 ;; that a Predicate cannot be declared with a certain type, we need to
 ;; express that in a more convoluted way.
+(define funny-is-loosely-equivalent-to-amusing
 (Equivalence (stv 0.7 0.9)
    (TypedVariable
       (Variable "$X")
@@ -312,7 +317,7 @@
       (Variable "$X"))
    (Evaluation
       (Predicate "is-amusing")
-      (Variable "$X")))
+      (Variable "$X"))))
 
 ;;;;;;;;;;;;;;;
 ;; The Party ;;
