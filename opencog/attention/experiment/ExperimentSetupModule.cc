@@ -17,6 +17,8 @@
 #include <opencog/attention/SimpleHebbianUpdatingAgent.h>
 #include <opencog/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/attention/StochasticImportanceDiffusionAgent.h>
+#include <opencog/attention/StochasticImportanceUpdatingAgent.h>
+#include <opencog/attention/MinMaxSTIUpdatingAgent.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/attention/experiment/SmokesDBFCAgent.h>
 
@@ -70,6 +72,14 @@ void ExperimentSetupModule::AVChangedCBListener(const Handle& h,
                                                 const AttentionValuePtr& av_old,
                                                 const AttentionValuePtr& av_new)
 {
+    if (h->isNode()) {
+        std::size_t index = NodeCast(h)->getName().find("@");
+        if (index != std::string::npos)
+            return;
+    } else {
+        return;
+    }
+
     AValues ecanval(av_new->getSTI(), av_new->getLTI(), av_new->getVLTI(),
                     _cs.getCycleCount());
     _av_data[h].push_back(ecanval);
@@ -122,6 +132,7 @@ void ExperimentSetupModule::registerAgentRequests()
     do_dump_data_register();
     do_start_nlp_stimulate_register();
     do_pause_nlp_stimulate_register();
+    do_start_exp_register();
 }
 
 void ExperimentSetupModule::unregisterAgentRequests()
@@ -134,6 +145,7 @@ void ExperimentSetupModule::unregisterAgentRequests()
     do_dump_data_unregister();
     do_start_nlp_stimulate_unregister();
     do_pause_nlp_stimulate_unregister();
+    do_start_exp_unregister();
 }
 void ExperimentSetupModule::init(void)
 {
@@ -142,6 +154,16 @@ void ExperimentSetupModule::init(void)
     std::cout << "AF_BOUNDARY = " << _as->get_attentional_focus_boundary()
               << std::endl;
     registerAgentRequests();
+}
+
+std::string ExperimentSetupModule::do_start_exp(Request *req,
+                                                std::list<std::string> args)
+{
+    do_ecan_load(req,args);
+    do_ecan_start(req,args);
+    do_load_word_dict(req,args);
+    do_start_nlp_stimulate(req,args);
+    return "Started Experiment\n";
 }
 
 std::string ExperimentSetupModule::do_ecan_load(Request *req,
@@ -153,11 +175,14 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
             SimpleHebbianUpdatingAgent::info().id,
             false);
     _importanceupdating_agentptr = _cs.createAgent(
-            ImportanceUpdatingAgent::info().id, false);
+          //ImportanceUpdatingAgent::info().id, false);
+            StochasticImportanceUpdatingAgent::info().id, false);
     _simpleimportancediffusion_agentptr = _cs.createAgent(
             SimpleImportanceDiffusionAgent::info().id, false);
     _stochasticimportancediffusion_agentptr = _cs.createAgent(
             StochasticImportanceDiffusionAgent::info().id,false);
+    _minmaxstiupdating_agentptr = _cs.createAgent(
+            MinMaxSTIUpdatingAgent::info().id,false);
 
     //Register experiment specific agents. Add more if you have here.
     if (_cs.registerAgent(ArtificialStimulatorAgent::info().id,
@@ -179,10 +204,14 @@ std::string ExperimentSetupModule::do_ecan_start(Request *req,
 {
     //_cs.startAgent(_artificialstimulatoragentptr);
     _cs.startAgent(_forgetting_agentptr);
-    _cs.startAgent(_hebbianupdating_agentptr);
-    _cs.startAgent(_importanceupdating_agentptr);
-    //_cs.startAgent(_simpleimportancediffusion_agentptr);
-    _cs.startAgent(_stochasticimportancediffusion_agentptr,true,"sida");
+    //_cs.startAgent(_hebbianupdating_agentptr);
+    _cs.startAgent(_minmaxstiupdating_agentptr);
+    _cs.startAgent(_importanceupdating_agentptr,true,"siua");
+    if (args.front() == "simple")
+        _cs.startAgent(_simpleimportancediffusion_agentptr);
+    else
+        _cs.startAgent(_stochasticimportancediffusion_agentptr,true,"sida");
+
     //_cs.startAgent(_smokes_fc_agentptr);
 
     return "The following agents were started:\n" + ECAN_EXP_AGENTS;
@@ -192,10 +221,13 @@ std::string ExperimentSetupModule::do_ecan_pause(Request *req,
                                                  std::list<std::string> args)
 {
     _cs.stopAgent(_forgetting_agentptr);
-    _cs.stopAgent(_hebbianupdating_agentptr);
+    //_cs.stopAgent(_hebbianupdating_agentptr);
     _cs.stopAgent(_importanceupdating_agentptr);
-    //_cs.stopAgent(_simpleimportancediffusion_agentptr);
-    _cs.stopAgent(_stochasticimportancediffusion_agentptr);
+    _cs.stopAgent(_minmaxstiupdating_agentptr);
+    if (args.front() == "simple")
+        _cs.stopAgent(_simpleimportancediffusion_agentptr);
+    else
+        _cs.stopAgent(_stochasticimportancediffusion_agentptr);
 
     //_cs.stopAgent(_artificialstimulatoragentptr);
     //_cs.stopAgent(_smokes_fc_agentptr);

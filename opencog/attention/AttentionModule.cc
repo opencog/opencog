@@ -44,8 +44,9 @@ AttentionModule::AttentionModule(CogServer& cs) :
     _cogserver.registerAgent(ImportanceSpreadingAgent::info().id, &spreadingFactory);
     _cogserver.registerAgent(ImportanceUpdatingAgent::info().id,  &updatingFactory);
     _cogserver.registerAgent(SimpleImportanceDiffusionAgent::info().id, &simpleDiffusionFactory);
-    _cogserver.registerAgent(StochasticImportanceDiffusionAgent::info().id,
-            &stochasticDiffusionFactory);
+    _cogserver.registerAgent(StochasticImportanceDiffusionAgent::info().id,&stochasticDiffusionFactory);
+    _cogserver.registerAgent(StochasticImportanceUpdatingAgent::info().id,&stochasticUpdatingFactory);
+    _cogserver.registerAgent(MinMaxSTIUpdatingAgent::info().id,&minMaxSTIUpdatingFactory);
 }
 
 AttentionModule::~AttentionModule()
@@ -60,6 +61,8 @@ AttentionModule::~AttentionModule()
     _cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
     _cogserver.unregisterAgent(SimpleImportanceDiffusionAgent::info().id);
     _cogserver.unregisterAgent(StochasticImportanceDiffusionAgent::info().id);
+    _cogserver.unregisterAgent(StochasticImportanceUpdatingAgent::info().id);
+    _cogserver.unregisterAgent(MinMaxSTIUpdatingAgent::info().id);
     logger().debug("[AttentionModule] exit destructor");
 }
 

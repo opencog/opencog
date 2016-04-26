@@ -33,6 +33,8 @@
 #include <opencog/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/attention/ImportanceUpdatingAgent.h>
 #include <opencog/attention/StochasticImportanceDiffusionAgent.h>
+#include <opencog/attention/StochasticImportanceUpdatingAgent.h>
+#include <opencog/attention/MinMaxSTIUpdatingAgent.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/Module.h>
 
@@ -56,6 +58,8 @@ private:
     Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
     Factory<SimpleImportanceDiffusionAgent, Agent> simpleDiffusionFactory;
     Factory<StochasticImportanceDiffusionAgent, Agent> stochasticDiffusionFactory;
+    Factory<StochasticImportanceUpdatingAgent, Agent> stochasticUpdatingFactory;
+    Factory<MinMaxSTIUpdatingAgent, Agent> minMaxSTIUpdatingFactory;
 
 public:
 
@@ -64,8 +68,6 @@ public:
     AttentionModule(CogServer&);
     virtual ~AttentionModule();
     virtual void init();
-
-    void startAgents();
 
 }; // class
 

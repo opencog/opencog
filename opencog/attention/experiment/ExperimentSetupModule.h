@@ -41,6 +41,7 @@ private:
     AgentPtr _importanceupdating_agentptr;
     AgentPtr _simpleimportancediffusion_agentptr;
     AgentPtr _stochasticimportancediffusion_agentptr;
+    AgentPtr _minmaxstiupdating_agentptr;
 
     AgentPtr _sentencegenstim_agentptr;
     AgentPtr _artificialstimulatoragentptr;
@@ -120,6 +121,15 @@ private:
 
     //Load word dict.
     DECLARE_CMD_REQUEST(ExperimentSetupModule, "load-word-dict",do_load_word_dict,
+            "Loads word dict for experimentation. The word dict file should have two sections\n"
+            "SPEICAL_WORDS = [comma separated words]\n"
+            "NON_SPECIAL_WORDS = [comma separated words] size\n",
+            "Usage: load-word-dict [FILE_NAME]\n"
+            "Dump time serise ECAN data\n",
+            false, true)
+
+    //Load word dict.
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "start-exp",do_start_exp,
             "Loads word dict for experimentation. The word dict file should have two sections\n"
             "SPEICAL_WORDS = [comma separated words]\n"
             "NON_SPECIAL_WORDS = [comma separated words] size\n",

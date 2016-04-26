@@ -111,24 +111,34 @@ void StochasticImportanceDiffusionAgent::run()
 
 void StochasticImportanceDiffusionAgent::spreadImportance()
 {
-    HandleSeq links;
-    std::back_insert_iterator< std::vector<Handle> > out_hi(links);
+  //HandleSeq atoms;
+  //std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
 
-    log->debug("Begin diffusive importance spread.");
+  //log->debug("Begin diffusive importance spread.");
+  //a->get_handles_by_AV(out_hi,diffusionThreshold);
 
-    a->get_handles_by_AV(out_hi,diffusionThreshold);
+    HandleSeq atoms;
+    a->get_all_atoms(atoms);
 
-    size_t size = links.size();
+    atoms.erase(remove_if(atoms.begin(),atoms.end(),
+                    [](Handle h) -> bool {
+                    return classserver().isA(h->getType(),HEBBIAN_LINK);
+                    }),atoms.end());
+
+    size_t size = atoms.size();
 
     if (size == 0)
         return;
 
     int index = rand() % size;
 
-    Handle source = links[index];
+    Handle source = atoms[index];
 
     HandleSeq targetSet =
             get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
+  //HandleSeq links;
+  //std::back_insert_iterator< std::vector<Handle> > out_hi2(links);
+  //source->getIncomingSetByType(out_hi2,ASYMMETRIC_HEBBIAN_LINK);
 
     if (targetSet.size() == 0)
         return;
@@ -137,14 +147,45 @@ void StochasticImportanceDiffusionAgent::spreadImportance()
 
     float availableDiffusionAmmount = totalAvailableDiffusionAmmount / targetSet.size();
 
+    float factor = 1;
+
+    std::map<Handle,float> tvs;
+
     for (Handle target : targetSet)
     {
         Handle link = a->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
 
-        float diffusionAmmount = availableDiffusionAmmount * link->getTruthValue()->getMean();
+        if (link == Handle::UNDEFINED)
+            continue;
 
-        a->set_STI(source, a->get_STI(source) - diffusionAmmount);
-        a->set_STI(target, a->get_STI(target) + diffusionAmmount);
+        float tv = link->getTruthValue()->getMean();
+        factor += tv;
+        tvs[target] = tv;
     }
+
+    int totalam = 0;
+
+    for (Handle target : targetSet)
+    {
+        std::map<Handle,float>::iterator it = tvs.find(target);
+
+        if (it == tvs.end())
+            continue;
+
+        float tv = it->second * 2 - 1;
+        int ssti = a->get_STI(source);
+        int tsti = a->get_STI(target);
+
+        //int diffusionAmmount = floor(((ssti - tsti) * tv) / factor);
+        int diffusionAmmount = floor(availableDiffusionAmmount * tv);
+        totalam +=diffusionAmmount;
+
+
+        if (diffusionAmmount > 0) {
+            a->set_STI(source, ssti - diffusionAmmount);
+            a->set_STI(target, tsti + diffusionAmmount);
+        }
+    }
+    //printf("diffusionAmmount: %d \n",totalam);
 }
 };

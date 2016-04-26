@@ -42,7 +42,7 @@
 #include "SimpleImportanceDiffusionAgent.h"
 #include "SpreadDecider.h"
 
-#define DEBUG
+//#define DEBUG
 #define _unused(x) ((void)x)
 
 namespace opencog

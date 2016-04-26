@@ -109,7 +109,7 @@ void AgentRunnerBase::remove_all_agents()
     logger().debug("[CogServer::%s] stopped all agents", name.c_str());
 }
 
-void AgentRunnerBase::run_agent(AgentPtr a)
+float AgentRunnerBase::run_agent(AgentPtr a)
 {
     size_t mem_start = getMemUsage();
     int atoms_start = atomspace().get_size();
@@ -148,15 +148,22 @@ void AgentRunnerBase::run_agent(AgentPtr a)
 
     cogserver().systemActivityTable().logActivity(a, elapsed, mem_used,
         atoms_used);
+
+    return elapsed_secs;
 }
 
-void SimpleRunner::process_agents()
+void SimpleRunner::process_agents(bool printRuntimes = false)
 {
     AgentSeq::const_iterator it;
     for (it = agents.begin(); it != agents.end(); ++it) {
         AgentPtr agent = *it;
         if ((cycle_count % agent->frequency()) == 0)
-            run_agent(agent);
+        {
+            auto elapsed_secs = run_agent(agent);
+            if (printRuntimes)
+                fprintf(stdout,"Agent: %s took %f seconds to run\n",
+                        agent->classinfo().id.c_str(),elapsed_secs);
+        }
     }
     ++cycle_count;
 }

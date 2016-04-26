@@ -52,6 +52,8 @@ class HebbianCreationModule : public Module
    private:
        AtomSpace* as;
        boost::signals2::connection addAFConnection;
+       void addHebbian(Handle atom,Handle source);
+       float targetConjunction(Handle handle1,Handle handle2);
 
    public:
        HebbianCreationModule(CogServer&);

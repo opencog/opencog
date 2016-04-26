@@ -18,7 +18,7 @@ def plot_sti(uuids):
    ylabel = u"\u0394STI"
    plt.xlabel(xlabel)
    plt.ylabel(ylabel)
-   plt.legend()
+   #plt.legend()
    plt.show()
 
 def plot_lti(uuids):

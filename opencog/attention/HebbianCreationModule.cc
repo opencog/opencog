@@ -128,12 +128,28 @@ void HebbianCreationModule::addAFSignalHandler(const Handle& source,
     // Resulting in the sets of nodes that require
     // a new AsymmetricHebbianLink in either direction
     for (Handle atom : needToBeSource) {
-        as->add_link(ASYMMETRIC_HEBBIAN_LINK, atom, source)->setTruthValue(
-                     SimpleTruthValue::createTV(0, 1));
+        addHebbian(atom,source);
     }
 
     for (Handle atom : needToBeTarget) {
-        as->add_link(ASYMMETRIC_HEBBIAN_LINK, source, atom)->setTruthValue(
-                     SimpleTruthValue::createTV(0, 1));
+        addHebbian(source,atom);
     }
+}
+
+void HebbianCreationModule::addHebbian(Handle atom,Handle source)
+{
+    float mean = targetConjunction(atom,source);
+    Handle link = as->add_link(ASYMMETRIC_HEBBIAN_LINK, atom, source);
+    link->setTruthValue(SimpleTruthValue::createTV(mean, 1));
+    link->setVLTI(1);
+}
+
+float HebbianCreationModule::targetConjunction(Handle handle1,Handle handle2)
+{
+    auto normsti_i = as->get_normalised_STI(handle1,true,true);
+    auto normsti_j = as->get_normalised_STI(handle2,true,true);
+    float conj = std::max(-1.0f,min(1.0f,normsti_i * normsti_j));
+    conj = conj + 1 / 2;
+
+    return conj;
 }

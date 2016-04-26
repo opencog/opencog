@@ -23,6 +23,7 @@
  */
 
 #include <opencog/attention/atom_types.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include "SimpleHebbianUpdatingAgent.h"
 
@@ -62,11 +63,15 @@ void SimpleHebbianUpdatingAgent::hebbianUpdatingUpdate()
         // old link strength decays
         old_tc = h->getTruthValue()->getMean();
         tc = tcDecayRate * new_tc + (1.0f - tcDecayRate) * old_tc;
-        if (tc < 0.0f)
-            tc = 0.0f;
+        if (tc < 0.2f) {
+            fprintf(stdout,"removing Hebbian \n");
+            a->remove_atom(h,true);
+            continue;
+        }
 
         //update truth value accordingly
         setMean(h, tc);
+        //h->setTruthValue(SimpleTruthValue::createTV(tc, 1));
         if (new_tc != old_tc) {
             log->fine("HebbianUpdatingAgent: %s old tv %f",
                       a->atom_as_string(h).c_str(), old_tc);
@@ -82,9 +87,10 @@ float SimpleHebbianUpdatingAgent::targetConjunction(HandleSeq handles)
                 "Size of outgoing set of a hebbian link must be 2.");
     }
     //XXX: Should this be normalised to 0->1 Range
-    auto normsti_i = a->get_normalised_STI(handles[0]);
-    auto normsti_j = a->get_normalised_STI(handles[1]);
-    auto conj = std::max(normsti_i * normsti_j, 1.0f);
+    auto normsti_i = a->get_normalised_STI(handles[0],true,true);
+    auto normsti_j = a->get_normalised_STI(handles[1],true,true);
+    float conj = std::max(-1.0f,std::min(1.0f,normsti_i * normsti_j));
+    conj = conj + 1 / 2;
 
     log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc %.3f", normsti_i,
               normsti_j, conj);

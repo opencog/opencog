@@ -95,6 +95,11 @@ public:
     //! Percentage of AtomSpace to forget.
     float forgetPercentage;
 
+    //!targetSize of AtomSpace
+    int maxSize;
+    //!acceptable diviation from maxSize;
+    int accDivSize;
+
     ForgettingAgent(CogServer&);
     virtual ~ForgettingAgent();
     virtual void run();

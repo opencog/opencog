@@ -32,7 +32,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include "ImportanceUpdatingAgent.h"
 
-#define DEBUG
+//#define DEBUG
 
 using namespace opencog;
 

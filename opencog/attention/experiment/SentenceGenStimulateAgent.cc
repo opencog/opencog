@@ -14,7 +14,9 @@
 #include <opencog/attention/atom_types.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/nlp/types/atom_types.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 
+#include <opencog/util/Config.h>
 
 using namespace opencog;
 using namespace opencog::ECANExperiment;
@@ -37,9 +39,27 @@ SentenceGenStimulateAgent::~SentenceGenStimulateAgent()
 {
     //delete _scm_eval;
 }
+
 SentenceGenStimulateAgent::SentenceGenStimulateAgent(CogServer& cs) :
         Agent(cs), _as(cs.getAtomSpace())
 {
+  //STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
+  //LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_RENT");
+
+  //targetSTI = config().get_int("STARTING_STI_FUNDS");
+  //stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
+  //targetLTI = config().get_int("STARTING_LTI_FUNDS");
+  //ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
+
+
+    STIAtomWage = 100;
+    LTIAtomWage = 100;
+
+    targetSTI = 10000;
+    stiFundsBuffer = 10000;
+    targetLTI = 10000;
+    ltiFundsBuffer = 10000;
+
     _scm_eval = new SchemeEval(&_as);
 }
 
@@ -65,30 +85,26 @@ void SentenceGenStimulateAgent::run(void)
 
     if(_cogserver.getCycleCount() % 50 == 0){
         std::string dir_path = std::string(PROJECT_SOURCE_DIR)
-                + "/opencog/attention/experiment/visualization/" + "cycle"
-                + std::to_string(_cogserver.getCycleCount());
+                + "/opencog/attention/experiment/visualization/";
+                //"cycle" + std::to_string(_cogserver.getCycleCount());
 
-        boost::filesystem::path dir(dir_path);
+        std::string file_name = dir_path + "dump";
 
-        if (boost::filesystem::create_directory(dir)) {
-            std::string file_name = dir_path + "/dump";
+        //dump hebbian strength of between special word nodes
+        ExperimentSetupModule::dump_ecan_data("heb", file_name);
+        ExperimentSetupModule::dump_ecan_data("av", file_name);
+        std::cout << "[INFO ]" << file_name << " written." << std::endl;
 
-            //dump hebbian strength of between special word nodes
-            ExperimentSetupModule::dump_ecan_data("heb", file_name);
-            std::cout << "[INFO ]" << file_name << " written." << std::endl;
+      //std::ofstream outf(dir_path + "/atom_count.txt",
+      //                   std::ofstream::out | std::ofstream::trunc);
 
-            std::ofstream outf(dir_path + "/atom_count.txt",
-                               std::ofstream::out | std::ofstream::trunc);
+      ////Print counts
+      //outf <<"WORD_NODE = "<< _as.get_num_atoms_of_type(WORD_NODE);
+      //outf <<"WORD_INSTANCE_NODE = "<< _as.get_num_atoms_of_type(WORD_INSTANCE_NODE);
+      //outf <<"ASYMMETRIC_HEBBIAN_LINK = "<< _as.get_num_atoms_of_type(ASYMMETRIC_HEBBIAN_LINK);
 
-            //Print counts
-            outf <<"WORD_NODE = "<< _as.get_num_atoms_of_type(WORD_NODE);
-            outf <<"WORD_INSTANCE_NODE = "<< _as.get_num_atoms_of_type(WORD_INSTANCE_NODE);
-            outf <<"ASYMMETRIC_HEBBIAN_LINK = "<< _as.get_num_atoms_of_type(ASYMMETRIC_HEBBIAN_LINK);
-
-            outf.flush();
-            outf.close();
-        }
-
+      //outf.flush();
+      //outf.close();
     }
 }
 
@@ -96,14 +112,14 @@ void SentenceGenStimulateAgent::generate_stimuate_sentence(void)
 {
     static int cycle = 1;
     std::vector<std::string> sentences;
-    int sw_end = special_words.size() - 1;
-    int nsw_end = nspecial_words.size() - 1;
+    int sw_end = special_words.size();
+    int nsw_end = nspecial_words.size();
     static int i = 0;
 
     HandleSeq hwords;
     HandleSeq hword_instances;
 
-    if (cycle % special_word_occurence_period == 0) {
+    if (cycle % special_word_occurence_period == 0 && cycle > 10) {
         //Two random special words from each half
         int sw1 = rand() % (sw_end / 2);
         hwords.push_back(
@@ -210,12 +226,59 @@ void SentenceGenStimulateAgent::generate_stimuate_sentence(void)
     //Should the non special word nodes be removed from the selection list?
 
     //Stimulate atoms. TODO change stimulus values.
-    stimulateAtom(hwords, 20);
-    stimulateAtom(hword_instances, 20);
+    for (Handle h : hwords)
+        localStimulateAtom(h,2);
+    for (Handle h : hword_instances)
+        localStimulateAtom(h,0.5);
+    //stimulateAtom(hwords, 20);
+    //stimulateAtom(hword_instances, 20);
+    fprintf(stdout,"stifunds: %d \n",_as.get_STI_funds());
 
     cycle++;
 
     //Push sentence nodes
     sent_wordnodes.push_back(hwords);
     wordinstancenodes.push_back(hword_instances);
+}
+
+
+void SentenceGenStimulateAgent::hebbianUpdatingUpdate(Handle source)
+{
+    float tcDecayRate = 0.3f;
+    float tc, old_tc, new_tc;
+
+    IncomingSet links = source->getIncomingSetByType(ASYMMETRIC_HEBBIAN_LINK);
+
+    for (LinkPtr h : links) {
+        if (source != h->getOutgoingAtom(0))
+            continue;
+        HandleSeq outgoing = h->getOutgoingSet();
+        new_tc = targetConjunction(outgoing);
+
+        // old link strength decays
+        TruthValuePtr oldtv  = h->getTruthValue();
+        old_tc = oldtv->getMean();
+        tc = tcDecayRate * new_tc + (1.0f - tcDecayRate) * old_tc;
+
+        //update truth value accordingly
+        TruthValuePtr newtv(SimpleTruthValue::createTV(tc, 1));
+        h->merge(newtv);
+    }
+    //h->setTruthValue(SimpleTruthValue::createTV(tc, 1));
+}
+
+float SentenceGenStimulateAgent::targetConjunction(HandleSeq handles)
+{
+    if (handles.size() != 2) {
+        throw RuntimeException(
+                TRACE_INFO,
+                "Size of outgoing set of a hebbian link must be 2.");
+    }
+    //XXX: Should this be normalised to 0->1 Range
+    auto normsti_i = _as.get_normalised_STI(handles[0],true,true);
+    auto normsti_j = _as.get_normalised_STI(handles[1],true,true);
+    float conj = std::max(-1.0f,std::min(1.0f,normsti_i * normsti_j));
+    conj = conj + 1 / 2;
+
+    return conj;
 }
