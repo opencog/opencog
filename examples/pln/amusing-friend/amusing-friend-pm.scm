@@ -30,7 +30,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (Evaluation (0.8 0.9)
+;; (Evaluation (stv 0.94999999 0.89999098)
 ;;   (Predicate "is-honest")
 ;;   (Concept "Bob"))
 (cog-bind implication-full-instantiation-rule)
@@ -40,7 +40,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (Implication (stv 0.6 0.5)
+;; (Implication (stv 0.85 0.5)
 ;;    (Lambda
 ;;       (VariableList
 ;;          (TypedVariable
@@ -65,10 +65,10 @@
 ;;       (And
 ;;          (Evaluation
 ;;             (Predicate "is-honest")
-;;             (Variable "$X")))
+;;             (Variable "$X"))
 ;;          (Evaluation
 ;;             (Predicate "is-honest")
-;;             (Variable "$Y"))))
+;;             (Variable "$Y")))))
 (cog-bind implication-scope-distribution-rule)
 
 ;; (3) Infer the TV of the implicant of (2) using
@@ -76,7 +76,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (Lambda 9.9999997e-05 0.89999998)
+;; (Lambda (stv 9.9999997e-05 0.89999998)
 ;;    (VariableList
 ;;       (TypedVariable
 ;;          (Variable "$X")
@@ -107,10 +107,10 @@
 ;;    (And
 ;;       (Evaluation
 ;;          (Predicate "is-honest")
-;;          (Variable "$X")))
+;;          (Variable "$X"))
 ;;       (Evaluation
 ;;          (Predicate "is-honest")
-;;          (Variable "$Y")))
+;;          (Variable "$Y"))))
 ;; For now inside the kb
 
 ;; (5) Infer that honest people are more likely to become
@@ -130,7 +130,7 @@
 ;;       (And
 ;;          (Evaluation
 ;;             (Predicate "is-honest")
-;;             (Variable "$X")))
+;;             (Variable "$X"))
 ;;          (Evaluation
 ;;             (Predicate "is-honest")
 ;;             (Variable "$Y"))))
@@ -146,7 +146,7 @@
 ;;          (Predicate "will-be-friends")
 ;;          (List
 ;;             (Variable "$X")
-;;             (Variable "$Y"))))
+;;             (Variable "$Y")))))
 (cog-bind inversion-implication-rule)
 
 ;; (6) Distribute the scope of the implication that human
@@ -282,7 +282,7 @@
 ;; Result should be:
 ;;
 ;; (ImplicationLink (stv 1 1)
-;;    (LambdaLink (stv 0.000128 0.89999998)
+;;    (LambdaLink (stv 0.000128 0.89999998)  <-- TODO wrong TV on the FC
 ;;       (VariableList
 ;;          (TypedVariableLink
 ;;             (VariableNode "$X")
