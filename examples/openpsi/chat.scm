@@ -21,11 +21,11 @@
 ;-------------------------------------------------------------------------------
 ; Keep track of the chat-state so that the psi-rules can make use of them
 
-(define chat-rule (ConceptNode "OpenPsi: Chat Rule"))
-(define no-new-input-utterance (ConceptNode "No New Input Utterance"))
-(define new-input-utterance (AnchorNode "New Input Utterance"))
-(StateLink new-input-utterance no-new-input-utterance)
-(define (chat utt) (StateLink new-input-utterance (car (nlp-parse utt))) (newline))
+(define chat-rule (Concept "OpenPsi: Chat Rule"))
+(define no-input-utterance (Concept "No Input Utterance"))
+(define input-utterance (Anchor "Input Utterance"))
+(State input-utterance no-input-utterance)
+(define (chat utt) (State input-utterance (car (nlp-parse utt))) (newline))
 
 ;-------------------------------------------------------------------------------
 ; Define the demands with their default values
@@ -71,23 +71,23 @@
 
         (if (> (length best-matches) 0)
             (if (> (length satisfied-rules) 0)
-                (SetLink (append satisfied-rules (list (list-ref best-matches (random (length best-matches))))))
+                (Set (append satisfied-rules (list (list-ref best-matches (random (length best-matches))))))
                 (list-ref best-matches (random (length best-matches)))
             )            
-            (SetLink satisfied-rules)
+            (Set satisfied-rules)
         )
     )
 )
 
-(DefineLink
-    (DefinedSchemaNode "psi-action-selector-chat")
-    (ExecutionOutputLink
-        (GroundedSchemaNode "scm: psi-action-selector-chat")
-        (ListLink)
+(Define
+    (DefinedSchema "psi-action-selector-chat")
+    (ExecutionOutput
+        (GroundedSchema "scm: psi-action-selector-chat")
+        (List)
     )
 )
 
-(define dsn (DefinedSchemaNode "psi-action-selector-chat"))
+(define dsn (DefinedSchema "psi-action-selector-chat"))
 (psi-action-selector-set! dsn)
 
 ;-------------------------------------------------------------------------------
@@ -101,8 +101,8 @@
 )
 
 (define (do-fuzzy-match rule-utt)
-    (let ((input-utt (car (cog-outgoing-set (cog-execute! (Get (State new-input-utterance (Variable "$x"))))))))
-        (if (equal? input-utt no-new-input-utterance)
+    (let ((input-utt (car (cog-outgoing-set (cog-execute! (Get (State input-utterance (Variable "$x"))))))))
+        (if (equal? input-utt no-input-utterance)
             (stv 0 1)
             (let* ((input-r2l (get-r2l-set-of-sent input-utt))
                    (rule-r2l (get-r2l-set-of-sent rule-utt))
@@ -117,7 +117,7 @@
 (define (say utterance)
     (display (list (map word-inst-get-word-str (cdr (car (sent-get-words-in-order utterance))))))
     (newline)
-    (State new-input-utterance no-new-input-utterance)
+    (State input-utterance no-input-utterance)
 )
 
 ;-------------------------------------------------------------------------------
@@ -127,9 +127,9 @@
 ; These rules change the demand values whenever there is an input utterance
 
 (psi-rule
-    (list (NotLink (EqualLink (SetLink no-new-input-utterance) (GetLink (StateLink new-input-utterance (VariableNode "$x"))))))
-    (ListLink)
-    (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-minimize") (ListLink sociality (NumberNode "10")))
+    (list (Not (Equal (Set no-input-utterance) (Get (State input-utterance (Variable "$x"))))))
+    (List)
+    (Evaluation (GroundedPredicate "scm:psi-demand-value-minimize") (List sociality (Number "10")))
     (stv 1 1)
     sociality
 )
@@ -142,31 +142,31 @@
 (define out_utt_1 (nlp-parse "I'm as conscious as you are, meat machine!"))
 (define out_utt_2 (nlp-parse "Yes I am."))
 (define out_utt_3 (nlp-parse "What do you think?"))
-(MemberLink
+(Member
     (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt_1))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "100")))
+        (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
+        (ExecutionOutput (GroundedSchema "scm:say") (List out_utt_1))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "100")))
         (stv 1 1)
         sociality
     )
     chat-rule
 )
-(MemberLink
+(Member
     (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt_2))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "100")))
+        (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
+        (ExecutionOutput (GroundedSchema "scm:say") (List out_utt_2))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "100")))
         (stv 1 1)
         sociality
     )
     chat-rule
 )
-(MemberLink
+(Member
     (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt_3))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "100")))
+        (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
+        (ExecutionOutput (GroundedSchema "scm:say") (List out_utt_3))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "100")))
         (stv 1 1)
         sociality
     )
@@ -176,11 +176,11 @@
 ;----------
 ; The default reply if there is no matching rule in the system
 
-(MemberLink
+(Member
     (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink sociality (NumberNode "0.1"))))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink (nlp-parse "Sorry I don't understand.")))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "100")))
+        (list (Evaluation (GroundedPredicate "scm:check-demand") (List sociality (Number "0.1"))))
+        (ExecutionOutput (GroundedSchema "scm:say") (List (nlp-parse "Sorry I don't understand.")))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "100")))
         (stv 1 1)
         sociality
     )
