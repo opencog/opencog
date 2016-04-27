@@ -97,7 +97,7 @@ public:
     static HandleSeq findAllGivenStateChangesAndLatestRelatedActions(Handle classValueNode, string stateName, Handle stateNewValNode,
                                                                Handle stateOldValueNode = opencog::Handle::UNDEFINED);
 
-
+    static HandleSeq findAllCandidatesByGivenPattern(HandleSeq &pattern, HandleSeq &variableNodes, Handle &queryVar);
 
     // inquery the spatial relationships
     // see the definition of SPATIAL_RELATION in Octree3DMapManager.h

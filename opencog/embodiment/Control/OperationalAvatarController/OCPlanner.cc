@@ -1018,6 +1018,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                         HandleSeq rulePattern = minedParamStruct.paramPrioPattern;
                         // the last link of each returned pattern is the variable ListLink
                         Handle variableListLink = rulePattern[rulePattern.size() - 1];
+                        HandleSeq allVariables = atomSpace->getOutgoing(variableListLink);
                         rulePattern.pop_back();
 
                         // First, try to find the already known variables in the pattern
@@ -1098,6 +1099,19 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                                 cleanBoundPattern.push_back(link);
                         }
 
+                        // Remove the action instance variable and already known variables from variable list
+                        HandleSeq cleanVariables;
+                        for (Handle varh : allVariables)
+                        {
+                            if (varh == actionInstanceVar)
+                                continue;
+
+                            if (varToValueMap.find(varh) != varToValueMap.end())
+                                continue;
+
+                            cleanVariables.push_back(varh);
+                        }
+
                         cout << "\npattern after removed links contain the variable represents action instance:\n";
                         for(Handle link : cleanBoundPattern)
                         {
@@ -1120,7 +1134,16 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                             cout << atomSpace->atomAsString(link) << std::endl;
                         }
 
-                        // run pattern matcher to find candidates
+                        // Found candicates in AtomSpace which match this pattern:
+                        HandleSeq candidates = Inquery::findAllCandidatesByGivenPattern(cleanBoundPattern, cleanVariables, minedParamStruct.paramObjVar);
+                        if (candidates.size() > 0)
+                        {
+                            cout << "\nFound candicates in the AtomSpace to match this pattern:\n";
+                            for (Handle c : candidates)
+                                cout << atomSpace->atomAsString(c) << std::endl;
+                        }
+                        else
+                            cout << "\nCan't found any candicates in the AtomSpace to match this pattern. Mining new pattern failed\n";
 
                     }
                 }

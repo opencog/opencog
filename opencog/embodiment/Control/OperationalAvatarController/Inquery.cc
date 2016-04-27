@@ -984,7 +984,48 @@ HandleSeq Inquery::findAllGivenStateChangesAndLatestRelatedActions(Handle classV
     return lastestActionNodes;
 }
 
+HandleSeq Inquery::findAllCandidatesByGivenPattern(HandleSeq& pattern, HandleSeq &variableNodes, Handle& queryVar)
+{
+    HandleSeq implicationLinkOutgoings, bindLinkOutgoings;
 
+    if (pattern.size() > 1)
+    {
+        Handle hAndLink = AtomSpaceUtil::addLink(*atomSpace,AND_LINK, pattern);;
+        implicationLinkOutgoings.push_back(hAndLink);
+    }
+    else
+        implicationLinkOutgoings.push_back(pattern[0]);
+
+    implicationLinkOutgoings.push_back(queryVar);
+    Handle hImplicationLink = AtomSpaceUtil::addLink(*atomSpace,IMPLICATION_LINK, implicationLinkOutgoings);
+
+    if (variableNodes.size() > 1)
+    {
+        Handle hVariablesListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,variableNodes);
+        bindLinkOutgoings.push_back(hVariablesListLink);
+    }
+    else
+        bindLinkOutgoings.push_back(variableNodes[0]);
+
+    bindLinkOutgoings.push_back(hImplicationLink);
+
+    Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
+
+    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
+            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+
+    // Run pattern matcher
+    Handle hResultListLink = bindlink(atomSpace, hBindLink);
+
+    std::cout<<"Debug: pattern matching results: " << std::endl
+            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
+
+    // Get result
+    // Note: Don't forget remove the hResultListLink
+    HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
+    atomSpace->removeAtom(hResultListLink);
+    return resultSet;
+}
 
 
 vector<ParamValue> Inquery::inqueryUnderPosition(const vector<ParamValue>& stateOwnerList)
