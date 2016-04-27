@@ -4,12 +4,15 @@ import socket
 import os
 import time
 import sh
+from sh import grep
+from sh import mv
 import sys
 
 LOCATION = "/home/misgana/OPENCOG/opencog/opencog/attention/experiment/data"
 # the first one is supposed to be started manually
-NOISE_SIZE = 20
-data = {} #size, starting_cycle, cycle
+noise_size = 10
+MAX_NOISE_SIZE = 990
+RESULT_STORE_FILE = "raw_result.csv"
 
 
 # This implements netcat in python.
@@ -44,36 +47,46 @@ def z_file_name(size):
 # on their turn
 # creates the following files Anna.data, Bob.data, Edward.data and Frank.data
 def switch_noise_file():
-    global NOISE_SIZE
-    cur_file = LOCATION+"/"+z_file_name(NOISE_SIZE)
+    global noise_size
+    cur_file = LOCATION+"/"+z_file_name(noise_size)
     noise_scm = LOCATION+"/noise.scm"
     print "Switching noise file.\n"
     print "cp "+cur_file + " "+noise_scm +"\n"
 
     os.system("cp "+cur_file + " "+noise_scm)
-    NOISE_SIZE = NOISE_SIZE + 10
-    if NOISE_SIZE > 900:
+    noise_size = noise_size + 10
+    if noise_size > MAX_NOISE_SIZE:
         print "Done with all noise files.\n"
-        global data
-        for namekey in data:
+        write_separate_result_files()
+        print "Exitng.\n"
+        sys.exit()
+
+def write_separate_result_files():
+    data = {}
+    with open(RESULT_STORE_FILE,'r') as r:
+        for line in r:
+            values = line.split(', ') #size,name,cycle
+            person = values[1]  # i.e name
+            if person in data.keys():
+                data[person].append([values[0],values[2]])
+            else:
+               data[person] = []
+               data[person].append([values[0],values[2]])
+    for namekey in data:
             print "Saving " + namekey+".data \n"
             with open(namekey+".data", "ab+") as f:
                 writer = csv.writer(f)
                 print "DEBUG"
                 print data[namekey]
                 writer.writerows(data[namekey])
-        print "Exitng.\n"
-        netcat("localhost",17001,"shutdown\n") 
-        sys.exit()
 
 
 
 def restart_ecan():
     print "Restarting congserver and ECAN-exp.\n"
     #os.system("kill -9 $(pgrep cogserver)")
-    netcat("localhost",17001,"shutdown\n") 
-    time.sleep(3)
-    os.system("rm *.data *.log"); 
+    #os.system("rm *.data *.log"); 
+    os.system("rm  *.log"); 
     cmd = sh.Command("./opencog/cogserver/server/cogserver")
     cmd(_bg = True)
     time.sleep(3)
@@ -83,47 +96,65 @@ def restart_ecan():
     time.sleep(3)
 
 
-def append_to_data():
-    with open('smokes-fc-result.data','rw') as loglines:
-        for line in loglines:
-            if 'INTERESTING:' in line:
-               info = line.replace('INTERESTING:','') # will leave Name,cycle
-               info = info.split(",") # i.e [Name,cycle]
-               info[0] = info[0].strip()
-               info[1] = info[1].strip().rstrip("\n")
-               curdata = [NOISE_SIZE + NOISE_SIZE*5,info[1]]
-               global data
-               if info[0] in data.keys() and data[info[0]][0] == curdata[0]: # size should be unique.
-                   continue
-               elif not info[0] in data.keys():
-                   data[info[0]] = [];
-                   data[info[0]].append(curdata) # i.e append to {Name => [size,cycle]} size is unique
-               else:
-                   data[info[0]].append(curdata) # i.e append to {Name => [size,cycle]} size is unique
-    pass
+def backup_result():
+        tmpfile = "result.tmp"
+        mv("smokes-fc-result.data",tmpfile)
+        interesting = ""
+        with open(tmpfile,'r') as loglines:
+            for line in loglines:
+                if 'INTERESTING:' in line:
+                   line = str(noise_size)+", "+line.replace('INTERESTING:','') # will leave Name,cycle
+                   interesting  = interesting + line
+        with open(RESULT_STORE_FILE,'ab+') as f:
+            f.write(interesting)
+
+def get_interesting(name):
+    try:
+        s=grep("-i","-e","INTERESTING: "+name,"smokes-fc-result.data")
+        return True
+    except:
+        return False
 
 if __name__=="__main__":
    print "Stop if found is running. Looking for the interesting atoms in smokes-fc-result.data file\n"
    names = ["Anna", "Bob", "Edward", "Frank"]
-
+   counter=0
+   cont=False
+   timeOut=0
+   timesTimeOut=0
+   switch_noise_file()
+   restart_ecan()
    while 1:
-       # if all are found exit
-        if len(names) == 0:
-            print "Found all."
-            append_to_data()
+        cont=False
+        # if all are found exit
+        for nm in names:
+            if not get_interesting(nm):
+                time.sleep(1)
+                timeOut=timeOut+1
+                cont=True
+                break
+
+        if cont and (timeOut<10*60):
+            continue
+
+    
+        netcat("localhost",17001,"shutdown\n") 
+        time.sleep(4)
+        if timeOut>=10*60:
+            timeOut=0
+            timesTimeOut=timesTimeOut+1
+            print "TIME OUT...\n"
+            print "time out .."+str(timesTimeOut)+"\n"
+            print "file count="+str(counter)+"\n"
             switch_noise_file()
             restart_ecan()
+            continue
 
-        found = []
-        with open('smokes-fc-result.data', 'r') as loglines:
-            for line in loglines:
-                if 'INTERESTING:' in line:
-                    for i, name in enumerate(names):
-                        # Delete the found names from list 
-                        if name in line:
-                            del names[i]
-                            break
-
-        # Do the above every 10 secs
-        time.sleep(10);
-
+        print "Found all."
+        counter=counter+1
+        print "file count="+str(counter)+"\n"
+        print "time out .."+str(timesTimeOut)+"\n"
+        backup_result()
+        switch_noise_file()
+        restart_ecan()
+        timeOut=0
