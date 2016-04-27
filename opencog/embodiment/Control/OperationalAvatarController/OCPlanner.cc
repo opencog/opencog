@@ -1047,6 +1047,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 //                            (VariableNode $var_1)
                         // if there is "target" or "actor" in the pattern, ground them first, because they are known.
                         map<Handle, Handle> varToValueMap;
+                        Handle actionInstanceVar;
                         for (Handle link : rulePattern)
                         {
                             if (atomSpace->getType(link) !=  EVALUATION_LINK)
@@ -1065,14 +1066,40 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                                 else // actor
                                     varToValueMap.insert(std::pair<Handle, Handle>(varH,selfHandle));
                             }
+                            else if (predicateStr == paramIt->first)
+                            {
+                                if (actionInstanceVar == Handle::UNDEFINED)
+                                {
+                                    Handle elistLink = atomSpace->getOutgoing(link,1);
+                                    actionInstanceVar = atomSpace->getOutgoing(elistLink, 0);
+                                }
+                            }
 
                         }
+
+                        string actionInstanceVarStr = atomSpace->getName(actionInstanceVar);
+                        cout << "Found out that the variable represents the action instance is: " << actionInstanceVarStr;
 
                         // Bind all the vars can be ground with varToValueMap
                         HandleSeq boundPattern = bindKnownVariablesForLinks(rulePattern, varToValueMap);
 
-                        cout << "pattern after bind all known variables :\n";
+                        cout << "\npattern after bind all known variables :\n";
                         for(Handle link : boundPattern)
+                        {
+                            cout << atomSpace->atomAsString(link) << std::endl;
+                        }
+
+                        // Remove all the links contains the action instance variable
+                        HandleSeq cleanBoundPattern;
+                        for (Handle link : boundPattern)
+                        {
+                            string linkToStr = atomspace().atomAsString(link);
+                            if (linkToStr.find(actionInstanceVarStr) == string::npos)
+                                cleanBoundPattern.push_back(link);
+                        }
+
+                        cout << "\npattern after removed links contain the variable represents action instance:\n";
+                        for(Handle link : cleanBoundPattern)
                         {
                             cout << atomSpace->atomAsString(link) << std::endl;
                         }
@@ -1085,10 +1112,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 //                            (VariableNode $var_1)
 //                            (VariableNode key)
                         for(Handle iulink : minedParamStruct.intrinsicUndistinguishingPropertyLinks)
-                            boundPattern.push_back(iulink);
+                            cleanBoundPattern.push_back(iulink);
 
-                        cout << "pattern after added intrinsic Undistinguishing Property Links :\n";
-                        for(Handle link : boundPattern)
+                        cout << "\npattern after added intrinsic Undistinguishing Property Links :\n";
+                        for(Handle link : cleanBoundPattern)
                         {
                             cout << atomSpace->atomAsString(link) << std::endl;
                         }
