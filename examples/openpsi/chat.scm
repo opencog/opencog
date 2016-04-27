@@ -19,7 +19,11 @@
 (set! relex-server-host "172.17.0.2")
 
 ;-------------------------------------------------------------------------------
-; Keep track of the chat-state so that the psi-rules can make use of them
+; Keep track of the states
+
+(define input-utterance (Anchor "Input Utterance"))
+(define no-input-utterance (Concept "No Input Utterance"))
+(State input-utterance no-input-utterance)
 
 (define psi-perceive #t)
 (define (psi-perceive-on) (set! psi-perceive #t))
@@ -31,10 +35,10 @@
 (define (psi-chat-off) (set! psi-chat #f))
 (define chat-rule (Concept (string-append (psi-prefix-str) "Chat Rule")))
 
-(define input-utterance (Anchor "Input Utterance"))
-(define no-input-utterance (Concept "No Input Utterance"))
-(State input-utterance no-input-utterance)
+;-------------------------------------------------------------------------------
+; Utilities
 
+(define (get-rules tag) (cog-chase-link 'MemberLink 'ImplicationLink tag))
 (define (chat utt) (State input-utterance (car (nlp-parse utt))) (newline))
 
 ;-------------------------------------------------------------------------------
