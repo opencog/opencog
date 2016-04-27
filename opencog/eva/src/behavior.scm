@@ -1,5 +1,12 @@
 ;
 ; behvaior.scm
+(use-modules (ice-9 format))
+
+
+(add-to-load-path "/usr/local/share/opencog/scm")
+(use-modules (opencog))
+(use-modules (opencog exec))
+(use-modules (opencog openpsi))
 ;
 ; Configurable robot behavior tree, implemented in Atomese.
 ;
@@ -173,6 +180,12 @@
 	(DefinedPredicate "Interaction requested")
 	(SequentialAnd
 		(DefinedPredicate "Someone requests interaction?")
+	))
+
+(DefineLink
+	(DefinedPredicate "Interaction requested action")
+	(SequentialAnd
+;		(DefinedPredicate "Someone requests interaction?")
 		(True (DefinedPredicate "If sleeping then wake"))
 		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "interact with requested person")
@@ -236,6 +249,12 @@
 	(DefinedPredicate "New arrival sequence")
 	(SequentialAnd
 		(DefinedPredicate "Did someone arrive?")
+	))
+
+(DefineLink
+	(DefinedPredicate "New arrival sequence action")
+	(SequentialAnd
+;		(DefinedPredicate "Did someone arrive?")
 		(True (DefinedPredicate "If sleeping then wake"))
 		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "Respond to new arrival")
@@ -247,6 +266,12 @@
 	(DefinedPredicate "Someone left")
 	(SequentialAnd
 		(DefinedPredicate "Did someone leave?")
+	))
+
+(DefineLink
+	(DefinedPredicate "Someone left action")
+	(SequentialAnd
+;		(DefinedPredicate "Did someone leave?")
 		(Put (DefinedPredicate "Publish behavior")
 			(Concept "Someone left"))
 		(Evaluation (GroundedPredicate "scm: print-msg")
@@ -289,6 +314,13 @@
 	(SequentialAnd
 		; True, if there is anyone visible.
 		(DefinedPredicate "Someone visible")
+	))
+
+(DefineLink
+	(DefinedPredicate "Interact with people action")
+	(SequentialAnd
+		; True, if there is anyone visible.
+;		(DefinedPredicate "Someone visible")
 
 		; Say something, if no one else has said anything in a while.
 		; i.e. if are being ignored, then say something.
@@ -483,6 +515,17 @@
 		(SequentialOr
 			(DefinedPredicate "Is bored?")
 			(DefinedPredicate "Is sleeping?")
+		)))
+
+(DefineLink
+	(DefinedPredicate "Nothing is happening action")
+	(SequentialAnd
+
+		; If we are not bored already, and we are not sleeping,
+		; and we didn't hear any noises, then we are bored now...
+		(SequentialOr
+;			(DefinedPredicate "Is bored?")
+;			(DefinedPredicate "Is sleeping?")
 			(SequentialAnd
 				(DefinedPredicate "Heard Something?")
 				(True (Put (DefinedPredicate "Publish behavior")
@@ -555,14 +598,20 @@
 ;; These can be unit-tested by saying
 ;;    rostopic pub --once chat_events std_msgs/String speechstart
 ;;    rostopic pub --once chat_events std_msgs/String speechend
-
-; Things to do, if TTS vocalization just started.
 (DefineLink
 	; owyl "chatbot_speech_start()" method
 	(DefinedPredicate "Speech started?")
 	(SequentialAnd
 		; If the TTS vocalization started (chatbot started talking) ...
 		(DefinedPredicate "chatbot started talking")
+	))
+; Things to do, if TTS vocalization just started.
+(DefineLink
+	; owyl "chatbot_speech_start()" method
+	(DefinedPredicate "Speech started? action")
+	(SequentialAnd
+		; If the TTS vocalization started (chatbot started talking) ...
+;		(DefinedPredicate "chatbot started talking")
 		; ... then switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:conversational_saccade")
 				(ListLink))
@@ -585,6 +634,11 @@
 	(DefinedPredicate "Listening started?")
 	(SequentialAnd
 		(DefinedPredicate "chatbot started listening")
+))
+(DefineLink
+	(DefinedPredicate "Listening started? action")
+	(SequentialAnd
+;		(DefinedPredicate "chatbot started listening")
 		; ... then switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:listening_saccade")
 				(ListLink))
@@ -608,6 +662,13 @@
 	(SequentialAnd
 		; If the chatbot currently talking ...
 		(DefinedPredicate "chatbot is talking")
+	))
+
+(DefineLink
+	(DefinedPredicate "Speech ongoing? action")
+	(SequentialAnd
+		; If the chatbot currently talking ...
+;		(DefinedPredicate "chatbot is talking")
 		; ... then handle the various affect states.
 		(SequentialOr
 			(SequentialAnd
@@ -668,6 +729,12 @@
 	(SequentialAnd
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot stopped talking")
+	))
+(DefineLink
+	(DefinedPredicate "Speech ended? action")
+	(SequentialAnd
+		; If the chatbot stopped talking ...
+;		(DefinedPredicate "chatbot stopped talking")
 
 		; ... then switch back to exploration saccade ...
 		(Evaluation (GroundedPredicate "py:explore_saccade")
@@ -693,6 +760,12 @@
 	(SequentialAnd
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot stopped listening")
+))
+(DefineLink
+	(DefinedPredicate "Listening ended? action")
+	(SequentialAnd
+		; If the chatbot stopped talking ...
+;		(DefinedPredicate "chatbot stopped listening")
 
 		; ... then switch back to exploration saccade ...
 		(Evaluation (GroundedPredicate "py:explore_saccade")
@@ -718,6 +791,13 @@
 	(SequentialAnd
 		; If the chatbot stopped talking ...
 		(DefinedPredicate "chatbot is listening")
+))
+
+(DefineLink
+	(DefinedPredicate "Listening? action")
+	(SequentialAnd
+		; If the chatbot stopped talking ...
+;		(DefinedPredicate "chatbot is listening")
         ; ... show one of the neutral-speech expressions
         (SequentialOr
             (Not (DefinedPredicate "Time to change expression"))
@@ -758,38 +838,92 @@
         ))
 		(TrueLink)
 	))
+;;
+(define (pred-2-schema pnode-str) 
+	(DefineLink 
+		(DefinedSchemaNode pnode-str)
+		(ExecutionOutputLink (GroundedSchemaNode "scm: cog-evaluate!")
+			(ListLink (DefinedPredicateNode pnode-str))
+)))
+;;
+(pred-2-schema "Interaction requested action")
+(pred-2-schema "New arrival sequence action")
+(pred-2-schema "Someone left action")
+(pred-2-schema "Interact with people action")
+(pred-2-schema "Nothing is happening action")
+(pred-2-schema "Speech started? action")
+(pred-2-schema "Speech ongoing? action")
+(pred-2-schema "Speech ended? action")
+(pred-2-schema "Listening started? action")
+(pred-2-schema "Listening? action")
+(pred-2-schema "Listening ended? action")
+(pred-2-schema "Keep alive")
+;;
+;(DefineLink (DefinedPredicateNode "do-noop") (True))
+;(pred-2-schema "do-noop")
+
+(define demand-satisfied (True))
+(define speech-demand-satisfied (True))
+(define face-demand (psi-demand "face interaction" 1))
+(define speech-demand (psi-demand "speech interaction" 1))
+(define run-demand (psi-demand "run demand" 1))
+
+;(psi-rule (list (DefinedPredicate "Interaction requested"))(DefinedSchemaNode "Interaction requested action") demand-satisfied (stv 1 1) face-demand)
+;(psi-rule (list (DefinedPredicate "New arrival sequence")) (DefinedSchemaNode "New arrival sequence action") demand-satisfied (stv 1 1) face-demand)
+;(psi-rule (list (DefinedPredicate "Someone left")) (DefinedSchemaNode "Someone left action") demand-satisfied (stv 1 1) face-demand)
+;(psi-rule (list (DefinedPredicate "Interact with people")) (DefinedSchemaNode "Interact with people action") demand-satisfied (stv 1 1) face-demand)
+;(psi-rule (list (DefinedPredicate "Nothing is happening")) (DefinedSchemaNode "Nothing is happening action") demand-satisfied (stv 1 1) face-demand)
+;(psi-rule (list (DefinedPredicate "Speech started?")) (DefinedSchemaNode "Speech started? action") speech-demand-satisfied (stv 1 1) speech-demand)
+;(psi-rule (list (DefinedPredicate "Speech ongoing?")) (DefinedSchemaNode "Speech ongoing? action") speech-demand-satisfied (stv 1 1) speech-demand)
+;(psi-rule (list (DefinedPredicate "Speech ended?")) (DefinedSchemaNode "Speech ended? action") speech-demand-satisfied (stv 1 1) speech-demand)
+;(psi-rule (list (DefinedPredicate "Skip Interaction?")) (DefinedSchemaNode "Keep alive") speech-demand-satisfied (stv 1 1) speech-demand)
+
+
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "Interaction requested"))(DefinedSchemaNode "Interaction requested action") demand-satisfied (stv 1 1) face-demand)
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "New arrival sequence")) (DefinedSchemaNode "New arrival sequence action") demand-satisfied (stv 1 1) face-demand)
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "Someone left")) (DefinedSchemaNode "Someone left action") demand-satisfied (stv 1 1) face-demand)
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "Interact with people")) (DefinedSchemaNode "Interact with people action") demand-satisfied (stv 1 1) face-demand)
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "Nothing is happening")) (DefinedSchemaNode "Nothing is happening action") demand-satisfied (stv 1 1) face-demand)
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "Speech started?")) (DefinedSchemaNode "Speech started? action") speech-demand-satisfied (stv 1 1) speech-demand)
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "Speech ongoing?")) (DefinedSchemaNode "Speech ongoing? action") speech-demand-satisfied (stv 1 1) speech-demand)
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "Speech ended?")) (DefinedSchemaNode "Speech ended? action") speech-demand-satisfied (stv 1 1) speech-demand)
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "Listening started?")) (DefinedSchemaNode "Listening started? action") speech-demand-satisfied (stv 1 1) speech-demand)
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "Listening?")) (DefinedSchemaNode "Listening? action") speech-demand-satisfied (stv 1 1) speech-demand)
+(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) (DefinedPredicate "Listening ended?")) (DefinedSchemaNode "Listening ended? action") speech-demand-satisfied (stv 1 1) speech-demand)
+
+(psi-rule (list (DefinedPredicate "Skip Interaction?")) (DefinedSchemaNode "Keep alive") speech-demand-satisfied (stv 1 1) speech-demand)
 ;; ------------------------------------------------------------------
 ;; Main loop. Uses tail recursion optimization to form the loop.
 (DefineLink
 	(DefinedPredicate "main loop")
 	(SatisfactionLink
 		(SequentialAnd
-			(SequentialOr
-			    (DefinedPredicate "Skip Interaction?")
-				(DefinedPredicate "Interaction requested")
-				(DefinedPredicate "New arrival sequence")
-				(DefinedPredicate "Someone left")
-				(DefinedPredicate "Interact with people")
-				(DefinedPredicate "Nothing is happening")
-				(True))
+;			(SequentialOr
+;			    (DefinedPredicate "Skip Interaction?")
+;				(DefinedPredicate "Interaction requested")
+;				(DefinedPredicate "New arrival sequence")
+;				(DefinedPredicate "Someone left")
+;				(DefinedPredicate "Interact with people")
+;				(DefinedPredicate "Nothing is happening")
+;				(True))
 
-			;; XXX FIXME chatbot is disengaged from everything else.
-			;; The room can be empty, the head is bored or even asleep,
-			;; but the chatbot is still smiling and yabbering.
-			;; If interaction is turned-off need keep alive gestures
-			(SequentialOr
-				(DefinedPredicate "Speech started?")
-				(DefinedPredicate "Speech ongoing?")
-				(DefinedPredicate "Speech ended?")
-				(DefinedPredicate "Listening started?")
-				(DefinedPredicate "Listening?")
-				(DefinedPredicate "Listening ended?")
-				(SequentialAnd
-				    (DefinedPredicate "Skip Interaction?")
-				    (DefinedPredicate "Keep alive")
-				)
-				(True)
-			)
+;			;; XXX FIXME chatbot is disengaged from everything else.
+;			;; The room can be empty, the head is bored or even asleep,
+;			;; but the chatbot is still smiling and yabbering.
+;			;; If interaction is turned-off need keep alive gestures
+;			(SequentialOr
+;				(DefinedPredicate "Speech started?")
+;				(DefinedPredicate "Speech ongoing?")
+;				(DefinedPredicate "Speech ended?")
+;				(DefinedPredicate "Listening started?")
+;				(DefinedPredicate "Listening?")
+;				(DefinedPredicate "Listening ended?")
+;				(SequentialAnd
+;				    (DefinedPredicate "Skip Interaction?")
+;				    (DefinedPredicate "Keep alive")
+;				)
+;				(True)
+;			)
 
 			; If ROS is dead, or the continue flag not set, then stop
 			; running the behavior loop.
