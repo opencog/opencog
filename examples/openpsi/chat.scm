@@ -2,13 +2,21 @@
 ; This is a simple example of how an OpenPsi driven dialogue system may look like
 
 ; Steps to run:
-; 1. (add-to-load-path "/absolute/path/to/opencog/opencog")
-;    e.g. (add-to-load-path "/opencog/opencog")
-; 2. (load "../examples/openpsi/chat.scm")
-; 3. Use (chat) function to talk to it
-;    e.g. (chat "Are you conscious?")
+; 1. Load this example, e.g.
+;    (load "../examples/openpsi/chat.scm")
+; 2. Use (chat) function to talk to it, e.g.
+;    (chat "Are you conscious?")
 
-(load-from-path "../opencog/openpsi/main.scm")
+(use-modules (opencog)
+             (opencog nlp)
+             (opencog nlp relex2logic)
+             (opencog nlp fuzzy)
+             (opencog nlp chatbot)
+             (opencog exec)
+             (opencog openpsi))
+
+(load-r2l-rulebase)
+(set! relex-server-host "172.17.0.2")
 
 ;-------------------------------------------------------------------------------
 ; Keep track of the chat-state so that the psi-rules can make use of them
