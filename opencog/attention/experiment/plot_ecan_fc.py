@@ -19,24 +19,31 @@ def plot2():
     rect.set_facecolor('white')
 
     x_sm = np.array(xval).astype(np.float)
-    print x_sm
     y_sm = np.array(yval[0]).astype(np.float)
-    print y_sm
-    x_smooth = np.linspace(x_sm.min(), x_sm.max(), 200)
+    
+    x_smooth = np.linspace(x_sm.min(), x_sm.max(), 1000)
     y_smooth1 = spline(np.array(xval,dtype=float), np.array(yval[0],dtype=float), x_smooth)
     y_smooth2 = spline(np.array(xval,dtype=float), np.array(yval[1],dtype=float), x_smooth)
     y_smooth3 = spline(np.array(xval,dtype=float), np.array(yval[2],dtype=float), x_smooth)
     y_smooth4 = spline(np.array(xval,dtype=float), np.array(yval[3],dtype=float), x_smooth)
+    
     # Placing the plot1 on 1x1 matrix, at pos 1
     sp1 = canvas.add_subplot(1,1,1, axisbg='w')
-    #sp1.plot(x, y, 'red', linewidth=2)
-    sp1.plot(x_smooth, y_smooth1, 'r', linewidth=1)
-    sp1.plot(x_smooth, y_smooth2, 'b', linewidth=1)
-    sp1.plot(x_smooth, y_smooth3, 'g', linewidth=1)
-    sp1.plot(x_smooth, y_smooth4, 'y', linewidth=1)
+    
+    sp1.plot(x_smooth, y_smooth1, 'r', linewidth=1,label="Anna") #Anna
+    sp1.plot(x_smooth, y_smooth2, 'b', linewidth=1,label="Bob") #Bob
+    sp1.plot(x_smooth, y_smooth3, 'g', linewidth=1,label="Edward") #Edward
+    sp1.plot(x_smooth, y_smooth4, 'y', linewidth=1,label="Frank") #Frank
+    
     # Colorcode the tick tabs 
     sp1.tick_params(axis='x', colors='gray')
     sp1.tick_params(axis='y', colors='gray')
+    
+    #legend
+    sp1.legend()
+    #handles, labels = sp1.get_legend_handles_labels()
+    #lgd = sp1.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5,-0.1))
+    #lgd = sp1.legend(handles, labels, bbox_to_anchor=(0.5,-0.1))
 
     # Colorcode the spine of the graph
     sp1.spines['bottom'].set_color('black')
