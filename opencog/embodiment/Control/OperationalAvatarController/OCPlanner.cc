@@ -1009,11 +1009,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                     cout << "Trying this new rule...\nAction name: " << minedNewRule->actionName <<"\nNext, try to ground all the parameters for this action..." << std::endl;
 
-                    // next, try to ground all the required parameters for this action
+                    // next, try to bind all the required parameters for this action
                     map<string, MinedParamStruct>::iterator paramIt = minedNewRule->paramToMinedStruct.begin();
                     for (; paramIt != minedNewRule->paramToMinedStruct.end(); paramIt ++) // for each param
                     {
-                        cout << "Grounding parameter: " << paramIt->first << std::endl;
+                        cout << "Binding parameter: " << paramIt->first << std::endl;
                         MinedParamStruct& minedParamStruct = paramIt->second;
                         HandleSeq rulePattern = minedParamStruct.paramPrioPattern;
                         // the last link of each returned pattern is the variable ListLink
@@ -1068,14 +1068,32 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                         }
 
-                        // added the intrinsic Undistinguishing Property Links to the pattern
+                        // Bind all the vars can be ground with varToValueMap
+                        HandleSeq boundPattern = bindKnownVariablesForLinks(rulePattern, varToValueMap);
+
+                        cout << "pattern after bind all known variables :\n";
+                        for(Handle link : boundPattern)
+                        {
+                            cout << atomSpace->atomAsString(link) << std::endl;
+                        }
+
+                        // Add the intrinsic Undistinguishing Property Links to the pattern
                         // e.g.
 //                        (EvaluationLink )
 //                          (PredicateNode class)
 //                          (ListLink )
 //                            (VariableNode $var_1)
 //                            (VariableNode key)
+                        for(Handle iulink : minedParamStruct.intrinsicUndistinguishingPropertyLinks)
+                            boundPattern.push_back(iulink);
 
+                        cout << "pattern after added intrinsic Undistinguishing Property Links :\n";
+                        for(Handle link : boundPattern)
+                        {
+                            cout << atomSpace->atomAsString(link) << std::endl;
+                        }
+
+                        // run pattern matcher to find candidates
 
                     }
                 }
@@ -4196,6 +4214,58 @@ void OCPlanner::outputRuleNodeStep(RuleNode* ruleNode, bool outputForwardStateNo
 
     cout << " Rule node dept = " << lastedStateNode->depth ;
 }
+
+void OCPlanner::bindVariablesForOneLink(Handle link, map<Handle,Handle>& varToValueMap, HandleSeq& bindOutgoingLinks)
+{
+
+    HandleSeq outgoingLinks = atomSpace->getOutgoing(link);
+
+    for (Handle h : outgoingLinks)
+    {
+
+        if (atomSpace->isNode(h))
+        {
+
+           if (varToValueMap.find(h) != varToValueMap.end())
+           {
+               bindOutgoingLinks.push_back(varToValueMap[h]);
+           }
+           else
+           {
+               bindOutgoingLinks.push_back(h);
+           }
+
+        }
+        else
+        {
+             HandleSeq _bindOutgoingLinks;
+             bindVariablesForOneLink(h, varToValueMap, _bindOutgoingLinks);
+             Handle reLink = atomSpace->addLink(atomSpace->getType(h),_bindOutgoingLinks);
+             reLink->merge(TruthValue::TRUE_TV());
+             bindOutgoingLinks.push_back(reLink);
+        }
+
+    }
+
+}
+
+vector<Handle> OCPlanner::bindKnownVariablesForLinks(vector<Handle>& handles, map<Handle,Handle>& varToValueMap)
+{
+
+    vector<Handle> rebindedPattern;
+
+    for (Handle link : handles)
+    {
+        HandleSeq bindOutgoingLinks;
+        bindVariablesForOneLink(link, varToValueMap, bindOutgoingLinks);
+        Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),bindOutgoingLinks);
+        rebindedLink->merge(TruthValue::TRUE_TV());
+        rebindedPattern.push_back(rebindedLink);
+    }
+
+    return rebindedPattern;
+}
+
 
 // a bunch of rules for test, load from c++ codes
 void OCPlanner::loadTestRulesFromCodes()
