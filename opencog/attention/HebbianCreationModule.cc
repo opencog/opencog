@@ -146,10 +146,18 @@ void HebbianCreationModule::addHebbian(Handle atom,Handle source)
 
 float HebbianCreationModule::targetConjunction(Handle handle1,Handle handle2)
 {
-    auto normsti_i = as->get_normalised_STI(handle1,true,true);
-    auto normsti_j = as->get_normalised_STI(handle2,true,true);
-    float conj = std::max(-1.0f,min(1.0f,normsti_i * normsti_j));
-    conj = conj + 1 / 2;
+  //auto normsti_i = as->get_normalised_STI(handle1,true,true);
+  //auto normsti_j = as->get_normalised_STI(handle2,true,true);
+  //float conj = (normsti_i * normsti_j);
+    auto normsti_i = as->get_normalised_zero_to_one_STI(handle1,true,true);
+    auto normsti_j = as->get_normalised_zero_to_one_STI(handle2,true,true);
+    float conj = (normsti_i * normsti_j)+ (normsti_j - normsti_i) * std::abs(normsti_j -normsti_i);
+
+    conj = conj / 2.0f;
+    conj = (conj + 1.0f) / 2.0f;
+
+
+    //printf("normsti_i: %f   normsti_j: %f   conj: %f    nconj: %f \n",normsti_i,normsti_j,conj,nconj);
 
     return conj;
 }

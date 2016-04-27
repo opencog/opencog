@@ -12,9 +12,9 @@
 #include <opencog/attention/experiment/ExperimentSetupModule.h>
 #include <opencog/attention/experiment/SentenceGenStimulateAgent.h>
 #include <opencog/attention/atom_types.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/nlp/types/atom_types.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/util/Config.h>
 
@@ -43,23 +43,6 @@ SentenceGenStimulateAgent::~SentenceGenStimulateAgent()
 SentenceGenStimulateAgent::SentenceGenStimulateAgent(CogServer& cs) :
         Agent(cs), _as(cs.getAtomSpace())
 {
-  //STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
-  //LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_RENT");
-
-  //targetSTI = config().get_int("STARTING_STI_FUNDS");
-  //stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
-  //targetLTI = config().get_int("STARTING_LTI_FUNDS");
-  //ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
-
-
-    STIAtomWage = 100;
-    LTIAtomWage = 100;
-
-    targetSTI = 10000;
-    stiFundsBuffer = 10000;
-    targetLTI = 10000;
-    ltiFundsBuffer = 10000;
-
     _scm_eval = new SchemeEval(&_as);
 }
 
@@ -119,7 +102,7 @@ void SentenceGenStimulateAgent::generate_stimuate_sentence(void)
     HandleSeq hwords;
     HandleSeq hword_instances;
 
-    if (cycle % special_word_occurence_period == 0 && cycle > 10) {
+    if (cycle % special_word_occurence_period == 0 && cycle > 100) {
         //Two random special words from each half
         int sw1 = rand() % (sw_end / 2);
         hwords.push_back(
@@ -227,9 +210,9 @@ void SentenceGenStimulateAgent::generate_stimuate_sentence(void)
 
     //Stimulate atoms. TODO change stimulus values.
     for (Handle h : hwords)
-        localStimulateAtom(h,2);
+        stimulateAtom(h,2);
     for (Handle h : hword_instances)
-        localStimulateAtom(h,0.5);
+        stimulateAtom(h,0.5);
     //stimulateAtom(hwords, 20);
     //stimulateAtom(hword_instances, 20);
     fprintf(stdout,"stifunds: %d \n",_as.get_STI_funds());
@@ -239,46 +222,4 @@ void SentenceGenStimulateAgent::generate_stimuate_sentence(void)
     //Push sentence nodes
     sent_wordnodes.push_back(hwords);
     wordinstancenodes.push_back(hword_instances);
-}
-
-
-void SentenceGenStimulateAgent::hebbianUpdatingUpdate(Handle source)
-{
-    float tcDecayRate = 0.3f;
-    float tc, old_tc, new_tc;
-
-    IncomingSet links = source->getIncomingSetByType(ASYMMETRIC_HEBBIAN_LINK);
-
-    for (LinkPtr h : links) {
-        if (source != h->getOutgoingAtom(0))
-            continue;
-        HandleSeq outgoing = h->getOutgoingSet();
-        new_tc = targetConjunction(outgoing);
-
-        // old link strength decays
-        TruthValuePtr oldtv  = h->getTruthValue();
-        old_tc = oldtv->getMean();
-        tc = tcDecayRate * new_tc + (1.0f - tcDecayRate) * old_tc;
-
-        //update truth value accordingly
-        TruthValuePtr newtv(SimpleTruthValue::createTV(tc, 1));
-        h->merge(newtv);
-    }
-    //h->setTruthValue(SimpleTruthValue::createTV(tc, 1));
-}
-
-float SentenceGenStimulateAgent::targetConjunction(HandleSeq handles)
-{
-    if (handles.size() != 2) {
-        throw RuntimeException(
-                TRACE_INFO,
-                "Size of outgoing set of a hebbian link must be 2.");
-    }
-    //XXX: Should this be normalised to 0->1 Range
-    auto normsti_i = _as.get_normalised_STI(handles[0],true,true);
-    auto normsti_j = _as.get_normalised_STI(handles[1],true,true);
-    float conj = std::max(-1.0f,std::min(1.0f,normsti_i * normsti_j));
-    conj = conj + 1 / 2;
-
-    return conj;
 }

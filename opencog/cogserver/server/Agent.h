@@ -117,6 +117,8 @@ private:
 protected:
     CogServer& _cogserver;
 
+    AtomSpace* as;
+
     /** Note: AttentionValue itself is read-only, so no need to protect, but
      * the pointer needs and is protected */
     AttentionValuePtr _attentionValue;
@@ -154,6 +156,15 @@ protected:
 
     /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(AtomPtr);
+
+    AttentionValue::sti_t STIAtomWage;
+    AttentionValue::lti_t LTIAtomWage;
+
+    AttentionValue::sti_t targetSTI;
+    AttentionValue::lti_t targetLTI;
+
+    AttentionValue::sti_t stiFundsBuffer;
+    AttentionValue::lti_t ltiFundsBuffer;
 
 public:
 
@@ -202,7 +213,8 @@ public:
      * @param amount of stimulus to give.
      * @return total stimulus given since last reset.
      */
-    stim_t stimulateAtom(Handle h, stim_t amount);
+    //stim_t stimulateAtom(Handle h, stim_t amount);
+    void stimulateAtom(Handle h, float amount);
 
     /**
      * Stimulate all atoms in HandleSeq evenly with a given amount of stimulus.
@@ -211,14 +223,14 @@ public:
      * @param amount amount of stimulus to share.
      * @return remainder stimulus after equal spread between atoms.
      */
-    stim_t stimulateAtom(HandleSeq hs, stim_t amount);
+    //stim_t stimulateAtom(HandleSeq hs, stim_t amount);
 
     /**
      * Remove stimulus from a Handle's atom.
      *
      * @param atom handle
      */
-    void removeAtomStimulus(Handle h);
+    //void removeAtomStimulus(Handle h);
 
     /**
      * Reset stimulus.
@@ -226,14 +238,14 @@ public:
      * @return new stimulus since reset, usually zero unless another
      * thread adds more.
      */
-    stim_t resetStimulus();
+    //stim_t resetStimulus();
 
     /**
      * Get total stimulus.
      *
      * @return total stimulus since last reset.
      */
-    stim_t getTotalStimulus() const;
+    //stim_t getTotalStimulus() const;
 
     /**
      * Get stimulus for Atom.
@@ -241,7 +253,12 @@ public:
      * @param h handle of atom to get stimulus for.
      * @return total stimulus since last reset.
      */
-    stim_t getAtomStimulus(Handle h) const;
+    //stim_t getAtomStimulus(Handle h) const;
+
+    AttentionValue::sti_t calculate_STI_Wage();
+    AttentionValue::lti_t calculate_LTI_Wage();
+    void updateHebbianLinks(Handle source);
+    float targetConjunction(HandleSeq handles);
 
     AttentionValuePtr getAV()
     {

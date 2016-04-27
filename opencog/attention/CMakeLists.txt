@@ -32,13 +32,13 @@ TARGET_LINK_LIBRARIES(attention-types
 ADD_LIBRARY(attention SHARED
 	AttentionModule
 	ForgettingAgent
-	HebbianUpdatingAgent
-	SimpleHebbianUpdatingAgent
-	ImportanceSpreadingAgent
-	ImportanceDiffusionAgent
+    #HebbianUpdatingAgent
+    #SimpleHebbianUpdatingAgent
+    #ImportanceSpreadingAgent
+    #ImportanceDiffusionAgent
     StochasticImportanceDiffusionAgent
-	SimpleImportanceDiffusionAgent
-	ImportanceUpdatingAgent
+    #SimpleImportanceDiffusionAgent
+    #ImportanceUpdatingAgent
     StochasticImportanceUpdatingAgent
     MinMaxSTIUpdatingAgent
 )
@@ -82,12 +82,12 @@ INSTALL (FILES
 	AttentionModule.h
 	ForgettingAgent.h
 	HebbianCreationModule.h
-	HebbianUpdatingAgent.h
-	ImportanceSpreadingAgent.h
-	ImportanceDiffusionAgent.h
-	SpreadDecider.h
-	SimpleImportanceDiffusionAgent.h
-	ImportanceUpdatingAgent.h
+    #HebbianUpdatingAgent.h
+    #ImportanceSpreadingAgent.h
+    #ImportanceDiffusionAgent.h
+    #SpreadDecider.h
+    #SimpleImportanceDiffusionAgent.h
+    #ImportanceUpdatingAgent.h
     StochasticImportanceDiffusionAgent.h
     StochasticImportanceUpdatingAgent.h
     MinMaxSTIUpdatingAgent.h

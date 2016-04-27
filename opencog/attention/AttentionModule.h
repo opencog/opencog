@@ -26,12 +26,12 @@
 #define _OPENCOG_ATTENTION_MODULE_H
 
 #include <opencog/attention/ForgettingAgent.h>
-#include <opencog/attention/HebbianUpdatingAgent.h>
-#include <opencog/attention/SimpleHebbianUpdatingAgent.h>
-#include <opencog/attention/ImportanceSpreadingAgent.h>
-#include <opencog/attention/ImportanceDiffusionAgent.h>
-#include <opencog/attention/SimpleImportanceDiffusionAgent.h>
-#include <opencog/attention/ImportanceUpdatingAgent.h>
+//#include <opencog/attention/HebbianUpdatingAgent.h>
+//#include <opencog/attention/SimpleHebbianUpdatingAgent.h>
+//#include <opencog/attention/ImportanceSpreadingAgent.h>
+//#include <opencog/attention/ImportanceDiffusionAgent.h>
+//#include <opencog/attention/SimpleImportanceDiffusionAgent.h>
+//#include <opencog/attention/ImportanceUpdatingAgent.h>
 #include <opencog/attention/StochasticImportanceDiffusionAgent.h>
 #include <opencog/attention/StochasticImportanceUpdatingAgent.h>
 #include <opencog/attention/MinMaxSTIUpdatingAgent.h>
@@ -49,14 +49,14 @@ class AttentionModule : public Module
 
 private:
     Factory<ForgettingAgent, Agent>          forgettingFactory;
-    Factory<HebbianUpdatingAgent, Agent>     hebbianFactory;
-    Factory<SimpleHebbianUpdatingAgent, Agent>     simpleHebbianFactory;
-    Factory<ImportanceSpreadingAgent, Agent> spreadingFactory;
-#ifdef HAVE_GSL
-    Factory<ImportanceDiffusionAgent, Agent> diffusionFactory;
-#endif
-    Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
-    Factory<SimpleImportanceDiffusionAgent, Agent> simpleDiffusionFactory;
+  //Factory<HebbianUpdatingAgent, Agent>     hebbianFactory;
+  //Factory<SimpleHebbianUpdatingAgent, Agent>     simpleHebbianFactory;
+  //Factory<ImportanceSpreadingAgent, Agent> spreadingFactory;
+//#ifndef HAVE_GSL
+  //Factory<ImportanceDiffusionAgent, Agent> diffusionFactory;
+//#endif
+  //Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
+  //Factory<SimpleImportanceDiffusionAgent, Agent> simpleDiffusionFactory;
     Factory<StochasticImportanceDiffusionAgent, Agent> stochasticDiffusionFactory;
     Factory<StochasticImportanceUpdatingAgent, Agent> stochasticUpdatingFactory;
     Factory<MinMaxSTIUpdatingAgent, Agent> minMaxSTIUpdatingFactory;

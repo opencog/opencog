@@ -36,14 +36,14 @@ AttentionModule::AttentionModule(CogServer& cs) :
     Module(cs)
 {
     _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
-    _cogserver.registerAgent(HebbianUpdatingAgent::info().id,     &hebbianFactory);
-    _cogserver.registerAgent(SimpleHebbianUpdatingAgent::info().id,     &simpleHebbianFactory);
-#ifdef HAVE_GSL
-    _cogserver.registerAgent(ImportanceDiffusionAgent::info().id, &diffusionFactory);
-#endif
-    _cogserver.registerAgent(ImportanceSpreadingAgent::info().id, &spreadingFactory);
-    _cogserver.registerAgent(ImportanceUpdatingAgent::info().id,  &updatingFactory);
-    _cogserver.registerAgent(SimpleImportanceDiffusionAgent::info().id, &simpleDiffusionFactory);
+  //_cogserver.registerAgent(HebbianUpdatingAgent::info().id,     &hebbianFactory);
+  //_cogserver.registerAgent(SimpleHebbianUpdatingAgent::info().id,     &simpleHebbianFactory);
+//#ifdef HAVE_GSL
+  //_cogserver.registerAgent(ImportanceDiffusionAgent::info().id, &diffusionFactory);
+//#endif
+  //_cogserver.registerAgent(ImportanceSpreadingAgent::info().id, &spreadingFactory);
+  //_cogserver.registerAgent(ImportanceUpdatingAgent::info().id,  &updatingFactory);
+  //_cogserver.registerAgent(SimpleImportanceDiffusionAgent::info().id, &simpleDiffusionFactory);
     _cogserver.registerAgent(StochasticImportanceDiffusionAgent::info().id,&stochasticDiffusionFactory);
     _cogserver.registerAgent(StochasticImportanceUpdatingAgent::info().id,&stochasticUpdatingFactory);
     _cogserver.registerAgent(MinMaxSTIUpdatingAgent::info().id,&minMaxSTIUpdatingFactory);
@@ -53,13 +53,13 @@ AttentionModule::~AttentionModule()
 {
     logger().debug("[AttentionModule] enter destructor");
     _cogserver.unregisterAgent(ForgettingAgent::info().id);
-    _cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
-    _cogserver.unregisterAgent(ImportanceSpreadingAgent::info().id);
-#ifdef HAVE_GSL
-    _cogserver.unregisterAgent(ImportanceDiffusionAgent::info().id);
-#endif
-    _cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
-    _cogserver.unregisterAgent(SimpleImportanceDiffusionAgent::info().id);
+  //_cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
+  //_cogserver.unregisterAgent(ImportanceSpreadingAgent::info().id);
+//#ifdef HAVE_GSL
+//    _cogserver.unregisterAgent(ImportanceDiffusionAgent::info().id);
+//#endif
+  //_cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
+  //_cogserver.unregisterAgent(SimpleImportanceDiffusionAgent::info().id);
     _cogserver.unregisterAgent(StochasticImportanceDiffusionAgent::info().id);
     _cogserver.unregisterAgent(StochasticImportanceUpdatingAgent::info().id);
     _cogserver.unregisterAgent(MinMaxSTIUpdatingAgent::info().id);

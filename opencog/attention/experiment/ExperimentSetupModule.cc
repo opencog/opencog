@@ -13,9 +13,9 @@
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/attention/ForgettingAgent.h>
-#include <opencog/attention/ImportanceUpdatingAgent.h>
-#include <opencog/attention/SimpleHebbianUpdatingAgent.h>
-#include <opencog/attention/SimpleImportanceDiffusionAgent.h>
+//include <opencog/attention/ImportanceUpdatingAgent.h>
+//include <opencog/attention/SimpleHebbianUpdatingAgent.h>
+//include <opencog/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/attention/StochasticImportanceDiffusionAgent.h>
 #include <opencog/attention/StochasticImportanceUpdatingAgent.h>
 #include <opencog/attention/MinMaxSTIUpdatingAgent.h>
@@ -171,14 +171,14 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
 {
     //These mind agents have already been made registered by the attention module.So no need to register them.
     _forgetting_agentptr = _cs.createAgent(ForgettingAgent::info().id, false);
-    _hebbianupdating_agentptr = _cs.createAgent(
-            SimpleHebbianUpdatingAgent::info().id,
-            false);
+  //_hebbianupdating_agentptr = _cs.createAgent(
+  //        SimpleHebbianUpdatingAgent::info().id,
+  //        false);
     _importanceupdating_agentptr = _cs.createAgent(
           //ImportanceUpdatingAgent::info().id, false);
             StochasticImportanceUpdatingAgent::info().id, false);
-    _simpleimportancediffusion_agentptr = _cs.createAgent(
-            SimpleImportanceDiffusionAgent::info().id, false);
+  //_simpleimportancediffusion_agentptr = _cs.createAgent(
+  //        SimpleImportanceDiffusionAgent::info().id, false);
     _stochasticimportancediffusion_agentptr = _cs.createAgent(
             StochasticImportanceDiffusionAgent::info().id,false);
     _minmaxstiupdating_agentptr = _cs.createAgent(

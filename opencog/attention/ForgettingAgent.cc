@@ -55,7 +55,7 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
 
 
     //Todo: Make configurable
-    maxSize = 20000;
+    maxSize = 50000;
     accDivSize = 100;
 
     // Provide a logger, but disable it initially
