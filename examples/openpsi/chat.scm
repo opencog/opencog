@@ -22,8 +22,8 @@
 ; Keep track of the chat-state so that the psi-rules can make use of them
 
 (define chat-rule (Concept "OpenPsi: Chat Rule"))
-(define no-input-utterance (Concept "No Input Utterance"))
 (define input-utterance (Anchor "Input Utterance"))
+(define no-input-utterance (Concept "No Input Utterance"))
 (State input-utterance no-input-utterance)
 (define (chat utt) (State input-utterance (car (nlp-parse utt))) (newline))
 
@@ -136,12 +136,12 @@
 
 ;----------
 ; Input: Are you conscious?
-; Output: I'm as conscious as you are, meat machine!
 
 (define in_utt (nlp-parse "Are you conscious?"))
 (define out_utt_1 (nlp-parse "I'm as conscious as you are, meat machine!"))
 (define out_utt_2 (nlp-parse "Yes I am."))
 (define out_utt_3 (nlp-parse "What do you think?"))
+(define out_utt_4 (nlp-parse "Of course."))
 (Member
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
@@ -156,8 +156,8 @@
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm:say") (List out_utt_2))
-        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "100")))
-        (stv 1 1)
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "90")))
+        (stv .9 1)
         sociality
     )
     chat-rule
@@ -166,8 +166,18 @@
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm:say") (List out_utt_3))
-        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "100")))
-        (stv 1 1)
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "80")))
+        (stv .8 1)
+        sociality
+    )
+    chat-rule
+)
+(Member
+    (psi-rule
+        (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
+        (ExecutionOutput (GroundedSchema "scm:say") (List out_utt_4))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "90")))
+        (stv .9 1)
         sociality
     )
     chat-rule
