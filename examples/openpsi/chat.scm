@@ -21,7 +21,7 @@
 ;-------------------------------------------------------------------------------
 ; Keep track of the chat-state so that the psi-rules can make use of them
 
-(define chat-rule (Concept "OpenPsi: Chat Rule"))
+(define chat-rule (Concept (string-append (psi-prefix-str) "Chat Rule")))
 (define input-utterance (Anchor "Input Utterance"))
 (define no-input-utterance (Concept "No Input Utterance"))
 (State input-utterance no-input-utterance)
@@ -79,16 +79,10 @@
     )
 )
 
-(Define
-    (DefinedSchema "psi-action-selector-chat")
-    (ExecutionOutput
-        (GroundedSchema "scm: psi-action-selector-chat")
-        (List)
-    )
-)
-
-(define dsn (DefinedSchema "psi-action-selector-chat"))
-(psi-action-selector-set! dsn)
+(psi-action-selector-set!
+    (psi-add-action-selector
+        (ExecutionOutput (GroundedSchema "scm: psi-action-selector-chat") (List))
+        "chat"))
 
 ;-------------------------------------------------------------------------------
 ; Scheme functions that will be called by the rules
