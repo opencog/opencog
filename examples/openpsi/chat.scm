@@ -1,12 +1,6 @@
 ; Copyright (C) 2016 OpenCog Foundation
 ; This is a simple example of how an OpenPsi driven dialogue system may look like
 
-; Steps to run:
-; 1. Load this example, e.g.
-;    (load "../examples/openpsi/chat.scm")
-; 2. Use (chat) function to talk to it, e.g.
-;    (chat "Are you conscious?")
-
 (use-modules (opencog)
              (opencog nlp)
              (opencog nlp relex2logic)
@@ -19,17 +13,30 @@
 (set! relex-server-host "172.17.0.2")
 
 ;-------------------------------------------------------------------------------
+; Steps to run:
+; 1. Make sure the above relex-server-host is set correctly
+; 2. Load this example in Guile, e.g.
+;    (load "../examples/openpsi/chat.scm")
+; 3. Use (chat) function to talk to it, e.g.
+;    (chat "Are you conscious?")
+
+;-------------------------------------------------------------------------------
 ; Keep track of the states
 
 (define input-utterance (Anchor "Input Utterance"))
 (define no-input-utterance (Concept "No Input Utterance"))
 (State input-utterance no-input-utterance)
 
+;-------------------------------------------------------------------------------
+; Types of rules we have
+
+; Should always on
 (define psi-perception #t)
 (define (psi-perception-on) (set! psi-perception #t))
 (define (psi-perception-off) (set! psi-perception #f))
 (define perception-rule (Concept (string-append (psi-prefix-str) "Perception Rule")))
 
+; On mostly when someone talks to the robot
 (define psi-chat #f)
 (define (psi-chat-on) (set! psi-chat #t))
 (define (psi-chat-off) (set! psi-chat #f))
@@ -45,6 +52,7 @@
 ; Define the demands with their default values
 
 (define sociality (psi-demand "Sociality" .8))
+(define humor (psi-demand "Humor" .5))
 
 ;-------------------------------------------------------------------------------
 ; Define and set an action selector
@@ -70,20 +78,25 @@
                     (lambda (r)
                         (let ((score (tv-mean (psi-satisfiable? r))))
                             (if (> score max-score)
-                                (begin (set! max-score score) (set! best-matches (list r)))
+                                (begin
+                                    (set! max-score score)
+                                    (set! best-matches (list r))
+                                )
                             )
                             (if (= score max-score)
                                 (append! best-matches (list r))
                             )
                         )
                     )
+                    ; TODO: Need to reduce the search space
                     (get-rules chat-rule)
                 )
 
-                ; TODO: Do this later?
                 (psi-chat-off)
 
-                ; Randomly pick one if there are more than one
+                ; Randomly pick one of them
+                ; TODO: Should have a higher probability to pick the one
+                ;       that can satisfy most of the demands, or something similar?
                 (if (> (length best-matches) 0)
                     (set! satisfied-rules (append satisfied-rules
                         (list (list-ref best-matches (random (length best-matches))))))
@@ -159,13 +172,24 @@
 (define out_utt_2 (nlp-parse "Yes I am."))
 (define out_utt_3 (nlp-parse "What do you think?"))
 (define out_utt_4 (nlp-parse "Of course."))
+(define out_utt_5 (nlp-parse "Let me check."))
 (Member
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm:say") (List out_utt_1))
-        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "100")))
-        (stv 1 1)
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "80")))
+        (stv .8 1)
         sociality
+    )
+    chat-rule
+)
+(Member
+    (psi-rule
+        (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
+        (ExecutionOutput (GroundedSchema "scm:say") (List out_utt_1))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List humor (Number "70")))
+        (stv .7 1)
+        humor
     )
     chat-rule
 )
@@ -196,6 +220,26 @@
         (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
         sociality
+    )
+    chat-rule
+)
+(Member
+    (psi-rule
+        (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
+        (ExecutionOutput (GroundedSchema "scm:say") (List out_utt_5))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "75")))
+        (stv .75 1)
+        sociality
+    )
+    chat-rule
+)
+(Member
+    (psi-rule
+        (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match") (List in_utt)))
+        (ExecutionOutput (GroundedSchema "scm:say") (List out_utt_5))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List humor (Number "80")))
+        (stv .8 1)
+        humor
     )
     chat-rule
 )
