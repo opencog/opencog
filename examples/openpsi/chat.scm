@@ -25,12 +25,12 @@
 (define no-input-utterance (Concept "No Input Utterance"))
 (State input-utterance no-input-utterance)
 
-(define psi-perceive #t)
-(define (psi-perceive-on) (set! psi-perceive #t))
-(define (psi-perceive-off) (set! psi-perceive #f))
+(define psi-perception #t)
+(define (psi-perception-on) (set! psi-perception #t))
+(define (psi-perception-off) (set! psi-perception #f))
 (define perception-rule (Concept (string-append (psi-prefix-str) "Perception Rule")))
 
-(define psi-chat #t)
+(define psi-chat #f)
 (define (psi-chat-on) (set! psi-chat #t))
 (define (psi-chat-off) (set! psi-chat #f))
 (define chat-rule (Concept (string-append (psi-prefix-str) "Chat Rule")))
@@ -50,45 +50,51 @@
 ; Define and set an action selector
 
 (define (psi-action-selector-chat)
-    (define (is-chat-rule? rule)
-        (let ((nodes (cog-chase-link 'MemberLink 'ConceptNode rule)))
-            (if (member chat-rule nodes)
-                #t
-                #f
-            ))
-    )
-    (let* ((max-score .5)
-           (best-matches '())
-           (satisfied-rules '())
-           (all-demands (cog-outgoing-set (psi-get-all-demands)))
-           (all-rules (append-map psi-get-rules all-demands))
-          )
-        (map (lambda (r)
-            (if (is-chat-rule? r)
-                (let ((score (tv-mean (psi-satisfiable? r))))
-                    (if (> score max-score)
-                        (begin (set! max-score score) (set! best-matches (list r)))
-                    )
-                    (if (= score max-score)
-                        (append! best-matches (list r))
+    (let ((satisfied-rules '()))
+        (if psi-perception
+            (map
+                (lambda (r)
+                    (if (equal? (stv 1 1) (psi-satisfiable? r))
+                        (set! satisfied-rules (append (list r)))
                     )
                 )
-                ; For other types of rules, just check if they are satisfiable
-                ; TODO: Ideally for non-chat rules, they should be handled
-                ;       by the default action selector or other acion selectors
-                ;       already defined in the system
-                (if (equal? (stv 1 1) (psi-satisfiable? r))
-                    (set! satisfied-rules (append satisfied-rules (list r)))
-                )
-            ))
-        all-rules)
+                (get-rules perception-rule)
+            )
+        )
 
-        (if (> (length best-matches) 0)
-            (if (> (length satisfied-rules) 0)
-                (Set (append satisfied-rules (list (list-ref best-matches (random (length best-matches))))))
-                (list-ref best-matches (random (length best-matches)))
-            )            
+        (if psi-chat
+            ; Find the best matches
+            (let ((max-score .5)
+                  (best-matches '()))
+                (map
+                    (lambda (r)
+                        (let ((score (tv-mean (psi-satisfiable? r))))
+                            (if (> score max-score)
+                                (begin (set! max-score score) (set! best-matches (list r)))
+                            )
+                            (if (= score max-score)
+                                (append! best-matches (list r))
+                            )
+                        )
+                    )
+                    (get-rules chat-rule)
+                )
+
+                ; TODO: Do this later?
+                (psi-chat-off)
+
+                ; Randomly pick one if there are more than one
+                (if (> (length best-matches) 0)
+                    (set! satisfied-rules (append satisfied-rules
+                        (list (list-ref best-matches (random (length best-matches))))))
+                )
+            )
+        )
+
+        ; Return all the satisfied rules
+        (if (> (length satisfied-rules) 0)
             (Set satisfied-rules)
+            (Set)
         )
     )
 )
@@ -199,8 +205,11 @@
 
 (Member
     (psi-rule
-        (list (Evaluation (GroundedPredicate "scm:check-demand") (List sociality (Number "0.1"))))
-        (ExecutionOutput (GroundedSchema "scm:say") (List (nlp-parse "Sorry I don't understand.")))
+        (list
+            (Not (Equal (Set no-input-utterance) (Get (State input-utterance (Variable "$x")))))
+            (Evaluation (GroundedPredicate "scm:check-demand") (List sociality (Number "0.1")))
+        )
+        (ExecutionOutput (GroundedSchema "scm:say") (List (nlp-parse "I don't understand.")))
         (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize") (List sociality (Number "100")))
         (stv 1 1)
         sociality
