@@ -31,9 +31,6 @@
 ; Define the demands with their default values
 
 (define sociality (psi-demand "Sociality" .8))
-(define please-user (psi-demand "PleaseUser" .8))
-(define learn-stuff (psi-demand "LearnStuff" .8))
-(define humor (psi-demand "Humor" .8))
 
 ;-------------------------------------------------------------------------------
 ; Define and set an action selector
@@ -136,26 +133,20 @@
     (stv 1 1)
     sociality
 )
-(psi-rule
-    (list (NotLink (EqualLink (SetLink no-new-input-utterance) (GetLink (StateLink new-input-utterance (VariableNode "$x"))))))
-    (ListLink)
-    (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-minimize") (ListLink please-user (NumberNode "10")))
-    (stv 1 1)
-    please-user
-)
 
 ;----------
 ; Input: Are you conscious?
 ; Output: I'm as conscious as you are, meat machine!
 
 (define in_utt (nlp-parse "Are you conscious?"))
-(define out_utt (nlp-parse "I'm as conscious as you are, meat machine!"))
+(define out_utt_1 (nlp-parse "I'm as conscious as you are, meat machine!"))
+(define out_utt_2 (nlp-parse "Yes I am."))
+(define out_utt_3 (nlp-parse "What do you think?"))
 (MemberLink
     (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink sociality (NumberNode "0.6")))
-              (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "30")))
+        (list (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
+        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt_1))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "100")))
         (stv 1 1)
         sociality
     )
@@ -163,39 +154,9 @@
 )
 (MemberLink
     (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink please-user (NumberNode "0.6")))
-              (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink please-user (NumberNode "20")))
-        (stv 1 1)
-        please-user
-    )
-    chat-rule
-)
-(MemberLink
-    (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink humor (NumberNode "0.6")))
-              (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink humor (NumberNode "30")))
-        (stv 1 1)
-        humor
-    )
-    chat-rule
-)
-
-;----------
-; Input: What do you call an alligator in a vest?
-; Output: An Investigator.
-
-(define in_utt (nlp-parse "What do you call an alligator in a vest?"))
-(define out_utt (nlp-parse "An Investigator."))
-(MemberLink
-    (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink sociality (NumberNode "0.6")))
-              (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "30")))
+        (list (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
+        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt_2))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "100")))
         (stv 1 1)
         sociality
     )
@@ -203,81 +164,11 @@
 )
 (MemberLink
     (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink please-user (NumberNode "0.6")))
-              (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink please-user (NumberNode "30")))
-        (stv 1 1)
-        please-user
-    )
-    chat-rule
-)
-(MemberLink
-    (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink humor (NumberNode "0.6")))
-              (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink humor (NumberNode "40")))
-        (stv 1 1)
-        humor
-    )
-    chat-rule
-)
-
-;----------
-; Input: How are you?
-; Output: I am great, thanks.
-
-(define in_utt (nlp-parse "How are you?"))
-(define out_utt (nlp-parse "I am great, thanks."))
-(MemberLink
-    (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink sociality (NumberNode "0.6")))
-              (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "40")))
+        (list (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
+        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt_3))
+        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "100")))
         (stv 1 1)
         sociality
-    )
-    chat-rule
-)
-(MemberLink
-    (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink please-user (NumberNode "0.6")))
-              (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink please-user (NumberNode "20")))
-        (stv 1 1)
-        please-user
-    )
-    chat-rule
-)
-
-;----------
-; Input: There is a monster.
-; Output: What is a monster?
-
-(define in_utt (nlp-parse "There is a monster."))
-(define out_utt (nlp-parse "What is a monster?"))
-(MemberLink
-    (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink sociality (NumberNode "0.6")))
-              (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink sociality (NumberNode "30")))
-        (stv 1 1)
-        sociality
-    )
-    chat-rule
-)
-(MemberLink
-    (psi-rule
-        (list (EvaluationLink (GroundedPredicateNode "scm:check-demand") (ListLink learn-stuff (NumberNode "0.6")))
-              (EvaluationLink (GroundedPredicateNode "scm:do-fuzzy-match") (ListLink in_utt)))
-        (ExecutionOutputLink (GroundedSchemaNode "scm:say") (ListLink out_utt))
-        (EvaluationLink (GroundedPredicateNode "scm:psi-demand-value-maximize") (ListLink learn-stuff (NumberNode "50")))
-        (stv 1 1)
-        learn-stuff
     )
     chat-rule
 )
@@ -295,8 +186,8 @@
     )
     chat-rule
 )
+
 ;-------------------------------------------------------------------------------
 ; Run OpenPsi
 
 (psi-run)
-
