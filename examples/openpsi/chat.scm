@@ -21,10 +21,20 @@
 ;-------------------------------------------------------------------------------
 ; Keep track of the chat-state so that the psi-rules can make use of them
 
+(define psi-perceive #t)
+(define (psi-perceive-on) (set! psi-perceive #t))
+(define (psi-perceive-off) (set! psi-perceive #f))
+(define perception-rule (Concept (string-append (psi-prefix-str) "Perception Rule")))
+
+(define psi-chat #t)
+(define (psi-chat-on) (set! psi-chat #t))
+(define (psi-chat-off) (set! psi-chat #f))
 (define chat-rule (Concept (string-append (psi-prefix-str) "Chat Rule")))
+
 (define input-utterance (Anchor "Input Utterance"))
 (define no-input-utterance (Concept "No Input Utterance"))
 (State input-utterance no-input-utterance)
+
 (define (chat utt) (State input-utterance (car (nlp-parse utt))) (newline))
 
 ;-------------------------------------------------------------------------------
@@ -120,12 +130,15 @@
 ;----------
 ; These rules change the demand values whenever there is an input utterance
 
-(psi-rule
-    (list (Not (Equal (Set no-input-utterance) (Get (State input-utterance (Variable "$x"))))))
-    (List)
-    (Evaluation (GroundedPredicate "scm:psi-demand-value-minimize") (List sociality (Number "10")))
-    (stv 1 1)
-    sociality
+(Member
+    (psi-rule
+        (list (Not (Equal (Set no-input-utterance) (Get (State input-utterance (Variable "$x"))))))
+        (ExecutionOutput (GroundedSchema "scm:psi-chat-on") (List))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-minimize") (List sociality (Number "10")))
+        (stv 1 1)
+        sociality
+    )
+    perception-rule
 )
 
 ;----------
