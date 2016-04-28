@@ -1,4 +1,7 @@
 ;; Print the inference steps leading to this target
+
+;; Just paste the following 2 functions, then paste the steps you
+;; would like to query (only the target queries are given)
 (define (get-target-inference-steps target)
   (let* ((pat (Execution
                  (Variable "$rule")
