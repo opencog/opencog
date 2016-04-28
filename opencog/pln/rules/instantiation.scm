@@ -102,8 +102,6 @@
              (query (GetLink TyVs P))
                                         ; Fetch all possible substitution terms
              (result (cog-execute! query)))
-        (cog-logger-info "Apparently all variables in scope ~a are free in ~a"
-                         TyVs P)
         ;; Select one randomly, but first purge the query to not pollute
         ;; the atomspace
         (extract-hypergraph query)

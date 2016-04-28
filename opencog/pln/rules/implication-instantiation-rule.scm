@@ -181,7 +181,8 @@
                (Qput (PutLink (LambdaLink TyVs Q) terms))
                (Qinst (cog-execute! Qput))
                (Qinst-s (* Impl-s Pinst-s))
-               (Qinst-c (* Impl-c Pinst-c (if (< 0 P-c ) (- 1 P-s) 1))))
+               ;; (Qinst-c (* Impl-c Pinst-c (if (< 0 P-c ) (- 1 P-s) 1))))
+               (Qinst-c (* Impl-c Pinst-c (- 1 P-s))))
           ;; Remove the PutLinks to not pollute the atomspace
           ;; TODO: replace this by something more sensible
           ;; (extract-hypergraph Pput)

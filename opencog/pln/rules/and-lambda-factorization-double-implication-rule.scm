@@ -99,12 +99,18 @@
      and-lambda-factorization-double-implication-rewrite))
 
 (define (and-lambda-factorization-double-implication-formula var a1 a2)
-  (let ((and-lamb (AndLink (LambdaLink var a1) (LambdaLink var a2)))
+  (let* ((and-lamb (AndLink (LambdaLink var a1) (LambdaLink var a2)))
+        (and-lamb-s (cog-stv-strength and-lamb))
+        (and-lamb-c (cog-stv-confidence and-lamb))
         (lamb (LambdaLink var (cog-new-flattened-link 'AndLink a1 a2))))
-    (cog-set-tv! lamb (cog-tv and-lamb))
-    (List
-       (cog-set-tv! (ImplicationLink and-lamb lamb) (stv 1 1))
-       (cog-set-tv! (ImplicationLink lamb and-lamb) (stv 1 1)))))
+    (if (and (< 1e-8 and-lamb-s) (< 1e-8 and-lamb-c))
+        (let ((lamb-s and-lamb-s)
+              (lamb-c and-lamb-c))
+          (cog-merge-hi-conf-tv! lamb (cog-tv and-lamb))
+          (List
+           (cog-set-tv! (ImplicationLink and-lamb lamb) (stv 1 1))
+           (cog-set-tv! (ImplicationLink lamb and-lamb) (stv 1 1))))
+        (cog-undefined-handle))))
 
 ;; Name the rule
 (define and-lambda-factorization-double-implication-rule-name
