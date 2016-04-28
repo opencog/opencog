@@ -43,10 +43,12 @@
 ;; Load rules ;;
 ;;;;;;;;;;;;;;;;
 
-;; Load the rules (use load for relative path w.r.t. to that file)
-(define pln-rules-dir "../../../../opencog/pln/rules/")
-(define (append-rule-dir basename) (string-append pln-rules-dir basename))
-(define rule-basenames
+;; Load the rules. Either w.r.t this file path
+(add-to-load-path "../../../../opencog/pln/rules/")
+;; Or the corresponding unit test
+(add-to-load-path "../../../opencog/pln/rules/")
+
+(define rule-filenames
   (list "implication-instantiation-rule.scm"
         "implication-scope-distribution-rule.scm"
         "and-lambda-distribution-rule.scm"
@@ -59,8 +61,7 @@
         "implication-implicant-disjunction-rule.scm"
         )
   )
-(define rule-files (map append-rule-dir rule-basenames))
-(for-each load rule-files)
+(for-each load-from-path rule-filenames)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Associate rules to PLN ;;
