@@ -103,7 +103,7 @@
                 )
             )
         )
-
+;(if (> (length satisfied-rules) 1) (begin (display "\n=====================================\npsi-action-selctor-chat chosen rules:\n")(display satisfied-rules)))
         ; Return all the satisfied rules
         (if (> (length satisfied-rules) 0)
             (Set satisfied-rules)
@@ -264,4 +264,4 @@
 ;-------------------------------------------------------------------------------
 ; Run OpenPsi
 
-(psi-run)
+;(psi-run)
