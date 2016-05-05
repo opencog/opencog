@@ -20,7 +20,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/attention/experiment/tv-toolbox/TVToolBoxCInterface_stub.h>
-
+#include <opencog/rule-engine/URECommons.h>
+#include <opencog/attention/atom_types.h>
 #include <algorithm>
 #include <utility>
 
@@ -52,7 +53,7 @@ using namespace opencog;
 
 class SmokesDBFCAgent: public Agent {
 private:
-    HandleSeq inference_result={};
+    HandleSeq fc_result={};
     AtomSpace& _atomspace;
     SchemeEval* _eval;
     Handle rule_base;
@@ -63,21 +64,56 @@ private:
     std::set<float, std::greater<int>> dist_surprisingness_smokes;
 
     const int K_PERCENTILE = 5;
+    int starting_cycle;
 
     float friends_mean();
     float smokes_mean();
     float cancer_mean();
 
-    HandleSeq capped_af_set(HandleSeq& afset, int size)
+    Handle select_source(void)
     {
-        HandleSeq out = afset;
-        //_atomspace.get_handle_set_in_attentional_focus(std::back_inserter(out));
+        HandleSeq out;
+        _atomspace.get_handle_set_in_attentional_focus(std::back_inserter(out));
+        std::map<Handle, float> atom_sti_map;
+        for (Handle& h : out) {
+            auto type = h->getType();
+            if (type == ASYMMETRIC_HEBBIAN_LINK || type == HEBBIAN_LINK
+                || type == SYMMETRIC_HEBBIAN_LINK
+                || type == INVERSE_HEBBIAN_LINK
+                || type == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
+                continue;
+            }
+            atom_sti_map[h] = h->getSTI();
+        }
+
+        if (atom_sti_map.size() == 0) {
+            std::cout << "[SmokesDBFCAgent::select_source] Empty source candidate set exiting.\n";
+            throw std::runtime_error("[SmokesDBFCAgent::select_source] Empty source candidate set.");
+        }
+        URECommons urec(_atomspace);
+
+        return urec.tournament_select(atom_sti_map);
+    }
+
+    void adjust_af_boundary(int cap_size)
+    {
+        HandleSeq out;
+        _atomspace.get_handle_set_in_attentional_focus(std::back_inserter(out));
+        if(out.size() == 0)
+            return;
         auto comparator =
                 [](Handle h1, Handle h2) -> bool {return h1->getSTI() > h2->getSTI();};
         std::sort(out.begin(), out.end(), comparator);
-        out.resize(size);
-        std::cerr << "OUTPUT_SIZE: " << out.size() << "\n";
-        return out;
+
+        AttentionValue::sti_t afboundary;
+        if (out.size() > (HandleSeq::size_type) cap_size) {
+            afboundary = out[cap_size]->getSTI();
+        } else {
+            afboundary = out[out.size() - 1]->getSTI();
+        }
+        // Set the AF boundary
+        _atomspace.set_attentional_focus_boundary(afboundary);
+
     }
 
 public:

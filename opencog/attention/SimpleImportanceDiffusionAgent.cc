@@ -262,6 +262,9 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
 
 #ifdef DEBUG
     std::cout << "Total diffusion amount: " << totalDiffusionAmount << std::endl;
+    double totalp = 0;
+    for(const auto& p : probabilityVector) totalp += p.second;
+    std::cout << "Total diffusion probability: " << totalp << std::endl;
 #endif
 
     /* ===================================================================== */

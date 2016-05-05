@@ -12,16 +12,12 @@
 using namespace opencog;
 using namespace opencog::ECANExperiment;
 
-std::vector<std::string> opencog::ECANExperiment::generated_sentences;
-std::vector<HandleSeq> opencog::ECANExperiment::sent_wordnodes;
-std::vector<HandleSeq> opencog::ECANExperiment::wordinstancenodes;
+std::vector<std::vector<std::string>> opencog::ECANExperiment::swords;
+std::vector<std::string> opencog::ECANExperiment::words;
 
-UnorderedHandleSet opencog::ECANExperiment::hspecial_word_nodes;
+int opencog::ECANExperiment::current_group = 0;
 
-std::vector<std::string> opencog::ECANExperiment::special_words;
-std::vector<std::string> opencog::ECANExperiment::nspecial_words;
-int opencog::ECANExperiment::sent_size;
-int opencog::ECANExperiment::special_word_occurence_period = 2;
+int opencog::ECANExperiment::special_word_occurence_period = 1;
 
 bool opencog::ECANExperiment::are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
 {

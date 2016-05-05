@@ -14,22 +14,38 @@ SERVER_CYCLE_DURATION = 100
 IDLE_CYCLES_PER_TICK  = 3
 
 # Economic Attention Allocation parameters
-STARTING_STI_FUNDS    = 10000
-STARTING_LTI_FUNDS    = 10000
+<<<<<<< HEAD
+STARTING_STI_FUNDS    = 50000
+STARTING_LTI_FUNDS    = 50000
 #STI_FUNDS_BUFFER      = 10000
 STI_FUNDS_BUFFER      =  10000
+=======
+STARTING_STI_FUNDS    = 500000
+STARTING_LTI_FUNDS    = 10000
+#STI_FUNDS_BUFFER      = 10000
+STI_FUNDS_BUFFER      =  1000000
+>>>>>>> ecan-wbench
 LTI_FUNDS_BUFFER      = 10000
 MIN_STI               = -400
 
 #ECAN_MAX_ATOM_STI_RENT      = 15
 #ECAN_STARTING_ATOM_STI_RENT = 10
 #ECAN_STARTING_ATOM_STI_WAGE = 2
+<<<<<<< HEAD
 ECAN_MAX_ATOM_STI_RENT      = 8
-ECAN_STARTING_ATOM_STI_RENT = 5
-ECAN_STARTING_ATOM_STI_WAGE = 2
+ECAN_STARTING_ATOM_STI_RENT = 40
+ECAN_STARTING_ATOM_STI_WAGE = 20
+
+ECAN_STARTING_ATOM_LTI_WAGE = 20
+ECAN_STARTING_ATOM_LTI_RENT = 05
+=======
+ECAN_MAX_ATOM_STI_RENT      = 3
+ECAN_STARTING_ATOM_STI_RENT = 2
+ECAN_STARTING_ATOM_STI_WAGE = 30
 
 ECAN_STARTING_ATOM_LTI_WAGE = 2
 ECAN_STARTING_ATOM_LTI_RENT = 0
+>>>>>>> ecan-wbench
 
 #Used by ImportanceDiffusionAgent class
 #0 => flat rent, 1 => exp rent, 2 => log rent, 3 => linear rent
@@ -42,15 +58,17 @@ ECAN_RENT_EQUATION_PARAMETER_1 = 0.0
 
 #Used by SimpleImportanceDiffusionAgent class
 #Maximum percentage of STI that is spread from an atom
-ECAN_MAX_SPREAD_PERCENTAGE = 0.6
-
+#ECAN_MAX_SPREAD_PERCENTAGE = 0.6
+ECAN_MAX_SPREAD_PERCENTAGE = 0.5
 # If false, will diffuse along hebbian links only. If true,
 # will also diffuse to all non-hebbian incident atoms in the
 # incoming and outgoing sets
-ECAN_SPREAD_HEBBIAN_ONLY = false
+#ECAN_SPREAD_HEBBIAN_ONLY = false
+ECAN_SPREAD_HEBBIAN_ONLY = true
 
 # Maximum percentage that will be available for diffusion to hebbian links
-HEBBIAN_MAX_ALLOCATION_PERCENTAGE = 0.5
+#HEBBIAN_MAX_ALLOCATION_PERCENTAGE = 0.5
+HEBBIAN_MAX_ALLOCATION_PERCENTAGE = 0.1
 ECAN_CONVERT_LINKS = false
 ECAN_CONVERSION_THRESHOLD = 15
 
@@ -78,19 +96,45 @@ ANSI_ENABLED	       = true
 # Cogserver in OSX will automatically change .so extension to .dylib
 # if .so exists.
 MODULES               = opencog/cogserver/server/libbuiltinreqs.so,
+                        opencog/modules/libPersistModule.so,
+                        opencog/modules/libQueryModule.so,
                         opencog/cogserver/shell/libscheme-shell.so,
-                        opencog/cogserver/shell/libpy-shell.so
+                        opencog/cogserver/shell/libpy-shell.so,
+                        opencog/nlp/types/libnlp-types.so,
+                        opencog/modules/libLGDictModule.so,
+                        opencog/modules/libSuRealModule.so,
+                        opencog/learning/pln/libPLNTypes.so,
+<<<<<<< HEAD
+                        opencog/nlp/types/libnlp-types.so,
+=======
+>>>>>>> ecan-wbench
+                        opencog/attention/libattention-types.so,
+                        opencog/attention/libattention.so,
+                        opencog/embodiment/libembodiment-types.so,
+                        opencog/spacetime/libspacetime-types.so,
+                        opencog/modules/python/libPythonModule.so,
                         opencog/modules/libRuleEngineModule.so,
                         opencog/attention/experiment/libdynamicsexpsetupmodule.so,
 # Optional modules, not enabled by default
-<<<<<<< HEAD
 #                       opencog/modules/libPersistZmqModule.so,
 #                       opencog/modules/benchmark/libbenchmark.so,
 #                       opencog/moldules/events/libatomspacepublishermodule.so
                         opencog/attention/libhebbiancreation.so
 #                       opencog/learning/dimensionalembedding/libdimensionalembedding.so
 #                       opencog/viterbi/libviterbi.so
+<<<<<<< HEAD
+=======
                       
+SCM_PRELOAD           = scm/config.scm,
+                        scm/core_types.scm,
+                        scm/core-docs.scm,
+                        scm/utilities.scm,
+                        scm/apply.scm,
+                        scm/file-utils.scm,
+                        scm/persistence.scm,
+                        scm/repl-shell.scm,
+                        scm/av-tv.scm
+
 # Uncomment if Python extensions are not stored in these locations,
 # or the binary and source directories:
 #     /usr/local/share/opencog/python
@@ -106,18 +150,10 @@ PYTHON_EXTENSION_DIRS  = ../opencog/python,
 # them in the PYTHON_PRELOAD_FUNCTIONS directory. PYTHON_PRELOAD is only for
 # MindAgent and Request Python handlers.
 PYTHON_PRELOAD_FUNCTIONS = ../opencog/python/preload_functions
+>>>>>>> ecan-wbench
 
 # Run these python cogserver modules on start up
 PYTHON_PRELOAD = pyshell, restapi, agent_finder
-=======
-#                        opencog/modules/libPersistZmqModule.so,
-#                        opencog/modules/benchmark/libbenchmark.so,
-#                        opencog/moldules/events/libatomspacepublishermodule.so
-#                        opencog/attention/libhebbiancreation.so
-#                        opencog/learning/dimensionalembedding/libdimensionalembedding.so
-#                        opencog/viterbi/libviterbi.so
-
->>>>>>> f97a7a51d3375965aab05fa371880b7704ddef68
 
 # IMPORTANT!
 # Database login credentials. Change these to reflect your actual setup!

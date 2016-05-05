@@ -74,14 +74,11 @@ public:
         _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR
                    "/opencog/scm\")");
         CHKERR
-        // TODO: Replace with use-modules when openpsi is modularized
-        _scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR  "/opencog\")");
-        CHKERR
 
-        // Load function definition to be tested and populate the atomspace
-        _scm->eval("(load-from-path \"openpsi/active-schema-pool.scm\")");
+        // Load require modules to be tested and populate the atomspace
+        _scm->eval("(use-modules (opencog) (opencog openpsi))");
         CHKERR
-        _scm->eval("(load \"" OPENPSI_TEST_PATH "/action-rules.scm\")");
+        _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
         CHKERR
     }
 
@@ -91,16 +88,18 @@ public:
         _scm = nullptr;
     }
 
-    // Check that scheme function `psi-satisfiable?``
+    // Check the scheme function `psi-satisfiable?``
     void test_psi_satisfiable()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
+        // Test 1:
         // Test unsatisfaiability
         auto result_1 = _scm->eval("(psi-satisfiable? (rule-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1);
 
+        // Test 2:
         // Test satisfaiability
         _scm->eval("(groundable-content-1)");
         CHKERR
@@ -110,7 +109,7 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
-    // Check that scheme function `psi-select-rules`
+    // Check the scheme function `psi-select-rules`
     void test_psi_select_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -121,12 +120,12 @@ public:
         auto rule_2 = _scm->eval_h("(rule-2)");
         CHKERR
 
-        // Test 1
+        // Test 1:
         auto result_1 = _scm->eval("(psi-select-rules)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1);
 
-        // Test 2
+        // Test 2:
         _scm->eval("(groundable-content-1)");
         CHKERR
         auto result_2_1 = _scm->eval("(length (psi-select-rules))");
@@ -138,14 +137,161 @@ public:
         TSM_ASSERT_EQUALS("Expected the same psi-rule", rule_1, result_2_2);
         CHKERR
 
-        // Test 3
+        // Test 3:
+        // Test that only one rule is selected when running in default mode,
+        // eventhough multiple rules are satisfiable.
         _scm->eval("(groundable-content-2)");
         CHKERR
         auto result_3 = _scm->eval("(length (psi-select-rules))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected a two rules", "2\n" , result_3);
+        TSM_ASSERT_EQUALS("Expected a single rule", "1\n" , result_3);
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
+    // Check the scheme function `psi-related-goals`
+    void test_psi_related_goals()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Add the rules
+        _scm->eval_h("(rule-1) (rule-2) (rule-3)");
+        CHKERR
+
+        // Test 1:
+        auto result_1 = _scm->eval("(test_psi_related_goals_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1);
+
+        // Test 2:
+        auto result_2 = _scm->eval("(test_psi_related_goals_2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
+    // Check the scheme function `psi-get-satisfiable-rules`
+    void test_psi_get_satisfiable_rules()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Add the rules and contents
+        _scm->eval_h("(rule-1) (rule-2) (rule-3)");
+        CHKERR
+
+        // Test 1:
+        _scm->eval("(groundable-content-1)");
+        CHKERR
+        auto result_1_1 = _scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_1_1);
+        auto result_1_2 =_scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-2))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `0`", "0\n" , result_1_2);
+
+        // Test 2:
+        _scm->eval("(groundable-content-2)");
+        CHKERR
+        auto result_2_1 = _scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `2`", "2\n" , result_2_1);
+        auto result_2_2 =_scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-2))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_2_2);
+
+        // Test 3:
+        _scm->eval("(map cog-delete (groundable-content-1))");
+        CHKERR
+        auto result_3_1 = _scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_3_1);
+        auto result_3_2 =_scm->eval("(length \
+                            (psi-get-satisfiable-rules demand-2))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `1`", "1\n" , result_3_2);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
+
+    // Check the scheme function `psi-step`
+    void test_psi_step()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Test 1:
+        // Test that actions are not executed and goal are not evaluated.
+        _scm->eval("(setup_test_psi_step_1)");
+        CHKERR
+
+        // For rule-1
+        auto result_1_1 = _scm->eval("(cog-node 'ConceptNode \"act-1\")");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_1);
+        auto result_1_2 = _scm->eval("(demand-value demand-1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_1_2);
+
+        // For rule-2
+        auto result_1_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_3);
+        auto result_1_4 = _scm->eval("(demand-value demand-2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_1_4);
+
+
+        // Test 2:
+        // Test that action-1 is executed, and goal-1 is evaluated.
+        _scm->eval("(setup_test_psi_step_2)");
+        CHKERR
+
+        // For rule-1
+        auto result_2_1 = _scm->eval("(test_psi_step_2_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected #t", "#t\n", result_2_1);
+        auto result_2_2 = _scm->eval("(demand-value demand-1)");
+        CHKERR
+
+        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_2_2);
+
+        // For rule-2
+        auto result_2_3 = _scm->eval("(cog-node 'ConceptNode \"act-2\")");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_3);
+        auto result_2_4 = _scm->eval("(demand-value demand-2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_2_4);
+        logger().info("END TEST: %s", __FUNCTION__);
+
+        // Test 3:
+        // Test that action-2 is executed, and both goal-1 and goal-2 are
+        // evaluated.
+        _scm->eval("(setup_test_psi_step_3)");
+        CHKERR
+
+        // For rule-2 or rule-3
+        auto result_3_1 = _scm->eval("(test_psi_step_3_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "#t\n", result_3_1);
+        auto result_3_2 = _scm->eval("(demand-value demand-2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_2);
+
+        // For rule-1
+        auto result_3_3 = _scm->eval("(test_psi_step_2_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "#f\n", result_3_3);
+        auto result_3_4 = _scm->eval("(demand-value demand-1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_4);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
 };

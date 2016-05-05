@@ -1,6 +1,6 @@
-INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
-
-ADD_LIBRARY (OpenPsi SHARED
-	OpenPsiModule
-	OpenPsiAgent
+ADD_GUILE_MODULE (openpsi.scm
+    action-selector.scm
+    demand.scm
+    main.scm
+    utilities.scm
 )

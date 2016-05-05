@@ -47,17 +47,12 @@ struct TValues {
     }
 };
 
-extern std::vector<std::string> generated_sentences;
-extern std::vector<HandleSeq> sent_wordnodes;
-extern std::vector<HandleSeq> wordinstancenodes;
-
-extern UnorderedHandleSet hspecial_word_nodes;
-
-extern std::vector<std::string> special_words;
-extern std::vector<std::string> nspecial_words;
-extern int sent_size;
+extern std::vector<std::vector<std::string>> swords;
+extern std::vector<std::string> words;
 
 extern int special_word_occurence_period;
+
+extern int current_group;
 
 bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match);
 bool exists_in(const Handle& hlink, const Handle& h);

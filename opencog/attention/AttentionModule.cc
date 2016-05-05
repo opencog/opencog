@@ -36,36 +36,59 @@ AttentionModule::AttentionModule(CogServer& cs) :
     Module(cs)
 {
     _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
-  //_cogserver.registerAgent(HebbianUpdatingAgent::info().id,     &hebbianFactory);
-  //_cogserver.registerAgent(SimpleHebbianUpdatingAgent::info().id,     &simpleHebbianFactory);
-//#ifdef HAVE_GSL
-  //_cogserver.registerAgent(ImportanceDiffusionAgent::info().id, &diffusionFactory);
-//#endif
-  //_cogserver.registerAgent(ImportanceSpreadingAgent::info().id, &spreadingFactory);
-  //_cogserver.registerAgent(ImportanceUpdatingAgent::info().id,  &updatingFactory);
-  //_cogserver.registerAgent(SimpleImportanceDiffusionAgent::info().id, &simpleDiffusionFactory);
     _cogserver.registerAgent(StochasticImportanceDiffusionAgent::info().id,&stochasticDiffusionFactory);
     _cogserver.registerAgent(StochasticImportanceUpdatingAgent::info().id,&stochasticUpdatingFactory);
     _cogserver.registerAgent(MinMaxSTIUpdatingAgent::info().id,&minMaxSTIUpdatingFactory);
+    _cogserver.registerAgent(HebbianCreationAgent::info().id,&hebbianCreationFactory);
 }
 
 AttentionModule::~AttentionModule()
 {
     logger().debug("[AttentionModule] enter destructor");
     _cogserver.unregisterAgent(ForgettingAgent::info().id);
-  //_cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
-  //_cogserver.unregisterAgent(ImportanceSpreadingAgent::info().id);
-//#ifdef HAVE_GSL
-//    _cogserver.unregisterAgent(ImportanceDiffusionAgent::info().id);
-//#endif
-  //_cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
-  //_cogserver.unregisterAgent(SimpleImportanceDiffusionAgent::info().id);
     _cogserver.unregisterAgent(StochasticImportanceDiffusionAgent::info().id);
     _cogserver.unregisterAgent(StochasticImportanceUpdatingAgent::info().id);
     _cogserver.unregisterAgent(MinMaxSTIUpdatingAgent::info().id);
+    _cogserver.unregisterAgent(HebbianCreationAgent::info().id);
     logger().debug("[AttentionModule] exit destructor");
 }
 
 void AttentionModule::init()
 {
 }
+
+void AttentionModule::createAgents()
+{
+    printf("1");
+    _forgetting_agentptr =
+        _cogserver.createAgent(ForgettingAgent::info().id, false);
+    printf("2");
+    _stiupdating_agentptr =
+        _cogserver.createAgent(StochasticImportanceUpdatingAgent::info().id, false);
+    _stidiffusion_agentptr =
+        _cogserver.createAgent(StochasticImportanceDiffusionAgent::info().id,false);
+    _minmaxstiupdating_agentptr =
+        _cogserver.createAgent(MinMaxSTIUpdatingAgent::info().id,false);
+    _hebbiancreation_agentptr =
+        _cogserver.createAgent(HebbianCreationAgent::info().id,false);
+}
+
+void AttentionModule::start_ecan()
+{
+    _cogserver.startAgent(_forgetting_agentptr);
+    _cogserver.startAgent(_minmaxstiupdating_agentptr);
+    _cogserver.startAgent(_stiupdating_agentptr,true,"siua");
+    _cogserver.startAgent(_stidiffusion_agentptr,true,"sida");
+    _cogserver.startAgent(_hebbiancreation_agentptr,true,"hca");
+}
+
+void AttentionModule::pause_ecan()
+{
+    _cogserver.stopAgent(_forgetting_agentptr);
+    _cogserver.stopAgent(_minmaxstiupdating_agentptr);
+    _cogserver.stopAgent(_stiupdating_agentptr);
+    _cogserver.stopAgent(_stidiffusion_agentptr);
+    _cogserver.stopAgent(_hebbiancreation_agentptr);
+}
+
+

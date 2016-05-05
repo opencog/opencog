@@ -45,6 +45,8 @@
 using namespace std;
 using namespace opencog;
 
+concurrent_queue<Handle> opencog::newAtomsInAV;
+
 DECLARE_MODULE(HebbianCreationModule)
 
 HebbianCreationModule::HebbianCreationModule(CogServer& cs) : Module(cs)
@@ -93,71 +95,5 @@ void HebbianCreationModule::addAFSignalHandler(const Handle& source,
                                         const AttentionValuePtr& av_old,
                                         const AttentionValuePtr& av_new)
 {
-    //HebbianLinks should not normally enter to the AF boundary since they
-    //should not normally have STI values.The below check will avoid such
-    //Scenarios from happening which could lead to HebbianLink creation
-    //bn atoms containing HebbianLink.
-    if (classserver().isA(source->getType(), HEBBIAN_LINK))
-        return;
-
-    // Retrieve the atoms in the AttentionalFocus
-    HandleSeq attentionalFocus;
-    as->get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
-
-    // Exclude the source atom
-    attentionalFocus.erase(std::remove(attentionalFocus.begin(),
-                                       attentionalFocus.end(),
-                                       source), attentionalFocus.end());
-
-    // Get the neighboring atoms, where the connecting edge
-    // is an AsymmetricHebbianLink in either direction
-    HandleSeq existingAsSource =
-            get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
-    HandleSeq existingAsTarget =
-            get_source_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
-
-    // Get the set differences between the AttentionalFocus
-    // and the sets of existing sources and targets
-    std::sort(existingAsSource.begin(), existingAsSource.end());
-    std::sort(existingAsTarget.begin(), existingAsTarget.end());
-    HandleSeq needToBeSource = set_difference(attentionalFocus,
-                                              existingAsSource);
-    HandleSeq needToBeTarget = set_difference(attentionalFocus,
-                                              existingAsTarget);
-
-    // Resulting in the sets of nodes that require
-    // a new AsymmetricHebbianLink in either direction
-    for (Handle atom : needToBeSource) {
-        addHebbian(atom,source);
-    }
-
-    for (Handle atom : needToBeTarget) {
-        addHebbian(source,atom);
-    }
-}
-
-void HebbianCreationModule::addHebbian(Handle atom,Handle source)
-{
-    float mean = targetConjunction(atom,source);
-    Handle link = as->add_link(ASYMMETRIC_HEBBIAN_LINK, atom, source);
-    link->setTruthValue(SimpleTruthValue::createTV(mean, 1));
-    link->setVLTI(1);
-}
-
-float HebbianCreationModule::targetConjunction(Handle handle1,Handle handle2)
-{
-  //auto normsti_i = as->get_normalised_STI(handle1,true,true);
-  //auto normsti_j = as->get_normalised_STI(handle2,true,true);
-  //float conj = (normsti_i * normsti_j);
-    auto normsti_i = as->get_normalised_zero_to_one_STI(handle1,true,true);
-    auto normsti_j = as->get_normalised_zero_to_one_STI(handle2,true,true);
-    float conj = (normsti_i * normsti_j)+ (normsti_j - normsti_i) * std::abs(normsti_j -normsti_i);
-
-    conj = conj / 2.0f;
-    conj = (conj + 1.0f) / 2.0f;
-
-
-    //printf("normsti_i: %f   normsti_j: %f   conj: %f    nconj: %f \n",normsti_i,normsti_j,conj,nconj);
-
-    return conj;
+    newAtomsInAV.push(source);
 }

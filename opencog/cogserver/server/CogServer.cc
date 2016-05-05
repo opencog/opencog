@@ -253,15 +253,15 @@ void CogServer::runLoopStep(void)
                currentCycle,
                elapsed_time.tv_usec/1000000.0, currentCycle
               );
-    }
 
-     HandleSeq links;
-     atomSpace->get_handles_by_type(links, HEBBIAN_LINK,true);
-     int hebcount = links.size();
-     HandleSeq atoms;
-     atomSpace->get_all_atoms(atoms);
-     int atomcount = atoms.size();
-     fprintf(stdout,"Atoms: %d  HebianLinks: %d \n",atomcount,hebcount);
+         HandleSeq links;
+         atomSpace->get_handles_by_type(links, HEBBIAN_LINK,true);
+         int hebcount = links.size();
+         HandleSeq atoms;
+         atomSpace->get_all_atoms(atoms);
+         int atomcount = atoms.size();
+         printf("Atoms: %d  HebianLinks: %d \n",atomcount,hebcount);
+    }
 
     cycleCount++;
     if (cycleCount < 0) cycleCount = 0;

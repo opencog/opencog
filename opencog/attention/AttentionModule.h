@@ -35,6 +35,7 @@
 #include <opencog/attention/StochasticImportanceDiffusionAgent.h>
 #include <opencog/attention/StochasticImportanceUpdatingAgent.h>
 #include <opencog/attention/MinMaxSTIUpdatingAgent.h>
+#include <opencog/attention/HebbianCreationAgent.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/Module.h>
 
@@ -49,17 +50,16 @@ class AttentionModule : public Module
 
 private:
     Factory<ForgettingAgent, Agent>          forgettingFactory;
-  //Factory<HebbianUpdatingAgent, Agent>     hebbianFactory;
-  //Factory<SimpleHebbianUpdatingAgent, Agent>     simpleHebbianFactory;
-  //Factory<ImportanceSpreadingAgent, Agent> spreadingFactory;
-//#ifndef HAVE_GSL
-  //Factory<ImportanceDiffusionAgent, Agent> diffusionFactory;
-//#endif
-  //Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
-  //Factory<SimpleImportanceDiffusionAgent, Agent> simpleDiffusionFactory;
     Factory<StochasticImportanceDiffusionAgent, Agent> stochasticDiffusionFactory;
     Factory<StochasticImportanceUpdatingAgent, Agent> stochasticUpdatingFactory;
     Factory<MinMaxSTIUpdatingAgent, Agent> minMaxSTIUpdatingFactory;
+    Factory<HebbianCreationAgent, Agent> hebbianCreationFactory;
+
+    AgentPtr _forgetting_agentptr;
+    AgentPtr _stiupdating_agentptr;
+    AgentPtr _stidiffusion_agentptr;
+    AgentPtr _minmaxstiupdating_agentptr;
+    AgentPtr _hebbiancreation_agentptr;
 
 public:
 
@@ -69,6 +69,9 @@ public:
     virtual ~AttentionModule();
     virtual void init();
 
+    void start_ecan();
+    void pause_ecan();
+    void createAgents();
 }; // class
 
 /** @}*/

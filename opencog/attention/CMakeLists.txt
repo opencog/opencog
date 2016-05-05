@@ -41,6 +41,7 @@ ADD_LIBRARY(attention SHARED
     #ImportanceUpdatingAgent
     StochasticImportanceUpdatingAgent
     MinMaxSTIUpdatingAgent
+    HebbianCreationAgent
 )
 
 ADD_DEPENDENCIES(attention attention-types)
@@ -91,6 +92,7 @@ INSTALL (FILES
     StochasticImportanceDiffusionAgent.h
     StochasticImportanceUpdatingAgent.h
     MinMaxSTIUpdatingAgent.h
+    HebbianCreationAgent.h
 	DESTINATION "include/${PROJECT_NAME}/attention"
 )
 

@@ -13,9 +13,6 @@
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/attention/ForgettingAgent.h>
-//include <opencog/attention/ImportanceUpdatingAgent.h>
-//include <opencog/attention/SimpleHebbianUpdatingAgent.h>
-//include <opencog/attention/SimpleImportanceDiffusionAgent.h>
 #include <opencog/attention/StochasticImportanceDiffusionAgent.h>
 #include <opencog/attention/StochasticImportanceUpdatingAgent.h>
 #include <opencog/attention/MinMaxSTIUpdatingAgent.h>
@@ -40,12 +37,15 @@ std::map<Handle, std::vector<AValues>> ExperimentSetupModule::_av_data;
 std::map<Handle, std::vector<TValues>> ExperimentSetupModule::_hebtv_data;
 std::map<Handle, std::vector<TValues>>  ExperimentSetupModule::_hascancer_tv_data;
 
+std::string ExperimentSetupModule::file_name;
+
 ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
         Module(cs), _cs(cs)
 {
     _log = new Logger(); //new Logger("ecanexpe.log");
     _log->fine("uuid,cycle,sti_old,sti_new,lti,vlti,wage,rent,agent_name");
     _as = &_cs.getAtomSpace();
+    am = (AttentionModule*)_cs.getModule(AttentionModule::id_function_name());
 
     _scmeval = new SchemeEval(_as);
     _scmeval->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
@@ -60,6 +60,9 @@ ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
 
     _AtomAddedSignalConnection = _as->addAtomSignal(
             boost::bind(&ExperimentSetupModule::AtomAddedCBListener, this, _1));
+
+    file_name = std::string(PROJECT_SOURCE_DIR)
+                + "/opencog/attention/experiment/visualization/dump";
 }
 
 ExperimentSetupModule::~ExperimentSetupModule()
@@ -72,17 +75,24 @@ void ExperimentSetupModule::AVChangedCBListener(const Handle& h,
                                                 const AttentionValuePtr& av_old,
                                                 const AttentionValuePtr& av_new)
 {
-    if (h->isNode()) {
-        std::size_t index = NodeCast(h)->getName().find("@");
-        if (index != std::string::npos)
-            return;
-    } else {
-        return;
-    }
+    NodePtr node;
+    std::string name;
 
-    AValues ecanval(av_new->getSTI(), av_new->getLTI(), av_new->getVLTI(),
-                    _cs.getCycleCount());
-    _av_data[h].push_back(ecanval);
+    if (h->isNode()) {
+        node = NodeCast(h);
+        name = node->getName();
+        if (name.find("@") == std::string::npos)
+        {
+            std::ofstream outf(file_name + "-av.data", std::ofstream::app);
+            outf << name << ","
+                 << av_new->getSTI() << ","
+                 << av_new->getLTI() << ","
+                 << av_new->getVLTI() << ","
+                 << std::time(nullptr) << "\n";
+            outf.flush();
+            outf.close();
+        }
+    }
 }
 
 void ExperimentSetupModule::TVChangedCBListener(const Handle& h,
@@ -94,14 +104,25 @@ void ExperimentSetupModule::TVChangedCBListener(const Handle& h,
     if (t == ASYMMETRIC_HEBBIAN_LINK) {
         HandleSeq outg = LinkCast(h)->getOutgoingSet();
         assert(outg.size() == 2);
-        auto end = hspecial_word_nodes.end();
 
-        if (hspecial_word_nodes.find(outg[0]) != end and hspecial_word_nodes.find(
-                outg[1])
-                                                         != end) {
-            TValues hebtvv(tv_new->getMean(), tv_new->getConfidence(),
-                              _cs.getCycleCount());
-            _hebtv_data[h].push_back(hebtvv);
+        if (!outg[0]->isNode() or !outg[1]->isNode())
+            return;
+        std::string nn0 = NodeCast(outg[0])->getName();
+        std::string nn1 = NodeCast(outg[1])->getName();
+
+        std::vector<std::vector<std::string>>::iterator it = swords.begin();
+        it = it + current_group;
+        std::vector<std::string>::iterator begin = it->begin();
+        std::vector<std::string>::iterator end = it->end();
+
+        if (find(begin,end,nn0) != end and find(begin,end,nn1) != end)
+        {
+            std::ofstream outf(file_name + "-hebtv.data", std::ofstream::app);
+            outf << tv_new->getMean() << ","
+                 << tv_new->getConfidence() << ","
+                 << std::time(nullptr);
+            outf.flush();
+            outf.close();
         }
     }
     // For the smokes FC experiment ( i.e Attention guided inference experiment with tuffy smokes database)
@@ -128,7 +149,6 @@ void ExperimentSetupModule::registerAgentRequests()
     do_ecan_start_register();
     do_ecan_pause_register();
     do_stimulate_register();
-    do_load_word_dict_register();
     do_dump_data_register();
     do_start_nlp_stimulate_register();
     do_pause_nlp_stimulate_register();
@@ -141,7 +161,6 @@ void ExperimentSetupModule::unregisterAgentRequests()
     do_ecan_start_unregister();
     do_ecan_pause_unregister();
     do_stimulate_unregister();
-    do_load_word_dict_unregister();
     do_dump_data_unregister();
     do_start_nlp_stimulate_unregister();
     do_pause_nlp_stimulate_unregister();
@@ -161,28 +180,22 @@ std::string ExperimentSetupModule::do_start_exp(Request *req,
 {
     do_ecan_load(req,args);
     do_ecan_start(req,args);
-    do_load_word_dict(req,args);
     do_start_nlp_stimulate(req,args);
+
+    int groups = std::stoi(args.front());
+    args.pop_front();
+    int groupsize = std::stoi(args.front());
+    args.pop_front();
+    int wordcount =  std::stoi(args.front());
+    genWords(groups,groupsize,wordcount);
+
     return "Started Experiment\n";
 }
 
 std::string ExperimentSetupModule::do_ecan_load(Request *req,
                                                 std::list<std::string> args)
 {
-    //These mind agents have already been made registered by the attention module.So no need to register them.
-    _forgetting_agentptr = _cs.createAgent(ForgettingAgent::info().id, false);
-  //_hebbianupdating_agentptr = _cs.createAgent(
-  //        SimpleHebbianUpdatingAgent::info().id,
-  //        false);
-    _importanceupdating_agentptr = _cs.createAgent(
-          //ImportanceUpdatingAgent::info().id, false);
-            StochasticImportanceUpdatingAgent::info().id, false);
-  //_simpleimportancediffusion_agentptr = _cs.createAgent(
-  //        SimpleImportanceDiffusionAgent::info().id, false);
-    _stochasticimportancediffusion_agentptr = _cs.createAgent(
-            StochasticImportanceDiffusionAgent::info().id,false);
-    _minmaxstiupdating_agentptr = _cs.createAgent(
-            MinMaxSTIUpdatingAgent::info().id,false);
+    am->createAgents();
 
     //Register experiment specific agents. Add more if you have here.
     if (_cs.registerAgent(ArtificialStimulatorAgent::info().id,
@@ -191,10 +204,9 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
                 ArtificialStimulatorAgent::info().id, false);
     }
 
-    //if (_cs.registerAgent(SmokesDBFCAgent::info().id, &smokesFCAgnetFactory)) {
-    //  _smokes_fc_agentptr = _cs.createAgent(SmokesDBFCAgent::info().id,
-    //    false);
-    //}
+    if (_cs.registerAgent(SmokesDBFCAgent::info().id, &smokesFCAgnetFactory)) {
+      _smokes_fc_agentptr = _cs.createAgent(SmokesDBFCAgent::info().id,false);
+    }
 
     return "Loaded the following agents:\n" + ECAN_EXP_AGENTS;
 }
@@ -202,16 +214,9 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
 std::string ExperimentSetupModule::do_ecan_start(Request *req,
                                                  std::list<std::string> args)
 {
-    //_cs.startAgent(_artificialstimulatoragentptr);
-    _cs.startAgent(_forgetting_agentptr);
-    //_cs.startAgent(_hebbianupdating_agentptr);
-    _cs.startAgent(_minmaxstiupdating_agentptr);
-    _cs.startAgent(_importanceupdating_agentptr,true,"siua");
-    if (args.front() == "simple")
-        _cs.startAgent(_simpleimportancediffusion_agentptr);
-    else
-        _cs.startAgent(_stochasticimportancediffusion_agentptr,true,"sida");
+    am->start_ecan();
 
+    //_cs.startAgent(_artificialstimulatoragentptr);
     //_cs.startAgent(_smokes_fc_agentptr);
 
     return "The following agents were started:\n" + ECAN_EXP_AGENTS;
@@ -220,14 +225,7 @@ std::string ExperimentSetupModule::do_ecan_start(Request *req,
 std::string ExperimentSetupModule::do_ecan_pause(Request *req,
                                                  std::list<std::string> args)
 {
-    _cs.stopAgent(_forgetting_agentptr);
-    //_cs.stopAgent(_hebbianupdating_agentptr);
-    _cs.stopAgent(_importanceupdating_agentptr);
-    _cs.stopAgent(_minmaxstiupdating_agentptr);
-    if (args.front() == "simple")
-        _cs.stopAgent(_simpleimportancediffusion_agentptr);
-    else
-        _cs.stopAgent(_stochasticimportancediffusion_agentptr);
+    am->pause_ecan();
 
     //_cs.stopAgent(_artificialstimulatoragentptr);
     //_cs.stopAgent(_smokes_fc_agentptr);
@@ -240,16 +238,40 @@ std::string ExperimentSetupModule::do_start_nlp_stimulate(
 {
     bool status = _cs.registerAgent(SentenceGenStimulateAgent::info().id,
                                     &sentenceGenStimulateFactory);
-    if (status) {
+    if (status)
+    {
+
+
         _sentencegenstim_agentptr = _cs.createAgent(
                 SentenceGenStimulateAgent::info().id, false);
         _cs.startAgent(_sentencegenstim_agentptr);
+
         return "The following agents were started:\nopencog::SentenceGenStimulateAgent\n";
     }
 
     return "Unable to start the agent.\n";
 }
 
+void ExperimentSetupModule::genWords(int groups,int groupsize,int nonspecial)
+{
+    swords.assign(groups,std::vector<std::string>(groupsize));
+
+    int i = 0;
+    int j = 0;
+
+    for (auto &sv : swords) {
+        for (std::string &word : sv) {
+            word =  "group" + std::to_string(i) + "word" + std::to_string(j++);
+        }
+        i++;
+    }
+
+    words.assign(nonspecial,"");
+    i = 0;
+
+    for (std::string &word : words)
+        word = "nonspecial" + std::to_string(i++);
+}
 std::string ExperimentSetupModule::do_pause_nlp_stimulate(
         Request *req, std::list<std::string> args)
 {
@@ -279,49 +301,13 @@ std::string ExperimentSetupModule::do_stimulate(Request *req,
 std::string ExperimentSetupModule::do_dump_data(Request *req,
                                                 std::list<std::string> args)
 {
-    std::string what_to_dump = *(args.begin());
-    std::string file_name = *(++args.begin());
+    ExperimentSetupModule::dump_ecan_data();
 
-    ExperimentSetupModule::dump_ecan_data(what_to_dump, file_name);
-
-    return "";
+    return "Data is dumped.";
 }
 
-std::string ExperimentSetupModule::dump_ecan_data(std::string what_to_dump,
-                                                  std::string file_name)
+std::string ExperimentSetupModule::dump_ecan_data()
 {
-    auto swprint = [=](const UnorderedHandleSet & uhs) {
-        std::stringstream sstream;
-        for (const auto & p : _av_data) {
-            if(uhs.find(p.first) != uhs.end()) {
-                for (const AValues& ev : p.second) {
-                    sstream << std::to_string(p.first.value()) << ","
-                    << std::to_string(ev._sti) << ","
-                    << std::to_string(ev._lti) << ","
-                    << std::to_string(ev._vlti) << ","
-                    << std::to_string(ev._cycle) << "\n";
-                }
-            }
-        }
-        return sstream.str();
-    };
-
-    auto nswprint = [=](const UnorderedHandleSet & uhs) {
-        std::stringstream sstream;
-        for (const auto & p : _av_data) {
-            if(uhs.find(p.first) == uhs.end()) {
-                for (const AValues& ev : p.second) {
-                    sstream << std::to_string(p.first.value()) << ","
-                    << std::to_string(ev._sti) << ","
-                    << std::to_string(ev._lti) << ","
-                    << std::to_string(ev._vlti) << ","
-                    << std::to_string(ev._cycle) << "\n";
-                }
-            }
-        }
-        return sstream.str();
-    };
-
     auto tvprint = [=](const std::map<Handle, std::vector<TValues>>& tvs) {
         std::stringstream sstream;
         for (const auto & p : tvs) {
@@ -335,73 +321,11 @@ std::string ExperimentSetupModule::dump_ecan_data(std::string what_to_dump,
         return sstream.str();
     };
 
-    if (what_to_dump == "av") {
-        std::ofstream outf(file_name + "-sw.data",
-                           std::ofstream::out | std::ofstream::trunc);
-        //Print ecan  values of special word nodes
-        outf << swprint(hspecial_word_nodes);
-        outf.flush();
-        outf.close();
-
-        std::ofstream outf2(file_name + "-nsw.data",
-                            std::ofstream::out | std::ofstream::trunc);
-        outf2 << nswprint(hspecial_word_nodes);
-        outf2.flush();
-        outf2.close();
-
-        return "Time series data dumped in to " + file_name + "-sw.data and"
-               + file_name + "-snw.data" + ".\n";
-    }
-
-    else if (what_to_dump == "heb") {
-        std::ofstream outf(file_name + "-hebtv.data",
-                           std::ofstream::out | std::ofstream::trunc);
-        //Print ecan  values of special word nodes
-        outf << tvprint(_hebtv_data);
-        outf.flush();
-        outf.close();
-        return "Hebbian TV dumped in to " + file_name + ".\n";
-    }
-
-    else if (what_to_dump == "smokes") {
-            std::ofstream outf(file_name + "-hascancer.data",
-                               std::ofstream::out | std::ofstream::trunc);
-            //Print ecan  values of special word nodes
-            outf << tvprint(_hascancer_tv_data);
-            outf.flush();
-            outf.close();
-            return "HasCancer TV dumped in to " + file_name + ".\n";
-        }
-    return "";
+    std::ofstream outf(file_name + "-hascancer.data",
+                       std::ofstream::out | std::ofstream::trunc);
+    //Print ecan  values of special word nodes
+    outf << tvprint(_hascancer_tv_data);
+    outf.flush();
+    outf.close();
+    return "HasCancer TV dumped in to " + file_name + ".\n";
 }
-
-std::string ExperimentSetupModule::do_load_word_dict(
-        Request *req, std::list<std::string> args)
-{
-    auto tokenize = [](const std::string& str,const char& delim) {
-        std::vector<std::string> words;
-        auto init = str.begin();
-        for (auto i = str.begin(); i != str.end(); ++i) {
-            if (*i == delim) {
-                std::string word = str.substr(
-                        init - str.begin(), std::distance(init,i));
-                words.push_back(word);
-                init = i + 1;
-            }
-        }
-
-        return words;
-    };
-
-    std::string file_name = args.back();
-    config().load(file_name.c_str());
-    std::string special_wstr = config().get("SPECIAL_WORDS");
-    std::string nspecial_wstr = config().get("NON_SPECIAL_WORDS");
-
-    special_words = tokenize(special_wstr, ',');
-    nspecial_words = tokenize(nspecial_wstr, ',');
-    sent_size = config().get_int("SENTENCE_SIZE");
-
-    return "Loading successful.\n";
-}
-

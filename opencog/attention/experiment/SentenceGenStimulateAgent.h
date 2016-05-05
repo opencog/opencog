@@ -7,7 +7,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/CogServer.h>
-#include <opencog/truthvalue/AttentionValue.h>
+#include "Globals.h"
 
 #ifndef _SENTENCEGENAGENT_H_
 #define _SENTENCEGENAGENT_H_
@@ -24,14 +24,7 @@ private:
     SchemeEval* _scm_eval;
     AtomSpace& _as;
 
-    AttentionValue::sti_t STIAtomWage;
-    AttentionValue::lti_t LTIAtomWage;
-
-    AttentionValue::sti_t targetSTI;
-    AttentionValue::lti_t targetLTI;
-
-    AttentionValue::sti_t stiFundsBuffer;
-    AttentionValue::lti_t ltiFundsBuffer;
+    int current_group;
 
 public:
     virtual ~ SentenceGenStimulateAgent();
@@ -39,16 +32,12 @@ public:
 
     virtual const ClassInfo& classinfo() const;
     static const ClassInfo& info();
-    void generate_stimuate_sentence(void);
     virtual void run();
 
-    void localStimulateAtom(Handle h,float stimulus);
-    AttentionValue::sti_t calculate_STI_Wage();
-    AttentionValue::lti_t calculate_LTI_Wage();
-    void hebbianUpdatingUpdate(Handle h);
-    float targetConjunction(HandleSeq handles);
+    void generate_stimulate_sentence();
 };
 
+typedef std::shared_ptr<SentenceGenStimulateAgent> SentenceGenStimulateAgentPtr;
 }
 }
 #endif /* _SENTENCEGENAGENT_H_ */
