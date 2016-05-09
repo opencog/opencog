@@ -55,11 +55,12 @@
          (cB (cog-stv-confidence B))
          (sAB (cog-stv-strength AB))
          (cAB (cog-stv-confidence AB))
-         (cBA (min cA cB cAB)))
-      (if (and (< 0 cBA) ; Try to avoid constructing informationless
-                         ; knowledge
+         (sBA (inversion-strength-formula sA sB sAB))
+         (cBA (* 0.9 (min cA cB cAB))))
+      (if (and (< 1e-8 sBA) (< 1e-8 cBA) ; Try to avoid constructing
+                                         ; informationless knowledge
                (inversion-consistency sA sB sAB))
-          (cog-set-tv! BA (stv (inversion-strength-formula sA sB sAB) cBA))
+          (cog-merge-hi-conf-tv! BA (stv sBA cBA))
           (cog-undefined-handle))))
 
 ;; Name the rules

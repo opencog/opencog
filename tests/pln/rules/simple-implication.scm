@@ -4,7 +4,7 @@
    (TypedVariableLink
       (VariableNode "$X")
       (TypeNode "ConceptNode"))
-   (EvaluationLink
+   (EvaluationLink (stv 0.2 0.9)
       (PredicateNode "P")
       (VariableNode "$X"))
    (EvaluationLink
@@ -23,7 +23,7 @@
       (TypedVariableLink
          (VariableNode "$Y")
          (TypeNode "ConceptNode")))
-   (EvaluationLink
+   (EvaluationLink (stv 0.04 0.6)
       (PredicateNode "P")
       (ListLink
          (VariableNode "$X")
