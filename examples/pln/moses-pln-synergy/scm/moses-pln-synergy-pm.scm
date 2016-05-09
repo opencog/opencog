@@ -40,11 +40,7 @@
 (cog-bind deduction-implication-rule)
 
 ;; (9)
-;;
-;; Actually the previous deduction step took care of that too, so no
-;; need to run it
-;;
-;; (cog-bind deduction-implication-rule)
+(cog-bind deduction-implication-rule)
 
 ;; (10)
 (cog-bind implication-full-instantiation-rule)
@@ -62,10 +58,6 @@
 (cog-bind deduction-implication-rule)
 
 ;; (15)
-;;
-;; Actually the previous deduction step took care of that too, so no
-;; need to run it
-;;
 ;; (cog-bind deduction-implication-rule)
 
 ;; (16)
