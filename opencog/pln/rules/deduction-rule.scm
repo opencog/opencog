@@ -77,16 +77,20 @@
          (cAB (cog-stv-confidence AB))
          (sBC (cog-stv-strength BC))
          (cBC (cog-stv-confidence BC))
-         (alpha 0.9) ; how much confidence is lost at each inference step
+         (alpha 0.9) ; how much confidence is lost at each deduction step
 
-         ;; Hacks to overcome the lack of distributional TV. If sB=1
-         ;; and cB=0, then assign sB to the mid value satisfying the
+         ;; Hacks to overcome the lack of distributional TV. If s=1
+         ;; and c=0, then assign s to the mode value satisfying the
          ;; deduction consistency constraint (what a pain, let's use
          ;; 0.25 for now).
-         (sB (if (and (< 0.99 sB) (<= cB 0)) 0.25 sB)))
+         (sA (if (and (< 0.99 sA) (<= cA 0)) 0.25 sA))
+         (sB (if (and (< 0.99 sB) (<= cB 0)) 0.25 sB))
+         (sC (if (and (< 0.99 sC) (<= cC 0)) 0.25 sC)))
       (if (and
-           (conditional-probability-consistency sA sB sAB)
-           (conditional-probability-consistency sB sC sBC))
+           (or (= 0 cA) (= 0 cB) (= 0 cAB)
+               (conditional-probability-consistency sA sB sAB))
+           (or (= 0 cB) (= 0 cC) (= 0 cBC)
+               (conditional-probability-consistency sB sC sBC)))
           (if (< 0.99 (* sB cB))
               ;; Hack to overcome for the lack of distributional
               ;; TV. This covers the case where B fully confidently
@@ -104,17 +108,23 @@
                                               ;; situation.
                     (cog-merge-hi-conf-tv! AC (stv sAC cAC))
                     (cog-undefined-handle)))
-              (let ((sAC (if (or (< 0.99 (* sAB cAB)) (< 0.99 (* sBC cBC)))
-                             ;; Hack to overcome for the lack of
-                             ;; distributional TV. This covers the case
-                             ;; where little is known about A and B
-                             ;; (i.e. their strength is meaningless), yet
-                             ;; we can confidently calculate sAC because
-                             ;; sAB and sBC are so high anyway.
-                             (* sAB sBC)
-                             ;; Otherwise fall back on the naive formula
-                             (simple-deduction-strength-formula sA sB sC sAB sBC)))
-                    (cAC (* alpha (min cAB cBC))))
+              ;; Branch if sB * cB <= 0.99
+              (let* ((sAC (if (or (< 0.99 (* sAB cAB)) (< 0.99 (* sBC cBC)))
+                              ;; Hack to overcome for the lack of
+                              ;; distributional TV. This covers the case
+                              ;; where little is known about A and B
+                              ;; (i.e. their strength is meaningless), yet
+                              ;; we can confidently calculate sAC because
+                              ;; sAB and sBC are so high anyway.
+                              (* sAB sBC)
+                              ;; Otherwise fall back on the naive formula
+                              (simple-deduction-strength-formula sA sB sC sAB sBC)))
+                     (cAC (min cAB cBC))
+                     ;; Unless the 2 implication are fully confident
+                     ;; decrease the confidence by some factor. I'm not
+                     ;; sure how justify this for now, it's perhaps a
+                     ;; bad hack.
+                     (cAC (* (if (< cAC 0.99) alpha 1.0) cAC)))
                 (if (and (< 1e-8 sAC) (< 1e-8 cAC)) ;; Don't create zero
                                               ;; knowledge. Note that
                                               ;; sAC == 0 is not zero

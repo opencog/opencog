@@ -149,7 +149,7 @@
 ;;
 ;;       where P.s is the strength of predicate P, the precondition.
 ;;
-;;       Informal proof: The c * P(a).c part makes sense
+;;       Informal (wrong) proof: The c * P(a).c part makes sense
 ;;       intuitively. The (1-P.s) is less intuitive, but here is the
 ;;       argument for it. The larger P the more elements which are not
 ;;       `a` are used to calculate the probability on the
@@ -164,6 +164,11 @@
          (P (cadr Impl-outgoings))
          (P-s (cog-stv-strength P))
          (P-c (cog-stv-confidence P))
+         ;; Hacks to overcome the lack of distributional TV. If s=1
+         ;; and c=0, then assign s to the mode value satisfying the
+         ;; deduction consistency constraint (what a pain, let's use
+         ;; 0.25 for now).
+         (P-s (if (and (< 0.99 P-s) (<= P-c 0)) 0.25 P-s))
          (Q (caddr Impl-outgoings))
          (terms (if (= 0 Impl-c) ; don't try to instantiate zero
                                  ; knowledge implication
