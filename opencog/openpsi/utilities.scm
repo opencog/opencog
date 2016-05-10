@@ -44,7 +44,8 @@
     (define (weight x)
         (let ((a-stv (cog-tv x)))
             (* (tv-conf a-stv) (tv-mean a-stv))))
-    (define (pick atom lst) ; prev is a list and next
+
+    (define (pick atom lst) ; prev is a `lst` and next `atom`
         (cond
             ((> (weight (car lst)) (weight atom)) lst)
             ((= (weight (car lst)) (weight atom)) (append lst (list atom)))
@@ -53,5 +54,32 @@
     (if (null? atom-list)
         '()
        (delete-duplicates (fold pick (list (car atom-list)) atom-list))
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (most-important-weighted-atoms atom-list)
+"
+  It returns a list with non-duplicating atoms with the highest
+  important-weight. If an empty list is passed an empty list is returned.
+  Weight of an atom is the product of the stength and confidence of the atom.
+
+  atom-list:
+  - A list of atoms to be compared.
+"
+    (define (weight x)
+        (let ((a-stv (cog-tv x))
+              (sti (assoc-ref (cog-av->alist (cog-av x)) 'sti)))
+            (* (tv-conf a-stv) (tv-mean a-stv) sti)))
+
+    (define (pick atom lst) ; prev is a `lst` and next `atom`
+        (cond
+            ((> (weight (car lst)) (weight atom)) lst)
+            ((= (weight (car lst)) (weight atom)) (append lst (list atom)))
+            (else (list atom))))
+
+    (if (null? atom-list)
+        '()
+        (delete-duplicates (fold pick (list (car atom-list)) atom-list))
     )
 )
