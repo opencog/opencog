@@ -58,3 +58,20 @@ tags in patterns. These could either be passed on to OpenCog as either
 a pointer to a collection concept, the collection list itself, a
 collection concept with its definition, or various ways of unrolling
 the defined set in intermediate format using duplicate definitions.
+
+### Output format
+
+The output format is in the form of OpenPsi rules, which have the format:
+```
+(Implication
+	(AndLink  (stv strength confidence)
+		(context)
+		(action))
+	(demand-goal))
+
+(Member (action) (Concept "OpenPsi: action"))
+
+(Member (implication) (demandgoal))
+```
+
+The scheme functions `psi-rule` and `psi-demand` create these.
