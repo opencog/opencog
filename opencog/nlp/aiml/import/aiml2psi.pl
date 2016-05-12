@@ -655,7 +655,8 @@ while (my $line = <FIN>)
          }
 			else
 			{
-				$rule = "(psi-rule ";
+				$rule = ";;; " . $cattext . "\n";
+				$rule .= "(psi-rule\n";
 				$rule .= "   ;; context\n";
 				$rule .= $psi_ctxt;
 				$rule .= "   ;; action\n";
@@ -692,6 +693,7 @@ while (my $line = <FIN>)
 			print FOUT "$rule\n";
 		}
 		$psi_ctxt = "";
+		$psi_goal = "";
 	}
 
 	# We are going to have to fix this for the various stars and
@@ -701,34 +703,34 @@ while (my $line = <FIN>)
 	if ($cmd eq "PAT")
 	{
 		$star_index = 0;
-		$psi_ctxt .= "         (ListLink\n";
+		$psi_ctxt .= "      (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
 		# Use lower-case ...
 		$arg = lc $arg;
-		$psi_ctxt .= "            " . $wordnode . "\"$arg\")\n";
+		$psi_ctxt .= "         " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
 		$star_index = $star_index + 1;
-		$psi_ctxt .= "            (Glob \"\$star-$star_index\")\n";
+		$psi_ctxt .= "         (Glob \"\$star-$star_index\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$psi_ctxt .= "            (GlobbyBlobbyNode \"_\")\n";
+		$psi_ctxt .= "         (GlobbyBlobbyNode \"_\")\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$psi_ctxt .= "            (BOTVARNode \"$arg\")\n";
+		$psi_ctxt .= "         (BOTVARNode \"$arg\")\n";
 	}
 	if ($cmd eq "PSET")
 	{
-		$psi_ctxt .= "            (XConceptxxNode \"$arg\") ; Huh?\n";
+		$psi_ctxt .= "         (XConceptxxNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
-		$psi_ctxt .= "         ) ; PATEND\n";
+		$psi_ctxt .= "      ) ; PATEND\n";
 	}
 
 	#TOPIC
@@ -813,7 +815,7 @@ while (my $line = <FIN>)
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
-		$psi_ctxt .= "      ) ;TEMPLATECODE\n";  # close pattern section
+		$psi_ctxt .= "   ) ;TEMPLATECODE\n";  # close pattern section
 
 		$arg =~ s/\"/\'/g;
 
