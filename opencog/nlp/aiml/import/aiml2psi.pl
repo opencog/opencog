@@ -685,9 +685,9 @@ while (my $line = <FIN>)
 			$rule .= "   ;; action\n";
 			$rule .= $psi_goal;
 			$rule .= $psi_tail;
-			$rule .= ")\n";
+			$rule .= ") ; CATEND\n";     # close category section
 
-			$psi_ctxt .= ") ; CATEND\n";     # close category section
+			$psi_goal = "";
 		}
 
 		if ($overwrite)
