@@ -367,6 +367,7 @@ sub process_star
 
 sub process_aiml_tags;
 
+# process_srai -- convert SRAI tags into atomese.
 # Decode and print nested SRAI tags.  This turns out to be a complicted
 # pain. The problem with srai is that it can be nested, and its hard to
 # use regexes to walk that nesting in a reliable way. (I don't feel like
@@ -455,6 +456,9 @@ sub process_srai
 	$tout;
 }
 
+# process_aiml_tags -- convert AIML tags into Atomese.
+# Currently handles STAR and SRAI.
+#
 # First argument: white-space indentation to insert on each line.
 # Second argument: the actual text to unpack
 sub process_aiml_tags
@@ -662,7 +666,7 @@ while (my $line = <FIN>)
          }
 			else
 			{
-				$rule = ";;; RAW CODE IN AIML\n";
+				$rule = ";;; COMPLEX CODE BRANCH\n";
 				$rule .= ";;; " . $cattext . "\n";
 				$rule .= "(psi-rule\n";
 				$rule .= "   ;; context\n";
