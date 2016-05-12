@@ -555,7 +555,8 @@ open (FIN,"<$intermediateFile");
 open (FOUT,">$finalFile");
 my $curPath="";
 my %overwriteSpace=();
-my $code = "";
+my $psi_ctxt = "";
+my $psi_goal = "";
 
 my $have_topic = 0;
 my $curr_topic = "";
@@ -588,9 +589,8 @@ while (my $line = <FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$code = "";
-		$code .= "   (Implication\n";
-		$code .= "      (And\n";
+		$psi_ctxt = "";
+		$psi_ctxt .= "   (And\n";
 	}
 	if ($cmd eq "CATTEXT")
 	{
@@ -615,7 +615,7 @@ while (my $line = <FIN>)
 	if ($cmd eq "PATH")
 	{
 		$curPath = $arg;
-		# $code .= "; PATH --> $curPath\n";
+		# $psi_ctxt .= "; PATH --> $curPath\n";
 	}
 
 	if ($cmd eq "CATEND")
@@ -643,12 +643,9 @@ while (my $line = <FIN>)
 					my $name = "random choice $i of $nc: ";
 					$name .= $cattext;
 
-					#$rule .= "(MemberLink\n";
-					#$rule .= "   (DefinedSchema \"$name\")\n";
-					#$rule .= "   (Concept \"$rulebase\"))\n";
 					$rule .= "(DefineLink\n";
 					$rule .= "   (DefinedSchema \"$name\")\n";
-					$rule .= $code;
+					$rule .= $psi_ctxt;
 					$rule .= "      (ListLink\n";
 					$rule .= &process_aiml_tags("         ", $ch);
 					$rule .= "      )\n";
@@ -658,20 +655,14 @@ while (my $line = <FIN>)
          }
 			else
 			{
-				# $rule  = "(MemberLink\n";
-				# $rule .= "   (DefinedSchema \"$cattext\")\n";
-				# $rule .= "   (Concept \"$rulebase\"))\n";
-				# $rule .= "(DefineLink\n";
-				# $rule .= "   (DefinedSchema \"$cattext\")\n";
-				# $rule .= $code;
-				# $rule .= "      (ListLink\n";
-				# $rule .= &process_aiml_tags("         ", $curr_raw_code);
-				# $rule .= "      )\n";
-				# $rule .= "   )\n)\n";  # close category section
 				$rule = "(psi-rule ";
-				$rule .= "   context";
+				$rule .= "   ;; context\n";
+				$rule .= $psi_ctxt;
 				$rule .= "   ;; action\n";
-				$rule .= &process_aiml_tags("   ", $curr_raw_code);  
+				$rule .= $psi_goal;
+				$rule .= "   (ListLink\n";
+				$rule .= &process_aiml_tags("      ", $curr_raw_code);  
+				$rule .= "   )\n";
 				$rule .= "   (Concept \"AIML chat demand\")";
 				$rule .= "   (stv 1 1)";
 				$rule .= "   (psi-demand \"AIML chat\" 0.97)";
@@ -686,8 +677,8 @@ while (my $line = <FIN>)
 			$rule .= "   (Concept \"$rulebase\"))\n";
 			$rule .= "(DefineLink\n";
 			$rule .= "   (DefinedSchema \"$cattext\")\n";
-			$rule .= $code;
-			$code .= ") ; CATEND\n";     # close category section
+			$rule .= $psi_ctxt;
+			$psi_ctxt .= ") ; CATEND\n";     # close category section
 		}
 
 		if ($overwrite)
@@ -700,7 +691,7 @@ while (my $line = <FIN>)
 			# Not merging, so just write it out.
 			print FOUT "$rule\n";
 		}
-		$code = "";
+		$psi_ctxt = "";
 	}
 
 	# We are going to have to fix this for the various stars and
@@ -710,34 +701,34 @@ while (my $line = <FIN>)
 	if ($cmd eq "PAT")
 	{
 		$star_index = 0;
-		$code .= "         (ListLink\n";
+		$psi_ctxt .= "         (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
 		# Use lower-case ...
 		$arg = lc $arg;
-		$code .= "            " . $wordnode . "\"$arg\")\n";
+		$psi_ctxt .= "            " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
 		$star_index = $star_index + 1;
-		$code .= "            (Glob \"\$star-$star_index\")\n";
+		$psi_ctxt .= "            (Glob \"\$star-$star_index\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$code .= "            (GlobbyBlobbyNode \"_\")\n";
+		$psi_ctxt .= "            (GlobbyBlobbyNode \"_\")\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$code .= "            (BOTVARNode \"$arg\")\n";
+		$psi_ctxt .= "            (BOTVARNode \"$arg\")\n";
 	}
 	if ($cmd eq "PSET")
 	{
-		$code .= "            (XConceptxxNode \"$arg\") ; Huh?\n";
+		$psi_ctxt .= "            (XConceptxxNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
-		$code .= "         ) ; PATEND\n";
+		$psi_ctxt .= "         ) ; PATEND\n";
 	}
 
 	#TOPIC
@@ -760,22 +751,22 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "TOPICBOTVAR")
 	{
-		$code .= "; TOPICBOTVAR $arg\n";
+		$psi_ctxt .= "; TOPICBOTVAR $arg\n";
 	}
 	if ($cmd eq "TOPICSET")
 	{
 		$have_topic = 1;
 		$curr_topic = $arg;
-		$code .= "; TOPICSET $arg\n";
+		$psi_ctxt .= "; TOPICSET $arg\n";
 	}
 	if ($cmd eq "TOPICEND")
 	{
 		if ($have_topic)
 		{
-			$code .= "         (State\n";
-			$code .= "            (Anchor \"\#topic\")\n";
-			$code .= "            (Concept \"$curr_topic\")\n";
-			$code .= "         )\n";
+			$psi_ctxt .= "         (State\n";
+			$psi_ctxt .= "            (Anchor \"\#topic\")\n";
+			$psi_ctxt .= "            (Concept \"$curr_topic\")\n";
+			$psi_ctxt .= "         )\n";
 		}
 		$have_topic = 0;
 	}
@@ -800,7 +791,7 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "THATBOTVAR")
 	{
-		$code .= "; THATBOTVAR $arg\n";
+		$psi_ctxt .= "; THATBOTVAR $arg\n";
 	}
 	if ($cmd eq "THATSET")
 	{
@@ -811,10 +802,10 @@ while (my $line = <FIN>)
 	{
 		if ($have_that)
 		{
-			$code .= "         (State\n";
-			$code .= "            (Anchor \"\#that\")\n";
-			$code .= "            (Concept \"$curr_that\")\n";
-			$code .= "         )\n";
+			$psi_ctxt .= "         (State\n";
+			$psi_ctxt .= "            (Anchor \"\#that\")\n";
+			$psi_ctxt .= "            (Concept \"$curr_that\")\n";
+			$psi_ctxt .= "         )\n";
 		}
 		$have_that = 0;
 	}
@@ -822,7 +813,7 @@ while (my $line = <FIN>)
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
-		$code .= "      ) ;TEMPLATECODE\n";  # close pattern section
+		$psi_ctxt .= "      ) ;TEMPLATECODE\n";  # close pattern section
 
 		$arg =~ s/\"/\'/g;
 
@@ -832,11 +823,12 @@ while (my $line = <FIN>)
 
 	if ($cmd eq "TEMPATOMIC")
 	{
-		$code .= "      ) ;TEMPATOMIC\n";  # close pattern section
+		$psi_ctxt .= "   ) ;TEMPATOMIC\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
-		$code .= "      (ListLink\n";
+		$psi_goal .= "   (ListLink\n";
 	}
+
 	if ($cmd eq "TEMPWRD")
 	{
 		# Unescape escaped single-quotes.
@@ -849,12 +841,12 @@ while (my $line = <FIN>)
 		$arg =~ s/"/\\"/g;
 
 		# Just another word in the reply chain.
-		$code .= "         " . $wordnode . "\"$arg\")\n";
+		$psi_ctxt .= "         " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
 		# Just another word in the reply chain.
-		$code .= "      ))) ; TEMPATOMICEND\n";
+		$psi_goal .= "   ) ; TEMPATOMICEND\n";
 	}
 }
 
