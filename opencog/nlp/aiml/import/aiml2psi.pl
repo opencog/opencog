@@ -683,7 +683,6 @@ while (my $line = <FIN>)
 			$rule .= "   ;; context\n";
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
-			$rule .= "   (ListLink\n";
 			$rule .= $psi_goal;
 			$rule .= $psi_tail;
 			$rule .= ")\n";
@@ -837,7 +836,7 @@ while (my $line = <FIN>)
 		$psi_ctxt .= "   ) ;TEMPATOMIC\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
-		$psi_goal .= "   (ListLink\n";
+		$psi_goal = "   (ListLink\n";
 	}
 
 	if ($cmd eq "TEMPWRD")
@@ -852,7 +851,7 @@ while (my $line = <FIN>)
 		$arg =~ s/"/\\"/g;
 
 		# Just another word in the reply chain.
-		$psi_ctxt .= "         " . $wordnode . "\"$arg\")\n";
+		$psi_goal .= "      " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
