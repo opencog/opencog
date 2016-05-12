@@ -337,6 +337,11 @@ my $textnode = "(TextNode ";
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
 
+my $dem_kind = "   (Concept \"AIML chat demand\")\n";
+my	$truth = "   (stv 1 1)\n";
+my $demand = "   (psi-demand \"AIML chat\" 0.97)\n";
+my $psi_tail = $dem_kind . $truth . $demand;
+
 # Handle expressions like <star/> and <star index='2'/> and so on.
 sub process_star
 {
@@ -665,9 +670,7 @@ while (my $line = <FIN>)
 				$rule .= "   (ListLink\n";
 				$rule .= &process_aiml_tags("      ", $curr_raw_code);  
 				$rule .= "   )\n";
-				$rule .= "   (Concept \"AIML chat demand\")";
-				$rule .= "   (stv 1 1)";
-				$rule .= "   (psi-demand \"AIML chat\" 0.97)";
+				$rule .= $psi_tail;
 				$rule .= ")\n";
 			}
 			$have_raw_code = 0;
@@ -680,11 +683,9 @@ while (my $line = <FIN>)
 			$rule .= "   ;; context\n";
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
-			$rule .= $psi_goal;
 			$rule .= "   (ListLink\n";
-			$rule .= "   (Concept \"AIML chat demand\")";
-			$rule .= "   (stv 1 1)";
-			$rule .= "   (psi-demand \"AIML chat\" 0.97)";
+			$rule .= $psi_goal;
+			$rule .= $psi_tail;
 			$rule .= ")\n";
 
 			$psi_ctxt .= ") ; CATEND\n";     # close category section
