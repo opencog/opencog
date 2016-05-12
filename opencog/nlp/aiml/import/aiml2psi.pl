@@ -342,6 +342,21 @@ my	$truth = "   (stv 1 1)\n";
 my $demand = "   (psi-demand \"AIML chat\" 0.97)\n";
 my $psi_tail = $dem_kind . $truth . $demand;
 
+# split_string -- split a string of words into distinct nodes.
+sub split_string
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+	my @words = split(/ /, $text);
+	my $tout = "";
+	for my $wrd (@words)
+	{
+		$tout .= $indent . $wordnode . "\"$wrd\")\n";
+	}
+	$tout;
+}
+
+# process_star -- deal with the star XML
 # Handle expressions like <star/> and <star index='2'/> and so on.
 sub process_star
 {
@@ -541,7 +556,9 @@ sub process_aiml_tags
 			}
 			elsif ($star ne "")
 			{
-				$tout .= $indent . $textnode . "\"$star\")\n";
+				# At this point, we expect just a string of words.
+				# $tout .= $indent . $textnode . "\"$star\" oooofax)\n";
+				$tout .= &split_string($indent, $star);
 			}
 		}
 	}
