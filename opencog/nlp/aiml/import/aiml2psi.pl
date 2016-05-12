@@ -645,16 +645,18 @@ while (my $line = <FIN>)
 					$ch =~ s/<\/li>//;
 					$ch =~ s/\s+$//;
 
-					my $name = "random choice $i of $nc: ";
-					$name .= $cattext;
+					$rule .= ";;; random choice $i of $nc: ";
+					$rule .= $cattext . "\n";
 
-					$rule .= "(DefineLink\n";
-					$rule .= "   (DefinedSchema \"$name\")\n";
+					$rule .= "(psi-rule\n";
+					$rule .= "   ; context\n";
 					$rule .= $psi_ctxt;
-					$rule .= "      (ListLink\n";
-					$rule .= &process_aiml_tags("         ", $ch);
-					$rule .= "      )\n";
-					$rule .= "   )) ; random choice $i of $nc\n\n";  # close category section
+					$rule .= "   ; action\n";
+					$rule .= "   (ListLink\n";
+					$rule .= &process_aiml_tags("      ", $ch);
+					$rule .= "   )\n";
+					$rule .= $psi_tail;
+					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
 				}
          }
