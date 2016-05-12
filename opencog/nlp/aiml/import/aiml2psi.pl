@@ -655,7 +655,8 @@ while (my $line = <FIN>)
          }
 			else
 			{
-				$rule = ";;; " . $cattext . "\n";
+				$rule = ";;; RAW CODE IN AIML\n";
+				$rule .= ";;; " . $cattext . "\n";
 				$rule .= "(psi-rule\n";
 				$rule .= "   ;; context\n";
 				$rule .= $psi_ctxt;
@@ -673,12 +674,19 @@ while (my $line = <FIN>)
 		}
 		else
 		{
-			$rule  = "(MemberLink\n";
-			$rule .= "   (DefinedSchema \"$cattext\")\n";
-			$rule .= "   (Concept \"$rulebase\"))\n";
-			$rule .= "(DefineLink\n";
-			$rule .= "   (DefinedSchema \"$cattext\")\n";
+			$rule = ";;; NO RAW CODE\n";
+			$rule .= ";;; $cattext\n";
+			$rule .= "(psi-rule\n";
+			$rule .= "   ;; context\n";
 			$rule .= $psi_ctxt;
+			$rule .= "   ;; action\n";
+			$rule .= $psi_goal;
+			$rule .= "   (ListLink\n";
+			$rule .= "   (Concept \"AIML chat demand\")";
+			$rule .= "   (stv 1 1)";
+			$rule .= "   (psi-demand \"AIML chat\" 0.97)";
+			$rule .= ")\n";
+
 			$psi_ctxt .= ") ; CATEND\n";     # close category section
 		}
 
@@ -693,7 +701,7 @@ while (my $line = <FIN>)
 			print FOUT "$rule\n";
 		}
 		$psi_ctxt = "";
-		$psi_goal = "";
+		# $psi_goal = "";
 	}
 
 	# We are going to have to fix this for the various stars and
