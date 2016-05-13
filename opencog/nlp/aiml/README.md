@@ -2,15 +2,13 @@
 # AIML in the AtomSpace
 
 ## Status
-*ATTTENTION* The code here is *MOTHBALLED*.
-The reason for this is that there is no compelling AIML content that
-is in any way useful to the current plans for OpenCog.  I think that
-we've moved past AIML in terms of what we can accomplish.
+In development.  Intended for anyone who has hand-crafted AIML content
+that they want imported into the AtomSpace.
 
 ## Goal
 Be able to apply AIML rules, in a fashion that is integrated with the
 rest of the OpenCog NLP pipeline.  That is, the AIML rules become just
-one more aspect of linguistic processing.  Of curse, traditional AIML
+one more aspect of linguistic processing.  Of course, traditional AIML
 completely short-circuits normal linguistic analysis, and simply finds
 some utterance that matches up with an input string of words.  By
 integrating with the NLP pipeline, this potentially allows for the
@@ -26,6 +24,10 @@ The goal of the import step is to map AIML expressions to equivalent
 atomspace graphs, in such a way that the OpenCog pattern matcher can
 perform most or all of the same functions that most AIML interpretors
 perform. The goal is NOT to re-invent an AIML interpreter in OpenCog!
+... although, de-facto, that's what actually ends up happening.
+
+The current importer generates OpenPsi-comaptile rules, so that the
+openpsi rule engine can process these.
 
 ## Lightning reivew of AIML
 Some example sentences.
