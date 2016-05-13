@@ -557,7 +557,7 @@ sub process_aiml_tags
 			elsif ($star ne "")
 			{
 				# At this point, we expect just a string of words.
-				# $tout .= $indent . $textnode . "\"$star\" oooofax)\n";
+				# $tout .= $indent . $textnode . "\"$star\")\n";
 				$tout .= &split_string($indent, $star);
 			}
 		}
@@ -570,7 +570,8 @@ sub process_aiml_tags
 	}
 	else
 	{
-		$tout .= $indent . $textnode . "\"$text\")\n";
+		# $tout .= $indent . $textnode . "\"$text\")\n";
+		$tout .= &split_string($indent, $text);
 	}
 	$tout;
 }
