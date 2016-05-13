@@ -25,6 +25,10 @@
                 (car (sent-get-words-in-order sent-node))
             )
         ))
+        (State
+            input-utterance-time
+            (Time (current-time))
+        )
     )
     (newline)
 )
@@ -32,6 +36,7 @@
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
 
+(define-public input-utterance-time (Anchor "InputUtteranceTime"))
 (define-public input-utterance (Anchor "InputUtterance"))
 (define-public no-input-utterance (Concept "NoInputUtterance"))
 (State input-utterance no-input-utterance)
