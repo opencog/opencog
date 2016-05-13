@@ -563,6 +563,13 @@ sub process_aiml_tags
 		}
 	}
 
+	elsif ($text =~ /<input\s*index\s*=\s*'(\d+)'\s*\/>/)
+	{
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag input\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= $indent . "       (Number \"$1\")))";
+	}
 	elsif ($text =~ /<!--.*-->/)
 	{
 		# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
