@@ -612,6 +612,9 @@ while (my $line = <FIN>)
 	# esacpe quote marks.
 	$arg =~ s/"/\\"/g;
 
+	# Undo html markup
+	$arg =~ s/&lt;/</g;
+
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
@@ -623,6 +626,9 @@ while (my $line = <FIN>)
 		$cattext = $line;
 		$cattext =~ s/^CATTEXT,//g;
 		$cattext =~ s/\#Comma/,/g;
+
+		# Undo html markup
+		$cattext =~ s/&lt;/</g;
 
 		# Unescape escaped single-quotes.
 		$cattext =~ s/\\'/'/g;
