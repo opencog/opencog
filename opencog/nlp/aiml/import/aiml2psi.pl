@@ -511,7 +511,7 @@ sub process_aiml_tags
 
 	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
 	{
-		# FIXME, should be like the loop, below.
+		# FIXME, should be like the star loop, below.
 		$tout .= $indent . $textnode . "\"$1\")\n";
 		$tout .= $indent . "(ExecutionOutput\n";
 		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
@@ -570,6 +570,24 @@ sub process_aiml_tags
 		$tout .= $indent . "   (ListLink\n";
 		$tout .= $indent . "       (Number \"$1\")))";
 	}
+
+	elsif ($text =~ /(.*)<set name='(.*)'>(.*)<\/set>(.*)/)
+	{
+		# FIXME, should be like the star loop, above.
+		$tout .= $indent . $textnode . "\"$1\")\n";
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag set\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= $indent . "      (Concept \"" . $2 . "\")\n";
+		$tout .= &process_aiml_tags($indent . "      ", $3);
+		$tout .= $indent . "   ))\n";
+		$tout .= $indent . $textnode . "\"$3\")\n";
+		if ($4 ne "")
+		{
+			$tout .= $indent . $textnode . "\"$4\")\n";
+		}
+	}
+
 	elsif ($text =~ /<!--.*-->/)
 	{
 		# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
