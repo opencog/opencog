@@ -83,3 +83,42 @@
         (delete-duplicates (fold pick (list (car atom-list)) atom-list))
     )
 )
+
+; --------------------------------------------------------------
+(define-public (psi-get-member-links atom)
+"
+  Returns a list of MemberLinks that are the root of the given atom.
+
+  atom:
+  - An atom you want to find its root MemberLinks.
+"
+    (define (get-roots an-atom)
+        (let ((pattern (cog-outgoing-set an-atom)))
+            (if (null? pattern)
+                '()
+                (delete-duplicates
+                    (cog-filter 'MemberLink (cog-get-root (car pattern))))
+            )))
+
+    (let ((duals (cog-outgoing-set (cog-execute! (DualLink atom)))))
+        (if (null? duals)
+            (get-roots atom)
+            (delete-duplicates (append-map get-roots duals))
+        )
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-dual-rules atom)
+"
+  Returns a list of psi-rules that atleast partially ground to the given atom.
+
+  atom:
+  - An atom you want to possibly will ground a psi-rule.
+"
+    (let ((member-links (psi-get-member-links atom)))
+         (delete-duplicates (append-map
+             (lambda (x) (filter psi-rule? (cog-outgoing-set x)))
+             member-links))
+    )
+)
