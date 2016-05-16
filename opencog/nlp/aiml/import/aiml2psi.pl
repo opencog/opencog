@@ -574,6 +574,21 @@ sub process_aiml_tags
 		$tout .= $indent . "       (Number \"$1\")))";
 	}
 
+	elsif ($text =~ /(.*)<think>(.*)<\/think>(.*)/)
+	{
+		# FIXME, should be like the star loop, above.
+		$tout .= &split_string($indent, $1);
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag think\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= &process_aiml_tags($indent . "      ", $2);
+		$tout .= $indent . "   ))\n";
+		if ($3 ne "")
+		{
+			$tout .= &split_string($indent, $3);
+		}
+	}
+
 	elsif ($text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*?)/)
 	{
 		# FIXME, should be like the star loop, above.
