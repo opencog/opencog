@@ -574,7 +574,7 @@ sub process_aiml_tags
 		$tout .= $indent . "       (Number \"$1\")))";
 	}
 
-	elsif ($text =~ /(.*?)<set name='(.*)'>(.*)<\/set>(.*?)/)
+	elsif ($text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*?)/)
 	{
 		# FIXME, should be like the star loop, above.
 		$tout .= &split_string($indent, $1);
