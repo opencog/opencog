@@ -732,8 +732,7 @@ while (my $line = <FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$psi_ctxt = "";
-		$psi_ctxt .= "   (And\n";
+		$psi_ctxt .= "   (list\n";
 	}
 	if ($cmd eq "CATTEXT")
 	{
