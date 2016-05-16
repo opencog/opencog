@@ -551,6 +551,7 @@ sub process_aiml_tags
 		}
 	}
 
+	# <think> can wrap sets and so must appear before those parts.
 	elsif ($text =~ /(.*)<think>(.*)<\/think>(.*)/)
 	{
 		# FIXME, should be like the star loop, above.
@@ -566,6 +567,7 @@ sub process_aiml_tags
 		}
 	}
 
+	# <set> may be nested, and thus must appear before other elements.
 	elsif ($text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*?)/)
 	{
 		# FIXME, should be like the star loop, above.
@@ -630,17 +632,25 @@ sub process_aiml_tags
 		$tout .= $indent . "       (Number \"$1\")))\n";
 	}
 
-	elsif ($text =~ /(.*)<bot name='(.*)'\/>(.*)/)
+	# Multiple bots may appear in one reply.
+	elsif ($text =~ /<bot name=/)
 	{
-		$tout .= &split_string($indent, $1);
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefinedSchema \"AIML-tag bot\")\n";
-		$tout .= $indent . "   (ListLink\n";
-		$tout .= $indent . "      (Concept \"$2\")\n";
-		$tout .= $indent . "   ))\n";
-		if ($3 ne "")
+		my @bots = split /<bot/, $text;
+		foreach my $bot (@bots)
 		{
-			$tout .= &split_string($indent, $3);
+			if ($bot =~ /name='(.*)'\/>(.*)/)
+			{
+				$tout .= $indent . "(ExecutionOutput\n";
+				$tout .= $indent . "   (DefinedSchema \"AIML-tag bot\")\n";
+				$tout .= $indent . "   (ListLink\n";
+				$tout .= $indent . "      (Concept \"$1\")\n";
+				$tout .= $indent . "   ))\n";
+				$tout .= &split_string($indent, $2);
+			}
+			else
+			{
+				$tout .= &split_string($indent, $bot);
+			}
 		}
 	}
 
