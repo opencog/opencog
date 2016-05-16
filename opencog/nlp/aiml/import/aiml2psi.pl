@@ -30,33 +30,29 @@ my $overwrite;
 my $aimlDir ='.';
 my $intermediateFile = 'flat-aiml.txt';
 my $finalFile = 'aiml.scm';
-my $rulebase = "*-AIML-rulebase-*";
 
 GetOptions(
     'dir=s' => \$aimlDir,
     'debug' => \$debug,
     'help' => \$help,
-    'rulebase-name=s' => \$rulebase,
     'last-only' => \$overwrite,
     'version' => \$version,
     'intermediate=s' => \$intermediateFile,
     'out=s' => \$finalFile,
-) or die "Usage: $0 [--debug] [--help] [--version] [--rulebase-name] [--last-only] [--dir
-<AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
+) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
 
 if ($help)
 {
 	print "Convert AIML markup files to OpenCog Atomese files.\n";
 	print "\n";
-	print "Usage: $0 [--debug] [--help] [--version] [--rulebase-name] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
+	print "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
 	print "   --debug                 Enable debugging (if any).\n";
 	print "   --help                  Print these helpful comments.\n";
 	print "   --version               Print version, current version '$ver'\n";
-	print "   --rulebase-name         Specify a name for the ruleset, default '$rulebase'\n";
 	print "   --last-only             Only the last category is output.\n";
 	print "   --dir <directory>       AIML source directory, default: '$aimlDir'\n";
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
-	print "   --out <file>          OpenCog output file, default is '$finalFile'\n";
+	print "   --out <file>            OpenCog output file, default is '$finalFile'\n";
 	die "\n";
 }
 
