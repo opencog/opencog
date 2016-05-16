@@ -605,6 +605,19 @@ sub process_aiml_tags
 		}
 	}
 
+	elsif ($text =~ /(.*)<that\/>(.*)/)
+	{
+		# FIXME, should be like the star loop, above.
+		$tout .= &process_aiml_tags($indent . "      ", $1);
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
+		$tout .= $indent . "   (ListLink))\n";
+		if ($2 ne "")
+		{
+			$tout .= &split_string($indent, $2);
+		}
+	}
+
 	elsif ($text =~ /<!--.*-->/)
 	{
 		# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
