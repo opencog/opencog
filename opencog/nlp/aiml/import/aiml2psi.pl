@@ -574,7 +574,7 @@ sub process_aiml_tags
 		$tout .= $indent . "       (Number \"$1\")))";
 	}
 
-	elsif ($text =~ /(.*)<set name='(.*)'>(.*)<\/set>(.*)/)
+	elsif ($text =~ /(.*?)<set name='(.*)'>(.*)<\/set>(.*?)/)
 	{
 		# FIXME, should be like the star loop, above.
 		$tout .= &split_string($indent, $1);
@@ -584,7 +584,6 @@ sub process_aiml_tags
 		$tout .= $indent . "      (Concept \"" . $2 . "\")\n";
 		$tout .= &process_aiml_tags($indent . "      ", $3);
 		$tout .= $indent . "   ))\n";
-		$tout .= &split_string($indent, $3);
 		if ($4 ne "")
 		{
 			$tout .= &split_string($indent, $4);
