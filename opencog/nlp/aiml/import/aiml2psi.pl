@@ -630,6 +630,20 @@ sub process_aiml_tags
 		$tout .= $indent . "       (Number \"$1\")))\n";
 	}
 
+	elsif ($text =~ /(.*)<bot name='(.*)'\/>(.*)/)
+	{
+		$tout .= &split_string($indent, $1);
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag bot\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= $indent . "      (Concept \"$2\")\n";
+		$tout .= $indent . "   ))\n";
+		if ($3 ne "")
+		{
+			$tout .= &split_string($indent, $3);
+		}
+	}
+
 	elsif ($text =~ /<!--.*-->/)
 	{
 		# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
