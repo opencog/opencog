@@ -7,10 +7,12 @@ imported, using the tools in `import` directory.
 
 Status
 ------
-*ATTTENTION* The code here is *MOTHBALLED*.
-The reason for this is that there is no compelling AIML content that
-is in any way useful to the current plans for OpenCog.  I think that
-we've moved past AIML in terms of what we can accomplish.
+Ongoing hackery
+
+
+Running
+-------
+
 
 
 Design Notes
@@ -58,11 +60,17 @@ none of the AIML rules to be imported are asking for this kind of
 information.
 
 ## Rule selection
-A typical AIML rule, represented in the AtomSpace, has this form:
+The OpenPsi-based rule importer represents a typical AIML rule in the
+following form:
 ```
-(Bind
+(Implication
+	; context
    (List (Concept "I") (Glob "$star") (Concept "you"))
-   (List (Concept "I") (Glob "$star") (Concept "you") (Concept "too")))
+	; goal
+   (List (Concept "I") (Glob "$star") (Concept "you") (Concept "too"))
+	; demand
+	(Concept "AIML chatbot demand")
+)
 ```
 
 To find this rule, we need to search for it.  This can be accomplished
@@ -72,8 +80,14 @@ by saying:
 	(Dual
 		(List (Concept "I") (Concept "love") (Concept "you"))))
 ```
-which will fint the above rule (and any other rules) that match this
-pattern.  But first, before we can do this, we must find the current
+which will find the above rule (and any other rules) that match this
+pattern. Alternately, there is a convenience wrapper:
+```
+(psi-get-dual-rules
+	(List (Concept "I") (Concept "love") (Concept "you"))))
+```
+
+But first, before we can do this, we must find the current
 sentence and parse in the atomspace.  This can be done by saying:
 ```
 (Get
@@ -108,3 +122,20 @@ several ways.  These are:
   of the naive AIML rule to only that parse.  This requires treating the
   rule as a kind of PutLink, i.e. of applying it only to a specified
   set.
+
+Misc Notes
+----------
+Hints for hand-testing this code:
+
+```
+(load "run.scm")
+(load "/tmp/aiml.scm")
+
+(map
+	(lambda (w) (Word w))
+	(string-split "you can do better" (lambda (x) (eq? x #\ ))))
+
+;; YOU CAN DO BETTER
+(psi-get-dual-rules (List (Word "you") (Word "can") (Word "do") (Word "better")))
+
+```
