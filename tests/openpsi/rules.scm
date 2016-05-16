@@ -12,6 +12,7 @@
        (ListLink
             (VariableNode "x")
             (VariableNode "y")
+            (ConceptNode "Required constant for DualLink")
             (VariableNode "z"))
         (InheritanceLink
             (VariableNode "x")
@@ -52,6 +53,7 @@
         (ListLink
             (NumberNode 1)
             (NumberNode 1)
+            (ConceptNode "Required constant for DualLink")
             (PredicateNode "z"))
         (InheritanceLink
             (NumberNode 1)
@@ -63,6 +65,7 @@
     (list ; They are in a list so as to simplify removal.
        (ListLink
             (VariableNode "x")
+            (ConceptNode "Required constant for DualLink")
             (VariableNode "z"))
         (InheritanceLink
             (VariableNode "x")
@@ -96,6 +99,7 @@
     (list ; They are in a list so as to simplify removal.
         (ListLink
             (NumberNode 1)
+            (ConceptNode "Required constant for DualLink")
             (NumberNode 2))
         (InheritanceLink
             (NumberNode 1)
@@ -138,7 +142,7 @@
 )
 
 (define (setup_test_psi_step_2)
-    ; Load groundalbe contents for satisfying rule-2 only
+    ; Load groundable contents for satisfying rule-2 only
     (groundable-content-1)
     ; Make one step
     (psi-step)

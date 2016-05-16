@@ -44,7 +44,8 @@
     (define (weight x)
         (let ((a-stv (cog-tv x)))
             (* (tv-conf a-stv) (tv-mean a-stv))))
-    (define (pick atom lst) ; prev is a list and next
+
+    (define (pick atom lst) ; prev is a `lst` and next `atom`
         (cond
             ((> (weight (car lst)) (weight atom)) lst)
             ((= (weight (car lst)) (weight atom)) (append lst (list atom)))
@@ -53,5 +54,71 @@
     (if (null? atom-list)
         '()
        (delete-duplicates (fold pick (list (car atom-list)) atom-list))
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (most-important-weighted-atoms atom-list)
+"
+  It returns a list with non-duplicating atoms with the highest
+  important-weight. If an empty list is passed an empty list is returned.
+  Weight of an atom is the product of the stength and confidence of the atom.
+
+  atom-list:
+  - A list of atoms to be compared.
+"
+    (define (weight x)
+        (let ((a-stv (cog-tv x))
+              (sti (assoc-ref (cog-av->alist (cog-av x)) 'sti)))
+            (* (tv-conf a-stv) (tv-mean a-stv) sti)))
+
+    (define (pick atom lst) ; prev is a `lst` and next `atom`
+        (cond
+            ((> (weight (car lst)) (weight atom)) lst)
+            ((= (weight (car lst)) (weight atom)) (append lst (list atom)))
+            (else (list atom))))
+
+    (if (null? atom-list)
+        '()
+        (delete-duplicates (fold pick (list (car atom-list)) atom-list))
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-member-links atom)
+"
+  Returns a list of MemberLinks that are the root of the given atom.
+
+  atom:
+  - An atom you want to find its root MemberLinks.
+"
+    (define (get-roots an-atom)
+        (let ((pattern (cog-outgoing-set an-atom)))
+            (if (null? pattern)
+                '()
+                (delete-duplicates
+                    (cog-filter 'MemberLink (cog-get-root (car pattern))))
+            )))
+
+    (let ((duals (cog-outgoing-set (cog-execute! (DualLink atom)))))
+        (if (null? duals)
+            (get-roots atom)
+            (delete-duplicates (append-map get-roots duals))
+        )
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-dual-rules atom)
+"
+  Returns a list of psi-rules that atleast partially ground to the given atom.
+
+  atom:
+  - An atom you want to possibly will ground a psi-rule.
+"
+    (let ((member-links (psi-get-member-links atom)))
+         (delete-duplicates (append-map
+             (lambda (x) (filter psi-rule? (cog-outgoing-set x)))
+             member-links))
     )
 )
