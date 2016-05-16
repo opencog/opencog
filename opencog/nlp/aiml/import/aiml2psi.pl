@@ -632,6 +632,28 @@ sub process_aiml_tags
 		$tout .= $indent . "       (Number \"$1\")))\n";
 	}
 
+	# Multiple gets may appear in one reply.
+	elsif ($text =~ /<get name=/)
+	{
+		my @gets = split /<get/, $text;
+		foreach my $get (@gets)
+		{
+			if ($get =~ /name='(.*)'\/>(.*)/)
+			{
+				$tout .= $indent . "(ExecutionOutput\n";
+				$tout .= $indent . "   (DefinedSchema \"AIML-tag get\")\n";
+				$tout .= $indent . "   (ListLink\n";
+				$tout .= $indent . "      (Concept \"$1\")\n";
+				$tout .= $indent . "   ))\n";
+				$tout .= &split_string($indent, $2);
+			}
+			else
+			{
+				$tout .= &split_string($indent, $get);
+			}
+		}
+	}
+
 	# Multiple bots may appear in one reply.
 	elsif ($text =~ /<bot name=/)
 	{
