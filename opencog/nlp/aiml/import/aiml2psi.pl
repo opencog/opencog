@@ -585,7 +585,7 @@ sub process_aiml_tags
 	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
 	{
 		# FIXME, should be like the star loop, below.
-		$tout .= $indent . $textnode . "\"$1\")\n";
+		$tout .= &split_string($indent, $1);
 		$tout .= $indent . "(ExecutionOutput\n";
 		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
 		$tout .= $indent . "   (ListLink\n";
@@ -593,7 +593,7 @@ sub process_aiml_tags
 		$tout .= $indent . "   ))\n";
 		if ($3 ne "")
 		{
-			$tout .= $indent . $textnode . "\"$3\")\n";
+			$tout .= &split_string($indent, $3);
 		}
 	}
 
@@ -615,7 +615,7 @@ sub process_aiml_tags
 		$tout .= $indent . "(ExecutionOutput\n";
 		$tout .= $indent . "   (DefinedSchema \"AIML-tag input\")\n";
 		$tout .= $indent . "   (ListLink\n";
-		$tout .= $indent . "       (Number \"$1\")))";
+		$tout .= $indent . "       (Number \"$1\")))\n";
 	}
 
 	elsif ($text =~ /<!--.*-->/)
