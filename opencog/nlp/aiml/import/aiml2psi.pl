@@ -512,21 +512,6 @@ sub process_aiml_tags
 		$tout .= &process_srai($indent, $text);
 	}
 
-	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
-	{
-		# FIXME, should be like the star loop, below.
-		$tout .= $indent . $textnode . "\"$1\")\n";
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
-		$tout .= $indent . "   (ListLink\n";
-		$tout .= &process_aiml_tags($indent . "      ", $2);
-		$tout .= $indent . "   ))\n";
-		if ($3 ne "")
-		{
-			$tout .= $indent . $textnode . "\"$3\")\n";
-		}
-	}
-
 	elsif ($text =~ /<star/)
 	{
 		my @stars = split /<star/, $text;
@@ -566,14 +551,6 @@ sub process_aiml_tags
 		}
 	}
 
-	elsif ($text =~ /<input\s*index\s*=\s*'(\d+)'\s*\/>/)
-	{
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefinedSchema \"AIML-tag input\")\n";
-		$tout .= $indent . "   (ListLink\n";
-		$tout .= $indent . "       (Number \"$1\")))";
-	}
-
 	elsif ($text =~ /(.*)<think>(.*)<\/think>(.*)/)
 	{
 		# FIXME, should be like the star loop, above.
@@ -605,6 +582,21 @@ sub process_aiml_tags
 		}
 	}
 
+	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
+	{
+		# FIXME, should be like the star loop, below.
+		$tout .= $indent . $textnode . "\"$1\")\n";
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= &process_aiml_tags($indent . "      ", $2);
+		$tout .= $indent . "   ))\n";
+		if ($3 ne "")
+		{
+			$tout .= $indent . $textnode . "\"$3\")\n";
+		}
+	}
+
 	elsif ($text =~ /(.*)<that\/>(.*)/)
 	{
 		# FIXME, should be like the star loop, above.
@@ -616,6 +608,14 @@ sub process_aiml_tags
 		{
 			$tout .= &split_string($indent, $2);
 		}
+	}
+
+	elsif ($text =~ /<input\s*index\s*=\s*'(\d+)'\s*\/>/)
+	{
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag input\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= $indent . "       (Number \"$1\")))";
 	}
 
 	elsif ($text =~ /<!--.*-->/)
