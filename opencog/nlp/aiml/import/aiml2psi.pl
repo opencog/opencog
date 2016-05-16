@@ -600,10 +600,22 @@ sub process_aiml_tags
 	elsif ($text =~ /(.*)<that\/>(.*)/)
 	{
 		# FIXME, should be like the star loop, above.
-		$tout .= &process_aiml_tags($indent . "      ", $1);
+		$tout .= &split_string($indent, $1);
 		$tout .= $indent . "(ExecutionOutput\n";
 		$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
 		$tout .= $indent . "   (ListLink))\n";
+		if ($2 ne "")
+		{
+			$tout .= &split_string($indent, $2);
+		}
+	}
+
+	# XXX FIXME ? This is supposed to be equivalent to
+	# <person><star/></person> however, in the actual AIML texts,'
+	# there is not actual star, so its broken/invalid sytax.
+	elsif ($text =~ /(.*)<person\/>(.*)/)
+	{
+		$tout .= &split_string($indent, $1);
 		if ($2 ne "")
 		{
 			$tout .= &split_string($indent, $2);
@@ -753,7 +765,7 @@ while (my $line = <FIN>)
 				$rule .= "   ;; action\n";
 				$rule .= $psi_goal;
 				$rule .= "   (ListLink\n";
-				$rule .= &process_aiml_tags("      ", $curr_raw_code);  
+				$rule .= &process_aiml_tags("      ", $curr_raw_code);
 				$rule .= "   )\n";
 				$rule .= $psi_tail;
 				$rule .= ")\n";
@@ -999,9 +1011,9 @@ CATEND,0
 =OpenCog equivalents
 * R1 example.
 ```
-; Every DefinedSchema must have a globally unique name, and the 
-; original category text is as good a name as any.  Useful for 
-; debugging.  In all other respects, the actual name chosen does 
+; Every DefinedSchema must have a globally unique name, and the
+; original category text is as good a name as any.  Useful for
+; debugging.  In all other respects, the actual name chosen does
 ; not matter. The MemberLink simply describes the DefinedSchema
 ; as belonging to a particular rulebase; in this case, the rulbase
 ; is called (Concept "*-AIML-rulebase-*").  The actual name of
