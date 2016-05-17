@@ -314,6 +314,16 @@ public:
         CHKERR
         TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1_2);
 
+        // Test 2:
+        // Test for finding psi-rules using DualLink for contexts that have
+        // variables in them.
+        auto result_2_1 = _scm->eval("(test_psi_get_dual_rules_2_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `2`", "2\n" , result_2_1);
+        auto result_2_2 = _scm->eval("(test_psi_get_dual_rules_2_2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2_2);
+
         logger().info("END TEST: %s", __FUNCTION__);
     }
 };
