@@ -90,7 +90,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-all-rules)
 "
-  Returns a list of all openpsi rules.
+  Returns a list of all known openpsi rules.
 "
     (fold append '()
         (par-map (lambda (x) (cog-chase-link 'MemberLink 'ImplicationLink x))
@@ -221,30 +221,36 @@
 )
 
 ; --------------------------------------------------------------
+(define-public (psi-get-all-satisfiable-rules)
+"
+  Returns a list of all the psi-rules that are satisfiable.
+"
+    (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
+        (psi-get-all-rules))
+)
+
+; --------------------------------------------------------------
 (define-public (psi-default-action-selector a-random-state)
 "
-  Retruns a list of one of the most weighted and satisfiable psi-rules. A single
-  psi-rule is returned so as help avoid mulitple actions of the same effect or
-  type(aka semantic of the action) from being executed. If a satisfiable rule
-  doesn't exist then the empty list is returned.
+  Returns a list of one of the most-important-weighted and satisfiable psi-rule
+  or an empty list. A single psi-rule is returned so as help avoid mulitple
+  actions of the same effect or type(aka semantic of the action) from being
+  executed. If a satisfiable rule doesn't exist then the empty list is returned.
 
   a-random-state:
-  - A random-state object used as a seed on how psi-rules of a demand, that are
-  satisfiable, are to be choosen.
+  - A random-state object used as a seed for choosing how multiple satisfiable
+  psi-rules with the same weight are to be choosen.
 "
-    (define (choose-one-rule demand-node)
-        ; Returns an empty list or a list containing a randomly choosen
-        ; satisfiable psi-rule.
-        (let ((rules (most-weighted-atoms
-                        (psi-get-satisfiable-rules demand-node))))
-            (if (null? rules)
-                '()
-                (list (list-ref rules (random (length rules) a-random-state)))))
+    (define (choose-rules)
+        ; NOTE: This check is required as ecan isn't being used continuesely.
+        ; Remove `most-weighted-atoms` version once ecan is integrated.
+        (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
+            (most-weighted-atoms (psi-get-all-satisfiable-rules))
+            (most-important-weighted-atoms (psi-get-all-satisfiable-rules))
+        )
     )
 
-    (let* ((set-link (psi-get-all-demands))
-           (demands (cog-outgoing-set set-link))
-           (rules (append-map choose-one-rule demands)))
+    (let ((rules (choose-rules)))
         (if (null? rules)
             '()
             (list (list-ref rules (random (length rules) a-random-state)))

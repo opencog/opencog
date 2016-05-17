@@ -58,7 +58,45 @@ is similar to `Belief + Intention ==> Desire`.
 Coming soon :smile:
 
 ### OpenPsi algorithm
-Coming soon :smile:
+1. psi-step:
+  * It wraps all the logic that is described below. And is run once per cycle.
+    See function `(psi-step)` which is the entry point [here](main.scm).
+
+2. choose action-selector:
+  * If you have defined an action selector then it will be used else the
+    default action selector is used. See function `(psi-select-rules)`
+    [here](main.scm).
+  * Only one action-selector is used in each step for all the demands. See
+    `psi-add-action-selector` and `psi-action-selector-set!`
+    [here](action-selector.scm) for adding and setting your an action-selector.
+
+3. default action selector:
+  * Most-weighted-satisfiable psi-rules of each demand are filtered out. If
+    there are more than one of them then one is randomly selected.
+  * The weight is calculated as the product of strength and confidence of the
+    psi-rule.
+  * A rule is checked if is satisfiable by extracting the context and wrapping
+    it in a `SatisfactionLink` before evaluating it. If TRUE_TV is returned
+    it means that is it satisifiable. See function `psi-satisfiable?`
+    [here](main.scm).
+
+4. action execution and goal evaluation:
+  * After the rules are choosen then the action and goals are extracted. During
+    the goal extraction, every goal that is related through the action are
+    choosen.
+  * Related/associated goals are those that are the implicand of the psi-rules
+    that have the given action in the implicant, that is, if more than one rule
+    has the same action helping achieve different goals then those goals are
+    related/associated. Thus, the execution of the given action should result
+    in achiving those goals as well, regardless of whether the rules that
+    resulted in the association are selected or not. See `psi-related-goals`
+    [here](main.scm).
+  * Then actions are executed followed by the evaluation of the goals. No check
+    is made before evaluating of goals to see if the action has been executed.
+    It is assumed that if the context is satisfied then there is nothing that
+    prevents the action from executing. __This assumption might not work when
+    ecan or some other process that modifys the context is running in
+    parallel.__
 
 <!--
 See [here](../../examples/openpsi) for some sample implementations of the

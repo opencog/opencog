@@ -391,3 +391,19 @@ adjectives should trigger these.
 Self-awareness questions:
 
    Where are you looking?   XXX this got broken, and the fix is hard.
+
+===========================
+TODO
+
+ActionLink could be/should be renamed ExecutionLink
+
+... and have Inheritance to identify it as a kind of action.
+
+
+OpenPsi:
+    ImplicationLink
+        AndLink
+            Predicate - Is there a new verbal command?
+            ExecuteOutputLink
+                Obey the command
+        Goal- "Obey user"

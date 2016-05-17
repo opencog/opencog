@@ -156,7 +156,7 @@
 ;; Result should be:
 ;;
 ;; (Implication (stv 0.1 0.5)
-;;    (LambdaLink (stv 0.001 0.9)
+;;    (LambdaLink (stv 0.0002 0.9)
 ;;       (VariableList
 ;;          (TypedVariable
 ;;             (Variable "$X")
@@ -195,8 +195,7 @@
 
 ;; (7) Infer that honest human acquaintances tend to become friends
 ;; (more so than just human acquaintances). Apply rule
-;; implication-implicant-conjunction-rule on (6) and the knowledge
-;; that human acquantances tend to become friend in the kb.
+;; implication-implicant-conjunction-rule on (6) and (5).
 ;;
 ;; Result should be:
 ;;
@@ -277,12 +276,13 @@
 (cog-bind implication-implicant-conjunction-rule)
 
 ;; (8) Factorize lambda in implicant of (7). Apply rule
-;; and-lambda-factorization-double-implication-rule to (7).
+;; and-lambda-factorization-double-implication-rule to the implicant
+;; of (7).
 ;;
 ;; Result should be:
 ;;
 ;; (ImplicationLink (stv 1 1)
-;;    (LambdaLink (stv 0.000128 0.89999998)  <-- TODO wrong TV on the FC
+;;    (LambdaLink (stv 0.000128 0.89999998)
 ;;       (VariableList
 ;;          (TypedVariableLink
 ;;             (VariableNode "$X")
