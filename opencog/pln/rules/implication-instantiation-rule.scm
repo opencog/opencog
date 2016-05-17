@@ -74,24 +74,127 @@
 ;;
 ;; 2. performs the substitution.
 ;;
-;; 3. calculates its TV (just the TV on the ImplicationLink)
+;; 3. calculates its TV as follows
 ;;
-;; If no substitution is possible it returns the undefined handle
+;;    Strength:
+;;
+;;       Let s be the strength of the Implication TV. Let Ps be the
+;;       strength of the TV of P[V->T], and Qs, the strength of the TV of
+;;       Q[V-T] to calculate. We define the formula as follows
+;;
+;;       Q(a) = s*P(a)
+;;
+;;       where P(a) and Q(a) are respectively the membership strengths
+;;       of a in P and Q.
+;;
+;;       Proof: s, the implication strength is, by definition (see PLN
+;;       book, Section 2.4.1.1, page 29)
+;;
+;;            Sum_x min(P(x), Q(x))
+;;       s = ----------------------
+;;                 Sum_x P(x)
+;;
+;;       where P(x), Q(x) are respectively the membership degrees of x
+;;       to P and Q. Let's assume that a is the substitution term, and
+;;       extract it from the sums
+;;
+;;            min(P(a), Q(a) + Sum_{x in X-a} min(P(x), Q(x))
+;;       s = ------------------------------------------------
+;;                      P(a) + Sum_{x in X-a} P(x)
+;;
+;;
+;;       Let's move the denominator to the left side and distribution s
+;;
+;;       s * P(a) + s * Sum_{x in X-a} P(x)
+;;       = min(P(a), Q(a) + Sum_{x in X-a} min(P(x), Q(x))
+;;
+;;       Let's divide every side by Sum_{x in X-a} P(x)
+;;
+;;      s * P(a)               min(P(a), Q(a))     Sum_{x in X-a} min(P(x), Q(x))
+;; ------------------- + s = ------------------- + ------------------------------
+;; Sum_{x in X-a} P(x)       Sum_{x in X-a} P(x)       Sum_{x in X-a} P(x)
+;;
+;;       Now, let's assume that P's and Q's support are infinite, thus
+;;
+;;       Sum_{x in X-a} min(P(x), Q(x))   Sum_x min(P(x), Q(x))
+;;       ------------------------------ = --------------------- = s
+;;            Sum_{x in X-a} P(x)              Sum_x P(x)
+;;
+;;       This allows us to simplify
+;;
+;;            s * P(a)               min(P(a), Q(a))
+;;       ------------------- + s = ------------------- + s
+;;       Sum_{x in X-a} P(x)       Sum_{x in X-a} P(x)
+;;
+;;       and finally
+;;
+;;       s * P(a) = min(P(a), Q(a))
+;;
+;;       if s = 1, P(a) = min(P(a), Q(a)) thus Q(a) >= P(a)
+;;
+;;       if s < 1, s * P(a) = min(P(a), Q(a)) thus Q(a) = s * P(a),
+;;       because min(P(a), Q(a)) < P(a), thus Q(a) < P(a), which by
+;;       definition of the min, Q(a) = min(P(a), Q(a)).
+;;
+;;       So Q(a) is only determined if s < 1, Q(a) = s * P(a). However, for
+;;       the sake of continuity, we'll assume that Q(a) = P(a) when s = 1.
+;;
+;;    Confidence:
+;;
+;;       Let c be the confidence of the implication TV, P(a).c the
+;;       confidence of the TV of P[V->a], and Q(a).c the confidence of
+;;       the TV of Q[V->a]. Q(a).c is calculated as follows
+;;
+;;       Q(a).c = c * P(a).c * (1-P.s)
+;;
+;;       where P.s is the strength of predicate P, the precondition.
+;;
+;;       Informal (wrong) proof: The c * P(a).c part makes sense
+;;       intuitively. The (1-P.s) is less intuitive, but here is the
+;;       argument for it. The larger P the more elements which are not
+;;       `a` are used to calculate the probability on the
+;;       implication. Anything that isn't `a` is in fact a potential
+;;       distraction toward the true membership of Q(a).
+;;
 (define (implication-full-instantiation-formula Impl)
-  (let* (
-         (Impl-outgoings (cog-outgoing-set Impl))
+  (let* ((Impl-outgoings (cog-outgoing-set Impl))
+         (Impl-s (cog-stv-strength Impl))
+         (Impl-c (cog-stv-confidence Impl))
          (TyVs (car Impl-outgoings))
          (P (cadr Impl-outgoings))
+         (P-s (cog-stv-strength P))
+         (P-c (cog-stv-confidence P))
+         ;; Hacks to overcome the lack of distributional TV. If s=1
+         ;; and c=0, then assign s to the mode value satisfying the
+         ;; deduction consistency constraint (what a pain, let's use
+         ;; 0.25 for now).
+         (P-s (if (and (< 0.99 P-s) (<= P-c 0)) 0.25 P-s))
          (Q (caddr Impl-outgoings))
-         (terms (select-conditioned-substitution-terms TyVs P)))
+         (terms (if (= 0 Impl-c) ; don't try to instantiate zero
+                                 ; knowledge implication
+                    (cog-undefined-handle)
+                    (select-conditioned-substitution-terms TyVs P))))
     (if (equal? terms (cog-undefined-handle))
-        terms
-        ;; Substitute the variables by the terms in the body
-        (let* ((put (PutLink (LambdaLink TyVs Q) terms))
-               (inst (cog-execute! put)))
-          ;; Remove the PutLink to not pollute the atomspace
-          (extract-hypergraph put)
-          (cog-set-tv! inst (cog-tv Impl))))))
+        (cog-undefined-handle)
+        ;; Substitute the variables by the terms in P and Q. In P to
+        ;; get its TV, in Q cause it's the rule output.
+        (let* (
+               (Pput (PutLink (LambdaLink TyVs P) terms))
+               (Pinst (cog-execute! Pput))
+               (Pinst-s (cog-stv-strength Pinst))
+               (Pinst-c (cog-stv-confidence Pinst))
+               (Qput (PutLink (LambdaLink TyVs Q) terms))
+               (Qinst (cog-execute! Qput))
+               (Qinst-s (* Impl-s Pinst-s))
+               ;; (Qinst-c (* Impl-c Pinst-c (if (< 0 P-c ) (- 1 P-s) 1))))
+               (Qinst-c (* Impl-c Pinst-c (- 1 P-s))))
+          ;; Remove the PutLinks to not pollute the atomspace
+          ;; TODO: replace this by something more sensible
+          ;; (extract-hypergraph Pput)
+          ;; (extract-hypergraph Qput)
+          (if (= 0 Qinst-c) ; avoid creating informationless knowledge
+              (cog-undefined-handle)
+              (cog-merge-hi-conf-tv! Qinst (stv Qinst-s Qinst-c)))))))
 
 ;; Name the rule
 (define implication-full-instantiation-rule-name

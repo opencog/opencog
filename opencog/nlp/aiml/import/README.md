@@ -4,15 +4,8 @@ This directory contains a perl script to convert AIML to OpenCog
 Atomese, so that the AIML rules can be integrated into the rest of
 the OpenCog natural language processing infrastructure.
 
-The directory `scm-variant` contains a scheme implementation of an
-AIML-to-Atomese converter.  Its discouraged, because its mis-designed,
-and is harder to maintain than the perl script.
-
-*ATTTENTION* Although the perl script here is correctly designed, and
-it works, generating the proper format, the code here is *MOTHBALLED*.
-The reason for this is that there is no compelling AIML content that
-is in any way useful to the current plans for OpenCog.  I think that
-we've moved past AIML in terms of what we can accomplish.
+The current target of the importer is to generate OpenPsi-compatable
+rules, so that the openpsi rule engine can act as an AIML engine.
 
 
 ### Usage
@@ -65,3 +58,20 @@ tags in patterns. These could either be passed on to OpenCog as either
 a pointer to a collection concept, the collection list itself, a
 collection concept with its definition, or various ways of unrolling
 the defined set in intermediate format using duplicate definitions.
+
+### Output format
+
+The output format is in the form of OpenPsi rules, which have the format:
+```
+(Implication
+	(AndLink  (stv strength confidence)
+		(context)
+		(action))
+	(demand-goal))
+
+(Member (action) (Concept "OpenPsi: action"))
+
+(Member (implication) (demandgoal))
+```
+
+The scheme functions `psi-rule` and `psi-demand` create these.

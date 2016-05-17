@@ -2,19 +2,10 @@
 ;; A list of the helper functions necessary in different inference rules
 ;; -----------------------------------------------------------------------------
 ;; Index
-;; - inversion-strength-formula
 ;; - simple-deduction-strength-formula
+;; - inversion-strength-formula
 ;; - find-replace
 ;;------------------------------------------------------------------------------
-
-
-;; =============================================================================
-;; Inversion Formula
-;; sBA = (sAB * sB)/sA
-;; -----------------------------------------------------------------------------
-
-(define (inversion-strength-formula sAB sA sB)
-	(/ (* sAB sB) sA))
 
 ;; =============================================================================
 ;; Simple Deduction Formula
@@ -23,32 +14,32 @@
 ;;
 ;;   1. Check that P(B|A) makes sense
 ;;
-;;      1.a P(B|A) is defined
+;;      1.a. P(B|A) is defined
 ;;
 ;;         0.0 < sA
 ;;
-;;      1.b P(B|A) is greater than or equal to P(A,B)/P(A) considering
+;;      1.b. P(B|A) is greater than or equal to P(A,B)/P(A) considering
 ;;      the smallest possible intersection between A and B
 ;;
 ;;         max((sA+sB-1)/sA, 0) <= sAB
 ;;
-;;      1.c P(B|A) is smaller than P(A,B)/P(A) considering the largest
+;;      1.c. P(B|A) is smaller than P(A,B)/P(A) considering the largest
 ;;      possible intersection between A and B
 ;;
 ;;         sAB <= min(1, sB/sA)
 ;;
 ;;   2. Check that P(C|B) makes sense
 ;;
-;;      1.a P(C|B) is defined
+;;      1.a. P(C|B) is defined
 ;;
 ;;         0.0 < sB
 ;;
-;;      1.b P(C|B) is greater than P(B,C)/P(B) considering the
+;;      1.b. P(C|B) is greater than P(B,C)/P(B) considering the
 ;;      smallest possible intersection between B and C
 ;;
 ;;         max((sB+sC-1)/sB, 0) <= sBC
 ;;
-;;      1.c P(C|B) is greater than P(B,C)/P(B) considering the
+;;      1.c. P(C|B) is greater than P(B,C)/P(B) considering the
 ;;      largest possible intersection between B and C
 ;;
 ;;         sBC <= min(1, sC/sB)
@@ -72,25 +63,27 @@
 ;; first place.
 ;; -----------------------------------------------------------------------------
 
+(use-modules (opencog logger))
+
 ; Consistency Conditions
-(define (deduction-smallest-intersection sA sB)
+(define (smallest-intersection-probability sA sB)
   (max (/ (+ sA sB -1) sA) 0))
 
-(define (deduction-largest-intersection sA sB)
+(define (largest-intersection-probability sA sB)
   (min (/ sB sA) 1))
 
-(define (deduction-consistency sA sB sAB)
+(define (conditional-probability-consistency sA sB sAB)
   (and (< 0 sA)
-       (<= (deduction-smallest-intersection sA sB) sAB)
-       (<= sAB (deduction-largest-intersection sA sB))))
+       (<= (smallest-intersection-probability sA sB) sAB)
+       (<= sAB (largest-intersection-probability sA sB))))
 
 ; Main Formula
 
 (define (simple-deduction-strength-formula sA sB sC sAB sBC)
   (if
      (and
-        (deduction-consistency sA sB sAB)
-        (deduction-consistency sB sC sBC))
+        (conditional-probability-consistency sA sB sAB)
+        (conditional-probability-consistency sB sC sBC))
      ;; Preconditions are met
      (if (< 0.99 sB)
         ;; sB tends to 1
@@ -99,6 +92,53 @@
         (+ (* sAB sBC) (/ (* (- 1 sAB) (- sC (* sB sBC))) (- 1 sB))))
      ;; Preconditions are not met
      0))
+
+;; =============================================================================
+;; Inversion Formula
+;;
+;; Preconditions:
+;;
+;;   1. Check that P(B|A) makes sense
+;;
+;;      1.a. P(B|A) is defined
+;;
+;;         0.0 < sA
+;;
+;;      1.b. P(B|A) is greater than or equal to P(A,B)/P(A) considering
+;;      the smallest possible intersection between A and B
+;;
+;;         max((sA+sB-1)/sA, 0) <= sAB
+;;
+;;      1.c. P(B|A) is smaller than P(A,B)/P(A) considering the largest
+;;      possible intersection between A and B
+;;
+;;         sAB <= min(1, sB/sA)
+;;
+;;   2. Check that P(A|B) makes sense
+;;
+;;      1. P(A|B) is defined
+;;
+;;         0.0 < sB
+;;
+;;         And that is all, ultimately the calculation should result
+;;         into a consistent sBA (or let's hope so).
+;;
+;; Calculation:
+;;
+;;   sBA = (sAB * sB) / sA
+;;
+;; -----------------------------------------------------------------------------
+
+(define (inversion-consistency sA sB sAB)
+  (and (< 0 sA)
+       (< 0 sB)
+       (<= (smallest-intersection-probability sA sB) sAB)
+       (<= sAB (largest-intersection-probability sA sB))))
+
+(define (inversion-strength-formula sA sB sAB)
+  (if (inversion-consistency sA sB sAB)
+      (/ (* sAB sA) sB)
+      0))
 
 ;; =============================================================================
 ;; Basic find and replace formula
