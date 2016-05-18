@@ -43,3 +43,16 @@
         (Inheritance (Variable "$interp") (DefinedLinguisticConcept "TruthQuerySpeechAct"))
     ))
 )
+
+(define (did-someone-say-this? . words)
+    ; TODO: Similar to "do-fuzzy-match"
+    (stv 1 1)
+)
+
+(Define
+    (DefinedPredicate "is-a-question?")
+    (Satisfaction (Or
+        (DefinedPredicate "is-interrogative?")
+        (DefinedPredicate "is-truth-query?")
+    ))
+)

@@ -7,13 +7,14 @@
              (opencog openpsi))
 
 (load-r2l-rulebase)
-(set! relex-server-host "172.17.0.3")
+(set! relex-server-host "172.17.0.2")
 
 ;-------------------------------------------------------------------------------
 ; Schema function for chatting
 
 (define (chat utterance)
-    (let ((sent-node (car (nlp-parse utterance))))
+    (let* ((sent-node (car (nlp-parse utterance)))
+           (speech-act (cog-name (car (sentence-get-utterance-type sent-node)))))
         (State input-utterance
             (Reference
                 (List
@@ -35,6 +36,9 @@
             (Time (current-time))
         )
         ; TODO: Check the speech act and feed to external sources
+        (if (equal? speech-act "InterrogativeSpeechAct")
+            (display "Should send to external source for finding answers...")
+        )
     )
     (newline)
 )
@@ -56,6 +60,12 @@
 
 ; Load the available contexts
 (load "contexts.scm")
+
+; Load the available actions
+(load "actions.scm")
+
+; Load the psi-rules
+(load "psi-rules.scm")
 
 ; Run OpenPsi
 (psi-run)
