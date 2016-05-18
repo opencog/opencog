@@ -90,20 +90,18 @@
   Returns a list of MemberLinks that are the root of the given atom.
 
   atom:
-  - An atom you want to find its root MemberLinks.
+  - An atom that possibly has root MemberLinks.
 "
     (define (get-roots an-atom)
-        (let ((pattern (cog-outgoing-set an-atom)))
-            (if (null? pattern)
-                '()
-                (delete-duplicates
-                    (cog-filter 'MemberLink (cog-get-root (car pattern))))
-            )))
+        (delete-duplicates (cog-filter 'MemberLink (cog-get-root an-atom))))
 
     (let ((duals (cog-outgoing-set (cog-execute! (DualLink atom)))))
         (if (null? duals)
             (get-roots atom)
-            (delete-duplicates (append-map get-roots duals))
+            (delete-duplicates (merge
+                (append-map get-roots duals)
+                (get-roots atom)
+                (lambda (x y) #t)))
         )
     )
 )
@@ -114,7 +112,7 @@
   Returns a list of psi-rules that atleast partially ground to the given atom.
 
   atom:
-  - An atom you want to possibly will ground a psi-rule.
+  - An atom that possibly will ground or forms the context of a psi-rule.
 "
     (let ((member-links (psi-get-member-links atom)))
          (delete-duplicates (append-map

@@ -294,4 +294,36 @@ public:
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
+
+    // Check the scheme function `psi-get-dual-rules`
+    void test_psi_get_dual_rules()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Add the rules
+        _scm->eval_h("(setup_test_psi_get_dual_rules)");
+        CHKERR
+
+        // Test 1:
+        // Test for finding psi-rules with context without variable in them,
+        // aka canned rules.
+        auto result_1_1 = _scm->eval("(test_psi_get_dual_rules_1_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1_1);
+        auto result_1_2 = _scm->eval("(test_psi_get_dual_rules_1_2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1_2);
+
+        // Test 2:
+        // Test for finding psi-rules using DualLink for contexts that have
+        // variables in them.
+        auto result_2_1 = _scm->eval("(test_psi_get_dual_rules_2_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `2`", "2\n" , result_2_1);
+        auto result_2_2 = _scm->eval("(test_psi_get_dual_rules_2_2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2_2);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
 };

@@ -6,20 +6,23 @@
 ; 2. run  (add-to-load-path "/absolute/path/to/build/opencog/scm")
 ; 3. (use-modules (opencog) (opencog openpsi))
 
+; NOTE: The context of the rules are created so as to test possible generic
+; atomese patterns during application development, thus the semantics might
+; not make sense.
 ; --------------------------------------------------------------
 (define context-1
     (list
        (ListLink
-            (VariableNode "x")
-            (VariableNode "y")
-            (ConceptNode "Required constant for DualLink")
-            (VariableNode "z"))
+            (VariableNode "x1")
+            (VariableNode "y1")
+            (ConceptNode "Required constant for DualLink-1")
+            (VariableNode "z1"))
         (InheritanceLink
-            (VariableNode "x")
-            (VariableNode "z"))
+            (VariableNode "x1")
+            (VariableNode "z1"))
         (EqualLink
-            (VariableNode "x")
-            (VariableNode "y"))
+            (VariableNode "x1")
+            (VariableNode "y1"))
         ))
 
 (define action-1
@@ -53,7 +56,7 @@
         (ListLink
             (NumberNode 1)
             (NumberNode 1)
-            (ConceptNode "Required constant for DualLink")
+            (ConceptNode "Required constant for DualLink-1")
             (PredicateNode "z"))
         (InheritanceLink
             (NumberNode 1)
@@ -64,15 +67,15 @@
 (define context-2
     (list ; They are in a list so as to simplify removal.
        (ListLink
-            (VariableNode "x")
-            (ConceptNode "Required constant for DualLink")
-            (VariableNode "z"))
+            (VariableNode "x2")
+            (ConceptNode "Required constant for DualLink-2")
+            (VariableNode "z2"))
         (InheritanceLink
-            (VariableNode "x")
-            (VariableNode "z"))
+            (VariableNode "x2")
+            (VariableNode "z2"))
         (NotLink (EqualLink
-            (VariableNode "x")
-            (VariableNode "z")))
+            (VariableNode "x2")
+            (VariableNode "z2")))
         ))
 
 (define action-2
@@ -99,7 +102,7 @@
     (list ; They are in a list so as to simplify removal.
         (ListLink
             (NumberNode 1)
-            (ConceptNode "Required constant for DualLink")
+            (ConceptNode "Required constant for DualLink-2")
             (NumberNode 2))
         (InheritanceLink
             (NumberNode 1)
@@ -163,3 +166,68 @@
 )
 
 (define (test_psi_step_3_1) (cog-node? (cog-node 'ConceptNode "act-2")))
+
+; --------------------------------------------------------------
+; Helper functions for `OpenPsiUTest::test_psi_get_dual_rules`
+(define action-4
+    (ExecutionOutputLink
+        (GroundedSchemaNode "scm: act-4")
+        (ListLink)))
+
+(define (act-4)
+    (ConceptNode "act-4")
+)
+
+(define goal-4
+    (EvaluationLink
+        (GroundedPredicateNode "scm: test-update-tv")
+        (ListLink
+            demand-1
+            (NumberNode .5))))
+
+
+(define (groundable-content-4)
+    (list ; They are in a list so as to simplify removal.
+        (ListLink
+            (NumberNode 1)
+            (NumberNode 2))
+        (InheritanceLink
+            (NumberNode 1)
+            (NumberNode 2)))
+)
+
+(define (rule-4)
+    (psi-rule (groundable-content-4) action-4 goal-4 (stv 1 1) demand-1))
+
+(define (rule-5)
+    (psi-rule (list context-1 (groundable-content-4)) action-1 goal-2 (stv 1 1) demand-2))
+
+(define (setup_test_psi_get_dual_rules)
+    (rule-1)
+    (rule-2)
+    (rule-3)
+    (rule-4)
+    (rule-5)
+)
+
+(define (test_psi_get_dual_rules_1_1)
+    (equal? (car (psi-get-dual-rules (car (groundable-content-4)))) (rule-4))
+)
+
+(define (test_psi_get_dual_rules_1_2)
+    (equal? (car (psi-get-dual-rules (cadr (groundable-content-4)))) (rule-4))
+)
+
+(define (test_psi_get_dual_rules_2_1)
+    (length (psi-get-dual-rules (car (groundable-content-1))))
+)
+
+(define (test_psi_get_dual_rules_2_2)
+    (if (and
+            (member (rule-1) (psi-get-dual-rules (car (groundable-content-1))))
+            (member (rule-5) (psi-get-dual-rules (car (groundable-content-1)))))
+        #t
+        #f
+    )
+)
+; --------------------------------------------------------------
