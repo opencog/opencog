@@ -129,13 +129,33 @@ Hints for hand-testing this code:
 
 ```
 (load "run.scm")
+(use-modules (opencog) (opencog nlp) (opencog openpsi))
 (load "/tmp/aiml.scm")
+```
+Except that loading the aiml rules triggers a compile, which takes too
+long.  So need to disable compiling.
 
+
+Search for the rules:
+```
+;; YOU CAN DO BETTER
+(psi-get-dual-rules (List (Word "you") (Word "can") (Word "do") (Word "better")))
+```
+write a quickie tokenizer:
+```
 (map
 	(lambda (w) (Word w))
 	(string-split "you can do better" (lambda (x) (eq? x #\ ))))
 
-;; YOU CAN DO BETTER
-(psi-get-dual-rules (List (Word "you") (Word "can") (Word "do") (Word "better")))
+(define (tokenize SENT-STR)
+	(ListLink (map
+		(lambda (w) (Word w))
+		(string-split SENT-STR (lambda (x) (eq? x #\ ))))
+))
+
+(tokenize "you can do better")
 
 ```
+
+TODO:
+* disable compiling when loading aiml rules (or compile in background)

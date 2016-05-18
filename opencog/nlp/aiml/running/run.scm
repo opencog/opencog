@@ -24,7 +24,7 @@
 		(PredicateNode "Token Sequence")
 		PARSE
 		(ListLink
-			(remove nil?
+			(remove null?
 				(map word-inst-get-lemma (parse-get-words-in-order PARSE)))
 		))
 )
