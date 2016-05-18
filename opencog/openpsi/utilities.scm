@@ -109,14 +109,13 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-dual-rules atom)
+(define-public (psi-get-dual-rules ATOM)
 "
-  Returns a list of psi-rules that atleast partially ground to the given atom.
+  Return list of psi-rules that at least partially ground ATOM.
 
-  atom:
-  - An atom you want to possibly will ground a psi-rule.
+  ATOM should be a part of a psi-rule.
 "
-    (let ((member-links (psi-get-member-links atom)))
+    (let ((member-links (psi-get-member-links ATOM)))
          (delete-duplicates (append-map
              (lambda (x) (filter psi-rule? (cog-outgoing-set x)))
              member-links))

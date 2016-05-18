@@ -159,3 +159,5 @@ write a quickie tokenizer:
 
 TODO:
 * disable compiling when loading aiml rules (or compile in background)
+
+psi-get-dual-rules calls psi-get-member-links
