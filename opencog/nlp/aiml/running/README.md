@@ -129,7 +129,7 @@ Hints for hand-testing this code:
 
 ```
 (load "run.scm")
-(use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
+(use-modules (opencog) (opencog nlp) (opencog exec) (opencog query) (opencog openpsi))
 (load "/tmp/aiml.scm")
 ```
 Except that loading the aiml rules triggers a compile, which takes too
@@ -154,6 +154,7 @@ write a quickie tokenizer:
 ))
 
 (tokenize "you can do better")
+(tokenize "you are such a winner")
 ```
 Search for duals by hand:
 ```
@@ -172,3 +173,18 @@ TODO:
 * disable compiling when loading aiml rules (or compile in background)
 
 psi-get-dual-rules calls psi-get-member-links
+
+(Bind (List (Word "foo")) (List (Word "bar")))
+(cog-execute!
+	(Bind (ListLink
+         (Word "who")
+         (Word "supports")
+         (Glob "$star-1")
+      ) ; PATEND
+         (ListLink
+            (Word "who")
+            (Word "endorses")
+            (Glob "$star-1")
+         ))
+)
+

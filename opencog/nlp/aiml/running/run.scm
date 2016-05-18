@@ -101,8 +101,11 @@
 	(define (chat-rule? r)
 		(equal? (gdr r) (Concept "AIML chat demand")))
 
+	(define (run-rule r)
+		(Bind (gaar r) (gadr r)))
+
 	; for now, just get the responses.
-	(map gaar
+	(map run-rule
 		(filter chat-rule? (psi-get-dual-alt SENT)))
 
 )
