@@ -333,10 +333,10 @@ my $textnode = "(TextNode ";
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
 
-my $dem_kind = "   (Concept \"AIML chat demand\")\n";
-my	$truth = "   (stv 1 1)\n";
+my $psi_goal = "   (Concept \"AIML chat goal\")\n";
+my	$goal_truth = "   (stv 1 0.8)\n";
 my $demand = "   (psi-demand \"AIML chat\" 0.97)\n";
-my $psi_tail = $dem_kind . $truth . $demand;
+my $psi_tail = $psi_goal . $goal_truth . $demand;
 
 # split_string -- split a string of words into distinct nodes.
 sub split_string
