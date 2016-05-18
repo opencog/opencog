@@ -129,7 +129,7 @@ Hints for hand-testing this code:
 
 ```
 (load "run.scm")
-(use-modules (opencog) (opencog nlp) (opencog openpsi))
+(use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
 (load "/tmp/aiml.scm")
 ```
 Except that loading the aiml rules triggers a compile, which takes too
@@ -154,8 +154,19 @@ write a quickie tokenizer:
 ))
 
 (tokenize "you can do better")
+```
+Search for duals by hand:
+```
+(define sent
+	(List (Word "you") (Word "can") (Word "do") (Word "better")))
+
+(cog-execute! (DualLink sent))
+
+(cog-incoming-set sent)
+(cog-get-root sent)
 
 ```
+
 
 TODO:
 * disable compiling when loading aiml rules (or compile in background)

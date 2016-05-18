@@ -85,24 +85,25 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-member-links atom)
-"
-  Returns a list of MemberLinks that are the root of the given atom.
 
-  atom:
-  - An atom you want to find its root MemberLinks.
+(define-public (psi-get-member-links ATOM)
+"
+  psi-get-member-links ATOM - Return list of MemberLinks that hold ATOM.
+
+  All psi rules are members of some ruleset; this searches for and
+  finds such MemberLinks.
 "
     (define (get-roots an-atom)
         (let ((pattern (cog-outgoing-set an-atom)))
             (if (null? pattern)
-                '()
+                ()
                 (delete-duplicates
                     (cog-filter 'MemberLink (cog-get-root (car pattern))))
             )))
 
-    (let ((duals (cog-outgoing-set (cog-execute! (DualLink atom)))))
+    (let ((duals (cog-outgoing-set (cog-execute! (DualLink ATOM)))))
         (if (null? duals)
-            (get-roots atom)
+            (get-roots ATOM)
             (delete-duplicates (append-map get-roots duals))
         )
     )
@@ -111,7 +112,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-dual-rules ATOM)
 "
-  Return list of psi-rules that at least partially ground ATOM.
+  psi-get-dual-rules ATOM - Return list of psi-rules that can ground ATOM.
 
   ATOM should be a part of a psi-rule.
 "
