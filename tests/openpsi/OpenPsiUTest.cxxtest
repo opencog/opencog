@@ -326,4 +326,24 @@ public:
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
+
+    // Check the scheme function `psi-action?`
+    // NOTE: The name of the test function uses `__predicate` in place of `?`
+    void test_psi_action__predicate()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        auto result_1 = _scm->eval("(psi-action? action-1) ");
+        TSM_ASSERT_EQUALS("Expected `#f`", "#f\n" , result_1);
+
+        // Use the executable term `action-1` in defining a rule, that results
+        // in the term being converted to a psi recognizable action.
+        _scm->eval_h("(rule-1)");
+        CHKERR
+
+        auto result_2 = _scm->eval("(psi-action? action-1) ");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2);
+
+    }
 };
