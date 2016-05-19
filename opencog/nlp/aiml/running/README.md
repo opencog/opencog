@@ -127,14 +127,23 @@ Misc Notes
 ----------
 Hints for hand-testing this code:
 
+Pre-compile the AIML files (this can take over an hour)
+(This is optional)
+```
+time guild compile "/tmp/aiml.scm"
+```
+
 ```
 (load "run.scm")
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog query) (opencog openpsi))
-(load "/tmp/aiml.scm")
 ```
-Except that loading the aiml rules triggers a compile, which takes too
-long.  So need to disable compiling.
+a normal file load trriggers a compile; avoid this as follows:
+```
+(primitive-load "/tmp/aiml.scm")
+(guile-compile "/tmp/aiml.scm")
+(load-compiled (compiled-file-name "/tmp/aiml.scm"))
 
+```
 
 Search for the rules:
 ```

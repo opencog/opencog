@@ -98,11 +98,14 @@
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
 "
+
+	; Return #t if the rule is a aiml chat rule
 	(define (chat-rule? r)
 		(equal? (gdr r) (Concept "AIML chat demand")))
 
+	; Create a BindLink
 	(define (run-rule r)
-		(Bind (gaar r) (gadr r)))
+		(Bind (gaar r) (gdar r)))
 
 	; for now, just get the responses.
 	(map run-rule
