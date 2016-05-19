@@ -113,4 +113,13 @@
 
 )
 
+; --------------------------------------------------------------
+
+(DefineLink
+	(DefinedSchemaNode "AIML-tag srai")
+	(GroundedSchemaNode "scm: foo"))
+
+(define (foo x y z)
+	(display "duuude its this") (display y) (newline) z)
+
 ; ==============================================================

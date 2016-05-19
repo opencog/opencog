@@ -197,3 +197,5 @@ psi-get-dual-rules calls psi-get-member-links
          ))
 )
 
+(cog-execute! (car (aiml-get-response-wl s3)))
+

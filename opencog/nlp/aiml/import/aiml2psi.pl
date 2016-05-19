@@ -444,8 +444,9 @@ sub process_srai
 				$tout .= $indent . "(ExecutionOutput\n";
 				$tout .= $indent . "   (DefinedSchema \"AIML-tag srai\")\n";
 				$tout .= $indent . "   (ListLink\n";
-				$tout .= &process_aiml_tags("      " . $indent, $contig);
-				$tout .= $indent . "   ))\n";
+				$tout .= $indent . "      (ListLink\n";
+				$tout .= &process_aiml_tags("         " . $indent, $contig);
+				$tout .= $indent . "   )))\n";
 
 				$contig = $post;
 			}
