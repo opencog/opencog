@@ -67,5 +67,8 @@
 ; Load the psi-rules
 (load "psi-rules.scm")
 
+; Load the action selector
+(load "action-selector.scm")
+
 ; Run OpenPsi
 (psi-run)

@@ -82,3 +82,41 @@
     (stv .9 1)
     sociality
 )
+
+;----------
+; Input: What is your name?
+
+(define in_utt (get-words (car (nlp-parse "What is your name?"))))
+(define out_utt_1 (get-words (car (nlp-parse "My name is Red."))))
+(define out_utt_2 (get-words (car (nlp-parse "I am Red."))))
+(define out_utt_3 (get-words (car (nlp-parse "Red."))))
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "is-input-utterance?")
+        (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
+    ))
+    (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_1))
+    (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
+    (stv .9 1)
+    sociality
+)
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "is-input-utterance?")
+        (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
+    ))
+    (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_2))
+    (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
+    (stv .9 1)
+    sociality
+)
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "is-input-utterance?")
+        (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
+    ))
+    (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_3))
+    (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
+    (stv .9 1)
+    sociality
+)
