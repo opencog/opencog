@@ -122,13 +122,27 @@
 ; --------------------------------------------------------------
 (define-public (psi-action? atom)
 "
-  Check if the given atom is an atom and return `#t` if it is and `#f` either
-  wise.
+  Check if the given atom is an action and return `#t`, if it is, and `#f`
+  other wise. An atom is an action if it a member of the set represented by
+  (ConceptNode \"OpenPsi: action\").
 
   atom:
   - An atom to be checked whether it is an action or not.
 "
-    (if (member atom (psi-get-all-actions)) #t #f)
+    (let ((action-node
+            (cog-node 'ConceptNode (string-append (psi-prefix-str) "action")))
+          (candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
+
+        (if (null? action-node)
+            ; `#f` is returned becasue an action hasn't been created yet, thus
+            ; the given atom can't be an action.
+            #f
+            ; A filter is used to account for empty list as well as
+            ; cog-chase-link returning multiple results, just in case.
+            (not (null?
+                (filter (lambda (x) (equal? x action-node)) candidates)))
+        )
+    )
 )
 
 ; --------------------------------------------------------------
