@@ -105,6 +105,7 @@
 
 	; Create a BindLink
 	(define (run-rule r)
+(display "duuude run rule \n") (display r) (newline)
 		(cog-execute! (Bind (gaar r) (gdar r))))
 
 	; for now, just get the responses.

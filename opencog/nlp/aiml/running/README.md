@@ -176,6 +176,7 @@ Search for duals by hand:
 (cog-get-root sent)
 
 (define s3 (tokenize "who supports Trump?"))
+(define s3a (tokenize "who endorses Trump?"))
 (define s4 (tokenize "who won the superbowl"))
 (aiml-get-response-wl s4)
 ```
@@ -201,4 +202,20 @@ psi-get-dual-rules calls psi-get-member-links
 )
 
 (cog-execute! (car (aiml-get-response-wl s3)))
+
+(cog-execute! (Put
+   (ListLink (Word "who") (Word "supports") (Glob "$star-1"))
+	(Word "dooh")))
+
+(cog-execute! (Put
+	(Lambda
+		(ListLink (Word "who") (Word "supports") (Glob "$star-1"))
+		(ListLink (Word "who") (Word "endorses") (Glob "$star-1")))
+	(Word "dooh")))
+
+(cog-execute! (Put
+	(Lambda
+		(ListLink (Word "who") (Word "supports") (Variable "$star-1"))
+		(ListLink (Word "who") (Word "endorses") (Variable "$star-1")))
+	(Word "dooh")))
 
