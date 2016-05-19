@@ -101,11 +101,11 @@
 
 	; Return #t if the rule is a aiml chat rule
 	(define (chat-rule? r)
-		(equal? (gdr r) (Concept "AIML chat demand")))
+		(equal? (gdr r) (Concept "AIML chat goal")))
 
 	; Create a BindLink
 	(define (run-rule r)
-		(Bind (gaar r) (gdar r)))
+		(cog-execute! (Bind (gaar r) (gdar r))))
 
 	; for now, just get the responses.
 	(map run-rule
@@ -117,9 +117,12 @@
 
 (DefineLink
 	(DefinedSchemaNode "AIML-tag srai")
-	(GroundedSchemaNode "scm: foo"))
+	(GroundedSchemaNode "scm: do-aiml-srai"))
 
-(define (foo x y z)
-	(display "duuude its this") (display y) (newline) z)
+; Run AIML recursively
+(define-public (do-aiml-srai x)
+	(display "duuude srai recurse\n") (display x) (newline)
+	(aiml-get-response-wl x)
+)
 
 ; ==============================================================

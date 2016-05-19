@@ -175,6 +175,8 @@ Search for duals by hand:
 (cog-incoming-set sent)
 (cog-get-root sent)
 
+(define s3 (tokenize "who supports Trump?"))
+(aiml-get-response-wl s3)
 ```
 
 
