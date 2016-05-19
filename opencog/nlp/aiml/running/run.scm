@@ -125,4 +125,23 @@
 	(aiml-get-response-wl x)
 )
 
+(DefineLink
+	(DefinedSchemaNode "AIML-tag think")
+	(GroundedSchemaNode "scm: do-aiml-think"))
+
+(define-public (do-aiml-think x)
+	(display "duuude think\n") (display x) (newline)
+	x
+)
+
+(DefineLink
+	(DefinedSchemaNode "AIML-tag set")
+	(GroundedSchemaNode "scm: do-aiml-set"))
+
+(define-public (do-aiml-set KEY VALUE)
+	(display "duuude set\n") (display KEY) (newline)
+	(display VALUE) (newline)
+	VALUE
+)
+
 ; ==============================================================

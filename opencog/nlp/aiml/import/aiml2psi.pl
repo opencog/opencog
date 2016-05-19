@@ -573,8 +573,9 @@ sub process_aiml_tags
 		$tout .= $indent . "   (DefinedSchema \"AIML-tag set\")\n";
 		$tout .= $indent . "   (ListLink\n";
 		$tout .= $indent . "      (Concept \"" . $2 . "\")\n";
-		$tout .= &process_aiml_tags($indent . "      ", $3);
-		$tout .= $indent . "   ))\n";
+		$tout .= $indent . "      (ListLink\n";
+		$tout .= &process_aiml_tags($indent . "         ", $3);
+		$tout .= $indent . "   )))\n";
 		if ($4 ne "")
 		{
 			$tout .= &split_string($indent, $4);
