@@ -6,9 +6,12 @@
 ; 2. run  (add-to-load-path "/absolute/path/to/build/opencog/scm")
 ; 3. (use-modules (opencog) (opencog openpsi))
 
-; NOTE: The context of the rules are created so as to test possible generic
-; atomese patterns during application development, thus the semantics might
-; not make sense.
+; NOTE:
+; 1. The context of the rules are created so as to test possible generic
+;    atomese patterns during application development, thus the semantics might
+;    not make sense.
+; 2. The numbering of the demands, context, action, and goals are used for
+;    differentiating and are not necessarily related with the number of tests.
 ; --------------------------------------------------------------
 (define context-1
     (list
@@ -169,6 +172,8 @@
 
 ; --------------------------------------------------------------
 ; Helper functions for `OpenPsiUTest::test_psi_get_dual_rules`
+(define demand-4 (psi-demand  "demand-4" .87))
+
 (define action-4
     (ExecutionOutputLink
         (GroundedSchemaNode "scm: act-4")
@@ -182,7 +187,7 @@
     (EvaluationLink
         (GroundedPredicateNode "scm: test-update-tv")
         (ListLink
-            demand-1
+            demand-4
             (NumberNode .5))))
 
 
@@ -197,17 +202,14 @@
 )
 
 (define (rule-4)
-    (psi-rule (groundable-content-4) action-4 goal-4 (stv 1 1) demand-1))
+    (psi-rule (groundable-content-4) action-4 goal-4 (stv 1 1) demand-4))
+
+(define demand-5 (psi-demand  "demand-5" .87))
 
 (define (rule-5)
-    (psi-rule (list context-1 (groundable-content-4)) action-1 goal-2 (stv 1 1) demand-2))
-
-(define (setup_test_psi_get_dual_rules)
-    (rule-1)
-    (rule-2)
-    (rule-3)
-    (rule-4)
-    (rule-5)
+    (psi-rule
+        (list context-1 (groundable-content-4))
+        action-1 goal-2 (stv 1 1) demand-5)
 )
 
 (define (test_psi_get_dual_rules_1_1)
