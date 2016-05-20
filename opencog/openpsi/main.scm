@@ -25,7 +25,7 @@
   context:
   - A list containing the terms/clauses that should be met for this action
     to be taken. These are atoms that should be evaluated to return
-    TRUE_TV/FASLE_TV.
+    TRUE_TV/FALSE_TV.
 
   action:
   - It should be an atom that can be run by `cog-evaluate!`. That means that
@@ -79,7 +79,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-rules demand-node)
 "
-  Returns a list of all psi-rules that are affect the given demand.
+  Returns a list of all psi-rules that affect the given demand.
 
   demand-node:
   - The node that represents the demand.
@@ -101,7 +101,7 @@
 (define-public (psi-rule? atom)
 "
   Returns `#t` or `#f` depending on whether the passed argument is a psi-rule
-  or not. An ImplicationLink that is a member on of the demand sets is a
+  or not. An ImplicationLink that is a member of the demand sets is a
   psi-rule.
 
   atom:
@@ -123,7 +123,7 @@
 (define-public (psi-action? atom)
 "
   Check if the given atom is an action and return `#t`, if it is, and `#f`
-  other wise. An atom is an action if it a member of the set represented by
+  otherwise. An atom is an action if it a member of the set represented by
   (ConceptNode \"OpenPsi: action\").
 
   atom:
