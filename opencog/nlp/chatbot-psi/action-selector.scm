@@ -1,10 +1,13 @@
 (define (psi-as-chat)
     ; Search rules
-    ; TODO: Also need to search more... e.g. QA rules
     (define (search-rules)
         (let ((rules '()))
             ; For searching canned rules
-            (cog-chase-link 'MemberLink 'ImplicationLink canned-rule)
+            (let ((cr (cog-chase-link 'StateLink 'ListLink canned-rules)))
+                (if (not (null? cr))
+                    (set! rules (append rules (cog-outgoing-set (car cr))))
+                )
+            )
 
             ; For searching QA rules
             (set! rules (append rules (cog-chase-link 'MemberLink 'ImplicationLink qa-rule)))
@@ -47,7 +50,6 @@
             )
         )
 
-        ; TODO: Change this to most-important-weighted-atoms when ECAN is ready
         (weight-and-filter-rules (search-rules))
     )
 

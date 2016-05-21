@@ -4,8 +4,9 @@
         (display (map cog-name words))
     )
 
-    ; TODO: Reset the QA-related StateLinks if it's a question
+    ; Reset evreything
     (State input-utterance no-input-utterance)
+    (State canned-rules no-canned-rules)
     (State fuzzy-answers no-fuzzy-answers)
 )
 

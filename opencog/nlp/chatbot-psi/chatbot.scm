@@ -13,21 +13,27 @@
 ; Schema function for chatting
 
 (define (chat utterance)
-    (let* ((sent-node (car (nlp-parse utterance)))
-           (speech-act (cog-name (car (sentence-get-utterance-type sent-node)))))
-        (State input-utterance
-            (Reference
-                (List
-                    (append-map
-                        (lambda (w)
-                            (if (not (string-prefix? "LEFT-WALL" (cog-name w)))
-                                (cog-chase-link 'ReferenceLink 'WordNode w)
-                                '()
-                            )
-                        )
-                        (car (sent-get-words-in-order sent-node))
+    (define (get-words-list sent-node)
+        (List
+            (append-map
+                (lambda (w)
+                    (if (not (string-prefix? "LEFT-WALL" (cog-name w)))
+                        (cog-chase-link 'ReferenceLink 'WordNode w)
+                        '()
                     )
                 )
+                (car (sent-get-words-in-order sent-node))
+            )
+        )
+    )
+
+    (let* ((sent-node (car (nlp-parse utterance)))
+           (speech-act (cog-name (car (sentence-get-utterance-type sent-node))))
+           (list-of-words (get-words-list sent-node)))
+
+        (State input-utterance
+            (Reference
+                list-of-words
                 sent-node
             )
         )
@@ -38,8 +44,27 @@
             (Time (current-time))
         )
 
+        ; Start searching for related canned rules, if any
+        ; TODO: Check if the word is actually in the psi-context as well
+        ; TODO: Skip punctuations
+        (begin-thread
+            (let ((roots (delete-duplicates (append-map cog-get-root (cog-outgoing-set list-of-words))))
+                  (rules '()))
+                (map
+                    (lambda (m)
+                        (if (equal? (cog-type m) 'MemberLink)
+                            (if (equal? (cadr (cog-outgoing-set m)) canned-rule)
+                                (set! rules (append rules (list (car (cog-outgoing-set m)))))
+                            )
+                        )
+                    )
+                    roots
+                )
+                (State canned-rules (List rules))
+            )
+        )
+
         ; TODO: Check the speech act and feed to external sources
-        ; Potentially these could be psi-rules
         (if (equal? speech-act "InterrogativeSpeechAct")
             ; To the fuzzy pattern matcher
             (begin-thread
@@ -61,6 +86,10 @@
 (define-public input-utterance (Anchor "InputUtterance"))
 (define-public no-input-utterance (Concept "NoInputUtterance"))
 (State input-utterance no-input-utterance)
+
+(define-public canned-rules (Anchor "CannedRules"))
+(define-public no-canned-rules (Anchor "NoCannedRules"))
+(State canned-rules no-canned-rules)
 
 (define-public fuzzy-answers (Anchor "FuzzyAnswers"))
 (define-public no-fuzzy-answers (Anchor "NoFuzzyAnswers"))
