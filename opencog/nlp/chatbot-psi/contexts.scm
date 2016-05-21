@@ -56,3 +56,9 @@
         (DefinedPredicate "is-truth-query?")
     ))
 )
+
+(Define
+    (DefinedPredicate "is-fuzzy-answer?")
+    (Not (Equal (Set no-fuzzy-answers)
+                (Get (State fuzzy-answers (Variable "$f")))))
+)

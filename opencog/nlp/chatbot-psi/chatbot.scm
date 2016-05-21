@@ -31,13 +31,24 @@
                 sent-node
             )
         )
+
+        ; Record the time
         (State
             input-utterance-time
             (Time (current-time))
         )
+
         ; TODO: Check the speech act and feed to external sources
+        ; Potentially these could be psi-rules
         (if (equal? speech-act "InterrogativeSpeechAct")
-            (display "Should send to external source for finding answers...")
+            ; To the fuzzy pattern matcher
+            (begin-thread
+                (let* ((fuz (get-fuzzy-answers sent-node)))
+                    (State fuzzy-answers (List (map Word (car fuz))))
+
+                    ; TODO: Create new ImplicationLinks for this question
+                )
+            )
         )
     )
     (newline)
@@ -50,6 +61,10 @@
 (define-public input-utterance (Anchor "InputUtterance"))
 (define-public no-input-utterance (Concept "NoInputUtterance"))
 (State input-utterance no-input-utterance)
+
+(define-public fuzzy-answers (Anchor "FuzzyAnswers"))
+(define-public no-fuzzy-answers (Anchor "NoFuzzyAnswers"))
+(State fuzzy-answers no-fuzzy-answers)
 
 ;-------------------------------------------------------------------------------
 ; Define the demands
