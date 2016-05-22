@@ -46,10 +46,17 @@
 
         ; Start searching for related canned rules, if any
         ; TODO: Check if the word is actually in the psi-context as well
-        ; TODO: Skip punctuations
         (begin-thread
-            (let ((roots (delete-duplicates (append-map cog-get-root (cog-outgoing-set list-of-words))))
-                  (rules '()))
+            (define (no-punctuation w)
+                (not (equal? (cog-name
+                    (car (cog-chase-link 'PartOfSpeechLink 'DefinedLinguisticConceptNode
+                        (car (cog-chase-link 'ReferenceLink 'WordInstanceNode w)))))
+                    "punctuation"
+                ))
+            )
+            (let* ((filtered-words (filter no-punctuation (cog-outgoing-set list-of-words)))
+                   (roots (delete-duplicates (append-map cog-get-root filtered-words)))
+                   (rules '()))
                 (map
                     (lambda (m)
                         (if (equal? (cog-type m) 'MemberLink)
