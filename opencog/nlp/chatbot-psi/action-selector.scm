@@ -10,7 +10,13 @@
             )
 
             ; For searching QA rules
-            (set! rules (append rules (cog-chase-link 'MemberLink 'ImplicationLink qa-rule)))
+            (set! rules (append rules
+                (filter
+                    (lambda (r)
+                        (if (equal? (psi-satisfiable? r) (stv 1 1)) #t #f))
+                    (cog-chase-link 'MemberLink 'ImplicationLink qa-rule)
+                )
+            ))
 
             ; For searching AIML rules
             ; (let* ((setlink (cog-execute! (Get (State input-utterance (Variable "$s")))))
