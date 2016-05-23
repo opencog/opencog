@@ -330,6 +330,22 @@ struct MinedRulePattern
     string actionName;
     map<string, MinedParamStruct> paramToMinedStruct;
 
+
+
+};
+
+struct ProcessedMinedRulePattern
+{
+
+    string actionName;
+
+    //map<paramName, std::pair<oldValue,newValue>>
+    map<string, std::pair<Handle,Handle>> effectEvalLinks;
+
+    //map<paramName, value>
+    map<string, Handle> preconditionEvalLinks; // can be empty
+
+    map<string,Handle> boundParamMap;
 };
 
 
@@ -562,6 +578,8 @@ protected:
 
      void bindVariablesForOneLink(Handle link, map<Handle,Handle>& varToValueMap, HandleSeq& bindOutgoingLinks);
      vector<Handle> bindKnownVariablesForLinks(vector<Handle>& handles, map<Handle,Handle>& varToValueMap);
+
+     Rule* generateANewRuleFromMinedPattern(MinedRulePattern& minedPattern);
 
 };
 

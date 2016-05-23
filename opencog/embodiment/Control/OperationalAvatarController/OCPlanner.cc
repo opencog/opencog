@@ -1011,6 +1011,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                     // next, try to bind all the required parameters for this action
                     map<string, MinedParamStruct>::iterator paramIt = minedNewRule->paramToMinedStruct.begin();
+                    map<string,Handle> paramCandidateMap;
                     for (; paramIt != minedNewRule->paramToMinedStruct.end(); paramIt ++) // for each param
                     {
                         cout << "Binding parameter: " << paramIt->first << std::endl;
@@ -1138,14 +1139,22 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                         HandleSeq candidates = Inquery::findAllCandidatesByGivenPattern(cleanBoundPattern, cleanVariables, minedParamStruct.paramObjVar);
                         if (candidates.size() > 0)
                         {
+                            paramCandidateMap.insert(std::pair<string, Handle>(paramIt->first,candidates[0]));// Currently only choose the top candidate.
                             cout << "\nFound candicates in the AtomSpace to match this pattern:\n";
                             for (Handle c : candidates)
                                 cout << atomSpace->atomAsString(c) << std::endl;
                         }
                         else
+                        {
                             cout << "\nCan't found any candicates in the AtomSpace to match this pattern. Mining new pattern failed\n";
-
+                            return "";
+                        }
                     }
+
+
+
+
+
                 }
                 else
                 {
@@ -3117,16 +3126,24 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
             minedStruct.externalProperties = externalProperties;
             minedStruct.intrinsicUndistinguishingPropertyLinks = intrinsicUndistinguishingPropertyLinks;
 
-
             paramToMinedStruct.insert(std::pair<string, MinedParamStruct>(paramMapIter->first, minedStruct));
+
+            // Find out the precondition
+            // Find the state changes occurred to the parameter objects before the action execution
+
 
         }
 
     }
 
+    // Find the state changes occurred to the  actors before the action execution
+
     MinedRulePattern* minedRulePattern = new MinedRulePattern();
     minedRulePattern->actionName = atomSpace->getName(highestActionTypeHandle);
     minedRulePattern->paramToMinedStruct = paramToMinedStruct;
+
+
+
 
     return minedRulePattern;
 
@@ -4314,6 +4331,11 @@ vector<Handle> OCPlanner::bindKnownVariablesForLinks(vector<Handle>& handles, ma
     }
 
     return rebindedPattern;
+}
+
+Rule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPattern)
+{
+
 }
 
 

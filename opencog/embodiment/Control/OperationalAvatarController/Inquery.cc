@@ -984,6 +984,119 @@ HandleSeq Inquery::findAllGivenStateChangesAndLatestRelatedActions(Handle classV
     return lastestActionNodes;
 }
 
+// return state name node and new state value node
+std::pair<Handle,Handle> Inquery::findLastestStateChangeOfGivenObject(Handle obj)
+{
+    // Create BindLink used by pattern matcher
+    HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
+
+    // Add the variable nodes
+    Handle hVariableStateChangeNode = atomSpace->addNode(VARIABLE_NODE, "$var_state_change");
+    Handle hVariableStateName = atomSpace->addNode(VARIABLE_NODE, "$var_state_name");
+    Handle hVariableStateNewValNode = atomSpace->addNode(VARIABLE_NODE, "$var_new_value");
+
+    variableNodes.push_back(hVariableStateChangeNode);
+    variableNodes.push_back(hVariableStateName);
+    variableNodes.push_back(hVariableStateNewValNode);
+
+    // Create EvaluationLink for actor predicate
+    //    (EvaluationLink (stv 1.000000 1.000000)
+    //      (PredicateNode "actor") ; [2601]
+    //      (ListLink (stv 1.000000 1.000000)
+    //        (ConceptNode "$var_instance") ; [3902]
+    //        (ObjectNode "obj") ; [1578]
+    //      ) ; [3904]
+    //    ) ; [3905]
+    TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
+    Handle actorEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "actor", hVariableStateChangeNode, obj, tv);
+    andLinkOutgoings.push_back(actorEvalLink);
+
+    // Create EvaluationLink for stateName predicate
+    //    (EvaluationLink (stv 1.000000 1.000000)
+    //      (PredicateNode "stateName") ; [2605]
+    //      (ListLink (stv 1.000000 1.000000)
+    //        (ConceptNode "$var_instance") ; [3902]
+    //        (ConceptNode "stateNameValHande") ; [3559]
+    //      ) ; [3906]
+    //    ) ; [3907]
+    Handle stateNameEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "stateName", hVariableStateChangeNode, hVariableStateName, tv);
+    andLinkOutgoings.push_back(stateNameEvalLink);
+
+    // Create EvaluationLink for NewValue predicate
+    //    (EvaluationLink (stv 1.000000 1.000000)
+    //      (PredicateNode "NewValue") ; [2612]
+    //      (ListLink (stv 1.000000 1.000000)
+    //        (ConceptNode "$var_instance") ; [3902]
+    //        (ConceptNode "stateNewValNode") ; [1190]
+    //      ) ; [3910]
+    //    ) ; [3911]
+    Handle newStateValEvalLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace, "NewValue", hVariableStateChangeNode, hVariableStateNewValNode, tv);
+    andLinkOutgoings.push_back(newStateValEvalLink);
+
+    // Each result contains state name node and new value node
+    HandleSeq resultListOutgoings;
+    resultListOutgoings.push_back(hVariableStateChangeNode);
+    resultListOutgoings.push_back(hVariableStateName);
+    resultListOutgoings.push_back(hVariableStateNewValNode);
+    Handle queryResultLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,resultListOutgoings);
+
+    Handle hAndLink = AtomSpaceUtil::addLink(*atomSpace,AND_LINK,andLinkOutgoings);
+    implicationLinkOutgoings.push_back(hAndLink);
+    implicationLinkOutgoings.push_back(queryResultLink);
+
+    Handle hImplicationLink = atomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+
+    Handle hVariablesListLink = atomSpace->addLink(LIST_LINK, variableNodes);
+
+    bindLinkOutgoings.push_back(hVariablesListLink);
+    bindLinkOutgoings.push_back(hImplicationLink);
+    Handle hBindLink = atomSpace->addLink(BIND_LINK, bindLinkOutgoings);
+
+    // Run pattern matcher
+    cout << "findLastestStateChangeOfGivenObject: bindLink = \n " << atomSpace->atomAsString(hBindLink) << std::endl;
+
+    Handle hResultListLink = bindlink(atomSpace, hBindLink);
+
+    cout << "findLastestStateChangeOfGivenObject: hResultListLink = \n " << atomSpace->atomAsString(hResultListLink) << std::endl;
+
+    // Get result
+    // Note: Don't forget remove the hResultListLink
+    std::vector<Handle> resultSet = atomSpace->getOutgoing(hResultListLink);
+    atomSpace->removeAtom(hResultListLink);
+
+    if (resultSet.size() == 0)
+    {
+        return (std::pair<Handle, Handle>(Handle::UNDEFINED, Handle::UNDEFINED));
+    }
+    else if (resultSet.size() == 1)
+    {
+        Handle listLink = resultSet[0];
+        HandleSeq rlistOutgoings = atomSpace->getOutgoing(listLink);
+        // return state name node and new state value node
+        return (std::pair<Handle, Handle>(rlistOutgoings[1],rlistOutgoings[2]));
+    }
+    else
+    {
+        // sort out the result and make it into map <state_change_node, pair<state name node, new value node> >
+        std::map < Handle, std::pair<Handle,Handle> > resultMap;
+        HandleSeq allStateChangeNodes;
+        for (Handle listLink : resultSet)
+        {
+            HandleSeq stateChange = atomSpace->getOutgoing(listLink);
+            allStateChangeNodes.push_back(stateChange[0]);
+            resultMap.insert(std::pair<Handle, std::pair<Handle,Handle>> (stateChange[0], std::pair<Handle,Handle>(stateChange[1],stateChange[2])));
+        }
+
+        // find the lastest state change node
+        Handle lastestStateChangeNode = AtomSpaceUtil::getLatestHandle(*atomSpace, allStateChangeNodes);
+        return resultMap[lastestStateChangeNode];
+
+
+    }
+
+}
+
+
 HandleSeq Inquery::findAllCandidatesByGivenPattern(HandleSeq& pattern, HandleSeq &variableNodes, Handle& queryVar)
 {
     HandleSeq implicationLinkOutgoings, bindLinkOutgoings;

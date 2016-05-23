@@ -76,6 +76,12 @@ namespace opencog { namespace oac {
         STATE_LESS_THAN     // LessThanLink
     };
 
+    enum RuleType
+    {
+        PREDIFINED_RULE,
+        MINED_RULE
+    };
+
     extern const char* STATE_TYPE_NAME[5];
 
     // some kind of state values cannot directly get from the
@@ -389,16 +395,18 @@ namespace opencog { namespace oac {
 
         bool isReversibleRule;
 
+        RuleType ruleType;
+
         // constructors
         Rule(AvatarAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false):
             action(_action) , actor(_actor), preconditionList(_preconditionList), effectList(_effectList), basic_cost(_basic_cost),
             CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent), isReversibleRule(_isReversibleRule)
-        {noCoexisenceOtherRules.clear();}
+        {noCoexisenceOtherRules.clear(); ruleType = PREDIFINED_RULE;}
 
         Rule(AvatarAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false):
             action(_action) , actor(_actor), preconditionList(), effectList(), basic_cost(_basic_cost),
             CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent),isReversibleRule(_isReversibleRule)
-        {noCoexisenceOtherRules.clear();}
+        {noCoexisenceOtherRules.clear(); ruleType = PREDIFINED_RULE;}
 
         float getBasicCost();
 
@@ -458,6 +466,19 @@ namespace opencog { namespace oac {
         // check if this rule is a recursive rule
         // Recursive rule is to break a problem into the same problems of smaller scales
         bool _isRecursiveRule();
+
+    };
+
+    class MinedRule : Rule
+    {
+
+    public:
+        MinedRule(AvatarAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false)
+           : Rule(_action, _actor, _basic_cost, _precondOrderDependent, _isReversibleRule)
+        {ruleType = MINED_RULE;}
+
+    public:
+        map<string, Handle> boundVarToValueMap;
 
     };
 
