@@ -100,8 +100,8 @@
         (if (null? duals)
             (get-roots ATOM)
             (delete-duplicates (concatenate
-                (append-map get-roots duals)
-                (append (get-roots ATOM))))
+                (list (append-map get-roots duals)
+                    (append (get-roots ATOM)))))
         )
     )
 )
