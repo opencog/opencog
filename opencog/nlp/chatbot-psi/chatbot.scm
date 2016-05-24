@@ -50,7 +50,6 @@
         )
 
         ; Start searching for related canned rules, if any
-        ; TODO: Check if the word is actually in the psi-context as well
         (begin-thread
             (define (no-punctuation w)
                 (not (equal? (cog-name
@@ -59,18 +58,35 @@
                     "punctuation"
                 ))
             )
+
+            (define (get-member-links atom)
+                (let ((iset (cog-incoming-set atom)))
+                    (if (null? iset)
+                        (if (equal? (cog-type atom) 'MemberLink)
+                            (list atom)
+                            '()
+                        )
+                        (append-map get-member-links iset)
+                    )
+                )
+            )
+
             (let* ((filtered-words (filter no-punctuation (cog-outgoing-set list-of-words)))
-                   (roots (delete-duplicates (append-map cog-get-root filtered-words)))
+                   ; Aims to find those in the contexts of the psi-rules only
+                   (eval-links (delete-duplicates
+                       (append-map
+                           (lambda (w)
+                               (cog-get-pred w 'GroundedPredicateNode))
+                               filtered-words)))
+                   (member-links (delete-duplicates (append-map get-member-links eval-links)))
                    (rules '()))
                 (map
                     (lambda (m)
-                        (if (equal? (cog-type m) 'MemberLink)
-                            (if (equal? (cadr (cog-outgoing-set m)) canned-rule)
-                                (set! rules (append rules (list (car (cog-outgoing-set m)))))
-                            )
+                        (if (equal? (cadr (cog-outgoing-set m)) canned-rule)
+                            (set! rules (append rules (list (car (cog-outgoing-set m)))))
                         )
                     )
-                    roots
+                    member-links
                 )
 
                 (if (null? rules)
