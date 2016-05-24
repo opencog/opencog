@@ -30,6 +30,7 @@
 )
 
 ; ==============================================================
+
 (define-public (token-seq-of-sent SENT)
 "
   token-seq-of-sent -- Create a list of words from input sentence.
@@ -69,7 +70,7 @@
 	; Create a BindLink
 	(define (run-rule r)
 (display "duuude run rule \n") (display r) (newline)
-		(cog-execute! (Bind (gaar r) (gdar r))))
+		(cog-execute! (Map (Implication (gaar r) (gdar r)) SENT)))
 
 	; for now, just get the responses.
 	(map run-rule

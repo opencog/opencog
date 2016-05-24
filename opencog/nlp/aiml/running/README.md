@@ -137,7 +137,7 @@ time guild compile "/tmp/aiml.scm"
 (load "run.scm")
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog query) (opencog openpsi))
 ```
-a normal file load trriggers a compile; avoid this as follows:
+A normal file load triggers a compile; avoid this as follows:
 ```
 (primitive-load "/tmp/aiml.scm")
 (guile-compile "/tmp/aiml.scm")
@@ -187,52 +187,12 @@ TODO:
 
 psi-get-dual-rules calls psi-get-member-links
 
-(Bind (List (Word "foo")) (List (Word "bar")))
-(cog-execute!
-	(Bind (ListLink
-         (Word "who")
-         (Word "supports")
-         (Glob "$star-1")
-      ) ; PATEND
-         (ListLink
-            (Word "who")
-            (Word "endorses")
-            (Glob "$star-1")
-         ))
-)
-
 (cog-execute! (car (aiml-get-response-wl s3)))
-
-(cog-execute! (Put
-   (ListLink (Word "who") (Word "supports") (Glob "$star-1"))
-	(Word "dooh")))
 
 (use-modules (opencog) (opencog nlp) (opencog exec))
 (cog-execute! (Map
 	(Implication
 		(ListLink (Word "who") (Word "supports") (Glob "$star-1"))
 		(ListLink (Word "who") (Word "endorses") (Glob "$star-1")))
-	(Set (Word "dooh"))))
-
-(cog-execute! (Map
-	(Implication
-		(ListLink (Word "who") (Word "supports") (Glob "$star-1"))
-		(ListLink (Word "who") (Word "endorses") (Glob "$star-1")))
 	(Set (ListLink (Word "who") (Word "supports") (Word "Trump")))
 ))
-
-(cog-execute! (Map
-	(ListLink (Word "who") (Word "supports") (Glob "$star-1"))
-	(Set (ListLink (Word "who") (Word "supports") (Word "Trump")))
-))
-
-_vars->substitute_nocheck
-
-(cog-execute! (Map
-	(Implication
-		(ListLink (Word "who") (Word "supports") (Variable "$star-1"))
-		(ListLink (Word "who") (Word "endorses") (Variable "$star-1")))
-	(Set (ListLink (Word "who") (Word "supports") (Word "Trump")))
-))
-
-find_variables not called ???
