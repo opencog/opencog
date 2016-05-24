@@ -207,15 +207,62 @@ psi-get-dual-rules calls psi-get-member-links
    (ListLink (Word "who") (Word "supports") (Glob "$star-1"))
 	(Word "dooh")))
 
-(cog-execute! (Put
-	(Lambda
+(use-modules (opencog) (opencog nlp) (opencog exec))
+(cog-execute! (Map
+	(Implication
 		(ListLink (Word "who") (Word "supports") (Glob "$star-1"))
 		(ListLink (Word "who") (Word "endorses") (Glob "$star-1")))
-	(Word "dooh")))
+	(Set (Word "dooh"))))
 
-(cog-execute! (Put
-	(Lambda
-		(ListLink (Word "who") (Word "supports") (Variable "$star-1"))
-		(ListLink (Word "who") (Word "endorses") (Variable "$star-1")))
-	(Word "dooh")))
+(cog-execute! (Map
+	(Implication
+		(ListLink (Word "who") (Word "supports") (Glob "$star-1"))
+		(ListLink (Word "who") (Word "endorses") (Glob "$star-1")))
+	(Set (ListLink (Word "who") (Word "supports") (Word "Trump")))
+))
+
+
+(cog-execute!
+	(MapLink
+		(EvaluationLink
+			(Predicate "foo")
+			(ListLink (Concept "bar") (Variable "$x")))
+		(EvaluationLink
+			(Predicate "foo")
+			(ListLink (Concept "bar") (Concept "baz"))))
+)
+
+(cog-execute!
+	(MapLink
+		(EvaluationLink
+			(Predicate "foo")
+			(ListLink (Concept "bar") (Glob "$x")))
+		(EvaluationLink
+			(Predicate "foo")
+			(ListLink (Concept "bar") (Concept "baz"))))
+)
+
+(cog-execute!
+    (MapLink
+       (EvaluationLink
+          (Predicate "foo")
+          (ListLink (Concept "bar") (Glob "$x") (Concept "bif")))
+		(EvaluationLink
+          (Predicate "foo")
+          (ListLink (Concept "bar")
+				 (Concept "baz") (Concept "gar") (Concept "goh")
+				 (Concept "bif")
+				 (Concept "fag")))) )
+
+(cog-execute!
+    (MapLink
+       (EvaluationLink
+          (Predicate "foo")
+          (ListLink (Concept "bar") (Glob "$x") (Concept "bif") (Glob "$x")))
+		(EvaluationLink
+          (Predicate "foo")
+          (ListLink (Concept "bar")
+				 (Concept "baz") (Concept "gar") (Concept "goh")
+				 (Concept "bif")
+				 (Concept "fag")))) )
 
