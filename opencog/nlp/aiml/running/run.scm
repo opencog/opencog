@@ -70,7 +70,7 @@
 	; Create a BindLink
 	(define (run-rule r)
 (display "duuude run rule \n") (display r) (newline)
-		(cog-execute! (Map (Implication (gaar r) (gdar r)) SENT)))
+		(cog-execute! (Map (Implication (gaar r) (gdar r)) (Set SENT))))
 
 	; for now, just get the responses.
 	(map run-rule

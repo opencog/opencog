@@ -196,3 +196,39 @@ psi-get-dual-rules calls psi-get-member-links
 		(ListLink (Word "who") (Word "endorses") (Glob "$star-1")))
 	(Set (ListLink (Word "who") (Word "supports") (Word "Trump")))
 ))
+
+
+(cog-execute!
+(MapLink
+   (ImplicationLink
+      (ListLink (WordNode "you") (WordNode "can") (WordNode "do") (WordNode "better"))
+      (ListLink (WordNode "Ok,") (WordNode "I") (WordNode "will") (WordNode "try.")))
+(Set
+   (ListLink
+      (WordNode "you")
+      (WordNode "can")
+      (WordNode "do")
+      (WordNode "better")
+   )
+)
+))
+
+
+(MapLink
+      (ListLink
+         (WordNode "you")
+         (WordNode "can")
+         (WordNode "do")
+         (WordNode "better")
+      )
+(SetLink
+   (ListLink
+      (WordNode "you")
+      (WordNode "can")
+      (WordNode "do")
+      (WordNode "better")
+   )
+)
+)
+
+
