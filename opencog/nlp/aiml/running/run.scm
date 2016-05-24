@@ -57,43 +57,6 @@
 
 ; --------------------------------------------------------------
 
-(define-public (psi-get-member-alt ATOM)
-"
-  psi-get-member-links ATOM - Return list of MemberLinks that hold ATOM.
-
-  All psi rules are members of some ruleset; this searches for and
-  finds such MemberLinks.
-"
-	(define (get-roots an-atom)
-		(delete-duplicates
-			(cog-filter 'MemberLink (cog-get-root an-atom)))
-	)
-
-	(let ((duals (cog-outgoing-set (cog-execute! (DualLink ATOM)))))
-		(if (null? duals)
-			(get-roots ATOM)
-			(delete-duplicates (append-map get-roots duals))
-		)
-	)
-)
-
-; --------------------------------------------------------------
-
-(define-public (psi-get-dual-alt ATOM)
-"
-  psi-get-dual-rules ATOM - Return list of psi-rules that can ground ATOM.
-
-  ATOM should be a part of a psi-rule.
-"
-	(let ((member-links (psi-get-member-alt ATOM)))
-		 (delete-duplicates (append-map
-			 (lambda (x) (filter psi-rule? (cog-outgoing-set x)))
-			 member-links))
-	)
-)
-
-; --------------------------------------------------------------
-
 (define-public (aiml-get-response-wl SENT)
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
@@ -110,7 +73,7 @@
 
 	; for now, just get the responses.
 	(map run-rule
-		(filter chat-rule? (psi-get-dual-alt SENT)))
+		(filter chat-rule? (psi-get-dual-rules SENT)))
 
 )
 
