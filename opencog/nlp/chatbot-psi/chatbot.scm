@@ -10,6 +10,11 @@
 (set! relex-server-host "172.17.0.2")
 
 ;-------------------------------------------------------------------------------
+; TV that will be assigned to any psi-rules being created by this chatbot
+
+(define-public new-rule-tv (stv .9 .9))
+
+;-------------------------------------------------------------------------------
 ; Schema function for chatting
 
 (define (chat utterance)
@@ -67,7 +72,11 @@
                     )
                     roots
                 )
-                (State canned-rules (List rules))
+
+                (if (null? rules)
+                    (State canned-rules no-canned-rules)
+                    (State canned-rules (List rules))
+                )
             )
         )
     )
@@ -82,15 +91,18 @@
 (define-public no-input-utterance (Concept "NoInputUtterance"))
 (State input-utterance no-input-utterance)
 
-(define-public default-state (Anchor "DefaultState"))
+(define-public default-state (Concept "DefaultState"))
+(define-public search-started (Concept "SearchStarted"))
 
 (define-public canned-rules (Anchor "CannedRules"))
-(define-public no-canned-rules (Anchor "NoCannedRules"))
+(define-public no-canned-rules (Concept "NoCannedRules"))
 (State canned-rules default-state)
 
 (define-public fuzzy-answers (Anchor "FuzzyAnswers"))
-(define-public no-fuzzy-answers (Anchor "NoFuzzyAnswers"))
+(define-public no-fuzzy-answers (Concept "NoFuzzyAnswers"))
+(define-public fuzzy-qa-search (Anchor "FuzzyQASearch"))
 (State fuzzy-answers default-state)
+(State fuzzy-qa-search default-state)
 
 ;-------------------------------------------------------------------------------
 ; Define the demands

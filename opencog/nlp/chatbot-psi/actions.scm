@@ -1,10 +1,30 @@
 (define (do-fuzzy-QA)
-    (begin-thread
-        (let* ((sent-node (get-current-sent-node))
-               (fuz (get-fuzzy-answers sent-node)))
-               (State fuzzy-answers (List (map Word (car fuz))))
+    (State fuzzy-qa-search search-started)
 
-            ; TODO: Create new ImplicationLinks for this question
+    (begin-thread
+        (let* ((sent-node (get-input-sent-node))
+               (ans (get-fuzzy-answers sent-node)))
+
+            (if (not (null? ans))
+                (let ((ans-in-words (List (map Word (car ans)))))
+                    (State fuzzy-answers ans-in-words)
+
+                    ; Create a new psi-canned-rule for it
+                    (Member
+                        (psi-rule
+                            (list (SequentialAnd
+                                (DefinedPredicate "is-input-utterance?")
+                                (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (get-input-word-list))
+                            ))
+                            (ExecutionOutput (GroundedSchema "scm: say") ans-in-words)
+                            (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
+                            new-rule-tv
+                            sociality
+                        )
+                        canned-rule
+                    )
+                )
+            )
         )
     )
 )

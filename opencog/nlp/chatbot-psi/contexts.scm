@@ -50,6 +50,12 @@
 )
 
 (Define
+    (DefinedPredicate "fuzzy-qa-search-not-started?")
+    (Not (Equal (Set search-started)
+                (Get (State fuzzy-qa-search (Variable "$s")))))
+)
+
+(Define
     (DefinedPredicate "is-a-question?")
     (Satisfaction (Or
         (DefinedPredicate "is-interrogative?")
