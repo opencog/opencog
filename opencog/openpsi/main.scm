@@ -25,7 +25,7 @@
   context:
   - A list containing the terms/clauses that should be met for this action
     to be taken. These are atoms that should be evaluated to return
-    TRUE_TV/FASLE_TV.
+    TRUE_TV/FALSE_TV.
 
   action:
   - It should be an atom that can be run by `cog-evaluate!`. That means that
@@ -79,7 +79,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-rules demand-node)
 "
-  Returns a list of all psi-rules that are affect the given demand.
+  Returns a list of all psi-rules that affect the given demand.
 
   demand-node:
   - The node that represents the demand.
@@ -101,7 +101,7 @@
 (define-public (psi-rule? atom)
 "
   Returns `#t` or `#f` depending on whether the passed argument is a psi-rule
-  or not. An ImplicationLink that is a member on of the demand sets is a
+  or not. An ImplicationLink that is a member of the demand sets is a
   psi-rule.
 
   atom:
@@ -122,13 +122,27 @@
 ; --------------------------------------------------------------
 (define-public (psi-action? atom)
 "
-  Check if the given atom is an atom and return `#t` if it is and `#f` either
-  wise.
+  Check if the given atom is an action and return `#t`, if it is, and `#f`
+  otherwise. An atom is an action if it a member of the set represented by
+  (ConceptNode \"OpenPsi: action\").
 
   atom:
   - An atom to be checked whether it is an action or not.
 "
-    (if (member atom (psi-get-all-actions)) #t #f)
+    (let ((action-node
+            (cog-node 'ConceptNode (string-append (psi-prefix-str) "action")))
+          (candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
+
+        (if (null? action-node)
+            ; `#f` is returned becasue an action hasn't been created yet, thus
+            ; the given atom can't be an action.
+            #f
+            ; A filter is used to account for empty list as well as
+            ; cog-chase-link returning multiple results, just in case.
+            (not (null?
+                (filter (lambda (x) (equal? x action-node)) candidates)))
+        )
+    )
 )
 
 ; --------------------------------------------------------------

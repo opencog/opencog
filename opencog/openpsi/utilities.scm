@@ -94,17 +94,15 @@
   finds such MemberLinks.
 "
     (define (get-roots an-atom)
-        (let ((pattern (cog-outgoing-set an-atom)))
-            (if (null? pattern)
-                ()
-                (delete-duplicates
-                    (cog-filter 'MemberLink (cog-get-root (car pattern))))
-            )))
+        (delete-duplicates (cog-filter 'MemberLink (cog-get-root an-atom))))
 
     (let ((duals (cog-outgoing-set (cog-execute! (DualLink ATOM)))))
         (if (null? duals)
-            (get-roots ATOM)
-            (delete-duplicates (append-map get-roots duals))
+            (get-roots atom)
+            (delete-duplicates (merge
+                (append-map get-roots duals)
+                (get-roots atom)
+                (lambda (x y) #t)))
         )
     )
 )
