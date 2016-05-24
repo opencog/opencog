@@ -99,10 +99,9 @@
     (let ((duals (cog-outgoing-set (cog-execute! (DualLink ATOM)))))
         (if (null? duals)
             (get-roots atom)
-            (delete-duplicates (merge
+            (delete-duplicates (concatenate
                 (append-map get-roots duals)
-                (get-roots atom)
-                (lambda (x y) #t)))
+                (append (get-roots atom))))
         )
     )
 )
