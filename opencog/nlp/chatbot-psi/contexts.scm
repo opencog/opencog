@@ -62,3 +62,9 @@
     (Not (Equal (Set no-fuzzy-answers)
                 (Get (State fuzzy-answers (Variable "$f")))))
 )
+
+(Define
+    (DefinedPredicate "no-canned-reply?")
+    (Equal (Set no-canned-rules)
+           (Get (State canned-rules (Variable "$r"))))
+)

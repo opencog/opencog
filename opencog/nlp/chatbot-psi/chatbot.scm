@@ -70,18 +70,6 @@
                 (State canned-rules (List rules))
             )
         )
-
-        ; TODO: Check the speech act and feed to external sources
-        (if (equal? speech-act "InterrogativeSpeechAct")
-            ; To the fuzzy pattern matcher
-            (begin-thread
-                (let* ((fuz (get-fuzzy-answers sent-node)))
-                    (State fuzzy-answers (List (map Word (car fuz))))
-
-                    ; TODO: Create new ImplicationLinks for this question
-                )
-            )
-        )
     )
     (newline)
 )
@@ -94,13 +82,15 @@
 (define-public no-input-utterance (Concept "NoInputUtterance"))
 (State input-utterance no-input-utterance)
 
+(define-public default-state (Anchor "DefaultState"))
+
 (define-public canned-rules (Anchor "CannedRules"))
 (define-public no-canned-rules (Anchor "NoCannedRules"))
-(State canned-rules no-canned-rules)
+(State canned-rules default-state)
 
 (define-public fuzzy-answers (Anchor "FuzzyAnswers"))
 (define-public no-fuzzy-answers (Anchor "NoFuzzyAnswers"))
-(State fuzzy-answers no-fuzzy-answers)
+(State fuzzy-answers default-state)
 
 ;-------------------------------------------------------------------------------
 ; Define the demands
@@ -120,6 +110,9 @@
 
 ; Load the action selector
 (load "action-selector.scm")
+
+; Load the utilities
+(load "utils.scm")
 
 ; Run OpenPsi
 (psi-run)

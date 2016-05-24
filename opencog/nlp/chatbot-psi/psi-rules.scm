@@ -1,7 +1,7 @@
 ;-------------------------------------------------------------------------------
 
+(define chat-rule (Concept (string-append (psi-prefix-str) "chat-rule")))
 (define canned-rule (Concept (string-append (psi-prefix-str) "canned-rule")))
-(define qa-rule (Concept (string-append (psi-prefix-str) "qa-rule")))
 
 ;-------------------------------------------------------------------------------
 
@@ -9,16 +9,28 @@
     (psi-rule
         (list (SequentialAnd
             (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "no-canned-reply?")
             (DefinedPredicate "is-interrogative?")
-            (DefinedPredicate "is-fuzzy-answer?")
         ))
-        (ExecutionOutput (GroundedSchema "scm: answer") (List fuzzy-answers))
+        (ExecutionOutput (GroundedSchema "scm: do-fuzzy-QA") (List))
+        (True)
+        (stv 1 1)
+        sociality
+    )
+    chat-rule
+)
+
+(Member
+    (psi-rule
+        (list (DefinedPredicate "is-fuzzy-answer?"))
+        (ExecutionOutput (GroundedSchema"scm: answer") (List fuzzy-answers))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
         sociality
     )
-    qa-rule
+    chat-rule
 )
+
 
 ;-------------------------------------------------------------------------------
 ; For testing purpose only

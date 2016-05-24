@@ -9,27 +9,14 @@
                 )
             )
 
-            ; For searching QA rules
+            ; For general chat rules
             (set! rules (append rules
                 (filter
                     (lambda (r)
                         (if (equal? (psi-satisfiable? r) (stv 1 1)) #t #f))
-                    (cog-chase-link 'MemberLink 'ImplicationLink qa-rule)
+                    (cog-chase-link 'MemberLink 'ImplicationLink chat-rule)
                 )
             ))
-
-            ; For searching AIML rules
-            ; (let* ((setlink (cog-execute! (Get (State input-utterance (Variable "$s")))))
-            ;        (in-utt (car (cog-outgoing-set setlink))))
-            ;     (if (equal? (cog-type in-utt) 'ReferenceLink)
-            ;         (psi-get-dual-rules
-            ;             ; Get ListLink from ReferenceLink
-            ;             (car (cog-outgoing-set in-utt))
-            ;         )
-            ;         '()
-            ;     )
-            ; )
-
             rules
         )
     )
