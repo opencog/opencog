@@ -197,38 +197,34 @@ psi-get-dual-rules calls psi-get-member-links
 	(Set (ListLink (Word "who") (Word "supports") (Word "Trump")))
 ))
 
-
-(cog-execute!
-(MapLink
-   (ImplicationLink
-      (ListLink (WordNode "you") (WordNode "can") (WordNode "do") (WordNode "better"))
-      (ListLink (WordNode "Ok,") (WordNode "I") (WordNode "will") (WordNode "try.")))
-(Set
-   (ListLink
-      (WordNode "you")
-      (WordNode "can")
-      (WordNode "do")
-      (WordNode "better")
-   )
-)
+(cog-execute! (Map
+	(Implication
+		(ListLink (Word "who") (Word "supports") (Glob "$star-1"))
+		(ExecutionOutput (DefinedSchema "AIML-tag srai")
+			(ListLink
+				(ListLink (Word "who") (Word "endorses") (Glob "$star-1")))))
+	(Set (ListLink (Word "who") (Word "endorses") (Word "Trump")))
 ))
 
 
-(MapLink
+(psi-rule
+   ;; context
+   (list
       (ListLink
-         (WordNode "you")
-         (WordNode "can")
-         (WordNode "do")
-         (WordNode "better")
-      )
-(SetLink
+         (Word "who")
+         (Word "endorses")
+         (Glob "$star-1")
+      ) ; PATEND
+   ) ;TEMPATOMIC
+   ;; action
    (ListLink
-      (WordNode "you")
-      (WordNode "can")
-      (WordNode "do")
-      (WordNode "better")
-   )
-)
-)
-
+      (Word "The")
+      (Word "crazies")
+      (Word "like")
+      (Glob "$star-1")
+   ) ; TEMPATOMICEND
+   (Concept "AIML chat goal")
+   (stv 1 0.8)
+   (psi-demand "AIML chat" 0.97)
+) ; CATEND
 
