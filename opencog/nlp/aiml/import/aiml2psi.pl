@@ -846,8 +846,13 @@ while (my $line = <FIN>)
 			# Not merging, so just write it out.
 			print FOUT "$rule\n";
 
+			# OK, so the current guile compiler is broken, it appears
+			# to have a runtime of N^2 where N is the size of the file.
+			# Avoid an excessively long compile time by writing lots of
+			# small files.  At this time (June 2016, guile-2.0), really
+			# tiny files work best.
 			$rule_count ++;
-			if ($rule_count > 100)
+			if ($rule_count > 40)
 			{
 				$rule_count = 0;
 				$file_count ++;

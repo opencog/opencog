@@ -249,3 +249,17 @@ WHY DO PEOPLE DIE
 
 -- non-trivial that:
 THAT IS A GOOD PARTY
+
+35 for 20
+41 for 50
+52  for 100
+74 for 200
+(use-modules (ice-9 ftw))
+
+(define (load-all-files DIR)
+	(map 
+		(lambda (fn) (primitive-load (string-join (list DIR fn) "/")))
+		(scandir DIR (lambda (fname) (string-contains fname ".scm"))))
+	#t)
+
+(load-all-files "/home/linas/src/opencog/opencog/nlp/aiml/import/aiml-scm/" 
