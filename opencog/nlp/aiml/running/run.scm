@@ -78,6 +78,25 @@
 
 ; --------------------------------------------------------------
 
+(define-public (word-list-set-flatten SET)
+"
+  word-list-set-flatten LIST -- flatten all word-lists in a set.
+
+  Example: the input
+     (Set (List (Concept \"A\") (List (Concept \"B\") (Concept \"C\"))))
+  will be flattened to:
+     (Set (List (Concept \"A\") (Concept \"B\") (Concept \"C\")))
+"
+	(cond
+		((equal? 'ListLink (cog-type SET))
+			(word-list-flatten SET))
+		((equal? 'SetLink (cog-type SET))
+			(SetLink (map word-list-flatten (cog-outgoing-set SET))))
+	)
+)
+
+; --------------------------------------------------------------
+
 (define-public (aiml-get-response-wl SENT)
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
@@ -90,7 +109,9 @@
 	; Create a BindLink
 	(define (run-rule r)
 (display "duuude run rule \n") (display r) (newline)
-		(cog-execute! (Map (Implication (gaar r) (gdar r)) (Set SENT))))
+		(word-list-set-flatten
+			(cog-execute!
+				(Map (Implication (gaar r) (gdar r)) (Set SENT)))))
 
 	; for now, just get the responses.
 	(map run-rule
@@ -165,3 +186,5 @@
 	(GroundedSchemaNode "scm: do-aiml-get"))
 
 ; ==============================================================
+;; mute the thing
+*unspecified*
