@@ -241,7 +241,7 @@ psi-get-dual-rules calls psi-get-member-links
 
 -- DIE is capitalized in the set chain....
    (all  sets are not downcased
- 
+
 WHY DO PEOPLE DIE
 
 (aiml-get-response-wl (tokenize "you do not learn"))
@@ -257,9 +257,9 @@ THAT IS A GOOD PARTY
 (use-modules (ice-9 ftw))
 
 (define (load-all-files DIR)
-	(map 
+	(map
 		(lambda (fn) (primitive-load (string-join (list DIR fn) "/")))
 		(scandir DIR (lambda (fname) (string-contains fname ".scm"))))
 	#t)
 
-(load-all-files "/home/linas/src/opencog/opencog/nlp/aiml/import/aiml-scm/" 
+(load-all-files "/home/linas/src/opencog/opencog/nlp/aiml/import/aiml-scm/")

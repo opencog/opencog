@@ -29,7 +29,8 @@ my $version;
 my $overwrite;
 my $aimlDir ='.';
 my $intermediateFile = 'flat-aiml.txt';
-my $outDir = 'aiml-scm';
+my $outDir = '';
+my $outFile = 'aiml.scm';
 
 GetOptions(
     'dir=s' => \$aimlDir,
@@ -52,7 +53,7 @@ if ($help)
 	print "   --last-only             Only the last category is output.\n";
 	print "   --dir <directory>       AIML source directory, default: '$aimlDir'\n";
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
-	print "   --out <directory>       Directory for OpenCog output files, default is '$outDir'\n";
+	print "   --out <directory>       Directory for OpenCog output files\n";
 	die "\n";
 }
 
@@ -712,8 +713,16 @@ my $star_index = 1;
 
 my $rule_count = 0;
 my $file_count = 1;
-mkdir $outDir;
-open (FOUT,">" . $outDir . "/aiml-" . $file_count . ".scm");
+
+if ($outDir ne '')
+{
+	mkdir $outDir;
+	open (FOUT,">" . $outDir . "/aiml-" . $file_count . ".scm");
+}
+else
+{
+	open (FOUT,">" . $outFile);
+}
 
 while (my $line = <FIN>)
 {
@@ -852,7 +861,7 @@ while (my $line = <FIN>)
 			# small files.  At this time (June 2016, guile-2.0), really
 			# tiny files work best.
 			$rule_count ++;
-			if ($rule_count > 40)
+			if ($outDir ne '' and $rule_count > 40)
 			{
 				$rule_count = 0;
 				$file_count ++;
