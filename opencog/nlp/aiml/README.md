@@ -43,7 +43,7 @@ AIML files need to be converted into Atomese, using the perl script
 provided in the `import` directory.  Then do this:
 
 ```
-(use-modules (opencog) (opencog nlp) (opencog nlp aiml))
+(use-modules (opencog) (opencog nlp) (opencog nlp aiml) (opencog openpsi))
 (primitive-load "/tmp/aiml.scm")
 (aiml-get-response-wl (string-tokenize "call me ishmael"))
 ```
@@ -268,9 +268,13 @@ several ways.  These are:
   rule as a kind of PutLink, i.e. of applying it only to a specified
   set.
 
-###Misc Notes
-TODO: openpsi duallink is returning too much -- should pre-filter the
-results.
+### TODO
+* openpsi duallink is returning too much -- should pre-filter the results.
+* Implement the person tag (XXX atomic.aiml seems to mis-use this
+   tag???)
+* Implement "that" (XXX need examples of how that works, for testing).
+
+### Misc Notes
 
 Hints for hand-testing this code:
 
@@ -367,6 +371,8 @@ psi-get-dual-rules calls psi-get-member-links
 (aiml-get-response-wl (string-tokenize "will you remember what"))
 (aiml-get-response-wl (string-tokenize "what will you remember"))
 (aiml-get-response-wl (string-tokenize "will you remember that"))
+MAY I TEACH YOU
+REMEMBER THAT
 
 (aiml-get-response-wl (string-tokenize "you do not learn"))
 (aiml-get-response-wl (string-tokenize "call me ishmael"))
