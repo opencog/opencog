@@ -3,18 +3,25 @@
 
 There are recurring, assorted requests to be able to script chatbot
 interactions using AIML, and this directory contains the tools to
-support
+support such capability.
 
-Be able to apply AIML rules, in a fashion that is integrated with the
-rest of the OpenCog NLP pipeline.  That is, the AIML rules become just
-one more aspect of linguistic processing.  Of course, traditional AIML
-completely short-circuits normal linguistic analysis, and simply finds
-some utterance that matches up with an input string of words.  By
-integrating with the NLP pipeline, this potentially allows for the
-creation of more subtle AIML-like rules, making use of linguistic
-information.  It also potentially allows the simulataneous scripting
-of speech and behavior.
+Please observe that using AIML is very much AGAINST the spirit of
+OpenCog, and so these tools are only grudgingly provided.  The real
+goal of OpenCog is to create a machine that can learn and think, rather
+than run off of hard-coded, human-created rules.  Of course, we've
+de-facto violeted this rule repeatedly: the link-grammar rules are
+human-created and hard-coded, as are the relex and relex2logic rules.
+Alas. So perhaps using AIML is no real crime.
 
+## Status
+Beta.  The code is done, its probably buggy. It attempts to support the
+most commonly used features of AIML version 2.1
+
+The mixed-mode operation of AIML with other verbal and non-verbal
+subsystems is in development (alpha stage).
+
+
+## Using
 There are two steps to this process: The import of standard AIML markup
 into the AtomSpace, and the application of the imported rules to the
 current speech (text-processing) context.
@@ -23,14 +30,13 @@ The goal of the import step is to map AIML expressions to equivalent
 atomspace graphs, in such a way that the OpenCog pattern matcher can
 perform most or all of the same functions that most AIML interpretors
 perform. The goal is NOT to re-invent an AIML interpreter in OpenCog!
-... although, de-facto, that's what actually ends up happening.
+... although, de-facto, that's what the end-result is: an AIML
+interpreter running in the AtomSpace.
 
-The current importer generates OpenPsi-comaptile rules, so that the
-openpsi rule engine can process these.
-
-## Status
-Stable.  Intended for anyone who has hand-crafted AIML content
-that they want imported into the AtomSpace.
+The current importer generates OpenPsi-compatible rules, so that the
+OpenPsi rule engine can process these.  This should allow AIML to be
+intermixed with other chat systems, as well as non-verbal behaviors.
+This mixed-mode operation is in development.
 
 ## Lightning reivew of AIML
 Some example sentences.
@@ -76,11 +82,12 @@ Future, not a current part of AIML:
 * star means "match one or more (space-separated) words"
   stars are greedy.
 * carat and hash (`^` `#`) mean "match zero or more words"
-* There is an implicit star at the end of all sentences it is less
+* There is an implicit star at the end of all sentences; it is less
   greedy).
 * (R11) the wild-card match matches the second of two words in a
   2-word topic.  (TBD XXX what about N words ??)
 * (R14) the wild-card match limited to one of a set.
+
 
 ## Pattern Recognition
 
@@ -89,10 +96,16 @@ matcher be run "in reverse": rather than applying one query to a
 database of thousands of facts, to find a small handful of facts that
 match the query; we instead apply thousands of queries to a single
 sentence, looking for the handful of queries that match the sentence.
-That is, AIML is an example of pattern recognition, rather than
-querying.  This means that the traditional link types BindLink and
-SatisfactionLink are not appropriate; instead, we use the PatternLink
-to specify the AIML patterns.
+In this sense, AIML is an example of pattern recognition, rather than
+querying.  The traditional pattern-matcher link types `BindLink`,
+`GetLink` and `SatisfactionLink` are not appropriate; instead, the
+underlying search is performed with `DualLink`.
+
+Given a graph (containing only constants -- that is, a "ground term")
+the `DualLink` mechanism will find all graphs with variables in them
+such that these graphs might be grounded by the given graph.
+See `http://wiki.opencog.org/w/DualLink` for details.
+
 
 ### Globbing
 
@@ -102,28 +115,30 @@ See `glob.scm` for a simple working example.
 
 
 ## OpenCog equivalents
-* R1 example.
+* R5 example.
+
+The R5 sentence in the example above is converted into the following
+OpenPsi fragment:
 
 ```
 ImplicationLink
    AndLink
       ListLink
-         Concept "Hello"
-         Glob "$eol"     # rest of the input line
+         Word "I"
+         Glob "$star"
+         Word "you"
 		ListLink
-         WordNode "Hi"
-         WordNode "there"
+         Word "I"
+         Glob "$star"
+         Word "you"
+         Word "too"
 ```
 
-There is another approach:
 
-I really really * you, darling.
-I really really love you, darling.
-
-
-# AIML tags
-
-The &lt;person&gt; tag gets converted to
+### AIML tags
+All AIML tags are converted into `DefinedSchema` nodes.  There are
+processing routines to carry out the actions.  For example, the
+&lt;person&gt; tag gets converted to
 ```
       (ExecutionOutput
          (DefineSchema "AIML-tag person")
@@ -132,29 +147,21 @@ The &lt;person&gt; tag gets converted to
 
 ```
 
-Running AIML in OpenCog
------------------------
-
-This directory includes assorted infrastructure for running AIML-style
-rules within OpenCog.  It assumes that AIML data has already been
-imported, using the tools in `import` directory.
-
-
-Running
--------
+##Running AIML in OpenCog
+AIML files need to be converted into Atomese, using the perl script
+provided in the `import` directory.
 
 
 
-Design Notes
-------------
+##Design Notes
 
-## Input
+### Input
 Sentences from RelEx.  That is, the normal RelEx and R2L pipeline
 runs, creating a large number of assorted atoms in the atomspace
 representing that sentence.  See the RelEx and R2L wiki pages for
 documentation.
 
-## Pre-processing
+### Pre-processing
 The script `make-token-sequence` creates a sequence of word tokens from
 a given RelEx parse.  For example, the sentence "I love you" can be
 tokenized as:
@@ -189,7 +196,7 @@ However, we will not be using this form at this time, primarily because
 none of the AIML rules to be imported are asking for this kind of
 information.
 
-## Rule selection
+### Rule selection
 The OpenPsi-based rule importer represents a typical AIML rule in the
 following form:
 ```
@@ -239,7 +246,7 @@ sentence and parse in the atomspace.  This can be done by saying:
 Running the above will return the sequence of words that have
 been recently uttered.
 
-## Rule application
+### Rule application
 Having found all of the rules, we now have to run them ... specifically,
 we have to apply them to the current parse.  We can do this in one of
 several ways.  These are:
@@ -253,8 +260,7 @@ several ways.  These are:
   rule as a kind of PutLink, i.e. of applying it only to a specified
   set.
 
-Misc Notes
-----------
+###Misc Notes
 TODO: openpsi duallink is returning too much -- should pre-filter the
 results.
 
@@ -315,9 +321,9 @@ Search for duals by hand:
 ```
 
 
-TODO:
-* disable compiling when loading aiml rules (or compile in background)
+###Notes:
 
+```
 psi-get-dual-rules calls psi-get-member-links
 
 (cog-execute! (car (aiml-get-response-wl s3)))
@@ -367,22 +373,12 @@ psi-get-dual-rules calls psi-get-member-links
 (aiml-get-response-wl (tokenize "what will you remember"))
 (aiml-get-response-wl (tokenize "will you remember that"))
 
-
--- DIE is capitalized in the set chain....
-   (all  sets are not downcased
-
-WHY DO PEOPLE DIE
-
 (aiml-get-response-wl (tokenize "you do not learn"))
 (aiml-get-response-wl (tokenize "call me ishmael"))
 
 -- non-trivial that:
 THAT IS A GOOD PARTY
 
-35 for 20
-41 for 50
-52  for 100
-74 for 200
 (use-modules (ice-9 ftw))
 
 (define (load-all-files DIR)
@@ -392,3 +388,4 @@ THAT IS A GOOD PARTY
 	#t)
 
 (load-all-files "/home/linas/src/opencog/opencog/nlp/aiml/import/aiml-scm/")
+```
