@@ -2,10 +2,12 @@ AIML to Atomese Conversion
 --------------------------
 This directory contains several perl scripts to convert AIML to OpenCog
 Atomese, so that the AIML rules can be integrated into the rest of the
-OpenCog natural language processing infrastructure.
+OpenCog natural language processing infrastructure.  Multiple users have
+requested scripting capabilities, and this is the tool that provides
+this.  Its up to you to integrate further.
 
-The current target of the importer is to generate OpenPsi-compatable
-rules, so that the openpsi rule engine can act as an AIML engine.
+The current target of the importer is to generate OpenPsi-compatible
+rules, so that the OpenPsi rule engine can act as an AIML engine.
 
 
 ### Usage

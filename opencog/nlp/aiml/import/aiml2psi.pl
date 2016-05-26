@@ -565,7 +565,7 @@ sub process_aiml_tags
 	}
 
 	# <set> may be nested, and thus must appear before other elements.
-	elsif ($text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*?)/)
+	elsif ($text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/)
 	{
 		# FIXME, should be like the star loop, above.
 		$tout .= &split_string($indent, $1);

@@ -233,12 +233,15 @@ psi-get-dual-rules calls psi-get-member-links
    (psi-demand "AIML chat" 0.97)
 ) ; CATEND
 
-YOU CHEATED  <bot name="genus"/>
+(aiml-get-response-wl (tokenize "will you remember what"))
+(aiml-get-response-wl (tokenize "what will you remember"))
+(aiml-get-response-wl (tokenize "will you remember that"))
 
-(cog-execute! (Get (State (Concept "topic") (Variable "$x"))))
 
-(aiml-get-response-wl (tokenize "will you rememeber what"))
-<bot name="botmaster"/>
 -- DIE is capitalized in the set chain....
+   (all  sets are not downcased
+
+-- CALL ME ISHMAEL is done wrong
+-- MY NAME IS SAM is wrong
  
 (aiml-get-response-wl (tokenize "you do not learn"))
