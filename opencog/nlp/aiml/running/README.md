@@ -234,3 +234,11 @@ psi-get-dual-rules calls psi-get-member-links
 ) ; CATEND
 
 YOU CHEATED  <bot name="genus"/>
+
+(cog-execute! (Get (State (Concept "topic") (Variable "$x"))))
+
+(aiml-get-response-wl (tokenize "will you rememeber what"))
+<bot name="botmaster"/>
+-- DIE is capitalized in the set chain....
+ 
+(aiml-get-response-wl (tokenize "you do not learn"))
