@@ -1,11 +1,10 @@
 
 # AIML in the AtomSpace
 
-## Status
-In development.  Intended for anyone who has hand-crafted AIML content
-that they want imported into the AtomSpace.
+There are recurring, assorted requests to be able to script chatbot
+interactions using AIML, and this directory contains the tools to
+support
 
-## Goal
 Be able to apply AIML rules, in a fashion that is integrated with the
 rest of the OpenCog NLP pipeline.  That is, the AIML rules become just
 one more aspect of linguistic processing.  Of course, traditional AIML
@@ -28,6 +27,10 @@ perform. The goal is NOT to re-invent an AIML interpreter in OpenCog!
 
 The current importer generates OpenPsi-comaptile rules, so that the
 openpsi rule engine can process these.
+
+## Status
+Stable.  Intended for anyone who has hand-crafted AIML content
+that they want imported into the AtomSpace.
 
 ## Lightning reivew of AIML
 Some example sentences.
@@ -135,10 +138,6 @@ Running AIML in OpenCog
 This directory includes assorted infrastructure for running AIML-style
 rules within OpenCog.  It assumes that AIML data has already been
 imported, using the tools in `import` directory.
-
-Status
-------
-Ongoing hackery
 
 
 Running
@@ -268,8 +267,7 @@ time guild compile "/tmp/aiml.scm"
 ```
 
 ```
-(load "run.scm")
-(use-modules (opencog) (opencog nlp) (opencog exec) (opencog query) (opencog openpsi))
+(use-modules (opencog) (opencog nlp aiml))
 ```
 A normal file load triggers a compile; avoid this as follows:
 ```

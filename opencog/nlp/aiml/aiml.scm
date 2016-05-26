@@ -3,7 +3,7 @@
 ;
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog nlp))
+(use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
 
 ; ==============================================================
 
@@ -63,8 +63,9 @@
   string-tokenize SENT-STR -- chop up SENT-STR string into word-nodes
 
   Example:
-
      (string-tokenize \"This is a test.\")
+  produces the output:
+     (List (Word \"this\") (Word \"is\") (Word \"a\") (Word \"test\"))
 
   This is a debugging utility, and not for general use!
 "
@@ -75,9 +76,15 @@
 
 ; --------------------------------------------------------------
 
-(define-public (word-list-flatten LIST)
+(define (word-list-flatten LIST)
 "
   word-list-flatten LIST -- remove nested ListLinks
+
+  This is used for flattening out the assorted lists of words
+  that result from the AIML processing utilities.
+
+  This is not exported publically, so as to avoid pullotuing the
+  namespace.
 
   Example: the input
      (List (Concept \"A\") (List (Concept \"B\") (Concept \"C\")))
@@ -95,9 +102,12 @@
 
 ; --------------------------------------------------------------
 
-(define-public (word-list-set-flatten SET)
+(define (word-list-set-flatten SET)
 "
   word-list-set-flatten LIST -- flatten all word-lists in a set.
+
+  This is not exported publically, so as to avoid pullotuing the
+  namespace.
 
   Example: the input
      (Set (List (Concept \"A\") (List (Concept \"B\") (Concept \"C\"))))
@@ -133,7 +143,6 @@
 	; for now, just get the responses.
 	(map run-rule
 		(filter chat-rule? (psi-get-dual-rules SENT)))
-
 )
 
 ; --------------------------------------------------------------
