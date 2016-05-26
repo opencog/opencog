@@ -240,8 +240,11 @@ psi-get-dual-rules calls psi-get-member-links
 
 -- DIE is capitalized in the set chain....
    (all  sets are not downcased
-
--- CALL ME ISHMAEL is done wrong
--- MY NAME IS SAM is wrong
  
+WHY DO PEOPLE DIE
+
 (aiml-get-response-wl (tokenize "you do not learn"))
+(aiml-get-response-wl (tokenize "call me ishmael"))
+
+-- non-trivial that:
+THAT IS A GOOD PARTY

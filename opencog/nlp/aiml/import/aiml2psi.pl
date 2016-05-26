@@ -549,6 +549,8 @@ sub process_aiml_tags
 	}
 
 	# <think> can wrap sets and so must appear before those parts.
+	# Also, lower-case (downcase) everything in  think, to avoid
+	# strange upper-case stuff.
 	elsif ($text =~ /(.*)<think>(.*)<\/think>(.*)/)
 	{
 		# FIXME, should be like the star loop, above.
@@ -556,7 +558,7 @@ sub process_aiml_tags
 		$tout .= $indent . "(ExecutionOutput\n";
 		$tout .= $indent . "   (DefinedSchema \"AIML-tag think\")\n";
 		$tout .= $indent . "   (ListLink\n";
-		$tout .= &process_aiml_tags($indent . "      ", $2);
+		$tout .= &process_aiml_tags($indent . "      ", lc $2);
 		$tout .= $indent . "   ))\n";
 		if ($3 ne "")
 		{
@@ -913,10 +915,11 @@ while (my $line = <FIN>)
 	{
 		if ($have_topic)
 		{
-			$psi_ctxt .= "         (State\n";
-			$psi_ctxt .= "            (Anchor \"\#topic\")\n";
-			$psi_ctxt .= "            (Concept \"$curr_topic\")\n";
-			$psi_ctxt .= "         )\n";
+# XXX this is wrong -- fixme ...
+			#$psi_ctxt .= "         (State\n";
+			#$psi_ctxt .= "            (Anchor \"\#topic\")\n";
+			#$psi_ctxt .= "            (Concept \"$curr_topic\")\n";
+			#$psi_ctxt .= "         )\n";
 		}
 		$have_topic = 0;
 	}
