@@ -87,7 +87,17 @@
 ; Run AIML recursively
 (define-public (do-aiml-srai x)
 	(display "duuude srai recurse\n") (display x) (newline)
-	(aiml-get-response-wl x)
+	(let ((resp (aiml-get-response-wl x)))
+		(if (null? resp)
+			'()
+			(begin
+				(display "duuude srai result is\n")
+				(display (gar (car resp))) (newline)
+				; XXX FIXME -- if SRAI returns multiple repsonses, we
+				; currently take just the first. Should we do something
+				; else?
+				(gar (car resp))))
+	)
 )
 
 (DefineLink

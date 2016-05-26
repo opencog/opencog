@@ -206,6 +206,8 @@ psi-get-dual-rules calls psi-get-member-links
 	(Set (ListLink (Word "who") (Word "endorses") (Word "Trump")))
 ))
 
+(aiml-get-response-wl
+	(ListLink (Word "who") (Word "endorses") (Word "Trump")))
 
 (psi-rule
    ;; context
