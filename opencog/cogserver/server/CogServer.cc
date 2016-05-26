@@ -602,7 +602,7 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
 {
     if (module_paths.empty()) {
         // Sometimes paths are given without the "opencog" part.
-        for (auto p : DEFAULT_MODULE_PATHS) {
+        for (auto p : get_module_paths()) {
             module_paths.push_back(p);
             module_paths.push_back(p + "/opencog");
         }
@@ -643,7 +643,7 @@ void CogServer::loadSCMModules(std::vector<std::string> module_paths)
 #ifdef HAVE_GUILE
     if (module_paths.empty()) {
         // Sometimes paths are given without the "opencog" part.
-        for (auto p : DEFAULT_MODULE_PATHS) {
+        for (auto p : get_module_paths()) {
             module_paths.push_back(p);
             module_paths.push_back(p + "/opencog");
         }

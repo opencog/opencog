@@ -5,7 +5,6 @@
 # It assumes by default that the building directory name is 'build`
 # otherwise the first command argument can be given to overwrite it
 
-set -u
 # set -x
 
 prg_path="$(readlink -f "$0")"
@@ -21,6 +20,7 @@ else # More than one command line arguments
 fi
 
 build_dir="${branch_dir}/${build_dir_name}"
+export OPENCOG_MODULE_PATHS="${OPENCOG_MODULE_PATHS}:${build_dir}"
 
 "${build_dir}/opencog/cogserver/server/cogserver" \
     -c "${branch_dir}/lib/opencog.conf"
