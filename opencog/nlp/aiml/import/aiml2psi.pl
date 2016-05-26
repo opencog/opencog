@@ -28,9 +28,9 @@ my $help;
 my $version;
 my $overwrite;
 my $aimlDir ='.';
-my $intermediateFile = 'flat-aiml.txt';
+my $intermediateFile = 'aiml-flat.txt';
 my $outDir = '';
-my $outFile = 'aiml.scm';
+my $outFile = 'aiml-rules.scm';
 
 GetOptions(
     'dir=s' => \$aimlDir,
