@@ -56,6 +56,23 @@
 	(map token-seq-of-parse (sentence-get-parses SENT))
 )
 
+; ==============================================================
+
+(define-public (string-tokenize SENT-STR)
+"
+  string-tokenize SENT-STR -- chop up SENT-STR string into word-nodes
+
+  Example:
+
+     (string-tokenize \"This is a test.\")
+
+  This is a debugging utility, and not for general use!
+"
+	(ListLink (map
+		(lambda (w) (Word w))
+		(string-split SENT-STR (lambda (x) (eq? x #\ )))))
+)
+
 ; --------------------------------------------------------------
 
 (define-public (word-list-flatten LIST)
