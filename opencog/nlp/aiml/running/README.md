@@ -125,6 +125,9 @@ several ways.  These are:
 
 Misc Notes
 ----------
+TODO: openpsi duallink is returning too much -- should pre-filter the
+results.
+
 Hints for hand-testing this code:
 
 Pre-compile the AIML files (this can take over an hour)
@@ -230,3 +233,4 @@ psi-get-dual-rules calls psi-get-member-links
    (psi-demand "AIML chat" 0.97)
 ) ; CATEND
 
+YOU CHEATED  <bot name="genus"/>

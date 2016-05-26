@@ -58,6 +58,26 @@
 
 ; --------------------------------------------------------------
 
+(define-public (word-list-flatten LIST)
+"
+  word-list-flatten LIST -- remove nested ListLinks
+
+  Example: the input
+     (List (Concept \"A\") (List (Concept \"B\") (Concept \"C\")))
+  will be flattened to:
+     (List (Concept \"A\") (Concept \"B\") (Concept \"C\"))
+"
+
+	(define (unwrap ATOM)
+		(if (equal? 'ListLink (cog-type ATOM))
+			(concatenate (map unwrap (cog-outgoing-set ATOM)))
+			(list ATOM)))
+
+	(if (equal? 'ListLink (cog-type LIST)) (ListLink (unwrap LIST)) LIST)
+)
+
+; --------------------------------------------------------------
+
 (define-public (aiml-get-response-wl SENT)
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
@@ -92,6 +112,7 @@
 			'()
 			(begin
 				(display "duuude srai result is\n")
+				(display resp) (newline)
 				(display (gar (car resp))) (newline)
 				; XXX FIXME -- if SRAI returns multiple repsonses, we
 				; currently take just the first. Should we do something
@@ -106,7 +127,9 @@
 
 (define-public (do-aiml-think x)
 	(display "duuude think\n") (display x) (newline)
-	x
+	(cog-execute! x)
+	; 'think' never returns anything
+	'()
 )
 
 (DefineLink
