@@ -554,7 +554,7 @@ sub process_aiml_tags
 	elsif ($text =~ /(.*)<think>(.*)<\/think>(.*)/)
 	{
 		# FIXME, should be like the star loop, above.
-		$tout .= &process_aiml_tags($indent . "   ", $1);
+		$tout .= &process_aiml_tags($indent, $1);
 		$tout .= $indent . "(ExecutionOutput\n";
 		$tout .= $indent . "   (DefinedSchema \"AIML-tag think\")\n";
 		$tout .= $indent . "   (ListLink\n";
