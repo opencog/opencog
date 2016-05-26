@@ -1,9 +1,12 @@
 ;
 ; Tools for running AIML in the AtomSpace.
 ;
+(define-module (opencog nlp aiml))
 
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
+
+(load "aiml/bot.scm")
 
 ; ==============================================================
 

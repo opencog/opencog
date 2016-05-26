@@ -38,6 +38,19 @@ OpenPsi rule engine can process these.  This should allow AIML to be
 intermixed with other chat systems, as well as non-verbal behaviors.
 This mixed-mode operation is in development.
 
+## Running AIML in OpenCog
+AIML files need to be converted into Atomese, using the perl script
+provided in the `import` directory.  Then do this:
+
+```
+(use-modules (opencog) (opencog nlp) (opencog nlp aiml))
+(primitive-load "/tmp/aiml.scm")
+(aiml-get-response-wl (string-tokenize "call me ishmael"))
+```
+
+The various sections below provide additional under-the-cover details.
+
+
 ## Lightning reivew of AIML
 Some example sentences.
 
@@ -146,11 +159,6 @@ processing routines to carry out the actions.  For example, the
              (Glob "$star-1")))
 
 ```
-
-##Running AIML in OpenCog
-AIML files need to be converted into Atomese, using the perl script
-provided in the `import` directory.
-
 
 
 ##Design Notes
@@ -288,21 +296,8 @@ Search for the rules:
 ```
 ;; YOU CAN DO BETTER
 (psi-get-dual-rules (List (Word "you") (Word "can") (Word "do") (Word "better")))
-```
-write a quickie tokenizer:
-```
-(map
-	(lambda (w) (Word w))
-	(string-split "you can do better" (lambda (x) (eq? x #\ ))))
-
-(define (tokenize SENT-STR)
-	(ListLink (map
-		(lambda (w) (Word w))
-		(string-split SENT-STR (lambda (x) (eq? x #\ ))))
-))
-
-(tokenize "you can do better")
-(tokenize "you are such a winner")
+(string-tokenize "you can do better")
+(string-tokenize "you are such a winner")
 ```
 Search for duals by hand:
 ```
@@ -314,9 +309,9 @@ Search for duals by hand:
 (cog-incoming-set sent)
 (cog-get-root sent)
 
-(define s3 (tokenize "who supports Trump?"))
-(define s3a (tokenize "who endorses Trump?"))
-(define s4 (tokenize "who won the superbowl"))
+(define s3 (string-tokenize "who supports Trump?"))
+(define s3a (string-tokenize "who endorses Trump?"))
+(define s4 (string-tokenize "who won the superbowl"))
 (aiml-get-response-wl s4)
 ```
 
@@ -369,12 +364,12 @@ psi-get-dual-rules calls psi-get-member-links
    (psi-demand "AIML chat" 0.97)
 ) ; CATEND
 
-(aiml-get-response-wl (tokenize "will you remember what"))
-(aiml-get-response-wl (tokenize "what will you remember"))
-(aiml-get-response-wl (tokenize "will you remember that"))
+(aiml-get-response-wl (string-tokenize "will you remember what"))
+(aiml-get-response-wl (string-tokenize "what will you remember"))
+(aiml-get-response-wl (string-tokenize "will you remember that"))
 
-(aiml-get-response-wl (tokenize "you do not learn"))
-(aiml-get-response-wl (tokenize "call me ishmael"))
+(aiml-get-response-wl (string-tokenize "you do not learn"))
+(aiml-get-response-wl (string-tokenize "call me ishmael"))
 
 -- non-trivial that:
 THAT IS A GOOD PARTY
