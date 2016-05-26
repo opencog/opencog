@@ -100,11 +100,12 @@
 
 ; --------------------------------------------------------------
 
+; AIML-tag srai -- Run AIML recursively
+; srai == "stimulous-response ai"
 (DefineLink
 	(DefinedSchemaNode "AIML-tag srai")
 	(GroundedSchemaNode "scm: do-aiml-srai"))
 
-; Run AIML recursively
 (define-public (do-aiml-srai x)
 	(display "duuude srai recurse\n") (display x) (newline)
 	(let ((resp (aiml-get-response-wl x)))
@@ -121,6 +122,7 @@
 	)
 )
 
+; AIML-tag think -- execute the arguments, silently.
 (DefineLink
 	(DefinedSchemaNode "AIML-tag think")
 	(GroundedSchemaNode "scm: do-aiml-think"))
@@ -147,5 +149,14 @@
 	(State KEY flat-val)
 	flat-val
 )
+
+; AIML-tag get -- Fetch value from a StateLink key-value pair
+(DefineLink
+	(DefinedSchemaNode "AIML-tag get")
+	(GroundedSchemaNode "scm: do-aiml-get"))
+
+; gar discards the SetLink that the GetLink returns.
+(define-public (do-aiml-get KEY)
+	(gar (cog-execute! (Get (State KEY (Variable "$x"))))))
 
 ; ==============================================================
