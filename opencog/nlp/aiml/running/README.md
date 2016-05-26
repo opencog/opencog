@@ -143,7 +143,8 @@ time guild compile "/tmp/aiml.scm"
 A normal file load triggers a compile; avoid this as follows:
 ```
 (primitive-load "/tmp/aiml.scm")
-(guile-compile "/tmp/aiml.scm")
+(use-modules (system base language))
+(compile "/tmp/aiml.scm")
 (load-compiled (compiled-file-name "/tmp/aiml.scm"))
 
 ```

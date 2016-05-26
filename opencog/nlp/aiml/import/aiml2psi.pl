@@ -22,14 +22,14 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.1.0";
+my $ver = "0.2.0";
 my $debug;
 my $help;
 my $version;
 my $overwrite;
 my $aimlDir ='.';
 my $intermediateFile = 'flat-aiml.txt';
-my $finalFile = 'aiml.scm';
+my $outDir = 'aiml-scm';
 
 GetOptions(
     'dir=s' => \$aimlDir,
@@ -38,8 +38,8 @@ GetOptions(
     'last-only' => \$overwrite,
     'version' => \$version,
     'intermediate=s' => \$intermediateFile,
-    'out=s' => \$finalFile,
-) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
+    'out=s' => \$outDir,
+) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>]\n";
 
 if ($help)
 {
@@ -52,7 +52,7 @@ if ($help)
 	print "   --last-only             Only the last category is output.\n";
 	print "   --dir <directory>       AIML source directory, default: '$aimlDir'\n";
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
-	print "   --out <file>            OpenCog output file, default is '$finalFile'\n";
+	print "   --out <directory>       Directory for OpenCog output files, default is '$outDir'\n";
 	die "\n";
 }
 
@@ -692,7 +692,6 @@ sub process_aiml_tags
 # Second pass
 
 open (FIN,"<$intermediateFile");
-open (FOUT,">$finalFile");
 my $curPath="";
 my %overwriteSpace=();
 my $psi_ctxt = "";
@@ -710,6 +709,11 @@ my $curr_raw_code = "";
 my $cattext = "";
 
 my $star_index = 1;
+
+my $rule_count = 0;
+my $file_count = 1;
+mkdir $outDir;
+open (FOUT,">" . $outDir . "/aiml-" . $file_count . ".scm");
 
 while (my $line = <FIN>)
 {
@@ -841,6 +845,18 @@ while (my $line = <FIN>)
 		{
 			# Not merging, so just write it out.
 			print FOUT "$rule\n";
+
+			$rule_count ++;
+			if ($rule_count > 100)
+			{
+				$rule_count = 0;
+				$file_count ++;
+
+				print FOUT "; ---------- end of file ----------\n";
+				print FOUT "*unspecified*\n";
+				close (FOUT);
+				open (FOUT,">" . $outDir . "/aiml-" . $file_count . ".scm");
+			}
 		}
 		$psi_ctxt = "";
 		# $psi_goal = "";
