@@ -125,21 +125,27 @@
 	(DefinedSchemaNode "AIML-tag think")
 	(GroundedSchemaNode "scm: do-aiml-think"))
 
+; Because do-aiml-think is a black-box, its arguments are
+; force-evaluated by teh evaluator. Thus, there is nothing to
+; do with the argument, when we get here.  Don't return anything
+; (be silent).
 (define-public (do-aiml-think x)
 	(display "duuude think\n") (display x) (newline)
-	(cog-execute! x)
 	; 'think' never returns anything
 	'()
 )
 
+; AIML-tag set -- Use a StateLink to store a key-value pair
 (DefineLink
 	(DefinedSchemaNode "AIML-tag set")
 	(GroundedSchemaNode "scm: do-aiml-set"))
 
 (define-public (do-aiml-set KEY VALUE)
-	(display "duuude set\n") (display KEY) (newline)
-	(display VALUE) (newline)
-	VALUE
+	(define flat-val (word-list-flatten VALUE))
+	(display "duuude set key=") (display KEY) (newline)
+	(display "duuude set value=") (display flat-val) (newline)
+	(State KEY flat-val)
+	flat-val
 )
 
 ; ==============================================================
