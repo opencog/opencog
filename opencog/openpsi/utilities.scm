@@ -85,36 +85,35 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-member-links atom)
-"
-  Returns a list of MemberLinks that are the root of the given atom.
 
-  atom:
-  - An atom that possibly has root MemberLinks.
+(define-public (psi-get-member-links ATOM)
+"
+  psi-get-member-links ATOM - Return list of MemberLinks that hold ATOM.
+
+  All psi rules are members of some ruleset; this searches for and
+  finds such MemberLinks.
 "
     (define (get-roots an-atom)
         (delete-duplicates (cog-filter 'MemberLink (cog-get-root an-atom))))
 
-    (let ((duals (cog-outgoing-set (cog-execute! (DualLink atom)))))
+    (let ((duals (cog-outgoing-set (cog-execute! (DualLink ATOM)))))
         (if (null? duals)
-            (get-roots atom)
-            (delete-duplicates (merge
-                (append-map get-roots duals)
-                (get-roots atom)
-                (lambda (x y) #t)))
+            (get-roots ATOM)
+            (delete-duplicates (concatenate
+                (list (append-map get-roots duals)
+                    (append (get-roots ATOM)))))
         )
     )
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-dual-rules atom)
+(define-public (psi-get-dual-rules ATOM)
 "
-  Returns a list of psi-rules that atleast partially ground to the given atom.
+  psi-get-dual-rules ATOM - Return list of psi-rules that can ground ATOM.
 
-  atom:
-  - An atom that possibly will ground or forms the context of a psi-rule.
+  ATOM should be a part of a psi-rule.
 "
-    (let ((member-links (psi-get-member-links atom)))
+    (let ((member-links (psi-get-member-links ATOM)))
          (delete-duplicates (append-map
              (lambda (x) (filter psi-rule? (cog-outgoing-set x)))
              member-links))

@@ -10,17 +10,17 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-(define-public (psi-rule context action demand-goal a-stv demand-node)
+(define-public (psi-rule context action goal a-stv demand)
 "
   It associates an action and context in which the action has to be taken
   to a goal that is satisfied when the action is executed. It is structured as
   as the following `ImplicationLink`,
 
-    (ImplicationLink
+    (ImplicationLink a-stv
         (AndLink
             (context)
             (action))
-        (demand-goal))
+        (goal))
 
   context:
   - A list containing the terms/clauses that should be met for this action
@@ -32,7 +32,7 @@
     it will have to return TRUE_TV or FALSE_TV. Any atom that could be executed
     by running `(cog-execute! your-action)`.
 
-  demand-goal:
+  goal:
   - It should be an atom that can be run by `cog-evaluate!`. That means that
     it will have to return TRUE_TV or FALSE_TV. This is basically a formula, on
     how this rule affects the demands.
@@ -40,12 +40,12 @@
   a-stv:
   - This is the stv of the ImplicationLink.
 
-  demand-node:
+  demand:
   - The node that represents a demand that this rule affects.
 "
     (define func-name "psi-rule") ; For use in error reporting
     (define (implication)
-        (ImplicationLink a-stv (AndLink context action) demand-goal))
+        (ImplicationLink a-stv (AndLink context action) goal))
 
     ; Check arguments
     (if (not (list? context))
@@ -54,15 +54,15 @@
     (if (not (cog-atom? action))
         (error (string-append "In procedure " func-name ", expected second "
             "argument to be an atom, got:") action))
-    (if (not (cog-atom? demand-goal))
+    (if (not (cog-atom? goal))
         (error (string-append "In procedure " func-name ", expected third "
-            "argument to be an atom, got:") demand-goal))
+            "argument to be an atom, got:") goal))
     (if (not (cog-tv? a-stv))
         (error (string-append "In procedure " func-name ", expected fourth "
             "argument to be a stv, got:") a-stv))
-    (if (not (equal? (stv 1 1) (psi-demand? demand-node)))
+    (if (not (equal? (stv 1 1) (psi-demand? demand)))
         (error (string-append "In procedure " func-name ", expected fifth "
-            "argument to be a node representing a demand, got:") demand-node))
+            "argument to be a node representing a demand, got:") demand))
 
     ; These memberships are needed for making filtering and searching simpler..
     ; If GlobNode had worked with GetLink at the time of coding this ,
@@ -71,7 +71,7 @@
         action
         (ConceptNode (string-append (psi-prefix-str) "action")))
 
-    (MemberLink (implication) demand-node)
+    (MemberLink (implication) demand)
 
     (implication)
 )

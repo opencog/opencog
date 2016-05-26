@@ -22,41 +22,38 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.1.0";
+my $ver = "0.2.0";
 my $debug;
 my $help;
 my $version;
 my $overwrite;
 my $aimlDir ='.';
-my $intermediateFile = 'flat-aiml.txt';
-my $finalFile = 'aiml.scm';
-my $rulebase = "*-AIML-rulebase-*";
+my $intermediateFile = 'aiml-flat.txt';
+my $outDir = '';
+my $outFile = 'aiml-rules.scm';
 
 GetOptions(
     'dir=s' => \$aimlDir,
     'debug' => \$debug,
     'help' => \$help,
-    'rulebase-name=s' => \$rulebase,
     'last-only' => \$overwrite,
     'version' => \$version,
     'intermediate=s' => \$intermediateFile,
-    'out=s' => \$finalFile,
-) or die "Usage: $0 [--debug] [--help] [--version] [--rulebase-name] [--last-only] [--dir
-<AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
+    'out=s' => \$outDir,
+) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>]\n";
 
 if ($help)
 {
 	print "Convert AIML markup files to OpenCog Atomese files.\n";
 	print "\n";
-	print "Usage: $0 [--debug] [--help] [--version] [--rulebase-name] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
+	print "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
 	print "   --debug                 Enable debugging (if any).\n";
 	print "   --help                  Print these helpful comments.\n";
 	print "   --version               Print version, current version '$ver'\n";
-	print "   --rulebase-name         Specify a name for the ruleset, default '$rulebase'\n";
 	print "   --last-only             Only the last category is output.\n";
 	print "   --dir <directory>       AIML source directory, default: '$aimlDir'\n";
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
-	print "   --out <file>          OpenCog output file, default is '$finalFile'\n";
+	print "   --out <directory>       Directory for OpenCog output files\n";
 	die "\n";
 }
 
@@ -337,10 +334,10 @@ my $textnode = "(TextNode ";
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
 
-my $dem_kind = "   (Concept \"AIML chat demand\")\n";
-my	$truth = "   (stv 1 1)\n";
+my $psi_goal = "   (Concept \"AIML chat goal\")\n";
+my	$goal_truth = "   (stv 1 0.8)\n";
 my $demand = "   (psi-demand \"AIML chat\" 0.97)\n";
-my $psi_tail = $dem_kind . $truth . $demand;
+my $psi_tail = $psi_goal . $goal_truth . $demand;
 
 # split_string -- split a string of words into distinct nodes.
 sub split_string
@@ -351,7 +348,10 @@ sub split_string
 	my $tout = "";
 	for my $wrd (@words)
 	{
-		$tout .= $indent . $wordnode . "\"$wrd\")\n";
+		if ($wrd ne "")
+		{
+			$tout .= $indent . $wordnode . "\"$wrd\")\n";
+		}
 	}
 	$tout;
 }
@@ -445,8 +445,9 @@ sub process_srai
 				$tout .= $indent . "(ExecutionOutput\n";
 				$tout .= $indent . "   (DefinedSchema \"AIML-tag srai\")\n";
 				$tout .= $indent . "   (ListLink\n";
-				$tout .= &process_aiml_tags("      " . $indent, $contig);
-				$tout .= $indent . "   ))\n";
+				$tout .= $indent . "      (ListLink\n";
+				$tout .= &process_aiml_tags("         " . $indent, $contig);
+				$tout .= $indent . "   )))\n";
 
 				$contig = $post;
 			}
@@ -509,21 +510,6 @@ sub process_aiml_tags
 		$tout .= &process_srai($indent, $text);
 	}
 
-	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
-	{
-		# FIXME, should be like the loop, below.
-		$tout .= $indent . $textnode . "\"$1\")\n";
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
-		$tout .= $indent . "   (ListLink\n";
-		$tout .= &process_aiml_tags($indent . "      ", $2);
-		$tout .= $indent . "   ))\n";
-		if ($3 ne "")
-		{
-			$tout .= $indent . $textnode . "\"$3\")\n";
-		}
-	}
-
 	elsif ($text =~ /<star/)
 	{
 		my @stars = split /<star/, $text;
@@ -563,6 +549,134 @@ sub process_aiml_tags
 		}
 	}
 
+	# <think> can wrap sets and so must appear before those parts.
+	# Also, lower-case (downcase) everything in  think, to avoid
+	# strange upper-case stuff.
+	elsif ($text =~ /(.*)<think>(.*)<\/think>(.*)/)
+	{
+		# FIXME, should be like the star loop, above.
+		$tout .= &process_aiml_tags($indent, $1);
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag think\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= &process_aiml_tags($indent . "      ", lc $2);
+		$tout .= $indent . "   ))\n";
+		if ($3 ne "")
+		{
+			$tout .= &split_string($indent, $3);
+		}
+	}
+
+	# <set> may be nested, and thus must appear before other elements.
+	elsif ($text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/)
+	{
+		# FIXME, should be like the star loop, above.
+		$tout .= &split_string($indent, $1);
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag set\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= $indent . "      (Concept \"" . $2 . "\")\n";
+		$tout .= $indent . "      (ListLink\n";
+		$tout .= &process_aiml_tags($indent . "         ", $3);
+		$tout .= $indent . "   )))\n";
+		if ($4 ne "")
+		{
+			$tout .= &split_string($indent, $4);
+		}
+	}
+
+	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
+	{
+		# FIXME, should be like the star loop, below.
+		$tout .= &split_string($indent, $1);
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= &process_aiml_tags($indent . "      ", $2);
+		$tout .= $indent . "   ))\n";
+		if ($3 ne "")
+		{
+			$tout .= &split_string($indent, $3);
+		}
+	}
+
+	elsif ($text =~ /(.*)<that\/>(.*)/)
+	{
+		# FIXME, should be like the star loop, above.
+		$tout .= &split_string($indent, $1);
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
+		$tout .= $indent . "   (ListLink))\n";
+		if ($2 ne "")
+		{
+			$tout .= &split_string($indent, $2);
+		}
+	}
+
+	# XXX FIXME ? This is supposed to be equivalent to
+	# <person><star/></person> however, in the actual AIML texts,'
+	# there is not actual star, so its broken/invalid sytax.
+	elsif ($text =~ /(.*)<person\/>(.*)/)
+	{
+		$tout .= &split_string($indent, $1);
+		if ($2 ne "")
+		{
+			$tout .= &split_string($indent, $2);
+		}
+	}
+
+	elsif ($text =~ /<input\s*index\s*=\s*'(\d+)'\s*\/>/)
+	{
+		$tout .= $indent . "(ExecutionOutput\n";
+		$tout .= $indent . "   (DefinedSchema \"AIML-tag input\")\n";
+		$tout .= $indent . "   (ListLink\n";
+		$tout .= $indent . "       (Number \"$1\")))\n";
+	}
+
+	# Multiple gets may appear in one reply.
+	elsif ($text =~ /<get name=/)
+	{
+		my @gets = split /<get/, $text;
+		foreach my $get (@gets)
+		{
+			if ($get =~ /name='(.*)'\/>(.*)/)
+			{
+				$tout .= $indent . "(ExecutionOutput\n";
+				$tout .= $indent . "   (DefinedSchema \"AIML-tag get\")\n";
+				$tout .= $indent . "   (ListLink\n";
+				$tout .= $indent . "      (Concept \"$1\")\n";
+				$tout .= $indent . "   ))\n";
+				$tout .= &split_string($indent, $2);
+			}
+			else
+			{
+				$tout .= &split_string($indent, $get);
+			}
+		}
+	}
+
+	# Multiple bots may appear in one reply.
+	elsif ($text =~ /<bot name=/)
+	{
+		my @bots = split /<bot/, $text;
+		foreach my $bot (@bots)
+		{
+			if ($bot =~ /name='(.*)'\/>(.*)/)
+			{
+				$tout .= $indent . "(ExecutionOutput\n";
+				$tout .= $indent . "   (DefinedSchema \"AIML-tag bot\")\n";
+				$tout .= $indent . "   (ListLink\n";
+				$tout .= $indent . "      (Concept \"$1\")\n";
+				$tout .= $indent . "   ))\n";
+				$tout .= &split_string($indent, $2);
+			}
+			else
+			{
+				$tout .= &split_string($indent, $bot);
+			}
+		}
+	}
+
 	elsif ($text =~ /<!--.*-->/)
 	{
 		# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
@@ -579,7 +693,6 @@ sub process_aiml_tags
 # Second pass
 
 open (FIN,"<$intermediateFile");
-open (FOUT,">$finalFile");
 my $curPath="";
 my %overwriteSpace=();
 my $psi_ctxt = "";
@@ -597,6 +710,19 @@ my $curr_raw_code = "";
 my $cattext = "";
 
 my $star_index = 1;
+
+my $rule_count = 0;
+my $file_count = 1;
+
+if ($outDir ne '')
+{
+	mkdir $outDir;
+	open (FOUT,">" . $outDir . "/aiml-" . $file_count . ".scm");
+}
+else
+{
+	open (FOUT,">" . $outFile);
+}
 
 while (my $line = <FIN>)
 {
@@ -619,8 +745,7 @@ while (my $line = <FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$psi_ctxt = "";
-		$psi_ctxt .= "   (And\n";
+		$psi_ctxt .= "   (list\n";
 	}
 	if ($cmd eq "CATTEXT")
 	{
@@ -698,7 +823,7 @@ while (my $line = <FIN>)
 				$rule .= "   ;; action\n";
 				$rule .= $psi_goal;
 				$rule .= "   (ListLink\n";
-				$rule .= &process_aiml_tags("      ", $curr_raw_code);  
+				$rule .= &process_aiml_tags("      ", $curr_raw_code);
 				$rule .= "   )\n";
 				$rule .= $psi_tail;
 				$rule .= ")\n";
@@ -729,6 +854,23 @@ while (my $line = <FIN>)
 		{
 			# Not merging, so just write it out.
 			print FOUT "$rule\n";
+
+			# OK, so the current guile compiler is broken, it appears
+			# to have a runtime of N^2 where N is the size of the file.
+			# Avoid an excessively long compile time by writing lots of
+			# small files.  At this time (June 2016, guile-2.0), really
+			# tiny files work best.
+			$rule_count ++;
+			if ($outDir ne '' and $rule_count > 40)
+			{
+				$rule_count = 0;
+				$file_count ++;
+
+				print FOUT "; ---------- end of file ----------\n";
+				print FOUT "*unspecified*\n";
+				close (FOUT);
+				open (FOUT,">" . $outDir . "/aiml-" . $file_count . ".scm");
+			}
 		}
 		$psi_ctxt = "";
 		# $psi_goal = "";
@@ -803,10 +945,11 @@ while (my $line = <FIN>)
 	{
 		if ($have_topic)
 		{
-			$psi_ctxt .= "         (State\n";
-			$psi_ctxt .= "            (Anchor \"\#topic\")\n";
-			$psi_ctxt .= "            (Concept \"$curr_topic\")\n";
-			$psi_ctxt .= "         )\n";
+# XXX this is wrong -- fixme ...
+			#$psi_ctxt .= "         (State\n";
+			#$psi_ctxt .= "            (Anchor \"\#topic\")\n";
+			#$psi_ctxt .= "            (Concept \"$curr_topic\")\n";
+			#$psi_ctxt .= "         )\n";
 		}
 		$have_topic = 0;
 	}
@@ -944,9 +1087,9 @@ CATEND,0
 =OpenCog equivalents
 * R1 example.
 ```
-; Every DefinedSchema must have a globally unique name, and the 
-; original category text is as good a name as any.  Useful for 
-; debugging.  In all other respects, the actual name chosen does 
+; Every DefinedSchema must have a globally unique name, and the
+; original category text is as good a name as any.  Useful for
+; debugging.  In all other respects, the actual name chosen does
 ; not matter. The MemberLink simply describes the DefinedSchema
 ; as belonging to a particular rulebase; in this case, the rulbase
 ; is called (Concept "*-AIML-rulebase-*").  The actual name of
