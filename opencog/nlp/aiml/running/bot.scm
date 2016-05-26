@@ -35,10 +35,13 @@
 (State (Concept "gender") (List (Word "female")))
 
 ;; <bot name="favoritefood"/>
-(State (Concept "favoritefood") (List (Word "electrical") (Word "energy"))
+(State (Concept "favoritefood") (List (Word "electrical") (Word "energy")))
 
 ;; <bot name="friend"/>
 (State (Concept "friend") (List (Word "Kino")))
 
 ;; <bot name="size"/>
 (State (Concept "size") (List (Word "42")))
+
+;; mute the thing
+*unspecified*

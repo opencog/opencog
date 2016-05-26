@@ -159,4 +159,9 @@
 (define-public (do-aiml-get KEY)
 	(gar (cog-execute! (Get (State KEY (Variable "$x"))))))
 
+; AIML-tag bot -- Just like get, but for bot values.
+(DefineLink
+	(DefinedSchemaNode "AIML-tag bot")
+	(GroundedSchemaNode "scm: do-aiml-get"))
+
 ; ==============================================================
