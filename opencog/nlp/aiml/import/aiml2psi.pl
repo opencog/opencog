@@ -472,12 +472,11 @@ sub process_srai
 	$tout;
 }
 
-# process_aiml_tags -- convert AIML tags into Atomese.
-# Currently handles STAR and SRAI.
+# process_category -- convert AIML <category> into Atomese.
 #
 # First argument: white-space indentation to insert on each line.
 # Second argument: the actual text to unpack
-sub process_aiml_tags
+sub process_category
 {
 	my $indent = $_[0];
 	my $text = $_[1];
@@ -497,6 +496,20 @@ sub process_aiml_tags
 	# Trim leading and trailing whtespace.
 	$text =~ s/^\s*//;
 	$text =~ s/\s*$//;
+
+	my $tout = &process_aiml_tags($indent, $text);
+	$tout;
+}
+
+# process_aiml_tags -- convert AIML tags into Atomese.
+# Currently handles STAR and SRAI.
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_aiml_tags
+{
+	my $indent = $_[0];
+	my $text = $_[1];
 
 	my $tout = "";
 
@@ -552,7 +565,7 @@ sub process_aiml_tags
 	# <think> can wrap sets and so must appear before those parts.
 	# Also, lower-case (downcase) everything in  think, to avoid
 	# strange upper-case stuff.
-	elsif ($text =~ /(.*)<think>(.*)<\/think>(.*)/)
+	elsif ($text =~ /(.*)<think>(.*?)<\/think>(.*)/)
 	{
 		# FIXME, should be like the star loop, above.
 		$tout .= &process_aiml_tags($indent, $1);
@@ -806,7 +819,7 @@ while (my $line = <FIN>)
 					$rule .= $psi_ctxt;
 					$rule .= "   ; action\n";
 					$rule .= "   (ListLink\n";
-					$rule .= &process_aiml_tags("      ", $ch);
+					$rule .= &process_category("      ", $ch);
 					$rule .= "   )\n";
 					$rule .= $psi_tail;
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
@@ -823,7 +836,7 @@ while (my $line = <FIN>)
 				$rule .= "   ;; action\n";
 				$rule .= $psi_goal;
 				$rule .= "   (ListLink\n";
-				$rule .= &process_aiml_tags("      ", $curr_raw_code);
+				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";
 				$rule .= $psi_tail;
 				$rule .= ")\n";
