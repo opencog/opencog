@@ -521,6 +521,9 @@ sub process_srai
 }
 
 # process_think -- process a think tag
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
 sub process_think
 {
 	my $indent = $_[0];
@@ -535,6 +538,60 @@ sub process_think
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag think\")\n";
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= &process_aiml_tags($indent . "      ", lc $2);
+	$tout .= $indent . "   ))\n";
+	if ($3 ne "")
+	{
+		$tout .= &split_string($indent, $3);
+	}
+	$tout;
+}
+
+# process_set -- process a set tag
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_set
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+	my $tout = "";
+
+	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/;
+
+	# FIXME, should be like the star loop, above.
+	$tout .= &split_string($indent, $1);
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag set\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "      (Concept \"" . $2 . "\")\n";
+	$tout .= $indent . "      (ListLink\n";
+	$tout .= &process_aiml_tags($indent . "         ", $3);
+	$tout .= $indent . "   )))\n";
+	if ($4 ne "")
+	{
+		$tout .= &split_string($indent, $4);
+	}
+	$tout;
+}
+
+# process_person -- process a person tag
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_person
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+	my $tout = "";
+
+	$text =~ /(.*)<person>(.*)<\/person>(.*)/;
+
+	# FIXME, should be like the star loop, below.
+	$tout .= &split_string($indent, $1);
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= &process_aiml_tags($indent . "      ", $2);
 	$tout .= $indent . "   ))\n";
 	if ($3 ne "")
 	{
@@ -603,37 +660,13 @@ sub process_aiml_tags
 		{
 			$tout .= process_think($indent, $text);
 		}
-
-	# <set> may be nested, and thus must appear before other elements.
-	elsif ($text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/)
-	{
-		# FIXME, should be like the star loop, above.
-		$tout .= &split_string($indent, $1);
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefinedSchema \"AIML-tag set\")\n";
-		$tout .= $indent . "   (ListLink\n";
-		$tout .= $indent . "      (Concept \"" . $2 . "\")\n";
-		$tout .= $indent . "      (ListLink\n";
-		$tout .= &process_aiml_tags($indent . "         ", $3);
-		$tout .= $indent . "   )))\n";
-		if ($4 ne "")
+		elsif ($tag =~ /^set name/)
 		{
-			$tout .= &split_string($indent, $4);
+			$tout .= process_set($indent, $text);
 		}
-	}
-
-	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
-	{
-		# FIXME, should be like the star loop, below.
-		$tout .= &split_string($indent, $1);
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
-		$tout .= $indent . "   (ListLink\n";
-		$tout .= &process_aiml_tags($indent . "      ", $2);
-		$tout .= $indent . "   ))\n";
-		if ($3 ne "")
+		elsif ($tag =~ /^person>/)
 		{
-			$tout .= &split_string($indent, $3);
+			$tout .= process_person($indent, $text);
 		}
 	}
 
@@ -652,7 +685,7 @@ sub process_aiml_tags
 
 	# XXX FIXME ? This is supposed to be equivalent to
 	# <person><star/></person> however, in the actual AIML texts,'
-	# there is not actual star, so its broken/invalid sytax.
+	# there is no actual star, so its broken/invalid sytax.
 	elsif ($text =~ /(.*)<person\/>(.*)/)
 	{
 		$tout .= &split_string($indent, $1);
