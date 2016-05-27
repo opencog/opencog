@@ -19,7 +19,7 @@
     ; that might have been; better, (or not as it might need as much chasing)
     (MemberLink
         action
-        (ConceptNode (string-append (psi-prefix-str) "action")))
+        (ConceptNode (string-append psi-prefix-str "action")))
 
     (MemberLink (implication) demand)
 
@@ -126,7 +126,7 @@
 "
     (cog-outgoing-set (cog-execute! (GetLink
         (MemberLink (VariableNode "x")
-        (ConceptNode (string-append (psi-prefix-str) "action")))))))
+        (ConceptNode (string-append psi-prefix-str "action")))))))
 
 ; --------------------------------------------------------------
 (define-public (psi-action? atom)
@@ -139,7 +139,7 @@
   - An atom to be checked whether it is an action or not.
 "
     (let ((action-node
-            (cog-node 'ConceptNode (string-append (psi-prefix-str) "action")))
+            (cog-node 'ConceptNode (string-append psi-prefix-str "action")))
           (candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
 
         (if (null? action-node)
@@ -356,7 +356,7 @@
 "
   Run `psi-step` in a new thread. Call (psi-halt) to exit the loop.
 "
-    (define loop-name (string-append (psi-prefix-str) "loop"))
+    (define loop-name (string-append psi-prefix-str "loop"))
     (define (loop-node) (DefinedPredicateNode loop-name))
     (define (define-psi-loop)
         (DefineLink

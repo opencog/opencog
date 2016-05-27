@@ -6,7 +6,7 @@
 (use-modules (srfi srfi-1)) ; For fold, delte-duplicates
 
 ; --------------------------------------------------------------
-(define-public (psi-prefix-str)
+(define-public psi-prefix-str
 "
   Returns the string used as a prefix to all OpenPsi realted atom definition
 "
@@ -22,11 +22,11 @@
     - a string that should have the`psi-prefix-str`
 
 "
-    (let ((z-match (string-match (psi-prefix-str) a-string)))
+    (let ((z-match (string-match psi-prefix-str a-string)))
         (if z-match
             (match:suffix z-match)
             (error (string-append "The string argument must have the prefix: "
-                "\"" (psi-prefix-str) "\". " "Instead got:" a-string) )
+                "\"" psi-prefix-str "\". " "Instead got:" a-string) )
         )
     )
 )
