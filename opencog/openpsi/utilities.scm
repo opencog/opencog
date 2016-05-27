@@ -13,6 +13,13 @@
     "OpenPsi: "
 )
 
+(define-public psi-action-str
+"
+  Returns the string used to identify an openpsi action
+"
+    "OpenPsi: action"
+)
+
 ; --------------------------------------------------------------
 (define-public (psi-suffix-str a-string)
 "

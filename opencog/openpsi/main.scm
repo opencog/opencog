@@ -17,9 +17,7 @@
     ; These memberships are needed for making filtering and searching simpler..
     ; If GlobNode had worked with GetLink at the time of coding this,
     ; that might have been; better, (or not as it might need as much chasing)
-    (MemberLink
-        action
-        (ConceptNode (string-append psi-prefix-str "action")))
+    (MemberLink action (Concept psi-action-str)))
 
     (MemberLink (implication) demand)
 
@@ -126,7 +124,7 @@
 "
     (cog-outgoing-set (cog-execute! (GetLink
         (MemberLink (VariableNode "x")
-        (ConceptNode (string-append psi-prefix-str "action")))))))
+        (Concept psi-action-str))))))
 
 ; --------------------------------------------------------------
 (define-public (psi-action? atom)
@@ -138,8 +136,7 @@
   atom:
   - An atom to be checked whether it is an action or not.
 "
-    (let ((action-node
-            (cog-node 'ConceptNode (string-append psi-prefix-str "action")))
+    (let ((action-node (Concept psi-action-str)))
           (candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
 
         (if (null? action-node)
