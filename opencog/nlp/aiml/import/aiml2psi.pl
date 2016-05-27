@@ -576,6 +576,40 @@ sub process_set
 	$tout;
 }
 
+# process_named_tag -- process a generic tag that has a name
+#
+# First argument: the tag name
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_named_tag
+{
+	my $tag = $_[0];
+	my $indent = $_[1];
+	my $text = $_[2];
+	my $tout = "";
+
+	# Multiple gets may appear in one reply.
+	$text =~ /<$tag name=/;
+
+	my @gets = split /<$tag/, $text;
+	foreach my $get (@gets)
+	{
+		if ($get =~ /name='(.*)'\/>(.*)/)
+		{
+			$tout .= $indent . "(ExecutionOutput\n";
+			$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
+			$tout .= $indent . "   (ListLink\n";
+			$tout .= $indent . "      (Concept \"$1\")\n";
+			$tout .= $indent . "   ))\n";
+			$tout .= &split_string($indent, $2);
+		}
+		else
+		{
+			$tout .= &split_string($indent, $get);
+		}
+	}
+}
+
 # process_that -- process a that tag
 #
 # First argument: white-space indentation to insert on each line.
@@ -699,28 +733,10 @@ sub process_aiml_tags
 		{
 			$tout .= process_input($indent, $text);
 		}
-
-	# Multiple gets may appear in one reply.
-	elsif ($text =~ /<get name=/)
-	{
-		my @gets = split /<get/, $text;
-		foreach my $get (@gets)
+		elsif ($tag =~ /^get name/)
 		{
-			if ($get =~ /name='(.*)'\/>(.*)/)
-			{
-				$tout .= $indent . "(ExecutionOutput\n";
-				$tout .= $indent . "   (DefinedSchema \"AIML-tag get\")\n";
-				$tout .= $indent . "   (ListLink\n";
-				$tout .= $indent . "      (Concept \"$1\")\n";
-				$tout .= $indent . "   ))\n";
-				$tout .= &split_string($indent, $2);
-			}
-			else
-			{
-				$tout .= &split_string($indent, $get);
-			}
+			$tout .= process_named_tag("get", $indent, $text);
 		}
-	}
 
 	# Multiple bots may appear in one reply.
 	elsif ($text =~ /<bot name=/)
