@@ -920,23 +920,20 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "TOPICBOTVAR")
 	{
-		$psi_ctxt .= "; TOPICBOTVAR $arg\n";
+		$psi_ctxt .= "TOPICBOTVAR $arg\n";
 	}
 	if ($cmd eq "TOPICSET")
 	{
 		$have_topic = 1;
 		$curr_topic = $arg;
-		$psi_ctxt .= "; TOPICSET $arg\n";
+		$psi_ctxt .= "TOPICSET $arg\n";
 	}
 	if ($cmd eq "TOPICEND")
 	{
 		if ($have_topic)
 		{
-# XXX this is wrong -- fixme ...
-			#$psi_ctxt .= "         (State\n";
-			#$psi_ctxt .= "            (Anchor \"\#topic\")\n";
-			#$psi_ctxt .= "            (Concept \"$curr_topic\")\n";
-			#$psi_ctxt .= "         )\n";
+			$psi_ctxt .= "      ; Context with topic!\n";
+			$psi_ctxt .= &print_named_tag("topic", "      ", lc $curr_topic);
 		}
 		$have_topic = 0;
 	}

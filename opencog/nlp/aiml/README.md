@@ -90,8 +90,8 @@ Future, not a current part of AIML:
   topic is just one key in a general key-value store of per-conversation
   key-value pairs.
 
-* star and underscore (`*` `_`) are essentially the same thing; it's an AIML
-  implementation detail.
+* star and underscore (`*` `_`) are essentially the same thing; it's an
+  AIML implementation detail.
 * star means "match one or more (space-separated) words"
   stars are greedy.
 * carat and hash (`^` `#`) mean "match zero or more words"
@@ -393,4 +393,7 @@ THAT IS A GOOD PARTY
 
 ==================
 WHEN WILL YOU * BODY
-WHAT ABOUT _ CHILD MACHINE
+
+TOPICBOTVAR
+
+TOPICSET
