@@ -382,6 +382,54 @@ sub process_star
 
 sub process_aiml_tags;
 
+# process_mutli_star -- multiple star extraction
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_multi_star
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+
+	my $tout = "";
+	my @stars = split /<star/, $text;
+	foreach my $star (@stars)
+	{
+		$star =~ s/^\s*//;
+		$star =~ s/\s*$//;
+		if ($star =~ /index='(\d+)'.*\/>(.*)/)
+		{
+			$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
+
+			my $t = $2;
+			$t =~ s/^\s*//;
+			$t =~ s/\s*$//;
+			if ($t ne "")
+			{
+				$tout .= $indent . $textnode . "\"$t\")\n";
+			}
+		}
+		elsif ($star =~ /\/>(.*)/)
+		{
+			$tout .= $indent . &process_star("<star \/>") . "\n";
+			my $t = $1;
+			$t =~ s/^\s*//;
+			$t =~ s/\s*$//;
+			if ($t ne "")
+			{
+				$tout .= $indent . $textnode . "\"$t\")\n";
+			}
+		}
+		elsif ($star ne "")
+		{
+			# At this point, we expect just a string of words.
+			# $tout .= $indent . $textnode . "\"$star\")\n";
+			$tout .= &split_string($indent, $star);
+		}
+	}
+	$tout;
+}
+
 # process_srai -- convert SRAI tags into atomese.
 # Decode and print nested SRAI tags.  This turns out to be a complicted
 # pain. The problem with srai is that it can be nested, and its hard to
@@ -477,6 +525,7 @@ sub process_think
 {
 	my $indent = $_[0];
 	my $text = $_[1];
+	my $tout = "";
 
 	$text =~ /(.*)<think>(.*?)<\/think>(.*)/;
 
@@ -548,43 +597,8 @@ sub process_aiml_tags
 		}
 		elsif ($tag =~ /^star/)
 		{
-			my @stars = split /<star/, $text;
-			foreach my $star (@stars)
-			{
-				$star =~ s/^\s*//;
-				$star =~ s/\s*$//;
-				if ($star =~ /index='(\d+)'.*\/>(.*)/)
-				{
-					$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
-	
-					my $t = $2;
-					$t =~ s/^\s*//;
-					$t =~ s/\s*$//;
-					if ($t ne "")
-					{
-						$tout .= $indent . $textnode . "\"$t\")\n";
-					}
-				}
-				elsif ($star =~ /\/>(.*)/)
-				{
-					$tout .= $indent . &process_star("<star \/>") . "\n";
-					my $t = $1;
-					$t =~ s/^\s*//;
-					$t =~ s/\s*$//;
-					if ($t ne "")
-					{
-						$tout .= $indent . $textnode . "\"$t\")\n";
-					}
-				}
-				elsif ($star ne "")
-				{
-					# At this point, we expect just a string of words.
-					# $tout .= $indent . $textnode . "\"$star\")\n";
-					$tout .= &split_string($indent, $star);
-				}
-			}
+			$tout .= &process_multi_star($indent, $text);
 		}
-
 		elsif ($tag =~ /^think>/)
 		{
 			$tout .= process_think($indent, $text);
