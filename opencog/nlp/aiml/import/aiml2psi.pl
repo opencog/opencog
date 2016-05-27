@@ -482,11 +482,31 @@ sub process_set
 	$tout;
 }
 
+# Print out a tag schema for named tag
+#
+#
+# First argument: the tag name
+# Second argument: white-space indentation to insert on each line.
+# Third argument: the value for the tag.
+sub print_named_tag
+{
+	my $tag = $_[0];
+	my $indent = $_[1];
+	my $arg = $_[2];
+	my $tout = "";
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "      (Concept \"$arg\")\n";
+	$tout .= $indent . "   ))\n";
+	$tout;
+}
+
 # process_named_tag -- process a generic tag that has a name
 #
 # First argument: the tag name
-# First argument: white-space indentation to insert on each line.
-# Second argument: the actual text to unpack
+# Second argument: white-space indentation to insert on each line.
+# Third argument: the actual text to unpack
 sub process_named_tag
 {
 	my $tag = $_[0];
@@ -502,11 +522,7 @@ sub process_named_tag
 	{
 		if ($get =~ /name='(.*)'\/>(.*)/)
 		{
-			$tout .= $indent . "(ExecutionOutput\n";
-			$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
-			$tout .= $indent . "   (ListLink\n";
-			$tout .= $indent . "      (Concept \"$1\")\n";
-			$tout .= $indent . "   ))\n";
+			$tout .= &print_named_tag($tag, $indent, $1);
 			$tout .= &split_string($indent, $2);
 		}
 		else
@@ -873,7 +889,7 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$psi_ctxt .= "         (BOTVARNode \"$arg\")\n";
+		$psi_ctxt .= &print_named_tag("bot", "         ", $arg);
 	}
 	if ($cmd eq "PSET")
 	{
