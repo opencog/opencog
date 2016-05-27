@@ -567,6 +567,8 @@ sub process_set
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= $indent . "      (Concept \"" . $2 . "\")\n";
 	$tout .= $indent . "      (ListLink\n";
+$tout .= "duuuuuuuude  offdah >>>$3<<<\n";
+$tout .= "duuuuuuuude zzissa >>>$text<<<\n";
 	$tout .= &process_aiml_tags($indent . "         ", $3);
 	$tout .= $indent . "   )))\n";
 	if ($4 ne "")
@@ -737,39 +739,20 @@ sub process_aiml_tags
 		{
 			$tout .= process_named_tag("get", $indent, $text);
 		}
-
-	# Multiple bots may appear in one reply.
-	elsif ($text =~ /<bot name=/)
-	{
-		my @bots = split /<bot/, $text;
-		foreach my $bot (@bots)
+		elsif ($tag =~ /^bot name/)
 		{
-			if ($bot =~ /name='(.*)'\/>(.*)/)
-			{
-				$tout .= $indent . "(ExecutionOutput\n";
-				$tout .= $indent . "   (DefinedSchema \"AIML-tag bot\")\n";
-				$tout .= $indent . "   (ListLink\n";
-				$tout .= $indent . "      (Concept \"$1\")\n";
-				$tout .= $indent . "   ))\n";
-				$tout .= &split_string($indent, $2);
-			}
-			else
-			{
-				$tout .= &split_string($indent, $bot);
-			}
+			$tout .= process_named_tag("bot", $indent, $text);
 		}
-	}
-
-	elsif ($text =~ /<!--.*-->/)
-	{
-		# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
-		$tout .= $indent . "; WTF $text\n";
-	}
-	else
-	{
-		# $tout .= $indent . $textnode . "\"$text\")\n";
-		$tout .= &split_string($indent, $text);
-	}
+		elsif ($text =~ /<!--.*-->/)
+		{
+			# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
+			$tout .= $indent . "; WTF $text\n";
+		}
+		else
+		{
+			# $tout .= $indent . $textnode . "\"$text\")\n";
+			$tout .= &split_string($indent, $text);
+		}
 	}
 	$tout;
 }

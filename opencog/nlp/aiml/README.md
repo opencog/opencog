@@ -390,3 +390,8 @@ THAT IS A GOOD PARTY
 
 (load-all-files "/home/linas/src/opencog/opencog/nlp/aiml/import/aiml-scm/")
 ```
+
+==================
+WHEN WILL YOU * BODY
+
+WHAT IS A CHAT ROBOT
