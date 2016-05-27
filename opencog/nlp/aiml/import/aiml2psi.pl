@@ -472,6 +472,28 @@ sub process_srai
 	$tout;
 }
 
+# process_think -- process a think tag
+sub process_think
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+
+	$text =~ /(.*)<think>(.*?)<\/think>(.*)/;
+
+	# FIXME, should be like the star loop, above.
+	$tout .= &process_aiml_tags($indent, $1);
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag think\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= &process_aiml_tags($indent . "      ", lc $2);
+	$tout .= $indent . "   ))\n";
+	if ($3 ne "")
+	{
+		$tout .= &split_string($indent, $3);
+	}
+	$tout;
+}
+
 # process_category -- convert AIML <category> into Atomese.
 #
 # First argument: white-space indentation to insert on each line.
@@ -480,6 +502,9 @@ sub process_category
 {
 	my $indent = $_[0];
 	my $text = $_[1];
+
+	# lower-case everything
+	$text = lc $text;
 
 	# Expand defintion of <sr/>
 	$text =~ s/<sr\/>/<srai><star\/><\/srai>/g;
@@ -513,72 +538,57 @@ sub process_aiml_tags
 
 	my $tout = "";
 
-	# <srai>'s can be nested, one inside the other.
-	# Maybe this could be solved with a recursive regex, but
-	# I don't feel like debugging that.  So instead, this
-	# uses a brute-force approach.
-	if ($text =~ /<srai>/)
+	# Find the very first angle bracket
+	if ($text =~ /(.*?)<(.*)/)
 	{
-		$text = lc $text;
-		$tout .= &process_srai($indent, $text);
-	}
-
-	elsif ($text =~ /<star/)
-	{
-		my @stars = split /<star/, $text;
-		foreach my $star (@stars)
+		my $tag = $2;
+		if ($tag =~ /^srai>/)
 		{
-			$star =~ s/^\s*//;
-			$star =~ s/\s*$//;
-			if ($star =~ /index='(\d+)'.*\/>(.*)/)
+			$tout .= &process_srai($indent, $text);
+		}
+		elsif ($tag =~ /^star/)
+		{
+			my @stars = split /<star/, $text;
+			foreach my $star (@stars)
 			{
-				$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
-
-				my $t = $2;
-				$t =~ s/^\s*//;
-				$t =~ s/\s*$//;
-				if ($t ne "")
+				$star =~ s/^\s*//;
+				$star =~ s/\s*$//;
+				if ($star =~ /index='(\d+)'.*\/>(.*)/)
 				{
-					$tout .= $indent . $textnode . "\"$t\")\n";
+					$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
+	
+					my $t = $2;
+					$t =~ s/^\s*//;
+					$t =~ s/\s*$//;
+					if ($t ne "")
+					{
+						$tout .= $indent . $textnode . "\"$t\")\n";
+					}
+				}
+				elsif ($star =~ /\/>(.*)/)
+				{
+					$tout .= $indent . &process_star("<star \/>") . "\n";
+					my $t = $1;
+					$t =~ s/^\s*//;
+					$t =~ s/\s*$//;
+					if ($t ne "")
+					{
+						$tout .= $indent . $textnode . "\"$t\")\n";
+					}
+				}
+				elsif ($star ne "")
+				{
+					# At this point, we expect just a string of words.
+					# $tout .= $indent . $textnode . "\"$star\")\n";
+					$tout .= &split_string($indent, $star);
 				}
 			}
-			elsif ($star =~ /\/>(.*)/)
-			{
-				$tout .= $indent . &process_star("<star \/>") . "\n";
-				my $t = $1;
-				$t =~ s/^\s*//;
-				$t =~ s/\s*$//;
-				if ($t ne "")
-				{
-					$tout .= $indent . $textnode . "\"$t\")\n";
-				}
-			}
-			elsif ($star ne "")
-			{
-				# At this point, we expect just a string of words.
-				# $tout .= $indent . $textnode . "\"$star\")\n";
-				$tout .= &split_string($indent, $star);
-			}
 		}
-	}
 
-	# <think> can wrap sets and so must appear before those parts.
-	# Also, lower-case (downcase) everything in  think, to avoid
-	# strange upper-case stuff.
-	elsif ($text =~ /(.*)<think>(.*?)<\/think>(.*)/)
-	{
-		# FIXME, should be like the star loop, above.
-		$tout .= &process_aiml_tags($indent, $1);
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefinedSchema \"AIML-tag think\")\n";
-		$tout .= $indent . "   (ListLink\n";
-		$tout .= &process_aiml_tags($indent . "      ", lc $2);
-		$tout .= $indent . "   ))\n";
-		if ($3 ne "")
+		elsif ($tag =~ /^think>/)
 		{
-			$tout .= &split_string($indent, $3);
+			$tout .= process_think($indent, $text);
 		}
-	}
 
 	# <set> may be nested, and thus must appear before other elements.
 	elsif ($text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/)
@@ -699,6 +709,7 @@ sub process_aiml_tags
 	{
 		# $tout .= $indent . $textnode . "\"$text\")\n";
 		$tout .= &split_string($indent, $text);
+	}
 	}
 	$tout;
 }
