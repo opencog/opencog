@@ -567,8 +567,6 @@ sub process_set
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= $indent . "      (Concept \"" . $2 . "\")\n";
 	$tout .= $indent . "      (ListLink\n";
-$tout .= "duuuuuuuude  offdah >>>$3<<<\n";
-$tout .= "duuuuuuuude zzissa >>>$text<<<\n";
 	$tout .= &process_aiml_tags($indent . "         ", $3);
 	$tout .= $indent . "   )))\n";
 	if ($4 ne "")
@@ -748,11 +746,10 @@ sub process_aiml_tags
 			# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
 			$tout .= $indent . "; WTF $text\n";
 		}
-		else
-		{
-			# $tout .= $indent . $textnode . "\"$text\")\n";
-			$tout .= &split_string($indent, $text);
-		}
+	}
+	else
+	{
+		$tout .= &split_string($indent, $text);
 	}
 	$tout;
 }
