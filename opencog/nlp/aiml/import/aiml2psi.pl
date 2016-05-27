@@ -958,7 +958,7 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "THATBOTVAR")
 	{
-		$psi_ctxt .= "; THATBOTVAR $arg\n";
+		$psi_ctxt .= "THATBOTVAR $arg\n";
 	}
 	if ($cmd eq "THATSET")
 	{
@@ -969,10 +969,8 @@ while (my $line = <FIN>)
 	{
 		if ($have_that)
 		{
-			$psi_ctxt .= "         (State\n";
-			$psi_ctxt .= "            (Anchor \"\#that\")\n";
-			$psi_ctxt .= "            (Concept \"$curr_that\")\n";
-			$psi_ctxt .= "         )\n";
+			$psi_ctxt .= "      ; Context with that!\n";
+			$psi_ctxt .= &print_named_tag("that", "      ", lc $curr_topic);
 		}
 		$have_that = 0;
 	}
