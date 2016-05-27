@@ -10,6 +10,7 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
+
 (define-public (psi-rule-nocheck context action goal a-stv demand)
 "
   psi-rule-nocheck -- same as psi-rule, but no checking
@@ -19,9 +20,7 @@
     ; that might have been; better, (or not as it might need as much chasing)
     (MemberLink action (Concept psi-action-str)))
 
-    (MemberLink (implication) demand)
-
-    (implication)
+    (MemberLink (Implication a-stv (AndLink context action) goal) demand)
 )
 
 ; --------------------------------------------------------------
@@ -60,8 +59,6 @@
   - The node that represents a demand that this rule affects.
 "
     (define func-name "psi-rule") ; For use in error reporting
-    (define (implication)
-        (ImplicationLink a-stv (AndLink context action) goal))
 
     ; Check arguments
     (if (not (list? context))
