@@ -32,10 +32,10 @@
                 dpn
                 (InheritanceLink
                     demand-var
-                    (ConceptNode (string-append (psi-prefix-str) "Demand")))
+                    (ConceptNode (string-append psi-prefix-str "Demand")))
                 (EvaluationLink
                     (PredicateNode
-                        (string-append (psi-prefix-str) "initial_value"))
+                        (string-append psi-prefix-str "initial_value"))
                     (ListLink
                         demand-var
                         (VariableNode "value"))))
@@ -81,17 +81,17 @@
        (error (string-append "In procedure psi-demand, expected second argument "
             "the to be within [0, 1] interval, got:") initial-value))
 
-    (let* ((demand-str (string-append (psi-prefix-str) demand-name))
+    (let* ((demand-str (string-append psi-prefix-str demand-name))
            (demand-node (ConceptNode demand-str (stv initial-value 1))))
 
             (InheritanceLink
                 demand-node
-                (ConceptNode (string-append (psi-prefix-str) "Demand")))
+                (ConceptNode (string-append psi-prefix-str "Demand")))
 
             ; NOTE: Not sure this is needed. Possibly use is if one wants
             ; to measure how the demand-value has changed.
             (EvaluationLink
-                (PredicateNode (string-append (psi-prefix-str) "initial_value"))
+                (PredicateNode (string-append psi-prefix-str "initial_value"))
                 (ListLink
                     demand-node
                     (NumberNode initial-value)))

@@ -9,7 +9,24 @@
 (load "demand.scm")
 (load "utilities.scm")
 
+(define psi-action (Concept "OpenPsi: action"))
+
 ; --------------------------------------------------------------
+
+(define-public (psi-rule-nocheck context action goal a-stv demand)
+"
+  psi-rule-nocheck -- same as psi-rule, but no checking
+"
+    ; These memberships are needed for making filtering and searching simpler..
+    ; If GlobNode had worked with GetLink at the time of coding this,
+    ; that might have been; better, (or not as it might need as much chasing)
+    (MemberLink action psi-action)
+
+    (MemberLink (Implication a-stv (AndLink context action) goal) demand)
+)
+
+; --------------------------------------------------------------
+
 (define-public (psi-rule context action goal a-stv demand)
 "
   It associates an action and context in which the action has to be taken
@@ -44,8 +61,6 @@
   - The node that represents a demand that this rule affects.
 "
     (define func-name "psi-rule") ; For use in error reporting
-    (define (implication)
-        (ImplicationLink a-stv (AndLink context action) goal))
 
     ; Check arguments
     (if (not (list? context))
@@ -64,16 +79,7 @@
         (error (string-append "In procedure " func-name ", expected fifth "
             "argument to be a node representing a demand, got:") demand))
 
-    ; These memberships are needed for making filtering and searching simpler..
-    ; If GlobNode had worked with GetLink at the time of coding this ,
-    ; that might have been; better,(or not as it might need as much chasing)
-    (MemberLink
-        action
-        (ConceptNode (string-append (psi-prefix-str) "action")))
-
-    (MemberLink (implication) demand)
-
-    (implication)
+    (psi-rule-nocheck context action goal a-stv demand)
 )
 
 ; --------------------------------------------------------------
@@ -116,8 +122,7 @@
   Returns a list of all openpsi actions.
 "
     (cog-outgoing-set (cog-execute! (GetLink
-        (MemberLink (VariableNode "x")
-        (ConceptNode (string-append (psi-prefix-str) "action")))))))
+        (MemberLink (VariableNode "x") psi-action)))))
 
 ; --------------------------------------------------------------
 (define-public (psi-action? atom)
@@ -129,19 +134,12 @@
   atom:
   - An atom to be checked whether it is an action or not.
 "
-    (let ((action-node
-            (cog-node 'ConceptNode (string-append (psi-prefix-str) "action")))
-          (candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
+    (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
 
-        (if (null? action-node)
-            ; `#f` is returned becasue an action hasn't been created yet, thus
-            ; the given atom can't be an action.
-            #f
-            ; A filter is used to account for empty list as well as
-            ; cog-chase-link returning multiple results, just in case.
-            (not (null?
-                (filter (lambda (x) (equal? x action-node)) candidates)))
-        )
+        ; A filter is used to account for empty list as well as
+        ; cog-chase-link returning multiple results, just in case.
+        (not (null?
+            (filter (lambda (x) (equal? x psi-action)) candidates)))
     )
 )
 
@@ -347,7 +345,7 @@
 "
   Run `psi-step` in a new thread. Call (psi-halt) to exit the loop.
 "
-    (define loop-name (string-append (psi-prefix-str) "loop"))
+    (define loop-name (string-append psi-prefix-str "loop"))
     (define (loop-node) (DefinedPredicateNode loop-name))
     (define (define-psi-loop)
         (DefineLink

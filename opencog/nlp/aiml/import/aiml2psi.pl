@@ -787,7 +787,7 @@ while (my $line = <FIN>)
 					$rule .= ";;; random choice $i of $nc: ";
 					$rule .= $cattext . "\n";
 
-					$rule .= "(psi-rule\n";
+					$rule .= "(psi-rule-nocheck\n";
 					$rule .= "   ; context\n";
 					$rule .= $psi_ctxt;
 					$rule .= "   ; action\n";
@@ -803,7 +803,7 @@ while (my $line = <FIN>)
 			{
 				$rule = ";;; COMPLEX CODE BRANCH\n";
 				$rule .= ";;; " . $cattext . "\n";
-				$rule .= "(psi-rule\n";
+				$rule .= "(psi-rule-nocheck\n";
 				$rule .= "   ;; context\n";
 				$rule .= $psi_ctxt;
 				$rule .= "   ;; action\n";
@@ -820,7 +820,7 @@ while (my $line = <FIN>)
 		{
 			$rule = ";;; NO RAW CODE\n";
 			$rule .= ";;; $cattext\n";
-			$rule .= "(psi-rule\n";
+			$rule .= "(psi-rule-nocheck\n";
 			$rule .= "   ;; context\n";
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
