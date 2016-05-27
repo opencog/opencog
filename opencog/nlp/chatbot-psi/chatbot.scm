@@ -82,8 +82,8 @@
                    (rules '()))
                 (map
                     (lambda (m)
-                        (if (equal? (cadr (cog-outgoing-set m)) canned-rule)
-                            (set! rules (append rules (list (car (cog-outgoing-set m)))))
+                        (if (equal? (gdr m) canned-rule)
+                            (set! rules (append rules (list (gar m))))
                         )
                     )
                     member-links
@@ -135,6 +135,7 @@
 
 ; Load the psi-rules
 (load "psi-rules.scm")
+(load "psi-rules-test.scm")
 
 ; Load the action selector
 (load "action-selector.scm")
