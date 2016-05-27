@@ -393,5 +393,4 @@ THAT IS A GOOD PARTY
 
 ==================
 WHEN WILL YOU * BODY
-
-TextNode
+WHAT ABOUT _ CHILD MACHINE

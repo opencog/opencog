@@ -868,7 +868,8 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$psi_ctxt .= "         (GlobbyBlobbyNode \"_\")\n";
+		$star_index = $star_index + 1;
+		$psi_ctxt .= "         (Glob \"\$star-$star_index\") ; underbar\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
