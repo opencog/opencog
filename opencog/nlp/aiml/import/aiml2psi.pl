@@ -327,10 +327,6 @@ close(FOUT);
 # ------------------------------------------------------------------
 # Second pass utilities
 
-# What node should we use for output text ???
-my $textnode = "(TextNode ";
-# my $textnode = "(Concept ";
-
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
 
@@ -406,7 +402,7 @@ sub process_multi_star
 			$t =~ s/\s*$//;
 			if ($t ne "")
 			{
-				$tout .= $indent . $textnode . "\"$t\")\n";
+				$tout .= &split_string($indent, $t);
 			}
 		}
 		elsif ($star =~ /\/>(.*)/)
@@ -417,7 +413,7 @@ sub process_multi_star
 			$t =~ s/\s*$//;
 			if ($t ne "")
 			{
-				$tout .= $indent . $textnode . "\"$t\")\n";
+				$tout .= &split_string($indent, $t);
 			}
 		}
 		elsif ($star ne "")
