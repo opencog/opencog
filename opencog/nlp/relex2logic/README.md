@@ -116,7 +116,7 @@ The other structures which seem closely related to these are:
     5. SV – subject-verb – “Bill sleeps.”
 
 Linguistically, these make pretty good sense.  But when you go to the
-scheme-helpers you realize that not all these of distinctions are
+scheme-helpers you realize that not all of these distinctions are
 necessary.  If you represent prepositions and adjectives as
 PredicateNodes (which I did) then all three can use the same scheme
 helper, producing:
