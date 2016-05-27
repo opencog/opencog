@@ -423,99 +423,8 @@ sub process_multi_star
 		elsif ($star ne "")
 		{
 			# At this point, we expect just a string of words.
-			# $tout .= $indent . $textnode . "\"$star\")\n";
 			$tout .= &split_string($indent, $star);
 		}
-	}
-	$tout;
-}
-
-# process_srai -- convert SRAI tags into atomese.
-# Decode and print nested SRAI tags.  This turns out to be a complicted
-# pain. The problem with srai is that it can be nested, and its hard to
-# use regexes to walk that nesting in a reliable way. (I don't feel like
-# debugging a recursive regex.) So this is implemented as a brute-force
-# string search, where I just count the nesting levels by hand. Even so,
-# this is painfully verbose.
-#
-# First argument: white-space indentation to insert on each line.
-# Second argument: the actual text to unpack
-sub process_srai
-{
-	my $indent = $_[0];
-	my $text = $_[1];
-
-	my $tout = "";
-
-	my $nest = 0;
-
-	# Split on all XML tags.
-	my @tags = split /</, $text;
-	my $contig = shift @tags;
-
-	# Iterate over all the tags.
-	for my $tag (@tags)
-	{
-
-		if ($tag =~ /^srai>(.*)/)
-		{
-			my $srt = $1;
-
-			# Found an srai tag. If the tag nesting level is zero,
-			# then process everything that came before it, (if there
-			# is anything)
-			if ($nest == 0)
-			{
-				$contig =~ s/^\s*//;
-				$contig =~ s/\s*$//;
-				if ($contig ne "")
-				{
-					$tout .= &process_aiml_tags($indent, $contig);
-				}
-				$contig = $srt;  # strip off the starting tag.
-			}
-			else
-			{
-				$contig .= "<" . $tag;
-			}
-			$nest = $nest + 1;
-		}
-		elsif ($tag =~ /^\/srai>(.*)/)
-		{
-			my $post = $1;
-
-			# Found an srai end-tag. If the nest level is 1, then
-			# print out what we've got; else accumulate some more.
-			if ($nest == 1)
-			{
-				$contig =~ s/^\s*//;
-				$contig =~ s/\s*$//;
-				$tout .= $indent . "(ExecutionOutput\n";
-				$tout .= $indent . "   (DefinedSchema \"AIML-tag srai\")\n";
-				$tout .= $indent . "   (ListLink\n";
-				$tout .= $indent . "      (ListLink\n";
-				$tout .= &process_aiml_tags("         " . $indent, $contig);
-				$tout .= $indent . "   )))\n";
-
-				$contig = $post;
-			}
-			else
-			{
-				$contig .= "<" . $tag;
-			}
-			$nest = $nest - 1;
-		}
-		else
-		{
-			$contig .= "<" . $tag;
-		}
-	}
-
-	$contig =~ s/^\s*//;
-	$contig =~ s/\s*$//;
-	if ($contig ne "")
-	{
-		$tout .= &process_aiml_tags($indent, $contig);
 	}
 	$tout;
 }
@@ -539,8 +448,9 @@ sub process_tag
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
 	$tout .= $indent . "   (ListLink\n";
-	$tout .= &process_aiml_tags($indent . "      ", lc $2);
-	$tout .= $indent . "   ))\n";
+	$tout .= $indent . "      (ListLink\n";
+	$tout .= &process_aiml_tags($indent . "         ", $2);
+	$tout .= $indent . "   )))\n";
 	if ($3 ne "")
 	{
 		$tout .= &split_string($indent, $3);
@@ -707,7 +617,7 @@ sub process_aiml_tags
 		my $tag = $2;
 		if ($tag =~ /^srai>/)
 		{
-			$tout .= &process_srai($indent, $text);
+			$tout .= process_tag("srai", $indent, $text);
 		}
 		elsif ($tag =~ /^star/)
 		{
