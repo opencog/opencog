@@ -8,7 +8,7 @@
 (Member
     (psi-rule
         (list (SequentialAnd
-            (DefinedPredicate "fuzzy-qa-search-not-started?")
+            (Not (DefinedPredicate "fuzzy-qa-search-started?"))
             (DefinedPredicate "is-input-utterance?")
             (DefinedPredicate "no-canned-reply?")
             (DefinedPredicate "is-interrogative?")
@@ -23,7 +23,10 @@
 
 (Member
     (psi-rule
-        (list (DefinedPredicate "is-fuzzy-answer?"))
+        (list (SequentialAnd
+            (DefinedPredicate "fuzzy-qa-search-started?")
+            (DefinedPredicate "is-fuzzy-answer?")
+        ))
         (ExecutionOutput (GroundedSchema "scm: answer") (List fuzzy-answers))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
@@ -60,10 +63,7 @@
 (define out_utt_5 (get-words (car (nlp-parse "Let me check."))))
 (Member
     (psi-rule
-        (list (SequentialAnd
-            (DefinedPredicate "is-input-utterance?")
-            (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
-        ))
+        (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_1))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
@@ -73,10 +73,7 @@
 )
 (Member
     (psi-rule
-        (list (SequentialAnd
-            (DefinedPredicate "is-input-utterance?")
-            (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
-        ))
+        (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_2))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
@@ -86,10 +83,7 @@
 )
 (Member
     (psi-rule
-        (list (SequentialAnd
-            (DefinedPredicate "is-input-utterance?")
-            (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
-        ))
+        (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_3))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
@@ -99,10 +93,7 @@
 )
 (Member
     (psi-rule
-        (list (SequentialAnd
-            (DefinedPredicate "is-input-utterance?")
-            (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
-        ))
+        (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_4))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
@@ -112,10 +103,7 @@
 )
 (Member
     (psi-rule
-        (list (SequentialAnd
-            (DefinedPredicate "is-input-utterance?")
-            (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
-        ))
+        (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_5))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
@@ -133,10 +121,7 @@
 (define out_utt_3 (get-words (car (nlp-parse "Red."))))
 (Member
     (psi-rule
-        (list (SequentialAnd
-            (DefinedPredicate "is-input-utterance?")
-            (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
-        ))
+        (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_1))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
@@ -146,10 +131,7 @@
 )
 (Member
     (psi-rule
-        (list (SequentialAnd
-            (DefinedPredicate "is-input-utterance?")
-            (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
-        ))
+        (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_2))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
@@ -159,10 +141,7 @@
 )
 (Member
     (psi-rule
-        (list (SequentialAnd
-            (DefinedPredicate "is-input-utterance?")
-            (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt))
-        ))
+        (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
         (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_3))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)

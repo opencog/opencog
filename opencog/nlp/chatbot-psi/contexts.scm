@@ -45,14 +45,19 @@
 )
 
 (define (did-someone-say-this? . words)
-    ; TODO: Similar to "do-fuzzy-match"
-    (stv 1 1)
+    (let* ((rule-sent-node (car (cog-chase-link 'ReferenceLink 'SentenceNode (List words))))
+           (rule-r2l (get-r2l-set-of-sent rule-sent-node))
+           (input-sent-node (get-input-sent-node))
+           (input-r2l (get-r2l-set-of-sent input-sent-node))
+           (score (string->number (cog-name (nlp-fuzzy-compare input-r2l rule-r2l)))))
+        (stv 1 score)
+    )
 )
 
 (Define
-    (DefinedPredicate "fuzzy-qa-search-not-started?")
-    (Not (Equal (Set search-started)
-                (Get (State fuzzy-qa-search (Variable "$s")))))
+    (DefinedPredicate "fuzzy-qa-search-started?")
+    (Equal (Set search-started)
+           (Get (State fuzzy-qa-search (Variable "$s"))))
 )
 
 (Define

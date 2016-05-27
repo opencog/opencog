@@ -17,6 +17,7 @@
                     (cog-chase-link 'MemberLink 'ImplicationLink chat-rule)
                 )
             ))
+
             rules
         )
     )
@@ -25,11 +26,16 @@
     (define (get-top-ranked-rules)
         (define (weight-and-filter-rules rules)
             (define (weight x)
-                (let ((a-stv (cog-tv x))
-                      ; TODO: Update this
-                      (fuz-score 1))
-                    ; TODO: Add importance values to the formula when ECAN is ready
-                    (* (tv-conf a-stv) (tv-mean a-stv) fuz-score)))
+                (let* ((a-stv (cog-tv x))
+                       ; TODO: Add importance values to the formula when ECAN is ready
+                       (weight (* (tv-conf a-stv) (tv-mean a-stv))))
+                    (if (is-canned-rule? x)
+                        ; Also take the 'did-someone-say-this' score into account
+                        (* weight (tv-conf (cog-evaluate! (car (psi-get-context x)))))
+                        weight
+                    )
+                )
+            )
 
             (define (pick atom lst)
                 (cond

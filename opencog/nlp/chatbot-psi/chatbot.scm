@@ -7,7 +7,7 @@
              (opencog openpsi))
 
 (load-r2l-rulebase)
-(set! relex-server-host "172.17.0.2")
+(set! relex-server-host "172.17.0.3")
 
 ;-------------------------------------------------------------------------------
 ; TV that will be assigned to any psi-rules being created by this chatbot
