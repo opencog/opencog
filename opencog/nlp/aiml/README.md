@@ -394,6 +394,7 @@ THAT IS A GOOD PARTY
 ==================
 WHEN WILL YOU * BODY
 
-TOPICBOTVAR
+psi-rule  calls psi-demand? 
+calls psi-get-all-demands
+calls psi-get-demands
 
-TOPICSET

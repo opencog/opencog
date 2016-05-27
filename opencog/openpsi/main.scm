@@ -10,6 +10,24 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
+(define-public (psi-rule-nocheck context action goal a-stv demand)
+"
+  psi-rule-nocheck -- same as psi-rule, but no checking
+"
+    ; These memberships are needed for making filtering and searching simpler..
+    ; If GlobNode had worked with GetLink at the time of coding this,
+    ; that might have been; better, (or not as it might need as much chasing)
+    (MemberLink
+        action
+        (ConceptNode (string-append (psi-prefix-str) "action")))
+
+    (MemberLink (implication) demand)
+
+    (implication)
+)
+
+; --------------------------------------------------------------
+
 (define-public (psi-rule context action goal a-stv demand)
 "
   It associates an action and context in which the action has to be taken
@@ -64,16 +82,7 @@
         (error (string-append "In procedure " func-name ", expected fifth "
             "argument to be a node representing a demand, got:") demand))
 
-    ; These memberships are needed for making filtering and searching simpler..
-    ; If GlobNode had worked with GetLink at the time of coding this ,
-    ; that might have been; better,(or not as it might need as much chasing)
-    (MemberLink
-        action
-        (ConceptNode (string-append (psi-prefix-str) "action")))
-
-    (MemberLink (implication) demand)
-
-    (implication)
+    (psi-rule-nocheck context action goal a-stv demand)
 )
 
 ; --------------------------------------------------------------
