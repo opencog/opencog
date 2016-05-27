@@ -6,12 +6,7 @@
 (use-modules (srfi srfi-1)) ; For fold, delte-duplicates
 
 ; --------------------------------------------------------------
-(define-public psi-prefix-str
-"
-  Returns the string used as a prefix to all OpenPsi realted atom definition
-"
-    "OpenPsi: "
-)
+(define-public psi-prefix-str "OpenPsi: ")
 
 ; --------------------------------------------------------------
 (define-public (psi-suffix-str a-string)
