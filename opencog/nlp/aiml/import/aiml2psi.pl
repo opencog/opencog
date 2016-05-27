@@ -532,7 +532,7 @@ sub process_tag
 	my $text = $_[2];
 	my $tout = "";
 
-	$text =~ /(.*)<$tag>(.*?)<\/$tag>(.*)/;
+	$text =~ /(.*?)<$tag>(.*?)<\/$tag>(.*)/;
 
 	# FIXME, should be like the star loop, above.
 	$tout .= &process_aiml_tags($indent, $1);
@@ -573,6 +573,48 @@ sub process_set
 	{
 		$tout .= &split_string($indent, $4);
 	}
+	$tout;
+}
+
+# process_that -- process a that tag
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_that
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+	my $tout = "";
+
+	$text =~ /(.*?)<that\/>(.*)/;
+
+	# FIXME, should be like the star loop, above.
+	$tout .= &split_string($indent, $1);
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
+	$tout .= $indent . "   (ListLink))\n";
+	if ($2 ne "")
+	{
+		$tout .= &process_aiml_tags($indent, $2);
+	}
+	$tout;
+}
+
+# process_input -- process a input tag
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_input
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+	my $tout = "";
+
+	$text =~ /<input\s*index\s*=\s*'(\d+)'\s*\/>/;
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag input\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "       (Number \"$1\")))\n";
 	$tout;
 }
 
@@ -649,28 +691,14 @@ sub process_aiml_tags
 		{
 			$tout .= process_tag("person", $indent, $text);
 		}
-	}
-
-	if ($text =~ /(.*)<that\/>(.*)/)
-	{
-		# FIXME, should be like the star loop, above.
-		$tout .= &split_string($indent, $1);
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
-		$tout .= $indent . "   (ListLink))\n";
-		if ($2 ne "")
+		elsif ($tag =~ /^that\/>/)
 		{
-			$tout .= &split_string($indent, $2);
+			$tout .= process_that($indent, $text);
 		}
-	}
-
-	elsif ($text =~ /<input\s*index\s*=\s*'(\d+)'\s*\/>/)
-	{
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefinedSchema \"AIML-tag input\")\n";
-		$tout .= $indent . "   (ListLink\n";
-		$tout .= $indent . "       (Number \"$1\")))\n";
-	}
+		elsif ($tag =~ /^input/)
+		{
+			$tout .= process_input($indent, $text);
+		}
 
 	# Multiple gets may appear in one reply.
 	elsif ($text =~ /<get name=/)
