@@ -9,6 +9,8 @@
 (load "demand.scm")
 (load "utilities.scm")
 
+(define psi-action (Concept "OpenPsi: action"))
+
 ; --------------------------------------------------------------
 
 (define-public (psi-rule-nocheck context action goal a-stv demand)
@@ -18,7 +20,7 @@
     ; These memberships are needed for making filtering and searching simpler..
     ; If GlobNode had worked with GetLink at the time of coding this,
     ; that might have been; better, (or not as it might need as much chasing)
-    (MemberLink action (Concept psi-action-str)))
+    (MemberLink action psi-action)
 
     (MemberLink (Implication a-stv (AndLink context action) goal) demand)
 )
@@ -120,8 +122,7 @@
   Returns a list of all openpsi actions.
 "
     (cog-outgoing-set (cog-execute! (GetLink
-        (MemberLink (VariableNode "x")
-        (Concept psi-action-str))))))
+        (MemberLink (VariableNode "x") psi-action)))))
 
 ; --------------------------------------------------------------
 (define-public (psi-action? atom)
@@ -133,18 +134,12 @@
   atom:
   - An atom to be checked whether it is an action or not.
 "
-    (let ((action-node (Concept psi-action-str)))
-          (candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
+    (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
 
-        (if (null? action-node)
-            ; `#f` is returned becasue an action hasn't been created yet, thus
-            ; the given atom can't be an action.
-            #f
-            ; A filter is used to account for empty list as well as
-            ; cog-chase-link returning multiple results, just in case.
-            (not (null?
-                (filter (lambda (x) (equal? x action-node)) candidates)))
-        )
+        ; A filter is used to account for empty list as well as
+        ; cog-chase-link returning multiple results, just in case.
+        (not (null?
+            (filter (lambda (x) (equal? x psi-action)) candidates)))
     )
 )
 

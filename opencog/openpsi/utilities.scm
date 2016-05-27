@@ -13,11 +13,18 @@
     "OpenPsi: "
 )
 
-(define-public psi-action-str
+(define psi-action-str
 "
   Returns the string used to identify an openpsi action
 "
     "OpenPsi: action"
+)
+
+(define psi-action
+"
+  Returns the node used to identify an openpsi action
+"
+    (Concept psi-action-str)
 )
 
 ; --------------------------------------------------------------
