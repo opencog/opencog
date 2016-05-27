@@ -382,7 +382,7 @@ sub process_star
 
 sub process_aiml_tags;
 
-# process_mutli_star -- multiple star extraction
+# process_multi_star -- multiple star extraction
 #
 # First argument: white-space indentation to insert on each line.
 # Second argument: the actual text to unpack
@@ -520,22 +520,24 @@ sub process_srai
 	$tout;
 }
 
-# process_think -- process a think tag
+# process_tag -- process a generic, un-named tag
 #
+# First argument: the tag name
 # First argument: white-space indentation to insert on each line.
 # Second argument: the actual text to unpack
-sub process_think
+sub process_tag
 {
-	my $indent = $_[0];
-	my $text = $_[1];
+	my $tag = $_[0];
+	my $indent = $_[1];
+	my $text = $_[2];
 	my $tout = "";
 
-	$text =~ /(.*)<think>(.*?)<\/think>(.*)/;
+	$text =~ /(.*)<$tag>(.*?)<\/$tag>(.*)/;
 
 	# FIXME, should be like the star loop, above.
 	$tout .= &process_aiml_tags($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
-	$tout .= $indent . "   (DefinedSchema \"AIML-tag think\")\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= &process_aiml_tags($indent . "      ", lc $2);
 	$tout .= $indent . "   ))\n";
@@ -574,32 +576,6 @@ sub process_set
 	$tout;
 }
 
-# process_person -- process a person tag
-#
-# First argument: white-space indentation to insert on each line.
-# Second argument: the actual text to unpack
-sub process_person
-{
-	my $indent = $_[0];
-	my $text = $_[1];
-	my $tout = "";
-
-	$text =~ /(.*)<person>(.*)<\/person>(.*)/;
-
-	# FIXME, should be like the star loop, below.
-	$tout .= &split_string($indent, $1);
-	$tout .= $indent . "(ExecutionOutput\n";
-	$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
-	$tout .= $indent . "   (ListLink\n";
-	$tout .= &process_aiml_tags($indent . "      ", $2);
-	$tout .= $indent . "   ))\n";
-	if ($3 ne "")
-	{
-		$tout .= &split_string($indent, $3);
-	}
-	$tout;
-}
-
 # process_category -- convert AIML <category> into Atomese.
 #
 # First argument: white-space indentation to insert on each line.
@@ -614,6 +590,11 @@ sub process_category
 
 	# Expand defintion of <sr/>
 	$text =~ s/<sr\/>/<srai><star\/><\/srai>/g;
+
+	# XXX FIXME ? This is supposed to be equivalent to
+	# <person><star/></person> however, in the actual AIML texts,
+	# there is no actual star, so its broken/invalid sytax.
+	$text =~ s/<person\/>/<person><star\/><\/person>/g;
 
 	# Convert mangled commas, from pass 1
 	$text =~ s/#Comma/,/g;
@@ -658,7 +639,7 @@ sub process_aiml_tags
 		}
 		elsif ($tag =~ /^think>/)
 		{
-			$tout .= process_think($indent, $text);
+			$tout .= process_tag("think", $indent, $text);
 		}
 		elsif ($tag =~ /^set name/)
 		{
@@ -666,29 +647,17 @@ sub process_aiml_tags
 		}
 		elsif ($tag =~ /^person>/)
 		{
-			$tout .= process_person($indent, $text);
+			$tout .= process_tag("person", $indent, $text);
 		}
 	}
 
-	elsif ($text =~ /(.*)<that\/>(.*)/)
+	if ($text =~ /(.*)<that\/>(.*)/)
 	{
 		# FIXME, should be like the star loop, above.
 		$tout .= &split_string($indent, $1);
 		$tout .= $indent . "(ExecutionOutput\n";
 		$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
 		$tout .= $indent . "   (ListLink))\n";
-		if ($2 ne "")
-		{
-			$tout .= &split_string($indent, $2);
-		}
-	}
-
-	# XXX FIXME ? This is supposed to be equivalent to
-	# <person><star/></person> however, in the actual AIML texts,'
-	# there is no actual star, so its broken/invalid sytax.
-	elsif ($text =~ /(.*)<person\/>(.*)/)
-	{
-		$tout .= &split_string($indent, $1);
 		if ($2 ne "")
 		{
 			$tout .= &split_string($indent, $2);
