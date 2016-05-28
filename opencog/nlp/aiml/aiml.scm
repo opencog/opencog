@@ -146,7 +146,7 @@
 
 	; for now, just get the responses.
 	(map run-rule
-		(filter chat-rule? (psi-get-dual-rules SENT)))
+		(filter chat-rule? (psi-get-member-links SENT)))
 )
 
 ; --------------------------------------------------------------
