@@ -89,7 +89,9 @@
   All psi rules are members of some ruleset; this searches for and
   finds such MemberLinks.
 "
-    (define inset (list ATOM))
+    (define set-of-duals (cog-execute! (DualLink ATOM)))
+
+    (define inset '())
 
     ;; Recursively get all links that contain the given atom.
     ;; Append them to the list "inset"
@@ -103,10 +105,13 @@
     )
 
     (get-iset ATOM)
-    (for-each get-iset (cog-outgoing-set (cog-execute! (DualLink ATOM))))
+    (for-each get-iset (cog-outgoing-set set-of-duals))
+
+    ; Avoid garbaging up the atomspace.
+    (cog-delete set-of-duals)
 
     ;; Keep only those links that are of type MemberLink
-    (cog-filter 'MemberLink inset)
+    (delete-duplicates (cog-filter 'MemberLink inset))
 )
 
 ; --------------------------------------------------------------
