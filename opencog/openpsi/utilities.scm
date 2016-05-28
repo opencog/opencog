@@ -3,7 +3,7 @@
 ; Helper functions for OpenPsi
 
 (use-modules (ice-9 regex)) ; For string-match
-(use-modules (srfi srfi-1)) ; For fold, delte-duplicates
+(use-modules (srfi srfi-1)) ; For fold, delete-duplicates
 
 ; --------------------------------------------------------------
 (define-public psi-prefix-str "OpenPsi: ")
@@ -128,7 +128,7 @@
 
     (let ((member-links (psi-get-member-links ATOM)))
          (delete-duplicates (append-map
-             (lambda (x) (filter psi-member? x))
+             (lambda (x) (filter psi-member? (list x)))
              member-links))
     )
 )
