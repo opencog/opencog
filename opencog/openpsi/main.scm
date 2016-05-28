@@ -22,7 +22,10 @@
     ; that might have been; better, (or not as it might need as much chasing)
     (MemberLink action psi-action)
 
-    (MemberLink (Implication a-stv (AndLink context action) goal) demand)
+    ; AndLink's are unordered links; must use an ordered link, if the
+    ; context is to preceed the action! SequentialAnd seems like an
+    ; OK choice, for now.
+    (MemberLink (Implication a-stv (SequentialAnd context action) goal) demand)
 )
 
 ; --------------------------------------------------------------
@@ -34,7 +37,7 @@
   as the following `ImplicationLink`,
 
     (ImplicationLink a-stv
-        (AndLink
+        (SequentialAnd
             (context)
             (action))
         (goal))
@@ -196,7 +199,7 @@
   action:
   - An action that is part of a psi-rule.
 "
-    (let* ((and-links (cog-filter 'AndLink (cog-incoming-set action)))
+    (let* ((and-links (cog-filter 'SequentialAndLink (cog-incoming-set action)))
            (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
            (delete-duplicates (map psi-get-goal rules))
     )

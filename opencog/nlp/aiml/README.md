@@ -398,3 +398,12 @@ psi-rule  calls psi-demand?
 calls psi-get-all-demands
 calls psi-get-demands
 
+2:20 to load
+
+15:20 to crash
+
+16:27 start --
+psi-get-dual-rules takes tooo long -- 3:00
+19:26 --
+
+AndLink is NOT sequential!!!
