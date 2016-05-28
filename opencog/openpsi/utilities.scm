@@ -108,17 +108,27 @@
 
   ATOM should be a part of a psi-rule.
 "
-    ; Define a local is-psi-rule? predicate, because the
-    ; main one is too slow.
-    (define (is-psi-rule? RULE)
+    ; Define a local variant of the psi-rule? predicate, because the
+    ; main one is too slow.  This checks to see if MEMB is ...
+    ; -- a MemberLink
+    ; -- has arity 2
+    ; -- first elt is an ImplicationLink
+    ; -- Second elt is a node starting with string "OpenPsi: "
+    (define (psi-member? MEMB)
         (and
-            (equal? 'ImplicationLink (cog-type RULE))
-            (equal? 2 (cog-arity RULE))
-    ))
+            (equal? 'MemberLink (cog-type MEMB))
+            (equal? 2 (cog-arity MEMB))
+            (let ((mem (cog-outgoing-set MEMB)))
+                (and
+                    (equal? 'ImplicationLink (cog-type (car mem)))
+                    (cog-node-type? (cog-type (cadr mem)))
+                    (string-prefix? psi-prefix-str (cog-name (cadr mem)))
+            ))
+        ))
 
     (let ((member-links (psi-get-member-links ATOM)))
          (delete-duplicates (append-map
-             (lambda (x) (filter psi-rule? (cog-outgoing-set x)))
+             (lambda (x) (filter psi-member? x))
              member-links))
     )
 )
