@@ -405,5 +405,7 @@ calls psi-get-demands
 16:27 start --
 psi-get-dual-rules takes tooo long -- 3:00
 19:26 --
+psi-get-member-links is fast ...
+ psi-rule? is slow!
 
 AndLink is NOT sequential!!!

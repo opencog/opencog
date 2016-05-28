@@ -124,8 +124,7 @@
 "
   Returns a list of all openpsi actions.
 "
-    (cog-outgoing-set (cog-execute! (GetLink
-        (MemberLink (VariableNode "x") psi-action)))))
+    (cog-chase-link 'MemberLink 'ListLink psi-action))
 
 ; --------------------------------------------------------------
 (define-public (psi-action? atom)
