@@ -108,6 +108,14 @@
 
   ATOM should be a part of a psi-rule.
 "
+    ; Define a local is-psi-rule? predicate, because the
+    ; main one is too slow.
+    (define (is-psi-rule? RULE)
+        (and
+            (equal? 'ImplicationLink (cog-type RULE))
+            (equal? 2 (cog-arity RULE))
+    ))
+
     (let ((member-links (psi-get-member-links ATOM)))
          (delete-duplicates (append-map
              (lambda (x) (filter psi-rule? (cog-outgoing-set x)))

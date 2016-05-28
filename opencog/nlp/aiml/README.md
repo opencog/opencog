@@ -270,9 +270,9 @@ several ways.  These are:
 
 ### TODO
 * openpsi duallink is returning too much -- should pre-filter the results.
-* Implement the person tag (XXX atomic.aiml seems to mis-use this
-   tag???)
 * Implement "that" (XXX need examples of how that works, for testing).
+* OpenPsi -- context is a list ... should be something evaluatable???
+* OpenPsi -- SequentialAnd
 
 ### Misc Notes
 
@@ -394,7 +394,7 @@ THAT IS A GOOD PARTY
 ==================
 WHEN WILL YOU * BODY
 
-psi-rule  calls psi-demand? 
+psi-rule  calls psi-demand?
 calls psi-get-all-demands
 calls psi-get-demands
 
@@ -409,3 +409,15 @@ psi-get-member-links is fast ...
  psi-rule? is slow!
 
 AndLink is NOT sequential!!!
+
+psi-rule?
+is a rule if 1) its an implication,
+2) implicad is concept
+3) concept begins with "OpenPsi: "
+    (MemberLink (Implication a-stv (SequentialAnd context action) goal)
+demand)
+
+(MemberLink action psi-action)
+
+
+(cog-chase-link 'MemberLink 'ImplicationLink x)
