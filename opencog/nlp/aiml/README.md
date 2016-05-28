@@ -44,8 +44,8 @@ provided in the `import` directory.  Then do this:
 
 ```
 (use-modules (opencog) (opencog nlp) (opencog nlp aiml) (opencog openpsi))
-(primitive-load "/tmp/aiml.scm")
-(aiml-get-response-wl (string-tokenize "call me ishmael"))
+(primitive-load "/tmp/aiml-rules.scm")
+(aiml-get-response-wl (string-words "call me ishmael"))
 ```
 
 The various sections below provide additional under-the-cover details.
@@ -300,8 +300,8 @@ Search for the rules:
 ```
 ;; YOU CAN DO BETTER
 (psi-get-dual-rules (List (Word "you") (Word "can") (Word "do") (Word "better")))
-(string-tokenize "you can do better")
-(string-tokenize "you are such a winner")
+(string-words "you can do better")
+(string-words "you are such a winner")
 ```
 Search for duals by hand:
 ```
@@ -313,9 +313,9 @@ Search for duals by hand:
 (cog-incoming-set sent)
 (cog-get-root sent)
 
-(define s3 (string-tokenize "who supports Trump?"))
-(define s3a (string-tokenize "who endorses Trump?"))
-(define s4 (string-tokenize "who won the superbowl"))
+(define s3 (string-words "who supports Trump?"))
+(define s3a (string-words "who endorses Trump?"))
+(define s4 (string-words "who won the superbowl"))
 (aiml-get-response-wl s4)
 ```
 
@@ -368,14 +368,14 @@ psi-get-dual-rules calls psi-get-member-links
    (psi-demand "AIML chat" 0.97)
 ) ; CATEND
 
-(aiml-get-response-wl (string-tokenize "will you remember what"))
-(aiml-get-response-wl (string-tokenize "what will you remember"))
-(aiml-get-response-wl (string-tokenize "will you remember that"))
+(aiml-get-response-wl (string-words "will you remember what"))
+(aiml-get-response-wl (string-words "what will you remember"))
+(aiml-get-response-wl (string-words "will you remember that"))
 MAY I TEACH YOU
 REMEMBER THAT
 
-(aiml-get-response-wl (string-tokenize "you do not learn"))
-(aiml-get-response-wl (string-tokenize "call me ishmael"))
+(aiml-get-response-wl (string-words "you do not learn"))
+(aiml-get-response-wl (string-words "call me ishmael"))
 
 -- non-trivial that:
 THAT IS A GOOD PARTY
@@ -393,31 +393,3 @@ THAT IS A GOOD PARTY
 
 ==================
 WHEN WILL YOU * BODY
-
-psi-rule  calls psi-demand?
-calls psi-get-all-demands
-calls psi-get-demands
-
-2:20 to load
-
-15:20 to crash
-
-16:27 start --
-psi-get-dual-rules takes tooo long -- 3:00
-19:26 --
-psi-get-member-links is fast ...
- psi-rule? is slow!
-
-AndLink is NOT sequential!!!
-
-psi-rule?
-is a rule if 1) its an implication,
-2) implicad is concept
-3) concept begins with "OpenPsi: "
-    (MemberLink (Implication a-stv (SequentialAnd context action) goal)
-demand)
-
-(MemberLink action psi-action)
-
-
-(cog-chase-link 'MemberLink 'ImplicationLink x)

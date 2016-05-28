@@ -62,20 +62,23 @@
 
 ; ==============================================================
 
-(define-public (string-tokenize SENT-STR)
+(define-public (string-words SENT-STR)
 "
-  string-tokenize SENT-STR -- chop up SENT-STR string into word-nodes
+  string-words SENT-STR -- chop up SENT-STR string into word-nodes
+  CAUTIION: this by-passes the NLP pipeline, and instead performs
+  an extremely low-brow tokenization!
+
+  This is a debugging utility, and not for general use!
 
   Example:
-     (string-tokenize \"This is a test.\")
+     (string-words \"This is a test.\")
   produces the output:
      (List (Word \"this\") (Word \"is\") (Word \"a\") (Word \"test\"))
 
-  This is a debugging utility, and not for general use!
 "
 	(ListLink (map
 		(lambda (w) (Word w))
-		(string-split SENT-STR (lambda (x) (eq? x #\ )))))
+		(string-tokenize SENT-STR)))
 )
 
 ; --------------------------------------------------------------
