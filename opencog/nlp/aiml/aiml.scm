@@ -7,6 +7,7 @@
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
 
 (load "aiml/bot.scm")
+(load "aiml/gender.scm")
 
 ; ==============================================================
 
@@ -219,27 +220,15 @@
 	(DefinedSchemaNode "AIML-tag person")
 	(GroundedSchemaNode "scm: do-aiml-person"))
 
-(define-public (do-aiml-person TEXT)
-	TEXT
-)
-
 ; AIML-tag person2 -- Convert 1st to second person, and back.
 (DefineLink
 	(DefinedSchemaNode "AIML-tag person2")
 	(GroundedSchemaNode "scm: do-aiml-person2"))
 
-(define-public (do-aiml-person2 TEXT)
-	TEXT
-)
-
 ; AIML-tag gender -- Convert male to female and back.
 (DefineLink
 	(DefinedSchemaNode "AIML-tag gender")
 	(GroundedSchemaNode "scm: do-aiml-gender"))
-
-(define-public (do-aiml-gender TEXT)
-	TEXT
-)
 
 ; ==============================================================
 ;; mute the thing
