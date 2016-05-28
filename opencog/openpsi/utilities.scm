@@ -83,22 +83,30 @@
 
 (define-public (psi-get-member-links ATOM)
 "
-  psi-get-member-links ATOM - Return list of MemberLinks that hold ATOM.
+  psi-get-member-links ATOM - Return list of all of the MemberLinks
+  holding rules whose context or action may apply to ATOM.
 
   All psi rules are members of some ruleset; this searches for and
   finds such MemberLinks.
 "
-    (define (get-roots an-atom)
-        (delete-duplicates (cog-filter 'MemberLink (cog-get-root an-atom))))
+    (define inset (list ATOM))
 
-    (let ((duals (cog-outgoing-set (cog-execute! (DualLink ATOM)))))
-        (if (null? duals)
-            (get-roots ATOM)
-            (delete-duplicates (concatenate
-                (list (append-map get-roots duals)
-                    (append (get-roots ATOM)))))
+    ;; Recursively get all links that contain the given atom.
+    ;; Append them to the list "inset"
+    (define (get-iset atom)
+        (define iset (cog-incoming-set atom))
+        (if (not (null? iset))
+             (begin
+                 (set! inset (concatenate! (list inset iset)))
+                 (for-each get-iset iset))
         )
     )
+
+    (get-iset ATOM)
+    (for-each get-iset (cog-outgoing-set (cog-execute! (DualLink ATOM))))
+
+    ;; Keep only those links that are of type MemberLink
+    (cog-filter 'MemberLink inset)
 )
 
 ; --------------------------------------------------------------
