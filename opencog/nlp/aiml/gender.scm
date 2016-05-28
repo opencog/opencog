@@ -4,7 +4,18 @@
 
 ; AIML-tag person -- Convert 1st to third person, and back.
 (define-public (do-aiml-person TEXT)
-	TEXT
+	(define (cvt WORD)
+		(define ws (cog-name WORD))
+		(cond
+			((equal? ws "we") "they")
+			((equal? ws "me") "they")
+			((equal? ws "they") "I")
+			((equal? ws "us") "them")
+			((equal? ws "them") "us")
+			(else ws)
+		)
+	)
+	(ListLink (map cvt (cog-outgoing-set TEXT)))
 )
 
 ; AIML-tag person2 -- Convert 1st to second person, and back.
