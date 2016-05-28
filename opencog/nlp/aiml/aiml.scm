@@ -149,7 +149,8 @@
 
 	; for now, just get the responses.
 	(map run-rule
-		(filter chat-rule? (psi-get-member-links SENT)))
+		(filter chat-rule?
+			(map gar (psi-get-member-links SENT))))
 )
 
 ; --------------------------------------------------------------
