@@ -89,6 +89,24 @@
   All psi rules are members of some ruleset; this searches for and
   finds such MemberLinks.
 "
+    ; Define a local variant of the psi-rule? predicate, because the
+    ; main one is too slow.  This checks to see if MEMB is ...
+    ; -- a MemberLink
+    ; -- has arity 2
+    ; -- first elt is an ImplicationLink
+    ; -- Second elt is a node starting with string "OpenPsi: "
+    (define (psi-member? MEMB)
+        (and
+            (equal? 'MemberLink (cog-type MEMB))
+            (equal? 2 (cog-arity MEMB))
+            (let ((mem (cog-outgoing-set MEMB)))
+                (and
+                    (equal? 'ImplicationLink (cog-type (car mem)))
+                    (cog-node-type? (cog-type (cadr mem)))
+                    (string-prefix? psi-prefix-str (cog-name (cadr mem)))
+            ))
+        ))
+
     (define set-of-duals (cog-execute! (DualLink ATOM)))
 
     (define inset '())
@@ -110,38 +128,9 @@
     ; Avoid garbaging up the atomspace.
     (cog-delete set-of-duals)
 
-    ;; Keep only those links that are of type MemberLink
-    (delete-duplicates (cog-filter 'MemberLink inset))
-)
-
-; --------------------------------------------------------------
-(define-public (psi-get-dual-rules ATOM)
-"
-  psi-get-dual-rules ATOM - Return list of psi-rules that can ground ATOM.
-
-  ATOM should be a part of a psi-rule.
-"
-    ; Define a local variant of the psi-rule? predicate, because the
-    ; main one is too slow.  This checks to see if MEMB is ...
-    ; -- a MemberLink
-    ; -- has arity 2
-    ; -- first elt is an ImplicationLink
-    ; -- Second elt is a node starting with string "OpenPsi: "
-    (define (psi-member? MEMB)
-        (and
-            (equal? 'MemberLink (cog-type MEMB))
-            (equal? 2 (cog-arity MEMB))
-            (let ((mem (cog-outgoing-set MEMB)))
-                (and
-                    (equal? 'ImplicationLink (cog-type (car mem)))
-                    (cog-node-type? (cog-type (cadr mem)))
-                    (string-prefix? psi-prefix-str (cog-name (cadr mem)))
-            ))
-        ))
-
-    (let ((member-links (psi-get-member-links ATOM)))
-         (delete-duplicates (append-map
-             (lambda (x) (filter psi-member? (list x)))
-             member-links))
-    )
+    ;; Keep only those links that are of type MemberLink...
+    ;; and, more precisely, a MmeberLink that is of a valid
+    ;; psi-fule form.
+    (filter psi-member?
+        (delete-duplicates (cog-filter 'MemberLink inset)))
 )
