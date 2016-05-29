@@ -408,3 +408,9 @@ that:  -- implement that
 
 person crashed:
  (aiml-get-response-wl (string-words "who supports Trump?"))
+
+DO YOU KNOW BOTNAME
+
+thatstar/>
+
+topicstar/>

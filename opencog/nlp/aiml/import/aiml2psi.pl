@@ -402,7 +402,7 @@ sub process_multi_star
 			$t =~ s/\s*$//;
 			if ($t ne "")
 			{
-				$tout .= &split_string($indent, $t);
+				$tout .= &process_aiml_tags($indent, $t);
 			}
 		}
 		elsif ($star =~ /\/>(.*)/)
@@ -413,13 +413,13 @@ sub process_multi_star
 			$t =~ s/\s*$//;
 			if ($t ne "")
 			{
-				$tout .= &split_string($indent, $t);
+				$tout .= &process_aiml_tags($indent, $t);
 			}
 		}
 		elsif ($star ne "")
 		{
 			# At this point, we expect just a string of words.
-			$tout .= &split_string($indent, $star);
+			$tout .= &process_aiml_tags($indent, $star);
 		}
 	}
 	$tout;
@@ -477,7 +477,7 @@ sub process_set
 	$tout .= $indent . "   )))\n";
 	if ($4 ne "")
 	{
-		$tout .= &split_string($indent, $4);
+		$tout .= &process_aiml_tags($indent, $4);
 	}
 	$tout;
 }
@@ -523,11 +523,11 @@ sub process_named_tag
 		if ($get =~ /name='(.*)'\/>(.*)/)
 		{
 			$tout .= &print_named_tag($tag, $indent, $1);
-			$tout .= &split_string($indent, $2);
+			$tout .= &process_aiml_tags($indent, $2);
 		}
 		else
 		{
-			$tout .= &split_string($indent, $get);
+			$tout .= &process_aiml_tags($indent, $get);
 		}
 	}
 }
