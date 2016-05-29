@@ -150,8 +150,10 @@
 			(word-list-set-flatten
 				(cog-execute!
 					(Map (Implication (gaar RULE) (gdar RULE)) (Set SENT)))))
+(if (not (null? (gar result)))
+(begin
 (display "duuude just ran rule\n") (display RULE) (newline)
-(display "duuude got result\n") (display result) (newline)
+(display "duuude got result\n") (display result) (newline)))
 		result
 	)
 
@@ -224,8 +226,8 @@
 
 (define-public (do-aiml-set KEY VALUE)
 	(define flat-val (word-list-flatten VALUE))
-	(display "duuude set key=") (display KEY) (newline)
-	(display "duuude set value=") (display flat-val) (newline)
+	; (display "duuude set key=") (display KEY) (newline)
+	; (display "duuude set value=") (display flat-val) (newline)
 	(State KEY flat-val)
 	flat-val
 )
