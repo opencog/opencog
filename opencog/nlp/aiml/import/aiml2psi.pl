@@ -352,30 +352,6 @@ sub split_string
 	$tout;
 }
 
-# process_star -- deal with the star XML
-# Handle expressions like <star/> and <star index='2'/> and so on.
-sub process_star
-{
-	my $text = $_[0];
-	my $tout = "";
-
-	if ($text =~ /<star\s*\/>/)
-	{
-		$tout .= "(Glob \"\$star-1\")";
-	}
-	elsif ($text =~ /<star\s*index\s*=\s*'(\d+)'\s*\/>/)
-	{
-		$tout .= "(Glob \"\$star-$1\")";
-	}
-	else
-	{
-		# Error .. should throw here I guess
-		$tout .= "(AIEEEE! \"$text\")";
-	}
-
-	$tout;
-}
-
 sub process_aiml_tags;
 
 # process_multi_star -- multiple star extraction
@@ -396,7 +372,7 @@ sub process_multi_star
 	$star =~ s/\s*$//;
 	if ($star =~ /^index='(\d+)'.*\/>(.*)/)
 	{
-		$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
+		$tout .= $indent . "(Glob \"\$star-$1\")\n";
 
 		my $t = $2;
 		$t =~ s/^\s*//;
@@ -408,7 +384,7 @@ sub process_multi_star
 	}
 	elsif ($star =~ /^\/>(.*)/)
 	{
-		$tout .= $indent . &process_star("<star \/>") . "\n";
+		$tout .= $indent .  "(Glob \"\$star-1\")\n";
 		my $t = $1;
 		$t =~ s/^\s*//;
 		$t =~ s/\s*$//;
