@@ -15,7 +15,8 @@
 			(else ws)
 		)
 	)
-	(ListLink (map cvt (cog-outgoing-set TEXT)))
+	(define (wcvt str) (Word (cvt str)))
+	(ListLink (map wcvt (cog-outgoing-set TEXT)))
 )
 
 ; AIML-tag person2 -- Convert 1st to second person, and back.
