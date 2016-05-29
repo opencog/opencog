@@ -352,75 +352,51 @@ sub split_string
 	$tout;
 }
 
-# process_star -- deal with the star XML
-# Handle expressions like <star/> and <star index='2'/> and so on.
-sub process_star
-{
-	my $text = $_[0];
-	my $tout = "";
-
-	if ($text =~ /<star\s*\/>/)
-	{
-		$tout .= "(Glob \"\$star-1\")";
-	}
-	elsif ($text =~ /<star\s*index\s*=\s*'(\d+)'\s*\/>/)
-	{
-		$tout .= "(Glob \"\$star-$1\")";
-	}
-	else
-	{
-		# Error .. should throw here I guess
-		$tout .= "(AIEEEE! \"$text\")";
-	}
-
-	$tout;
-}
-
 sub process_aiml_tags;
 
-# process_multi_star -- multiple star extraction
+# process_star -- star extraction
 #
 # First argument: white-space indentation to insert on each line.
 # Second argument: the actual text to unpack
-sub process_multi_star
+sub process_star
 {
 	my $indent = $_[0];
 	my $text = $_[1];
 
 	my $tout = "";
-	my @stars = split /<star/, $text;
-	foreach my $star (@stars)
-	{
-		$star =~ s/^\s*//;
-		$star =~ s/\s*$//;
-		if ($star =~ /index='(\d+)'.*\/>(.*)/)
-		{
-			$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
+	$text =~ /(.*?)<star(.*)/;
+	$tout .= &split_string($indent, $1);
 
-			my $t = $2;
-			$t =~ s/^\s*//;
-			$t =~ s/\s*$//;
-			if ($t ne "")
-			{
-				$tout .= &split_string($indent, $t);
-			}
-		}
-		elsif ($star =~ /\/>(.*)/)
+	my $star = $2;
+	$star =~ s/^\s*//;
+	$star =~ s/\s*$//;
+	if ($star =~ /^index='(\d+)'\s*\/>(.*)/)
+	{
+		$tout .= $indent . "(Glob \"\$star-$1\")\n";
+
+		my $t = $2;
+		$t =~ s/^\s*//;
+		$t =~ s/\s*$//;
+		if ($t ne "")
 		{
-			$tout .= $indent . &process_star("<star \/>") . "\n";
-			my $t = $1;
-			$t =~ s/^\s*//;
-			$t =~ s/\s*$//;
-			if ($t ne "")
-			{
-				$tout .= &split_string($indent, $t);
-			}
+			$tout .= &process_aiml_tags($indent, $t);
 		}
-		elsif ($star ne "")
+	}
+	elsif ($star =~ /^\/>(.*)/)
+	{
+		$tout .= $indent .  "(Glob \"\$star-1\")\n";
+		my $t = $1;
+		$t =~ s/^\s*//;
+		$t =~ s/\s*$//;
+		if ($t ne "")
 		{
-			# At this point, we expect just a string of words.
-			$tout .= &split_string($indent, $star);
+			$tout .= &process_aiml_tags($indent, $t);
 		}
+	}
+	else
+	{
+		print "Ohhhh nooo, Mr. Bill!\n";
+		die;
 	}
 	$tout;
 }
@@ -449,7 +425,7 @@ sub process_tag
 	$tout .= $indent . "   )))\n";
 	if ($3 ne "")
 	{
-		$tout .= &split_string($indent, $3);
+		$tout .= &process_aiml_tags($indent, $3);
 	}
 	$tout;
 }
@@ -477,7 +453,7 @@ sub process_set
 	$tout .= $indent . "   )))\n";
 	if ($4 ne "")
 	{
-		$tout .= &split_string($indent, $4);
+		$tout .= &process_aiml_tags($indent, $4);
 	}
 	$tout;
 }
@@ -523,11 +499,11 @@ sub process_named_tag
 		if ($get =~ /name='(.*)'\/>(.*)/)
 		{
 			$tout .= &print_named_tag($tag, $indent, $1);
-			$tout .= &split_string($indent, $2);
+			$tout .= &process_aiml_tags($indent, $2);
 		}
 		else
 		{
-			$tout .= &split_string($indent, $get);
+			$tout .= &process_aiml_tags($indent, $get);
 		}
 	}
 }
@@ -624,49 +600,52 @@ sub process_aiml_tags
 	my $tout = "";
 
 	# Find the very first angle bracket
-	if ($text =~ /(.*?)<(.*)/)
+	if ($text =~ /.*?<(.*)/)
 	{
-		my $tag = $2;
+		my $tag = $1;
 		if ($tag =~ /^srai>/)
 		{
-			$tout .= process_tag("srai", $indent, $text);
+			$tout .= &process_tag("srai", $indent, $text);
 		}
 		elsif ($tag =~ /^star/)
 		{
-			$tout .= &process_multi_star($indent, $text);
+			$tout .= &process_star($indent, $text);
 		}
 		elsif ($tag =~ /^think>/)
 		{
-			$tout .= process_tag("think", $indent, $text);
+			$tout .= &process_tag("think", $indent, $text);
 		}
 		elsif ($tag =~ /^set name/)
 		{
-			$tout .= process_set($indent, $text);
+			$tout .= &process_set($indent, $text);
 		}
 		elsif ($tag =~ /^person>/)
 		{
-			$tout .= process_tag("person", $indent, $text);
+			$tout .= &process_tag("person", $indent, $text);
 		}
 		elsif ($tag =~ /^that\/>/)
 		{
-			$tout .= process_that($indent, $text);
+			$tout .= &process_that($indent, $text);
 		}
 		elsif ($tag =~ /^input/)
 		{
-			$tout .= process_input($indent, $text);
+			$tout .= &process_input($indent, $text);
 		}
 		elsif ($tag =~ /^get name/)
 		{
-			$tout .= process_named_tag("get", $indent, $text);
+			$tout .= &process_named_tag("get", $indent, $text);
 		}
 		elsif ($tag =~ /^bot name/)
 		{
-			$tout .= process_named_tag("bot", $indent, $text);
+			$tout .= &process_named_tag("bot", $indent, $text);
 		}
-		elsif ($text =~ /<!--.*-->/)
+		elsif ($tag =~ /^!--.*-->(.*)/)
 		{
 			# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
-			$tout .= $indent . "; WTF $text\n";
+			if ($1 != "")
+			{
+				$tout .= &process_aiml_tags($indent, $1);
+			}
 		}
 	}
 	else

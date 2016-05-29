@@ -7,6 +7,7 @@
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
 
 (load "aiml/bot.scm")
+(load "aiml/gender.scm")
 
 ; ==============================================================
 
@@ -61,20 +62,23 @@
 
 ; ==============================================================
 
-(define-public (string-tokenize SENT-STR)
+(define-public (string-words SENT-STR)
 "
-  string-tokenize SENT-STR -- chop up SENT-STR string into word-nodes
+  string-words SENT-STR -- chop up SENT-STR string into word-nodes
+  CAUTIION: this by-passes the NLP pipeline, and instead performs
+  an extremely low-brow tokenization!
+
+  This is a debugging utility, and not for general use!
 
   Example:
-     (string-tokenize \"This is a test.\")
+     (string-words \"This is a test.\")
   produces the output:
      (List (Word \"this\") (Word \"is\") (Word \"a\") (Word \"test\"))
 
-  This is a debugging utility, and not for general use!
 "
 	(ListLink (map
 		(lambda (w) (Word w))
-		(string-split SENT-STR (lambda (x) (eq? x #\ )))))
+		(string-tokenize SENT-STR)))
 )
 
 ; --------------------------------------------------------------
@@ -94,7 +98,6 @@
   will be flattened to:
      (List (Concept \"A\") (Concept \"B\") (Concept \"C\"))
 "
-
 	(define (unwrap ATOM)
 		(if (equal? 'ListLink (cog-type ATOM))
 			(concatenate (map unwrap (cog-outgoing-set ATOM)))
@@ -136,16 +139,45 @@
 	(define (chat-rule? r)
 		(equal? (gdr r) (Concept "AIML chat goal")))
 
-	; Create a BindLink
-	(define (run-rule r)
-(display "duuude run rule \n") (display r) (newline)
-		(word-list-set-flatten
-			(cog-execute!
-				(Map (Implication (gaar r) (gdar r)) (Set SENT)))))
+	; Create a MapLink and run it. RULE is currently expected to
+	; be an ImplicationLink wrapping a SequentialAnd where the
+	; first part of the SequentialAnd is the input sentnece, and the
+	; second is the response. XXX FIXME except that this is wrong:
+	; any "that" or "topic" matching fails. Also, its wrapping
+	; word-lists and not predicates. Yuck!
+	(define (run-rule RULE)
+		(define result
+			(word-list-set-flatten
+				(cog-execute!
+					(Map (Implication (gaar RULE) (gdar RULE)) (Set SENT)))))
+(if (not (null? (gar result)))
+(begin
+(display "duuude just ran rule\n") (display RULE) (newline)
+(display "duuude got result\n") (display result) (newline)))
+		result
+	)
 
-	; for now, just get the responses.
-	(map run-rule
-		(filter chat-rule? (psi-get-dual-rules SENT)))
+	; For now, just get the responses.
+	(define all-responses
+		(map run-rule
+			(filter chat-rule?
+				(map gar (psi-get-member-links SENT)))))
+
+	; Remove the empty responses
+	(define responses
+		(filter (lambda (s) (not (null? (gar s)))) all-responses))
+
+	; The robots response is the current "that".
+	; XXX FIXME this should be delayed until one of possibly
+	; several responses is actually chosen.
+	; Nlote that resp is a SetLink usually containing only one
+	; word-list, but maybe more than one...
+	(for-each
+		(lambda (resp) (do-aiml-set (Concept "that") (gar resp)))
+		responses)
+
+	; Return the responses.
+	responses
 )
 
 ; --------------------------------------------------------------
@@ -194,8 +226,8 @@
 
 (define-public (do-aiml-set KEY VALUE)
 	(define flat-val (word-list-flatten VALUE))
-	(display "duuude set key=") (display KEY) (newline)
-	(display "duuude set value=") (display flat-val) (newline)
+	; (display "duuude set key=") (display KEY) (newline)
+	; (display "duuude set value=") (display flat-val) (newline)
 	(State KEY flat-val)
 	flat-val
 )
@@ -213,6 +245,33 @@
 (DefineLink
 	(DefinedSchemaNode "AIML-tag bot")
 	(GroundedSchemaNode "scm: do-aiml-get"))
+
+; AIML-tag that -- Handle that tag. XXX all wrong.
+(DefineLink
+	(DefinedSchemaNode "AIML-tag that")
+	(GroundedSchemaNode "scm: do-aiml-that"))
+
+(define-public (do-aiml-that VAL)
+	(display "duuude handle that!! -->")
+	(display VAL)
+	(newline)
+)
+
+;; -------------------------
+; AIML-tag person -- Convert 1st to third person, and back.
+(DefineLink
+	(DefinedSchemaNode "AIML-tag person")
+	(GroundedSchemaNode "scm: do-aiml-person"))
+
+; AIML-tag person2 -- Convert 1st to second person, and back.
+(DefineLink
+	(DefinedSchemaNode "AIML-tag person2")
+	(GroundedSchemaNode "scm: do-aiml-person2"))
+
+; AIML-tag gender -- Convert male to female and back.
+(DefineLink
+	(DefinedSchemaNode "AIML-tag gender")
+	(GroundedSchemaNode "scm: do-aiml-gender"))
 
 ; ==============================================================
 ;; mute the thing

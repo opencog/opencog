@@ -21,7 +21,7 @@ is similar to `Belief + Intention ==> Desire`.
   * A rule is an ImplicationLink structured as
     ```scheme
             (ImplicationLink
-                (AndLink
+                (SequentialAndLink
                     (context)
                     (action))
                 (demand-goal))
@@ -40,6 +40,16 @@ is similar to `Belief + Intention ==> Desire`.
   * An action is an `ExecutionOutputLink` or any atom that could be executed by
     running `(cog-execute! your-action)`. An action is the means for interacting
     with the atomspace or other systems.
+
+    XXX FIXME the action should be TV-valued, e.g. should probobably be
+wrapped inside a TrueLink.  That is because the SequentaialAndLink
+assumes that all of its elements are evaluatable; i.e. are TV-valued.
+Either that, or we need some other mechanism for grabbing the TV
+from the resulting execution of the action.
+
+Note also: the SequentialAnd is used instead of AndLink, because the
+AndLink is an unordered link, and thus cannot distinguish its first
+and second elements!
 
 4. Goal/Demand-goal:
   * A goal is an `EvaluationLink` or any atom that could be evaluated by

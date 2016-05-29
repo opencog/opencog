@@ -22,43 +22,44 @@
     ; that might have been; better, (or not as it might need as much chasing)
     (MemberLink action psi-action)
 
-    (MemberLink (Implication a-stv (AndLink context action) goal) demand)
+    ; AndLink's are unordered links; must use an ordered link, if the
+    ; context is to preceed the action! SequentialAnd seems like an
+    ; OK choice, for now.
+    (MemberLink (Implication a-stv (SequentialAnd context action) goal) demand)
 )
 
 ; --------------------------------------------------------------
 
 (define-public (psi-rule context action goal a-stv demand)
 "
-  It associates an action and context in which the action has to be taken
-  to a goal that is satisfied when the action is executed. It is structured as
-  as the following `ImplicationLink`,
+  psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
 
-    (ImplicationLink a-stv
-        (AndLink
-            (context)
-            (action))
-        (goal))
+  Associate an action with a context such that, if the action is
+  taken, then the goal will be satisfied.  The structure of a rule
+  is in the form of an `ImplicationLink`,
 
-  context:
-  - A list containing the terms/clauses that should be met for this action
-    to be taken. These are atoms that should be evaluated to return
-    TRUE_TV/FALSE_TV.
+    (ImplicationLink TV
+        (SequentialAnd
+            CONTEXT
+            ACTION)
+        GOAL)
 
-  action:
-  - It should be an atom that can be run by `cog-evaluate!`. That means that
-    it will have to return TRUE_TV or FALSE_TV. Any atom that could be executed
-    by running `(cog-execute! your-action)`.
+  where:
+  CONTEXT is a scheme list containing all of the terms that should
+    be met for the ACTION to be taken. These are atoms that, when
+    evaluated, should result in a true or false TV.
 
-  goal:
-  - It should be an atom that can be run by `cog-evaluate!`. That means that
-    it will have to return TRUE_TV or FALSE_TV. This is basically a formula, on
+  ACTION is an evaluatable atom, i.e. returns a TV when evaluated by
+    `cog-evaluate!`.  It should return a true of false TV.
+
+  GOAL is an evaluatable atom, i.e. returns a TV when evaluated by
+    `cog-evaluate!`.  The returned TV is used as a formula tp rank
     how this rule affects the demands.
 
-  a-stv:
-  - This is the stv of the ImplicationLink.
+  TV is the TruthValue assigned to the ImplicationLink. It should
+    be a SimpleTruthValue.
 
-  demand:
-  - The node that represents a demand that this rule affects.
+  DEMAND is a Node, representing teh demand that this rule affects.
 "
     (define func-name "psi-rule") ; For use in error reporting
 
@@ -97,6 +98,9 @@
 (define-public (psi-get-all-rules)
 "
   Returns a list of all known openpsi rules.
+
+XXX FIXME -- this is painfully slow --- multiple minutes when
+there are 100K rules!
 "
     (fold append '()
         (par-map (lambda (x) (cog-chase-link 'MemberLink 'ImplicationLink x))
@@ -106,9 +110,12 @@
 ; --------------------------------------------------------------
 (define-public (psi-rule? atom)
 "
-  Returns `#t` or `#f` depending on whether the passed argument is a psi-rule
-  or not. An ImplicationLink that is a member of the demand sets is a
-  psi-rule.
+  Returns `#t` or `#f` depending on whether the passed argument
+  is a valid psi-rule or not. An ImplicationLink that is a member 
+  of the demand sets is a psi-rule.
+
+  XXX FIXME -- this is very very slow (many minutes) when there
+  are 100K or more rules!
 
   atom:
   - An atom passed for checking.
@@ -121,8 +128,7 @@
 "
   Returns a list of all openpsi actions.
 "
-    (cog-outgoing-set (cog-execute! (GetLink
-        (MemberLink (VariableNode "x") psi-action)))))
+    (cog-chase-link 'MemberLink 'ListLink psi-action))
 
 ; --------------------------------------------------------------
 (define-public (psi-action? atom)
@@ -196,7 +202,7 @@
   action:
   - An action that is part of a psi-rule.
 "
-    (let* ((and-links (cog-filter 'AndLink (cog-incoming-set action)))
+    (let* ((and-links (cog-filter 'SequentialAndLink (cog-incoming-set action)))
            (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
            (delete-duplicates (map psi-get-goal rules))
     )
