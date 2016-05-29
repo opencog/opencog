@@ -394,7 +394,7 @@ sub process_multi_star
 	my $star = $2;
 	$star =~ s/^\s*//;
 	$star =~ s/\s*$//;
-	if ($star =~ /index='(\d+)'.*\/>(.*)/)
+	if ($star =~ /^index='(\d+)'.*\/>(.*)/)
 	{
 		$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
 
@@ -406,7 +406,7 @@ sub process_multi_star
 			$tout .= &process_aiml_tags($indent, $t);
 		}
 	}
-	elsif ($star =~ /\/>(.*)/)
+	elsif ($star =~ /^\/>(.*)/)
 	{
 		$tout .= $indent . &process_star("<star \/>") . "\n";
 		my $t = $1;
