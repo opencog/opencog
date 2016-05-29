@@ -98,7 +98,6 @@
   will be flattened to:
      (List (Concept \"A\") (Concept \"B\") (Concept \"C\"))
 "
-
 	(define (unwrap ATOM)
 		(if (equal? 'ListLink (cog-type ATOM))
 			(concatenate (map unwrap (cog-outgoing-set ATOM)))
@@ -163,7 +162,7 @@
 
 	; Remove the empty responses
 	(define responses
-		(filter (lambda (s) (null? (gar s))) all-responses)
+		(filter (lambda (s) (null? (gar s))) all-responses))
 
 	; The robots response is the current "that".
 	; XXX FIXME this should be delayed until one of possibly
