@@ -147,10 +147,19 @@
 			(cog-execute!
 				(Map (Implication (gaar r) (gdar r)) (Set SENT)))))
 
-	; for now, just get the responses.
-	(map run-rule
-		(filter chat-rule?
-			(map gar (psi-get-member-links SENT))))
+	; For now, just get the responses.
+	(define responses
+		(map run-rule
+			(filter chat-rule?
+				(map gar (psi-get-member-links SENT)))))
+
+	; The robots response is the current "that".
+	; XXX FIXME this should be delayed until one of possibly
+	; several responses is actually chosen.
+	(for-each (lambda (resp) (do-aiml-set "that" resp) responses))
+
+	; Return the responses.
+	responses
 )
 
 ; --------------------------------------------------------------
@@ -219,6 +228,18 @@
 	(DefinedSchemaNode "AIML-tag bot")
 	(GroundedSchemaNode "scm: do-aiml-get"))
 
+; AIML-tag that -- Handle that tag. XXX all wrong.
+(DefineLink
+	(DefinedSchemaNode "AIML-tag that")
+	(GroundedSchemaNode "scm: do-aiml-that"))
+
+(define-public (do-aiml-that VAL)
+	(display "duuude handle that!! -->")
+	(display VAL)
+	(newline)
+)
+
+;; -------------------------
 ; AIML-tag person -- Convert 1st to third person, and back.
 (DefineLink
 	(DefinedSchemaNode "AIML-tag person")

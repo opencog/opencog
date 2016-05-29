@@ -282,6 +282,7 @@ several ways.  These are:
 * Implement "that" (XXX need examples of how that works, for testing).
 * OpenPsi -- context is a list ... should be something evaluatable???
 * OpenPsi -- SequentialAnd
+* AIML -- thatstar and topicstar not handled.
 
 ### Misc Notes
 
@@ -417,9 +418,3 @@ topicstar/>
 
 114690a114709 -- condition-response
 <pattern>_</pattern> <topic>BADANSWER</topic>
-
- WHEN I
-1715521
-
-1714822
-435854
