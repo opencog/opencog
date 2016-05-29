@@ -156,7 +156,7 @@
 	; The robots response is the current "that".
 	; XXX FIXME this should be delayed until one of possibly
 	; several responses is actually chosen.
-	(for-each (lambda (resp) (do-aiml-set "that" resp) responses))
+	(for-each (lambda (resp) (do-aiml-set "that" resp)) responses)
 
 	; Return the responses.
 	responses
