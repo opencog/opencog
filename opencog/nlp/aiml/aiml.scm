@@ -140,24 +140,38 @@
 	(define (chat-rule? r)
 		(equal? (gdr r) (Concept "AIML chat goal")))
 
-	; Create a BindLink
-	(define (run-rule r)
-(display "duuude run rule \n") (display r) (newline)
-		(word-list-set-flatten
-			(cog-execute!
-				(Map (Implication (gaar r) (gdar r)) (Set SENT)))))
+	; Create a MapLink and run it. RULE is currently expected to
+	; be an ImplicationLink wrapping a SequentialAnd where the
+	; first part of the SequentialAnd is the input sentnece, and the
+	; second is the response. XXX FIXME except that this is wrong:
+	; any "that" or "topic" matching fails. Also, its wrapping
+	; word-lists and not predicates. Yuck!
+	(define (run-rule RULE)
+		(define result
+			(word-list-set-flatten
+				(cog-execute!
+					(Map (Implication (gaar RULE) (gdar RULE)) (Set SENT)))))
+(display "duuude just ran rule\n") (display RULE) (newline)
+(display "duuude got result\n") (display result) (newline)
+	)
 
 	; For now, just get the responses.
-	(define responses
+	(define all-responses
 		(map run-rule
 			(filter chat-rule?
 				(map gar (psi-get-member-links SENT)))))
 
+	; Remove the empty responses
+	(define responses
+		(filter (lambda (s) (null? (gar s))) all-responses)
+
 	; The robots response is the current "that".
 	; XXX FIXME this should be delayed until one of possibly
 	; several responses is actually chosen.
+	; Nlote that resp is a SetLink usually containing only one
+	; word-list, but maybe more than one...
 	(for-each
-		(lambda (resp) (do-aiml-set (Concept "that") resp))
+		(lambda (resp) (do-aiml-set (Concept "that") (gar resp)))
 		responses)
 
 	; Return the responses.
