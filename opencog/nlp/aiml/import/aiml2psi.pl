@@ -388,39 +388,39 @@ sub process_multi_star
 	my $text = $_[1];
 
 	my $tout = "";
-	my @stars = split /<star/, $text;
-	foreach my $star (@stars)
-	{
-		$star =~ s/^\s*//;
-		$star =~ s/\s*$//;
-		if ($star =~ /index='(\d+)'.*\/>(.*)/)
-		{
-			$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
+	$text =~ /(.*?)<star(.*)/;
+	$tout .= &split_string($indent, $1);
 
-			my $t = $2;
-			$t =~ s/^\s*//;
-			$t =~ s/\s*$//;
-			if ($t ne "")
-			{
-				$tout .= &process_aiml_tags($indent, $t);
-			}
-		}
-		elsif ($star =~ /\/>(.*)/)
+	my $star = $2;
+	$star =~ s/^\s*//;
+	$star =~ s/\s*$//;
+	if ($star =~ /index='(\d+)'.*\/>(.*)/)
+	{
+		$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
+
+		my $t = $2;
+		$t =~ s/^\s*//;
+		$t =~ s/\s*$//;
+		if ($t ne "")
 		{
-			$tout .= $indent . &process_star("<star \/>") . "\n";
-			my $t = $1;
-			$t =~ s/^\s*//;
-			$t =~ s/\s*$//;
-			if ($t ne "")
-			{
-				$tout .= &process_aiml_tags($indent, $t);
-			}
+			$tout .= &process_aiml_tags($indent, $t);
 		}
-		elsif ($star ne "")
+	}
+	elsif ($star =~ /\/>(.*)/)
+	{
+		$tout .= $indent . &process_star("<star \/>") . "\n";
+		my $t = $1;
+		$t =~ s/^\s*//;
+		$t =~ s/\s*$//;
+		if ($t ne "")
 		{
-			# At this point, we expect just a string of words.
-			$tout .= &process_aiml_tags($indent, $star);
+			$tout .= &process_aiml_tags($indent, $t);
 		}
+	}
+	else
+	{
+		print "Ohhhh nooo, Mr. Bill!\n";
+		die;
 	}
 	$tout;
 }

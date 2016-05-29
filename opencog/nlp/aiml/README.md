@@ -414,3 +414,13 @@ DO YOU KNOW BOTNAME
 thatstar/>
 
 topicstar/>
+
+435798,435803 -- empty set
+KARE WA * DESU
+<star/> wa <set name=\"kare\"><star/></set> desu.
+
+172431,172435 -- empty think
+DO YOU LIKE HELPING
+
+114690a114709 -- condition-response
+<pattern>_</pattern> <topic>BADANSWER</topic>
