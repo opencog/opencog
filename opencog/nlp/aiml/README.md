@@ -417,4 +417,5 @@ thatstar/>
 topicstar/>
 
 114690a114709 -- condition-response
+
 <pattern>_</pattern> <topic>BADANSWER</topic>
