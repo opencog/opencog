@@ -152,6 +152,7 @@
 					(Map (Implication (gaar RULE) (gdar RULE)) (Set SENT)))))
 (display "duuude just ran rule\n") (display RULE) (newline)
 (display "duuude got result\n") (display result) (newline)
+		result
 	)
 
 	; For now, just get the responses.
