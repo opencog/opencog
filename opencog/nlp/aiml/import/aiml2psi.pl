@@ -449,7 +449,7 @@ sub process_tag
 	$tout .= $indent . "   )))\n";
 	if ($3 ne "")
 	{
-		$tout .= &split_string($indent, $3);
+		$tout .= &process_aiml_tags($indent, $3);
 	}
 	$tout;
 }
