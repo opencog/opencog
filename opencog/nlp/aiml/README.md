@@ -418,4 +418,8 @@ topicstar/>
 114690a114709 -- condition-response
 <pattern>_</pattern> <topic>BADANSWER</topic>
 
-<pattern>_ HAD TIRED *</pattern>
+ WHEN I
+1715521
+
+1714822
+435854

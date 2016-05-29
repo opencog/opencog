@@ -354,11 +354,11 @@ sub split_string
 
 sub process_aiml_tags;
 
-# process_multi_star -- multiple star extraction
+# process_star -- star extraction
 #
 # First argument: white-space indentation to insert on each line.
 # Second argument: the actual text to unpack
-sub process_multi_star
+sub process_star
 {
 	my $indent = $_[0];
 	my $text = $_[1];
@@ -609,7 +609,7 @@ sub process_aiml_tags
 		}
 		elsif ($tag =~ /^star/)
 		{
-			$tout .= &process_multi_star($indent, $text);
+			$tout .= &process_star($indent, $text);
 		}
 		elsif ($tag =~ /^think>/)
 		{
