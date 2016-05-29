@@ -370,7 +370,7 @@ sub process_multi_star
 	my $star = $2;
 	$star =~ s/^\s*//;
 	$star =~ s/\s*$//;
-	if ($star =~ /^index='(\d+)'.*\/>(.*)/)
+	if ($star =~ /^index='(\d+)'\s*\/>(.*)/)
 	{
 		$tout .= $indent . "(Glob \"\$star-$1\")\n";
 
