@@ -40,11 +40,20 @@ This mixed-mode operation is in development.
 
 ## Running AIML in OpenCog
 AIML files need to be converted into Atomese, using the perl script
-provided in the `import` directory.  Then do this:
+provided in the `import` directory.  This  can be done as:
+```
+import/aiml2psi.pl --dir /where/the/aiml/files/are
+cp aiml-rules.scm /tmp
+```
+Then do this:
 
 ```
 (use-modules (opencog) (opencog nlp) (opencog nlp aiml) (opencog openpsi))
 (primitive-load "/tmp/aiml-rules.scm")
+```
+For basic debugging, the `strring-words` utility can be used to tokenize
+a string into words; its very low-brow and basic:
+```
 (aiml-get-response-wl (string-words "call me ishmael"))
 ```
 
@@ -393,3 +402,9 @@ THAT IS A GOOD PARTY
 
 ==================
 WHEN WILL YOU * BODY
+
+that:  -- implement that
+(aiml-get-response-wl (string-words "call me ishmael"))
+
+person crashed:
+ (aiml-get-response-wl (string-words "who supports Trump?"))

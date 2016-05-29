@@ -624,12 +624,12 @@ sub process_aiml_tags
 	my $tout = "";
 
 	# Find the very first angle bracket
-	if ($text =~ /(.*?)<(.*)/)
+	if ($text =~ /.*?<(.*)/)
 	{
-		my $tag = $2;
+		my $tag = $1;
 		if ($tag =~ /^srai>/)
 		{
-			$tout .= process_tag("srai", $indent, $text);
+			$tout .= &process_tag("srai", $indent, $text);
 		}
 		elsif ($tag =~ /^star/)
 		{
@@ -637,36 +637,39 @@ sub process_aiml_tags
 		}
 		elsif ($tag =~ /^think>/)
 		{
-			$tout .= process_tag("think", $indent, $text);
+			$tout .= &process_tag("think", $indent, $text);
 		}
 		elsif ($tag =~ /^set name/)
 		{
-			$tout .= process_set($indent, $text);
+			$tout .= &process_set($indent, $text);
 		}
 		elsif ($tag =~ /^person>/)
 		{
-			$tout .= process_tag("person", $indent, $text);
+			$tout .= &process_tag("person", $indent, $text);
 		}
 		elsif ($tag =~ /^that\/>/)
 		{
-			$tout .= process_that($indent, $text);
+			$tout .= &process_that($indent, $text);
 		}
 		elsif ($tag =~ /^input/)
 		{
-			$tout .= process_input($indent, $text);
+			$tout .= &process_input($indent, $text);
 		}
 		elsif ($tag =~ /^get name/)
 		{
-			$tout .= process_named_tag("get", $indent, $text);
+			$tout .= &process_named_tag("get", $indent, $text);
 		}
 		elsif ($tag =~ /^bot name/)
 		{
-			$tout .= process_named_tag("bot", $indent, $text);
+			$tout .= &process_named_tag("bot", $indent, $text);
 		}
-		elsif ($text =~ /<!--.*-->/)
+		elsif ($tag =~ /^!--.*-->(.*)/)
 		{
 			# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
-			$tout .= $indent . "; WTF $text\n";
+			if ($1 != "")
+			{
+				$tout .= &process_aiml_tags($indent, $1);
+			}
 		}
 	}
 	else
