@@ -17,7 +17,7 @@
   changing the action-rule-selector through learning.
 "
     (StateLink
-        (ConceptNode (string-append (psi-prefix-str) "action-selector"))
+        (ConceptNode (string-append psi-prefix-str "action-selector"))
         (VariableNode "$dpn")
     )
 )
@@ -36,7 +36,7 @@
         (error "Expected DefinedSchemaNode got: " dsn))
 
     (StateLink
-        (ConceptNode (string-append (psi-prefix-str) "action-selector"))
+        (ConceptNode (string-append psi-prefix-str "action-selector"))
         dsn
     )
 )
@@ -60,7 +60,7 @@
 
     ; TODO: Add checks to ensure the exec-term argument is actually executable
     (let* ((z-name (string-append
-                        (psi-prefix-str) "action-selector-" name))
+                        psi-prefix-str "action-selector-" name))
            (selector-dsn (cog-node 'DefinedSchemaNode z-name)))
        (if (null? selector-dsn)
            (begin
@@ -69,7 +69,7 @@
 
                 (EvaluationLink
                     (PredicateNode "action-selector-for")
-                    (ListLink selector-dsn (ConceptNode (psi-prefix-str))))
+                    (ListLink selector-dsn (ConceptNode psi-prefix-str)))
 
                 selector-dsn
            )

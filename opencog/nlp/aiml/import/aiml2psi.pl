@@ -22,41 +22,38 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.1.0";
+my $ver = "0.2.0";
 my $debug;
 my $help;
 my $version;
 my $overwrite;
 my $aimlDir ='.';
-my $intermediateFile = 'flat-aiml.txt';
-my $finalFile = 'aiml.scm';
-my $rulebase = "*-AIML-rulebase-*";
+my $intermediateFile = 'aiml-flat.txt';
+my $outDir = '';
+my $outFile = 'aiml-rules.scm';
 
 GetOptions(
     'dir=s' => \$aimlDir,
     'debug' => \$debug,
     'help' => \$help,
-    'rulebase-name=s' => \$rulebase,
     'last-only' => \$overwrite,
     'version' => \$version,
     'intermediate=s' => \$intermediateFile,
-    'out=s' => \$finalFile,
-) or die "Usage: $0 [--debug] [--help] [--version] [--rulebase-name] [--last-only] [--dir
-<AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
+    'out=s' => \$outDir,
+) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>]\n";
 
 if ($help)
 {
 	print "Convert AIML markup files to OpenCog Atomese files.\n";
 	print "\n";
-	print "Usage: $0 [--debug] [--help] [--version] [--rulebase-name] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
+	print "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <OpenCog file>]\n";
 	print "   --debug                 Enable debugging (if any).\n";
 	print "   --help                  Print these helpful comments.\n";
 	print "   --version               Print version, current version '$ver'\n";
-	print "   --rulebase-name         Specify a name for the ruleset, default '$rulebase'\n";
 	print "   --last-only             Only the last category is output.\n";
 	print "   --dir <directory>       AIML source directory, default: '$aimlDir'\n";
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
-	print "   --out <file>          OpenCog output file, default is '$finalFile'\n";
+	print "   --out <directory>       Directory for OpenCog output files\n";
 	die "\n";
 }
 
@@ -330,17 +327,13 @@ close(FOUT);
 # ------------------------------------------------------------------
 # Second pass utilities
 
-# What node should we use for output text ???
-my $textnode = "(TextNode ";
-# my $textnode = "(Concept ";
-
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
 
-my $dem_kind = "   (Concept \"AIML chat demand\")\n";
-my	$truth = "   (stv 1 1)\n";
+my $psi_goal = "   (Concept \"AIML chat goal\")\n";
+my	$goal_truth = "   (stv 1 0.8)\n";
 my $demand = "   (psi-demand \"AIML chat\" 0.97)\n";
-my $psi_tail = $dem_kind . $truth . $demand;
+my $psi_tail = $psi_goal . $goal_truth . $demand;
 
 # split_string -- split a string of words into distinct nodes.
 sub split_string
@@ -351,138 +344,231 @@ sub split_string
 	my $tout = "";
 	for my $wrd (@words)
 	{
-		$tout .= $indent . $wordnode . "\"$wrd\")\n";
+		if ($wrd ne "")
+		{
+			$tout .= $indent . $wordnode . "\"$wrd\")\n";
+		}
 	}
-	$tout;
-}
-
-# process_star -- deal with the star XML
-# Handle expressions like <star/> and <star index='2'/> and so on.
-sub process_star
-{
-	my $text = $_[0];
-	my $tout = "";
-
-	if ($text =~ /<star\s*\/>/)
-	{
-		$tout .= "(Glob \"\$star-1\")";
-	}
-	elsif ($text =~ /<star\s*index\s*=\s*'(\d+)'\s*\/>/)
-	{
-		$tout .= "(Glob \"\$star-$1\")";
-	}
-	else
-	{
-		# Error .. should throw here I guess
-		$tout .= "(AIEEEE! \"$text\")";
-	}
-
 	$tout;
 }
 
 sub process_aiml_tags;
 
-# process_srai -- convert SRAI tags into atomese.
-# Decode and print nested SRAI tags.  This turns out to be a complicted
-# pain. The problem with srai is that it can be nested, and its hard to
-# use regexes to walk that nesting in a reliable way. (I don't feel like
-# debugging a recursive regex.) So this is implemented as a brute-force
-# string search, where I just count the nesting levels by hand. Even so,
-# this is painfully verbose.
+# process_star -- star extraction
 #
 # First argument: white-space indentation to insert on each line.
 # Second argument: the actual text to unpack
-sub process_srai
+sub process_star
 {
 	my $indent = $_[0];
 	my $text = $_[1];
 
 	my $tout = "";
+	$text =~ /(.*?)<star(.*)/;
+	$tout .= &split_string($indent, $1);
 
-	my $nest = 0;
-
-	# Split on all XML tags.
-	my @tags = split /</, $text;
-	my $contig = shift @tags;
-
-	# Iterate over all the tags.
-	for my $tag (@tags)
+	my $star = $2;
+	$star =~ s/^\s*//;
+	$star =~ s/\s*$//;
+	if ($star =~ /^index='(\d+)'\s*\/>(.*)/)
 	{
+		$tout .= $indent . "(Glob \"\$star-$1\")\n";
 
-		if ($tag =~ /^srai>(.*)/)
+		my $t = $2;
+		$t =~ s/^\s*//;
+		$t =~ s/\s*$//;
+		if ($t ne "")
 		{
-			my $srt = $1;
-
-			# Found an srai tag. If the tag nesting level is zero,
-			# then process everything that came before it, (if there
-			# is anything)
-			if ($nest == 0)
-			{
-				$contig =~ s/^\s*//;
-				$contig =~ s/\s*$//;
-				if ($contig ne "")
-				{
-					$tout .= &process_aiml_tags($indent, $contig);
-				}
-				$contig = $srt;  # strip off the starting tag.
-			}
-			else
-			{
-				$contig .= "<" . $tag;
-			}
-			$nest = $nest + 1;
-		}
-		elsif ($tag =~ /^\/srai>(.*)/)
-		{
-			my $post = $1;
-
-			# Found an srai end-tag. If the nest level is 1, then
-			# print out what we've got; else accumulate some more.
-			if ($nest == 1)
-			{
-				$contig =~ s/^\s*//;
-				$contig =~ s/\s*$//;
-				$tout .= $indent . "(ExecutionOutput\n";
-				$tout .= $indent . "   (DefinedSchema \"AIML-tag srai\")\n";
-				$tout .= $indent . "   (ListLink\n";
-				$tout .= &process_aiml_tags("      " . $indent, $contig);
-				$tout .= $indent . "   ))\n";
-
-				$contig = $post;
-			}
-			else
-			{
-				$contig .= "<" . $tag;
-			}
-			$nest = $nest - 1;
-		}
-		else
-		{
-			$contig .= "<" . $tag;
+			$tout .= &process_aiml_tags($indent, $t);
 		}
 	}
-
-	$contig =~ s/^\s*//;
-	$contig =~ s/\s*$//;
-	if ($contig ne "")
+	elsif ($star =~ /^\/>(.*)/)
 	{
-		$tout .= &process_aiml_tags($indent, $contig);
+		$tout .= $indent .  "(Glob \"\$star-1\")\n";
+		my $t = $1;
+		$t =~ s/^\s*//;
+		$t =~ s/\s*$//;
+		if ($t ne "")
+		{
+			$tout .= &process_aiml_tags($indent, $t);
+		}
+	}
+	else
+	{
+		print "Ohhhh nooo, Mr. Bill!\n";
+		die;
 	}
 	$tout;
 }
 
-# process_aiml_tags -- convert AIML tags into Atomese.
-# Currently handles STAR and SRAI.
+# process_tag -- process a generic, un-named tag
+#
+# First argument: the tag name
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_tag
+{
+	my $tag = $_[0];
+	my $indent = $_[1];
+	my $text = $_[2];
+	my $tout = "";
+
+	$text =~ /(.*?)<$tag>(.*?)<\/$tag>(.*)/;
+
+	# FIXME, should be like the star loop, above.
+	$tout .= &process_aiml_tags($indent, $1);
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "      (ListLink\n";
+	$tout .= &process_aiml_tags($indent . "         ", $2);
+	$tout .= $indent . "   )))\n";
+	if ($3 ne "")
+	{
+		$tout .= &process_aiml_tags($indent, $3);
+	}
+	$tout;
+}
+
+# process_set -- process a set tag
 #
 # First argument: white-space indentation to insert on each line.
 # Second argument: the actual text to unpack
-sub process_aiml_tags
+sub process_set
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+	my $tout = "";
+
+	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/;
+
+	# FIXME, should be like the star loop, above.
+	$tout .= &split_string($indent, $1);
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag set\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "      (Concept \"" . $2 . "\")\n";
+	$tout .= $indent . "      (ListLink\n";
+	$tout .= &process_aiml_tags($indent . "         ", $3);
+	$tout .= $indent . "   )))\n";
+	if ($4 ne "")
+	{
+		$tout .= &process_aiml_tags($indent, $4);
+	}
+	$tout;
+}
+
+# Print out a tag schema for named tag
+#
+#
+# First argument: the tag name
+# Second argument: white-space indentation to insert on each line.
+# Third argument: the value for the tag.
+sub print_named_tag
+{
+	my $tag = $_[0];
+	my $indent = $_[1];
+	my $arg = $_[2];
+	my $tout = "";
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "      (Concept \"$arg\")\n";
+	$tout .= $indent . "   ))\n";
+	$tout;
+}
+
+# process_named_tag -- process a generic tag that has a name
+#
+# First argument: the tag name
+# Second argument: white-space indentation to insert on each line.
+# Third argument: the actual text to unpack
+sub process_named_tag
+{
+	my $tag = $_[0];
+	my $indent = $_[1];
+	my $text = $_[2];
+	my $tout = "";
+
+	# Multiple gets may appear in one reply.
+	$text =~ /<$tag name=/;
+
+	my @gets = split /<$tag/, $text;
+	foreach my $get (@gets)
+	{
+		if ($get =~ /name='(.*)'\/>(.*)/)
+		{
+			$tout .= &print_named_tag($tag, $indent, $1);
+			$tout .= &process_aiml_tags($indent, $2);
+		}
+		else
+		{
+			$tout .= &process_aiml_tags($indent, $get);
+		}
+	}
+}
+
+# process_that -- process a that tag
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_that
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+	my $tout = "";
+
+	$text =~ /(.*?)<that\/>(.*)/;
+
+	# FIXME, should be like the star loop, above.
+	$tout .= &split_string($indent, $1);
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
+	$tout .= $indent . "   (ListLink))\n";
+	if ($2 ne "")
+	{
+		$tout .= &process_aiml_tags($indent, $2);
+	}
+	$tout;
+}
+
+# process_input -- process a input tag
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_input
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+	my $tout = "";
+
+	$text =~ /<input\s*index\s*=\s*'(\d+)'\s*\/>/;
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag input\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "       (Number \"$1\")))\n";
+	$tout;
+}
+
+# process_category -- convert AIML <category> into Atomese.
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_category
 {
 	my $indent = $_[0];
 	my $text = $_[1];
 
+	# lower-case everything
+	$text = lc $text;
+
 	# Expand defintion of <sr/>
 	$text =~ s/<sr\/>/<srai><star\/><\/srai>/g;
+
+	# XXX FIXME ? This is supposed to be equivalent to
+	# <person><star/></person> however, in the actual AIML texts,
+	# there is no actual star, so its broken/invalid sytax.
+	$text =~ s/<person\/>/<person><star\/><\/person>/g;
 
 	# Convert mangled commas, from pass 1
 	$text =~ s/#Comma/,/g;
@@ -497,80 +583,73 @@ sub process_aiml_tags
 	$text =~ s/^\s*//;
 	$text =~ s/\s*$//;
 
+	my $tout = &process_aiml_tags($indent, $text);
+	$tout;
+}
+
+# process_aiml_tags -- convert AIML tags into Atomese.
+# Currently handles STAR and SRAI.
+#
+# First argument: white-space indentation to insert on each line.
+# Second argument: the actual text to unpack
+sub process_aiml_tags
+{
+	my $indent = $_[0];
+	my $text = $_[1];
+
 	my $tout = "";
 
-	# <srai>'s can be nested, one inside the other.
-	# Maybe this could be solved with a recursive regex, but
-	# I don't feel like debugging that.  So instead, this
-	# uses a brute-force approach.
-	if ($text =~ /<srai>/)
+	# Find the very first angle bracket
+	if ($text =~ /.*?<(.*)/)
 	{
-		$text = lc $text;
-		$tout .= &process_srai($indent, $text);
-	}
-
-	elsif ($text =~ /(.*)<person>(.*)<\/person>(.*)/)
-	{
-		# FIXME, should be like the loop, below.
-		$tout .= $indent . $textnode . "\"$1\")\n";
-		$tout .= $indent . "(ExecutionOutput\n";
-		$tout .= $indent . "   (DefinedSchema \"AIML-tag person\")\n";
-		$tout .= $indent . "   (ListLink\n";
-		$tout .= &process_aiml_tags($indent . "      ", $2);
-		$tout .= $indent . "   ))\n";
-		if ($3 ne "")
+		my $tag = $1;
+		if ($tag =~ /^srai>/)
 		{
-			$tout .= $indent . $textnode . "\"$3\")\n";
+			$tout .= &process_tag("srai", $indent, $text);
 		}
-	}
-
-	elsif ($text =~ /<star/)
-	{
-		my @stars = split /<star/, $text;
-		foreach my $star (@stars)
+		elsif ($tag =~ /^star/)
 		{
-			$star =~ s/^\s*//;
-			$star =~ s/\s*$//;
-			if ($star =~ /index='(\d+)'.*\/>(.*)/)
+			$tout .= &process_star($indent, $text);
+		}
+		elsif ($tag =~ /^think>/)
+		{
+			$tout .= &process_tag("think", $indent, $text);
+		}
+		elsif ($tag =~ /^set name/)
+		{
+			$tout .= &process_set($indent, $text);
+		}
+		elsif ($tag =~ /^person>/)
+		{
+			$tout .= &process_tag("person", $indent, $text);
+		}
+		elsif ($tag =~ /^that\/>/)
+		{
+			$tout .= &process_that($indent, $text);
+		}
+		elsif ($tag =~ /^input/)
+		{
+			$tout .= &process_input($indent, $text);
+		}
+		elsif ($tag =~ /^get name/)
+		{
+			$tout .= &process_named_tag("get", $indent, $text);
+		}
+		elsif ($tag =~ /^bot name/)
+		{
+			$tout .= &process_named_tag("bot", $indent, $text);
+		}
+		elsif ($tag =~ /^!--.*-->(.*)/)
+		{
+			# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
+			if ($1 != "")
 			{
-				$tout .= $indent . &process_star("<star index='" . $1 . "'\/>") . "\n";
-
-				my $t = $2;
-				$t =~ s/^\s*//;
-				$t =~ s/\s*$//;
-				if ($t ne "")
-				{
-					$tout .= $indent . $textnode . "\"$t\")\n";
-				}
-			}
-			elsif ($star =~ /\/>(.*)/)
-			{
-				$tout .= $indent . &process_star("<star \/>") . "\n";
-				my $t = $1;
-				$t =~ s/^\s*//;
-				$t =~ s/\s*$//;
-				if ($t ne "")
-				{
-					$tout .= $indent . $textnode . "\"$t\")\n";
-				}
-			}
-			elsif ($star ne "")
-			{
-				# At this point, we expect just a string of words.
-				# $tout .= $indent . $textnode . "\"$star\")\n";
-				$tout .= &split_string($indent, $star);
+				$tout .= &process_aiml_tags($indent, $1);
 			}
 		}
-	}
-
-	elsif ($text =~ /<!--.*-->/)
-	{
-		# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
-		$tout .= $indent . "; WTF $text\n";
 	}
 	else
 	{
-		# $tout .= $indent . $textnode . "\"$text\")\n";
 		$tout .= &split_string($indent, $text);
 	}
 	$tout;
@@ -579,7 +658,6 @@ sub process_aiml_tags
 # Second pass
 
 open (FIN,"<$intermediateFile");
-open (FOUT,">$finalFile");
 my $curPath="";
 my %overwriteSpace=();
 my $psi_ctxt = "";
@@ -597,6 +675,19 @@ my $curr_raw_code = "";
 my $cattext = "";
 
 my $star_index = 1;
+
+my $rule_count = 0;
+my $file_count = 1;
+
+if ($outDir ne '')
+{
+	mkdir $outDir;
+	open (FOUT,">" . $outDir . "/aiml-" . $file_count . ".scm");
+}
+else
+{
+	open (FOUT,">" . $outFile);
+}
 
 while (my $line = <FIN>)
 {
@@ -619,8 +710,7 @@ while (my $line = <FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$psi_ctxt = "";
-		$psi_ctxt .= "   (And\n";
+		$psi_ctxt .= "   (list\n";
 	}
 	if ($cmd eq "CATTEXT")
 	{
@@ -676,12 +766,12 @@ while (my $line = <FIN>)
 					$rule .= ";;; random choice $i of $nc: ";
 					$rule .= $cattext . "\n";
 
-					$rule .= "(psi-rule\n";
+					$rule .= "(psi-rule-nocheck\n";
 					$rule .= "   ; context\n";
 					$rule .= $psi_ctxt;
 					$rule .= "   ; action\n";
 					$rule .= "   (ListLink\n";
-					$rule .= &process_aiml_tags("      ", $ch);
+					$rule .= &process_category("      ", $ch);
 					$rule .= "   )\n";
 					$rule .= $psi_tail;
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
@@ -692,13 +782,13 @@ while (my $line = <FIN>)
 			{
 				$rule = ";;; COMPLEX CODE BRANCH\n";
 				$rule .= ";;; " . $cattext . "\n";
-				$rule .= "(psi-rule\n";
+				$rule .= "(psi-rule-nocheck\n";
 				$rule .= "   ;; context\n";
 				$rule .= $psi_ctxt;
 				$rule .= "   ;; action\n";
 				$rule .= $psi_goal;
 				$rule .= "   (ListLink\n";
-				$rule .= &process_aiml_tags("      ", $curr_raw_code);  
+				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";
 				$rule .= $psi_tail;
 				$rule .= ")\n";
@@ -709,7 +799,7 @@ while (my $line = <FIN>)
 		{
 			$rule = ";;; NO RAW CODE\n";
 			$rule .= ";;; $cattext\n";
-			$rule .= "(psi-rule\n";
+			$rule .= "(psi-rule-nocheck\n";
 			$rule .= "   ;; context\n";
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
@@ -729,6 +819,23 @@ while (my $line = <FIN>)
 		{
 			# Not merging, so just write it out.
 			print FOUT "$rule\n";
+
+			# OK, so the current guile compiler is broken, it appears
+			# to have a runtime of N^2 where N is the size of the file.
+			# Avoid an excessively long compile time by writing lots of
+			# small files.  At this time (June 2016, guile-2.0), really
+			# tiny files work best.
+			$rule_count ++;
+			if ($outDir ne '' and $rule_count > 40)
+			{
+				$rule_count = 0;
+				$file_count ++;
+
+				print FOUT "; ---------- end of file ----------\n";
+				print FOUT "*unspecified*\n";
+				close (FOUT);
+				open (FOUT,">" . $outDir . "/aiml-" . $file_count . ".scm");
+			}
 		}
 		$psi_ctxt = "";
 		# $psi_goal = "";
@@ -756,11 +863,12 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PUSTAR")
 	{
-		$psi_ctxt .= "         (GlobbyBlobbyNode \"_\")\n";
+		$star_index = $star_index + 1;
+		$psi_ctxt .= "         (Glob \"\$star-$star_index\") ; underbar\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$psi_ctxt .= "         (BOTVARNode \"$arg\")\n";
+		$psi_ctxt .= &print_named_tag("bot", "         ", $arg);
 	}
 	if ($cmd eq "PSET")
 	{
@@ -791,22 +899,20 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "TOPICBOTVAR")
 	{
-		$psi_ctxt .= "; TOPICBOTVAR $arg\n";
+		$psi_ctxt .= "TOPICBOTVAR $arg\n";
 	}
 	if ($cmd eq "TOPICSET")
 	{
 		$have_topic = 1;
 		$curr_topic = $arg;
-		$psi_ctxt .= "; TOPICSET $arg\n";
+		$psi_ctxt .= "TOPICSET $arg\n";
 	}
 	if ($cmd eq "TOPICEND")
 	{
 		if ($have_topic)
 		{
-			$psi_ctxt .= "         (State\n";
-			$psi_ctxt .= "            (Anchor \"\#topic\")\n";
-			$psi_ctxt .= "            (Concept \"$curr_topic\")\n";
-			$psi_ctxt .= "         )\n";
+			$psi_ctxt .= "      ; Context with topic!\n";
+			$psi_ctxt .= &print_named_tag("topic", "      ", lc $curr_topic);
 		}
 		$have_topic = 0;
 	}
@@ -831,7 +937,7 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "THATBOTVAR")
 	{
-		$psi_ctxt .= "; THATBOTVAR $arg\n";
+		$psi_ctxt .= "THATBOTVAR $arg\n";
 	}
 	if ($cmd eq "THATSET")
 	{
@@ -842,10 +948,8 @@ while (my $line = <FIN>)
 	{
 		if ($have_that)
 		{
-			$psi_ctxt .= "         (State\n";
-			$psi_ctxt .= "            (Anchor \"\#that\")\n";
-			$psi_ctxt .= "            (Concept \"$curr_that\")\n";
-			$psi_ctxt .= "         )\n";
+			$psi_ctxt .= "      ; Context with that!\n";
+			$psi_ctxt .= &print_named_tag("that", "      ", lc $curr_topic);
 		}
 		$have_that = 0;
 	}
@@ -944,9 +1048,9 @@ CATEND,0
 =OpenCog equivalents
 * R1 example.
 ```
-; Every DefinedSchema must have a globally unique name, and the 
-; original category text is as good a name as any.  Useful for 
-; debugging.  In all other respects, the actual name chosen does 
+; Every DefinedSchema must have a globally unique name, and the
+; original category text is as good a name as any.  Useful for
+; debugging.  In all other respects, the actual name chosen does
 ; not matter. The MemberLink simply describes the DefinedSchema
 ; as belonging to a particular rulebase; in this case, the rulbase
 ; is called (Concept "*-AIML-rulebase-*").  The actual name of

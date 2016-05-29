@@ -3,15 +3,10 @@
 ; Helper functions for OpenPsi
 
 (use-modules (ice-9 regex)) ; For string-match
-(use-modules (srfi srfi-1)) ; For fold, delte-duplicates
+(use-modules (srfi srfi-1)) ; For fold, delete-duplicates
 
 ; --------------------------------------------------------------
-(define-public (psi-prefix-str)
-"
-  Returns the string used as a prefix to all OpenPsi realted atom definition
-"
-    "OpenPsi: "
-)
+(define-public psi-prefix-str "OpenPsi: ")
 
 ; --------------------------------------------------------------
 (define-public (psi-suffix-str a-string)
@@ -22,11 +17,11 @@
     - a string that should have the`psi-prefix-str`
 
 "
-    (let ((z-match (string-match (psi-prefix-str) a-string)))
+    (let ((z-match (string-match psi-prefix-str a-string)))
         (if z-match
             (match:suffix z-match)
             (error (string-append "The string argument must have the prefix: "
-                "\"" (psi-prefix-str) "\". " "Instead got:" a-string) )
+                "\"" psi-prefix-str "\". " "Instead got:" a-string) )
         )
     )
 )
@@ -85,38 +80,57 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-member-links atom)
-"
-  Returns a list of MemberLinks that are the root of the given atom.
 
-  atom:
-  - An atom that possibly has root MemberLinks.
+(define-public (psi-get-member-links ATOM)
 "
-    (define (get-roots an-atom)
-        (delete-duplicates (cog-filter 'MemberLink (cog-get-root an-atom))))
+  psi-get-member-links ATOM - Return list of all of the MemberLinks
+  holding rules whose context or action may apply to ATOM.
 
-    (let ((duals (cog-outgoing-set (cog-execute! (DualLink atom)))))
-        (if (null? duals)
-            (get-roots atom)
-            (delete-duplicates (merge
-                (append-map get-roots duals)
-                (get-roots atom)
-                (lambda (x y) #t)))
+  All psi rules are members of some ruleset; this searches for and
+  finds such MemberLinks.
+"
+    ; Define a local variant of the psi-rule? predicate, because the
+    ; main one is too slow.  This checks to see if MEMB is ...
+    ; -- a MemberLink
+    ; -- has arity 2
+    ; -- first elt is an ImplicationLink
+    ; -- Second elt is a node starting with string "OpenPsi: "
+    (define (psi-member? MEMB)
+        (and
+            (equal? 'MemberLink (cog-type MEMB))
+            (equal? 2 (cog-arity MEMB))
+            (let ((mem (cog-outgoing-set MEMB)))
+                (and
+                    (equal? 'ImplicationLink (cog-type (car mem)))
+                    (cog-node-type? (cog-type (cadr mem)))
+                    (string-prefix? psi-prefix-str (cog-name (cadr mem)))
+            ))
+        ))
+
+    (define set-of-duals (cog-execute! (DualLink ATOM)))
+
+    (define inset '())
+
+    ;; Recursively get all links that contain the given atom.
+    ;; Append them to the list "inset"
+    (define (get-iset atom)
+        (define iset (cog-incoming-set atom))
+        (if (not (null? iset))
+             (begin
+                 (set! inset (concatenate! (list inset iset)))
+                 (for-each get-iset iset))
         )
     )
-)
 
-; --------------------------------------------------------------
-(define-public (psi-get-dual-rules atom)
-"
-  Returns a list of psi-rules that atleast partially ground to the given atom.
+    (get-iset ATOM)
+    (for-each get-iset (cog-outgoing-set set-of-duals))
 
-  atom:
-  - An atom that possibly will ground or forms the context of a psi-rule.
-"
-    (let ((member-links (psi-get-member-links atom)))
-         (delete-duplicates (append-map
-             (lambda (x) (filter psi-rule? (cog-outgoing-set x)))
-             member-links))
-    )
+    ; Avoid garbaging up the atomspace.
+    (cog-delete set-of-duals)
+
+    ;; Keep only those links that are of type MemberLink...
+    ;; and, more precisely, a MmeberLink that is of a valid
+    ;; psi-fule form.
+    (filter psi-member?
+        (delete-duplicates (cog-filter 'MemberLink inset)))
 )

@@ -9,6 +9,7 @@ ADD_SUBDIRECTORY (types)
 ADD_SUBDIRECTORY (wsd)
 
 IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
+	ADD_SUBDIRECTORY (aiml)
 	ADD_SUBDIRECTORY (chatbot)
 	ADD_SUBDIRECTORY (chatbot-eva)
 	# fuzzy depends on sureal

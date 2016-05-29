@@ -9,43 +9,59 @@
 (load "demand.scm")
 (load "utilities.scm")
 
+(define psi-action (Concept "OpenPsi: action"))
+
 ; --------------------------------------------------------------
-(define-public (psi-rule context action demand-goal a-stv demand-node)
+
+(define-public (psi-rule-nocheck context action goal a-stv demand)
 "
-  It associates an action and context in which the action has to be taken
-  to a goal that is satisfied when the action is executed. It is structured as
-  as the following `ImplicationLink`,
+  psi-rule-nocheck -- same as psi-rule, but no checking
+"
+    ; These memberships are needed for making filtering and searching simpler..
+    ; If GlobNode had worked with GetLink at the time of coding this,
+    ; that might have been; better, (or not as it might need as much chasing)
+    (MemberLink action psi-action)
 
-    (ImplicationLink
-        (AndLink
-            (context)
-            (action))
-        (demand-goal))
+    ; AndLink's are unordered links; must use an ordered link, if the
+    ; context is to preceed the action! SequentialAnd seems like an
+    ; OK choice, for now.
+    (MemberLink (Implication a-stv (SequentialAnd context action) goal) demand)
+)
 
-  context:
-  - A list containing the terms/clauses that should be met for this action
-    to be taken. These are atoms that should be evaluated to return
-    TRUE_TV/FASLE_TV.
+; --------------------------------------------------------------
 
-  action:
-  - It should be an atom that can be run by `cog-evaluate!`. That means that
-    it will have to return TRUE_TV or FALSE_TV. Any atom that could be executed
-    by running `(cog-execute! your-action)`.
+(define-public (psi-rule context action goal a-stv demand)
+"
+  psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
 
-  demand-goal:
-  - It should be an atom that can be run by `cog-evaluate!`. That means that
-    it will have to return TRUE_TV or FALSE_TV. This is basically a formula, on
+  Associate an action with a context such that, if the action is
+  taken, then the goal will be satisfied.  The structure of a rule
+  is in the form of an `ImplicationLink`,
+
+    (ImplicationLink TV
+        (SequentialAnd
+            CONTEXT
+            ACTION)
+        GOAL)
+
+  where:
+  CONTEXT is a scheme list containing all of the terms that should
+    be met for the ACTION to be taken. These are atoms that, when
+    evaluated, should result in a true or false TV.
+
+  ACTION is an evaluatable atom, i.e. returns a TV when evaluated by
+    `cog-evaluate!`.  It should return a true of false TV.
+
+  GOAL is an evaluatable atom, i.e. returns a TV when evaluated by
+    `cog-evaluate!`.  The returned TV is used as a formula tp rank
     how this rule affects the demands.
 
-  a-stv:
-  - This is the stv of the ImplicationLink.
+  TV is the TruthValue assigned to the ImplicationLink. It should
+    be a SimpleTruthValue.
 
-  demand-node:
-  - The node that represents a demand that this rule affects.
+  DEMAND is a Node, representing teh demand that this rule affects.
 "
     (define func-name "psi-rule") ; For use in error reporting
-    (define (implication)
-        (ImplicationLink a-stv (AndLink context action) demand-goal))
 
     ; Check arguments
     (if (not (list? context))
@@ -54,32 +70,23 @@
     (if (not (cog-atom? action))
         (error (string-append "In procedure " func-name ", expected second "
             "argument to be an atom, got:") action))
-    (if (not (cog-atom? demand-goal))
+    (if (not (cog-atom? goal))
         (error (string-append "In procedure " func-name ", expected third "
-            "argument to be an atom, got:") demand-goal))
+            "argument to be an atom, got:") goal))
     (if (not (cog-tv? a-stv))
         (error (string-append "In procedure " func-name ", expected fourth "
             "argument to be a stv, got:") a-stv))
-    (if (not (equal? (stv 1 1) (psi-demand? demand-node)))
+    (if (not (equal? (stv 1 1) (psi-demand? demand)))
         (error (string-append "In procedure " func-name ", expected fifth "
-            "argument to be a node representing a demand, got:") demand-node))
+            "argument to be a node representing a demand, got:") demand))
 
-    ; These memberships are needed for making filtering and searching simpler..
-    ; If GlobNode had worked with GetLink at the time of coding this ,
-    ; that might have been; better,(or not as it might need as much chasing)
-    (MemberLink
-        action
-        (ConceptNode (string-append (psi-prefix-str) "action")))
-
-    (MemberLink (implication) demand-node)
-
-    (implication)
+    (psi-rule-nocheck context action goal a-stv demand)
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-get-rules demand-node)
 "
-  Returns a list of all psi-rules that are affect the given demand.
+  Returns a list of all psi-rules that affect the given demand.
 
   demand-node:
   - The node that represents the demand.
@@ -91,6 +98,9 @@
 (define-public (psi-get-all-rules)
 "
   Returns a list of all known openpsi rules.
+
+XXX FIXME -- this is painfully slow --- multiple minutes when
+there are 100K rules!
 "
     (fold append '()
         (par-map (lambda (x) (cog-chase-link 'MemberLink 'ImplicationLink x))
@@ -100,9 +110,12 @@
 ; --------------------------------------------------------------
 (define-public (psi-rule? atom)
 "
-  Returns `#t` or `#f` depending on whether the passed argument is a psi-rule
-  or not. An ImplicationLink that is a member on of the demand sets is a
-  psi-rule.
+  Returns `#t` or `#f` depending on whether the passed argument
+  is a valid psi-rule or not. An ImplicationLink that is a member 
+  of the demand sets is a psi-rule.
+
+  XXX FIXME -- this is very very slow (many minutes) when there
+  are 100K or more rules!
 
   atom:
   - An atom passed for checking.
@@ -115,20 +128,25 @@
 "
   Returns a list of all openpsi actions.
 "
-    (cog-outgoing-set (cog-execute! (GetLink
-        (MemberLink (VariableNode "x")
-        (ConceptNode (string-append (psi-prefix-str) "action")))))))
+    (cog-chase-link 'MemberLink 'ListLink psi-action))
 
 ; --------------------------------------------------------------
 (define-public (psi-action? atom)
 "
-  Check if the given atom is an atom and return `#t` if it is and `#f` either
-  wise.
+  Check if the given atom is an action and return `#t`, if it is, and `#f`
+  otherwise. An atom is an action if it a member of the set represented by
+  (ConceptNode \"OpenPsi: action\").
 
   atom:
   - An atom to be checked whether it is an action or not.
 "
-    (if (member atom (psi-get-all-actions)) #t #f)
+    (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
+
+        ; A filter is used to account for empty list as well as
+        ; cog-chase-link returning multiple results, just in case.
+        (not (null?
+            (filter (lambda (x) (equal? x psi-action)) candidates)))
+    )
 )
 
 ; --------------------------------------------------------------
@@ -184,7 +202,7 @@
   action:
   - An action that is part of a psi-rule.
 "
-    (let* ((and-links (cog-filter 'AndLink (cog-incoming-set action)))
+    (let* ((and-links (cog-filter 'SequentialAndLink (cog-incoming-set action)))
            (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
            (delete-duplicates (map psi-get-goal rules))
     )
@@ -333,7 +351,7 @@
 "
   Run `psi-step` in a new thread. Call (psi-halt) to exit the loop.
 "
-    (define loop-name (string-append (psi-prefix-str) "loop"))
+    (define loop-name (string-append psi-prefix-str "loop"))
     (define (loop-node) (DefinedPredicateNode loop-name))
     (define (define-psi-loop)
         (DefineLink
