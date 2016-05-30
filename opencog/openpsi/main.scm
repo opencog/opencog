@@ -17,6 +17,8 @@
 "
   psi-rule-nocheck -- same as psi-rule, but no checking
 "
+    (define implication (Implication a-stv (SequentialAnd context action) goal))
+
     ; These memberships are needed for making filtering and searching simpler..
     ; If GlobNode had worked with GetLink at the time of coding this,
     ; that might have been; better, (or not as it might need as much chasing)
@@ -25,7 +27,9 @@
     ; AndLink's are unordered links; must use an ordered link, if the
     ; context is to preceed the action! SequentialAnd seems like an
     ; OK choice, for now.
-    (MemberLink (Implication a-stv (SequentialAnd context action) goal) demand)
+    (MemberLink implication demand)
+
+    implication
 )
 
 ; --------------------------------------------------------------
@@ -111,7 +115,7 @@ there are 100K rules!
 (define-public (psi-rule? atom)
 "
   Returns `#t` or `#f` depending on whether the passed argument
-  is a valid psi-rule or not. An ImplicationLink that is a member 
+  is a valid psi-rule or not. An ImplicationLink that is a member
   of the demand sets is a psi-rule.
 
   XXX FIXME -- this is very very slow (many minutes) when there
