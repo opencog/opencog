@@ -444,13 +444,3 @@ topicstar/>
 
 <pattern>_</pattern> <topic>BADANSWER</topic>
 ===================================
-
-(define (getem-all atom)
-	(define iset (cog-incoming-set atom))
-	(if (null? iset)
-		'()
-		(concatenate (list
-			iset (concatenate (map getem-all iset))))))
-
-128660
-

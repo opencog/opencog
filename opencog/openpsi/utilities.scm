@@ -81,6 +81,27 @@
 
 ; --------------------------------------------------------------
 
+; Define a local variant of the psi-rule? predicate, because the
+; main one is too slow.  This checks to see if MEMB is ...
+; -- a MemberLink
+; -- has arity 2
+; -- first elt is an ImplicationLink
+; -- Second elt is a node starting with string "OpenPsi: "
+;
+; internal-use only, thus, not define-public.
+(define (psi-member? MEMB)
+    (and
+        (equal? 'MemberLink (cog-type MEMB))
+        (equal? 2 (cog-arity MEMB))
+        (let ((mem (cog-outgoing-set MEMB)))
+            (and
+                (equal? 'ImplicationLink (cog-type (car mem)))
+                (cog-node-type? (cog-type (cadr mem)))
+                (string-prefix? psi-prefix-str (cog-name (cadr mem)))
+        ))
+    ))
+
+; --------------------------------------------------------------
 (define-public (psi-get-member-links ATOM)
 "
   psi-get-member-links ATOM - Return list of all of the MemberLinks
@@ -89,42 +110,15 @@
   All psi rules are members of some ruleset; this searches for and
   finds such MemberLinks.
 "
-    ; Define a local variant of the psi-rule? predicate, because the
-    ; main one is too slow.  This checks to see if MEMB is ...
-    ; -- a MemberLink
-    ; -- has arity 2
-    ; -- first elt is an ImplicationLink
-    ; -- Second elt is a node starting with string "OpenPsi: "
-    (define (psi-member? MEMB)
-        (and
-            (equal? 'MemberLink (cog-type MEMB))
-            (equal? 2 (cog-arity MEMB))
-            (let ((mem (cog-outgoing-set MEMB)))
-                (and
-                    (equal? 'ImplicationLink (cog-type (car mem)))
-                    (cog-node-type? (cog-type (cadr mem)))
-                    (string-prefix? psi-prefix-str (cog-name (cadr mem)))
-            ))
-        ))
-
     (define set-of-duals (cog-execute! (DualLink ATOM)))
 
-    ;; Recursively get all links that contain the given atom.
-    ;; Append them to the list "inset"
-    (define (get-all-incoming atom)
-        (define iset (cog-incoming-set atom))
-        (if (null? iset)
-            '()
-            (concatenate
-                (list iset (concatenate (map get-all-incoming iset))))))
-
     ;; Get all exact matches
-    (define inset (get-all-incoming ATOM))
+    (define inset (cog-get-trunk ATOM))
 
     ;; Get all patterned rules
     (define duset
         (concatenate
-            (map get-all-incoming (cog-outgoing-set set-of-duals))))
+            (map cog-get-trunk (cog-outgoing-set set-of-duals))))
     (define all-in (concatenate (list inset duset)))
 
     ; Avoid garbaging up the atomspace.
