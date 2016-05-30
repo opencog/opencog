@@ -296,10 +296,17 @@ to a BindLink approach for ease-of-use.
                  accepting answer.
 * AIML HR -- in a session, never say the same thing twice!
 
+### BUGS
+* agians takes too long -- maybe due to excessive rules
+
 ### HR Demo
 ```
-import/aiml2psi.pl --dir ./chathub/generic_aiml/ --outfile generic.aiml
-import/aiml2psi.pl --dir ./chathub/futurist_aiml/ --outfile futurist.aiml
+import/aiml2psi.pl --dir ./chathub/generic_aiml/ --outfile generic.scm
+import/aiml2psi.pl --dir ./chathub/futurist_aiml/ --outfile futurist.scm
+guile
+(use-modules (opencog) (opencog nlp) (opencog nlp aiml) (opencog openpsi))
+(primitive-load "/tmp/generic.scm")
+(primitive-load "/tmp/futurist.scm")
 ```
 
 

@@ -157,11 +157,14 @@
 		result
 	)
 
+	; Get the applicable rules
+	(define all-rules
+		(filter chat-rule?
+			(map gar (psi-get-member-links SENT))))
+
 	; For now, just get the responses.
 	(define all-responses
-		(map run-rule
-			(filter chat-rule?
-				(map gar (psi-get-member-links SENT)))))
+		(map run-rule all-rules))
 
 	; Remove the empty responses
 	(define responses
