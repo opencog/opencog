@@ -296,6 +296,12 @@ to a BindLink approach for ease-of-use.
                  accepting answer.
 * AIML HR -- in a session, never say the same thing twice!
 
+### HR Demo
+```
+import/aiml2psi.pl --dir ./chathub/generic_aiml/ --outfile generic.aiml
+import/aiml2psi.pl --dir ./chathub/futurist_aiml/ --outfile futurist.aiml
+```
+
 
 ### Misc Notes
 

@@ -22,7 +22,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.2.0";
+my $ver = "0.3.0";
 my $debug;
 my $help;
 my $version;
@@ -40,7 +40,8 @@ GetOptions(
     'version' => \$version,
     'intermediate=s' => \$intermediateFile,
     'out=s' => \$outDir,
-) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>]\n";
+    'outfile=s' => \$outFile,
+) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>] [--outfile <filename>]\n";
 
 if ($help)
 {
@@ -53,7 +54,8 @@ if ($help)
 	print "   --last-only             Only the last category is output.\n";
 	print "   --dir <directory>       AIML source directory, default: '$aimlDir'\n";
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
-	print "   --out <directory>       Directory for OpenCog output files\n";
+	print "   --out <directory>       Dir for many small output files.\n";
+	print "   --outfile <filename>    Output one large file, default: '$outFile'\n";
 	die "\n";
 }
 
@@ -62,9 +64,6 @@ if ($version)
 	print "version $ver\n";
 	die "\n";
 }
-
-
-#$src = 'core65.aiml';
 
 # Conversion is done in a two-pass process.  The first pass flattens
 # the AIML format into a simplified linear format.  A second pass
