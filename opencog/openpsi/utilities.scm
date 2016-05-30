@@ -109,21 +109,23 @@
 
     (define set-of-duals (cog-execute! (DualLink ATOM)))
 
-    (define inset '())
-
     ;; Recursively get all links that contain the given atom.
     ;; Append them to the list "inset"
-    (define (get-iset atom)
+    (define (get-all-incoming atom)
         (define iset (cog-incoming-set atom))
-        (if (not (null? iset))
-             (begin
-                 (set! inset (concatenate! (list inset iset)))
-                 (for-each get-iset iset))
-        )
-    )
+        (if (null? iset)
+            '()
+            (concatenate
+                (list iset (concatenate (map get-all-incoming iset))))))
 
-    (get-iset ATOM)
-    (for-each get-iset (cog-outgoing-set set-of-duals))
+    ;; Get all exact matches
+    (define inset (get-all-incoming ATOM))
+
+    ;; Get all patterned rules
+    (define duset
+        (concatenate
+            (map get-all-incoming (cog-outgoing-set set-of-duals))))
+    (define all-in (concatenate (list inset duset)))
 
     ; Avoid garbaging up the atomspace.
     (cog-delete set-of-duals)
@@ -132,5 +134,5 @@
     ;; and, more precisely, a MmeberLink that is of a valid
     ;; psi-fule form.
     (filter psi-member?
-        (delete-duplicates (cog-filter 'MemberLink inset)))
+        (delete-duplicates (cog-filter 'MemberLink all-in)))
 )

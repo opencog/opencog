@@ -297,7 +297,8 @@ to a BindLink approach for ease-of-use.
 * AIML HR -- in a session, never say the same thing twice!
 
 ### BUGS
-* agians takes too long -- maybe due to excessive rules
+* agians takes too long -- psi-get-member-links is taking too long
+  when there are many rules. -- get-iset taking too long.
 
 ### HR Demo
 ```
@@ -430,11 +431,8 @@ THAT IS A GOOD PARTY
 ==================
 WHEN WILL YOU * BODY
 
-that:  -- implement that
 (aiml-get-response-wl (string-words "call me ishmael"))
-
-person crashed:
- (aiml-get-response-wl (string-words "who supports Trump?"))
+(aiml-get-response-wl (string-words "who supports Trump?"))
 
 DO YOU KNOW BOTNAME
 
@@ -445,3 +443,14 @@ topicstar/>
 114690a114709 -- condition-response
 
 <pattern>_</pattern> <topic>BADANSWER</topic>
+===================================
+
+(define (getem-all atom)
+	(define iset (cog-incoming-set atom))
+	(if (null? iset)
+		'()
+		(concatenate (list
+			iset (concatenate (map getem-all iset))))))
+
+128660
+
