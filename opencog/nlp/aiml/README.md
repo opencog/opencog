@@ -266,23 +266,36 @@ been recently uttered.
 ### Rule application
 Having found all of the rules, we now have to run them ... specifically,
 we have to apply them to the current parse.  We can do this in one of
-several ways.  These are:
+several ways.  One is to use a BindLink, the other is to use a MapLink.
+The MapLink is sort-of like a BindLink, but it is applied only to its
+argument set, instead of being applied to the entire atomspace.
 
-* Create a NEW bindlink, which mashes together both the search for the
-  current parse, and the AIML rule, and generate the resulting output,
-  which then needs to be routed to the chatbot, to be voiced.
+* The BindLink approach requires that the current parse be tagged in the
+  atomspace, and a BindLink created that mashes together the current
+  tag, and the rule to be applied.  The response(s) are then the result
+  of evaluating the BindLinks.
 
-* Since we already know the current parse, we can limit the application
-  of the naive AIML rule to only that parse.  This requires treating the
-  rule as a kind of PutLink, i.e. of applying it only to a specified
-  set.
+* The MapLink approach is similar, except that the rule becomes the body
+  of the apLink, and the current sentence is given as the argument to
+  the MapLink.
+
+Either approach should work fine. Currently, the MapLink approach is
+being used, for no particular reason other than to see how it compares
+to a BindLink approach for ease-of-use.
+
 
 ### TODO
-* openpsi duallink is returning too much -- should pre-filter the results.
-* Implement "that" (XXX need examples of how that works, for testing).
-* OpenPsi -- context is a list ... should be something evaluatable???
-* OpenPsi -- SequentialAnd
+* OpenPsi duallink is returning too much -- i.e. matches to the action.
+  We really only want matches to the context only.
+* OpenPsi -- our context is a list of words ... perhaps it should be
+  something evaluatable? (according to the strict definition, it should
+  be.)
+* AIML -- Implement "that" (XXX need examples of how that works, for testing).
 * AIML -- thatstar and topicstar not handled.
+* AIML HR extensions -- define a priority level, define a probability of
+                 accepting answer.
+* AIML HR -- in a session, never say the same thing twice!
+
 
 ### Misc Notes
 
