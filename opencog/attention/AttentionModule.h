@@ -26,6 +26,7 @@
 #define _OPENCOG_ATTENTION_MODULE_H
 
 #include <opencog/attention/ForgettingAgent.h>
+#include <opencog/attention/scm/StimulationAgent.h>
 #include <opencog/attention/HebbianUpdatingAgent.h>
 #include <opencog/attention/SimpleHebbianUpdatingAgent.h>
 #include <opencog/attention/ImportanceSpreadingAgent.h>
@@ -45,6 +46,7 @@ class AttentionModule : public Module
 {
 
 private:
+    Factory<StimulationAgent, Agent>  stimulationFactory;
     Factory<ForgettingAgent, Agent>          forgettingFactory;
     Factory<HebbianUpdatingAgent, Agent>     hebbianFactory;
     Factory<SimpleHebbianUpdatingAgent, Agent>     simpleHebbianFactory;

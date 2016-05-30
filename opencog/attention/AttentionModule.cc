@@ -35,6 +35,7 @@ DECLARE_MODULE(AttentionModule)
 AttentionModule::AttentionModule(CogServer& cs) :
     Module(cs)
 {
+    _cogserver.registerAgent(StimulationAgent::info().id,  &stimulationFactory);
     _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
     _cogserver.registerAgent(HebbianUpdatingAgent::info().id,     &hebbianFactory);
     _cogserver.registerAgent(SimpleHebbianUpdatingAgent::info().id,     &simpleHebbianFactory);
@@ -49,6 +50,7 @@ AttentionModule::AttentionModule(CogServer& cs) :
 AttentionModule::~AttentionModule()
 {
     logger().debug("[AttentionModule] enter destructor");
+    _cogserver.unregisterAgent(StimulationAgent::info().id);
     _cogserver.unregisterAgent(ForgettingAgent::info().id);
     _cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
     _cogserver.unregisterAgent(ImportanceSpreadingAgent::info().id);
