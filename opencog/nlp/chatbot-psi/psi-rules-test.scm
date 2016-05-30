@@ -2,7 +2,7 @@
 ; For testing purpose only
 ; All canned rules will be generated and imported separately
 
-(define canned-rule (Concept (string-append (psi-prefix-str) "canned-rule")))
+(define canned-rule (Concept (string-append psi-prefix-str "canned-rule")))
 
 (define (get-words sent)
     (let ((words (car (sent-get-words-in-order sent))))
@@ -29,7 +29,7 @@
 (Member
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
-        (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_1))
+        (True (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_1)))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
         sociality
@@ -39,7 +39,7 @@
 (Member
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
-        (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_2))
+        (True (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_2)))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
         sociality
@@ -49,7 +49,7 @@
 (Member
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
-        (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_3))
+        (True (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_3)))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
         sociality
@@ -59,7 +59,7 @@
 (Member
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
-        (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_4))
+        (True (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_4)))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
         sociality
@@ -69,7 +69,7 @@
 (Member
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
-        (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_5))
+        (True (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_5)))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
         sociality
@@ -87,7 +87,7 @@
 (Member
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
-        (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_1))
+        (True (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_1)))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
         sociality
@@ -97,7 +97,7 @@
 (Member
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
-        (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_2))
+        (True (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_2)))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
         sociality
@@ -107,7 +107,7 @@
 (Member
     (psi-rule
         (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (List in_utt)))
-        (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_3))
+        (True (ExecutionOutput (GroundedSchema "scm: say") (List out_utt_3)))
         (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
         (stv .9 1)
         sociality
