@@ -54,16 +54,16 @@
     evaluated, should result in a true or false TV.
 
   ACTION is an evaluatable atom, i.e. returns a TV when evaluated by
-    `cog-evaluate!`.  It should return a true of false TV.
+    `cog-evaluate!`.  It should return a true or false TV.
 
   GOAL is an evaluatable atom, i.e. returns a TV when evaluated by
-    `cog-evaluate!`.  The returned TV is used as a formula tp rank
+    `cog-evaluate!`.  The returned TV is used as a formula to rank
     how this rule affects the demands.
 
   TV is the TruthValue assigned to the ImplicationLink. It should
     be a SimpleTruthValue.
 
-  DEMAND is a Node, representing teh demand that this rule affects.
+  DEMAND is a Node, representing the demand that this rule affects.
 "
     (define func-name "psi-rule") ; For use in error reporting
 
