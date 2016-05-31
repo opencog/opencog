@@ -311,17 +311,17 @@ bool Fuzzy::try_match(const Handle& soln)
  *
  * @param hs1, hs2   The two trees being compared
  * @param score      The score of the current combination
- * @param max_score  The highest score among the explored combinations
+ * @param h_score  The highest score among the explored combinations
  * @param taf        A flag indicating which tree is from the target
  */
 void Fuzzy::compare(HandleSeq& hs1, HandleSeq& hs2,
-                    double score, double& max_score, bool taf)
+                    double score, double& h_score, bool taf)
 {
     if (hs1.size() == 0)
     {
         // Only record the highest score it found so far
-        if (score > max_score)
-            max_score = score;
+        if (score > h_score)
+            h_score = score;
 
         return;
     }
@@ -338,7 +338,7 @@ void Fuzzy::compare(HandleSeq& hs1, HandleSeq& hs2,
         hs1_cp.erase(hs1_cp.begin());
         hs2_cp.erase(std::find(hs2_cp.begin(), hs2_cp.end(), h2));
 
-        compare(hs1_cp, hs2_cp, score, max_score, taf);
+        compare(hs1_cp, hs2_cp, score, h_score, taf);
 
         score -= s;
     }
