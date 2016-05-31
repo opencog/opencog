@@ -35,29 +35,16 @@
 //#include <assert.h>
 #include "opencog/util/oc_assert.h"
 TimeSpaceAtom::TimeSpaceAtom(unsigned int num_time_units,
-                             vector<double>map_res_meters):
-    time_circle(num_time_units), created_once(false)
+                             double map_res_meters):
+    time_circle(num_time_units),map_res(map_res_meters),created_once(false)
 {
-    map_count = map_res_meters.size(); //if zero throw exception
-    int i = 0;
-    for_each(map_res_meters.begin(), map_res_meters.end(), [&](double resolution) {
-        i++;
-        map_res[i] = resolution;
-    });
-}
-
-unsigned int
-TimeSpaceAtom::get_map_count()
-{
-    return map_count;
+        
 }
 
 bool
-TimeSpaceAtom::get_map_resolution(const int handle, double& res)
+TimeSpaceAtom::get_map_resolution(double& res)
 {
-    auto it = map_res.find(handle);
-    if (it == map_res.end()) return false;
-    res = it->second;
+    res = map_res;
     return true;
 }
 
@@ -86,9 +73,12 @@ TimeSpaceAtom::create_new_time_unit(const time_pt time_p,
     time_circle.push_back(temp);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
+    /*
     for_each( map_res.begin(), map_res.end(), [&](pair<int, double> handle) {
         time_circle[i].map_tree[handle.first].setResolution(handle.second);
     }
+    */
+    time_circle[i].map_tree.setResolution(handle.second);
     );
 
     curr_time = time_p;
@@ -98,23 +88,21 @@ TimeSpaceAtom::create_new_time_unit(const time_pt time_p,
 }
 
 bool
-TimeSpaceAtom::put_atom_at_current_time(const int map_handle,
-                                    const point3d location,
-                                    const aHandle& ato)
+TimeSpaceAtom::put_atom_at_current_time(const point3d location,
+                                        const aHandle& ato)
 {
     //if (!created_once)return false;
     OC_ASSERT(created_once);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
     //if (!time_circle[i].has_map(handle)) return false;//may assert too
-    OC_ASSERT(time_circle[i].has_map(map_handle));
     time_circle[i].map_tree[map_handle].updateNode(location, true);
     time_circle[i].map_tree[map_handle].setNodeData(location, ato);
     return true;
 }
 
 bool
-TimeSpaceAtom::remove_atom_at_current_time(const int map_handle,
+TimeSpaceAtom::remove_atom_at_current_time_by_location(
                                        const point3d location)
 {
     OC_ASSERT(created_once);
@@ -122,34 +110,31 @@ TimeSpaceAtom::remove_atom_at_current_time(const int map_handle,
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
     OC_ASSERT(time_circle[i].has_map(map_handle));
     //time_circle[i].map_tree[map_handle].setNodeData(location,UndefinedHandle);
-    time_circle[i].map_tree[map_handle].updateNode(location, false);
+    time_circle[i].map_tree.updateNode(location, false);
     return true;
 }
 
 bool
-TimeSpaceAtom::remove_atom_at_time(time_pt tp, const int map_handle,
+TimeSpaceAtom::remove_atom_at_time_by_location(time_pt tp,
                                 const point3d location)
 {
     OC_ASSERT(created_once);
     auto it = std::find(std::begin(time_circle), std::end(time_circle), tp); //time_circle.begin(),time_circle.end()
     if (it == std::end(time_circle))return false;
-    OC_ASSERT(it->has_map(map_handle));
     //it->map_tree[map_handle].setNodeData(location,UndefinedHandle);
-    it->map_tree[map_handle].updateNode(location, false);
+    it->map_tree.updateNode(location, false);
     return true;
 }
 
-
 bool
-TimeSpaceAtom::get_atom_current_time(const int map_handle,
+TimeSpaceAtom::get_atom_current_time_at_location(
                                   const point3d location, aHandle& ato)
 {
     //
     OC_ASSERT(created_once);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-    OC_ASSERT(time_circle[i].has_map(map_handle));
-    OcTreeNode* result = time_circle[i].map_tree[map_handle].search(location);
+    OcTreeNode* result = time_circle[i].map_tree.search(location);
     if (result == nullptr) {
         ato = UndefinedHandle;
         return false;
@@ -160,7 +145,7 @@ TimeSpaceAtom::get_atom_current_time(const int map_handle,
 }
 
 bool
-TimeSpaceAtom::get_atom_at_time(const time_pt& time_p, const int map_handle,
+TimeSpaceAtom::get_atom_at_time_by_location(const time_pt& time_p,
                              const point3d location, aHandle& ato)
 {
     //
@@ -168,8 +153,7 @@ TimeSpaceAtom::get_atom_at_time(const time_pt& time_p, const int map_handle,
     //find time in time circle time unit
     auto it = std::find(std::begin(time_circle), std::end(time_circle), time_p); //time_circle.begin(),time_circle.end()
     if (it == std::end(time_circle))return false;
-    OC_ASSERT(it->has_map(map_handle));
-    OcTreeNode* result = it->map_tree[map_handle].search(location);
+    OcTreeNode* result = it->map_tree.search(location);
     if (result == nullptr) {
         ato = UndefinedHandle;
         return false;
@@ -180,18 +164,14 @@ TimeSpaceAtom::get_atom_at_time(const time_pt& time_p, const int map_handle,
 }//ok
 
 time_list
-TimeSpaceAtom::get_times_of_atom_occurence_at_location(const int map_handle,
+TimeSpaceAtom::get_times_of_atom_occurence_at_location(
                                                  const point3d location,
                                                  const aHandle& ato)
 {
     //
     time_list tl;
     for(auto tu = std::begin(time_circle), end = std::end(time_circle); (tu != end); tu++) {
-        if (!tu->has_map(map_handle)) {
-            cout << "map " << map_handle << " not found" << endl;
-            continue;
-        }
-        OcTreeNode* result = tu->map_tree[map_handle].search(location);
+        OcTreeNode* result = tu->map_tree.search(location);
         if (result == nullptr) {
             cout << "null ret by search" << endl;
             continue;
@@ -207,19 +187,18 @@ TimeSpaceAtom::get_times_of_atom_occurence_at_location(const int map_handle,
 }//ok time_circle.begin is causing problem
 
 time_list
-TimeSpaceAtom::get_times_of_atom_occurence_in_map(int map_handle, const aHandle& ato)
+TimeSpaceAtom::get_times_of_atom_occurence_in_map(const aHandle& ato)
 {
     //
     time_list tl;
     for(auto tu = std::begin(time_circle), end = std::end(time_circle);
         (tu != end);
         tu++) {
-        if (!tu->has_map(map_handle))continue;
         bool found = false;
         //go through all nodes and leafs of octomap to search atom
         for(AtomOcTree::tree_iterator it =
-            tu->map_tree[map_handle].begin_tree(),
-            end = tu->map_tree[map_handle].end_tree();
+            tu->map_tree.begin_tree(),
+            end = tu->map_tree.end_tree();
             it != end;
             ++it) {
             //
@@ -234,7 +213,7 @@ TimeSpaceAtom::get_times_of_atom_occurence_in_map(int map_handle, const aHandle&
 }//ok
 
 point3d_list
-TimeSpaceAtom::get_locations_of_atom_occurence_now(const int map_handle,
+TimeSpaceAtom::get_locations_of_atom_occurence_now(
                                               const aHandle& ato)
 {
     //
@@ -243,10 +222,9 @@ TimeSpaceAtom::get_locations_of_atom_occurence_now(const int map_handle,
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity())
         i = time_circle.size() - 1;
-    OC_ASSERT(time_circle[i].has_map(map_handle));
     for(AtomOcTree::tree_iterator it =
-        time_circle[i].map_tree[map_handle].begin_tree(),
-        end = time_circle[i].map_tree[map_handle].end_tree();
+        time_circle[i].map_tree.begin_tree(),
+        end = time_circle[i].map_tree.end_tree();
         it != end;
         ++it) {
         //
@@ -257,8 +235,7 @@ TimeSpaceAtom::get_locations_of_atom_occurence_now(const int map_handle,
 
 point3d_list
 TimeSpaceAtom::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
-                                                 const int map_handle,
-                                                 const aHandle& ato)
+                                                       const aHandle& ato)
 {
     //
     OC_ASSERT(created_once);
@@ -267,10 +244,9 @@ TimeSpaceAtom::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
                         std::end(time_circle),
                         time_p); //time_circle.begin(),time_circle.end()
     if (it == std::end(time_circle))return point3d_list();
-    OC_ASSERT(it->has_map(map_handle));//map handles not added dynamically, just during construction. assert in case user put wrong one
     for(AtomOcTree::tree_iterator ita =
-        it->map_tree[map_handle].begin_tree(),
-        end = it->map_tree[map_handle].end_tree();
+        it->map_tree.begin_tree(),
+        end = it->map_tree.end_tree();
         ita != end;
         ++ita) {
         //
@@ -280,22 +256,16 @@ TimeSpaceAtom::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
 }//ok
 
 void
-TimeSpaceAtom::remove_atom(const aHandle& ato)
+TimeSpaceAtom::void remove_atom_at_current_time(const aHandle& ato)
 {
-    //remove all occurences of atom in all maps at all times
     point3d_list pl;
-    for(auto tu = std::begin(time_circle),
-        end = std::end(time_circle);
-        (tu != end);
-        tu++) {
-        for(auto it1 = std::begin(tu->map_tree),
-            endit1 = std::end(tu->map_tree);
-            it1 != endit1;
-            it1++) {
-            pl.clear();
+    int i = time_circle.capacity() - 1;
+    if (time_circle.size() < time_circle.capacity())
+        i = time_circle.size() - 1;
+    auto* tu=&time_circle[i];
             for(AtomOcTree::tree_iterator it2 =
-                it1->second.begin_tree(),
-                endit2 = it1->second.end_tree();
+                tu->map_tree.begin_tree(),
+                endit2 = tu->map_tree.end_tree();
                 it2 != endit2;
                 ++it2) {
                 if (it2->getData() == ato) {
@@ -308,9 +278,63 @@ TimeSpaceAtom::remove_atom(const aHandle& ato)
             for(auto it3 = std::begin(pl), endit3 = std::end(pl);
                 it3 != endit3;
                 it3++) {
-                it1->second.deleteNode(*it3);
-            };
+                tu->map_tree.deleteNode(*it3);
+            }
+}
+void
+TimeSpaceAtom::void remove_atom_at_time(const time_pt& time_p,const aHandle& ato)
+{
+    point3d_list pl;
+    auto tu = std::find(std::begin(time_circle),
+                        std::end(time_circle),
+                        time_p); //time_circle.begin(),time_circle.end()
+    if (tu == std::end(time_circle))return;
+            for(AtomOcTree::tree_iterator it2 =
+                tu->map_tree.begin_tree(),
+                endit2 = tu->map_tree.end_tree();
+                it2 != endit2;
+                ++it2) {
+                if (it2->getData() == ato) {
+                    pl.push_back(it2.getCoordinate());
+                    it2->setData(UndefinedHandle);
+                }
+            }
 
-        };
-    };
+            //cout<<"remove size="<<pl.size()<<endl;
+            for(auto it3 = std::begin(pl), endit3 = std::end(pl);
+                it3 != endit3;
+                it3++) {
+                tu->map_tree.deleteNode(*it3);
+            }
+}
+
+void
+TimeSpaceAtom::remove_atom(const aHandle& ato)
+{
+    //remove all occurences of atom in all maps at all times
+    point3d_list pl;
+    for(auto tu = std::begin(time_circle),
+        end = std::end(time_circle);
+        (tu != end);
+        tu++) {
+            pl.clear();
+            for(AtomOcTree::tree_iterator it2 =
+                tu->map_tree.begin_tree(),
+                endit2 = tu->map_tree.end_tree();
+                it2 != endit2;
+                ++it2) {
+                if (it2->getData() == ato) {
+                    pl.push_back(it2.getCoordinate());
+                    it2->setData(UndefinedHandle);
+                }
+            }
+
+            //cout<<"remove size="<<pl.size()<<endl;
+            for(auto it3 = std::begin(pl), endit3 = std::end(pl);
+                it3 != endit3;
+                it3++) {
+                tu->map_tree.deleteNode(*it3);
+            }
+
+    }
 }//hacked not perfect

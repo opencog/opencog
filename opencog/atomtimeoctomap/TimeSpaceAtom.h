@@ -57,7 +57,7 @@ typedef list<time_pt> time_list;
 struct TimeUnit
 {
     time_pt t; duration_c duration;
-    map<int, AtomOcTree> map_tree;
+    AtomOcTree tree;
     TimeUnit(time_pt tp, duration_c d): t(tp), duration(d)
     {}
     bool operator==(time_pt tp)
@@ -65,19 +65,13 @@ struct TimeUnit
         return (tp >= t && tp <= t + duration);
     }
     //>,< not needed as only == search happens although created buffer should always be sorted, just simplifies a bit over search speed cost
-    bool has_map(int handle)
-    {
-        auto it = map_tree.find(handle);
-        return !(it == map_tree.end());
-    }
 };
 
 class TimeSpaceAtom
 {
 public:
     //API
-    unsigned int get_map_count();
-    bool get_map_resolution(const int handle, double& res);
+    bool get_map_resolution(double& res);
     bool get_current_time_range(time_pt& time_p, duration_c& duration);
     bool is_time_point_in_range(const time_pt& time_to_check, const time_pt& t,
                             const duration_c& duration)
@@ -85,35 +79,31 @@ public:
         return (time_to_check >= t && time_to_check < t + duration);
     }
     bool create_new_time_unit(const time_pt time_p, const duration_c duration);
-    bool put_atom_at_current_time(const int map_handle, const point3d location,
+    bool put_atom_at_current_time(const point3d location,
                               const aHandle& ato);
-    bool remove_atom_at_current_time(const int map_handle,
-                                 const point3d location);
-    bool remove_atom_at_time(time_pt tp, const int map_handle,
-                          const point3d location);
+    bool remove_atom_at_current_time_by_location(const point3d location);
+    bool remove_atom_at_time_by_location(time_pt tp,const point3d location);
+    void remove_atom_at_current_time(const aHandle& ato);
+    void remove_atom_at_time(const aHandle& ato);
     void remove_atom(const aHandle& ato);
-    bool get_atom_current_time(const int map_handle, const point3d location,
+    bool get_atom_current_time_at_location(const point3d location,
                             aHandle& ato);
-    bool get_atom_at_time(const time_pt& time_p, const int map_handle,
+    bool get_atom_at_time_by_location(const time_pt& time_p,
                        const point3d location, aHandle& ato);
-    time_list get_times_of_atom_occurence_at_location(const int map_handle,
+    time_list get_times_of_atom_occurence_at_location(
                                                const point3d location,
                                                const aHandle& ato);
-    time_list get_times_of_atom_occurence_in_map(int map_handle, const aHandle& ato);
-    point3d_list get_locations_of_atom_occurence_now(const int map_handle,
-                                                const aHandle& ato);
+    point3d_list get_locations_of_atom_occurence_now(const aHandle& ato);
     point3d_list get_locations_of_atom_occurence_at_time(const time_pt& time_p,
-                                                   const int map_handle,
-                                                   const aHandle& ato);
+                                                         const aHandle& ato);
     //AtomList& GetAtomsInLocationBBXatTime();//BBX = bounding box
 
 public:
     //constructor
-    TimeSpaceAtom(unsigned int num_time_units, vector<double>map_res_meters);
+    TimeSpaceAtom(unsigned int num_time_units, double map_res_meters);
 private:
-    unsigned int map_count;
     //each map may have translation rotation (orientation) co-ordinates managed by user
-    map<int, double>map_res; //resolution of maps
+    double map_res; //resolution of maps
     boost::circular_buffer<TimeUnit> time_circle;
     time_pt curr_time; duration_c curr_duration;
     bool created_once;
