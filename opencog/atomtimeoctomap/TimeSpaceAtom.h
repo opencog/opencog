@@ -57,13 +57,20 @@ typedef list<time_pt> time_list;
 struct TimeUnit
 {
     time_pt t; duration_c duration;
-    AtomOcTree tree;
+    AtomOcTree map_tree;
     TimeUnit(time_pt tp, duration_c d): t(tp), duration(d)
     {}
     bool operator==(time_pt tp)
     {
         return (tp >= t && tp <= t + duration);
     }
+    
+    TimeUnit& operator=(const TimeUnit& tu)
+    {
+        t=tu.t;duration=tu.duration;
+        return *this;
+    }
+    
     //>,< not needed as only == search happens although created buffer should always be sorted, just simplifies a bit over search speed cost
 };
 
@@ -84,7 +91,7 @@ public:
     bool remove_atom_at_current_time_by_location(const point3d location);
     bool remove_atom_at_time_by_location(time_pt tp,const point3d location);
     void remove_atom_at_current_time(const aHandle& ato);
-    void remove_atom_at_time(const aHandle& ato);
+    void remove_atom_at_time(const time_pt& time_p,const aHandle& ato);
     void remove_atom(const aHandle& ato);
     bool get_atom_current_time_at_location(const point3d location,
                             aHandle& ato);
@@ -93,6 +100,7 @@ public:
     time_list get_times_of_atom_occurence_at_location(
                                                const point3d location,
                                                const aHandle& ato);
+    time_list get_times_of_atom_occurence_in_map(const aHandle& ato);
     point3d_list get_locations_of_atom_occurence_now(const aHandle& ato);
     point3d_list get_locations_of_atom_occurence_at_time(const time_pt& time_p,
                                                          const aHandle& ato);

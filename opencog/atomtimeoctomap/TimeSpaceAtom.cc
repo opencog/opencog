@@ -34,6 +34,7 @@
 //#include "octomap/OcTreeKey.h"
 //#include <assert.h>
 #include "opencog/util/oc_assert.h"
+
 TimeSpaceAtom::TimeSpaceAtom(unsigned int num_time_units,
                              double map_res_meters):
     time_circle(num_time_units),map_res(map_res_meters),created_once(false)
@@ -77,9 +78,9 @@ TimeSpaceAtom::create_new_time_unit(const time_pt time_p,
     for_each( map_res.begin(), map_res.end(), [&](pair<int, double> handle) {
         time_circle[i].map_tree[handle.first].setResolution(handle.second);
     }
-    */
-    time_circle[i].map_tree.setResolution(handle.second);
     );
+    */
+    time_circle[i].map_tree.setResolution(map_res);
 
     curr_time = time_p;
     curr_duration = duration;
@@ -96,8 +97,8 @@ TimeSpaceAtom::put_atom_at_current_time(const point3d location,
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
     //if (!time_circle[i].has_map(handle)) return false;//may assert too
-    time_circle[i].map_tree[map_handle].updateNode(location, true);
-    time_circle[i].map_tree[map_handle].setNodeData(location, ato);
+    time_circle[i].map_tree.updateNode(location, true);
+    time_circle[i].map_tree.setNodeData(location, ato);
     return true;
 }
 
@@ -108,7 +109,6 @@ TimeSpaceAtom::remove_atom_at_current_time_by_location(
     OC_ASSERT(created_once);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-    OC_ASSERT(time_circle[i].has_map(map_handle));
     //time_circle[i].map_tree[map_handle].setNodeData(location,UndefinedHandle);
     time_circle[i].map_tree.updateNode(location, false);
     return true;
@@ -182,7 +182,7 @@ TimeSpaceAtom::get_times_of_atom_occurence_at_location(
             continue;
         }
         tl.push_back(tu->t);
-    };
+    }
     return tl;
 }//ok time_circle.begin is causing problem
 
@@ -256,7 +256,7 @@ TimeSpaceAtom::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
 }//ok
 
 void
-TimeSpaceAtom::void remove_atom_at_current_time(const aHandle& ato)
+TimeSpaceAtom::remove_atom_at_current_time(const aHandle& ato)
 {
     point3d_list pl;
     int i = time_circle.capacity() - 1;
@@ -282,7 +282,7 @@ TimeSpaceAtom::void remove_atom_at_current_time(const aHandle& ato)
             }
 }
 void
-TimeSpaceAtom::void remove_atom_at_time(const time_pt& time_p,const aHandle& ato)
+TimeSpaceAtom::remove_atom_at_time(const time_pt& time_p,const aHandle& ato)
 {
     point3d_list pl;
     auto tu = std::find(std::begin(time_circle),
