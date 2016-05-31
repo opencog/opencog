@@ -183,6 +183,7 @@ void Fuzzy::start_search(const Handle& trg)
 {
     target = trg;
     get_all_words(target, target_words, target_winsts);
+    std::sort(target_words.begin(), target_words.end());
     calculate_tfidf(target_words);
 }
 
@@ -241,12 +242,29 @@ bool Fuzzy::try_match(const Handle& soln)
     HandleSeq soln_winsts;
     get_all_words(soln, soln_words, soln_winsts);
 
-    double score = 0;  // Initial value
+    // Find the difference between two vectors
+    HandleSeq target_diff;
+    HandleSeq soln_diff;
 
-    if (target_words.size() > soln_words.size())
-        compare(soln_words, target_words, 0, score, false);
+    std::sort(soln_words.begin(), soln_words.end());
+
+    std::set_difference(target_words.begin(), target_words.end(),
+                        soln_words.begin(), soln_words.end(),
+                        std::back_inserter(target_diff));
+
+    std::set_difference(soln_words.begin(), soln_words.end(),
+                        target_words.begin(), target_words.end(),
+                        std::back_inserter(soln_diff));
+
+    // Initial value = No. of common nodes
+    // TODO: This implicitly assumes that two identical nodes always
+    //       have the same meaning, may be ok for now
+    double score = (target_words.size() - target_diff.size()) * NODE_WEIGHT;
+
+    if (target_diff.size() > soln_diff.size())
+        compare(soln_diff, target_diff, score, score, false);
     else
-        compare(target_words, soln_words, 0, score, true);
+        compare(target_diff, soln_diff, score, score, true);
 
     score /= std::max(target_words.size(), soln_words.size());
 
@@ -261,7 +279,7 @@ bool Fuzzy::try_match(const Handle& soln)
  * A recursive method for finding the highest similarity score between
  * two trees.
  *
- * @param hs1, hs2   The two tree being compared
+ * @param hs1, hs2   The two trees being compared
  * @param score      The score of the current combination
  * @param max_score  The highest score among the explored combinations
  * @param taf        A flag indicating which tree is from the target
@@ -313,34 +331,22 @@ double Fuzzy::get_score(const Handle& h1, const Handle& h2, bool target_at_first
     double score = 0;
     bool proceed = false;
 
-    // Consider they are the same if two nodes are identical
-    // TODO: Should check the semantic as well
-    if (h1 == h2)
+    HandleSeq iset;
+
+    // Loop the smaller set...
+    if (h1->getIncomingSetSize() > h2->getIncomingSetSize())
+        h2->getIncomingSet(back_inserter(iset));
+    else h1->getIncomingSet(back_inserter(iset));
+
+    for (const Handle& h : iset)
     {
-        score += NODE_WEIGHT;
-        proceed = true;
-    }
+        if (h->getType() != SIMILARITY_LINK) continue;
 
-    // If they are different, see if they are connected by a SimilarityLink
-    else
-    {
-        HandleSeq iset;
-
-        // Loop the smaller set...
-        if (h1->getIncomingSetSize() > h2->getIncomingSetSize())
-            h2->getIncomingSet(back_inserter(iset));
-        else h1->getIncomingSet(back_inserter(iset));
-
-        for (const Handle& h : iset)
+        if (is_atom_in_tree(h, h1) and is_atom_in_tree(h, h2))
         {
-            if (h->getType() != SIMILARITY_LINK) continue;
-
-            if (is_atom_in_tree(h, h1) and is_atom_in_tree(h, h2))
-            {
-                score = h->getTruthValue()->getMean() * NODE_WEIGHT;
-                proceed = true;
-                break;
-            }
+            score = h->getTruthValue()->getMean() * NODE_WEIGHT;
+            proceed = true;
+            break;
         }
     }
 
