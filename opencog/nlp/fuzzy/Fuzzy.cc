@@ -241,25 +241,55 @@ bool Fuzzy::try_match(const Handle& soln)
     HandleSeq soln_words;
     HandleSeq soln_winsts;
     get_all_words(soln, soln_words, soln_winsts);
-
-    // Find the difference between two vectors
-    HandleSeq target_diff;
-    HandleSeq soln_diff;
-
     std::sort(soln_words.begin(), soln_words.end());
 
-    std::set_difference(target_words.begin(), target_words.end(),
-                        soln_words.begin(), soln_words.end(),
-                        std::back_inserter(target_diff));
+    HandleSeq target_diff;
+    HandleSeq soln_diff;
+    HandleSeq common_nodes;
+    auto target_iterator = target_words.begin();
+    auto soln_iterator = soln_words.begin();
 
-    std::set_difference(soln_words.begin(), soln_words.end(),
-                        target_words.begin(), target_words.end(),
-                        std::back_inserter(soln_diff));
+    // See which nodes are common/uncommon
+    while (target_iterator != target_words.end() or
+           soln_iterator != soln_words.end())
+    {
+        if (target_iterator == target_words.end())
+        {
+            soln_diff.insert(soln_diff.end(), soln_iterator, soln_words.end());
+            break;
+        }
 
-    // Initial value = No. of common nodes
-    // TODO: This implicitly assumes that two identical nodes always
-    //       have the same meaning, may be ok for now
-    double score = (target_words.size() - target_diff.size()) * NODE_WEIGHT;
+        if (soln_iterator == soln_words.end())
+        {
+            target_diff.insert(target_diff.end(), target_iterator, target_words.end());
+            break;
+        }
+
+        if (*target_iterator < *soln_iterator)
+        {
+            target_diff.push_back(*target_iterator);
+            target_iterator++;
+        }
+
+        else if (*soln_iterator < *target_iterator)
+        {
+            soln_diff.push_back(*soln_iterator);
+            soln_iterator++;
+        }
+
+        else
+        {
+            common_nodes.push_back(*target_iterator);
+            target_iterator++;
+            soln_iterator++;
+        }
+    }
+
+    // Initial value
+    double score = 0;
+
+    for (const Handle& c : common_nodes)
+        score += get_score(c, c, true);
 
     if (target_diff.size() > soln_diff.size())
         compare(soln_diff, target_diff, score, score, false);
@@ -331,22 +361,34 @@ double Fuzzy::get_score(const Handle& h1, const Handle& h2, bool target_at_first
     double score = 0;
     bool proceed = false;
 
-    HandleSeq iset;
-
-    // Loop the smaller set...
-    if (h1->getIncomingSetSize() > h2->getIncomingSetSize())
-        h2->getIncomingSet(back_inserter(iset));
-    else h1->getIncomingSet(back_inserter(iset));
-
-    for (const Handle& h : iset)
+    // Consider they are the same if two nodes are identical
+    // TODO: Should check the semantic as well
+    if (h1 == h2)
     {
-        if (h->getType() != SIMILARITY_LINK) continue;
+        score += NODE_WEIGHT;
+        proceed = true;
+    }
 
-        if (is_atom_in_tree(h, h1) and is_atom_in_tree(h, h2))
+    // If they are different, see if they are connected by a SimilarityLink
+    else
+    {
+        HandleSeq iset;
+
+        // Loop the smaller set...
+        if (h1->getIncomingSetSize() > h2->getIncomingSetSize())
+            h2->getIncomingSet(back_inserter(iset));
+        else h1->getIncomingSet(back_inserter(iset));
+
+        for (const Handle& h : iset)
         {
-            score = h->getTruthValue()->getMean() * NODE_WEIGHT;
-            proceed = true;
-            break;
+            if (h->getType() != SIMILARITY_LINK) continue;
+
+            if (is_atom_in_tree(h, h1) and is_atom_in_tree(h, h2))
+            {
+                score = h->getTruthValue()->getMean() * NODE_WEIGHT;
+                proceed = true;
+                break;
+            }
         }
     }
 
