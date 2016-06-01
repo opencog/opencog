@@ -78,14 +78,20 @@ class TimeOctomap
 {
 public:
     //API
-    bool get_map_resolution(double& res);
+    bool get_map_resolution(double& res);//map resolution in meters
+    //current time unit time point and time duration are queried
     bool get_current_time_range(time_pt& time_p, duration_c& duration);
+    //helper function to check if a time point is within the Time unit time range
     bool is_time_point_in_range(const time_pt& time_to_check, const time_pt& t,
                             const duration_c& duration)
     {
         return (time_to_check >= t && time_to_check < t + duration);
     }
+    //make a new time unit for storage, 
+    //should not overlap a previous time unit 
+    //and should fall after the previous time unit
     bool create_new_time_unit(const time_pt time_p, const duration_c duration);
+    //store an atom at coordinates in map
     bool put_atom_at_current_time(const point3d location,
                               const opencog::Handle& ato);
     bool remove_atom_at_current_time_by_location(const point3d location);
@@ -93,6 +99,7 @@ public:
     void remove_atom_at_current_time(const opencog::Handle& ato);
     void remove_atom_at_time(const time_pt& time_p,const opencog::Handle& ato);
     void remove_atom(const opencog::Handle& ato);
+    //get atom at current time unit
     bool get_atom_current_time_at_location(const point3d location,
                             opencog::Handle& ato);
     bool get_atom_at_time_by_location(const time_pt& time_p,
@@ -104,9 +111,11 @@ public:
     point3d_list get_locations_of_atom_occurence_now(const opencog::Handle& ato);
     point3d_list get_locations_of_atom_occurence_at_time(const time_pt& time_p,
                                                          const opencog::Handle& ato);
+    //get the first atom observation after a time point
     bool get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,
                                               const time_pt& from_d,
                                               time_pt& result);
+    //get the last atom observation before a time point
     bool get_last_time_elapse_atom_observed(const opencog::Handle& ato,
                                             const time_pt& till_d,
                                             time_pt& result);

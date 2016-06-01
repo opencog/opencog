@@ -30,7 +30,12 @@
  */
  
 TimeOctomap API:
-  Purpose: This API is meant to store Atom coordinates in a map, and to create time buffer of maps, such that we can query the past location of an atom.
+  Purpose: This API is meant to store Atom(representing a spacial thing) coordinates in a map, and to create time buffer of maps, such that we can query the past or current location of an atom. Time goes on infinitely long, so a circular time buffer has been implemented and maps beyond some time units are automatically lost when newer time units are added. The time duration in the buffer can vary due to the fact that developer can vary time duration limit for each new time unit created. If the user maintains consistency in time durations then buffer can have some degree of predictability or total predictability depending on consistency. 
+
+The library is supposed to be exposed to atomspace via scheme module functions and initially is meant to store perceived face and sound locations in a map, which can be queried by inquery engine for spatial relations between things. 
+Perceptual (cognitive) relations may differ from mathematical relations based on context the relations are observed in, however this is a larger problem for later.
+
+Map representation is inherited from octomap library and stores atom handle at an x,y,z location(user is responsible for conversion of coordinates based on tranform frames). Atom orientation is not stored, as several locations might be taken up by same atom type(eg: point cloud of face atoms).
 
 Note:
  A little problem due to map being accessed probabilistic-ally is that deletion acts probabilistic as well.
