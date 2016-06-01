@@ -105,6 +105,29 @@
 "
   r2l-count SENT -- maintain counts of R2L statistics for SENT-LIST.
 "
+	(define (update-tv nodes)
+		(let ((default-stv (stv 1 0))
+		      (default-k 800))
+			(par-map
+				(lambda (n)
+					(if (equal? (cog-tv n) default-stv)
+						(let* ((new-mean (/ 1 (cog-count-atoms (cog-type n))))
+								(new-conf (/ 1 (+ 1 default-k))))
+							(cog-set-tv! n (cog-new-stv new-mean new-conf))
+						)
+						(let* ((current-count (round (assoc-ref (cog-tv->alist (cog-tv n)) 'count)))
+								(new-count (+ current-count 1))
+								(new-mean (/ new-count (cog-count-atoms (cog-type n))))
+								(new-conf (/ new-count (+ new-count default-k))))
+							(cog-set-tv! n (cog-new-stv new-mean new-conf))
+						)
+					)
+				)
+				nodes
+			)
+		)
+	)
+
 	; Increment the R2L's node count value
 	(parallel-map-parses
 		(lambda (p)
@@ -119,24 +142,7 @@
 			       ; to get to the abstracted node from an instanced node yet, such
 			       ; repeatition are ignored for now
 			       (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes))))
-				(par-map
-					(lambda (n)
-						(let* ((atv (cog-tv->alist (cog-tv n)))
-								(mean (assoc-ref atv 'mean))
-								(conf (assoc-ref atv 'confidence))
-								(count (assoc-ref atv 'count))
-								; STV will have count value as well, so checking type
-								; to see whether we want that count value
-								(ntv
-									(if (cog-ptv? (cog-tv n))
-										(cog-new-ptv mean conf (+ count 1))
-										(cog-new-ptv mean conf 1))
-								))
-							(cog-set-tv! n ntv)
-						)
-					)
-					abst-nodes
-				)
+				(update-tv abst-nodes)
 			)
 		)
 		sent-list
