@@ -469,6 +469,23 @@ namespace opencog { namespace oac {
 
     };
 
+    struct MinedPreCondition
+    {
+        string stateName;
+        Handle stateOwner;
+        Handle stateValue;
+
+    };
+
+    struct MinedEffect
+    {
+        string stateName;
+        Handle stateOwner;
+        Handle newStateValue;
+    };
+
+    // Currently a mined rule is bound, so it will only be used once, will not be reused.
+    // This can be easily improved by a little more work.
     class MinedRule : Rule
     {
 
@@ -479,6 +496,8 @@ namespace opencog { namespace oac {
 
     public:
         map<string, Handle> boundVarToValueMap;
+        vector<MinedPreCondition> preconditions;
+        vector<MinedEffect> effects;
 
     };
 

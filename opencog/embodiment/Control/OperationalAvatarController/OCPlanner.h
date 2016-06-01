@@ -329,7 +329,7 @@ struct MinedRulePattern
 {
     string actionName;
     map<string, MinedParamStruct> paramToMinedStruct;
-
+    vector<MinedPreCondition> preconditions;
 
 
 };
@@ -341,10 +341,7 @@ struct ProcessedMinedRulePattern
 
     //map<paramName, std::pair<oldValue,newValue>>
     map<string, std::pair<Handle,Handle>> effectEvalLinks;
-
-    //map<paramName, value>
-    map<string, Handle> preconditionEvalLinks; // can be empty
-
+    vector<MinedPreCondition> preconditions;// can be empty
     map<string,Handle> boundParamMap;
 };
 

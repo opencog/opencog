@@ -99,7 +99,7 @@ public:
 
     static HandleSeq findAllCandidatesByGivenPattern(HandleSeq &pattern, HandleSeq &variableNodes, Handle &queryVar);
 
-    std::pair<Handle, Handle> findLastestStateChangeOfGivenObject(Handle obj);
+    static std::pair<Handle, Handle> findLastestStateChangeOfGivenObject(Handle obj);
 
     // inquery the spatial relationships
     // see the definition of SPATIAL_RELATION in Octree3DMapManager.h

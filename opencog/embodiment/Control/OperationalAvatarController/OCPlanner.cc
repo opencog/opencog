@@ -2930,6 +2930,8 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
     std::map <string, MinedParamStruct> paramToMinedStruct;
     std::map <string, HandleSeq>::iterator paramMapIter = paramNameToParamEvalLinks.begin();
+    vector<MinedPreCondition> preconditions;
+
     for (; paramMapIter != paramNameToParamEvalLinks.end(); paramMapIter ++ )
     {
 
@@ -3128,22 +3130,77 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
             paramToMinedStruct.insert(std::pair<string, MinedParamStruct>(paramMapIter->first, minedStruct));
 
-            // Find out the precondition
+            // Find out the potential preconditions related to this parameter
             // Find the state changes occurred to the parameter objects before the action execution
+            map<Handle, HandleSeq> preStateChangeMap; // map<state name, value of all objects for this state name>
+            for (Handle paramObj : parmValueHandles)
+            {
+                // pair<state name node, new state value node>
+                std::pair<Handle, Handle> preStateChange = Inquery::findLastestStateChangeOfGivenObject(paramObj);
+                if (preStateChangeMap.find(preStateChange.first) != preStateChangeMap.end())
+                {
+                    (preStateChangeMap[preStateChange.first]).push_back(preStateChange.second);
+                }
+                else
+                {
+                    HandleSeq newStateValues;
+                    newStateValues.push_back(preStateChange.second);
+                    preStateChangeMap.insert(std::pair<Handle, HandleSeq>(preStateChange.first, newStateValues));
+                }
+            }
+
+            // Find the state changes in common for all the parameter objects
+            map<Handle, HandleSeq> ::iterator preStateIt;
+            for (preStateIt = preStateChangeMap.begin(); preStateIt != preStateChangeMap.end();)
+            {
+                if ( (preStateIt->second).size() < parmValueHandles.size())
+                    preStateChangeMap.erase(preStateIt ++);
+                else
+                    preStateIt ++;
+
+            }
+
+            for (preStateIt = preStateChangeMap.begin(); preStateIt != preStateChangeMap.end();preStateIt ++)
+            {
+                // check the value type
+                HandleSeq& values = preStateIt->second;
+                if (AtomSpaceUtil::isHandleAnEntity(atomSpace, values[0]))
+                {
+                    bool isConst = true;
+                    Handle v1 = values[0];
+                    for (Handle v : values)
+                    {
+                        if (v != v1)
+                        {
+                            isConst = false;
+                            break;
+                        }
+                    }
+
+                    if (isConst)// it's const: all the values are the same
+                    {
+
+                    }
+                    else // it's not const, so need to find out its pattern
+                    {
+
+                    }
 
 
+
+                }
+            }
         }
 
     }
 
-    // Find the state changes occurred to the  actors before the action execution
+    // Todo:Find the state changes occurred to the  actors before the action execution
 
+    // Create MinedRulePattern
     MinedRulePattern* minedRulePattern = new MinedRulePattern();
     minedRulePattern->actionName = atomSpace->getName(highestActionTypeHandle);
     minedRulePattern->paramToMinedStruct = paramToMinedStruct;
-
-
-
+    minedRulePattern->preconditions = preconditions;
 
     return minedRulePattern;
 
