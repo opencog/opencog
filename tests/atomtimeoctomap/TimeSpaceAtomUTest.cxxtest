@@ -32,7 +32,7 @@
 //TestAtomOcTree.cpp
 #include <cxxtest/TestSuite.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "opencog/atomtimeoctomap/TimeOctomap.h"
+#include "opencog/timeoctomap/TimeOctomap.h"
 
 using namespace std;
 using namespace opencog;
@@ -67,10 +67,11 @@ public:
         cout << "generating example map" << endl;
 
         double res=0.1;//0.2 failed
-        TimeOctomap tsa(3,res);  // create empty tree with resolution 0.1
-        time_pt t1=std::chrono::system_clock::now();
-        duration_c dd=std::chrono::seconds(10);
-        tsa.create_new_time_unit(t1,dd);
+        TimeOctomap tsa(3,res,std::chrono::seconds(10));  // create empty tree with resolution 0.1
+        time_pt t1;//=std::chrono::system_clock::now();
+        duration_c dd;//=std::chrono::seconds(10);
+        tsa.step_time_unit();
+        tsa.get_current_time_range(t1,dd);
 
 
         // insert some measurements of occupied cells
@@ -166,9 +167,9 @@ public:
         TS_ASSERT_EQUALS(pl.size(),0);
 
         cout<<"adding units.."<<endl;
-        TS_ASSERT(tsa.create_new_time_unit(t1+dd,dd));
-        TS_ASSERT(tsa.create_new_time_unit(t1+dd+dd,dd));
-        TS_ASSERT(tsa.create_new_time_unit(t1+dd+dd+dd,dd));
+        TS_ASSERT(tsa.step_time_unit());
+        TS_ASSERT(tsa.step_time_unit());
+        TS_ASSERT(tsa.step_time_unit());
 
         cout<<"get locations at time:";
         pl=tsa.get_locations_of_atom_occurence_at_time(t1,testHandle);
