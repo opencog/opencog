@@ -29,7 +29,7 @@ IF (CXXTEST_FOUND)
 		IF (HAVE_OCTOMAP)
 			ADD_SUBDIRECTORY (spacetime)
 			ADD_SUBDIRECTORY (spatial)
-			ADD_SUBDIRECTORY (atomtimeoctomap)
+			ADD_SUBDIRECTORY (timeoctomap)
 		ENDIF (HAVE_OCTOMAP)
 
 		ADD_SUBDIRECTORY (nlp)
