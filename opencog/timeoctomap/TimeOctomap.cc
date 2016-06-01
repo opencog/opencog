@@ -36,17 +36,23 @@
 #include "opencog/util/oc_assert.h"
 
 TimeOctomap::TimeOctomap(unsigned int num_time_units,
-                             double map_res_meters):
-    time_circle(num_time_units),map_res(map_res_meters),created_once(false)
+                         double map_res_meters,
+                         duration_c time_resolution):
+    time_circle(num_time_units),map_res(map_res_meters),time_res(time_resolution),created_once(false)
 {
         
 }
 
-bool
-TimeOctomap::get_map_resolution(double& res)
+double
+TimeOctomap::get_space_resolution()
 {
-    res = map_res;
-    return true;
+    return map_res;
+}
+
+duration_c
+TimeOctomap::get_time_resolution()
+{
+    return time_res;
 }
 
 bool
@@ -54,20 +60,27 @@ TimeOctomap::get_current_time_range(time_pt& time_p, duration_c& duration)
 {
     if (time_circle.size() < 1) return false;
     time_p = curr_time;
-    duration = curr_duration;
+    duration = time_res;
     return true;
 }
 
 bool
-TimeOctomap::create_new_time_unit(const time_pt time_p,
-                                 const duration_c duration)
+TimeOctomap::step_time_unit()
 {
+    time_pt time_p;
+    duration_c duration=time_res;
     //ideally greater than check should be done
     if (created_once) {
+        get_current_time_range(time_p,duration);//uniform time
+        time_p+=duration;//uniform time duration
+        /* do not delete this, may be useful in future
         if (is_time_point_in_range(time_p, curr_time, curr_duration) ||
                 is_time_point_in_range(time_p + duration, curr_time, curr_duration)) {
             return false;
         }
+        */
+    }else{
+         time_p=std::chrono::system_clock::now();
     }
 
     TimeUnit temp(time_p, duration);

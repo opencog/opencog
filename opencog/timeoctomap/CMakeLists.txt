@@ -21,7 +21,7 @@ IF (HAVE_OCTOMAP)
 		AtomOcTree.h
 		AtomOcTreeNode.h
 		TimeOctomap.h
-		DESTINATION "include/${PROJECT_NAME}/atomtimeoctomap"
+		DESTINATION "include/${PROJECT_NAME}/timeoctomap"
 	)
 
 ENDIF (HAVE_OCTOMAP)

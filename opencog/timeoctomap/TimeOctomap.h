@@ -78,19 +78,19 @@ class TimeOctomap
 {
 public:
     //API
-    bool get_map_resolution(double& res);//map resolution in meters
+    double get_space_resolution();//map resolution in meters
+    duration_c get_time_resolution();
     //current time unit time point and time duration are queried
     bool get_current_time_range(time_pt& time_p, duration_c& duration);
     //helper function to check if a time point is within the Time unit time range
-    bool is_time_point_in_range(const time_pt& time_to_check, const time_pt& t,
-                            const duration_c& duration)
+    bool is_time_point_in_range(const time_pt& time_to_check, const time_pt& t, const duration_c& duration)
     {
         return (time_to_check >= t && time_to_check < t + duration);
     }
     //make a new time unit for storage, 
     //should not overlap a previous time unit 
     //and should fall after the previous time unit
-    bool create_new_time_unit(const time_pt time_p, const duration_c duration);
+    bool step_time_unit();//step_time_unit
     //store an atom at coordinates in map
     bool put_atom_at_current_time(const point3d location,
                               const opencog::Handle& ato);
@@ -109,24 +109,23 @@ public:
                                                const opencog::Handle& ato);
     time_list get_times_of_atom_occurence_in_map(const opencog::Handle& ato);
     point3d_list get_locations_of_atom_occurence_now(const opencog::Handle& ato);
-    point3d_list get_locations_of_atom_occurence_at_time(const time_pt& time_p,
-                                                         const opencog::Handle& ato);
+    point3d_list get_locations_of_atom_occurence_at_time(const time_pt& time_p,const opencog::Handle& ato);
     //get the first atom observation after a time point
-    bool get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,
-                                              const time_pt& from_d,
-                                              time_pt& result);
+    bool get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,const time_pt& from_d,time_pt& result);
     //get the last atom observation before a time point
     bool get_last_time_elapse_atom_observed(const opencog::Handle& ato,
                                             const time_pt& till_d,
-                                            time_pt& result);
+                                            time_pt& result);//throw
     //AtomList& GetAtomsInLocationBBXatTime();//BBX = bounding box
 
 public:
     //constructor
-    TimeOctomap(unsigned int num_time_units, double map_res_meters);
+    TimeOctomap(unsigned int num_time_units, double map_res_meters,
+                duration_c time_resolution);
 private:
     //each map may have translation rotation (orientation) co-ordinates managed by user
     double map_res; //resolution of maps
+    duration_c time_res;
     boost::circular_buffer<TimeUnit> time_circle;
     time_pt curr_time; duration_c curr_duration;
     bool created_once;
