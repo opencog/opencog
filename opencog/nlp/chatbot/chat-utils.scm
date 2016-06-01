@@ -141,8 +141,10 @@
 			       ; multiple instances in a sentence.  Since there is no clean way
 			       ; to get to the abstracted node from an instanced node yet, such
 			       ; repeatition are ignored for now
-			       (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes))))
+			       (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes)))
+			       (word-nodes (append-map word-inst-get-word (parse-get-words p))))
 				(update-tv abst-nodes)
+				(update-tv word-nodes)
 			)
 		)
 		sent-list
