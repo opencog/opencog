@@ -104,6 +104,12 @@ public:
     point3d_list get_locations_of_atom_occurence_now(const opencog::Handle& ato);
     point3d_list get_locations_of_atom_occurence_at_time(const time_pt& time_p,
                                                          const opencog::Handle& ato);
+    bool get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,
+                                              const time_pt& from_d,
+                                              time_pt& result);
+    bool get_last_time_elapse_atom_observed(const opencog::Handle& ato,
+                                            const time_pt& till_d,
+                                            time_pt& result);
     //AtomList& GetAtomsInLocationBBXatTime();//BBX = bounding box
 
 public:

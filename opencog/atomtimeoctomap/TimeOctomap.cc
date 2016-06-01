@@ -208,9 +208,54 @@ TimeOctomap::get_times_of_atom_occurence_in_map(const opencog::Handle& ato)
             }
         }
         if (found) tl.push_back(tu->t);
-    };
+    }
     return tl;
 }//ok
+    
+bool TimeOctomap::get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,
+                                            const time_pt& from_d,
+                                            time_pt& result)
+{
+    time_list tl=get_times_of_atom_occurence_in_map(ato);
+    //sort
+    int sz=tl.size();
+    if (sz<1) return false;
+    tl.sort();
+    if (from_d>tl.back()) return false;
+    for (int i=0;i<sz;i++)
+    {
+       result=tl.front();
+       tl.pop_front();
+       if (result>=from_d)
+       {
+         return true;
+       } 
+    }
+    return false;
+}
+    
+bool TimeOctomap::get_last_time_elapse_atom_observed(const opencog::Handle& ato,
+                                            const time_pt& till_d,
+                                            time_pt& result)
+{
+    
+    time_list tl=get_times_of_atom_occurence_in_map(ato);
+    //sort
+    int sz=tl.size();
+    if (sz<1) return false;
+    tl.sort();
+    if (till_d<tl.front()) return false;
+    for (int i=0;i<sz;i++)
+    {
+       result=tl.back();
+       tl.pop_back();
+       if (result<=till_d)
+       {
+         return true;
+       } 
+    }
+    return false;
+}
 
 point3d_list
 TimeOctomap::get_locations_of_atom_occurence_now(

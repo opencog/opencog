@@ -29,7 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
  
+TimeOctomap API:
+  Purpose: This API is meant to store Atom coordinates in a map, and to create time buffer of maps, such that we can query the past location of an atom.
 
+Note:
  A little problem due to map being accessed probabilistic-ally is that deletion acts probabilistic as well.
  currently put a hack to change node value for full delete in case all atom references for particular atom need to be forgotten.
  The aHandle type(currently int but will be changed) is supposed to hold atom reference.
