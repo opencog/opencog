@@ -40,7 +40,7 @@ AtomOcTree::AtomOcTree(double resolution)
 }
 
 AtomOcTreeNode*
-AtomOcTree::setNodeData(const OcTreeKey& key, const aHandle& r)
+AtomOcTree::setNodeData(const OcTreeKey& key, const opencog::Handle& r)
 {
     AtomOcTreeNode *n = search(key);
     if (n != 0) {
@@ -71,12 +71,12 @@ AtomOcTree::setNodeData(const OcTreeKey& key, const aHandle& r)
     }
   }
 
-  std::ostream& operator<<(std::ostream& out, aHandle const& c) {
+  std::ostream& operator<<(std::ostream& out, opencog::Handle const& c) {
     return out << '(' << c << ')';
   }
 */
 
-//typedef int aHandle;
+//typedef int opencog::Handle;
 AtomOcTree::StaticMemberInitializer AtomOcTree::atomOcTreeMemberInit;
 
 } // end namespace

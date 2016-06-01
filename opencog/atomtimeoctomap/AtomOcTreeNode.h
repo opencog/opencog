@@ -37,8 +37,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 namespace octomap
 {
-typedef opencog::Handle aHandle;
-const aHandle UndefinedHandle = opencog::Handle::UNDEFINED;
+//typedef opencog::Handle opencog::Handle;
+const opencog::Handle UndefinedHandle = opencog::Handle::UNDEFINED;
 // node definition
 class AtomOcTreeNode : public OcTreeNode
 {
@@ -74,16 +74,16 @@ public:
     bool pruneNode();
     void expandNode();
 
-    inline aHandle getData() const
+    inline opencog::Handle getData() const
     {
         return dat;
     }
-    inline void  setData(aHandle c)
+    inline void  setData(opencog::Handle c)
     {
         this->dat = c;
     }
 
-    aHandle& getData()
+    opencog::Handle& getData()
     {
         return dat;
     }
@@ -93,7 +93,7 @@ public:
     std::ostream& writeValue(std::ostream &s) const;
 
 protected:
-    aHandle dat;
+    opencog::Handle dat;
 };
 
 } // end namespace

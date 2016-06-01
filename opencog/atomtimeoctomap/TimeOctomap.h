@@ -29,14 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// TimeSpaceAtom.h
+// TimeOctomap.h
 // make cicular buffer of struct of time+octomap array holding atom values
 // api to put time space atom
 // api to query time space for atom
 // api to search and delete all atom occurences
 
-#ifndef TimeSpaceAtom_H
-#define TimeSpaceAtom_H
+#ifndef TimeOctomap_H
+#define TimeOctomap_H
 #include <iostream>
 #include <boost/circular_buffer.hpp>
 #include <list>
@@ -74,7 +74,7 @@ struct TimeUnit
     //>,< not needed as only == search happens although created buffer should always be sorted, just simplifies a bit over search speed cost
 };
 
-class TimeSpaceAtom
+class TimeOctomap
 {
 public:
     //API
@@ -87,28 +87,28 @@ public:
     }
     bool create_new_time_unit(const time_pt time_p, const duration_c duration);
     bool put_atom_at_current_time(const point3d location,
-                              const aHandle& ato);
+                              const opencog::Handle& ato);
     bool remove_atom_at_current_time_by_location(const point3d location);
     bool remove_atom_at_time_by_location(time_pt tp,const point3d location);
-    void remove_atom_at_current_time(const aHandle& ato);
-    void remove_atom_at_time(const time_pt& time_p,const aHandle& ato);
-    void remove_atom(const aHandle& ato);
+    void remove_atom_at_current_time(const opencog::Handle& ato);
+    void remove_atom_at_time(const time_pt& time_p,const opencog::Handle& ato);
+    void remove_atom(const opencog::Handle& ato);
     bool get_atom_current_time_at_location(const point3d location,
-                            aHandle& ato);
+                            opencog::Handle& ato);
     bool get_atom_at_time_by_location(const time_pt& time_p,
-                       const point3d location, aHandle& ato);
+                       const point3d location, opencog::Handle& ato);
     time_list get_times_of_atom_occurence_at_location(
                                                const point3d location,
-                                               const aHandle& ato);
-    time_list get_times_of_atom_occurence_in_map(const aHandle& ato);
-    point3d_list get_locations_of_atom_occurence_now(const aHandle& ato);
+                                               const opencog::Handle& ato);
+    time_list get_times_of_atom_occurence_in_map(const opencog::Handle& ato);
+    point3d_list get_locations_of_atom_occurence_now(const opencog::Handle& ato);
     point3d_list get_locations_of_atom_occurence_at_time(const time_pt& time_p,
-                                                         const aHandle& ato);
+                                                         const opencog::Handle& ato);
     //AtomList& GetAtomsInLocationBBXatTime();//BBX = bounding box
 
 public:
     //constructor
-    TimeSpaceAtom(unsigned int num_time_units, double map_res_meters);
+    TimeOctomap(unsigned int num_time_units, double map_res_meters);
 private:
     //each map may have translation rotation (orientation) co-ordinates managed by user
     double map_res; //resolution of maps
