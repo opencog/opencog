@@ -495,13 +495,13 @@ Bob is honest.<br />
 		<tr>
 			<td style="vertical-align: top">implication-full-instantiation-rule:<br />
 			<br />
-			ImplicationLink<br />
-			&nbsp;&nbsp;&nbsp; V<br />
-			&nbsp;&nbsp;&nbsp; P<br />
-			&nbsp;&nbsp;&nbsp; Q<br />
-			&nbsp;T<br />
-			&nbsp;|-<br />
-			Q[V-&gt;T]<br />
+			&nbsp;ImplicationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			&nbsp;&nbsp;T<br />
+			&nbsp;&nbsp;|-<br />
+			&nbsp;Q[V-&gt;T]<br />
 			<br />
 			where V is a variable or a list of variables, P is a condition, Q<br />
 			is the implicand, T is an atom (or a list of atoms) to substitute<br />
@@ -706,18 +706,18 @@ Infer the TV of the implicant of conclusion (2) using lambda-predicate-construct
 			<td style="vertical-align: top">
 			<p>lambda-predicate-construction-rule:<br />
 			<br />
-			;; Predicate &lt;TV&gt;<br />
-			;; |-<br />
-			;; Lambda &lt;TV&gt;<br />
-			;;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
-			;;&nbsp;&nbsp;&nbsp; Evaluation<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Predicate &lt;TV&gt;<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; List<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
-			;;<br />
-			;; Wrap a Lambda around an evaluation of predicate and assign to the<br />
-			;; lambda the TV of the predicate.<br />
-			&nbsp;</p>
+			&nbsp; Predicate &lt;TV&gt;<br />
+			&nbsp; |-<br />
+			&nbsp; Lambda &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Predicate &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
+			<br />
+			Wrap a Lambda around an evaluation of predicate and assign to the<br />
+			lambda the TV of the predicate.<br />
+			</p>
 			</td>
 			<td style="vertical-align: top">
 			<p>Antecedent:<br />
@@ -801,17 +801,17 @@ Infer the TV of the implicand of conclusion (2) using lambda-predicate-construct
 			<td style="vertical-align: top">
 			<p>lambda-predicate-construction-rule:<br />
 			<br />
-			;; Predicate &lt;TV&gt;<br />
-			;; |-<br />
-			;; Lambda &lt;TV&gt;<br />
-			;;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
-			;;&nbsp;&nbsp;&nbsp; Evaluation<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Predicate &lt;TV&gt;<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; List<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
-			;;<br />
-			;; Wrap a Lambda around an evaluation of predicate and assign to the<br />
-			;; lambda the TV of the predicate.<br />
+			&nbsp; Predicate &lt;TV&gt;<br />
+			&nbsp; |-<br />
+			&nbsp; Lambda &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Evaluation<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Predicate &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; List<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;variables&gt;<br />
+			<br />
+			Wrap a Lambda around an evaluation of predicate and assign to the<br />
+			lambda the TV of the predicate.<br />
 			&nbsp;</p>
 			</td>
 			<td style="vertical-align: top">
@@ -876,13 +876,13 @@ People who are honest are more likely to become friends.
 		<tr>
 			<td style="vertical-align: top">InversionRule:<br />
 			<br />
-			&lt;LinkType&gt;<br />
-			&nbsp;&nbsp;&nbsp;&nbsp; A<br />
-			&nbsp;&nbsp;&nbsp;&nbsp; B<br />
-			|-<br />
-			&lt;LinkType&gt;<br />
-			&nbsp;&nbsp; &nbsp; B<br />
-			&nbsp; &nbsp;&nbsp; A<br />
+			&nbsp;&lt;LinkType&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;|-<br />
+			&nbsp;&lt;LinkType&gt;<br />
+			&nbsp;&nbsp;&nbsp; &nbsp; B<br />
+			&nbsp;&nbsp; &nbsp;&nbsp; A<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
 			<td style="vertical-align: top">
 			<p>Antecedent:<br />
@@ -1122,18 +1122,18 @@ Apply rule implication-implicant-conjunction-rule on (5) and (6).<br />
 		<tr>
 			<td style="vertical-align: top">implication-implicant-conjunction-rule:<br />
 			<br />
-			;; ImplicationLink &lt;TV1&gt;<br />
-			;;&nbsp;&nbsp;&nbsp; A<br />
-			;;&nbsp;&nbsp;&nbsp; C<br />
-			;; ImplicationLink &lt;TV2&gt;<br />
-			;;&nbsp;&nbsp;&nbsp; B<br />
-			;;&nbsp;&nbsp;&nbsp; C<br />
-			;; |-<br />
-			;; ImplicationLink &lt;TV&gt;<br />
-			;;&nbsp;&nbsp;&nbsp; AndLink<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; B<br />
-			;;&nbsp;&nbsp;&nbsp; C</td>
+			&nbsp; ImplicationLink &lt;TV1&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; C<br />
+			&nbsp; ImplicationLink &lt;TV2&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; C<br />
+			&nbsp; |-<br />
+			&nbsp; ImplicationLink &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; C</td>
 			<td style="vertical-align: top">Conclusion (7):<br />
 			<br />
 			&nbsp;&nbsp; (ImplicationLink (stv 0.13281251 0.44999999)<br />
@@ -1243,21 +1243,21 @@ Factorize lambda in implicant of (7). Apply rule and-lambda-factorization-double
 		<tr>
 			<td style="vertical-align: top">and-lambda-factorization-double-implication-rule:<br />
 			<br />
-			;; AndLink<br />
-			;;&nbsp;&nbsp;&nbsp; LambdaLink<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A1<br />
-			;;&nbsp;&nbsp;&nbsp; ...<br />
-			;;&nbsp;&nbsp;&nbsp; LambdaLink<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; An<br />
-			;; |-<br />
-			;; LambdaLink<br />
-			;;&nbsp;&nbsp;&nbsp; V<br />
-			;;&nbsp;&nbsp;&nbsp; AndLink<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A1<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; An</td>
+			&nbsp; AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A1<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; ...<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; An<br />
+			&nbsp; |-<br />
+			&nbsp; LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; AndLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A1<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; An</td>
 			<td style="vertical-align: top">Conclusion (8):<br />
 			<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (ImplicationLink (stv 1 1)<br />
@@ -1387,16 +1387,16 @@ Apply deduction-implication-rule on (7) and (8).
 		<tr>
 			<td style="vertical-align: top">deduction-implication-rule:<br />
 			<br />
-			;; &lt;LinkType&gt;<br />
-			;;&nbsp;&nbsp; A<br />
-			;;&nbsp;&nbsp; B<br />
-			;; &lt;LinkType&gt;<br />
-			;;&nbsp;&nbsp; B<br />
-			;;&nbsp;&nbsp; C<br />
-			;; |-<br />
-			;; &lt;LinkType&gt;<br />
-			;;&nbsp;&nbsp; A<br />
-			;;&nbsp;&nbsp; C</td>
+			&nbsp; &lt;LinkType&gt;<br />
+			&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp; &lt;LinkType&gt;<br />
+			&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;&nbsp;&nbsp; C<br />
+			&nbsp; |-<br />
+			&nbsp; &lt;LinkType&gt;<br />
+			&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp; C</td>
 			<td style="vertical-align: top">Conclusion (9):<br />
 			<br />
 			&nbsp;&nbsp; (ImplicationLink (stv 0.13281251 0.405)<br />
@@ -1497,13 +1497,13 @@ Bob and I will become friends.
 		<tr>
 			<td style="vertical-align: top">implication-full-instantiation-rule:<br />
 			<br />
-			ImplicationLink<br />
-			&nbsp;&nbsp;&nbsp; V<br />
-			&nbsp;&nbsp;&nbsp; P<br />
-			&nbsp;&nbsp;&nbsp; Q<br />
-			&nbsp;T<br />
+			&nbsp;ImplicationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			&nbsp;&nbsp;T<br />
 			&nbsp;|-<br />
-			Q[V-&gt;T]<br />
+			&nbsp;Q[V-&gt;T]<br />
 			<br />
 			where V is a variable or a list of variables, P is a condition, Q<br />
 			is the implicand, T is an atom (or a list of atoms) to substitute<br />
@@ -1556,13 +1556,13 @@ Bob is funny.
 		<tr>
 			<td style="vertical-align: top">implication-full-instantiation-rule:<br />
 			<br />
-			ImplicationLink<br />
-			&nbsp;&nbsp;&nbsp; V<br />
-			&nbsp;&nbsp;&nbsp; P<br />
-			&nbsp;&nbsp;&nbsp; Q<br />
-			&nbsp;T<br />
+			&nbsp;ImplicationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			&nbsp;&nbsp;T<br />
 			&nbsp;|-<br />
-			Q[V-&gt;T]<br />
+			&nbsp;Q[V-&gt;T]<br />
 			<br />
 			where V is a variable or a list of variables, P is a condition, Q<br />
 			is the implicand, T is an atom (or a list of atoms) to substitute<br />
@@ -1650,21 +1650,21 @@ Apply equivalence-scope-distribution-rule.
 		<tr>
 			<td style="vertical-align: top">equivalence-scope-distribution-rule:<br />
 			<br />
-			;; EquivalenceLink<br />
-			;;&nbsp;&nbsp;&nbsp; V<br />
-			;;&nbsp;&nbsp;&nbsp; P<br />
-			;;&nbsp;&nbsp;&nbsp; Q<br />
-			;; |-<br />
-			;; EquivalenceLink<br />
-			;;&nbsp;&nbsp;&nbsp; LambdaLink<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P<br />
-			;;&nbsp;&nbsp;&nbsp; LambdaLink<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
-			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
-			;;<br />
-			;; where V is a variable or a list of variables, P and Q are the<br />
-			;; implicant and implicand bodies.</td>
+			&nbsp; EquivalenceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			&nbsp; |-<br />
+			&nbsp; EquivalenceLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; LambdaLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			<br />
+			where V is a variable or a list of variables, P and Q are the<br />
+			implicant and implicand bodies.</td>
 			<td style="vertical-align: top">Conclusion (12):<br />
 			<br />
 			&nbsp;&nbsp; (EquivalenceLink (stv 0.69999999 0.89999998)<br />
@@ -1729,16 +1729,16 @@ If X is funny, then X is amusing.</p>
 			<td style="vertical-align: top">
 			<p>&nbsp;equivalence-to-double-implication-rule:</p>
 
-			<p>;; Equivalence<br />
-			;;&nbsp;&nbsp;&nbsp; A<br />
-			;;&nbsp;&nbsp;&nbsp; B<br />
-			;; |-<br />
-			;; Implication<br />
-			;;&nbsp;&nbsp;&nbsp; A<br />
-			;;&nbsp;&nbsp;&nbsp; B<br />
-			;; Implication<br />
-			;;&nbsp;&nbsp;&nbsp; B<br />
-			;;&nbsp;&nbsp;&nbsp; A</p>
+			<p>&nbsp; Equivalence<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp; |-<br />
+			&nbsp; Implication<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp; Implication<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; B<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; A</p>
 			</td>
 			<td style="vertical-align: top">
 			<p>Conclusion (13):</p>
@@ -1809,13 +1809,13 @@ If X is funny, then X is amusing.</p>
 			<td style="vertical-align: top">
 			<p>implication-full-instantiation-rule:<br />
 			<br />
-			ImplicationLink<br />
-			&nbsp;&nbsp;&nbsp; V<br />
-			&nbsp;&nbsp;&nbsp; P<br />
-			&nbsp;&nbsp;&nbsp; Q<br />
-			&nbsp;T<br />
+			&nbsp;ImplicationLink<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
+			&nbsp;&nbsp;T<br />
 			&nbsp;|-<br />
-			Q[V-&gt;T]<br />
+			&nbsp;Q[V-&gt;T]<br />
 			<br />
 			where V is a variable or a list of variables, P is a condition, Q<br />
 			is the implicand, T is an atom (or a list of atoms) to substitute<br />
@@ -1872,12 +1872,12 @@ If X is funny, then X is amusing.</p>
 			<td style="vertical-align: top">
 			<p>and-construction-rule:</p>
 
-			<p>; A&lt;TV1&gt;<br />
-			; B&lt;TV2&gt;<br />
-			; |-<br />
-			; AndLink &lt;TV&gt;<br />
-			;&nbsp;&nbsp;&nbsp; A<br />
-			;&nbsp;&nbsp;&nbsp; B</p>
+			<p>&nbsp; A&lt;TV1&gt;<br />
+			&nbsp; B&lt;TV2&gt;<br />
+			&nbsp; |-<br />
+			&nbsp; AndLink &lt;TV&gt;<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; A<br />
+			&nbsp;&nbsp;&nbsp;&nbsp; B</p>
 			</td>
 			<td style="vertical-align: top">
 			<p>Conclusion (15):</p>
