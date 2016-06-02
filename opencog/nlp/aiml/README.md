@@ -144,7 +144,7 @@ OpenPsi fragment:
 
 ```
 ImplicationLink
-   AndLink
+   SequantialAndLink
       ListLink
          Word "I"
          Glob "$star"
@@ -215,7 +215,7 @@ information.
 
 ### Rule selection
 The OpenPsi-based rule importer represents a typical AIML rule in the
-following form:
+approximately the following form:
 ```
 (Implication
 	; context
@@ -226,6 +226,8 @@ following form:
 	(Concept "AIML chatbot demand")
 )
 ```
+The actual representation is a bit more complicated; the above captures
+the general idea of a psi-rule, as needed for AIML processing.
 
 To find this rule, we need to search for it.  This can be accomplished
 by saying:
@@ -237,7 +239,7 @@ by saying:
 which will find the above rule (and any other rules) that match this
 pattern. Alternately, there is a convenience wrapper:
 ```
-(psi-get-dual-rules
+(psi-get-members
 	(List (Concept "I") (Concept "love") (Concept "you"))))
 ```
 

@@ -160,7 +160,7 @@
 	; Get the applicable rules
 	(define all-rules
 		(filter chat-rule?
-			(map gar (psi-get-member-links SENT))))
+			(map gar (psi-get-members SENT))))
 
 	; For now, just get the responses.
 	(define all-responses
