@@ -22,7 +22,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.3.0";
+my $ver = "0.3.1";
 my $debug;
 my $help;
 my $version;
@@ -31,6 +31,8 @@ my $aimlDir ='.';
 my $intermediateFile = 'aiml-flat.txt';
 my $outDir = '';
 my $outFile = 'aiml-rules.scm';
+
+my $base_priority = 1.0;
 
 GetOptions(
     'dir=s' => \$aimlDir,
@@ -41,6 +43,7 @@ GetOptions(
     'intermediate=s' => \$intermediateFile,
     'out=s' => \$outDir,
     'outfile=s' => \$outFile,
+    'priority=f' => \$base_priority,
 ) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>] [--outfile <filename>]\n";
 
 if ($help)
@@ -56,6 +59,7 @@ if ($help)
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
 	print "   --out <directory>       Dir for many small output files.\n";
 	print "   --outfile <filename>    Output one large file, default: '$outFile'\n";
+	print "   --priority <float>      Rule priority, default: '$base_priority'\n";
 	die "\n";
 }
 
@@ -328,11 +332,6 @@ close(FOUT);
 
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
-
-my $psi_goal = "   (Concept \"AIML chat goal\")\n";
-my	$goal_truth = "   (stv 1 0.8)\n";
-my $demand = "   (psi-demand \"AIML chat\" 0.97)\n";
-my $psi_tail = $psi_goal . $goal_truth . $demand;
 
 # split_string -- split a string of words into distinct nodes.
 sub split_string
@@ -653,6 +652,25 @@ sub process_aiml_tags
 	}
 	$tout;
 }
+
+# ------------------------------------------------------------------
+
+sub psi_tail
+{
+	my $num_stars = $_[0];
+	my $chat_goal = "   (Concept \"AIML chat goal\")\n";
+	my $demand = "   (psi-demand \"AIML chat\" 0.97)\n";
+
+
+	# Stupid hack for rule priority, for lack of something better.
+	my $weight = $base_priority / (1.0 + $num_stars);
+	# my $goal_truth = "   (stv 1 0.8)\n";
+	my $goal_truth = "   (stv 1 $weight)\n";
+	my $rule_tail = $chat_goal . $goal_truth . $demand;
+
+	$rule_tail;
+}
+
 # ------------------------------------------------------------------
 # Second pass
 
@@ -674,6 +692,7 @@ my $curr_raw_code = "";
 my $cattext = "";
 
 my $star_index = 1;
+my $num_stars = 0;
 
 my $rule_count = 0;
 my $file_count = 1;
@@ -772,7 +791,7 @@ while (my $line = <FIN>)
 					$rule .= "   (ListLink\n";
 					$rule .= &process_category("      ", $ch);
 					$rule .= "   )\n";
-					$rule .= $psi_tail;
+					$rule .= &psi_tail($num_stars);
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
 				}
@@ -789,7 +808,7 @@ while (my $line = <FIN>)
 				$rule .= "   (ListLink\n";
 				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";
-				$rule .= $psi_tail;
+				$rule .= &psi_tail($num_stars);
 				$rule .= ")\n";
 			}
 			$have_raw_code = 0;
@@ -803,7 +822,7 @@ while (my $line = <FIN>)
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
 			$rule .= $psi_goal;
-			$rule .= $psi_tail;
+			$rule .= &psi_tail($num_stars);
 			$rule .= ") ; CATEND\n";     # close category section
 
 			$psi_goal = "";
