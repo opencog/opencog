@@ -692,7 +692,6 @@ my $curr_raw_code = "";
 my $cattext = "";
 
 my $star_index = 1;
-my $num_stars = 0;
 
 my $rule_count = 0;
 my $file_count = 1;
@@ -762,6 +761,7 @@ while (my $line = <FIN>)
 	if ($cmd eq "CATEND")
 	{
 		my $rule = "";
+		my $num_stars = $star_index;
 
 		if ($have_raw_code)
 		{

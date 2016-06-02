@@ -304,8 +304,8 @@ to a BindLink approach for ease-of-use.
 
 ### HR Demo
 ```
-import/aiml2psi.pl --dir ./chathub/generic_aiml/ --outfile generic.scm
-import/aiml2psi.pl --dir ./chathub/futurist_aiml/ --outfile futurist.scm
+import/aiml2psi.pl --dir ./chathub/generic_aiml/ --outfile generic.scm --priority=0.9
+import/aiml2psi.pl --dir ./chathub/futurist_aiml/ --outfile futurist.scm --priority=0.6
 guile
 (use-modules (opencog) (opencog nlp) (opencog nlp aiml) (opencog openpsi))
 (primitive-load "/tmp/generic.scm")
@@ -446,3 +446,6 @@ topicstar/>
 
 <pattern>_</pattern> <topic>BADANSWER</topic>
 ===================================
+
+-- count number of stars
+-- set tv to 1/stars`
