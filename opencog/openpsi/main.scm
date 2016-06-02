@@ -17,6 +17,8 @@
 "
   psi-rule-nocheck -- same as psi-rule, but no checking
 "
+    (define implication (Implication a-stv (SequentialAnd context action) goal))
+
     ; These memberships are needed for making filtering and searching simpler..
     ; If GlobNode had worked with GetLink at the time of coding this,
     ; that might have been; better, (or not as it might need as much chasing)
@@ -25,7 +27,9 @@
     ; AndLink's are unordered links; must use an ordered link, if the
     ; context is to preceed the action! SequentialAnd seems like an
     ; OK choice, for now.
-    (MemberLink (Implication a-stv (SequentialAnd context action) goal) demand)
+    (MemberLink implication demand)
+
+    implication
 )
 
 ; --------------------------------------------------------------
@@ -50,16 +54,16 @@
     evaluated, should result in a true or false TV.
 
   ACTION is an evaluatable atom, i.e. returns a TV when evaluated by
-    `cog-evaluate!`.  It should return a true of false TV.
+    `cog-evaluate!`.  It should return a true or false TV.
 
   GOAL is an evaluatable atom, i.e. returns a TV when evaluated by
-    `cog-evaluate!`.  The returned TV is used as a formula tp rank
+    `cog-evaluate!`.  The returned TV is used as a formula to rank
     how this rule affects the demands.
 
   TV is the TruthValue assigned to the ImplicationLink. It should
     be a SimpleTruthValue.
 
-  DEMAND is a Node, representing teh demand that this rule affects.
+  DEMAND is a Node, representing the demand that this rule affects.
 "
     (define func-name "psi-rule") ; For use in error reporting
 
@@ -111,7 +115,7 @@ there are 100K rules!
 (define-public (psi-rule? atom)
 "
   Returns `#t` or `#f` depending on whether the passed argument
-  is a valid psi-rule or not. An ImplicationLink that is a member 
+  is a valid psi-rule or not. An ImplicationLink that is a member
   of the demand sets is a psi-rule.
 
   XXX FIXME -- this is very very slow (many minutes) when there

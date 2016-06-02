@@ -26,10 +26,14 @@ TARGET_LINK_LIBRARIES(attention-types
 )
 
 # --------------------------------------------------
+
+ADD_SUBDIRECTORY (scm)
+
 # AttentionModule
 ADD_LIBRARY(attention SHARED
 	AttentionModule
 	ForgettingAgent
+        scm/StimulationAgent
 	HebbianUpdatingAgent
 	SimpleHebbianUpdatingAgent
 	ImportanceSpreadingAgent
