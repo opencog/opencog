@@ -458,7 +458,6 @@ sub process_set
 
 # Print out a tag schema for named tag
 #
-#
 # First argument: the tag name
 # Second argument: white-space indentation to insert on each line.
 # Third argument: the value for the tag.
@@ -470,6 +469,25 @@ sub print_named_tag
 	my $tout = "";
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "      (Concept \"$arg\")\n";
+	$tout .= $indent . "   ))\n";
+	$tout;
+}
+
+# Print out a tag predicate for named tag
+#
+# First argument: the tag name
+# Second argument: white-space indentation to insert on each line.
+# Third argument: the value for the tag.
+sub print_named_eval_tag
+{
+	my $tag = $_[0];
+	my $indent = $_[1];
+	my $arg = $_[2];
+	my $tout = "";
+	$tout .= $indent . "(EvaluationLink\n";
+	$tout .= $indent . "   (DefinedPredicate \"AIML-pred $tag\")\n";
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= $indent . "      (Concept \"$arg\")\n";
 	$tout .= $indent . "   ))\n";
@@ -931,7 +949,7 @@ while (my $line = <FIN>)
 		if ($have_topic)
 		{
 			$psi_ctxt .= "      ; Context with topic!\n";
-			$psi_ctxt .= &print_named_tag("topic", "      ", lc $curr_topic);
+			$psi_ctxt .= &print_named_eval_tag("topic", "      ", lc $curr_topic);
 		}
 		$have_topic = 0;
 	}
@@ -968,7 +986,7 @@ while (my $line = <FIN>)
 		if ($have_that)
 		{
 			$psi_ctxt .= "      ; Context with that!\n";
-			$psi_ctxt .= &print_named_tag("that", "      ", lc $curr_topic);
+			$psi_ctxt .= &print_named_eval_tag("that", "      ", lc $curr_topic);
 		}
 		$have_that = 0;
 	}

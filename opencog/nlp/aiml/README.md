@@ -471,3 +471,7 @@ topicstar/>
 
 <pattern>_</pattern> <topic>BADANSWER</topic>
 ===================================
+; Context with topic!
+&print_named_tag
+(DefinedPredicate \"AIML-tag topic\")
+(DefinedPredicate \"AIML-tag that\")

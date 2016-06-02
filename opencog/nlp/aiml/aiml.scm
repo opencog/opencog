@@ -249,15 +249,28 @@
 	(DefinedSchemaNode "AIML-tag bot")
 	(GroundedSchemaNode "scm: do-aiml-get"))
 
-; AIML-tag that -- Handle that tag. XXX all wrong.
+; AIML-pred topic -- Handle topic tag. XXX all wrong.
 (DefineLink
-	(DefinedSchemaNode "AIML-tag that")
-	(GroundedSchemaNode "scm: do-aiml-that"))
+	(DefinedPredicate "AIML-pred topic")
+	(GroundedPredicate "scm: do-aiml-topic"))
+
+(define-public (do-aiml-topic VAL)
+	(display "duuude handle topic!! -->")
+	(display VAL)
+	(newline)
+	(stv 1 1)
+)
+
+; AIML-pred that -- Handle that tag. XXX all wrong.
+(DefineLink
+	(DefinedPredicate "AIML-pred that")
+	(GroundedPredicate "scm: do-aiml-that"))
 
 (define-public (do-aiml-that VAL)
 	(display "duuude handle that!! -->")
 	(display VAL)
 	(newline)
+	(stv 1 1)
 )
 
 ;; -------------------------
