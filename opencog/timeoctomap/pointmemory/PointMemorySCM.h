@@ -30,11 +30,6 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/timeoctomap/TimeOctomap.h>
 
-#define FPS 30
-//at-least 10 seconds records
-#define MEM_SEC 10
-//assuming face height of 0.22 meters
-#define SPACE_RES_M 0.01
 
 using namespace std;
 
@@ -50,27 +45,27 @@ private:
     void init(void);
     //bool .. handle float float float
 public:
-    bool create_map(string name,
+    bool create_map(string map_name,
                     double space_res_mtr,
-                    double time_res_sec,
+                    int time_res_milli_sec,
                     int time_units);
-    void step_time_unit(string name);
+    void step_time_unit(string map_name);
     bool map_ato(string map_name,Handle,double,double,double);
-    Handle get_first_ato(string map_name,Handle,double elapse);
-    Handle get_last_ato(string map_name,Handle,double elapse);
+    Handle get_first_ato(string map_name,Handle,int elapse);
+    Handle get_last_ato(string map_name,Handle,int elapse);
     Handle get_at_loc_ato(string map_name,double,double,double);
-    Handle get_past_loc_ato(string map_name,double elapse,
+    Handle get_past_loc_ato(string map_name,int elapse,
                             double,double,double);
     Handle get_locs_ato(string map_name,Handle);//listlink atLocationLink
-    Handle get_past_locs_ato(string map_name,Handle,double elapse);
-    Handle get_elapse_list_at_loc_ato(string map_name,
+    Handle get_past_locs_ato(string map_name,Handle,int elapse);
+    Handle get_elapse_list_at_loc_ato(string map_name, Handle,
               double,double,double);//listlink atTimeLink
     Handle get_elapse_list_ato(string map_name,Handle);//listlink atTimeLink
     bool remove_location_ato(string map_name,double,double,double);
-    bool remove_past_location_ato(string map_name,double elapse,
+    bool remove_past_location_ato(string map_name,int elapse,
          double,double,double);
     void remove_curr_ato(string map_name,Handle);
-    void remove_past_ato(string map_name,Handle,double elapse);
+    void remove_past_ato(string map_name,Handle,int elapse);
     void remove_all_ato(string map_name,Handle);
     //list .. handle float float
 private:
