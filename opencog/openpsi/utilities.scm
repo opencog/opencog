@@ -27,6 +27,26 @@
 )
 
 ; --------------------------------------------------------------
+(define-public (satisfication-level rule)
+"
+  Returns the probability of satisfaction of the given rule's context as a
+  SimpleTruthValue.
+
+  rule:
+  - A psi-rule with context to be evaluated.
+"
+; NOTE
+; 1. This is the same as the `psi-satisfiable?`
+; 2. Should a context evaluator be added here?????
+; 3. What is the "right" way of communicating the level of information.
+    (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
+           (result (cog-evaluate! pattern)))
+          (cog-delete pattern)
+          result
+    )
+)
+
+; --------------------------------------------------------------
 (define-public (most-weighted-atoms atom-list)
 "
   It returns a list with non-duplicating atoms with the highest weight. If an
@@ -37,8 +57,10 @@
   - A list of atoms to be compared.
 "
     (define (weight x)
-        (let ((a-stv (cog-tv x)))
-            (* (tv-conf a-stv) (tv-mean a-stv))))
+        (let ((rule-stv (cog-tv x))
+              (context-stv (satisfaction-level x)))
+            (* (tv-conf rule-stv) (tv-mean rule-stv)
+               (tv-conf context-stv) (tv-conf context-stv))))
 
     (define (pick atom lst) ; prev is a `lst` and next `atom`
         (cond
