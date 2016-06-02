@@ -28,7 +28,7 @@
 #include <map>
 #include <vector>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atomtimeoctomap/TimeSpaceAtom.h>
+#include <opencog/timeoctomap/TimeOctomap.h>
 
 #define FPS 30
 //at-least 10 seconds records
@@ -49,13 +49,33 @@ private:
     static void init_in_module(void*);
     void init(void);
     //bool .. handle float float float
-    bool map_ato(Handle,double,double,double);
-    get_first_ato(Handle,double,double);
-    get_last_ato(Handle,double,double);
-    get_mem_elapse();
+public:
+    bool create_map(string name,
+                    double space_res_mtr,
+                    double time_res_sec,
+                    int time_units);
+    void step_time_unit(string name);
+    bool map_ato(string map_name,Handle,double,double,double);
+    Handle get_first_ato(string map_name,Handle,double elapse);
+    Handle get_last_ato(string map_name,Handle,double elapse);
+    Handle get_at_loc_ato(string map_name,double,double,double);
+    Handle get_past_loc_ato(string map_name,double elapse,
+                            double,double,double);
+    Handle get_locs_ato(string map_name,Handle);//listlink atLocationLink
+    Handle get_past_locs_ato(string map_name,Handle,double elapse);
+    Handle get_elapse_list_at_loc_ato(string map_name,
+              double,double,double);//listlink atTimeLink
+    Handle get_elapse_list_ato(string map_name,Handle);//listlink atTimeLink
+    bool remove_location_ato(string map_name,double,double,double);
+    bool remove_past_location_ato(string map_name,double elapse,
+         double,double,double);
+    void remove_curr_ato(string map_name,Handle);
+    void remove_past_ato(string map_name,Handle,double elapse);
+    void remove_all_ato(string map_name,Handle);
     //list .. handle float float
-    TimeSpaceAtom* tsa;
-    vector<double> space_res;
+private:
+    map<string,TimeOctomap*> tsa;
+    
 public:
     PointMemorySCM();
     ~PointMemorySCM();
