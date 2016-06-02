@@ -134,13 +134,24 @@
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
 "
-
-	; Return #t if the rule is a aiml chat rule
+	; Return #t if the rule is a AIML chat rule
 	(define (chat-rule? r)
-		(equal? (gdr r) (Concept "AIML chat goal")))
+		(equal? (gdr r) (Concept "AIML chat subsystem goal")))
+
+	; Given an AIML rule, return a scheme list holding the context
+	; followed by the action.  Given a rule, (gar r) is the AndLink.
+	; Either gaar or gadr is the context; the other is the action.
+	(define (get-ctxt-act r)
+		(define andy (gar r))
+		(define pa (gar andy))
+		(define pb (gdr andy))
+		(if (psi-action? pb)
+			(list pa pb)
+			(list pb pa))
+	)
 
 	; Create a MapLink and run it. RULE is currently expected to
-	; be an ImplicationLink wrapping a SequentialAnd where the
+	; be an ImplicationLink wrapping an SequentialAnd where the
 	; first part of the SequentialAnd is the input sentnece, and the
 	; second is the response. XXX FIXME except that this is wrong:
 	; any "that" or "topic" matching fails. Also, its wrapping

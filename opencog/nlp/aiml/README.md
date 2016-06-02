@@ -322,6 +322,7 @@ to a BindLink approach for ease-of-use.
 * AIML HR extensions -- define a priority level, define a probability of
                  accepting answer.
 * AIML HR -- in a session, never say the same thing twice!
+* general utility -- create an is-member? utility to replace psi-action?
 
 ### BUGS
 * agians takes too long -- psi-get-member-links is taking too long
@@ -472,6 +473,12 @@ topicstar/>
 <pattern>_</pattern> <topic>BADANSWER</topic>
 ===================================
 ; Context with topic!
-&print_named_tag
-(DefinedPredicate \"AIML-tag topic\")
-(DefinedPredicate \"AIML-tag that\")
+; Context with that!
+
+i
+psi-action?
+
+ (MemberLink action psi-action)
+(cog-chase-link
+
+(cog-get-link 'MemberLink 'Foo psi-action)
