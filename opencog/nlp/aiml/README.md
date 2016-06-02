@@ -136,7 +136,19 @@ See `http://wiki.opencog.org/w/GlobNode` for details.
 See `glob.scm` for a simple working example.
 
 
-## OpenCog equivalents
+## OpenPsi general format
+OpenPsi rules have the following general format:
+```
+ImplicationLink
+   AndLink
+      context
+      action
+   goal
+```
+The context must be fullfilled (at least approximately) in order for
+the action to be taken.
+
+## OpenCog AIML equivalent
 * R5 example.
 
 The R5 sentence in the example above is converted into the following
@@ -144,17 +156,26 @@ OpenPsi fragment:
 
 ```
 ImplicationLink
-   SequantialAndLink
+   AndLink
+      SetLink
+         ListLink
+            Word "I"
+            Glob "$star"
+            Word "you"
       ListLink
          Word "I"
          Glob "$star"
          Word "you"
-		ListLink
-         Word "I"
-         Glob "$star"
-         Word "you"
          Word "too"
+   Concept "AIML chat subsystem goal"
 ```
+
+The SetLink contains all of the context that must be fulfilled, in order
+for a rule to be chosen.  In this case, the Set contains only one item:
+the list of words in the sentence.  For AIML rules that have a
+non-trivial topic, the Set contains atoms to match the topic. For AIML
+rules that have a non-trivial "that" section, the Set would also contain
+atoms that match previous the sentence.
 
 
 ### AIML tags
@@ -215,15 +236,19 @@ information.
 
 ### Rule selection
 The OpenPsi-based rule importer represents a typical AIML rule in the
-approximately the following form:
+following form:
 ```
 (Implication
-	; context
-   (List (Concept "I") (Glob "$star") (Concept "you"))
+	(AndLink
+		; context
+		(SetLink
+			(List (Concept "I") (Glob "$star") (Concept "you"))
+		)
+		; action
+		(List (Concept "I") (Glob "$star") (Concept "you") (Concept "too"))
+	)
 	; goal
-   (List (Concept "I") (Glob "$star") (Concept "you") (Concept "too"))
-	; demand
-	(Concept "AIML chatbot demand")
+	(Concept "AIML chatbot goal")
 )
 ```
 The actual representation is a bit more complicated; the above captures
@@ -446,6 +471,3 @@ topicstar/>
 
 <pattern>_</pattern> <topic>BADANSWER</topic>
 ===================================
-
--- count number of stars
--- set tv to 1/stars`

@@ -658,8 +658,8 @@ sub process_aiml_tags
 sub psi_tail
 {
 	my $num_stars = $_[0];
-	my $chat_goal = "   (Concept \"AIML chat goal\")\n";
-	my $demand = "   (psi-demand \"AIML chat\" 0.97)\n";
+	my $chat_goal = "   (Concept \"AIML chat subsystem goal\")\n";
+	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
 
 
 	# Stupid hack for rule priority, for lack of something better.
@@ -727,7 +727,7 @@ while (my $line = <FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$psi_ctxt .= "   (list\n";
+		$psi_ctxt .= "   (list (SetLink\n";
 	}
 	if ($cmd eq "CATTEXT")
 	{
@@ -865,6 +865,7 @@ while (my $line = <FIN>)
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
+		# List of words will follow.
 		$star_index = 0;
 		$psi_ctxt .= "      (ListLink\n";
 	}
@@ -894,7 +895,7 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PATEND")
 	{
-		$psi_ctxt .= "      ) ; PATEND\n";
+		$psi_ctxt .= "      )) ; PATEND\n";
 	}
 
 	#TOPIC
