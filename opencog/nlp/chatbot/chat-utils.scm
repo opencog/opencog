@@ -106,6 +106,7 @@
   r2l-count SENT -- maintain counts of R2L statistics for SENT-LIST.
 "
     (define (update-tv nodes)
+        ; DEFAULT_TV and DEFAULT_K as defined in TruthValue.cc
         (let ((default-stv (stv 1 0))
               (default-k 800))
             (par-map
