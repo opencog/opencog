@@ -948,8 +948,8 @@ while (my $line = <FIN>)
 		{
 			$psi_ctxt .= "      (StateLink\n";
 			$psi_ctxt .= "         (Anchor \"*-AIML-current-pattern-*\")\n";
-			$psi_ctxt .= $flat_pattern . ")\n";
-			$psi_ctxt .= "      ) ; got stars!\n";
+			$psi_ctxt .= $flat_pattern;
+			$psi_ctxt .= "      )) ; got stars!\n";
 		}
 		else
 		{
@@ -958,8 +958,8 @@ while (my $line = <FIN>)
 			$psi_ctxt .= "         (Variable \"\$var-aiml-pattern\"))\n";
 			$psi_ctxt .= "      (Identical\n";
 			$psi_ctxt .= "         (Variable \"\$var-aiml-pattern\")\n";
-			$psi_ctxt .= $flat_pattern . ")\n;
-			$psi_ctxt .= "      ) ; no stars at all!\n";
+			$psi_ctxt .= $flat_pattern;
+			$psi_ctxt .= "      )) ; no stars at all!\n";
 		}
 		# $psi_ctxt .= &print_anchor_tag("pattern", "      ", lc $curr_pattern);
 	}
