@@ -475,47 +475,5 @@ topicstar/>
 ; Context with topic!
 ; Context with that!
 
-===================================
 
-
-THAT,WHAT KIND OF BOOKS DO YOU LIKE
-THATWRD,WHAT
-THATWRD,KIND
-THATWRD,OF
-THATWRD,BOOKS
-THATWRD,DO
-THATWRD,YOU
-THATWRD,LIKE
-THATEND,0
-
-print_anchor_tag ("template, "   ", arg
 *-AIML-current-pattern-*
-
-(cog-execute!
-(Get
-	(And
-		(StateLink
-  		 	(AnchorNode "*-AIML-input-sentence-*")
-			(Variable "nin")
-		)
-		(Identical
-			(Variable "nin")
-   		(ListLink
-      		(WordNode "generic")
-      		(WordNode "fool")
-      		(WordNode "a.i.")
-   		)
-))))
-
-(StateLink
-   (AnchorNode "*-AIML-input-sentence-*")
-   (ListLink
-      (WordNode "generic")
-      (WordNode "fool")
-      (WordNode "a.i.")
-      (WordNode "ef")
-   ))
-
-I AM TONISHA
-got stars ))
-TRMPAT ))

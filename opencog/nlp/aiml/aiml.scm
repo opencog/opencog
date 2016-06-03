@@ -150,63 +150,25 @@
 			(list pb pa))
 	)
 
-	; Are there any exact responses to the input text? That is,
-	; AIML rules with no stars in them. If so, get those replies.
-	(define (get-exact-replies sent)
-		(define memlist (psi-get-exact-match sent))
-		(define (reply memb)
-			; gar unwraps the MemberLink to return the rule
-			; (cadr (get-ctxt-act)) returns the action part
-			; cog-execute runs the action directly.
-			(cog-execute! (cadr (get-ctxt-act (gar memb))))
-		)
-		(map reply memlist)
-	)
-
-	; AIML rules with stars in them require that we run the
-	; pattern matcher. Set up the infrascturutre for that.
-	(define input-anchor (Anchor "*-AIML-input-sentence-*"))
-	(define output-anchor (Anchor "*-AIML-output-sentence-*"))
-
-	; Create a BindLink that applies a RULE to the current input
+	; Create a BindLink from the conext and the action.
 	; sentence.
 	(define (mk-binder RULE)
 		(define c-a (get-ctxt-act RULE))
-		(BindLink
-			(AndLink
-				(ListLink
-					input-anchor
-					(gar (car c-a))
-			))
-			(cadr c-a)
-		)
+		(BindLink (car c-a) (cadr c-a))
 	)
 
-	(define (dual-responses sent)
-		; Create a temporary anchor
-		(define anch (ListLink input-sent sent))
+	; Get all the rules that apply to the SENT
+	(define all-rules
+		(filter chat-rule?
+			(map gar (psi-get-members SENT))))
 
-		; Get all the rules that apply to the SENT
-		(define dual-rules
-			(filter chat-rule?
-				(map gar (psi-get-dual-match sent))))
-
-		(define (run-binders rule)
-			(cog-execute! (mk-binder rule)))
-
-		(define resp
-			(map run-binders dual-rules))
-
-		; Cleanup the garbage temp anchr we created above.
-		(cog-delete! anch)
-
-		; Return the responses
-		resp
+	(define (get-responses sent)
+		(StateLink (Anchor "*-AIML-current-pattern-*") sent)
+		(map (lambda (ru) (cog-execute! (mk-binder ru))) all-rules)
 	)
 
 	; For now, just get the responses.
-	(define all-responses
-		(map run-rule all-rules))
+	(define all-responses (get-responses SENT))
 
 	; Remove the empty responses
 	(define responses
