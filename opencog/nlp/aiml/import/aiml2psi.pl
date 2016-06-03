@@ -502,22 +502,26 @@ sub print_anchor_tag
 	my $tag = $_[0];
 	my $indent = $_[1];
 	my $arg = $_[2];
+	my $anchor = $tag;
 
 	if ($tag eq "pattern")
 	{
-		$tag = "*-AIML-current-pattern-*";
+		$anchor = "*-AIML-current-pattern-*";
 	}
 	elsif ($tag eq "that")
 	{
-		$tag = "*-AIML-current-that-*";
+		$anchor = "*-AIML-current-that-*";
 	}
 	elsif ($tag eq "topic")
 	{
-		$tag = "*-AIML-current-topic-*";
+		$anchor = "*-AIML-current-topic-*";
 	}
 	my $tout = "";
-	$tout .= $indent . "(ListLink\n";
-	$tout .= $indent . "   (Anchor \"$tag\")\n";
+	$tout .= $indent . "(StateLink\n";
+	$tout .= $indent . "   (Anchor \"$anchor\")\n";
+	$tout .= $indent . "   (Variable \"\$var-aiml-$tag\"))\n";
+	$tout .= $indent . "(Identical\n";
+	$tout .= $indent . "   (Variable \"\$var-aiml-$tag\")\n";
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= &process_aiml_tags($indent . "      ", $arg);
 	$tout .= $indent . "   ))\n";
@@ -727,11 +731,7 @@ my %overwriteSpace=();
 my $psi_ctxt = "";
 my $psi_goal = "";
 
-my $have_topic = 0;
-my $curr_topic = "";
-
-my $have_that = 0;
-my $curr_that = "";
+my $curr_pattern = "";
 
 my $have_raw_code = 0;
 my $curr_raw_code = "";
@@ -914,8 +914,9 @@ while (my $line = <FIN>)
 	{
 		# List of words will follow.
 		$star_index = 0;
-		$psi_ctxt .= "      (ListLink\n";
-		$psi_ctxt .= "         (AnchoreNode \"*-AIML-current-pattern-*\")\n";
+		$curr_pattern = $arg;
+		$psi_ctxt .= "      xxx(StateLink\n";
+		$psi_ctxt .= "         (AnchorNode \"*-AIML-current-pattern-*\")\n";
 		$psi_ctxt .= "         (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
@@ -945,79 +946,27 @@ while (my $line = <FIN>)
 	if ($cmd eq "PATEND")
 	{
 		$psi_ctxt .= "      )) ; PATEND\n";
+		$psi_ctxt .= &print_anchor_tag("pattern", "      ", lc $curr_pattern);
 	}
 
 	#TOPIC
 	if ($cmd eq "TOPIC")
 	{
-		$have_topic = 0;
-	}
-	if ($cmd eq "TOPICWRD")
-	{
-		$have_topic = 1;
-		$curr_topic = $arg;
-	}
-	if ($cmd eq "TOPICSTAR")
-	{
-		$have_topic = 0;
-	}
-	if ($cmd eq "TOPICUSTAR")
-	{
-		$have_topic = 0;
-	}
-	if ($cmd eq "TOPICBOTVAR")
-	{
-		$psi_ctxt .= "TOPICBOTVAR $arg\n";
-	}
-	if ($cmd eq "TOPICSET")
-	{
-		$have_topic = 1;
-		$curr_topic = $arg;
-		$psi_ctxt .= "TOPICSET $arg\n";
-	}
-	if ($cmd eq "TOPICEND")
-	{
-		if ($have_topic)
-		{
+		if ($arg ne "" and $arg ne "*") {
+			my $curr_topic = $arg;
 			$psi_ctxt .= "      ; Context with topic!\n";
 			$psi_ctxt .= &print_anchor_tag("topic", "      ", lc $curr_topic);
 		}
-		$have_topic = 0;
 	}
 
 	# THAT
 	if ($cmd eq "THAT")
 	{
-		$have_that = 0;
-		if ($arg ne "*") {
-			$have_that = 1;
-			$curr_that = $arg;
-		}
-	}
-	if ($cmd eq "THATWRD")
-	{
-	}
-	if ($cmd eq "THATSTAR")
-	{
-	}
-	if ($cmd eq "THATUSTAR")
-	{
-	}
-	if ($cmd eq "THATBOTVAR")
-	{
-		$psi_ctxt .= "THATBOTVAR $arg\n";
-	}
-	if ($cmd eq "THATSET")
-	{
-	}
-	if ($cmd eq "THATEND")
-	{
-		if ($have_that)
-		{
+		if ($arg ne "" and $arg ne "*") {
+			my $curr_that = $arg;
 			$psi_ctxt .= "      ; Context with that!\n";
 			$psi_ctxt .= &print_anchor_tag("that", "      ", lc $curr_that);
 		}
-		$have_that = 0;
 	}
 
 	#template
