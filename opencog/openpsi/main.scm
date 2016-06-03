@@ -107,7 +107,7 @@ there are 100K rules!
 "
     (fold append '()
         (par-map (lambda (x) (cog-chase-link 'MemberLink 'ImplicationLink x))
-            (cog-outgoing-set (psi-get-all-demands))))
+            (psi-get-all-demands)))
 )
 
 ; --------------------------------------------------------------
