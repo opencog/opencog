@@ -77,8 +77,11 @@ void PointMemorySCM::init_in_module(void* data)
 void PointMemorySCM::init()
 {
 #ifdef HAVE_GUILE
-    define_scheme_primitive("create-map", &PointMemorySCM:::create_map, this, "ato pointmem");
-    define_scheme_primitive("map-ato", &PointMemorySCM::map_ato, this, "ato pointmem");
+    define_scheme_primitive("create-map", &PointMemorySCM::create_map, this, "ato pointmem");
+    define_scheme_primitive("get-time-res", &PointMemorySCM::get_time_res, this, "ato pointmem");
+    define_scheme_primitive("get-space-res", &PointMemorySCM::get_space_res, this, "ato pointmem");
+    define_scheme_primitive("get-time-units", &PointMemorySCM::get_time_units, this, "ato pointmem");
+     define_scheme_primitive("map-ato", &PointMemorySCM::map_ato, this, "ato pointmem");
     define_scheme_primitive("get-first-ato", &PointMemorySCM::get_first_ato, this, "ato pointmem");
     define_scheme_primitive("get-last-ato", &PointMemorySCM::get_last_ato, this, "ato pointmem");
     define_scheme_primitive("get-at-loc-ato", &PointMemorySCM::get_at_loc_ato, this, "ato pointmem");

@@ -65,6 +65,14 @@ public:
     Handle get_past_loc_ato(string map_name,int elapse,
                             double,double,double);
     Handle get_locs_ato(string map_name,Handle);//listlink atLocationLink
+    //AtLocationLink
+    //   Atom
+    //   ListLink
+    //     ConceptNode "map name"
+    //     ListLink
+    //       NumberNode x
+    //       NumberNode y
+    //       NumberNode z
     Handle get_past_locs_ato(string map_name,Handle,int elapse);
     Handle get_elapse_list_at_loc_ato(string map_name, Handle,
               double,double,double);//listlink atTimeLink
