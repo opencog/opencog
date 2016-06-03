@@ -732,6 +732,7 @@ my $psi_ctxt = "";
 my $psi_goal = "";
 
 my $curr_pattern = "";
+my $flat_pattern = "";
 
 my $have_raw_code = 0;
 my $curr_raw_code = "";
@@ -915,38 +916,52 @@ while (my $line = <FIN>)
 		# List of words will follow.
 		$star_index = 0;
 		$curr_pattern = $arg;
-		$psi_ctxt .= "      xxx(StateLink\n";
-		$psi_ctxt .= "         (AnchorNode \"*-AIML-current-pattern-*\")\n";
-		$psi_ctxt .= "         (ListLink\n";
+		$flat_pattern = "      (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
 		# Use lower-case ...
 		$arg = lc $arg;
-		$psi_ctxt .= "               " . $wordnode . "\"$arg\")\n";
+		$flat_pattern .= "            " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
 		$star_index = $star_index + 1;
-		$psi_ctxt .= "               (Glob \"\$star-$star_index\")\n";
+		$flat_pattern .= "            (Glob \"\$star-$star_index\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
 		$star_index = $star_index + 1;
-		$psi_ctxt .= "               (Glob \"\$star-$star_index\") ; underbar\n";
+		$flat_pattern .= "            (Glob \"\$star-$star_index\") ; underbar\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
-		$psi_ctxt .= &print_named_tag("bot", "         ", $arg);
+		$flat_pattern .= &print_named_tag("bot", "         ", $arg);
 	}
 	if ($cmd eq "PSET")
 	{
-		$psi_ctxt .= "         (XConceptxxNode \"$arg\") ; Huh?\n";
+		$flat_pattern .= "      (XConceptxxNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
-		$psi_ctxt .= "      )) ; PATEND\n";
-		$psi_ctxt .= &print_anchor_tag("pattern", "      ", lc $curr_pattern);
+		if (0 < $star_index)
+		{
+			$psi_ctxt .= "      (StateLink\n";
+			$psi_ctxt .= "         (Anchor \"*-AIML-current-pattern-*\")\n";
+			$psi_ctxt .= $flat_pattern . ")\n";
+			$psi_ctxt .= "      ) ; got stars!\n";
+		}
+		else
+		{
+			$psi_ctxt .= "      (StateLink\n";
+			$psi_ctxt .= "         (Anchor \"*-AIML-current-pattern-*\")\n";
+			$psi_ctxt .= "         (Variable \"\$var-aiml-pattern\"))\n";
+			$psi_ctxt .= "      (Identical\n";
+			$psi_ctxt .= "         (Variable \"\$var-aiml-pattern\")\n";
+			$psi_ctxt .= $flat_pattern . ")\n;
+			$psi_ctxt .= "      ) ; no stars at all!\n";
+		}
+		# $psi_ctxt .= &print_anchor_tag("pattern", "      ", lc $curr_pattern);
 	}
 
 	#TOPIC
@@ -982,7 +997,7 @@ while (my $line = <FIN>)
 
 	if ($cmd eq "TEMPATOMIC")
 	{
-		$psi_ctxt .= "   ) ;TEMPATOMIC\n";  # close pattern section
+		$psi_ctxt .= "   )) ;TEMPATOMIC\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
 		$psi_goal = "   (ListLink\n";
