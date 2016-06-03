@@ -194,6 +194,7 @@
              tag-node)
          value-node)
 )
+
 ; --------------------------------------------------------------
 (define-public (psi-set-functionality exec-term tag-node functionality-name)
     ; Check arguments

@@ -354,16 +354,16 @@ there are 100K rules!
   psi-set-goal-evaluator EVAL-TERM DEMAND-NODE - Sets EVAL-TERM as the
   the function to be used as goal-evaluator for the rules of DEMAND-NODE.
 "
-    (psi-set-functionality eval-term demand-node "action-executor")
+    (psi-set-functionality eval-term demand-node "goal-evaluator")
 )
 
 ; ----------------------------------------------------------------------
-(define-public (psi-get-action-executor tag-node)
+(define-public (psi-get-goal-evaluator tag-node)
 "
-  psi-get-action-executor DEMAND-NODE - Gets the goal-evaluator for
+  psi-get-goal-evaluator DEMAND-NODE - Gets the goal-evaluator for
   DEMAND-NODE.
 "
-    (psi-get-functionality tag-node "action-executor")
+    (psi-get-functionality tag-node "goal-evaluator")
 )
 
 ; ----------------------------------------------------------------------
