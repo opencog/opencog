@@ -340,12 +340,12 @@ there are 100K rules!
 )
 
 ; ----------------------------------------------------------------------
-(define-public (psi-get-action-executor tag-node)
+(define-public (psi-get-action-executor demand-node)
 "
   psi-get-action-executor DEMAND-NODE - Gets the action-executor of
   DEMAND-NODE.
 "
-    (psi-get-functionality tag-node "action-executor")
+    (psi-get-functionality demand-node "action-executor")
 )
 
 ; ----------------------------------------------------------------------
@@ -358,12 +358,12 @@ there are 100K rules!
 )
 
 ; ----------------------------------------------------------------------
-(define-public (psi-get-goal-evaluator tag-node)
+(define-public (psi-get-goal-evaluator demand-node)
 "
   psi-get-goal-evaluator DEMAND-NODE - Gets the goal-evaluator for
   DEMAND-NODE.
 "
-    (psi-get-functionality tag-node "goal-evaluator")
+    (psi-get-functionality demand-node "goal-evaluator")
 )
 
 ; ----------------------------------------------------------------------
