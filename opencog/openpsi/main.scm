@@ -331,6 +331,42 @@ there are 100K rules!
 )
 
 ; ----------------------------------------------------------------------
+(define-public (psi-set-action-executor exec-term demand-node)
+"
+  psi-set-action-executor EXEC-TERM DEMAND-NODE - Sets EXEC-TERM as the
+  the function to be used as action-executor for the rules of DEMAND-NODE.
+"
+    (psi-set-functionality exec-term demand-node "action-executor")
+)
+
+; ----------------------------------------------------------------------
+(define-public (psi-get-action-executor tag-node)
+"
+  psi-get-action-executor DEMAND-NODE - Gets the action-executor of
+  DEMAND-NODE.
+"
+    (psi-get-functionality tag-node "action-executor")
+)
+
+; ----------------------------------------------------------------------
+(define-public (psi-set-goal-evaluator eval-term demand-node)
+"
+  psi-set-goal-evaluator EVAL-TERM DEMAND-NODE - Sets EVAL-TERM as the
+  the function to be used as goal-evaluator for the rules of DEMAND-NODE.
+"
+    (psi-set-functionality eval-term demand-node "action-executor")
+)
+
+; ----------------------------------------------------------------------
+(define-public (psi-get-action-executor tag-node)
+"
+  psi-get-action-executor DEMAND-NODE - Gets the goal-evaluator for
+  DEMAND-NODE.
+"
+    (psi-get-functionality tag-node "action-executor")
+)
+
+; ----------------------------------------------------------------------
 (define-public (psi-step)
 "
   The main function that defines the steps to be taken in every cycle.

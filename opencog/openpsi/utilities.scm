@@ -187,61 +187,39 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-define-functionality-pattern tag-node functionality-name)
-"
-  This returns the StateLink that is used for specifying the action selecting
-  evaluatable term.
-"
-    (lambda ()
-    "
-        TODO: get documentation output include the parameter details from
-        psi-functionality-pattern
-    "
+(define-public (psi-set-functionality exec-term tag-node functionality-name)
+    ; Check arguments
+    (if (not (string? functionality-name))
+        (error "Expected second argument to be a string, got: "
+            functionality-name))
+
+    ; TODO: Add checks to ensure the exec-term argument is actually executable
+    (let* ((name (string-append
+                        psi-prefix-str functionality-name "-"
+                        (cog-name tag-node)))
+           (dsn (cog-node 'DefinedSchemaNode name)))
+       (if (null? dsn)
+           (begin
+               (set! dsn (DefinedSchemaNode name))
+               (DefineLink dsn exec-term)
+               (EvaluationLink
+                   (PredicateNode (string-append
+                       psi-prefix-str functionality-name))
+                   (ListLink tag-node dsn))
+                dsn
+           )
+            dsn ; The assumption is that the EvaluationLink is already created
+       )
+    )
+)
+
+; --------------------------------------------------------------
+(define (psi-get-functionality tag-node functionality-name)
+; The assumption is that there will be only one element in the returned list.
+; This is a weak. Need a better way of using DefineLink short of defining
+; the relationship in the predicatenode as a part of the alias-node name.
+    (cog-outgoing-set (cog-execute! (GetLink
         (EvaluationLink
             (PredicateNode (string-append  psi-prefix-str functionality-name))
-            (ListLink tag-node (VariableNode "$dpn"))
-        )
-    )
-)
-
-; --------------------------------------------------------------
-(define-public (psi-define-add-functionality functionality-name)
-    (lambda (exec-term tag-node)
-        ; Check arguments
-        (if (not (string? functionality-name))
-            (error "Expected second argument to be a string, got: "
-                functionality-name))
-
-        ; TODO: Add checks to ensure the exec-term argument is actually executable
-        (let* ((name (string-append
-                            psi-prefix-str functionality-name "-"
-                            (cog-name tag-node)))
-               (dsn (cog-node 'DefinedSchemaNode name)))
-           (if (null? dsn)
-               (begin
-                   (set! dsn (DefinedSchemaNode name))
-                   (DefineLink dsn exec-term)
-
-                    (EvaluationLink
-                        (PredicateNode (string-append
-                            psi-prefix-str functionality-name))
-                        (ListLink tag-node dsn))
-
-                    dsn
-               )
-               (begin
-                   (EvaluationLink
-                       (PredicateNode (string-append
-                           psi-prefix-str functionality-name))
-                           (ListLink tag-node dsn))
-                    dsn
-               )
-           )
-        )
-    )
-)
-
-; --------------------------------------------------------------
-(define (psi-define-get-functionality pattern)
-    (lambda () (cog-outgoing-set (cog-execute! (GetLink pattern))))
+            (ListLink tag-node (VariableNode "$dpn"))))))
 )
