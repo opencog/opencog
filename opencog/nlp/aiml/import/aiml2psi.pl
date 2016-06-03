@@ -503,16 +503,24 @@ sub print_anchor_tag
 	my $indent = $_[1];
 	my $arg = $_[2];
 
-	if ($tag eq "that")
+	if ($tag eq "pattern")
+	{
+		$tag = "*-AIML-current-pattern-*";
+	}
+	elsif ($tag eq "that")
 	{
 		$tag = "*-AIML-current-that-*";
+	}
+	elsif ($tag eq "topic")
+	{
+		$tag = "*-AIML-current-topic-*";
 	}
 	my $tout = "";
 	$tout .= $indent . "(ListLink\n";
 	$tout .= $indent . "   (Anchor \"$tag\")\n";
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= &process_aiml_tags($indent . "      ", $arg);
-	$tout .= $indent . "   )))\n";
+	$tout .= $indent . "   ))\n";
 	$tout;
 }
 
@@ -766,7 +774,7 @@ while (my $line = <FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$psi_ctxt .= "   (list (SetLink\n";
+		$psi_ctxt .= "   (list (AndLink\n";
 	}
 	if ($cmd eq "CATTEXT")
 	{
@@ -907,22 +915,24 @@ while (my $line = <FIN>)
 		# List of words will follow.
 		$star_index = 0;
 		$psi_ctxt .= "      (ListLink\n";
+		$psi_ctxt .= "         (AnchoreNode \"*-AIML-current-pattern-*\"\n";
+		$psi_ctxt .= "         (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
 		# Use lower-case ...
 		$arg = lc $arg;
-		$psi_ctxt .= "         " . $wordnode . "\"$arg\")\n";
+		$psi_ctxt .= "               " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
 		$star_index = $star_index + 1;
-		$psi_ctxt .= "         (Glob \"\$star-$star_index\")\n";
+		$psi_ctxt .= "               (Glob \"\$star-$star_index\")\n";
 	}
 	if ($cmd eq "PUSTAR")
 	{
 		$star_index = $star_index + 1;
-		$psi_ctxt .= "         (Glob \"\$star-$star_index\") ; underbar\n";
+		$psi_ctxt .= "               (Glob \"\$star-$star_index\") ; underbar\n";
 	}
 	if ($cmd eq "PBOTVAR")
 	{
@@ -934,7 +944,7 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PATEND")
 	{
-		$psi_ctxt .= "      )) ; PATEND\n";
+		$psi_ctxt .= "      ))) ; PATEND\n";
 	}
 
 	#TOPIC
