@@ -27,7 +27,7 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (satisfication-level rule)
+(define-public (satisfaction-level rule)
 "
   Returns the probability of satisfaction of the given rule's context as a
   SimpleTruthValue.
