@@ -9,6 +9,7 @@
 (load-extension "libnlpfz" "opencog_nlp_fuzzy_init")
 
 (use-modules (srfi srfi-1)
+             (ice-9 optargs)      ; for doing define*-public
              (opencog)
              (opencog query)      ; for fuzzy-match
              (opencog atom-types) ; for WordNode, ParseNode, etc.
@@ -129,7 +130,7 @@
 )
 
 ; ----------------------------------------------------------
-(define-public (get-fuzzy-answers sent-node)
+(define*-public (get-fuzzy-answers sent-node #:key do-microplanning)
 "
   Find answers (i.e., similar sentences that share some keyword) from
   the Atomspace by using the fuzzy pattern matcher. By default, it
