@@ -263,14 +263,14 @@ ELSE (LAPACK_FOUND)
 ENDIF (LAPACK_FOUND)
 
 
-# Link-Gramar is needed for the Viterbi parser
+# Link-Gramar is needed for the Viterbi parser and more generally NLP
 # Only 4.7.12 or newer has the required read-dict API in it.
 FIND_PACKAGE(LinkGrammar 4.7.12)
 IF (LINK_GRAMMAR_FOUND)
 	SET(HAVE_LINK_GRAMMAR 1)
 	INCLUDE_DIRECTORIES(${LINK_GRAMMAR_INCLUDE_DIRS})
 ELSE (LINK_GRAMMAR_FOUND)
-	MESSAGE(STATUS "Link Grammar missing: needed for the Viterbi parser.")
+	MESSAGE(STATUS "Link Grammar missing: needed for NLP.")
 ENDIF (LINK_GRAMMAR_FOUND)
 
 
