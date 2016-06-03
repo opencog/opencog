@@ -104,7 +104,7 @@
 
 ; --------------------------------------------------------------
 
-(define (psi-get-exact-match ATOM)
+(define-public (psi-get-exact-match ATOM)
 "
   psi-get-exact-match ATOM - Return list of all of the MemberLinks
   holding rules whose context or action apply exactly (without
@@ -124,7 +124,7 @@
         (delete-duplicates (cog-filter 'MemberLink inset)))
 )
 
-(define (psi-get-dual-match ATOM)
+(define-public (psi-get-dual-match ATOM)
 "
   psi-get-dual-match ATOM - Return list of the MemberLinks
   holding rules whose context or action might apply to ATOM,

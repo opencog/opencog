@@ -150,6 +150,38 @@
 			(list pb pa))
 	)
 
+	; Are there any exact responses to the input text? That is,
+	; AIML rules with no stars in them. If so, get those replies.
+	(define (get-exact-replies sent)
+		(define memlist (psi-get-exact-match sent))
+		(define (reply memb)
+			; gar unwraps the MemberLink to return the rule
+			; (cadr (get-ctxt-act)) returns the action part
+			; cog-execute runs the action directly.
+			(cog-execute! (cadr (get-ctxt-act (gar memb))))
+		)
+		(map reply memlist)
+	)
+
+	; AIML rules with stars in them require that we run the
+	; pattern matcher. Set up the infrascturutre for that.
+	(define input-anchor (Anchor "*-AIML-input-sentence-*"))
+	(define output-anchor (Anchor "*-AIML-output-sentence-*"))
+
+	(define (anchor-sent sent)
+		(ListLink input-anchor sent)
+	)
+
+	(define (mk-binder RULE)
+		(define c-a (get-ctxt-act RULE))
+		(BindLink
+			(AndLink
+				(gar (car c-a))
+			)
+			(cadr c-a)
+		)
+	)
+
 	; Create a MapLink and run it. RULE is currently expected to
 	; be an ImplicationLink wrapping an SequentialAnd where the
 	; first part of the SequentialAnd is the input sentnece, and the
