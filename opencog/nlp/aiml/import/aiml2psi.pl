@@ -958,19 +958,19 @@ while (my $line = <FIN>)
 	if ($cmd eq "THAT")
 	{
 		$have_that = 0;
+		if ($arg ne "*") {
+			$have_that = 1;
+			$curr_that = $arg;
+		}
 	}
 	if ($cmd eq "THATWRD")
 	{
-		$have_that = 1;
-		$curr_that = $arg;
 	}
 	if ($cmd eq "THATSTAR")
 	{
-		$have_that = 0;
 	}
 	if ($cmd eq "THATUSTAR")
 	{
-		$have_that = 0;
 	}
 	if ($cmd eq "THATBOTVAR")
 	{
@@ -978,15 +978,13 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "THATSET")
 	{
-		$have_that = 1;
-		$curr_that = $arg;
 	}
 	if ($cmd eq "THATEND")
 	{
 		if ($have_that)
 		{
 			$psi_ctxt .= "      ; Context with that!\n";
-			$psi_ctxt .= &print_named_eval_tag("that", "      ", lc $curr_topic);
+			$psi_ctxt .= &print_named_eval_tag("that", "      ", lc $curr_that);
 		}
 		$have_that = 0;
 	}

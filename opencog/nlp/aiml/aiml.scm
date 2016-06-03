@@ -215,7 +215,7 @@
 	; The robots response is the current "that".
 	; XXX FIXME this should be delayed until one of possibly
 	; several responses is actually chosen.
-	; Nlote that resp is a SetLink usually containing only one
+	; Note that resp is a SetLink usually containing only one
 	; word-list, but maybe more than one...
 	(for-each
 		(lambda (resp) (do-aiml-set (Concept "that") (gar resp)))
