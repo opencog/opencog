@@ -475,10 +475,18 @@ topicstar/>
 ; Context with topic!
 ; Context with that!
 
-i
-psi-action?
+===================================
 
- (MemberLink action psi-action)
-(cog-chase-link
 
-(cog-get-link 'MemberLink 'Foo psi-action)
+THAT,WHAT KIND OF BOOKS DO YOU LIKE
+THATWRD,WHAT
+THATWRD,KIND
+THATWRD,OF
+THATWRD,BOOKS
+THATWRD,DO
+THATWRD,YOU
+THATWRD,LIKE
+THATEND,0
+
+print_anchor_tag ("template, "   ", arg
+*-AIML-current-pattern-*

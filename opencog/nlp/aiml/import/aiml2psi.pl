@@ -915,7 +915,7 @@ while (my $line = <FIN>)
 		# List of words will follow.
 		$star_index = 0;
 		$psi_ctxt .= "      (ListLink\n";
-		$psi_ctxt .= "         (AnchoreNode \"*-AIML-current-pattern-*\"\n";
+		$psi_ctxt .= "         (AnchoreNode \"*-AIML-current-pattern-*\")\n";
 		$psi_ctxt .= "         (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
@@ -944,7 +944,7 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PATEND")
 	{
-		$psi_ctxt .= "      ))) ; PATEND\n";
+		$psi_ctxt .= "      )) ; PATEND\n";
 	}
 
 	#TOPIC
@@ -1023,7 +1023,7 @@ while (my $line = <FIN>)
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
-		$psi_ctxt .= "   ) ;TEMPLATECODE\n";  # close pattern section
+		$psi_ctxt .= "   )) ;TEMPLATECODE\n";  # close pattern section
 
 		$arg =~ s/\"/\'/g;
 
