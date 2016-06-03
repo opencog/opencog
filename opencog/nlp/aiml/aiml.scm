@@ -172,7 +172,8 @@
 
 	; Remove the empty responses
 	(define responses
-		(filter (lambda (s) (not (null? (gar s)))) all-responses))
+		(map word-list-set-flatten
+			(filter (lambda (s) (not (null? (gar s)))) all-responses)))
 
 	; The robots response is the current "that".
 	; XXX FIXME this should be delayed until one of possibly
