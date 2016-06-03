@@ -168,42 +168,41 @@
 	(define input-anchor (Anchor "*-AIML-input-sentence-*"))
 	(define output-anchor (Anchor "*-AIML-output-sentence-*"))
 
-	(define (anchor-sent sent)
-		(ListLink input-anchor sent)
-	)
-
+	; Create a BindLink that applies a RULE to the current input
+	; sentence.
 	(define (mk-binder RULE)
 		(define c-a (get-ctxt-act RULE))
 		(BindLink
 			(AndLink
-				(gar (car c-a))
-			)
+				(ListLink
+					input-anchor
+					(gar (car c-a))
+			))
 			(cadr c-a)
 		)
 	)
 
-	; Create a MapLink and run it. RULE is currently expected to
-	; be an ImplicationLink wrapping an SequentialAnd where the
-	; first part of the SequentialAnd is the input sentnece, and the
-	; second is the response. XXX FIXME except that this is wrong:
-	; any "that" or "topic" matching fails. Also, its wrapping
-	; word-lists and not predicates. Yuck!
-	(define (run-rule RULE)
-		(define result
-			(word-list-set-flatten
-				(cog-execute!
-					(Map (Implication (gaar RULE) (gdar RULE)) (Set SENT)))))
-(if (not (null? (gar result)))
-(begin
-(display "duuude just ran rule\n") (display RULE) (newline)
-(display "duuude got result\n") (display result) (newline)))
-		result
-	)
+	(define (dual-responses sent)
+		; Create a temporary anchor
+		(define anch (ListLink input-sent sent))
 
-	; Get the applicable rules
-	(define all-rules
-		(filter chat-rule?
-			(map gar (psi-get-members SENT))))
+		; Get all the rules that apply to the SENT
+		(define dual-rules
+			(filter chat-rule?
+				(map gar (psi-get-dual-match sent))))
+
+		(define (run-binders rule)
+			(cog-execute! (mk-binder rule)))
+
+		(define resp
+			(map run-binders dual-rules))
+
+		; Cleanup the garbage temp anchr we created above.
+		(cog-delete! anch)
+
+		; Return the responses
+		resp
+	)
 
 	; For now, just get the responses.
 	(define all-responses
