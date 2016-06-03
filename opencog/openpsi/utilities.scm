@@ -187,6 +187,14 @@
 )
 
 ; --------------------------------------------------------------
+(define (functionality-pattern tag-node functionality-name value-node)
+    (StateLink
+        (ListLink
+            (Node (string-append psi-prefix-str functionality-name))
+             tag-node)
+         value-node)
+)
+; --------------------------------------------------------------
 (define-public (psi-set-functionality exec-term tag-node functionality-name)
     ; Check arguments
     (if (not (string? functionality-name))
@@ -202,10 +210,7 @@
            (begin
                (set! dsn (DefinedSchemaNode name))
                (DefineLink dsn exec-term)
-               (EvaluationLink
-                   (PredicateNode (string-append
-                       psi-prefix-str functionality-name))
-                   (ListLink tag-node dsn))
+               (functionality-pattern tag-node functionality-name dsn)
                 dsn
            )
             dsn ; The assumption is that the EvaluationLink is already created
@@ -219,7 +224,5 @@
 ; This is a weak. Need a better way of using DefineLink short of defining
 ; the relationship in the predicatenode as a part of the alias-node name.
     (cog-outgoing-set (cog-execute! (GetLink
-        (EvaluationLink
-            (PredicateNode (string-append  psi-prefix-str functionality-name))
-            (ListLink tag-node (VariableNode "$dpn"))))))
+        (functionality-pattern tag-node functionality-name (Variable "$x")))))
 )
