@@ -413,7 +413,6 @@ sub process_tag
 
 	$text =~ /(.*?)<$tag>(.*?)<\/$tag>(.*)/;
 
-	# FIXME, should be like the star loop, above.
 	$tout .= &process_aiml_tags($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
@@ -440,7 +439,6 @@ sub process_set
 
 	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/;
 
-	# FIXME, should be like the star loop, above.
 	$tout .= &split_string($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag set\")\n";
@@ -494,6 +492,30 @@ sub print_named_eval_tag
 	$tout;
 }
 
+# Print out an anchor pattern
+#
+# First argument: the tag name
+# Second argument: white-space indentation to insert on each line.
+# Third argument: the value for the tag.
+sub print_anchor_tag
+{
+	my $tag = $_[0];
+	my $indent = $_[1];
+	my $arg = $_[2];
+
+	if ($tag eq "that")
+	{
+		$tag = "*-AIML-current-that-*";
+	}
+	my $tout = "";
+	$tout .= $indent . "(ListLink\n";
+	$tout .= $indent . "   (Anchor \"$tag\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= &process_aiml_tags($indent . "      ", $arg);
+	$tout .= $indent . "   )))\n";
+	$tout;
+}
+
 # process_named_tag -- process a generic tag that has a name
 #
 # First argument: the tag name
@@ -536,7 +558,6 @@ sub process_that
 
 	$text =~ /(.*?)<that\/>(.*)/;
 
-	# FIXME, should be like the star loop, above.
 	$tout .= &split_string($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
@@ -949,7 +970,7 @@ while (my $line = <FIN>)
 		if ($have_topic)
 		{
 			$psi_ctxt .= "      ; Context with topic!\n";
-			$psi_ctxt .= &print_named_eval_tag("topic", "      ", lc $curr_topic);
+			$psi_ctxt .= &print_anchor_tag("topic", "      ", lc $curr_topic);
 		}
 		$have_topic = 0;
 	}
@@ -984,7 +1005,7 @@ while (my $line = <FIN>)
 		if ($have_that)
 		{
 			$psi_ctxt .= "      ; Context with that!\n";
-			$psi_ctxt .= &print_named_eval_tag("that", "      ", lc $curr_that);
+			$psi_ctxt .= &print_anchor_tag("that", "      ", lc $curr_that);
 		}
 		$have_that = 0;
 	}
