@@ -17,7 +17,7 @@
 "
   psi-rule-nocheck -- same as psi-rule, but no checking
 "
-    (define implication (Implication a-stv (SequentialAnd context action) goal))
+    (define implication (Implication a-stv (And context action) goal))
 
     ; These memberships are needed for making filtering and searching simpler..
     ; If GlobNode had worked with GetLink at the time of coding this,
@@ -33,7 +33,6 @@
 )
 
 ; --------------------------------------------------------------
-
 (define-public (psi-rule context action goal a-stv demand)
 "
   psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
@@ -43,7 +42,7 @@
   is in the form of an `ImplicationLink`,
 
     (ImplicationLink TV
-        (SequentialAnd
+        (AndLink
             CONTEXT
             ACTION)
         GOAL)
