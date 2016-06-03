@@ -43,6 +43,7 @@ PointMemorySCM::PointMemorySCM()
 PointMemorySCM::~PointMemorySCM()
 {
     //delete tsa;
+    for (auto& x: tsa) {delete x.second;}
 }
 /**
  * Init function for using with scm_with_guile.
@@ -104,7 +105,7 @@ if (name.length()<1)return false;
 //reject if time units < 1
 if (time_units<1)return false;
 //reject if time res,space_res <=0
-if ((time_res<=0.0)||(space_res_mtr)<=0.0) return false;
+if ((time_res<=0)||(space_res_mtr)<=0.0) return false;
 
 std::map<string,TimeOctomap*>::iterator it;
 it=tsa.find(name);
@@ -112,6 +113,21 @@ if (it != tsa.end()) return false;
 tsa[name]=new TimeOctomap(time_units,space_res_mtr,std::chrono::milliseconds(time_res_milli_sec));
 return true;
 }
+//add point clouds later
+int PointMemorySCM::get_time_res(string map_name)
+{
+  duration_c dr=tsa[map_name]->get_time_resolution();
+  return chrono::milliseconds(dr).count();
+}
+double PointMemorySCM::get_space_res(string map_name)
+{
+  return tsa[map_name]->get_space_resolution();
+}
+int PointMemorySCM::get_time_units(string map_name)
+{
+  return tsa[map_name]->get_time_units();
+}
+
 void PointMemorySCM::step_time_unit(string map_name)
 {
   tsa[map_name]->step_time_unit();
@@ -167,7 +183,24 @@ Handle PointMemorySCM::get_locs_ato(string map_name,Handle ato)//listlink atLoca
 {
   point3d_list pl=tsa[map_name]->get_locations_of_atom_occurence_now(ato);
   if (pl.size()<1)return UndefinedHandle;
-  return;
+  HandleSeq loc_links(pl.size());
+  while (pl.size()>0)
+  {
+    point3d pt=pl.front();
+    loc_links.add(createLink(AT_LOCATION_LINK,
+      createNode(OBJECT_NODE,map_name),
+      createLink(LIST_LINK,ato,
+        createLink(LIST_LINK,
+          createNode(NUMBER_NODE,to_string(pt.x())),
+          createNode(NUMBER_NODE,to_string(pt.y())),
+          createNode(NUMBER_NODE,to_string(pt.z()))
+        )
+      )
+    ));
+    pl.pop_front();
+  }//while
+  
+  return createLink(LIST_LINK,loc_links);
 }
 Handle PointMemorySCM::get_past_locs_ato(string map_name,Handle ato,int elapse)
 {
@@ -177,9 +210,27 @@ Handle PointMemorySCM::get_past_locs_ato(string map_name,Handle ato,int elapse)
   tpt-=dr;
   point3d_list pl=tsa[map_name]->get_locations_of_atom_occurence_at_time(tpt,ato);
   if (pl.size()<1)return UndefinedHandle;
-  return;
 
+  HandleSeq loc_links(pl.size());
+  while (pl.size()>0)
+  {
+    point3d pt=pl.front();
+    loc_links.add(createLink(AT_LOCATION_LINK,
+      createNode(OBJECT_NODE,map_name),
+      createLink(LIST_LINK,ato,
+        createLink(LIST_LINK,
+          createNode(NUMBER_NODE,to_string(pt.x())),
+          createNode(NUMBER_NODE,to_string(pt.y())),
+          createNode(NUMBER_NODE,to_string(pt.z()))
+        )
+      )
+    ));
+    pl.pop_front();
+  }//while
+
+  return createLink(LIST_LINK,loc_links);
 }
+
 Handle PointMemorySCM::get_elapse_list_at_loc_ato(string map_name,Handle ato,
               double x,double y,double z)//listlink atTimeLink
 {
@@ -193,12 +244,37 @@ Handle PointMemorySCM::get_elapse_list_ato(string map_name,Handle ato)//listlink
   if (tl.size()<1)return UndefinedHandle;
   return;
 }
-bool PointMemorySCM::remove_location_ato(string map_name,double,double,double)
+bool PointMemorySCM::remove_location_ato(string map_name,double x,double y,double z)
 {
+  return tsa[map_name]->remove_atom_at_current_time_by_location(point3d(x,y,z));
 }
 bool PointMemorySCM::remove_past_location_ato(string map_name,int elapse,
-         double,double,double);
-void PointMemorySCM::remove_curr_ato(string map_name,Handle);
-void PointMemorySCM::remove_past_ato(string map_name,Handle,int elapse);
-void PointMemorySCM::remove_all_ato(string map_name,Handle);
+         double x,double y,double z)
+{
+  time_pt tpt; duration_c dr;
+  tsa[map_name]->get_current_time_range(tpt,dr);
+  dr=std::chrono::milliseconds(elapse);
+  tpt-=dr;
+  return tsa[map_name]->remove_atom_at_time_by_location(tpt,point3d(x,y,z));
+}
+void PointMemorySCM::remove_curr_ato(string map_name,Handle ato)
+{
+  tsa[map_name]->remove_atom_at_current_time(ato);
+}
+void PointMemorySCM::remove_past_ato(string map_name,Handle,int elapse)
+{
+  time_pt tpt; duration_c dr;
+  tsa[map_name]->get_current_time_range(tpt,dr);
+  dr=std::chrono::milliseconds(elapse);
+  tpt-=dr;
+  tsa[map_name]->remove_atom_at_time(tpt,ato);
+}
+void PointMemorySCM::remove_all_ato(string map_name,Handle ato)
+{
+  tsa[map_name]->remove_atom(ato);
+}
 
+void opencog_ato_pointmem_init(void)
+{
+    static PointMemorySCM pm;
+}

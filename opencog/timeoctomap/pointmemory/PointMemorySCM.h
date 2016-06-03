@@ -27,7 +27,11 @@
 
 #include <map>
 #include <vector>
+
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/timeoctomap/TimeOctomap.h>
 
 
@@ -49,6 +53,10 @@ public:
                     double space_res_mtr,
                     int time_res_milli_sec,
                     int time_units);
+    int get_time_res(string map_name);
+    double get_space_res(string map_name);
+    int get_time_units(string map_name);
+
     void step_time_unit(string map_name);
     bool map_ato(string map_name,Handle,double,double,double);
     Handle get_first_ato(string map_name,Handle,int elapse);

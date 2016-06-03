@@ -80,6 +80,9 @@ public:
     //API
     double get_space_resolution();//map resolution in meters
     duration_c get_time_resolution();
+    int get_time_units(){
+      return time_circle.capacity(); 
+    }
     //current time unit time point and time duration are queried
     bool get_current_time_range(time_pt& time_p, duration_c& duration);
     //helper function to check if a time point is within the Time unit time range
