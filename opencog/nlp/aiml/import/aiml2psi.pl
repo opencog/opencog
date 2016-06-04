@@ -330,6 +330,8 @@ close(FOUT);
 # ------------------------------------------------------------------
 # Second pass utilities
 
+my $star_count = 1;
+
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
 
@@ -343,9 +345,15 @@ sub split_string
 	for my $wrd (@words)
 	{
 		$wrd =~ s/\s*//;
-		if ($wrd ne "")
+		if ($wrd eq "") {}
+		elsif ($wrd eq "*" or $wrd eq "_")
 		{
-			$tout .= $indent . $wordnode . "\"$wrd\")\n";
+			$tout .= $indent . "(Glob \"\$star-$star_count\")xxx\n";
+			$star_count ++;
+		}
+		else
+		{
+			$tout .= $indent . $wordnode . "\"$wrd\")xxx\n";
 		}
 	}
 	$tout;
@@ -920,7 +928,7 @@ while (my $line = <FIN>)
 	{
 		# Use lower-case ...
 		$arg = lc $arg;
-		$flat_pattern .= "            " . $wordnode . "\"$arg\")\n";
+		$flat_pattern .= "            " . $wordnode . "\"$arg\")ppp\n";
 	}
 	if ($cmd eq "PSTAR")
 	{
@@ -944,6 +952,7 @@ while (my $line = <FIN>)
 	{
 		# TODO -- the above complexity shold be replaced by
 		# the 
+		$star_count = 1;
 		$psi_ctxt .= &print_predicate_tag("pattern", "      ", lc $curr_pattern);
 $psi_ctxt .= "foooooooooooo\n";
 		$psi_ctxt .= "      (EvaluationLink\n";
@@ -1003,7 +1012,7 @@ $psi_ctxt .= "foooooooooooo\n";
 		$arg =~ s/"/\\"/g;
 
 		# Just another word in the reply chain.
-		$psi_goal .= "      " . $wordnode . "\"$arg\")\n";
+		$psi_goal .= "      " . $wordnode . "\"$arg\")rrr\n";
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
