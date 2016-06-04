@@ -492,12 +492,12 @@ sub print_named_eval_tag
 	$tout;
 }
 
-# Print out an anchor pattern
+# Print out an Evaluation (predicate) pattern
 #
 # First argument: the tag name
 # Second argument: white-space indentation to insert on each line.
 # Third argument: the value for the tag.
-sub print_anchor_tag
+sub print_predicate_tag
 {
 	my $tag = $_[0];
 	my $indent = $_[1];
@@ -506,22 +506,19 @@ sub print_anchor_tag
 
 	if ($tag eq "pattern")
 	{
-		$anchor = "*-AIML-current-pattern-*";
+		$anchor = "*-AIML-pattern-*";
 	}
 	elsif ($tag eq "that")
 	{
-		$anchor = "*-AIML-current-that-*";
+		$anchor = "*-AIML-that-*";
 	}
 	elsif ($tag eq "topic")
 	{
-		$anchor = "*-AIML-current-topic-*";
+		$anchor = "*-AIML-topic-*";
 	}
 	my $tout = "";
-	$tout .= $indent . "(StateLink\n";
-	$tout .= $indent . "   (Anchor \"$anchor\")\n";
-	$tout .= $indent . "   (Variable \"\$var-aiml-$tag\"))\n";
-	$tout .= $indent . "(Identical\n";
-	$tout .= $indent . "   (Variable \"\$var-aiml-$tag\")\n";
+	$tout .= $indent . "(Evaluation\n";
+	$tout .= $indent . "   (Predicate \"$anchor\")\n";
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= &process_aiml_tags($indent . "      ", $arg);
 	$tout .= $indent . "   ))\n";
@@ -916,7 +913,7 @@ while (my $line = <FIN>)
 		# List of words will follow.
 		$star_index = 0;
 		$curr_pattern = $arg;
-		$flat_pattern = "      (ListLink\n";
+		$flat_pattern = "         (ListLink\n";
 	}
 	if ($cmd eq "PWRD")
 	{
@@ -944,24 +941,14 @@ while (my $line = <FIN>)
 	}
 	if ($cmd eq "PATEND")
 	{
-		if (0 < $star_index)
-		{
-			$psi_ctxt .= "      (StateLink\n";
-			$psi_ctxt .= "         (Anchor \"*-AIML-current-pattern-*\")\n";
-			$psi_ctxt .= $flat_pattern;
-			$psi_ctxt .= "      )) ; got stars!\n";
-		}
-		else
-		{
-			$psi_ctxt .= "      (StateLink\n";
-			$psi_ctxt .= "         (Anchor \"*-AIML-current-pattern-*\")\n";
-			$psi_ctxt .= "         (Variable \"\$var-aiml-pattern\"))\n";
-			$psi_ctxt .= "      (Identical\n";
-			$psi_ctxt .= "         (Variable \"\$var-aiml-pattern\")\n";
-			$psi_ctxt .= $flat_pattern;
-			$psi_ctxt .= "      )) ; no stars at all!\n";
-		}
-		# $psi_ctxt .= &print_anchor_tag("pattern", "      ", lc $curr_pattern);
+		# TODO -- the above complexity shold be replaced by
+		# the 
+		$psi_ctxt .= &print_predicate_tag("pattern", "      ", lc $curr_pattern);
+$psi_ctxt .= "foooooooooooo\n";
+		$psi_ctxt .= "      (EvaluationLink\n";
+		$psi_ctxt .= "         (Predicate \"*-AIML-pattern-*\")\n";
+		$psi_ctxt .= $flat_pattern;
+		$psi_ctxt .= "      ))\n";
 	}
 
 	#TOPIC
@@ -970,7 +957,7 @@ while (my $line = <FIN>)
 		if ($arg ne "" and $arg ne "*") {
 			my $curr_topic = $arg;
 			$psi_ctxt .= "      ; Context with topic!\n";
-			$psi_ctxt .= &print_anchor_tag("topic", "      ", lc $curr_topic);
+			$psi_ctxt .= &print_predicate_tag("topic", "      ", lc $curr_topic);
 		}
 	}
 
@@ -980,7 +967,7 @@ while (my $line = <FIN>)
 		if ($arg ne "" and $arg ne "*") {
 			my $curr_that = $arg;
 			$psi_ctxt .= "      ; Context with that!\n";
-			$psi_ctxt .= &print_anchor_tag("that", "      ", lc $curr_that);
+			$psi_ctxt .= &print_predicate_tag("that", "      ", lc $curr_that);
 		}
 	}
 
