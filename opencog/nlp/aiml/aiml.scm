@@ -190,12 +190,24 @@
 	; until we are sure that we really really want to run the rule?
 	(define exact-responses (map run-exact-rule exact-rules))
 
+	; Get all of the rules that might apply to this sentence,
+	; and are inexact matches (i.e. have a variable in it)
 	(define dual-rules
 		(filter chat-rule?
 			(map gar (psi-get-dual-match SENT))))
 
+	; Make sure that a given RULE can actually result in a match
+	; on the sentence.
+	(define (is-usable-rule? RULE)
+		(define pred (get-pred RULE "*-AIML-pattern-*"))
+		(if (null? pred) #f
+			(not (null? (gar
+				(cog-execute! (MapLink (gdr pred) (SetLink SENT)))
+			)))
+		))
+
 ; -------------
-; everything below iw wrong
+; everything below is wrong
 	(define (get-responses sent)
 		(StateLink (Anchor "*-AIML-current-pattern-*") sent)
 		(map (lambda (ru) (cog-execute! (mk-binder ru))) all-rules)
