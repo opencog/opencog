@@ -263,14 +263,14 @@ ELSE (LAPACK_FOUND)
 ENDIF (LAPACK_FOUND)
 
 
-# Link-Gramar is needed for the Viterbi parser
+# Link-Gramar is needed for the Viterbi parser and more generally NLP
 # Only 4.7.12 or newer has the required read-dict API in it.
 FIND_PACKAGE(LinkGrammar 4.7.12)
 IF (LINK_GRAMMAR_FOUND)
 	SET(HAVE_LINK_GRAMMAR 1)
 	INCLUDE_DIRECTORIES(${LINK_GRAMMAR_INCLUDE_DIRS})
 ELSE (LINK_GRAMMAR_FOUND)
-	MESSAGE(STATUS "Link Grammar missing: needed for the Viterbi parser.")
+	MESSAGE(STATUS "Link Grammar missing: needed for NLP.")
 ENDIF (LINK_GRAMMAR_FOUND)
 
 
@@ -461,7 +461,7 @@ IF(HAVE_ATOMSPACE)
 ENDIF(HAVE_ATOMSPACE)
 
 IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
-	SET(HAVE_VITERBI 1)
+	SET(HAVE_NLP 1)
 ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 IF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
@@ -693,5 +693,5 @@ SUMMARY_ADD("REST" "REST Atomspace Publisher module" HAVE_REST)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS AND HAVE_OCTOMAP)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
-SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
+SUMMARY_ADD("NLP" "Natural Language Processing" HAVE_NLP)
 SUMMARY_SHOW()
