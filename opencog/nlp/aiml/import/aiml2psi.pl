@@ -348,12 +348,12 @@ sub split_string
 		if ($wrd eq "") {}
 		elsif ($wrd eq "*" or $wrd eq "_")
 		{
-			$tout .= $indent . "(Glob \"\$star-$star_count\")xxx\n";
+			$tout .= $indent . "(Glob \"\$star-$star_count\")\n";
 			$star_count ++;
 		}
 		else
 		{
-			$tout .= $indent . $wordnode . "\"$wrd\")xxx\n";
+			$tout .= $indent . $wordnode . "\"$wrd\")\n";
 		}
 	}
 	$tout;
@@ -738,14 +738,11 @@ my $psi_ctxt = "";
 my $psi_goal = "";
 
 my $curr_pattern = "";
-my $flat_pattern = "";
 
 my $have_raw_code = 0;
 my $curr_raw_code = "";
 
 my $cattext = "";
-
-my $star_index = 1;
 
 my $rule_count = 0;
 my $file_count = 1;
@@ -815,7 +812,7 @@ while (my $line = <FIN>)
 	if ($cmd eq "CATEND")
 	{
 		my $rule = "";
-		my $num_stars = $star_index;
+		my $num_stars = $star_count;
 
 		if ($have_raw_code)
 		{
@@ -920,33 +917,7 @@ while (my $line = <FIN>)
 	if ($cmd eq "PAT")
 	{
 		# List of words will follow.
-		$star_index = 0;
 		$curr_pattern = $arg;
-		$flat_pattern = "         (ListLink\n";
-	}
-	if ($cmd eq "PWRD")
-	{
-		# Use lower-case ...
-		$arg = lc $arg;
-		$flat_pattern .= "            " . $wordnode . "\"$arg\")ppp\n";
-	}
-	if ($cmd eq "PSTAR")
-	{
-		$star_index = $star_index + 1;
-		$flat_pattern .= "            (Glob \"\$star-$star_index\")\n";
-	}
-	if ($cmd eq "PUSTAR")
-	{
-		$star_index = $star_index + 1;
-		$flat_pattern .= "            (Glob \"\$star-$star_index\") ; underbar\n";
-	}
-	if ($cmd eq "PBOTVAR")
-	{
-		$flat_pattern .= &print_named_tag("bot", "         ", $arg);
-	}
-	if ($cmd eq "PSET")
-	{
-		$flat_pattern .= "      (XConceptxxNode \"$arg\") ; Huh?\n";
 	}
 	if ($cmd eq "PATEND")
 	{
@@ -954,11 +925,6 @@ while (my $line = <FIN>)
 		# the 
 		$star_count = 1;
 		$psi_ctxt .= &print_predicate_tag("pattern", "      ", lc $curr_pattern);
-$psi_ctxt .= "foooooooooooo\n";
-		$psi_ctxt .= "      (EvaluationLink\n";
-		$psi_ctxt .= "         (Predicate \"*-AIML-pattern-*\")\n";
-		$psi_ctxt .= $flat_pattern;
-		$psi_ctxt .= "      ))\n";
 	}
 
 	#TOPIC
@@ -1012,7 +978,7 @@ $psi_ctxt .= "foooooooooooo\n";
 		$arg =~ s/"/\\"/g;
 
 		# Just another word in the reply chain.
-		$psi_goal .= "      " . $wordnode . "\"$arg\")rrr\n";
+		$psi_goal .= "      " . $wordnode . "\"$arg\")\n";
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
@@ -1035,6 +1001,8 @@ print FOUT "*unspecified*\n";
 
 close(FIN);
 close(FOUT);
+
+print "Processed $rule_count rules\n";
 exit;
 =for comment
 
