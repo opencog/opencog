@@ -170,11 +170,6 @@
 				(if (null? pred) #f
 					(equal? (gdr pred) SENT)))))
 
-	; Get all the exact rules that apply to the SENT
-	(define exact-rules
-		(filter is-exact-rule?
-			(map gar (psi-get-exact-match SENT))))
-
 	;; XXX TODO -- filter out the exact rules that have non-trivial
 	;; THAT and TOPIC contexts.
 
@@ -184,15 +179,10 @@
 		(cog-execute! (cadr (get-ctxt-act RULE)))
 	)
 
-	;; XXX FIXME -- although this runs the exact rules (if any),
-	; its not the right thing to do, cause running the action
-	; can have side-effects, and perhaps these should be avoided,
-	; until we are sure that we really really want to run the rule?
-	(define exact-responses (map run-exact-rule exact-rules))
-
 	; -----------------------------------------
-	; Make sure that a given RULE can actually result in a match
-	; on the sentence.
+	; Make sure that a given pattern RULE (i.e. a rule with
+	; variables in it) can actually result in a match on the
+	; sentence.
 	(define (is-usable-rule? RULE)
 		(if (not (chat-rule? RULE)) #f
 			(let ((pred (get-pred RULE "*-AIML-pattern-*")))
@@ -202,18 +192,28 @@
 				))))
 		)))
 
+	; ----------------------------
+	; Get all the exact rules that apply to the SENT
+	(define exact-rules
+		(filter is-exact-rule?
+			(map gar (psi-get-exact-match SENT))))
+
 	; Get all of the rules that might apply to this sentence,
 	; and are inexact matches (i.e. have a variable in it)
 	(define dual-rules
-		(filter is-usable-rule?
-			(map gar (psi-get-dual-match SENT))))
+		(if (null? exact-rules)
+			(filter is-usable-rule?
+				(map gar (psi-get-dual-match SENT)))
+			'()))
+
+	;; XXX FIXME -- although this runs the exact rules (if any),
+	; its not the right thing to do, cause running the action
+	; can have side-effects, and perhaps these should be avoided,
+	; until we are sure that we really really want to run the rule?
+	(define exact-responses (map run-exact-rule exact-rules))
 
 ; -------------
 ; everything below is wrong
-	(define (get-responses sent)
-		(StateLink (Anchor "*-AIML-current-pattern-*") sent)
-		(map (lambda (ru) (cog-execute! (mk-binder ru))) all-rules)
-	)
 
 	; For now, just get the responses.
 	(define all-responses (get-responses SENT))
