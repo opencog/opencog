@@ -142,3 +142,95 @@
 
 
 
+; --------------------------------------------------------------
+; Updater Loop Control
+; --------------------------------------------------------------
+(define psi-updater-is-running #f)
+(define psi-updater-loop-count 0)
+(define continue-psi-updater-loop (stv 1 1))
+
+(define-public (psi-running?)
+"
+  Return #t if the openpsi loop is running, else return #f.
+"
+    psi-updater-is-running
+)
+
+(define continue-pred
+	(Evaluation (stv 1 1)
+	    (Predicate "continue-psi-updater-loop")
+	    (ListLink)))
+
+(define (psi-pause)
+    ; Pause for 100 millisecs, to keep the number of loops within a reasonable
+    ; range.
+    ; todo: is this needed?
+    (usleep 100000))
+
+
+; ----------------------------------------------------------------------
+(define-public (do-psi-updater-step)
+"
+  The main function that defines the steps to be taken in every cycle.
+"
+	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
+	(display "loop count: ")(display psi-updater-loop-count)(newline)
+
+;    (let* ((rules (psi-select-rules)))
+;        (map (lambda (x)
+;                (let* ((action (psi-get-action x))
+;                       (goals (psi-related-goals action)))
+;                    (cog-execute! action)
+;                    (map cog-evaluate! goals)))
+;            rules)
+;        (stv 1 1)
+;    )
+
+	(psi-pause)
+	(stv 1 1)
+)
+
+; --------------------------------------------------------------
+(define-public (psi-updater-run)
+"
+  Run `psi-step` in a new thread. Call (psi-updater-halt) to exit the loop.
+"
+    (define loop-name (string-append psi-prefix-str "updater-loop"))
+    (define (loop-node) (DefinedPredicateNode loop-name))
+    (define (define-psi-loop)
+        (DefineLink
+            (loop-node)
+            (SatisfactionLink
+                (SequentialAnd
+                    (Evaluation
+                        (Predicate "continue-psi-updater-loop")
+                        (ListLink))
+                    (Evaluation
+                        (GroundedPredicate "scm: do-psi-updater-step")
+                        (ListLink))
+                    (loop-node)))))
+
+    ;(if (null? (cog-node 'DefinedPredicateNode loop-name))
+        (define-psi-loop)
+    ;    #f ; Nothing to do already defined
+    ;)
+
+    (set! psi-updater-is-running #t)
+    (call-with-new-thread
+        (lambda () (cog-evaluate! (loop-node))))
+)
+
+; --------------------------------------------------------------
+(define-public (psi-updater-halt)
+"
+  Tells the psi loop thread, that is started by running `(psi-run)`, to exit.
+"
+    (set! psi-updater-is-running #f)
+    (cog-set-tv! continue-pred (stv 0 1))
+)
+
+
+; --------------------------------------------------------------
+; Shortcuts
+
+(define halt psi-updater-halt)
