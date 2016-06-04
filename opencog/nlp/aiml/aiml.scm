@@ -160,15 +160,26 @@
 		(if (null? pred-list) '() (car pred-list))
 	)
 
+	; Verify that rule really is an exact rule for this sentence.
+	; -- check that its a chat rule
+	; -- check that it has the AIML pattern PredicateNode
+	; -- check that the pattern is the sentence.
+	(define (is-exact-rule? RULE)
+		(if (not (chat-rule? RULE)) #f
+			(let ((pred (get-pred RULE "*-AIML-pattern-*")))
+				(if (null? pred) #f
+					(equal? (gdr pred) SENT)))))
+
 	; Get all the exact rules that apply to the SENT
 	(define exact-rules
-		(filter chat-rule?
+		(filter is-exact-rule?
 			(map gar (psi-get-exact-match SENT))))
 
 	;; XXX TODO -- filter out the exact rules that have non-trivial
 	;; THAT and TOPIC contexts.
 
 	; Run the exact rules
+	(define (run-exact-rule RULE)
 
 	(define dual-rules
 		(filter chat-rule?
