@@ -737,8 +737,6 @@ my %overwriteSpace=();
 my $psi_ctxt = "";
 my $psi_goal = "";
 
-my $curr_pattern = "";
-
 my $have_raw_code = 0;
 my $curr_raw_code = "";
 
@@ -916,13 +914,7 @@ while (my $line = <FIN>)
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
-		# List of words will follow.
-		$curr_pattern = $arg;
-	}
-	if ($cmd eq "PATEND")
-	{
-		# TODO -- the above complexity shold be replaced by
-		# the 
+		my $curr_pattern = $arg;
 		$star_count = 1;
 		$psi_ctxt .= &print_predicate_tag("pattern", "      ", lc $curr_pattern);
 	}
