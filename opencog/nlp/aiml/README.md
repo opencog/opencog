@@ -314,13 +314,7 @@ to a BindLink approach for ease-of-use.
 ### TODO
 * OpenPsi duallink is returning too much -- i.e. matches to the action.
   We really only want matches to the context only.
-* OpenPsi -- our context is a list of words ... perhaps it should be
-  something evaluatable? (according to the strict definition, it should
-  be.)
-* AIML -- Implement "that" (XXX need examples of how that works, for testing).
 * AIML -- thatstar and topicstar not handled.
-* AIML HR extensions -- define a priority level, define a probability of
-                 accepting answer.
 * AIML HR -- in a session, never say the same thing twice!
 * general utility -- create an is-member? utility to replace psi-action?
 

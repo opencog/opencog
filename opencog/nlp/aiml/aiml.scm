@@ -150,17 +150,29 @@
 			(list pb pa))
 	)
 
-	; Create a BindLink from the conext and the action.
-	; sentence.
-	(define (mk-binder RULE)
-		(define c-a (get-ctxt-act RULE))
-		(BindLink (car c-a) (cadr c-a))
+	; Get the predicate named PRED out of the context part of the rule.
+	; Assumes that there is only one such.
+	(define (get-pred RULE PRED-NAME)
+		(define ctxt (car (get-ctxt-act RULE)))
+		(define (is-pred EVL)
+			(equal? PRED-NAME (cog-name (gar EVL))))
+		(define pred-list (filter is-pred (cog-outgoing-set ctxt)))
+		(if (null? pred-list) '() (car pred-list))
 	)
 
-	; Get all the rules that apply to the SENT
-	(define all-rules
+	; Get all the exact rules that apply to the SENT
+	(define exact-rules
 		(filter chat-rule?
-			(map gar (psi-get-members SENT))))
+			(map gar (psi-get-exact-match SENT))))
+
+	;; XXX TODO -- filter out the exact rules that have non-trivial
+	;; THAT and TOPIC contexts.
+
+	; Run the exact rules
+
+	(define dual-rules
+		(filter chat-rule?
+			(map gar (psi-get-dual-match SENT))))
 
 	(define (get-responses sent)
 		(StateLink (Anchor "*-AIML-current-pattern-*") sent)
