@@ -160,7 +160,7 @@
 		(if (null? pred-list) '() (car pred-list))
 	)
 
-	; Verify that rule really is an exact rule for this sentence.
+	; Verify that RULE really is an exact rule for this sentence.
 	; -- check that its a chat rule
 	; -- check that it has the AIML pattern PredicateNode
 	; -- check that the pattern is the sentence.
@@ -178,13 +178,24 @@
 	;; XXX TODO -- filter out the exact rules that have non-trivial
 	;; THAT and TOPIC contexts.
 
-	; Run the exact rules
+	; Run the exact rules.  We already know that the context is
+	; fulfilled, so just grab the action, and run it.
 	(define (run-exact-rule RULE)
+		(cog-execute! (cadr (get-ctxt-act RULE)))
+	)
+
+	;; XXX FIXME -- although this runs the exact rules (if any),
+	; its not the right thing to do, cause running the action
+	; can have side-effects, and perhaps these should be avoided,
+	; until we are sure that we really really want to run the rule?
+	(define exact-responses (map run-exact-rule exact-rules))
 
 	(define dual-rules
 		(filter chat-rule?
 			(map gar (psi-get-dual-match SENT))))
 
+; -------------
+; everything below iw wrong
 	(define (get-responses sent)
 		(StateLink (Anchor "*-AIML-current-pattern-*") sent)
 		(map (lambda (ru) (cog-execute! (mk-binder ru))) all-rules)
