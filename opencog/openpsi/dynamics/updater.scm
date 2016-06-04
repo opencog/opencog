@@ -2,50 +2,59 @@
 ;(use-modules (opencog))
 (use-modules (opencog atom-types))  ;needed for AtTimeLink definition?
 
-;;; PARAM DEFINITIONS
-;; todo: move to own file
+;;; Agent State
+(define agent-state (Concept (string-append psi-prefix-str "agent-state")))
 
-;; todo: should the parmaters be a concept or predicate?
-;; todo: and same with the somatic parameters
-
-(define (create-openpsi-param name initial-value)
-    (define param
-        (Concept (string-append (psi-prefix-str) name) (stv initial-value 1)))
+;;; Modulator Creation
+(define (create-openpsi-modulator name initial-value)
+    (define mod
+        (Concept (string-append psi-prefix-str name) (stv initial-value 1)))
     (Inheritance
         param
-        (Concept (string-append (psi-prefix-str) "Parameter")))
-    param)
+        (Concept (string-append psi-prefix-str "Modulator")))
+    mod)
 
+
+;;; SEC Creation
+(define (create-openpsi-sec name initial-value)
+    (define sec
+        (Concept (string-append psi-prefix-str name) (stv initial-value 1)))
+    (Inheritance
+        sec
+        (Concept (string-append psi-prefix-str "SEC")))
+    sec)
+
+;;;;;;; todo: need to figure out how SEC's are going to fit into this
 ;; todo: make util function to define
-(define power (create-openpsi-param "Power" .5))
-
+(define power (create-openpsi-sec "Power" .5))
+(define agent-state-power
+	(Evaluation (stv .5 1)
+		power
+		agent-state))
 
 
 ;;; EVENT PREDICATES
 (Predicate "speech-giving starts" (stv 0 1))
 
 
-;;; SOMATIC PREDICATES
-(define somatic-prefix-str "Somatic: ")
-
-(define (create-somatic-predicate name initial-value)
-	(define somatic
-		(Concept (string-append somatic-prefix-str name) (stv initial-value 1)))
+;;; PAU PREDICATES
+; actually these will be defined somewhere else in the system
+(define pau-prefix-str "PAU: ")
+(define (create-pau-predicate name initial-value)
+	(define pau
+		(Predicate (string-append pau-prefix-str name) (stv initial-value 1)))
 	(Inheritance
-		somatic
-		(Concept "Somatic"))
-	somatic)
-;; todo: can a Predicate inherit from a Concept?
-;; maybe we instead should do?:
-;; (Eval (Predicate "Somatic: voice width") (Predicate "Somatic"))
+		pau
+		(Concept "PAU"))
+	pau)
 
 (define voice-width
-	(create-somatic-predicate "voice width" .5))
+	(create-pau-predicate "voice width" .5))
 
 
 
 
-;;; PARAM UPDATE RULES
+;;; SYSTEM DYNAMIC INTERACTION UPDATE RULES
 ;; todo: move to own file
 
 ;; When starting a speech -> boost power
@@ -62,9 +71,9 @@
     (AtTime
         (Variable "$time")
         (ExecutionLink
-            (DefinedSchema "adjust-openpsi-parameter")
+            (DefinedSchema "adjust-openpsi-var-level")
             (List
-                power
+                agent-state-power
                 (NumberNode .7)))))
 
 
@@ -81,18 +90,18 @@
         (Evaluation
 	        (Predicate "change")
 	        (List
-	            power)))
+	            agent-state-power)))
     (AtTime
         (Variable "$time")
         (ExecutionLink
-            (DefinedSchema "adjust-openpsi-parameter")
+            (DefinedSchema "adjust-openpsi-var-level")
             (List
                 voice-width
-                (NumberNode .3)
-                power))))
+                (NumberNode .7)
+                agent-state-power))))
 
 ;; todo: we are not changing the y var in proportion to the change in the x var
-;; at this point. We may want to add that.
+;; at this point. We probably want to add that soon.
 
 ;(TimeNode (number->string (current-time)))
 
@@ -104,15 +113,23 @@
 
 ;; check out TriggerLink (some kind of trigger subscription-based messaging system
 
-;; PARAMETER UPDATING
-
+;; OPENPSI VALUE UPDATING
+;;
+;; Update openpsi parameter and variable values as a funciton of the current
+;; value, so that increases in value are larger when the current value is low
+;; and smaller when the current value is high. (And vica versa for decreases.)
+;;
+;; Currently this function assumes the value to be updated is stored in the
+;; tv.strength of target-param. However, this representation maybe be changing
+;; subject to feedback from those in the know.
+;;
 ;; alpha is in the range of [-1, 1] and represents the degree of change and
 ;;     whether the change is positively or negatively correlated with the
 ;;     origin parameter
 ;;     0 would lead to no change
 ;;
 ;; todo: see case-lambda in scheme for function overloading
-(define (adjust-openpsi-parameter target-parm alpha . origin-param)
+(define (adjust-openpsi-var-level target-parm alpha . origin-param)
 	(let* ((strength (cog-stv-strength target-parm))
 		   (confidence (cog-stv-confidence target-parm))
 
