@@ -342,6 +342,7 @@ sub split_string
 	my $tout = "";
 	for my $wrd (@words)
 	{
+		$wrd =~ s/\s*//;
 		if ($wrd ne "")
 		{
 			$tout .= $indent . $wordnode . "\"$wrd\")\n";

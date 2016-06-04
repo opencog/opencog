@@ -477,3 +477,6 @@ topicstar/>
 
 
 *-AIML-current-pattern-*
+BEETHOVEN *
+
+bad stars are xxx
