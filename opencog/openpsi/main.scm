@@ -135,16 +135,13 @@ there are 100K rules!
     (cog-chase-link 'MemberLink 'ListLink psi-action))
 
 ; --------------------------------------------------------------
-(define-public (psi-action? atom)
+(define-public (psi-action? ATOM)
 "
-  Check if the given atom is an action and return `#t`, if it is, and `#f`
-  otherwise. An atom is an action if it a member of the set represented by
-  (ConceptNode \"OpenPsi: action\").
-
-  atom:
-  - An atom to be checked whether it is an action or not.
+  Check if ATOM is an action and return `#t`, if it is, and `#f`
+  otherwise. An atom is an action if it a member of the set
+  represented by (ConceptNode \"OpenPsi: action\").
 "
-    (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
+    (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode ATOM)))
 
         ; A filter is used to account for empty list as well as
         ; cog-chase-link returning multiple results, just in case.
