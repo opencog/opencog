@@ -624,11 +624,18 @@ sub process_category
 	# Expand defintion of <sr/>
 	$text =~ s/<sr\/>/<srai><star\/><\/srai>/g;
 	$text =~ s/<sr \/>/<srai><star\/><\/srai>/g;
+	$text =~ s/<srai \/>/<srai><star\/><\/srai>/g;
+
+	# typo
+	$text =~ s/<peron/<person/g;
+	$text =~ s/<\/peron/<\/person/g;
+	$text =~ s/<thastar/<thatstar/g;
 
 	# XXX FIXME ? This is supposed to be equivalent to
 	# <person><star/></person> however, in the actual AIML texts,
 	# there is no actual star, so its broken/invalid sytax.
 	$text =~ s/<person\/>/<person><star\/><\/person>/g;
+	$text =~ s/<person \/>/<person><star\/><\/person>/g;
 
 	# Convert mangled commas, from pass 1
 	$text =~ s/#Comma/,/g;
@@ -705,6 +712,12 @@ sub process_aiml_tags
 		{
 			$tout .= &process_tag("person", $indent, $text);
 		}
+		elsif ($tag =~ /^person.*>(.*?)/)
+		{
+			print "Aieee! Unhandled screwball person tag!!!\n";
+			print "$text\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
 		elsif ($tag =~ /^that\/>/)
 		{
 			$tout .= &process_that($indent, $text);
@@ -736,6 +749,24 @@ sub process_aiml_tags
 			$tout .= &split_string($indent, $preplate);
 			$tout .= &process_aiml_tags($indent, "greater " . $1 . " less " . $2);
 		}
+		elsif ($tag =~ /^date.*?>(.*)/)
+		{
+			# These are harder to handle and we don't use them so screw it.
+			print "Aieee! Unhandled date tag!!!\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^size\/>(.*)/)
+		{
+			# Blow this off.
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^get_likes.*?>(.*)/)
+		{
+			# WTF is this???
+			print "Aieee! weird stuff!!!\n";
+			print "$text\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
 		elsif ($tag =~ /^random>/)
 		{
 			# These are harder to handle and we don't use them so screw it.
@@ -759,6 +790,13 @@ sub process_aiml_tags
 			print "Aieee! Bad recursion!!!\n";
 			print ">>>>>>$text\n";
 		}
+		elsif ($tag =~ /^\/srai>/)
+		{
+			# Sometimes, recursion screws up. This is rare, and I'm going
+			# to punt, for now.
+			print "Aieee! Bad recursion!!!\n";
+			print ">>>>>>$text\n";
+		}
 		elsif ($tag =~ /^condition/)
 		{
 			# WTF. Blow this off, for now.
@@ -768,11 +806,24 @@ sub process_aiml_tags
 		elsif ($tag =~ /^\/condition>/)
 		{
 		}
+		elsif ($tag =~ /^topicstar\/>/)
+		{
+			# WTF. Blow this off, for now.
+			print "Aieee! topicstar tag is not handled!!!\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^thatstar\/>/)
+		{
+			# WTF. Blow this off, for now.
+			print "Aieee! thatstar tag is not handled!!!\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
 		elsif ($tag =~ /^bot_name/)
 		{
 			# Blow this off
 			print "Aieee! bot_name tag in the pattern!!\n";
 			print ">>>>>>$text\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^that/)
 		{
