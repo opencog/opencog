@@ -550,21 +550,11 @@ sub process_named_tag
 	my $text = $_[2];
 	my $tout = "";
 
-# xxxxxxxxxxxxxxxxxxx
-	# Multiple gets may appear in one reply.
-	my @gets = split /<$tag/, $text;
-	foreach my $get (@gets)
-	{
-		if ($get =~ /name='(.*?)'\/>(.*)/)
-		{
-			$tout .= &print_named_tag($tag, $indent, $1);
-			$tout .= &process_aiml_tags($indent, $2);
-		}
-		else
-		{
-			$tout .= &process_aiml_tags($indent, $get);
-		}
-	}
+	$text =~ /(.*?)<$tag name='(.*?)'\/>(.*)/;
+
+	$tout .= &split_string($tag, $indent, $1);
+	$tout .= &print_named_tag($tag, $indent, $2);
+	$tout .= &process_aiml_tags($indent, $3);
 	$tout;
 }
 
