@@ -348,7 +348,7 @@
 	; previous response. Right now, we just check one level deep.
 	; XXX FIXME .. Maybe check a much longer list??
 	(define (same-as-before? SENT)
-		(equal? SENT (do-aiml-get (Concept "that")))
+		(equal? SENT (do-aiml-get (Concept "AIML state that")))
 	)
 
 	(define (do-while-same SENT CNT)
@@ -363,7 +363,7 @@
 
 	; The robots response is the current "that".
 	(if (valid-response? response)
-		(do-aiml-set (Concept "that") response))
+		(do-aiml-set (Concept "AIML state that") response))
 
 	; Return the response.
 	response

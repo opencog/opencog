@@ -490,3 +490,14 @@ topicstar/>
 ALICE</topic> <that>*</that> <template><bot name=\"name\"/> is
 functioning normally. <think><set name=\"matched\">true</set></think>
 </template> </category>
+
+duuude srai recurse
+(ListLink
+   (WordNode "push")
+   (ListLink
+      (WordNode "won")
+      (WordNode "the")
+      (WordNode "superbowl")
+   )
+)
+
