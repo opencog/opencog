@@ -316,7 +316,13 @@ to a BindLink approach for ease-of-use.
   We really only want matches to the context only.
 * AIML -- thatstar and topicstar not handled.
 * AIML HR -- in a session, never say the same thing twice!
+  Done -- for just one sentence .. as Vytas about more.
+* AIML HR -- load only the current, desired rule-set.
+* OpenPsi -- need a general mechanism that avoids doing the same thing
+  over and over.
 * general utility -- create an is-member? utility to replace psi-action?
+* integration: any AIML xfind response should be handled by
+  the fuzzy matcher instead...
 
 ### BUGS
 * agians takes too long -- psi-get-member-links is taking too long
@@ -469,5 +475,4 @@ topicstar/>
 ; Context with topic!
 ; Context with that!
 
-
-*-AIML-current-pattern-*
+(do-aiml-get (Concept "that"))

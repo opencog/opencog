@@ -244,11 +244,28 @@
   aiml-select-rule RULE-LIST - Given a list of AIML rules,
   select one to run.
 "
-	; XXX TODO -- we should rank according to the TV, and then
-	; randomly pick one, using the TV as a weighting.
-	;
-	; XXX right now just uniform weighting
-	(list-ref RULE-LIST (random (length RULE-LIST)))
+	;; Total up all of the confidence values on all of the rules
+	;; in the RULE-LIST.
+	(define sum 0.0)
+	(define (add-to-sum ATOM)
+		(set! sum (+ sum (tv-conf (cog-tv ATOM)))))
+
+	;; Return #t for the first rule in the RULE-LIST for which the
+	;; accumulated weight is above THRESH.
+	(define accum 0.0001)
+	(define (pick-first ATOM THRESH)
+		(set! accum (+ accum (tv-conf (cog-tv ATOM))))
+		(< THRESH accum))
+
+	; OK, so actually yoyal up the weights
+	(for-each add-to-sum RULE-LIST)
+
+	; Randomly pick one, using the TV-confidence from above) as a
+	; weighting.
+	(let ((thresh (random sum)))
+		(list-ref RULE-LIST (list-index
+			(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST))
+	)
 )
 
 ; --------------------------------------------------------------
@@ -271,21 +288,29 @@
 
 ; --------------------------------------------------------------
 
-(define-public (aiml-get-response-wl SENT)
+; Return true if RESP is a SetLink containing a non-empty
+; word sequence. ... or if RESP is just a ListLink that isn't
+; empty (we assume the ListLink is just a single sentence).
+; Examples of valid responses are:
+;    (ListLink (Word "blah") (Word "blah"))
+;    (SetLink (ListLink (Word "blah") (Word "blah")))
+(define (valid-response? RESP)
+	(if (null? RESP) #f
+		(if (equal? 'SetLink (cog-type RESP))
+			(if (null? (gar RESP)) #f
+				(not (null? (gaar RESP))))
+			(not (null? (gar RESP))))))
+
+;; get-response-step SENT -- get an AIML response to the sentence
+;; SENT.  Recursive, i.e. it will recursively handle the SRAI's,
+;; but is not necessarily the outermost response generator. That
+;; is, this is the correct routine to call for handling SRAI
+;; recursion.
+(define (get-response-step SENT)
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
 "
 	(define all-rules (aiml-get-applicable-rules SENT))
-
-	; Return true if RESP is a SetLink containing a non-empty
-	; word sequence. ... of if RESP is just a ListLink that isn't
-	; empty (we assume teh ListLink is just a single sentence).
-	(define (valid-response? RESP)
-		(if (null? RESP) #f
-			(if (equal? 'SetLink (cog-type RESP))
-				(if (null? (gar RESP)) #f
-					(not (null? (gaar RESP))))
-				(not (null? (gar RESP))))))
 
 	; Some AIML rules fail to generate any response at all --
 	; These are typically srai rules that fail to terminate.
@@ -302,12 +327,42 @@
 
 	(define response (do-while-null SENT 10))
 
-	; The robots response is the current "that".
-	(if (not (null? response))
-		(do-aiml-set (Concept "that") (gar response)))
+	; Strip out the SetLink, if any.
+	(if (equal? 'SetLink (cog-type response))
+		(set! response (gar response)))
 
 	; Return the response.
-	;	(word-list-set-flatten response)
+	(word-list-flatten response)
+)
+
+(define-public (aiml-get-response-wl SENT)
+"
+  aiml-get-response-wl SENT - Get AIML response to word-list SENT
+"
+	; Sometimes, the mechanism will result in exactly the same
+	; response being given twice in a row. Avoid repeating, by
+	; checking to see if the suggested response is the same as the
+	; previous response. Right now, we just check one level deep.
+	; XXX FIXME .. Maybe check a much longer list??
+	(define (same-as-before? SENT)
+		(equal? SENT (do-aiml-get (Concept "that")))
+	)
+
+	(define (do-while-same SENT CNT)
+		(if (>= 0 CNT) '()
+			(let ((response (get-response-step SENT)))
+				(if (same-as-before? response)
+					(do-while-same SENT (- CNT 1))
+					response
+				))))
+
+	(define response (do-while-same SENT 5))
+
+	; The robots response is the current "that".
+	(if (valid-response? response)
+		(do-aiml-set (Concept "that") response))
+
+	; Return the response.
 	response
 )
 
@@ -321,17 +376,9 @@
 
 (define-public (do-aiml-srai x)
 	(display "duuude srai recurse\n") (display x) (newline)
-	(let ((resp (aiml-get-response-wl x)))
-		(if (null? resp)
-			'()
-			(begin
-				(display "duuude srai result is\n")
-				(display resp) (newline)
-				(display (gar (car resp))) (newline)
-				; XXX FIXME -- if SRAI returns multiple repsonses, we
-				; currently take just the first. Should we do something
-				; else?
-				(gar (car resp))))
+	(let ((resp (get-response-step x)))
+		(display "duuude srai result is\n") (display resp) (newline)
+		resp
 	)
 )
 
