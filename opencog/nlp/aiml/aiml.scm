@@ -129,37 +129,38 @@
 )
 
 ; --------------------------------------------------------------
+; non-public utilities
 
-(define-public (aiml-get-response-wl SENT)
-"
-  aiml-get-response-wl SENT - Get AIML response to word-list SENT
-"
-	; Return #t if the rule is a AIML chat rule
-	(define (chat-rule? r)
-		(equal? (gdr r) (Concept "AIML chat subsystem goal")))
+; Return #t if the rule is a AIML chat rule
+(define (chat-rule? r)
+	(equal? (gdr r) (Concept "AIML chat subsystem goal")))
 
-	; Given an AIML rule, return a scheme list holding the context
-	; followed by the action.  Given a rule, (gar r) is the AndLink.
-	; Either gaar or gadr is the context; the other is the action.
-	(define (get-ctxt-act r)
-		(define andy (gar r))
-		(define pa (gar andy))
-		(define pb (gdr andy))
-		(if (psi-action? pb)
-			(list pa pb)
-			(list pb pa))
-	)
+; Given an AIML rule, return a scheme list holding the context
+; followed by the action.  Given a rule, (gar r) is the AndLink.
+; Either gaar or gadr is the context; the other is the action.
+(define (get-ctxt-act r)
+	(define andy (gar r))
+	(define pa (gar andy))
+	(define pb (gdr andy))
+	(if (psi-action? pb)
+		(list pa pb)
+		(list pb pa))
+)
 
-	; Get the predicate named PRED out of the context part of the rule.
-	; Assumes that there is only one such.
-	(define (get-pred RULE PRED-NAME)
-		(define ctxt (car (get-ctxt-act RULE)))
-		(define (is-pred EVL)
-			(equal? PRED-NAME (cog-name (gar EVL))))
-		(define pred-list (filter is-pred (cog-outgoing-set ctxt)))
-		(if (null? pred-list) '() (car pred-list))
-	)
+; Get the predicate named PRED out of the context part of the rule.
+; Assumes that there is only one such.
+(define (get-pred RULE PRED-NAME)
+	(define ctxt (car (get-ctxt-act RULE)))
+	(define (is-pred EVL)
+		(equal? PRED-NAME (cog-name (gar EVL))))
+	(define pred-list (filter is-pred (cog-outgoing-set ctxt)))
+	(if (null? pred-list) '() (car pred-list))
+)
 
+; -----------------------------------------------------------
+; Return all of the rules that provide exact matches to the input
+; sentence.
+(define (get-exact-rules SENT)
 	; Verify that RULE really is an exact rule for this sentence.
 	; -- check that its a chat rule
 	; -- check that it has the AIML pattern PredicateNode
@@ -173,13 +174,22 @@
 	;; XXX TODO -- filter out the exact rules that have non-trivial
 	;; THAT and TOPIC contexts.
 
-	; Run the exact rules.  We already know that the context is
-	; fulfilled, so just grab the action, and run it.
-	(define (run-exact-rule RULE)
-		(cog-execute! (cadr (get-ctxt-act RULE)))
-	)
+	; Get all the exact rules that apply to the SENT
+	(filter is-exact-rule?
+		(map gar (psi-get-exact-match SENT))))
+)
 
-	; -----------------------------------------
+; Run the exact rules.  We already know that the context is
+; fulfilled, so just grab the action, and run it.
+(define (run-exact-rule RULE)
+	(cog-execute! (cadr (get-ctxt-act RULE)))
+)
+
+; -----------------------------------------------------------
+; Return all of the rules that match the input SENT via a patern
+; (i.e. use variables in the pattern)
+(define (get-pattern-rules SENT)
+
 	; Make sure that a given pattern RULE (i.e. a rule with
 	; variables in it) can actually result in a match on the
 	; sentence.
@@ -192,35 +202,34 @@
 				))))
 		)))
 
-	; Given a pattern-based rule, run it. Given that it has variables
-	; in it, accomplish this by creating and running a BindLink.
-	; XXX Need to handle that, topic rules as appropriate.
-	(define (run-pattern-rule RULE)
-		(define bindlk (BindLink
-			(gdr (get-pred RULE "*-AIML-pattern-*"))
-			(cadr (get-ctxt-act RULE))
-		))
-		(define results (cog-execute! bindlk))
-
-		; Remove the bindlink, to avoid garbaging up the atomspace.
-		(cog-delete bindlk)
-		results
-	)
-
-	; ----------------------------
-	; Get all the exact rules that apply to the SENT
-	(define exact-rules
-		(filter is-exact-rule?
-			(map gar (psi-get-exact-match SENT))))
-
 	; Get all of the rules that might apply to this sentence,
 	; and are inexact matches (i.e. have a variable in it)
-	(define dual-rules
-		(if (null? exact-rules)
-			(filter is-usable-rule?
-				(map gar (psi-get-dual-match SENT)))
-			'()))
+	(filter is-usable-rule?
+		(map gar (psi-get-dual-match SENT)))
+)
 
+; Given a pattern-based rule, run it. Given that it has variables
+; in it, accomplish this by creating and running a BindLink.
+; XXX Need to handle that, topic rules as appropriate.
+(define (run-pattern-rule RULE)
+	(define bindlk (BindLink
+		(gdr (get-pred RULE "*-AIML-pattern-*"))
+		(cadr (get-ctxt-act RULE))
+	))
+	(define results (cog-execute! bindlk))
+
+	; Remove the bindlink, to avoid garbaging up the atomspace.
+	(cog-delete bindlk)
+	results
+)
+
+; --------------------------------------------------------------
+; --------------------------------------------------------------
+
+(define-public (aiml-get-response-wl SENT)
+"
+  aiml-get-response-wl SENT - Get AIML response to word-list SENT
+"
 	;; XXX FIXME -- although this runs the exact rules (if any),
 	; its not the right thing to do, cause running the action
 	; can have side-effects, and perhaps these should be avoided,
