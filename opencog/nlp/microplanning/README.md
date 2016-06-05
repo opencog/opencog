@@ -1,6 +1,6 @@
 # Microplanning
 
-The folder contains microplanning code for the natural langauge
+The folder contains microplanning code for the natural language
 generation (NLG) pipeline.
 
 - microplanning.scm
