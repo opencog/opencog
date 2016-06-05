@@ -277,12 +277,15 @@
 "
 	(define all-rules (aiml-get-applicable-rules SENT))
 
-	; Return true if RESP is a SetLink ctonaining a non-empty
-	; word sequence.
+	; Return true if RESP is a SetLink containing a non-empty
+	; word sequence. ... of if RESP is just a ListLink that isn't
+	; empty (we assume teh ListLink is just a single sentence).
 	(define (valid-response? RESP)
 		(if (null? RESP) #f
-			(if (null? (gar RESP)) #f
-				(not (null? (gaar RESP))))))
+			(if (equal? 'SetLink (cog-type RESP))
+				(if (null? (gar RESP)) #f
+					(not (null? (gaar RESP))))
+				(not (null? (gar RESP))))))
 
 	; Some AIML rules fail to generate any response at all --
 	; These are typically srai rules that fail to terminate.
