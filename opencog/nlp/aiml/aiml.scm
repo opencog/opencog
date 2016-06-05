@@ -409,7 +409,8 @@
 	(define flat-val (word-list-flatten VALUE))
 	; (display "duuude set key=") (display KEY) (newline)
 	; (display "duuude set value=") (display flat-val) (newline)
-	(State KEY flat-val)
+	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
+	(State rekey flat-val)
 	flat-val
 )
 
@@ -420,7 +421,8 @@
 
 ; gar discards the SetLink that the GetLink returns.
 (define-public (do-aiml-get KEY)
-	(gar (cog-execute! (Get (State KEY (Variable "$x"))))))
+	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
+	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
 
 ; AIML-tag bot -- Just like get, but for bot values.
 (DefineLink
