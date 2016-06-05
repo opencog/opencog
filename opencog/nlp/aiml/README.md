@@ -326,7 +326,6 @@ to a BindLink approach for ease-of-use.
 * general utility -- create an is-member? utility to replace psi-action?
 * integration: any AIML xfind response should be handled by
   the fuzzy matcher instead...
-* Arghhh -- bot name is borken
 
 ### BUGS
 * agians takes too long -- psi-get-member-links is taking too long
@@ -491,3 +490,8 @@ topicstar/>
 ALICE</topic> <that>*</that> <template><bot name=\"name\"/> is
 functioning normally. <think><set name=\"matched\">true</set></think>
 </template> </category>
+
+(do-aiml-bot-get (Concept "name"))
+(do-aiml-get (Concept "name"))
+(aiml-get-response-wl (string-words "my name is joob"))
+(aiml-get-response-wl (string-words "call me joob"))
