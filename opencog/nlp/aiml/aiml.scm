@@ -380,7 +380,7 @@
 
 (define-public (do-aiml-srai x)
 	(display "duuude srai recurse\n") (display x) (newline)
-	(let ((resp (get-response-step x)))
+	(let ((resp (get-response-step (word-list-flatten x))))
 		(display "duuude srai result is\n") (display resp) (newline)
 		resp
 	)
