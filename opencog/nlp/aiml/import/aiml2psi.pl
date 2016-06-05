@@ -550,9 +550,8 @@ sub process_named_tag
 	my $text = $_[2];
 	my $tout = "";
 
+# xxxxxxxxxxxxxxxxxxx
 	# Multiple gets may appear in one reply.
-	$text =~ /<$tag name=/;
-
 	my @gets = split /<$tag/, $text;
 	foreach my $get (@gets)
 	{
@@ -566,6 +565,7 @@ sub process_named_tag
 			$tout .= &process_aiml_tags($indent, $get);
 		}
 	}
+	$tout;
 }
 
 # process_that -- process a that tag
@@ -1007,7 +1007,6 @@ while (my $line = <FIN>)
 				$rule .= "   ;; context\n";
 				$rule .= $psi_ctxt;
 				$rule .= "   ;; action\n";
-				$rule .= $psi_goal;
 				$rule .= "   (ListLink\n";
 				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";

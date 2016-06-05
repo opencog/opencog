@@ -482,3 +482,11 @@ topicstar/>
 (do-aiml-get (Concept "topic"))
 (do-aiml-set (Concept "topic")   (string-words "ends with alice"))
 (aiml-get-response-wl (string-words "test botname"))
+
+
+;;; <category><pattern>TEST BOTNAME</pattern> <topic>ENDS WITH
+ALICE</topic> <that>*</that> <template><bot name=\"name\"/> is
+functioning normally. <think><set name=\"matched\">true</set></think>
+</template> </category>
+
+TEMPLATECODE
