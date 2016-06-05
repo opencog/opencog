@@ -289,7 +289,7 @@
 ;; but is not necessarily the outermost response generator. That
 ;; is, this is the correct routine to call for handling SRAI
 ;; recursion.
-(definec (get-response-step SENT)
+(define (get-response-step SENT)
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
 "
@@ -321,9 +321,13 @@
 "
 	(define response (get-response-step SENT))
 
+	; Strip out the SetLink, if any.
+	(if (equal? 'SetLink (cog-type response))
+		(set! response (gar response)))
+
 	; The robots response is the current "that".
-	(if (not (null? response))
-		(do-aiml-set (Concept "that") (gar response)))
+	(if (valid-response? response)
+		(do-aiml-set (Concept "that") response))
 
 	; Return the response.
 	;	(word-list-set-flatten response)
