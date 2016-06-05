@@ -33,9 +33,11 @@
 (define power (create-openpsi-sec "Power"))
 
 (define agent-state-power
-	(Evaluation (stv .5 1)
-		power
-		agent-state))
+	(State
+		(List
+			agent-state
+			power)
+		(Number .5)))
 (hash-set! prev-value agent-state-power .5)
 
 ;;; EVENT PREDICATES
@@ -45,16 +47,17 @@
 ;;; PAU PREDICATES
 ; actually these will be defined somewhere else in the system
 (define pau-prefix-str "PAU: ")
-(define (create-pau-predicate name initial-value)
+(define (create-pau name initial-value)
 	(define pau
-		(Predicate (string-append pau-prefix-str name) (stv initial-value 1)))
+		(Predicate (string-append pau-prefix-str name)))
 	(Inheritance
 		pau
 		(Concept "PAU"))
+	(psi-set-value pau (Number initial-value))
 	pau)
 
 (define voice-width
-	(create-pau-predicate "voice width" .5))
+	(create-pau "voice width" .2))
 
 
 
@@ -77,7 +80,7 @@
 		    (AtTime
 		        (Variable "$time")
 		        (ExecutionOutputLink
-		            (GroundedSchema "scm: adjust-openpsi-var-level")
+		            (GroundedSchema "scm: adjust-psi-var-level")
 		            (List
 		                consequent
 		                (NumberNode strength)
@@ -120,7 +123,7 @@
 	    (AtTime
 	        (Variable "$time")
 	        (ExecutionLink
-	            (GroundedSchema "scm: adjust-openpsi-var-level")
+	            (GroundedSchema "scm: adjust-psi-var-level")
 	            (List
 	                agent-state-power
 	                (NumberNode .7)))))
@@ -143,7 +146,7 @@
 	    (AtTime
 	        (Variable "$time")
 	        (ExecutionLink
-	            (GroundedSchema "scm: adjust-openpsi-var-level")
+	            (GroundedSchema "scm: adjust-psi-var-level")
 	            (List
 	                voice-width
 	                (NumberNode .7)
@@ -163,35 +166,61 @@
 
 ;; check out TriggerLink (some kind of trigger subscription-based messaging system
 
-;; OPENPSI VALUE UPDATING
-;;
-;; Update openpsi parameter and variable values as a funciton of the current
-;; value, so that increases in value are larger when the current value is low
-;; and smaller when the current value is high. (And vica versa for decreases.)
-;;
-;; Currently this function assumes the value to be updated is stored in the
-;; tv.strength of target-param. However, this representation maybe be changing
-;; subject to feedback from those in the know.
-;;
-;; alpha is in the range of [-1, 1] and represents the degree of change and
-;;     whether the change is positively or negatively correlated with the
-;;     origin parameter
-;;     0 would lead to no change
-;;
-;; todo: see case-lambda in scheme for function overloading
-(define-public (adjust-openpsi-var-level target alpha . origin-param)
-	(display "adjust-openpsi-var-level\n")
+; --------------------------------------------------------------
+"
+ Openpsi Value Updating
+
+ Update openpsi parameter and variable values as a funciton of the current
+ value, so that increases in value are larger when the current value is low
+ and smaller when the current value is high. (And vica versa for decreases.)
+
+ Currently this function assumes the value to be updated is stored in the
+ tv.strength of target-param. However, this representation maybe be changing
+ subject to feedback from those in the know.
+
+ alpha is in the range of [-1, 1] and represents the degree of change and
+     whether the change is positively or negatively correlated with the
+     origin parameter
+     0 would lead to no change
+
+ todo: see case-lambda in scheme for function overloading
+"
+(define-public (adjust-psi-var-level target alpha . origin-param)
+	(display "adjust-psi-var-level\n")
 	(display target)
-	(let* ((strength (cog-stv-strength target))
-		   (confidence (cog-stv-confidence target))
+	(let* ((value (string->number (cog-name (psi-get-value target))))
+
+		   ;(strength (cog-stv-strength target))
+		   ;(confidence (cog-stv-confidence target))
 
 			; todo: replace this with a function
-			(new-strength (min 1 (max 0 (+ strength
+			(new-value (min 1 (max 0 (+ value
 				(string->number (cog-name alpha)))))))
 
-		(cog-set-tv! target (cog-new-stv new-strength confidence))
-		(display "new strength: ")(display new-strength)(newline)))
 
+		(psi-set-value target (Number new-value))
+		;(cog-set-tv! target (cog-new-stv new-strength confidence))
+		(display "new vale: ")(display new-value)(newline)))
+
+; --------------------------------------------------------------
+(define (psi-get-value entity)
+	; todo: handle no value set (iow empty set returned from cog-execute)
+	; OpenPsi values are stored using StateLinks
+	(gar
+		(cog-execute!
+
+				(Get
+					(State
+						entity
+						(Variable "$n"))))))
+
+
+; --------------------------------------------------------------
+(define (psi-set-value entity value)
+	; OpenPsi values are stored using StateLinks
+	(State
+		entity
+		value))
 
 
 ; --------------------------------------------------------------
