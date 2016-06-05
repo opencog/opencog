@@ -237,38 +237,53 @@
 
 ; --------------------------------------------------------------
 
+(define-public (aiml-select-rule RULE-LIST)
+"
+  aiml-select-rule RULE-LIST - Given a list of AIML rules,
+  select one to run.
+"
+	; XXX TODO -- we should rank according to the TV, and then
+	; randomly pick one, using the TV as a weighting.
+	;
+	; XXX but for right now, just return the first rule in the list.
+	(car RULE-LIST)
+)
+
+; --------------------------------------------------------------
+
+(define-public (aiml-run-rule SENT RULE)
+"
+  aiml-run-rule - Given a single AIML RULE, and the SENT sentence to
+  apply it to, run the rule, and return the response.
+"
+	(define (is-exact-rule? RULE)
+		(let ((pred (get-pred RULE "*-AIML-pattern-*")))
+			(if (null? pred) #f
+				(equal? (gdr pred) SENT))))
+
+	(if (is-exact-rule? RULE)
+		(run-exact-rule RULE)
+		(run-pattern-rule RULE)
+	)
+)
+
+; --------------------------------------------------------------
+
 (define-public (aiml-get-response-wl SENT)
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
 "
-	;; XXX FIXME -- although this runs the exact rules (if any),
-	; its not the right thing to do, cause running the action
-	; can have side-effects, and perhaps these should be avoided,
-	; until we are sure that we really really want to run the rule?
-	(define exact-responses (map run-exact-rule exact-rules))
+	(define all-rules (aiml-get-applicable-rules SENT))
+	(define rule (aiml-select-rule all-rules))
+	(define response (aiml-run-rule SENT rule))
 
-; -------------
-; everything below is wrong
-
-	; For now, just get the responses.
-	(define all-responses (get-responses SENT))
-
-	; Remove the empty responses
-	(define responses
-		(map word-list-set-flatten
-			(filter (lambda (s) (not (null? (gar s)))) all-responses)))
 
 	; The robots response is the current "that".
-	; XXX FIXME this should be delayed until one of possibly
-	; several responses is actually chosen.
-	; Note that resp is a SetLink usually containing only one
-	; word-list, but maybe more than one...
-	(for-each
-		(lambda (resp) (do-aiml-set (Concept "that") (gar resp)))
-		responses)
+	(do-aiml-set (Concept "that") (gar response))
 
-	; Return the responses.
-	responses
+	; Return the response.
+	;	(word-list-set-flatten response)
+	response
 )
 
 ; --------------------------------------------------------------
