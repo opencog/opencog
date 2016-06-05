@@ -226,12 +226,21 @@
 )
 
 ; --------------------------------------------------------------
+
+; Return #t if the topic in the RULE context is actually equal
+; to the current AIML topic state.
+; XXX FIXME -- handle topic stars also ....
 (define (is-topical-rule? RULE)
 	(define pred (get-pred RULE "*-AIML-topic-*"))
-	(display RULE) (newline)
-	#t
+	(if (null? pred) #t
+		(equal?
+			(do-aiml-get (Concept "topic"))
+			(gdr pred)
+		)
+	)
 )
 
+;; XXX FIXME Handle THAT sections too ... same way as topic ...
 (define-public (aiml-get-applicable-rules SENT)
 "
   aiml-get-applicable-rules SENT - Get all AIML rules that are suitable
