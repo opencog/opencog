@@ -478,16 +478,24 @@ topicstar/>
 ; Context with topic!
 ; Context with that!
 
-(do-aiml-get (Concept "that"))
-(do-aiml-set (Concept "topic")   (string-words "ends with alice"))
+(do-aiml-get (Concept "AIML state that"))
+(do-aiml-get (Concept "AIML state topic"))
+(do-aiml-set (Concept "AIML state topic")   (string-words "ends with alice"))
 (aiml-get-response-wl (string-words "test botname"))
 
+(do-aiml-get (Concept "name"))
 
-I AM ALWAYS GLAD TO M
 
-formal
-random choice 1 of 19
-<pattern>CALL ME *</pattern>
+;;; <category><pattern>TEST BOTNAME</pattern> <topic>ENDS WITH
+ALICE</topic> <that>*</that> <template><bot name=\"name\"/> is
+functioning normally. <think><set name=\"matched\">true</set></think>
+</template> </category>
 
-(aiml-get-response-wl (string-words "call me ishmael"))
+duuude srai recurse
+
+(define pu
+(ListLink (WordNode "push")
+   (ListLink (WordNode "won") (WordNode "the") (WordNode "superbowl")))
+)
+(do-aiml-srai pu)
 

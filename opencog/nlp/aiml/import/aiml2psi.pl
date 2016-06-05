@@ -550,22 +550,12 @@ sub process_named_tag
 	my $text = $_[2];
 	my $tout = "";
 
-	# Multiple gets may appear in one reply.
-	$text =~ /<$tag name=/;
+	$text =~ /(.*?)<$tag name='(.*?)'\/>(.*)/;
 
-	my @gets = split /<$tag/, $text;
-	foreach my $get (@gets)
-	{
-		if ($get =~ /name='(.*?)'\/>(.*)/)
-		{
-			$tout .= &print_named_tag($tag, $indent, $1);
-			$tout .= &process_aiml_tags($indent, $2);
-		}
-		else
-		{
-			$tout .= &process_aiml_tags($indent, $get);
-		}
-	}
+	$tout .= &split_string($tag, $indent, $1);
+	$tout .= &print_named_tag($tag, $indent, $2);
+	$tout .= &process_aiml_tags($indent, $3);
+	$tout;
 }
 
 # process_that -- process a that tag
@@ -754,6 +744,7 @@ sub process_aiml_tags
 		{
 			# These are harder to handle and we don't use them so screw it.
 			print "Aieee! Unhandled date tag!!!\n";
+			print "See file line number $.\n";
 			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^size\/>(.*)/)
@@ -765,6 +756,7 @@ sub process_aiml_tags
 		{
 			# WTF is this???
 			print "Aieee! weird stuff!!!\n";
+			print "See file line number $.\n";
 			print "$text\n";
 			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
@@ -772,6 +764,7 @@ sub process_aiml_tags
 		{
 			# These are harder to handle and we don't use them so screw it.
 			print "Aieee! Nested random tag!!!\n";
+			print "See file line number $.\n";
 			print ">>>>>>$text\n";
 		}
 		elsif ($tag =~ /^\/random>/)
@@ -782,6 +775,7 @@ sub process_aiml_tags
 			# Sometimes, recursion screws up. This is rare, and I'm going
 			# to punt, for now.
 			print "Aieee! Bad recursion!!!\n";
+			print "See file line number $.\n";
 			print ">>>>>>$text\n";
 		}
 		elsif ($tag =~ /^\/think>/)
@@ -789,6 +783,7 @@ sub process_aiml_tags
 			# Sometimes, recursion screws up. This is rare, and I'm going
 			# to punt, for now.
 			print "Aieee! Bad recursion!!!\n";
+			print "See file line number $.\n";
 			print ">>>>>>$text\n";
 		}
 		elsif ($tag =~ /^\/srai>/)
@@ -796,12 +791,14 @@ sub process_aiml_tags
 			# Sometimes, recursion screws up. This is rare, and I'm going
 			# to punt, for now.
 			print "Aieee! Bad recursion!!!\n";
+			print "See file line number $.\n";
 			print ">>>>>>$text\n";
 		}
 		elsif ($tag =~ /^condition/)
 		{
 			# WTF. Blow this off, for now.
 			print "Aieee! Condition tag is not handled!!!\n";
+			print "See file line number $.\n";
 			print ">>>>>>$text\n";
 		}
 		elsif ($tag =~ /^\/condition>/)
@@ -811,18 +808,21 @@ sub process_aiml_tags
 		{
 			# WTF. Blow this off, for now.
 			print "Aieee! topicstar tag is not handled!!!\n";
+			print "See file line number $.\n";
 			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^thatstar\/>/)
 		{
 			# WTF. Blow this off, for now.
 			print "Aieee! thatstar tag is not handled!!!\n";
+			print "See file line number $.\n";
 			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^bot_name/)
 		{
 			# Blow this off
 			print "Aieee! bot_name tag in the pattern!!\n";
+			print "See file line number $.\n";
 			print ">>>>>>$text\n";
 			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
@@ -830,11 +830,13 @@ sub process_aiml_tags
 		{
 			# Blow this off
 			print "Aieee! Wacky that tag!!\n";
+			print "See file line number $.\n";
 			print ">>>>>>$text\n";
 		}
 		else
 		{
 			print "Aieee! what is this tag???\n";
+			print "See file line number $.\n";
 			print ">>>>>>$tag\n\n\n";
 			print ">>>>>>$text\n";
 			die;
@@ -995,7 +997,6 @@ while (my $line = <FIN>)
 				$rule .= "   ;; context\n";
 				$rule .= $psi_ctxt;
 				$rule .= "   ;; action\n";
-				$rule .= $psi_goal;
 				$rule .= "   (ListLink\n";
 				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";

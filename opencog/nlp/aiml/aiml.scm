@@ -263,9 +263,11 @@
 	; Randomly pick one, using the TV-confidence from above) as a
 	; weighting.
 	(let ((thresh (random sum)))
-		(list-ref RULE-LIST (list-index
-			(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST))
-	)
+		(if (null? RULE-LIST)
+			'()
+			(list-ref RULE-LIST (list-index
+				(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST))
+	))
 )
 
 ; --------------------------------------------------------------
@@ -280,10 +282,12 @@
 			(if (null? pred) #f
 				(equal? (gdr pred) SENT))))
 
-	(if (is-exact-rule? RULE)
-		(run-exact-rule RULE)
-		(run-pattern-rule RULE SENT)
-	)
+	(if (null? RULE)
+		'()
+		(if (is-exact-rule? RULE)
+			(run-exact-rule RULE)
+			(run-pattern-rule RULE SENT)
+	))
 )
 
 ; --------------------------------------------------------------
@@ -307,9 +311,6 @@
 ;; is, this is the correct routine to call for handling SRAI
 ;; recursion.
 (define (get-response-step SENT)
-"
-  aiml-get-response-wl SENT - Get AIML response to word-list SENT
-"
 	(define all-rules (aiml-get-applicable-rules SENT))
 
 	; Some AIML rules fail to generate any response at all --
@@ -326,6 +327,9 @@
 				))))
 
 	(define response (do-while-null SENT 10))
+
+	; Deal with a null list...
+	(if (null? response) (set! response (ListLink)))
 
 	; Strip out the SetLink, if any.
 	(if (equal? 'SetLink (cog-type response))
@@ -345,7 +349,7 @@
 	; previous response. Right now, we just check one level deep.
 	; XXX FIXME .. Maybe check a much longer list??
 	(define (same-as-before? SENT)
-		(equal? SENT (do-aiml-get (Concept "that")))
+		(equal? SENT (do-aiml-get (Concept "AIML state that")))
 	)
 
 	(define (do-while-same SENT CNT)
@@ -360,7 +364,7 @@
 
 	; The robots response is the current "that".
 	(if (valid-response? response)
-		(do-aiml-set (Concept "that") response))
+		(do-aiml-set (Concept "AIML state that") response))
 
 	; Return the response.
 	response
@@ -376,7 +380,7 @@
 
 (define-public (do-aiml-srai x)
 	(display "duuude srai recurse\n") (display x) (newline)
-	(let ((resp (get-response-step x)))
+	(let ((resp (get-response-step (word-list-flatten x))))
 		(display "duuude srai result is\n") (display resp) (newline)
 		resp
 	)
@@ -406,7 +410,8 @@
 	(define flat-val (word-list-flatten VALUE))
 	; (display "duuude set key=") (display KEY) (newline)
 	; (display "duuude set value=") (display flat-val) (newline)
-	(State KEY flat-val)
+	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
+	(State rekey flat-val)
 	flat-val
 )
 
@@ -417,36 +422,13 @@
 
 ; gar discards the SetLink that the GetLink returns.
 (define-public (do-aiml-get KEY)
-	(gar (cog-execute! (Get (State KEY (Variable "$x"))))))
+	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
+	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
 
 ; AIML-tag bot -- Just like get, but for bot values.
 (DefineLink
 	(DefinedSchemaNode "AIML-tag bot")
 	(GroundedSchemaNode "scm: do-aiml-get"))
-
-; AIML-pred topic -- Handle topic tag. XXX all wrong.
-(DefineLink
-	(DefinedPredicate "AIML-pred topic")
-	(GroundedPredicate "scm: do-aiml-topic"))
-
-(define-public (do-aiml-topic VAL)
-	(display "duuude handle topic!! -->")
-	(display VAL)
-	(newline)
-	(stv 1 1)
-)
-
-; AIML-pred that -- Handle that tag. XXX all wrong.
-(DefineLink
-	(DefinedPredicate "AIML-pred that")
-	(GroundedPredicate "scm: do-aiml-that"))
-
-(define-public (do-aiml-that VAL)
-	(display "duuude handle that!! -->")
-	(display VAL)
-	(newline)
-	(stv 1 1)
-)
 
 ;; -------------------------
 ; AIML-tag person -- Convert 1st to third person, and back.
