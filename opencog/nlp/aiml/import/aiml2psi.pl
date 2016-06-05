@@ -656,12 +656,16 @@ sub process_aiml_tags
 	my $indent = $_[0];
 	my $text = $_[1];
 
+	if ($text eq "") { return ""; }
+
 	my $tout = "";
 
 	# Find the very first angle bracket
-	if ($text =~ /.*?<(.*)/)
+	if ($text =~ /(.*?)<(.*)/)
 	{
-		my $tag = $1;
+		my $preplate = $1;
+		my $tag = $2;
+
 		if ($tag =~ /^srai>/)
 		{
 			$tout .= &process_tag("srai", $indent, $text);
@@ -698,13 +702,39 @@ sub process_aiml_tags
 		{
 			$tout .= &process_named_tag("bot", $indent, $text);
 		}
+		elsif ($tag =~ /^formal>/)
+		{
+			$tout .= &process_tag("formal", $indent, $text);
+		}
 		elsif ($tag =~ /^!--.*-->(.*)/)
 		{
+			$tout .= &split_string($indent, $preplate);
 			# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
-			if ($1 != "")
-			{
-				$tout .= &process_aiml_tags($indent, $1);
-			}
+			$tout .= &process_aiml_tags($indent, $1);
+		}
+		# strip out HTML markup. <br/> tag
+		elsif ($tag =~ /^br\/>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^\/a>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		# strip out HTML markup. <a href> tag
+		elsif ($tag =~ /^a target=.*?>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		else
+		{
+			print "Aieee! what is this tag???\n";
+			print ">>>>>>$tag\n\n\n";
+			print ">>>>>>$text\n";
+			die;
 		}
 	}
 	else
@@ -849,7 +879,7 @@ $rule .= "duuuude choice is >>>$catty<<<\n";
 					$rule .= $psi_ctxt;
 					$rule .= "   ; action\n";
 					$rule .= "   (ListLink\n";
-					$rule .= &process_aiml_tags("      ", $catty);
+					$rule .= &process_category("      ", $catty);
 					$rule .= "   )\n";
 					$rule .= &psi_tail($num_stars, $pat_word_count);
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
