@@ -211,15 +211,17 @@
 ; Given a pattern-based rule, run it. Given that it has variables
 ; in it, accomplish this by creating and running a BindLink.
 ; XXX Need to handle that, topic rules as appropriate.
-(define (run-pattern-rule RULE)
-	(define bindlk (BindLink
-		(gdr (get-pred RULE "*-AIML-pattern-*"))
-		(cadr (get-ctxt-act RULE))
+(define (run-pattern-rule RULE SENT)
+	(define maplk (MapLink
+		(ImplicationLink
+			(gdr (get-pred RULE "*-AIML-pattern-*"))
+			(cadr (get-ctxt-act RULE)))
+		(SetLink SENT)
 	))
-	(define results (cog-execute! bindlk))
+	(define results (cog-execute! maplk))
 
 	; Remove the bindlink, to avoid garbaging up the atomspace.
-	(cog-delete bindlk)
+	(cog-delete maplk)
 	results
 )
 
@@ -263,7 +265,7 @@
 
 	(if (is-exact-rule? RULE)
 		(run-exact-rule RULE)
-		(run-pattern-rule RULE)
+		(run-pattern-rule RULE SENT)
 	)
 )
 
