@@ -327,11 +327,7 @@
 			(begin
 				(display "duuude srai result is\n")
 				(display resp) (newline)
-				(display (gar (car resp))) (newline)
-				; XXX FIXME -- if SRAI returns multiple repsonses, we
-				; currently take just the first. Should we do something
-				; else?
-				(gar (car resp))))
+				resp))
 	)
 )
 
