@@ -204,14 +204,8 @@
 
 	; Get all of the rules that might apply to this sentence,
 	; and are inexact matches (i.e. have a variable in it)
-	(define pat-rules
-		(filter is-usable-rule?
-			(map gar (psi-get-dual-match SENT))))
-
-	(define (is-topical-rule? RULE)
-	)
-
-	pat-rules
+	(filter is-usable-rule?
+		(map gar (psi-get-dual-match SENT)))
 )
 
 ; Given a pattern-based rule, run it. Given that it has variables
@@ -232,15 +226,26 @@
 )
 
 ; --------------------------------------------------------------
+(define (is-topical-rule? RULE)
+	(define pred (get-pred RULE "*-AIML-topic-*"))
+	(display RULE) (newline)
+	#t
+)
 
 (define-public (aiml-get-applicable-rules SENT)
 "
   aiml-get-applicable-rules SENT - Get all AIML rules that are suitable
   for generating a reply to the givven sentence.
 "
-	(concatenate! (list
-		(get-exact-rules SENT)
-		(get-pattern-rules SENT)))
+	(define all-rules
+		(concatenate! (list
+			(get-exact-rules SENT)
+			(get-pattern-rules SENT))))
+
+	(define top-rules
+		(filter is-topical-rule? all-rules))
+
+	top-rules
 )
 
 ; --------------------------------------------------------------
