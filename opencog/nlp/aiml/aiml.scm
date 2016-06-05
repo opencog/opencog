@@ -129,55 +129,186 @@
 )
 
 ; --------------------------------------------------------------
+; non-public utilities
+
+; Return #t if the rule is a AIML chat rule
+(define (chat-rule? r)
+	(equal? (gdr r) (Concept "AIML chat subsystem goal")))
+
+; Given an AIML rule, return a scheme list holding the context
+; followed by the action.  Given a rule, (gar r) is the AndLink.
+; Either gaar or gadr is the context; the other is the action.
+(define (get-ctxt-act r)
+	(define andy (gar r))
+	(define pa (gar andy))
+	(define pb (gdr andy))
+	(if (psi-action? pb)
+		(list pa pb)
+		(list pb pa))
+)
+
+; Get the predicate named PRED out of the context part of the rule.
+; Assumes that there is only one such.
+(define (get-pred RULE PRED-NAME)
+	(define ctxt (car (get-ctxt-act RULE)))
+	(define (is-pred EVL)
+		(equal? PRED-NAME (cog-name (gar EVL))))
+	(define pred-list (filter is-pred (cog-outgoing-set ctxt)))
+	(if (null? pred-list) '() (car pred-list))
+)
+
+; -----------------------------------------------------------
+; Return all of the rules that provide exact matches to the input
+; sentence.
+(define (get-exact-rules SENT)
+	; Verify that RULE really is an exact rule for this sentence.
+	; -- check that its a chat rule
+	; -- check that it has the AIML pattern PredicateNode
+	; -- check that the pattern is the sentence.
+	(define (is-exact-rule? RULE)
+		(if (not (chat-rule? RULE)) #f
+			(let ((pred (get-pred RULE "*-AIML-pattern-*")))
+				(if (null? pred) #f
+					(equal? (gdr pred) SENT)))))
+
+	;; XXX TODO -- filter out the exact rules that have non-trivial
+	;; THAT and TOPIC contexts.
+
+	; Get all the exact rules that apply to the SENT
+	(filter is-exact-rule?
+		(map gar (psi-get-exact-match SENT)))
+)
+
+; Run the exact rules.  We already know that the context is
+; fulfilled, so just grab the action, and run it.
+(define (run-exact-rule RULE)
+	(cog-execute! (cadr (get-ctxt-act RULE)))
+)
+
+; -----------------------------------------------------------
+; Return all of the rules that match the input SENT via a patern
+; (i.e. use variables in the pattern)
+(define (get-pattern-rules SENT)
+
+	; Make sure that a given pattern RULE (i.e. a rule with
+	; variables in it) can actually result in a match on the
+	; sentence.
+	(define (is-usable-rule? RULE)
+		(if (not (chat-rule? RULE)) #f
+			(let ((pred (get-pred RULE "*-AIML-pattern-*")))
+				(if (null? pred) #f
+					(not (null? (gar
+						(cog-execute! (MapLink (gdr pred) (SetLink SENT)))
+				))))
+		)))
+
+	; Get all of the rules that might apply to this sentence,
+	; and are inexact matches (i.e. have a variable in it)
+	(filter is-usable-rule?
+		(map gar (psi-get-dual-match SENT)))
+)
+
+; Given a pattern-based rule, run it. Given that it has variables
+; in it, accomplish this by creating and running a BindLink.
+; XXX Need to handle that, topic rules as appropriate.
+(define (run-pattern-rule RULE SENT)
+	(define maplk (MapLink
+		(ImplicationLink
+			(gdr (get-pred RULE "*-AIML-pattern-*"))
+			(cadr (get-ctxt-act RULE)))
+		(SetLink SENT)
+	))
+	(define results (cog-execute! maplk))
+
+	; Remove the bindlink, to avoid garbaging up the atomspace.
+	(cog-delete maplk)
+	results
+)
+
+; --------------------------------------------------------------
+
+(define-public (aiml-get-applicable-rules SENT)
+"
+  aiml-get-applicable-rules SENT - Get all AIML rules that are suitable
+  for generating a reply to the givven sentence.
+"
+	(concatenate! (list
+		(get-exact-rules SENT)
+		(get-pattern-rules SENT)))
+)
+
+; --------------------------------------------------------------
+
+(define-public (aiml-select-rule RULE-LIST)
+"
+  aiml-select-rule RULE-LIST - Given a list of AIML rules,
+  select one to run.
+"
+	; XXX TODO -- we should rank according to the TV, and then
+	; randomly pick one, using the TV as a weighting.
+	;
+	; XXX right now just uniform weighting
+	(list-ref RULE-LIST (random (length RULE-LIST)))
+)
+
+; --------------------------------------------------------------
+
+(define-public (aiml-run-rule SENT RULE)
+"
+  aiml-run-rule - Given a single AIML RULE, and the SENT sentence to
+  apply it to, run the rule, and return the response.
+"
+	(define (is-exact-rule? RULE)
+		(let ((pred (get-pred RULE "*-AIML-pattern-*")))
+			(if (null? pred) #f
+				(equal? (gdr pred) SENT))))
+
+	(if (is-exact-rule? RULE)
+		(run-exact-rule RULE)
+		(run-pattern-rule RULE SENT)
+	)
+)
+
+; --------------------------------------------------------------
 
 (define-public (aiml-get-response-wl SENT)
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
 "
+	(define all-rules (aiml-get-applicable-rules SENT))
 
-	; Return #t if the rule is a aiml chat rule
-	(define (chat-rule? r)
-		(equal? (gdr r) (Concept "AIML chat goal")))
+	; Return true if RESP is a SetLink containing a non-empty
+	; word sequence. ... of if RESP is just a ListLink that isn't
+	; empty (we assume teh ListLink is just a single sentence).
+	(define (valid-response? RESP)
+		(if (null? RESP) #f
+			(if (equal? 'SetLink (cog-type RESP))
+				(if (null? (gar RESP)) #f
+					(not (null? (gaar RESP))))
+				(not (null? (gar RESP))))))
 
-	; Create a MapLink and run it. RULE is currently expected to
-	; be an ImplicationLink wrapping a SequentialAnd where the
-	; first part of the SequentialAnd is the input sentnece, and the
-	; second is the response. XXX FIXME except that this is wrong:
-	; any "that" or "topic" matching fails. Also, its wrapping
-	; word-lists and not predicates. Yuck!
-	(define (run-rule RULE)
-		(define result
-			(word-list-set-flatten
-				(cog-execute!
-					(Map (Implication (gaar RULE) (gdar RULE)) (Set SENT)))))
-(if (not (null? (gar result)))
-(begin
-(display "duuude just ran rule\n") (display RULE) (newline)
-(display "duuude got result\n") (display result) (newline)))
-		result
-	)
+	; Some AIML rules fail to generate any response at all --
+	; These are typically srai rules that fail to terminate.
+	; So, try again, picking a different rule, till we do get some
+	; response.
+	(define (do-while-null SENT CNT)
+		(if (>= 0 CNT) '()
+			(let* ((rule (aiml-select-rule all-rules))
+					(response (aiml-run-rule SENT rule)))
+				(if (valid-response? response)
+					response
+					(do-while-null SENT (- CNT 1))
+				))))
 
-	; For now, just get the responses.
-	(define all-responses
-		(map run-rule
-			(filter chat-rule?
-				(map gar (psi-get-member-links SENT)))))
-
-	; Remove the empty responses
-	(define responses
-		(filter (lambda (s) (not (null? (gar s)))) all-responses))
+	(define response (do-while-null SENT 10))
 
 	; The robots response is the current "that".
-	; XXX FIXME this should be delayed until one of possibly
-	; several responses is actually chosen.
-	; Nlote that resp is a SetLink usually containing only one
-	; word-list, but maybe more than one...
-	(for-each
-		(lambda (resp) (do-aiml-set (Concept "that") (gar resp)))
-		responses)
+	(if (not (null? response))
+		(do-aiml-set (Concept "that") (gar response)))
 
-	; Return the responses.
-	responses
+	; Return the response.
+	;	(word-list-set-flatten response)
+	response
 )
 
 ; --------------------------------------------------------------
@@ -246,15 +377,28 @@
 	(DefinedSchemaNode "AIML-tag bot")
 	(GroundedSchemaNode "scm: do-aiml-get"))
 
-; AIML-tag that -- Handle that tag. XXX all wrong.
+; AIML-pred topic -- Handle topic tag. XXX all wrong.
 (DefineLink
-	(DefinedSchemaNode "AIML-tag that")
-	(GroundedSchemaNode "scm: do-aiml-that"))
+	(DefinedPredicate "AIML-pred topic")
+	(GroundedPredicate "scm: do-aiml-topic"))
+
+(define-public (do-aiml-topic VAL)
+	(display "duuude handle topic!! -->")
+	(display VAL)
+	(newline)
+	(stv 1 1)
+)
+
+; AIML-pred that -- Handle that tag. XXX all wrong.
+(DefineLink
+	(DefinedPredicate "AIML-pred that")
+	(GroundedPredicate "scm: do-aiml-that"))
 
 (define-public (do-aiml-that VAL)
 	(display "duuude handle that!! -->")
 	(display VAL)
 	(newline)
+	(stv 1 1)
 )
 
 ;; -------------------------
