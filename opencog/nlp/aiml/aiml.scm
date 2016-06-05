@@ -327,6 +327,9 @@
 
 	(define response (do-while-null SENT 10))
 
+	; Deal with a null list...
+	(if (null? response) (set! response (ListLink)))
+
 	; Strip out the SetLink, if any.
 	(if (equal? 'SetLink (cog-type response))
 		(set! response (gar response)))
