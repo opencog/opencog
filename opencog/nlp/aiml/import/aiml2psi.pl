@@ -718,16 +718,46 @@ sub process_aiml_tags
 			$tout .= &split_string($indent, $preplate);
 			$tout .= &process_aiml_tags($indent, " " . $1);
 		}
-		elsif ($tag =~ /^\/a>(.*)/)
-		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
-		}
 		# strip out HTML markup. <a href> tag
 		elsif ($tag =~ /^a target=.*?>(.*)/)
 		{
 			$tout .= &split_string($indent, $preplate);
 			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^\/a>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^ul>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^\/ul>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^li>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^\/li>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^p\/>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^(.*?)&gt;(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, "greater " . $1 . " less " . $2);
 		}
 		else
 		{

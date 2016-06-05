@@ -493,3 +493,5 @@ there's a think and a set ...
 
 &process_aiml_tags
 he alice ai foundation websi
+
+associated closing tag
