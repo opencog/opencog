@@ -176,7 +176,7 @@
 
 	; Get all the exact rules that apply to the SENT
 	(filter is-exact-rule?
-		(map gar (psi-get-exact-match SENT))))
+		(map gar (psi-get-exact-match SENT)))
 )
 
 ; Run the exact rules.  We already know that the context is
@@ -224,6 +224,17 @@
 )
 
 ; --------------------------------------------------------------
+
+(define-public (aiml-get-applicable-rules SENT)
+"
+  aiml-get-applicable-rules SENT - Get all AIML rules that are suitable
+  for generating a reply to the givven sentence.
+"
+	(concatenate! (list
+		(get-exact-rules SENT)
+		(get-pattern-rules SENT)))
+)
+
 ; --------------------------------------------------------------
 
 (define-public (aiml-get-response-wl SENT)
