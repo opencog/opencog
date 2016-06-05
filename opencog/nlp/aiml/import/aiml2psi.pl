@@ -709,83 +709,83 @@ sub process_aiml_tags
 		}
 		elsif ($tag =~ /^!--.*-->(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
 			# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
-			$tout .= &process_aiml_tags($indent, $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		# strip out HTML markup. <br/> tag
 		elsif ($tag =~ /^br\/>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		# strip out HTML markup. <em> tag
 		elsif ($tag =~ /^em>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		# strip out HTML markup. </em> tag
 		elsif ($tag =~ /^\/em>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		# strip out HTML markup. <a href> tag
 		elsif ($tag =~ /^a target=.*?>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^\/a>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		# strip out HTML markup. <ul> tag
 		elsif ($tag =~ /^ul>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^\/ul>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		# strip out HTML markup. <li> tag
 		elsif ($tag =~ /^li>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^\/li>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		# strip out HTML markup. <uppercase> tag
+		elsif ($tag =~ /^uppercase>(.*)/)
+		{
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^\/uppercase>(.*)/)
+		{
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		# strip out HTML markup. <p/> tag
 		elsif ($tag =~ /^p\/>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		# strip out HTML markup. <img src> tag
 		elsif ($tag =~ /^img src=.*?>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^\/img>(.*)/)
 		{
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		# strip out HTML markup. <property> tag
+		elsif ($tag =~ /^property.*?>(.*)/)
+		{
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^id\/>(.*)/)
 		{
 			# id is supposed to be the IP address. Blow this off.
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, " " . $1);
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^(.*?)&gt;(.*)/)
 		{
@@ -803,6 +803,13 @@ sub process_aiml_tags
 		{
 		}
 		elsif ($tag =~ /^\/set>/)
+		{
+			# Sometimes, recursion screws up. This is rare, and I'm going
+			# to punt, for now.
+			print "Aieee! Bad recursion!!!\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/think>/)
 		{
 			# Sometimes, recursion screws up. This is rare, and I'm going
 			# to punt, for now.
