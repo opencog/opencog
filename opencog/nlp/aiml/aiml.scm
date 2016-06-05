@@ -271,7 +271,12 @@
 
 ; --------------------------------------------------------------
 
-(define-public (aiml-get-response-wl SENT)
+;; get-response-step SENT -- get an AIML response to the sentence
+;; SENT.  Recursive, i.e. it will recursively handle the SRAI's,
+;; but is not necessarily the outermost response generator. That
+;; is, this is the correct routine to call for handling SRAI
+;; recursion.
+(definec (get-response-step SENT)
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
 "
@@ -302,6 +307,17 @@
 
 	(define response (do-while-null SENT 10))
 
+	; Return the response.
+	;	(word-list-set-flatten response)
+	response
+)
+
+(define-public (aiml-get-response-wl SENT)
+"
+  aiml-get-response-wl SENT - Get AIML response to word-list SENT
+"
+	(define response (get-response-step SENT))
+
 	; The robots response is the current "that".
 	(if (not (null? response))
 		(do-aiml-set (Concept "that") (gar response)))
@@ -321,13 +337,9 @@
 
 (define-public (do-aiml-srai x)
 	(display "duuude srai recurse\n") (display x) (newline)
-	(let ((resp (aiml-get-response-wl x)))
-		(if (null? resp)
-			'()
-			(begin
-				(display "duuude srai result is\n")
-				(display resp) (newline)
-				resp))
+	(let ((resp (get-response-step x)))
+		(display "duuude srai result is\n") (display resp) (newline)
+		resp
 	)
 )
 
