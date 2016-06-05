@@ -276,12 +276,28 @@
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
 "
 	(define all-rules (aiml-get-applicable-rules SENT))
-	(define rule (aiml-select-rule all-rules))
-	(define response (aiml-run-rule SENT rule))
 
+	; Return true if RESP is a SetLink ctonaining a non-empty
+	; word sequence.
+	(define (valid-response? RESP)
+		(if (null? RESP) #f
+			(if (null? (gar RESP)) #f
+				(not (null? (gaar RESP))))))
+
+	(define (do-while-null SENT CNT)
+		(if (>= 0 CNT) '()
+			(let* ((rule (aiml-select-rule all-rules))
+					(response (aiml-run-rule SENT rule)))
+				(if (valid-response? response)
+					(do-while-null SENT (- CNT 1))
+					response
+				))))
+
+	(define response (do-while-null SENT 10))
 
 	; The robots response is the current "that".
-	(do-aiml-set (Concept "that") (gar response))
+	(if (not (null? response))
+		(do-aiml-set (Concept "that") (gar response)))
 
 	; Return the response.
 	;	(word-list-set-flatten response)
