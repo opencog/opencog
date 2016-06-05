@@ -491,7 +491,17 @@ random choice 1 of 19
 
 there's a think and a set ...
 
-&process_aiml_tags
-he alice ai foundation websi
+<set name='topic'>ends with alice</set> <set name='matched'>false</set>
+<set name='response'><srai><star/> bot
 
-associated closing tag
+;;; COMPLEX CODE BRANCH
+;;; <category><pattern>_ ALICE</pattern> <topic>*</topic> <that>*</that>
+<template> <think> <set name=\"savedtopic\"><get name=\"topic\"/></set>
+<set name=\"topic\">ENDS WITH ALICE</set> <set
+name=\"matched\">false</set> <set name=\"response\"><srai><star/>
+BOTNAME</srai></set> </think> <condition name=\"matched\"> <li
+value=\"true\"><get name=\"response\"/></li>
+<li><srai><star/></srai></li> </condition> <think> <set
+name=\"topic\"><get name=\"savedtopic\"/></set> </think> </template>
+</category>
+

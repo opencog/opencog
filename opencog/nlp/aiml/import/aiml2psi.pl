@@ -22,7 +22,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.4.1";
+my $ver = "0.4.2";
 my $debug;
 my $help;
 my $version;
@@ -450,7 +450,7 @@ sub process_set
 	my $text = $_[1];
 	my $tout = "";
 
-	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/;
+	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*?)/;
 
 	$tout .= &split_string($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
@@ -556,7 +556,7 @@ sub process_named_tag
 	my @gets = split /<$tag/, $text;
 	foreach my $get (@gets)
 	{
-		if ($get =~ /name='(.*)'\/>(.*)/)
+		if ($get =~ /name='(.*?)'\/>(.*)/)
 		{
 			$tout .= &print_named_tag($tag, $indent, $1);
 			$tout .= &process_aiml_tags($indent, $2);
@@ -623,6 +623,7 @@ sub process_category
 
 	# Expand defintion of <sr/>
 	$text =~ s/<sr\/>/<srai><star\/><\/srai>/g;
+	$text =~ s/<sr \/>/<srai><star\/><\/srai>/g;
 
 	# XXX FIXME ? This is supposed to be equivalent to
 	# <person><star/></person> however, in the actual AIML texts,
@@ -718,6 +719,18 @@ sub process_aiml_tags
 			$tout .= &split_string($indent, $preplate);
 			$tout .= &process_aiml_tags($indent, " " . $1);
 		}
+		# strip out HTML markup. <em> tag
+		elsif ($tag =~ /^em>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		# strip out HTML markup. </em> tag
+		elsif ($tag =~ /^\/em>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
 		# strip out HTML markup. <a href> tag
 		elsif ($tag =~ /^a target=.*?>(.*)/)
 		{
@@ -729,6 +742,7 @@ sub process_aiml_tags
 			$tout .= &split_string($indent, $preplate);
 			$tout .= &process_aiml_tags($indent, " " . $1);
 		}
+		# strip out HTML markup. <ul> tag
 		elsif ($tag =~ /^ul>(.*)/)
 		{
 			$tout .= &split_string($indent, $preplate);
@@ -739,6 +753,7 @@ sub process_aiml_tags
 			$tout .= &split_string($indent, $preplate);
 			$tout .= &process_aiml_tags($indent, " " . $1);
 		}
+		# strip out HTML markup. <li> tag
 		elsif ($tag =~ /^li>(.*)/)
 		{
 			$tout .= &split_string($indent, $preplate);
@@ -749,15 +764,71 @@ sub process_aiml_tags
 			$tout .= &split_string($indent, $preplate);
 			$tout .= &process_aiml_tags($indent, " " . $1);
 		}
+		# strip out HTML markup. <p/> tag
 		elsif ($tag =~ /^p\/>(.*)/)
 		{
 			$tout .= &split_string($indent, $preplate);
 			$tout .= &process_aiml_tags($indent, " " . $1);
 		}
-		elsif ($tag =~ /^(.*?)&gt;(.*)/)
+		# strip out HTML markup. <img src> tag
+		elsif ($tag =~ /^img src=.*?>(.*)/)
 		{
 			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^\/img>(.*)/)
+		{
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^id\/>(.*)/)
+		{
+			# id is supposed to be the IP address. Blow this off.
+			$tout .= &split_string($indent, $preplate);
+			$tout .= &process_aiml_tags($indent, " " . $1);
+		}
+		elsif ($tag =~ /^(.*?)&gt;(.*)/)
+		{
+			# These occur when the responses are trying to explain XML.
+			$tout .= &split_string($indent, $preplate);
 			$tout .= &process_aiml_tags($indent, "greater " . $1 . " less " . $2);
+		}
+		elsif ($tag =~ /^random>/)
+		{
+			# These are harder to handle and we don't use them so screw it.
+			print "Aieee! Nested random tag!!!\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/random>/)
+		{
+		}
+		elsif ($tag =~ /^\/set>/)
+		{
+			# Sometimes, recursion screws up. This is rare, and I'm going
+			# to punt, for now.
+			print "Aieee! Bad recursion!!!\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^condition/)
+		{
+			# WTF. Blow this off, for now.
+			print "Aieee! Condition tag is not handled!!!\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/condition>/)
+		{
+		}
+		elsif ($tag =~ /^bot_name/)
+		{
+			# Blow this off
+			print "Aieee! bot_name tag in the pattern!!\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^that/)
+		{
+			# Blow this off
+			print "Aieee! Wacky that tag!!\n";
+			print ">>>>>>$text\n";
 		}
 		else
 		{
@@ -915,7 +986,7 @@ $rule .= "duuuude choice is >>>$catty<<<\n";
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
 				}
-         }
+			}
 			else
 			{
 				$rule = ";;; COMPLEX CODE BRANCH\n";
