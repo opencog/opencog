@@ -263,9 +263,11 @@
 	; Randomly pick one, using the TV-confidence from above) as a
 	; weighting.
 	(let ((thresh (random sum)))
-		(list-ref RULE-LIST (list-index
-			(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST))
-	)
+		(if (null? RULE-LIST)
+			'()
+			(list-ref RULE-LIST (list-index
+				(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST))
+	))
 )
 
 ; --------------------------------------------------------------
@@ -280,10 +282,12 @@
 			(if (null? pred) #f
 				(equal? (gdr pred) SENT))))
 
-	(if (is-exact-rule? RULE)
-		(run-exact-rule RULE)
-		(run-pattern-rule RULE SENT)
-	)
+	(if (null? RULE)
+		'()
+		(if (is-exact-rule? RULE)
+			(run-exact-rule RULE)
+			(run-pattern-rule RULE SENT)
+	))
 )
 
 ; --------------------------------------------------------------
@@ -307,9 +311,6 @@
 ;; is, this is the correct routine to call for handling SRAI
 ;; recursion.
 (define (get-response-step SENT)
-"
-  aiml-get-response-wl SENT - Get AIML response to word-list SENT
-"
 	(define all-rules (aiml-get-applicable-rules SENT))
 
 	; Some AIML rules fail to generate any response at all --

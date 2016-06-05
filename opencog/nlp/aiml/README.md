@@ -492,12 +492,10 @@ functioning normally. <think><set name=\"matched\">true</set></think>
 </template> </category>
 
 duuude srai recurse
-(ListLink
-   (WordNode "push")
-   (ListLink
-      (WordNode "won")
-      (WordNode "the")
-      (WordNode "superbowl")
-   )
+
+(define pu
+(ListLink (WordNode "push")
+   (ListLink (WordNode "won") (WordNode "the") (WordNode "superbowl")))
 )
+(do-aiml-srai pu)
 
