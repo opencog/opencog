@@ -440,15 +440,20 @@
 	(DefinedSchemaNode "AIML-tag get")
 	(GroundedSchemaNode "scm: do-aiml-get"))
 
-; gar discards the SetLink that the GetLink returns.
 (define-public (do-aiml-get KEY)
 	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
+	; gar discards the SetLink that the GetLink returns.
 	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
 
 ; AIML-tag bot -- Just like get, but for bot values.
 (DefineLink
 	(DefinedSchemaNode "AIML-tag bot")
-	(GroundedSchemaNode "scm: do-aiml-get"))
+	(GroundedSchemaNode "scm: do-aiml-bot-get"))
+
+(define-public (do-aiml-bot-get KEY)
+	(define rekey (Concept (string-append "AIML-bot-" (cog-name KEY))))
+	; gar discards the SetLink that the GetLink returns.
+	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
 
 ;; -------------------------
 ; AIML-tag person -- Convert 1st to third person, and back.

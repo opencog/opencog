@@ -326,6 +326,7 @@ to a BindLink approach for ease-of-use.
 * general utility -- create an is-member? utility to replace psi-action?
 * integration: any AIML xfind response should be handled by
   the fuzzy matcher instead...
+* Arghhh -- bot name is borken
 
 ### BUGS
 * agians takes too long -- psi-get-member-links is taking too long
@@ -478,9 +479,9 @@ topicstar/>
 ; Context with topic!
 ; Context with that!
 
-(do-aiml-get (Concept "AIML state that"))
-(do-aiml-get (Concept "AIML state topic"))
-(do-aiml-set (Concept "AIML state topic")   (string-words "ends with alice"))
+(do-aiml-get (Concept "that"))
+(do-aiml-get (Concept "topic"))
+(do-aiml-set (Concept "topic")   (string-words "ends with alice"))
 (aiml-get-response-wl (string-words "test botname"))
 
 (do-aiml-get (Concept "name"))
@@ -490,12 +491,3 @@ topicstar/>
 ALICE</topic> <that>*</that> <template><bot name=\"name\"/> is
 functioning normally. <think><set name=\"matched\">true</set></think>
 </template> </category>
-
-duuude srai recurse
-
-(define pu
-(ListLink (WordNode "push")
-   (ListLink (WordNode "won") (WordNode "the") (WordNode "superbowl")))
-)
-(do-aiml-srai pu)
-
