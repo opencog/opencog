@@ -478,9 +478,9 @@ topicstar/>
 ; Context with topic!
 ; Context with that!
 
-(do-aiml-get (Concept "AIML state that"))
-(do-aiml-get (Concept "AIML state topic"))
-(do-aiml-set (Concept "AIML state topic")   (string-words "ends with alice"))
+(do-aiml-get (Concept "that"))
+(do-aiml-get (Concept "topic"))
+(do-aiml-set (Concept "topic")   (string-words "ends with alice"))
 (aiml-get-response-wl (string-words "test botname"))
 
 (do-aiml-get (Concept "name"))
@@ -491,11 +491,7 @@ ALICE</topic> <that>*</that> <template><bot name=\"name\"/> is
 functioning normally. <think><set name=\"matched\">true</set></think>
 </template> </category>
 
-duuude srai recurse
-
-(define pu
-(ListLink (WordNode "push")
-   (ListLink (WordNode "won") (WordNode "the") (WordNode "superbowl")))
-)
-(do-aiml-srai pu)
-
+(do-aiml-bot-get (Concept "name"))
+(do-aiml-get (Concept "name"))
+(aiml-get-response-wl (string-words "my name is joob"))
+(aiml-get-response-wl (string-words "call me joob"))

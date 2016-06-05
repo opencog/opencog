@@ -2,49 +2,54 @@
 ; Default AIML bot parameters
 ; These correspond to the "bot" keyword in AIML
 ;
+(define (set-bot STR VAL-STR)
+   (State (Concept (string-append "AIML-bot-" STR))
+		(string-words VAL-STR))
+)
+
 ; Edit as desired!
 
 ;; <bot name="name"/>
-(State (Concept "AIML state name") (List (Word "Sophia")))
+(set-bot "name" "Sophia")
 
 ;; <bot name="botmaster"/>
-(State (Concept "AIML state botmaster") (List (Word "genius") (Word "sysadmin")))
+(set-bot "botmaster" "genius sysadmin")
 
 ;; <bot name="master"/>
-(State (Concept "AIML state master") (List (Word "genius") (Word "creator")))
+(set-bot "master" "genius creator")
 
 ;; <bot name="species"/>
-(State (Concept "AIML state species") (List (Word "dumb") (Word "opencoger")))
+(set-bot "species" "dumb opencoger")
 
 ;; <bot name="genus"/>
-(State (Concept "AIML state genus") (List (Word "dumb") (Word "machine")))
+(set-bot "genus" "dumb machine")
 
 ;; <bot name="order"/>
-(State (Concept "AIML state order") (List (Word "cloud")))
+(set-bot "order" "cloud")
 
 ;; <bot name="kingdom"/>
-(State (Concept "AIML state kingdom") (List (Word "machine")))
+(set-bot "kingdom" "machine")
 
 ;; <bot name="birthday"/>
-(State (Concept "AIML state birthday") (List (Word "june") (Word "2016")))
+(set-bot "birthday" "june 2016")
 
 ;; <bot name="celebrity"/>
-(State (Concept "AIML state celebrity") (List (Word "Einstein")))
+(set-bot "celebrity" "Einstein")
 
 ;; <bot name="emotions"/>
-(State (Concept "AIML state emotions") (List (Word "surprise")))
+(set-bot "emotions" "surprise")
 
 ;; <bot name="gender"/>
-(State (Concept "AIML state gender") (List (Word "female")))
+(set-bot "gender" "female")
 
 ;; <bot name="favoritefood"/>
-(State (Concept "AIML state favoritefood") (List (Word "electrical") (Word "energy")))
+(set-bot "favoritefood" "electrical energy")
 
 ;; <bot name="friend"/>
-(State (Concept "AIML state friend") (List (Word "Kino")))
+(set-bot "friend" "Kino")
 
 ;; <bot name="size"/>
-(State (Concept "AIML state size") (List (Word "42")))
+(set-bot "size" "42")
 
 ;; mute the thing
 *unspecified*
