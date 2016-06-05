@@ -4,6 +4,9 @@
 ;
 ; Edit as desired!
 
+;; <bot name="name"/>
+(State (Concept "name") (List (Word "Sophia")))
+
 ;; <bot name="botmaster"/>
 (State (Concept "botmaster") (List (Word "genius") (Word "sysadmin")))
 
