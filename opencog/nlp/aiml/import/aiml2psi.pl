@@ -22,7 +22,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.4.0";
+my $ver = "0.4.1";
 my $debug;
 my $help;
 my $version;
@@ -379,6 +379,7 @@ sub process_star
 	my $star = $2;
 	$star =~ s/^\s*//;
 	$star =~ s/\s*$//;
+	$star =~ s/\\'/'/g;
 	if ($star =~ /^index='(\d+)'\s*\/>(.*)/)
 	{
 		$tout .= $indent . "(Glob \"\$star-$1\")\n";
@@ -405,6 +406,7 @@ sub process_star
 	else
 	{
 		print "Ohhhh nooo, Mr. Bill!\n";
+		print "$text\n";
 		die;
 	}
 	$tout;
@@ -821,9 +823,11 @@ while (my $line = <FIN>)
 			# Random sections are handled by duplicating
 			# the rule repeatedly, each time with the same
 			# premise template, but each with a diffrerent output.
-			if ($curr_raw_code =~ /<random>(.*)<\/random>/)
+			if ($curr_raw_code =~ /(.*?)<random>(.*?)<\/random>(.*)/)
 			{
-				my $choices = $1;
+				my $preplate = $1;
+				my $choices = $2;
+				my $postplate = $3;
 				$choices =~ s/^\s+//;
 				my @choicelist = split /<li>/, $choices;
 				shift @choicelist;
@@ -834,15 +838,18 @@ while (my $line = <FIN>)
 					$ch =~ s/<\/li>//;
 					$ch =~ s/\s+$//;
 
+					my $catty = $preplate . $ch . $postplate;
+
 					$rule .= ";;; random choice $i of $nc: ";
 					$rule .= $cattext . "\n";
+$rule .= "duuuude choice is >>>$catty<<<\n";
 
 					$rule .= "(psi-rule-nocheck\n";
 					$rule .= "   ; context\n";
 					$rule .= $psi_ctxt;
 					$rule .= "   ; action\n";
 					$rule .= "   (ListLink\n";
-					$rule .= &process_category("      ", $ch);
+					$rule .= &process_aiml_tags("      ", $catty);
 					$rule .= "   )\n";
 					$rule .= &psi_tail($num_stars, $pat_word_count);
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section

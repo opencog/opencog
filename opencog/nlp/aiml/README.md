@@ -479,3 +479,16 @@ topicstar/>
 ; Context with that!
 
 (do-aiml-get (Concept "that"))
+(do-aiml-set (Concept "topic")   (string-words "ends with alice"))
+(aiml-get-response-wl (string-words "test botname"))
+
+
+I AM ALWAYS GLAD TO M
+
+formal
+random choice 1 of 19
+<pattern>CALL ME *</pattern>
+
+there's a think and a set ...
+
+&process_aiml_tags
