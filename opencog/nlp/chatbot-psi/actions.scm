@@ -3,7 +3,7 @@
 
     (begin-thread
         (let* ((sent-node (get-input-sent-node))
-               (ans (get-fuzzy-answers sent-node)))
+               (ans (get-fuzzy-answers sent-node #:do-microplanning #f)))
 
             (if (not (null? ans))
                 (let ((ans-in-words (List (map Word (car ans)))))

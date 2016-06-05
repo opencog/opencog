@@ -1,3 +1,4 @@
+(use-modules (ice-9 threads))
 (use-modules (opencog)
              (opencog nlp)
              (opencog nlp relex2logic)
