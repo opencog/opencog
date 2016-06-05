@@ -310,6 +310,10 @@
 
 	(define response (do-while-null SENT 10))
 
+	; Strip out the SetLink, if any.
+	(if (equal? 'SetLink (cog-type response))
+		(set! response (gar response)))
+
 	; Return the response.
 	;	(word-list-set-flatten response)
 	response
@@ -319,11 +323,24 @@
 "
   aiml-get-response-wl SENT - Get AIML response to word-list SENT
 "
-	(define response (get-response-step SENT))
+	; Sometimes, the mechanism will result in exactly the same
+	; response being given twice in a row. Avoid repeating, by
+	; checking to see if the suggested response is the same as the
+	; previous response. Right now, we just check one level deep.
+	; XXX FIXME .. Maybe check a much longer list??
+	(define (same-as-before? SENT)
+		(equal? SENT (do-aiml-get (Concept "that")))
+	)
 
-	; Strip out the SetLink, if any.
-	(if (equal? 'SetLink (cog-type response))
-		(set! response (gar response)))
+	(define (do-while-same SENT CNT)
+		(if (>= 0 CNT) '()
+			(let ((response (get-response-step SENT)))
+				(if (same-as-before? response)
+					(do-while-same SENT (- CNT 1))
+					response
+				))))
+
+	(define response (do-while-same SENT 5))
 
 	; The robots response is the current "that".
 	(if (valid-response? response)
