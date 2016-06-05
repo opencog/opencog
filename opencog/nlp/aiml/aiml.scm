@@ -332,8 +332,7 @@
 		(set! response (gar response)))
 
 	; Return the response.
-	;	(word-list-set-flatten response)
-	response
+	(word-list-flatten response)
 )
 
 (define-public (aiml-get-response-wl SENT)
@@ -364,7 +363,6 @@
 		(do-aiml-set (Concept "that") response))
 
 	; Return the response.
-	;	(word-list-set-flatten response)
 	response
 )
 
