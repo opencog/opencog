@@ -192,6 +192,21 @@
 				))))
 		)))
 
+	; Given a pattern-based rule, run it. Given that it has variables
+	; in it, accomplish this by creating and running a BindLink.
+	; XXX Need to handle that, topic rules as appropriate.
+	(define (run-pattern-rule RULE)
+		(define bindlk (BindLink
+			(gdr (get-pred RULE "*-AIML-pattern-*"))
+			(cadr (get-ctxt-act RULE))
+		))
+		(define results (cog-execute! bindlk))
+
+		; Remove the bindlink, to avoid garbaging up the atomspace.
+		(cog-delete bindlk)
+		results
+	)
+
 	; ----------------------------
 	; Get all the exact rules that apply to the SENT
 	(define exact-rules
