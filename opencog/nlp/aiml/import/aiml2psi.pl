@@ -975,8 +975,6 @@ while (my $line = <FIN>)
 
 					$rule .= ";;; random choice $i of $nc: ";
 					$rule .= $cattext . "\n";
-$rule .= "duuuude choice is >>>$catty<<<\n";
-
 					$rule .= "(psi-rule-nocheck\n";
 					$rule .= "   ; context\n";
 					$rule .= $psi_ctxt;

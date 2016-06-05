@@ -489,19 +489,5 @@ formal
 random choice 1 of 19
 <pattern>CALL ME *</pattern>
 
-there's a think and a set ...
-
-<set name='topic'>ends with alice</set> <set name='matched'>false</set>
-<set name='response'><srai><star/> bot
-
-;;; COMPLEX CODE BRANCH
-;;; <category><pattern>_ ALICE</pattern> <topic>*</topic> <that>*</that>
-<template> <think> <set name=\"savedtopic\"><get name=\"topic\"/></set>
-<set name=\"topic\">ENDS WITH ALICE</set> <set
-name=\"matched\">false</set> <set name=\"response\"><srai><star/>
-BOTNAME</srai></set> </think> <condition name=\"matched\"> <li
-value=\"true\"><get name=\"response\"/></li>
-<li><srai><star/></srai></li> </condition> <think> <set
-name=\"topic\"><get name=\"savedtopic\"/></set> </think> </template>
-</category>
+(aiml-get-response-wl (string-words "call me ishmael"))
 
