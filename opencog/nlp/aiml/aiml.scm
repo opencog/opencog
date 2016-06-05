@@ -284,13 +284,17 @@
 			(if (null? (gar RESP)) #f
 				(not (null? (gaar RESP))))))
 
+	; Some AIML rules fail to generate any response at all --
+	; These are typically srai rules that fail to terminate.
+	; So, try again, picking a different rule, till we do get some
+	; response.
 	(define (do-while-null SENT CNT)
 		(if (>= 0 CNT) '()
 			(let* ((rule (aiml-select-rule all-rules))
 					(response (aiml-run-rule SENT rule)))
 				(if (valid-response? response)
-					(do-while-null SENT (- CNT 1))
 					response
+					(do-while-null SENT (- CNT 1))
 				))))
 
 	(define response (do-while-null SENT 10))
