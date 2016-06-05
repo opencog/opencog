@@ -204,8 +204,14 @@
 
 	; Get all of the rules that might apply to this sentence,
 	; and are inexact matches (i.e. have a variable in it)
-	(filter is-usable-rule?
-		(map gar (psi-get-dual-match SENT)))
+	(define pat-rules
+		(filter is-usable-rule?
+			(map gar (psi-get-dual-match SENT))))
+
+	(define (is-topical-rule? RULE)
+	)
+
+	pat-rules
 )
 
 ; Given a pattern-based rule, run it. Given that it has variables
@@ -349,7 +355,7 @@
 	; previous response. Right now, we just check one level deep.
 	; XXX FIXME .. Maybe check a much longer list??
 	(define (same-as-before? SENT)
-		(equal? SENT (do-aiml-get (Concept "AIML state that")))
+		(equal? SENT (do-aiml-get (Concept "that")))
 	)
 
 	(define (do-while-same SENT CNT)
@@ -364,7 +370,7 @@
 
 	; The robots response is the current "that".
 	(if (valid-response? response)
-		(do-aiml-set (Concept "AIML state that") response))
+		(do-aiml-set (Concept "that") response))
 
 	; Return the response.
 	response
