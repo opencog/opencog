@@ -20,3 +20,8 @@ cp aiml-rules.scm /tmp
 ```
 (primitive-load "psi-canned-rules.scm")
 ```
+
+Use `chat` to chat with it, e.g.
+```
+(chat "Are you conscious?")
+```
