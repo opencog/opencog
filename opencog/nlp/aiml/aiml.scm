@@ -416,7 +416,7 @@
 ; do with the argument, when we get here.  Don't return anything
 ; (be silent).
 (define-public (do-aiml-think x)
-	(display "duuude think\n") (display x) (newline)
+	; (display "duuude think\n") (display x) (newline)
 	; 'think' never returns anything
 	'()
 )
