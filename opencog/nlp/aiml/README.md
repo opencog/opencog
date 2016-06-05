@@ -312,14 +312,17 @@ to a BindLink approach for ease-of-use.
 
 
 ### TODO
-* OpenPsi duallink is returning too much -- i.e. matches to the action.
-  We really only want matches to the context only.
+* OpenPsi duallink is returning too much -- i.e. it includes matches to
+  the action.  We really only want matches to the context only.
+  An extended version of the `get-pattern-rules` tool could do this
+  kind of filtering.  Review with Amen, maybe open bug report.
 * AIML -- thatstar and topicstar not handled.
 * AIML HR -- in a session, never say the same thing twice!
-  Done -- for just one sentence .. as Vytas about more.
-* AIML HR -- load only the current, desired rule-set.
+  Done -- for just one sentence .. ask Vytas about more.
+* AIML HR -- load only the current, desired rule-set. Get someone
+  to write shell scripts or config files for this (Wenwei?)
 * OpenPsi -- need a general mechanism that avoids doing the same thing
-  over and over.
+  over and over. Discusss with Ben, Amen.
 * general utility -- create an is-member? utility to replace psi-action?
 * integration: any AIML xfind response should be handled by
   the fuzzy matcher instead...
