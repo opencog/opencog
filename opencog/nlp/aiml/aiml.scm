@@ -244,11 +244,28 @@
   aiml-select-rule RULE-LIST - Given a list of AIML rules,
   select one to run.
 "
-	; XXX TODO -- we should rank according to the TV, and then
-	; randomly pick one, using the TV as a weighting.
-	;
-	; XXX right now just uniform weighting
-	(list-ref RULE-LIST (random (length RULE-LIST)))
+	;; Total up all of the confidence values on all of the rules
+	;; in the RULE-LIST.
+	(define sum 0.0)
+	(define (add-to-sum ATOM)
+		(set! sum (+ sum (tv-conf (cog-tv ATOM)))))
+
+	;; Return #t for the first rule in the RULE-LIST for which the
+	;; accumulated weight is above THRESH.
+	(define accum 0.0001)
+	(define (pick-first ATOM THRESH)
+		(set! accum (+ accum (tv-conf (cog-tv ATOM))))
+		(< THRESH accum))
+
+	; OK, so actually yoyal up the weights
+	(for-each add-to-sum RULE-LIST)
+
+	; Randomly pick one, using the TV-confidence from above) as a
+	; weighting.
+	(let ((thresh (random sum)))
+		(list-ref RULE-LIST (list-index
+			(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST))
+	)
 )
 
 ; --------------------------------------------------------------
