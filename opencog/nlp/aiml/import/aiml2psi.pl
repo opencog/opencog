@@ -746,8 +746,9 @@ sub process_aiml_tags
 		elsif ($tag =~ /^(.*?)&gt;(.*)/)
 		{
 			# These occur when the responses are trying to explain XML.
-			$tout .= &split_string($indent, $preplate);
-			$tout .= &process_aiml_tags($indent, "greater " . $1 . " less " . $2);
+			# It creates a huge mess, so blow it all off.
+			#$tout .= &split_string($indent, $preplate);
+			#$tout .= &process_aiml_tags($indent, "greater " . $1 . " less " . $2);
 		}
 		elsif ($tag =~ /^date.*?>(.*)/)
 		{
