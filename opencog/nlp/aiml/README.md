@@ -478,9 +478,9 @@ topicstar/>
 ; Context with topic!
 ; Context with that!
 
-(do-aiml-get (Concept "that"))
-(do-aiml-get (Concept "topic"))
-(do-aiml-set (Concept "topic")   (string-words "ends with alice"))
+(do-aiml-get (Concept "AIML state that"))
+(do-aiml-get (Concept "AIML state topic"))
+(do-aiml-set (Concept "AIML state topic")   (string-words "ends with alice"))
 (aiml-get-response-wl (string-words "test botname"))
 
 (do-aiml-get (Concept "name"))
