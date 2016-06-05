@@ -29,23 +29,37 @@
     )
 )
 
+(define (do-aiml-search)
+    (State aiml-search search-started)
+
+    (begin-thread
+        (State aiml-replies (aiml-get-response-wl (get-input-word-list)))
+    )
+)
+
 (define (say . words)
     (if (list? (car words))
         (display (map cog-name (car words)))
         (display (map cog-name words))
     )
 
-    ; Reset evreything
-    (State input-utterance no-input-utterance)
-    (State canned-rules no-canned-rules)
-    (State fuzzy-answers no-fuzzy-answers)
+    (reset-all-states)
 )
 
-(define (answer anchor)
+(define (reply anchor)
     (let ((ans (cog-chase-link 'StateLink 'ListLink anchor)))
         (if (null? ans)
             '()
             (say (cog-outgoing-set (car ans)))
         )
     )
+)
+
+(define (reset-all-states)
+    (State input-utterance no-input-utterance)
+    (State canned-rules default-state)
+    (State aiml-replies default-state)
+    (State aiml-search default-state)
+    (State fuzzy-answers default-state)
+    (State fuzzy-qa-search default-state)
 )

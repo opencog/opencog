@@ -3,11 +3,11 @@
              (opencog nlp relex2logic)
              (opencog nlp fuzzy)
              (opencog nlp chatbot)
+             (opencog nlp aiml)
              (opencog exec)
              (opencog openpsi))
 
 (load-r2l-rulebase)
-(set! relex-server-host "172.17.0.3")
 
 ;-------------------------------------------------------------------------------
 ; TV that will be assigned to any psi-rules being created by this chatbot
@@ -114,6 +114,12 @@
 (define-public no-canned-rules (Concept "NoCannedRules"))
 (State canned-rules default-state)
 
+(define-public aiml-replies (Anchor "AIMLReplies"))
+(define-public no-aiml-reply (Concept "NoAIMLReply"))
+(define-public aiml-search (Anchor "AIMLSearch"))
+(State aiml-replies default-state)
+(State aiml-search default-state)
+
 (define-public fuzzy-answers (Anchor "FuzzyAnswers"))
 (define-public no-fuzzy-answers (Concept "NoFuzzyAnswers"))
 (define-public fuzzy-qa-search (Anchor "FuzzyQASearch"))
@@ -135,7 +141,6 @@
 
 ; Load the psi-rules
 (load "psi-rules.scm")
-(load "psi-rules-test.scm")
 
 ; Load the action selector
 (load "action-selector.scm")

@@ -79,3 +79,15 @@
     (Equal (Set no-canned-rules)
            (Get (State canned-rules (Variable "$r"))))
 )
+
+(Define
+    (DefinedPredicate "aiml-search-started?")
+    (Equal (Set search-started)
+           (Get (State aiml-search (Variable "$s"))))
+)
+
+(Define
+    (DefinedPredicate "is-aiml-reply?")
+    (Not (Equal (Set no-aiml-reply)
+                (Get (State aiml-replies (Variable "$r")))))
+)
