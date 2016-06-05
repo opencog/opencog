@@ -722,7 +722,8 @@ sub psi_tail
 	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
 
 	# Stupid hack for rule priority, for lack of something better.
-	my $weight = $base_priority / (1.0 + $num_stars + (1.0 / $word_count));
+	my $weight = 1.0 / (0.5 + $word_count);
+	$weight = $base_priority / (1.0 + $num_stars + $weight);
 	# my $goal_truth = "   (stv 1 0.8)\n";
 	my $goal_truth = "   (stv 1 $weight)\n";
 	my $rule_tail = $chat_goal . $goal_truth . $demand;
