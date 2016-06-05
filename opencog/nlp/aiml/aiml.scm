@@ -247,8 +247,8 @@
 	; XXX TODO -- we should rank according to the TV, and then
 	; randomly pick one, using the TV as a weighting.
 	;
-	; XXX but for right now, just return the first rule in the list.
-	(car RULE-LIST)
+	; XXX right now just uniform weighting
+	(list-ref RULE-LIST (random (length RULE-LIST)))
 )
 
 ; --------------------------------------------------------------
