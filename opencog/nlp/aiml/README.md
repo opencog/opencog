@@ -317,6 +317,9 @@ to a BindLink approach for ease-of-use.
 * AIML -- thatstar and topicstar not handled.
 * AIML HR -- in a session, never say the same thing twice!
   Done -- for just one sentence .. as Vytas about more.
+* AIML HR -- load only the current, desired rule-set.
+* OpenPsi -- need a general mechanism that avoids doing the same thing
+  over and over.
 * general utility -- create an is-member? utility to replace psi-action?
 
 ### BUGS

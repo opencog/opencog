@@ -22,7 +22,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.3.2";
+my $ver = "0.4.0";
 my $debug;
 my $help;
 my $version;
@@ -330,7 +330,8 @@ close(FOUT);
 # ------------------------------------------------------------------
 # Second pass utilities
 
-my $star_count = 1;
+my $star_index = 1;  # First star has index of one.
+my $pat_word_count = 0;
 
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
@@ -348,12 +349,13 @@ sub split_string
 		if ($wrd eq "") {}
 		elsif ($wrd eq "*" or $wrd eq "_")
 		{
-			$tout .= $indent . "(Glob \"\$star-$star_count\")\n";
-			$star_count ++;
+			$tout .= $indent . "(Glob \"\$star-$star_index\")\n";
+			$star_index ++;
 		}
 		else
 		{
 			$tout .= $indent . $wordnode . "\"$wrd\")\n";
+			$pat_word_count ++;
 		}
 	}
 	$tout;
@@ -715,12 +717,12 @@ sub process_aiml_tags
 sub psi_tail
 {
 	my $num_stars = $_[0];
+	my $word_count = $_[1];
 	my $chat_goal = "   (Concept \"AIML chat subsystem goal\")\n";
 	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
 
-
 	# Stupid hack for rule priority, for lack of something better.
-	my $weight = $base_priority / (1.0 + $num_stars);
+	my $weight = $base_priority / (1.0 + $num_stars + (1.0 / $word_count));
 	# my $goal_truth = "   (stv 1 0.8)\n";
 	my $goal_truth = "   (stv 1 $weight)\n";
 	my $rule_tail = $chat_goal . $goal_truth . $demand;
@@ -810,7 +812,8 @@ while (my $line = <FIN>)
 	if ($cmd eq "CATEND")
 	{
 		my $rule = "";
-		my $num_stars = $star_count;
+		# Number of stars is one less than the current index.
+		my $num_stars = $star_index - 1;
 
 		if ($have_raw_code)
 		{
@@ -840,7 +843,7 @@ while (my $line = <FIN>)
 					$rule .= "   (ListLink\n";
 					$rule .= &process_category("      ", $ch);
 					$rule .= "   )\n";
-					$rule .= &psi_tail($num_stars);
+					$rule .= &psi_tail($num_stars, $pat_word_count);
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
 				}
@@ -857,7 +860,7 @@ while (my $line = <FIN>)
 				$rule .= "   (ListLink\n";
 				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";
-				$rule .= &psi_tail($num_stars);
+				$rule .= &psi_tail($num_stars, $pat_word_count);
 				$rule .= ")\n";
 			}
 			$have_raw_code = 0;
@@ -871,7 +874,7 @@ while (my $line = <FIN>)
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
 			$rule .= $psi_goal;
-			$rule .= &psi_tail($num_stars);
+			$rule .= &psi_tail($num_stars, $pat_word_count);
 			$rule .= ") ; CATEND\n";     # close category section
 
 			$psi_goal = "";
@@ -915,7 +918,8 @@ while (my $line = <FIN>)
 	if ($cmd eq "PAT")
 	{
 		my $curr_pattern = $arg;
-		$star_count = 1;
+		$star_index = 1;
+		$pat_word_count = 0;
 		$psi_ctxt .= &print_predicate_tag("pattern", "      ", lc $curr_pattern);
 	}
 
