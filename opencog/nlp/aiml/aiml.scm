@@ -476,10 +476,7 @@
 	(DefinedSchemaNode "AIML-tag formal")
 	(GroundedSchemaNode "scm: do-aiml-formal"))
 
-(define-public (do-aiml-formal x)
-	(display "duuude formal\n") (display x) (newline)
-	x
-)
+(define-public (do-aiml-formal x) x)
 
 ; ==============================================================
 
