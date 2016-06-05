@@ -321,6 +321,8 @@ to a BindLink approach for ease-of-use.
 * OpenPsi -- need a general mechanism that avoids doing the same thing
   over and over.
 * general utility -- create an is-member? utility to replace psi-action?
+* integration: any AIML xfind response should be handled by
+  the fuzzy matcher instead...
 
 ### BUGS
 * agians takes too long -- psi-get-member-links is taking too long
