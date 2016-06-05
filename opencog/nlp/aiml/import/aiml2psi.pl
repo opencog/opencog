@@ -22,7 +22,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.4.0";
+my $ver = "0.4.2";
 my $debug;
 my $help;
 my $version;
@@ -379,6 +379,7 @@ sub process_star
 	my $star = $2;
 	$star =~ s/^\s*//;
 	$star =~ s/\s*$//;
+	$star =~ s/\\'/'/g;
 	if ($star =~ /^index='(\d+)'\s*\/>(.*)/)
 	{
 		$tout .= $indent . "(Glob \"\$star-$1\")\n";
@@ -405,6 +406,7 @@ sub process_star
 	else
 	{
 		print "Ohhhh nooo, Mr. Bill!\n";
+		print "$text\n";
 		die;
 	}
 	$tout;
@@ -448,7 +450,7 @@ sub process_set
 	my $text = $_[1];
 	my $tout = "";
 
-	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/;
+	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*?)/;
 
 	$tout .= &split_string($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
@@ -554,7 +556,7 @@ sub process_named_tag
 	my @gets = split /<$tag/, $text;
 	foreach my $get (@gets)
 	{
-		if ($get =~ /name='(.*)'\/>(.*)/)
+		if ($get =~ /name='(.*?)'\/>(.*)/)
 		{
 			$tout .= &print_named_tag($tag, $indent, $1);
 			$tout .= &process_aiml_tags($indent, $2);
@@ -621,11 +623,19 @@ sub process_category
 
 	# Expand defintion of <sr/>
 	$text =~ s/<sr\/>/<srai><star\/><\/srai>/g;
+	$text =~ s/<sr \/>/<srai><star\/><\/srai>/g;
+	$text =~ s/<srai \/>/<srai><star\/><\/srai>/g;
+
+	# typo
+	$text =~ s/<peron/<person/g;
+	$text =~ s/<\/peron/<\/person/g;
+	$text =~ s/<thastar/<thatstar/g;
 
 	# XXX FIXME ? This is supposed to be equivalent to
 	# <person><star/></person> however, in the actual AIML texts,
 	# there is no actual star, so its broken/invalid sytax.
 	$text =~ s/<person\/>/<person><star\/><\/person>/g;
+	$text =~ s/<person \/>/<person><star\/><\/person>/g;
 
 	# Convert mangled commas, from pass 1
 	$text =~ s/#Comma/,/g;
@@ -635,6 +645,24 @@ sub process_category
 
 	# Escape back-slashes
 	$text =~ s/\\/\\\\/g;
+
+	# strip out HTML markup. <a href> tag
+	$text =~ s/<a target=.*?>//g;
+	$text =~ s/<\/a>//g;
+	$text =~ s/<ul>//g;
+	$text =~ s/<\/ul>//g;
+	$text =~ s/<li>//g;
+	$text =~ s/<\/li>//g;
+	$text =~ s/<uppercase>//g;
+	$text =~ s/<\/uppercase>//g;
+	$text =~ s/<p\/>//g;
+	$text =~ s/<img src=.*?>//g;
+	$text =~ s/<\/img>//g;
+	$text =~ s/<property.*?>//g;
+	$text =~ s/<id\/>//g;
+	$text =~ s/<br\/>//g;
+	$text =~ s/<em>//g;
+	$text =~ s/<\/em>//g;
 
 	# Trim leading and trailing whtespace.
 	$text =~ s/^\s*//;
@@ -654,12 +682,16 @@ sub process_aiml_tags
 	my $indent = $_[0];
 	my $text = $_[1];
 
+	if ($text eq "") { return ""; }
+
 	my $tout = "";
 
 	# Find the very first angle bracket
-	if ($text =~ /.*?<(.*)/)
+	if ($text =~ /(.*?)<(.*)/)
 	{
-		my $tag = $1;
+		my $preplate = $1;
+		my $tag = $2;
+
 		if ($tag =~ /^srai>/)
 		{
 			$tout .= &process_tag("srai", $indent, $text);
@@ -680,6 +712,12 @@ sub process_aiml_tags
 		{
 			$tout .= &process_tag("person", $indent, $text);
 		}
+		elsif ($tag =~ /^person.*>(.*?)/)
+		{
+			print "Aieee! Unhandled screwball person tag!!!\n";
+			print "$text\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
 		elsif ($tag =~ /^that\/>/)
 		{
 			$tout .= &process_that($indent, $text);
@@ -696,13 +734,110 @@ sub process_aiml_tags
 		{
 			$tout .= &process_named_tag("bot", $indent, $text);
 		}
+		elsif ($tag =~ /^formal>/)
+		{
+			$tout .= &process_tag("formal", $indent, $text);
+		}
 		elsif ($tag =~ /^!--.*-->(.*)/)
 		{
 			# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
-			if ($1 != "")
-			{
-				$tout .= &process_aiml_tags($indent, $1);
-			}
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^(.*?)&gt;(.*)/)
+		{
+			# These occur when the responses are trying to explain XML.
+			# It creates a huge mess, so blow it all off.
+			#$tout .= &split_string($indent, $preplate);
+			#$tout .= &process_aiml_tags($indent, "greater " . $1 . " less " . $2);
+		}
+		elsif ($tag =~ /^date.*?>(.*)/)
+		{
+			# These are harder to handle and we don't use them so screw it.
+			print "Aieee! Unhandled date tag!!!\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^size\/>(.*)/)
+		{
+			# Blow this off.
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^get_likes.*?>(.*)/)
+		{
+			# WTF is this???
+			print "Aieee! weird stuff!!!\n";
+			print "$text\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^random>/)
+		{
+			# These are harder to handle and we don't use them so screw it.
+			print "Aieee! Nested random tag!!!\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/random>/)
+		{
+		}
+		elsif ($tag =~ /^\/set>/)
+		{
+			# Sometimes, recursion screws up. This is rare, and I'm going
+			# to punt, for now.
+			print "Aieee! Bad recursion!!!\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/think>/)
+		{
+			# Sometimes, recursion screws up. This is rare, and I'm going
+			# to punt, for now.
+			print "Aieee! Bad recursion!!!\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/srai>/)
+		{
+			# Sometimes, recursion screws up. This is rare, and I'm going
+			# to punt, for now.
+			print "Aieee! Bad recursion!!!\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^condition/)
+		{
+			# WTF. Blow this off, for now.
+			print "Aieee! Condition tag is not handled!!!\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/condition>/)
+		{
+		}
+		elsif ($tag =~ /^topicstar\/>/)
+		{
+			# WTF. Blow this off, for now.
+			print "Aieee! topicstar tag is not handled!!!\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^thatstar\/>/)
+		{
+			# WTF. Blow this off, for now.
+			print "Aieee! thatstar tag is not handled!!!\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^bot_name/)
+		{
+			# Blow this off
+			print "Aieee! bot_name tag in the pattern!!\n";
+			print ">>>>>>$text\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^that/)
+		{
+			# Blow this off
+			print "Aieee! Wacky that tag!!\n";
+			print ">>>>>>$text\n";
+		}
+		else
+		{
+			print "Aieee! what is this tag???\n";
+			print ">>>>>>$tag\n\n\n";
+			print ">>>>>>$text\n";
+			die;
 		}
 	}
 	else
@@ -821,9 +956,11 @@ while (my $line = <FIN>)
 			# Random sections are handled by duplicating
 			# the rule repeatedly, each time with the same
 			# premise template, but each with a diffrerent output.
-			if ($curr_raw_code =~ /<random>(.*)<\/random>/)
+			if ($curr_raw_code =~ /(.*?)<random>(.*?)<\/random>(.*)/)
 			{
-				my $choices = $1;
+				my $preplate = $1;
+				my $choices = $2;
+				my $postplate = $3;
 				$choices =~ s/^\s+//;
 				my @choicelist = split /<li>/, $choices;
 				shift @choicelist;
@@ -834,21 +971,22 @@ while (my $line = <FIN>)
 					$ch =~ s/<\/li>//;
 					$ch =~ s/\s+$//;
 
+					my $catty = $preplate . $ch . $postplate;
+
 					$rule .= ";;; random choice $i of $nc: ";
 					$rule .= $cattext . "\n";
-
 					$rule .= "(psi-rule-nocheck\n";
 					$rule .= "   ; context\n";
 					$rule .= $psi_ctxt;
 					$rule .= "   ; action\n";
 					$rule .= "   (ListLink\n";
-					$rule .= &process_category("      ", $ch);
+					$rule .= &process_category("      ", $catty);
 					$rule .= "   )\n";
 					$rule .= &psi_tail($num_stars, $pat_word_count);
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
 				}
-         }
+			}
 			else
 			{
 				$rule = ";;; COMPLEX CODE BRANCH\n";
