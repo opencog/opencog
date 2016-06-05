@@ -464,6 +464,16 @@
 	(DefinedSchemaNode "AIML-tag gender")
 	(GroundedSchemaNode "scm: do-aiml-gender"))
 
+; AIML-tag formal -- Do nothing, its pointless for spoken text.
+(DefineLink
+	(DefinedSchemaNode "AIML-tag formal")
+	(GroundedSchemaNode "scm: do-aiml-formal"))
+
+(define-public (do-aiml-formal x)
+	(display "duuude formal\n") (display x) (newline)
+	x
+)
+
 ; ==============================================================
 ;; mute the thing
 *unspecified*
