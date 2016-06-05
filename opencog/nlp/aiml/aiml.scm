@@ -6,7 +6,7 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
 
-(load "aiml/bot.scm")
+; (load "aiml/bot.scm")
 (load "aiml/gender.scm")
 
 ; ==============================================================
@@ -463,5 +463,8 @@
 )
 
 ; ==============================================================
+
+(load "aiml/bot.scm")
+
 ;; mute the thing
 *unspecified*
