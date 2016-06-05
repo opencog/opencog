@@ -639,6 +639,24 @@ sub process_category
 	# Escape back-slashes
 	$text =~ s/\\/\\\\/g;
 
+	# strip out HTML markup. <a href> tag
+	$text =~ s/<a target=.*?>//g;
+	$text =~ s/<\/a>//g;
+	$text =~ s/<ul>//g;
+	$text =~ s/<\/ul>//g;
+	$text =~ s/<li>//g;
+	$text =~ s/<\/li>//g;
+	$text =~ s/<uppercase>//g;
+	$text =~ s/<\/uppercase>//g;
+	$text =~ s/<p\/>//g;
+	$text =~ s/<img src=.*?>//g;
+	$text =~ s/<\/img>//g;
+	$text =~ s/<property.*?>//g;
+	$text =~ s/<id\/>//g;
+	$text =~ s/<br\/>//g;
+	$text =~ s/<em>//g;
+	$text =~ s/<\/em>//g;
+
 	# Trim leading and trailing whtespace.
 	$text =~ s/^\s*//;
 	$text =~ s/\s*$//;
@@ -710,81 +728,6 @@ sub process_aiml_tags
 		elsif ($tag =~ /^!--.*-->(.*)/)
 		{
 			# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		# strip out HTML markup. <br/> tag
-		elsif ($tag =~ /^br\/>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		# strip out HTML markup. <em> tag
-		elsif ($tag =~ /^em>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		# strip out HTML markup. </em> tag
-		elsif ($tag =~ /^\/em>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		# strip out HTML markup. <a href> tag
-		elsif ($tag =~ /^a target=.*?>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		elsif ($tag =~ /^\/a>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		# strip out HTML markup. <ul> tag
-		elsif ($tag =~ /^ul>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		elsif ($tag =~ /^\/ul>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		# strip out HTML markup. <li> tag
-		elsif ($tag =~ /^li>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		elsif ($tag =~ /^\/li>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		# strip out HTML markup. <uppercase> tag
-		elsif ($tag =~ /^uppercase>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		elsif ($tag =~ /^\/uppercase>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		# strip out HTML markup. <p/> tag
-		elsif ($tag =~ /^p\/>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		# strip out HTML markup. <img src> tag
-		elsif ($tag =~ /^img src=.*?>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		elsif ($tag =~ /^\/img>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		# strip out HTML markup. <property> tag
-		elsif ($tag =~ /^property.*?>(.*)/)
-		{
-			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
-		}
-		elsif ($tag =~ /^id\/>(.*)/)
-		{
-			# id is supposed to be the IP address. Blow this off.
 			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
 		elsif ($tag =~ /^(.*?)&gt;(.*)/)
