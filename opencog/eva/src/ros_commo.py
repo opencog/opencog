@@ -276,6 +276,11 @@ class EvaControl():
 
 	# ----------------------------------------------------------
 
+	# Tell the TTS subsystem to vocalize a plain text-string
+	def say_text(self, text_to_say):
+		rospy.logwarn('publishing text to TTS ' + text_to_say)
+		self.tts_pub.publish(text_to_say)
+
 	# The text that the STT module heard.
 	# Unit test by saying
 	#   rostopic pub --once perceived_text std_msgs/String "Look afraid!"
@@ -422,8 +427,12 @@ class EvaControl():
 		self.behavior_pub = rospy.Publisher("robot_behavior",
 		                                  String, queue_size=1)
 
+		# Tell the TTS subsystem what to vocalize
+		# self.tts_pub = rospy.Publisher("tts", String, queue_size=1)
+		self.tts_pub = rospy.Publisher("chatbot_speech", String, queue_size=1)
+
 		# Tell the chatbot what sort of affect to apply during
-		# TTS vocalization.
+		# TTS vocalization. (Huhh???)
 		self.affect_pub = rospy.Publisher("chatbot_affect_express",
 		                                  String, queue_size=1)
 
