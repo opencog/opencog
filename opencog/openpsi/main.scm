@@ -283,7 +283,7 @@ there are 100K rules!
   you defined or the default-action-selector predefined if you haven't defined
   a different action-selector.
 "
-    (let ((as (psi-get-action-selector)))
+    (let ((dsn (psi-get-action-selector)))
         (if (null? dsn)
             (psi-default-action-selector (random-state-from-platform))
             (let ((result (cog-execute! (car dsn))))
@@ -304,10 +304,10 @@ there are 100K rules!
   a different action-selector.
 "
 
-    (let ((as (car (psi-get-action-selector d))))
+    (let ((as (psi-get-action-selector d)))
         (if (null? as)
             (psi-default-action-selector (random-state-from-platform))
-            (let ((result (cog-execute! (car dsn))))
+            (let ((result (cog-execute! (car as))))
                 (if (equal? (cog-type result) 'SetLink)
                     (cog-outgoing-set result)
                     (list result)
