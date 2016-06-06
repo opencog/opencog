@@ -288,6 +288,8 @@ class EvaControl():
 	def language_perceived_text_cb(self, text_heard):
 		self.puta.perceived_text(text_heard.data)
 
+	# The chat_heard message is of type chatbot/ChatMessage
+	# from chatbot.msg import ChatMessage
 	def chat_perceived_text_cb(self, chat_heard):
 		if chat_heard.confidence >= 50:
 			self.puta.perceived_text(chat_heard.utterance)
@@ -429,7 +431,8 @@ class EvaControl():
 
 		# Tell the TTS subsystem what to vocalize
 		# self.tts_pub = rospy.Publisher("tts", String, queue_size=1)
-		self.tts_pub = rospy.Publisher("chatbot_speech", String, queue_size=1)
+		# self.tts_pub = rospy.Publisher("/robot/chatbot_responses", String, queue_size=1)
+		self.tts_pub = rospy.Publisher("chatbot_responses", String, queue_size=1)
 
 		# Tell the chatbot what sort of affect to apply during
 		# TTS vocalization. (Huhh???)
@@ -441,6 +444,7 @@ class EvaControl():
 			self.language_perceived_text_cb)
 
 		# Chat infrastructure text.
+		# from chatbot.msg import ChatMessage
 		#rospy.Subscriber("/robot/speech", chatbot/ChatMessage,
 		#rospy.Subscriber("chatbot_speech", chatbot/ChatMessage,
 		#	self.chat_perceived_text_cb)
