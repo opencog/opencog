@@ -196,25 +196,33 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-set-functionality exec-term tag-node functionality-name)
-    ; Check arguments
-    (if (not (string? functionality-name))
-        (error "Expected second argument to be a string, got: "
-            functionality-name))
+(define-public (psi-set-functionality term is-eval tag-node functionality-name)
+"
+  is-eval: #t if it is evaluatable and #f if not.
+"
+    (define (check-alias a-name)
+        (if is-eval
+            (cog-node 'DefinedPredicateNode a-name)
+            (cog-node 'DefinedSchemaNode a-name)))
 
-    ; TODO: Add checks to ensure the exec-term argument is actually executable
     (let* ((name (string-append
                         psi-prefix-str functionality-name "-"
                         (cog-name tag-node)))
-           (dsn (cog-node 'DefinedSchemaNode name)))
-       (if (null? dsn)
+           (alias (check-alias name)))
+
+       (if (null? alias)
            (begin
-               (set! dsn (DefinedSchemaNode name))
-               (DefineLink dsn exec-term)
-               (functionality-pattern tag-node functionality-name dsn)
-                dsn
+               (set! alias
+                    (if is-eval
+                        (DefinedPredicateNode name)
+                        (DefinedSchemaNode name)
+                    )
+                )
+               (DefineLink alias term)
+               (functionality-pattern tag-node functionality-name alias)
+                alias
            )
-            dsn ; The assumption is that the EvaluationLink is already created
+            alias ; The assumption is that the EvaluationLink is already created
        )
     )
 )

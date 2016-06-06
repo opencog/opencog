@@ -283,7 +283,7 @@ there are 100K rules!
   you defined or the default-action-selector predefined if you haven't defined
   a different action-selector.
 "
-    (let ((dsn (psi-get-action-selector)))
+    (let ((as (psi-get-action-selector)))
         (if (null? dsn)
             (psi-default-action-selector (random-state-from-platform))
             (let ((result (cog-execute! (car dsn))))
@@ -294,6 +294,41 @@ there are 100K rules!
             )
         )
     )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-select-rules-per-demand d)
+"
+  Returns a list of psi-rules that are satisfiable by using the action-selector
+  you defined or the default-action-selector predefined if you haven't defined
+  a different action-selector.
+"
+
+    (let ((as (car (psi-get-action-selector d))))
+        (if (null? as)
+            (psi-default-action-selector (random-state-from-platform))
+            (let ((result (cog-execute! (car dsn))))
+                (if (equal? (cog-type result) 'SetLink)
+                    (cog-outgoing-set result)
+                    (list result)
+                )
+            )
+        )
+    )
+
+
+    ;(let ((demands (psi-get-all-demands)))
+    ;    ;NOTE:
+    ;    ; 1. If there is any hierarcy/graph, get the information from the
+    ;    ;    atomspace and do it here.
+    ;    ; 2. Any changes between steps are accounted for, i.e, there is no
+    ;    ;    caching of demands. This has a performance penality.
+    ;    ; FIXME:
+    ;    ; 1. Right now the demands are not separated between those that
+    ;    ;    are used for emotiong modeling vs those that are used for system
+    ;    ;    such as chat, behavior, ...
+    ;    (append-map select-rules demands)
+    ;)
 )
 
 ; --------------------------------------------------------------
@@ -336,7 +371,7 @@ there are 100K rules!
   psi-set-action-executor EXEC-TERM DEMAND-NODE - Sets EXEC-TERM as the
   the function to be used as action-executor for the rules of DEMAND-NODE.
 "
-    (psi-set-functionality exec-term demand-node "action-executor")
+    (psi-set-functionality exec-term #f demand-node "action-executor")
 )
 
 ; ----------------------------------------------------------------------
@@ -354,7 +389,7 @@ there are 100K rules!
   psi-set-goal-evaluator EVAL-TERM DEMAND-NODE - Sets EVAL-TERM as the
   the function to be used as goal-evaluator for the rules of DEMAND-NODE.
 "
-    (psi-set-functionality eval-term demand-node "goal-evaluator")
+    (psi-set-functionality eval-term #t demand-node "goal-evaluator")
 )
 
 ; ----------------------------------------------------------------------
@@ -371,15 +406,42 @@ there are 100K rules!
 "
   The main function that defines the steps to be taken in every cycle.
 "
-    (let* ((rules (psi-select-rules)))
-        (map (lambda (x)
-                (let* ((action (psi-get-action x))
-                       (goals (psi-related-goals action)))
-                    (cog-execute! action)
-                    (map cog-evaluate! goals)))
-            rules)
-        (stv 1 1)
+    (define (get-context-grounding-atoms rule)
+        (let* ((pattern (GetLink (AndLink (psi-get-context rule))))
+                ;FIXME: Cache `results` during `psi-select-rules` stage
+               (results (cog-execute! pattern)))
+            (cog-delete pattern)
+            ; If it is only links then nothing to pass to an action.
+            (if (null? (cog-get-all-nodes results))
+                '()
+                results
+            )))
+
+
+    (define (act-and-evaluate rule)
+        ;NOTE: This is the job of the action-orchestrator.
+        (let* ((action (psi-get-action rule))
+               (goals (psi-related-goals action))
+               (context-atoms (get-context-grounding-atoms rule)))
+
+            (if (null? context-atoms)
+                (cog-execute! action)
+                (cog-execute! (PutLink action context-atoms))
+            )
+            (map cog-evaluate! goals)
+        ))
+
+    (par-map
+        (lambda (d)
+            ; The assumption is that the rules can be run concurrently.
+            ; FIXME: Once action-orchestrator is available then a modified
+            ; `psi-select-rules` should be used insted of
+            ; `psi-select-rules-per-demand`
+            (par-map act-and-evaluate (psi-select-rules-per-demand d)))
+        (psi-get-all-demands)
     )
+
+    (stv 1 1) ; For continuing psi-run loop.
 )
 
 ; --------------------------------------------------------------
@@ -411,7 +473,7 @@ there are 100K rules!
         (lambda () (cog-evaluate! (loop-node))))
 )
 
-; --------------------------------------------------------------
+; -------------------------------------------------------------
 (define-public (psi-halt)
 "
   Tells the psi loop thread, that is started by running `(psi-run)`, to exit.
