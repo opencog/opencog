@@ -27,6 +27,26 @@
 )
 
 ; --------------------------------------------------------------
+(define-public (satisfaction-level rule)
+"
+  Returns the probability of satisfaction of the given rule's context as a
+  SimpleTruthValue.
+
+  rule:
+  - A psi-rule with context to be evaluated.
+"
+; NOTE
+; 1. This is the same as the `psi-satisfiable?`
+; 2. Should a context evaluator be added here?????
+; 3. What is the "right" way of communicating the level of information.
+    (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
+           (result (cog-evaluate! pattern)))
+          (cog-delete pattern)
+          result
+    )
+)
+
+; --------------------------------------------------------------
 (define-public (most-weighted-atoms atom-list)
 "
   It returns a list with non-duplicating atoms with the highest weight. If an
@@ -37,8 +57,10 @@
   - A list of atoms to be compared.
 "
     (define (weight x)
-        (let ((a-stv (cog-tv x)))
-            (* (tv-conf a-stv) (tv-mean a-stv))))
+        (let ((rule-stv (cog-tv x))
+              (context-stv (satisfaction-level x)))
+            (* (tv-conf rule-stv) (tv-mean rule-stv)
+               (tv-conf context-stv) (tv-conf context-stv))))
 
     (define (pick atom lst) ; prev is a `lst` and next `atom`
         (cond
@@ -162,4 +184,54 @@
         (psi-get-exact-match ATOM)
         (psi-get-dual-match ATOM)
     )))
+)
+
+; --------------------------------------------------------------
+(define (functionality-pattern tag-node functionality-name value-node)
+    (StateLink
+        (ListLink
+            (Node (string-append psi-prefix-str functionality-name))
+             tag-node)
+         value-node)
+)
+
+; --------------------------------------------------------------
+(define-public (psi-set-functionality term is-eval tag-node functionality-name)
+"
+  is-eval: #t if it is evaluatable and #f if not.
+"
+    (define (check-alias a-name)
+        (if is-eval
+            (cog-node 'DefinedPredicateNode a-name)
+            (cog-node 'DefinedSchemaNode a-name)))
+
+    (let* ((name (string-append
+                        psi-prefix-str functionality-name "-"
+                        (cog-name tag-node)))
+           (alias (check-alias name)))
+
+       (if (null? alias)
+           (begin
+               (set! alias
+                    (if is-eval
+                        (DefinedPredicateNode name)
+                        (DefinedSchemaNode name)
+                    )
+                )
+               (DefineLink alias term)
+               (functionality-pattern tag-node functionality-name alias)
+                alias
+           )
+            alias ; The assumption is that the EvaluationLink is already created
+       )
+    )
+)
+
+; --------------------------------------------------------------
+(define (psi-get-functionality tag-node functionality-name)
+; The assumption is that there will be only one element in the returned list.
+; This is a weak. Need a better way of using DefineLink short of defining
+; the relationship in the predicatenode as a part of the alias-node name.
+    (cog-outgoing-set (cog-execute! (GetLink
+        (functionality-pattern tag-node functionality-name (Variable "$x")))))
 )

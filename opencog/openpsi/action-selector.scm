@@ -79,10 +79,28 @@
     )
 )
 
-(define-public (psi-get-action-selector)
+;(define-public (psi-get-action-selector)
+;"
+;  Returns a list containing the user-defined action-selector.
+;"
+;    (cog-outgoing-set (cog-execute!
+;        (GetLink (psi-action-selector-pattern))))
+;)
+
+; ----------------------------------------------------------------------
+(define-public (psi-set-action-selector exec-term demand-node)
 "
-  Returns a list containing the user-defined action-selector.
+  psi-set-action-selector EXEC-TERM DEMAND-NODE - Sets EXEC-TERM as the
+  the function to be used as action-selector for the rules of DEMAND-NODE.
 "
-    (cog-outgoing-set (cog-execute!
-        (GetLink (psi-action-selector-pattern))))
+    (psi-set-functionality exec-term #f demand-node "action-selector")
+)
+
+; ----------------------------------------------------------------------
+(define-public (psi-get-action-selector demand-node)
+"
+  psi-get-action-selector DEMAND-NODE - Gets the action-selector of
+  DEMAND-NODE.
+"
+    (psi-get-functionality demand-node "action-selector")
 )
