@@ -1,7 +1,8 @@
 ;
-; btree-eva.scm
+; btree-psi.scm
 ;
-; Eva behavior tree (for the Eva blender model animations).
+; OpenPsi-based Eva behavior action selection (for the Eva blender
+; model animations).
 ;
 ; Runs a set of defined behaviors that express Eva's personality.
 ; This version integrates the OpenCog chatbot.
@@ -36,6 +37,7 @@
 (use-modules (opencog exec))        ; needed for cog-evaluate! in put_atoms.py
 (use-modules (opencog eva-model))   ; needed for defines in put_atoms.py
 (use-modules (opencog eva-behavior))
+(use-modules (opencog openpsi))
 
 ; Load the Eva personality configuration.
 ; (display %load-path)
@@ -51,7 +53,7 @@
 ; Load the chat modules.
 ;
 (use-modules (opencog nlp))
-(use-modules (opencog nlp chatbot-eva))
+(use-modules (opencog nlp chatbot))
 
 ; Work-around to weird bug: must load relex2logic at the top level.
 (use-modules (opencog nlp relex2logic))
@@ -68,7 +70,8 @@
 		; Must run in a new thread, else it deadlocks in python,
 		; since the text processing results in python calls.
       ; (lambda () (process-query "luser" (cog-name txt)))
-      (lambda () (grounded-talk "luser" (cog-name txt)))
+      ; (lambda () (grounded-talk "luser" (cog-name txt)))
+      (lambda () (chat (cog-name txt)))
    )
    (stv 1 1)
 )

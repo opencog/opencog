@@ -14,7 +14,6 @@
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
 (use-modules (opencog python))
-(use-modules (opencog openpsi))
 
 ; Try loading the python code from this directory;
 ; else go for the install directory. This is kind-of hacky;
@@ -182,16 +181,6 @@ except:
 ;; Main loop control
 (define do-run-loop #t)
 
-;(define-public (behavior-tree-run)
-;"
-; behavior-tree-run
-
-; Run the Eva behavior tree main loop (in a new thread),
-; Call (behavior-tree-halt) to exit the loop.
-;"
-;	(set! do-run-loop #t)
-;	(call-with-new-thread
-;		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
 (define-public (behavior-tree-run)
 "
  behavior-tree-run
@@ -201,11 +190,7 @@ except:
 "
 	(set! do-run-loop #t)
 	(call-with-new-thread
-		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop"))))
-	(psi-run)
-	;(while #t ((usleep 100000)(psi-step)) ) causes crash
-
-)
+		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
 
 (define-public (behavior-tree-halt)
 "
