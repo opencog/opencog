@@ -8,7 +8,7 @@ INSTALL (FILES
 # will not load the config parameters -- that has to be done by hand.
 INSTALL (FILES
 	psi-behavior.scm
-#	behavior.scm
+	behavior.scm
 	express.scm
 	primitives.scm
 	cfg-tools.scm
