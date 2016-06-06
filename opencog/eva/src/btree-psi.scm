@@ -53,11 +53,23 @@
 (define (run) (psi-run))
 (define (halt) (psi-halt))
 
-; XXX FIXME
-; If ROS is dead, or the continue flag not set, then stop
-; running the behavior loop.
-(DefinedPredicate "Continue running loop?")
-(DefinedPredicate "ROS is running?")
+; There MUST be a DefinedPredicateNode with exactly the name
+; below in order for psi-run to work. Or we could just blow
+; that off, and use our own loop...
+(define loop-name (string-append psi-prefix-str "loop"))
+(DefineLink
+	(DefinedPredicateNode loop-name)
+	(SatisfactionLink
+		(SequentialAnd
+			(Evaluation (GroundedPredicate "scm: psi-step")
+				(ListLink))
+			(Evaluation (GroundedPredicate "scm: psi-run-continue?")
+				(ListLink))
+			; If ROS is dead, or the continue flag not set,
+			; then stop running the behavior loop.
+			(DefinedPredicate "ROS is running?")
+			(DefinedPredicateNode loop-name))))
+
 
 ; ---------------------------------------------------------
 ; Load the chat modules.
