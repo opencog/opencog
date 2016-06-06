@@ -8,6 +8,35 @@
 (use-modules (opencog exec))
 (use-modules (opencog openpsi))
 ;
+;; ------------------------------------------------------------------
+;; Main loop.
+;			(SequentialOr
+;			    (DefinedPredicate "Skip Interaction?")
+;				(DefinedPredicate "Interaction requested")
+;				(DefinedPredicate "New arrival sequence")
+;				(DefinedPredicate "Someone left")
+;				(DefinedPredicate "Interact with people")
+;				(DefinedPredicate "Nothing is happening")
+;				(True))
+
+;			;; XXX FIXME chatbot is disengaged from everything else.
+;			;; The room can be empty, the head is bored or even asleep,
+;			;; but the chatbot is still smiling and yabbering.
+;			;; If interaction is turned-off need keep alive gestures
+;			(SequentialOr
+;				(DefinedPredicate "Speech started?")
+;				(DefinedPredicate "Speech ongoing?")
+;				(DefinedPredicate "Speech ended?")
+;				(DefinedPredicate "Listening started?")
+;				(DefinedPredicate "Listening?")
+;				(DefinedPredicate "Listening ended?")
+;				(SequentialAnd
+;				    (DefinedPredicate "Skip Interaction?")
+;				    (DefinedPredicate "Keep alive")
+;				)
+;				(True)
+;			)
+
 ;;
 (define (pred-2-schema pnode-str) 
 	(DefineLink 
@@ -107,47 +136,5 @@
 (psi-rule (list (DefinedPredicate "Skip Interaction?")) 
 	(DefinedSchemaNode "Keep alive") 
 	speech-demand-satisfied (stv 1 1) speech-demand)
-
-;; ------------------------------------------------------------------
-;; Main loop. Uses tail recursion optimization to form the loop.
-(DefineLink
-	(DefinedPredicate "main loop")
-	(SatisfactionLink
-		(SequentialAnd
-;			(SequentialOr
-;			    (DefinedPredicate "Skip Interaction?")
-;				(DefinedPredicate "Interaction requested")
-;				(DefinedPredicate "New arrival sequence")
-;				(DefinedPredicate "Someone left")
-;				(DefinedPredicate "Interact with people")
-;				(DefinedPredicate "Nothing is happening")
-;				(True))
-
-;			;; XXX FIXME chatbot is disengaged from everything else.
-;			;; The room can be empty, the head is bored or even asleep,
-;			;; but the chatbot is still smiling and yabbering.
-;			;; If interaction is turned-off need keep alive gestures
-;			(SequentialOr
-;				(DefinedPredicate "Speech started?")
-;				(DefinedPredicate "Speech ongoing?")
-;				(DefinedPredicate "Speech ended?")
-;				(DefinedPredicate "Listening started?")
-;				(DefinedPredicate "Listening?")
-;				(DefinedPredicate "Listening ended?")
-;				(SequentialAnd
-;				    (DefinedPredicate "Skip Interaction?")
-;				    (DefinedPredicate "Keep alive")
-;				)
-;				(True)
-;			)
-
-			; If ROS is dead, or the continue flag not set, then stop
-			; running the behavior loop.
-			(DefinedPredicate "Continue running loop?")
-			(DefinedPredicate "ROS is running?")
-
-			;; Call self -- tail-recurse.
-			(DefinedPredicate "main loop")
-		)))
 
 ; ----------------------------------------------------------------------

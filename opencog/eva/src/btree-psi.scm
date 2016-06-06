@@ -43,11 +43,21 @@
 ; (display %load-path)
 (add-to-load-path "../src")
 (load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
+; (load-from-path "cfg-sophia.scm") ;;; <<<=== See, its Sophia here!
+
+;; Load the actual psi rules.
+(load-from-path "psi-behavior.scm")
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.
 (define (run) (psi-run))
 (define (halt) (psi-halt))
+
+; XXX FIXME
+; If ROS is dead, or the continue flag not set, then stop
+; running the behavior loop.
+(DefinedPredicate "Continue running loop?")
+(DefinedPredicate "ROS is running?")
 
 ; ---------------------------------------------------------
 ; Load the chat modules.
