@@ -173,6 +173,12 @@ def blink_rate(mean_node, var_node):
 	# evl.blink_rate(mean, var)
 	return TruthValue(1, 1)
 
+def say_text(text_node):
+   text = text_node.name
+	print "(Eva says: ", text, ")"
+   # evl.say_text(text)
+   return TruthValue(1, 1)
+
 # Return true as long as ROS is running.
 def ros_is_running():
 	# if (rospy.is_shutdown())
