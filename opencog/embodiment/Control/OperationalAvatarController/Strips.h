@@ -472,9 +472,11 @@ namespace opencog { namespace oac {
     struct MinedPreCondition
     {
         string stateName;
-        Handle stateOwner;
-        Handle stateValue;
+        Handle stateOwner; // usually it's a variable
 
+        // stateValue can be a const or a variable, like the same variable to represent the actor, target
+        // todo: can also be other object in the mined pattern
+        Handle stateValue;
     };
 
     struct MinedEffect

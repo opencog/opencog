@@ -3128,7 +3128,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
             minedStruct.paramObjVar = paramVar;
 
-            cout << "The variable representing this parameter value object is: " << paramVar << std::endl;
+            cout << "The variable representing this parameter value object is: " << atomSpace->getName(paramVar) << std::endl;
 
             HandleSeq intrinsicUndistinguishingPropertyLinks;
             for (string propertyStr : intrinsicUndistinguishingProperties)
@@ -3150,6 +3150,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
             paramToMinedStruct.insert(std::pair<string, MinedParamStruct>(paramMapIter->first, minedStruct));
 
+            cout << "Start to find the potential preconditions related to this parameter..." << std::endl;
             // Find out the potential preconditions related to this parameter
             // Find the state changes occurred to the parameter objects before the action execution
             // e.g. the parameter objects are the keys, the state changes are their holders changed into the actor agent
@@ -3242,6 +3243,8 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                                     invalid = true;
                                     break;
                                 }
+
+                                vi ++;
                             }
                         }
                         else
@@ -3254,22 +3257,23 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                             aPrecond.stateName = atomSpace->getName(preStateIt->first);
                             aPrecond.stateOwner =  minedStruct.paramObjVar;
 
-                            if (isConst)
-                                aPrecond.stateValue = valueHandle;
-                            else
+                            if (! isConst)
                             {
                                 if (patternStr == "actor")
-                                    aPrecond.stateValue = actorPredicateHandle;
+                                    valueHandle = actorPredicateHandle;
                                 else if (patternStr == "target")
-                                    aPrecond.stateValue = targetPredicateHandle;
+                                    valueHandle = targetPredicateHandle;
                             }
+
+                            aPrecond.stateValue = valueHandle;
 
                             preconditions.push_back(aPrecond);
 
+                            cout << "A precondition found: State " << aPrecond.stateName << " of "
+                                 << atomSpace->getName(aPrecond.stateOwner) << " should be " << atomSpace->getName(valueHandle) << std::endl;
+
                         }
                     }
-
-
 
                 }
             }
