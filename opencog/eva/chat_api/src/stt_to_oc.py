@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 #
+# stt_to_oc.py - ROS messaging STT to OpenCog bridge.
+# Copyright (C) 2016  Hanson Robotics
+#
 # STT to OpenCog bridge.  Subscribe to ROS chat messages coming
 # from the Speech-to-Text (STT) subsystem, and forward them to
 # the OpenCog chatbot.

@@ -281,11 +281,9 @@ class EvaControl():
 	#   rostopic pub --once perceived_text std_msgs/String "Look afraid!"
 	#
 	def language_perceived_text_cb(self, text_heard):
-		return
 		self.puta.perceived_text(text_heard.data)
 
 	def chat_perceived_text_cb(self, chat_heard):
-		return
 		if chat_heard.confidence >= 50:
 			self.puta.perceived_text(chat_heard.utterance)
 
@@ -434,6 +432,7 @@ class EvaControl():
 			self.language_perceived_text_cb)
 
 		# Chat infrastructure text.
+		#rospy.Subscriber("/robot/speech", chatbot/ChatMessage,
 		#rospy.Subscriber("chatbot_speech", chatbot/ChatMessage,
 		#	self.chat_perceived_text_cb)
 
@@ -444,7 +443,7 @@ class EvaControl():
 		# Chatbot can request blinks correlated with hearing and speaking.
 		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
 
-		# Receive messages tht indicate that TTS (or chatbot) has started
+		# Receive messages that indicate that TTS (or chatbot) has started
 		# or finished vocalizing.
 		rospy.Subscriber("speech_events", String, self.chat_event_cb)
 
