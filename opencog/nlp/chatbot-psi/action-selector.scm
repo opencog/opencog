@@ -61,9 +61,7 @@
     )
 )
 
-(psi-action-selector-set!
-    (psi-add-action-selector
-        (ExecutionOutput (GroundedSchema "scm: psi-as-chat") (List))
-        "chat"
-    )
+(psi-set-action-selector
+    (ExecutionOutput (GroundedSchema "scm: psi-as-chat") (List))
+    sociality
 )
