@@ -4,19 +4,16 @@
     (begin-thread
         (let* ((sent-node (get-input-sent-node))
                (ans (get-fuzzy-answers sent-node #:do-microplanning #f)))
-
             (if (not (null? ans))
-                (let ((ans-in-words (List (map Word (car ans)))))
+                (let ((ans-in-words (List (map Word ans))))
                     (State fuzzy-answers ans-in-words)
 
                     ; Create a new psi-canned-rule for it
+                    ; TODO: Make it a function for creating canned-rules
                     (Member
                         (psi-rule
-                            (list (SequentialAnd
-                                (DefinedPredicate "is-input-utterance?")
-                                (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (get-input-word-list))
-                            ))
-                            (ExecutionOutput (GroundedSchema "scm: say") ans-in-words)
+                            (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (get-input-word-list)))
+                            (True (ExecutionOutput (GroundedSchema "scm: say") ans-in-words))
                             (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
                             new-rule-tv
                             sociality
@@ -46,17 +43,6 @@
     )
 
     (display utterance)
-
-    ; Send it via ROS
-    (catch #t
-        (lambda ()
-            (cog-evaluate! (Evaluation (GroundedPredicate "py: say") (List (Node utterance))))
-            (cog-extract (Node utterance))
-        )
-        (lambda (key . parameters)
-            (error "ERR: Can't do \"py: say\"?!\n")
-        )
-    )
 
     (reset-all-states)
 )
