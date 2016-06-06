@@ -131,7 +131,10 @@ there are 100K rules!
 "
   Returns a list of all openpsi actions.
 "
-    (cog-chase-link 'MemberLink 'ListLink psi-action))
+    (append
+        (cog-chase-link 'MemberLink 'ExecutionOutputLink psi-action)
+        (cog-chase-link 'MemberLink 'DefinedSchemaNode psi-action))
+)
 
 ; --------------------------------------------------------------
 (define-public (psi-action? ATOM)
