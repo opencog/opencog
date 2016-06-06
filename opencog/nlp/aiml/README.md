@@ -495,3 +495,13 @@ functioning normally. <think><set name=\"matched\">true</set></think>
 (do-aiml-get (Concept "name"))
 (aiml-get-response-wl (string-words "my name is joob"))
 (aiml-get-response-wl (string-words "call me joob"))
+
+=================================
+General demo instructions
+
+scm: dispatch-text  in btree.scm
+(State heard-sound
+
+py: say_text -- single string atom
+
+(psi-run)
