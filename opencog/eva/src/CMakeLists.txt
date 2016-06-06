@@ -7,7 +7,8 @@ INSTALL (FILES
 # Install the Eva and Sophia config files; however, the scheme module
 # will not load the config parameters -- that has to be done by hand.
 INSTALL (FILES
-	behavior.scm
+	psi-behavior.scm
+#	behavior.scm
 	express.scm
 	primitives.scm
 	cfg-tools.scm
