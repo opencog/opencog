@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import rospy
-from chatbot.msg import ChatMessage
+from oc_chat_ros.msg import ChatMessage
 from netcat import netcat
 
 def callback(data):
     rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.utterance)
-    netcat("localhost",17040,data.utterance)
+    netcat("localhost",17040,"(chat \""+data.utterance+"\")")
     
 def listener():
 
