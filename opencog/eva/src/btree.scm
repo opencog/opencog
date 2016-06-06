@@ -75,7 +75,7 @@
 
 ; Work-around to circular dependency: define `dispatch-text` at the
 ; top level of the guile executation environment.
-;(define-public (dispatch-text txt)
+(define-public (dispatch-text txt)
 "
   dispatch-text TEXT
 
@@ -85,10 +85,12 @@
 		; Must run in a new thread, else it deadlocks in python,
 		; since the text processing results in python calls.
 		; (lambda () (process-query "luser" (cog-name txt)))
-;		(lambda () (grounded-talk "luser" (cog-name txt)))
+		; (lambda () (grounded-talk "luser" (cog-name txt)))
+		; XXX Need to ... auuh load the chatbot...
+;		(lambda () (chat txt))
 ;	)
-;	(stv 1 1)
-;)
+	(stv 1 1)
+)
 
 ; ---------------------------------------------------------
 
