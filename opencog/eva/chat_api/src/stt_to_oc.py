@@ -1,27 +1,26 @@
 #!/usr/bin/env python
+#
+# STT to OpenCog bridge.  Subscribe to ROS chat messages coming
+# from the Speech-to-Text (STT) subsystem, and forward them to
+# the OpenCog chatbot.
+#
 import rospy
-from oc_chat_ros.msg import ChatMessage
+from chat_api.msg import ChatMessage
 from netcat import netcat
 
-def callback(data):
+def stt_callback(data):
     rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.utterance)
-    netcat("localhost",17040,"(chat \""+data.utterance+"\")")
-    
-def listener():
 
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # node are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
+    # port 17020 should be the same as that in ../scripts/opencog.conf
+    netcat("localhost", 17020, "(chat \"" + data.utterance + "\")")
+
+if __name__ == '__main__':
     rospy.init_node('stt_to_oc', anonymous=True)
 
-    rospy.Subscriber("/robot/speech", ChatMessage, callback)
+    rospy.Subscriber("/robot/speech", ChatMessage, stt_callback)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
 
-
-if __name__ == '__main__':
     listener()
 
