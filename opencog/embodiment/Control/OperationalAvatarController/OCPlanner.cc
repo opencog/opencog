@@ -2861,6 +2861,10 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
     // Step 3: Find out what kind of parameters required for this action
 
+    Handle actorPredicateHandle = atomSpace->addNode(PREDICATE_NODE, "actor");
+    Handle targetPredicateHandle = atomSpace->addNode(PREDICATE_NODE, "target");
+
+
     // Find all the other parameters except actor and target
     // e.g.
     //    (EvaluationLink (stv 1.000000 1.000000)
@@ -2873,6 +2877,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
     //   map <paramName, its instance evaluationlinks>
     std::map <string, HandleSeq> paramNameToParamEvalLinks;
+    vector<Handle> actors, targets;
     for (Handle actionInstanceHandle : highestActionInstances)
     {
         HandleSeq evalFirstOutgoings;
@@ -2884,8 +2889,21 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
             Handle paramNameNode = atomSpace->getOutgoing(ParamEvalLink, 0);
             string paramName = atomSpace->getName(paramNameNode);
 
-            if ((paramName  == "actor") || ( paramName == "target"))
+            if (paramName  == "actor")
+            {
+                Handle actorListlink = atomSpace->getOutgoing(ParamEvalLink,1);
+                Handle actorHanlde = atomSpace->getOutgoing(actorListlink,1);
+                actors.push_back(actorHanlde);
                 continue;
+            }
+
+            if (paramName == "target")
+            {
+                Handle targetListlink = atomSpace->getOutgoing(ParamEvalLink,1);
+                Handle targetHanlde = atomSpace->getOutgoing(targetListlink,1);
+                targets.push_back(targetHanlde);
+                continue;
+            }
 
             if (paramNameToParamEvalLinks.find (paramName) != paramNameToParamEvalLinks.end())
             {
@@ -2945,7 +2963,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
         patternMiner->mineRelatedPatternsOnQueryByLinks_OR(paramEvalLinks,MINE_PATTERN_GRAM , pai);
 
         cout << "Finished mining all patterns on query related to this parameter: " << paramMapIter->first
-             << " Now start to select the best patterns . . ."
+             << ". Now start to select the best patterns . . ."
              << std::endl;
 
         // If the parameter value is an object, distinguishing intrinsic properties should have higher priority:
@@ -3110,6 +3128,8 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
             minedStruct.paramObjVar = paramVar;
 
+            cout << "The variable representing this parameter value object is: " << paramVar << std::endl;
+
             HandleSeq intrinsicUndistinguishingPropertyLinks;
             for (string propertyStr : intrinsicUndistinguishingProperties)
             {
@@ -3132,6 +3152,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
             // Find out the potential preconditions related to this parameter
             // Find the state changes occurred to the parameter objects before the action execution
+            // e.g. the parameter objects are the keys, the state changes are their holders changed into the actor agent
             map<Handle, HandleSeq> preStateChangeMap; // map<state name, value of all objects for this state name>
             for (Handle paramObj : parmValueHandles)
             {
@@ -3160,12 +3181,20 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
             }
 
+
             for (preStateIt = preStateChangeMap.begin(); preStateIt != preStateChangeMap.end();preStateIt ++)
             {
+                // If value is const, then the valueHandle is the const handle, e.g. valueHandle = (ConceptNode "6")
+                // If the value is not a const, then it usually is actor or target, or related.
+                // e.g. valueHandle = (ConceptNode "actor")
+                // todo: this part can be improved by using pattern miner as well, but for most cases, there is no need.
+                Handle valueHandle;
+
                 // check the value type
                 HandleSeq& values = preStateIt->second;
                 if (AtomSpaceUtil::isHandleAnEntity(atomSpace, values[0]))
                 {
+                    // check if it's const:all the values are the same
                     bool isConst = true;
                     Handle v1 = values[0];
                     for (Handle v : values)
@@ -3177,13 +3206,67 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                         }
                     }
 
-                    if (isConst)// it's const: all the values are the same
+                    if (isConst)// it's const
                     {
-
+                        valueHandle = v1;
                     }
                     else // it's not const, so need to find out its pattern
                     {
+                        // if not all the values are of the same pattern, then this is an invalid precondition, skip it.
+                        string patternStr;
+                        if (values[0] == actors[0])
+                            patternStr = "actor";
+                        else if (values[0] == targets[0])
+                            patternStr = "target";
+                        else
+                            patternStr = "unknown";
 
+                        bool invalid = false;
+
+                        if (patternStr != "unknown")
+                        {
+
+                            unsigned int vi = 0;
+                            for (Handle v : values)
+                            {
+                                string patternStri;
+                                if (v == actors[vi])
+                                    patternStri = "actor";
+                                else if (v == targets[vi])
+                                    patternStri == "target";
+                                else
+                                    patternStri = "unknown";
+
+                                if (patternStri != patternStr)
+                                {
+                                    invalid = true;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                            invalid = true;
+
+                        if (! invalid)
+                        {
+                            // add a precondition
+                            MinedPreCondition aPrecond;
+                            aPrecond.stateName = atomSpace->getName(preStateIt->first);
+                            aPrecond.stateOwner =  minedStruct.paramObjVar;
+
+                            if (isConst)
+                                aPrecond.stateValue = valueHandle;
+                            else
+                            {
+                                if (patternStr == "actor")
+                                    aPrecond.stateValue = actorPredicateHandle;
+                                else if (patternStr == "target")
+                                    aPrecond.stateValue = targetPredicateHandle;
+                            }
+
+                            preconditions.push_back(aPrecond);
+
+                        }
                     }
 
 
@@ -3194,7 +3277,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
     }
 
-    // Todo:Find the state changes occurred to the  actors before the action execution
+    // Todo:Find the state changes occurred to the  actors before the action execution. Not necessary in current stage.
 
     // Create MinedRulePattern
     MinedRulePattern* minedRulePattern = new MinedRulePattern();
