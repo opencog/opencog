@@ -466,9 +466,8 @@ there are 100K rules!
                     loop-node))))
 
     (if (null? (cog-node 'DefinedPredicateNode loop-name))
-        (define-psi-loop)
-        #f ; Nothing to do already defined
-    )
+        (define-psi-loop))
+
     (set! psi-do-run-loop #t)
     (call-with-new-thread
         (lambda () (cog-evaluate! loop-node)))
