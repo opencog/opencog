@@ -38,9 +38,24 @@
 )
 
 (define (say . words)
+    (define utterance "")
+
     (if (list? (car words))
-        (display (map cog-name (car words)))
-        (display (map cog-name words))
+        (set! utterance (string-join (map cog-name (car words))))
+        (set! utterance (string-join (map cog-name words)))
+    )
+
+    (display utterance)
+
+    ; Send it via ROS
+    (catch #t
+        (lambda ()
+            (cog-evaluate! (Evaluation (GroundedPredicate "py: say") (List (Node utterance))))
+            (cog-extract (Node utterance))
+        )
+        (lambda (key . parameters)
+            (error "ERR: Can't do \"py: say\"?!\n")
+        )
     )
 
     (reset-all-states)
