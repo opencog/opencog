@@ -112,7 +112,7 @@
 ; --------------------------------------------------------
 ;
 ; This will be used to tag the name of the module making the request.
-; Everything in ths module is the behavior tree, so that is what we
+; Everything in this module is the behavior tree, so that is what we
 ; call it.
 (define bhv-source (Concept "Behavior Tree"))
 
