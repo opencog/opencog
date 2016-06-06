@@ -6,7 +6,7 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
 
-(load "aiml/bot.scm")
+; (load "aiml/bot.scm")
 (load "aiml/gender.scm")
 
 ; ==============================================================
@@ -227,14 +227,34 @@
 
 ; --------------------------------------------------------------
 
+; Return #t if the topic in the RULE context is actually equal
+; to the current AIML topic state.
+; XXX FIXME -- handle topic stars also ....
+(define (is-topical-rule? RULE)
+	(define pred (get-pred RULE "*-AIML-topic-*"))
+	(if (null? pred) #t
+		(equal?
+			(do-aiml-get (Concept "topic"))
+			(gdr pred)
+		)
+	)
+)
+
+;; XXX FIXME Handle THAT sections too ... same way as topic ...
 (define-public (aiml-get-applicable-rules SENT)
 "
   aiml-get-applicable-rules SENT - Get all AIML rules that are suitable
   for generating a reply to the givven sentence.
 "
-	(concatenate! (list
-		(get-exact-rules SENT)
-		(get-pattern-rules SENT)))
+	(define all-rules
+		(concatenate! (list
+			(get-exact-rules SENT)
+			(get-pattern-rules SENT))))
+
+	(define top-rules
+		(filter is-topical-rule? all-rules))
+
+	top-rules
 )
 
 ; --------------------------------------------------------------
@@ -263,9 +283,11 @@
 	; Randomly pick one, using the TV-confidence from above) as a
 	; weighting.
 	(let ((thresh (random sum)))
-		(list-ref RULE-LIST (list-index
-			(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST))
-	)
+		(if (null? RULE-LIST)
+			'()
+			(list-ref RULE-LIST (list-index
+				(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST))
+	))
 )
 
 ; --------------------------------------------------------------
@@ -280,10 +302,12 @@
 			(if (null? pred) #f
 				(equal? (gdr pred) SENT))))
 
-	(if (is-exact-rule? RULE)
-		(run-exact-rule RULE)
-		(run-pattern-rule RULE SENT)
-	)
+	(if (null? RULE)
+		'()
+		(if (is-exact-rule? RULE)
+			(run-exact-rule RULE)
+			(run-pattern-rule RULE SENT)
+	))
 )
 
 ; --------------------------------------------------------------
@@ -307,9 +331,6 @@
 ;; is, this is the correct routine to call for handling SRAI
 ;; recursion.
 (define (get-response-step SENT)
-"
-  aiml-get-response-wl SENT - Get AIML response to word-list SENT
-"
 	(define all-rules (aiml-get-applicable-rules SENT))
 
 	; Some AIML rules fail to generate any response at all --
@@ -326,6 +347,9 @@
 				))))
 
 	(define response (do-while-null SENT 10))
+
+	; Deal with a null list...
+	(if (null? response) (set! response (ListLink)))
 
 	; Strip out the SetLink, if any.
 	(if (equal? 'SetLink (cog-type response))
@@ -376,7 +400,7 @@
 
 (define-public (do-aiml-srai x)
 	(display "duuude srai recurse\n") (display x) (newline)
-	(let ((resp (get-response-step x)))
+	(let ((resp (get-response-step (word-list-flatten x))))
 		(display "duuude srai result is\n") (display resp) (newline)
 		resp
 	)
@@ -392,7 +416,7 @@
 ; do with the argument, when we get here.  Don't return anything
 ; (be silent).
 (define-public (do-aiml-think x)
-	(display "duuude think\n") (display x) (newline)
+	; (display "duuude think\n") (display x) (newline)
 	; 'think' never returns anything
 	'()
 )
@@ -406,7 +430,8 @@
 	(define flat-val (word-list-flatten VALUE))
 	; (display "duuude set key=") (display KEY) (newline)
 	; (display "duuude set value=") (display flat-val) (newline)
-	(State KEY flat-val)
+	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
+	(State rekey flat-val)
 	flat-val
 )
 
@@ -415,38 +440,20 @@
 	(DefinedSchemaNode "AIML-tag get")
 	(GroundedSchemaNode "scm: do-aiml-get"))
 
-; gar discards the SetLink that the GetLink returns.
 (define-public (do-aiml-get KEY)
-	(gar (cog-execute! (Get (State KEY (Variable "$x"))))))
+	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
+	; gar discards the SetLink that the GetLink returns.
+	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
 
 ; AIML-tag bot -- Just like get, but for bot values.
 (DefineLink
 	(DefinedSchemaNode "AIML-tag bot")
-	(GroundedSchemaNode "scm: do-aiml-get"))
+	(GroundedSchemaNode "scm: do-aiml-bot-get"))
 
-; AIML-pred topic -- Handle topic tag. XXX all wrong.
-(DefineLink
-	(DefinedPredicate "AIML-pred topic")
-	(GroundedPredicate "scm: do-aiml-topic"))
-
-(define-public (do-aiml-topic VAL)
-	(display "duuude handle topic!! -->")
-	(display VAL)
-	(newline)
-	(stv 1 1)
-)
-
-; AIML-pred that -- Handle that tag. XXX all wrong.
-(DefineLink
-	(DefinedPredicate "AIML-pred that")
-	(GroundedPredicate "scm: do-aiml-that"))
-
-(define-public (do-aiml-that VAL)
-	(display "duuude handle that!! -->")
-	(display VAL)
-	(newline)
-	(stv 1 1)
-)
+(define-public (do-aiml-bot-get KEY)
+	(define rekey (Concept (string-append "AIML-bot-" (cog-name KEY))))
+	; gar discards the SetLink that the GetLink returns.
+	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
 
 ;; -------------------------
 ; AIML-tag person -- Convert 1st to third person, and back.
@@ -464,6 +471,16 @@
 	(DefinedSchemaNode "AIML-tag gender")
 	(GroundedSchemaNode "scm: do-aiml-gender"))
 
+; AIML-tag formal -- Do nothing, its pointless for spoken text.
+(DefineLink
+	(DefinedSchemaNode "AIML-tag formal")
+	(GroundedSchemaNode "scm: do-aiml-formal"))
+
+(define-public (do-aiml-formal x) x)
+
 ; ==============================================================
+
+(load "aiml/bot.scm")
+
 ;; mute the thing
 *unspecified*
