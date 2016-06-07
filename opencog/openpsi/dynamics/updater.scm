@@ -254,12 +254,12 @@
 
 
 (define (psi-get-interaction-rules)
+	(cog-outgoing-set
 			(cog-execute!
 				(Get
 					(Member
 						(Variable "$rule")
-						psi-interaction-rule)))
-)
+						psi-interaction-rule)))))
 
 ; ----------------------------------------------------------------------
 (define-public (do-psi-updater-step)
@@ -270,21 +270,10 @@
 	(display "loop count: ")(display psi-updater-loop-count)(newline)
 
 	; grab and evaluate the interaction rules
-	(let ((rules (cog-outgoing-set (psi-get-interaction-rules))))
+	(let ((rules (psi-get-interaction-rules)))
 		(map psi-evaluate-interaction-rule rules)
 	)
 
-
-
-;    (let* ((rules (psi-select-rules)))
-;        (map (lambda (x)
-;                (let* ((action (psi-get-action x))
-;                       (goals (psi-related-goals action)))
-;                    (cog-execute! action)
-;                    (map cog-evaluate! goals)))
-;            rules)
-;        (stv 1 1)
-;    )
 
 	(psi-pause)
 	(stv 1 1)
@@ -321,11 +310,35 @@
 	)
 )
 
-(define (psi-updater-init)
-	; Create list of the changed-predicates based on the rules?
-	; Alternatively we can check for change for each occurence in the rules
+(define (psi-change-eval? atom)
+	(if (and (equal? (cog-type atom) 'EvaluationLink)
+			 (equal? (gar atom) (GroundedPredicateNode "scm: psi-change-in?")))
+		#t
+		#f))
 
-	(display "<insert init psi-updater here>\n")
+
+(define (filter-hypergraph-links-too pred? atom)
+	(define results '())
+	;(format #t "atom: \n~a\n" atom)
+	(if (pred? atom)
+		(set! results (append results (list atom))))
+	(if (cog-link? atom)
+		(for-each (lambda (sub-atom)
+					(set! results (append (filter pred? sub-atom) results))
+				  )
+				  (cog-outgoing-set atom)))
+	results
+)
+
+(define (psi-updater-init)
+	; Populate prev-values-table based on current value of the arguments to
+	; (GroupdedPredicate "psi-change-in") in the interaction rules
+	; Grab the interaction rules
+	(define rules (psi-get-interaction-rules))
+	(define change-evals (filter-hypergraph-links-too psi-change-eval?
+							(Set rules)))
+	(format #t "change-evals: ~a\n" change-evals)
+
 )
 
 (define change-predicates)
@@ -394,6 +407,7 @@
 (define r2 power->voice)
 (define voice voice-width)
 (define value psi-get-value)
+(define rules (psi-get-interaction-rules))
 
 ;for fun
 (psi-set-value agent-state-power (Number .2))
