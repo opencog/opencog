@@ -11,7 +11,7 @@
 ;; ------------------------------------------------------------------
 
 (define (foobar x)
-(display "duuuuuuuude wtf foobar\n")
+(display "duuuuuuuude foobar pred-schema wrapper\n")
 (display x) (newline)
 	(cog-evaluate! x)
  (Node "bad value"))
@@ -55,57 +55,57 @@
 			(DefinedPredicate "Someone visible?"))))
 
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone requests interaction?"))
 	(DefinedSchemaNode "Interaction requested action")
 	demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Did someone arrive?"))
 	(DefinedSchemaNode "New arrival sequence")
 	demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Did someone leave?"))
 	(DefinedSchemaNode "Someone left action")
 	demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone visible?"))
 	(DefinedSchemaNode "Interact with people")
 	demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Nothing happening?"))
 	(DefinedSchemaNode "Nothing is happening")
 	demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot started talking?"))
 	(DefinedSchemaNode "Speech started")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot is talking?"))
 	(DefinedSchemaNode "Speech ongoing")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot stopped talking?"))
 	(DefinedSchemaNode "Speech ended")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot started listening?"))
 	(DefinedSchemaNode "Listening started")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot is listening?"))
 	(DefinedSchemaNode "Listening ongoing")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-(psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
+(psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot stopped listening?"))
 	(DefinedSchemaNode "Listening ended")
 	speech-demand-satisfied (stv 1 1) speech-demand)
