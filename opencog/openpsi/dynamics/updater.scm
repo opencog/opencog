@@ -11,20 +11,43 @@
 ; --------------------------------------------------------------
 
 (define (psi-get-value entity)
-	; todo: handle no value set (iow empty set returned from cog-execute)
-	; OpenPsi values are stored using StateLinks
-	(gar
-		(cog-execute!
+	(define result #f)
 
+	; First check for StateLink value
+	; OpenPsi values are stored using StateLinks
+	(define resultset
+		(cog-execute!
 				(Get
 					(State
 						entity
-						(Variable "$n"))))))
+						(Variable "$n")))))
+	(if (not (null? (cog-outgoing-set resultset)))
+		(set! result (gar resultset))
+
+		; else check if entity is an evaluation or predicate or schema
+		(let ((type (cog-type entity)))
+			(if (or (equal? type 'PredicateNode)
+				   (equal? type 'GroundedPredicateNode)
+				   (equal? type 'DefinedPredicateNode))
+				(set! result (cog-evaluate! (Evaluation entity (List)))))
+			(if (or (equal? type 'SchemaNode)
+            		(equal? type 'GroundedSchemaNode)
+            	    (equal? type 'DefinedSchemaeNode))
+            	(set! result (cog-execute! (ExecutionOutput entity (List)))))
+            (if (equal? type 'EvaluationLink)
+                (set! result (cog-evaluate! entity)))
+        )
+	)
+	result
+)
 
 (define (psi-get-number-value entity)
-	(define numlink (psi-get-value entity))
-	(if (eq? 'NumberNode (cog-type numlink))
-		(string->number (cog-name numlink))))
+	(define result (psi-get-value entity))
+	(if (and (cog-atom? result) (eq? 'NumberNode (cog-type result)))
+		(set! result (string->number (cog-name result))))
+	(if (cog-tv? result)
+		(set! result (tv-mean result)))
+	result)
 
 (define (psi-set-value entity value)
 	; OpenPsi values are stored using StateLinks
@@ -67,7 +90,9 @@
 (hash-set! prev-value-table agent-state-power .3)
 
 ;;; EVENT PREDICATES
-(Predicate "speech-giving starts" (stv 0 1))
+(define speech (Predicate "speech-giving-starts"))
+(Evaluation speech (List) (stv 0 1))
+(hash-set! prev-value-table speech 0.0)
 
 
 ;;; PAU PREDICATES
@@ -96,7 +121,24 @@
 
 (define (create-psi-interaction-rule antecedent consequent strength)
 	(define rule
-		(Implication
+		(PredictiveImplication
+			(TimeNode 1)
+		    (Evaluation
+                (GroundedPredicate "scm: psi-change-in?")
+                (List
+                    antecedent))
+		    (ExecutionOutputLink
+	            (GroundedSchema "scm: adjust-psi-var-level")
+	            (List
+	                consequent
+	                (NumberNode strength)
+	                antecedent))))
+	(Member rule psi-interaction-rule)
+	rule
+)
+(define (create-psi-interaction-rule-BAK antecedent consequent strength)
+	(define rule
+		(PredictiveImplication
 			(TypedVariable
 				(Variable "$time")
 				(Type "TimeNode"))
@@ -115,6 +157,7 @@
 	rule
 )
 
+; not using, can trash
 (define (psi-change-eval entity)
     (Evaluation
         (GroundedPredicate "scm: psi-change-in?")
@@ -122,27 +165,16 @@
             entity))
 )
 
-(define power->voice (create-psi-interaction-rule
-;    (Evaluation
-;        (GroundedPredicate "scm: psi-change-in?")
-;        (List
-;            agent-state-power))
-    (psi-change-eval agent-state-power)
-    voice-width
-	.7)
+(define speech->power
+	(create-psi-interaction-rule
+		;(Predicate "speech-giving-starts")
+		speech
+		agent-state-power
+		.1)
 )
 
-; Do we want to specifiy that all antecedents will be psi-change-in? predicates?
-; That would simplify the above, by just being able to pass in the entity to
-; create-psi-interaction-rule. But then below format wouldn't be allowed.
-; But maybe we do want to allow flexibility with the antecedent predicates.
-(define speech->power (create-psi-interaction-rule
-	(Evaluation
-		(Predicate "speech-giving-starts"))
-	agent-state-power
-	.7)
-)
-
+(define power->voice
+	(create-psi-interaction-rule agent-state-power voice-width .1))
 
 
 
@@ -179,12 +211,8 @@
  todo: see case-lambda in scheme for function overloading
 "
 (define-public (adjust-psi-var-level target alpha . origin-param)
-	(display "adjust-psi-var-level\n")
-	(display target)
-	;(let* ((value (string->number (cog-name (psi-get-value target))))
+	(format #t "adjust-psi-var-level   alpha: ~a   target: ~a" alpha target)
 	(let* ((value (psi-get-number-value target))
-		   ;(strength (cog-stv-strength target))
-		   ;(confidence (cog-stv-confidence target))
 		   ; todo: replace this with a function
 		   (new-value (min 1 (max 0 (+ value
 				(string->number (cog-name alpha))))))
@@ -192,7 +220,7 @@
 
 		(psi-set-value target (Number new-value))
 		;(cog-set-tv! target (cog-new-stv new-strength confidence))
-		(display "new vale: ")(display new-value)(newline)
+		(format #t "previous value: ~a    new value: ~a\n" value new-value)
 	)
 )
 
@@ -242,7 +270,7 @@
 	(display "loop count: ")(display psi-updater-loop-count)(newline)
 
 	; grab and evaluate the interaction rules
-	(let ((rules psi-get-interaction-rules))
+	(let ((rules (cog-outgoing-set (psi-get-interaction-rules))))
 		(map psi-evaluate-interaction-rule rules)
 	)
 
@@ -265,37 +293,33 @@
 ; --------------------------------------------------------------
 
 (define-public (psi-change-in? target)
-	(display "psi-change-in? argument: ")(display target)
+	(display "psi-change-in? argument: \n")(display target)
 	(let* ((previous (hash-ref prev-value-table target))
 		   (current (psi-get-number-value target)))
 
-		(display previous)(newline)(display current)(newline)
-		(if (not (equal? previous current))
+		(format #t "previous value: ~a   current value: ~a\n" previous current)
+		(if (and
+				; current value is defined
+				(not (equal? #f current))
+				(not (equal? previous current)))
 			(stv 1 1)
 			(stv 0 1))
 	)
-
-
 )
 
-
 (define (psi-evaluate-interaction-rule rule)
-	; Assumes rule is of the form (Implication (TypedVar...) (AtTime ) (AtTime))
-	(define antecedent (gdr (gdr rule)))
-	(display antecedent)
+	; Assumes rule is of the form (PredictiveImplication AtTime ...)
+	(define antecedent (gdr rule))
+	(format #t "evaluating: ~a\n" antecedent)
 
 	; starting out not using time server but will add
 	(if (equal? (tv-mean (cog-evaluate! antecedent)) 1.0)
-		(let ((consequent (gdr (car (cdr (cdr (cog-outgoing-set rule)))))))
-			(display consequent)
+		(let ((consequent (list-ref (cog-outgoing-set rule) 2)))
+			(format #t "executing: ~a\n" consequent)
 			(cog-execute! consequent)
 		)
 	)
-
-
-
 )
-
 
 (define (psi-updater-init)
 	; Create list of the changed-predicates based on the rules?
@@ -366,13 +390,13 @@
 ; Shortcuts for dev use
 
 (define halt psi-updater-halt)
-(define rule power->voice)
+(define r1 speech->power)
+(define r2 power->voice)
 (define voice voice-width)
 (define value psi-get-value)
 
 ;for fun
-(psi-set-value agent-state-power (Number .7))
-
+(psi-set-value agent-state-power (Number .2))
 
 ; --------------------------------------------------------------
 ; --------------------------------------------------------------
