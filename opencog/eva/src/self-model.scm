@@ -168,7 +168,7 @@
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
-	(DefinedPredicate "chatbot stopped listening")
+	(DefinedPredicate "chatbot stopped listening?")
 	(Equal (Set chat-listen-stop)
 		(Get (State chat-state (Variable "$x")))))
 

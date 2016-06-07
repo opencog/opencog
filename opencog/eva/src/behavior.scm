@@ -676,12 +676,9 @@
 
 ; Things to do, if stopped listening.
 (DefineLink
-	(DefinedPredicate "Listening ended?")
+	(DefinedPredicate "Listening ended")
 	(SequentialAnd
-		; If the chatbot stopped talking ...
-		(DefinedPredicate "chatbot stopped listening")
-
-		; ... then switch back to exploration saccade ...
+		; Switch back to exploration saccade ...
 		(Evaluation (GroundedPredicate "py:explore_saccade")
 			(ListLink))
 
@@ -797,7 +794,11 @@
 					(DefinedPredicate "chatbot is listening")
 					(DefinedPredicate "Listening ongoing"))
 
-				(DefinedPredicate "Listening ended?")
+				; If the chatbot stopped talking ...
+				(SequentialAnd
+					(DefinedPredicate "chatbot stopped listening")
+					(DefinedPredicate "Listening ended"))
+
 				(SequentialAnd
 				    (DefinedPredicate "Skip Interaction?")
 				    (DefinedPredicate "Keep alive")
