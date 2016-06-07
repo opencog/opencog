@@ -391,8 +391,8 @@ there are 100K rules!
 (define-public (psi-run-continue?)  ; public only because its in a GPN
     (set! psi-loop-count (+ psi-loop-count 1))
 
-    ; Pause for 101 millisecs, to kepp the number of loops within a reasonable
-    ; range.    ;
+    ; Pause for 101 millisecs, to keep the number of loops
+    ; within a reasonable range.
     (usleep 101000)
     (if psi-do-run-loop (stv 1 1) (stv 0 1))
 )
@@ -484,10 +484,10 @@ there are 100K rules!
   Run `psi-step` in a new thread. Call (psi-halt) to exit the loop.
 "
     (define loop-name (string-append psi-prefix-str "loop"))
-    (define (loop-node) (DefinedPredicateNode loop-name))
+    (define loop-node (DefinedPredicateNode loop-name))
     (define (define-psi-loop)
         (DefineLink
-            (loop-node)
+            loop-node
             (SatisfactionLink
                 (SequentialAnd
                     (Evaluation
@@ -496,15 +496,15 @@ there are 100K rules!
                     (Evaluation
                         (GroundedPredicate "scm: psi-run-continue?")
                         (ListLink))
-                    (loop-node)))))
+                    ; tail-recursive call
+                    loop-node))))
 
     (if (null? (cog-node 'DefinedPredicateNode loop-name))
-        (define-psi-loop)
-        #f ; Nothing to do already defined
-    )
+        (define-psi-loop))
+
     (set! psi-do-run-loop #t)
     (call-with-new-thread
-        (lambda () (cog-evaluate! (loop-node))))
+        (lambda () (cog-evaluate! loop-node)))
 )
 
 ; -------------------------------------------------------------
