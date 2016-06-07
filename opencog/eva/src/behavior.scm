@@ -197,7 +197,7 @@
 
 ;; Respond to a new face becoming visible.
 ;
-;; XXX TODO -- need to also do line 590, if interacting for a while
+;; XXX TODO -- if interacting for a while
 ;; this alters probability of glance...
 (DefineLink
 	(DefinedPredicate "Respond to new arrival")
@@ -749,18 +749,22 @@
 			(SequentialOr
 				(DefinedPredicate "Skip Interaction?")
 
-				(DefinedPredicate "Someone requests interaction?")
-				(DefinedPredicate "Interaction requested action")
+				(SequentialAnd
+					(DefinedPredicate "Someone requests interaction?")
+					(DefinedPredicate "Interaction requested action"))
 
-				(DefinedPredicate "Did someone arrive?")
-				(DefinedPredicate "New arrival sequence")
+				(SequentialAnd
+					(DefinedPredicate "Did someone arrive?")
+					(DefinedPredicate "New arrival sequence"))
 
-				(DefinedPredicate "Did someone leave?")
-				(DefinedPredicate "Someone left action")
+				(SequentialAnd
+					(DefinedPredicate "Did someone leave?")
+					(DefinedPredicate "Someone left action"))
 
 				; True, if there is anyone visible.
-				(DefinedPredicate "Someone visible?")
-				(DefinedPredicate "Interact with people")
+				(SequentialAnd
+					(DefinedPredicate "Someone visible?")
+					(DefinedPredicate "Interact with people"))
 
 				(DefinedPredicate "Nothing is happening")
 				(True))
