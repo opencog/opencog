@@ -572,12 +572,12 @@
 			(ListLink (Node "--- Start talking")))
 ))
 
-; Currently used for scripted behaviors while STT doesnt publish accurate events.
+; Currently used for scripted behaviors while STT doesn't publish
+; accurate events.
 (DefineLink
-	(DefinedPredicate "Listening started?")
+	(DefinedPredicate "Listening started")
 	(SequentialAnd
-		(DefinedPredicate "chatbot started listening")
-		; ... then switch to face-study saccade ...
+		; Switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:listening_saccade")
 				(ListLink))
 		; ... and show one random gesture from "conversing" set.
@@ -790,7 +790,10 @@
 					(DefinedPredicate "chatbot stopped talking?")
 					(DefinedPredicate "Speech ended"))
 
-				(DefinedPredicate "Listening started?")
+				(SequentialAnd
+					(DefinedPredicate "chatbot started listening?")
+					(DefinedPredicate "Listening started"))
+
 				(DefinedPredicate "Listening?")
 				(DefinedPredicate "Listening ended?")
 				(SequentialAnd
