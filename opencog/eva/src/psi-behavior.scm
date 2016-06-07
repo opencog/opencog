@@ -59,7 +59,7 @@
 (pred-2-schema "Speech ongoing")
 (pred-2-schema "Speech ended")
 (pred-2-schema "Listening started")
-(pred-2-schema "Listening? action")
+(pred-2-schema "Listening ongoing")
 (pred-2-schema "Listening ended? action")
 (pred-2-schema "Keep alive")
 ;;
@@ -138,8 +138,8 @@
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
-		(DefinedPredicate "Listening?"))
-	(DefinedSchemaNode "Listening? action")
+		(DefinedPredicate "chatbot is listening?"))
+	(DefinedSchemaNode "Listening ongoing")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))

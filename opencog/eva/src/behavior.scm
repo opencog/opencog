@@ -701,11 +701,9 @@
 
 ; Things to do, if the chatbot is listening.
 (DefineLink
-	(DefinedPredicate "Listening?")
+	(DefinedPredicate "Listening ongoing")
 	(SequentialAnd
-		; If the chatbot stopped talking ...
-		(DefinedPredicate "chatbot is listening")
-        ; ... show one of the neutral-speech expressions
+        ; Show one of the neutral-speech expressions
         (SequentialOr
             (Not (DefinedPredicate "Time to change expression"))
             (Put (DefinedPredicateNode "Show random expression")
@@ -794,7 +792,11 @@
 					(DefinedPredicate "chatbot started listening?")
 					(DefinedPredicate "Listening started"))
 
-				(DefinedPredicate "Listening?")
+				; If the chatbot stopped talking ...
+				(SequentialAnd
+					(DefinedPredicate "chatbot is listening")
+					(DefinedPredicate "Listening ongoing"))
+
 				(DefinedPredicate "Listening ended?")
 				(SequentialAnd
 				    (DefinedPredicate "Skip Interaction?")
