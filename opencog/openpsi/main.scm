@@ -297,20 +297,52 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
+(define-public (psi-default-action-selector-per-demand a-random-state demand)
+"
+  Returns a list of one of the most-important-weighted and satisfiable psi-rule
+  or an empty list. A single psi-rule is returned so as help avoid mulitple
+  actions of the same effect or type(aka semantic of the action) from being
+  executed. If a satisfiable rule doesn't exist then the empty list is returned.
+
+  a-random-state:
+  - A random-state object used as a seed for choosing how multiple satisfiable
+  psi-rules with the same weight are to be choosen.
+"
+    (define (choose-rules)
+        ; NOTE: This check is required as ecan isn't being used continuesely.
+        ; Remove `most-weighted-atoms` version once ecan is integrated.
+        (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
+            (most-weighted-atoms (psi-get-satisfiable-rules demand))
+            (most-important-weighted-atoms (psi-get-all-satisfiable-rules))
+        )
+    )
+
+    (let ((rules (choose-rules)))
+        (if (null? rules)
+            '()
+            (list (list-ref rules (random (length rules) a-random-state)))
+        )
+    )
+)
+
+; --------------------------------------------------------------
 (define-public (psi-select-rules-per-demand d)
 "
   Returns a list of psi-rules that are satisfiable by using the action-selector
   you defined or the default-action-selector predefined if you haven't defined
   a different action-selector.
 "
-
-    (let ((as (psi-get-action-selector d)))
-        (if (null? as)
-            (psi-default-action-selector (random-state-from-platform))
-            (let ((result (cog-execute! (car as))))
-                (if (equal? (cog-type result) 'SetLink)
-                    (cog-outgoing-set result)
-                    (list result)
+    (if (equal? d (ConceptNode "OpenPsi: AIML chat demand"))
+        (list) ; Skip the aiml chat demand . FIXME: this is a hack  
+        (let ((as (psi-get-action-selector d)))
+            (if (null? as)
+                (psi-default-action-selector-per-demand
+                           (random-state-from-platform) d)
+                (let ((result (cog-execute! (car as))))
+                    (if (equal? (cog-type result) 'SetLink)
+                        (cog-outgoing-set result)
+                        (list result)
+                    )
                 )
             )
         )
@@ -407,6 +439,7 @@ there are 100K rules!
   The main function that defines the steps to be taken in every cycle.
 "
     (define (get-context-grounding-atoms rule)
+        #!
         (let* ((pattern (GetLink (AndLink (psi-get-context rule))))
                 ;FIXME: Cache `results` during `psi-select-rules` stage
                (results (cog-execute! pattern)))
@@ -415,7 +448,8 @@ there are 100K rules!
             (if (null? (cog-get-all-nodes results))
                 '()
                 results
-            )))
+            )))!#
+            '())
 
 
     (define (act-and-evaluate rule)
@@ -431,13 +465,13 @@ there are 100K rules!
             (map cog-evaluate! goals)
         ))
 
-    (par-map
+    (map
         (lambda (d)
             ; The assumption is that the rules can be run concurrently.
             ; FIXME: Once action-orchestrator is available then a modified
             ; `psi-select-rules` should be used insted of
             ; `psi-select-rules-per-demand`
-            (par-map act-and-evaluate (psi-select-rules-per-demand d)))
+            (map act-and-evaluate (psi-select-rules-per-demand d)))
         (psi-get-all-demands)
     )
 
