@@ -42,8 +42,8 @@
 ; Load the Eva personality configuration.
 ; (display %load-path)
 (add-to-load-path "../src")
-(load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
-; (load-from-path "cfg-sophia.scm") ;;; <<<=== See, its Sophia here!
+; (load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
+(load-from-path "cfg-sophia.scm") ;;; <<<=== See, its Sophia here!
 
 ;; Load the actual psi rules.
 (load-from-path "psi-behavior.scm")

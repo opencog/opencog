@@ -26,7 +26,7 @@
 ; Examples and debugging hints:
 ; Some (but not all) state queries:
 ; (cog-evaluate! (DefinedPredicate "chatbot is talking?"))
-; (cog-evaluate! (DefinedPredicate "chatbot is listening"))
+; (cog-evaluate! (DefinedPredicate "chatbot is listening?"))
 ; (cog-evaluate! (DefinedPredicate "chatbot is happy"))
 ; (cog-evaluate! (DefinedPredicateNode "Did someone arrive?"))
 ; (cog-evaluate! (DefinedPredicateNode "Someone visible?"))
@@ -468,7 +468,7 @@
 	(DefinedPredicate "Is interacting with someone?")
 	(OrLink
 		; true if talking not listening.
-		(NotLink (DefinedPredicate "chatbot is listening"))
+		(NotLink (DefinedPredicate "chatbot is listening?"))
 		; true if not not-making eye-contact.
 		(NotLink (Equal
 			(SetLink no-interaction)

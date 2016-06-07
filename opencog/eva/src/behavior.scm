@@ -129,7 +129,7 @@
 
 		;; Show random expressions only if NOT talking
 		(SequentialOr
-			;(Not (DefinedPredicate "chatbot is listening"))
+			;(Not (DefinedPredicate "chatbot is listening?"))
 			(SequentialAnd
 
 				(SequentialOrLink
@@ -791,12 +791,12 @@
 
 				; If the chatbot stopped talking ...
 				(SequentialAnd
-					(DefinedPredicate "chatbot is listening")
+					(DefinedPredicate "chatbot is listening?")
 					(DefinedPredicate "Listening ongoing"))
 
 				; If the chatbot stopped talking ...
 				(SequentialAnd
-					(DefinedPredicate "chatbot stopped listening")
+					(DefinedPredicate "chatbot stopped listening?")
 					(DefinedPredicate "Listening ended"))
 
 				(SequentialAnd
