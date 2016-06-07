@@ -596,11 +596,9 @@
 
 ;; Things to do, if the chatbot is currently talking.
 (DefineLink
-	(DefinedPredicate "Speech ongoing?")
+	(DefinedPredicate "Speech ongoing")
 	(SequentialAnd
-		; If the chatbot currently talking ...
-		(DefinedPredicate "chatbot is talking")
-		; ... then handle the various affect states.
+		; Handle the various affect states.
 		(SequentialOr
 			(SequentialAnd
 				; If chatbot is happy ...
@@ -785,7 +783,11 @@
 					(DefinedPredicate "chatbot started talking?")
 					(DefinedPredicate "Speech started"))
 
-				(DefinedPredicate "Speech ongoing?")
+				; If the chatbot currently talking ...
+				(SequentialAnd
+					(DefinedPredicate "chatbot is talking?")
+					(DefinedPredicate "Speech ongoing"))
+
 				(DefinedPredicate "Speech ended?")
 				(DefinedPredicate "Listening started?")
 				(DefinedPredicate "Listening?")

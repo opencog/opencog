@@ -25,7 +25,7 @@
 ;
 ; Examples and debugging hints:
 ; Some (but not all) state queries:
-; (cog-evaluate! (DefinedPredicate "chatbot is talking"))
+; (cog-evaluate! (DefinedPredicate "chatbot is talking?"))
 ; (cog-evaluate! (DefinedPredicate "chatbot is listening"))
 ; (cog-evaluate! (DefinedPredicate "chatbot is happy"))
 ; (cog-evaluate! (DefinedPredicateNode "Did someone arrive?"))
@@ -148,7 +148,7 @@
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
-	(DefinedPredicate "chatbot is talking")
+	(DefinedPredicate "chatbot is talking?")
 	(Equal (Set chat-talk)
 		(Get (State chat-state (Variable "$x")))))
 
