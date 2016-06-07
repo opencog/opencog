@@ -234,7 +234,6 @@
 (DefineLink
 	(DefinedPredicate "New arrival sequence")
 	(SequentialAnd
-		(DefinedPredicate "Did someone arrive?")
 		(True (DefinedPredicate "If sleeping then wake"))
 		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "Respond to new arrival")
@@ -767,6 +766,7 @@
 				(DefinedPredicate "Skip Interaction?")
 				(DefinedPredicate "Someone requests interaction?")
 				(DefinedPredicate "Interaction requested action")
+				(DefinedPredicate "Did someone arrive?")
 				(DefinedPredicate "New arrival sequence")
 				(DefinedPredicate "Someone left")
 				(DefinedPredicate "Interact with people")
