@@ -56,20 +56,15 @@
 	(DefinedPredicate loop-name)
 	(SatisfactionLink
 		(SequentialAnd
-(Evaluation (GroundedPredicate "scm: wtf") (ListLink (Node "start")))
 			(Evaluation (GroundedPredicate "scm: psi-step")
 				(ListLink))
-(Evaluation (GroundedPredicate "scm: wtf") (ListLink (Node "middle")))
 			(Evaluation (GroundedPredicate "scm: psi-run-continue?")
 				(ListLink))
-(Evaluation (GroundedPredicate "scm: wtf") (ListLink (Node "more")))
 			; If ROS is dead, or the continue flag not set,
 			; then stop running the behavior loop.
 			(DefinedPredicate "ROS is running?")
-(Evaluation (GroundedPredicate "scm: wtf") (ListLink (Node "tail")))
 			(DefinedPredicate loop-name))))
 
-(define (wtf x) (display "heyyyyy\n") (display x)(newline) (stv 1 1))
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.
 (define (run) (psi-run))
