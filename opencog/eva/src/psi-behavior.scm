@@ -43,7 +43,7 @@
 (define speech-demand-satisfied (True))
 (define face-demand (psi-demand "face interaction" 1))
 (define speech-demand (psi-demand "speech interaction" 1))
-(define run-demand (psi-demand "run demand" 1))
+; (define run-demand (psi-demand "run demand" 1))
 
 (DefineLink
 	(DefinedPredicate "Nothing happening?")
