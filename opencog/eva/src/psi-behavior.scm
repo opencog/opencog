@@ -54,7 +54,7 @@
 (pred-2-schema "New arrival sequence")
 (pred-2-schema "Someone left action")
 (pred-2-schema "Interact with people")
-(pred-2-schema "Nothing is happening action")
+(pred-2-schema "Nothing is happening")
 (pred-2-schema "Speech started? action")
 (pred-2-schema "Speech ongoing? action")
 (pred-2-schema "Speech ended? action")
@@ -82,6 +82,15 @@
 ;(psi-rule (list (DefinedPredicate "Speech ended?")) (DefinedSchemaNode "Speech ended? action") speech-demand-satisfied (stv 1 1) speech-demand)
 ;(psi-rule (list (DefinedPredicate "Skip Interaction?")) (DefinedSchemaNode "Keep alive") speech-demand-satisfied (stv 1 1) speech-demand)
 
+(DefineLink
+	(DefinedPredicate "Nothing happening?")
+	(NotLink
+		(SequentialOr
+			(DefinedPredicate "Someone requests interaction?")
+			(DefinedPredicate "Did someone arrive?")
+			(DefinedPredicate "Did someone leave?")
+			(DefinedPredicate "Someone visible?"))))
+
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone requests interaction?"))
@@ -104,8 +113,8 @@
 	demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
-		(DefinedPredicate "Nothing is happening"))
-	(DefinedSchemaNode "Nothing is happening action")
+		(DefinedPredicate "Nothing happening?"))
+	(DefinedSchemaNode "Nothing is happening")
 	demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
