@@ -322,7 +322,7 @@ to a BindLink approach for ease-of-use.
 * AIML HR -- load only the current, desired rule-set. Get someone
   to write shell scripts or config files for this (Wenwei?)
 * OpenPsi -- need a general mechanism that avoids doing the same thing
-  over and over. Discusss with Ben, Amen.
+  over and over (e.g. saying teh same thing). Discusss with Ben, Amen.
 * general utility -- create an is-member? utility to replace psi-action?
 * integration: any AIML xfind response should be handled by
   the fuzzy matcher instead...
@@ -505,3 +505,30 @@ scm: dispatch-text  in btree.scm
 py: say_text -- single string atom
 
 (psi-run)
+
+(cog-execute! (DefinedSchemaNode "Listening ongoing"))
+
+(cog-evaluate!   (Put (DefinedPredicateNode "Show random expression")
+                (ConceptNode "neutral-listen")))
+
+
+(DefinedSchemaNode "New arrival sequence")
+
+(cog-evaluate! (DefinedPredicate  "New arrival sequence"))
+(cog-evaluate!  (DefinedPredicate "Respond to new arrival"))o
+(DefinedPredicate "Was Empty Sequence")
+(DefinedPredicate "interact with new person")
+
+(DefinedPredicateNode "Did someone arrive?")
+
+--------------------
+ (DefinedPredicate "Respond to new arrival")
+(DefinedPredicate "Interacting Sequence")
+
+(DefinedSchema "glance at new person") -- again
+
+id someone lea
+
+map::at -- is this DefineLink.cc arity check???? (at line 81)
+
+do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
