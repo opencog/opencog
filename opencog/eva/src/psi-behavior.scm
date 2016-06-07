@@ -53,7 +53,7 @@
 (pred-2-schema "Interaction requested action")
 (pred-2-schema "New arrival sequence")
 (pred-2-schema "Someone left action")
-(pred-2-schema "Interact with people action")
+(pred-2-schema "Interact with people")
 (pred-2-schema "Nothing is happening action")
 (pred-2-schema "Speech started? action")
 (pred-2-schema "Speech ongoing? action")
@@ -99,8 +99,8 @@
 	demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
-		(DefinedPredicate "Interact with people"))
-	(DefinedSchemaNode "Interact with people action")
+		(DefinedPredicate "Someone visible?"))
+	(DefinedSchemaNode "Interact with people")
 	demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))

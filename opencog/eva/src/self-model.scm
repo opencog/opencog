@@ -29,7 +29,7 @@
 ; (cog-evaluate! (DefinedPredicate "chatbot is listening"))
 ; (cog-evaluate! (DefinedPredicate "chatbot is happy"))
 ; (cog-evaluate! (DefinedPredicateNode "Did someone arrive?"))
-; (cog-evaluate! (DefinedPredicateNode "Someone visible"))
+; (cog-evaluate! (DefinedPredicateNode "Someone visible?"))
 ; (cog-execute! (DefinedSchemaNode "Num visible faces"))
 ;
 (add-to-load-path "/usr/local/share/opencog/scm")
@@ -379,7 +379,7 @@
 ;; Is there someone present?  We check for acked faces.
 ;; The someone-arrived code converts newly-visible faces to acked faces.
 (DefineLink
-	(DefinedPredicateNode "Someone visible")
+	(DefinedPredicateNode "Someone visible?")
 	(SatisfactionLink
 		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
 		(PresentLink

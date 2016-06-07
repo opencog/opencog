@@ -284,9 +284,6 @@
 (DefineLink
 	(DefinedPredicate "Interact with people")
 	(SequentialAnd
-		; True, if there is anyone visible.
-		(DefinedPredicate "Someone visible")
-
 		; Say something, if no one else has said anything in a while.
 		; i.e. if are being ignored, then say something.
 ;		(SequentialOr
@@ -773,7 +770,10 @@
 				(DefinedPredicate "Did someone leave?")
 				(DefinedPredicate "Someone left action")
 
+				; True, if there is anyone visible.
+				(DefinedPredicate "Someone visible?")
 				(DefinedPredicate "Interact with people")
+
 				(DefinedPredicate "Nothing is happening")
 				(True))
 
