@@ -168,6 +168,10 @@
 ; (emo-gest-spec "chat-neg-think" "think-browsDown.003"  0.8 0.5 0.7 1 1 0.3 0.5)
 (emo-gest-spec "chat-neg-think" "noop"                 0.2 0   0   1 1 0   0  )
 
+; Gestures to use during listening.
+(emo-gest-spec "listening" "thoughtful"  0.4 0.7 1.0 1 1 0.6 0.8)
+(emo-gest-spec "listening" "noop"        0.6 0.0 1.0 1 1 0.0 0.0)
+
 ; Used for imperatives, i.e. when she is verbally told to do something.
 ; Thus, we list all of them here. The probability column is ignored.
 ; The shake and nod gestures are very weak, for some reason.
