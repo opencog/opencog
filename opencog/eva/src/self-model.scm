@@ -628,9 +628,14 @@
 ;; (DefinedSchema "look at person") to make it look.
 (DefineLink
 	(DefinedPredicate "interact with new person")
-	(True (Put (DefinedPredicate "Set interaction target")
-		; If more than one new arrival, pick one randomly.
-		(RandomChoice (DefinedSchema "New arrivals"))))
+	; XXX Double-check that the "New arrivals" list is non-empty;
+	; some OpenPsi bug sometimes sends us here, and the RandomChoice
+	; crashes if the list is empty.
+	(SequentialAnd
+		(DefinedPredicateNode "Did someone arrive?")
+		(True (Put (DefinedPredicate "Set interaction target")
+			; If more than one new arrival, pick one randomly.
+			(RandomChoice (DefinedSchema "New arrivals")))))
 )
 
 ;; Set eye-contact face to the requested face.
