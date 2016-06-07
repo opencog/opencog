@@ -51,7 +51,7 @@
 )))
 ;;
 (pred-2-schema "Interaction requested action")
-(pred-2-schema "New arrival sequence action")
+(pred-2-schema "New arrival sequence")
 (pred-2-schema "Someone left action")
 (pred-2-schema "Interact with people action")
 (pred-2-schema "Nothing is happening action")
@@ -94,7 +94,7 @@
 	demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
-		(DefinedPredicate "Someone left"))
+		(DefinedPredicate "Did someone leave?"))
 	(DefinedSchemaNode "Someone left action")
 	demand-satisfied (stv 1 1) face-demand)
 

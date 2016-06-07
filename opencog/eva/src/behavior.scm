@@ -242,9 +242,8 @@
 
 ;; Check to see if someone left.
 (DefineLink
-	(DefinedPredicate "Someone left")
+	(DefinedPredicate "Someone left action")
 	(SequentialAnd
-		(DefinedPredicate "Did someone leave?")
 		(Put (DefinedPredicate "Publish behavior")
 			(Concept "Someone left"))
 		(Evaluation (GroundedPredicate "scm: print-msg")
@@ -764,11 +763,16 @@
 		(SequentialAnd
 			(SequentialOr
 				(DefinedPredicate "Skip Interaction?")
+
 				(DefinedPredicate "Someone requests interaction?")
 				(DefinedPredicate "Interaction requested action")
+
 				(DefinedPredicate "Did someone arrive?")
 				(DefinedPredicate "New arrival sequence")
-				(DefinedPredicate "Someone left")
+
+				(DefinedPredicate "Did someone leave?")
+				(DefinedPredicate "Someone left action")
+
 				(DefinedPredicate "Interact with people")
 				(DefinedPredicate "Nothing is happening")
 				(True))
