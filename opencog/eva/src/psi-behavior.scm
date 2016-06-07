@@ -9,33 +9,6 @@
 (use-modules (opencog openpsi))
 ;
 ;; ------------------------------------------------------------------
-;; Main loop.
-;			(SequentialOr
-;			    (DefinedPredicate "Skip Interaction?")
-;				(DefinedPredicate "Interaction requested")
-;				(DefinedPredicate "New arrival sequence")
-;				(DefinedPredicate "Someone left")
-;				(DefinedPredicate "Interact with people")
-;				(DefinedPredicate "Nothing is happening")
-;				(True))
-
-;			;; XXX FIXME chatbot is disengaged from everything else.
-;			;; The room can be empty, the head is bored or even asleep,
-;			;; but the chatbot is still smiling and yabbering.
-;			;; If interaction is turned-off need keep alive gestures
-;			(SequentialOr
-;				(DefinedPredicate "Speech started?")
-;				(DefinedPredicate "Speech ongoing?")
-;				(DefinedPredicate "Speech ended?")
-;				(DefinedPredicate "Listening started?")
-;				(DefinedPredicate "Listening?")
-;				(DefinedPredicate "Listening ended?")
-;				(SequentialAnd
-;				    (DefinedPredicate "Skip Interaction?")
-;				    (DefinedPredicate "Keep alive")
-;				)
-;				(True)
-;			)
 
 (define (foobar x)
 (display "duuuuuuuude wtf foobar\n")
@@ -71,16 +44,6 @@
 (define face-demand (psi-demand "face interaction" 1))
 (define speech-demand (psi-demand "speech interaction" 1))
 (define run-demand (psi-demand "run demand" 1))
-
-;(psi-rule (list (DefinedPredicate "Interaction requested"))(DefinedSchemaNode "Interaction requested action") demand-satisfied (stv 1 1) face-demand)
-;(psi-rule (list (DefinedPredicate "New arrival sequence")) (DefinedSchemaNode "New arrival sequence action") demand-satisfied (stv 1 1) face-demand)
-;(psi-rule (list (DefinedPredicate "Someone left")) (DefinedSchemaNode "Someone left action") demand-satisfied (stv 1 1) face-demand)
-;(psi-rule (list (DefinedPredicate "Interact with people")) (DefinedSchemaNode "Interact with people action") demand-satisfied (stv 1 1) face-demand)
-;(psi-rule (list (DefinedPredicate "Nothing is happening")) (DefinedSchemaNode "Nothing is happening action") demand-satisfied (stv 1 1) face-demand)
-;(psi-rule (list (DefinedPredicate "Speech started?")) (DefinedSchemaNode "Speech started? action") speech-demand-satisfied (stv 1 1) speech-demand)
-;(psi-rule (list (DefinedPredicate "Speech ongoing?")) (DefinedSchemaNode "Speech ongoing? action") speech-demand-satisfied (stv 1 1) speech-demand)
-;(psi-rule (list (DefinedPredicate "Speech ended?")) (DefinedSchemaNode "Speech ended? action") speech-demand-satisfied (stv 1 1) speech-demand)
-;(psi-rule (list (DefinedPredicate "Skip Interaction?")) (DefinedSchemaNode "Keep alive") speech-demand-satisfied (stv 1 1) speech-demand)
 
 (DefineLink
 	(DefinedPredicate "Nothing happening?")
