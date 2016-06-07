@@ -801,8 +801,8 @@
 
 				(SequentialAnd
 				    (DefinedPredicate "Skip Interaction?")
-				    (DefinedPredicate "Keep alive")
-				)
+				    (DefinedPredicate "Keep alive"))
+
 				(True)
 			)
 
