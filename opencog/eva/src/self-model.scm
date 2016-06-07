@@ -138,7 +138,7 @@
 (StateLink chat-state chat-idle)
 
 (DefineLink
-	(DefinedPredicate "chatbot started talking")
+	(DefinedPredicate "chatbot started talking?")
 	(Equal (Set chat-start)
 		(Get (State chat-state (Variable "$x")))))
 

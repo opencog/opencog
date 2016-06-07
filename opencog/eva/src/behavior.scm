@@ -553,11 +553,9 @@
 ; Things to do, if TTS vocalization just started.
 (DefineLink
 	; owyl "chatbot_speech_start()" method
-	(DefinedPredicate "Speech started?")
+	(DefinedPredicate "Speech started")
 	(SequentialAnd
-		; If the TTS vocalization started (chatbot started talking) ...
-		(DefinedPredicate "chatbot started talking")
-		; ... then switch to face-study saccade ...
+		; Switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:conversational_saccade")
 				(ListLink))
 		; ... and show one random gesture from "conversing" set.
@@ -782,7 +780,11 @@
 			;; but the chatbot is still smiling and yabbering.
 			;; If interaction is turned-off need keep alive gestures
 			(SequentialOr
-				(DefinedPredicate "Speech started?")
+				; If the TTS vocalization started (chatbot started talking) ...
+				(SequentialAnd
+					(DefinedPredicate "chatbot started talking?")
+					(DefinedPredicate "Speech started"))
+
 				(DefinedPredicate "Speech ongoing?")
 				(DefinedPredicate "Speech ended?")
 				(DefinedPredicate "Listening started?")

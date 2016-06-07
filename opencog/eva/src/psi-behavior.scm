@@ -118,8 +118,8 @@
 	demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
-		(DefinedPredicate "Speech started?"))
-	(DefinedSchemaNode "Speech started? action")
+		(DefinedPredicate "chatbot started talking?"))
+	(DefinedSchemaNode "Speech started")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?"))
