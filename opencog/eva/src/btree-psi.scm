@@ -48,28 +48,32 @@
 ;; Load the actual psi rules.
 (load-from-path "psi-behavior.scm")
 
-;; Call (run) to run the main loop, (halt) to pause the loop.
-;; The main loop runs in its own thread.
-(define (run) (psi-run))
-(define (halt) (psi-halt))
-
 ; There MUST be a DefinedPredicateNode with exactly the name
 ; below in order for psi-run to work. Or we could just blow
 ; that off, and use our own loop...
 (define loop-name (string-append psi-prefix-str "loop"))
 (DefineLink
-	(DefinedPredicateNode loop-name)
+	(DefinedPredicate loop-name)
 	(SatisfactionLink
 		(SequentialAnd
+(Evaluation (GroundedPredicate "scm: wtf") (ListLink (Node "start")))
 			(Evaluation (GroundedPredicate "scm: psi-step")
 				(ListLink))
+(Evaluation (GroundedPredicate "scm: wtf") (ListLink (Node "middle")))
 			(Evaluation (GroundedPredicate "scm: psi-run-continue?")
 				(ListLink))
+(Evaluation (GroundedPredicate "scm: wtf") (ListLink (Node "more")))
 			; If ROS is dead, or the continue flag not set,
 			; then stop running the behavior loop.
 			(DefinedPredicate "ROS is running?")
-			(DefinedPredicateNode loop-name))))
+(Evaluation (GroundedPredicate "scm: wtf") (ListLink (Node "tail")))
+			(DefinedPredicate loop-name))))
 
+(define (wtf x) (display "heyyyyy\n") (display x)(newline) (stv 1 1))
+;; Call (run) to run the main loop, (halt) to pause the loop.
+;; The main loop runs in its own thread.
+(define (run) (psi-run))
+(define (halt) (psi-halt))
 
 ; ---------------------------------------------------------
 ; Load the chat modules.
@@ -100,7 +104,7 @@
 
 ; ---------------------------------------------------------
 ; Run the hacky garbage collection loop.
-(run-behavior-tree-gc)
+; (run-behavior-tree-gc)
 
 ; Silence the output.
 *unspecified*

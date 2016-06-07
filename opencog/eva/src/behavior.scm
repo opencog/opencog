@@ -170,9 +170,8 @@
 ;; If interaction is requested, then interact with that specific person.
 ;; Make sure we look at that person ...
 (DefineLink
-	(DefinedPredicate "Interaction requested")
+	(DefinedPredicate "Interaction requested action")
 	(SequentialAnd
-		(DefinedPredicate "Someone requests interaction?")
 		(True (DefinedPredicate "If sleeping then wake"))
 		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "interact with requested person")
@@ -765,8 +764,9 @@
 	(SatisfactionLink
 		(SequentialAnd
 			(SequentialOr
-			    (DefinedPredicate "Skip Interaction?")
-				(DefinedPredicate "Interaction requested")
+				(DefinedPredicate "Skip Interaction?")
+				(DefinedPredicate "Someone requests interaction?")
+				(DefinedPredicate "Interaction requested action")
 				(DefinedPredicate "New arrival sequence")
 				(DefinedPredicate "Someone left")
 				(DefinedPredicate "Interact with people")

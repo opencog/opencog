@@ -37,11 +37,16 @@
 ;				(True)
 ;			)
 
+(define (foobar x)
+(display "duuuuuuuude wtf foobar\n")
+(display x) (newline)
+	(cog-evaluate! x)
+ (Node "bad value"))
 ;;
 (define (pred-2-schema pnode-str) 
 	(DefineLink 
 		(DefinedSchemaNode pnode-str)
-		(ExecutionOutputLink (GroundedSchemaNode "scm: cog-evaluate!")
+		(ExecutionOutputLink (GroundedSchemaNode "scm: foobar")
 			(ListLink (DefinedPredicateNode pnode-str))
 )))
 ;;
@@ -79,7 +84,7 @@
 
 
 (psi-rule (list (NotLink(DefinedPredicate "Skip Interaction?")) 
-		(DefinedPredicate "Interaction requested"))
+		(DefinedPredicate "Someone requests interaction?"))
 	(DefinedSchemaNode "Interaction requested action") 
 	demand-satisfied (stv 1 1) face-demand)
 
