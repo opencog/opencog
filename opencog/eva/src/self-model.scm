@@ -25,11 +25,11 @@
 ;
 ; Examples and debugging hints:
 ; Some (but not all) state queries:
-; (cog-evaluate! (DefinedPredicate "chatbot is talking"))
-; (cog-evaluate! (DefinedPredicate "chatbot is listening"))
+; (cog-evaluate! (DefinedPredicate "chatbot is talking?"))
+; (cog-evaluate! (DefinedPredicate "chatbot is listening?"))
 ; (cog-evaluate! (DefinedPredicate "chatbot is happy"))
 ; (cog-evaluate! (DefinedPredicateNode "Did someone arrive?"))
-; (cog-evaluate! (DefinedPredicateNode "Someone visible"))
+; (cog-evaluate! (DefinedPredicateNode "Someone visible?"))
 ; (cog-execute! (DefinedSchemaNode "Num visible faces"))
 ;
 (add-to-load-path "/usr/local/share/opencog/scm")
@@ -138,7 +138,7 @@
 (StateLink chat-state chat-idle)
 
 (DefineLink
-	(DefinedPredicate "chatbot started talking")
+	(DefinedPredicate "chatbot started talking?")
 	(Equal (Set chat-start)
 		(Get (State chat-state (Variable "$x")))))
 
@@ -148,27 +148,27 @@
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
-	(DefinedPredicate "chatbot is talking")
+	(DefinedPredicate "chatbot is talking?")
 	(Equal (Set chat-talk)
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
-	(DefinedPredicate "chatbot stopped talking")
+	(DefinedPredicate "chatbot stopped talking?")
 	(Equal (Set chat-stop)
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
-	(DefinedPredicate "chatbot started listening")
+	(DefinedPredicate "chatbot started listening?")
 	(Equal (Set chat-listen-start)
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
-	(DefinedPredicate "chatbot is listening")
+	(DefinedPredicate "chatbot is listening?")
 	(Equal (Set chat-listen)
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
-	(DefinedPredicate "chatbot stopped listening")
+	(DefinedPredicate "chatbot stopped listening?")
 	(Equal (Set chat-listen-stop)
 		(Get (State chat-state (Variable "$x")))))
 
@@ -379,7 +379,7 @@
 ;; Is there someone present?  We check for acked faces.
 ;; The someone-arrived code converts newly-visible faces to acked faces.
 (DefineLink
-	(DefinedPredicateNode "Someone visible")
+	(DefinedPredicateNode "Someone visible?")
 	(SatisfactionLink
 		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
 		(PresentLink
@@ -468,7 +468,7 @@
 	(DefinedPredicate "Is interacting with someone?")
 	(OrLink
 		; true if talking not listening.
-		(NotLink (DefinedPredicate "chatbot is listening"))
+		(NotLink (DefinedPredicate "chatbot is listening?"))
 		; true if not not-making eye-contact.
 		(NotLink (Equal
 			(SetLink no-interaction)
@@ -628,9 +628,14 @@
 ;; (DefinedSchema "look at person") to make it look.
 (DefineLink
 	(DefinedPredicate "interact with new person")
-	(True (Put (DefinedPredicate "Set interaction target")
-		; If more than one new arrival, pick one randomly.
-		(RandomChoice (DefinedSchema "New arrivals"))))
+	; XXX Double-check that the "New arrivals" list is non-empty;
+	; some OpenPsi bug sometimes sends us here, and the RandomChoice
+	; crashes if the list is empty.
+	(SequentialAnd
+		(DefinedPredicateNode "Did someone arrive?")
+		(True (Put (DefinedPredicate "Set interaction target")
+			; If more than one new arrival, pick one randomly.
+			(RandomChoice (DefinedSchema "New arrivals")))))
 )
 
 ;; Set eye-contact face to the requested face.

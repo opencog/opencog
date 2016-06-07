@@ -74,20 +74,20 @@
 ;(use-modules (opencog nlp relex2logic))
 
 ; Work-around to circular dependency: define `dispatch-text` at the
-; top level of the guile executation environment.
-(define-public (dispatch-text txt)
+; top level of the guile execution environment.
+(define-public (dispatch-text TXT-ATOM)
 "
-  dispatch-text TEXT
+  dispatch-text TXT-ATOM
 
-  Pass the TEXT that STT heard into the OpenCog chatbot.
+  Pass the TXT-ATOM that STT heard into the OpenCog chatbot.
 "
 ;	(call-with-new-thread
 		; Must run in a new thread, else it deadlocks in python,
 		; since the text processing results in python calls.
-		; (lambda () (process-query "luser" (cog-name txt)))
-		; (lambda () (grounded-talk "luser" (cog-name txt)))
+		; (lambda () (process-query "luser" (cog-name TXT-ATOM)))
+		; (lambda () (grounded-talk "luser" (cog-name TXT-ATOM)))
 		; XXX Need to ... auuh load the chatbot...
-;		(lambda () (chat txt))
+;		(lambda () (chat TXT-ATOM))
 ;	)
 	(stv 1 1)
 )

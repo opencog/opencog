@@ -129,7 +129,7 @@
 
 		;; Show random expressions only if NOT talking
 		(SequentialOr
-			;(Not (DefinedPredicate "chatbot is listening"))
+			;(Not (DefinedPredicate "chatbot is listening?"))
 			(SequentialAnd
 
 				(SequentialOrLink
@@ -170,9 +170,8 @@
 ;; If interaction is requested, then interact with that specific person.
 ;; Make sure we look at that person ...
 (DefineLink
-	(DefinedPredicate "Interaction requested")
+	(DefinedPredicate "Interaction requested action")
 	(SequentialAnd
-		(DefinedPredicate "Someone requests interaction?")
 		(True (DefinedPredicate "If sleeping then wake"))
 		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "interact with requested person")
@@ -198,7 +197,7 @@
 
 ;; Respond to a new face becoming visible.
 ;
-;; XXX TODO -- need to also do line 590, if interacting for a while
+;; XXX TODO -- if interacting for a while
 ;; this alters probability of glance...
 (DefineLink
 	(DefinedPredicate "Respond to new arrival")
@@ -235,7 +234,6 @@
 (DefineLink
 	(DefinedPredicate "New arrival sequence")
 	(SequentialAnd
-		(DefinedPredicate "Did someone arrive?")
 		(True (DefinedPredicate "If sleeping then wake"))
 		(True (DefinedPredicate "If bored then alert"))
 		(DefinedPredicate "Respond to new arrival")
@@ -244,9 +242,8 @@
 
 ;; Check to see if someone left.
 (DefineLink
-	(DefinedPredicate "Someone left")
+	(DefinedPredicate "Someone left action")
 	(SequentialAnd
-		(DefinedPredicate "Did someone leave?")
 		(Put (DefinedPredicate "Publish behavior")
 			(Concept "Someone left"))
 		(Evaluation (GroundedPredicate "scm: print-msg")
@@ -287,9 +284,6 @@
 (DefineLink
 	(DefinedPredicate "Interact with people")
 	(SequentialAnd
-		; True, if there is anyone visible.
-		(DefinedPredicate "Someone visible")
-
 		; Say something, if no one else has said anything in a while.
 		; i.e. if are being ignored, then say something.
 ;		(SequentialOr
@@ -559,11 +553,9 @@
 ; Things to do, if TTS vocalization just started.
 (DefineLink
 	; owyl "chatbot_speech_start()" method
-	(DefinedPredicate "Speech started?")
+	(DefinedPredicate "Speech started")
 	(SequentialAnd
-		; If the TTS vocalization started (chatbot started talking) ...
-		(DefinedPredicate "chatbot started talking")
-		; ... then switch to face-study saccade ...
+		; Switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:conversational_saccade")
 				(ListLink))
 		; ... and show one random gesture from "conversing" set.
@@ -580,12 +572,12 @@
 			(ListLink (Node "--- Start talking")))
 ))
 
-; Currently used for scripted behaviors while STT doesnt publish accurate events.
+; Currently used for scripted behaviors while STT doesn't publish
+; accurate events.
 (DefineLink
-	(DefinedPredicate "Listening started?")
+	(DefinedPredicate "Listening started")
 	(SequentialAnd
-		(DefinedPredicate "chatbot started listening")
-		; ... then switch to face-study saccade ...
+		; Switch to face-study saccade ...
 		(Evaluation (GroundedPredicate "py:listening_saccade")
 				(ListLink))
 		; ... and show one random gesture from "conversing" set.
@@ -604,11 +596,9 @@
 
 ;; Things to do, if the chatbot is currently talking.
 (DefineLink
-	(DefinedPredicate "Speech ongoing?")
+	(DefinedPredicate "Speech ongoing")
 	(SequentialAnd
-		; If the chatbot currently talking ...
-		(DefinedPredicate "chatbot is talking")
-		; ... then handle the various affect states.
+		; Handle the various affect states.
 		(SequentialOr
 			(SequentialAnd
 				; If chatbot is happy ...
@@ -664,12 +654,9 @@
 
 ; Things to do, if the chattbot stopped talking.
 (DefineLink
-	(DefinedPredicate "Speech ended?")
+	(DefinedPredicate "Speech ended")
 	(SequentialAnd
-		; If the chatbot stopped talking ...
-		(DefinedPredicate "chatbot stopped talking")
-
-		; ... then switch back to exploration saccade ...
+		; Switch back to exploration saccade ...
 		(Evaluation (GroundedPredicate "py:explore_saccade")
 			(ListLink))
 
@@ -689,12 +676,9 @@
 
 ; Things to do, if stopped listening.
 (DefineLink
-	(DefinedPredicate "Listening ended?")
+	(DefinedPredicate "Listening ended")
 	(SequentialAnd
-		; If the chatbot stopped talking ...
-		(DefinedPredicate "chatbot stopped listening")
-
-		; ... then switch back to exploration saccade ...
+		; Switch back to exploration saccade ...
 		(Evaluation (GroundedPredicate "py:explore_saccade")
 			(ListLink))
 
@@ -714,11 +698,9 @@
 
 ; Things to do, if the chatbot is listening.
 (DefineLink
-	(DefinedPredicate "Listening?")
+	(DefinedPredicate "Listening ongoing")
 	(SequentialAnd
-		; If the chatbot stopped talking ...
-		(DefinedPredicate "chatbot is listening")
-        ; ... show one of the neutral-speech expressions
+        ; Show one of the neutral-speech expressions
         (SequentialOr
             (Not (DefinedPredicate "Time to change expression"))
             (Put (DefinedPredicateNode "Show random expression")
@@ -765,11 +747,25 @@
 	(SatisfactionLink
 		(SequentialAnd
 			(SequentialOr
-			    (DefinedPredicate "Skip Interaction?")
-				(DefinedPredicate "Interaction requested")
-				(DefinedPredicate "New arrival sequence")
-				(DefinedPredicate "Someone left")
-				(DefinedPredicate "Interact with people")
+				(DefinedPredicate "Skip Interaction?")
+
+				(SequentialAnd
+					(DefinedPredicate "Someone requests interaction?")
+					(DefinedPredicate "Interaction requested action"))
+
+				(SequentialAnd
+					(DefinedPredicate "Did someone arrive?")
+					(DefinedPredicate "New arrival sequence"))
+
+				(SequentialAnd
+					(DefinedPredicate "Did someone leave?")
+					(DefinedPredicate "Someone left action"))
+
+				; True, if there is anyone visible.
+				(SequentialAnd
+					(DefinedPredicate "Someone visible?")
+					(DefinedPredicate "Interact with people"))
+
 				(DefinedPredicate "Nothing is happening")
 				(True))
 
@@ -778,16 +774,39 @@
 			;; but the chatbot is still smiling and yabbering.
 			;; If interaction is turned-off need keep alive gestures
 			(SequentialOr
-				(DefinedPredicate "Speech started?")
-				(DefinedPredicate "Speech ongoing?")
-				(DefinedPredicate "Speech ended?")
-				(DefinedPredicate "Listening started?")
-				(DefinedPredicate "Listening?")
-				(DefinedPredicate "Listening ended?")
+				; If the TTS vocalization started (chatbot started talking) ...
+				(SequentialAnd
+					(DefinedPredicate "chatbot started talking?")
+					(DefinedPredicate "Speech started"))
+
+				; If the chatbot currently talking ...
+				(SequentialAnd
+					(DefinedPredicate "chatbot is talking?")
+					(DefinedPredicate "Speech ongoing"))
+
+				; If the chatbot stopped talking ...
+				(SequentialAnd
+					(DefinedPredicate "chatbot stopped talking?")
+					(DefinedPredicate "Speech ended"))
+
+				(SequentialAnd
+					(DefinedPredicate "chatbot started listening?")
+					(DefinedPredicate "Listening started"))
+
+				; If the chatbot stopped talking ...
+				(SequentialAnd
+					(DefinedPredicate "chatbot is listening?")
+					(DefinedPredicate "Listening ongoing"))
+
+				; If the chatbot stopped talking ...
+				(SequentialAnd
+					(DefinedPredicate "chatbot stopped listening?")
+					(DefinedPredicate "Listening ended"))
+
 				(SequentialAnd
 				    (DefinedPredicate "Skip Interaction?")
-				    (DefinedPredicate "Keep alive")
-				)
+				    (DefinedPredicate "Keep alive"))
+
 				(True)
 			)
 

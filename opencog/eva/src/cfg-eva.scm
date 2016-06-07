@@ -67,6 +67,19 @@
 (emo-expr-spec "neutral-speech"  "comprehending" 0.4  0.5 0.8 4 8)
 (emo-expr-spec "neutral-speech"  "engaged"       0.4  0.5 0.8 4 8)
 
+(emo-expr-spec "neutral-listen"  "happy"         0.2  0.1 0.3 4 8)
+(emo-expr-spec "neutral-listen"  "comprehending" 0.4  0.5 0.8 4 8)
+(emo-expr-spec "neutral-listen"  "engaged"       0.4  0.5 0.8 4 8)
+
+(emo-expr-spec "neutral-keep-alive"  "happy"          0.2  0.4 1.0 2 8)
+(emo-expr-spec "neutral-keep-alive"  "confused"       0.2  0.6 1.0 3 8)
+(emo-expr-spec "neutral-keep-alive"  "engaged"        0.2  0.4 1.0 4 9)
+(emo-expr-spec "neutral-keep-alive"  "amused"         0.2  0.3 1.0 2 5)
+(emo-expr-spec "neutral-keep-alive"  "recoil"         0.1  0.2 0.5 1 4)
+(emo-expr-spec "neutral-keep-alive"  "irritated"      0.1 0.1 0.7 1 4)
+(emo-expr-spec "neutral-keep-alive"  "angry"          0.1 0.1 0.6 1 4)
+(emo-expr-spec "neutral-keep-alive"  "bored"          0.1 0.1 1.0 3 7)
+
 ; Used for imperatives, i.e. when she is verbally told to do something.
 ; Thus, we list all of them here. The probability column is ignored.
 ; The strength has to be 0.6 or more, or else blender doesn't play the
@@ -154,6 +167,10 @@
 ; This animation doesn't exist ...
 ; (emo-gest-spec "chat-neg-think" "think-browsDown.003"  0.8 0.5 0.7 1 1 0.3 0.5)
 (emo-gest-spec "chat-neg-think" "noop"                 0.2 0   0   1 1 0   0  )
+
+; Gestures to use during listening.
+(emo-gest-spec "listening" "thoughtful"  0.4 0.7 1.0 1 1 0.6 0.8)
+(emo-gest-spec "listening" "noop"        0.6 0.0 1.0 1 1 0.0 0.0)
 
 ; Used for imperatives, i.e. when she is verbally told to do something.
 ; Thus, we list all of them here. The probability column is ignored.

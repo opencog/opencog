@@ -42,12 +42,33 @@
 ; Load the Eva personality configuration.
 ; (display %load-path)
 (add-to-load-path "../src")
-(load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
+; (load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
+(load-from-path "cfg-sophia.scm") ;;; <<<=== See, its Sophia here!
+
+;; Load the actual psi rules.
+(load-from-path "psi-behavior.scm")
+
+; There MUST be a DefinedPredicateNode with exactly the name
+; below in order for psi-run to work. Or we could just blow
+; that off, and use our own loop...
+(define loop-name (string-append psi-prefix-str "loop"))
+(DefineLink
+	(DefinedPredicate loop-name)
+	(SatisfactionLink
+		(SequentialAnd
+			(Evaluation (GroundedPredicate "scm: psi-step")
+				(ListLink))
+			(Evaluation (GroundedPredicate "scm: psi-run-continue?")
+				(ListLink))
+			; If ROS is dead, or the continue flag not set,
+			; then stop running the behavior loop.
+			(DefinedPredicate "ROS is running?")
+			(DefinedPredicate loop-name))))
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.
-(define (run) (behavior-tree-run))
-(define (halt) (behavior-tree-halt))
+(define (run) (psi-run))
+(define (halt) (psi-halt))
 
 ; ---------------------------------------------------------
 ; Load the chat modules.
@@ -59,26 +80,26 @@
 (use-modules (opencog nlp relex2logic))
 
 ; Work-around to circular dependency: define `dispatch-text` at the
-; top level of the guile executation environment.
-(define-public (dispatch-text txt)
+; top level of the guile execution environment.
+(define-public (dispatch-text TXT-ATOM)
 "
-  dispatch-text TEXT
+  dispatch-text TXT-ATOM
 
-  Pass the TEXT that STT heard into the OpenCog chatbot.
+  Pass the TXT-ATOM that STT heard into the OpenCog chatbot.
 "
    (call-with-new-thread
 		; Must run in a new thread, else it deadlocks in python,
 		; since the text processing results in python calls.
-      ; (lambda () (process-query "luser" (cog-name txt)))
-      ; (lambda () (grounded-talk "luser" (cog-name txt)))
-      (lambda () (chat (cog-name txt)))
+      ; (lambda () (process-query "luser" (cog-name TXT-ATOM)))
+      ; (lambda () (grounded-talk "luser" (cog-name TXT-ATOM)))
+      (lambda () (chat (cog-name TXT-ATOM)))
    )
    (stv 1 1)
 )
 
 ; ---------------------------------------------------------
 ; Run the hacky garbage collection loop.
-(run-behavior-tree-gc)
+; (run-behavior-tree-gc)
 
 ; Silence the output.
 *unspecified*
