@@ -185,3 +185,11 @@ A list of random ideas.
   (DefinedPredicateNode "Is interacting with someone?")
 
   Everything emitted to ROS is a state.... look for the behavior pubs.
+
+----------------
+
+Pending bugs:
+* (DefinedPredicateNode "Did someone leave?")  being called much much
+   too often!!! ... why???
+* Psi hung ... for no apparent reason.
+  (psi-running?)    (psi-get-loop-count)

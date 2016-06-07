@@ -11,8 +11,8 @@
 ;; ------------------------------------------------------------------
 
 (define (foobar x)
-(display "duuuuuuuude foobar pred-schema wrapper\n")
-(display x) (newline)
+; (display "duuuuuuuude foobar pred-schema wrapper\n")
+; (display x) (newline)
 	(cog-evaluate! x)
  (Node "bad value"))
 ;;
