@@ -27,7 +27,9 @@
 ; groups based on the demands that they are fulfilling.
 ;
 ; The content below consits entirely of actions to nbe taken; the
-; contexts are in the `primitives.scm` file.
+; contexts are in the `self-model.scm` file.  The structure of the
+; conexts is fairly rigid; these could probably be loosened to a
+; large degree.
 ;
 ; The OpenPsi engine could be (should be?) updated to perform fuzzy
 ; matching on the contexts, to find close or similar contexts, if no
