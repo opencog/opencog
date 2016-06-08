@@ -3,9 +3,12 @@
 
     (begin-thread
         (let* ((sent-node (get-input-sent-node))
-               (ans (get-fuzzy-answers sent-node #:do-microplanning #f)))
-            (if (not (null? ans))
-                (let ((ans-in-words (List (map Word ans))))
+               (fuz-ans (get-fuzzy-answers sent-node #:do-microplanning #f)))
+            (if (not (null? fuz-ans))
+                ; Fuzzy matcher may return more than one answers that has the
+                ; same score, randomly pick one of them if so
+                (let* ((ans (list (list-ref fuz-ans (random (length fuz-ans)))))
+                       (ans-in-words (List (map Word ans))))
                     (State fuzzy-answers ans-in-words)
 
                     ; TODO: Create a new psi-rule for this QA in the OpenCog AIML format
@@ -46,7 +49,7 @@
             (cog-evaluate! (Evaluation (GroundedPredicate "py: say_text") (List (Node utterance))))
         )
         (lambda (key . parameters)
-            (display "\nWarning: Failed to call \"py: say_text\" to send out the message.\n")
+            (display "\n(Warning: Failed to call \"py: say_text\" to send out the message.)\n")
         )
     )
 
