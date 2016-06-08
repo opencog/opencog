@@ -152,10 +152,4 @@
 	(Evaluation
 		(GroundedPredicate "scm:continue-running-loop") (ListLink)))
 
-; Return true if ROS is still running.
-(DefineLink
-	(DefinedPredicate "ROS is running?")
-	(Evaluation
-		(GroundedPredicate "py:ros_is_running") (ListLink)))
-
 ; ----------------------------------------------------------------------
