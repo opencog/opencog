@@ -9,7 +9,6 @@
         (list (SequentialAnd
             (Not (DefinedPredicate "fuzzy-qa-search-started?"))
             (DefinedPredicate "is-input-utterance?")
-            (DefinedPredicate "no-canned-reply?")
             (DefinedPredicate "is-interrogative?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: do-fuzzy-QA") (List)))

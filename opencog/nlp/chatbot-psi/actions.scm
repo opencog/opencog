@@ -8,18 +8,7 @@
                 (let ((ans-in-words (List (map Word ans))))
                     (State fuzzy-answers ans-in-words)
 
-                    ; Create a new psi-canned-rule for it
-                    ; TODO: Make it a function for creating canned-rules
-                    (Member
-                        (psi-rule
-                            (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (get-input-word-list)))
-                            (True (ExecutionOutput (GroundedSchema "scm: say") ans-in-words))
-                            (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
-                            new-rule-tv
-                            sociality
-                        )
-                        canned-rule
-                    )
+                    ; TODO: Create a new psi-rule for this QA in the OpenCog AIML format
                 )
             )
         )
@@ -75,7 +64,6 @@
 
 (define (reset-all-states)
     (State input-utterance no-input-utterance)
-    (State canned-rules default-state)
     (State aiml-replies default-state)
     (State aiml-search default-state)
     (State fuzzy-answers default-state)

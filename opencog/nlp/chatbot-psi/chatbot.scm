@@ -43,59 +43,6 @@
                 sent-node
             )
         )
-
-        ; Record the time
-        (State
-            input-utterance-time
-            (Time (current-time))
-        )
-
-        ; Start searching for related canned rules, if any
-        (begin-thread
-            (define (no-punctuation w)
-                (not (equal? (cog-name
-                    (car (cog-chase-link 'PartOfSpeechLink 'DefinedLinguisticConceptNode
-                        (car (cog-chase-link 'ReferenceLink 'WordInstanceNode w)))))
-                    "punctuation"
-                ))
-            )
-
-            (define (get-member-links atom)
-                (let ((iset (cog-incoming-set atom)))
-                    (if (null? iset)
-                        (if (equal? (cog-type atom) 'MemberLink)
-                            (list atom)
-                            '()
-                        )
-                        (append-map get-member-links iset)
-                    )
-                )
-            )
-
-            (let* ((filtered-words (filter no-punctuation (cog-outgoing-set list-of-words)))
-                   ; Aims to find those in the contexts of the psi-rules only
-                   (eval-links (delete-duplicates
-                       (append-map
-                           (lambda (w)
-                               (cog-get-pred w 'GroundedPredicateNode))
-                               filtered-words)))
-                   (member-links (delete-duplicates (append-map get-member-links eval-links)))
-                   (rules '()))
-                (map
-                    (lambda (m)
-                        (if (equal? (gdr m) canned-rule)
-                            (set! rules (append rules (list (gar m))))
-                        )
-                    )
-                    member-links
-                )
-
-                (if (null? rules)
-                    (State canned-rules no-canned-rules)
-                    (State canned-rules (List rules))
-                )
-            )
-        )
     )
     (newline)
 )
@@ -110,10 +57,6 @@
 
 (define-public default-state (Concept "DefaultState"))
 (define-public search-started (Concept "SearchStarted"))
-
-(define-public canned-rules (Anchor "CannedRules"))
-(define-public no-canned-rules (Concept "NoCannedRules"))
-(State canned-rules default-state)
 
 (define-public aiml-replies (Anchor "AIMLReplies"))
 (define-public no-aiml-reply (Concept "NoAIMLReply"))

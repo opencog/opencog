@@ -2,13 +2,6 @@
     ; Search rules
     (define (search-rules)
         (let ((rules '()))
-            ; For searching canned rules
-            (let ((cr (cog-chase-link 'StateLink 'ListLink canned-rules)))
-                (if (not (null? cr))
-                    (set! rules (append rules (cog-outgoing-set (car cr))))
-                )
-            )
-
             ; For general chat rules
             (set! rules (append rules
                 (filter
@@ -26,14 +19,9 @@
     (define (get-top-ranked-rules)
         (define (weight-and-filter-rules rules)
             (define (weight x)
-                (let* ((a-stv (cog-tv x))
+                (let* ((a-stv (cog-tv x)))
                        ; TODO: Add importance values to the formula when ECAN is ready
-                       (weight (* (tv-conf a-stv) (tv-mean a-stv))))
-                    (if (is-canned-rule? x)
-                        ; Also take the 'did-someone-say-this' score into account
-                        (* weight (tv-conf (cog-evaluate! (car (psi-get-context x)))))
-                        weight
-                    )
+                       (* (tv-conf a-stv) (tv-mean a-stv))
                 )
             )
 

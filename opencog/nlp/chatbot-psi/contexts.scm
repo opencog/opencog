@@ -44,16 +44,6 @@
     ))
 )
 
-(define (did-someone-say-this? . words)
-    (let* ((rule-sent-node (car (cog-chase-link 'ReferenceLink 'SentenceNode (List words))))
-           (rule-r2l (get-r2l-set-of-sent rule-sent-node))
-           (input-sent-node (get-input-sent-node))
-           (input-r2l (get-r2l-set-of-sent input-sent-node))
-           (score (string->number (cog-name (nlp-fuzzy-compare input-r2l rule-r2l)))))
-        (stv 1 score)
-    )
-)
-
 (Define
     (DefinedPredicate "fuzzy-qa-search-started?")
     (Equal (Set search-started)
@@ -72,12 +62,6 @@
     (DefinedPredicate "is-fuzzy-answer?")
     (Not (Equal (Set no-fuzzy-answers)
                 (Get (State fuzzy-answers (Variable "$f")))))
-)
-
-(Define
-    (DefinedPredicate "no-canned-reply?")
-    (Equal (Set no-canned-rules)
-           (Get (State canned-rules (Variable "$r"))))
 )
 
 (Define
