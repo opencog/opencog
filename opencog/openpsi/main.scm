@@ -369,7 +369,7 @@ there are 100K rules!
 ; --------------------------------------------------------------
 ; Main loop control
 ; --------------------------------------------------------------
-(define psi-do-run-loop #t)
+(define psi-do-run-loop #f)
 
 (define-public (psi-running?)
 "
