@@ -131,7 +131,10 @@ there are 100K rules!
 "
   Returns a list of all openpsi actions.
 "
-    (cog-chase-link 'MemberLink 'ListLink psi-action))
+    (append
+        (cog-chase-link 'MemberLink 'ExecutionOutputLink psi-action)
+        (cog-chase-link 'MemberLink 'DefinedSchemaNode psi-action))
+)
 
 ; --------------------------------------------------------------
 (define-public (psi-action? ATOM)
@@ -283,7 +286,7 @@ there are 100K rules!
   you defined or the default-action-selector predefined if you haven't defined
   a different action-selector.
 "
-    (let ((dsn (psi-get-action-selector)))
+    (let ((dsn (psi-get-action-selector-generic)))
         (if (null? dsn)
             (psi-default-action-selector (random-state-from-platform))
             (let ((result (cog-execute! (car dsn))))
@@ -333,7 +336,7 @@ there are 100K rules!
   a different action-selector.
 "
     (if (equal? d (ConceptNode "OpenPsi: AIML chat demand"))
-        (list) ; Skip the aiml chat demand . FIXME: this is a hack  
+        (list) ; Skip the aiml chat demand . FIXME: this is a hack
         (let ((as (psi-get-action-selector d)))
             (if (null? as)
                 (psi-default-action-selector-per-demand
@@ -499,7 +502,8 @@ there are 100K rules!
                     ; tail-recursive call
                     loop-node))))
 
-    (if (null? (cog-node 'DefinedPredicateNode loop-name))
+    (if (or (null? (cog-node 'DefinedPredicateNode loop-name))
+            (null? (cog-chase-link 'DefineLink 'SatisfactionLink loop-node)))
         (define-psi-loop))
 
     (set! psi-do-run-loop #t)
