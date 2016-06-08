@@ -92,5 +92,7 @@
 ; Load the utilities
 (load "utils.scm")
 
-; Run OpenPsi
-(psi-run)
+; Run OpenPsi if it's not already running
+(if (not (psi-running?))
+    (psi-run)
+)
