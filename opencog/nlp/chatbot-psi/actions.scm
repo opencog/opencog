@@ -30,7 +30,13 @@
     (State aiml-search search-started)
 
     (begin-thread
-        (State aiml-replies (aiml-get-response-wl (get-input-word-list)))
+        (let ((aiml-resp (aiml-get-response-wl (get-input-word-list))))
+            ; No result if it's a ListLink with arity 0
+            (if (equal? (cog-arity aiml-resp) 0)
+                (State aiml-replies no-aiml-reply)
+                (State aiml-replies aiml-resp)
+            )
+        )
     )
 )
 
