@@ -1,6 +1,6 @@
 OpenCog
 =======
-[![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-opencog2)](http://61.92.69.39:8080/job/ci-opencog2/)
+[![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-opencog)](http://61.92.69.39:8080/job/ci-opencog/)
 
 
 OpenCog is a framework for developing AI systems, especially appropriate
