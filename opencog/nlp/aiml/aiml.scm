@@ -6,8 +6,8 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
 
-(load "aiml/bot.scm")
-; (load "aiml/gender.scm")
+; (load "aiml/bot.scm")
+(load "aiml/gender.scm")
 
 ; ==============================================================
 
@@ -357,17 +357,17 @@
 					(do-while-null SENT (- CNT 1))
 				))))
 
-	(define response (do-while-null SENT 10))
+	(let ((response (do-while-null SENT 10)))
+		; Deal with a null list...
+		(if (null? response) (set! response (ListLink)))
 
-	; Deal with a null list...
-	(if (null? response) (set! response (ListLink)))
+		; Strip out the SetLink, if any.
+		(if (equal? 'SetLink (cog-type response))
+			(set! response (gar response)))
 
-	; Strip out the SetLink, if any.
-	(if (equal? 'SetLink (cog-type response))
-		(set! response (gar response)))
-
-	; Return the response.
-	(word-list-flatten response)
+		; Return the response.
+		(word-list-flatten response)
+	)
 )
 
 (define-public (aiml-get-response-wl SENT)
@@ -391,14 +391,15 @@
 					response
 				))))
 
-	(define response (word-list-flatten (do-while-same SENT 5)))
+	(let ((response (word-list-flatten (do-while-same SENT 5))))
 
-	; The robots response is the current "that".
-	(if (valid-response? response)
-		(do-aiml-set (Concept "that") response))
+		; The robots response is the current "that".
+		(if (valid-response? response)
+			(do-aiml-set (Concept "that") response))
 
-	; Return the response.
-	response
+		; Return the response.
+		response
+	)
 )
 
 ; --------------------------------------------------------------
@@ -427,7 +428,7 @@
 ; do with the argument, when we get here.  Don't return anything
 ; (be silent).
 (define-public (do-aiml-think x)
-	; (display "duuude think\n") (display x) (newline)
+	; (display "Perform think\n") (display x) (newline)
 	; 'think' never returns anything
 	'()
 )
@@ -439,8 +440,8 @@
 
 (define-public (do-aiml-set KEY VALUE)
 	(define flat-val (word-list-flatten VALUE))
-	; (display "duuude set key=") (display KEY) (newline)
-	; (display "duuude set value=") (display flat-val) (newline)
+	; (display "Perform AIML set key=") (display KEY) (newline)
+	; (display "set value=") (display flat-val) (newline)
 	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
 	(State rekey flat-val)
 	flat-val

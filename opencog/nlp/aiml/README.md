@@ -526,3 +526,29 @@ OpenPsi predicate/schema issues!
 (aiml-get-response-wl (string-words "what are you doing tonight?"))
 (define SENT (string-words "what are you doing tonight?"))
 
+
+(use-modules (opencog) (opencog exec) (opencog nlp))
+(Define (DefinedSchema "wtf")
+(GroundedSchemaNode "scm: fart"))
+(define (fart x) (display "duuude fart") (display x)(newline))
+
+(define maplk
+(MapLink
+   (ImplicationLink
+      (ListLink (WordNode "what") (GlobNode "$star-1"))
+      (ListLink
+         (ExecutionOutputLink
+            (DefinedSchemaNode "AIML-tag srai")
+            ; (DefinedSchemaNode "wtf")
+            (ListLink
+               (ListLink (WordNode "xfind") (GlobNode "$star-1"))))))
+   (SetLink
+      (ListLink
+         (WordNode "what")
+         (WordNode "are")
+         (WordNode "you")
+         (WordNode "doing")
+         (WordNode "tonight?"))))
+)
+
+(cog-execute! maplk)
