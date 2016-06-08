@@ -336,7 +336,7 @@ there are 100K rules!
   a different action-selector.
 "
     (if (equal? d (ConceptNode "OpenPsi: AIML chat demand"))
-        (list) ; Skip the aiml chat demand . FIXME: this is a hack  
+        (list) ; Skip the aiml chat demand . FIXME: this is a hack
         (let ((as (psi-get-action-selector d)))
             (if (null? as)
                 (psi-default-action-selector-per-demand
@@ -502,7 +502,8 @@ there are 100K rules!
                     ; tail-recursive call
                     loop-node))))
 
-    (if (null? (cog-node 'DefinedPredicateNode loop-name))
+    (if (or (null? (cog-node 'DefinedPredicateNode loop-name))
+            (null? (cog-chase-link 'DefineLink 'SatisfactionLink loop-node)))
         (define-psi-loop))
 
     (set! psi-do-run-loop #t)
