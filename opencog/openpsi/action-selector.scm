@@ -79,13 +79,13 @@
     )
 )
 
-;(define-public (psi-get-action-selector)
-;"
-;  Returns a list containing the user-defined action-selector.
-;"
-;    (cog-outgoing-set (cog-execute!
-;        (GetLink (psi-action-selector-pattern))))
-;)
+(define-public (psi-get-action-selector-generic)
+"
+  Returns a list containing the user-defined action-selector.
+"
+    (cog-outgoing-set (cog-execute!
+        (GetLink (psi-action-selector-pattern))))
+)
 
 ; ----------------------------------------------------------------------
 (define-public (psi-set-action-selector exec-term demand-node)
