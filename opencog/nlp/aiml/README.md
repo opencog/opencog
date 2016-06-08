@@ -499,36 +499,17 @@ functioning normally. <think><set name=\"matched\">true</set></think>
 =================================
 General demo instructions
 
-scm: dispatch-text  in btree.scm
-(State heard-sound
 
-py: say_text -- single string atom
+(Define (DefinedPredicate "pblorf")
+(SequentialAnd
+(Evaluation (GroundedPredicate "scm: print-msg-face")
+         (ListLink (Node "--boaty")))`
+(Evaluation (GroundedPredicate "scm: print-msg")
+         (ListLink (Node "--mcboat")))
+(True)
+))
 
-(psi-run)
-
-(cog-execute! (DefinedSchemaNode "Listening ongoing"))
-
-(cog-evaluate!   (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "neutral-listen")))
+(cog-execute! (DefinedPredicate "pblorf"))
 
 
-(DefinedSchemaNode "New arrival sequence")
 
-(cog-evaluate! (DefinedPredicate  "New arrival sequence"))
-(cog-evaluate!  (DefinedPredicate "Respond to new arrival"))o
-(DefinedPredicate "Was Empty Sequence")
-(DefinedPredicate "interact with new person")
-
-(DefinedPredicateNode "Did someone arrive?")
-
---------------------
- (DefinedPredicate "Respond to new arrival")
-(DefinedPredicate "Interacting Sequence")
-
-(DefinedSchema "glance at new person") -- again
-
-id someone lea
-
-map::at -- is this DefineLink.cc arity check???? (at line 81)
-
-do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
