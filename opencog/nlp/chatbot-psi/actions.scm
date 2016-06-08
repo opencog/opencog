@@ -50,6 +50,17 @@
 
     (display utterance)
 
+    ; For sending out the chatbot response via the grounded predicate defined
+    ; in ros-behavior-scripting
+    (catch #t
+        (lambda ()
+            (cog-evaluate! (Evaluation (GroundedPredicate "py: say_text") (List (Node utterance))))
+        )
+        (lambda (key . parameters)
+            (display "\nWarning: Failed to call \"py: say_text\" to send out the message.\n")
+        )
+    )
+
     (reset-all-states)
 )
 
