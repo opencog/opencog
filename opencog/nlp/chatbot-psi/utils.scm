@@ -7,19 +7,10 @@
     ))
 )
 
-(define-public (get-input-word-list)
+(define (get-input-word-list)
     (get-input 'ListLink)
 )
 
-(define-public (get-input-sent-node)
+(define (get-input-sent-node)
     (get-input 'SentenceNode)
-)
-
-(define-public (is-canned-rule? rule)
-    (let ((m (cog-chase-link 'MemberLink 'ConceptNode rule)))
-        (if (and (not (null? m)) (equal? (car m) canned-rule))
-            #t
-            #f
-        )
-    )
 )

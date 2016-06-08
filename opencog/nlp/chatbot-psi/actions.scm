@@ -3,23 +3,15 @@
 
     (begin-thread
         (let* ((sent-node (get-input-sent-node))
-               (ans (get-fuzzy-answers sent-node #:do-microplanning #f)))
-            (if (not (null? ans))
-                (let ((ans-in-words (List (map Word ans))))
+               (fuz-ans (get-fuzzy-answers sent-node #:do-microplanning #f)))
+            (if (not (null? fuz-ans))
+                ; Fuzzy matcher may return more than one answers that has the
+                ; same score, randomly pick one of them if so
+                (let* ((ans (list (list-ref fuz-ans (random (length fuz-ans)))))
+                       (ans-in-words (List (map Word ans))))
                     (State fuzzy-answers ans-in-words)
 
-                    ; Create a new psi-canned-rule for it
-                    ; TODO: Make it a function for creating canned-rules
-                    (Member
-                        (psi-rule
-                            (list (Evaluation (GroundedPredicate "scm: did-someone-say-this?") (get-input-word-list)))
-                            (True (ExecutionOutput (GroundedSchema "scm: say") ans-in-words))
-                            (Evaluation (GroundedPredicate "scm: psi-demand-value-maximize") (List sociality (Number "90")))
-                            new-rule-tv
-                            sociality
-                        )
-                        canned-rule
-                    )
+                    ; TODO: Create a new psi-rule for this QA in the OpenCog AIML format
                 )
             )
         )
@@ -30,7 +22,13 @@
     (State aiml-search search-started)
 
     (begin-thread
-        (State aiml-replies (aiml-get-response-wl (get-input-word-list)))
+        (let ((aiml-resp (aiml-get-response-wl (get-input-word-list))))
+            ; No result if it's a ListLink with arity 0
+            (if (equal? (cog-arity aiml-resp) 0)
+                (State aiml-replies no-aiml-reply)
+                (State aiml-replies aiml-resp)
+            )
+        )
     )
 )
 
@@ -43,6 +41,17 @@
     )
 
     (display utterance)
+
+    ; For sending out the chatbot response via the grounded predicate defined
+    ; in ros-behavior-scripting
+    (catch #t
+        (lambda ()
+            (cog-evaluate! (Evaluation (GroundedPredicate "py: say_text") (List (Node utterance))))
+        )
+        (lambda (key . parameters)
+            (display "\n(Warning: Failed to call \"py: say_text\" to send out the message.)\n")
+        )
+    )
 
     (reset-all-states)
 )
@@ -58,7 +67,6 @@
 
 (define (reset-all-states)
     (State input-utterance no-input-utterance)
-    (State canned-rules default-state)
     (State aiml-replies default-state)
     (State aiml-search default-state)
     (State fuzzy-answers default-state)
