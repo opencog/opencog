@@ -1,7 +1,7 @@
 ;
 ; btree-eva.scm
 ;
-; Eva behavior tree (for the Eva blender model animations).
+; Eva OpenPsi behaviors (for the Eva blender model animations).
 ;
 ; Runs a set of defined behaviors that express Eva's personality.
 ; This version integrates the OpenCog chatbot.
@@ -36,16 +36,18 @@
 (use-modules (opencog exec))        ; needed for cog-evaluate! in put_atoms.py
 (use-modules (opencog eva-model))   ; needed for defines in put_atoms.py
 (use-modules (opencog eva-behavior))
+(use-modules (opencog openpsi))
 
 ; Load the Eva personality configuration.
 ; (display %load-path)
 (add-to-load-path "../src")
 (load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
+(load-from-path "psi-behavior.scm")
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.
-(define (run) (behavior-tree-run))
-(define (halt) (behavior-tree-halt))
+(define (run) (psi-run))
+(define (halt) (psi-halt))
 
 ; ---------------------------------------------------------
 ; Load the chat modules.

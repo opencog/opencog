@@ -1,10 +1,10 @@
 ;
 ; btree-psi.scm
 ;
-; OpenPsi-based Eva behavior action selection (for the Eva blender
+; Sophia OpenPsi behavior action selection (for the Sophia blender
 ; model animations).
 ;
-; Runs a set of defined behaviors that express Eva's personality.
+; Runs a set of defined behaviors that express Sophia's personality.
 ; This version integrates the OpenCog chatbot.
 ;
 ; The currently-defined behaviors include acknowledging new people who
@@ -82,7 +82,7 @@
 
 ; ---------------------------------------------------------
 ; Run the hacky garbage collection loop.
-; (run-behavior-tree-gc)
+(run-behavior-tree-gc)
 
 ; Silence the output.
 *unspecified*
