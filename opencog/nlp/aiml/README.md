@@ -14,12 +14,8 @@ human-created and hard-coded, as are the relex and relex2logic rules.
 Alas. So perhaps using AIML is no real crime.
 
 ## Status
-Beta.  The code is done, its probably buggy. It attempts to support the
-most commonly used features of AIML version 2.1
-
-The mixed-mode operation of AIML with other verbal and non-verbal
-subsystems is in development (alpha stage).
-
+Beta.  Most things work. There are known bugs. See TODO list below.
+It attempts to support the most commonly used features of AIML version 2.1
 
 ## Using
 There are two steps to this process: The import of standard AIML markup
@@ -33,14 +29,15 @@ perform. The goal is NOT to re-invent an AIML interpreter in OpenCog!
 ... although, de-facto, that's what the end-result is: an AIML
 interpreter running in the AtomSpace.
 
-The current importer generates OpenPsi-compatible rules, so that the
-OpenPsi rule engine can process these.  This should allow AIML to be
-intermixed with other chat systems, as well as non-verbal behaviors.
-This mixed-mode operation is in development.
+The current importer generates OpenPsi rules, so that the selection
+and execution of the AIML rules is performed by OpenPsi (see the
+[OpenPsi directory](../../openpsi) for details.) This allows
+the AIML chat subsystem to be inter-operated together with other
+subsystems (for example, the on-verbal robot behavviors).
 
 ## Running AIML in OpenCog
 AIML files need to be converted into Atomese, using the perl script
-provided in the `import` directory.  This  can be done as:
+provided in the [`import`](import) directory.  This  can be done as:
 ```
 import/aiml2psi.pl --dir /where/the/aiml/files/are
 cp aiml-rules.scm /tmp
@@ -51,13 +48,18 @@ Then do this:
 (use-modules (opencog) (opencog nlp) (opencog nlp aiml) (opencog openpsi))
 (primitive-load "/tmp/aiml-rules.scm")
 ```
-For basic debugging, the `strring-words` utility can be used to tokenize
+For basic debugging, the `string-words` utility can be used to tokenize
 a string into words; its very low-brow and basic:
 ```
 (aiml-get-response-wl (string-words "call me ishmael"))
 ```
+Proper integration with the normal language pipeline requires the use
+of the `token-seq-of-parse` and `token-seq-of-sent` functions, which
+get the word-sequence as determined by the link-grammar parser (i.e.
+obtain the word sequence from the normal OpennCog NLP ppipeline.)
 
-The various sections below provide additional under-the-cover details.
+The various sections below provide additional details about how the
+system is implemented and how it works.
 
 
 ## Lightning reivew of AIML
