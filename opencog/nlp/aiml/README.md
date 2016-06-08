@@ -526,29 +526,19 @@ OpenPsi predicate/schema issues!
 (aiml-get-response-wl (string-words "what are you doing tonight?"))
 (define SENT (string-words "what are you doing tonight?"))
 
-
 (use-modules (opencog) (opencog exec) (opencog nlp))
-(Define (DefinedSchema "wtf")
-(GroundedSchemaNode "scm: fart"))
-(define (fart x) (display "duuude fart") (display x)(newline))
 
-(define maplk
-(MapLink
-   (ImplicationLink
-      (ListLink (WordNode "what") (GlobNode "$star-1"))
-      (ListLink
-         (ExecutionOutputLink
-            (DefinedSchemaNode "AIML-tag srai")
-            ; (DefinedSchemaNode "wtf")
-            (ListLink
-               (ListLink (WordNode "xfind") (GlobNode "$star-1"))))))
-   (SetLink
-      (ListLink
-         (WordNode "what")
-         (WordNode "are")
-         (WordNode "you")
-         (WordNode "doing")
-         (WordNode "tonight?"))))
-)
+(aiml-get-response-wl (string-words "what was that sound?"))
+(aiml-get-response-wl (string-words "what is a bludgeon?"))
+(aiml-get-response-wl (string-words "what do you think?"))
+(aiml-get-response-wl (string-words "where is the ball?"))
+(aiml-get-response-wl (string-words "when will you know?"))
+(aiml-get-response-wl (string-words "How is it going?"))
 
-(cog-execute! maplk)
+test topic:
+set topic:
+(aiml-get-response-wl (string-words "when will you astronaut body"))
+(do-aiml-get (Concept "topic"))
+(do-aiml-set (Concept "topic") (ListLink (WordNode "astronaut")))
+
+(aiml-get-response-wl (string-words "I am an astronaut"))
