@@ -6,8 +6,8 @@
 (use-modules (srfi srfi-1))
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
 
-; (load "aiml/bot.scm")
-(load "aiml/gender.scm")
+(load "aiml/bot.scm")
+; (load "aiml/gender.scm")
 
 ; ==============================================================
 
@@ -138,6 +138,8 @@
 ; Given an AIML rule, return a scheme list holding the context
 ; followed by the action.  Given a rule, (gar r) is the AndLink.
 ; Either gaar or gadr is the context; the other is the action.
+; We identify the action by using the `psi-action?` utility.
+; XXX FIXME. This is yucky, something prettier is needed.
 (define (get-ctxt-act r)
 	(define andy (gar r))
 	(define pa (gar andy))
@@ -209,7 +211,7 @@
 )
 
 ; Given a pattern-based rule, run it. Given that it has variables
-; in it, accomplish this by creating and running a BindLink.
+; in it, accomplish this by creating and running a MapLink.
 ; XXX Need to handle that, topic rules as appropriate.
 (define (run-pattern-rule RULE SENT)
 	(define maplk (MapLink
@@ -389,7 +391,7 @@
 					response
 				))))
 
-	(define response (do-while-same SENT 5))
+	(define response (word-list-flatten (do-while-same SENT 5)))
 
 	; The robots response is the current "that".
 	(if (valid-response? response)
@@ -408,9 +410,9 @@
 	(GroundedSchemaNode "scm: do-aiml-srai"))
 
 (define-public (do-aiml-srai x)
-	(display "duuude srai recurse\n") (display x) (newline)
+	(display "perform srai recursion\n") (display x) (newline)
 	(let ((resp (get-response-step (word-list-flatten x))))
-		(display "duuude srai result is\n") (display resp) (newline)
+		(display "srai result is\n") (display resp) (newline)
 		resp
 	)
 )

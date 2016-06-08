@@ -318,6 +318,13 @@ to a BindLink approach for ease-of-use.
   the action.  We really only want matches to the context only.
   An extended version of the `get-pattern-rules` tool could do this
   kind of filtering.  Review with Amen, maybe open bug report.
+* OpenPsi rule deisgn is kind-of broken -- in two ways:
+  (1) the action should be imeidately obtainable from the rule,
+  instead of fishing around for it via the psi-action? utility.
+  (2) If an action is a schema, it should not appear in and AndLink,
+  because its not evaluatable.
+  (3) Actions are naturally ordered sequences, and that means
+  SequentialAnd and that meands a predicate, not a schema.
 * AIML -- implicit * at end of sentence, can be NULL.
   (I guess globbing should wrk with that...?)
 * AIML -- thatstar and topicstar not handled.
