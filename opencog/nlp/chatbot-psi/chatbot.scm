@@ -11,11 +11,6 @@
 (load-r2l-rulebase)
 
 ;-------------------------------------------------------------------------------
-; TV that will be assigned to any psi-rules being created by this chatbot
-
-(define-public new-rule-tv (stv .9 .9))
-
-;-------------------------------------------------------------------------------
 ; Schema function for chatting
 
 (define (chat utterance)
@@ -34,7 +29,6 @@
     )
 
     (let* ((sent-node (car (nlp-parse utterance)))
-           (speech-act (cog-name (car (sentence-get-utterance-type sent-node))))
            (list-of-words (get-words-list sent-node)))
 
         (State input-utterance
@@ -85,9 +79,6 @@
 
 ; Load the psi-rules
 (load "psi-rules.scm")
-
-; Load the action selector
-(load "action-selector.scm")
 
 ; Load the utilities
 (load "utils.scm")
