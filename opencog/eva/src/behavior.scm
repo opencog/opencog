@@ -12,22 +12,28 @@
 ; HOWTO:
 ; ------
 ; Run the main loop:
-;    (behavior-tree-run)
+;    (run)
 ; Pause the main loop:
-;    (behavior-tree-halt)
+;    (halt)
 ;
 ; TODO:
 ; -----
-; XXX This needs a major redesign, to NOT use behavior trees at the top
-; level, but instead to provide a library of suitable actions that can
-; be searched over, and then performed when a given situation applies.
-; That is, given a certain state vector (typically, a subset of the
-; current state), the library is searched to see if there is a behavior
-; sequence that can be applied to this situation.  If there is no such
-; explicit match, then the fuzzy matcher should be employed to find
-; something that is at least close.  If nothing close is found, then
-; either the concept blending code, or a hack of the MOSES knob-turning
-; and genetic cross-over code should be used to create new quasi-random
+; The current OpenPsi framework allows much more general and flexible
+; rules than what are presented below; this geneality should be made
+; use of.
+;
+; A general OpenPsi rule has the form of if(context) then take(action);
+; these can contain variables, adn can also be classed into different
+; groups based on the demands that they are fulfilling.
+;
+; The content below consits entirely of actions to nbe taken; the
+; contexts are in the `primitives.scm` file.
+;
+; The OpenPsi engine could be (should be?) updated to perform fuzzy
+; matching on the contexts, to find close or similar contexts, if no
+; one exact match can be made.  If nothing close is found, then either
+; the concept blending code, or a hack of the MOSES knob-turning and
+; genetic cross-over code should be used to create new quasi-random
 ; performance sequences from a bag of likely matches.
 ;
 ; Unit testing:
@@ -719,6 +725,7 @@
         ))
 		(TrueLink)
 	))
+
 (DefineLink
 	(DefinedPredicate "Keep alive")
 	(SequentialAnd

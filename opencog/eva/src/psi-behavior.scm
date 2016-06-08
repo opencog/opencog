@@ -10,6 +10,8 @@
 ;
 ;; ------------------------------------------------------------------
 
+; XXX FIXME -- terrible errible hack -- mostly because OpenPsi
+; is expecting actions to be schema, and not predicates.
 (define (foobar x)
 ; (display "duuuuuuuude foobar pred-schema wrapper\n")
 ; (display x) (newline)
