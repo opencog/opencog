@@ -215,7 +215,7 @@
                     (lambda ()
                         (proc line))
                     (lambda (key . parameters)
-                        (string-append "*** Unable to parse: " line)
+                        (display (string-append "*** Unable to parse: " line))
                         (newline)))
                     (set! line (get-line port)))))
         (close-pipe port))
