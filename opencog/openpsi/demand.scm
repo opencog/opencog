@@ -77,7 +77,7 @@
 
     ; Check arguments
     (if (not (string? demand-name))
-        (error (string-append "In procedure psi-demand, expected frist argument "
+        (error (string-append "In procedure psi-demand, expected first argument "
             "to be a string got: ") demand-name))
     (if (or (> 0 initial-value) (< 1 initial-value))
        (error (string-append "In procedure psi-demand, expected second argument "
