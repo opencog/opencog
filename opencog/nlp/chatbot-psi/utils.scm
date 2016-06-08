@@ -7,10 +7,10 @@
     ))
 )
 
-(define-public (get-input-word-list)
+(define (get-input-word-list)
     (get-input 'ListLink)
 )
 
-(define-public (get-input-sent-node)
+(define (get-input-sent-node)
     (get-input 'SentenceNode)
 )

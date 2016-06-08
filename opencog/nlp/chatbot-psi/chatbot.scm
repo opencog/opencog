@@ -44,30 +44,30 @@
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
 
-(define-public input-utterance-time (Anchor "InputUtteranceTime"))
-(define-public input-utterance (Anchor "InputUtterance"))
-(define-public no-input-utterance (Concept "NoInputUtterance"))
+(define input-utterance-time (Anchor "InputUtteranceTime"))
+(define input-utterance (Anchor "InputUtterance"))
+(define no-input-utterance (Concept "NoInputUtterance"))
 (State input-utterance no-input-utterance)
 
-(define-public default-state (Concept "DefaultState"))
-(define-public search-started (Concept "SearchStarted"))
+(define default-state (Concept "DefaultState"))
+(define search-started (Concept "SearchStarted"))
 
-(define-public aiml-replies (Anchor "AIMLReplies"))
-(define-public no-aiml-reply (Concept "NoAIMLReply"))
-(define-public aiml-search (Anchor "AIMLSearch"))
+(define aiml-replies (Anchor "AIMLReplies"))
+(define no-aiml-reply (Concept "NoAIMLReply"))
+(define aiml-search (Anchor "AIMLSearch"))
 (State aiml-replies default-state)
 (State aiml-search default-state)
 
-(define-public fuzzy-answers (Anchor "FuzzyAnswers"))
-(define-public no-fuzzy-answers (Concept "NoFuzzyAnswers"))
-(define-public fuzzy-qa-search (Anchor "FuzzyQASearch"))
+(define fuzzy-answers (Anchor "FuzzyAnswers"))
+(define no-fuzzy-answers (Concept "NoFuzzyAnswers"))
+(define fuzzy-qa-search (Anchor "FuzzyQASearch"))
 (State fuzzy-answers default-state)
 (State fuzzy-qa-search default-state)
 
 ;-------------------------------------------------------------------------------
 ; Define the demands
 
-(define-public sociality (psi-demand "Sociality" .8))
+(define sociality (psi-demand "Sociality" .8))
 
 ;-------------------------------------------------------------------------------
 
