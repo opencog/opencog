@@ -48,23 +48,6 @@
 ;; Load the actual psi rules.
 (load-from-path "psi-behavior.scm")
 
-; There MUST be a DefinedPredicateNode with exactly the name
-; below in order for psi-run to work. Or we could just blow
-; that off, and use our own loop...
-(define loop-name (string-append psi-prefix-str "loop"))
-(DefineLink
-	(DefinedPredicate loop-name)
-	(SatisfactionLink
-		(SequentialAnd
-			(Evaluation (GroundedPredicate "scm: psi-step")
-				(ListLink))
-			(Evaluation (GroundedPredicate "scm: psi-run-continue?")
-				(ListLink))
-			; If ROS is dead, or the continue flag not set,
-			; then stop running the behavior loop.
-			(DefinedPredicate "ROS is running?")
-			(DefinedPredicate loop-name))))
-
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.
 (define (run) (psi-run))
