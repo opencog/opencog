@@ -264,24 +264,33 @@
   aiml-select-rule RULE-LIST - Given a list of AIML rules,
   select one to run.
 "
-	;; Total up all of the confidence values on all of the rules
+	;; XXX FIXME crazy hacky weight-adjusting formula. This makes
+	;; no sense at all, but is a hacky hack designed to pick more
+	;; desirable rules more often.  Someone should figure out
+	;; some weighting formula that makes more sense tahn this.
+	;; Currently, the square of the confidence.
+	(define (get-weight ATOM)
+		(define w (tv-conf (cog-tv ATOM)))
+		(* w w)
+	)
+
+	;; Total up all of the weights on all of the rules
 	;; in the RULE-LIST.
 	(define sum 0.0)
 	(define (add-to-sum ATOM)
-		(set! sum (+ sum (tv-conf (cog-tv ATOM)))))
+		(set! sum (+ sum (get-weight ATOM))))
 
 	;; Return #t for the first rule in the RULE-LIST for which the
 	;; accumulated weight is above THRESH.
-	(define accum 0.0001)
+	(define accum 0.000000001)
 	(define (pick-first ATOM THRESH)
-		(set! accum (+ accum (tv-conf (cog-tv ATOM))))
+		(set! accum (+ accum (get-weight ATOM)))
 		(< THRESH accum))
 
-	; OK, so actually yoyal up the weights
+	; OK, so actually total up the weights
 	(for-each add-to-sum RULE-LIST)
 
-	; Randomly pick one, using the TV-confidence from above) as a
-	; weighting.
+	; Randomly pick one, using the weighting above.
 	(let ((thresh (random sum)))
 		(if (null? RULE-LIST)
 			'()

@@ -314,10 +314,12 @@ to a BindLink approach for ease-of-use.
 
 
 ### TODO
-* OpenPsi duallink is returning too much -- i.e. it includes matches to
+* OpenPsi DualLink is returning too much -- i.e. it includes matches to
   the action.  We really only want matches to the context only.
   An extended version of the `get-pattern-rules` tool could do this
   kind of filtering.  Review with Amen, maybe open bug report.
+* AIML -- implicit * at end of sentence, can be NULL.
+  (I guess globbing should wrk with that...?)
 * AIML -- thatstar and topicstar not handled.
 * AIML HR -- in a session, never say the same thing twice!
   Done -- for just one sentence .. ask Vytas about more.
@@ -499,8 +501,8 @@ functioning normally. <think><set name=\"matched\">true</set></think>
 (aiml-get-response-wl (string-words "call me joob"))
 
 =================================
-General demo instructions
 
+OpenPsi predicate/schema issues!
 
 (Define (DefinedPredicate "pblorf")
 (SequentialAnd
@@ -513,5 +515,7 @@ General demo instructions
 
 (cog-execute! (DefinedPredicate "pblorf"))
 
-
+=================================
+(aiml-get-response-wl (string-words "what are you doing tonight?"))
+(define SENT (string-words "what are you doing tonight?"))
 
