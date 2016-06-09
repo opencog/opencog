@@ -22,6 +22,8 @@
  */
 
 #include <time.h>
+#include <thread>
+#include <chrono>
 
 #include <opencog/util/Config.h>
 #include <opencog/util/platform.h>
@@ -30,6 +32,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomutils/Neighbors.h>
 #include <opencog/attention/atom_types.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 
 #define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
@@ -38,6 +41,10 @@
 #include "StochasticImportanceDiffusionAgent.h"
 
 #define DEBUG
+
+using namespace std;
+using namespace chrono;
+
 namespace opencog
 {
 
@@ -67,6 +74,8 @@ StochasticImportanceDiffusionAgent::StochasticImportanceDiffusionAgent(CogServer
     // Provide a logger
     log = NULL;
     setLogger(new opencog::Logger("StochasticImportanceDiffusionAgent.log", Logger::FINE, true));
+
+    a = &_cogserver.getAtomSpace();
 }
 
 StochasticImportanceDiffusionAgent::~StochasticImportanceDiffusionAgent()
@@ -98,94 +107,160 @@ void StochasticImportanceDiffusionAgent::setDiffusionThreshold(float p)
 float StochasticImportanceDiffusionAgent::getDiffusionThreshold() const
 { return diffusionThreshold; }
 
-void StochasticImportanceDiffusionAgent::run()
-{
-    a = &_cogserver.getAtomSpace();
-#ifdef DEBUG
-    totalSTI = 0;
-#endif
-    spreadImportance();
-}
-
 #define toFloat getMean
 
-void StochasticImportanceDiffusionAgent::spreadImportance()
+void StochasticImportanceDiffusionAgent::run()
 {
-  //HandleSeq atoms;
-  //std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
+    std::thread producer(&StochasticImportanceDiffusionAgent::produce,this);
+    consume();
+    producer.join(); //Will wait forever as these threads will run indefinitelly
+}
 
-  //log->debug("Begin diffusive importance spread.");
-  //a->get_handles_by_AV(out_hi,diffusionThreshold);
+void StochasticImportanceDiffusionAgent::produce()
+{
+    std::default_random_engine generator;
 
-    HandleSeq atoms;
-    a->get_all_atoms(atoms);
+    while (true) {
+        count++;
+        if (count == 100 || atomcount == 0) {
+            count = 0;
+            a->get_all_atoms(atoms);
 
-    atoms.erase(remove_if(atoms.begin(),atoms.end(),
-                    [](Handle h) -> bool {
-                    return classserver().isA(h->getType(),HEBBIAN_LINK);
-                    }),atoms.end());
+            atoms.erase(remove_if(atoms.begin(),atoms.end(),
+                            [](Handle h) -> bool {
+                            bool isHebbian = classserver().isA(h->getType(),HEBBIAN_LINK);
+                            bool lowSTI = h->getSTI() < 3;
+                            return (isHebbian or lowSTI);
+                            }),atoms.end());
 
-    size_t size = atoms.size();
+            atomcount = atoms.size();
 
-    if (size == 0)
-        return;
+            if (atomcount == 0) {
+                //printf("no atoms found. \n");
+                continue;
+            }
+        }
 
-    int index = rand() % size;
+        HandleSeq targetSet;
+        int idx;
 
-    Handle source = atoms[index];
+        std::uniform_int_distribution<int> distribution(0,atomcount-1);
 
-    HandleSeq targetSet =
-            get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
-  //HandleSeq links;
-  //std::back_insert_iterator< std::vector<Handle> > out_hi2(links);
-  //source->getIncomingSetByType(out_hi2,ASYMMETRIC_HEBBIAN_LINK);
+        idx = distribution(generator);
 
-    if (targetSet.size() == 0)
-        return;
+        targetSet = get_target_neighbors(atoms[idx], ASYMMETRIC_HEBBIAN_LINK);
 
-    float totalAvailableDiffusionAmmount = a->get_STI(source) * maxSpreadPercentage;
-
-    float availableDiffusionAmmount = totalAvailableDiffusionAmmount / targetSet.size();
-
-    float factor = 1;
-
-    std::map<Handle,float> tvs;
-
-    for (Handle target : targetSet)
-    {
-        Handle link = a->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
-
-        if (link == Handle::UNDEFINED)
+        if (targetSet.size() == 0)
             continue;
 
-        float tv = link->getTruthValue()->getMean();
-        factor += tv;
-        tvs[target] = tv;
-    }
+        short startSTI = a->get_STI(atoms[idx]);
+        float totalAvailableDiffusionAmmount = (float)startSTI * maxSpreadPercentage;
 
-    int totalam = 0;
-
-    for (Handle target : targetSet)
-    {
-        std::map<Handle,float>::iterator it = tvs.find(target);
-
-        if (it == tvs.end())
+        if (totalAvailableDiffusionAmmount < 1.0f) {
+            //printf("Total to low.\n");
             continue;
+        }
 
-        float tv = it->second * 2 - 1;
-        int ssti = a->get_STI(source);
-        int tsti = a->get_STI(target);
+        if (targetSet.size() > floor(totalAvailableDiffusionAmmount)) {
+            unsigned int end = targetSet.size() - floor(totalAvailableDiffusionAmmount);
 
-        //int diffusionAmmount = floor(((ssti - tsti) * tv) / factor);
-        int diffusionAmmount = floor(availableDiffusionAmmount * tv);
-        totalam +=diffusionAmmount;
+            if (targetSet.size() == end) {
+                //printf("Not enought STI.\n");
+                continue;
+            }
 
+            //printf("targets: %zd end: %d totaladm: %d",targetSet.size(), end, totalAvailableDiffusionAmmount);
 
-        if (diffusionAmmount > 0) {
-            a->set_STI(source, ssti - diffusionAmmount);
-            a->set_STI(target, tsti + diffusionAmmount);
+            std::sort(targetSet.begin(), targetSet.end(),
+                    [](Handle a, Handle b) -> bool {
+                        return a->getTruthValue()->getMean() < a->getTruthValue()->getMean();
+                    }
+                    );
+            targetSet.erase(targetSet.begin(), targetSet.begin() + end);
+            //printf("new targets: %zd",targetSet.size());
+        }
+
+        while (!queue.push(std::pair<Handle,HandleSeq>(atoms[idx],targetSet))) {
+            std::this_thread::yield();
         }
     }
-    //printf("diffusionAmmount: %d \n",totalam);
 }
+
+void StochasticImportanceDiffusionAgent::consume()
+{
+    std::pair<Handle,HandleSeq> p;
+    Handle source;
+    HandleSeq targetSet;
+    while (true) {
+        if (!queue.pop(p)) {
+            std::this_thread::yield();
+            continue;
+        }
+
+        source = p.first;
+        targetSet = p.second;
+
+      //printf("Source: %s,targetSet.size(): %d ",source->toString().c_str(),targetSet.size());
+
+        float totalAvailableDiffusionAmmount = source->getSTI();
+
+        float availableDiffusionAmmount = totalAvailableDiffusionAmmount / (float)targetSet.size();
+
+        //Check if there is at least 1 STI for each HebbianLink
+        //This might have changed since the producer checked
+        if (availableDiffusionAmmount < 1.0f) {
+            continue;
+        }
+
+        int total = 0;
+
+        for (Handle target : targetSet)
+        {
+            Handle link = a->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+            if (link == Handle::UNDEFINED) {
+                continue;
+            }
+
+            //Normalize to [-1,1] so values <0.5 act like a Inverse Link
+            float tv = link->getTruthValue()->getMean();
+            tv = tv * 2.0f - 1.0f;
+
+            int ssti = a->get_STI(source);
+            int tsti = a->get_STI(target);
+
+            float fdiffusionAmmount = availableDiffusionAmmount * tv;
+            int diffusionAmmount = 0;
+
+            //If we want to spread less then 1 STI use the value instead
+            //as a probability to spread 1 STI
+            if (fdiffusionAmmount < 1 && fdiffusionAmmount > 0) {
+                if ((rand() % 100) > (100 * fdiffusionAmmount)) {
+                    diffusionAmmount = 1;
+                }
+            } else if (fdiffusionAmmount > -1 && fdiffusionAmmount < 0) {
+                if ((rand() % 100) > (100 * fdiffusionAmmount)) {
+                    diffusionAmmount = -1;
+                }
+            } else {
+                diffusionAmmount = round(fdiffusionAmmount)
+            }
+
+            if (abs(diffusionAmmount) < 1)
+                continue;
+
+            //If we have a Inverse Connection
+            //Make sure not to take more STI then the Target has
+            if (tsti + diffusionAmmount < 0)
+                diffusionAmmount = -tsti;
+
+            total += diffusionAmmount;
+
+            source->setSTI(ssti - diffusionAmmount);
+            target->setSTI(tsti + diffusionAmmount);
+        }
+
+      //printf("Total Available STI: %f Available per Link: %f Diffused a Total of: %d \n",totalAvailableDiffusionAmmount,availableDiffusionAmmount,total);
+    }
+}
+
 };

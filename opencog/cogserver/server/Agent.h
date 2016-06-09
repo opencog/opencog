@@ -45,6 +45,8 @@ namespace opencog
  *  @{
  */
 
+extern concurrent_queue<Handle> newAtomsInAV;
+
 typedef short stim_t;
 typedef std::unordered_map<Handle, stim_t, handle_hash> AtomStimHashMap;
 
@@ -167,6 +169,9 @@ protected:
     AttentionValue::lti_t ltiFundsBuffer;
 
 public:
+
+    static float mean;
+    static float std;
 
     /** Agent's constructor. By default, initializes the frequency to 1. */
     Agent(CogServer&, const unsigned int f = 1);

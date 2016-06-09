@@ -27,12 +27,15 @@
 #include <string>
 #include <math.h>
 
+#include <boost/lockfree/spsc_queue.hpp>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
-#include "SpreadDecider.h"
+
+using namespace boost::lockfree;
 
 namespace opencog
 {
@@ -42,21 +45,33 @@ namespace opencog
 
 class CogServer;
 
-/** Spreads short term importance along HebbianLinks using a diffusion approach.
+/** Spreads short term importance along AsymmetricHebbianLinks.
  *
- * Spreads along:
- * \arg SymmetricHebbianLinks
- * \arg InverseHebbianLinks
- * \arg AsymmetricHebbianLink
- * \arg SymmetricInverseHebbianLink
+ * This Agents consists of 2 threads that communicated with an spsc_queue
  *
- * @todo Optionally spread long term importance?
+ * The Producer Randomly picks 1 atom
+ * checks that it has enough STI for spreading if possible ignores some of the
+ * HebbianLinks (with the weakes strenght) to allow spreading allong the rest
+ * (at least 1 available STI per HebbianLinks)
+ *
+ * The Consumer takes one of those pre checked Atoms and there TargetSet and
+ * spreds the STI
+ *
+ * This Agent is supposed to run in it's own Thread. It will block this thread.
+ *
+ * TODO: Select Atoms based on there STI
+ * TODO: Have one of those Agents for the Focus and on for the rest of the AS
+ * TODO: Optionally spread long term importance?
  */
 class StochasticImportanceDiffusionAgent : public Agent
 {
 
 private:
     AtomSpace* a;
+
+    HandleSeq atoms;
+
+    size_t atomcount;
 
     //! Total amount spread during recent runs.
     opencog::recent_val<long> amountSpread;
@@ -72,13 +87,6 @@ private:
     //! If there are multiple links between the same two Atoms, then it will add up their strengths.
     bool allLinksSpread;
 
-    //! Spread importance along Hebbian links.
-    //! @todo split into sub functions instead of one giant beast.
-    void spreadImportance();
-
-    //! For checking that STI is conserved
-    int totalSTI;
-
     /** Set the agent's logger object
      *
      * Note, this will be deleted when this agent is.
@@ -88,6 +96,19 @@ private:
     void setLogger(Logger* l);
 
     Logger *log; //!< Logger object for Agent
+
+    int count;
+
+    /**
+     *  Produces Handles from which STI shoudl be Spreads
+     */
+    void produce();
+    /**
+     *  Consumes Handles and spreads STI from them
+     */
+    void consume();
+
+    spsc_queue<std::pair<Handle,HandleSeq>, capacity<500>> queue;
 
 public:
 

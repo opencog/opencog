@@ -62,8 +62,8 @@ def plot2():
     plt.savefig("example6.eps")
     plt.show()
 def plot():
-  print "get val\n"
-  print xval
+  print("get val\n")
+  print(xval)
   p= plt.plot(xval,yval[0],marker=".",label="Anna")
   plt.plot(xval,yval[1],marker=".",label="Bob")
   plt.plot(xval,yval[2],marker=".",label="Edward")

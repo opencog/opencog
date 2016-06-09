@@ -9,13 +9,19 @@
 #include <string>
 #include <fstream>
 
+#include <stdio.h>
+#include <chrono>
+#include <thread>
+
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/attention/ForgettingAgent.h>
-#include <opencog/attention/StochasticImportanceDiffusionAgent.h>
-#include <opencog/attention/StochasticImportanceUpdatingAgent.h>
-#include <opencog/attention/MinMaxSTIUpdatingAgent.h>
+//#include <opencog/attention/StochasticImportanceDiffusionAgent.h>
+//#include <opencog/attention/StochasticImportanceUpdatingAgent.h>
+//#include <opencog/attention/MinMaxSTIUpdatingAgent.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/attention/experiment/SmokesDBFCAgent.h>
 
@@ -30,6 +36,7 @@
 
 using namespace opencog;
 using namespace opencog::ECANExperiment;
+using namespace std::chrono;
 
 DECLARE_MODULE(ExperimentSetupModule);
 
@@ -63,6 +70,7 @@ ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
 
     file_name = std::string(PROJECT_SOURCE_DIR)
                 + "/opencog/attention/experiment/visualization/dump";
+
 }
 
 ExperimentSetupModule::~ExperimentSetupModule()
@@ -83,14 +91,14 @@ void ExperimentSetupModule::AVChangedCBListener(const Handle& h,
         name = node->getName();
         if (name.find("@") == std::string::npos)
         {
-            std::ofstream outf(file_name + "-av.data", std::ofstream::app);
-            outf << name << ","
+            std::ofstream outav(file_name + "-av.data", std::ofstream::app);
+            outav << name << ","
                  << av_new->getSTI() << ","
                  << av_new->getLTI() << ","
                  << av_new->getVLTI() << ","
-                 << std::time(nullptr) << "\n";
-            outf.flush();
-            outf.close();
+                 << system_clock::now().time_since_epoch().count() << ","
+                 << current_group << "\n";
+            outav.close();
         }
     }
 }
@@ -110,19 +118,17 @@ void ExperimentSetupModule::TVChangedCBListener(const Handle& h,
         std::string nn0 = NodeCast(outg[0])->getName();
         std::string nn1 = NodeCast(outg[1])->getName();
 
-        std::vector<std::vector<std::string>>::iterator it = swords.begin();
-        it = it + current_group;
-        std::vector<std::string>::iterator begin = it->begin();
-        std::vector<std::string>::iterator end = it->end();
-
-        if (find(begin,end,nn0) != end and find(begin,end,nn1) != end)
+        if (boost::starts_with(nn0, "group") and boost::starts_with(nn1, "group")
+            and !boost::contains(nn0,"@") and !boost::contains(nn1,"@"))
         {
-            std::ofstream outf(file_name + "-hebtv.data", std::ofstream::app);
-            outf << tv_new->getMean() << ","
-                 << tv_new->getConfidence() << ","
-                 << std::time(nullptr);
-            outf.flush();
-            outf.close();
+            std::ofstream outheb(file_name + "-hebtv.data", std::ofstream::app);
+            outheb << h.value() << ","
+                   << nn0 << ","
+                   << nn1 << ","
+                   << tv_new->getMean() << ","
+                   << tv_new->getConfidence() << ","
+                   << system_clock::now().time_since_epoch().count() << "\n";
+            outheb.close();
         }
     }
     // For the smokes FC experiment ( i.e Attention guided inference experiment with tuffy smokes database)
@@ -153,6 +159,7 @@ void ExperimentSetupModule::registerAgentRequests()
     do_start_nlp_stimulate_register();
     do_pause_nlp_stimulate_register();
     do_start_exp_register();
+    do_stop_exp_register();
 }
 
 void ExperimentSetupModule::unregisterAgentRequests()
@@ -164,7 +171,7 @@ void ExperimentSetupModule::unregisterAgentRequests()
     do_dump_data_unregister();
     do_start_nlp_stimulate_unregister();
     do_pause_nlp_stimulate_unregister();
-    do_start_exp_unregister();
+    do_stop_exp_unregister();
 }
 void ExperimentSetupModule::init(void)
 {
@@ -178,24 +185,51 @@ void ExperimentSetupModule::init(void)
 std::string ExperimentSetupModule::do_start_exp(Request *req,
                                                 std::list<std::string> args)
 {
-    do_ecan_load(req,args);
-    do_ecan_start(req,args);
-    do_start_nlp_stimulate(req,args);
-
     int groups = std::stoi(args.front());
     args.pop_front();
     int groupsize = std::stoi(args.front());
     args.pop_front();
     int wordcount =  std::stoi(args.front());
+    args.pop_front();
+    int assize =  std::stoi(args.front());
     genWords(groups,groupsize,wordcount);
 
+    std::ofstream outf(file_name + "-av.data", std::ofstream::trunc);
+    outf << groups << ","
+         << groupsize << ","
+         << wordcount << "\n";
+    outf.flush();
+    outf.close();
+
+    remove((file_name + "-hebtv.data").c_str());
+
+    ForgettingAgent::maxSize = assize;
+
+    //do_ecan_load(req,args);
+    //do_ecan_start(req,args);
+    do_start_nlp_stimulate(req,args);
     return "Started Experiment\n";
+}
+
+
+std::string ExperimentSetupModule::do_stop_exp(Request *req,
+                                                std::list<std::string> args) {
+
+    do_pause_nlp_stimulate(req,args);
+
+    ForgettingAgent::maxSize = 0;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+
+    printf("STI in Bank: %ld \n",_as->get_STI_funds());
+
+    return "Stoped Experiment \n";
 }
 
 std::string ExperimentSetupModule::do_ecan_load(Request *req,
                                                 std::list<std::string> args)
 {
-    am->createAgents();
+    //am->createAgents();
 
     //Register experiment specific agents. Add more if you have here.
     if (_cs.registerAgent(ArtificialStimulatorAgent::info().id,
@@ -214,10 +248,10 @@ std::string ExperimentSetupModule::do_ecan_load(Request *req,
 std::string ExperimentSetupModule::do_ecan_start(Request *req,
                                                  std::list<std::string> args)
 {
-    am->start_ecan();
+    //am->do_start_ecan(req,args);
 
-    //_cs.startAgent(_artificialstimulatoragentptr);
-    //_cs.startAgent(_smokes_fc_agentptr);
+    _cs.startAgent(_artificialstimulatoragentptr);
+    _cs.startAgent(_smokes_fc_agentptr);
 
     return "The following agents were started:\n" + ECAN_EXP_AGENTS;
 }
@@ -264,6 +298,7 @@ void ExperimentSetupModule::genWords(int groups,int groupsize,int nonspecial)
             word =  "group" + std::to_string(i) + "word" + std::to_string(j++);
         }
         i++;
+        j=0;
     }
 
     words.assign(nonspecial,"");

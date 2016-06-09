@@ -1,5 +1,5 @@
 /*
- * opencog/attention/MinMaxSTIUpdatingAgent.h
+ * opencog/attention/WageCollectionAgent.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_MIN_MAX_STI_IMPORTANCE_UPDATING_AGENT_H
-#define _OPENCOG_MIN_MAX_STI_IMPORTANCE_UPDATING_AGENT_H
+#ifndef _OPENCOG_WAGE_COLLECTION_AGENT_H
+#define _OPENCOG_WAGE_COLLECTION_AGENT_H
 
 #include <string>
 #include <iostream>
@@ -37,8 +37,6 @@
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Agent.h>
 
-class MinMaxSTIUpdatingAgentUTest;
-
 namespace opencog
 {
 /** \addtogroup grp_attention
@@ -48,11 +46,20 @@ namespace opencog
 class CogServer;
 
 /**
- * The AtomSpace needs to know the Minimum and Maximum STI of the Atoms
- * This agent updates these values after iterating over the whole AtomSpace
+ * This Agent collects wages form inside the AttentionalFocus
+ *
+ * It randomly picks an atom from the Focus and collects the Wage
+ * which is calculate depending on the current funds in the Bank
+ *
+ * The wage is computed as a linar function form the Funds and a Target Value.
+ * It is capped to the range 0-2x defaul Wage
+ *
+ * This Agent is supposed to run in it's own Thread.
  */
-class MinMaxSTIUpdatingAgent : public Agent
+class WageCollectionAgent : public Agent
 {
+
+public:
 
 private:
 
@@ -78,12 +85,12 @@ public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
-        static const ClassInfo _ci("opencog::MinMaxSTIUpdatingAgent");
+        static const ClassInfo _ci("opencog::WageCollectionAgent");
         return _ci;
     }
 
-    MinMaxSTIUpdatingAgent(CogServer&);
-    virtual ~MinMaxSTIUpdatingAgent();
+    WageCollectionAgent(CogServer&);
+    virtual ~WageCollectionAgent();
     virtual void run();
 
     /** Return the agent's logger object
@@ -92,9 +99,12 @@ public:
      */
     Logger* getLogger();
 
+    int calculate_STI_Rent();
+    int calculate_LTI_Rent();
+
 }; // class
 
-typedef std::shared_ptr<MinMaxSTIUpdatingAgent> MinMaxSTIUpdatingAgentPtr;
+typedef std::shared_ptr<WageCollectionAgent> WageCollectionAgentPtr;
 
 /** @}*/
 }  // namespace

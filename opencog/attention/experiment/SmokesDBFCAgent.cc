@@ -211,7 +211,7 @@ void SmokesDBFCAgent::run()
 
     // Dynamically set the AF boundary with lbound of the top K STI values
     // K=50
-    adjust_af_boundary(30);
+    //adjust_af_boundary(30);
 
      af_set.clear();
     _atomspace.get_handle_set_in_attentional_focus(std::back_inserter(af_set));

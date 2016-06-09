@@ -26,18 +26,17 @@
 #define _OPENCOG_ATTENTION_MODULE_H
 
 #include <opencog/attention/ForgettingAgent.h>
-//#include <opencog/attention/HebbianUpdatingAgent.h>
-//#include <opencog/attention/SimpleHebbianUpdatingAgent.h>
-//#include <opencog/attention/ImportanceSpreadingAgent.h>
-//#include <opencog/attention/ImportanceDiffusionAgent.h>
-//#include <opencog/attention/SimpleImportanceDiffusionAgent.h>
-//#include <opencog/attention/ImportanceUpdatingAgent.h>
 #include <opencog/attention/StochasticImportanceDiffusionAgent.h>
-#include <opencog/attention/StochasticImportanceUpdatingAgent.h>
+#include <opencog/attention/WageCollectionAgent.h>
 #include <opencog/attention/MinMaxSTIUpdatingAgent.h>
 #include <opencog/attention/HebbianCreationAgent.h>
+#include <opencog/attention/FocusBoundaryUpdatingAgent.h>
+#include <opencog/attention/HebbianUpdatingAgent.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/Agent.h>
+
+using namespace std;
 
 namespace opencog
 {
@@ -45,23 +44,44 @@ namespace opencog
  *  @{
  */
 
+/**
+ * The AttentionModule
+ * is resposible for registering all ECAN agents with the CogServer
+ * it also provides a console commmand "start-ecan" to the CogServer
+ * which can be used to start all the Agents
+ */
 class AttentionModule : public Module
 {
 
 private:
-    Factory<ForgettingAgent, Agent>          forgettingFactory;
+    Factory<ForgettingAgent, Agent> forgettingFactory;
     Factory<StochasticImportanceDiffusionAgent, Agent> stochasticDiffusionFactory;
-    Factory<StochasticImportanceUpdatingAgent, Agent> stochasticUpdatingFactory;
+    Factory<WageCollectionAgent, Agent> stochasticUpdatingFactory;
     Factory<MinMaxSTIUpdatingAgent, Agent> minMaxSTIUpdatingFactory;
     Factory<HebbianCreationAgent, Agent> hebbianCreationFactory;
+    Factory<FocusBoundaryUpdatingAgent, Agent> focusUpdatingFactory;
+    Factory<HebbianUpdatingAgent, Agent> hebbianUpdatingFactory;
 
     AgentPtr _forgetting_agentptr;
     AgentPtr _stiupdating_agentptr;
     AgentPtr _stidiffusion_agentptr;
     AgentPtr _minmaxstiupdating_agentptr;
     AgentPtr _hebbiancreation_agentptr;
+    AgentPtr _focusupdating_agentptr;
+    AgentPtr _hebbianupdating_agentptr;
 
+    boost::signals2::connection addAFConnection;
+
+    void addAFSignal(const Handle& h, const AttentionValuePtr& av_old,
+                     const AttentionValuePtr& av_new);
+    void addAFSignalHandler(const Handle& h, const AttentionValuePtr& av_old,
+                            const AttentionValuePtr& av_new);
 public:
+
+   DECLARE_CMD_REQUEST(AttentionModule, "start-ecan", do_start_ecan,
+            "Starts main ECAN agents\n",
+            "Usage: ecan-start\n",
+            false, true)
 
     static inline const char* id();
 
@@ -69,7 +89,6 @@ public:
     virtual ~AttentionModule();
     virtual void init();
 
-    void start_ecan();
     void pause_ecan();
     void createAgents();
 }; // class

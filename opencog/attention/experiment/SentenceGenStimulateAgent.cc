@@ -6,6 +6,8 @@
  */
 #include <sstream>
 #include <fstream>
+#include <chrono>
+#include <thread>
 #include <boost/filesystem.hpp>
 
 #include <opencog/atomutils/AtomUtils.h>
@@ -19,6 +21,9 @@
 using namespace opencog;
 using namespace opencog::ECANExperiment;
 
+using namespace std;
+using namespace chrono;
+
 SentenceGenStimulateAgent::~SentenceGenStimulateAgent()
 {
     //delete _scm_eval;
@@ -27,6 +32,9 @@ SentenceGenStimulateAgent::SentenceGenStimulateAgent(CogServer& cs) :
         Agent(cs), _as(cs.getAtomSpace())
 {
     _scm_eval = new SchemeEval(&_as);
+    current_group = 0;
+    startcount = _cogserver.getCycleCount();
+    stime = std::time(nullptr);
 }
 
 const ClassInfo& SentenceGenStimulateAgent::classinfo() const
@@ -67,19 +75,25 @@ void SentenceGenStimulateAgent::generate_stimulate_sentence()
     auto select = [](int num,StringSeq &data,StringSeq &out) -> void {
         int rnd;
         for (int i = 0; i < num;++i){
-            rnd = rand() % (data.size() / num) + (data.size() / num) * i;
+            rnd = rand() % data.size();
             out.push_back(data[rnd]);
         }
     };
 
-    if (_cogserver.getCycleCount() % special_word_occurence_period == 0) {
-        if (_cogserver.getCycleCount() % 25 == 0)
-            current_group = (current_group + 1) % swords.size();
-        select(2,swords[current_group],selected_words);
-        select(4,words,selected_words);
-    } else {
-        select(6,words,selected_words);
+    if (time(nullptr) > stime + 5) {
+        current_group = (current_group + 1) % swords.size();
+        if (current_group == 0)
+            this_thread::sleep_for(seconds(5));
+        stime = time(nullptr);
     }
+
+      if (_cogserver.getCycleCount() % special_word_occurence_period == 0) { // and
+      //(_cogserver.getCycleCount() - startcount) > 5 ) {
+        select(4,swords[current_group],selected_words);
+        select(2,words,selected_words);
+      } else {
+          select(6,words,selected_words);
+      }
 
     for (std::string word : selected_words) {
         hwords.push_back(evalWord(word));
@@ -90,5 +104,7 @@ void SentenceGenStimulateAgent::generate_stimulate_sentence()
         stimulateAtom(h,2);
     for (Handle h : hword_instances)
         stimulateAtom(h,0.5);
+    this_thread::sleep_for(milliseconds(400));
+
     printf("stifunds: %ld \n",_as.get_STI_funds());
 }

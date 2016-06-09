@@ -36,6 +36,8 @@
 
 using namespace opencog;
 
+int ForgettingAgent::maxSize = 100000;
+
 ForgettingAgent::ForgettingAgent(CogServer& cs) :
     Agent(cs)
 {
@@ -55,8 +57,8 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
 
 
     //Todo: Make configurable
-    maxSize = 50000;
-    accDivSize = 100;
+    maxSize = 100000;
+    accDivSize = 10;
 
     // Provide a logger, but disable it initially
     log = NULL;
@@ -129,19 +131,20 @@ void ForgettingAgent::forget(float proportion = 0.10f)
                 }
                 if (!recursive)
                     continue;
+
+                atomsVector[i]->setSTI(0);
+                atomsVector[i]->setLTI(0);
                 //fprintf(stdout,"Removing atom %s",atomsVector[i]->toString().c_str());
                 if (!a->remove_atom(atomsVector[i],recursive)) {
                     // Atom must have already been removed through having
                     // previously removed atoms in it's outgoing set.
                     log->error("Couldn't remove atom %s", atomName.c_str());
                 }
-                a->update_STI_funds(atomsVector[i]->getAttentionValue()->getSTI());
-                a->update_LTI_funds(atomsVector[i]->getAttentionValue()->getLTI());
                 count++;
                 count += iset.size();
             }
         } else {
-            i = atomsVector.size();
+            break;
         }
     }
     fprintf(stdout,"Forgetting Stuff, Atoms Forgotten: %d \n",count);

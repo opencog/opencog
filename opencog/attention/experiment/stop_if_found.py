@@ -26,7 +26,7 @@ def netcat(hostname, port, content) :
         try:
             s.connect((hostname, port))
         except socket.error as msg:
-            print "Connect failed: ", msgs.close()
+            print("Connect failed: ", msgs.close())
             return
         s.sendall(content)
         s.shutdown(socket.SHUT_WR)
@@ -34,8 +34,8 @@ def netcat(hostname, port, content) :
             data = s.recv(1024)
             if not data or data == "":
                     break
-        # print "Received:", repr(data)
-        # print "Connection closed."
+        # print("Received:", repr(data))
+        # print("Connection closed.")
         s.close()
 
 # This how the noise files names are set based on the size
@@ -50,15 +50,15 @@ def switch_noise_file():
     global noise_size
     cur_file = LOCATION+"/"+z_file_name(noise_size)
     noise_scm = LOCATION+"/noise.scm"
-    print "Switching noise file.\n"
-    print "cp "+cur_file + " "+noise_scm +"\n"
+    print("Switching noise file.\n")
+    print("cp "+cur_file + " "+noise_scm +"\n")
 
     os.system("cp "+cur_file + " "+noise_scm)
     noise_size = noise_size + 10
     if noise_size > MAX_NOISE_SIZE:
-        print "Done with all noise files.\n"
+        print("Done with all noise files.\n")
         write_separate_result_files()
-        print "Exitng.\n"
+        print("Exitng.\n")
         sys.exit()
 
 def write_separate_result_files():
@@ -73,26 +73,26 @@ def write_separate_result_files():
                data[person] = []
                data[person].append([values[0],values[2]])
     for namekey in data:
-            print "Saving " + namekey+".data \n"
+            print("Saving " + namekey+".data \n")
             with open(namekey+".data", "ab+") as f:
                 writer = csv.writer(f)
-                print "DEBUG"
-                print data[namekey]
+                print("DEBUG")
+                print(data[namekey])
                 writer.writerows(data[namekey])
 
 
 
 def restart_ecan():
-    print "Restarting congserver and ECAN-exp.\n"
+    print("Restarting congserver and ECAN-exp.\n")
     #os.system("kill -9 $(pgrep cogserver)")
     #os.system("rm *.data *.log"); 
     os.system("rm  *.log"); 
     cmd = sh.Command("./opencog/cogserver/server/cogserver")
     cmd(_bg = True)
     time.sleep(3)
-    print "Server restarted.\n"
+    print("Server restarted.\n")
     netcat("localhost",17001,"ecan-load\necan-start\n") 
-    print "Ecan restarted.\n"
+    print("Ecan restarted.\n")
     time.sleep(3)
 
 
@@ -116,7 +116,7 @@ def get_interesting(name):
         return False
 
 if __name__=="__main__":
-   print "Stop if found is running. Looking for the interesting atoms in smokes-fc-result.data file\n"
+   print("Stop if found is running. Looking for the interesting atoms in smokes-fc-result.data file\n")
    names = ["Anna", "Bob", "Edward", "Frank"]
    counter=0
    cont=False
@@ -143,17 +143,17 @@ if __name__=="__main__":
         if timeOut>=10*60:
             timeOut=0
             timesTimeOut=timesTimeOut+1
-            print "TIME OUT...\n"
-            print "time out .."+str(timesTimeOut)+"\n"
-            print "file count="+str(counter)+"\n"
+            print("TIME OUT...\n")
+            print("time out .."+str(timesTimeOut)+"\n")
+            print("file count="+str(counter)+"\n")
             switch_noise_file()
             restart_ecan()
             continue
 
-        print "Found all."
+        print("Found all.")
         counter=counter+1
-        print "file count="+str(counter)+"\n"
-        print "time out .."+str(timesTimeOut)+"\n"
+        print("file count="+str(counter)+"\n")
+        print("time out .."+str(timesTimeOut)+"\n")
         backup_result()
         switch_noise_file()
         restart_ecan()

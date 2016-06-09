@@ -33,6 +33,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include "MinMaxSTIUpdatingAgent.h"
 
+#include <opencog/cogserver/server/Agent.h>
+
 //#define DEBUG
 
 using namespace opencog;
@@ -71,13 +73,23 @@ void MinMaxSTIUpdatingAgent::run()
     HandleSeq atoms;
     a->get_all_atoms(atoms);
 
+    if (atoms.size() == 0)
+        return;
+
     AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
     AttentionValue::sti_t minSTISeen = AttentionValue::MAXSTI;
 
     AttentionValue::sti_t sti;
 
+    int sum = 0;
+    int sum2 = 0;
+
     for (Handle atom : atoms) {
         sti = atom->getAttentionValue()->getSTI();
+
+        sum += sti;
+        sum2 = pow(sti-mean,2);
+
         if (sti > maxSTISeen) {
             maxSTISeen = sti;
         }
@@ -86,6 +98,9 @@ void MinMaxSTIUpdatingAgent::run()
             minSTISeen = sti;
         }
     }
+
+    Agent::mean = sum / atoms.size();
+    Agent::std = sqrt(sum2 / atoms.size());
 
     if (minSTISeen > maxSTISeen) {
         minSTISeen = maxSTISeen;

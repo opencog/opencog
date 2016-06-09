@@ -1,5 +1,5 @@
 /*
- * opencog/attention/MinMaxSTIUpdatingAgent.h
+ * opencog/attention/FocusBoundaryUpdatingAgent.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_MIN_MAX_STI_IMPORTANCE_UPDATING_AGENT_H
-#define _OPENCOG_MIN_MAX_STI_IMPORTANCE_UPDATING_AGENT_H
+#ifndef _OPENCOG_FOCUS_BOUNDARY_UPDATING_AGENT_H
+#define _OPENCOG_FOCUS_BOUNDARY_UPDATING_AGENT_H
 
 #include <string>
 #include <iostream>
@@ -37,8 +37,6 @@
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Agent.h>
 
-class MinMaxSTIUpdatingAgentUTest;
-
 namespace opencog
 {
 /** \addtogroup grp_attention
@@ -48,21 +46,19 @@ namespace opencog
 class CogServer;
 
 /**
- * The AtomSpace needs to know the Minimum and Maximum STI of the Atoms
- * This agent updates these values after iterating over the whole AtomSpace
+ * This agent updates the Boundary of the AttentionalFocus to equal the top 25%
+ * of the STI Range.
+ * The Boundary will never drop Below 100 STI.
+ * TODO: Implement and upper limit to the number of Atoms in the Focus.
  */
-class MinMaxSTIUpdatingAgent : public Agent
+class FocusBoundaryUpdatingAgent : public Agent
 {
 
 private:
 
     AtomSpace* a;
 
-    AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
-    AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
-
-    AttentionValue::sti_t stiFundsBuffer;
-    AttentionValue::lti_t ltiFundsBuffer;
+    int cap_size;
 
     /** Set the agent's logger object
      *
@@ -78,12 +74,12 @@ public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
-        static const ClassInfo _ci("opencog::MinMaxSTIUpdatingAgent");
+        static const ClassInfo _ci("opencog::FocusBoundaryUpdatingAgent");
         return _ci;
     }
 
-    MinMaxSTIUpdatingAgent(CogServer&);
-    virtual ~MinMaxSTIUpdatingAgent();
+    FocusBoundaryUpdatingAgent(CogServer&);
+    virtual ~FocusBoundaryUpdatingAgent();
     virtual void run();
 
     /** Return the agent's logger object
@@ -94,7 +90,7 @@ public:
 
 }; // class
 
-typedef std::shared_ptr<MinMaxSTIUpdatingAgent> MinMaxSTIUpdatingAgentPtr;
+typedef std::shared_ptr<FocusBoundaryUpdatingAgent> FocusBoundaryUpdatingAgentPtr;
 
 /** @}*/
 }  // namespace

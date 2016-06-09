@@ -1,5 +1,5 @@
 /*
- * opencog/attention/StochasticImportanceUpdatingAgent.cc
+ * opencog/attention/WageCollectionAgent.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -31,13 +31,13 @@
 
 #define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
-#include "StochasticImportanceUpdatingAgent.h"
+#include "WageCollectionAgent.h"
 
 //#define DEBUG
 
 using namespace opencog;
 
-StochasticImportanceUpdatingAgent::StochasticImportanceUpdatingAgent(CogServer& cs) :
+WageCollectionAgent::WageCollectionAgent(CogServer& cs) :
         Agent(cs)
 {
     // init starting wages/rents. these should quickly change and reach
@@ -45,64 +45,53 @@ StochasticImportanceUpdatingAgent::StochasticImportanceUpdatingAgent(CogServer& 
     STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
     LTIAtomRent = config().get_int("ECAN_STARTING_ATOM_LTI_RENT");
 
-  //targetSTI = config().get_int("STARTING_STI_FUNDS");
-  //stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
-  //targetLTI = config().get_int("STARTING_LTI_FUNDS");
-  //ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
-
-    targetSTI = 10000;
-    stiFundsBuffer = 10000;
-    targetLTI = 10000;
-    ltiFundsBuffer = 10000;
+    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
+    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
 
     // Provide a logger
     log = NULL;
-    setLogger(new opencog::Logger("StochasticImportanceUpdatingAgent.log", Logger::FINE,
+    setLogger(new opencog::Logger("WageCollectionAgent.log", Logger::FINE,
     true));
 }
 
-StochasticImportanceUpdatingAgent::~StochasticImportanceUpdatingAgent()
+WageCollectionAgent::~WageCollectionAgent()
 {
     if (log)
         delete log;
 }
 
-void StochasticImportanceUpdatingAgent::setLogger(Logger* _log)
+void WageCollectionAgent::setLogger(Logger* _log)
 {
     if (log)
         delete log;
     log = _log;
 }
 
-Logger* StochasticImportanceUpdatingAgent::getLogger()
+Logger* WageCollectionAgent::getLogger()
 {
     return log;
 }
 
-
-
-void StochasticImportanceUpdatingAgent::run()
+void WageCollectionAgent::run()
 {
     a = &_cogserver.getAtomSpace();
 
     HandleSeq atoms;
-    a->get_all_atoms(atoms);
+    size_t size;
 
-    atoms.erase(remove_if(atoms.begin(),atoms.end(),
-                    [](Handle h) -> bool {
-                    return classserver().isA(h->getType(),HEBBIAN_LINK);
-                    }),atoms.end());
+    std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
 
-    size_t size = atoms.size();
+    a->get_handle_set_in_attentional_focus(out_hi);
 
-    //printf("size: %d    ",size);
+    size = atoms.size();
 
     if (size == 0)
         return;
 
-    int index = rand() % size;
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(0,size-1);
 
-    Handle h = atoms[index];
+    Handle h = atoms[distribution(generator)];
 
     int sti = h->getAttentionValue()->getSTI();
     int lti = h->getAttentionValue()->getLTI();
@@ -121,28 +110,25 @@ void StochasticImportanceUpdatingAgent::run()
     //printf("stiRent: %d \n",stiRent);
 
     h->setSTI(sti - stiRent);
-    a->update_STI_funds(stiRent);
-
     h->setLTI(lti - ltiRent);
-    a->update_LTI_funds(ltiRent);
 }
 
-int StochasticImportanceUpdatingAgent::calculate_STI_Rent()
+int WageCollectionAgent::calculate_STI_Rent()
 {
     int funds = a->get_STI_funds();
-    float diff  = targetSTI - funds;
+    float diff  = stiFundsBuffer - funds;
     float ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
-    ndiff = std::max(ndiff,-1.0f);
+    ndiff = std::max(ndiff,-0.9f);
     //printf("ndiff: %f   ",ndiff);
 
     return STIAtomRent + floor(STIAtomRent * ndiff);
 }
 
-int StochasticImportanceUpdatingAgent::calculate_LTI_Rent()
+int WageCollectionAgent::calculate_LTI_Rent()
 {
     int funds = a->get_LTI_funds();
-    float diff  = targetLTI - funds;
+    float diff  = ltiFundsBuffer - funds;
     float ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
     ndiff = std::max(ndiff,-1.0f);

@@ -122,6 +122,15 @@ private:
             "Dump time serise ECAN data\n",
             false, true)
 
+    DECLARE_CMD_REQUEST(ExperimentSetupModule, "stop-exp",do_stop_exp,
+            "Loads word dict for experimentation. The word dict file should have two sections\n"
+            "SPEICAL_WORDS = [comma separated words]\n"
+            "NON_SPECIAL_WORDS = [comma separated words] size\n",
+            "Usage: load-word-dict [FILE_NAME]\n"
+            "Dump time serise ECAN data\n",
+            false, true)
+
+
     void registerAgentRequests();
     void unregisterAgentRequests();
 
@@ -133,8 +142,12 @@ public:
     static inline const char* id();
     virtual void init(void);
 
-    static std::string dump_ecan_data();
+    std::string dump_ecan_data();
     static std::string file_name;
+
+  //std::ofstream outav;
+  //std::ofstream outheb;
+
 };
 }
 

@@ -42,6 +42,21 @@ extern concurrent_queue<Handle> newAtomsInAV;
 
 class CogServer;
 
+/**
+ * This agent is resposible for Creating new HebbianLinks and making sure
+ * that the maximum number of Links per Atom is not exceeded.
+ * If an Atom enters the AttentionalFocus this Agent will create links between
+ * it and all other atoms in the AttentionalFocus.
+ * If will also create links to Atoms outside the Focus. The localToFarLinks
+ * parameter decides how many of these "far" Links should be created.
+ *
+ * If after creating these Links the Atom has to many outgoing HebbianLinks
+ * this agent will delete Links randomly until the number of links is less then
+ * the maxLinkNum.
+ *
+ * This Agents is supposed to run in it's own Thread and gets Atoms that enter
+ * the Focus via a shared queue  (newAtomsInAV) from the AttentionModule.
+ */
 class HebbianCreationAgent : public Agent
 {
 
@@ -53,6 +68,13 @@ protected:
 
     void addHebbian(Handle atom,Handle source);
     float targetConjunction(Handle handle1,Handle handle2);
+
+    unsigned int maxLinkNum;
+
+    //The Number of Local Links (Links to Atoms in the Focus)
+    //for which 1 Far Link (Links to Atoms not in the Focus)
+    //should be created
+    int localToFarLinks;
 
 public:
 
@@ -78,4 +100,4 @@ typedef std::shared_ptr<HebbianCreationAgent> HebbianCreationAgentPtr;
 /** @}*/
 } // namespace
 
-#endif // _OPENCOG_HEBBIAN_LEARNING_AGENT_H
+#endif // _OPENCOG_HEBBIAN_CREATION_AGENT_H

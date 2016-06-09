@@ -29,28 +29,35 @@
 #include <opencog/attention/atom_types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
+#include <opencog/util/Config.h>
+
 //#define DEBUG
 
 using namespace opencog;
 
+concurrent_queue<Handle> opencog::newAtomsInAV;
+
+float Agent::mean = 1;
+float Agent::std = 1;
+
 Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f)
 {
-  //STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
-  //LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_RENT");
+    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
+    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
 
-  //targetSTI = config().get_int("STARTING_STI_FUNDS");
-  //stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
-  //targetLTI = config().get_int("STARTING_LTI_FUNDS");
-  //ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
+    targetSTI = config().get_int("STARTING_STI_FUNDS");
+    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
+    targetLTI = config().get_int("STARTING_LTI_FUNDS");
+    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
 
 
-    STIAtomWage = 100;
-    LTIAtomWage = 100;
+  //STIAtomWage = 100;
+  //LTIAtomWage = 100;
 
-    targetSTI = 10000;
-    stiFundsBuffer = 10000;
-    targetLTI = 10000;
-    ltiFundsBuffer = 10000;
+  //targetSTI = 10000;
+  //stiFundsBuffer = 10000;
+  //targetLTI = 10000;
+  //ltiFundsBuffer = 10000;
 
 
     _attentionValue = AttentionValue::DEFAULT_AV();
@@ -218,18 +225,17 @@ void Agent::stimulateAtom(Handle h,float stimulus)
     int ltiWage = calculate_LTI_Wage() * stimulus;
 
     h->setSTI(sti + stiWage);
-    as->update_STI_funds(-stiWage);
-
     h->setLTI(lti + ltiWage);
-    as->update_LTI_funds(-ltiWage);
 
-    updateHebbianLinks(h);
+    //newAtomsInAV.push(h);
+
+  //updateHebbianLinks(h);
 }
 
 AttentionValue::sti_t Agent::calculate_STI_Wage()
 {
     int funds = as->get_STI_funds();
-    float diff  = funds - targetSTI;
+    float diff  = funds - stiFundsBuffer;
     float ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
     ndiff = std::max(ndiff,-1.0f);
@@ -240,7 +246,7 @@ AttentionValue::sti_t Agent::calculate_STI_Wage()
 AttentionValue::lti_t Agent::calculate_LTI_Wage()
 {
     int funds = as->get_LTI_funds();
-    float diff  = funds - targetLTI;
+    float diff  = funds - ltiFundsBuffer;
     float ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
     ndiff = std::max(ndiff,-1.0f);
@@ -270,8 +276,15 @@ void Agent::updateHebbianLinks(Handle source)
         //  printf("old_tc: %f new_tc: %f  tc: %f \n",old_tc,new_tc,tc);
 
         //update truth value accordingly
-        TruthValuePtr newtv(SimpleTruthValue::createTV(tc, 1));
+        TruthValuePtr newtv = SimpleTruthValue::createTV(tc, 0.01);
         h->merge(newtv);
+
+      //truthvalueptr mergedTV = h->getTruthValue();
+      //if (mergedTV->getMean() == 0.5) {
+      //    printf(("NewTV: " + newtv->toString() + " ").c_str());
+      //    printf(("OldTV: " + oldtv->toString() + " ").c_str());
+      //    printf(("MergedTV: " + mergedTV->toString() + "\n").c_str());
+      //}
     }
     //h->setTruthValue(SimpleTruthValue::createTV(tc, 1));
 }
@@ -287,9 +300,26 @@ float Agent::targetConjunction(HandleSeq handles)
   //auto normsti_i = as->get_normalised_STI(handles[0],true,true);
   //auto normsti_j = as->get_normalised_STI(handles[1],true,true);
   //float conj = (normsti_i * normsti_j);
+
     auto normsti_i = as->get_normalised_zero_to_one_STI(handles[0],true,true);
     auto normsti_j = as->get_normalised_zero_to_one_STI(handles[1],true,true);
     float conj = (normsti_i * normsti_j) + ((normsti_j - normsti_i) * std::abs(normsti_j -normsti_i));
+
+  //AttentionValue::sti_t sti1 = handles[0]->getSTI();
+  //AttentionValue::sti_t sti2 = handles[0]->getSTI();
+
+  //auto afb = as->get_attentional_focus_boundary();
+  //auto maxsti = as->get_max_STI();
+  //auto minsti = as->get_min_STI();
+  //float nsti1 = (sti1 - afb) / (afb > sti1 ? afb - minsti : maxsti - afb);
+  //float nsti2 = (sti2 - afb) / (afb > sti2 ? afb - minsti : maxsti - afb);
+
+  //float nsti1 = (sti1 - mean) / (std * 3);
+  //float nsti2 = (sti2 - mean) / (std * 3);
+  //
+  //nsti1 = std::min(std::max(nsti1,-1.0f),1.0f) + 1.0f / 2.0f;
+  //nsti2 = std::min(std::max(nsti2,-1.0f),1.0f) + 1.0f / 2.0f;
+  //float conj = (nsti1 * nsti2) + ((nsti2 - nsti1) * std::abs(nsti2 - nsti1));
     conj = (conj + 1.0f) / 2.0f;
 
     //printf("normsti_i: %f   normsti_j: %f   conj: %f    nconj: %f \n",normsti_i,normsti_j,conj,nconj);

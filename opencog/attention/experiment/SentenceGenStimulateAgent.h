@@ -24,7 +24,8 @@ private:
     SchemeEval* _scm_eval;
     AtomSpace& _as;
 
-    int current_group;
+    int startcount;
+    time_t stime;
 
 public:
     virtual ~ SentenceGenStimulateAgent();
