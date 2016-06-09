@@ -177,65 +177,7 @@ except:
 (change-template "Time to change gaze" "attn-search"
 	"time_search_attn_min" "time_search_attn_max")
 
-;; ------------------------------------------------------------------
-;; Main loop control
-(define do-run-loop #t)
-
-(define-public (behavior-tree-run)
-"
- behavior-tree-run
-
- Run the Eva behavior tree main loop (in a new thread),
- Call (behavior-tree-halt) to exit the loop.
-"
-	(set! do-run-loop #t)
-	(call-with-new-thread
-		(lambda () (cog-evaluate! (DefinedPredicateNode "main loop")))))
-
-(define-public (behavior-tree-halt)
-"
- behavior-tree-halt
-
- Tell the Eva behavior tree main loop thread to exit.
-"
-	(set! do-run-loop #f))
-
-
-(define-public (behavior-tree-running?)
-"
- behavior-tree-running?
-
- Return #t if the behavior tree is running, else return false.
-"
-	do-run-loop)
-
-(define-public (behavior-tree-loop-count)
-"
- behavior-tree-loop-count
-
- Return the loop-count of the behavior tree.
-"
-	loop-count)
-
-
-(define loop-count 0)
-(define-public (continue-running-loop)  ; public only because its in a GPN
-	(set! loop-count (+ loop-count 1))
-
-	; Print loop count to the screen.
-	; (if (eq? 0 (modulo loop-count 30))
-	;	(format #t "Main loop: ~a\n" loop-count))
-
-	; Pause for one-tenth of a second... 101 millisecs
-	(usleep 101000)
-	(if do-run-loop (stv 1 1) (stv 0 1)))
-
-; Return true if the behavior loop should keep running.
-(DefineLink
-	(DefinedPredicate "Continue running loop?")
-	(Evaluation
-		(GroundedPredicate "scm:continue-running-loop") (ListLink)))
-
+; ----------------------------------------------------------------------
 ; Return true if ROS is still running.
 (DefineLink
 	(DefinedPredicate "ROS is running?")

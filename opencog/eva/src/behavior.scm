@@ -12,22 +12,30 @@
 ; HOWTO:
 ; ------
 ; Run the main loop:
-;    (behavior-tree-run)
+;    (run)
 ; Pause the main loop:
-;    (behavior-tree-halt)
+;    (halt)
 ;
 ; TODO:
 ; -----
-; XXX This needs a major redesign, to NOT use behavior trees at the top
-; level, but instead to provide a library of suitable actions that can
-; be searched over, and then performed when a given situation applies.
-; That is, given a certain state vector (typically, a subset of the
-; current state), the library is searched to see if there is a behavior
-; sequence that can be applied to this situation.  If there is no such
-; explicit match, then the fuzzy matcher should be employed to find
-; something that is at least close.  If nothing close is found, then
-; either the concept blending code, or a hack of the MOSES knob-turning
-; and genetic cross-over code should be used to create new quasi-random
+; The current OpenPsi framework allows much more general and flexible
+; rules than what are presented below; this geneality should be made
+; use of.
+;
+; A general OpenPsi rule has the form of if(context) then take(action);
+; these can contain variables, adn can also be classed into different
+; groups based on the demands that they are fulfilling.
+;
+; The content below consits entirely of actions to nbe taken; the
+; contexts are in the `self-model.scm` file.  The structure of the
+; conexts is fairly rigid; these could probably be loosened to a
+; large degree.
+;
+; The OpenPsi engine could be (should be?) updated to perform fuzzy
+; matching on the contexts, to find close or similar contexts, if no
+; one exact match can be made.  If nothing close is found, then either
+; the concept blending code, or a hack of the MOSES knob-turning and
+; genetic cross-over code should be used to create new quasi-random
 ; performance sequences from a bag of likely matches.
 ;
 ; Unit testing:
@@ -719,6 +727,7 @@
         ))
 		(TrueLink)
 	))
+
 (DefineLink
 	(DefinedPredicate "Keep alive")
 	(SequentialAnd
@@ -740,83 +749,5 @@
         ))
 		(TrueLink)
 	))
-;; ------------------------------------------------------------------
-;; Main loop. Uses tail recursion optimization to form the loop.
-(DefineLink
-	(DefinedPredicate "main loop")
-	(SatisfactionLink
-		(SequentialAnd
-			(SequentialOr
-				(DefinedPredicate "Skip Interaction?")
-
-				(SequentialAnd
-					(DefinedPredicate "Someone requests interaction?")
-					(DefinedPredicate "Interaction requested action"))
-
-				(SequentialAnd
-					(DefinedPredicate "Did someone arrive?")
-					(DefinedPredicate "New arrival sequence"))
-
-				(SequentialAnd
-					(DefinedPredicate "Did someone leave?")
-					(DefinedPredicate "Someone left action"))
-
-				; True, if there is anyone visible.
-				(SequentialAnd
-					(DefinedPredicate "Someone visible?")
-					(DefinedPredicate "Interact with people"))
-
-				(DefinedPredicate "Nothing is happening")
-				(True))
-
-			;; XXX FIXME chatbot is disengaged from everything else.
-			;; The room can be empty, the head is bored or even asleep,
-			;; but the chatbot is still smiling and yabbering.
-			;; If interaction is turned-off need keep alive gestures
-			(SequentialOr
-				; If the TTS vocalization started (chatbot started talking) ...
-				(SequentialAnd
-					(DefinedPredicate "chatbot started talking?")
-					(DefinedPredicate "Speech started"))
-
-				; If the chatbot currently talking ...
-				(SequentialAnd
-					(DefinedPredicate "chatbot is talking?")
-					(DefinedPredicate "Speech ongoing"))
-
-				; If the chatbot stopped talking ...
-				(SequentialAnd
-					(DefinedPredicate "chatbot stopped talking?")
-					(DefinedPredicate "Speech ended"))
-
-				(SequentialAnd
-					(DefinedPredicate "chatbot started listening?")
-					(DefinedPredicate "Listening started"))
-
-				; If the chatbot stopped talking ...
-				(SequentialAnd
-					(DefinedPredicate "chatbot is listening?")
-					(DefinedPredicate "Listening ongoing"))
-
-				; If the chatbot stopped talking ...
-				(SequentialAnd
-					(DefinedPredicate "chatbot stopped listening?")
-					(DefinedPredicate "Listening ended"))
-
-				(SequentialAnd
-				    (DefinedPredicate "Skip Interaction?")
-				    (DefinedPredicate "Keep alive"))
-
-				(True)
-			)
-
-			; If ROS is dead, or the continue flag not set, then stop
-			; running the behavior loop.
-			(DefinedPredicate "Continue running loop?")
-			(DefinedPredicate "ROS is running?")
-
-			;; Call self -- tail-recurse.
-			(DefinedPredicate "main loop")
-		)))
 
 ; ----------------------------------------------------------------------

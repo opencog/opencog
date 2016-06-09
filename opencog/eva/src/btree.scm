@@ -61,6 +61,7 @@
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.
+(load-from-path "old-tree.scm")
 (define (run) (behavior-tree-run))
 (define (halt) (behavior-tree-halt))
 

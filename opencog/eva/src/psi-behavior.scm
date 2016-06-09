@@ -10,6 +10,8 @@
 ;
 ;; ------------------------------------------------------------------
 
+; XXX FIXME -- terrible errible hack -- mostly because OpenPsi
+; is expecting actions to be schema, and not predicates.
 (define (foobar x)
 ; (display "duuuuuuuude foobar pred-schema wrapper\n")
 ; (display x) (newline)
@@ -39,7 +41,7 @@
 ;(DefineLink (DefinedPredicateNode "do-noop") (True))
 ;(pred-2-schema "do-noop")
 
-(define demand-satisfied (True))
+(define face-demand-satisfied (True))
 (define speech-demand-satisfied (True))
 (define face-demand (psi-demand "face interaction" 1))
 (define speech-demand (psi-demand "speech interaction" 1))
@@ -58,27 +60,27 @@
 (psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone requests interaction?"))
 	(DefinedSchemaNode "Interaction requested action")
-	demand-satisfied (stv 1 1) face-demand)
+	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Did someone arrive?"))
 	(DefinedSchemaNode "New arrival sequence")
-	demand-satisfied (stv 1 1) face-demand)
+	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Did someone leave?"))
 	(DefinedSchemaNode "Someone left action")
-	demand-satisfied (stv 1 1) face-demand)
+	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone visible?"))
 	(DefinedSchemaNode "Interact with people")
-	demand-satisfied (stv 1 1) face-demand)
+	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Nothing happening?"))
 	(DefinedSchemaNode "Nothing is happening")
-	demand-satisfied (stv 1 1) face-demand)
+	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot started talking?"))
@@ -113,5 +115,24 @@
 (psi-rule (list (DefinedPredicate "Skip Interaction?"))
 	(DefinedSchemaNode "Keep alive")
 	speech-demand-satisfied (stv 1 1) speech-demand)
+
+; ----------------------------------------------------------------------
+
+; There MUST be a DefinedPredicateNode with exactly the name
+; below in order for psi-run to work. Or we could just blow
+; that off, and use our own loop...
+(define loop-name (string-append psi-prefix-str "loop"))
+(DefineLink
+	(DefinedPredicate loop-name)
+	(SatisfactionLink
+		(SequentialAnd
+			(Evaluation (GroundedPredicate "scm: psi-step")
+				(ListLink))
+			(Evaluation (GroundedPredicate "scm: psi-run-continue?")
+				(ListLink))
+			; If ROS is dead, or the continue flag not set,
+			; then stop running the behavior loop.
+			(DefinedPredicate "ROS is running?")
+			(DefinedPredicate loop-name))))
 
 ; ----------------------------------------------------------------------

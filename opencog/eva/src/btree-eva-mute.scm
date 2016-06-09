@@ -40,6 +40,7 @@
 ; (display %load-path)
 (add-to-load-path "../src")
 (load-from-path "cfg-eva.scm") ;;; <<<=== See, its Eva here!
+(load-from-path "old-tree.scm")
 
 ;; Call (run) to run the main loop, (halt) to pause the loop.
 ;; The main loop runs in its own thread.
