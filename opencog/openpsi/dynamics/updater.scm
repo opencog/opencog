@@ -59,12 +59,11 @@
 ;;; Modulator Creation
 (define (create-openpsi-modulator name initial-value)
     (define mod
-        (Concept (string-append psi-prefix-str name) (stv initial-value 1)))
+        (Concept (string-append psi-prefix-str name)))
     (Inheritance
         mod
         (Concept (string-append psi-prefix-str "Modulator")))
-    ; todo: the below should probably be set as part of the updater init
-    ;(hash-set! prev-value-table mod initial-value)
+    (psi-set-value! mod (Number initial-value))
     mod)
 
 (define arousal (create-openpsi-modulator "arousal" .5))
@@ -137,45 +136,19 @@
 	(Member rule psi-interaction-rule)
 	rule
 )
-(define (create-psi-interaction-rule-BAK antecedent consequent strength)
-	(define rule
-		(PredictiveImplication
-			(TypedVariable
-				(Variable "$time")
-				(Type "TimeNode"))
-		    (AtTime
-		        (Variable "$time")
-			     antecedent)
-		    (AtTime
-		        (Variable "$time")
-		        (ExecutionOutputLink
-		            (GroundedSchema "scm: adjust-psi-var-level")
-		            (List
-		                consequent
-		                (NumberNode strength)
-		                antecedent)))))
-	(Member rule psi-interaction-rule)
-	rule
-)
-
-; not using, can trash
-(define (psi-change-eval entity)
-    (Evaluation
-        (GroundedPredicate "scm: psi-change-in?")
-        (List
-            entity))
-)
 
 (define speech->power
-	(create-psi-interaction-rule
-		;(Predicate "speech-giving-starts")
-		speech
-		agent-state-power
-		.1)
+	(create-psi-interaction-rule speech agent-state-power .3)
 )
 
 (define power->voice
 	(create-psi-interaction-rule agent-state-power voice-width .1))
+
+(define power->arousal
+	(create-psi-interaction-rule agent-state-power arousal .2))
+
+(define arousal->voice
+	(create-psi-interaction-rule arousal voice-width .1))
 
 
 
@@ -242,7 +215,7 @@
     psi-updater-is-running
 )
 
-(define continue-pred
+(define updater-continue-pred
 	(Evaluation (stv 1 1)
 	    (Predicate "continue-psi-updater-loop")
 	    (ListLink)))
@@ -251,7 +224,7 @@
     ; Pause for 100 millisecs, to keep the number of loops within a reasonable
     ; range.
     ; todo: is this needed?
-    (usleep 5000000))
+    (usleep 7000000))
 
 
 (define (psi-get-interaction-rules)
@@ -292,12 +265,6 @@
 	(define evals-with-change-pred (cog-filter-hypergraph psi-changed-eval? (Set rules)))
 	;(define change-evals (cog-filter-hypergraph psi-change-eval? (Set rules)))
 
-	; Store the current values in the prev-value-table
-	; not using anymore
-	(define (get-value-and-store eval-link)
-		(define value (psi-get-value key))
-		(hash-set! prev-value-table key value))
-
 	(for-each (lambda (eval-link)
 				(define key (gadr eval-link))
 				(define value (psi-get-value key))
@@ -306,6 +273,8 @@
 												  (list key)))
 			  )
 			evals-with-change-pred)
+
+	(set! psi-monitored-params (delete-duplicates psi-monitored-params))
 
 	;(for-each (get-value-and-store key) evals-with-change-pred)
 
@@ -323,18 +292,19 @@
     2) Fire up the interaction rules
     3) Update the previous values of the changed monitored params
 "
-	(define psi-changed-params (list))
+	(define changed-params '())
+	(define current-values-table (make-hash-table 20))
 
 	(define (set-param-change-status param)
 		(define tv)
 		;(define changed (psi-change-in? param))
 		;(format #t "\npsi-change-in? RETURN: ~a\n" changed)
 		(if (psi-change-in? param)
-		;(if (changed param)
 	            (begin
-	                (set! psi-changed-params
-	                    (append psi-changed-params (list param)))
-	                (set! tv (stv 1 1)))
+	                (set! changed-params
+	                    (append changed-params (list param)))
+	                (set! tv (stv 1 1))
+	                (hash-set! current-values-table param (psi-get-value param)))
 	            (set! tv (stv 0 1)))
         (Evaluation tv
             (Predicate "psi-changed")
@@ -346,24 +316,25 @@
 		psi-updater-loop-count)
 
 	; Evaluate the monitored params and set "changed" predicates accordingly
-	; (make sure to either zero out of change back the ones from the previous round
-	(set! psi-changed-params '())
+	(set! changed-params '())
 	(for-each set-param-change-status psi-monitored-params)
-	(format #t "\npsi-changed-params: ~a\n\n" psi-changed-params)
+	(format #t "\nchanged-params: ~a\n\n" changed-params)
 
 
 	; grab and evaluate the interaction rules
 	; todo: Could optimize by only calling rules containing the changed params
+	; todo: Ideally adjust-psi-var-level should use the current-vales-table
+	;   rather than grabbing the value dynamically from the atomspace, because
+	;   the current value might have changed from previous rules.
 	(let ((rules (psi-get-interaction-rules)))
 		(map psi-evaluate-interaction-rule rules)
 	)
 
-
-	; Update prev-value-table entries just for the changed (monitored) params
+	; Update prev-value-table entries for the changed (monitored) params
 	(for-each (lambda (param)
-					(define value (psi-get-value param))
+					(define value (hash-ref current-values-table param))
 					(hash-set! prev-value-table param value))
-			  psi-changed-params)
+			  changed-params)
 
 
 	(psi-pause)
@@ -399,8 +370,9 @@
 	; starting out not using time server but will add
 	(if (equal? (tv-mean (cog-evaluate! antecedent)) 1.0)
 		(let ((consequent (list-ref (cog-outgoing-set rule) 2)))
-			(format #t "**********************************\nexecuting: ")
-			(format #t "~a**********************************\n" consequent)
+			(format #t "\n**********************************\nexecuting: ~a"
+				consequent)
+			;(format #t "~a**********************************\n" consequent)
 			(cog-execute! consequent)
 		)
 	)
@@ -480,6 +452,7 @@
 
 	(psi-updater-init)
     (set! psi-updater-is-running #t)
+    (cog-set-tv! updater-continue-pred (stv 1 1))
     (call-with-new-thread
         (lambda () (cog-evaluate! (loop-node))))
 )
@@ -489,7 +462,7 @@
   Tells the psi loop thread, that is started by running `(psi-run)`, to exit.
 "
     (set! psi-updater-is-running #f)
-    (cog-set-tv! continue-pred (stv 0 1))
+    (cog-set-tv! updater-continue-pred (stv 0 1))
 )
 
 
@@ -499,6 +472,7 @@
 
 (define halt psi-updater-halt)
 (define h halt)
+(define r psi-updater-run)
 (define r1 speech->power)
 (define r2 power->voice)
 (define voice voice-width)
