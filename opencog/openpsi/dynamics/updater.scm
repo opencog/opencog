@@ -49,7 +49,7 @@
 		(set! result (tv-mean result)))
 	result)
 
-(define (psi-set-value entity value)
+(define (psi-set-value! entity value)
 	; OpenPsi values are stored using StateLinks
 	(State
 		entity
@@ -64,7 +64,7 @@
         mod
         (Concept (string-append psi-prefix-str "Modulator")))
     ; todo: the below should probably be set as part of the updater init
-    (hash-set! prev-value-table mod initial-value)
+    ;(hash-set! prev-value-table mod initial-value)
     mod)
 
 (define arousal (create-openpsi-modulator "arousal" .5))
@@ -86,13 +86,13 @@
 	(List
 		agent-state
 		power))
-(psi-set-value agent-state-power (Number .3))
-(hash-set! prev-value-table agent-state-power .3)
+(psi-set-value! agent-state-power (Number .3))
+;(hash-set! prev-value-table agent-state-power .3)
 
 ;;; EVENT PREDICATES
 (define speech (Predicate "speech-giving-starts"))
 (Evaluation speech (List) (stv 0 1))
-(hash-set! prev-value-table speech 0.0)
+;(hash-set! prev-value-table speech 0.0)
 
 
 ;;; PAU PREDICATES
@@ -104,8 +104,8 @@
 	(Inheritance
 		pau
 		(Concept "PAU"))
-	(psi-set-value pau (Number initial-value))
-	(hash-set! prev-value-table pau initial-value)
+	(psi-set-value! pau (Number initial-value))
+	;(hash-set! prev-value-table pau initial-value)
 	pau)
 
 (define voice-width
@@ -124,7 +124,8 @@
 		(PredictiveImplication
 			(TimeNode 1)
 		    (Evaluation
-                (GroundedPredicate "scm: psi-change-in?")
+                ;(GroundedPredicate "scm: psi-change-in?")
+                (Predicate "psi-changed")
                 (List
                     antecedent))
 		    (ExecutionOutputLink
@@ -218,7 +219,7 @@
 				(string->number (cog-name alpha))))))
 		  )
 
-		(psi-set-value target (Number new-value))
+		(psi-set-value! target (Number new-value))
 		;(cog-set-tv! target (cog-new-stv new-strength confidence))
 		(format #t "previous value: ~a    new value: ~a\n" value new-value)
 	)
@@ -250,7 +251,7 @@
     ; Pause for 100 millisecs, to keep the number of loops within a reasonable
     ; range.
     ; todo: is this needed?
-    (usleep 1000000))
+    (usleep 5000000))
 
 
 (define (psi-get-interaction-rules)
@@ -261,18 +262,108 @@
 						(Variable "$rule")
 						psi-interaction-rule)))))
 
+; helper to identify (Eval (GPN "scm: psi-change-in?" (List . . .))) links
+; not used anymore i think
+(define (psi-change-eval? atom)
+	(if (and (equal? (cog-type atom) 'EvaluationLink)
+			 (equal? (gar atom) (GroundedPredicateNode "scm: psi-change-in?")))
+		#t
+		#f))
+
+; helper to identify (Eval (Predicate "psi-changed" (List . . .))) links
+(define (psi-changed-eval? atom)
+	(if (and (equal? (cog-type atom) 'EvaluationLink)
+			 (equal? (gar atom) (Predicate "psi-changed")))
+		#t
+		#f))
+
+(define psi-monitored-params '())
+
+(define (psi-updater-init)
+	; Grab all variables in the antecedents of the interaction rules that are
+	; arguments to (Predicate "psi-changed") and put them in
+	; psi-monintered--params. Populate the prev-value-table with their current
+	; values.
+
+	; Populate prev-values-table based on current value of the arguments to
+	; (GroupdedPredicate "psi-change-in") in the interaction rules
+	; Grab the interaction rules and get the eval links
+	(define rules (psi-get-interaction-rules))
+	(define evals-with-change-pred (cog-filter-hypergraph psi-changed-eval? (Set rules)))
+	;(define change-evals (cog-filter-hypergraph psi-change-eval? (Set rules)))
+
+	; Store the current values in the prev-value-table
+	; not using anymore
+	(define (get-value-and-store eval-link)
+		(define value (psi-get-value key))
+		(hash-set! prev-value-table key value))
+
+	(for-each (lambda (eval-link)
+				(define key (gadr eval-link))
+				(define value (psi-get-value key))
+				(hash-set! prev-value-table key value)
+				(set! psi-monitored-params (append psi-monitored-params
+												  (list key)))
+			  )
+			evals-with-change-pred)
+
+	;(for-each (get-value-and-store key) evals-with-change-pred)
+
+	;(format #t "psi-evals-with-change-pred: ~a\n" evals-with-change-pred)
+
+)
+
 ; ----------------------------------------------------------------------
+
 (define-public (do-psi-updater-step)
 "
   The main function that defines the steps to be taken in every cycle.
+  At each step:
+    1) Evaluate the monitored params and set their 'changed' predicates
+    2) Fire up the interaction rules
+    3) Update the previous values of the changed monitored params
 "
+	(define psi-changed-params (list))
+
+	(define (set-param-change-status param)
+		(define tv)
+		;(define changed (psi-change-in? param))
+		;(format #t "\npsi-change-in? RETURN: ~a\n" changed)
+		(if (psi-change-in? param)
+		;(if (changed param)
+	            (begin
+	                (set! psi-changed-params
+	                    (append psi-changed-params (list param)))
+	                (set! tv (stv 1 1)))
+	            (set! tv (stv 0 1)))
+        (Evaluation tv
+            (Predicate "psi-changed")
+            (List
+                param)))
+
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
-	(display "loop count: ")(display psi-updater-loop-count)(newline)
+	(format #t "\n\n----------------------------------------\nLoop Count: ~a\n"
+		psi-updater-loop-count)
+
+	; Evaluate the monitored params and set "changed" predicates accordingly
+	; (make sure to either zero out of change back the ones from the previous round
+	(set! psi-changed-params '())
+	(for-each set-param-change-status psi-monitored-params)
+	(format #t "\npsi-changed-params: ~a\n\n" psi-changed-params)
+
 
 	; grab and evaluate the interaction rules
+	; todo: Could optimize by only calling rules containing the changed params
 	(let ((rules (psi-get-interaction-rules)))
 		(map psi-evaluate-interaction-rule rules)
 	)
+
+
+	; Update prev-value-table entries just for the changed (monitored) params
+	(for-each (lambda (param)
+					(define value (psi-get-value param))
+					(hash-set! prev-value-table param value))
+			  psi-changed-params)
 
 
 	(psi-pause)
@@ -281,65 +372,69 @@
 
 ; --------------------------------------------------------------
 
-(define-public (psi-change-in? target)
-	(display "psi-change-in? argument: \n")(display target)
+(define (psi-change-in? target)
+	;(display "psi-change-in? argument: \n")(display target)
 	(let* ((previous (hash-ref prev-value-table target))
-		   (current (psi-get-number-value target)))
+		   (current (psi-get-value target)))
 
-		(format #t "previous value: ~a   current value: ~a\n" previous current)
+		;(format #t "previous value: ~a   current value: ~a\n" previous current)
 		(if (and
 				; current value is defined
 				(not (equal? #f current))
 				(not (equal? previous current)))
-			(stv 1 1)
-			(stv 0 1))
+			#t
+			#f
+			; from when function was called as a GPN
+			;(stv 1 1)
+			;(stv 0 1)
+		)
 	)
 )
 
 (define (psi-evaluate-interaction-rule rule)
 	; Assumes rule is of the form (PredictiveImplication AtTime ...)
 	(define antecedent (gdr rule))
-	(format #t "evaluating: ~a\n" antecedent)
+	;(format #t "\nevaluating: ~a\n" antecedent)
 
 	; starting out not using time server but will add
 	(if (equal? (tv-mean (cog-evaluate! antecedent)) 1.0)
 		(let ((consequent (list-ref (cog-outgoing-set rule) 2)))
-			(format #t "executing: ~a\n" consequent)
+			(format #t "**********************************\nexecuting: ")
+			(format #t "~a**********************************\n" consequent)
 			(cog-execute! consequent)
 		)
 	)
 )
 
-(define (psi-change-eval? atom)
-	(if (and (equal? (cog-type atom) 'EvaluationLink)
-			 (equal? (gar atom) (GroundedPredicateNode "scm: psi-change-in?")))
+
+;temp
+(define (listlink? atom)
+	(if (equal? (cog-type atom) 'ListLink)
 		#t
 		#f))
 
-
-(define (filter-hypergraph-links-too pred? atom)
+(define (cog-filter-hypergraph pred? atom)
+"
+  Recursively traverse hyptergraph and return list of all atoms that satisfy
+  function pred?
+  (This is similar to the opencog utilities.scm filter-hypergraph function, but
+  filters out links also. And also takes atom rather than scheme list as the
+  parameter.)
+"
 	(define results '())
-	;(format #t "atom: \n~a\n" atom)
 	(if (pred? atom)
 		(set! results (append results (list atom))))
 	(if (cog-link? atom)
 		(for-each (lambda (sub-atom)
-					(set! results (append (filter pred? sub-atom) results))
+					(set! results (append (cog-filter-hypergraph pred? sub-atom) results))
 				  )
 				  (cog-outgoing-set atom)))
 	results
 )
 
-(define (psi-updater-init)
-	; Populate prev-values-table based on current value of the arguments to
-	; (GroupdedPredicate "psi-change-in") in the interaction rules
-	; Grab the interaction rules
-	(define rules (psi-get-interaction-rules))
-	(define change-evals (filter-hypergraph-links-too psi-change-eval?
-							(Set rules)))
-	(format #t "change-evals: ~a\n" change-evals)
 
-)
+
+
 
 (define change-predicates)
 (define (psi-update-change-predicates)
@@ -353,7 +448,6 @@
 	;     b) based on changed predicates
 
 
-	; Update prev-value-table entries for contents of changed-predicates list
 
 )
 
@@ -384,12 +478,12 @@
     ;    #f ; Nothing to do already defined
     ;)
 
+	(psi-updater-init)
     (set! psi-updater-is-running #t)
     (call-with-new-thread
         (lambda () (cog-evaluate! (loop-node))))
 )
 
-; --------------------------------------------------------------
 (define-public (psi-updater-halt)
 "
   Tells the psi loop thread, that is started by running `(psi-run)`, to exit.
@@ -399,21 +493,41 @@
 )
 
 
+
 ; --------------------------------------------------------------
 ; Shortcuts for dev use
 
 (define halt psi-updater-halt)
+(define h halt)
 (define r1 speech->power)
 (define r2 power->voice)
 (define voice voice-width)
 (define value psi-get-value)
 (define rules (psi-get-interaction-rules))
 
-;for fun
-(psi-set-value agent-state-power (Number .2))
+(define (psi-decrease-value target)
+	(psi-set-value! target (Number (- (psi-get-number-value target) .1))))
+(define (psi-increase-value target)
+	(psi-set-value! target (Number (+ (psi-get-number-value target) .1))))
+
+(define d psi-decrease-value)
+(define i psi-increase-value)
+
+(define (psi-set-pred-true target)
+	(Evaluation target (List) (stv 1 1)))
+(define (psi-set-pred-false target)
+	(Evaluation target (List) (stv 0 1)))
+
+(define t psi-set-pred-true)
+(define f psi-set-pred-false)
+
+(define s speech)
+(define p agent-state-power)
+
+
+
+
 
 ; --------------------------------------------------------------
-; --------------------------------------------------------------
-#! Old Code
 
-!#
+
