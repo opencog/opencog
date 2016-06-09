@@ -70,6 +70,9 @@ private:
 
     Logger *log; //!< Logger object for Agent
 
+    float targetConjunction(HandleSeq handles);
+    void updateHebbianLinks(Handle source);
+
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }

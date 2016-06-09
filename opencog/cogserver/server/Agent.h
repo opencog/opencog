@@ -221,49 +221,8 @@ public:
     //stim_t stimulateAtom(Handle h, stim_t amount);
     void stimulateAtom(Handle h, float amount);
 
-    /**
-     * Stimulate all atoms in HandleSeq evenly with a given amount of stimulus.
-     *
-     * @param hs set of atoms to spread stimulus across.
-     * @param amount amount of stimulus to share.
-     * @return remainder stimulus after equal spread between atoms.
-     */
-    //stim_t stimulateAtom(HandleSeq hs, stim_t amount);
-
-    /**
-     * Remove stimulus from a Handle's atom.
-     *
-     * @param atom handle
-     */
-    //void removeAtomStimulus(Handle h);
-
-    /**
-     * Reset stimulus.
-     *
-     * @return new stimulus since reset, usually zero unless another
-     * thread adds more.
-     */
-    //stim_t resetStimulus();
-
-    /**
-     * Get total stimulus.
-     *
-     * @return total stimulus since last reset.
-     */
-    //stim_t getTotalStimulus() const;
-
-    /**
-     * Get stimulus for Atom.
-     *
-     * @param h handle of atom to get stimulus for.
-     * @return total stimulus since last reset.
-     */
-    //stim_t getAtomStimulus(Handle h) const;
-
     AttentionValue::sti_t calculate_STI_Wage();
     AttentionValue::lti_t calculate_LTI_Wage();
-    void updateHebbianLinks(Handle source);
-    float targetConjunction(HandleSeq handles);
 
     AttentionValuePtr getAV()
     {

@@ -45,7 +45,9 @@ WageCollectionAgent::WageCollectionAgent(CogServer& cs) :
     STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
     LTIAtomRent = config().get_int("ECAN_STARTING_ATOM_LTI_RENT");
 
+    targetSTI = config().get_int("TARGET_STI_FUNDS");
     stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
+    targetLTI = config().get_int("TARGET_LTI_FUNDS");
     ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
 
     // Provide a logger
@@ -116,7 +118,7 @@ void WageCollectionAgent::run()
 int WageCollectionAgent::calculate_STI_Rent()
 {
     int funds = a->get_STI_funds();
-    float diff  = stiFundsBuffer - funds;
+    float diff  = targetSTI - funds;
     float ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
     ndiff = std::max(ndiff,-0.9f);
@@ -128,7 +130,7 @@ int WageCollectionAgent::calculate_STI_Rent()
 int WageCollectionAgent::calculate_LTI_Rent()
 {
     int funds = a->get_LTI_funds();
-    float diff  = ltiFundsBuffer - funds;
+    float diff  = targetLTI - funds;
     float ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
     ndiff = std::max(ndiff,-1.0f);

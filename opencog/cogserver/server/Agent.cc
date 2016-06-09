@@ -45,20 +45,10 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
 
-    targetSTI = config().get_int("STARTING_STI_FUNDS");
+    targetSTI = config().get_int("TARGET_STI_FUNDS");
     stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
-    targetLTI = config().get_int("STARTING_LTI_FUNDS");
+    targetLTI = config().get_int("TARGET_LTI_FUNDS");
     ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
-
-
-  //STIAtomWage = 100;
-  //LTIAtomWage = 100;
-
-  //targetSTI = 10000;
-  //stiFundsBuffer = 10000;
-  //targetLTI = 10000;
-  //ltiFundsBuffer = 10000;
-
 
     _attentionValue = AttentionValue::DEFAULT_AV();
 
@@ -132,91 +122,6 @@ void Agent::resetUtilizedHandleSets()
     _utilizedHandleSets.clear();
 }
 
-
-//tim_t Agent::stimulateAtom(Handle h, stim_t amount)
-//
-//   {
-//       std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-//
-//       // Add atom to the map of atoms with stimulus
-//       // and add stimulus to it
-//       (*stimulatedAtoms)[h] += amount;
-//   }
-//
-//   // update record of total stimulus given out
-//   totalStimulus += amount;
-//
-//   logger().fine("Atom %d received stimulus of %d, total now %d",
-//                 h.value(),
-//                 amount,
-//                 totalStimulus.load(std::memory_order_relaxed));
-//
-//ifdef DEBUG
-//   std::cout << "Atom " << h.value() << " received stimulus of " << amount <<
-//                ", total now " << totalStimulus.load(std::memory_order_relaxed)
-//                << "\n";
-//endif
-//
-//   return totalStimulus.load(std::memory_order_relaxed);
-//
-//
-//oid Agent::removeAtomStimulus(Handle h)
-//
-//   stim_t amount;
-//   {
-//       std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-//       // if handle not in map then return
-//       if (stimulatedAtoms->find(h) == stimulatedAtoms->end())
-//           return;
-//
-//       amount = (*stimulatedAtoms)[h];
-//       stimulatedAtoms->erase(h);
-//   }
-//
-//   // update record of total stimulus given out
-//   totalStimulus -= amount;
-//
-//
-//tim_t Agent::stimulateAtom(HandleSeq hs, stim_t amount)
-//
-//   stim_t split;
-//
-//   // how much to give each atom
-//   split = amount / hs.size();
-//
-//   for (Handle handle : hs) {
-//       stimulateAtom(handle, split);
-//   }
-//   // return unused stimulus
-//   return amount - (split * hs.size());
-//
-//
-//tim_t Agent::resetStimulus()
-//
-//   {
-//       std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-//       stimulatedAtoms->clear();
-//   }
-//   // reset stimulus counter
-//   totalStimulus = 0;
-//   return totalStimulus.load(std::memory_order_relaxed);
-//
-//
-//tim_t Agent::getTotalStimulus() const
-//
-//   return totalStimulus;
-//
-//
-//tim_t Agent::getAtomStimulus(Handle h) const
-//
-//   std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-//   if (stimulatedAtoms->find(h) == stimulatedAtoms->end()) {
-//       return 0;
-//   } else {
-//       return (*stimulatedAtoms)[h];
-//   }
-//
-
 void Agent::stimulateAtom(Handle h,float stimulus)
 {
     int sti = h->getAttentionValue()->getSTI();
@@ -235,7 +140,7 @@ void Agent::stimulateAtom(Handle h,float stimulus)
 AttentionValue::sti_t Agent::calculate_STI_Wage()
 {
     int funds = as->get_STI_funds();
-    float diff  = funds - stiFundsBuffer;
+    float diff  = funds - targetSTI;
     float ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
     ndiff = std::max(ndiff,-1.0f);
@@ -246,83 +151,10 @@ AttentionValue::sti_t Agent::calculate_STI_Wage()
 AttentionValue::lti_t Agent::calculate_LTI_Wage()
 {
     int funds = as->get_LTI_funds();
-    float diff  = funds - ltiFundsBuffer;
+    float diff  = funds - targetLTI;
     float ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
     ndiff = std::max(ndiff,-1.0f);
 
     return LTIAtomWage + (LTIAtomWage * ndiff);
-}
-
-void Agent::updateHebbianLinks(Handle source)
-{
-    float tcDecayRate = 0.1f;
-    float tc, old_tc, new_tc;
-
-    IncomingSet links = source->getIncomingSetByType(ASYMMETRIC_HEBBIAN_LINK);
-
-    for (LinkPtr h : links) {
-        if (source != h->getOutgoingAtom(0))
-            continue;
-        HandleSeq outgoing = h->getOutgoingSet();
-        new_tc = targetConjunction(outgoing);
-
-        // old link strength decays
-        TruthValuePtr oldtv  = h->getTruthValue();
-        old_tc = oldtv->getMean();
-        tc = tcDecayRate * new_tc + (1.0f - tcDecayRate) * old_tc;
-
-        //if (tc < 0)
-        //  printf("old_tc: %f new_tc: %f  tc: %f \n",old_tc,new_tc,tc);
-
-        //update truth value accordingly
-        TruthValuePtr newtv = SimpleTruthValue::createTV(tc, 0.01);
-        h->merge(newtv);
-
-      //truthvalueptr mergedTV = h->getTruthValue();
-      //if (mergedTV->getMean() == 0.5) {
-      //    printf(("NewTV: " + newtv->toString() + " ").c_str());
-      //    printf(("OldTV: " + oldtv->toString() + " ").c_str());
-      //    printf(("MergedTV: " + mergedTV->toString() + "\n").c_str());
-      //}
-    }
-    //h->setTruthValue(SimpleTruthValue::createTV(tc, 1));
-}
-
-float Agent::targetConjunction(HandleSeq handles)
-{
-    if (handles.size() != 2) {
-        throw RuntimeException(
-                TRACE_INFO,
-                "Size of outgoing set of a hebbian link must be 2.");
-    }
-    //XXX: Should this be normalised to 0->1 Range
-  //auto normsti_i = as->get_normalised_STI(handles[0],true,true);
-  //auto normsti_j = as->get_normalised_STI(handles[1],true,true);
-  //float conj = (normsti_i * normsti_j);
-
-    auto normsti_i = as->get_normalised_zero_to_one_STI(handles[0],true,true);
-    auto normsti_j = as->get_normalised_zero_to_one_STI(handles[1],true,true);
-    float conj = (normsti_i * normsti_j) + ((normsti_j - normsti_i) * std::abs(normsti_j -normsti_i));
-
-  //AttentionValue::sti_t sti1 = handles[0]->getSTI();
-  //AttentionValue::sti_t sti2 = handles[0]->getSTI();
-
-  //auto afb = as->get_attentional_focus_boundary();
-  //auto maxsti = as->get_max_STI();
-  //auto minsti = as->get_min_STI();
-  //float nsti1 = (sti1 - afb) / (afb > sti1 ? afb - minsti : maxsti - afb);
-  //float nsti2 = (sti2 - afb) / (afb > sti2 ? afb - minsti : maxsti - afb);
-
-  //float nsti1 = (sti1 - mean) / (std * 3);
-  //float nsti2 = (sti2 - mean) / (std * 3);
-  //
-  //nsti1 = std::min(std::max(nsti1,-1.0f),1.0f) + 1.0f / 2.0f;
-  //nsti2 = std::min(std::max(nsti2,-1.0f),1.0f) + 1.0f / 2.0f;
-  //float conj = (nsti1 * nsti2) + ((nsti2 - nsti1) * std::abs(nsti2 - nsti1));
-    conj = (conj + 1.0f) / 2.0f;
-
-    //printf("normsti_i: %f   normsti_j: %f   conj: %f    nconj: %f \n",normsti_i,normsti_j,conj,nconj);
-
-    return conj;
 }

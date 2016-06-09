@@ -87,27 +87,80 @@ void HebbianUpdatingAgent::run()
 
     Handle source = atoms[distribution(generator)];
 
-    HandleSeq targetSet = get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
+    updateHebbianLinks(source);
 
-    for (Handle target : targetSet)
-    {
-        Handle link = a->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+  //Experimental Coce
+  //HandleSeq targetSet = get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
 
-        float learningRate = 0.01f;
-        float new_tc, old_tc;
+  //for (Handle target : targetSet)
+  //{
+  //    Handle link = a->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
 
-        auto magnitued = as->get_normalised_zero_to_one_STI(source,true,true);
-        auto direction = as->get_normalised_STI(target,true,true);
+  //    float learningRate = 0.01f;
+  //    float new_tc, old_tc;
 
-        old_tc = link->getTruthValue()->getMean();
+  //    auto magnitued = as->get_normalised_zero_to_one_STI(source,true,true);
+  //    auto direction = as->get_normalised_STI(target,true,true);
 
-        new_tc = new_tc + magnitued * direction * learningRate;
-        new_tc = std::min(std::max(new_tc,0.0f),1.0f);
+  //    old_tc = link->getTruthValue()->getMean();
 
-        //update truth value accordingly
-        TruthValuePtr newtv = SimpleTruthValue::createTV(new_tc, 0.1);
-        link->merge(newtv);
-    }
+  //    new_tc = new_tc + magnitued * direction * learningRate;
+  //    new_tc = std::min(std::max(new_tc,0.0f),1.0f);
+
+  //    //update truth value accordingly
+  //    TruthValuePtr newtv = SimpleTruthValue::createTV(new_tc, 0.1);
+  //    link->merge(newtv);
+  //}
 }
 
+void HebbianUpdatingAgent::updateHebbianLinks(Handle source)
+{
+    float tcDecayRate = 0.1f;
+    float tc, old_tc, new_tc;
 
+    IncomingSet links = source->getIncomingSetByType(ASYMMETRIC_HEBBIAN_LINK);
+
+    for (LinkPtr h : links) {
+        if (source != h->getOutgoingAtom(0))
+            continue;
+        HandleSeq outgoing = h->getOutgoingSet();
+        new_tc = targetConjunction(outgoing);
+
+        // old link strength decays
+        TruthValuePtr oldtv  = h->getTruthValue();
+        old_tc = oldtv->getMean();
+        tc = tcDecayRate * new_tc + (1.0f - tcDecayRate) * old_tc;
+
+        //if (tc < 0)
+        //  printf("old_tc: %f new_tc: %f  tc: %f \n",old_tc,new_tc,tc);
+
+        //update truth value accordingly
+        TruthValuePtr newtv = SimpleTruthValue::createTV(tc, 0.01);
+        h->merge(newtv);
+
+      //truthvalueptr mergedTV = h->getTruthValue();
+      //if (mergedTV->getMean() == 0.5) {
+      //    printf(("NewTV: " + newtv->toString() + " ").c_str());
+      //    printf(("OldTV: " + oldtv->toString() + " ").c_str());
+      //    printf(("MergedTV: " + mergedTV->toString() + "\n").c_str());
+      //}
+    }
+    //h->setTruthValue(SimpleTruthValue::createTV(tc, 1));
+}
+
+float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
+{
+    if (handles.size() != 2) {
+        throw RuntimeException(
+                TRACE_INFO,
+                "Size of outgoing set of a hebbian link must be 2.");
+    }
+
+    auto normsti_i = as->get_normalised_zero_to_one_STI(handles[0],true,true);
+    auto normsti_j = as->get_normalised_zero_to_one_STI(handles[1],true,true);
+    float conj = (normsti_i * normsti_j) + ((normsti_j - normsti_i) * std::abs(normsti_j -normsti_i));
+
+    conj = (conj + 1.0f) / 2.0f;
+
+    return conj;
+}

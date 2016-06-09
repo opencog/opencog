@@ -242,7 +242,7 @@ void StochasticImportanceDiffusionAgent::consume()
                     diffusionAmmount = -1;
                 }
             } else {
-                diffusionAmmount = round(fdiffusionAmmount)
+                diffusionAmmount = round(fdiffusionAmmount);
             }
 
             if (abs(diffusionAmmount) < 1)
