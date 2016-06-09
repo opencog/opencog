@@ -188,7 +188,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (parse-all proc path)
+(define-public (parse-all proc path)
 "
   Parse of all sentences in each of the files in 'path' using 'proc'. Assuming
   each line of the files represents a sentence.
