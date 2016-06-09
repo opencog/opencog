@@ -334,16 +334,16 @@ struct MinedRulePattern
 
 };
 
-struct ProcessedMinedRulePattern
-{
+//struct ProcessedMinedRulePattern
+//{
 
-    string actionName;
+//    string actionName;
 
-    //map<paramName, std::pair<oldValue,newValue>>
-    map<string, std::pair<Handle,Handle>> effectEvalLinks;
-    vector<MinedPreCondition> preconditions;// can be empty
-    map<string,Handle> boundParamMap;
-};
+//    //map<paramName, std::pair<oldValue,newValue>>
+//    map<string, std::pair<Handle,Handle>> effectEvalLinks;
+//    vector<MinedPreCondition> preconditions;// can be empty
+//    map<string,Handle> boundParamMap;
+//};
 
 
 
@@ -423,6 +423,12 @@ protected:
 
      PatternMiner* patternMiner;
 
+     Handle actorPredicateHandle;
+     Handle targetPredicateHandle;
+
+     Handle defaultActorVarHandle;
+     Handle defaultTargetVarHandle;
+
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
 
@@ -438,6 +444,9 @@ protected:
      void cleanUpContextBeforeRollBackToPreviousStep();
 
      void cleanUpEverythingAfterPlanning();
+
+     void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
+     vector<Handle> ReplaceVariableNames(vector<Handle>& pattern, map<Handle,Handle>& varNameMap);
 
      MinedRulePattern* mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode, Handle stateOwnerHanlde);
 
@@ -511,6 +520,8 @@ protected:
      // @ varName: the variable name
      ParamValue selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings,
                                                      string varName, vector<ParamValue>& values, Rule* orginalRule = 0, bool checkPrecons = true);
+
+     bool groundAMinedRuleFromItsForwardStateNode(RuleNode* ruleNode, StateNode* forwardStateNode);
 
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)

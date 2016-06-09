@@ -53,7 +53,6 @@ using namespace std;
 
 RuleNode OCPlanner::goalRuleNode = RuleNode();
 
-
 string RuleNode::getDepthOfRuleNode()
 {
      // check the depth of the effect state nodes of this rule, get the deepest state node.
@@ -491,6 +490,15 @@ OCPlanner::OCPlanner(AtomSpace *_atomspace, string _selfID, string _selfType, bo
             cout<< (((Rule*)(iter->second))->action)->getName() << std::endl;
 
         }
+    }
+
+    if (ENABLE_MINING_RULES)
+    {
+        actorPredicateHandle = atomSpace->addNode(PREDICATE_NODE, "actor");
+        targetPredicateHandle = atomSpace->addNode(PREDICATE_NODE, "target");
+
+        defaultActorVarHandle = atomSpace->addNode(VARIABLE_NODE, "$var_actor");
+        defaultTargetVarHandle = atomSpace->addNode(VARIABLE_NODE, "$var_target");
     }
 
 }
@@ -990,174 +998,39 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             {
                 cout<< std::endl << "Debug planning step " << tryStepNum <<" : current subgoal has not any candidate suitable rules." << std::endl;
 
+                bool toRollback = true;
+
                 if (ENABLE_MINING_RULES)
                 {
+                    toRollback = false;
+
                     cout << "Start to mine related rules from perception. " << std::endl;
                     vector<ParamValue> stateOwnerList = curStateNode->state->stateOwnerList;
 
                     if (stateOwnerList.size() < 1)
-                        return "";
+                        toRollback = true;
 
                     Handle stateOwnerHanlde = Handle::UNDEFINED;
 
                     stateOwnerHanlde = Inquery::getStateOwnerHandle(stateOwnerList[0]);
 
                     if (stateOwnerHanlde == Handle::UNDEFINED)
-                        return "";
+                        toRollback = true;
 
-                    MinedRulePattern* minedNewRule = mineNewRuleForCurrentSubgoal(curStateNode, stateOwnerHanlde);
+                    MinedRulePattern* minedNewRulePattern = mineNewRuleForCurrentSubgoal(curStateNode, stateOwnerHanlde);
 
-                    cout << "Trying this new rule...\nAction name: " << minedNewRule->actionName <<"\nNext, try to ground all the parameters for this action..." << std::endl;
-
-                    // next, try to bind all the required parameters for this action
-                    map<string, MinedParamStruct>::iterator paramIt = minedNewRule->paramToMinedStruct.begin();
-                    map<string,Handle> paramCandidateMap;
-                    for (; paramIt != minedNewRule->paramToMinedStruct.end(); paramIt ++) // for each param
-                    {
-                        cout << "Binding parameter: " << paramIt->first << std::endl;
-                        MinedParamStruct& minedParamStruct = paramIt->second;
-                        HandleSeq rulePattern = minedParamStruct.paramPrioPattern;
-                        // the last link of each returned pattern is the variable ListLink
-                        Handle variableListLink = rulePattern[rulePattern.size() - 1];
-                        HandleSeq allVariables = atomSpace->getOutgoing(variableListLink);
-                        rulePattern.pop_back();
-
-                        // First, try to find the already known variables in the pattern
-                        // e.g.
-//                        (EvaluationLink )
-//                          (PredicateNode color)
-//                          (ListLink )
-//                            (VariableNode $var_1)
-//                            (VariableNode $var_2)
-
-//                        (EvaluationLink )
-//                          (PredicateNode color)
-//                          (ListLink )
-//                            (VariableNode $var_3)
-//                            (VariableNode $var_2)
-
-//                        (EvaluationLink )
-//                          (PredicateNode target)
-//                          (ListLink )
-//                            (VariableNode $var_4)
-//                            (VariableNode $var_3)
-
-//                        (EvaluationLink )
-//                          (PredicateNode with)
-//                          (ListLink )
-//                            (VariableNode $var_4)
-//                            (VariableNode $var_1)
-                        // if there is "target" or "actor" in the pattern, ground them first, because they are known.
-                        map<Handle, Handle> varToValueMap;
-                        Handle actionInstanceVar;
-                        for (Handle link : rulePattern)
-                        {
-                            if (atomSpace->getType(link) !=  EVALUATION_LINK)
-                                continue;
-
-                            Handle predicate = atomSpace->getOutgoing(link,0);
-                            string predicateStr = atomSpace->getName(predicate);
-                            if ((predicateStr  == "target") || (predicateStr  == "actor"))
-                            {
-                                Handle elistLink = atomSpace->getOutgoing(link,1);
-                                HandleSeq elistLinkOutgoings = atomSpace->getOutgoing(elistLink);
-                                Handle varH = elistLinkOutgoings[elistLinkOutgoings.size() - 1];
-
-                                if (predicateStr  == "target")
-                                    varToValueMap.insert(std::pair<Handle, Handle>(varH,stateOwnerHanlde));
-                                else // actor
-                                    varToValueMap.insert(std::pair<Handle, Handle>(varH,selfHandle));
-                            }
-                            else if (predicateStr == paramIt->first)
-                            {
-                                if (actionInstanceVar == Handle::UNDEFINED)
-                                {
-                                    Handle elistLink = atomSpace->getOutgoing(link,1);
-                                    actionInstanceVar = atomSpace->getOutgoing(elistLink, 0);
-                                }
-                            }
-
-                        }
-
-                        string actionInstanceVarStr = atomSpace->getName(actionInstanceVar);
-                        cout << "Found out that the variable represents the action instance is: " << actionInstanceVarStr;
-
-                        // Bind all the vars can be ground with varToValueMap
-                        HandleSeq boundPattern = bindKnownVariablesForLinks(rulePattern, varToValueMap);
-
-                        cout << "\npattern after bind all known variables :\n";
-                        for(Handle link : boundPattern)
-                        {
-                            cout << atomSpace->atomAsString(link) << std::endl;
-                        }
-
-                        // Remove all the links contains the action instance variable
-                        HandleSeq cleanBoundPattern;
-                        for (Handle link : boundPattern)
-                        {
-                            string linkToStr = atomspace().atomAsString(link);
-                            if (linkToStr.find(actionInstanceVarStr) == string::npos)
-                                cleanBoundPattern.push_back(link);
-                        }
-
-                        // Remove the action instance variable and already known variables from variable list
-                        HandleSeq cleanVariables;
-                        for (Handle varh : allVariables)
-                        {
-                            if (varh == actionInstanceVar)
-                                continue;
-
-                            if (varToValueMap.find(varh) != varToValueMap.end())
-                                continue;
-
-                            cleanVariables.push_back(varh);
-                        }
-
-                        cout << "\npattern after removed links contain the variable represents action instance:\n";
-                        for(Handle link : cleanBoundPattern)
-                        {
-                            cout << atomSpace->atomAsString(link) << std::endl;
-                        }
-
-                        // Add the intrinsic Undistinguishing Property Links to the pattern
-                        // e.g.
-//                        (EvaluationLink )
-//                          (PredicateNode class)
-//                          (ListLink )
-//                            (VariableNode $var_1)
-//                            (VariableNode key)
-                        for(Handle iulink : minedParamStruct.intrinsicUndistinguishingPropertyLinks)
-                            cleanBoundPattern.push_back(iulink);
-
-                        cout << "\npattern after added intrinsic Undistinguishing Property Links :\n";
-                        for(Handle link : cleanBoundPattern)
-                        {
-                            cout << atomSpace->atomAsString(link) << std::endl;
-                        }
-
-                        // Found candicates in AtomSpace which match this pattern:
-                        HandleSeq candidates = Inquery::findAllCandidatesByGivenPattern(cleanBoundPattern, cleanVariables, minedParamStruct.paramObjVar);
-                        if (candidates.size() > 0)
-                        {
-                            paramCandidateMap.insert(std::pair<string, Handle>(paramIt->first,candidates[0]));// Currently only choose the top candidate.
-                            cout << "\nFound candicates in the AtomSpace to match this pattern:\n";
-                            for (Handle c : candidates)
-                                cout << atomSpace->atomAsString(c) << std::endl;
-                        }
-                        else
-                        {
-                            cout << "\nCan't found any candicates in the AtomSpace to match this pattern. Mining new pattern failed\n";
-                            return "";
-                        }
-                    }
-
+                    // Create a new rule from this mined pattern
+                    // MinedRule* minedRule = generateANewRuleFromMinedPattern(minedNewRulePattern);
 
 
 
 
                 }
-                else
+
+
+                if (toRollback)
                 {
+
                     cout << "Roll back! " << std::endl;
                     // we have tried all the candidate rules, still cannot achieve this state, which means this state is impossible to be achieved here
                     // so go back to the its forward rule which produce this state to check if we can apply another bindings to the same rule or we shoud try another rule
@@ -1396,28 +1269,37 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             // When apply a rule, we need to select proper variables to ground it.
 
-            // To ground a rule, first, we get all the variable values from the current state node to ground it.
-            // ToBeImproved:  need to groundARuleNodeFromItsForwardState when choose which rule to apply, to avoid the rules that will cause a lot of effect on the already solved states
-            groundARuleNodeFromItsForwardState(ruleNode, curStateNode);
-
-            // And then is possible to still have some variables cannot be grounded by just copy from the forward state
-            // So we need to select suitable variables to ground them.
-            if (! groundARuleNodeBySelectingNonNumericValues(ruleNode))
+            if (selectedRule->ruleType == MINED_RULE)
             {
-                // fail to ground all non numeric variables, roll back to previous step
-                cout<< "GroundARuleNodeBySelectingNonNumericValues failed! This rule doesn't work!"<< std::endl;
+                // This rule is a mined rule, need to ground it in a different way from predefined rules.
 
-                if ((curStateNode->forwardRuleNode != (&OCPlanner::goalRuleNode)) && curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+
+            }
+            else
+            {
+                // To ground a rule, first, we get all the variable values from the current state node to ground it.
+                // ToBeImproved:  need to groundARuleNodeFromItsForwardState when choose which rule to apply, to avoid the rules that will cause a lot of effect on the already solved states
+                groundARuleNodeFromItsForwardState(ruleNode, curStateNode);
+
+                // And then is possible to still have some variables cannot be grounded by just copy from the forward state
+                // So we need to select suitable variables to ground them.
+                if (! groundARuleNodeBySelectingNonNumericValues(ruleNode))
                 {
-                    cout<<"This fail also imply that its forward state :";
-                    outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
-                    cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
-                    curStateNode->forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
+                    // fail to ground all non numeric variables, roll back to previous step
+                    cout<< "GroundARuleNodeBySelectingNonNumericValues failed! This rule doesn't work!"<< std::endl;
+
+                    if ((curStateNode->forwardRuleNode != (&OCPlanner::goalRuleNode)) && curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+                    {
+                        cout<<"This fail also imply that its forward state :";
+                        outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
+                        cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
+                        curStateNode->forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
+                    }
+
+                    cleanUpContextBeforeRollBackToPreviousStep();
+                    continue;
+
                 }
-
-                cleanUpContextBeforeRollBackToPreviousStep();
-                continue;
-
             }
 
             if (ruleNode->ParamCandidates.size() > 0)
@@ -2717,6 +2599,70 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
 
 }
 
+void OCPlanner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks)
+{
+
+    HandleSeq outgoingLinks = atomSpace->getOutgoing(link);
+
+    for (Handle h : outgoingLinks)
+    {
+
+        if (atomSpace->isNode(h))
+        {
+           if (atomSpace->getType(h) == opencog::VARIABLE_NODE)
+           {
+               // it's a variable node, rename it if it's in the varNameMap
+               if (varNameMap.find(h) != varNameMap.end())
+               {
+                   renameOutgoingLinks.push_back(varNameMap[h]);
+               }
+               else
+               {
+                   renameOutgoingLinks.push_back(h);
+               }
+           }
+           else
+           {
+               // it's a const node, just add it
+               renameOutgoingLinks.push_back(h);
+
+           }
+        }
+        else // it's a link
+        {
+             HandleSeq _renameOutgoingLinks;
+             findAndRenameVariablesForOneLink(h, varNameMap, _renameOutgoingLinks);
+             Handle reLink = atomSpace->addLink(atomSpace->getType(h),_renameOutgoingLinks);
+             // XXX why do we need to set the TV ???
+             reLink->merge(TruthValue::TRUE_TV());
+             renameOutgoingLinks.push_back(reLink);
+        }
+
+    }
+
+}
+
+// replace the variable in varNameMap with its value
+// e.g. <$var_3, $var_actor>, to replace $var_3 with $var_actor
+vector<Handle> OCPlanner::ReplaceVariableNames(vector<Handle>& pattern, map<Handle,Handle>& varNameMap)
+{
+
+    vector<Handle> rebindedPattern;
+
+    for (Handle link : pattern)
+    {
+        HandleSeq renameOutgoingLinks;
+        findAndRenameVariablesForOneLink(link, varNameMap, renameOutgoingLinks);
+        Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),renameOutgoingLinks);
+        // XXX why do we need to set the TV ???
+        rebindedLink->merge(TruthValue::TRUE_TV());
+        rebindedPattern.push_back(rebindedLink);
+    }
+
+    return rebindedPattern;
+}
+
+
 //void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap)
 //{
 //    // currently we just cheat to enable the following actions
@@ -2861,11 +2807,9 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
     // Step 3: Find out what kind of parameters required for this action
 
-    Handle actorPredicateHandle = atomSpace->addNode(PREDICATE_NODE, "actor");
-    Handle targetPredicateHandle = atomSpace->addNode(PREDICATE_NODE, "target");
 
-
-    // Find all the other parameters except actor and target
+    // Find all the other parameters except actor and target, usually the target is the statechange owner
+    // To to be improved: some times the target is not the statechange ower
     // e.g.
     //    (EvaluationLink (stv 1.000000 1.000000)
     //      (PredicateNode "with") ; [3461]
@@ -2920,7 +2864,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
     }
 
     // For each parameter, use pattern miner to mine relations from this parameter node, to find out the rule to bind the parameter
-    // e.g.  a target can be opened with a tool of same color
+    // e.g.  a target can be opened with a tool of same color to this target
     //    (EvaluationLink )
     //      (PredicateNode color)
     //      (ListLink )
@@ -3106,29 +3050,75 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                 cout << "There is no distinguishingProperties or intrinsicProperties for this kind of entities, just adopt the patterns with highest frequency..."<< std::endl;
             }
 
+            cout << "Top Selected Pattern:\n";
+            for (Handle l : priorPatterns[0])
+                cout << atomSpace->atomAsString(l);
+            cout << std::endl;
+
             MinedParamStruct minedStruct;
 
-            minedStruct.paramPrioPattern =  priorPatterns[0];    // currently we just try to use the top selected pattern
-            // find out which variable in the mined pattern represent the param object
-            Handle paramVar;
-            for (Handle link : minedStruct.paramPrioPattern)
+            // Unify the variables in the mined pattern
+            // replace the variable representing actor by var_actor, the variable representing target by var_target
+
+            // To be improved: for the patterns of different parameters, there may be some overlape variables of different variable name,
+            // but actually representing the same thing, these patterns should be unified too.
+
+            // find out which variable in the mined pattern represent the param object, the actor and the target
+            Handle paramVar, actorVar, targetVar;
+            for (Handle link : priorPatterns[0]) // currently we just try to use the top selected pattern
             {
                 if (atomSpace->getType(link) != EVALUATION_LINK)
                     continue;
 
                 Handle predicateNode = atomSpace->getOutgoing(link,0);
-                if (atomSpace->getName(predicateNode) == paramMapIter->first)
+                string predicateNameString = atomSpace->getName(predicateNode);
+                if (predicateNameString == paramMapIter->first)
                 {
                     Handle listLink = atomSpace->getOutgoing(link,1);
                     HandleSeq listOutgoings = atomSpace->getOutgoing(listLink);
                     paramVar = listOutgoings[listOutgoings.size() - 1];
-                    break;
+                    cout << "The variable representing this parameter value object is: " << atomSpace->getName(paramVar) << std::endl;
+
+                }
+                else if (predicateNameString == "actor")
+                {
+                    Handle listLink = atomSpace->getOutgoing(link,1);
+                    HandleSeq listOutgoings = atomSpace->getOutgoing(listLink);
+                    actorVar = listOutgoings[listOutgoings.size() - 1];
+                    cout << "The variable representing actor is: " << atomSpace->getName(actorVar) << std::endl;
+
+                }
+                else if (predicateNameString == "target")
+                {
+                    Handle listLink = atomSpace->getOutgoing(link,1);
+                    HandleSeq listOutgoings = atomSpace->getOutgoing(listLink);
+                    targetVar = listOutgoings[listOutgoings.size() - 1];
+                    cout << "The variable representing target is: " << atomSpace->getName(targetVar) << std::endl;
+
                 }
             }
 
-            minedStruct.paramObjVar = paramVar;
+            map<Handle,Handle> varNameMapToReplace;
 
-            cout << "The variable representing this parameter value object is: " << atomSpace->getName(paramVar) << std::endl;
+            if (actorVar != Handle::UNDEFINED)
+                varNameMapToReplace.insert(std::pair<Handle,Handle>(actorVar, defaultActorVarHandle));
+
+            if (actorVar != Handle::UNDEFINED)
+                varNameMapToReplace.insert(std::pair<Handle,Handle>(targetVar, defaultTargetVarHandle));
+
+
+            if (varNameMapToReplace.size() != 0)
+            {
+                minedStruct.paramPrioPattern =  ReplaceVariableNames(priorPatterns[0], varNameMapToReplace);
+                cout << "After unified the variable names in this pattern:\n";
+                for (Handle l : minedStruct.paramPrioPattern)
+                    cout << atomSpace->atomAsString(l);
+                cout << std::endl;
+            }
+            else
+                minedStruct.paramPrioPattern =  priorPatterns[0];
+
+            minedStruct.paramObjVar = paramVar;
 
             HandleSeq intrinsicUndistinguishingPropertyLinks;
             for (string propertyStr : intrinsicUndistinguishingProperties)
@@ -3269,7 +3259,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
                             preconditions.push_back(aPrecond);
 
-                            cout << "A precondition found: State " << aPrecond.stateName << " of "
+                            cout << "A precondition found: State: " << aPrecond.stateName << " of "
                                  << atomSpace->getName(aPrecond.stateOwner) << " should be " << atomSpace->getName(valueHandle) << std::endl;
 
                         }
@@ -3281,7 +3271,10 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
     }
 
-    // Todo:Find the state changes occurred to the  actors before the action execution. Not necessary in current stage.
+
+    // To find out the other effects of this rule besides the main goal.
+
+    // To be improved:Find the state changes occurred to the  actors before the action execution for preconditions.
 
     // Create MinedRulePattern
     MinedRulePattern* minedRulePattern = new MinedRulePattern();
@@ -3630,6 +3623,156 @@ bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode,
 //              << " from its forward state " << forwardStateNode->state->name().c_str() << std::endl;
 
     return true;
+}
+
+bool OCPlanner::groundAMinedRuleFromItsForwardStateNode(RuleNode* ruleNode, StateNode* forwardStateNode)
+{
+
+//    cout << "\nAction name: " << minedNewRule->actionName <<"\nNow try to ground all the parameters for this action..." << std::endl;
+
+//    // next, try to bind all the required parameters for this action
+//    map<string, MinedParamStruct>::iterator paramIt = minedNewRule->paramToMinedStruct.begin();
+//    map<string,Handle> paramCandidateMap;
+//    for (; paramIt != minedNewRule->paramToMinedStruct.end(); paramIt ++) // for each param
+//    {
+//        cout << "Binding parameter: " << paramIt->first << std::endl;
+//        MinedParamStruct& minedParamStruct = paramIt->second;
+//        HandleSeq rulePattern = minedParamStruct.paramPrioPattern;
+//        // the last link of each returned pattern is the variable ListLink
+//        Handle variableListLink = rulePattern[rulePattern.size() - 1];
+//        HandleSeq allVariables = atomSpace->getOutgoing(variableListLink);
+//        rulePattern.pop_back();
+
+//        // First, try to find the already known variables in the pattern
+//        // e.g.
+////                        (EvaluationLink )
+////                          (PredicateNode color)
+////                          (ListLink )
+////                            (VariableNode $var_1)
+////                            (VariableNode $var_2)
+
+////                        (EvaluationLink )
+////                          (PredicateNode color)
+////                          (ListLink )
+////                            (VariableNode $var_3)
+////                            (VariableNode $var_2)
+
+////                        (EvaluationLink )
+////                          (PredicateNode target)
+////                          (ListLink )
+////                            (VariableNode $var_4)
+////                            (VariableNode $var_3)
+
+////                        (EvaluationLink )
+////                          (PredicateNode with)
+////                          (ListLink )
+////                            (VariableNode $var_4)
+////                            (VariableNode $var_1)
+//        // if there is "target" or "actor" in the pattern, ground them first, because they are known.
+//        map<Handle, Handle> varToValueMap;
+//        Handle actionInstanceVar;
+//        for (Handle link : rulePattern)
+//        {
+//            if (atomSpace->getType(link) !=  EVALUATION_LINK)
+//                continue;
+
+//            Handle predicate = atomSpace->getOutgoing(link,0);
+//            string predicateStr = atomSpace->getName(predicate);
+//            if ((predicateStr  == "target") || (predicateStr  == "actor"))
+//            {
+//                Handle elistLink = atomSpace->getOutgoing(link,1);
+//                HandleSeq elistLinkOutgoings = atomSpace->getOutgoing(elistLink);
+//                Handle varH = elistLinkOutgoings[elistLinkOutgoings.size() - 1];
+
+//                if (predicateStr  == "target")
+//                    varToValueMap.insert(std::pair<Handle, Handle>(varH,stateOwnerHanlde));
+//                else // actor
+//                    varToValueMap.insert(std::pair<Handle, Handle>(varH,selfHandle));
+//            }
+//            else if (predicateStr == paramIt->first)
+//            {
+//                if (actionInstanceVar == Handle::UNDEFINED)
+//                {
+//                    Handle elistLink = atomSpace->getOutgoing(link,1);
+//                    actionInstanceVar = atomSpace->getOutgoing(elistLink, 0);
+//                }
+//            }
+
+//        }
+
+//        string actionInstanceVarStr = atomSpace->getName(actionInstanceVar);
+//        cout << "Found out that the variable represents the action instance is: " << actionInstanceVarStr;
+
+//        // Bind all the vars can be ground with varToValueMap
+//        HandleSeq boundPattern = bindKnownVariablesForLinks(rulePattern, varToValueMap);
+
+//        cout << "\npattern after bind all known variables :\n";
+//        for(Handle link : boundPattern)
+//        {
+//            cout << atomSpace->atomAsString(link) << std::endl;
+//        }
+
+//        // Remove all the links contains the action instance variable
+//        HandleSeq cleanBoundPattern;
+//        for (Handle link : boundPattern)
+//        {
+//            string linkToStr = atomspace().atomAsString(link);
+//            if (linkToStr.find(actionInstanceVarStr) == string::npos)
+//                cleanBoundPattern.push_back(link);
+//        }
+
+//        // Remove the action instance variable and already known variables from variable list
+//        HandleSeq cleanVariables;
+//        for (Handle varh : allVariables)
+//        {
+//            if (varh == actionInstanceVar)
+//                continue;
+
+//            if (varToValueMap.find(varh) != varToValueMap.end())
+//                continue;
+
+//            cleanVariables.push_back(varh);
+//        }
+
+//        cout << "\npattern after removed links contain the variable represents action instance:\n";
+//        for(Handle link : cleanBoundPattern)
+//        {
+//            cout << atomSpace->atomAsString(link) << std::endl;
+//        }
+
+//        // Add the intrinsic Undistinguishing Property Links to the pattern
+//        // e.g.
+////                        (EvaluationLink )
+////                          (PredicateNode class)
+////                          (ListLink )
+////                            (VariableNode $var_1)
+////                            (VariableNode key)
+//        for(Handle iulink : minedParamStruct.intrinsicUndistinguishingPropertyLinks)
+//            cleanBoundPattern.push_back(iulink);
+
+//        cout << "\npattern after added intrinsic Undistinguishing Property Links :\n";
+//        for(Handle link : cleanBoundPattern)
+//        {
+//            cout << atomSpace->atomAsString(link) << std::endl;
+//        }
+
+//        // Found candicates in AtomSpace which match this pattern:
+//        HandleSeq candidates = Inquery::findAllCandidatesByGivenPattern(cleanBoundPattern, cleanVariables, minedParamStruct.paramObjVar);
+//        if (candidates.size() > 0)
+//        {
+//            paramCandidateMap.insert(std::pair<string, Handle>(paramIt->first,candidates[0]));// Currently only choose the top candidate.
+//            cout << "\nFound candicates in the AtomSpace to match this pattern:\n";
+//            for (Handle c : candidates)
+//                cout << atomSpace->atomAsString(c) << std::endl;
+//        }
+//        else
+//        {
+//            cout << "\nCan't found any candicates in the AtomSpace to match this pattern. Mining new pattern failed\n";
+//            return false;
+//        }
+//    }
+
+
 }
 
 bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode)
