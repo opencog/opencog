@@ -859,8 +859,20 @@ sub psi_tail
 	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
 
 	# Stupid hack for rule priority, for lack of something better.
+	# Adjust weights so that more than one star is strongly punished.
+	# That's in order to supress the pattern "* are *" which matches
+	# any sentence with the word "are" in it. Skanky rule, maybe
+	# it should be ditched.  More generally, some kind of weighting
+	# formula should be developed, one that is more "scientifically"
+	# motivated.  Of course, this breaks the AIML spec, which does
+	# not use randomness or weighting in it; however, we want to avoid
+	# strict determinism here, as its not very realistic.  Note that
+	# this kind of randomness will break any sort of customer-support
+	# system that insists on eexactly a given fixed answer to a given
+	# situation.  Oh well; that's not what we're after, here.
+	#`
 	my $weight = 1.0 / (0.5 + $word_count);
-	$weight = $base_priority / (1.0 + $num_stars + $weight);
+	$weight = $base_priority / (1.0 + $num_stars * $num_stars + $weight);
 	# my $goal_truth = "   (stv 1 0.8)\n";
 	my $goal_truth = "   (stv 1 $weight)\n";
 	my $rule_tail = $chat_goal . $goal_truth . $demand;

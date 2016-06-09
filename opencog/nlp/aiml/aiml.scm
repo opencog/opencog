@@ -138,6 +138,8 @@
 ; Given an AIML rule, return a scheme list holding the context
 ; followed by the action.  Given a rule, (gar r) is the AndLink.
 ; Either gaar or gadr is the context; the other is the action.
+; We identify the action by using the `psi-action?` utility.
+; XXX FIXME. This is yucky, something prettier is needed.
 (define (get-ctxt-act r)
 	(define andy (gar r))
 	(define pa (gar andy))
@@ -209,7 +211,7 @@
 )
 
 ; Given a pattern-based rule, run it. Given that it has variables
-; in it, accomplish this by creating and running a BindLink.
+; in it, accomplish this by creating and running a MapLink.
 ; XXX Need to handle that, topic rules as appropriate.
 (define (run-pattern-rule RULE SENT)
 	(define maplk (MapLink
@@ -264,24 +266,33 @@
   aiml-select-rule RULE-LIST - Given a list of AIML rules,
   select one to run.
 "
-	;; Total up all of the confidence values on all of the rules
+	;; XXX FIXME crazy hacky weight-adjusting formula. This makes
+	;; no sense at all, but is a hacky hack designed to pick more
+	;; desirable rules more often.  Someone should figure out
+	;; some weighting formula that makes more sense tahn this.
+	;; Currently, the square of the confidence.
+	(define (get-weight ATOM)
+		(define w (tv-conf (cog-tv ATOM)))
+		(* w w)
+	)
+
+	;; Total up all of the weights on all of the rules
 	;; in the RULE-LIST.
 	(define sum 0.0)
 	(define (add-to-sum ATOM)
-		(set! sum (+ sum (tv-conf (cog-tv ATOM)))))
+		(set! sum (+ sum (get-weight ATOM))))
 
 	;; Return #t for the first rule in the RULE-LIST for which the
 	;; accumulated weight is above THRESH.
-	(define accum 0.0001)
+	(define accum 0.000000001)
 	(define (pick-first ATOM THRESH)
-		(set! accum (+ accum (tv-conf (cog-tv ATOM))))
+		(set! accum (+ accum (get-weight ATOM)))
 		(< THRESH accum))
 
-	; OK, so actually yoyal up the weights
+	; OK, so actually total up the weights
 	(for-each add-to-sum RULE-LIST)
 
-	; Randomly pick one, using the TV-confidence from above) as a
-	; weighting.
+	; Randomly pick one, using the weighting above.
 	(let ((thresh (random sum)))
 		(if (null? RULE-LIST)
 			'()
@@ -346,17 +357,17 @@
 					(do-while-null SENT (- CNT 1))
 				))))
 
-	(define response (do-while-null SENT 10))
+	(let ((response (do-while-null SENT 10)))
+		; Deal with a null list...
+		(if (null? response) (set! response (ListLink)))
 
-	; Deal with a null list...
-	(if (null? response) (set! response (ListLink)))
+		; Strip out the SetLink, if any.
+		(if (equal? 'SetLink (cog-type response))
+			(set! response (gar response)))
 
-	; Strip out the SetLink, if any.
-	(if (equal? 'SetLink (cog-type response))
-		(set! response (gar response)))
-
-	; Return the response.
-	(word-list-flatten response)
+		; Return the response.
+		(word-list-flatten response)
+	)
 )
 
 (define-public (aiml-get-response-wl SENT)
@@ -380,14 +391,15 @@
 					response
 				))))
 
-	(define response (do-while-same SENT 5))
+	(let ((response (word-list-flatten (do-while-same SENT 5))))
 
-	; The robots response is the current "that".
-	(if (valid-response? response)
-		(do-aiml-set (Concept "that") response))
+		; The robots response is the current "that".
+		(if (valid-response? response)
+			(do-aiml-set (Concept "that") response))
 
-	; Return the response.
-	response
+		; Return the response.
+		response
+	)
 )
 
 ; --------------------------------------------------------------
@@ -399,9 +411,9 @@
 	(GroundedSchemaNode "scm: do-aiml-srai"))
 
 (define-public (do-aiml-srai x)
-	(display "duuude srai recurse\n") (display x) (newline)
+	(display "perform srai recursion\n") (display x) (newline)
 	(let ((resp (get-response-step (word-list-flatten x))))
-		(display "duuude srai result is\n") (display resp) (newline)
+		(display "srai result is\n") (display resp) (newline)
 		resp
 	)
 )
@@ -416,7 +428,7 @@
 ; do with the argument, when we get here.  Don't return anything
 ; (be silent).
 (define-public (do-aiml-think x)
-	; (display "duuude think\n") (display x) (newline)
+	; (display "Perform think\n") (display x) (newline)
 	; 'think' never returns anything
 	'()
 )
@@ -428,8 +440,8 @@
 
 (define-public (do-aiml-set KEY VALUE)
 	(define flat-val (word-list-flatten VALUE))
-	; (display "duuude set key=") (display KEY) (newline)
-	; (display "duuude set value=") (display flat-val) (newline)
+	; (display "Perform AIML set key=") (display KEY) (newline)
+	; (display "set value=") (display flat-val) (newline)
 	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
 	(State rekey flat-val)
 	flat-val

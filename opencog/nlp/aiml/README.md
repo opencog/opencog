@@ -14,12 +14,8 @@ human-created and hard-coded, as are the relex and relex2logic rules.
 Alas. So perhaps using AIML is no real crime.
 
 ## Status
-Beta.  The code is done, its probably buggy. It attempts to support the
-most commonly used features of AIML version 2.1
-
-The mixed-mode operation of AIML with other verbal and non-verbal
-subsystems is in development (alpha stage).
-
+Beta.  Most things work. There are known bugs. See TODO list below.
+It attempts to support the most commonly used features of AIML version 2.1
 
 ## Using
 There are two steps to this process: The import of standard AIML markup
@@ -33,14 +29,15 @@ perform. The goal is NOT to re-invent an AIML interpreter in OpenCog!
 ... although, de-facto, that's what the end-result is: an AIML
 interpreter running in the AtomSpace.
 
-The current importer generates OpenPsi-compatible rules, so that the
-OpenPsi rule engine can process these.  This should allow AIML to be
-intermixed with other chat systems, as well as non-verbal behaviors.
-This mixed-mode operation is in development.
+The current importer generates OpenPsi rules, so that the selection
+and execution of the AIML rules is performed by OpenPsi (see the
+[OpenPsi directory](../../openpsi) for details.) This allows
+the AIML chat subsystem to be inter-operated together with other
+subsystems (for example, the on-verbal robot behavviors).
 
 ## Running AIML in OpenCog
 AIML files need to be converted into Atomese, using the perl script
-provided in the `import` directory.  This  can be done as:
+provided in the [`import`](import) directory.  This  can be done as:
 ```
 import/aiml2psi.pl --dir /where/the/aiml/files/are
 cp aiml-rules.scm /tmp
@@ -51,13 +48,18 @@ Then do this:
 (use-modules (opencog) (opencog nlp) (opencog nlp aiml) (opencog openpsi))
 (primitive-load "/tmp/aiml-rules.scm")
 ```
-For basic debugging, the `strring-words` utility can be used to tokenize
+For basic debugging, the `string-words` utility can be used to tokenize
 a string into words; its very low-brow and basic:
 ```
 (aiml-get-response-wl (string-words "call me ishmael"))
 ```
+Proper integration with the normal language pipeline requires the use
+of the `token-seq-of-parse` and `token-seq-of-sent` functions, which
+get the word-sequence as determined by the link-grammar parser (i.e.
+obtain the word sequence from the normal OpennCog NLP ppipeline.)
 
-The various sections below provide additional under-the-cover details.
+The various sections below provide additional details about how the
+system is implemented and how it works.
 
 
 ## Lightning reivew of AIML
@@ -312,10 +314,19 @@ to a BindLink approach for ease-of-use.
 
 
 ### TODO
-* OpenPsi duallink is returning too much -- i.e. it includes matches to
+* OpenPsi DualLink is returning too much -- i.e. it includes matches to
   the action.  We really only want matches to the context only.
   An extended version of the `get-pattern-rules` tool could do this
   kind of filtering.  Review with Amen, maybe open bug report.
+* OpenPsi rule deisgn is kind-of broken -- in two ways:
+  (1) the action should be imeidately obtainable from the rule,
+  instead of fishing around for it via the psi-action? utility.
+  (2) If an action is a schema, it should not appear in and AndLink,
+  because its not evaluatable.
+  (3) Actions are naturally ordered sequences, and that means
+  SequentialAnd and that meands a predicate, not a schema.
+* AIML -- implicit * at end of sentence, can be NULL.
+  (I guess globbing should wrk with that...?)
 * AIML -- thatstar and topicstar not handled.
 * AIML HR -- in a session, never say the same thing twice!
   Done -- for just one sentence .. ask Vytas about more.
@@ -497,38 +508,37 @@ functioning normally. <think><set name=\"matched\">true</set></think>
 (aiml-get-response-wl (string-words "call me joob"))
 
 =================================
-General demo instructions
 
-scm: dispatch-text  in btree.scm
-(State heard-sound
+OpenPsi predicate/schema issues!
 
-py: say_text -- single string atom
+(Define (DefinedPredicate "pblorf")
+(SequentialAnd
+(Evaluation (GroundedPredicate "scm: print-msg-face")
+         (ListLink (Node "--boaty")))`
+(Evaluation (GroundedPredicate "scm: print-msg")
+         (ListLink (Node "--mcboat")))
+(True)
+))
 
-(psi-run)
+(cog-execute! (DefinedPredicate "pblorf"))
 
-(cog-execute! (DefinedSchemaNode "Listening ongoing"))
+=================================
+(aiml-get-response-wl (string-words "what are you doing tonight?"))
+(define SENT (string-words "what are you doing tonight?"))
 
-(cog-evaluate!   (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "neutral-listen")))
+(use-modules (opencog) (opencog exec) (opencog nlp))
 
+(aiml-get-response-wl (string-words "what was that sound?"))
+(aiml-get-response-wl (string-words "what is a bludgeon?"))
+(aiml-get-response-wl (string-words "what do you think?"))
+(aiml-get-response-wl (string-words "where is the ball?"))
+(aiml-get-response-wl (string-words "when will you know?"))
+(aiml-get-response-wl (string-words "How is it going?"))
 
-(DefinedSchemaNode "New arrival sequence")
+test topic:
+set topic:
+(aiml-get-response-wl (string-words "when will you astronaut body"))
+(do-aiml-get (Concept "topic"))
+(do-aiml-set (Concept "topic") (ListLink (WordNode "astronaut")))
 
-(cog-evaluate! (DefinedPredicate  "New arrival sequence"))
-(cog-evaluate!  (DefinedPredicate "Respond to new arrival"))o
-(DefinedPredicate "Was Empty Sequence")
-(DefinedPredicate "interact with new person")
-
-(DefinedPredicateNode "Did someone arrive?")
-
---------------------
- (DefinedPredicate "Respond to new arrival")
-(DefinedPredicate "Interacting Sequence")
-
-(DefinedSchema "glance at new person") -- again
-
-id someone lea
-
-map::at -- is this DefineLink.cc arity check???? (at line 81)
-
-do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
+(aiml-get-response-wl (string-words "I am an astronaut"))
