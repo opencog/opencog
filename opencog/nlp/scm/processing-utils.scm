@@ -205,7 +205,8 @@
 "
     (let* ((cmd (string-append "find " path " -type f -exec cat {} \\;"))
            (port (open-input-pipe cmd))
-           (line (get-line port)))
+           (line (get-line port))
+           (cnt 0))
 
         (while (not (eof-object? line))
             ; Ignore empty lines
@@ -213,10 +214,15 @@
                 (set! line (get-line port))
                 (begin (catch #t
                     (lambda ()
-                        (proc line))
+                        (set! cnt (+ cnt 1))
+                        (proc line)
+                        (if (equal? (modulo cnt 10) 0)
+                            (begin (display cnt) (display " sentences parsed\n"))
+                        ))
                     (lambda (key . parameters)
                         (display (string-append "*** Unable to parse: " line))
                         (newline)))
                     (set! line (get-line port)))))
+        (display "Finished parsing ") (display cnt) (display " sentences\n")
         (close-pipe port))
 )
