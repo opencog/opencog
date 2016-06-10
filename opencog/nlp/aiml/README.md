@@ -332,8 +332,9 @@ to a BindLink approach for ease-of-use.
   Done -- for just one sentence .. ask Vytas about more.
 * AIML HR -- load only the current, desired rule-set. Get someone
   to write shell scripts or config files for this (Wenwei?)
+  Per config files in `chathub/server/characters/sophia.properties`
 * OpenPsi -- need a general mechanism that avoids doing the same thing
-  over and over (e.g. saying teh same thing). Discusss with Ben, Amen.
+  over and over (e.g. saying the same thing). Discusss with Ben, Amen.
 * general utility -- create an is-member? utility to replace psi-action?
 * integration: any AIML xfind response should be handled by
   the fuzzy matcher instead...
@@ -541,4 +542,6 @@ set topic:
 (do-aiml-get (Concept "topic"))
 (do-aiml-set (Concept "topic") (ListLink (WordNode "astronaut")))
 
-(aiml-get-response-wl (string-words "I am an astronaut"))
+(aiml-get-response-wl (string-words "i am an astronaut"))
+(define SENT (string-words "i am an astronaut"))
+(psi-get-exact-match SENT)
