@@ -74,6 +74,9 @@ public:
     //       NumberNode y
     //       NumberNode z
     Handle get_past_locs_ato(string map_name,Handle,int elapse);
+    //AtTimeLink
+    //TimeNode "yyyy-mm-dd hh:mm:ss.millisec"
+    //Atom
     Handle get_elapse_list_at_loc_ato(string map_name, Handle,
               double,double,double);//listlink atTimeLink
     Handle get_elapse_list_ato(string map_name,Handle);//listlink atTimeLink

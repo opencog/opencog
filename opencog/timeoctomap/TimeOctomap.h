@@ -48,6 +48,9 @@
 //#include "AtomOcTreeNode.h"
 using namespace std;
 using namespace octomap;
+//high_resolution_clock
+//typedef std::chrono::high_resolution_clock::time_point time_pt;
+//typedef std::chrono::high_resolution_clock::duration duration_c;
 
 typedef std::chrono::system_clock::time_point time_pt;
 typedef std::chrono::system_clock::duration duration_c;

@@ -81,7 +81,7 @@ void PointMemorySCM::init()
     define_scheme_primitive("get-time-res", &PointMemorySCM::get_time_res, this, "ato pointmem");
     define_scheme_primitive("get-space-res", &PointMemorySCM::get_space_res, this, "ato pointmem");
     define_scheme_primitive("get-time-units", &PointMemorySCM::get_time_units, this, "ato pointmem");
-     define_scheme_primitive("map-ato", &PointMemorySCM::map_ato, this, "ato pointmem");
+    define_scheme_primitive("map-ato", &PointMemorySCM::map_ato, this, "ato pointmem");
     define_scheme_primitive("get-first-ato", &PointMemorySCM::get_first_ato, this, "ato pointmem");
     define_scheme_primitive("get-last-ato", &PointMemorySCM::get_last_ato, this, "ato pointmem");
     define_scheme_primitive("get-at-loc-ato", &PointMemorySCM::get_at_loc_ato, this, "ato pointmem");
@@ -239,13 +239,31 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(string map_name,Handle ato,
 {
   time_list tl=tsa[map_name]->get_times_of_atom_occurence_at_location(point3d(x,y,z),ato);
   if (tl.size()<1)return UndefinedHandle;
-  return;
+  HandleSeq LL;
+  while (tl.size()>0)
+  {
+    time_pt tp=tl.front();
+    tl.pop_front();
+    std::time_t ttp=std::chrono::system_clock::to_time_t(tp);
+    string ts=std::put_time(std::localtime(&ttp), "%F %T ");
+    //time_since_epoch gives duration, duration to seconds and milliseconds then subtract [millisec - sec to millisec] 
+    //add milli sec to ts    
+    LL.add(createLink(AT_TIME_LINK,createNode(TIME_NODE,ts),ato));
+  }
+  return LL;
 }
 Handle PointMemorySCM::get_elapse_list_ato(string map_name,Handle ato)//listlink atTimeLink
 {
   time_list tl=tsa[map_name]->get_times_of_atom_occurence_in_map(ato);
   if (tl.size()<1)return UndefinedHandle;
-  return;
+  HandleSeq LL;
+  while (tl.size()>0)
+  {
+    time_pt tp=tl.front();
+    tl.pop_front();
+    LL.add(createLink(AT_TIME_LINK,createNode(TIME_NODE,),ato));
+  }
+  return LL;
 }
 bool PointMemorySCM::remove_location_ato(string map_name,double x,double y,double z)
 {
