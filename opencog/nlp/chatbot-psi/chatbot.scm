@@ -28,6 +28,8 @@
         )
     )
 
+    (reset-all-states)
+
     (let* ((sent-node (car (nlp-parse utterance)))
            (list-of-words (get-words-list sent-node)))
 
