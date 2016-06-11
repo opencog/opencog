@@ -160,6 +160,7 @@ public:
     static HandleSeq findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string> &varNames);
 
     static ParamValue getParamValueFromHandle(string var, Handle& valueH);
+    static ParamValue getParamValueFromHandle(Handle& valueH); // when the value type is unknown
 
  private:
     static  HandleSeq _findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string>& varNames);

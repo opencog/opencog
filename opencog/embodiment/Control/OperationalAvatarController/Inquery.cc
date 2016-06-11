@@ -345,6 +345,7 @@ ParamValue Inquery::inqueryIsSame(const vector<ParamValue>& stateOwnerList)
     return opencog::oac::SV_FALSE;
 }
 
+// var is the variable name e.g. $bool_var0 , which can indicate the type of the value
 ParamValue Inquery::getParamValueFromHandle(string var, Handle& valueH)
 {
     switch (opencog::oac::GetVariableType(var))
@@ -391,6 +392,56 @@ ParamValue Inquery::getParamValueFromHandle(string var, Handle& valueH)
             return UNDEFINED_VALUE;
         }
     }
+}
+
+
+// when the value type is unknown
+ParamValue Inquery::getParamValueFromHandle(Handle& valueH)
+{
+
+    // case ENTITY_CODE:
+    if (AtomSpaceUtil::isHandleAnEntity(atomSpace, valueH))
+    {
+        return Entity(atomSpace->getName(valueH) ,PAI::getObjectTypeFromHandle(*atomSpace, valueH));
+    }
+    // case BOOLEAN_CODE:
+    else if (atomSpace->getName(valueH) == "true" || atomSpace->getName(valueH) == "false"
+             || atomSpace->getName(valueH) == "True" || atomSpace->getName(valueH) == "False")
+    {
+        string strVar = atomSpace->getName(valueH);
+        if ((strVar == "true")||(strVar == "True"))
+            return opencog::oac::SV_TRUE;
+        else
+            return opencog::oac::SV_FALSE;
+    }
+    // case VECTOR_CODE:
+    else if ((atomSpace->getOutgoing(valueH).size()) == 3)
+    {
+        Handle valueHandle1 = atomSpace->getOutgoing(valueH, 0);// the ownerSize is just the index of the value node
+        Handle valueHandle2 = atomSpace->getOutgoing(valueH, 1);
+        Handle valueHandle3 = atomSpace->getOutgoing(valueH, 2);
+
+        if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) || (valueHandle3 == Handle::UNDEFINED) )
+        {
+            logger().error("Inquery::getParamValueFromHandle :Type error: The value type is vector or rotation,but there are not 3 number nodes in its listlink ");
+
+            return UNDEFINED_VALUE;
+        }
+
+        double x = atof(atomSpace->getName(valueHandle1).c_str());
+        double y = atof(atomSpace->getName(valueHandle2).c_str());
+        double z = atof(atomSpace->getName(valueHandle3).c_str());
+
+        return Vector(x,y,z);
+    }
+    //        case INT_CODE:
+    //        case FLOAT_CODE:
+    //        case STRING_CODE:
+    else
+    {
+        return (atomSpace->getName(valueH));
+    }
+
 }
 
 ParamValue Inquery::inqueryDistance(const vector<ParamValue>& stateOwnerList)
