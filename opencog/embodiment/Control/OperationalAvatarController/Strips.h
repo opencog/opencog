@@ -469,6 +469,7 @@ namespace opencog { namespace oac {
 
     };
 
+
     struct MinedPreCondition
     {
         string stateName;
@@ -486,8 +487,26 @@ namespace opencog { namespace oac {
         Handle newStateValue;
     };
 
+    struct MinedParamStruct
+    {
+        HandleSeq paramPrioPattern;
+        Handle paramObjVar;
+        HandleSeq intrinsicUndistinguishingPropertyLinks;
+        set<string> externalProperties;
 
-    class MinedRule : Rule
+    };
+
+    struct MinedRulePattern
+    {
+        string actionName;
+        map<string, MinedParamStruct> paramToMinedStruct;
+        vector<MinedPreCondition> preconditions;
+        vector<MinedEffect> effects;
+
+    };
+
+
+    class MinedRule : public Rule
     {
 
     public:
@@ -496,8 +515,7 @@ namespace opencog { namespace oac {
         {ruleType = MINED_RULE;}
 
     public:
-        vector<MinedPreCondition> preconditions;
-        vector<MinedEffect> effects;
+        MinedRulePattern* minedRulePattern;
 
     };
 

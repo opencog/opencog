@@ -316,23 +316,7 @@ struct TmpParamCandidate
    }
 };
 
-struct MinedParamStruct
-{
-    HandleSeq paramPrioPattern;
-    Handle paramObjVar;
-    HandleSeq intrinsicUndistinguishingPropertyLinks;
-    set<string> externalProperties;
 
-};
-
-struct MinedRulePattern
-{
-    string actionName;
-    map<string, MinedParamStruct> paramToMinedStruct;
-    vector<MinedPreCondition> preconditions;
-
-
-};
 
 //struct ProcessedMinedRulePattern
 //{
@@ -521,7 +505,7 @@ protected:
      ParamValue selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings,
                                                      string varName, vector<ParamValue>& values, Rule* orginalRule = 0, bool checkPrecons = true);
 
-     bool groundAMinedRuleFromItsForwardStateNode(RuleNode* ruleNode, StateNode* forwardStateNode);
+     bool groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode);
 
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)

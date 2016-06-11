@@ -3625,152 +3625,163 @@ bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode,
     return true;
 }
 
-bool OCPlanner::groundAMinedRuleFromItsForwardStateNode(RuleNode* ruleNode, StateNode* forwardStateNode)
+bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode)
 {
+    vector<ParamValue> stateOwnerList = forwardStateNode->state->stateOwnerList;
 
-//    cout << "\nAction name: " << minedNewRule->actionName <<"\nNow try to ground all the parameters for this action..." << std::endl;
+    if (stateOwnerList.size() < 1)
+        return false;
 
-//    // next, try to bind all the required parameters for this action
-//    map<string, MinedParamStruct>::iterator paramIt = minedNewRule->paramToMinedStruct.begin();
-//    map<string,Handle> paramCandidateMap;
-//    for (; paramIt != minedNewRule->paramToMinedStruct.end(); paramIt ++) // for each param
-//    {
-//        cout << "Binding parameter: " << paramIt->first << std::endl;
-//        MinedParamStruct& minedParamStruct = paramIt->second;
-//        HandleSeq rulePattern = minedParamStruct.paramPrioPattern;
-//        // the last link of each returned pattern is the variable ListLink
-//        Handle variableListLink = rulePattern[rulePattern.size() - 1];
-//        HandleSeq allVariables = atomSpace->getOutgoing(variableListLink);
-//        rulePattern.pop_back();
+    Handle stateOwnerHanlde = Handle::UNDEFINED;
 
-//        // First, try to find the already known variables in the pattern
-//        // e.g.
-////                        (EvaluationLink )
-////                          (PredicateNode color)
-////                          (ListLink )
-////                            (VariableNode $var_1)
-////                            (VariableNode $var_2)
+    stateOwnerHanlde = Inquery::getStateOwnerHandle(stateOwnerList[0]);
 
-////                        (EvaluationLink )
-////                          (PredicateNode color)
-////                          (ListLink )
-////                            (VariableNode $var_3)
-////                            (VariableNode $var_2)
+    if (stateOwnerHanlde == Handle::UNDEFINED)
+        return false;
 
-////                        (EvaluationLink )
-////                          (PredicateNode target)
-////                          (ListLink )
-////                            (VariableNode $var_4)
-////                            (VariableNode $var_3)
+    MinedRule* minedRule = (MinedRule*)(ruleNode->originalRule);
+    cout << "\nAction name: " << minedRule->action->getName() <<"\nNow try to ground all the parameters for this action..." << std::endl;
 
-////                        (EvaluationLink )
-////                          (PredicateNode with)
-////                          (ListLink )
-////                            (VariableNode $var_4)
-////                            (VariableNode $var_1)
-//        // if there is "target" or "actor" in the pattern, ground them first, because they are known.
-//        map<Handle, Handle> varToValueMap;
-//        Handle actionInstanceVar;
-//        for (Handle link : rulePattern)
-//        {
-//            if (atomSpace->getType(link) !=  EVALUATION_LINK)
-//                continue;
+    map<string, MinedParamStruct>::iterator paramIt = minedRule->minedRulePattern->paramToMinedStruct.begin();
+    map<string,Handle> paramCandidateMap;
+    for (; paramIt != minedRule->minedRulePattern->paramToMinedStruct.end(); paramIt ++) // for each param
+    {
+        cout << "Binding parameter: " << paramIt->first << std::endl;
+        MinedParamStruct& minedParamStruct = paramIt->second;
+        HandleSeq rulePattern = minedParamStruct.paramPrioPattern;
+        // the last link of each returned pattern is the variable ListLink
+        Handle variableListLink = rulePattern[rulePattern.size() - 1];
+        HandleSeq allVariables = atomSpace->getOutgoing(variableListLink);
+        rulePattern.pop_back();
 
-//            Handle predicate = atomSpace->getOutgoing(link,0);
-//            string predicateStr = atomSpace->getName(predicate);
-//            if ((predicateStr  == "target") || (predicateStr  == "actor"))
-//            {
-//                Handle elistLink = atomSpace->getOutgoing(link,1);
-//                HandleSeq elistLinkOutgoings = atomSpace->getOutgoing(elistLink);
-//                Handle varH = elistLinkOutgoings[elistLinkOutgoings.size() - 1];
+        // First, try to find the already known variables in the pattern
+        // e.g.
+//                        (EvaluationLink )
+//                          (PredicateNode color)
+//                          (ListLink )
+//                            (VariableNode $var_1)
+//                            (VariableNode $var_2)
 
-//                if (predicateStr  == "target")
-//                    varToValueMap.insert(std::pair<Handle, Handle>(varH,stateOwnerHanlde));
-//                else // actor
-//                    varToValueMap.insert(std::pair<Handle, Handle>(varH,selfHandle));
-//            }
-//            else if (predicateStr == paramIt->first)
-//            {
-//                if (actionInstanceVar == Handle::UNDEFINED)
-//                {
-//                    Handle elistLink = atomSpace->getOutgoing(link,1);
-//                    actionInstanceVar = atomSpace->getOutgoing(elistLink, 0);
-//                }
-//            }
+//                        (EvaluationLink )
+//                          (PredicateNode color)
+//                          (ListLink )
+//                            (VariableNode $var_3)
+//                            (VariableNode $var_2)
 
-//        }
+//                        (EvaluationLink )
+//                          (PredicateNode target)
+//                          (ListLink )
+//                            (VariableNode $var_4)
+//                            (VariableNode $var_3)
 
-//        string actionInstanceVarStr = atomSpace->getName(actionInstanceVar);
-//        cout << "Found out that the variable represents the action instance is: " << actionInstanceVarStr;
+//                        (EvaluationLink )
+//                          (PredicateNode with)
+//                          (ListLink )
+//                            (VariableNode $var_4)
+//                            (VariableNode $var_1)
+        // if there is "target" or "actor" in the pattern, ground them first, because they are known.
+        map<Handle, Handle> varToValueMap;
+        Handle actionInstanceVar;
+        for (Handle link : rulePattern)
+        {
+            if (atomSpace->getType(link) !=  EVALUATION_LINK)
+                continue;
 
-//        // Bind all the vars can be ground with varToValueMap
-//        HandleSeq boundPattern = bindKnownVariablesForLinks(rulePattern, varToValueMap);
+            Handle predicate = atomSpace->getOutgoing(link,0);
+            string predicateStr = atomSpace->getName(predicate);
+            if ((predicateStr  == "target") || (predicateStr  == "actor"))
+            {
+                Handle elistLink = atomSpace->getOutgoing(link,1);
+                HandleSeq elistLinkOutgoings = atomSpace->getOutgoing(elistLink);
+                Handle varH = elistLinkOutgoings[elistLinkOutgoings.size() - 1];
 
-//        cout << "\npattern after bind all known variables :\n";
-//        for(Handle link : boundPattern)
-//        {
-//            cout << atomSpace->atomAsString(link) << std::endl;
-//        }
+                if (predicateStr  == "target")
+                    varToValueMap.insert(std::pair<Handle, Handle>(varH,stateOwnerHanlde));
+                else // actor
+                    varToValueMap.insert(std::pair<Handle, Handle>(varH,selfHandle));
+            }
+            else if (predicateStr == paramIt->first)
+            {
+                if (actionInstanceVar == Handle::UNDEFINED)
+                {
+                    Handle elistLink = atomSpace->getOutgoing(link,1);
+                    actionInstanceVar = atomSpace->getOutgoing(elistLink, 0);
+                }
+            }
 
-//        // Remove all the links contains the action instance variable
-//        HandleSeq cleanBoundPattern;
-//        for (Handle link : boundPattern)
-//        {
-//            string linkToStr = atomspace().atomAsString(link);
-//            if (linkToStr.find(actionInstanceVarStr) == string::npos)
-//                cleanBoundPattern.push_back(link);
-//        }
+        }
 
-//        // Remove the action instance variable and already known variables from variable list
-//        HandleSeq cleanVariables;
-//        for (Handle varh : allVariables)
-//        {
-//            if (varh == actionInstanceVar)
-//                continue;
+        string actionInstanceVarStr = atomSpace->getName(actionInstanceVar);
+        cout << "Found out that the variable represents the action instance is: " << actionInstanceVarStr;
 
-//            if (varToValueMap.find(varh) != varToValueMap.end())
-//                continue;
+        // Bind all the vars can be ground with varToValueMap
+        HandleSeq boundPattern = bindKnownVariablesForLinks(rulePattern, varToValueMap);
 
-//            cleanVariables.push_back(varh);
-//        }
+        cout << "\npattern after bind all known variables :\n";
+        for(Handle link : boundPattern)
+        {
+            cout << atomSpace->atomAsString(link) << std::endl;
+        }
 
-//        cout << "\npattern after removed links contain the variable represents action instance:\n";
-//        for(Handle link : cleanBoundPattern)
-//        {
-//            cout << atomSpace->atomAsString(link) << std::endl;
-//        }
+        // Remove all the links contains the action instance variable
+        HandleSeq cleanBoundPattern;
+        for (Handle link : boundPattern)
+        {
+            string linkToStr = atomspace().atomAsString(link);
+            if (linkToStr.find(actionInstanceVarStr) == string::npos)
+                cleanBoundPattern.push_back(link);
+        }
 
-//        // Add the intrinsic Undistinguishing Property Links to the pattern
-//        // e.g.
-////                        (EvaluationLink )
-////                          (PredicateNode class)
-////                          (ListLink )
-////                            (VariableNode $var_1)
-////                            (VariableNode key)
-//        for(Handle iulink : minedParamStruct.intrinsicUndistinguishingPropertyLinks)
-//            cleanBoundPattern.push_back(iulink);
+        // Remove the action instance variable and already known variables from variable list
+        HandleSeq cleanVariables;
+        for (Handle varh : allVariables)
+        {
+            if (varh == actionInstanceVar)
+                continue;
 
-//        cout << "\npattern after added intrinsic Undistinguishing Property Links :\n";
-//        for(Handle link : cleanBoundPattern)
-//        {
-//            cout << atomSpace->atomAsString(link) << std::endl;
-//        }
+            if (varToValueMap.find(varh) != varToValueMap.end())
+                continue;
 
-//        // Found candicates in AtomSpace which match this pattern:
-//        HandleSeq candidates = Inquery::findAllCandidatesByGivenPattern(cleanBoundPattern, cleanVariables, minedParamStruct.paramObjVar);
-//        if (candidates.size() > 0)
-//        {
-//            paramCandidateMap.insert(std::pair<string, Handle>(paramIt->first,candidates[0]));// Currently only choose the top candidate.
-//            cout << "\nFound candicates in the AtomSpace to match this pattern:\n";
-//            for (Handle c : candidates)
-//                cout << atomSpace->atomAsString(c) << std::endl;
-//        }
-//        else
-//        {
-//            cout << "\nCan't found any candicates in the AtomSpace to match this pattern. Mining new pattern failed\n";
-//            return false;
-//        }
-//    }
+            cleanVariables.push_back(varh);
+        }
+
+        cout << "\npattern after removed links contain the variable represents action instance:\n";
+        for(Handle link : cleanBoundPattern)
+        {
+            cout << atomSpace->atomAsString(link) << std::endl;
+        }
+
+        // Add the intrinsic Undistinguishing Property Links to the pattern
+        // e.g.
+//                        (EvaluationLink )
+//                          (PredicateNode class)
+//                          (ListLink )
+//                            (VariableNode $var_1)
+//                            (VariableNode key)
+        for(Handle iulink : minedParamStruct.intrinsicUndistinguishingPropertyLinks)
+            cleanBoundPattern.push_back(iulink);
+
+        cout << "\npattern after added intrinsic Undistinguishing Property Links :\n";
+        for(Handle link : cleanBoundPattern)
+        {
+            cout << atomSpace->atomAsString(link) << std::endl;
+        }
+
+        // Found candicates in AtomSpace which match this pattern:
+        HandleSeq candidates = Inquery::findAllCandidatesByGivenPattern(cleanBoundPattern, cleanVariables, minedParamStruct.paramObjVar);
+        if (candidates.size() > 0)
+        {
+            paramCandidateMap.insert(std::pair<string, Handle>(paramIt->first,candidates[0]));// Currently only choose the top candidate.
+            cout << "\nFound candicates in the AtomSpace to match this pattern:\n";
+            for (Handle c : candidates)
+                cout << atomSpace->atomAsString(c) << std::endl;
+        }
+        else
+        {
+            cout << "\nCan't found any candicates in the AtomSpace to match this pattern. Mining new pattern failed\n";
+            return false;
+        }
+    }
 
 
 }
