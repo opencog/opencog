@@ -109,6 +109,7 @@ void ActionType::initParamTypes()
 ActionType::Name2ActionTypeMap ActionType::nameMap;
 ActionType::Code2ActionTypeMap ActionType::codeMap;
 
+
 // Definition of all action type values
 const ActionType& ActionType::EAT()
 {
@@ -398,12 +399,111 @@ const ActionType& ActionType::ROTATE_RIGHT()
     return *result;
 }
 
+const ActionType& ActionType::OPEN()
+{
+    initParamTypes();
+    static const char* paramNames[] = {"target", "with"};
+    static ActionType* result = new ActionType(OPEN_CODE, "open", ENTITY, ENTITY, paramNames, "void open(EntityID target [, EntityID withTool])");
+    return *result;
+}
+
 const ActionType& ActionType::DO_NOTHING()
 {
     initParamTypes();
     static const char* paramNames[] = {};
     static ActionType* result = new ActionType(DO_NOTHING_CODE, "do_nothing", EMPTY, EMPTY, paramNames, "void do_nothing()");
     return *result;
+}
+
+
+const ActionType& ActionType::GetActionTypeByName(const std::string &actionName)
+{
+    if (actionName == "eat")
+        return EAT();
+    else if (actionName == "walk")
+        return WALK();
+    else if (actionName == "move_to_obj")
+        return MOVE_TO_OBJ();
+    else if (actionName == "grab")
+        return GRAB();
+    else if (actionName == "drop")
+        return DROP();
+    else if (actionName == "sit")
+        return SIT();
+    else if (actionName == "fly")
+        return FLY();
+    else if (actionName == "fly_follow")
+        return FLY_FOLLOW();
+    else if (actionName == "follow")
+        return FOLLOW();
+    else if (actionName == "nudge_to")
+        return NUDGE_TO();
+    else if (actionName == "move_head")
+        return MOVE_HEAD();
+    else if (actionName == "wake")
+        return WAKE();
+    else if (actionName == "sleep")
+        return SLEEP();
+    else if (actionName == "drink")
+        return DRINK();
+    else if (actionName == "turn")
+        return TURN();
+    else if (actionName == "rotate")
+        return ROTATE();
+    else if (actionName == "jumpe_up")
+        return JUMP_UP();
+    else if (actionName == "jumpe_toward")
+        return JUMP_TOWARD();
+    else if (actionName == "jumpe_forward")
+        return JUMP_FORWARD();
+    else if (actionName == "pay_attention")
+        return PAY_ATTENTION();
+    else if (actionName == "widen_eyes")
+        return WIDEN_EYES();
+    else if (actionName == "look_right")
+        return LOOK_RIGHT();
+    else if (actionName == "look_left")
+        return LOOK_LEFT();
+    else if (actionName == "kick_left")
+        return KICK_LEFT();
+    else if (actionName == "kick_right")
+        return KICK_RIGHT();
+    else if (actionName == "angry_eyes")
+        return ANGRY_EYES();
+    else if (actionName == "sad_eyes")
+        return SAD_EYES();
+    else if (actionName == "happy_eyes")
+        return HAPPY_EYES();
+    else if (actionName == "close_eyes")
+        return CLOSE_EYES();
+    else if (actionName == "kick")
+        return KICK();
+    else if (actionName == "group_command")
+        return GROUP_COMMAND();
+    else if (actionName == "receive_latest_group_commands")
+        return RECEIVE_LATEST_GROUP_COMMANDS();
+    else if (actionName == "look_at")
+        return LOOK_AT();
+    else if (actionName == "say")
+        return SAY();
+    else if (actionName == "build_block")
+        return BUILD_BLOCK();
+    else if (actionName == "destroy_block")
+        return DESTROY_BLOCK();
+    else if (actionName == "open")
+        return OPEN();
+    else if (actionName == "do_nothing")
+        return DO_NOTHING();
+    else if (actionName == "step_forward")
+        return STEP_FORWARD();
+    else if (actionName == "rotate_left")
+        return ROTATE_LEFT();
+    else if (actionName == "rotate_right")
+        return ROTATE_RIGHT();
+    else
+        return DO_NOTHING();
+
+
 }
 
 #if 0
@@ -544,6 +644,8 @@ void ActionType::init()
         STEP_FORWARD();
         ROTATE_LEFT();
         ROTATE_RIGHT();
+
+        OPEN();
 
         DO_NOTHING();
 

@@ -82,6 +82,9 @@ enum ActionTypeCode {
 
     BUILD_BLOCK_CODE,
     DESTROY_BLOCK_CODE,
+
+    OPEN_CODE,
+
     DO_NOTHING_CODE,
 
     // For Santa Fe Trail problem
@@ -125,6 +128,8 @@ public:
     static const ActionType& getFromName(const std::string& name);
     static const ActionType& getFromCode(ActionTypeCode code);
     static void printHelp();
+
+    static const ActionType& GetActionTypeByName(const std::string& actionName);
 
     static const ActionType& EAT();
     /**
@@ -291,6 +296,8 @@ public:
      * void rotate_left()
      */
     static const ActionType& ROTATE_LEFT();
+
+    static const ActionType& OPEN();
 
     /**
      * void do_nothing( )  // this is using in planning
