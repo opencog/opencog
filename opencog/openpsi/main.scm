@@ -79,7 +79,7 @@
     (if (not (cog-tv? a-stv))
         (error (string-append "In procedure " func-name ", expected fourth "
             "argument to be a stv, got:") a-stv))
-    (if (not (equal? (stv 1 1) (psi-demand? demand)))
+    (if (not (psi-demand? demand))
         (error (string-append "In procedure " func-name ", expected fifth "
             "argument to be a node representing a demand, got:") demand))
 
