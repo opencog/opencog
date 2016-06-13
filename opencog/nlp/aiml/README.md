@@ -14,12 +14,8 @@ human-created and hard-coded, as are the relex and relex2logic rules.
 Alas. So perhaps using AIML is no real crime.
 
 ## Status
-Beta.  The code is done, its probably buggy. It attempts to support the
-most commonly used features of AIML version 2.1
-
-The mixed-mode operation of AIML with other verbal and non-verbal
-subsystems is in development (alpha stage).
-
+Beta.  Most things work. There are known bugs. See TODO list below.
+It attempts to support the most commonly used features of AIML version 2.1
 
 ## Using
 There are two steps to this process: The import of standard AIML markup
@@ -33,14 +29,15 @@ perform. The goal is NOT to re-invent an AIML interpreter in OpenCog!
 ... although, de-facto, that's what the end-result is: an AIML
 interpreter running in the AtomSpace.
 
-The current importer generates OpenPsi-compatible rules, so that the
-OpenPsi rule engine can process these.  This should allow AIML to be
-intermixed with other chat systems, as well as non-verbal behaviors.
-This mixed-mode operation is in development.
+The current importer generates OpenPsi rules, so that the selection
+and execution of the AIML rules is performed by OpenPsi (see the
+[OpenPsi directory](../../openpsi) for details.) This allows
+the AIML chat subsystem to be inter-operated together with other
+subsystems (for example, the on-verbal robot behavviors).
 
 ## Running AIML in OpenCog
 AIML files need to be converted into Atomese, using the perl script
-provided in the `import` directory.  This  can be done as:
+provided in the [`import`](import) directory.  This  can be done as:
 ```
 import/aiml2psi.pl --dir /where/the/aiml/files/are
 cp aiml-rules.scm /tmp
@@ -51,13 +48,18 @@ Then do this:
 (use-modules (opencog) (opencog nlp) (opencog nlp aiml) (opencog openpsi))
 (primitive-load "/tmp/aiml-rules.scm")
 ```
-For basic debugging, the `strring-words` utility can be used to tokenize
+For basic debugging, the `string-words` utility can be used to tokenize
 a string into words; its very low-brow and basic:
 ```
 (aiml-get-response-wl (string-words "call me ishmael"))
 ```
+Proper integration with the normal language pipeline requires the use
+of the `token-seq-of-parse` and `token-seq-of-sent` functions, which
+get the word-sequence as determined by the link-grammar parser (i.e.
+obtain the word sequence from the normal OpennCog NLP ppipeline.)
 
-The various sections below provide additional under-the-cover details.
+The various sections below provide additional details about how the
+system is implemented and how it works.
 
 
 ## Lightning reivew of AIML
@@ -136,7 +138,19 @@ See `http://wiki.opencog.org/w/GlobNode` for details.
 See `glob.scm` for a simple working example.
 
 
-## OpenCog equivalents
+## OpenPsi general format
+OpenPsi rules have the following general format:
+```
+ImplicationLink
+   AndLink
+      context
+      action
+   goal
+```
+The context must be fullfilled (at least approximately) in order for
+the action to be taken.
+
+## OpenCog AIML equivalent
 * R5 example.
 
 The R5 sentence in the example above is converted into the following
@@ -145,16 +159,25 @@ OpenPsi fragment:
 ```
 ImplicationLink
    AndLink
+      SetLink
+         ListLink
+            Word "I"
+            Glob "$star"
+            Word "you"
       ListLink
          Word "I"
          Glob "$star"
          Word "you"
-		ListLink
-         Word "I"
-         Glob "$star"
-         Word "you"
          Word "too"
+   Concept "AIML chat subsystem goal"
 ```
+
+The SetLink contains all of the context that must be fulfilled, in order
+for a rule to be chosen.  In this case, the Set contains only one item:
+the list of words in the sentence.  For AIML rules that have a
+non-trivial topic, the Set contains atoms to match the topic. For AIML
+rules that have a non-trivial "that" section, the Set would also contain
+atoms that match previous the sentence.
 
 
 ### AIML tags
@@ -218,14 +241,20 @@ The OpenPsi-based rule importer represents a typical AIML rule in the
 following form:
 ```
 (Implication
-	; context
-   (List (Concept "I") (Glob "$star") (Concept "you"))
+	(AndLink
+		; context
+		(SetLink
+			(List (Concept "I") (Glob "$star") (Concept "you"))
+		)
+		; action
+		(List (Concept "I") (Glob "$star") (Concept "you") (Concept "too"))
+	)
 	; goal
-   (List (Concept "I") (Glob "$star") (Concept "you") (Concept "too"))
-	; demand
-	(Concept "AIML chatbot demand")
+	(Concept "AIML chatbot goal")
 )
 ```
+The actual representation is a bit more complicated; the above captures
+the general idea of a psi-rule, as needed for AIML processing.
 
 To find this rule, we need to search for it.  This can be accomplished
 by saying:
@@ -237,7 +266,7 @@ by saying:
 which will find the above rule (and any other rules) that match this
 pattern. Alternately, there is a convenience wrapper:
 ```
-(psi-get-dual-rules
+(psi-get-members
 	(List (Concept "I") (Concept "love") (Concept "you"))))
 ```
 
@@ -266,23 +295,64 @@ been recently uttered.
 ### Rule application
 Having found all of the rules, we now have to run them ... specifically,
 we have to apply them to the current parse.  We can do this in one of
-several ways.  These are:
+several ways.  One is to use a BindLink, the other is to use a MapLink.
+The MapLink is sort-of like a BindLink, but it is applied only to its
+argument set, instead of being applied to the entire atomspace.
 
-* Create a NEW bindlink, which mashes together both the search for the
-  current parse, and the AIML rule, and generate the resulting output,
-  which then needs to be routed to the chatbot, to be voiced.
+* The BindLink approach requires that the current parse be tagged in the
+  atomspace, and a BindLink created that mashes together the current
+  tag, and the rule to be applied.  The response(s) are then the result
+  of evaluating the BindLinks.
 
-* Since we already know the current parse, we can limit the application
-  of the naive AIML rule to only that parse.  This requires treating the
-  rule as a kind of PutLink, i.e. of applying it only to a specified
-  set.
+* The MapLink approach is similar, except that the rule becomes the body
+  of the apLink, and the current sentence is given as the argument to
+  the MapLink.
+
+Either approach should work fine. Currently, the MapLink approach is
+being used, for no particular reason other than to see how it compares
+to a BindLink approach for ease-of-use.
+
 
 ### TODO
-* openpsi duallink is returning too much -- should pre-filter the results.
-* Implement "that" (XXX need examples of how that works, for testing).
-* OpenPsi -- context is a list ... should be something evaluatable???
-* OpenPsi -- SequentialAnd
+* OpenPsi DualLink is returning too much -- i.e. it includes matches to
+  the action.  We really only want matches to the context only.
+  An extended version of the `get-pattern-rules` tool could do this
+  kind of filtering.  Review with Amen, maybe open bug report.
+* OpenPsi rule deisgn is kind-of broken -- in two ways:
+  (1) the action should be imeidately obtainable from the rule,
+  instead of fishing around for it via the psi-action? utility.
+  (2) If an action is a schema, it should not appear in and AndLink,
+  because its not evaluatable.
+  (3) Actions are naturally ordered sequences, and that means
+  SequentialAnd and that meands a predicate, not a schema.
+* AIML -- implicit * at end of sentence, can be NULL.
+  (I guess globbing should wrk with that...?)
 * AIML -- thatstar and topicstar not handled.
+* AIML HR -- in a session, never say the same thing twice!
+  Done -- for just one sentence .. ask Vytas about more.
+* AIML HR -- load only the current, desired rule-set. Get someone
+  to write shell scripts or config files for this (Wenwei?)
+  Per config files in `chathub/server/characters/sophia.properties`
+* OpenPsi -- need a general mechanism that avoids doing the same thing
+  over and over (e.g. saying the same thing). Discusss with Ben, Amen.
+* general utility -- create an is-member? utility to replace psi-action?
+* integration: any AIML xfind response should be handled by
+  the fuzzy matcher instead...
+
+### BUGS
+* agians takes too long -- psi-get-member-links is taking too long
+  when there are many rules. -- get-iset taking too long.
+
+### HR Demo
+```
+import/aiml2psi.pl --dir ./chathub/generic_aiml/ --outfile generic.scm --priority=0.9
+import/aiml2psi.pl --dir ./chathub/futurist_aiml/ --outfile futurist.scm --priority=0.6
+guile
+(use-modules (opencog) (opencog nlp) (opencog nlp aiml) (opencog openpsi))
+(primitive-load "/tmp/generic.scm")
+(primitive-load "/tmp/futurist.scm")
+```
+
 
 ### Misc Notes
 
@@ -404,11 +474,8 @@ THAT IS A GOOD PARTY
 ==================
 WHEN WILL YOU * BODY
 
-that:  -- implement that
 (aiml-get-response-wl (string-words "call me ishmael"))
-
-person crashed:
- (aiml-get-response-wl (string-words "who supports Trump?"))
+(aiml-get-response-wl (string-words "who supports Trump?"))
 
 DO YOU KNOW BOTNAME
 
@@ -419,3 +486,62 @@ topicstar/>
 114690a114709 -- condition-response
 
 <pattern>_</pattern> <topic>BADANSWER</topic>
+===================================
+; Context with topic!
+; Context with that!
+
+(do-aiml-get (Concept "that"))
+(do-aiml-get (Concept "topic"))
+(do-aiml-set (Concept "topic")   (string-words "ends with alice"))
+(aiml-get-response-wl (string-words "test botname"))
+
+(do-aiml-get (Concept "name"))
+
+
+;;; <category><pattern>TEST BOTNAME</pattern> <topic>ENDS WITH
+ALICE</topic> <that>*</that> <template><bot name=\"name\"/> is
+functioning normally. <think><set name=\"matched\">true</set></think>
+</template> </category>
+
+(do-aiml-bot-get (Concept "name"))
+(do-aiml-get (Concept "name"))
+(aiml-get-response-wl (string-words "my name is joob"))
+(aiml-get-response-wl (string-words "call me joob"))
+
+=================================
+
+OpenPsi predicate/schema issues!
+
+(Define (DefinedPredicate "pblorf")
+(SequentialAnd
+(Evaluation (GroundedPredicate "scm: print-msg-face")
+         (ListLink (Node "--boaty")))`
+(Evaluation (GroundedPredicate "scm: print-msg")
+         (ListLink (Node "--mcboat")))
+(True)
+))
+
+(cog-execute! (DefinedPredicate "pblorf"))
+
+=================================
+(aiml-get-response-wl (string-words "what are you doing tonight?"))
+(define SENT (string-words "what are you doing tonight?"))
+
+(use-modules (opencog) (opencog exec) (opencog nlp))
+
+(aiml-get-response-wl (string-words "what was that sound?"))
+(aiml-get-response-wl (string-words "what is a bludgeon?"))
+(aiml-get-response-wl (string-words "what do you think?"))
+(aiml-get-response-wl (string-words "where is the ball?"))
+(aiml-get-response-wl (string-words "when will you know?"))
+(aiml-get-response-wl (string-words "How is it going?"))
+
+test topic:
+set topic:
+(aiml-get-response-wl (string-words "when will you astronaut body"))
+(do-aiml-get (Concept "topic"))
+(do-aiml-set (Concept "topic") (ListLink (WordNode "astronaut")))
+
+(aiml-get-response-wl (string-words "i am an astronaut"))
+(define SENT (string-words "i am an astronaut"))
+(psi-get-exact-match SENT)

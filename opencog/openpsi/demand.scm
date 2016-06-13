@@ -11,6 +11,8 @@
 ; NOTE: Shouldn't be exported to prevent modification.
 (define demand-var (VariableNode "Demand"))
 
+(define psi-demand-node (ConceptNode (string-append psi-prefix-str "Demand")))
+
 ; --------------------------------------------------------------
 (define-public (psi-get-demands dpn)
 "
@@ -30,9 +32,7 @@
         (BindLink
             (AndLink
                 dpn
-                (InheritanceLink
-                    demand-var
-                    (ConceptNode (string-append psi-prefix-str "Demand")))
+                (InheritanceLink demand-var psi-demand-node)
                 (EvaluationLink
                     (PredicateNode
                         (string-append psi-prefix-str "initial_value"))
@@ -55,7 +55,9 @@
   Returns a SetLink containing the nodes that carry the demand-value. The
   strength of their stv is the demand value.
 "
-    (psi-get-demands (TrueLink))
+    (filter
+        (lambda (x) (not (equal? x psi-demand-node)))
+        (cog-chase-link 'InheritanceLink 'ConceptNode psi-demand-node))
 )
 
 ; --------------------------------------------------------------
@@ -75,7 +77,7 @@
 
     ; Check arguments
     (if (not (string? demand-name))
-        (error (string-append "In procedure psi-demand, expected frist argument "
+        (error (string-append "In procedure psi-demand, expected first argument "
             "to be a string got: ") demand-name))
     (if (or (> 0 initial-value) (< 1 initial-value))
        (error (string-append "In procedure psi-demand, expected second argument "
@@ -84,9 +86,7 @@
     (let* ((demand-str (string-append psi-prefix-str demand-name))
            (demand-node (ConceptNode demand-str (stv initial-value 1))))
 
-            (InheritanceLink
-                demand-node
-                (ConceptNode (string-append psi-prefix-str "Demand")))
+            (InheritanceLink demand-node psi-demand-node)
 
             ; NOTE: Not sure this is needed. Possibly use is if one wants
             ; to measure how the demand-value has changed.
@@ -103,25 +103,21 @@
 ; --------------------------------------------------------------
 (define-public (psi-demand? node)
 "
-  Checks whether an atom is The node that satisfies the pattern used
-  to define an OpenPsi demand. Returns True-TruthValue `(stv 1 1)` if it is
-  and False-TruthValue `(stv 0 1)` if it isn't.
+  Checks whether an atom is a node that satisfies the pattern used
+  to define an OpenPsi-demand and returns `#t` if it does and `#f` if not.
 
   node:
   - The node that is being checked to see if it is a ConceptNode that represents
     a demand type.
 "
     (define (demand-names)
-        (map cog-name (cog-outgoing-set (psi-get-all-demands))))
+        (map cog-name (psi-get-all-demands)))
 
-    ; Check arguments
-    (if (not (cog-node? node))
-        (error "In procedure psi-demand?: Expected a Node got: " node))
-
-    (if (and (member (cog-name node) (demand-names))
+    (if (and (cog-node? node)
+             (member (cog-name node) (demand-names))
              (equal? (cog-type node) 'ConceptNode))
-        (stv 1 1)
-        (stv 0 1)
+        #t
+        #f
     )
 )
 
@@ -209,13 +205,13 @@
     a demand type, with a lowest demand-value.
 "
     ; check if atom is a demand-node
-    (if (equal? (stv 0 1) (psi-demand? atom))
+    (if (not (psi-demand? atom))
         (error "Expected argument to be a demand-node, got: " atom))
 
     (let ((atom-strength (tv-mean (cog-tv atom)))
           (lowest-demand-value (car (list-sort < (delete-duplicates
               (map (lambda (x) (tv-mean (cog-tv x)))
-                   (cog-outgoing-set (psi-get-all-demands)))))))
+                   (psi-get-all-demands))))))
          )
          (if (<= atom-strength lowest-demand-value)
             (stv 1 1)

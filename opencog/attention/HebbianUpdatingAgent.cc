@@ -116,7 +116,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
         old_tc = h->getTruthValue()->getMean();
 		if (new_tc != old_tc) isDifferent = true;
 
-        if (convertLinks and h->getAttentionValue()->getLTI() < conversionThreshold) {
+        if (convertLinks and h->getAttentionValue()->getSTI() < conversionThreshold) {
             // If mind agent is set to convert hebbian links then
             // inverse and symmetric links will convert between one
             // another when conjunction between sti values is correct

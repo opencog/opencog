@@ -110,7 +110,7 @@ public:
     }
 
     // Check the scheme function `psi-select-rules`
-    void test_psi_select_rules()
+    void psi_select_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -150,7 +150,7 @@ public:
     }
 
     // Check the scheme function `psi-related-goals`
-    void test_psi_related_goals()
+    void psi_related_goals()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -172,7 +172,7 @@ public:
     }
 
     // Check the scheme function `psi-get-satisfiable-rules`
-    void test_psi_get_satisfiable_rules()
+    void psi_get_satisfiable_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -221,7 +221,7 @@ public:
 
 
     // Check the scheme function `psi-step`
-    void test_psi_step()
+    void psi_step()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -296,7 +296,7 @@ public:
     }
 
     // Check the scheme function `psi-get-dual-rules`
-    void test_psi_get_dual_rules()
+    void psi_get_dual_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -329,7 +329,7 @@ public:
 
     // Check the scheme function `psi-action?`
     // NOTE: The name of the test function uses `__predicate` in place of `?`
-    void test_psi_action__predicate()
+    void psi_action__predicate()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 

@@ -22,7 +22,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.2.0";
+my $ver = "0.4.2";
 my $debug;
 my $help;
 my $version;
@@ -32,6 +32,8 @@ my $intermediateFile = 'aiml-flat.txt';
 my $outDir = '';
 my $outFile = 'aiml-rules.scm';
 
+my $base_priority = 1.0;
+
 GetOptions(
     'dir=s' => \$aimlDir,
     'debug' => \$debug,
@@ -40,7 +42,9 @@ GetOptions(
     'version' => \$version,
     'intermediate=s' => \$intermediateFile,
     'out=s' => \$outDir,
-) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>]\n";
+    'outfile=s' => \$outFile,
+    'priority=f' => \$base_priority,
+) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>] [--outfile <filename>]\n";
 
 if ($help)
 {
@@ -53,7 +57,9 @@ if ($help)
 	print "   --last-only             Only the last category is output.\n";
 	print "   --dir <directory>       AIML source directory, default: '$aimlDir'\n";
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
-	print "   --out <directory>       Directory for OpenCog output files\n";
+	print "   --out <directory>       Dir for many small output files.\n";
+	print "   --outfile <filename>    Output one large file, default: '$outFile'\n";
+	print "   --priority <float>      Rule priority, default: '$base_priority'\n";
 	die "\n";
 }
 
@@ -62,9 +68,6 @@ if ($version)
 	print "version $ver\n";
 	die "\n";
 }
-
-
-#$src = 'core65.aiml';
 
 # Conversion is done in a two-pass process.  The first pass flattens
 # the AIML format into a simplified linear format.  A second pass
@@ -327,13 +330,11 @@ close(FOUT);
 # ------------------------------------------------------------------
 # Second pass utilities
 
+my $star_index = 1;  # First star has index of one.
+my $pat_word_count = 0;
+
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
-
-my $psi_goal = "   (Concept \"AIML chat goal\")\n";
-my	$goal_truth = "   (stv 1 0.8)\n";
-my $demand = "   (psi-demand \"AIML chat\" 0.97)\n";
-my $psi_tail = $psi_goal . $goal_truth . $demand;
 
 # split_string -- split a string of words into distinct nodes.
 sub split_string
@@ -344,9 +345,17 @@ sub split_string
 	my $tout = "";
 	for my $wrd (@words)
 	{
-		if ($wrd ne "")
+		$wrd =~ s/\s*//;
+		if ($wrd eq "") {}
+		elsif ($wrd eq "*" or $wrd eq "_")
+		{
+			$tout .= $indent . "(Glob \"\$star-$star_index\")\n";
+			$star_index ++;
+		}
+		else
 		{
 			$tout .= $indent . $wordnode . "\"$wrd\")\n";
+			$pat_word_count ++;
 		}
 	}
 	$tout;
@@ -370,6 +379,7 @@ sub process_star
 	my $star = $2;
 	$star =~ s/^\s*//;
 	$star =~ s/\s*$//;
+	$star =~ s/\\'/'/g;
 	if ($star =~ /^index='(\d+)'\s*\/>(.*)/)
 	{
 		$tout .= $indent . "(Glob \"\$star-$1\")\n";
@@ -396,6 +406,7 @@ sub process_star
 	else
 	{
 		print "Ohhhh nooo, Mr. Bill!\n";
+		print "$text\n";
 		die;
 	}
 	$tout;
@@ -415,7 +426,6 @@ sub process_tag
 
 	$text =~ /(.*?)<$tag>(.*?)<\/$tag>(.*)/;
 
-	# FIXME, should be like the star loop, above.
 	$tout .= &process_aiml_tags($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
@@ -440,9 +450,8 @@ sub process_set
 	my $text = $_[1];
 	my $tout = "";
 
-	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/;
+	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*?)/;
 
-	# FIXME, should be like the star loop, above.
 	$tout .= &split_string($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag set\")\n";
@@ -459,7 +468,6 @@ sub process_set
 }
 
 # Print out a tag schema for named tag
-#
 #
 # First argument: the tag name
 # Second argument: white-space indentation to insert on each line.
@@ -478,6 +486,58 @@ sub print_named_tag
 	$tout;
 }
 
+# Print out a tag predicate for named tag
+#
+# First argument: the tag name
+# Second argument: white-space indentation to insert on each line.
+# Third argument: the value for the tag.
+sub print_named_eval_tag
+{
+	my $tag = $_[0];
+	my $indent = $_[1];
+	my $arg = $_[2];
+	my $tout = "";
+	$tout .= $indent . "(EvaluationLink\n";
+	$tout .= $indent . "   (DefinedPredicate \"AIML-pred $tag\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "      (Concept \"$arg\")\n";
+	$tout .= $indent . "   ))\n";
+	$tout;
+}
+
+# Print out an Evaluation (predicate) pattern
+#
+# First argument: the tag name
+# Second argument: white-space indentation to insert on each line.
+# Third argument: the value for the tag.
+sub print_predicate_tag
+{
+	my $tag = $_[0];
+	my $indent = $_[1];
+	my $arg = $_[2];
+	my $anchor = $tag;
+
+	if ($tag eq "pattern")
+	{
+		$anchor = "*-AIML-pattern-*";
+	}
+	elsif ($tag eq "that")
+	{
+		$anchor = "*-AIML-that-*";
+	}
+	elsif ($tag eq "topic")
+	{
+		$anchor = "*-AIML-topic-*";
+	}
+	my $tout = "";
+	$tout .= $indent . "(Evaluation\n";
+	$tout .= $indent . "   (Predicate \"$anchor\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= &process_aiml_tags($indent . "      ", $arg);
+	$tout .= $indent . "   ))\n";
+	$tout;
+}
+
 # process_named_tag -- process a generic tag that has a name
 #
 # First argument: the tag name
@@ -490,22 +550,12 @@ sub process_named_tag
 	my $text = $_[2];
 	my $tout = "";
 
-	# Multiple gets may appear in one reply.
-	$text =~ /<$tag name=/;
+	$text =~ /(.*?)<$tag name='(.*?)'\/>(.*)/;
 
-	my @gets = split /<$tag/, $text;
-	foreach my $get (@gets)
-	{
-		if ($get =~ /name='(.*)'\/>(.*)/)
-		{
-			$tout .= &print_named_tag($tag, $indent, $1);
-			$tout .= &process_aiml_tags($indent, $2);
-		}
-		else
-		{
-			$tout .= &process_aiml_tags($indent, $get);
-		}
-	}
+	$tout .= &split_string($tag, $indent, $1);
+	$tout .= &print_named_tag($tag, $indent, $2);
+	$tout .= &process_aiml_tags($indent, $3);
+	$tout;
 }
 
 # process_that -- process a that tag
@@ -520,7 +570,6 @@ sub process_that
 
 	$text =~ /(.*?)<that\/>(.*)/;
 
-	# FIXME, should be like the star loop, above.
 	$tout .= &split_string($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
@@ -564,11 +613,19 @@ sub process_category
 
 	# Expand defintion of <sr/>
 	$text =~ s/<sr\/>/<srai><star\/><\/srai>/g;
+	$text =~ s/<sr \/>/<srai><star\/><\/srai>/g;
+	$text =~ s/<srai \/>/<srai><star\/><\/srai>/g;
+
+	# typo
+	$text =~ s/<peron/<person/g;
+	$text =~ s/<\/peron/<\/person/g;
+	$text =~ s/<thastar/<thatstar/g;
 
 	# XXX FIXME ? This is supposed to be equivalent to
 	# <person><star/></person> however, in the actual AIML texts,
 	# there is no actual star, so its broken/invalid sytax.
 	$text =~ s/<person\/>/<person><star\/><\/person>/g;
+	$text =~ s/<person \/>/<person><star\/><\/person>/g;
 
 	# Convert mangled commas, from pass 1
 	$text =~ s/#Comma/,/g;
@@ -578,6 +635,24 @@ sub process_category
 
 	# Escape back-slashes
 	$text =~ s/\\/\\\\/g;
+
+	# strip out HTML markup. <a href> tag
+	$text =~ s/<a target=.*?>//g;
+	$text =~ s/<\/a>//g;
+	$text =~ s/<ul>//g;
+	$text =~ s/<\/ul>//g;
+	$text =~ s/<li>//g;
+	$text =~ s/<\/li>//g;
+	$text =~ s/<uppercase>//g;
+	$text =~ s/<\/uppercase>//g;
+	$text =~ s/<p\/>//g;
+	$text =~ s/<img src=.*?>//g;
+	$text =~ s/<\/img>//g;
+	$text =~ s/<property.*?>//g;
+	$text =~ s/<id\/>//g;
+	$text =~ s/<br\/>//g;
+	$text =~ s/<em>//g;
+	$text =~ s/<\/em>//g;
 
 	# Trim leading and trailing whtespace.
 	$text =~ s/^\s*//;
@@ -597,12 +672,16 @@ sub process_aiml_tags
 	my $indent = $_[0];
 	my $text = $_[1];
 
+	if ($text eq "") { return ""; }
+
 	my $tout = "";
 
 	# Find the very first angle bracket
-	if ($text =~ /.*?<(.*)/)
+	if ($text =~ /(.*?)<(.*)/)
 	{
-		my $tag = $1;
+		my $preplate = $1;
+		my $tag = $2;
+
 		if ($tag =~ /^srai>/)
 		{
 			$tout .= &process_tag("srai", $indent, $text);
@@ -623,6 +702,12 @@ sub process_aiml_tags
 		{
 			$tout .= &process_tag("person", $indent, $text);
 		}
+		elsif ($tag =~ /^person.*>(.*?)/)
+		{
+			print "Aieee! Unhandled screwball person tag!!!\n";
+			print "$text\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
 		elsif ($tag =~ /^that\/>/)
 		{
 			$tout .= &process_that($indent, $text);
@@ -639,13 +724,122 @@ sub process_aiml_tags
 		{
 			$tout .= &process_named_tag("bot", $indent, $text);
 		}
+		elsif ($tag =~ /^formal>/)
+		{
+			$tout .= &process_tag("formal", $indent, $text);
+		}
 		elsif ($tag =~ /^!--.*-->(.*)/)
 		{
 			# WTF is <!-- REDUCTION --> ??? whatever it is we don't print it.
-			if ($1 != "")
-			{
-				$tout .= &process_aiml_tags($indent, $1);
-			}
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^(.*?)&gt;(.*)/)
+		{
+			# These occur when the responses are trying to explain XML.
+			# It creates a huge mess, so blow it all off.
+			#$tout .= &split_string($indent, $preplate);
+			#$tout .= &process_aiml_tags($indent, "greater " . $1 . " less " . $2);
+		}
+		elsif ($tag =~ /^date.*?>(.*)/)
+		{
+			# These are harder to handle and we don't use them so screw it.
+			print "Aieee! Unhandled date tag!!!\n";
+			print "See file line number $.\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^size\/>(.*)/)
+		{
+			# Blow this off.
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^get_likes.*?>(.*)/)
+		{
+			# WTF is this???
+			print "Aieee! weird stuff!!!\n";
+			print "See file line number $.\n";
+			print "$text\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^random>/)
+		{
+			# These are harder to handle and we don't use them so screw it.
+			print "Aieee! Nested random tag!!!\n";
+			print "See file line number $.\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/random>/)
+		{
+		}
+		elsif ($tag =~ /^\/set>/)
+		{
+			# Sometimes, recursion screws up. This is rare, and I'm going
+			# to punt, for now.
+			print "Aieee! Bad recursion!!!\n";
+			print "See file line number $.\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/think>/)
+		{
+			# Sometimes, recursion screws up. This is rare, and I'm going
+			# to punt, for now.
+			print "Aieee! Bad recursion!!!\n";
+			print "See file line number $.\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/srai>/)
+		{
+			# Sometimes, recursion screws up. This is rare, and I'm going
+			# to punt, for now.
+			print "Aieee! Bad recursion!!!\n";
+			print "See file line number $.\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^condition/)
+		{
+			# WTF. Blow this off, for now.
+			print "Aieee! Condition tag is not handled!!!\n";
+			print "See file line number $.\n";
+			print ">>>>>>$text\n";
+		}
+		elsif ($tag =~ /^\/condition>/)
+		{
+		}
+		elsif ($tag =~ /^topicstar\/>/)
+		{
+			# WTF. Blow this off, for now.
+			print "Aieee! topicstar tag is not handled!!!\n";
+			print "See file line number $.\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^thatstar\/>/)
+		{
+			# WTF. Blow this off, for now.
+			print "Aieee! thatstar tag is not handled!!!\n";
+			print "See file line number $.\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^bot_name/)
+		{
+			# Blow this off
+			print "Aieee! bot_name tag in the pattern!!\n";
+			print "See file line number $.\n";
+			print ">>>>>>$text\n";
+			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
+		}
+		elsif ($tag =~ /^that/)
+		{
+			# Blow this off
+			print "Aieee! Wacky that tag!!\n";
+			print "See file line number $.\n";
+			print ">>>>>>$text\n";
+		}
+		else
+		{
+			print "Aieee! what is this tag???\n";
+			print "See file line number $.\n";
+			print ">>>>>>$tag\n\n\n";
+			print ">>>>>>$text\n";
+			die;
 		}
 	}
 	else
@@ -654,6 +848,38 @@ sub process_aiml_tags
 	}
 	$tout;
 }
+
+# ------------------------------------------------------------------
+
+sub psi_tail
+{
+	my $num_stars = $_[0];
+	my $word_count = $_[1];
+	my $chat_goal = "   (Concept \"AIML chat subsystem goal\")\n";
+	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
+
+	# Stupid hack for rule priority, for lack of something better.
+	# Adjust weights so that more than one star is strongly punished.
+	# That's in order to supress the pattern "* are *" which matches
+	# any sentence with the word "are" in it. Skanky rule, maybe
+	# it should be ditched.  More generally, some kind of weighting
+	# formula should be developed, one that is more "scientifically"
+	# motivated.  Of course, this breaks the AIML spec, which does
+	# not use randomness or weighting in it; however, we want to avoid
+	# strict determinism here, as its not very realistic.  Note that
+	# this kind of randomness will break any sort of customer-support
+	# system that insists on eexactly a given fixed answer to a given
+	# situation.  Oh well; that's not what we're after, here.
+	#`
+	my $weight = 1.0 / (0.5 + $word_count);
+	$weight = $base_priority / (1.0 + $num_stars * $num_stars + $weight);
+	# my $goal_truth = "   (stv 1 0.8)\n";
+	my $goal_truth = "   (stv 1 $weight)\n";
+	my $rule_tail = $chat_goal . $goal_truth . $demand;
+
+	$rule_tail;
+}
+
 # ------------------------------------------------------------------
 # Second pass
 
@@ -663,18 +889,10 @@ my %overwriteSpace=();
 my $psi_ctxt = "";
 my $psi_goal = "";
 
-my $have_topic = 0;
-my $curr_topic = "";
-
-my $have_that = 0;
-my $curr_that = "";
-
 my $have_raw_code = 0;
 my $curr_raw_code = "";
 
 my $cattext = "";
-
-my $star_index = 1;
 
 my $rule_count = 0;
 my $file_count = 1;
@@ -710,7 +928,7 @@ while (my $line = <FIN>)
 	# CATEGORY
 	if ($cmd eq "CATBEGIN")
 	{
-		$psi_ctxt .= "   (list\n";
+		$psi_ctxt .= "   (list (AndLink\n";
 	}
 	if ($cmd eq "CATTEXT")
 	{
@@ -744,15 +962,19 @@ while (my $line = <FIN>)
 	if ($cmd eq "CATEND")
 	{
 		my $rule = "";
+		# Number of stars is one less than the current index.
+		my $num_stars = $star_index - 1;
 
 		if ($have_raw_code)
 		{
 			# Random sections are handled by duplicating
 			# the rule repeatedly, each time with the same
 			# premise template, but each with a diffrerent output.
-			if ($curr_raw_code =~ /<random>(.*)<\/random>/)
+			if ($curr_raw_code =~ /(.*?)<random>(.*?)<\/random>(.*)/)
 			{
-				my $choices = $1;
+				my $preplate = $1;
+				my $choices = $2;
+				my $postplate = $3;
 				$choices =~ s/^\s+//;
 				my @choicelist = split /<li>/, $choices;
 				shift @choicelist;
@@ -763,21 +985,22 @@ while (my $line = <FIN>)
 					$ch =~ s/<\/li>//;
 					$ch =~ s/\s+$//;
 
+					my $catty = $preplate . $ch . $postplate;
+
 					$rule .= ";;; random choice $i of $nc: ";
 					$rule .= $cattext . "\n";
-
 					$rule .= "(psi-rule-nocheck\n";
 					$rule .= "   ; context\n";
 					$rule .= $psi_ctxt;
 					$rule .= "   ; action\n";
 					$rule .= "   (ListLink\n";
-					$rule .= &process_category("      ", $ch);
+					$rule .= &process_category("      ", $catty);
 					$rule .= "   )\n";
-					$rule .= $psi_tail;
+					$rule .= &psi_tail($num_stars, $pat_word_count);
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
 				}
-         }
+			}
 			else
 			{
 				$rule = ";;; COMPLEX CODE BRANCH\n";
@@ -786,11 +1009,10 @@ while (my $line = <FIN>)
 				$rule .= "   ;; context\n";
 				$rule .= $psi_ctxt;
 				$rule .= "   ;; action\n";
-				$rule .= $psi_goal;
 				$rule .= "   (ListLink\n";
 				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";
-				$rule .= $psi_tail;
+				$rule .= &psi_tail($num_stars, $pat_word_count);
 				$rule .= ")\n";
 			}
 			$have_raw_code = 0;
@@ -804,7 +1026,7 @@ while (my $line = <FIN>)
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
 			$rule .= $psi_goal;
-			$rule .= $psi_tail;
+			$rule .= &psi_tail($num_stars, $pat_word_count);
 			$rule .= ") ; CATEND\n";     # close category section
 
 			$psi_goal = "";
@@ -847,117 +1069,36 @@ while (my $line = <FIN>)
 	# PATTERN
 	if ($cmd eq "PAT")
 	{
-		$star_index = 0;
-		$psi_ctxt .= "      (ListLink\n";
-	}
-	if ($cmd eq "PWRD")
-	{
-		# Use lower-case ...
-		$arg = lc $arg;
-		$psi_ctxt .= "         " . $wordnode . "\"$arg\")\n";
-	}
-	if ($cmd eq "PSTAR")
-	{
-		$star_index = $star_index + 1;
-		$psi_ctxt .= "         (Glob \"\$star-$star_index\")\n";
-	}
-	if ($cmd eq "PUSTAR")
-	{
-		$star_index = $star_index + 1;
-		$psi_ctxt .= "         (Glob \"\$star-$star_index\") ; underbar\n";
-	}
-	if ($cmd eq "PBOTVAR")
-	{
-		$psi_ctxt .= &print_named_tag("bot", "         ", $arg);
-	}
-	if ($cmd eq "PSET")
-	{
-		$psi_ctxt .= "         (XConceptxxNode \"$arg\") ; Huh?\n";
-	}
-	if ($cmd eq "PATEND")
-	{
-		$psi_ctxt .= "      ) ; PATEND\n";
+		my $curr_pattern = $arg;
+		$star_index = 1;
+		$pat_word_count = 0;
+		$psi_ctxt .= &print_predicate_tag("pattern", "      ", lc $curr_pattern);
 	}
 
 	#TOPIC
 	if ($cmd eq "TOPIC")
 	{
-		$have_topic = 0;
-	}
-	if ($cmd eq "TOPICWRD")
-	{
-		$have_topic = 1;
-		$curr_topic = $arg;
-	}
-	if ($cmd eq "TOPICSTAR")
-	{
-		$have_topic = 0;
-	}
-	if ($cmd eq "TOPICUSTAR")
-	{
-		$have_topic = 0;
-	}
-	if ($cmd eq "TOPICBOTVAR")
-	{
-		$psi_ctxt .= "TOPICBOTVAR $arg\n";
-	}
-	if ($cmd eq "TOPICSET")
-	{
-		$have_topic = 1;
-		$curr_topic = $arg;
-		$psi_ctxt .= "TOPICSET $arg\n";
-	}
-	if ($cmd eq "TOPICEND")
-	{
-		if ($have_topic)
-		{
+		if ($arg ne "" and $arg ne "*") {
+			my $curr_topic = $arg;
 			$psi_ctxt .= "      ; Context with topic!\n";
-			$psi_ctxt .= &print_named_tag("topic", "      ", lc $curr_topic);
+			$psi_ctxt .= &print_predicate_tag("topic", "      ", lc $curr_topic);
 		}
-		$have_topic = 0;
 	}
 
 	# THAT
 	if ($cmd eq "THAT")
 	{
-		$have_that = 0;
-	}
-	if ($cmd eq "THATWRD")
-	{
-		$have_that = 1;
-		$curr_that = $arg;
-	}
-	if ($cmd eq "THATSTAR")
-	{
-		$have_that = 0;
-	}
-	if ($cmd eq "THATUSTAR")
-	{
-		$have_that = 0;
-	}
-	if ($cmd eq "THATBOTVAR")
-	{
-		$psi_ctxt .= "THATBOTVAR $arg\n";
-	}
-	if ($cmd eq "THATSET")
-	{
-		$have_that = 1;
-		$curr_that = $arg;
-	}
-	if ($cmd eq "THATEND")
-	{
-		if ($have_that)
-		{
+		if ($arg ne "" and $arg ne "*") {
+			my $curr_that = $arg;
 			$psi_ctxt .= "      ; Context with that!\n";
-			$psi_ctxt .= &print_named_tag("that", "      ", lc $curr_topic);
+			$psi_ctxt .= &print_predicate_tag("that", "      ", lc $curr_that);
 		}
-		$have_that = 0;
 	}
 
 	#template
 	if ($cmd eq "TEMPLATECODE")
 	{
-		$psi_ctxt .= "   ) ;TEMPLATECODE\n";  # close pattern section
+		$psi_ctxt .= "   )) ;TEMPLATECODE\n";  # close pattern section
 
 		$arg =~ s/\"/\'/g;
 
@@ -967,7 +1108,7 @@ while (my $line = <FIN>)
 
 	if ($cmd eq "TEMPATOMIC")
 	{
-		$psi_ctxt .= "   ) ;TEMPATOMIC\n";  # close pattern section
+		$psi_ctxt .= "   )) ;TEMPATOMIC\n";  # close pattern section
 		# The AIML code was just a list of words, so just set up for a
 		#word sequence.
 		$psi_goal = "   (ListLink\n";
@@ -1008,6 +1149,8 @@ print FOUT "*unspecified*\n";
 
 close(FIN);
 close(FOUT);
+
+print "Processed $rule_count rules\n";
 exit;
 =for comment
 
