@@ -40,8 +40,8 @@ class TestRESTApi():
             types.InheritanceLink, [self.swan, self.bird], TruthValue(1, 0.0011237357975915074))
         self.bird_animal = self.atomspace.add_link(
             types.InheritanceLink, [self.bird, self.animal], TruthValue(1, 0.0011237357975915074))
-        self.bird.av = {'lti': 0, 'sti': 9, 'vlti': 0}
-        self.swan.av = {'lti': 0, 'sti': 9, 'vlti': 0}
+        self.bird.sti = 9
+        self.swan.sti = 9
 
         self.api = RESTAPI(self.atomspace)
         self.client = self.api.test()
@@ -333,10 +333,10 @@ class TestRESTApi():
 
     def test_get_atoms_by_av(self):
         # Assign some STI values
-        self.bird.av = {'lti': 0, 'sti': 9, 'vlti': 0}
-        self.swan.av = {'lti': 0, 'sti': 20, 'vlti': 0}
-        self.bird_animal.av = {'lti': 0, 'sti': 15, 'vlti': 0}
-        self.animal.av = {'lti': 0, 'sti': 0, 'vlti': 0}
+        self.bird.sti = 9
+        self.swan.sti = 20
+        self.bird_animal.sti = 15
+        self.animal.sti = 0
 
         get_response = \
             self.client.get(self.uri + 'atoms?filterby=attentionalfocus')
