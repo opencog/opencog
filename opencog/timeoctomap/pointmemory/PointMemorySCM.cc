@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <PointMemorySCM.h>
+#include "PointMemorySCM.h"
 #include <opencog/guile/SchemePrimitive.h>
 using namespace std;
 using namespace opencog::ato;
@@ -35,7 +35,6 @@ PointMemorySCM::PointMemorySCM()
 //allocate point ato data structure object
     static bool is_init = false;
     if (is_init) return;
-    space_res.push_back(SPACE_RES_M);
     //tsa = new TimeSpaceAtom(MEM_SEC*FPS,space_res);
     is_init = true;
     scm_with_guile(init_in_guile, this);

@@ -1,4 +1,4 @@
-        ADD_LIBRARY(point_memory
+        ADD_LIBRARY(point_memory SHARED
                 PointMemorySCM.cc
         )
         TARGET_LINK_LIBRARIES(point_memory
