@@ -23,21 +23,6 @@ IF (HAVE_OCTOMAP)
 		TimeOctomap.h
 		DESTINATION "include/${PROJECT_NAME}/timeoctomap"
 	)
-
-        ADD_LIBRARY(point_memory
-                pointmemory/PointMemorySCM.cc
-        )
-        TARGET_LINK_LIBRARIES(point_memory
-                time_octomap
-                ${ATOMSPACE_LIBRARIES}
-        )
-        INSTALL (TARGETS point_memory
-                 DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-        )
-        INSTALL (FILES
-                 pointmemory/PointMemorySCM.h
-                 DESTINATION "include/${PROJECT_NAME}/timeoctomap"
-        )
-
-        ADD_GUILE_MODULE(pointmemory/point-memory.scm)
+        
+        ADD_SUBDIRECTORY (pointmemory)
 ENDIF (HAVE_OCTOMAP)
