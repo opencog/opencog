@@ -65,9 +65,9 @@
 )
 
 (Define
-    (DefinedPredicate "fuzzy-search-started?")
+    (DefinedPredicate "fuzzy-match-started?")
     (Equal (Set search-started)
-           (Get (State fuzzy-search (Variable "$s"))))
+           (Get (State fuzzy-match (Variable "$s"))))
 )
 
 (Define

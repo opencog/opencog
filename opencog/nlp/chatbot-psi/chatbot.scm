@@ -47,9 +47,9 @@
 
 (define fuzzy-replies (Anchor "FuzzyReplies"))
 (define no-fuzzy-reply (Concept "NoFuzzyReply"))
-(define fuzzy-search (Anchor "FuzzySearch"))
+(define fuzzy-match (Anchor "FuzzyMatch"))
 (State fuzzy-replies default-state)
-(State fuzzy-search default-state)
+(State fuzzy-match default-state)
 
 (define fuzzy-answers (Anchor "FuzzyAnswers"))
 (define no-fuzzy-answers (Concept "NoFuzzyAnswers"))

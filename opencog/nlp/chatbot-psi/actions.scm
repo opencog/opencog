@@ -20,24 +20,8 @@
     )
 )
 
-(define (do-fuzzy-search)
-    (define (pick-and-generate list-of-results)
-        (if (equal? (length list-of-results) 0)
-            '()
-            (let* (; TODO: Should be bias according to the score
-                   (picked (list-ref list-of-results (random (length list-of-results))))
-                   ; TODO: Should use gen-sentences when new microplanner is ready
-                   (generated (sureal (gar picked))))
-                (if (null? generated)
-                    ; Do it again if the chosen one can't be used to generate a sentence
-                    (pick-and-generate (delete! generated list-of-results))
-                    generated
-                )
-            )
-        )
-    )
-
-    (State fuzzy-search search-started)
+(define (do-fuzzy-match)
+    (State fuzzy-match search-started)
 
     (begin-thread
         (let ((fuzzy-results (fuzzy-match-sent (get-input-sent-node) '()))
