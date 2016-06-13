@@ -10,7 +10,7 @@
                 ; Fuzzy matcher may return more than one answers that has the
                 ; same score, randomly pick one of them if so
                 (let* ((ans (list (list-ref fuz-ans (random (length fuz-ans)))))
-                       (ans-in-words (List (map Word ans))))
+                       (ans-in-words (List (map Word (string-split (car ans) #\ )))))
                     (State fuzzy-answers ans-in-words)
 
                     ; TODO: Create a new psi-rule for this QA in the OpenCog AIML format
