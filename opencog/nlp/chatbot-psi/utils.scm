@@ -1,3 +1,17 @@
+(define (get-word-list sent-node)
+    (List
+        (append-map
+            (lambda (w)
+                (if (not (string-prefix? "LEFT-WALL" (cog-name w)))
+                    (cog-chase-link 'ReferenceLink 'WordNode w)
+                    '()
+                )
+            )
+            (car (sent-get-words-in-order sent-node))
+        )
+    )
+)
+
 (define (get-input type)
     (car (filter
         (lambda (x)
@@ -19,6 +33,8 @@
     (State input-utterance no-input-utterance)
     (State aiml-replies default-state)
     (State aiml-search default-state)
+    (State fuzzy-replies default-state)
+    (State fuzzy-search default-state)
     (State fuzzy-answers default-state)
     (State fuzzy-qa-search default-state)
 )

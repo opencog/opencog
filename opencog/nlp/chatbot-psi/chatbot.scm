@@ -14,24 +14,10 @@
 ; Schema function for chatting
 
 (define (chat utterance)
-    (define (get-words-list sent-node)
-        (List
-            (append-map
-                (lambda (w)
-                    (if (not (string-prefix? "LEFT-WALL" (cog-name w)))
-                        (cog-chase-link 'ReferenceLink 'WordNode w)
-                        '()
-                    )
-                )
-                (car (sent-get-words-in-order sent-node))
-            )
-        )
-    )
-
     (reset-all-states)
 
     (let* ((sent-node (car (nlp-parse utterance)))
-           (list-of-words (get-words-list sent-node)))
+           (list-of-words (get-word-list sent-node)))
 
         (State input-utterance
             (Reference
@@ -58,6 +44,12 @@
 (define aiml-search (Anchor "AIMLSearch"))
 (State aiml-replies default-state)
 (State aiml-search default-state)
+
+(define fuzzy-replies (Anchor "FuzzyReplies"))
+(define no-fuzzy-reply (Concept "NoFuzzyReply"))
+(define fuzzy-search (Anchor "FuzzySearch"))
+(State fuzzy-replies default-state)
+(State fuzzy-search default-state)
 
 (define fuzzy-answers (Anchor "FuzzyAnswers"))
 (define no-fuzzy-answers (Concept "NoFuzzyAnswers"))

@@ -65,6 +65,18 @@
 )
 
 (Define
+    (DefinedPredicate "fuzzy-search-started?")
+    (Equal (Set search-started)
+           (Get (State fuzzy-search (Variable "$s"))))
+)
+
+(Define
+    (DefinedPredicate "is-fuzzy-reply?")
+    (Not (Equal (Set no-fuzzy-reply)
+                (Get (State fuzzy-replies (Variable "$r")))))
+)
+
+(Define
     (DefinedPredicate "aiml-search-started?")
     (Equal (Set search-started)
            (Get (State aiml-search (Variable "$s"))))

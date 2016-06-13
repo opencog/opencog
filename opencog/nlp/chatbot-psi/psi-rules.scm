@@ -36,6 +36,32 @@
 (Member
     (psi-rule
         (list (SequentialAnd
+            (Not (DefinedPredicate "fuzzy-search-started?"))
+            (DefinedPredicate "is-input-utterance?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: do-fuzzy-search") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+    )
+)
+
+(Member
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "fuzzy-search-started?")
+            (DefinedPredicate "is-fuzzy-reply?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-replies)))
+        (True)
+        (stv .9 .9)
+        sociality
+    )
+)
+
+(Member
+    (psi-rule
+        (list (SequentialAnd
             (Not (DefinedPredicate "aiml-search-started?"))
             (DefinedPredicate "is-input-utterance?")
         ))
