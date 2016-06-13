@@ -40,8 +40,8 @@ class TestRESTApi():
             types.InheritanceLink, [self.swan, self.bird], TruthValue(1, 0.0011237357975915074))
         self.bird_animal = self.atomspace.add_link(
             types.InheritanceLink, [self.bird, self.animal], TruthValue(1, 0.0011237357975915074))
-        self.bird.av = {'sti': 9}
-        self.swan.av = {'sti': 9}
+        self.bird.av = {'lti': 0, 'sti': 9, 'vlti': 0}
+        self.swan.av = {'lti': 0, 'sti': 9, 'vlti': 0}  
 
         self.api = RESTAPI(self.atomspace)
         self.client = self.api.test()
