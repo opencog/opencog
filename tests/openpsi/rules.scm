@@ -212,24 +212,24 @@
         action-1 goal-2 (stv 1 1) demand-5)
 )
 
-(define (test_psi_get_dual_rules_1_1)
-    (equal? (car (psi-get-dual-rules (car (groundable-content-4)))) (rule-4))
-)
-
-(define (test_psi_get_dual_rules_1_2)
-    (equal? (car (psi-get-dual-rules (cadr (groundable-content-4)))) (rule-4))
-)
-
-(define (test_psi_get_dual_rules_2_1)
-    (length (psi-get-dual-rules (car (groundable-content-1))))
-)
-
-(define (test_psi_get_dual_rules_2_2)
-    (if (and
-            (member (rule-1) (psi-get-dual-rules (car (groundable-content-1))))
-            (member (rule-5) (psi-get-dual-rules (car (groundable-content-1)))))
-        #t
-        #f
-    )
-)
+;(define (test_psi_get_dual_rules_1_1)
+;    (equal? (car (psi-get-dual-rules (car (groundable-content-4)))) (rule-4))
+;)
+;
+;(define (test_psi_get_dual_rules_1_2)
+;    (equal? (car (psi-get-dual-rules (cadr (groundable-content-4)))) (rule-4))
+;)
+;
+;(define (test_psi_get_dual_rules_2_1)
+;    (length (psi-get-dual-rules (car (groundable-content-1))))
+;)
+;
+;(define (test_psi_get_dual_rules_2_2)
+;    (if (and
+;            (member (rule-1) (psi-get-dual-rules (car (groundable-content-1))))
+;            (member (rule-5) (psi-get-dual-rules (car (groundable-content-1)))))
+;        #t
+;        #f
+;    )
+;)
 ; --------------------------------------------------------------
