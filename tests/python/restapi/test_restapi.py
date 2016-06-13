@@ -333,10 +333,10 @@ class TestRESTApi():
 
     def test_get_atoms_by_av(self):
         # Assign some STI values
-        self.atomspace.set_av(h=self.bird.h, sti=9)
-        self.atomspace.set_av(h=self.swan.h, sti=20)
-        self.atomspace.set_av(h=self.bird_animal.h, sti=15)
-        self.atomspace.set_av(h=self.animal.h, sti=0)
+        self.bird.av = {'lti': 0, 'sti': 9, 'vlti': 0}
+        self.swan.av = {'lti': 0, 'sti': 20, 'vlti': 0}
+        self.bird_animal.av = {'lti': 0, 'sti': 15, 'vlti': 0}
+        self.animal.av = {'lti': 0, 'sti': 0, 'vlti': 0}
 
         get_response = \
             self.client.get(self.uri + 'atoms?filterby=attentionalfocus')
