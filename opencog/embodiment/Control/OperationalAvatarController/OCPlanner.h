@@ -432,6 +432,7 @@ protected:
      void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
      vector<Handle> ReplaceVariableNames(vector<Handle>& pattern, map<Handle,Handle>& varNameMap);
 
+     ParamValue generateParamValFromHandle(Handle& varHandle, map<Handle, ParamValue>& handleToParamValMap);
      MinedRulePattern* mineNewRuleForCurrentSubgoal(StateNode* curSubgoalNode, Handle stateOwnerHanlde);
 
 //     // to store the intermediate states which may be produced during planning stepps
@@ -571,7 +572,7 @@ protected:
      void bindVariablesForOneLink(Handle link, map<Handle,Handle>& varToValueMap, HandleSeq& bindOutgoingLinks);
      vector<Handle> bindKnownVariablesForLinks(vector<Handle>& handles, map<Handle,Handle>& varToValueMap);
 
-     Rule* generateANewRuleFromMinedPattern(MinedRulePattern& minedPattern);
+     MinedRule *generateANewRuleFromMinedPattern(MinedRulePattern& minedPattern);
 
 };
 

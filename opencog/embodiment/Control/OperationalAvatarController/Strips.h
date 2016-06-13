@@ -500,6 +500,7 @@ namespace opencog { namespace oac {
     {
         string actionName;
         map<string, MinedParamStruct> paramToMinedStruct;
+        map<string,Handle> allVariables; // <PredicateName, variableNameHandle>
         vector<MinedPreCondition> preconditions;
         vector<MinedEffect> effects;
 

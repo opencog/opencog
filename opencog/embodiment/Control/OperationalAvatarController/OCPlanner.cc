@@ -1020,10 +1020,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     MinedRulePattern* minedNewRulePattern = mineNewRuleForCurrentSubgoal(curStateNode, stateOwnerHanlde);
 
                     // Create a new rule from this mined pattern
-                    // MinedRule* minedRule = generateANewRuleFromMinedPattern(minedNewRulePattern);
-
-
-
+                    // MinedRule* minedRule = generateANewRuleFromMinedPattern(minedNewRulePattern, curStateNode);
 
                 }
 
@@ -2878,13 +2875,13 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
     //        (VariableNode $var_2)
 
     //    (EvaluationLink )
-    //      (PredicateNode open:target)
+    //      (PredicateNode target)
     //      (ListLink )
     //        (VariableNode $var_4)
     //        (VariableNode $var_3)
 
     //    (EvaluationLink )
-    //      (PredicateNode open:with)
+    //      (PredicateNode with)
     //      (ListLink )
     //        (VariableNode $var_4)
     //        (VariableNode $var_1)
@@ -2893,10 +2890,10 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
     std::map <string, MinedParamStruct> paramToMinedStruct;
     std::map <string, HandleSeq>::iterator paramMapIter = paramNameToParamEvalLinks.begin();
     vector<MinedPreCondition> preconditions;
+    map<string, Handle> allVariables;
 
     for (; paramMapIter != paramNameToParamEvalLinks.end(); paramMapIter ++ )
     {
-
         HandleSeq& paramEvalLinks = paramMapIter->second;
         cout << "Start mining patterns on query related to this parameter: " << paramMapIter->first << " , for these EvaluationLinks." << std::endl;
         for (Handle ph : paramEvalLinks)
@@ -3061,10 +3058,10 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
             // replace the variable representing actor by var_actor, the variable representing target by var_target
 
             // To be improved: for the patterns of different parameters, there may be some overlape variables of different variable name,
-            // but actually representing the same thing, these patterns should be unified too.
+            // but actually representing the same thing, or same variable name representing different thing, these patterns should be unified too.
 
-            // find out which variable in the mined pattern represent the param object, the actor and the target
-            Handle paramVar, actorVar, targetVar;
+            // find out which variable in the mined pattern represent the actor and the target
+            Handle actorVar, targetVar;
             for (Handle link : priorPatterns[0]) // currently we just try to use the top selected pattern
             {
                 if (atomSpace->getType(link) != EVALUATION_LINK)
@@ -3072,15 +3069,8 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
                 Handle predicateNode = atomSpace->getOutgoing(link,0);
                 string predicateNameString = atomSpace->getName(predicateNode);
-                if (predicateNameString == paramMapIter->first)
-                {
-                    Handle listLink = atomSpace->getOutgoing(link,1);
-                    HandleSeq listOutgoings = atomSpace->getOutgoing(listLink);
-                    paramVar = listOutgoings[listOutgoings.size() - 1];
-                    cout << "The variable representing this parameter value object is: " << atomSpace->getName(paramVar) << std::endl;
 
-                }
-                else if (predicateNameString == "actor")
+                if (predicateNameString == "actor")
                 {
                     Handle listLink = atomSpace->getOutgoing(link,1);
                     HandleSeq listOutgoings = atomSpace->getOutgoing(listLink);
@@ -3096,6 +3086,8 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                     cout << "The variable representing target is: " << atomSpace->getName(targetVar) << std::endl;
 
                 }
+
+
             }
 
             map<Handle,Handle> varNameMapToReplace;
@@ -3103,9 +3095,14 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
             if (actorVar != Handle::UNDEFINED)
                 varNameMapToReplace.insert(std::pair<Handle,Handle>(actorVar, defaultActorVarHandle));
 
-            if (actorVar != Handle::UNDEFINED)
+            if (targetVar != Handle::UNDEFINED)
+            {
                 varNameMapToReplace.insert(std::pair<Handle,Handle>(targetVar, defaultTargetVarHandle));
-
+                if (allVariables.find("target") == allVariables.end())
+                {
+                    allVariables.insert(std::pair<string, Handle>("target", defaultTargetVarHandle));
+                }
+            }
 
             if (varNameMapToReplace.size() != 0)
             {
@@ -3118,7 +3115,31 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
             else
                 minedStruct.paramPrioPattern =  priorPatterns[0];
 
+            // find out which variable in the pattern represent the param object after rebinding variable names
+            Handle paramVar;
+            for (Handle link : minedStruct.paramPrioPattern)
+            {
+                if (atomSpace->getType(link) != EVALUATION_LINK)
+                    continue;
+
+                Handle predicateNode = atomSpace->getOutgoing(link,0);
+                string predicateNameString = atomSpace->getName(predicateNode);
+                if (predicateNameString == paramMapIter->first)
+                {
+                    Handle listLink = atomSpace->getOutgoing(link,1);
+                    HandleSeq listOutgoings = atomSpace->getOutgoing(listLink);
+                    paramVar = listOutgoings[listOutgoings.size() - 1];
+                    cout << "The variable representing this parameter value object is: " << atomSpace->getName(paramVar) << std::endl;
+
+                }
+
+            }
+
             minedStruct.paramObjVar = paramVar;
+            if (allVariables.find(paramMapIter->first) == allVariables.end())
+            {
+                allVariables.insert(std::pair<string, Handle>(paramMapIter->first, paramVar));
+            }
 
             HandleSeq intrinsicUndistinguishingPropertyLinks;
             for (string propertyStr : intrinsicUndistinguishingProperties)
@@ -3171,7 +3192,6 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                     preStateIt ++;
 
             }
-
 
             for (preStateIt = preStateChangeMap.begin(); preStateIt != preStateChangeMap.end();preStateIt ++)
             {
@@ -3281,6 +3301,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
     minedRulePattern->actionName = atomSpace->getName(highestActionTypeHandle);
     minedRulePattern->paramToMinedStruct = paramToMinedStruct;
     minedRulePattern->preconditions = preconditions;
+    minedRulePattern->allVariables = allVariables;
 
     return minedRulePattern;
 
@@ -4631,8 +4652,119 @@ vector<Handle> OCPlanner::bindKnownVariablesForLinks(vector<Handle>& handles, ma
     return rebindedPattern;
 }
 
-Rule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPattern)
+unsigned int boolVarCount = 0;
+unsigned int strVarCount = 0;
+unsigned int intVarCount = 0;
+unsigned int floatVarCount = 0;
+unsigned int vectorVarCount = 0;
+unsigned int entityVarCount = 0;
+
+ParamValue OCPlanner::generateParamValFromHandle(Handle& varHandle, map<Handle, ParamValue>& handleToParamValMap)
 {
+    if (handleToParamValMap.find(varHandle) != handleToParamValMap.end())
+    {
+        return handleToParamValMap[varHandle];
+    }
+    else
+    {
+        ParamValue pv;
+        if (atomSpace->getType(varHandle) == VARIABLE_NODE)
+        {
+            pv = entity_var[entityVarCount++];
+        }
+        else
+        {
+            pv = Inquery::getParamValueFromHandle(varHandle);
+        }
+
+        handleToParamValMap.insert(std::pair<Handle, ParamValue>(varHandle, pv));
+        return pv;
+
+    }
+}
+
+
+MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPattern)
+{
+
+    ParamValue varAvatar = entity_var[0];
+
+    boolVarCount = 0;
+    strVarCount = 0;
+    intVarCount = 0;
+    floatVarCount = 0;
+    vectorVarCount = 0;
+    entityVarCount = 1;
+
+    map<Handle, ParamValue> handleToParamValMap;
+
+    // generate the action
+    AvatarAction* action = new AvatarAction(ActionType::GetActionTypeByName(minedPattern.actionName));
+
+    // add parameters to this action
+    map<string,Handle>::iterator allVarIt = minedPattern.allVariables.begin();
+    for (; allVarIt != minedPattern.allVariables.end(); allVarIt ++)
+    {
+        ParamValue param = generateParamValFromHandle(allVarIt->second, handleToParamValMap);
+        action->addParameter(ActionParameter(allVarIt->first,
+                                            ActionParameter::getTypeFromParam(param),
+                                            param));
+    }
+
+    Rule* minedRule = new Rule(action,boost::get<Entity>(varAvatar),0.1f);
+
+    // generate preconditions
+    for (MinedPreCondition& precond : minedPattern.preconditions)
+    {
+        vector<ParamValue> precondStateOwnerList;
+        ParamValue ownerParamVal = generateParamValFromHandle(precond.stateOwner, handleToParamValMap);
+        precondStateOwnerList.push_back(ownerParamVal);
+        ParamValue stateValParam = generateParamValFromHandle(precond.stateValue, handleToParamValMap);
+
+        State* preconState = new State(precond.stateName,ActionParameter::getTypeFromParam(stateValParam),STATE_EQUAL_TO ,stateValParam, precondStateOwnerList);
+        minedRule->addPrecondition(preconState);
+    }
+
+    // Added a default precondition: if the target is an Entity, the agent should be in the assess distance of the target
+    if (minedPattern.allVariables.find("target") != minedPattern.allVariables.end())
+    {
+        vector<ParamValue> closedStateOwnerList;
+        closedStateOwnerList.push_back(varAvatar);
+        closedStateOwnerList.push_back(handleToParamValMap[defaultTargetVarHandle]);
+        ParamValue accessDistance = ACCESS_DISTANCE;
+        State* closedState = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,accessDistance, closedStateOwnerList, true, &Inquery::inqueryDistance);
+        minedRule->addPrecondition(closedState);
+    }
+
+    // todo: added effects
+
+//    // precondition 2: The object can be picked up
+//    vector<ParamValue> pickupableStateOwnerList;
+//    pickupableStateOwnerList.push_back(varFood);
+//    State* pickupableState = new State("is_pickupable",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,"true", pickupableStateOwnerList);
+
+//    // action: pick up
+//    AvatarAction* pickupAction = new AvatarAction(ActionType::GRAB());
+//    pickupAction->addParameter(ActionParameter("target",
+//                                        ActionParamType::ENTITY(),
+//                                        varFood));
+
+//    // effect1: The agent hold this object
+//    // holder state
+//    vector<ParamValue> holderStateOwnerList2;
+//    holderStateOwnerList2.push_back(varFood);
+//    State* holderState2 = new State("holder",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_holder, holderStateOwnerList2);
+//    Effect* holderEffect = new Effect(holderState2, OP_ASSIGN, varAvatar);
+
+//    // rule:  pick up an object if closed enough, to hold it
+//    Rule* pickupRule = new Rule(pickupAction,boost::get<Entity>(varAvatar),0.1f);
+//    pickupRule->ruleName = "pickupObjecttoHoldIt";
+//    pickupRule->addPrecondition(pickupableState);
+//    pickupRule->addPrecondition(closedState);
+
+//    pickupRule->addEffect(EffectPair(1.0f,holderEffect));
+
+//    this->AllRules.push_back(pickupRule);
 
 }
 
