@@ -45,7 +45,7 @@ class ParseTruthValue(object):
             if 'strength' in data['truthvalue']['details'] \
                 and 'count' in data['truthvalue']['details']:
                 tv = TruthValue(data['truthvalue']['details']['strength'],
-                                TruthValue.count_to_confidence(data['truthvalue']['details']['count']))
+                                data['truthvalue']['details']['confidence'])
             else:
                 abort(400, 'Invalid request: truthvalue details object '
                            'requires both a strength and count parameter')
