@@ -77,24 +77,25 @@ void PointMemorySCM::init_in_module(void* data)
 void PointMemorySCM::init()
 {
 #ifdef HAVE_GUILE
-    define_scheme_primitive("create-map", &PointMemorySCM::create_map, this, "ato pointmem");
-    define_scheme_primitive("get-time-res", &PointMemorySCM::get_time_res, this, "ato pointmem");
-    define_scheme_primitive("get-space-res", &PointMemorySCM::get_space_res, this, "ato pointmem");
-    define_scheme_primitive("get-time-units", &PointMemorySCM::get_time_units, this, "ato pointmem");
-    define_scheme_primitive("map-ato", &PointMemorySCM::map_ato, this, "ato pointmem");
-    define_scheme_primitive("get-first-ato", &PointMemorySCM::get_first_ato, this, "ato pointmem");
-    define_scheme_primitive("get-last-ato", &PointMemorySCM::get_last_ato, this, "ato pointmem");
-    define_scheme_primitive("get-at-loc-ato", &PointMemorySCM::get_at_loc_ato, this, "ato pointmem");
-    define_scheme_primitive("get-past-loc-ato", &PointMemorySCM::get_past_loc_ato, this, "ato pointmem");
-    define_scheme_primitive("get-locs-ato", &PointMemorySCM::get_locs_ato, this, "ato pointmem");
-    define_scheme_primitive("get-past-locs-ato", &PointMemorySCM::get_past_locs_ato, this, "ato pointmem");
-    define_scheme_primitive("get-elapse-list-at-loc-ato", &PointMemorySCM::get_elapse_list_at_loc_ato, this, "ato pointmem");
-    define_scheme_primitive("get-elapse-list-ato", &PointMemorySCM::get_elapse_list_ato, this, "ato pointmem");
-    define_scheme_primitive("remove-location-ato", &PointMemorySCM::remove_location_ato, this, "ato pointmem");
-    define_scheme_primitive("remove-past-location-ato", &PointMemorySCM::remove_past_location_ato, this, "ato pointmem");
-    define_scheme_primitive("remove-curr-ato", &PointMemorySCM::remove_curr_ato, this, "ato pointmem");
-    define_scheme_primitive("remove-past-ato", &PointMemorySCM::remove_past_ato, this, "ato pointmem");
-    define_scheme_primitive("remove_all_ato", &PointMemorySCM::remove_all_ato, this, "ato pointmem");
+    define_scheme_primitive("create-map", &PointMemorySCM::create_map, this, "ato pointmem");//b_sdii
+    define_scheme_primitive("get-time-res", &PointMemorySCM::get_time_res, this, "ato pointmem");//i_s
+    define_scheme_primitive("get-space-res", &PointMemorySCM::get_space_res, this, "ato pointmem");//d_s
+    define_scheme_primitive("get-time-units", &PointMemorySCM::get_time_units, this, "ato pointmem");//i_s
+    define_scheme_primitive("step-time-unit", &PointMemorySCM::step_time_unit, this, "ato pointmem");//v_s
+    define_scheme_primitive("map-ato", &PointMemorySCM::map_ato, this, "ato pointmem");//b_shddd
+    define_scheme_primitive("get-first-ato", &PointMemorySCM::get_first_ato, this, "ato pointmem");//h_shi
+    define_scheme_primitive("get-last-ato", &PointMemorySCM::get_last_ato, this, "ato pointmem");//h_shi
+    define_scheme_primitive("get-at-loc-ato", &PointMemorySCM::get_at_loc_ato, this, "ato pointmem");//h_sddd
+    define_scheme_primitive("get-past-loc-ato", &PointMemorySCM::get_past_loc_ato, this, "ato pointmem");//h_siddd
+    define_scheme_primitive("get-locs-ato", &PointMemorySCM::get_locs_ato, this, "ato pointmem");//h_sh
+    define_scheme_primitive("get-past-locs-ato", &PointMemorySCM::get_past_locs_ato, this, "ato pointmem");//h_shi
+    define_scheme_primitive("get-elapse-list-at-loc-ato", &PointMemorySCM::get_elapse_list_at_loc_ato, this, "ato pointmem");//h_shddd
+    define_scheme_primitive("get-elapse-list-ato", &PointMemorySCM::get_elapse_list_ato, this, "ato pointmem");//h_sh
+    define_scheme_primitive("remove-location-ato", &PointMemorySCM::remove_location_ato, this, "ato pointmem");//b_sddd
+    define_scheme_primitive("remove-past-location-ato", &PointMemorySCM::remove_past_location_ato, this, "ato pointmem");//b_siddd
+    define_scheme_primitive("remove-curr-ato", &PointMemorySCM::remove_curr_ato, this, "ato pointmem");//v_sh
+    define_scheme_primitive("remove-past-ato", &PointMemorySCM::remove_past_ato, this, "ato pointmem");//v_shi
+    define_scheme_primitive("remove_all_ato", &PointMemorySCM::remove_all_ato, this, "ato pointmem");//v_sh
 #endif
 }
 
@@ -103,29 +104,32 @@ bool PointMemorySCM::create_map(string name,
                     int time_res_milli_sec,
                     int time_units)
 {
-//reject if name already exists
-if (name.length()<1)return false;
-//reject if time units < 1
-if (time_units<1)return false;
-//reject if time res,space_res <=0
-if ((time_res<=0)||(space_res_mtr)<=0.0) return false;
+  //reject if name already exists
+  if (name.length()<1)return false;
+  //reject if time units < 1
+  if (time_units<1)return false;
+  //reject if time res,space_res <=0
+  if ((time_res<=0)||(space_res_mtr)<=0.0) return false;
 
-std::map<string,TimeOctomap*>::iterator it;
-it=tsa.find(name);
-if (it != tsa.end()) return false;
-tsa[name]=new TimeOctomap(time_units,space_res_mtr,std::chrono::milliseconds(time_res_milli_sec));
-return true;
+  std::map<string,TimeOctomap*>::iterator it;
+  it=tsa.find(name);
+  if (it != tsa.end()) return false;
+  tsa[name]=new TimeOctomap(time_units,space_res_mtr,std::chrono::milliseconds(time_res_milli_sec));
+  return true;
 }
 //add point clouds later
+
 int PointMemorySCM::get_time_res(string map_name)
 {
   duration_c dr=tsa[map_name]->get_time_resolution();
   return chrono::milliseconds(dr).count();
 }
+
 double PointMemorySCM::get_space_res(string map_name)
 {
   return tsa[map_name]->get_space_resolution();
 }
+
 int PointMemorySCM::get_time_units(string map_name)
 {
   return tsa[map_name]->get_time_units();
@@ -135,10 +139,12 @@ void PointMemorySCM::step_time_unit(string map_name)
 {
   tsa[map_name]->step_time_unit();
 }
+
 bool PointMemorySCM::map_ato(string map_name,Handle ato,double x,double y,double z)
 {
   return tsa[map_name]->put_atom_at_current_time(point3d(x,y,z),ato);
 }
+
 Handle PointMemorySCM::get_first_ato(string map_name,Handle ato,int elapse)
 {
   time_pt tpt,tp; duration_c dr;
@@ -158,6 +164,7 @@ Handle PointMemorySCM::get_first_ato(string map_name,Handle ato,int elapse)
   ts+=to_string(mil_diff);
   return createLink(AT_TIME_LINK,createNode(TIME_NODE,ts),ato);
 }
+
 Handle PointMemorySCM::get_last_ato(string map_name,Handle ato,int elapse)
 {
   time_pt tpt,tp; duration_c dr;
