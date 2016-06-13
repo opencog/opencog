@@ -22,11 +22,12 @@
     ; These memberships are needed for making filtering and searching simpler..
     ; If GlobNode had worked with GetLink at the time of coding this,
     ; that might have been; better, (or not as it might need as much chasing)
+    ; TODO: Remove this when ExecutionLinks are used as that can be used
+    ; for filtering.
     (MemberLink action psi-action)
 
-    ; AndLink's are unordered links; must use an ordered link, if the
-    ; context is to preceed the action! SequentialAnd seems like an
-    ; OK choice, for now.
+    ; This memberLink is added so as to minimize the tree walking needed to get
+    ; from a goal to a psi-rule. For example, if the goal is a DefinedPredicate.
     (MemberLink implication demand)
 
     implication
