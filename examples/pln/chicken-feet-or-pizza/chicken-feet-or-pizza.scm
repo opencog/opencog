@@ -40,7 +40,7 @@
 
 ;; (chat "What does Jane like?")
 
-;; Janes likes pizza
+;; Jane likes pizza
 ;;
 ;; (SetLink
 ;;    (InheritanceLink
@@ -89,6 +89,58 @@
 ;;    (InheritanceLink
 ;;       (PredicateNode "likes@a21229d1-107f-42f8-b15a-c388b9ec96f1")
 ;;       (DefinedLinguisticConceptNode "present")
+;;    )
+;; )
+
+;; What does Jane like?
+;;
+;; (SetLink
+;;    (InheritanceLink
+;;       (ConceptNode "Jane@2fd0dd6e-a31f-4b61-963a-0f2d6e3b8cdb")
+;;       (ConceptNode "Jane" (stv 0.032258064 0.0012484394))
+;;    )
+;;    (EvaluationLink
+;;       (DefinedLinguisticPredicateNode "definite")
+;;       (ListLink
+;;          (ConceptNode "Jane@2fd0dd6e-a31f-4b61-963a-0f2d6e3b8cdb")
+;;       )
+;;    )
+;;    (ImplicationLink
+;;       (PredicateNode "like@58211994-e4a6-41fb-aa1b-ef0b999277a7")
+;;       (PredicateNode "like" (stv 0.25 0.0012484394))
+;;    )
+;;    (InheritanceLink
+;;       (ConceptNode "what@c7fe43d5-7899-47fb-a2a2-9e51bd32dc03")
+;;       (ConceptNode "what" (stv 0.032258064 0.0012484394))
+;;    )
+;;    (EvaluationLink
+;;       (PredicateNode "like@58211994-e4a6-41fb-aa1b-ef0b999277a7")
+;;       (ListLink
+;;          (ConceptNode "Jane@2fd0dd6e-a31f-4b61-963a-0f2d6e3b8cdb")
+;;          (ConceptNode "what@c7fe43d5-7899-47fb-a2a2-9e51bd32dc03")
+;;       )
+;;    )
+;;    (EvaluationLink
+;;       (PredicateNode "like@58211994-e4a6-41fb-aa1b-ef0b999277a7")
+;;       (ListLink
+;;          (ConceptNode "Jane@2fd0dd6e-a31f-4b61-963a-0f2d6e3b8cdb")
+;;       )
+;;    )
+;;    (InheritanceLink
+;;       (InterpretationNode "sentence@67c4bd87-d367-42f7-9427-758e6f9bccf4_parse_0_interpretation_$X")
+;;       (DefinedLinguisticConceptNode "InterrogativeSpeechAct")
+;;    )
+;;    (InheritanceLink
+;;       (SpecificEntityNode "Jane@2fd0dd6e-a31f-4b61-963a-0f2d6e3b8cdb")
+;;       (DefinedLinguisticConceptNode "female" (stv 0.045454547 0.0012484394))
+;;    )
+;;    (InheritanceLink
+;;       (SpecificEntityNode "Jane@2fd0dd6e-a31f-4b61-963a-0f2d6e3b8cdb")
+;;       (ConceptNode "Jane" (stv 0.032258064 0.0012484394))
+;;    )
+;;    (InheritanceLink
+;;       (PredicateNode "like@58211994-e4a6-41fb-aa1b-ef0b999277a7")
+;;       (DefinedLinguisticConceptNode "present_infinitive")
 ;;    )
 ;; )
 
