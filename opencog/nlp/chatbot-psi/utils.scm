@@ -29,6 +29,14 @@
     (get-input 'SentenceNode)
 )
 
+(define (search-started? anchor)
+    (Equal (Set search-started) (Get (State anchor (Variable "$s"))))
+)
+
+(define (any-result? anchor)
+    (Not (Equal (Set no-result) (Get (State anchor (Variable "$f")))))
+)
+
 (define (reset-all-states)
     (State input-utterance no-input-utterance)
     (State aiml-replies default-state)
@@ -39,6 +47,7 @@
     (State fuzzy-qa-search default-state)
 )
 
+; For handling things return by the fuzzy matcher
 (define (pick-and-generate list-of-results)
     (if (equal? (length list-of-results) 0)
         '()

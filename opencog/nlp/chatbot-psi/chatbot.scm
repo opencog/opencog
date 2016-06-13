@@ -38,21 +38,19 @@
 
 (define default-state (Concept "DefaultState"))
 (define search-started (Concept "SearchStarted"))
+(define no-result (Concept "NoResult"))
 
 (define aiml-replies (Anchor "AIMLReplies"))
-(define no-aiml-reply (Concept "NoAIMLReply"))
 (define aiml-search (Anchor "AIMLSearch"))
 (State aiml-replies default-state)
 (State aiml-search default-state)
 
 (define fuzzy-replies (Anchor "FuzzyReplies"))
-(define no-fuzzy-reply (Concept "NoFuzzyReply"))
 (define fuzzy-match (Anchor "FuzzyMatch"))
 (State fuzzy-replies default-state)
 (State fuzzy-match default-state)
 
 (define fuzzy-answers (Anchor "FuzzyAnswers"))
-(define no-fuzzy-answers (Concept "NoFuzzyAnswers"))
 (define fuzzy-qa-search (Anchor "FuzzyQASearch"))
 (State fuzzy-answers default-state)
 (State fuzzy-qa-search default-state)
@@ -64,6 +62,9 @@
 
 ;-------------------------------------------------------------------------------
 
+; Load the utilities
+(load "utils.scm")
+
 ; Load the available contexts
 (load "contexts.scm")
 
@@ -72,9 +73,6 @@
 
 ; Load the psi-rules
 (load "psi-rules.scm")
-
-; Load the utilities
-(load "utils.scm")
 
 ; Run OpenPsi if it's not already running
 (if (not (psi-running?))

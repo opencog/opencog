@@ -45,12 +45,6 @@
 )
 
 (Define
-    (DefinedPredicate "fuzzy-qa-search-started?")
-    (Equal (Set search-started)
-           (Get (State fuzzy-qa-search (Variable "$s"))))
-)
-
-(Define
     (DefinedPredicate "is-a-question?")
     (Satisfaction (Or
         (DefinedPredicate "is-interrogative?")
@@ -59,31 +53,31 @@
 )
 
 (Define
+    (DefinedPredicate "fuzzy-qa-search-started?")
+    (search-started? fuzzy-qa-search)
+)
+
+(Define
     (DefinedPredicate "is-fuzzy-answer?")
-    (Not (Equal (Set no-fuzzy-answers)
-                (Get (State fuzzy-answers (Variable "$f")))))
+    (any-result? fuzzy-answers)
 )
 
 (Define
     (DefinedPredicate "fuzzy-match-started?")
-    (Equal (Set search-started)
-           (Get (State fuzzy-match (Variable "$s"))))
+    (search-started? fuzzy-match)
 )
 
 (Define
     (DefinedPredicate "is-fuzzy-reply?")
-    (Not (Equal (Set no-fuzzy-reply)
-                (Get (State fuzzy-replies (Variable "$r")))))
+    (any-result? fuzzy-replies)
 )
 
 (Define
     (DefinedPredicate "aiml-search-started?")
-    (Equal (Set search-started)
-           (Get (State aiml-search (Variable "$s"))))
+    (search-started? aiml-search)
 )
 
 (Define
     (DefinedPredicate "is-aiml-reply?")
-    (Not (Equal (Set no-aiml-reply)
-                (Get (State aiml-replies (Variable "$r")))))
+    (any-result? aiml-replies)
 )

@@ -4,7 +4,7 @@
     (begin-thread
         (let ((fuz-ans (get-fuzzy-answers (get-input-sent-node) #:do-microplanning #f)))
             (if (null? fuz-ans)
-                (State fuzzy-answers no-fuzzy-answers)
+                (State fuzzy-answers no-result)
 
                 ; Fuzzy matcher may return more than one answers that have the
                 ; same score, randomly pick one of them if so
@@ -28,14 +28,14 @@
               (rtn '()))
             ; No result if it's an empty ListLink
             (if (equal? (cog-arity fuzzy-results) 0)
-                (State fuzzy-replies no-fuzzy-reply)
+                (State fuzzy-replies no-result)
                 (begin
                     (set! rtn (pick-and-generate (cog-outgoing-set fuzzy-results)))
                     (cog-extract fuzzy-results)
                     (if (null? rtn)
                         ; Could happen if none of them can be used to generate
                         ; an actual sentence
-                        (State fuzzy-replies no-fuzzy-reply)
+                        (State fuzzy-replies no-result)
                         (State fuzzy-replies (List (map Word (string-split rtn #\ ))))
                     )
                 )
@@ -51,7 +51,7 @@
         (let ((aiml-resp (aiml-get-response-wl (get-input-word-list))))
             ; No result if it's a ListLink with arity 0
             (if (equal? (cog-arity aiml-resp) 0)
-                (State aiml-replies no-aiml-reply)
+                (State aiml-replies no-result)
                 (State aiml-replies aiml-resp)
             )
         )
