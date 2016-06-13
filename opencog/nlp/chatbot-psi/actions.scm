@@ -4,7 +4,9 @@
     (begin-thread
         (let* ((sent-node (get-input-sent-node))
                (fuz-ans (get-fuzzy-answers sent-node #:do-microplanning #f)))
-            (if (not (null? fuz-ans))
+            (if (null? fuz-ans)
+                (State fuzzy-answers no-fuzzy-answers)
+
                 ; Fuzzy matcher may return more than one answers that has the
                 ; same score, randomly pick one of them if so
                 (let* ((ans (list (list-ref fuz-ans (random (length fuz-ans)))))
@@ -14,6 +16,13 @@
                     ; TODO: Create a new psi-rule for this QA in the OpenCog AIML format
                 )
             )
+
+(newline)
+(display "----------> Fuzzy answers:\n")
+(display (car (append (cog-chase-link 'StateLink 'ListLink fuzzy-answers)
+    (cog-chase-link 'StateLink 'ConceptNode fuzzy-answers))))
+(newline)
+
         )
     )
 )
@@ -29,6 +38,13 @@
                 (State aiml-replies aiml-resp)
             )
         )
+
+(newline)
+(display "----------> AIML replies:\n")
+(display (car (append (cog-chase-link 'StateLink 'ListLink aiml-replies)
+    (cog-chase-link 'StateLink 'ConceptNode aiml-replies))))
+(newline)
+
     )
 )
 
