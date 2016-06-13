@@ -253,6 +253,40 @@ bool ActionParameter::isFuzzyIntervalFloatValue(ParamValue value)
 }
 
 
+const ActionParamType& ActionParameter::getTypeFromParam(ParamValue& value)
+{
+    if (isStringValue(value))
+    {
+        string val = boost::get<string>(value);
+        if (! opencog::StringManipulator::isNumber(val))
+        {
+            if (val == "true" || val == "false" || val == "True" || val == "False")
+                return ActionParamType::BOOLEAN();
+            else
+                return ActionParamType::STRING();
+        }
+        else
+        {
+            if (val.find('.') == string::npos)
+                return ActionParamType::INT();
+            else
+                return ActionParamType::FLOAT();
+
+        }
+    }
+    else if (isRotationValue(value))
+        return ActionParamType::ROTATION();
+    else if (isVectorValue(value))
+        return ActionParamType::VECTOR();
+    else if (isEntityValue(value))
+        return ActionParamType::ENTITY();
+    else if (isFuzzyIntervalIntValue(value))
+        return ActionParamType::FUZZY_INTERVAL_INT();
+    else // if (isFuzzyIntervalFloatValue(value))
+        return ActionParamType::FUZZY_INTERVAL_FLOAT();
+}
+
+
 const string& ActionParameter::getStringValue() const
 {
     return get<string>(value);

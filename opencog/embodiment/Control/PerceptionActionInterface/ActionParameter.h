@@ -297,6 +297,9 @@ public:
     static bool isFuzzyIntervalIntValue(ParamValue value) ;
     static bool isFuzzyIntervalFloatValue(ParamValue value) ;
 
+
+    static const ActionParamType& getTypeFromParam(ParamValue& value);
+
     /**
      * Methods for getting the real value of the value attribute.
      * Before calling one of thes methods, the is<Type>Value() method
