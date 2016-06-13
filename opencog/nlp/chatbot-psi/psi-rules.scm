@@ -9,7 +9,7 @@
         (list (SequentialAnd
             (Not (DefinedPredicate "fuzzy-qa-search-started?"))
             (DefinedPredicate "is-input-utterance?")
-            (DefinedPredicate "is-interrogative?")
+            (DefinedPredicate "is-a-question?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: do-fuzzy-QA") (List)))
         (True)
@@ -31,6 +31,33 @@
         sociality
     )
     chat-rule
+)
+
+(Member
+    (psi-rule
+        (list (SequentialAnd
+            (Not (DefinedPredicate "fuzzy-match-started?"))
+            (DefinedPredicate "is-input-utterance?")
+            (Not (DefinedPredicate "is-a-question?"))
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: do-fuzzy-match") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+    )
+)
+
+(Member
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "fuzzy-match-started?")
+            (DefinedPredicate "is-fuzzy-reply?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-replies)))
+        (True)
+        (stv .9 .9)
+        sociality
+    )
 )
 
 (Member

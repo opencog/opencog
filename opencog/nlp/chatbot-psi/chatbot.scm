@@ -14,24 +14,10 @@
 ; Schema function for chatting
 
 (define (chat utterance)
-    (define (get-words-list sent-node)
-        (List
-            (append-map
-                (lambda (w)
-                    (if (not (string-prefix? "LEFT-WALL" (cog-name w)))
-                        (cog-chase-link 'ReferenceLink 'WordNode w)
-                        '()
-                    )
-                )
-                (car (sent-get-words-in-order sent-node))
-            )
-        )
-    )
-
     (reset-all-states)
 
     (let* ((sent-node (car (nlp-parse utterance)))
-           (list-of-words (get-words-list sent-node)))
+           (list-of-words (get-word-list sent-node)))
 
         (State input-utterance
             (Reference
@@ -46,22 +32,25 @@
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
 
-(define input-utterance-time (Anchor "InputUtteranceTime"))
 (define input-utterance (Anchor "InputUtterance"))
 (define no-input-utterance (Concept "NoInputUtterance"))
 (State input-utterance no-input-utterance)
 
 (define default-state (Concept "DefaultState"))
 (define search-started (Concept "SearchStarted"))
+(define no-result (Concept "NoResult"))
 
 (define aiml-replies (Anchor "AIMLReplies"))
-(define no-aiml-reply (Concept "NoAIMLReply"))
 (define aiml-search (Anchor "AIMLSearch"))
 (State aiml-replies default-state)
 (State aiml-search default-state)
 
+(define fuzzy-replies (Anchor "FuzzyReplies"))
+(define fuzzy-match (Anchor "FuzzyMatch"))
+(State fuzzy-replies default-state)
+(State fuzzy-match default-state)
+
 (define fuzzy-answers (Anchor "FuzzyAnswers"))
-(define no-fuzzy-answers (Concept "NoFuzzyAnswers"))
 (define fuzzy-qa-search (Anchor "FuzzyQASearch"))
 (State fuzzy-answers default-state)
 (State fuzzy-qa-search default-state)
@@ -73,6 +62,9 @@
 
 ;-------------------------------------------------------------------------------
 
+; Load the utilities
+(load "utils.scm")
+
 ; Load the available contexts
 (load "contexts.scm")
 
@@ -81,9 +73,6 @@
 
 ; Load the psi-rules
 (load "psi-rules.scm")
-
-; Load the utilities
-(load "utils.scm")
 
 ; Run OpenPsi if it's not already running
 (if (not (psi-running?))
