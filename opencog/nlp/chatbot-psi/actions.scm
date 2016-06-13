@@ -16,13 +16,6 @@
                     ; TODO: Create a new psi-rule for this QA in the OpenCog AIML format
                 )
             )
-
-(newline)
-(display "----------> Fuzzy answers:\n")
-(display (car (append (cog-chase-link 'StateLink 'ListLink fuzzy-answers)
-    (cog-chase-link 'StateLink 'ConceptNode fuzzy-answers))))
-(newline)
-
         )
     )
 )
@@ -38,13 +31,6 @@
                 (State aiml-replies aiml-resp)
             )
         )
-
-(newline)
-(display "----------> AIML replies:\n")
-(display (car (append (cog-chase-link 'StateLink 'ListLink aiml-replies)
-    (cog-chase-link 'StateLink 'ConceptNode aiml-replies))))
-(newline)
-
     )
 )
 

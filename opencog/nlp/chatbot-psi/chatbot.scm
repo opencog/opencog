@@ -46,7 +46,6 @@
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
 
-(define input-utterance-time (Anchor "InputUtteranceTime"))
 (define input-utterance (Anchor "InputUtterance"))
 (define no-input-utterance (Concept "NoInputUtterance"))
 (State input-utterance no-input-utterance)
