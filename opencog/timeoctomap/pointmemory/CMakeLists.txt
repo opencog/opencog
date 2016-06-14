@@ -3,6 +3,7 @@
         )
         TARGET_LINK_LIBRARIES(point_memory
                 time_octomap
+                spacetime
                 ${ATOMSPACE_LIBRARIES}
         )
         INSTALL (TARGETS point_memory
