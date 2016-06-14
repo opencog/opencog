@@ -100,6 +100,142 @@
 (chat "Jane lives in France")
 (chat "Jane likes pizza")
 
+;; Facts about Jack
+(chat "Jack lives in China")
+(chat "Jack likes chicken feet")
+
+;; Partial facts about Jim.
+(chat "Jim lives in China")
+
+;; Now reasoning should be used to infer the answer of the following.
+(chat "What does Jim like?")
+
+;;
+;; Inference experimentation
+;;
+
+;; r2l output corresponding to (chat "Bob lives in China")
+
+   (SetLink
+      (InheritanceLink
+         (ConceptNode "in@b8dbff0f-ffe4-4775-9905-f9c87f29f63d")
+         (ConceptNode "in" (stv 0.032258064 0.0012484394))
+      )
+      (ImplicationLink
+         (PredicateNode "bob@04c3177d-bb4d-4a44-ae30-f4acbf1ea59f")
+         (PredicateNode "bob" (stv 0.16666667 0.0012484394))
+      )
+      (InheritanceLink
+         (SatisfyingSetLink
+            (PredicateNode "bob@04c3177d-bb4d-4a44-ae30-f4acbf1ea59f")
+         )
+         (ConceptNode "in@b8dbff0f-ffe4-4775-9905-f9c87f29f63d")
+      )
+      (InheritanceLink
+         (ConceptNode "China@b5d7ee9c-4cb1-4a70-b7ea-4dec2db35558")
+         (ConceptNode "China" (stv 0.032258064 0.0012484394))
+      )
+      (ImplicationLink
+         (PredicateNode "in@b8dbff0f-ffe4-4775-9905-f9c87f29f63d")
+         (PredicateNode "in" (stv 0.16666667 0.0012484394))
+      )
+      (EvaluationLink
+         (PredicateNode "in@b8dbff0f-ffe4-4775-9905-f9c87f29f63d")
+         (ListLink
+            (PredicateNode "bob@04c3177d-bb4d-4a44-ae30-f4acbf1ea59f")
+            (ConceptNode "China@b5d7ee9c-4cb1-4a70-b7ea-4dec2db35558")
+         )
+      )
+      (EvaluationLink
+         (DefinedLinguisticPredicateNode "definite")
+         (ListLink
+            (ConceptNode "China@b5d7ee9c-4cb1-4a70-b7ea-4dec2db35558")
+         )
+      )
+      (EvaluationLink
+         (PredicateNode "in@b8dbff0f-ffe4-4775-9905-f9c87f29f63d")
+         (ListLink
+            (ConceptNode "China@b5d7ee9c-4cb1-4a70-b7ea-4dec2db35558")
+         )
+      )
+      (InheritanceLink
+         (InterpretationNode "sentence@0c2ab58f-7150-4259-8cd2-52ddf260d7f1_parse_0_interpretation_$X")
+         (DefinedLinguisticConceptNode "ImperativeSpeechAct")
+      )
+      (InheritanceLink
+         (SpecificEntityNode "China@b5d7ee9c-4cb1-4a70-b7ea-4dec2db35558")
+         (DefinedLinguisticConceptNode "female" (stv 0.050000001 0.0012484394))
+      )
+      (InheritanceLink
+         (SpecificEntityNode "China@b5d7ee9c-4cb1-4a70-b7ea-4dec2db35558")
+         (ConceptNode "China" (stv 0.032258064 0.0012484394))
+      )
+      (InheritanceLink
+         (PredicateNode "bob@04c3177d-bb4d-4a44-ae30-f4acbf1ea59f")
+         (DefinedLinguisticConceptNode "imperative")
+      )
+   )
+
+;; r2l output corresponding to (chat "Bob likes chicken feet")
+
+   (SetLink
+      (InheritanceLink
+         (ConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+         (ConceptNode "Bob" (stv 0.025641026 0.0012484394))
+      )
+      (EvaluationLink
+         (DefinedLinguisticPredicateNode "definite")
+         (ListLink
+            (ConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+         )
+      )
+      (ImplicationLink
+         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
+         (PredicateNode "like" (stv 0.125 0.0012484394))
+      )
+      (InheritanceLink
+         (ConceptNode "feet@68a4daa2-1f53-4c0f-8443-806099311b49")
+         (ConceptNode "foot" (stv 0.025641026 0.0012484394))
+      )
+      (EvaluationLink
+         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
+         (ListLink
+            (ConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+            (ConceptNode "feet@68a4daa2-1f53-4c0f-8443-806099311b49")
+         )
+      )
+      (EvaluationLink
+         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
+         (ListLink
+            (ConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+         )
+      )
+      (InheritanceLink
+         (InterpretationNode "sentence@e943fc5b-cf61-4ed1-a172-ab09d545ae67_parse_0_interpretation_$X")
+         (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
+      )
+      (InheritanceLink
+         (ConceptNode "chicken@43d36c82-1eb0-4e42-b694-68e21023b5fa")
+         (ConceptNode "chicken" (stv 0.025641026 0.0012484394))
+      )
+      (InheritanceLink
+         (ConceptNode "feet@68a4daa2-1f53-4c0f-8443-806099311b49")
+         (ConceptNode "chicken@43d36c82-1eb0-4e42-b694-68e21023b5fa")
+      )
+      (InheritanceLink
+         (SpecificEntityNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+         (DefinedLinguisticConceptNode "male")
+      )
+      (InheritanceLink
+         (SpecificEntityNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+         (ConceptNode "Bob" (stv 0.025641026 0.0012484394))
+      )
+      (InheritanceLink
+         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
+         (DefinedLinguisticConceptNode "present")
+      )
+   )
+
 ;; The following is what is generated by the chatbot when entering
 ;; "Jane likes pizza". All (or almost all) of that turns out to be
 ;; useful for NLG processing to generate the answer to the question
@@ -332,12 +468,126 @@
       (SentenceNode "sentence@a88796c5-be60-4036-beb1-39bf193c1551")
    )
 
-;; Facts about Jack
-(chat "Jack lives in China")
-(chat "Jack likes chicken feet")
+;; Try to manually craft a rule telling that people living in China
+;; like chicken feet. For now the rule has a full strength and
+;; confidence.
 
-;; Partial facts about Jim.
-(chat "Jim lives in China")
-
-;; Now reasoning should be used to infer the answer of the following.
-(chat "What does Jim like?")
+(ImplicationLink (stv 1 1)
+   (VariableList
+      (TypedVariable
+         (Variable "$individual")
+         (Type "PredicateNode"))
+      (TypedVariable
+         (Variable "$individual-instance")
+         (Type "PredicateNode"))
+      (TypedVariable
+         (Variable "$in-instance")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$China-instance")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$China-specific-entity-instance")
+         (Type "SpecificEntityNode"))
+      (TypedVariable
+         (Variable "$interpretation-instance")
+         (Type "InterpretationNode")))
+   (Set
+      (Inheritance
+         (Variable "$in-instance")
+         (ConceptNode "in"))
+      (Implication
+         (Variable "$individual-instance")
+         (Variable "$individual"))
+      (Inheritance
+         (SatisfyingSet
+            (Variable "$individual-instance"))
+         (Variable "$in-instance"))
+      (Inheritance
+         (Variable "$China-instance")
+         (Concept "China"))
+      (Implication
+         (Variable "$in-instance")
+         (PredicateNode "in"))
+      (Evaluation
+         (Variable "$in-instance")
+         (List
+            (Variable "$individual-instance")
+            (Variable "$China-instance")))
+      (Evaluation
+         (DefinedLinguisticPredicateNode "definite")
+         (List
+            (Variable "$China-instance")))
+      (Evaluation
+         (Variable "in-instance")
+         (List
+            (Variable "$China-instance")))
+      (Inheritance
+         (Variable "$interpretation-instance")
+         (DefinedLinguisticConcept "ImperativeSpeechAct"))
+      (Inheritance
+         (Variable "$China-specific-entity-instance")
+         (DefinedLinguisticConceptNode "female"))
+      (Inheritance
+         (Variable "$China-specific-entity-instance")
+         (Concept "China"))
+      (Inheritance
+         (Variable "individual-instance")
+         (DefinedLinguisticConceptNode "imperative")))
+   (Set
+      (InheritanceLink
+         (VariableConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+         (ConceptNode "Bob" (stv 0.025641026 0.0012484394))
+      )
+      (EvaluationLink
+         (DefinedLinguisticPredicateNode "definite")
+         (ListLink
+            (ConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+         )
+      )
+      (ImplicationLink
+         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
+         (PredicateNode "like" (stv 0.125 0.0012484394))
+      )
+      (InheritanceLink
+         (ConceptNode "feet@68a4daa2-1f53-4c0f-8443-806099311b49")
+         (ConceptNode "foot" (stv 0.025641026 0.0012484394))
+      )
+      (EvaluationLink
+         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
+         (ListLink
+            (ConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+            (ConceptNode "feet@68a4daa2-1f53-4c0f-8443-806099311b49")
+         )
+      )
+      (EvaluationLink
+         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
+         (ListLink
+            (ConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+         )
+      )
+      (InheritanceLink
+         (InterpretationNode "sentence@e943fc5b-cf61-4ed1-a172-ab09d545ae67_parse_0_interpretation_$X")
+         (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
+      )
+      (InheritanceLink
+         (ConceptNode "chicken@43d36c82-1eb0-4e42-b694-68e21023b5fa")
+         (ConceptNode "chicken" (stv 0.025641026 0.0012484394))
+      )
+      (InheritanceLink
+         (ConceptNode "feet@68a4daa2-1f53-4c0f-8443-806099311b49")
+         (ConceptNode "chicken@43d36c82-1eb0-4e42-b694-68e21023b5fa")
+      )
+      (InheritanceLink
+         (SpecificEntityNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+         (DefinedLinguisticConceptNode "male")
+      )
+      (InheritanceLink
+         (SpecificEntityNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
+         (ConceptNode "Bob" (stv 0.025641026 0.0012484394))
+      )
+      (InheritanceLink
+         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
+         (DefinedLinguisticConceptNode "present")
+      )
+   )
