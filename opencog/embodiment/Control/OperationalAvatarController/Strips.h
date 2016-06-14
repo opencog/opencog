@@ -482,9 +482,8 @@ namespace opencog { namespace oac {
 
     struct MinedEffect
     {
-        string stateName;
         Handle stateOwner;
-        Handle newStateValue;
+        ActionParameter* newStateParameter;
     };
 
     struct MinedParamStruct

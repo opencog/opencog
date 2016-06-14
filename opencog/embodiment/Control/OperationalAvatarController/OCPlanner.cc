@@ -3291,10 +3291,13 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
 
     }
 
+    // To be improved: Find the state changes occurred to the  actors before the action execution for preconditions.
 
-    // To find out the other effects of this rule besides the main goal.
-
-    // To be improved:Find the state changes occurred to the  actors before the action execution for preconditions.
+    // To be imrpoved: Find out the other side effects of this rule besides the main goal.
+    // Add the main effect
+    MinedEffect mainEffect;
+    mainEffect.stateOwner = defaultTargetVarHandle;
+    mainEffect.newStateParameter = curSubgoalNode->state->stateVariable;
 
     // Create MinedRulePattern
     MinedRulePattern* minedRulePattern = new MinedRulePattern();
@@ -3302,6 +3305,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
     minedRulePattern->paramToMinedStruct = paramToMinedStruct;
     minedRulePattern->preconditions = preconditions;
     minedRulePattern->allVariables = allVariables;
+    minedRulePattern->effects.push_back(mainEffect);
 
     return minedRulePattern;
 
@@ -4686,7 +4690,6 @@ ParamValue OCPlanner::generateParamValFromHandle(Handle& varHandle, map<Handle, 
 
 MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPattern)
 {
-
     ParamValue varAvatar = entity_var[0];
 
     boolVarCount = 0;
@@ -4711,7 +4714,7 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
                                             param));
     }
 
-    Rule* minedRule = new Rule(action,boost::get<Entity>(varAvatar),0.1f);
+    MinedRule* minedRule = new MinedRule(action,varAvatar,0.1f);
 
     // generate preconditions
     for (MinedPreCondition& precond : minedPattern.preconditions)
@@ -4725,9 +4728,10 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
         minedRule->addPrecondition(preconState);
     }
 
-    // Added a default precondition: if the target is an Entity, the agent should be in the assess distance of the target
+
     if (minedPattern.allVariables.find("target") != minedPattern.allVariables.end())
     {
+        // Added a default precondition: if the target is an Entity, the agent should be in the assess distance of the target
         vector<ParamValue> closedStateOwnerList;
         closedStateOwnerList.push_back(varAvatar);
         closedStateOwnerList.push_back(handleToParamValMap[defaultTargetVarHandle]);
@@ -4736,35 +4740,22 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
         minedRule->addPrecondition(closedState);
     }
 
-    // todo: added effects
+    // Add effects :
+    // To be improved, sometimes there are some side effects besides the main effect described in the subgoal StateNode.
+    //                 Also currently the target is usually the subgoal state owner, but not always, this need to be improved too.
+    for (MinedEffect& minedEffect : minedPattern.effects)
+    {
+        vector<ParamValue> mainEffectStateOwnerList;
+        ParamValue ownerParamVal = generateParamValFromHandle(minedEffect.stateOwner, handleToParamValMap);
+        mainEffectStateOwnerList.push_back(ownerParamVal);
 
-//    // precondition 2: The object can be picked up
-//    vector<ParamValue> pickupableStateOwnerList;
-//    pickupableStateOwnerList.push_back(varFood);
-//    State* pickupableState = new State("is_pickupable",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,"true", pickupableStateOwnerList);
+        State* effectState = new State(minedEffect.newStateParameter->getName(), minedEffect.newStateParameter->getType(),STATE_EQUAL_TO,  minedEffect.newStateParameter->getValue(), mainEffectStateOwnerList);
+        Effect* effect = new Effect(effectState, OP_ASSIGN, minedEffect.newStateParameter->getValue());
+        minedRule->addEffect(EffectPair(1.0f, effect));
+    }
 
-//    // action: pick up
-//    AvatarAction* pickupAction = new AvatarAction(ActionType::GRAB());
-//    pickupAction->addParameter(ActionParameter("target",
-//                                        ActionParamType::ENTITY(),
-//                                        varFood));
-
-//    // effect1: The agent hold this object
-//    // holder state
-//    vector<ParamValue> holderStateOwnerList2;
-//    holderStateOwnerList2.push_back(varFood);
-//    State* holderState2 = new State("holder",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_holder, holderStateOwnerList2);
-//    Effect* holderEffect = new Effect(holderState2, OP_ASSIGN, varAvatar);
-
-//    // rule:  pick up an object if closed enough, to hold it
-//    Rule* pickupRule = new Rule(pickupAction,boost::get<Entity>(varAvatar),0.1f);
-//    pickupRule->ruleName = "pickupObjecttoHoldIt";
-//    pickupRule->addPrecondition(pickupableState);
-//    pickupRule->addPrecondition(closedState);
-
-//    pickupRule->addEffect(EffectPair(1.0f,holderEffect));
-
-//    this->AllRules.push_back(pickupRule);
+    this->AllRules.push_back(minedRule);
+    return minedRule;
 
 }
 
