@@ -728,7 +728,7 @@ Returns a JSON representation of the result, indicating success or failure.
         Removes an atom from the AtomSpace
         """
 
-        if Atom(id) not in self.atomspace:
+        if not Atom(id, self.atomspace):
             abort(404, 'Atom not found')
         else:
             atom = atomspace.get_atom_with_uuid(id)
