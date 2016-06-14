@@ -50,31 +50,31 @@ private:
 
 public:
     //create a map
-    bool create_map(string map_name,
+    bool create_map(const string& map_name,
                     double space_res_mtr,
                     int time_res_milli_sec,
                     int time_units);
     //get time resolution milli-sec
-    int get_time_res(string map_name);
+    int get_time_res(const string& map_name);
     //get space resolution meters
-    double get_space_res(string map_name);
+    double get_space_res(const string& map_name);
     //get time units
-    int get_time_units(string map_name);
+    int get_time_units(const string& map_name);
     //step time before adding atoms
-    void step_time_unit(string map_name);
+    void step_time_unit(const string& map_name);
     //add an atom at location on current time step
-    bool map_ato(string map_name,Handle ato,double x,double y,double z);
+    bool map_ato(const string& map_name,Handle ato,double x,double y,double z);
     //get time of first atom in past elapsed time
-    Handle get_first_ato(string map_name,Handle ato,int elapse);
+    Handle get_first_ato(const string& map_name,Handle ato,int elapse);
     //get time of last atom in past elapsed time
-    Handle get_last_ato(string map_name,Handle ato,int elapse);
+    Handle get_last_ato(const string& map_name,Handle ato,int elapse);
     //get atom at location
-    Handle get_at_loc_ato(string map_name,double x,double y,double z);
+    Handle get_at_loc_ato(const string& map_name,double x,double y,double z);
     //get atom at location in elapsed past
-    Handle get_past_loc_ato(string map_name,int elapse,
+    Handle get_past_loc_ato(const string& map_name,int elapse,
                             double x,double y,double z);
     //get locations of atom in current time
-    Handle get_locs_ato(string map_name,Handle);//listlink atLocationLink
+    Handle get_locs_ato(const string& map_name,Handle);//listlink atLocationLink
     //AtLocationLink
     //   Atom
     //   ListLink
@@ -85,27 +85,27 @@ public:
     //       NumberNode z
 
     //get locations of atom in elapsed past
-    Handle get_past_locs_ato(string map_name,Handle ato,int elapse);
+    Handle get_past_locs_ato(const string& map_name,Handle ato,int elapse);
 
     //AtTimeLink
     //  TimeNode "Date Time millisec"
     //  Atom
     // get time points of atom occuring at a location
-    Handle get_elapse_list_at_loc_ato(string map_name, Handle ato,
+    Handle get_elapse_list_at_loc_ato(const string& map_name, Handle ato,
               double x,double y,double z);//listlink atTimeLink
     //get time points of atom occuring in map
-    Handle get_elapse_list_ato(string map_name,Handle ato);//listlink atTimeLink
+    Handle get_elapse_list_ato(const string& map_name,Handle ato);//listlink atTimeLink
     //remove atom from location at currrent time
-    bool remove_location_ato(string map_name,double x,double y,double z);
+    bool remove_location_ato(const string& map_name,double x,double y,double z);
     //remove atom from location at elapsed past time
-    bool remove_past_location_ato(string map_name,int elapse,
+    bool remove_past_location_ato(const string& map_name,int elapse,
          double x,double y,double z);
     //remove all specific atoms from map at current time
-    void remove_curr_ato(string map_name,Handle ato);
+    void remove_curr_ato(const string& map_name,Handle ato);
     //remove all specific atoms from map in elapsed past 
-    void remove_past_ato(string map_name,Handle ato,int elapse);
+    void remove_past_ato(const string& map_name,Handle ato,int elapse);
     //remove all specific atoms in all time points and all locations
-    void remove_all_ato(string map_name,Handle ato);
+    void remove_all_ato(const string& map_name,Handle ato);
     //list .. handle float float
 private:
     map<string,TimeOctomap*> tsa;
