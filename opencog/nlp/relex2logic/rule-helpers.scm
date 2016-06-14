@@ -466,26 +466,26 @@
 	(define adv (cog-name adv-node))
 	(define adv_instance (cog-name adv-instance-node))
 	(ListLink
-		(InheritanceLink  (ConceptNode adv_instance) (ConceptNode adv))
-			(ImplicationLink  (PredicateNode instance) (PredicateNode verb))
-			(r2l-wordinst-Predicate instance)
-			(r2l-wordinst-concept adv_instance)
-			(InheritanceLink  (SatisfyingSetLink (PredicateNode instance)) (ConceptNode adv_instance))
+		(ImplicationLink  (PredicateNode adv_instance) (PredicateNode adv))
+		(InheritanceLink  (ConceptNode instance) (ConceptNode verb))
+		(r2l-wordinst-concept instance)
+		(r2l-wordinst-Predicate adv_instance)
+		(InheritanceLink  (ConceptNode instance) (SatisfyingSet (PredicateNode adv_instance)))
 	)
 )
 
 (define-public (adverbialpp-rule verb instance prep  prep_instance noun noun_instance)
     (ListLink
     (InheritanceLink  (ConceptNode noun_instance) (ConceptNode noun))
-    (ImplicationLink  (PredicateNode instance) (PredicateNode verb))
+    (InheritanceLink  (ConceptNode instance) (ConceptNode verb))
     (ImplicationLink  (PredicateNode prep_instance) (PredicateNode prep))
-    (r2l-wordinst-Predicate instance)
+    (r2l-wordinst-concept instance)
     (r2l-wordinst-concept noun_instance)
     (r2l-wordinst-Predicate prep_instance)
     (EvaluationLink
         (PredicateNode prep_instance)
         (ListLink
-            (PredicateNode instance)
+            (ConceptNode instance)
             (ConceptNode noun_instance))
 	))
 )
@@ -553,9 +553,9 @@
 	(define tense (cog-name tns))
 
 	(ListLink
-		(Implication (Predicate instance) (Predicate verb))
-		(r2l-wordinst-Predicate instance)
-		(Inheritance (Predicate instance) (DefinedLinguisticConceptNode tense))
+		(Inheritance (Concept instance) (Concept verb))
+		(r2l-wordinst-concept instance)
+		(Inheritance (Concept instance) (DefinedLinguisticConceptNode tense))
 	)
 )
 
