@@ -669,7 +669,8 @@ containing the atom.
         Updates the AttentionValue (STI, LTI, VLTI) or TruthValue of an atom
         """
 
-        if Atom(id) not in self.atomspace:
+        # If the atom is not found in the atomspace.
+        if not Atom(id , self.atomspace):
             abort(404, 'Atom not found')
 
         # Prepare the atom data
