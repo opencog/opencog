@@ -62,16 +62,20 @@
 
 ; ==============================================================
 
-(define-public (string-words SENT-STR)
+(define (string-words SENT-STR)
 "
   string-words SENT-STR -- chop up SENT-STR string into word-nodes
   CAUTIION: this by-passes the NLP pipeline, and instead performs
-  an extremely low-brow tokenization!
+  an extremely low-brow tokenization!  In particular, it does not
+  handle upper/lower case correctly (all AIML rules are lower-case
+  only) and it does not handle punctuation (AIML rules have no
+  punctuation in them).
 
-  This is a debugging utility, and not for general use!
+  This is a debugging utility, and not for general use!  It is NOT
+  exported for public use!
 
   Example:
-     (string-words \"This is a test.\")
+     (string-words \"this is a test\")
   produces the output:
      (List (Word \"this\") (Word \"is\") (Word \"a\") (Word \"test\"))
 
