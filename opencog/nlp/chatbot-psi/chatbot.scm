@@ -3,6 +3,7 @@
              (opencog nlp)
              (opencog nlp relex2logic)
              (opencog nlp fuzzy)
+             (opencog nlp sureal)
              (opencog nlp chatbot)
              (opencog nlp aiml)
              (opencog exec)
