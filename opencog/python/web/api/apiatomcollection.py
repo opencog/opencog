@@ -731,7 +731,7 @@ Returns a JSON representation of the result, indicating success or failure.
         if not Atom(id, self.atomspace):
             abort(404, 'Atom not found')
         else:
-            atom = atomspace.get_atom_with_uuid(id)
+            atom = self.atomspace.get_atom_with_uuid(id)
 
         status = self.atomspace.remove(atom)
         response = DeleteAtomResponse(id, status)
