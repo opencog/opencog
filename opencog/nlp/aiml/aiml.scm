@@ -62,16 +62,20 @@
 
 ; ==============================================================
 
-(define-public (string-words SENT-STR)
+(define (string-words SENT-STR)
 "
   string-words SENT-STR -- chop up SENT-STR string into word-nodes
   CAUTIION: this by-passes the NLP pipeline, and instead performs
-  an extremely low-brow tokenization!
+  an extremely low-brow tokenization!  In particular, it does not
+  handle upper/lower case correctly (all AIML rules are lower-case
+  only) and it does not handle punctuation (AIML rules have no
+  punctuation in them).
 
-  This is a debugging utility, and not for general use!
+  This is a debugging utility, and not for general use!  It is NOT
+  exported for public use!
 
   Example:
-     (string-words \"This is a test.\")
+     (string-words \"this is a test\")
   produces the output:
      (List (Word \"this\") (Word \"is\") (Word \"a\") (Word \"test\"))
 
@@ -90,7 +94,7 @@
   This is used for flattening out the assorted lists of words
   that result from the AIML processing utilities.
 
-  This is not exported publically, so as to avoid pullotuing the
+  This is not exported publicly, so as to avoid polluting the
   namespace.
 
   Example: the input
@@ -314,7 +318,7 @@
 				(equal? (gdr pred) SENT))))
 
 	(if (null? RULE)
-		'()
+		(ListLink)
 		(if (is-exact-rule? RULE)
 			(run-exact-rule RULE)
 			(run-pattern-rule RULE SENT)
@@ -329,12 +333,13 @@
 ; Examples of valid responses are:
 ;    (ListLink (Word "blah") (Word "blah"))
 ;    (SetLink (ListLink (Word "blah") (Word "blah")))
+; Examples of invalid responses:
+;    (ListLink)
 (define (valid-response? RESP)
-	(if (null? RESP) #f
-		(if (equal? 'SetLink (cog-type RESP))
-			(if (null? (gar RESP)) #f
-				(not (null? (gaar RESP))))
-			(not (null? (gar RESP))))))
+	(if (equal? 'SetLink (cog-type RESP))
+		(if (null? (gar RESP)) #f
+			(not (null? (gaar RESP))))
+		(not (null? (gar RESP)))))
 
 ;; get-response-step SENT -- get an AIML response to the sentence
 ;; SENT.  Recursive, i.e. it will recursively handle the SRAI's,
@@ -349,7 +354,7 @@
 	; So, try again, picking a different rule, till we do get some
 	; response.
 	(define (do-while-null SENT CNT)
-		(if (>= 0 CNT) '()
+		(if (>= 0 CNT) (ListLink)
 			(let* ((rule (aiml-select-rule all-rules))
 					(response (aiml-run-rule SENT rule)))
 				(if (valid-response? response)
@@ -358,9 +363,6 @@
 				))))
 
 	(let ((response (do-while-null SENT 10)))
-		; Deal with a null list...
-		(if (null? response) (set! response (ListLink)))
-
 		; Strip out the SetLink, if any.
 		(if (equal? 'SetLink (cog-type response))
 			(set! response (gar response)))
@@ -384,7 +386,7 @@
 	)
 
 	(define (do-while-same SENT CNT)
-		(if (>= 0 CNT) '()
+		(if (>= 0 CNT) (ListLink)
 			(let ((response (get-response-step SENT)))
 				(if (same-as-before? response)
 					(do-while-same SENT (- CNT 1))
