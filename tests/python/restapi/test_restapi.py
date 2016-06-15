@@ -297,7 +297,7 @@ class TestRESTApi():
             TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
                == existing_atom.tv
 
-    @raises(IndexError)
+    # @raises(IndexError)
     def test_delete_node(self):
         atom = self.swan
         handle = atom.value()
@@ -312,9 +312,9 @@ class TestRESTApi():
         assert delete_result['handle'] == get_result['handle']
 
         # Confirm the atom isn't contained in the AtomSpace anymore
-        assert_raises(self.atomspace[atom.h], IndexError)
+        assert self.atomspace.get_atom_with_uuid(handle) == None
 
-    @raises(IndexError)
+    # @raises(IndexError)
     def test_delete_link(self):
         atom = self.bird_animal
         handle = atom.value()
@@ -329,7 +329,7 @@ class TestRESTApi():
         assert delete_result['handle'] == get_result['handle']
 
         # Confirm the atom isn't contained in the AtomSpace anymore
-        assert_raises(self.atomspace[atom.h], IndexError)
+        assert self.atomspace.get_atom_with_uuid(handle) == None
 
     def test_get_atoms_by_av(self):
         # Assign some STI values
