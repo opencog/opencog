@@ -98,7 +98,7 @@ def vertices_from_atomset(atomset):
         vertex = {
             'type': get_type_name(atom.type),
             'name': atom.name,
-            'handle': atom.h.value()
+            'handle': atom.value()
         }
         vertices.append(vertex)
     return vertices
@@ -114,8 +114,8 @@ def edges_from_atomset(atomset):
         sequence_number = 0
         for outgoing_atom in atom.out:
             edge = {
-                'source': atom.h.value(),
-                'target': outgoing_atom.h.value(),
+                'source': atom.value(),
+                'target': outgoing_atom.value(),
                 'sequence_number': sequence_number
             }
             edges.append(edge)
