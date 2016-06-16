@@ -224,7 +224,7 @@ TimeOctomap::get_times_of_atom_occurence_in_map(const opencog::Handle& ato)
     }
     return tl;
 }//ok
-    
+//FIXME: check time point within time duration and not just greater or less    
 bool TimeOctomap::get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,
                                             const time_pt& from_d,
                                             time_pt& result)
