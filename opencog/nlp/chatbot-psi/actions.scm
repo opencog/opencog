@@ -1,7 +1,7 @@
 (define (do-fuzzy-QA)
     (State fuzzy-qa-search search-started)
 
-    (begin-thread
+    (log-thread (begin-thread
         (let ((fuz-ans (get-fuzzy-answers (get-input-sent-node) #:do-microplanning #f)))
             (if (null? fuz-ans)
                 (State fuzzy-answers no-result)
@@ -17,13 +17,13 @@
                 )
             )
         )
-    )
+    ))
 )
 
 (define (do-fuzzy-match)
     (State fuzzy-match search-started)
 
-    (begin-thread
+    (log-thread (begin-thread
         (let ((fuzzy-results (fuzzy-match-sent (get-input-sent-node) '()))
               (rtn '()))
             ; No result if it's an empty ListLink
@@ -41,13 +41,13 @@
                 )
             )
         )
-    )
+    ))
 )
 
 (define (do-aiml-search)
     (State aiml-search search-started)
 
-    (begin-thread
+    (log-thread (begin-thread
         (let ((aiml-resp (aiml-get-response-wl (get-input-word-list))))
             ; No result if it's a ListLink with arity 0
             (if (equal? (cog-arity aiml-resp) 0)
@@ -55,7 +55,7 @@
                 (State aiml-replies aiml-resp)
             )
         )
-    )
+    ))
 )
 
 (define (say . words)
@@ -82,6 +82,7 @@
         )
     )
 
+    (cancel-all-threads)
     (reset-all-states)
 )
 
