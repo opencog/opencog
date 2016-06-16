@@ -81,6 +81,7 @@
 
 ; Load the available actions
 (load "actions.scm")
+(load "duckduckgo.scm")
 
 ; Load the psi-rules
 (load "psi-rules.scm")

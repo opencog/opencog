@@ -17,11 +17,8 @@ def set_atomspace(atsp):
 def call_duckduckgo(query):
     global atomspace
 
-    # Update the state
+    # Anchor for the result
     answer_anchor = atomspace.add_node(types.AnchorNode, 'DuckDuckGoAnswers')
-    search_anchor = atomspace.add_node(types.AnchorNode, 'DuckDuckGoSearch')
-    search_started = atomspace.add_node(types.ConceptNode, 'SearchStarted')
-    atomspace.add_link(types.StateLink, [search_anchor, search_started])
 
     # Send the query
     response = urllib2.urlopen('http://api.duckduckgo.com/?q=' + query.name + '&format=json').read()
@@ -38,5 +35,14 @@ def call_duckduckgo(query):
     return TruthValue(1, 1)
 ")
 
-(python-call-with-as "set_atomspace" (cog-atomspace))
-(cog-evaluate! (Evaluation (GroundedPredicate "py: call_duckduckgo") (List (Node "OpenCog"))))
+(define (ask-duckduckgo)
+    (State duckduckgo-search search-started)
+
+    ; TODO: We may want to actually nlp-parse the answer, but a typical answer
+    ; of this type seems to be very long (a paragraph), split into sentences
+    ; and then parse?
+    (add-thread (begin-thread
+        (python-call-with-as "set_atomspace" (cog-atomspace))
+        (cog-evaluate! (Evaluation (GroundedPredicate "py: call_duckduckgo") (List (get-input-text-node))))
+    ))
+)

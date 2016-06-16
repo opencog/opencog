@@ -61,3 +61,13 @@
     (DefinedPredicate "is-aiml-reply?")
     (any-result? aiml-replies)
 )
+
+(Define
+    (DefinedPredicate "duckduckgo-search-started?")
+    (search-started? duckduckgo-search)
+)
+
+(Define
+    (DefinedPredicate "is-duckduckgo-answer?")
+    (any-result? duckduckgo-answers)
+)
