@@ -25,6 +25,7 @@
             (Reference
                 list-of-words
                 sent-node
+                (Node utterance)
             )
         )
     )

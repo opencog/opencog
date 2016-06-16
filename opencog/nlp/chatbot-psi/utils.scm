@@ -29,6 +29,19 @@
     (get-input 'SentenceNode)
 )
 
+(define (get-input-text-node)
+    (get-input 'Node)
+)
+
+(define (is-utterance-type? speechact)
+    (Satisfaction (And
+        (State input-utterance (Reference (Variable "$l") (Variable "$x") (Variable "$a")))
+        (Parse (Variable "$parse") (Variable "$x"))
+        (Interpretation (Variable "$interp") (Variable "$parse"))
+        (Inheritance (Variable "$interp") speechact)
+    ))
+)
+
 (define (search-started? anchor)
     (Equal (Set search-started) (Get (State anchor (Variable "$s"))))
 )
