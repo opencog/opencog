@@ -38,7 +38,7 @@
 TimeOctomap::TimeOctomap(unsigned int num_time_units,
                          double map_res_meters,
                          duration_c time_resolution):
-    time_circle(num_time_units),map_res(map_res_meters),time_res(time_resolution),created_once(false)
+             map_res(map_res_meters),time_res(time_resolution),created_once(false),time_circle(num_time_units)
 {
         
 }
