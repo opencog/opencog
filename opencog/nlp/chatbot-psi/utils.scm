@@ -37,7 +37,7 @@
     (Not (Equal (Set no-result) (Get (State anchor (Variable "$f")))))
 )
 
-(define (log-thread t)
+(define (add-thread t)
     (set! all-threads (append all-threads (list t)))
 )
 
