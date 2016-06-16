@@ -8,6 +8,9 @@ from mappers import *
 from flask.ext.restful.utils import cors
 from flask_restful_swagger import swagger
 
+# Temporary hack
+from web.api.utilities import get_atoms_by_name
+
 # If the system doesn't have these dependencies installed, display a warning
 # but allow the API to load
 try:
@@ -326,8 +329,10 @@ class AtomCollectionAPI(Resource):
                     atoms = self.atomspace.get_atoms_by_type(
                         types.__dict__.get(type))
                 else:
-                    abort(400, 'Invalid request: get atoms by name no longer'
-                    		   ' supported')
+                    if type is None:
+                        type = 'Node'
+                    atoms = get_atoms_by_name(types.__dict__.get(type),
+                                name, self.atomspace)
 
             # Optionally, filter by TruthValue
             if tv_strength_min is not None:
