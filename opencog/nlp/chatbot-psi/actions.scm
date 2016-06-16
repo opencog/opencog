@@ -66,6 +66,9 @@
         (set! utterance (string-join (map cog-name words)))
     )
 
+    ; Remove those '[' and ']' that may exist in the output
+    (set! utterance (string-filter (lambda (c) (not (or (char=? #\[ c) (char=? #\] c)))) utterance))
+
     (display utterance)
 
     ; For sending out the chatbot response via the grounded predicate defined
