@@ -76,8 +76,9 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
 
         # Compare to the values created in the AtomSpace
-        atomspace_result = self.atomspace[Handle(post_result['handle'])]
-        assert Handle(post_result['handle']) == atomspace_result.h
+        atomspace_result = Atom(post_result['handle'], self.atomspace)
+        assert Atom(post_result['handle'], self.atomspace).value() == \
+            atomspace_result.value()
         assert post_result['name'] == atomspace_result.name
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
@@ -133,8 +134,9 @@ class TestRESTApi():
         assert self.animal.value() in post_result['outgoing']
 
         # Compare to the values created in the AtomSpace
-        atomspace_result = self.atomspace[Handle(post_result['handle'])]
-        assert Handle(post_result['handle']) == atomspace_result.h
+        atomspace_result = Atom(post_result['handle'], self.atomspace)
+        assert Atom(post_result['handle'], self.atomspace).value() == \
+            atomspace_result.value()
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
@@ -152,8 +154,8 @@ class TestRESTApi():
 
         # Check if the link is in the incoming set of each of the nodes
         for h in post_result['outgoing']:
-            assert Handle(post_result['handle']) \
-                in [atom.h for atom in self.atomspace[Handle(h)].incoming]
+            assert post_result['handle'] \
+                in [atom.value() for atom in Atom(h, self.atomspace).incoming]
 
     def test_put_and_get_tv_av_node(self):
         atom = self.swan
