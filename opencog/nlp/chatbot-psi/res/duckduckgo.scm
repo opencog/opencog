@@ -13,11 +13,28 @@ def set_atomspace(atsp):
     atomspace = atsp
     return TruthValue(1, 1)
 
+# TODO: Attribution!
 def call_duckduckgo(query):
     global atomspace
+
+    # Update the state
+    answer_anchor = atomspace.add_node(types.AnchorNode, 'DuckDuckGoAnswers')
+    search_anchor = atomspace.add_node(types.AnchorNode, 'DuckDuckGoSearch')
+    search_started = atomspace.add_node(types.ConceptNode, 'SearchStarted')
+    atomspace.add_link(types.StateLink, [search_anchor, search_started])
+
+    # Send the query
     response = urllib2.urlopen('http://api.duckduckgo.com/?q=' + query.name + '&format=json').read()
     result = json.loads(response)
-    atomspace.add_node(types.Node, result['AbstractText'])
+    abstract_text = result['AbstractText']
+
+    if abstract_text:
+        ans = atomspace.add_node(types.Node, abstract_text)
+        atomspace.add_link(types.StateLink, [answer_anchor, ans])
+    else:
+        no_result = atomspace.add_node(types.Node, 'NoResult')
+        atomspace.add_link(types.StateLink, [answer_anchor, no_result])
+
     return TruthValue(1, 1)
 ")
 

@@ -60,6 +60,11 @@
 (State fuzzy-answers default-state)
 (State fuzzy-qa-search default-state)
 
+(define duckduckgo-answers (Anchor "DuckDuckGoAnswers"))
+(define duckduckgo-search (Anchor "DuckDuckGoSearch"))
+(State duckduckgo-answers default-state)
+(State duckduckgo-search default-state)
+
 ;-------------------------------------------------------------------------------
 ; Define the demands
 
