@@ -8,6 +8,7 @@ from opencog.atomspace import *
 # (see: https://github.com/opencog/opencog/issues/337)
 try:
     from web.api.apimain import RESTAPI
+    from web.api.utilities import count_to_confidence  # Temporary hack
 except ImportError:
     import unittest
     raise unittest.SkipTest("ImportError exception: make sure the required "
@@ -81,7 +82,8 @@ class TestRESTApi():
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(post_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
 
         # Get by handle and compare
@@ -136,7 +138,8 @@ class TestRESTApi():
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(post_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
 
         # Get by handle and compare
@@ -183,7 +186,8 @@ class TestRESTApi():
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(put_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(put_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
         assert put_result['attentionvalue'] == atomspace_result.av
 
@@ -225,7 +229,8 @@ class TestRESTApi():
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(put_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(put_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
         assert put_result['attentionvalue'] == atomspace_result.av
 
@@ -262,7 +267,8 @@ class TestRESTApi():
         assert post_result['handle'] == existing_atom.value()
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(post_result['truthvalue']['details']['count']))) \
                == existing_atom.tv
 
     def test_post_revise_existing_link(self):
@@ -294,7 +300,8 @@ class TestRESTApi():
         assert post_result['handle'] == existing_atom.value()
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(post_result['truthvalue']['details']['count']))) \
                == existing_atom.tv
 
     # @raises(IndexError)

@@ -12,6 +12,8 @@ from flask import abort
 from flask.ext.restful import fields, marshal
 from opencog.atomspace import *
 
+# Temporary hack
+from web.api.utilities import count_to_confidence
 
 # TruthValue helpers
 class ParseTruthValue(object):
@@ -45,7 +47,8 @@ class ParseTruthValue(object):
             if 'strength' in data['truthvalue']['details'] \
                 and 'count' in data['truthvalue']['details']:
                 tv = TruthValue(data['truthvalue']['details']['strength'],
-                                data['truthvalue']['details']['confidence'])
+                                count_to_confidence(
+                                    data['truthvalue']['details']['count']))
             else:
                 abort(400, 'Invalid request: truthvalue details object '
                            'requires both a strength and count parameter')

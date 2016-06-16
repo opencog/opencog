@@ -682,11 +682,11 @@ containing the atom.
 
         if 'truthvalue' in data:
             tv = ParseTruthValue.parse(data)
-            self.atomspace.set_tv(h=Atom(id), tv=tv)
+            Atom(id, self.atomspace).tv = tv
 
         if 'attentionvalue' in data:
             (sti, lti, vlti) = ParseAttentionValue.parse(data)
-            self.atomspace.set_av(h=Atom(id), sti=sti, lti=lti, vlti=vlti)
+            Atom(id, self.atomspace).av = {'sti': sti, 'lti': lti, 'vlti': vlti}
 
         atom = self.atomspace.get_atom_with_uuid(id)
         return {'atoms': marshal(atom, atom_fields)}
