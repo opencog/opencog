@@ -521,8 +521,10 @@ the atom. Example:
 
         # Outgoing set
         if 'outgoing' in data:
+            print data
             if len(data['outgoing']) > 0:
-                outgoing = [Atom(uuid) for uuid in data['outgoing']]
+                outgoing = [Atom(uuid, self.atomspace)
+                                for uuid in data['outgoing']]
         else:
             outgoing = None
 
