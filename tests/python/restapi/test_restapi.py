@@ -181,8 +181,9 @@ class TestRESTApi():
         assert put_result['attentionvalue']['vlti'] == attentionvalue['vlti']
 
         # Compare to the values updated in the AtomSpace
-        atomspace_result = self.atomspace[Handle(put_result['handle'])]
-        assert Handle(put_result['handle']) == atomspace_result.h
+        atomspace_result = Atom(put_result['handle'], self.atomspace)
+        assert Atom(put_result['handle'], self.atomspace).value() == \
+            atomspace_result.value()
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
@@ -224,8 +225,9 @@ class TestRESTApi():
         assert put_result['attentionvalue']['vlti'] == attentionvalue['vlti']
 
         # Compare to the values updated in the AtomSpace
-        atomspace_result = self.atomspace[Handle(put_result['handle'])]
-        assert Handle(put_result['handle']) == atomspace_result.h
+        atomspace_result = Atom(put_result['handle'], self.atomspace)
+        assert Atom(put_result['handle'], self.atomspace).value() == \
+            atomspace_result.value()
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
