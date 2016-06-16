@@ -243,6 +243,10 @@ bool Fuzzy::try_match(const Handle& soln)
     get_all_words(soln, soln_words, soln_winsts);
     std::sort(soln_words.begin(), soln_words.end());
 
+    // Reject if it's identical to the input
+    if (soln_words == target_words)
+        return false;
+
     HandleSeq target_diff;
     HandleSeq soln_diff;
     HandleSeq common_nodes;
