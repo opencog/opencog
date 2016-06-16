@@ -109,9 +109,9 @@
 (chat "Jane lives in France")
 (chat "Jane likes pizza")
 
-;; Facts about Jack
-(chat "Jack lives in China")
-(chat "Jack likes chicken feet")
+;; Facts about Jack (we replace by Joe because LG doesn't like Jack either)
+(chat "Joe lives in China")
+(chat "Joe likes chicken feet")
 
 ;; Partial facts about Jim.
 (chat "Jim lives in China")
@@ -482,121 +482,137 @@
 ;; confidence.
 
 (ImplicationLink (stv 1 1)
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;; Variable declaration ;;
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;
    (VariableList
+      ;; Individual
       (TypedVariable
          (Variable "$individual")
          (Type "ConceptNode"))
       (TypedVariable
          (Variable "$individual-instance")
          (Type "ConceptNode"))
+      ;; Live
+      (TypedVariable
+         (Variable "live-instance")
+         (Type "PredicateNode"))
+      ;; In
       (TypedVariable
          (Variable "$in-instance")
-         (Type "ConceptNode"))
+         (Type "PredicateNode"))
+      ;; China
       (TypedVariable
          (Variable "$China-instance")
          (Type "ConceptNode"))
       (TypedVariable
          (Variable "$China-specific-entity-instance")
          (Type "SpecificEntityNode"))
+      ;; Interpretation
       (TypedVariable
          (Variable "$interpretation-instance")
-         (Type "InterpretationNode")))
+         (Type "InterpretationNode"))
+      ;; Like
+      (TypedVariable
+         (Variable "$like-instance")
+         (Type "PredicateNode"))
+      ;; Chicken feet
+      (TypedVariable
+         (Variable "$chicken-instance")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$foot-instance")
+         (Type "ConceptNode")))
+   ;;;;;;;;;;;;;;;
+   ;; Implicant ;;
+   ;;;;;;;;;;;;;;;
    (Set
+      ;; Individual
       (Inheritance
-         (Variable "$in-instance")
-         (ConceptNode "in"))
-      (Implication
          (Variable "$individual-instance")
          (Variable "$individual"))
-      (Inheritance
-         (SatisfyingSet
-            (Variable "$individual-instance"))
-         (Variable "$in-instance"))
+      (EvaluationLink
+         (DefinedLinguisticPredicateNode "definite")
+         (ListLink
+            (Variable "$individual-instance")))
+      ;; Live
+      (ImplicationLink
+         (Variable "live-instance")
+         (PredicateNode "live")
+      )
+      (EvaluationLink
+         (Variable "live-instance")
+         (ListLink
+            (Variable "individual-instance")))
+      (InheritanceLink
+         (Variable "live-instance")
+         (DefinedLinguisticConceptNode "present"))
+      ;; In
+      (ImplicationLink
+         (Variable "$in-instance")
+         (PredicateNode "in"))
+      (EvaluationLink
+         (Variable "$in-instance")
+         (ListLink
+            (Variable "live-instance")
+            (Variable "China-instance")))
+      (EvaluationLink
+         (Variable "$in-instance")
+         (ListLink
+            (Variable "China-instance")))
+      ;; China
       (Inheritance
          (Variable "$China-instance")
          (Concept "China"))
-      (Implication
-         (Variable "$in-instance")
-         (PredicateNode "in"))
-      (Evaluation
-         (Variable "$in-instance")
-         (List
-            (Variable "$individual-instance")
-            (Variable "$China-instance")))
-      (Evaluation
+      (EvaluationLink
          (DefinedLinguisticPredicateNode "definite")
-         (List
+         (ListLink
             (Variable "$China-instance")))
-      (Evaluation
-         (Variable "in-instance")
-         (List
-            (Variable "$China-instance")))
-      (Inheritance
-         (Variable "$interpretation-instance")
-         (DefinedLinguisticConcept "ImperativeSpeechAct"))
-      (Inheritance
+      (InheritanceLink
          (Variable "$China-specific-entity-instance")
          (DefinedLinguisticConceptNode "female"))
-      (Inheritance
-         (Variable "$China-specific-entity-instance")
-         (Concept "China"))
-      (Inheritance
-         (Variable "individual-instance")
-         (DefinedLinguisticConceptNode "imperative")))
-   (Set
       (InheritanceLink
-         (VariableConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
-         (ConceptNode "Bob" (stv 0.025641026 0.0012484394))
-      )
+         (Variable "China-specific-entity-instance")
+         (ConceptNode "China"))
+      ;; Interpretation
+      (InheritanceLink
+         (Variable "$interpretation-instance")
+         (DefinedLinguisticConceptNode "DeclarativeSpeechAct")))
+   ;;;;;;;;;;;;;;;
+   ;; Implicand ;;
+   ;;;;;;;;;;;;;;;
+   (Set
+      ;; Individual
+      (InheritanceLink
+         (Variable "$individual-instance")
+         (Variable "$individual"))
       (EvaluationLink
          (DefinedLinguisticPredicateNode "definite")
          (ListLink
-            (ConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
-         )
-      )
+            (Variable "$individual-instance")))
+      ;; Like
       (ImplicationLink
-         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
-         (PredicateNode "like" (stv 0.125 0.0012484394))
-      )
-      (InheritanceLink
-         (ConceptNode "feet@68a4daa2-1f53-4c0f-8443-806099311b49")
-         (ConceptNode "foot" (stv 0.025641026 0.0012484394))
-      )
+         (Variable "$like-instance")
+         (PredicateNode "like"))
       (EvaluationLink
-         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
+         (Variable "$like-instance")
          (ListLink
-            (ConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
-            (ConceptNode "feet@68a4daa2-1f53-4c0f-8443-806099311b49")
-         )
-      )
+            (Variable "$individual-instance")
+            (Variable "$foot-instance")))
       (EvaluationLink
-         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
+         (Variable "$like-instance")
          (ListLink
-            (ConceptNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
-         )
-      )
+            (ConceptNode "$individual-instance")))
       (InheritanceLink
-         (InterpretationNode "sentence@e943fc5b-cf61-4ed1-a172-ab09d545ae67_parse_0_interpretation_$X")
-         (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
-      )
+         (Variable "$like-instance")
+         (DefinedLinguisticConceptNode "present"))
+      ;; Chicken feet
       (InheritanceLink
-         (ConceptNode "chicken@43d36c82-1eb0-4e42-b694-68e21023b5fa")
-         (ConceptNode "chicken" (stv 0.025641026 0.0012484394))
-      )
+         (Variable "$foot-instance")
+         (ConceptNode "foot"))
       (InheritanceLink
-         (ConceptNode "feet@68a4daa2-1f53-4c0f-8443-806099311b49")
-         (ConceptNode "chicken@43d36c82-1eb0-4e42-b694-68e21023b5fa")
-      )
+         (Variable "$chicken-instance")
+         (ConceptNode "chicken"))
       (InheritanceLink
-         (SpecificEntityNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
-         (DefinedLinguisticConceptNode "male")
-      )
-      (InheritanceLink
-         (SpecificEntityNode "Bob@c0bce0fd-d30f-402e-8897-259fa248473d")
-         (ConceptNode "Bob" (stv 0.025641026 0.0012484394))
-      )
-      (InheritanceLink
-         (PredicateNode "likes@dc51995f-6e69-4d8e-91a7-0d5992dba6c6")
-         (DefinedLinguisticConceptNode "present")
-      )
-   )
+         (ConceptNode "$foot-instance")
+         (ConceptNode "chicken-instance"))))
