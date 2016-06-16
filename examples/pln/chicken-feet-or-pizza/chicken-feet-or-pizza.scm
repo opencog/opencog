@@ -80,6 +80,14 @@
                            (Type "InterpretationLink"))
                          (Variable "$I"))))
 
+;; Get all of them
+(define (get-execution-links)
+  (cog-satisfying-set (Get
+                         (TypedVariable
+                           (Variable "$E")
+                           (Type "ExecutionLink"))
+                         (Variable "$E"))))
+
 ;; To get the r2l outputs of a parse use
 ;;
 ;; (parse-get-r2l-outputs parse)
@@ -92,9 +100,10 @@
 ;;
 ;; “I’m Bob.   I live in China.   I like chicken feet.”
 ;;
-;; as follows
-(chat "Bob lives in China")
-(chat "Bob likes chicken feet")
+;; as follows (also, Bob has been replaced by Robert because LG
+;; doesn't like Bob).
+(chat "Robert lives in China")
+(chat "Robert likes chicken feet")
 
 ;; Same thing for Jane
 (chat "Jane lives in France")
@@ -476,10 +485,10 @@
    (VariableList
       (TypedVariable
          (Variable "$individual")
-         (Type "PredicateNode"))
+         (Type "ConceptNode"))
       (TypedVariable
          (Variable "$individual-instance")
-         (Type "PredicateNode"))
+         (Type "ConceptNode"))
       (TypedVariable
          (Variable "$in-instance")
          (Type "ConceptNode"))
