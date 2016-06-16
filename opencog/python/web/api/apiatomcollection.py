@@ -8,6 +8,9 @@ from mappers import *
 from flask.ext.restful.utils import cors
 from flask_restful_swagger import swagger
 
+# Temporary hack
+from web.api.utilities import get_atoms_by_name
+
 # If the system doesn't have these dependencies installed, display a warning
 # but allow the API to load
 try:
@@ -326,8 +329,10 @@ class AtomCollectionAPI(Resource):
                     atoms = self.atomspace.get_atoms_by_type(
                         types.__dict__.get(type))
                 else:
-                    abort(400, 'Invalid request: get atoms by name no longer'
-                    		   ' supported')
+                    if type is None:
+                        type = 'Node'
+                    atoms = get_atoms_by_name(types.__dict__.get(type),
+                                name, self.atomspace)
 
             # Optionally, filter by TruthValue
             if tv_strength_min is not None:
@@ -521,8 +526,10 @@ the atom. Example:
 
         # Outgoing set
         if 'outgoing' in data:
+            print data
             if len(data['outgoing']) > 0:
-                outgoing = [Atom(uuid) for uuid in data['outgoing']]
+                outgoing = [Atom(uuid, self.atomspace)
+                                for uuid in data['outgoing']]
         else:
             outgoing = None
 
@@ -669,7 +676,8 @@ containing the atom.
         Updates the AttentionValue (STI, LTI, VLTI) or TruthValue of an atom
         """
 
-        if Atom(id) not in self.atomspace:
+        # If the atom is not found in the atomspace.
+        if not Atom(id , self.atomspace):
             abort(404, 'Atom not found')
 
         # Prepare the atom data
@@ -681,11 +689,11 @@ containing the atom.
 
         if 'truthvalue' in data:
             tv = ParseTruthValue.parse(data)
-            self.atomspace.set_tv(h=Atom(id), tv=tv)
+            Atom(id, self.atomspace).tv = tv
 
         if 'attentionvalue' in data:
             (sti, lti, vlti) = ParseAttentionValue.parse(data)
-            self.atomspace.set_av(h=Atom(id), sti=sti, lti=lti, vlti=vlti)
+            Atom(id, self.atomspace).av = {'sti': sti, 'lti': lti, 'vlti': vlti}
 
         atom = self.atomspace.get_atom_with_uuid(id)
         return {'atoms': marshal(atom, atom_fields)}
@@ -727,10 +735,10 @@ Returns a JSON representation of the result, indicating success or failure.
         Removes an atom from the AtomSpace
         """
 
-        if Atom(id) not in self.atomspace:
+        if not Atom(id, self.atomspace):
             abort(404, 'Atom not found')
         else:
-            atom = atomspace.get_atom_with_uuid(id)
+            atom = self.atomspace.get_atom_with_uuid(id)
 
         status = self.atomspace.remove(atom)
         response = DeleteAtomResponse(id, status)
