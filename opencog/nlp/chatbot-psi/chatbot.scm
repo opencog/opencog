@@ -15,6 +15,7 @@
 ; Schema function for chatting
 
 (define (chat utterance)
+    (cancel-all-threads)
     (reset-all-states)
 
     (let* ((sent-node (car (nlp-parse utterance)))
@@ -27,11 +28,14 @@
             )
         )
     )
+
     (newline)
 )
 
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
+
+(define all-threads '())
 
 (define input-utterance (Anchor "InputUtterance"))
 (define no-input-utterance (Concept "NoInputUtterance"))
