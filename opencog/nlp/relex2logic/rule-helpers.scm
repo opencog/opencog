@@ -57,7 +57,7 @@
 ; -----------------------------------------------------------------------
 ; Connect WordInstanceNode With PredicateNode
 ; TODO: do the same for non-instanced node
-(define (r2l-wordinst-Predicate inst-name)
+(define (r2l-wordinst-predicate inst-name)
 	(ReferenceLink
 		(PredicateNode inst-name)
 		(WordInstanceNode inst-name)
@@ -171,7 +171,7 @@
 				(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 				(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 				(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
-				(r2l-wordinst-Predicate verb_instance)
+				(r2l-wordinst-predicate verb_instance)
 				(r2l-wordinst-concept obj_instance)
 				(r2l-wordinst-concept iobj_instance)
 				(EvaluationLink
@@ -190,7 +190,7 @@
 					(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 					(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 					(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
-					(r2l-wordinst-Predicate verb_instance)
+					(r2l-wordinst-predicate verb_instance)
 					(r2l-wordinst-concept subj_instance)
 					(r2l-wordinst-concept iobj_instance)
 					(EvaluationLink
@@ -210,7 +210,7 @@
 					(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 					(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 					(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-					(r2l-wordinst-Predicate verb_instance)
+					(r2l-wordinst-predicate verb_instance)
 					(r2l-wordinst-concept subj_instance)
 					(r2l-wordinst-concept obj_instance)
 					(EvaluationLink
@@ -230,7 +230,7 @@
 				(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 				(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
 				(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
-				(r2l-wordinst-Predicate verb_instance)
+				(r2l-wordinst-predicate verb_instance)
 				(r2l-wordinst-concept subj_instance)
 				(r2l-wordinst-concept iobj_instance)
 				(r2l-wordinst-concept obj_instance)
@@ -269,7 +269,7 @@
 			(ListLink
 				(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 				(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
-				(r2l-wordinst-Predicate verb_instance)
+				(r2l-wordinst-predicate verb_instance)
 				(r2l-wordinst-concept obj_instance)
 				(EvaluationLink
 					(PredicateNode verb_instance)
@@ -285,7 +285,7 @@
 				(ListLink
 					(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 					(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-					(r2l-wordinst-Predicate verb_instance)
+					(r2l-wordinst-predicate verb_instance)
 					(r2l-wordinst-concept subj_instance)
 					(EvaluationLink
 						(PredicateNode verb_instance)
@@ -305,7 +305,7 @@
 					(ConceptNode subj_instance) (ConceptNode subj_concept))
 				(InheritanceLink
 					(ConceptNode obj_instance) (ConceptNode obj_concept))
-				(r2l-wordinst-Predicate verb_instance)
+				(r2l-wordinst-predicate verb_instance)
 				(r2l-wordinst-concept subj_instance)
 				(r2l-wordinst-concept obj_instance)
 				(EvaluationLink
@@ -337,7 +337,7 @@
 			(let ((var_name (choose-var-name)))
 				(ListLink
 					(Implication (Predicate verb_instance) (Predicate verb))
-					(r2l-wordinst-Predicate verb_instance)
+					(r2l-wordinst-predicate verb_instance)
 					(EvaluationLink
 						(PredicateNode verb_instance)
 						(ListLink (VariableNode var_name)))
@@ -356,7 +356,7 @@
 		(else
 			(ListLink
 				(r2l-wordinst-concept subj_instance)
-				(r2l-wordinst-Predicate verb_instance)
+				(r2l-wordinst-predicate verb_instance)
 				(Implication (Predicate verb_instance) (Predicate verb))
 				(Inheritance (Concept subj_instance) (Concept subj_concept))
 				(EvaluationLink
@@ -387,7 +387,7 @@
 		(InheritanceLink (ConceptNode subj_ins) (ConceptNode subj))
 		(InheritanceLink (ConceptNode adj_ins) (ConceptNode adj))
 		(r2l-wordinst-concept subj_ins)
-		(r2l-wordinst-Predicate verb_ins)
+		(r2l-wordinst-predicate verb_ins)
 		(r2l-wordinst-concept adj_ins)
 		(EvaluationLink
 			(PredicateNode verb_ins)
@@ -435,7 +435,7 @@
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode predicate_instance) (PredicateNode predicate_concept))
-			(r2l-wordinst-Predicate predicate_instance)
+			(r2l-wordinst-predicate predicate_instance)
 			(EvaluationLink (DefinedLinguisticPredicateNode "Truth Value")
 				(EvaluationLink (PredicateNode predicate_instance))
 				(VariableNode var_name)
@@ -466,26 +466,26 @@
 	(define adv (cog-name adv-node))
 	(define adv_instance (cog-name adv-instance-node))
 	(ListLink
-		(InheritanceLink  (ConceptNode adv_instance) (ConceptNode adv))
-			(ImplicationLink  (PredicateNode instance) (PredicateNode verb))
-			(r2l-wordinst-Predicate instance)
-			(r2l-wordinst-concept adv_instance)
-			(InheritanceLink  (SatisfyingSetLink (PredicateNode instance)) (ConceptNode adv_instance))
+		(ImplicationLink  (PredicateNode adv_instance) (PredicateNode adv))
+		(InheritanceLink  (ConceptNode instance) (ConceptNode verb))
+		(r2l-wordinst-concept instance)
+		(r2l-wordinst-predicate adv_instance)
+		(InheritanceLink  (ConceptNode instance) (SatisfyingSet (PredicateNode adv_instance)))
 	)
 )
 
 (define-public (adverbialpp-rule verb instance prep  prep_instance noun noun_instance)
     (ListLink
     (InheritanceLink  (ConceptNode noun_instance) (ConceptNode noun))
-    (ImplicationLink  (PredicateNode instance) (PredicateNode verb))
+    (InheritanceLink  (ConceptNode instance) (ConceptNode verb))
     (ImplicationLink  (PredicateNode prep_instance) (PredicateNode prep))
-    (r2l-wordinst-Predicate instance)
+    (r2l-wordinst-concept instance)
     (r2l-wordinst-concept noun_instance)
-    (r2l-wordinst-Predicate prep_instance)
+    (r2l-wordinst-predicate prep_instance)
     (EvaluationLink
         (PredicateNode prep_instance)
         (ListLink
-            (PredicateNode instance)
+            (ConceptNode instance)
             (ConceptNode noun_instance))
 	))
 )
@@ -496,7 +496,7 @@
 	(ListLink
 		(ImplicationLink (PredicateNode prep_instance) (PredicateNode prep_concept))
 		(InheritanceLink (ConceptNode noun_instance) (ConceptNode noun_concept))
-		(r2l-wordinst-Predicate prep_instance)
+		(r2l-wordinst-predicate prep_instance)
 		(r2l-wordinst-concept noun_instance)
 		(EvaluationLink
 			(PredicateNode prep_instance)
@@ -553,9 +553,9 @@
 	(define tense (cog-name tns))
 
 	(ListLink
-		(Implication (Predicate instance) (Predicate verb))
-		(r2l-wordinst-Predicate instance)
-		(Inheritance (Predicate instance) (DefinedLinguisticConceptNode tense))
+		(Inheritance (Concept instance) (Concept verb))
+		(r2l-wordinst-concept instance)
+		(Inheritance (Concept instance) (DefinedLinguisticConceptNode tense))
 	)
 )
 
@@ -578,7 +578,7 @@
 	(ListLink (InheritanceLink (VariableNode "$qVar") (ConceptNode noun_concept))
 	(InheritanceLink (ConceptNode noun_instance) (VariableNode "$qVar"))
 	(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-	(r2l-wordinst-Predicate verb_instance)
+	(r2l-wordinst-predicate verb_instance)
 	(cond ((string=? qtype "when")
 		(AtTimeLink
 			(VariableNode "$qVar")
@@ -653,7 +653,7 @@
 	(define verb (cog-name lemma))
 	(define instance (cog-name verb-inst))
 	(ListLink
-		(r2l-wordinst-Predicate instance)
+		(r2l-wordinst-predicate instance)
 		(ImplicationLink (PredicateNode instance) (NotLink (PredicateNode verb))))
 )
 
@@ -676,7 +676,7 @@
 	(define word_instance (cog-name word-instance-node))
 	(ListLink
 		(ImplicationLink (PredicateNode word_instance) (PredicateNode word))
-		(r2l-wordinst-Predicate word_instance)
+		(r2l-wordinst-predicate word_instance)
 		(EvaluationLink
 			(DefinedLinguisticPredicateNode "maybemarker")
 			(ListLink
@@ -768,8 +768,8 @@
 		(ImplicationLink (PredicateNode v2_instance) (PredicateNode v2))
 		(r2l-wordinst-concept s_instance)
 		(r2l-wordinst-concept o_instance)
-		(r2l-wordinst-Predicate v1_instance)
-		(r2l-wordinst-Predicate v2_instance)
+		(r2l-wordinst-predicate v1_instance)
+		(r2l-wordinst-predicate v2_instance)
 		(EvaluationLink
 			(PredicateNode v1_instance)
 			(ListLink
@@ -798,8 +798,8 @@
 		(r2l-wordinst-concept s1_instance)
 		(r2l-wordinst-concept s2_instance)
 		(r2l-wordinst-concept o_instance)
-		(r2l-wordinst-Predicate v1_instance)
-		(r2l-wordinst-Predicate v2_instance)
+		(r2l-wordinst-predicate v1_instance)
+		(r2l-wordinst-predicate v2_instance)
 		(EvaluationLink
 			(PredicateNode v1_instance)
 			(ListLink
@@ -831,7 +831,7 @@
 		(InheritanceLink (ConceptNode v3_instance) (ConceptNode v3))
 		(r2l-wordinst-concept v1_instance)
 		(r2l-wordinst-concept v3_instance)
-		(r2l-wordinst-Predicate v2_instance)
+		(r2l-wordinst-predicate v2_instance)
 		(EvaluationLink
 			(PredicateNode v2_instance)
 			(ListLink ; does this ListLink make sense here? (by sebastianruder)
@@ -850,7 +850,7 @@
 		(InheritanceLink (ConceptNode v2_instance) (ConceptNode v2))
 		(ImplicationLink (PredicateNode v1_instance) (PredicateNode v1))
 		(r2l-wordinst-concept v2_instance)
-		(r2l-wordinst-Predicate v1_instance)
+		(r2l-wordinst-predicate v1_instance)
 		(EvaluationLink
 			(DefinedLinguisticPredicateNode "able_to")
 			(ListLink
@@ -878,8 +878,8 @@
 		(ImplicationLink (PredicateNode verb1_instance) (PredicateNode verb1))
 		(ImplicationLink (PredicateNode verb2_instance) (PredicateNode verb2))
 		(r2l-wordinst-concept subj_instance)
-		(r2l-wordinst-Predicate verb1_instance)
-		(r2l-wordinst-Predicate verb2_instance)
+		(r2l-wordinst-predicate verb1_instance)
+		(r2l-wordinst-predicate verb2_instance)
 		(EvaluationLink
 			(PredicateNode verb1_instance)
 			(ListLink
@@ -906,7 +906,7 @@
 		)
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-			(r2l-wordinst-Predicate verb_instance)
+			(r2l-wordinst-predicate verb_instance)
 			(EvaluationLink
 				(DefinedLinguisticPredicateNode "AtPlace")
 				(ListLink
@@ -950,7 +950,7 @@
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-			(r2l-wordinst-Predicate verb_instance)
+			(r2l-wordinst-predicate verb_instance)
 			(AtTimeLink
 				(VariableNode var_name)
 				(PredicateNode verb_instance)
@@ -986,7 +986,7 @@
 			(var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-			(r2l-wordinst-Predicate verb_instance)
+			(r2l-wordinst-predicate verb_instance)
 			(EvaluationLink
 				(DefinedLinguisticPredicateNode "Because")
 				(ListLink
@@ -1028,7 +1028,7 @@
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-			(r2l-wordinst-Predicate verb_instance)
+			(r2l-wordinst-predicate verb_instance)
 			(EvaluationLink
 				(DefinedLinguisticPredicateNode "InManner")
 				(ListLink
@@ -1117,7 +1117,7 @@
 			(InheritanceLink (VariableNode var_name) (ConceptNode obj_instance))
 			(r2l-wordinst-concept subj_instance)
 			(r2l-wordinst-concept obj_instance)
-			(r2l-wordinst-Predicate verb_instance)
+			(r2l-wordinst-predicate verb_instance)
 			(SatisfyingSetLink
 				(VariableNode var_name)
 				(EvaluationLink (PredicateNode verb_instance)
@@ -1142,7 +1142,7 @@
 			(InheritanceLink (VariableNode var_name) (ConceptNode subj_instance))
 			(r2l-wordinst-concept subj_instance)
 			(r2l-wordinst-concept obj_instance)
-			(r2l-wordinst-Predicate verb_instance)
+			(r2l-wordinst-predicate verb_instance)
 			(SatisfyingSetLink
 				(VariableNode var_name)
 				(EvaluationLink (PredicateNode verb_instance)
@@ -1169,7 +1169,7 @@
 			(r2l-wordinst-concept subj_instance)
 			(r2l-wordinst-concept obj_instance)
 			(r2l-wordinst-concept iobj_instance)
-			(r2l-wordinst-Predicate verb_instance)
+			(r2l-wordinst-predicate verb_instance)
 			(SatisfyingSetLink
 				(VariableNode var_name)
 				(EvaluationLink (PredicateNode verb_instance)
@@ -1193,7 +1193,7 @@
 			(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
 			(InheritanceLink (VariableNode var_name) (ConceptNode subj_instance) )
 			(r2l-wordinst-concept subj_instance)
-			(r2l-wordinst-Predicate pred_instance)
+			(r2l-wordinst-predicate pred_instance)
 			(SatisfyingSetLink
 				; (ScopeLink ;; not yet supported !? Huhh ??
 					(VariableNode var_name)
@@ -1244,7 +1244,7 @@
     (InheritanceLink (ConceptNode passive_obj_instance) (ConceptNode passive_obj))
 	(r2l-wordinst-concept obj_instance)
 	(r2l-wordinst-concept passive_obj_instance)
-	(r2l-wordinst-Predicate verb_instance)
+	(r2l-wordinst-predicate verb_instance)
     (EvaluationLink
             (PredicateNode verb_instance)
             (ListLink
@@ -1261,7 +1261,7 @@
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj))
 			(r2l-wordinst-concept obj_instance)
-			(r2l-wordinst-Predicate verb_instance)
+			(r2l-wordinst-predicate verb_instance)
 			(EvaluationLink
 				(PredicateNode verb_instance)
 					(ListLink
@@ -1288,8 +1288,8 @@
         (ListLink
         (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
         (ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
-        (r2l-wordinst-Predicate var1_instance)
-        (r2l-wordinst-Predicate var2_instance)
+        (r2l-wordinst-predicate var1_instance)
+        (r2l-wordinst-predicate var2_instance)
         (EvaluationLink
             (DefinedLinguisticPredicateNode "and")
             (ListLink
@@ -1317,8 +1317,8 @@
         (ListLink
         (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
         (ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
-        (r2l-wordinst-Predicate var1_instance)
-        (r2l-wordinst-Predicate var2_instance)
+        (r2l-wordinst-predicate var1_instance)
+        (r2l-wordinst-predicate var2_instance)
         (EvaluationLink
             (DefinedLinguisticPredicateNode "but")
             (ListLink
@@ -1345,8 +1345,8 @@
         (ListLink
         (ImplicationLink (PredicateNode var1_instance) (PredicateNode var1))
         (ImplicationLink (PredicateNode var2_instance) (PredicateNode var2))
-        (r2l-wordinst-Predicate var1_instance)
-        (r2l-wordinst-Predicate var2_instance)
+        (r2l-wordinst-predicate var1_instance)
+        (r2l-wordinst-predicate var2_instance)
         (EvaluationLink
             (DefinedLinguisticPredicateNode "or")
             (ListLink
@@ -1376,8 +1376,8 @@
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
-		(r2l-wordinst-Predicate comp_instance)
-		(r2l-wordinst-Predicate pred_instance)
+		(r2l-wordinst-predicate comp_instance)
+		(r2l-wordinst-predicate pred_instance)
 		(EvaluationLink
 			(PredicateNode comp_instance)
 			(ListLink
@@ -1391,8 +1391,8 @@
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
-		(r2l-wordinst-Predicate comp_instance)
-		(r2l-wordinst-Predicate pred_instance)
+		(r2l-wordinst-predicate comp_instance)
+		(r2l-wordinst-predicate pred_instance)
 		(r2l-wordinst-concept comp_instance)
 		(EvaluationLink
 			(DefinedLinguisticPredicateNode "InManner")
@@ -1408,8 +1408,8 @@
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
-		(r2l-wordinst-Predicate comp_instance)
-		(r2l-wordinst-Predicate pred_instance)
+		(r2l-wordinst-predicate comp_instance)
+		(r2l-wordinst-predicate pred_instance)
 		(r2l-wordinst-concept comp_instance)
 		(EvaluationLink
 			(DefinedLinguisticPredicateNode "Because")
@@ -1425,8 +1425,8 @@
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
-		(r2l-wordinst-Predicate comp_instance)
-		(r2l-wordinst-Predicate pred_instance)
+		(r2l-wordinst-predicate comp_instance)
+		(r2l-wordinst-predicate pred_instance)
 		(r2l-wordinst-concept comp_instance)
 		(AtTimeLink
 			(PredicateNode pred_instance)
@@ -1443,8 +1443,8 @@
 	(ListLink
 		(ImplicationLink (PredicateNode comp_instance) (PredicateNode comp_concept))
 		(ImplicationLink (PredicateNode pred_instance) (PredicateNode pred_concept))
-		(r2l-wordinst-Predicate comp_instance)
-		(r2l-wordinst-Predicate pred_instance)
+		(r2l-wordinst-predicate comp_instance)
+		(r2l-wordinst-predicate pred_instance)
 		(r2l-wordinst-concept comp_instance)
 		(EvaluationLink
 			(PredicateNode pred_instance)
@@ -1467,8 +1467,8 @@
 ;	(ListLink
 ;		(ImplicationLink (PredicateNode main_instance) (PredicateNode main))
 ;		(ImplicationLink (PredicateNode sub_instance) (PredicateNode sub))
-;		(r2l-wordinst-Predicate main_instance)
-;		(r2l-wordinst-Predicate sub_instance)
+;		(r2l-wordinst-predicate main_instance)
+;		(r2l-wordinst-predicate sub_instance)
 ;		(EvaluationLink
 ;			(DefinedLinguisticPredicateNode "that")
 ;			(ListLink
