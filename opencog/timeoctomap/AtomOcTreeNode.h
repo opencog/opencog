@@ -28,11 +28,74 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
- 
-Needs -std=c++14 flag set. Currently place holder for Atom in int
 
-made pull request for the required Time space Atom Maps with API and example code.
- A little problem due to map being accessed probabilistic-ally is that deletion acts probabilistic as well.
- currently put a hack to change node value for full delete in case all atom references for particular atom need to be forgotten.
- The aHandle type(currently int but will be changed) is supposed to hold atom reference.
- RemoveAtomAtTime removes probabilistic while RemoveAtom to forget all atoms removes by changing value to UndefinedHandle
+#ifndef TEMPLATE_OCTREE_NODE_H
+#define TEMPLATE_OCTREE_NODE_H
+
+#include <iostream>
+#include <octomap/OcTreeNode.h>
+#include <opencog/atomspace/AtomSpace.h>
+namespace octomap
+{
+//typedef opencog::Handle opencog::Handle;
+const opencog::Handle UndefinedHandle = opencog::Handle::UNDEFINED;
+// node definition
+class AtomOcTreeNode : public OcTreeNode
+{
+public:
+    AtomOcTreeNode() : OcTreeNode(), dat(0)
+    {} //dat gets default value from prunning
+
+    AtomOcTreeNode(const AtomOcTreeNode& rhs) : OcTreeNode(rhs), dat(rhs.dat)
+    {}
+
+    bool operator==(const AtomOcTreeNode& rhs) const
+    {
+        return (rhs.value == value && rhs.dat == dat);
+    }
+
+    // children
+    inline AtomOcTreeNode* getChild(unsigned int i)
+    {
+        return static_cast<AtomOcTreeNode*> (OcTreeNode::getChild(i));
+    }
+    inline const AtomOcTreeNode* getChild(unsigned int i) const
+    {
+        return static_cast<const AtomOcTreeNode*> (OcTreeNode::getChild(i));
+    }
+
+    bool createChild(unsigned int i)
+    {
+        if (children == nullptr) allocChildren();
+        children[i] = new AtomOcTreeNode();
+        return true;
+    }
+
+    bool pruneNode();
+    void expandNode();
+
+    inline opencog::Handle getData() const
+    {
+        return dat;
+    }
+    inline void  setData(opencog::Handle c)
+    {
+        this->dat = c;
+    }
+
+    opencog::Handle& getData()
+    {
+        return dat;
+    }
+
+    // file I/O
+    std::istream& readValue (std::istream &s);
+    std::ostream& writeValue(std::ostream &s) const;
+
+protected:
+    opencog::Handle dat;
+};
+
+} // end namespace
+
+#endif
