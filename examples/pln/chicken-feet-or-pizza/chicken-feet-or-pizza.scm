@@ -1,3 +1,6 @@
+;; WIP. To have this work you need to disable the advmod rule in
+;; opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm
+
 ;; Inference example combining the openpsi chatbot and PLN
 ;;
 ;; Given the following facts (obtaine via NLP)
