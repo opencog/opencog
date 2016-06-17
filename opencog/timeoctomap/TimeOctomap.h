@@ -44,6 +44,7 @@
 #include <string>
 #include <chrono>
 #include <algorithm>
+#include <cmath>
 #include "AtomOcTree.h"
 //#include "AtomOcTreeNode.h"
 using namespace std;
@@ -55,6 +56,11 @@ using namespace octomap;
 typedef std::chrono::system_clock::time_point time_pt;
 typedef std::chrono::system_clock::duration duration_c;
 typedef list<time_pt> time_list;
+//constants below require tweaking or better logic
+#define PI 3.142
+#define DEG2RAD(deg) (PI/180.0)*deg
+#define TOUCH_ANGLE DEG2RAD(10.0)
+#define NEAR_ANGLE DEG2RAD(20.0) 
 
 //data structures
 struct TimeUnit
@@ -117,17 +123,51 @@ public:
     point3d_list get_locations_of_atom_occurence_now(const opencog::Handle& ato);
     point3d_list get_locations_of_atom_occurence_at_time(const time_pt& time_p,const opencog::Handle& ato);
     //get the first atom observation after a time point
-    bool get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,const time_pt& from_d,time_pt& result);
+    bool get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,const time_pt& from_d,time_pt& result);//?return location too? 
     //get the last atom observation before a time point
     bool get_last_time_elapse_atom_observed(const opencog::Handle& ato,
                                             const time_pt& till_d,
                                             time_pt& result);//throw
     //AtomList& GetAtomsInLocationBBXatTime();//BBX = bounding box
+    //insert point cloud
+    //find ray intersection
 
+    //////////spatial-relations-queries
+    //should be true-false-unknown
+    //assuming z orientation is fixed i.e. sky relative to ground
+    //assuming observer is looking towards target
+    //x=1-left,0-right,-1-unknown (>elipson,<-elipson)
+    //y=1-above,0-below, -1 unknown
+    //z=1-ahead,0-behind, -1 unknown
+    point3d get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
+    //not normalized: direction vector -> (target-observer)
+    point3d get_direction_vector(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target);
+    //2=far,1=near,0=touching, -1 unknown
+    int get_nearness(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
+    //<-elipson=unknown,>=0 distance
+    double get_distance_between(const time_pt& time_p,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
+    point3d get_a_location(const time_pt& time_p,const opencog::Handle& ato_target);
 public:
     //constructor
     TimeOctomap(unsigned int num_time_units, double map_res_meters,
                 duration_c time_resolution);
+    inline double sqr(double a){return (a*a);}
+    inline double dot(point3d a,point3d b){return (a.x()*b.x()+a.y()*b.y()+a.z()*b.z());}
+    inline double mag(point3d a){return sqrt(sqr(a.x())+sqr(a.y())+sqr(a.z()));}
+    inline double ang_vec(point3d a,point3d b)
+    {
+        //FIXME: Test this hueristic to be correct 
+        double num=dot(a,b);
+        double den=mag(a)*mag(b);
+        double diff=abs(mag(a)-mag(b));
+        if (den<1e-9)//num might be greater or equal to space_res
+        {
+            if (diff<1e-3)return 0;//magic number
+            else
+            return PI;//Pi radians
+        }
+        return acos(num/den);
+    }
 private:
     //each map may have translation rotation (orientation) co-ordinates managed by user
     double map_res; //resolution of maps

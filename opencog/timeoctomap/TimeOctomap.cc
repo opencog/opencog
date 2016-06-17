@@ -396,3 +396,60 @@ TimeOctomap::remove_atom(const opencog::Handle& ato)
 
     }
 }//hacked not perfect
+
+//////spatial relations
+bool 
+TimeOctomap::get_a_location(const time_pt& time_p,const opencog::Handle& ato_target,point3d& location)
+{
+    //get atom location
+    point3d_list target_list=get_locations_of_atom_occurence_at_time(time_p,ato_target);
+    if (target_list.size()<1) return false;
+    location=target_list.front();
+    return true;
+}
+
+point3d
+TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
+{
+    //
+}
+    
+bool //not normalized
+TimeOctomap::get_direction_vector(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,point3d& dir)
+{
+    //direction vector
+    point3d tarh;
+    point3d refh;
+    if (!get_a_location(time_p,ato_target,tarh) return false;
+    if (!get_a_location(time_p,ato_obs,refh) return false;
+    dir= (tarh-refh);
+    return true;
+}
+    
+//2=far,1=near,0=touching, -1 unknown
+int 
+TimeOctomap::get_nearness(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
+{
+    point3d dir1,dir2;
+    if (!get_direction_vector(time_p,ato_obs,ato_target,dir1))return -1;
+    if (!get_direction_vector(time_p,ato_obs,ato_ref,dir2))return -1;
+    double ang=ang_vec(dir1,dir2);
+    if (ang<=TOUCH_ANGLE) return 0;
+    else if (ang<=NEAR_ANGLE) return 1;
+    return 2;
+}
+    
+//<-elipson=unknown,>=0 distance
+double 
+TimeOctomap::get_distance_between(const time_pt& time_p,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
+{
+    //get atom location
+    point3d tarh;
+    point3d refh;
+    if (!get_a_location(time_p,ato_target,tarh) return (-1.0);
+    if (!get_a_location(time_p,ato_ref,refh) return (-1.0);
+
+    double dist=sqrt(sqr(tarh.x()-refh.x())+qr(tarh.y()-refh.y())+sqr(tarh.z()-refh.z()));
+    return dist;
+}
+
