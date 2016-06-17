@@ -6,42 +6,22 @@
 
 (Define
     (DefinedPredicate "is-declarative?")
-    (Satisfaction (And
-        (State input-utterance (Reference (Variable "$l") (Variable "$x")))
-        (Parse (Variable "$parse") (Variable "$x"))
-        (Interpretation (Variable "$interp") (Variable "$parse"))
-        (Inheritance (Variable "$interp") (DefinedLinguisticConcept "DeclarativeSpeechAct"))
-    ))
+    (is-utterance-type? (DefinedLinguisticConcept "DeclarativeSpeechAct"))
 )
 
 (Define
     (DefinedPredicate "is-imperative?")
-    (Satisfaction (And
-        (State input-utterance (Reference (Variable "$l") (Variable "$x")))
-        (Parse (Variable "$parse") (Variable "$x"))
-        (Interpretation (Variable "$interp") (Variable "$parse"))
-        (Inheritance (Variable "$interp") (DefinedLinguisticConcept "ImperativeSpeechAct"))
-    ))
+    (is-utterance-type? (DefinedLinguisticConcept "ImperativeSpeechAct"))
 )
 
 (Define
     (DefinedPredicate "is-interrogative?")
-    (Satisfaction (And
-        (State input-utterance (Reference (Variable "$l") (Variable "$x")))
-        (Parse (Variable "$parse") (Variable "$x"))
-        (Interpretation (Variable "$interp") (Variable "$parse"))
-        (Inheritance (Variable "$interp") (DefinedLinguisticConcept "InterrogativeSpeechAct"))
-    ))
+    (is-utterance-type? (DefinedLinguisticConcept "InterrogativeSpeechAct"))
 )
 
 (Define
     (DefinedPredicate "is-truth-query?")
-    (Satisfaction (And
-        (State input-utterance (Reference (Variable "$l") (Variable "$x")))
-        (Parse (Variable "$parse") (Variable "$x"))
-        (Interpretation (Variable "$interp") (Variable "$parse"))
-        (Inheritance (Variable "$interp") (DefinedLinguisticConcept "TruthQuerySpeechAct"))
-    ))
+    (is-utterance-type? (DefinedLinguisticConcept "TruthQuerySpeechAct"))
 )
 
 (Define
@@ -80,4 +60,14 @@
 (Define
     (DefinedPredicate "is-aiml-reply?")
     (any-result? aiml-replies)
+)
+
+(Define
+    (DefinedPredicate "duckduckgo-search-started?")
+    (search-started? duckduckgo-search)
+)
+
+(Define
+    (DefinedPredicate "is-duckduckgo-answer?")
+    (any-result? duckduckgo-answers)
 )

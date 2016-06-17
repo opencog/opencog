@@ -25,6 +25,7 @@
             (Reference
                 list-of-words
                 sent-node
+                (Node utterance)
             )
         )
     )
@@ -60,6 +61,11 @@
 (State fuzzy-answers default-state)
 (State fuzzy-qa-search default-state)
 
+(define duckduckgo-answers (Anchor "DuckDuckGoAnswers"))
+(define duckduckgo-search (Anchor "DuckDuckGoSearch"))
+(State duckduckgo-answers default-state)
+(State duckduckgo-search default-state)
+
 ;-------------------------------------------------------------------------------
 ; Define the demands
 
@@ -75,6 +81,7 @@
 
 ; Load the available actions
 (load "actions.scm")
+(load "duckduckgo.scm")
 
 ; Load the psi-rules
 (load "psi-rules.scm")

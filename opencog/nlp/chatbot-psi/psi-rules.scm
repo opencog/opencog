@@ -17,7 +17,7 @@
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-answers)))
     (True)
-    (stv .9 .9)
+    (stv .5 .5)
     sociality
 )
 
@@ -61,6 +61,28 @@
         (DefinedPredicate "is-aiml-reply?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (Not (DefinedPredicate "duckduckgo-search-started?"))
+        (DefinedPredicate "is-input-utterance?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: ask-duckduckgo") (List)))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "duckduckgo-search-started?")
+        (DefinedPredicate "is-duckduckgo-answer?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List duckduckgo-answers)))
     (True)
     (stv .9 .9)
     sociality
