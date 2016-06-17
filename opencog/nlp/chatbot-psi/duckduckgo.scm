@@ -1,3 +1,6 @@
+; This will try to get results from DuckDuckGo
+; https://duckduckgo.com/
+
 (use-modules (opencog) (opencog python))
 
 (python-eval "

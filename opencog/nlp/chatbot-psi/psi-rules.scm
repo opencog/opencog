@@ -17,7 +17,7 @@
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-answers)))
     (True)
-    (stv .9 .9)
+    (stv .5 .5)
     sociality
 )
 
@@ -70,7 +70,6 @@
     (list (SequentialAnd
         (Not (DefinedPredicate "duckduckgo-search-started?"))
         (DefinedPredicate "is-input-utterance?")
-        (DefinedPredicate "is-a-question?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: ask-duckduckgo") (List)))
     (True)
