@@ -1020,7 +1020,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     MinedRulePattern* minedNewRulePattern = mineNewRuleForCurrentSubgoal(curStateNode, stateOwnerHanlde);
 
                     // Create a new rule from this mined pattern
-                    // MinedRule* minedRule = generateANewRuleFromMinedPattern(minedNewRulePattern, curStateNode);
+                    MinedRule* minedRule = generateANewRuleFromMinedPattern(*minedNewRulePattern);
+
+                    selectedRule = minedRule;
+                    curStateNode->ruleHistory.push_back(selectedRule);
 
                 }
 
@@ -1240,9 +1243,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     }
                 }
 
-
-
-
             }
         }
 
@@ -1254,7 +1254,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         {
             cout<<"Debug planning step " << tryStepNum <<": Selected rule :"<< selectedRule->ruleName << std::endl;
 
-            curStateNode->candidateRules.pop_front();
+            if (curStateNode->candidateRules.size() > 0)
+                curStateNode->candidateRules.pop_front();
 
             // create a new RuleNode to apply this selected rule
             ruleNode = new RuleNode(selectedRule, curStateNode);
@@ -1264,12 +1265,18 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             allRuleNodeInThisPlan.insert(allRuleNodeInThisPlan.begin(),ruleNode);
 
-            // When apply a rule, we need to select proper variables to ground it.
+            // When apply a rule, we need to select proper values to ground all the variables in it.
 
+            bool failToGroundRule = false;
             if (selectedRule->ruleType == MINED_RULE)
             {
                 // This rule is a mined rule, need to ground it in a different way from predefined rules.
-
+                if (! groundAMinedRule(ruleNode, curStateNode))
+                {
+                    // fail to ground variables, roll back to previous step
+                    cout<< "groundAMinedRule failed! This rule doesn't work!"<< std::endl;
+                    failToGroundRule = true;
+                }
 
             }
             else
@@ -1284,28 +1291,36 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 {
                     // fail to ground all non numeric variables, roll back to previous step
                     cout<< "GroundARuleNodeBySelectingNonNumericValues failed! This rule doesn't work!"<< std::endl;
-
-                    if ((curStateNode->forwardRuleNode != (&OCPlanner::goalRuleNode)) && curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+                    failToGroundRule = true;
+                }
+                else
+                {
+                    if (ruleNode->ParamCandidates.size() > 0)
                     {
-                        cout<<"This fail also imply that its forward state :";
-                        outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
-                        cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
-                        curStateNode->forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
+                        ruleNode->currentBindingsViaSelecting = ruleNode->ParamCandidates.front();
+                        ruleNode->ParamCandidates.erase(ruleNode->ParamCandidates.begin());
                     }
 
-                    cleanUpContextBeforeRollBackToPreviousStep();
-                    continue;
+                    ruleNode->updateCurrentAllBindings();
 
                 }
+
             }
 
-            if (ruleNode->ParamCandidates.size() > 0)
+            if (failToGroundRule)
             {
-                ruleNode->currentBindingsViaSelecting = ruleNode->ParamCandidates.front();
-                ruleNode->ParamCandidates.erase(ruleNode->ParamCandidates.begin());
-            }
+                if ((curStateNode->forwardRuleNode != (&OCPlanner::goalRuleNode)) && curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+                {
+                    cout<<"This fail also imply that its forward state :";
+                    outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
+                    cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
+                    curStateNode->forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
+                }
 
-            ruleNode->updateCurrentAllBindings();
+                cleanUpContextBeforeRollBackToPreviousStep();
+                continue;
+
+            }
 
             // if the actor of this rule has not been grounded till now, it indicates it doesn't matter who is to be the actor
             // so we just simply ground it as the self agent.
@@ -1320,19 +1335,24 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 }
             }
 
-            // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
-            if (! selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode))
+            // Ground numeric variables for predifined rules.
+            // To be improved: currently mined rules do not deal with numeric variables
+            if (selectedRule->ruleType == PREDIFINED_RULE)
             {
-                cout << "SelectValueForGroundingNumericState failed! This rule doesn't work!"<< std::endl;
-                if ((curStateNode->forwardRuleNode != (&OCPlanner::goalRuleNode)) && curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+                // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
+                if (! selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode))
                 {
-                    cout<<"This fail also imply that its forward state :";
-                    outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
-                    cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
-                    curStateNode->forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
+                    cout << "SelectValueForGroundingNumericState failed! This rule doesn't work!"<< std::endl;
+                    if ((curStateNode->forwardRuleNode != (&OCPlanner::goalRuleNode)) && curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+                    {
+                        cout<<"This fail also imply that its forward state :";
+                        outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
+                        cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
+                        curStateNode->forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
+                    }
+                    cleanUpContextBeforeRollBackToPreviousStep();
+                    continue;
                 }
-                cleanUpContextBeforeRollBackToPreviousStep();
-                continue;
             }
         }
         else
@@ -3664,11 +3684,22 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
     if (stateOwnerHanlde == Handle::UNDEFINED)
         return false;
 
+    cout << "\nFound candicates in the AtomSpace to match this pattern:\n";
+
     MinedRule* minedRule = (MinedRule*)(ruleNode->originalRule);
     cout << "\nAction name: " << minedRule->action->getName() <<"\nNow try to ground all the parameters for this action..." << std::endl;
 
+    // action target: to be improved, currently the target is the state owner
+    string targetVarName = atomSpace->getName(minedRule->minedRulePattern->allVariables["target"]);
+    ParamValue targetParamVal = Inquery::getParamValueFromHandle(stateOwnerHanlde);
+    ruleNode->currentAllBindings.insert(std::pair<string, ParamValue>(targetVarName,targetParamVal));
+
+    // action actor
+    string actorVarName = atomSpace->getName(minedRule->minedRulePattern->allVariables["actor"]);
+    ruleNode->currentAllBindings.insert(std::pair<string, ParamValue>(actorVarName,selfEntityParamValue));
+
     map<string, MinedParamStruct>::iterator paramIt = minedRule->minedRulePattern->paramToMinedStruct.begin();
-    map<string,Handle> paramCandidateMap;
+
     for (; paramIt != minedRule->minedRulePattern->paramToMinedStruct.end(); paramIt ++) // for each param
     {
         cout << "Binding parameter: " << paramIt->first << std::endl;
@@ -3796,7 +3827,9 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
         HandleSeq candidates = Inquery::findAllCandidatesByGivenPattern(cleanBoundPattern, cleanVariables, minedParamStruct.paramObjVar);
         if (candidates.size() > 0)
         {
-            paramCandidateMap.insert(std::pair<string, Handle>(paramIt->first,candidates[0]));// Currently only choose the top candidate.
+            string varName = atomSpace->getName(minedRule->minedRulePattern->allVariables[paramIt->first]);
+            ParamValue paramVal = Inquery::getParamValueFromHandle(candidates[0]);// Currently only choose the top candidate.
+            ruleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,paramVal));
             cout << "\nFound candicates in the AtomSpace to match this pattern:\n";
             for (Handle c : candidates)
                 cout << atomSpace->atomAsString(c) << std::endl;
@@ -3804,9 +3837,12 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
         else
         {
             cout << "\nCan't found any candicates in the AtomSpace to match this pattern. Mining new pattern failed\n";
+            ruleNode->currentAllBindings.clear();
             return false;
         }
     }
+
+    return true;
 
 
 }
@@ -4372,7 +4408,7 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
         else
             return false;
 
-        // todo: for general way:
+        // to be improved: for general way:
         // if there are more than two preconditions in this rule, borrow the one without any other backward rule to satisfy it, as hard restrics for selecting values.
         // because others preconditions can be achieved by other rules.
         // so that we can select values at least satisfied one condition.
@@ -4656,6 +4692,7 @@ vector<Handle> OCPlanner::bindKnownVariablesForLinks(vector<Handle>& handles, ma
     return rebindedPattern;
 }
 
+
 unsigned int boolVarCount = 0;
 unsigned int strVarCount = 0;
 unsigned int intVarCount = 0;
@@ -4686,6 +4723,7 @@ ParamValue OCPlanner::generateParamValFromHandle(Handle& varHandle, map<Handle, 
 
     }
 }
+
 
 
 MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPattern)
@@ -4728,7 +4766,6 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
         minedRule->addPrecondition(preconState);
     }
 
-
     if (minedPattern.allVariables.find("target") != minedPattern.allVariables.end())
     {
         // Added a default precondition: if the target is an Entity, the agent should be in the assess distance of the target
@@ -4743,6 +4780,7 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
     // Add effects :
     // To be improved, sometimes there are some side effects besides the main effect described in the subgoal StateNode.
     //                 Also currently the target is usually the subgoal state owner, but not always, this need to be improved too.
+    string newRuleName = "ToAchieve";
     for (MinedEffect& minedEffect : minedPattern.effects)
     {
         vector<ParamValue> mainEffectStateOwnerList;
@@ -4752,9 +4790,16 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
         State* effectState = new State(minedEffect.newStateParameter->getName(), minedEffect.newStateParameter->getType(),STATE_EQUAL_TO,  minedEffect.newStateParameter->getValue(), mainEffectStateOwnerList);
         Effect* effect = new Effect(effectState, OP_ASSIGN, minedEffect.newStateParameter->getValue());
         minedRule->addEffect(EffectPair(1.0f, effect));
+        newRuleName += "_";
+        newRuleName += minedEffect.newStateParameter->getName();
     }
-
+    newRuleName += "_Rule";
+    minedRule->ruleName = newRuleName;
     this->AllRules.push_back(minedRule);
+
+    minedRule->handleToParamValMap = handleToParamValMap;
+
+    cout << "Converted a mined pattern into a planning rule: " << newRuleName << std::endl;
     return minedRule;
 
 }

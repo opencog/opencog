@@ -516,6 +516,7 @@ namespace opencog { namespace oac {
 
     public:
         MinedRulePattern* minedRulePattern;
+        map<Handle, ParamValue> handleToParamValMap;
 
     };
 
