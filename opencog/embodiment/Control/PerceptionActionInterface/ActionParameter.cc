@@ -440,8 +440,8 @@ std::string ActionParameter::ParamValueToString(const ParamValue& paramVal)
         Entity e = boost::get<Entity>(paramVal);
         answer = "(";
         answer.append(opencog::toString(boost::get<Entity>(paramVal).id));
-        answer.append(",");
-        answer.append(opencog::toString(boost::get<Entity>(paramVal).type));
+//        answer.append(",");
+//        answer.append(opencog::toString(boost::get<Entity>(paramVal).type));
         answer.append(")");
     }
     else if(boost::get<Vector>(&(paramVal)))

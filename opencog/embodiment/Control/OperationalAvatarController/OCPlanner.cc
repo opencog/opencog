@@ -3690,12 +3690,12 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
     cout << "\nAction name: " << minedRule->action->getName() <<"\nNow try to ground all the parameters for this action..." << std::endl;
 
     // action target: to be improved, currently the target is the state owner
-    string targetVarName = atomSpace->getName(minedRule->minedRulePattern->allVariables["target"]);
+    string targetVarName = ActionParameter::ParamValueToString(minedRule->handleToParamVarMap[minedRule->minedRulePattern->allVariables["target"]]);
     ParamValue targetParamVal = Inquery::getParamValueFromHandle(stateOwnerHanlde);
     ruleNode->currentAllBindings.insert(std::pair<string, ParamValue>(targetVarName,targetParamVal));
 
     // action actor
-    string actorVarName = atomSpace->getName(minedRule->minedRulePattern->allVariables["actor"]);
+    string actorVarName = ActionParameter::ParamValueToString(minedRule->actor);
     ruleNode->currentAllBindings.insert(std::pair<string, ParamValue>(actorVarName,selfEntityParamValue));
 
     map<string, MinedParamStruct>::iterator paramIt = minedRule->minedRulePattern->paramToMinedStruct.begin();
@@ -3827,7 +3827,7 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
         HandleSeq candidates = Inquery::findAllCandidatesByGivenPattern(cleanBoundPattern, cleanVariables, minedParamStruct.paramObjVar);
         if (candidates.size() > 0)
         {
-            string varName = atomSpace->getName(minedRule->minedRulePattern->allVariables[paramIt->first]);
+            string varName = ActionParameter::ParamValueToString(minedRule->handleToParamVarMap[minedRule->minedRulePattern->allVariables[paramIt->first]]);
             ParamValue paramVal = Inquery::getParamValueFromHandle(candidates[0]);// Currently only choose the top candidate.
             ruleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,paramVal));
             cout << "\nFound candicates in the AtomSpace to match this pattern:\n";
@@ -3841,6 +3841,7 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
             return false;
         }
     }
+
 
     return true;
 
@@ -4603,7 +4604,7 @@ void OCPlanner::outputStateInfo(State* s,bool outPutStateValue)
 
     if (outPutStateValue)
     {
-        cout << " " << STATE_TYPE_NAME[s->stateType] << " " << s->stateVariable->stringRepresentation();
+        cout << " " << STATE_TYPE_NAME[s->stateType] << " " << ActionParameter::ParamValueToString(s->stateVariable->getValue());
     }
 
 }
@@ -4737,7 +4738,7 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
     vectorVarCount = 0;
     entityVarCount = 1;
 
-    map<Handle, ParamValue> handleToParamValMap;
+    map<Handle, ParamValue> handleToParamVarMap;
 
     // generate the action
     AvatarAction* action = new AvatarAction(ActionType::GetActionTypeByName(minedPattern.actionName));
@@ -4746,7 +4747,7 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
     map<string,Handle>::iterator allVarIt = minedPattern.allVariables.begin();
     for (; allVarIt != minedPattern.allVariables.end(); allVarIt ++)
     {
-        ParamValue param = generateParamValFromHandle(allVarIt->second, handleToParamValMap);
+        ParamValue param = generateParamValFromHandle(allVarIt->second, handleToParamVarMap);
         action->addParameter(ActionParameter(allVarIt->first,
                                             ActionParameter::getTypeFromParam(param),
                                             param));
@@ -4758,9 +4759,16 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
     for (MinedPreCondition& precond : minedPattern.preconditions)
     {
         vector<ParamValue> precondStateOwnerList;
-        ParamValue ownerParamVal = generateParamValFromHandle(precond.stateOwner, handleToParamValMap);
+        ParamValue ownerParamVal = generateParamValFromHandle(precond.stateOwner, handleToParamVarMap);
         precondStateOwnerList.push_back(ownerParamVal);
-        ParamValue stateValParam = generateParamValFromHandle(precond.stateValue, handleToParamValMap);
+
+        ParamValue stateValParam;
+        if (precond.stateValue == actorPredicateHandle)
+            stateValParam = varAvatar;
+        else if (precond.stateValue == targetPredicateHandle)
+            stateValParam = generateParamValFromHandle(minedPattern.allVariables["target"], handleToParamVarMap);
+        else
+            stateValParam = generateParamValFromHandle(precond.stateValue, handleToParamVarMap);
 
         State* preconState = new State(precond.stateName,ActionParameter::getTypeFromParam(stateValParam),STATE_EQUAL_TO ,stateValParam, precondStateOwnerList);
         minedRule->addPrecondition(preconState);
@@ -4771,7 +4779,7 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
         // Added a default precondition: if the target is an Entity, the agent should be in the assess distance of the target
         vector<ParamValue> closedStateOwnerList;
         closedStateOwnerList.push_back(varAvatar);
-        closedStateOwnerList.push_back(handleToParamValMap[defaultTargetVarHandle]);
+        closedStateOwnerList.push_back(handleToParamVarMap[defaultTargetVarHandle]);
         ParamValue accessDistance = ACCESS_DISTANCE;
         State* closedState = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,accessDistance, closedStateOwnerList, true, &Inquery::inqueryDistance);
         minedRule->addPrecondition(closedState);
@@ -4784,7 +4792,7 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
     for (MinedEffect& minedEffect : minedPattern.effects)
     {
         vector<ParamValue> mainEffectStateOwnerList;
-        ParamValue ownerParamVal = generateParamValFromHandle(minedEffect.stateOwner, handleToParamValMap);
+        ParamValue ownerParamVal = generateParamValFromHandle(minedEffect.stateOwner, handleToParamVarMap);
         mainEffectStateOwnerList.push_back(ownerParamVal);
 
         State* effectState = new State(minedEffect.newStateParameter->getName(), minedEffect.newStateParameter->getType(),STATE_EQUAL_TO,  minedEffect.newStateParameter->getValue(), mainEffectStateOwnerList);
@@ -4797,10 +4805,51 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
     minedRule->ruleName = newRuleName;
     this->AllRules.push_back(minedRule);
 
-    minedRule->handleToParamValMap = handleToParamValMap;
+    minedRule->handleToParamVarMap = handleToParamVarMap;
+    minedRule->minedRulePattern = &minedPattern;
 
-    cout << "Converted a mined pattern into a planning rule: " << newRuleName << std::endl;
+    cout << "\nAll variables handle to ParamValue Variable:\n";
+    for (std::pair<Handle, ParamValue> hToParam : minedRule->handleToParamVarMap)
+        cout << atomSpace->atomAsString(hToParam.first) << " -> " << ActionParameter::ParamValueToString(hToParam.second) << std::endl;
+
+    cout << "\nConverted this new mined pattern into a planning rule: " << std::endl;
+    outputARule(minedRule);
+
     return minedRule;
+
+}
+
+void OCPlanner::outputARule(Rule* rule)
+{
+    cout << "Rule name: " << rule->ruleName << "\n";
+    cout << "Action name: " << rule->action->getName() << "\nActor: " << ActionParameter::ParamValueToString(rule->actor) << "\n";
+    cout << "\nAction parameter: \n";
+
+    for (ActionParameter param : rule->action->getParameters())
+    {
+        cout << param.getName() << ": " << ActionParameter::ParamValueToString(param.getValue()) << "\n";
+    }
+
+    cout << "\nRule effects: \n";
+    for (EffectPair& effectPair : rule->effectList)
+    {
+        Effect* e = (Effect*)(effectPair.second);
+        cout << e->state->stateName << " of ";
+        for (ParamValue& stateOwner : e->state->stateOwnerList)
+        {
+            cout << ActionParameter::ParamValueToString(stateOwner) << " ";
+        }
+        cout << "will " << STATE_TYPE_NAME[e->state->stateType] << " " << ActionParameter::ParamValueToString(e->opParamValue) <<"\n";
+    }
+
+    cout << "\nRule preconditions: \n";
+    for (State* precon : rule->preconditionList)
+    {
+        outputStateInfo(precon, true);
+        cout << std::endl;
+    }
+    cout << std::endl;
+
 
 }
 

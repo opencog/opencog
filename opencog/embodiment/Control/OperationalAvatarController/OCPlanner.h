@@ -568,6 +568,7 @@ protected:
 
      void outputStateInfo(State* s, bool outPutStateValue);
      void outputRuleNodeStep(RuleNode* ruleNode, bool outputForwardStateNodes = true);
+     void outputARule(Rule* rule);
 
      void bindVariablesForOneLink(Handle link, map<Handle,Handle>& varToValueMap, HandleSeq& bindOutgoingLinks);
      vector<Handle> bindKnownVariablesForLinks(vector<Handle>& handles, map<Handle,Handle>& varToValueMap);
