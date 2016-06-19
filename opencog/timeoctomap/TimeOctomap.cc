@@ -419,6 +419,9 @@ TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& 
     if (!get_a_location(time_p,ato_target,v2)) return res;
     if (!get_a_location(time_p,ato_ref,v3)) return res;
     //calculate res
+    //translate obs to origin and relatively move others
+    //rotate vector obs target to be on an axis, relatively rotate ref
+    //see if on left or right, up or down, front or back
     return res;
 }
     
