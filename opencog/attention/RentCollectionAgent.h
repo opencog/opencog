@@ -1,5 +1,5 @@
 /*
- * opencog/attention/WageCollectionAgent.h
+ * opencog/attention/RentCollectionAgent.h
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -56,7 +56,7 @@ class CogServer;
  *
  * This Agent is supposed to run in it's own Thread.
  */
-class WageCollectionAgent : public Agent
+class RentCollectionAgent : public Agent
 {
 
 public:
@@ -85,12 +85,12 @@ public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
-        static const ClassInfo _ci("opencog::WageCollectionAgent");
+        static const ClassInfo _ci("opencog::RentCollectionAgent");
         return _ci;
     }
 
-    WageCollectionAgent(CogServer&);
-    virtual ~WageCollectionAgent();
+    RentCollectionAgent(CogServer&);
+    virtual ~RentCollectionAgent();
     virtual void run();
 
     /** Return the agent's logger object
@@ -104,7 +104,7 @@ public:
 
 }; // class
 
-typedef std::shared_ptr<WageCollectionAgent> WageCollectionAgentPtr;
+typedef std::shared_ptr<RentCollectionAgent> RentCollectionAgentPtr;
 
 /** @}*/
 }  // namespace

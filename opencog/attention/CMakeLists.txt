@@ -39,7 +39,7 @@ ADD_LIBRARY(attention SHARED
     StochasticImportanceDiffusionAgent
     #SimpleImportanceDiffusionAgent
     #ImportanceUpdatingAgent
-    WageCollectionAgent
+    RentCollectionAgent
     MinMaxSTIUpdatingAgent
     HebbianCreationAgent
     FocusBoundaryUpdatingAgent
@@ -92,7 +92,7 @@ INSTALL (FILES
     #SimpleImportanceDiffusionAgent.h
     #ImportanceUpdatingAgent.h
     StochasticImportanceDiffusionAgent.h
-    WageCollectionAgent.h
+    RentCollectionAgent.h
     MinMaxSTIUpdatingAgent.h
     HebbianCreationAgent.h
     FocusBoundaryUpdatingAgent.h

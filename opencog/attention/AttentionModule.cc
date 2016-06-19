@@ -38,7 +38,7 @@ AttentionModule::AttentionModule(CogServer& cs) :
 {
     _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
     _cogserver.registerAgent(StochasticImportanceDiffusionAgent::info().id,&stochasticDiffusionFactory);
-    _cogserver.registerAgent(WageCollectionAgent::info().id,&stochasticUpdatingFactory);
+    _cogserver.registerAgent(RentCollectionAgent::info().id,&stochasticUpdatingFactory);
     _cogserver.registerAgent(MinMaxSTIUpdatingAgent::info().id,&minMaxSTIUpdatingFactory);
     _cogserver.registerAgent(HebbianCreationAgent::info().id,&hebbianCreationFactory);
     _cogserver.registerAgent(FocusBoundaryUpdatingAgent::info().id,&focusUpdatingFactory);
@@ -47,7 +47,7 @@ AttentionModule::AttentionModule(CogServer& cs) :
     _forgetting_agentptr =
         _cogserver.createAgent(ForgettingAgent::info().id, false);
     _stiupdating_agentptr =
-        _cogserver.createAgent(WageCollectionAgent::info().id, false);
+        _cogserver.createAgent(RentCollectionAgent::info().id, false);
     _stidiffusion_agentptr =
         _cogserver.createAgent(StochasticImportanceDiffusionAgent::info().id,false);
     _minmaxstiupdating_agentptr =
@@ -71,7 +71,7 @@ AttentionModule::~AttentionModule()
     logger().debug("[AttentionModule] enter destructor");
     _cogserver.unregisterAgent(ForgettingAgent::info().id);
     _cogserver.unregisterAgent(StochasticImportanceDiffusionAgent::info().id);
-    _cogserver.unregisterAgent(WageCollectionAgent::info().id);
+    _cogserver.unregisterAgent(RentCollectionAgent::info().id);
     _cogserver.unregisterAgent(MinMaxSTIUpdatingAgent::info().id);
     _cogserver.unregisterAgent(HebbianCreationAgent::info().id);
     _cogserver.unregisterAgent(FocusBoundaryUpdatingAgent::info().id);

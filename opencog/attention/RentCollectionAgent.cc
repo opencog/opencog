@@ -1,5 +1,5 @@
 /*
- * opencog/attention/WageCollectionAgent.cc
+ * opencog/attention/RentCollectionAgent.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * Written by Joel Pitt <joel@fruitionnz.com>
@@ -31,13 +31,13 @@
 
 #define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
-#include "WageCollectionAgent.h"
+#include "RentCollectionAgent.h"
 
 //#define DEBUG
 
 using namespace opencog;
 
-WageCollectionAgent::WageCollectionAgent(CogServer& cs) :
+RentCollectionAgent::RentCollectionAgent(CogServer& cs) :
         Agent(cs)
 {
     // init starting wages/rents. these should quickly change and reach
@@ -52,29 +52,29 @@ WageCollectionAgent::WageCollectionAgent(CogServer& cs) :
 
     // Provide a logger
     log = NULL;
-    setLogger(new opencog::Logger("WageCollectionAgent.log", Logger::FINE,
+    setLogger(new opencog::Logger("RentCollectionAgent.log", Logger::FINE,
     true));
 }
 
-WageCollectionAgent::~WageCollectionAgent()
+RentCollectionAgent::~RentCollectionAgent()
 {
     if (log)
         delete log;
 }
 
-void WageCollectionAgent::setLogger(Logger* _log)
+void RentCollectionAgent::setLogger(Logger* _log)
 {
     if (log)
         delete log;
     log = _log;
 }
 
-Logger* WageCollectionAgent::getLogger()
+Logger* RentCollectionAgent::getLogger()
 {
     return log;
 }
 
-void WageCollectionAgent::run()
+void RentCollectionAgent::run()
 {
     a = &_cogserver.getAtomSpace();
 
@@ -115,19 +115,25 @@ void WageCollectionAgent::run()
     h->setLTI(lti - ltiRent);
 }
 
-int WageCollectionAgent::calculate_STI_Rent()
+int RentCollectionAgent::calculate_STI_Rent()
 {
     int funds = a->get_STI_funds();
     float diff  = targetSTI - funds;
     float ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
-    ndiff = std::max(ndiff,-0.9f);
+    ndiff = std::max(ndiff,-0.99f);
     //printf("ndiff: %f   ",ndiff);
+    //
+    float res = STIAtomRent + (STIAtomRent * ndiff);
 
-    return STIAtomRent + floor(STIAtomRent * ndiff);
+    if (res < 1)
+        if ((rand() % 100) > (100 * res))
+            res = 1;
+
+    return floor(res);
 }
 
-int WageCollectionAgent::calculate_LTI_Rent()
+int RentCollectionAgent::calculate_LTI_Rent()
 {
     int funds = a->get_LTI_funds();
     float diff  = targetLTI - funds;

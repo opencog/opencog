@@ -27,7 +27,7 @@
 
 #include <opencog/attention/ForgettingAgent.h>
 #include <opencog/attention/StochasticImportanceDiffusionAgent.h>
-#include <opencog/attention/WageCollectionAgent.h>
+#include <opencog/attention/RentCollectionAgent.h>
 #include <opencog/attention/MinMaxSTIUpdatingAgent.h>
 #include <opencog/attention/HebbianCreationAgent.h>
 #include <opencog/attention/FocusBoundaryUpdatingAgent.h>
@@ -56,7 +56,7 @@ class AttentionModule : public Module
 private:
     Factory<ForgettingAgent, Agent> forgettingFactory;
     Factory<StochasticImportanceDiffusionAgent, Agent> stochasticDiffusionFactory;
-    Factory<WageCollectionAgent, Agent> stochasticUpdatingFactory;
+    Factory<RentCollectionAgent, Agent> stochasticUpdatingFactory;
     Factory<MinMaxSTIUpdatingAgent, Agent> minMaxSTIUpdatingFactory;
     Factory<HebbianCreationAgent, Agent> hebbianCreationFactory;
     Factory<FocusBoundaryUpdatingAgent, Agent> focusUpdatingFactory;

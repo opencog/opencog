@@ -11,7 +11,7 @@ IF (TBB_FOUND)
 		${TBB_INCLUDE_DIR}
 		${GHC_LIB_DIR}/include
         #hardcoded ghc lib dir for docker
-        /home/opencog/.stack/programs/x86_64-linux/ghc-7.10.3/lib/ghc-7.10.3/include/
+        ~/.stack/programs/x86_64-linux/ghc-7.10.3/lib/ghc-7.10.3/include/
 		${CMAKE_BINARY_DIR}
 	)
 
