@@ -55,6 +55,8 @@
 		entity
 		value))
 
+; --------------------------------------------------------------
+; Entity Creation
 
 ;;; Modulator Creation
 (define (create-openpsi-modulator name initial-value)
@@ -169,7 +171,7 @@
 "
  Openpsi Value Updating
 
- Update openpsi parameter and variable values as a funciton of the current
+ Update openpsi parameter and variable values as a functon of the current
  value, so that increases in value are larger when the current value is low
  and smaller when the current value is high. (And vica versa for decreases.)
 
@@ -312,8 +314,10 @@
                 param)))
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
-	(format #t "\n\n----------------------------------------\nLoop Count: ~a\n"
-		psi-updater-loop-count)
+	(let ((output-port (open-file "psilog.txt" "a")))
+			(format output-port "\n\n----------------------------------------\nLoop Count: ~a\n"
+				psi-updater-loop-count)
+			(close-output-port output-port))
 
 	; Evaluate the monitored params and set "changed" predicates accordingly
 	(set! changed-params '())
@@ -459,7 +463,7 @@
 
 (define-public (psi-updater-halt)
 "
-  Tells the psi loop thread, that is started by running `(psi-run)`, to exit.
+  Tells the psi loop thread, that is started by running `(psi-update-run)`, to exit.
 "
     (set! psi-updater-is-running #f)
     (cog-set-tv! updater-continue-pred (stv 0 1))
