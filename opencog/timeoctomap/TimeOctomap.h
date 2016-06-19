@@ -136,9 +136,9 @@ public:
     //should be true-false-unknown
     //assuming z orientation is fixed i.e. sky relative to ground
     //assuming observer is looking towards target
-    //x=1-left,0-right,-1-unknown (>elipson,<-elipson)
-    //y=1-above,0-below, -1 unknown
-    //z=1-ahead,0-behind, -1 unknown
+    //x=2-right,1-left,0-aligned,-1-unknown (>elipson,<-elipson)
+    //y=2-above,1-below,0-aligned, -1 unknown
+    //z=2-ahead,1-behind,0 - aligned, -1 unknown
     point3d get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
     //not normalized: direction vector -> (target-observer)
     bool get_direction_vector(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,point3d&);
