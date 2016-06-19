@@ -447,7 +447,7 @@ of some relatively easy and useful things that could be done.
 Speech-to-text system needs:
  * Provide timestamps for words, i.e. to indicate: is speaker talking
    quickly, slowly?
- * Is speaker talking quietly or loud?  Shouting?
+ * Is speaker talking quietly or loud? Shouting? Excited? Bored? Sad?
  * General affect perception: angry speech? gentle speech? Falling or
    rising tones?
  * Sex perception: is speaker male or female?
@@ -466,12 +466,13 @@ Visual system needs:
  * Are they making eye contact?
  * Are their lips moving? i.e. visually, might they be talking?
  * Are there gestures of surprise (lips parting open, suddenly)?
- * Are the still, or animated? Bouncing with excitement or bored?
+ * Are they still, or animated? Bouncing with excitement or bored?
    Even a simple measure of visual flow will do: a general rate of
    movement, amplitude of movement.
  * Are we looking at a large crowd?  Is the crowd agitated or still?
- * Are they moving towards or away from us? Are they turning sideways?
- * Are they sitting or standing?
+ * In a small-room setting, (not a crowd) which individuals are moving
+   towards us, and which are moving away? Who is turning sideways?
+ * Which individuals are sitting? Which are standing?
 
 Some of these things could be easy: just like we listen for audio noise,
 and measure the noise intensity, we could measure "video noise" and

@@ -183,6 +183,7 @@ void Fuzzy::start_search(const Handle& trg)
 {
     target = trg;
     get_all_words(target, target_words, target_winsts);
+    std::sort(target_words.begin(), target_words.end());
     calculate_tfidf(target_words);
 }
 
@@ -240,13 +241,64 @@ bool Fuzzy::try_match(const Handle& soln)
     HandleSeq soln_words;
     HandleSeq soln_winsts;
     get_all_words(soln, soln_words, soln_winsts);
+    std::sort(soln_words.begin(), soln_words.end());
 
-    double score = 0;  // Initial value
+    // Reject if it's identical to the input
+    if (soln_words == target_words)
+        return false;
 
-    if (target_words.size() > soln_words.size())
-        compare(soln_words, target_words, 0, score, false);
+    HandleSeq target_diff;
+    HandleSeq soln_diff;
+    HandleSeq common_nodes;
+    auto target_iterator = target_words.begin();
+    auto soln_iterator = soln_words.begin();
+
+    // See which nodes are common/uncommon
+    while (target_iterator != target_words.end() or
+           soln_iterator != soln_words.end())
+    {
+        if (target_iterator == target_words.end())
+        {
+            soln_diff.insert(soln_diff.end(), soln_iterator, soln_words.end());
+            break;
+        }
+
+        if (soln_iterator == soln_words.end())
+        {
+            target_diff.insert(target_diff.end(), target_iterator, target_words.end());
+            break;
+        }
+
+        if (*target_iterator < *soln_iterator)
+        {
+            target_diff.push_back(*target_iterator);
+            target_iterator++;
+        }
+
+        else if (*soln_iterator < *target_iterator)
+        {
+            soln_diff.push_back(*soln_iterator);
+            soln_iterator++;
+        }
+
+        else
+        {
+            common_nodes.push_back(*target_iterator);
+            target_iterator++;
+            soln_iterator++;
+        }
+    }
+
+    // Initial value
+    double score = 0;
+
+    for (const Handle& c : common_nodes)
+        score += get_score(c, c, true);
+
+    if (target_diff.size() > soln_diff.size())
+        compare(soln_diff, target_diff, score, score, false);
     else
-        compare(target_words, soln_words, 0, score, true);
+        compare(target_diff, soln_diff, score, score, true);
 
     score /= std::max(target_words.size(), soln_words.size());
 
@@ -261,19 +313,19 @@ bool Fuzzy::try_match(const Handle& soln)
  * A recursive method for finding the highest similarity score between
  * two trees.
  *
- * @param hs1, hs2   The two tree being compared
+ * @param hs1, hs2   The two trees being compared
  * @param score      The score of the current combination
- * @param max_score  The highest score among the explored combinations
+ * @param h_score  The highest score among the explored combinations
  * @param taf        A flag indicating which tree is from the target
  */
 void Fuzzy::compare(HandleSeq& hs1, HandleSeq& hs2,
-                    double score, double& max_score, bool taf)
+                    double score, double& h_score, bool taf)
 {
     if (hs1.size() == 0)
     {
         // Only record the highest score it found so far
-        if (score > max_score)
-            max_score = score;
+        if (score > h_score)
+            h_score = score;
 
         return;
     }
@@ -290,7 +342,7 @@ void Fuzzy::compare(HandleSeq& hs1, HandleSeq& hs2,
         hs1_cp.erase(hs1_cp.begin());
         hs2_cp.erase(std::find(hs2_cp.begin(), hs2_cp.end(), h2));
 
-        compare(hs1_cp, hs2_cp, score, max_score, taf);
+        compare(hs1_cp, hs2_cp, score, h_score, taf);
 
         score -= s;
     }

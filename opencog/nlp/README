@@ -3,7 +3,7 @@
                     ---------------------------
 
 This directory contains an assortment of natural language processing
-subsystems, primarily focused on the English language). This includes
+subsystems, primarily focused on the English language. This includes
 language learning code, logical reasoning on facts extracted from
 sentences, reference resolution, question answering, natural
 language output (generation of syntactically valid sentences),
@@ -109,7 +109,7 @@ Interfaces to IRC; provide an easy way to connect opencog to IRC.
 
 learn
 -----
-Langauge learning code. Goal is to learn any language at all, given
+Language learning code. Goal is to learn any language at all, given
 some sufficiently large corpus.  Experiment is in progress, results
 are promising but inconclusive. Starved for time.
 

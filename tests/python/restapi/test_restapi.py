@@ -8,6 +8,7 @@ from opencog.atomspace import *
 # (see: https://github.com/opencog/opencog/issues/337)
 try:
     from web.api.apimain import RESTAPI
+    from web.api.utilities import count_to_confidence  # Temporary hack
 except ImportError:
     import unittest
     raise unittest.SkipTest("ImportError exception: make sure the required "
@@ -40,8 +41,8 @@ class TestRESTApi():
             types.InheritanceLink, [self.swan, self.bird], TruthValue(1, 0.0011237357975915074))
         self.bird_animal = self.atomspace.add_link(
             types.InheritanceLink, [self.bird, self.animal], TruthValue(1, 0.0011237357975915074))
-        self.bird.av = {'sti': 9}
-        self.swan.av = {'sti': 9}
+        self.bird.sti = 9
+        self.swan.sti = 9
 
         self.api = RESTAPI(self.atomspace)
         self.client = self.api.test()
@@ -75,13 +76,15 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
 
         # Compare to the values created in the AtomSpace
-        atomspace_result = self.atomspace[Handle(post_result['handle'])]
-        assert Handle(post_result['handle']) == atomspace_result.h
+        atomspace_result = Atom(post_result['handle'], self.atomspace)
+        assert Atom(post_result['handle'], self.atomspace).value() == \
+            atomspace_result.value()
         assert post_result['name'] == atomspace_result.name
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(post_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
 
         # Get by handle and compare
@@ -112,7 +115,7 @@ class TestRESTApi():
         truthvalue = \
             {'type': 'simple', 'details': {'strength': 0.5, 'count': 0.4}}
         atom = {'type': 'InheritanceLink', 'truthvalue': truthvalue,
-                'outgoing': [self.swan.h.value(), self.animal.h.value()]}
+                'outgoing': [self.swan.value(), self.animal.value()]}
 
         post_response = self.client.post(
             self.uri + 'atoms', data=json.dumps(atom), headers=self.headers)
@@ -127,16 +130,18 @@ class TestRESTApi():
         assert_almost_equals(
             float(post_result['truthvalue']['details']['count']),
             truthvalue['details']['count'], places=5)
-        assert self.swan.h.value() in post_result['outgoing']
-        assert self.animal.h.value() in post_result['outgoing']
+        assert self.swan.value() in post_result['outgoing']
+        assert self.animal.value() in post_result['outgoing']
 
         # Compare to the values created in the AtomSpace
-        atomspace_result = self.atomspace[Handle(post_result['handle'])]
-        assert Handle(post_result['handle']) == atomspace_result.h
+        atomspace_result = Atom(post_result['handle'], self.atomspace)
+        assert Atom(post_result['handle'], self.atomspace).value() == \
+            atomspace_result.value()
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(post_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
 
         # Get by handle and compare
@@ -149,8 +154,8 @@ class TestRESTApi():
 
         # Check if the link is in the incoming set of each of the nodes
         for h in post_result['outgoing']:
-            assert Handle(post_result['handle']) \
-                in [atom.h for atom in self.atomspace[Handle(h)].incoming]
+            assert post_result['handle'] \
+                in [atom.value() for atom in Atom(h, self.atomspace).incoming]
 
     def test_put_and_get_tv_av_node(self):
         atom = self.swan
@@ -160,13 +165,13 @@ class TestRESTApi():
         atom_update = \
             {'truthvalue': truthvalue, 'attentionvalue': attentionvalue}
         put_response = self.client.put(
-            self.uri + 'atoms/' + str(atom.h.value()),
+            self.uri + 'atoms/' + str(atom.value()),
             data=json.dumps(atom_update),
             headers=self.headers)
         put_result = json.loads(put_response.data)['atoms']
 
         # Verify values returned by the PUT request
-        assert put_result['handle'] == atom.h.value()
+        assert put_result['handle'] == atom.value()
         assert_almost_equals(
             float(put_result['truthvalue']['details']['strength']),
             truthvalue['details']['strength'], places=5)
@@ -178,18 +183,20 @@ class TestRESTApi():
         assert put_result['attentionvalue']['vlti'] == attentionvalue['vlti']
 
         # Compare to the values updated in the AtomSpace
-        atomspace_result = self.atomspace[Handle(put_result['handle'])]
-        assert Handle(put_result['handle']) == atomspace_result.h
+        atomspace_result = Atom(put_result['handle'], self.atomspace)
+        assert Atom(put_result['handle'], self.atomspace).value() == \
+            atomspace_result.value()
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(put_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(put_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
         assert put_result['attentionvalue'] == atomspace_result.av
 
         # Get by handle and compare
         get_response = \
-            self.client.get(self.uri + 'atoms/' + str(atom.h.value()))
+            self.client.get(self.uri + 'atoms/' + str(atom.value()))
         get_result = json.loads(get_response.data)['result']['atoms'][0]
         assert put_result == get_result
 
@@ -202,13 +209,13 @@ class TestRESTApi():
             {'truthvalue': truthvalue, 'attentionvalue': attentionvalue}
         put_response =\
             self.client.put(
-                self.uri + 'atoms/' + str(atom.h.value()),
+                self.uri + 'atoms/' + str(atom.value()),
                 data=json.dumps(atom_update),
                 headers=self.headers)
         put_result = json.loads(put_response.data)['atoms']
 
         # Verify values returned by the PUT request
-        assert put_result['handle'] == atom.h.value()
+        assert put_result['handle'] == atom.value()
         assert_almost_equals(
             float(put_result['truthvalue']['details']['strength']),
             truthvalue['details']['strength'], places=5)
@@ -220,18 +227,20 @@ class TestRESTApi():
         assert put_result['attentionvalue']['vlti'] == attentionvalue['vlti']
 
         # Compare to the values updated in the AtomSpace
-        atomspace_result = self.atomspace[Handle(put_result['handle'])]
-        assert Handle(put_result['handle']) == atomspace_result.h
+        atomspace_result = Atom(put_result['handle'], self.atomspace)
+        assert Atom(put_result['handle'], self.atomspace).value() == \
+            atomspace_result.value()
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(put_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(put_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
         assert put_result['attentionvalue'] == atomspace_result.av
 
         # Get by handle and compare
         get_response = \
-            self.client.get(self.uri + 'atoms/' + str(atom.h.value()))
+            self.client.get(self.uri + 'atoms/' + str(atom.value()))
         get_result = json.loads(get_response.data)['result']['atoms'][0]
         assert put_result == get_result
 
@@ -259,10 +268,11 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
 
         # Compare to the values updated in the AtomSpace
-        assert post_result['handle'] == existing_atom.h.value()
+        assert post_result['handle'] == existing_atom.value()
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(post_result['truthvalue']['details']['count']))) \
                == existing_atom.tv
 
     def test_post_revise_existing_link(self):
@@ -272,7 +282,7 @@ class TestRESTApi():
         existing_atom = self.bird_animal
         truthvalue = \
             {'type': 'simple', 'details': {'strength': 0.1, 'count': 0.95}}
-        outgoing = [a.h.value() for a in existing_atom.out]
+        outgoing = [a.value() for a in existing_atom.out]
         atom = {'type': 'InheritanceLink',
                 'truthvalue': truthvalue,
                 'outgoing': outgoing}
@@ -291,75 +301,76 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
 
         # Compare to the values updated in the AtomSpace
-        assert post_result['handle'] == existing_atom.h.value()
+        assert post_result['handle'] == existing_atom.value()
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            TruthValue.count_to_confidence(float(post_result['truthvalue']['details']['count']))) \
+            count_to_confidence(
+                float(post_result['truthvalue']['details']['count']))) \
                == existing_atom.tv
 
-    @raises(IndexError)
+    # @raises(IndexError)
     def test_delete_node(self):
         atom = self.swan
-        handle = atom.h.value()
+        handle = atom.value()
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))
         get_result = json.loads(get_response.data)['result']['atoms'][0]
 
         delete_response = \
-            self.client.delete(self.uri + 'atoms/' + str(atom.h.value()))
+            self.client.delete(self.uri + 'atoms/' + str(atom.value()))
         delete_result = json.loads(delete_response.data)['result']
 
         assert delete_result['success']
         assert delete_result['handle'] == get_result['handle']
 
         # Confirm the atom isn't contained in the AtomSpace anymore
-        assert_raises(self.atomspace[atom.h], IndexError)
+        assert self.atomspace.get_atom_with_uuid(handle) == None
 
-    @raises(IndexError)
+    # @raises(IndexError)
     def test_delete_link(self):
         atom = self.bird_animal
-        handle = atom.h.value()
+        handle = atom.value()
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))
         get_result = json.loads(get_response.data)['result']['atoms'][0]
 
         delete_response = \
-            self.client.delete(self.uri + 'atoms/' + str(atom.h.value()))
+            self.client.delete(self.uri + 'atoms/' + str(atom.value()))
         delete_result = json.loads(delete_response.data)['result']
 
         assert delete_result['success']
         assert delete_result['handle'] == get_result['handle']
 
         # Confirm the atom isn't contained in the AtomSpace anymore
-        assert_raises(self.atomspace[atom.h], IndexError)
+        assert self.atomspace.get_atom_with_uuid(handle) == None
 
     def test_get_atoms_by_av(self):
         # Assign some STI values
-        self.atomspace.set_av(h=self.bird.h, sti=9)
-        self.atomspace.set_av(h=self.swan.h, sti=20)
-        self.atomspace.set_av(h=self.bird_animal.h, sti=15)
-        self.atomspace.set_av(h=self.animal.h, sti=0)
+        self.bird.sti = 9
+        self.swan.sti = 20
+        self.bird_animal.sti = 15
+        self.animal.sti = 0
 
         get_response = \
             self.client.get(self.uri + 'atoms?filterby=attentionalfocus')
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 3
         assert set([atom['handle'] for atom in get_result]) \
-            == {self.bird.h.value(),
-                self.swan.h.value(),
-                self.bird_animal.h.value()}
+            == {self.bird.value(),
+                self.swan.value(),
+                self.bird_animal.value()}
 
         get_response = \
             self.client.get(self.uri + 'atoms?filterby=stirange&stimin=15')
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 2
         assert set([atom['handle'] for atom in get_result]) \
-            == {self.swan.h.value(), self.bird_animal.h.value()}
+            == {self.swan.value(), self.bird_animal.value()}
 
         get_response = self.client.get(
             self.uri + 'atoms?filterby=stirange&stimin=15&stimax=18')
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 1
         assert set([atom['handle'] for atom in get_result]) \
-            == {self.bird_animal.h.value()}
+            == {self.bird_animal.value()}
 
     def test_get_types(self):
         # Verify that a list of valid atom types was returned

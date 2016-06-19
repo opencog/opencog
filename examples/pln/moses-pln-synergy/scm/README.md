@@ -118,7 +118,7 @@ scheme@(guile-user)> (for-each (lambda (i) (cog-bind implication-partial-instant
 scheme@(guile-user)> (cog-prt-atomspace)
 And search for the following
 ...
-   (ImplicationLink (stv 1 0.99999982)
+   (ImplicationLink (stv 1 1)
       (TypedVariableLink
          (VariableNode "$X")
          (TypeNode "ConceptNode")
@@ -159,9 +159,9 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind implication-lambda-distribution-rule)
+scheme@(guile-user)> (cog-bind implication-scope-distribution-rule)
 ...
-   (ImplicationLink (stv 1 0.99999982)
+   (ImplicationLink (stv 1 1)
       (LambdaLink
          (TypedVariableLink
             (VariableNode "$X")
@@ -175,7 +175,7 @@ scheme@(guile-user)> (cog-bind implication-lambda-distribution-rule)
                   (ConceptNode "treatment-1")
                )
             )
-            (EvaluationLink (stv 1 0.99999982)
+            (EvaluationLink (stv 1 1)
                (PredicateNode "contain")
                (ListLink
                   (ConceptNode "treatment-1")
@@ -230,7 +230,7 @@ scheme@(guile-user)> (cog-bind and-lambda-distribution-rule)
             (VariableNode "$X")
             (TypeNode "ConceptNode")
          )
-         (EvaluationLink (stv 1 0.99999982)
+         (EvaluationLink (stv 1 1)
             (PredicateNode "contain")
             (ListLink
                (ConceptNode "treatment-1")
@@ -252,12 +252,12 @@ Semi-formally
 ```scheme
 scheme@(guile-user)> (cog-bind lambda-grounded-construction-rule)
 $5 = (SetLink
-   (LambdaLink (stv 1 0.99999982)
+   (LambdaLink (stv 1 1)
       (TypedVariableLink
          (VariableNode "$X")
          (TypeNode "ConceptNode")
       )
-      (EvaluationLink (stv 1 0.99999982)
+      (EvaluationLink (stv 1 1)
          (PredicateNode "contain")
          (ListLink
             (ConceptNode "treatment-1")
@@ -278,7 +278,7 @@ Semi-formally
 ```scheme
 scheme@(guile-user)> (cog-bind implication-construction-rule)
 ...
-   (ImplicationLink (stv 1 0.99999982)
+   (ImplicationLink (stv 1 1)
       (LambdaLink
          (TypedVariableLink
             (VariableNode "$X")
@@ -292,12 +292,12 @@ scheme@(guile-user)> (cog-bind implication-construction-rule)
             )
          )
       )
-      (LambdaLink (stv 1 0.99999982)
+      (LambdaLink (stv 1 1)
          (TypedVariableLink
             (VariableNode "$X")
             (TypeNode "ConceptNode")
          )
-         (EvaluationLink (stv 1 0.99999982)
+         (EvaluationLink (stv 1 1)
             (PredicateNode "contain")
             (ListLink
                (ConceptNode "treatment-1")
@@ -320,7 +320,7 @@ Semi-formally
 ```scheme
 scheme@(guile-user)> (cog-bind implication-implicant-distribution-rule)
 ...
-   (ImplicationLink (stv 1 0.99999982)
+   (ImplicationLink (stv 1 1)
       (LambdaLink
          (TypedVariableLink
             (VariableNode "$X")
@@ -348,12 +348,12 @@ scheme@(guile-user)> (cog-bind implication-implicant-distribution-rule)
                )
             )
          )
-         (LambdaLink (stv 1 0.99999982)
+         (LambdaLink (stv 1 1)
             (TypedVariableLink
                (VariableNode "$X")
                (TypeNode "ConceptNode")
             )
-            (EvaluationLink (stv 1 0.99999982)
+            (EvaluationLink (stv 1 1)
                (PredicateNode "contain")
                (ListLink
                   (ConceptNode "treatment-1")
@@ -377,7 +377,7 @@ Semi-formally
 ```scheme
 scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
 ...
-   (ImplicationLink (stv 1 0.99999982)
+   (ImplicationLink (stv 1 1)
       (AndLink
          (LambdaLink
             (TypedVariableLink
@@ -392,12 +392,12 @@ scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
                )
             )
          )
-         (LambdaLink (stv 1 0.99999982)
+         (LambdaLink (stv 1 1)
             (TypedVariableLink
                (VariableNode "$X")
                (TypeNode "ConceptNode")
             )
-            (EvaluationLink (stv 1 0.99999982)
+            (EvaluationLink (stv 1 1)
                (PredicateNode "contain")
                (ListLink
                   (ConceptNode "treatment-1")
@@ -419,7 +419,7 @@ scheme@(guile-user)> (cog-bind implication-and-lambda-factorization-rule)
                   (ConceptNode "treatment-1")
                )
             )
-            (EvaluationLink (stv 1 0.99999982)
+            (EvaluationLink (stv 1 1)
                (PredicateNode "contain")
                (ListLink
                   (ConceptNode "treatment-1")
@@ -443,7 +443,7 @@ Semi-formally
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
-   (ImplicationLink (stv 1 0.99999982)
+   (ImplicationLink (stv 1 1)
       (LambdaLink
          (TypedVariableLink
             (VariableNode "$X")
@@ -470,7 +470,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
                   (ConceptNode "treatment-1")
                )
             )
-            (EvaluationLink (stv 1 0.99999982)
+            (EvaluationLink (stv 1 1)
                (PredicateNode "contain")
                (ListLink
                   (ConceptNode "treatment-1")
@@ -493,10 +493,9 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> ;; Actually the previous deduction step took care of that too
-scheme@(guile-user)> ;; (cog-bind deduction-implication-rule)
+scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
-   (ImplicationLink (stv 1 0.99999982)
+   (ImplicationLink (stv 1 1)
       (LambdaLink
          (TypedVariableLink
             (VariableNode "$X")
@@ -532,7 +531,7 @@ scheme@(guile-user)> ;; (cog-bind deduction-implication-rule)
 ```scheme
 scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
 ...
-   (ImplicationLink (stv 0.69999999 0.69999999)
+   (ImplicationLink (stv 0.69999999 0.52499998)
       (PredicateNode "is-well-hydrated")
       (PredicateNode "recovery-speed-of-injury-alpha")
    )
@@ -542,9 +541,9 @@ scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
 ##### (11) - Turn equivalences such as between `\x take(x, treatment-1)` and `take-treatment-1` into implications
 
 ```scheme
-scheme@(guile-user)> (cog-bind equivalence-to-double-implication-rule)
+scheme@(guile-user)> (cog-bind (ure-get-forward-rule equivalence-to-double-implication-rule))
 ...
-      (ImplicationLink (stv 1 0.99999982)
+      (ImplicationLink (stv 1 1)
          (LambdaLink
             (TypedVariableLink
                (VariableNode "$X")
@@ -561,7 +560,7 @@ scheme@(guile-user)> (cog-bind equivalence-to-double-implication-rule)
          (PredicateNode "take-compound-A" (stv 0.2 0.80000001))
       )
 ...
-      (ImplicationLink (stv 1 0.99999982)
+      (ImplicationLink (stv 1 1)
          (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
          (LambdaLink
             (TypedVariableLink
@@ -590,7 +589,7 @@ take-treatment-1 -> \x take(x, compound-A)
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
-   (ImplicationLink (stv 1 0.99999982)
+   (ImplicationLink (stv 1 1)
       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
       (LambdaLink
          (TypedVariableLink
@@ -614,7 +613,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
-   (ImplicationLink (stv 1 0.99999982)
+   (ImplicationLink (stv 1 1)
       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
       (PredicateNode "take-compound-A" (stv 0.2 0.80000001))
    )
@@ -631,7 +630,7 @@ take-treatment-1 -> recovery-speed-of-injury-alpha
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
-   (ImplicationLink (stv 0.55000001 0.89999998)
+   (ImplicationLink (stv 0.55000001 0.81)
       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
       (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
    )
@@ -648,7 +647,7 @@ eat-lost-fruits-vegetables -> recovery-speed-of-injury-alpha
 ```scheme
 scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
-   (ImplicationLink (stv 0.62 0.69999999)
+   (ImplicationLink (stv 0.62 0.64124995)
       (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
       (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
    )
@@ -660,7 +659,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ```
 scheme@(guile-user)> (cog-bind implication-implicant-disjunction-rule)
 $10 = (SetLink
-   (ImplicationLink (stv 0.60357851 0.69999999)
+   (ImplicationLink (stv 0.60357851 0.64124995)
       (OrLink
          (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
          (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))

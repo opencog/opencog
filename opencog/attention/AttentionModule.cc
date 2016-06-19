@@ -36,6 +36,7 @@ DECLARE_MODULE(AttentionModule)
 AttentionModule::AttentionModule(CogServer& cs) :
     Module(cs)
 {
+    _cogserver.registerAgent(StimulationAgent::info().id,  &stimulationFactory);
     _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
     _cogserver.registerAgent(StochasticImportanceDiffusionAgent::info().id,&stochasticDiffusionFactory);
     _cogserver.registerAgent(RentCollectionAgent::info().id,&stochasticUpdatingFactory);
@@ -69,6 +70,7 @@ AttentionModule::AttentionModule(CogServer& cs) :
 AttentionModule::~AttentionModule()
 {
     logger().debug("[AttentionModule] enter destructor");
+    _cogserver.unregisterAgent(StimulationAgent::info().id);
     _cogserver.unregisterAgent(ForgettingAgent::info().id);
     _cogserver.unregisterAgent(StochasticImportanceDiffusionAgent::info().id);
     _cogserver.unregisterAgent(RentCollectionAgent::info().id);

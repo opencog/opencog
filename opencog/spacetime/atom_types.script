@@ -16,6 +16,7 @@ AT_LOCATION_LINK <- ORDERED_LINK
 // TimeNode inherits from NumerNode, so that a umeric value can be
 // directly stored (wihout converting it to a string)
 TIME_NODE <- NUMBER_NODE
+TIME_INTERVAL_LINK <- ORDERED_LINK
 TIME_DOMAIN_NODE <- NODE
 AT_TIME_LINK <- ORDERED_LINK
 LATEST_LINK <- ORDERED_LINK

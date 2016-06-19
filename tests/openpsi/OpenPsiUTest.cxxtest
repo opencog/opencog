@@ -110,7 +110,7 @@ public:
     }
 
     // Check the scheme function `psi-select-rules`
-    void test_psi_select_rules()
+    void psi_select_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -150,7 +150,7 @@ public:
     }
 
     // Check the scheme function `psi-related-goals`
-    void test_psi_related_goals()
+    void psi_related_goals()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -172,7 +172,7 @@ public:
     }
 
     // Check the scheme function `psi-get-satisfiable-rules`
-    void test_psi_get_satisfiable_rules()
+    void psi_get_satisfiable_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -221,7 +221,7 @@ public:
 
 
     // Check the scheme function `psi-step`
-    void test_psi_step()
+    void psi_step()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -293,5 +293,57 @@ public:
         TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_4);
 
         logger().info("END TEST: %s", __FUNCTION__);
+    }
+
+    // Check the scheme function `psi-get-dual-rules`
+    void psi_get_dual_rules()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Test 1:
+        // Test for finding psi-rules with context without variable in them,
+        // aka canned rules.
+        _scm->eval_h("(rule-1)(rule-2)(rule-3)(rule-4)");
+        CHKERR
+        auto result_1_1 = _scm->eval("(test_psi_get_dual_rules_1_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1_1);
+        auto result_1_2 = _scm->eval("(test_psi_get_dual_rules_1_2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_1_2);
+
+        // Test 2:
+        // Test for finding psi-rules using DualLink for contexts that have
+        // variables in them.
+        _scm->eval_h("(rule-5)");
+        CHKERR
+        auto result_2_1 = _scm->eval("(test_psi_get_dual_rules_2_1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `2`", "2\n" , result_2_1);
+        auto result_2_2 = _scm->eval("(test_psi_get_dual_rules_2_2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2_2);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
+    // Check the scheme function `psi-action?`
+    // NOTE: The name of the test function uses `__predicate` in place of `?`
+    void psi_action__predicate()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        auto result_1 = _scm->eval("(psi-action? action-1) ");
+        TSM_ASSERT_EQUALS("Expected `#f`", "#f\n" , result_1);
+
+        // Use the executable term `action-1` in defining a rule, that results
+        // in the term being converted to a psi recognizable action.
+        _scm->eval_h("(rule-1)");
+        CHKERR
+
+        auto result_2 = _scm->eval("(psi-action? action-1) ");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2);
+
     }
 };
