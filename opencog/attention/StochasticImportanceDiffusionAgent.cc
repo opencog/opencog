@@ -141,19 +141,20 @@ void StochasticImportanceDiffusionAgent::produce()
             }
         }
 
-        HandleSeq targetSet;
-        int idx;
-
         std::uniform_int_distribution<int> distribution(0,atomcount-1);
 
-        idx = distribution(generator);
+        int idx = distribution(generator);
 
-        targetSet = get_target_neighbors(atoms[idx], ASYMMETRIC_HEBBIAN_LINK);
+        HandleSeq targetSet;
+
+        Handle source = atoms[idx];//STISamplingAgent::getAtom();
+
+        targetSet = get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
 
         if (targetSet.size() == 0)
             continue;
 
-        short startSTI = a->get_STI(atoms[idx]);
+        short startSTI = a->get_STI(source);
         float totalAvailableDiffusionAmmount = (float)startSTI * maxSpreadPercentage;
 
         if (totalAvailableDiffusionAmmount < 1.0f) {
@@ -180,7 +181,7 @@ void StochasticImportanceDiffusionAgent::produce()
             //printf("new targets: %zd",targetSet.size());
         }
 
-        while (!queue.push(std::pair<Handle,HandleSeq>(atoms[idx],targetSet))) {
+        while (!queue.push(std::pair<Handle,HandleSeq>(source,targetSet))) {
             std::this_thread::yield();
         }
     }
