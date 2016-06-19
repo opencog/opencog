@@ -141,12 +141,12 @@ public:
     //z=1-ahead,0-behind, -1 unknown
     point3d get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
     //not normalized: direction vector -> (target-observer)
-    point3d get_direction_vector(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target);
+    bool get_direction_vector(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,point3d&);
     //2=far,1=near,0=touching, -1 unknown
     int get_nearness(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
     //<-elipson=unknown,>=0 distance
     double get_distance_between(const time_pt& time_p,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
-    point3d get_a_location(const time_pt& time_p,const opencog::Handle& ato_target);
+    bool get_a_location(const time_pt& time_p,const opencog::Handle& ato_target,point3d&);
 public:
     //constructor
     TimeOctomap(unsigned int num_time_units, double map_res_meters,

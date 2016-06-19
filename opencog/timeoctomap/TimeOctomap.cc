@@ -412,6 +412,14 @@ point3d
 TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
 {
     //
+    point3d res(-1.0,-1.0,-1.0);
+    point3d v1,v2,v3;
+    point3d d1,d2;
+    if (!get_a_location(time_p,ato_obs,v1)) return res;
+    if (!get_a_location(time_p,ato_target,v2)) return res;
+    if (!get_a_location(time_p,ato_ref,v3)) return res;
+    //calculate res
+    return res;
 }
     
 bool //not normalized
@@ -420,8 +428,8 @@ TimeOctomap::get_direction_vector(const time_pt& time_p,const opencog::Handle& a
     //direction vector
     point3d tarh;
     point3d refh;
-    if (!get_a_location(time_p,ato_target,tarh) return false;
-    if (!get_a_location(time_p,ato_obs,refh) return false;
+    if (!get_a_location(time_p,ato_target,tarh)) return false;
+    if (!get_a_location(time_p,ato_obs,refh)) return false;
     dir= (tarh-refh);
     return true;
 }
@@ -446,10 +454,10 @@ TimeOctomap::get_distance_between(const time_pt& time_p,const opencog::Handle& a
     //get atom location
     point3d tarh;
     point3d refh;
-    if (!get_a_location(time_p,ato_target,tarh) return (-1.0);
-    if (!get_a_location(time_p,ato_ref,refh) return (-1.0);
+    if (!get_a_location(time_p,ato_target,tarh)) return (-1.0);
+    if (!get_a_location(time_p,ato_ref,refh)) return (-1.0);
 
-    double dist=sqrt(sqr(tarh.x()-refh.x())+qr(tarh.y()-refh.y())+sqr(tarh.z()-refh.z()));
+    double dist=sqrt(sqr(tarh.x()-refh.x())+sqr(tarh.y()-refh.y())+sqr(tarh.z()-refh.z()));
     return dist;
 }
 
