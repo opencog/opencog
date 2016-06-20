@@ -186,14 +186,33 @@
 
  todo: see case-lambda in scheme for function overloading
 "
-(define-public (adjust-psi-var-level target alpha . origin-param)
-	(format #t "adjust-psi-var-level   alpha: ~a   target: ~a" alpha target)
+(define-public (adjust-psi-var-level target strength . origin)
+	(define new-value)
+	(set! origin (list-ref origin 0))
+	(format #t "adjust-psi-var-level   strength: ~a   target: ~a   origin: ~a"
+		strength target origin)
 	(let* ((value (psi-get-number-value target))
 		   ; todo: replace this with a function
-		   (new-value (min 1 (max 0 (+ value
-				(string->number (cog-name alpha))))))
-		  )
+		   ; Determine normalized value for the alpha for the change function.
+		   ; Alpha is based on the strength of the interaction and the
+		   ; magnititude of change in the origin.
 
+		   ; Assume interaction strength .5 means a roughly one-to-one
+		   ; change in magnititude between the origin and target. IOW a given
+		   ; change in origin results in a change of approximately equal
+		   ; magnitude in the target.
+		   ; WAIT - why not just have alpha be the multiplier duh
+		   ; We could even assume alpha = 1 by default if not present and make
+		   ; it optional, but not sure how that would/wouldn't work with the
+		   ; rules.
+
+		   (origin-change (psi-get-change-magnitude origin))
+		   (alpha (* (string->number (cog-name strength)) origin-change))
+		  )
+		(set! new-value (max .15 (tanh (* 3.141592654 value))))
+		; tanh never gets to one so set it to one above a certain point
+		(if (> new-value .99)
+			(set! new-value 1))
 		(psi-set-value! target (Number new-value))
 		;(cog-set-tv! target (cog-new-stv new-strength confidence))
 		(format #t "previous value: ~a    new value: ~a\n" value new-value)
@@ -226,7 +245,8 @@
     ; Pause for 100 millisecs, to keep the number of loops within a reasonable
     ; range.
     ; todo: is this needed?
-    (usleep 7000000))
+    ; keeping it slow for now dev purposes
+    (usleep 1500000))
 
 
 (define (psi-get-interaction-rules)
@@ -315,14 +335,22 @@
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 	(let ((output-port (open-file "psilog.txt" "a")))
-			(format output-port "\n\n----------------------------------------\nLoop Count: ~a\n"
+			(format output-port "\n---------------------------------------- Loop ~a\n"
 				psi-updater-loop-count)
+			(format output-port
+				"agent power: ~a  arousal: ~a  speech: ~a  voice: ~a\n"
+				(psi-get-number-value agent-state-power)
+				(psi-get-number-value arousal)
+				(psi-get-number-value speech)
+				(psi-get-number-value voice-width))
+
+
 			(close-output-port output-port))
 
 	; Evaluate the monitored params and set "changed" predicates accordingly
 	(set! changed-params '())
 	(for-each set-param-change-status psi-monitored-params)
-	(format #t "\nchanged-params: ~a\n\n" changed-params)
+	;(format #t "\nchanged-params: ~a\n\n" changed-params)
 
 
 	; grab and evaluate the interaction rules
@@ -345,6 +373,8 @@
 	(stv 1 1)
 )
 
+
+
 ; --------------------------------------------------------------
 
 (define (psi-change-in? target)
@@ -365,6 +395,18 @@
 		)
 	)
 )
+
+(define (psi-get-change-magnitude target)
+  "
+  Returns the normalized magnitude change in target from its previous value.
+  Todo: Assuming for now that the values are normalized in [0,1]
+  "
+	(let* ((previous (hash-ref prev-value-table target))
+		   (current (psi-get-number-value target)))
+		(if (and (number? previous) (number? current))
+			(- previous current)
+			0)))
+
 
 (define (psi-evaluate-interaction-rule rule)
 	; Assumes rule is of the form (PredictiveImplication AtTime ...)
@@ -503,7 +545,10 @@
 (define p agent-state-power)
 
 
+(define (uupdate a x) (/ (- (expt a x) 1) (- a 1)))
 
+; (10000^(a*x) - 1) / (10000^a -1)
+(define (update2 a x) (/ (- (expt 1000 (* a x)) 1) (- (expt 1000 a) 1)))
 
 
 ; --------------------------------------------------------------
