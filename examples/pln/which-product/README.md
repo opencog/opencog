@@ -1,6 +1,6 @@
 # Overview
 
-Work in progress PLN inference to conclude that the cost of some
+Work in progress of a PLN inference to infer that the cost of some
 product is less than the cost of another. The facts about the products
 would be obtained via the NLP pipeline, and the conclusion would be
 passed back to the NLG pipeline to generate the answer to a query.
@@ -9,7 +9,9 @@ passed back to the NLG pipeline to generate the answer to a query.
 
 ## (kb.1) Product one costs $100
 
-Output of the NLP sentence "Product one costs $100"
+Output of the NLP sentence "Product one costs $100" -- letting aside
+the details about the processing involved to determine that the cost
+is in USD.
 
 ```atomese
 EvaluationLink
@@ -30,9 +32,6 @@ EvaluationLink
     ConceptNode "product two"
     QuantityNode "USD:200"
 ```
-
-We let aside the details about the processing involved to determine
-that the cost is in USD.
 
 # Query
 
@@ -56,7 +55,8 @@ Evaluation
         Concept "product two"
 ```
 
-Given that NLG could build the answer
+Given that, as well some knowledge about the uniqueness of cost for
+each product, see (kb.6) below, NLG could build the answer
 
 "Product one costs less than product two"
 
@@ -81,7 +81,7 @@ QuantityLink
 and that GreaterThanLink, etc, work with Quantity nodes and links in
 addition to numbers. Without bringing the full specification of
 GreaterThanLink, we will assume our axiomatic scheme can generate
-on-demand facts like
+facts on-demand like
 
 ```atomese
 GreaterThanLink <1,1>
@@ -164,7 +164,7 @@ Evaluation <1,1>
 
 These higher order facts have been tailored for that demo to make the
 inference simpler (as opposed to using more general albeit possibly
-more convoluted facts).
+more difficult to use facts).
 
 ### (kb.7) Equality is compatible with predicate evaluation
 
@@ -215,7 +215,7 @@ Implication <1,1>
 
 # Inference chain
 
-Here the inference chain is built in a forward manner. In practice it
+Here the inference chain is built in a forward way. In practice it
 would be built backward, from the conclusion associated to the query
 back to the initial premises.
 
@@ -291,7 +291,7 @@ Equal <1,1>
     QuantityNode "USD:200"
 ```
 
-## (s.6) The cost of product one is less than the cost of product two
+## (s.6) Conclusion, the cost of product one is less than the cost of product two
 
 Apply modus ponens to implication (kb.7) with premises (s.5) and (s.2)
 
