@@ -308,5 +308,5 @@ Evaluation <1,1>
       Schema "get-attribute"
       List
         Predicate "cost"
-        Concept "product one"
+        Concept "product two"
 ```
