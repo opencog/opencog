@@ -25,8 +25,10 @@
 #define _OPENCOG_SUREAL_PMCB_H
 
 
+#include <unordered_map>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>
+#include <opencog/atoms/base/Handle.h>
 
 
 namespace opencog
@@ -81,6 +83,14 @@ private:
         Handle handle;
         size_t r2lSetLinkSize;
     };
+
+    /*
+    typedef std::unordered_map<std::string, bool> HandleMap;
+    typedef std::unordered_map<std::string, HandleMap> CacheMap;
+
+    CacheMap m_variable_cache;
+    CacheMap m_clause_cache;
+    */
 };
 
 }
