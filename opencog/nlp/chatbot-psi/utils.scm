@@ -47,7 +47,10 @@
 )
 
 (define (any-result? anchor)
-    (Not (Equal (Set no-result) (Get (State anchor (Variable "$f")))))
+    (Not (Or
+        (Equal (Set default-state) (Get (State anchor (Variable "$f"))))
+        (Equal (Set no-result) (Get (State anchor (Variable "$f"))))
+    ))
 )
 
 (define (add-thread t)
