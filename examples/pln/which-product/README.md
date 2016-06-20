@@ -11,21 +11,25 @@ passed back to the NLG pipeline to generate the answer to a query.
 
 Output of the NLP sentence "Product one costs $100"
 
+```atomese
 EvaluationLink
   PredicateNode "cost"
   ListLink
     ConceptNode "product one"
     QuantityNode "USD:100"
+```
 
 ## (kb.2) Product one costs $100
 
 Output of the NLP sentence "Product two costs $200"
 
+```atomese
 EvaluationLink
   PredicateNode "cost"
   ListLink
     ConceptNode "product two"
     QuantityNode "USD:200"
+```
 
 We let aside the details about the processing involved to determine
 that the cost is in USD.
@@ -36,6 +40,7 @@ that the cost is in USD.
 
 ## AtomSpace representation of the answer to that query
 
+```atomese
 Evaluation
   Predicate "less"
   List
@@ -49,6 +54,7 @@ Evaluation
       List
         Predicate "cost"
         Concept "product two"
+```
 
 Given that NLG could build the answer
 
@@ -64,22 +70,28 @@ QuantityNode "USD:100"
 
 stands for
 
+```atomese
 QuantityLink
   UnitNode "USD"
   NumberNode 100
+```
 
 and that GreaterThanLink, etc, work with Quantity nodes and links in
 addition to numbers. Without bringing the full specification of
 GreaterThanLink, we will assume our axiomatic scheme can generate
 on-demand facts like
 
+```atomese
 GreaterThanLink <1,1>
   QuantityNode "USD:200"
   QuantityNode "USD:100"
+```
 
+```atomese
 GreaterThanLink <0,1>
   QuantityNode "USD:1"
   QuantityNode "USD:100"
+```
 
 etc.
 
@@ -87,6 +99,7 @@ etc.
 
 If Y>X then less(X,Y)
 
+```atomese
 Implication <1,1>
   VariableList
     TypedVariable
@@ -103,6 +116,7 @@ Implication <1,1>
     List
       Variable "$X"
       Variable "$Y"
+```
 
 ## (kb.5) Predicate associating unique attributes
 
@@ -110,6 +124,7 @@ If predicate P associates a unique attribute A to individual I, in
 other words P is a functional relationship, then the output of
 get-attribute(P, I) is A.
 
+```atomese
 Implication <1,1>
   VariableList
     TypedVariable
@@ -133,12 +148,15 @@ Implication <1,1>
         Variable "$P"
         Variable "$I"
     Variable "$A"
+```
 
 ### (kb.6) Cost associates a unique attribute per individual
 
+```atomese
 Evaluation <1,1>
   Predicate "is-functional"
   Predicate "cost"
+```
 
 ## Compatibility
 
@@ -148,6 +166,7 @@ more convoluted facts).
 
 ### (kb.7) Equality is compatible with predicate evaluation
 
+```atomese
 Implication <1,1>
   VariableList
     TypedVariable
@@ -165,9 +184,11 @@ Implication <1,1>
   Evaluation
     Variable "$P"
     Variable "$B"
+```
 
 ### (kb.8) Equality is compatible with List construction
 
+```atomese
 Implication <1,1>
   VariableList
     Variable "$A"
@@ -188,6 +209,7 @@ Implication <1,1>
     List
       Variable "$B"
       Variable "$D"
+```
 
 # Inference chain
 
@@ -199,24 +221,29 @@ back to the initial premises.
 
 From axiomatic scheme (kb.3)
 
+```atomese
 GreaterThanLink <1,1>
   QuantityNode "USD:200"
   QuantityNode "USD:100"
+```
 
 ## (s.2) less(USD:100, USD:200)
 
 Apply modus ponens on implication (kb.4) with premise (s.1)
 
+```atomese
 Evaluation <1,1>
   Predicate "less"
   List
     QuantityNode "USD:100"
     QuantityNode "USD:200"
+```
 
 ## (s.3) The cost of product one is uniquely 100 USD
 
 Apply modus ponens on implication (kb.5) with premises (kb.1) and (kb.6)
 
+```atomese
 Equal <1,1>
   ExecutionOutput
     Schema "get-attribute"
@@ -224,11 +251,13 @@ Equal <1,1>
       Predicate "cost"
       Concept "product one"
   QuantityNode "USD:100"
+```
   
 ## (s.4) The cost of product two is uniquely 200 USD
 
 Apply modus ponens on implication (kb.5) with premises (kb.2) and (kb.6)
 
+```atomese
 Equal <1,1>
   ExecutionOutput
     Schema "get-attribute"
@@ -236,11 +265,13 @@ Equal <1,1>
       Predicate "cost"
       Concept "product two"
   QuantityNode "USD:200"
+```
   
 ## (s.5) Pair of costs of product one and two
 
 Apply modules ponens on implication (kb.8) with premises (s.3) and (s.4)
 
+```atomese
 Equal <1,1>
   List
     ExecutionOutput
@@ -256,11 +287,13 @@ Equal <1,1>
   List"
     QuantityNode "USD:100"
     QuantityNode "USD:200"
+```
 
 ## (s.6) The cost of product one is less than the cost of product two
 
 Apply modus ponens to implication (kb.7) with premises (s.5) and (s.2)
 
+```atomese
 Evaluation <1,1>
   Predicate "less"
   List
@@ -274,3 +307,4 @@ Evaluation <1,1>
       List
         Predicate "cost"
         Concept "product one"
+```
