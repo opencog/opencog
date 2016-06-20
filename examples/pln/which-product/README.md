@@ -66,7 +66,9 @@ Given that NLG could build the answer
 
 We are going to assume that
 
+```atomese
 QuantityNode "USD:100"
+```
 
 stands for
 
@@ -284,7 +286,7 @@ Equal <1,1>
       List
         Predicate "cost"
         Concept "product two
-  List"
+  List
     QuantityNode "USD:100"
     QuantityNode "USD:200"
 ```
