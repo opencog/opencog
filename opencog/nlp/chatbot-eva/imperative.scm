@@ -70,7 +70,7 @@
 ;--------------------------------------------------------------------
 
 ; Stove-pipe hack to perform an action associated with an imperative.
-(define (imperative-process imp)
+(define-public (imperative-process imp)
 "
   Process imperative IMP, which should be a SentenceNode.
 "
