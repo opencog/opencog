@@ -14,42 +14,6 @@
 (define psi-demand-node (ConceptNode (string-append psi-prefix-str "Demand")))
 
 ; --------------------------------------------------------------
-(define-public (psi-get-demands dpn)
-"
-  Filters demands using the DefinedPredicateNode passed as argument and
-  returns a SetLink with the results.
-
-  dpn:
-  - DefinedPredicateNode that represents the evaluatable term that will filter
-    demands. The evaluatable term should take a single demand-ConceptNode and
-    return True-TruthValue `(stv 1 1)`  or False-TruthValue `(stv 0 1)`. The
-    term should have atleast one `(VariableNode \"demand\")`.
-    (Optionaly the argument could be a `(TrueLink)` for returning all the
-    demands defined)
-"
-
-    (define (get-demand) (cog-bind
-        (BindLink
-            (AndLink
-                dpn
-                (InheritanceLink demand-var psi-demand-node)
-                (EvaluationLink
-                    (PredicateNode
-                        (string-append psi-prefix-str "initial_value"))
-                    (ListLink
-                        demand-var
-                        (VariableNode "value"))))
-                demand-var)))
-
-    ; check arguments
-    (if (and (not (equal? (cog-type dpn) 'DefinedPredicateNode))
-             (not (equal? (cog-type dpn) 'TrueLink)))
-        (error "Expected DefinedPredicateNode or TrueLink got: " dpn))
-
-    (get-demand)
-)
-
-; --------------------------------------------------------------
 (define-public (psi-get-all-demands)
 "
   Returns a SetLink containing the nodes that carry the demand-value. The
@@ -61,18 +25,15 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-demand demand-name initial-value)
+(define-public (psi-demand demand-name desired-value)
 "
-  Define an OpenPsi demand, that will have a default behavior defined by the
-  the action passed. It returns the demand-node which is a ConceptNode.
+  Returns the ConceptNode that represents an OpenPsi demand
 
   demand-name:
   - The name of the demand that is created.
 
-  initial-value:
-  - The initial demand-value. This is the strength of the demand's
-    ConceptNode stv. The confidence of the stv is always 1.
-
+  desired-value:
+  - The desired demand-value. This is used for setting goals.
 "
 
     ; Check arguments
@@ -91,7 +52,7 @@
             ; NOTE: Not sure this is needed. Possibly use is if one wants
             ; to measure how the demand-value has changed.
             (EvaluationLink
-                (PredicateNode (string-append psi-prefix-str "initial_value"))
+                (PredicateNode (string-append psi-prefix-str "desired_value"))
                 (ListLink
                     demand-node
                     (NumberNode initial-value)))
