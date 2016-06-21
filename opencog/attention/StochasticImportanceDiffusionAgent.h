@@ -1,0 +1,153 @@
+/*
+ * opencog/attention/StochasticImportanceDiffusionAgent.h
+ *
+ * Copyright (C) 2008 by OpenCog Foundation
+ * Written by Joel Pitt <joel@fruitionnz.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#ifndef _OPENCOG_STOCHASTIC_IMPORTANCE_DIFFUSION_AGENT_H
+#define _OPENCOG_STOCHASTIC_IMPORTANCE_DIFFUSION_AGENT_H
+
+#include <string>
+#include <math.h>
+
+#include <boost/lockfree/spsc_queue.hpp>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/RandGen.h>
+
+using namespace boost::lockfree;
+
+namespace opencog
+{
+/** \addtogroup grp_attention
+ *  @{
+ */
+
+class CogServer;
+
+/** Spreads short term importance along AsymmetricHebbianLinks.
+ *
+ * This Agents consists of 2 threads that communicated with an spsc_queue
+ *
+ * The Producer Randomly picks 1 atom
+ * checks that it has enough STI for spreading if possible ignores some of the
+ * HebbianLinks (with the weakes strenght) to allow spreading allong the rest
+ * (at least 1 available STI per HebbianLinks)
+ *
+ * The Consumer takes one of those pre checked Atoms and there TargetSet and
+ * spreds the STI
+ *
+ * This Agent is supposed to run in it's own Thread. It will block this thread.
+ *
+ * TODO: Select Atoms based on there STI
+ * TODO: Have one of those Agents for the Focus and on for the rest of the AS
+ * TODO: Optionally spread long term importance?
+ */
+class StochasticImportanceDiffusionAgent : public Agent
+{
+
+private:
+    AtomSpace* a;
+
+    HandleSeq atoms;
+
+    size_t atomcount;
+
+    //! Total amount spread during recent runs.
+    opencog::recent_val<long> amountSpread;
+
+    //! Maximum percentage of importance to spread
+    float maxSpreadPercentage;
+
+    //! Value that normalised STI has to be above before being spread
+    //! Is a normalised value from -1 to 1. 0 == AF
+    float diffusionThreshold;
+
+    //! Whether to spread STI across all types of Links and not just HebbianLinks.
+    //! If there are multiple links between the same two Atoms, then it will add up their strengths.
+    bool allLinksSpread;
+
+    /** Set the agent's logger object
+     *
+     * Note, this will be deleted when this agent is.
+     *
+     * @param l The logger to associate with the agent.
+     */
+    void setLogger(Logger* l);
+
+    Logger *log; //!< Logger object for Agent
+
+    int count;
+
+    /**
+     *  Produces Handles from which STI shoudl be Spreads
+     */
+    void produce();
+    /**
+     *  Consumes Handles and spreads STI from them
+     */
+    void consume();
+
+    spsc_queue<std::pair<Handle,HandleSeq>, capacity<500>> queue;
+
+public:
+
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::StochasticImportanceDiffusionAgent");
+        return _ci;
+    }
+
+    enum { HYPERBOLIC, STEP };
+    void setSpreadDecider(int type, float shape = 30);
+
+    StochasticImportanceDiffusionAgent(CogServer&);
+    virtual ~StochasticImportanceDiffusionAgent();
+    virtual void run();
+
+    /** Return the agent's logger object
+     *
+     * @return A logger object.
+     */
+    Logger* getLogger();
+
+    /** Set the maximum percentage of importance that can be spread.
+     * @param p the maximum percentage of importance that can be spread.
+     */
+    void setMaxSpreadPercentage(float p);
+
+    /** Get the maximum percentage of importance that can be spread.
+     * @return the maximum percentage of importance that can be spread.
+     */
+    float getMaxSpreadPercentage() const;
+
+    void setDiffusionThreshold(float p);
+    float getDiffusionThreshold() const;
+}; // class
+
+typedef std::shared_ptr<StochasticImportanceDiffusionAgent> StochasticImportanceDiffusionAgentPtr;
+
+/** @}*/
+} // namespace
+
+#endif // _OPENCOG_STOCHASTIC_IMPORTANCE_DIFFUSION_AGENT_H

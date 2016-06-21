@@ -26,13 +26,30 @@
 
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/Config.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 
-#define DEBUG
+#include <opencog/util/Config.h>
+
+//#define DEBUG
 
 using namespace opencog;
 
+concurrent_queue<Handle> opencog::newAtomsInAV;
+
+float Agent::mean = 1;
+float Agent::std = 1;
+
 Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f)
 {
+    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
+    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
+
+    targetSTI = config().get_int("TARGET_STI_FUNDS");
+    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
+    targetLTI = config().get_int("TARGET_LTI_FUNDS");
+    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
+
     _attentionValue = AttentionValue::DEFAULT_AV();
 
     // an empty set of parameters and defaults (so that various
@@ -46,15 +63,16 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
     stimulatedAtoms = new AtomStimHashMap();
     totalStimulus = 0;
 
-    conn = _cogserver.getAtomSpace().removeAtomSignal(
+    as = &_cogserver.getAtomSpace();
+    conn = as->removeAtomSignal(
             boost::bind(&Agent::atomRemoved, this, _1));
 }
 
 Agent::~Agent()
 {
     // give back funds
-    _cogserver.getAtomSpace().update_STI_funds(_attentionValue->getSTI());
-    _cogserver.getAtomSpace().update_LTI_funds(_attentionValue->getLTI());
+    as->update_STI_funds(_attentionValue->getSTI());
+    as->update_LTI_funds(_attentionValue->getLTI());
 
     resetUtilizedHandleSets();
     conn.disconnect();
@@ -93,7 +111,7 @@ void Agent::atomRemoved(AtomPtr atom)
         for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
             _utilizedHandleSets[i].erase(h);
     }
-    removeAtomStimulus(h);
+    //removeAtomStimulus(h);
 }
 
 void Agent::resetUtilizedHandleSets()
@@ -104,88 +122,39 @@ void Agent::resetUtilizedHandleSets()
     _utilizedHandleSets.clear();
 }
 
-
-stim_t Agent::stimulateAtom(Handle h, stim_t amount)
+void Agent::stimulateAtom(Handle h,float stimulus)
 {
-    {
-        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
+    int sti = h->getAttentionValue()->getSTI();
+    int lti = h->getAttentionValue()->getLTI();
+    int stiWage = calculate_STI_Wage() * stimulus;
+    int ltiWage = calculate_LTI_Wage() * stimulus;
 
-        // Add atom to the map of atoms with stimulus
-        // and add stimulus to it
-        (*stimulatedAtoms)[h] += amount;
-    }
+    h->setSTI(sti + stiWage);
+    h->setLTI(lti + ltiWage);
 
-    // update record of total stimulus given out
-    totalStimulus += amount;
+    //newAtomsInAV.push(h);
 
-    logger().fine("Atom %d received stimulus of %d, total now %d",
-                  h.value(),
-                  amount,
-                  totalStimulus.load(std::memory_order_relaxed));
-
-#ifdef DEBUG
-    std::cout << "Atom " << h.value() << " received stimulus of " << amount <<
-                 ", total now " << totalStimulus.load(std::memory_order_relaxed)
-                 << "\n";
-#endif
-
-    return totalStimulus.load(std::memory_order_relaxed);
+  //updateHebbianLinks(h);
 }
 
-void Agent::removeAtomStimulus(Handle h)
+AttentionValue::sti_t Agent::calculate_STI_Wage()
 {
-    stim_t amount;
-    {
-        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-        // if handle not in map then return
-        if (stimulatedAtoms->find(h) == stimulatedAtoms->end())
-            return;
+    int funds = as->get_STI_funds();
+    float diff  = funds - targetSTI;
+    float ndiff = diff / stiFundsBuffer;
+    ndiff = std::min(ndiff,1.0f);
+    ndiff = std::max(ndiff,-1.0f);
 
-        amount = (*stimulatedAtoms)[h];
-        stimulatedAtoms->erase(h);
-    }
-
-    // update record of total stimulus given out
-    totalStimulus -= amount;
+    return STIAtomWage + (STIAtomWage * ndiff);
 }
 
-stim_t Agent::stimulateAtom(HandleSeq hs, stim_t amount)
+AttentionValue::lti_t Agent::calculate_LTI_Wage()
 {
-    stim_t split;
+    int funds = as->get_LTI_funds();
+    float diff  = funds - targetLTI;
+    float ndiff = diff / ltiFundsBuffer;
+    ndiff = std::min(ndiff,1.0f);
+    ndiff = std::max(ndiff,-1.0f);
 
-    // how much to give each atom
-    split = amount / hs.size();
-
-    for (Handle handle : hs) {
-        stimulateAtom(handle, split);
-    }
-    // return unused stimulus
-    return amount - (split * hs.size());
+    return LTIAtomWage + (LTIAtomWage * ndiff);
 }
-
-stim_t Agent::resetStimulus()
-{
-    {
-        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-        stimulatedAtoms->clear();
-    }
-    // reset stimulus counter
-    totalStimulus = 0;
-    return totalStimulus.load(std::memory_order_relaxed);
-}
-
-stim_t Agent::getTotalStimulus() const
-{
-    return totalStimulus;
-}
-
-stim_t Agent::getAtomStimulus(Handle h) const
-{
-    std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-    if (stimulatedAtoms->find(h) == stimulatedAtoms->end()) {
-        return 0;
-    } else {
-        return (*stimulatedAtoms)[h];
-    }
-}
-

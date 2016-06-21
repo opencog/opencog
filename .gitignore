@@ -16,6 +16,7 @@ examples/hopfield/hopfield
 examples/server/derivedserver
 opencog/embodiment/DestinCudaAlt/bin/destin
 opencog/embodiment/DestinCudaAlt/bin/kerneltest
+.stack-work/
 
 # cmake
 CMakeCache.txt

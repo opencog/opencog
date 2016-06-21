@@ -44,6 +44,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
+#include <opencog/attention/atom_types.h>
+
 #ifdef HAVE_CYTHON
 #include <opencog/cython/PythonEval.h>
 #endif
@@ -242,7 +244,8 @@ void CogServer::runLoopStep(void)
     // Process mind agents
     if (customLoopRun() and agentsRunning and 0 < agentScheduler.get_agents().size())
     {
-        agentScheduler.process_agents();
+        gettimeofday(&timer_start, NULL);
+        agentScheduler.process_agents(true);
 
         gettimeofday(&timer_end, NULL);
         timersub(&timer_end, &timer_start, &elapsed_time);
@@ -250,6 +253,14 @@ void CogServer::runLoopStep(void)
                currentCycle,
                elapsed_time.tv_usec/1000000.0, currentCycle
               );
+
+         HandleSeq links;
+         atomSpace->get_handles_by_type(links, HEBBIAN_LINK,true);
+         int hebcount = links.size();
+         HandleSeq atoms;
+         atomSpace->get_all_atoms(atoms);
+         int atomcount = atoms.size();
+         printf("Atoms: %d  HebianLinks: %d \n",atomcount,hebcount);
     }
 
     cycleCount++;
@@ -431,6 +442,7 @@ bool CogServer::loadModule(const std::string& filename)
     if ((dynLibrary == NULL) || (dlsymError)) {
         // This is almost surely due to a user configuration error.
         // User errors are always logged as warnings.
+        printf("Unable to load module \"%s\": %s", filename.c_str(), dlsymError);
         logger().warn("Unable to load module \"%s\": %s", filename.c_str(), dlsymError);
         return false;
     }

@@ -46,6 +46,7 @@ TARGET_LINK_LIBRARIES(server
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
+    attention-types
 	dl
 )
 

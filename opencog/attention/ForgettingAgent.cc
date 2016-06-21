@@ -30,10 +30,13 @@
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Factory.h>
+#include <opencog/attention/atom_types.h>
 #include <opencog/util/Config.h>
 #include "ForgettingAgent.h"
 
 using namespace opencog;
+
+int ForgettingAgent::maxSize = 100000;
 
 ForgettingAgent::ForgettingAgent(CogServer& cs) :
     Agent(cs)
@@ -41,7 +44,7 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     std::string defaultForgetThreshold;
     std::ostringstream buf;
 
-    // No limit to lti of removed atoms    
+    // No limit to lti of removed atoms
     // Convert MAXLTI to a string for storing in the configuration
     buf << AttentionValue::MAXLTI;
     defaultForgetThreshold = buf.str();
@@ -51,6 +54,11 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
 
     forgetThreshold = (AttentionValue::lti_t)
                       (config().get_int("ECAN_FORGET_THRESHOLD"));
+
+
+    //Todo: Make configurable
+    maxSize = 100000;
+    accDivSize = 10;
 
     // Provide a logger, but disable it initially
     log = NULL;
@@ -86,33 +94,60 @@ void ForgettingAgent::forget(float proportion = 0.10f)
     std::back_insert_iterator<HandleSeq> output2(atomsVector);
     int count = 0;
     int removalAmount;
+    bool recursive;
 
     a->get_handles_by_type(output2, ATOM, true);
+
+    int asize = atomsVector.size();
+    if (asize < (maxSize + accDivSize)) {
+        return;
+    }
+
+    fprintf(stdout,"Forgetting Stuff, Atomspace Size: %d \n",asize);
     // Sort atoms by lti, remove the lowest unless vlti is NONDISPOSABLE
     std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort(a));
 
-    removalAmount = (int) (atomsVector.size() * proportion);
+    removalAmount = asize - (maxSize - accDivSize); //(int) (atomsVector.size() * proportion);
     log->info("ForgettingAgent::forget - will attempt to remove %d atoms", removalAmount);
 
-    for (unsigned int i = 0; i < atomsVector.size(); i++) {
+    for (unsigned int i = 0; i < atomsVector.size(); i++)
+    {
         if (atomsVector[i]->getAttentionValue()->getLTI() <= forgetThreshold
-                && count < removalAmount) {
-            if (atomsVector[i]->getAttentionValue()->getVLTI() == AttentionValue::DISPOSABLE ) {
+                && count < removalAmount)
+        {
+            if (atomsVector[i]->getAttentionValue()->getVLTI() == AttentionValue::DISPOSABLE )
+            {
                 std::string atomName = a->atom_as_string(atomsVector[i]);
                 log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important
-                if (!a->remove_atom(atomsVector[i])) {
-                    // Atom must have already been removed through having 
+                IncomingSet iset = atomsVector[i]->getIncomingSet(a);
+                recursive = true;
+                for (LinkPtr h : iset)
+                {
+                    if (h->getType() != ASYMMETRIC_HEBBIAN_LINK) {
+                        recursive = false;
+                        break;
+                    }
+                }
+                if (!recursive)
+                    continue;
+
+                atomsVector[i]->setSTI(0);
+                atomsVector[i]->setLTI(0);
+                //fprintf(stdout,"Removing atom %s",atomsVector[i]->toString().c_str());
+                if (!a->remove_atom(atomsVector[i],recursive)) {
+                    // Atom must have already been removed through having
                     // previously removed atoms in it's outgoing set.
                     log->error("Couldn't remove atom %s", atomName.c_str());
-                    count++;
                 }
                 count++;
+                count += iset.size();
             }
         } else {
-            i = atomsVector.size();
+            break;
         }
     }
+    fprintf(stdout,"Forgetting Stuff, Atoms Forgotten: %d \n",count);
     log->info("ForgettingAgent::forget - %d atoms removed.", count);
 
 }

@@ -69,7 +69,7 @@ class AgentRunnerBase
         void remove_all_agents();
 
         /** Run an Agent and log its activity. */
-        void run_agent(AgentPtr a);
+        float run_agent(AgentPtr a);
 };
 
 
@@ -103,7 +103,7 @@ class SimpleRunner: public AgentRunnerBase
          * agents to run in each cycle based on their \link Agent::_frequency
          * frequency \endlink property.
          */
-        void process_agents();
+        void process_agents(bool printRuntimes);
 };
 
 } /* namespace opencog */
