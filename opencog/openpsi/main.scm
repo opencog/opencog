@@ -12,7 +12,6 @@
 (define psi-action (Concept "OpenPsi: action"))
 
 ; --------------------------------------------------------------
-
 (define-public (psi-rule-nocheck context action goal a-stv demand)
 "
   psi-rule-nocheck -- same as psi-rule, but no checking
@@ -399,42 +398,6 @@ there are 100K rules!
     ; within a reasonable range.
     (usleep 101000)
     (if psi-do-run-loop (stv 1 1) (stv 0 1))
-)
-
-; ----------------------------------------------------------------------
-(define-public (psi-set-action-executor exec-term demand-node)
-"
-  psi-set-action-executor EXEC-TERM DEMAND-NODE - Sets EXEC-TERM as the
-  the function to be used as action-executor for the rules of DEMAND-NODE.
-"
-    (psi-set-functionality exec-term #f demand-node "action-executor")
-)
-
-; ----------------------------------------------------------------------
-(define-public (psi-get-action-executor demand-node)
-"
-  psi-get-action-executor DEMAND-NODE - Gets the action-executor of
-  DEMAND-NODE.
-"
-    (psi-get-functionality demand-node "action-executor")
-)
-
-; ----------------------------------------------------------------------
-(define-public (psi-set-goal-evaluator eval-term demand-node)
-"
-  psi-set-goal-evaluator EVAL-TERM DEMAND-NODE - Sets EVAL-TERM as the
-  the function to be used as goal-evaluator for the rules of DEMAND-NODE.
-"
-    (psi-set-functionality eval-term #t demand-node "goal-evaluator")
-)
-
-; ----------------------------------------------------------------------
-(define-public (psi-get-goal-evaluator demand-node)
-"
-  psi-get-goal-evaluator DEMAND-NODE - Gets the goal-evaluator for
-  DEMAND-NODE.
-"
-    (psi-get-functionality demand-node "goal-evaluator")
 )
 
 ; ----------------------------------------------------------------------
