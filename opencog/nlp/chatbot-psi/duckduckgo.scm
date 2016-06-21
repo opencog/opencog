@@ -32,7 +32,11 @@ def call_duckduckgo(qq):
     abstract_text = result['AbstractText']
 
     if abstract_text:
-        ans = atomspace.add_node(types.Node, abstract_text)
+        word_nodes = []
+        words = abstract_text.split(' ')
+        for word in words:
+            word_nodes.append(atomspace.add_node(types.WordNode, word))
+        ans = atomspace.add_link(types.ListLink, word_nodes)
         atomspace.add_link(types.StateLink, [answer_anchor, ans])
     else:
         no_result = atomspace.add_node(types.ConceptNode, 'NoResult')
