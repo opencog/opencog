@@ -440,7 +440,7 @@ namespace opencog { namespace oac {
        static State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings,bool toGroundStateValue = true,
                                                 bool ifRealTimeQueryStateValue = true, ParamValue knownStateVal = UNDEFINED_VALUE, bool fullGroundStateOwners = true);
 
-        bool static isRuleUnGrounded( Rule* rule);
+        bool static isRuleUnGrounded(Rule* rule);
 
         // Check if a parameter is an ungrounded parameter
         // Compared to the bool_var[PARAMETER_NUM],str_var[PARAMETER_NUM]...in PlanningHeaderFiles.h
@@ -510,7 +510,7 @@ namespace opencog { namespace oac {
     {
 
     public:
-        MinedRule(AvatarAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false)
+        MinedRule(AvatarAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = true, bool _isReversibleRule = false)
            : Rule(_action, _actor, _basic_cost, _precondOrderDependent, _isReversibleRule)
         {ruleType = MINED_RULE;}
 

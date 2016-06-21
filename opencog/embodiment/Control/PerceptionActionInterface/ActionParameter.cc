@@ -393,8 +393,8 @@ std::string ActionParameter::stringRepresentation() const throw (opencog::Runtim
     case ENTITY_CODE: {
         answer = "(";
         answer.append(opencog::toString(boost::get<Entity>(value).id));
-        answer.append(",");
-        answer.append(opencog::toString(boost::get<Entity>(value).type));
+//        answer.append(",");
+//        answer.append(opencog::toString(boost::get<Entity>(value).type));
         answer.append(")");
         break;
     }

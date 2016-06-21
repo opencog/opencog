@@ -1790,6 +1790,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             startPos = backwardStepMap->getObjectLocation(actor->id);
 
+
             opencog::world::PAIWorldWrapper::createNavigationPlanAction(*pai,*backwardStepMap,startPos,targetPos,planID,includesLastStep);
 
         }
@@ -4156,7 +4157,7 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
     if (number_easy_state == 0)
     {
-        cout<<"Debug: groundARuleNodeBySelectingNonNumericValues(): There is no non numeric variable in this rule. Doesn't need to be grounded!"<<std::endl;
+        cout<<"Debug: groundARuleNodeBySelectingNonNumericValues(): There is no numeric variables in this rule need to be grounded!"<<std::endl;
         return true;
     }
 
