@@ -1,4 +1,4 @@
-This directory contains example scripts for starting the restapi server and
+This directory contains example scripts for starting the restapi and
 interacting with it through a client.
 
 # Steps
@@ -12,6 +12,8 @@ interacting with it through a client.
    export PYTHONPATH="${PYTHONPATH}:/path/to/opencog/clone/build/opencog/cython"
    ```
 
-3. In a terminal run `python start_restapi.py` to start the server
+3. Start the restapi. There are two options use either one.
+   * run `python start_restapi.py`
+   * run `guile -l start-restapi.scm`
 4. In a separate terminal run ` python exampleclient.py` for interacting with
    the atomspace.
