@@ -3,8 +3,7 @@ interacting with it through a client.
 
 # Steps
 1. Install atomspace and cogutils
-2. Build opencog
-3. Run the following, replace `/path/to/opencog/clone` with your actual git
+2. Run the following, replace `/path/to/opencog/clone` with your actual git
    clone path.
 
    ```
@@ -13,6 +12,6 @@ interacting with it through a client.
    export PYTHONPATH="${PYTHONPATH}:/path/to/opencog/clone/build/opencog/cython"
    ```
 
-4. In a terminal run `python start_restapi.py` to start the server
-5. In a separate terminal run ` python exampleclient.py` for interacting with
+3. In a terminal run `python start_restapi.py` to start the server
+4. In a separate terminal run ` python exampleclient.py` for interacting with
    the atomspace.
