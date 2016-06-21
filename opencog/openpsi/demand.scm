@@ -40,12 +40,12 @@
     (if (not (string? demand-name))
         (error (string-append "In procedure psi-demand, expected first argument "
             "to be a string got: ") demand-name))
-    (if (or (> 0 initial-value) (< 1 initial-value))
+    (if (or (> 0 desired-value) (< 1 desired-value))
        (error (string-append "In procedure psi-demand, expected second argument "
-            "the to be within [0, 1] interval, got:") initial-value))
+            "the to be within [0, 1] interval, got:") desired-value))
 
     (let* ((demand-str (string-append psi-prefix-str demand-name))
-           (demand-node (ConceptNode demand-str (stv initial-value 1))))
+           (demand-node (ConceptNode demand-str (stv desired-value 1))))
 
             (InheritanceLink demand-node psi-demand-node)
 
@@ -55,7 +55,7 @@
                 (PredicateNode (string-append psi-prefix-str "desired_value"))
                 (ListLink
                     demand-node
-                    (NumberNode initial-value)))
+                    (NumberNode desired-value)))
 
             demand-node
     )
