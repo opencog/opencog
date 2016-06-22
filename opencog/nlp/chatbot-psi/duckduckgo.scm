@@ -21,7 +21,7 @@ def call_duckduckgo(qq):
     global atomspace
 
     # Anchor for the result
-    answer_anchor = atomspace.add_node(types.AnchorNode, 'DuckDuckGoAnswers')
+    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: DuckDuckGoAnswers')
 
     # Avoid HTTP Error 400: Bad Request
     query = qq.name.replace(' ', '+')
@@ -39,7 +39,7 @@ def call_duckduckgo(qq):
         ans = atomspace.add_link(types.ListLink, word_nodes)
         atomspace.add_link(types.StateLink, [answer_anchor, ans])
     else:
-        no_result = atomspace.add_node(types.ConceptNode, 'NoResult')
+        no_result = atomspace.add_node(types.ConceptNode, 'Chatbot: NoResult')
         atomspace.add_link(types.StateLink, [answer_anchor, no_result])
 
     return TruthValue(1, 1)
