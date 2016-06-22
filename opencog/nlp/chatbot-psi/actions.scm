@@ -59,12 +59,7 @@
 )
 
 (define (say . words)
-    (define utterance "")
-
-    (if (list? (car words))
-        (set! utterance (string-join (map cog-name (car words))))
-        (set! utterance (cog-name (car words)))
-    )
+    (define utterance (string-join (map cog-name words)))
 
     ; Remove those '[' and ']' that may exist in the output
     (set! utterance (string-filter (lambda (c) (not (or (char=? #\[ c) (char=? #\] c)))) utterance))
@@ -78,7 +73,8 @@
             (cog-evaluate! (Evaluation (GroundedPredicate "py: say_text") (List (Node utterance))))
         )
         (lambda (key . parameters)
-            (display "\n(Warning: Failed to call \"py: say_text\" to send out the message.)\n")
+            ; (display "\n(Warning: Failed to call \"py: say_text\" to send out the message.)\n")
+            *unspecified*
         )
     )
 
@@ -86,18 +82,10 @@
 )
 
 (define (reply anchor)
-    ; For most of the cases (e.g. AIML and fuzzy match), the reply is
-    ; a bunch of WordNodes wrapped in a ListLink
-    ; If it's from external sources, it's a plain Node, for now
-    (let ((ans-in-words (cog-chase-link 'StateLink 'ListLink anchor))
-          (ans-in-text (cog-chase-link 'StateLink 'Node anchor)))
-
+    (let ((ans-in-words (cog-chase-link 'StateLink 'ListLink anchor)))
         (if (null? ans-in-words)
-            (if (null? ans-in-text)
-                '()
-                (say (car ans-in-text))
-            )
-            (say (cog-outgoing-set (car ans-in-words)))
+            '()
+            (apply say (cog-outgoing-set (car ans-in-words)))
         )
     )
 )

@@ -18,51 +18,62 @@
     (cancel-all-threads)
     (reset-all-states)
 
-    (let* ((sent-node (car (nlp-parse utterance)))
-           (list-of-words (get-word-list sent-node)))
-
-        (State input-utterance
-            (Reference
-                list-of-words
-                sent-node
-                (Node utterance)
-            )
+    (catch #t
+        (lambda ()
+            (let ((sent-node (car (nlp-parse utterance))))
+                (State input-parse parse-succeeded)
+                (State input-utterance
+                    (Reference
+                        (get-word-list sent-node)
+                        sent-node
+                        (Node utterance)
+                    )
+                )
+            ))
+        (lambda (key . parameters)
+            (State input-parse parse-failed)
         )
     )
 
-    (newline)
+    *unspecified*
 )
 
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
 
 (define all-threads '())
+(define chat-prefix "Chatbot: ")
 
-(define input-utterance (Anchor "InputUtterance"))
-(define no-input-utterance (Concept "NoInputUtterance"))
+(define input-utterance (Anchor (string-append chat-prefix "InputUtterance")))
+(define no-input-utterance (Concept (string-append chat-prefix "NoInputUtterance")))
 (State input-utterance no-input-utterance)
 
-(define default-state (Concept "DefaultState"))
-(define search-started (Concept "SearchStarted"))
-(define no-result (Concept "NoResult"))
+(define input-parse (Anchor (string-append chat-prefix "InputParse")))
+(define parse-succeeded (Concept (string-append chat-prefix "ParseSucceeded")))
+(define parse-failed (Concept (string-append chat-prefix "ParseFailed")))
+(State input-parse no-input-utterance)
 
-(define aiml-replies (Anchor "AIMLReplies"))
-(define aiml-search (Anchor "AIMLSearch"))
+(define default-state (Concept (string-append chat-prefix "DefaultState")))
+(define search-started (Concept (string-append chat-prefix "SearchStarted")))
+(define no-result (Concept (string-append chat-prefix "NoResult")))
+
+(define aiml-replies (Anchor (string-append chat-prefix "AIMLReplies")))
+(define aiml-search (Anchor (string-append chat-prefix "AIMLSearch")))
 (State aiml-replies default-state)
 (State aiml-search default-state)
 
-(define fuzzy-replies (Anchor "FuzzyReplies"))
-(define fuzzy-match (Anchor "FuzzyMatch"))
+(define fuzzy-replies (Anchor (string-append chat-prefix "FuzzyReplies")))
+(define fuzzy-match (Anchor (string-append chat-prefix "FuzzyMatch")))
 (State fuzzy-replies default-state)
 (State fuzzy-match default-state)
 
-(define fuzzy-answers (Anchor "FuzzyAnswers"))
-(define fuzzy-qa-search (Anchor "FuzzyQASearch"))
+(define fuzzy-answers (Anchor (string-append chat-prefix "FuzzyAnswers")))
+(define fuzzy-qa-search (Anchor (string-append chat-prefix "FuzzyQASearch")))
 (State fuzzy-answers default-state)
 (State fuzzy-qa-search default-state)
 
-(define duckduckgo-answers (Anchor "DuckDuckGoAnswers"))
-(define duckduckgo-search (Anchor "DuckDuckGoSearch"))
+(define duckduckgo-answers (Anchor (string-append chat-prefix "DuckDuckGoAnswers")))
+(define duckduckgo-search (Anchor (string-append chat-prefix "DuckDuckGoSearch")))
 (State duckduckgo-answers default-state)
 (State duckduckgo-search default-state)
 
