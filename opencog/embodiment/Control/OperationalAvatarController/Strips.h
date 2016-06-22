@@ -510,7 +510,7 @@ namespace opencog { namespace oac {
     {
 
     public:
-        MinedRule(AvatarAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false)
+        MinedRule(AvatarAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = true, bool _isReversibleRule = false)
            : Rule(_action, _actor, _basic_cost, _precondOrderDependent, _isReversibleRule)
         {ruleType = MINED_RULE;}
 

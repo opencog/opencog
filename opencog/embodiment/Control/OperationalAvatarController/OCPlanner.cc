@@ -4759,6 +4759,19 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
 
     MinedRule* minedRule = new MinedRule(action,varAvatar,0.1f);
 
+    if (minedPattern.allVariables.find("target") != minedPattern.allVariables.end())
+    {
+        // Added a default precondition: if the target is an Entity, the agent should be in the assess distance of the target
+        // This precondition usually the lastest among all its preconditions if there is any precondtion order dependence
+        // Add it to the beginning of the precondition list to ensure that it will be the precondtion that most closed to the subgoal
+        vector<ParamValue> closedStateOwnerList;
+        closedStateOwnerList.push_back(varAvatar);
+        closedStateOwnerList.push_back(handleToParamVarMap[defaultTargetVarHandle]);
+        ParamValue accessDistance = ACCESS_DISTANCE;
+        State* closedState = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,accessDistance, closedStateOwnerList, true, &Inquery::inqueryDistance);
+        minedRule->addPrecondition(closedState);
+    }
+
     // generate preconditions
     for (MinedPreCondition& precond : minedPattern.preconditions)
     {
@@ -4778,16 +4791,7 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
         minedRule->addPrecondition(preconState);
     }
 
-    if (minedPattern.allVariables.find("target") != minedPattern.allVariables.end())
-    {
-        // Added a default precondition: if the target is an Entity, the agent should be in the assess distance of the target
-        vector<ParamValue> closedStateOwnerList;
-        closedStateOwnerList.push_back(varAvatar);
-        closedStateOwnerList.push_back(handleToParamVarMap[defaultTargetVarHandle]);
-        ParamValue accessDistance = ACCESS_DISTANCE;
-        State* closedState = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,accessDistance, closedStateOwnerList, true, &Inquery::inqueryDistance);
-        minedRule->addPrecondition(closedState);
-    }
+
 
     // Add effects :
     // To be improved, sometimes there are some side effects besides the main effect described in the subgoal StateNode.
