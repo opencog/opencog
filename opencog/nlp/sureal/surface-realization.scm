@@ -54,6 +54,15 @@
     )
 )
 
+;; This "cached" version of sureal is used by Microplanner.
+;;
+;; The idea is to cache the results from the calls to SuRealPCMB, 
+;; which is the PaternMatcher callback object (see PatternMatcher documentation).
+;;
+;; This cached version makes sense for Microplanner because it performs a lot of 
+;; sureal queries with very similar inputs.
+;;
+;; The cache lifetime is a single call of a Microplanner query
 (define-public (cached-sureal a-set-link)
 "
   sureal SETLINK -- main entry point for sureface realization

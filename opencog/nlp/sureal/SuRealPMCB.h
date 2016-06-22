@@ -84,14 +84,6 @@ private:
         Handle handle;
         size_t r2lSetLinkSize;
     };
-
-    /*
-    typedef std::unordered_map<std::string, bool> HandleMap;
-    typedef std::unordered_map<std::string, HandleMap> CacheMap;
-
-    CacheMap m_variable_cache;
-    CacheMap m_clause_cache;
-    */
 };
 
 }

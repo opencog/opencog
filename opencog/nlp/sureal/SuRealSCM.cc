@@ -110,6 +110,10 @@ static void get_all_unique_nodes(const Handle& h,
       get_all_unique_nodes(o, node_set);
 }
 
+/**
+ * Implement the "reset-sureal-cache" scheme primitive.
+ *
+ */
 HandleSeqSeq SuRealSCM::reset_cache(Handle dummy)
 {
     SuRealCache::instance().reset();
@@ -210,6 +214,14 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 
     slp->satisfy(pmcb);
 
+    // The cached version of SuReal is supposed to return only true or false,
+    // not the set of all acceptable answers. To keep ortogonality with the
+    // interface of the standard (non-cached) version, this shortcut is
+    // returning an empty HandleSeq meaning 'false' or a HandleSeq with a single
+    // (actually meaningless) Handle meaning 'true'.
+    //
+    // Ideally there should be two different methods with different interfaces
+    // for the cached and the non-cached versions.
     if (use_cache) {
         if (pmcb.m_results.empty()) {
             return HandleSeqSeq();

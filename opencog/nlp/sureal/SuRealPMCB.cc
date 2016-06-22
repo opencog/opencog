@@ -27,8 +27,6 @@
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/nlp/lg-dict/LGDictUtils.h>
 
-//#include <opencog/atoms/base/Node.h>
-
 #include "SuRealPMCB.h"
 #include "SuRealCache.h"
 
