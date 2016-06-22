@@ -398,6 +398,7 @@ TimeOctomap::remove_atom(const opencog::Handle& ato)
 }//hacked not perfect
 
 //////spatial relations
+//later instead of get a location, use get nearest location or get furthest location
 bool 
 TimeOctomap::get_a_location(const time_pt& time_p,const opencog::Handle& ato_target,point3d& location)
 {
