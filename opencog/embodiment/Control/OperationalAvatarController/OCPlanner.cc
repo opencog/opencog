@@ -2579,7 +2579,7 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
             // get the object want to move to
             string targetVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
             Entity target =  boost::get<Entity>((ruleNode->currentAllBindings)[targetVarName]);
-            Handle targetH = AtomSpaceUtil::getAgentHandle(*atomSpace,target.id);
+            Handle targetH = AtomSpaceUtil::getEntityHandle(*atomSpace,target.id);
             // get new location it moves tol
             spatial::BlockVector targetLocation = iSpaceMap->getObjectLocation(targetH);
             iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp,true);
