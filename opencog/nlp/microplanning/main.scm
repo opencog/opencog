@@ -91,6 +91,7 @@
 
 	; Initialize the sentence forms as needed
 	(microplanning-init)
+	(reset-sureal-cache seq-link)
 
 	(set! all-sets (make-sentence-chunks
 		(cog-outgoing-set seq-link) utterance-type option))
