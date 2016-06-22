@@ -1,161 +1,12 @@
 (load "../main.scm")
+(load "utilities.scm")
+(load "entities-temp.scm")
+(load "interaction-rules.scm")
+
 ;(use-modules (opencog))
-(use-modules (opencog atom-types))  ;needed for AtTimeLink definition?
+;(use-modules (opencog atom-types))  ;needed for AtTimeLink definition?
 
 (define prev-value-table (make-hash-table 47))
-
-;;; Agent State
-(define agent-state (Concept (string-append psi-prefix-str "agent-state")))
-
-
-; --------------------------------------------------------------
-
-(define (psi-get-value entity)
-	(define result #f)
-
-	; First check for StateLink value
-	; OpenPsi values are stored using StateLinks
-	(define resultset
-		(cog-execute!
-				(Get
-					(State
-						entity
-						(Variable "$n")))))
-	(if (not (null? (cog-outgoing-set resultset)))
-		(set! result (gar resultset))
-
-		; else check if entity is an evaluation or predicate or schema
-		(let ((type (cog-type entity)))
-			(if (or (equal? type 'PredicateNode)
-				   (equal? type 'GroundedPredicateNode)
-				   (equal? type 'DefinedPredicateNode))
-				(set! result (cog-evaluate! (Evaluation entity (List)))))
-			(if (or (equal? type 'SchemaNode)
-            		(equal? type 'GroundedSchemaNode)
-            	    (equal? type 'DefinedSchemaeNode))
-            	(set! result (cog-execute! (ExecutionOutput entity (List)))))
-            (if (equal? type 'EvaluationLink)
-                (set! result (cog-evaluate! entity)))
-        )
-	)
-	result
-)
-
-(define (psi-get-number-value entity)
-	(define result (psi-get-value entity))
-	(if (and (cog-atom? result) (eq? 'NumberNode (cog-type result)))
-		(set! result (string->number (cog-name result))))
-	(if (cog-tv? result)
-		(set! result (tv-mean result)))
-	result)
-
-(define (psi-set-value! entity value)
-	; OpenPsi values are stored using StateLinks
-	(State
-		entity
-		value))
-
-; --------------------------------------------------------------
-; Entity Creation
-
-;;; Modulator Creation
-(define (create-openpsi-modulator name initial-value)
-    (define mod
-        (Concept (string-append psi-prefix-str name)))
-    (Inheritance
-        mod
-        (Concept (string-append psi-prefix-str "Modulator")))
-    (psi-set-value! mod (Number initial-value))
-    mod)
-
-(define arousal (create-openpsi-modulator "arousal" .5))
-
-;;; SEC Creation
-(define (create-openpsi-sec name)
-    (define sec
-        (Predicate (string-append psi-prefix-str name)))
-    (Inheritance
-        sec
-        (Concept (string-append psi-prefix-str "SEC")))
-    sec)
-
-;;;;;;; todo: need to figure out how SEC's are going to fit into this
-;; todo: make util function to define
-(define power (create-openpsi-sec "Power"))
-
-(define agent-state-power
-	(List
-		agent-state
-		power))
-(psi-set-value! agent-state-power (Number .3))
-;(hash-set! prev-value-table agent-state-power .3)
-
-;;; EVENT PREDICATES
-(define speech (Predicate "speech-giving-starts"))
-(Evaluation speech (List) (stv 0 1))
-;(hash-set! prev-value-table speech 0.0)
-
-
-;;; PAU PREDICATES
-; actually these will be defined somewhere else in the system
-(define pau-prefix-str "PAU: ")
-(define (create-pau name initial-value)
-	(define pau
-		(Predicate (string-append pau-prefix-str name)))
-	(Inheritance
-		pau
-		(Concept "PAU"))
-	(psi-set-value! pau (Number initial-value))
-	;(hash-set! prev-value-table pau initial-value)
-	pau)
-
-(define voice-width
-	(create-pau "voice width" .2))
-
-;;; SYSTEM DYNAMIC INTERACTION UPDATE RULES
-;; todo: move to own file
-
-;(define psi-interaction-rule-str
-;	(string-append psi-prefix-str "interaction rule"))
-(define psi-interaction-rule
-	(ConceptNode (string-append psi-prefix-str "interaction rule")))
-
-(define (create-psi-interaction-rule antecedent consequent strength)
-	(define rule
-		(PredictiveImplication
-			(TimeNode 1)
-		    (Evaluation
-                ;(GroundedPredicate "scm: psi-change-in?")
-                (Predicate "psi-changed")
-                (List
-                    antecedent))
-		    (ExecutionOutputLink
-	            (GroundedSchema "scm: adjust-psi-var-level")
-	            (List
-	                consequent
-	                (NumberNode strength)
-	                antecedent))))
-	(Member rule psi-interaction-rule)
-	rule
-)
-
-(define speech->power
-	(create-psi-interaction-rule speech agent-state-power .3)
-)
-
-(define power->voice
-	(create-psi-interaction-rule agent-state-power voice-width .1))
-
-(define power->arousal
-	(create-psi-interaction-rule agent-state-power arousal .2))
-
-(define arousal->voice
-	(create-psi-interaction-rule arousal voice-width .1))
-
-
-
-;; todo: we are not changing the y var in proportion to the change in the x var
-;; at this point. We want to add that soon.
 
 ;(TimeNode (number->string (current-time)))
 
@@ -209,13 +60,21 @@
 		   (origin-change (psi-get-change-magnitude origin))
 		   (alpha (* (string->number (cog-name strength)) origin-change))
 		  )
-		(set! new-value (max .15 (tanh (* 3.141592654 value))))
+
+		(format #t "current value: ~a     origin change: ~a        alpha: ~a\n" value origin-change alpha)
+
+		; For the following formula alpha needs to be negative for increases
+		; and positive for decreases. And it can't be 0.
+		(set! alpha (* alpha -1))
+		; Todo: check that alpha is not 0, and confirm that alpha can't be 0 with new formula
+		(set! new-value (/ (- (expt 1000 (* alpha value)) 1) (- (expt 1000 alpha) 1)))
+		;(set! new-value (max .15 (tanh (* 3.141592654 value))))
 		; tanh never gets to one so set it to one above a certain point
-		(if (> new-value .99)
+		(if (> new-value .95)
 			(set! new-value 1))
 		(psi-set-value! target (Number new-value))
 		;(cog-set-tv! target (cog-new-stv new-strength confidence))
-		(format #t "previous value: ~a    new value: ~a\n" value new-value)
+		(format #t "current value: ~a    new value: ~a\n" value new-value)
 	)
 )
 
@@ -310,7 +169,14 @@
 "
   The main function that defines the steps to be taken in every cycle.
   At each step:
-    1) Evaluate the monitored params and set their 'changed' predicates
+    1) Evaluate the monitored entities and set their 'changed' predicates, and
+       for each changed entity store it's value in a current-value-table (this,
+       or otherwise storing the change magnitude, is needed because the current
+       value of a "trigger" entity might change because of application of a
+       previous rule.)
+    2) TODO: need to store the change magnitude before firing the rules because
+       the current value of the trigger might change as a result of a previous
+       rule.
     2) Fire up the interaction rules
     3) Update the previous values of the changed monitored params
 "
@@ -335,7 +201,7 @@
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 	(let ((output-port (open-file "psilog.txt" "a")))
-			(format output-port "\n---------------------------------------- Loop ~a\n"
+			(format output-port "---------------------------------------- Loop ~a\n"
 				psi-updater-loop-count)
 			(format output-port
 				"agent power: ~a  arousal: ~a  speech: ~a  voice: ~a\n"
@@ -355,7 +221,7 @@
 
 	; grab and evaluate the interaction rules
 	; todo: Could optimize by only calling rules containing the changed params
-	; todo: Ideally adjust-psi-var-level should use the current-vales-table
+	; todo: Adjust-psi-var-level should use the current-vales-table
 	;   rather than grabbing the value dynamically from the atomspace, because
 	;   the current value might have changed from previous rules.
 	(let ((rules (psi-get-interaction-rules)))
@@ -401,11 +267,21 @@
   Returns the normalized magnitude change in target from its previous value.
   Todo: Assuming for now that the values are normalized in [0,1]
   "
+    (define return)
+    (format #t "psi-get-change-magnitude target: ~a" target)
 	(let* ((previous (hash-ref prev-value-table target))
 		   (current (psi-get-number-value target)))
 		(if (and (number? previous) (number? current))
-			(- previous current)
-			0)))
+			(set! return (- previous current))
+			(set! return 0))
+		(display previous)
+		(display current)
+		(display return)
+		(format #t "previous: ~a   current: ~a   return: ~a\n"
+			previous current return)
+		return)
+)
+
 
 
 (define (psi-evaluate-interaction-rule rule)
