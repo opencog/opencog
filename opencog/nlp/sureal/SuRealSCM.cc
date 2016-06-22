@@ -31,10 +31,13 @@
 
 #include "SuRealSCM.h"
 #include "SuRealPMCB.h"
+#include "SuRealCache.h"
 
 
 using namespace opencog::nlp;
 using namespace opencog;
+
+using namespace std;
 
 
 /**
@@ -81,6 +84,7 @@ void SuRealSCM::init()
 {
 #ifdef HAVE_GUILE
     define_scheme_primitive("sureal-match", &SuRealSCM::do_sureal_match, this, "nlp sureal");
+    define_scheme_primitive("reset-cache", &SuRealSCM::reset_cache, this, "nlp sureal");
 #endif
 }
 
@@ -103,6 +107,84 @@ static void get_all_unique_nodes(const Handle& h,
 
    for (const Handle& o : lll->getOutgoingSet())
       get_all_unique_nodes(o, node_set);
+}
+
+bool SuRealSCM::do_sureal_check(Handle h)
+{
+#ifdef HAVE_GUILE
+    // only accept SetLink
+    if (h->getType() != SET_LINK)
+        return false;
+
+    AtomSpace* pAS = SchemeSmob::ss_get_env_as("sureal-match");
+
+    OrderedHandleSet sVars;
+
+    // Extract the graph under the SetLink; this is done so that the content
+    // of the SetLink could be matched to another SetLink with differnet arity.
+    // It is possible to keep the clauses in a SetLink and override the PM's
+    // link_match() callback to skip SetLink's arity check , but that would
+    // be assuming R2L will never use SetLink for other purposes.
+    const HandleSeq& qClauses = LinkCast(h)->getOutgoingSet();
+
+    // get all the nodes to be treated as variable in the Pattern Matcher
+    // XXX perhaps it's better to write a eval_q in SchemeEval to convert
+    //     a scm list to HandleSeq, so can just use the scheme utilities?
+    UnorderedHandleSet allNodes;
+    get_all_unique_nodes(h, allNodes);
+
+    // isolate which nodes are actually words, and which are not; all words
+    // need to become variable for the Pattern Matcher
+    for (auto& n : allNodes)
+    {
+        // special treatment for InterpretationNode and VariableNode, treating
+        // them as variables;  this is because we have
+        //    (InterpreationNode "MicroplanningNewSentence")
+        // from the microplanner that should be matched to any InterpretationNode
+        if (n->getType() == INTERPRETATION_NODE || n->getType() == VARIABLE_NODE)
+        {
+            sVars.insert(n);
+            continue;
+        }
+
+        // special treatment for DefinedLinguisticConceptNode and
+        // DefinedLinguisticPredicateNode, do not treat them as variables
+        // because they are not actual words of a sentence.
+        if (n->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE or
+            n->getType() == DEFINED_LINGUISTIC_PREDICATE_NODE)
+           continue;
+
+        std::string sName = NodeCast(n)->getName();
+        std::string sWord = sName.substr(0, sName.find_first_of('@'));
+        Handle hWordNode = pAS->get_handle(WORD_NODE, sWord);
+
+        // no WordNode found
+        if (hWordNode == Handle::UNDEFINED)
+            continue;
+
+        // if no LG dictionary entry
+        if (get_target_neighbors(hWordNode, LG_DISJUNCT).empty())
+            continue;
+
+        sVars.insert(n);
+    }
+
+    SuRealPMCB pmcb(pAS, sVars);
+    PatternLinkPtr slp(createPatternLink(sVars, qClauses));
+
+    slp->satisfy(pmcb);
+
+    return (not pmcb.m_results.empty());
+
+#else
+    return false;
+#endif
+}
+
+HandleSeqSeq SuRealSCM::reset_cache(Handle dummy)
+{
+    SuRealCache::instance().reset();
+    return HandleSeqSeq();
 }
 
 /**
@@ -180,7 +262,19 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
 
     SuRealPMCB pmcb(pAS, sVars);
     PatternLinkPtr slp(createPatternLink(sVars, qClauses));
+
     slp->satisfy(pmcb);
+
+    if (pmcb.m_results.empty()) {
+        return HandleSeqSeq();
+    } else {
+        HandleSeqSeq results;
+        HandleSeq item;
+        Handle h;
+        item.push_back(h);
+        results.push_back(item);
+        return results;
+    }
 
     HandleSeq keys;
 
