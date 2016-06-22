@@ -73,7 +73,8 @@
             (cog-evaluate! (Evaluation (GroundedPredicate "py: say_text") (List (Node utterance))))
         )
         (lambda (key . parameters)
-            (display "\n(Warning: Failed to call \"py: say_text\" to send out the message.)\n")
+            ; (display "\n(Warning: Failed to call \"py: say_text\" to send out the message.)\n")
+            *unspecified*
         )
     )
 
