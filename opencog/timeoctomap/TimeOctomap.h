@@ -135,10 +135,11 @@ public:
     //////////spatial-relations-queries
     //should be true-false-unknown
     //assuming z orientation is fixed i.e. sky relative to ground
-    //assuming observer is looking towards target
-    //x=2-right,1-left,0-aligned,-1-unknown (>elipson,<-elipson)
-    //y=2-above,1-below,0-aligned, -1 unknown
-    //z=2-ahead,1-behind,0 - aligned, -1 unknown
+    //assuming observer is looking towards reference
+    //target is $x of reference 
+    //y=2-right,1-left,0-aligned,-1-unknown (>elipson,<-elipson)
+    //z=2-above,1-below,0-aligned, -1 unknown
+    //x=2-ahead,1-behind,0 - aligned, -1 unknown
     point3d get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
     //not normalized: direction vector -> (target-observer)
     bool get_direction_vector(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,point3d&);
@@ -167,6 +168,11 @@ public:
             return PI;//Pi radians
         }
         return acos(num/den);
+    }
+    inline void rot2d(double x,double y,double th,double &rx,double &ry)
+    {
+        rx=x*cos(th)-y*sin(th);
+        ry=x*sin(th)+y*cos(th);
     }
 private:
     //each map may have translation rotation (orientation) co-ordinates managed by user

@@ -411,10 +411,10 @@ TimeOctomap::get_a_location(const time_pt& time_p,const opencog::Handle& ato_tar
 point3d
 TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
 {
-    //
+    //reference and observer cant be the same location
     point3d res(-1.0,-1.0,-1.0);
     point3d v1,v2,v3;
-    point3d d1,d2;
+    double eps=map_res*0.1;
     if (!get_a_location(time_p,ato_obs,v1)) return res;
     if (!get_a_location(time_p,ato_target,v2)) return res;
     if (!get_a_location(time_p,ato_ref,v3)) return res;
@@ -422,6 +422,34 @@ TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& 
     //translate obs to origin and relatively move others
     //rotate vector obs target to be on an axis, relatively rotate ref
     //see if on left or right, up or down, front or back
+    point3d orv=v3-v1;
+    if (abs(orv.x())<=eps && abs(orv.y())<=eps && abs(orv.z())<=eps) return res;
+    point3d otv=v2-v1;
+    double th=atan2(orv.y(),orv.x());
+    double cx,cy,dx,dy;
+    //rotate around z to zx plane
+    rot2d(orv.x(),orv.y(),-1.0*th,cx,cy);
+    orv=point3d(cx,0.0,orv.z());
+    //rotate around z
+    rot2d(otv.x(),otv.y(),-1.0*th,dx,dy);
+    otv=point3d(dx,dy,otv.z());
+    th=atan2(orv.z(),orv.x());
+    //rotate around y to x axis
+    rot2d(orv.x(),orv.z(),-1.0*th,cx,cy);
+    orv=point3d(cx,0.0,0.0);
+    //rotate around y axis
+    rot2d(otv.x(),otv.z(),-1.0*th,dx,dy);
+    otv=point3d(dx,otv.y(),dy);
+    res=otv-orv;
+
+    //x .. ahead=2, behind=1,aligned=0 
+    //y .. right,left,align
+    //z .. above,below,align
+    double px,py,pz;
+    if (res.x()>eps)px=1.0;else if (res.x()<eps)px=2.0;else px=0.0;
+    if (res.y()>eps)py=2.0;else if (res.y()<eps)py=1.0;else py=0.0;
+    if (res.z()>eps)pz=2.0;else if (res.z()<eps)pz=1.0;else pz=0.0;
+    res=point3d(px,py,pz); 
     return res;
 }
     
