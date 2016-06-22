@@ -9,11 +9,12 @@
 (load "rule.scm")
 (load "utilities.scm")
 
+
 ; --------------------------------------------------------------
-; Main loop control
-; --------------------------------------------------------------
+; Variable for controlling whether to keep on running the loop or not.
 (define psi-do-run-loop #f)
 
+; --------------------------------------------------------------
 (define-public (psi-running?)
 "
   Return #t if the openpsi loop is running, else return #f.
@@ -26,15 +27,17 @@
 
 (define-public (psi-get-loop-count)
 "
- behavior-tree-loop-count
-
- Return the loop-count of the behavior tree.
+  Returns how many times psi-step have been executed.
 "
     psi-loop-count
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-run-continue?)  ; public only because its in a GPN
+"
+  Function used for checking whether the thread that is executing the
+  psi-loop should continue doing so.
+"
     (set! psi-loop-count (+ psi-loop-count 1))
 
     ; Pause for 101 millisecs, to keep the number of loops
