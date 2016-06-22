@@ -588,7 +588,7 @@ ParamValue Inquery::inqueryExistPath(const vector<ParamValue>& stateOwnerList)
             return "false";
     }
 
-    cout << "\nInquery::inqueryExistPath " << pos1.toString() <<  " to " << pos2.toString() << std::endl;
+    // cout << "\nInquery::inqueryExistPath " << pos1.toString() <<  " to " << pos2.toString() << std::endl;
 
     vector<spatial::BlockVector> path;
     spatial::BlockVector nearestPos, bestPos;

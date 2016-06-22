@@ -1685,7 +1685,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     // generate the action series according to the planning network we have constructed in this planning process
     planID = "";
 
-    std::cout<<std::endl<<"OCPlanner::Planning success! Total steps = "<< tryStepNum <<", Cost time = "<< endTime - startTime << "ms" << std::endl;
+    std::cout<<std::endl<<"OCPlanner::Planning success! Total steps = "<< tryStepNum <<", Cost time = "<< endTime - startTime << "ms. \nPlan action sequence:" << std::endl;
 
     // sort the list of rule node
     sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),compareRuleNodeDepth );
@@ -2580,6 +2580,9 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
             string targetVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
             Entity target =  boost::get<Entity>((ruleNode->currentAllBindings)[targetVarName]);
             Handle targetH = AtomSpaceUtil::getEntityHandle(*atomSpace,target.id);
+            if (targetH == Handle::UNDEFINED)
+                targetH = AtomSpaceUtil::getAgentHandle(*atomSpace,target.id);
+
             // get new location it moves tol
             spatial::BlockVector targetLocation = iSpaceMap->getObjectLocation(targetH);
             iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp,true);

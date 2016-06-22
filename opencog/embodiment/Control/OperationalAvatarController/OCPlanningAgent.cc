@@ -317,7 +317,7 @@ void OCPlanningAgent::run()
         }
         else
         {
-            std::cout<<"OCPlanner found a plan: "<< currentOCPlanID << " for the given goal:"
+            std::cout<<"\nOCPlanner found a plan: "<< currentOCPlanID << " for the given goal:"
                     // <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
                      <<std::endl;
 
