@@ -143,6 +143,7 @@ public:
     point3d get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
     //not normalized: direction vector -> (target-observer)
     bool get_direction_vector(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,point3d&);
+    //got to another nearness for physical distance, this one is angular
     //2=far,1=near,0=touching, -1 unknown
     int get_nearness(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
     //<-elipson=unknown,>=0 distance
