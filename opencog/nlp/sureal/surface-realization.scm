@@ -32,10 +32,6 @@
 )
 
 ; ---------------------------------------------------------------------
-(define-public (reset-sureal-cache dummy)
-    (reset-cache dummy)
-)
-
 (define-public (sureal a-set-link)
 "
   sureal SETLINK -- main entry point for sureface realization
@@ -46,9 +42,7 @@
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
             (if (null? interpretations)
-                ;; Senna
-                ;;(delete-duplicates (create-sentence a-set-link))
-                (create-sentence a-set-link)
+                (delete-duplicates (create-sentence a-set-link))
                 (get-sentence interpretations)
             )
         )
@@ -138,12 +132,10 @@
         )
     )
 
-    ;; Senna
-    ;;(let* ((results (sureal-match a-set-link))
-    ;;       (interps (delete-duplicates (map car results))))
-    ;;    (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
-    ;;)
-    (sureal-match a-set-link)
+    (let* ((results (sureal-match a-set-link))
+           (interps (delete-duplicates (map car results))))
+        (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
+    )
 )
 
 ; Returns a number that could be used to compare atoms of the same type. For eg.
