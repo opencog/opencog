@@ -44,12 +44,13 @@ using namespace std;
  * @param pAS            the corresponding AtomSpace
  * @param vars           the set of nodes that should be treated as variables
  */
-SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const OrderedHandleSet& vars) :
+SuRealPMCB::SuRealPMCB(AtomSpace* pAS, const OrderedHandleSet& vars, bool use_cache) :
     InitiateSearchCB(pAS),
     DefaultPatternMatchCB(pAS),
     m_as(pAS),
     m_vars(vars)
 {
+    m_use_cache = use_cache;
 }
 
 SuRealPMCB::~SuRealPMCB()
@@ -70,12 +71,14 @@ SuRealPMCB::~SuRealPMCB()
 bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
 {
 
-    int cached = SuRealCache::instance().variable_match(hPat, hSoln);
-    if (cached >= 0) {
-        if (cached == 0) {
-            return false;
-        } else {
-            return true;
+    if (m_use_cache) {
+        int cached = SuRealCache::instance().variable_match(hPat, hSoln);
+        if (cached >= 0) {
+            if (cached == 0) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 
@@ -106,7 +109,9 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
         }
     }
 
-    SuRealCache::instance().add_variable_match(hPat, hSoln, answer);
+    if (m_use_cache) {
+        SuRealCache::instance().add_variable_match(hPat, hSoln, answer);
+    }
 
     return answer;
 }
@@ -130,12 +135,16 @@ static void get_nodes(const Handle& h, HandleSeq& node_list)
       get_nodes(o, node_list);
 }
 
-static void get_all_nodes(const Handle& h, HandleSeq& node_list)
+static void get_all_nodes(const Handle& h, HandleSeq& node_list, bool use_cache)
 {
-    bool cached = SuRealCache::instance().get_node_list(h, node_list);
-    if (! cached) {
+    if (use_cache) {
+        bool cached = SuRealCache::instance().get_node_list(h, node_list);
+        if (! cached) {
+            get_nodes(h, node_list);
+            SuRealCache::instance().add_node_list(h, node_list);
+        }
+    } else {
         get_nodes(h, node_list);
-        SuRealCache::instance().add_node_list(h, node_list);
     }
 }
 
@@ -158,12 +167,14 @@ static void get_all_nodes(const Handle& h, HandleSeq& node_list)
  */
 bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_link_h)
 {
-    int cached = SuRealCache::instance().clause_match(pattrn_link_h, grnd_link_h);
-    if (cached >= 0) {
-        if (cached == 0) {
-            return false;
-        } else {
-            return true;
+    if (m_use_cache) {
+        int cached = SuRealCache::instance().clause_match(pattrn_link_h, grnd_link_h);
+        if (cached >= 0) {
+            if (cached == 0) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 
@@ -192,19 +203,23 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     // reject match (ie. return false) if there is no InterpretationNode, or
     // the InterpretationNode is not one of the targets
     if (not std::any_of(qISet.begin(), qISet.end(), hasInterpretation)) {
-        SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, false);
+        if (m_use_cache) {
+            SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, false);
+        }
         return false;
     }
 
     // Get all the nodes from the pattern and the potential solution.
     HandleSeq qAllPatNodes;
-    get_all_nodes(pattrn_link_h, qAllPatNodes);
+    get_all_nodes(pattrn_link_h, qAllPatNodes, m_use_cache);
     HandleSeq qAllSolnNodes;
-    get_all_nodes(grnd_link_h, qAllSolnNodes);
+    get_all_nodes(grnd_link_h, qAllSolnNodes, m_use_cache);
 
     // Just in case if their sizes are not the same, reject the match.
     if (qAllPatNodes.size() != qAllSolnNodes.size()) {
-        SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, false);
+        if (m_use_cache) {
+            SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, false);
+        }
         return false;
     }
 
@@ -251,7 +266,9 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
 
         // do the actual disjunct match
         if (not disjunct_match(hPatWordNode, hSolnWordInst)) {
-            SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, false);
+            if (m_use_cache) {
+                SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, false);
+            }
             return false;
         }
     }
@@ -261,7 +278,9 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     m_interp.insert(qTempInterpNodes.begin(), qTempInterpNodes.end());
 
 
-    SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, true);
+    if (m_use_cache) {
+        SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, true);
+    }
     return true;
 }
 
@@ -279,12 +298,14 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
  */
 bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::map<Handle, Handle> &pred_soln)
 {
-    int cached = SuRealCache::instance().grounding_match(var_soln, pred_soln);
-    if (cached >= 0) {
-        if (cached == 0) {
-            return false;
-        } else {
-            return true;
+    if (m_use_cache) {
+        int cached = SuRealCache::instance().grounding_match(var_soln, pred_soln);
+        if (cached >= 0) {
+            if (cached == 0) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 
@@ -325,7 +346,9 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
 
     // no common InterpretationNode, ignore this grounding
     if (qItprNode.empty()) {
-        SuRealCache::instance().add_grounding_match(pred_soln, false); // pred
+        if (m_use_cache) {
+            SuRealCache::instance().add_grounding_match(pred_soln, false); // pred
+        }
         return false;
     }
 
@@ -346,7 +369,9 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         // if another variable already map to the same solution, discard this grounding
         // because each variable should map to its own unique solution
         if (std::any_of(shrinked_soln.begin(), shrinked_soln.end(), checker)) {
-            SuRealCache::instance().add_grounding_match(var_soln, false); // var
+            if (m_use_cache) {
+                SuRealCache::instance().add_grounding_match(var_soln, false); // var
+            }
             return false;
         }
 
@@ -367,7 +392,9 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             {
                 // reject it if disjuncts do not match
                 if (not disjunct_match(hPatWord, hSolnWordInst)) {
-                    SuRealCache::instance().add_grounding_match(var_soln, false); // var
+                    if (m_use_cache) {
+                        SuRealCache::instance().add_grounding_match(var_soln, false); // var
+                    }
                     return false;
                 }
 
@@ -456,7 +483,9 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                 // will not consider it as a match if none of them
                 // passed the disjunct match
                 if (not found) {
-                    SuRealCache::instance().add_grounding_match(var_soln, false); // var
+                    if (m_use_cache) {
+                        SuRealCache::instance().add_grounding_match(var_soln, false); // var
+                    }
                     return false;
                 }
             }
@@ -511,7 +540,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         };
 
         HandleSeq qWordInstNodes;
-        get_all_nodes(hSetLink, qWordInstNodes);
+        get_all_nodes(hSetLink, qWordInstNodes, m_use_cache);
         qWordInstNodes.erase(std::remove_if(qWordInstNodes.begin(), qWordInstNodes.end(),
                                             checker), qWordInstNodes.end());
 
@@ -521,7 +550,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         {
             std::set<UUID> sWordFound;
             HandleSeq qNodes;
-            get_all_nodes(l, qNodes);
+            get_all_nodes(l, qNodes, m_use_cache);
 
             for (const Handle& n : qNodes)
             {
@@ -582,13 +611,17 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             logger().debug("[SuReal] grounding Interpreation: %s", n->toShortString().c_str());
             m_results[n].push_back(shrinked_soln);
         }
-
-        //SuRealCache::instance().add_grounding_match(var_soln, pred_soln, true);
-        //return isGoodEnough;
-        return true;
+        if (m_use_cache) {
+            //SuRealCache::instance().add_grounding_match(var_soln, pred_soln, true);
+            return true;
+        } else {
+            return isGoodEnough;
+        }
     }
 
-    SuRealCache::instance().add_grounding_match(var_soln, pred_soln, false);
+    if (m_use_cache) {
+        SuRealCache::instance().add_grounding_match(var_soln, pred_soln, false);
+    }
     return false;
 }
 

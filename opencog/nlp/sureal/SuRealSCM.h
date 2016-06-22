@@ -47,9 +47,11 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    HandleSeqSeq do_sureal_match(Handle);
+    HandleSeqSeq do_sureal_match(Handle, bool);
+    HandleSeqSeq do_non_cached_sureal_match(Handle);
+    HandleSeqSeq do_cached_sureal_match(Handle);
     HandleSeqSeq reset_cache(Handle);
-    bool do_sureal_check(Handle);
+    //bool do_sureal_check(Handle);
 
     HandleSeqSeq sureal_get_mapping(Handle&, std::vector<std::map<Handle, Handle> >&);
 

@@ -46,9 +46,25 @@
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
             (if (null? interpretations)
-                ;; Senna
-                ;;(delete-duplicates (create-sentence a-set-link))
-                (create-sentence a-set-link)
+                (delete-duplicates (create-sentence a-set-link #f))
+                (get-sentence interpretations)
+            )
+        )
+        (display "Please input a SetLink only")
+    )
+)
+
+(define-public (cached-sureal a-set-link)
+"
+  sureal SETLINK -- main entry point for sureface realization
+
+  Expect SETLINK to be a SetLink -- since it is assumed that the
+  output of the micro-planner is unordered.
+"
+    (if (equal? 'SetLink (cog-type a-set-link))
+        (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
+            (if (null? interpretations)
+                (create-sentence a-set-link #t)
                 (get-sentence interpretations)
             )
         )
@@ -58,7 +74,8 @@
 
 ; Returns a possible set of SuReals from an input SetLink
 ; * 'a-set-link' : A SetLink which is to be SuRealed
-(define (create-sentence a-set-link)
+; * 'use-cache' : A flag to specify that the cached version of SuReal should be used
+(define (create-sentence a-set-link use-cache)
     (define (construct-sntc mappings)
         ; get the words, skipping ###LEFT-WALL###
         (define words-seq (cdr (parse-get-words-in-order (interp-get-parse (caar mappings)))))
@@ -138,12 +155,13 @@
         )
     )
 
-    ;; Senna
-    ;;(let* ((results (sureal-match a-set-link))
-    ;;       (interps (delete-duplicates (map car results))))
-    ;;    (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
-    ;;)
-    (sureal-match a-set-link)
+    (if use-cache
+        (cached-sureal-match a-set-link)
+        (let* ((results (sureal-match a-set-link))
+            (interps (delete-duplicates (map car results))))
+            (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
+        )
+    )
 )
 
 ; Returns a number that could be used to compare atoms of the same type. For eg.
