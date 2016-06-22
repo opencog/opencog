@@ -91,7 +91,6 @@
 
 	; Initialize the sentence forms as needed
 	(microplanning-init)
-    (reset-sureal-cache seq-link)
 
 	(set! all-sets (make-sentence-chunks
 		(cog-outgoing-set seq-link) utterance-type option))
@@ -111,14 +110,6 @@
   varying utterance-types, with each set of chunks contained
   within an <chunks-set> object.
 "
-
-    ; (define out (open-output-file "microplanningLog.txt"))
-    (define out (open-file "microplanningLog.txt" "a"))
-    ; (define blah01 (display "================================================================================\n" out))
-    ; (define blah02 (display atoms-list out))
-    ; (define blah03 (display "\n" out))
-    ; (define blah (close-output-port out))
-
 	; Wrap each atom in a container to allow repeated atoms, and
 	; persistence time weights
 	(define atomW-complete-set
@@ -136,7 +127,7 @@
 		; Helper function for branching into different utterance types.
 		(define (sub-helper ut)
 			(define new-atomW-chunk
-				(make-sentence atomW-unused atomW-complete-set ut option out))
+				(make-sentence atomW-unused atomW-complete-set ut option))
 			(cond
 				; make-sentence made a new chunk; make more chunks
 				; with the remaining atoms.
@@ -241,7 +232,7 @@
 )
 
 ; -----------------------------------------------------------------------
-(define (make-sentence atomW-unused atomW-complete-set utterance-type option out)
+(define (make-sentence atomW-unused atomW-complete-set utterance-type option)
 "
   make-sentence -- Create a single sentence
 
@@ -263,7 +254,7 @@
 		(define result
 			; Return *microplanning_sayable* if no need to check.
 			(if do-check
-				(check-chunk (map get-atom atomW-to-try) utterance-type option out)
+				(check-chunk (map get-atom atomW-to-try) utterance-type option)
 				*microplanning_sayable*
 			)
 		)
@@ -502,7 +493,7 @@
 ; "say-able" for a specific 'utterance-type', and if so, determines whether
 ; the sentence is too long or complex.
 ;
-(define (check-chunk atoms utterance-type option out)
+(define (check-chunk atoms utterance-type option)
 	(define favored-forms (get-sentence-forms utterance-type))
 	(define ok-length
 		(< (length (filter-map (lambda (l) (match-sentence-forms l favored-forms)) atoms)) (get-form-limit option))
@@ -511,19 +502,7 @@
 	(define temp-set-link (SetLink (get-utterance-link utterance-type atoms) atoms))
 
 	; do something with SuReal to see if all atoms can be included in a sentence
-    ;(define blah01 (display "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n" out))
-    ;(define blah02 (display temp-set-link out))
-    ;(define blah03 (display "\n" out))
-    (define blah04 (display (gettimeofday) out))
-    (define blah05 (display "\n" out))
 	(define say-able (not (null? (sureal temp-set-link))))
-    (define blah06 (display (gettimeofday) out))
-    (define blah07 (display "\n" out))
-    ;(define blah08 (display "++++++\n" out))
-    ;(define blah09 (display say-able out))
-    ;(define blah10 (display "\n" out))
-	;(define blah11 (display (sureal temp-set-link) out))
-    ;(define blah12 (display "\n" out))
 
 	; remove the temporary SetLink
 	(cog-extract temp-set-link)
