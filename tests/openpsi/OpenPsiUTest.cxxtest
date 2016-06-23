@@ -121,7 +121,7 @@ public:
     }
 
     // Check the scheme function `psi-select-rules`
-    void psi_select_rules()
+    void test_psi_select_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 

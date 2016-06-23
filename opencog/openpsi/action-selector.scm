@@ -122,7 +122,7 @@
         ; NOTE: This check is required as ecan isn't being used continuesely.
         ; Remove `most-weighted-atoms` version once ecan is integrated.
         (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
-            (most-weighted-atoms (psi-get-all-rules))
+            (most-weighted-atoms (psi-get-all-satisfiable-rules))
             (most-important-weighted-atoms (psi-get-all-satisfiable-rules))
         )
     )
