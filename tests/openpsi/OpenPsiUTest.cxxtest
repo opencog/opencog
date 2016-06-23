@@ -183,7 +183,7 @@ public:
     }
 
     // Check the scheme function `psi-get-satisfiable-rules`
-    void psi_get_satisfiable_rules()
+    void test_psi_get_satisfiable_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -232,7 +232,7 @@ public:
 
 
     // Check the scheme function `psi-step`
-    void psi_step()
+    void test_psi_step()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -307,6 +307,9 @@ public:
     }
 
     // Check the scheme function `psi-get-dual-rules`
+    // NOTE: The function `psi-get-dual-rules` has been removed but something
+    // similar will be added. This test is not removed the test may come in
+    // handy.
     void psi_get_dual_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
