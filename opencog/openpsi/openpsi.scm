@@ -7,6 +7,7 @@
 
 (load-from-path "opencog/openpsi/action-selector.scm")
 (load-from-path "opencog/openpsi/demand.scm")
+(load-from-path "opencog/openpsi/rule.scm")
 (load-from-path "opencog/openpsi/main.scm")
 (load-from-path "opencog/openpsi/utilities.scm")
 
