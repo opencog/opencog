@@ -1,3 +1,5 @@
+; Copyright (C) 2016 OpenCog Foundation
+
 (use-modules (ice-9 threads)) ; For `par-map`
 (use-modules (srfi srfi-1)) ; For `append-map`
 
