@@ -24,9 +24,9 @@
                 (State input-parse parse-succeeded)
                 (State input-utterance
                     (Reference
-                        (get-word-list sent-node)
                         sent-node
                         (Node utterance)
+                        (get-word-list sent-node)
                     )
                 )
             ))

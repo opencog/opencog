@@ -35,8 +35,8 @@
 
 (define (is-utterance-type? speechact)
     (Satisfaction (And
-        (State input-utterance (Reference (Variable "$l") (Variable "$x") (Variable "$a")))
-        (Parse (Variable "$parse") (Variable "$x"))
+        (State input-utterance (Reference (Variable "$s") (Variable "$n") (Variable "$l")))
+        (Parse (Variable "$parse") (Variable "$s"))
         (Interpretation (Variable "$interp") (Variable "$parse"))
         (Inheritance (Variable "$interp") speechact)
     ))
