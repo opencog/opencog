@@ -161,7 +161,7 @@ public:
     }
 
     // Check the scheme function `psi-related-goals`
-    void psi_related_goals()
+    void test_psi_related_goals()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 

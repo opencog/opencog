@@ -203,7 +203,7 @@ there are 100K rules!
   action:
   - An action that is part of a psi-rule.
 "
-    (let* ((and-links (cog-filter 'SequentialAndLink (cog-incoming-set action)))
+    (let* ((and-links (cog-filter 'AndLink (cog-incoming-set action)))
            (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
            (delete-duplicates (map psi-get-goal rules))
     )
