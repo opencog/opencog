@@ -123,7 +123,8 @@
          ;; Get all unfree variables stripped from their types
          (unfree-vars (unfree-variables TyVs P))
          ;; Build pattern matcher query for the subtitution terms
-         (query (GetLink TyVs (And P unfree-vars)))
+         (query-body (if (null? unfree-vars) P (And P unfree-vars)))
+         (query (GetLink TyVs query-body))
          ;; Fetch all possible substitution terms
          (results (cog-execute! query)))
         ;; Select one randomly, but first purge the query to not
