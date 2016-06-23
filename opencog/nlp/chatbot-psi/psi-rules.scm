@@ -17,7 +17,7 @@
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-answers)))
     (True)
-    (stv .5 .5)
+    (stv .9 .9)
     sociality
 )
 
