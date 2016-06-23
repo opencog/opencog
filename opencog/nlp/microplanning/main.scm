@@ -97,6 +97,17 @@
     ; if the sureal queries are split into several threads. If you plan to do 
     ; this (split sureal requests amongst multiple threads), just comment the 
     ; following call and change the call to sureal below to use its non-cached version.
+    ;
+    ; It is not thread safe because in this version there is only one instance of 
+    ; the cache (reached via a singleton wrapper). So if two threads with two 
+    ; different Microplanner queries add stuff to the cache, one may lead to false 
+    ; hits in the other. In addition to this, the cache is reset (clear) just before 
+    ; the Microplanner query starts so if the second query reach the reset point 
+    ; before the first query ended, the cache will be reset during the lifetime 
+    ; of the first query, which may lead to false misses.
+    ;
+    ; A suggested approach to make it thread safe is having each Microplanner 
+    ; query to have its own cache instance.
 	(reset-sureal-cache seq-link)
 
 	(set! all-sets (make-sentence-chunks

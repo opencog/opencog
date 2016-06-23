@@ -95,7 +95,7 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
             hPat->getType() == INTERPRETATION_NODE) {
             answer = true;
         } else {
-            std::string sSoln = NodeCast(hSoln)->getName();
+            std::string sSoln = hSoln->getName();
             // get the corresponding WordInstanceNode for hSoln
             Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
             // no WordInstanceNode? reject!
