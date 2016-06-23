@@ -180,9 +180,6 @@
          (terms (if (= 0 Impl-c) ; don't try to instantiate zero
                                  ; knowledge implication
                     (cog-undefined-handle)
-                    ;; TODO: take the subset of TyVs that is free in P
-                    ;; and select the substitution term with it Rename
-                    ;; it P-TyVs and use it below instead of TyVs.
                     (select-conditioned-substitution-terms TyVs P))))
     (if (equal? terms (cog-undefined-handle))
         (cog-undefined-handle)
@@ -193,10 +190,6 @@
                (Pinst (cog-execute! Pput))
                (Pinst-s (cog-stv-strength Pinst))
                (Pinst-c (cog-stv-confidence Pinst))
-               ;; TODO: generate Q-TyVs which contains the substition
-               ;; terms compatible with P and randomly create new ones
-               ;; for the variable in Q that are missing in P. Use
-               ;; Q-TyVs instead of TyVs below.
                (Qput (PutLink (LambdaLink TyVs Q) terms))
                (Qinst (cog-execute! Qput))
                (Qinst-s (* Impl-s Pinst-s))
