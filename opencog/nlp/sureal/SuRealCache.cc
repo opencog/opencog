@@ -1,7 +1,7 @@
 /*
  * SuRealCache.cc
  *
- * Copyright (C) 2014 OpenCog Foundation
+ * Copyright (C) 2016 OpenCog Foundation
  *
  * Author: Andre Senna <https://github.com/andre-senna>
  *
