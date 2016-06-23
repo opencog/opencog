@@ -447,9 +447,9 @@ TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& 
     //y .. right,left,align
     //z .. above,below,align
     double px,py,pz;
-    if (res.x()>eps)px=1.0;else if (res.x()<eps)px=2.0;else px=0.0;
-    if (res.y()>eps)py=2.0;else if (res.y()<eps)py=1.0;else py=0.0;
-    if (res.z()>eps)pz=2.0;else if (res.z()<eps)pz=1.0;else pz=0.0;
+    if (res.x()>eps)px=1.0;else if (res.x()<-1.0*eps)px=2.0;else px=0.0;
+    if (res.y()>eps)py=2.0;else if (res.y()<-1.0*eps)py=1.0;else py=0.0;
+    if (res.z()>eps)pz=2.0;else if (res.z()<-1.0*eps)pz=1.0;else pz=0.0;
     res=point3d(px,py,pz); 
     return res;
 }
@@ -468,7 +468,7 @@ TimeOctomap::get_direction_vector(const time_pt& time_p,const opencog::Handle& a
     
 //2=far,1=near,0=touching, -1 unknown
 int 
-TimeOctomap::get_nearness(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
+TimeOctomap::get_angular_nearness(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
 {
     point3d dir1,dir2;
     if (!get_direction_vector(time_p,ato_obs,ato_target,dir1))return -1;

@@ -106,7 +106,9 @@ public:
     void remove_past_ato(const string& map_name,Handle ato,int elapse);
     //remove all specific atoms in all time points and all locations
     void remove_all_ato(const string& map_name,Handle ato);
-    //list .. handle float float
+    
+    ////spatial query api
+    
 private:
     map<string,TimeOctomap*> tsa;
     
