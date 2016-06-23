@@ -172,7 +172,7 @@
     1) Evaluate the monitored entities and set their 'changed' predicates, and
        for each changed entity store it's value in a current-value-table (this,
        or otherwise storing the change magnitude, is needed because the current
-       value of a "trigger" entity might change because of application of a
+       value of a trigger entity might change because of application of a
        previous rule.)
     2) TODO: need to store the change magnitude before firing the rules because
        the current value of the trigger might change as a result of a previous
