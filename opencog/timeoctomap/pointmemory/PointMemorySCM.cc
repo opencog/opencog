@@ -96,7 +96,14 @@ void PointMemorySCM::init()
     define_scheme_primitive("remove-past-location-ato", &PointMemorySCM::remove_past_location_ato, this, "ato pointmem");//b_siddd
     define_scheme_primitive("remove-curr-ato", &PointMemorySCM::remove_curr_ato, this, "ato pointmem");//v_sh
     define_scheme_primitive("remove-past-ato", &PointMemorySCM::remove_past_ato, this, "ato pointmem");//v_shi
-    define_scheme_primitive("remove_all_ato", &PointMemorySCM::remove_all_ato, this, "ato pointmem");//v_sh
+    define_scheme_primitive("remove-all-ato", &PointMemorySCM::remove_all_ato, this, "ato pointmem");//v_sh
+
+    //spatial query
+    define_scheme_primitive("get-dist-ato", &PointMemorySCM::get_distance_between, this, "ato pointmem");//d_shhi
+    define_scheme_primitive("get-angular-nearness-ato", &PointMemorySCM::get_angular_nearness, this, "ato pointmem");//i_shhhi
+    define_scheme_primitive("get-right-left-of-ato", &PointMemorySCM::get_target_is_right_left, this, "ato pointmem");//i_shhhi
+    define_scheme_primitive("get-above-below-of-ato", &PointMemorySCM::get_target_is_above_below, this, "ato pointmem");//i_shhhi
+    define_scheme_primitive("get-front-back-of-ato", &PointMemorySCM::get_target_is_front_back, this, "ato pointmem");//i_shhhi
 #endif
 }
 
@@ -148,10 +155,8 @@ bool PointMemorySCM::map_ato(const string& map_name,Handle ato,double x,double y
 
 Handle PointMemorySCM::get_first_ato(const string& map_name,Handle ato,int elapse)
 {
-    time_pt tpt,tp; duration_c dr;
-    tsa[map_name]->get_current_time_range(tpt,dr);
-    dr=std::chrono::milliseconds(elapse);
-    tpt-=dr;
+    time_pt tpt,tp; 
+    if (!get_map_time(map_name,elapse,tpt))return UndefinedHandle;
     bool r=tsa[map_name]->get_oldest_time_elapse_atom_observed(ato,tpt,tp);
     if (!r) return UndefinedHandle;
     //make and return atTimeLink
@@ -171,10 +176,8 @@ Handle PointMemorySCM::get_first_ato(const string& map_name,Handle ato,int elaps
 
 Handle PointMemorySCM::get_last_ato(const string& map_name,Handle ato,int elapse)
 {
-    time_pt tpt,tp; duration_c dr;
-    tsa[map_name]->get_current_time_range(tpt,dr);
-    dr=std::chrono::milliseconds(elapse);
-    tpt-=dr;
+    time_pt tpt,tp; 
+    if (!get_map_time(map_name,elapse,tpt))return UndefinedHandle;
     bool r=tsa[map_name]->get_last_time_elapse_atom_observed(ato,tpt,tp);
     if (!r) return UndefinedHandle;
     //make and return atTimeLink
@@ -204,10 +207,8 @@ Handle PointMemorySCM::get_at_loc_ato(const string& map_name,double x,double y,d
 Handle PointMemorySCM::get_past_loc_ato(const string& map_name,int elapse,
                             double x,double y,double z)
 {
-    time_pt tpt; duration_c dr;
-    tsa[map_name]->get_current_time_range(tpt,dr);
-    dr=std::chrono::milliseconds(elapse);
-    tpt-=dr;
+    time_pt tpt; 
+    if (!get_map_time(map_name,elapse,tpt))return UndefinedHandle;
     Handle ato;
     if (tsa[map_name]->get_atom_at_time_by_location(tpt,point3d(x,y,z),ato))
         return ato;
@@ -240,10 +241,8 @@ Handle PointMemorySCM::get_locs_ato(const string& map_name,Handle ato)//listlink
 
 Handle PointMemorySCM::get_past_locs_ato(const string& map_name,Handle ato,int elapse)
 {
-    time_pt tpt; duration_c dr;
-    tsa[map_name]->get_current_time_range(tpt,dr);
-    dr=std::chrono::milliseconds(elapse);
-    tpt-=dr;
+    time_pt tpt; 
+    if (!get_map_time(map_name,elapse,tpt))return UndefinedHandle;
     point3d_list pl=tsa[map_name]->get_locations_of_atom_occurence_at_time(tpt,ato);
     if (pl.size()<1)return UndefinedHandle;
 
@@ -328,10 +327,8 @@ bool PointMemorySCM::remove_location_ato(const string& map_name,double x,double 
 bool PointMemorySCM::remove_past_location_ato(const string& map_name,int elapse,
          double x,double y,double z)
 {
-    time_pt tpt; duration_c dr;
-    tsa[map_name]->get_current_time_range(tpt,dr);
-    dr=std::chrono::milliseconds(elapse);
-    tpt-=dr;
+    time_pt tpt; 
+    if (!get_map_time(map_name,elapse,tpt))return false;
     return tsa[map_name]->remove_atom_at_time_by_location(tpt,point3d(x,y,z));
 }
 
@@ -342,10 +339,8 @@ void PointMemorySCM::remove_curr_ato(const string& map_name,Handle ato)
 
 void PointMemorySCM::remove_past_ato(const string& map_name,Handle ato,int elapse)
 {
-    time_pt tpt; duration_c dr;
-    tsa[map_name]->get_current_time_range(tpt,dr);
-    dr=std::chrono::milliseconds(elapse);
-    tpt-=dr;
+    time_pt tpt; 
+    if (!get_map_time(map_name,elapse,tpt))return;
     tsa[map_name]->remove_atom_at_time(tpt,ato);
 }
 
@@ -353,6 +348,67 @@ void PointMemorySCM::remove_all_ato(const string& map_name,Handle ato)
 {
     tsa[map_name]->remove_atom(ato);
 }
+
+
+bool 
+PointMemorySCM::get_map_time(const string& map_name,int elapse,time_pt& tpt)
+{
+    duration_c dr;
+    if (!tsa[map_name]->get_current_time_range(tpt,dr))return false;
+    dr=std::chrono::milliseconds(elapse);
+    tpt-=dr;
+    return true;
+}
+////spatial query api assuming 1 ato in 1 map at 1 location. 
+//for multi-map need to add features to main api to provide more raw data results
+//-ve for unknown
+double 
+PointMemorySCM::get_distance_between(const string& map_name,Handle ato1,Handle ato2,int elapse)
+{
+    time_pt tpt; 
+    if (!get_map_time(map_name,elapse,tpt))return -1.0; 
+    return tsa[map_name]->get_distance_between(tpt,ato1,ato2);
+}
+
+//2=far,1=near,0=touching,-1=unknown
+int 
+PointMemorySCM::get_angular_nearness(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse)
+{
+    time_pt tpt; 
+    if (!get_map_time(map_name,elapse,tpt))return -1.0;
+    return tsa[map_name]->get_angular_nearness(tpt,ato_obs,ato_tgt,ato_ref);
+}
+
+//2=right,1=left,0=aligned,-1=unknown
+int 
+PointMemorySCM::get_target_is_right_left(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse)
+{
+    time_pt tpt; 
+    if (!get_map_time(map_name,elapse,tpt))return -1.0;
+    point3d res=tsa[map_name]->get_spatial_relations(tpt,ato_obs,ato_tgt,ato_ref);
+    return lround(res.y());
+}
+
+//2=above,1=below,0=aligned,-1=unknown
+int 
+PointMemorySCM::get_target_is_above_below(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse)
+{
+    time_pt tpt; 
+    if (!get_map_time(map_name,elapse,tpt))return -1.0;
+    point3d res=tsa[map_name]->get_spatial_relations(tpt,ato_obs,ato_tgt,ato_ref);
+    return lround(res.z());
+}
+
+//2=ahead/front,1=behind/back,0=aligned,-1=unknown
+int 
+PointMemorySCM::get_target_is_front_back(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse)
+{
+    time_pt tpt; 
+    if (!get_map_time(map_name,elapse,tpt))return -1.0;
+    point3d res=tsa[map_name]->get_spatial_relations(tpt,ato_obs,ato_tgt,ato_ref);
+    return lround(res.x());
+}
+
 
 void opencog_ato_pointmem_init(void)
 {
