@@ -157,7 +157,7 @@
     (psi-rule
         (list (Not (Equal (Set no-input-utterance) (Get (State input-utterance (Variable "$x"))))))
         (ExecutionOutput (GroundedSchema "scm:psi-chat-on") (List))
-        (Evaluation (GroundedPredicate "scm:psi-demand-value-minimize") (List sociality (Number "10")))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-decrease") (List sociality (Number "10")))
         (stv 1 1)
         sociality
     )

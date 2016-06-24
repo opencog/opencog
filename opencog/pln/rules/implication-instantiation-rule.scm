@@ -156,6 +156,13 @@
 ;;       implication. Anything that isn't `a` is in fact a potential
 ;;       distraction toward the true membership of Q(a).
 ;;
+;;       EDIT: To really address that you need use Bayes rule
+;;
+;;       P(M|D) = P(D|M) * P(M) / P(D)
+;;
+;;       and use that over known models (implications, whatever) to
+;;       estimate P(D'|D)
+;;
 (define (implication-full-instantiation-formula Impl)
   (let* ((Impl-outgoings (cog-outgoing-set Impl))
          (Impl-s (cog-stv-strength Impl))

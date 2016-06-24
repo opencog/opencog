@@ -31,10 +31,13 @@
 
 #include "SuRealSCM.h"
 #include "SuRealPMCB.h"
+#include "SuRealCache.h"
 
 
 using namespace opencog::nlp;
 using namespace opencog;
+
+using namespace std;
 
 
 /**
@@ -80,7 +83,9 @@ void SuRealSCM::init_in_module(void* data)
 void SuRealSCM::init()
 {
 #ifdef HAVE_GUILE
-    define_scheme_primitive("sureal-match", &SuRealSCM::do_sureal_match, this, "nlp sureal");
+    define_scheme_primitive("sureal-match", &SuRealSCM::do_non_cached_sureal_match, this, "nlp sureal");
+    define_scheme_primitive("cached-sureal-match", &SuRealSCM::do_cached_sureal_match, this, "nlp sureal");
+    define_scheme_primitive("reset-cache", &SuRealSCM::reset_cache, this, "nlp sureal");
 #endif
 }
 
@@ -106,8 +111,34 @@ static void get_all_unique_nodes(const Handle& h,
 }
 
 /**
+ * Implement the "reset-sureal-cache" scheme primitive.
+ *
+ */
+HandleSeqSeq SuRealSCM::reset_cache(Handle dummy)
+{
+    SuRealCache::instance().reset();
+    return HandleSeqSeq();
+}
+
+/**
+ * Implement the "cached-sureal-match" scheme primitive.
+ *
+ */
+HandleSeqSeq SuRealSCM::do_cached_sureal_match(Handle h)
+{
+    return do_sureal_match(h, true);
+}
+
+/**
  * Implement the "sureal-match" scheme primitive.
  *
+ */
+HandleSeqSeq SuRealSCM::do_non_cached_sureal_match(Handle h)
+{
+    return do_sureal_match(h, false);
+}
+
+/**
  * Uses the pattern matcher to find all InterpretationNodes whoses
  * corresponding SetLink contains a structure similar to the input,
  * taking into accounting each ConceptNode/PredicateNode's corresponding
@@ -118,7 +149,7 @@ static void get_all_unique_nodes(const Handle& h,
  * @return    a list of the form returned by sureal_get_mapping, but spanning
  *            multiple InterpretationNode
  */
-HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
+HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 {
 #ifdef HAVE_GUILE
     // only accept SetLink
@@ -178,9 +209,31 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h)
         sVars.insert(n);
     }
 
-    SuRealPMCB pmcb(pAS, sVars);
+    SuRealPMCB pmcb(pAS, sVars, use_cache);
     PatternLinkPtr slp(createPatternLink(sVars, qClauses));
+
     slp->satisfy(pmcb);
+
+    // The cached version of SuReal is supposed to return only true or false,
+    // not the set of all acceptable answers. To keep ortogonality with the
+    // interface of the standard (non-cached) version, this shortcut is
+    // returning an empty HandleSeq meaning 'false' or a HandleSeq with a single
+    // (actually meaningless) Handle meaning 'true'.
+    //
+    // Ideally there should be two different methods with different interfaces
+    // for the cached and the non-cached versions.
+    if (use_cache) {
+        if (pmcb.m_results.empty()) {
+            return HandleSeqSeq();
+        } else {
+            HandleSeqSeq results;
+            HandleSeq item;
+            Handle h;
+            item.push_back(h);
+            results.push_back(item);
+            return results;
+        }
+    }
 
     HandleSeq keys;
 
