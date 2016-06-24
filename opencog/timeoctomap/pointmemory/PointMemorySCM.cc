@@ -219,7 +219,8 @@ Handle PointMemorySCM::get_locs_ato(const string& map_name,Handle ato)//listlink
 {
     point3d_list pl=tsa[map_name]->get_locations_of_atom_occurence_now(ato);
     if (pl.size()<1)return UndefinedHandle;
-    HandleSeq loc_links(pl.size());
+    //HandleSeq loc_links(pl.size());
+    HandleSeq loc_links;
     while (pl.size()>0)
     {
         point3d pt=pl.front();
@@ -236,7 +237,7 @@ Handle PointMemorySCM::get_locs_ato(const string& map_name,Handle ato)//listlink
         pl.pop_front();
     }//while
   
-    return Handle(createLink(LIST_LINK,loc_links));
+    return Handle(createLink(SET_LINK,loc_links));
 }
 
 Handle PointMemorySCM::get_past_locs_ato(const string& map_name,Handle ato,int elapse)
@@ -245,8 +246,8 @@ Handle PointMemorySCM::get_past_locs_ato(const string& map_name,Handle ato,int e
     if (!get_map_time(map_name,elapse,tpt))return UndefinedHandle;
     point3d_list pl=tsa[map_name]->get_locations_of_atom_occurence_at_time(tpt,ato);
     if (pl.size()<1)return UndefinedHandle;
-
-    HandleSeq loc_links(pl.size());
+    //HandleSeq loc_links(pl.size());
+    HandleSeq loc_links;
     while (pl.size()>0)
     {
         point3d pt=pl.front();
@@ -263,7 +264,7 @@ Handle PointMemorySCM::get_past_locs_ato(const string& map_name,Handle ato,int e
         pl.pop_front();
     }//while
 
-    return Handle(createLink(LIST_LINK,loc_links));
+    return Handle(createLink(SET_LINK,loc_links));
 }
 
 Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name,Handle ato,
