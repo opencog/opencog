@@ -164,9 +164,10 @@ public:
         double diff=abs(mag(a)-mag(b));
         if (den<1e-9)//num might be greater or equal to space_res
         {
-            if (diff<1e-3)return 0;//magic number
+            if (diff<1e-3)
+                return 0;//magic number
             else
-            return PI;//Pi radians
+                return PI;//Pi radians
         }
         return acos(num/den);
     }

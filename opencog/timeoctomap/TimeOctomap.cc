@@ -58,7 +58,8 @@ TimeOctomap::get_time_resolution()
 bool
 TimeOctomap::get_current_time_range(time_pt& time_p, duration_c& duration)
 {
-    if (time_circle.size() < 1) return false;
+    if (time_circle.size() < 1)
+         return false;
     time_p = curr_time;
     duration = time_res;
     return true;
@@ -133,7 +134,8 @@ TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
 {
     OC_ASSERT(created_once);
     auto it = std::find(std::begin(time_circle), std::end(time_circle), tp); //time_circle.begin(),time_circle.end()
-    if (it == std::end(time_circle))return false;
+    if (it == std::end(time_circle))
+        return false;
     //it->map_tree[map_handle].setNodeData(location,UndefinedHandle);
     it->map_tree.updateNode(location, false);
     return true;
@@ -153,7 +155,8 @@ TimeOctomap::get_atom_current_time_at_location(
         return false;
     }
     ato = (static_cast<AtomOcTreeNode*>(result))->getData();
-    if (ato == UndefinedHandle) return false;
+    if (ato == UndefinedHandle)
+        return false;
     return true;
 }
 
@@ -165,14 +168,16 @@ TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
     OC_ASSERT(created_once);
     //find time in time circle time unit
     auto it = std::find(std::begin(time_circle), std::end(time_circle), time_p); //time_circle.begin(),time_circle.end()
-    if (it == std::end(time_circle))return false;
+    if (it == std::end(time_circle))
+        return false;
     OcTreeNode* result = it->map_tree.search(location);
     if (result == nullptr) {
         ato = UndefinedHandle;
         return false;
     }
     ato = (static_cast<AtomOcTreeNode*>(result))->getData();
-    if (ato == UndefinedHandle) return false;
+    if (ato == UndefinedHandle)
+        return false;
     return true;
 }//ok
 
@@ -232,9 +237,11 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const opencog::Handle& at
     time_list tl=get_times_of_atom_occurence_in_map(ato);
     //sort
     int sz=tl.size();
-    if (sz<1) return false;
+    if (sz<1)
+        return false;
     tl.sort();
-    if (from_d>tl.back()) return false;
+    if (from_d>tl.back())
+        return false;
     for (int i=0;i<sz;i++)
     {
        result=tl.front();
@@ -255,9 +262,11 @@ bool TimeOctomap::get_last_time_elapse_atom_observed(const opencog::Handle& ato,
     time_list tl=get_times_of_atom_occurence_in_map(ato);
     //sort
     int sz=tl.size();
-    if (sz<1) return false;
+    if (sz<1)
+        return false;
     tl.sort();
-    if (till_d<tl.front()) return false;
+    if (till_d<tl.front())
+        return false;
     for (int i=0;i<sz;i++)
     {
        result=tl.back();
@@ -286,7 +295,8 @@ TimeOctomap::get_locations_of_atom_occurence_now(
         it != end;
         ++it) {
         //
-        if (it->getData() == ato) pl.push_back(it.getCoordinate());
+        if (it->getData() == ato)
+            pl.push_back(it.getCoordinate());
     }
     return pl;
 }//ok
@@ -301,14 +311,16 @@ TimeOctomap::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
     auto it = std::find(std::begin(time_circle),
                         std::end(time_circle),
                         time_p); //time_circle.begin(),time_circle.end()
-    if (it == std::end(time_circle))return point3d_list();
+    if (it == std::end(time_circle))
+        return point3d_list();
     for(AtomOcTree::tree_iterator ita =
         it->map_tree.begin_tree(),
         end = it->map_tree.end_tree();
         ita != end;
         ++ita) {
         //
-        if (ita->getData() == ato) pl.push_back(ita.getCoordinate());
+        if (ita->getData() == ato)
+            pl.push_back(ita.getCoordinate());
     }
     return pl;
 }//ok
@@ -346,7 +358,8 @@ TimeOctomap::remove_atom_at_time(const time_pt& time_p,const opencog::Handle& at
     auto tu = std::find(std::begin(time_circle),
                         std::end(time_circle),
                         time_p); //time_circle.begin(),time_circle.end()
-    if (tu == std::end(time_circle))return;
+    if (tu == std::end(time_circle))
+        return;
             for(AtomOcTree::tree_iterator it2 =
                 tu->map_tree.begin_tree(),
                 endit2 = tu->map_tree.end_tree();
@@ -404,7 +417,8 @@ TimeOctomap::get_a_location(const time_pt& time_p,const opencog::Handle& ato_tar
 {
     //get atom location
     point3d_list target_list=get_locations_of_atom_occurence_at_time(time_p,ato_target);
-    if (target_list.size()<1) return false;
+    if (target_list.size()<1) 
+        return false;
     location=target_list.front();
     return true;
 }
@@ -416,15 +430,19 @@ TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& 
     point3d res(-1.0,-1.0,-1.0);
     point3d v1,v2,v3;
     double eps=map_res*0.1;
-    if (!get_a_location(time_p,ato_obs,v1)) return res;
-    if (!get_a_location(time_p,ato_target,v2)) return res;
-    if (!get_a_location(time_p,ato_ref,v3)) return res;
+    if (!get_a_location(time_p,ato_obs,v1)) 
+        return res;
+    if (!get_a_location(time_p,ato_target,v2))
+        return res;
+    if (!get_a_location(time_p,ato_ref,v3))
+        return res;
     //calculate res
     //translate obs to origin and relatively move others
     //rotate vector obs target to be on an axis, relatively rotate ref
     //see if on left or right, up or down, front or back
     point3d orv=v3-v1;
-    if (abs(orv.x())<=eps && abs(orv.y())<=eps && abs(orv.z())<=eps) return res;
+    if (abs(orv.x())<=eps && abs(orv.y())<=eps && abs(orv.z())<=eps)
+        return res;
     point3d otv=v2-v1;
     double th=atan2(orv.y(),orv.x());
     double cx,cy,dx,dy;
@@ -453,9 +471,24 @@ TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& 
     //y .. right,left,align
     //z .. above,below,align
     double px,py,pz;
-    if (res.x()>eps)px=1.0;else if (res.x()<-1.0*eps)px=2.0;else px=0.0;
-    if (res.y()>eps)py=2.0;else if (res.y()<-1.0*eps)py=1.0;else py=0.0;
-    if (res.z()>eps)pz=2.0;else if (res.z()<-1.0*eps)pz=1.0;else pz=0.0;
+    if (res.x()>eps)
+        px=1.0;
+    else if (res.x()<-1.0*eps)
+             px=2.0;
+         else 
+             px=0.0;
+    if (res.y()>eps)
+        py=2.0;
+    else if (res.y()<-1.0*eps)
+             py=1.0;
+         else 
+             py=0.0;
+    if (res.z()>eps)
+        pz=2.0;
+    else if (res.z()<-1.0*eps)
+             pz=1.0;
+         else 
+             pz=0.0;
     res=point3d(px,py,pz); 
     return res;
 }
@@ -466,8 +499,10 @@ TimeOctomap::get_direction_vector(const time_pt& time_p,const opencog::Handle& a
     //direction vector
     point3d tarh;
     point3d refh;
-    if (!get_a_location(time_p,ato_target,tarh)) return false;
-    if (!get_a_location(time_p,ato_obs,refh)) return false;
+    if (!get_a_location(time_p,ato_target,tarh))
+        return false;
+    if (!get_a_location(time_p,ato_obs,refh))
+        return false;
     dir= (tarh-refh);
     return true;
 }
@@ -477,11 +512,15 @@ int
 TimeOctomap::get_angular_nearness(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
 {
     point3d dir1,dir2;
-    if (!get_direction_vector(time_p,ato_obs,ato_target,dir1))return -1;
-    if (!get_direction_vector(time_p,ato_obs,ato_ref,dir2))return -1;
+    if (!get_direction_vector(time_p,ato_obs,ato_target,dir1))
+        return -1;
+    if (!get_direction_vector(time_p,ato_obs,ato_ref,dir2))
+        return -1;
     double ang=ang_vec(dir1,dir2);
-    if (ang<=TOUCH_ANGLE) return 0;
-    else if (ang<=NEAR_ANGLE) return 1;
+    if (ang<=TOUCH_ANGLE)
+        return 0;
+    else if (ang<=NEAR_ANGLE)
+             return 1;
     return 2;
 }
     
@@ -492,8 +531,10 @@ TimeOctomap::get_distance_between(const time_pt& time_p,const opencog::Handle& a
     //get atom location
     point3d tarh;
     point3d refh;
-    if (!get_a_location(time_p,ato_target,tarh)) return (-1.0);
-    if (!get_a_location(time_p,ato_ref,refh)) return (-1.0);
+    if (!get_a_location(time_p,ato_target,tarh))
+        return (-1.0);
+    if (!get_a_location(time_p,ato_ref,refh))
+        return (-1.0);
 
     double dist=sqrt(sqr(tarh.x()-refh.x())+sqr(tarh.y()-refh.y())+sqr(tarh.z()-refh.z()));
     return dist;
