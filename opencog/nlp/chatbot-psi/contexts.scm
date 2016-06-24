@@ -71,3 +71,8 @@
     (DefinedPredicate "is-duckduckgo-answer?")
     (any-result? duckduckgo-answers)
 )
+
+(Define
+    (DefinedPredicate "called-chatbot-eva?")
+    (search-started? chatbot-eva)
+)

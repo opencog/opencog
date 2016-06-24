@@ -87,3 +87,15 @@
     (stv .9 .9)
     sociality
 )
+
+(psi-rule
+    (list (SequentialAnd
+        (Not (DefinedPredicate "called-chatbot-eva?"))
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "is-imperative?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: call-chatbot-eva") (List)))
+    (True)
+    (stv .9 .9)
+    sociality
+)

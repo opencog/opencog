@@ -4,7 +4,7 @@
              (opencog nlp relex2logic)
              (opencog nlp fuzzy)
              (opencog nlp sureal)
-             (opencog nlp chatbot)
+             (opencog nlp chatbot-eva)
              (opencog nlp aiml)
              (opencog exec)
              (opencog openpsi))
@@ -67,6 +67,9 @@
 (define duckduckgo-search (Anchor (chat-prefix "DuckDuckGoSearch")))
 (State duckduckgo-answers default-state)
 (State duckduckgo-search default-state)
+
+(define chatbot-eva (Anchor (chat-prefix "ChatbotEva")))
+(State chatbot-eva default-state)
 
 ;-------------------------------------------------------------------------------
 ; Define the demands
