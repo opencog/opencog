@@ -6,6 +6,7 @@
 ;(use-modules (opencog))
 ;(use-modules (opencog atom-types))  ;needed for AtTimeLink definition?
 
+; Todo: implement this table in the atomspace
 (define prev-value-table (make-hash-table 40))
 
 (define PSI-MAX-STRENGTH-MULTIPLIER 5)
@@ -28,14 +29,17 @@
  value, so that increases in value are larger when the current value is low
  and smaller when the current value is high. (And vica versa for decreases.)
 
- Currently this function assumes the value to be updated is stored in the
- tv.strength of target-param. However, this representation maybe be changing
- subject to feedback from those in the know.
+ Currently the implementation assumes the openpsi parameters are
+ normalized in [0 1]. The values of the params are assumed to be stored
+ in a StateLink or if not in a StateLink an attempt is made to evaluate or
+ execute the atom to obtain a value (see psi-get-value function). However, this
+ representation maybe be changing subject to feedback from those in the know.
 
- alpha is in the range of [-1, 1] and represents the degree of change and
-     whether the change is positively or negatively correlated with the
-     origin parameter
-     0 would lead to no change
+ alpha is in the range of [-1, 1] and represents the strength of change for a
+    for a given rule and whether the change in the target  is positively or
+    negatively correlated with the origin parameter. An alpha of 0 means no
+    change, and 1 and -1 indicate the strongest degree of change in the positive
+    and negative directions respectively.
 
  todo: see case-lambda in scheme for function overloading
 "
@@ -65,14 +69,15 @@
 		; it optional, but not sure how that would/wouldn't work with the
 		; rules.
 
-		; Todo: add check for strength in [-1,1]
-		; Todo: handle negatively correlated changes
+		(set! strength (string->number (cog-name strength)))
+		; Strength needs to be in [-1, 1]
+		(set! strength (max (min strength 1) -1))
+
 		; We want to map the strength to some multiplier, where of .5 strength
 		; maps
 		; to multiplier of 1, and strength 1 maps to some max multiplier
 		; Probably want some exponential function that passes through (0,0),
 		; (.5,1), and (1,MAX), but in the meantime:
-		(set! strength (string->number (cog-name strength)))
 		(if (<= strength .5)
 			(set! strength-multiplier (* 2 strength))
 
@@ -126,15 +131,13 @@
 		;(cog-set-tv! target (cog-new-stv new-strength confidence))
 		(format #t "current value: ~a    new value: ~a\n" current-value new-value)
 
-
-		; Todo: check for negative changes
 		; Todo: create one-way direction rules (e.g., only for a trigger increase,)
-		;       but not for a decrease.
+		; but not for a decrease. Could implement with "increase-in" and
+		; decrease-in predicates which are evaluated and set at the same time
+		; as the change-in predicates.
 
 	)
 )
-
-
 
 (define (psi-get-interaction-rules)
 	(cog-outgoing-set
