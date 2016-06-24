@@ -35,8 +35,8 @@
 
 (define (is-utterance-type? speechact)
     (Satisfaction (And
-        (State input-utterance (Reference (Variable "$l") (Variable "$x") (Variable "$a")))
-        (Parse (Variable "$parse") (Variable "$x"))
+        (State input-utterance (Reference (Variable "$s") (Variable "$n") (Variable "$l")))
+        (Parse (Variable "$parse") (Variable "$s"))
         (Interpretation (Variable "$interp") (Variable "$parse"))
         (Inheritance (Variable "$interp") speechact)
     ))
@@ -51,15 +51,6 @@
         (Equal (Set default-state) (Get (State anchor (Variable "$f"))))
         (Equal (Set no-result) (Get (State anchor (Variable "$f"))))
     ))
-)
-
-(define (add-thread t)
-    (set! all-threads (append all-threads (list t)))
-)
-
-(define (cancel-all-threads)
-    (map cancel-thread all-threads)
-    (set! all-threads '())
 )
 
 (define (reset-all-states)
