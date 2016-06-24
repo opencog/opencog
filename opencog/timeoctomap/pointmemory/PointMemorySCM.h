@@ -106,10 +106,22 @@ public:
     void remove_past_ato(const string& map_name,Handle ato,int elapse);
     //remove all specific atoms in all time points and all locations
     void remove_all_ato(const string& map_name,Handle ato);
-    //list .. handle float float
+    
+    ////spatial query api assuming 1 ato in 1 map at 1 location. 
+    //for multi-map need to add features to main api to provide more raw data results
+    //-ve for unknown
+    double get_distance_between(const string& map_name,Handle ato1,Handle ato2,int elapse);
+    //2=far,1=near,0=touching,-1=unknown
+    int get_angular_nearness(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse);
+    //2=right,1=left,0=aligned,-1=unknown
+    int get_target_is_right_left(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse);
+    //2=above,1=below,0=aligned,-1=unknown
+    int get_target_is_above_below(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse);
+    //2=ahead,1=behind,0=aligned,-1=unknown
+    int get_target_is_front_back(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse); 
 private:
     map<string,TimeOctomap*> tsa;
-    
+    bool get_map_time(const string& map_name,int elapse,time_pt& tpt);    
 public:
     PointMemorySCM();
     ~PointMemorySCM();

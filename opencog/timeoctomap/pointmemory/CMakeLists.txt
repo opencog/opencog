@@ -14,8 +14,8 @@
                  DESTINATION "include/${PROJECT_NAME}/timeoctomap"
         )
         INSTALL (FILES
-                 point-memory.scm
-                 DESTINATION "share/${PROJECT_NAME}/scm/opencog/timeoctomap"
+                 pointmem.scm
+                 DESTINATION "share/${PROJECT_NAME}/scm/opencog/ato"
         )
 
         #ADD_GUILE_MODULE(point-memory.scm)
