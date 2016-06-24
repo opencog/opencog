@@ -442,6 +442,12 @@ TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& 
     rot2d(otv.x(),otv.z(),-1.0*th,dx,dy);
     otv=point3d(dx,otv.y(),dy);
     res=otv-orv;
+    
+    //Debug
+    //cout<<otv<<endl;
+    //cout<<orv<<endl;
+    //cout<<res<<endl;
+    //Debug
 
     //x .. ahead=2, behind=1,aligned=0 
     //y .. right,left,align
