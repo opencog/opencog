@@ -53,15 +53,6 @@
     ))
 )
 
-(define (add-thread t)
-    (set! all-threads (append all-threads (list t)))
-)
-
-(define (cancel-all-threads)
-    (map cancel-thread all-threads)
-    (set! all-threads '())
-)
-
 (define (reset-all-states)
     (State input-utterance no-input-utterance)
     (State aiml-replies default-state)

@@ -51,8 +51,8 @@ def call_duckduckgo(qq):
     ; TODO: We may want to actually nlp-parse the answer, but a typical answer
     ; of this type seems to be very long (a paragraph), split into sentences
     ; and then parse?
-    (add-thread (begin-thread
+    (begin-thread
         (python-call-with-as "set_atomspace" (cog-atomspace))
         (cog-evaluate! (Evaluation (GroundedPredicate "py: call_duckduckgo") (List (get-input-text-node))))
-    ))
+    )
 )

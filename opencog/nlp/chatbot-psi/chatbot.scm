@@ -15,23 +15,15 @@
 ; Schema function for chatting
 
 (define (chat utterance)
-    (cancel-all-threads)
     (reset-all-states)
 
-    (catch #t
-        (lambda ()
-            (let ((sent-node (car (nlp-parse utterance))))
-                (State input-parse parse-succeeded)
-                (State input-utterance
-                    (Reference
-                        sent-node
-                        (Node utterance)
-                        (get-word-list sent-node)
-                    )
-                )
-            ))
-        (lambda (key . parameters)
-            (State input-parse parse-failed)
+    (let ((sent-node (car (nlp-parse utterance))))
+        (State input-utterance
+            (Reference
+                sent-node
+                (Node utterance)
+                (get-word-list sent-node)
+            )
         )
     )
 
@@ -41,7 +33,6 @@
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
 
-(define all-threads '())
 (define (chat-prefix node_name) (string-append "Chatbot: " node_name))
 
 (define input-utterance (Anchor (chat-prefix "InputUtterance")))
