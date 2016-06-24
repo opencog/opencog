@@ -6,7 +6,9 @@
 ;(use-modules (opencog))
 ;(use-modules (opencog atom-types))  ;needed for AtTimeLink definition?
 
-(define prev-value-table (make-hash-table 47))
+(define prev-value-table (make-hash-table 40))
+
+(define PSI-MAX-STRENGTH-MULTIPLIER 5)
 
 ;(TimeNode (number->string (current-time)))
 
@@ -39,73 +41,99 @@
 "
 (define-public (adjust-psi-var-level target strength . origin)
 	(define new-value)
+	(define strength-multiplier)
+	(define alpha)
+	(define slope)
 	(set! origin (list-ref origin 0))
-	(format #t "adjust-psi-var-level   strength: ~a   target: ~a   origin: ~a"
-		strength target origin)
-	(let* ((value (psi-get-number-value target))
-		   ; todo: replace this with a function
-		   ; Determine normalized value for the alpha for the change function.
-		   ; Alpha is based on the strength of the interaction and the
-		   ; magnititude of change in the origin.
-
-		   ; Assume interaction strength .5 means a roughly one-to-one
-		   ; change in magnititude between the origin and target. IOW a given
-		   ; change in origin results in a change of approximately equal
-		   ; magnitude in the target.
-		   ; WAIT - why not just have alpha be the multiplier duh
-		   ; We could even assume alpha = 1 by default if not present and make
-		   ; it optional, but not sure how that would/wouldn't work with the
-		   ; rules.
-
+	(display "\n------------------------------------------------------\n")
+	(format #t "adjust-psi-var-level   target: ~a   trigger: ~a"
+		target origin)
+	(let* ((current-value (psi-get-number-value target))
 		   (origin-change (psi-get-change-magnitude origin))
-		   (alpha (* (string->number (cog-name strength)) origin-change))
 		  )
 
-		(format #t "current value: ~a     origin change: ~a        alpha: ~a\n" value origin-change alpha)
+		; Determine normalized value for the alpha for the change function.
+		; Alpha is based on the strength of the interaction and the
+		; magnititude of change in the origin.
 
-		; For the following formula alpha needs to be negative for increases
+		; Assume interaction strength .5 means a roughly one-to-one
+		; change in magnititude between the origin and target. IOW a given
+		; change in origin results in a change of approximately equal
+		; magnitude in the target.
+		; WAIT - maybe just have interaction strength be the multiplier ?
+		; We could assume strength = 1 by default if not present and make
+		; it optional, but not sure how that would/wouldn't work with the
+		; rules.
+
+		; Todo: add check for strength in [-1,1]
+		; Todo: handle negatively correlated changes
+		; We want to map the strength to some multiplier, where of .5 strength
+		; maps
+		; to multiplier of 1, and strength 1 maps to some max multiplier
+		; Probably want some exponential function that passes through (0,0),
+		; (.5,1), and (1,MAX), but in the meantime:
+		(set! strength (string->number (cog-name strength)))
+		(if (<= strength .5)
+			(set! strength-multiplier (* 2 strength))
+
+			; else stength is > .5 so set multiplier between 1 and some specified max
+			; using the formula that god only knows how i came up with but i
+			; think actually works.
+			(let ((max PSI-MAX-STRENGTH-MULTIPLIER))
+				(set! strength-multiplier
+					(- (+ (* (- (* 2 max) 2) strength) 2) max)))
+		)
+
+		(set! alpha (* origin-change strength-multiplier))
+		; make sure alpha is in [-1,1]
+		(if (> alpha 0)
+			(set! alpha (min alpha 1))
+			(set! alpha (max alpha -1)))
+
+		(format #t "strength: ~a     change: ~a       alpha: ~a\n"
+			strength origin-change alpha)
+
+		; Todo: check that alpha is not 0, and confirm that alpha can't be 0 with new formula
+		; increasing slope increases the degree change at all levels
+		(set! slope 10000)
+		; finagle the extreme cases because the curve is not exactly how we want
+		(if (> alpha 0)
+			(if (>= alpha .5)
+				(set! current-value (max current-value .2))
+				(set! current-value (max current-value .1))))
+		(if (< alpha 0)
+			(if (<= alpha -.5)
+				(set! current-value (min current-value .8))
+				(set! current-value (min current-value .9))))
+
+		; The formula is: (slope^(a*x) - 1) / (slope^a -1)
+		; For this formula alpha needs to be negative for increases
 		; and positive for decreases. And it can't be 0.
 		(set! alpha (* alpha -1))
-		; Todo: check that alpha is not 0, and confirm that alpha can't be 0 with new formula
-		(set! new-value (/ (- (expt 1000 (* alpha value)) 1) (- (expt 1000 alpha) 1)))
-		;(set! new-value (max .15 (tanh (* 3.141592654 value))))
+
+		; alpha == 0 means no change
+		(if (= alpha 0)
+			(set! new-value current-value)
+			(set! new-value (/ (- (expt slope (* alpha current-value)) 1)
+				(- (expt slope alpha) 1))))
+
+		; An older version formula using tanh
+		;(set! new-value (max .15 (tanh (* 3.141592654 current-value))))
 		; tanh never gets to one so set it to one above a certain point
-		(if (> new-value .95)
-			(set! new-value 1))
+		;(if (> new-value .95)
+		;	(set! new-value 1))
 		(psi-set-value! target (Number new-value))
 		;(cog-set-tv! target (cog-new-stv new-strength confidence))
-		(format #t "current value: ~a    new value: ~a\n" value new-value)
+		(format #t "current value: ~a    new value: ~a\n" current-value new-value)
+
+
+		; Todo: check for negative changes
+		; Todo: create one-way direction rules (e.g., only for a trigger increase,)
+		;       but not for a decrease.
+
 	)
 )
 
-
-
-
-; --------------------------------------------------------------
-; Updater Loop Control
-; --------------------------------------------------------------
-(define psi-updater-is-running #f)
-(define psi-updater-loop-count 0)
-(define continue-psi-updater-loop (stv 1 1))
-
-(define-public (psi-running?)
-"
-  Return #t if the openpsi loop is running, else return #f.
-"
-    psi-updater-is-running
-)
-
-(define updater-continue-pred
-	(Evaluation (stv 1 1)
-	    (Predicate "continue-psi-updater-loop")
-	    (ListLink)))
-
-(define (psi-pause)
-    ; Pause for 100 millisecs, to keep the number of loops within a reasonable
-    ; range.
-    ; todo: is this needed?
-    ; keeping it slow for now dev purposes
-    (usleep 1500000))
 
 
 (define (psi-get-interaction-rules)
@@ -148,7 +176,7 @@
 
 	(for-each (lambda (eval-link)
 				(define key (gadr eval-link))
-				(define value (psi-get-value key))
+				(define value (psi-get-number-value key))
 				(hash-set! prev-value-table key value)
 				(set! psi-monitored-params (append psi-monitored-params
 												  (list key)))
@@ -189,10 +217,11 @@
 		;(format #t "\npsi-change-in? RETURN: ~a\n" changed)
 		(if (psi-change-in? param)
 	            (begin
+	                (format "*** Found change in : ~a\n" param)
 	                (set! changed-params
 	                    (append changed-params (list param)))
 	                (set! tv (stv 1 1))
-	                (hash-set! current-values-table param (psi-get-value param)))
+	                (hash-set! current-values-table param (psi-get-number-value param)))
 	            (set! tv (stv 0 1)))
         (Evaluation tv
             (Predicate "psi-changed")
@@ -246,7 +275,7 @@
 (define (psi-change-in? target)
 	;(display "psi-change-in? argument: \n")(display target)
 	(let* ((previous (hash-ref prev-value-table target))
-		   (current (psi-get-value target)))
+		   (current (psi-get-number-value target)))
 
 		;(format #t "previous value: ~a   current value: ~a\n" previous current)
 		(if (and
@@ -268,17 +297,17 @@
   Todo: Assuming for now that the values are normalized in [0,1]
   "
     (define return)
-    (format #t "psi-get-change-magnitude target: ~a" target)
+    ;(format #t "psi-get-change-magnitude target: ~a" target)
 	(let* ((previous (hash-ref prev-value-table target))
 		   (current (psi-get-number-value target)))
 		(if (and (number? previous) (number? current))
-			(set! return (- previous current))
+			(set! return (- current previous))
 			(set! return 0))
-		(display previous)
-		(display current)
-		(display return)
-		(format #t "previous: ~a   current: ~a   return: ~a\n"
-			previous current return)
+		;(display previous)
+		;(display current)
+		;(display return)
+		;(format #t "previous: ~a   current: ~a   return: ~a\n"
+		;	previous current return)
 		return)
 )
 
@@ -292,8 +321,8 @@
 	; starting out not using time server but will add
 	(if (equal? (tv-mean (cog-evaluate! antecedent)) 1.0)
 		(let ((consequent (list-ref (cog-outgoing-set rule) 2)))
-			(format #t "\n**********************************\nexecuting: ~a"
-				consequent)
+			;(format #t "\n**********************************\nexecuting: ~a"
+			;	consequent)
 			;(format #t "~a**********************************\n" consequent)
 			(cog-execute! consequent)
 		)
@@ -345,6 +374,31 @@
 
 )
 
+; --------------------------------------------------------------
+; Updater Loop Control
+; --------------------------------------------------------------
+(define psi-updater-is-running #f)
+(define psi-updater-loop-count 0)
+(define continue-psi-updater-loop (stv 1 1))
+
+(define-public (psi-running?)
+"
+  Return #t if the openpsi loop is running, else return #f.
+"
+    psi-updater-is-running
+)
+
+(define updater-continue-pred
+	(Evaluation (stv 1 1)
+	    (Predicate "continue-psi-updater-loop")
+	    (ListLink)))
+
+(define (psi-pause)
+    ; Pause for 100 millisecs, to keep the number of loops within a reasonable
+    ; range.
+    ; todo: is this needed?
+    ; keeping it slow for now dev purposes
+    (usleep 1500000))
 
 
 ; --------------------------------------------------------------
@@ -398,7 +452,7 @@
 (define r1 speech->power)
 (define r2 power->voice)
 (define voice voice-width)
-(define value psi-get-value)
+(define value psi-get-number-value)
 (define rules (psi-get-interaction-rules))
 
 (define (psi-decrease-value target)

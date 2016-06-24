@@ -32,11 +32,11 @@
 	(create-psi-interaction-rule speech agent-state-power .5))
 
 (define power->voice
-	(create-psi-interaction-rule agent-state-power voice-width .5))
+	(create-psi-interaction-rule agent-state-power voice-width 1))
 
 (define power->arousal
-	(create-psi-interaction-rule agent-state-power arousal .5))
+	(create-psi-interaction-rule agent-state-power arousal .1))
 
 (define arousal->voice
-	(create-psi-interaction-rule arousal voice-width .5))
+	(create-psi-interaction-rule arousal voice-width -.9))
 
