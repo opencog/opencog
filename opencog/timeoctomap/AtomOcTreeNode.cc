@@ -50,7 +50,7 @@ AtomOcTreeNode::writeValue (std::ostream &s) const
 
     // write node data
     s.write((const char*) &value, sizeof(value)); // occupancy
-    s.write((const char*) &dat, sizeof(aHandle)); // dat
+    s.write((const char*) &dat, sizeof(opencog::Handle)); // dat
     s.write((char*)&children_char, sizeof(char)); // child existence
 
     // write existing children
@@ -65,7 +65,7 @@ AtomOcTreeNode::readValue (std::istream &s)
     // read node data
     char children_char;
     s.read((char*) &value, sizeof(value)); // occupancy
-    s.read((char*) &dat, sizeof(aHandle)); // dat
+    s.read((char*) &dat, sizeof(opencog::Handle)); // dat
     s.read((char*)&children_char, sizeof(char)); // child existence
 
     // read existing children

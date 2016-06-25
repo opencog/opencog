@@ -29,73 +29,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEMPLATE_OCTREE_NODE_H
-#define TEMPLATE_OCTREE_NODE_H
-
-#include <iostream>
-#include <octomap/OcTreeNode.h>
-#include <opencog/atomspace/AtomSpace.h>
+#include "AtomOcTree.h"
 namespace octomap
 {
-typedef opencog::Handle aHandle;
-const aHandle UndefinedHandle = opencog::Handle::UNDEFINED;
-// node definition
-class AtomOcTreeNode : public OcTreeNode
+// tree implementation  --------------------------------------
+AtomOcTree::AtomOcTree(double resolution)
+    : OccupancyOcTreeBase< AtomOcTreeNode >(resolution)
 {
-public:
-    AtomOcTreeNode() : OcTreeNode(), dat(0)
-    {} //dat gets default value from prunning
+    atomOcTreeMemberInit.ensureLinking();
+}
 
-    AtomOcTreeNode(const AtomOcTreeNode& rhs) : OcTreeNode(rhs), dat(rhs.dat)
-    {}
-
-    bool operator==(const AtomOcTreeNode& rhs) const
-    {
-        return (rhs.value == value && rhs.dat == dat);
+AtomOcTreeNode*
+AtomOcTree::setNodeData(const OcTreeKey& key, const opencog::Handle& r)
+{
+    AtomOcTreeNode *n = search(key);
+    if (n != 0) {
+        n->setData(r);//setColor
     }
+    return n;
+}
+/* This may not be required ..
+  template <class T>
+  void AtomOcTree<T>::updateInnerOccupancy() {
+    this->updateInnerOccupancyRecurs(this->root, 0);
+  }
 
-    // children
-    inline AtomOcTreeNode* getChild(unsigned int i)
-    {
-        return static_cast<AtomOcTreeNode*> (OcTreeNode::getChild(i));
+  template <class T>
+  void AtomOcTree<T>::updateInnerOccupancyRecurs(AtomOcTreeNode<T>* node, unsigned int depth) {
+    // only recurse and update for inner nodes:
+    if (node->hasChildren()){
+      // return early for last level:
+      if (depth < this->tree_depth){
+        for (unsigned int i=0; i<8; i++) {
+          if (node->childExists(i)) {
+            updateInnerOccupancyRecurs(node->getChild(i), depth+1);
+          }
+        }
+      }
+      node->updateOccupancyChildren();
+      //node->updateTemplateChildren();//
     }
-    inline const AtomOcTreeNode* getChild(unsigned int i) const
-    {
-        return static_cast<const AtomOcTreeNode*> (OcTreeNode::getChild(i));
-    }
+  }
 
-    bool createChild(unsigned int i)
-    {
-        if (children == nullptr) allocChildren();
-        children[i] = new AtomOcTreeNode();
-        return true;
-    }
+  std::ostream& operator<<(std::ostream& out, opencog::Handle const& c) {
+    return out << '(' << c << ')';
+  }
+*/
 
-    bool pruneNode();
-    void expandNode();
-
-    inline aHandle getData() const
-    {
-        return dat;
-    }
-    inline void  setData(aHandle c)
-    {
-        this->dat = c;
-    }
-
-    aHandle& getData()
-    {
-        return dat;
-    }
-
-    // file I/O
-    std::istream& readValue (std::istream &s);
-    std::ostream& writeValue(std::ostream &s) const;
-
-protected:
-    aHandle dat;
-};
+//typedef int opencog::Handle;
+AtomOcTree::StaticMemberInitializer AtomOcTree::atomOcTreeMemberInit;
 
 } // end namespace
-
-#endif

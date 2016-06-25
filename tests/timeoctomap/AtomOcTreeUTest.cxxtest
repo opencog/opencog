@@ -32,7 +32,7 @@
 //TestAtomOcTree.cpp
 #include <cxxtest/TestSuite.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include "opencog/spacetime/TimeSpaceAtomMapsAPI/AtomOcTree.h"
+#include "opencog/timeoctomap/AtomOcTree.h"
 
 using namespace std;
 using namespace opencog;
@@ -56,7 +56,7 @@ public:
     void print_query_info(point3d query, OcTreeNode* node)
     {
         if (node != nullptr) {
-            aHandle i=(static_cast<AtomOcTreeNode*>(node))->getData();
+            opencog::Handle i=(static_cast<AtomOcTreeNode*>(node))->getData();
             cout << "occupancy probability at " << query << ":\t " << node->getOccupancy() << ";"<< endl;
         }
         else

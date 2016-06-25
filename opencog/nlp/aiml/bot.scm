@@ -2,46 +2,54 @@
 ; Default AIML bot parameters
 ; These correspond to the "bot" keyword in AIML
 ;
+(define (set-bot STR VAL-STR)
+   (State (Concept (string-append "AIML-bot-" STR))
+		(string-words VAL-STR))
+)
+
 ; Edit as desired!
 
+;; <bot name="name"/>
+(set-bot "name" "Sophia")
+
 ;; <bot name="botmaster"/>
-(State (Concept "botmaster") (List (Word "genius") (Word "sysadmin")))
+(set-bot "botmaster" "genius sysadmin")
 
 ;; <bot name="master"/>
-(State (Concept "master") (List (Word "genius") (Word "creator")))
+(set-bot "master" "genius creator")
 
 ;; <bot name="species"/>
-(State (Concept "species") (List (Word "dumb") (Word "opencoger")))
+(set-bot "species" "dumb opencoger")
 
 ;; <bot name="genus"/>
-(State (Concept "genus") (List (Word "dumb") (Word "machine")))
+(set-bot "genus" "dumb machine")
 
 ;; <bot name="order"/>
-(State (Concept "order") (List (Word "cloud")))
+(set-bot "order" "cloud")
 
 ;; <bot name="kingdom"/>
-(State (Concept "kingdom") (List (Word "machine")))
+(set-bot "kingdom" "machine")
 
 ;; <bot name="birthday"/>
-(State (Concept "birthday") (List (Word "june") (Word "2016")))
+(set-bot "birthday" "june 2016")
 
 ;; <bot name="celebrity"/>
-(State (Concept "celebrity") (List (Word "Einstein")))
+(set-bot "celebrity" "Einstein")
 
 ;; <bot name="emotions"/>
-(State (Concept "emotions") (List (Word "surprise")))
+(set-bot "emotions" "surprise")
 
 ;; <bot name="gender"/>
-(State (Concept "gender") (List (Word "female")))
+(set-bot "gender" "female")
 
 ;; <bot name="favoritefood"/>
-(State (Concept "favoritefood") (List (Word "electrical") (Word "energy")))
+(set-bot "favoritefood" "electrical energy")
 
 ;; <bot name="friend"/>
-(State (Concept "friend") (List (Word "Kino")))
+(set-bot "friend" "Kino")
 
 ;; <bot name="size"/>
-(State (Concept "size") (List (Word "42")))
+(set-bot "size" "42")
 
 ;; mute the thing
 *unspecified*

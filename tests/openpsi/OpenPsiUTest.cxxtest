@@ -71,12 +71,21 @@ public:
         CHKERR
         _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR  "\")");
         CHKERR
-        _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR
-                   "/opencog/scm\")");
-        CHKERR
 
         // Load require modules to be tested and populate the atomspace
-        _scm->eval("(use-modules (opencog) (opencog openpsi))");
+        _scm->eval("(use-modules (opencog))");
+        CHKERR
+        // NOTE: Using  module (opencog openpsi) after running
+        // ```
+        // _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR
+        //            "/opencog/scm\")");
+        // ```
+        // will get test_psi_action__predicate to fail. Since psi-action? is
+        // core part of the other functions, that are tested, most tests fail
+        // as a result. That is why main.scm is loaded here instead of running
+        // (use-modules (opencog openpsi)).
+        _scm->eval("(load \"" PROJECT_SOURCE_DIR
+                   "/opencog/openpsi/main.scm\")");
         CHKERR
         _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
         CHKERR
@@ -84,7 +93,9 @@ public:
 
     void tearDown()
     {
+        delete _as;
         _as = nullptr;
+        delete _scm;
         _scm = nullptr;
     }
 
@@ -296,7 +307,10 @@ public:
     }
 
     // Check the scheme function `psi-get-dual-rules`
-    void test_psi_get_dual_rules()
+    // NOTE: The function `psi-get-dual-rules` has been removed but something
+    // similar will be added. This test is not removed the test may come in
+    // handy.
+    void psi_get_dual_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 

@@ -1,5 +1,5 @@
 ;
-; rule-tuils.scm
+; rule-utils.scm
 ;
 ; Some generic rule utilities, not limited to r2l.
 ;
