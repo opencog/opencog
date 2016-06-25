@@ -12,14 +12,7 @@
 (define PSI-MAX-STRENGTH-MULTIPLIER 5)
 
 ;(TimeNode (number->string (current-time)))
-
-;; todo:
-;; maybe we want some kind of mechanism to indicate a new event is beginning
-;; that persists for some specified time duration and then goes away. A recent
-;; event pred? Some agent controls/updates this? A context evaluation agent? Is
-;; this in the ROS behavioral control loop?
-
-;; check out TriggerLink (some kind of trigger subscription-based messaging system
+;; check out TriggerLink, trigger subscription-based messaging system
 
 ; --------------------------------------------------------------
 "
@@ -35,11 +28,11 @@
  execute the atom to obtain a value (see psi-get-value function). However, this
  representation maybe be changing subject to feedback from those in the know.
 
- alpha is in the range of [-1, 1] and represents the strength of change for a
-    for a given rule and whether the change in the target  is positively or
-    negatively correlated with the origin parameter. An alpha of 0 means no
-    change, and 1 and -1 indicate the strongest degree of change in the positive
-    and negative directions respectively.
+ Alpha, a parameter to the update function is in the range of [-1, 1] and
+ represents the strength of change given interaction rule and whether the change
+ in the target is positively or negatively correlated with the origin parameter.
+ An alpha of 0 means no change, and 1 and -1 indicate the strongest degree of
+ change in the positive and negative directions respectively.
 
  todo: see case-lambda in scheme for function overloading
 "
@@ -98,8 +91,7 @@
 		(format #t "strength: ~a     change: ~a       alpha: ~a\n"
 			strength origin-change alpha)
 
-		; Todo: check that alpha is not 0, and confirm that alpha can't be 0 with new formula
-		; increasing slope increases the degree change at all levels
+		; Increasing slope increases the degree change at all levels
 		(set! slope 10000)
 		; finagle the extreme cases because the curve is not exactly how we want
 		(if (> alpha 0)
@@ -205,7 +197,7 @@
        or otherwise storing the change magnitude, is needed because the current
        value of a trigger entity might change because of application of a
        previous rule.)
-    2) TODO: need to store the change magnitude before firing the rules because
+    2) Store the current value or change magnitude before firing the rules because
        the current value of the trigger might change as a result of a previous
        rule.
     2) Fire up the interaction rules
@@ -253,9 +245,6 @@
 
 	; grab and evaluate the interaction rules
 	; todo: Could optimize by only calling rules containing the changed params
-	; todo: Adjust-psi-var-level should use the current-vales-table
-	;   rather than grabbing the value dynamically from the atomspace, because
-	;   the current value might have changed from previous rules.
 	(let ((rules (psi-get-interaction-rules)))
 		(map psi-evaluate-interaction-rule rules)
 	)
@@ -297,7 +286,7 @@
 (define (psi-get-change-magnitude target)
   "
   Returns the normalized magnitude change in target from its previous value.
-  Todo: Assuming for now that the values are normalized in [0,1]
+  Assumes (for now) that the values are normalized in [0,1]
   "
     (define return)
     ;(format #t "psi-get-change-magnitude target: ~a" target)
