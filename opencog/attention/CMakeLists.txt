@@ -29,6 +29,8 @@ TARGET_LINK_LIBRARIES(attention-types
 
 ADD_SUBDIRECTORY (scm)
 
+ADD_SUBDIRECTORY (experimental)
+
 # AttentionModule
 ADD_LIBRARY(attention SHARED
 	AttentionModule
