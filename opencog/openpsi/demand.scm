@@ -16,8 +16,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-all-demands)
 "
-  Returns a SetLink containing the nodes that carry the demand-value. The
-  strength of their stv is the demand value.
+  Returns a list containing all the demand-nodes
 "
     (filter
         (lambda (x) (not (equal? x psi-demand-node)))
@@ -80,6 +79,22 @@
         #t
         #f
     )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-set-demand-value demand-node demand-value)
+"
+  Sets the demand-value of demand-node.
+
+  demand-node:
+  - The node representing the demand.
+
+  demand-value:
+  - A number between [0, 1] that is used to set the demand-value.
+"
+; NOTE: This function is added to simplify the process of setting demand-value
+; when the move is made to represent that in atomese rather than stv.
+    (cog-set-tv! demand-node (stv demand-value (tv-conf (cog-tv demand-node))))
 )
 
 ; --------------------------------------------------------------
@@ -214,10 +229,10 @@
   - A NumberNode for the percentage of change that a demand-value will be
     updated with, on each step.
 "
-    (let ((strength (tv-mean (cog-tv  demand-node)))
-          (conf (tv-conf (cog-tv demand-node)))
-          (rate (/ (string->number (cog-name rate-node)) 100)))
-        (cog-set-tv! demand-node (stv (+ strength (* strength rate)) conf))
+    (let* ((strength (tv-mean (cog-tv  demand-node)))
+           (rate (/ (string->number (cog-name rate-node)) 100))
+           (demand-value (+ strength (* strength rate))))
+        (psi-set-demand-value demand-node demand-value)
         (stv 1 1)
     )
 )
@@ -253,10 +268,10 @@
   - A NumberNode for the percentage of change that a demand-value will be
     updated with, on each step.
 "
-    (let ((strength (tv-mean (cog-tv  demand-node)))
-          (conf (tv-conf (cog-tv demand-node)))
-          (rate (/ (string->number (cog-name rate-node)) 100)))
-        (cog-set-tv! demand-node (stv (- strength (* strength rate)) conf))
+    (let* ((strength (tv-mean (cog-tv  demand-node)))
+           (rate (/ (string->number (cog-name rate-node)) 100))
+           (demand-value (- strength (* strength rate))))
+        (psi-set-demand-value demand-node demand-value)
         (stv 1 1)
     )
 )
