@@ -3,5 +3,6 @@ ADD_GUILE_MODULE (openpsi.scm
     demand.scm
     rule.scm
     main.scm
+    modulator.scm
     utilities.scm
 )
