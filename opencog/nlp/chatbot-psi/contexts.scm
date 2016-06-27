@@ -76,3 +76,8 @@
     (DefinedPredicate "called-chatbot-eva?")
     (search-started? chatbot-eva)
 )
+
+(Define
+    (DefinedPredicate "don't-know-how-to-do-the-action")
+    (any-result? chatbot-eva)
+)

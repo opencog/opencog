@@ -26,6 +26,10 @@
         (Not (DefinedPredicate "fuzzy-match-started?"))
         (DefinedPredicate "is-input-utterance?")
         (Not (DefinedPredicate "is-a-question?"))
+        (SequentialOr
+            (Not (DefinedPredicate "is-imperative?"))
+            (DefinedPredicate "don't-know-how-to-do-the-action")
+        )
     ))
     (True (ExecutionOutput (GroundedSchema "scm: do-fuzzy-match") (List)))
     (True)
@@ -48,6 +52,10 @@
     (list (SequentialAnd
         (Not (DefinedPredicate "aiml-search-started?"))
         (DefinedPredicate "is-input-utterance?")
+        (SequentialOr
+            (Not (DefinedPredicate "is-imperative?"))
+            (DefinedPredicate "don't-know-how-to-do-the-action")
+        )
     ))
     (True (ExecutionOutput (GroundedSchema "scm: do-aiml-search") (List)))
     (True)
@@ -70,6 +78,7 @@
     (list (SequentialAnd
         (Not (DefinedPredicate "duckduckgo-search-started?"))
         (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "is-a-question?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: ask-duckduckgo") (List)))
     (True)

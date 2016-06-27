@@ -63,6 +63,7 @@
     (State fuzzy-qa-search default-state)
     (State duckduckgo-answers default-state)
     (State duckduckgo-search default-state)
+    (State chatbot-eva default-state)
 )
 
 ; For handling things return by the fuzzy matcher

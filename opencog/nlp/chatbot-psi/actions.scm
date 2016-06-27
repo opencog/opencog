@@ -1,9 +1,9 @@
 (define (call-chatbot-eva)
     (State chatbot-eva search-started)
 
-    (add-thread (begin-thread
+    (begin-thread
         (imperative-process (get-input-sent-node))
-    ))
+    )
 )
 
 (define (do-fuzzy-QA)
