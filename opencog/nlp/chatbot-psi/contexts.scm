@@ -26,10 +26,8 @@
 
 (Define
     (DefinedPredicate "is-a-question?")
-    (Satisfaction (Or
-        (DefinedPredicate "is-interrogative?")
-        (DefinedPredicate "is-truth-query?")
-    ))
+    (Or (DefinedPredicate "is-interrogative?")
+        (DefinedPredicate "is-truth-query?"))
 )
 
 (Define
