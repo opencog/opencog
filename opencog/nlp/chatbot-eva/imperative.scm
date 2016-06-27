@@ -121,7 +121,7 @@
 		(if (eq? '() action-list)
 			(begin
 				(State (Anchor "Chatbot: ChatbotEva")
-					(Concept "Chatbot: NoResult"))
+					(Concept "Chatbot: NoActionTaken"))
 				(display "I don't know how to do that.\n")))
 	)
 

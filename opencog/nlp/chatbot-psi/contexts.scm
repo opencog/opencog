@@ -33,8 +33,8 @@
 )
 
 (Define
-    (DefinedPredicate "fuzzy-qa-search-started?")
-    (search-started? fuzzy-qa-search)
+    (DefinedPredicate "fuzzy-qa-started?")
+    (search-started? fuzzy-qa)
 )
 
 (Define
@@ -74,10 +74,13 @@
 
 (Define
     (DefinedPredicate "called-chatbot-eva?")
-    (search-started? chatbot-eva)
+    (Not (Or
+        (Equal (Set default-state) (Get (State chatbot-eva (Variable "$s"))))
+        (Equal (Set no-action-taken) (Get (State chatbot-eva (Variable "$s"))))
+    ))
 )
 
 (Define
-    (DefinedPredicate "don't-know-how-to-do-the-action")
-    (Equal (Set no-result) (Get (State chatbot-eva (Variable "$s"))))
+    (DefinedPredicate "don't-know-how-to-do-it")
+    (Equal (Set no-action-taken) (Get (State chatbot-eva (Variable "$s"))))
 )

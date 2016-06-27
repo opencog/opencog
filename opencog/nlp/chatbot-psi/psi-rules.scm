@@ -1,6 +1,6 @@
 (psi-rule
     (list (SequentialAnd
-        (Not (DefinedPredicate "fuzzy-qa-search-started?"))
+        (Not (DefinedPredicate "fuzzy-qa-started?"))
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "is-a-question?")
     ))
@@ -12,7 +12,7 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "fuzzy-qa-search-started?")
+        (DefinedPredicate "fuzzy-qa-started?")
         (DefinedPredicate "is-fuzzy-answer?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-answers)))
@@ -28,7 +28,7 @@
         (Not (DefinedPredicate "is-a-question?"))
         (SequentialOr
             (Not (DefinedPredicate "is-imperative?"))
-            (DefinedPredicate "don't-know-how-to-do-the-action")
+            (DefinedPredicate "don't-know-how-to-do-it")
         )
     ))
     (True (ExecutionOutput (GroundedSchema "scm: do-fuzzy-match") (List)))
@@ -54,7 +54,7 @@
         (DefinedPredicate "is-input-utterance?")
         (SequentialOr
             (Not (DefinedPredicate "is-imperative?"))
-            (DefinedPredicate "don't-know-how-to-do-the-action")
+            (DefinedPredicate "don't-know-how-to-do-it")
         )
     ))
     (True (ExecutionOutput (GroundedSchema "scm: do-aiml-search") (List)))

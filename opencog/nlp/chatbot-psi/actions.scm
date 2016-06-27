@@ -1,5 +1,5 @@
 (define (call-chatbot-eva)
-    (State chatbot-eva search-started)
+    (State chatbot-eva sent-to-chatbot-eva)
 
     (begin-thread
         (imperative-process (get-input-sent-node))
@@ -7,7 +7,7 @@
 )
 
 (define (do-fuzzy-QA)
-    (State fuzzy-qa-search search-started)
+    (State fuzzy-qa search-started)
 
     (begin-thread
         (let ((fuz-ans (get-fuzzy-answers (get-input-sent-node) #:do-microplanning #f)))
