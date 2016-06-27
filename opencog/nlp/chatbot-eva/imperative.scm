@@ -119,7 +119,10 @@
 
 		; XXX replace this by AIML or something.
 		(if (eq? '() action-list)
-			(display "I don't know how to do that.\n"))
+			(begin
+				(State (Anchor "Chatbot: ChatbotEva")
+					(Concept "Chatbot: NoResult"))
+				(display "I don't know how to do that.\n")))
 	)
 
 	; Reset the current-imperative state, as otherwise, any subsequent

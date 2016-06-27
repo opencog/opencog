@@ -79,5 +79,5 @@
 
 (Define
     (DefinedPredicate "don't-know-how-to-do-the-action")
-    (any-result? chatbot-eva)
+    (Equal (Set no-result) (Get (State chatbot-eva (Variable "$s"))))
 )
