@@ -54,5 +54,6 @@ def call_duckduckgo(qq):
     (begin-thread
         (python-call-with-as "set_atomspace" (cog-atomspace))
         (cog-evaluate! (Evaluation (GroundedPredicate "py: call_duckduckgo") (List (get-input-text-node))))
+        (State duckduckgo-search search-finished)
     )
 )

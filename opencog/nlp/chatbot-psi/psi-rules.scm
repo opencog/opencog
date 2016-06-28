@@ -1,6 +1,6 @@
 (psi-rule
     (list (SequentialAnd
-        (Not (DefinedPredicate "fuzzy-qa-started?"))
+        (DefinedPredicate "fuzzy-qa-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "is-a-question?")
     ))
@@ -12,8 +12,9 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "fuzzy-qa-started?")
+        (DefinedPredicate "fuzzy-qa-finished?")
         (DefinedPredicate "is-fuzzy-answer?")
+        (DefinedPredicate "is-input-utterance?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-answers)))
     (True)
@@ -23,7 +24,7 @@
 
 (psi-rule
     (list (SequentialAnd
-        (Not (DefinedPredicate "fuzzy-match-started?"))
+        (DefinedPredicate "fuzzy-match-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (Not (DefinedPredicate "is-a-question?"))
         (SequentialOr
@@ -39,8 +40,9 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "fuzzy-match-started?")
+        (DefinedPredicate "fuzzy-match-finished?")
         (DefinedPredicate "is-fuzzy-reply?")
+        (DefinedPredicate "is-input-utterance?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-replies)))
     (True)
@@ -50,7 +52,7 @@
 
 (psi-rule
     (list (SequentialAnd
-        (Not (DefinedPredicate "aiml-search-started?"))
+        (DefinedPredicate "aiml-search-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (SequentialOr
             (Not (DefinedPredicate "is-imperative?"))
@@ -65,8 +67,9 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "aiml-search-started?")
+        (DefinedPredicate "aiml-search-finished?")
         (DefinedPredicate "is-aiml-reply?")
+        (DefinedPredicate "is-input-utterance?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
     (True)
@@ -76,7 +79,7 @@
 
 (psi-rule
     (list (SequentialAnd
-        (Not (DefinedPredicate "duckduckgo-search-started?"))
+        (DefinedPredicate "duckduckgo-search-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "is-a-question?")
     ))
@@ -88,8 +91,9 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "duckduckgo-search-started?")
+        (DefinedPredicate "duckduckgo-search-finished?")
         (DefinedPredicate "is-duckduckgo-answer?")
+        (DefinedPredicate "is-input-utterance?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List duckduckgo-answers)))
     (True)
