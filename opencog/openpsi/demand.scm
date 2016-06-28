@@ -14,13 +14,35 @@
 (define psi-demand-node (ConceptNode (string-append psi-prefix-str "Demand")))
 
 ; --------------------------------------------------------------
+; A cache of the demands for performance.
+(define psi-demand-cache '())
+
+; --------------------------------------------------------------
+(define-public (psi-reset-demand-cache)
+"
+  Reset the cache for psi-demand-cache.
+"
+    (set! psi-demand-cache '())
+)
+; --------------------------------------------------------------
 (define-public (psi-get-all-demands)
 "
-  Returns a list containing all the demand-nodes
+  Returns a list containing all the demand-nodes that are valid. A valid demand
+  is one which is not a member of the set defined by
+  (ConceptNode \"OpenPsi: skip\").
 "
-    (filter
-        (lambda (x) (not (equal? x psi-demand-node)))
-        (cog-chase-link 'InheritanceLink 'ConceptNode psi-demand-node))
+    (if (null? psi-demand-cache)
+        (begin
+            (set! psi-demand-cache (filter
+                (lambda (x)
+                    (and (not (equal? x psi-demand-node))
+                         (not (psi-demand-skip? x))))
+                (cog-chase-link 'InheritanceLink 'ConceptNode psi-demand-node))
+            )
+            psi-demand-cache
+        )
+        psi-demand-cache
+    )
 )
 
 ; --------------------------------------------------------------
@@ -70,14 +92,12 @@
   - The node that is being checked to see if it is a ConceptNode that represents
     a demand type.
 "
-    (define (demand-names)
-        (map cog-name (psi-get-all-demands)))
+    (let ((candidates (cog-chase-link 'InheritanceLink 'ConceptNode node)))
 
-    (if (and (cog-node? node)
-             (member (cog-name node) (demand-names))
-             (equal? (cog-type node) 'ConceptNode))
-        #t
-        #f
+        ; A filter is used to account for empty list as well as
+        ; cog-chase-link returning multiple results, just in case.
+        (not (null?
+            (filter (lambda (x) (equal? x psi-demand-node)) candidates)))
     )
 )
 
@@ -273,5 +293,47 @@
            (demand-value (- strength (* strength rate))))
         (psi-set-demand-value demand-node demand-value)
         (stv 1 1)
+    )
+)
+
+; --------------------------------------------------------------
+; This is used to label a demand for skipping. During actions-selection.
+(define psi-label-skip (ConceptNode (string-append psi-prefix-str "skip")))
+
+; --------------------------------------------------------------
+(define-public (psi-demand-skip demand)
+"
+  This is used to label a demand as one to be skipped during action-selection.
+
+  demand:
+  - A ConceptNode, representing a demand that should be skipped during
+   action-selection.
+"
+    ; Check arguments
+    (if (not (psi-demand? demand))
+        (error (string-append "In procedure psi-demand-skip, expected "
+            "argument to be a node representing a demand, got:") demand))
+
+    (MemberLink demand psi-label-skip)
+)
+
+; --------------------------------------------------------------
+(define-public (psi-demand-skip? demand)
+"
+  Check if the passed atom is skipable demand and return `#t`, if it is,
+  and `#f` otherwise. An atom is an skippable if it a member of the set
+  represented by (ConceptNode \"OpenPsi: skip\").
+"
+    ; Check arguments
+    (if (not (psi-demand? demand))
+        (error (string-append "In procedure psi-demand-skip?, expected "
+            "argument to be a node representing a demand, got:") demand))
+
+    (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode demand)))
+
+        ; A filter is used to account for empty list as well as
+        ; cog-chase-link returning multiple results, just in case.
+        (not (null?
+            (filter (lambda (x) (equal? x psi-label-skip)) candidates)))
     )
 )
