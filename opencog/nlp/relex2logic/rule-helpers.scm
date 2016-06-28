@@ -976,8 +976,11 @@
 ;
 ; Example "When is the party?" etc.
 ;
-(define-public (whencop-Q-rule subj_concept subj_instance)
-	(let ((var_name (choose-var-name)))
+(define-public (whencop-Q-rule subj-concept-node subj-instance-node)
+	(let ((var_name (choose-var-name))
+			(subj_concept (cog-name subj-concept-node))
+			(subj_instance (cog-name subj-instance-node))
+		)
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
