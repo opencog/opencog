@@ -117,13 +117,16 @@ there are 100K rules!
   is a valid psi-rule or not. An ImplicationLink that is a member
   of the demand sets is a psi-rule.
 
-  XXX FIXME -- this is very very slow (many minutes) when there
-  are 100K or more rules!
-
   atom:
   - An atom passed for checking.
 "
-    (if (member atom (psi-get-all-rules)) #t #f)
+    (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
+
+        ; A filter is used to account for empty list as well as
+        ; cog-chase-link returning multiple results, just in case.
+        (not (null?
+            (filter psi-demand? candidates)))
+    )
 )
 
 ; --------------------------------------------------------------
