@@ -770,7 +770,7 @@
          (ConceptNode "chicken"))
       (InheritanceLink
          (VariableNode "$foot-instance")
-         (ConceptNode "chicken-instance"))))
+         (VariableNode "$chicken-instance"))))
 
 ;; Try to instantiate that with (chat "Robert lives in China")
 
