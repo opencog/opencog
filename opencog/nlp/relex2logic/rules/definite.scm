@@ -6,9 +6,9 @@
 ; leaving some of the words that make up the name without a lemma.
 ; Ignore those.
 (define-public (check-name lemma)
-	(if (not (equal? "" (cog-name lemma)))
-		(stv 1 1)
+	(if (equal? "" (cog-name lemma))
 		(stv 0 1)
+		(stv 1 1)
 	)
 )
 
