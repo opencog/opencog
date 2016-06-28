@@ -191,17 +191,14 @@
   you defined or the default-action-selector predefined if you haven't defined
   a different action-selector.
 "
-    (if (equal? d (ConceptNode "OpenPsi: AIML chat demand"))
-        (list) ; Skip the aiml chat demand . FIXME: this is a hack
-        (let ((as (psi-get-action-selector d)))
-            (if (null? as)
-                (psi-default-action-selector-per-demand
-                           (random-state-from-platform) d)
-                (let ((result (cog-execute! (car as))))
-                    (if (equal? (cog-type result) 'SetLink)
-                        (cog-outgoing-set result)
-                        (list result)
-                    )
+    (let ((as (psi-get-action-selector d)))
+        (if (null? as)
+            (psi-default-action-selector-per-demand
+                       (random-state-from-platform) d)
+            (let ((result (cog-execute! (car as))))
+                (if (equal? (cog-type result) 'SetLink)
+                    (cog-outgoing-set result)
+                    (list result)
                 )
             )
         )

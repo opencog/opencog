@@ -14,14 +14,45 @@
 (define psi-demand-node (ConceptNode (string-append psi-prefix-str "Demand")))
 
 ; --------------------------------------------------------------
+; A cache of the demands for performance.
+(define psi-valid-demand-cache '())
+
+; --------------------------------------------------------------
+(define-public (psi-reset-valid-demand-cache)
+"
+  Reset the cache for psi-demand-cache.
+"
+    (set! psi-valid-demand-cache '())
+)
+; --------------------------------------------------------------
+; --------------------------------------------------------------
 (define-public (psi-get-all-demands)
 "
-  Returns a SetLink containing the nodes that carry the demand-value. The
-  strength of their stv is the demand value.
+  Returns a list containing all the demand-nodes.
 "
     (filter
         (lambda (x) (not (equal? x psi-demand-node)))
         (cog-chase-link 'InheritanceLink 'ConceptNode psi-demand-node))
+)
+
+
+; --------------------------------------------------------------
+(define-public (psi-get-all-valid-demands)
+"
+  Returns a list containing all the demand-nodes that are valid. A valid demand
+  is one which is not a member of the set defined by
+  (ConceptNode \"OpenPsi: skip\").
+"
+    (if (null? psi-valid-demand-cache)
+        (begin
+            (set! psi-valid-demand-cache
+                (filter (lambda (x) (not (psi-demand-skip? x)))
+                    (psi-get-all-demands))
+            )
+            psi-valid-demand-cache
+        )
+        psi-valid-demand-cache
+    )
 )
 
 ; --------------------------------------------------------------
@@ -71,15 +102,29 @@
   - The node that is being checked to see if it is a ConceptNode that represents
     a demand type.
 "
-    (define (demand-names)
-        (map cog-name (psi-get-all-demands)))
+    (let ((candidates (cog-chase-link 'InheritanceLink 'ConceptNode node)))
 
-    (if (and (cog-node? node)
-             (member (cog-name node) (demand-names))
-             (equal? (cog-type node) 'ConceptNode))
-        #t
-        #f
+        ; A filter is used to account for empty list as well as
+        ; cog-chase-link returning multiple results, just in case.
+        (not (null?
+            (filter (lambda (x) (equal? x psi-demand-node)) candidates)))
     )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-set-demand-value demand-node demand-value)
+"
+  Sets the demand-value of demand-node.
+
+  demand-node:
+  - The node representing the demand.
+
+  demand-value:
+  - A number between [0, 1] that is used to set the demand-value.
+"
+; NOTE: This function is added to simplify the process of setting demand-value
+; when the move is made to represent that in atomese rather than stv.
+    (cog-set-tv! demand-node (stv demand-value (tv-conf (cog-tv demand-node))))
 )
 
 ; --------------------------------------------------------------
@@ -214,10 +259,10 @@
   - A NumberNode for the percentage of change that a demand-value will be
     updated with, on each step.
 "
-    (let ((strength (tv-mean (cog-tv  demand-node)))
-          (conf (tv-conf (cog-tv demand-node)))
-          (rate (/ (string->number (cog-name rate-node)) 100)))
-        (cog-set-tv! demand-node (stv (+ strength (* strength rate)) conf))
+    (let* ((strength (tv-mean (cog-tv  demand-node)))
+           (rate (/ (string->number (cog-name rate-node)) 100))
+           (demand-value (+ strength (* strength rate))))
+        (psi-set-demand-value demand-node demand-value)
         (stv 1 1)
     )
 )
@@ -253,10 +298,52 @@
   - A NumberNode for the percentage of change that a demand-value will be
     updated with, on each step.
 "
-    (let ((strength (tv-mean (cog-tv  demand-node)))
-          (conf (tv-conf (cog-tv demand-node)))
-          (rate (/ (string->number (cog-name rate-node)) 100)))
-        (cog-set-tv! demand-node (stv (- strength (* strength rate)) conf))
+    (let* ((strength (tv-mean (cog-tv  demand-node)))
+           (rate (/ (string->number (cog-name rate-node)) 100))
+           (demand-value (- strength (* strength rate))))
+        (psi-set-demand-value demand-node demand-value)
         (stv 1 1)
+    )
+)
+
+; --------------------------------------------------------------
+; This is used to label a demand for skipping. During actions-selection.
+(define psi-label-skip (ConceptNode (string-append psi-prefix-str "skip")))
+
+; --------------------------------------------------------------
+(define-public (psi-demand-skip demand)
+"
+  This is used to label a demand as one to be skipped during action-selection.
+
+  demand:
+  - A ConceptNode, representing a demand that should be skipped during
+   action-selection.
+"
+    ; Check arguments
+    (if (not (psi-demand? demand))
+        (error (string-append "In procedure psi-demand-skip, expected "
+            "argument to be a node representing a demand, got:") demand))
+
+    (MemberLink demand psi-label-skip)
+)
+
+; --------------------------------------------------------------
+(define-public (psi-demand-skip? demand)
+"
+  Check if the passed atom is skippable demand and return `#t`, if it is,
+  and `#f` otherwise. An atom is an skippable if it a member of the set
+  represented by (ConceptNode \"OpenPsi: skip\").
+"
+    ; Check arguments
+    (if (not (psi-demand? demand))
+        (error (string-append "In procedure psi-demand-skip?, expected "
+            "argument to be a node representing a demand, got:") demand))
+
+    (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode demand)))
+
+        ; A filter is used to account for empty list as well as
+        ; cog-chase-link returning multiple results, just in case.
+        (not (null?
+            (filter (lambda (x) (equal? x psi-label-skip)) candidates)))
     )
 )

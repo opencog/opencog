@@ -5,6 +5,8 @@
 (use-modules (ice-9 regex)) ; For string-match
 (use-modules (srfi srfi-1)) ; For fold, delete-duplicates
 
+(use-modules (opencog) (opencog exec))
+
 ; --------------------------------------------------------------
 (define-public psi-prefix-str "OpenPsi: ")
 
@@ -187,18 +189,50 @@
 )
 
 ; --------------------------------------------------------------
-(define (functionality-pattern tag-node functionality-name value-node)
+(define (functionality-pattern tag-node functionlity functionality-name)
+"
+  Returns a StateLink with the following structure
+    (StateLink
+      (ListLink
+          (Node (string-append psi-prefix-str functionality-name))
+           tag-node)
+       functionlity)
+
+  tag-node:
+  - A demand/modulator node that the functionality is being added to.
+
+  functionlity:
+  - A DefinedPredicateNode/DefinedSchemaNode that is evaluated for performing
+    the functionality over the particular demand/modulator.
+
+  functionality-name:
+  - The type of functionality.
+"
     (StateLink
         (ListLink
             (Node (string-append psi-prefix-str functionality-name))
              tag-node)
-         value-node)
+         functionlity)
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-set-functionality term is-eval tag-node functionality-name)
+(define-public
+    (psi-set-functionality functionlity is-eval tag-node functionality-name)
 "
-  is-eval: #t if it is evaluatable and #f if not.
+  This function is used to add a functionality to a particular demand/modulator.
+
+  functionlity:
+  - A DefinedPredicateNode/DefinedSchemaNode that is evaluated for performing
+    the functionality over the particular demand/modulator.
+
+  is-eval:
+  - #t if the functionality is evaluatable and #f if not.
+
+  tag-node:
+  - A demand/modulator node that the functionality is being added to.
+
+  functionality-name:
+  - The type of functionality.
 "
     (define (check-alias a-name)
         (if is-eval
@@ -218,8 +252,8 @@
                         (DefinedSchemaNode name)
                     )
                 )
-               (DefineLink alias term)
-               (functionality-pattern tag-node functionality-name alias)
+               (DefineLink alias functionlity)
+               (functionality-pattern tag-node alias functionality-name)
                 alias
            )
             alias ; The assumption is that the EvaluationLink is already created
@@ -228,10 +262,21 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-get-functionality tag-node functionality-name)
+(define-public (psi-get-functionality tag-node functionality-name)
+"
+  Returns a list with the node that represents the functionality for the given
+  demand/modulator or nil if it doesn't exist.
+
+  tag-node:
+  - A demand/modulator node that the functionality is being added to.
+
+  functionality-name:
+  - The type of functionality.
+"
 ; The assumption is that there will be only one element in the returned list.
 ; This is a weak. Need a better way of using DefineLink short of defining
-; the relationship in the predicatenode as a part of the alias-node name.
+; the relationship in the DefinedSchema/Predicate as a part of the alias-node
+; name.
     (cog-outgoing-set (cog-execute! (GetLink
-        (functionality-pattern tag-node functionality-name (Variable "$x")))))
+        (functionality-pattern tag-node (Variable "$x") functionality-name))))
 )

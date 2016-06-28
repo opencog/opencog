@@ -78,6 +78,10 @@
 ; Define the demands
 
 (define sociality (psi-demand "Sociality" .8))
+;-------------------------------------------------------------------------------
+; Skip the demand (ConceptNode "OpenPsi: AIML chat demand")
+(psi-demand-skip (ConceptNode "OpenPsi: AIML chat demand"))
+(psi-reset-valid-demand-cache)
 
 ;-------------------------------------------------------------------------------
 

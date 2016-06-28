@@ -6,6 +6,7 @@
 
 (load "action-selector.scm")
 (load "demand.scm")
+(load "modulator.scm")
 (load "rule.scm")
 (load "utilities.scm")
 
@@ -51,6 +52,10 @@
 "
   The main function that defines the steps to be taken in every cycle.
 "
+; TODO: Add reinforcement signal in psi-step
+; 1. Record which rule-was selected per demand on the previous run.
+; 2. Update the rule strength depndeing on the reinforcement signal.
+; 3. Define the representation for the reinforcement signal.
     (define (get-context-grounding-atoms rule)
         #!
         (let* ((pattern (GetLink (AndLink (psi-get-context rule))))
@@ -78,14 +83,22 @@
             (map cog-evaluate! goals)
         ))
 
+
     (map
         (lambda (d)
-            ; The assumption is that the rules can be run concurrently.
-            ; FIXME: Once action-orchestrator is available then a modified
-            ; `psi-select-rules` should be used insted of
-            ; `psi-select-rules-per-demand`
-            (map act-and-evaluate (psi-select-rules-per-demand d)))
-        (psi-get-all-demands)
+            (let ((updater (psi-get-updater d)))
+                ; Run the updater for the demand.
+                (if (not (null? updater))
+                    (cog-evaluate! updater)
+                )
+                ; The assumption is that the rules can be run concurrently.
+                ; FIXME: Once action-orchestrator is available then a modified
+                ; `psi-select-rules` should be used insted of
+                ; `psi-select-rules-per-demand`
+                (map act-and-evaluate (psi-select-rules-per-demand d))
+            ))
+
+        (psi-get-all-valid-demands)
     )
 
     (stv 1 1) ; For continuing psi-run loop.
