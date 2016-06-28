@@ -961,8 +961,10 @@
 ; Example: "When did jazz die?","When did you bake the cake?",
 ; "When did you give him the money?" etc.
 ;
-(define-public (when-rule verb verb_instance)
-	(let ((var_name (choose-var-name)))
+(define-public (when-rule lemma verb-inst)
+	(let ((verb (cog-name lemma))
+			(verb_instance (cog-name verb-inst))
+			(var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-predicate verb_instance)
