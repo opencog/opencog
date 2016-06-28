@@ -788,7 +788,22 @@
 ; Example: "She wants you to help us." -- assigns wrong subject in
 ; second clause. XXX FIXME
 ;
-(define-public (to-do-rule-2 v1 v1_instance v2 v2_instance s1 s1_instance s2 s2_instance o o_instance)
+(define-public (to-do-rule-2
+                verb1_lemma verb1_inst
+                verb2_lemma verb2_inst
+                subj1_lemma subj1_inst
+                subj2_lemma subj2_inst
+                obj_lemma obj_inst)
+	(define v1 (cog-name verb1_lemma))
+	(define v1_instance (cog-name verb1_inst))
+	(define v2 (cog-name verb2_lemma))
+	(define v2_instance (cog-name verb2_inst))
+	(define s1 (cog-name subj1_lemma))
+	(define s1_instance (cog-name subj1_inst))
+	(define s2 (cog-name subj2_lemma))
+	(define s2_instance (cog-name subj2_inst))
+	(define o (cog-name obj_lemma))
+	(define o_instance (cog-name obj_inst))
 	(ListLink
 		(InheritanceLink (ConceptNode s1_instance) (ConceptNode s1))
 		(InheritanceLink (ConceptNode s2_instance) (ConceptNode s2))
