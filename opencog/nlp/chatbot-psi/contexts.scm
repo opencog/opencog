@@ -31,8 +31,13 @@
 )
 
 (Define
-    (DefinedPredicate "fuzzy-qa-started?")
-    (search-started? fuzzy-qa)
+    (DefinedPredicate "fuzzy-qa-not-started?")
+    (search-not-started? fuzzy-qa)
+)
+
+(Define
+    (DefinedPredicate "fuzzy-qa-finished?")
+    (search-finished? fuzzy-qa)
 )
 
 (Define
@@ -41,8 +46,13 @@
 )
 
 (Define
-    (DefinedPredicate "fuzzy-match-started?")
-    (search-started? fuzzy-match)
+    (DefinedPredicate "fuzzy-match-not-started?")
+    (search-not-started? fuzzy-match)
+)
+
+(Define
+    (DefinedPredicate "fuzzy-match-finished?")
+    (search-finished? fuzzy-match)
 )
 
 (Define
@@ -51,8 +61,13 @@
 )
 
 (Define
-    (DefinedPredicate "aiml-search-started?")
-    (search-started? aiml-search)
+    (DefinedPredicate "aiml-search-not-started?")
+    (search-not-started? aiml-search)
+)
+
+(Define
+    (DefinedPredicate "aiml-search-finished?")
+    (search-finished? aiml-search)
 )
 
 (Define
@@ -61,8 +76,13 @@
 )
 
 (Define
-    (DefinedPredicate "duckduckgo-search-started?")
-    (search-started? duckduckgo-search)
+    (DefinedPredicate "duckduckgo-search-not-started?")
+    (search-not-started? duckduckgo-search)
+)
+
+(Define
+    (DefinedPredicate "duckduckgo-search-finished?")
+    (search-finished? duckduckgo-search)
 )
 
 (Define

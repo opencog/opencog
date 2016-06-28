@@ -24,6 +24,7 @@
                     ; TODO: Create a new psi-rule for this QA in the OpenCog AIML format
                 )
             )
+            (State fuzzy-qa search-finished)
         )
     )
 )
@@ -48,6 +49,7 @@
                     )
                 )
             )
+            (State fuzzy-match search-finished)
         )
     )
 )
@@ -62,6 +64,7 @@
                 (State aiml-replies no-result)
                 (State aiml-replies aiml-resp)
             )
+            (State aiml-search search-finished)
         )
     )
 )

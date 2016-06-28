@@ -46,6 +46,7 @@
 
 (define default-state (Concept (chat-prefix "DefaultState")))
 (define search-started (Concept (chat-prefix "SearchStarted")))
+(define search-finished (Concept (chat-prefix "SearchFinished")))
 (define no-result (Concept (chat-prefix "NoResult")))
 
 (define aiml-replies (Anchor (chat-prefix "AIMLReplies")))

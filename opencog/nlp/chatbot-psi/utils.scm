@@ -42,8 +42,12 @@
     ))
 )
 
-(define (search-started? anchor)
-    (Equal (Set search-started) (Get (State anchor (Variable "$s"))))
+(define (search-not-started? anchor)
+    (Equal (Set default-state) (Get (State anchor (Variable "$s"))))
+)
+
+(define (search-finished? anchor)
+    (Equal (Set search-finished) (Get (State anchor (Variable "$s"))))
 )
 
 (define (any-result? anchor)
