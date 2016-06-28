@@ -15,19 +15,7 @@ class Start(opencog.cogserver.Request):
     Implements a CogServer Module to load upon startup that will load the REST
     API defined in apimain.py
 
-    Prerequisites:
-        1) Requires installation of the Python dependencies by running:
-            sudo ./install_dependencies.sh
-
-        2) Requires the configuration file (opencog.conf) to contain the
-           following parameters:
-            - PYTHON_EXTENSION_DIRS must specify the relative location of the
-              API scripts
-                Example: PYTHON_EXTENSION_DIRS = ../opencog/python/web/api
-            - PYTHON_PRELOAD must specify the restapi module
-                Example: PYTHON_PRELOAD = restapi
-
-    To start the REST API, type restapi.Start at the CogServer shell
+    See examples @ github.com/opencog/opencog/tree/master/examples/restapi
     """
 
     summary = "Start the OpenCog REST API"
@@ -42,7 +30,7 @@ class Start(opencog.cogserver.Request):
     def __init__(self):
         self.atomspace = None  # Will be passed as argument in run method
 
-    def run(self, args, atomspace):        
+    def run(self, args, atomspace):
         self.atomspace = atomspace
         '''
         make a daemon thread so that it can be interrupted
@@ -50,7 +38,7 @@ class Start(opencog.cogserver.Request):
         thread = Thread(target=self.invoke)
         thread.setDaemon(True)
         thread.start()
-        print "REST API is now running in a separate daemon thread."        
+        print "REST API is now running in a separate daemon thread."
 
     def invoke(self):
         self.api = RESTAPI(self.atomspace)

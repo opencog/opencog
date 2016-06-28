@@ -15,50 +15,58 @@
 ; Schema function for chatting
 
 (define (chat utterance)
-    (cancel-all-threads)
     (reset-all-states)
 
-    (let* ((sent-node (car (nlp-parse utterance)))
-           (list-of-words (get-word-list sent-node)))
-
+    (let ((sent-node (car (nlp-parse utterance))))
         (State input-utterance
             (Reference
-                list-of-words
                 sent-node
+                (Node utterance)
+                (get-word-list sent-node)
             )
         )
     )
 
-    (newline)
+    *unspecified*
 )
 
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
 
-(define all-threads '())
+(define (chat-prefix node_name) (string-append "Chatbot: " node_name))
 
-(define input-utterance (Anchor "InputUtterance"))
-(define no-input-utterance (Concept "NoInputUtterance"))
+(define input-utterance (Anchor (chat-prefix "InputUtterance")))
+(define no-input-utterance (Concept (chat-prefix "NoInputUtterance")))
 (State input-utterance no-input-utterance)
 
-(define default-state (Concept "DefaultState"))
-(define search-started (Concept "SearchStarted"))
-(define no-result (Concept "NoResult"))
+(define input-parse (Anchor (chat-prefix "InputParse")))
+(define parse-succeeded (Concept (chat-prefix "ParseSucceeded")))
+(define parse-failed (Concept (chat-prefix "ParseFailed")))
+(State input-parse no-input-utterance)
 
-(define aiml-replies (Anchor "AIMLReplies"))
-(define aiml-search (Anchor "AIMLSearch"))
+(define default-state (Concept (chat-prefix "DefaultState")))
+(define search-started (Concept (chat-prefix "SearchStarted")))
+(define no-result (Concept (chat-prefix "NoResult")))
+
+(define aiml-replies (Anchor (chat-prefix "AIMLReplies")))
+(define aiml-search (Anchor (chat-prefix "AIMLSearch")))
 (State aiml-replies default-state)
 (State aiml-search default-state)
 
-(define fuzzy-replies (Anchor "FuzzyReplies"))
-(define fuzzy-match (Anchor "FuzzyMatch"))
+(define fuzzy-replies (Anchor (chat-prefix "FuzzyReplies")))
+(define fuzzy-match (Anchor (chat-prefix "FuzzyMatch")))
 (State fuzzy-replies default-state)
 (State fuzzy-match default-state)
 
-(define fuzzy-answers (Anchor "FuzzyAnswers"))
-(define fuzzy-qa-search (Anchor "FuzzyQASearch"))
+(define fuzzy-answers (Anchor (chat-prefix "FuzzyAnswers")))
+(define fuzzy-qa-search (Anchor (chat-prefix "FuzzyQASearch")))
 (State fuzzy-answers default-state)
 (State fuzzy-qa-search default-state)
+
+(define duckduckgo-answers (Anchor (chat-prefix "DuckDuckGoAnswers")))
+(define duckduckgo-search (Anchor (chat-prefix "DuckDuckGoSearch")))
+(State duckduckgo-answers default-state)
+(State duckduckgo-search default-state)
 
 ;-------------------------------------------------------------------------------
 ; Define the demands
@@ -75,6 +83,7 @@
 
 ; Load the available actions
 (load "actions.scm")
+(load "duckduckgo.scm")
 
 ; Load the psi-rules
 (load "psi-rules.scm")

@@ -65,3 +65,25 @@
     (stv .9 .9)
     sociality
 )
+
+(psi-rule
+    (list (SequentialAnd
+        (Not (DefinedPredicate "duckduckgo-search-started?"))
+        (DefinedPredicate "is-input-utterance?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: ask-duckduckgo") (List)))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "duckduckgo-search-started?")
+        (DefinedPredicate "is-duckduckgo-answer?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List duckduckgo-answers)))
+    (True)
+    (stv .9 .9)
+    sociality
+)

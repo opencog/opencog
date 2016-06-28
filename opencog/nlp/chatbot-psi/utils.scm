@@ -29,21 +29,28 @@
     (get-input 'SentenceNode)
 )
 
+(define (get-input-text-node)
+    (get-input 'Node)
+)
+
+(define (is-utterance-type? speechact)
+    (Satisfaction (And
+        (State input-utterance (Reference (Variable "$s") (Variable "$n") (Variable "$l")))
+        (Parse (Variable "$parse") (Variable "$s"))
+        (Interpretation (Variable "$interp") (Variable "$parse"))
+        (Inheritance (Variable "$interp") speechact)
+    ))
+)
+
 (define (search-started? anchor)
     (Equal (Set search-started) (Get (State anchor (Variable "$s"))))
 )
 
 (define (any-result? anchor)
-    (Not (Equal (Set no-result) (Get (State anchor (Variable "$f")))))
-)
-
-(define (add-thread t)
-    (set! all-threads (append all-threads (list t)))
-)
-
-(define (cancel-all-threads)
-    (map cancel-thread all-threads)
-    (set! all-threads '())
+    (Not (Or
+        (Equal (Set default-state) (Get (State anchor (Variable "$f"))))
+        (Equal (Set no-result) (Get (State anchor (Variable "$f"))))
+    ))
 )
 
 (define (reset-all-states)
@@ -54,6 +61,8 @@
     (State fuzzy-match default-state)
     (State fuzzy-answers default-state)
     (State fuzzy-qa-search default-state)
+    (State duckduckgo-answers default-state)
+    (State duckduckgo-search default-state)
 )
 
 ; For handling things return by the fuzzy matcher

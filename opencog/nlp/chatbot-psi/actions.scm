@@ -1,7 +1,7 @@
 (define (do-fuzzy-QA)
     (State fuzzy-qa-search search-started)
 
-    (add-thread (begin-thread
+    (begin-thread
         (let ((fuz-ans (get-fuzzy-answers (get-input-sent-node) #:do-microplanning #f)))
             (if (null? fuz-ans)
                 (State fuzzy-answers no-result)
@@ -17,13 +17,13 @@
                 )
             )
         )
-    ))
+    )
 )
 
 (define (do-fuzzy-match)
     (State fuzzy-match search-started)
 
-    (add-thread (begin-thread
+    (begin-thread
         (let ((fuzzy-results (fuzzy-match-sent (get-input-sent-node) '()))
               (rtn '()))
             ; No result if it's an empty ListLink
@@ -41,13 +41,13 @@
                 )
             )
         )
-    ))
+    )
 )
 
 (define (do-aiml-search)
     (State aiml-search search-started)
 
-    (add-thread (begin-thread
+    (begin-thread
         (let ((aiml-resp (aiml-get-response-wl (get-input-word-list))))
             ; No result if it's a ListLink with arity 0
             (if (equal? (cog-arity aiml-resp) 0)
@@ -55,16 +55,11 @@
                 (State aiml-replies aiml-resp)
             )
         )
-    ))
+    )
 )
 
 (define (say . words)
-    (define utterance "")
-
-    (if (list? (car words))
-        (set! utterance (string-join (map cog-name (car words))))
-        (set! utterance (string-join (map cog-name words)))
-    )
+    (define utterance (string-join (map cog-name words)))
 
     ; Remove those '[' and ']' that may exist in the output
     (set! utterance (string-filter (lambda (c) (not (or (char=? #\[ c) (char=? #\] c)))) utterance))
@@ -78,7 +73,8 @@
             (cog-evaluate! (Evaluation (GroundedPredicate "py: say_text") (List (Node utterance))))
         )
         (lambda (key . parameters)
-            (display "\n(Warning: Failed to call \"py: say_text\" to send out the message.)\n")
+            ; (display "\n(Warning: Failed to call \"py: say_text\" to send out the message.)\n")
+            *unspecified*
         )
     )
 
@@ -86,10 +82,10 @@
 )
 
 (define (reply anchor)
-    (let ((ans (cog-chase-link 'StateLink 'ListLink anchor)))
-        (if (null? ans)
+    (let ((ans-in-words (cog-chase-link 'StateLink 'ListLink anchor)))
+        (if (null? ans-in-words)
             '()
-            (say (cog-outgoing-set (car ans)))
+            (apply say (cog-outgoing-set (car ans-in-words)))
         )
     )
 )
