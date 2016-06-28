@@ -14,6 +14,7 @@
     (list (SequentialAnd
         (DefinedPredicate "fuzzy-qa-finished?")
         (DefinedPredicate "is-fuzzy-answer?")
+        (DefinedPredicate "is-input-utterance?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-answers)))
     (True)
@@ -41,6 +42,7 @@
     (list (SequentialAnd
         (DefinedPredicate "fuzzy-match-finished?")
         (DefinedPredicate "is-fuzzy-reply?")
+        (DefinedPredicate "is-input-utterance?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-replies)))
     (True)
@@ -67,6 +69,7 @@
     (list (SequentialAnd
         (DefinedPredicate "aiml-search-finished?")
         (DefinedPredicate "is-aiml-reply?")
+        (DefinedPredicate "is-input-utterance?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
     (True)
@@ -90,6 +93,7 @@
     (list (SequentialAnd
         (DefinedPredicate "duckduckgo-search-finished?")
         (DefinedPredicate "is-duckduckgo-answer?")
+        (DefinedPredicate "is-input-utterance?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List duckduckgo-answers)))
     (True)
