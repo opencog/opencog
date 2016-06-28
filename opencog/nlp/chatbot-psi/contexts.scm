@@ -26,15 +26,13 @@
 
 (Define
     (DefinedPredicate "is-a-question?")
-    (Satisfaction (Or
-        (DefinedPredicate "is-interrogative?")
-        (DefinedPredicate "is-truth-query?")
-    ))
+    (Or (DefinedPredicate "is-interrogative?")
+        (DefinedPredicate "is-truth-query?"))
 )
 
 (Define
-    (DefinedPredicate "fuzzy-qa-search-started?")
-    (search-started? fuzzy-qa-search)
+    (DefinedPredicate "fuzzy-qa-started?")
+    (search-started? fuzzy-qa)
 )
 
 (Define
@@ -70,4 +68,17 @@
 (Define
     (DefinedPredicate "is-duckduckgo-answer?")
     (any-result? duckduckgo-answers)
+)
+
+(Define
+    (DefinedPredicate "called-chatbot-eva?")
+    (Not (Or
+        (Equal (Set default-state) (Get (State chatbot-eva (Variable "$s"))))
+        (Equal (Set no-action-taken) (Get (State chatbot-eva (Variable "$s"))))
+    ))
+)
+
+(Define
+    (DefinedPredicate "don't-know-how-to-do-it")
+    (Equal (Set no-action-taken) (Get (State chatbot-eva (Variable "$s"))))
 )
