@@ -123,11 +123,20 @@
          ;; Get all unfree variables stripped from their types
          (unfree-vars (unfree-variables TyVs P))
          ;; Build pattern matcher query for the subtitution terms
-         (query-body (if (null? unfree-vars) P (And P unfree-vars)))
+         (query-body (if (null? unfree-vars)
+                         P
+                         (cog-new-flattened-link 'AndLink P unfree-vars)))
          (query (GetLink TyVs query-body))
          ;; Fetch all possible substitution terms
-         (results (cog-execute! query)))
+         ;; (results (cog-execute! query)))
+         )
+    (cog-logger-info "select-conditioned-substitution-terms TyVs = ~a" TyVs)
+    (cog-logger-info "select-conditioned-substitution-terms P = ~a" P)
+    (cog-logger-info "select-conditioned-substitution-terms unfree-vars = ~a" unfree-vars)
+    (cog-logger-info "select-conditioned-substitution-terms query-body = ~a" query-body)
+    (cog-logger-info "select-conditioned-substitution-terms query = ~a" query)
         ;; Select one randomly, but first purge the query to not
         ;; pollute the atomspace
-        (extract-hypergraph query)
-        (select-rnd-outgoing results)))
+        ;; (extract-hypergraph query)
+        ;; (select-rnd-outgoing results)))
+        (select-rnd-outgoing (cog-execute! query))))
