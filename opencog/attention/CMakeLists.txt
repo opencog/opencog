@@ -29,19 +29,23 @@ TARGET_LINK_LIBRARIES(attention-types
 
 ADD_SUBDIRECTORY (scm)
 
-ADD_SUBDIRECTORY (experimental)
+# Fails to build without the REST interfaces.
+IF (HAVE_cpprest)
+	ADD_SUBDIRECTORY (experimental)
+ENDIF (HAVE_cpprest)
+
 
 # AttentionModule
 ADD_LIBRARY(attention SHARED
 	AttentionModule
 	ForgettingAgent
-        scm/StimulationAgent
 	HebbianUpdatingAgent
-	SimpleHebbianUpdatingAgent
-	ImportanceSpreadingAgent
 	ImportanceDiffusionAgent
-	SimpleImportanceDiffusionAgent
+	ImportanceSpreadingAgent
 	ImportanceUpdatingAgent
+	SimpleHebbianUpdatingAgent
+	SimpleImportanceDiffusionAgent
+	scm/StimulationAgent
 )
 
 ADD_DEPENDENCIES(attention attention-types)
