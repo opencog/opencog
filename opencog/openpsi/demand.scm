@@ -15,33 +15,43 @@
 
 ; --------------------------------------------------------------
 ; A cache of the demands for performance.
-(define psi-demand-cache '())
+(define psi-valid-demand-cache '())
 
 ; --------------------------------------------------------------
-(define-public (psi-reset-demand-cache)
+(define-public (psi-reset-valid-demand-cache)
 "
   Reset the cache for psi-demand-cache.
 "
-    (set! psi-demand-cache '())
+    (set! psi-valid-demand-cache '())
 )
 ; --------------------------------------------------------------
+; --------------------------------------------------------------
 (define-public (psi-get-all-demands)
+"
+  Returns a list containing all the demand-nodes.
+"
+    (filter
+        (lambda (x) (not (equal? x psi-demand-node)))
+        (cog-chase-link 'InheritanceLink 'ConceptNode psi-demand-node))
+)
+
+
+; --------------------------------------------------------------
+(define-public (psi-get-all-valid-demands)
 "
   Returns a list containing all the demand-nodes that are valid. A valid demand
   is one which is not a member of the set defined by
   (ConceptNode \"OpenPsi: skip\").
 "
-    (if (null? psi-demand-cache)
+    (if (null? psi-valid-demand-cache)
         (begin
-            (set! psi-demand-cache (filter
-                (lambda (x)
-                    (and (not (equal? x psi-demand-node))
-                         (not (psi-demand-skip? x))))
-                (cog-chase-link 'InheritanceLink 'ConceptNode psi-demand-node))
+            (set! psi-valid-demand-cache
+                (filter (lambda (x) (not (psi-demand-skip? x)))
+                    (psi-get-all-demands))
             )
-            psi-demand-cache
+            psi-valid-demand-cache
         )
-        psi-demand-cache
+        psi-valid-demand-cache
     )
 )
 
@@ -320,7 +330,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-demand-skip? demand)
 "
-  Check if the passed atom is skipable demand and return `#t`, if it is,
+  Check if the passed atom is skippable demand and return `#t`, if it is,
   and `#f` otherwise. An atom is an skippable if it a member of the set
   represented by (ConceptNode \"OpenPsi: skip\").
 "

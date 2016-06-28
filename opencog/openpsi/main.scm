@@ -98,7 +98,7 @@
                 (map act-and-evaluate (psi-select-rules-per-demand d))
             ))
 
-        (psi-get-all-demands)
+        (psi-get-all-valid-demands)
     )
 
     (stv 1 1) ; For continuing psi-run loop.
