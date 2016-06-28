@@ -19,8 +19,8 @@
 ; NOTE: The weight is chosen to be equal for all rules as the mode ure is
 ; being run in doesn't require it.
 
-(ure-define-add-rule r2l-rules "advmod" advmod 1)
-(ure-define-add-rule r2l-rules "advmod-maybe" advmod-maybe 1)
+;; (ure-define-add-rule r2l-rules "advmod" advmod 1)
+;; (ure-define-add-rule r2l-rules "advmod-maybe" advmod-maybe 1)
 
 (ure-define-add-rule r2l-rules "adverbialpp" adverbialpp 1)
 
