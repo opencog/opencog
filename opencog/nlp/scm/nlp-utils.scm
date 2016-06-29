@@ -882,7 +882,7 @@
 )
 
 ; ---------------------------------------------------------------------
-(define-public (set-relex-server)
+(define-public (set-relex-server-host)
 "
   Sets the relex-server-host address. This is only to be used in a docker setup.
 "
