@@ -881,4 +881,22 @@
 	)
 )
 
+; ---------------------------------------------------------------------
+(define-public (set-relex-server)
+"
+  Sets the relex-server-host address. This is only to be used in a docker setup.
+"
+    (catch
+        #t
+        (lambda ()
+            (let ((host (gethost "relex")))
+                (set! relex-server-host (inet-ntop (hostent:addrtype host)
+                    (car (hostent:addr-list host))))
+                relex-server-host
+            )
+        )
+        (lambda (key . rest) relex-server-host)
+    )
+)
+
 ; =============================================================
