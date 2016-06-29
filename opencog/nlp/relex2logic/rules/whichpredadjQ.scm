@@ -1,5 +1,5 @@
-; This rule is for which-subjects in predicate-adjective sentences, as in
-; "Which book is better?"
+; This rule is for which-subjects in predicate-adjective sentences, 
+; as in "Which book is better?"
 ; (AN June 2015)
 
 
@@ -10,6 +10,8 @@
 			(var-decl "$subj" "WordInstanceNode")
 			(var-decl "$predadj" "WordInstanceNode")
 			(var-decl "$qVar" "WordInstanceNode")
+			(var-decl "$subj-lemma" "WordNode")
+			(var-decl "$predadj-lemma" "WordNode")
 		)
 		(AndLink
 			(word-in-parse "$subj" "$a-parse")
@@ -17,21 +19,17 @@
 			(dependency "_predadj" "$subj" "$predadj")
 			(dependency "_det" "$subj" "$qVar")
 			(word-feat "$qVar" "which")
+			(word-lemma "$subj" "$subj-lemma")
+			(word-lemma "$predadj" "$predadj-lemma")
 		)
 		(ExecutionOutputLink
-			(GroundedSchemaNode "scm: pre-whichpredadjQ-rule")
+			(GroundedSchemaNode "scm: whichpredadjQ-rule")
 			(ListLink
+				(VariableNode "$subj-lemma")
 				(VariableNode "$subj")
+				(VariableNode "$preadj-lemma")
 				(VariableNode "$predadj")
 			)
 		)
-	)
-)
-
-; This is function is not needed. It is added so as not to break the existing
-; r2l pipeline.
-(define-public (pre-whichpredadjQ-rule subj predadj)
-	(whichpredadjQ-rule (cog-name (word-inst-get-lemma  subj)) (cog-name subj)
-			  (cog-name (word-inst-get-lemma  predadj)) (cog-name predadj)
 	)
 )
