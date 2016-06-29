@@ -27,7 +27,7 @@ PGStorageDelegate::PGStorageDelegate(const char *dbName, const char *userName, c
 {
     dbInterface = new PGAtomStorage(dbName, userName, password);
     if (! dbInterface->connected()) {
-        logger().info("PGStoreDelegate() could not connect to the database");
+        logger().error("PGStoreDelegate() could not connect to the database");
     } else {
         logger().info("Connected to database \"%s\" as \"%s\"", dbName, dbUser);
     }

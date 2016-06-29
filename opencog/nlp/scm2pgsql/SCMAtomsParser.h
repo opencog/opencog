@@ -24,6 +24,7 @@
 #ifndef _OPENCOG_SCMATOMSPARSER_H
 #define _OPENCOG_SCMATOMSPARSER_H
 
+#include <stdio.h>
 
 namespace opencog
 {
@@ -42,6 +43,8 @@ public:
 private:
 
     std::vector<AtomPtr> atomsList;
+
+    void parseFile(FILE *f);
 
 };
 
