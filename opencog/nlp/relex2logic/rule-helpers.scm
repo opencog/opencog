@@ -1258,6 +1258,75 @@
 		)
 	)
 )
+
+(define-public (whichsubjQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+	(throw 'not-implemented)
+)
+
+(define-public (whichsubjSVIOQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst iobj_lemma iobj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+	(define iobj_concept (cog-name iobj_lemma))
+	(define iobj_instance (cog-name iobj_inst))
+	(throw 'not-implemented)
+)
+
+(define-public (whichobjSVIOQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst iobj_lemma iobj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+	(define iobj_concept (cog-name iobj_lemma))
+	(define iobj_instance (cog-name iobj_inst))
+	(throw 'not-implemented)
+)
+
+(define-public (whichpobjQ-rule
+	subj_lemma subj_inst prep_lemma prep_inst pobj_lemma pobj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define prep (cog-name prep_lemma))
+	(define prep_instance (cog-name prep_inst))
+	(define pobj_concept (cog-name pobj_lemma))
+	(define pobj_instance (cog-name pobj_inst))
+	(throw 'not-implemented)
+)
+
+(define-public (whichsubjpobjQ-rule
+	subj_lemma subj_inst prep_lemma prep_inst pobj_lemma pobj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define prep (cog-name prep_lemma))
+	(define prep_instance (cog-name prep_inst))
+	(define pobj_concept (cog-name pobj_lemma))
+	(define pobj_instance (cog-name pobj_inst))
+	(throw 'not-implemented)
+)
+
+(define-public (whichsubjSVQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(throw 'not-implemented)
+)
+
 ;
 ; -----------------------------------------------------------------------
 ; all rules

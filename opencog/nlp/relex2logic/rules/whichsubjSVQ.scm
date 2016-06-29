@@ -26,7 +26,6 @@
 			(word-lemma "$verb" "$verb-lemma")
 		)
 		(ExecutionOutputLink
-; XXX this is not implemented anywhere!
 			(GroundedSchemaNode "scm: whichsubjSVQ-rule")
 			(ListLink
 				(VariableNode "$subj-lemma")
