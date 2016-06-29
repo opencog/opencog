@@ -1116,19 +1116,29 @@
 )
 ;
 ;-------------------------------------------
-; CHOICE-TYPE QUESTIONS (also known as question-determiners) -- what and which
+; CHOICE-TYPE QUESTIONS (also known as question-determiners)
+; -- what and which questions
 ;
-; NB: I don't think these rules could be made to plug into the setence templates because of the
-; SatisfyingSet logic . . .
+; NB: I don't think these rules could be made to plug into the
+; setence templates because of the SatisfyingSet logic . . .
 ;
-; Therefore still need to write SV, prep, to-do, and to-be versions of these if we want that functionality --
-; or do them without the satisfying set logic, so they can just plug into the templates . . .
+; Therefore still need to write SV, prep, to-do, and to-be versions
+; of these if we want that functionality -- or do them without the
+; satisfying set logic, so they can just plug into the templates . . .
 ;
 ;-------------------------------------------
 ;
 ; Example: "Which girl do you like?" "What book are you reading?"
 ;
-(define-public (whichobjQ-rule obj_concept obj_instance verb verb_instance subj_concept subj_instance)
+(define-public (whichobjQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1153,7 +1163,15 @@
 ;
 ; Example: "Which girl likes you?" "What fool said that?"
 ;
-(define-public (whichsubjSVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
+(define-public (whichsubjSVOQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1178,7 +1196,17 @@
 ;
 ; Example: "To which address did you send the email?"
 ;
-(define-public (whichiobjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance iobj_concept iobj_instance)
+(define-public (whichiobjQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst iobj_lemma iobj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+	(define iobj_concept (cog-name iobj_lemma))
+	(define iobj_instance (cog-name iobj_inst))
+
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1206,7 +1234,12 @@
 ;
 ; Example: "Which girl is crazy?"
 ;
-(define-public (whichpredadjQ-rule subj_concept subj_instance pred_concept pred_instance)
+(define-public (whichpredadjQ-rule
+	subj_lemma subj_inst pred_lemma pred_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define pred_concept (cog-name pred_lemma))
+	(define pred_instance (cog-name pred_inst))
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
@@ -1215,14 +1248,12 @@
 			(r2l-wordinst-concept subj_instance)
 			(r2l-wordinst-predicate pred_instance)
 			(SatisfyingSetLink
-				; (ScopeLink ;; not yet supported !? Huhh ??
-					(VariableNode var_name)
-					(EvaluationLink
-						(PredicateNode pred_instance)
-						(ListLink
-							(VariableNode var_name))
-					)
-				; )
+				(VariableNode var_name)
+				(EvaluationLink
+					(PredicateNode pred_instance)
+					(ListLink
+						(VariableNode var_name))
+				)
 			)
 		)
 	)
