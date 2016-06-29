@@ -42,8 +42,12 @@
     ))
 )
 
-(define (search-started? anchor)
-    (Equal (Set search-started) (Get (State anchor (Variable "$s"))))
+(define (search-not-started? anchor)
+    (Equal (Set default-state) (Get (State anchor (Variable "$s"))))
+)
+
+(define (search-finished? anchor)
+    (Equal (Set search-finished) (Get (State anchor (Variable "$s"))))
 )
 
 (define (any-result? anchor)
@@ -60,9 +64,10 @@
     (State fuzzy-replies default-state)
     (State fuzzy-match default-state)
     (State fuzzy-answers default-state)
-    (State fuzzy-qa-search default-state)
+    (State fuzzy-qa default-state)
     (State duckduckgo-answers default-state)
     (State duckduckgo-search default-state)
+    (State chatbot-eva default-state)
 )
 
 ; For handling things return by the fuzzy matcher

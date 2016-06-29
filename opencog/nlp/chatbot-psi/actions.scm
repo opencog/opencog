@@ -1,5 +1,13 @@
+(define (call-chatbot-eva)
+    (State chatbot-eva sent-to-chatbot-eva)
+
+    (begin-thread
+        (imperative-process (get-input-sent-node))
+    )
+)
+
 (define (do-fuzzy-QA)
-    (State fuzzy-qa-search search-started)
+    (State fuzzy-qa search-started)
 
     (begin-thread
         (let ((fuz-ans (get-fuzzy-answers (get-input-sent-node) #:do-microplanning #f)))
@@ -16,6 +24,7 @@
                     ; TODO: Create a new psi-rule for this QA in the OpenCog AIML format
                 )
             )
+            (State fuzzy-qa search-finished)
         )
     )
 )
@@ -40,6 +49,7 @@
                     )
                 )
             )
+            (State fuzzy-match search-finished)
         )
     )
 )
@@ -54,6 +64,7 @@
                 (State aiml-replies no-result)
                 (State aiml-replies aiml-resp)
             )
+            (State aiml-search search-finished)
         )
     )
 )

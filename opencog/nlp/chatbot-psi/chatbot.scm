@@ -4,7 +4,7 @@
              (opencog nlp relex2logic)
              (opencog nlp fuzzy)
              (opencog nlp sureal)
-             (opencog nlp chatbot)
+             (opencog nlp chatbot-eva)
              (opencog nlp aiml)
              (opencog exec)
              (opencog openpsi))
@@ -46,6 +46,7 @@
 
 (define default-state (Concept (chat-prefix "DefaultState")))
 (define search-started (Concept (chat-prefix "SearchStarted")))
+(define search-finished (Concept (chat-prefix "SearchFinished")))
 (define no-result (Concept (chat-prefix "NoResult")))
 
 (define aiml-replies (Anchor (chat-prefix "AIMLReplies")))
@@ -59,19 +60,33 @@
 (State fuzzy-match default-state)
 
 (define fuzzy-answers (Anchor (chat-prefix "FuzzyAnswers")))
-(define fuzzy-qa-search (Anchor (chat-prefix "FuzzyQASearch")))
+(define fuzzy-qa (Anchor (chat-prefix "FuzzyQA")))
 (State fuzzy-answers default-state)
-(State fuzzy-qa-search default-state)
+(State fuzzy-qa default-state)
 
 (define duckduckgo-answers (Anchor (chat-prefix "DuckDuckGoAnswers")))
 (define duckduckgo-search (Anchor (chat-prefix "DuckDuckGoSearch")))
 (State duckduckgo-answers default-state)
 (State duckduckgo-search default-state)
 
+(define chatbot-eva (Anchor (chat-prefix "ChatbotEva")))
+(define sent-to-chatbot-eva (Concept (chat-prefix "SentToChatbotEva")))
+(define no-action-taken (Concept (chat-prefix "NoActionTaken")))
+(State chatbot-eva default-state)
+
 ;-------------------------------------------------------------------------------
 ; Define the demands
 
 (define sociality (psi-demand "Sociality" .8))
+
+;-------------------------------------------------------------------------------
+; Skip the demand (ConceptNode "OpenPsi: AIML chat demand"), a temp workaround
+
+; Define the demand here to prevent error if this chatbot is loaded before
+; loading the aiml psi-rules
+(define aiml-chat-demand (psi-demand "AIML chat demand" .8))
+(psi-demand-skip aiml-chat-demand)
+(psi-reset-valid-demand-cache)
 
 ;-------------------------------------------------------------------------------
 

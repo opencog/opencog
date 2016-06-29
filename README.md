@@ -1,8 +1,10 @@
 OpenCog
 =======
 
+master:
 [![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-opencog-master)](http://61.92.69.39:8080/job/ci-opencog-master)
-
+stable:
+[![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-opencog-stable)](http://61.92.69.39:8080/job/ci-opencog-stable)
 
 OpenCog is a framework for developing AI systems, especially appropriate
 for integrative multi-algorithm systems, and artificial general intelligence

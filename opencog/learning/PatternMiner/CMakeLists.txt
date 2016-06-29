@@ -18,6 +18,7 @@ ADD_DEPENDENCIES(PatternMiner spacetime_atom_types)
 
 TARGET_LINK_LIBRARIES (PatternMiner
 	${COGUTIL_LIBRARY}
+	${ATOMSPACE_LIBRARIES}
 	cpprest.so
 )
 
