@@ -11,6 +11,8 @@ cp aiml-rules.scm /tmp
 
 - Install (if you haven't done so) and start the [RelEx server] (https://github.com/opencog/relex)
 
+- Sign up an account and then an AppID for sending query to [WolframAlpha] (http://developer.wolframalpha.com/portal/apisignup.html)
+
 - Start a Guile interpreter and load the chatbot, e.g.
 ```
 guile -l "chatbot.scm"
@@ -24,6 +26,11 @@ guile -l "chatbot.scm"
 - Parse the text file into the AtomSpace, e.g.
 ```
 (parse-all nlp-parse "/where/the/text/file/is")
+```
+
+- Set the AppID (an error will be thrown without doing this step, but the chatbot would still give responses)
+```
+(set-appid "YOUR-WOLFRAMALPHA-APPID")
 ```
 
 - Finally use the `chat` function to interact with the chatbot, e.g.
@@ -40,7 +47,7 @@ This chatbot is driven by [OpenPsi] (https://github.com/leungmanhin/opencog/tree
 Currently it generates replies by using one of the following components:
 - AIML engine
 - Fuzzy matcher
-- External sources, like [DuckDuckGo] (https://duckduckgo.com)
+- External sources, like [DuckDuckGo] (https://duckduckgo.com) and [WolframAlpha] (http://www.wolframalpha.com/)
 
 And it will pick the reply according to the currently context and the weight of the corresponding psi-rules (i.e. the truth values assign to those OpenPsi rules, in the form of ImplicationLinks, as defined in `psi-rules.scm`), so adjusting and contexts and weights could alter the behavior of the chatbot to some extent.
 
