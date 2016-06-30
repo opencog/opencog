@@ -1,9 +1,11 @@
 import urllib2
 import xml.etree.ElementTree as ET
 
-def call_wolframalpha(qq):
-    # Enter your own key here!
-    appid = ''
+def call_wolframalpha(qq, aid):
+    if aid == '':
+        raise ValueError('AppID for Wolfram|Alpha Webservice API is missing!')
+
+    appid = aid
 
     # Avoid HTTP Error 400: Bad Request
     # query = qq.name.replace(' ', '+')
@@ -34,4 +36,4 @@ def call_wolframalpha(qq):
 
 # XXX For testing only, to be removed
 import sys
-call_wolframalpha(' '.join(sys.argv[1:]))
+call_wolframalpha(' '.join(sys.argv[1:]), '')
