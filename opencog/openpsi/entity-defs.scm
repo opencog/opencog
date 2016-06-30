@@ -4,10 +4,10 @@
 ; OpenPsi-related modulator, parameter, and other entity definitions for use in
 ; the interaction dynamics rules.
 
-(load "../modulator.scm") ; not being used yet
+(load "modulator.scm") ; not being used yet
 (load "utilities.scm")
 
-; Modulators
+; Modulator
 (define (create-openpsi-modulator name initial-value)
     (define mod
         (Concept (string-append psi-prefix-str name)))
@@ -17,9 +17,7 @@
     (psi-set-value! mod (Number initial-value))
     mod)
 
-(define arousal (create-openpsi-modulator "arousal" .5))
-
-;SECs
+;SEC
 (define (create-openpsi-sec name)
     (define sec
         (Predicate (string-append psi-prefix-str name)))
@@ -29,12 +27,16 @@
     sec)
 
 
+; --------------------------------------------------------------
 
+; Create Modulators
+(define arousal (create-openpsi-modulator "arousal" .5))
 
-;;; Agent State
-(define agent-state (Concept (string-append psi-prefix-str "agent-state")))
-
+; Create SECs
 (define power (create-openpsi-sec "Power"))
+
+; Agent State
+(define agent-state (Concept (string-append psi-prefix-str "agent-state")))
 
 (define agent-state-power
 	(List
@@ -43,14 +45,14 @@
 (psi-set-value! agent-state-power (Number .3))
 ;(hash-set! prev-value-table agent-state-power .3)
 
-;;; EVENT PREDICATES
+
+; EVENT PREDICATES
 (define speech (Predicate "speech-giving-starts"))
 (Evaluation speech (List) (stv 0 1))
 ;(hash-set! prev-value-table speech 0.0)
 
-
-;;; PAU PREDICATES
-; actually these will be defined somewhere else in the system
+; PAU PREDICATES
+; Actually these will be defined somewhere else in the system
 (define pau-prefix-str "PAU: ")
 (define (create-pau name initial-value)
 	(define pau

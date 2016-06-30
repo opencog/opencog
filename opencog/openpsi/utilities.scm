@@ -283,9 +283,18 @@
 
 ; --------------------------------------------------------------
 ; --------------------------------------------------------------
-; Getters and setters for openpsi entity values
+; Getters and setters for openpsi-related entity/parameter values
+;
+; Presently the implementation assumes the values of openpsi parameters are
+; normalized in [0 1]. The current values of the params are assumed to be stored
+; in a StateLink or if not in a StateLink an attempt is made to evaluate or
+; execute the atom to obtain a value.
 
 (define (psi-get-value entity)
+"
+  Get the current value of a psi-related entity. For entities with numerical
+  values, and NumberNode is returned.
+"
 	(define result #f)
 
 	; First check for StateLink value
@@ -317,6 +326,10 @@
 )
 
 (define (psi-get-number-value entity)
+"
+	Get the current value of psi-related entity and return as a number (rather
+	than NumberNode).
+"
 	(define result (psi-get-value entity))
 	(if (and (cog-atom? result) (eq? 'NumberNode (cog-type result)))
 		(set! result (string->number (cog-name result))))
@@ -325,7 +338,10 @@
 	result)
 
 (define (psi-set-value! entity value)
-	; OpenPsi values are stored using StateLinks
+"
+  Set the current value of psi-related entity.
+"
+	; OpenPsi values are stored using StateLinks by default
 	(State
 		entity
 		value))

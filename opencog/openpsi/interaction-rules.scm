@@ -44,10 +44,12 @@
   strength - the degree to which a change in the trigger event causes a change
     in the target. Value is in [0,1]
 "
-	(if (or (< strength 0) (> strength 1))
-        (error (string-append "In function create-psi-interaction rule, "
-            "parameter strength needs to be in [0,1])))
-	(define rule
+	(define rule)
+	; Todo: Why is this executing the error when the file is loaded?
+	;(if (or (< strength 0) (> strength 1))
+    ;    (error (string-append "In function create-psi-interaction rule, "
+    ;        "strength parameter needs to be in [0,1]")))
+	(set! rule
 		(PredictiveImplication
 			(TimeNode 1)
 		    (Evaluation

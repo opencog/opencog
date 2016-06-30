@@ -14,9 +14,9 @@
 ; of those rules should be executed once and only once for a given change.
 ;
 
-(load "../main.scm")
+(load "main.scm")
 (load "utilities.scm")
-(load "entities-temp.scm")
+(load "entity-defs.scm")
 (load "interaction-rules.scm")
 
 (define logging #f)
@@ -152,7 +152,7 @@
  magnitude such that increases in value are larger when the current value is low
  and smaller when the current value is high. (And vica versa for decreases.)
 
- Currently the implementation assumes the openpsi parameters are
+ Currently the implementation assumes the values of openpsi parameters are
  normalized in [0 1]. The values of the params are assumed to be stored
  in a StateLink or if not in a StateLink an attempt is made to evaluate or
  execute the atom to obtain a value (see psi-get-value function). However, this
