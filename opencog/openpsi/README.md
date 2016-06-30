@@ -10,6 +10,43 @@ main loop is an action-selection mechanism, examining the context to
 see if any of the current demands/goals can be fullfilled, and then
 taking apropriate action.
 
+## Modulators and Internal Dynamics
+
+OpenPsi contains parameters that regulate processes such as stimulus 
+evaluation, action selection, and emotional expression. 
+Modulators are based on MicroPsi, and SECs are based on Component 
+Process Model theory (see references for  more info). These and other 
+OpenPsi-related entities dynamically interact with each other according 
+to rules that specify how a change in a "trigger" entity cause a change 
+in a "target" entity.
+
+The interaction rules have the logical form of:
+
+    change in trigger entity --> change in target entity
+
+The rules in Atomese have the form:
+
+    (PredictiveImplication
+        (TimeNode 1)
+            (Evaluation
+                  (Predicate "psi-changed")
+                  (List
+                      trigger))
+            (ExecutionOutputLink
+                (GroundedSchema "scm: adjust-psi-var-level")
+                (List
+                    target
+                    (NumberNode strength)
+                    trigger))))
+
+Files:
+
+* interaction-rules.scm - the rules specifying interaction dynamics 
+between entities
+* entity-defs.scm - defines entities that are used in interaction rules
+* updater.scm - controls the dynamic updating of entity values based on
+  the interaction rules.
+
 ## Status and TODO List
 
 The code currently works at a basic level, and is used to control the
