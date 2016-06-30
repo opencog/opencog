@@ -117,6 +117,8 @@ class FaceTrack:
 		self.EVENT_TRACK_FACE = "track_face"
 
 		self.TOPIC_FACE_LOCATIONS = "/camera/face_locations"
+		
+		self.control_mode = 255
 
 		# Subscribed OpenCog commands
 		self.TOPIC_GLANCE_FACE = "/opencog/glance_at"
@@ -155,7 +157,7 @@ class FaceTrack:
 		rospy.Subscriber("/behavior_control", Int32, \
 			self.behavior_control_callback)
 		# Control Eeys and face by default
-		self.control_mode = 255
+		#self.control_mode = 255
 	# ---------------------------------------------------------------
 	# Public API. Use these to get things done.
 
@@ -376,15 +378,16 @@ class FaceTrack:
 	def face_loc_cb(self, data):
 		if not self.control_mode & self.C_FACE_TRACKING:
 			return
-		for face in data.faces:
-			fid = face.id
-			loc = face.point
-			# Sanity check.  Sometimes pi_vision sends us faces with
-			# location (0,0,0). Discard these.
-			if loc.x < 0.05:
-				continue
-			self.add_face(fid)
-
+		#below causes error in cmt .. mandeep
+		#for face in data.faces:
+			#fid = face.id
+			#loc = face.point
+			## Sanity check.  Sometimes pi_vision sends us faces with
+			## location (0,0,0). Discard these.
+			#if loc.x < 0.05:
+				#continue
+			#self.add_face(fid)
+		#above causes error in cmt
 		# Now perform all the various looking-at actions
 		self.do_look_at_actions()
 
