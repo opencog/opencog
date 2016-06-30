@@ -9,22 +9,28 @@
     (ConceptNode (string-append psi-prefix-str "modulator")))
 
 ; --------------------------------------------------------------
-(define-public (psi-modulator modulator-name)
+(define-public (psi-create-modulator modulator-name initial-value)
 "
-  Returns the ConceptNode that represents an OpenPsi modulator
+  Creates and returns ConceptNode that represents an OpenPsi modulator
 
   modulator-name:
   - The name of the modulator that is created.
+  initial-value:
+  - In [0,1]
 "
     ; Check arguments
     (if (not (string? modulator-name))
         (error (string-append "In procedure psi-modulator, expected first "
             "argument to be a string got: ") modulator-name))
+    (if (or (< initial-value 0) (> initial-value 1))
+        (error (string-append "In procedure psi-modulator, expected second "
+            "argument to be in [0,1], got: ") modulator-name))
 
     (let* ((modulator-str (string-append psi-prefix-str modulator-name))
            (modulator-node (ConceptNode modulator-str)))
 
        (InheritanceLink modulator-node psi-modulator-node)
+       (psi-set-value! modulator-node (Number initial-value))
 
         modulator-node
     )

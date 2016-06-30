@@ -19,10 +19,11 @@
 (load "entity-defs.scm")
 (load "interaction-rules.scm")
 
-(define logging #f)
-(define verbose #f)
+(define logging #t)
+(define verbose #t)
 
-; parameter for the impact of the change in trigger variable on target
+; Parameter to tweak the strength of impact of changes in triggers on changes in
+; targets.
 (define psi-max-strength-multiplier 5)
 
 ; Todo: implement this table in the atomspace
@@ -339,13 +340,6 @@
 	)
 )
 
-
-;temp
-(define (listlink? atom)
-	(if (equal? (cog-type atom) 'ListLink)
-		#t
-		#f))
-
 (define (cog-filter-hypergraph pred? atom)
 "
   Recursively traverse hyptergraph and return list of all atoms that satisfy
@@ -371,6 +365,8 @@
 ; --------------------------------------------------------------
 ; Updater Loop Control
 ; --------------------------------------------------------------
+; Todo: Integrate this into the main OpenPsi loop
+
 (define psi-updater-is-running #f)
 (define psi-updater-loop-count 0)
 (define continue-psi-updater-loop (stv 1 1))

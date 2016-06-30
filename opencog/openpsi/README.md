@@ -24,6 +24,10 @@ The interaction rules have the logical form of:
 
     change in trigger entity --> change in target entity
 
+The change in the target is a function of the magnitude of change in the
+trigger, the strength of the interaction rule, and the current value of the
+target.
+
 The rules in Atomese have the form:
 
     (PredictiveImplication

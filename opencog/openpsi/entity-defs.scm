@@ -4,46 +4,24 @@
 ; OpenPsi-related modulator, parameter, and other entity definitions for use in
 ; the interaction dynamics rules.
 
-(load "modulator.scm") ; not being used yet
-(load "utilities.scm")
-
-; Modulator
-(define (create-openpsi-modulator name initial-value)
-    (define mod
-        (Concept (string-append psi-prefix-str name)))
-    (Inheritance
-        mod
-        (Concept (string-append psi-prefix-str "Modulator")))
-    (psi-set-value! mod (Number initial-value))
-    mod)
-
-;SEC
-(define (create-openpsi-sec name)
-    (define sec
-        (Predicate (string-append psi-prefix-str name)))
-    (Inheritance
-        sec
-        (Concept (string-append psi-prefix-str "SEC")))
-    sec)
-
+(load "modulator.scm")
+(load "sec.scm")
+;(load "utilities.scm")
 
 ; --------------------------------------------------------------
 
 ; Create Modulators
-(define arousal (create-openpsi-modulator "arousal" .5))
-
-; Create SECs
-(define power (create-openpsi-sec "Power"))
+(define arousal (psi-create-modulator "arousal" .5))
 
 ; Agent State
 (define agent-state (Concept (string-append psi-prefix-str "agent-state")))
 
+; Create SECs
+(define power (psi-create-sec "Power"))
+
+; Create Stimulus-SEC Associations
 (define agent-state-power
-	(List
-		agent-state
-		power))
-(psi-set-value! agent-state-power (Number .3))
-;(hash-set! prev-value-table agent-state-power .3)
+	(psi-create-stimulus-sec agent-state power .5))
 
 
 ; EVENT PREDICATES

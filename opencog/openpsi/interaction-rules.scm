@@ -4,7 +4,7 @@
 ; Rules specfying the dynamic interactions between different OpenPsi related
 ; entities.
 ;
-; They express rules of the form:
+; They express rules of the logical form:
 ;  "change in trigger-entity results in change in target-entity with strength s"
 ;
 ; The change in the target is a function of the magnitude of change in the
@@ -69,9 +69,11 @@
 
 ; --------------------------------------------------------------
 ; The Rules
+;
+; Todo: Rule sets should be moved to their own files.
 
 ; ==============================================================
-; mock interaction rules for dev purposes
+; Below are bogus mock interaction rules for dev purposes
 
 (define speech->power
 	(create-psi-interaction-rule speech agent-state-power .5))
