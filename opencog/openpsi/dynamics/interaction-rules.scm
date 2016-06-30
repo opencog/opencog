@@ -25,6 +25,8 @@
 ;  	                (NumberNode strength)
 ;  	                trigger))))
 
+; Contains defined entities to be used in the interaction rules
+(load "entity-defs.scm")
 
 (define psi-interaction-rule
 	(ConceptNode (string-append psi-prefix-str "interaction rule")))
@@ -39,7 +41,12 @@
 
   trigger-entity - the variable that when it changes triggers a change in target
   target-entity - the variable that is changed as a result of change in trigger
+  strength - the degree to which a change in the trigger event causes a change
+    in the target. Value is in [0,1]
 "
+	(if (or (< strength 0) (> strength 1))
+        (error (string-append "In function create-psi-interaction rule, "
+            "parameter strength needs to be in [0,1])))
 	(define rule
 		(PredictiveImplication
 			(TimeNode 1)
@@ -61,6 +68,9 @@
 ; --------------------------------------------------------------
 ; The Rules
 
+; ==============================================================
+; mock interaction rules for dev purposes
+
 (define speech->power
 	(create-psi-interaction-rule speech agent-state-power .5))
 
@@ -72,4 +82,5 @@
 
 (define arousal->voice
 	(create-psi-interaction-rule arousal voice-width -.9))
+; ==============================================================
 

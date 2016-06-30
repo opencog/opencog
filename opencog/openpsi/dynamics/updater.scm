@@ -19,6 +19,9 @@
 (load "entities-temp.scm")
 (load "interaction-rules.scm")
 
+(define logging #f)
+(define verbose #f)
+
 ; parameter for the impact of the change in trigger variable on target
 (define psi-max-strength-multiplier 5)
 
@@ -85,7 +88,8 @@
 		;(format #t "\npsi-change-in? RETURN: ~a\n" changed)
 		(if (psi-change-in? param)
 	            (begin
-	                (format "*** Found change in : ~a\n" param)
+	                (if verbose
+	                    (format "*** Found change in : ~a\n" param))
 	                (set! changed-params
 	                    (append changed-params (list param)))
 	                (set! tv (stv 1 1))
@@ -97,18 +101,19 @@
                 param)))
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
-	(let ((output-port (open-file "psilog.txt" "a")))
-			(format output-port "---------------------------------------- Loop ~a\n"
-				psi-updater-loop-count)
-			(format output-port
-				"agent power: ~a  arousal: ~a  speech: ~a  voice: ~a\n"
-				(psi-get-number-value agent-state-power)
-				(psi-get-number-value arousal)
-				(psi-get-number-value speech)
-				(psi-get-number-value voice-width))
+	(if logging
+		(let ((output-port (open-file "psilog.txt" "a")))
+				(format output-port "---------------------------------------- Loop ~a\n"
+					psi-updater-loop-count)
+				(format output-port
+					"agent power: ~a  arousal: ~a  speech: ~a  voice: ~a\n"
+					(psi-get-number-value agent-state-power)
+					(psi-get-number-value arousal)
+					(psi-get-number-value speech)
+					(psi-get-number-value voice-width))
 
 
-			(close-output-port output-port))
+				(close-output-port output-port)))
 
 	; Evaluate the monitored params and set "changed" predicates accordingly
 	(set! changed-params '())
@@ -141,11 +146,11 @@
 "
  Adjust psi-related variable based on triggered interaction rule
 
- Update openpsi parameter and variable values as a functon of the current
- value of the target and the strength of the interaction rule. The current value
- of the target influences the change magnitude such that increases in value are
- larger when the current value is low and smaller when the current value is
- high. (And vica versa for decreases.)
+ Update openpsi parameter and variable values as a functon of the magnitude of
+ change in the trigger entity, the current value of the target and the strength
+ of the interaction rule. The current value of the target influences the change
+ magnitude such that increases in value are larger when the current value is low
+ and smaller when the current value is high. (And vica versa for decreases.)
 
  Currently the implementation assumes the openpsi parameters are
  normalized in [0 1]. The values of the params are assumed to be stored
@@ -161,9 +166,10 @@
 	(define strength-multiplier)
 	(define alpha)
 	(define slope)
-	(display "\n------------------------------------------------------\n")
-	(format #t "adjust-psi-var-level   target: ~a   trigger: ~a"
-		target trigger)
+	(if verbose (begin
+		(display "\n------------------------------------------------------\n")
+		(format #t "adjust-psi-var-level   target: ~a   trigger: ~a"
+			target trigger)))
 	(let* ((current-value (psi-get-number-value target))
 		   (trigger-change (psi-get-change-magnitude trigger))
 		  )
@@ -206,8 +212,9 @@
 			(set! alpha (min alpha 1))
 			(set! alpha (max alpha -1)))
 
-		(format #t "strength: ~a     change: ~a       alpha: ~a\n"
-			strength trigger-change alpha)
+		(if verbose
+			(format #t "strength: ~a     change: ~a       alpha: ~a\n"
+				strength trigger-change alpha))
 
 		; Increasing slope increases the degree change at all levels
 		(set! slope 10000)
@@ -239,7 +246,9 @@
 		;	(set! new-value 1))
 		(psi-set-value! target (Number new-value))
 		;(cog-set-tv! target (cog-new-stv new-strength confidence))
-		(format #t "current value: ~a    new value: ~a\n" current-value new-value)
+		(if verbose
+			(format #t "current value: ~a    new value: ~a\n" current-value
+				new-value))
 
 		; Todo: create one-way direction rules (e.g., only for a trigger increase,)
 		; but not for a decrease. Could implement with "increase-in" and

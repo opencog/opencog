@@ -1,7 +1,13 @@
-; --------------------------------------------------------------
-; Entity Creation
+;
+; entity-defs.scm
+;
+; OpenPsi-related modulator, parameter, and other entity definitions for use in
+; the interaction dynamics rules.
 
-;;; Modulator Creation
+(load "../modulator.scm") ; not being used yet
+(load "utilities.scm")
+
+; Modulators
 (define (create-openpsi-modulator name initial-value)
     (define mod
         (Concept (string-append psi-prefix-str name)))
@@ -13,7 +19,7 @@
 
 (define arousal (create-openpsi-modulator "arousal" .5))
 
-;;; SEC Creation
+;SECs
 (define (create-openpsi-sec name)
     (define sec
         (Predicate (string-append psi-prefix-str name)))
@@ -27,7 +33,6 @@
 
 ;;; Agent State
 (define agent-state (Concept (string-append psi-prefix-str "agent-state")))
-
 
 (define power (create-openpsi-sec "Power"))
 
