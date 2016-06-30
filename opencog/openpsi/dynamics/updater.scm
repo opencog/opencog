@@ -1,26 +1,151 @@
+;
+; updater.scm
+;
+; Code responsible for updating various openpsi related entities, modulators,
+; and parameters based on interaction rules governing the dynamic relationships
+; between them.
+;
+; The interaction rules specify internal dynamic relationships of the form:
+;  "change in trigger-entity results in change in target-entity with strength s"
+; See interaction-rules.scm for more information
+;
+; The updater runs in a loop, and for each change in a trigger entity, it should
+; execute each and every rule containing the trigger as an antecedent, and each
+; of those rules should be executed once and only once for a given change.
+;
+
 (load "../main.scm")
 (load "utilities.scm")
 (load "entities-temp.scm")
 (load "interaction-rules.scm")
 
-;(use-modules (opencog))
-;(use-modules (opencog atom-types))  ;needed for AtTimeLink definition?
+; parameter for the impact of the change in trigger variable on target
+(define psi-max-strength-multiplier 5)
 
 ; Todo: implement this table in the atomspace
 (define prev-value-table (make-hash-table 40))
 
-(define PSI-MAX-STRENGTH-MULTIPLIER 5)
+; --------------------------------------------------------------
 
-;(TimeNode (number->string (current-time)))
-;; check out TriggerLink, trigger subscription-based messaging system
+; List of entities that are antecedants in the interaction rules
+(define psi-monitored-entities '())
+
+(define (psi-updater-init)
+"
+  Initialization of the updater. Called by psi-updater-run.
+"
+	; Grab all variables in the antecedents of the interaction rules that are
+	; arguments to (Predicate "psi-changed") and put them in
+	; psi-montored-params. Populate the prev-value-table with their current
+	; values.
+	(define rules (psi-get-interaction-rules))
+	(define evals-with-change-pred
+		(cog-filter-hypergraph psi-changed-eval? (Set rules)))
+
+	(for-each (lambda (eval-link)
+				(define key (gadr eval-link))
+				(define value (psi-get-number-value key))
+				(hash-set! prev-value-table key value)
+				(set! psi-monitored-entities (append psi-monitored-entities
+												  (list key)))
+			  )
+			evals-with-change-pred)
+
+	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
+
+	;(for-each (get-value-and-store key) evals-with-change-pred)
+
+	;(format #t "psi-evals-with-change-pred: ~a\n" evals-with-change-pred)
+
+)
+
+; ----------------------------------------------------------------------
+
+(define-public (do-psi-updater-step)
+"
+  Main function that executes the actions to be taken in every cycle.
+  At each step:
+    1) Evaluate the monitored entities and set their 'changed' predicates, and
+       for each changed entity store it's value in a current-value-table (this,
+       or otherwise storing the change magnitude, is needed because the current
+       value of a trigger entity might change because of application of a
+       previous rule.)
+    2) Store the current value or change magnitude before firing the rules
+       because the current value of the trigger might change as a result of a
+       previous rule.
+    3) Execute the interaction rules
+    4) Update the previous values of the changed monitored params
+"
+	(define changed-params '())
+	(define current-values-table (make-hash-table 20))
+
+	(define (set-param-change-status param)
+		(define tv)
+		;(define changed (psi-change-in? param))
+		;(format #t "\npsi-change-in? RETURN: ~a\n" changed)
+		(if (psi-change-in? param)
+	            (begin
+	                (format "*** Found change in : ~a\n" param)
+	                (set! changed-params
+	                    (append changed-params (list param)))
+	                (set! tv (stv 1 1))
+	                (hash-set! current-values-table param (psi-get-number-value param)))
+	            (set! tv (stv 0 1)))
+        (Evaluation tv
+            (Predicate "psi-changed")
+            (List
+                param)))
+
+	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
+	(let ((output-port (open-file "psilog.txt" "a")))
+			(format output-port "---------------------------------------- Loop ~a\n"
+				psi-updater-loop-count)
+			(format output-port
+				"agent power: ~a  arousal: ~a  speech: ~a  voice: ~a\n"
+				(psi-get-number-value agent-state-power)
+				(psi-get-number-value arousal)
+				(psi-get-number-value speech)
+				(psi-get-number-value voice-width))
+
+
+			(close-output-port output-port))
+
+	; Evaluate the monitored params and set "changed" predicates accordingly
+	(set! changed-params '())
+	(for-each set-param-change-status psi-monitored-entities)
+	;(format #t "\nchanged-params: ~a\n\n" changed-params)
+
+
+	; grab and evaluate the interaction rules
+	; todo: Could optimize by only calling rules containing the changed params
+	(let ((rules (psi-get-interaction-rules)))
+		(map psi-evaluate-interaction-rule rules)
+	)
+
+	; Update prev-value-table entries for the changed (monitored) params
+	(for-each (lambda (param)
+					(define value (hash-ref current-values-table param))
+					(hash-set! prev-value-table param value))
+			  changed-params)
+
+
+	(psi-pause)
+	(stv 1 1)
+)
+
+
+
 
 ; --------------------------------------------------------------
+(define-public (adjust-psi-var-level target strength trigger)
 "
- Openpsi Value Updating
+ Adjust psi-related variable based on triggered interaction rule
 
  Update openpsi parameter and variable values as a functon of the current
- value, so that increases in value are larger when the current value is low
- and smaller when the current value is high. (And vica versa for decreases.)
+ value of the target and the strength of the interaction rule. The current value
+ of the target influences the change magnitude such that increases in value are
+ larger when the current value is low and smaller when the current value is
+ high. (And vica versa for decreases.)
 
  Currently the implementation assumes the openpsi parameters are
  normalized in [0 1]. The values of the params are assumed to be stored
@@ -28,34 +153,28 @@
  execute the atom to obtain a value (see psi-get-value function). However, this
  representation maybe be changing subject to feedback from those in the know.
 
- Alpha, a parameter to the update function is in the range of [-1, 1] and
- represents the strength of change given interaction rule and whether the change
- in the target is positively or negatively correlated with the origin parameter.
- An alpha of 0 means no change, and 1 and -1 indicate the strongest degree of
- change in the positive and negative directions respectively.
-
- todo: see case-lambda in scheme for function overloading
+  target - the entity to update
+  strength - the strength of the interaction rule
+  trigger - the entity that changed that triggered the interaction rule
 "
-(define-public (adjust-psi-var-level target strength . origin)
 	(define new-value)
 	(define strength-multiplier)
 	(define alpha)
 	(define slope)
-	(set! origin (list-ref origin 0))
 	(display "\n------------------------------------------------------\n")
 	(format #t "adjust-psi-var-level   target: ~a   trigger: ~a"
-		target origin)
+		target trigger)
 	(let* ((current-value (psi-get-number-value target))
-		   (origin-change (psi-get-change-magnitude origin))
+		   (trigger-change (psi-get-change-magnitude trigger))
 		  )
 
 		; Determine normalized value for the alpha for the change function.
 		; Alpha is based on the strength of the interaction and the
-		; magnititude of change in the origin.
+		; magnititude of change in the trigger.
 
 		; Assume interaction strength .5 means a roughly one-to-one
-		; change in magnititude between the origin and target. IOW a given
-		; change in origin results in a change of approximately equal
+		; change in magnititude between the trigger and target. IOW a given
+		; change in trigger results in a change of approximately equal
 		; magnitude in the target.
 		; WAIT - maybe just have interaction strength be the multiplier ?
 		; We could assume strength = 1 by default if not present and make
@@ -66,30 +185,29 @@
 		; Strength needs to be in [-1, 1]
 		(set! strength (max (min strength 1) -1))
 
-		; We want to map the strength to some multiplier, where of .5 strength
-		; maps
-		; to multiplier of 1, and strength 1 maps to some max multiplier
+		; We want to map the strength to some multiplier, where .5 strength
+		; maps to multiplier of 1, and strength 1 maps to some max multiplier
 		; Probably want some exponential function that passes through (0,0),
 		; (.5,1), and (1,MAX), but in the meantime:
 		(if (<= strength .5)
 			(set! strength-multiplier (* 2 strength))
 
-			; else stength is > .5 so set multiplier between 1 and some specified max
+			; else strength is > .5 so set multiplier between 1 and some specified max
 			; using the formula that god only knows how i came up with but i
 			; think actually works.
-			(let ((max PSI-MAX-STRENGTH-MULTIPLIER))
+			(let ((max psi-max-strength-multiplier))
 				(set! strength-multiplier
 					(- (+ (* (- (* 2 max) 2) strength) 2) max)))
 		)
 
-		(set! alpha (* origin-change strength-multiplier))
+		(set! alpha (* trigger-change strength-multiplier))
 		; make sure alpha is in [-1,1]
 		(if (> alpha 0)
 			(set! alpha (min alpha 1))
 			(set! alpha (max alpha -1)))
 
 		(format #t "strength: ~a     change: ~a       alpha: ~a\n"
-			strength origin-change alpha)
+			strength trigger-change alpha)
 
 		; Increasing slope increases the degree change at all levels
 		(set! slope 10000)
@@ -131,6 +249,9 @@
 	)
 )
 
+; --------------------------------------------------------------
+; Helper functions
+
 (define (psi-get-interaction-rules)
 	(cog-outgoing-set
 			(cog-execute!
@@ -153,116 +274,6 @@
 			 (equal? (gar atom) (Predicate "psi-changed")))
 		#t
 		#f))
-
-(define psi-monitored-params '())
-
-(define (psi-updater-init)
-	; Grab all variables in the antecedents of the interaction rules that are
-	; arguments to (Predicate "psi-changed") and put them in
-	; psi-monintered--params. Populate the prev-value-table with their current
-	; values.
-
-	; Populate prev-values-table based on current value of the arguments to
-	; (GroupdedPredicate "psi-change-in") in the interaction rules
-	; Grab the interaction rules and get the eval links
-	(define rules (psi-get-interaction-rules))
-	(define evals-with-change-pred (cog-filter-hypergraph psi-changed-eval? (Set rules)))
-	;(define change-evals (cog-filter-hypergraph psi-change-eval? (Set rules)))
-
-	(for-each (lambda (eval-link)
-				(define key (gadr eval-link))
-				(define value (psi-get-number-value key))
-				(hash-set! prev-value-table key value)
-				(set! psi-monitored-params (append psi-monitored-params
-												  (list key)))
-			  )
-			evals-with-change-pred)
-
-	(set! psi-monitored-params (delete-duplicates psi-monitored-params))
-
-	;(for-each (get-value-and-store key) evals-with-change-pred)
-
-	;(format #t "psi-evals-with-change-pred: ~a\n" evals-with-change-pred)
-
-)
-
-; ----------------------------------------------------------------------
-
-(define-public (do-psi-updater-step)
-"
-  The main function that defines the steps to be taken in every cycle.
-  At each step:
-    1) Evaluate the monitored entities and set their 'changed' predicates, and
-       for each changed entity store it's value in a current-value-table (this,
-       or otherwise storing the change magnitude, is needed because the current
-       value of a trigger entity might change because of application of a
-       previous rule.)
-    2) Store the current value or change magnitude before firing the rules because
-       the current value of the trigger might change as a result of a previous
-       rule.
-    2) Fire up the interaction rules
-    3) Update the previous values of the changed monitored params
-"
-	(define changed-params '())
-	(define current-values-table (make-hash-table 20))
-
-	(define (set-param-change-status param)
-		(define tv)
-		;(define changed (psi-change-in? param))
-		;(format #t "\npsi-change-in? RETURN: ~a\n" changed)
-		(if (psi-change-in? param)
-	            (begin
-	                (format "*** Found change in : ~a\n" param)
-	                (set! changed-params
-	                    (append changed-params (list param)))
-	                (set! tv (stv 1 1))
-	                (hash-set! current-values-table param (psi-get-number-value param)))
-	            (set! tv (stv 0 1)))
-        (Evaluation tv
-            (Predicate "psi-changed")
-            (List
-                param)))
-
-	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
-	(let ((output-port (open-file "psilog.txt" "a")))
-			(format output-port "---------------------------------------- Loop ~a\n"
-				psi-updater-loop-count)
-			(format output-port
-				"agent power: ~a  arousal: ~a  speech: ~a  voice: ~a\n"
-				(psi-get-number-value agent-state-power)
-				(psi-get-number-value arousal)
-				(psi-get-number-value speech)
-				(psi-get-number-value voice-width))
-
-
-			(close-output-port output-port))
-
-	; Evaluate the monitored params and set "changed" predicates accordingly
-	(set! changed-params '())
-	(for-each set-param-change-status psi-monitored-params)
-	;(format #t "\nchanged-params: ~a\n\n" changed-params)
-
-
-	; grab and evaluate the interaction rules
-	; todo: Could optimize by only calling rules containing the changed params
-	(let ((rules (psi-get-interaction-rules)))
-		(map psi-evaluate-interaction-rule rules)
-	)
-
-	; Update prev-value-table entries for the changed (monitored) params
-	(for-each (lambda (param)
-					(define value (hash-ref current-values-table param))
-					(hash-set! prev-value-table param value))
-			  changed-params)
-
-
-	(psi-pause)
-	(stv 1 1)
-)
-
-
-
-; --------------------------------------------------------------
 
 (define (psi-change-in? target)
 	;(display "psi-change-in? argument: \n")(display target)
@@ -303,8 +314,6 @@
 		return)
 )
 
-
-
 (define (psi-evaluate-interaction-rule rule)
 	; Assumes rule is of the form (PredictiveImplication AtTime ...)
 	(define antecedent (gdr rule))
@@ -335,36 +344,20 @@
   (This is similar to the opencog utilities.scm filter-hypergraph function, but
   filters out links also. And also takes atom rather than scheme list as the
   parameter.)
+  Todo: Add this to scheme utilities in Atomspace repo?
 "
 	(define results '())
 	(if (pred? atom)
 		(set! results (append results (list atom))))
 	(if (cog-link? atom)
 		(for-each (lambda (sub-atom)
-					(set! results (append (cog-filter-hypergraph pred? sub-atom) results))
+					(set! results
+						(append (cog-filter-hypergraph pred? sub-atom) results))
 				  )
 				  (cog-outgoing-set atom)))
 	results
 )
 
-
-
-
-
-(define change-predicates)
-(define (psi-update-change-predicates)
-	(display "<insert update change-predicates here>\n")
-)
-
-(define-public (psi-evaluate-interaction-rules)
-	(display "placeholder")
-	; evaluate roles either by:
-	;     a) iterate each rule
-	;     b) based on changed predicates
-
-
-
-)
 
 ; --------------------------------------------------------------
 ; Updater Loop Control
