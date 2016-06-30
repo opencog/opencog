@@ -19,7 +19,7 @@
     (opencog eva-behavior))
 
 ; load kino's atomese string match code
-(load "../aiml/import/scm-variant/OpenCogAimlReply1.scm")
+(load "../aiml2oc/aiml2oc_guile/code/OpenCogAimlReply1.scm")
 
 ; load config file for chatbot (eva)
 (load-from-path "opencog/eva-behavior/cfg-eva.scm")
@@ -54,7 +54,7 @@
 
 ; Removing this for now - need to figure out how to stop the pattern below from
 ; matching with the pattern above. Also need to figure out how to deal with the
-; situation of a word in the stimulus also being in the training pattern. E.g.,
+; situation of a words in the stimuls also being in the training pattern. E.g.,
 ; if the training pattern is "When I say * you *" and then the word "you" gets
 ; used in the stimilus.
 ; "When I say * then you *"
@@ -91,7 +91,6 @@
     (define consequent)
     (define result)
 	(define listified-string (mapConceptualizeString (clean-text input-str)))
-	;(display "listified-string: ")(display listified-string)(newline)
 
     (set! rule (get-tree-with-antecedent listified-string))
     (if rule
@@ -100,9 +99,6 @@
 
             ; Need to unify the variables in the rule with the input without
             ; matching to existing phrases that may be in the atomspace.
-			; TODO: this could be handled more simply by a FilterLink when
-			; that is implemented.
-
             ; Create and set a temp atomspace
             (set! as-orig (cog-set-atomspace! (cog-new-atomspace)))
             ; Add the rule and the listified input to the new atomspace

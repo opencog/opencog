@@ -141,10 +141,8 @@
 	(stv 1 1)
 )
 
-
-
-
 ; --------------------------------------------------------------
+
 (define-public (adjust-psi-var-level target strength trigger)
 "
  Adjust psi-related variable based on triggered interaction rule
