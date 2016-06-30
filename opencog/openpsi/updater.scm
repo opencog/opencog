@@ -6,7 +6,7 @@
 ; between them.
 ;
 ; The interaction rules specify internal dynamic relationships of the form:
-;  "change in trigger-entity results in change in target-entity with strength s"
+; "change in trigger-entity causes change in target-entity with strength s"
 ; See interaction-rules.scm for more information
 ;
 ; The updater runs in a loop, and for each change in a trigger entity, it should
@@ -94,7 +94,8 @@
 	                (set! changed-params
 	                    (append changed-params (list param)))
 	                (set! tv (stv 1 1))
-	                (hash-set! current-values-table param (psi-get-number-value param)))
+	                (hash-set! current-values-table param
+	                    (psi-get-number-value param)))
 	            (set! tv (stv 0 1)))
         (Evaluation tv
             (Predicate "psi-changed")
@@ -104,7 +105,8 @@
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 	(if logging
 		(let ((output-port (open-file "psilog.txt" "a")))
-				(format output-port "---------------------------------------- Loop ~a\n"
+				(format output-port
+					"---------------------------------------- Loop ~a\n"
 					psi-updater-loop-count)
 				(format output-port
 					"agent power: ~a  arousal: ~a  speech: ~a  voice: ~a\n"
@@ -199,9 +201,9 @@
 		(if (<= strength .5)
 			(set! strength-multiplier (* 2 strength))
 
-			; else strength is > .5 so set multiplier between 1 and some specified max
-			; using the formula that god only knows how i came up with but i
-			; think actually works.
+			; else strength is > .5 so set multiplier between 1 and some
+			; specified max using the formula that god only knows how i came up
+			; with but i think actually works.
 			(let ((max psi-max-strength-multiplier))
 				(set! strength-multiplier
 					(- (+ (* (- (* 2 max) 2) strength) 2) max)))
@@ -425,7 +427,8 @@
 
 (define-public (psi-updater-halt)
 "
-  Tells the psi loop thread, that is started by running `(psi-update-run)`, to exit.
+  Tells the psi loop thread, that is started by running `(psi-update-run)`, to
+  exit.
 "
     (set! psi-updater-is-running #f)
     (cog-set-tv! updater-continue-pred (stv 0 1))
