@@ -1,8 +1,7 @@
 /*
  * opencog/attention/WARentCollectionAgent.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,7 +36,7 @@
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Agent.h>
 
-#include "RentCollectionBase.h"
+#include "RentCollectionBaseAgent.h"
 
 namespace opencog {
     /** \addtogroup grp_attention
@@ -49,13 +48,13 @@ namespace opencog {
     /**
      * This Agent collects wages form inside the attentional focus by iterating
      * through each atoms in the attentional focus and collects the Wage which
-     * is calculate depending on the current funds in the Bank. The wage is 
-     * computed as a linear function form the Funds and a Target Value. 
+     * is calculate depending on the current funds in the Bank. The wage is
+     * computed as a linear function form the Funds and a Target Value.
      * It is capped to the range 0-2x default Wage.
      *
      * This Agent is supposed to run in it's own Thread.
      */
-    class AFRentCollectionAgent : public RentCollectionBase, public Agent {
+    class AFRentCollectionAgent : public RentCollectionBaseAgent {
     private:
 
 
@@ -72,7 +71,7 @@ namespace opencog {
 
         AFRentCollectionAgent(CogServer&);
         virtual ~AFRentCollectionAgent();
-        virtual void run();
+        virtual void selectTargets(HandleSeq &targetSetOut);
     }; // class
 
     /** @}*/
