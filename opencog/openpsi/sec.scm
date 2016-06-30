@@ -28,3 +28,31 @@
 	        sec))
     (psi-set-value! stimulus-sec (Number initial-value))
     stimulus-sec)
+
+
+; =============================================================================
+; CREATE SECs
+
+(define novelty (psi-create-sec "novelty"))
+(define goal-relevance (psi-create-sec "goal-relevance"))
+(define pleasantness (psi-create-sec "pleasantness"))
+(define outcome-probability (psi-create-sec "outcome-probability"))
+(define surprise (psi-create-sec "surprise"))
+(define agent-and-intention (psi-create-sec "agent-and-intention"))
+(define control (psi-create-sec "control"))
+(define power (psi-create-sec "power"))
+(define adjustment (psi-create-sec "adjustment"))
+(define standards (psi-create-sec "standards"))
+
+; --------------------------------------------------------------
+
+; Agent State
+(define agent-state (Concept (string-append psi-prefix-str "agent-state")))
+
+; --------------------------------------------------------------
+
+; Create Stimulus-SEC Associations
+(define agent-state-power
+	(psi-create-stimulus-sec agent-state power .5))
+
+

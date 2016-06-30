@@ -16,15 +16,29 @@
 
 (load "main.scm")
 (load "utilities.scm")
+(load "modulator.scm")
+(load "sec.scm")
 (load "entity-defs.scm")
 (load "interaction-rules.scm")
 
 (define logging #t)
 (define verbose #t)
+(define slo-mo #f)
+(define single-step #f)
+
+; --------------------------------------------------------------
+; Config Parameters
+; Todo: Add these to a config file
+
+; Multiplier that can be tweaked to increase or decrease the sensitivity of
+; interactactions between openpsi entities. Default is 1. 
+(define dynamics-sensitivity 1)
 
 ; Parameter to tweak the strength of impact of changes in triggers on changes in
 ; targets.
 (define psi-max-strength-multiplier 5)
+
+; --------------------------------------------------------------
 
 ; Todo: implement this table in the atomspace
 (define prev-value-table (make-hash-table 40))
@@ -45,6 +59,8 @@
 	(define rules (psi-get-interaction-rules))
 	(define evals-with-change-pred
 		(cog-filter-hypergraph psi-changed-eval? (Set rules)))
+
+	(if verbose (display "psi-updater-init\n"))
 
 	(for-each (lambda (eval-link)
 				(define key (gadr eval-link))
@@ -84,23 +100,51 @@
 	(define current-values-table (make-hash-table 20))
 
 	(define (set-param-change-status param)
-		(define tv)
-		;(define changed (psi-change-in? param))
-		;(format #t "\npsi-change-in? RETURN: ~a\n" changed)
+		(define changed-tv)
+		(define pos-change-tv)
+		(define neg-change-tv)
+		(define current-val)
+		(define previous-val)
+		;(format #t "set-param-change-status: ~a  psi-change-in?: ~a\n" param (psi-change-in? param))
 		(if (psi-change-in? param)
-	            (begin
-	                (if verbose
-	                    (format "*** Found change in : ~a\n" param))
-	                (set! changed-params
-	                    (append changed-params (list param)))
-	                (set! tv (stv 1 1))
-	                (hash-set! current-values-table param
-	                    (psi-get-number-value param)))
-	            (set! tv (stv 0 1)))
-        (Evaluation tv
+            (begin
+                (if verbose
+                    (format #t "*** Found change in : ~a\n" param))
+                (set! changed-params
+                    (append changed-params (list param)))
+                (set! previous-val (hash-ref prev-value-table param))
+                (set! current-val (psi-get-number-value param))
+                (hash-set! current-values-table param
+                    (psi-get-number-value param))
+                (set! changed-tv (stv 1 1))
+                (if (> current-val previous-val)
+                    (begin
+	                    (set! pos-change-tv (stv 1 1))
+	                    (set! neg-change-tv (stv 0 1)))
+	                (begin
+	                    (set! pos-change-tv (stv 0 1))
+	                    (set! neg-change-tv (stv 1 1)))))
+
+            (begin ; no change in the param
+                (set! changed-tv (stv 0 1))
+                (set! pos-change-tv (stv 0 1))
+                (set! neg-change-tv (stv 0 1))))
+
+        (Evaluation changed-tv
             (Predicate "psi-changed")
             (List
-                param)))
+                param))
+
+        (Evaluation pos-change-tv
+            (Predicate "psi-increased")
+            (List
+                param))
+
+        (Evaluation neg-change-tv
+            (Predicate "psi-decreased")
+            (List
+                param))
+    )
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 	(if logging
@@ -138,6 +182,8 @@
 
 
 	(psi-pause)
+	(if single-step
+		(psi-updater-halt))
 	(stv 1 1)
 )
 
@@ -272,21 +318,24 @@
 
 ; helper to identify (Eval (GPN "scm: psi-change-in?" (List . . .))) links
 ; not used anymore i think
-(define (psi-change-eval? atom)
-	(if (and (equal? (cog-type atom) 'EvaluationLink)
-			 (equal? (gar atom) (GroundedPredicateNode "scm: psi-change-in?")))
-		#t
-		#f))
+;(define (psi-change-eval? atom)
+;	(if (and (equal? (cog-type atom) 'EvaluationLink)
+;			 (equal? (gar atom) (GroundedPredicateNode "scm: psi-change-in?")))
+;		#t
+;		#f))
 
 ; helper to identify (Eval (Predicate "psi-changed" (List . . .))) links
 (define (psi-changed-eval? atom)
 	(if (and (equal? (cog-type atom) 'EvaluationLink)
-			 (equal? (gar atom) (Predicate "psi-changed")))
+			 (or
+				 (equal? (gar atom) (Predicate "psi-changed"))
+				 (equal? (gar atom) (Predicate "psi-increased"))
+				 (equal? (gar atom) (Predicate "psi-decreased"))))
 		#t
 		#f))
 
 (define (psi-change-in? target)
-	;(display "psi-change-in? argument: \n")(display target)
+	;(display "psi-change-in? target: \n")(display target)
 	(let* ((previous (hash-ref prev-value-table target))
 		   (current (psi-get-number-value target)))
 
@@ -387,8 +436,10 @@
     ; Pause for 100 millisecs, to keep the number of loops within a reasonable
     ; range.
     ; todo: is this needed?
-    ; keeping it slow for now dev purposes
-    (usleep 1500000))
+    (define pause-time 100000)
+    (if slo-mo
+        (set! pause-time 1500000))
+    (usleep pause-time))
 
 
 ; --------------------------------------------------------------
@@ -447,9 +498,11 @@
 (define rules (psi-get-interaction-rules))
 
 (define (psi-decrease-value target)
-	(psi-set-value! target (Number (- (psi-get-number-value target) .1))))
+	(psi-set-value! target (Number
+		(max 0 (- (psi-get-number-value target) .1)))))
 (define (psi-increase-value target)
-	(psi-set-value! target (Number (+ (psi-get-number-value target) .1))))
+	(psi-set-value! target (Number
+		(min 1 (+ (psi-get-number-value target) .1)))))
 
 (define-public d psi-decrease-value)
 (define-public i psi-increase-value)

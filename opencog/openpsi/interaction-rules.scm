@@ -24,6 +24,15 @@
 ;  	                target
 ;  	                (NumberNode strength)
 ;  	                trigger))))
+;
+; The valid predicates for the antecdent are:
+;
+;       (Predicate "psi-changed") - trigger entity value has changed
+;       (Predicate "psi-increased") - trigger entity value has increased
+;       (Predicate "psi-decreased") - trigger entity value has decreased
+
+
+(use-modules (opencog atom-types)) ; needed for PredictiveImplication definition
 
 ; Contains defined entities to be used in the interaction rules
 (load "entity-defs.scm")
@@ -31,7 +40,8 @@
 (define psi-interaction-rule
 	(ConceptNode (string-append psi-prefix-str "interaction rule")))
 
-(define (create-psi-interaction-rule trigger-entity target-entity strength)
+(define (create-psi-interaction-rule trigger-entity change-type target-entity
+	strength)
 "
   Helper function to create the interaction rules. It is assumed that the
   trigger and target store their current values in a StateLink, and if not are
@@ -39,21 +49,41 @@
   entity is an evaluatable predicate, current value of the entity is assumed to
   be the strength of its evaluated truth value.
 
+  Parameters:
   trigger-entity - the variable that when it changes triggers a change in target
+  change-type - specifies type of change in the trigger.
+                options: changed, increased, decreased
   target-entity - the variable that is changed as a result of change in trigger
   strength - the degree to which a change in the trigger event causes a change
-    in the target. Value is in [0,1]
+    in the target.
+    Value is in [-1,1].
+    Positive value means target changes in the same direction as the trigger
+    Negative value means target changes in the opposite direction as trigger
+    Large magnitude means charge in trigger has a large effect on target value
+    Small magnitdue means change in trigger has small effect on target value
+    0 would mean no change occurs in the target, rendering such a rule useless
 "
 	(define rule)
-	; Todo: Why is this executing the error when the file is loaded?
-	;(if (or (< strength 0) (> strength 1))
-    ;    (error (string-append "In function create-psi-interaction rule, "
-    ;        "strength parameter needs to be in [0,1]")))
+	(define pred-change-type-name
+		(case change-type
+			(("changed") "psi-changed")
+			(("increased") "psi-increased")
+			(("decreased") "psi-decreased")
+			(else "error")))
+	(if (eq? pred-change-type-name "error")
+		(error (string-append "In function create-psi-interaction rule, "
+			"change-type parameter needs to be one of 'changed', 'increased' or "
+			"'decreased'. got: " change-type)))
+	(if (or (< strength -1) (> strength 1))
+        (error (string-append "In function create-psi-interaction rule, "
+            "strength parameter needs to be in [-1,1]. got: "
+            (number->string strength))))
+
 	(set! rule
 		(PredictiveImplication
 			(TimeNode 1)
 		    (Evaluation
-                (Predicate "psi-changed")
+                (Predicate pred-change-type-name)
                 (List
                     trigger-entity))
 		    (ExecutionOutputLink
@@ -66,25 +96,29 @@
 	rule
 )
 
+(define changed "changed")
+(define increased "increased")
+(define decreased "decreased")
 
 ; --------------------------------------------------------------
 ; The Rules
 ;
 ; Todo: Rule sets should be moved to their own files.
 
-; ==============================================================
+; ===========================================================================
 ; Below are bogus mock interaction rules for dev purposes
 
 (define speech->power
-	(create-psi-interaction-rule speech agent-state-power .5))
+	(create-psi-interaction-rule speech increased agent-state-power .5))
 
 (define power->voice
-	(create-psi-interaction-rule agent-state-power voice-width 1))
+	(create-psi-interaction-rule agent-state-power changed voice-width 1))
 
 (define power->arousal
-	(create-psi-interaction-rule agent-state-power arousal .1))
+	(create-psi-interaction-rule agent-state-power changed arousal .1))
 
 (define arousal->voice
-	(create-psi-interaction-rule arousal voice-width -.9))
-; ==============================================================
+	(create-psi-interaction-rule arousal changed voice-width -.9))
+
+; ===========================================================================
 

@@ -331,10 +331,13 @@
 	than NumberNode).
 "
 	(define result (psi-get-value entity))
+	;(format #t "psi-get-number-value entity: \n~a initial result: ~a\n"
+	;	entity result)
 	(if (and (cog-atom? result) (eq? 'NumberNode (cog-type result)))
 		(set! result (string->number (cog-name result))))
 	(if (cog-tv? result)
 		(set! result (tv-mean result)))
+    ;(format #t "return result: ~a\n" result)
 	result)
 
 (define (psi-set-value! entity value)
@@ -342,6 +345,7 @@
   Set the current value of psi-related entity.
 "
 	; OpenPsi values are stored using StateLinks by default
+	; Todo: need to handle case where value is not stored in StateLink
 	(State
 		entity
 		value))
