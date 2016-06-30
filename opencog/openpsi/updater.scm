@@ -438,8 +438,8 @@
 ; Shortcuts for dev use
 
 (define halt psi-updater-halt)
-(define h halt)
-(define r psi-updater-run)
+(define-public h halt)
+(define-public r psi-updater-run)
 (define r1 speech->power)
 (define r2 power->voice)
 (define voice voice-width)
@@ -451,25 +451,26 @@
 (define (psi-increase-value target)
 	(psi-set-value! target (Number (+ (psi-get-number-value target) .1))))
 
-(define d psi-decrease-value)
-(define i psi-increase-value)
+(define-public d psi-decrease-value)
+(define-public i psi-increase-value)
 
 (define (psi-set-pred-true target)
 	(Evaluation target (List) (stv 1 1)))
 (define (psi-set-pred-false target)
 	(Evaluation target (List) (stv 0 1)))
 
-(define t psi-set-pred-true)
+(define-public t psi-set-pred-true)
 (define f psi-set-pred-false)
 
-(define s speech)
-(define p agent-state-power)
+(define-public s speech)
+(define-public p agent-state-power)
+(define-public a arousal)
 
 
-(define (uupdate a x) (/ (- (expt a x) 1) (- a 1)))
+;(define (uupdate a x) (/ (- (expt a x) 1) (- a 1)))
 
 ; (10000^(a*x) - 1) / (10000^a -1)
-(define (update2 a x) (/ (- (expt 1000 (* a x)) 1) (- (expt 1000 a) 1)))
+;(define (update2 a x) (/ (- (expt 1000 (* a x)) 1) (- (expt 1000 a) 1)))
 
 
 ; --------------------------------------------------------------
