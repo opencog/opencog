@@ -77,12 +77,12 @@ def call_wolframalpha(qq, aid):
     (set! appid (Node id))
 )
 
-(define (call-wolframalpha)
-;    (State duckduckgo-search search-started)
+(define (ask-wolframalpha)
+    (State wolframalpha-search search-started)
 
     (begin-thread
         (python-call-with-as "set_atomspace_wa" (cog-atomspace))
         (cog-evaluate! (Evaluation (GroundedPredicate "py: call_wolframalpha") (List (get-input-text-node) appid)))
-;        (State duckduckgo-search search-finished)
+        (State wolframalpha-search search-finished)
     )
 )

@@ -69,6 +69,11 @@
 (State duckduckgo-answers default-state)
 (State duckduckgo-search default-state)
 
+(define wolframalpha-answers (Anchor (chat-prefix "WolframAlphaAnswers")))
+(define wolframalpha-search (Anchor (chat-prefix "WolframAlphaSearch")))
+(State wolframalpha-answers default-state)
+(State wolframalpha-search default-state)
+
 (define chatbot-eva (Anchor (chat-prefix "ChatbotEva")))
 (define sent-to-chatbot-eva (Concept (chat-prefix "SentToChatbotEva")))
 (define no-action-taken (Concept (chat-prefix "NoActionTaken")))
@@ -99,6 +104,7 @@
 ; Load the available actions
 (load "actions.scm")
 (load "duckduckgo.scm")
+(load "wolframalpha.scm")
 
 ; Load the psi-rules
 (load "psi-rules.scm")
