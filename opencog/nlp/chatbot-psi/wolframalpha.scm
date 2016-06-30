@@ -47,12 +47,14 @@ def call_wolframalpha(qq, aid):
         if title == 'Result' or title == 'Definition' or title == 'Basic definition':
             result = pod.find('subpod').find('plaintext').text
 
-    # Sometimes '|' exists in the result
-    # Also skip brackets
-    result = result.replace('|', '').replace('(', '').replace(')', '')
+    # Post-process the result a bit
+    if result:
+        # Sometimes '|' exists in the result
+        # Also skip brackets
+        result = result.replace('|', '').replace('(', '').replace(')', '')
 
-    # For common punctuations, to turn them into actual WordNode later
-    result = result.replace(',', ' ,').replace('.', ' .').replace('?', ' ?').replace('!', ' !')
+        # For common punctuations, to turn them into actual WordNode later
+        result = result.replace(',', ' ,').replace('.', ' .').replace('?', ' ?').replace('!', ' !')
 
     # Write to AtomSpace
     if result:
