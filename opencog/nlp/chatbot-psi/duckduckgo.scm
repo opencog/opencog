@@ -11,7 +11,7 @@ import json
 
 atomspace = ''
 
-def set_atomspace(atsp):
+def set_atomspace_ddg(atsp):
     global atomspace
     atomspace = atsp
     return TruthValue(1, 1)
@@ -52,7 +52,7 @@ def call_duckduckgo(qq):
     ; of this type seems to be very long (a paragraph), split into sentences
     ; and then parse?
     (begin-thread
-        (python-call-with-as "set_atomspace" (cog-atomspace))
+        (python-call-with-as "set_atomspace_ddg" (cog-atomspace))
         (cog-evaluate! (Evaluation (GroundedPredicate "py: call_duckduckgo") (List (get-input-text-node))))
         (State duckduckgo-search search-finished)
     )
