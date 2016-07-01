@@ -31,7 +31,7 @@
 ; Todo: Add these to a config file
 
 ; Multiplier that can be tweaked to increase or decrease the sensitivity of
-; interactactions between openpsi entities. Default is 1. 
+; interactactions between openpsi entities. Default is 1.
 (define dynamics-sensitivity 1)
 
 ; Parameter to tweak the strength of impact of changes in triggers on changes in
@@ -105,7 +105,8 @@
 		(define neg-change-tv)
 		(define current-val)
 		(define previous-val)
-		;(format #t "set-param-change-status: ~a  psi-change-in?: ~a\n" param (psi-change-in? param))
+		;(format #t "set-param-change-status: ~a  psi-change-in?: ~a\n"
+		;	param (psi-change-in? param))
 		(if (psi-change-in? param)
             (begin
                 (if verbose
@@ -253,7 +254,7 @@
 					(- (+ (* (- (* 2 max) 2) strength) 2) max)))
 		)
 
-		(set! alpha (* trigger-change strength-multiplier))
+		(set! alpha (* trigger-change strength-multiplier dynamics-sensitivity))
 		; make sure alpha is in [-1,1]
 		(if (> alpha 0)
 			(set! alpha (min alpha 1))

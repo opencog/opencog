@@ -12,8 +12,9 @@ taking apropriate action.
 
 ## Modulators and Internal Dynamics
 
-OpenPsi contains parameters that regulate processes such as stimulus 
-evaluation, action selection, and emotional expression. 
+OpenPsi includes a dynamical system of interacting modulator variables.
+The model contains varying parameters that regulate processes such as 
+stimulus evaluation, action selection, and emotional expression. 
 Modulators are based on MicroPsi, and SECs are based on Component 
 Process Model theory (see references for  more info). These and other 
 OpenPsi-related entities dynamically interact with each other according 
@@ -25,8 +26,8 @@ The interaction rules have the logical form of:
     change in trigger entity --> change in target entity
 
 The change in the target is a function of the magnitude of change in the
-trigger, the strength of the interaction rule, and the current value of the
-target.
+trigger, the strength of the interaction rule, and the current value of 
+the target.
 
 The rules in Atomese have the form:
 
@@ -42,6 +43,9 @@ The rules in Atomese have the form:
                     target
                     (NumberNode strength)
                     trigger))))
+
+The antecedent predicate can be one of "psi-changed", "psi-increased"
+or "psi-decreased".
 
 Files:
 
