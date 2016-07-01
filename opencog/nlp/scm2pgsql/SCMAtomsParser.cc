@@ -42,6 +42,41 @@ SCMAtomsParser::~SCMAtomsParser()
 
 void SCMAtomsParser::parseFile(FILE *f)
 {
+
+    int lineAllocSize = 1024;
+    char *currentLine = (char *) malloc(lineAllocSize);
+    int cursor = 0;
+    currentLine[0] = '\0';
+
+    while ((int c = fgetc(f)) != EOF) {
+        if (cursor == (lineAllocSize - 1)) {
+            lineAllocSize = 2 * lineAllocSize;
+            currentLine = (char *) realloc(currentLine, lineAllocSize);
+        }
+        currentLine[cursor++] = c;
+        currentLine[cursor] = '\0';
+        switch (c) {
+            case '(': {
+                level++;
+                break;
+            }
+            case ')': {
+                if (--level == 0) {
+                    printf("%s\n" currentLine);
+                    currentLine[0] = '\0';
+                }
+                break;
+            }
+            default: {
+                // do nothing
+            }
+        }
+    }
+}
+
+
+void SCMAtomsParser::parseFile(FILE *f)
+{
     char *line = NULL;
     size_t lineLength;
     int lineCount;
@@ -61,8 +96,13 @@ void SCMAtomsParser::parseFile(FILE *f)
         lineCount++;
         switch (state) {
             case EXPECT_ATOM_DEFINITION: {
-                if (isNodeDefinition(line, lineLength)) {
-                } else if (isLinkDefinition(line, lineLength)) {
+                Type atomType = parseAtomType(line);
+                if (classserver().isNode(atomType)) {
+                    std::string nodeName = parseNodeName(line);
+                    Handle handle = getNodeHandle(atomType, nodeName);
+                    AtomPtr node(createNode(atomType, nodeName));
+                    TLB::addAtom(node);
+                } else if (classserver().isNode(atomType)) {
                 }
                 break;
             }
@@ -75,5 +115,52 @@ void SCMAtomsParser::parseFile(FILE *f)
     }
 
     logger().info("Parsed \"%d\" lines", lineCount);
+    if (NULL != line) {
+        free(line);
+    }
+}
 
+Handle SCMAtomsParser::getNodeHandle(Type type, std::string name)
+{
+
+}
+
+Type SCMAtomsParser::parseAtomType(char *line)
+{
+    
+    Type answer = NOTYPE;
+
+    char *cursor1 = strchr(s, '(');
+    if (NULL != cursor1) {
+        char *cursor2 = strchr(s, ' ');
+        if (NULL != cursor2) {
+            int length = cursor2 - cursor1 - 1;
+            std::string typeName(cursor1 + 1, length);
+            answer = classserver().getType(typeName);
+        }
+    }
+
+    return answer;
+}
+
+std::string SCMAtomsParser::parseNodeName(char *line)
+{
+    
+    // TODO: This method will fail if " is used in the Node's name.
+    // For example: (WordNode "\"WeirdNodeName\"")
+      
+    std::string answer = "";
+
+    char *cursor1 = strchr(s, '\"');
+    if (NULL != cursor1) {
+        char *cursor2 = strchr(cursor1 + 1, '\"');
+        if (NULL != cursor2) {
+            int length = cursor2 - cursor1 - 1;
+            std::string nodeName(cursor1 + 1, length);
+            //answer = nodeName;
+            return nodeName;
+        }
+    }
+
+    return answer;
 }
