@@ -2,19 +2,14 @@
 #
 # Convert AIML files to OpenCog Atomese.
 #
-# The perl script converts AIML XML into OpenCog Atomese.  See the
+# The perl script converts AIML XML into OpenCog OpenPsi rules.  See the
 # bottom for an example of the output format, and a breif discussion
-# about the design choices taken.  This script "works", in that it
-# generates valid Atomese that can actually be imported into the
-# atomspace.
+# about the design choices taken.
 #
-# As of April 2016, the idea of importing AIML is mothballed: so,
-# although the conversion and import works, the surrounding code
-# to attach the AIML rules into the rest of the OpenCog chat
-# infrastructure has not been created, and probably wont be.  The
-# reason for this is that there is no compelling AIML content that
-# is in any way useful to the current plans for OpenCog.  I think
-# we've moved past AIML in terms of what we can accomplish.
+# The use of AIML is strongly discouraged, and is not a formal OpenCog
+# project goal. However, there are various requests from various
+# directions asking for AIML to OpenCog interoperation, and this script
+# is meant to fulfill this request.
 #
 # Copyright (c) Kino Coursey 2015
 # Copyright (c) Linas Vepstas 2016
@@ -22,15 +17,16 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.4.2";
+my $ver = "0.5.0";
 my $debug;
 my $help;
 my $version;
-my $overwrite;
+my $overwrite = 0;
 my $aimlDir ='.';
 my $intermediateFile = 'aiml-flat.txt';
 my $outDir = '';
 my $outFile = 'aiml-rules.scm';
+my $weightFile = '';
 
 my $base_priority = 1.0;
 
@@ -44,7 +40,8 @@ GetOptions(
     'out=s' => \$outDir,
     'outfile=s' => \$outFile,
     'priority=f' => \$base_priority,
-) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>] [--outfile <filename>]\n";
+    'weights=s' => \$weightfile,
+) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>] [--outfile <filename>] [--weights <weight-filename>]\n";
 
 if ($help)
 {
@@ -59,6 +56,7 @@ if ($help)
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
 	print "   --out <directory>       Dir for many small output files.\n";
 	print "   --outfile <filename>    Output one large file, default: '$outFile'\n";
+	print "   --weights <filename>    Input file, holding rule entropies\n";
 	print "   --priority <float>      Rule priority, default: '$base_priority'\n";
 	die "\n";
 }
