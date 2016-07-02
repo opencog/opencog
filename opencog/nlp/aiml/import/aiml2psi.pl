@@ -7,9 +7,9 @@
 # about the design choices taken.
 #
 # The use of AIML is strongly discouraged, and is not a formal OpenCog
-# project goal. However, there are various requests from various
-# directions asking for AIML to OpenCog interoperation, and this script
-# is meant to fulfill this request.
+# project goal. However, there are various requests from various forces
+# asking for AIML-within-OpenCog capabilities, and this script is meant
+# to fulfill these requests.
 #
 # Copyright (c) Kino Coursey 2015
 # Copyright (c) Linas Vepstas 2016
@@ -40,7 +40,7 @@ GetOptions(
     'out=s' => \$outDir,
     'outfile=s' => \$outFile,
     'priority=f' => \$base_priority,
-    'weights=s' => \$weightfile,
+    'weights=s' => \$weightFile,
 ) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>] [--outfile <filename>] [--weights <weight-filename>]\n";
 
 if ($help)
@@ -67,11 +67,41 @@ if ($version)
 	die "\n";
 }
 
+# ------------------------------------------------------------------
+# If there is a weights file, ingest it.
+# The format is assumed to be three columns: an AIML filename,
+# an AIML rule, and a log-liklihood column.
+# Example:
+#
+# interjection.aiml	INTERJECTION <THAT> * <TOPIC> *	-1.97356795842974
+# stack.aiml	PUSH * <THAT> * <TOPIC> *	-2.08673772127076
+# mp0.aiml	INSULT <THAT> * <TOPIC> *	-3.96370879747086
+# default.aiml	IT * <THAT> * <TOPIC> *	-4.12722757190359
+# that.aiml	THAT * <THAT> * <TOPIC> *	-4.25883896393828
+# atomic.aiml	WHY <THAT> * <TOPIC> *	-4.28192456627784
+#
+sub ingest_weights
+{
+	if ('' eq $weightFile)
+	{
+		print "No weightfile specified.\n";
+		return;
+	}
+	open WFILE, $weightFile
+		or die "Can't open the weight file `$weightFile`\n";
+	print "Reading weights from `$weightFile`\n";
+
+	close WFILE;
+}
+
+&ingest_weights();
+
+# ------------------------------------------------------------------
 # Conversion is done in a two-pass process.  The first pass flattens
 # the AIML format into a simplified linear format.  A second pass
 # converts this flattened format into Atomese.
 
-print "\n AIML Source directory = $aimlDir\n";
+print "\nAIML Source directory = $aimlDir\n";
 opendir(DIR, "$aimlDir");
 my @aimlFiles = grep(/\.aiml$/, readdir(DIR));
 closedir(DIR);
