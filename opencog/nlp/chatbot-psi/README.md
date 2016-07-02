@@ -11,7 +11,7 @@ cp aiml-rules.scm /tmp
 
 - Install (if you haven't done so) and start the [RelEx server] (https://github.com/opencog/relex)
 
-- Sign up an account and then an AppID for sending query to [WolframAlpha] (http://developer.wolframalpha.com/portal/apisignup.html)
+- [Sign up an account] (http://developer.wolframalpha.com/portal/apisignup.html) and then an AppID if you want the chatbot to send queries to [WolframAlpha] (http://www.wolframalpha.com/)
 
 - Start a Guile interpreter and load the chatbot, e.g.
 ```
@@ -28,7 +28,7 @@ guile -l "chatbot.scm"
 (parse-all nlp-parse "/where/the/text/file/is")
 ```
 
-- Set the AppID (an error will be thrown without doing this step, but the chatbot would still give responses)
+- Set the WolframAlpha AppID (Without doing this step, the chatbot will not send any query to WolframAlpha, but would still give responses)
 ```
 (set-appid "YOUR-WOLFRAMALPHA-APPID")
 ```
@@ -65,7 +65,10 @@ The code consists of:
   - All the chat-related actions available for the psi-rules
 
 - duckduckgo.scm
-  - Can be considered as another available action for the psi-rules as well, which allows that chatbot to query [DuckDuckGo] (https://duckduckgo.com) by using its [API] (https://duckduckgo.com/api)
+  - Can be considered as another available action for the psi-rules as well, which allows the chatbot to query [DuckDuckGo] (https://duckduckgo.com) by using its [API] (https://duckduckgo.com/api)
+
+- wolframalpha.scm
+  - Can be considered as another available action for the psi-rules as well, which allows the chatbot to query [WolframAlpha] (http://www.wolframalpha.com/)
 
 - utils.scm
   - Utilities that are useful in general

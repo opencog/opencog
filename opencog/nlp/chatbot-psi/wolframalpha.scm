@@ -73,18 +73,23 @@ def call_wolframalpha(qq, aid):
 ")
 
 ; AppID for Wolfram|Alpha Webservice API
-(define appid (Node ""))
+(define appid "")
 
 (define (set-appid id)
-    (set! appid (Node id))
+    (set! appid id)
 )
 
 (define (ask-wolframalpha)
-    (State wolframalpha-search search-started)
+    (if (not (equal? appid ""))
+        (begin-thread
+            (define appid_node (Node appid))
+            (State wolframalpha-search search-started)
 
-    (begin-thread
-        (python-call-with-as "set_atomspace_wa" (cog-atomspace))
-        (cog-evaluate! (Evaluation (GroundedPredicate "py: call_wolframalpha") (List (get-input-text-node) appid)))
-        (State wolframalpha-search search-finished)
+            (python-call-with-as "set_atomspace_wa" (cog-atomspace))
+            (cog-evaluate! (Evaluation (GroundedPredicate "py: call_wolframalpha")
+                (List (get-input-text-node) appid_node)))
+            (State wolframalpha-search search-finished)
+            (cog-extract appid_node)
+        )
     )
 )
