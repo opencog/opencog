@@ -91,6 +91,20 @@ sub ingest_weights
 		or die "Can't open the weight file `$weightFile`\n";
 	print "Reading weights from `$weightFile`\n";
 
+	while (<WFILE>) {
+		# split into filename, text, log-liklihood
+		if (/([\w]+?\.aiml)\s+(.*)\s+-([\d\.]+)\s*$/)
+		{
+			my $filename = $1;
+			my $loglikeli = $3;
+			my $pat = $2;
+# print "oofdah $1 and >>$3<< and >>>$2<<<\n";
+		}
+		else
+		{
+			print "Unexpected text in the weights file: $_\n";
+		}
+	}
 	close WFILE;
 }
 
