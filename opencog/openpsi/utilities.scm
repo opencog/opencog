@@ -290,24 +290,34 @@
 ; in a StateLink or if not in a StateLink an attempt is made to evaluate or
 ; execute the atom to obtain a value.
 
+(define (cog-get-state-value entity)
+	(define query
+		(Get
+			(State
+				entity
+				(Variable "$n"))))
+	(define result (cog-execute! query))
+	;(cog-delete query) ; maybe more optimal to keep this in the atomspace
+	(if (not (null? (cog-outgoing-set result)))
+		(gar result)
+		#f))
+
+
 (define (psi-get-value entity)
 "
   Get the current value of a psi-related entity. For entities with numerical
   values, and NumberNode is returned.
 "
-	(define result #f)
+	;(define result #f)
+
+	; Todo: Could potential optimize? here by using
+	; psi-value-representation-type fucntion
 
 	; First check for StateLink value
-	; OpenPsi values are stored using StateLinks
-	(define resultset
-		(cog-execute!
-				(Get
-					(State
-						entity
-						(Variable "$n")))))
-	(if (not (null? (cog-outgoing-set resultset)))
-		(set! result (gar resultset))
-
+	(define result (cog-get-state-value entity))
+	(if result
+		; if result is not #f return it
+		result
 		; else check if entity is an evaluation or predicate or schema
 		(let ((type (cog-type entity)))
 			(if (or (equal? type 'PredicateNode)
@@ -340,12 +350,118 @@
     ;(format #t "return result: ~a\n" result)
 	result)
 
+
+; OpenPsi entity current value representation types
+(define statelink "StateLink")
+(define evaluatable "Evaluatable")
+(define executable "Executable")
+(define evaluationlink "EvaluationLink") ; not sure if we need this yet
+(define executionlink "ExecutionLink") ; ditto
+(define undefined "Undefined")
+
+
 (define (psi-set-value! entity value)
 "
   Set the current value of psi-related entity.
 "
-	; OpenPsi values are stored using StateLinks by default
-	; Todo: need to handle case where value is not stored in StateLink
-	(State
-		entity
-		value))
+	(define value-rep-type (psi-value-representation-type entity))
+	(define representation) ; the atomese representation of the stored value
+
+	(format #t "\npsi-set-value! \n  entity: ~a  value: ~a  value-rep-type: ~a\n"
+    		entity value value-rep-type)
+
+	; TODO: need to handle if value is a NumberNode or a number
+	(set! representation
+		(cond
+			((equal? value-rep-type statelink) (State entity (Number value)))
+			((equal? value-rep-type evaluatable)
+				(Evaluation entity (List) (stv value 1)))
+			((equal? value-rep-type executable)
+				(ExecutionOutput entity (List) (stv value 1)))
+			(else (error (string-append "In psi-set-value! encountered undefined"
+			    " value representation type: ") value-rep-type))))
+
+	(format #t "representation: ~a" representation))
+
+(define psi-rep-type-node (Concept "value-representation-type"))
+
+(define (psi-value-representation-type entity)
+"
+  Returns the representation type used to store the current value of entity.
+  Potential return values: 'StateLink' 'Evaluatable' 'Executable'
+  'Evaluation and ExecutionLink themselves?'
+
+  Value representation type is stored in a StateLink:
+        State
+            List
+                entity
+                Concept 'value-representation-type'
+            Concept '<the type for this entity>'
+"
+	;(define rep-type undefined)
+
+	(define (set-value-rep-type! entity type)
+		(State
+            (List
+                entity
+                psi-rep-type-node)
+            (Concept type)))
+
+	; first see if representation type is already set for this entity
+	(define rep-type (cog-get-state-value (List entity psi-rep-type-node)))
+
+	(format #t (string-append "\npsi-value-representation-type \n  entity: ~a  "
+		"initial rep-type: ~a\n") entity rep-type)
+
+	(if rep-type
+		; return the stored representation type
+		(cog-name rep-type)
+
+		; else value representation type is not yet set
+		;begin
+		; Check if value is stored in StateLink, which is the default
+		(if (eq? (tv-mean
+			(cog-evaluate!
+				(Satisfaction
+					(State
+						entity
+						(Variable "$n"))))) 1)
+			(begin
+				(set-value-rep-type! entity statelink)
+	            (format #t (string-append "Found value stored in SateLink. "
+	                "Setting value-rep type to ~a\n") statelink)
+				;(set! rep-type statelink)
+				; let's see if it will return from here
+				statelink)
+
+			; else check if entity is a predicate or schema
+			(let ((atom-type (cog-type entity)))
+				(if (or (equal? atom-type 'PredicateNode)
+					   (equal? atom-type 'GroundedPredicateNode)
+					   (equal? atom-type 'DefinedPredicateNode))
+					(let ((confidence (tv-conf
+							(cog-evaluate! (Evaluation entity (List))))))
+						(if (not (eq? confidence 0))
+							(begin
+								(set-value-rep-type! entity evaluatable)
+								(set! rep-type evaluatable)))))
+				(if (or (equal? atom-type 'SchemaNode)
+	                    (equal? atom-type 'GroundedSchemaNode)
+	                    (equal? atom-type 'DefinedSchemaeNode))
+	                (begin
+	                    (set-value-rep-type! entity executable)
+	                    (set! rep-type executable)))
+
+	            ; Not sure if we need this for EvaluationLinks and
+	            ; ExecutionLinks.
+	            ;(if (equal? atom-type 'EvaluationLink)
+	            ;    (begin (set-rep-type... ) (set! rep-type ...)))
+
+	            ; If no current value is set for the entity, then set the value
+	            ; type to statelink, which is the default
+	            (if (not rep-type)
+	                (begin
+		                (set-value-rep-type! entity statelink)
+		                (set! rep-type statelink)))
+	            (format #t "Set value-rep type: ~a\n" rep-type)
+	            rep-type))))

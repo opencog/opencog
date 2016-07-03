@@ -30,7 +30,7 @@
            (modulator-node (ConceptNode modulator-str)))
 
        (InheritanceLink modulator-node psi-modulator-node)
-       (psi-set-value! modulator-node (Number initial-value))
+       (psi-set-value! modulator-node initial-value)
 
         modulator-node
     )

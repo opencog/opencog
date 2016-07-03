@@ -26,7 +26,7 @@
 		(List
 	        stimulus
 	        sec))
-    (psi-set-value! stimulus-sec (Number initial-value))
+    (psi-set-value! stimulus-sec initial-value)
     stimulus-sec)
 
 
