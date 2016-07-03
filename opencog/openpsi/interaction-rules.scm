@@ -35,16 +35,21 @@
 (use-modules (opencog atom-types)) ; needed for PredictiveImplication definition
 
 ; Contains defined entities to be used in the interaction rules
-(load "entity-defs.scm")
+(include "entity-defs.scm")
+
+; Define the change-predicate types that can be used in the interaction rules.
+(define changed "changed")
+(define increased "increased")
+(define decreased "decreased")
 
 (define psi-interaction-rule
 	(ConceptNode (string-append psi-prefix-str "interaction rule")))
 
-(define (create-psi-interaction-rule trigger-entity change-type target-entity
+(define (psi-create-interaction-rule trigger-entity change-type target-entity
 	strength)
 "
   Helper function to create the interaction rules. It is assumed that the
-  trigger and target store their current values in a StateLink, and if not are
+  trigger and target store their current values in a StateLink by default, and if not are
   evaluatable or executable with the result being the current value. If the
   entity is an evaluatable predicate, current value of the entity is assumed to
   be the strength of its evaluated truth value.
@@ -65,10 +70,10 @@
 "
 	(define rule)
 	(define pred-change-type-name
-		(case change-type
-			(("changed") "psi-changed")
-			(("increased") "psi-increased")
-			(("decreased") "psi-decreased")
+		(cond
+			((equal? change-type changed) "psi-changed")
+			((equal? change-type increased) "psi-increased")
+			((equal? change-type decreased) "psi-decreased")
 			(else "error")))
 	(if (eq? pred-change-type-name "error")
 		(error (string-append "In function create-psi-interaction rule, "
@@ -93,32 +98,12 @@
 	                (NumberNode strength)
 	                trigger-entity))))
 	(Member rule psi-interaction-rule)
+	;(format #t (string-append "\npsi-create-interaction-rule  trigger: ~a  type:"
+	;	"  ~a  strength: ~a  target: ~a\nrule: ~a") trigger-entity change-type
+	;	strength target-entity rule)
 	rule
 )
 
-(define changed "changed")
-(define increased "increased")
-(define decreased "decreased")
 
-; --------------------------------------------------------------
-; The Rules
-;
-; Todo: Rule sets should be moved to their own files.
 
-; ===========================================================================
-; Below are bogus mock interaction rules for dev purposes
-
-(define speech->power
-	(create-psi-interaction-rule speech increased agent-state-power .5))
-
-(define power->voice
-	(create-psi-interaction-rule agent-state-power changed voice-width 1))
-
-(define power->arousal
-	(create-psi-interaction-rule agent-state-power changed arousal .1))
-
-(define arousal->voice
-	(create-psi-interaction-rule arousal changed voice-width -.9))
-
-; ===========================================================================
 
