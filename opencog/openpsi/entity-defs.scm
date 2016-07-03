@@ -9,8 +9,9 @@
 
 ; EVENT PREDICATES
 (define speech (Predicate "speech-giving-starts"))
-(Evaluation speech (List) (stv 0 1))
-;(hash-set! prev-value-table speech 0.0)
+;(Evaluation speech (List) (stv .5 1))
+(psi-set-value! speech 0)
+
 
 ; PAU PREDICATES
 ; Actually these will be defined somewhere else in the system
@@ -21,7 +22,7 @@
 	(Inheritance
 		pau
 		(Concept "PAU"))
-	(psi-set-value! pau (Number initial-value))
+	(psi-set-value! pau initial-value)
 	;(hash-set! prev-value-table pau initial-value)
 	pau)
 

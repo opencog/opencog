@@ -14,7 +14,7 @@
 ; of those rules should be executed once and only once for a given change.
 ;
 
-(load "main.scm")
+;(load "main.scm")
 (load "utilities.scm")
 (load "modulator.scm")
 (load "sec.scm")
@@ -23,7 +23,7 @@
 
 (define logging #t)
 (define verbose #t)
-(define slo-mo #f)
+(define slo-mo #t)
 (define single-step #f)
 
 ; --------------------------------------------------------------
@@ -51,6 +51,11 @@
 (define (psi-updater-init)
 "
   Initialization of the updater. Called by psi-updater-run.
+
+  Initializes list of monitered entities and table of their previous values.
+  Question: do we want to have the loading of the interaction rules happen here?
+      I think perhaps better to have load them when the code files are loaded
+      so errors can be caught then rather than at runtime.
 "
 	; Grab all variables in the antecedents of the interaction rules that are
 	; arguments to (Predicate "psi-changed") and put them in
@@ -110,7 +115,7 @@
 		(if (psi-change-in? param)
             (begin
                 (if verbose
-                    (format #t "*** Found change in : ~a\n" param))
+                    (format #t "\n*** Found change in : ~a\n" param))
                 (set! changed-params
                     (append changed-params (list param)))
                 (set! previous-val (hash-ref prev-value-table param))
@@ -266,11 +271,13 @@
 
 		; Increasing slope increases the degree change at all levels
 		(set! slope 10000)
+
 		; finagle the extreme cases because the curve is not exactly how we want
 		(if (> alpha 0)
 			(if (>= alpha .5)
 				(set! current-value (max current-value .2))
 				(set! current-value (max current-value .1))))
+
 		(if (< alpha 0)
 			(if (<= alpha -.5)
 				(set! current-value (min current-value .8))
@@ -280,7 +287,7 @@
 		; For this formula alpha needs to be negative for increases
 		; and positive for decreases. And it can't be 0.
 		(set! alpha (* alpha -1))
-
+		;(format #t "alpha: ~a\n" alpha)
 		; alpha == 0 means no change
 		(if (= alpha 0)
 			(set! new-value current-value)
@@ -292,7 +299,7 @@
 		; tanh never gets to one so set it to one above a certain point
 		;(if (> new-value .95)
 		;	(set! new-value 1))
-		(psi-set-value! target (Number new-value))
+		(psi-set-value! target new-value)
 		;(cog-set-tv! target (cog-new-stv new-strength confidence))
 		(if verbose
 			(format #t "current value: ~a    new value: ~a\n" current-value
@@ -411,6 +418,11 @@
 	results
 )
 
+; --------------------------------------------------------------
+; Load the interaction rules
+; Todo: This should be a config setting to specify the rule set or a list of
+;       rulesets in scheme.
+(load "mock-interaction-rules.scm")
 
 ; --------------------------------------------------------------
 ; Updater Loop Control
@@ -499,11 +511,11 @@
 (define rules (psi-get-interaction-rules))
 
 (define (psi-decrease-value target)
-	(psi-set-value! target (Number
-		(max 0 (- (psi-get-number-value target) .1)))))
+	(psi-set-value! target
+		(max 0 (- (psi-get-number-value target) .1))))
 (define (psi-increase-value target)
-	(psi-set-value! target (Number
-		(min 1 (+ (psi-get-number-value target) .1)))))
+	(psi-set-value! target
+		(min 1 (+ (psi-get-number-value target) .1))))
 
 (define-public d psi-decrease-value)
 (define-public i psi-increase-value)
