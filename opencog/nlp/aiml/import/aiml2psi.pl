@@ -68,9 +68,12 @@ if ($version)
 }
 
 # ------------------------------------------------------------------
-# If there is a weights file, ingest it.
-# The format is assumed to be three columns: an AIML filename,
+# If there is a weights file, ingest it, and stuff it into an associate
+# array.
+#
+# The file format is assumed to be three columns: an AIML filename,
 # an AIML rule, and a log-liklihood column.
+#
 # Example:
 #
 # interjection.aiml	INTERJECTION <THAT> * <TOPIC> *	-1.97356795842974
@@ -925,6 +928,7 @@ sub psi_tail
 {
 	my $num_stars = $_[0];
 	my $word_count = $_[1];
+	my $wadjust = $_[2];
 	my $chat_goal = "   (Concept \"AIML chat subsystem goal\")\n";
 	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
 
@@ -943,11 +947,23 @@ sub psi_tail
 	#`
 	my $weight = 1.0 / (0.5 + $word_count);
 	$weight = $base_priority / (1.0 + $num_stars * $num_stars + $weight);
+
+	# Adjust the weight by the desired adjustment.
+	$weight *= $wadjust;
+
 	# my $goal_truth = "   (stv 1 0.8)\n";
 	my $goal_truth = "   (stv 1 $weight)\n";
 	my $rule_tail = $chat_goal . $goal_truth . $demand;
 
 	$rule_tail;
+}
+
+# If there is a weight file, and the pattern an be found in
+# the weight file, then modulate the above, with the indicated
+# inverted likelihood.
+sub get_weight
+{
+	1.0;
 }
 
 # ------------------------------------------------------------------
@@ -1056,6 +1072,7 @@ while (my $line = <FIN>)
 					$ch =~ s/\s+$//;
 
 					my $catty = $preplate . $ch . $postplate;
+					my $wadj = &get_weight();
 
 					$rule .= ";;; random choice $i of $nc: ";
 					$rule .= $cattext . "\n";
@@ -1066,13 +1083,14 @@ while (my $line = <FIN>)
 					$rule .= "   (ListLink\n";
 					$rule .= &process_category("      ", $catty);
 					$rule .= "   )\n";
-					$rule .= &psi_tail($num_stars, $pat_word_count);
+					$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
 				}
 			}
 			else
 			{
+				my $wadj = &get_weight();
 				$rule = ";;; COMPLEX CODE BRANCH\n";
 				$rule .= ";;; " . $cattext . "\n";
 				$rule .= "(psi-rule-nocheck\n";
@@ -1082,13 +1100,14 @@ while (my $line = <FIN>)
 				$rule .= "   (ListLink\n";
 				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";
-				$rule .= &psi_tail($num_stars, $pat_word_count);
+				$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
 				$rule .= ")\n";
 			}
 			$have_raw_code = 0;
 		}
 		else
 		{
+			my $wadj = &get_weight();
 			$rule = ";;; NO RAW CODE\n";
 			$rule .= ";;; $cattext\n";
 			$rule .= "(psi-rule-nocheck\n";
@@ -1096,7 +1115,7 @@ while (my $line = <FIN>)
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
 			$rule .= $psi_goal;
-			$rule .= &psi_tail($num_stars, $pat_word_count);
+			$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
 			$rule .= ") ; CATEND\n";     # close category section
 
 			$psi_goal = "";
