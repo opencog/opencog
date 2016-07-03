@@ -80,6 +80,15 @@ if ($version)
 # that.aiml	THAT * <THAT> * <TOPIC> *	-4.25883896393828
 # atomic.aiml	WHY <THAT> * <TOPIC> *	-4.28192456627784
 #
+
+my %weights = ();
+sub make_wkey
+{
+	my $key = $_[0] . " <THAT> " . $_[1] . " <TOPIC> " . $_[2];
+}
+
+sub trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
+
 sub ingest_weights
 {
 	if ('' eq $weightFile)
@@ -100,12 +109,19 @@ sub ingest_weights
 			my $filename = $1;
 			my $loglikeli = $3;
 			my $mlpat = $2;
+
+			# Extract the AIML pattern, the THAT and the TOPIC
 			if ($mlpat =~ /^(.*)\s*<THAT>\s*(.*?)\s*<TOPIC>\s*(.*)\s*$/)
 			{
 				my $pat = $1;
 				my $that = $2;
 				my $topic = $3;
-# print "oofdah $1 and >>$3<< and >>>$2<<<\n";
+				$pat = lc $pat;
+				$pat = trim $pat;
+
+				# my $key = $pat . " <THAT> " . $that . " <TOPIC> " . $topic;
+				my $key = make_wkey($pat, $that, $topic);
+				$weights{$key} = $loglikeli;
 			}
 			else
 			{
