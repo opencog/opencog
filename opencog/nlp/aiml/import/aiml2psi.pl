@@ -978,7 +978,13 @@ sub get_weight
 			# as it results in values that will always be 0.9999 pretty
 			# much no matter what.  So some other formula has to be used.
 			# 2 July 2016 - sent email asking about this.
-			my $prob = 1.0 - exp(-$logli);
+			# my $prob = 1.0 - exp(-$logli);
+
+			# Utter and pure hack: the largest entropies in the file are
+			# about 12 or 13. So use that as a scale max, and invert the
+			# direction.
+			my $prob = $logli / 12.0;
+			if ($prob > 1.0) { $prob = 1.0; }
 			return $prob;
 		}
 	}
