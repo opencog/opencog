@@ -119,7 +119,7 @@ sub ingest_weights
 				my $pat = $1;
 				my $that = $2;
 				my $topic = $3;
-				$pat = lc $pat;
+				# $pat = lc $pat;
 				$pat = trim $pat;
 
 				# my $key = $pat . " <THAT> " . $that . " <TOPIC> " . $topic;
@@ -959,10 +959,29 @@ sub psi_tail
 }
 
 # If there is a weight file, and the pattern an be found in
-# the weight file, then modulate the above, with the indicated
-# inverted likelihood.
+# the weight file, then get that weight.
 sub get_weight
 {
+	my $cattext = $_[0];
+	if ($cattext =~/<pattern>(.*)<\/pattern>\s*<topic>(.*)<\/topic>\s*<that>(.*)<\/that>/)
+	{
+		my $pat = $1;
+		my $topic = $2;
+		my $that = $3;
+
+		my $key = make_wkey($pat, $that, $topic);
+		if (defined $weights{$key})
+		{
+			my $logli = $weights{$key};
+
+			# XXX FIXME -- this modulation is totally bogus,
+			# as it results in values that will always be 0.9999 pretty
+			# much no matter what.  So some other formula has to be used.
+			# 2 July 2016 - sent email asking about this.
+			my $prob = 1.0 - exp(-$logli);
+			return $prob;
+		}
+	}
 	1.0;
 }
 
@@ -1072,7 +1091,7 @@ while (my $line = <FIN>)
 					$ch =~ s/\s+$//;
 
 					my $catty = $preplate . $ch . $postplate;
-					my $wadj = &get_weight();
+					my $wadj = &get_weight($cattext);
 
 					$rule .= ";;; random choice $i of $nc: ";
 					$rule .= $cattext . "\n";
@@ -1090,7 +1109,7 @@ while (my $line = <FIN>)
 			}
 			else
 			{
-				my $wadj = &get_weight();
+				my $wadj = &get_weight($cattext);
 				$rule = ";;; COMPLEX CODE BRANCH\n";
 				$rule .= ";;; " . $cattext . "\n";
 				$rule .= "(psi-rule-nocheck\n";
@@ -1107,7 +1126,7 @@ while (my $line = <FIN>)
 		}
 		else
 		{
-			my $wadj = &get_weight();
+			my $wadj = &get_weight($cattext);
 			$rule = ";;; NO RAW CODE\n";
 			$rule .= ";;; $cattext\n";
 			$rule .= "(psi-rule-nocheck\n";
