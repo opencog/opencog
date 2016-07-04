@@ -23,7 +23,7 @@
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 
-(load-from-path "instantiation.scm")
+(load "instantiation.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helper definition ;;
