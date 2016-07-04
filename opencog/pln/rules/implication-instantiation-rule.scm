@@ -254,8 +254,6 @@
 ;; the pattern matcher would do the trick (see
 ;; PatternMatchEngine::self_compare)
 (define (implication-partial-instantiation-formula Impl)
-  (cog-logger-info "[PLN] implication-partial-instantiation-formula Impl = ~a"
-                   Impl)
   (let* (
          (Impl-outgoings (cog-outgoing-set Impl))
          (TyVs (car Impl-outgoings))
