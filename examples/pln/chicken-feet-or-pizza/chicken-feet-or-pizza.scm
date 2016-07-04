@@ -1,6 +1,9 @@
-;; Work in progress! To have this work you need to disable the advmod
-;; rule in opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm
-;; and reinstall!
+;; Work in progress! This demo is a mess and is not ready for the
+;; lambda user!
+;;
+;; To have this work you need to disable the advmod rule in
+;; opencog/nlp/relex2logic/loader/gen-r2l-en-rulebase.scm and
+;; reinstall!
 ;;
 ;; Of course you need to have the opencog relex server running. The
 ;; easiest way to achieve that is with docker, running
