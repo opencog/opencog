@@ -123,7 +123,9 @@
          ;; Get all unfree variables stripped from their types
          (unfree-vars (unfree-variables TyVs P))
          ;; Build pattern matcher query for the subtitution terms
-         (query-body (if (null? unfree-vars) P (And P unfree-vars)))
+         (query-body (if (null? unfree-vars)
+                         P
+                         (cog-new-flattened-link 'AndLink P unfree-vars)))
          (query (GetLink TyVs query-body))
          ;; Fetch all possible substitution terms
          (results (cog-execute! query)))
