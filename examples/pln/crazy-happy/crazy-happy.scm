@@ -1,4 +1,11 @@
-;; Abductive reasoning about crazy happy people
+;; Inductive reasoning about crazy happy people
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; Load prerequisite ;;
+;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Load modules
+(use-modules (opencog query))
 
 ;; Load the chatbot
 (add-to-load-path "../../../opencog/nlp/chatbot-psi")
@@ -79,4 +86,107 @@
 (chat "Ben is happy")
 (chat "Ben is crazy")
 
-;; TODO write BindLinks to turn r2l structure into happy(Ben), crazy(Ben)
+;;;;;;;;;;;;;;;
+;; L2S rules ;;
+;;;;;;;;;;;;;;;
+
+;; Rule to turn something like
+;;
+;; (InheritanceLink
+;;    (ConceptNode "Ben@b0f3845c-9cfb-4b39-99a6-131004f6203d")
+;;    (ConceptNode "Ben" (stv 0.029411765 0.0012484394))
+;; )
+;; (ImplicationLink
+;;    (PredicateNode "happy@1d08ff8b-4149-4362-97ef-9103a307a879")
+;;    (PredicateNode "happy" (stv 0.25 0.0012484394))
+;; )
+;; (EvaluationLink
+;;    (PredicateNode "happy@1d08ff8b-4149-4362-97ef-9103a307a879")
+;;    (ListLink
+;;       (ConceptNode "Ben@b0f3845c-9cfb-4b39-99a6-131004f6203d")
+;;    )
+;; )
+;; (InheritanceLink
+;;    (InterpretationNode "sentence@bf0cc09b-b2c3-4373-9573-6e8bb60a6b5f_parse_0_interpretation_$X")
+;;    (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
+;; )
+;;
+;; plus possibly (TBD)
+;;
+;; (EvaluationLink
+;;    (DefinedLinguisticPredicateNode "definite")
+;;    (ListLink
+;;       (ConceptNode "Ben@b0f3845c-9cfb-4b39-99a6-131004f6203d")
+;;    )
+;; )
+;; (InheritanceLink
+;;    (SpecificEntityNode "Ben@b0f3845c-9cfb-4b39-99a6-131004f6203d")
+;;    (ConceptNode "Ben" (stv 0.029411765 0.0012484394))
+;; )
+;;
+;; into
+;;
+;; (EvaluationLink (stv 1 0.1)
+;;    (Predicate "happy")
+;;    (ListLink
+;;       (ConceptNode "Ben")))
+;;
+;; The 0.1 is just to convey the fact that we only have one piece of
+;; evidence, ideally we would use count-to-confidence
+;;
+;; We call these rule l2s, which stands for logic to
+;; semantics. Eventually maybe these can be turned into a rule-base,
+;; using the URE, but for now it's more like a hack.
+
+;;;;;;;;;;;;;;;;;;;;;;
+;; Unary predicates ;;
+;;;;;;;;;;;;;;;;;;;;;;
+
+(define unary-predicate-speech-act-vardecl
+   (VariableList
+      (TypedVariable
+         (Variable "$element-instance")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$element")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$predicate-instance")
+         (Type "PredicateNode"))
+      (TypedVariable
+         (Variable "$predicate")
+         (Type "PredicateNode"))
+      (TypedVariable
+         (Variable "$interpretation")
+         (Type "InterpretationNode"))))
+
+(define unary-predicate-speech-act-pattern
+   (And
+      (Inheritance
+         (Variable "$element-instance")
+         (Variable "$element"))
+      (Implication
+         (Variable "$predicate-instance")
+         (Variable "$predicate"))
+      (Evaluation
+         (Variable "$predicate-instance")
+         (List
+            (Variable "$element-instance")))
+      (Inheritance
+         (Variable "$interpretation")
+         (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))))
+
+(define unary-predicate-speech-act-rewrite
+   (Evaluation (stv 1 0.1)
+      (Variable "$predicate")
+      (Variable "$element")))
+
+(define unary-predicate-speech-act-rule
+   (Bind
+      unary-predicate-speech-act-vardecl
+      unary-predicate-speech-act-pattern
+      unary-predicate-speech-act-rewrite))
+
+;; Apply all l2s rules
+(cog-bind unary-predicate-speech-act-rule)
+
