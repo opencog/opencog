@@ -99,6 +99,78 @@
                            (Type "ExecutionLink"))
                          (Variable "$E"))))
 
+;;;;;;;;;;;;;;;;;;;;;
+;; Sub experiments ;;
+;;;;;;;;;;;;;;;;;;;;;
+
+(chat "Robert likes pizza")
+
+;; corresponding r2l structure
+   (SetLink
+      (InheritanceLink
+         (ConceptNode "Robert@2291e65a-e782-45ed-a849-90eabb0d9c1b")
+         (ConceptNode "Robert" (stv 0.028571429 0.0012484394))
+      )
+      (EvaluationLink
+         (DefinedLinguisticPredicateNode "definite")
+         (ListLink
+            (ConceptNode "Robert@2291e65a-e782-45ed-a849-90eabb0d9c1b")
+         )
+      )
+      (ImplicationLink
+         (PredicateNode "likes@44a7a36f-07e5-48ec-bd51-7dd2277f3464")
+         (PredicateNode "like" (stv 0.25 0.0012484394))
+      )
+      (InheritanceLink
+         (ConceptNode "pizza@31c87ccb-0f52-4c05-8112-53c16cc294e3")
+         (ConceptNode "pizza" (stv 0.028571429 0.0012484394))
+      )
+      (EvaluationLink
+         (PredicateNode "likes@44a7a36f-07e5-48ec-bd51-7dd2277f3464")
+         (ListLink
+            (ConceptNode "Robert@2291e65a-e782-45ed-a849-90eabb0d9c1b")
+            (ConceptNode "pizza@31c87ccb-0f52-4c05-8112-53c16cc294e3")
+         )
+      )
+      (EvaluationLink
+         (PredicateNode "likes@44a7a36f-07e5-48ec-bd51-7dd2277f3464")
+         (ListLink
+            (ConceptNode "Robert@2291e65a-e782-45ed-a849-90eabb0d9c1b")
+         )
+      )
+      (InheritanceLink
+         (InterpretationNode "sentence@f3a3ed98-afa1-4928-88d2-e2ce4bbb8a4e_parse_0_interpretation_$X")
+         (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
+      )
+      (InheritanceLink
+         (PredicateNode "likes@44a7a36f-07e5-48ec-bd51-7dd2277f3464")
+         (DefinedLinguisticConceptNode "present")
+      )
+   )
+   (SetLink
+      (ReferenceLink
+         (SentenceNode "sentence@f3a3ed98-afa1-4928-88d2-e2ce4bbb8a4e")
+         (Node "Robert likes pizza")
+         (ListLink
+            (WordNode "Robert" (stv 0.035714287 0.0012484394))
+            (WordNode "likes" (stv 0.035714287 0.0012484394))
+            (WordNode "pizza" (stv 0.035714287 0.0012484394))
+         )
+      )
+   )
+
+(chat "Alice likes pizza")
+
+(chat "What does Robert like?")
+
+;; Call sureal with "Robert likes pizza" structure
+(Word "Robert") (sureal (Set (Evaluation (Predicate "likes") (List (Concept "Robert") (Concept "pizza")))))
+
+;;;;;;;;;;;;;;;;;
+;; Sub-exp end ;;
+;;;;;;;;;;;;;;;;;
+
+
 ;; To get the r2l outputs of a parse use
 ;;
 ;; (parse-get-r2l-outputs parse)
@@ -115,6 +187,86 @@
 ;; doesn't like Bob).
 (chat "Robert lives in China")
 ;; (chat "Robert likes chicken feet")
+
+;; r2l corresponding to Robert lives in China
+
+   (SetLink
+      (InheritanceLink
+         (ConceptNode "in@1a483359-e626-49d9-a52e-838196b07d4d")
+         (ConceptNode "in" (stv 0.027027028 0.0012484394))
+      )
+      (ImplicationLink
+         (PredicateNode "lives@59fae2d9-5d64-476b-962e-a706a9990905")
+         (PredicateNode "live" (stv 0.16666667 0.0012484394))
+      )
+      (InheritanceLink
+         (SatisfyingSetLink
+            (PredicateNode "lives@59fae2d9-5d64-476b-962e-a706a9990905")
+         )
+         (ConceptNode "in@1a483359-e626-49d9-a52e-838196b07d4d")
+      )
+      (InheritanceLink
+         (ConceptNode "China@d4b1ce02-5277-4734-96b3-3e95443d7136")
+         (ConceptNode "China" (stv 0.027027028 0.0012484394))
+      )
+      (ImplicationLink
+         (PredicateNode "in@1a483359-e626-49d9-a52e-838196b07d4d")
+         (PredicateNode "in" (stv 0.16666667 0.0012484394))
+      )
+      (EvaluationLink
+         (PredicateNode "in@1a483359-e626-49d9-a52e-838196b07d4d")
+         (ListLink
+            (PredicateNode "lives@59fae2d9-5d64-476b-962e-a706a9990905")
+            (ConceptNode "China@d4b1ce02-5277-4734-96b3-3e95443d7136")
+         )
+      )
+      (EvaluationLink
+         (DefinedLinguisticPredicateNode "definite")
+         (ListLink
+            (ConceptNode "China@d4b1ce02-5277-4734-96b3-3e95443d7136")
+         )
+      )
+      (InheritanceLink
+         (ConceptNode "Robert@de5b4eb3-16c8-4648-8673-54ed676efb72")
+         (ConceptNode "Robert" (stv 0.027027028 0.0012484394))
+      )
+      (EvaluationLink
+         (DefinedLinguisticPredicateNode "definite")
+         (ListLink
+            (ConceptNode "Robert@de5b4eb3-16c8-4648-8673-54ed676efb72")
+         )
+      )
+      (EvaluationLink
+         (PredicateNode "in@1a483359-e626-49d9-a52e-838196b07d4d")
+         (ListLink
+            (ConceptNode "China@d4b1ce02-5277-4734-96b3-3e95443d7136")
+         )
+      )
+      (EvaluationLink
+         (PredicateNode "lives@59fae2d9-5d64-476b-962e-a706a9990905")
+         (ListLink
+            (ConceptNode "Robert@de5b4eb3-16c8-4648-8673-54ed676efb72")
+         )
+      )
+      (InheritanceLink
+         (InterpretationNode "sentence@d0996a37-27c4-451c-a9ec-33c385c9a498_parse_0_interpretation_$X")
+         (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
+      )
+      (InheritanceLink
+         (SpecificEntityNode "China@d4b1ce02-5277-4734-96b3-3e95443d7136")
+         (DefinedLinguisticConceptNode "female" (stv 0.055555556 0.0012484394))
+      )
+      (InheritanceLink
+         (SpecificEntityNode "China@d4b1ce02-5277-4734-96b3-3e95443d7136")
+         (ConceptNode "China" (stv 0.027027028 0.0012484394))
+      )
+      (InheritanceLink
+         (PredicateNode "lives@59fae2d9-5d64-476b-962e-a706a9990905")
+         (DefinedLinguisticConceptNode "present")
+      )
+   )
+
+
 
 ;; ;; Same thing for Jane
 ;; (chat "Jane lives in France")
