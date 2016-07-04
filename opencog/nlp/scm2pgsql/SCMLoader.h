@@ -25,6 +25,8 @@
 #define _OPENCOG_SCMLOADER_H
 
 #include <fstream>
+#include <string>
+#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog
 {
@@ -37,11 +39,11 @@ class SCMLoader
 
 public:
 
-    static bool load(const std:string &fileName, AtomSpace &atomSpace);
+    static bool load(const std::string &fileName, AtomSpace &atomSpace);
 
 private:
 
-    static void parseFile(std:fstream &fin, AtomSpace &atomSpace);
+    static void parseFile(std::fstream &fin, AtomSpace &atomSpace, int fileSize = -1);
 };
 
 }
