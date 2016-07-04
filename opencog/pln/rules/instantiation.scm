@@ -128,10 +128,8 @@
                          (cog-new-flattened-link 'AndLink P unfree-vars)))
          (query (GetLink TyVs query-body))
          ;; Fetch all possible substitution terms
-         ;; (results (cog-execute! query)))
-         )
+         (results (cog-execute! query)))
         ;; Select one randomly, but first purge the query to not
         ;; pollute the atomspace
-        ;; (extract-hypergraph query)
-        ;; (select-rnd-outgoing results)))
-        (select-rnd-outgoing (cog-execute! query))))
+        (extract-hypergraph query)
+        (select-rnd-outgoing results)))

@@ -181,9 +181,6 @@
                                  ; knowledge implication
                     (cog-undefined-handle)
                     (select-conditioned-substitution-terms TyVs P))))
-    (let* (
-           (Pput (PutLink (LambdaLink TyVs P) terms)))
-           ;; (Pinst (cog-execute! Pput)))
     (if (equal? terms (cog-undefined-handle))
         (cog-undefined-handle)
         ;; Substitute the variables by the terms in P and Q. In P to
