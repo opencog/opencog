@@ -130,11 +130,6 @@
          ;; Fetch all possible substitution terms
          ;; (results (cog-execute! query)))
          )
-    (cog-logger-info "select-conditioned-substitution-terms TyVs = ~a" TyVs)
-    (cog-logger-info "select-conditioned-substitution-terms P = ~a" P)
-    (cog-logger-info "select-conditioned-substitution-terms unfree-vars = ~a" unfree-vars)
-    (cog-logger-info "select-conditioned-substitution-terms query-body = ~a" query-body)
-    (cog-logger-info "select-conditioned-substitution-terms query = ~a" query)
         ;; Select one randomly, but first purge the query to not
         ;; pollute the atomspace
         ;; (extract-hypergraph query)

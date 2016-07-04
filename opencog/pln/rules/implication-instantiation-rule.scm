@@ -164,9 +164,6 @@
 ;;       estimate P(D'|D)
 ;;
 (define (implication-full-instantiation-formula Impl)
-  (cog-logger-info "[PLN] implication-full-instantiation-formula Impl = ~a"
-                   Impl)
-
   (let* ((Impl-outgoings (cog-outgoing-set Impl))
          (Impl-s (cog-stv-strength Impl))
          (Impl-c (cog-stv-confidence Impl))
@@ -180,16 +177,13 @@
          ;; 0.25 for now).
          (P-s (if (and (< 0.99 P-s) (<= P-c 0)) 0.25 P-s))
          (Q (caddr Impl-outgoings))
-         (terms (if #f;(= 0 Impl-c) ; don't try to instantiate zero
+         (terms (if (= 0 Impl-c) ; don't try to instantiate zero
                                  ; knowledge implication
                     (cog-undefined-handle)
                     (select-conditioned-substitution-terms TyVs P))))
-    (cog-logger-info "[PLN] implication-full-instantiation-formula terms = ~a"
-                     terms)
     (let* (
            (Pput (PutLink (LambdaLink TyVs P) terms)))
            ;; (Pinst (cog-execute! Pput)))
-      (cog-logger-info "[PLN] Pput = ~a" Pput))
     (if (equal? terms (cog-undefined-handle))
         (cog-undefined-handle)
         ;; Substitute the variables by the terms in P and Q. In P to
@@ -204,12 +198,11 @@
                (Qinst-s (* Impl-s Pinst-s))
                ;; (Qinst-c (* Impl-c Pinst-c (if (< 0 P-c ) (- 1 P-s) 1))))
                (Qinst-c (* Impl-c Pinst-c (- 1 P-s))))
-          (cog-logger-info "Are you here?")
           ;; Remove the PutLinks to not pollute the atomspace
           ;; TODO: replace this by something more sensible
           ;; (extract-hypergraph Pput)
           ;; (extract-hypergraph Qput)
-          (if #f;(= 0 Qinst-c) ; avoid creating informationless knowledge
+          (if (= 0 Qinst-c) ; avoid creating informationless knowledge
               (cog-undefined-handle)
               (cog-merge-hi-conf-tv! Qinst (stv Qinst-s Qinst-c)))))))
 
