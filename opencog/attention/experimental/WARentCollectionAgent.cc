@@ -1,8 +1,7 @@
 /*
  * opencog/attention/RentCollectionAgent.cc
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,8 +37,7 @@
 
 using namespace opencog;
 
-WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBase(cs),
-Agent(cs)
+WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
 {
     // READ SLEEPING TIME HERE
     set_sleep_time(2000);
@@ -48,67 +46,36 @@ Agent(cs)
 
 WARentCollectionAgent::~WARentCollectionAgent() { }
 
-void WARentCollectionAgent::run()
+void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
-    while (true) {
-        a = &_cogserver.getAtomSpace();
+    HandleSeq atoms;
 
-        HandleSeq atoms;
+    as->get_all_atoms(atoms);
 
-        a->get_all_atoms(atoms);
+    if (atoms.size() == 0) return;
 
-        if (atoms.size() == 0) continue;
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(0, atoms.size() - 1);
 
-        HandleSeq targetSet;
-        std::default_random_engine generator;
-        std::uniform_int_distribution<int> distribution(0, atoms.size() - 1);
+    for (unsigned int i = 0; (i < SAMPLE_SIZE and i < atoms.size()); i++) {
+        HandleSeq tmp;
 
-
-        for (unsigned int i = 0; (i < SAMPLE_SIZE and i < atoms.size()); i++) {
-            HandleSeq tmp;
-
-            // Randomly sample 50% of the atoms in the atomspace.
-            for (unsigned int i = 0; i < atoms.size() / 2; i++) {
-                int idx = distribution(generator);
-                tmp.push_back(atoms[idx]);
-            }
-
-            auto result = std::max_element(tmp.begin(), tmp.end(), []
-                                           (const Handle& h1, const Handle & h2)
-            {
-                return (h1->getSTI() > h2->getSTI());
-            });
-
-            // Select the atoms with the highest STI amongst the samples
-            targetSet.push_back(*result);
-
-            // set diffusionSource vector to the current samples.
-            atoms = tmp;
+        // Randomly sample 50% of the atoms in the atomspace.
+        for (unsigned int i = 0; i < atoms.size() / 2; i++) {
+            int idx = distribution(generator);
+            tmp.push_back(atoms[idx]);
         }
 
+        auto result = std::max_element(tmp.begin(), tmp.end(), []
+                                       (const Handle& h1, const Handle & h2)
+        {
+            return (h1->getSTI() > h2->getSTI());
+        });
 
-        for (Handle& h : targetSet) {
-            int sti = h->getAttentionValue()->getSTI();
-            int lti = h->getAttentionValue()->getLTI();
-            int stiRent = calculate_STI_Rent();
-            int ltiRent = calculate_LTI_Rent();
+        // Select the atoms with the highest STI amongst the samples
+        targetSetOut.push_back(*result);
 
-            //printf("stiRent: %d ",stiRent);
-            //printf("sti: %d ",sti);
-
-            if (stiRent > sti)
-                stiRent = sti;
-
-            if (ltiRent > lti)
-                ltiRent = lti;
-
-            //printf("stiRent: %d \n",stiRent);
-
-            h->setSTI(sti - stiRent);
-            h->setLTI(lti - ltiRent);
-        }
-
-        std::cout << "[DEBUG] [WARentCollectionAgent] sleeping for " << get_sleep_time() << "\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
+        // set diffusionSource vector to the current samples.
+        atoms = tmp;
     }
 }

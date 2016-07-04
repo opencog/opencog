@@ -1,8 +1,7 @@
 /*
  * opencog/attention/AFRentCollectionAgent.cc
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,53 +37,16 @@
 
 using namespace opencog;
 
-AFRentCollectionAgent::AFRentCollectionAgent(CogServer& cs) : RentCollectionBase(cs),
-Agent(cs) {
+AFRentCollectionAgent::AFRentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
+{
     set_sleep_time(500);
- }
+}
 
 AFRentCollectionAgent::~AFRentCollectionAgent() {
- }
+}
 
-void AFRentCollectionAgent::run()
+void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
-    while (true) {
-        a = &_cogserver.getAtomSpace();
-
-        HandleSeq atoms;
-        size_t size;
-
-        std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
-
-        a->get_handle_set_in_attentional_focus(out_hi);
-
-        size = atoms.size();
-
-        if (size == 0) continue;
-
-        for (Handle& h : atoms) {
-	    
-            int sti = h->getAttentionValue()->getSTI();
-            int lti = h->getAttentionValue()->getLTI();
-            int stiRent = calculate_STI_Rent();
-            int ltiRent = calculate_LTI_Rent();
-
-            //printf("stiRent: %d ",stiRent);
-            //printf("sti: %d ",sti);
-
-            if (stiRent > sti)
-                stiRent = sti;
-
-            if (ltiRent > lti)
-                ltiRent = lti;
-
-            //printf("stiRent: %d \n",stiRent);
-
-            h->setSTI(sti - stiRent);
-            h->setLTI(lti - ltiRent);
-        }
-
-        std::cout << "[DEBUG] [AFRentCollectionAgent] sleeping for " << get_sleep_time() << "\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
-    }
+        std::back_insert_iterator< std::vector<Handle> > out_hi(targetSetOut);
+        as->get_handle_set_in_attentional_focus(out_hi);
 }

@@ -1,10 +1,10 @@
 # ExperimentalAttentionModule
 ADD_LIBRARY(attention-experimental SHARED
-            ExperimentalAttentionModule	
+            ExperimentalAttentionModule
             ImportanceDiffusionBase
             AFImportanceDiffusionAgent
             WAImportanceDiffusionAgent
-            RentCollectionBase
+            RentCollectionBaseAgent
             AFRentCollectionAgent
             WARentCollectionAgent
 )
