@@ -390,10 +390,11 @@ public:
         auto result_2_1 = _scm->eval("(length \
             (psi-get-all-valid-demands))");
         CHKERR
+        TSM_ASSERT_EQUALS("Expected `3`", "3\n", result_2_1);
         auto result_2_2 = _scm->eval("(member demand-1 \
             (psi-get-all-valid-demands))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected `3`", "3\n", result_2_1);
+        TSM_ASSERT_EQUALS("Expected `#f`", "#f\n", result_2_2);
         logger().info("END TEST: %s", __FUNCTION__);
 
     }

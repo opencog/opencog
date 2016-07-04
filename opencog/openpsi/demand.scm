@@ -334,16 +334,23 @@
   and `#f` otherwise. An atom is an skippable if it a member of the set
   represented by (ConceptNode \"OpenPsi: skip\").
 "
+    (define (get-skipped-demands)
+        (cog-outgoing-set (cog-execute!
+            (GetLink
+                (TypedVariableLink
+                    (VariableNode "demand")
+                    (TypeNode "ConceptNode"))
+                (AndLink
+                    (InheritanceLink (VariableNode "demand") psi-demand-node)
+                    (MemberLink (VariableNode "demand") psi-label-skip)))
+        )))
+
     ; Check arguments
     (if (not (psi-demand? demand))
         (error (string-append "In procedure psi-demand-skip?, expected "
             "argument to be a node representing a demand, got:") demand))
 
-    (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode demand)))
-
-        ; A filter is used to account for empty list as well as
-        ; cog-chase-link returning multiple results, just in case.
-        (not (null?
-            (filter (lambda (x) (equal? x psi-label-skip)) candidates)))
+    (let ((candidates (get-skipped-demands)))
+        (if (member demand candidates) #t #f)
     )
 )
