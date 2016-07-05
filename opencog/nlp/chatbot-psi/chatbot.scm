@@ -103,8 +103,7 @@
 
 ; Load the available actions
 (load "actions.scm")
-(load "duckduckgo.scm")
-(load "wolframalpha.scm")
+(load "external-sources.scm")
 
 ; Load the psi-rules
 (load "psi-rules.scm")
