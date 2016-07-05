@@ -86,6 +86,9 @@
 (chat "Ben is happy")
 (chat "Ben is crazy")
 
+(chat "Eddie is happy")
+(chat "Eddie is crazy")
+
 ;;;;;;;;;;;;;;;
 ;; L2S rules ;;
 ;;;;;;;;;;;;;;;
