@@ -11,6 +11,10 @@
 (add-to-load-path "../../../opencog/nlp/chatbot-psi")
 (load-from-path "chatbot.scm")
 
+;; Load PLN rule implication direct evaluation
+(add-to-load-path "../../../opencog/pln/rules")
+(load-from-path "implication-direct-evaluation-rule.scm")
+
 ;; Convenient fetchers
 (use-modules (opencog query))
 (define (get-parse-nodes)
@@ -193,3 +197,5 @@
 ;; Apply all l2s rules
 (cog-bind unary-predicate-speech-act-rule)
 
+;; Apply Implication direct evaluation
+(cog-bind implication-direct-evaluation-rule)
