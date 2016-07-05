@@ -1,10 +1,10 @@
 /*
- * attention/AttentionModule.cc
+ * attention/ExperimentalAttentionModule.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Gustavo Gama <gama@vettalabs.com>
+ * Written by Misgana Bayetta && Roman Treutlein
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -32,17 +32,17 @@ DECLARE_MODULE(ExperimentalAttentionModule)
 
 ExperimentalAttentionModule::ExperimentalAttentionModule(CogServer& cs) :
     Module(cs)
-{   
+{
     // New Thread based ECAN agents.
     _cogserver.registerAgent(AFImportanceDiffusionAgent::info().id, &afImportanceFactory);
     _cogserver.registerAgent(WAImportanceDiffusionAgent::info().id, &waImportanceFactory);
-   
+
     _cogserver.registerAgent(AFRentCollectionAgent::info().id, &afRentFactory);
     _cogserver.registerAgent(WARentCollectionAgent::info().id, &waRentFactory);
-    
+
     _afImportanceAgentPtr = _cogserver.createAgent(AFImportanceDiffusionAgent::info().id,false);
     _waImportanceAgentPtr = _cogserver.createAgent(WAImportanceDiffusionAgent::info().id,false);
-    
+
     _afRentAgentPtr = _cogserver.createAgent(AFRentCollectionAgent::info().id, false);
     _waRentAgentPtr = _cogserver.createAgent(WARentCollectionAgent::info().id, false);
  }
@@ -50,10 +50,10 @@ ExperimentalAttentionModule::ExperimentalAttentionModule(CogServer& cs) :
 ExperimentalAttentionModule::~ExperimentalAttentionModule()
 {
     logger().debug("[ExperimentalAttentionModule] enter destructor");
-      
+
     _cogserver.unregisterAgent(AFImportanceDiffusionAgent::info().id);
     _cogserver.unregisterAgent(WAImportanceDiffusionAgent::info().id);
-    
+
      do_start_ecan_unregister();
 
     logger().debug("[ExperimentalAttentionModule] exit destructor");
@@ -71,13 +71,13 @@ std::string ExperimentalAttentionModule::do_start_ecan(Request *req, std::list<s
 
  std::string afRent = AFRentCollectionAgent::info().id;
  std::string waRent = WARentCollectionAgent::info().id;
- 
+
  _cogserver.startAgent(_afImportanceAgentPtr, true, afImportance);
  _cogserver.startAgent(_waImportanceAgentPtr, true, waImportance);
- 
+
  _cogserver.startAgent(_afRentAgentPtr, true, afRent);
  _cogserver.startAgent(_waRentAgentPtr, true, waRent);
- 
+
  return ("Started the following agents:\n" + afImportance + "\n" + waImportance +
 	 "\n" + afRent + "\n" + waRent + "\n");
 }

@@ -1,8 +1,7 @@
 /*
  * opencog/attention/WARentCollectionAgent.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,7 +36,7 @@
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Agent.h>
 
-#include "RentCollectionBase.h"
+#include "RentCollectionBaseAgent.h"
 
 namespace opencog {
     /** \addtogroup grp_attention
@@ -55,14 +54,14 @@ namespace opencog {
      *
      * This Agent is supposed to run in it's own Thread.
      */
-    class WARentCollectionAgent : public RentCollectionBase, public Agent {
+    class WARentCollectionAgent : public RentCollectionBaseAgent {
     private:
 	
         unsigned int SAMPLE_SIZE = 5;
 
     public:
 
-        virtual const ClassInfo& classinfo() const {
+        const ClassInfo& classinfo() const {
             return info();
         }
 
@@ -73,7 +72,7 @@ namespace opencog {
 
         WARentCollectionAgent(CogServer&);
         virtual ~WARentCollectionAgent();
-        virtual void run();
+        void selectTargets(HandleSeq &targetSetOut);
     }; // class
 
 

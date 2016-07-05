@@ -90,13 +90,6 @@ protected:
     
     virtual void spreadImportance() = 0;
     
-    int get_sleep_time(){
-        return sleep_time_ms;
-    };
-    void set_sleep_time(int ms){
-      sleep_time_ms = ms;  
-    };
-     
 public:
     enum { HYPERBOLIC, STEP };
     void setSpreadDecider(int type, float shape = 30);
@@ -108,6 +101,15 @@ public:
     virtual ~ImportanceDiffusionBase();
     
     Logger* getLogger();
+    
+    int get_sleep_time(){
+        return sleep_time_ms;
+    }
+    
+    void set_sleep_time(int ms){
+      sleep_time_ms = ms;  
+    }
+
 }; // class
 
 /** @}*/

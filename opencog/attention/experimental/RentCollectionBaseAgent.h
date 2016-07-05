@@ -1,8 +1,7 @@
 /*
  * opencog/attention/RentCollectionAgent.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Misgana Bayetta
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -55,19 +54,19 @@ class CogServer;
  *
  * This Agent is supposed to run in it's own Thread.
  */
-class RentCollectionBase
+class RentCollectionBaseAgent : public Agent
 {
 
 private:
      int sleep_time_ms;
-     
+
 protected:
 
-    AtomSpace* a;
+    AtomSpace* as;
 
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
-    
+
     AttentionValue::sti_t targetSTI;
     AttentionValue::sti_t targetLTI;
 
@@ -85,9 +84,9 @@ protected:
     Logger *log; //!< Logger object for Agent
 
 public:
-    RentCollectionBase(CogServer& cs);
-    ~RentCollectionBase();
-    
+    RentCollectionBaseAgent(CogServer& cs);
+    ~RentCollectionBaseAgent();
+
     /** Return the agent's logger object
      *
      * @return A logger object.
@@ -96,12 +95,15 @@ public:
 
     int calculate_STI_Rent();
     int calculate_LTI_Rent();
-    
-     int get_sleep_time(){
+
+    virtual void selectTargets(HandleSeq &targetSetOut) = 0;
+    void run();
+
+    int get_sleep_time(){
         return sleep_time_ms;
     };
     void set_sleep_time(int ms){
-      sleep_time_ms = ms;  
+      sleep_time_ms = ms;
     };
 
 }; // class
