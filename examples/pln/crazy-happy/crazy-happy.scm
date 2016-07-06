@@ -337,29 +337,6 @@
 ;; Sub-experiment, don't run it ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; Sub experiment turning the inferred knowledge into speech
-
-(Word "people")
-(Word "crazy")
-(Word "happy")
-
-;; Using inheritance directly (doesn't work)
-(sureal (SetLink
-      (InheritanceLink
-         (ConceptNode "people@8107be66-4424-445b-9875-96fa5d3d3204")
-         (ConceptNode "people" (stv 0.022727273 0.0012484394))
-      )
-      (InheritanceLink
-         (ConceptNode "people@8107be66-4424-445b-9875-96fa5d3d3204")
-         (ConceptNode "crazy")
-      )
-      (InheritanceLink
-         (ConceptNode "people@8107be66-4424-445b-9875-96fa5d3d3204")
-         (ConceptNode "happy")
-      )
-   )
-)
-
 ;; Using predicate. Works, just need to add the following sentence
 (chat "small cats are cute")
 (Word "happy")
