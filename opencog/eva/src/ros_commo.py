@@ -17,12 +17,13 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
+import rosmsg
 import rospy
 import roslib
 import time
 import logging
 import random
+import yaml
 # Eva ROS message imports
 from std_msgs.msg import String, Int32
 from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
@@ -65,8 +66,7 @@ logger = logging.getLogger('hr.OpenCog_Eva')
 # This does listen to several topics that are used to turn behaviors on
 # and off:
 #
-# `/behavior_switch`, which is used to start and stop the the behavior
-#      tree.
+# `/behavior_switch`, which is used to start and stop the behavior tree.
 #
 # `/behavior_control`, which is used to enable/disable the publication
 #      of classes of expression/gesture messages.
@@ -377,6 +377,17 @@ class EvaControl():
 	def behavior_control_callback(self, data):
 		self.control_mode = data.data
 
+	def interactive_learning_cb(self, data):
+		"""
+		This function is used for interactively modifying the weight of openpsi
+		rules.
+		"""
+		param_list = yaml.load(rosmsg.get_yaml_for_msg(data.doubles))
+		for i in param_list:
+			scm_str = '''(StateLink (AnchorNode \"%s\") (NumberNode %f))''' % \
+					(i["name"], i["value"])
+			self.puta.evaluate_scm(scm_str)
+
 	def __init__(self):
 
 		self.puta = PutAtoms()
@@ -460,6 +471,15 @@ class EvaControl():
 		rospy.Subscriber("speech_events", String, self.chat_event_cb)
 
 		# ----------------
+		# Interactive learning.
+		# TODO: Separate out the dynamic parameters from the /robot/chatbot
+		# node. Placed there for now as they are being used to control
+		# chatbot-psi
+		from dynamic_reconfigure.msg import Config
+		rospy.Subscriber("/robot/chatbot/parameter_updates", Config,
+			self.interactive_learning_cb)
+
+		# ----------------
 		# Boolean flag, turn the behavior tree on and off (set it running,
 		# or stop it)
 		rospy.Subscriber("/behavior_switch", String, \
@@ -473,5 +493,6 @@ class EvaControl():
 		# Full control by default
 		self.control_mode = 255
 		self.running = True
+
 
 # ----------------------------------------------------------------
