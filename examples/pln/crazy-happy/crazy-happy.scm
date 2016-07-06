@@ -311,9 +311,27 @@
 ;; Apply s2l rules
 (cog-bind inheritance-to-evaluation-s2l-rule)
 
-;; Apply sureal with the output s2l
+;; Give model to sureal to produce the forthcoming sentence
 (chat "small cats are cute")
+(Word "happy")
+(Word "people")
+(Word "crazy")
 
+;; Apply sureal with the output s2l
+(sureal
+   (SetLink
+      (EvaluationLink
+         (PredicateNode "happy" (stv 0.2857143 0.0024937657))
+         (ListLink
+            (ConceptNode "people")
+         )
+      )
+      (InheritanceLink
+         (ConceptNode "people")
+         (ConceptNode "crazy")
+      )
+   )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sub-experiment, don't run it ;;
