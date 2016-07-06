@@ -5,6 +5,7 @@ from opencog.atomspace import AtomSpace, types, TruthValue
 
 import urllib2
 import json
+import threading
 import xml.etree.ElementTree as ET
 
 atomspace = ''
@@ -15,7 +16,7 @@ def set_atomspace(atsp):
     return TruthValue(1, 1)
 
 # TODO: Attribution!
-def call_duckduckgo(qq):
+def to_duckduckgo(qq):
     global atomspace
 
     # Anchor for the result
@@ -40,9 +41,7 @@ def call_duckduckgo(qq):
         no_result = atomspace.add_node(types.ConceptNode, 'Chatbot: NoResult')
         atomspace.add_link(types.StateLink, [answer_anchor, no_result])
 
-    return TruthValue(1, 1)
-
-def call_wolframalpha(qq, aid):
+def to_wolframalpha(qq, aid):
     global atomspace
     appid = aid.name
 
@@ -98,6 +97,14 @@ def call_wolframalpha(qq, aid):
         no_result = atomspace.add_node(types.ConceptNode, 'Chatbot: NoResult')
         atomspace.add_link(types.StateLink, [answer_anchor, no_result])
 
+def call_duckduckgo(qq):
+    t = threading.Thread(target=to_duckduckgo, args=(qq,))
+    t.start()
+    return TruthValue(1, 1)
+
+def call_wolframalpha(qq, aid):
+    t = threading.Thread(target=to_wolframalpha, args=(qq, aid))
+    t.start()
     return TruthValue(1, 1)
 ")
 
