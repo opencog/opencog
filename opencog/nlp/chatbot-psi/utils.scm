@@ -67,6 +67,8 @@
     (State fuzzy-qa default-state)
     (State duckduckgo-answers default-state)
     (State duckduckgo-search default-state)
+    (State wolframalpha-answers default-state)
+    (State wolframalpha-search default-state)
     (State chatbot-eva default-state)
 )
 

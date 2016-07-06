@@ -103,6 +103,30 @@
 
 (psi-rule
     (list (SequentialAnd
+        (DefinedPredicate "wolframalpha-search-not-started?")
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "is-interrogative?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: ask-wolframalpha") (List)))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "wolframalpha-search-finished?")
+        (DefinedPredicate "is-wolframalpha-answer?")
+        (DefinedPredicate "is-input-utterance?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List wolframalpha-answers)))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
         (Not (DefinedPredicate "called-chatbot-eva?"))
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "is-imperative?")

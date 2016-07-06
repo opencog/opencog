@@ -91,6 +91,21 @@
 )
 
 (Define
+    (DefinedPredicate "wolframalpha-search-not-started?")
+    (search-not-started? wolframalpha-search)
+)
+
+(Define
+    (DefinedPredicate "wolframalpha-search-finished?")
+    (search-finished? wolframalpha-search)
+)
+
+(Define
+    (DefinedPredicate "is-wolframalpha-answer?")
+    (any-result? wolframalpha-answers)
+)
+
+(Define
     (DefinedPredicate "called-chatbot-eva?")
     (Not (Or
         (Equal (Set default-state) (Get (State chatbot-eva (Variable "$s"))))
