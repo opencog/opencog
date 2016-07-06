@@ -12,8 +12,6 @@
 ; ===========================================================================
 ; Below are bogus mock OpenPsi interaction rules for dev purposes
 
-(define speech->power
-	(psi-create-interaction-rule speech increased agent-state-power .5))
 
 (define power->voice
 	(psi-create-interaction-rule agent-state-power changed voice-width 1))
@@ -24,3 +22,12 @@
 (define arousal->voice
 	(psi-create-interaction-rule arousal changed voice-width -.9))
 
+
+;; new face -> increased arousal
+(define new-face->arousal
+	(psi-create-interaction-rule new-face increased arousal .5))
+
+;; speech giving starts -> increased power
+(define speech->power
+	(psi-create-interaction-rule speech-giving-starts increased
+		agent-state-power .5))

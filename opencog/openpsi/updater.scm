@@ -42,11 +42,17 @@
 
 ; Todo: implement this table in the atomspace
 (define prev-value-table (make-hash-table 40))
+(define prev-most-recent-ts-table (make-hash-table 40))
 
 ; --------------------------------------------------------------
 
+(define psi-event-detected-pred (Predicate "psi-event-detected"))
+(define most-recent-occurrence-pred (Predicate "psi-most-recent-occurrence"))
+
+
 ; List of entities that are antecedants in the interaction rules
 (define psi-monitored-entities '())
+(define psi-monitored-events '())
 
 (define (psi-updater-init)
 "
@@ -78,11 +84,26 @@
 
 	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
 
+	; Event Detection
+	; TODO: Replace this temporary list with dynamically generated list based on
+	; membership.
+	(set! psi-monitored-events (list new-face speech-giving-starts))
+	(for-each (lambda (event)
+				(define most-recent-ts (psi-get-most-recent-ts event))
+				(hash-set! prev-most-recent-ts-table event most-recent-ts)
+				;(set! psi-monitored-events (append psi-monitored-events
+				;								(list event)))
+			  )
+			  psi-monitored-events)
+	;(set! psi-monitored-events (delete-duplicates psi-monitored-events))
+
+
 	;(for-each (get-value-and-store key) evals-with-change-pred)
 
 	;(format #t "psi-evals-with-change-pred: ~a\n" evals-with-change-pred)
 
 )
+
 
 ; ----------------------------------------------------------------------
 
@@ -90,18 +111,22 @@
 "
   Main function that executes the actions to be taken in every cycle.
   At each step:
-    1) Evaluate the monitored entities and set their 'changed' predicates, and
+  (1a) Evaluate the monitored events and set their 'event-detected' predicates
+   (1) Evaluate the monitored entities and set their 'changed' predicates, and
        for each changed entity store it's value in a current-value-table (this,
        or otherwise storing the change magnitude, is needed because the current
        value of a trigger entity might change because of application of a
        previous rule.)
-    2) Store the current value or change magnitude before firing the rules
+   (2) Store the current value or change magnitude before firing the rules
        because the current value of the trigger might change as a result of a
        previous rule.
-    3) Execute the interaction rules
-    4) Update the previous values of the changed monitored params
+   (3) Execute the interaction rules
+   (4) Update the previous values of the changed monitored params
+  (4b) Set the previous values of the event predicates to 0, because each
+       particular instance of an event should only fire rules at a single step.
 "
 	(define changed-params '())
+	(define new-events '())
 	(define current-values-table (make-hash-table 20))
 
 	(define (set-param-change-status param)
@@ -120,6 +145,11 @@
                     (append changed-params (list param)))
                 (set! previous-val (hash-ref prev-value-table param))
                 (set! current-val (psi-get-number-value param))
+                ;Todo: If previous-val was #f (iow not set), assume previous
+                ;      value to be 0? Doing that for now, but not sure if this is
+                ;      best.
+                (if (eq? previous-val #f)
+                    (set! previous-val 0))
                 (hash-set! current-values-table param
                     (psi-get-number-value param))
                 (set! changed-tv (stv 1 1))
@@ -152,27 +182,63 @@
                 param))
     )
 
+    (define (set-new-event-status event)
+        (define prev-latest-ts (hash-ref prev-most-recent-ts-table event))
+        (define curr-latest-ts (psi-get-most-recent-ts event))
+        (define new-event-tv)
+        ;(format #t "set-new-event-status event: ~a" event)
+        ;(format #t "prev-latest-ts: ~a   curr-latest-ts: ~a\n" prev-latest-ts
+        ;    curr-latest-ts)
+        (if (not (equal? prev-latest-ts curr-latest-ts))
+            (begin
+                (if verbose
+                    (format #t "\n*** Found new event: ~a\n" event))
+                (set! new-events
+                    (append new-events (list event)))
+                ;(set! previous-val (hash-ref prev-value-table param))
+                ;(set! current-val (psi-get-number-value param))
+                ; I think we want to set based on the tv for the Eval Pred "event-detected" here
+                ; because it will be used when the rule is executed (?)
+                (hash-set! current-values-table (psi-new-event-eval event) 1)
+                (set! new-event-tv (stv 1 1))
+                ; Put new ts into prev-value-table
+                (hash-set! prev-value-table event curr-latest-ts)
+                (set! changed-events (append changed-events (list event))))
+             ; else no new event detected
+             (set! new-event-tv (stv 0 1)))
+        ;(Evaluation new-event-tv
+        ;    psi-event-detected-pred
+        ;    (List event)))
+		(cog-set-tv! (psi-new-event-eval event) new-event-tv))
+
+    (define changed-events '())
+
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
+
+	; Event Detection
+	; Evaluate the monitored events and set "new-event" predicates
+	; This needs to happen before evaluating the monitored params so the
+	; new-event predicates can are set beforehand.
+	(for-each set-new-event-status psi-monitored-events)
+
 	(if logging
 		(let ((output-port (open-file "psilog.txt" "a")))
 				(format output-port
 					"---------------------------------------- Loop ~a\n"
 					psi-updater-loop-count)
 				(format output-port
-					"agent power: ~a  arousal: ~a  speech: ~a  voice: ~a\n"
+					"agent power: ~a  arousal: ~a  speech: ~1,1f  voice: ~1,1f new-face: ~1,1f\n"
 					(psi-get-number-value agent-state-power)
 					(psi-get-number-value arousal)
 					(psi-get-number-value speech)
-					(psi-get-number-value voice-width))
-
-
+					(psi-get-number-value voice-width)
+					(psi-get-number-value new-face))
 				(close-output-port output-port)))
 
 	; Evaluate the monitored params and set "changed" predicates accordingly
 	(set! changed-params '())
 	(for-each set-param-change-status psi-monitored-entities)
 	;(format #t "\nchanged-params: ~a\n\n" changed-params)
-
 
 	; grab and evaluate the interaction rules
 	; todo: Could optimize by only calling rules containing the changed params
@@ -186,12 +252,25 @@
 					(hash-set! prev-value-table param value))
 			  changed-params)
 
+	; Wait, don't think I need to do this anymore
+	; Set event-detected predicates to 0, since any particular event instance
+	; should fire rules for only one step (could also do this at the beginning
+	; of the step function)
+	;(for-each (lambda (event) (psi-set-value! event 0)) changed-events)
+
+		;(Evaluation (stv 0 1)
+		;	psi-event-detected-pred
+		;	(List event))
+		;(psi-new-event-eval-with-tv event (stv 0 1))
+		;psi-monitored-events)
+
 
 	(psi-pause)
 	(if single-step
 		(psi-updater-halt))
 	(stv 1 1)
 )
+
 
 ; --------------------------------------------------------------
 
@@ -271,13 +350,13 @@
 
 		; Increasing slope increases the degree change at all levels
 		(set! slope 10000)
-
+		;(format #t "current value: ~a\n" current-value)
+; TODO: handle current value = #f (or not number in general)
 		; finagle the extreme cases because the curve is not exactly how we want
 		(if (> alpha 0)
 			(if (>= alpha .5)
 				(set! current-value (max current-value .2))
 				(set! current-value (max current-value .1))))
-
 		(if (< alpha 0)
 			(if (<= alpha -.5)
 				(set! current-value (min current-value .8))
@@ -287,7 +366,7 @@
 		; For this formula alpha needs to be negative for increases
 		; and positive for decreases. And it can't be 0.
 		(set! alpha (* alpha -1))
-		;(format #t "alpha: ~a\n" alpha)
+		(format #t "alpha: ~a\n" alpha)
 		; alpha == 0 means no change
 		(if (= alpha 0)
 			(set! new-value current-value)
@@ -299,17 +378,13 @@
 		; tanh never gets to one so set it to one above a certain point
 		;(if (> new-value .95)
 		;	(set! new-value 1))
-		(psi-set-value! target new-value)
-		;(cog-set-tv! target (cog-new-stv new-strength confidence))
 		(if verbose
-			(format #t "current value: ~a    new value: ~a\n" current-value
+			(format #t "current value: ~a    setting new value: ~a\n"
+				current-value
 				new-value))
 
-		; Todo: create one-way direction rules (e.g., only for a trigger increase,)
-		; but not for a decrease. Could implement with "increase-in" and
-		; decrease-in predicates which are evaluated and set at the same time
-		; as the change-in predicates.
-
+		(psi-set-value! target new-value)
+		;(cog-set-tv! target (cog-new-stv new-strength confidence))
 	)
 )
 
@@ -324,14 +399,6 @@
 						(Variable "$rule")
 						psi-interaction-rule)))))
 
-; helper to identify (Eval (GPN "scm: psi-change-in?" (List . . .))) links
-; not used anymore i think
-;(define (psi-change-eval? atom)
-;	(if (and (equal? (cog-type atom) 'EvaluationLink)
-;			 (equal? (gar atom) (GroundedPredicateNode "scm: psi-change-in?")))
-;		#t
-;		#f))
-
 ; helper to identify (Eval (Predicate "psi-changed" (List . . .))) links
 (define (psi-changed-eval? atom)
 	(if (and (equal? (cog-type atom) 'EvaluationLink)
@@ -343,22 +410,24 @@
 		#f))
 
 (define (psi-change-in? target)
-	;(display "psi-change-in? target: \n")(display target)
-	(let* ((previous (hash-ref prev-value-table target))
-		   (current (psi-get-number-value target)))
+    ;(display "psi-change-in? target: \n")(display target)
+    (let* ((previous (hash-ref prev-value-table target))
+           (current (psi-get-number-value target)))
 
-		;(format #t "previous value: ~a   current value: ~a\n" previous current)
-		(if (and
-				; current value is defined
-				(not (equal? #f current))
-				(not (equal? previous current)))
-			#t
-			#f
-			; from when function was called as a GPN
-			;(stv 1 1)
-			;(stv 0 1)
-		)
-	)
+        ;(format #t "previous value: ~a   current value: ~a\n" previous current)
+        (if (and
+                ; current value is defined
+                (not (equal? #f current))
+                (not (equal? previous current))
+                (not (and (equal? previous #f)
+                          (equal? current 0.0))))
+            #t
+            #f
+            ; from when function was called as a GPN
+            ;(stv 1 1)
+            ;(stv 0 1)
+        )
+    )
 )
 
 (define (psi-get-change-magnitude target)
@@ -418,10 +487,18 @@
 	results
 )
 
+; ----------------------------------------------------------------------
+(define (psi-get-most-recent-ts event)
+    (cog-get-state-value
+        (List
+            event
+            most-recent-occurrence-pred)))
+
 ; --------------------------------------------------------------
-; Load the interaction rules
+; Load the events and interaction rules
 ; Todo: This should be a config setting to specify the rule set or a list of
 ;       rulesets in scheme.
+(load "event.scm")
 (load "mock-interaction-rules.scm")
 
 ; --------------------------------------------------------------
@@ -501,6 +578,13 @@
 ; --------------------------------------------------------------
 ; Shortcuts for dev use
 
+(define (new-event event)
+    (State
+        (List
+            event
+            most-recent-occurrence-pred)
+        (TimeNode (number->string (current-time)))))
+
 (define halt psi-updater-halt)
 (define-public h halt)
 (define-public r psi-updater-run)
@@ -539,6 +623,4 @@
 ;(define (update2 a x) (/ (- (expt 1000 (* a x)) 1) (- (expt 1000 a) 1)))
 
 
-; --------------------------------------------------------------
-
-
+; ----------------

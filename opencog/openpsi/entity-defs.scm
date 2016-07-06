@@ -3,14 +3,31 @@
 ;
 ; OpenPsi-related entity definitions for use in
 ; the interaction dynamics rules.
-
+;
+;
 ; --------------------------------------------------------------
 
 
 ; EVENT PREDICATES
-(define speech (Predicate "speech-giving-starts"))
-;(Evaluation speech (List) (stv .5 1))
-(psi-set-value! speech 0)
+; Event/Stimilus Predicates are assumed to get evaluate to 1 for a single
+; psi-loop step and only for a single psi-loop step whenever a particular
+; instance of the event is detected.
+
+
+;; new face detected
+;(define new-face (Concept "new face"))
+;(define new-face-detected
+	;(Evaluation (stv 0 1)
+	;	(Predicate "psi-event-detected")
+	;	(List
+	;		new-face))
+
+	;(event-detected-eval new-face))
+
+; rework the below with the new Predicate "psi-event-detected"
+;(define speech (Predicate "speech-giving-starts"))
+;(define (speech-giving-starts (psi-create-event-detected-eval speech)))
+
 
 
 ; PAU PREDICATES

@@ -303,6 +303,12 @@
 		#f))
 
 
+(define (cog-set-state-value entity value)
+			(State
+				entity
+				value))
+
+
 (define (psi-get-value entity)
 "
   Get the current value of a psi-related entity. For entities with numerical
@@ -339,14 +345,18 @@
 "
 	Get the current value of psi-related entity and return as a number (rather
 	than NumberNode).
+	Todo: How to handle non-number returns. #f?
 "
 	(define result (psi-get-value entity))
 	;(format #t "psi-get-number-value entity: \n~a initial result: ~a\n"
 	;	entity result)
 	(if (and (cog-atom? result) (eq? 'NumberNode (cog-type result)))
 		(set! result (string->number (cog-name result))))
-	(if (cog-tv? result)
+	; if result is a tv and confidenct is 0, means that it has not been set
+	(if (and (cog-tv? result) (> (tv-conf result) 0))
 		(set! result (tv-mean result)))
+	(if (not (number? result))
+		(set! result #f))
     ;(format #t "return result: ~a\n" result)
 	result)
 
@@ -465,3 +475,5 @@
 		                (set! rep-type statelink)))
 	            (format #t "Set value-rep type: ~a\n" rep-type)
 	            rep-type))))
+
+
