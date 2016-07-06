@@ -32,6 +32,7 @@ from blender_api_msgs.msg import Target
 from blender_api_msgs.msg import BlinkCycle
 from blender_api_msgs.msg import SaccadeCycle
 from blender_api_msgs.msg import SomaState
+from chatbot.msg import ChatMessage
 
 # Not everything has this message; don't break if it's missing.
 # i.e. create a stub if its not defined.
@@ -444,10 +445,8 @@ class EvaControl():
 			self.language_perceived_text_cb)
 
 		# Chat infrastructure text.
-		# from chatbot.msg import ChatMessage
-		#rospy.Subscriber("/robot/speech", chatbot/ChatMessage,
-		#rospy.Subscriber("chatbot_speech", chatbot/ChatMessage,
-		#	self.chat_perceived_text_cb)
+		rospy.Subscriber("chatbot_speech", ChatMessage,
+			self.chat_perceived_text_cb)
 
 		# Emotional content of words spoken to the robot.
 		rospy.Subscriber("chatbot_affect_perceive", String,
