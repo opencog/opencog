@@ -16,7 +16,6 @@
 (load-from-path "implication-direct-evaluation-rule.scm")
 
 ;; Convenient fetchers
-(use-modules (opencog query))
 (define (get-parse-nodes)
   (cog-satisfying-set (Get
                          (TypedVariable
@@ -145,11 +144,7 @@
 ;; semantics. Eventually maybe these can be turned into a rule-base,
 ;; using the URE, but for now it's more like a hack.
 
-;;;;;;;;;;;;;;;;;;;;;;
-;; Unary predicates ;;
-;;;;;;;;;;;;;;;;;;;;;;
-
-(define unary-predicate-speech-act-vardecl
+(define unary-predicate-speech-act-l2s-vardecl
    (VariableList
       (TypedVariable
          (Variable "$element-instance")
@@ -162,12 +157,9 @@
          (Type "PredicateNode"))
       (TypedVariable
          (Variable "$predicate")
-         (Type "PredicateNode"))
-      (TypedVariable
-         (Variable "$interpretation")
-         (Type "InterpretationNode"))))
+         (Type "PredicateNode"))))
 
-(define unary-predicate-speech-act-pattern
+(define unary-predicate-speech-act-l2s-pattern
    (And
       (Inheritance
          (Variable "$element-instance")
@@ -178,24 +170,192 @@
       (Evaluation
          (Variable "$predicate-instance")
          (List
-            (Variable "$element-instance")))
-      (Inheritance
-         (Variable "$interpretation")
-         (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))))
+            (Variable "$element-instance")))))
 
-(define unary-predicate-speech-act-rewrite
+(define unary-predicate-speech-act-l2s-rewrite
    (Evaluation (stv 1 0.1)
       (Variable "$predicate")
       (Variable "$element")))
 
-(define unary-predicate-speech-act-rule
+(define unary-predicate-speech-act-l2s-rule
    (Bind
-      unary-predicate-speech-act-vardecl
-      unary-predicate-speech-act-pattern
-      unary-predicate-speech-act-rewrite))
+      unary-predicate-speech-act-l2s-vardecl
+      unary-predicate-speech-act-l2s-pattern
+      unary-predicate-speech-act-l2s-rewrite))
 
-;; Apply all l2s rules
-(cog-bind unary-predicate-speech-act-rule)
+;;;;;;;;;;;;;;;
+;; S2L rules ;;
+;;;;;;;;;;;;;;;
+
+;; Rule to turn something like
+;;
+;; (Implication
+;;    (Predicate "crazy")
+;;    (Predicate "happy"))
+;;
+;; into
+;;
+;; (SetLink
+;;    (Evaluation
+;;       (Predicate "happy")
+;;       (List
+;;          (Concept "people")))
+;;    (Inheritance
+;;       (Concept "people")
+;;       (Concept "crazy")))
+;;
+;; Mind that Predicate is turned into a Concept, that's normal.
+;;
+;; s2l stands for semantics to logic.
+
+(define inheritance-to-evaluation-s2l-vardecl
+   (VariableList
+      (TypedVariable
+         (Variable "$P")
+         (Type "PredicateNode"))
+      (TypedVariable
+         (Variable "$Q")
+         (Type "PredicateNode"))
+      ;; The following is to minimize the probability that this rule
+      ;; is gonna turn any Implication into a mess. We try to filter
+      ;; in Implication inferred from r2l->l2s knowledge.
+      (TypedVariable
+         (Variable "$P-element-instance")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$P-element")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$P-instance")
+         (Type "PredicateNode"))
+      (TypedVariable
+         (Variable "$P")
+         (Type "PredicateNode"))
+      (TypedVariable
+         (Variable "$Q-element-instance")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$Q-element")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$Q-instance")
+         (Type "PredicateNode"))
+      (TypedVariable
+         (Variable "$Q")
+         (Type "PredicateNode"))))
+
+(define inheritance-to-evaluation-s2l-pattern
+   (And
+      (Implication
+         (Variable "$P")
+         (Variable "$Q"))
+      ;; The following is to minimize the probability that this rule
+      ;; is gonna turn any Implication into a mess. We try to filter
+      ;; in Implication inferred from r2l->l2s knowledge.
+      (Inheritance
+         (Variable "$P-element-instance")
+         (Variable "$P-element"))
+      (Implication
+         (Variable "$P-instance")
+         (Variable "$P"))
+      (Evaluation
+         (Variable "$P-instance")
+         (List
+            (Variable "$P-element-instance")))
+      (Inheritance
+         (Variable "$Q-element-instance")
+         (Variable "$Q-element"))
+      (Implication
+         (Variable "$Q-instance")
+         (Variable "$Q"))
+      (Evaluation
+         (Variable "$Q-instance")
+         (List
+            (Variable "$Q-element-instance")))))
+
+(define inheritance-to-evaluation-s2l-rewrite
+   (ExecutionOutput
+      (GroundedSchema "scm: inheritance-to-evaluation-s2l-formula")
+      (List
+         (Variable "$P")
+         (Variable "$Q"))))
+
+(define (inheritance-to-evaluation-s2l-formula P Q)
+   (let ((P-name (cog-name P)))
+       (Word "people")
+       (Set
+          (Evaluation
+             Q
+             (List
+                (Concept "people")))
+          (Inheritance
+             (Concept "people")
+             (Concept P-name)))))
+
+(define inheritance-to-evaluation-s2l-rule
+   (Bind
+      inheritance-to-evaluation-s2l-vardecl
+      inheritance-to-evaluation-s2l-pattern
+      inheritance-to-evaluation-s2l-rewrite))
+
+;;;;;;;;;;
+;; Main ;;
+;;;;;;;;;;
+
+;; Apply l2s rules
+(cog-bind unary-predicate-speech-act-l2s-rule)
 
 ;; Apply Implication direct evaluation
 (cog-bind implication-direct-evaluation-rule)
+
+;; Apply s2l rules
+(cog-bind inheritance-to-evaluation-s2l-rule)
+
+;; Apply sureal with the output s2l
+(chat "small cats are cute")
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Sub-experiment, don't run it ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;; Sub experiment turning the inferred knowledge into speech
+
+(Word "people")
+(Word "crazy")
+(Word "happy")
+
+;; Using inheritance directly (doesn't work)
+(sureal (SetLink
+      (InheritanceLink
+         (ConceptNode "people@8107be66-4424-445b-9875-96fa5d3d3204")
+         (ConceptNode "people" (stv 0.022727273 0.0012484394))
+      )
+      (InheritanceLink
+         (ConceptNode "people@8107be66-4424-445b-9875-96fa5d3d3204")
+         (ConceptNode "crazy")
+      )
+      (InheritanceLink
+         (ConceptNode "people@8107be66-4424-445b-9875-96fa5d3d3204")
+         (ConceptNode "happy")
+      )
+   )
+)
+
+;; Using predicate. Works, just need to add the following sentence
+(chat "small cats are cute")
+(Word "happy")
+(Word "people")
+(Word "crazy")
+
+;; Wait a bit before pasting that because the chat needs a second to
+;; get processed.
+(sureal
+   (SetLink
+      (Evaluation
+         (Predicate "happy")
+         (List
+            (Concept "people")))
+      (Inheritance
+         (Concept "people")
+         (Concept "crazy"))))
