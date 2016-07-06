@@ -103,6 +103,8 @@ public:
     //should not overlap a previous time unit 
     //and should fall after the previous time unit
     bool step_time_unit();//step_time_unit
+    bool is_auto_step_time();
+    void auto_step_time(bool astep);
     //store an atom at coordinates in map
     bool put_atom_at_current_time(const point3d location,
                               const opencog::Handle& ato);
@@ -183,5 +185,8 @@ private:
     boost::circular_buffer<TimeUnit> time_circle;
     time_pt curr_time; duration_c curr_duration;
     bool created_once;
+    void auto_timer();
+    bool auto_step;
+    std::mutex mtx;
 };
 #endif
