@@ -107,11 +107,13 @@ TimeOctomap::step_time_unit()
   //;
     return true;
 }
+
 bool 
-TimeOctomap::is_auto_step_time()
+TimeOctomap::is_auto_step_time_on()
 {
   return auto_step;
 }
+
 void
 TimeOctomap::auto_step_time(bool astep)
 {
@@ -119,13 +121,14 @@ TimeOctomap::auto_step_time(bool astep)
     auto_step=astep;
     if (astep) auto_timer();
 }
+
 void
 TimeOctomap::auto_timer()
 {
     TimeOctomap *tp=this;
     duration_c tr=time_res;
     std::thread( [tr,tp] () {
-        while(tp->is_auto_step_time())
+        while(tp->is_auto_step_time_on())
         {
             std::this_thread::sleep_for(tr);
         
@@ -133,6 +136,7 @@ TimeOctomap::auto_timer()
         }
     }).detach();
 }
+
 bool
 TimeOctomap::put_atom_at_current_time(const point3d location,
                                         const opencog::Handle& ato)

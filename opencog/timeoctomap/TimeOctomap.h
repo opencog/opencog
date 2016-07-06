@@ -103,7 +103,7 @@ public:
     //should not overlap a previous time unit 
     //and should fall after the previous time unit
     bool step_time_unit();//step_time_unit
-    bool is_auto_step_time();
+    bool is_auto_step_time_on();
     void auto_step_time(bool astep);
     //store an atom at coordinates in map
     bool put_atom_at_current_time(const point3d location,
