@@ -42,6 +42,13 @@ TimeOctomap::TimeOctomap(unsigned int num_time_units,
 {
         
 }
+TimeOctomap::~TimeOctomap()
+{
+    auto_step_time(false);
+    duration_c td=std::chrono::milliseconds(500);//magic number of acceptable time
+    std::this_thread::sleep_for(td);
+    //std::this_thread::sleep_for(time_res);//only if time res is small enough to be acceptable
+}
 
 double
 TimeOctomap::get_space_resolution()
@@ -77,8 +84,9 @@ TimeOctomap::step_time_unit()
     duration_c duration=time_res;
     //ideally greater than check should be done
     if (created_once) {
-        get_current_time_range(time_p,duration);//uniform time
-        time_p+=duration;//uniform time duration
+        //get_current_time_range(time_p,duration);//uniform time
+        time_p = curr_time;
+        time_p+= duration;//uniform time duration
         /* do not delete this, may be useful in future
         if (is_time_point_in_range(time_p, curr_time, curr_duration) ||
                 is_time_point_in_range(time_p + duration, curr_time, curr_duration)) {

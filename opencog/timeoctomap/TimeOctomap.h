@@ -155,6 +155,7 @@ public:
     //constructor
     TimeOctomap(unsigned int num_time_units, double map_res_meters,
                 duration_c time_resolution);
+    ~TimeOctomap();
     inline double sqr(double a){return (a*a);}
     inline double dot(point3d a,point3d b){return (a.x()*b.x()+a.y()*b.y()+a.z()*b.z());}
     inline double mag(point3d a){return sqrt(sqr(a.x())+sqr(a.y())+sqr(a.z()));}
