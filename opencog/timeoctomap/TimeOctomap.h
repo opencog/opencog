@@ -188,6 +188,7 @@ private:
     bool created_once;
     void auto_timer();
     bool auto_step;
-    std::mutex mtx;
+    std::mutex mtx,mtx_auto;
+    std::thread g_thread;
 };
 #endif

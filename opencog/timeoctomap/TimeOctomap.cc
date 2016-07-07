@@ -45,8 +45,8 @@ TimeOctomap::TimeOctomap(unsigned int num_time_units,
 TimeOctomap::~TimeOctomap()
 {
     auto_step_time(false);
-    duration_c td=std::chrono::milliseconds(500);//magic number of acceptable time
-    std::this_thread::sleep_for(td);
+    //duration_c td=std::chrono::milliseconds(500);//magic number of acceptable time
+    //std::this_thread::sleep_for(td);
     //std::this_thread::sleep_for(time_res);//only if time res is small enough to be acceptable
 }
 
@@ -125,9 +125,11 @@ TimeOctomap::is_auto_step_time_on()
 void
 TimeOctomap::auto_step_time(bool astep)
 {
+  std::lock_guard<std::mutex> t_mtx(mtx_auto);
     if (auto_step==astep)return;
     auto_step=astep;
     if (astep) auto_timer();
+    else g_thread.join();
 }
 
 void
@@ -135,14 +137,14 @@ TimeOctomap::auto_timer()
 {
     TimeOctomap *tp=this;
     duration_c tr=time_res;
-    std::thread( [tr,tp] () {
+    g_thread=std::thread( [tr,tp] () {
         while(tp->is_auto_step_time_on())
         {
             std::this_thread::sleep_for(tr);
         
             tp->step_time_unit();
         }
-    }).detach();
+    });//.detach();
 }
 
 bool
