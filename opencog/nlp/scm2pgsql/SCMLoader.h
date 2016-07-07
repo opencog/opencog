@@ -32,13 +32,28 @@ namespace opencog
 {
 
 /**
- * 
+ * A helper class that implements a simple strategy to load HUGE SCM (Atomese)
+ * files. The issue with such huge files is that trying to load them directly in
+ * guile or either pre-compiling them using "guild compile" requires an insane 
+ * amount of RAM.
+ *
+ * To load the atoms from such huge SCM (Atomese) files, load() will read each 
+ * top-level atom from the file and execute it using SchemeEval, populating the
+ * passed AtomSpace properly.
  */
 class SCMLoader 
 {
 
 public:
 
+    /**
+     * Load the contents of an SCM (Atomese) file and populates the passed
+     * AtomSpace.
+     *
+     * @return true if the passed file is somehow unusable or false otherwise
+     * @param fileName Full path of the file to be parsed
+     * @param atomSpace The AtomSpace to be populated
+     */
     static bool load(const std::string &fileName, AtomSpace &atomSpace);
 
 private:

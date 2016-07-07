@@ -9,21 +9,15 @@ bool SCMLoader::load(const std::string &fileName, AtomSpace &atomSpace)
 {
     bool exitValue = false;
 
+    logger().set_sync_flag(true);
     std::fstream fin(fileName, std::fstream::in);
     if (fin.good()) {
-        /*
-        std::fstream fcount(fileName, std::fstream::in);
-        int lineCount = 0;
-        std::string line;
-        while (std::getline(fcount, line)) {
-            ++lineCount;
-        }
+        ifstream fcount(fileName, ios::binary | ios::ate);
+        int fileSize = fcount.tellg();
         fcount.close();
-        */
-        logger().info("Parsing file: \"%s\"", fileName.c_str());
-        //parseFile(fin, atomSpace, lineCount);
-        parseFile(fin, atomSpace, -1);
-        logger().info("Parse done.");
+        logger().info("Loading file: \"%s\"", fileName.c_str());
+        parseFile(fin, atomSpace, fileSize);
+        logger().info("Loading finished.");
         fin.close();
     } else {
         logger().error("Could not open file: \"%s\"", fileName.c_str());
@@ -37,44 +31,31 @@ void SCMLoader::parseFile(std::fstream &fin, AtomSpace &atomSpace, int inputFile
 {
     SchemeEval *schemeEval = SchemeEval::get_evaluator(&atomSpace);
     int percentDone = 0;
-    int inputFileLineCount = 0;
-    int level = 0;
+    int inputFileCharCount = 0;
+    bool firstCharInLine = true;
     char c;
     std::string line = "";
     while (fin >> std::noskipws >> c) {
+        inputFileCharCount++;
         if (c == '\n') {
+            firstCharInLine = true;
             if (inputFileSize > 0) {
                 // Logs current % done
-                inputFileLineCount++;
-                int n = (((float) inputFileLineCount) / inputFileSize) * 100;
-                if (n > percentDone) {
-                    logger().info("%d%% done", percentDone);
+                int n = (((float) inputFileCharCount) / inputFileSize) * 100;
+                if ((n > percentDone) && (n < 100)) {
                     percentDone = n;
+                    logger().info("%d%% done", percentDone);
                 }
             }
         } else {
             line += c;
-        }
-        switch (c) {
-            case '(': {
-                level++;
-                break;
+            if (firstCharInLine && (c == ')')) {
+                schemeEval->eval(line);
+                line = "";
             }
-            case ')': {
-                if (--level == 0) {
-                    //printf("%s\n", line.c_str());
-                    //line = "(WordInstanceNode \"-\")";
-                    //line = "(WordInstanceNode \"ola\")";
-                    std::string result = schemeEval->eval(line);
-                    result = schemeEval->eval("(count-all)");
-                    printf("%s\n", result.c_str());
-                    line = "";
-                    //return;
-                }
-                break;
-            }
-            default: {
-            }
+            firstCharInLine = false;
         }
     }
+    std::string output = schemeEval->eval("(count-all)");
+    logger().info("Atom count after loading: %s", output.c_str());
 }
