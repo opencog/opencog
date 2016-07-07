@@ -66,7 +66,14 @@
             ; No result if it's a ListLink with arity 0
             (if (equal? (cog-arity aiml-resp) 0)
                 (State aiml-replies no-result)
-                (State aiml-replies aiml-resp)
+                (begin
+                    (State aiml-replies aiml-resp)
+
+                    ; Update the TV of the psi-rule that will actually execute
+                    ; the "Reply" action
+                    (cog-set-tv! (car (cog-chase-link 'MemberLink 'ImplicationLink aiml-reply-rule))
+                        (cog-tv (aiml-get-selected-rule)))
+                )
             )
             (State aiml-search search-finished)
         )
