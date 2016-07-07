@@ -1,0 +1,32 @@
+
+            Helper classes to deal with HUGE Atomese (.scm) files
+            -----------------------------------------------------
+
+This directory contains a couple of classes and programs to help dealing with
+HUGE Atomese (.scm) files. The issue with such files is that compiling them
+either in guile or using "guild compile" requires a LOT of RAM.
+
+SCMLoader 
+---------
+
+A helper class that implements a simple strategy to load huge .scm files by parsing
+each toplevel atom separately and feeding it (with all the inner atoms, in the case 
+of links) in an AtomSpace.
+
+PGStorageDelegate
+-----------------
+
+A helper class that uses SCMLoader to load a .scm file into an AtomSpace and store
+this AtomSpace in a Postgress DB.
+
+Helper executables
+------------------
+
+There are also two executable programs.
+
+    scm2pgsql - Expects a .scm file name and the DB credentials and properly read the 
+                file and store the resulting AtomSpace into the DB
+    loadscm   - Just crteates an empty AtomSpace and populate it with the contents of
+                the passed file before dying. This is useful to test with new .scm files
+                and probe the amount of time/RAM riquered to load that file.
+
