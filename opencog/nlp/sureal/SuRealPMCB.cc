@@ -445,21 +445,21 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                     // then get the tense of the one in this LemmaLink and see if they match
                     Handle hPatPredNode = m_as->get_handle(PREDICATE_NODE, sName);
                     IncomingSet qPatIS = hPatPredNode->getIncomingSetByType(INHERITANCE_LINK);
-                    bool tense = false;
+                    bool has_tense = false;
+                    bool eq_tense = false;
                     for (LinkPtr lpInhLk : qPatIS)
                     {
                         HandleSeq qInhOS = lpInhLk->getOutgoingSet();
                         if (qInhOS[0] == hPatPredNode and
-                                qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE and
-                                    sTense.compare(NodeCast(qInhOS[1])->getName()) == 0)
-                        {
-                            tense = true;
-                            break;
+                            qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE) {
+                            has_tense = true;
+                            eq_tense = sTense == NodeCast(qInhOS[1])->getName();
+	                        break;
                         }
                     }
 
                     // reject if their tenses don't match
-                    if (not tense) continue;
+                    if (has_tense and not eq_tense) continue;
 
                     Handle hWordNode = m_as->get_handle(WORD_NODE, sWord);
 
