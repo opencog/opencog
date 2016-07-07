@@ -22,39 +22,53 @@
  */
 
 #include "PGStorageDelegate.h"
+#include "SCMLoader.h"
+#include <opencog/guile/SchemeEval.h>
+
+using namespace opencog;
 
 PGStorageDelegate::PGStorageDelegate(const char *dbName, const char *userName, const char *password)
 {
-    dbInterface = new PGAtomStorage(dbName, userName, password);
-    if (! dbInterface->connected()) {
-        logger().error("PGStoreDelegate() could not connect to the database");
-    } else {
-        logger().info("Connected to database \"%s\" as \"%s\"", dbName, dbUser);
-    }
+    _dbName = dbName;
+    _userName = userName;
+    _password = password;
 }
 
 PGStorageDelegate::~PGStorageDelegate()
 {
-    delete dbInterface;
 }
 
-void PGStorageDelegate::loadSCMFile(const char *fileName, int dbCommitThreshold)
+bool PGStorageDelegate::loadSCMFile(const char *fileName)
 {
+    bool exitValue = true;
 
-    // TODO : consistency check of parameters
+    SchemeEval::init_scheme();
+    AtomSpace atomSpace;
+    SchemeEval::set_scheme_as(&atomSpace);
+    SchemeEval *schemeEval = new SchemeEval(&atomSpace);
+    schemeEval->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+    schemeEval->eval("(add-to-load-path \"/opencog/build/opencog/scm/opencog/\")");
+    schemeEval->eval("(add-to-load-path \".\")");
+    schemeEval->eval("(use-modules (ice-9 readline))");
+    schemeEval->eval("(activate-readline)");
+    schemeEval->eval("(use-modules (opencog))");
+    schemeEval->eval("(use-modules (opencog nlp) (opencog nlp lg-dict) (opencog nlp relex2logic) (opencog nlp chatbot) (opencog persist-pgsql))");
+    schemeEval->eval("(use-modules (opencog persist-pgsql))");
 
-    std::vector<AtomPtr> allAtoms;
-    parseSCMFile(fileName, allAtoms);
-    bool dirty = false;
-    for (int i = 0; i < allAtoms.size(); i++) {
-        dbInterface->storeAtom(allAtoms[i], false);
-        dirty = true;
-        if (((i % dbCommitThreashold) == 0) && (i > 0)) {
-            dbInterface->flushStoreQueue();
-            dirty = false;
-        }
+    exitValue = SCMLoader::load(fileName, atomSpace);
+
+    if (! exitValue) {
+        logger().info("Storing AtomSpace into DB...");
+        std::string commandLine = "(pgsql-open \"" + _dbName + "\" \"" + _userName + "\" \"" + _password + "\")";
+        std::string answer;
+        answer = schemeEval->eval(commandLine);
+        printf("%s\n", answer.c_str());
+        answer = schemeEval->eval("(pgsql-store)");
+        printf("%s\n", answer.c_str());
+        answer = schemeEval->eval("(pgsql-close)");
+        printf("%s\n", answer.c_str());
+        logger().info("Finished storing AtomSpace into DB.");
     }
-    if (dirty) {
-        dbInterface->flushStoreQueue();
-    }
+
+    return exitValue;
 }
