@@ -44,17 +44,6 @@ bool loadFile(char *fileName)
 
     bool exitValue = SCMLoader::load(fileName, atomSpace);
 
-    output = schemeEval->eval("(count-all)");
-    printf("%s\n", output.c_str());
-
-    //output = schemeEval->eval("(count-all)");
-    //printf("%s\n", output.c_str());
-    //output = schemeEval->eval("(EvaluationLink (PredicateNode \"predicate\") (ConceptNode \"concept\"))");
-    //printf("%s\n", output.c_str());
-    //output = schemeEval->eval("(count-all)");
-    //printf("%s\n", output.c_str());
-
-
     return exitValue;
 }
 
@@ -73,4 +62,3 @@ int main(int argc, char *argv[]) {
 
     return exitValue;
 }
-
