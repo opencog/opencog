@@ -341,6 +341,15 @@
 			(not (null? (gaar RESP))))
 		(not (null? (gar RESP)))))
 
+(define selected-rule "")
+(define-public (aiml-get-selected-rule)
+"
+  aiml-get-selected-rule - Return the AIML rule that has been selected
+  by the engine
+"
+	selected-rule
+)
+
 ;; get-response-step SENT -- get an AIML response to the sentence
 ;; SENT.  Recursive, i.e. it will recursively handle the SRAI's,
 ;; but is not necessarily the outermost response generator. That
@@ -358,7 +367,7 @@
 			(let* ((rule (aiml-select-rule all-rules))
 					(response (aiml-run-rule SENT rule)))
 				(if (valid-response? response)
-					response
+					(begin (set! selected-rule rule) response)
 					(do-while-null SENT (- CNT 1))
 				))))
 
