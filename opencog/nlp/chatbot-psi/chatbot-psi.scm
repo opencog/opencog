@@ -1,4 +1,3 @@
-;-------------------------------------------------------------------------------
 (define-module (opencog nlp chatbot-psi))
 
 (load "chatbot-psi/actions.scm")
