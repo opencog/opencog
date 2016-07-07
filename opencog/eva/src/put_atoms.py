@@ -87,7 +87,7 @@ class PutAtoms:
 
 	# Start or stop the behavior tree.
 	def btree_stop(self):
-		scheme_eval(self.atomspace, "(behavior-tree-halt)")
+		scheme_eval(self.atomspace, "(halt)")
 
 	def btree_run(self):
-		scheme_eval(self.atomspace, "(behavior-tree-run)")
+		scheme_eval(self.atomspace, "(run)")
