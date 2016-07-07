@@ -1,3 +1,12 @@
+(use-modules (opencog) (opencog nlp fuzzy) (opencog openpsi))
+
+(load "states.scm")
+;-------------------------------------------------------------------------------
+; Define the demands
+
+(define sociality (psi-demand "Sociality" .8))
+;-------------------------------------------------------------------------------
+
 (psi-rule
     (list (SequentialAnd
         (DefinedPredicate "fuzzy-qa-not-started?")
