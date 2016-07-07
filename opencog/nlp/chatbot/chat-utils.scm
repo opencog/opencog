@@ -19,6 +19,39 @@
              (opencog nlp relex2logic))
 
 ; -----------------------------------------------------------------------
+
+(use-modules (opencog) (opencog python) (opencog exec))
+
+(python-eval "
+from opencog.atomspace import AtomSpace, types, TruthValue
+
+import basic_sentiment_analysis
+
+atomspace = ''
+
+def set_atomspace(atsp):
+      global atomspace
+      atomspace = atsp
+      return TruthValue(1, 1)
+
+def call_sentiment_parse(text_node, sent_node):
+      global atomspace
+
+      sentiment_score = basic_sentiment_analysis.sentiment_parse(text_node.name)
+      if sentiment_score > 0:
+          positive_node = atomspace.add_node(types.ConceptNode, 'Positive')
+          atomspace.add_link(types.InheritanceLink, [sent_node, positive_node])
+      elif sentiment_score < 0:
+          negative_node = atomspace.add_node(types.ConceptNode, 'Negative')
+          atomspace.add_link(types.InheritanceLink, [sent_node, negative_node])
+      else:
+          neutral_node = atomspace.add_node(types.ConceptNode, 'Neutral')
+          atomspace.add_link(types.InheritanceLink, [sent_node, neutral_node])
+
+      return TruthValue(1, 1)
+")
+
+; -----------------------------------------------------------------------
 (define (r2l-parse sent)
 "
   r2l-parse SENT -- perform relex2logic processing on sentence SENT.
@@ -177,6 +210,10 @@
 
 		; Perform the R2L processing.
 		(r2l-parse (car sent-list))
+
+    ; Testing the Sentiment_eval function
+    (python-call-with-as "set_atomspace" (cog-atomspace))
+    (cog-evaluate! (Evaluation (GroundedPredicate "py: call_sentiment_parse") (List (Node plain-text) (car sent-list))))
 
 		; Track some counts needed by R2L.
 		(r2l-count sent-list)
