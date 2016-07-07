@@ -1,4 +1,8 @@
-(define (call-chatbot-eva)
+(use-modules (ice-9 threads))
+(use-modules (opencog))
+
+;-------------------------------------------------------------------------------
+(define-public (call-chatbot-eva)
     (State chatbot-eva sent-to-chatbot-eva)
 
     (begin-thread
@@ -6,7 +10,7 @@
     )
 )
 
-(define (do-fuzzy-QA)
+(define-public (do-fuzzy-QA)
     (State fuzzy-qa search-started)
 
     (begin-thread
@@ -29,7 +33,7 @@
     )
 )
 
-(define (do-fuzzy-match)
+(define-public (do-fuzzy-match)
     (State fuzzy-match search-started)
 
     (begin-thread
@@ -54,7 +58,7 @@
     )
 )
 
-(define (do-aiml-search)
+(define-public (do-aiml-search)
     (State aiml-search search-started)
 
     (begin-thread
@@ -93,7 +97,7 @@
     (reset-all-states)
 )
 
-(define (reply anchor)
+(define-public (reply anchor)
     (let ((ans-in-words (cog-chase-link 'StateLink 'ListLink anchor)))
         (if (null? ans-in-words)
             '()

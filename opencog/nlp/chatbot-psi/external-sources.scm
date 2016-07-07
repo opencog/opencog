@@ -1,5 +1,7 @@
-(use-modules (opencog) (opencog python))
+(use-modules (ice-9 threads))
+(use-modules (opencog) (opencog exec)(opencog python))
 
+;-------------------------------------------------------------------------------
 (python-eval "
 from opencog.atomspace import AtomSpace, types, TruthValue
 
@@ -118,7 +120,7 @@ def call_wolframalpha(qq, aid):
     (set! appid id)
 )
 
-(define (ask-duckduckgo)
+(define-public (ask-duckduckgo)
     (State duckduckgo-search search-started)
 
     ; TODO: We may want to actually nlp-parse the answer, but a typical answer
@@ -131,7 +133,7 @@ def call_wolframalpha(qq, aid):
     )
 )
 
-(define (ask-wolframalpha)
+(define-public (ask-wolframalpha)
     (if (not (equal? appid ""))
         (begin-thread
             (define appid_node (Node appid))

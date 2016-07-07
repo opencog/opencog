@@ -1,3 +1,9 @@
+(use-modules (opencog) (opencog atom-types))
+
+(load "states.scm")
+(load "utils.scm")
+;-------------------------------------------------------------------------------
+
 (Define
     (DefinedPredicate "is-input-utterance?")
     (Not (Equal (Set no-input-utterance)
