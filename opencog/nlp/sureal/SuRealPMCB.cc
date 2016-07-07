@@ -445,7 +445,11 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                     // then get the tense of the one in this LemmaLink and see if they match
                     Handle hPatPredNode = m_as->get_handle(PREDICATE_NODE, sName);
                     IncomingSet qPatIS = hPatPredNode->getIncomingSetByType(INHERITANCE_LINK);
-                    bool tense = false;
+
+                    // Only check tense consistence if the tense of
+                    // the exemplar sentence is defined
+                    bool tense = sTense.empty();
+
                     for (LinkPtr lpInhLk : qPatIS)
                     {
                         HandleSeq qInhOS = lpInhLk->getOutgoingSet();
