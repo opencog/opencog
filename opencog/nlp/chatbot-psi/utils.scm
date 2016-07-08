@@ -73,6 +73,8 @@
     (State wolframalpha-answers default-state)
     (State wolframalpha-search default-state)
     (State chatbot-eva default-state)
+    (State pln-answers default-state)
+    (State pln-qa default-state)
 )
 
 ; For handling things return by the fuzzy matcher

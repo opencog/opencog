@@ -12,13 +12,16 @@
 
 ; Load the available contexts
 (load "contexts.scm")
+(load "pln-contexts.scm")
 
 ; Load the available actions
 (load "actions.scm")
 (load "external-sources.scm")
+(load "pln-actions.scm")
 
 ; Load the psi-rules
 (load "psi-rules.scm")
+(load "pln-psi-rules.scm")
 
 ; Load r2l-rules
 (load-r2l-rulebase)
