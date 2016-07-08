@@ -24,6 +24,7 @@
 #include "PGStorageDelegate.h"
 
 using namespace opencog;
+using namespace opencog::nlp;
 
 int main(int argc, char *argv[]) {
 

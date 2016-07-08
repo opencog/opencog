@@ -30,6 +30,8 @@
 
 namespace opencog
 {
+namespace nlp
+{
 
 /**
  * A helper class that implements a method to load a HUGE .scm file and
@@ -72,6 +74,7 @@ private:
     std::string _password;
 };
 
+}
 }
 
 #endif // _OPENCOG_PGSTORAGE_DELEGATE_H

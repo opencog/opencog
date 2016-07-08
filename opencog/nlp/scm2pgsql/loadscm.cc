@@ -25,6 +25,7 @@
 #include <opencog/guile/SchemeEval.h>
 
 using namespace opencog;
+using namespace opencog::nlp;
 
 bool loadFile(char *fileName)
 {
