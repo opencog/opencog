@@ -10,6 +10,9 @@
 ; Load the utilities
 (load "utils.scm")
 
+; Load the states
+(load "states.scm")
+
 ; Load the available contexts
 (load "contexts.scm")
 
