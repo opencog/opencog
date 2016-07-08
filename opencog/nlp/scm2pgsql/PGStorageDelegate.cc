@@ -40,22 +40,13 @@ PGStorageDelegate::~PGStorageDelegate()
 
 bool PGStorageDelegate::loadSCMFile(const char *fileName)
 {
-    bool exitValue = true;
-
-    SchemeEval::init_scheme();
     AtomSpace atomSpace;
+    SchemeEval::init_scheme();
     SchemeEval::set_scheme_as(&atomSpace);
     SchemeEval *schemeEval = new SchemeEval(&atomSpace);
-    schemeEval->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
-    schemeEval->eval("(add-to-load-path \"/opencog/build/opencog/scm/opencog/\")");
-    schemeEval->eval("(add-to-load-path \".\")");
-    schemeEval->eval("(use-modules (ice-9 readline))");
-    schemeEval->eval("(activate-readline)");
-    schemeEval->eval("(use-modules (opencog))");
-    schemeEval->eval("(use-modules (opencog nlp) (opencog nlp lg-dict) (opencog nlp relex2logic) (opencog nlp chatbot) (opencog persist-pgsql))");
-    schemeEval->eval("(use-modules (opencog persist-pgsql))");
+    schemeEval->eval("(use-modules (opencog nlp relex2logic) (opencog persist-pgsql))");
 
-    exitValue = SCMLoader::load(fileName, atomSpace);
+    bool exitValue = SCMLoader::load(fileName, atomSpace);
 
     if (! exitValue) {
         logger().info("Storing AtomSpace into DB...");

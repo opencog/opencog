@@ -32,7 +32,7 @@ namespace opencog
 {
 
 /**
- * A helper class that implements a method to load a HUGE SCM (Atomese) file and
+ * A helper class that implements a method to load a HUGE .scm file and
  * store it in the passed DB using (pgsql-store).
  */
 class PGStorageDelegate 
@@ -52,7 +52,7 @@ public:
     PGStorageDelegate(const char *dbName, const char *userName, const char *password);
 
     /**
-     * Load the atoms from the passed SCm (Atomese) file and store them in the
+     * Load the atoms from the passed .scm file and store them in the
      * database passed in the constructor. This command will:
      *     (1) Create an empty AtomSpace
      *     (2) Use SCMLoad to populate this AtomSpace with the atoms from the
