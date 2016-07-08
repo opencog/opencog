@@ -3,7 +3,7 @@
 
 
 using namespace opencog;
-using namespace std;
+using namespace opencog::nlp;
 
 bool SCMLoader::load(const std::string &fileName, AtomSpace &atomSpace)
 {
@@ -12,7 +12,7 @@ bool SCMLoader::load(const std::string &fileName, AtomSpace &atomSpace)
     logger().set_sync_flag(true);
     std::fstream fin(fileName, std::fstream::in);
     if (fin.good()) {
-        ifstream fcount(fileName, ios::binary | ios::ate);
+        std::ifstream fcount(fileName, std::ios::binary | std::ios::ate);
         int fileSize = fcount.tellg();
         fcount.close();
         logger().info("Loading file: \"%s\"", fileName.c_str());

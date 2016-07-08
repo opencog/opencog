@@ -26,6 +26,7 @@
 #include <opencog/guile/SchemeEval.h>
 
 using namespace opencog;
+using namespace opencog::nlp;
 
 PGStorageDelegate::PGStorageDelegate(const char *dbName, const char *userName, const char *password)
 {
