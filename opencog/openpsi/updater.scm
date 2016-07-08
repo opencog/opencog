@@ -10,16 +10,24 @@
 ; See interaction-rules.scm for more information
 ;
 ; The updater runs in a loop, and for each change in a trigger entity, it should
-; execute each and every rule containing the trigger as an antecedent, and each
+; execute each and every rule containing that trigger as an antecedent, and each
 ; of those rules should be executed once and only once for a given change.
 ;
+; To run:
+; (load "updater.scm")
+; (psi-updater-run)  ; to start the loop
+; (psi-updater-halt) ; to stop the loop
+;
+; If (define logging #t) is set below, then
+; > tail -f "psilog.txt"
+; can be used to monitor changes in some select events and variables.
 
 (load "utilities.scm")
 (load "modulator.scm")
 (load "sec.scm")
 (load "entity-defs.scm")
 (load "interaction-rules.scm")
-(define blah "blah")
+
 (define logging #t)
 (define verbose #t)
 (define slo-mo #t)

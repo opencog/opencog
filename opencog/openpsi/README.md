@@ -49,11 +49,20 @@ or "psi-decreased".
 
 Files:
 
-* interaction-rules.scm - the rules specifying interaction dynamics 
-between entities
-* entity-defs.scm - defines entities that are used in interaction rules
-* updater.scm - controls the dynamic updating of entity values based on
-  the interaction rules.
+* updater.scm - the main control file that handles the dynamic updating 
+  of entity values based on the interaction rules.
+* interaction-rules.scm - code for creating the rules specifying 
+  interaction dynamics between entities.
+* modulator.scm - internal openpsi modulator variables
+* sec.scm - internal openpsi Stimulus Evaluation Check variables
+* events.scm - defines perceived events that are monitored and trigger 
+  changes in openpsi variables.
+* entity-defs.scm - defines entities external to openpsi (e.g., PAU's) 
+  that are used in interaction rules
+  
+Todo: Interaction rule sets, events, and entities should be specified 
+      via config file
+
 
 ## Status and TODO List
 

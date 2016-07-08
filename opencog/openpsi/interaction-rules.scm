@@ -31,7 +31,7 @@
 ;       (Predicate "psi-increased") - trigger entity value has increased
 ;       (Predicate "psi-decreased") - trigger entity value has decreased
 ;
-; Depends on entity-defs.scm for entity definitions in the rules. 
+; Depends on entity-defs.scm for entity definitions in the rules.
 
 (use-modules (opencog atom-types)) ; needed for PredictiveImplication definition
 
