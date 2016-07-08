@@ -24,40 +24,20 @@
     ))
 )
 
-(define (get-input-word-list)
+(define-public (get-input-word-list)
     (get-input 'ListLink)
 )
 
-(define (get-input-sent-node)
+(define-public (get-input-sent-node)
     (get-input 'SentenceNode)
 )
 
-(define (get-input-text-node)
+(define-public (get-input-text-node)
     (get-input 'Node)
 )
 
-(define-public (is-utterance-type? speechact)
-    (Satisfaction (And
-        (State input-utterance (Reference (Variable "$s") (Variable "$n") (Variable "$l")))
-        (Parse (Variable "$parse") (Variable "$s"))
-        (Interpretation (Variable "$interp") (Variable "$parse"))
-        (Inheritance (Variable "$interp") speechact)
-    ))
-)
-
-(define (search-not-started? anchor)
-    (Equal (Set default-state) (Get (State anchor (Variable "$s"))))
-)
-
-(define (search-finished? anchor)
-    (Equal (Set search-finished) (Get (State anchor (Variable "$s"))))
-)
-
-(define (any-result? anchor)
-    (Not (Or
-        (Equal (Set default-state) (Get (State anchor (Variable "$f"))))
-        (Equal (Set no-result) (Get (State anchor (Variable "$f"))))
-    ))
+(define-public (get-input-time)
+    (cog-name (car (cog-chase-link 'AtTimeLink 'TimeNode (get-input-sent-node))))
 )
 
 (define (reset-all-states)

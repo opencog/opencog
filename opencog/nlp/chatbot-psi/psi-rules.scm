@@ -87,6 +87,25 @@
         (list (SequentialAnd
             (DefinedPredicate "aiml-search-finished?")
             (DefinedPredicate "is-aiml-reply?")
+            (Not (DefinedPredicate "is-a-question?"))
+            (DefinedPredicate "is-input-utterance?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
+        (True)
+        (stv .9 .9)
+        sociality
+    )
+    aiml-reply-rule
+)
+
+(Member
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "aiml-search-finished?")
+            (DefinedPredicate "is-aiml-reply?")
+            (DefinedPredicate "is-a-question?")
+            (Or (DefinedPredicate "is-aiml-reply-good?")
+                (DefinedPredicate "no-good-fast-answer?"))
             (DefinedPredicate "is-input-utterance?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))

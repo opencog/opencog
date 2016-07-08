@@ -116,11 +116,11 @@ def call_wolframalpha(qq, aid):
 ; AppID for Wolfram|Alpha Webservice API
 (define appid "")
 
-(define (set-appid id)
+(define-public (set-appid id)
     (set! appid id)
 )
 
-(define-public (ask-duckduckgo)
+(define (ask-duckduckgo)
     (State duckduckgo-search search-started)
 
     ; TODO: We may want to actually nlp-parse the answer, but a typical answer
@@ -133,7 +133,7 @@ def call_wolframalpha(qq, aid):
     )
 )
 
-(define-public (ask-wolframalpha)
+(define (ask-wolframalpha)
     (if (not (equal? appid ""))
         (begin-thread
             (define appid_node (Node appid))

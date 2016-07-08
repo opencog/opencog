@@ -23,6 +23,9 @@
 ; Load r2l-rules
 (load-r2l-rulebase)
 
+; Set relex-server-host
+(set-relex-server-host)
+
 ;-------------------------------------------------------------------------------
 ; Schema function for chatting
 
@@ -52,11 +55,8 @@
 (psi-reset-valid-demand-cache)
 
 ;-------------------------------------------------------------------------------
-; Set relex-server-host
-(set-relex-server-host)
-
-;-------------------------------------------------------------------------------
 ; Run OpenPsi if it's not already running
+
 (if (not (psi-running?))
     (psi-run)
 )
