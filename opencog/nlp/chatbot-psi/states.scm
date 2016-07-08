@@ -47,10 +47,3 @@
 (define sent-to-chatbot-eva (Concept (chat-prefix "SentToChatbotEva")))
 (define no-action-taken (Concept (chat-prefix "NoActionTaken")))
 (State chatbot-eva default-state)
-
-;; PLN states
-
-(define pln-answers (Anchor (chat-prefix "PLNAnswers")))
-(define pln-qa (Anchor (chat-prefix "PLNQA")))
-(State pln-answers default-state)
-(State pln-qa default-state)
