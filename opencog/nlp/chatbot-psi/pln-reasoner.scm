@@ -1,100 +1,22 @@
-;; Inductive reasoning about crazy happy people
+;; Background PLN reasoning
+;;
+;; Very simplistic and hacky at the moment, loop of 2 rules
+;;
+;; 1. Preprocessing to turn r2l outputs into something that PLN can reason on
+;;
+;; 2. Limited induction reasoning
+;;
+;; The reasoner doesn't use the URE. Instead if merely applies the 2
+;; rules on after then other in a loop.
 
-;;;;;;;;;;;;;;;;;;;;;;;
-;; Load prerequisite ;;
-;;;;;;;;;;;;;;;;;;;;;;;
+(load "pln-states.scm")
 
-;; Load modules
-(use-modules (opencog query))
 (use-modules (opencog logger))
-
-;; (cog-logger-set-sync! #t)
-;; (cog-logger-set-timestamp! #f)
-
-;; Load the chatbot (don't forget to run the relex sever)
-(add-to-load-path "../../../opencog/nlp/chatbot-psi")
-(load-from-path "chatbot.scm")
+(use-modules (opencog query))
 
 ;; Load PLN rule implication direct evaluation
-(add-to-load-path "../../../opencog/pln/rules")
+(add-to-load-path "../../pln/rules")
 (load-from-path "implication-direct-evaluation-rule.scm")
-
-;; Convenient fetchers
-(define (get-parse-nodes)
-  (cog-satisfying-set (Get
-                         (TypedVariable
-                           (Variable "$P")
-                           (Type "ParseNode"))
-                         (Variable "$P"))))
-
-;; Get the r2l output
-(define (get-set-links)
-  (cog-satisfying-set (Get
-                         (TypedVariable
-                           (Variable "$S")
-                           (Type "SetLink"))
-                         (Variable "$S"))))
-
-(define (get-wordinstance-nodes)
-  (cog-satisfying-set (Get
-                         (TypedVariable
-                           (Variable "$W")
-                           (Type "WordInstanceNode"))
-                         (Variable "$W"))))
-
-;; Get all of them
-(define (get-wordinstance-links)
-  (cog-satisfying-set (Get
-                         (TypedVariable
-                           (Variable "$W")
-                           (Type "WordInstanceLink"))
-                         (Variable "$W"))))
-
-;; Get all of them
-(define (get-wordsequence-links)
-  (cog-satisfying-set (Get
-                         (TypedVariable
-                           (Variable "$W")
-                           (Type "WordSequenceLink"))
-                         (Variable "$W"))))
-
-;; Get all of them
-(define (get-lemma-links)
-  (cog-satisfying-set (Get
-                         (TypedVariable
-                           (Variable "$L")
-                           (Type "LemmaLink"))
-                         (Variable "$L"))))
-
-;; Get all of them
-(define (get-reference-links)
-  (cog-satisfying-set (Get
-                         (TypedVariable
-                           (Variable "$R")
-                           (Type "ReferenceLink"))
-                         (Variable "$R"))))
-
-;; Get all of them
-(define (get-interpretation-links)
-  (cog-satisfying-set (Get
-                         (TypedVariable
-                           (Variable "$I")
-                           (Type "InterpretationLink"))
-                         (Variable "$I"))))
-
-;; Get all of them
-(define (get-execution-links)
-  (cog-satisfying-set (Get
-                         (TypedVariable
-                           (Variable "$E")
-                           (Type "ExecutionLink"))
-                         (Variable "$E"))))
-
-(chat "Ben is happy")
-(chat "Ben is crazy")
-
-(chat "Eddie is happy")
-(chat "Eddie is crazy")
 
 ;;;;;;;;;;;;;;;
 ;; L2S rules ;;
@@ -339,33 +261,25 @@
 ;; Main ;;
 ;;;;;;;;;;
 
-;; Apply l2s rules
-(cog-bind unary-predicate-speech-act-l2s-rule)
 
-;; Apply Implication direct evaluation
-(cog-bind implication-direct-evaluation-rule)
+(define (pln-run)
+  (define (pln-loop)
+    ;; Apply l2s rules
+    (cog-bind unary-predicate-speech-act-l2s-rule)
 
-;; Apply s2l rules
-(cog-bind inheritance-to-evaluation-s2l-rule)
+    ;; Apply Implication direct evaluation (and put the result in
+    ;; pln-inferred-atoms state)
+    (State pln-inferred-atoms (cog-bind implication-direct-evaluation-rule))
 
-;; Give model to sureal to produce the forthcoming sentence
-(chat "small cats are cute")
-(Word "happy")
-(Word "people")
-(Word "crazy")
+    ;; Log the current state
+    (cog-logger-info "[PLN-Psi] pln-inferred-atoms = ~a"
+                     (cog-incoming-set pln-inferred-atoms))
+    
+    ;; Sleep a bit, cause thinking is tiring
+    (sleep 1)
 
-;; Apply sureal with the output s2l
-(sureal
-   (SetLink
-      (EvaluationLink
-         (PredicateNode "happy" (stv 0.2857143 0.0024937657))
-         (ListLink
-            (ConceptNode "people")
-         )
-      )
-      (InheritanceLink
-         (ConceptNode "people")
-         (ConceptNode "crazy")
-      )
-   )
-)
+    ;; Loop
+    (pln-loop))
+  (begin-thread (pln-loop)))
+
+(pln-run)

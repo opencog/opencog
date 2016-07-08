@@ -1,5 +1,6 @@
 (use-modules (ice-9 threads))
 (use-modules (opencog))
+(use-modules (opencog logger))
 
 ;-------------------------------------------------------------------------------
 ; Useful functions for the actions
