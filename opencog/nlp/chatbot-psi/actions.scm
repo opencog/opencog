@@ -3,7 +3,28 @@
 (use-modules (opencog logger))
 
 ;-------------------------------------------------------------------------------
-(define-public (call-chatbot-eva)
+; Useful functions for the actions
+
+; For handling things return by the fuzzy matcher
+(define (pick-and-generate list-of-results)
+    (if (equal? (length list-of-results) 0)
+        '()
+        (let* (; TODO: Should be bias according to the score
+               (picked (list-ref list-of-results (random (length list-of-results))))
+               ; TODO: Should use gen-sentences when new microplanner is ready
+               (generated (sureal (gar picked))))
+            (if (null? generated)
+                ; Do it again if the chosen one can't be used to generate a sentence
+                (pick-and-generate (delete! generated list-of-results))
+                generated
+            )
+        )
+    )
+)
+
+;-------------------------------------------------------------------------------
+
+(define (call-chatbot-eva)
     (State chatbot-eva sent-to-chatbot-eva)
 
     (begin-thread
@@ -11,7 +32,7 @@
     )
 )
 
-(define-public (do-fuzzy-QA)
+(define (do-fuzzy-QA)
     (State fuzzy-qa search-started)
 
     (begin-thread
@@ -34,7 +55,7 @@
     )
 )
 
-(define-public (do-fuzzy-match)
+(define (do-fuzzy-match)
     (State fuzzy-match search-started)
 
     (begin-thread
@@ -59,7 +80,7 @@
     )
 )
 
-(define-public (do-aiml-search)
+(define (do-aiml-search)
     (State aiml-search search-started)
 
     (begin-thread
@@ -67,13 +88,13 @@
             ; No result if it's a ListLink with arity 0
             (if (equal? (cog-arity aiml-resp) 0)
                 (State aiml-replies no-result)
-                (begin
+                (let ((target-rules (cog-chase-link 'MemberLink 'ImplicationLink aiml-reply-rule))
+                      (target-tv (cog-tv (aiml-get-selected-rule))))
                     (State aiml-replies aiml-resp)
 
-                    ; Update the TV of the psi-rule that will actually execute
+                    ; Update the TVs of the psi-rules that will actually execute
                     ; the "Reply" action
-                    (cog-set-tv! (car (cog-chase-link 'MemberLink 'ImplicationLink aiml-reply-rule))
-                        (cog-tv (aiml-get-selected-rule)))
+                    (map (lambda (r) (cog-set-tv! r target-tv)) target-rules)
                 )
             )
             (State aiml-search search-finished)
@@ -105,7 +126,7 @@
     (reset-all-states)
 )
 
-(define-public (reply anchor)
+(define (reply anchor)
     (let ((ans-in-words (cog-chase-link 'StateLink 'ListLink anchor)))
         (if (null? ans-in-words)
             '()

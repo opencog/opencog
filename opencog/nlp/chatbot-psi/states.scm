@@ -2,6 +2,7 @@
 
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
+
 (define (chat-prefix node_name) (string-append "Chatbot: " node_name))
 
 (define input-utterance (Anchor (chat-prefix "InputUtterance")))
@@ -47,3 +48,20 @@
 (define sent-to-chatbot-eva (Concept (chat-prefix "SentToChatbotEva")))
 (define no-action-taken (Concept (chat-prefix "NoActionTaken")))
 (State chatbot-eva default-state)
+
+;-------------------------------------------------------------------------------
+
+(define (reset-all-states)
+    (State input-utterance no-input-utterance)
+    (State aiml-replies default-state)
+    (State aiml-search default-state)
+    (State fuzzy-replies default-state)
+    (State fuzzy-match default-state)
+    (State fuzzy-answers default-state)
+    (State fuzzy-qa default-state)
+    (State duckduckgo-answers default-state)
+    (State duckduckgo-search default-state)
+    (State wolframalpha-answers default-state)
+    (State wolframalpha-search default-state)
+    (State chatbot-eva default-state)
+)

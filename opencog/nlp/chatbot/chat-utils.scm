@@ -90,7 +90,7 @@
                 ; be used. Will do for now, assuming a single instance
                 ; deals with a single conversation.
                 (TimeNode (number->string (current-time)))
-                interp-node
+                sent
                 (TimeDomainNode "Dialogue-System"))
 
             result

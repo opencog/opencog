@@ -53,6 +53,7 @@ def to_wolframalpha(qq, aid):
 
     # Anchor for the result
     answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: WolframAlphaAnswers')
+    no_result = atomspace.add_node(types.ConceptNode, 'Chatbot: NoResult')
 
     # Avoid HTTP Error 400: Bad Request
     query = qq.name.replace(' ', '+')
@@ -85,6 +86,8 @@ def to_wolframalpha(qq, aid):
 
         # For common punctuations, to turn them into actual WordNode later
         result = result.replace(',', ' ,').replace('.', ' .').replace('?', ' ?').replace('!', ' !')
+    else:
+        atomspace.add_link(types.StateLink, [answer_anchor, no_result])
 
     # Write to AtomSpace
     if result:
@@ -96,7 +99,6 @@ def to_wolframalpha(qq, aid):
         ans = atomspace.add_link(types.ListLink, word_nodes)
         atomspace.add_link(types.StateLink, [answer_anchor, ans])
     else:
-        no_result = atomspace.add_node(types.ConceptNode, 'Chatbot: NoResult')
         atomspace.add_link(types.StateLink, [answer_anchor, no_result])
 
 def call_duckduckgo(qq):
@@ -116,11 +118,11 @@ def call_wolframalpha(qq, aid):
 ; AppID for Wolfram|Alpha Webservice API
 (define appid "")
 
-(define (set-appid id)
+(define-public (set-appid id)
     (set! appid id)
 )
 
-(define-public (ask-duckduckgo)
+(define (ask-duckduckgo)
     (State duckduckgo-search search-started)
 
     ; TODO: We may want to actually nlp-parse the answer, but a typical answer
@@ -133,7 +135,7 @@ def call_wolframalpha(qq, aid):
     )
 )
 
-(define-public (ask-wolframalpha)
+(define (ask-wolframalpha)
     (if (not (equal? appid ""))
         (begin-thread
             (define appid_node (Node appid))
