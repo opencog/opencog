@@ -10,7 +10,7 @@
 ;-------------------------------------------------------------------------------
 ; Define the tags
 
-(define aiml-reply-rule (Concept (chat-prefix "AIML Reply Rule")))
+(define aiml-reply-rule (Concept (chat-prefix "AIMLReplyRule")))
 
 ;-------------------------------------------------------------------------------
 ; Define the psi-rules
