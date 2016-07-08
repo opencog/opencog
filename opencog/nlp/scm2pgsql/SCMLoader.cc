@@ -44,7 +44,7 @@ void SCMLoader::parseFile(std::fstream &fin, AtomSpace &atomSpace, int inputFile
                 int n = (((float) inputFileCharCount) / inputFileSize) * 100;
                 if ((n > percentDone) && (n < 100)) {
                     percentDone = n;
-                    logger().info("%d%% done", percentDone);
+                    logger().info("Loading file. %d%% done.", percentDone);
                 }
             }
         } else {
