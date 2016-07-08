@@ -106,12 +106,10 @@
 )
 
 (define-public (reply anchor)
-    (cog-logger-info "[PLN-Psi] reply anchor = ~a" anchor)
     (let ((ans-in-words (cog-chase-link 'StateLink 'ListLink anchor)))
         (if (null? ans-in-words)
             '()
             (apply say (cog-outgoing-set (car ans-in-words)))
         )
     )
-    (reset-all-states)                  ; TODO remove that once working
 )
