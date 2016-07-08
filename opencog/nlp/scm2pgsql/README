@@ -1,9 +1,9 @@
 
-            Helper classes to deal with HUGE Atomese (.scm) files
-            -----------------------------------------------------
+            Helper classes to deal with HUGE .scm files
+            -------------------------------------------
 
-This directory contains a couple of classes and programs to help dealing with
-HUGE Atomese (.scm) files. The issue with such files is that compiling them
+This directory contains a couple of classes and programs to help dealing 
+with HUGE .scm files. The issue with such files is that compiling them
 either in guile or using "guild compile" requires a LOT of RAM.
 
 SCMLoader 
@@ -25,8 +25,11 @@ Helper executables
 There are also two executable programs.
 
     scm2pgsql - Expects a .scm file name and the DB credentials and properly read the 
-                file and store the resulting AtomSpace into the DB
+                file and store the resulting AtomSpace into the DB. This program is
+                installed by default by "make install". Call it with no args to see 
+                a usage message.
     loadscm   - Just crteates an empty AtomSpace and populate it with the contents of
                 the passed file before dying. This is useful to test with new .scm files
-                and probe the amount of time/RAM riquered to load that file.
+                and probe the amount of time/RAM required to load them. It is not 
+                installed by default. It will be in build/opencog/nlp/scm2pgsql/loadscm
 
