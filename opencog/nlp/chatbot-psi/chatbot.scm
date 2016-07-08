@@ -26,6 +26,9 @@
 ; Load r2l-rules
 (load-r2l-rulebase)
 
+; Load pln reasoner
+(load "pln-reasoner.scm")
+
 ;-------------------------------------------------------------------------------
 ; Schema function for chatting
 
