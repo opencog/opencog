@@ -373,14 +373,16 @@
 (define (psi-set-value! entity value)
 "
   Set the current value of psi-related entity.
+
+  entity - the object whose value is being set
+  value - a numerical value (not NumberNode), assumed to be in [0,1] (for now)
 "
 	(define value-rep-type (psi-value-representation-type entity))
 	(define representation) ; the atomese representation of the stored value
 
-	(format #t "\npsi-set-value! \n  entity: ~a  value: ~a  value-rep-type: ~a\n"
-    		entity value value-rep-type)
+	;(format #t "\npsi-set-value! \n  entity: ~a  value: ~a  value-rep-type: ~a\n"
+    ;		entity value value-rep-type)
 
-	; TODO: need to handle if value is a NumberNode or a number
 	(set! representation
 		(cond
 			((equal? value-rep-type statelink) (State entity (Number value)))
@@ -391,7 +393,8 @@
 			(else (error (string-append "In psi-set-value! encountered undefined"
 			    " value representation type: ") value-rep-type))))
 
-	(format #t "representation: ~a" representation))
+	;(format #t "representation: ~a" representation)
+)
 
 (define psi-rep-type-node (Concept "value-representation-type"))
 
@@ -420,8 +423,8 @@
 	; first see if representation type is already set for this entity
 	(define rep-type (cog-get-state-value (List entity psi-rep-type-node)))
 
-	(format #t (string-append "\npsi-value-representation-type \n  entity: ~a  "
-		"initial rep-type: ~a\n") entity rep-type)
+	;(format #t (string-append "\npsi-value-representation-type \n  entity: ~a  "
+	;	"initial rep-type: ~a\n") entity rep-type)
 
 	(if rep-type
 		; return the stored representation type
@@ -438,8 +441,8 @@
 						(Variable "$n"))))) 1)
 			(begin
 				(set-value-rep-type! entity statelink)
-	            (format #t (string-append "Found value stored in SateLink. "
-	                "Setting value-rep type to ~a\n") statelink)
+	            ;(format #t (string-append "Found value stored in SateLink. "
+	            ;    "Setting value-rep type to ~a\n") statelink)
 				;(set! rep-type statelink)
 				; let's see if it will return from here
 				statelink)
@@ -473,7 +476,7 @@
 	                (begin
 		                (set-value-rep-type! entity statelink)
 		                (set! rep-type statelink)))
-	            (format #t "Set value-rep type: ~a\n" rep-type)
+	            ;(format #t "Set value-rep type: ~a\n" rep-type)
 	            rep-type))))
 
 

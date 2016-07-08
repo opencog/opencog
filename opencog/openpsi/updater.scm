@@ -14,13 +14,12 @@
 ; of those rules should be executed once and only once for a given change.
 ;
 
-;(load "main.scm")
 (load "utilities.scm")
 (load "modulator.scm")
 (load "sec.scm")
 (load "entity-defs.scm")
 (load "interaction-rules.scm")
-
+(define blah "blah")
 (define logging #t)
 (define verbose #t)
 (define slo-mo #t)
@@ -58,7 +57,8 @@
 "
   Initialization of the updater. Called by psi-updater-run.
 
-  Initializes list of monitered entities and table of their previous values.
+  Initializes list of monitered entities events and table of their previous
+  values.
   Question: do we want to have the loading of the interaction rules happen here?
       I think perhaps better to have load them when the code files are loaded
       so errors can be caught then rather than at runtime.
@@ -87,7 +87,8 @@
 	; Event Detection
 	; TODO: Replace this temporary list with dynamically generated list based on
 	; membership.
-	(set! psi-monitored-events (list new-face speech-giving-starts))
+	(set! psi-monitored-events (psi-get-monitored-events))
+	(if verbose (format #t "monitored events: ~a\n" psi-monitored-events))
 	(for-each (lambda (event)
 				(define most-recent-ts (psi-get-most-recent-ts event))
 				(hash-set! prev-most-recent-ts-table event most-recent-ts)
@@ -103,7 +104,6 @@
 	;(format #t "psi-evals-with-change-pred: ~a\n" evals-with-change-pred)
 
 )
-
 
 ; ----------------------------------------------------------------------
 
@@ -126,7 +126,7 @@
        particular instance of an event should only fire rules at a single step.
 "
 	(define changed-params '())
-	(define new-events '())
+	(define detected-events '())
 	(define current-values-table (make-hash-table 20))
 
 	(define (set-param-change-status param)
@@ -145,6 +145,8 @@
                     (append changed-params (list param)))
                 (set! previous-val (hash-ref prev-value-table param))
                 (set! current-val (psi-get-number-value param))
+                (format #t "previous: ~a  current: ~a\n" previous-val
+                    current-val)
                 ;Todo: If previous-val was #f (iow not set), assume previous
                 ;      value to be 0? Doing that for now, but not sure if this is
                 ;      best.
@@ -183,35 +185,28 @@
     )
 
     (define (set-new-event-status event)
-        (define prev-latest-ts (hash-ref prev-most-recent-ts-table event))
-        (define curr-latest-ts (psi-get-most-recent-ts event))
+        (define prev-most-recent-ts (hash-ref prev-most-recent-ts-table event))
+        (define curr-most-recent-ts (psi-get-most-recent-ts event))
         (define new-event-tv)
         ;(format #t "set-new-event-status event: ~a" event)
-        ;(format #t "prev-latest-ts: ~a   curr-latest-ts: ~a\n" prev-latest-ts
-        ;    curr-latest-ts)
-        (if (not (equal? prev-latest-ts curr-latest-ts))
+        ;(format #t "prev-most-recent-ts: ~a   curr-most-recent-ts: ~a\n" prev-most-recent-ts
+        ;    curr-most-recent-ts)
+        (if (not (equal? prev-most-recent-ts curr-most-recent-ts))
             (begin
                 (if verbose
-                    (format #t "\n*** Found new event: ~a\n" event))
-                (set! new-events
-                    (append new-events (list event)))
-                ;(set! previous-val (hash-ref prev-value-table param))
-                ;(set! current-val (psi-get-number-value param))
-                ; I think we want to set based on the tv for the Eval Pred "event-detected" here
-                ; because it will be used when the rule is executed (?)
-                (hash-set! current-values-table (psi-new-event-eval event) 1)
-                (set! new-event-tv (stv 1 1))
-                ; Put new ts into prev-value-table
-                (hash-set! prev-value-table event curr-latest-ts)
-                (set! changed-events (append changed-events (list event))))
-             ; else no new event detected
-             (set! new-event-tv (stv 0 1)))
-        ;(Evaluation new-event-tv
-        ;    psi-event-detected-pred
-        ;    (List event)))
-		(cog-set-tv! (psi-new-event-eval event) new-event-tv))
+                    (format #t "\n*** Detected event occurrence: ~a\n" event))
+                (set! detected-events
+                    (append detected-events (list event)))
 
-    (define changed-events '())
+                ; set the event value to one
+				(psi-set-value! event 1)
+                ; replace previous-latest-ts with current-latest-ts
+                (hash-set! prev-most-recent-ts-table event curr-most-recent-ts)
+			)
+		)
+	)
+
+;    (define changed-events '())
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 
@@ -224,15 +219,26 @@
 	(if logging
 		(let ((output-port (open-file "psilog.txt" "a")))
 				(format output-port
-					"---------------------------------------- Loop ~a\n"
+					(string-append "-------------------------------------------"
+						"------------------------ Loop ~a\n")
 					psi-updater-loop-count)
 				(format output-port
-					"agent power: ~a  arousal: ~a  speech: ~1,1f  voice: ~1,1f new-face: ~1,1f\n"
-					(psi-get-number-value agent-state-power)
+					(string-append
+						"speech: ~1,1f  new-face: ~1,1f  "
+						"pos-dialog: ~1,1f  neg-dialog: ~1,1f  "
+						"\n\n"
+						"arousal: ~1,1f  valence: ~1,1f  "
+						"agent power: ~1,1f  voice: ~1,1f  "
+						"\n")
+					(psi-get-number-value speech-giving-starts)
+					(psi-get-number-value new-face)
+					(psi-get-number-value positive-sentiment-dialog)
+					(psi-get-number-value negative-sentiment-dialog)
 					(psi-get-number-value arousal)
-					(psi-get-number-value speech)
+					(psi-get-number-value valence)
+					(psi-get-number-value agent-state-power)
 					(psi-get-number-value voice-width)
-					(psi-get-number-value new-face))
+				)
 				(close-output-port output-port)))
 
 	; Evaluate the monitored params and set "changed" predicates accordingly
@@ -252,18 +258,13 @@
 					(hash-set! prev-value-table param value))
 			  changed-params)
 
-	; Wait, don't think I need to do this anymore
-	; Set event-detected predicates to 0, since any particular event instance
+	; Set detected events value to 0, since any particular event instance
 	; should fire rules for only one step (could also do this at the beginning
 	; of the step function)
-	;(for-each (lambda (event) (psi-set-value! event 0)) changed-events)
-
-		;(Evaluation (stv 0 1)
-		;	psi-event-detected-pred
-		;	(List event))
-		;(psi-new-event-eval-with-tv event (stv 0 1))
-		;psi-monitored-events)
-
+	(for-each (lambda (event)
+				(psi-set-value! event 0)
+				(hash-set! prev-value-table event 0))
+			detected-events)
 
 	(psi-pause)
 	(if single-step
@@ -366,7 +367,6 @@
 		; For this formula alpha needs to be negative for increases
 		; and positive for decreases. And it can't be 0.
 		(set! alpha (* alpha -1))
-		(format #t "alpha: ~a\n" alpha)
 		; alpha == 0 means no change
 		(if (= alpha 0)
 			(set! new-value current-value)
@@ -418,9 +418,9 @@
         (if (and
                 ; current value is defined
                 (not (equal? #f current))
-                (not (equal? previous current))
+                (not (= previous current))
                 (not (and (equal? previous #f)
-                          (equal? current 0.0))))
+                          (= current 0))))
             #t
             #f
             ; from when function was called as a GPN
@@ -429,6 +429,9 @@
         )
     )
 )
+
+(define (psi-monitored-event? target)
+	(member target psi-monitored-events))
 
 (define (psi-get-change-magnitude target)
   "
@@ -447,6 +450,13 @@
 		;(display return)
 		;(format #t "previous: ~a   current: ~a   return: ~a\n"
 		;	previous current return)
+
+		; Special handling for events. Moderate the magnitude change since the
+		; monitored event values are binary, the change will always be 1.
+		; Set event change magnitude to .5 for events.
+		(if (psi-monitored-event? target)
+			(set! return .5))
+
 		return)
 )
 
@@ -612,7 +622,6 @@
 (define-public t psi-set-pred-true)
 (define f psi-set-pred-false)
 
-(define-public s speech)
 (define-public p agent-state-power)
 (define-public a arousal)
 
@@ -623,4 +632,6 @@
 ;(define (update2 a x) (/ (- (expt 1000 (* a x)) 1) (- (expt 1000 a) 1)))
 
 
-; ----------------
+; --------------------------------------------------------------
+
+

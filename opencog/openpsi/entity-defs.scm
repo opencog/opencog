@@ -14,19 +14,7 @@
 ; instance of the event is detected.
 
 
-;; new face detected
-;(define new-face (Concept "new face"))
-;(define new-face-detected
-	;(Evaluation (stv 0 1)
-	;	(Predicate "psi-event-detected")
-	;	(List
-	;		new-face))
 
-	;(event-detected-eval new-face))
-
-; rework the below with the new Predicate "psi-event-detected"
-;(define speech (Predicate "speech-giving-starts"))
-;(define (speech-giving-starts (psi-create-event-detected-eval speech)))
 
 
 
