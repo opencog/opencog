@@ -8,8 +8,8 @@
 (use-modules (opencog query))
 (use-modules (opencog logger))
 
-(cog-logger-set-sync! #t)
-(cog-logger-set-timestamp! #f)
+;; (cog-logger-set-sync! #t)
+;; (cog-logger-set-timestamp! #f)
 
 ;; Load the chatbot (don't forget to run the relex sever)
 (add-to-load-path "../../../opencog/nlp/chatbot-psi")
@@ -336,29 +336,3 @@
       )
    )
 )
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Sub-experiment, don't run it ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; Using predicate. Works, just need to add the following sentence
-(chat "small cats are happy")
-(Word "happy")
-(Word "people")
-(Word "crazy")
-
-(psi-halt)
-
-(cog-logger-set-level! "fine")
-
-;; Wait a bit before pasting that because the chat needs a second to
-;; get processed.
-(sureal
-   (SetLink
-      (Evaluation
-         (Predicate "happy")
-         (List
-            (Concept "people")))
-      (Inheritance
-         (Concept "people")
-         (Concept "crazy"))))

@@ -1,3 +1,6 @@
+(use-modules (opencog))
+
+;-------------------------------------------------------------------------------
 (define (get-word-list sent-node)
     (List
         (append-map
@@ -33,7 +36,7 @@
     (get-input 'Node)
 )
 
-(define (is-utterance-type? speechact)
+(define-public (is-utterance-type? speechact)
     (Satisfaction (And
         (State input-utterance (Reference (Variable "$s") (Variable "$n") (Variable "$l")))
         (Parse (Variable "$parse") (Variable "$s"))

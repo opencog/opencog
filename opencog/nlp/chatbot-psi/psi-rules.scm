@@ -1,3 +1,20 @@
+(use-modules (opencog) (opencog nlp fuzzy) (opencog openpsi))
+
+(load "states.scm")
+
+;-------------------------------------------------------------------------------
+; Define the demands
+
+(define sociality (psi-demand "Sociality" .8))
+
+;-------------------------------------------------------------------------------
+; Define the tags
+
+(define aiml-reply-rule (Concept (chat-prefix "AIML Reply Rule")))
+
+;-------------------------------------------------------------------------------
+; Define the psi-rules
+
 (psi-rule
     (list (SequentialAnd
         (DefinedPredicate "fuzzy-qa-not-started?")
@@ -65,16 +82,19 @@
     sociality
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "aiml-search-finished?")
-        (DefinedPredicate "is-aiml-reply?")
-        (DefinedPredicate "is-input-utterance?")
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
-    (True)
-    (stv .9 .9)
-    sociality
+(Member
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "aiml-search-finished?")
+            (DefinedPredicate "is-aiml-reply?")
+            (DefinedPredicate "is-input-utterance?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
+        (True)
+        (stv .9 .9)
+        sociality
+    )
+    aiml-reply-rule
 )
 
 (psi-rule
