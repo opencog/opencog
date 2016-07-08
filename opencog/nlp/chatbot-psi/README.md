@@ -15,7 +15,7 @@ cp aiml-rules.scm /tmp
 
 - Start a Guile interpreter and load the chatbot, e.g.
 ```
-guile -l "chatbot.scm"
+guile -l "main.scm"
 ```
 
 - Load all of the AIML psi-rules, e.g.
@@ -52,7 +52,7 @@ Currently it generates replies by using one of the following components:
 And it will pick the reply according to the currently context and the weight of the corresponding psi-rules (i.e. the truth values assign to those OpenPsi rules, in the form of ImplicationLinks, as defined in `psi-rules.scm`), so adjusting and contexts and weights could alter the behavior of the chatbot to some extent.
 
 The code consists of:
-- chatbot.scm
+- main.scm
   - The main, entry point of the chatbot
 
 - psi-rules.scm
