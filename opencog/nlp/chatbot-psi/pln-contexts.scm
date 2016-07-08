@@ -1,17 +1,30 @@
 ;; PLN contexts
 
-(use-modules (opencog logger))
+(use-modules (srfi srfi-1))
 
-;; TODO: put everything produced by PLN under a certain predicate, and
-;; check if the current query has some common terms.
+(use-modules (opencog logger))
+(use-modules (opencog query))
+
+(load "pln-states.scm")
+(load "pln-utils.scm")
+
+;; Check whether the query has common words with the inferred atoms
 (define (is-pln-inferred-related?)
-  (cog-logger-info "[PLN-Psi] is-pln-inferred-related?")
-  (True)
-)
+  (let* (
+         (inferred-names (get-inferred-names))
+         (sentence-names (get-input-utterance-names))
+         (inter-names (lset-intersection equal? inferred-names sentence-names)))
+    ;; (cog-logger-info "[PLN-Psi] inferred-names = ~a" inferred-names)
+    ;; (cog-logger-info "[PLN-Psi] sentence-names = ~a" sentence-names)
+    (if (null? inter-names)
+        (stv 0 1)
+        (stv 1 1))))
 
 (Define
     (DefinedPredicate "is-pln-inferred-related?")
-    (is-pln-inferred-related?)
+    (Evaluation
+       (GroundedPredicate "scm: is-pln-inferred-related?")
+       (List))
 )
 
 (Define
