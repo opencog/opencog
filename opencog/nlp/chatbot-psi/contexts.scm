@@ -30,6 +30,10 @@
     ))
 )
 
+(define (no-result? anchor)
+    (Equal (Set no-result) (Get (State anchor (Variable "$r"))))
+)
+
 (define (check-aiml-reply num-node)
     (let* ((tv (cog-tv (aiml-get-selected-rule)))
            (conf (cog-tv-confidence tv))
@@ -129,10 +133,19 @@
     (Evaluation (GroundedPredicate "scm: check-aiml-reply") (List (Number .5)))
 )
 
+(Define
+    (DefinedPredicate "no-result-from-other-sources?")
+    (And (search-finished? duckduckgo-search)
+         (search-finished? wolframalpha-search)
+         (no-result? duckduckgo-answers)
+         (no-result? wolframalpha-answers))
+)
+
 ; Number being passed is time (in second) threshold
 (Define
     (DefinedPredicate "no-good-fast-answer?")
-    (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List (Number 3)))
+    (Or (DefinedPredicate "no-result-from-other-sources?")
+        (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List (Number 3))))
 )
 
 (Define
