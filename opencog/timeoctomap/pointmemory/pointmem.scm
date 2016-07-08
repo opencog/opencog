@@ -13,7 +13,7 @@
 ;utility functions
 
 ;;Convert from at location link to (x y z) list
-(define-public (space-nodes at-loc-link) (cog-outgoing-set (cadr (cog-outgoing-set (cadr (cog-outgoing-set al-link))))))
+(define-public (space-nodes at-loc-link) (cog-outgoing-set (cadr (cog-outgoing-set (cadr (cog-outgoing-set at-loc-link))))))
 (define-public (loc-link-x at-loc-link) 
 		(string->number (cog-name (car (space-nodes at-loc-link))))
 )
