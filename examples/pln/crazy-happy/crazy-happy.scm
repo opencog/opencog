@@ -141,8 +141,41 @@
 ;;    (ListLink
 ;;       (ConceptNode "Ben")))
 ;;
-;; The 0.1 is just to convey the fact that we only have one piece of
-;; evidence, ideally we would use count-to-confidence
+;; The 0.1 is largely arbitrary and convey the fact that we only have
+;; limited evidences.
+;;
+;; To do well this rule should be replaced by an axioms relating the
+;; cohesiveness of the involved predicate + PLN rules. THe axiom would
+;; look like
+;;
+;; Implication
+;;   VariableList
+;;     TypedVariable
+;;       Variable "$P"
+;;       Type "Predicate"
+;;     TypedVariable
+;;       Variable "$X"
+;;       Type "Concept"
+;;     TypedVariable
+;;       Variable "$Y"
+;;       Type "Concept"
+;;   And
+;;     Evaluation
+;;       Predicate "is-cohesive"
+;;       Variable "$P"
+;;     Evaluation
+;;       Variable "$P"
+;;       Variable "$X"
+;;     Similarity
+;;       Variable "$X"
+;;       Variable "$Y"
+;;   Evaluation
+;;     Variable "$P"
+;;     Variable "$X"
+;;
+;; Then PLN would use, as well as estimate the Similarities between
+;; the arguments to produce some equivalent (but with better true
+;; value estimate) outcome.
 ;;
 ;; We call these rule l2s, which stands for logic to
 ;; semantics. Eventually maybe these can be turned into a rule-base,
