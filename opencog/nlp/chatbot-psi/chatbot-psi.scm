@@ -1,7 +1,7 @@
 (define-module (opencog nlp chatbot-psi))
 
 (load "chatbot-psi/actions.scm")
-(load "chatbot-psi/chatbot.scm")
+(load "chatbot-psi/main.scm")
 (load "chatbot-psi/contexts.scm")
 (load "chatbot-psi/external-sources.scm")
 (load "chatbot-psi/psi-rules.scm")

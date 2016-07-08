@@ -1,6 +1,6 @@
 ADD_GUILE_MODULE (chatbot-psi.scm
 	actions.scm
-	chatbot.scm
+	main.scm
 	contexts.scm
 	external-sources.scm
 	states.scm
