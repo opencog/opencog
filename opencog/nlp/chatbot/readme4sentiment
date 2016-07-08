@@ -1,0 +1,36 @@
+To run sentiment_parse:
+
+1) Install nltk:
+    sudo pip install -U nltk
+
+2) Specify the path of the "basic_sentiment_analysis.py" file to PYTHONPATH, for example:
+   export PYTHONPATH="$HOME/hansonrobotics/opencog/opencog/opencog/"
+
+3) Specify the path of the dictionary files, for example:
+   export OPENCOG_PATH="$HOME/hansonrobotics/opencog/opencog/opencog/"
+
+   or change the path in the basic_sentiment_analysis.py code (line 156-157):
+
+   path = os.environ['OPENCOG_PATH'] + 'nlp/chatbot/'
+   dicttagger = DictionaryTagger([path + 'dicts/positive.yml',
+         path + 'dicts/negative.yml', path + 'dicts/inc.yml', path + 'dicts/dec.yml', path + 'dicts/inv.yml'])
+
+3) run nlp-parse, follow the InheritanceLink to check the sentiment of the sentence:
+guile> (cog-incoming-set (car (nlp-parse "This is not a disgusting test.")))
+((InheritanceLink
+   (SentenceNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb")
+   (ConceptNode "Positive")
+)
+ (ParseLink (stv 1 1)
+   (ParseNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb_parse_0" (stv 1 0.61070001))
+   (SentenceNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb")
+)
+ (SentenceSequenceLink (stv 1 1)
+   (SentenceNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb")
+   (NumberNode "612.000000")
+)
+ (ListLink
+   (Node "This is not a disgusting test.")
+   (SentenceNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb")
+)
+)
