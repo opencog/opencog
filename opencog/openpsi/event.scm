@@ -12,8 +12,6 @@
         (cog-chase-link 'InheritanceLink 'ConceptNode psi-event-node))
 )
 
-
-
 (define (psi-create-monitored-event event)
 	(define event-concept (Concept (string-append psi-prefix-str event)))
 	(Inheritance event-concept psi-event-node)
@@ -22,26 +20,6 @@
 	(psi-set-value! event-concept 0)
 	;(format #t "new event: ~a\n" event-concept)
 	event-concept)
-
-(define (psi-create-event-detected-eval event)
-"
-  Creates a new evaluation of the form:
-    Evaluation (stv 0 1)
-        Predicate "event-detected"
-        List
-            event
-  stv strength is set to 0 by default
-"
-	(psi-new-event-eval-with-tv event (stv 0 1)))
-
-
-(define (psi-new-event-eval event)
-	(Evaluation
-        psi-event-detected-pred
-        (List event)))
-
-(define (psi-new-event-eval-with-tv event tv)
-	(cog-set-tv! (psi-new-event-eval event) tv))
 
 
 ; --------------------------------------------------------------

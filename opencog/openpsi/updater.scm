@@ -20,7 +20,8 @@
 ;
 ; If (define logging #t) is set below, then
 ; > tail -f "psilog.txt"
-; can be used to monitor changes in some select events and variables.
+; can be used to monitor changes in some select events and variables. (It's
+; pretty crude.)
 
 (load "utilities.scm")
 (load "modulator.scm")
@@ -47,7 +48,7 @@
 
 ; --------------------------------------------------------------
 
-; Todo: implement this table in the atomspace
+; Todo: implement these tables in the atomspace
 (define prev-value-table (make-hash-table 40))
 (define prev-most-recent-ts-table (make-hash-table 40))
 
@@ -93,8 +94,6 @@
 	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
 
 	; Event Detection
-	; TODO: Replace this temporary list with dynamically generated list based on
-	; membership.
 	(set! psi-monitored-events (psi-get-monitored-events))
 	(if verbose (format #t "monitored events: ~a\n" psi-monitored-events))
 	(for-each (lambda (event)
