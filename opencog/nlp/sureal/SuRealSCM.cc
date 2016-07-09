@@ -151,9 +151,6 @@ HandleSeqSeq SuRealSCM::do_non_cached_sureal_match(Handle h)
  */
 HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 {
-	logger().info() << "SuRealSCM::do_sureal_match, "
-	                << "h = " << h->toString()
-	                << ", use_cache = " << use_cache;
 #ifdef HAVE_GUILE
     // only accept SetLink
     if (h->getType() != SET_LINK)
@@ -211,9 +208,6 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 
         sVars.insert(n);
     }
-
-    logger().info() << "SuRealSCM::do_sureal_match sVars = "
-                    << oc_to_string(sVars);
 
     SuRealPMCB pmcb(pAS, sVars, use_cache);
     PatternLinkPtr slp(createPatternLink(sVars, qClauses));
