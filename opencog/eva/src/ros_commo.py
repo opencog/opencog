@@ -476,7 +476,7 @@ class EvaControl():
 		# node. Placed there for now as they are being used to control
 		# chatbot-psi
 		from dynamic_reconfigure.msg import Config
-		rospy.Subscriber("/robot/chatbot/parameter_updates", Config,
+		rospy.Subscriber("/opencog_control/parameter_updates", Config,
 			self.interactive_learning_cb)
 
 		# ----------------
