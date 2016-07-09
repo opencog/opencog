@@ -15,8 +15,7 @@
 (use-modules (opencog query))
 
 ;; Load PLN rule implication direct evaluation
-(add-to-load-path "../../pln/rules")
-(load-from-path "implication-direct-evaluation-rule.scm")
+(load-from-path "opencog/pln/rules/implication-direct-evaluation-rule.scm")
 
 ;;;;;;;;;;;;;;;
 ;; L2S rules ;;
@@ -274,7 +273,7 @@
     ;; Log the current state
     (cog-logger-info "[PLN-Psi] pln-inferred-atoms = ~a"
                      (cog-incoming-set pln-inferred-atoms))
-    
+
     ;; Sleep a bit, cause thinking is tiring
     (sleep 1)
 
