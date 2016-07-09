@@ -6,4 +6,10 @@ ADD_GUILE_MODULE (chatbot-psi.scm
 	states.scm
 	psi-rules.scm
 	utils.scm
+	pln-actions.scm
+	pln-contexts.scm
+	pln-psi-rules.scm
+	pln-reasoner.scm
+	pln-states.scm
+	pln-utils.scm
 )
