@@ -55,8 +55,8 @@ Files:
   interaction dynamics between entities.
 * modulator.scm - internal openpsi modulator variables
 * sec.scm - internal openpsi Stimulus Evaluation Check variables
-* events.scm - defines perceived events that are monitored and trigger 
-  changes in openpsi variables.
+* events.scm - defines perceived events that are monitored and that 
+  trigger changes in openpsi variables.
 * entity-defs.scm - defines entities external to openpsi (e.g., PAU's) 
   that are used in interaction rules
   

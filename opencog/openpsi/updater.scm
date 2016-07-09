@@ -213,6 +213,12 @@
 		)
 	)
 
+	(define (display-with-highting var)
+		; add astericks to highlight changed values
+		(if (find (equal? var) changed-params)
+			(format "~1,1f" (psi-get-number-value var))
+			(format "~1,1f" (psi-get-number-value var))))
+
 ;    (define changed-events '())
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
@@ -223,6 +229,8 @@
 	; new-event predicates can are set beforehand.
 	(for-each set-new-event-status psi-monitored-events)
 
+
+
 	(if logging
 		(let ((output-port (open-file "psilog.txt" "a")))
 				(format output-port
@@ -232,17 +240,20 @@
 				(format output-port
 					(string-append
 						"speech: ~1,1f  new-face: ~1,1f  "
+						;"speech: ~a  new-face: ~a  "
 						"pos-dialog: ~1,1f  neg-dialog: ~1,1f  "
 						"\n\n"
-						"arousal: ~1,1f  valence: ~1,1f  "
+						"arousal: ~1,1f  pos-valence: ~1,1f  neg-valence: ~1,1f  "
 						"agent power: ~1,1f  voice: ~1,1f  "
 						"\n")
+					;(display-with-highlighting speech-giving-starts)
 					(psi-get-number-value speech-giving-starts)
 					(psi-get-number-value new-face)
 					(psi-get-number-value positive-sentiment-dialog)
 					(psi-get-number-value negative-sentiment-dialog)
 					(psi-get-number-value arousal)
-					(psi-get-number-value valence)
+					(psi-get-number-value pos-valence)
+					(psi-get-number-value neg-valence)
 					(psi-get-number-value agent-state-power)
 					(psi-get-number-value voice-width)
 				)

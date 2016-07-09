@@ -32,14 +32,25 @@
 	(psi-create-interaction-rule speech-giving-starts increased
 		agent-state-power .5))
 
-; positive sentiment dialog -> increased valence
-(define pos-dialog->valence
-	(psi-create-interaction-rule positive-sentiment-dialog increased valence
+; positive sentiment dialog -> increased pos-valence
+(define pos-dialog->pos-valence
+	(psi-create-interaction-rule positive-sentiment-dialog changed pos-valence
 		.5))
 
-; negative sentiment dialog -> decreased valence
-(define pos-dialog->valence
-	(psi-create-interaction-rule negative-sentiment-dialog increased valence
+; positive sentiment dialog -> decreased neg-valence
+(define pos-dialog->neg-valence
+	(psi-create-interaction-rule positive-sentiment-dialog changed neg-valence
+		-.5))
+
+
+; negative sentiment dialog -> increased neg-valence
+(define pos-dialog->neg-valence
+	(psi-create-interaction-rule negative-sentiment-dialog changed neg-valence
+		.5))
+
+; negative sentiment dialog -> decreased pos-valence
+(define pos-dialog->pos-valence
+	(psi-create-interaction-rule negative-sentiment-dialog changed pos-valence
 		-.5))
 
 
