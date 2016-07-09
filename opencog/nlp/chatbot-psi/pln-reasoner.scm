@@ -8,6 +8,20 @@
 ;;
 ;; The reasoner doesn't use the URE. Instead if merely applies the 2
 ;; rules on after then other in a loop.
+;;
+;; You may test it as following (wait for a couple seconds between
+;; each command to be sure that the chatbot-psi and the pln-reasoner
+;; have time to diggest them.
+;;
+;; guile -l main.scm
+;; (chat "small cats are cute") ;; exemplar to help sureal to generate answer
+;; (chat "Ben is crazy")
+;; (chat "Ben is happy")
+;; (chat "Eddie is funny")
+;; (chat "Eddie is happy")
+;; (chat "Robert is funny")
+;; (chat "Robert is happy")
+;; (chat "What do you know about happy?") ;; Answer: funny people are happy
 
 (load "pln-states.scm")
 
