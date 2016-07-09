@@ -7,6 +7,7 @@
 ;------------------------------------------------------------------------------
 
 (use-modules (ice-9 popen) (rnrs io ports))
+(load "states.scm")
 
 ;------------------------------------------------------------------------------
 
@@ -18,15 +19,21 @@
     (set! markov-dict dict-dir)
 )
 
-(define (call-random-sentence-generator dict)
-    (if (not (or (equal? markov-bin "") (equal? markov-dict "")))
-        (let* ((input-text (cog-name (get-input-text-node)))
-               (cmd (string-append "ruby " markov-bin " speak -d " markov-dict "/" dict " -c 1 -p \"" input-text "\""))
-               (port (open-input-pipe cmd))
-               (line (get-line port)))
-            ; Create a list of WordNodes wrapped in a ListLink
-            ; TODO
-            (List (map Word (string-split input-text #\ )))
+(define (call-random-sentence-generator dict-node)
+    (State random-sentence-generator search-started)
+
+    (begin-thread
+        (if (not (or (equal? markov-bin "") (equal? markov-dict "")))
+            (let* ((input-text (cog-name (get-input-text-node)))
+                   (dict (cog-name dict-node))
+                   (cmd (string-append "ruby " markov-bin " speak -d " markov-dict
+                        "/" dict " -c 1 -p \"" input-text "\""))
+                   (port (open-input-pipe cmd))
+                   (line (get-line port)))
+                (State random-sentence-generated
+                    (List (map Word (string-split line #\ ))))
+            )
         )
+        (State random-sentence-generator search-finished)
     )
 )

@@ -44,6 +44,11 @@
 (State wolframalpha-answers default-state)
 (State wolframalpha-search default-state)
 
+(define random-sentence-generator (Anchor (chat-prefix "RandomSentenceGenerator")))
+(define random-sentence-generated (Anchor (chat-prefix "RandomSentenceGenerated")))
+(State random-sentence-generator default-state)
+(State random-sentence-generated default-state)
+
 (define chatbot-eva (Anchor (chat-prefix "ChatbotEva")))
 (define sent-to-chatbot-eva (Concept (chat-prefix "SentToChatbotEva")))
 (define no-action-taken (Concept (chat-prefix "NoActionTaken")))
@@ -71,6 +76,8 @@
     (State duckduckgo-search default-state)
     (State wolframalpha-answers default-state)
     (State wolframalpha-search default-state)
+    (State random-sentence-generator default-state)
+    (State random-sentence-generated default-state)
     (State chatbot-eva default-state)
     (State pln-answers default-state)
     (State pln-qa default-state)

@@ -184,6 +184,28 @@
 )
 
 (Define
+    (DefinedPredicate "random-sentence-generator-not-started?")
+    (search-not-started? random-sentence-generator)
+)
+
+(Define
+    (DefinedPredicate "random-sentence-generated?")
+    (any-result? random-sentence-generated)
+)
+
+(Define
+    (DefinedPredicate "has-pkd-related-words?")
+    ; TODO
+    (True)
+)
+
+(Define
+    (DefinedPredicate "has-blog-related-words?")
+    ; TODO
+    (True)
+)
+
+(Define
     (DefinedPredicate "called-chatbot-eva?")
     (Not (Or
         (Equal (Set default-state) (Get (State chatbot-eva (Variable "$s"))))
