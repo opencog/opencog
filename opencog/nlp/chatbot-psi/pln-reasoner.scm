@@ -7,7 +7,7 @@
 ;; 2. Limited induction reasoning
 ;;
 ;; The reasoner doesn't use the URE. Instead if merely applies the 2
-;; rules on after then other in a loop.
+;; rules one after the other in a loop.
 ;;
 ;; You may test it as following (wait for a couple seconds between
 ;; each command to be sure that the chatbot-psi and the pln-reasoner
