@@ -68,7 +68,8 @@
 ; CREATE MODULATORS
 
 (define arousal (psi-create-modulator "arousal" .5))
-(define valence (psi-create-modulator "valence" .5))
+(define pos-valence (psi-create-modulator "valence" .5))
+(define neg-valence (psi-create-modulator "valence" .5))
 (define resolution-level (psi-create-modulator "resolution-level" .5))
 (define selection-threshold (psi-create-modulator "selection-threshold" .5))
 (define securing-threshold (psi-create-modulator "securing-threshold" .5))
