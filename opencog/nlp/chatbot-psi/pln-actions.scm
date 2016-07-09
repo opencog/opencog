@@ -1,6 +1,5 @@
 ;; PLN actions
 
-(load "pln-states.scm")
 (load "pln-utils.scm")
 
 (use-modules (srfi srfi-1))
@@ -70,14 +69,14 @@
            (word-list (if (null? logic) '() (first (sureal logic))))
           )
 
-      ;; (cog-logger-info "[PLN-Psi] assoc-inferred-names = ~a"
+      ;; (cog-logger-info "[PLN-Action] assoc-inferred-names = ~a"
       ;;                  assoc-inferred-names)
-      ;; (cog-logger-info "[PLN-Psi] iu-names = ~a" iu-names)
-      ;; (cog-logger-info "[PLN-Psi] iu-inter = ~a" iu-inter)
-      ;; (cog-logger-info "[PLN-Psi] filtered-in = ~a" filtered-in)
-      ;; (cog-logger-info "[PLN-Psi] semantics = ~a" semantics)
-      ;; (cog-logger-info "[PLN-Psi] logic = ~a" logic)
-      ;; (cog-logger-info "[PLN-Psi] word-list = ~a" word-list)
+      ;; (cog-logger-info "[PLN-Action] iu-names = ~a" iu-names)
+      ;; (cog-logger-info "[PLN-Action] iu-inter = ~a" iu-inter)
+      ;; (cog-logger-info "[PLN-Action] filtered-in = ~a" filtered-in)
+      ;; (cog-logger-info "[PLN-Action] semantics = ~a" semantics)
+      ;; (cog-logger-info "[PLN-Action] logic = ~a" logic)
+      ;; (cog-logger-info "[PLN-Action] word-list = ~a" word-list)
 
       (State pln-answers (List (map Word word-list)))
 

@@ -23,8 +23,6 @@
 ;; (chat "Robert is happy")
 ;; (chat "What do you know about happy?") ;; Answer: funny people are happy
 
-(load "pln-states.scm")
-
 (use-modules (opencog logger))
 (use-modules (opencog query))
 (use-modules (srfi srfi-1))

@@ -1,5 +1,3 @@
-(load "pln-states.scm")
-
 (use-modules (opencog query))
 
 (define (search-inferred-atoms)
