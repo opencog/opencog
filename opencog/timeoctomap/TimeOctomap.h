@@ -77,6 +77,7 @@ struct TimeUnit
     TimeUnit& operator=(const TimeUnit& tu)
     {
         t=tu.t;duration=tu.duration;
+        map_tree.clear();
         return *this;
     }
     
