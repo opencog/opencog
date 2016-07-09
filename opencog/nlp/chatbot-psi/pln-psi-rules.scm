@@ -1,7 +1,5 @@
 ;; PLN rules
 
-(load "pln-states.scm")
-
 (psi-rule
     (list (SequentialAnd
         (DefinedPredicate "is-pln-inferred-related?")
