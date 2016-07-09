@@ -15,8 +15,8 @@
 (State input-parse no-input-utterance)
 
 (define default-state (Concept (chat-prefix "DefaultState")))
-(define search-started (Concept (chat-prefix "SearchStarted")))
-(define search-finished (Concept (chat-prefix "SearchFinished")))
+(define process-started (Concept (chat-prefix "ProcessStarted")))
+(define process-finished (Concept (chat-prefix "ProcessFinished")))
 (define no-result (Concept (chat-prefix "NoResult")))
 
 (define aiml-replies (Anchor (chat-prefix "AIMLReplies")))

@@ -15,12 +15,12 @@
     ))
 )
 
-(define (search-not-started? anchor)
+(define (process-not-started? anchor)
     (Equal (Set default-state) (Get (State anchor (Variable "$s"))))
 )
 
-(define (search-finished? anchor)
-    (Equal (Set search-finished) (Get (State anchor (Variable "$s"))))
+(define (process-finished? anchor)
+    (Equal (Set process-finished) (Get (State anchor (Variable "$s"))))
 )
 
 (define (any-result? anchor)
@@ -89,12 +89,12 @@
 
 (Define
     (DefinedPredicate "fuzzy-qa-not-started?")
-    (search-not-started? fuzzy-qa)
+    (process-not-started? fuzzy-qa)
 )
 
 (Define
     (DefinedPredicate "fuzzy-qa-finished?")
-    (search-finished? fuzzy-qa)
+    (process-finished? fuzzy-qa)
 )
 
 (Define
@@ -104,12 +104,12 @@
 
 (Define
     (DefinedPredicate "fuzzy-match-not-started?")
-    (search-not-started? fuzzy-match)
+    (process-not-started? fuzzy-match)
 )
 
 (Define
     (DefinedPredicate "fuzzy-match-finished?")
-    (search-finished? fuzzy-match)
+    (process-finished? fuzzy-match)
 )
 
 (Define
@@ -119,12 +119,12 @@
 
 (Define
     (DefinedPredicate "aiml-search-not-started?")
-    (search-not-started? aiml-search)
+    (process-not-started? aiml-search)
 )
 
 (Define
     (DefinedPredicate "aiml-search-finished?")
-    (search-finished? aiml-search)
+    (process-finished? aiml-search)
 )
 
 ; Number being passed is the confidence threshold
@@ -135,8 +135,8 @@
 
 (Define
     (DefinedPredicate "no-result-from-other-sources?")
-    (And (search-finished? duckduckgo-search)
-         (search-finished? wolframalpha-search)
+    (And (process-finished? duckduckgo-search)
+         (process-finished? wolframalpha-search)
          (no-result? duckduckgo-answers)
          (no-result? wolframalpha-answers))
 )
@@ -155,12 +155,12 @@
 
 (Define
     (DefinedPredicate "duckduckgo-search-not-started?")
-    (search-not-started? duckduckgo-search)
+    (process-not-started? duckduckgo-search)
 )
 
 (Define
     (DefinedPredicate "duckduckgo-search-finished?")
-    (search-finished? duckduckgo-search)
+    (process-finished? duckduckgo-search)
 )
 
 (Define
@@ -170,12 +170,12 @@
 
 (Define
     (DefinedPredicate "wolframalpha-search-not-started?")
-    (search-not-started? wolframalpha-search)
+    (process-not-started? wolframalpha-search)
 )
 
 (Define
     (DefinedPredicate "wolframalpha-search-finished?")
-    (search-finished? wolframalpha-search)
+    (process-finished? wolframalpha-search)
 )
 
 (Define
@@ -185,7 +185,7 @@
 
 (Define
     (DefinedPredicate "random-sentence-generator-not-started?")
-    (search-not-started? random-sentence-generator)
+    (process-not-started? random-sentence-generator)
 )
 
 (Define

@@ -20,7 +20,7 @@
 )
 
 (define (call-random-sentence-generator dict-node)
-    (State random-sentence-generator search-started)
+    (State random-sentence-generator process-started)
 
     (begin-thread
         (if (not (or (equal? markov-bin "") (equal? markov-dict "")))
@@ -34,6 +34,6 @@
                     (List (map Word (string-split line #\ ))))
             )
         )
-        (State random-sentence-generator search-finished)
+        (State random-sentence-generator process-finished)
     )
 )
