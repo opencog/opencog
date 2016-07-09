@@ -1,34 +1,4 @@
-(use-modules (ice-9 threads))
-(use-modules (opencog)
-             (opencog nlp)
-             (opencog nlp relex2logic)
-             (opencog nlp fuzzy)
-             (opencog nlp sureal)
-             (opencog nlp chatbot-eva)
-             (opencog nlp aiml)
-             (opencog exec)
-             (opencog openpsi))
-
-(load-r2l-rulebase)
-
-;-------------------------------------------------------------------------------
-; Schema function for chatting
-
-(define (chat utterance)
-    (reset-all-states)
-
-    (let ((sent-node (car (nlp-parse utterance))))
-        (State input-utterance
-            (Reference
-                sent-node
-                (Node utterance)
-                (get-word-list sent-node)
-            )
-        )
-    )
-
-    *unspecified*
-)
+(use-modules (opencog))
 
 ;-------------------------------------------------------------------------------
 ; Keep track of the states
@@ -69,41 +39,29 @@
 (State duckduckgo-answers default-state)
 (State duckduckgo-search default-state)
 
+(define wolframalpha-answers (Anchor (chat-prefix "WolframAlphaAnswers")))
+(define wolframalpha-search (Anchor (chat-prefix "WolframAlphaSearch")))
+(State wolframalpha-answers default-state)
+(State wolframalpha-search default-state)
+
 (define chatbot-eva (Anchor (chat-prefix "ChatbotEva")))
 (define sent-to-chatbot-eva (Concept (chat-prefix "SentToChatbotEva")))
 (define no-action-taken (Concept (chat-prefix "NoActionTaken")))
 (State chatbot-eva default-state)
 
 ;-------------------------------------------------------------------------------
-; Define the demands
 
-(define sociality (psi-demand "Sociality" .8))
-
-;-------------------------------------------------------------------------------
-; Skip the demand (ConceptNode "OpenPsi: AIML chat demand"), a temp workaround
-
-; Define the demand here to prevent error if this chatbot is loaded before
-; loading the aiml psi-rules
-(define aiml-chat-demand (psi-demand "AIML chat demand" .8))
-(psi-demand-skip aiml-chat-demand)
-(psi-reset-valid-demand-cache)
-
-;-------------------------------------------------------------------------------
-
-; Load the utilities
-(load "utils.scm")
-
-; Load the available contexts
-(load "contexts.scm")
-
-; Load the available actions
-(load "actions.scm")
-(load "duckduckgo.scm")
-
-; Load the psi-rules
-(load "psi-rules.scm")
-
-; Run OpenPsi if it's not already running
-(if (not (psi-running?))
-    (psi-run)
+(define (reset-all-states)
+    (State input-utterance no-input-utterance)
+    (State aiml-replies default-state)
+    (State aiml-search default-state)
+    (State fuzzy-replies default-state)
+    (State fuzzy-match default-state)
+    (State fuzzy-answers default-state)
+    (State fuzzy-qa default-state)
+    (State duckduckgo-answers default-state)
+    (State duckduckgo-search default-state)
+    (State wolframalpha-answers default-state)
+    (State wolframalpha-search default-state)
+    (State chatbot-eva default-state)
 )

@@ -1,3 +1,20 @@
+(use-modules (opencog) (opencog nlp fuzzy) (opencog openpsi))
+
+(load "states.scm")
+
+;-------------------------------------------------------------------------------
+; Define the demands
+
+(define sociality (psi-demand "Sociality" .8))
+
+;-------------------------------------------------------------------------------
+; Define the tags
+
+(define aiml-reply-rule (Concept (chat-prefix "AIMLReplyRule")))
+
+;-------------------------------------------------------------------------------
+; Define the psi-rules
+
 (psi-rule
     (list (SequentialAnd
         (DefinedPredicate "fuzzy-qa-not-started?")
@@ -65,16 +82,38 @@
     sociality
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "aiml-search-finished?")
-        (DefinedPredicate "is-aiml-reply?")
-        (DefinedPredicate "is-input-utterance?")
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
-    (True)
-    (stv .9 .9)
-    sociality
+(Member
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "aiml-search-finished?")
+            (DefinedPredicate "is-aiml-reply?")
+            (Not (DefinedPredicate "is-a-question?"))
+            (DefinedPredicate "is-input-utterance?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
+        (True)
+        (stv .9 .9)
+        sociality
+    )
+    aiml-reply-rule
+)
+
+(Member
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "aiml-search-finished?")
+            (DefinedPredicate "is-aiml-reply?")
+            (DefinedPredicate "is-a-question?")
+            (Or (DefinedPredicate "is-aiml-reply-good?")
+                (DefinedPredicate "no-good-fast-answer?"))
+            (DefinedPredicate "is-input-utterance?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
+        (True)
+        (stv .9 .9)
+        sociality
+    )
+    aiml-reply-rule
 )
 
 (psi-rule
@@ -96,6 +135,30 @@
         (DefinedPredicate "is-input-utterance?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List duckduckgo-answers)))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "wolframalpha-search-not-started?")
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "is-interrogative?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: ask-wolframalpha") (List)))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "wolframalpha-search-finished?")
+        (DefinedPredicate "is-wolframalpha-answer?")
+        (DefinedPredicate "is-input-utterance?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List wolframalpha-answers)))
     (True)
     (stv .9 .9)
     sociality

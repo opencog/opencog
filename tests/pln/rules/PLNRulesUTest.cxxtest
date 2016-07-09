@@ -74,6 +74,7 @@ public:
 	void test_equivalence_to_double_implication();
 	void test_implication_and_lambda_factorization();
 	void test_implication_implicant_conjunction();
+	void test_implication_direct_evaluation();
 };
 
 void PLNRulesUTest::tearDown()
@@ -771,6 +772,39 @@ void PLNRulesUTest::test_implication_implicant_conjunction()
 		 "         (Predicate \"P1\")"
 		 "         (Predicate \"P2\"))"
 		 "      (Predicate \"Q\")))");
+
+	std::cout << "results = " << results->toString();
+	std::cout << "expected = " << expected->toString();
+
+	TS_ASSERT_EQUALS(results, expected);
+}
+
+/**
+ * test implication-direct-evaluation-rule defined in:
+ * opencog/pln/rules/implication-direct-evaluation-rule.scm
+ */
+void PLNRulesUTest::test_implication_direct_evaluation()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as.clear();
+
+	config().set("SCM_PRELOAD",
+	             "tests/pln/rules/implication-direct-evaluation.scm, "
+	             "opencog/pln/rules/implication-direct-evaluation-rule.scm");
+	load_scm_files_from_config(as);
+
+	// Apply the rule
+	Handle rule = eval.eval_h("implication-direct-evaluation-rule");
+	Handle results = bindlink(&as, rule);
+	Handle expected = eval.eval_h
+		("(SetLink"
+		 "   (ImplicationLink"
+		 "      (PredicateNode \"P\")"
+		 "      (PredicateNode \"Q\"))"
+		 "   (ImplicationLink"
+		 "      (PredicateNode \"Q\")"
+		 "      (PredicateNode \"P\")))");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected = " << expected->toString();
