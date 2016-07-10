@@ -83,29 +83,36 @@
 )
 
 (Define
-    (DefinedPredicate "is-declarative?")
+    (DefinedPredicate "input-type-is-declarative?")
     (is-utterance-type? (DefinedLinguisticConcept "DeclarativeSpeechAct"))
 )
 
 (Define
-    (DefinedPredicate "is-imperative?")
+    (DefinedPredicate "input-type-is-imperative?")
     (is-utterance-type? (DefinedLinguisticConcept "ImperativeSpeechAct"))
 )
 
 (Define
-    (DefinedPredicate "is-interrogative?")
+    (DefinedPredicate "input-type-is-interrogative?")
     (is-utterance-type? (DefinedLinguisticConcept "InterrogativeSpeechAct"))
 )
 
 (Define
-    (DefinedPredicate "is-truth-query?")
+    (DefinedPredicate "input-type-is-truth-query?")
     (is-utterance-type? (DefinedLinguisticConcept "TruthQuerySpeechAct"))
 )
 
 (Define
-    (DefinedPredicate "is-a-question?")
-    (Or (DefinedPredicate "is-interrogative?")
-        (DefinedPredicate "is-truth-query?"))
+    (DefinedPredicate "input-is-a-question?")
+    (Or (DefinedPredicate "input-type-is-interrogative?")
+        (DefinedPredicate "input-type-is-truth-query?"))
+)
+
+; Essentially equivalent to "is-input-utterance", as currently
+; the state will be reset after giving a reply
+(Define
+    (DefinedPredicate "has-not-reply-anything-yet?")
+    (DefinedPredicate "is-input-utterance?")
 )
 
 (Define
