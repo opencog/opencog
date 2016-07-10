@@ -92,6 +92,7 @@
 			evals-with-change-pred)
 
 	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
+	(format #t "monitored entities: ~a\n" psi-monitored-entities)
 
 	; Event Detection
 	(set! psi-monitored-events (psi-get-monitored-events))
@@ -104,6 +105,11 @@
 			  )
 			  psi-monitored-events)
 	;(set! psi-monitored-events (delete-duplicates psi-monitored-events))
+
+	(if logging
+		(let ((output-port (open-file "psilog.txt" "a")))
+			(format output-port "\n\n\n")))
+
 
 
 	;(for-each (get-value-and-store key) evals-with-change-pred)
@@ -135,6 +141,10 @@
 	(define changed-params '())
 	(define detected-events '())
 	(define current-values-table (make-hash-table 20))
+
+	; These are used just for display highlighting for testing
+    (define monitored-pau '())
+    (define changed-pau '())
 
 	(define (set-param-change-status param)
 		(define changed-tv)
@@ -213,13 +223,12 @@
 		)
 	)
 
-	(define (display-with-highting var)
-		; add astericks to highlight changed values
-		(if (find (equal? var) changed-params)
-			(format "~1,1f" (psi-get-number-value var))
-			(format "~1,1f" (psi-get-number-value var))))
-
-;    (define changed-events '())
+	(define (highlight-display var)
+        ; add astericks to highlight changed values
+        (if (or (member var changed-params)
+                (member var changed-pau))
+            (format #f "*~1,1f*" (psi-get-number-value var))
+            (format #f "~1,1f" (psi-get-number-value var))))
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 
@@ -229,40 +238,66 @@
 	; new-event predicates can are set beforehand.
 	(for-each set-new-event-status psi-monitored-events)
 
+	; Evaluate the monitored params and set "changed" predicates accordingly
+	(set! changed-params '())
+	(for-each set-param-change-status psi-monitored-entities)
+	;(format #t "\nchanged-params: ~a\n\n" changed-params)
 
+	; Check for changed PAUs, just for highlighting in test output
+	(set! monitored-pau (list voice-width))
+	(for-each (lambda (pau)
+			    (let* ((previous (hash-ref prev-value-table pau))
+                       (current (psi-get-number-value pau)))
+                    ;(format #t "pau: ~a  prev: ~a  current: ~a\n" pau previous
+                    ;    current)
+                    ; if previous is #f, means it has not been set yet
+                    (if (equal? previous #f)
+                        (begin
+                            (hash-set! prev-value-table pau current)
+	                        (set! previous current)))
+                    (if (not (= previous current))
+                        (begin
+							(set! changed-pau (append changed-pau (list pau)))
+							(hash-set! current-values-table pau current)
+						))))
+			monitored-pau)
+			;(format #t "Changed PAU's: ~a\n" changed-pau)
 
 	(if logging
 		(let ((output-port (open-file "psilog.txt" "a")))
 				(format output-port
 					(string-append "-------------------------------------------"
-						"------------------------ Loop ~a\n")
+						"-------------------------------- Loop ~a\n")
 					psi-updater-loop-count)
+
 				(format output-port
 					(string-append
-						"speech: ~1,1f  new-face: ~1,1f  "
-						;"speech: ~a  new-face: ~a  "
-						"pos-dialog: ~1,1f  neg-dialog: ~1,1f  "
+                        "speech: ~a  new-face: ~a  "
+						"pos-dialog: ~a  neg-dialog: ~a  "
 						"\n\n"
-						"arousal: ~1,1f  pos-valence: ~1,1f  neg-valence: ~1,1f  "
-						"agent power: ~1,1f  voice: ~1,1f  "
+						"arousal: ~a  pos-valence: ~a  neg-valence: ~a  "
+						"agent power: ~a  voice: ~a  "
 						"\n")
-					;(display-with-highlighting speech-giving-starts)
-					(psi-get-number-value speech-giving-starts)
-					(psi-get-number-value new-face)
-					(psi-get-number-value positive-sentiment-dialog)
-					(psi-get-number-value negative-sentiment-dialog)
-					(psi-get-number-value arousal)
-					(psi-get-number-value pos-valence)
-					(psi-get-number-value neg-valence)
-					(psi-get-number-value agent-state-power)
-					(psi-get-number-value voice-width)
+					(highlight-display speech-giving-starts)
+                    (highlight-display new-face)
+                    (highlight-display positive-sentiment-dialog)
+                    (highlight-display negative-sentiment-dialog)
+                    (highlight-display arousal)
+                    (highlight-display pos-valence)
+                    (highlight-display neg-valence)
+                    (highlight-display agent-state-power)
+                    (highlight-display voice-width)
+					;(psi-get-number-value speech-giving-starts)
+					;(psi-get-number-value new-face)
+					;(psi-get-number-value positive-sentiment-dialog)
+					;(psi-get-number-value negative-sentiment-dialog)
+					;(psi-get-number-value arousal)
+					;(psi-get-number-value pos-valence)
+					;(psi-get-number-value neg-valence)
+					;(psi-get-number-value agent-state-power)
+					;(psi-get-number-value voice-width)
 				)
 				(close-output-port output-port)))
-
-	; Evaluate the monitored params and set "changed" predicates accordingly
-	(set! changed-params '())
-	(for-each set-param-change-status psi-monitored-entities)
-	;(format #t "\nchanged-params: ~a\n\n" changed-params)
 
 	; grab and evaluate the interaction rules
 	; todo: Could optimize by only calling rules containing the changed params
@@ -275,6 +310,13 @@
 					(define value (hash-ref current-values-table param))
 					(hash-set! prev-value-table param value))
 			  changed-params)
+
+	; Update prev-value-table entries for the changed pau's
+	;(This is just for log highlighint for testing)
+	(for-each (lambda (pau)
+					(define value (hash-ref current-values-table pau))
+					(hash-set! prev-value-table pau value))
+			  changed-pau)
 
 	; Set detected events value to 0, since any particular event instance
 	; should fire rules for only one step (could also do this at the beginning
@@ -441,9 +483,6 @@
                           (= current 0))))
             #t
             #f
-            ; from when function was called as a GPN
-            ;(stv 1 1)
-            ;(stv 0 1)
         )
     )
 )
