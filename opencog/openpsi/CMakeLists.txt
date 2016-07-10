@@ -9,4 +9,6 @@ ADD_GUILE_MODULE (openpsi.scm
     entity-defs.scm
     interaction-rules.scm
     updater.scm
+    event.scm
+    mock-interaction-rules.scm
 )
