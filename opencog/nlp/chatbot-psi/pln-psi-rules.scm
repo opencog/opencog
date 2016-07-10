@@ -17,7 +17,7 @@
     (list (SequentialAnd
         (DefinedPredicate "pln-qa-finished?")
         (DefinedPredicate "is-pln-answer?")
-        (DefinedPredicate "has-not-reply-anything-yet?")
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List pln-answers)))
     (True)

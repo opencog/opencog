@@ -108,26 +108,11 @@
         (DefinedPredicate "input-type-is-truth-query?"))
 )
 
-; Essentially equivalent to "is-input-utterance", as currently
-; the state will be reset after giving a reply
+; Essentially equivalent to "is-input-utterance", as the states
+; will be reset after giving a reply by default
 (Define
-    (DefinedPredicate "has-not-reply-anything-yet?")
+    (DefinedPredicate "has-not-replied-anything-yet?")
     (DefinedPredicate "is-input-utterance?")
-)
-
-(Define
-    (DefinedPredicate "fuzzy-qa-not-started?")
-    (process-not-started? fuzzy-qa)
-)
-
-(Define
-    (DefinedPredicate "fuzzy-qa-finished?")
-    (process-finished? fuzzy-qa)
-)
-
-(Define
-    (DefinedPredicate "is-fuzzy-answer?")
-    (any-result? fuzzy-answers)
 )
 
 (Define
@@ -142,7 +127,13 @@
 
 (Define
     (DefinedPredicate "is-fuzzy-reply?")
-    (any-result? fuzzy-replies)
+    (any-result? fuzzy-reply)
+)
+
+(Define
+    (DefinedPredicate "fuzzy-reply-is-declarative?")
+    (Equal (Set (DefinedLinguisticConcept "DeclarativeSpeechAct"))
+        (Get (State fuzzy-reply-type (Variable "$s"))))
 )
 
 (Define

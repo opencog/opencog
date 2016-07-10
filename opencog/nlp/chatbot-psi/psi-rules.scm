@@ -17,33 +17,8 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "fuzzy-qa-not-started?")
-        (DefinedPredicate "is-input-utterance?")
-        (DefinedPredicate "input-is-a-question?")
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: call-fuzzy-QA") (List)))
-    (True)
-    (stv .9 .9)
-    sociality
-)
-
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "fuzzy-qa-finished?")
-        (DefinedPredicate "is-fuzzy-answer?")
-        (DefinedPredicate "has-not-reply-anything-yet?")
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-answers)))
-    (True)
-    (stv .9 .9)
-    sociality
-)
-
-(psi-rule
-    (list (SequentialAnd
         (DefinedPredicate "fuzzy-not-started?")
         (DefinedPredicate "is-input-utterance?")
-        (Not (DefinedPredicate "input-is-a-question?"))
         (SequentialOr
             (Not (DefinedPredicate "input-type-is-imperative?"))
             (DefinedPredicate "don't-know-how-to-do-it")
@@ -59,11 +34,27 @@
     (list (SequentialAnd
         (DefinedPredicate "fuzzy-finished?")
         (DefinedPredicate "is-fuzzy-reply?")
-        (DefinedPredicate "has-not-reply-anything-yet?")
+        (SequentialOr
+            (Not (DefinedPredicate "input-is-a-question?"))
+            (DefinedPredicate "fuzzy-reply-is-declarative?")
+        )
     ))
-    (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-replies)))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-reply)))
     (True)
     (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "fuzzy-finished?")
+        (DefinedPredicate "is-fuzzy-reply?")
+        (DefinedPredicate "input-is-a-question?")
+        (Not (DefinedPredicate "fuzzy-reply-is-declarative?"))
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-reply)))
+    (True)
+    (stv .9 .5)
     sociality
 )
 
@@ -88,7 +79,7 @@
             (DefinedPredicate "aiml-finished?")
             (DefinedPredicate "is-aiml-reply?")
             (Not (DefinedPredicate "input-is-a-question?"))
-            (DefinedPredicate "has-not-reply-anything-yet?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
         (True)
@@ -106,7 +97,7 @@
             (DefinedPredicate "input-is-a-question?")
             (Or (DefinedPredicate "is-aiml-reply-good?")
                 (DefinedPredicate "no-good-fast-answer?"))
-            (DefinedPredicate "has-not-reply-anything-yet?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
         (True)
@@ -132,7 +123,7 @@
     (list (SequentialAnd
         (DefinedPredicate "duckduckgo-finished?")
         (DefinedPredicate "is-duckduckgo-answer?")
-        (DefinedPredicate "has-not-reply-anything-yet?")
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List duckduckgo-answers)))
     (True)
@@ -156,7 +147,7 @@
     (list (SequentialAnd
         (DefinedPredicate "wolframalpha-finished?")
         (DefinedPredicate "is-wolframalpha-answer?")
-        (DefinedPredicate "has-not-reply-anything-yet?")
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List wolframalpha-answers)))
     (True)
@@ -191,7 +182,7 @@
 (psi-rule
     (list (SequentialAnd
         (DefinedPredicate "random-sentence-generated?")
-        (DefinedPredicate "has-not-reply-anything-yet?")
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-sentence-generated)))
     (True)
