@@ -49,8 +49,7 @@
             ; No result if it's an empty ListLink
             (if (equal? (cog-arity fuzzy-results) 0)
                 (State fuzzy-reply no-result)
-                (let ((rtn '()))
-                    (set! rtn (pick-and-generate (cog-outgoing-set fuzzy-results)))
+                (let ((rtn (pick-and-generate (cog-outgoing-set fuzzy-results))))
                     (cog-extract fuzzy-results)
                     (if (null? rtn)
                         ; Could happen if none of them can be used to generate

@@ -38,6 +38,11 @@
             (Not (DefinedPredicate "input-is-a-question?"))
             (DefinedPredicate "fuzzy-reply-is-declarative?")
         )
+        (SequentialOr
+            (DefinedPredicate "is-fuzzy-reply-good?")
+            (DefinedPrecicate "no-good-fast-reply?")
+        )
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-reply)))
     (True)
@@ -51,6 +56,11 @@
         (DefinedPredicate "is-fuzzy-reply?")
         (DefinedPredicate "input-is-a-question?")
         (Not (DefinedPredicate "fuzzy-reply-is-declarative?"))
+        (SequentialOr
+            (DefinedPredicate "is-fuzzy-reply-good?")
+            (DefinedPrecicate "no-good-fast-answer?")
+        )
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-reply)))
     (True)
