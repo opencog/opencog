@@ -63,8 +63,11 @@
                    (port (open-input-pipe cmd))
                    (line (get-line port)))
 
-                (State random-sentence-generated
-                    (List (map Word (string-split line #\ ))))
+                (if (eof-object? line)
+                    (State random-sentence-generated no-result)
+                    (State random-sentence-generated
+                        (List (map Word (string-split line #\ ))))
+                )
 
                 (State random-sentence-generator process-finished)
 

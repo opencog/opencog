@@ -53,6 +53,27 @@
     )
 )
 
+(define (check-words source)
+    (filter-map
+        (lambda (w) (list? (member (cog-name w) source)))
+        (cog-outgoing-set (get-input-word-list))
+    )
+)
+
+(define (check-pkd-words)
+    (if (null? (check-words pkd-relevant-words))
+        (stv 0 1)
+        (stv 1 1)
+    )
+)
+
+(define (check-blog-words)
+    (if (null? (check-words blog-relevant-words))
+        (stv 0 1)
+        (stv 1 1)
+    )
+)
+
 ;-------------------------------------------------------------------------------
 
 (Define
@@ -195,14 +216,12 @@
 
 (Define
     (DefinedPredicate "has-pkd-related-words?")
-    ; TODO
-    (True)
+    (Evaluation (GroundedPredicate "scm: check-pkd-words") (List))
 )
 
 (Define
     (DefinedPredicate "has-blog-related-words?")
-    ; TODO
-    (True)
+    (Evaluation (GroundedPredicate "scm: check-blog-words") (List))
 )
 
 (Define
