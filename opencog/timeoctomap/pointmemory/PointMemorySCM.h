@@ -62,6 +62,9 @@ public:
     int get_time_units(const string& map_name);
     //step time before adding atoms
     void step_time_unit(const string& map_name);
+    void auto_step_time_on(const string& map_name);
+    void auto_step_time_off(const string& map_name);
+    int is_auto_step_on(const string& map_name);
     //add an atom at location on current time step
     bool map_ato(const string& map_name,Handle ato,double x,double y,double z);
     //get time of first atom in past elapsed time
