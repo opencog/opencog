@@ -15,8 +15,8 @@
 (State input-parse no-input-utterance)
 
 (define default-state (Concept (chat-prefix "DefaultState")))
-(define search-started (Concept (chat-prefix "SearchStarted")))
-(define search-finished (Concept (chat-prefix "SearchFinished")))
+(define process-started (Concept (chat-prefix "ProcessStarted")))
+(define process-finished (Concept (chat-prefix "ProcessFinished")))
 (define no-result (Concept (chat-prefix "NoResult")))
 
 (define aiml-replies (Anchor (chat-prefix "AIMLReplies")))
@@ -43,6 +43,11 @@
 (define wolframalpha-search (Anchor (chat-prefix "WolframAlphaSearch")))
 (State wolframalpha-answers default-state)
 (State wolframalpha-search default-state)
+
+(define random-sentence-generator (Anchor (chat-prefix "RandomSentenceGenerator")))
+(define random-sentence-generated (Anchor (chat-prefix "RandomSentenceGenerated")))
+(State random-sentence-generator default-state)
+(State random-sentence-generated default-state)
 
 (define chatbot-eva (Anchor (chat-prefix "ChatbotEva")))
 (define sent-to-chatbot-eva (Concept (chat-prefix "SentToChatbotEva")))
@@ -71,6 +76,8 @@
     (State duckduckgo-search default-state)
     (State wolframalpha-answers default-state)
     (State wolframalpha-search default-state)
+    (State random-sentence-generator default-state)
+    (State random-sentence-generated default-state)
     (State chatbot-eva default-state)
     (State pln-answers default-state)
     (State pln-qa default-state)

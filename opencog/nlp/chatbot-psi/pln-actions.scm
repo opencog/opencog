@@ -49,7 +49,7 @@
 ;; Fetch the semantics with the highest strength*confidence that
 ;; contains words in common with the query
 (define-public (do-pln-QA)
-    (State pln-qa search-started)
+    (State pln-qa process-started)
 
     ;; (cog-logger-info "[PLN-Psi] do-pln-QA")
 
@@ -82,7 +82,7 @@
 
       ;; (State pln-answers (List (Word "I") (Word "am") (Word "the") (Word "PLN") (Word "answer")))
 
-      (State pln-qa search-finished)
+      (State pln-qa process-finished)
     )
 )
 

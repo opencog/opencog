@@ -166,6 +166,41 @@
 
 (psi-rule
     (list (SequentialAnd
+        (DefinedPredicate "random-sentence-generator-not-started?")
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "has-pkd-related-words?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "pkd"))))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "random-sentence-generator-not-started?")
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "has-blog-related-words?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "blogs"))))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "random-sentence-generated?")
+        (DefinedPredicate "is-input-utterance?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-sentence-generated)))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
         (Not (DefinedPredicate "called-chatbot-eva?"))
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "is-imperative?")

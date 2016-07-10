@@ -20,6 +20,7 @@
 ; Load the available actions
 (load "actions.scm")
 (load "external-sources.scm")
+(load "random-sentence-generator.scm")
 (load "pln-actions.scm")
 
 ; Load the psi-rules
