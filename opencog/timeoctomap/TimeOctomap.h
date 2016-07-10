@@ -60,7 +60,7 @@ typedef list<time_pt> time_list;
 #define PI 3.142
 #define DEG2RAD(deg) (PI/180.0)*deg
 #define TOUCH_ANGLE DEG2RAD(10.0)
-#define NEAR_ANGLE DEG2RAD(20.0) 
+#define NEAR_ANGLE DEG2RAD(20.0)
 
 //data structures
 struct TimeUnit
@@ -73,14 +73,14 @@ struct TimeUnit
     {
         return (tp >= t && tp <= t + duration);
     }
-    
+
     TimeUnit& operator=(const TimeUnit& tu)
     {
-        t=tu.t;duration=tu.duration;
+        t=tu.t; duration=tu.duration;
         map_tree.clear();
         return *this;
     }
-    
+
     //>,< not needed as only == search happens although created buffer should always be sorted, just simplifies a bit over search speed cost
 };
 
@@ -91,7 +91,7 @@ public:
     double get_space_resolution();//map resolution in meters
     duration_c get_time_resolution();
     int get_time_units(){
-      return time_circle.capacity(); 
+      return time_circle.capacity();
     }
     //current time unit time point and time duration are queried
     bool get_current_time_range(time_pt& time_p, duration_c& duration);
@@ -100,8 +100,8 @@ public:
     {
         return (time_to_check >= t && time_to_check < t + duration);
     }
-    //make a new time unit for storage, 
-    //should not overlap a previous time unit 
+    //make a new time unit for storage,
+    //should not overlap a previous time unit
     //and should fall after the previous time unit
     bool step_time_unit();//step_time_unit
     bool is_auto_step_time_on();
@@ -126,7 +126,7 @@ public:
     point3d_list get_locations_of_atom_occurence_now(const opencog::Handle& ato);
     point3d_list get_locations_of_atom_occurence_at_time(const time_pt& time_p,const opencog::Handle& ato);
     //get the first atom observation after a time point
-    bool get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,const time_pt& from_d,time_pt& result);//?return location too? 
+    bool get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,const time_pt& from_d,time_pt& result);//?return location too?
     //get the last atom observation before a time point
     bool get_last_time_elapse_atom_observed(const opencog::Handle& ato,
                                             const time_pt& till_d,
@@ -139,7 +139,7 @@ public:
     //should be true-false-unknown
     //assuming z orientation is fixed i.e. sky relative to ground
     //assuming observer is looking towards reference
-    //target is $x of reference 
+    //target is $x of reference
     //y=2-right,1-left,0-aligned,-1-unknown (>elipson,<-elipson)
     //z=2-above,1-below,0-aligned, -1 unknown
     //x=2-ahead,1-behind,0 - aligned, -1 unknown
@@ -162,7 +162,7 @@ public:
     inline double mag(point3d a){return sqrt(sqr(a.x())+sqr(a.y())+sqr(a.z()));}
     inline double ang_vec(point3d a,point3d b)
     {
-        //FIXME: Test this hueristic to be correct 
+        //FIXME: Test this hueristic to be correct
         double num=dot(a,b);
         double den=mag(a)*mag(b);
         double diff=abs(mag(a)-mag(b));
