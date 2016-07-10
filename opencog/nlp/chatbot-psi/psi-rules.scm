@@ -81,7 +81,7 @@
             (Not (DefinedPredicate "input-is-a-question?"))
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
-        (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-reply)))
         (True)
         (stv .9 .9)
         sociality
@@ -99,7 +99,7 @@
                 (DefinedPredicate "no-good-fast-answer?"))
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
-        (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-replies)))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-reply)))
         (True)
         (stv .9 .9)
         sociality
@@ -125,7 +125,7 @@
         (DefinedPredicate "is-duckduckgo-answer?")
         (DefinedPredicate "has-not-replied-anything-yet?")
     ))
-    (True (ExecutionOutput (GroundedSchema "scm: reply") (List duckduckgo-answers)))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List duckduckgo-answer)))
     (True)
     (stv .9 .9)
     sociality
@@ -149,7 +149,7 @@
         (DefinedPredicate "is-wolframalpha-answer?")
         (DefinedPredicate "has-not-replied-anything-yet?")
     ))
-    (True (ExecutionOutput (GroundedSchema "scm: reply") (List wolframalpha-answers)))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List wolframalpha-answer)))
     (True)
     (stv .9 .9)
     sociality
@@ -160,6 +160,10 @@
         (DefinedPredicate "random-sentence-generator-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "has-pkd-related-words?")
+        (SequentialOr
+            (Not (DefinedPredicate "input-type-is-imperative?"))
+            (DefinedPredicate "don't-know-how-to-do-it")
+        )
     ))
     (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "pkd"))))
     (True)
@@ -172,6 +176,10 @@
         (DefinedPredicate "random-sentence-generator-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "has-blog-related-words?")
+        (SequentialOr
+            (Not (DefinedPredicate "input-type-is-imperative?"))
+            (DefinedPredicate "don't-know-how-to-do-it")
+        )
     ))
     (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "blogs"))))
     (True)

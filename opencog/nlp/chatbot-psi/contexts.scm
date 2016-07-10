@@ -156,8 +156,8 @@
     (DefinedPredicate "no-result-from-other-sources?")
     (And (process-finished? duckduckgo)
          (process-finished? wolframalpha)
-         (no-result? duckduckgo-answers)
-         (no-result? wolframalpha-answers))
+         (no-result? duckduckgo-answer)
+         (no-result? wolframalpha-answer))
 )
 
 ; Number being passed is time (in second) threshold
@@ -169,7 +169,7 @@
 
 (Define
     (DefinedPredicate "is-aiml-reply?")
-    (any-result? aiml-replies)
+    (any-result? aiml-reply)
 )
 
 (Define
@@ -184,7 +184,7 @@
 
 (Define
     (DefinedPredicate "is-duckduckgo-answer?")
-    (any-result? duckduckgo-answers)
+    (any-result? duckduckgo-answer)
 )
 
 (Define
@@ -199,7 +199,7 @@
 
 (Define
     (DefinedPredicate "is-wolframalpha-answer?")
-    (any-result? wolframalpha-answers)
+    (any-result? wolframalpha-answer)
 )
 
 (Define
