@@ -123,7 +123,7 @@ def call_wolframalpha(qq, aid):
 )
 
 (define (ask-duckduckgo)
-    (State duckduckgo-search process-started)
+    (State duckduckgo process-started)
 
     ; TODO: We may want to actually nlp-parse the answer, but a typical answer
     ; of this type seems to be very long (a paragraph), split into sentences
@@ -131,7 +131,7 @@ def call_wolframalpha(qq, aid):
     (begin-thread
         (cog-evaluate! (Evaluation (GroundedPredicate "py: call_duckduckgo")
             (List (get-input-text-node))))
-        (State duckduckgo-search process-finished)
+        (State duckduckgo process-finished)
     )
 )
 
@@ -139,11 +139,11 @@ def call_wolframalpha(qq, aid):
     (if (not (equal? appid ""))
         (begin-thread
             (define appid_node (Node appid))
-            (State wolframalpha-search process-started)
+            (State wolframalpha process-started)
 
             (cog-evaluate! (Evaluation (GroundedPredicate "py: call_wolframalpha")
                 (List (get-input-text-node) appid_node)))
-            (State wolframalpha-search process-finished)
+            (State wolframalpha process-finished)
             (cog-extract appid_node)
         )
     )

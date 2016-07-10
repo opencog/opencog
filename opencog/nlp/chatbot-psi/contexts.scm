@@ -53,9 +53,9 @@
     )
 )
 
-(define (check-words source)
+(define (check-words target-words)
     (filter-map
-        (lambda (w) (list? (member (cog-name w) source)))
+        (lambda (w) (list? (member (cog-name w) target-words)))
         (cog-outgoing-set (get-input-word-list))
     )
 )
@@ -124,13 +124,13 @@
 )
 
 (Define
-    (DefinedPredicate "fuzzy-match-not-started?")
-    (process-not-started? fuzzy-match)
+    (DefinedPredicate "fuzzy-not-started?")
+    (process-not-started? fuzzy)
 )
 
 (Define
-    (DefinedPredicate "fuzzy-match-finished?")
-    (process-finished? fuzzy-match)
+    (DefinedPredicate "fuzzy-finished?")
+    (process-finished? fuzzy)
 )
 
 (Define
@@ -139,13 +139,13 @@
 )
 
 (Define
-    (DefinedPredicate "aiml-search-not-started?")
-    (process-not-started? aiml-search)
+    (DefinedPredicate "aiml-not-started?")
+    (process-not-started? aiml)
 )
 
 (Define
-    (DefinedPredicate "aiml-search-finished?")
-    (process-finished? aiml-search)
+    (DefinedPredicate "aiml-finished?")
+    (process-finished? aiml)
 )
 
 ; Number being passed is the confidence threshold
@@ -156,8 +156,8 @@
 
 (Define
     (DefinedPredicate "no-result-from-other-sources?")
-    (And (process-finished? duckduckgo-search)
-         (process-finished? wolframalpha-search)
+    (And (process-finished? duckduckgo)
+         (process-finished? wolframalpha)
          (no-result? duckduckgo-answers)
          (no-result? wolframalpha-answers))
 )
@@ -175,13 +175,13 @@
 )
 
 (Define
-    (DefinedPredicate "duckduckgo-search-not-started?")
-    (process-not-started? duckduckgo-search)
+    (DefinedPredicate "duckduckgo-not-started?")
+    (process-not-started? duckduckgo)
 )
 
 (Define
-    (DefinedPredicate "duckduckgo-search-finished?")
-    (process-finished? duckduckgo-search)
+    (DefinedPredicate "duckduckgo-finished?")
+    (process-finished? duckduckgo)
 )
 
 (Define
@@ -190,13 +190,13 @@
 )
 
 (Define
-    (DefinedPredicate "wolframalpha-search-not-started?")
-    (process-not-started? wolframalpha-search)
+    (DefinedPredicate "wolframalpha-not-started?")
+    (process-not-started? wolframalpha)
 )
 
 (Define
-    (DefinedPredicate "wolframalpha-search-finished?")
-    (process-finished? wolframalpha-search)
+    (DefinedPredicate "wolframalpha-finished?")
+    (process-finished? wolframalpha)
 )
 
 (Define

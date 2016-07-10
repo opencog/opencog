@@ -21,7 +21,7 @@
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "is-a-question?")
     ))
-    (True (ExecutionOutput (GroundedSchema "scm: do-fuzzy-QA") (List)))
+    (True (ExecutionOutput (GroundedSchema "scm: call-fuzzy-QA") (List)))
     (True)
     (stv .9 .9)
     sociality
@@ -41,7 +41,7 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "fuzzy-match-not-started?")
+        (DefinedPredicate "fuzzy-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (Not (DefinedPredicate "is-a-question?"))
         (SequentialOr
@@ -49,7 +49,7 @@
             (DefinedPredicate "don't-know-how-to-do-it")
         )
     ))
-    (True (ExecutionOutput (GroundedSchema "scm: do-fuzzy-match") (List)))
+    (True (ExecutionOutput (GroundedSchema "scm: call-fuzzy") (List)))
     (True)
     (stv .9 .9)
     sociality
@@ -57,7 +57,7 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "fuzzy-match-finished?")
+        (DefinedPredicate "fuzzy-finished?")
         (DefinedPredicate "is-fuzzy-reply?")
         (DefinedPredicate "is-input-utterance?")
     ))
@@ -69,14 +69,14 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "aiml-search-not-started?")
+        (DefinedPredicate "aiml-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (SequentialOr
             (Not (DefinedPredicate "is-imperative?"))
             (DefinedPredicate "don't-know-how-to-do-it")
         )
     ))
-    (True (ExecutionOutput (GroundedSchema "scm: do-aiml-search") (List)))
+    (True (ExecutionOutput (GroundedSchema "scm: call-aiml") (List)))
     (True)
     (stv .9 .9)
     sociality
@@ -85,7 +85,7 @@
 (Member
     (psi-rule
         (list (SequentialAnd
-            (DefinedPredicate "aiml-search-finished?")
+            (DefinedPredicate "aiml-finished?")
             (DefinedPredicate "is-aiml-reply?")
             (Not (DefinedPredicate "is-a-question?"))
             (DefinedPredicate "is-input-utterance?")
@@ -101,7 +101,7 @@
 (Member
     (psi-rule
         (list (SequentialAnd
-            (DefinedPredicate "aiml-search-finished?")
+            (DefinedPredicate "aiml-finished?")
             (DefinedPredicate "is-aiml-reply?")
             (DefinedPredicate "is-a-question?")
             (Or (DefinedPredicate "is-aiml-reply-good?")
@@ -118,7 +118,7 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "duckduckgo-search-not-started?")
+        (DefinedPredicate "duckduckgo-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "is-a-question?")
     ))
@@ -130,7 +130,7 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "duckduckgo-search-finished?")
+        (DefinedPredicate "duckduckgo-finished?")
         (DefinedPredicate "is-duckduckgo-answer?")
         (DefinedPredicate "is-input-utterance?")
     ))
@@ -142,7 +142,7 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "wolframalpha-search-not-started?")
+        (DefinedPredicate "wolframalpha-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "is-interrogative?")
     ))
@@ -154,7 +154,7 @@
 
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "wolframalpha-search-finished?")
+        (DefinedPredicate "wolframalpha-finished?")
         (DefinedPredicate "is-wolframalpha-answer?")
         (DefinedPredicate "is-input-utterance?")
     ))

@@ -32,7 +32,7 @@
     )
 )
 
-(define (do-fuzzy-QA)
+(define (call-fuzzy-QA)
     (State fuzzy-qa process-started)
 
     (begin-thread
@@ -55,11 +55,11 @@
     )
 )
 
-(define (do-fuzzy-match)
-    (State fuzzy-match process-started)
+(define (call-fuzzy)
+    (State fuzzy process-started)
 
     (begin-thread
-        (let ((fuzzy-results (fuzzy-match-sent (get-input-sent-node) '()))
+        (let ((fuzzy-results (fuzzy-sent (get-input-sent-node) '()))
               (rtn '()))
             ; No result if it's an empty ListLink
             (if (equal? (cog-arity fuzzy-results) 0)
@@ -75,13 +75,13 @@
                     )
                 )
             )
-            (State fuzzy-match process-finished)
+            (State fuzzy process-finished)
         )
     )
 )
 
-(define (do-aiml-search)
-    (State aiml-search process-started)
+(define (call-aiml)
+    (State aiml process-started)
 
     (begin-thread
         (let ((aiml-resp (aiml-get-response-wl (get-input-word-list))))
@@ -97,7 +97,7 @@
                     (map (lambda (r) (cog-set-tv! r target-tv)) target-rules)
                 )
             )
-            (State aiml-search process-finished)
+            (State aiml process-finished)
         )
     )
 )
