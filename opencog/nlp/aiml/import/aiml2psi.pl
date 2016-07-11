@@ -416,20 +416,23 @@ sub trim_punct
 	# Remove whitespace.
 	$wrd =~ s/\s*//;
 
+	# More HTML markup is sneaking by...
+	$wrd =~ s/&gt;//g;
+
 	# Remove leading and trailing punctuation, keep star and underscore.
 	# Keep embedded dots (for decimal numbers!?, acronyms, abbreviations)
 	# Keep exclamation and question mark, maybe the text-to-speech can do
 	# something with that?
-	# $wrd =~ s/^[.'():;!?,"\\<>]+//;
-	$wrd =~ s/^[.'():;,"\\<>]+//;
-	$wrd =~ s/[.'():;,"\\<>]+$//;
+	# $wrd =~ s/^[.'(){}\-:;!?,"\\\/<>]+//;
+	$wrd =~ s/^[.'(){}\-:;,"\\\/<>]+//;
+	$wrd =~ s/[.'(){}\-:;,"\\\/<>]+$//;
 
 	# Remove back-slashed quotes in the middle of words.
 	$wrd =~ s/\.\\"//g;
 	$wrd =~ s/\\"//g;
 
-	# More HTML markup is sneaking by...
-	$wrd =~ s/&gt//g;
+	# Convert any remaining backslashes into forward-slashes.
+	$wrd =~ s/\\/\//g;
 
 	$wrd;
 }
