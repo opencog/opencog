@@ -143,7 +143,6 @@ def sentence_score(sentence_tokens, previous_token, acum_score, neg_num):
             elif 'dec' in previous_tags:
                 token_score /= 2.0
             elif 'inv' in previous_tags:
-#               token_score *= -1.0
                 neg_num += 1
         return sentence_score(sentence_tokens[1:], current_token, acum_score + token_score, neg_num)
 
@@ -155,7 +154,7 @@ def sentiment_parse(plain_text):
     postagger = POSTagger()
     path = os.environ['OPENCOG_PATH'] + 'nlp/chatbot/'
     dicttagger = DictionaryTagger([path + 'dicts/positive.yml',
-        path + 'dicts/negative.yml', path + 'dicts/inc.yml', path + 'dicts/dec.yml', path + 'dicts/inv.yml'])
+        path + 'dicts/negative.yml', path + 'dicts/inc.yml', path + 'dicts/dec.yml', path + 'dicts/inv.yml']])
     splitted_sentences = splitter.split(plain_text)
     pos_tagged_sentences = postagger.pos_tag(splitted_sentences)
     dict_tagged_sentences = dicttagger.tag(pos_tagged_sentences)
