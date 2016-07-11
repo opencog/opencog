@@ -378,6 +378,11 @@ foreach my $af (sort @aimlFiles)
 					{
 						$raw = $1 . $3;
 					}
+
+					# Space-pad embedded long dashes.
+					$raw =~ s/---/ --- /g;
+					$raw =~ s/--/ -- /g;
+
 					print FOUT "TEMPATOMIC,0\n";
 					my @TEMPWRDS = split(/ /, $raw); #
 					foreach my $w (@TEMPWRDS)
