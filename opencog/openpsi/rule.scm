@@ -222,15 +222,16 @@ there are 100K rules!
   psi-rule:
   - An ImplicationLink whose weight is going to be modified.
 "
-    (cog-outgoing-set (cog-execute! (GetLink
-        (TypedVariableLink
-            (VariableNode "rule-alias")
-            (TypeNode "ConceptNode"))
-        (AndLink (EvaluationLink
-            psi-rule-name-predicate-node
-            (ListLink
-                (QuoteLink psi-rule)
-                (VariableNode "rule-alias")))))))
+    (cog-outgoing-set (cog-execute!
+        (GetLink
+            (TypedVariableLink
+                (VariableNode "rule-alias")
+                (TypeNode "ConceptNode"))
+            (EvaluationLink
+                psi-rule-name-predicate-node
+                (ListLink
+                    (QuoteLink psi-rule)
+                    (VariableNode "rule-alias"))))))
 )
 
 ; --------------------------------------------------------------
