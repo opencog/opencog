@@ -67,22 +67,34 @@
     )
 )
 
-(define (check-words target-words)
-    (filter-map
+(define (check-words . target-words)
+    ; target-words is a list of WordNodes
+    (if (or (null? (get-input-word-list))
+            (null? (filter
+                (lambda (w) (list? (member w target-words)))
+                (cog-outgoing-set (get-input-word-list)))))
+        (stv 0 1)
+        (stv 1 1)
+    )
+)
+
+(define (check-theme-words target-words)
+    ; target-words is a list of strings
+    (filter
         (lambda (w) (list? (member (cog-name w) target-words)))
         (cog-outgoing-set (get-input-word-list))
     )
 )
 
 (define (check-pkd-words)
-    (if (null? (check-words pkd-relevant-words))
+    (if (null? (check-theme-words pkd-relevant-words))
         (stv 0 1)
         (stv 1 1)
     )
 )
 
 (define (check-blog-words)
-    (if (null? (check-words blog-relevant-words))
+    (if (null? (check-theme-words blog-relevant-words))
         (stv 0 1)
         (stv 1 1)
     )
@@ -122,6 +134,12 @@
         (DefinedPredicate "input-type-is-truth-query?"))
 )
 
+(Define
+    (DefinedPredicate "input-is-about-the-robot?")
+    (Evaluation (GroundedPredicate "scm: check-words")
+        (List (Word "you") (Word "your") (Word "yours") (Word "robot")))
+)
+
 ; Essentially equivalent to "is-input-utterance", as the states
 ; will be reset after giving a reply by default
 (Define
@@ -156,7 +174,7 @@
 )
 
 (Define
-    (DefinedPredicate "no-good-fast-reply?")
+    (DefinedPredicate "no-other-fast-reply?")
     ; TODO: May want to check more than time elapsed
     (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List (Number 3)))
 )
