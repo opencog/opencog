@@ -18,6 +18,8 @@
              (opencog nlp microplanning)
              (opencog nlp relex2logic))
 
+(use-modules (opencog logger))
+
 ; -----------------------------------------------------------------------
 
 (use-modules (opencog) (opencog python) (opencog exec))
@@ -212,6 +214,7 @@ def call_sentiment_parse(text_node, sent_node):
 		(r2l-parse (car sent-list))
 
     ; Testing the Sentiment_eval function
+    (cog-logger-info "nlp-parse: testing Sentiment_eval")
     (python-call-with-as "set_atomspace" (cog-atomspace))
     (cog-evaluate! (Evaluation (GroundedPredicate "py: call_sentiment_parse") (List (Node plain-text) (car sent-list))))
 
