@@ -1,11 +1,10 @@
-(use-modules ((rnrs) :version(6)))
 (use-modules (opencog) (opencog atom-types) (opencog ato pointmem)); needed for mapsi
 (use-modules (opencog python))
 ;;initialize octomap with 15hz, 10 second or 150 frames buffer ; 1 cm spatial resolution
-(create-map "faces" 0.01 (div 1000 15) 150) (step-time-unit "faces")(auto-step-time-on "faces")
+(create-map "faces" 0.01 66 150) (step-time-unit "faces")(auto-step-time-on "faces")
 ;;scm code
 (define (look-at-face face-id-node)
-		(let* ((loc-atom (get-past-locs-ato "faces" face-id-node (div 1000 15)))
+		(let* ((loc-atom (get-past-locs-ato "faces" face-id-node 1))
 			(fnc "look_at_face_point("))
 			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom) (stv 0 0)
 				(let* ((loc-link (car (cog-outgoing-set loc-atom)))
