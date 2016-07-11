@@ -45,6 +45,15 @@
     )
 )
 
+(define (check-fuzzy-reply num-node)
+    (if (> (string->number (cog-name (car
+            (cog-chase-link 'StateLink 'NumberNode fuzzy-reply-conf))))
+                (string->number (cog-name num-node)))
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
 (define (long-time-elapsed num-node)
     (if (> (- (current-time) (string->number (get-input-time)))
             (string->number (cog-name num-node)))
@@ -134,6 +143,17 @@
     (DefinedPredicate "fuzzy-reply-is-declarative?")
     (Equal (Set (DefinedLinguisticConcept "DeclarativeSpeechAct"))
         (Get (State fuzzy-reply-type (Variable "$s"))))
+)
+
+(Define
+    (DefinedPredicate "is-fuzzy-reply-good?")
+    (Evaluation (GroundedPredicate "scm: check-fuzzy-reply") (List (Number .5)))
+)
+
+(Define
+    (DefinedPredicate "no-good-fast-reply?")
+    ; TODO: May want to check more than time elapsed
+    (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List (Number 3)))
 )
 
 (Define
