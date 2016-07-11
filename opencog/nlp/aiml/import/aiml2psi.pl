@@ -425,9 +425,9 @@ sub split_string
 		# Keep embedded dots (for decimal numbers!?, acronyms, abbreviations)
 		# Keep exclamation and question mark, maybe the text-to-speech can do
 		# something with that?
-		# $wrd =~ s/^[.'():!?,]+//;
-		$wrd =~ s/^[.'():,]+//;
-		$wrd =~ s/[.'():,]+$//;
+		# $wrd =~ s/^[.'():!?,"\\]+//;
+		$wrd =~ s/^[.'():,"\\]+//;
+		$wrd =~ s/[.'():,"\\]+$//;
 
 		if ($wrd eq "") {}
 		elsif ($wrd eq "*" or $wrd eq "_")
