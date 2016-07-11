@@ -83,6 +83,9 @@ void PointMemorySCM::init()
     define_scheme_primitive("get-space-res", &PointMemorySCM::get_space_res, this, "ato pointmem");//d_s
     define_scheme_primitive("get-time-units", &PointMemorySCM::get_time_units, this, "ato pointmem");//i_s
     define_scheme_primitive("step-time-unit", &PointMemorySCM::step_time_unit, this, "ato pointmem");//v_s
+    define_scheme_primitive("auto-step-time-on", &PointMemorySCM::auto_step_time_on, this, "ato pointmem");//v_s
+    define_scheme_primitive("auto-step-time-off", &PointMemorySCM::auto_step_time_off, this, "ato pointmem");//v_s
+    define_scheme_primitive("is-auto-step-on", &PointMemorySCM::is_auto_step_on, this, "ato pointmem");//i_s
     define_scheme_primitive("map-ato", &PointMemorySCM::map_ato, this, "ato pointmem");//b_shddd
     define_scheme_primitive("get-first-ato", &PointMemorySCM::get_first_ato, this, "ato pointmem");//h_shi
     define_scheme_primitive("get-last-ato", &PointMemorySCM::get_last_ato, this, "ato pointmem");//h_shi
@@ -152,6 +155,21 @@ void PointMemorySCM::step_time_unit(const string& map_name)
     tsa[map_name]->step_time_unit();
 }
 
+void PointMemorySCM::auto_step_time_on(const string& map_name)
+{
+    tsa[map_name]->auto_step_time(true);
+}
+
+void PointMemorySCM::auto_step_time_off(const string& map_name)
+{
+    tsa[map_name]->auto_step_time(false);
+}
+
+int PointMemorySCM::is_auto_step_on(const string& map_name)
+{
+    return (tsa[map_name]->is_auto_step_time_on())?1:0;
+}
+ 
 bool PointMemorySCM::map_ato(const string& map_name,Handle ato,double x,double y,double z)
 {
     return tsa[map_name]->put_atom_at_current_time(point3d(x,y,z),ato);
