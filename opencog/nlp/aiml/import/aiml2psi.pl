@@ -625,7 +625,7 @@ sub process_named_tag
 
 	$text =~ /(.*?)<$tag name='(.*?)'\/>(.*)/;
 
-	$tout .= &split_string($tag, $indent, $1);
+	$tout .= &split_string($indent, $1);
 	$tout .= &print_named_tag($tag, $indent, $2);
 	$tout .= &process_aiml_tags($indent, $3);
 	$tout;
