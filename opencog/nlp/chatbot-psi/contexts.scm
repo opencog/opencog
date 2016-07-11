@@ -67,18 +67,18 @@
     )
 )
 
+; Make sure the robot has not replied anything yet when calling this
 (define (check-words . target-words)
     ; target-words is a list of WordNodes
-    (if (or (null? (get-input-word-list))
-            (null? (filter
-                (lambda (w) (list? (member w target-words)))
-                (cog-outgoing-set (get-input-word-list)))))
+    (if (null? (filter (lambda (w) (list? (member w target-words)))
+            (cog-outgoing-set (get-input-word-list))))
         (stv 0 1)
         (stv 1 1)
     )
 )
 
-(define (check-theme-words target-words)
+; Make sure the robot has not replied anything yet when calling this
+(define (check-theme target-words)
     ; target-words is a list of strings
     (filter
         (lambda (w) (list? (member (cog-name w) target-words)))
@@ -87,14 +87,14 @@
 )
 
 (define (check-pkd-words)
-    (if (null? (check-theme-words pkd-relevant-words))
+    (if (null? (check-theme pkd-relevant-words))
         (stv 0 1)
         (stv 1 1)
     )
 )
 
 (define (check-blog-words)
-    (if (null? (check-theme-words blog-relevant-words))
+    (if (null? (check-theme blog-relevant-words))
         (stv 0 1)
         (stv 1 1)
     )
