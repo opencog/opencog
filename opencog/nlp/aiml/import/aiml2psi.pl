@@ -371,8 +371,15 @@ foreach my $af (sort @aimlFiles)
 				# interpretation of XML that AIML assumes.
 				if ($template[0] !~ /</) #
 				{
+					# Remove HTML-encoded XML. This is mostly going to be
+					# XML meant to control some text-to-speech system.
+					my $raw = $template[0];
+					while ($raw =~ /(.*)&lt;(.+?)&gt;(.*)/)
+					{
+						$raw = $1 . $3;
+					}
 					print FOUT "TEMPATOMIC,0\n";
-					my @TEMPWRDS = split(/ /,$template[0]); #
+					my @TEMPWRDS = split(/ /, $raw); #
 					foreach my $w (@TEMPWRDS)
 					{
 						if (length($w)>0)
