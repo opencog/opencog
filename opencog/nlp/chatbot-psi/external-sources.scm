@@ -22,7 +22,7 @@ def to_duckduckgo(qq):
     global atomspace
 
     # Anchor for the result
-    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: DuckDuckGoAnswers')
+    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: DuckDuckGoAnswer')
 
     # Avoid HTTP Error 400: Bad Request
     query = qq.name.replace(' ', '+')
@@ -52,7 +52,7 @@ def to_wolframalpha(qq, aid):
         raise ValueError('AppID for Wolfram|Alpha Webservice API is missing!')
 
     # Anchor for the result
-    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: WolframAlphaAnswers')
+    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: WolframAlphaAnswer')
     no_result = atomspace.add_node(types.ConceptNode, 'Chatbot: NoResult')
 
     # Avoid HTTP Error 400: Bad Request
