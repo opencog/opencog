@@ -409,6 +409,24 @@ my $pat_word_count = 0;
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
 
+sub trim_punct
+{
+	my $wrd = $_[0];
+
+	# Remove whitespace.
+	$wrd =~ s/\s*//;
+
+	# Remove leading and trailing punctuation, keep star and underscore.
+	# Keep embedded dots (for decimal numbers!?, acronyms, abbreviations)
+	# Keep exclamation and question mark, maybe the text-to-speech can do
+	# something with that?
+	# $wrd =~ s/^[.'():!?,"\\]+//;
+	$wrd =~ s/^[.'():,"\\]+//;
+	$wrd =~ s/[.'():,"\\]+$//;
+
+	$wrd;
+}
+
 # split_string -- split a string of words into distinct nodes.
 sub split_string
 {
@@ -418,7 +436,9 @@ sub split_string
 	my $tout = "";
 	for my $wrd (@words)
 	{
-		$wrd =~ s/\s*//;
+		# Remove punction.
+		$wrd = &trim_punct($wrd);
+
 		if ($wrd eq "") {}
 		elsif ($wrd eq "*" or $wrd eq "_")
 		{
@@ -625,7 +645,7 @@ sub process_named_tag
 
 	$text =~ /(.*?)<$tag name='(.*?)'\/>(.*)/;
 
-	$tout .= &split_string($tag, $indent, $1);
+	$tout .= &split_string($indent, $1);
 	$tout .= &print_named_tag($tag, $indent, $2);
 	$tout .= &process_aiml_tags($indent, $3);
 	$tout;
@@ -1230,17 +1250,12 @@ while (my $line = <FIN>)
 
 	if ($cmd eq "TEMPWRD")
 	{
-		# Unescape escaped single-quotes.
-		$arg =~ s/\\'/'/g;
-
-		# Escape back-slashes
-		$arg =~ s/\\/\\\\/g;
-
-		# Escape double-quotes.
-		$arg =~ s/"/\\"/g;
-
-		# Just another word in the reply chain.
-		$psi_goal .= "      " . $wordnode . "\"$arg\")\n";
+		$arg = &trim_punct($arg);
+		if ($arg ne "")
+		{
+			# Just another word in the reply chain.
+			$psi_goal .= "      " . $wordnode . "\"$arg\")\n";
+		}
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
