@@ -421,8 +421,10 @@ sub split_string
 		# Remove whitespace.
 		$wrd =~ s/\s*//;
 
-		# Remove punctuation, keep star and underscore.
-		$wrd =~ s/[.!?,]//;
+		# Remove leading and trailing punctuation, keep star and underscore.
+		# Keep embedded dots (for decimal numbers!?, acronyms, abbreviations)
+		$wrd =~ s/^[.'():!?,]+//;
+		$wrd =~ s/[.'():!?,]+$//;
 
 		if ($wrd eq "") {}
 		elsif ($wrd eq "*" or $wrd eq "_")
@@ -432,8 +434,6 @@ sub split_string
 		}
 		else
 		{
-			# Remove punctuation.
-			$wrd =~ s/[[:punct:]]//;
 			$tout .= $indent . $wordnode . "\"$wrd\")\n";
 			$pat_word_count ++;
 		}
