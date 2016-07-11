@@ -152,9 +152,10 @@ def sentiment_score(review):
 def sentiment_parse(plain_text):
     splitter = Splitter()
     postagger = POSTagger()
-    path = '/home/nilg/OpenCog/opencog/opencog/nlp/chatbot/dicts/' # TODO
+    configpath = '/usr/local/etc/'
+    path = os.path.join(configpath, 'opencog/dicts');
     dictfilenames = ['positive.yml', 'negative.yml', 'inc.yml', 'dec.yml', 'inv.yml']
-    dicttagger = DictionaryTagger([path + 'dicts/' + d for d in dictfilenames])
+    dicttagger = DictionaryTagger([os.path.join(path, d) for d in dictfilenames])
     splitted_sentences = splitter.split(plain_text)
     pos_tagged_sentences = postagger.pos_tag(splitted_sentences)
     dict_tagged_sentences = dicttagger.tag(pos_tagged_sentences)

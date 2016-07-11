@@ -38,8 +38,9 @@ def loadSentiWords (filename):
     return words
 
 def load_sentiment_list(atomspace):
-      path = os.environ['OPENCOG_PATH'] + 'nlp/chatbot/'
-      sentiWordList = loadSentiWords(path + '/dicts/sentiWordNet.txt')
+      configpath = '/usr/local/etc'
+      path = os.path.join(configpath, 'opencog/dicts/')
+      sentiWordList = loadSentiWords(os.path.join(path, 'sentiWordNet.txt'))
       for sentiWord in sentiWordList:
             word_node = atomspace.add_node(types.ConceptNode, sentiWord.word)
             if sentiWord.posScore > 0:
