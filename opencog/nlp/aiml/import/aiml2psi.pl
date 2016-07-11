@@ -418,7 +418,12 @@ sub split_string
 	my $tout = "";
 	for my $wrd (@words)
 	{
+		# Remove whitespace.
 		$wrd =~ s/\s*//;
+
+		# Remove punctuation, keep star and underscore.
+		$wrd =~ s/[.!?,]//;
+
 		if ($wrd eq "") {}
 		elsif ($wrd eq "*" or $wrd eq "_")
 		{
@@ -427,6 +432,8 @@ sub split_string
 		}
 		else
 		{
+			# Remove punctuation.
+			$wrd =~ s/[[:punct:]]//;
 			$tout .= $indent . $wordnode . "\"$wrd\")\n";
 			$pat_word_count ++;
 		}
