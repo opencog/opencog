@@ -1,19 +1,13 @@
 To run sentiment_parse:
 
 1) Install nltk:
-    sudo pip install -U nltk
+   sudo pip install -U nltk
 
-2) Specify the path of the "basic_sentiment_analysis.py" file to PYTHONPATH, for example:
-   export PYTHONPATH="$HOME/hansonrobotics/opencog/opencog/opencog/"
+2) Install nltk data, beware it takes a while:
+   sudo python -m nltk.downloader -d /usr/local/share/nltk_data all
 
 3) Specify the path of the dictionary files, for example:
-   export OPENCOG_PATH="$HOME/hansonrobotics/opencog/opencog/opencog/"
-
-   or change the path in the basic_sentiment_analysis.py code (line 156-157):
-
-   path = os.environ['OPENCOG_PATH'] + 'nlp/chatbot/'
-   dicttagger = DictionaryTagger([path + 'dicts/positive.yml',
-         path + 'dicts/negative.yml', path + 'dicts/inc.yml', path + 'dicts/dec.yml', path + 'dicts/inv.yml'])
+   export OPENCOG_PATH="$OPENCOG_PATH:$OPENCOG_REPO/opencog/"
 
 4) run nlp-parse, follow the InheritanceLink to check the sentiment of the sentence:
 guile> (cog-incoming-set (car (nlp-parse "This is not a disgusting test.")))
