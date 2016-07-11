@@ -54,7 +54,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-updater tag-node)
 "
-  Returns a list containing the updater for the given tag-node. Nil is returned
+  Returns a list containing the updater for the given tag-node. Null is returned
   if it doesn't have one.
 
   tag-node:
@@ -73,5 +73,3 @@
 (define resolution-level (psi-create-modulator "resolution-level" .5))
 (define selection-threshold (psi-create-modulator "selection-threshold" .5))
 (define securing-threshold (psi-create-modulator "securing-threshold" .5))
-
-
