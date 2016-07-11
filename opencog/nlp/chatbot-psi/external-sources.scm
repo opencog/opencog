@@ -22,7 +22,7 @@ def to_duckduckgo(qq):
     global atomspace
 
     # Anchor for the result
-    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: DuckDuckGoAnswers')
+    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: DuckDuckGoAnswer')
 
     # Avoid HTTP Error 400: Bad Request
     query = qq.name.replace(' ', '+')
@@ -52,7 +52,7 @@ def to_wolframalpha(qq, aid):
         raise ValueError('AppID for Wolfram|Alpha Webservice API is missing!')
 
     # Anchor for the result
-    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: WolframAlphaAnswers')
+    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: WolframAlphaAnswer')
     no_result = atomspace.add_node(types.ConceptNode, 'Chatbot: NoResult')
 
     # Avoid HTTP Error 400: Bad Request
@@ -117,13 +117,16 @@ def call_wolframalpha(qq, aid):
 
 ; AppID for Wolfram|Alpha Webservice API
 (define appid "")
+(define has-wolframalpha-setup #f)
 
 (define-public (set-appid id)
     (set! appid id)
+    (State wolframalpha default-state)
+    (set! has-wolframalpha-setup #t)
 )
 
 (define (ask-duckduckgo)
-    (State duckduckgo-search process-started)
+    (State duckduckgo process-started)
 
     ; TODO: We may want to actually nlp-parse the answer, but a typical answer
     ; of this type seems to be very long (a paragraph), split into sentences
@@ -131,7 +134,7 @@ def call_wolframalpha(qq, aid):
     (begin-thread
         (cog-evaluate! (Evaluation (GroundedPredicate "py: call_duckduckgo")
             (List (get-input-text-node))))
-        (State duckduckgo-search process-finished)
+        (State duckduckgo process-finished)
     )
 )
 
@@ -139,11 +142,11 @@ def call_wolframalpha(qq, aid):
     (if (not (equal? appid ""))
         (begin-thread
             (define appid_node (Node appid))
-            (State wolframalpha-search process-started)
+            (State wolframalpha process-started)
 
             (cog-evaluate! (Evaluation (GroundedPredicate "py: call_wolframalpha")
                 (List (get-input-text-node) appid_node)))
-            (State wolframalpha-search process-finished)
+            (State wolframalpha process-finished)
             (cog-extract appid_node)
         )
     )

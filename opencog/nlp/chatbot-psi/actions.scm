@@ -16,7 +16,16 @@
             (if (null? generated)
                 ; Do it again if the chosen one can't be used to generate a sentence
                 (pick-and-generate (delete! generated list-of-results))
-                generated
+                (begin
+                    ; Get the speech act of the reply
+                    (State fuzzy-reply-type
+                        (car (filter (lambda (node) (string-suffix? "SpeechAct" (cog-name node)))
+                            (cog-filter 'DefinedLinguisticConceptNode (cog-get-all-nodes (gar picked)))))
+                    )
+                    ; Get the score
+                    (State fuzzy-reply-conf (gdr picked))
+                    generated
+                )
             )
         )
     )
@@ -32,72 +41,47 @@
     )
 )
 
-(define (do-fuzzy-QA)
-    (State fuzzy-qa process-started)
+(define (call-fuzzy)
+    (State fuzzy process-started)
 
     (begin-thread
-        (let ((fuz-ans (get-fuzzy-answers (get-input-sent-node) #:do-microplanning #f)))
-            (if (null? fuz-ans)
-                (State fuzzy-answers no-result)
-
-                ; Fuzzy matcher may return more than one answers that have the
-                ; same score, randomly pick one of them if so
-                ; TODO: Should also return other results accordingly, not always the top ones only
-                (let* ((ans (list (list-ref fuz-ans (random (length fuz-ans)))))
-                       (ans-in-words (List (map Word (string-split (car ans) #\ )))))
-                    (State fuzzy-answers ans-in-words)
-
-                    ; TODO: Create a new psi-rule for this QA in the OpenCog AIML format
-                )
-            )
-            (State fuzzy-qa process-finished)
-        )
-    )
-)
-
-(define (do-fuzzy-match)
-    (State fuzzy-match process-started)
-
-    (begin-thread
-        (let ((fuzzy-results (fuzzy-match-sent (get-input-sent-node) '()))
-              (rtn '()))
+        (let ((fuzzy-results (fuzzy-match-sent (get-input-sent-node) '())))
             ; No result if it's an empty ListLink
             (if (equal? (cog-arity fuzzy-results) 0)
-                (State fuzzy-replies no-result)
-                (begin
-                    (set! rtn (pick-and-generate (cog-outgoing-set fuzzy-results)))
+                (State fuzzy-reply no-result)
+                (let ((rtn (pick-and-generate (cog-outgoing-set fuzzy-results))))
                     (cog-extract fuzzy-results)
                     (if (null? rtn)
                         ; Could happen if none of them can be used to generate
                         ; an actual sentence
-                        (State fuzzy-replies no-result)
-                        (State fuzzy-replies (List (map Word (string-split rtn #\ ))))
+                        (State fuzzy-reply no-result)
+                        (State fuzzy-reply (List (map Word (string-split rtn #\ ))))
                     )
                 )
             )
-            (State fuzzy-match process-finished)
+            (State fuzzy process-finished)
         )
     )
 )
 
-(define (do-aiml-search)
-    (State aiml-search process-started)
+(define (call-aiml)
+    (State aiml process-started)
 
     (begin-thread
         (let ((aiml-resp (aiml-get-response-wl (get-input-word-list))))
             ; No result if it's a ListLink with arity 0
             (if (equal? (cog-arity aiml-resp) 0)
-                (State aiml-replies no-result)
+                (State aiml-reply no-result)
                 (let ((target-rules (cog-chase-link 'MemberLink 'ImplicationLink aiml-reply-rule))
                       (target-tv (cog-tv (aiml-get-selected-rule))))
-                    (State aiml-replies aiml-resp)
+                    (State aiml-reply aiml-resp)
 
                     ; Update the TVs of the psi-rules that will actually execute
                     ; the "Reply" action
                     (map (lambda (r) (cog-set-tv! r target-tv)) target-rules)
                 )
             )
-            (State aiml-search process-finished)
+            (State aiml process-finished)
         )
     )
 )
