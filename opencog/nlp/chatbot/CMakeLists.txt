@@ -10,4 +10,8 @@ INSTALL (FILES
 INSTALL (FILES
     dicts/positive.yml
     dicts/negative.yml
-    DESTINATION "/usr/local/etc/")
+    dicts/inc.yml
+    dicts/dec.yml
+    dicts/inv.yml
+    dicts/sentiWordNet.txt
+    DESTINATION "/usr/local/etc/opencog/dicts")
