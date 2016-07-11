@@ -3,7 +3,7 @@
 (use-modules (ice-9 threads)) ; For `par-map`
 (use-modules (ice-9 optargs)) ; For `define*-public`
 (use-modules (srfi srfi-1)) ; For `append-map`
-(use-modules (opencog))
+(use-modules (opencog) (opencog query))
 
 (load "demand.scm")
 (load "utilities.scm")
@@ -33,6 +33,8 @@
         (MemberLink implication demand)
 
         ; Give name this is used for control/feedback purposes
+        ; Why EvaluationLink? B/c we can't use DefineLink. Maybe when protoatom
+        ; are ready that could be used????
         (if name
             (EvaluationLink
                 psi-rule-name-predicate-node
@@ -209,6 +211,26 @@ there are 100K rules!
     ; NOTE: Why this function? -> For consisentency and to accomodate future
     ; changes
      (cadr (cog-outgoing-set rule))
+)
+
+; --------------------------------------------------------------
+(define-public (psi-rule-alias psi-rule)
+"
+  Returns a list with the node that aliases the psi-rule if it has a an alias,
+  or Returns null if it doesn't.
+
+  psi-rule:
+  - An ImplicationLink whose weight is going to be modified.
+"
+    (cog-outgoing-set (cog-execute! (GetLink
+        (TypedVariableLink
+            (VariableNode "rule-alias")
+            (TypeNode "ConceptNode"))
+        (AndLink (EvaluationLink
+            psi-rule-name-predicate-node
+            (ListLink
+                (QuoteLink psi-rule)
+                (VariableNode "rule-alias")))))))
 )
 
 ; --------------------------------------------------------------
