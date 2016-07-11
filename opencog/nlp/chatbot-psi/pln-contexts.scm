@@ -28,12 +28,12 @@
 
 (Define
     (DefinedPredicate "pln-qa-not-started?")
-    (search-not-started? pln-qa)
+    (process-not-started? pln-qa)
 )
 
 (Define
     (DefinedPredicate "pln-qa-finished?")
-    (search-finished? pln-qa)
+    (process-finished? pln-qa)
 )
 
 (Define
