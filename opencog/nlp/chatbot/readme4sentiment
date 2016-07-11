@@ -15,7 +15,7 @@ To run sentiment_parse:
    dicttagger = DictionaryTagger([path + 'dicts/positive.yml',
          path + 'dicts/negative.yml', path + 'dicts/inc.yml', path + 'dicts/dec.yml', path + 'dicts/inv.yml'])
 
-3) run nlp-parse, follow the InheritanceLink to check the sentiment of the sentence:
+4) run nlp-parse, follow the InheritanceLink to check the sentiment of the sentence:
 guile> (cog-incoming-set (car (nlp-parse "This is not a disgusting test.")))
 ((InheritanceLink
    (SentenceNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb")
@@ -32,5 +32,27 @@ guile> (cog-incoming-set (car (nlp-parse "This is not a disgusting test.")))
  (ListLink
    (Node "This is not a disgusting test.")
    (SentenceNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb")
+)
+)
+
+
+To load sentiment word list:
+
+1) using the same OPENCOG_PATH as running the sentiment parse to specify the path of the simplified ictionary file "sentiWordNet", i.e
+
+2) load the sentiment word list from sentiWordNet file:
+
+(load "../opencog/nlp/chatbot/loadSentiList.scm")
+
+3) check if it's correctly loaded:
+
+guile> (cog-incoming-set (cog-node 'ConceptNode "comparative"))
+((InheritanceLink (stv 0.75 0.89999998)
+   (ConceptNode "comparative")
+   (ConceptNode "Negative")
+)
+ (InheritanceLink (stv 0.625 0.89999998)
+   (ConceptNode "comparative")
+   (ConceptNode "Positive")
 )
 )
