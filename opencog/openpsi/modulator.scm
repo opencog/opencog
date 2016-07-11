@@ -36,34 +36,6 @@
     )
 )
 
-; --------------------------------------------------------------
-(define-public (psi-set-updater! updater tag-node)
-"
-  Returns the alias node that represents the updater.
-
-  updater:
-  - An evaluatable link/node which when evaluated will updater the values for
-    the given demand/modulator.
-
-  tag-node:
-  - A demand/modulator node that the updater is being added to.
-"
-    (psi-set-functionality updater #t tag-node "updater")
-)
-
-; --------------------------------------------------------------
-(define-public (psi-get-updater tag-node)
-"
-  Returns a list containing the updater for the given tag-node. Null is returned
-  if it doesn't have one.
-
-  tag-node:
-  - A demand/modulator node that has the updater.
-"
-    (psi-get-functionality tag-node "updater")
-)
-
-
 ; =============================================================================
 ; CREATE MODULATORS
 
