@@ -15,6 +15,10 @@
     ))
 )
 
+(define (setup-done? anchor)
+    (Not (Equal (Set setup-not-done) (Get (State anchor (Variable "$s")))))
+)
+
 (define (process-not-started? anchor)
     (Equal (Set default-state) (Get (State anchor (Variable "$s"))))
 )
@@ -25,6 +29,7 @@
 
 (define (any-result? anchor)
     (Not (Or
+        (Equal (Set setup-not-done) (Get (State anchor (Variable "$f"))))
         (Equal (Set default-state) (Get (State anchor (Variable "$f"))))
         (Equal (Set no-result) (Get (State anchor (Variable "$f"))))
     ))
@@ -208,6 +213,11 @@
 )
 
 (Define
+    (DefinedPredicate "is-wolframalpha-ready?")
+    (setup-done? wolframalpha)
+)
+
+(Define
     (DefinedPredicate "wolframalpha-not-started?")
     (process-not-started? wolframalpha)
 )
@@ -220,6 +230,11 @@
 (Define
     (DefinedPredicate "is-wolframalpha-answer?")
     (any-result? wolframalpha-answer)
+)
+
+(Define
+    (DefinedPredicate "is-random-sentence-generator-ready?")
+    (setup-done? random-sentence-generator)
 )
 
 (Define

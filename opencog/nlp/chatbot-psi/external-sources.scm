@@ -117,9 +117,12 @@ def call_wolframalpha(qq, aid):
 
 ; AppID for Wolfram|Alpha Webservice API
 (define appid "")
+(define has-wolframalpha-setup #f)
 
 (define-public (set-appid id)
     (set! appid id)
+    (State wolframalpha default-state)
+    (set! has-wolframalpha-setup #t)
 )
 
 (define (ask-duckduckgo)

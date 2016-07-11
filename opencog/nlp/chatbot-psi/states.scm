@@ -17,6 +17,7 @@
 (define default-state (Concept (chat-prefix "DefaultState")))
 (define process-started (Concept (chat-prefix "ProcessStarted")))
 (define process-finished (Concept (chat-prefix "ProcessFinished")))
+(define setup-not-done (Concept (chat-prefix "SetupNotDone")))
 (define no-result (Concept (chat-prefix "NoResult")))
 
 (define aiml (Anchor (chat-prefix "AIML")))
@@ -40,12 +41,12 @@
 
 (define wolframalpha (Anchor (chat-prefix "WolframAlpha")))
 (define wolframalpha-answer (Anchor (chat-prefix "WolframAlphaAnswer")))
-(State wolframalpha default-state)
+(State wolframalpha setup-not-done)  ; An AppID is required to use WolframAlpha
 (State wolframalpha-answer default-state)
 
 (define random-sentence-generator (Anchor (chat-prefix "RandomSentenceGenerator")))
 (define random-sentence-generated (Anchor (chat-prefix "RandomSentenceGenerated")))
-(State random-sentence-generator default-state)
+(State random-sentence-generator setup-not-done)  ; Need to do (markov-setup ...) first
 (State random-sentence-generated default-state)
 
 (define chatbot-eva (Anchor (chat-prefix "ChatbotEva")))
@@ -73,9 +74,11 @@
     (State fuzzy-reply-conf default-state)
     (State duckduckgo default-state)
     (State duckduckgo-answer default-state)
-    (State wolframalpha default-state)
+    (if has-wolframalpha-setup
+        (State wolframalpha default-state))
     (State wolframalpha-answer default-state)
-    (State random-sentence-generator default-state)
+    (if has-markov-setup
+        (State random-sentence-generator default-state))
     (State random-sentence-generated default-state)
     (State chatbot-eva default-state)
     (State pln-answers default-state)

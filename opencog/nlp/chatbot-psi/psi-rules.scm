@@ -40,7 +40,7 @@
         )
         (SequentialOr
             (DefinedPredicate "is-fuzzy-reply-good?")
-            (DefinedPrecicate "no-good-fast-reply?")
+            (DefinedPredicate "no-good-fast-reply?")
         )
         (DefinedPredicate "has-not-replied-anything-yet?")
     ))
@@ -58,7 +58,7 @@
         (Not (DefinedPredicate "fuzzy-reply-is-declarative?"))
         (SequentialOr
             (DefinedPredicate "is-fuzzy-reply-good?")
-            (DefinedPrecicate "no-good-fast-answer?")
+            (DefinedPredicate "no-good-fast-answer?")
         )
         (DefinedPredicate "has-not-replied-anything-yet?")
     ))
@@ -143,6 +143,7 @@
 
 (psi-rule
     (list (SequentialAnd
+        (DefinedPredicate "is-wolframalpha-ready?")
         (DefinedPredicate "wolframalpha-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "input-type-is-interrogative?")
@@ -167,6 +168,7 @@
 
 (psi-rule
     (list (SequentialAnd
+        (DefinedPredicate "is-random-sentence-generator-ready?")
         (DefinedPredicate "random-sentence-generator-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "has-pkd-related-words?")
@@ -183,6 +185,7 @@
 
 (psi-rule
     (list (SequentialAnd
+        (DefinedPredicate "is-random-sentence-generator-ready?")
         (DefinedPredicate "random-sentence-generator-not-started?")
         (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "has-blog-related-words?")

@@ -14,6 +14,7 @@
 
 ;------------------------------------------------------------------------------
 
+(define has-markov-setup #f)
 (define markov-bin "")
 (define markov-dict "")
 (define pkd-relevant-words '())
@@ -50,6 +51,8 @@
     (set! markov-dict dict-dir)
     (set! pkd-relevant-words (read-words "PKD_relevant_words.txt"))
     (set! blog-relevant-words (read-words "blog_relevant_words.txt"))
+    (State random-sentence-generator default-state)
+    (set! has-markov-setup #t)
 )
 
 (define (call-random-sentence-generator dict-node)
