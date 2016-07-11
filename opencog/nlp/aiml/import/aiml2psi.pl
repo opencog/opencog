@@ -423,8 +423,11 @@ sub split_string
 
 		# Remove leading and trailing punctuation, keep star and underscore.
 		# Keep embedded dots (for decimal numbers!?, acronyms, abbreviations)
-		$wrd =~ s/^[.'():!?,]+//;
-		$wrd =~ s/[.'():!?,]+$//;
+		# Keep exclamation and question mark, maybe the text-to-speech can do
+		# something with that?
+		# $wrd =~ s/^[.'():!?,]+//;
+		$wrd =~ s/^[.'():,]+//;
+		$wrd =~ s/[.'():,]+$//;
 
 		if ($wrd eq "") {}
 		elsif ($wrd eq "*" or $wrd eq "_")
