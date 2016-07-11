@@ -143,8 +143,6 @@ void OCPlanningAgent::run()
     OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
-    static int waitToStart =  0;
-
     if (!this->bInitialized)
         this->init();
 
@@ -154,14 +152,10 @@ void OCPlanningAgent::run()
              // && ( oac->getPsiDemandUpdaterAgent().get()->getHasPsiDemandUpdaterForTheFirstTime())
             )
         {
-            // to wait for the PAI to finish more perception processing
-            waitToStart ++;
 
-            if (waitToStart > 10)
-            {
-                startPlanning = true;
-                std::cout<<"OCPlanningAgent start!" <<std::endl;
-            }
+            startPlanning = true;
+            std::cout<<"OCPlanningAgent start!" <<std::endl;
+
         }
 
         return;

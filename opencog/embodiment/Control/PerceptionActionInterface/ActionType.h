@@ -84,6 +84,7 @@ enum ActionTypeCode {
     DESTROY_BLOCK_CODE,
 
     OPEN_CODE,
+    HEAL_CODE,
 
     DO_NOTHING_CODE,
 
@@ -298,6 +299,9 @@ public:
     static const ActionType& ROTATE_LEFT();
 
     static const ActionType& OPEN();
+
+    static const ActionType& HEAL();
+
 
     /**
      * void do_nothing( )  // this is using in planning

@@ -800,15 +800,15 @@ bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
 
     // because the agent has a height,
     // we should check if there are enough room above this pos for this agent to stand on
-    if (mAgentHeight > 1)
-    {
-        for (int height = 1; height < mAgentHeight; height ++)
-        {
-            BlockVector blockAbove(pos.x,pos.y,pos.z + height);
-            if (mRootOctree->checkIsSolid(blockAbove,block))
-                return false;
-        }
-    }
+//    if (mAgentHeight > 1)
+//    {
+//        for (int height = 1; height < mAgentHeight; height ++)
+//        {
+//            BlockVector blockAbove(pos.x,pos.y,pos.z + height);
+//            if (mRootOctree->checkIsSolid(blockAbove,block))
+//                return false;
+//        }
+//    }
 
     // because there are too many blocks for the whole floor, we don't send these floor blocks to opencog
     // so we just check if the pos height is just on the floor.

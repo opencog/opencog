@@ -1660,7 +1660,7 @@ void PAI::addToWaitFeedingQueue(HandleSeq &newLinks)
 
         if (patternMiner != NULL)
         {
-            cout << "PAI: patternMiner != NULL" << std::endl;
+            // cout << "PAI: patternMiner != NULL" << std::endl;
             if (perceptionWaitingForPatternMiner.size() != 0)
             {
                 patternMiner-> feedEmbodimentLinksToObservingAtomSpace(perceptionWaitingForPatternMiner);
@@ -1671,7 +1671,7 @@ void PAI::addToWaitFeedingQueue(HandleSeq &newLinks)
         }
         else
         {
-            cout << "PAI: patternMiner == NULL" << std::endl;
+            // cout << "PAI: patternMiner == NULL" << std::endl;
             for (unsigned int i = 0; i < newLinks.size(); ++ i)
             {
                 perceptionWaitingForPatternMiner.push_back(newLinks[i]);
@@ -3987,7 +3987,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 
 //    bool isVisible = isObjectVisible(properties);
 
-   // const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
+    const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
    // const std::string& texture = getStringProperty(properties, TEXTURE_ATTRIBUTE);
 //    const std::string& ownerId = getStringProperty(properties, OWNER_ID_ATTRIBUTE);
 
@@ -4013,9 +4013,12 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 
 //  addPropertyPredicate(std::string("is_drinkable"), objectNode, isDrinkable, true);
 //  addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);
-    propertyLink = addPropertyPredicate(std::string("is_pickupable"), objectNode, isPickupable, true);
-    if (propertyLink != Handle::UNDEFINED)
-        entityRelatedLinks.push_back(propertyLink);
+    if (entityClass != "block")
+    {
+        propertyLink = addPropertyPredicate(std::string("is_pickupable"), objectNode, isPickupable, true);
+        if (propertyLink != Handle::UNDEFINED)
+            entityRelatedLinks.push_back(propertyLink);
+    }
 
     // Add the inheritance link to mark the family of this entity.
 //    addInheritanceLink(std::string("pet_home"), objectNode, isHome);
@@ -4077,12 +4080,12 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
             entityRelatedLinks.push_back(propertyLink);
     }
 
-//    // Add material property predicate
-//    if (material != NULL_ATTRIBUTE){
-//       // printf("Material found: %s\n",material.c_str());
+    // Add material property predicate
+    if (material != NULL_ATTRIBUTE){
+       // printf("Material found: %s\n",material.c_str());
 
-//        Handle materialWordNode = atomSpace.addNode(WORD_NODE, material);
-//        Handle materialConceptNode = atomSpace.addNode(CONCEPT_NODE, material);
+        // Handle materialWordNode = atomSpace.addNode(WORD_NODE, material);
+        Handle materialConceptNode = atomSpace.addNode(CONCEPT_NODE, material);
 
 //        HandleSeq referenceLinkOutgoing;
 //        referenceLinkOutgoing.push_back(materialConceptNode);
@@ -4093,9 +4096,13 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 //        referenceLink->setTruthValue(TruthValue::TRUE_TV());
 //        atomSpace.setLTI(referenceLink, 1);
 
-//        AtomSpaceUtil::setPredicateValue(atomSpace, "material",
-//                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, materialConceptNode);
-//    } // if
+        propertyLink = AtomSpaceUtil::setPredicateValue(atomSpace, "material",
+                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, materialConceptNode);
+
+        if (propertyLink != Handle::UNDEFINED)
+            entityRelatedLinks.push_back(propertyLink);
+
+    } // if
 
 //    // Add color property predicate
 //    if (color_name != NULL_ATTRIBUTE){
@@ -4563,7 +4570,8 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, Hand
 void PAI::processStartPlanningFromClientSignalType(DOMElement* element)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
-    // getting timestamp attribute value
+
+    // get objest id
     XMLString::transcode(OBJECT_ID_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
     char* objectIDChar = XMLString::transcode(element->getAttribute(tag));
 
@@ -4572,8 +4580,26 @@ void PAI::processStartPlanningFromClientSignalType(DOMElement* element)
 
     XMLString::release(&objectIDChar);
 
+    // get the goal state name
+    XMLString::transcode(STATE_NAME_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* stateNameChar = XMLString::transcode(element->getAttribute(tag));
+
+    string stateName(stateNameChar);
+    curGoalStateName = stateName;
+
+    XMLString::release(&stateNameChar);
+
+    // get the goal state value
+    XMLString::transcode(VALUE_ATTRIBUTE, tag, PAIUtils::MAX_TAG_LENGTH);
+    char* stateValChar = XMLString::transcode(element->getAttribute(tag));
+
+    string stateVal(stateValChar);
+    curGoalStateValue = stateVal;
+
+    XMLString::release(&stateValChar);
+
     hasStartPlanningFromClientSignal = true;
-    printf("\nReceived singal from the client to start planning!\n");
+    printf("\nAgent got a new planning goal... \n");
 
 }
 

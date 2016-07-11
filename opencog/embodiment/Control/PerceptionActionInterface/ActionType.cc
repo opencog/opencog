@@ -407,6 +407,14 @@ const ActionType& ActionType::OPEN()
     return *result;
 }
 
+const ActionType& ActionType::HEAL()
+{
+    initParamTypes();
+    static const char* paramNames[] = {"target"};
+    static ActionType* result = new ActionType(HEAL_CODE, "heal", ENTITY, ENTITY, paramNames, "void heal( EntityID target )");
+    return *result;
+}
+
 const ActionType& ActionType::DO_NOTHING()
 {
     initParamTypes();

@@ -94,6 +94,8 @@ public:
     std::mutex waitingToFeedToPatternMinerLock;
 
     string curGoalObjectID;
+    string curGoalStateName;
+    string curGoalStateValue;
 
 private:
 

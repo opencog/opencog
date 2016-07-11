@@ -53,6 +53,14 @@ using namespace std;
 
 RuleNode OCPlanner::goalRuleNode = RuleNode();
 
+bool ENABLE_PAUSE_FOR_DEMO  = true;
+
+void PauseForDemo(int seconds)
+{
+    if (ENABLE_PAUSE_FOR_DEMO)
+        sleep (seconds);
+}
+
 string RuleNode::getDepthOfRuleNode()
 {
      // check the depth of the effect state nodes of this rule, get the deepest state node.
@@ -642,25 +650,26 @@ ActionPlanID OCPlanner::doPlanningForGivenGoal(opencog::CogServer * server, Patt
     // need to translate the psi demanding goal Handle into vector<State*>
     vector<State*> goal,knownStates;
 
-    State* goalState = new State("is_open",ActionParamType::BOOLEAN(),STATE_EQUAL_TO,SV_TRUE);
-
     OAC* oac = dynamic_cast<OAC*>(server);
 
-    ParamValue blackChestEntity = Entity(oac->pai->curGoalObjectID,"object");
+    ParamValue goalEntity = Entity(oac->pai->curGoalObjectID,"object");
+    ParamValue goalValue = oac->pai->curGoalStateValue;
+    string goalStateName = oac->pai->curGoalStateName;
 
-    goalState->addOwner(blackChestEntity);
+    State* goalState = new State(goalStateName, ActionParameter::getTypeFromParam(goalValue),STATE_EQUAL_TO, goalValue);
 
-    State* knownState = new State("is_open",ActionParamType::BOOLEAN(),STATE_EQUAL_TO,SV_FALSE);
-    knownState->addOwner(blackChestEntity);
+    goalState->addOwner(goalEntity);
+
+    State* knownState = new State(goalStateName, ActionParameter::getTypeFromParam(goalValue),STATE_NOT_EQUAL_TO, goalValue);
+    knownState->addOwner(goalEntity);
 
     goal.push_back(goalState);
 
     knownStates.push_back(knownState);
 
-    string goalname = "blackChestIsOpen";
-    std::cout<< "OCPLANNER: Planning for given goal: "<< goalname.c_str() << ": \n"
-             << "State: is_open (id_chest13442) = True"
-             <<  std::endl;
+    std::cout << "OCPLANNER: Planning for given goal: \n";
+    outputStateInfo(goalState, true);
+    std::cout << std::endl;
 
     // test :
     // loadFacts(knownStates);
@@ -697,7 +706,7 @@ ActionPlanID OCPlanner::doPlanningForPsiDemandingGoal(Handle& goalHandle,opencog
     knownStates.push_back(knownState);
 
     // test :
-    loadFacts(knownStates);
+    // loadFacts(knownStates);
 
     return doPlanning(goal,knownStates,server);
 
@@ -1004,7 +1013,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 {
                     toRollback = false;
 
-                    cout << "Start to mine related rules from perception. " << std::endl;
+                    cout << "Start to mine related rules from perception using Pattern Miner... " << std::endl;
+                    PauseForDemo(2);
+
                     vector<ParamValue> stateOwnerList = curStateNode->state->stateOwnerList;
 
                     if (stateOwnerList.size() < 1)
@@ -1673,6 +1684,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         if (curImaginaryMap != curMap)
             delete curImaginaryMap;
 
+        PauseForDemo(3);
+
     }
 
     // finished planning!
@@ -1842,6 +1855,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     {
         std::cout << "It's able to achieve the goal without doing any action! Not need a plan!" << std::endl;
     }
+
+    PauseForDemo(3);
 
     return planID;
 }
@@ -2920,6 +2935,9 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
     {
         HandleSeq& paramEvalLinks = paramMapIter->second;
         cout << "Start mining patterns on query related to this parameter: " << paramMapIter->first << " , for these EvaluationLinks." << std::endl;
+
+        PauseForDemo(3);
+
         for (Handle ph : paramEvalLinks)
         {
             cout << atomSpace->atomAsString(ph) << std::endl;
@@ -3099,7 +3117,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                     Handle listLink = atomSpace->getOutgoing(link,1);
                     HandleSeq listOutgoings = atomSpace->getOutgoing(listLink);
                     actorVar = listOutgoings[listOutgoings.size() - 1];
-                    cout << "The variable representing actor is: " << atomSpace->getName(actorVar) << std::endl;
+                    //cout << "The variable representing actor is: " << atomSpace->getName(actorVar) << std::endl;
 
                 }
                 else if (predicateNameString == "target")
@@ -3107,7 +3125,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                     Handle listLink = atomSpace->getOutgoing(link,1);
                     HandleSeq listOutgoings = atomSpace->getOutgoing(listLink);
                     targetVar = listOutgoings[listOutgoings.size() - 1];
-                    cout << "The variable representing target is: " << atomSpace->getName(targetVar) << std::endl;
+                    //cout << "The variable representing target is: " << atomSpace->getName(targetVar) << std::endl;
 
                 }
 
@@ -3186,6 +3204,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
             paramToMinedStruct.insert(std::pair<string, MinedParamStruct>(paramMapIter->first, minedStruct));
 
             cout << "Start to find the potential preconditions related to this parameter..." << std::endl;
+            PauseForDemo (3);
             // Find out the potential preconditions related to this parameter
             // Find the state changes occurred to the parameter objects before the action execution
             // e.g. the parameter objects are the keys, the state changes are their holders changed into the actor agent
@@ -3306,6 +3325,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                             cout << "A precondition found: State: " << aPrecond.stateName << " of "
                                  << atomSpace->getName(aPrecond.stateOwner) << " should be " << atomSpace->getName(valueHandle) << std::endl;
 
+                            PauseForDemo (2);
                         }
                     }
 
@@ -3692,7 +3712,7 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
 
     MinedRule* minedRule = (MinedRule*)(ruleNode->originalRule);
     cout << "\nAction name: " << minedRule->action->getName() <<"\nNow try to ground all the parameters for this action..." << std::endl;
-
+    PauseForDemo (2);
     // action target: to be improved, currently the target is the state owner
     string targetVarName = ActionParameter::ParamValueToString(minedRule->handleToParamVarMap[minedRule->minedRulePattern->allVariables["target"]]);
     ParamValue targetParamVal = Inquery::getParamValueFromHandle(stateOwnerHanlde);
@@ -3772,16 +3792,18 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
         }
 
         string actionInstanceVarStr = atomSpace->getName(actionInstanceVar);
-        cout << "Found out that the variable represents the action instance is: " << actionInstanceVarStr;
+        // cout << "Found out that the variable represents the action instance is: " << actionInstanceVarStr;
 
         // Bind all the vars can be ground with varToValueMap
         HandleSeq boundPattern = bindKnownVariablesForLinks(rulePattern, varToValueMap);
 
-        cout << "\npattern after bind all known variables :\n";
+        cout << "\nPattern for this parameter after bind all known variables :\n";
         for(Handle link : boundPattern)
         {
             cout << atomSpace->atomAsString(link) << std::endl;
         }
+
+        PauseForDemo (2);
 
         // Remove all the links contains the action instance variable
         HandleSeq cleanBoundPattern;
@@ -3805,7 +3827,7 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
             cleanVariables.push_back(varh);
         }
 
-        cout << "\npattern after removed links contain the variable represents action instance:\n";
+        cout << "\nPattern after removed links contain the variable represents action instance:\n";
         for(Handle link : cleanBoundPattern)
         {
             cout << atomSpace->atomAsString(link) << std::endl;
@@ -3821,11 +3843,13 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
         for(Handle iulink : minedParamStruct.intrinsicUndistinguishingPropertyLinks)
             cleanBoundPattern.push_back(iulink);
 
-        cout << "\npattern after added intrinsic Undistinguishing Property Links :\n";
+        cout << "\nPattern after added intrinsic Undistinguishing Property Links :\n";
         for(Handle link : cleanBoundPattern)
         {
             cout << atomSpace->atomAsString(link) << std::endl;
         }
+
+        PauseForDemo (3);
 
         // Found candicates in AtomSpace which match this pattern:
         HandleSeq candidates = Inquery::findAllCandidatesByGivenPattern(cleanBoundPattern, cleanVariables, minedParamStruct.paramObjVar);
@@ -3844,6 +3868,8 @@ bool OCPlanner::groundAMinedRule(RuleNode* ruleNode, StateNode* forwardStateNode
             ruleNode->currentAllBindings.clear();
             return false;
         }
+
+        PauseForDemo (3);
     }
 
 
@@ -4141,7 +4167,6 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
     // find the last state in the list ParamCandidates, which needs no real-time inquery state , and not numeric
 
-    cout<<"Debug: groundARuleNodeBySelectingNonNumericValues() is finding candidate groups..." << std::endl;
     int number_easy_state = 0;
     list<UngroundedVariablesInAState>::iterator uvIt= ruleNode->curUngroundedVariables.begin();
     for (; uvIt != ruleNode->curUngroundedVariables.end(); ++ uvIt)
@@ -4160,9 +4185,11 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
     if (number_easy_state == 0)
     {
-        cout<<"Debug: groundARuleNodeBySelectingNonNumericValues(): There is no numeric variables in this rule need to be grounded!"<<std::endl;
+        // cout<<"Debug: groundARuleNodeBySelectingNonNumericValues(): There is no numeric variables in this rule need to be grounded!"<<std::endl;
         return true;
     }
+
+    cout<<"Debug: groundARuleNodeBySelectingNonNumericValues() is finding candidate groups..." << std::endl;
 
     // ToBeImproved: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
 
@@ -4822,6 +4849,7 @@ MinedRule* OCPlanner::generateANewRuleFromMinedPattern(MinedRulePattern& minedPa
 
     cout << "\nConverted this new mined pattern into a planning rule: " << std::endl;
     outputARule(minedRule);
+    PauseForDemo (3);
 
     return minedRule;
 

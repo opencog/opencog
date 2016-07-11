@@ -1178,14 +1178,14 @@ HandleSeq Inquery::findAllCandidatesByGivenPattern(HandleSeq& pattern, HandleSeq
 
     Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
 
-    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
-            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+//    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
+//            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
 
     // Run pattern matcher
     Handle hResultListLink = bindlink(atomSpace, hBindLink);
 
-    std::cout<<"Debug: pattern matching results: " << std::endl
-            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
+//    std::cout<<"Debug: pattern matching results: " << std::endl
+//            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
 
     // Get result
     // Note: Don't forget remove the hResultListLink

@@ -2366,14 +2366,14 @@ void PatternMiner::feedEmbodimentLinksToObservingAtomSpace (HandleSeq &_newLinks
 
     for(Handle cur_link :_newLinks)
     {
-        cout << "Feeding new link: \n" << originalAtomSpace->atomAsString(cur_link) << std::endl;
+        cout << "Perceived new knowledge: \n" << originalAtomSpace->atomAsString(cur_link) << std::endl;
         // Add this link into observingAtomSpace
         HandleSeq outgoingLinks,outVariableNodes;
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
         Handle existLink = observingAtomSpace->getLink(originalAtomSpace->getType(cur_link), outgoingLinks);
         if (existLink != Handle::UNDEFINED)
         {
-            cout << "This link is dupicated! Skip it." << std::endl;
+            // cout << "This link is dupicated! Skip it." << std::endl;
             continue;
         }
 
