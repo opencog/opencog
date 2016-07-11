@@ -30,7 +30,8 @@ For details, run:
 ```
 perl aiml2psi.pl --help
 ```
-For aiml files, see https://github.com/jstnhuang/chatbot/tree/master/aiml
+For aiml files, see
+https://github.com/hansonrobotics/HEAD/tree/master/src/chatbot/aiml/
 
 ### Overview
 Conversion is done in a two-pass process.  The first pass flattens
