@@ -3,7 +3,6 @@ IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 	# microplanning depends on sureal, so should test after it
 	ADD_SUBDIRECTORY (microplanning)
-	ADD_SUBDIRECTORY (scm2pgsql)
 ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 IF (HAVE_VITERBI)
