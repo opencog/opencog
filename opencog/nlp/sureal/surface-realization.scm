@@ -14,6 +14,8 @@
              (opencog nlp lg-dict)
              (opencog nlp relex2logic))
 
+(use-modules (opencog logger))
+
 ; ---------------------------------------------------------------------
 ; Creates a single list  made of the elements of lists within it with
 ; the exception of empty-lists.
@@ -43,6 +45,7 @@
   Expect SETLINK to be a SetLink -- since it is assumed that the
   output of the micro-planner is unordered.
 "
+    ;; (cog-logger-info "sureal a-set-link = ~a" a-set-link)
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
             (if (null? interpretations)
@@ -134,6 +137,9 @@
         (map construct-sntc-mapping (circular-list words-seq) (circular-list (cdar mappings)) (map cdr (cdr mappings)))
     )
 
+    ;; (cog-logger-info "create-sentence a-set-link = ~a, use-cache = ~a"
+    ;;                  a-set-link use-cache)
+
     ; add LG dictionary on each word if not already in the atomspace
     (par-map
         lg-get-dict-entry
@@ -164,6 +170,8 @@
         )
     )
 
+    ;; (cog-logger-info "Still there?")
+
     (if use-cache
         (cached-sureal-match a-set-link)
         (let* ((results (sureal-match a-set-link))
@@ -188,6 +196,10 @@
 ; This just takes the one of the many InterpretationNode.
 (define (get-sentence interpret-node-lst)
     (define parse (list-ref (cog-chase-link 'InterpretationLink 'ParseNode (list-ref interpret-node-lst 0)) 0))
+
+    ;; (cog-logger-info "create-sentence interpret-node-lst = ~a"
+    ;;                  interpret-node-lst)
+
     (string-join (cdr (map word-inst-get-word-str (parse-get-words-in-order parse))))
 )
 

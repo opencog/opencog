@@ -1,3 +1,60 @@
+(use-modules (opencog) (opencog atom-types))
+
+(load "states.scm")
+(load "utils.scm")
+
+;-------------------------------------------------------------------------------
+; Useful functions for the contexts
+
+(define (is-utterance-type? speechact)
+    (Satisfaction (And
+        (State input-utterance (Reference (Variable "$s") (Variable "$n") (Variable "$l")))
+        (Parse (Variable "$parse") (Variable "$s"))
+        (Interpretation (Variable "$interp") (Variable "$parse"))
+        (Inheritance (Variable "$interp") speechact)
+    ))
+)
+
+(define (search-not-started? anchor)
+    (Equal (Set default-state) (Get (State anchor (Variable "$s"))))
+)
+
+(define (search-finished? anchor)
+    (Equal (Set search-finished) (Get (State anchor (Variable "$s"))))
+)
+
+(define (any-result? anchor)
+    (Not (Or
+        (Equal (Set default-state) (Get (State anchor (Variable "$f"))))
+        (Equal (Set no-result) (Get (State anchor (Variable "$f"))))
+    ))
+)
+
+(define (no-result? anchor)
+    (Equal (Set no-result) (Get (State anchor (Variable "$r"))))
+)
+
+(define (check-aiml-reply num-node)
+    (let* ((tv (cog-tv (aiml-get-selected-rule)))
+           (conf (cog-tv-confidence tv))
+           (threshold (string->number (cog-name num-node))))
+        (if (> conf threshold)
+            (stv 1 1)
+            (stv 0 1)
+        )
+    )
+)
+
+(define (long-time-elapsed num-node)
+    (if (> (- (current-time) (string->number (get-input-time)))
+            (string->number (cog-name num-node)))
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
+;-------------------------------------------------------------------------------
+
 (Define
     (DefinedPredicate "is-input-utterance?")
     (Not (Equal (Set no-input-utterance)
@@ -68,6 +125,27 @@
 (Define
     (DefinedPredicate "aiml-search-finished?")
     (search-finished? aiml-search)
+)
+
+; Number being passed is the confidence threshold
+(Define
+    (DefinedPredicate "is-aiml-reply-good?")
+    (Evaluation (GroundedPredicate "scm: check-aiml-reply") (List (Number .5)))
+)
+
+(Define
+    (DefinedPredicate "no-result-from-other-sources?")
+    (And (search-finished? duckduckgo-search)
+         (search-finished? wolframalpha-search)
+         (no-result? duckduckgo-answers)
+         (no-result? wolframalpha-answers))
+)
+
+; Number being passed is time (in second) threshold
+(Define
+    (DefinedPredicate "no-good-fast-answer?")
+    (Or (DefinedPredicate "no-result-from-other-sources?")
+        (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List (Number 3))))
 )
 
 (Define
