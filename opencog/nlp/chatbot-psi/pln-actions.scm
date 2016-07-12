@@ -51,8 +51,6 @@
 (define-public (do-pln-QA)
     (State pln-qa process-started)
 
-    ;; (cog-logger-info "[PLN-Psi] do-pln-QA")
-
     (let* (
            (assoc-inferred-names (get-assoc-inferred-names))
            (iu-names (get-input-utterance-names))
@@ -69,18 +67,14 @@
            (word-list (if (null? logic) '() (first (sureal logic))))
           )
 
-      ;; (cog-logger-info "[PLN-Action] assoc-inferred-names = ~a"
-      ;;                  assoc-inferred-names)
-      ;; (cog-logger-info "[PLN-Action] iu-names = ~a" iu-names)
-      ;; (cog-logger-info "[PLN-Action] iu-inter = ~a" iu-inter)
-      ;; (cog-logger-info "[PLN-Action] filtered-in = ~a" filtered-in)
-      ;; (cog-logger-info "[PLN-Action] semantics = ~a" semantics)
-      ;; (cog-logger-info "[PLN-Action] logic = ~a" logic)
-      ;; (cog-logger-info "[PLN-Action] word-list = ~a" word-list)
+      (cog-logger-debug "[PLN-Action] assoc-inferred-names = ~a"
+                       assoc-inferred-names)
+      (cog-logger-debug "[PLN-Action] filtered-in = ~a" filtered-in)
+      (cog-logger-debug "[PLN-Action] semantics = ~a" semantics)
+      (cog-logger-debug "[PLN-Action] logic = ~a" logic)
+      (cog-logger-debug "[PLN-Action] word-list = ~a" word-list)
 
       (State pln-answers (List (map Word word-list)))
-
-      ;; (State pln-answers (List (Word "I") (Word "am") (Word "the") (Word "PLN") (Word "answer")))
 
       (State pln-qa process-finished)
     )
