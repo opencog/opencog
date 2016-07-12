@@ -117,7 +117,7 @@ class FaceTrack:
 		self.EVENT_TRACK_FACE = "track_face"
 
 		self.TOPIC_FACE_LOCATIONS = "/camera/face_locations"
-		
+
 		self.control_mode = 255
 
 		# Subscribed OpenCog commands
@@ -253,6 +253,11 @@ class FaceTrack:
 
 		logger.info("Lost face; visibile faces now: " + str(self.visible_faces))
 
+	# Update face location in octomap if it is in visible faces list
+	def update_face_loc(self,face):
+		if face.id in self.visible_faces:
+			self.atomo.update_face_octomap(face.id,face.point.x,face.point.y,face.point.z)
+
 	# ----------------------------------------------------------
 	# Main look-at action driver.  Should be called at least a few times
 	# per second.  This publishes all of the eye-related actions that the
@@ -350,7 +355,7 @@ class FaceTrack:
 		if faceid in self.visible_faces:
 			logger.info("Face requested interaction: " + str(faceid))
 			self.atomo.add_tracked_face_to_atomspace(faceid)
-		return 
+		return
 
 	# ----------------------------------------------------------
 	# pi_vision ROS callbacks
@@ -378,6 +383,9 @@ class FaceTrack:
 	def face_loc_cb(self, data):
 		if not self.control_mode & self.C_FACE_TRACKING:
 			return
+
+		for face in data.faces:
+			self.update_face_loc(face)
 		#below causes error in cmt .. mandeep
 		#for face in data.faces:
 			#fid = face.id

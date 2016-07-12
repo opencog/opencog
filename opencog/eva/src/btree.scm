@@ -28,7 +28,7 @@
 
 (use-modules (opencog))
 (use-modules (opencog query))  ; XXX work-around relex2logic bug
-
+(load-from-path "time-map.scm") ;;; octomap for faces
 ; Start the cogsserver.  It is used by the face-tracker to poke data
 ; into the atomspace.
 (use-modules (opencog cogserver))

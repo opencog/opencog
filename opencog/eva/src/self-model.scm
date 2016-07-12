@@ -505,7 +505,7 @@
 			(Get (State eye-contact-state (Variable "$x")))
 			(SetLink no-interaction)))
 		(True (Put
-			(Evaluation (GroundedPredicate "py:look_at_face")
+			(Evaluation (GroundedPredicate "scm:look-at-face")
 				(ListLink (Variable "$face")))
 			(Get (State eye-contact-state (Variable "$x")))))
 	))
@@ -530,7 +530,7 @@
 (DefineLink
 	(DefinedPredicate "return to neutral")
 	(SequentialAnd
-		(Evaluation (GroundedPredicate "py:look_at_face")
+		(Evaluation (GroundedPredicate "scm:look-at-face")
 			(ListLink neutral-face))
 		(True (Put
 			(State eye-contact-state (Variable "$face-id"))
