@@ -3,16 +3,19 @@ To run sentiment_parse:
 1) Install nltk:
    sudo pip install -U nltk
 
-2) Install nltk data, beware it takes a while:
+2) Install pyyaml:
+   sudo pip install pyyaml
+
+3) Install nltk data, beware it takes a while:
    sudo python -m nltk.downloader -d /usr/local/share/nltk_data all
 
-3) Be sure to have compiled and install opencog because python files
+4) Be sure to have compiled and install opencog because python files
    and configuration file installed on the system are required
 
-4) Enter the chatbot (or chatbot-psi see
+5) Enter the chatbot (or chatbot-psi see
 opencog/nlp/chatbot-psi/README.md)
 
-5) load the sentiment word list from sentiWordNet file:
+6) load the sentiment word list from sentiWordNet file:
 
 (load "loadSentiList.scm")
 
