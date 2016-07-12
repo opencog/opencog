@@ -6,8 +6,14 @@
 (define (chat-prefix node_name) (string-append "Chatbot: " node_name))
 
 (define input-utterance (Anchor (chat-prefix "InputUtterance")))
+(define input-utterance-sentence (Anchor (chat-prefix "InputUtteranceSentence")))
+(define input-utterance-text (Anchor (chat-prefix "InputUtteranceText")))
+(define input-utterance-words (Anchor (chat-prefix "InputUtteranceWords")))
 (define no-input-utterance (Concept (chat-prefix "NoInputUtterance")))
 (State input-utterance no-input-utterance)
+(State input-utterance-sentence no-input-utterance)  ; No need to be reset
+(State input-utterance-text no-input-utterance)  ; No need to be reset
+(State input-utterance-words no-input-utterance)  ; No need to be reset
 
 (define input-parse (Anchor (chat-prefix "InputParse")))
 (define parse-succeeded (Concept (chat-prefix "ParseSucceeded")))
