@@ -253,7 +253,10 @@ there are 100K rules!
 ; --------------------------------------------------------------
 (define-public (psi-satisfiable? rule)
 "
-  Check if the rule is satisfiable and return TRUE_TV or FALSE_TV.
+  Check if the rule is satisfiable and return TRUE_TV or FALSE_TV. A rule is
+  satisfiable when it's context is fully groundable. The idea is only
+  valid when ranking of context grounding isn't consiedered. This is being
+  replaced.
 
   rule:
   - A psi-rule to be checked if its context is satisfiable.
