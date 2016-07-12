@@ -20,6 +20,7 @@
 ; Load the available actions
 (load "actions.scm")
 (load "external-sources.scm")
+(load "random-sentence-generator.scm")
 (load "pln-actions.scm")
 
 ; Load the psi-rules
@@ -42,13 +43,14 @@
     (reset-all-states)
 
     (let ((sent-node (car (nlp-parse utterance))))
-        (State input-utterance
-            (Reference
-                sent-node
-                (Node utterance)
-                (get-word-list sent-node)
-            )
-        )
+        ; This is for keeping track of whether we have input that has not
+        ; been handled
+        (State input-utterance sent-node)
+
+        ; These are for the contexts
+        (State input-utterance-sentence sent-node)
+        (State input-utterance-text (Node utterance))
+        (State input-utterance-words (get-word-list sent-node))
     )
 
     *unspecified*

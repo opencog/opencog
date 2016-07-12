@@ -1,5 +1,3 @@
-(load "pln-states.scm")
-
 (use-modules (opencog query))
 
 (define (search-inferred-atoms)
@@ -22,9 +20,6 @@
   (let ((inferred-atoms-list (cog-outgoing-set (search-inferred-atoms)))
         (gen-assoc (lambda (x) (list x (get-names (cog-get-all-nodes x)))))
         )
-    ;; (cog-logger-info "[PLN-Psi] (search-inferred-atoms) = ~a"
-    ;;                  (search-inferred-atoms))
-    ;; (cog-logger-info "[PLN-Psi] inferred-atoms-list = ~a" inferred-atoms-list)
     (map gen-assoc inferred-atoms-list)))
 
 (define (search-input-utterance)

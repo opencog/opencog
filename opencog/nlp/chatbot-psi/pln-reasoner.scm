@@ -7,16 +7,28 @@
 ;; 2. Limited induction reasoning
 ;;
 ;; The reasoner doesn't use the URE. Instead if merely applies the 2
-;; rules on after then other in a loop.
-
-(load "pln-states.scm")
+;; rules one after the other in a loop.
+;;
+;; You may test it as following (wait for a couple seconds between
+;; each command to be sure that the chatbot-psi and the pln-reasoner
+;; have time to diggest them.
+;;
+;; guile -l main.scm
+;; (chat "small cats are cute") ;; exemplar to help sureal to generate answer
+;; (chat "Ben is crazy")
+;; (chat "Ben is happy")
+;; (chat "Eddie is funny")
+;; (chat "Eddie is happy")
+;; (chat "Robert is funny")
+;; (chat "Robert is happy")
+;; (chat "What do you know about happy?") ;; Answer: funny people are happy
 
 (use-modules (opencog logger))
 (use-modules (opencog query))
+(use-modules (srfi srfi-1))
 
 ;; Load PLN rule implication direct evaluation
-(add-to-load-path "../../pln/rules")
-(load-from-path "implication-direct-evaluation-rule.scm")
+(load-from-path "opencog/pln/rules/implication-direct-evaluation-rule.scm")
 
 ;;;;;;;;;;;;;;;
 ;; L2S rules ;;
@@ -42,15 +54,15 @@
 ;;    (InterpretationNode "sentence@bf0cc09b-b2c3-4373-9573-6e8bb60a6b5f_parse_0_interpretation_$X")
 ;;    (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
 ;; )
-;;
-;; plus possibly (TBD)
-;;
 ;; (EvaluationLink
 ;;    (DefinedLinguisticPredicateNode "definite")
 ;;    (ListLink
 ;;       (ConceptNode "Ben@b0f3845c-9cfb-4b39-99a6-131004f6203d")
 ;;    )
 ;; )
+;;
+;; plus possibly (TBD)
+;;
 ;; (InheritanceLink
 ;;    (SpecificEntityNode "Ben@b0f3845c-9cfb-4b39-99a6-131004f6203d")
 ;;    (ConceptNode "Ben" (stv 0.029411765 0.0012484394))
@@ -111,6 +123,9 @@
       (TypedVariable
          (Variable "$element")
          (Type "ConceptNode"))
+      ;; (TypedVariable
+      ;;    (Variable "$specific-entity-instance")
+      ;;    (Type "SpecificEntityNode"))
       (TypedVariable
          (Variable "$predicate-instance")
          (Type "PredicateNode"))
@@ -129,7 +144,14 @@
       (Evaluation
          (Variable "$predicate-instance")
          (List
-            (Variable "$element-instance")))))
+            (Variable "$element-instance")))
+      (EvaluationLink
+         (DefinedLinguisticPredicateNode "definite")
+         (ListLink
+           (Variable "$element-instance")))))
+      ;; (InheritanceLink
+      ;;    (Variable "$specific-entity-instance")
+      ;;    (Variable "$element"))))
 
 (define unary-predicate-speech-act-l2s-rewrite
    (Evaluation (stv 1 0.1)
@@ -142,140 +164,25 @@
       unary-predicate-speech-act-l2s-pattern
       unary-predicate-speech-act-l2s-rewrite))
 
-;;;;;;;;;;;;;;;
-;; S2L rules ;;
-;;;;;;;;;;;;;;;
-
-;; Rule to turn something like
-;;
-;; (Implication
-;;    (Predicate "crazy")
-;;    (Predicate "happy"))
-;;
-;; into
-;;
-;; (SetLink
-;;    (Evaluation
-;;       (Predicate "happy")
-;;       (List
-;;          (Concept "people")))
-;;    (Inheritance
-;;       (Concept "people")
-;;       (Concept "crazy")))
-;;
-;; Mind that Predicate is turned into a Concept, that's normal.
-;;
-;; s2l stands for semantics to logic.
-
-(define inheritance-to-evaluation-s2l-vardecl
-   (VariableList
-      (TypedVariable
-         (Variable "$P")
-         (Type "PredicateNode"))
-      (TypedVariable
-         (Variable "$Q")
-         (Type "PredicateNode"))
-      ;; The following is to minimize the probability that this rule
-      ;; is gonna turn any Implication into a mess. We try to filter
-      ;; in Implication inferred from r2l->l2s knowledge.
-      (TypedVariable
-         (Variable "$P-element-instance")
-         (Type "ConceptNode"))
-      (TypedVariable
-         (Variable "$P-element")
-         (Type "ConceptNode"))
-      (TypedVariable
-         (Variable "$P-instance")
-         (Type "PredicateNode"))
-      (TypedVariable
-         (Variable "$P")
-         (Type "PredicateNode"))
-      (TypedVariable
-         (Variable "$Q-element-instance")
-         (Type "ConceptNode"))
-      (TypedVariable
-         (Variable "$Q-element")
-         (Type "ConceptNode"))
-      (TypedVariable
-         (Variable "$Q-instance")
-         (Type "PredicateNode"))
-      (TypedVariable
-         (Variable "$Q")
-         (Type "PredicateNode"))))
-
-(define inheritance-to-evaluation-s2l-pattern
-   (And
-      (Implication
-         (Variable "$P")
-         (Variable "$Q"))
-      ;; The following is to minimize the probability that this rule
-      ;; is gonna turn any Implication into a mess. We try to filter
-      ;; in Implication inferred from r2l->l2s knowledge.
-      (Inheritance
-         (Variable "$P-element-instance")
-         (Variable "$P-element"))
-      (Implication
-         (Variable "$P-instance")
-         (Variable "$P"))
-      (Evaluation
-         (Variable "$P-instance")
-         (List
-            (Variable "$P-element-instance")))
-      (Inheritance
-         (Variable "$Q-element-instance")
-         (Variable "$Q-element"))
-      (Implication
-         (Variable "$Q-instance")
-         (Variable "$Q"))
-      (Evaluation
-         (Variable "$Q-instance")
-         (List
-            (Variable "$Q-element-instance")))))
-
-(define inheritance-to-evaluation-s2l-rewrite
-   (ExecutionOutput
-      (GroundedSchema "scm: inheritance-to-evaluation-s2l-formula")
-      (List
-         (Variable "$P")
-         (Variable "$Q"))))
-
-(define (inheritance-to-evaluation-s2l-formula P Q)
-   (let ((P-name (cog-name P)))
-       (Word "people")
-       (Set
-          (Evaluation
-             Q
-             (List
-                (Concept "people")))
-          (Inheritance
-             (Concept "people")
-             (Concept P-name)))))
-
-(define inheritance-to-evaluation-s2l-rule
-   (Bind
-      inheritance-to-evaluation-s2l-vardecl
-      inheritance-to-evaluation-s2l-pattern
-      inheritance-to-evaluation-s2l-rewrite))
-
 ;;;;;;;;;;
 ;; Main ;;
 ;;;;;;;;;;
 
-
 (define (pln-run)
   (define (pln-loop)
     ;; Apply l2s rules
-    (cog-bind unary-predicate-speech-act-l2s-rule)
+    (let ((l2s-outputs (cog-bind unary-predicate-speech-act-l2s-rule)))
+      (cog-logger-debug "[PLN-Reasoner] l2s-outputs = ~a" l2s-outputs))
 
     ;; Apply Implication direct evaluation (and put the result in
     ;; pln-inferred-atoms state)
-    (State pln-inferred-atoms (cog-bind implication-direct-evaluation-rule))
+    (let ((direct-eval-outputs (cog-bind implication-direct-evaluation-rule)))
+      (State pln-inferred-atoms direct-eval-outputs)
+      (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
+                       direct-eval-outputs))
 
-    ;; Log the current state
-    (cog-logger-info "[PLN-Psi] pln-inferred-atoms = ~a"
-                     (cog-incoming-set pln-inferred-atoms))
-    
-    ;; Sleep a bit, cause thinking is tiring
+    ;; sleep a bit, to not overload the CPU too much
+    (cog-logger-debug "[PLN-Reasoner] Sleep for a second")
     (sleep 1)
 
     ;; Loop

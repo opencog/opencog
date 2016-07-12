@@ -1,13 +1,11 @@
 ;; PLN rules
 
-(load "pln-states.scm")
-
 (psi-rule
     (list (SequentialAnd
         (DefinedPredicate "is-pln-inferred-related?")
         (DefinedPredicate "pln-qa-not-started?")
         (DefinedPredicate "is-input-utterance?")
-        (DefinedPredicate "is-a-question?")
+        (DefinedPredicate "input-is-a-question?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: do-pln-QA") (List)))
     (True)
@@ -19,7 +17,7 @@
     (list (SequentialAnd
         (DefinedPredicate "pln-qa-finished?")
         (DefinedPredicate "is-pln-answer?")
-        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List pln-answers)))
     (True)

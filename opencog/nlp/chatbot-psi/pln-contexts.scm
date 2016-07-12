@@ -5,7 +5,6 @@
 (use-modules (opencog logger))
 (use-modules (opencog query))
 
-(load "pln-states.scm")
 (load "pln-utils.scm")
 
 ;; Check whether the query has common words with the inferred atoms
@@ -14,8 +13,8 @@
          (inferred-names (get-inferred-names))
          (sentence-names (get-input-utterance-names))
          (inter-names (lset-intersection equal? inferred-names sentence-names)))
-    ;; (cog-logger-info "[PLN-Psi] inferred-names = ~a" inferred-names)
-    ;; (cog-logger-info "[PLN-Psi] sentence-names = ~a" sentence-names)
+    ;; (cog-logger-info "[PLN-Context] inferred-names = ~a" inferred-names)
+    ;; (cog-logger-info "[PLN-Context] sentence-names = ~a" sentence-names)
     (if (null? inter-names)
         (stv 0 1)
         (stv 1 1))))
@@ -29,12 +28,12 @@
 
 (Define
     (DefinedPredicate "pln-qa-not-started?")
-    (search-not-started? pln-qa)
+    (process-not-started? pln-qa)
 )
 
 (Define
     (DefinedPredicate "pln-qa-finished?")
-    (search-finished? pln-qa)
+    (process-finished? pln-qa)
 )
 
 (Define

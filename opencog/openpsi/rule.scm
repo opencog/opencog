@@ -1,39 +1,54 @@
 ; Copyright (C) 2016 OpenCog Foundation
 
 (use-modules (ice-9 threads)) ; For `par-map`
+(use-modules (ice-9 optargs)) ; For `define*-public`
 (use-modules (srfi srfi-1)) ; For `append-map`
-
-(use-modules (opencog))
+(use-modules (opencog) (opencog query))
 
 (load "demand.scm")
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
 (define psi-action (ConceptNode (string-append psi-prefix-str "action")))
+(define psi-rule-name-predicate-node
+    (PredicateNode (string-append psi-prefix-str "rule_name")))
 
 ; --------------------------------------------------------------
-(define-public (psi-rule-nocheck context action goal a-stv demand)
+(define*-public (psi-rule-nocheck context action goal a-stv demand
+     #:optional name)
 "
   psi-rule-nocheck -- same as psi-rule, but no checking
 "
-    (define implication (Implication a-stv (And context action) goal))
+    (let ((implication (Implication a-stv (And context action) goal)))
 
     ; These memberships are needed for making filtering and searching simpler..
     ; If GlobNode had worked with GetLink at the time of coding this,
     ; that might have been; better, (or not as it might need as much chasing)
     ; TODO: Remove this when ExecutionLinks are used as that can be used
     ; for filtering.
-    (MemberLink action psi-action)
+        (MemberLink action psi-action)
 
     ; This memberLink is added so as to minimize the tree walking needed to get
     ; from a goal to a psi-rule. For example, if the goal is a DefinedPredicate.
-    (MemberLink implication demand)
+        (MemberLink implication demand)
 
-    implication
+        ; Give name this is used for control/feedback purposes
+        ; Why EvaluationLink? B/c we can't use DefineLink. Maybe when protoatom
+        ; are ready that could be used????
+        (if name
+            (EvaluationLink
+                psi-rule-name-predicate-node
+                (ListLink
+                    implication
+                    (ConceptNode (string-append psi-prefix-str name))))
+        )
+
+        implication
+    )
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-rule context action goal a-stv demand)
+(define*-public (psi-rule context action goal a-stv demand  #:optional name)
 "
   psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
 
@@ -83,7 +98,7 @@
         (error (string-append "In procedure " func-name ", expected fifth "
             "argument to be a node representing a demand, got:") demand))
 
-    (psi-rule-nocheck context action goal a-stv demand)
+    (psi-rule-nocheck context action goal a-stv demand name)
 )
 
 ; --------------------------------------------------------------
@@ -199,6 +214,27 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
+(define-public (psi-rule-alias psi-rule)
+"
+  Returns a list with the node that aliases the psi-rule if it has a an alias,
+  or Returns null if it doesn't.
+
+  psi-rule:
+  - An ImplicationLink whose weight is going to be modified.
+"
+    (cog-outgoing-set (cog-execute!
+        (GetLink
+            (TypedVariableLink
+                (VariableNode "rule-alias")
+                (TypeNode "ConceptNode"))
+            (EvaluationLink
+                psi-rule-name-predicate-node
+                (ListLink
+                    (QuoteLink psi-rule)
+                    (VariableNode "rule-alias"))))))
+)
+
+; --------------------------------------------------------------
 (define-public (psi-related-goals action)
 "
   Return a list of all the goals that are associated by an action. Associated
@@ -217,7 +253,10 @@ there are 100K rules!
 ; --------------------------------------------------------------
 (define-public (psi-satisfiable? rule)
 "
-  Check if the rule is satisfiable and return TRUE_TV or FALSE_TV.
+  Check if the rule is satisfiable and return TRUE_TV or FALSE_TV. A rule is
+  satisfiable when it's context is fully groundable. The idea is only
+  valid when ranking of context grounding isn't consiedered. This is being
+  replaced.
 
   rule:
   - A psi-rule to be checked if its context is satisfiable.

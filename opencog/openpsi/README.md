@@ -13,12 +13,12 @@ taking apropriate action.
 ## Modulators and Internal Dynamics
 
 OpenPsi includes a dynamical system of interacting modulator variables.
-The model contains varying parameters that regulate processes such as 
-stimulus evaluation, action selection, and emotional expression. 
-Modulators are based on MicroPsi, and SECs are based on Component 
-Process Model theory (see references for  more info). These and other 
-OpenPsi-related entities dynamically interact with each other according 
-to rules that specify how a change in a "trigger" entity cause a change 
+The model contains varying parameters that regulate processes such as
+stimulus evaluation, action selection, and emotional expression.
+Modulators are based on MicroPsi, and SECs are based on Component
+Process Model theory (see references for  more info). These and other
+OpenPsi-related entities dynamically interact with each other according
+to rules that specify how a change in a "trigger" entity cause a change
 in a "target" entity.
 
 The interaction rules have the logical form of:
@@ -26,7 +26,7 @@ The interaction rules have the logical form of:
     change in trigger entity --> change in target entity
 
 The change in the target is a function of the magnitude of change in the
-trigger, the strength of the interaction rule, and the current value of 
+trigger, the strength of the interaction rule, and the current value of
 the target.
 
 The rules in Atomese have the form:
@@ -49,18 +49,18 @@ or "psi-decreased".
 
 Files:
 
-* updater.scm - the main control file that handles the dynamic updating 
+* updater.scm - the main control file that handles the dynamic updating
   of entity values based on the interaction rules.
-* interaction-rules.scm - code for creating the rules specifying 
+* interaction-rules.scm - code for creating the rules specifying
   interaction dynamics between entities.
 * modulator.scm - internal openpsi modulator variables
 * sec.scm - internal openpsi Stimulus Evaluation Check variables
-* events.scm - defines perceived events that are monitored and that 
+* events.scm - defines perceived events that are monitored and that
   trigger changes in openpsi variables.
-* entity-defs.scm - defines entities external to openpsi (e.g., PAU's) 
+* entity-defs.scm - defines entities external to openpsi (e.g., PAU's)
   that are used in interaction rules
-  
-Todo: Interaction rule sets, events, and entities should be specified 
+
+Todo: Interaction rule sets, events, and entities should be specified
       via config file
 
 
@@ -180,6 +180,26 @@ Coming soon :smile:
     wrapping it in a `SatisfactionLink` before evaluating it. If TRUE_TV is
     returned it means that is it satisifiable. See function `psi-satisfiable?`
     [here](main.scm).
+  * The formula for the weight of an action that will be used for
+    action-selection is,
+    ```
+    Wa = 1/Na * sum ( Wcagi ...)
+    Wcagi = Scga * Sc * STIcga
+    ```
+    where,
+    Wa = weight of an action
+    Wcagi = weight of an action in a single psi-rule 'i' (An action 'a' could be
+            part of multiple psi-rules achieving multiple goals, so if an
+            action is likely to achieve multiple goals then it should have a
+            higher weight). It is implemented in `psi-action-weight`.
+            (Present value = Scga * Sc * confidence(cga) * confidence(context))
+    Na = Number of rules that have action `a` (Present value =1 )
+    Scga = Strength of psi-rule
+    Sc = Strength of context that is partially implemented in
+        `psi-context-weight`. Implementation details are being discussed
+        [here](https://github.com/opencog/atomspace/issues/823).
+        (Present value = 0 or 1)
+    STIcga = short-term-importance of the psi-rule (Present value = 1)
 
 XXX FIXME -- this needs fixing, as contexts may contain variables whose
 groundings can carry over into the action.  In addition, it is extremely
