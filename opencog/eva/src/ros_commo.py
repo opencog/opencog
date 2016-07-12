@@ -384,8 +384,12 @@ class EvaControl():
 		"""
 		param_list = yaml.load(rosmsg.get_yaml_for_msg(data.doubles))
 		for i in param_list:
-			scm_str = '''(StateLink (AnchorNode \"%s\") (NumberNode %f))''' % \
-					(i["name"], i["value"])
+			scm_str = '''(StateLink
+			                 (ListLink
+			                     (ConceptNode "OpenPsi: %s")
+			                     (ConceptNode "OpenPsi: weight"))
+			                 (NumberNode %f))''' % (i["name"], i["value"])
+
 			self.puta.evaluate_scm(scm_str)
 
 	def __init__(self):
