@@ -155,11 +155,11 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-most-weighted-rule rule-list)
+(define-public (psi-most-weighted-rules rule-list)
 "
   It returns a list with non-duplicating rules with the highest weight. If an
   empty list is passed an empty list is returned. Weight of an psi-rule is as
-  defined in `psi-action-weight` function.
+  defined in `psi-action-weight` function
 
   rule-list:
   - A list of psi-rules to be compared.
@@ -241,6 +241,8 @@
     (define (choose-rules)
         ; NOTE: This check is required as ecan isn't being used continuesely.
         ; Remove `most-weighted-atoms` version once ecan is integrated.
+        ; FIXME; Replace by
+        ; (psi-most-weighted-rules (psi-get-satisfiable-rules demand))
         (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
             (most-weighted-atoms (psi-get-satisfiable-rules demand))
             (most-important-weighted-atoms (psi-get-all-satisfiable-rules))
