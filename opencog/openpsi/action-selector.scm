@@ -107,6 +107,32 @@
 )
 
 ; --------------------------------------------------------------
+(define-public (psi-context-weight rule)
+"
+  Returns the TruthValue of an evaluated conetext. The strength is known as
+  the weight(Sc) of the context.
+
+  rule:
+  - A psi-rule with context to be evaluated.
+"
+    (define (context-stv stv-list)
+    ; See and-side-effect-free-formula in pln-and-construction-rule
+        (stv
+            (fold * 1 (map (lambda (x) (tv-mean x)) stv-list))
+            (fold min 1 (map (lambda (x) (tv-conf x)) stv-list)))
+    )
+
+    (let* ((context (psi-get-context rule))
+        ; map-in-order is used to simulate SequentialAndLink assuming
+        ; psi-get-context maintaines, which is unlikely. What other options
+        ; are there?
+           (stvs (map-in-order cog-evaluate! context)))
+
+           (context-stv stvs)
+   )
+)
+
+; --------------------------------------------------------------
 (define-public (psi-default-action-selector a-random-state)
 "
   Returns a list of one of the most-important-weighted and satisfiable psi-rule
