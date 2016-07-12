@@ -34,6 +34,7 @@ from blender_api_msgs.msg import BlinkCycle
 from blender_api_msgs.msg import SaccadeCycle
 from blender_api_msgs.msg import SomaState
 from chatbot.msg import ChatMessage
+from dynamic_reconfigure.msg import Config
 
 # Not everything has this message; don't break if it's missing.
 # i.e. create a stub if its not defined.
@@ -475,11 +476,7 @@ class EvaControl():
 		rospy.Subscriber("speech_events", String, self.chat_event_cb)
 
 		# ----------------
-		# Interactive learning.
-		# TODO: Separate out the dynamic parameters from the /robot/chatbot
-		# node. Placed there for now as they are being used to control
-		# chatbot-psi
-		from dynamic_reconfigure.msg import Config
+		# chatbot-psi controls
 		rospy.Subscriber("/opencog_control/parameter_updates", Config,
 			self.openpsi_control_cb)
 
