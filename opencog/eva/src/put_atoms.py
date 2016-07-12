@@ -91,3 +91,12 @@ class PutAtoms:
 
 	def btree_run(self):
 		scheme_eval(self.atomspace, "(run)")
+
+	# Generic function for experimentation and with use with different robots
+	# or game-worlds like minecraft.
+	def evaluate_scm(self, scm_string):
+		"""
+		This is a generic function for passing strings of scheme expressions to
+		be evaluated over the atomspace.
+		"""
+		scheme_eval(self.atomspace, scm_string)
