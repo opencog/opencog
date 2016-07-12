@@ -3144,6 +3144,7 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
                 {
                     allVariables.insert(std::pair<string, Handle>("target", defaultTargetVarHandle));
                 }
+
             }
 
             if (varNameMapToReplace.size() != 0)
@@ -3333,6 +3334,11 @@ MinedRulePattern* OCPlanner::mineNewRuleForCurrentSubgoal(StateNode* curSubgoalN
             }
         }
 
+    }
+
+    if (allVariables.find("target") == allVariables.end())
+    {
+        allVariables.insert(std::pair<string, Handle>("target", defaultTargetVarHandle));
     }
 
     // To be improved: Find the state changes occurred to the  actors before the action execution for preconditions.
@@ -4870,12 +4876,12 @@ void OCPlanner::outputARule(Rule* rule)
     for (EffectPair& effectPair : rule->effectList)
     {
         Effect* e = (Effect*)(effectPair.second);
-        cout << e->state->stateName << " of ";
+        cout << e->state->stateName;
         for (ParamValue& stateOwner : e->state->stateOwnerList)
         {
             cout << ActionParameter::ParamValueToString(stateOwner) << " ";
         }
-        cout << "will " << STATE_TYPE_NAME[e->state->stateType] << " " << ActionParameter::ParamValueToString(e->opParamValue) <<"\n";
+        cout << " -> " << STATE_TYPE_NAME[e->state->stateType] << " " << ActionParameter::ParamValueToString(e->opParamValue) <<"\n";
     }
 
     cout << "\nRule preconditions: \n";

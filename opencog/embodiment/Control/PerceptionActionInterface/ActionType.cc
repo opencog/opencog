@@ -500,6 +500,8 @@ const ActionType& ActionType::GetActionTypeByName(const std::string &actionName)
         return DESTROY_BLOCK();
     else if (actionName == "open")
         return OPEN();
+    else if (actionName == "heal")
+        return HEAL();
     else if (actionName == "do_nothing")
         return DO_NOTHING();
     else if (actionName == "step_forward")
