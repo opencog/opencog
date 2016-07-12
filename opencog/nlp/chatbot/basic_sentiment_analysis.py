@@ -149,13 +149,14 @@ def sentence_score(sentence_tokens, previous_token, acum_score, neg_num):
 def sentiment_score(review):
     return sum([sentence_score(sentence, None, 0.0, 0) for sentence in review])
 
+configpath = '/usr/local/etc/'
+path = os.path.join(configpath, 'opencog/dicts');
+dictfilenames = ['positive.yml', 'negative.yml', 'inc.yml', 'dec.yml', 'inv.yml']
+dicttagger = DictionaryTagger([os.path.join(path, d) for d in dictfilenames])
+
 def sentiment_parse(plain_text):
     splitter = Splitter()
     postagger = POSTagger()
-    configpath = '/usr/local/etc/'
-    path = os.path.join(configpath, 'opencog/dicts');
-    dictfilenames = ['positive.yml', 'negative.yml', 'inc.yml', 'dec.yml', 'inv.yml']
-    dicttagger = DictionaryTagger([os.path.join(path, d) for d in dictfilenames])
     splitted_sentences = splitter.split(plain_text)
     pos_tagged_sentences = postagger.pos_tag(splitted_sentences)
     dict_tagged_sentences = dicttagger.tag(pos_tagged_sentences)
