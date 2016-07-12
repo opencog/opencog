@@ -52,6 +52,12 @@
   - An ImplicationLink whose weight is going to be modified.
 "
     (MemberLink psi-rule psi-controller-demand)
+    (StateLink ; FIXME should use AtTimeLink
+        (ListLink
+            (psi-rule-alias psi-rule)
+            (ConceptNode (string-append psi-prefix-str "weight")))
+        (NumberNode (tv-mean (cog-tv psi-rule))))
+    psi-rule
 )
 
 ; --------------------------------------------------------------
