@@ -172,17 +172,17 @@
   (define (pln-loop)
     ;; Apply l2s rules
     (let ((l2s-outputs (cog-bind unary-predicate-speech-act-l2s-rule)))
-      (cog-logger-info "[PLN-Reasoner] l2s-outputs = ~a" l2s-outputs))
+      (cog-logger-debug "[PLN-Reasoner] l2s-outputs = ~a" l2s-outputs))
 
     ;; Apply Implication direct evaluation (and put the result in
     ;; pln-inferred-atoms state)
-    (State pln-inferred-atoms (cog-bind implication-direct-evaluation-rule))
+    (let ((direct-eval-outputs (cog-bind implication-direct-evaluation-rule)))
+      (State pln-inferred-atoms direct-eval-outputs)
+      (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
+                       direct-eval-outputs))
 
-    ;; Log the current state
-    (cog-logger-info "[PLN-Reasoner] pln-inferred-atoms = ~a"
-                     (gdr (first (cog-incoming-set pln-inferred-atoms))))
-
-    ;; sleep a bit, cause thinking is tiring
+    ;; sleep a bit, to not overload the CPU too much
+    (cog-logger-debug "[PLN-Reasoner] Sleep for a second")
     (sleep 1)
 
     ;; Loop
