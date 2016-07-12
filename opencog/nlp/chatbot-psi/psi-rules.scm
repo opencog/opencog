@@ -36,10 +36,10 @@
         (SequentialOr
             (Not (DefinedPredicate "input-is-a-question?"))
             (DefinedPredicate "fuzzy-reply-is-declarative?"))
-        (DefinedPredicate "has-not-replied-anything-yet?")
         (SequentialOr
             (DefinedPredicate "is-fuzzy-reply-good?")
             (DefinedPredicate "no-other-fast-reply?"))
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-reply)))
     (True)
@@ -53,10 +53,10 @@
         (DefinedPredicate "is-fuzzy-reply?")
         (DefinedPredicate "input-is-a-question?")
         (Not (DefinedPredicate "fuzzy-reply-is-declarative?"))
-        (DefinedPredicate "has-not-replied-anything-yet?")
         (SequentialOr
             (DefinedPredicate "is-fuzzy-reply-good?")
             (DefinedPredicate "no-good-fast-answer?"))
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-reply)))
     (True)
@@ -82,8 +82,8 @@
     (list (SequentialAnd
         (DefinedPredicate "aiml-finished?")
         (DefinedPredicate "is-aiml-reply?")
-        (DefinedPredicate "has-not-replied-anything-yet?")
         (DefinedPredicate "input-is-about-the-robot?")
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-reply)))
     (True)
@@ -143,8 +143,8 @@
     (list (SequentialAnd
         (DefinedPredicate "duckduckgo-finished?")
         (DefinedPredicate "is-duckduckgo-answer?")
-        (DefinedPredicate "has-not-replied-anything-yet?")
         (Not (DefinedPredicate "input-is-about-the-robot?"))
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List duckduckgo-answer)))
     (True)
@@ -156,9 +156,9 @@
     (list (SequentialAnd
         (DefinedPredicate "duckduckgo-finished?")
         (DefinedPredicate "is-duckduckgo-answer?")
-        (DefinedPredicate "has-not-replied-anything-yet?")
         (DefinedPredicate "input-is-about-the-robot?")
         (DefinedPredicate "no-other-fast-reply?")
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List duckduckgo-answer)))
     (True)
@@ -183,8 +183,8 @@
     (list (SequentialAnd
         (DefinedPredicate "wolframalpha-finished?")
         (DefinedPredicate "is-wolframalpha-answer?")
-        (DefinedPredicate "has-not-replied-anything-yet?")
         (Not (DefinedPredicate "input-is-about-the-robot?"))
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List wolframalpha-answer)))
     (True)
@@ -196,9 +196,9 @@
     (list (SequentialAnd
         (DefinedPredicate "wolframalpha-finished?")
         (DefinedPredicate "is-wolframalpha-answer?")
-        (DefinedPredicate "has-not-replied-anything-yet?")
         (DefinedPredicate "input-is-about-the-robot?")
         (DefinedPredicate "no-other-fast-reply?")
+        (DefinedPredicate "has-not-replied-anything-yet?")
     ))
     (True (ExecutionOutput (GroundedSchema "scm: reply") (List wolframalpha-answer)))
     (True)
