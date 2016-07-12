@@ -250,9 +250,11 @@
     )
 
     (let ((rules (choose-rules)))
-        (if (null? rules)
-            '()
-            (list (list-ref rules (random (length rules) a-random-state)))
+        (cond
+            ((null? rules) '())
+            ((equal? (tv-mean (cog-tv (car rules))) 0.0) '())
+            (else
+                (list (list-ref rules (random (length rules) a-random-state))))
         )
     )
 )
