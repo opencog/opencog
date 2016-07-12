@@ -377,7 +377,7 @@ class EvaControl():
 	def behavior_control_callback(self, data):
 		self.control_mode = data.data
 
-	def interactive_learning_cb(self, data):
+	def openpsi_control_cb(self, data):
 		"""
 		This function is used for interactively modifying the weight of openpsi
 		rules.
@@ -477,7 +477,7 @@ class EvaControl():
 		# chatbot-psi
 		from dynamic_reconfigure.msg import Config
 		rospy.Subscriber("/opencog_control/parameter_updates", Config,
-			self.interactive_learning_cb)
+			self.openpsi_control_cb)
 
 		# ----------------
 		# Boolean flag, turn the behavior tree on and off (set it running,
