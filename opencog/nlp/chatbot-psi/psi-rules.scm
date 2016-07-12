@@ -28,7 +28,7 @@
         (True)
         (stv .9 .9)
         sociality
-        "fuzzy-matcher"
+        "fuzzy_matcher"
     )
 )
 
@@ -233,7 +233,7 @@
         (True)
         (stv .9 .9)
         sociality
-        "random-sentence-pkd"
+        "random_sentence_pkd"
     )
 )
 
@@ -252,7 +252,7 @@
         (True)
         (stv .9 .9)
         sociality
-        "random-sentence-blogs"
+        "random_sentence_blogs"
     )
 )
 
@@ -278,6 +278,6 @@
         (True)
         (stv .9 .9)
         sociality
-        "chatbot-eva"
+        "chatbot_eva"
     )
 )
