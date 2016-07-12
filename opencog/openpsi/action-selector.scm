@@ -141,15 +141,14 @@
   - The psi-rule that has the action, for which the action weight is being
   calcualated.
 "
-    ()
     ; NOTE: This check is required as ecan isn't being used continuesely.
     ; Remove `most-weighted-atoms` version once ecan is integrated.
     (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
         ; Wcagi = Scga * Sc * 1 (assuming every rule is important)
-        (* (tv-mean rule) ;Scga
+        (* (tv-mean (cog-tv rule)) ;Scga
            (tv-mean (psi-context-weight rule))) ; Sc
         ; Wcagi = Scga * Sc * STIcga
-        (* (tv-mean rule) ;Scga
+        (* (tv-mean (cog-tv rule)) ;Scga
            (tv-mean (psi-context-weight rule)) ; Sc
            (assoc-ref (cog-av->alist (cog-av rule)) 'sti)) ; STIcga
     )
