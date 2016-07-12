@@ -1,5 +1,6 @@
 ADD_GUILE_MODULE (openpsi.scm
     action-selector.scm
+    control.scm
     demand.scm
     rule.scm
     main.scm

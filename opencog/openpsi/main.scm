@@ -6,7 +6,7 @@
 
 (load "action-selector.scm")
 (load "demand.scm")
-(load "modulator.scm")
+(load "control.scm")
 (load "rule.scm")
 (load "utilities.scm")
 
@@ -83,7 +83,10 @@
             (map cog-evaluate! goals)
         ))
 
+    ; Run the controler that updates the weight.
+    (psi-controller-update-weights)
 
+    ; Do action-selection & orchesteration.
     (map
         (lambda (d)
             (let ((updater (psi-get-updater d)))
