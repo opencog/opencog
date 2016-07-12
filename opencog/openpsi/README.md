@@ -191,7 +191,8 @@ Coming soon :smile:
     Wcagi = weight of an action in a single psi-rule 'i' (An action 'a' could be
             part of multiple psi-rules achieving multiple goals, so if an
             action is likely to achieve multiple goals then it should have a
-            higher weight). It is implemented in `psi-action-weight`
+            higher weight). It is implemented in `psi-action-weight`.
+            (Present value = Scga * Sc * confidence(cga) * confidence(context))
     Na = Number of rules that have action `a` (Present value =1 )
     Scga = Strength of psi-rule
     Sc = Strength of context that is partially implemented in
