@@ -15,18 +15,21 @@
 ;-------------------------------------------------------------------------------
 ; Define the psi-rules
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "fuzzy-not-started?")
-        (DefinedPredicate "is-input-utterance?")
-        (SequentialOr
-            (Not (DefinedPredicate "input-type-is-imperative?"))
-            (DefinedPredicate "don't-know-how-to-do-it"))
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: call-fuzzy") (List)))
-    (True)
-    (stv .9 .9)
-    sociality
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "fuzzy-not-started?")
+            (DefinedPredicate "is-input-utterance?")
+            (SequentialOr
+                (Not (DefinedPredicate "input-type-is-imperative?"))
+                (DefinedPredicate "don't-know-how-to-do-it"))
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: call-fuzzy") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "fuzzy-matcher"
+    )
 )
 
 (psi-rule
@@ -64,18 +67,21 @@
     sociality
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "aiml-not-started?")
-        (DefinedPredicate "is-input-utterance?")
-        (SequentialOr
-            (Not (DefinedPredicate "input-type-is-imperative?"))
-            (DefinedPredicate "don't-know-how-to-do-it"))
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: call-aiml") (List)))
-    (True)
-    (stv .9 .9)
-    sociality
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "aiml-not-started?")
+            (DefinedPredicate "is-input-utterance?")
+            (SequentialOr
+                (Not (DefinedPredicate "input-type-is-imperative?"))
+                (DefinedPredicate "don't-know-how-to-do-it"))
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: call-aiml") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "aiml"
+    )
 )
 
 (psi-rule
@@ -127,16 +133,19 @@
     aiml-reply-rule
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "duckduckgo-not-started?")
-        (DefinedPredicate "is-input-utterance?")
-        (DefinedPredicate "input-is-a-question?")
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: ask-duckduckgo") (List)))
-    (True)
-    (stv .9 .9)
-    sociality
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "duckduckgo-not-started?")
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "input-is-a-question?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: ask-duckduckgo") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "duckduckgo"
+    )
 )
 
 (psi-rule
@@ -166,17 +175,20 @@
     sociality
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "is-wolframalpha-ready?")
-        (DefinedPredicate "wolframalpha-not-started?")
-        (DefinedPredicate "is-input-utterance?")
-        (DefinedPredicate "input-type-is-interrogative?")
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: ask-wolframalpha") (List)))
-    (True)
-    (stv .9 .9)
-    sociality
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "is-wolframalpha-ready?")
+            (DefinedPredicate "wolframalpha-not-started?")
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "input-type-is-interrogative?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: ask-wolframalpha") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "wolframalpha"
+    )
 )
 
 (psi-rule
@@ -206,36 +218,42 @@
     sociality
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "is-random-sentence-generator-ready?")
-        (DefinedPredicate "random-sentence-generator-not-started?")
-        (DefinedPredicate "is-input-utterance?")
-        (DefinedPredicate "has-pkd-related-words?")
-        (SequentialOr
-            (Not (DefinedPredicate "input-type-is-imperative?"))
-            (DefinedPredicate "don't-know-how-to-do-it"))
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "pkd"))))
-    (True)
-    (stv .9 .9)
-    sociality
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "is-random-sentence-generator-ready?")
+            (DefinedPredicate "random-sentence-generator-not-started?")
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "has-pkd-related-words?")
+            (SequentialOr
+                (Not (DefinedPredicate "input-type-is-imperative?"))
+                (DefinedPredicate "don't-know-how-to-do-it"))
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "pkd"))))
+        (True)
+        (stv .9 .9)
+        sociality
+        "random-sentence-pkd"
+    )
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "is-random-sentence-generator-ready?")
-        (DefinedPredicate "random-sentence-generator-not-started?")
-        (DefinedPredicate "is-input-utterance?")
-        (DefinedPredicate "has-blog-related-words?")
-        (SequentialOr
-            (Not (DefinedPredicate "input-type-is-imperative?"))
-            (DefinedPredicate "don't-know-how-to-do-it"))
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "blogs"))))
-    (True)
-    (stv .9 .9)
-    sociality
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "is-random-sentence-generator-ready?")
+            (DefinedPredicate "random-sentence-generator-not-started?")
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "has-blog-related-words?")
+            (SequentialOr
+                (Not (DefinedPredicate "input-type-is-imperative?"))
+                (DefinedPredicate "don't-know-how-to-do-it"))
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "blogs"))))
+        (True)
+        (stv .9 .9)
+        sociality
+        "random-sentence-blogs"
+    )
 )
 
 (psi-rule
@@ -249,14 +267,17 @@
     sociality
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (Not (DefinedPredicate "called-chatbot-eva?"))
-        (DefinedPredicate "is-input-utterance?")
-        (DefinedPredicate "input-type-is-imperative?")
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: call-chatbot-eva") (List)))
-    (True)
-    (stv .9 .9)
-    sociality
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (Not (DefinedPredicate "called-chatbot-eva?"))
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "input-type-is-imperative?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: call-chatbot-eva") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "chatbot-eva"
+    )
 )
