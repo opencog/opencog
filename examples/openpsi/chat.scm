@@ -191,7 +191,7 @@
             (list (Evaluation (GroundedPredicate "scm:do-fuzzy-match")
                 (List in_utt)))
             (ExecutionOutput (GroundedSchema "scm:say") (List OUT-UTT))
-            (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize")
+            (Evaluation (GroundedPredicate "scm:psi-demand-value-increase")
                 (List DEMAND (Number AMT)))
             W
             DEMAND
@@ -221,8 +221,9 @@
         )
         (ExecutionOutput (GroundedSchema "scm:say")
             (List (nlp-parse "I don't understand.")))
-        (Evaluation (GroundedPredicate "scm:psi-demand-value-maximize")
-            (List sociality (Number "100")))
+        (Evaluation (GroundedPredicate "scm:psi-demand-value-decrease")
+        ; (Evaluation (GroundedPredicate "scm:psi-demand-value-increase")
+            (List sociality (Number 100)))
         (stv 1 1)
         sociality
     )
