@@ -1,5 +1,6 @@
 ; Copyright (C) 2016 OpenCog Foundation
-; This is a simple example of how an OpenPsi driven dialogue system may look like
+; This is a simple example of how an OpenPsi driven dialogue system
+; might look like
 
 (use-modules (opencog)
              (opencog nlp)
@@ -10,7 +11,8 @@
              (opencog openpsi))
 
 (load-r2l-rulebase)
-(set! relex-server-host "172.17.0.2")
+(use-relex-server "172.17.0.2")
+(use-relex-server "localhost")
 
 ;-------------------------------------------------------------------------------
 ; Steps to run:

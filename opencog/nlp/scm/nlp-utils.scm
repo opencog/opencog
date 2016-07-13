@@ -882,21 +882,33 @@
 )
 
 ; ---------------------------------------------------------------------
+(define-public (use-relex-server HOSTNAME)
+"
+  Declare HOSTNAME to be the RelEx parse server to be used.
+  Any sentences to be parsed will be sent to this server.
+
+  HOSTNAME can be either a TCPIPv4 hostname or IP address, for example,
+  \"foo.bar.org\" or \"localhost\" or \"127.0.0.1\".
+
+  The IP address is returned.  If the HOSTNAME is invalid, the
+  currently-set server is not changed.
+"
+	(define hosty (gethost HOSTNAME))
+	(set! relex-server-host
+		(inet-ntop (hostent:addrtype hosty)
+			(car (hostent:addr-list hosty))))
+
+	relex-server-host
+)
+
 (define-public (set-relex-server-host)
 "
-  Sets the relex-server-host address. This is only to be used in a docker setup.
+  Sets the relex-server address. To be used only in a docker setup.
 "
-    (catch
-        #t
-        (lambda ()
-            (let ((host (gethost "relex")))
-                (set! relex-server-host (inet-ntop (hostent:addrtype host)
-                    (car (hostent:addr-list host))))
-                relex-server-host
-            )
-        )
-        (lambda (key . rest) relex-server-host)
-    )
+	(catch
+		#t
+		(lambda () (use-relex-server "relex"))
+		(lambda (key . rest) relex-server-host))
 )
 
 ; =============================================================
