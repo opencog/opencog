@@ -30,8 +30,8 @@
 (load "interaction-rules.scm")
 
 (define logging #t)
-(define verbose #t)
-(define slo-mo #t)
+(define verbose #f)
+(define slo-mo #f)
 (define single-step #f)
 
 ; --------------------------------------------------------------
@@ -110,7 +110,7 @@
 			evals-with-change-pred)
 
 	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
-	(format #t "monitored entities: ~a\n" psi-monitored-entities)
+	(if verbose (format #t "monitored entities: ~a\n" psi-monitored-entities))
 
 	; Event Detection
 	(set! psi-monitored-events (psi-get-monitored-events))
@@ -183,8 +183,9 @@
                     (append changed-params (list param)))
                 (set! previous-val (hash-ref prev-value-table param))
                 (set! current-val (psi-get-number-value param))
-                (format #t "previous: ~a  current: ~a\n" previous-val
-                    current-val)
+                (if verbose
+                    (format #t "previous: ~a  current: ~a\n" previous-val
+                        current-val))
                 ;Todo: If previous-val was #f (iow not set), assume previous
                 ;      value to be 0? Doing that for now, but not sure if this is
                 ;      best.
@@ -377,6 +378,7 @@
 			detected-events)
 
 	(psi-pause)
+	; This didn't seem to work well
 	(if single-step
 		(psi-updater-halt))
 	(stv 1 1)
