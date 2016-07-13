@@ -23,6 +23,7 @@
 ;; (chat "Robert is happy")
 ;; (chat "What do you know about happy?") ;; Answer: funny people are happy
 
+(use-modules (opencog))
 (use-modules (opencog logger))
 (use-modules (opencog query))
 (use-modules (srfi srfi-1))
