@@ -11,8 +11,8 @@
              (opencog openpsi))
 
 (load-r2l-rulebase)
-(use-relex-server "172.17.0.2")
-(use-relex-server "localhost")
+(use-relex-server "172.17.0.2" 4444)
+(use-relex-server "localhost" 4444)
 
 ;-------------------------------------------------------------------------------
 ; Steps to run:
