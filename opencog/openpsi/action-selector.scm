@@ -243,10 +243,10 @@
         ; Remove `most-weighted-atoms` version once ecan is integrated.
         ; FIXME; Replace by
         ; (psi-most-weighted-rules (psi-get-satisfiable-rules demand))
-        (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
+        ;(if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
             (most-weighted-atoms (psi-get-satisfiable-rules demand))
-            (most-important-weighted-atoms (psi-get-all-satisfiable-rules))
-        )
+            ;(most-important-weighted-atoms (psi-get-all-satisfiable-rules))
+        ;)
     )
 
     (let ((rules (choose-rules)))
