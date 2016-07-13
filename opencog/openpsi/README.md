@@ -230,8 +230,8 @@ generalized and ported over here.
 
 ## OpenPsi examples
 * The examples [here](../../examples/openpsi) are currently broken.
-* The AIML interpreter [here](../nlpe/aiml) uses Opensi and currently
+* The AIML interpreter [here](../nlp/aiml) uses Opensi and currently
   works.
 * The ROS behavior scripts
   [here](http://github.com/opencog/ros-behavior-scripting) use OpenPsi
-  and are currently wrking.
+  and are currently working.

@@ -34,6 +34,8 @@
 (load "pln-reasoner.scm")
 
 ; Set relex-server-host
+; (use-relex-server "localhost" 4444)
+; (use-relex-server "relex" 4444)
 (set-relex-server-host)
 
 ;-------------------------------------------------------------------------------
