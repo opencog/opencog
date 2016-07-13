@@ -36,7 +36,7 @@
 
 ; --------------------------------------------------------------
 ; Config Parameters
-; Todo: Add these to a config file
+; Todo: Move these to a config file
 
 ; Multiplier that can be tweaked to increase or decrease the sensitivity of
 ; interactactions between openpsi entities. Default is 1.
@@ -46,6 +46,11 @@
 ; targets.
 (define psi-max-strength-multiplier 5)
 
+; Number of steps after a new event has occurred to fire off the expression
+; callback. This is needed to allow the effects of interaction rules to
+; propagate through the system after an event has occurred.
+(define psi-expression-loop-delay 4)
+
 ; --------------------------------------------------------------
 
 ; Todo: implement these tables in the atomspace
@@ -53,14 +58,27 @@
 (define prev-most-recent-ts-table (make-hash-table 40))
 
 ; --------------------------------------------------------------
+;
+; Call back function for client to convert psi params to physiogical and
+; emotional expression.
+(define psi-expression-callback)
 
 (define psi-event-detected-pred (Predicate "psi-event-detected"))
 (define most-recent-occurrence-pred (Predicate "psi-most-recent-occurrence"))
+(define psi-event-at-loop-num-node (Concept "psi-event-at-loop-num"))
 
 
 ; List of entities that are antecedants in the interaction rules
 (define psi-monitored-entities '())
 (define psi-monitored-events '())
+
+; This is a callback function supplied by the client that gets called when
+; OpenPsi believes a change of emotion expression based on psi values would be
+; good to do (e.g., after a new event is detected and psi params have been
+; updated)
+; Todo: Change this to DSN atomese
+(define (psi-set-expression-callback! callback)
+	(set! psi-expression-callback callback))
 
 (define (psi-updater-init)
 "
@@ -104,7 +122,10 @@
 				;								(list event)))
 			  )
 			  psi-monitored-events)
-	;(set! psi-monitored-events (delete-duplicates psi-monitored-events))
+
+	; Set event detected loop count to 0
+	(psi-set-value! psi-event-at-loop-num-node 0)
+
 
 	(if logging
 		(let ((output-port (open-file "psilog.txt" "a")))
@@ -304,6 +325,35 @@
 	(let ((rules (psi-get-interaction-rules)))
 		(map psi-evaluate-interaction-rule rules)
 	)
+
+	; Update psi-emotion-states
+	; Todo: Not sure if this should be in OpenPsi or somewhere else
+	; Keeping it simple for now
+	; For happy perhaps pos-valence * arousal or weighted average?
+	(psi-set-value! psi-happy (* (psi-get-number-value pos-valence)
+								(psi-get-number-value arousal)))
+
+	; Have OpenPsi trigger emotion expression updates after events are detected
+	; that impact modulator and sec variables
+	; Trigger an expression update after n loop steps have occurred following an
+	; event occurrence.
+	(let ((event-at-loop-num
+				(psi-get-number-value psi-event-at-loop-num-node)))
+		;(format #t "\nevent-at-loop-num: ~a\n" event-at-loop-num)
+		(if (= event-at-loop-num 0)
+			; If a new event has been detected, set the loop count for it.
+			; Todo: probably want to account for "overlapping" events here
+			(if (> (length detected-events) 0)
+				(psi-set-value! psi-event-at-loop-num-node psi-updater-loop-count))
+
+			; else, event at loop count is already set, so check if it's time
+			; to fire off the expression callback
+            (if (= (+ event-at-loop-num psi-expression-loop-delay)
+                   psi-updater-loop-count)
+                (begin
+					(if (not (unspecified? psi-expression-callback))
+						(apply psi-expression-callback '()))
+					(psi-set-value! psi-event-at-loop-num-node 0)))))
 
 	; Update prev-value-table entries for the changed (monitored) params
 	(for-each (lambda (param)
@@ -640,6 +690,34 @@
     (cog-set-tv! updater-continue-pred (stv 0 1))
 )
 
+; --------------------------------------------------------------
+; Psi Emotion Representations
+; Todo: move to emotions.scm file? Should this be outside of OpenPsi?
+
+(define psi-emotion-node (Concept (string-append psi-prefix-str "emotion")))
+
+(define (psi-create-emotion emotion)
+	(define emotion-concept (Concept (string-append psi-prefix-str emotion)))
+	(Inheritance emotion-concept psi-emotion-node)
+	; initialize value ?
+	(psi-set-value! emotion-concept 0)
+	;(format #t "new emotion: ~a\n" emotion-concept)
+	emotion-concept)
+
+(define-public (psi-get-emotion)
+"
+  Returns a list of all psi emotions.
+"
+    (filter
+        (lambda (x) (not (equal? x psi-emotion-node)))
+        (cog-chase-link 'InheritanceLink 'ConceptNode psi-emotion-node))
+)
+
+; Create emotions
+(define psi-happy (psi-create-emotion "happy"))
+(define psi-sad (psi-create-emotion "sad"))
+(define psi-excited (psi-create-emotion "excited"))
+(define psi-tired (psi-create-emotion "tired"))
 
 
 ; --------------------------------------------------------------

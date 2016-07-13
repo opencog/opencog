@@ -1,4 +1,3 @@
-; Todo: Move this to a event.scm file
 ; --------------------------------------------------------------
 ; Event Detection
 (define psi-event-node (Concept (string-append psi-prefix-str "event")))
