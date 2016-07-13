@@ -14,25 +14,197 @@
 ;; have time to diggest them.
 ;;
 ;; guile -l main.scm
-;; (chat "small cats are cute") ;; exemplar to help sureal to generate answer
-;; (chat "Ben is crazy")
-;; (chat "Ben is happy")
-;; (chat "Eddie is funny")
-;; (chat "Eddie is happy")
-;; (chat "Robert is funny")
-;; (chat "Robert is happy")
-;; (chat "What do you know about happy?") ;; Answer: funny people are happy
+;;
+;; ;; positive sentence, also helps sureal to generate answer
+;; (mock-HEAD-chat "p-1" "Eddie" "small animals are cute")
+;;
+;; ;; positive sentences
+;; (mock-HEAD-chat "p-2" "Ruiting" "birds are lovely")
+;; (mock-HEAD-chat "p-3" "Ben" "dogs are awesome")
+;; (mock-HEAD-chat "p-3" "Ben" "the multiverse is beautiful")
+;;
+;; ;; negative sentences
+;; (mock-HEAD-chat "p-3" "Ben" "I hate to relax, it makes me nervous")
+;;
+;; ;; Statement about Ben
+;; (mock-HEAD-chat "p-1" "Eddie" "Ben is crazy")
+;;
+;; ;; Question about happiness. Answer should be: crazy people are happy
+;; (mock-HEAD-chat "p-1" "Eddie" "What do you know about happy?")
 
 (use-modules (opencog logger))
 (use-modules (opencog query))
 (use-modules (srfi srfi-1))
 
+;; (cog-logger-set-level! "debug")
+
 ;; Load PLN rule implication direct evaluation
 (load-from-path "opencog/pln/rules/implication-direct-evaluation-rule.scm")
 
 ;;;;;;;;;;;;;;;
+;; HEAD mock ;;
+;;;;;;;;;;;;;;;
+
+;; Code to mock the HEAD. Given a person id and its name, creates the
+;; call chat and create the following
+;;
+;; (Evaluation
+;;    (Predicate "name")
+;;    (List
+;;       (Concept person-id)
+;;       (Concept name)))
+;; (Evaluation
+;;    (Predicate "say")
+;;    (List
+;;       (Concept person-id)
+;;       (Sentence <sentence-id>)))
+(define (mock-HEAD-chat person-id name message)
+  (chat message)
+  (sleep 1)                             ; you never know
+
+  ;; Create name structure
+  (Evaluation
+     (Predicate "name")
+     (List
+        (Concept person-id)
+        (Word name)))
+
+  ;; Create say structure
+  (let* ((sentence (cog-chase-link 'ListLink 'SentenceNode (Node message))))
+    (Evaluation
+       (Predicate "say")
+       (List
+          (Concept person-id)
+          sentence))))
+
+;;;;;;;;;;;;;;;
 ;; L2S rules ;;
 ;;;;;;;;;;;;;;;
+
+;; Rule to turn something like
+;;
+;; (Evaluation
+;;    (Predicate "name")
+;;    (List
+;;       (Concept "Person_215")
+;;       (Word "Ben")))
+;; (Evaluation
+;;    (Predicate "say")
+;;    (List
+;;       (Concept "Person_215")
+;;       (Sentence <sentence-1>)))
+;; (InheritanceLink
+;;    (Sentence <sentence-1>)
+;;    (Concept <sentiment-1>))
+;; ...
+;; (Evaluation
+;;    (Predicate "say")
+;;    (List
+;;       (Concept "Person_215")
+;;       (Sentence <sentence-n>)))
+;; (InheritanceLink
+;;    (Sentence <sentence-n>)
+;;    (Concept <sentiment-n>))
+;;
+;; into
+;;
+;; (Inheritance (stv s c)
+;;    (Concept "Ben")
+;;    (Concept "happy"))
+;;
+;; where s in the number of positive sentences divided by the number of
+;; sentences, and c is the number of sentences divided by 800.
+
+(define sentiment-sentence-to-person-l2s-vardecl
+   (VariableList
+      (TypedVariable
+         (Variable "$person")
+         (Type "ConceptNode"))
+      (TypedVariable
+         (Variable "$name")
+         (Type "WordNode"))
+      (TypedVariable
+         (Variable "$sentence")
+         (Type "SentenceNode"))
+      (TypedVariable
+         (Variable "$sentiment")
+         (Type "ConceptNode"))))
+
+(define sentiment-sentence-to-person-l2s-pattern
+   (And
+      (Evaluation
+         (Predicate "name")
+         (List
+            (Variable "$person")
+            (Variable "$name")))
+      (Evaluation
+         (Predicate "say")
+         (List
+            (Variable "$person")
+            (Variable "$sentence")))
+      (Inheritance
+         (Variable "$sentence")
+         (Variable "$sentiment"))))
+
+(define sentiment-sentence-to-person-l2s-rewrite
+   (ExecutionOutput
+      (GroundedSchema "scm: sentiment-sentence-to-person-l2s-formula")
+      (List
+         (Variable "$person")
+         (Variable "$name"))))
+
+(define sentiment-sentence-to-person-l2s-rule
+   (Bind
+      sentiment-sentence-to-person-l2s-vardecl
+      sentiment-sentence-to-person-l2s-pattern
+      sentiment-sentence-to-person-l2s-rewrite))
+
+;; Return the number of sentences from person P tagged with sentiment S
+;;
+;; More specifically count the number of matches
+;;
+;; (Evaluation
+;;    (Predicate "say")
+;;    (List
+;;       P
+;;       (Sentence <sentence-1>)))
+;; (InheritanceLink
+;;    (Sentence <sentence-1>)
+;;    S))
+;; ...
+;; (Evaluation
+;;    (Predicate "say")
+;;    (List
+;;       P
+;;       (Sentence <sentence-n>)))
+;; (InheritanceLink
+;;    (Sentence <sentence-n>)
+;;    S)
+(define (count-sentiment-sentences P S)
+  (let* (
+         (V (Variable "$sentence"))
+         (vardecl (TypedVariable V (Type "SentenceNode")))
+         (say-pattern (Evaluation (Predicate "say") (List P V)))
+         (query-pattern (And say-pattern (InheritanceLink V S)))
+         (query (Get vardecl query-pattern))
+         (results (cog-satisfying-set query)))
+    (length (cog-outgoing-set results))))
+
+(define (sentiment-sentence-to-person-l2s-formula Person Name)
+  (let* (
+         (K 800) ; parameter to convert from count to confidence
+         ;; Count positive and negative sentences
+         (pos-count (count-sentiment-sentences Person (Concept "Positive")))
+         (neg-count (count-sentiment-sentences Person (Concept "Negative")))
+         (total-count (+ pos-count neg-count))
+         ;; Calculate strength and confidence
+         (s (exact->inexact (/ pos-count total-count)))
+         (c (exact->inexact (/ total-count K))))
+    ;; (cog-logger-debug "[PLN-Reasoner] pos-count = ~a" pos-count)
+    ;; (cog-logger-debug "[PLN-Reasoner] pos-count = ~a" neg-count)
+    (Evaluation (stv s c)
+       (Predicate "happy")
+       (Concept (cog-name Name)))))
 
 ;; Rule to turn something like
 ;;
@@ -41,18 +213,14 @@
 ;;    (ConceptNode "Ben" (stv 0.029411765 0.0012484394))
 ;; )
 ;; (ImplicationLink
-;;    (PredicateNode "happy@1d08ff8b-4149-4362-97ef-9103a307a879")
-;;    (PredicateNode "happy" (stv 0.25 0.0012484394))
+;;    (PredicateNode "crazy@1d08ff8b-4149-4362-97ef-9103a307a879")
+;;    (PredicateNode "crazy" (stv 0.25 0.0012484394))
 ;; )
 ;; (EvaluationLink
-;;    (PredicateNode "happy@1d08ff8b-4149-4362-97ef-9103a307a879")
+;;    (PredicateNode "crazy@1d08ff8b-4149-4362-97ef-9103a307a879")
 ;;    (ListLink
 ;;       (ConceptNode "Ben@b0f3845c-9cfb-4b39-99a6-131004f6203d")
 ;;    )
-;; )
-;; (InheritanceLink
-;;    (InterpretationNode "sentence@bf0cc09b-b2c3-4373-9573-6e8bb60a6b5f_parse_0_interpretation_$X")
-;;    (DefinedLinguisticConceptNode "DeclarativeSpeechAct")
 ;; )
 ;; (EvaluationLink
 ;;    (DefinedLinguisticPredicateNode "definite")
@@ -61,19 +229,11 @@
 ;;    )
 ;; )
 ;;
-;; plus possibly (TBD)
-;;
-;; (InheritanceLink
-;;    (SpecificEntityNode "Ben@b0f3845c-9cfb-4b39-99a6-131004f6203d")
-;;    (ConceptNode "Ben" (stv 0.029411765 0.0012484394))
-;; )
-;;
 ;; into
 ;;
 ;; (EvaluationLink (stv 1 0.1)
-;;    (Predicate "happy")
-;;    (ListLink
-;;       (ConceptNode "Ben")))
+;;    (Predicate "crazy")
+;;    (ConceptNode "Ben"))
 ;;
 ;; The 0.1 is largely arbitrary and convey the fact that we only have
 ;; limited evidences.
@@ -123,9 +283,6 @@
       (TypedVariable
          (Variable "$element")
          (Type "ConceptNode"))
-      ;; (TypedVariable
-      ;;    (Variable "$specific-entity-instance")
-      ;;    (Type "SpecificEntityNode"))
       (TypedVariable
          (Variable "$predicate-instance")
          (Type "PredicateNode"))
@@ -149,9 +306,6 @@
          (DefinedLinguisticPredicateNode "definite")
          (ListLink
            (Variable "$element-instance")))))
-      ;; (InheritanceLink
-      ;;    (Variable "$specific-entity-instance")
-      ;;    (Variable "$element"))))
 
 (define unary-predicate-speech-act-l2s-rewrite
    (Evaluation (stv 1 0.1)
@@ -171,8 +325,13 @@
 (define (pln-run)
   (define (pln-loop)
     ;; Apply l2s rules
-    (let ((l2s-outputs (cog-bind unary-predicate-speech-act-l2s-rule)))
-      (cog-logger-debug "[PLN-Reasoner] l2s-outputs = ~a" l2s-outputs))
+    (let (
+          (sentiment-sentence-to-person-l2s-results
+           (cog-bind sentiment-sentence-to-person-l2s-rule))
+          (unary-predicate-speech-act-l2s-results
+           (cog-bind unary-predicate-speech-act-l2s-rule)))
+      (cog-logger-debug "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a" sentiment-sentence-to-person-l2s-results)
+      (cog-logger-debug "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a" unary-predicate-speech-act-l2s-results))
 
     ;; Apply Implication direct evaluation (and put the result in
     ;; pln-inferred-atoms state)
