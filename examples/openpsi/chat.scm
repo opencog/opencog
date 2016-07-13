@@ -149,8 +149,8 @@
 )
 
 (define (say utterance)
-    (display (list (map word-inst-get-word-str
-        (cdr (car (sent-get-words-in-order utterance))))))
+    (display (string-join (map word-inst-get-word-str
+        (cdr (car (sent-get-words-in-order utterance)))) " "))
     (newline)
     (State input-utterance no-input-utterance)
 )
