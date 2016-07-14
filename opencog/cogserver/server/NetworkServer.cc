@@ -35,7 +35,7 @@
 using namespace opencog;
 
 NetworkServer::NetworkServer()
-    : _started(false), _running(false), _thread(0)
+    : _started(false), _running(false), _listener(NULL), _thread(0)
 {
     logger().debug("[NetworkServer] constructor");
 }
@@ -44,7 +44,7 @@ NetworkServer::~NetworkServer()
 {
     logger().debug("[NetworkServer] enter destructor");
 
-    for (SocketPort* sp : _listeners) delete sp;
+    delete _listener;
     logger().debug("[NetworkServer] all threads joined, exit destructor");
 }
 
@@ -105,14 +105,4 @@ void NetworkServer::run()
     }
     logger().debug("[NetworkServer] end of run");
     _started = false;
-}
-
-namespace opencog {
-struct equal_to_port : public std::binary_function<const SocketPort*, const unsigned short &, bool>
-{
-    bool operator()(const SocketPort* sock, const unsigned short &port) {
-        SocketPort* s = const_cast<SocketPort*>(sock);
-        return ((s->getPort()) == port);
-    }
-};
 }
