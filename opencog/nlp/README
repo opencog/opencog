@@ -138,6 +138,12 @@ The scm directory contains miscellaneous scheme scripts of general
 utility for NLP work. This includes scripts for pulling out link-grammar
 disjuncts from parse data.
 
+scm2pgsql
+---------
+This directory contains a couple of classes and programs to help dealing with
+HUGE Atomese (.scm) files. The issue with such files is that compiling them
+either in guile or using "guild compile" requires a LOT of RAM.
+
 sureal
 ------
 Surface realization -- the lowest level portion of natural language
