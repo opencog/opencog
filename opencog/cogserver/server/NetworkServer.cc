@@ -87,7 +87,7 @@ void NetworkServer::stop()
 {
     logger().debug("[NetworkServer] stop");
     _running = false;
-    io_service.stop();
+    _io_service.stop();
     if (_thread != 0)
         pthread_join(_thread, NULL);
 } 
@@ -97,7 +97,7 @@ void NetworkServer::run()
     logger().debug("[NetworkServer] run");
     while (_running) {
         try {
-            io_service.run();
+            _io_service.run();
         } catch (boost::system::system_error& e) {
             logger().error("Error in boost::asio io_service::run() => %s", e.what());
         }
@@ -105,4 +105,16 @@ void NetworkServer::run()
     }
     logger().debug("[NetworkServer] end of run");
     _started = false;
+}
+
+
+void NetworkServer::addListener(const unsigned int port)
+{
+    if (_listener)
+    {
+        printf("Only one port is allowed\n");
+        exit(1);
+    }
+    _listener = new SocketListener<ConsoleSocket>(_io_service, port);
+    printf("Listening on port %d\n", port);
 }

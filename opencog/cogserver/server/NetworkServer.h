@@ -29,6 +29,7 @@
 #include <queue>
 
 #include <pthread.h>
+#include <boost/asio.hpp>
 
 #include <opencog/cogserver/server/SocketListener.h>
 #include <opencog/cogserver/server/ConsoleSocket.h>
@@ -64,8 +65,8 @@ protected:
 
     bool _started;
     bool _running;
-    boost::asio::io_service io_service;
-    SocketPort* _listener;
+    boost::asio::io_service _io_service;
+    SocketListener<ConsoleSocket>* _listener;
     pthread_t _thread;
 
 public:
@@ -99,17 +100,7 @@ public:
      * '_Socket' and binds it to port 'port'. Returns 'true' if
      * successful and 'false' otherwise.
      */
-    bool addListener(const unsigned int port)
-    {
-        if (_listener)
-        {
-            printf("Only one port is allowed\n");
-            exit(1);
-        }
-        _listener = new SocketListener<ConsoleSocket>(io_service, port);
-        printf("Listening on port %d\n", port);
-        return true;
-    }
+    void addListener(const unsigned int port);
 }; // class
 
 /** @}*/
