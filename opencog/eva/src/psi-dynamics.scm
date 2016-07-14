@@ -11,7 +11,7 @@
 (define valence-activation-level .4)
 
 (define verbose #t)
-(define no-blender #t)
+(define no-blender #f)
 
 ; Temporary call needed to load dynamics code while it's in dev phase
 (load-openpsi-in-development)
@@ -63,7 +63,6 @@
          (ConceptNode "negative"))))
 
 ;(format #t "do_random_postive_expression: ~a\n" (do_random_positive_expression))
-
 
 ; Temp error catching for when blender not running
 (define (do-catch function . params)
