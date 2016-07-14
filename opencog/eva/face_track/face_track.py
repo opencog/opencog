@@ -29,6 +29,7 @@ from pi_face_tracker.msg import FaceEvent, Faces
 from blender_api_msgs.msg import Target
 
 from face_atomic import FaceAtomic
+from geometry_msgs.msg import PoseStamped #for sound
 
 logger = logging.getLogger('hr.eva_behavior.face_track')
 
@@ -231,7 +232,7 @@ class FaceTrack:
 	def glance_at_cb(self, msg):
 		self.glance_at_face(msg.data, 0.5)
 
-	def snd1_cb(self.msg):
+	def snd1_cb(self,msg):
 		self.save_snd1(msg.position.x,msg.position.y,msg.position.z)
 
 	# ---------------------------------------------------------------
