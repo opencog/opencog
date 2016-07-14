@@ -40,8 +40,30 @@
 ; CREATE MODULATORS
 
 (define arousal (psi-create-modulator "arousal" .5))
-(define pos-valence (psi-create-modulator "valence" .5))
-(define neg-valence (psi-create-modulator "valence" .5))
+(define pos-valence (psi-create-modulator "positive valence" .5))
+(define neg-valence (psi-create-modulator "negative valence" .5))
 (define resolution-level (psi-create-modulator "resolution-level" .5))
 (define selection-threshold (psi-create-modulator "selection-threshold" .5))
 (define securing-threshold (psi-create-modulator "securing-threshold" .5))
+
+
+; -------------------------------------------------------------
+; Getters
+
+(define-public (psi-get-arousal)
+	(psi-get-number-value arousal))
+
+(define-public (psi-get-pos-valence)
+	(psi-get-number-value pos-valence))
+
+(define-public (psi-get-neg-valence)
+    (psi-get-number-value neg-valence))
+
+(define-public (psi-get-resolution-level)
+	(psi-get-number-value resolution-level))
+
+(define-public (psi-get-selection-threshold)
+	(psi-get-number-value selection-threshold))
+
+(define-public (psi-get-securing-threshold)
+	(psi-get-number-value securing-threshold))
