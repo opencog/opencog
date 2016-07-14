@@ -188,6 +188,55 @@ def call_sentiment_parse(text_node, sent_node):
 )
 
 ; -----------------------------------------------------------------------
+; Control variable used to switch stimulation of WordNodes and
+; WordInstanceNodes on parsing. This shouldn't be public.
+(define nlp-stimulate-parses #f)
+
+; The sti value that WordNodes and WordInstanceNodes are stimulated with.
+(define nlp-stimulation-value 0)
+
+; -----------------------------------------------------------------------
+(define-public (nlp-start-stimulation STI)
+"
+  Switchs on the stimulation of WordNodes and WordInstanceNodes during parse
+  by STI amount.
+"
+    (set! nlp-stimulation-value STI)
+    (set! nlp-stimulate-parses #t)
+)
+
+; -----------------------------------------------------------------------
+(define-public (nlp-stimuating?)
+"
+  Returns #t if nlp-stimuation of parse is taking place and #f if not.
+"
+    nlp-stimulate-parses
+)
+
+; -----------------------------------------------------------------------
+(define-public (nlp-stop-stimulation)
+"
+  Switchs off the stimulation of WordNodes and WordInstanceNodes during parse.
+"
+    (set! nlp-stimulate-parses #f)
+)
+
+; -----------------------------------------------------------------------
+(define (nlp-stimulate SENT STI)
+"
+  Stimulate the WordNodes and WordInstanceNodes associated with the SentenceNode
+  SENT by STI amount.
+"
+    (define (set-sti x) (cog-set-sti! x STI))
+    (let* ((word-inst-list
+                (append-map parse-get-words (sentence-get-parses SENT)))
+           (word-list (append-map word-inst-get-word word-inst-list)))
+        (map set-sti word-inst-list)
+        (map set-sti word-list)
+    )
+)
+
+; -----------------------------------------------------------------------
 (define-public (nlp-parse plain-text)
 "
   nlp-parse PLAIN-TEXT -- Wrap most of the NLP pipeline in one function.
@@ -212,6 +261,10 @@ def call_sentiment_parse(text_node, sent_node):
 
 		; Perform the R2L processing.
 		(r2l-parse (car sent-list))
+
+        ; Stimulate WordNodes and WordInstanceNodes
+        (if nlp-stimulate-parses
+            (nlp-stimulate (car sent-list) nlp-stimulation-value))
 
     ; Testing the Sentiment_eval function
     (cog-logger-info "nlp-parse: testing Sentiment_eval")
