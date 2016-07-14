@@ -37,6 +37,10 @@ class FaceAtomic:
 		#face = "(NumberNode \"" + str(faceid) + "\" (av 5 0 0))\n"
 		#netcat(self.hostname, self.port, face + "\n")
 
+	def save_snd1(self,x,y,z):
+		snd="(map-ato \"sounds\" (NumberNode \"1\") "+str(x)+" "+str(y)+" "+str(z)+")\n"
+		netcat(self.hostname, self.port, snd + "\n")
+
 	# Add a newly visible face to the atomspace.
 	def add_face_to_atomspace(self, faceid):
 		face = self.define_face(faceid)

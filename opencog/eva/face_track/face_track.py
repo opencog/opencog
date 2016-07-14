@@ -127,6 +127,8 @@ class FaceTrack:
 		rospy.Subscriber(self.TOPIC_GLANCE_FACE, Int32, self.glance_at_cb)
 		rospy.Subscriber(self.TOPIC_LOOKAT_FACE, Int32, self.look_at_cb)
 		rospy.Subscriber(self.TOPIC_GAZEAT_FACE, Int32, self.gaze_at_cb)
+		rospy.Subscriber("/manyears/source_pose",PoseStamped, \
+			self.snd1_cb)
 
 		# Published blender_api topics
 		self.TOPIC_FACE_TARGET = "/blender_api/set_face_target"
@@ -229,10 +231,20 @@ class FaceTrack:
 	def glance_at_cb(self, msg):
 		self.glance_at_face(msg.data, 0.5)
 
+	def snd1_cb(self.msg):
+		self.save_snd1(msg.position.x,msg.position.y,msg.position.z)
+
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
 	#
 	# Start tracking a face
+	def save_snd1(self,x,y,z):
+		#correct by translation and rotation for camera space
+		xc=x
+		yc=y
+		zc=z
+		self.atomo.save_snd1(xc,yc,zc)
+
 	def add_face(self, faceid):
 		if faceid in self.visible_faces:
 			return

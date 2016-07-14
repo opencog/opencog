@@ -70,10 +70,10 @@
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
 (define (angle_face_snd face-id snd-id)
-	(angle (get-face (NumberNode face-id-node)) (get-snd-loc (NumberNode snd-id-node)))
+	(angle_bw (get-face (NumberNode face-id)) (get-snd-loc (NumberNode snd-id)))
 )
 (define (angle_face_snd1 face-id)
-	(angle (get-face (NumberNode face-id-node)) (get-snd-1))
+	(angle_bw (get-face (NumberNode face-id)) (get-snd-1))
 )
 ;;get all face-ids and only one sound id 1.0, compare them
 
@@ -90,4 +90,24 @@
 			)
 		)
 		(stv 1 1)
+)
+
+(define (show-visible-faces)
+        (define visible-face (PredicateNode "visible face"))
+        (map (lambda (x) (car (cog-outgoing-set x)))
+        (cog-chase-link 'EvaluationLink 'ListLink visible-face)))
+
+;;get string of face-id's seperated by space - call python split() function
+;;in scheme itself list of number nodes
+(define (get-visible-faces)
+  (cog-filter 'NumberNode (show-visible-faces))
+	;;(string-concatenate (map (lambda (x)(string-append (cog-name x) " ")) (cog-filter 'NumberNode (show-visible-faces)) ))
+)
+;;below returns face id of face nearest to sound vector atleast 10 degrees, or 0 face id
+(define (snd1-nearest-face)
+	(let* ((lst (get-visible-faces))(falist (map (lambda (x)(list (string->number x) (angle_face_snd1 x))) lst)))
+		(if (< (length falist) 1) 0 (let* ((alist (map (lambda (x)(cdr x))falist))(amin (abs (min alist))))
+			(if (< (/ (* 3.142 10.0) 180.0) amin) (car (car(filter (lambda (x)(< amin (+ (abs (car x)) 0.0001)))alist))) 0))
+		)
+	)
 )
