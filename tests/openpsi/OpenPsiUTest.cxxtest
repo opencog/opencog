@@ -53,7 +53,9 @@ public:
     {
         // Clean Up
         delete _as;
+        _as = nullptr;
         delete _scm;
+        _scm = nullptr;
 
         // Erase the log file if no assertions failed
         if(!CxxTest::TestTracker::tracker().suiteFailed())
@@ -71,12 +73,21 @@ public:
         CHKERR
         _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR  "\")");
         CHKERR
-        _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR
-                   "/opencog/scm\")");
-        CHKERR
 
         // Load require modules to be tested and populate the atomspace
-        _scm->eval("(use-modules (opencog) (opencog openpsi))");
+        _scm->eval("(use-modules (opencog))");
+        CHKERR
+        // NOTE: Using  module (opencog openpsi) after running
+        // ```
+        // _scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR
+        //            "/opencog/scm\")");
+        // ```
+        // will get test_psi_action__predicate to fail. Since psi-action? is
+        // core part of the other functions, that are tested, most tests fail
+        // as a result. That is why main.scm is loaded here instead of running
+        // (use-modules (opencog openpsi)).
+        _scm->eval("(load \"" PROJECT_SOURCE_DIR
+                   "/opencog/openpsi/main.scm\")");
         CHKERR
         _scm->eval("(load \"" OPENPSI_TEST_PATH "/rules.scm\")");
         CHKERR
@@ -84,7 +95,9 @@ public:
 
     void tearDown()
     {
+        delete _as;
         _as = nullptr;
+        delete _scm;
         _scm = nullptr;
     }
 
@@ -110,7 +123,7 @@ public:
     }
 
     // Check the scheme function `psi-select-rules`
-    void psi_select_rules()
+    void test_psi_select_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -150,7 +163,7 @@ public:
     }
 
     // Check the scheme function `psi-related-goals`
-    void psi_related_goals()
+    void test_psi_related_goals()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -172,7 +185,7 @@ public:
     }
 
     // Check the scheme function `psi-get-satisfiable-rules`
-    void psi_get_satisfiable_rules()
+    void test_psi_get_satisfiable_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -221,7 +234,7 @@ public:
 
 
     // Check the scheme function `psi-step`
-    void psi_step()
+    void test_psi_step()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -296,6 +309,9 @@ public:
     }
 
     // Check the scheme function `psi-get-dual-rules`
+    // NOTE: The function `psi-get-dual-rules` has been removed but something
+    // similar will be added. This test is not removed the test may come in
+    // handy.
     void psi_get_dual_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -329,7 +345,7 @@ public:
 
     // Check the scheme function `psi-action?`
     // NOTE: The name of the test function uses `__predicate` in place of `?`
-    void psi_action__predicate()
+    void test_psi_action__predicate()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -344,6 +360,42 @@ public:
         auto result_2 = _scm->eval("(psi-action? action-1) ");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `#t`", "#t\n" , result_2);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+
+    }
+
+    // Check the scheme function `psi-demand-skip` and
+    // `psi-get-all-valid-demands`.
+    void test_psi_demand_skip_and_psi_get_all_valid_demands()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Test 1:
+        // Set the cache and then try to label a demand to be skipped. There
+        // shouldn't be any difference.
+        auto result_1_1 = _scm->eval("(length (psi-get-all-valid-demands))");
+        CHKERR
+        _scm->eval("(psi-demand-skip demand-1)");
+        CHKERR
+        auto result_1_2 = _scm->eval("(length (psi-get-all-valid-demands))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected no difference", result_1_2, result_1_1);
+
+        // Test 2:
+        // Reset the cache then the valid set of demands should be updated to
+        // include one less demand.
+        _scm->eval("(psi-reset-valid-demand-cache)");
+        CHKERR
+        auto result_2_1 = _scm->eval("(length \
+            (psi-get-all-valid-demands))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `3`", "3\n", result_2_1);
+        auto result_2_2 = _scm->eval("(member demand-1 \
+            (psi-get-all-valid-demands))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `#f`", "#f\n", result_2_2);
+        logger().info("END TEST: %s", __FUNCTION__);
 
     }
 };

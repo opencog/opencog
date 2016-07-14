@@ -70,7 +70,7 @@
 ;--------------------------------------------------------------------
 
 ; Stove-pipe hack to perform an action associated with an imperative.
-(define (imperative-process imp)
+(define-public (imperative-process imp)
 "
   Process imperative IMP, which should be a SentenceNode.
 "
@@ -119,7 +119,10 @@
 
 		; XXX replace this by AIML or something.
 		(if (eq? '() action-list)
-			(display "I don't know how to do that.\n"))
+			(begin
+				(State (Anchor "Chatbot: ChatbotEva")
+					(Concept "Chatbot: NoActionTaken"))
+				(display "I don't know how to do that.\n")))
 	)
 
 	; Reset the current-imperative state, as otherwise, any subsequent

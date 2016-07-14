@@ -1,0 +1,61 @@
+# To run sentiment_parse:
+
+1) Install nltk:
+   sudo pip install -U nltk
+
+2) Install pyyaml:
+   sudo pip install pyyaml
+
+3) Install nltk data, beware it takes a while:
+   sudo python -m nltk.downloader -d /usr/local/share/nltk_data all
+
+4) Be sure to have compiled and install opencog because python files
+   and configuration file installed on the system are required
+
+5) Enter the chatbot (or chatbot-psi see
+opencog/nlp/chatbot-psi/README.md)
+
+6) run nlp-parse, follow the InheritanceLink to check the sentiment of
+the sentence:
+
+guile> (cog-incoming-set (car (nlp-parse "This is not a disgusting test.")))
+((InheritanceLink
+   (SentenceNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb")
+   (ConceptNode "Positive")
+)
+ (ParseLink (stv 1 1)
+   (ParseNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb_parse_0" (stv 1 0.61070001))
+   (SentenceNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb")
+)
+ (SentenceSequenceLink (stv 1 1)
+   (SentenceNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb")
+   (NumberNode "612.000000")
+)
+ (ListLink
+   (Node "This is not a disgusting test.")
+   (SentenceNode "sentence@d6584821-3683-47a5-b77f-8971e20db8cb")
+)
+)
+
+# To load the sentiment word list from sentiWordNet file:
+
+(load "loadSentiList.scm")
+
+or
+
+(load "../chatbot/loadSentiList.scm")
+
+if you are running sentiment tagging from the chatbot-psi location.
+
+You may check if it's correctly loaded:
+
+guile> (cog-incoming-set (cog-node 'ConceptNode "comparative"))
+((InheritanceLink (stv 0.75 0.89999998)
+   (ConceptNode "comparative")
+   (ConceptNode "Negative")
+)
+ (InheritanceLink (stv 0.625 0.89999998)
+   (ConceptNode "comparative")
+   (ConceptNode "Positive")
+)
+)

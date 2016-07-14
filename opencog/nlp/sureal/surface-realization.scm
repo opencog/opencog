@@ -14,6 +14,8 @@
              (opencog nlp lg-dict)
              (opencog nlp relex2logic))
 
+(use-modules (opencog logger))
+
 ; ---------------------------------------------------------------------
 ; Creates a single list  made of the elements of lists within it with
 ; the exception of empty-lists.
@@ -32,7 +34,39 @@
 )
 
 ; ---------------------------------------------------------------------
+(define-public (reset-sureal-cache dummy)
+    (reset-cache dummy)
+)
+
 (define-public (sureal a-set-link)
+"
+  sureal SETLINK -- main entry point for sureface realization
+
+  Expect SETLINK to be a SetLink -- since it is assumed that the
+  output of the micro-planner is unordered.
+"
+    ;; (cog-logger-info "sureal a-set-link = ~a" a-set-link)
+    (if (equal? 'SetLink (cog-type a-set-link))
+        (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
+            (if (null? interpretations)
+                (delete-duplicates (create-sentence a-set-link #f))
+                (get-sentence interpretations)
+            )
+        )
+        (display "Please input a SetLink only")
+    )
+)
+
+;; This "cached" version of sureal is used by Microplanner.
+;;
+;; The idea is to cache the results from the calls to SuRealPCMB, 
+;; which is the PaternMatcher callback object (see PatternMatcher documentation).
+;;
+;; This cached version makes sense for Microplanner because it performs a lot of 
+;; sureal queries with very similar inputs.
+;;
+;; The cache lifetime is a single call of a Microplanner query
+(define-public (cached-sureal a-set-link)
 "
   sureal SETLINK -- main entry point for sureface realization
 
@@ -42,7 +76,7 @@
     (if (equal? 'SetLink (cog-type a-set-link))
         (let ((interpretations (cog-chase-link 'ReferenceLink 'InterpretationNode a-set-link)))
             (if (null? interpretations)
-                (delete-duplicates (create-sentence a-set-link))
+                (create-sentence a-set-link #t)
                 (get-sentence interpretations)
             )
         )
@@ -52,7 +86,8 @@
 
 ; Returns a possible set of SuReals from an input SetLink
 ; * 'a-set-link' : A SetLink which is to be SuRealed
-(define (create-sentence a-set-link)
+; * 'use-cache' : A flag to specify that the cached version of SuReal should be used
+(define (create-sentence a-set-link use-cache)
     (define (construct-sntc mappings)
         ; get the words, skipping ###LEFT-WALL###
         (define words-seq (cdr (parse-get-words-in-order (interp-get-parse (caar mappings)))))
@@ -102,6 +137,9 @@
         (map construct-sntc-mapping (circular-list words-seq) (circular-list (cdar mappings)) (map cdr (cdr mappings)))
     )
 
+    ;; (cog-logger-info "create-sentence a-set-link = ~a, use-cache = ~a"
+    ;;                  a-set-link use-cache)
+
     ; add LG dictionary on each word if not already in the atomspace
     (par-map
         lg-get-dict-entry
@@ -132,9 +170,14 @@
         )
     )
 
-    (let* ((results (sureal-match a-set-link))
-           (interps (delete-duplicates (map car results))))
-        (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
+    ;; (cog-logger-info "Still there?")
+
+    (if use-cache
+        (cached-sureal-match a-set-link)
+        (let* ((results (sureal-match a-set-link))
+            (interps (delete-duplicates (map car results))))
+            (append-map construct-sntc (map (lambda (i) (filter (lambda (r) (equal? (car r) i)) results)) interps))
+        )
     )
 )
 
@@ -153,6 +196,10 @@
 ; This just takes the one of the many InterpretationNode.
 (define (get-sentence interpret-node-lst)
     (define parse (list-ref (cog-chase-link 'InterpretationLink 'ParseNode (list-ref interpret-node-lst 0)) 0))
+
+    ;; (cog-logger-info "create-sentence interpret-node-lst = ~a"
+    ;;                  interpret-node-lst)
+
     (string-join (cdr (map word-inst-get-word-str (parse-get-words-in-order parse))))
 )
 

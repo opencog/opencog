@@ -1183,3 +1183,21 @@ irc_reply_data
 
 todo: AO to get source of the command.
 todo: random expresion context is really part of self-model.
+
+================================================
+
+(psi-rule-nocheck
+	;; context
+	(list (AndLink
+		(Predicate "input thing")
+		(List args)
+	))
+	;; action
+	(List
+		(ExecutionOutput
+			(DefinedSchema "thing to do")
+			(List args)))
+	(Concept "demo goal")
+	(stv 1 0.8181)
+	(psi-demand "want a demo" 0.97)
+)

@@ -201,6 +201,8 @@
             (NumberNode 2)))
 )
 
+; (rule-4) & (rule-5) are for usage with DualLink version of action-selection
+; i.e. psi-satisfiable? should use DualLink
 (define (rule-4)
     (psi-rule (groundable-content-4) action-4 goal-4 (stv 1 1) demand-4))
 

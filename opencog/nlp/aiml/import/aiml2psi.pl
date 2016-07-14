@@ -2,19 +2,14 @@
 #
 # Convert AIML files to OpenCog Atomese.
 #
-# The perl script converts AIML XML into OpenCog Atomese.  See the
+# The perl script converts AIML XML into OpenCog OpenPsi rules.  See the
 # bottom for an example of the output format, and a breif discussion
-# about the design choices taken.  This script "works", in that it
-# generates valid Atomese that can actually be imported into the
-# atomspace.
+# about the design choices taken.
 #
-# As of April 2016, the idea of importing AIML is mothballed: so,
-# although the conversion and import works, the surrounding code
-# to attach the AIML rules into the rest of the OpenCog chat
-# infrastructure has not been created, and probably wont be.  The
-# reason for this is that there is no compelling AIML content that
-# is in any way useful to the current plans for OpenCog.  I think
-# we've moved past AIML in terms of what we can accomplish.
+# The use of AIML is strongly discouraged, and is not a formal OpenCog
+# project goal. However, there are various requests from various forces
+# asking for AIML-within-OpenCog capabilities, and this script is meant
+# to fulfill these requests.
 #
 # Copyright (c) Kino Coursey 2015
 # Copyright (c) Linas Vepstas 2016
@@ -22,17 +17,20 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.4.2";
+my $ver = "0.5.1";
 my $debug;
 my $help;
 my $version;
-my $overwrite;
+my $overwrite = 0;
 my $aimlDir ='.';
 my $intermediateFile = 'aiml-flat.txt';
 my $outDir = '';
 my $outFile = 'aiml-rules.scm';
+my $weightFile = '';
 
 my $base_priority = 1.0;
+
+my $cmdline = $0 . " " . join(" ", @ARGV);
 
 GetOptions(
     'dir=s' => \$aimlDir,
@@ -44,7 +42,8 @@ GetOptions(
     'out=s' => \$outDir,
     'outfile=s' => \$outFile,
     'priority=f' => \$base_priority,
-) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>] [--outfile <filename>]\n";
+    'weights=s' => \$weightFile,
+) or die "Usage: $0 [--debug] [--help] [--version] [--last-only] [--dir <AIML source directory>] [--intermediate <IMMFile>] [--out <output directory>] [--outfile <filename>] [--weights <weight-filename>]\n";
 
 if ($help)
 {
@@ -59,6 +58,7 @@ if ($help)
 	print "   --intermediate <file>   Intermediate file, default: '$intermediateFile'\n";
 	print "   --out <directory>       Dir for many small output files.\n";
 	print "   --outfile <filename>    Output one large file, default: '$outFile'\n";
+	print "   --weights <filename>    Input file, holding rule entropies\n";
 	print "   --priority <float>      Rule priority, default: '$base_priority'\n";
 	die "\n";
 }
@@ -69,11 +69,86 @@ if ($version)
 	die "\n";
 }
 
+# ------------------------------------------------------------------
+# If there is a weights file, ingest it, and stuff it into an associate
+# array.
+#
+# The file format is assumed to be three columns: an AIML filename,
+# an AIML rule, and a log-liklihood column.
+#
+# Example:
+#
+# interjection.aiml	INTERJECTION <THAT> * <TOPIC> *	-1.97356795842974
+# stack.aiml	PUSH * <THAT> * <TOPIC> *	-2.08673772127076
+# mp0.aiml	INSULT <THAT> * <TOPIC> *	-3.96370879747086
+# default.aiml	IT * <THAT> * <TOPIC> *	-4.12722757190359
+# that.aiml	THAT * <THAT> * <TOPIC> *	-4.25883896393828
+# atomic.aiml	WHY <THAT> * <TOPIC> *	-4.28192456627784
+#
+
+my %weights = ();
+sub make_wkey
+{
+	my $key = $_[0] . " <THAT> " . $_[1] . " <TOPIC> " . $_[2];
+}
+
+sub trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
+
+sub ingest_weights
+{
+	if ('' eq $weightFile)
+	{
+		print "No weightfile specified.\n";
+		return;
+	}
+	open WFILE, $weightFile
+		or die "Can't open the weight file `$weightFile`\n";
+	print "Reading weights from `$weightFile`\n";
+
+	while (<WFILE>)
+	{
+		chop;
+		# split into filename, text, log-liklihood
+		if (/^([\w\.]+?\.aiml)\s+(.*)\s+-([\d\.]+)\s*$/)
+		{
+			my $filename = $1;
+			my $loglikeli = $3;
+			my $mlpat = $2;
+
+			# Extract the AIML pattern, the THAT and the TOPIC
+			if ($mlpat =~ /^(.*)\s*<THAT>\s*(.*?)\s*<TOPIC>\s*(.*)\s*$/)
+			{
+				my $pat = $1;
+				my $that = $2;
+				my $topic = $3;
+				# $pat = lc $pat;
+				$pat = trim $pat;
+
+				# my $key = $pat . " <THAT> " . $that . " <TOPIC> " . $topic;
+				my $key = make_wkey($pat, $that, $topic);
+				$weights{$key} = $loglikeli;
+			}
+			else
+			{
+				print "Unexpected format in the weights file: >>>$_<<<\n";
+			}
+		}
+		else
+		{
+			print "Unexpected text in the weights file: >>>$_<<<\n";
+		}
+	}
+	close WFILE;
+}
+
+&ingest_weights();
+
+# ------------------------------------------------------------------
 # Conversion is done in a two-pass process.  The first pass flattens
 # the AIML format into a simplified linear format.  A second pass
 # converts this flattened format into Atomese.
 
-print "\n AIML Source directory = $aimlDir\n";
+print "\nAIML Source directory = $aimlDir\n";
 opendir(DIR, "$aimlDir");
 my @aimlFiles = grep(/\.aiml$/, readdir(DIR));
 closedir(DIR);
@@ -298,8 +373,20 @@ foreach my $af (sort @aimlFiles)
 				# interpretation of XML that AIML assumes.
 				if ($template[0] !~ /</) #
 				{
+					# Remove HTML-encoded XML. This is mostly going to be
+					# XML meant to control some text-to-speech system.
+					my $raw = $template[0];
+					while ($raw =~ /(.*)&lt;(.+?)&gt;(.*)/)
+					{
+						$raw = $1 . $3;
+					}
+
+					# Space-pad embedded long dashes.
+					$raw =~ s/---/ --- /g;
+					$raw =~ s/--/ -- /g;
+
 					print FOUT "TEMPATOMIC,0\n";
-					my @TEMPWRDS = split(/ /,$template[0]); #
+					my @TEMPWRDS = split(/ /, $raw); #
 					foreach my $w (@TEMPWRDS)
 					{
 						if (length($w)>0)
@@ -336,6 +423,34 @@ my $pat_word_count = 0;
 my $wordnode = "(Word ";
 # my $wordnode = "(Concept ";
 
+sub trim_punct
+{
+	my $wrd = $_[0];
+
+	# Remove whitespace.
+	$wrd =~ s/\s*//;
+
+	# More HTML markup is sneaking by...
+	$wrd =~ s/&gt;//g;
+
+	# Remove leading and trailing punctuation, keep star and underscore.
+	# Keep embedded dots (for decimal numbers!?, acronyms, abbreviations)
+	# Keep exclamation and question mark, maybe the text-to-speech can do
+	# something with that?
+	# $wrd =~ s/^[.'(){}\-:;!?,"\\\/<>]+//;
+	$wrd =~ s/^[.'(){}\-:;,"\\\/<>]+//;
+	$wrd =~ s/[.'(){}\-:;,"\\\/<>]+$//;
+
+	# Remove back-slashed quotes in the middle of words.
+	$wrd =~ s/\.\\"//g;
+	$wrd =~ s/\\"//g;
+
+	# Convert any remaining backslashes into forward-slashes.
+	$wrd =~ s/\\/\//g;
+
+	$wrd;
+}
+
 # split_string -- split a string of words into distinct nodes.
 sub split_string
 {
@@ -345,7 +460,9 @@ sub split_string
 	my $tout = "";
 	for my $wrd (@words)
 	{
-		$wrd =~ s/\s*//;
+		# Remove punction.
+		$wrd = &trim_punct($wrd);
+
 		if ($wrd eq "") {}
 		elsif ($wrd eq "*" or $wrd eq "_")
 		{
@@ -552,7 +669,7 @@ sub process_named_tag
 
 	$text =~ /(.*?)<$tag name='(.*?)'\/>(.*)/;
 
-	$tout .= &split_string($tag, $indent, $1);
+	$tout .= &split_string($indent, $1);
 	$tout .= &print_named_tag($tag, $indent, $2);
 	$tout .= &process_aiml_tags($indent, $3);
 	$tout;
@@ -855,6 +972,7 @@ sub psi_tail
 {
 	my $num_stars = $_[0];
 	my $word_count = $_[1];
+	my $wadjust = $_[2];
 	my $chat_goal = "   (Concept \"AIML chat subsystem goal\")\n";
 	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
 
@@ -873,11 +991,48 @@ sub psi_tail
 	#`
 	my $weight = 1.0 / (0.5 + $word_count);
 	$weight = $base_priority / (1.0 + $num_stars * $num_stars + $weight);
+
+	# Adjust the weight by the desired adjustment.
+	$weight *= $wadjust;
+
 	# my $goal_truth = "   (stv 1 0.8)\n";
 	my $goal_truth = "   (stv 1 $weight)\n";
 	my $rule_tail = $chat_goal . $goal_truth . $demand;
 
 	$rule_tail;
+}
+
+# If there is a weight file, and the pattern an be found in
+# the weight file, then get that weight.
+sub get_weight
+{
+	my $cattext = $_[0];
+	if ($cattext =~/<pattern>(.*)<\/pattern>\s*<topic>(.*)<\/topic>\s*<that>(.*)<\/that>/)
+	{
+		my $pat = $1;
+		my $topic = $2;
+		my $that = $3;
+
+		my $key = make_wkey($pat, $that, $topic);
+		if (defined $weights{$key})
+		{
+			my $logli = $weights{$key};
+
+			# XXX FIXME -- this modulation is totally bogus,
+			# as it results in values that will always be 0.9999 pretty
+			# much no matter what.  So some other formula has to be used.
+			# 2 July 2016 - sent email asking about this.
+			# my $prob = 1.0 - exp(-$logli);
+
+			# Utter and pure hack: the largest entropies in the file are
+			# about 12 or 13. So use that as a scale max, and invert the
+			# direction.
+			my $prob = $logli / 12.0;
+			if ($prob > 1.0) { $prob = 1.0; }
+			return $prob;
+		}
+	}
+	1.0;
 }
 
 # ------------------------------------------------------------------
@@ -906,6 +1061,12 @@ else
 {
 	open (FOUT,">" . $outFile);
 }
+
+my $date = localtime();
+print FOUT ";;\n;; Generated by aiml2psi.pl version $ver on $date\n;;\n";
+print FOUT ";; AIML Source directory = $aimlDir\n;;\n";
+print FOUT ";; Command line was\n;;\n";
+print FOUT ";;      $cmdline\n;;\n";
 
 while (my $line = <FIN>)
 {
@@ -986,6 +1147,7 @@ while (my $line = <FIN>)
 					$ch =~ s/\s+$//;
 
 					my $catty = $preplate . $ch . $postplate;
+					my $wadj = &get_weight($cattext);
 
 					$rule .= ";;; random choice $i of $nc: ";
 					$rule .= $cattext . "\n";
@@ -996,13 +1158,14 @@ while (my $line = <FIN>)
 					$rule .= "   (ListLink\n";
 					$rule .= &process_category("      ", $catty);
 					$rule .= "   )\n";
-					$rule .= &psi_tail($num_stars, $pat_word_count);
+					$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
 					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
 					$i = $i + 1;
 				}
 			}
 			else
 			{
+				my $wadj = &get_weight($cattext);
 				$rule = ";;; COMPLEX CODE BRANCH\n";
 				$rule .= ";;; " . $cattext . "\n";
 				$rule .= "(psi-rule-nocheck\n";
@@ -1012,13 +1175,14 @@ while (my $line = <FIN>)
 				$rule .= "   (ListLink\n";
 				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";
-				$rule .= &psi_tail($num_stars, $pat_word_count);
+				$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
 				$rule .= ")\n";
 			}
 			$have_raw_code = 0;
 		}
 		else
 		{
+			my $wadj = &get_weight($cattext);
 			$rule = ";;; NO RAW CODE\n";
 			$rule .= ";;; $cattext\n";
 			$rule .= "(psi-rule-nocheck\n";
@@ -1026,7 +1190,7 @@ while (my $line = <FIN>)
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
 			$rule .= $psi_goal;
-			$rule .= &psi_tail($num_stars, $pat_word_count);
+			$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
 			$rule .= ") ; CATEND\n";     # close category section
 
 			$psi_goal = "";
@@ -1116,17 +1280,12 @@ while (my $line = <FIN>)
 
 	if ($cmd eq "TEMPWRD")
 	{
-		# Unescape escaped single-quotes.
-		$arg =~ s/\\'/'/g;
-
-		# Escape back-slashes
-		$arg =~ s/\\/\\\\/g;
-
-		# Escape double-quotes.
-		$arg =~ s/"/\\"/g;
-
-		# Just another word in the reply chain.
-		$psi_goal .= "      " . $wordnode . "\"$arg\")\n";
+		$arg = &trim_punct($arg);
+		if ($arg ne "")
+		{
+			# Just another word in the reply chain.
+			$psi_goal .= "      " . $wordnode . "\"$arg\")\n";
+		}
 	}
 	if ($cmd eq "TEMPATOMICEND")
 	{
