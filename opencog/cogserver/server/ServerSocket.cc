@@ -28,10 +28,10 @@
 #include <opencog/util/Logger.h>
 #include <opencog/cogserver/server/ServerSocket.h>
 
-using namespace opencog; 
+using namespace opencog;
 
 ServerSocket::ServerSocket(boost::asio::io_service& _io_service)
-    : io_service(_io_service), socket(io_service), 
+    : io_service(_io_service), socket(io_service),
       lineProtocol(true), closed(false)
 {
 }
@@ -63,7 +63,7 @@ void ServerSocket::SetCloseAndDelete()
     logger().debug("ServerSocket::SetCloseAndDelete()");
     closed = true;
     socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    // Avoid crash on socket shutdown. is socket.close() buggy??? 
+    // Avoid crash on socket shutdown. is socket.close() buggy???
     // investigate and FIXME ...
     // socket.close();
 }
@@ -90,14 +90,14 @@ typedef boost::asio::buffers_iterator<
 #define DO 0xfd   // Telnet DO
 #define TIMING_MARK 0x6 // Telnet RFC 860 timing mark
 #define TRANSMIT_BINARY 0x0 // Telnet RFC 856 8-bit-clean
-#define CHARSET 0x2A // Telnet RFC 2066 
+#define CHARSET 0x2A // Telnet RFC 2066
 
 
-// Goal: if the user types in a ctrl-C or a ctrl-D, we want to 
+// Goal: if the user types in a ctrl-C or a ctrl-D, we want to
 // react immediately to this. A ctrl-D is just the ascii char 0x4
 // while the ctrl-C is wrapped in a telnet "interpret as command"
-// IAC byte secquence.  Basically, we want to forward all IAC 
-// sequences immediately, as well as the ctrl-D. 
+// IAC byte secquence.  Basically, we want to forward all IAC
+// sequences immediately, as well as the ctrl-D.
 //
 // Currently not implemented, but could be: support for the arrow
 // keys, which generate the sequence 0x1b 0x5c A B C or D.
@@ -126,17 +126,17 @@ void ServerSocket::handle_connection(ServerSocket* ss)
     logger().debug("ServerSocket::handle_connection()");
     ss->OnConnection();
     boost::asio::streambuf b;
-    for (;;) 
+    for (;;)
     {
         try {
-            if (ss->LineProtocol()) 
+            if (ss->LineProtocol())
             {
                 //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
                 boost::asio::read_until(ss->getSocket(), b, match_eol_or_escape);
                 //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
                 std::istream is(&b);
                 std::string line;
-                std::getline(is, line); 
+                std::getline(is, line);
                 if (!line.empty() && line[line.length()-1] == '\r') {
                     line.erase(line.end()-1);
                 }
@@ -179,4 +179,3 @@ bool ServerSocket::isClosed()
 {
     return closed;
 }
-
