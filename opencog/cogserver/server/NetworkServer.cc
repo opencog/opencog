@@ -116,19 +116,3 @@ struct equal_to_port : public std::binary_function<const SocketPort*, const unsi
     }
 };
 }
-
-bool NetworkServer::removeListener(const unsigned short port)
-{
-    logger().debug("[NetworkServer] removing listener bound to port %d", port);
-    std::vector<SocketPort*>::iterator l = 
-        std::find_if(_listeners.begin(), _listeners.end(),
-                     boost::bind(equal_to_port(), _1, port));
-    if (l == _listeners.end()) {
-        logger().warn("unable to remove listener from port %d", port);
-        return false;
-    }
-    SocketPort* sp = *l;
-    _listeners.erase(l);
-    delete sp;
-    return true;
-}

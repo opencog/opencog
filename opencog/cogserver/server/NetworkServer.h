@@ -50,9 +50,9 @@ namespace opencog
  * loop to deal with requests and agents only). And it may be enabled/disabled
  * at will so that a cogserver may run in networkless mode if desired.
  * 
- * The network server supports multiple server sockets. Client applications
- * should use the 'addListener' functor and the 'removeListener' method to
- * add/remove custom server sockets. Currently, the network server doesn't
+ * The network server supports only one server socket. Client applications
+ * should use the 'addListener' functor to add custom server sockets.
+ * Currently, the network server doesn't
  * support selecting the network interface that the server socket will bind to
  * (every server sockets binds to 0.0.0.0, i.e., all interfaces). Thus,
  * server sockets are identified/selected by the port they bind to.
@@ -119,12 +119,6 @@ public:
         printf("Listening on port %d\n", port);
         return true;
     }
-
-    /** Closes the listener socket bound to port 'port'. Returns 'true'
-     * if successful and 'false' otherwise.
-     */
-    bool removeListener(const unsigned short port);
-
 }; // class
 
 /** @}*/
