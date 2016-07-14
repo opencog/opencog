@@ -31,6 +31,7 @@
 #include <pthread.h>
 
 #include <opencog/cogserver/server/SocketListener.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
 
 #include <opencog/util/Logger.h>
 
@@ -98,7 +99,6 @@ public:
      * '_Socket' and binds it to port 'port'. Returns 'true' if
      * successful and 'false' otherwise.
      */
-    template<class _Socket>
     bool addListener(const unsigned int port)
     {
         if (_listener)
@@ -106,7 +106,7 @@ public:
             printf("Only one port is allowed\n");
             exit(1);
         }
-        _listener = new SocketListener<_Socket>(io_service, port);
+        _listener = new SocketListener<ConsoleSocket>(io_service, port);
         printf("Listening on port %d\n", port);
         return true;
     }
