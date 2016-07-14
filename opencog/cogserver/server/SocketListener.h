@@ -27,7 +27,6 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <opencog/cogserver/server/SocketPort.h>
 #include <opencog/util/Logger.h>
 
 using boost::asio::ip::tcp;
@@ -42,7 +41,7 @@ namespace opencog
  * This class defines a socket listener for a given port number
  */
 template <class _Socket>
-class SocketListener : public SocketPort
+class SocketListener
 {
 private:
 
@@ -55,7 +54,6 @@ private:
 public:
 
     SocketListener(boost::asio::io_service& io_service, int port) :
-        SocketPort(port),
         _io_service(io_service),
         _acceptor(io_service, tcp::endpoint(tcp::v4(), port))
     {
