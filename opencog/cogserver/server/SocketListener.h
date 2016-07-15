@@ -27,8 +27,9 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <opencog/cogserver/server/SocketPort.h>
 #include <opencog/util/Logger.h>
+
+#include <opencog/cogserver/server/ConsoleSocket.h>
 
 using boost::asio::ip::tcp;
 
@@ -41,8 +42,7 @@ namespace opencog
 /**
  * This class defines a socket listener for a given port number
  */
-template <class _Socket>
-class SocketListener : public SocketPort
+class SocketListener
 {
 private:
 
@@ -50,12 +50,11 @@ private:
     tcp::acceptor _acceptor;
 
     // Avoid memory leaks; free the accepted sockets
-    std::vector<_Socket*> _accepted_sockets;
+    std::vector<ConsoleSocket*> _accepted_sockets;
 
 public:
 
     SocketListener(boost::asio::io_service& io_service, int port) :
-        SocketPort(port),
         _io_service(io_service),
         _acceptor(io_service, tcp::endpoint(tcp::v4(), port))
     {
@@ -64,7 +63,7 @@ public:
 
         // XXX FIXME ... this is leaking memory -- theres no dtor for
         // this socket !?  Or does tcp::acceptor magically release it?
-        _Socket* ss = new _Socket(_io_service);
+        ConsoleSocket* ss = new ConsoleSocket(_io_service);
         _acceptor.async_accept(ss->getSocket(),
              boost::bind(&SocketListener::handle_accept,
              this, ss,
@@ -83,13 +82,13 @@ public:
         // for (_Socket* so : _accepted_sockets) delete so;
     }
 
-    void handle_accept(_Socket* ss, const boost::system::error_code& error)
+    void handle_accept(ConsoleSocket* ss, const boost::system::error_code& error)
     {
         logger().debug("SocketListener::handle_accept() started");
         if (!error)
         {
             ss->start();
-            _Socket* nss = new _Socket(_io_service);
+            ConsoleSocket* nss = new ConsoleSocket(_io_service);
             _accepted_sockets.push_back(nss);
             _acceptor.async_accept(nss->getSocket(),
                   boost::bind(&SocketListener::handle_accept,

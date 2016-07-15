@@ -135,7 +135,7 @@ CogServer::~CogServer()
 }
 
 CogServer::CogServer(AtomSpace* as) :
-    cycleCount(1), running(false)
+    cycleCount(1), running(false), _networkServer(nullptr)
 {
     // We shouldn't get called with a non-NULL atomSpace static global as
     // that's indicative of a missing call to CogServer::~CogServer.
@@ -168,23 +168,16 @@ CogServer::CogServer(AtomSpace* as) :
     agentsRunning = true;
 }
 
-NetworkServer& CogServer::networkServer()
-{
-    return _networkServer;
-}
-
 void CogServer::enableNetworkServer()
 {
-    // WARN: By using boost::asio, at least one listener must be added to
-    // the NetworkServer before starting its thread. Other Listeners may
-    // be added later, though.
-    _networkServer.addListener<ConsoleSocket>(config().get_int("SERVER_PORT"));
-    _networkServer.start();
+    if (_networkServer) return;
+    _networkServer = new NetworkServer(config().get_int("SERVER_PORT"));
 }
 
 void CogServer::disableNetworkServer()
 {
-    _networkServer.stop();
+    delete _networkServer;
+    _networkServer = nullptr;
 }
 
 SystemActivityTable& CogServer::systemActivityTable()
