@@ -30,30 +30,32 @@
 
 using namespace opencog;
 
-ServerSocket::ServerSocket(boost::asio::io_service& _io_service)
-    : io_service(_io_service), socket(io_service),
-      lineProtocol(true), closed(false)
+ServerSocket::ServerSocket(boost::asio::io_service& io_service) :
+    _io_service(io_service), _socket(_io_service),
+    _lineProtocol(true), _closed(false)
 {
 }
 
-ServerSocket::~ServerSocket() {
+ServerSocket::~ServerSocket()
+{
    logger().debug("ServerSocket::~ServerSocket()");
 }
 
 boost::asio::ip::tcp::socket& ServerSocket::getSocket()
 {
-    return socket;
+    return _socket;
 }
 
 void ServerSocket::Send(const std::string& cmd)
 {
     boost::system::error_code error;
-    boost::asio::write(socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+    boost::asio::write(_socket, boost::asio::buffer(cmd),
+                       boost::asio::transfer_all(), error);
 
     // The most likely cause of an error is that the remote side has
     // closed the socket, and we just don't know it yet.  We should
     // maybe not log those errors?
-    if (error && !closed) {
+    if (error && !_closed) {
         logger().warn("ServerSocket::Send(): %s", error.message().c_str());
     }
 }
@@ -61,21 +63,21 @@ void ServerSocket::Send(const std::string& cmd)
 void ServerSocket::SetCloseAndDelete()
 {
     logger().debug("ServerSocket::SetCloseAndDelete()");
-    closed = true;
-    socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+    _closed = true;
+    _socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
     // Avoid crash on socket shutdown. is socket.close() buggy???
     // investigate and FIXME ...
-    // socket.close();
+    // _socket.close();
 }
 
 void ServerSocket::SetLineProtocol(bool val)
 {
-    lineProtocol = val;
+    _lineProtocol = val;
 }
 
 bool ServerSocket::LineProtocol()
 {
-    return lineProtocol;
+    return _lineProtocol;
 }
 
 typedef boost::asio::buffers_iterator<
@@ -172,10 +174,10 @@ void ServerSocket::handle_connection(ServerSocket* ss)
 void ServerSocket::start()
 {
     logger().debug("ServerSocket::start()");
-    connectionThread = boost::thread(boost::bind(&handle_connection, this));
+    _connectionThread = boost::thread(boost::bind(&handle_connection, this));
 }
 
 bool ServerSocket::isClosed()
 {
-    return closed;
+    return _closed;
 }
