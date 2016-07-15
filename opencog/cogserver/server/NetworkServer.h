@@ -27,8 +27,8 @@
 
 #include <string>
 #include <queue>
+#include <thread>
 
-#include <pthread.h>
 #include <boost/asio.hpp>
 
 #include <opencog/cogserver/server/SocketListener.h>
@@ -62,11 +62,10 @@ class NetworkServer
 
 protected:
 
-    bool _started;
     bool _running;
     boost::asio::io_service _io_service;
     SocketListener* _listener;
-    pthread_t _thread;
+    std::thread* _thread;
 
 public:
 

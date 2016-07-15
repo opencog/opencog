@@ -26,16 +26,12 @@
 
 #include "NetworkServer.h"
 
-#include <boost/bind.hpp>
-
 #include <opencog/util/Logger.h>
-#include <opencog/util/exceptions.h>
-#include <opencog/util/platform.h>
 
 using namespace opencog;
 
 NetworkServer::NetworkServer()
-    : _started(false), _running(false), _listener(NULL), _thread(0)
+    : _running(false), _listener(NULL), _thread(0)
 {
     logger().debug("[NetworkServer] constructor");
 }
@@ -48,16 +44,6 @@ NetworkServer::~NetworkServer()
     logger().debug("[NetworkServer] all threads joined, exit destructor");
 }
 
-extern "C" {
-static void* _opencog_run_wrapper(void* arg)
-{
-    logger().debug("[NetworkServer] run wrapper");
-    NetworkServer* ns = (NetworkServer*) arg;
-    ns->run();
-    return NULL;
-}
-}
-
 void NetworkServer::start()
 {
     if (_running) {
@@ -65,21 +51,8 @@ void NetworkServer::start()
         return;
     }
 
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setscope(&attr, PTHREAD_SCOPE_PROCESS);
-    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    _thread = new std::thread(&NetworkServer::run, this);
 
-    // create thread
-    int rc = pthread_create(&_thread, &attr, _opencog_run_wrapper, this);
-    if (rc != 0) {
-        logger().error("Unable to start network server thread: %d", rc);
-        _running = false;
-        _started = false;
-        return;
-    }
-    _started = true;
     _running = true;
 }
 
@@ -88,8 +61,12 @@ void NetworkServer::stop()
     logger().debug("[NetworkServer] stop");
     _running = false;
     _io_service.stop();
-    if (_thread != 0)
-        pthread_join(_thread, NULL);
+    if (_thread)
+    {
+        _thread->join();
+        delete _thread;
+        _thread = NULL;
+    }
 } 
 
 void NetworkServer::run()
@@ -104,7 +81,6 @@ void NetworkServer::run()
         usleep(50000); // avoids busy wait
     }
     logger().debug("[NetworkServer] end of run");
-    _started = false;
 }
 
 
