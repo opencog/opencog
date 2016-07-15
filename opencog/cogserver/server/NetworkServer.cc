@@ -30,14 +30,15 @@
 
 using namespace opencog;
 
-NetworkServer::NetworkServer(unsigned short port)
+NetworkServer::NetworkServer(unsigned short port) :
+    _port(port),
+    _acceptor(_io_service,
+        boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
 {
     logger().debug("[NetworkServer] constructor");
 
+    _service_thread = new std::thread(&NetworkServer::run, this);
     _running = true;
-    _listener = new SocketListener(_io_service, port);
-    _thread = new std::thread(&NetworkServer::run, this);
-    printf("Listening on port %d\n", port);
 }
 
 NetworkServer::~NetworkServer()
@@ -54,14 +55,30 @@ void NetworkServer::stop()
     _running = false;
     _io_service.stop();
 
-    _thread->join();
-    delete _thread;
-    delete _listener;
+    _listener_thread->join();
+    _service_thread->join();
+    // delete _service_thread;
+}
+
+void NetworkServer::listen()
+{
+    printf("Listening on port %d\n", _port);
+    while (_running)
+    {
+        // The handle_connection() callback will delete this
+        // class, when the thread exits.
+        ConsoleSocket* ss = new ConsoleSocket(_io_service);
+        _acceptor.accept(ss->getSocket());
+        new std::thread(&ConsoleSocket::handle_connection, ss);
+    }
 }
 
 void NetworkServer::run()
 {
-    while (_running) {
+    _listener_thread = new std::thread(&NetworkServer::listen, this);
+
+    while (_running)
+    {
         try {
             _io_service.run();
         } catch (boost::system::system_error& e) {

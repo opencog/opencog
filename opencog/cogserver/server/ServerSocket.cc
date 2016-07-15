@@ -23,37 +23,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/bind.hpp>
 #include <boost/array.hpp>
-#include <opencog/util/Logger.h>
+
 #include <opencog/cogserver/server/ServerSocket.h>
+#include <opencog/util/Logger.h>
 
 using namespace opencog;
 
-ServerSocket::ServerSocket(boost::asio::io_service& _io_service)
-    : io_service(_io_service), socket(io_service),
-      lineProtocol(true), closed(false)
+ServerSocket::ServerSocket(boost::asio::io_service& io_service) :
+    _socket(io_service), _lineProtocol(true), _closed(false)
 {
 }
 
-ServerSocket::~ServerSocket() {
+ServerSocket::~ServerSocket()
+{
    logger().debug("ServerSocket::~ServerSocket()");
 }
 
-tcp::socket& ServerSocket::getSocket()
+bool ServerSocket::isClosed()
 {
-    return socket;
+    return _closed;
+}
+
+boost::asio::ip::tcp::socket& ServerSocket::getSocket()
+{
+    return _socket;
 }
 
 void ServerSocket::Send(const std::string& cmd)
 {
     boost::system::error_code error;
-    boost::asio::write(socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+    boost::asio::write(_socket, boost::asio::buffer(cmd),
+                       boost::asio::transfer_all(), error);
 
     // The most likely cause of an error is that the remote side has
     // closed the socket, and we just don't know it yet.  We should
     // maybe not log those errors?
-    if (error && !closed) {
+    if (error && !_closed) {
         logger().warn("ServerSocket::Send(): %s", error.message().c_str());
     }
 }
@@ -61,21 +67,19 @@ void ServerSocket::Send(const std::string& cmd)
 void ServerSocket::SetCloseAndDelete()
 {
     logger().debug("ServerSocket::SetCloseAndDelete()");
-    closed = true;
-    socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    // Avoid crash on socket shutdown. is socket.close() buggy???
-    // investigate and FIXME ...
-    // socket.close();
+    _closed = true;
+    _socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+    _socket.close();
 }
 
 void ServerSocket::SetLineProtocol(bool val)
 {
-    lineProtocol = val;
+    _lineProtocol = val;
 }
 
 bool ServerSocket::LineProtocol()
 {
-    return lineProtocol;
+    return _lineProtocol;
 }
 
 typedef boost::asio::buffers_iterator<
@@ -131,16 +135,13 @@ void ServerSocket::handle_connection(ServerSocket* ss)
         try {
             if (ss->LineProtocol())
             {
-                //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
                 boost::asio::read_until(ss->getSocket(), b, match_eol_or_escape);
-                //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
                 std::istream is(&b);
                 std::string line;
                 std::getline(is, line);
                 if (!line.empty() && line[line.length()-1] == '\r') {
                     line.erase(line.end()-1);
                 }
-                //logger().debug("%p: ServerSocket::handle_connection(): Got new line: %s", ss, line.c_str());
                 ss->OnLine(line);
             }
             else {
@@ -167,15 +168,4 @@ void ServerSocket::handle_connection(ServerSocket* ss)
         }
     }
     delete ss;
-}
-
-void ServerSocket::start()
-{
-    logger().debug("ServerSocket::start()");
-    connectionThread = boost::thread(boost::bind(&handle_connection, this));
-}
-
-bool ServerSocket::isClosed()
-{
-    return closed;
 }
