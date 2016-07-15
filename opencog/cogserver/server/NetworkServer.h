@@ -59,19 +59,18 @@ class NetworkServer
 {
 protected:
     bool _running;
-    std::thread* _thread;
+    short _port;
     boost::asio::io_service _io_service;
     boost::asio::ip::tcp::acceptor _acceptor;
-
-    std::vector<ConsoleSocket*> _accepted_sockets;
+    std::thread* _service_thread;
+    std::thread* _listener_thread;
 
     /** Stops the server */
     void stop();
 
     /** The network server's thread main method.  */
+    void listen();
     void run();
-
-    void handle_accept(ConsoleSocket*, const boost::system::error_code&);
 
 public:
 
