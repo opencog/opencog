@@ -6,15 +6,33 @@
 ; SEC are associated with a particular stimulus or the agent state. Thus, they
 ; do not have values on their own but only in association with a stimulus.
 
-(define (psi-create-sec name)
+; Parameter specifying the initial default level for agent-state SECs
+(define agent-state-sec-init-value .5)
+
+; Agent State (iow system state)
+(define agent-state (Concept (string-append psi-prefix-str "agent-state")))
+
+(define-public (psi-create-sec name)
+"
+	Create a new SEC
+
+	name - name of the SEC
+"
     (define sec
         (Concept (string-append psi-prefix-str name)))
+    (define agent-state-var-name (string-append "agent-state-" name))
     (Inheritance
         sec
         (Concept (string-append psi-prefix-str "SEC")))
+
+    ;create the agent/system-state variable for this sec
+	(psi-create-stimulus-sec agent-state sec agent-state-sec-init-value)
+    ;(eval `(define ,(string->symbol agent-state-var-name)
+   	;    ,(psi-create-stimulus-sec agent-state sec agent-state-sec-init-value)))
+   	;(export (string->symbol agent-state-var-name))
     sec)
 
-(define (psi-create-stimulus-sec stimulus sec initial-value)
+(define-public (psi-create-stimulus-sec stimulus sec initial-value)
 "
   Create a stimulus-SEC association and assign its initial value.
   A stimulus-SEC takes the form (List stimulus SEC) and its current value is
@@ -29,9 +47,24 @@
     (psi-set-value! stimulus-sec initial-value)
     stimulus-sec)
 
+; Todo: add variable names (?) and add getters for agent-state secs
 
 ; =============================================================================
 ; CREATE SECs
+
+;(define secs (list
+;		"novelty"
+;		"goal-relevance"
+;		"pleasantness"
+;		"outcome-probability"
+;		"surprise"
+;		"agent-and-intention"
+;		"control"
+;		"power"
+;		"adjustment"
+;		"standards" ))
+
+;(for-each (lambda (sec) (psi-create-sec sec)) secs)
 
 (define novelty (psi-create-sec "novelty"))
 (define goal-relevance (psi-create-sec "goal-relevance"))
@@ -44,15 +77,7 @@
 (define adjustment (psi-create-sec "adjustment"))
 (define standards (psi-create-sec "standards"))
 
-; --------------------------------------------------------------
-
-; Agent State
-(define agent-state (Concept (string-append psi-prefix-str "agent-state")))
-
-; --------------------------------------------------------------
-
+; Temp for development, until this assignment happens in the create function
 ; Create Stimulus-SEC Associations
 (define agent-state-power
-	(psi-create-stimulus-sec agent-state power .5))
-
-
+       (psi-create-stimulus-sec agent-state power .5))
