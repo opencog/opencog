@@ -31,8 +31,6 @@
 
 #include <opencog/cogserver/server/ConsoleSocket.h>
 
-using boost::asio::ip::tcp;
-
 namespace opencog
 {
 /** \addtogroup grp_server
@@ -47,7 +45,7 @@ class SocketListener
 private:
 
     boost::asio::io_service& _io_service;
-    tcp::acceptor _acceptor;
+    boost::asio::ip::tcp::acceptor _acceptor;
 
     // Avoid memory leaks; free the accepted sockets
     std::vector<ConsoleSocket*> _accepted_sockets;
@@ -56,7 +54,7 @@ public:
 
     SocketListener(boost::asio::io_service& io_service, int port) :
         _io_service(io_service),
-        _acceptor(io_service, tcp::endpoint(tcp::v4(), port))
+        _acceptor(io_service, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
     {
         logger().debug("SocketListener::SocketListener() started");
         logger().debug("Acceptor listening.");

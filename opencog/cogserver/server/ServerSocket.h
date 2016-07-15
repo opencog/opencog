@@ -28,8 +28,6 @@
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
 
-using boost::asio::ip::tcp;
-
 namespace opencog
 {
 /** \addtogroup grp_server
@@ -48,7 +46,7 @@ class ServerSocket
 private:
 
     boost::asio::io_service& io_service;
-    tcp::socket socket;
+    boost::asio::ip::tcp::socket socket;
     boost::thread connectionThread;
     bool lineProtocol;
     bool closed;
@@ -74,7 +72,7 @@ public:
 
     /** Gets the tcp socket 
      */
-    tcp::socket& getSocket(void);
+    boost::asio::ip::tcp::socket& getSocket(void);
 
     /** Sends data to the client
      */

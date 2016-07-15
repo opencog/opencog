@@ -130,7 +130,7 @@ void ConsoleSocket::sendPrompt()
         Send(config()["PROMPT"]);
 }
 
-tcp::socket& ConsoleSocket::getSocket()
+boost::asio::ip::tcp::socket& ConsoleSocket::getSocket()
 {
     return ServerSocket::getSocket();
 }

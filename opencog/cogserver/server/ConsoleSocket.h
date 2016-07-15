@@ -146,7 +146,7 @@ public:
 
     /** Gets the tcp socket 
      */
-    tcp::socket& getSocket(void);
+    boost::asio::ip::tcp::socket& getSocket(void);
 
 }; // class
 

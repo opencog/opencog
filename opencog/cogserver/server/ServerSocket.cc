@@ -40,7 +40,7 @@ ServerSocket::~ServerSocket() {
    logger().debug("ServerSocket::~ServerSocket()");
 }
 
-tcp::socket& ServerSocket::getSocket()
+boost::asio::ip::tcp::socket& ServerSocket::getSocket()
 {
     return socket;
 }
