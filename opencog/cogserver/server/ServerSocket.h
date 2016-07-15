@@ -26,9 +26,6 @@
 #define _OPENCOG_SERVER_SOCKET_H
 
 #include <boost/asio.hpp>
-#include <boost/thread/thread.hpp>
-
-using boost::asio::ip::tcp;
 
 namespace opencog
 {
@@ -40,67 +37,62 @@ namespace opencog
  * This class defines the minimal set of methods a server socket must
  * have to handle the primary interface of the cogserver.
  *
- * Each ServerSocket supports a client that connects to the cog server. 
+ * Each ServerSocket supports a client that connects to the cog server.
  */
 class ServerSocket
 {
-
 private:
+    boost::asio::ip::tcp::socket _socket;
+    bool _lineProtocol;
+    bool _closed;
 
-    boost::asio::io_service& io_service;
-    tcp::socket socket;
-    boost::thread connectionThread;
-    bool lineProtocol;
-    bool closed;
-
-public:
-
-    ServerSocket(boost::asio::io_service& _io_service);
-    virtual ~ServerSocket();
-
-    /** Connection callback: called whenever a new connection arrives
+protected:
+    /**
+     * Connection callback: called whenever a new connection arrives
      */
     virtual void OnConnection(void) = 0;
 
-    /** OnLine callback: called when in LineProtocol mode and a new line is 
-     *  received from the client.
+    /**
+     * OnLine callback: called when in LineProtocol mode and a new
+     * line is received from the client.
      */
-    virtual void OnLine            (const std::string& line) = 0;
+    virtual void OnLine (const std::string&) = 0;
 
-    /** OnRawDta callback: called when LineProtocol is disabled and new data 
-     *  is received from the client.
+    /**
+     * OnRawData callback: called when LineProtocol is disabled and
+     * new data is received from the client.
      */
-    virtual void OnRawData         (const char * buf, size_t len) = 0;
+    virtual void OnRawData (const char*, size_t) = 0;
 
-    /** Gets the tcp socket 
+public:
+    ServerSocket(boost::asio::io_service&);
+    virtual ~ServerSocket();
+
+    static void handle_connection(ServerSocket*);
+    boost::asio::ip::tcp::socket& getSocket(void);
+
+    /**
+     * Sends data to the client
      */
-    tcp::socket& getSocket(void);
+    void Send(const std::string&);
 
-    /** Sends data to the client
-     */
-    void Send(const std::string& cmd);
-
-    /** Close this socket
+    /**
+     * Close this socket
      */
     void SetCloseAndDelete(void);
 
-    /** Set LineProtocol mode for this socket
+    /**
+     *Set LineProtocol mode for this socket
      */
     void SetLineProtocol(bool);
 
-    /** Check if this socket is in LineProtocol mode
+    /**
+     * Check if this socket is in LineProtocol mode
      */
     bool LineProtocol(void);
 
-    /** Handles socket connection. Loop for receiving data.
-     */
-    static void handle_connection(ServerSocket*);
-
-    /** Starts thread to handle socket connection
-     */
-    void start();
-
-    /** Check if this socket was closed
+    /**
+     * Check if this socket was closed
      */
     bool isClosed();
 

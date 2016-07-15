@@ -67,7 +67,6 @@
     )
 )
 
-; Make sure the robot has not replied anything yet when calling this
 (define (check-words . target-words)
     ; target-words is a list of WordNodes
     (if (null? (filter (lambda (w) (list? (member w target-words)))
@@ -77,27 +76,43 @@
     )
 )
 
-; Make sure the robot has not replied anything yet when calling this
+(define rsg-input "")
 (define (check-theme target-words)
+    (define idx '())
+    (define cnt 0)
+    (define input-wl (cog-outgoing-set (get-input-word-list)))
+
     ; target-words is a list of strings
     (filter
-        (lambda (w) (list? (member (cog-name w) target-words)))
-        (cog-outgoing-set (get-input-word-list))
+        (lambda (w)
+            (if (list? (member (cog-name w) target-words))
+                (set! idx (append idx (list cnt))))
+            (set! cnt (+ cnt 1)))
+        input-wl
+    )
+
+    (if (null? idx)
+        (stv 0 1)
+        (let ((rand-idx (list-ref idx (random (length idx)))))
+            (if (equal? rand-idx 0)
+                (set! rsg-input (string-append
+                    (cog-name (list-ref input-wl rand-idx))
+                        " " (cog-name (list-ref input-wl (+ rand-idx 1)))))
+                (set! rsg-input (string-append
+                    (cog-name (list-ref input-wl (- rand-idx 1)))
+                        " " (cog-name (list-ref input-wl rand-idx))))
+            )
+            (stv 1 1)
+        )
     )
 )
 
 (define (check-pkd-words)
-    (if (null? (check-theme pkd-relevant-words))
-        (stv 0 1)
-        (stv 1 1)
-    )
+    (check-theme pkd-relevant-words)
 )
 
 (define (check-blog-words)
-    (if (null? (check-theme blog-relevant-words))
-        (stv 0 1)
-        (stv 1 1)
-    )
+    (check-theme blog-relevant-words)
 )
 
 ;-------------------------------------------------------------------------------

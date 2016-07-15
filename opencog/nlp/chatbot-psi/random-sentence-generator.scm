@@ -56,13 +56,12 @@
 )
 
 (define (call-random-sentence-generator dict-node)
-    (if (not (or (equal? markov-bin "") (equal? markov-dict "")))
+    (if (not (or (equal? markov-bin "") (equal? markov-dict "") (null? rsg-input)))
         (begin-thread
             (State random-sentence-generator process-started)
-            (let* ((input-text (cog-name (get-input-text-node)))
-                   (dict (cog-name dict-node))
+            (let* ((dict (cog-name dict-node))
                    (cmd (string-append "ruby " markov-bin " speak -d " markov-dict
-                        "/" dict " -c 1 -p \"" input-text "\""))
+                        "/" dict " -c 1 -p \"" rsg-input "\""))
                    (port (open-input-pipe cmd))
                    (line (get-line port)))
 
