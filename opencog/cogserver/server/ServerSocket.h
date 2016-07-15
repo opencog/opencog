@@ -26,7 +26,6 @@
 #define _OPENCOG_SERVER_SOCKET_H
 
 #include <boost/asio.hpp>
-#include <boost/thread/thread.hpp>
 
 namespace opencog
 {
@@ -47,13 +46,11 @@ private:
 
     boost::asio::io_service& _io_service;
     boost::asio::ip::tcp::socket _socket;
-    boost::thread _connectionThread;
     bool _lineProtocol;
     bool _closed;
 
 protected:
     boost::asio::ip::tcp::socket& getSocket(void);
-    static void handle_connection(ServerSocket*);
 
     /**
      * Connection callback: called whenever a new connection arrives
@@ -77,6 +74,8 @@ public:
     ServerSocket(boost::asio::io_service&);
     virtual ~ServerSocket();
 
+    static void handle_connection(ServerSocket*);
+
     /**
      * Sends data to the client
      */
@@ -96,11 +95,6 @@ public:
      * Check if this socket is in LineProtocol mode
      */
     bool LineProtocol(void);
-
-    /**
-     * Starts thread to handle socket connection
-     */
-    void start();
 
     /**
      * Check if this socket was closed

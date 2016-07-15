@@ -41,6 +41,11 @@ ServerSocket::~ServerSocket()
    logger().debug("ServerSocket::~ServerSocket()");
 }
 
+bool ServerSocket::isClosed()
+{
+    return _closed;
+}
+
 boost::asio::ip::tcp::socket& ServerSocket::getSocket()
 {
     return _socket;
@@ -133,9 +138,7 @@ void ServerSocket::handle_connection(ServerSocket* ss)
         try {
             if (ss->LineProtocol())
             {
-                //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
                 boost::asio::read_until(ss->getSocket(), b, match_eol_or_escape);
-                //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
                 std::istream is(&b);
                 std::string line;
                 std::getline(is, line);
@@ -169,15 +172,4 @@ void ServerSocket::handle_connection(ServerSocket* ss)
         }
     }
     delete ss;
-}
-
-void ServerSocket::start()
-{
-    logger().debug("ServerSocket::start()");
-    _connectionThread = boost::thread(boost::bind(&handle_connection, this));
-}
-
-bool ServerSocket::isClosed()
-{
-    return _closed;
 }

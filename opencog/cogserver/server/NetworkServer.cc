@@ -65,11 +65,11 @@ void NetworkServer::listen()
     printf("Listening on port %d\n", _port);
     while (_running)
     {
-        // XXX FIXME ... this is leaking memory -- theres no dtor for
-        // this socket !?  Or does tcp::acceptor magically release it?
+        // The handle_connection() callback will delete this
+        // class, when the thread exits.
         ConsoleSocket* ss = new ConsoleSocket(_io_service);
         _acceptor.accept(ss->getSocket());
-        ss->start();
+        std::thread(&ConsoleSocket::handle_connection, ss);
     }
 }
 
