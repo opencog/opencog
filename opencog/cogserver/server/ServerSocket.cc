@@ -69,9 +69,7 @@ void ServerSocket::SetCloseAndDelete()
     logger().debug("ServerSocket::SetCloseAndDelete()");
     _closed = true;
     _socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    // Avoid crash on socket shutdown. is socket.close() buggy???
-    // investigate and FIXME ...
-    // _socket.close();
+    _socket.close();
 }
 
 void ServerSocket::SetLineProtocol(bool val)
@@ -144,7 +142,6 @@ void ServerSocket::handle_connection(ServerSocket* ss)
                 if (!line.empty() && line[line.length()-1] == '\r') {
                     line.erase(line.end()-1);
                 }
-                //logger().debug("%p: ServerSocket::handle_connection(): Got new line: %s", ss, line.c_str());
                 ss->OnLine(line);
             }
             else {
