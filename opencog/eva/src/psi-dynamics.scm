@@ -33,14 +33,14 @@
 	; both for now, which may or may not be a good thing, but probably
 	; interesting nonetheless.
 	(if (>= pos-valence valence-activation-level)
-		;(do-catch do-random-positive-expression))
-		(if no-blender
-			(if psi-verbose (display "doing random positive expression\n"))
+		;( (do-catch do-random-positive-expression))
+		(if psi-verbose (display "doing random positive expression\n"))
+		(if (not no-blender)
 			(do-random-positive-expression)))
 	(if (>= neg-valence valence-activation-level)
-		;(do-catch do-random-negative-expression))
-		(if no-blender
-			(if psi-verbose (display "doing random negative expression\n"))
+		;( (do-catch do-random-negative-expression))
+		(if psi-verbose (display "doing random negative expression\n"))
+		(if (not no-blender)
 			(do-random-negative-expression)))
 
 	;(set! verbose prev-verbose)
