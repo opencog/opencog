@@ -83,43 +83,42 @@ ConsoleSocket::~ConsoleSocket()
 void ConsoleSocket::OnConnection()
 {
     logger().debug("[ConsoleSocket] OnConnection");
-    if (!isClosed()) {
+    if (isClosed()) return;
 
 #ifdef NOT_RIGHT_NOW
-        // Crude attempt to negotiate for a utf-8 clean channel.
-        // Using RFC 2066 protocols.  Not robust.  We're just praying
-        // for non-garbled UTF-8 goodness, here.
+    // Crude attempt to negotiate for a utf-8 clean channel.
+    // Using RFC 2066 protocols.  Not robust.  We're just praying
+    // for non-garbled UTF-8 goodness, here.
 
-        // Anyway, this won't work for netcat, socat, because they'll
-        // just pass all this crap back to the user, and we don't want
-        // that.  I'm not sure how to tell if we're talking to a true
-        // RFC telnet.
-        char utf_plz[20];
-        utf_plz[0] = IAC;
-        utf_plz[1] = WILL;
-        utf_plz[2] = CHARSET;
-        utf_plz[3] = 0;
-        Send(utf_plz);
-        utf_plz[1] = DO;
-        Send(utf_plz);
+    // Anyway, this won't work for netcat, socat, because they'll
+    // just pass all this crap back to the user, and we don't want
+    // that.  I'm not sure how to tell if we're talking to a true
+    // RFC telnet.
+    char utf_plz[20];
+    utf_plz[0] = IAC;
+    utf_plz[1] = WILL;
+    utf_plz[2] = CHARSET;
+    utf_plz[3] = 0;
+    Send(utf_plz);
+    utf_plz[1] = DO;
+    Send(utf_plz);
 
-        utf_plz[0] = IAC;
-        utf_plz[1] = SB;
-        utf_plz[2] = CHARSET;
-        utf_plz[3] = '\02';
-        utf_plz[4] = 'U';
-        utf_plz[5] = 'T';
-        utf_plz[6] = 'F';
-        utf_plz[7] = '-';
-        utf_plz[8] = '8';
-        utf_plz[9] = IAC;
-        utf_plz[10] = SE;
-        utf_plz[11] = 0;
-        Send(utf_plz);
+    utf_plz[0] = IAC;
+    utf_plz[1] = SB;
+    utf_plz[2] = CHARSET;
+    utf_plz[3] = '\02';
+    utf_plz[4] = 'U';
+    utf_plz[5] = 'T';
+    utf_plz[6] = 'F';
+    utf_plz[7] = '-';
+    utf_plz[8] = '8';
+    utf_plz[9] = IAC;
+    utf_plz[10] = SE;
+    utf_plz[11] = 0;
+    Send(utf_plz);
 #endif
 
-        sendPrompt();
-    }
+    sendPrompt();
 }
 
 void ConsoleSocket::sendPrompt()
@@ -128,11 +127,6 @@ void ConsoleSocket::sendPrompt()
         Send(config()["ANSI_PROMPT"]);
     else 
         Send(config()["PROMPT"]);
-}
-
-boost::asio::ip::tcp::socket& ConsoleSocket::getSocket()
-{
-    return ServerSocket::getSocket();
 }
 
 void ConsoleSocket::OnLine(const std::string& line)

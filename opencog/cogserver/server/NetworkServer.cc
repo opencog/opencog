@@ -69,7 +69,7 @@ void NetworkServer::listen()
         // class, when the thread exits.
         ConsoleSocket* ss = new ConsoleSocket(_io_service);
         _acceptor.accept(ss->getSocket());
-        std::thread(&ConsoleSocket::handle_connection, ss);
+        new std::thread(&ConsoleSocket::handle_connection, ss);
     }
 }
 

@@ -23,16 +23,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/bind.hpp>
 #include <boost/array.hpp>
-#include <opencog/util/Logger.h>
+
 #include <opencog/cogserver/server/ServerSocket.h>
+#include <opencog/util/Logger.h>
 
 using namespace opencog;
 
 ServerSocket::ServerSocket(boost::asio::io_service& io_service) :
-    _io_service(io_service), _socket(_io_service),
-    _lineProtocol(true), _closed(false)
+    _socket(io_service), _lineProtocol(true), _closed(false)
 {
 }
 

@@ -41,17 +41,12 @@ namespace opencog
  */
 class ServerSocket
 {
-
 private:
-
-    boost::asio::io_service& _io_service;
     boost::asio::ip::tcp::socket _socket;
     bool _lineProtocol;
     bool _closed;
 
 protected:
-    boost::asio::ip::tcp::socket& getSocket(void);
-
     /**
      * Connection callback: called whenever a new connection arrives
      */
@@ -70,11 +65,11 @@ protected:
     virtual void OnRawData (const char*, size_t) = 0;
 
 public:
-
     ServerSocket(boost::asio::io_service&);
     virtual ~ServerSocket();
 
     static void handle_connection(ServerSocket*);
+    boost::asio::ip::tcp::socket& getSocket(void);
 
     /**
      * Sends data to the client
