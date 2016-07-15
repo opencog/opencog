@@ -10,7 +10,7 @@
 ; Param setting
 (define valence-activation-level .4)
 
-(define verbose #t)
+(define psi-verbose #t)
 (define no-blender #f)
 
 ; Temporary call needed to load dynamics code while it's in dev phase
@@ -24,7 +24,7 @@
 	(define neg-valence (psi-get-neg-valence))
 	;(define prev-verbose verbose)
 	;(set! verbose #t)
-	;(if verbose (display "psi-dynamics expression callback called\n"))
+	;(if psi-verbose (display "psi-dynamics expression callback called\n"))
 
 	; For now we are doing something simple - do a random positive or negative
 	; expression based on valence and arousal.
@@ -35,12 +35,12 @@
 	(if (>= pos-valence valence-activation-level)
 		;(do-catch do-random-positive-expression))
 		(if no-blender
-			(if verbose (display "doing random positive expression\n"))
-			(do_random-positive-expression)))
+			(if psi-verbose (display "doing random positive expression\n"))
+			(do-random-positive-expression)))
 	(if (>= neg-valence valence-activation-level)
 		;(do-catch do-random-negative-expression))
 		(if no-blender
-			(if verbose (display "doing random negative expression\n"))
+			(if psi-verbose (display "doing random negative expression\n"))
 			(do-random-negative-expression)))
 
 	;(set! verbose prev-verbose)
@@ -76,6 +76,24 @@
 	)
 )
 
+; ------------------------------------------------------------------
+; OpenPsi Dynamics Interaction Rules
+
+; Todo: move to own file probably
+
+; The following change-predicate types have been defined in
+; opencog/opencog/openpsi/interaction-rule.scm:
+;(define changed "changed")
+;(define increased "increased")
+;(define decreased "decreased")
+
+(define power->voice
+	(psi-create-interaction-rule agent-state-power changed voice-width 1))
+
+
+
+
+; ------------------------------------------------------------------
 ; Run the dyanmics updater loop. Eventually this will be part of the main
 ; OpenPsi loop.
 (psi-updater-run)
