@@ -30,10 +30,14 @@
 
 using namespace opencog;
 
-NetworkServer::NetworkServer()
-    : _running(false), _thread(NULL), _listener(NULL)
+NetworkServer::NetworkServer(unsigned short port)
 {
     logger().debug("[NetworkServer] constructor");
+
+    _running = true;
+    _listener = new SocketListener(_io_service, port);
+    _thread = new std::thread(&NetworkServer::run, this);
+    printf("Listening on port %d\n", port);
 }
 
 NetworkServer::~NetworkServer()
@@ -45,36 +49,14 @@ NetworkServer::~NetworkServer()
     logger().debug("[NetworkServer] all threads joined, exit destructor");
 }
 
-void NetworkServer::start(unsigned short port)
-{
-    if (_running)
-    {
-        printf("Only one port is allowed\n");
-        exit(1);
-    }
-
-    _running = true;
-    _listener = new SocketListener(_io_service, port);
-    _thread = new std::thread(&NetworkServer::run, this);
-    printf("Listening on port %d\n", port);
-}
-
 void NetworkServer::stop()
 {
-    if (not _running) return;
-
-    logger().debug("[NetworkServer] stop");
     _running = false;
     _io_service.stop();
-    if (_thread)
-    {
-        _thread->join();
-        delete _thread;
-        _thread = NULL;
 
-        delete _listener;
-        _listener = NULL;
-    }
+    _thread->join();
+    delete _thread;
+    delete _listener;
 }
 
 void NetworkServer::run()
