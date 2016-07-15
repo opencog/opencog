@@ -167,7 +167,7 @@ protected:
     std::mutex processRequestsMutex;
     concurrent_queue<Request*> requestQueue;
 
-    NetworkServer _networkServer;
+    NetworkServer* _networkServer;
 
     SystemActivityTable _systemActivityTable;
 
@@ -224,9 +224,6 @@ public:
 
     /** Stops the network server and closes all the open server sockets. */
     virtual void disableNetworkServer(void);
-
-    /** Returns a reference to the network server instance */
-    virtual NetworkServer& networkServer(void);
 
     /** Returns a reference to the system activity table instance */
     virtual SystemActivityTable& systemActivityTable(void);

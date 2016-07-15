@@ -83,32 +83,50 @@
      implication-direct-evaluation-pattern
      implication-direct-evaluation-rewrite))
 
+;; Return #t is the strength of the TV of A is above 0.5 and its
+;; confidence is above zero.
+(define (true-enough? A)
+  (let* (
+         (TV (cog-tv A))
+         (s (tv-mean TV))
+         (c (tv-conf TV)))
+    (and (> s 0.5) (> c 0))))
+
 (define (implication-direct-evaluation-formula P Q)
   (let* (
          (K 800) ; parameter to convert from count to confidence
          ;; Current hack to limit X as concepts
          (X (Variable "$X"))
          (vardecl (TypedVariable X (Type "ConceptNode")))
-         (P-query (Get vardecl (Evaluation P X)))
-         (P-instances (cog-outgoing-set (cog-satisfying-set P-query)))
-         (P-length (length P-instances))
-         (Q-query (Get vardecl (Evaluation Q X)))
-         (Q-instances (cog-outgoing-set (cog-satisfying-set Q-query)))
-         (P-inter-Q-instances (lset-intersection equal?
-                                                 P-instances
-                                                 Q-instances))
-         (P-inter-Q-length (length P-inter-Q-instances))
-         (TV-strength (exact->inexact (/ P-inter-Q-length P-length)))
+         (term->instance (lambda (p x) (Evaluation p x)))
+         (true-enough-term? (lambda (p x) (true-enough? (term->instance p x))))
+         (fetch-true-enough-terms
+          (lambda (p)
+            (let* ((query (Get vardecl (term->instance p X)))
+                   (terms (cog-outgoing-set (cog-satisfying-set query))))
+              (filter (lambda (x) (true-enough-term? p x)) terms))))
+         (P-true-enough-terms (fetch-true-enough-terms P))
+         (Q-true-enough-terms (fetch-true-enough-terms Q))
+         (P-length (length P-true-enough-terms))
+         (P-inter-Q-terms (lset-intersection equal?
+                                             P-true-enough-terms
+                                             Q-true-enough-terms))
+         (P-inter-Q-length (length P-inter-Q-terms))
+         (TV-strength (if (> P-length 0)
+                          (exact->inexact (/ P-inter-Q-length P-length))
+                          0))
          (TV-confidence (exact->inexact (/ P-length K))))
-    (cog-logger-debug "[PLN-Induction] P = ~a" P)
-    (cog-logger-debug "[PLN-Induction] Q = ~a" Q)
-    (cog-logger-debug "[PLN-Induction] P-instances = ~a" P-instances)
-    (cog-logger-debug "[PLN-Induction] Q-instances = ~a" Q-instances)
-    (cog-logger-debug "[PLN-Induction] P-length = ~a" P-length)
-    (cog-logger-debug "[PLN-Induction] P-inter-Q-length = ~a" P-inter-Q-length)
-    (cog-logger-debug "[PLN-Induction] TV-strength = ~a" TV-strength)
-    (cog-logger-debug "[PLN-Induction] TV-confidence = ~a" TV-confidence)
-    (Implication (stv TV-strength TV-confidence) P Q)))
+    ;; (cog-logger-debug "[PLN-Induction] P = ~a" P)
+    ;; (cog-logger-debug "[PLN-Induction] Q = ~a" Q)
+    ;; (cog-logger-debug "[PLN-Induction] P-true-enough-terms = ~a" P-true-enough-terms) 
+    ;; (cog-logger-debug "[PLN-Induction] Q-true-enough-terms = ~a" Q-true-enough-terms)
+    ;; (cog-logger-debug "[PLN-Induction] P-length = ~a" P-length)
+    ;; (cog-logger-debug "[PLN-Induction] P-inter-Q-length = ~a" P-inter-Q-length)
+    ;; (cog-logger-debug "[PLN-Induction] TV-strength = ~a" TV-strength)
+    ;; (cog-logger-debug "[PLN-Induction] TV-confidence = ~a" TV-confidence)
+    (if (> TV-confidence 0)
+        (Implication (stv TV-strength TV-confidence) P Q)
+        (cog-undefined-handle))))
 
 ;; Name the rule
 (define implication-direct-evaluation-rule-name

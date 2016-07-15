@@ -121,7 +121,6 @@ INSTALL (FILES
 	Module.h
 	NetworkServer.h
 	SocketListener.h
-	SocketPort.h
 	SystemActivityTable.h
 	Registry.h
 	Request.h

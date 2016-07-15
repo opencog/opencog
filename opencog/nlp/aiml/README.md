@@ -318,30 +318,39 @@ to a BindLink approach for ease-of-use.
   the action.  We really only want matches to the context only.
   An extended version of the `get-pattern-rules` tool could do this
   kind of filtering.  Review with Amen, maybe open bug report.
-* OpenPsi rule deisgn is kind-of broken -- in two ways:
-  (1) the action should be imeidately obtainable from the rule,
+* OpenPsi rule design is kind-of broken -- in two ways:
+  (1) the action should be immediately obtainable from the rule,
   instead of fishing around for it via the psi-action? utility.
-  (2) If an action is a schema, it should not appear in and AndLink,
+  (2) If an action is a schema, it should not appear in an AndLink,
   because its not evaluatable.
   (3) Actions are naturally ordered sequences, and that means
   SequentialAnd and that meands a predicate, not a schema.
 * AIML -- implicit * at end of sentence, can be NULL.
-  (I guess globbing should wrk with that...?)
+  (I guess globbing should work with that...?)
 * AIML -- thatstar and topicstar not handled.
+* OpenPsi -- need a general mechanism that avoids doing the same thing
+  over and over (e.g. saying the same thing). Discusss with Ben, Amen.
+  After this is done, remove the duplicate-sentence filter from the
+  get-repsonses method 9which also sets "that"
+* general utility -- create an is-member? utility to replace psi-action?
+* integration: any AIML xfind response should be handled by
+  the fuzzy matcher instead...
+* AIML: should use fuzzy matching when there are no globs.
+* Invent a fuzzy matcher that does support globs.
+
+### BUGS
+* "agians" takes too long -- psi-get-member-links is taking too long
+  when there are many rules. -- get-iset taking too long.
+  ("agians" is a rule in the futurist set of rules).
+
+### Done
+Completed tasks, but double check!?
 * AIML HR -- in a session, never say the same thing twice!
   Done -- for just one sentence .. ask Vytas about more.
 * AIML HR -- load only the current, desired rule-set. Get someone
   to write shell scripts or config files for this (Wenwei?)
   Per config files in `chathub/server/characters/sophia.properties`
-* OpenPsi -- need a general mechanism that avoids doing the same thing
-  over and over (e.g. saying the same thing). Discusss with Ben, Amen.
-* general utility -- create an is-member? utility to replace psi-action?
-* integration: any AIML xfind response should be handled by
-  the fuzzy matcher instead...
-
-### BUGS
-* agians takes too long -- psi-get-member-links is taking too long
-  when there are many rules. -- get-iset taking too long.
+  (It seems that all of the files are currently loaded).
 
 ### HR Demo
 ```
