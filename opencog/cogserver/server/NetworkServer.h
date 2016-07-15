@@ -32,7 +32,6 @@
 #include <boost/asio.hpp>
 
 #include <opencog/cogserver/server/SocketListener.h>
-#include <opencog/cogserver/server/ConsoleSocket.h>
 
 #include <opencog/util/Logger.h>
 
@@ -66,7 +65,7 @@ protected:
     bool _started;
     bool _running;
     boost::asio::io_service _io_service;
-    SocketListener<ConsoleSocket>* _listener;
+    SocketListener* _listener;
     pthread_t _thread;
 
 public:

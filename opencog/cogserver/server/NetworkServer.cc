@@ -115,6 +115,6 @@ void NetworkServer::addListener(const unsigned int port)
         printf("Only one port is allowed\n");
         exit(1);
     }
-    _listener = new SocketListener<ConsoleSocket>(_io_service, port);
+    _listener = new SocketListener(_io_service, port);
     printf("Listening on port %d\n", port);
 }
