@@ -31,9 +31,7 @@
 
 #include <boost/asio.hpp>
 
-#include <opencog/cogserver/server/SocketListener.h>
-
-#include <opencog/util/Logger.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
 
 namespace opencog
 {
@@ -62,14 +60,18 @@ class NetworkServer
 protected:
     bool _running;
     std::thread* _thread;
-    SocketListener* _listener;
     boost::asio::io_service _io_service;
+    boost::asio::ip::tcp::acceptor _acceptor;
+
+    std::vector<ConsoleSocket*> _accepted_sockets;
 
     /** Stops the server */
     void stop();
 
     /** The network server's thread main method.  */
     void run();
+
+    void handle_accept(ConsoleSocket*, const boost::system::error_code&);
 
 public:
 

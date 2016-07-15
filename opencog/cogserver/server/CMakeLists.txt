@@ -120,7 +120,6 @@ INSTALL (FILES
 	LoadModuleRequest.h
 	Module.h
 	NetworkServer.h
-	SocketListener.h
 	SystemActivityTable.h
 	Registry.h
 	Request.h

@@ -30,14 +30,23 @@
 
 using namespace opencog;
 
-NetworkServer::NetworkServer(unsigned short port)
+NetworkServer::NetworkServer(unsigned short port) :
+    _acceptor(_io_service,
+        boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
 {
     logger().debug("[NetworkServer] constructor");
 
-    _running = true;
-    _listener = new SocketListener(_io_service, port);
+    // XXX FIXME ... this is leaking memory -- theres no dtor for
+    // this socket !?  Or does tcp::acceptor magically release it?
+    ConsoleSocket* ss = new ConsoleSocket(_io_service);
+    _acceptor.async_accept(ss->getSocket(),
+         boost::bind(&NetworkServer::handle_accept,
+         this, ss,
+         boost::asio::placeholders::error));
+
     _thread = new std::thread(&NetworkServer::run, this);
     printf("Listening on port %d\n", port);
+    _running = true;
 }
 
 NetworkServer::~NetworkServer()
@@ -56,7 +65,6 @@ void NetworkServer::stop()
 
     _thread->join();
     delete _thread;
-    delete _listener;
 }
 
 void NetworkServer::run()
@@ -69,4 +77,28 @@ void NetworkServer::run()
         }
         usleep(50000); // avoids busy wait
     }
+}
+
+void NetworkServer::handle_accept(ConsoleSocket* ss, const
+                                  boost::system::error_code& error)
+{
+    logger().debug("NetworkServer::handle_accept() started");
+    if (!error)
+    {
+        ss->start();
+        ConsoleSocket* nss = new ConsoleSocket(_io_service);
+        // _accepted_sockets.push_back(nss);
+        _acceptor.async_accept(nss->getSocket(),
+              boost::bind(&NetworkServer::handle_accept,
+              this, nss,
+              boost::asio::placeholders::error));
+    }
+    else
+    {
+        // TODO: add more data to the error log (using the passed
+        // boost::system::error_code)
+        logger().error("NetworkServer::handle_accept(): Accept error");
+        delete ss;
+    }
+    logger().debug("NetworkServer::handle_accept() ended");
 }
