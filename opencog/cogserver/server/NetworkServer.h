@@ -49,9 +49,9 @@ namespace opencog
  * The network server runs on its own thread (thus freeing the cogserver's main
  * loop to deal with requests and agents only). It may be enabled/disabled
  * at will so that a cogserver may run in networkless mode if desired.
- * 
+ *
  * The network server supports only one server socket. Client applications
- * should use the 'addListener' functor to add custom server sockets.
+ * should use the 'start' methodr to start listening to a port.
  * Currently, the network server doesn't
  * support selecting the network interface that the server socket will bind to
  * (every server sockets binds to 0.0.0.0, i.e., all interfaces). Thus,
@@ -59,46 +59,29 @@ namespace opencog
  */
 class NetworkServer
 {
-
 protected:
-
     bool _running;
-    boost::asio::io_service _io_service;
-    SocketListener* _listener;
     std::thread* _thread;
+    SocketListener* _listener;
+    boost::asio::io_service _io_service;
+
+    /** Stops the server */
+    void stop();
+
+    /** The network server's thread main method.  */
+    void run();
 
 public:
 
-    /** NetworkServer's contructor. Initializes the threading control
-     *  class members. */
     NetworkServer();
+    ~NetworkServer();
 
-    /** NetworkServer's destructor. */
-    virtual ~NetworkServer();
-
-    /** Starts the NetworkServer by creating a new pthread and
-     * (indirectly) calling the method 'run'
+    /**
+     * Starts the NetworkServer in a new thread.
+     * The socket listen happens in the new thread.
      */
-    virtual void start();
+    void start(unsigned short port);
 
-    /** Stops the NetworkServer by flipping the flag that controls the
-     * main loop.
-     */
-    virtual void stop();
-
-    /** The network server's thread main method. It should not be
-     * called by external classes and is only declared as public
-     * because we use a 'extern "C"' wrapper when calling 
-     * pthread_create (many C++ 'best practices' guides state that
-     * directly using the C++ 'run' is unsafe)
-     */
-    void run();
-
-    /** Instantiates a listener socket (i.e. server socket) of class
-     * '_Socket' and binds it to port 'port'. Returns 'true' if
-     * successful and 'false' otherwise.
-     */
-    void addListener(const unsigned int port);
 }; // class
 
 /** @}*/

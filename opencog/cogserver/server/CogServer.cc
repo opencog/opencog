@@ -178,13 +178,11 @@ void CogServer::enableNetworkServer()
     // WARN: By using boost::asio, at least one listener must be added to
     // the NetworkServer before starting its thread. Other Listeners may
     // be added later, though.
-    _networkServer.addListener(config().get_int("SERVER_PORT"));
-    _networkServer.start();
+    _networkServer.start(config().get_int("SERVER_PORT"));
 }
 
 void CogServer::disableNetworkServer()
 {
-    _networkServer.stop();
 }
 
 SystemActivityTable& CogServer::systemActivityTable()

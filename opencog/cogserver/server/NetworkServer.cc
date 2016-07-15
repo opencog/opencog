@@ -31,7 +31,7 @@
 using namespace opencog;
 
 NetworkServer::NetworkServer()
-    : _running(false), _listener(NULL), _thread(0)
+    : _running(false), _thread(NULL), _listener(NULL)
 {
     logger().debug("[NetworkServer] constructor");
 }
@@ -40,24 +40,29 @@ NetworkServer::~NetworkServer()
 {
     logger().debug("[NetworkServer] enter destructor");
 
-    delete _listener;
+    stop();
+
     logger().debug("[NetworkServer] all threads joined, exit destructor");
 }
 
-void NetworkServer::start()
+void NetworkServer::start(unsigned short port)
 {
-    if (_running) {
-        logger().warn("server has already started");
-        return;
+    if (_running)
+    {
+        printf("Only one port is allowed\n");
+        exit(1);
     }
 
-    _thread = new std::thread(&NetworkServer::run, this);
-
     _running = true;
+    _listener = new SocketListener(_io_service, port);
+    _thread = new std::thread(&NetworkServer::run, this);
+    printf("Listening on port %d\n", port);
 }
 
 void NetworkServer::stop()
 {
+    if (not _running) return;
+
     logger().debug("[NetworkServer] stop");
     _running = false;
     _io_service.stop();
@@ -66,12 +71,14 @@ void NetworkServer::stop()
         _thread->join();
         delete _thread;
         _thread = NULL;
+
+        delete _listener;
+        _listener = NULL;
     }
-} 
+}
 
 void NetworkServer::run()
 {
-    logger().debug("[NetworkServer] run");
     while (_running) {
         try {
             _io_service.run();
@@ -80,17 +87,4 @@ void NetworkServer::run()
         }
         usleep(50000); // avoids busy wait
     }
-    logger().debug("[NetworkServer] end of run");
-}
-
-
-void NetworkServer::addListener(const unsigned int port)
-{
-    if (_listener)
-    {
-        printf("Only one port is allowed\n");
-        exit(1);
-    }
-    _listener = new SocketListener(_io_service, port);
-    printf("Listening on port %d\n", port);
 }
