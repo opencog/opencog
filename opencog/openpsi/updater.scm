@@ -7,7 +7,7 @@
 ;
 ; The interaction rules specify internal dynamic relationships of the form:
 ; "change in trigger-entity causes change in target-entity with strength s"
-; See interaction-rules.scm for more information
+; See interaction-rule.scm for more information
 ;
 ; The updater runs in a loop, and for each change in a trigger entity, it should
 ; execute each and every rule containing that trigger as an antecedent, and each
@@ -27,11 +27,11 @@
 (load "modulator.scm")
 (load "sec.scm")
 (load "entity-defs.scm")
-(load "interaction-rules.scm")
+(load "interaction-rule.scm")
 
 (define logging #t)
 (define verbose #f)
-(define slo-mo #f)
+(define slo-mo #t)
 (define single-step #f)
 
 ; --------------------------------------------------------------
@@ -647,7 +647,7 @@
     ; todo: is this needed?
     (define pause-time 100000)
     (if slo-mo
-        (set! pause-time 1500000))
+        (set! pause-time 1000000))
     (usleep pause-time))
 
 

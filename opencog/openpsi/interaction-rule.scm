@@ -1,5 +1,5 @@
 ;
-; interaction-rules.scm
+; interaction-rule.scm
 ;
 ; Rules specfying the dynamic interactions between different OpenPsi related
 ; entities.

@@ -51,7 +51,7 @@ Files:
 
 * updater.scm - the main control file that handles the dynamic updating
   of entity values based on the interaction rules.
-* interaction-rules.scm - code for creating the rules specifying
+* interaction-rule.scm - code for creating the rules specifying
   interaction dynamics between entities.
 * modulator.scm - internal openpsi modulator variables
 * sec.scm - internal openpsi Stimulus Evaluation Check variables
