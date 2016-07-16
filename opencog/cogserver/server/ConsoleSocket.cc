@@ -206,7 +206,6 @@ void ConsoleSocket::OnLine(const std::string& line)
     {
         logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
 
-        _show_prompt = false;
         // Force a drain of this request, because we *must* enter
         // shell mode before handling any additional input from the
         // socket (since the next input is almost surely intended for
@@ -225,7 +224,7 @@ void ConsoleSocket::OnRequestComplete()
     logger().debug("[ConsoleSocket] OnRequestComplete");
 
     // Shells will send their own prompt
-    if (_show_prompt) sendPrompt();
+    if (nullptr == _shell) sendPrompt();
 }
 
 void ConsoleSocket::Exit()

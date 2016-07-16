@@ -59,7 +59,6 @@ class ConsoleSocket : public ServerSocket,
                       public RequestResult
 {
 private:
-    bool _show_prompt;
     GenericShell *_shell;
 
 protected:
