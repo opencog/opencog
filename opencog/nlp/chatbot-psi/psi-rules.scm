@@ -270,7 +270,7 @@
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
-            (Not (DefinedPredicate "called-chatbot-eva?"))
+            (DefinedPredicate "chatbot-eva-not-started?")
             (DefinedPredicate "is-input-utterance?")
             (DefinedPredicate "input-type-is-imperative?")
         ))

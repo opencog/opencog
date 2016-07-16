@@ -291,11 +291,9 @@
 )
 
 (Define
-    (DefinedPredicate "called-chatbot-eva?")
-    (Not (Or
-        (Equal (Set default-state) (Get (State chatbot-eva (Variable "$s"))))
-        (Equal (Set no-action-taken) (Get (State chatbot-eva (Variable "$s"))))
-    ))
+    (DefinedPredicate "chatbot-eva-not-started?")
+    (Or (Equal (Set default-state) (Get (State chatbot-eva (Variable "$s"))))
+        (Equal (Set no-action-taken) (Get (State chatbot-eva (Variable "$s")))))
 )
 
 (Define
