@@ -67,8 +67,6 @@ void ServerSocket::SetCloseAndDelete()
     _closed = true;
     _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
     _socket->close();
-    // delete _socket;
-    // _socket = nullptr;
 }
 
 void ServerSocket::SetLineProtocol(bool val)
@@ -135,7 +133,7 @@ void ServerSocket::handle_connection(void)
     logger().debug("ServerSocket::handle_connection()");
     OnConnection();
     boost::asio::streambuf b;
-    for (;;)
+    while (not _closed)
     {
         try
         {
@@ -175,9 +173,14 @@ void ServerSocket::handle_connection(void)
             }
         }
     }
+
+    // Might already be closed from the SetCloseAndelete() method.
+    if (not _closed)
+    {
+       _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+       _socket->close();
+    }
     _closed = true;
-    _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    _socket->close();
     delete _socket;
     _socket = nullptr;
 }
