@@ -34,8 +34,8 @@
 
 using namespace opencog;
 
-ConsoleSocket::ConsoleSocket(boost::asio::io_service& _io_service) : 
-    ServerSocket(_io_service),
+ConsoleSocket::ConsoleSocket(void) :
+    ServerSocket(),
     RequestResult("text/plain")
 {
     SetLineProtocol(true);
@@ -51,7 +51,7 @@ ConsoleSocket::~ConsoleSocket()
     // is broken. Basically, the boost::asio code calls this destructor
     // for ConsoleSocket while there are still requests outstanding
     // in another thread.  We have to stall the destructor until all
-    // the in-flight requests are complete; we use the condition 
+    // the in-flight requests are complete; we use the condition
     // variable to do this. But really, something somewhere is broken
     // or mis-designed. Not sure what/where; this code is too complicated.
     //
@@ -125,7 +125,7 @@ void ConsoleSocket::sendPrompt()
 {
     if (config().get_bool("ANSI_ENABLED"))
         Send(config()["ANSI_PROMPT"]);
-    else 
+    else
         Send(config()["PROMPT"]);
 }
 
@@ -167,7 +167,7 @@ void ConsoleSocket::OnLine(const std::string& line)
 
     // If the command starts with an open-paren, or a semi-colon, assume
     // its a scheme command. Pop into the scheme shell, and try again.
-    if (_request == NULL and 
+    if (_request == NULL and
         (cmdName[0] == '(' or cmdName[0] == ';')) {
         OnLine("scm");
 
@@ -198,12 +198,14 @@ void ConsoleSocket::OnLine(const std::string& line)
     _request->setRequestResult(this);
     _request->setParameters(params);
 
-    if (LineProtocol()) {
+    if (LineProtocol())
+    {
         // We only add the command to the processing queue
         // if it hasn't disabled the line protocol
         cogserver.pushRequest(_request);
 
-        if (_request->isShell()) {
+        if (_request->isShell())
+        {
             logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
 
             // Use a stupid trick to deal with poor architecture.
@@ -220,7 +222,9 @@ void ConsoleSocket::OnLine(const std::string& line)
             // of the main thread (where the server loop runs).
             cogserver.processRequests();
         }
-    } else {
+    }
+    else
+    {
         // reset input buffer
         _buffer.clear();
     }
@@ -242,7 +246,7 @@ void ConsoleSocket::OnLine(const std::string& line)
 void ConsoleSocket::OnRawData(const char *buf, size_t len)
 {
 #ifndef __APPLE__
-    char* _tmp = strndup(buf, len); 
+    char* _tmp = strndup(buf, len);
     logger().debug("[ConsoleSocket] OnRawData local buffer [%s]", _tmp);
     free(_tmp);
 #endif
@@ -251,16 +255,21 @@ void ConsoleSocket::OnRawData(const char *buf, size_t len)
     logger().debug("[ConsoleSocket] OnRawData: global buffer:\n%s\n", _buffer.c_str());
     size_t buffer_len = _buffer.length();
     bool rawDataEnd = false;
-    if (buffer_len > 1 && (_buffer.at(buffer_len-1) == 0xa)) {
-        if (_buffer.at(buffer_len-2) == 0x4) {
+    if (buffer_len > 1 && (_buffer.at(buffer_len-1) == 0xa))
+    {
+        if (_buffer.at(buffer_len-2) == 0x4)
+        {
             rawDataEnd = true;
-        } else if (buffer_len > 2 && 
-                   (_buffer.at(buffer_len-2) == 0xd) && 
-                   (_buffer.at(buffer_len-3) == 0x4)) {
+        }
+        else if (buffer_len > 2 &&
+                 (_buffer.at(buffer_len-2) == 0xd) &&
+                 (_buffer.at(buffer_len-3) == 0x4))
+        {
             rawDataEnd = true;
-        } 
+        }
     }
-    if (rawDataEnd) {
+    if (rawDataEnd)
+    {
         logger().debug("[ConsoleSocket] found EOT; dispatching");
         // found the EOT pattern. dispatch the request and reset
         // the socket's line protocol flag
@@ -276,9 +285,8 @@ void ConsoleSocket::OnRequestComplete()
     logger().debug("[ConsoleSocket] OnRequestComplete");
 
     // Shells will send their own prompt
-    if (_request != SECRET_HANDSHAKE) {
+    if (_request != SECRET_HANDSHAKE)
         sendPrompt();
-    }
 }
 
 void ConsoleSocket::SetDataRequest()

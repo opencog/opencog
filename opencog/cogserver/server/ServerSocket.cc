@@ -30,8 +30,8 @@
 
 using namespace opencog;
 
-ServerSocket::ServerSocket(boost::asio::io_service& io_service) :
-    _socket(io_service), _lineProtocol(true), _closed(false)
+ServerSocket::ServerSocket(void) :
+    _socket(nullptr), _lineProtocol(true), _closed(false)
 {
 }
 
@@ -45,15 +45,10 @@ bool ServerSocket::isClosed()
     return _closed;
 }
 
-boost::asio::ip::tcp::socket& ServerSocket::getSocket()
-{
-    return _socket;
-}
-
 void ServerSocket::Send(const std::string& cmd)
 {
     boost::system::error_code error;
-    boost::asio::write(_socket, boost::asio::buffer(cmd),
+    boost::asio::write(*_socket, boost::asio::buffer(cmd),
                        boost::asio::transfer_all(), error);
 
     // The most likely cause of an error is that the remote side has
@@ -66,10 +61,12 @@ void ServerSocket::Send(const std::string& cmd)
 
 void ServerSocket::SetCloseAndDelete()
 {
+    if (_closed) return;
+
     logger().debug("ServerSocket::SetCloseAndDelete()");
     _closed = true;
-    _socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    _socket.close();
+    _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+    _socket->close();
 }
 
 void ServerSocket::SetLineProtocol(bool val)
@@ -125,38 +122,47 @@ match_eol_or_escape(bitter begin, bitter end)
     return std::make_pair(i, false);
 }
 
-void ServerSocket::handle_connection(ServerSocket* ss)
+void ServerSocket::set_socket(boost::asio::ip::tcp::socket* sock)
+{
+    _socket = sock;
+    _closed = false;
+}
+
+void ServerSocket::handle_connection(void)
 {
     logger().debug("ServerSocket::handle_connection()");
-    ss->OnConnection();
+    OnConnection();
     boost::asio::streambuf b;
-    for (;;)
+    while (not _closed)
     {
-        try {
-            if (ss->LineProtocol())
+        try
+        {
+            if (LineProtocol())
             {
-                boost::asio::read_until(ss->getSocket(), b, match_eol_or_escape);
+                boost::asio::read_until(*_socket, b, match_eol_or_escape);
                 std::istream is(&b);
                 std::string line;
                 std::getline(is, line);
                 if (!line.empty() && line[line.length()-1] == '\r') {
                     line.erase(line.end()-1);
                 }
-                ss->OnLine(line);
+                OnLine(line);
             }
             else {
                 boost::array<char, 128> buf;
                 boost::system::error_code error;
-                size_t len = ss->getSocket().read_some(boost::asio::buffer(buf), error);
+                size_t len = _socket->read_some(boost::asio::buffer(buf), error);
                 if (error == boost::asio::error::eof)
                     break; // Connection closed cleanly by peer.
                 else if (error)
                     throw boost::system::system_error(error); // Some other error.
 
-                ss->OnRawData(buf.data(), len);
+                OnRawData(buf.data(), len);
             }
-        } catch (boost::system::system_error& e) {
-            if (ss->isClosed()) {
+        }
+        catch (const boost::system::system_error& e)
+        {
+            if (isClosed()) {
                 break;
             } else if (e.code() == boost::asio::error::eof) {
                 break;
@@ -167,5 +173,14 @@ void ServerSocket::handle_connection(ServerSocket* ss)
             }
         }
     }
-    delete ss;
+
+    // Might already be closed from the SetCloseAndelete() method.
+    if (not _closed)
+    {
+       _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+       _socket->close();
+    }
+    _closed = true;
+    delete _socket;
+    _socket = nullptr;
 }
