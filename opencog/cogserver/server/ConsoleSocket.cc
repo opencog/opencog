@@ -36,7 +36,8 @@ using namespace opencog;
 
 ConsoleSocket::ConsoleSocket(void)
 {
-    _shell = NULL;
+    _shell = nullptr;
+    _show_prompt = true;
 }
 
 ConsoleSocket::~ConsoleSocket()
@@ -152,7 +153,6 @@ void ConsoleSocket::OnLine(const std::string& line)
     logger().debug("params.size(): %d", params.size());
     if (params.empty()) {
         // return on empty/blank line
-        _request = NULL;
         OnRequestComplete();
         return;
     }
@@ -160,12 +160,13 @@ void ConsoleSocket::OnLine(const std::string& line)
     params.pop_front();
 
     CogServer& cogserver = static_cast<CogServer&>(server());
-    _request = cogserver.createRequest(cmdName);
+    Request* request = cogserver.createRequest(cmdName);
 
     // If the command starts with an open-paren, or a semi-colon, assume
     // its a scheme command. Pop into the scheme shell, and try again.
-    if (_request == NULL and
-        (cmdName[0] == '(' or cmdName[0] == ';')) {
+    if (nullptr == request and
+        (cmdName[0] == '(' or cmdName[0] == ';'))
+    {
         OnLine("scm");
 
         // Re-issue the command, but only if we sucessfully got a shell.
@@ -177,35 +178,35 @@ void ConsoleSocket::OnLine(const std::string& line)
     }
 
     // Command not found.
-    if (_request == NULL) {
+    if (nullptr == request)
+    {
         char msg[256];
         snprintf(msg, 256, "command \"%s\" not found\n", cmdName.c_str());
         logger().warn(msg);
         Send(msg);
 
         // try to send "help" command response
-        _request = cogserver.createRequest("help");
-        if (_request == NULL) {
+        request = cogserver.createRequest("help");
+        if (nullptr == request)
+        {
             // no help request; just terminate the request
             OnRequestComplete();
             return;
         }
     }
 
-    _request->setRequestResult(this);
-    _request->setParameters(params);
+    request->setRequestResult(this);
+    request->setParameters(params);
 
     // We only add the command to the processing queue
     // if it hasn't disabled the line protocol
-    cogserver.pushRequest(_request);
+    cogserver.pushRequest(request);
 
-    if (_request->isShell())
+    if (request->isShell())
     {
         logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
 
-        // Use a stupid trick to deal with poor architecture.
-#define SECRET_HANDSHAKE ((Request*) 0x1)
-        _request = SECRET_HANDSHAKE;
+        _show_prompt = false;
         // Force a drain of this request, because we *must* enter
         // shell mode before handling any additional input from the
         // socket (since the next input is almost surely intended for
@@ -224,8 +225,7 @@ void ConsoleSocket::OnRequestComplete()
     logger().debug("[ConsoleSocket] OnRequestComplete");
 
     // Shells will send their own prompt
-    if (_request != SECRET_HANDSHAKE)
-        sendPrompt();
+    if (_show_prompt) sendPrompt();
 }
 
 void ConsoleSocket::Exit()
