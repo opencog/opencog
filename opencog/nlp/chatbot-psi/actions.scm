@@ -1,6 +1,8 @@
 (use-modules (ice-9 threads))
 (use-modules (opencog))
 (use-modules (opencog logger))
+(use-modules (opencog eva-model))
+(use-modules (opencog nlp chatbot-eva))
 
 ;-------------------------------------------------------------------------------
 ; Useful functions for the actions
