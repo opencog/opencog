@@ -219,55 +219,6 @@ void ConsoleSocket::OnLine(const std::string& line)
     }
 }
 
-/**
- * Buffer up incoming raw data until an end-of-transmission (EOT)
- * is received. After the EOT, dispatch the buffered data as a single
- * request.
- *
- * Note that there is just one ConsoleSocket per client, so the buffer
- * is not shared.
- *
- * XXX the data buffer is currently just a string buffer, so any
- * null char in the data stream will terminate the string. So
- * this method isn't really for "raw" data containing null chars.
- * This should be fixed someday, as needed.
- */
-void ConsoleSocket::OnRawData(const char *buf, size_t len)
-{
-#ifndef __APPLE__
-    char* _tmp = strndup(buf, len);
-    logger().debug("[ConsoleSocket] OnRawData local buffer [%s]", _tmp);
-    free(_tmp);
-#endif
-
-    _buffer.append(buf, len);
-    logger().debug("[ConsoleSocket] OnRawData: global buffer:\n%s\n", _buffer.c_str());
-    size_t buffer_len = _buffer.length();
-    bool rawDataEnd = false;
-    if (buffer_len > 1 && (_buffer.at(buffer_len-1) == 0xa))
-    {
-        if (_buffer.at(buffer_len-2) == 0x4)
-        {
-            rawDataEnd = true;
-        }
-        else if (buffer_len > 2 &&
-                 (_buffer.at(buffer_len-2) == 0xd) &&
-                 (_buffer.at(buffer_len-3) == 0x4))
-        {
-            rawDataEnd = true;
-        }
-    }
-    if (rawDataEnd)
-    {
-        logger().debug("[ConsoleSocket] found EOT; dispatching");
-        // found the EOT pattern. dispatch the request and reset
-        // the socket's line protocol flag
-        _request->addParameter(_buffer);
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        cogserver.pushRequest(_request);
-    }
-}
-
 void ConsoleSocket::OnRequestComplete()
 {
     logger().debug("[ConsoleSocket] OnRequestComplete");
