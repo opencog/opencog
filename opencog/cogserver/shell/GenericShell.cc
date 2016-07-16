@@ -232,6 +232,7 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 
 	// Cleanup.
 	close(pipefd[0]);
+	close(stdout_backup);
 #endif // PERFORM_STDOUT_DUPLICATION
 
 	// The user is exiting the shell. No one will ever call a method on

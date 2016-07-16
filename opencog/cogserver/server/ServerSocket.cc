@@ -65,8 +65,18 @@ void ServerSocket::SetCloseAndDelete()
 
     logger().debug("ServerSocket::SetCloseAndDelete()");
     _closed = true;
-    _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    _socket->close();
+    try
+    {
+        _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        _socket->close();
+    }
+    catch (const boost::system::system_error& e)
+    {
+        if (e.code() != boost::asio::error::not_connected)
+        {
+            logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
+        }
+    }
 }
 
 void ServerSocket::SetLineProtocol(bool val)
@@ -168,6 +178,8 @@ void ServerSocket::handle_connection(void)
                 break;
             } else if (e.code() == boost::asio::error::connection_reset) {
                 break;
+            } else if (e.code() == boost::asio::error::not_connected) {
+                break;
             } else {
                 logger().error("ServerSocket::handle_connection(): Error reading data. Message: %s", e.what());
             }
@@ -177,10 +189,22 @@ void ServerSocket::handle_connection(void)
     // Might already be closed from the SetCloseAndelete() method.
     if (not _closed)
     {
-       _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-       _socket->close();
+        try
+        {
+            _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+            _socket->close();
+        }
+        catch (const boost::system::system_error& e)
+        {
+            if (e.code() != boost::asio::error::not_connected)
+            {
+                logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
+            }
+        }
     }
     _closed = true;
     delete _socket;
     _socket = nullptr;
+
+    delete this;
 }
