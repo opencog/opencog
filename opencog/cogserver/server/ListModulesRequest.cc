@@ -22,16 +22,11 @@ bool ListModulesRequest::syntaxError()
 bool ListModulesRequest::execute()
 {
     std::string moduleList = _cogserver.listModules();
-
     send(moduleList);
-
     return true;
 }
 
 void ListModulesRequest::sendError()
 {
-    if (_mimeType != "text/plain")
-        throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s",
-                _mimeType.c_str());
     send(_error.str());
 }

@@ -29,7 +29,6 @@
 #include <mutex>
 #include <string>
 
-#include <opencog/cogserver/server/IHasMimeType.h>
 #include <opencog/cogserver/server/IRequestComplete.h>
 
 namespace opencog
@@ -49,20 +48,13 @@ class Request;
  * that request processing has finished (so that we may 
  * synchronously send the request result to the client but process the 
  * request 'asynchronously' on the cogserver's main thread).
- *
- * As required by the Request abstract class, the RequestResult class
- * also defines the IHasMimeType interface, defining its mime-type
- * as 'text/plain'.
- *
  */
-class RequestResult : public IHasMimeType,
-                      public IRequestComplete
+class RequestResult : public IRequestComplete
 {
 
 public:
 
-    RequestResult(const std::string& mimeType)
-       : IHasMimeType(mimeType), _use_count(0) {}
+    RequestResult(void) : _use_count(0) {}
     virtual ~RequestResult() {}
 
     /** SetDataRequest: called when this is assigned to a DataRequest */

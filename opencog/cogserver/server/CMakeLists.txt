@@ -114,7 +114,6 @@ INSTALL (FILES
 	CogServer.h
 	ConsoleSocket.h
 	Factory.h
-	IHasMimeType.h
 	IRequestComplete.h
 	ListRequest.h
 	LoadModuleRequest.h
