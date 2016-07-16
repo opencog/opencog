@@ -31,6 +31,7 @@
 using namespace opencog;
 
 NetworkServer::NetworkServer(unsigned short port) :
+    _running(true),
     _port(port),
     _acceptor(_io_service,
         boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
@@ -38,7 +39,6 @@ NetworkServer::NetworkServer(unsigned short port) :
     logger().debug("[NetworkServer] constructor");
 
     _service_thread = new std::thread(&NetworkServer::run, this);
-    _running = true;
 }
 
 NetworkServer::~NetworkServer()
