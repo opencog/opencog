@@ -60,7 +60,6 @@ class ConsoleSocket : public ServerSocket,
 {
 private:
     Request* _request;
-    std::string _buffer;
     GenericShell *_shell;
 
 protected:
