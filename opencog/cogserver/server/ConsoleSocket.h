@@ -117,11 +117,6 @@ public:
     void OnRequestComplete();
 
     /**
-     * Called when this is assigned to a DataRequest
-     */
-    void SetDataRequest();
-
-    /**
      * Sends a request result to the client,
      */
     void SendResult(const std::string&);

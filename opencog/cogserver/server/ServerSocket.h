@@ -43,7 +43,6 @@ class ServerSocket
 {
 private:
     boost::asio::ip::tcp::socket* _socket;
-    bool _lineProtocol;
     bool _closed;
 
 protected:
@@ -80,16 +79,6 @@ public:
      * Close this socket
      */
     void SetCloseAndDelete(void);
-
-    /**
-     *Set LineProtocol mode for this socket
-     */
-    void SetLineProtocol(bool);
-
-    /**
-     * Check if this socket is in LineProtocol mode
-     */
-    bool LineProtocol(void);
 
     /**
      * Check if this socket was closed

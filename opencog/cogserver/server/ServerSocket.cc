@@ -31,7 +31,7 @@
 using namespace opencog;
 
 ServerSocket::ServerSocket(void) :
-    _socket(nullptr), _lineProtocol(true), _closed(false)
+    _socket(nullptr), _closed(false)
 {
 }
 
@@ -77,16 +77,6 @@ void ServerSocket::SetCloseAndDelete()
             logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
         }
     }
-}
-
-void ServerSocket::SetLineProtocol(bool val)
-{
-    _lineProtocol = val;
-}
-
-bool ServerSocket::LineProtocol()
-{
-    return _lineProtocol;
 }
 
 typedef boost::asio::buffers_iterator<
@@ -147,28 +137,14 @@ void ServerSocket::handle_connection(void)
     {
         try
         {
-            if (LineProtocol())
-            {
-                boost::asio::read_until(*_socket, b, match_eol_or_escape);
-                std::istream is(&b);
-                std::string line;
-                std::getline(is, line);
-                if (!line.empty() && line[line.length()-1] == '\r') {
-                    line.erase(line.end()-1);
-                }
-                OnLine(line);
+            boost::asio::read_until(*_socket, b, match_eol_or_escape);
+            std::istream is(&b);
+            std::string line;
+            std::getline(is, line);
+            if (!line.empty() && line[line.length()-1] == '\r') {
+                line.erase(line.end()-1);
             }
-            else {
-                boost::array<char, 128> buf;
-                boost::system::error_code error;
-                size_t len = _socket->read_some(boost::asio::buffer(buf), error);
-                if (error == boost::asio::error::eof)
-                    break; // Connection closed cleanly by peer.
-                else if (error)
-                    throw boost::system::system_error(error); // Some other error.
-
-                OnRawData(buf.data(), len);
-            }
+            OnLine(line);
         }
         catch (const boost::system::system_error& e)
         {
@@ -202,6 +178,7 @@ void ServerSocket::handle_connection(void)
             }
         }
     }
+
     _closed = true;
     delete _socket;
     _socket = nullptr;

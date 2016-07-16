@@ -34,11 +34,8 @@
 
 using namespace opencog;
 
-ConsoleSocket::ConsoleSocket(void) :
-    ServerSocket(),
-    RequestResult("text/plain")
+ConsoleSocket::ConsoleSocket(void)
 {
-    SetLineProtocol(true);
     _shell = NULL;
 }
 
@@ -198,35 +195,27 @@ void ConsoleSocket::OnLine(const std::string& line)
     _request->setRequestResult(this);
     _request->setParameters(params);
 
-    if (LineProtocol())
+    // We only add the command to the processing queue
+    // if it hasn't disabled the line protocol
+    cogserver.pushRequest(_request);
+
+    if (_request->isShell())
     {
-        // We only add the command to the processing queue
-        // if it hasn't disabled the line protocol
-        cogserver.pushRequest(_request);
+        logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
 
-        if (_request->isShell())
-        {
-            logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
-
-            // Use a stupid trick to deal with poor architecture.
+        // Use a stupid trick to deal with poor architecture.
 #define SECRET_HANDSHAKE ((Request*) 0x1)
-            _request = SECRET_HANDSHAKE;
-            // Force a drain of this request, because we *must* enter
-            // shell mode before handling any additional input from the
-            // socket (since the next input is almost surely intended for
-            // the new shell, not for the cogserver one).
-            //
-            // NOTE: Calling this method for non-shell requests may
-            // cause cogserver to crash due to concurrency issues, since
-            // this runs in a separate thread (for socket handler) instead
-            // of the main thread (where the server loop runs).
-            cogserver.processRequests();
-        }
-    }
-    else
-    {
-        // reset input buffer
-        _buffer.clear();
+        _request = SECRET_HANDSHAKE;
+        // Force a drain of this request, because we *must* enter
+        // shell mode before handling any additional input from the
+        // socket (since the next input is almost surely intended for
+        // the new shell, not for the cogserver one).
+        //
+        // NOTE: Calling this method for non-shell requests may
+        // cause cogserver to crash due to concurrency issues, since
+        // this runs in a separate thread (for socket handler) instead
+        // of the main thread (where the server loop runs).
+        cogserver.processRequests();
     }
 }
 
@@ -276,7 +265,6 @@ void ConsoleSocket::OnRawData(const char *buf, size_t len)
         _request->addParameter(_buffer);
         CogServer& cogserver = static_cast<CogServer&>(server());
         cogserver.pushRequest(_request);
-        SetLineProtocol(true);
     }
 }
 
@@ -287,12 +275,6 @@ void ConsoleSocket::OnRequestComplete()
     // Shells will send their own prompt
     if (_request != SECRET_HANDSHAKE)
         sendPrompt();
-}
-
-void ConsoleSocket::SetDataRequest()
-{
-    logger().debug("[ConsoleSocket] SetDataRequest");
-    SetLineProtocol(false);
 }
 
 void ConsoleSocket::Exit()

@@ -50,9 +50,6 @@ public:
     RequestResult(void) : _use_count(0) {}
     virtual ~RequestResult() {}
 
-    /** SetDataRequest: called when this is assigned to a DataRequest */
-    virtual void SetDataRequest() {}
-
     /** Exit: called when a Request exits the connection */
     virtual void Exit() {}
 
