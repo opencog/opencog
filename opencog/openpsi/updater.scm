@@ -30,7 +30,7 @@
 (load "interaction-rule.scm")
 
 (define logging #t)
-(define verbose #f)
+(define verbose #t)
 (define slo-mo #t)
 (define single-step #f)
 
@@ -56,6 +56,7 @@
 ; Todo: implement these tables in the atomspace
 (define prev-value-table (make-hash-table 40))
 (define prev-most-recent-ts-table (make-hash-table 40))
+(define psi-event-detection-callbacks '())
 
 ; --------------------------------------------------------------
 ;
@@ -79,6 +80,15 @@
 ; Todo: Change this to DSN atomese
 (define (psi-set-expression-callback! callback)
 	(set! psi-expression-callback callback))
+
+(define-public (psi-set-event-callback! callback)
+	; Todo: Move this out of or rename the prev-value-table
+	;       Or move to the atomspace as a a DSN.
+	; Save the callback function for event detection
+	;(psi-set-value! (hash-set! prev-value-table event callback))
+	(set! psi-event-detection-callbacks
+		(append psi-event-detection-callbacks (list callback))))
+
 
 (define (psi-updater-init)
 "
@@ -259,6 +269,11 @@
 	; This needs to happen before evaluating the monitored params so the
 	; new-event predicates can are set beforehand.
 	(for-each set-new-event-status psi-monitored-events)
+
+	; First call the event detection callback functions
+	(format #t "psi-event-detection-callbacks: ~a\n"
+		psi-event-detection-callbacks)
+    (for-each (lambda (f) (apply f '())) psi-event-detection-callbacks)
 
 	; Evaluate the monitored params and set "changed" predicates accordingly
 	(set! changed-params '())
@@ -618,7 +633,7 @@
 ; Todo: This should be a config setting to specify the rule set or a list of
 ;       rulesets in scheme.
 (load "event.scm")
-(load "mock-interaction-rules.scm")
+;(load "mock-interaction-rules.scm")
 
 ; --------------------------------------------------------------
 ; Updater Loop Control
@@ -735,8 +750,8 @@
 (define halt psi-updater-halt)
 (define-public h halt)
 (define-public r psi-updater-run)
-(define r1 speech->power)
-(define r2 power->voice)
+;(define r1 speech->power)
+;(define r2 power->voice)
 (define voice voice-width)
 (define value psi-get-number-value)
 (define rules (psi-get-interaction-rules))
@@ -762,13 +777,5 @@
 (define-public p agent-state-power)
 (define-public a arousal)
 
-
-;(define (uupdate a x) (/ (- (expt a x) 1) (- a 1)))
-
-; (10000^(a*x) - 1) / (10000^a -1)
-;(define (update2 a x) (/ (- (expt 1000 (* a x)) 1) (- (expt 1000 a) 1)))
-
-
-; --------------------------------------------------------------
 
 

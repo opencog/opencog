@@ -21,19 +21,3 @@
 	event-concept)
 
 
-; --------------------------------------------------------------
-; Event Creation
-(define new-face (psi-create-monitored-event "new-face"))
-(define speech-giving-starts
-	(psi-create-monitored-event "speech-giving-starts"))
-(define positive-sentiment-dialog
-	(psi-create-monitored-event "positive-sentiment-dialog"))
-(define negative-sentiment-dialog
-	(psi-create-monitored-event "negative-sentiment-dialog"))
-
-
-; Shortcuts for dev purposes
-(define s speech-giving-starts)
-(define pos positive-sentiment-dialog)
-(define neg negative-sentiment-dialog)
-(define nf new-face)
