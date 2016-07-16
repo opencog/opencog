@@ -78,7 +78,6 @@ GenericShell::~GenericShell()
 	if (socket)
 	{
 		socket->SetShell(NULL);
-		socket->OnRequestComplete();
 		socket = NULL;
 	}
 }
@@ -144,11 +143,7 @@ const std::string& GenericShell::get_prompt(void)
  */
 void GenericShell::set_socket(ConsoleSocket *s)
 {
-	if (socket)
-	{
-		socket->SetShell(NULL);
-		socket->OnRequestComplete();
-	}
+	if (socket) socket->SetShell(NULL);
 
 	socket = s;
 	socket->SetShell(this);

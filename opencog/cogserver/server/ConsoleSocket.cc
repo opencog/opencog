@@ -37,7 +37,6 @@ using namespace opencog;
 ConsoleSocket::ConsoleSocket(void)
 {
     _shell = nullptr;
-    _show_prompt = true;
 }
 
 ConsoleSocket::~ConsoleSocket()
@@ -153,7 +152,7 @@ void ConsoleSocket::OnLine(const std::string& line)
     logger().debug("params.size(): %d", params.size());
     if (params.empty()) {
         // return on empty/blank line
-        OnRequestComplete();
+        sendPrompt();
         return;
     }
     std::string cmdName = params.front();
@@ -190,7 +189,7 @@ void ConsoleSocket::OnLine(const std::string& line)
         if (nullptr == request)
         {
             // no help request; just terminate the request
-            OnRequestComplete();
+            sendPrompt();
             return;
         }
     }
