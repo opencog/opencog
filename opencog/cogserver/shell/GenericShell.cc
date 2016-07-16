@@ -171,14 +171,17 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	// Work-around some printing madness. See issue
 	// https://github.com/opencog/atomspace/issues/629
 	// This is kind of complicated to explain, so pay attention:
-	// When runnning scheme, or python, code from the cogserver
-	// shell, that could cause all sorts of things to happen, including
-	// possibly some printing to the stdout file descriptor. That
-	// would normally result in the output going to the terminal in
-	// which the cogserver is running. But we really, actually want
-	// that output to also go back to the shell, where the user can
-	// see it.  The code below, ifdefed PERFORM_STDOUT_DUPLICATION,
-	// does this. Its a bit of a trick: make a backup copy of stdout,
+	// When runnning scheme, or python code, from the cogserver
+	// shell, that code might cause all sorts of things to happen,
+	// including possibly printing to the stdout file descriptor.
+	// The stdout descriptor goes to the terminal in which the
+	// cogserver was started. Which is nice, and all that, but
+	// is usually not quite what the user expected --- and so we
+	// actually want to redirect stdout to the shell, where the user
+	// can see it.
+	//
+	// The code below, ifdefed PERFORM_STDOUT_DUPLICATION, does this.
+	// It's a bit of a trick: make a backup copy of stdout,
 	// then attach stdout to a pipe, perform the evaluation, then
 	// restore stdout from the backup. Finally, drain the pipe,
 	// printing both to stdout and to the shell socket.
