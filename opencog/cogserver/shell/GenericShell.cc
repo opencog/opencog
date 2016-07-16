@@ -24,7 +24,6 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
-#include <opencog/util/platform.h>
 
 #include <opencog/cogserver/server/ConsoleSocket.h>
 #include <opencog/eval/GenericEval.h>
@@ -171,14 +170,17 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	// Work-around some printing madness. See issue
 	// https://github.com/opencog/atomspace/issues/629
 	// This is kind of complicated to explain, so pay attention:
-	// When runnning scheme, or python, code from the cogserver
-	// shell, that could cause all sorts of things to happen, including
-	// possibly some printing to the stdout file descriptor. That
-	// would normally result in the output going to the terminal in
-	// which the cogserver is running. But we really, actually want
-	// that output to also go back to the shell, where the user can
-	// see it.  The code below, ifdefed PERFORM_STDOUT_DUPLICATION,
-	// does this. Its a bit of a trick: make a backup copy of stdout,
+	// When runnning scheme, or python code, from the cogserver
+	// shell, that code might cause all sorts of things to happen,
+	// including possibly printing to the stdout file descriptor.
+	// The stdout descriptor goes to the terminal in which the
+	// cogserver was started. Which is nice, and all that, but
+	// is usually not quite what the user expected --- and so we
+	// actually want to redirect stdout to the shell, where the user
+	// can see it.
+	//
+	// The code below, ifdefed PERFORM_STDOUT_DUPLICATION, does this.
+	// It's a bit of a trick: make a backup copy of stdout,
 	// then attach stdout to a pipe, perform the evaluation, then
 	// restore stdout from the backup. Finally, drain the pipe,
 	// printing both to stdout and to the shell socket.
@@ -186,12 +188,16 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 #ifdef PERFORM_STDOUT_DUPLICATION
 	// What used to be stdout will now go to the pipe.
 	int pipefd[2];
-	int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
-	OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
-	int stdout_backup = dup(fileno(stdout));
-	OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
-	rc = dup2(pipefd[1], fileno(stdout));
-	OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
+	int stdout_backup = -1;
+	if (show_output and show_prompt)
+	{
+		int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
+		OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
+		stdout_backup = dup(fileno(stdout));
+		OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
+		rc = dup2(pipefd[1], fileno(stdout));
+		OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
+	}
 #endif // PERFORM_STDOUT_DUPLICATION
 
 	// Launch the evaluator, possibly in a different thread,
@@ -205,34 +211,37 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	}
 
 #ifdef PERFORM_STDOUT_DUPLICATION
-	// Restore stdout
-	fflush(stdout);
-	rc = write(pipefd[1], "", 1); // null-terminated string!
-	OC_ASSERT(0 < rc, "GenericShell pipe termination failure");
-	rc = close(pipefd[1]);
-	OC_ASSERT(0 == rc, "GenericShell pipe close failure");
-	rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
-	OC_ASSERT(0 < rc, "GenericShell restore stdout failure");
-
-	// Drain the pipe
-	char buf[4097];
-	int nr = read(pipefd[0], buf, sizeof(buf)-1);
-	OC_ASSERT(0 < rc, "GenericShell pipe read failure");
-	while (0 < nr)
+	if (show_output and show_prompt)
 	{
-		buf[nr] = 0;
-		if (1 < nr or 0 != buf[0])
-		{
-			printf("%s", buf); // print to the cogservers stdout.
-			socket->Send(buf);
-		}
-		nr = read(pipefd[0], buf, sizeof(buf)-1);
-		OC_ASSERT(0 < rc, "GenericShell pipe read failure");
-	}
+		// Restore stdout
+		fflush(stdout);
+		int rc = write(pipefd[1], "", 1); // null-terminated string!
+		OC_ASSERT(0 < rc, "GenericShell pipe termination failure");
+		rc = close(pipefd[1]);
+		OC_ASSERT(0 == rc, "GenericShell pipe close failure");
+		rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
+		OC_ASSERT(0 < rc, "GenericShell restore stdout failure");
 
-	// Cleanup.
-	close(pipefd[0]);
-	close(stdout_backup);
+		// Drain the pipe
+		char buf[4097];
+		int nr = read(pipefd[0], buf, sizeof(buf)-1);
+		OC_ASSERT(0 < rc, "GenericShell pipe read failure");
+		while (0 < nr)
+		{
+			buf[nr] = 0;
+			if (1 < nr or 0 != buf[0])
+			{
+				printf("%s", buf); // print to the cogservers stdout.
+				socket->Send(buf);
+			}
+			nr = read(pipefd[0], buf, sizeof(buf)-1);
+			OC_ASSERT(0 < rc, "GenericShell pipe read failure");
+		}
+
+		// Cleanup.
+		close(pipefd[0]);
+		close(stdout_backup);
+	}
 #endif // PERFORM_STDOUT_DUPLICATION
 
 	// The user is exiting the shell. No one will ever call a method on
