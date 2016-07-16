@@ -67,8 +67,11 @@ void NetworkServer::listen()
     {
         // The handle_connection() callback will delete this
         // class, when the thread exits.
-        ConsoleSocket* ss = new ConsoleSocket(_io_service);
-        _acceptor.accept(ss->getSocket());
+        boost::asio::ip::tcp::socket* sock = new boost::asio::ip::tcp::socket(_io_service);
+        _acceptor.accept(*sock);
+
+        ConsoleSocket* ss = new ConsoleSocket();
+        ss->set_socket(sock);
         std::thread(&ConsoleSocket::handle_connection, ss).detach();
     }
 }
