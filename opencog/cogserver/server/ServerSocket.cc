@@ -183,4 +183,6 @@ void ServerSocket::handle_connection(void)
     _closed = true;
     delete _socket;
     _socket = nullptr;
+
+    delete this;
 }
