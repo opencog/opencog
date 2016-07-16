@@ -168,6 +168,8 @@ void ServerSocket::handle_connection(void)
                 break;
             } else if (e.code() == boost::asio::error::connection_reset) {
                 break;
+            } else if (e.code() == boost::asio::error::not_connected) {
+                break;
             } else {
                 logger().error("ServerSocket::handle_connection(): Error reading data. Message: %s", e.what());
             }
