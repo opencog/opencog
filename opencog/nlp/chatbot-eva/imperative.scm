@@ -33,6 +33,7 @@
 ;
 
 (use-modules (opencog) (opencog query) (opencog exec))
+(use-modules (opencog nlp chatbot-psi))
 
 ;--------------------------------------------------------------------
 ; State and state anchors. These should be thought of as work-arounds,
@@ -122,7 +123,9 @@
 			(begin
 				(State (Anchor "Chatbot: ChatbotEva")
 					(Concept "Chatbot: NoActionTaken"))
-				(display "I don't know how to do that.\n")))
+				(display "I don't know how to do that.\n"))
+			(apply say (list (Word "ok")))
+		)
 	)
 
 	; Reset the current-imperative state, as otherwise, any subsequent
