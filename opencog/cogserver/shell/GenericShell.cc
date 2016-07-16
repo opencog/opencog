@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <mutex>
 #include <thread>
 
 #include <opencog/util/Logger.h>
@@ -155,6 +156,9 @@ void GenericShell::set_socket(ConsoleSocket *s)
 
 /* ============================================================== */
 
+static std::mutex _stdout_redirect_mutex;
+static GenericShell* _redirector = nullptr;
+
 void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 {
 	// XXX A subtle but important point: the way that socket handling
@@ -191,12 +195,17 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	int stdout_backup = -1;
 	if (show_output and show_prompt)
 	{
-		int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
-		OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
-		stdout_backup = dup(fileno(stdout));
-		OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
-		rc = dup2(pipefd[1], fileno(stdout));
-		OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
+		std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
+		if (nullptr == _redirector)
+		{
+			_redirector = this;
+			int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
+			OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
+			stdout_backup = dup(fileno(stdout));
+			OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
+			rc = dup2(pipefd[1], fileno(stdout));
+			OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
+		}
 	}
 #endif // PERFORM_STDOUT_DUPLICATION
 
@@ -213,34 +222,39 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 #ifdef PERFORM_STDOUT_DUPLICATION
 	if (show_output and show_prompt)
 	{
-		// Restore stdout
-		fflush(stdout);
-		int rc = write(pipefd[1], "", 1); // null-terminated string!
-		OC_ASSERT(0 < rc, "GenericShell pipe termination failure");
-		rc = close(pipefd[1]);
-		OC_ASSERT(0 == rc, "GenericShell pipe close failure");
-		rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
-		OC_ASSERT(0 < rc, "GenericShell restore stdout failure");
-
-		// Drain the pipe
-		char buf[4097];
-		int nr = read(pipefd[0], buf, sizeof(buf)-1);
-		OC_ASSERT(0 < rc, "GenericShell pipe read failure");
-		while (0 < nr)
+		std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
+		if (this == _redirector)
 		{
-			buf[nr] = 0;
-			if (1 < nr or 0 != buf[0])
-			{
-				printf("%s", buf); // print to the cogservers stdout.
-				socket->Send(buf);
-			}
-			nr = read(pipefd[0], buf, sizeof(buf)-1);
-			OC_ASSERT(0 < rc, "GenericShell pipe read failure");
-		}
+			_redirector = nullptr;
+			// Restore stdout
+			fflush(stdout);
+			int rc = write(pipefd[1], "", 1); // null-terminated string!
+			OC_ASSERT(0 < rc, "GenericShell pipe termination failure");
+			rc = close(pipefd[1]);
+			OC_ASSERT(0 == rc, "GenericShell pipe close failure");
+			rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
+			OC_ASSERT(0 < rc, "GenericShell restore stdout failure");
 
-		// Cleanup.
-		close(pipefd[0]);
-		close(stdout_backup);
+			// Drain the pipe
+			char buf[4097];
+			int nr = read(pipefd[0], buf, sizeof(buf)-1);
+			OC_ASSERT(0 < rc, "GenericShell pipe read failure");
+			while (0 < nr)
+			{
+				buf[nr] = 0;
+				if (1 < nr or 0 != buf[0])
+				{
+					printf("%s", buf); // print to the cogservers stdout.
+					socket->Send(buf);
+				}
+				nr = read(pipefd[0], buf, sizeof(buf)-1);
+				OC_ASSERT(0 < rc, "GenericShell pipe read failure");
+			}
+
+			// Cleanup.
+			close(pipefd[0]);
+			close(stdout_backup);
+		}
 	}
 #endif // PERFORM_STDOUT_DUPLICATION
 
