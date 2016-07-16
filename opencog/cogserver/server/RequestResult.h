@@ -29,31 +29,24 @@
 #include <mutex>
 #include <string>
 
-#include <opencog/cogserver/server/IRequestComplete.h>
-
 namespace opencog
 {
 /** \addtogroup grp_server
  *  @{
  */
-
 class Request;
-
 
 /**
  * This abstract class defines the API needed to handle a request result.
  *
- * We provide a callback method from the IRequestComplete interface: 
- * 'OnRequestCompleted()'. This callback signals the RequestResult object 
+ * We provide a callback 'OnRequestCompleted()'. This callback indicates
  * that request processing has finished (so that we may 
  * synchronously send the request result to the client but process the 
  * request 'asynchronously' on the cogserver's main thread).
  */
-class RequestResult : public IRequestComplete
+class RequestResult
 {
-
 public:
-
     RequestResult(void) : _use_count(0) {}
     virtual ~RequestResult() {}
 
