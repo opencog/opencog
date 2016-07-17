@@ -79,7 +79,6 @@ ConsoleSocket::~ConsoleSocket()
 void ConsoleSocket::OnConnection()
 {
     logger().debug("[ConsoleSocket] OnConnection");
-    if (isClosed()) return;
 
 #ifdef NOT_RIGHT_NOW
     // Crude attempt to negotiate for a utf-8 clean channel.

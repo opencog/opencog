@@ -43,7 +43,6 @@ class ServerSocket
 {
 private:
     boost::asio::ip::tcp::socket* _socket;
-    bool _closed;
 
 protected:
     /**
@@ -72,12 +71,6 @@ public:
      * Close this socket
      */
     void SetCloseAndDelete(void);
-
-    /**
-     * Check if this socket was closed
-     */
-    bool isClosed();
-
 }; // class
 
 /** @}*/

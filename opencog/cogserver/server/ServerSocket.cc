@@ -31,18 +31,13 @@
 using namespace opencog;
 
 ServerSocket::ServerSocket(void) :
-    _socket(nullptr), _closed(false)
+    _socket(nullptr)
 {
 }
 
 ServerSocket::~ServerSocket()
 {
    logger().debug("ServerSocket::~ServerSocket()");
-}
-
-bool ServerSocket::isClosed()
-{
-    return _closed;
 }
 
 void ServerSocket::Send(const std::string& cmd)
@@ -54,17 +49,14 @@ void ServerSocket::Send(const std::string& cmd)
     // The most likely cause of an error is that the remote side has
     // closed the socket, and we just don't know it yet.  We should
     // maybe not log those errors?
-    if (error && !_closed) {
+    if (error)
         logger().warn("ServerSocket::Send(): %s", error.message().c_str());
-    }
 }
 
 void ServerSocket::SetCloseAndDelete()
 {
-    if (_closed) return;
 
     logger().debug("ServerSocket::SetCloseAndDelete()");
-    _closed = true;
     try
     {
         _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
@@ -125,7 +117,6 @@ match_eol_or_escape(bitter begin, bitter end)
 void ServerSocket::set_socket(boost::asio::ip::tcp::socket* sock)
 {
     _socket = sock;
-    _closed = false;
 }
 
 void ServerSocket::handle_connection(void)
@@ -133,7 +124,7 @@ void ServerSocket::handle_connection(void)
     logger().debug("ServerSocket::handle_connection()");
     OnConnection();
     boost::asio::streambuf b;
-    while (not _closed)
+    while (true)
     {
         try
         {
@@ -148,9 +139,7 @@ void ServerSocket::handle_connection(void)
         }
         catch (const boost::system::system_error& e)
         {
-            if (isClosed()) {
-                break;
-            } else if (e.code() == boost::asio::error::eof) {
+            if (e.code() == boost::asio::error::eof) {
                 break;
             } else if (e.code() == boost::asio::error::connection_reset) {
                 break;
@@ -162,24 +151,19 @@ void ServerSocket::handle_connection(void)
         }
     }
 
-    // Might already be closed from the SetCloseAndelete() method.
-    if (not _closed)
+    try
     {
-        try
+        _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        _socket->close();
+    }
+    catch (const boost::system::system_error& e)
+    {
+        if (e.code() != boost::asio::error::not_connected)
         {
-            _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-            _socket->close();
-        }
-        catch (const boost::system::system_error& e)
-        {
-            if (e.code() != boost::asio::error::not_connected)
-            {
-                logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
-            }
+            logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
         }
     }
 
-    _closed = true;
     delete _socket;
     _socket = nullptr;
 
