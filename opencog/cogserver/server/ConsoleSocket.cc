@@ -60,9 +60,8 @@ ConsoleSocket::~ConsoleSocket()
     std::unique_lock<std::mutex> lck(_mtx);
     while (_use_count) _cv.wait(lck);
 
-    // If there's a shell, let them know that we are going away.
-    // This wouldn't be needed if we had garbage collection.
-    if (_shell) _shell->socketClosed();
+    // If there's a shell, kill it.
+    if (_shell) delete _shell;
 }
 
 // Some random RFC 854 characters

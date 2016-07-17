@@ -83,7 +83,6 @@ class GenericShell
 		virtual ~GenericShell();
 
 		virtual void eval(const std::string &, ConsoleSocket *);
-		virtual void socketClosed(void);
 
 		virtual void hush_output(bool);
 		virtual void hush_prompt(bool);
