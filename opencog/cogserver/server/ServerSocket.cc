@@ -23,7 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/array.hpp>
+#include <mutex>
 
 #include <opencog/cogserver/server/ServerSocket.h>
 #include <opencog/util/Logger.h>
@@ -53,9 +53,15 @@ void ServerSocket::Send(const std::string& cmd)
         logger().warn("ServerSocket::Send(): %s", error.message().c_str());
 }
 
+// As far as I can tell, boost::asio is not actually thread-safe,
+// in particular, when closing and estroying sockets.  This strikes
+// me as incredibly stupid -- a first-class reason to not use boost.
+// But whatever.  Hack around this for now.
+static std::mutex _asio_crash;
+
 void ServerSocket::SetCloseAndDelete()
 {
-
+    std::lock_guard<std::mutex> lock(_asio_crash);
     logger().debug("ServerSocket::SetCloseAndDelete()");
     try
     {
@@ -151,6 +157,7 @@ void ServerSocket::handle_connection(void)
         }
     }
 
+    std::lock_guard<std::mutex> lock(_asio_crash);
     try
     {
         _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
