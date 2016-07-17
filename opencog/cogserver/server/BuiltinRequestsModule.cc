@@ -64,6 +64,7 @@ void BuiltinRequestsModule::registerAgentRequests()
     do_quit_register();
     do_q_register();
     do_ctrld_register();
+    do_dot_register();
 
     do_startAgents_register();
     do_stopAgents_register();
@@ -83,6 +84,7 @@ void BuiltinRequestsModule::unregisterAgentRequests()
     do_quit_unregister();
     do_q_unregister();
     do_ctrld_unregister();
+    do_dot_unregister();
 
     do_startAgents_unregister();
     do_stopAgents_unregister();
@@ -120,6 +122,11 @@ std::string BuiltinRequestsModule::do_q(Request *req, std::list<std::string> arg
 }
 
 std::string BuiltinRequestsModule::do_ctrld(Request *req, std::list<std::string> args)
+{
+    return do_exit(req, args);
+}
+
+std::string BuiltinRequestsModule::do_dot(Request *req, std::list<std::string> args)
 {
     return do_exit(req, args);
 }
