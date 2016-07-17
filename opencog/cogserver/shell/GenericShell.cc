@@ -232,6 +232,7 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	if (self_destruct)
 	{
 		socket->sendPrompt();
+		socket->SetShell(nullptr);
 		delete this;
 	}
 }
