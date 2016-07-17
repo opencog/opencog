@@ -17,16 +17,6 @@ namespace opencog
 
 class ListModulesRequest : public Request
 {
-
-protected:
-
-    HandleSeq _handles;
-    std::ostringstream  _error;
-
-    void sendOutput(void);
-    void sendError (void);
-    bool syntaxError(void);
-
 public:
 
     static inline const RequestClassInfo& info() {

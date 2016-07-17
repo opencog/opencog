@@ -43,8 +43,6 @@ class ServerSocket
 {
 private:
     boost::asio::ip::tcp::socket* _socket;
-    bool _lineProtocol;
-    bool _closed;
 
 protected:
     /**
@@ -53,16 +51,9 @@ protected:
     virtual void OnConnection(void) = 0;
 
     /**
-     * OnLine callback: called when in LineProtocol mode and a new
-     * line is received from the client.
+     * Callback: called when client has a text line to send.
      */
     virtual void OnLine (const std::string&) = 0;
-
-    /**
-     * OnRawData callback: called when LineProtocol is disabled and
-     * new data is received from the client.
-     */
-    virtual void OnRawData (const char*, size_t) = 0;
 
 public:
     ServerSocket(void);
@@ -80,22 +71,6 @@ public:
      * Close this socket
      */
     void SetCloseAndDelete(void);
-
-    /**
-     *Set LineProtocol mode for this socket
-     */
-    void SetLineProtocol(bool);
-
-    /**
-     * Check if this socket is in LineProtocol mode
-     */
-    bool LineProtocol(void);
-
-    /**
-     * Check if this socket was closed
-     */
-    bool isClosed();
-
 }; // class
 
 /** @}*/

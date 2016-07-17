@@ -59,8 +59,6 @@ class ConsoleSocket : public ServerSocket,
                       public RequestResult
 {
 private:
-    Request* _request;
-    std::string _buffer;
     GenericShell *_shell;
 
 protected:
@@ -83,25 +81,11 @@ protected:
      * which will return a useful message to the client.
      *
      * If the request class is found, we instantiate a new request,
-     * set its parameters and push it to the cogserver's request queue
-     * (*unless* the request instance has disabled the line protocol;
-     * see the OnRawData() method documentation).
+     * set its parameters and push it to the cogserver's request queue.
      */
-    void OnLine (const std::string&);
-
-    /**
-     * Some requests may require input that spans multiple lines. To
-     * handle these cases, the request should disable the socket's
-     * line protocol when the method 'Request.setSocket' is called.
-     *
-     * If the line protocol is disabled, this callback will be called
-     * whenever the client sends data to server. Parsing the contents
-     * of input buffer is up to the the request itself.
-     */
-    void OnRawData (const char*, size_t);
+    void OnLine(const std::string&);
 
 public:
-
     /**
      * Ctor. Defines the socket's mime-type as 'text/plain' and then
      * configures the Socket to use line protocol.
@@ -115,11 +99,6 @@ public:
      * "PROMPT") to the client.
      */
     void OnRequestComplete();
-
-    /**
-     * Called when this is assigned to a DataRequest
-     */
-    void SetDataRequest();
 
     /**
      * Sends a request result to the client,

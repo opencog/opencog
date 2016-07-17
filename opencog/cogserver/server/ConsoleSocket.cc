@@ -34,12 +34,9 @@
 
 using namespace opencog;
 
-ConsoleSocket::ConsoleSocket(void) :
-    ServerSocket(),
-    RequestResult("text/plain")
+ConsoleSocket::ConsoleSocket(void)
 {
-    SetLineProtocol(true);
-    _shell = NULL;
+    _shell = nullptr;
 }
 
 ConsoleSocket::~ConsoleSocket()
@@ -63,9 +60,8 @@ ConsoleSocket::~ConsoleSocket()
     std::unique_lock<std::mutex> lck(_mtx);
     while (_use_count) _cv.wait(lck);
 
-    // If there's a shell, let them know that we are going away.
-    // This wouldn't be needed if we had garbage collection.
-    if (_shell) _shell->socketClosed();
+    // If there's a shell, kill it.
+    if (_shell) delete _shell;
 }
 
 // Some random RFC 854 characters
@@ -83,7 +79,6 @@ ConsoleSocket::~ConsoleSocket()
 void ConsoleSocket::OnConnection()
 {
     logger().debug("[ConsoleSocket] OnConnection");
-    if (isClosed()) return;
 
 #ifdef NOT_RIGHT_NOW
     // Crude attempt to negotiate for a utf-8 clean channel.
@@ -155,20 +150,20 @@ void ConsoleSocket::OnLine(const std::string& line)
     logger().debug("params.size(): %d", params.size());
     if (params.empty()) {
         // return on empty/blank line
-        _request = NULL;
-        OnRequestComplete();
+        sendPrompt();
         return;
     }
     std::string cmdName = params.front();
     params.pop_front();
 
     CogServer& cogserver = static_cast<CogServer&>(server());
-    _request = cogserver.createRequest(cmdName);
+    Request* request = cogserver.createRequest(cmdName);
 
     // If the command starts with an open-paren, or a semi-colon, assume
     // its a scheme command. Pop into the scheme shell, and try again.
-    if (_request == NULL and
-        (cmdName[0] == '(' or cmdName[0] == ';')) {
+    if (nullptr == request and
+        (cmdName[0] == '(' or cmdName[0] == ';'))
+    {
         OnLine("scm");
 
         // Re-issue the command, but only if we sucessfully got a shell.
@@ -180,103 +175,44 @@ void ConsoleSocket::OnLine(const std::string& line)
     }
 
     // Command not found.
-    if (_request == NULL) {
+    if (nullptr == request)
+    {
         char msg[256];
         snprintf(msg, 256, "command \"%s\" not found\n", cmdName.c_str());
         logger().warn(msg);
         Send(msg);
 
         // try to send "help" command response
-        _request = cogserver.createRequest("help");
-        if (_request == NULL) {
+        request = cogserver.createRequest("help");
+        if (nullptr == request)
+        {
             // no help request; just terminate the request
-            OnRequestComplete();
+            sendPrompt();
             return;
         }
     }
 
-    _request->setRequestResult(this);
-    _request->setParameters(params);
+    request->setRequestResult(this);
+    request->setParameters(params);
 
-    if (LineProtocol())
+    // We only add the command to the processing queue
+    // if it hasn't disabled the line protocol
+    cogserver.pushRequest(request);
+
+    if (request->isShell())
     {
-        // We only add the command to the processing queue
-        // if it hasn't disabled the line protocol
-        cogserver.pushRequest(_request);
+        logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
 
-        if (_request->isShell())
-        {
-            logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
-
-            // Use a stupid trick to deal with poor architecture.
-#define SECRET_HANDSHAKE ((Request*) 0x1)
-            _request = SECRET_HANDSHAKE;
-            // Force a drain of this request, because we *must* enter
-            // shell mode before handling any additional input from the
-            // socket (since the next input is almost surely intended for
-            // the new shell, not for the cogserver one).
-            //
-            // NOTE: Calling this method for non-shell requests may
-            // cause cogserver to crash due to concurrency issues, since
-            // this runs in a separate thread (for socket handler) instead
-            // of the main thread (where the server loop runs).
-            cogserver.processRequests();
-        }
-    }
-    else
-    {
-        // reset input buffer
-        _buffer.clear();
-    }
-}
-
-/**
- * Buffer up incoming raw data until an end-of-transmission (EOT)
- * is received. After the EOT, dispatch the buffered data as a single
- * request.
- *
- * Note that there is just one ConsoleSocket per client, so the buffer
- * is not shared.
- *
- * XXX the data buffer is currently just a string buffer, so any
- * null char in the data stream will terminate the string. So
- * this method isn't really for "raw" data containing null chars.
- * This should be fixed someday, as needed.
- */
-void ConsoleSocket::OnRawData(const char *buf, size_t len)
-{
-#ifndef __APPLE__
-    char* _tmp = strndup(buf, len);
-    logger().debug("[ConsoleSocket] OnRawData local buffer [%s]", _tmp);
-    free(_tmp);
-#endif
-
-    _buffer.append(buf, len);
-    logger().debug("[ConsoleSocket] OnRawData: global buffer:\n%s\n", _buffer.c_str());
-    size_t buffer_len = _buffer.length();
-    bool rawDataEnd = false;
-    if (buffer_len > 1 && (_buffer.at(buffer_len-1) == 0xa))
-    {
-        if (_buffer.at(buffer_len-2) == 0x4)
-        {
-            rawDataEnd = true;
-        }
-        else if (buffer_len > 2 &&
-                 (_buffer.at(buffer_len-2) == 0xd) &&
-                 (_buffer.at(buffer_len-3) == 0x4))
-        {
-            rawDataEnd = true;
-        }
-    }
-    if (rawDataEnd)
-    {
-        logger().debug("[ConsoleSocket] found EOT; dispatching");
-        // found the EOT pattern. dispatch the request and reset
-        // the socket's line protocol flag
-        _request->addParameter(_buffer);
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        cogserver.pushRequest(_request);
-        SetLineProtocol(true);
+        // Force a drain of this request, because we *must* enter
+        // shell mode before handling any additional input from the
+        // socket (since the next input is almost surely intended for
+        // the new shell, not for the cogserver one).
+        //
+        // NOTE: Calling this method for non-shell requests may
+        // cause cogserver to crash due to concurrency issues, since
+        // this runs in a separate thread (for socket handler) instead
+        // of the main thread (where the server loop runs).
+        cogserver.processRequests();
     }
 }
 
@@ -285,14 +221,7 @@ void ConsoleSocket::OnRequestComplete()
     logger().debug("[ConsoleSocket] OnRequestComplete");
 
     // Shells will send their own prompt
-    if (_request != SECRET_HANDSHAKE)
-        sendPrompt();
-}
-
-void ConsoleSocket::SetDataRequest()
-{
-    logger().debug("[ConsoleSocket] SetDataRequest");
-    SetLineProtocol(false);
+    if (nullptr == _shell) sendPrompt();
 }
 
 void ConsoleSocket::Exit()
