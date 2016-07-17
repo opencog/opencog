@@ -70,7 +70,7 @@
 
 ;-------------------------------------------------------------------------------
 
-(define (reset-all-states)
+(define (reset-all-chatbot-states)
     (State input-utterance no-input-utterance)
     (State aiml default-state)
     (State aiml-reply default-state)

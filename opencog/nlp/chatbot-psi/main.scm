@@ -42,7 +42,7 @@
 ; Schema function for chatting
 
 (define-public (chat utterance)
-    (reset-all-states)
+    (reset-all-chatbot-states)
 
     (let ((sent-node (car (nlp-parse utterance))))
         ; This is for keeping track of whether we have input that has not

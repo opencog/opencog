@@ -88,7 +88,7 @@
     )
 )
 
-(define (say . words)
+(define-public (say . words)
     (define utterance "")
 
     ; This is for getting sentiment info, e.g.
@@ -135,7 +135,7 @@
         )
     )
 
-    (reset-all-states)
+    (reset-all-chatbot-states)
 )
 
 (define (reply anchor)
