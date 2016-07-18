@@ -23,10 +23,10 @@
 ; use of.
 ;
 ; A general OpenPsi rule has the form of if(context) then take(action);
-; these can contain variables, adn can also be classed into different
+; these can contain variables, and can also be classed into different
 ; groups based on the demands that they are fulfilling.
 ;
-; The content below consits entirely of actions to nbe taken; the
+; The content below consits entirely of actions to be taken; the
 ; contexts are in the `self-model.scm` file.  The structure of the
 ; conexts is fairly rigid; these could probably be loosened to a
 ; large degree.
@@ -71,7 +71,7 @@
 ; --------------------------------------------------------
 ; Character engine notes
 ; The character engine is an older incarnation of this code, predating
-; the owyl behavior trees.  The below are notes abouit some of the
+; the owyl behavior trees.  The below are notes about some of the
 ; things it did, and where to look for equivalents here.
 ;
 ; 1) Room-state transtions
