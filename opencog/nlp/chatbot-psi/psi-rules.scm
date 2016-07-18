@@ -281,3 +281,17 @@
         "chatbot_eva"
     )
 )
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "no-other-fast-reply?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: pickup-reply") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "pickup"
+    )
+)

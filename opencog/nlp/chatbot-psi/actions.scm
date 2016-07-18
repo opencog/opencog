@@ -88,6 +88,15 @@
     )
 )
 
+(define (pickup-reply)
+    (let* ((pickup-sents (cog-incoming-set (Concept (chat-prefix "PickupSentence"))))
+           (chosen-sent (list-ref pickup-sents (random (length pickup-sents))))
+           (sent-node (gar chosen-sent))
+           (words (get-word-list sent-node)))
+        (apply say (cog-outgoing-set words))
+    )
+)
+
 (define-public (say . words)
     (define utterance "")
 
