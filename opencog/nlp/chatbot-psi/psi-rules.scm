@@ -282,6 +282,8 @@
     )
 )
 
+; If no reply has been generated after some time, randomly pick one of the
+; "pickup sentences" (extracted from some AIML rule files) and say it
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
