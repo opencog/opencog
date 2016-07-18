@@ -281,3 +281,19 @@
         "chatbot_eva"
     )
 )
+
+; If no reply has been generated after some time, randomly pick one of the
+; "pickup sentences" (extracted from some AIML rule files) and say it
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "no-other-fast-reply?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: pickup-reply") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "pickup"
+    )
+)
