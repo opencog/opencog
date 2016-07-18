@@ -283,10 +283,34 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
+(define-public (psi-get-weighted-satisfiable-rules demand-node)
+"
+  Returns a list of all the psi-rules that are satisfiable and
+  have a non-zero strength
+"
+    (filter
+        (lambda (x) (and (> (cog-stv-strength x) 0)
+            (equal? (stv 1 1) (psi-satisfiable? x))))
+        (psi-get-rules demand-node))
+)
+
+; --------------------------------------------------------------
 (define-public (psi-get-all-satisfiable-rules)
 "
   Returns a list of all the psi-rules that are satisfiable.
 "
     (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
+        (psi-get-all-rules))
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-all-weighted-satisfiable-rules)
+"
+  Returns a list of all the psi-rules that are satisfiable and
+  have a non-zero strength
+"
+    (filter
+        (lambda (x) (and (> (cog-stv-strength x) 0)
+            (equal? (stv 1 1) (psi-satisfiable? x))))
         (psi-get-all-rules))
 )
