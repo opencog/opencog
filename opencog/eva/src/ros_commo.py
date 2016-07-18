@@ -383,7 +383,7 @@ class EvaControl():
 		This function is used for interactively modifying the weight of openpsi
 		rules.
 		"""
-		param_list = yaml.load(rosmsg.get_yaml_for_msg(data.doubles))
+		param_list = yaml.load(rosmsg.get_yaml_for_msg(data.doubles + data.ints))
 		for i in param_list:
 			scm_str = '''(StateLink
 			                 (ListLink
