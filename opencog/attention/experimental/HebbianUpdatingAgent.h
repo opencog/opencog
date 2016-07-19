@@ -42,8 +42,6 @@ namespace opencog
  *  @{
  */
 
-class CogServer;
-
 /**
  * This Agent randomly picks an Atom and updates all the outgoing HebbianLinks
  *
@@ -56,18 +54,6 @@ class HebbianUpdatingAgent : public Agent
 {
 
 private:
-
-    AtomSpace* as;
-
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
-    Logger *log; //!< Logger object for Agent
 
     float targetConjunction(HandleSeq handles);
     void updateHebbianLinks(Handle source);
@@ -83,12 +69,6 @@ public:
     HebbianUpdatingAgent(CogServer&);
     virtual ~HebbianUpdatingAgent();
     virtual void run();
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
 
 }; // class
 

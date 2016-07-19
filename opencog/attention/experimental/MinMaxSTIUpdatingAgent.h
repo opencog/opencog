@@ -55,23 +55,11 @@ class MinMaxSTIUpdatingAgent : public Agent
 
 private:
 
-    AtomSpace* a;
-
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
 
     AttentionValue::sti_t stiFundsBuffer;
     AttentionValue::lti_t ltiFundsBuffer;
-
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
-    Logger *log; //!< Logger object for Agent
 
 public:
 
@@ -84,12 +72,6 @@ public:
     MinMaxSTIUpdatingAgent(CogServer&);
     virtual ~MinMaxSTIUpdatingAgent();
     virtual void run();
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
 
 }; // class
 

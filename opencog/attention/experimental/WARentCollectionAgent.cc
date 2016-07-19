@@ -50,7 +50,7 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
     HandleSeq atoms;
 
-    as->get_all_atoms(atoms);
+    _as->get_all_atoms(atoms);
 
     if (atoms.size() == 0) return;
 

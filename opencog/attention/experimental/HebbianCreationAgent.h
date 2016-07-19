@@ -62,9 +62,6 @@ class HebbianCreationAgent : public Agent
 protected:
     AtomSpace* as;
 
-    void setLogger(Logger* l);
-    Logger *log; //!< Logger object for Agent
-
     void addHebbian(Handle atom,Handle source);
     float targetConjunction(Handle handle1,Handle handle2);
 
@@ -87,11 +84,6 @@ public:
     virtual ~HebbianCreationAgent();
     virtual void run();
 
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
 }; // class
 
 typedef std::shared_ptr<HebbianCreationAgent> HebbianCreationAgentPtr;

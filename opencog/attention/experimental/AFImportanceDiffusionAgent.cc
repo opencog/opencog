@@ -40,14 +40,10 @@ AFImportanceDiffusionAgent::AFImportanceDiffusionAgent(CogServer& cs) :
 {
    set_sleep_time(500);
 }
-AFImportanceDiffusionAgent::~AFImportanceDiffusionAgent(){
-
-}
 
 void AFImportanceDiffusionAgent::run()
 {
     std::cout << "[DEBUG] [AFImportanceDiffusionAgent] started running.\n";
-    as = &_cogserver.getAtomSpace();
 
     while(true){
         spreadDecider->setFocusBoundary(0);

@@ -66,17 +66,6 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
                                   Logger::FINE, true));
 }
 
-void ImportanceDiffusionBase::setLogger(Logger* _log)
-{
-    if (log) delete log;
-    log = _log;
-}
-
-Logger* ImportanceDiffusionBase::getLogger()
-{
-    return log;
-}
-
 /*
  * Set the value of the parameter that determines how much of an atom's STI
  * is available for diffusion at each time step. An atom will not diffuse more
@@ -95,7 +84,7 @@ void ImportanceDiffusionBase::setMaxSpreadPercentage(float percent)
  */
 void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
     HandleSeq resultSet;
-    as->get_handles_by_name(back_inserter(resultSet), "CONFIG-DiffusionPercent");
+    _as->get_handles_by_name(back_inserter(resultSet), "CONFIG-DiffusionPercent");
     if (resultSet.size() > 0) {
         // Given the PredicateNode, walk to the NumberNode
         Handle h = resultSet.front();
@@ -107,7 +96,7 @@ void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
             resultSet = h->getOutgoingSet();
             h = resultSet.front();
         }
-        float value = std::atof(as->get_name(h).c_str());
+        float value = std::atof(_as->get_name(h).c_str());
         setMaxSpreadPercentage(value);
 
 #ifdef DEBUG
@@ -270,8 +259,8 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
 void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
 {
     // Trade STI between the source and target atoms
-    as->set_STI(event.source, as->get_STI(event.source) - event.amount);
-    as->set_STI(event.target, as->get_STI(event.target) + event.amount);
+    _as->set_STI(event.source, _as->get_STI(event.source) - event.amount);
+    _as->set_STI(event.target, _as->get_STI(event.target) + event.amount);
 
 #ifdef DEBUG
     std::cout << "tradeSTI: " << event.amount << " from " << event.source
@@ -305,9 +294,9 @@ HandleSeq ImportanceDiffusionBase::diffusionSourceVector(bool af_only)
     HandleSeq resultSet;
 
     if(af_only)
-        as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
+        _as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
     else
-        as->get_all_atoms(resultSet);
+        _as->get_all_atoms(resultSet);
 
 #ifdef DEBUG
     std::cout << "Calculating diffusionSourceVector." << std::endl;
@@ -320,7 +309,7 @@ HandleSeq ImportanceDiffusionBase::diffusionSourceVector(bool af_only)
         std::remove_if(resultSet.begin(), resultSet.end(),
                        [=](const Handle& h)
                        {
-                           Type type = as->get_type(h);
+                           Type type = _as->get_type(h);
 
 #ifdef DEBUG
                            std::cout << "Checking atom of type: " <<
@@ -449,7 +438,7 @@ ImportanceDiffusionBase::probabilityVectorHebbianAdjacent(
     for (Handle target : targets)
     {
         // Find the hebbian link that connects the source atom to this target
-        Handle link = as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+        Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
 
         // Calculate the discounted diffusion amount based on the link
         // attributes
@@ -565,7 +554,7 @@ AttentionValue::sti_t ImportanceDiffusionBase::calculateDiffusionAmount(
 {
     updateMaxSpreadPercentage();
 
-    return (AttentionValue::sti_t) round(as->get_STI(h) * maxSpreadPercentage);
+    return (AttentionValue::sti_t) round(_as->get_STI(h) * maxSpreadPercentage);
 
     // TODO: Using integers for STI values can cause strange consequences.
     // For example, if the amount to diffuse is 0.4, it will become 0, causing

@@ -57,19 +57,36 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
     conn = _cogserver.getAtomSpace().removeAtomSignal(
             boost::bind(&Agent::atomRemoved, this, _1));
 
-    as = &_cogserver.getAtomSpace();
+    _as = &cs.getAtomSpace();
 }
 
 Agent::~Agent()
 {
     // give back funds
-    as->update_STI_funds(_attentionValue->getSTI());
-    as->update_LTI_funds(_attentionValue->getLTI());
+    _as->update_STI_funds(_attentionValue->getSTI());
+    _as->update_LTI_funds(_attentionValue->getLTI());
 
     resetUtilizedHandleSets();
     conn.disconnect();
     delete stimulatedAtoms;
+
+    if (log)
+        delete log;
 }
+
+void Agent::setLogger(Logger* _log)
+{
+    if (log)
+        delete log;
+    log = _log;
+}
+
+Logger* Agent::getLogger()
+{
+    return log;
+}
+
+
 
 void Agent::setParameters(const std::string* params)
 {
@@ -212,7 +229,7 @@ void Agent::experimentalStimulateAtom(Handle h,float stimulus)
 
 AttentionValue::sti_t Agent::calculate_STI_Wage()
 {
-    int funds = as->get_STI_funds();
+    int funds = _as->get_STI_funds();
     float diff  = funds - targetSTI;
     float ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
@@ -223,7 +240,7 @@ AttentionValue::sti_t Agent::calculate_STI_Wage()
 
 AttentionValue::lti_t Agent::calculate_LTI_Wage()
 {
-    int funds = as->get_LTI_funds();
+    int funds = _as->get_LTI_funds();
     float diff  = funds - targetLTI;
     float ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);

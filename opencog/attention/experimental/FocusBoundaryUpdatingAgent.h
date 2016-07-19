@@ -42,8 +42,6 @@ namespace opencog
  *  @{
  */
 
-class CogServer;
-
 /**
  * This agent updates the Boundary of the AttentionalFocus to equal the top 25%
  * of the STI Range.
@@ -55,21 +53,9 @@ class FocusBoundaryUpdatingAgent : public Agent
 
 private:
 
-    AtomSpace* a;
-
     float afbSize;
 
     AttentionValue::sti_t bottomBoundary;
-
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
-    Logger *log; //!< Logger object for Agent
 
 public:
 
@@ -82,12 +68,6 @@ public:
     FocusBoundaryUpdatingAgent(CogServer&);
     virtual ~FocusBoundaryUpdatingAgent();
     virtual void run();
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
 
 }; // class
 

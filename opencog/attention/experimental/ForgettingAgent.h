@@ -68,16 +68,6 @@ class ForgettingAgent : public Agent
 {
 
 private:
-    AtomSpace* a;
-    Logger *log; //!< Logger object for Agent
-
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
 
 public:
 
@@ -100,12 +90,6 @@ public:
     virtual void run();
 
     void forget();
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
 
 }; // class
 

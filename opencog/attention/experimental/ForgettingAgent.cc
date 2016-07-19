@@ -60,26 +60,9 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     setLogger(new opencog::Logger("ForgettingAgent.log", Logger::WARN, true));
 }
 
-ForgettingAgent::~ForgettingAgent()
-{
-    if (log) delete log;
-}
-
-Logger* ForgettingAgent::getLogger()
-{
-    return log;
-}
-
-void ForgettingAgent::setLogger(Logger* _log)
-{
-    if (log) delete log;
-    log = _log;
-}
-
 void ForgettingAgent::run()
 {
     log->fine("=========== ForgettingAgent::run =======");
-    a = &_cogserver.getAtomSpace();
     forget();
 }
 
@@ -91,7 +74,7 @@ void ForgettingAgent::forget()
     int removalAmount;
     bool recursive;
 
-    a->get_handles_by_type(output2, ATOM, true);
+    _as->get_handles_by_type(output2, ATOM, true);
 
     int asize = atomsVector.size();
     if (asize < (maxSize + accDivSize)) {
@@ -100,7 +83,7 @@ void ForgettingAgent::forget()
 
     fprintf(stdout,"Forgetting Stuff, Atomspace Size: %d \n",asize);
     // Sort atoms by lti, remove the lowest unless vlti is NONDISPOSABLE
-    std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort(a));
+    std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort(_as));
 
     removalAmount = asize - (maxSize - accDivSize);
     log->info("ForgettingAgent::forget - will attempt to remove %d atoms", removalAmount);
@@ -112,10 +95,10 @@ void ForgettingAgent::forget()
         {
             if (atomsVector[i]->getAttentionValue()->getVLTI() == AttentionValue::DISPOSABLE )
             {
-                std::string atomName = a->atom_as_string(atomsVector[i]);
+                std::string atomName = _as->atom_as_string(atomsVector[i]);
                 log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important
-                IncomingSet iset = atomsVector[i]->getIncomingSet(a);
+                IncomingSet iset = atomsVector[i]->getIncomingSet(_as);
                 recursive = true;
                 for (LinkPtr h : iset)
                 {
@@ -129,7 +112,7 @@ void ForgettingAgent::forget()
 
                 atomsVector[i]->setSTI(0);
                 atomsVector[i]->setLTI(0);
-                if (!a->remove_atom(atomsVector[i],recursive)) {
+                if (!_as->remove_atom(atomsVector[i],recursive)) {
                     // Atom must have already been removed through having
                     // previously removed atoms in it's outgoing set.
                     log->error("Couldn't remove atom %s", atomName.c_str());
