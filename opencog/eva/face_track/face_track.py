@@ -114,6 +114,7 @@ class FaceTrack:
 		self.TOPIC_FACE_EVENT = "/camera/face_event"
 		self.EVENT_NEW_FACE = "new_face"
 		self.EVENT_LOST_FACE = "lost_face"
+		self.EVENT_RECOGNIZED_FACE = "recognized_face"
 		# Overrides current face being tracked by WebUI
 		self.EVENT_TRACK_FACE = "track_face"
 
@@ -388,6 +389,9 @@ class FaceTrack:
 
 		elif data.face_event == self.EVENT_TRACK_FACE:
 			self.track_face(data.face_id)
+
+		elif data.face_event == self.EVENT_RECOGNIZED_FACE:
+			self.atomo.face_recognition(data.face_id,data.recognized_id)
 
 	# pi_vision ROS callback, called when pi_vision has new face
 	# location data for us. Because this happens frequently (10x/second)
