@@ -37,6 +37,21 @@ class FaceAtomic:
 		#face = "(NumberNode \"" + str(faceid) + "\" (av 5 0 0))\n"
 		#netcat(self.hostname, self.port, face + "\n")
 
+	def save_snd1(self,x,y,z):
+		snd="(map-ato \"sounds\" (NumberNode \"1\") "+str(x)+" "+str(y)+" "+str(z)+")\n"
+		netcat(self.hostname, self.port, snd + "\n")
+
+	def face_recognition(self,tracker_id,rec_id):
+		'''
+		tracker_id is id for tracking, needs to map to recocgzed or unrecognized rec_id.
+		rec_id is "0" for un recognized face and some other string for recognized face
+		if THIS evaluation link does not exist then face is seen but not determined as known or unknown
+		rec_id is a string and is stored as ConceptNode
+		tracker_id is integer stored as NumberNode
+		'''
+		stl = "(EvaluationLink (Predicate \"name\") (ListLink (ConceptNode \"" + str(tracker_id) + "\") (ConceptNode \"" + rec_id + "\")))\n"
+		#stl = "(StateLink (NumberNode \"" + str(faceid) + "\") (ConceptNode \"" + rec_id +"\"))\n"
+		netcat(self.hostname, self.port, stl + "\n")
 	# Add a newly visible face to the atomspace.
 	def add_face_to_atomspace(self, faceid):
 		face = self.define_face(faceid)
@@ -61,17 +76,21 @@ class FaceAtomic:
 	def define_face(self, faceid):
 		face = "(EvaluationLink (PredicateNode \"visible face\") " + \
 		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n"
+		#stl = "(StateLink (NumberNode \"" + str(faceid) + "\") (ConceptNode \"to-know\"))\n"
 		return face
 
 	# Build string to delete the face, and also to garbage-collect
 	# the ListLink NumberNode.
 	def delete_face(self, faceid):
+		pattern = "(EvaluationLink (Predicate \"name\") (ListLink (ConceptNode \"" + str(faceid) + "\") (VariableNode \"f\")))"
+		del_face = "(cog-execute! (PutLink (DeleteLink "+pattern+") (GetLink "+pattern+")))"
 		face = "(cog-delete " + \
-		       "(EvaluationLink (PredicateNode \"visible face\") " + \
-		       "(ListLink (NumberNode \"" + str(faceid) + "\"))))\n" + \
-		       "(cog-delete " + \
-		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n" + \
-		       "(cog-delete (NumberNode \"" + str(faceid) + "\"))\n"
+				"(EvaluationLink (PredicateNode \"visible face\") " + \
+				"(ListLink (NumberNode \"" + str(faceid) + "\"))))\n" + \
+				del_face + "\n" + \
+				"(cog-delete " + \
+				"(ListLink (NumberNode \"" + str(faceid) + "\")))\n" + \
+				"(cog-delete (NumberNode \"" + str(faceid) + "\"))\n"
 		return face
 
 	# Build string to force attention to focus on the requested face.

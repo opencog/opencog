@@ -397,6 +397,9 @@ class EvaControl():
 
 			self.puta.evaluate_scm(scm_str)
 
+	def pub_snd_face_id(faceid):
+		self.face_sound_pub.publish(faceid)
+
 	def __init__(self):
 
 		self.puta = PutAtoms()
@@ -442,6 +445,10 @@ class EvaControl():
 
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
+
+		self.face_sound_pub = rospy.Publisher("/manyyears/face_id",
+			Int32, queue_size=1)
+
 
 		# ----------------
 		rospy.logwarn("setting up chatbot affect perceive and express links")
