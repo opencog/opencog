@@ -7,6 +7,12 @@ ADD_LIBRARY(attention-experimental SHARED
             RentCollectionBaseAgent
             AFRentCollectionAgent
             WARentCollectionAgent
+
+            ForgettingAgent
+            MinMaxSTIUpdatingAgent
+            FocusBoundaryUpdatingAgent
+            HebbianCreationAgent
+            HebbianUpdatingAgent
 )
 
 ADD_DEPENDENCIES(attention-experimental attention-types)

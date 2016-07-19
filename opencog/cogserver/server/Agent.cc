@@ -33,6 +33,14 @@ using namespace opencog;
 
 Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f)
 {
+    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
+    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
+
+    targetSTI = config().get_int("TARGET_STI_FUNDS");
+    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
+    targetLTI = config().get_int("TARGET_LTI_FUNDS");
+    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
+
     _attentionValue = AttentionValue::DEFAULT_AV();
 
     // an empty set of parameters and defaults (so that various
@@ -48,13 +56,15 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
 
     conn = _cogserver.getAtomSpace().removeAtomSignal(
             boost::bind(&Agent::atomRemoved, this, _1));
+
+    as = &_cogserver.getAtomSpace();
 }
 
 Agent::~Agent()
 {
     // give back funds
-    _cogserver.getAtomSpace().update_STI_funds(_attentionValue->getSTI());
-    _cogserver.getAtomSpace().update_LTI_funds(_attentionValue->getLTI());
+    as->update_STI_funds(_attentionValue->getSTI());
+    as->update_LTI_funds(_attentionValue->getLTI());
 
     resetUtilizedHandleSets();
     conn.disconnect();
@@ -189,3 +199,35 @@ stim_t Agent::getAtomStimulus(Handle h) const
     }
 }
 
+void Agent::experimentalStimulateAtom(Handle h,float stimulus)
+{
+    int sti = h->getAttentionValue()->getSTI();
+    int lti = h->getAttentionValue()->getLTI();
+    int stiWage = calculate_STI_Wage() * stimulus;
+    int ltiWage = calculate_LTI_Wage() * stimulus;
+
+    h->setSTI(sti + stiWage);
+    h->setLTI(lti + ltiWage);
+}
+
+AttentionValue::sti_t Agent::calculate_STI_Wage()
+{
+    int funds = as->get_STI_funds();
+    float diff  = funds - targetSTI;
+    float ndiff = diff / stiFundsBuffer;
+    ndiff = std::min(ndiff,1.0f);
+    ndiff = std::max(ndiff,-1.0f);
+
+    return STIAtomWage + (STIAtomWage * ndiff);
+}
+
+AttentionValue::lti_t Agent::calculate_LTI_Wage()
+{
+    int funds = as->get_LTI_funds();
+    float diff  = funds - targetLTI;
+    float ndiff = diff / ltiFundsBuffer;
+    ndiff = std::min(ndiff,1.0f);
+    ndiff = std::max(ndiff,-1.0f);
+
+    return LTIAtomWage + (LTIAtomWage * ndiff);
+}

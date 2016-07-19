@@ -34,7 +34,8 @@
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
-#include <opencog/attention/SpreadDecider.h>
+//#include <opencog/attention/SpreadDecider.h>
+#include "SpreadDecider.h"
 
 namespace opencog
 {
@@ -44,24 +45,22 @@ namespace opencog
 
 class CogServer;
 
-/** 
+/**
  * Common methods and variables used for Importance diffusion.
  */
-class ImportanceDiffusionBase
+class ImportanceDiffusionBase : public Agent
 {
 private:
     int sleep_time_ms;
-    
+
 protected:
-    AtomSpace* as;
-    CogServer& _cs;
     float maxSpreadPercentage;
     float hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;
     SpreadDecider* spreadDecider;
     void setLogger(Logger* l);
     Logger *log;
-    
+
     typedef struct DiffusionEventType
     {
         Handle source;
@@ -71,13 +70,13 @@ protected:
 
     std::stack<DiffusionEventType> diffusionStack;
     void processDiffusionStack();
-    
+
     virtual void diffuseAtom(Handle);
-    
+
     HandleSeq diffusionSourceVector(bool af_only);
     HandleSeq incidentAtoms(Handle);
     HandleSeq hebbianAdjacentAtoms(Handle);
-    std::map<Handle, double> probabilityVector(HandleSeq);    
+    std::map<Handle, double> probabilityVector(HandleSeq);
     AttentionValue::sti_t calculateDiffusionAmount(Handle);
     float calculateHebbianDiffusionPercentage(Handle);
     float calculateIncidentDiffusionPercentage(Handle);
@@ -87,26 +86,26 @@ protected:
             std::map<Handle, double>, std::map<Handle, double>);
     void tradeSTI(DiffusionEventType);
     void updateMaxSpreadPercentage();
-    
+
     virtual void spreadImportance() = 0;
-    
+
     int get_sleep_time(){
         return sleep_time_ms;
     };
     void set_sleep_time(int ms){
-      sleep_time_ms = ms;  
+      sleep_time_ms = ms;
     };
-     
+
 public:
     enum { HYPERBOLIC, STEP };
     void setSpreadDecider(int type, float shape = 30);
     void setMaxSpreadPercentage(float);
     void setHebbianMaxAllocationPercentage(float);
     void setSpreadHebbianOnly(bool);
-    
+
     ImportanceDiffusionBase(CogServer&);
     virtual ~ImportanceDiffusionBase();
-    
+
     Logger* getLogger();
 }; // class
 

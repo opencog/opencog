@@ -55,7 +55,7 @@ class CogServer;
  * where an extensive explanation of the algorithm, features and pending
  * work is explained.
  */
-class WAImportanceDiffusionAgent : public Agent, public ImportanceDiffusionBase
+class WAImportanceDiffusionAgent : public ImportanceDiffusionBase
 {
   
 private:

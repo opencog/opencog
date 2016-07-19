@@ -47,7 +47,7 @@
 using namespace opencog;
 
 
-ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : _cs(cs)
+ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
 {
     spreadDecider = NULL;
     setSpreadDecider(config().get_int("SPREAD_DECIDER_TYPE"));
@@ -56,8 +56,8 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : _cs(cs)
     setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
     setHebbianMaxAllocationPercentage(
                 config().get_double("HEBBIAN_MAX_ALLOCATION_PERCENTAGE"));
-    
-    // TODO 
+
+    // TODO
     // Read diffusion rate from config file.
 
     // Provide a logger
@@ -151,10 +151,10 @@ void ImportanceDiffusionBase::setSpreadDecider(int type, float shape)
     switch (type) {
     case HYPERBOLIC:
         spreadDecider =
-                (SpreadDecider*) new HyperbolicDecider(_cs, shape);
+                (SpreadDecider*) new HyperbolicDecider(_cogserver, shape);
         break;
     case STEP:
-        spreadDecider = (SpreadDecider*) new StepDecider(_cs);
+        spreadDecider = (SpreadDecider*) new StepDecider(_cogserver);
         break;
     }
 
@@ -174,7 +174,7 @@ ImportanceDiffusionBase::~ImportanceDiffusionBase()
  */
 void ImportanceDiffusionBase::diffuseAtom(Handle source)
 {
-    
+
     // (1) Find the incident atoms that will be diffused to
     HandleSeq incidentAtoms =
             ImportanceDiffusionBase::incidentAtoms(source);
@@ -290,7 +290,7 @@ void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
     // diffuse more STI than it has. This also can cause an atom to not
     // diffuse any STI when the amount to be diffused is less than 1.
     //   * See: https://github.com/opencog/opencog/issues/676
-    
+
 }
 
 /*
@@ -301,9 +301,9 @@ void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
  */
 HandleSeq ImportanceDiffusionBase::diffusionSourceVector(bool af_only)
 {
-    
+
     HandleSeq resultSet;
-    
+
     if(af_only)
         as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
     else
@@ -353,7 +353,7 @@ HandleSeq ImportanceDiffusionBase::diffusionSourceVector(bool af_only)
     resultSet.size() << "\n";
 #endif
 
-    
+
     return resultSet;
 }
 
@@ -603,7 +603,7 @@ float ImportanceDiffusionBase::calculateHebbianDiffusionPercentage(
  */
 void ImportanceDiffusionBase::processDiffusionStack()
 {
-    
+
 #ifdef DEBUG
     // Keep track of the total amount of STI traded for debugging
     AttentionValue::sti_t totalAmountTraded = 0;
@@ -625,6 +625,6 @@ void ImportanceDiffusionBase::processDiffusionStack()
     // trades, it should be equal to twice the amount that was diffused
     std::cout << "Total STI traded: " << totalAmountTraded << std::endl;
 #endif
-    
+
 }
 
