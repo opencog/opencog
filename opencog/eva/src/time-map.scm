@@ -66,7 +66,7 @@
 		(bz (string->number(caddr stb))))
 		(angle ax ay az bx by bz))
 )
-
+;assuming common zero in coordinates
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
 (define (angle_face_snd face-id snd-id)
@@ -108,6 +108,17 @@
 	(let* ((lst (get-visible-faces))(falist (map (lambda (x)(list (string->number x) (angle_face_snd1 x))) lst)))
 		(if (< (length falist) 1) 0 (let* ((alist (map (lambda (x)(cdr x))falist))(amin (abs (min alist))))
 			(if (< (/ (* 3.142 10.0) 180.0) amin) (car (car(filter (lambda (x)(< amin (+ (abs (car x)) 0.0001)))alist))) 0))
+		)
+	)
+)
+;;get last sentence id
+(define (get-last-sent-id)
+
+)
+;;below creates say atom for face if sound came from it
+(define (who-said? sent)
+	(let* ((fid (snd1-nearest-face))(sent ))
+		(if (> fid 0) (EvaluationLink (PredicateNode "say")(ListLink (ConceptNode (number->string fid))(SentenceNode sent)))
 		)
 	)
 )

@@ -24,7 +24,7 @@ import tf
 import math
 import logging
 
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, String
 from pi_face_tracker.msg import FaceEvent, Faces
 from blender_api_msgs.msg import Target
 
@@ -144,7 +144,8 @@ class FaceTrack:
 
 		# Which face to look at
 		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
-
+		rospy.Subscriber("perceived_text", String,
+			self.user_said_cb)
 		# Where to look
 		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
 			Target, queue_size=10)
@@ -372,6 +373,9 @@ class FaceTrack:
 		return
 
 	# ----------------------------------------------------------
+
+	def user_said_cb(self,msg):
+		self.atomo.who_spoke(msg.data)
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,

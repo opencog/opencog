@@ -37,6 +37,10 @@ class FaceAtomic:
 		#face = "(NumberNode \"" + str(faceid) + "\" (av 5 0 0))\n"
 		#netcat(self.hostname, self.port, face + "\n")
 
+	def who_spoke(self,stt):
+		spoke = "(who-said? \""+stt+"\")\n"
+		netcat(self.hostname, self.port, spoke + "\n")
+
 	def save_snd1(self,x,y,z):
 		snd="(map-ato \"sounds\" (NumberNode \"1\") "+str(x)+" "+str(y)+" "+str(z)+")\n"
 		netcat(self.hostname, self.port, snd + "\n")
@@ -52,6 +56,7 @@ class FaceAtomic:
 		stl = "(EvaluationLink (Predicate \"name\") (ListLink (ConceptNode \"" + str(tracker_id) + "\") (ConceptNode \"" + rec_id + "\")))\n"
 		#stl = "(StateLink (NumberNode \"" + str(faceid) + "\") (ConceptNode \"" + rec_id +"\"))\n"
 		netcat(self.hostname, self.port, stl + "\n")
+
 	# Add a newly visible face to the atomspace.
 	def add_face_to_atomspace(self, faceid):
 		face = self.define_face(faceid)
