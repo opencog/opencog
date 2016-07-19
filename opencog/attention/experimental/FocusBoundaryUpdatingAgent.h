@@ -1,7 +1,7 @@
 /*
- * opencog/attention/RentCollectionAgent.h
+ * opencog/attention/FocusBoundaryUpdatingAgent.h
  *
- * Written by Misgana Bayetta
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef RENTCOLLECTIONBASE_H
-#define RENTCOLLECTIONBASE_H
+#ifndef _OPENCOG_FOCUS_BOUNDARY_UPDATING_AGENT_H
+#define _OPENCOG_FOCUS_BOUNDARY_UPDATING_AGENT_H
 
 #include <string>
 #include <iostream>
@@ -32,8 +32,9 @@
 #include <opencog/util/recent_val.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Agent.h>
 
 namespace opencog
 {
@@ -44,32 +45,21 @@ namespace opencog
 class CogServer;
 
 /**
- * This Agent collects wages form inside the AttentionalFocus
- *
- * It randomly picks an atom from the Focus and collects the Wage
- * which is calculate depending on the current funds in the Bank
- *
- * The wage is computed as a linar function form the Funds and a Target Value.
- * It is capped to the range 0-2x defaul Wage
- *
- * This Agent is supposed to run in it's own Thread.
+ * This agent updates the Boundary of the AttentionalFocus to equal the top 25%
+ * of the STI Range.
+ * The Boundary will never drop Below 100 STI.
+ * TODO: Implement and upper limit to the number of Atoms in the Focus.
  */
-class RentCollectionBaseAgent : public Agent
+class FocusBoundaryUpdatingAgent : public Agent
 {
 
 private:
-     int sleep_time_ms;
 
-protected:
+    AtomSpace* a;
 
-    AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
-    AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
+    float afbSize;
 
-    AttentionValue::sti_t targetSTI;
-    AttentionValue::sti_t targetLTI;
-
-    AttentionValue::sti_t stiFundsBuffer;
-    AttentionValue::lti_t ltiFundsBuffer;
+    AttentionValue::sti_t bottomBoundary;
 
     /** Set the agent's logger object
      *
@@ -82,8 +72,16 @@ protected:
     Logger *log; //!< Logger object for Agent
 
 public:
-    RentCollectionBaseAgent(CogServer& cs);
-    ~RentCollectionBaseAgent();
+
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::FocusBoundaryUpdatingAgent");
+        return _ci;
+    }
+
+    FocusBoundaryUpdatingAgent(CogServer&);
+    virtual ~FocusBoundaryUpdatingAgent();
+    virtual void run();
 
     /** Return the agent's logger object
      *
@@ -91,23 +89,11 @@ public:
      */
     Logger* getLogger();
 
-    int calculate_STI_Rent();
-    int calculate_LTI_Rent();
-
-    virtual void selectTargets(HandleSeq &targetSetOut) = 0;
-    void run();
-
-    int get_sleep_time(){
-        return sleep_time_ms;
-    };
-    void set_sleep_time(int ms){
-      sleep_time_ms = ms;
-    };
-
 }; // class
+
+typedef std::shared_ptr<FocusBoundaryUpdatingAgent> FocusBoundaryUpdatingAgentPtr;
 
 /** @}*/
 }  // namespace
 
-#endif /* RENTCOLLECTIONBASE_H */
-
+#endif // _OPENCOG_IMPORTANCE_UPDATING_AGENT_H

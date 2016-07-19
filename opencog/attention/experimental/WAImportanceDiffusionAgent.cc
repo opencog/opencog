@@ -32,7 +32,7 @@ using namespace opencog;
 
 
 WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
-    Agent(cs), ImportanceDiffusionBase(cs)
+    ImportanceDiffusionBase(cs)
 {
     set_sleep_time(300);
 }

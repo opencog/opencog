@@ -35,6 +35,12 @@
 #include <opencog/attention/experimental/WAImportanceDiffusionAgent.h>
 #include <opencog/attention/experimental/WARentCollectionAgent.h>
 
+#include <opencog/attention/experimental/ForgettingAgent.h>
+#include <opencog/attention/experimental/MinMaxSTIUpdatingAgent.h>
+#include <opencog/attention/experimental/FocusBoundaryUpdatingAgent.h>
+#include <opencog/attention/experimental/HebbianUpdatingAgent.h>
+#include <opencog/attention/experimental/HebbianCreationAgent.h>
+
 namespace opencog
 {
 /** \addtogroup grp_attention
@@ -44,26 +50,51 @@ namespace opencog
 class ExperimentalAttentionModule : public Module
 {
 
-private:  
-    
+private:
+
     Factory<AFImportanceDiffusionAgent, Agent>  afImportanceFactory;
     Factory<WAImportanceDiffusionAgent, Agent>  waImportanceFactory;
-    
+
     Factory<AFRentCollectionAgent, Agent>  afRentFactory;
     Factory<WARentCollectionAgent, Agent>  waRentFactory;
-   
-    AgentPtr _afImportanceAgentPtr; 
+
+    Factory<ForgettingAgent, Agent> forgettingFactory;
+
+    Factory<MinMaxSTIUpdatingAgent, Agent>  minMaxSTIUpdatingFactory;
+
+    Factory<FocusBoundaryUpdatingAgent, Agent>  focusUpdatingFactory;
+
+    Factory<HebbianUpdatingAgent, Agent> hebbianUpdatingFactory;
+    Factory<HebbianCreationAgent, Agent> hebbianCreationFactory;
+
+    AgentPtr _forgetting_agentptr;
+
+    AgentPtr _minmaxstiupdating_agentptr;
+
+    AgentPtr _focusupdating_agentptr;
+
+    AgentPtr _hebbianupdating_agentptr;
+    AgentPtr _hebbiancreation_agentptr;
+
+    AgentPtr _afImportanceAgentPtr;
     AgentPtr _waImportanceAgentPtr;
-    
+
     AgentPtr _waRentAgentPtr;
     AgentPtr _afRentAgentPtr;
 
+    boost::signals2::connection addAFConnection;
+
+    void addAFSignal(const Handle& h, const AttentionValuePtr& av_old,
+                     const AttentionValuePtr& av_new);
+    void addAFSignalHandler(const Handle& h, const AttentionValuePtr& av_old,
+                            const AttentionValuePtr& av_new);
+
 public:
-    
+
     DECLARE_CMD_REQUEST(ExperimentalAttentionModule, "start-ecan", do_start_ecan,
                         "Starts main ECAN agents\n",
                         "Usage: ecan-start\n", false, true)
- 
+
     static inline const char* id();
 
     ExperimentalAttentionModule(CogServer&);

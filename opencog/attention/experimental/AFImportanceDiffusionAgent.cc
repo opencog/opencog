@@ -2,7 +2,7 @@
  * AFImportanceDiffusionAgent.cc
  *
  * Copyright (C) 2016 Opencog Foundation
- * 
+ *
  * All Rights Reserved
  *
  * Written by Misgana Bayetta <misgana.bayetta@gmail.com>
@@ -36,9 +36,9 @@
 using namespace opencog;
 
 AFImportanceDiffusionAgent::AFImportanceDiffusionAgent(CogServer& cs) :
-    Agent(cs), ImportanceDiffusionBase(cs)
+    ImportanceDiffusionBase(cs)
 {
-   set_sleep_time(500); 
+   set_sleep_time(500);
 }
 AFImportanceDiffusionAgent::~AFImportanceDiffusionAgent(){
 
@@ -46,15 +46,15 @@ AFImportanceDiffusionAgent::~AFImportanceDiffusionAgent(){
 
 void AFImportanceDiffusionAgent::run()
 {
-    std::cout << "[DEBUG] [AFImportanceDiffusionAgent] started running.\n"; 
+    std::cout << "[DEBUG] [AFImportanceDiffusionAgent] started running.\n";
     as = &_cogserver.getAtomSpace();
 
     while(true){
         spreadDecider->setFocusBoundary(0);
-        spreadImportance();        
-        
+        spreadImportance();
+
         //some sleep code
-        std::cout << "[DEBUG] [AFImportanceDiffusionAgent] sleeping for " << get_sleep_time() << "\n"; 
+        std::cout << "[DEBUG] [AFImportanceDiffusionAgent] sleeping for " << get_sleep_time() << "\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
     }
 }
@@ -66,7 +66,7 @@ void AFImportanceDiffusionAgent::run()
 void AFImportanceDiffusionAgent::spreadImportance()
 {
     HandleSeq diffusionSourceVector =  ImportanceDiffusionBase::diffusionSourceVector(true);
-    
+
     // Calculate the diffusion for each source atom, and store the diffusion
     // event in a stack
     for (Handle atomSource : diffusionSourceVector)
@@ -80,10 +80,10 @@ void AFImportanceDiffusionAgent::spreadImportance()
         }
 #ifdef DEBUG
         else
-        {                                                                                                                                                       
+        {
             std::cout << "Did not call diffuseAtom." << std::endl;
         }
-#endif 
+#endif
     }
 
     // Now, process all of the outstanding diffusion events in the diffusion
@@ -157,19 +157,19 @@ void AFImportanceDiffusionAgent::diffuseAtom(Handle source)
     }
 
     // Used for calculating decay amount. Since we will be using per time unit
-    // decay, we need to calculated elapsed time unit since last spreading for 
+    // decay, we need to calculated elapsed time unit since last spreading for
     // adjusting the decay exponent.
     opencog::ecan::chrono_d elapsed_seconds;
     auto now = hr_clock::now();
-    
-    if(first_time){        
+
+    if(first_time){
         elapsed_seconds = now - now;
-        last_spreading_time = now;       
-    
+        last_spreading_time = now;
+
     }else{
-        elapsed_seconds = now - last_spreading_time; 
+        elapsed_seconds = now - last_spreading_time;
     }
-    
+
     // Perform diffusion from the source to each atom target
     typedef std::map<Handle, double>::iterator it_type;
     for(it_type iterator = probabilityVector.begin();
@@ -181,13 +181,13 @@ void AFImportanceDiffusionAgent::diffuseAtom(Handle source)
         // vector for this particular target (stored in iterator->second)
         diffusionEvent.amount = (AttentionValue::sti_t)
                 floor(totalDiffusionAmount * iterator->second);
-        
+
         // TODO Use elapsed seconds and to calculate the diffusion amount.
         // (r_WA)^elapsed_seconds
         // Maintain STI freq bin.
         /*diffusionEvent.amount = (AttentionValue::sti_t)
                 floor(pow ((totalDiffusionAmount * iterator->second),elapsed_seconds));*/
-        
+
         diffusionEvent.source = source;
         diffusionEvent.target = iterator->first;
 
@@ -197,9 +197,9 @@ void AFImportanceDiffusionAgent::diffuseAtom(Handle source)
         // amounts will be calculated in a different way than expected.
         diffusionStack.push(diffusionEvent);
     }
-    
 
-    last_spreading_time = now;    
+
+    last_spreading_time = now;
     first_time = false;
 
     /* ===================================================================== */
