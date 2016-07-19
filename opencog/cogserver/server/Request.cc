@@ -30,7 +30,7 @@
 using namespace opencog;
 
 Request::Request(CogServer& cs) :
-    _cogserver(cs), _requestResult(NULL), _mimeType("text/plain")
+    _cogserver(cs), _requestResult(NULL)
 {
 }
 
@@ -49,7 +49,6 @@ void Request::setRequestResult(RequestResult* rr)
     if (NULL == _requestResult) {
         rr->get();  // inc use count -- we plan to use the req res
         _requestResult = rr;
-        _mimeType = _requestResult->mimeType();
     } else if (NULL == rr) {
         if (_requestResult) _requestResult->put();  // dec use count; we are done with it.
         _requestResult = NULL;  // used by exit/quit commands to not send any result.

@@ -23,59 +23,58 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/bind.hpp>
-#include <boost/array.hpp>
-#include <opencog/util/Logger.h>
+#include <mutex>
+
 #include <opencog/cogserver/server/ServerSocket.h>
+#include <opencog/util/Logger.h>
 
-using namespace opencog; 
+using namespace opencog;
 
-ServerSocket::ServerSocket(boost::asio::io_service& _io_service)
-    : io_service(_io_service), socket(io_service), 
-      lineProtocol(true), closed(false)
+ServerSocket::ServerSocket(void) :
+    _socket(nullptr)
 {
 }
 
-ServerSocket::~ServerSocket() {
+ServerSocket::~ServerSocket()
+{
    logger().debug("ServerSocket::~ServerSocket()");
-}
-
-tcp::socket& ServerSocket::getSocket()
-{
-    return socket;
 }
 
 void ServerSocket::Send(const std::string& cmd)
 {
     boost::system::error_code error;
-    boost::asio::write(socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+    boost::asio::write(*_socket, boost::asio::buffer(cmd),
+                       boost::asio::transfer_all(), error);
 
     // The most likely cause of an error is that the remote side has
     // closed the socket, and we just don't know it yet.  We should
     // maybe not log those errors?
-    if (error && !closed) {
+    if (error)
         logger().warn("ServerSocket::Send(): %s", error.message().c_str());
-    }
 }
+
+// As far as I can tell, boost::asio is not actually thread-safe,
+// in particular, when closing and estroying sockets.  This strikes
+// me as incredibly stupid -- a first-class reason to not use boost.
+// But whatever.  Hack around this for now.
+static std::mutex _asio_crash;
 
 void ServerSocket::SetCloseAndDelete()
 {
+    std::lock_guard<std::mutex> lock(_asio_crash);
     logger().debug("ServerSocket::SetCloseAndDelete()");
-    closed = true;
-    socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    // Avoid crash on socket shutdown. is socket.close() buggy??? 
-    // investigate and FIXME ...
-    // socket.close();
-}
-
-void ServerSocket::SetLineProtocol(bool val)
-{
-    lineProtocol = val;
-}
-
-bool ServerSocket::LineProtocol()
-{
-    return lineProtocol;
+    try
+    {
+        _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        _socket->close();
+    }
+    catch (const boost::system::system_error& e)
+    {
+        if (e.code() != boost::asio::error::not_connected)
+        {
+            logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
+        }
+    }
 }
 
 typedef boost::asio::buffers_iterator<
@@ -90,14 +89,14 @@ typedef boost::asio::buffers_iterator<
 #define DO 0xfd   // Telnet DO
 #define TIMING_MARK 0x6 // Telnet RFC 860 timing mark
 #define TRANSMIT_BINARY 0x0 // Telnet RFC 856 8-bit-clean
-#define CHARSET 0x2A // Telnet RFC 2066 
+#define CHARSET 0x2A // Telnet RFC 2066
 
 
-// Goal: if the user types in a ctrl-C or a ctrl-D, we want to 
+// Goal: if the user types in a ctrl-C or a ctrl-D, we want to
 // react immediately to this. A ctrl-D is just the ascii char 0x4
 // while the ctrl-C is wrapped in a telnet "interpret as command"
-// IAC byte secquence.  Basically, we want to forward all IAC 
-// sequences immediately, as well as the ctrl-D. 
+// IAC byte secquence.  Basically, we want to forward all IAC
+// sequences immediately, as well as the ctrl-D.
 //
 // Currently not implemented, but could be: support for the arrow
 // keys, which generate the sequence 0x1b 0x5c A B C or D.
@@ -121,62 +120,59 @@ match_eol_or_escape(bitter begin, bitter end)
     return std::make_pair(i, false);
 }
 
-void ServerSocket::handle_connection(ServerSocket* ss)
+void ServerSocket::set_socket(boost::asio::ip::tcp::socket* sock)
+{
+    _socket = sock;
+}
+
+void ServerSocket::handle_connection(void)
 {
     logger().debug("ServerSocket::handle_connection()");
-    ss->OnConnection();
+    OnConnection();
     boost::asio::streambuf b;
-    for (;;) 
+    while (true)
     {
-        try {
-            if (ss->LineProtocol()) 
-            {
-                //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
-                boost::asio::read_until(ss->getSocket(), b, match_eol_or_escape);
-                //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
-                std::istream is(&b);
-                std::string line;
-                std::getline(is, line); 
-                if (!line.empty() && line[line.length()-1] == '\r') {
-                    line.erase(line.end()-1);
-                }
-                //logger().debug("%p: ServerSocket::handle_connection(): Got new line: %s", ss, line.c_str());
-                ss->OnLine(line);
+        try
+        {
+            boost::asio::read_until(*_socket, b, match_eol_or_escape);
+            std::istream is(&b);
+            std::string line;
+            std::getline(is, line);
+            if (!line.empty() && line[line.length()-1] == '\r') {
+                line.erase(line.end()-1);
             }
-            else {
-                boost::array<char, 128> buf;
-                boost::system::error_code error;
-                size_t len = ss->getSocket().read_some(boost::asio::buffer(buf), error);
-                if (error == boost::asio::error::eof)
-                    break; // Connection closed cleanly by peer.
-                else if (error)
-                    throw boost::system::system_error(error); // Some other error.
-
-                ss->OnRawData(buf.data(), len);
-            }
-        } catch (boost::system::system_error& e) {
-            if (ss->isClosed()) {
-                break;
-            } else if (e.code() == boost::asio::error::eof) {
+            OnLine(line);
+        }
+        catch (const boost::system::system_error& e)
+        {
+            if (e.code() == boost::asio::error::eof) {
                 break;
             } else if (e.code() == boost::asio::error::connection_reset) {
+                break;
+            } else if (e.code() == boost::asio::error::not_connected) {
                 break;
             } else {
                 logger().error("ServerSocket::handle_connection(): Error reading data. Message: %s", e.what());
             }
         }
     }
-    delete ss;
-}
 
-void ServerSocket::start()
-{
-    logger().debug("ServerSocket::start()");
-    connectionThread = boost::thread(boost::bind(&handle_connection, this));
-}
+    std::lock_guard<std::mutex> lock(_asio_crash);
+    try
+    {
+        _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        _socket->close();
+    }
+    catch (const boost::system::system_error& e)
+    {
+        if (e.code() != boost::asio::error::not_connected)
+        {
+            logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
+        }
+    }
 
-bool ServerSocket::isClosed()
-{
-    return closed;
-}
+    delete _socket;
+    _socket = nullptr;
 
+    delete this;
+}

@@ -151,17 +151,13 @@ class CogServer;
     virtual ~do_cmd##Request() {};                                    \
     virtual bool execute(void) {                                      \
         logger().debug("[" cmd_str " Request] execute");              \
-        std::ostringstream oss;                                       \
                                                                       \
         mod_type* mod =                                               \
             static_cast<mod_type *>(_cogserver.getModule(             \
                  "opencog::" #mod_type));                             \
                                                                       \
         std::string rs = mod->do_cmd(this, _parameters);              \
-        oss << rs;                                                    \
-                                                                      \
-        if (_mimeType == "text/plain")                                \
-            send(oss.str());                                          \
+        send(rs);                                                     \
         return true;                                                  \
     }                                                                 \
     virtual bool isShell(void) {                                      \
@@ -249,16 +245,12 @@ class CogServer;
  */
 class Request
 {
-
 protected:
-
     CogServer&             _cogserver;
     RequestResult*         _requestResult;
     std::list<std::string> _parameters;
-    std::string            _mimeType;
 
 public:
-
     /** Request's constructor */
     Request(CogServer&);
 
