@@ -1,8 +1,7 @@
 /*
  * opencog/attention/HebbianUpdatingAgent.cc
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -89,7 +88,7 @@ void HebbianUpdatingAgent::run()
 
     updateHebbianLinks(source);
 
-  //Experimental Coce
+  //Experimental Code
   //HandleSeq targetSet = get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
 
   //for (Handle target : targetSet)
@@ -131,21 +130,11 @@ void HebbianUpdatingAgent::updateHebbianLinks(Handle source)
         old_tc = oldtv->getMean();
         tc = tcDecayRate * new_tc + (1.0f - tcDecayRate) * old_tc;
 
-        //if (tc < 0)
-        //  printf("old_tc: %f new_tc: %f  tc: %f \n",old_tc,new_tc,tc);
-
         //update truth value accordingly
         TruthValuePtr newtv = SimpleTruthValue::createTV(tc, 0.01);
         h->merge(newtv);
 
-      //truthvalueptr mergedTV = h->getTruthValue();
-      //if (mergedTV->getMean() == 0.5) {
-      //    printf(("NewTV: " + newtv->toString() + " ").c_str());
-      //    printf(("OldTV: " + oldtv->toString() + " ").c_str());
-      //    printf(("MergedTV: " + mergedTV->toString() + "\n").c_str());
-      //}
     }
-    //h->setTruthValue(SimpleTruthValue::createTV(tc, 1));
 }
 
 float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)

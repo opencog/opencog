@@ -34,8 +34,7 @@
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
-//#include <opencog/attention/SpreadDecider.h>
-#include "SpreadDecider.h"
+#include <opencog/attention/SpreadDecider.h>
 
 namespace opencog
 {

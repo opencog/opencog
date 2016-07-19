@@ -1,8 +1,7 @@
 /*
  * opencog/attention/HebbianCreationAgent.cc
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,8 +43,8 @@ HebbianCreationAgent::HebbianCreationAgent(CogServer& cs) :
     log = NULL;
     setLogger(new opencog::Logger("HebbianCreationAgent.log", Logger::FINE, true));
 
-    maxLinkNum = 300;
-    localToFarLinks = 5;
+    maxLinkNum = config().get_int("ECAN_MAXLINKS");
+    localToFarLinks = config().get_int("ECAN_LOCAL_FAR_LINK_RATIO");
 
     as = &_cogserver.getAtomSpace();
 }
@@ -91,6 +90,9 @@ void HebbianCreationAgent::run()
                                        attentionalFocus.end(),
                                        source), attentionalFocus.end());
 
+    if (source == Handle::UNDEFINED)
+        return;
+
     // Get the neighboring atoms, where the connecting edge
     // is an AsymmetricHebbianLink in either direction
     HandleSeq existingAsSource =
@@ -116,25 +118,21 @@ void HebbianCreationAgent::run()
     for (Handle atom : needToBeSource) {
         if (atom == Handle::UNDEFINED)
             continue;
-        if (source == Handle::UNDEFINED)
-            return;
         addHebbian(atom,source);
-        count++;
     }
 
     for (Handle atom : needToBeTarget) {
         if (atom == Handle::UNDEFINED)
             continue;
-        if (source == Handle::UNDEFINED)
-            return;
         addHebbian(source,atom);
+        count++;
     }
 
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0,notAttentionalFocus.size()-1);
 
     //How many links outside the AF should be created
-    int farLinks = count > localToFarLinks ? count / localToFarLinks : 1;
+    int farLinks = round(count / localToFarLinks);
 
     Handle link = Handle::UNDEFINED;
     Handle target = Handle::UNDEFINED;
@@ -167,9 +165,9 @@ void HebbianCreationAgent::run()
     }
 }
 
-void HebbianCreationAgent::addHebbian(Handle atom,Handle source)
+void HebbianCreationAgent::addHebbian(Handle source,Handle target)
 {
-    Handle link = as->add_link(ASYMMETRIC_HEBBIAN_LINK, atom, source);
+    Handle link = as->add_link(ASYMMETRIC_HEBBIAN_LINK, source, target);
     link->setTruthValue(SimpleTruthValue::createTV(0.5, 0.1));
     link->setVLTI(1);
 }

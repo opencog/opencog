@@ -1,8 +1,7 @@
 /*
  * opencog/attention/MinMaxSTIUpdatingAgent.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify

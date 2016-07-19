@@ -1,8 +1,7 @@
 /*
  * opencog/attention/FocusBoundaryUpdatingAgent.cc
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -51,11 +50,8 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
     setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE,
     true));
 
-    cap_size = 20;
-
-    std::string file_name = std::string(PROJECT_SOURCE_DIR)
-            + "/opencog/attention/experiment/visualization/dump";
-    remove((file_name + "-fb.data").c_str());
+    afbSize         = (float)(config().get_double("ECAN_AFB_SIZE"));
+    bottomBoundary  = (AttentionValue::sti_t)(config().get_int("ECAN_AFB_BOTTOM"));
 }
 
 FocusBoundaryUpdatingAgent::~FocusBoundaryUpdatingAgent()
@@ -87,50 +83,17 @@ void FocusBoundaryUpdatingAgent::run()
         AttentionValue::sti_t range = maxsti - minsti;
 
         float decay = 0.1;
-        float afbper = 0.20;
 
-        int newafb = maxsti - (range * afbper);
-        int oldafb = afboundary;
+        int newafb = maxsti - (range * afbSize);
+        //int oldafb = afboundary;
 
         afboundary = newafb * decay + (1 - decay) * afboundary;
 
-        AttentionValue::sti_t minimum = 100;
+        afboundary = std::max(afboundary,bottomBoundary);
 
-        afboundary = std::max(afboundary,minimum);
-
-        printf("NewAfb: %d OldAfb: %d Afb: %d \n",newafb,oldafb,afboundary);
-
-      //HandleSeq out;
-      //a->get_handle_set_in_attentional_focus(std::back_inserter(out));
-
-      //if (out.size() > (HandleSeq::size_type) cap_size) {
-      //    //Need this because the STI values could be changed by another thread
-      //    std::vector<AttentionValue::sti_t> stis;
-      //    for (Handle h: out){
-      //        stis.push_back(h->getSTI());
-      //    }
-      //    std::sort(stis.begin(), stis.end(), std::greater<short>());
-
-      //  //int i = 0;
-      //  //for (short s : stis)
-      //  //    printf("Value: %d is %d \n",i++,s);
-
-      //    afboundary = stis[cap_size];
-      //} else {
-      //    afboundary = a->get_attentional_focus_boundary() - 1;
-      //    if (afboundary < 1)
-      //        afboundary = 1;
-      //}
+        //printf("NewAfb: %d OldAfb: %d Afb: %d \n",newafb,oldafb,afboundary);
 
         // Set the AF boundary
         a->set_attentional_focus_boundary(afboundary);
 
-        std::string file_name = std::string(PROJECT_SOURCE_DIR)
-                + "/opencog/attention/experiment/visualization/dump";
-        std::ofstream outf(file_name + "-fb.data", std::ofstream::app);
-              outf << "afb" << ","
-                   << afboundary << ","
-                   << system_clock::now().time_since_epoch().count() << "\n";
-              outf.flush();
-              outf.close();
 }

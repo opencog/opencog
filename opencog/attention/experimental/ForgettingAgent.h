@@ -1,8 +1,7 @@
 /*
  * opencog/attention/ForgettingAgent.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -90,11 +89,9 @@ public:
 
     //! Maximum LTI of an atom that can be forgot.
     AttentionValue::lti_t forgetThreshold;
-    //! Percentage of AtomSpace to forget.
-    float forgetPercentage;
 
     //!targetSize of AtomSpace
-    static int maxSize;
+    int maxSize;
     //!acceptable diviation from maxSize;
     int accDivSize;
 
@@ -102,7 +99,7 @@ public:
     virtual ~ForgettingAgent();
     virtual void run();
 
-    void forget(float p);
+    void forget();
 
     /** Return the agent's logger object
      *
