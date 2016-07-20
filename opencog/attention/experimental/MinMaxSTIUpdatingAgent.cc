@@ -47,30 +47,10 @@ MinMaxSTIUpdatingAgent::MinMaxSTIUpdatingAgent(CogServer& cs) :
     true));
 }
 
-MinMaxSTIUpdatingAgent::~MinMaxSTIUpdatingAgent()
-{
-    if (log)
-        delete log;
-}
-
-void MinMaxSTIUpdatingAgent::setLogger(Logger* _log)
-{
-    if (log)
-        delete log;
-    log = _log;
-}
-
-Logger* MinMaxSTIUpdatingAgent::getLogger()
-{
-    return log;
-}
-
 void MinMaxSTIUpdatingAgent::run()
 {
-    a = &_cogserver.getAtomSpace();
-
     HandleSeq atoms;
-    a->get_all_atoms(atoms);
+    _as->get_all_atoms(atoms);
 
     if (atoms.size() == 0)
         return;
@@ -96,6 +76,6 @@ void MinMaxSTIUpdatingAgent::run()
         minSTISeen = maxSTISeen;
     }
 
-    a->update_max_STI(maxSTISeen);
-    a->update_min_STI(minSTISeen);
+    _as->update_max_STI(maxSTISeen);
+    _as->update_min_STI(minSTISeen);
 }

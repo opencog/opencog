@@ -45,24 +45,6 @@ HebbianCreationAgent::HebbianCreationAgent(CogServer& cs) :
 
     maxLinkNum = config().get_int("ECAN_MAXLINKS");
     localToFarLinks = config().get_int("ECAN_LOCAL_FAR_LINK_RATIO");
-
-    as = &_cogserver.getAtomSpace();
-}
-
-HebbianCreationAgent::~HebbianCreationAgent()
-{
-    if (log) delete log;
-}
-
-void HebbianCreationAgent::setLogger(Logger* _log)
-{
-    if (log) delete log;
-    log = _log;
-}
-
-Logger* HebbianCreationAgent::getLogger()
-{
-    return log;
 }
 
 void HebbianCreationAgent::run()
@@ -78,52 +60,45 @@ void HebbianCreationAgent::run()
         return;
 
     HandleSeq notAttentionalFocus;
-    int afb = as->get_attentional_focus_boundary();
-    as->get_handles_by_AV(back_inserter(notAttentionalFocus),0,afb);
+    int afb = _as->get_attentional_focus_boundary();
+    _as->get_handles_by_AV(back_inserter(notAttentionalFocus),0,afb);
 
    // Retrieve the atoms in the AttentionalFocus
-    HandleSeq attentionalFocus;
-    as->get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
+    OrderedHandleSet attentionalFocus;
+    _as->get_handle_set_in_attentional_focus(std::inserter(attentionalFocus,attentionalFocus.begin()));
 
     // Exclude the source atom
-    attentionalFocus.erase(std::remove(attentionalFocus.begin(),
-                                       attentionalFocus.end(),
-                                       source), attentionalFocus.end());
+    attentionalFocus.erase(source);
 
     if (source == Handle::UNDEFINED)
         return;
 
     // Get the neighboring atoms, where the connecting edge
     // is an AsymmetricHebbianLink in either direction
-    HandleSeq existingAsSource =
+    HandleSeq existingAsSourceHS =
             get_target_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
-    HandleSeq existingAsTarget =
+    HandleSeq existingAsTargetHS =
             get_source_neighbors(source, ASYMMETRIC_HEBBIAN_LINK);
+
+    OrderedHandleSet existingAsSource(existingAsSourceHS.begin(),existingAsSourceHS.end());
+    OrderedHandleSet existingAsTarget(existingAsTargetHS.begin(),existingAsTargetHS.end());
 
     // Get the set differences between the AttentionalFocus
     // and the sets of existing sources and targets
-    std::sort(existingAsSource.begin(), existingAsSource.end());
-    std::sort(existingAsTarget.begin(), existingAsTarget.end());
-    std::sort(attentionalFocus.begin(), attentionalFocus.end());
-    HandleSeq needToBeSource = set_difference(attentionalFocus,
+    OrderedHandleSet needToBeSource = set_difference(attentionalFocus,
                                               existingAsSource);
-    HandleSeq needToBeTarget = set_difference(attentionalFocus,
+    OrderedHandleSet needToBeTarget = set_difference(attentionalFocus,
                                               existingAsTarget);
-
 
     int count = 0;
 
     // Resulting in the sets of nodes that require
     // a new AsymmetricHebbianLink in either direction
-    for (Handle atom : needToBeSource) {
-        if (atom == Handle::UNDEFINED)
-            continue;
+    for (const Handle atom : needToBeSource) {
         addHebbian(atom,source);
     }
 
-    for (Handle atom : needToBeTarget) {
-        if (atom == Handle::UNDEFINED)
-            continue;
+    for (const Handle atom : needToBeTarget) {
         addHebbian(source,atom);
         count++;
     }
@@ -134,23 +109,16 @@ void HebbianCreationAgent::run()
     //How many links outside the AF should be created
     int farLinks = round(count / localToFarLinks);
 
-    Handle link = Handle::UNDEFINED;
-    Handle target = Handle::UNDEFINED;
-
     //Pick a random target and create the link if it doesn't exist already
     for (int i = 0; i < farLinks; i++) {
-        target = notAttentionalFocus[distribution(generator)];
-        link = as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+        Handle target = notAttentionalFocus[distribution(generator)];
+        Handle link = as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
         if (link == Handle::UNDEFINED)
             addHebbian(source,target);
     }
 
     //Check the ammount of HebbianLinks the Atom has
-    IncomingSet iset = source->getIncomingSet();
-    iset.erase(remove_if(iset.begin(),iset.end(),
-                            [](LinkPtr lp) -> bool {
-                            return !(classserver().isA(lp->getType(), HEBBIAN_LINK));
-                            }),iset.end());
+    IncomingSet iset = source->getIncomingSetByType(HEBBIAN_LINK,true);
 
     //If it is more then the allowed max delete some randomly.
     //TODO: find a simple rule to decide which atoms to forget

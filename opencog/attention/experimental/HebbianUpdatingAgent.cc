@@ -45,26 +45,6 @@ HebbianUpdatingAgent::HebbianUpdatingAgent(CogServer& cs) :
     log = NULL;
     setLogger(new opencog::Logger("HebbianUpdatingAgent.log", Logger::FINE,
     true));
-
-    as = &_cogserver.getAtomSpace();
-}
-
-HebbianUpdatingAgent::~HebbianUpdatingAgent()
-{
-    if (log)
-        delete log;
-}
-
-void HebbianUpdatingAgent::setLogger(Logger* _log)
-{
-    if (log)
-        delete log;
-    log = _log;
-}
-
-Logger* HebbianUpdatingAgent::getLogger()
-{
-    return log;
 }
 
 void HebbianUpdatingAgent::run()
@@ -74,7 +54,7 @@ void HebbianUpdatingAgent::run()
 
     std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
 
-    as->get_handle_set_in_attentional_focus(out_hi);
+    _as->get_handle_set_in_attentional_focus(out_hi);
 
     size = atoms.size();
 
@@ -145,8 +125,8 @@ float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
                 "Size of outgoing set of a hebbian link must be 2.");
     }
 
-    auto normsti_i = as->get_normalised_zero_to_one_STI(handles[0],true,true);
-    auto normsti_j = as->get_normalised_zero_to_one_STI(handles[1],true,true);
+    auto normsti_i = _as->get_normalised_zero_to_one_STI(handles[0],true,true);
+    auto normsti_j = _as->get_normalised_zero_to_one_STI(handles[1],true,true);
     float conj = (normsti_i * normsti_j) + ((normsti_j - normsti_i) * std::abs(normsti_j -normsti_i));
 
     conj = (conj + 1.0f) / 2.0f;

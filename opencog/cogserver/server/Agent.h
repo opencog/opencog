@@ -117,7 +117,7 @@ private:
 protected:
     CogServer& _cogserver;
 
-    AtomSpace* as;
+    AtomSpace* _as;
 
     /** Note: AttentionValue itself is read-only, so no need to protect, but
      * the pointer needs and is protected */
@@ -166,7 +166,23 @@ protected:
     AttentionValue::sti_t stiFundsBuffer;
     AttentionValue::lti_t ltiFundsBuffer;
 
+    /** Set the agent's logger object
+     *
+     * Note, this will be deleted when this agent is.
+     *
+     * @param l The logger to associate with the agent.
+     */
+    void setLogger(Logger* l);
+
+    Logger *log; //!< Logger object for Agent
+
 public:
+
+    /** Return the agent's logger object
+     *
+     * @return A logger object.
+     */
+    Logger* getLogger();
 
     /** Agent's constructor. By default, initializes the frequency to 1. */
     Agent(CogServer&, const unsigned int f = 1);

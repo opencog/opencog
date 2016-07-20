@@ -54,31 +54,12 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
     bottomBoundary  = (AttentionValue::sti_t)(config().get_int("ECAN_AFB_BOTTOM"));
 }
 
-FocusBoundaryUpdatingAgent::~FocusBoundaryUpdatingAgent()
-{
-    if (log)
-        delete log;
-}
-
-void FocusBoundaryUpdatingAgent::setLogger(Logger* _log)
-{
-    if (log)
-        delete log;
-    log = _log;
-}
-
-Logger* FocusBoundaryUpdatingAgent::getLogger()
-{
-    return log;
-}
-
 void FocusBoundaryUpdatingAgent::run()
 {
-        a = &_cogserver.getAtomSpace();
-        AttentionValue::sti_t afboundary = a->get_attentional_focus_boundary();
+        AttentionValue::sti_t afboundary = _as->get_attentional_focus_boundary();
 
-        AttentionValue::sti_t maxsti = a->get_max_STI();
-        AttentionValue::sti_t minsti = a->get_min_STI();
+        AttentionValue::sti_t maxsti = _as->get_max_STI();
+        AttentionValue::sti_t minsti = _as->get_min_STI();
 
         AttentionValue::sti_t range = maxsti - minsti;
 
@@ -94,6 +75,6 @@ void FocusBoundaryUpdatingAgent::run()
         //printf("NewAfb: %d OldAfb: %d Afb: %d \n",newafb,oldafb,afboundary);
 
         // Set the AF boundary
-        a->set_attentional_focus_boundary(afboundary);
+        _as->set_attentional_focus_boundary(afboundary);
 
 }

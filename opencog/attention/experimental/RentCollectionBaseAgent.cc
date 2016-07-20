@@ -40,8 +40,6 @@ using namespace opencog;
 RentCollectionBaseAgent::RentCollectionBaseAgent(CogServer& cs) :
     Agent(cs)
 {
-    as = &cs.getAtomSpace();
-
     // init starting wages/rents. these should quickly change and reach
     // stable values, which adapt to the system dynamics
     STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
@@ -56,24 +54,6 @@ RentCollectionBaseAgent::RentCollectionBaseAgent(CogServer& cs) :
     log = NULL;
     setLogger(new opencog::Logger("RentCollectionAgent.log", Logger::FINE,
     true));
-}
-
-RentCollectionBaseAgent::~RentCollectionBaseAgent()
-{
-    if (log)
-        delete log;
-}
-
-void RentCollectionBaseAgent::setLogger(Logger* _log)
-{
-    if (log)
-        delete log;
-    log = _log;
-}
-
-Logger* RentCollectionBaseAgent::getLogger()
-{
-    return log;
 }
 
 void RentCollectionBaseAgent::run()
@@ -108,7 +88,7 @@ void RentCollectionBaseAgent::run()
 
 int RentCollectionBaseAgent::calculate_STI_Rent()
 {
-    int funds = as->get_STI_funds();
+    int funds = _as->get_STI_funds();
     float diff  = targetSTI - funds;
     float ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
@@ -126,7 +106,7 @@ int RentCollectionBaseAgent::calculate_STI_Rent()
 
 int RentCollectionBaseAgent::calculate_LTI_Rent()
 {
-    int funds = as->get_LTI_funds();
+    int funds = _as->get_LTI_funds();
     float diff  = targetLTI - funds;
     float ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);

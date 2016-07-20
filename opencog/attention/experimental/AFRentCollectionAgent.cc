@@ -48,5 +48,5 @@ AFRentCollectionAgent::~AFRentCollectionAgent() {
 void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
         std::back_insert_iterator< std::vector<Handle> > out_hi(targetSetOut);
-        as->get_handle_set_in_attentional_focus(out_hi);
+        _as->get_handle_set_in_attentional_focus(out_hi);
 }

@@ -57,8 +57,6 @@ protected:
     float hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;
     SpreadDecider* spreadDecider;
-    void setLogger(Logger* l);
-    Logger *log;
 
     typedef struct DiffusionEventType
     {
@@ -98,14 +96,12 @@ public:
     ImportanceDiffusionBase(CogServer&);
     virtual ~ImportanceDiffusionBase();
 
-    Logger* getLogger();
-    
     int get_sleep_time(){
         return sleep_time_ms;
     }
-    
+
     void set_sleep_time(int ms){
-      sleep_time_ms = ms;  
+      sleep_time_ms = ms;
     }
 
 }; // class
