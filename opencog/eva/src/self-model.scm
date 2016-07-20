@@ -403,15 +403,19 @@
 		(DefinedSchemaNode "Num visible faces")
 		(NumberNode 1)))
 
+;; Get the face-id of all the acknowledged faces.
+(DefineLink
+	(DefinedSchema "Get acknowledged faces")
+	(Get
+	   (TypedVariable (Variable "$face-id") (Type "NumberNode"))
+	   (Evaluation (Predicate "acked face")
+		   (ListLink (Variable "$face-id")))
+	))
 
 ;; Randomly select a face out of the crowd.
 (DefineLink
 	(DefinedSchema "Select random face")
-	(RandomChoice (Get
-		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
-		(Evaluation (Predicate "acked face")
-			(ListLink (Variable "$face-id")))
-	)))
+	(RandomChoice (DefinedSchema "Get acknowledged faces")))
 
 ;; Randomly glance at someone (who we are not currently making
 ;; eye-contact with)
