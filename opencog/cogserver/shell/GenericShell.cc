@@ -161,20 +161,6 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	// What used to be stdout will now go to the pipe.
 	int pipefd[2];
 	int stdout_backup = -1;
-	if (show_output and show_prompt)
-	{
-		std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
-		if (nullptr == _redirector)
-		{
-			_redirector = this;
-			int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
-			OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
-			stdout_backup = dup(fileno(stdout));
-			OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
-			rc = dup2(pipefd[1], fileno(stdout));
-			OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
-		}
-	}
 #endif // PERFORM_STDOUT_DUPLICATION
 
 	// Launch the evaluator, possibly in a different thread,
@@ -191,6 +177,17 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	if (show_output and show_prompt)
 	{
 		std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
+		if (nullptr == _redirector)
+		{
+			_redirector = this;
+			int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
+			OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
+			stdout_backup = dup(fileno(stdout));
+			OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
+			rc = dup2(pipefd[1], fileno(stdout));
+			OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
+		}
+
 		if (this == _redirector)
 		{
 			_redirector = nullptr;
