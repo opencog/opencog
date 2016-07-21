@@ -504,7 +504,7 @@
 	(DefinedPredicate "look at person")
 	(SequentialAnd
 		;; Issue the look-at command, only if there is someone to
-		;; make eye conact with.
+		;; make eye contact with.
 		(NotLink (Equal
 			(Get (State eye-contact-state (Variable "$x")))
 			(SetLink no-interaction)))

@@ -64,21 +64,21 @@
 ; Assorted debugging utilities.
 ;
 ;; Display the current room state
-(define (show-visible-faces)
+(define-public (show-visible-faces)
 	(define visible-face (PredicateNode "visible face"))
 	(map (lambda (x) (car (cog-outgoing-set x)))
 	(cog-chase-link 'EvaluationLink 'ListLink visible-face)))
 
-(define (show-acked-faces)
+(define-public (show-acked-faces)
 	(define acked-face (PredicateNode "acked face"))
 	(map (lambda (x) (car (cog-outgoing-set x)))
 	(cog-chase-link 'EvaluationLink 'ListLink acked-face)))
 
-(define (show-room-state)
+(define-public (show-room-state)
 	(car (cog-chase-link 'StateLink 'ConceptNode room-state)))
 
 
-(define (show-eye-contact-state)
+(define-public (show-eye-contact-state)
 	(define e-c-state (Anchor "Eye Contact State"))
 	(car (cog-chase-link 'StateLink 'NumberNode e-c-state)))
 

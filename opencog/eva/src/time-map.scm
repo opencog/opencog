@@ -116,11 +116,6 @@
 		(stv 1 1)
 )
 
-(define (show-visible-faces)
-        (define visible-face (PredicateNode "visible face"))
-        (map (lambda (x) (car (cog-outgoing-set x)))
-        (cog-chase-link 'EvaluationLink 'ListLink visible-face)))
-
 ;;get string of face-id's seperated by space - call python split() function
 ;;in scheme itself list of number nodes
 (define (get-visible-faces)
