@@ -26,5 +26,6 @@ INSTALL (TARGETS scm2pgsql RUNTIME DESTINATION "bin")
 INSTALL (FILES
 	SCMLoader.h
 	PGStorageDelegate.h
+	SCMLoaderCallback.h
 	DESTINATION "include/${PROJECT_NAME}/nlp/scm2pgsql"
 )

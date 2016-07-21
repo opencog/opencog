@@ -28,6 +28,8 @@
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>
 
+#include "SCMLoaderCallback.h"
+
 namespace opencog
 {
 namespace nlp
@@ -55,12 +57,14 @@ public:
      * @return true if the passed file is somehow unusable or false otherwise
      * @param fileName Full path of the file to be parsed
      * @param atomSpace The AtomSpace to be populated
+     * @param callbackListener An object that will be notified just before and
+     * just after each toplevel atom insertion.
      */
-    static bool load(const std::string &fileName, AtomSpace &atomSpace);
+    static bool load(const std::string &fileName, AtomSpace &atomSpace, SCMLoaderCallback *callbackListener = NULL);
 
 private:
 
-    static void parseFile(std::fstream &fin, AtomSpace &atomSpace, int fileSize = -1);
+    static void parseFile(std::fstream &fin, AtomSpace &atomSpace, int fileSize, SCMLoaderCallback *callbackListener);
 };
 
 }

@@ -5,7 +5,9 @@
 using namespace opencog;
 using namespace opencog::nlp;
 
-bool SCMLoader::load(const std::string &fileName, AtomSpace &atomSpace)
+bool SCMLoader::load(const std::string &fileName, 
+                     AtomSpace &atomSpace, 
+                     SCMLoaderCallback *listener)
 {
     bool exitValue = false;
 
@@ -16,7 +18,7 @@ bool SCMLoader::load(const std::string &fileName, AtomSpace &atomSpace)
         int fileSize = fcount.tellg();
         fcount.close();
         logger().info("Loading file: \"%s\"", fileName.c_str());
-        parseFile(fin, atomSpace, fileSize);
+        parseFile(fin, atomSpace, fileSize, listener);
         logger().info("Loading finished.");
         fin.close();
     } else {
@@ -27,7 +29,10 @@ bool SCMLoader::load(const std::string &fileName, AtomSpace &atomSpace)
     return exitValue;
 }
 
-void SCMLoader::parseFile(std::fstream &fin, AtomSpace &atomSpace, int inputFileSize)
+void SCMLoader::parseFile(std::fstream &fin, 
+                          AtomSpace &atomSpace, 
+                          int inputFileSize, 
+                          SCMLoaderCallback *listener)
 {
     SchemeEval *schemeEval = SchemeEval::get_evaluator(&atomSpace);
     int percentDone = 0;
@@ -50,7 +55,9 @@ void SCMLoader::parseFile(std::fstream &fin, AtomSpace &atomSpace, int inputFile
         } else {
             line += c;
             if (firstCharInLine && (c == ')')) {
+                if (listener != NULL) listener->beforeInserting(line);
                 schemeEval->eval(line);
+                //if (listener != NULL) listener->afterInserting(NULL);
                 line = "";
             }
             firstCharInLine = false;
