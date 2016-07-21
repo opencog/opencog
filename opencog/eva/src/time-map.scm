@@ -111,10 +111,6 @@
 		)
 	)
 )
-;;get last sentence id
-(define (get-last-sent-id)
-
-)
 ;;below creates say atom for face if sound came from it
 (define (who-said? sent)
 	(let* ((fid (snd1-nearest-face))(sent ))
