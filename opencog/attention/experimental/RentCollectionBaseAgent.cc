@@ -80,7 +80,6 @@ void RentCollectionBaseAgent::run()
         h->setLTI(lti - ltiRent);
     }
 
-    std::cout << "[DEBUG] [WARentCollectionAgent] sleeping for " << get_sleep_time() << "\n";
     std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
