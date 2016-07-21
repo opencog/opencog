@@ -45,14 +45,12 @@ void AFImportanceDiffusionAgent::run()
 {
     std::cout << "[DEBUG] [AFImportanceDiffusionAgent] started running.\n";
 
-    while(true){
         spreadDecider->setFocusBoundary(0);
         spreadImportance();
 
         //some sleep code
         std::cout << "[DEBUG] [AFImportanceDiffusionAgent] sleeping for " << get_sleep_time() << "\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
-    }
 }
 
 /*
