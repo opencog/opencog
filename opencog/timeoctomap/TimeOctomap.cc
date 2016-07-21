@@ -294,6 +294,18 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const opencog::Handle& at
     return false;
 }
 
+bool TimeOctomap::get_oldest_time_locations_atom_observed(const opencog::Handle& ato,
+                                            const time_pt& from_d,
+                                            point3d_list& result)
+{
+  time_pt tpt;
+  if (!get_oldest_time_elapse_atom_observed(ato,from_d,tpt)) return false;
+  result=get_locations_of_atom_occurence_at_time(tpt,ato);
+  if (result.size()<1)return false;
+  return true;
+}
+
+
 bool TimeOctomap::get_last_time_elapse_atom_observed(const opencog::Handle& ato,
                                             const time_pt& till_d,
                                             time_pt& result)
@@ -316,6 +328,17 @@ bool TimeOctomap::get_last_time_elapse_atom_observed(const opencog::Handle& ato,
        }
     }
     return false;
+}
+
+bool TimeOctomap::get_last_locations_of_atom_observed(const opencog::Handle& ato,
+                                            const time_pt& till_d,
+                                            point3d_list& result)
+{
+  time_pt tpt;
+  if (!get_last_time_elapse_atom_observed(ato,till_d,tpt)) return false;
+  result=get_locations_of_atom_occurence_at_time(tpt,ato);
+  if (result.size()<1)return false;
+  return true;
 }
 
 point3d_list
