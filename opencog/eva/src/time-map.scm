@@ -113,7 +113,7 @@
 )
 ;;below creates say atom for face if sound came from it
 (define (who-said? sent)
-	(let* ((fid (snd1-nearest-face))(sent ))
+	(let* ((fid (snd1-nearest-face)))
 		(if (> fid 0) (EvaluationLink (PredicateNode "say")(ListLink (ConceptNode (number->string fid))(SentenceNode sent)))
 		)
 	)
