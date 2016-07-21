@@ -33,3 +33,20 @@
 
 (define (get-input-utterance-names)
   (get-names (get-input-utterance-atoms)))
+
+(define (get-last-sentence-id)
+  (let* (
+         (query (Bind
+                 (VariableList
+                  (Variable "$sentence")
+                  (Variable "$parse"))
+                 (And (State input-utterance-sentence (Variable "$sentence"))
+                      (Parse (Variable "$parse") (Variable "$sentence")))
+                 (Variable "$sentence")))
+         (results (cog-outgoing-set (cog-bind query))))
+    (if (null? results) '() (first results))))
+
+(define (get-last-rec-id)
+  (let* ((last-recognized-face (Anchor "last-recognized-face"))
+         (results (cog-chase-link 'StateLink 'Concept last-recognized-face)))
+    (if (null? results) '() (first results))))
