@@ -293,6 +293,10 @@ class EvaControl():
 	# The chat_heard message is of type chatbot/ChatMessage
 	# from chatbot.msg import ChatMessage
 	def chat_perceived_text_cb(self, chat_heard):
+		if 'shut up' in chat_heard.utterance.lower():
+			self.tts_control_pub.publish("shutup")
+			return
+
 		if chat_heard.confidence >= 50:
 			self.puta.perceived_text(chat_heard.utterance)
 
@@ -383,7 +387,7 @@ class EvaControl():
 		This function is used for interactively modifying the weight of openpsi
 		rules.
 		"""
-		param_list = yaml.load(rosmsg.get_yaml_for_msg(data.doubles))
+		param_list = yaml.load(rosmsg.get_yaml_for_msg(data.doubles + data.ints))
 		for i in param_list:
 			scm_str = '''(StateLink
 			                 (ListLink
@@ -392,6 +396,9 @@ class EvaControl():
 			                 (NumberNode %f))''' % (i["name"], i["value"])
 
 			self.puta.evaluate_scm(scm_str)
+
+	def pub_snd_face_id(faceid):
+		self.face_sound_pub.publish(faceid)
 
 	def __init__(self):
 
@@ -439,6 +446,10 @@ class EvaControl():
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
 
+		self.face_sound_pub = rospy.Publisher("/manyyears/face_id",
+			Int32, queue_size=1)
+
+
 		# ----------------
 		rospy.logwarn("setting up chatbot affect perceive and express links")
 
@@ -454,6 +465,10 @@ class EvaControl():
 		# Tell the chatbot what sort of affect to apply during
 		# TTS vocalization. (Huhh???)
 		self.affect_pub = rospy.Publisher("chatbot_affect_express",
+		                                  String, queue_size=1)
+
+		# Used to stop the vocalization.
+		self.tts_control_pub = rospy.Publisher("tts_control",
 		                                  String, queue_size=1)
 
 		# String text of what the robot heard (from TTS)
