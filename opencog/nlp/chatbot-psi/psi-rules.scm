@@ -258,6 +258,8 @@
     )
 )
 
+; TODO: Merge both pkd and blogs into one, and set this as another psi
+; controlled rule as well?
 (psi-rule
     (list (SequentialAnd
         (DefinedPredicate "random-sentence-generated?")
