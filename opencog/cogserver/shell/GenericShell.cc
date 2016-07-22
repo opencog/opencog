@@ -248,69 +248,70 @@ void GenericShell::line_discipline(const std::string &expr)
 	logger().debug("[GenericShell] line disc: expr, len of %zd ='%s'",
 		len, expr.c_str());
 
-	// Make sure there is at least one character if we are checking
-	// for abort, interrrupt, escape, etc.
-	if (0 != len)
+	if (0 == len)
 	{
-		// Handle Telnet RFC 854 IAC format
-		// Basically, we're looking for telnet-encoded abort or interrupt
-		// characters, starting at the end of the input string. If they
-		// are there, then don't process input, and clear out the evaluator.
-		// Also, be sure to send telnet IAC WILL TIMING-MARK so that telnet
-		// doesn't sit there flushing output forever.
-		//
-		// Search for IAC to at most 20 chars from the end of the string.
-		int i = len-2;
-		int m = len - 20;
-		if (m < 0) m = 0;
-		while (m <= i)
+		do_eval("\n");
+		return;
+	}
+
+	// Handle Telnet RFC 854 IAC format
+	// Basically, we're looking for telnet-encoded abort or interrupt
+	// characters, starting at the end of the input string. If they
+	// are there, then don't process input, and clear out the evaluator.
+	// Also, be sure to send telnet IAC WILL TIMING-MARK so that telnet
+	// doesn't sit there flushing output forever.
+	//
+	// Search for IAC to at most 20 chars from the end of the string.
+	int i = len-2;
+	int m = len - 20;
+	if (m < 0) m = 0;
+	while (m <= i)
+	{
+		unsigned char c = expr[i];
+		if (IAC == c)
 		{
-			unsigned char c = expr[i];
-			if (IAC == c)
+			c = expr[i+1];
+			if ((IP == c) || (AO == c))
 			{
-				c = expr[i+1];
-				if ((IP == c) || (AO == c))
-				{
-					evaluator->clear_pending();
-					put_output(abort_prompt);
-					return;
-				}
-
-				// Erase line -- just ignore this line.
-				if (EL == c)
-				{
-					put_output(get_prompt());
-					return;
-				}
+				evaluator->clear_pending();
+				put_output(abort_prompt);
+				return;
 			}
-			i--;
-		}
 
-		// Don't evaluate if the line is terminated by
-		// escape (^[), cancel (^X) or quit (^C)
-		// These would typically be sent by netcat, and not telnet.
-		unsigned char c = expr[len-1];
-		if ((SYN == c) || (CAN == c) || (ESC == c))
-		{
-			evaluator->clear_pending();
-			put_output("\n");
-			put_output(normal_prompt);
-			return;
+			// Erase line -- just ignore this line.
+			if (EL == c)
+			{
+				put_output(get_prompt());
+				return;
+			}
 		}
+		i--;
+	}
 
-		// Look for either an isolated control-D, or a single period on a line
-		// by itself. This means "leave the shell". We leave the shell by
-		// unsetting the shell pointer in the ConsoleSocket.
-		// 0x4 is ASCII EOT, which is what ctrl-D at keybd becomes.
-		if ((false == evaluator->input_pending()) and
-		    ((EOT == expr[len-1]) or ((1 == len) and ('.' == expr[0]))))
-		{
-			self_destruct = true;
-			put_output("");
-			if (show_prompt)
-				put_output("Exiting the shell\n");
-			return;
-		}
+	// Don't evaluate if the line is terminated by
+	// escape (^[), cancel (^X) or quit (^C)
+	// These would typically be sent by netcat, and not telnet.
+	unsigned char c = expr[len-1];
+	if ((SYN == c) || (CAN == c) || (ESC == c))
+	{
+		evaluator->clear_pending();
+		put_output("\n");
+		put_output(normal_prompt);
+		return;
+	}
+
+	// Look for either an isolated control-D, or a single period on a line
+	// by itself. This means "leave the shell". We leave the shell by
+	// unsetting the shell pointer in the ConsoleSocket.
+	// 0x4 is ASCII EOT, which is what ctrl-D at keybd becomes.
+	if ((false == evaluator->input_pending()) and
+	    ((EOT == expr[len-1]) or ((1 == len) and ('.' == expr[0]))))
+	{
+		self_destruct = true;
+		put_output("");
+		if (show_prompt)
+			put_output("Exiting the shell\n");
+		return;
 	}
 
 	/*
