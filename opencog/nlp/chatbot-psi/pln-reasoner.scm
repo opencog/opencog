@@ -117,7 +117,7 @@
   (let ((last-sentence-id (get-last-sentence-id))
         (last-rec-id (get-last-rec-id))
         ;; rec-ids and names
-        (rec-id-1 20839)
+        (rec-id-1 "20839")
         (name-1 "Nil"))
     (cog-logger-debug "[PLN-Reasoner] last-sentence-id = ~a" last-sentence-id)
     (cog-logger-debug "[PLN-Reasoner] last-rec-id = ~a" last-rec-id)
