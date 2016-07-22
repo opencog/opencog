@@ -74,14 +74,7 @@
             ; No result if it's a ListLink with arity 0
             (if (equal? (cog-arity aiml-resp) 0)
                 (State aiml-reply no-result)
-                (let ((target-rules (cog-chase-link 'MemberLink 'ImplicationLink aiml-reply-rule))
-                      (target-tv (cog-tv (aiml-get-selected-rule))))
-                    (State aiml-reply aiml-resp)
-
-                    ; Update the TVs of the psi-rules that will actually execute
-                    ; the "Reply" action
-                    (map (lambda (r) (cog-set-tv! r target-tv)) target-rules)
-                )
+                (State aiml-reply aiml-resp)
             )
             (State aiml process-finished)
         )
