@@ -103,11 +103,29 @@
 ;;    (List
 ;;       (Concept <rec-id>)
 ;;       (Sentence <sentence-1>)))
+;;
+;; In addition to that it also produces
+;;
+;; (Evaluation
+;;    (Predicate "name")
+;;    (List
+;;       (Concept <rec-id>
+;;       (Word <name>)))
+;;
+;; with specific ids and names.
 (define (put-name-on-the-last-sentence)
   (let ((last-sentence-id (get-last-sentence-id))
-        (last-rec-id (get-last-rec-id)))
+        (last-rec-id (get-last-rec-id))
+        ;; rec-ids and names
+        (rec-id-1 20839)
+        (name-1 "Nil"))
     (cog-logger-debug "[PLN-Reasoner] last-sentence-id = ~a" last-sentence-id)
     (cog-logger-debug "[PLN-Reasoner] last-rec-id = ~a" last-rec-id)
+    (Evaluation
+       (Predicate "name")
+          (List
+             (Concept rec-id-1)
+             (Word name-1)))
     (if (or (null? last-sentence-id) (null? last-rec-id))
         '()
         (Evaluation
