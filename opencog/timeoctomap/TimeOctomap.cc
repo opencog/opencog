@@ -279,9 +279,9 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const opencog::Handle& at
         return false;
     }
     tl.sort();
-    if (from_d>tl.back()){
+    /*if (from_d>tl.back()){
         return false;
-    }
+    }*/
     for (int i=0;i<sz;i++)
     {
        result=tl.front();
