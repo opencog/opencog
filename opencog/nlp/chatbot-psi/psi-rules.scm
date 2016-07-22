@@ -8,11 +8,6 @@
 (define sociality (psi-demand "Sociality" .8))
 
 ;-------------------------------------------------------------------------------
-; Define the tags
-
-(define aiml-reply-rule (Concept (chat-prefix "AIMLReplyRule")))
-
-;-------------------------------------------------------------------------------
 ; Define the psi-rules
 
 (psi-set-controlled-rule
@@ -95,7 +90,9 @@
         (list (SequentialAnd
             (DefinedPredicate "aiml-finished?")
             (DefinedPredicate "is-aiml-reply?")
-            (DefinedPredicate "input-is-about-the-robot?")
+            (SequentialOr
+                (DefinedPredicate "input-is-about-the-robot?")
+                (Not (DefinedPredicate "input-is-a-question?")))
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-reply)))
@@ -106,26 +103,6 @@
     )
 )
 
-(Member
-(psi-set-controlled-rule
-    (psi-rule
-        (list (SequentialAnd
-            (DefinedPredicate "aiml-finished?")
-            (DefinedPredicate "is-aiml-reply?")
-            (Not (DefinedPredicate "input-is-a-question?"))
-            (DefinedPredicate "has-not-replied-anything-yet?")
-        ))
-        (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-reply)))
-        (True)
-        (stv .9 .9)
-        sociality
-        "aiml"
-    )
-)
-    aiml-reply-rule
-)
-
-(Member
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
@@ -144,8 +121,6 @@
         sociality
         "aiml"
     )
-)
-    aiml-reply-rule
 )
 
 (psi-set-controlled-rule
