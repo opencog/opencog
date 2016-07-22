@@ -7,6 +7,7 @@ from opencog.atomspace import AtomSpace, types, TruthValue
 
 import urllib2
 import json
+import nltk
 import threading
 import xml.etree.ElementTree as ET
 
@@ -21,6 +22,8 @@ def set_atomspace(atsp):
 def to_duckduckgo(qq):
     global atomspace
 
+    nltk_splitter = nltk.data.load('tokenizers/punkt/english.pickle')
+
     # Anchor for the result
     answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: DuckDuckGoAnswer')
 
@@ -34,7 +37,8 @@ def to_duckduckgo(qq):
 
     if abstract_text:
         word_nodes = []
-        words = abstract_text.split(' ')
+        sentences = nltk_splitter.tokenize(abstract_text)
+        words = sentences[0].split(' ')
         for word in words:
             word_nodes.append(atomspace.add_node(types.WordNode, word))
         ans = atomspace.add_link(types.ListLink, word_nodes)

@@ -1,5 +1,5 @@
 /*
- * opencog/attention/AFRentCollectionAgent.cc
+ * opencog/attention/MinMaxSTIUpdatingAgent.cc
  *
  * Written by Roman Treutlein
  * All Rights Reserved
@@ -30,23 +30,52 @@
 
 #define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
+#include "MinMaxSTIUpdatingAgent.h"
 
-#include "AFRentCollectionAgent.h"
+#include <opencog/cogserver/server/Agent.h>
 
 //#define DEBUG
 
 using namespace opencog;
 
-AFRentCollectionAgent::AFRentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
+MinMaxSTIUpdatingAgent::MinMaxSTIUpdatingAgent(CogServer& cs) :
+        Agent(cs)
 {
-    set_sleep_time(500);
+    // Provide a logger
+    log = NULL;
+    setLogger(new opencog::Logger("MinMaxSTIUpdatingAgent.log", Logger::FINE,
+    true));
 }
 
-AFRentCollectionAgent::~AFRentCollectionAgent() {
-}
-
-void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
+void MinMaxSTIUpdatingAgent::run()
 {
-        std::back_insert_iterator< std::vector<Handle> > out_hi(targetSetOut);
-        _as->get_handle_set_in_attentional_focus(out_hi);
+    HandleSeq atoms;
+    _as->get_all_atoms(atoms);
+
+    if (atoms.size() == 0)
+        return;
+
+    AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
+    AttentionValue::sti_t minSTISeen = AttentionValue::MAXSTI;
+
+    AttentionValue::sti_t sti;
+
+    for (Handle atom : atoms) {
+        sti = atom->getAttentionValue()->getSTI();
+
+        if (sti > maxSTISeen) {
+            maxSTISeen = sti;
+        }
+
+        if (sti < maxSTISeen) {
+            minSTISeen = sti;
+        }
+    }
+
+    if (minSTISeen > maxSTISeen) {
+        minSTISeen = maxSTISeen;
+    }
+
+    _as->update_max_STI(maxSTISeen);
+    _as->update_min_STI(minSTISeen);
 }

@@ -31,6 +31,7 @@
 using namespace opencog;
 
 NetworkServer::NetworkServer(unsigned short port) :
+    _running(true),
     _port(port),
     _acceptor(_io_service,
         boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
@@ -38,7 +39,6 @@ NetworkServer::NetworkServer(unsigned short port) :
     logger().debug("[NetworkServer] constructor");
 
     _service_thread = new std::thread(&NetworkServer::run, this);
-    _running = true;
 }
 
 NetworkServer::~NetworkServer()
@@ -67,8 +67,11 @@ void NetworkServer::listen()
     {
         // The handle_connection() callback will delete this
         // class, when the thread exits.
-        ConsoleSocket* ss = new ConsoleSocket(_io_service);
-        _acceptor.accept(ss->getSocket());
+        boost::asio::ip::tcp::socket* sock = new boost::asio::ip::tcp::socket(_io_service);
+        _acceptor.accept(*sock);
+
+        ConsoleSocket* ss = new ConsoleSocket();
+        ss->set_socket(sock);
         std::thread(&ConsoleSocket::handle_connection, ss).detach();
     }
 }

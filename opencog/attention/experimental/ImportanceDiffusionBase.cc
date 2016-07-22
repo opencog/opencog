@@ -47,7 +47,7 @@
 using namespace opencog;
 
 
-ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : _cs(cs)
+ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
 {
     spreadDecider = NULL;
     setSpreadDecider(config().get_int("SPREAD_DECIDER_TYPE"));
@@ -56,25 +56,14 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : _cs(cs)
     setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
     setHebbianMaxAllocationPercentage(
                 config().get_double("HEBBIAN_MAX_ALLOCATION_PERCENTAGE"));
-    
-    // TODO 
+
+    // TODO
     // Read diffusion rate from config file.
 
     // Provide a logger
     log = NULL;
     setLogger(new opencog::Logger("ImportanceDiffusionBase.log",
                                   Logger::FINE, true));
-}
-
-void ImportanceDiffusionBase::setLogger(Logger* _log)
-{
-    if (log) delete log;
-    log = _log;
-}
-
-Logger* ImportanceDiffusionBase::getLogger()
-{
-    return log;
 }
 
 /*
@@ -95,7 +84,7 @@ void ImportanceDiffusionBase::setMaxSpreadPercentage(float percent)
  */
 void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
     HandleSeq resultSet;
-    as->get_handles_by_name(back_inserter(resultSet), "CONFIG-DiffusionPercent");
+    _as->get_handles_by_name(back_inserter(resultSet), "CONFIG-DiffusionPercent");
     if (resultSet.size() > 0) {
         // Given the PredicateNode, walk to the NumberNode
         Handle h = resultSet.front();
@@ -107,7 +96,7 @@ void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
             resultSet = h->getOutgoingSet();
             h = resultSet.front();
         }
-        float value = std::atof(as->get_name(h).c_str());
+        float value = std::atof(_as->get_name(h).c_str());
         setMaxSpreadPercentage(value);
 
 #ifdef DEBUG
@@ -151,10 +140,10 @@ void ImportanceDiffusionBase::setSpreadDecider(int type, float shape)
     switch (type) {
     case HYPERBOLIC:
         spreadDecider =
-                (SpreadDecider*) new HyperbolicDecider(_cs, shape);
+                (SpreadDecider*) new HyperbolicDecider(_cogserver, shape);
         break;
     case STEP:
-        spreadDecider = (SpreadDecider*) new StepDecider(_cs);
+        spreadDecider = (SpreadDecider*) new StepDecider(_cogserver);
         break;
     }
 
@@ -174,7 +163,7 @@ ImportanceDiffusionBase::~ImportanceDiffusionBase()
  */
 void ImportanceDiffusionBase::diffuseAtom(Handle source)
 {
-    
+
     // (1) Find the incident atoms that will be diffused to
     HandleSeq incidentAtoms =
             ImportanceDiffusionBase::incidentAtoms(source);
@@ -270,8 +259,8 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
 void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
 {
     // Trade STI between the source and target atoms
-    as->set_STI(event.source, as->get_STI(event.source) - event.amount);
-    as->set_STI(event.target, as->get_STI(event.target) + event.amount);
+    _as->set_STI(event.source, _as->get_STI(event.source) - event.amount);
+    _as->set_STI(event.target, _as->get_STI(event.target) + event.amount);
 
 #ifdef DEBUG
     std::cout << "tradeSTI: " << event.amount << " from " << event.source
@@ -290,7 +279,7 @@ void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
     // diffuse more STI than it has. This also can cause an atom to not
     // diffuse any STI when the amount to be diffused is less than 1.
     //   * See: https://github.com/opencog/opencog/issues/676
-    
+
 }
 
 /*
@@ -301,13 +290,13 @@ void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
  */
 HandleSeq ImportanceDiffusionBase::diffusionSourceVector(bool af_only)
 {
-    
+
     HandleSeq resultSet;
-    
+
     if(af_only)
-        as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
+        _as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
     else
-        as->get_all_atoms(resultSet);
+        _as->get_all_atoms(resultSet);
 
 #ifdef DEBUG
     std::cout << "Calculating diffusionSourceVector." << std::endl;
@@ -320,7 +309,7 @@ HandleSeq ImportanceDiffusionBase::diffusionSourceVector(bool af_only)
         std::remove_if(resultSet.begin(), resultSet.end(),
                        [=](const Handle& h)
                        {
-                           Type type = as->get_type(h);
+                           Type type = _as->get_type(h);
 
 #ifdef DEBUG
                            std::cout << "Checking atom of type: " <<
@@ -353,7 +342,7 @@ HandleSeq ImportanceDiffusionBase::diffusionSourceVector(bool af_only)
     resultSet.size() << "\n";
 #endif
 
-    
+
     return resultSet;
 }
 
@@ -449,7 +438,7 @@ ImportanceDiffusionBase::probabilityVectorHebbianAdjacent(
     for (Handle target : targets)
     {
         // Find the hebbian link that connects the source atom to this target
-        Handle link = as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+        Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
 
         // Calculate the discounted diffusion amount based on the link
         // attributes
@@ -565,7 +554,7 @@ AttentionValue::sti_t ImportanceDiffusionBase::calculateDiffusionAmount(
 {
     updateMaxSpreadPercentage();
 
-    return (AttentionValue::sti_t) round(as->get_STI(h) * maxSpreadPercentage);
+    return (AttentionValue::sti_t) round(_as->get_STI(h) * maxSpreadPercentage);
 
     // TODO: Using integers for STI values can cause strange consequences.
     // For example, if the amount to diffuse is 0.4, it will become 0, causing
@@ -603,7 +592,7 @@ float ImportanceDiffusionBase::calculateHebbianDiffusionPercentage(
  */
 void ImportanceDiffusionBase::processDiffusionStack()
 {
-    
+
 #ifdef DEBUG
     // Keep track of the total amount of STI traded for debugging
     AttentionValue::sti_t totalAmountTraded = 0;
@@ -625,6 +614,6 @@ void ImportanceDiffusionBase::processDiffusionStack()
     // trades, it should be equal to twice the amount that was diffused
     std::cout << "Total STI traded: " << totalAmountTraded << std::endl;
 #endif
-    
+
 }
 

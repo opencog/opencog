@@ -22,7 +22,7 @@
             (DefinedPredicate "is-input-utterance?")
             (SequentialOr
                 (Not (DefinedPredicate "input-type-is-imperative?"))
-                (DefinedPredicate "don't-know-how-to-do-it"))
+                (DefinedPredicate "don't-know-how-to-do-it?"))
         ))
         (True (ExecutionOutput (GroundedSchema "scm: call-fuzzy") (List)))
         (True)
@@ -74,7 +74,7 @@
             (DefinedPredicate "is-input-utterance?")
             (SequentialOr
                 (Not (DefinedPredicate "input-type-is-imperative?"))
-                (DefinedPredicate "don't-know-how-to-do-it"))
+                (DefinedPredicate "don't-know-how-to-do-it?"))
         ))
         (True (ExecutionOutput (GroundedSchema "scm: call-aiml") (List)))
         (True)
@@ -227,7 +227,7 @@
             (DefinedPredicate "has-pkd-related-words?")
             (SequentialOr
                 (Not (DefinedPredicate "input-type-is-imperative?"))
-                (DefinedPredicate "don't-know-how-to-do-it"))
+                (DefinedPredicate "don't-know-how-to-do-it?"))
         ))
         (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "pkd"))))
         (True)
@@ -246,7 +246,7 @@
             (DefinedPredicate "has-blog-related-words?")
             (SequentialOr
                 (Not (DefinedPredicate "input-type-is-imperative?"))
-                (DefinedPredicate "don't-know-how-to-do-it"))
+                (DefinedPredicate "don't-know-how-to-do-it?"))
         ))
         (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "blogs"))))
         (True)
@@ -270,7 +270,7 @@
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
-            (Not (DefinedPredicate "called-chatbot-eva?"))
+            (DefinedPredicate "chatbot-eva-not-started?")
             (DefinedPredicate "is-input-utterance?")
             (DefinedPredicate "input-type-is-imperative?")
         ))
@@ -279,5 +279,21 @@
         (stv .9 .9)
         sociality
         "chatbot_eva"
+    )
+)
+
+; If no reply has been generated after some time, randomly pick one of the
+; "pickup sentences" (extracted from some AIML rule files) and say it
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "no-other-fast-reply?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: pickup-reply") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "pickup"
     )
 )

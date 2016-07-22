@@ -1,7 +1,7 @@
 /*
- * opencog/attention/RentCollectionAgent.h
+ * opencog/attention/MinMaxSTIUpdatingAgent.h
  *
- * Written by Misgana Bayetta
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef RENTCOLLECTIONBASE_H
-#define RENTCOLLECTIONBASE_H
+#ifndef _OPENCOG_MIN_MAX_STI_IMPORTANCE_UPDATING_AGENT_H
+#define _OPENCOG_MIN_MAX_STI_IMPORTANCE_UPDATING_AGENT_H
 
 #include <string>
 #include <iostream>
@@ -32,8 +32,11 @@
 #include <opencog/util/recent_val.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/Agent.h>
+
+class MinMaxSTIUpdatingAgentUTest;
 
 namespace opencog
 {
@@ -44,54 +47,37 @@ namespace opencog
 class CogServer;
 
 /**
- * This Agent collects wages form inside the AttentionalFocus
- *
- * It randomly picks an atom from the Focus and collects the Wage
- * which is calculate depending on the current funds in the Bank
- *
- * The wage is computed as a linar function form the Funds and a Target Value.
- * It is capped to the range 0-2x defaul Wage
- *
- * This Agent is supposed to run in it's own Thread.
+ * The AtomSpace needs to know the Minimum and Maximum STI of the Atoms
+ * This agent updates these values after iterating over the whole AtomSpace
  */
-class RentCollectionBaseAgent : public Agent
+class MinMaxSTIUpdatingAgent : public Agent
 {
 
 private:
-     int sleep_time_ms;
-
-protected:
 
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
-
-    AttentionValue::sti_t targetSTI;
-    AttentionValue::sti_t targetLTI;
 
     AttentionValue::sti_t stiFundsBuffer;
     AttentionValue::lti_t ltiFundsBuffer;
 
 public:
-    RentCollectionBaseAgent(CogServer& cs);
-    ~RentCollectionBaseAgent();
 
-    int calculate_STI_Rent();
-    int calculate_LTI_Rent();
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::MinMaxSTIUpdatingAgent");
+        return _ci;
+    }
 
-    virtual void selectTargets(HandleSeq &targetSetOut) = 0;
-    void run();
-
-    int get_sleep_time(){
-        return sleep_time_ms;
-    };
-    void set_sleep_time(int ms){
-      sleep_time_ms = ms;
-    };
+    MinMaxSTIUpdatingAgent(CogServer&);
+    virtual ~MinMaxSTIUpdatingAgent();
+    virtual void run();
 
 }; // class
+
+typedef std::shared_ptr<MinMaxSTIUpdatingAgent> MinMaxSTIUpdatingAgentPtr;
 
 /** @}*/
 }  // namespace
 
-#endif /* RENTCOLLECTIONBASE_H */
-
+#endif // _OPENCOG_IMPORTANCE_UPDATING_AGENT_H

@@ -1,6 +1,8 @@
 (use-modules (ice-9 threads))
 (use-modules (opencog))
 (use-modules (opencog logger))
+(use-modules (opencog eva-model))
+(use-modules (opencog nlp chatbot-eva))
 
 ;-------------------------------------------------------------------------------
 ; Useful functions for the actions
@@ -86,7 +88,16 @@
     )
 )
 
-(define (say . words)
+(define (pickup-reply)
+    (let* ((pickup-sents (cog-incoming-set (Concept (chat-prefix "PickupSentence"))))
+           (chosen-sent (list-ref pickup-sents (random (length pickup-sents))))
+           (sent-node (gar chosen-sent))
+           (words (get-word-list sent-node)))
+        (apply say (cog-outgoing-set words))
+    )
+)
+
+(define-public (say . words)
     (define utterance "")
 
     ; This is for getting sentiment info, e.g.
@@ -133,7 +144,7 @@
         )
     )
 
-    (reset-all-states)
+    (reset-all-chatbot-states)
 )
 
 (define (reply anchor)

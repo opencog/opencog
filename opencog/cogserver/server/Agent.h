@@ -117,6 +117,8 @@ private:
 protected:
     CogServer& _cogserver;
 
+    AtomSpace* _as;
+
     /** Note: AttentionValue itself is read-only, so no need to protect, but
      * the pointer needs and is protected */
     AttentionValuePtr _attentionValue;
@@ -155,7 +157,32 @@ protected:
     /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(AtomPtr);
 
+    AttentionValue::sti_t STIAtomWage;
+    AttentionValue::lti_t LTIAtomWage;
+
+    AttentionValue::sti_t targetSTI;
+    AttentionValue::lti_t targetLTI;
+
+    AttentionValue::sti_t stiFundsBuffer;
+    AttentionValue::lti_t ltiFundsBuffer;
+
+    /** Set the agent's logger object
+     *
+     * Note, this will be deleted when this agent is.
+     *
+     * @param l The logger to associate with the agent.
+     */
+    void setLogger(Logger* l);
+
+    Logger *log; //!< Logger object for Agent
+
 public:
+
+    /** Return the agent's logger object
+     *
+     * @return A logger object.
+     */
+    Logger* getLogger();
 
     /** Agent's constructor. By default, initializes the frequency to 1. */
     Agent(CogServer&, const unsigned int f = 1);
@@ -242,6 +269,12 @@ public:
      * @return total stimulus since last reset.
      */
     stim_t getAtomStimulus(Handle h) const;
+
+    void experimentalStimulateAtom(Handle h,float stimulus);
+
+    AttentionValue::sti_t calculate_STI_Wage();
+
+    AttentionValue::lti_t calculate_LTI_Wage();
 
     AttentionValuePtr getAV()
     {

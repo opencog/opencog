@@ -2,7 +2,7 @@
  * WAImportanceDiffusionAgent.cc
  *
  * Copyright (C) 2016 Opencog Foundation
- * 
+ *
  * All Rights Reserved
  *
  * Writeen by Cosmo Harrigan
@@ -32,28 +32,22 @@ using namespace opencog;
 
 
 WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
-    Agent(cs), ImportanceDiffusionBase(cs)
+    ImportanceDiffusionBase(cs)
 {
     set_sleep_time(300);
 }
 
 WAImportanceDiffusionAgent::~WAImportanceDiffusionAgent(){
-    
+
 }
 
 void WAImportanceDiffusionAgent::run()
 {
-    std::cout << "[DEBUG] [WAImportanceDiffusionAgent] started running.\n"; 
-    as = &_cogserver.getAtomSpace();
-    
-    while(true){      
-        spreadDecider->setFocusBoundary(0);
-        spreadImportance();
-        
-        //some sleep code
-        std::cout << "[DEBUG] [WAImportanceDiffusionAgent] sleeping for " <<  get_sleep_time() << "\n"; 
-        std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
-    }
+    spreadDecider->setFocusBoundary(0);
+    spreadImportance();
+
+    //some sleep code
+    std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
 /*
@@ -63,15 +57,15 @@ void WAImportanceDiffusionAgent::run()
 void WAImportanceDiffusionAgent::spreadImportance()
 {
     HandleSeq diffusionSourceVector = ImportanceDiffusionBase::diffusionSourceVector(false);
-    
+
     HandleSeq targetSet;
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0,diffusionSourceVector.size()-1);
-    
-    
+
+
     for (unsigned int i = 0; (i < SAMPLE_SIZE and i < diffusionSourceVector.size()) ; i++) {
         HandleSeq tmp;
-        
+
         // Randomly sample 50% of the diffusionSourceVector
         for (unsigned int i = 0; i < diffusionSourceVector.size()/2; i++) {
             int idx = distribution(generator);
@@ -83,15 +77,15 @@ void WAImportanceDiffusionAgent::spreadImportance()
         {
             return (h1->getSTI() > h2->getSTI());
         });
-        
+
         // Select the atoms with the highest STI amongst the samples
         targetSet.push_back(*result);
-        
+
         // set diffusionSource vector to the current samples.
         diffusionSourceVector = tmp;
     }
 
-    diffusionSourceVector = targetSet; 
+    diffusionSourceVector = targetSet;
 
     // Calculate the diffusion for each source atom, and store the diffusion
     // event in a stack
@@ -109,7 +103,7 @@ void WAImportanceDiffusionAgent::spreadImportance()
         {
             std::cout << "Did not call diffuseAtom." << std::endl;
         }
-#endif 
+#endif
     }
 
     // Now, process all of the outstanding diffusion events in the diffusion

@@ -42,9 +42,7 @@ namespace opencog
 class ServerSocket
 {
 private:
-    boost::asio::ip::tcp::socket _socket;
-    bool _lineProtocol;
-    bool _closed;
+    boost::asio::ip::tcp::socket* _socket;
 
 protected:
     /**
@@ -53,23 +51,16 @@ protected:
     virtual void OnConnection(void) = 0;
 
     /**
-     * OnLine callback: called when in LineProtocol mode and a new
-     * line is received from the client.
+     * Callback: called when client has a text line to send.
      */
     virtual void OnLine (const std::string&) = 0;
 
-    /**
-     * OnRawData callback: called when LineProtocol is disabled and
-     * new data is received from the client.
-     */
-    virtual void OnRawData (const char*, size_t) = 0;
-
 public:
-    ServerSocket(boost::asio::io_service&);
+    ServerSocket(void);
     virtual ~ServerSocket();
 
-    static void handle_connection(ServerSocket*);
-    boost::asio::ip::tcp::socket& getSocket(void);
+    void set_socket(boost::asio::ip::tcp::socket*);
+    void handle_connection(void);
 
     /**
      * Sends data to the client
@@ -80,22 +71,6 @@ public:
      * Close this socket
      */
     void SetCloseAndDelete(void);
-
-    /**
-     *Set LineProtocol mode for this socket
-     */
-    void SetLineProtocol(bool);
-
-    /**
-     * Check if this socket is in LineProtocol mode
-     */
-    bool LineProtocol(void);
-
-    /**
-     * Check if this socket was closed
-     */
-    bool isClosed();
-
 }; // class
 
 /** @}*/

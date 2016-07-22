@@ -2,7 +2,7 @@
  * AFImportanceDiffusionAgent.h
  *
  * Copyright (C) 2016 Opencog Foundation
- * 
+ *
  * All Rights Reserved
  *
  * Written by Cosmo   Harrigan
@@ -40,35 +40,35 @@ class CogServer;
 
 /** Diffuses short term importance between atoms in the AtomSpace.
  *
- * Diffusion sources consist of STI proportionate based randomly selected set 
+ * Diffusion sources consist of STI proportionate based randomly selected set
  * of atoms.
- * 
+ *
  * Supports two types of importance diffusion:
- * 
- * (1) Diffusion to atoms that are incident to each atom, consisting of that 
+ *
+ * (1) Diffusion to atoms that are incident to each atom, consisting of that
  *     atom's incoming and outgoing sets (excluding hebbian links)
- * 
+ *
  * (2) Diffusion to atoms that are adjacent to each atom, where the type of
  *     the connecting edge is a hebbian link
- * 
+ *
  * Please refer to the detailed description of this agent in the README file,
  * where an extensive explanation of the algorithm, features and pending
  * work is explained.
  */
-class WAImportanceDiffusionAgent : public Agent, public ImportanceDiffusionBase
+class WAImportanceDiffusionAgent : public ImportanceDiffusionBase
 {
-  
+
 private:
     HandleSeq diffusionSourceVector();
-    unsigned int SAMPLE_SIZE = 1;    
-    
+    unsigned int SAMPLE_SIZE = 1;
+
 private:
     void spreadImportance();
-    
+
 public:
      WAImportanceDiffusionAgent(CogServer&);
     ~WAImportanceDiffusionAgent();
-    
+
     virtual void run();
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {

@@ -79,6 +79,12 @@ DECLARE_CMD_REQUEST(BuiltinRequestsModule, "", do_ctrld,
        "Close the shell TCP/IP connection.\n",
        false, true)
 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, ".", do_dot,
+       "Close the shell connection",
+       "Usage: .\n\n"
+       "Close the shell TCP/IP connection.\n",
+       false, true)
+
 DECLARE_CMD_REQUEST(BuiltinRequestsModule, "help", do_help,
        "List the available commands or print the help for a specific command",
        "Usage: help [<command>]\n\n"

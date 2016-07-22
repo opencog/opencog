@@ -40,8 +40,6 @@ using namespace opencog;
 RentCollectionBaseAgent::RentCollectionBaseAgent(CogServer& cs) :
     Agent(cs)
 {
-    as = &cs.getAtomSpace();
-
     // init starting wages/rents. these should quickly change and reach
     // stable values, which adapt to the system dynamics
     STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
@@ -58,57 +56,35 @@ RentCollectionBaseAgent::RentCollectionBaseAgent(CogServer& cs) :
     true));
 }
 
-RentCollectionBaseAgent::~RentCollectionBaseAgent()
-{
-    if (log)
-        delete log;
-}
-
-void RentCollectionBaseAgent::setLogger(Logger* _log)
-{
-    if (log)
-        delete log;
-    log = _log;
-}
-
-Logger* RentCollectionBaseAgent::getLogger()
-{
-    return log;
-}
-
 void RentCollectionBaseAgent::run()
 {
-    while (true) {
-        HandleSeq targetSet;
-        selectTargets(targetSet);
+    HandleSeq targetSet;
+    selectTargets(targetSet);
 
-        if (targetSet.size() == 0)
-            continue;
+    if (targetSet.size() == 0) return;
 
-        for (Handle& h : targetSet) {
-            int sti = h->getAttentionValue()->getSTI();
-            int lti = h->getAttentionValue()->getLTI();
-            int stiRent = calculate_STI_Rent();
-            int ltiRent = calculate_LTI_Rent();
+    for (Handle& h : targetSet) {
+        int sti = h->getAttentionValue()->getSTI();
+        int lti = h->getAttentionValue()->getLTI();
+        int stiRent = calculate_STI_Rent();
+        int ltiRent = calculate_LTI_Rent();
 
-            if (stiRent > sti)
-                stiRent = sti;
+        if (stiRent > sti)
+            stiRent = sti;
 
-            if (ltiRent > lti)
-                ltiRent = lti;
+        if (ltiRent > lti)
+            ltiRent = lti;
 
-            h->setSTI(sti - stiRent);
-            h->setLTI(lti - ltiRent);
-        }
-
-        std::cout << "[DEBUG] [WARentCollectionAgent] sleeping for " << get_sleep_time() << "\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
+        h->setSTI(sti - stiRent);
+        h->setLTI(lti - ltiRent);
     }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
 int RentCollectionBaseAgent::calculate_STI_Rent()
 {
-    int funds = as->get_STI_funds();
+    int funds = _as->get_STI_funds();
     float diff  = targetSTI - funds;
     float ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);
@@ -126,7 +102,7 @@ int RentCollectionBaseAgent::calculate_STI_Rent()
 
 int RentCollectionBaseAgent::calculate_LTI_Rent()
 {
-    int funds = as->get_LTI_funds();
+    int funds = _as->get_LTI_funds();
     float diff  = targetLTI - funds;
     float ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff,1.0f);

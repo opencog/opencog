@@ -24,9 +24,13 @@
 
 #include "ExperimentalAttentionModule.h"
 
+#include <opencog/cogserver/server/CogServer.h>
+
 #include "opencog/attention/atom_types.definitions"
 
 using namespace opencog;
+
+concurrent_queue<Handle> opencog::newAtomsInAV;
 
 DECLARE_MODULE(ExperimentalAttentionModule)
 
@@ -40,12 +44,35 @@ ExperimentalAttentionModule::ExperimentalAttentionModule(CogServer& cs) :
     _cogserver.registerAgent(AFRentCollectionAgent::info().id, &afRentFactory);
     _cogserver.registerAgent(WARentCollectionAgent::info().id, &waRentFactory);
 
+    _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
+    _cogserver.registerAgent(MinMaxSTIUpdatingAgent::info().id,&minMaxSTIUpdatingFactory);
+    _cogserver.registerAgent(HebbianCreationAgent::info().id,&hebbianCreationFactory);
+    _cogserver.registerAgent(FocusBoundaryUpdatingAgent::info().id,&focusUpdatingFactory);
+    _cogserver.registerAgent(HebbianUpdatingAgent::info().id,&hebbianUpdatingFactory);
+
+    _forgetting_agentptr =
+        _cogserver.createAgent(ForgettingAgent::info().id, false);
+    _minmaxstiupdating_agentptr =
+        _cogserver.createAgent(MinMaxSTIUpdatingAgent::info().id,false);
+    _hebbiancreation_agentptr =
+        _cogserver.createAgent(HebbianCreationAgent::info().id,false);
+    _focusupdating_agentptr =
+        _cogserver.createAgent(FocusBoundaryUpdatingAgent::info().id,false);
+    _hebbianupdating_agentptr =
+        _cogserver.createAgent(HebbianUpdatingAgent::info().id,false);
+
     _afImportanceAgentPtr = _cogserver.createAgent(AFImportanceDiffusionAgent::info().id,false);
     _waImportanceAgentPtr = _cogserver.createAgent(WAImportanceDiffusionAgent::info().id,false);
 
     _afRentAgentPtr = _cogserver.createAgent(AFRentCollectionAgent::info().id, false);
     _waRentAgentPtr = _cogserver.createAgent(WARentCollectionAgent::info().id, false);
- }
+
+
+     addAFConnection =_cogserver.getAtomSpace().AddAFSignal(
+                       boost::bind(&ExperimentalAttentionModule::addAFSignalHandler,
+                                   this, _1, _2, _3));
+    do_start_ecan_register();
+}
 
 ExperimentalAttentionModule::~ExperimentalAttentionModule()
 {
@@ -54,14 +81,21 @@ ExperimentalAttentionModule::~ExperimentalAttentionModule()
     _cogserver.unregisterAgent(AFImportanceDiffusionAgent::info().id);
     _cogserver.unregisterAgent(WAImportanceDiffusionAgent::info().id);
 
-     do_start_ecan_unregister();
+    _cogserver.unregisterAgent(ForgettingAgent::info().id);
+    _cogserver.unregisterAgent(MinMaxSTIUpdatingAgent::info().id);
+    _cogserver.unregisterAgent(FocusBoundaryUpdatingAgent::info().id);
+    _cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
+    _cogserver.unregisterAgent(HebbianCreationAgent::info().id);
+
+    do_start_ecan_unregister();
+
+    addAFConnection.disconnect();
 
     logger().debug("[ExperimentalAttentionModule] exit destructor");
 }
 
 void ExperimentalAttentionModule::init()
 {
-    do_start_ecan_register();
 }
 
 std::string ExperimentalAttentionModule::do_start_ecan(Request *req, std::list<std::string> args)
@@ -78,6 +112,25 @@ std::string ExperimentalAttentionModule::do_start_ecan(Request *req, std::list<s
  _cogserver.startAgent(_afRentAgentPtr, true, afRent);
  _cogserver.startAgent(_waRentAgentPtr, true, waRent);
 
+  _cogserver.startAgent(_forgetting_agentptr,true,"attention");
+  _cogserver.startAgent(_minmaxstiupdating_agentptr,true,"attention");
+  _cogserver.startAgent(_focusupdating_agentptr,true,"attention");
+
+  _cogserver.startAgent(_hebbiancreation_agentptr,true,"hca");
+  _cogserver.startAgent(_hebbianupdating_agentptr,true,"hua");
+
  return ("Started the following agents:\n" + afImportance + "\n" + waImportance +
 	 "\n" + afRent + "\n" + waRent + "\n");
+}
+
+/*
+ * When an atom enters the AttentionalFocus, it is added to a concurrent_queue
+ * so that the HebbianCreationAgent know to check it and create HebbianLinks if
+ * neccesary
+ */
+void ExperimentalAttentionModule::addAFSignalHandler(const Handle& source,
+                                        const AttentionValuePtr& av_old,
+                                        const AttentionValuePtr& av_new)
+{
+  newAtomsInAV.push(source);
 }

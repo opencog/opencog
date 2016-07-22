@@ -142,22 +142,14 @@ bool ListRequest::execute()
 void ListRequest::sendOutput()
 {
     std::ostringstream oss;
-
-    if (_mimeType == "text/plain") {
-        for (Handle& h : _handles) {
-            oss << h->toString() << std::endl;
-        }
-    } else throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s",
-            _mimeType.c_str());
-
+    for (const Handle& h : _handles) {
+        oss << h->toString() << std::endl;
+    }
     send(oss.str());
 }
 
 void ListRequest::sendError()
 {
-    if (_mimeType != "text/plain")
-        throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s",
-                _mimeType.c_str());
     _error << "Supported options:" << std::endl;
     _error << "-a          List all atoms" << std::endl;
     _error << "-h handle   List given handle" << std::endl;

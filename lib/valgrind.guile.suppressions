@@ -182,6 +182,13 @@
    ...
 }
 
+{
+   <gc_condjmp>
+   Memcheck:Cond
+   ...
+   fun:GC_promote_black_lists
+   ...
+}
 # ------------------------------------------
 # libuistring stuff
 
