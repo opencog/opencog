@@ -48,5 +48,5 @@
 
 (define (get-last-rec-id)
   (let* ((last-recognized-face (Anchor "last-recognized-face"))
-         (results (cog-chase-link 'StateLink 'Concept last-recognized-face)))
+         (results (cog-chase-link 'StateLink 'ConceptNode last-recognized-face)))
     (if (null? results) '() (first results))))

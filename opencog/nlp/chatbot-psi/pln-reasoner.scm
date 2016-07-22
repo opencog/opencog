@@ -118,7 +118,7 @@
         (last-rec-id (get-last-rec-id))
         ;; rec-ids and names
         (rec-id-1 "20839")
-        (name-1 "Nil"))
+        (name-1 "Ben"))
     (cog-logger-debug "[PLN-Reasoner] last-sentence-id = ~a" last-sentence-id)
     (cog-logger-debug "[PLN-Reasoner] last-rec-id = ~a" last-rec-id)
     (Evaluation
@@ -251,7 +251,9 @@
          (neg-count (count-sentiment-sentences Person (Concept "Negative")))
          (total-count (+ pos-count neg-count))
          ;; Calculate strength and confidence
-         (s (exact->inexact (/ pos-count total-count)))
+         (s (if (> total-count 0)
+                (exact->inexact (/ pos-count total-count))
+                0))
          (c (exact->inexact (/ total-count K))))
     ;; (cog-logger-debug "[PLN-Reasoner] pos-count = ~a" pos-count)
     ;; (cog-logger-debug "[PLN-Reasoner] pos-count = ~a" neg-count)
