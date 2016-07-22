@@ -61,8 +61,7 @@ void RentCollectionBaseAgent::run()
     HandleSeq targetSet;
     selectTargets(targetSet);
 
-    if (targetSet.size() == 0)
-        continue;
+    if (targetSet.size() == 0) return;
 
     for (Handle& h : targetSet) {
         int sti = h->getAttentionValue()->getSTI();
