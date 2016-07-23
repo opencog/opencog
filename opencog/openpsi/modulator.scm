@@ -1,6 +1,6 @@
 ; Copyright (C) 2016 OpenCog Foundation
 
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 
 (load "utilities.scm")
 
@@ -35,6 +35,12 @@
         modulator-node
     )
 )
+
+(define-public (psi-get-modulators)
+    ; todo: cog-chase-link bug? - it is returning the anchor node in the results
+    ;(cog-chase-link 'InheritanceLink 'ConceptNode psi-modulator-node))
+    (cog-outgoing-set (cog-execute!
+        (Get (Inheritance (Variable "$mod") psi-modulator-node)))))
 
 ; =============================================================================
 ; CREATE MODULATORS

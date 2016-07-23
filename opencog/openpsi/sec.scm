@@ -12,6 +12,8 @@
 ; Agent State (iow system state)
 (define agent-state (Concept (string-append psi-prefix-str "agent-state")))
 
+(define psi-sec-node (Concept (string-append psi-prefix-str "SEC")))
+
 (define-public (psi-create-sec name)
 "
 	Create a new SEC
@@ -23,7 +25,7 @@
     (define agent-state-var-name (string-append "agent-state-" name))
     (Inheritance
         sec
-        (Concept (string-append psi-prefix-str "SEC")))
+        psi-sec-node)
 
     ;create the agent/system-state variable for this sec
 	(psi-create-stimulus-sec agent-state sec agent-state-sec-init-value)
@@ -46,6 +48,10 @@
 	        sec))
     (psi-set-value! stimulus-sec initial-value)
     stimulus-sec)
+
+(define-public (psi-get-secs)
+    (cog-outgoing-set
+        (cog-execute! (Get (Inheritance (Variable "$sec") psi-sec-node)))))
 
 ; Todo: add variable names (?) and add getters for agent-state secs
 
