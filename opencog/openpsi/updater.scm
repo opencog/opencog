@@ -68,7 +68,6 @@
 (define most-recent-occurrence-pred (Predicate "psi-most-recent-occurrence"))
 (define psi-event-at-loop-num-node (Concept "psi-event-at-loop-num"))
 
-
 ; List of entities that are antecedants in the interaction rules
 (define psi-monitored-entities '())
 (define psi-monitored-events '())
@@ -79,13 +78,18 @@
 ; updated)
 ; Todo: Change this to DSN atomese
 (define (psi-set-expression-callback! callback)
+"
+    Callback function that triggers emotion expression update
+"
 	(set! psi-expression-callback callback))
 
 (define-public (psi-set-event-callback! callback)
+"
+    Callback functions for event detection
+"
 	; Todo: Move this out of or rename the prev-value-table
 	;       Or move to the atomspace as a a DSN.
-	; Save the callback function for event detection
-	;(psi-set-value! (hash-set! prev-value-table event callback))
+	; Save callback function for event detection
 	(set! psi-event-detection-callbacks
 		(append psi-event-detection-callbacks (list callback))))
 
@@ -108,8 +112,10 @@
 	(define evals-with-change-pred
 		(cog-filter-hypergraph psi-changed-eval? (Set rules)))
 
+
 	(if verbose (display "psi-updater-init\n"))
 
+    ; Init previous value table for the monitored entities
 	(for-each (lambda (eval-link)
 				(define key (gadr eval-link))
 				(define value (psi-get-number-value key))
@@ -118,6 +124,18 @@
 												  (list key)))
 			  )
 			evals-with-change-pred)
+
+	; If we are logging for debugging, then add all the modulators and sec's to
+	; the list of entities that get monitored so they will be flagged as changed
+	; in the output.
+	; Todo: not sure if this is the best way to handle this
+	(if logging
+	    (begin
+            (set! psi-monitored-entities (delete-duplicates
+                (append (psi-get-modulators) (append (psi-get-secs)
+                psi-monitored-entities))))
+        )
+    )
 
 	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
 	(if verbose (format #t "monitored entities: ~a\n" psi-monitored-entities))
@@ -136,12 +154,9 @@
 	; Set event detected loop count to 0
 	(psi-set-value! psi-event-at-loop-num-node 0)
 
-
 	(if logging
 		(let ((output-port (open-file "psilog.txt" "a")))
 			(format output-port "\n\n\n")))
-
-
 
 	;(for-each (get-value-and-store key) evals-with-change-pred)
 
@@ -157,7 +172,7 @@
   At each step:
   (1a) Evaluate the monitored events and set their 'event-detected' predicates
    (1) Evaluate the monitored entities and set their 'changed' predicates, and
-       for each changed entity store it's value in a current-value-table (this,
+       for each changed entity store it's value in a value-at-step-start (this,
        or otherwise storing the change magnitude, is needed because the current
        value of a trigger entity might change because of application of a
        previous rule.)
@@ -171,9 +186,9 @@
 "
 	(define changed-params '())
 	(define detected-events '())
-	(define current-values-table (make-hash-table 20))
+	(define value-at-step-start (make-hash-table 20))
 
-	; These are used just for display highlighting for testing
+	; These are used just for display highlighting for debug output
     (define monitored-pau '())
     (define changed-pau '())
 
@@ -201,7 +216,7 @@
                 ;      best.
                 (if (eq? previous-val #f)
                     (set! previous-val 0))
-                (hash-set! current-values-table param
+                (hash-set! value-at-step-start param
                     (psi-get-number-value param))
                 (set! changed-tv (stv 1 1))
                 (if (> current-val previous-val)
@@ -271,8 +286,8 @@
 	(for-each set-new-event-status psi-monitored-events)
 
 	; First call the event detection callback functions
-	(format #t "psi-event-detection-callbacks: ~a\n"
-		psi-event-detection-callbacks)
+	;(format #t "psi-event-detection-callbacks: ~a\n"
+	;	psi-event-detection-callbacks)
     (for-each (lambda (f) (apply f '())) psi-event-detection-callbacks)
 
 	; Evaluate the monitored params and set "changed" predicates accordingly
@@ -295,7 +310,7 @@
                     (if (not (= previous current))
                         (begin
 							(set! changed-pau (append changed-pau (list pau)))
-							(hash-set! current-values-table pau current)
+							(hash-set! value-at-step-start pau current)
 						))))
 			monitored-pau)
 			;(format #t "Changed PAU's: ~a\n" changed-pau)
@@ -343,7 +358,8 @@
 	)
 
 	; Update psi-emotion-states
-	; Todo: Not sure if this should be in OpenPsi or somewhere else
+	; Todo: Not sure if this should be in OpenPsi or somewhere else. Move this
+	; to ros-behavior-scripting
 	; Keeping it simple for now
 	; For happy perhaps pos-valence * arousal or weighted average?
 	(psi-set-value! psi-happy (* (psi-get-number-value pos-valence)
@@ -373,14 +389,14 @@
 
 	; Update prev-value-table entries for the changed (monitored) params
 	(for-each (lambda (param)
-					(define value (hash-ref current-values-table param))
+					(define value (hash-ref value-at-step-start param))
 					(hash-set! prev-value-table param value))
 			  changed-params)
 
 	; Update prev-value-table entries for the changed pau's
 	;(This is just for log highlighint for testing)
 	(for-each (lambda (pau)
-					(define value (hash-ref current-values-table pau))
+					(define value (hash-ref value-at-step-start pau))
 					(hash-set! prev-value-table pau value))
 			  changed-pau)
 
@@ -541,10 +557,15 @@
     (let* ((previous (hash-ref prev-value-table target))
            (current (psi-get-number-value target)))
 
+        ; If no previous value set, attempt to set it based on current
+        (if (equal? previous #f)
+            (hash-set! prev-value-table target current))
+
         ;(format #t "previous value: ~a   current value: ~a\n" previous current)
         (if (and
                 ; current value is defined
                 (not (equal? #f current))
+                (not (equal? #f previous))
                 (not (= previous current))
                 (not (and (equal? previous #f)
                           (= current 0))))
