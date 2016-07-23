@@ -3,11 +3,11 @@
 (use-modules (opencog ato pointmem)); needed for mapsi
 (use-modules (opencog python))
 ;;initialize octomap with 15hz, 10 second or 150 frames buffer ; 1 cm spatial resolution
-(create-map "faces" 0.01 66 150) (step-time-unit "faces");(auto-step-time-on "faces")
-(create-map "sounds" 0.01 100 100) (step-time-unit "sounds");(auto-step-time-on "sounds")
+(create-map "faces" 0.01 66 150) (step-time-unit "faces") (auto-step-time-on "faces")
+(create-map "sounds" 0.01 100 100) (step-time-unit "sounds") (auto-step-time-on "sounds")
 
-(map-ato "faces" (NumberNode "1") 1 2 3)
-(map-ato "sounds" (NumberNode "1") 1 2 3)
+;(map-ato "faces" (NumberNode "1") 1 2 3)
+;(map-ato "sounds" (NumberNode "1") 1 2 3)
 
 ;;returns null string if atom not found, number x y z string if okay
 ;;these functions assume only one location for one atom in a map at a time
@@ -127,7 +127,7 @@
   (cog-filter 'NumberNode (show-visible-faces))
 	;;(string-concatenate (map (lambda (x)(string-append (cog-name x) " ")) (cog-filter 'NumberNode (show-visible-faces)) ))
 )
-(define (get-visible-faces)(list (NumberNode "1")(NumberNode "2")))
+;(define (get-visible-faces)(list (NumberNode "1")(NumberNode "2")))
 ;;below returns face id of face nearest to sound vector atleast 10 degrees, or 0 face id
 (define (snd1-nearest-face)
 	(let* ((lst (get-visible-faces))
