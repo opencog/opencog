@@ -1,9 +1,13 @@
+(use-modules (srfi srfi-1) )
 (use-modules (opencog) (opencog atom-types) (opencog eva-behavior))
 (use-modules (opencog ato pointmem)); needed for mapsi
 (use-modules (opencog python))
 ;;initialize octomap with 15hz, 10 second or 150 frames buffer ; 1 cm spatial resolution
-(create-map "faces" 0.01 66 150) (step-time-unit "faces")(auto-step-time-on "faces")
-(create-map "sounds" 0.01 100 100) (step-time-unit "sounds")(auto-step-time-on "sounds")
+(create-map "faces" 0.01 66 150) (step-time-unit "faces");(auto-step-time-on "faces")
+(create-map "sounds" 0.01 100 100) (step-time-unit "sounds");(auto-step-time-on "sounds")
+
+(map-ato "faces" (NumberNode "1") 1 2 3)
+(map-ato "sounds" (NumberNode "1") 1 2 3)
 
 ;;returns null string if atom not found, number x y z string if okay
 ;;these functions assume only one location for one atom in a map at a time
@@ -85,10 +89,15 @@
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
 (define (angle_face_snd face-id snd-id)
-	(angle_bw (get-face (NumberNode face-id)) (get-snd-loc (NumberNode snd-id)))
+  (let* ((fc (get-face (NumberNode face-id))) (sn (get-snd-1)) )
+	(if (equal? fc "") (* 2 3.142)
+										(if (equal? sn "") (* 2 3.142)
+												(angle_bw fc sn)
+										)
+	))
 )
 (define (angle_face_snd1 face-id)
-	(angle_bw (get-face (NumberNode face-id)) (get-snd-1))
+	(angle_face_snd face-id (get-snd-1))
 )
 ;;get all face-ids and only one sound id 1.0, compare them
 
@@ -118,14 +127,23 @@
   (cog-filter 'NumberNode (show-visible-faces))
 	;;(string-concatenate (map (lambda (x)(string-append (cog-name x) " ")) (cog-filter 'NumberNode (show-visible-faces)) ))
 )
+(define (get-visible-faces)(list (NumberNode "1")(NumberNode "2")))
 ;;below returns face id of face nearest to sound vector atleast 10 degrees, or 0 face id
 (define (snd1-nearest-face)
-	(let* ((lst (get-visible-faces))(falist (map (lambda (x)(list (string->number x) (angle_face_snd1 x))) lst)))
-		(if (< (length falist) 1) 0 (let* ((alist (map (lambda (x)(cdr x))falist))(amin (abs (min alist))))
-			(if (< (/ (* 3.142 10.0) 180.0) amin) (car (car(filter (lambda (x)(< amin (+ (abs (car x)) 0.0001)))alist))) 0))
+	(let* ((lst (get-visible-faces))
+				 (falist (map (lambda (x)(list (string->number (cog-name x)) (angle_face_snd1 (cog-name x)))) lst)))
+		(if (< (length falist) 1)
+			0
+			(let* ((alist (append-map (lambda (x)(cdr x))falist))
+						(amin (fold (lambda (n p) (min (abs p) (abs n))) (car alist) alist)))
+			(if (> (/ (* 3.142 10.0) 180.0) amin)
+				(car (car (filter (lambda (x) (> (+ amin 0.0001) (abs (cadr x)))) falist)))
+				0
+			))
 		)
 	)
 )
+
 ;;below creates say atom for face if sound came from it
 (define (who-said? sent)
 	(let* ((fid (snd1-nearest-face)))
