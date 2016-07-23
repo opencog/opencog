@@ -131,6 +131,10 @@ public:
     bool get_last_time_elapse_atom_observed(const opencog::Handle& ato,
                                             const time_pt& till_d,
                                             time_pt& result);//throw
+    bool get_last_time_before_elapse_atom_observed(const opencog::Handle& ato,
+                                                  const time_pt& till_d,
+                                                  time_pt& result);
+
     bool get_oldest_time_locations_atom_observed(const opencog::Handle& ato,
                                                 const time_pt& from_d,
                                                 point3d_list& result);
@@ -186,6 +190,7 @@ public:
         rx=x*cos(th)-y*sin(th);
         ry=x*sin(th)+y*cos(th);
     }
+    TimeUnit *find(const time_pt& time_p);
 private:
     //each map may have translation rotation (orientation) co-ordinates managed by user
     double map_res; //resolution of maps
