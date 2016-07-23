@@ -18,6 +18,21 @@
 			)
 		)
 )
+
+;;returns null string if atom not found, number x y z string if okay
+;;these functions assume only one location for one atom in a map at a time
+(define (get-last-xyz map-name id-node elapse)
+		(let* ((loc-atom (get-last-locs-ato map-name id-node elapse) ))
+			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom) ""
+				(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+					(xx (number->string (loc-link-x loc-link)))
+					(yy (number->string (loc-link-y loc-link)))
+					(zz (number->string (loc-link-z loc-link))))
+						(string-append xx " " yy " " zz))
+			)
+		)
+)
+
 ;;returns null string if atom not found, number x y z string if okay
 (define (get-xyz map-name id-node)
 		(let* ((loc-atom (get-locs-ato map-name id-node) ))
@@ -33,11 +48,11 @@
 
 ;;scm code
 (define (get-face face-id-node)
- (get-past-xyz "faces" face-id-node 1)
+ (get-last-xyz "faces" face-id-node 200)
 )
 
 (define (get-snd-loc snd-id-node)
- (get-past-xyz "sounds" snd-id-node 1)
+ (get-last-xyz "sounds" snd-id-node 400)
 )
 ;;sound id 1
 (define (save-snd-1 x y z)
