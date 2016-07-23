@@ -16,14 +16,17 @@
     )
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "pln-qa-finished?")
-        (DefinedPredicate "is-pln-answer?")
-        (DefinedPredicate "has-not-replied-anything-yet?")
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: reply") (List pln-answers)))
-    (True)
-    (stv .95 .9)
-    sociality
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "pln-qa-finished?")
+            (DefinedPredicate "is-pln-answer?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List pln-answers)))
+        (True)
+        (stv .95 .9)
+        sociality
+        "select_pln_answer"
+    )
 )
