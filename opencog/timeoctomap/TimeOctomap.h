@@ -71,7 +71,7 @@ struct TimeUnit
     {}
     bool operator==(time_pt tp)
     {
-        return (tp >= t && tp <= t + duration);
+        return ((tp >= t) && (tp <= (t + duration)));
     }
 
     TimeUnit& operator=(const TimeUnit& tu)
