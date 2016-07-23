@@ -312,13 +312,12 @@ bool TimeOctomap::get_oldest_time_locations_atom_observed(const opencog::Handle&
   time_pt tpt;
   if (!get_oldest_time_elapse_atom_observed(ato,from_d,tpt)) return false;
   result=get_locations_of_atom_occurence_at_time(tpt,ato);
-  std::cout << result.size()<<"\n ";//<<from_d;
-  std::time_t ttp=std::chrono::system_clock::to_time_t(tpt);
-  //string ts=std::put_time(std::localtime(&ttp), "%F %T ");
-  char buff[31];
-  strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
-  string ts(buff);
-  std::cout << ts <<endl;
+  //std::cout << result.size()<<"\n ";//<<from_d;
+  //std::time_t ttp=std::chrono::system_clock::to_time_t(tpt);
+  //char buff[31];
+  //strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
+  //string ts(buff);
+  //std::cout << ts <<endl;
   if (result.size()<1)return false;
   return true;
 }
