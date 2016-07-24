@@ -31,7 +31,7 @@
 
 (define logging #t)
 (define verbose #t)
-(define slo-mo #t)
+(define slo-mo #f)
 (define single-step #f)
 
 ; --------------------------------------------------------------
@@ -65,7 +65,6 @@
 (define psi-expression-callback)
 
 (define psi-event-detected-pred (Predicate "psi-event-detected"))
-(define most-recent-occurrence-pred (Predicate "psi-most-recent-occurrence"))
 (define psi-event-at-loop-num-node (Concept "psi-event-at-loop-num"))
 
 ; List of entities that are antecedants in the interaction rules
@@ -87,9 +86,8 @@
 "
     Callback functions for event detection
 "
-	; Todo: Move this out of or rename the prev-value-table
-	;       Or move to the atomspace as a a DSN.
 	; Save callback function for event detection
+	; Todo: change this to DSN's?
 	(set! psi-event-detection-callbacks
 		(append psi-event-detection-callbacks (list callback))))
 
@@ -140,7 +138,7 @@
 	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
 	(if verbose (format #t "monitored entities: ~a\n" psi-monitored-entities))
 
-	; Event Detection
+    ; Set most-recent timestamps for events
 	(set! psi-monitored-events (psi-get-monitored-events))
 	(if verbose (format #t "monitored events: ~a\n" psi-monitored-events))
 	(for-each (lambda (event)
@@ -203,7 +201,8 @@
 		(if (psi-change-in? param)
             (begin
                 (if verbose
-                    (format #t "\n*** Found change in : ~a\n" param))
+                    (format #t "\n*** Found change in : ~a   loop ~a\n" param
+                        psi-updater-loop-count))
                 (set! changed-params
                     (append changed-params (list param)))
                 (set! previous-val (hash-ref prev-value-table param))
@@ -258,7 +257,8 @@
         (if (not (equal? prev-most-recent-ts curr-most-recent-ts))
             (begin
                 (if verbose
-                    (format #t "\n*** Detected event occurrence: ~a\n" event))
+                    (format #t "\n*** Detected event occurrence: ~a  loop ~a\n"
+                        event psi-updater-loop-count))
                 (set! detected-events
                     (append detected-events (list event)))
 
@@ -282,7 +282,7 @@
 	; Event Detection
 	; Evaluate the monitored events and set "new-event" predicates
 	; This needs to happen before evaluating the monitored params so the
-	; new-event predicates can are set beforehand.
+	; new-event predicates are set beforehand.
 	(for-each set-new-event-status psi-monitored-events)
 
 	; First call the event detection callback functions
@@ -444,8 +444,8 @@
 	(define slope)
 	(if verbose (begin
 		(display "\n------------------------------------------------------\n")
-		(format #t "adjust-psi-var-level   target: ~a   trigger: ~a"
-			target trigger)))
+		(format #t "adjust-psi-var-level   target: ~a   trigger: ~a    loop: ~a\n"
+			target trigger psi-updater-loop-count)))
 	(let* ((current-value (psi-get-number-value target))
 		   (trigger-change (psi-get-change-magnitude trigger))
 		  )
@@ -647,7 +647,7 @@
     (cog-get-state-value
         (List
             event
-            most-recent-occurrence-pred)))
+            psi-most-recent-occurrence-pred)))
 
 ; --------------------------------------------------------------
 ; Load the events and interaction rules
@@ -761,12 +761,7 @@
 ; --------------------------------------------------------------
 ; Shortcuts for dev use
 
-(define (new-event event)
-    (State
-        (List
-            event
-            most-recent-occurrence-pred)
-        (TimeNode (number->string (current-time)))))
+(define e psi-set-event-occurrence!)
 
 (define halt psi-updater-halt)
 (define-public h halt)
