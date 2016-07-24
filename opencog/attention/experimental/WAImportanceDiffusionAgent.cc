@@ -39,16 +39,11 @@ WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
 
 void WAImportanceDiffusionAgent::run()
 {
-    std::cout << "[DEBUG] [WAImportanceDiffusionAgent] started running.\n";
+    spreadDecider->setFocusBoundary(0);
+    spreadImportance();
 
-    while(true){
-        spreadDecider->setFocusBoundary(0);
-        spreadImportance();
-
-        //some sleep code
-        std::cout << "[DEBUG] [WAImportanceDiffusionAgent] sleeping for " <<  get_sleep_time() << "\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
-    }
+    //some sleep code
+    std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
 /*

@@ -58,32 +58,28 @@ RentCollectionBaseAgent::RentCollectionBaseAgent(CogServer& cs) :
 
 void RentCollectionBaseAgent::run()
 {
-    while (true) {
-        HandleSeq targetSet;
-        selectTargets(targetSet);
+    HandleSeq targetSet;
+    selectTargets(targetSet);
 
-        if (targetSet.size() == 0)
-            continue;
+    if (targetSet.size() == 0) return;
 
-        for (Handle& h : targetSet) {
-            int sti = h->getAttentionValue()->getSTI();
-            int lti = h->getAttentionValue()->getLTI();
-            int stiRent = calculate_STI_Rent();
-            int ltiRent = calculate_LTI_Rent();
+    for (Handle& h : targetSet) {
+        int sti = h->getAttentionValue()->getSTI();
+        int lti = h->getAttentionValue()->getLTI();
+        int stiRent = calculate_STI_Rent();
+        int ltiRent = calculate_LTI_Rent();
 
-            if (stiRent > sti)
-                stiRent = sti;
+        if (stiRent > sti)
+            stiRent = sti;
 
-            if (ltiRent > lti)
-                ltiRent = lti;
+        if (ltiRent > lti)
+            ltiRent = lti;
 
-            h->setSTI(sti - stiRent);
-            h->setLTI(lti - ltiRent);
-        }
-
-        std::cout << "[DEBUG] [WARentCollectionAgent] sleeping for " << get_sleep_time() << "\n";
-        std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
+        h->setSTI(sti - stiRent);
+        h->setLTI(lti - ltiRent);
     }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
 int RentCollectionBaseAgent::calculate_STI_Rent()
