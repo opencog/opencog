@@ -61,7 +61,6 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 	sh->set_socket(s);
 
 	bool hush = false;
-	bool sync = false;
 	if (!args.empty())
 	{
 		std::string &arg = args.front();

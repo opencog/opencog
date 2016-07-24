@@ -66,9 +66,6 @@ class GenericShell
 		std::thread* evalthr;
 		std::thread* pollthr;
 
-		virtual void set_socket(ConsoleSocket *);
-		virtual const std::string& get_prompt(void);
-
 		virtual void thread_init(void);
 		virtual void line_discipline(const std::string &expr);
 		virtual void do_eval(const std::string &expr);
@@ -82,8 +79,10 @@ class GenericShell
 		GenericShell(void);
 		virtual ~GenericShell();
 
-		virtual void eval(const std::string &, ConsoleSocket *);
+		virtual void set_socket(ConsoleSocket *);
+		virtual void eval(const std::string &);
 
+		virtual const std::string& get_prompt(void);
 		virtual void hush_output(bool);
 		virtual void hush_prompt(bool);
 };

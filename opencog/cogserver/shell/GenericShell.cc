@@ -150,18 +150,13 @@ static GenericShell* _redirector = nullptr;
 // threads for each evaluation: one thread for the evaluation, and
 // another thread to listen for results, and pass them on.
 //
-void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
+// Side-note: the constructor for this class runs in a different thead
+// than the caller for this method. That's because the socket listen
+// and socket accept runs in a different thread, than the socket
+// receive.  The receiver thread calls us.
+//
+void GenericShell::eval(const std::string &expr)
 {
-	// XXX A subtle but important point: the way that socket handling
-	// works in OpenCog is that socket-listen/accept happens in one
-	// thread, while socket receive is in another. In particular, the
-	// constructor for this class runs in a *different* thread than
-	// this method does.
-	if (NULL == socket)
-	{
-		socket = s;
-	}
-
 	// Work-around some printing madness. See issue
 	// https://github.com/opencog/atomspace/issues/629
 	// This is kind of complicated to explain, so pay attention:
