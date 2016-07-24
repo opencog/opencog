@@ -66,11 +66,9 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 	{
 		std::string &arg = args.front();
 		if (arg == "quiet" || arg == "hush") hush = true;
-		if (arg == "sync") sync = true;
 	}
 	sh->hush_prompt(hush);
 	sh->hush_output(hush);
-	sh->sync_output(sync);
 
 	if (hush) return "";
 

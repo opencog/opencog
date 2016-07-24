@@ -63,7 +63,6 @@ GenericShell::GenericShell(void)
 	socket = NULL;
 	evalthr = NULL;
 	self_destruct = false;
-	do_async_output = false;
 }
 
 GenericShell::~GenericShell()
@@ -86,11 +85,6 @@ void GenericShell::hush_output(bool hush)
 void GenericShell::hush_prompt(bool hush)
 {
 	show_prompt = !hush;
-}
-
-void GenericShell::sync_output(bool sync)
-{
-	do_async_output = !sync;
 }
 
 const std::string& GenericShell::get_prompt(void)
@@ -127,6 +121,27 @@ void GenericShell::set_socket(ConsoleSocket *s)
 static std::mutex _stdout_redirect_mutex;
 static GenericShell* _redirector = nullptr;
 
+// Implementation requirements:
+//
+// 1) We want all evaluations to be carried out in serial order,
+//    so that the previous expression is full evaluated before the
+//    next one is started.
+// 2) We want all evaluations to be interruptible, so that if an
+//    expression is an infinite loop (or simply is taking too long)
+//    the user can send a control-C and interrupt the execution.
+// 3) Due to the client-server socket model, this method should
+//    return as soon as possible, so that the caller can resume
+//    waiting on the socket, in case the user is trying to send
+//    a control-C to us.
+// 4) Long-running evaluations should send output back to the user
+//    synchronously: i.e. send output back to the socket as the
+//    output is generated, instead of waiting for the evaluation
+//    to terminate first, before relaying output.
+//
+// The above requirements force us to create not just one, but two
+// threads for each evaluation: one thread for the evaluation, and
+// another thread to listen for results, and pass them on.
+//
 void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 {
 	// XXX A subtle but important point: the way that socket handling
@@ -156,7 +171,7 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	// then attach stdout to a pipe, perform the evaluation, then
 	// restore stdout from the backup. Finally, drain the pipe,
 	// printing both to stdout and to the shell socket.
-#define PERFORM_STDOUT_DUPLICATION 1
+// #define PERFORM_STDOUT_DUPLICATION 1
 #ifdef PERFORM_STDOUT_DUPLICATION
 	// What used to be stdout will now go to the pipe.
 	int pipefd[2];
@@ -331,30 +346,28 @@ void GenericShell::line_discipline(const std::string &expr)
 void GenericShell::do_eval(const std::string &input)
 {
 	eval_done = false;
-	evaluator->begin_eval(); // must be called in same thread as result_poll
-	if (do_async_output)
-	{
-		auto async_wrapper = [&](GenericShell* p, const std::string& in)
-		{
-			thread_init();
-			p->evaluator->eval_expr(in.c_str());
-		};
+	evaluator->begin_eval(); // must be called in same thread as poll_result
 
-		// We cannot use the same evaluator in two different threads
-		// at the same time; a single evaluator is not thread-safe
-		// against itself. So always wait for the previous thread to
-		// finish, before we go at it again.
-		if (evalthr)
-		{
-			evalthr->join();
-			delete evalthr;
-		}
-		evalthr = new std::thread(async_wrapper, this, input);
-	}
-	else
+	auto async_wrapper = [&](GenericShell* p, const std::string& in)
 	{
-		evaluator->eval_expr(input.c_str());
+		thread_init();
+		p->evaluator->eval_expr(in.c_str());
+	};
+
+	// Always wait for the previous evaluation to complete, before
+	// starting the next one.  That is, evaluations are always
+	// explicitly serialized.
+	//
+	// ... and even if they were not, we cannot use the same evaluator
+	// in two different threads at the same time; a single evaluator is
+	// not thread-safe against itself. So always wait for the previous
+	// evaluation thread to finish, before we go at it again.
+	if (evalthr)
+	{
+		evalthr->join();
+		delete evalthr;
 	}
+	evalthr = new std::thread(async_wrapper, this, input);
 }
 
 void GenericShell::thread_init(void)
@@ -391,13 +404,13 @@ std::string GenericShell::poll_output()
 
 	if (evaluator->input_pending())
 	{
-		if (show_output && show_prompt)
+		if (show_output and show_prompt)
 			return pending_prompt;
 		else
 			return "";
 	}
 
-	if (show_output || evaluator->eval_error())
+	if (show_output or evaluator->eval_error())
 	{
 		if (show_prompt) return normal_prompt;
 	}

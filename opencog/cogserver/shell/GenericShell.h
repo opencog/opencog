@@ -73,7 +73,6 @@ class GenericShell
 		virtual void do_eval(const std::string &expr);
 
 		// Async output handling.
-		bool do_async_output;
 		bool eval_done;
 		virtual void put_output(const std::string&);
 		virtual std::string poll_output();
@@ -86,7 +85,6 @@ class GenericShell
 
 		virtual void hush_output(bool);
 		virtual void hush_prompt(bool);
-		virtual void sync_output(bool);
 };
 
 /** @}*/
