@@ -196,30 +196,39 @@ void GenericShell::eval(const std::string &expr)
 #endif // PERFORM_STDOUT_DUPLICATION
 
 	// Run the evaluator (in a different thread)
+	poll_needed = false;
 	line_discipline(expr);
 
-	// Poll for output from the evaluator, and send back results.
-	auto poll_wrapper = [&](void)
+	if (not poll_needed)
 	{
 		std::string retstr = poll_output();
-		while (0 < retstr.size())
-		{
-			socket->Send(retstr);
-			retstr = poll_output();
-		}
-	};
-
-	// Always wait for the previous poll of results to complete, before
-	// starting the next one.  The goal here is to keep results
-	// serialized on the socket, so that chronologically-earlier
-	// results are written to the socket in order, before the newer
-	// results.
-	if (pollthr)
-	{
-		pollthr->join();
-		delete pollthr;
+		socket->Send(retstr);
 	}
-	pollthr = new std::thread(poll_wrapper);
+	else
+	{
+		// Poll for output from the evaluator, and send back results.
+		auto poll_wrapper = [&](void)
+		{
+			std::string retstr = poll_output();
+			while (0 < retstr.size())
+			{
+				socket->Send(retstr);
+				retstr = poll_output();
+			}
+		};
+
+		// Always wait for the previous poll of results to complete, before
+		// starting the next one.  The goal here is to keep results
+		// serialized on the socket, so that chronologically-earlier
+		// results are written to the socket in order, before the newer
+		// results.
+		if (pollthr)
+		{
+			pollthr->join();
+			delete pollthr;
+		}
+		pollthr = new std::thread(poll_wrapper);
+	}
 
 #ifdef PERFORM_STDOUT_DUPLICATION
 	if (show_output and show_prompt)
@@ -365,6 +374,7 @@ void GenericShell::line_discipline(const std::string &expr)
 void GenericShell::do_eval(const std::string &input)
 {
 	eval_done = false;
+	poll_needed = true;
 	evaluator->begin_eval(); // must be called in same thread as poll_result
 
 	auto eval_wrapper = [&](const std::string& in)
