@@ -89,7 +89,8 @@ public:
 
     //get locations of atom in elapsed past
     Handle get_past_locs_ato(const string& map_name,Handle ato,int elapse);
-
+    Handle get_first_locs_ato(const string& map_name,Handle ato,int elapse);
+    Handle get_last_locs_ato(const string& map_name,Handle ato,int elapse);
     //AtTimeLink
     //  TimeNode "Date Time millisec"
     //  Atom
@@ -105,12 +106,12 @@ public:
          double x,double y,double z);
     //remove all specific atoms from map at current time
     void remove_curr_ato(const string& map_name,Handle ato);
-    //remove all specific atoms from map in elapsed past 
+    //remove all specific atoms from map in elapsed past
     void remove_past_ato(const string& map_name,Handle ato,int elapse);
     //remove all specific atoms in all time points and all locations
     void remove_all_ato(const string& map_name,Handle ato);
-    
-    ////spatial query api assuming 1 ato in 1 map at 1 location. 
+
+    ////spatial query api assuming 1 ato in 1 map at 1 location.
     //for multi-map need to add features to main api to provide more raw data results
     //-ve for unknown
     double get_distance_between(const string& map_name,Handle ato1,Handle ato2,int elapse);
@@ -121,10 +122,10 @@ public:
     //2=above,1=below,0=aligned,-1=unknown
     int get_target_is_above_below(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse);
     //2=ahead,1=behind,0=aligned,-1=unknown
-    int get_target_is_front_back(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse); 
+    int get_target_is_front_back(const string& map_name,Handle ato_obs,Handle ato_tgt,Handle ato_ref,int elapse);
 private:
     map<string,TimeOctomap*> tsa;
-    bool get_map_time(const string& map_name,int elapse,time_pt& tpt);    
+    bool get_map_time(const string& map_name,int elapse,time_pt& tpt);
 public:
     PointMemorySCM();
     ~PointMemorySCM();
