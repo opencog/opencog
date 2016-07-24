@@ -44,8 +44,6 @@ WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBase
     SAMPLE_SIZE = 5;
 }
 
-WARentCollectionAgent::~WARentCollectionAgent() { }
-
 void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
     HandleSeq atoms;

@@ -81,7 +81,6 @@ public:
     }
 
     HebbianCreationAgent(CogServer&);
-    virtual ~HebbianCreationAgent();
     virtual void run();
 
 }; // class

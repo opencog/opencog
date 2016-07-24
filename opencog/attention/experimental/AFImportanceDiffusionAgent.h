@@ -70,7 +70,6 @@ private:
 
 public:
      AFImportanceDiffusionAgent(CogServer&);
-    ~AFImportanceDiffusionAgent();
 
     virtual void run();
     virtual const ClassInfo& classinfo() const { return info(); }

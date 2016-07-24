@@ -66,7 +66,6 @@ public:
     }
 
     FocusBoundaryUpdatingAgent(CogServer&);
-    virtual ~FocusBoundaryUpdatingAgent();
     virtual void run();
 
 }; // class
