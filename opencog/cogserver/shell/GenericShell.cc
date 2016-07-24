@@ -59,9 +59,10 @@ GenericShell::GenericShell(void)
 	abort_prompt[2] = TIMING_MARK;
 	abort_prompt[3] = '\n';
 
-	evaluator = NULL;
-	socket = NULL;
-	evalthr = NULL;
+	evaluator = nullptr;
+	socket = nullptr;
+	evalthr = nullptr;
+	pollthr = nullptr;
 	self_destruct = false;
 }
 
@@ -71,7 +72,14 @@ GenericShell::~GenericShell()
 	{
 		evalthr->join();
 		delete evalthr;
-		evalthr = NULL;
+		evalthr = nullptr;
+	}
+
+	if (pollthr)
+	{
+		pollthr->join();
+		delete pollthr;
+		pollthr = nullptr;
 	}
 }
 
@@ -192,15 +200,31 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	}
 #endif // PERFORM_STDOUT_DUPLICATION
 
-	// Launch the evaluator, possibly in a different thread,
-	// and then send out whatever is reported back.
+	// Run the evaluator (in a different thread)
 	line_discipline(expr);
-	std::string retstr = poll_output();
-	while (0 < retstr.size())
+
+	// Poll for output from the evaluator, and send back results.
+	auto poll_wrapper = [&](GenericShell* p)
 	{
-		socket->Send(retstr);
-		retstr = poll_output();
+		std::string retstr = poll_output();
+		while (0 < retstr.size())
+		{
+			socket->Send(retstr);
+			retstr = poll_output();
+		}
+	};
+
+	// Always wait for the previous poll of results to complete, before
+	// starting the next one.  The goal here is to keep results
+	// serialized on the socket, so that chronologically-earlier
+	// results are written to the socket in order, before the newer
+	// results.
+	if (pollthr)
+	{
+		pollthr->join();
+		delete pollthr;
 	}
+	pollthr = new std::thread(poll_wrapper, this);
 
 #ifdef PERFORM_STDOUT_DUPLICATION
 	if (show_output and show_prompt)
@@ -348,7 +372,7 @@ void GenericShell::do_eval(const std::string &input)
 	eval_done = false;
 	evaluator->begin_eval(); // must be called in same thread as poll_result
 
-	auto async_wrapper = [&](GenericShell* p, const std::string& in)
+	auto eval_wrapper = [&](GenericShell* p, const std::string& in)
 	{
 		thread_init();
 		p->evaluator->eval_expr(in.c_str());
@@ -367,7 +391,7 @@ void GenericShell::do_eval(const std::string &input)
 		evalthr->join();
 		delete evalthr;
 	}
-	evalthr = new std::thread(async_wrapper, this, input);
+	evalthr = new std::thread(eval_wrapper, this, input);
 }
 
 void GenericShell::thread_init(void)
