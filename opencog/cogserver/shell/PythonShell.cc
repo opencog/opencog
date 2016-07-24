@@ -71,11 +71,11 @@ void PythonShell::set_socket(ConsoleSocket *s)
     if (!evaluator) evaluator = &PythonEval::instance();
 }
 
-void PythonShell::eval(const std::string &expr, ConsoleSocket *s)
+void PythonShell::eval(const std::string &expr)
 {
     bool selfie = self_destruct;
     self_destruct = false;
-    GenericShell::eval(expr, s);
+    GenericShell::eval(expr);
     if (selfie) {
         self_destruct = true;
 

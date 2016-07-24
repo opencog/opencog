@@ -59,11 +59,11 @@ GenericShell::GenericShell(void)
 	abort_prompt[2] = TIMING_MARK;
 	abort_prompt[3] = '\n';
 
-	evaluator = NULL;
-	socket = NULL;
-	evalthr = NULL;
+	evaluator = nullptr;
+	socket = nullptr;
+	evalthr = nullptr;
+	pollthr = nullptr;
 	self_destruct = false;
-	do_async_output = false;
 }
 
 GenericShell::~GenericShell()
@@ -72,7 +72,14 @@ GenericShell::~GenericShell()
 	{
 		evalthr->join();
 		delete evalthr;
-		evalthr = NULL;
+		evalthr = nullptr;
+	}
+
+	if (pollthr)
+	{
+		pollthr->join();
+		delete pollthr;
+		pollthr = nullptr;
 	}
 }
 
@@ -86,11 +93,6 @@ void GenericShell::hush_output(bool hush)
 void GenericShell::hush_prompt(bool hush)
 {
 	show_prompt = !hush;
-}
-
-void GenericShell::sync_output(bool sync)
-{
-	do_async_output = !sync;
 }
 
 const std::string& GenericShell::get_prompt(void)
@@ -127,18 +129,34 @@ void GenericShell::set_socket(ConsoleSocket *s)
 static std::mutex _stdout_redirect_mutex;
 static GenericShell* _redirector = nullptr;
 
-void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
+// Implementation requirements:
+//
+// 1) We want all evaluations to be carried out in serial order,
+//    so that the previous expression is full evaluated before the
+//    next one is started.
+// 2) We want all evaluations to be interruptible, so that if an
+//    expression is an infinite loop (or simply is taking too long)
+//    the user can send a control-C and interrupt the execution.
+// 3) Due to the client-server socket model, this method should
+//    return as soon as possible, so that the caller can resume
+//    waiting on the socket, in case the user is trying to send
+//    a control-C to us.
+// 4) Long-running evaluations should send output back to the user
+//    synchronously: i.e. send output back to the socket as the
+//    output is generated, instead of waiting for the evaluation
+//    to terminate first, before relaying output.
+//
+// The above requirements force us to create not just one, but two
+// threads for each evaluation: one thread for the evaluation, and
+// another thread to listen for results, and pass them on.
+//
+// Side-note: the constructor for this class runs in a different thead
+// than the caller for this method. That's because the socket listen
+// and socket accept runs in a different thread, than the socket
+// receive.  The receiver thread calls us.
+//
+void GenericShell::eval(const std::string &expr)
 {
-	// XXX A subtle but important point: the way that socket handling
-	// works in OpenCog is that socket-listen/accept happens in one
-	// thread, while socket receive is in another. In particular, the
-	// constructor for this class runs in a *different* thread than
-	// this method does.
-	if (NULL == socket)
-	{
-		socket = s;
-	}
-
 	// Work-around some printing madness. See issue
 	// https://github.com/opencog/atomspace/issues/629
 	// This is kind of complicated to explain, so pay attention:
@@ -156,7 +174,7 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	// then attach stdout to a pipe, perform the evaluation, then
 	// restore stdout from the backup. Finally, drain the pipe,
 	// printing both to stdout and to the shell socket.
-#define PERFORM_STDOUT_DUPLICATION 1
+// #define PERFORM_STDOUT_DUPLICATION 1
 #ifdef PERFORM_STDOUT_DUPLICATION
 	// What used to be stdout will now go to the pipe.
 	int pipefd[2];
@@ -177,15 +195,31 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 	}
 #endif // PERFORM_STDOUT_DUPLICATION
 
-	// Launch the evaluator, possibly in a different thread,
-	// and then send out whatever is reported back.
+	// Run the evaluator (in a different thread)
 	line_discipline(expr);
-	std::string retstr = poll_output();
-	while (0 < retstr.size())
+
+	// Poll for output from the evaluator, and send back results.
+	auto poll_wrapper = [&](void)
 	{
-		socket->Send(retstr);
-		retstr = poll_output();
+		std::string retstr = poll_output();
+		while (0 < retstr.size())
+		{
+			socket->Send(retstr);
+			retstr = poll_output();
+		}
+	};
+
+	// Always wait for the previous poll of results to complete, before
+	// starting the next one.  The goal here is to keep results
+	// serialized on the socket, so that chronologically-earlier
+	// results are written to the socket in order, before the newer
+	// results.
+	if (pollthr)
+	{
+		pollthr->join();
+		delete pollthr;
 	}
+	pollthr = new std::thread(poll_wrapper);
 
 #ifdef PERFORM_STDOUT_DUPLICATION
 	if (show_output and show_prompt)
@@ -248,69 +282,70 @@ void GenericShell::line_discipline(const std::string &expr)
 	logger().debug("[GenericShell] line disc: expr, len of %zd ='%s'",
 		len, expr.c_str());
 
-	// Make sure there is at least one character if we are checking
-	// for abort, interrrupt, escape, etc.
-	if (0 != len)
+	if (0 == len)
 	{
-		// Handle Telnet RFC 854 IAC format
-		// Basically, we're looking for telnet-encoded abort or interrupt
-		// characters, starting at the end of the input string. If they
-		// are there, then don't process input, and clear out the evaluator.
-		// Also, be sure to send telnet IAC WILL TIMING-MARK so that telnet
-		// doesn't sit there flushing output forever.
-		//
-		// Search for IAC to at most 20 chars from the end of the string.
-		int i = len-2;
-		int m = len - 20;
-		if (m < 0) m = 0;
-		while (m <= i)
+		do_eval("\n");
+		return;
+	}
+
+	// Handle Telnet RFC 854 IAC format
+	// Basically, we're looking for telnet-encoded abort or interrupt
+	// characters, starting at the end of the input string. If they
+	// are there, then don't process input, and clear out the evaluator.
+	// Also, be sure to send telnet IAC WILL TIMING-MARK so that telnet
+	// doesn't sit there flushing output forever.
+	//
+	// Search for IAC to at most 20 chars from the end of the string.
+	int i = len-2;
+	int m = len - 20;
+	if (m < 0) m = 0;
+	while (m <= i)
+	{
+		unsigned char c = expr[i];
+		if (IAC == c)
 		{
-			unsigned char c = expr[i];
-			if (IAC == c)
+			c = expr[i+1];
+			if ((IP == c) || (AO == c))
 			{
-				c = expr[i+1];
-				if ((IP == c) || (AO == c))
-				{
-					evaluator->clear_pending();
-					put_output(abort_prompt);
-					return;
-				}
-
-				// Erase line -- just ignore this line.
-				if (EL == c)
-				{
-					put_output(get_prompt());
-					return;
-				}
+				evaluator->clear_pending();
+				put_output(abort_prompt);
+				return;
 			}
-			i--;
-		}
 
-		// Don't evaluate if the line is terminated by
-		// escape (^[), cancel (^X) or quit (^C)
-		// These would typically be sent by netcat, and not telnet.
-		unsigned char c = expr[len-1];
-		if ((SYN == c) || (CAN == c) || (ESC == c))
-		{
-			evaluator->clear_pending();
-			put_output("\n");
-			put_output(normal_prompt);
-			return;
+			// Erase line -- just ignore this line.
+			if (EL == c)
+			{
+				put_output(get_prompt());
+				return;
+			}
 		}
+		i--;
+	}
 
-		// Look for either an isolated control-D, or a single period on a line
-		// by itself. This means "leave the shell". We leave the shell by
-		// unsetting the shell pointer in the ConsoleSocket.
-		// 0x4 is ASCII EOT, which is what ctrl-D at keybd becomes.
-		if ((false == evaluator->input_pending()) and
-		    ((EOT == expr[len-1]) or ((1 == len) and ('.' == expr[0]))))
-		{
-			self_destruct = true;
-			put_output("");
-			if (show_prompt)
-				put_output("Exiting the shell\n");
-			return;
-		}
+	// Don't evaluate if the line is terminated by
+	// escape (^[), cancel (^X) or quit (^C)
+	// These would typically be sent by netcat, and not telnet.
+	unsigned char c = expr[len-1];
+	if ((SYN == c) || (CAN == c) || (ESC == c))
+	{
+		evaluator->clear_pending();
+		put_output("\n");
+		put_output(normal_prompt);
+		return;
+	}
+
+	// Look for either an isolated control-D, or a single period on a line
+	// by itself. This means "leave the shell". We leave the shell by
+	// unsetting the shell pointer in the ConsoleSocket.
+	// 0x4 is ASCII EOT, which is what ctrl-D at keybd becomes.
+	if ((false == evaluator->input_pending()) and
+	    ((EOT == expr[len-1]) or ((1 == len) and ('.' == expr[0]))))
+	{
+		self_destruct = true;
+		put_output("");
+		if (show_prompt)
+			put_output("Exiting the shell\n");
+		return;
 	}
 
 	/*
@@ -330,30 +365,28 @@ void GenericShell::line_discipline(const std::string &expr)
 void GenericShell::do_eval(const std::string &input)
 {
 	eval_done = false;
-	evaluator->begin_eval(); // must be called in same thread as result_poll
-	if (do_async_output)
-	{
-		auto async_wrapper = [&](GenericShell* p, const std::string& in)
-		{
-			thread_init();
-			p->evaluator->eval_expr(in.c_str());
-		};
+	evaluator->begin_eval(); // must be called in same thread as poll_result
 
-		// We cannot use the same evaluator in two different threads
-		// at the same time; a single evaluator is not thread-safe
-		// against itself. So always wait for the previous thread to
-		// finish, before we go at it again.
-		if (evalthr)
-		{
-			evalthr->join();
-			delete evalthr;
-		}
-		evalthr = new std::thread(async_wrapper, this, input);
-	}
-	else
+	auto eval_wrapper = [&](const std::string& in)
 	{
-		evaluator->eval_expr(input.c_str());
+		thread_init();
+		evaluator->eval_expr(in.c_str());
+	};
+
+	// Always wait for the previous evaluation to complete, before
+	// starting the next one.  That is, evaluations are always
+	// explicitly serialized.
+	//
+	// ... and even if they were not, we cannot use the same evaluator
+	// in two different threads at the same time; a single evaluator is
+	// not thread-safe against itself. So always wait for the previous
+	// evaluation thread to finish, before we go at it again.
+	if (evalthr)
+	{
+		evalthr->join();
+		delete evalthr;
 	}
+	evalthr = new std::thread(eval_wrapper, input);
 }
 
 void GenericShell::thread_init(void)
@@ -390,13 +423,13 @@ std::string GenericShell::poll_output()
 
 	if (evaluator->input_pending())
 	{
-		if (show_output && show_prompt)
+		if (show_output and show_prompt)
 			return pending_prompt;
 		else
 			return "";
 	}
 
-	if (show_output || evaluator->eval_error())
+	if (show_output or evaluator->eval_error())
 	{
 		if (show_prompt) return normal_prompt;
 	}

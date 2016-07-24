@@ -44,8 +44,6 @@ SchemeShell::SchemeShell(void)
 
 	pending_prompt = "... ";
 
-	do_async_output = true;
-
 	evaluator = SchemeEval::get_evaluator();
 
 	// Set the inital atomspace for this thread.

@@ -64,16 +64,13 @@ class GenericShell
 		ConsoleSocket* socket;
 		GenericEval* evaluator;
 		std::thread* evalthr;
-
-		virtual void set_socket(ConsoleSocket *);
-		virtual const std::string& get_prompt(void);
+		std::thread* pollthr;
 
 		virtual void thread_init(void);
 		virtual void line_discipline(const std::string &expr);
 		virtual void do_eval(const std::string &expr);
 
-		// Async output handling.
-		bool do_async_output;
+		// Output handling.
 		bool eval_done;
 		virtual void put_output(const std::string&);
 		virtual std::string poll_output();
@@ -82,11 +79,12 @@ class GenericShell
 		GenericShell(void);
 		virtual ~GenericShell();
 
-		virtual void eval(const std::string &, ConsoleSocket *);
+		virtual void set_socket(ConsoleSocket *);
+		virtual void eval(const std::string &);
 
+		virtual const std::string& get_prompt(void);
 		virtual void hush_output(bool);
 		virtual void hush_prompt(bool);
-		virtual void sync_output(bool);
 };
 
 /** @}*/
