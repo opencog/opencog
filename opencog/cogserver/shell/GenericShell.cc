@@ -199,7 +199,7 @@ void GenericShell::eval(const std::string &expr)
 	line_discipline(expr);
 
 	// Poll for output from the evaluator, and send back results.
-	auto poll_wrapper = [&](GenericShell* p)
+	auto poll_wrapper = [&](void)
 	{
 		std::string retstr = poll_output();
 		while (0 < retstr.size())
@@ -219,7 +219,7 @@ void GenericShell::eval(const std::string &expr)
 		pollthr->join();
 		delete pollthr;
 	}
-	pollthr = new std::thread(poll_wrapper, this);
+	pollthr = new std::thread(poll_wrapper);
 
 #ifdef PERFORM_STDOUT_DUPLICATION
 	if (show_output and show_prompt)
@@ -367,10 +367,10 @@ void GenericShell::do_eval(const std::string &input)
 	eval_done = false;
 	evaluator->begin_eval(); // must be called in same thread as poll_result
 
-	auto eval_wrapper = [&](GenericShell* p, const std::string& in)
+	auto eval_wrapper = [&](const std::string& in)
 	{
 		thread_init();
-		p->evaluator->eval_expr(in.c_str());
+		evaluator->eval_expr(in.c_str());
 	};
 
 	// Always wait for the previous evaluation to complete, before
@@ -386,7 +386,7 @@ void GenericShell::do_eval(const std::string &input)
 		evalthr->join();
 		delete evalthr;
 	}
-	evalthr = new std::thread(eval_wrapper, this, input);
+	evalthr = new std::thread(eval_wrapper, input);
 }
 
 void GenericShell::thread_init(void)
