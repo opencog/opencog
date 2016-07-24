@@ -73,7 +73,6 @@ protected:
 
 public:
     RentCollectionBaseAgent(CogServer& cs);
-    ~RentCollectionBaseAgent();
 
     int calculate_STI_Rent();
     int calculate_LTI_Rent();

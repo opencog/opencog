@@ -70,7 +70,6 @@ public:
     }
 
     MinMaxSTIUpdatingAgent(CogServer&);
-    virtual ~MinMaxSTIUpdatingAgent();
     virtual void run();
 
 }; // class
