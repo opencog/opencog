@@ -274,8 +274,8 @@
         ; add astericks to highlight changed values
         (if (or (member var changed-params)
                 (member var changed-pau))
-            (format #f "*~1,1f*" (psi-get-number-value var))
-            (format #f "~1,1f" (psi-get-number-value var))))
+            (format #f "*~1,2f*" (psi-get-number-value var))
+            (format #f "~1,2f" (psi-get-number-value var))))
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 
