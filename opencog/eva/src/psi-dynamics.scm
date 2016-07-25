@@ -3,18 +3,25 @@
 ;
 ; OpenPsi dynamics control for Hanson robot
 
-(use-modules (opencog) (opencog exec) (opencog openpsi))
+(use-modules (opencog) (opencog exec) (opencog openpsi) (opencog python))
 
 ; needed for nlp parsing
 (use-modules (opencog nlp) (opencog nlp chatbot))
 
 (load "express.scm") ; For random pos and neg expressions
+(load "faces.scm")
+(load "self-model.scm") ; For soma-state def
+(load "orchestrate.scm") ; For DefinedPredicate "Show expression"
 
 ; Param setting
 (define valence-activation-level .5)
 
 (define psi-verbose #t)
-(define no-blender #t)
+(define no-blender #f)
+
+(if no-blender
+    (python-eval "execfile('/usr/local/share/opencog/python/atomic-dbg.py')"))
+
 
 (define prev-value-node (Concept "previous value"))
 (define current-sentence-node (Concept "current sentence"))
@@ -39,17 +46,27 @@
 	; both for now, which may or may not be a good thing, but probably
 	; interesting nonetheless.
 	(if (>= pos-valence valence-activation-level)
-		;( (do-catch do-random-positive-expression))
-		(if psi-verbose
-			(display "psi-dynamics: doing random positive expression\n"))
-		(if (not no-blender)
-			(do-random-positive-expression)))
+	    (begin
+            ;( (do-catch do-random-positive-expression))
+            (if psi-verbose
+                (display "psi-dynamics: doing random positive expression\n"))
+            (if (not no-blender)
+                (be-happy pos-valence)
+                ;(do-random-positive-expression)
+            )
+        )
+	)
 	(if (>= neg-valence valence-activation-level)
-		;( (do-catch do-random-negative-expression))
-		(if psi-verbose
-			(display "psi-dynamics: doing random negative expression\n"))
-		(if (not no-blender)
-			(do-random-negative-expression)))
+	    (begin
+            ;( (do-catch do-random-negative-expression))
+            (if psi-verbose
+                (display "psi-dynamics: doing random negative expression\n"))
+            (if (not no-blender)
+                (be-sad neg-valence)
+                ;(do-random-negative-expression)
+		    )
+	    )
+	)
 
 	;(set! verbose prev-verbose)
 )
@@ -60,15 +77,31 @@
 ; ------------------------------------------------------------------
 ; Functions to initiate random positive and negative epxerssions
 
-(define (do-random-positive-expression)
-   (cog-execute!
-      (PutLink (DefinedSchemaNode "Pick random expression")
-         (ConceptNode "positive"))))
+(define (do-random-positive-expression intensity)
+    (define expression
+       (cog-execute!
+          (PutLink (DefinedSchemaNode "Pick random expression")
+             (ConceptNode "positive"))))
+     (cog-evaluate! (Put (DefinedPredicate "Show expression")
+         (ListLink expression (Number 8) (Number intensity)))))
 
-(define (do-random-negative-expression)
-   (cog-execute!
-	      (PutLink (DefinedSchemaNode "Pick random expression")
-         (ConceptNode "frustrated"))))
+(define (do-random-negative-expression intensity)
+    (define expression
+       (cog-execute!
+          (PutLink (DefinedSchemaNode "Pick random expression")
+             (ConceptNode "frustrated"))))
+     (cog-evaluate! (Put (DefinedPredicate "Show expression")
+         (ListLink expression (Number 8) (Number intensity)))))
+
+(define (be-happy intensity)
+    (display "in (be-happy)\n")
+    (cog-evaluate! (Put (DefinedPredicate "Show expression")
+        (ListLink (Concept "happy") (Number 8) (Number intensity)))))
+
+(define (be-sad intensity)
+    (display "in (be-sad)\n")
+    (cog-evaluate! (Put (DefinedPredicate "Show expression")
+        (ListLink (Concept "sad") (Number 8) (Number intensity)))))
 
 ; Temp error catching for when blender not running
 (define (do-catch function . params)
@@ -93,23 +126,42 @@
 (define negative-sentiment-dialog
 	(psi-create-monitored-event "negative-sentiment-dialog"))
 
+
+; ------------------------------------------------------------------
+; Event detection callbacks
+
+(define no-input-utterance (ConceptNode "Chatbot: NoInputUtterance"))
+
 ; Callback functions for positive and negative chat sentiment detection
 (define (psi-detect-dialog-sentiment)
 	(define current-input (get-input-sent-node))
-	(if (not (equal? current-input (psi-get-value current-sentence-node)))
+	(define previous-input (psi-get-value current-sentence-node))
+	;(format #t "current-input: ~a\n" current-input)
+	(if (and (not (equal? current-input no-input-utterance))
+	         (not (equal? current-input previous-input)))
 		; We have a new input sentence
-		(psi-set-value! current-sentence-node current-sentence)
-		; Check for positive and/or negative sentimement
-		; Sentence sentiment is put in the atomspace as
-		;   (Inheritance (Sentence "blah") (Concept "Positive")) or "Negative"
-		;   or "Neutral"
-		(let ((parents (cog-chase-link 'InheritanceLink 'ConceptNode
-				current-input)))
-			(for-each (lambda (concept)
-						(if (equal? concept (Concept "Positive"))
-							(set-value! positive-sentiment-dialog 1))
-						(if (equal? concept (Concept "Negative"))
-							(set-value! negative-sentiment-dialog 1)))))))
+		(begin
+            (format #t "\n*** New input sentance detected *** loop ~a\n"
+                psi-updater-loop-count)
+            (format #t "previous-input: ~a   current-input: ~a\n"
+                previous-input current-input)
+            (StateLink current-sentence-node current-input)
+            ; Check for positive and/or negative sentimement
+            ; Sentence sentiment is put in the atomspace as
+            ;   (Inheritance (Sentence "blah") (Concept "Positive")) or "Negative"
+            ;   or "Neutral"
+            (let ((inher-super (cog-chase-link 'InheritanceLink 'ConceptNode
+                    current-input)))
+                (format #t "inher-super: ~a\n" inher-super)
+                (for-each (lambda (concept)
+                            (format #t "concept: ~a\n" concept)
+                            (if (equal? concept (Concept "Positive"))
+                       		    (psi-set-event-occurrence!
+                       		        positive-sentiment-dialog))
+                            (if (equal? concept (Concept "Negative"))
+                                (psi-set-event-occurrence!
+                                    negative-sentiment-dialog)))
+                        inher-super)))))
 
 ; Callback checks for both positive and negative sentiment
 (psi-set-event-callback! psi-detect-dialog-sentiment)
@@ -127,19 +179,26 @@
 
 (define pos-sentiment->pos-valence
 	(psi-create-interaction-rule positive-sentiment-dialog
-		increased pos-valence .8))
+		increased pos-valence .3))
 (define pos-sentiment->neg-valence
 	(psi-create-interaction-rule positive-sentiment-dialog
-		increased neg-valence -.8))
+		increased neg-valence -.3))
 (define neg-sentiment->neg-valence
 	(psi-create-interaction-rule negative-sentiment-dialog
-		increased neg-valence .8))
+		increased neg-valence .3))
 (define neg-sentiment->pos-valence
 	(psi-create-interaction-rule negative-sentiment-dialog
-		increased pos-valence -.8))
+		increased pos-valence -.3))
 
 (define power->voice
 	(psi-create-interaction-rule agent-state-power changed voice-width 1))
+
+(define speech->power
+    (psi-create-interaction-rule speech-giving-starts increased
+        agent-state-power .5))
+
+(define new-face->arousal
+    (psi-create-interaction-rule new-face increased arousal .3))
 
 
 ; ------------------------------------------------------------------
@@ -148,6 +207,7 @@
 (psi-updater-run)
 
 
+; ------------------------------------------------------------------
 ; Shortcuts for dev and testing purposes
 (define s speech-giving-starts)
 (define pos positive-sentiment-dialog)
@@ -156,14 +216,26 @@
 
 (define (place-neg-dialog)
 	(define sentence (SentenceNode (number->string (random 1000000000))))
-	(State (Anchor "Chatbot: InutUtteranceSentence")  sentence)
-	(Inheritance sentence (Concept "Negatative")))
+	(State (Anchor "Chatbot: InputUtteranceSentence")  sentence)
+	(Inheritance sentence (Concept "Negative")))
+
+(define (place-pos-dialog)
+	(define sentence (SentenceNode (number->string (random 1000000000))))
+	(State (Anchor "Chatbot: InputUtteranceSentence")  sentence)
+	(Inheritance sentence (Concept "Positive")))
+
+(define pos place-pos-dialog)
+(define neg place-neg-dialog)
 
 
 ; ---------------------------------------------------------------------
-; for testing
-;(load "../../opencog/opencog/nlp/chatbot-psi/utils.scm")
-;(load "../../opencog/opencog/nlp/chatbot-psi/states.scm")
-;(load "../../opencog/opencog/nlp/chatbot-eva/imperative-rules.scm")
+; for testing/dev when chatbot-psi files are not already loaded
+(if (not (defined? 'get-input-sent-node))
+    (begin
+        (display "Loading support files for testing\n")
+        (load "../../opencog/opencog/nlp/chatbot-psi/utils.scm")
+        (load "../../opencog/opencog/nlp/chatbot-psi/states.scm")
+        (load "../../opencog/opencog/nlp/chatbot-eva/imperative-rules.scm"))
+        (python-eval "execfile('atomic.py')"))
 
 
