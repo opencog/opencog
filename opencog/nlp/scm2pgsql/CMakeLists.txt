@@ -1,6 +1,9 @@
 ADD_LIBRARY (scmloader SHARED
 	SCMLoader
 	PGStorageDelegate
+	TypeFrameIndexBuilder
+	TypeFrameIndex
+	TypeFrame
 )
 
 ADD_DEPENDENCIES (scmloader
@@ -13,8 +16,12 @@ TARGET_LINK_LIBRARIES(scmloader
 
 
 ADD_EXECUTABLE (loadscm loadscm.cc)
+ADD_EXECUTABLE (frame frame.cc)
 ADD_EXECUTABLE (scm2pgsql scm2pgsql.cc)
 TARGET_LINK_LIBRARIES(loadscm
+	scmloader
+)
+TARGET_LINK_LIBRARIES(frame
 	scmloader
 )
 TARGET_LINK_LIBRARIES(scm2pgsql
@@ -27,5 +34,8 @@ INSTALL (FILES
 	SCMLoader.h
 	PGStorageDelegate.h
 	SCMLoaderCallback.h
+	TypeFrame.h
+	TypeFrameIndex.h
+	TypeFrameIndexBuilder.h
 	DESTINATION "include/${PROJECT_NAME}/nlp/scm2pgsql"
 )
