@@ -9,12 +9,13 @@
 
 ;; Check whether the query has common words with the inferred atoms
 (define (is-pln-inferred-related?)
+  (cog-logger-debug "[PLN-Context] is-pln-inferred-related?")
   (let* (
          (inferred-names (get-inferred-names))
          (sentence-names (get-input-utterance-names))
          (inter-names (lset-intersection equal? inferred-names sentence-names)))
-    ;; (cog-logger-info "[PLN-Context] inferred-names = ~a" inferred-names)
-    ;; (cog-logger-info "[PLN-Context] sentence-names = ~a" sentence-names)
+    (cog-logger-debug "[PLN-Context] inferred-names = ~a" inferred-names)
+    (cog-logger-debug "[PLN-Context] sentence-names = ~a" sentence-names)
     (if (null? inter-names)
         (stv 0 1)
         (stv 1 1))))

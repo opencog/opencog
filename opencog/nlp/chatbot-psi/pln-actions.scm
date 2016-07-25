@@ -49,6 +49,8 @@
 ;; Fetch the semantics with the highest strength*confidence that
 ;; contains words in common with the query
 (define-public (do-pln-QA)
+    (cog-logger-debug "[PLN-Action] do-pln-QA")
+
     (State pln-qa process-started)
 
     (let* (
@@ -64,7 +66,7 @@
                       (implication-to-evaluation-s2l (gar semantics)
                                                      (gdr semantics))
                       '()))
-           (word-list (if (null? logic) '() (first (sureal logic))))
+           ;; (word-list (if (null? logic) '() (first (sureal logic))))
           )
 
       (cog-logger-debug "[PLN-Action] assoc-inferred-names = ~a"
@@ -72,9 +74,10 @@
       (cog-logger-debug "[PLN-Action] filtered-in = ~a" filtered-in)
       (cog-logger-debug "[PLN-Action] semantics = ~a" semantics)
       (cog-logger-debug "[PLN-Action] logic = ~a" logic)
-      (cog-logger-debug "[PLN-Action] word-list = ~a" word-list)
+      (cog-logger-debug "[PLN-Action] sureal = ~a" (sureal logic))
+      ;; (cog-logger-debug "[PLN-Action] word-list = ~a" word-list)
 
-      (State pln-answers (List (map Word word-list)))
+      ;; (State pln-answers (List (map Word word-list)))
 
       (State pln-qa process-finished)
     )
