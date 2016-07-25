@@ -32,8 +32,6 @@
 
 namespace opencog
 {
-namespace nlp
-{
 
 /**
  * A helper class that implements a simple strategy to load HUGE .scm
@@ -67,7 +65,6 @@ private:
     static void parseFile(std::fstream &fin, AtomSpace &atomSpace, int fileSize, SCMLoaderCallback *callbackListener);
 };
 
-}
 }
 
 #endif // _OPENCOG_SCMLOADER_H

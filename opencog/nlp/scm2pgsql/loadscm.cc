@@ -22,19 +22,22 @@
  */
 
 #include "SCMLoader.h"
+#include "TypeFrameIndex.h"
+#include "TypeFrameIndexBuilder.h"
 #include <opencog/guile/SchemeEval.h>
 
 using namespace opencog;
-using namespace opencog::nlp;
 
 bool loadFile(char *fileName)
 {
+    TypeFrameIndex typeFrameIndex;
+    TypeFrameIndexBuilder builder(&typeFrameIndex);
     AtomSpace atomSpace;
     SchemeEval::init_scheme();
     SchemeEval::set_scheme_as(&atomSpace);
     SchemeEval *schemeEval = new SchemeEval(&atomSpace);
     schemeEval->eval("(use-modules (opencog nlp relex2logic))");
-    return SCMLoader::load(fileName, atomSpace);
+    return SCMLoader::load(fileName, atomSpace, &builder);
 }
 
 int main(int argc, char *argv[]) {

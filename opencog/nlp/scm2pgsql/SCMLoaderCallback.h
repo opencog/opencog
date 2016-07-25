@@ -30,8 +30,6 @@
 
 namespace opencog
 {
-namespace nlp
-{
 
 /**
  * This interface is supposed to be implemented by objects that will be notified
@@ -50,7 +48,7 @@ public:
      * @param schemeText The Scheme definition of the atom that is going to be
      * inserted
      */
-    virtual void beforeInserting(std::string schemeText) = 0;
+    virtual void beforeInserting(const std::string &schemeText) = 0;
 
     /**
      * This method is called just after inserting a new toplevel atom from the
@@ -62,7 +60,6 @@ public:
     virtual void afterInserting(const Handle &toplevelAtom) = 0;
 };
 
-}
 }
 
 #endif // _OPENCOG_SCMLOADERCALLBACK_H

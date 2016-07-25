@@ -1,9 +1,9 @@
 #include "SCMLoader.h"
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Logger.h>
 
 
 using namespace opencog;
-using namespace opencog::nlp;
 
 bool SCMLoader::load(const std::string &fileName, 
                      AtomSpace &atomSpace, 
@@ -15,6 +15,7 @@ bool SCMLoader::load(const std::string &fileName,
     std::fstream fin(fileName, std::fstream::in);
     if (fin.good()) {
         std::ifstream fcount(fileName, std::ios::binary | std::ios::ate);
+        // Just to provide log message with % done
         int fileSize = fcount.tellg();
         fcount.close();
         logger().info("Loading file: \"%s\"", fileName.c_str());
@@ -29,6 +30,8 @@ bool SCMLoader::load(const std::string &fileName,
     return exitValue;
 }
 
+
+/*
 void SCMLoader::parseFile(std::fstream &fin, 
                           AtomSpace &atomSpace, 
                           int inputFileSize, 
@@ -37,7 +40,7 @@ void SCMLoader::parseFile(std::fstream &fin,
     SchemeEval *schemeEval = SchemeEval::get_evaluator(&atomSpace);
     int percentDone = 0;
     int inputFileCharCount = 0;
-    bool firstCharInLine = true;
+    bool firstCharInLine = false;
     char c;
     std::string line = "";
     while (fin >> std::noskipws >> c) {
@@ -53,14 +56,70 @@ void SCMLoader::parseFile(std::fstream &fin,
                 }
             }
         } else {
-            line += c;
-            if (firstCharInLine && (c == ')')) {
-                if (listener != NULL) listener->beforeInserting(line);
-                schemeEval->eval(line);
-                //if (listener != NULL) listener->afterInserting(NULL);
-                line = "";
+            if (firstCharInLine) {
+                if (c == ')') {
+                    line += c;
+                    if (listener != NULL) listener->beforeInserting(line);
+                    schemeEval->eval(line);
+                    line = "";
+                } else if (c == '(') {
+                    if (listener != NULL) listener->beforeInserting(line);
+                    schemeEval->eval(line);
+                    line = c;
+                }
+                firstCharInLine = false;
+            } else {
+                line += c;
             }
-            firstCharInLine = false;
+        }
+    }
+    if (line != "") {
+        if (listener != NULL) listener->beforeInserting(line);
+        schemeEval->eval(line);
+    }
+    std::string output = schemeEval->eval("(count-all)");
+    logger().info("Atom count after loading: %s", output.c_str());
+}
+*/
+
+void SCMLoader::parseFile(std::fstream &fin, 
+                          AtomSpace &atomSpace, 
+                          int inputFileSize, 
+                          SCMLoaderCallback *listener)
+{
+    SchemeEval *schemeEval = SchemeEval::get_evaluator(&atomSpace);
+    int percentDone = 0;
+    int inputFileCharCount = 0;
+    int level = 0;
+    bool inNodeName = false;
+    char c;
+    std::string line = "";
+    while (fin >> std::noskipws >> c) {
+        inputFileCharCount++;
+        if (c == '\n') {
+            if (inputFileSize > 0) {
+                // Logs current % done
+                int n = (((float) inputFileCharCount) / inputFileSize) * 100;
+                if ((n > percentDone) && (n < 100)) {
+                    percentDone = n;
+                    logger().info("Loading file. %d%% done.", percentDone);
+                }
+            }
+        } else {
+            line += c;
+            if (inNodeName) {
+                if (c == '\"') inNodeName = false;
+            } else {
+                if (c == '\"') inNodeName = true;
+                if (c == '(') level++;
+                if (c == ')') {
+                    if (--level == 0) {
+                        if (listener != NULL) listener->beforeInserting(line);
+                        schemeEval->eval(line);
+                        line = "";
+                    }
+                }
+            }
         }
     }
     std::string output = schemeEval->eval("(count-all)");
