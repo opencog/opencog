@@ -13,6 +13,15 @@ TypeFrameIndex::~TypeFrameIndex()
 
 bool TypeFrameIndex::addFromScheme(const std::string &txt)
 {
+
+    bool returnValue = true;
     TypeFrame frame(txt);
-    return ! frame.isValid();
+    if (frame.isValid()) {
+        for (int i = 0; i < frame.size(); i++) {
+            
+        }
+        returnValue = false;
+    }
+
+    return returnValue;
 }

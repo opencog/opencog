@@ -4,7 +4,7 @@
 using namespace opencog;
 using namespace std;
 
-TypeFrame::TypeFrame(const std::string &schemeRepresentation) 
+TypeFrame::TypeFrame(const string &schemeRepresentation) 
 {
     validInstance = ! buildFrameRepresentation(schemeRepresentation);
 }
@@ -18,6 +18,16 @@ bool TypeFrame::isValid()
     return validInstance;
 }
 
+int TypeFrame::size()
+{
+    return parse.size();
+}
+
+pair<Type, Arity> TypeFrame::at(int pos)
+{
+    return parse.at(pos);
+}
+
 bool TypeFrame::buildFrameRepresentation(const string &schemeTxt)
 {
     printf("0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789\n");
@@ -26,8 +36,8 @@ bool TypeFrame::buildFrameRepresentation(const string &schemeTxt)
         fprintf(stderr, "Invalid scheme: %s\n", schemeTxt.c_str());
         return true;
     } else {
-        for (unsigned int i = 0; i < parseAnswer.size(); i++) {
-            printf("%d ", parseAnswer.at(i));
+        for (unsigned int i = 0; i < parse.size(); i++) {
+            printf("(%d %d) ", parse.at(i).first, parse.at(i).second);
         }
         printf("\n");
     }
@@ -94,7 +104,6 @@ int TypeFrame::recursiveParse(const string &txt, int begin)
         fprintf(stderr, "Unknown type name: %s\n", typeName.c_str());
         return -1;
     }
-    parseAnswer.push_back(type);
     if (classserver().isLink(type)) {
         printf("isLink\n");
         int tvBegin = txt.find_first_of("(", separatorPos);
@@ -111,13 +120,13 @@ int TypeFrame::recursiveParse(const string &txt, int begin)
         }
         printf("targetBegin = %d\n", targetBegin);
         int targetEnd = 0;
-        int targetCount = countTargets(txt, targetBegin);
+        Arity targetCount = countTargets(txt, targetBegin);
         printf("targetCount = %d\n", targetCount);
         if (targetCount < 0){
             error("Could not compute targetCount");
             return -1;
         }
-        parseAnswer.push_back(targetCount);
+        parse.push_back(pair<Type, Arity>(type, targetCount));
         for (int i = 0; i < targetCount; i++) {
             printf("Processing target #%d\n", i);
             targetEnd = recursiveParse(txt, targetBegin);
@@ -134,7 +143,7 @@ int TypeFrame::recursiveParse(const string &txt, int begin)
         return DUMMY;
     } else {
         printf("isNode\n");
-        parseAnswer.push_back(0);
+        parse.push_back(pair<Type, Arity>(type, 0));
         int cursor = separatorPos + 2;
         bool nameEndedFlag = false;
         int level = 1;

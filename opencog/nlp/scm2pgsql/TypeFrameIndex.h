@@ -24,6 +24,7 @@
 #ifndef _OPENCOG_TYPEFRAMEINDEX_H
 #define _OPENCOG_TYPEFRAMEINDEX_H
 
+#include "TypeFramePattern.h"
 #include <string>
 
 namespace opencog
@@ -38,12 +39,15 @@ class TypeFrameIndex
 public:
 
     TypeFrameIndex();
+
+    // TODO Implement this
     ~TypeFrameIndex();
 
     bool addFromScheme(const std::string &txt);
 
 private:
 
+    TypeFramePattern rootPattern;
 };
 
 }

@@ -24,6 +24,7 @@
 #ifndef _OPENCOG_TYPEFRAME_H
 #define _OPENCOG_TYPEFRAME_H
 
+#include <opencog/atoms/base/Atom.h>
 #include <string>
 #include <vector>
 
@@ -41,11 +42,14 @@ public:
     TypeFrame(const std::string &schemeRepresentation);
     bool isValid();
     ~TypeFrame();
+    int size();
+    std::pair<Type, Arity> at(int pos);
+    
 
 private:
 
     bool validInstance;
-    std::vector<int> parseAnswer;
+    std::vector<std::pair<Type, Arity>> parse;
 
     bool buildFrameRepresentation(const std::string &schemeRepresentation);
 
