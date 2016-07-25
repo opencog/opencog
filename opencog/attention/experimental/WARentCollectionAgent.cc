@@ -55,25 +55,6 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0, atoms.size() - 1);
 
-    for (unsigned int i = 0; (i < SAMPLE_SIZE and i < atoms.size()); i++) {
-        HandleSeq tmp;
-
-        // Randomly sample 50% of the atoms in the atomspace.
-        for (unsigned int i = 0; i < atoms.size() / 2; i++) {
-            int idx = distribution(generator);
-            tmp.push_back(atoms[idx]);
-        }
-
-        auto result = std::max_element(tmp.begin(), tmp.end(), []
-                                       (const Handle& h1, const Handle & h2)
-        {
-            return (h1->getSTI() > h2->getSTI());
-        });
-
-        // Select the atoms with the highest STI amongst the samples
-        targetSetOut.push_back(*result);
-
-        // set diffusionSource vector to the current samples.
-        atoms = tmp;
-    }
+    int idx = distribution(generator);
+    targetSetOut.push_back(atoms[idx]);
 }

@@ -58,34 +58,12 @@ void WAImportanceDiffusionAgent::spreadImportance()
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0,diffusionSourceVector.size()-1);
 
-
-    for (unsigned int i = 0; (i < SAMPLE_SIZE and i < diffusionSourceVector.size()) ; i++) {
-        HandleSeq tmp;
-
-        // Randomly sample 50% of the diffusionSourceVector
-        for (unsigned int i = 0; i < diffusionSourceVector.size()/2; i++) {
-            int idx = distribution(generator);
-            tmp.push_back(diffusionSourceVector[idx]);
-        }
-
-        auto result = std::max_element(tmp.begin(), tmp.end(), []
-                                  (const Handle& h1, const Handle & h2)
-        {
-            return (h1->getSTI() > h2->getSTI());
-        });
-
-        // Select the atoms with the highest STI amongst the samples
-        targetSet.push_back(*result);
-
-        // set diffusionSource vector to the current samples.
-        diffusionSourceVector = tmp;
-    }
-
-    diffusionSourceVector = targetSet;
+    int idx = distribution(generator);
+    targetSet.push_back(diffusionSourceVector[idx]);
 
     // Calculate the diffusion for each source atom, and store the diffusion
     // event in a stack
-    for (Handle atomSource : diffusionSourceVector)
+    for (Handle atomSource : targetSet)
     {
         // Check the decision function to determine if spreading will occur
         if (spreadDecider->spreadDecision(atomSource->getSTI())) {
