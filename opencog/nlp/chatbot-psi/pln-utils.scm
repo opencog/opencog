@@ -22,17 +22,12 @@
         )
     (map gen-assoc inferred-atoms-list)))
 
-(define (search-input-utterance)
-  (gar (cog-satisfying-set (Get (State input-utterance (Variable "$x"))))))
-
-(define (get-input-utterance-atoms)
-  (let ((iu (search-input-utterance)))
-  (if (cog-link? iu)
-      (cog-outgoing-set (third (cog-outgoing-set iu)))
-      '())))
+(define (search-input-utterance-words)
+  (let* ((results (cog-chase-link 'StateLink 'ListLink input-utterance-words)))
+    (if (null? results) '() (cog-outgoing-set (first results)))))
 
 (define (get-input-utterance-names)
-  (get-names (get-input-utterance-atoms)))
+  (get-names (search-input-utterance-words)))
 
 (define (get-last-sentence-id)
   (let* (
