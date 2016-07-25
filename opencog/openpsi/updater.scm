@@ -156,8 +156,6 @@
 		(let ((output-port (open-file "psilog.txt" "a")))
 			(format output-port "\n\n\n")))
 
-	;(for-each (get-value-and-store key) evals-with-change-pred)
-
 	;(format #t "psi-evals-with-change-pred: ~a\n" evals-with-change-pred)
 
 )
@@ -280,15 +278,15 @@
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 
 	; Event Detection
-	; Evaluate the monitored events and set "new-event" predicates
-	; This needs to happen before evaluating the monitored params so the
-	; new-event predicates are set beforehand.
-	(for-each set-new-event-status psi-monitored-events)
-
 	; First call the event detection callback functions
 	;(format #t "psi-event-detection-callbacks: ~a\n"
 	;	psi-event-detection-callbacks)
     (for-each (lambda (f) (apply f '())) psi-event-detection-callbacks)
+
+	; Evaluate the monitored events and set "new-event" predicates
+	; This needs to happen before evaluating the monitored params so the
+	; new-event predicates are set beforehand.
+	(for-each set-new-event-status psi-monitored-events)
 
 	; Evaluate the monitored params and set "changed" predicates accordingly
 	(set! changed-params '())
