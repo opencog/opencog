@@ -15,7 +15,7 @@ class StringRequestResult : public RequestResult
 {
 public:
     string result;
-    StringRequestResult(): RequestResult ("text/plain"){};
+    StringRequestResult(): RequestResult (/*"text/plain"*/){};
     ~StringRequestResult(){};
     virtual void SendResult(const std::string& res) {
         result = res;

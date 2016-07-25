@@ -29,17 +29,17 @@
 #include <opencog/cogserver/server/Module.h>
 #include <opencog/cogserver/server/CogServer.h>
 
-#include <opencog/attention/experimental/AFImportanceDiffusionAgent.h>
-#include <opencog/attention/experimental/AFRentCollectionAgent.h>
+#include "AFImportanceDiffusionAgent.h"
+#include "AFRentCollectionAgent.h"
 
-#include <opencog/attention/experimental/WAImportanceDiffusionAgent.h>
-#include <opencog/attention/experimental/WARentCollectionAgent.h>
+#include "WAImportanceDiffusionAgent.h"
+#include "WARentCollectionAgent.h"
 
-#include <opencog/attention/experimental/ForgettingAgent.h>
-#include <opencog/attention/experimental/MinMaxSTIUpdatingAgent.h>
-#include <opencog/attention/experimental/FocusBoundaryUpdatingAgent.h>
-#include <opencog/attention/experimental/HebbianUpdatingAgent.h>
-#include <opencog/attention/experimental/HebbianCreationAgent.h>
+#include "ForgettingAgent.h"
+#include "MinMaxSTIUpdatingAgent.h"
+#include "FocusBoundaryUpdatingAgent.h"
+#include "HebbianUpdatingAgent.h"
+#include "HebbianCreationAgent.h"
 
 namespace opencog
 {

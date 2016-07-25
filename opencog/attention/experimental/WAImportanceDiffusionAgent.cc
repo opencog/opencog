@@ -37,10 +37,6 @@ WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
     set_sleep_time(300);
 }
 
-WAImportanceDiffusionAgent::~WAImportanceDiffusionAgent(){
-
-}
-
 void WAImportanceDiffusionAgent::run()
 {
     spreadDecider->setFocusBoundary(0);
