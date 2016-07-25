@@ -84,7 +84,7 @@
 
 ;; Rule to put a name on the last sentence using:
 ;;
-;; 1. The state of "last-face"
+;; 1. The state of "last-recognized-face"
 ;;
 ;; (State
 ;;    (Anchor "last-recognized-face")
@@ -121,6 +121,7 @@
         (name-1 "Ben"))
     (cog-logger-debug "[PLN-Reasoner] last-sentence-id = ~a" last-sentence-id)
     (cog-logger-debug "[PLN-Reasoner] last-rec-id = ~a" last-rec-id)
+    (StateLink (AnchorNode "last-recognized-face") (ConceptNode "20839"))
     (Evaluation
        (Predicate "name")
           (List
