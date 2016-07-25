@@ -199,6 +199,8 @@ void GenericShell::eval(const std::string &expr)
 	poll_needed = false;
 	line_discipline(expr);
 
+	// Avoid polling, if an evaluation thread was not created. This is
+	// used to handle interrupts (control-c's).
 	if (not poll_needed)
 	{
 		std::string retstr = poll_output();
@@ -227,6 +229,7 @@ void GenericShell::eval(const std::string &expr)
 			pollthr->join();
 			delete pollthr;
 		}
+		sched_yield();
 		pollthr = new std::thread(poll_wrapper);
 	}
 
@@ -316,6 +319,7 @@ void GenericShell::line_discipline(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
+				evaluator->interrupt();
 				evaluator->clear_pending();
 				put_output(abort_prompt);
 				return;
@@ -337,6 +341,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
+		evaluator->interrupt();
 		evaluator->clear_pending();
 		put_output("\n");
 		put_output(normal_prompt);
@@ -380,7 +385,7 @@ void GenericShell::do_eval(const std::string &input)
 	auto eval_wrapper = [&](const std::string& in)
 	{
 		thread_init();
-		evaluator->eval_expr(in.c_str());
+		evaluator->eval_expr(in);
 	};
 
 	// Always wait for the previous evaluation to complete, before
