@@ -196,30 +196,42 @@ void GenericShell::eval(const std::string &expr)
 #endif // PERFORM_STDOUT_DUPLICATION
 
 	// Run the evaluator (in a different thread)
+	poll_needed = false;
 	line_discipline(expr);
 
-	// Poll for output from the evaluator, and send back results.
-	auto poll_wrapper = [&](void)
+	// Avoid polling, if an evaluation thread was not created. This is
+	// used to handle interrupts (control-c's).
+	if (not poll_needed)
 	{
 		std::string retstr = poll_output();
-		while (0 < retstr.size())
-		{
-			socket->Send(retstr);
-			retstr = poll_output();
-		}
-	};
-
-	// Always wait for the previous poll of results to complete, before
-	// starting the next one.  The goal here is to keep results
-	// serialized on the socket, so that chronologically-earlier
-	// results are written to the socket in order, before the newer
-	// results.
-	if (pollthr)
-	{
-		pollthr->join();
-		delete pollthr;
+		socket->Send(retstr);
 	}
-	pollthr = new std::thread(poll_wrapper);
+	else
+	{
+		// Poll for output from the evaluator, and send back results.
+		auto poll_wrapper = [&](void)
+		{
+			std::string retstr = poll_output();
+			while (0 < retstr.size())
+			{
+				socket->Send(retstr);
+				retstr = poll_output();
+			}
+		};
+
+		// Always wait for the previous poll of results to complete, before
+		// starting the next one.  The goal here is to keep results
+		// serialized on the socket, so that chronologically-earlier
+		// results are written to the socket in order, before the newer
+		// results.
+		if (pollthr)
+		{
+			pollthr->join();
+			delete pollthr;
+		}
+		sched_yield();
+		pollthr = new std::thread(poll_wrapper);
+	}
 
 #ifdef PERFORM_STDOUT_DUPLICATION
 	if (show_output and show_prompt)
@@ -238,24 +250,30 @@ void GenericShell::eval(const std::string &expr)
 			OC_ASSERT(0 < rc, "GenericShell restore stdout failure");
 
 			// Drain the pipe
-			char buf[4097];
-			int nr = read(pipefd[0], buf, sizeof(buf)-1);
-			OC_ASSERT(0 < rc, "GenericShell pipe read failure");
-			while (0 < nr)
+			auto drain_wrapper = [&](void)
 			{
-				buf[nr] = 0;
-				if (1 < nr or 0 != buf[0])
-				{
-					printf("%s", buf); // print to the cogservers stdout.
-					socket->Send(buf);
-				}
-				nr = read(pipefd[0], buf, sizeof(buf)-1);
+				char buf[4097];
+				int nr = read(pipefd[0], buf, sizeof(buf)-1);
 				OC_ASSERT(0 < rc, "GenericShell pipe read failure");
-			}
+				while (0 < nr)
+				{
+					buf[nr] = 0;
+					if (1 < nr or 0 != buf[0])
+					{
+						printf("hey hye hey %s", buf); // print to the cogservers stdout.
+						socket->Send(buf);
+					}
+					nr = read(pipefd[0], buf, sizeof(buf)-1);
+					OC_ASSERT(0 < rc, "GenericShell pipe read failure");
+				}
 
-			// Cleanup.
-			close(pipefd[0]);
-			close(stdout_backup);
+				// Cleanup.
+				close(pipefd[0]);
+				close(stdout_backup);
+			};
+
+			drain_wrapper();
+			// stdout_thr = new std::thread(drain_wrapper);
 		}
 	}
 #endif // PERFORM_STDOUT_DUPLICATION
@@ -307,6 +325,7 @@ void GenericShell::line_discipline(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
+				evaluator->interrupt();
 				evaluator->clear_pending();
 				put_output(abort_prompt);
 				return;
@@ -328,6 +347,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
+		evaluator->interrupt();
 		evaluator->clear_pending();
 		put_output("\n");
 		put_output(normal_prompt);
@@ -364,15 +384,6 @@ void GenericShell::line_discipline(const std::string &expr)
  */
 void GenericShell::do_eval(const std::string &input)
 {
-	eval_done = false;
-	evaluator->begin_eval(); // must be called in same thread as poll_result
-
-	auto eval_wrapper = [&](const std::string& in)
-	{
-		thread_init();
-		evaluator->eval_expr(in.c_str());
-	};
-
 	// Always wait for the previous evaluation to complete, before
 	// starting the next one.  That is, evaluations are always
 	// explicitly serialized.
@@ -385,7 +396,29 @@ void GenericShell::do_eval(const std::string &input)
 	{
 		evalthr->join();
 		delete evalthr;
+		evalthr = nullptr;
 	}
+
+	// Wait for the polling thread to finish also, as otherwise a new
+	// evaluation might be started before polling for the last one has
+	// finished.  The new evaluation might clobber previous results.
+	if (pollthr)
+	{
+		pollthr->join();
+		delete pollthr;
+		pollthr = nullptr;
+	}
+
+	eval_done = false;
+	poll_needed = true;
+	evaluator->begin_eval(); // must be called in same thread as poll_result
+
+	auto eval_wrapper = [&](const std::string& in)
+	{
+		thread_init();
+		evaluator->eval_expr(in);
+	};
+
 	evalthr = new std::thread(eval_wrapper, input);
 }
 

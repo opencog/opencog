@@ -71,6 +71,7 @@ class GenericShell
 		virtual void do_eval(const std::string &expr);
 
 		// Output handling.
+		bool poll_needed;
 		bool eval_done;
 		virtual void put_output(const std::string&);
 		virtual std::string poll_output();
