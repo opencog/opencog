@@ -68,7 +68,12 @@
 	    )
 	)
 
-	;(set! verbose prev-verbose)
+	; Update psi-emotion-states
+	; Keeping it simple for now
+	; For happy perhaps pos-valence * arousal or weighted average?
+	; Todo: Map out other emotions
+	(psi-set-value! psi-happy (* (psi-get-number-value pos-valence)
+								(psi-get-number-value arousal)))
 )
 
 ; Register the expression callback function with OpenPsi
@@ -199,6 +204,36 @@
 
 (define new-face->arousal
     (psi-create-interaction-rule new-face increased arousal .3))
+
+
+; --------------------------------------------------------------
+; Psi Emotion Representations
+; Todo: move to psi-emotions.scm file?
+
+(define psi-emotion-node (Concept (string-append psi-prefix-str "emotion")))
+
+(define (psi-create-emotion emotion)
+	(define emotion-concept (Concept (string-append psi-prefix-str emotion)))
+	(Inheritance emotion-concept psi-emotion-node)
+	; initialize value ?
+	(psi-set-value! emotion-concept 0)
+	;(format #t "new emotion: ~a\n" emotion-concept)
+	emotion-concept)
+
+(define-public (psi-get-emotion)
+"
+  Returns a list of all psi emotions.
+"
+    (filter
+        (lambda (x) (not (equal? x psi-emotion-node)))
+        (cog-chase-link 'InheritanceLink 'ConceptNode psi-emotion-node))
+)
+
+; Create emotions
+(define psi-happy (psi-create-emotion "happy"))
+(define psi-sad (psi-create-emotion "sad"))
+(define psi-excited (psi-create-emotion "excited"))
+(define psi-tired (psi-create-emotion "tired"))
 
 
 ; ------------------------------------------------------------------
