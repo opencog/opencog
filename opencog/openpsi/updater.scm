@@ -71,16 +71,19 @@
 (define psi-monitored-entities '())
 (define psi-monitored-events '())
 
-; This is a callback function supplied by the client that gets called when
-; OpenPsi believes a change of emotion expression based on psi values would be
-; good to do (e.g., after a new event is detected and psi params have been
-; updated)
+
 ; Todo: Change this to DSN atomese
 (define (psi-set-expression-callback! callback)
 "
-    Callback function that triggers emotion expression update
+    Callback function that triggers emotion expression update.
+
+    This callback function is supplied by the client and gets called when
+    OpenPsi believes a change of emotion expression based on psi values would be
+    good to do (e.g., after a new event is detected and psi params have been
+    updated)
 "
 	(set! psi-expression-callback callback))
+
 
 (define-public (psi-set-event-callback! callback)
 "
@@ -91,16 +94,14 @@
 	(set! psi-event-detection-callbacks
 		(append psi-event-detection-callbacks (list callback))))
 
+; Todo: Add a general callback function that is called once each loop
 
 (define (psi-updater-init)
 "
   Initialization of the updater. Called by psi-updater-run.
 
-  Initializes list of monitered entities events and table of their previous
+  Initializes list of monitered entities and events, and table of their previous
   values.
-  Question: do we want to have the loading of the interaction rules happen here?
-      I think perhaps better to have load them when the code files are loaded
-      so errors can be caught then rather than at runtime.
 "
 	; Grab all variables in the antecedents of the interaction rules that are
 	; arguments to (Predicate "psi-changed") and put them in
@@ -209,8 +210,7 @@
                     (format #t "previous: ~a  current: ~a\n" previous-val
                         current-val))
                 ;Todo: If previous-val was #f (iow not set), assume previous
-                ;      value to be 0? Doing that for now, but not sure if this is
-                ;      best.
+                ;value to be 0? Doing that for now, but not sure if this is best.
                 (if (eq? previous-val #f)
                     (set! previous-val 0))
                 (hash-set! value-at-step-start param
@@ -294,7 +294,8 @@
 	;(format #t "\nchanged-params: ~a\n\n" changed-params)
 
 	; Check for changed PAUs, just for highlighting in test output
-	(set! monitored-pau (list voice-width))
+	; Todo: Change this to a callback function
+	;(set! monitored-pau (list voice-width))
 	(for-each (lambda (pau)
 			    (let* ((previous (hash-ref prev-value-table pau))
                        (current (psi-get-number-value pau)))
@@ -326,7 +327,7 @@
 						"pos-dialog: ~a  neg-dialog: ~a  "
 						"\n\n"
 						"arousal: ~a  pos-valence: ~a  neg-valence: ~a  "
-						"agent power: ~a  voice: ~a  "
+						"agent power: ~a  " ; voice: ~a  "
 						"\n")
 					(highlight-display speech-giving-starts)
                     (highlight-display new-face)
@@ -336,16 +337,7 @@
                     (highlight-display pos-valence)
                     (highlight-display neg-valence)
                     (highlight-display agent-state-power)
-                    (highlight-display voice-width)
-					;(psi-get-number-value speech-giving-starts)
-					;(psi-get-number-value new-face)
-					;(psi-get-number-value positive-sentiment-dialog)
-					;(psi-get-number-value negative-sentiment-dialog)
-					;(psi-get-number-value arousal)
-					;(psi-get-number-value pos-valence)
-					;(psi-get-number-value neg-valence)
-					;(psi-get-number-value agent-state-power)
-					;(psi-get-number-value voice-width)
+                    ;(highlight-display voice-width)
 				)
 				(close-output-port output-port)))
 
@@ -354,14 +346,6 @@
 	(let ((rules (psi-get-interaction-rules)))
 		(map psi-evaluate-interaction-rule rules)
 	)
-
-	; Update psi-emotion-states
-	; Todo: Not sure if this should be in OpenPsi or somewhere else. Move this
-	; to ros-behavior-scripting
-	; Keeping it simple for now
-	; For happy perhaps pos-valence * arousal or weighted average?
-	(psi-set-value! psi-happy (* (psi-get-number-value pos-valence)
-								(psi-get-number-value arousal)))
 
 	; Have OpenPsi trigger emotion expression updates after events are detected
 	; that impact modulator and sec variables
@@ -493,7 +477,7 @@
 		; Increasing slope increases the degree change at all levels
 		(set! slope 10000)
 		;(format #t "current value: ~a\n" current-value)
-; TODO: handle current value = #f (or not number in general)
+        ; TODO: handle current value = #f (or not number in general)
 		; finagle the extreme cases because the curve is not exactly how we want
 		(if (> alpha 0)
 			(if (>= alpha .5)
@@ -726,35 +710,6 @@
     (cog-set-tv! updater-continue-pred (stv 0 1))
 )
 
-; --------------------------------------------------------------
-; Psi Emotion Representations
-; Todo: move to emotions.scm file? Should this be outside of OpenPsi?
-
-(define psi-emotion-node (Concept (string-append psi-prefix-str "emotion")))
-
-(define (psi-create-emotion emotion)
-	(define emotion-concept (Concept (string-append psi-prefix-str emotion)))
-	(Inheritance emotion-concept psi-emotion-node)
-	; initialize value ?
-	(psi-set-value! emotion-concept 0)
-	;(format #t "new emotion: ~a\n" emotion-concept)
-	emotion-concept)
-
-(define-public (psi-get-emotion)
-"
-  Returns a list of all psi emotions.
-"
-    (filter
-        (lambda (x) (not (equal? x psi-emotion-node)))
-        (cog-chase-link 'InheritanceLink 'ConceptNode psi-emotion-node))
-)
-
-; Create emotions
-(define psi-happy (psi-create-emotion "happy"))
-(define psi-sad (psi-create-emotion "sad"))
-(define psi-excited (psi-create-emotion "excited"))
-(define psi-tired (psi-create-emotion "tired"))
-
 
 ; --------------------------------------------------------------
 ; Shortcuts for dev use
@@ -766,7 +721,7 @@
 (define-public r psi-updater-run)
 ;(define r1 speech->power)
 ;(define r2 power->voice)
-(define voice voice-width)
+;(define voice voice-width)
 (define value psi-get-number-value)
 (define rules (psi-get-interaction-rules))
 

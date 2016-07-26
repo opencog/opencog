@@ -31,7 +31,10 @@
 ;       (Predicate "psi-increased") - trigger entity value has increased
 ;       (Predicate "psi-decreased") - trigger entity value has decreased
 ;
-; Depends on entity-defs.scm for entity definitions in the rules.
+; To create an interaction rule, use the psi-create-interaction-rule function,
+; which has documentation with the function.
+; e.g., (psi-create-interaction-rule positive-sentiment-dialog
+;        		increased pos-valence .3))
 
 (use-modules (opencog atom-types)) ; needed for PredictiveImplication definition
 

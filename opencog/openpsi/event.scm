@@ -11,6 +11,19 @@
 ; the most-recent-event-ts each time the event occurs. One place where this
 ; can happen is through an event-detection callback (see psi-set-event-callback),
 ; which is called at each step of the psi-dynamics loop.
+;
+; When a particular instance of an event is detected, the value of the event is
+; set to 1 for a single psi-loop step and only for a single psi-loop step.
+;
+; Instructions
+;
+; Create monitored events with psi-create-monitored-event function in event.scm.
+;
+; Create event detection callback(s) with (psi-set-event-callback! callback) in
+; updater.scm. The callback function should indicate that a particular event has
+; occurred by calling (psi-set-event-occurrence! event), which uses a StateLink
+; to represent the most recent occurrence of the event.
+
 
 (define psi-event-node (Concept (string-append psi-prefix-str "event")))
 

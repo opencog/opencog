@@ -10,60 +10,6 @@ main loop is an action-selection mechanism, examining the context to
 see if any of the current demands/goals can be fullfilled, and then
 taking apropriate action.
 
-## Modulators and Internal Dynamics
-
-OpenPsi includes a dynamical system of interacting modulator variables.
-The model contains varying parameters that regulate processes such as
-stimulus evaluation, action selection, and emotional expression.
-Modulators are based on MicroPsi, and SECs are based on Component
-Process Model theory (see references for  more info). These and other
-OpenPsi-related entities dynamically interact with each other according
-to rules that specify how a change in a "trigger" entity cause a change
-in a "target" entity.
-
-The interaction rules have the logical form of:
-
-    change in trigger entity --> change in target entity
-
-The change in the target is a function of the magnitude of change in the
-trigger, the strength of the interaction rule, and the current value of
-the target.
-
-The rules in Atomese have the form:
-
-    (PredictiveImplication
-        (TimeNode 1)
-            (Evaluation
-                  (Predicate "psi-changed")
-                  (List
-                      trigger))
-            (ExecutionOutputLink
-                (GroundedSchema "scm: adjust-psi-var-level")
-                (List
-                    target
-                    (NumberNode strength)
-                    trigger))))
-
-The antecedent predicate can be one of "psi-changed", "psi-increased"
-or "psi-decreased".
-
-Files:
-
-* updater.scm - the main control file that handles the dynamic updating
-  of entity values based on the interaction rules.
-* interaction-rule.scm - code for creating the rules specifying
-  interaction dynamics between entities.
-* modulator.scm - internal openpsi modulator variables
-* sec.scm - internal openpsi Stimulus Evaluation Check variables
-* events.scm - defines perceived events that are monitored and that
-  trigger changes in openpsi variables.
-* entity-defs.scm - defines entities external to openpsi (e.g., PAU's)
-  that are used in interaction rules
-
-Todo: Interaction rule sets, events, and entities should be specified
-      via config file
-
-
 ## Status and TODO List
 
 The code currently works at a basic level, and is used to control the
@@ -235,3 +181,64 @@ generalized and ported over here.
 * The ROS behavior scripts
   [here](http://github.com/opencog/ros-behavior-scripting) use OpenPsi
   and are currently working.
+
+## Modulators and Internal Dynamics
+
+OpenPsi includes a dynamical system of interacting modulator variables.
+The model contains varying parameters that regulate processes such as
+stimulus evaluation, action selection, and emotional expression.
+Modulators are based on MicroPsi, and SECs are based on Component
+Process Model theory (see references for  more info). These and other
+OpenPsi-related entities dynamically interact with each other according
+to rules that specify how a change in a "trigger" entity cause a change
+in a "target" entity.
+
+The interaction rules have the logical form of:
+
+    change in trigger entity --> change in target entity
+
+The change in the target is a function of the magnitude of change in the
+trigger, the strength of the interaction rule, and the current value of
+the target.
+
+The rules in Atomese have the form:
+
+    (PredictiveImplication
+        (TimeNode 1)
+            (Evaluation
+                  (Predicate "psi-changed")
+                  (List
+                      trigger))
+            (ExecutionOutputLink
+                (GroundedSchema "scm: adjust-psi-var-level")
+                (List
+                    target
+                    (NumberNode strength)
+                    trigger))))
+
+The antecedent predicate can be one of "psi-changed", "psi-increased"
+or "psi-decreased".
+
+Files:
+
+* updater.scm - the main control file that handles the dynamic updating
+  of entity values based on the interaction rules.
+* interaction-rule.scm - code for creating the rules specifying
+  interaction dynamics between entities.
+* modulator.scm - internal openpsi modulator variables
+* sec.scm - internal openpsi Stimulus Evaluation Check variables
+* events.scm - defines perceived events that are monitored and that
+  trigger changes in openpsi variables.
+
+Instructions:
+* Create interaction rules with the psi-create-interaction-rule function in 
+  interaction-rule.scm
+* Create monitored events with psi-create-monitored-event function in event.scm.
+* Create event detection callback(s) with (psi-set-event-callback! callback) in
+  updater.scm. The callback function should indicate that a particular event has
+  occurred by calling (psi-set-event-occurrence! event), which uses a StateLink
+  to represent the most recent occurrence of the event.
+
+Todo: Interaction rule sets, events, and entities should be specified
+      via config file
+
