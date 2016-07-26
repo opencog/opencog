@@ -46,6 +46,27 @@ void WAImportanceDiffusionAgent::run()
     std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
+Handle tournamentSelect(HandleSeq population){
+
+    int k = 5;
+    Handle[] tournament = new Handle[k];
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(0,diffusionSourceVector.size()-1);
+
+    for(int i = 0; i < k; i++){
+        int idx = distribution(generator);
+        tournament[i] = population[idx];
+    }
+
+    auto result = std::max_element(tmp.begin(), tmp.end(), []
+                              (const Handle& h1, const Handle & h2)
+    {
+        return (h1->getSTI() > h2->getSTI());
+    });
+
+    return *result;
+}
+
 /*
  * Carries out the importance diffusion process, spreading STI along the
  * graph according to the configuration settings
@@ -54,31 +75,24 @@ void WAImportanceDiffusionAgent::spreadImportance()
 {
     HandleSeq diffusionSourceVector = ImportanceDiffusionBase::diffusionSourceVector(false);
 
-    HandleSeq targetSet;
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0,diffusionSourceVector.size()-1);
+    if (diffusionSourceVector.size() == 0)
+        return;
 
-    int idx = distribution(generator);
-    targetSet.push_back(diffusionSourceVector[idx]);
+    Handle target = tournamentSelect(diffusionSourceVector);
 
-    // Calculate the diffusion for each source atom, and store the diffusion
-    // event in a stack
-    for (Handle atomSource : targetSet)
-    {
-        // Check the decision function to determine if spreading will occur
-        if (spreadDecider->spreadDecision(atomSource->getSTI())) {
+    // Check the decision function to determine if spreading will occur
+    if (spreadDecider->spreadDecision(target->getSTI())) {
 #ifdef DEBUG
-            std::cout << "Calling diffuseAtom." << std::endl;
+        std::cout << "Calling diffuseAtom." << std::endl;
 #endif
-            diffuseAtom(atomSource);
-        }
-#ifdef DEBUG
-        else
-        {
-            std::cout << "Did not call diffuseAtom." << std::endl;
-        }
-#endif
+        diffuseAtom(target);
     }
+#ifdef DEBUG
+    else
+    {
+        std::cout << "Did not call diffuseAtom." << std::endl;
+    }
+#endif
 
     // Now, process all of the outstanding diffusion events in the diffusion
     // stack
