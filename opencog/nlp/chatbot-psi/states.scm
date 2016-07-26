@@ -26,6 +26,9 @@
 (define setup-not-done (Concept (chat-prefix "SetupNotDone")))
 (define no-result (Concept (chat-prefix "NoResult")))
 
+(define max-waiting-time (Anchor (chat-prefix "MaxWaitingTime")))
+(State max-waiting-time (Time 3))
+
 (define aiml (Anchor (chat-prefix "AIML")))
 (define aiml-reply (Anchor (chat-prefix "AIMLReply")))
 (State aiml default-state)

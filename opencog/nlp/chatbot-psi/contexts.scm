@@ -59,9 +59,10 @@
     )
 )
 
-(define (long-time-elapsed num-node)
+(define (long-time-elapsed)
     (if (> (- (current-time) (string->number (get-input-time)))
-            (string->number (cog-name num-node)))
+            (string->number (cog-name (gar (cog-execute!
+                (Get (State max-waiting-time (Variable "$t"))))))))
         (stv 1 1)
         (stv 0 1)
     )
@@ -191,7 +192,7 @@
 (Define
     (DefinedPredicate "no-other-fast-reply?")
     ; TODO: May want to check more than time elapsed
-    (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List (Number 3)))
+    (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List))
 )
 
 (Define
@@ -218,11 +219,10 @@
          (no-result? wolframalpha-answer))
 )
 
-; Number being passed is time (in second) threshold
 (Define
     (DefinedPredicate "no-good-fast-answer?")
     (Or (DefinedPredicate "no-result-from-other-sources?")
-        (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List (Number 3))))
+        (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List)))
 )
 
 (Define
@@ -298,6 +298,6 @@
 
 (Define
     (DefinedPredicate "don't-know-how-to-do-it?")
-    (Or (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List (Number 2)))
+    (Or (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List))
         (Equal (Set no-action-taken) (Get (State chatbot-eva (Variable "$s")))))
 )
