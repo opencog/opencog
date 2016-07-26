@@ -49,16 +49,16 @@ void WAImportanceDiffusionAgent::run()
 Handle tournamentSelect(HandleSeq population){
 
     int k = 5;
-    Handle[] tournament = new Handle[k];
+    Handle tournament[k];
     std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0,diffusionSourceVector.size()-1);
+    std::uniform_int_distribution<int> distribution(0,population.size()-1);
 
     for(int i = 0; i < k; i++){
         int idx = distribution(generator);
         tournament[i] = population[idx];
     }
 
-    auto result = std::max_element(tmp.begin(), tmp.end(), []
+    auto result = std::max_element(tournament, tournament + (k - 1), []
                               (const Handle& h1, const Handle & h2)
     {
         return (h1->getSTI() > h2->getSTI());
