@@ -35,9 +35,7 @@
 	(define arousal (psi-get-arousal))
 	(define pos-valence (psi-get-pos-valence))
 	(define neg-valence (psi-get-neg-valence))
-	;(define prev-verbose verbose)
-	;(set! verbose #t)
-	(if psi-verbose (display "psi-dynamics expression callback called\n"))
+	;(if psi-verbose (display "psi-dynamics expression callback called\n"))
 
 	; For now we are doing something simple - do a random positive or negative
 	; expression based on valence and arousal.
@@ -49,7 +47,7 @@
 	    (begin
             ;( (do-catch do-random-positive-expression))
             (if psi-verbose
-                (display "psi-dynamics: doing random positive expression\n"))
+                (display "psi-dynamics: doing positive expression\n"))
             (if (not no-blender)
                 (be-happy pos-valence)
                 ;(do-random-positive-expression)
@@ -60,7 +58,7 @@
 	    (begin
             ;( (do-catch do-random-negative-expression))
             (if psi-verbose
-                (display "psi-dynamics: doing random negative expression\n"))
+                (display "psi-dynamics: doing negative expression\n"))
             (if (not no-blender)
                 (be-sad neg-valence)
                 ;(do-random-negative-expression)
@@ -72,8 +70,7 @@
 	; Keeping it simple for now
 	; For happy perhaps pos-valence * arousal or weighted average?
 	; Todo: Map out other emotions
-	(psi-set-value! psi-happy (* (psi-get-number-value pos-valence)
-								(psi-get-number-value arousal)))
+	(psi-set-value! psi-happy (* pos-valence arousal))
 )
 
 ; Register the expression callback function with OpenPsi
@@ -99,12 +96,12 @@
          (ListLink expression (Number 8) (Number intensity)))))
 
 (define (be-happy intensity)
-    (display "in (be-happy)\n")
+    ;(display "in (be-happy)\n")
     (cog-evaluate! (Put (DefinedPredicate "Show expression")
         (ListLink (Concept "happy") (Number 8) (Number intensity)))))
 
 (define (be-sad intensity)
-    (display "in (be-sad)\n")
+    ;(display "in (be-sad)\n")
     (cog-evaluate! (Put (DefinedPredicate "Show expression")
         (ListLink (Concept "sad") (Number 8) (Number intensity)))))
 
@@ -146,10 +143,9 @@
 	         (not (equal? current-input previous-input)))
 		; We have a new input sentence
 		(begin
-            (format #t "\n*** New input sentance detected *** loop ~a\n"
-                psi-updater-loop-count)
-            (format #t "previous-input: ~a   current-input: ~a\n"
-                previous-input current-input)
+            (if psi-verbose (format #t "\n* New input sentance detected *\n"))
+            ;(format #t "previous-input: ~a   current-input: ~a\n"
+            ;    previous-input current-input)
             (StateLink current-sentence-node current-input)
             ; Check for positive and/or negative sentimement
             ; Sentence sentiment is put in the atomspace as
@@ -157,9 +153,9 @@
             ;   or "Neutral"
             (let ((inher-super (cog-chase-link 'InheritanceLink 'ConceptNode
                     current-input)))
-                (format #t "inher-super: ~a\n" inher-super)
+                ;(format #t "inher-super: ~a\n" inher-super)
                 (for-each (lambda (concept)
-                            (format #t "concept: ~a\n" concept)
+                            (if psi-verbose (format #t "sentiment: ~a\n" concept))
                             (if (equal? concept (Concept "Positive"))
                        		    (psi-set-event-occurrence!
                        		        positive-sentiment-dialog))
