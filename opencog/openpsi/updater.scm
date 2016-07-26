@@ -315,7 +315,10 @@
 			;(format #t "Changed PAU's: ~a\n" changed-pau)
 
 	(if logging
-		(let ((output-port (open-file "psilog.txt" "a")))
+	    (if (or (not (null? changed-params))
+	            (not (null? detected-events))
+	            (not (null? changed-pau)))
+		    (let ((output-port (open-file "psilog.txt" "a")))
 				(format output-port
 					(string-append "-------------------------------------------"
 						"-------------------------------- Loop ~a\n")
@@ -339,7 +342,7 @@
                     (highlight-display agent-state-power)
                     ;(highlight-display voice-width)
 				)
-				(close-output-port output-port)))
+				(close-output-port output-port))))
 
 	; grab and evaluate the interaction rules
 	; todo: Could optimize by only calling rules containing the changed params

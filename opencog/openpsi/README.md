@@ -231,6 +231,7 @@ Files:
   trigger changes in openpsi variables.
 
 Instructions:
+
 * Create interaction rules with the psi-create-interaction-rule function in 
   interaction-rule.scm
 * Create monitored events with psi-create-monitored-event function in event.scm.
@@ -238,7 +239,11 @@ Instructions:
   updater.scm. The callback function should indicate that a particular event has
   occurred by calling (psi-set-event-occurrence! event), which uses a StateLink
   to represent the most recent occurrence of the event.
-
+* Create "expression" callback function with (psi-set-expression-callback! 
+  callback) in updater.scm. This function should handle implementation-specific
+  expression of emotion and/or physiology based on the OpenPsi dynamic variables.
+* Todo: Create general callback that is called at each loop step.   
+   
 Todo: Interaction rule sets, events, and entities should be specified
       via config file
 
