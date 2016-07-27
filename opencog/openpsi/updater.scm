@@ -26,7 +26,7 @@
 (load "utilities.scm")
 (load "modulator.scm")
 (load "sec.scm")
-(load "entity-defs.scm")
+;(load "entity-defs.scm")
 (load "interaction-rule.scm")
 
 (define logging #t)
@@ -155,7 +155,7 @@
 
 	(if logging
 		(let ((output-port (open-file "psilog.txt" "a")))
-			(format output-port "\n\n\n")))
+			(format output-port "\n\n\n--- New Session ---\n\n")))
 
 	;(format #t "psi-evals-with-change-pred: ~a\n" evals-with-change-pred)
 
@@ -295,7 +295,7 @@
 
 	; Check for changed PAUs, just for highlighting in test output
 	; Todo: Change this to a callback function
-	;(set! monitored-pau (list voice-width))
+	(set! monitored-pau (list voice-width))
 	(for-each (lambda (pau)
 			    (let* ((previous (hash-ref prev-value-table pau))
                        (current (psi-get-number-value pau)))
@@ -330,8 +330,8 @@
 						"pos-dialog: ~a  neg-dialog: ~a  "
 						"\n\n"
 						"arousal: ~a  pos-valence: ~a  neg-valence: ~a  "
-						"agent power: ~a  " ; voice: ~a  "
-						"\n")
+						"agent power: ~a  voice: ~a  "
+						"\n\n")
 					(highlight-display speech-giving-starts)
                     (highlight-display new-face)
                     (highlight-display positive-sentiment-dialog)
@@ -340,7 +340,7 @@
                     (highlight-display pos-valence)
                     (highlight-display neg-valence)
                     (highlight-display agent-state-power)
-                    ;(highlight-display voice-width)
+                    (highlight-display voice-width)
 				)
 				(close-output-port output-port))))
 
@@ -713,6 +713,24 @@
     (cog-set-tv! updater-continue-pred (stv 0 1))
 )
 
+; ------------------------------------------------------------------
+; THIS IS TEMPORARY FOR DEVELOPMENT/TESTING - PAU'S WILL NOT LIVE IN THIS DICTORY
+; PAU Predicates
+; Actually these will be defined somewhere else in the system
+(define pau-prefix-str "PAU: ")
+(define (create-pau name initial-value)
+	(define pau
+		(Predicate (string-append pau-prefix-str name)))
+	(Inheritance
+		pau
+		(Concept "PAU"))
+	(psi-set-value! pau initial-value)
+	;(hash-set! prev-value-table pau initial-value)
+	pau)
+
+(define voice-width
+	(create-pau "voice width" .2))
+
 
 ; --------------------------------------------------------------
 ; Shortcuts for dev use
@@ -724,7 +742,6 @@
 (define-public r psi-updater-run)
 ;(define r1 speech->power)
 ;(define r2 power->voice)
-;(define voice voice-width)
 (define value psi-get-number-value)
 (define rules (psi-get-interaction-rules))
 
@@ -748,6 +765,8 @@
 
 (define-public p agent-state-power)
 (define-public a arousal)
+
+(define voice voice-width)
 
 
 
