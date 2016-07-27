@@ -1,31 +1,31 @@
 ;; For testing implication direct evaluation rule
 
 ;; Instances of P
-(Evaluation
+(Evaluation (stv 1 1)
    (Predicate "P")
    (Concept "A"))
 
-(Evaluation
+(Evaluation (stv 1 1)
    (Predicate "P")
    (Concept "B"))
 
-(Evaluation
+(Evaluation (stv 1 1)
    (Predicate "P")
    (Concept "C"))
 
 ;; Instances of Q
-(Evaluation
+(Evaluation (stv 1 1)
    (Predicate "Q")
    (Concept "B"))
 
-(Evaluation
+(Evaluation (stv 1 1)
    (Predicate "Q")
    (Concept "C"))
 
-(Evaluation
+(Evaluation (stv 1 1)
    (Predicate "Q")
    (Concept "D"))
 
-(Evaluation
+(Evaluation (stv 1 1)
    (Predicate "Q")
    (Concept "E"))

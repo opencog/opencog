@@ -132,13 +132,14 @@ void ConsoleSocket::OnLine(const std::string& line)
     if (IAC == (line[0] & 0xff) and CHARSET == (line[2] & 0xff)) {
         return;
     }
+
     // If a shell processor has been designated, then defer all
     // processing to the shell.  In particular, avoid as much overhead
     // as possible, since the shell needs to be able to handle a
     // high-speed data feed with as little getting in the way as
     // possible.
     if (_shell) {
-        _shell->eval(line, this);
+        _shell->eval(line);
         return;
     }
 
@@ -201,7 +202,8 @@ void ConsoleSocket::OnLine(const std::string& line)
 
     if (request->isShell())
     {
-        logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
+        logger().debug("[ConsoleSocket] OnLine request %s is a shell",
+                       line.c_str());
 
         // Force a drain of this request, because we *must* enter
         // shell mode before handling any additional input from the
