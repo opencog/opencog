@@ -29,42 +29,45 @@
 ;;returns null string if atom not found, number x y z string if okay
 ;;these functions assume only one location for one atom in a map at a time
 (define (get-past-xyz map-name id-node elapse)
-		(let* ((loc-atom (get-past-locs-ato map-name id-node elapse) ))
-			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom) ""
-				(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-					(xx (number->string (loc-link-x loc-link)))
-					(yy (number->string (loc-link-y loc-link)))
-					(zz (number->string (loc-link-z loc-link))))
-						(string-append xx " " yy " " zz))
-			)
+	(let* ((loc-atom (get-past-locs-ato map-name id-node elapse) ))
+		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
+			""
+			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+				(xx (number->string (loc-link-x loc-link)))
+				(yy (number->string (loc-link-y loc-link)))
+				(zz (number->string (loc-link-z loc-link))))
+					(string-append xx " " yy " " zz))
 		)
+	)
 )
 
 ;;returns null string if atom not found, number x y z string if okay
 ;;these functions assume only one location for one atom in a map at a time
 (define (get-last-xyz map-name id-node elapse)
-		(let* ((loc-atom (get-last-locs-ato map-name id-node elapse) ))
-			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom) ""
-				(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-					(xx (number->string (loc-link-x loc-link)))
-					(yy (number->string (loc-link-y loc-link)))
-					(zz (number->string (loc-link-z loc-link))))
-						(string-append xx " " yy " " zz))
-			)
+	(let* ((loc-atom (get-last-locs-ato map-name id-node elapse) ))
+		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
+			""
+			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+				(xx (number->string (loc-link-x loc-link)))
+				(yy (number->string (loc-link-y loc-link)))
+				(zz (number->string (loc-link-z loc-link))))
+					(string-append xx " " yy " " zz))
 		)
+	)
 )
 
 ;;returns null string if atom not found, number x y z string if okay
 (define (get-xyz map-name id-node)
-		(let* ((loc-atom (get-locs-ato map-name id-node) ))
-			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom) ""
-				(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-					(xx (number->string (loc-link-x loc-link)))
-					(yy (number->string (loc-link-y loc-link)))
-					(zz (number->string (loc-link-z loc-link))))
-						(string-append xx " " yy " " zz))
-			)
+	(let* ((loc-atom (get-locs-ato map-name id-node) ))
+		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
+			""
+			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+				(xx (number->string (loc-link-x loc-link)))
+				(yy (number->string (loc-link-y loc-link)))
+				(zz (number->string (loc-link-z loc-link))))
+					(string-append xx " " yy " " zz))
 		)
+	)
 )
 
 ;;scm code
@@ -87,8 +90,13 @@
 (define (dot-prod ax ay az bx by bz) (+ (* ax bx) (* ay by)(* az bz)))
 (define (magnitude ax ay az) (sqrt (+ (* ax ax) (* ay ay) (* az az))))
 (define (angle ax ay az bx by bz)
-	(let* ((dp (dot-prod ax ay az bx by bz))(denom (* (magnitude ax ay az)(magnitude bx by bz))))
-	(if (> denom 0) (acos (/ dp denom)) 0.0))
+	(let* ((dp (dot-prod ax ay az bx by bz))
+			(denom (* (magnitude ax ay az)(magnitude bx by bz))))
+		(if (> denom 0)
+			(acos (/ dp denom))
+			0.0
+		)
+	)
 )
 
 (define (angle_bw xyz-a xyz-b)
@@ -100,19 +108,25 @@
 		(bx (string->number(car stb)))
 		(by (string->number(cadr stb)))
 		(bz (string->number(caddr stb))))
-		(angle ax ay az bx by bz))
+		(angle ax ay az bx by bz)
+	)
 )
 ;assuming common zero in coordinates
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
 (define (angle_face_snd face-id snd-id)
-  (let* ((fc (get-face (NumberNode face-id))) (sn (get-snd-1)) )
-	(if (equal? fc "") (* 2 3.142)
-										(if (equal? sn "") (* 2 3.142)
-												(angle_bw fc sn)
-										)
-	))
+	(let* ((fc (get-face (NumberNode face-id)))
+			(sn (get-snd-1)))
+		(if (equal? fc "")
+			(* 2 3.142)
+			(if (equal? sn "")
+				(* 2 3.142)
+				(angle_bw fc sn)
+			)
+		)
+	)
 )
+
 (define (angle_face_snd1 face-id)
 	(angle_face_snd face-id (get-snd-1))
 )
@@ -147,23 +161,34 @@
 ;;get all face-ids and only one sound id 1.0, compare them
 (define (snd1-nearest-face)
 	(let* ((lst (get-visible-faces))
-				 (falist (map (lambda (x)(list (string->number (cog-name x)) (angle_face_snd1 (cog-name x)))) lst)))
+			(falist (map
+				(lambda (x) (list
+					(string->number (cog-name x))
+					(angle_face_snd1 (cog-name x))))
+				lst)))
 		(if (< (length falist) 1)
 			0
-			(let* ((alist (append-map (lambda (x)(cdr x))falist))
-						(amin (fold (lambda (n p) (min (abs p) (abs n))) (car alist) alist)))
-			(if (> (/ (* 3.142 10.0) 180.0) amin)
-				(car (car (filter (lambda (x) (> (+ amin 0.0001) (abs (cadr x)))) falist)))
-				0
-			))
+			(let* ((alist (append-map (lambda (x)(cdr x)) falist))
+					(amin (fold (lambda (n p) (min (abs p) (abs n)))
+						(car alist) alist)))
+				(if (> (/ (* 3.142 10.0) 180.0) amin)
+					(car (car (filter
+						(lambda (x) (> (+ amin 0.0001) (abs (cadr x)))) falist)))
+					0
+				)
+			)
 		)
 	)
 )
 
 ;;below creates say atom for face if sound came from it
 (define (who-said? sent)
-	(let* ((fid (snd1-nearest-face)))
-		(if (> fid 0) (EvaluationLink (PredicateNode "say")(ListLink (ConceptNode (number->string fid))(SentenceNode sent)))
+	(let ((fid (snd1-nearest-face)))
+		(if (> fid 0)
+			(EvaluationLink
+				(PredicateNode "say")
+				(ListLink (ConceptNode (number->string fid))
+				(SentenceNode sent)))
 		)
 	)
 )
