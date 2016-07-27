@@ -99,6 +99,47 @@
 	(EvaluationLink (PredicateNode "visible face")
 		(ListLink (ConceptNode id))))
 
+(define-public (make-mapped-face face-id x y z)
+"
+  make-mapped-face FACE-ID X Y Z
+
+  FACE-ID is a number that represents the face ID, and RECOG-ID is a number that
+  represents the recognition ID. X, Y and Z are the coordinate numbers
+  associated with the face that represented by FACE-ID. It returns the atomese
+  representation of a visible face that was added to the octomap.
+"
+	(map-ato "faces" (NumberNode face-id (av 5 0 0)) x y z)
+	(make-new-face (number->string face-id))
+)
+
+(define-public (make-recognized-face face-id recog-id)
+"
+  make-recognized-face FACE-ID RECOG-ID
+
+  FACE-ID is a number that represents the face ID and RECOG-ID is a number that
+  represents the recognition ID for the visible face. It returns the atomese
+  representation of the recognized face.
+"
+	(EvaluationLink
+		(PredicateNode "name")
+		(ListLink
+			(ConceptNode (number->string face-id))
+			(ConceptNode (number->string recog-id))))
+)
+
+(define-public (make-mapped-recognized-face face-id recog-id x y z)
+"
+  make-mapped-recognized-face FACE-ID RECOG-ID X Y Z
+
+  FACE-ID is a number that represents the face ID, and RECOG-ID is a number that
+  represents the recognition ID. X, Y and Z are the coordinate numbers
+  associated with the face that represented by FACE-ID. It returns the atomese
+  representation of the recognized face that was added to the octomap.
+"
+	(make-mapped-face face-id x y z)
+	(make-recognized-face face-id recog-id)
+)
+
 (define-public (remove-face id)
 "
  remove-face ID
