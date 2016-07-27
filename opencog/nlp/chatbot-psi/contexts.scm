@@ -266,18 +266,33 @@
 )
 
 (Define
-    (DefinedPredicate "is-random-sentence-generator-ready?")
-    (setup-done? random-sentence-generator)
+    (DefinedPredicate "is-random-pkd-sentence-generator-ready?")
+    (setup-done? random-pkd-sentence-generator)
 )
 
 (Define
-    (DefinedPredicate "random-sentence-generator-not-started?")
-    (process-not-started? random-sentence-generator)
+    (DefinedPredicate "is-random-blogs-sentence-generator-ready?")
+    (setup-done? random-blogs-sentence-generator)
 )
 
 (Define
-    (DefinedPredicate "random-sentence-generated?")
-    (any-result? random-sentence-generated)
+    (DefinedPredicate "random-pkd-sentence-generator-not-started?")
+    (process-not-started? random-pkd-sentence-generator)
+)
+
+(Define
+    (DefinedPredicate "random-blogs-sentence-generator-not-started?")
+    (process-not-started? random-blogs-sentence-generator)
+)
+
+(Define
+    (DefinedPredicate "random-pkd-sentence-generated?")
+    (any-result? random-pkd-sentence-generated)
+)
+
+(Define
+    (DefinedPredicate "random-blogs-sentence-generated?")
+    (any-result? random-blogs-sentence-generated)
 )
 
 (Define
