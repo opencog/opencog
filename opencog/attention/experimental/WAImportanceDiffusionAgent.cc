@@ -24,7 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/util/Config.h>
 
 #include "WAImportanceDiffusionAgent.h"
 
@@ -34,6 +34,8 @@ using namespace opencog;
 WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
     ImportanceDiffusionBase(cs)
 {
+    _tournamentSize = config().get_int("ECAN_DIFFUSION_TOURNAMENT_SIZE");
+
     set_sleep_time(300);
 }
 
@@ -46,19 +48,18 @@ void WAImportanceDiffusionAgent::run()
     std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
-Handle tournamentSelect(HandleSeq population){
+Handle WAImportanceDiffusionAgent::tournamentSelect(HandleSeq population){
 
-    int k = 5;
-    Handle tournament[k];
+    Handle tournament[_tournamentSize];
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0,population.size()-1);
 
-    for(int i = 0; i < k; i++){
+    for(int i = 0; i < _tournamentSize; i++){
         int idx = distribution(generator);
         tournament[i] = population[idx];
     }
 
-    auto result = std::max_element(tournament, tournament + (k - 1), []
+    auto result = std::max_element(tournament, tournament + (_tournamentSize - 1), []
                               (const Handle& h1, const Handle & h2)
     {
         return (h1->getSTI() > h2->getSTI());

@@ -58,6 +58,8 @@ namespace opencog {
     private:
 
         unsigned int SAMPLE_SIZE = 5;
+        int _tournamentSize;
+        Handle tournamentSelect(HandleSeq population);
 
     public:
 

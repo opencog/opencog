@@ -39,10 +39,32 @@ using namespace opencog;
 
 WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
 {
+    _tournamentSize = config().get_int("ECAN_RENT_TOURNAMENT_SIZE");
+
     // READ SLEEPING TIME HERE
     set_sleep_time(2000);
-    SAMPLE_SIZE = 5;
 }
+
+Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
+
+    Handle tournament[_tournamentSize];
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(0,population.size()-1);
+
+    for(int i = 0; i < _tournamentSize; i++){
+        int idx = distribution(generator);
+        tournament[i] = population[idx];
+    }
+
+    auto result = std::max_element(tournament, tournament + (_tournamentSize - 1), []
+                              (const Handle& h1, const Handle & h2)
+    {
+        return (h1->getSTI() > h2->getSTI());
+    });
+
+    return *result;
+}
+
 
 void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
@@ -52,9 +74,6 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 
     if (atoms.size() == 0) return;
 
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0, atoms.size() - 1);
-
-    int idx = distribution(generator);
-    targetSetOut.push_back(atoms[idx]);
+    Handle h = tournamentSelect(atoms);
+    targetSetOut.push_back(h);
 }

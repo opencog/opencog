@@ -28,6 +28,8 @@
 #ifndef WAIMPORTANCEDIFFUSIONAGENT_H
 #define WAIMPORTANCEDIFFUSIONAGENT_H
 
+#include <opencog/cogserver/server/CogServer.h>
+
 #include "ImportanceDiffusionBase.h"
 
 
@@ -61,9 +63,11 @@ class WAImportanceDiffusionAgent : public ImportanceDiffusionBase
 private:
     HandleSeq diffusionSourceVector();
     unsigned int SAMPLE_SIZE = 1;
+    int _tournamentSize;
 
 private:
     void spreadImportance();
+    Handle tournamentSelect(HandleSeq population);
 
 public:
      WAImportanceDiffusionAgent(CogServer&);
