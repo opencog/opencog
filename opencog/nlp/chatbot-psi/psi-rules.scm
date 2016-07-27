@@ -223,8 +223,8 @@
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
-            (DefinedPredicate "is-random-sentence-generator-ready?")
-            (DefinedPredicate "random-sentence-generator-not-started?")
+            (DefinedPredicate "is-random-pkd-sentence-generator-ready?")
+            (DefinedPredicate "random-pkd-sentence-generator-not-started?")
             (DefinedPredicate "is-input-utterance?")
             (DefinedPredicate "has-pkd-related-words?")
             (SequentialOr
@@ -242,8 +242,8 @@
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
-            (DefinedPredicate "is-random-sentence-generator-ready?")
-            (DefinedPredicate "random-sentence-generator-not-started?")
+            (DefinedPredicate "is-random-blogs-sentence-generator-ready?")
+            (DefinedPredicate "random-blogs-sentence-generator-not-started?")
             (DefinedPredicate "is-input-utterance?")
             (DefinedPredicate "has-blog-related-words?")
             (SequentialOr
@@ -258,14 +258,23 @@
     )
 )
 
-; TODO: Merge both pkd and blogs into one, and set this as another psi
-; controlled rule as well?
 (psi-rule
     (list (SequentialAnd
-        (DefinedPredicate "random-sentence-generated?")
+        (DefinedPredicate "random-pkd-sentence-generated?")
         (DefinedPredicate "has-not-replied-anything-yet?")
     ))
-    (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-sentence-generated)))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-pkd-sentence-generated)))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "random-blogs-sentence-generated?")
+        (DefinedPredicate "has-not-replied-anything-yet?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-blogs-sentence-generated)))
     (True)
     (stv .9 .9)
     sociality
