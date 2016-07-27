@@ -389,11 +389,16 @@ class EvaControl():
 		"""
 		param_list = yaml.load(rosmsg.get_yaml_for_msg(data.doubles + data.ints))
 		for i in param_list:
-			scm_str = '''(StateLink
-			                 (ListLink
-			                     (ConceptNode "OpenPsi: %s")
-			                     (ConceptNode "OpenPsi: weight"))
-			                 (NumberNode %f))''' % (i["name"], i["value"])
+			if i["name"] == "max_waiting_time":
+				scm_str = '''(StateLink
+				                 (AnchorNode "Chatbot: MaxWaitingTime")
+				                 (TimeNode %f))''' % (i["value"])
+			else:
+				scm_str = '''(StateLink
+				                 (ListLink
+				                     (ConceptNode "OpenPsi: %s")
+				                     (ConceptNode "OpenPsi: weight"))
+				                 (NumberNode %f))''' % (i["name"], i["value"])
 
 			self.puta.evaluate_scm(scm_str)
 
