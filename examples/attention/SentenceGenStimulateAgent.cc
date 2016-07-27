@@ -87,13 +87,13 @@ void SentenceGenStimulateAgent::generate_stimulate_sentence()
         stime = time(nullptr);
     }
 
-      if (_cogserver.getCycleCount() % special_word_occurence_period == 0) { // and
-      //(_cogserver.getCycleCount() - startcount) > 5 ) {
-        select(4,swords[current_group],selected_words);
-        select(2,words,selected_words);
-      } else {
-          select(6,words,selected_words);
-      }
+    if (_cogserver.getCycleCount() % special_word_occurence_period == 0) { // and
+    //(_cogserver.getCycleCount() - startcount) > 5 ) {
+      select(4,swords[current_group],selected_words);
+      select(2,words,selected_words);
+    } else {
+        select(6,words,selected_words);
+    }
 
     for (std::string word : selected_words) {
         hwords.push_back(evalWord(word));

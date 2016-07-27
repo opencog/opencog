@@ -78,7 +78,8 @@ void ExperimentSetupModule::AVChangedCBListener(const Handle& h,
                  << av_new->getLTI() << ","
                  << av_new->getVLTI() << ","
                  << system_clock::now().time_since_epoch().count() << ","
-                 << current_group << "\n";
+                 << current_group << ","
+                 << _as->get_attentional_focus_boundary() << "\n";
             outav.close();
         }
     }

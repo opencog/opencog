@@ -18,7 +18,7 @@ namespace ECANExperiment {
 /**
  * Generate Random sentence and stimulates them on some cognitive cycle interval.
  */
-class SentenceGenStimulateAgent: public AttentionAgent {
+class SentenceGenStimulateAgent: public Agent {
 private:
     UnorderedHandleSet _hword_wordInstance_nodes;
     SchemeEval* _scm_eval;
