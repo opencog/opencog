@@ -66,13 +66,15 @@
 ;; Display the current room state
 (define-public (show-visible-faces)
 	(define visible-face (PredicateNode "visible face"))
+	(filter (lambda(y) (equal? (cog-type y) 'ConceptNode))
 	(map (lambda (x) (car (cog-outgoing-set x)))
-	(cog-chase-link 'EvaluationLink 'ListLink visible-face)))
+	(cog-chase-link 'EvaluationLink 'ListLink visible-face))))
 
 (define-public (show-acked-faces)
 	(define acked-face (PredicateNode "acked face"))
+	(filter (lambda(y) (equal? (cog-type y) 'ConceptNode))
 	(map (lambda (x) (car (cog-outgoing-set x)))
-	(cog-chase-link 'EvaluationLink 'ListLink acked-face)))
+	(cog-chase-link 'EvaluationLink 'ListLink acked-face))))
 
 (define-public (show-room-state)
 	(car (cog-chase-link 'StateLink 'ConceptNode room-state)))
