@@ -91,9 +91,9 @@
     (if has-wolframalpha-setup
         (State wolframalpha default-state))
     (State wolframalpha-answer default-state)
-    (if has-markov-setup
+    (if has-markov-setup (begin
         (State random-pkd-sentence-generator default-state)
-        (State random-blogs-sentence-generator default-state))
+        (State random-blogs-sentence-generator default-state)))
     (State random-pkd-sentence-generated default-state)
     (State random-blogs-sentence-generated default-state)
     (State chatbot-eva default-state)
