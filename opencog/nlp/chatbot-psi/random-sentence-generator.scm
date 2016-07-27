@@ -57,33 +57,31 @@
 )
 
 (define (call-random-sentence-generator dict-node)
-    (if (not (or (equal? markov-bin "") (equal? markov-dict "") (null? rsg-input)))
-        (begin-thread
-            (define dict (cog-name dict-node))
-            (define random-sentence-generator
-                (cond ((equal? dict "pkd") random-pkd-sentence-generator)
-                      ((equal? dict "blogs") random-blogs-sentence-generator)))
-            (define random-sentence-generated
-                (cond ((equal? dict "pkd") random-pkd-sentence-generated)
-                      ((equal? dict "blogs") random-blogs-sentence-generated)))
+    (begin-thread
+        (define dict (cog-name dict-node))
+        (define random-sentence-generator
+            (cond ((equal? dict "pkd") random-pkd-sentence-generator)
+                  ((equal? dict "blogs") random-blogs-sentence-generator)))
+        (define random-sentence-generated
+            (cond ((equal? dict "pkd") random-pkd-sentence-generated)
+                  ((equal? dict "blogs") random-blogs-sentence-generated)))
 
-            (State random-sentence-generator process-started)
+        (State random-sentence-generator process-started)
 
-            (let* ((cmd (string-append "ruby " markov-bin " speak -d " markov-dict
-                        "/" dict " -c 1 -p \"" rsg-input "\""))
-                   (port (open-input-pipe cmd))
-                   (line (get-line port)))
+        (let* ((cmd (string-append "ruby " markov-bin " speak -d " markov-dict
+                    "/" dict " -c 1 -p \"" rsg-input "\""))
+               (port (open-input-pipe cmd))
+               (line (get-line port)))
 
-                (if (eof-object? line)
-                    (State random-sentence-generated no-result)
-                    (State random-sentence-generated
-                        (List (map Word (string-split line #\ ))))
-                )
-
-                (State random-sentence-generator process-finished)
-
-                (close-pipe port)
+            (if (eof-object? line)
+                (State random-sentence-generated no-result)
+                (State random-sentence-generated
+                    (List (map Word (string-split line #\ ))))
             )
+
+            (State random-sentence-generator process-finished)
+
+            (close-pipe port)
         )
     )
 )

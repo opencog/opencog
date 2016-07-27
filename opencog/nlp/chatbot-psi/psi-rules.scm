@@ -258,26 +258,32 @@
     )
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "random-pkd-sentence-generated?")
-        (DefinedPredicate "has-not-replied-anything-yet?")
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-pkd-sentence-generated)))
-    (True)
-    (stv .9 .9)
-    sociality
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "random-pkd-sentence-generated?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-pkd-sentence-generated)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "random_sentence_pkd"
+    )
 )
 
-(psi-rule
-    (list (SequentialAnd
-        (DefinedPredicate "random-blogs-sentence-generated?")
-        (DefinedPredicate "has-not-replied-anything-yet?")
-    ))
-    (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-blogs-sentence-generated)))
-    (True)
-    (stv .9 .9)
-    sociality
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "random-blogs-sentence-generated?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-blogs-sentence-generated)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "random_sentence_blogs"
+    )
 )
 
 (psi-set-controlled-rule
