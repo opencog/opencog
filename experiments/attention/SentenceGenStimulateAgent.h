@@ -7,7 +7,6 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/attention/AttentionAgent.h>
 #include <opencog/cogserver/server/CogServer.h>
-#include "Globals.h"
 
 #ifndef _SENTENCEGENAGENT_H_
 #define _SENTENCEGENAGENT_H_
@@ -22,7 +21,6 @@ class SentenceGenStimulateAgent: public Agent {
 private:
     UnorderedHandleSet _hword_wordInstance_nodes;
     SchemeEval* _scm_eval;
-    AtomSpace& _as;
 
     int startcount;
     time_t stime;

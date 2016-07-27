@@ -13,8 +13,6 @@
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/attention/AttentionModule.h>
 
-#include "Globals.h"
-
 namespace opencog {
 
 class AtomSpace;
@@ -25,11 +23,12 @@ class Logger;
 
 namespace ECANExperiment {
 
-static std::string ECAN_EXP_AGENTS = "opencog::SimpleHebbianUpdatingAgent\n"
-                                     "opencog::ImportanceUpdatingAgent\n"
-                                     "opencog::SimpleImportanceDiffusionAgent\n"
-                                     "opencog::ForgettingAgent\n"
-                                     "opencog::ArtificilaStimulatorAgent\n";
+extern std::vector<std::vector<std::string>> swords;
+extern std::vector<std::string> words;
+
+extern int special_word_occurence_period;
+
+extern int current_group;
 
 class ExperimentSetupModule: public Module {
 private:

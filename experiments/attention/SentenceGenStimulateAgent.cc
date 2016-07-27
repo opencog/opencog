@@ -29,9 +29,9 @@ SentenceGenStimulateAgent::~SentenceGenStimulateAgent()
     //delete _scm_eval;
 }
 SentenceGenStimulateAgent::SentenceGenStimulateAgent(CogServer& cs) :
-        Agent(cs), _as(cs.getAtomSpace())
+        Agent(cs)
 {
-    _scm_eval = new SchemeEval(&_as);
+    _scm_eval = new SchemeEval(_as);
     current_group = 0;
     startcount = _cogserver.getCycleCount();
     stime = std::time(nullptr);
@@ -54,9 +54,9 @@ void SentenceGenStimulateAgent::run(void)
 
     if(_cogserver.getCycleCount() % 10 == 0){
         //Print counts
-        printf("WORD_NODE = %d \n",_as.get_num_atoms_of_type(WORD_NODE));
-        printf("WORD_INSTANCE_NODE = %d \n",_as.get_num_atoms_of_type(WORD_INSTANCE_NODE));
-        printf("ASYMMETRIC_HEBBIAN_LINK = %d \n",_as.get_num_atoms_of_type(ASYMMETRIC_HEBBIAN_LINK));
+        printf("WORD_NODE = %d \n",_as->get_num_atoms_of_type(WORD_NODE));
+        printf("WORD_INSTANCE_NODE = %d \n",_as->get_num_atoms_of_type(WORD_INSTANCE_NODE));
+        printf("ASYMMETRIC_HEBBIAN_LINK = %d \n",_as->get_num_atoms_of_type(ASYMMETRIC_HEBBIAN_LINK));
     }
 }
 
@@ -106,5 +106,5 @@ void SentenceGenStimulateAgent::generate_stimulate_sentence()
         experimentalStimulateAtom(h,0.5);
     this_thread::sleep_for(milliseconds(400));
 
-    printf("stifunds: %ld \n",_as.get_STI_funds());
+    printf("stifunds: %ld \n",_as->get_STI_funds());
 }

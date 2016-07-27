@@ -36,6 +36,13 @@ DECLARE_MODULE(ExperimentSetupModule);
 
 std::string ExperimentSetupModule::file_name;
 
+std::vector<std::vector<std::string>> opencog::ECANExperiment::swords;
+std::vector<std::string> opencog::ECANExperiment::words;
+
+int opencog::ECANExperiment::current_group = 0;
+
+int opencog::ECANExperiment::special_word_occurence_period = 1;
+
 ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
         Module(cs), _cs(cs)
 {
@@ -51,7 +58,7 @@ ExperimentSetupModule::ExperimentSetupModule(CogServer& cs) :
                         _2, _3));
 
     file_name = std::string(PROJECT_SOURCE_DIR)
-                + "/examples/attention/dump";
+                + "/experiments/attention/dump";
 
 }
 
