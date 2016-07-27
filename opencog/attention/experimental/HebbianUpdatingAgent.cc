@@ -111,7 +111,7 @@ void HebbianUpdatingAgent::updateHebbianLinks(Handle source)
         tc = tcDecayRate * new_tc + (1.0f - tcDecayRate) * old_tc;
 
         //update truth value accordingly
-        TruthValuePtr newtv = SimpleTruthValue::createTV(tc, 0.01);
+        TruthValuePtr newtv = SimpleTruthValue::createTV(tc, 0.1);
         h->merge(newtv);
 
     }

@@ -112,7 +112,7 @@ void HebbianCreationAgent::run()
     //Pick a random target and create the link if it doesn't exist already
     for (int i = 0; i < farLinks; i++) {
         Handle target = notAttentionalFocus[distribution(generator)];
-        Handle link = as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+        Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
         if (link == Handle::UNDEFINED)
             addHebbian(source,target);
     }
@@ -127,7 +127,7 @@ void HebbianCreationAgent::run()
         std::uniform_int_distribution<int> distribution2(0,iset.size()-1);
         size_t s = iset.size();
         do {
-            as->remove_atom(iset[distribution2(generator)]->getHandle(),true);
+            _as->remove_atom(iset[distribution2(generator)]->getHandle(),true);
             s--;
         } while (s >= maxLinkNum);
     }
@@ -135,7 +135,7 @@ void HebbianCreationAgent::run()
 
 void HebbianCreationAgent::addHebbian(Handle source,Handle target)
 {
-    Handle link = as->add_link(ASYMMETRIC_HEBBIAN_LINK, source, target);
+    Handle link = _as->add_link(ASYMMETRIC_HEBBIAN_LINK, source, target);
     link->setTruthValue(SimpleTruthValue::createTV(0.5, 0.1));
     link->setVLTI(1);
 }

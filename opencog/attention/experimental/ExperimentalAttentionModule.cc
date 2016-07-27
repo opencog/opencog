@@ -100,27 +100,27 @@ void ExperimentalAttentionModule::init()
 
 std::string ExperimentalAttentionModule::do_start_ecan(Request *req, std::list<std::string> args)
 {
- std::string afImportance = AFImportanceDiffusionAgent::info().id;
- std::string waImportance = WAImportanceDiffusionAgent::info().id;
+    std::string afImportance = AFImportanceDiffusionAgent::info().id;
+    std::string waImportance = WAImportanceDiffusionAgent::info().id;
 
- std::string afRent = AFRentCollectionAgent::info().id;
- std::string waRent = WARentCollectionAgent::info().id;
+    std::string afRent = AFRentCollectionAgent::info().id;
+    std::string waRent = WARentCollectionAgent::info().id;
 
- _cogserver.startAgent(_afImportanceAgentPtr, true, afImportance);
- _cogserver.startAgent(_waImportanceAgentPtr, true, waImportance);
+    _cogserver.startAgent(_afImportanceAgentPtr, true, afImportance);
+    _cogserver.startAgent(_waImportanceAgentPtr, true, waImportance);
 
- _cogserver.startAgent(_afRentAgentPtr, true, afRent);
- _cogserver.startAgent(_waRentAgentPtr, true, waRent);
+    _cogserver.startAgent(_afRentAgentPtr, true, afRent);
+    _cogserver.startAgent(_waRentAgentPtr, true, waRent);
 
-  _cogserver.startAgent(_forgetting_agentptr,true,"attention");
-  _cogserver.startAgent(_minmaxstiupdating_agentptr,true,"attention");
-  _cogserver.startAgent(_focusupdating_agentptr,true,"attention");
+    _cogserver.startAgent(_forgetting_agentptr,true,"attention");
+    _cogserver.startAgent(_minmaxstiupdating_agentptr,true,"attention");
+    _cogserver.startAgent(_focusupdating_agentptr,true,"attention");
 
-  _cogserver.startAgent(_hebbiancreation_agentptr,true,"hca");
-  _cogserver.startAgent(_hebbianupdating_agentptr,true,"hua");
+    _cogserver.startAgent(_hebbiancreation_agentptr,true,"hca");
+    _cogserver.startAgent(_hebbianupdating_agentptr,true,"hua");
 
- return ("Started the following agents:\n" + afImportance + "\n" + waImportance +
-	 "\n" + afRent + "\n" + waRent + "\n");
+    return ("Started the following agents:\n" + afImportance + "\n" + waImportance +
+         "\n" + afRent + "\n" + waRent + "\n");
 }
 
 /*
@@ -132,5 +132,5 @@ void ExperimentalAttentionModule::addAFSignalHandler(const Handle& source,
                                         const AttentionValuePtr& av_old,
                                         const AttentionValuePtr& av_new)
 {
-  newAtomsInAV.push(source);
+    newAtomsInAV.push(source);
 }

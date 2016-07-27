@@ -60,7 +60,6 @@ class HebbianCreationAgent : public Agent
 {
 
 protected:
-    AtomSpace* as;
 
     void addHebbian(Handle atom,Handle source);
     float targetConjunction(Handle handle1,Handle handle2);

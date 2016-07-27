@@ -24,7 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/util/Config.h>
 
 #include "WAImportanceDiffusionAgent.h"
 
@@ -34,6 +34,8 @@ using namespace opencog;
 WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
     ImportanceDiffusionBase(cs)
 {
+    _tournamentSize = config().get_int("ECAN_DIFFUSION_TOURNAMENT_SIZE");
+
     set_sleep_time(300);
 }
 
@@ -46,6 +48,26 @@ void WAImportanceDiffusionAgent::run()
     std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
+Handle WAImportanceDiffusionAgent::tournamentSelect(HandleSeq population){
+
+    Handle tournament[_tournamentSize];
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> distribution(0,population.size()-1);
+
+    for(int i = 0; i < _tournamentSize; i++){
+        int idx = distribution(generator);
+        tournament[i] = population[idx];
+    }
+
+    auto result = std::max_element(tournament, tournament + (_tournamentSize - 1), []
+                              (const Handle& h1, const Handle & h2)
+    {
+        return (h1->getSTI() > h2->getSTI());
+    });
+
+    return *result;
+}
+
 /*
  * Carries out the importance diffusion process, spreading STI along the
  * graph according to the configuration settings
@@ -54,53 +76,24 @@ void WAImportanceDiffusionAgent::spreadImportance()
 {
     HandleSeq diffusionSourceVector = ImportanceDiffusionBase::diffusionSourceVector(false);
 
-    HandleSeq targetSet;
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0,diffusionSourceVector.size()-1);
+    if (diffusionSourceVector.size() == 0)
+        return;
 
+    Handle target = tournamentSelect(diffusionSourceVector);
 
-    for (unsigned int i = 0; (i < SAMPLE_SIZE and i < diffusionSourceVector.size()) ; i++) {
-        HandleSeq tmp;
-
-        // Randomly sample 50% of the diffusionSourceVector
-        for (unsigned int i = 0; i < diffusionSourceVector.size()/2; i++) {
-            int idx = distribution(generator);
-            tmp.push_back(diffusionSourceVector[idx]);
-        }
-
-        auto result = std::max_element(tmp.begin(), tmp.end(), []
-                                  (const Handle& h1, const Handle & h2)
-        {
-            return (h1->getSTI() > h2->getSTI());
-        });
-
-        // Select the atoms with the highest STI amongst the samples
-        targetSet.push_back(*result);
-
-        // set diffusionSource vector to the current samples.
-        diffusionSourceVector = tmp;
+    // Check the decision function to determine if spreading will occur
+    if (spreadDecider->spreadDecision(target->getSTI())) {
+#ifdef DEBUG
+        std::cout << "Calling diffuseAtom." << std::endl;
+#endif
+        diffuseAtom(target);
     }
-
-    diffusionSourceVector = targetSet;
-
-    // Calculate the diffusion for each source atom, and store the diffusion
-    // event in a stack
-    for (Handle atomSource : diffusionSourceVector)
+#ifdef DEBUG
+    else
     {
-        // Check the decision function to determine if spreading will occur
-        if (spreadDecider->spreadDecision(atomSource->getSTI())) {
-#ifdef DEBUG
-            std::cout << "Calling diffuseAtom." << std::endl;
-#endif
-            diffuseAtom(atomSource);
-        }
-#ifdef DEBUG
-        else
-        {
-            std::cout << "Did not call diffuseAtom." << std::endl;
-        }
-#endif
+        std::cout << "Did not call diffuseAtom." << std::endl;
     }
+#endif
 
     // Now, process all of the outstanding diffusion events in the diffusion
     // stack
