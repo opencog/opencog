@@ -39,17 +39,48 @@ class TypeFrame
 
 public:
 
+    typedef std::pair<Type, Arity> TypePair;
+
+    class TypeVector: public std::vector<TypeFrame::TypePair> {
+        bool operator <(TypeVector &other)
+        {
+            TypeVector::iterator it1 = this->begin();    
+            TypeVector::iterator it2 = other.begin();    
+            while (it1 < this->end()) {
+                if (it2 == other.end()) return false;
+                if ((*it1).first < (*it2).first) {
+                    return true;
+                } else if ((*it1).first > (*it2).first) {
+                    return false;
+                } else {
+                    if ((*it1).second < (*it2).second) {
+                        return true;
+                    } else if ((*it1).second > (*it2).second) {
+                        return false;
+                    }
+                }
+                it1++;
+                it2++;
+            }
+            return (it2 != other.end());
+        }
+    };
+
     TypeFrame(const std::string &schemeRepresentation);
-    bool isValid();
     ~TypeFrame();
+
+    bool isValid();
+    TypeVector buildSignatureVector(int cursor);
     int size();
-    std::pair<Type, Arity> at(int pos);
+    TypePair at(int pos);
+    void printForDebug();
     
 
 private:
 
+    bool DEBUG = false;
     bool validInstance;
-    std::vector<std::pair<Type, Arity>> parse;
+    std::vector<TypePair> parse;
 
     bool buildFrameRepresentation(const std::string &schemeRepresentation);
 

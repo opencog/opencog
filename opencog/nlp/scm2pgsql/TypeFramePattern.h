@@ -25,6 +25,7 @@
 #define _OPENCOG_TYPEFRAMEPATTERN_H
 
 #include "PatternBranch.h"
+#include "TypeFrame.h"
 #include <vector>
 #include <string>
 
@@ -43,11 +44,31 @@ public:
 
     TypeFramePattern();
     ~TypeFramePattern();
+    void add(TypeFrame &frame);
+    void printForDebug(std::string prefix);
+
+
+    /*
+    typedef std::map<std::pair<Type, Arity>, 
+             TypeFramePattern *, 
+             struct 
+             {
+                bool operator()(const std::pair<Type, Arity> &a, const std::pair<Type, Arity> &b) const {
+                    (a.first < b.first) or ((a.first == b.first) and (a.second < b.second))
+                }
+             }> BranchMap;
+             */
+
 
 private:
 
-    std::vector<PatternBranch> branches;
-    std::vector<std::string> occurrences;
+    typedef std::vector<class TypeFramePattern *> BranchVector;
+    typedef std::map<TypeFrame::TypeVector, BranchVector> TypeVectorMap;
+
+    void recursiveAdd(TypeFrame &frame, int cursor);
+    bool DEBUG = false;
+
+    TypeVectorMap branches;
 };
 
 }

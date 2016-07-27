@@ -38,6 +38,8 @@ class TypeFrameIndex
 
 public:
 
+    typedef std::map<TypeFrame::TypePair, TypeFramePattern *> TypePairMap;
+
     TypeFrameIndex();
 
     // TODO Implement this
@@ -45,9 +47,11 @@ public:
 
     bool addFromScheme(const std::string &txt);
 
+    void printForDebug();
+
 private:
 
-    TypeFramePattern rootPattern;
+    TypePairMap patterns;
 };
 
 }
