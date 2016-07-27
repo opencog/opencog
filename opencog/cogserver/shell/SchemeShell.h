@@ -34,11 +34,8 @@ namespace opencog {
  *  @{
  */
 
-class SchemeShellModule;
-
 class SchemeShell : public GenericShell
 {
-	friend class SchemeShellModule; // needs to call set_socket()
 	protected:
 		void thread_init();
 

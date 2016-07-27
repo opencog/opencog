@@ -47,16 +47,16 @@ namespace opencog {
 
     /**
      * This Agent collects wages form inside the Whole Atomsapce by picking a
-     * atoms via sti biased random selection from the whole atomspace and 
-     * collects the Wage which is calculate depending on the current funds 
-     * in the Bank. The wage is computed as a linear function form the Funds 
+     * atoms via sti biased random selection from the whole atomspace and
+     * collects the Wage which is calculate depending on the current funds
+     * in the Bank. The wage is computed as a linear function form the Funds
      * and a Target Value. It is capped to the range 0-2x default Wage.
      *
      * This Agent is supposed to run in it's own Thread.
      */
     class WARentCollectionAgent : public RentCollectionBaseAgent {
     private:
-	
+
         unsigned int SAMPLE_SIZE = 5;
 
     public:
@@ -71,7 +71,6 @@ namespace opencog {
         }
 
         WARentCollectionAgent(CogServer&);
-        virtual ~WARentCollectionAgent();
         void selectTargets(HandleSeq &targetSetOut);
     }; // class
 

@@ -67,7 +67,6 @@ public:
     }
 
     HebbianUpdatingAgent(CogServer&);
-    virtual ~HebbianUpdatingAgent();
     virtual void run();
 
 }; // class

@@ -175,8 +175,12 @@ TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
 {
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
+    /*
     auto it = std::find(std::begin(time_circle), std::end(time_circle), tp); //time_circle.begin(),time_circle.end()
     if (it == std::end(time_circle)) return false;
+    */
+    auto it = find (tp);
+    if (it == nullptr) return false;
     //it->map_tree[map_handle].setNodeData(location,UndefinedHandle);
     it->map_tree.updateNode(location, false);
     return true;
@@ -207,8 +211,12 @@ TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
     //find time in time circle time unit
+    /*
     auto it = std::find(std::begin(time_circle), std::end(time_circle), time_p); //time_circle.begin(),time_circle.end()
     if (it == std::end(time_circle)) return false;
+    */
+    auto it = find (time_p);
+    if (it == nullptr) return false;
     OcTreeNode* result = it->map_tree.search(location);
     if (result == nullptr) {
         ato = UndefinedHandle;
@@ -267,6 +275,7 @@ TimeOctomap::get_times_of_atom_occurence_in_map(const opencog::Handle& ato)
     }
     return tl;
 }//ok
+//get the first atom from the elapse from now
 //FIXME: check time point within time duration and not just greater or less
 bool TimeOctomap::get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,
                                             const time_pt& from_d,
@@ -279,22 +288,69 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const opencog::Handle& at
         return false;
     }
     tl.sort();
-    if (from_d>tl.back()){
+    //check the list
+
+    if ((from_d>tl.back()) && (! is_time_point_in_range(from_d,tl.back(),curr_duration))){
         return false;
     }
     for (int i=0;i<sz;i++)
     {
        result=tl.front();
        tl.pop_front();
-       if (result>=from_d)
+       if (result>=from_d || (is_time_point_in_range(from_d,result,curr_duration)))
+       {
+         return true;
+       }
+    }
+    return true;
+}
+
+bool TimeOctomap::get_oldest_time_locations_atom_observed(const opencog::Handle& ato,
+                                            const time_pt& from_d,
+                                            point3d_list& result)
+{
+  time_pt tpt;
+  if (!get_oldest_time_elapse_atom_observed(ato,from_d,tpt)) return false;
+  result=get_locations_of_atom_occurence_at_time(tpt,ato);
+  //std::cout << result.size()<<"\n ";//<<from_d;
+  //std::time_t ttp=std::chrono::system_clock::to_time_t(tpt);
+  //char buff[31];
+  //strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
+  //string ts(buff);
+  //std::cout << ts <<endl;
+  if (result.size()<1)return false;
+  return true;
+}
+
+bool TimeOctomap::get_last_time_elapse_atom_observed(const opencog::Handle& ato,
+                                            const time_pt& from_d,
+                                            time_pt& result)
+{
+    time_list tl=get_times_of_atom_occurence_in_map(ato);
+    //sort
+    int sz=tl.size();
+    if (sz<1)
+        return false;
+    tl.sort();
+    if ((from_d>tl.back())&&(!is_time_point_in_range(from_d,tl.back(),curr_duration)))
+        return false;
+    result=tl.back();
+    return true;
+    /*
+    for (int i=0;i<sz;i++)
+    {
+       result=tl.back();
+       tl.pop_back();
+       if (result<=till_d)
        {
          return true;
        }
     }
     return false;
+    */
 }
 
-bool TimeOctomap::get_last_time_elapse_atom_observed(const opencog::Handle& ato,
+bool TimeOctomap::get_last_time_before_elapse_atom_observed(const opencog::Handle& ato,
                                             const time_pt& till_d,
                                             time_pt& result)
 {
@@ -316,6 +372,17 @@ bool TimeOctomap::get_last_time_elapse_atom_observed(const opencog::Handle& ato,
        }
     }
     return false;
+}
+
+bool TimeOctomap::get_last_locations_of_atom_observed(const opencog::Handle& ato,
+                                            const time_pt& till_d,
+                                            point3d_list& result)
+{
+  time_pt tpt;
+  if (!get_last_time_elapse_atom_observed(ato,till_d,tpt)) return false;
+  result=get_locations_of_atom_occurence_at_time(tpt,ato);
+  if (result.size()<1)return false;
+  return true;
 }
 
 point3d_list
@@ -340,6 +407,18 @@ TimeOctomap::get_locations_of_atom_occurence_now(
     return pl;
 }//ok
 
+TimeUnit *
+TimeOctomap::find(const time_pt& time_p)
+{
+  int a= time_circle.size();
+  for (int i=0;i<a;i++)
+  {
+    if (is_time_point_in_range(time_p,time_circle[i].t,time_circle[i].duration))
+    return &time_circle[i];
+  }
+  return nullptr;
+}
+
 point3d_list
 TimeOctomap::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
                                                        const opencog::Handle& ato)
@@ -347,10 +426,14 @@ TimeOctomap::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
     point3d_list pl;
+    /*
     auto it = std::find(std::begin(time_circle),
                         std::end(time_circle),
                         time_p); //time_circle.begin(),time_circle.end()
     if (it == std::end(time_circle)) return point3d_list();
+    */
+    TimeUnit * it = find(time_p);
+    if (it == nullptr) return point3d_list();
     for(AtomOcTree::tree_iterator ita =
         it->map_tree.begin_tree(),
         end = it->map_tree.end_tree();
@@ -396,10 +479,14 @@ TimeOctomap::remove_atom_at_time(const time_pt& time_p,const opencog::Handle& at
 {
     std::lock_guard<std::mutex> lgm(mtx);
     point3d_list pl;
+    /*
     auto tu = std::find(std::begin(time_circle),
                         std::end(time_circle),
                         time_p); //time_circle.begin(),time_circle.end()
     if (tu == std::end(time_circle)) return;
+    */
+    auto tu = find(time_p);
+    if (tu == nullptr) return;
             for(AtomOcTree::tree_iterator it2 =
                 tu->map_tree.begin_tree(),
                 endit2 = tu->map_tree.end_tree();
