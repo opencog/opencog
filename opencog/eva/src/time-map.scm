@@ -118,18 +118,20 @@
 )
 
 (define (look-at-face face-id-node)
-		(let* ((loc-atom
-					(get-last-locs-ato "faces" face-id-node face-loc-time-span))
-			(fnc "look_at_face_point("))
-			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom) (stv 0 0)
-				(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+	(let ((loc-atom
+			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
+		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
+			(stv 0 1)
+			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
 					(xx (number->string (loc-link-x loc-link)))
 					(yy (number->string (loc-link-y loc-link)))
 					(zz (number->string (loc-link-z loc-link))))
-						(python-eval (string-append fnc xx "," yy "," zz ")")))
+				(python-eval
+					(string-append "look_at_face_point(" xx "," yy "," zz ")"))
+				(stv 1 1)
 			)
 		)
-		(stv 1 1)
+	)
 )
 
 ;;get string of face-id's seperated by space - call python split() function
