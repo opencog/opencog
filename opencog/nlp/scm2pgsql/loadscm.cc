@@ -30,14 +30,17 @@ using namespace opencog;
 
 bool loadFile(char *fileName)
 {
-    TypeFrameIndex typeFrameIndex;
-    TypeFrameIndexBuilder builder(&typeFrameIndex);
+    TypeFrameIndex index;
+    TypeFrameIndexBuilder builder(&index);
     AtomSpace atomSpace;
     SchemeEval::init_scheme();
     SchemeEval::set_scheme_as(&atomSpace);
     SchemeEval *schemeEval = new SchemeEval(&atomSpace);
     schemeEval->eval("(use-modules (opencog nlp relex2logic))");
-    return SCMLoader::load(fileName, atomSpace, &builder);
+    bool returnValue = SCMLoader::load(fileName, atomSpace, &builder);
+    //bool returnValue = SCMLoader::load(fileName, atomSpace);
+    index.printForDebug();
+    return returnValue;
 }
 
 int main(int argc, char *argv[]) {
