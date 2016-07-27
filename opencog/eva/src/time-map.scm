@@ -1,14 +1,31 @@
 (use-modules (srfi srfi-1) )
 (use-modules (opencog) (opencog atom-types) (opencog eva-behavior))
-(use-modules (opencog ato pointmem)); needed for mapsi
+(use-modules (opencog ato pointmem)); needed for maps
 (use-modules (opencog python))
-;;initialize octomap with 15hz, 10 second or 150 frames buffer ; 1 cm spatial resolution
-(create-map "faces" 0.01 66 150) (step-time-unit "faces") (auto-step-time-on "faces")
-(create-map "sounds" 0.01 100 100) (step-time-unit "sounds") (auto-step-time-on "sounds")
 
-;(map-ato "faces" (NumberNode "1") 1 2 3)
-;(map-ato "sounds" (NumberNode "1") 1 2 3)
+; -----------------------------------------------------------------------------
+; For recording facial coordinates, create octomap with 15hz, 10 second or
+; 150 frames buffer and 1 cm spatial resolution.
+(create-map "faces" 0.01 66 150)
+; Initialize  the map
+(step-time-unit "faces")
+; Make the stepping take place automatically
+(auto-step-time-on "faces")
+; time-span is the amount of time in milliseconds to be considered for locating
+; a face. The time limit for spatial memory for faces :-). The value is
+; dependent on the frequency of update of the map and the number of frames.
+(define face-loc-time-span 5000) ; (/ (* (/ 1000.0 15) 150) 2)
 
+; -----------------------------------------------------------------------------
+; For recording sound coordinates, create octomap with 10hz, 10 second or
+; 100 frames buffer and 1 cm spatial resolution.
+(create-map "sounds" 0.01 100 100)
+; Initialize  the map
+(step-time-unit "sounds")
+; Make the stepping take place automatically
+(auto-step-time-on "sounds")
+
+; -----------------------------------------------------------------------------
 ;;returns null string if atom not found, number x y z string if okay
 ;;these functions assume only one location for one atom in a map at a time
 (define (get-past-xyz map-name id-node elapse)
@@ -99,10 +116,10 @@
 (define (angle_face_snd1 face-id)
 	(angle_face_snd face-id (get-snd-1))
 )
-;;get all face-ids and only one sound id 1.0, compare them
 
 (define (look-at-face face-id-node)
-		(let* ((loc-atom (get-past-locs-ato "faces" face-id-node 1))
+		(let* ((loc-atom
+					(get-last-locs-ato "faces" face-id-node face-loc-time-span))
 			(fnc "look_at_face_point("))
 			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom) (stv 0 0)
 				(let* ((loc-link (car (cog-outgoing-set loc-atom)))
@@ -110,7 +127,6 @@
 					(yy (number->string (loc-link-y loc-link)))
 					(zz (number->string (loc-link-z loc-link))))
 						(python-eval (string-append fnc xx "," yy "," zz ")")))
-
 			)
 		)
 		(stv 1 1)
@@ -123,7 +139,10 @@
 	;;(string-concatenate (map (lambda (x)(string-append (cog-name x) " ")) (cog-filter 'NumberNode (show-visible-faces)) ))
 )
 ;(define (get-visible-faces)(list (NumberNode "1")(NumberNode "2")))
-;;below returns face id of face nearest to sound vector atleast 10 degrees, or 0 face id
+;below returns face id of face nearest to sound vector atleast 10 degrees, or
+;0 face id
+
+;;get all face-ids and only one sound id 1.0, compare them
 (define (snd1-nearest-face)
 	(let* ((lst (get-visible-faces))
 				 (falist (map (lambda (x)(list (string->number (cog-name x)) (angle_face_snd1 (cog-name x)))) lst)))
