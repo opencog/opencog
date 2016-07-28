@@ -70,6 +70,7 @@ GenericShell::~GenericShell()
 {
 	if (evalthr)
 	{
+		logger().debug("[GenericShell] dtor, wait for eval threads.");
 		evalthr->join();
 		delete evalthr;
 		evalthr = nullptr;
@@ -77,10 +78,12 @@ GenericShell::~GenericShell()
 
 	if (pollthr)
 	{
+		logger().debug("[GenericShell] dtor, wait for writer threads.");
 		pollthr->join();
 		delete pollthr;
 		pollthr = nullptr;
 	}
+	logger().debug("[GenericShell] dtor finsihed.");
 }
 
 /* ============================================================== */
