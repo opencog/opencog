@@ -245,9 +245,11 @@ class CogServer;
  */
 class Request
 {
+private:
+    ConsoleSocket*         _console;
+
 protected:
     CogServer&             _cogserver;
-    ConsoleSocket*         _console;
     std::list<std::string> _parameters;
 
 public:
@@ -266,11 +268,11 @@ public:
     virtual bool isShell(void) = 0;
 
     /** Send the command output back to the client. */
-    virtual void send(const std::string& msg) const;
+    void send(const std::string& msg) const;
 
     /** Stores the socket on which to return results. */
-    virtual void set_console(ConsoleSocket*);
-    virtual ConsoleSocket *get_console(void) { return _console; }
+    void set_console(ConsoleSocket*);
+    ConsoleSocket *get_console(void) const { return _console; }
 
     /** sets the command's parameter list. */
     virtual void setParameters(const std::list<std::string>&);
