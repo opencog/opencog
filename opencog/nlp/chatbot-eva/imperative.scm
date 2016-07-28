@@ -120,7 +120,7 @@
 		; XXX replace this by AIML or something.
 		(if (eq? '() action-list)
 			(begin
-				(State (Anchor "Chatbot: ChatbotEva")
+				(State (Anchor "Chatbot: ChatbotEvaAction")
 					(Concept "Chatbot: NoActionTaken"))
 				(display "I don't know how to do that.\n")))
 
