@@ -6,6 +6,7 @@
 (add-to-load-path "/usr/local/share/opencog/scm")
 
 (use-modules (opencog))
+(use-modules (opencog ato pointmem))
 (use-modules (opencog exec))
 (use-modules (opencog query))
 
@@ -135,6 +136,8 @@
   represents the recognition ID. X, Y and Z are the coordinate numbers
   associated with the face that represented by FACE-ID. It returns the atomese
   representation of the recognized face that was added to the octomap.
+
+  If RECOG-ID is `0` then it is an unrecognized face.
 "
 	(make-mapped-face face-id x y z)
 	(make-recognized-face face-id recog-id)
