@@ -56,7 +56,8 @@ void ServerSocket::Send(const std::string& cmd)
     // closed the socket, even though we still had stuff to send.
     // I beleive this is a ENOTCON errno, maybe its another one as well.
     // Don't log these harmless errors.
-    if (error.value() != boost::system::errc::not_connected)
+    if (error.value() != boost::system::errc::success and
+        error.value() != boost::system::errc::not_connected)
         logger().warn("ServerSocket::Send(): %s", error.message().c_str());
 }
 
