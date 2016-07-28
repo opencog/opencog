@@ -146,24 +146,24 @@ class CogServer;
                                                  shell_cmd,           \
                                                  hidden);             \
               return _cci;                                            \
-    }                                                                 \
-    do_cmd##Request(CogServer& cs) : Request(cs) {};                  \
-    virtual ~do_cmd##Request() {};                                    \
-    virtual bool execute(void) {                                      \
-        logger().debug("[" cmd_str " Request] execute");              \
+          }                                                           \
+          do_cmd##Request(CogServer& cs) : Request(cs) {};            \
+          virtual ~do_cmd##Request() {};                              \
+          virtual bool execute(void) {                                \
+              logger().debug("[" cmd_str " Request] execute");        \
                                                                       \
-        mod_type* mod =                                               \
-            static_cast<mod_type *>(_cogserver.getModule(             \
-                 "opencog::" #mod_type));                             \
+              mod_type* mod =                                         \
+                  static_cast<mod_type *>(_cogserver.getModule(       \
+                       "opencog::" #mod_type));                       \
                                                                       \
-        std::string rs = mod->do_cmd(this, _parameters);              \
-        send(rs);                                                     \
-        return true;                                                  \
-    }                                                                 \
-    virtual bool isShell(void) {                                      \
-        return info().is_shell;                                       \
-    }                                                                 \
-};                                                                    \
+              std::string rs = mod->do_cmd(this, _parameters);        \
+              send(rs);                                               \
+              return true;                                            \
+          }                                                           \
+          virtual bool isShell(void) {                                \
+              return info().is_shell;                                 \
+          }                                                           \
+    };                                                                \
                                                                       \
     /* Declare the factory to manage this request */                  \
     Factory<do_cmd##Request, Request> do_cmd##Factory;                \
