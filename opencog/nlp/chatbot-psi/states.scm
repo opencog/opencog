@@ -64,9 +64,9 @@
 (State random-blogs-sentence-generated default-state)
 
 (define chatbot-eva (Anchor (chat-prefix "ChatbotEva")))
-(define sent-to-chatbot-eva (Concept (chat-prefix "SentToChatbotEva")))
-(define no-action-taken (Concept (chat-prefix "NoActionTaken")))
+(define chatbot-eva-action (Anchor (chat-prefix "ChatbotEvaAction")))
 (State chatbot-eva default-state)
+(State chatbot-eva-action default-state)
 
 ;; PLN states
 (define pln-answers (Anchor (chat-prefix "PLNAnswers")))
@@ -97,6 +97,7 @@
     (State random-pkd-sentence-generated default-state)
     (State random-blogs-sentence-generated default-state)
     (State chatbot-eva default-state)
+    (State chatbot-eva-action default-state)
     (State pln-answers default-state)
     (State pln-qa default-state)
 )
