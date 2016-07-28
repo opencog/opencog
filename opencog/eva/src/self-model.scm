@@ -315,6 +315,27 @@
 					(ListLink (VariableNode "$face-id"))))
 		)))
 
+;; Return true if someone recognizable but not yet acknowledged face appears.
+(DefineLink
+	(DefinedPredicateNode "Did someone recognizable arrive?")
+	(SatisfactionLink
+		(AndLink
+			; If someone is visible...
+			(PresentLink (EvaluationLink (PredicateNode "visible face")
+					(ListLink (VariableNode "$face-id"))))
+			; but not yet acknowledged...
+			(AbsentLink (EvaluationLink (PredicateNode "acked face")
+					(ListLink (VariableNode "$face-id"))))
+			; NOTE: The above is a copy of the DefinedPredicateNode
+			; "Did someone arrive?" but that dpn can't be used, b/c this dpn
+			; will return (stv 1 1) no matter what, if it is used instead.
+			(PresentLink (EvaluationLink (PredicateNode "name")
+					(ListLink
+					(VariableNode "$face-id")
+					(VariableNode "$recog-id"))))
+			(Not (Equal (VariableNode "$recog-id") (ConceptNode "0")))
+			)))
+
 ;; Return the set of newly-arrived faces.
 ;; Will return a SetLink holding zero, one or more face id's
 (DefineLink
