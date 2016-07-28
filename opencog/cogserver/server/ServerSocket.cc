@@ -176,7 +176,8 @@ void ServerSocket::handle_connection(void)
     }
     catch (const boost::system::system_error& e)
     {
-        if (e.code() != boost::asio::error::not_connected)
+        if (e.code() != boost::asio::error::not_connected and
+            e.code() != boost::asio::error::bad_descriptor)
         {
             logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
         }
