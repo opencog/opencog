@@ -79,7 +79,7 @@ void NetworkServer::listen()
         _acceptor.accept(*sock);
 
         ConsoleSocket* ss = new ConsoleSocket();
-        ss->set_socket(sock);
+        ss->set_connection(sock);
         std::thread(&ConsoleSocket::handle_connection, ss).detach();
     }
 }

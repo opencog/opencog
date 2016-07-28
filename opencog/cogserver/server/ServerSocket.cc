@@ -131,7 +131,7 @@ match_eol_or_escape(bitter begin, bitter end)
     return std::make_pair(i, false);
 }
 
-void ServerSocket::set_socket(boost::asio::ip::tcp::socket* sock)
+void ServerSocket::set_connection(boost::asio::ip::tcp::socket* sock)
 {
     _socket = sock;
 }
