@@ -31,7 +31,7 @@
 using namespace opencog;
 
 Request::Request(CogServer& cs) :
-    _cogserver(cs), _console(nullptr)
+    _console(nullptr), _cogserver(cs)
 {
 }
 
