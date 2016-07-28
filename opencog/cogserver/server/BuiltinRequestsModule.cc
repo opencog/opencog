@@ -106,6 +106,9 @@ std::string BuiltinRequestsModule::do_exit(Request* req, std::list<std::string> 
     ConsoleSocket* con = req->get_console();
     OC_ASSERT(con, "Bad request state");
 
+    // After the exit, the pointer to the console will be invalid,
+    // so zero it out now, to avoid a bad dereference.
+    req->set_console(nullptr);
     con->Exit();
     return "";
 }

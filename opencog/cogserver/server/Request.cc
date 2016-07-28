@@ -47,6 +47,16 @@ Request::~Request()
 
 void Request::set_console(ConsoleSocket* con)
 {
+    // The "exit" request causes the console to be destroyed,
+    // rendering the _console pointer invalid. However, generic
+    // code will try to call Request::send() afterwards. So
+    // prevent the invalid reference by zeroing he pointer.
+    if (nullptr == con)
+    {
+        _console = nullptr;
+        return;
+    }
+
     OC_ASSERT(nullptr == _console, "Setting console twice!");
 
     logger().debug("[Request] setting socket: %p", con);
@@ -56,8 +66,10 @@ void Request::set_console(ConsoleSocket* con)
 
 void Request::send(const std::string& msg) const
 {
-    OC_ASSERT(_console, "Bad console for the request!");
-    _console->SendResult(msg);
+    // The _console might be zero for the exit request, because the
+    // exit command destroys the socket, and then tries to send a
+    // reply on the socket it just destroyed.
+    if (_console) _console->SendResult(msg);
 }
 
 void Request::setParameters(const std::list<std::string>& params)
