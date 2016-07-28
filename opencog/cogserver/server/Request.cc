@@ -22,10 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Request.h"
-
-#include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
+
+#include "Request.h"
 
 using namespace opencog;
 
@@ -46,30 +47,17 @@ Request::~Request()
 
 void Request::set_console(ConsoleSocket* con)
 {
+    OC_ASSERT(nullptr == _console, "Setting console twice!");
+
     logger().debug("[Request] setting socket: %p", con);
-    if (NULL == _console)
-    {
-        con->get();  // inc use count -- we plan to use the socket
-        _console = con;
-        return;
-    }
-
-    // con will be null only for the exit/quit command.
-    // XXX why do we even bother? won't the destructor do this for us?
-    if (nullptr == con)
-    {
-        if (_console) _console->put();  // dec use count; we are done with it.
-        _console = nullptr;
-        return;
-    }
-
-    throw RuntimeException(TRACE_INFO,
-        "Requests work on only one socket!");
+    con->get();  // inc use count -- we plan to use the socket
+    _console = con;
 }
 
 void Request::send(const std::string& msg) const
 {
-    if (_console) _console->SendResult(msg);
+    OC_ASSERT(_console, "Bad console for the request!");
+    _console->SendResult(msg);
 }
 
 void Request::setParameters(const std::list<std::string>& params)

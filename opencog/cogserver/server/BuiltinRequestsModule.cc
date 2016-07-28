@@ -104,11 +104,9 @@ void BuiltinRequestsModule::init()
 std::string BuiltinRequestsModule::do_exit(Request* req, std::list<std::string> args)
 {
     ConsoleSocket* con = req->get_console();
-    if (con)
-    {
-        req->set_console(nullptr);
-        con->Exit();
-    }
+    OC_ASSERT(con, "Bad request state");
+
+    con->Exit();
     return "";
 }
 
