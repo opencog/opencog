@@ -53,6 +53,7 @@ void Request::set_console(ConsoleSocket* con)
     // prevent the invalid reference by zeroing he pointer.
     if (nullptr == con)
     {
+        _console->put();  // dec use count -- we are done with socket.
         _console = nullptr;
         return;
     }

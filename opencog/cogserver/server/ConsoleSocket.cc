@@ -231,7 +231,6 @@ void ConsoleSocket::Exit()
 {
     logger().debug("[ConsoleSocket] ExecuteExitRequest");
     SetCloseAndDelete();
-    put();
 }
 
 void ConsoleSocket::SendResult(const std::string& res)
