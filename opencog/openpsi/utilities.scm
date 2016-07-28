@@ -372,7 +372,7 @@
 
 (define (psi-set-value! entity value)
 "
-  Set the current value of psi-related entity.
+  Set the current numerical value of psi-related entity.
 
   entity - the object whose value is being set
   value - a numerical value (not NumberNode), assumed to be in [0,1] (for now)
