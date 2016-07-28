@@ -60,11 +60,16 @@ void ServerSocket::Send(const std::string& cmd)
 }
 
 // As far as I can tell, boost::asio is not actually thread-safe,
-// in particular, when closing and estroying sockets.  This strikes
+// in particular, when closing and destroying sockets.  This strikes
 // me as incredibly stupid -- a first-class reason to not use boost.
 // But whatever.  Hack around this for now.
 static std::mutex _asio_crash;
 
+// This is called in a different thread than the thread that is running
+// the handle_connection() method. It's purpose in life is to terminate
+// the connection -- it does so by closing the socket. Sometime later,
+// the handle_connection() method notices that it's closed, and exits
+// it's loop, thus ending the thread that its running in.
 void ServerSocket::SetCloseAndDelete()
 {
     std::lock_guard<std::mutex> lock(_asio_crash);
