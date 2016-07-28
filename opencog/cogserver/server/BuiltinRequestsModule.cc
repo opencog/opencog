@@ -101,12 +101,13 @@ void BuiltinRequestsModule::init()
 
 // ====================================================================
 // Various flavors of closing the connection
-std::string BuiltinRequestsModule::do_exit(Request *req, std::list<std::string> args)
+std::string BuiltinRequestsModule::do_exit(Request* req, std::list<std::string> args)
 {
-    RequestResult* rr = req->getRequestResult();
-    if (rr) {
-        rr->Exit();
-        req->setRequestResult(NULL);
+    ConsoleSocket* con = req->get_console();
+    if (con)
+    {
+        req->set_console(nullptr);
+        con->Exit();
     }
     return "";
 }

@@ -122,7 +122,6 @@ INSTALL (FILES
 	Registry.h
 	Request.h
 	RequestClassInfo.h
-	RequestResult.h
 	ShutdownRequest.h
 	UnloadModuleRequest.h
 	DESTINATION "include/${PROJECT_NAME}/cogserver/server"

@@ -30,36 +30,46 @@
 using namespace opencog;
 
 Request::Request(CogServer& cs) :
-    _cogserver(cs), _requestResult(NULL)
+    _cogserver(cs), _console(nullptr)
 {
 }
 
 Request::~Request()
 {
     logger().debug("[Request] destructor");
-    if (_requestResult) {
-        _requestResult->OnRequestComplete();
-        _requestResult->put();  // dec use count we are done with it.
+    if (_console)
+    {
+        _console->OnRequestComplete();
+        _console->put();  // dec use count we are done with it.
     }
 }
 
-void Request::setRequestResult(RequestResult* rr)
+void Request::set_console(ConsoleSocket* con)
 {
-    logger().debug("[Request] setting requestResult: %p", rr);
-    if (NULL == _requestResult) {
-        rr->get();  // inc use count -- we plan to use the req res
-        _requestResult = rr;
-    } else if (NULL == rr) {
-        if (_requestResult) _requestResult->put();  // dec use count; we are done with it.
-        _requestResult = NULL;  // used by exit/quit commands to not send any result.
-    } else
-        throw RuntimeException(TRACE_INFO,
-            "Bad idea to try to set the RequestResult more than once.");
+    logger().debug("[Request] setting socket: %p", con);
+    if (NULL == _console)
+    {
+        con->get();  // inc use count -- we plan to use the socket
+        _console = con;
+        return;
+    }
+
+    // con will be null only for the exit/quit command.
+    // XXX why do we even bother? won't the destructor do this for us?
+    if (nullptr == con)
+    {
+        if (_console) _console->put();  // dec use count; we are done with it.
+        _console = nullptr;
+        return;
+    }
+
+    throw RuntimeException(TRACE_INFO,
+        "Requests work on only one socket!");
 }
 
 void Request::send(const std::string& msg) const
 {
-    if (_requestResult) _requestResult->SendResult(msg);
+    if (_console) _console->SendResult(msg);
 }
 
 void Request::setParameters(const std::list<std::string>& params)

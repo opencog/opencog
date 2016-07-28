@@ -36,6 +36,7 @@ using namespace opencog;
 
 ConsoleSocket::ConsoleSocket(void)
 {
+    _use_count = 0;
     _shell = nullptr;
 }
 
@@ -193,7 +194,7 @@ void ConsoleSocket::OnLine(const std::string& line)
         }
     }
 
-    request->setRequestResult(this);
+    request->set_console(this);
     request->setParameters(params);
 
     // We only add the command to the processing queue

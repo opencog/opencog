@@ -30,8 +30,8 @@
 #include <list>
 #include <string>
 
+#include <opencog/cogserver/server/ConsoleSocket.h>
 #include <opencog/cogserver/server/Factory.h>
-#include <opencog/cogserver/server/RequestResult.h>
 
 namespace opencog
 {
@@ -247,7 +247,7 @@ class Request
 {
 protected:
     CogServer&             _cogserver;
-    RequestResult*         _requestResult;
+    ConsoleSocket*         _console;
     std::list<std::string> _parameters;
 
 public:
@@ -268,16 +268,15 @@ public:
     /** Send the command output back to the client. */
     virtual void send(const std::string& msg) const;
 
-    /** Stores the RequestResult that makes interface with the requesting client. */
-    virtual void setRequestResult(RequestResult*);
-    virtual RequestResult *getRequestResult(void) {return _requestResult; }
+    /** Stores the socket on which to return results. */
+    virtual void set_console(ConsoleSocket*);
+    virtual ConsoleSocket *get_console(void) { return _console; }
 
     /** sets the command's parameter list. */
-    virtual void setParameters(const std::list<std::string>& params);
+    virtual void setParameters(const std::list<std::string>&);
 
     /** adds a parameter to the commands parameter list. */
-    virtual void addParameter(const std::string& param);
-
+    virtual void addParameter(const std::string&);
 };
 
 /** @}*/

@@ -25,10 +25,10 @@
 #ifndef _OPENCOG_CONSOLE_SOCKET_H
 #define _OPENCOG_CONSOLE_SOCKET_H
 
+#include <condition_variable>
+#include <mutex>
 #include <string>
-#include <tr1/memory>
 
-#include <opencog/cogserver/server/RequestResult.h>
 #include <opencog/cogserver/shell/GenericShell.h>
 #include <opencog/cogserver/server/ServerSocket.h>
 
@@ -37,9 +37,6 @@ namespace opencog
 /** \addtogroup grp_server
  *  @{
  */
-
-class Request;
-
 
 /**
  * This class implements the ServerSocket that handles the primary
@@ -55,11 +52,23 @@ class Request;
  * the command prompt can be sent to the client immediately, while the
  * request itself is processed 'asynchronously'.
  */
-class ConsoleSocket : public ServerSocket,
-                      public RequestResult
+class ConsoleSocket : public ServerSocket
 {
 private:
     GenericShell *_shell;
+
+    // We need the use-count and the condition variables because
+    // somehow the design of either this subsystem, or boost::asio
+    // is broken. Basically, the boost::asio code calls the destructor
+    // for ConsoleSocket while there are still requests outstanding
+    // in another thread.  We have to stall the destructor until all
+    // the in-flight requests are complete; we use the condition 
+    // variable to do this. But really, something somewhere is broken
+    // or mis-designed. Not sure what/where; this code is too
+    // complicated.
+    unsigned int _use_count;
+    std::mutex _mtx;
+    std::condition_variable _cv;
 
 protected:
 
@@ -92,6 +101,9 @@ public:
      */
     ConsoleSocket(void);
     ~ConsoleSocket();
+
+    void get() { std::unique_lock<std::mutex> lck(_mtx); _use_count++; }
+    void put() { std::unique_lock<std::mutex> lck(_mtx); _use_count--; _cv.notify_all(); }
 
     /**
      * OnRequestComplete: called when a request has finished. It

@@ -45,8 +45,8 @@ bool ShutdownRequest::execute()
     send(oss.str());
 
     _cogserver.stop();
-    _requestResult->Exit();
-    _requestResult = NULL;
+    _console->Exit();
+    _console = NULL;
 
     return true;
 }
