@@ -118,7 +118,7 @@ const std::string& GenericShell::get_prompt(void)
  */
 void GenericShell::set_socket(ConsoleSocket *s)
 {
-	if (socket) socket->SetShell(NULL);
+	OC_ASSERT(socket==nullptr, "Shell already associated with socket!");
 
 	socket = s;
 	socket->SetShell(this);

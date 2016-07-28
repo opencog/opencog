@@ -168,6 +168,8 @@ void ServerSocket::handle_connection(void)
         }
     }
 
+    logger().debug("ServerSocket::exiting handle_connection()");
+
     std::lock_guard<std::mutex> lock(_asio_crash);
     try
     {

@@ -63,6 +63,8 @@ ConsoleSocket::~ConsoleSocket()
 
     // If there's a shell, kill it.
     if (_shell) delete _shell;
+
+    logger().debug("[ConsoleSocket] destructor finished");
 }
 
 // Some random RFC 854 characters
