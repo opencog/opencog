@@ -37,7 +37,10 @@ ServerSocket::ServerSocket(void) :
 
 ServerSocket::~ServerSocket()
 {
-   logger().debug("ServerSocket::~ServerSocket()");
+    logger().debug("ServerSocket::~ServerSocket()");
+
+    delete _socket;
+    _socket = nullptr;
 }
 
 void ServerSocket::Send(const std::string& cmd)
@@ -184,9 +187,6 @@ void ServerSocket::handle_connection(void)
             logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
         }
     }
-
-    delete _socket;
-    _socket = nullptr;
 
     delete this;
 }
