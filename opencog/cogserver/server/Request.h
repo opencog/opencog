@@ -30,8 +30,8 @@
 #include <list>
 #include <string>
 
+#include <opencog/cogserver/server/ConsoleSocket.h>
 #include <opencog/cogserver/server/Factory.h>
-#include <opencog/cogserver/server/RequestResult.h>
 
 namespace opencog
 {
@@ -146,24 +146,24 @@ class CogServer;
                                                  shell_cmd,           \
                                                  hidden);             \
               return _cci;                                            \
-    }                                                                 \
-    do_cmd##Request(CogServer& cs) : Request(cs) {};                  \
-    virtual ~do_cmd##Request() {};                                    \
-    virtual bool execute(void) {                                      \
-        logger().debug("[" cmd_str " Request] execute");              \
+          }                                                           \
+          do_cmd##Request(CogServer& cs) : Request(cs) {};            \
+          virtual ~do_cmd##Request() {};                              \
+          virtual bool execute(void) {                                \
+              logger().debug("[" cmd_str " Request] execute");        \
                                                                       \
-        mod_type* mod =                                               \
-            static_cast<mod_type *>(_cogserver.getModule(             \
-                 "opencog::" #mod_type));                             \
+              mod_type* mod =                                         \
+                  static_cast<mod_type *>(_cogserver.getModule(       \
+                       "opencog::" #mod_type));                       \
                                                                       \
-        std::string rs = mod->do_cmd(this, _parameters);              \
-        send(rs);                                                     \
-        return true;                                                  \
-    }                                                                 \
-    virtual bool isShell(void) {                                      \
-        return info().is_shell;                                       \
-    }                                                                 \
-};                                                                    \
+              std::string rs = mod->do_cmd(this, _parameters);        \
+              send(rs);                                               \
+              return true;                                            \
+          }                                                           \
+          virtual bool isShell(void) {                                \
+              return info().is_shell;                                 \
+          }                                                           \
+    };                                                                \
                                                                       \
     /* Declare the factory to manage this request */                  \
     Factory<do_cmd##Request, Request> do_cmd##Factory;                \
@@ -245,9 +245,11 @@ class CogServer;
  */
 class Request
 {
+private:
+    ConsoleSocket*         _console;
+
 protected:
     CogServer&             _cogserver;
-    RequestResult*         _requestResult;
     std::list<std::string> _parameters;
 
 public:
@@ -266,18 +268,17 @@ public:
     virtual bool isShell(void) = 0;
 
     /** Send the command output back to the client. */
-    virtual void send(const std::string& msg) const;
+    void send(const std::string& msg) const;
 
-    /** Stores the RequestResult that makes interface with the requesting client. */
-    virtual void setRequestResult(RequestResult*);
-    virtual RequestResult *getRequestResult(void) {return _requestResult; }
+    /** Stores the socket on which to return results. */
+    void set_console(ConsoleSocket*);
+    ConsoleSocket *get_console(void) const { return _console; }
 
     /** sets the command's parameter list. */
-    virtual void setParameters(const std::list<std::string>& params);
+    virtual void setParameters(const std::list<std::string>&);
 
     /** adds a parameter to the commands parameter list. */
-    virtual void addParameter(const std::string& param);
-
+    virtual void addParameter(const std::string&);
 };
 
 /** @}*/

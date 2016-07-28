@@ -36,6 +36,7 @@ using namespace opencog;
 
 ConsoleSocket::ConsoleSocket(void)
 {
+    _use_count = 0;
     _shell = nullptr;
 }
 
@@ -62,6 +63,8 @@ ConsoleSocket::~ConsoleSocket()
 
     // If there's a shell, kill it.
     if (_shell) delete _shell;
+
+    logger().debug("[ConsoleSocket] destructor finished");
 }
 
 // Some random RFC 854 characters
@@ -193,7 +196,7 @@ void ConsoleSocket::OnLine(const std::string& line)
         }
     }
 
-    request->setRequestResult(this);
+    request->set_console(this);
     request->setParameters(params);
 
     // We only add the command to the processing queue

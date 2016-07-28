@@ -101,13 +101,17 @@ void BuiltinRequestsModule::init()
 
 // ====================================================================
 // Various flavors of closing the connection
-std::string BuiltinRequestsModule::do_exit(Request *req, std::list<std::string> args)
+std::string BuiltinRequestsModule::do_exit(Request* req, std::list<std::string> args)
 {
-    RequestResult* rr = req->getRequestResult();
-    if (rr) {
-        rr->Exit();
-        req->setRequestResult(NULL);
-    }
+    ConsoleSocket* con = req->get_console();
+    OC_ASSERT(con, "Bad request state");
+
+    con->Exit();
+
+    // After the exit, the pointer to the console will be invalid,
+    // so zero it out now, to avoid a bad dereference.  (Note that
+    // this call may trigger the ConsoleSocket dtor to run).
+    req->set_console(nullptr);
     return "";
 }
 

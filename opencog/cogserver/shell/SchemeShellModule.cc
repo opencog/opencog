@@ -52,13 +52,11 @@ SchemeShellModule::~SchemeShellModule()
  */
 std::string SchemeShellModule::shellout(Request *req, std::list<std::string> args)
 {
-	ConsoleSocket *s = dynamic_cast<ConsoleSocket*>(req->getRequestResult());
-	if (!s)
-		throw RuntimeException(TRACE_INFO, "Invalid RequestResult object"
-		       " for SchemeShellModule: a ConsoleSocket object was expected.");
+	ConsoleSocket *con = req->get_console();
+	OC_ASSERT(con, "Invalid Request object");
 
 	SchemeShell *sh = new SchemeShell();
-	sh->set_socket(s);
+	sh->set_socket(con);
 
 	bool hush = false;
 	if (!args.empty())

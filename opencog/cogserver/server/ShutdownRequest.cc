@@ -45,8 +45,11 @@ bool ShutdownRequest::execute()
     send(oss.str());
 
     _cogserver.stop();
-    _requestResult->Exit();
-    _requestResult = NULL;
+
+    ConsoleSocket* con = get_console();
+    OC_ASSERT(con, "Bad request state");
+    set_console(nullptr);
+    con->Exit();
 
     return true;
 }

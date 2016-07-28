@@ -5,13 +5,12 @@
 
 #include <opencog/cogserver/modules/python/PyMindAgent.h>
 #include <opencog/cogserver/server/CogServer.h>
-#include <opencog/cogserver/server/RequestResult.h>
 
 using std::string;
 
 using namespace opencog;
 
-class StringRequestResult : public RequestResult
+class StringRequestResult
 {
 public:
     string result;
@@ -108,7 +107,6 @@ public:
         TS_ASSERT_DIFFERS(pythonEvalRequest, (Request*) NULL);
         pythonEvalRequest->addParameter("print 'Hello'");
         StringRequestResult *pythonEvalRequestResult = new StringRequestResult();
-        pythonEvalRequest->setRequestResult(pythonEvalRequestResult);
 
         // Add request to queue.
         cogserver.pushRequest(pythonEvalRequest);
