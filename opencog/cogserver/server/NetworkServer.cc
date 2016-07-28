@@ -65,8 +65,16 @@ void NetworkServer::listen()
     printf("Listening on port %d\n", _port);
     while (_running)
     {
-        // The handle_connection() callback will delete this
-        // class, when the thread exits.
+        // The call to _acceptor.accept() will block this thread until
+        // a network connection is made. Thus, we defer the creation
+        // of the connection handler thread until after accept()
+        // returns.  However, the boost design violates RAII principles,
+        // so instead, what we do is to hand off the socket created here,
+        // to the ServerSocket class, which will delete it, when the
+        // connection socket closes (just before the connection handler
+        // thread exits).  That is why there is no delete of the *ss
+        // below, and that is why there is the weird self-delete at the
+        // end of ServerSocket::handle_connection().
         boost::asio::ip::tcp::socket* sock = new boost::asio::ip::tcp::socket(_io_service);
         _acceptor.accept(*sock);
 
