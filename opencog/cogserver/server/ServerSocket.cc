@@ -25,8 +25,9 @@
 
 #include <mutex>
 
-#include <opencog/cogserver/server/ServerSocket.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
+#include <opencog/cogserver/server/ServerSocket.h>
 
 using namespace opencog;
 
@@ -45,21 +46,18 @@ ServerSocket::~ServerSocket()
 
 void ServerSocket::Send(const std::string& cmd)
 {
-    if (_socket)
-    {
-        boost::system::error_code error;
-        boost::asio::write(*_socket, boost::asio::buffer(cmd),
-                           boost::asio::transfer_all(), error);
+    OC_ASSERT(_socket, "Use of socket after it's been closed!\n");
 
-        // The most likely cause of an error is that the remote side has
-        // closed the socket, and we just don't know it yet.  We should
-        // maybe not log those errors?
-        if (error)
-            logger().warn("ServerSocket::Send(): %s", error.message().c_str());
-    }
-    else
-        logger().warn("ServerSocket::Send(): cannot send '%s' "
-                      "because _socket is nullptr", cmd.c_str());
+    boost::system::error_code error;
+    boost::asio::write(*_socket, boost::asio::buffer(cmd),
+                       boost::asio::transfer_all(), error);
+
+    // The most likely cause of an error is that the remote side has
+    // closed the socket, even though we still had stuff to send.
+    // I beleive this is a ENOTCON errno, maybe its another one as well.
+    // Don't log these harmless errors.
+    if (error.value() != boost::system::errc::not_connected)
+        logger().warn("ServerSocket::Send(): %s", error.message().c_str());
 }
 
 // As far as I can tell, boost::asio is not actually thread-safe,
