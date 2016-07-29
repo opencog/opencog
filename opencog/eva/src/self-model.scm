@@ -326,9 +326,7 @@
 			; but not yet acknowledged...
 			(AbsentLink (EvaluationLink (PredicateNode "acked face")
 					(ListLink (VariableNode "$face-id"))))
-			; NOTE: The above is a copy of the DefinedPredicateNode
-			; "Did someone arrive?" but that dpn can't be used, b/c this dpn
-			; will return (stv 1 1) no matter what, if it is used instead.
+			; and is recognizable
 			(PresentLink (EvaluationLink (PredicateNode "name")
 					(ListLink
 					(VariableNode "$face-id")
