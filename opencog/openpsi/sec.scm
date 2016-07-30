@@ -82,3 +82,8 @@
 (define power (psi-create-sec "power"))
 (define adjustment (psi-create-sec "adjustment"))
 (define standards (psi-create-sec "standards"))
+
+; Temp for development, until this assignment happens in the create function
+; Create Stimulus-SEC Associations
+(define agent-state-power
+       (psi-create-stimulus-sec agent-state power .5))
