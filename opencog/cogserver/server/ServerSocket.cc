@@ -57,8 +57,8 @@ void ServerSocket::Send(const std::string& cmd)
     // I beleive this is a ENOTCON errno, maybe its another one as well.
     // Don't log these harmless errors.
     if (error.value() != boost::system::errc::success and
-        error.value() != boost::system::errc::not_connected and
-        error.value() != boost::system::errc::bad_descriptor)
+        error.value() != boost::asio::error::not_connected and
+        error.value() != boost::asio::error::bad_descriptor)
         logger().warn("ServerSocket::Send(): %s on thread 0x%x",
              error.message().c_str(), pthread_self());
 }
