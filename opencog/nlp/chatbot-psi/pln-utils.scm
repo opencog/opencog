@@ -20,8 +20,8 @@
 (define (add-to-pln-inferred-atoms s)
   (let* ((sl (cog-outgoing-set s))
          (ia (cog-outgoing-set (search-inferred-atoms)))
-         (slia (SetLink sl ia)))
-    (State pln-inferred-atoms slia)))
+         (slia (delete-duplicates (append sl ia))))
+    (State pln-inferred-atoms (SetLink slia))))
 
 ;; Return a list of pairs (inferred atom, name list) 
 (define (get-assoc-inferred-names)
