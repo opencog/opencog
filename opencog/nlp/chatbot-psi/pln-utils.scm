@@ -15,6 +15,14 @@
 (define (get-names atom-list)
   (map cog-name atom-list))
 
+;; Insert the elements of a given Set to the elements of the Set
+;; associated to the Anchor pln-inferred-atoms
+(define (add-to-pln-inferred-atoms s)
+  (let* ((sl (cog-outgoing-set s))
+         (ia (cog-outgoing-set (search-inferred-atoms)))
+         (slia (SetLink sl ia)))
+    (State pln-inferred-atoms slia)))
+
 ;; Return a list of pairs (inferred atom, name list) 
 (define (get-assoc-inferred-names)
   (let ((inferred-atoms-list (cog-outgoing-set (search-inferred-atoms)))
