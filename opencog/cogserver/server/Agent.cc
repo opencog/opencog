@@ -33,6 +33,10 @@ using namespace opencog;
 
 Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f)
 {
+#if 0
+This causes the cogserver to crash!
+See https://github.com/opencog/opencog/issues/2329
+
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE");
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE");
 
@@ -40,6 +44,7 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
     stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
     targetLTI = config().get_int("TARGET_LTI_FUNDS");
     ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
+#endif
 
     _attentionValue = AttentionValue::DEFAULT_AV();
 
