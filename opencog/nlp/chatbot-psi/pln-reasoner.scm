@@ -108,6 +108,12 @@
     (Implication (stv 0.51 0.0001)
        (Predicate "happy")
        (Predicate "free"))))
+(Word "healthy")
+(add-to-pln-inferred-atoms
+ (Set
+    (Implication (stv 0.51 0.0001)
+       (Predicate "happy")
+       (Predicate "healthy"))))
 
 ;; Peter is happy
 (Evaluation (stv 1 0.1)
