@@ -22,8 +22,4 @@
     (load-from-path "opencog/openpsi/updater.scm")
 )
 
-
-
-
-
 (export)
