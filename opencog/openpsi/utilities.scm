@@ -326,13 +326,14 @@
 		result
 		; else check if entity is an evaluation or predicate or schema
 		(let ((type (cog-type entity)))
-			(if (or (equal? type 'PredicateNode)
-				   (equal? type 'GroundedPredicateNode)
+			(if (or (equal? type 'GroundedPredicateNode)
 				   (equal? type 'DefinedPredicateNode))
 				(set! result (cog-evaluate! (Evaluation entity (List)))))
-			(if (or (equal? type 'SchemaNode)
+			(if (equal? type 'PredicateNode)
+				(set! result (cog-tv entity)))
+			(if (or ; (equal? type 'SchemaNode) ;FIXME SchemaNode not executable
             		(equal? type 'GroundedSchemaNode)
-            	    (equal? type 'DefinedSchemaeNode))
+                    (equal? type 'DefinedSchemaNode))
             	(set! result (cog-execute! (ExecutionOutput entity (List)))))
             (if (equal? type 'EvaluationLink)
                 (set! result (cog-evaluate! entity)))
@@ -478,5 +479,3 @@
 		                (set! rep-type statelink)))
 	            ;(format #t "Set value-rep type: ~a\n" rep-type)
 	            rep-type))))
-
-
