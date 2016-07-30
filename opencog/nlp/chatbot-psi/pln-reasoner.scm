@@ -82,13 +82,37 @@
 ;; Extra knowledge ;;
 ;;;;;;;;;;;;;;;;;;;;;
 
-;; Funny implies happy with some small above average strength
-(Word "funny")
+;; Add knowledge about happy. The strenght is set low so that the new
+;; inferred knowledge can get easily expressed.
+(Word "playful")
 (add-to-pln-inferred-atoms
  (Set
     (Implication (stv 0.51 0.0001)
        (Predicate "happy")
-       (Predicate "funny"))))
+       (Predicate "playful"))))
+(Word "funny")
+(add-to-pln-inferred-atoms
+ (Set
+    (Implication (stv 0.51 0.0001)
+       (Predicate "funny")
+       (Predicate "happy"))))
+(Word "pleasant")
+(add-to-pln-inferred-atoms
+ (Set
+    (Implication (stv 0.51 0.0001)
+       (Predicate "happy")
+       (Predicate "pleasant"))))
+(Word "free")
+(add-to-pln-inferred-atoms
+ (Set
+    (Implication (stv 0.51 0.0001)
+       (Predicate "happy")
+       (Predicate "free"))))
+
+;; Peter is happy
+(Evaluation (stv 1 0.1)
+   (Predicate "happy")
+   (Concept "Peter"))
 
 ;;;;;;;;;;;;;;;
 ;; L2S rules ;;
@@ -130,7 +154,7 @@
         (last-rec-id (get-last-rec-id))
         ;; rec-ids and names
         (rec-id-1 "20839")
-        (name-1 "Ben"))
+        (name-1 "Louis"))
     (cog-logger-debug "[PLN-Reasoner] last-sentence-id = ~a" last-sentence-id)
     (cog-logger-debug "[PLN-Reasoner] last-rec-id = ~a" last-rec-id)
     (StateLink (AnchorNode "last-recognized-face") (ConceptNode "20839"))
