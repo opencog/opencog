@@ -78,6 +78,18 @@
           (Concept person-id)
           sentence))))
 
+;;;;;;;;;;;;;;;;;;;;;
+;; Extra knowledge ;;
+;;;;;;;;;;;;;;;;;;;;;
+
+;; Funny implies happy with some small above average strength
+(Word "funny")
+(add-to-pln-inferred-atoms
+ (Set
+    (Implication (stv 0.51 0.01)
+       (Predicate "funny")
+       (Predicate "happy"))))
+
 ;;;;;;;;;;;;;;;
 ;; L2S rules ;;
 ;;;;;;;;;;;;;;;
@@ -395,10 +407,11 @@
 
     ;; Apply Implication direct evaluation (and put the result in
     ;; pln-inferred-atoms state)
-    (let ((direct-eval-outputs (cog-bind implication-direct-evaluation-rule)))
-      (State pln-inferred-atoms direct-eval-outputs)
-      (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
-                       direct-eval-outputs))
+    (let ((direct-eval-results (cog-bind implication-direct-evaluation-rule)))
+      (add-to-pln-inferred-atoms direct-eval-results))
+
+    (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
+                      (search-inferred-atoms))
 
     ;; sleep a bit, to not overload the CPU too much
     (cog-logger-debug "[PLN-Reasoner] Sleep for a second")
