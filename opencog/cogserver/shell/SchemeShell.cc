@@ -48,9 +48,6 @@ SchemeShell::SchemeShell(void)
 
 	// Set the inital atomspace for this thread.
 	SchemeEval::set_scheme_as(&cogserver().getAtomSpace());
-	evaluator->begin_eval();
-	evaluator->eval_expr("(setlocale LC_CTYPE \"\")");
-	evaluator->poll_result();
 }
 
 SchemeShell::~SchemeShell()
