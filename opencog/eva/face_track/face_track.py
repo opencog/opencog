@@ -24,7 +24,7 @@ import tf
 import math
 import logging
 
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, String
 from pi_face_tracker.msg import FaceEvent, Faces
 from blender_api_msgs.msg import Target
 
@@ -144,7 +144,8 @@ class FaceTrack:
 
 		# Which face to look at
 		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
-
+		rospy.Subscriber("/robot/perceived_text", String,
+			self.user_said_cb)
 		# Where to look
 		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
 			Target, queue_size=10)
@@ -234,7 +235,7 @@ class FaceTrack:
 		self.glance_at_face(msg.data, 0.5)
 
 	def snd1_cb(self,msg):
-		self.save_snd1(msg.position.x,msg.position.y,msg.position.z)
+		self.save_snd1(msg.pose.position.x,msg.pose.position.y,msg.pose.position.z)
 
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
@@ -242,9 +243,27 @@ class FaceTrack:
 	# Start tracking a face
 	def save_snd1(self,x,y,z):
 		#correct by translation and rotation for camera space
-		xc=x
-		yc=y
-		zc=z
+		r = [[0],[0],[0],[0]]
+		vs = [[x],[y],[z],[1]]
+		n=0
+		#fill cmat correctly from icp results
+		'''
+		  0.943789   0.129327   0.304204 0.00736024
+		  -0.131484   0.991228 -0.0134787 0.00895614
+		  -0.303278 -0.0272767   0.952513  0.0272001
+		  0          0          0          1
+		'''
+
+		cmat = [[0.943789,0.129327,0.304204,0.00736024],
+				[-0.131484,0.991228,-0.0134787,0.00895614],
+				[-0.303278,-0.0272767,0.952513,0.0272001],
+				[0, 0, 0, 1]]
+		for i in range(0,3):
+			for j in range(0,3):
+				r[i][0]+=cmat[i][j]*vs[j][0]
+		xc=r[0][0]
+		yc=r[1][0]
+		zc=r[2][0]
 		self.atomo.save_snd1(xc,yc,zc)
 
 	def add_face(self, faceid):
@@ -372,6 +391,9 @@ class FaceTrack:
 		return
 
 	# ----------------------------------------------------------
+
+	def user_said_cb(self,msg):
+		self.atomo.who_spoke(msg.data)
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,
