@@ -23,6 +23,8 @@
 #ifndef _OPENCOG_GENERIC_SHELL_H
 #define _OPENCOG_GENERIC_SHELL_H
 
+#include <condition_variable>
+#include <mutex>
 #include <string>
 #include <thread>
 
@@ -37,7 +39,7 @@
  *
  * If instead a module has only a small number of simple commands that
  * need to be implemented, then the DECLARE_CMD_REQUEST function, defined
- * in Request.h, provides a simpler and easier way implementing comands.
+ * in Request.h, provides a simpler and easier way implementing commands.
  */
 
 namespace opencog {
@@ -66,13 +68,20 @@ class GenericShell
 		std::thread* evalthr;
 		std::thread* pollthr;
 
+		// Concurrency handling
+		bool _eval_done;
+		std::condition_variable _cv;
+		std::mutex _mtx;
+		void start_eval();
+		void finish_eval();
+		void while_not_done();
+
 		virtual void thread_init(void);
 		virtual void line_discipline(const std::string &expr);
 		virtual void do_eval(const std::string &expr);
 
 		// Output handling.
 		bool poll_needed;
-		bool eval_done;
 		virtual void put_output(const std::string&);
 		virtual std::string poll_output();
 
