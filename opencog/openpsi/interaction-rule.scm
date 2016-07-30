@@ -50,10 +50,10 @@
 	strength)
 "
   Helper function to create the interaction rules. It is assumed that the
-  trigger and target store their current values in a StateLink by default, and if not are
-  evaluatable or executable with the result being the current value. If the
-  entity is an evaluatable predicate, current value of the entity is assumed to
-  be the strength of its evaluated truth value.
+  trigger and target store their current values in a StateLink by default, and
+  if not are evaluatable or executable with the result being the current value.
+  If the entity is an evaluatable predicate, current value of the entity is
+  assumed to be the strength of its evaluated truth value.
 
   Parameters:
   trigger-entity - the variable that when it changes triggers a change in target
@@ -64,9 +64,9 @@
     in the target.
     Value is in [-1,1].
     Positive value means target changes in the same direction as the trigger
-    Negative value means target changes in the opposite direction as trigger
-    Large magnitude means charge in trigger has a large effect on target value
-    Small magnitdue means change in trigger has small effect on target value
+    Negative value means target changes in the opposite direction as the trigger
+    Large magnitude means change in trigger has a large effect on target value
+    Small magnitude means change in trigger has small effect on target value
     0 would mean no change occurs in the target, rendering such a rule useless
 "
 	(define rule)
@@ -78,8 +78,8 @@
 			(else "error")))
 	(if (eq? pred-change-type-name "error")
 		(error (string-append "In function create-psi-interaction rule, "
-			"change-type parameter needs to be one of 'changed', 'increased' or "
-			"'decreased'. got: " change-type)))
+			"change-type parameter needs to be one of 'changed', 'increased' "
+			"or 'decreased'. got: " change-type)))
 	(if (or (< strength -1) (> strength 1))
         (error (string-append "In function create-psi-interaction rule, "
             "strength parameter needs to be in [-1,1]. got: "
@@ -104,7 +104,3 @@
 	;	strength target-entity rule)
 	rule
 )
-
-
-
-
