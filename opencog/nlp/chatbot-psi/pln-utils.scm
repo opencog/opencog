@@ -53,3 +53,8 @@
   (let* ((last-recognized-face (Anchor "last-recognized-face"))
          (results (cog-chase-link 'StateLink 'ConceptNode last-recognized-face)))
     (if (null? results) '() (first results))))
+
+(define (shuffle l)
+  (map cdr
+    (sort (map (lambda (x) (cons (random 1.0) x)) l)
+          (lambda (x y) (< (car x) (car y))))))
