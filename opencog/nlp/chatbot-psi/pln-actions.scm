@@ -59,7 +59,7 @@
            (iu-inter (lambda (x) (lset-intersection equal? x iu-names)))
            (not-null-iu-inter? (lambda (x) (not (null? (iu-inter (second x))))))
            (filtered-in (filter not-null-iu-inter? assoc-inferred-names))
-           (semantics-list (map first filtered-in))
+           (semantics-list (shuffle (map first filtered-in)))
            (semantics (select-highest-tv-semantics semantics-list))
            (semantics-type (cog-type semantics))
            (logic (if (equal? 'ImplicationLink semantics-type)
@@ -72,6 +72,7 @@
       ;; (cog-logger-debug "[PLN-Action] assoc-inferred-names = ~a"
       ;;                  assoc-inferred-names)
       ;; (cog-logger-debug "[PLN-Action] filtered-in = ~a" filtered-in)
+      ;; (cog-logger-debug "[PLN-Action] semantics-list = ~a" semantics-list)
       ;; (cog-logger-debug "[PLN-Action] semantics = ~a" semantics)
       ;; (cog-logger-debug "[PLN-Action] logic = ~a" logic)
       ;; (cog-logger-debug "[PLN-Action] sureal = ~a" (sureal logic))
