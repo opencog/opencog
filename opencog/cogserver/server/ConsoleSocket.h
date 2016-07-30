@@ -25,10 +25,10 @@
 #ifndef _OPENCOG_CONSOLE_SOCKET_H
 #define _OPENCOG_CONSOLE_SOCKET_H
 
+#include <condition_variable>
+#include <mutex>
 #include <string>
-#include <tr1/memory>
 
-#include <opencog/cogserver/server/RequestResult.h>
 #include <opencog/cogserver/shell/GenericShell.h>
 #include <opencog/cogserver/server/ServerSocket.h>
 
@@ -37,9 +37,6 @@ namespace opencog
 /** \addtogroup grp_server
  *  @{
  */
-
-class Request;
-
 
 /**
  * This class implements the ServerSocket that handles the primary
@@ -55,11 +52,30 @@ class Request;
  * the command prompt can be sent to the client immediately, while the
  * request itself is processed 'asynchronously'.
  */
-class ConsoleSocket : public ServerSocket,
-                      public RequestResult
+class ConsoleSocket : public ServerSocket
 {
 private:
     GenericShell *_shell;
+
+    // We need the use-count and the condition variables to avoid races
+    // between asynchronous socket closures and unsent replies. So, for
+    // example, the user may send a command, but then close the socket
+    // before the reply is sent.  The boost::asio code notices the
+    // closed socket, and ServerSocket::handle_connection() exits it's
+    // loop, and then tries to destruct this class and exit the thread
+    // that has been handling the socket i/o. We have to hold off this
+    // destruction, until all of the users of this class have completed
+    // thier work. We accomplish this with a use-count: each in-flight
+    // request increments the use-count, and then decrements it when done.
+    // The destructor can run only when the use-count has dropped to zero.
+    //
+    // Sockets with a shell on them will typically have a use-count of
+    // zero already; these use a different method of holding off the dtor.
+    // Basically, the shell dtor has to run first, before the
+    // ServerSocket::handle_connection() invokes this dtor.
+    unsigned int _use_count;
+    std::mutex _mtx;
+    std::condition_variable _cv;
 
 protected:
 
@@ -92,6 +108,9 @@ public:
      */
     ConsoleSocket(void);
     ~ConsoleSocket();
+
+    void get() { std::unique_lock<std::mutex> lck(_mtx); _use_count++; }
+    void put() { std::unique_lock<std::mutex> lck(_mtx); _use_count--; _cv.notify_all(); }
 
     /**
      * OnRequestComplete: called when a request has finished. It

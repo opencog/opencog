@@ -307,12 +307,21 @@
 
 (Define
     (DefinedPredicate "chatbot-eva-not-started?")
-    (Or (Equal (Set default-state) (Get (State chatbot-eva (Variable "$s"))))
-        (Equal (Set no-action-taken) (Get (State chatbot-eva (Variable "$s")))))
+    (process-not-started? chatbot-eva)
+)
+
+(Define
+    (DefinedPredicate "chatbot-eva-finished?")
+    (process-finished? chatbot-eva)
+)
+
+(Define
+    (DefinedPredicate "going-to-do-the-action?")
+    (Not (Equal (Set no-result) (Get (State chatbot-eva-action (Variable "$s")))))
 )
 
 (Define
     (DefinedPredicate "don't-know-how-to-do-it?")
     (Or (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List))
-        (Equal (Set no-action-taken) (Get (State chatbot-eva (Variable "$s")))))
+        (Equal (Set no-result) (Get (State chatbot-eva-action (Variable "$s")))))
 )

@@ -59,7 +59,7 @@ public:
     ServerSocket(void);
     virtual ~ServerSocket();
 
-    void set_socket(boost::asio::ip::tcp::socket*);
+    void set_connection(boost::asio::ip::tcp::socket*);
     void handle_connection(void);
 
     /**

@@ -7,7 +7,7 @@
 ;
 ; The interaction rules specify internal dynamic relationships of the form:
 ; "change in trigger-entity causes change in target-entity with strength s"
-; See interaction-rules.scm for more information
+; See interaction-rule.scm for more information
 ;
 ; The updater runs in a loop, and for each change in a trigger entity, it should
 ; execute each and every rule containing that trigger as an antecedent, and each
@@ -26,17 +26,17 @@
 (load "utilities.scm")
 (load "modulator.scm")
 (load "sec.scm")
-(load "entity-defs.scm")
-(load "interaction-rules.scm")
+;(load "entity-defs.scm")
+(load "interaction-rule.scm")
 
 (define logging #t)
 (define verbose #t)
-(define slo-mo #t)
+(define slo-mo #f)
 (define single-step #f)
 
 ; --------------------------------------------------------------
 ; Config Parameters
-; Todo: Add these to a config file
+; Todo: Move these to a config file
 
 ; Multiplier that can be tweaked to increase or decrease the sensitivity of
 ; interactactions between openpsi entities. Default is 1.
@@ -46,31 +46,62 @@
 ; targets.
 (define psi-max-strength-multiplier 5)
 
+; Number of steps after a new event has occurred to fire off the expression
+; callback. This is needed to allow the effects of interaction rules to
+; propagate through the system after an event has occurred.
+(define psi-expression-loop-delay 4)
+
 ; --------------------------------------------------------------
 
 ; Todo: implement these tables in the atomspace
 (define prev-value-table (make-hash-table 40))
 (define prev-most-recent-ts-table (make-hash-table 40))
+(define psi-event-detection-callbacks '())
 
 ; --------------------------------------------------------------
+;
+; Call back function for client to convert psi params to physiogical and
+; emotional expression.
+(define psi-expression-callback)
 
 (define psi-event-detected-pred (Predicate "psi-event-detected"))
-(define most-recent-occurrence-pred (Predicate "psi-most-recent-occurrence"))
-
+(define psi-event-at-loop-num-node (Concept "psi-event-at-loop-num"))
 
 ; List of entities that are antecedants in the interaction rules
 (define psi-monitored-entities '())
 (define psi-monitored-events '())
 
+
+; Todo: Change this to DSN atomese
+(define (psi-set-expression-callback! callback)
+"
+    Callback function that triggers emotion expression update.
+
+    This callback function is supplied by the client and gets called when
+    OpenPsi believes a change of emotion expression based on psi values would be
+    good to do (e.g., after a new event is detected and psi params have been
+    updated)
+"
+	(set! psi-expression-callback callback))
+
+
+(define-public (psi-set-event-callback! callback)
+"
+    Callback functions for event detection
+"
+	; Save callback function for event detection
+	; Todo: change this to DSN's?
+	(set! psi-event-detection-callbacks
+		(append psi-event-detection-callbacks (list callback))))
+
+; Todo: Add a general callback function that is called once each loop
+
 (define (psi-updater-init)
 "
   Initialization of the updater. Called by psi-updater-run.
 
-  Initializes list of monitered entities events and table of their previous
+  Initializes list of monitered entities and events, and table of their previous
   values.
-  Question: do we want to have the loading of the interaction rules happen here?
-      I think perhaps better to have load them when the code files are loaded
-      so errors can be caught then rather than at runtime.
 "
 	; Grab all variables in the antecedents of the interaction rules that are
 	; arguments to (Predicate "psi-changed") and put them in
@@ -80,8 +111,10 @@
 	(define evals-with-change-pred
 		(cog-filter-hypergraph psi-changed-eval? (Set rules)))
 
+
 	(if verbose (display "psi-updater-init\n"))
 
+    ; Init previous value table for the monitored entities
 	(for-each (lambda (eval-link)
 				(define key (gadr eval-link))
 				(define value (psi-get-number-value key))
@@ -91,9 +124,22 @@
 			  )
 			evals-with-change-pred)
 
-	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
+	; If we are logging for debugging, then add all the modulators and sec's to
+	; the list of entities that get monitored so they will be flagged as changed
+	; in the output.
+	; Todo: not sure if this is the best way to handle this
+	(if logging
+	    (begin
+            (set! psi-monitored-entities (delete-duplicates
+                (append (psi-get-modulators) (append (psi-get-secs)
+                psi-monitored-entities))))
+        )
+    )
 
-	; Event Detection
+	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
+	(if verbose (format #t "monitored entities: ~a\n" psi-monitored-entities))
+
+    ; Set most-recent timestamps for events
 	(set! psi-monitored-events (psi-get-monitored-events))
 	(if verbose (format #t "monitored events: ~a\n" psi-monitored-events))
 	(for-each (lambda (event)
@@ -103,10 +149,13 @@
 				;								(list event)))
 			  )
 			  psi-monitored-events)
-	;(set! psi-monitored-events (delete-duplicates psi-monitored-events))
 
+	; Set event detected loop count to 0
+	(psi-set-value! psi-event-at-loop-num-node 0)
 
-	;(for-each (get-value-and-store key) evals-with-change-pred)
+	(if logging
+		(let ((output-port (open-file "psilog.txt" "a")))
+			(format output-port "\n\n\n--- New Session ---\n\n")))
 
 	;(format #t "psi-evals-with-change-pred: ~a\n" evals-with-change-pred)
 
@@ -120,7 +169,7 @@
   At each step:
   (1a) Evaluate the monitored events and set their 'event-detected' predicates
    (1) Evaluate the monitored entities and set their 'changed' predicates, and
-       for each changed entity store it's value in a current-value-table (this,
+       for each changed entity store it's value in a value-at-step-start (this,
        or otherwise storing the change magnitude, is needed because the current
        value of a trigger entity might change because of application of a
        previous rule.)
@@ -134,7 +183,11 @@
 "
 	(define changed-params '())
 	(define detected-events '())
-	(define current-values-table (make-hash-table 20))
+	(define value-at-step-start (make-hash-table 20))
+
+	; These are used just for display highlighting for debug output
+    (define monitored-pau '())
+    (define changed-pau '())
 
 	(define (set-param-change-status param)
 		(define changed-tv)
@@ -147,19 +200,20 @@
 		(if (psi-change-in? param)
             (begin
                 (if verbose
-                    (format #t "\n*** Found change in : ~a\n" param))
+                    (format #t "\n*** Found change in : ~a   loop ~a\n" param
+                        psi-updater-loop-count))
                 (set! changed-params
                     (append changed-params (list param)))
                 (set! previous-val (hash-ref prev-value-table param))
                 (set! current-val (psi-get-number-value param))
-                (format #t "previous: ~a  current: ~a\n" previous-val
-                    current-val)
+                (if verbose
+                    (format #t "previous: ~a  current: ~a\n" previous-val
+                        current-val))
                 ;Todo: If previous-val was #f (iow not set), assume previous
-                ;      value to be 0? Doing that for now, but not sure if this is
-                ;      best.
+                ;value to be 0? Doing that for now, but not sure if this is best.
                 (if (eq? previous-val #f)
                     (set! previous-val 0))
-                (hash-set! current-values-table param
+                (hash-set! value-at-step-start param
                     (psi-get-number-value param))
                 (set! changed-tv (stv 1 1))
                 (if (> current-val previous-val)
@@ -201,7 +255,8 @@
         (if (not (equal? prev-most-recent-ts curr-most-recent-ts))
             (begin
                 (if verbose
-                    (format #t "\n*** Detected event occurrence: ~a\n" event))
+                    (format #t "\n*** Detected event occurrence: ~a  loop ~a\n"
+                        event psi-updater-loop-count))
                 (set! detected-events
                     (append detected-events (list event)))
 
@@ -213,56 +268,81 @@
 		)
 	)
 
-	(define (display-with-highting var)
-		; add astericks to highlight changed values
-		(if (find (equal? var) changed-params)
-			(format "~1,1f" (psi-get-number-value var))
-			(format "~1,1f" (psi-get-number-value var))))
-
-;    (define changed-events '())
+	(define (highlight-display var)
+        ; add astericks to highlight changed values
+        (if (or (member var changed-params)
+                (member var changed-pau))
+            (format #f "*~1,2f*" (psi-get-number-value var))
+            (format #f "~1,2f" (psi-get-number-value var))))
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 
 	; Event Detection
+	; First call the event detection callback functions
+	;(format #t "psi-event-detection-callbacks: ~a\n"
+	;	psi-event-detection-callbacks)
+    (for-each (lambda (f) (apply f '())) psi-event-detection-callbacks)
+
 	; Evaluate the monitored events and set "new-event" predicates
 	; This needs to happen before evaluating the monitored params so the
-	; new-event predicates can are set beforehand.
+	; new-event predicates are set beforehand.
 	(for-each set-new-event-status psi-monitored-events)
-
-
-
-	(if logging
-		(let ((output-port (open-file "psilog.txt" "a")))
-				(format output-port
-					(string-append "-------------------------------------------"
-						"------------------------ Loop ~a\n")
-					psi-updater-loop-count)
-				(format output-port
-					(string-append
-						"speech: ~1,1f  new-face: ~1,1f  "
-						;"speech: ~a  new-face: ~a  "
-						"pos-dialog: ~1,1f  neg-dialog: ~1,1f  "
-						"\n\n"
-						"arousal: ~1,1f  pos-valence: ~1,1f  neg-valence: ~1,1f  "
-						"agent power: ~1,1f  voice: ~1,1f  "
-						"\n")
-					;(display-with-highlighting speech-giving-starts)
-					(psi-get-number-value speech-giving-starts)
-					(psi-get-number-value new-face)
-					(psi-get-number-value positive-sentiment-dialog)
-					(psi-get-number-value negative-sentiment-dialog)
-					(psi-get-number-value arousal)
-					(psi-get-number-value pos-valence)
-					(psi-get-number-value neg-valence)
-					(psi-get-number-value agent-state-power)
-					(psi-get-number-value voice-width)
-				)
-				(close-output-port output-port)))
 
 	; Evaluate the monitored params and set "changed" predicates accordingly
 	(set! changed-params '())
 	(for-each set-param-change-status psi-monitored-entities)
 	;(format #t "\nchanged-params: ~a\n\n" changed-params)
+
+	; Check for changed PAUs, just for highlighting in test output
+	; Todo: Change this to a callback function
+	(set! monitored-pau (list voice-width))
+	(for-each (lambda (pau)
+			    (let* ((previous (hash-ref prev-value-table pau))
+                       (current (psi-get-number-value pau)))
+                    ;(format #t "pau: ~a  prev: ~a  current: ~a\n" pau previous
+                    ;    current)
+                    ; if previous is #f, means it has not been set yet
+                    (if (equal? previous #f)
+                        (begin
+                            (hash-set! prev-value-table pau current)
+	                        (set! previous current)))
+                    (if (not (= previous current))
+                        (begin
+							(set! changed-pau (append changed-pau (list pau)))
+							(hash-set! value-at-step-start pau current)
+						))))
+			monitored-pau)
+			;(format #t "Changed PAU's: ~a\n" changed-pau)
+
+	(if logging
+	    (if (or (not (null? changed-params))
+	            (not (null? detected-events))
+	            (not (null? changed-pau)))
+		    (let ((output-port (open-file "psilog.txt" "a")))
+				(format output-port
+					(string-append "-------------------------------------------"
+						"-------------------------------- Loop ~a\n")
+					psi-updater-loop-count)
+
+				(format output-port
+					(string-append
+                        "speech: ~a  new-face: ~a  "
+						"pos-dialog: ~a  neg-dialog: ~a  "
+						"\n\n"
+						"arousal: ~a  pos-valence: ~a  neg-valence: ~a  "
+						"agent power: ~a  voice: ~a  "
+						"\n\n")
+					(highlight-display speech-giving-starts)
+                    (highlight-display new-face)
+                    (highlight-display positive-sentiment-dialog)
+                    (highlight-display negative-sentiment-dialog)
+                    (highlight-display arousal)
+                    (highlight-display pos-valence)
+                    (highlight-display neg-valence)
+                    (highlight-display agent-state-power)
+                    (highlight-display voice-width)
+				)
+				(close-output-port output-port))))
 
 	; grab and evaluate the interaction rules
 	; todo: Could optimize by only calling rules containing the changed params
@@ -270,11 +350,40 @@
 		(map psi-evaluate-interaction-rule rules)
 	)
 
+	; Have OpenPsi trigger emotion expression updates after events are detected
+	; that impact modulator and sec variables
+	; Trigger an expression update after n loop steps have occurred following an
+	; event occurrence.
+	(let ((event-at-loop-num
+				(psi-get-number-value psi-event-at-loop-num-node)))
+		;(format #t "\nevent-at-loop-num: ~a\n" event-at-loop-num)
+		(if (= event-at-loop-num 0)
+			; If a new event has been detected, set the loop count for it.
+			; Todo: probably want to account for "overlapping" events here
+			(if (> (length detected-events) 0)
+				(psi-set-value! psi-event-at-loop-num-node psi-updater-loop-count))
+
+			; else, event at loop count is already set, so check if it's time
+			; to fire off the expression callback
+            (if (= (+ event-at-loop-num psi-expression-loop-delay)
+                   psi-updater-loop-count)
+                (begin
+					(if (not (unspecified? psi-expression-callback))
+						(apply psi-expression-callback '()))
+					(psi-set-value! psi-event-at-loop-num-node 0)))))
+
 	; Update prev-value-table entries for the changed (monitored) params
 	(for-each (lambda (param)
-					(define value (hash-ref current-values-table param))
+					(define value (hash-ref value-at-step-start param))
 					(hash-set! prev-value-table param value))
 			  changed-params)
+
+	; Update prev-value-table entries for the changed pau's
+	;(This is just for log highlighint for testing)
+	(for-each (lambda (pau)
+					(define value (hash-ref value-at-step-start pau))
+					(hash-set! prev-value-table pau value))
+			  changed-pau)
 
 	; Set detected events value to 0, since any particular event instance
 	; should fire rules for only one step (could also do this at the beginning
@@ -285,6 +394,7 @@
 			detected-events)
 
 	(psi-pause)
+	; This didn't seem to work well
 	(if single-step
 		(psi-updater-halt))
 	(stv 1 1)
@@ -319,8 +429,8 @@
 	(define slope)
 	(if verbose (begin
 		(display "\n------------------------------------------------------\n")
-		(format #t "adjust-psi-var-level   target: ~a   trigger: ~a"
-			target trigger)))
+		(format #t "adjust-psi-var-level   target: ~a   trigger: ~a    loop: ~a\n"
+			target trigger psi-updater-loop-count)))
 	(let* ((current-value (psi-get-number-value target))
 		   (trigger-change (psi-get-change-magnitude trigger))
 		  )
@@ -370,7 +480,7 @@
 		; Increasing slope increases the degree change at all levels
 		(set! slope 10000)
 		;(format #t "current value: ~a\n" current-value)
-; TODO: handle current value = #f (or not number in general)
+        ; TODO: handle current value = #f (or not number in general)
 		; finagle the extreme cases because the curve is not exactly how we want
 		(if (> alpha 0)
 			(if (>= alpha .5)
@@ -432,18 +542,20 @@
     (let* ((previous (hash-ref prev-value-table target))
            (current (psi-get-number-value target)))
 
+        ; If no previous value set, attempt to set it based on current
+        (if (equal? previous #f)
+            (hash-set! prev-value-table target current))
+
         ;(format #t "previous value: ~a   current value: ~a\n" previous current)
         (if (and
                 ; current value is defined
                 (not (equal? #f current))
+                (not (equal? #f previous))
                 (not (= previous current))
                 (not (and (equal? previous #f)
                           (= current 0))))
             #t
             #f
-            ; from when function was called as a GPN
-            ;(stv 1 1)
-            ;(stv 0 1)
         )
     )
 )
@@ -520,14 +632,14 @@
     (cog-get-state-value
         (List
             event
-            most-recent-occurrence-pred)))
+            psi-most-recent-occurrence-pred)))
 
 ; --------------------------------------------------------------
 ; Load the events and interaction rules
 ; Todo: This should be a config setting to specify the rule set or a list of
 ;       rulesets in scheme.
 (load "event.scm")
-(load "mock-interaction-rules.scm")
+;(load "mock-interaction-rules.scm")
 
 ; --------------------------------------------------------------
 ; Updater Loop Control
@@ -556,7 +668,7 @@
     ; todo: is this needed?
     (define pause-time 100000)
     (if slo-mo
-        (set! pause-time 1500000))
+        (set! pause-time 1000000))
     (usleep pause-time))
 
 
@@ -601,24 +713,35 @@
     (cog-set-tv! updater-continue-pred (stv 0 1))
 )
 
+; ------------------------------------------------------------------
+; THIS IS TEMPORARY FOR DEVELOPMENT/TESTING - PAU'S WILL NOT LIVE IN THIS DICTORY
+; PAU Predicates
+; Actually these will be defined somewhere else in the system
+(define pau-prefix-str "PAU: ")
+(define (create-pau name initial-value)
+	(define pau
+		(Predicate (string-append pau-prefix-str name)))
+	(Inheritance
+		pau
+		(Concept "PAU"))
+	(psi-set-value! pau initial-value)
+	;(hash-set! prev-value-table pau initial-value)
+	pau)
+
+(define voice-width
+	(create-pau "voice width" .2))
 
 
 ; --------------------------------------------------------------
 ; Shortcuts for dev use
 
-(define (new-event event)
-    (State
-        (List
-            event
-            most-recent-occurrence-pred)
-        (TimeNode (number->string (current-time)))))
+(define e psi-set-event-occurrence!)
 
 (define halt psi-updater-halt)
 (define-public h halt)
 (define-public r psi-updater-run)
-(define r1 speech->power)
-(define r2 power->voice)
-(define voice voice-width)
+;(define r1 speech->power)
+;(define r2 power->voice)
 (define value psi-get-number-value)
 (define rules (psi-get-interaction-rules))
 
@@ -643,13 +766,7 @@
 (define-public p agent-state-power)
 (define-public a arousal)
 
+(define voice voice-width)
 
-;(define (uupdate a x) (/ (- (expt a x) 1) (- a 1)))
-
-; (10000^(a*x) - 1) / (10000^a -1)
-;(define (update2 a x) (/ (- (expt 1000 (* a x)) 1) (- (expt 1000 a) 1)))
-
-
-; --------------------------------------------------------------
 
 

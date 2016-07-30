@@ -70,6 +70,7 @@ GenericShell::~GenericShell()
 {
 	if (evalthr)
 	{
+		logger().debug("[GenericShell] dtor, wait for eval threads.");
 		evalthr->join();
 		delete evalthr;
 		evalthr = nullptr;
@@ -77,10 +78,12 @@ GenericShell::~GenericShell()
 
 	if (pollthr)
 	{
+		logger().debug("[GenericShell] dtor, wait for writer threads.");
 		pollthr->join();
 		delete pollthr;
 		pollthr = nullptr;
 	}
+	logger().debug("[GenericShell] dtor finsihed.");
 }
 
 /* ============================================================== */
@@ -118,7 +121,7 @@ const std::string& GenericShell::get_prompt(void)
  */
 void GenericShell::set_socket(ConsoleSocket *s)
 {
-	if (socket) socket->SetShell(NULL);
+	OC_ASSERT(socket==nullptr, "Shell already associated with socket!");
 
 	socket = s;
 	socket->SetShell(this);

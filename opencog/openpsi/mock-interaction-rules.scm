@@ -4,7 +4,7 @@
 ; mock interaction rules for openpsi dynamics development
 
 ; The following change-predicate types have been defined in
-; interaction-rules.scm:
+; interaction-rule.scm:
 ;(define changed "changed")
 ;(define increased "increased")
 ;(define decreased "decreased")

@@ -36,7 +36,7 @@
 ;-------------------------------------------------------------------------------
 
 (define (call-chatbot-eva)
-    (State chatbot-eva sent-to-chatbot-eva)
+    (State chatbot-eva process-started)
 
     (begin-thread
         (imperative-process (get-input-sent-node))
