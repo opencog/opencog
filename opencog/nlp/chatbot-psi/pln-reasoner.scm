@@ -86,9 +86,9 @@
 (Word "funny")
 (add-to-pln-inferred-atoms
  (Set
-    (Implication (stv 0.51 0.01)
-       (Predicate "funny")
-       (Predicate "happy"))))
+    (Implication (stv 0.51 0.0001)
+       (Predicate "happy")
+       (Predicate "funny"))))
 
 ;;;;;;;;;;;;;;;
 ;; L2S rules ;;
