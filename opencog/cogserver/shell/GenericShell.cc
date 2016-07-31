@@ -64,21 +64,26 @@ GenericShell::GenericShell(void)
 	evalthr = nullptr;
 	pollthr = nullptr;
 	self_destruct = false;
+	_eval_done = true;
 }
 
 GenericShell::~GenericShell()
 {
 	if (evalthr)
 	{
-		logger().debug("[GenericShell] dtor, wait for eval threads.");
+		logger().debug("[GenericShell] dtor, wait for eval thread 0x%x.",
+		               evalthr->native_handle());
 		evalthr->join();
+		logger().debug("[GenericShell] dtor, joined eval thread 0x%x.",
+		               evalthr->native_handle());
 		delete evalthr;
 		evalthr = nullptr;
 	}
 
 	if (pollthr)
 	{
-		logger().debug("[GenericShell] dtor, wait for writer threads.");
+		logger().debug("[GenericShell] dtor, wait for writer thread 0x%x.",
+		               pollthr->native_handle());
 		pollthr->join();
 		delete pollthr;
 		pollthr = nullptr;
@@ -382,6 +387,36 @@ void GenericShell::line_discipline(const std::string &expr)
 }
 
 /* ============================================================== */
+// The problem being adressed here is that the shell destructor
+// can start running (because the socket was closed) before the
+// evaluator has even started running. This is not really a
+// problem for this class; however, if a derived class
+// (specifically, the SchemeShell) is destroyed before it has a
+// chance to run thread_init() during evaluation, then crashes
+// will result (in this case, because the atomspace was not set).
+
+void GenericShell::start_eval()
+{
+	OC_ASSERT(_eval_done, "Bad evaluator flag state!");
+	std::unique_lock<std::mutex> lck(_mtx);
+	_eval_done = false;
+}
+
+void GenericShell::finish_eval()
+{
+	OC_ASSERT(not _eval_done, "Bad evaluator flag state!");
+	std::unique_lock<std::mutex> lck(_mtx);
+	_eval_done = true;
+	_cv.notify_all();
+}
+
+void GenericShell::while_not_done()
+{
+	std::unique_lock<std::mutex> lck(_mtx);
+	while (not _eval_done) _cv.wait(lck);
+}
+
+/* ============================================================== */
 /**
  * Evaluate the expression. Assumes line discipline was already done.
  */
@@ -412,7 +447,7 @@ void GenericShell::do_eval(const std::string &input)
 		pollthr = nullptr;
 	}
 
-	eval_done = false;
+	start_eval();
 	poll_needed = true;
 	evaluator->begin_eval(); // must be called in same thread as poll_result
 
@@ -454,8 +489,8 @@ std::string GenericShell::poll_output()
 		return result;
 
 	// If we are here, the evaluator is done. Return shell prompts.
-	if (eval_done) return "";
-	eval_done = true;
+	if (_eval_done) return "";
+	finish_eval();
 
 	if (evaluator->input_pending())
 	{

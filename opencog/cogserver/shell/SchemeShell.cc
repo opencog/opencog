@@ -48,13 +48,15 @@ SchemeShell::SchemeShell(void)
 
 	// Set the inital atomspace for this thread.
 	SchemeEval::set_scheme_as(&cogserver().getAtomSpace());
-	evaluator->begin_eval();
-	evaluator->eval_expr("(setlocale LC_CTYPE \"\")");
-	evaluator->poll_result();
 }
 
 SchemeShell::~SchemeShell()
 {
+	// We must stall until after the evaluator has finished
+	// evaluating. Otherwise, the thread_init() method (below)
+	// might never get a chance to run, leading to a NULL
+	// atomspace, leading to a crash.  Bug #2328.
+	while_not_done();
 }
 
 /**
