@@ -270,10 +270,14 @@
 
 	(define (highlight-display var)
         ; add astericks to highlight changed values
-        (if (or (member var changed-params)
-                (member var changed-pau))
-            (format #f "*~1,2f*" (psi-get-number-value var))
-            (format #f "~1,2f" (psi-get-number-value var))))
+        (define value (psi-get-number-value var))
+        (if (number? value)
+            (if (or (member var changed-params)
+                    (member var changed-pau))
+                (format #f "*~1,2f*" value)
+                (format #f "~1,2f" value))
+            ; value is not a number, just return it
+            value))
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 
