@@ -387,7 +387,13 @@
 		(cond
 			((equal? value-rep-type statelink) (State entity (Number value)))
 			((equal? value-rep-type evaluatable)
-				(Evaluation entity (List) (stv value 1)))
+			    (if (equal? (cog-type entity) 'PredicateNode)
+			        ; If PredicateNode, then set node TV
+			        (cog-set-tv! entity (stv value 1))
+			        ; else wrap it in an EvaluationLink
+			        ; Todo: this will probably need to be changed to handle
+			        ; arguments.
+				    (Evaluation entity (List) (stv value 1))))
 			((equal? value-rep-type executable)
 				(ExecutionOutput entity (List) (stv value 1)))
 			(else (error (string-append "In psi-set-value! encountered undefined"
