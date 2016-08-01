@@ -331,8 +331,7 @@
 				(set! result (cog-evaluate! (Evaluation entity (List)))))
 			(if (equal? type 'PredicateNode)
 				(set! result (cog-tv entity)))
-			(if (or ; (equal? type 'SchemaNode) ;FIXME SchemaNode not executable
-            		(equal? type 'GroundedSchemaNode)
+			(if (or (equal? type 'GroundedSchemaNode)
                     (equal? type 'DefinedSchemaNode))
             	(set! result (cog-execute! (ExecutionOutput entity (List)))))
             (if (equal? type 'EvaluationLink)

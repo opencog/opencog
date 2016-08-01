@@ -717,6 +717,8 @@
 ; THIS IS TEMPORARY FOR DEVELOPMENT/TESTING - PAU'S WILL NOT LIVE IN THIS DICTORY
 ; PAU Predicates
 ; Actually these will be defined somewhere else in the system
+; PAU(Physiological Action Unit) is a kind of physiological command to the
+; robot.
 (define pau-prefix-str "PAU: ")
 (define (create-pau name initial-value)
 	(define pau
@@ -767,6 +769,3 @@
 (define-public a arousal)
 
 (define voice voice-width)
-
-
-
