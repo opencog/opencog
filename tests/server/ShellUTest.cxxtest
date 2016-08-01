@@ -34,14 +34,14 @@ void gargleblast(int tid, int secs)
 	for (int i=0; i<secs; i++)
 	{
 		char buf[1000];
-		sprintf(buf, "echo '(Evaluation (Predicate \"visible face\") (List (Number %d)))\n' | nc localhost 17333", i);
+		sprintf(buf, "echo '(Evaluation (Predicate \"visible face\") (List (Number %d)))\n' | nc -q 1 localhost 17333", i);
 		int rc = system(buf);
 		OC_ASSERT(rc==0, "system call failure");
 		usleep(500000);
 
 		if (20 <= i)
 		{
-			sprintf(buf, "echo '(cog-delete (Evaluation (Predicate \"visible face\") (List (Number %d))))\n' | nc localhost 17333", i-20);
+			sprintf(buf, "echo '(cog-delete (Evaluation (Predicate \"visible face\") (List (Number %d))))\n' | nc -q 1 localhost 17333", i-20);
 			rc = system(buf);
 			OC_ASSERT(rc==0, "system call failure");
 
