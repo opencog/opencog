@@ -29,7 +29,7 @@
 
 using namespace opencog;
 
-void gargleblast(int secs)
+void gargleblast(int tid, int secs)
 {
 	for (int i=0; i<secs; i++)
 	{
@@ -82,6 +82,9 @@ public:
 	void testMessaging()
 	{
 		csrv = new CogServer();
+		csrv->loadModules();
+		csrv->loadModule("libscheme-shell.so");
+		csrv->enableNetworkServer();
 		std::thread* main_loop = new std::thread(&CogServer::serverLoop, csrv);
 
 #define NT 20
@@ -89,7 +92,7 @@ public:
 		int j;
 		for (j=0; j<NT; j++)
 		{
-			pangalactic[j] = new std::thread(&gargleblast, 60);
+			pangalactic[j] = new std::thread(&gargleblast, j, 60);
 		}
 		for (j=0; j<NT; j++)
 		{
