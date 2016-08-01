@@ -1,0 +1,68 @@
+/*
+ * tests/server/ShellUTest.cxxtest
+ *
+ * Copyright (C) 2016 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <thread>
+
+#include <opencog/util/Config.h>
+#include <opencog/cogserver/server/CogServer.h>
+
+using namespace opencog;
+
+class ShellUTest :  public CxxTest::TestSuite
+{
+private:
+	CogServer* csrv;
+
+public:
+
+	ShellUTest()
+	{
+		logger().set_level(Logger::DEBUG);
+		//logger().set_print_to_stdout_flag(true);
+	}
+
+	~ShellUTest()
+	{
+		// erase the log file if no assertions failed
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp()
+	{
+		config().set("SERVER_PORT", "17333");
+	}
+
+	void tearDown()
+	{
+	}
+
+	void testMessaging()
+	{
+		csrv = new CogServer();
+		std::thread * main_loop = new std::thread(&CogServer::serverLoop, csrv);
+		sleep(10);
+		csrv->stop();
+		main_loop->join();
+		delete csrv;
+	}
+};
