@@ -439,6 +439,11 @@
 		   (trigger-change (psi-get-change-magnitude trigger))
 		  )
 
+		; If current value is not a number (e.g., #f for not previously set),
+		; set it to .5.
+		(if (not (number? current-value))
+		    (set! current-value .5))
+
 		; Determine normalized value for the alpha for the change function.
 		; Alpha is based on the strength of the interaction and the
 		; magnititude of change in the trigger.
