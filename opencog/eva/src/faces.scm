@@ -67,7 +67,7 @@
 ;; Display the current room state
 (define-public (show-visible-faces)
 	(define visible-face (PredicateNode "visible face"))
-	(filter (lambda(y) (equal? (cog-type y) 'ConceptNode))
+	(filter (lambda(y) (equal? (cog-type y) 'NumberNode))
 	(map (lambda (x) (car (cog-outgoing-set x)))
 	(cog-chase-link 'EvaluationLink 'ListLink visible-face))))
 
@@ -98,7 +98,7 @@
  the ROS tf2 will not be able to make the robot turn to look...
 "
 	(EvaluationLink (PredicateNode "visible face")
-		(ListLink (ConceptNode id))))
+		(ListLink (NumberNode id))))
 
 (define-public (make-mapped-face face-id x y z)
 "
