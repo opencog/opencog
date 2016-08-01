@@ -306,7 +306,7 @@
                         (begin
                             (hash-set! prev-value-table pau current)
 	                        (set! previous current)))
-                    (if (not (= previous current))
+                    (if (not (equal? previous current))
                         (begin
 							(set! changed-pau (append changed-pau (list pau)))
 							(hash-set! value-at-step-start pau current)
