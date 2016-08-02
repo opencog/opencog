@@ -44,7 +44,7 @@ namespace opencog
 ImportanceDiffusionAgent::ImportanceDiffusionAgent(CogServer& cs) :
     Agent(cs)
 {
-    static const std::vector<std::string> defaultConfig({
+    setParameters({
         //! Default value that normalised STI has to be above before
         //! being spread
         "ECAN_DIFFUSION_THRESHOLD","0.0",
@@ -53,7 +53,6 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent(CogServer& cs) :
         "ECAN_ALL_LINKS_SPREAD","false",
         "",""
     });
-    setParameters(defaultConfig);
     spreadDecider = NULL;
 
     //! @todo won't respond to the parameters being changed later
