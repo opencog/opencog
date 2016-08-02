@@ -115,6 +115,18 @@ private:
     boost::signals2::connection conn;
 
 protected:
+    /**
+     * Set the agent's logger object
+     * Note, this will be deleted when this agent is.
+     * XXX FIXME This is a terrible API design! One must never use
+     * setters like this!  Let the agent own the logger, and if need be,
+     * it could be queried (e.g. to alter the debug level).
+     *
+     * @param l The logger to associate with the agent.
+     */
+    void setLogger(Logger*);
+    Logger* _log;
+
     CogServer& _cogserver;
 
     AtomSpace* _as;
@@ -165,16 +177,6 @@ protected:
 
     AttentionValue::sti_t stiFundsBuffer;
     AttentionValue::lti_t ltiFundsBuffer;
-
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
-    Logger *log; //!< Logger object for Agent
 
 public:
 

@@ -31,7 +31,8 @@
 
 using namespace opencog;
 
-Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f)
+Agent::Agent(CogServer& cs, const unsigned int f) :
+    _log(nullptr), _cogserver(cs), _frequency(f)
 {
 #if 0
 This causes the cogserver to crash!
@@ -75,22 +76,19 @@ Agent::~Agent()
     conn.disconnect();
     delete stimulatedAtoms;
 
-    if (log)
-        delete log;
+    if (_log) delete _log;
 }
 
-void Agent::setLogger(Logger* _log)
+void Agent::setLogger(Logger* l)
 {
-    if (log)
-        delete log;
-    log = _log;
+    if (_log) delete _log;
+    _log = l;
 }
 
 Logger* Agent::getLogger()
 {
-    return log;
+    return _log;
 }
-
 
 
 void Agent::setParameters(const std::string* params)
