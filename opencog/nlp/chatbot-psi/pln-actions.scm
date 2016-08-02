@@ -49,6 +49,8 @@
 ;; Fetch the semantics with the highest strength*confidence that
 ;; contains words in common with the query
 (define-public (do-pln-QA)
+    (cog-logger-debug "[PLN-Action] do-pln-QA")
+
     (State pln-qa process-started)
 
     (let* (
@@ -57,24 +59,29 @@
            (iu-inter (lambda (x) (lset-intersection equal? x iu-names)))
            (not-null-iu-inter? (lambda (x) (not (null? (iu-inter (second x))))))
            (filtered-in (filter not-null-iu-inter? assoc-inferred-names))
-           (semantics-list (map first filtered-in))
+           (semantics-list (shuffle (map first filtered-in)))
            (semantics (select-highest-tv-semantics semantics-list))
            (semantics-type (cog-type semantics))
            (logic (if (equal? 'ImplicationLink semantics-type)
                       (implication-to-evaluation-s2l (gar semantics)
                                                      (gdr semantics))
                       '()))
-           (word-list (if (null? logic) '() (first (sureal logic))))
+           (sureal-result (if (null? logic) '() (sureal logic)))
+           (word-list (if (null? sureal-result) '() (first sureal-result)))
           )
 
       (cog-logger-debug "[PLN-Action] assoc-inferred-names = ~a"
-                       assoc-inferred-names)
+                        assoc-inferred-names)
       (cog-logger-debug "[PLN-Action] filtered-in = ~a" filtered-in)
+      (cog-logger-debug "[PLN-Action] semantics-list = ~a" semantics-list)
       (cog-logger-debug "[PLN-Action] semantics = ~a" semantics)
       (cog-logger-debug "[PLN-Action] logic = ~a" logic)
+      (cog-logger-debug "[PLN-Action] sureal-result = ~a" sureal-result)
       (cog-logger-debug "[PLN-Action] word-list = ~a" word-list)
 
-      (State pln-answers (List (map Word word-list)))
+      (State pln-answers (if (null? word-list)
+                             no-result
+                             (List (map Word word-list))))
 
       (State pln-qa process-finished)
     )

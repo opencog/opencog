@@ -78,39 +78,134 @@
           (Concept person-id)
           sentence))))
 
+;;;;;;;;;;;;;;;;;;;;;
+;; Extra knowledge ;;
+;;;;;;;;;;;;;;;;;;;;;
+
+;; Add knowledge about happy. The strenght is set low so that the new
+;; inferred knowledge can get easily expressed.
+(Word "playful")
+(add-to-pln-inferred-atoms
+ (Set
+    (Implication (stv 0.51 0.0001)
+       (Predicate "happy")
+       (Predicate "playful"))))
+(Word "funny")
+(add-to-pln-inferred-atoms
+ (Set
+    (Implication (stv 0.51 0.0001)
+       (Predicate "funny")
+       (Predicate "happy"))))
+(Word "pleasant")
+(add-to-pln-inferred-atoms
+ (Set
+    (Implication (stv 0.51 0.0001)
+       (Predicate "happy")
+       (Predicate "pleasant"))))
+(Word "free")
+(add-to-pln-inferred-atoms
+ (Set
+    (Implication (stv 0.51 0.0001)
+       (Predicate "happy")
+       (Predicate "free"))))
+(Word "healthy")
+(add-to-pln-inferred-atoms
+ (Set
+    (Implication (stv 0.51 0.0001)
+       (Predicate "happy")
+       (Predicate "healthy"))))
+
+;; Peter is happy
+(Evaluation (stv 1 0.1)
+   (Predicate "happy")
+   (Concept "Peter"))
+
 ;;;;;;;;;;;;;;;
 ;; L2S rules ;;
 ;;;;;;;;;;;;;;;
+
+;; Rule to put a name on the last sentence using:
+;;
+;; 1. The state of "last-recognized-face"
+;;
+;; (State
+;;    (Anchor "last-recognized-face")
+;;    (Concept <rec-id>))
+;;
+;; 2. The state of input-utterance-sentence
+;;
+;; (State
+;;    input-utterance-sentence
+;;    (Sentence <sentence-id>))
+;;
+;; To produce
+;;
+;; (Evaluation
+;;    (Predicate "say")
+;;    (List
+;;       (Concept <rec-id>)
+;;       (Sentence <sentence-1>)))
+;;
+;; In addition to that it also produces
+;;
+;; (Evaluation
+;;    (Predicate "name")
+;;    (List
+;;       (Concept <rec-id>
+;;       (Word <name>)))
+;;
+;; with specific ids and names.
+(define (put-name-on-the-last-sentence)
+  (let ((last-sentence-id (get-last-sentence-id))
+        (last-rec-id (get-last-rec-id))
+        ;; rec-ids and names
+        (rec-id-1 "20839")
+        (name-1 "Louis"))
+    (cog-logger-debug "[PLN-Reasoner] last-sentence-id = ~a" last-sentence-id)
+    (cog-logger-debug "[PLN-Reasoner] last-rec-id = ~a" last-rec-id)
+    (StateLink (AnchorNode "last-recognized-face") (ConceptNode "20839"))
+    (Evaluation
+       (Predicate "name")
+          (List
+             (Concept rec-id-1)
+             (Word name-1)))
+    (if (or (null? last-sentence-id) (null? last-rec-id))
+        '()
+        (Evaluation
+           (Predicate "say")
+           (List
+              last-rec-id
+              last-sentence-id)))))
 
 ;; Rule to turn something like
 ;;
 ;; (Evaluation
 ;;    (Predicate "name")
 ;;    (List
-;;       (Concept "Person_215")
-;;       (Word "Ben")))
+;;       (Concept <rec-id>)
+;;       (Word <name>)))
 ;; (Evaluation
 ;;    (Predicate "say")
 ;;    (List
-;;       (Concept "Person_215")
-;;       (Sentence <sentence-1>)))
+;;       (Concept <rec-id>)
+;;       (Sentence <sentence-id-1>)))
 ;; (InheritanceLink
-;;    (Sentence <sentence-1>)
+;;    (Sentence <sentence-id-1>)
 ;;    (Concept <sentiment-1>))
 ;; ...
 ;; (Evaluation
 ;;    (Predicate "say")
 ;;    (List
-;;       (Concept "Person_215")
-;;       (Sentence <sentence-n>)))
+;;       (Concept <rec-id>)
+;;       (Sentence <sentence-id-n>)))
 ;; (InheritanceLink
-;;    (Sentence <sentence-n>)
+;;    (Sentence <sentence-id-n>)
 ;;    (Concept <sentiment-n>))
 ;;
 ;; into
 ;;
 ;; (Inheritance (stv s c)
-;;    (Concept "Ben")
+;;    (Concept <name>)
 ;;    (Concept "happy"))
 ;;
 ;; where s in the number of positive sentences divided by the number of
@@ -199,7 +294,9 @@
          (neg-count (count-sentiment-sentences Person (Concept "Negative")))
          (total-count (+ pos-count neg-count))
          ;; Calculate strength and confidence
-         (s (exact->inexact (/ pos-count total-count)))
+         (s (if (> total-count 0)
+                (exact->inexact (/ pos-count total-count))
+                0))
          (c (exact->inexact (/ total-count K))))
     ;; (cog-logger-debug "[PLN-Reasoner] pos-count = ~a" pos-count)
     ;; (cog-logger-debug "[PLN-Reasoner] pos-count = ~a" neg-count)
@@ -327,19 +424,30 @@
   (define (pln-loop)
     ;; Apply l2s rules
     (let (
+          (name-on-last-sentence (put-name-on-the-last-sentence))
           (sentiment-sentence-to-person-l2s-results
            (cog-bind sentiment-sentence-to-person-l2s-rule))
           (unary-predicate-speech-act-l2s-results
            (cog-bind unary-predicate-speech-act-l2s-rule)))
+      ;; (cog-logger-debug "[PLN-Reasoner] StateLinks = ~a" (cog-get-atoms 'StateLink))
+      ;; (cog-logger-debug "[PLN-Reasoner] PredicateNodes = ~a" (map cog-incoming-set (cog-get-atoms 'PredicateNode)))
+      (cog-logger-debug "[PLN-Reasoner] name-on-last-sentence = ~a" name-on-last-sentence)
       (cog-logger-debug "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a" sentiment-sentence-to-person-l2s-results)
       (cog-logger-debug "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a" unary-predicate-speech-act-l2s-results))
 
     ;; Apply Implication direct evaluation (and put the result in
     ;; pln-inferred-atoms state)
-    (let ((direct-eval-outputs (cog-bind implication-direct-evaluation-rule)))
-      (State pln-inferred-atoms direct-eval-outputs)
-      (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
-                       direct-eval-outputs))
+    (let* ((direct-eval-results (cog-bind implication-direct-evaluation-rule))
+          ;; Filter only inferred result containing "happy". This is a
+          ;; temporary hack to make it up for the lack of attentional
+          ;; allocation
+          (must-contain (list (Predicate "happy")))
+          (ff (lambda (x) (lset<= equal? must-contain (cog-get-all-nodes x))))
+          (filtered-results (filter ff (cog-outgoing-set direct-eval-results))))
+      (add-to-pln-inferred-atoms (Set filtered-results)))
+
+    (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
+                      (search-inferred-atoms))
 
     ;; sleep a bit, to not overload the CPU too much
     (cog-logger-debug "[PLN-Reasoner] Sleep for a second")
