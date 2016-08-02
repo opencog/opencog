@@ -598,6 +598,7 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
         for (auto p : get_module_paths()) {
             module_paths.push_back(p);
             module_paths.push_back(p + "/opencog");
+            module_paths.push_back(p + "/opencog/modules");
         }
     }
 

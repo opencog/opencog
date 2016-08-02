@@ -55,6 +55,10 @@ class GenericShell
 	private:
 		std::string pending_output;
 
+		ConsoleSocket* socket;
+		std::thread* evalthr;
+		std::thread* pollthr;
+
 	protected:
 		std::string abort_prompt;
 		std::string normal_prompt;
@@ -63,22 +67,19 @@ class GenericShell
 		bool show_prompt;
 		bool self_destruct;
 
-		ConsoleSocket* socket;
-		GenericEval* evaluator;
-		std::thread* evalthr;
-		std::thread* pollthr;
+		virtual GenericEval* get_evaluator(void) = 0;
+		virtual void thread_init(void);
+		virtual void line_discipline(const std::string &expr);
+		virtual void do_eval(const std::string &expr);
 
 		// Concurrency handling
 		bool _eval_done;
 		std::condition_variable _cv;
 		std::mutex _mtx;
+		GenericEval* _evaluator;
 		void start_eval();
 		void finish_eval();
 		void while_not_done();
-
-		virtual void thread_init(void);
-		virtual void line_discipline(const std::string &expr);
-		virtual void do_eval(const std::string &expr);
 
 		// Output handling.
 		bool poll_needed;

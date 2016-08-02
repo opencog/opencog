@@ -42,6 +42,7 @@ class SchemeShell : public GenericShell
 	public:
 		SchemeShell(void);
 		virtual ~SchemeShell();
+		virtual GenericEval* get_evaluator(void);
 };
 
 /** @}*/

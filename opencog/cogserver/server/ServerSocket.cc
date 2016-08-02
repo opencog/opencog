@@ -58,6 +58,7 @@ void ServerSocket::Send(const std::string& cmd)
     // Don't log these harmless errors.
     if (error.value() != boost::system::errc::success and
         error.value() != boost::asio::error::not_connected and
+        error.value() != boost::asio::error::broken_pipe and
         error.value() != boost::asio::error::bad_descriptor)
         logger().warn("ServerSocket::Send(): %s on thread 0x%x",
              error.message().c_str(), pthread_self());

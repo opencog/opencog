@@ -1,0 +1,106 @@
+/*
+ * tests/server/ShellUTest.cxxtest
+ *
+ * Copyright (C) 2016 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <thread>
+#include <unistd.h>
+
+#include <opencog/util/Config.h>
+#include <opencog/util/oc_assert.h>
+#include <opencog/cogserver/server/CogServer.h>
+
+using namespace opencog;
+
+void gargleblast(int tid, int secs)
+{
+	for (int i=0; i<secs; i++)
+	{
+		char buf[1000];
+		sprintf(buf, "echo '(Evaluation (Predicate \"visible face\") (List (Number %d)))\n' | nc -q 1 localhost 17333", i);
+		int rc = system(buf);
+		OC_ASSERT(rc==0, "system call failure");
+		usleep(500000);
+
+		if (20 <= i)
+		{
+			sprintf(buf, "echo '(cog-delete (Evaluation (Predicate \"visible face\") (List (Number %d))))\n' | nc -q 1 localhost 17333", i-20);
+			rc = system(buf);
+			OC_ASSERT(rc==0, "system call failure");
+
+		}
+		usleep(500000);
+	}
+}
+
+class ShellUTest :  public CxxTest::TestSuite
+{
+private:
+	CogServer* csrv;
+
+public:
+
+	ShellUTest()
+	{
+		logger().set_level(Logger::DEBUG);
+		//logger().set_print_to_stdout_flag(true);
+	}
+
+	~ShellUTest()
+	{
+		// erase the log file if no assertions failed
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp()
+	{
+		config().set("SERVER_PORT", "17333");
+	}
+
+	void tearDown()
+	{
+	}
+
+	void testMessaging()
+	{
+		csrv = new CogServer();
+		csrv->loadModules();
+		csrv->loadModule("libscheme-shell.so");
+		csrv->enableNetworkServer();
+		std::thread* main_loop = new std::thread(&CogServer::serverLoop, csrv);
+
+#define NT 20
+		std::thread* pangalactic[NT];
+		int j;
+		for (j=0; j<NT; j++)
+		{
+			pangalactic[j] = new std::thread(&gargleblast, j, 60);
+		}
+		for (j=0; j<NT; j++)
+		{
+			pangalactic[j]->join();
+		}
+		sleep(3);
+		csrv->stop();
+		main_loop->join();
+		delete csrv;
+	}
+};

@@ -31,14 +31,14 @@
 using namespace opencog;
 
 NetworkServer::NetworkServer(unsigned short port) :
-    _running(true),
+    _running(false),
     _port(port),
     _acceptor(_io_service,
         boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
 {
     logger().debug("[NetworkServer] constructor");
 
-    _service_thread = new std::thread(&NetworkServer::run, this);
+    run();
 }
 
 NetworkServer::~NetworkServer()
@@ -52,12 +52,19 @@ NetworkServer::~NetworkServer()
 
 void NetworkServer::stop()
 {
+    if (not _running) return;
     _running = false;
+
+    boost::system::error_code ec;
+    _acceptor.cancel(ec);
     _io_service.stop();
 
+    // Booost::asio hangs, despite the above.  Brute-force it to
+    // get it's head out of it's butt, and do the right thing.
+    pthread_cancel(_listener_thread->native_handle());
+
     _listener_thread->join();
-    _service_thread->join();
-    // delete _service_thread;
+    _listener_thread = nullptr;
 }
 
 void NetworkServer::listen()
@@ -86,15 +93,14 @@ void NetworkServer::listen()
 
 void NetworkServer::run()
 {
-    _listener_thread = new std::thread(&NetworkServer::listen, this);
+    if (_running) return;
+    _running = true;
 
-    while (_running)
-    {
-        try {
-            _io_service.run();
-        } catch (boost::system::system_error& e) {
-            logger().error("Error in boost::asio io_service::run() => %s", e.what());
-        }
-        usleep(50000); // avoids busy wait
+    try {
+        _io_service.run();
+    } catch (boost::system::system_error& e) {
+        logger().error("Error in boost::asio io_service::run() => %s", e.what());
     }
+
+    _listener_thread = new std::thread(&NetworkServer::listen, this);
 }
