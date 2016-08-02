@@ -44,8 +44,6 @@ SchemeShell::SchemeShell(void)
 
 	pending_prompt = "... ";
 
-	evaluator = SchemeEval::get_evaluator();
-
 	// Set the inital atomspace for this thread.
 	SchemeEval::set_scheme_as(&cogserver().getAtomSpace());
 }
@@ -57,6 +55,11 @@ SchemeShell::~SchemeShell()
 	// might never get a chance to run, leading to a NULL
 	// atomspace, leading to a crash.  Bug #2328.
 	while_not_done();
+}
+
+GenericEval* SchemeShell::get_evaluator(void)
+{
+	return SchemeEval::get_evaluator();
 }
 
 /**

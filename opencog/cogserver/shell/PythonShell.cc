@@ -57,18 +57,13 @@ PythonShell::~PythonShell()
     //	if (evaluator) delete evaluator;
 }
 
-/**
- * Register this shell with the console.
- */
-void PythonShell::set_socket(ConsoleSocket *s)
+GenericEval* PythonShell::get_evaluator(void)
 {
-    // Let the generic shell do the basic work.
-    GenericShell::set_socket(s);
-
     // We are using a singlton instance here, because the current
     // Python evaluator isn't thread safe.  If/when it does become
     // thread-safe, we should probably go multi-threaed, instead.
     if (!evaluator) evaluator = &PythonEval::instance();
+    return evaluator;
 }
 
 void PythonShell::eval(const std::string &expr)

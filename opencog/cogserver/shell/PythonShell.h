@@ -44,10 +44,12 @@ namespace opencog
 
 class PythonShell: public GenericShell
 {
+private:
+    GenericEval* evaluator;
 public:
     PythonShell(void);
     virtual ~PythonShell();
-    virtual void set_socket(ConsoleSocket *);
+    virtual GenericEval* get_evaluator(void);
     virtual void eval(const std::string &);
 };
 

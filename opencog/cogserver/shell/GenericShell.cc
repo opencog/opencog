@@ -59,12 +59,12 @@ GenericShell::GenericShell(void)
 	abort_prompt[2] = TIMING_MARK;
 	abort_prompt[3] = '\n';
 
-	evaluator = nullptr;
 	socket = nullptr;
 	evalthr = nullptr;
 	pollthr = nullptr;
 	self_destruct = false;
 	_eval_done = true;
+	_evaluator = nullptr;
 }
 
 GenericShell::~GenericShell()
@@ -110,7 +110,7 @@ const std::string& GenericShell::get_prompt(void)
 
 	// Use different prompts, depending on whether there is pending
 	// input or not.
-	if (evaluator->input_pending())
+	if (_evaluator and _evaluator->input_pending())
 	{
 		return pending_prompt;
 	}
@@ -165,6 +165,20 @@ static GenericShell* _redirector = nullptr;
 //
 void GenericShell::eval(const std::string &expr)
 {
+	// The first time through, there might not be an evaluator yet.
+	// Create one now. We cannot do this in the constructor, for a
+	// rather subtle reason: multiple calls to the constructor may
+	// run in the same thread, resulting in multiple shells sharing
+	// the same evaluator, which leads to a badness. We really want
+	// each unique instance of the shell to have it's own evaluator,
+	// and so we defer allocation until this point.
+	//
+	// The ctor runs in the main cogserver request-processor thread.
+	// Calling get_evaluator() there would always return the same
+	// single instance of the evaluator (because there can be at most
+	// just one evaluator per thread).
+	if (nullptr == _evaluator) _evaluator = get_evaluator();
+
 	// Work-around some printing madness. See issue
 	// https://github.com/opencog/atomspace/issues/629
 	// This is kind of complicated to explain, so pay attention:
@@ -333,8 +347,8 @@ void GenericShell::line_discipline(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
-				evaluator->interrupt();
-				evaluator->clear_pending();
+				_evaluator->interrupt();
+				_evaluator->clear_pending();
 				put_output(abort_prompt);
 				return;
 			}
@@ -355,8 +369,8 @@ void GenericShell::line_discipline(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
-		evaluator->interrupt();
-		evaluator->clear_pending();
+		_evaluator->interrupt();
+		_evaluator->clear_pending();
 		put_output("\n");
 		put_output(normal_prompt);
 		return;
@@ -366,7 +380,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	// by itself. This means "leave the shell". We leave the shell by
 	// unsetting the shell pointer in the ConsoleSocket.
 	// 0x4 is ASCII EOT, which is what ctrl-D at keybd becomes.
-	if ((false == evaluator->input_pending()) and
+	if ((false == _evaluator->input_pending()) and
 	    ((EOT == expr[len-1]) or ((1 == len) and ('.' == expr[0]))))
 	{
 		self_destruct = true;
@@ -449,12 +463,12 @@ void GenericShell::do_eval(const std::string &input)
 
 	start_eval();
 	poll_needed = true;
-	evaluator->begin_eval(); // must be called in same thread as poll_result
 
 	auto eval_wrapper = [&](const std::string& in)
 	{
 		thread_init();
-		evaluator->eval_expr(in);
+		_evaluator->begin_eval();
+		_evaluator->eval_expr(in);
 	};
 
 	evalthr = new std::thread(eval_wrapper, input);
@@ -484,7 +498,7 @@ std::string GenericShell::poll_output()
 
 	// If we are here, there's no pending output. Does the
 	// evaluator have anything for us?
-	std::string result = evaluator->poll_result();
+	std::string result = _evaluator->poll_result();
 	if (0 < result.size())
 		return result;
 
@@ -492,7 +506,7 @@ std::string GenericShell::poll_output()
 	if (_eval_done) return "";
 	finish_eval();
 
-	if (evaluator->input_pending())
+	if (_evaluator->input_pending())
 	{
 		if (show_output and show_prompt)
 			return pending_prompt;
@@ -500,7 +514,7 @@ std::string GenericShell::poll_output()
 			return "";
 	}
 
-	if (show_output or evaluator->eval_error())
+	if (show_output or _evaluator->eval_error())
 	{
 		if (show_prompt) return normal_prompt;
 	}
