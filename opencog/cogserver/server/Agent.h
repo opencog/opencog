@@ -116,8 +116,8 @@ private:
 
 protected:
     /**
-     * Set the agent's logger object
-     * Note, this will be deleted when this agent is.
+     * Set the agent's logger object.
+     * NOTE: this will be deleted when this agent is.
      * XXX FIXME This is a terrible API design! One must never use
      * setters like this!  Let the agent own the logger, and if need be,
      * it could be queried (e.g. to alter the debug level).
@@ -128,33 +128,42 @@ protected:
     Logger* _log;
 
     CogServer& _cogserver;
-
     AtomSpace* _as;
 
-    /** Note: AttentionValue itself is read-only, so no need to protect, but
-     * the pointer needs and is protected */
-    AttentionValuePtr _attentionValue;
-
+    /*
+     * Note: AttentionValue itself is read-only(!??).
+     * However, shared pointers are not thread-safe, see
+     * http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
+     * http://cppwisdom.quora.com/shared_ptr-is-almost-thread-safe
+     * and so the pointer itself must be protected.
+     */
 #if !defined SHARED_PTR_ATOMIC_OPS
     mutable std::mutex _attentionValueMutex;
 #endif
+    AttentionValuePtr _attentionValue;
 
-    /** The agent's frequency. Determines how often the opencog server should
-     *  schedule this agent. A value of 1 (the default) means that the agent
-     *  will be executed every server cycle; a value of 2 means that the agent
-     *  will be executed every 2 cycles; and so on. */
+    /**
+     * The agent's frequency. Determines how often the opencog server should
+     * schedule this agent. A value of 1 (the default) means that the agent
+     * will be executed every server cycle; a value of 2 means that the agent
+     * will be executed every 2 cycles; and so on.
+     */
     int _frequency;
 
-    /** Sets the list of parameters for this agent and their default values.
+    /**
+     * Sets the list of parameters for this agent and their default values.
      * If any parameter values are unspecified in the Config singleton, sets
      * them to the default values.
      * Note: it is assumed to be called only during initialization, so it is not
-     * thread safe and shouldn't be called from multiple threads */
+     * thread safe and shouldn't be called from multiple threads
+     */
     void setParameters(const std::vector<std::string>&);
     std::vector<std::string> _parameters;
 
-    /** The atoms utilized by the Agent in a single cycle, to be used by the
-     *  System Activity Table to assign credit to this agent. */
+    /**
+     * The atoms utilized by the Agent in a single cycle, to be used by the
+     * System Activity Table to assign credit to this agent.
+     */
     std::vector<UnorderedHandleSet> _utilizedHandleSets;
     mutable std::mutex _handleSetMutex;
 
@@ -179,7 +188,8 @@ protected:
 
 public:
 
-    /** Return the agent's logger object
+    /**
+     * Return the agent's logger object
      *
      * @return A logger object.
      */
@@ -191,12 +201,13 @@ public:
     /** Agent's destructor */
     virtual ~Agent();
 
-    /** Abstract run method. Should be overridden by a derived agent with the
-     *  actual agent's behavior. */
+    /**
+     * Abstract run method. Should be overridden by a derived agent with the
+     * actual agent's behavior.
+     */
     virtual void run() = 0;
 
-    /** Agent stop() method, called when the agent is stopped
-     */
+    /** Agent stop() method, called when the agent is stopped */
     virtual void stop() {}
 
     /** Returns the agent's frequency. */
@@ -208,12 +219,16 @@ public:
     /** Returns the agent's class info. */
     virtual const ClassInfo& classinfo() const = 0;
 
-    /** Dumps the agent's name and all its configuration parameters
-     * to a string. */
+    /**
+     * Dumps the agent's name and all its configuration parameters
+     * to a string.
+     */
     std::string to_string() const;
 
-    /** Returns the sequence of handle sets for this cycle that the agent
-     *  would like to claim credit for in the System Activity Table. */
+    /**
+     * Returns the sequence of handle sets for this cycle that the agent
+     * would like to claim credit for in the System Activity Table.
+     */
     virtual std::vector<UnorderedHandleSet> getUtilizedHandleSets() const
     {
         std::lock_guard<std::mutex> lock(_handleSetMutex);
@@ -286,6 +301,7 @@ public:
         return _attentionValue;
 #endif
     }
+
     void setAV(AttentionValuePtr new_av)
     {
 #ifdef SHARED_PTR_ATOMIC_OPS
