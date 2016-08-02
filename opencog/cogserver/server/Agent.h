@@ -159,23 +159,23 @@ protected:
     mutable std::mutex _handleSetMutex;
 
     /** Total stimulus given out to atoms */
-    stim_t totalStimulus;
+    stim_t _totalStimulus;
 
     /** Hash table of atoms given stimulus since reset */
-    AtomStimHashMap stimulatedAtoms;
-    mutable std::mutex stimulatedAtomsMutex;
+    AtomStimHashMap _stimulatedAtoms;
+    mutable std::mutex _stimulatedAtomsMutex;
 
     /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(AtomPtr);
 
-    AttentionValue::sti_t STIAtomWage;
-    AttentionValue::lti_t LTIAtomWage;
+    AttentionValue::sti_t _STIAtomWage;
+    AttentionValue::lti_t _LTIAtomWage;
 
-    AttentionValue::sti_t targetSTI;
-    AttentionValue::lti_t targetLTI;
+    AttentionValue::sti_t _targetSTI;
+    AttentionValue::lti_t _targetLTI;
 
-    AttentionValue::sti_t stiFundsBuffer;
-    AttentionValue::lti_t ltiFundsBuffer;
+    AttentionValue::sti_t _stiFundsBuffer;
+    AttentionValue::lti_t _ltiFundsBuffer;
 
 public:
 

@@ -51,7 +51,7 @@ See https://github.com/opencog/opencog/issues/2329
 
     setParameters({""});
 
-    totalStimulus = 0;
+    _totalStimulus = 0;
 
     conn = _cogserver.getAtomSpace().removeAtomSignal(
             boost::bind(&Agent::atomRemoved, this, _1));
@@ -129,35 +129,35 @@ void Agent::resetUtilizedHandleSets(void)
 stim_t Agent::stimulateAtom(const Handle& h, stim_t amount)
 {
     {
-        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
+        std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
 
         // Add atom to the map of atoms with stimulus
         // and add stimulus to it
-        stimulatedAtoms[h] += amount;
+        _stimulatedAtoms[h] += amount;
     }
 
     // update record of total stimulus given out
-    totalStimulus += amount;
+    _totalStimulus += amount;
 
     logger().fine("Atom %s received stimulus of %d, total now %d",
-                  h->toString(), amount, totalStimulus);
+                  h->toString().c_str(), amount, _totalStimulus);
 
-    return totalStimulus;
+    return _totalStimulus;
 }
 
 void Agent::removeAtomStimulus(const Handle& h)
 {
-    std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
+    std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
 
     // if handle not in map then return
-    auto pr = stimulatedAtoms.find(h);
-    if (pr == stimulatedAtoms.end()) return;
+    auto pr = _stimulatedAtoms.find(h);
+    if (pr == _stimulatedAtoms.end()) return;
 
     stim_t amount = pr->second;
-    stimulatedAtoms.erase(h);
+    _stimulatedAtoms.erase(h);
 
     // update record of total stimulus given out
-    totalStimulus -= amount;
+    _totalStimulus -= amount;
 }
 
 stim_t Agent::stimulateAtom(const HandleSeq& hs, stim_t amount)
@@ -176,24 +176,24 @@ stim_t Agent::stimulateAtom(const HandleSeq& hs, stim_t amount)
 
 stim_t Agent::resetStimulus(void)
 {
-    std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-    stimulatedAtoms.clear();
+    std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
+    _stimulatedAtoms.clear();
 
     // reset stimulus counter
-    totalStimulus = 0;
+    _totalStimulus = 0;
     return 0;
 }
 
 stim_t Agent::getTotalStimulus(void) const
 {
-    return totalStimulus;
+    return _totalStimulus;
 }
 
 stim_t Agent::getAtomStimulus(const Handle& h) const
 {
-    std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-    auto pr = stimulatedAtoms.find(h);
-    if (pr == stimulatedAtoms.end())
+    std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
+    auto pr = _stimulatedAtoms.find(h);
+    if (pr == _stimulatedAtoms.end())
         return 0;
     else
         return pr->second;
@@ -213,21 +213,21 @@ void Agent::experimentalStimulateAtom(const Handle& h, double stimulus)
 AttentionValue::sti_t Agent::calculate_STI_Wage(void)
 {
     long funds = _as->get_STI_funds();
-    double diff  = funds - targetSTI;
-    double ndiff = diff / stiFundsBuffer;
+    double diff  = funds - _targetSTI;
+    double ndiff = diff / _stiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);
     ndiff = std::max(ndiff, -1.0);
 
-    return STIAtomWage + (STIAtomWage * ndiff);
+    return _STIAtomWage + _STIAtomWage * ndiff;
 }
 
 AttentionValue::lti_t Agent::calculate_LTI_Wage(void)
 {
     long funds = _as->get_LTI_funds();
-    double diff  = funds - targetLTI;
-    double ndiff = diff / ltiFundsBuffer;
+    double diff  = funds - _targetLTI;
+    double ndiff = diff / _ltiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);
     ndiff = std::max(ndiff, -1.0);
 
-    return LTIAtomWage + (LTIAtomWage * ndiff);
+    return _LTIAtomWage + _LTIAtomWage * ndiff;
 }
