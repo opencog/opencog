@@ -59,6 +59,8 @@ void NetworkServer::stop()
     _acceptor.cancel(ec);
     _io_service.stop();
 
+    // Booost::asio hangs, despite the above.  Brute-force it to
+    // get it's head out of it's butt, and do the right thing.
     pthread_cancel(_listener_thread->native_handle());
 
     _listener_thread->join();
@@ -93,6 +95,8 @@ void NetworkServer::listen()
 
 void NetworkServer::run()
 {
+    if (_running) return;
+
     _listener_thread = new std::thread(&NetworkServer::listen, this);
 
     while (_running)

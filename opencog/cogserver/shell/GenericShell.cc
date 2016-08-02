@@ -74,8 +74,7 @@ GenericShell::~GenericShell()
 		logger().debug("[GenericShell] dtor, wait for eval thread 0x%x.",
 		               evalthr->native_handle());
 		evalthr->join();
-		logger().debug("[GenericShell] dtor, joined eval thread 0x%x.",
-		               evalthr->native_handle());
+		logger().debug("[GenericShell] dtor, joined eval thread");
 		delete evalthr;
 		evalthr = nullptr;
 	}
