@@ -429,8 +429,8 @@
            (cog-bind sentiment-sentence-to-person-l2s-rule))
           (unary-predicate-speech-act-l2s-results
            (cog-bind unary-predicate-speech-act-l2s-rule)))
-      (cog-logger-debug "[PLN-Reasoner] StateLinks = ~a" (cog-get-atoms 'StateLink))
-      (cog-logger-debug "[PLN-Reasoner] PredicateNodes = ~a" (map cog-incoming-set (cog-get-atoms 'PredicateNode)))
+      ;; (cog-logger-debug "[PLN-Reasoner] StateLinks = ~a" (cog-get-atoms 'StateLink))
+      ;; (cog-logger-debug "[PLN-Reasoner] PredicateNodes = ~a" (map cog-incoming-set (cog-get-atoms 'PredicateNode)))
       (cog-logger-debug "[PLN-Reasoner] name-on-last-sentence = ~a" name-on-last-sentence)
       (cog-logger-debug "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a" sentiment-sentence-to-person-l2s-results)
       (cog-logger-debug "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a" unary-predicate-speech-act-l2s-results))
