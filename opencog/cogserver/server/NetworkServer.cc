@@ -59,6 +59,8 @@ void NetworkServer::stop()
     _acceptor.cancel(ec);
     _io_service.stop();
 
+    pthread_cancel(_listener_thread->native_handle());
+
     _listener_thread->join();
     _listener_thread = nullptr;
     _service_thread->join();
