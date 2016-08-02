@@ -159,7 +159,7 @@ protected:
     mutable std::mutex _handleSetMutex;
 
     /** Total stimulus given out to atoms */
-    std::atomic<stim_t> totalStimulus;
+    stim_t totalStimulus;
 
     /** Hash table of atoms given stimulus since reset */
     AtomStimHashMap stimulatedAtoms;

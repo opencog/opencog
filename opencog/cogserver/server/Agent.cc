@@ -140,31 +140,21 @@ stim_t Agent::stimulateAtom(const Handle& h, stim_t amount)
     totalStimulus += amount;
 
     logger().fine("Atom %d received stimulus of %d, total now %d",
-                  h.value(),
-                  amount,
-                  totalStimulus.load(std::memory_order_relaxed));
+                  h.value(), amount, totalStimulus);
 
-#ifdef DEBUG
-    std::cout << "Atom " << h.value() << " received stimulus of " << amount <<
-                 ", total now " << totalStimulus.load(std::memory_order_relaxed)
-                 << "\n";
-#endif
-
-    return totalStimulus.load(std::memory_order_relaxed);
+    return totalStimulus;
 }
 
 void Agent::removeAtomStimulus(const Handle& h)
 {
-    stim_t amount;
-    {
-        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-        // if handle not in map then return
-        if (stimulatedAtoms.find(h) == stimulatedAtoms.end())
-            return;
+    std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
 
-        amount = stimulatedAtoms[h];
-        stimulatedAtoms.erase(h);
-    }
+    // if handle not in map then return
+    auto pr = stimulatedAtoms.find(h);
+    if (pr == stimulatedAtoms.end()) return;
+
+    stim_t amount = pr->second;
+    stimulatedAtoms.erase(h);
 
     // update record of total stimulus given out
     totalStimulus -= amount;
@@ -186,13 +176,12 @@ stim_t Agent::stimulateAtom(const HandleSeq& hs, stim_t amount)
 
 stim_t Agent::resetStimulus(void)
 {
-    {
-        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-        stimulatedAtoms.clear();
-    }
+    std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
+    stimulatedAtoms.clear();
+
     // reset stimulus counter
     totalStimulus = 0;
-    return totalStimulus.load(std::memory_order_relaxed);
+    return 0;
 }
 
 stim_t Agent::getTotalStimulus(void) const
