@@ -49,13 +49,7 @@ See https://github.com/opencog/opencog/issues/2329
 
     _attentionValue = AttentionValue::DEFAULT_AV();
 
-    // an empty set of parameters and defaults (so that various
-    // methods will still work even if none are set in this or a derived
-    // class)
-    static const std::string defaultConfig[] = {
-        "", ""
-    };
-    setParameters(defaultConfig);
+    setParameters({""});
 
     stimulatedAtoms = new AtomStimHashMap();
     totalStimulus = 0;
@@ -91,14 +85,13 @@ Logger* Agent::getLogger()
 }
 
 
-void Agent::setParameters(const std::string* params)
+void Agent::setParameters(const std::vector<std::string>& params)
 {
-    PARAMETERS = params;
-
-    for (unsigned int i = 0; params[i] != ""; i += 2) {
-        if (!config().has(params[i])) {
+    _parameters = params;
+    for (unsigned int i = 0; params[i] != ""; i += 2)
+    {
+        if (!config().has(params[i]))
            config().set(params[i], params[i + 1]);
-        }
     }
 }
 
@@ -107,9 +100,9 @@ std::string Agent::to_string() const
     std::ostringstream oss;
     oss << classinfo().id;
     oss << " {\"";
-    for (unsigned int i = 0; PARAMETERS[i] != ""; i += 2) {
+    for (unsigned int i = 0; _parameters[i] != ""; i += 2) {
         if (i != 0) oss << "\", \"";
-        oss << PARAMETERS[i] << "\" => \"" << config()[PARAMETERS[i]];
+        oss << _parameters[i] << "\" => \"" << config()[_parameters[i]];
     }
     oss << "\"}";
     return oss.str();

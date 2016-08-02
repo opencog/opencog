@@ -150,9 +150,8 @@ protected:
      * them to the default values.
      * Note: it is assumed to be called only during initialization, so it is not
      * thread safe and shouldn't be called from multiple threads */
-    void setParameters(const std::string* params);
-
-    const std::string* PARAMETERS;
+    void setParameters(const std::vector<std::string>&);
+    std::vector<std::string> _parameters;
 
     /** The atoms utilized by the Agent in a single cycle, to be used by the
      *  System Activity Table to assign credit to this agent. */
@@ -204,7 +203,7 @@ public:
     virtual int frequency(void) const { return _frequency; }
 
     /** Sets the agent's frequency. */
-    virtual void setFrequency(int frequency) { _frequency=frequency; }
+    virtual void setFrequency(int freq) { _frequency = freq; }
 
     /** Returns the agent's class info. */
     virtual const ClassInfo& classinfo() const = 0;
