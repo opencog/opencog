@@ -62,15 +62,10 @@ protected:
     short _port;
     boost::asio::io_service _io_service;
     boost::asio::ip::tcp::acceptor _acceptor;
-    std::thread* _service_thread;
     std::thread* _listener_thread;
 
-    /** Stops the server */
-    void stop();
-
-    /** The network server's thread main method.  */
+    /** The network server's main listener thread.  */
     void listen();
-    void run();
 
 public:
 
@@ -80,6 +75,10 @@ public:
      */
     NetworkServer(unsigned short port);
     ~NetworkServer();
+
+    /** Start and stop the server */
+    void run();
+    void stop();
 
 }; // class
 

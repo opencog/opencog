@@ -31,14 +31,14 @@
 using namespace opencog;
 
 NetworkServer::NetworkServer(unsigned short port) :
-    _running(true),
+    _running(false),
     _port(port),
     _acceptor(_io_service,
         boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port))
 {
     logger().debug("[NetworkServer] constructor");
 
-    _service_thread = new std::thread(&NetworkServer::run, this);
+    run();
 }
 
 NetworkServer::~NetworkServer()
@@ -65,8 +65,6 @@ void NetworkServer::stop()
 
     _listener_thread->join();
     _listener_thread = nullptr;
-    _service_thread->join();
-    _service_thread = nullptr;
 }
 
 void NetworkServer::listen()
@@ -96,16 +94,13 @@ void NetworkServer::listen()
 void NetworkServer::run()
 {
     if (_running) return;
+    _running = true;
+
+    try {
+        _io_service.run();
+    } catch (boost::system::system_error& e) {
+        logger().error("Error in boost::asio io_service::run() => %s", e.what());
+    }
 
     _listener_thread = new std::thread(&NetworkServer::listen, this);
-
-    while (_running)
-    {
-        try {
-            _io_service.run();
-        } catch (boost::system::system_error& e) {
-            logger().error("Error in boost::asio io_service::run() => %s", e.what());
-        }
-        usleep(50000); // avoids busy wait
-    }
 }
