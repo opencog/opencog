@@ -110,15 +110,13 @@ public:
     MyAgentWithDefaults(CogServer& cs) : Agent(cs) {
         _count = 0;
      
-        static const std::string defaultConfig[] = {
-        
+        setParameters({
             "MYAGENT_USE_BAYES", "true",
             "MYAGENT_ENERGY", "12345",
             "MYAGENT_ENTHUSIASM", "1000",
             "MYAGENT_MOOD", "happy",
             "",""
-        };
-        setParameters(defaultConfig);
+        });
      }
     ~MyAgentWithDefaults() {}
     void setFrequency(int f) { _frequency = f; }
