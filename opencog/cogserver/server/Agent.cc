@@ -135,7 +135,8 @@ long Agent::stimulateAtom(const Handle& h, stim_t amount)
         _stimulatedAtoms[h] += amount;
     }
 
-    // update record of total stimulus given out
+    // Update record of total stimulus given out.
+    // XXX FIXME: This could overflow and you'd never know it!
     _totalStimulus += amount;
 
     logger().fine("Atom %s received stimulus of %d, total now %ld",
@@ -155,7 +156,8 @@ void Agent::removeAtomStimulus(const Handle& h)
     stim_t amount = pr->second;
     _stimulatedAtoms.erase(h);
 
-    // update record of total stimulus given out
+    // Update record of total stimulus given out.
+    // XXX FIXME: This could underflow and you'd never know it!
     _totalStimulus -= amount;
 }
 
