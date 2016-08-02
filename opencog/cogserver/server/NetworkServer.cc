@@ -52,12 +52,17 @@ NetworkServer::~NetworkServer()
 
 void NetworkServer::stop()
 {
+    if (not _running) return;
     _running = false;
+
+    boost::system::error_code ec;
+    _acceptor.cancel(ec);
     _io_service.stop();
 
     _listener_thread->join();
+    _listener_thread = nullptr;
     _service_thread->join();
-    // delete _service_thread;
+    _service_thread = nullptr;
 }
 
 void NetworkServer::listen()
