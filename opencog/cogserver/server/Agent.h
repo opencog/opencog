@@ -230,7 +230,7 @@ public:
      * @param amount of stimulus to give.
      * @return total stimulus given since last reset.
      */
-    stim_t stimulateAtom(Handle h, stim_t amount);
+    stim_t stimulateAtom(const Handle&, stim_t amount);
 
     /**
      * Stimulate all atoms in HandleSeq evenly with a given amount of stimulus.
@@ -239,14 +239,14 @@ public:
      * @param amount amount of stimulus to share.
      * @return remainder stimulus after equal spread between atoms.
      */
-    stim_t stimulateAtom(HandleSeq hs, stim_t amount);
+    stim_t stimulateAtom(const HandleSeq&, stim_t amount);
 
     /**
      * Remove stimulus from a Handle's atom.
      *
      * @param atom handle
      */
-    void removeAtomStimulus(Handle h);
+    void removeAtomStimulus(const Handle&);
 
     /**
      * Reset stimulus.
@@ -269,15 +269,15 @@ public:
      * @param h handle of atom to get stimulus for.
      * @return total stimulus since last reset.
      */
-    stim_t getAtomStimulus(Handle h) const;
+    stim_t getAtomStimulus(const Handle&) const;
 
-    void experimentalStimulateAtom(Handle h,float stimulus);
+    void experimentalStimulateAtom(const Handle&, double stimulus);
 
     AttentionValue::sti_t calculate_STI_Wage();
 
     AttentionValue::lti_t calculate_LTI_Wage();
 
-    AttentionValuePtr getAV()
+    AttentionValuePtr getAV(void)
     {
 #ifdef SHARED_PTR_ATOMIC_OPS
         return std::atomic_load(&_attentionValue);

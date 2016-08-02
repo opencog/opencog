@@ -110,7 +110,7 @@ std::string Agent::to_string() const
 
 void Agent::atomRemoved(AtomPtr atom)
 {
-    Handle h = atom->getHandle();
+    Handle h(atom->getHandle());
     {
         std::lock_guard<std::mutex> lock(_handleSetMutex);
         for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
@@ -119,7 +119,7 @@ void Agent::atomRemoved(AtomPtr atom)
     removeAtomStimulus(h);
 }
 
-void Agent::resetUtilizedHandleSets()
+void Agent::resetUtilizedHandleSets(void)
 {
     std::lock_guard<std::mutex> lock(_handleSetMutex);
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
@@ -128,7 +128,7 @@ void Agent::resetUtilizedHandleSets()
 }
 
 
-stim_t Agent::stimulateAtom(Handle h, stim_t amount)
+stim_t Agent::stimulateAtom(const Handle& h, stim_t amount)
 {
     {
         std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
@@ -155,7 +155,7 @@ stim_t Agent::stimulateAtom(Handle h, stim_t amount)
     return totalStimulus.load(std::memory_order_relaxed);
 }
 
-void Agent::removeAtomStimulus(Handle h)
+void Agent::removeAtomStimulus(const Handle& h)
 {
     stim_t amount;
     {
@@ -172,21 +172,21 @@ void Agent::removeAtomStimulus(Handle h)
     totalStimulus -= amount;
 }
 
-stim_t Agent::stimulateAtom(HandleSeq hs, stim_t amount)
+stim_t Agent::stimulateAtom(const HandleSeq& hs, stim_t amount)
 {
     stim_t split;
 
     // how much to give each atom
     split = amount / hs.size();
 
-    for (Handle handle : hs) {
+    for (const Handle& handle : hs) {
         stimulateAtom(handle, split);
     }
     // return unused stimulus
     return amount - (split * hs.size());
 }
 
-stim_t Agent::resetStimulus()
+stim_t Agent::resetStimulus(void)
 {
     {
         std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
@@ -197,12 +197,12 @@ stim_t Agent::resetStimulus()
     return totalStimulus.load(std::memory_order_relaxed);
 }
 
-stim_t Agent::getTotalStimulus() const
+stim_t Agent::getTotalStimulus(void) const
 {
     return totalStimulus;
 }
 
-stim_t Agent::getAtomStimulus(Handle h) const
+stim_t Agent::getAtomStimulus(const Handle& h) const
 {
     std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
     if (stimulatedAtoms->find(h) == stimulatedAtoms->end()) {
@@ -212,35 +212,35 @@ stim_t Agent::getAtomStimulus(Handle h) const
     }
 }
 
-void Agent::experimentalStimulateAtom(Handle h,float stimulus)
+void Agent::experimentalStimulateAtom(const Handle& h, double stimulus)
 {
-    int sti = h->getAttentionValue()->getSTI();
-    int lti = h->getAttentionValue()->getLTI();
-    int stiWage = calculate_STI_Wage() * stimulus;
-    int ltiWage = calculate_LTI_Wage() * stimulus;
+    long sti = h->getAttentionValue()->getSTI();
+    long lti = h->getAttentionValue()->getLTI();
+    long stiWage = calculate_STI_Wage() * stimulus;
+    long ltiWage = calculate_LTI_Wage() * stimulus;
 
     h->setSTI(sti + stiWage);
     h->setLTI(lti + ltiWage);
 }
 
-AttentionValue::sti_t Agent::calculate_STI_Wage()
+AttentionValue::sti_t Agent::calculate_STI_Wage(void)
 {
-    int funds = _as->get_STI_funds();
-    float diff  = funds - targetSTI;
-    float ndiff = diff / stiFundsBuffer;
-    ndiff = std::min(ndiff,1.0f);
-    ndiff = std::max(ndiff,-1.0f);
+    long funds = _as->get_STI_funds();
+    double diff  = funds - targetSTI;
+    double ndiff = diff / stiFundsBuffer;
+    ndiff = std::min(ndiff, 1.0);
+    ndiff = std::max(ndiff, -1.0);
 
     return STIAtomWage + (STIAtomWage * ndiff);
 }
 
-AttentionValue::lti_t Agent::calculate_LTI_Wage()
+AttentionValue::lti_t Agent::calculate_LTI_Wage(void)
 {
-    int funds = _as->get_LTI_funds();
-    float diff  = funds - targetLTI;
-    float ndiff = diff / ltiFundsBuffer;
-    ndiff = std::min(ndiff,1.0f);
-    ndiff = std::max(ndiff,-1.0f);
+    long funds = _as->get_LTI_funds();
+    double diff  = funds - targetLTI;
+    double ndiff = diff / ltiFundsBuffer;
+    ndiff = std::min(ndiff, 1.0);
+    ndiff = std::max(ndiff, -1.0);
 
     return LTIAtomWage + (LTIAtomWage * ndiff);
 }
