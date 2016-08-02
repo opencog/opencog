@@ -167,15 +167,15 @@ protected:
     std::vector<UnorderedHandleSet> _utilizedHandleSets;
     mutable std::mutex _handleSetMutex;
 
-    /** Total stimulus given out to atoms */
-    stim_t _totalStimulus;
+    /** Total stimulus given out to atoms. */
+    long _totalStimulus;
 
-    /** Hash table of atoms given stimulus since reset */
+    /** Hash table of atoms given stimulus since reset. */
     AtomStimHashMap _stimulatedAtoms;
     mutable std::mutex _stimulatedAtomsMutex;
 
     /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
-    void atomRemoved(AtomPtr);
+    void atomRemoved(const AtomPtr&);
 
     AttentionValue::sti_t _STIAtomWage;
     AttentionValue::lti_t _LTIAtomWage;
@@ -245,7 +245,7 @@ public:
      * @param amount of stimulus to give.
      * @return total stimulus given since last reset.
      */
-    stim_t stimulateAtom(const Handle&, stim_t amount);
+    long stimulateAtom(const Handle&, stim_t amount);
 
     /**
      * Stimulate all atoms in HandleSeq evenly with a given amount of stimulus.
@@ -263,20 +263,15 @@ public:
      */
     void removeAtomStimulus(const Handle&);
 
-    /**
-     * Reset stimulus.
-     *
-     * @return new stimulus since reset, usually zero unless another
-     * thread adds more.
-     */
-    stim_t resetStimulus();
+    /** Reset stimulus.  */
+    void resetStimulus(void);
 
     /**
      * Get total stimulus.
      *
      * @return total stimulus since last reset.
      */
-    stim_t getTotalStimulus() const;
+    long getTotalStimulus() const;
 
     /**
      * Get stimulus for Atom.

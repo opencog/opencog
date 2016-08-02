@@ -106,7 +106,7 @@ std::string Agent::to_string() const
     return oss.str();
 }
 
-void Agent::atomRemoved(AtomPtr atom)
+void Agent::atomRemoved(const AtomPtr& atom)
 {
     Handle h(atom->getHandle());
     {
@@ -125,8 +125,7 @@ void Agent::resetUtilizedHandleSets(void)
     _utilizedHandleSets.clear();
 }
 
-
-stim_t Agent::stimulateAtom(const Handle& h, stim_t amount)
+long Agent::stimulateAtom(const Handle& h, stim_t amount)
 {
     {
         std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
@@ -139,7 +138,7 @@ stim_t Agent::stimulateAtom(const Handle& h, stim_t amount)
     // update record of total stimulus given out
     _totalStimulus += amount;
 
-    logger().fine("Atom %s received stimulus of %d, total now %d",
+    logger().fine("Atom %s received stimulus of %d, total now %ld",
                   h->toString().c_str(), amount, _totalStimulus);
 
     return _totalStimulus;
@@ -162,29 +161,26 @@ void Agent::removeAtomStimulus(const Handle& h)
 
 stim_t Agent::stimulateAtom(const HandleSeq& hs, stim_t amount)
 {
-    stim_t split;
+    // How much to give each atom.
+    stim_t split = amount / hs.size();
 
-    // how much to give each atom
-    split = amount / hs.size();
-
-    for (const Handle& handle : hs) {
+    for (const Handle& handle : hs)
         stimulateAtom(handle, split);
-    }
-    // return unused stimulus
+
+    // Return unused stimulus.
     return amount - (split * hs.size());
 }
 
-stim_t Agent::resetStimulus(void)
+void Agent::resetStimulus(void)
 {
     std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
     _stimulatedAtoms.clear();
 
     // reset stimulus counter
     _totalStimulus = 0;
-    return 0;
 }
 
-stim_t Agent::getTotalStimulus(void) const
+long Agent::getTotalStimulus(void) const
 {
     return _totalStimulus;
 }
