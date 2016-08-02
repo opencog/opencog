@@ -162,7 +162,7 @@ protected:
     std::atomic<stim_t> totalStimulus;
 
     /** Hash table of atoms given stimulus since reset */
-    AtomStimHashMap* stimulatedAtoms;
+    AtomStimHashMap stimulatedAtoms;
     mutable std::mutex stimulatedAtomsMutex;
 
     /** called by AtomTable via a boost::signals2::signal when an atom is removed. */

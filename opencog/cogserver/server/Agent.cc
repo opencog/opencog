@@ -51,7 +51,6 @@ See https://github.com/opencog/opencog/issues/2329
 
     setParameters({""});
 
-    stimulatedAtoms = new AtomStimHashMap();
     totalStimulus = 0;
 
     conn = _cogserver.getAtomSpace().removeAtomSignal(
@@ -68,7 +67,6 @@ Agent::~Agent()
 
     resetUtilizedHandleSets();
     conn.disconnect();
-    delete stimulatedAtoms;
 
     if (_log) delete _log;
 }
@@ -135,7 +133,7 @@ stim_t Agent::stimulateAtom(const Handle& h, stim_t amount)
 
         // Add atom to the map of atoms with stimulus
         // and add stimulus to it
-        (*stimulatedAtoms)[h] += amount;
+        stimulatedAtoms[h] += amount;
     }
 
     // update record of total stimulus given out
@@ -161,11 +159,11 @@ void Agent::removeAtomStimulus(const Handle& h)
     {
         std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
         // if handle not in map then return
-        if (stimulatedAtoms->find(h) == stimulatedAtoms->end())
+        if (stimulatedAtoms.find(h) == stimulatedAtoms.end())
             return;
 
-        amount = (*stimulatedAtoms)[h];
-        stimulatedAtoms->erase(h);
+        amount = stimulatedAtoms[h];
+        stimulatedAtoms.erase(h);
     }
 
     // update record of total stimulus given out
@@ -190,7 +188,7 @@ stim_t Agent::resetStimulus(void)
 {
     {
         std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-        stimulatedAtoms->clear();
+        stimulatedAtoms.clear();
     }
     // reset stimulus counter
     totalStimulus = 0;
@@ -205,11 +203,11 @@ stim_t Agent::getTotalStimulus(void) const
 stim_t Agent::getAtomStimulus(const Handle& h) const
 {
     std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-    if (stimulatedAtoms->find(h) == stimulatedAtoms->end()) {
+    auto pr = stimulatedAtoms.find(h);
+    if (pr == stimulatedAtoms.end())
         return 0;
-    } else {
-        return (*stimulatedAtoms)[h];
-    }
+    else
+        return pr->second;
 }
 
 void Agent::experimentalStimulateAtom(const Handle& h, double stimulus)
