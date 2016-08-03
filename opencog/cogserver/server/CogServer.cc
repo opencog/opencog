@@ -170,7 +170,7 @@ CogServer::CogServer(AtomSpace* as) :
 void CogServer::enableNetworkServer()
 {
     if (_networkServer) return;
-    _networkServer = new NetworkServer(config().get_int("SERVER_PORT"));
+    _networkServer = new NetworkServer(config().get_int("SERVER_PORT", 17001));
 }
 
 void CogServer::disableNetworkServer()

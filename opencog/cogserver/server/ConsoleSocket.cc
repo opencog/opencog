@@ -121,10 +121,11 @@ void ConsoleSocket::OnConnection()
 
 void ConsoleSocket::sendPrompt()
 {
-    if (config().get_bool("ANSI_ENABLED"))
-        Send(config()["ANSI_PROMPT"]);
+    // Prompt with ANSI color codes, if possible.
+    if (config().get_bool("ANSI_ENABLED", true))
+        Send(config().get("ANSI_PROMPT", "[0;32mopencog[1;32m> [0m"));
     else
-        Send(config()["PROMPT"]);
+        Send(config().get("PROMPT", "opencog> "));
 }
 
 void ConsoleSocket::OnLine(const std::string& line)

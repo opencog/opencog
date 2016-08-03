@@ -35,10 +35,11 @@ using namespace opencog;
 SchemeShell::SchemeShell(void)
 {
 	normal_prompt = "guile> ";
-	if (config().get_bool("ANSI_ENABLED"))
-		normal_prompt = config()["ANSI_SCM_PROMPT"];
+	// Prompt with ANSI color codes, if possible.
+	if (config().get_bool("ANSI_ENABLED", true))
+		normal_prompt = config().get("ANSI_SCM_PROMPT", "[0;34mguile[1;34m> [0m");
 	else
-		normal_prompt = config()["SCM_PROMPT"];
+		normal_prompt = config().get("SCM_PROMPT", "guile> ");
 
 	abort_prompt += normal_prompt;
 
