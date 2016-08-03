@@ -28,7 +28,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/recent_val.h>
 
@@ -44,8 +43,6 @@ namespace opencog
 /** \addtogroup grp_attention
  *  @{
  */
-
-class CogServer;
 
 /** ImportantUpdatingAgent updates the AttentionValues of atoms.
  *
@@ -113,11 +110,9 @@ class CogServer;
  */
 class ImportanceUpdatingAgent : public Agent
 {
-
     friend class ::ImportanceUpdatingAgentUTest;
 
 public:
-
     /** The different ways rent can be calculated
      * for atoms in the attentional focus.
      */
@@ -343,18 +338,7 @@ private:
 
     void updateRentAndWages(AtomSpace*);
 
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
-    Logger *log; //!< Logger object for Agent
-
 public:
-
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::ImportanceUpdatingAgent");
@@ -366,12 +350,6 @@ public:
     virtual void run();
 
     virtual std::string toString();
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
 
     /** Set whether to randomly stimulate atoms.
      *

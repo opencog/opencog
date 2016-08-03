@@ -29,17 +29,14 @@
 #include <math.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/util/Logger.h>
+#include <opencog/truthvalue/AttentionValue.h>
 
 namespace opencog
 {
 /** \addtogroup grp_attention
  *  @{
  */
-
-class CogServer;
 
 /** The ForgettingAgent, carries out the forgetting process in OpenCog Prime. 
  * 
@@ -69,19 +66,6 @@ class CogServer;
  */
 class ForgettingAgent : public Agent
 {
-
-private:
-    AtomSpace* a;
-    Logger *log; //!< Logger object for Agent
-
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }

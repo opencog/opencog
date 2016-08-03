@@ -133,7 +133,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
     
     // If this link doesn't have source as a source return 0
     if (! is_source(source, link)) {
-       _log->debug("Skipping link because link doesn't have this source as a source: " + std::to_string(link.value()));
+       _log->debug("Skipping link because link doesn't have this source as a source: " + link->toString());
         return 0;
     }
 
@@ -162,7 +162,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
             Handle target_h = *t;
 
             if (target_h == source) {
-               _log->debug("Skipping link because link has source as target: " + std::to_string(link.value()));
+               _log->debug("Skipping link because link has source as target: " + link->toString());
                 continue;
             }
 
@@ -253,7 +253,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 
         // For the case of an asymmetric link without this atom as a source
         if (!is_source(h, lh)) {
-           _log->fine("Skipping link due to assymetric link without this atom as a source: " + h.value());
+           _log->fine("Skipping link due to assymetric link without this atom as a source: " + h.toString());
             continue;
         }
 

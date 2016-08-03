@@ -100,8 +100,7 @@ void AFImportanceDiffusionAgent::diffuseAtom(Handle source)
                 incidentAtoms);
 
 #ifdef DEBUG
-    std::cout << "Calculating diffusion for handle # " << source.value() <<
-                 std::endl;
+    std::cout << "Calculating diffusion for " << source << std::endl;
     std::cout << "Incident probability vector contains " <<
                  probabilityVectorIncident.size() << " atoms." << std::endl;
 #endif
@@ -140,9 +139,7 @@ void AFImportanceDiffusionAgent::diffuseAtom(Handle source)
 
     // If there is nothing to diffuse, finish
     if (totalDiffusionAmount == 0)
-    {
         return;
-    }
 
     // Used for calculating decay amount. Since we will be using per time unit
     // decay, we need to calculated elapsed time unit since last spreading for
@@ -150,11 +147,10 @@ void AFImportanceDiffusionAgent::diffuseAtom(Handle source)
     opencog::ecan::chrono_d elapsed_seconds;
     auto now = hr_clock::now();
 
-    if(first_time){
+    if (first_time) {
         elapsed_seconds = now - now;
         last_spreading_time = now;
-
-    }else{
+    } else {
         elapsed_seconds = now - last_spreading_time;
     }
 

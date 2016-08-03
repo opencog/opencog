@@ -97,15 +97,11 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent(CogServer& cs) :
     rng = NULL;
 
     // Provide a logger
-    log = NULL;
-    setLogger(new opencog::Logger("ImportanceUpdatingAgent.log", Logger::FINE,
-    true));
+    setLogger(new opencog::Logger("ImportanceUpdatingAgent.log", Logger::FINE, true));
 }
 
 ImportanceUpdatingAgent::~ImportanceUpdatingAgent()
 {
-    if (log)
-        delete log;
     if (rng)
         delete rng;
 }
@@ -117,18 +113,6 @@ void ImportanceUpdatingAgent::init()
     initialEstimateMade = true;
     // Perhaps initiate recent_val members to initial
     // size before the mind process begins.
-}
-
-void ImportanceUpdatingAgent::setLogger(Logger* _log)
-{
-    if (log)
-        delete log;
-    log = _log;
-}
-
-Logger* ImportanceUpdatingAgent::getLogger()
-{
-    return log;
 }
 
 void ImportanceUpdatingAgent::getHandlesToUpdate(AtomSpace *a, HandleSeq &hs)
@@ -352,7 +336,7 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
                   afterTax);
 
 #ifdef DEBUG        
-        std::cout << "Atom " << handle.value() << " STI " << beforeTax
+        std::cout << "Atom " << handle << " STI " << beforeTax
                   << ". Tax " << actualTax << ". After tax " << afterTax << "."
                   << std::endl;
 #endif
@@ -605,7 +589,7 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a,
 
 #ifdef DEBUG
     if (stiRentCharged != 0 || exchangeAmount != 0 || total_stim != 0) {
-        std::cout << "Atom " << h.value() << " total stimulus = " << total_stim
+        std::cout << "Atom " << h << " total stimulus = " << total_stim
                   << " STI old = " << current << ", new = " << a->get_STI(h)
                   << ", rent = " << stiRentCharged << ", exchangeAmount = "
                   << exchangeAmount << std::endl;

@@ -60,20 +60,8 @@ SimpleImportanceDiffusionAgent::SimpleImportanceDiffusionAgent(CogServer& cs) :
                 config().get_double("HEBBIAN_MAX_ALLOCATION_PERCENTAGE"));
 
     // Provide a logger
-    log = NULL;
     setLogger(new opencog::Logger("SimpleImportanceDiffusionAgent.log",
                                   Logger::FINE, true));
-}
-
-void SimpleImportanceDiffusionAgent::setLogger(Logger* _log)
-{
-    if (log) delete log;
-    log = _log;
-}
-
-Logger* SimpleImportanceDiffusionAgent::getLogger()
-{
-    return log;
 }
 
 /*
@@ -92,12 +80,13 @@ void SimpleImportanceDiffusionAgent::setMaxSpreadPercentage(double percent)
  * existence of the configuration atom, and if it exists, updates the parameter
  * to its current value. The value should be a probability between 0 and 1.
  */
-void SimpleImportanceDiffusionAgent::updateMaxSpreadPercentage() {
-    HandleSeq resultSet;
-    as->get_handles_by_name(back_inserter(resultSet), "CONFIG-DiffusionPercent");
-    if (resultSet.size() > 0) {
+void SimpleImportanceDiffusionAgent::updateMaxSpreadPercentage()
+{
+    Handle h = _as->get_handle(CONCEPT_NODE, "CONFIG-DiffusionPercent");
+    if (h)
+    {
         // Given the PredicateNode, walk to the NumberNode
-        Handle h = resultSet.front();
+        HandleSeq resultSet;
         h->getIncomingSet(back_inserter(resultSet));
         h = resultSet.front();
         if (h->isLink()) {
@@ -106,7 +95,7 @@ void SimpleImportanceDiffusionAgent::updateMaxSpreadPercentage() {
             resultSet = h->getOutgoingSet();
             h = resultSet.front();
         }
-        double value = std::atof(as->get_name(h).c_str());
+        double value = std::atof(h->getName().c_str());
         setMaxSpreadPercentage(value);
 
 #ifdef DEBUG
@@ -188,7 +177,7 @@ void SimpleImportanceDiffusionAgent::spreadImportance()
     for (Handle atomSource : diffusionSourceVector)
     {
         // Check the decision function to determine if spreading will occur
-        if (spreadDecider->spreadDecision(as->get_STI(atomSource))) {
+        if (spreadDecider->spreadDecision(_as->get_STI(atomSource))) {
 #ifdef DEBUG
             std::cout << "Calling diffuseAtom." << std::endl;
 #endif
@@ -228,7 +217,7 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
                 incidentAtoms);
 
 #ifdef DEBUG
-    std::cout << "Calculating diffusion for handle # " << source.value() <<
+    std::cout << "Calculating diffusion for handle # " << source <<
                  std::endl;
     std::cout << "Incident probability vector contains " <<
                  probabilityVectorIncident.size() << " atoms." << std::endl;
@@ -308,8 +297,8 @@ void SimpleImportanceDiffusionAgent::diffuseAtom(Handle source)
 void SimpleImportanceDiffusionAgent::tradeSTI(DiffusionEventType event)
 {
     // Trade STI between the source and target atoms
-    as->set_STI(event.source, as->get_STI(event.source) - event.amount);
-    as->set_STI(event.target, as->get_STI(event.target) + event.amount);
+    event.source->setSTI(event.source->getSTI() - event.amount);
+    event.target->setSTI(event.target->getSTI() + event.amount);
 
 #ifdef DEBUG
     std::cout << "tradeSTI: " << event.amount << " from " << event.source

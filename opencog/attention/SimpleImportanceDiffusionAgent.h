@@ -25,14 +25,14 @@
 #ifndef _OPENCOG_SIMPLE_IMPORTANCE_DIFFUSION_AGENT_H
 #define _OPENCOG_SIMPLE_IMPORTANCE_DIFFUSION_AGENT_H
 
-#include <string>
-#include <stack>
 #include <math.h>
+#include <stack>
+#include <string>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/util/Logger.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/util/RandGen.h>
+
 #include "SpreadDecider.h"
 
 namespace opencog
@@ -40,8 +40,6 @@ namespace opencog
 /** \addtogroup grp_attention
  *  @{
  */
-
-class CogServer;
 
 /** Diffuses short term importance between atoms in the attentional focus.
  *
@@ -61,15 +59,11 @@ class CogServer;
  */
 class SimpleImportanceDiffusionAgent : public Agent
 {
-
 private:
-    AtomSpace* as;
     double maxSpreadPercentage;
     double hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;
     SpreadDecider* spreadDecider;
-    void setLogger(Logger* l);
-    Logger *log;
     
     typedef struct DiffusionEventType
     {
@@ -106,7 +100,6 @@ public:
     SimpleImportanceDiffusionAgent(CogServer&);
     virtual ~SimpleImportanceDiffusionAgent();
     virtual void run();
-    Logger* getLogger();
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::SimpleImportanceDiffusionAgent");

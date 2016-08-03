@@ -25,7 +25,6 @@
 #define _OPENCOG_HEBBIAN_LEARNING_AGENT_H
 
 #include <string>
-#include <opencog/util/Logger.h>
 
 #define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
@@ -37,8 +36,6 @@ namespace opencog
 /** \addtogroup grp_attention
  *  @{
  */
-
-class CogServer;
 
 /** Agent that carries out simple Hebbian learning.
  *

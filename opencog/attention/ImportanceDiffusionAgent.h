@@ -27,16 +27,13 @@
 #include <string>
 
 #include <math.h>
-//#include <gsl/gsl_matrix.h>
-//#include <gsl/gsl_vector.h>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/util/Logger.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/util/RandGen.h>
 #include "SpreadDecider.h"
 

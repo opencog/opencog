@@ -56,22 +56,6 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     setLogger(new opencog::Logger("ForgettingAgent.log", Logger::WARN, true));
 }
 
-ForgettingAgent::~ForgettingAgent()
-{
-    if (log) delete log;
-}
-
-Logger* ForgettingAgent::getLogger()
-{
-    return log;
-}
-
-void ForgettingAgent::setLogger(Logger* _log)
-{
-    if (log) delete log;
-    log = _log;
-}
-
 void ForgettingAgent::run()
 {
     log->fine("=========== ForgettingAgent::run =======");
