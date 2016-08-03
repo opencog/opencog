@@ -54,7 +54,7 @@ SimpleImportanceDiffusionAgent::SimpleImportanceDiffusionAgent(CogServer& cs) :
     spreadDecider = NULL;
     setSpreadDecider(config().get_int("SPREAD_DECIDER_TYPE"));
     setMaxSpreadPercentage(
-                (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE")));
+                config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
     setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
     setHebbianMaxAllocationPercentage(
                 config().get_double("HEBBIAN_MAX_ALLOCATION_PERCENTAGE"));
@@ -81,7 +81,7 @@ Logger* SimpleImportanceDiffusionAgent::getLogger()
  * is available for diffusion at each time step. An atom will not diffuse more
  * than this percentage.
  */
-void SimpleImportanceDiffusionAgent::setMaxSpreadPercentage(float percent)
+void SimpleImportanceDiffusionAgent::setMaxSpreadPercentage(double percent)
 {
     maxSpreadPercentage = percent;
 }
@@ -106,7 +106,7 @@ void SimpleImportanceDiffusionAgent::updateMaxSpreadPercentage() {
             resultSet = h->getOutgoingSet();
             h = resultSet.front();
         }
-        float value = std::atof(as->get_name(h).c_str());
+        double value = std::atof(as->get_name(h).c_str());
         setMaxSpreadPercentage(value);
 
 #ifdef DEBUG
@@ -124,7 +124,7 @@ void SimpleImportanceDiffusionAgent::updateMaxSpreadPercentage() {
  * that option is enabled.
  */
 void SimpleImportanceDiffusionAgent::setHebbianMaxAllocationPercentage(
-        float percent)
+        double percent)
 {
     hebbianMaxAllocationPercentage = percent;
 }
@@ -141,7 +141,7 @@ void SimpleImportanceDiffusionAgent::setSpreadHebbianOnly(bool option)
     spreadHebbianOnly = option;
 }
 
-void SimpleImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
+void SimpleImportanceDiffusionAgent::setSpreadDecider(int type, double shape)
 {
     if (spreadDecider) {
         delete spreadDecider;
@@ -441,7 +441,7 @@ SimpleImportanceDiffusionAgent::probabilityVectorIncident(HandleSeq handles)
     std::map<Handle, double> result;
 
     // Allocate an equal probability to each incident atom
-    double diffusionAmount = 1.0f / handles.size();
+    double diffusionAmount = 1.0 / handles.size();
 
     for (Handle target : handles)
     {
@@ -619,7 +619,7 @@ AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
  * confidence, if either value is far from 1.0, then the link will allow less
  * diffusion to occur across the hebbian link
  */
-float SimpleImportanceDiffusionAgent::calculateHebbianDiffusionPercentage(
+double SimpleImportanceDiffusionAgent::calculateHebbianDiffusionPercentage(
         Handle h)
 {
     strength_t strength = h->getTruthValue()->getMean();

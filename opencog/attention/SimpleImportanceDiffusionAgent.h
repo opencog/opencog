@@ -64,8 +64,8 @@ class SimpleImportanceDiffusionAgent : public Agent
 
 private:
     AtomSpace* as;
-    float maxSpreadPercentage;
-    float hebbianMaxAllocationPercentage;
+    double maxSpreadPercentage;
+    double hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;
     SpreadDecider* spreadDecider;
     void setLogger(Logger* l);
@@ -88,8 +88,8 @@ private:
     HandleSeq hebbianAdjacentAtoms(Handle);
     std::map<Handle, double> probabilityVector(HandleSeq);    
     AttentionValue::sti_t calculateDiffusionAmount(Handle);
-    float calculateHebbianDiffusionPercentage(Handle);
-    float calculateIncidentDiffusionPercentage(Handle);
+    double calculateHebbianDiffusionPercentage(Handle);
+    double calculateIncidentDiffusionPercentage(Handle);
     std::map<Handle, double> probabilityVectorIncident(HandleSeq);
     std::map<Handle, double> probabilityVectorHebbianAdjacent(Handle, HandleSeq);
     std::map<Handle, double> combineIncidentAdjacentVectors(
@@ -99,9 +99,9 @@ private:
     
 public:
     enum { HYPERBOLIC, STEP };
-    void setSpreadDecider(int type, float shape = 30);
-    void setMaxSpreadPercentage(float);
-    void setHebbianMaxAllocationPercentage(float);
+    void setSpreadDecider(int type, double shape = 30);
+    void setMaxSpreadPercentage(double);
+    void setHebbianMaxAllocationPercentage(double);
     void setSpreadHebbianOnly(bool);
     SimpleImportanceDiffusionAgent(CogServer&);
     virtual ~SimpleImportanceDiffusionAgent();

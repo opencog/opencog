@@ -93,19 +93,13 @@ public:
     //! Maximum LTI of an atom that can be forgot.
     AttentionValue::lti_t forgetThreshold;
     //! Percentage of AtomSpace to forget.
-    float forgetPercentage;
+    double forgetPercentage;
 
     ForgettingAgent(CogServer&);
     virtual ~ForgettingAgent();
     virtual void run();
 
-    void forget(float p);
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
+    void forget(double p);
 
 }; // class
 
@@ -128,7 +122,7 @@ struct ForgettingLTIThenTVAscendingSort
         lti2 = h2->getAttentionValue()->getLTI();
         if (lti1 != lti2) return lti1 < lti2;
         else {
-            float tv1, tv2;
+            double tv1, tv2;
             tv1 = fabs(h1->getTruthValue()->getMean());
             tv2 = fabs(h2->getTruthValue()->getMean());
             return tv1 < tv2;

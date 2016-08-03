@@ -35,7 +35,7 @@
 
 using namespace opencog;
 
-void HebbianUpdatingAgent::setMean(Handle h, float tc)
+void HebbianUpdatingAgent::setMean(Handle h, double tc)
 {
 	TruthValuePtr oldtv(h->getTruthValue());
 	switch (oldtv->getType())
@@ -93,8 +93,8 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
 {
 
     // tc affects the truthvalue
-    float tc, old_tc, new_tc;
-    float tcDecayRate = 0.1f;
+    double tc, old_tc, new_tc;
+    double tcDecayRate = 0.1f;
 
     log->info("HebbianUpdatingAgent::hebbianUpdatingupdate "
                    "(convert links = %d)", convertLinks);
@@ -209,7 +209,7 @@ HandleSeq& HebbianUpdatingAgent::moveSourceToFront(HandleSeq &outgoing)
     Handle theSource;
     bool foundTheSource = false;
     for (auto outgoing_i = outgoing.begin();outgoing_i != outgoing.end();) {
-        float normsti;
+        double normsti;
         Handle oh = *outgoing_i;
         normsti = a->get_normalised_STI(oh,true,false);
         if (normsti > 0.0f) {
@@ -227,7 +227,7 @@ HandleSeq& HebbianUpdatingAgent::moveSourceToFront(HandleSeq &outgoing)
     return outgoing;
 
 }
-float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
+double HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 {
     // TODO: this won't work for Hebbian Links with arity > 2
 
@@ -235,8 +235,9 @@ float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
     // in the attentional focus
     bool inAttention = false;
     AttentionValue::sti_t sti;
-    float tc = 0.0f, normsti;
-    std::vector<float> normsti_v;
+    double tc = 0.0;
+    double normsti;
+    std::vector<double> normsti_v;
     bool tcInit = true;
 
 	log->fine("HebbianUpdatingAgent::targetConjunction");
@@ -267,11 +268,11 @@ float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 
     }
 
-    if (!inAttention) return 0.0f;
+    if (!inAttention) return 0.0;
 
     // cap conjunction to range [-1,1]
-    if (tc > 1.0f) tc = 1.0f;
-    if (tc < -1.0f) tc = -1.0f;
+    if (tc > 1.0) tc = 1.0;
+    if (tc < -1.0) tc = -1.0;
 
     log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc = %.3f",
         normsti_v[0], normsti_v[1], tc);

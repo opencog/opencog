@@ -82,17 +82,7 @@ protected:
 	 */
     HandleSeq& moveSourceToFront(HandleSeq &outgoing);
 
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
     void setMean(Handle h, float tc);
-
-    Logger *log; //!< Logger object for Agent
 
 public:
 
@@ -105,12 +95,6 @@ public:
     HebbianUpdatingAgent(CogServer&);
     virtual ~HebbianUpdatingAgent();
     virtual void run();
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
 
     //! Whether to convert links to/from InverseHebbianLinks as necessary.
     bool convertLinks;

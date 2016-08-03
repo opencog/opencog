@@ -151,8 +151,8 @@ private:
 
     AttentionValue::sti_t STIAtomWage; //!< Max atom STI wage per stimulus
     AttentionValue::lti_t LTIAtomWage; //!< Max atom LTI wage per stimulus
-    std::vector<float> STIAtomWageForAgent; //!< Atom STI wage per stimulus for each Agent
-    std::vector<float> LTIAtomWageForAgent; //!< Atom LTI wage per stimulus for each Agent
+    std::vector<double> STIAtomWageForAgent; //!< Atom STI wage per stimulus for each Agent
+    std::vector<double> LTIAtomWageForAgent; //!< Atom LTI wage per stimulus for each Agent
 
     /** Calculate the wages to pay to atoms for each agent
      *
@@ -178,7 +178,7 @@ private:
     void randomStimulation(AtomSpace *a, AgentPtr agent);
 
     bool noiseOn;     //!< Randomly stimulate atoms?
-    float noiseOdds;  //!< Chance of randomly introduced stimulus
+    double noiseOdds;  //!< Chance of randomly introduced stimulus
     stim_t noiseUnit; //!< The default stimulus unit used by random stimulation
 
     //! Recent amount of stimulus given per cycle
@@ -300,7 +300,7 @@ private:
      * Internally takes the integer component of the mean, and samples
      * from a Poisson distribution for the remainder.
      *
-     * @param mean The mean tax that would be charged if STI/LTI were a float.
+     * @param mean The mean tax that would be charged if STI/LTI were a double.
      * @return An integer amount of tax to charge
      */
     int getTaxAmount(double mean);

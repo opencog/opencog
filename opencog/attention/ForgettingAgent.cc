@@ -46,7 +46,7 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     defaultForgetThreshold = buf.str();
     config().set("ECAN_FORGET_THRESHOLD",defaultForgetThreshold);
 
-    forgetPercentage = (float) (config().get_double("ECAN_FORGET_PERCENTAGE"));
+    forgetPercentage = (double) (config().get_double("ECAN_FORGET_PERCENTAGE"));
 
     forgetThreshold = (AttentionValue::lti_t)
                       (config().get_int("ECAN_FORGET_THRESHOLD"));
@@ -79,7 +79,7 @@ void ForgettingAgent::run()
     forget(forgetPercentage);
 }
 
-void ForgettingAgent::forget(float proportion = 0.10f)
+void ForgettingAgent::forget(double proportion = 0.10)
 {
     HandleSeq atomsVector;
     std::back_insert_iterator<HandleSeq> output2(atomsVector);

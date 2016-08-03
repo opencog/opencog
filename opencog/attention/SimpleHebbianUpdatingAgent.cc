@@ -41,7 +41,7 @@ SimpleHebbianUpdatingAgent::~SimpleHebbianUpdatingAgent()
 void SimpleHebbianUpdatingAgent::hebbianUpdatingUpdate()
 {
     // tc affects the truthvalue
-    float tcDecayRate = 0.1f;
+    double tcDecayRate = 0.1;
     log->info("HebbianUpdatingAgent::hebbianUpdatingupdate "
               "(convert links = %d)",
               convertLinks);
@@ -50,7 +50,7 @@ void SimpleHebbianUpdatingAgent::hebbianUpdatingUpdate()
     HandleSeq links;
     std::back_insert_iterator<HandleSeq> link_output(links);
     a->get_handles_by_type(link_output, HEBBIAN_LINK, true);
-    float tc, old_tc, new_tc;
+    double tc, old_tc, new_tc;
 
     // for each hebbian link, find targets, work out conjunction and convert
     // that into truthvalue change. the change should be based on existing TV.
@@ -61,9 +61,9 @@ void SimpleHebbianUpdatingAgent::hebbianUpdatingUpdate()
 
         // old link strength decays
         old_tc = h->getTruthValue()->getMean();
-        tc = tcDecayRate * new_tc + (1.0f - tcDecayRate) * old_tc;
-        if (tc < 0.0f)
-            tc = 0.0f;
+        tc = tcDecayRate * new_tc + (1.0 - tcDecayRate) * old_tc;
+        if (tc < 0.0)
+            tc = 0.0;
 
         //update truth value accordingly
         setMean(h, tc);
@@ -74,7 +74,7 @@ void SimpleHebbianUpdatingAgent::hebbianUpdatingUpdate()
     }
 }
 
-float SimpleHebbianUpdatingAgent::targetConjunction(HandleSeq handles)
+double SimpleHebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 {
     if (handles.size() != 2) {
         throw RuntimeException(
@@ -84,7 +84,7 @@ float SimpleHebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 
     auto normsti_i = a->get_normalised_STI(handles[0]);
     auto normsti_j = a->get_normalised_STI(handles[1]);
-    auto conj = std::max(normsti_i * normsti_j, 1.0f);
+    auto conj = std::max(normsti_i * normsti_j, 1.0);
 
     log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc %.3f", normsti_i,
               normsti_j, conj);
