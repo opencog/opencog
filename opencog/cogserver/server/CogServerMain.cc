@@ -175,15 +175,15 @@ int main(int argc, char *argv[])
     }
 
     // setup global logger
-    if (logger().get_filename() != config()["LOG_FILE"]) {
+    if (logger().get_filename() != config().get("LOG_FILE", "opencog.log") {
 	    logger().info() << "Subsequent logging will be redirected to file: "
-	                    << config()["LOG_FILE"];
+	                    << config().get("LOG_FILE", "opencog.log");
     }
-    logger().set_filename(config()["LOG_FILE"]);
-    logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
-    auto level = Logger::get_level_from_string(config()["BACK_TRACE_LOG_LEVEL"]);
+    logger().set_filename(config().get("LOG_FILE", "opencog.log"));
+    logger().set_level(Logger::get_level_from_string(config().get("LOG_LEVEL", "info")));
+    auto level = Logger::get_level_from_string(config().get("BACK_TRACE_LOG_LEVEL", "error");
     logger().set_backtrace_level(level);
-    logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
+    logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT", false));
     //logger().set_level(Logger::DEBUG);
 
     // Start catching signals
