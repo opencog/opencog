@@ -124,7 +124,7 @@
 "
   make-recognized-face FACE-ID RECOG-ID
 
-  FACE-ID is a number that represents the face ID and RECOG-ID is a number that
+  FACE-ID is a number that represents the face ID and RECOG-ID is a string that
   represents the recognition ID for the visible face. It returns the atomese
   representation of the recognized face.
 "
@@ -132,14 +132,14 @@
 		(PredicateNode "name")
 		(ListLink
 			(ConceptNode (number->string face-id))
-			(ConceptNode (number->string recog-id))))
+			(ConceptNode recog-id)))
 )
 
 (define-public (make-mapped-recognized-face face-id recog-id x y z)
 "
   make-mapped-recognized-face FACE-ID RECOG-ID X Y Z
 
-  FACE-ID is a number that represents the face ID, and RECOG-ID is a number that
+  FACE-ID is a number that represents the face ID, and RECOG-ID is a string that
   represents the recognition ID. X, Y and Z are the coordinate numbers
   associated with the face that represented by FACE-ID. It returns the atomese
   representation of the recognized face that was added to the octomap.
