@@ -643,8 +643,13 @@ void CogServer::loadSCMModules(std::vector<std::string> module_paths)
         }
     }
 
+    // Load scheme modules specified in the config file
+    std::vector<std::string> scm_modules;
+    tokenize(config().get("SCM_PRELOAD", ""), std::back_inserter(scm_modules), ", ");
 
-    load_scm_files_from_config(*atomSpace, module_paths);
+    for (const std::string& scm_module : scm_modules)
+        load_scm_file_relative(atomSpace, scm_module, search_paths);
+
 #else /* HAVE_GUILE */
     logger().warn("Server compiled without SCM support");
 #endif /* HAVE_GUILE */
