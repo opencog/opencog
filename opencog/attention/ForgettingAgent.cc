@@ -24,12 +24,8 @@
 #include <algorithm>
 #include <sstream>
 
-#include <opencog/atomspace/AtomSpace.h>
-
-#include <opencog/cogserver/server/Agent.h>
-#include <opencog/cogserver/server/CogServer.h>
-#include <opencog/cogserver/server/Factory.h>
 #include <opencog/util/Config.h>
+#include <opencog/cogserver/server/Agent.h>
 #include "ForgettingAgent.h"
 
 using namespace opencog;
@@ -54,6 +50,8 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     // Provide a logger, but disable it initially
     setLogger(new opencog::Logger("ForgettingAgent.log", Logger::WARN, true));
 }
+
+ForgettingAgent::~ForgettingAgent() {}
 
 void ForgettingAgent::run()
 {
@@ -96,5 +94,4 @@ void ForgettingAgent::forget(double proportion = 0.10)
         }
     }
     _log->info("ForgettingAgent::forget - %d atoms removed.", count);
-
 }
