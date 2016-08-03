@@ -73,6 +73,7 @@
 	(DefinedSchemaNode "Someone left action")
 	face-demand-satisfied (stv 1 1) face-demand)
 
+; This rule is the old multiple-face tracking rule
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone visible?")))
 	(DefinedSchemaNode "Interact with people")
