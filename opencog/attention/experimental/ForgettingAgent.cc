@@ -24,7 +24,6 @@
 #include <algorithm>
 #include <sstream>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/cogserver/server/Agent.h>
@@ -94,12 +93,12 @@ void ForgettingAgent::forget()
         {
             if (atomsVector[i]->getAttentionValue()->getVLTI() == AttentionValue::DISPOSABLE )
             {
-                std::string atomName = _as->atom_as_string(atomsVector[i]);
+                std::string atomName = atomsVector[i]->toString();
                 _log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important
                 IncomingSet iset = atomsVector[i]->getIncomingSet(_as);
                 recursive = true;
-                for (LinkPtr h : iset)
+                for (const LinkPtr& h : iset)
                 {
                     if (h->getType() != ASYMMETRIC_HEBBIAN_LINK) {
                         recursive = false;

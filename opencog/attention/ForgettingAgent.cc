@@ -24,7 +24,6 @@
 #include <algorithm>
 #include <sstream>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/cogserver/server/Agent.h>
@@ -98,7 +97,7 @@ void ForgettingAgent::forget(float proportion = 0.10f)
         if (atomsVector[i]->getAttentionValue()->getLTI() <= forgetThreshold
                 && count < removalAmount) {
             if (atomsVector[i]->getAttentionValue()->getVLTI() == AttentionValue::DISPOSABLE ) {
-                std::string atomName = a->atom_as_string(atomsVector[i]);
+                std::string atomName = atomsVector[i]->toString();
                 log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important
                 if (!a->remove_atom(atomsVector[i])) {

@@ -32,4 +32,3 @@
 using namespace opencog;
 TRIVIAL_MODULE(AttentionTypesModule)
 DECLARE_MODULE(AttentionTypesModule)
-

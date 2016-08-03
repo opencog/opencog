@@ -95,7 +95,7 @@ void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
             resultSet = h->getOutgoingSet();
             h = resultSet.front();
         }
-        double value = std::atof(_as->get_name(h).c_str());
+        double value = std::atof(h->getName().c_str());
         setMaxSpreadPercentage(value);
 
 #ifdef DEBUG
@@ -258,8 +258,8 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
 void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
 {
     // Trade STI between the source and target atoms
-    _as->set_STI(event.source, _as->get_STI(event.source) - event.amount);
-    _as->set_STI(event.target, _as->get_STI(event.target) + event.amount);
+    event.source->setSTI(event.source->getSTI() - event.amount);
+    event.target->setSTI(event.target->getSTI() + event.amount);
 
 #ifdef DEBUG
     std::cout << "tradeSTI: " << event.amount << " from " << event.source
@@ -308,7 +308,7 @@ HandleSeq ImportanceDiffusionBase::diffusionSourceVector(bool af_only)
         std::remove_if(resultSet.begin(), resultSet.end(),
                        [=](const Handle& h)
                        {
-                           Type type = _as->get_type(h);
+                           Type type = h->getType();
 
 #ifdef DEBUG
                            std::cout << "Checking atom of type: " <<
@@ -553,7 +553,7 @@ AttentionValue::sti_t ImportanceDiffusionBase::calculateDiffusionAmount(
 {
     updateMaxSpreadPercentage();
 
-    return (AttentionValue::sti_t) round(_as->get_STI(h) * maxSpreadPercentage);
+    return (AttentionValue::sti_t) round(h->getSTI() * maxSpreadPercentage);
 
     // TODO: Using integers for STI values can cause strange consequences.
     // For example, if the amount to diffuse is 0.4, it will become 0, causing
