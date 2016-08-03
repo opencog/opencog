@@ -45,14 +45,14 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     // Convert MAXLTI to a string for storing in the configuration
     buf << AttentionValue::MAXLTI;
     defaultForgetThreshold = buf.str();
-    config().set("ECAN_FORGET_THRESHOLD",defaultForgetThreshold);
+    config().set("ECAN_FORGET_THRESHOLD", defaultForgetThreshold);
 
     forgetThreshold = (AttentionValue::lti_t)
-                      (config().get_int("ECAN_FORGET_THRESHOLD"));
+                      (config().get_int("ECAN_FORGET_THRESHOLD", 0));
 
     //Todo: Make configurable
-    maxSize = config().get_int("ECAN_ATOMSPACE_MAXSIZE");
-    accDivSize = config().get_int("ECAN_ATOMSPACE_ACCEPTABLE_SIZE_SPREAD");
+    maxSize = config().get_int("ECAN_ATOMSPACE_MAXSIZE", 10000);
+    accDivSize = config().get_int("ECAN_ATOMSPACE_ACCEPTABLE_SIZE_SPREAD", 100);
 
     // Provide a logger, but disable it initially
     setLogger(new opencog::Logger("ForgettingAgent.log", Logger::WARN, true));
@@ -123,5 +123,4 @@ void ForgettingAgent::forget()
         }
     }
     _log->info("ForgettingAgent::forget - %d atoms removed.", count);
-
 }

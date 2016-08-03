@@ -34,10 +34,7 @@ using namespace opencog;
 WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
     ImportanceDiffusionBase(cs)
 {
-    if (config().has("ECAN_DIFFUSION_TOURNAMENT_SIZE"))
-        _tournamentSize = config().get_int("ECAN_DIFFUSION_TOURNAMENT_SIZE");
-    else
-        _tournamentSize = 5;
+    _tournamentSize = config().get_int("ECAN_DIFFUSION_TOURNAMENT_SIZE", 5);
 
     set_sleep_time(300);
 }
