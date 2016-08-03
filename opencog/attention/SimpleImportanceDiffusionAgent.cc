@@ -158,7 +158,6 @@ SimpleImportanceDiffusionAgent::~SimpleImportanceDiffusionAgent()
 
 void SimpleImportanceDiffusionAgent::run()
 {
-    as = &_cogserver.getAtomSpace();
     spreadDecider->setFocusBoundary(0);
     spreadImportance();
 }
@@ -329,7 +328,7 @@ HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
 {
     // Retrieve the atoms in the AttentionalFocus
     HandleSeq resultSet;
-    as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
+    _as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
 
 #ifdef DEBUG
     std::cout << "Calculating diffusionSourceVector." << std::endl;
@@ -342,7 +341,7 @@ HandleSeq SimpleImportanceDiffusionAgent::diffusionSourceVector()
         std::remove_if(resultSet.begin(), resultSet.end(),
                        [=](const Handle& h)
                        {
-                           Type type = as->get_type(h);
+                           Type type = h->getType();
 
 #ifdef DEBUG
                            std::cout << "Checking atom of type: " <<
@@ -467,10 +466,10 @@ SimpleImportanceDiffusionAgent::probabilityVectorHebbianAdjacent(
     // For each hebbian link that will be spread across, discount the
     // amount that is actually allocated to it, based on certain attributes
     // of the link
-    for (Handle target : targets)
+    for (const Handle& target : targets)
     {
         // Find the hebbian link that connects the source atom to this target
-        Handle link = as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
+        Handle link = _as->get_handle(ASYMMETRIC_HEBBIAN_LINK, source, target);
 
         // Calculate the discounted diffusion amount based on the link
         // attributes
@@ -586,7 +585,7 @@ AttentionValue::sti_t SimpleImportanceDiffusionAgent::calculateDiffusionAmount(
 {
     updateMaxSpreadPercentage();
 
-    return (AttentionValue::sti_t) round(as->get_STI(h) * maxSpreadPercentage);
+    return round(h->getSTI() * maxSpreadPercentage);
 
     // TODO: Using integers for STI values can cause strange consequences.
     // For example, if the amount to diffuse is 0.4, it will become 0, causing

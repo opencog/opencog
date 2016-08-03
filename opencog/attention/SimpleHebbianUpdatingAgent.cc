@@ -42,14 +42,14 @@ void SimpleHebbianUpdatingAgent::hebbianUpdatingUpdate()
 {
     // tc affects the truthvalue
     double tcDecayRate = 0.1;
-    log->info("HebbianUpdatingAgent::hebbianUpdatingupdate "
+    _log->info("HebbianUpdatingAgent::hebbianUpdatingupdate "
               "(convert links = %d)",
               convertLinks);
 
     // get links again to include the new ones
     HandleSeq links;
     std::back_insert_iterator<HandleSeq> link_output(links);
-    a->get_handles_by_type(link_output, HEBBIAN_LINK, true);
+    _as->get_handles_by_type(link_output, HEBBIAN_LINK, true);
     double tc, old_tc, new_tc;
 
     // for each hebbian link, find targets, work out conjunction and convert
@@ -68,8 +68,8 @@ void SimpleHebbianUpdatingAgent::hebbianUpdatingUpdate()
         //update truth value accordingly
         setMean(h, tc);
         if (new_tc != old_tc) {
-            log->fine("HebbianUpdatingAgent: %s old tv %f",
-                      a->atom_as_string(h).c_str(), old_tc);
+            _log->fine("HebbianUpdatingAgent: %s old tv %f",
+                       h->toString().c_str(), old_tc);
         }
     }
 }
@@ -82,11 +82,11 @@ double SimpleHebbianUpdatingAgent::targetConjunction(HandleSeq handles)
                 "Size of outgoing set of a hebbian link must be 2.");
     }
 
-    auto normsti_i = a->get_normalised_STI(handles[0]);
-    auto normsti_j = a->get_normalised_STI(handles[1]);
-    auto conj = std::max(normsti_i * normsti_j, 1.0);
+    double normsti_i = _as->get_normalised_STI(handles[0]);
+    double normsti_j = _as->get_normalised_STI(handles[1]);
+    double conj = std::max(normsti_i * normsti_j, 1.0);
 
-    log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc %.3f", normsti_i,
+    _log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc %.3f", normsti_i,
               normsti_j, conj);
 
     return conj;

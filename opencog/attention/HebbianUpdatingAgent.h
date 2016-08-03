@@ -26,7 +26,6 @@
 
 #include <string>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
@@ -45,9 +44,7 @@ namespace opencog
  */
 class HebbianUpdatingAgent : public Agent
 {
-
 protected:
-    AtomSpace* a;
 
 	/** Work out the conjunction between a series of handles.
 	 *
@@ -62,14 +59,14 @@ protected:
 	 * @todo create a method for working out conjunction between more than
 	 * two atoms.
 	 */
-    float targetConjunction(HandleSeq handles);
+    double targetConjunction(HandleSeq);
 
 	/** Transform STI into a normalised STI value between -1 and 1.
 	 *
 	 * @param s STI to normalise.
 	 * @return the normalised STI between -1.0 and 1.0
 	 */
-    float getNormSTI(AttentionValue::sti_t s);
+    double getNormSTI(AttentionValue::sti_t);
 
 	/** Rearrange the the vector so that the one with a positive normalised
 	 * STI is at the front.
@@ -77,12 +74,11 @@ protected:
 	 * @param outgoing Vector to rearrange.
 	 * @return rearranged vector.
 	 */
-    HandleSeq& moveSourceToFront(HandleSeq &outgoing);
+    HandleSeq& moveSourceToFront(HandleSeq&);
 
-    void setMean(Handle h, float tc);
+    void setMean(Handle, double tc);
 
 public:
-
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::HebbianUpdatingAgent");

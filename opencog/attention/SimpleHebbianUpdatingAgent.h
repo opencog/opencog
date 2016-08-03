@@ -25,7 +25,6 @@
 #ifndef SIMPLEHEBBIANPDATINGAGENT_H_
 #define SIMPLEHEBBIANPDATINGAGENT_H_
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include "HebbianUpdatingAgent.h"
@@ -49,10 +48,10 @@ public:
         static const ClassInfo _ci("opencog::SimpleHebbianUpdatingAgent");
         return _ci;
     }
-    SimpleHebbianUpdatingAgent(CogServer& cs);
+    SimpleHebbianUpdatingAgent(CogServer&);
     virtual ~SimpleHebbianUpdatingAgent();
     void hebbianUpdatingUpdate();
-    float targetConjunction(HandleSeq handles);
+    double targetConjunction(HandleSeq);
 };
 
 typedef std::shared_ptr<SimpleHebbianUpdatingAgent> SimpleHebbianUpdatingAgentPtr;

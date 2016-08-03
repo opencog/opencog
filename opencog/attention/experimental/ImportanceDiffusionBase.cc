@@ -398,7 +398,7 @@ ImportanceDiffusionBase::probabilityVectorIncident(HandleSeq handles)
     std::map<Handle, double> result;
 
     // Allocate an equal probability to each incident atom
-    double diffusionAmount = 1.0f / handles.size();
+    double diffusionAmount = 1.0 / handles.size();
 
     for (Handle target : handles)
     {

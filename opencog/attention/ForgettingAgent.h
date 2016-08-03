@@ -67,7 +67,6 @@ namespace opencog
 class ForgettingAgent : public Agent
 {
 public:
-
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::ForgettingAgent");
@@ -83,8 +82,7 @@ public:
     virtual ~ForgettingAgent();
     virtual void run();
 
-    void forget(double p);
-
+    void forget(double);
 }; // class
 
 typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
@@ -96,14 +94,14 @@ typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
  */
 struct ForgettingLTIThenTVAscendingSort
 {
-    ForgettingLTIThenTVAscendingSort(AtomSpace* _a) {};
+    ForgettingLTIThenTVAscendingSort(AtomSpace*) {};
 
     bool operator()(const Handle& h1, const Handle& h2)
     {
         AttentionValue::lti_t lti1, lti2;
 
-        lti1 = h1->getAttentionValue()->getLTI();
-        lti2 = h2->getAttentionValue()->getLTI();
+        lti1 = h1->getLTI();
+        lti2 = h2->getLTI();
         if (lti1 != lti2) return lti1 < lti2;
         else {
             double tv1, tv2;

@@ -81,7 +81,7 @@ private:
     //! print a gsl matrix to stdout
     void printMatrix(bmatrix *m);
     //! print a gsl vector to stdout
-    void printVector(bvector *m, double threshold = 1.0f);
+    void printVector(bvector *m, double threshold = 1.0);
 
     //! Set the STI of h from a scaled 0..1 STI value
     void setScaledSTI(Handle h, double scaledSTI);

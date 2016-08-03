@@ -253,7 +253,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
 
         // For the case of an asymmetric link without this atom as a source
         if (!is_source(h, lh)) {
-           _log->fine("Skipping link due to assymetric link without this atom as a source: " + h.toString());
+           _log->fine("Skipping link due to assymetric link without this atom as a source: " + h->toString());
             continue;
         }
 
@@ -296,5 +296,4 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
                     _as->atom_as_string(h).c_str(), _as->atom_as_string(target_h).c_str() );
         }
     }
-
 }
