@@ -24,17 +24,16 @@
 #ifndef _OPENCOG_IMPORTANCE_DIFFUSION_AGENT_H
 #define _OPENCOG_IMPORTANCE_DIFFUSION_AGENT_H
 
+#include <math.h>
 #include <string>
 
-#include <math.h>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cogserver/server/Agent.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/util/RandGen.h>
+#include <opencog/util/recent_val.h>
+#include <opencog/cogserver/server/Agent.h>
 #include "SpreadDecider.h"
 
 typedef boost::numeric::ublas::vector<double> bvector;

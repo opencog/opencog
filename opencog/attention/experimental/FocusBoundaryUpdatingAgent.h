@@ -27,12 +27,8 @@
 #include <iostream>
 #include <sstream>
 
-#include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
-#include <opencog/util/recent_val.h>
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Agent.h>
 
@@ -50,15 +46,11 @@ namespace opencog
  */
 class FocusBoundaryUpdatingAgent : public Agent
 {
-
 private:
-
     double afbSize;
-
     AttentionValue::sti_t bottomBoundary;
 
 public:
-
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::FocusBoundaryUpdatingAgent");

@@ -31,7 +31,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/attention/atom_types.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -83,7 +82,7 @@ void ImportanceDiffusionAgent::setSpreadDecider(int type, double shape)
         spreadDecider = (SpreadDecider*) new StepDecider(_cogserver);
         break;
     }
-    
+
 }
 
 ImportanceDiffusionAgent::~ImportanceDiffusionAgent()
@@ -133,7 +132,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
         HandleSeq targets;
         HandleSeq::iterator targetItr;
         Handle linkHandle = *hi;
-        double val = _as->get_TV(linkHandle)->toFloat();
+        double val = linkHandle->getTruthValue()->toFloat();
         if (val == 0.0) {
             continue;
         }
@@ -141,12 +140,13 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
         targets = linkHandle->getOutgoingSet();
 
         for (targetItr = targets.begin(); targetItr != targets.end();
-                ++targetItr) {
-            if (diffusionAtomsMap.find(*targetItr) == diffusionAtomsMap.end()) {
+                ++targetItr)
+        {
+            if (diffusionAtomsMap.find(*targetItr) == diffusionAtomsMap.end())
+            {
                 diffusionAtomsMap[*targetItr] = totalDiffusionAtoms;
 #ifdef DEBUG
-                _log->fine("%s = %d",
-                        _as->atom_as_string(*targetItr).c_str(),
+                _log->fine("%s = %d", (*targetItr)->toString().c_str(),
                         totalDiffusionAtoms);
 #endif
                 totalDiffusionAtoms++;
@@ -156,7 +156,6 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
     // diffusionAtomsMap now contains all atoms involved in spread as keys and
     // their matrix indices as values.
     return totalDiffusionAtoms;
-    
 }
 
 void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
@@ -164,9 +163,8 @@ void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
     // go through diffusionAtomsMap and add each to the STI vector.
     // position in stiVector matches set (set is ordered and won't change
     // unless you add to it.
-    
     // alloc
-    stiVector = new bvector(totalDiffusionAtoms);    
+    stiVector = new bvector(totalDiffusionAtoms);
     // zero vector
     //gsl_vector_set_zero(stiVector);
 
@@ -178,10 +176,10 @@ void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
 //      (*stiVector)((*i).second) = _as->getNormalisedSTI(dAtom,false)+1.0)/2.0);
         (*stiVector)((*i).second) = _as->get_normalised_zero_to_one_STI(dAtom,false);
 #ifdef DEBUG
-        totalSTI += _as->get_STI(dAtom);
+        totalSTI += dAtom->getSTI();
 #endif
     }
-    
+
 #ifdef DEBUG
     if (_log->is_fine_enabled()) {
         _log->fine("Initial normalised STI values");
@@ -201,11 +199,9 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
     connections_ = new bmatrix(totalDiffusionAtoms, totalDiffusionAtoms, totalDiffusionAtoms * totalDiffusionAtoms);
     // To avoid having to dereference pointers everywhere
     bmatrix& connections = *connections_;
-    
-    // obviously the use of sparse matrixes means this isn't necessary
-//    gsl_matrix_set_zero(connections);
 
-    for (hi=links.begin(); hi != links.end(); ++hi) {
+    for (hi=links.begin(); hi != links.end(); ++hi)
+    {
         // Get all atoms in outgoing set of link
         HandleSeq targets;
         HandleSeq::iterator targetItr;
@@ -216,10 +212,10 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         int targetIndex;
         Type type;
 
-        double val = _as->get_TV(*hi)->toFloat();
+        double val = (*hi)->getTruthValue()->toFloat();
         if (val == 0.0) continue;
         //val *= diffuseTemperature;
-        type = _as->get_type(*hi); 
+        type = (*hi)->getType();
 
         targets = (*hi)->getOutgoingSet();
         if (classserver().isA(type,ORDERED_LINK)) {
@@ -236,7 +232,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
 #endif
             sourceHandle = (*sourcePosItr).first;
             // If source atom isn't within diffusionThreshold, then skip
-            if (!spreadDecider->spreadDecision(_as->get_STI(sourceHandle))) {
+            if (!spreadDecider->spreadDecision(sourceHandle->getSTI())) {
                 continue;
             }
             sourceIndex = (*sourcePosItr).second;
@@ -244,11 +240,11 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
             _log->fine("Ordered link with source index %d.", sourceIndex);
 #endif
             // Then spread from index 1 (since source is at index 0)
-            
+
             targetItr = targets.begin();
             ++targetItr;
             for (; targetItr != targets.end();
-            //for (targetItr = (targets.begin())++; targetItr != targets.end(); 
+            //for (targetItr = (targets.begin())++; targetItr != targets.end();
                      ++targetItr) {
                 targetPosItr = diffusionAtomsMap.find(*targetItr);
                 targetIndex = (*targetPosItr).second;
@@ -273,7 +269,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                 Handle sourceHandle;
                 sourceHandle = (*sourceItr);
                 // If source atom isn't within diffusionThreshold, then skip
-                if (!spreadDecider->spreadDecision(_as->get_STI(sourceHandle))) {
+                if (!spreadDecider->spreadDecision(sourceHandle->getSTI())) {
                     continue;
                 }
                 for (targetItr = targets.begin(); targetItr != targets.end();
@@ -319,7 +315,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         //gsl_matrix_set(connections,j,j,1.0-sumProb);
         connections(j,j) = 1.0-sumProb;
     }
-    
+
 #ifdef DEBUG
     if (_log->is_fine_enabled()) {
         _log->debug("Hebbian connection matrix:");
@@ -366,7 +362,7 @@ void ImportanceDiffusionAgent::spreadImportance()
     makeConnectionMatrix(connections, totalDiffusionAtoms, diffusionAtomsMap, links);
 
     bvector result = prod(*connections, *stiVector);
-    
+
     if (_log->is_fine_enabled()) {
         double normAF = (_as->get_attentional_focus_boundary() - _as->get_min_STI(false)) / (double) ( _as->get_max_STI(false) - _as->get_min_STI(false) );
         _log->fine("Result (AF at %.3f)\n",normAF);
@@ -374,7 +370,7 @@ void ImportanceDiffusionAgent::spreadImportance()
     }
 
     // set the sti of all atoms based on new values in results vector from
-    // multiplication 
+    // multiplication
 #ifdef DEBUG
     int totalSTI_After = 0;
 #endif
@@ -385,7 +381,7 @@ void ImportanceDiffusionAgent::spreadImportance()
         double val = result(i->second);
         setScaledSTI(dAtom, val);
 #ifdef DEBUG
-        totalSTI_After += _as->get_STI(dAtom);
+        totalSTI_After += dAtom->getSTI();
 #endif
     }
 #if 0 //def DEBUG
@@ -415,7 +411,7 @@ void ImportanceDiffusionAgent::setScaledSTI(Handle h, double scaledSTI)
         val = af + (scaledSTI * (_as->getMaxSTI(false) - af ));
     }
 */
-    _as->set_STI(h, val);
+    h->setSTI(val);
 }
 
 void ImportanceDiffusionAgent::printMatrix(bmatrix* m)

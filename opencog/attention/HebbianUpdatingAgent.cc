@@ -27,7 +27,6 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/attention/atom_types.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -135,7 +134,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                     if (tc < 0) {
                         // Inverse link no longer representative
                         // change to symmetric hebbian link
-                        _log->fine("HebbianUpdatingAgent: change old inverse %s to sym link", _as->atom_as_string(h).c_str());
+                        _log->fine("HebbianUpdatingAgent: change old inverse %s to sym link", h->toString().c_str());
                         // save STI/LTI
                         AttentionValuePtr backupAV = h->getAttentionValue();
                         _as->remove_atom(h);
@@ -153,7 +152,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                 if (tc < 0) {
                     // link no longer representative
                     // change to inverse hebbian link
-                    _log->fine("HebbianUpdatingAgent: change old sym %s to inverse link", _as->atom_as_string(h).c_str());
+                    _log->fine("HebbianUpdatingAgent: change old sym %s to inverse link", h->toString().c_str());
                     // save STI/LTI
                     AttentionValuePtr backupAV = h->getAttentionValue();
                     _as->remove_atom(h);
@@ -182,7 +181,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             setMean(h, tc);
         }
         if (isDifferent)
-            _log->fine("HebbianUpdatingAgent: %s old tv %f", _as->atom_as_string(h).c_str(), old_tc);
+            _log->fine("HebbianUpdatingAgent: %s old tv %f", h->toString().c_str(), old_tc);
 
     }
     // if not enough links, try and create some more either randomly

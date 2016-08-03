@@ -24,9 +24,7 @@
 #define _OPENCOG_HEBBIAN_CREATION_AGENT_H
 
 #include <string>
-#include <opencog/util/Logger.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>

@@ -35,7 +35,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/attention/atom_types.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -173,10 +172,10 @@ void SimpleImportanceDiffusionAgent::spreadImportance()
 
     // Calculate the diffusion for each source atom, and store the diffusion
     // event in a stack
-    for (Handle atomSource : diffusionSourceVector)
+    for (const Handle& atomSource : diffusionSourceVector)
     {
         // Check the decision function to determine if spreading will occur
-        if (spreadDecider->spreadDecision(_as->get_STI(atomSource))) {
+        if (spreadDecider->spreadDecision(atomSource->getSTI())) {
 #ifdef DEBUG
             std::cout << "Calling diffuseAtom." << std::endl;
 #endif

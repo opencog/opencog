@@ -28,8 +28,6 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/mt19937ar.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
-#include <opencog/atomspace/AtomSpace.h>
 #include "ImportanceUpdatingAgent.h"
 
 #define DEBUG
@@ -194,10 +192,10 @@ void ImportanceUpdatingAgent::run()
         enforceLTICap(a, handle);
 
         // Greater than max sti seen?
-        if (a->get_STI(handle) > maxSTISeen) {
-            maxSTISeen = a->get_STI(handle);
-        } else if (a->get_STI(handle) < minSTISeen) {
-            minSTISeen = a->get_STI(handle);
+        if (handle->getSTI() > maxSTISeen) {
+            maxSTISeen = handle->getSTI();
+        } else if (handle->getSTI() < minSTISeen) {
+            minSTISeen = handle->getSTI();
         }
     }
 
@@ -328,10 +326,10 @@ void ImportanceUpdatingAgent::adjustSTIFunds(AtomSpace* a)
     for (Handle handle : hs) {
         int actualTax;
         actualTax = getTaxAmount(taxAmount);
-        beforeTax = a->get_STI(handle);
+        beforeTax = handle->getSTI();
         afterTax = beforeTax - actualTax;
 
-        a->set_STI(handle, afterTax);
+        handle->setSTI(afterTax);
         _log->fine("sti %d. Actual tax %d. after tax %d.", beforeTax, actualTax,
                   afterTax);
 
@@ -557,7 +555,7 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a,
     // Check for changes to the rent and wage parameters
     updateRentAndWages(a);
 
-    AttentionValue::sti_t current = a->get_STI(h);
+    AttentionValue::sti_t current = h->getSTI();
     AttentionValue::sti_t stiRentCharged = calculateSTIRent(a, current);
 
     int total_stim = 0;
@@ -581,16 +579,16 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a,
         createAV(current - exchangeAmount, old_av->getLTI(), old_av->getVLTI());
         agents[n]->setAV(new_av);
     }
-    a->set_STI(h, current + exchangeAmount);
+    h->setSTI(current + exchangeAmount);
 
     _log->fine("Atom %s total stim = %d, STI old = %d, new = %d, rent = %d",
-              a->get_name(h).c_str(), total_stim, current, a->get_STI(h),
+              h->getName().c_str(), total_stim, current, h->getSTI(),
               stiRentCharged);
 
 #ifdef DEBUG
     if (stiRentCharged != 0 || exchangeAmount != 0 || total_stim != 0) {
         std::cout << "Atom " << h << " total stimulus = " << total_stim
-                  << " STI old = " << current << ", new = " << a->get_STI(h)
+                  << " STI old = " << current << ", new = " << h->getSTI()
                   << ", rent = " << stiRentCharged << ", exchangeAmount = "
                   << exchangeAmount << std::endl;
     }
@@ -686,8 +684,8 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a,
 
     h->setLTI(current + exchangeAmount);
 
-    _log->fine("Atom %s LTI old = %d, new = %d", a->get_name(h).c_str(), current,
-              h->getAttentionValue()->getLTI());
+    _log->fine("Atom %s LTI old = %d, new = %d", h->getName().c_str(), current,
+              h->getLTI());
 }
 
 bool ImportanceUpdatingAgent::enforceSTICap(AtomSpace* a, Handle h)
@@ -798,7 +796,7 @@ void ImportanceUpdatingAgent::updateRentAndWages(AtomSpace* a)
         h = wage.back();
         wage = h->getOutgoingSet();
         h = wage.front();
-        int value = std::stoi(a->get_name(h));
+        int value = std::stoi(h->getName());
 
         if (STIAtomRent != value) {
 #ifdef DEBUG
@@ -822,7 +820,7 @@ void ImportanceUpdatingAgent::updateRentAndWages(AtomSpace* a)
         h = rent.back();
         rent = h->getOutgoingSet();
         h = rent.front();
-        int value = std::stoi(a->get_name(h));
+        int value = std::stoi(h->getName());
 
         if (STIAtomWage != value) {
 #ifdef DEBUG
