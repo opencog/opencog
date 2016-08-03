@@ -492,9 +492,8 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
     _log->fine("attentionalFocusSize = %d, recent = %f",
               attentionalFocusSize.val, attentionalFocusSize.recent);
 
-    for (Handle h : inFocus) {
-        if (a->is_node(h))
-            n += 1;
+    for (const Handle& h : inFocus) {
+        if (h->isNode()) n += 1;
     }
     attentionalFocusNodesSize.update(n);
 
@@ -785,11 +784,11 @@ std::string ImportanceUpdatingAgent::toString()
 void ImportanceUpdatingAgent::updateRentAndWages(AtomSpace* a)
 {
     // Update rent
-    HandleSeq wage;
-    a->get_handles_by_name(back_inserter(wage), "CONFIG-Rent");
-    if (wage.size() > 0) {
+    Handle h = _as->get_handle(CONCEPT_NODE, "CONFIG-Rent");
+    if (h)
+    {
         // Given the PredicateNode, walk to the NumberNode
-        Handle h = wage.front();
+        HandleSeq wage;
         h->getIncomingSet(back_inserter(wage));
         h = wage.front();
         wage = h->getOutgoingSet();
@@ -809,11 +808,10 @@ void ImportanceUpdatingAgent::updateRentAndWages(AtomSpace* a)
     }
 
     // Update wages
-    HandleSeq rent;
-    a->get_handles_by_name(back_inserter(rent), "CONFIG-Wages");
-    if (rent.size() > 0) {
+    h = _as->get_handle(CONCEPT_NODE, "CONFIG-Wages");
+    if (h) {
+        HandleSeq rent;
         // Given the PredicateNode, walk to the NumberNode
-        Handle h = rent.front();
         h->getIncomingSet(back_inserter(rent));
         h = rent.front();
         rent = h->getOutgoingSet();

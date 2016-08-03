@@ -88,7 +88,7 @@ void ImportanceSpreadingAgent::spreadImportance()
 }
 
 // for a bunch of links from the source, get links passed as pointer
-// to avoid retrieving them twice 
+// to avoid retrieving them twice
 int ImportanceSpreadingAgent::sumTotalDifference(Handle source, HandleSeq& links)
 {
     int totalDifference = 0;
@@ -129,7 +129,7 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
     HandleSeq::iterator t;
     AttentionValue::sti_t sourceSTI;
     AttentionValue::sti_t targetSTI;
-    
+
     // If this link doesn't have source as a source return 0
     if (! is_source(source, link)) {
        _log->debug("Skipping link because link doesn't have this source as a source: " + link->toString());
@@ -165,10 +165,10 @@ int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
                 continue;
             }
 
-           _log->fine("Target atom %s", target_h->toSttring().c_str());
+           _log->fine("Target atom %s", target_h->toString().c_str());
 
             targetSTI = target_h->getSTI();  // why is it 0?
-                
+
             linkDifference += calcDifference(sourceSTI, targetSTI, linkWeight);
         }
     }
@@ -249,7 +249,7 @@ void ImportanceSpreadingAgent::spreadAtomImportance(Handle h)
         HandleSeq targets;
         HandleSeq::iterator t;
         Handle lh = *linksVector_i;
-        TruthValuePtr linkTV = _as->get_TV(lh);
+        TruthValuePtr linkTV = lh->getTruthValue();
 
         // For the case of an asymmetric link without this atom as a source
         if (!is_source(h, lh)) {
