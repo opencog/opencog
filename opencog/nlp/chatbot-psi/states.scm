@@ -63,6 +63,8 @@
 (State random-pkd-sentence-generated default-state)
 (State random-blogs-sentence-generated default-state)
 
+(define pickup-sentence (Concept (chat-prefix "PickupSentence")))
+
 (define chatbot-eva (Anchor (chat-prefix "ChatbotEva")))
 (define chatbot-eva-action (Anchor (chat-prefix "ChatbotEvaAction")))
 (State chatbot-eva default-state)
