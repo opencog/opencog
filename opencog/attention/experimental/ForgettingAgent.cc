@@ -38,17 +38,15 @@ using namespace opencog;
 ForgettingAgent::ForgettingAgent(CogServer& cs) :
     Agent(cs)
 {
-    std::string defaultForgetThreshold;
-    std::ostringstream buf;
-
     // No limit to lti of removed atoms
     // Convert MAXLTI to a string for storing in the configuration
+    std::ostringstream buf;
     buf << AttentionValue::MAXLTI;
-    defaultForgetThreshold = buf.str();
+    std::string defaultForgetThreshold = buf.str();
     config().set("ECAN_FORGET_THRESHOLD", defaultForgetThreshold);
 
     forgetThreshold = (AttentionValue::lti_t)
-                      (config().get_int("ECAN_FORGET_THRESHOLD", defaultForgetThreshold));
+                      (config().get_int("ECAN_FORGET_THRESHOLD", AttentionValue::MAXLTI));
 
     //Todo: Make configurable
     maxSize = config().get_int("ECAN_ATOMSPACE_MAXSIZE", 10000);
