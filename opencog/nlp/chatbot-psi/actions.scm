@@ -82,7 +82,7 @@
 )
 
 (define (pickup-reply)
-    (let* ((pickup-sents (cog-incoming-set (Concept (chat-prefix "PickupSentence"))))
+    (let* ((pickup-sents (cog-incoming-set pickup-sentence))
            (chosen-sent (list-ref pickup-sents (random (length pickup-sents))))
            (sent-node (gar chosen-sent))
            (words (get-word-list sent-node)))

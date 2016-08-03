@@ -320,6 +320,7 @@
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
+            (DefinedPredicate "has-pickup-sentence?")
             (DefinedPredicate "is-input-utterance?")
             (DefinedPredicate "no-other-fast-reply?")
         ))
