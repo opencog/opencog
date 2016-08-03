@@ -176,7 +176,11 @@ void GenericShell::eval(const std::string &expr)
 	// Calling get_evaluator() there would always return the same
 	// single instance of the evaluator (because there can be at most
 	// just one evaluator per thread).
-	if (nullptr == _evaluator) _evaluator = get_evaluator();
+	if (nullptr == _evaluator)
+	{
+		_evaluator = get_evaluator();
+		_evaluator->clear_pending();
+	}
 
 	// Work-around some printing madness. See issue
 	// https://github.com/opencog/atomspace/issues/629
