@@ -187,7 +187,7 @@ SystemActivityTable& CogServer::systemActivityTable()
 void CogServer::serverLoop()
 {
     struct timeval timer_start, timer_end, elapsed_time;
-    time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
+    time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION", 100) * 1000;
 //    bool externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
 
     logger().info("Starting CogServer loop.");
