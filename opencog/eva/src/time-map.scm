@@ -2,6 +2,7 @@
 (use-modules (opencog) (opencog atom-types) (opencog eva-behavior))
 (use-modules (opencog ato pointmem)); needed for maps
 (use-modules (opencog python))
+(use-modules (opencog eva-model) (opencog eva-behavior)) ; For utility function
 
 ; -----------------------------------------------------------------------------
 ; For recording facial coordinates, create octomap with 15hz, 10 second or

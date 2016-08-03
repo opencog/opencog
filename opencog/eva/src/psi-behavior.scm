@@ -37,6 +37,7 @@
 (pred-2-schema "Listening ongoing")
 (pred-2-schema "Listening ended")
 (pred-2-schema "Keep alive")
+;(pred-2-schema "Interacting Sequence for recognized person")
 ;;
 ;(DefineLink (DefinedPredicateNode "do-noop") (True))
 ;(pred-2-schema "do-noop")
@@ -81,6 +82,13 @@
 		(DefinedPredicate "Nothing happening?")))
 	(DefinedSchemaNode "Nothing is happening")
 	face-demand-satisfied (stv 1 1) face-demand)
+
+;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+;		(Not (DefinedPredicate "chatbot started talking?"))
+;		(Not (DefinedPredicate "Is interacting with someone?"))
+;		(DefinedPredicateNode "Did someone recognizable arrive?")))
+;	(DefinedSchemaNode "Interacting Sequence for recognized person")
+;	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot started talking?")))

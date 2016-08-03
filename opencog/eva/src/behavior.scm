@@ -203,6 +203,29 @@
 			(ListLink (Node "--- Glance at new person")))
 	))
 
+;; New recognized person sequence
+(DefineLink
+	(DefinedPredicate "Interacting Sequence for recognized person")
+	(SequentialAnd
+		;(True (DefinedSchema "glance at new person"))
+		(True (Put ; Setting interaction target for "look at person"
+			(DefinedPredicate "Set interaction target")
+			(RandomChoice (Put; FIXME Replace by multiple face tracking.
+				(DefinedSchemaNode "Get recognized face's face id")
+				(DefinedSchema "Get recognized faces")))))
+		(DefinedPredicate "look at person")
+		(True (Put
+			(DefinedPredicate "Greet recognized person")
+			(Get
+				(EvaluationLink
+					(PredicateNode "name")
+					(ListLink
+						(VariableNode "face-id")
+						(VariableNode "recog-id"))))))
+		(Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Glance at and greet new recognized person")))
+	))
+
 ;; Respond to a new face becoming visible.
 ;
 ;; XXX TODO -- if interacting for a while

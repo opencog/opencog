@@ -77,6 +77,13 @@
 	(map (lambda (x) (car (cog-outgoing-set x)))
 	(cog-chase-link 'EvaluationLink 'ListLink acked-face))))
 
+(define-public (show-recognized-faces)
+"
+ Show face-id recognized-face name pairs in atomese
+"
+	(cog-outgoing-set (cog-execute! (DefinedSchema "Get recognized faces")))
+)
+
 (define-public (show-room-state)
 	(car (cog-chase-link 'StateLink 'ConceptNode room-state)))
 
