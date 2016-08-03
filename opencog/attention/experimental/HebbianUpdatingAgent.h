@@ -55,7 +55,7 @@ class HebbianUpdatingAgent : public Agent
 
 private:
 
-    float targetConjunction(HandleSeq handles);
+    double targetConjunction(HandleSeq handles);
     void updateHebbianLinks(Handle source);
 
 public:

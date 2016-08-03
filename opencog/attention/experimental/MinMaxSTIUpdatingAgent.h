@@ -44,17 +44,13 @@ namespace opencog
  *  @{
  */
 
-class CogServer;
-
 /**
  * The AtomSpace needs to know the Minimum and Maximum STI of the Atoms
  * This agent updates these values after iterating over the whole AtomSpace
  */
 class MinMaxSTIUpdatingAgent : public Agent
 {
-
 private:
-
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
 
@@ -62,7 +58,6 @@ private:
     AttentionValue::lti_t ltiFundsBuffer;
 
 public:
-
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::MinMaxSTIUpdatingAgent");

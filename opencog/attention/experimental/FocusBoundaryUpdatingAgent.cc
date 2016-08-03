@@ -46,12 +46,10 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
         Agent(cs)
 {
     // Provide a logger
-    log = NULL;
-    setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE,
-    true));
+    setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE, true));
 
-    afbSize         = (float)(config().get_double("ECAN_AFB_SIZE"));
-    bottomBoundary  = (AttentionValue::sti_t)(config().get_int("ECAN_AFB_BOTTOM"));
+    afbSize         = config().get_double("ECAN_AFB_SIZE");
+    bottomBoundary  = config().get_int("ECAN_AFB_BOTTOM");
 }
 
 void FocusBoundaryUpdatingAgent::run()
@@ -63,12 +61,12 @@ void FocusBoundaryUpdatingAgent::run()
 
         AttentionValue::sti_t range = maxsti - minsti;
 
-        float decay = 0.1;
+        double decay = 0.1;
 
         int newafb = maxsti - (range * afbSize);
         //int oldafb = afboundary;
 
-        afboundary = newafb * decay + (1 - decay) * afboundary;
+        afboundary = newafb * decay + (1.0 - decay) * afboundary;
 
         afboundary = std::max(afboundary,bottomBoundary);
 
@@ -76,5 +74,4 @@ void FocusBoundaryUpdatingAgent::run()
 
         // Set the AF boundary
         _as->set_attentional_focus_boundary(afboundary);
-
 }

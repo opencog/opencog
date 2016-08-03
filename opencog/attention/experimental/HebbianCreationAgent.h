@@ -39,8 +39,6 @@ namespace opencog
 
 extern concurrent_queue<Handle> newAtomsInAV;
 
-class CogServer;
-
 /**
  * This agent is resposible for Creating new HebbianLinks and making sure
  * that the maximum number of Links per Atom is not exceeded.
@@ -62,7 +60,7 @@ class HebbianCreationAgent : public Agent
 protected:
 
     void addHebbian(Handle atom,Handle source);
-    float targetConjunction(Handle handle1,Handle handle2);
+    double targetConjunction(Handle handle1,Handle handle2);
 
     unsigned int maxLinkNum;
 

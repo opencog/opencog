@@ -26,10 +26,7 @@
 #include <chrono>
 #include <thread>
 
-#define DEPRECATED_ATOMSPACE_CALLS
-
 #include <opencog/cogserver/server/CogServer.h>
-#include <cpprest/details/http_constants.dat>
 
 #include "AFImportanceDiffusionAgent.h"
 

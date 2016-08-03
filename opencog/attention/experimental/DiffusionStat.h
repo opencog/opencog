@@ -60,12 +60,12 @@ namespace opencog {
 
             int count = 0;
             std::chrono::time_point<hr_clock> last_update;
-            float freq = 0;
+            double freq = 0;
 
             // upper and lower bounds of the bin
-            float lb_sti, ub_sti;
+            double lb_sti, ub_sti;
 
-            Bin(float lb, float ub) {
+            Bin(double lb, double ub) {
                 lb_sti = lb;
                 ub_sti = ub;
                 last_update = hr_clock::now(); //seconds ago.	
@@ -78,7 +78,7 @@ namespace opencog {
                 sti_update_times.push_back(diff);
                 last_update = current;
 
-                float average_time = std::accumulate(sti_update_times.begin(),
+                double average_time = std::accumulate(sti_update_times.begin(),
                         sti_update_times.end(), chrono_d(0)).count()
                         / sti_update_times.size();
 
@@ -87,13 +87,13 @@ namespace opencog {
 
         };
 
-        void update_bins(std::vector<Bin>& bins, float ivalue);
+        void update_bins(std::vector<Bin>& bins, double ivalue);
 
-        int get_bin(const std::vector<Bin>& bins, float sti);
+        int get_bin(const std::vector<Bin>& bins, double sti);
 
-        std::vector<Bin> create_bins(std::set<float> ivalues, int size = 10);
+        std::vector<Bin> create_bins(std::set<double> ivalues, int size = 10);
 
-        std::vector<Bin> merge_bins(std::vector<Bin>& past, std::vector<Bin>& recent, float bias);
+        std::vector<Bin> merge_bins(std::vector<Bin>& past, std::vector<Bin>& recent, double bias);
     }
 }
 

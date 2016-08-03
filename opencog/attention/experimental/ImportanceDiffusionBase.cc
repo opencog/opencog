@@ -52,7 +52,7 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
     spreadDecider = NULL;
     setSpreadDecider(config().get_int("SPREAD_DECIDER_TYPE"));
     setMaxSpreadPercentage(
-                (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE")));
+                config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
     setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
     setHebbianMaxAllocationPercentage(
                 config().get_double("HEBBIAN_MAX_ALLOCATION_PERCENTAGE"));
@@ -61,7 +61,6 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
     // Read diffusion rate from config file.
 
     // Provide a logger
-    log = NULL;
     setLogger(new opencog::Logger("ImportanceDiffusionBase.log",
                                   Logger::FINE, true));
 }
@@ -71,7 +70,7 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
  * is available for diffusion at each time step. An atom will not diffuse more
  * than this percentage.
  */
-void ImportanceDiffusionBase::setMaxSpreadPercentage(float percent)
+void ImportanceDiffusionBase::setMaxSpreadPercentage(double percent)
 {
     maxSpreadPercentage = percent;
 }
@@ -96,7 +95,7 @@ void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
             resultSet = h->getOutgoingSet();
             h = resultSet.front();
         }
-        float value = std::atof(_as->get_name(h).c_str());
+        double value = std::atof(_as->get_name(h).c_str());
         setMaxSpreadPercentage(value);
 
 #ifdef DEBUG
@@ -114,7 +113,7 @@ void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
  * that option is enabled.
  */
 void ImportanceDiffusionBase::setHebbianMaxAllocationPercentage(
-        float percent)
+        double percent)
 {
     hebbianMaxAllocationPercentage = percent;
 }
@@ -131,7 +130,7 @@ void ImportanceDiffusionBase::setSpreadHebbianOnly(bool option)
     spreadHebbianOnly = option;
 }
 
-void ImportanceDiffusionBase::setSpreadDecider(int type, float shape)
+void ImportanceDiffusionBase::setSpreadDecider(int type, double shape)
 {
     if (spreadDecider) {
         delete spreadDecider;
@@ -576,7 +575,7 @@ AttentionValue::sti_t ImportanceDiffusionBase::calculateDiffusionAmount(
  * confidence, if either value is far from 1.0, then the link will allow less
  * diffusion to occur across the hebbian link
  */
-float ImportanceDiffusionBase::calculateHebbianDiffusionPercentage(
+double ImportanceDiffusionBase::calculateHebbianDiffusionPercentage(
         Handle h)
 {
     strength_t strength = h->getTruthValue()->getMean();

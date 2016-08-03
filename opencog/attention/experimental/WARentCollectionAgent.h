@@ -43,8 +43,6 @@ namespace opencog {
      *  @{
      */
 
-    class CogServer;
-
     /**
      * This Agent collects wages form inside the Whole Atomsapce by picking a
      * atoms via sti biased random selection from the whole atomspace and
@@ -54,18 +52,15 @@ namespace opencog {
      *
      * This Agent is supposed to run in it's own Thread.
      */
-    class WARentCollectionAgent : public RentCollectionBaseAgent {
+    class WARentCollectionAgent : public RentCollectionBaseAgent
+    {
     private:
-
         unsigned int SAMPLE_SIZE = 5;
         int _tournamentSize;
         Handle tournamentSelect(HandleSeq population);
 
     public:
-
-        const ClassInfo& classinfo() const {
-            return info();
-        }
+        const ClassInfo& classinfo() const { return info(); }
 
         static const ClassInfo& info() {
             static const ClassInfo _ci("opencog::WARentCollectionAgent");
@@ -75,7 +70,6 @@ namespace opencog {
         WARentCollectionAgent(CogServer&);
         void selectTargets(HandleSeq &targetSetOut);
     }; // class
-
 
     /** @}*/
 } // namespace

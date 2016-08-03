@@ -38,8 +38,6 @@ namespace opencog
  *  @{
  */
 
-class CogServer;
-
 /** The ForgettingAgent, carries out the forgetting process in OpenCog Prime. 
  * 
  * It does based on the LTI of Atoms. Low LTI indicates that an atom has not been
@@ -112,7 +110,7 @@ struct ForgettingLTIThenTVAscendingSort
         lti2 = h2->getAttentionValue()->getLTI();
         if (lti1 != lti2) return lti1 < lti2;
         else {
-            float tv1, tv2;
+            double tv1, tv2;
             tv1 = fabs(h1->getTruthValue()->getMean());
             tv2 = fabs(h2->getTruthValue()->getMean());
             return tv1 < tv2;

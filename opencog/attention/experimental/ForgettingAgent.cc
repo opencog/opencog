@@ -56,13 +56,12 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     accDivSize = config().get_int("ECAN_ATOMSPACE_ACCEPTABLE_SIZE_SPREAD");
 
     // Provide a logger, but disable it initially
-    log = NULL;
     setLogger(new opencog::Logger("ForgettingAgent.log", Logger::WARN, true));
 }
 
 void ForgettingAgent::run()
 {
-    log->fine("=========== ForgettingAgent::run =======");
+    _log->fine("=========== ForgettingAgent::run =======");
     forget();
 }
 
@@ -86,7 +85,7 @@ void ForgettingAgent::forget()
     std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort(_as));
 
     removalAmount = asize - (maxSize - accDivSize);
-    log->info("ForgettingAgent::forget - will attempt to remove %d atoms", removalAmount);
+    _log->info("ForgettingAgent::forget - will attempt to remove %d atoms", removalAmount);
 
     for (unsigned int i = 0; i < atomsVector.size(); i++)
     {
@@ -96,7 +95,7 @@ void ForgettingAgent::forget()
             if (atomsVector[i]->getAttentionValue()->getVLTI() == AttentionValue::DISPOSABLE )
             {
                 std::string atomName = _as->atom_as_string(atomsVector[i]);
-                log->fine("Removing atom %s", atomName.c_str());
+                _log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important
                 IncomingSet iset = atomsVector[i]->getIncomingSet(_as);
                 recursive = true;
@@ -115,7 +114,7 @@ void ForgettingAgent::forget()
                 if (!_as->remove_atom(atomsVector[i],recursive)) {
                     // Atom must have already been removed through having
                     // previously removed atoms in it's outgoing set.
-                    log->error("Couldn't remove atom %s", atomName.c_str());
+                    _log->error("Couldn't remove atom %s", atomName.c_str());
                 }
                 count++;
                 count += iset.size();
@@ -124,6 +123,6 @@ void ForgettingAgent::forget()
             break;
         }
     }
-    log->info("ForgettingAgent::forget - %d atoms removed.", count);
+    _log->info("ForgettingAgent::forget - %d atoms removed.", count);
 
 }

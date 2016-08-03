@@ -27,13 +27,8 @@ TARGET_LINK_LIBRARIES(attention-types
 
 # --------------------------------------------------
 
+ADD_SUBDIRECTORY (experimental)
 ADD_SUBDIRECTORY (scm)
-
-# Fails to build without the REST interfaces.
-IF (HAVE_cpprest)
-	ADD_SUBDIRECTORY (experimental)
-ENDIF (HAVE_cpprest)
-
 
 # AttentionModule
 ADD_LIBRARY(attention SHARED

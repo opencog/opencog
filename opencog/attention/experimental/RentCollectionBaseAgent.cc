@@ -51,9 +51,7 @@ RentCollectionBaseAgent::RentCollectionBaseAgent(CogServer& cs) :
     ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
 
     // Provide a logger
-    log = NULL;
-    setLogger(new opencog::Logger("RentCollectionAgent.log", Logger::FINE,
-    true));
+    setLogger(new opencog::Logger("RentCollectionAgent.log", Logger::FINE, true));
 }
 
 void RentCollectionBaseAgent::run()

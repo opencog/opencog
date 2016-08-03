@@ -43,8 +43,6 @@ namespace opencog {
      *  @{
      */
 
-    class CogServer;
-
     /**
      * This Agent collects wages form inside the attentional focus by iterating
      * through each atoms in the attentional focus and collects the Wage which

@@ -42,9 +42,7 @@ MinMaxSTIUpdatingAgent::MinMaxSTIUpdatingAgent(CogServer& cs) :
         Agent(cs)
 {
     // Provide a logger
-    log = NULL;
-    setLogger(new opencog::Logger("MinMaxSTIUpdatingAgent.log", Logger::FINE,
-    true));
+    setLogger(new opencog::Logger("MinMaxSTIUpdatingAgent.log", Logger::FINE, true));
 }
 
 void MinMaxSTIUpdatingAgent::run()

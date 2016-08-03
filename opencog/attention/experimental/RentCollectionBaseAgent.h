@@ -41,8 +41,6 @@ namespace opencog
  *  @{
  */
 
-class CogServer;
-
 /**
  * This Agent collects wages form inside the AttentionalFocus
  *
@@ -56,12 +54,10 @@ class CogServer;
  */
 class RentCollectionBaseAgent : public Agent
 {
-
 private:
      int sleep_time_ms;
 
 protected:
-
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
 
@@ -80,17 +76,11 @@ public:
     virtual void selectTargets(HandleSeq &targetSetOut) = 0;
     void run();
 
-    int get_sleep_time(){
-        return sleep_time_ms;
-    };
-    void set_sleep_time(int ms){
-      sleep_time_ms = ms;
-    };
-
+    int get_sleep_time() { return sleep_time_ms; };
+    void set_sleep_time(int ms) { sleep_time_ms = ms; };
 }; // class
 
 /** @}*/
 }  // namespace
 
 #endif /* RENTCOLLECTIONBASE_H */
-
