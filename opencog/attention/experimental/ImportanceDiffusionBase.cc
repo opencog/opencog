@@ -35,7 +35,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/attention/atom_types.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -81,12 +80,14 @@ void ImportanceDiffusionBase::setMaxSpreadPercentage(double percent)
  * existence of the configuration atom, and if it exists, updates the parameter
  * to its current value. The value should be a probability between 0 and 1.
  */
-void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
-    HandleSeq resultSet;
-    _as->get_handles_by_name(back_inserter(resultSet), "CONFIG-DiffusionPercent");
-    if (resultSet.size() > 0) {
+void ImportanceDiffusionBase::updateMaxSpreadPercentage()
+{
+    Handle h = _as->get_handle(CONCEPT_NODE, "CONFIG-DiffusionPercent");
+
+    if (h)
+    {
+        HandleSeq resultSet;
         // Given the PredicateNode, walk to the NumberNode
-        Handle h = resultSet.front();
         h->getIncomingSet(back_inserter(resultSet));
         h = resultSet.front();
         if (h->isLink()) {
