@@ -43,7 +43,7 @@ using namespace std;
 
 StorkeyAgent::StorkeyAgent(CogServer& cs) : Agent(cs)
 {
-    static const std::string defaultConfig[] = {
+    static const std::vector<std::string> defaultConfig = {
         "ECAN_CONVERT_LINKS","false",
         "",""
     };
