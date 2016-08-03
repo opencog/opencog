@@ -42,8 +42,6 @@ namespace opencog
  *  @{
  */
 
-class CogServer;
-
 /**
  * Common methods and variables used for Importance diffusion.
  */
@@ -53,8 +51,8 @@ private:
     int sleep_time_ms;
 
 protected:
-    float maxSpreadPercentage;
-    float hebbianMaxAllocationPercentage;
+    double maxSpreadPercentage;
+    double hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;
     SpreadDecider* spreadDecider;
 
@@ -75,8 +73,8 @@ protected:
     HandleSeq hebbianAdjacentAtoms(Handle);
     std::map<Handle, double> probabilityVector(HandleSeq);
     AttentionValue::sti_t calculateDiffusionAmount(Handle);
-    float calculateHebbianDiffusionPercentage(Handle);
-    float calculateIncidentDiffusionPercentage(Handle);
+    double calculateHebbianDiffusionPercentage(Handle);
+    double calculateIncidentDiffusionPercentage(Handle);
     std::map<Handle, double> probabilityVectorIncident(HandleSeq);
     std::map<Handle, double> probabilityVectorHebbianAdjacent(Handle, HandleSeq);
     std::map<Handle, double> combineIncidentAdjacentVectors(
@@ -88,21 +86,17 @@ protected:
 
 public:
     enum { HYPERBOLIC, STEP };
-    void setSpreadDecider(int type, float shape = 30);
-    void setMaxSpreadPercentage(float);
-    void setHebbianMaxAllocationPercentage(float);
+    void setSpreadDecider(int type, double shape = 30);
+    void setMaxSpreadPercentage(double);
+    void setHebbianMaxAllocationPercentage(double);
     void setSpreadHebbianOnly(bool);
 
     ImportanceDiffusionBase(CogServer&);
     virtual ~ImportanceDiffusionBase();
 
-    int get_sleep_time(){
-        return sleep_time_ms;
-    }
+    int get_sleep_time() { return sleep_time_ms; }
 
-    void set_sleep_time(int ms){
-      sleep_time_ms = ms;
-    }
+    void set_sleep_time(int ms) { sleep_time_ms = ms; }
 
 }; // class
 

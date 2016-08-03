@@ -28,7 +28,6 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/attention/atom_types.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "RentCollectionBaseAgent.h"
@@ -51,9 +50,7 @@ RentCollectionBaseAgent::RentCollectionBaseAgent(CogServer& cs) :
     ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
 
     // Provide a logger
-    log = NULL;
-    setLogger(new opencog::Logger("RentCollectionAgent.log", Logger::FINE,
-    true));
+    setLogger(new opencog::Logger("RentCollectionAgent.log", Logger::FINE, true));
 }
 
 void RentCollectionBaseAgent::run()
@@ -85,13 +82,13 @@ void RentCollectionBaseAgent::run()
 int RentCollectionBaseAgent::calculate_STI_Rent()
 {
     int funds = _as->get_STI_funds();
-    float diff  = targetSTI - funds;
-    float ndiff = diff / stiFundsBuffer;
-    ndiff = std::min(ndiff,1.0f);
-    ndiff = std::max(ndiff,-0.99f);
+    double diff  = targetSTI - funds;
+    double ndiff = diff / stiFundsBuffer;
+    ndiff = std::min(ndiff, 1.0);
+    ndiff = std::max(ndiff, -0.99);
     //printf("ndiff: %f   ",ndiff);
     //
-    float res = STIAtomRent + (STIAtomRent * ndiff);
+    double res = STIAtomRent + (STIAtomRent * ndiff);
 
     if (res < 1)
         if ((rand() % 100) > (100 * res))
@@ -103,10 +100,10 @@ int RentCollectionBaseAgent::calculate_STI_Rent()
 int RentCollectionBaseAgent::calculate_LTI_Rent()
 {
     int funds = _as->get_LTI_funds();
-    float diff  = targetLTI - funds;
-    float ndiff = diff / ltiFundsBuffer;
-    ndiff = std::min(ndiff,1.0f);
-    ndiff = std::max(ndiff,-1.0f);
+    double diff  = targetLTI - funds;
+    double ndiff = diff / ltiFundsBuffer;
+    ndiff = std::min(ndiff, 1.0);
+    ndiff = std::max(ndiff, -1.0);
 
     return LTIAtomRent + (LTIAtomRent * ndiff);
 }

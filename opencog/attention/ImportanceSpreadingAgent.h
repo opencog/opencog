@@ -24,14 +24,11 @@
 #ifndef _OPENCOG_IMPORTANCE_SPREADING_AGENT_H
 #define _OPENCOG_IMPORTANCE_SPREADING_AGENT_H
 
+#include <math.h>
 #include <string>
 
-#include <math.h>
-
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/util/recent_val.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/util/Logger.h>
 
 namespace opencog
 {

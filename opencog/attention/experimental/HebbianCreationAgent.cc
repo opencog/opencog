@@ -28,7 +28,6 @@
 #include <opencog/attention/atom_types.h>
 #include <opencog/atomutils/Neighbors.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -40,7 +39,6 @@ HebbianCreationAgent::HebbianCreationAgent(CogServer& cs) :
     Agent(cs)
 {
     // Provide a logger, but disable it initially
-    log = NULL;
     setLogger(new opencog::Logger("HebbianCreationAgent.log", Logger::FINE, true));
 
     maxLinkNum = config().get_int("ECAN_MAXLINKS");

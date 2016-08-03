@@ -24,13 +24,8 @@
 #include <algorithm>
 #include <sstream>
 
-#define DEPRECATED_ATOMSPACE_CALLS
-#include <opencog/atomspace/AtomSpace.h>
-
-#include <opencog/cogserver/server/Agent.h>
-#include <opencog/cogserver/server/CogServer.h>
-#include <opencog/cogserver/server/Factory.h>
 #include <opencog/util/Config.h>
+#include <opencog/cogserver/server/Agent.h>
 #include "ForgettingAgent.h"
 
 using namespace opencog;
@@ -47,64 +42,49 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     defaultForgetThreshold = buf.str();
     config().set("ECAN_FORGET_THRESHOLD",defaultForgetThreshold);
 
-    forgetPercentage = (float) (config().get_double("ECAN_FORGET_PERCENTAGE"));
+    forgetPercentage = (double) (config().get_double("ECAN_FORGET_PERCENTAGE"));
 
     forgetThreshold = (AttentionValue::lti_t)
                       (config().get_int("ECAN_FORGET_THRESHOLD"));
 
     // Provide a logger, but disable it initially
-    log = NULL;
     setLogger(new opencog::Logger("ForgettingAgent.log", Logger::WARN, true));
 }
 
-ForgettingAgent::~ForgettingAgent()
-{
-    if (log) delete log;
-}
-
-Logger* ForgettingAgent::getLogger()
-{
-    return log;
-}
-
-void ForgettingAgent::setLogger(Logger* _log)
-{
-    if (log) delete log;
-    log = _log;
-}
+ForgettingAgent::~ForgettingAgent() {}
 
 void ForgettingAgent::run()
 {
-    log->fine("=========== ForgettingAgent::run =======");
-    a = &_cogserver.getAtomSpace();
+    _log->fine("=========== ForgettingAgent::run =======");
     forget(forgetPercentage);
 }
 
-void ForgettingAgent::forget(float proportion = 0.10f)
+void ForgettingAgent::forget(double proportion = 0.10)
 {
     HandleSeq atomsVector;
     std::back_insert_iterator<HandleSeq> output2(atomsVector);
     int count = 0;
     int removalAmount;
 
-    a->get_handles_by_type(output2, ATOM, true);
+    _as->get_handles_by_type(output2, ATOM, true);
     // Sort atoms by lti, remove the lowest unless vlti is NONDISPOSABLE
-    std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort(a));
+    std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort(_as));
 
     removalAmount = (int) (atomsVector.size() * proportion);
-    log->info("ForgettingAgent::forget - will attempt to remove %d atoms", removalAmount);
+    _log->info("ForgettingAgent::forget - will attempt to remove %d atoms", removalAmount);
 
     for (unsigned int i = 0; i < atomsVector.size(); i++) {
         if (atomsVector[i]->getAttentionValue()->getLTI() <= forgetThreshold
                 && count < removalAmount) {
             if (atomsVector[i]->getAttentionValue()->getVLTI() == AttentionValue::DISPOSABLE ) {
-                std::string atomName = a->atom_as_string(atomsVector[i]);
-                log->fine("Removing atom %s", atomName.c_str());
+                std::string atomName = atomsVector[i]->toString();
+                _log->fine("Removing atom %s", atomName.c_str());
                 // TODO: do recursive remove if neighbours are not very important
-                if (!a->remove_atom(atomsVector[i])) {
+                if (!_as->remove_atom(atomsVector[i]))
+                {
                     // Atom must have already been removed through having 
                     // previously removed atoms in it's outgoing set.
-                    log->error("Couldn't remove atom %s", atomName.c_str());
+                    _log->error("Couldn't remove atom %s", atomName.c_str());
                     count++;
                 }
                 count++;
@@ -113,6 +93,5 @@ void ForgettingAgent::forget(float proportion = 0.10f)
             i = atomsVector.size();
         }
     }
-    log->info("ForgettingAgent::forget - %d atoms removed.", count);
-
+    _log->info("ForgettingAgent::forget - %d atoms removed.", count);
 }

@@ -29,17 +29,14 @@
 #include <math.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/util/Logger.h>
+#include <opencog/truthvalue/AttentionValue.h>
 
 namespace opencog
 {
 /** \addtogroup grp_attention
  *  @{
  */
-
-class CogServer;
 
 /** The ForgettingAgent, carries out the forgetting process in OpenCog Prime. 
  * 
@@ -69,21 +66,7 @@ class CogServer;
  */
 class ForgettingAgent : public Agent
 {
-
-private:
-    AtomSpace* a;
-    Logger *log; //!< Logger object for Agent
-
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
 public:
-
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::ForgettingAgent");
@@ -93,20 +76,13 @@ public:
     //! Maximum LTI of an atom that can be forgot.
     AttentionValue::lti_t forgetThreshold;
     //! Percentage of AtomSpace to forget.
-    float forgetPercentage;
+    double forgetPercentage;
 
     ForgettingAgent(CogServer&);
     virtual ~ForgettingAgent();
     virtual void run();
 
-    void forget(float p);
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
-
+    void forget(double);
 }; // class
 
 typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
@@ -118,17 +94,17 @@ typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
  */
 struct ForgettingLTIThenTVAscendingSort
 {
-    ForgettingLTIThenTVAscendingSort(AtomSpace* _a) {};
+    ForgettingLTIThenTVAscendingSort(AtomSpace*) {};
 
     bool operator()(const Handle& h1, const Handle& h2)
     {
         AttentionValue::lti_t lti1, lti2;
 
-        lti1 = h1->getAttentionValue()->getLTI();
-        lti2 = h2->getAttentionValue()->getLTI();
+        lti1 = h1->getLTI();
+        lti2 = h2->getLTI();
         if (lti1 != lti2) return lti1 < lti2;
         else {
-            float tv1, tv2;
+            double tv1, tv2;
             tv1 = fabs(h1->getTruthValue()->getMean());
             tv2 = fabs(h2->getTruthValue()->getMean());
             return tv1 < tv2;

@@ -24,9 +24,7 @@
 #define _OPENCOG_HEBBIAN_CREATION_AGENT_H
 
 #include <string>
-#include <opencog/util/Logger.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
@@ -38,8 +36,6 @@ namespace opencog
  */
 
 extern concurrent_queue<Handle> newAtomsInAV;
-
-class CogServer;
 
 /**
  * This agent is resposible for Creating new HebbianLinks and making sure
@@ -62,7 +58,7 @@ class HebbianCreationAgent : public Agent
 protected:
 
     void addHebbian(Handle atom,Handle source);
-    float targetConjunction(Handle handle1,Handle handle2);
+    double targetConjunction(Handle handle1,Handle handle2);
 
     unsigned int maxLinkNum;
 

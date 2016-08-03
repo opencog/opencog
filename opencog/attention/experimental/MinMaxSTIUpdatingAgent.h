@@ -27,13 +27,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
-#include <opencog/util/recent_val.h>
-
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Agent.h>
 
 class MinMaxSTIUpdatingAgentUTest;
@@ -44,17 +38,13 @@ namespace opencog
  *  @{
  */
 
-class CogServer;
-
 /**
  * The AtomSpace needs to know the Minimum and Maximum STI of the Atoms
  * This agent updates these values after iterating over the whole AtomSpace
  */
 class MinMaxSTIUpdatingAgent : public Agent
 {
-
 private:
-
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
 
@@ -62,7 +52,6 @@ private:
     AttentionValue::lti_t ltiFundsBuffer;
 
 public:
-
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::MinMaxSTIUpdatingAgent");

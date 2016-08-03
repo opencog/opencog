@@ -27,9 +27,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
-#include <opencog/util/recent_val.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
@@ -42,8 +40,6 @@ namespace opencog {
     /** \addtogroup grp_attention
      *  @{
      */
-
-    class CogServer;
 
     /**
      * This Agent collects wages form inside the attentional focus by iterating

@@ -28,7 +28,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/recent_val.h>
 
@@ -44,8 +43,6 @@ namespace opencog
 /** \addtogroup grp_attention
  *  @{
  */
-
-class CogServer;
 
 /** ImportantUpdatingAgent updates the AttentionValues of atoms.
  *
@@ -113,11 +110,9 @@ class CogServer;
  */
 class ImportanceUpdatingAgent : public Agent
 {
-
     friend class ::ImportanceUpdatingAgentUTest;
 
 public:
-
     /** The different ways rent can be calculated
      * for atoms in the attentional focus.
      */
@@ -151,8 +146,8 @@ private:
 
     AttentionValue::sti_t STIAtomWage; //!< Max atom STI wage per stimulus
     AttentionValue::lti_t LTIAtomWage; //!< Max atom LTI wage per stimulus
-    std::vector<float> STIAtomWageForAgent; //!< Atom STI wage per stimulus for each Agent
-    std::vector<float> LTIAtomWageForAgent; //!< Atom LTI wage per stimulus for each Agent
+    std::vector<double> STIAtomWageForAgent; //!< Atom STI wage per stimulus for each Agent
+    std::vector<double> LTIAtomWageForAgent; //!< Atom LTI wage per stimulus for each Agent
 
     /** Calculate the wages to pay to atoms for each agent
      *
@@ -178,7 +173,7 @@ private:
     void randomStimulation(AtomSpace *a, AgentPtr agent);
 
     bool noiseOn;     //!< Randomly stimulate atoms?
-    float noiseOdds;  //!< Chance of randomly introduced stimulus
+    double noiseOdds;  //!< Chance of randomly introduced stimulus
     stim_t noiseUnit; //!< The default stimulus unit used by random stimulation
 
     //! Recent amount of stimulus given per cycle
@@ -300,7 +295,7 @@ private:
      * Internally takes the integer component of the mean, and samples
      * from a Poisson distribution for the remainder.
      *
-     * @param mean The mean tax that would be charged if STI/LTI were a float.
+     * @param mean The mean tax that would be charged if STI/LTI were a double.
      * @return An integer amount of tax to charge
      */
     int getTaxAmount(double mean);
@@ -343,18 +338,7 @@ private:
 
     void updateRentAndWages(AtomSpace*);
 
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
-    Logger *log; //!< Logger object for Agent
-
 public:
-
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::ImportanceUpdatingAgent");
@@ -366,12 +350,6 @@ public:
     virtual void run();
 
     virtual std::string toString();
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
 
     /** Set whether to randomly stimulate atoms.
      *

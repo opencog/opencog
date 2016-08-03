@@ -31,7 +31,7 @@
 using namespace opencog;
 using namespace opencog::ecan;
 
-void update_bins(std::vector<Bin>& bins, float ivalue)
+void update_bins(std::vector<Bin>& bins, double ivalue)
 {
     for (auto& bin : bins) {
         if (bin.lb_sti > ivalue and bin.ub_sti <= ivalue) {
@@ -41,7 +41,7 @@ void update_bins(std::vector<Bin>& bins, float ivalue)
     }
 }
 
-int get_bin_index(const std::vector<Bin>& bins, float sti)
+int get_bin_index(const std::vector<Bin>& bins, double sti)
 {
     for (std::vector<Bin>::size_type i = 0; i < bins.size(); i++) {
         if (bins[i].lb_sti <= sti and bins[i].ub_sti >= sti) return i;
@@ -59,12 +59,12 @@ int get_bin_index(const std::vector<Bin>& bins, float sti)
  *
  * @returns a vector of Bin.
  */
-std::vector<Bin> create_bins(std::set<float> ivalues, int size /*= 10*/)
+std::vector<Bin> create_bins(std::set<double> ivalues, int size /*= 10*/)
 {
     std::vector<Bin> bins;
     bins.reserve(size);
-    float lbound = 0.0f;
-    float step_size = *std::max_element(ivalues.begin(), ivalues.end()) / size;
+    double lbound = 0.0;
+    double step_size = *std::max_element(ivalues.begin(), ivalues.end()) / size;
 
     for (int i = 0; i < size; i++) {
         bins.emplace_back(lbound, lbound + step_size);
@@ -84,8 +84,8 @@ std::vector<Bin> create_bins(std::set<float> ivalues, int size /*= 10*/)
  *
  * @returns A vector of Bin.
  */
-std::vector<Bin> merge_bins(std::vector<Bin>& past, std::vector<Bin>& recent
-                            , float bias)
+std::vector<Bin> merge_bins(std::vector<Bin>& past, std::vector<Bin>& recent,
+                            double bias)
 {
     assert(past.size() == recent.size());
     assert(bias <= 1);

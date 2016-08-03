@@ -32,13 +32,11 @@
 
 #include "ImportanceDiffusionBase.h"
 
-
 namespace opencog
 {
 /** \addtogroup grp_attention
  *  @{
  */
-class CogServer;
 
 /** Diffuses short term importance between atoms in the AtomSpace.
  *
@@ -59,18 +57,16 @@ class CogServer;
  */
 class WAImportanceDiffusionAgent : public ImportanceDiffusionBase
 {
-
 private:
     HandleSeq diffusionSourceVector();
     unsigned int SAMPLE_SIZE = 1;
     int _tournamentSize;
 
-private:
     void spreadImportance();
     Handle tournamentSelect(HandleSeq population);
 
 public:
-     WAImportanceDiffusionAgent(CogServer&);
+    WAImportanceDiffusionAgent(CogServer&);
 
     virtual void run();
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -85,4 +81,3 @@ public:
 
 
 #endif /* WAIMPORTANCEDIFFUSIONAGENT_H */
-

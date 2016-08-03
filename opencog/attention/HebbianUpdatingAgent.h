@@ -25,9 +25,7 @@
 #define _OPENCOG_HEBBIAN_LEARNING_AGENT_H
 
 #include <string>
-#include <opencog/util/Logger.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
@@ -38,8 +36,6 @@ namespace opencog
  *  @{
  */
 
-class CogServer;
-
 /** Agent that carries out simple Hebbian learning.
  *
  * @note Only updates existing HebbianLinks.
@@ -48,9 +44,7 @@ class CogServer;
  */
 class HebbianUpdatingAgent : public Agent
 {
-
 protected:
-    AtomSpace* a;
 
 	/** Work out the conjunction between a series of handles.
 	 *
@@ -65,14 +59,14 @@ protected:
 	 * @todo create a method for working out conjunction between more than
 	 * two atoms.
 	 */
-    float targetConjunction(HandleSeq handles);
+    double targetConjunction(HandleSeq);
 
 	/** Transform STI into a normalised STI value between -1 and 1.
 	 *
 	 * @param s STI to normalise.
 	 * @return the normalised STI between -1.0 and 1.0
 	 */
-    float getNormSTI(AttentionValue::sti_t s);
+    double getNormSTI(AttentionValue::sti_t);
 
 	/** Rearrange the the vector so that the one with a positive normalised
 	 * STI is at the front.
@@ -80,22 +74,11 @@ protected:
 	 * @param outgoing Vector to rearrange.
 	 * @return rearranged vector.
 	 */
-    HandleSeq& moveSourceToFront(HandleSeq &outgoing);
+    HandleSeq& moveSourceToFront(HandleSeq&);
 
-    /** Set the agent's logger object
-     *
-     * Note, this will be deleted when this agent is.
-     *
-     * @param l The logger to associate with the agent.
-     */
-    void setLogger(Logger* l);
-
-    void setMean(Handle h, float tc);
-
-    Logger *log; //!< Logger object for Agent
+    void setMean(Handle, double tc);
 
 public:
-
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::HebbianUpdatingAgent");
@@ -105,12 +88,6 @@ public:
     HebbianUpdatingAgent(CogServer&);
     virtual ~HebbianUpdatingAgent();
     virtual void run();
-
-    /** Return the agent's logger object
-     *
-     * @return A logger object.
-     */
-    Logger* getLogger();
 
     //! Whether to convert links to/from InverseHebbianLinks as necessary.
     bool convertLinks;

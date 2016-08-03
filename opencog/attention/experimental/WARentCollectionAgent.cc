@@ -28,7 +28,6 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/attention/atom_types.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "WARentCollectionAgent.h"

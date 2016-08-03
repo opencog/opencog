@@ -27,13 +27,10 @@
 #include <iostream>
 #include <sstream>
 
-#include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
-#include <opencog/util/recent_val.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Agent.h>
 
 namespace opencog
@@ -55,7 +52,7 @@ class HebbianUpdatingAgent : public Agent
 
 private:
 
-    float targetConjunction(HandleSeq handles);
+    double targetConjunction(HandleSeq handles);
     void updateHebbianLinks(Handle source);
 
 public:

@@ -26,8 +26,6 @@
 #ifndef AFIMPORTANCEDIFFUSIONAGENT_H
 #define AFIMPORTANCEDIFFUSIONAGENT_H
 
-//#include <chrono>
-
 #include "ImportanceDiffusionBase.h"
 #include "DiffusionStat.h"
 
@@ -37,8 +35,6 @@ namespace opencog
  *  @{
  */
 using namespace opencog::ecan;
-
-class CogServer;
 
 /** Diffuses short term importance between atoms in the attentional focus.
  *

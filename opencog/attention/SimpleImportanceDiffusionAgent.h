@@ -25,14 +25,14 @@
 #ifndef _OPENCOG_SIMPLE_IMPORTANCE_DIFFUSION_AGENT_H
 #define _OPENCOG_SIMPLE_IMPORTANCE_DIFFUSION_AGENT_H
 
-#include <string>
-#include <stack>
 #include <math.h>
+#include <stack>
+#include <string>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/util/Logger.h>
+#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/util/RandGen.h>
+
 #include "SpreadDecider.h"
 
 namespace opencog
@@ -40,8 +40,6 @@ namespace opencog
 /** \addtogroup grp_attention
  *  @{
  */
-
-class CogServer;
 
 /** Diffuses short term importance between atoms in the attentional focus.
  *
@@ -61,15 +59,11 @@ class CogServer;
  */
 class SimpleImportanceDiffusionAgent : public Agent
 {
-
 private:
-    AtomSpace* as;
-    float maxSpreadPercentage;
-    float hebbianMaxAllocationPercentage;
+    double maxSpreadPercentage;
+    double hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;
     SpreadDecider* spreadDecider;
-    void setLogger(Logger* l);
-    Logger *log;
     
     typedef struct DiffusionEventType
     {
@@ -88,8 +82,8 @@ private:
     HandleSeq hebbianAdjacentAtoms(Handle);
     std::map<Handle, double> probabilityVector(HandleSeq);    
     AttentionValue::sti_t calculateDiffusionAmount(Handle);
-    float calculateHebbianDiffusionPercentage(Handle);
-    float calculateIncidentDiffusionPercentage(Handle);
+    double calculateHebbianDiffusionPercentage(Handle);
+    double calculateIncidentDiffusionPercentage(Handle);
     std::map<Handle, double> probabilityVectorIncident(HandleSeq);
     std::map<Handle, double> probabilityVectorHebbianAdjacent(Handle, HandleSeq);
     std::map<Handle, double> combineIncidentAdjacentVectors(
@@ -99,14 +93,13 @@ private:
     
 public:
     enum { HYPERBOLIC, STEP };
-    void setSpreadDecider(int type, float shape = 30);
-    void setMaxSpreadPercentage(float);
-    void setHebbianMaxAllocationPercentage(float);
+    void setSpreadDecider(int type, double shape = 30);
+    void setMaxSpreadPercentage(double);
+    void setHebbianMaxAllocationPercentage(double);
     void setSpreadHebbianOnly(bool);
     SimpleImportanceDiffusionAgent(CogServer&);
     virtual ~SimpleImportanceDiffusionAgent();
     virtual void run();
-    Logger* getLogger();
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::SimpleImportanceDiffusionAgent");

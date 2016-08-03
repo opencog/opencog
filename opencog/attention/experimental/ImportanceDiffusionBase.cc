@@ -35,7 +35,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/attention/atom_types.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -52,7 +51,7 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
     spreadDecider = NULL;
     setSpreadDecider(config().get_int("SPREAD_DECIDER_TYPE"));
     setMaxSpreadPercentage(
-                (float) (config().get_double("ECAN_MAX_SPREAD_PERCENTAGE")));
+                config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
     setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
     setHebbianMaxAllocationPercentage(
                 config().get_double("HEBBIAN_MAX_ALLOCATION_PERCENTAGE"));
@@ -61,7 +60,6 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
     // Read diffusion rate from config file.
 
     // Provide a logger
-    log = NULL;
     setLogger(new opencog::Logger("ImportanceDiffusionBase.log",
                                   Logger::FINE, true));
 }
@@ -71,7 +69,7 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
  * is available for diffusion at each time step. An atom will not diffuse more
  * than this percentage.
  */
-void ImportanceDiffusionBase::setMaxSpreadPercentage(float percent)
+void ImportanceDiffusionBase::setMaxSpreadPercentage(double percent)
 {
     maxSpreadPercentage = percent;
 }
@@ -82,12 +80,14 @@ void ImportanceDiffusionBase::setMaxSpreadPercentage(float percent)
  * existence of the configuration atom, and if it exists, updates the parameter
  * to its current value. The value should be a probability between 0 and 1.
  */
-void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
-    HandleSeq resultSet;
-    _as->get_handles_by_name(back_inserter(resultSet), "CONFIG-DiffusionPercent");
-    if (resultSet.size() > 0) {
+void ImportanceDiffusionBase::updateMaxSpreadPercentage()
+{
+    Handle h = _as->get_handle(CONCEPT_NODE, "CONFIG-DiffusionPercent");
+
+    if (h)
+    {
+        HandleSeq resultSet;
         // Given the PredicateNode, walk to the NumberNode
-        Handle h = resultSet.front();
         h->getIncomingSet(back_inserter(resultSet));
         h = resultSet.front();
         if (h->isLink()) {
@@ -96,7 +96,7 @@ void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
             resultSet = h->getOutgoingSet();
             h = resultSet.front();
         }
-        float value = std::atof(_as->get_name(h).c_str());
+        double value = std::atof(h->getName().c_str());
         setMaxSpreadPercentage(value);
 
 #ifdef DEBUG
@@ -114,7 +114,7 @@ void ImportanceDiffusionBase::updateMaxSpreadPercentage() {
  * that option is enabled.
  */
 void ImportanceDiffusionBase::setHebbianMaxAllocationPercentage(
-        float percent)
+        double percent)
 {
     hebbianMaxAllocationPercentage = percent;
 }
@@ -131,7 +131,7 @@ void ImportanceDiffusionBase::setSpreadHebbianOnly(bool option)
     spreadHebbianOnly = option;
 }
 
-void ImportanceDiffusionBase::setSpreadDecider(int type, float shape)
+void ImportanceDiffusionBase::setSpreadDecider(int type, double shape)
 {
     if (spreadDecider) {
         delete spreadDecider;
@@ -259,8 +259,8 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
 void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
 {
     // Trade STI between the source and target atoms
-    _as->set_STI(event.source, _as->get_STI(event.source) - event.amount);
-    _as->set_STI(event.target, _as->get_STI(event.target) + event.amount);
+    event.source->setSTI(event.source->getSTI() - event.amount);
+    event.target->setSTI(event.target->getSTI() + event.amount);
 
 #ifdef DEBUG
     std::cout << "tradeSTI: " << event.amount << " from " << event.source
@@ -309,7 +309,7 @@ HandleSeq ImportanceDiffusionBase::diffusionSourceVector(bool af_only)
         std::remove_if(resultSet.begin(), resultSet.end(),
                        [=](const Handle& h)
                        {
-                           Type type = _as->get_type(h);
+                           Type type = h->getType();
 
 #ifdef DEBUG
                            std::cout << "Checking atom of type: " <<
@@ -398,7 +398,7 @@ ImportanceDiffusionBase::probabilityVectorIncident(HandleSeq handles)
     std::map<Handle, double> result;
 
     // Allocate an equal probability to each incident atom
-    double diffusionAmount = 1.0f / handles.size();
+    double diffusionAmount = 1.0 / handles.size();
 
     for (Handle target : handles)
     {
@@ -554,7 +554,7 @@ AttentionValue::sti_t ImportanceDiffusionBase::calculateDiffusionAmount(
 {
     updateMaxSpreadPercentage();
 
-    return (AttentionValue::sti_t) round(_as->get_STI(h) * maxSpreadPercentage);
+    return (AttentionValue::sti_t) round(h->getSTI() * maxSpreadPercentage);
 
     // TODO: Using integers for STI values can cause strange consequences.
     // For example, if the amount to diffuse is 0.4, it will become 0, causing
@@ -576,7 +576,7 @@ AttentionValue::sti_t ImportanceDiffusionBase::calculateDiffusionAmount(
  * confidence, if either value is far from 1.0, then the link will allow less
  * diffusion to occur across the hebbian link
  */
-float ImportanceDiffusionBase::calculateHebbianDiffusionPercentage(
+double ImportanceDiffusionBase::calculateHebbianDiffusionPercentage(
         Handle h)
 {
     strength_t strength = h->getTruthValue()->getMean();

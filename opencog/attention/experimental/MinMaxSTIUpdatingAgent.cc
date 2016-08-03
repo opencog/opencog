@@ -28,11 +28,10 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/attention/atom_types.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/cogserver/server/Agent.h>
 #include "MinMaxSTIUpdatingAgent.h"
 
-#include <opencog/cogserver/server/Agent.h>
 
 //#define DEBUG
 
@@ -42,9 +41,7 @@ MinMaxSTIUpdatingAgent::MinMaxSTIUpdatingAgent(CogServer& cs) :
         Agent(cs)
 {
     // Provide a logger
-    log = NULL;
-    setLogger(new opencog::Logger("MinMaxSTIUpdatingAgent.log", Logger::FINE,
-    true));
+    setLogger(new opencog::Logger("MinMaxSTIUpdatingAgent.log", Logger::FINE, true));
 }
 
 void MinMaxSTIUpdatingAgent::run()

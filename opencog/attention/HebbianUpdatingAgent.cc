@@ -27,7 +27,6 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/attention/atom_types.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -35,25 +34,25 @@
 
 using namespace opencog;
 
-void HebbianUpdatingAgent::setMean(Handle h, float tc)
+void HebbianUpdatingAgent::setMean(Handle h, double tc)
 {
-	TruthValuePtr oldtv(h->getTruthValue());
-	switch (oldtv->getType())
-	{
-		case SIMPLE_TRUTH_VALUE: {
-			TruthValuePtr newtv(SimpleTruthValue::createTV(tc, oldtv->getConfidence()));
-			h->merge(newtv);
-			break;
-		}
-		case INDEFINITE_TRUTH_VALUE: {
-			IndefiniteTruthValuePtr newtv(IndefiniteTruthValue::createITV(oldtv));
-			// newtv->setMean(tc);
-			h->merge(newtv);
-			break;
-		}
-		default:
-			throw InvalidParamException(TRACE_INFO, "Unsupported TV type in Hebbian");
-	}
+    TruthValuePtr oldtv(h->getTruthValue());
+    switch (oldtv->getType())
+    {
+        case SIMPLE_TRUTH_VALUE: {
+            TruthValuePtr newtv(SimpleTruthValue::createTV(tc, oldtv->getConfidence()));
+            h->merge(newtv);
+            break;
+        }
+        case INDEFINITE_TRUTH_VALUE: {
+            IndefiniteTruthValuePtr newtv(IndefiniteTruthValue::createITV(oldtv));
+            // newtv->setMean(tc);
+            h->merge(newtv);
+            break;
+        }
+        default:
+            throw InvalidParamException(TRACE_INFO, "Unsupported TV type in Hebbian");
+    }
 }
 
 HebbianUpdatingAgent::HebbianUpdatingAgent(CogServer& cs) :
@@ -63,29 +62,15 @@ HebbianUpdatingAgent::HebbianUpdatingAgent(CogServer& cs) :
     conversionThreshold = config().get_int("ECAN_CONVERSION_THRESHOLD");
 
     // Provide a logger, but disable it initially
-    log = NULL;
     setLogger(new opencog::Logger("HebbianUpdatingAgent.log", Logger::FINE, true));
 }
 
 HebbianUpdatingAgent::~HebbianUpdatingAgent()
 {
-    if (log) delete log;
-}
-
-void HebbianUpdatingAgent::setLogger(Logger* _log)
-{
-    if (log) delete log;
-    log = _log;
-}
-
-Logger* HebbianUpdatingAgent::getLogger()
-{
-    return log;
 }
 
 void HebbianUpdatingAgent::run()
 {
-    a = &_cogserver.getAtomSpace();
     hebbianUpdatingUpdate();
 }
 
@@ -93,28 +78,28 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
 {
 
     // tc affects the truthvalue
-    float tc, old_tc, new_tc;
-    float tcDecayRate = 0.1f;
+    double tc, old_tc, new_tc;
+    double tcDecayRate = 0.1f;
 
-    log->info("HebbianUpdatingAgent::hebbianUpdatingupdate "
+    _log->info("HebbianUpdatingAgent::hebbianUpdatingupdate "
                    "(convert links = %d)", convertLinks);
 
     // get links again to include the new ones
     HandleSeq links;
     std::back_insert_iterator<HandleSeq> link_output(links);
-    a->get_handles_by_type(link_output, HEBBIAN_LINK, true);
+    _as->get_handles_by_type(link_output, HEBBIAN_LINK, true);
 
-    for(Handle h:links){
+    for (Handle h: links) {
         // for each hebbian link, find targets, work out conjunction and convert
         // that into truthvalue change. the change should be based on existing TV.
-		bool isDifferent = false;
+        bool isDifferent = false;
 
         // get out going set
         HandleSeq outgoing = h->getOutgoingSet();
         new_tc = targetConjunction(outgoing);
         // old link strength decays
         old_tc = h->getTruthValue()->getMean();
-		if (new_tc != old_tc) isDifferent = true;
+        if (new_tc != old_tc) isDifferent = true;
 
         if (convertLinks and h->getAttentionValue()->getSTI() < conversionThreshold) {
             // If mind agent is set to convert hebbian links then
@@ -125,17 +110,17 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             if (h->getType() == INVERSE_HEBBIAN_LINK) {
                 // if inverse normalised sti of source is negative
                 // (i.e. hebbian link is pointing in the wrong direction)
-                if (a->get_normalised_STI(outgoing[0],true,false) < 0.0f) {
-                    tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
+                if (_as->get_normalised_STI(outgoing[0],true,false) < 0.0) {
+                    tc = (tcDecayRate * new_tc) + ( (1.0 - tcDecayRate) * old_tc);
                     if (tc < 0) {
                         // link no longer representative
                         // swap inverse hebbian link direction
-                        log->fine("HebbianUpdatingAgent: swapping direction of inverse link %s", h->toString().c_str());
+                        _log->fine("HebbianUpdatingAgent: swapping direction of inverse link %s", h->toString().c_str());
                         // save STI/LTI
                         AttentionValuePtr backupAV = h->getAttentionValue();
-                        a->remove_atom(h);
+                        _as->remove_atom(h);
                         outgoing = moveSourceToFront(outgoing);
-                        h = a->add_link(INVERSE_HEBBIAN_LINK, outgoing);
+                        h = _as->add_link(INVERSE_HEBBIAN_LINK, outgoing);
                         h->setTruthValue(SimpleTruthValue::createTV(-tc, 0));
                         // restore STI/LTI
                         h->setAttentionValue(backupAV);
@@ -144,16 +129,16 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                 } else {
                     // Work out whether to convert to symmetric, if not, just
                     // update weight
-                    tc = (tcDecayRate * -new_tc) + ( (1.0f - tcDecayRate) * old_tc);
+                    tc = (tcDecayRate * -new_tc) + ( (1.0 - tcDecayRate) * old_tc);
 
                     if (tc < 0) {
                         // Inverse link no longer representative
                         // change to symmetric hebbian link
-                        log->fine("HebbianUpdatingAgent: change old inverse %s to sym link", a->atom_as_string(h).c_str());
+                        _log->fine("HebbianUpdatingAgent: change old inverse %s to sym link", h->toString().c_str());
                         // save STI/LTI
                         AttentionValuePtr backupAV = h->getAttentionValue();
-                        a->remove_atom(h);
-                        h = a->add_link(SYMMETRIC_HEBBIAN_LINK, outgoing);
+                        _as->remove_atom(h);
+                        h = _as->add_link(SYMMETRIC_HEBBIAN_LINK, outgoing);
                         h->setTruthValue(SimpleTruthValue::createTV(-tc, 1));
                         // restore STI/LTI
                         h->setAttentionValue(backupAV);
@@ -163,16 +148,16 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                     }
                 }
             } else {
-                tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
+                tc = (tcDecayRate * new_tc) + ( (1.0 - tcDecayRate) * old_tc);
                 if (tc < 0) {
                     // link no longer representative
                     // change to inverse hebbian link
-                    log->fine("HebbianUpdatingAgent: change old sym %s to inverse link", a->atom_as_string(h).c_str());
+                    _log->fine("HebbianUpdatingAgent: change old sym %s to inverse link", h->toString().c_str());
                     // save STI/LTI
                     AttentionValuePtr backupAV = h->getAttentionValue();
-                    a->remove_atom(h);
+                    _as->remove_atom(h);
                     outgoing = moveSourceToFront(outgoing);
-                    h = a->add_link(INVERSE_HEBBIAN_LINK, outgoing);
+                    h = _as->add_link(INVERSE_HEBBIAN_LINK, outgoing);
                     h->setTruthValue(SimpleTruthValue::createTV(-tc, 0));
                     // restore STI/LTI
                     h->setAttentionValue(backupAV);
@@ -186,16 +171,17 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
             // otherwise just update link weights
             // if inverse normalised sti of source is positive
             // (i.e. hebbian link is pointing in the right direction)
-            if (h->getType() == INVERSE_HEBBIAN_LINK &&
-                    a->get_normalised_STI(outgoing[0],true,false) < 0.0f) {
-					new_tc = -new_tc;
+            if (h->getType() == INVERSE_HEBBIAN_LINK and
+                    _as->get_normalised_STI(outgoing[0], true, false) < 0.0)
+            {
+               new_tc = -new_tc;
             }
-            tc = (tcDecayRate * new_tc) + ( (1.0f - tcDecayRate) * old_tc);
-            if (tc < 0.0f) tc = 0.0f;
+            tc = (tcDecayRate * new_tc) + ( (1.0 - tcDecayRate) * old_tc);
+            if (tc < 0.0) tc = 0.0;
             setMean(h, tc);
         }
-		if (isDifferent)
-			log->fine("HebbianUpdatingAgent: %s old tv %f", a->atom_as_string(h).c_str(), old_tc);
+        if (isDifferent)
+            _log->fine("HebbianUpdatingAgent: %s old tv %f", h->toString().c_str(), old_tc);
 
     }
     // if not enough links, try and create some more either randomly
@@ -209,10 +195,10 @@ HandleSeq& HebbianUpdatingAgent::moveSourceToFront(HandleSeq &outgoing)
     Handle theSource;
     bool foundTheSource = false;
     for (auto outgoing_i = outgoing.begin();outgoing_i != outgoing.end();) {
-        float normsti;
+        double normsti;
         Handle oh = *outgoing_i;
-        normsti = a->get_normalised_STI(oh,true,false);
-        if (normsti > 0.0f) {
+        normsti = _as->get_normalised_STI(oh, true, false);
+        if (normsti > 0.0) {
             theSource = oh;
             foundTheSource = true;
             outgoing_i = outgoing.erase(outgoing_i);
@@ -222,12 +208,12 @@ HandleSeq& HebbianUpdatingAgent::moveSourceToFront(HandleSeq &outgoing)
     if (foundTheSource) {
         outgoing.insert(outgoing.begin(), theSource);
     } else {
-        log->error("Can't find source atom for new Asymmetric Hebbian Link");
+        _log->error("Can't find source atom for new Asymmetric Hebbian Link");
     }
     return outgoing;
 
 }
-float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
+double HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
 {
     // TODO: this won't work for Hebbian Links with arity > 2
 
@@ -235,26 +221,27 @@ float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
     // in the attentional focus
     bool inAttention = false;
     AttentionValue::sti_t sti;
-    float tc = 0.0f, normsti;
-    std::vector<float> normsti_v;
+    double tc = 0.0;
+    double normsti;
+    std::vector<double> normsti_v;
     bool tcInit = true;
 
-	log->fine("HebbianUpdatingAgent::targetConjunction");
+    _log->fine("HebbianUpdatingAgent::targetConjunction");
 
     for (const Handle& h: handles) {
         sti = h->getAttentionValue()->getSTI();
 
         // if none in attention return 0 at end
-        if (sti > a->get_attentional_focus_boundary()) {
-            log->fine("HebbianUpdatingAgent: handle %d STI value %d in attention, focus boundary = %d", 
-                      h.value(),
+        if (sti > _as->get_attentional_focus_boundary()) {
+            _log->fine("HebbianUpdatingAgent: %s STI value %d in attention, focus boundary = %d", 
+                      h->toString().c_str(),
                       sti,
-                      a->get_attentional_focus_boundary());
+                      _as->get_attentional_focus_boundary());
             inAttention = true;
-		}
+        }
 
         // normalise each sti and multiply each
-        normsti = a->get_normalised_STI(h,true,false);
+        normsti = _as->get_normalised_STI(h,true,false);
 
         // For debugging:
         normsti_v.push_back(normsti);
@@ -263,17 +250,17 @@ float HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
             tc = normsti;
             tcInit = false;
         } else tc *= normsti;
-		log->fine("HebbianUpdatingAgent: normsti %.3f, tc %.3f", normsti, tc);
+        _log->fine("HebbianUpdatingAgent: normsti %.3f, tc %.3f", normsti, tc);
 
     }
 
-    if (!inAttention) return 0.0f;
+    if (!inAttention) return 0.0;
 
     // cap conjunction to range [-1,1]
-    if (tc > 1.0f) tc = 1.0f;
-    if (tc < -1.0f) tc = -1.0f;
+    if (tc > 1.0) tc = 1.0;
+    if (tc < -1.0) tc = -1.0;
 
-    log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc = %.3f",
+    _log->fine("HebbianUpdatingAgent: normstis [%.3f,%.3f], tc = %.3f",
         normsti_v[0], normsti_v[1], tc);
 
     return tc;

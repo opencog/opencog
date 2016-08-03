@@ -27,13 +27,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
-#include <opencog/util/recent_val.h>
-
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Agent.h>
 
 #include "RentCollectionBaseAgent.h"
@@ -42,8 +36,6 @@ namespace opencog {
     /** \addtogroup grp_attention
      *  @{
      */
-
-    class CogServer;
 
     /**
      * This Agent collects wages form inside the Whole Atomsapce by picking a
@@ -54,18 +46,15 @@ namespace opencog {
      *
      * This Agent is supposed to run in it's own Thread.
      */
-    class WARentCollectionAgent : public RentCollectionBaseAgent {
+    class WARentCollectionAgent : public RentCollectionBaseAgent
+    {
     private:
-
         unsigned int SAMPLE_SIZE = 5;
         int _tournamentSize;
         Handle tournamentSelect(HandleSeq population);
 
     public:
-
-        const ClassInfo& classinfo() const {
-            return info();
-        }
+        const ClassInfo& classinfo() const { return info(); }
 
         static const ClassInfo& info() {
             static const ClassInfo _ci("opencog::WARentCollectionAgent");
@@ -75,7 +64,6 @@ namespace opencog {
         WARentCollectionAgent(CogServer&);
         void selectTargets(HandleSeq &targetSetOut);
     }; // class
-
 
     /** @}*/
 } // namespace
