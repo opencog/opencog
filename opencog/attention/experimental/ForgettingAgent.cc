@@ -48,7 +48,7 @@ ForgettingAgent::ForgettingAgent(CogServer& cs) :
     config().set("ECAN_FORGET_THRESHOLD", defaultForgetThreshold);
 
     forgetThreshold = (AttentionValue::lti_t)
-                      (config().get_int("ECAN_FORGET_THRESHOLD", 0));
+                      (config().get_int("ECAN_FORGET_THRESHOLD", defaultForgetThreshold));
 
     //Todo: Make configurable
     maxSize = config().get_int("ECAN_ATOMSPACE_MAXSIZE", 10000);
