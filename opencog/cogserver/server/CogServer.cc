@@ -602,9 +602,17 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
     }
 
     // Load modules specified in the config file
-    bool load_failure = false;
+    std::string modlist;
+    if (config().has("MODULES"))
+        modlist = config().get("MODULES");
+    else
+        modlist =
+            "opencog/cogserver/server/libbuiltinreqs.so, "
+            "opencog/cogserver/shell/libscheme-shell.so, "
+            "opencog/cogserver/shell/libpy-shell.so";
     std::vector<std::string> modules;
-    tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
+    tokenize(modlist, std::back_inserter(modules), ", ");
+    bool load_failure = false;
     for (const std::string& module : modules) {
         bool rc = false;
         if (not module_paths.empty()) {
