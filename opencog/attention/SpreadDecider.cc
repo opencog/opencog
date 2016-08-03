@@ -31,7 +31,7 @@ RandGen* SpreadDecider::rng = NULL;
 
 bool SpreadDecider::spreadDecision(AttentionValue::sti_t s)
 {
-    if (getRNG()->randfloat() < function(s))
+    if (getRNG()->randdouble() < function(s))
         return true;
     else
         return false;
@@ -48,20 +48,20 @@ double HyperbolicDecider::function(AttentionValue::sti_t s)
 {
     AtomSpace& a = _cogserver.getAtomSpace();
     // Convert boundary from -1..1 to 0..1
-    float af = a.getAttentionalFocusBoundary();
-    float minSTI = a.getMinSTI(false);
-    float maxSTI = a.getMaxSTI(false);
-    float norm_b = focusBoundary > 0.0f ?
+    double af = a.getAttentionalFocusBoundary();
+    double minSTI = a.getMinSTI(false);
+    double maxSTI = a.getMaxSTI(false);
+    double norm_b = focusBoundary > 0.0 ?
         af + (focusBoundary * (maxSTI - af)) :
         af + (focusBoundary * (af - minSTI ));
     // norm_b is now the actual STI value, normalise to 0..1
-    norm_b = (norm_b - minSTI) / (float) ( maxSTI - minSTI );
+    norm_b = (norm_b - minSTI) / (double) ( maxSTI - minSTI );
     // Scale s to 0..1
-    float norm_s = (s - minSTI) / (float) ( maxSTI - minSTI );
-    return (tanh(shape*(norm_s-norm_b))+1.0f)/2.0f;
+    double norm_s = (s - minSTI) / (double) ( maxSTI - minSTI );
+    return (tanh(shape*(norm_s-norm_b))+1.0)/2.0;
 }
 
-void HyperbolicDecider::setFocusBoundary(float b)
+void HyperbolicDecider::setFocusBoundary(double b)
 {
     // Store as -1..1 since exact 0..1 mapping of boundary
     // will change based on min/max STI
@@ -70,15 +70,15 @@ void HyperbolicDecider::setFocusBoundary(float b)
 
 double StepDecider::function(AttentionValue::sti_t s)
 {
-    return (s>focusBoundary ? 1.0f : 0.0f);
+    return (s>focusBoundary ? 1.0 : 0.0);
 }
 
-void StepDecider::setFocusBoundary(float b)
+void StepDecider::setFocusBoundary(double b)
 {
     AtomSpace& a = _cogserver.getAtomSpace();
     // Convert to an exact STI amount
-    float af = a.getAttentionalFocusBoundary();
-    focusBoundary = (b > 0.0f)?
+    double af = a.getAttentionalFocusBoundary();
+    focusBoundary = (b > 0.0)?
         (int) (af + (b * (a.getMaxSTI(false) - af))) :
         (int) (af + (b * (af - a.getMinSTI(false))));
 

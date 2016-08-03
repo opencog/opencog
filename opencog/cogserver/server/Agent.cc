@@ -31,7 +31,8 @@
 
 using namespace opencog;
 
-Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f)
+Agent::Agent(CogServer& cs, const unsigned int f) :
+    _log(nullptr), _cogserver(cs), _frequency(f)
 {
 #if 0
 This causes the cogserver to crash!
@@ -48,16 +49,9 @@ See https://github.com/opencog/opencog/issues/2329
 
     _attentionValue = AttentionValue::DEFAULT_AV();
 
-    // an empty set of parameters and defaults (so that various
-    // methods will still work even if none are set in this or a derived
-    // class)
-    static const std::string defaultConfig[] = {
-        "", ""
-    };
-    setParameters(defaultConfig);
+    setParameters({""});
 
-    stimulatedAtoms = new AtomStimHashMap();
-    totalStimulus = 0;
+    _totalStimulus = 0;
 
     conn = _cogserver.getAtomSpace().removeAtomSignal(
             boost::bind(&Agent::atomRemoved, this, _1));
@@ -73,34 +67,29 @@ Agent::~Agent()
 
     resetUtilizedHandleSets();
     conn.disconnect();
-    delete stimulatedAtoms;
 
-    if (log)
-        delete log;
+    if (_log) delete _log;
 }
 
-void Agent::setLogger(Logger* _log)
+void Agent::setLogger(Logger* l)
 {
-    if (log)
-        delete log;
-    log = _log;
+    if (_log) delete _log;
+    _log = l;
 }
 
 Logger* Agent::getLogger()
 {
-    return log;
+    return _log;
 }
 
 
-
-void Agent::setParameters(const std::string* params)
+void Agent::setParameters(const std::vector<std::string>& params)
 {
-    PARAMETERS = params;
-
-    for (unsigned int i = 0; params[i] != ""; i += 2) {
-        if (!config().has(params[i])) {
+    _parameters = params;
+    for (unsigned int i = 0; params[i] != ""; i += 2)
+    {
+        if (!config().has(params[i]))
            config().set(params[i], params[i + 1]);
-        }
     }
 }
 
@@ -109,17 +98,17 @@ std::string Agent::to_string() const
     std::ostringstream oss;
     oss << classinfo().id;
     oss << " {\"";
-    for (unsigned int i = 0; PARAMETERS[i] != ""; i += 2) {
+    for (unsigned int i = 0; _parameters[i] != ""; i += 2) {
         if (i != 0) oss << "\", \"";
-        oss << PARAMETERS[i] << "\" => \"" << config()[PARAMETERS[i]];
+        oss << _parameters[i] << "\" => \"" << config()[_parameters[i]];
     }
     oss << "\"}";
     return oss.str();
 }
 
-void Agent::atomRemoved(AtomPtr atom)
+void Agent::atomRemoved(const AtomPtr& atom)
 {
-    Handle h = atom->getHandle();
+    Handle h(atom->getHandle());
     {
         std::lock_guard<std::mutex> lock(_handleSetMutex);
         for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
@@ -128,7 +117,7 @@ void Agent::atomRemoved(AtomPtr atom)
     removeAtomStimulus(h);
 }
 
-void Agent::resetUtilizedHandleSets()
+void Agent::resetUtilizedHandleSets(void)
 {
     std::lock_guard<std::mutex> lock(_handleSetMutex);
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
@@ -136,120 +125,107 @@ void Agent::resetUtilizedHandleSets()
     _utilizedHandleSets.clear();
 }
 
-
-stim_t Agent::stimulateAtom(Handle h, stim_t amount)
+long Agent::stimulateAtom(const Handle& h, stim_t amount)
 {
     {
-        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
+        std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
 
         // Add atom to the map of atoms with stimulus
         // and add stimulus to it
-        (*stimulatedAtoms)[h] += amount;
+        _stimulatedAtoms[h] += amount;
     }
 
-    // update record of total stimulus given out
-    totalStimulus += amount;
+    // Update record of total stimulus given out.
+    // XXX FIXME: This could overflow and you'd never know it!
+    _totalStimulus += amount;
 
-    logger().fine("Atom %d received stimulus of %d, total now %d",
-                  h.value(),
-                  amount,
-                  totalStimulus.load(std::memory_order_relaxed));
+    logger().fine("Atom %s received stimulus of %d, total now %ld",
+                  h->toString().c_str(), amount, _totalStimulus);
 
-#ifdef DEBUG
-    std::cout << "Atom " << h.value() << " received stimulus of " << amount <<
-                 ", total now " << totalStimulus.load(std::memory_order_relaxed)
-                 << "\n";
-#endif
-
-    return totalStimulus.load(std::memory_order_relaxed);
+    return _totalStimulus;
 }
 
-void Agent::removeAtomStimulus(Handle h)
+void Agent::removeAtomStimulus(const Handle& h)
 {
-    stim_t amount;
-    {
-        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-        // if handle not in map then return
-        if (stimulatedAtoms->find(h) == stimulatedAtoms->end())
-            return;
+    std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
 
-        amount = (*stimulatedAtoms)[h];
-        stimulatedAtoms->erase(h);
-    }
+    // if handle not in map then return
+    auto pr = _stimulatedAtoms.find(h);
+    if (pr == _stimulatedAtoms.end()) return;
 
-    // update record of total stimulus given out
-    totalStimulus -= amount;
+    stim_t amount = pr->second;
+    _stimulatedAtoms.erase(h);
+
+    // Update record of total stimulus given out.
+    // XXX FIXME: This could underflow and you'd never know it!
+    _totalStimulus -= amount;
 }
 
-stim_t Agent::stimulateAtom(HandleSeq hs, stim_t amount)
+stim_t Agent::stimulateAtom(const HandleSeq& hs, stim_t amount)
 {
-    stim_t split;
+    // How much to give each atom.
+    stim_t split = amount / hs.size();
 
-    // how much to give each atom
-    split = amount / hs.size();
-
-    for (Handle handle : hs) {
+    for (const Handle& handle : hs)
         stimulateAtom(handle, split);
-    }
-    // return unused stimulus
+
+    // Return unused stimulus.
     return amount - (split * hs.size());
 }
 
-stim_t Agent::resetStimulus()
+void Agent::resetStimulus(void)
 {
-    {
-        std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-        stimulatedAtoms->clear();
-    }
+    std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
+    _stimulatedAtoms.clear();
+
     // reset stimulus counter
-    totalStimulus = 0;
-    return totalStimulus.load(std::memory_order_relaxed);
+    _totalStimulus = 0;
 }
 
-stim_t Agent::getTotalStimulus() const
+long Agent::getTotalStimulus(void) const
 {
-    return totalStimulus;
+    return _totalStimulus;
 }
 
-stim_t Agent::getAtomStimulus(Handle h) const
+stim_t Agent::getAtomStimulus(const Handle& h) const
 {
-    std::lock_guard<std::mutex> lock(stimulatedAtomsMutex);
-    if (stimulatedAtoms->find(h) == stimulatedAtoms->end()) {
+    std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
+    auto pr = _stimulatedAtoms.find(h);
+    if (pr == _stimulatedAtoms.end())
         return 0;
-    } else {
-        return (*stimulatedAtoms)[h];
-    }
+    else
+        return pr->second;
 }
 
-void Agent::experimentalStimulateAtom(Handle h,float stimulus)
+void Agent::experimentalStimulateAtom(const Handle& h, double stimulus)
 {
-    int sti = h->getAttentionValue()->getSTI();
-    int lti = h->getAttentionValue()->getLTI();
-    int stiWage = calculate_STI_Wage() * stimulus;
-    int ltiWage = calculate_LTI_Wage() * stimulus;
+    long sti = h->getAttentionValue()->getSTI();
+    long lti = h->getAttentionValue()->getLTI();
+    long stiWage = calculate_STI_Wage() * stimulus;
+    long ltiWage = calculate_LTI_Wage() * stimulus;
 
     h->setSTI(sti + stiWage);
     h->setLTI(lti + ltiWage);
 }
 
-AttentionValue::sti_t Agent::calculate_STI_Wage()
+AttentionValue::sti_t Agent::calculate_STI_Wage(void)
 {
-    int funds = _as->get_STI_funds();
-    float diff  = funds - targetSTI;
-    float ndiff = diff / stiFundsBuffer;
-    ndiff = std::min(ndiff,1.0f);
-    ndiff = std::max(ndiff,-1.0f);
+    long funds = _as->get_STI_funds();
+    double diff  = funds - _targetSTI;
+    double ndiff = diff / _stiFundsBuffer;
+    ndiff = std::min(ndiff, 1.0);
+    ndiff = std::max(ndiff, -1.0);
 
-    return STIAtomWage + (STIAtomWage * ndiff);
+    return _STIAtomWage + _STIAtomWage * ndiff;
 }
 
-AttentionValue::lti_t Agent::calculate_LTI_Wage()
+AttentionValue::lti_t Agent::calculate_LTI_Wage(void)
 {
-    int funds = _as->get_LTI_funds();
-    float diff  = funds - targetLTI;
-    float ndiff = diff / ltiFundsBuffer;
-    ndiff = std::min(ndiff,1.0f);
-    ndiff = std::max(ndiff,-1.0f);
+    long funds = _as->get_LTI_funds();
+    double diff  = funds - _targetLTI;
+    double ndiff = diff / _ltiFundsBuffer;
+    ndiff = std::min(ndiff, 1.0);
+    ndiff = std::max(ndiff, -1.0);
 
-    return LTIAtomWage + (LTIAtomWage * ndiff);
+    return _LTIAtomWage + _LTIAtomWage * ndiff;
 }

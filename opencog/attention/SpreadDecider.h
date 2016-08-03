@@ -40,7 +40,7 @@ class SpreadDecider
     //!
     //! @param s The STI to base the decision on.
     //! @return Probability of given STI value resulting in spread.
-    virtual double function(AttentionValue::sti_t s) = 0;
+    virtual double function(AttentionValue::sti_t) = 0;
 
 protected:
     CogServer& _cogserver;
@@ -57,7 +57,7 @@ public:
     //!
     //! @param b the -1..1 normalised boundary position. 0 = AtomSpace
     //! AttentionalFocusBoundary.
-    virtual void setFocusBoundary(float b = 0.0f) {};
+    virtual void setFocusBoundary(double b = 0.0) {};
 
     //! Get the random number generator for the SpreadDecider
     //!
@@ -93,17 +93,17 @@ class HyperbolicDecider : SpreadDecider
 
 public:
     //! Used to determine the steepness of the hyperbolic decision function.
-    float shape;
+    double shape;
 
     //! The decision focus boundary, or where the decision function is centered
     //! around.
     double focusBoundary;
 
-    HyperbolicDecider(CogServer& cs, float _s = 10.0f):
-        SpreadDecider(cs), shape(_s), focusBoundary(0.0f) {}
+    HyperbolicDecider(CogServer& cs, double _s = 10.0):
+        SpreadDecider(cs), shape(_s), focusBoundary(0.0) {}
 
     virtual ~HyperbolicDecider() {}
-    virtual void setFocusBoundary(float b = 0.0f);
+    virtual void setFocusBoundary(double b = 0.0);
 };
 
 /** A basic spread decider based on a step function.
@@ -117,7 +117,7 @@ public:
     int focusBoundary;
     StepDecider(CogServer& cs) : SpreadDecider(cs) {}
     virtual ~StepDecider() {}
-    virtual void setFocusBoundary(float b = 0.0f);
+    virtual void setFocusBoundary(double b = 0.0);
 };
 
 /** @}*/
