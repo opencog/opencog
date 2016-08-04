@@ -281,8 +281,6 @@ public:
      */
     stim_t getAtomStimulus(const Handle&) const;
 
-    void experimentalStimulateAtom(const Handle&, double stimulus);
-
     AttentionValue::sti_t calculate_STI_Wage();
 
     AttentionValue::lti_t calculate_LTI_Wage();

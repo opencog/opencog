@@ -192,17 +192,6 @@ stim_t Agent::getAtomStimulus(const Handle& h) const
         return pr->second;
 }
 
-void Agent::experimentalStimulateAtom(const Handle& h, double stimulus)
-{
-    long sti = h->getAttentionValue()->getSTI();
-    long lti = h->getAttentionValue()->getLTI();
-    long stiWage = calculate_STI_Wage() * stimulus;
-    long ltiWage = calculate_LTI_Wage() * stimulus;
-
-    h->setSTI(sti + stiWage);
-    h->setLTI(lti + ltiWage);
-}
-
 AttentionValue::sti_t Agent::calculate_STI_Wage(void)
 {
     long funds = _as->get_STI_funds();
