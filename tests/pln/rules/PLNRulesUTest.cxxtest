@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -55,6 +54,7 @@ public:
 
 	void setUp();
 	void tearDown();
+	void load_scm_files(std::vector<std::string>);
 
 	void test_deduction();
 	void test_and_construction();
@@ -83,8 +83,6 @@ void PLNRulesUTest::tearDown()
 
 void PLNRulesUTest::setUp()
 {
-	load_scm_files_from_config(as);
-
 	string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
 		cur_dir = cur_ppp_dir + "/tests/pln/rules";
 	vector<string> load_paths = {cur_ppp_dir, cur_dir};
@@ -100,6 +98,13 @@ void PLNRulesUTest::setUp()
 	eval.eval("(use-modules (srfi srfi-1))");
 }
 
+void PLNRulesUTest::load_scm_files(std::vector<std::string> files)
+{
+	std::string hd("(load-from-path \"");
+	std::string tl("\")");
+	for (auto f: files) eval.eval(hd + f + tl);
+}
+
 #define getarity(hand) LinkCast(hand)->getArity()
 
 /**
@@ -112,10 +117,8 @@ void PLNRulesUTest::test_deduction()
 
 	as.clear();
     
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-assertions.scm, "
-	             "opencog/pln/rules/deduction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-assertions.scm",
+	               "opencog/pln/rules/deduction-rule.scm"});
     
 	Handle results;
     
@@ -144,10 +147,8 @@ void PLNRulesUTest::test_and_construction()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-predicates.scm, "
-	             "opencog/pln/rules/and-construction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-predicates.scm",
+	                "opencog/pln/rules/and-construction-rule.scm"});
 
 	// Apply the rule
 	Handle results = eval.eval_h("(cog-bind-af and-construction-rule)");
@@ -166,10 +167,8 @@ void PLNRulesUTest::test_or_construction()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-predicates.scm, "
-	             "opencog/pln/rules/or-construction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-predicates.scm",
+	                "opencog/pln/rules/or-construction-rule.scm"});
 
 	// Apply the rule
 	Handle results = eval.eval_h("(cog-bind-af or-construction-rule)");
@@ -188,10 +187,8 @@ void PLNRulesUTest::test_not_construction()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-predicates.scm, "
-	             "opencog/pln/rules/not-construction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-predicates.scm",
+	               "opencog/pln/rules/not-construction-rule.scm"});
 
 	// Apply the rule
 	Handle results = eval.eval_h("(cog-bind-af not-construction-rule)");
@@ -210,10 +207,8 @@ void PLNRulesUTest::test_forall_full_instantiation()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-forall.scm, "
-	             "opencog/pln/rules/forall-instantiation-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-forall.scm",
+	                "opencog/pln/rules/forall-instantiation-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("forall-full-instantiation-rule");
@@ -249,10 +244,8 @@ void PLNRulesUTest::test_forall_partial_instantiation()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-forall.scm, "
-	             "opencog/pln/rules/forall-instantiation-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-forall.scm",
+	                "opencog/pln/rules/forall-instantiation-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("forall-partial-instantiation-rule");
@@ -278,10 +271,8 @@ void PLNRulesUTest::test_forall_implication_to_higher_order()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-forall.scm, "
-	             "opencog/pln/rules/forall-implication-to-higher-order-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-forall.scm",
+	                "opencog/pln/rules/forall-implication-to-higher-order-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("forall-implication-to-higher-order-rule");
@@ -320,10 +311,8 @@ void PLNRulesUTest::test_implication_full_instantiation()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-implication.scm, "
-	             "opencog/pln/rules/implication-instantiation-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-implication.scm",
+	                "opencog/pln/rules/implication-instantiation-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("implication-full-instantiation-rule");
@@ -355,10 +344,8 @@ void PLNRulesUTest::test_implication_full_instantiation_extra_variables()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/implication-extra-variables.scm, "
-	             "opencog/pln/rules/implication-instantiation-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/implication-extra-variables.scm",
+	                "opencog/pln/rules/implication-instantiation-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("implication-full-instantiation-rule");
@@ -387,10 +374,8 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-implication.scm, "
-	             "opencog/pln/rules/implication-instantiation-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-implication.scm",
+	                "opencog/pln/rules/implication-instantiation-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("implication-partial-instantiation-rule");
@@ -445,10 +430,8 @@ void PLNRulesUTest::test_implication_scope_distribution()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-implication.scm, "
-	             "opencog/pln/rules/implication-scope-distribution-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-implication.scm",
+	                "opencog/pln/rules/implication-scope-distribution-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("implication-scope-distribution-rule");
@@ -529,10 +512,8 @@ void PLNRulesUTest::test_and_lambda_distribution()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-lambda.scm, "
-	             "opencog/pln/rules/and-lambda-distribution-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-lambda.scm",
+	                "opencog/pln/rules/and-lambda-distribution-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("and-lambda-distribution-rule");
@@ -567,10 +548,8 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-implication.scm, "
-	             "opencog/pln/rules/implication-implicant-distribution-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-implication.scm",
+	                "opencog/pln/rules/implication-implicant-distribution-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("implication-implicant-distribution-rule");
@@ -599,10 +578,8 @@ void PLNRulesUTest::test_implication_construction()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-predicates.scm, "
-	             "opencog/pln/rules/implication-construction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-predicates.scm",
+	                "opencog/pln/rules/implication-construction-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("implication-construction-rule");
@@ -632,10 +609,8 @@ void PLNRulesUTest::test_lambda_grounded_construction()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-lambda.scm, "
-	             "opencog/pln/rules/lambda-grounded-construction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-lambda.scm",
+	                "opencog/pln/rules/lambda-grounded-construction-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("lambda-grounded-construction-rule");
@@ -664,10 +639,8 @@ void PLNRulesUTest::test_equivalence_to_double_implication()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-equivalence.scm, "
-	             "opencog/pln/rules/equivalence-to-double-implication-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-equivalence.scm",
+	                "opencog/pln/rules/equivalence-to-double-implication-rule.scm"});
 
 	// Apply the rule
 	Handle rule_alias =
@@ -706,10 +679,8 @@ void PLNRulesUTest::test_implication_and_lambda_factorization()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-lambda.scm, "
-	             "opencog/pln/rules/implication-and-lambda-factorization-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-lambda.scm",
+	                "opencog/pln/rules/implication-and-lambda-factorization-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("implication-and-lambda-factorization-rule");
@@ -757,10 +728,8 @@ void PLNRulesUTest::test_implication_implicant_conjunction()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/simple-implication-implicant-conjunction.scm, "
-	             "opencog/pln/rules/implication-implicant-conjunction-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/simple-implication-implicant-conjunction.scm",
+	                "opencog/pln/rules/implication-implicant-conjunction-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("implication-implicant-conjunction-rule");
@@ -789,10 +758,8 @@ void PLNRulesUTest::test_implication_direct_evaluation()
 
 	as.clear();
 
-	config().set("SCM_PRELOAD",
-	             "tests/pln/rules/implication-direct-evaluation.scm, "
-	             "opencog/pln/rules/implication-direct-evaluation-rule.scm");
-	load_scm_files_from_config(as);
+	load_scm_files({"tests/pln/rules/implication-direct-evaluation.scm",
+	                "opencog/pln/rules/implication-direct-evaluation-rule.scm"});
 
 	// Apply the rule
 	Handle rule = eval.eval_h("implication-direct-evaluation-rule");
