@@ -34,14 +34,6 @@ using namespace opencog;
 Agent::Agent(CogServer& cs, const unsigned int f) :
     _log(nullptr), _cogserver(cs), _frequency(f)
 {
-    _STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
-    _LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
-
-    _targetSTI = config().get_int("TARGET_STI_FUNDS", 10000);
-    _stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER", 10000);
-    _targetLTI = config().get_int("TARGET_LTI_FUNDS", 10000);
-    _ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER", 10000);
-
     _attentionValue = AttentionValue::DEFAULT_AV();
 
     setParameters({""});
@@ -190,37 +182,4 @@ stim_t Agent::getAtomStimulus(const Handle& h) const
         return 0;
     else
         return pr->second;
-}
-
-void Agent::experimentalStimulateAtom(const Handle& h, double stimulus)
-{
-    long sti = h->getAttentionValue()->getSTI();
-    long lti = h->getAttentionValue()->getLTI();
-    long stiWage = calculate_STI_Wage() * stimulus;
-    long ltiWage = calculate_LTI_Wage() * stimulus;
-
-    h->setSTI(sti + stiWage);
-    h->setLTI(lti + ltiWage);
-}
-
-AttentionValue::sti_t Agent::calculate_STI_Wage(void)
-{
-    long funds = _as->get_STI_funds();
-    double diff  = funds - _targetSTI;
-    double ndiff = diff / _stiFundsBuffer;
-    ndiff = std::min(ndiff, 1.0);
-    ndiff = std::max(ndiff, -1.0);
-
-    return _STIAtomWage + _STIAtomWage * ndiff;
-}
-
-AttentionValue::lti_t Agent::calculate_LTI_Wage(void)
-{
-    long funds = _as->get_LTI_funds();
-    double diff  = funds - _targetLTI;
-    double ndiff = diff / _ltiFundsBuffer;
-    ndiff = std::min(ndiff, 1.0);
-    ndiff = std::max(ndiff, -1.0);
-
-    return _LTIAtomWage + _LTIAtomWage * ndiff;
 }

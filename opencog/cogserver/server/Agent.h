@@ -177,15 +177,6 @@ protected:
     /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(const AtomPtr&);
 
-    AttentionValue::sti_t _STIAtomWage;
-    AttentionValue::lti_t _LTIAtomWage;
-
-    AttentionValue::sti_t _targetSTI;
-    AttentionValue::lti_t _targetLTI;
-
-    AttentionValue::sti_t _stiFundsBuffer;
-    AttentionValue::lti_t _ltiFundsBuffer;
-
 public:
 
     /**
@@ -280,12 +271,6 @@ public:
      * @return total stimulus since last reset.
      */
     stim_t getAtomStimulus(const Handle&) const;
-
-    void experimentalStimulateAtom(const Handle&, double stimulus);
-
-    AttentionValue::sti_t calculate_STI_Wage();
-
-    AttentionValue::lti_t calculate_LTI_Wage();
 
     AttentionValuePtr getAV(void)
     {
