@@ -62,12 +62,6 @@ public:
         logger().set_level(Logger::DEBUG);
         logger().set_print_to_stdout_flag(true);
 
-        // setup global logger
-        logger().set_filename(config()["LOG_FILE"]);
-        logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
-        logger().set_backtrace_level(Logger::get_level_from_string(config()["BACK_TRACE_LOG_LEVEL"]));
-        logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
-
         // set cycle duration to a smaller value so that this test do not take too long.
         config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
