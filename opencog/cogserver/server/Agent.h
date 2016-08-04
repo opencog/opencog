@@ -281,10 +281,6 @@ public:
      */
     stim_t getAtomStimulus(const Handle&) const;
 
-    AttentionValue::sti_t calculate_STI_Wage();
-
-    AttentionValue::lti_t calculate_LTI_Wage();
-
     AttentionValuePtr getAV(void)
     {
 #ifdef SHARED_PTR_ATOMIC_OPS

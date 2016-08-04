@@ -191,25 +191,3 @@ stim_t Agent::getAtomStimulus(const Handle& h) const
     else
         return pr->second;
 }
-
-AttentionValue::sti_t Agent::calculate_STI_Wage(void)
-{
-    long funds = _as->get_STI_funds();
-    double diff  = funds - _targetSTI;
-    double ndiff = diff / _stiFundsBuffer;
-    ndiff = std::min(ndiff, 1.0);
-    ndiff = std::max(ndiff, -1.0);
-
-    return _STIAtomWage + _STIAtomWage * ndiff;
-}
-
-AttentionValue::lti_t Agent::calculate_LTI_Wage(void)
-{
-    long funds = _as->get_LTI_funds();
-    double diff  = funds - _targetLTI;
-    double ndiff = diff / _ltiFundsBuffer;
-    ndiff = std::min(ndiff, 1.0);
-    ndiff = std::max(ndiff, -1.0);
-
-    return _LTIAtomWage + _LTIAtomWage * ndiff;
-}
