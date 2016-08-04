@@ -34,14 +34,6 @@ using namespace opencog;
 Agent::Agent(CogServer& cs, const unsigned int f) :
     _log(nullptr), _cogserver(cs), _frequency(f)
 {
-    _STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
-    _LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
-
-    _targetSTI = config().get_int("TARGET_STI_FUNDS", 10000);
-    _stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER", 10000);
-    _targetLTI = config().get_int("TARGET_LTI_FUNDS", 10000);
-    _ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER", 10000);
-
     _attentionValue = AttentionValue::DEFAULT_AV();
 
     setParameters({""});

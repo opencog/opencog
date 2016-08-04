@@ -177,15 +177,6 @@ protected:
     /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(const AtomPtr&);
 
-    AttentionValue::sti_t _STIAtomWage;
-    AttentionValue::lti_t _LTIAtomWage;
-
-    AttentionValue::sti_t _targetSTI;
-    AttentionValue::lti_t _targetLTI;
-
-    AttentionValue::sti_t _stiFundsBuffer;
-    AttentionValue::lti_t _ltiFundsBuffer;
-
 public:
 
     /**
