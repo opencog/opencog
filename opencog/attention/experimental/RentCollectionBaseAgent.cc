@@ -41,13 +41,13 @@ RentCollectionBaseAgent::RentCollectionBaseAgent(CogServer& cs) :
 {
     // init starting wages/rents. these should quickly change and reach
     // stable values, which adapt to the system dynamics
-    STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT");
-    LTIAtomRent = config().get_int("ECAN_STARTING_ATOM_LTI_RENT");
+    STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT", 10);
+    LTIAtomRent = config().get_int("ECAN_STARTING_ATOM_LTI_RENT", 1);
 
-    targetSTI = config().get_int("TARGET_STI_FUNDS");
-    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER");
-    targetLTI = config().get_int("TARGET_LTI_FUNDS");
-    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER");
+    targetSTI = config().get_int("TARGET_STI_FUNDS", 10000);
+    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER", 10000);
+    targetLTI = config().get_int("TARGET_LTI_FUNDS", 10000);
+    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER", 10000);
 
     // Provide a logger
     setLogger(new opencog::Logger("RentCollectionAgent.log", Logger::FINE, true));

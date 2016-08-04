@@ -21,11 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
@@ -96,9 +94,9 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD",
-	             "examples/pln/moses-pln-synergy/scm/moses-pln-synergy-pm.scm");
-	load_scm_files_from_config(as);
+	eval.eval("(add-to-load-path \"..\")");
+	eval.eval("(add-to-load-path \"../../..\")");
+	eval.eval("(load-from-path \"examples/pln/moses-pln-synergy/scm/moses-pln-synergy-pm.scm\")");
 
 	// Query the TV of the inference target, which should be
 	//

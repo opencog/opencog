@@ -26,10 +26,9 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/atoms/base/types.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/atoms/base/Handle.h>
-
-#include <opencog/guile/load-file.h>
+#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/guile/SchemeEval.h>
 
 #define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
@@ -86,12 +85,14 @@ public:
      */
     void testEvaluationLink(void)
     {
-        config().set("SCM_PRELOAD", "tests/dynamics/scm/example-1.scm");
+        SchemeEval eval(as);
+        eval.eval("(add-to-load-path \"..\")");
+        eval.eval("(add-to-load-path \"../../..\")");
+        eval.eval("(load-from-path \"tests/dynamics/scm/example-1.scm\")");
         agent->setMaxSpreadPercentage(0.60f);
         agent->setSpreadHebbianOnly(false);
         agent->setHebbianMaxAllocationPercentage(0.50f);
         agent->setMaxSpreadPercentage(0.60f);
-        load_scm_files_from_config(*as);    
 
 #define get_STI(h) ((h)->getAttentionValue()->getSTI())
         // Initial conditions        

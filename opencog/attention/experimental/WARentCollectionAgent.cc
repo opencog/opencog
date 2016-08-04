@@ -38,7 +38,7 @@ using namespace opencog;
 
 WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
 {
-    _tournamentSize = config().get_int("ECAN_RENT_TOURNAMENT_SIZE");
+    _tournamentSize = config().get_int("ECAN_RENT_TOURNAMENT_SIZE", 5);
 
     // READ SLEEPING TIME HERE
     set_sleep_time(2000);

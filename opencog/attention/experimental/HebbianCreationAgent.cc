@@ -41,8 +41,8 @@ HebbianCreationAgent::HebbianCreationAgent(CogServer& cs) :
     // Provide a logger, but disable it initially
     setLogger(new opencog::Logger("HebbianCreationAgent.log", Logger::FINE, true));
 
-    maxLinkNum = config().get_int("ECAN_MAXLINKS");
-    localToFarLinks = config().get_int("ECAN_LOCAL_FAR_LINK_RATIO");
+    maxLinkNum = config().get_int("ECAN_MAXLINKS", 300);
+    localToFarLinks = config().get_int("ECAN_LOCAL_FAR_LINK_RATIO", 10);
 }
 
 void HebbianCreationAgent::run()

@@ -47,8 +47,8 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
     // Provide a logger
     setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE, true));
 
-    afbSize         = config().get_double("ECAN_AFB_SIZE");
-    bottomBoundary  = config().get_int("ECAN_AFB_BOTTOM");
+    afbSize         = config().get_double("ECAN_AFB_SIZE", 0.2);
+    bottomBoundary  = config().get_int("ECAN_AFB_BOTTOM", 100);
 }
 
 void FocusBoundaryUpdatingAgent::run()

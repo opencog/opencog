@@ -23,10 +23,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
 
 using namespace opencog;
 

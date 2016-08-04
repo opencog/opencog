@@ -48,7 +48,6 @@
 #include <opencog/cython/PythonEval.h>
 #endif
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/cogserver/server/Agent.h>
@@ -171,7 +170,7 @@ CogServer::CogServer(AtomSpace* as) :
 void CogServer::enableNetworkServer()
 {
     if (_networkServer) return;
-    _networkServer = new NetworkServer(config().get_int("SERVER_PORT"));
+    _networkServer = new NetworkServer(config().get_int("SERVER_PORT", 17001));
 }
 
 void CogServer::disableNetworkServer()
@@ -188,7 +187,7 @@ SystemActivityTable& CogServer::systemActivityTable()
 void CogServer::serverLoop()
 {
     struct timeval timer_start, timer_end, elapsed_time;
-    time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION") * 1000;
+    time_t cycle_duration = config().get_int("SERVER_CYCLE_DURATION", 100) * 1000;
 //    bool externalTickMode = config().get_bool("EXTERNAL_TICK_MODE");
 
     logger().info("Starting CogServer loop.");
@@ -603,9 +602,17 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
     }
 
     // Load modules specified in the config file
-    bool load_failure = false;
+    std::string modlist;
+    if (config().has("MODULES"))
+        modlist = config().get("MODULES");
+    else
+        modlist =
+            "opencog/cogserver/server/libbuiltinreqs.so, "
+            "opencog/cogserver/shell/libscheme-shell.so, "
+            "opencog/cogserver/shell/libpy-shell.so";
     std::vector<std::string> modules;
-    tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
+    tokenize(modlist, std::back_inserter(modules), ", ");
+    bool load_failure = false;
     for (const std::string& module : modules) {
         bool rc = false;
         if (not module_paths.empty()) {
@@ -632,6 +639,75 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
     }
 }
 
+#ifdef HAVE_GUILE
+
+/**
+ * Load scheme code from a file.
+ * The code will be loaded into a running instance of the evaluator.
+ * Parsing errors will be printed to stderr.
+ *
+ * Return errno if file cannot be opened.
+ */
+int load_scm_file(AtomSpace* as, const std::string& filename)
+{
+    SchemeEval evaluator(as);
+
+    evaluator.begin_eval();
+
+    std::string load_exp("(load \"");
+    load_exp += filename + "\")";
+    evaluator.eval_expr(load_exp.c_str());
+
+    std::string rv = evaluator.poll_result();
+    if (evaluator.eval_error()) {
+        printf("Error: %s\n", rv.c_str());
+        return 1;
+    }
+
+    return 0;
+}
+
+/**
+ * Load scheme file, with the filename specified as a relative path,
+ * and the search paths prepended to the relative path.  If the search
+ * paths are null, a list of defaults search paths are used.
+ */
+int load_scm_file_relative(AtomSpace* as, const std::string& filename)
+{
+    std::vector<std::string> search_paths;
+    // Sometimes paths are given without the "opencog" part.
+    // Also check the build directory for autogen'ed files.
+    // XXX This is fairly tacky/broken, and needs a better fix.
+    for (auto p : DEFAULT_MODULE_PATHS) {
+        search_paths.push_back(p);
+        search_paths.push_back(p + "/opencog");
+        search_paths.push_back(p + "/build");
+        search_paths.push_back(p + "/build/opencog");
+    }
+
+    int rc = 2;
+    for (const std::string& search_path : search_paths) {
+        boost::filesystem::path modulePath(search_path);
+        modulePath /= filename;
+        logger().fine("Searching path %s", modulePath.string().c_str());
+        if (boost::filesystem::exists(modulePath)) {
+            rc = load_scm_file(as, modulePath.string());
+            if (0 == rc) {
+                logger().info("Loaded %s", modulePath.string().c_str());
+                break;
+            }
+        }
+    }
+
+    if (rc)
+    {
+       logger().warn("Failed to load file %s: %d %s",
+                     filename.c_str(), rc, strerror(rc));
+    }
+    return rc;
+}
+#endif /* HAVE_GUILE */
+
 void CogServer::loadSCMModules(std::vector<std::string> module_paths)
 {
 #ifdef HAVE_GUILE
@@ -643,8 +719,13 @@ void CogServer::loadSCMModules(std::vector<std::string> module_paths)
         }
     }
 
+    // Load scheme modules specified in the config file
+    std::vector<std::string> scm_modules;
+    tokenize(config().get("SCM_PRELOAD", ""), std::back_inserter(scm_modules), ", ");
 
-    load_scm_files_from_config(*atomSpace, module_paths);
+    for (const std::string& scm_module : scm_modules)
+        load_scm_file_relative(atomSpace, scm_module);
+
 #else /* HAVE_GUILE */
     logger().warn("Server compiled without SCM support");
 #endif /* HAVE_GUILE */
