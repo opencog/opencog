@@ -26,7 +26,6 @@
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/util/Logger.h>
-#include <opencog/guile/load-file.h>
 
 using namespace opencog;
 
@@ -45,7 +44,7 @@ DistributedPatternMinerServerModule::~DistributedPatternMinerServerModule()
 }
 
 void DistributedPatternMinerServerModule::init()
-{   
+{
     logger().info("[DistributedPatternMinerServerModule] init");
     _cogserver.registerAgent(DistributedPatternMinerServer::info().id, &factory);
     _cogserver.createAgent(DistributedPatternMinerServer::info().id, true);
