@@ -196,12 +196,12 @@ def call_sentiment_parse(text_node, sent_node):
 (define nlp-stimulation-value 0)
 
 ; -----------------------------------------------------------------------
-(define-public (nlp-start-stimulation stimulus)
+(define-public (nlp-start-stimulation STIMULUS)
 "
   Switchs on the stimulation of WordNodes and WordInstanceNodes during parse
   by STI amount.
 "
-    (set! nlp-stimulation-value stimulus)
+    (set! nlp-stimulation-value STIMULUS)
     (set! nlp-stimulate-parses #t)
 )
 
@@ -222,12 +222,12 @@ def call_sentiment_parse(text_node, sent_node):
 )
 
 ; -----------------------------------------------------------------------
-(define (nlp-stimulate SENT stimulus)
+(define (nlp-stimulate SENT STIMULUS)
 "
   Stimulate the WordNodes and WordInstanceNodes associated with the SentenceNode
   SENT by STI amount.
 "
-    (define (stimulate x) (cog-stimulate x stimulus))
+    (define (stimulate x) (cog-stimulate x STIMULUS))
     (let* ((word-inst-list
                 (append-map parse-get-words (sentence-get-parses SENT)))
            (word-list (append-map word-inst-get-word word-inst-list)))
