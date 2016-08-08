@@ -4,7 +4,7 @@
 (use-modules (opencog python))
 ;;initialize octomap with 15hz, 10 second or 150 frames buffer ; 1 cm spatial resolution
 (create-map "faces" 0.01 66 150) (step-time-unit "faces") (auto-step-time-on "faces")
-(create-map "sounds" 0.01 100 100) (step-time-unit "sounds") (auto-step-time-on "sounds")
+(create-map "sounds" 0.01 66 150) (step-time-unit "sounds") (auto-step-time-on "sounds")
 
 ;(map-ato "faces" (NumberNode "1") 1 2 3)
 ;(map-ato "sounds" (NumberNode "1") 1 2 3)
@@ -52,11 +52,11 @@
 
 ;;scm code
 (define (get-face face-id-node)
- (get-last-xyz "faces" face-id-node 200)
+ (get-last-xyz "faces" face-id-node 500)
 )
 
 (define (get-snd-loc snd-id-node)
- (get-last-xyz "sounds" snd-id-node 400)
+ (get-last-xyz "sounds" snd-id-node 5000)
 )
 ;;sound id 1
 (define (save-snd-1 x y z)
@@ -147,7 +147,13 @@
 ;;below creates say atom for face if sound came from it
 (define (who-said? sent)
 	(let* ((fid (snd1-nearest-face)))
-		(if (> fid 0) (EvaluationLink (PredicateNode "say")(ListLink (ConceptNode (number->string fid))(SentenceNode sent)))
+		(if (> fid 0)
+			(AtTimeLink
+				(TimeNode (number->string (current-time)))
+				(EvaluationLink
+					(PredicateNode "say")
+					(ListLink (ConceptNode (number->string fid))(SentenceNode sent)))
+					(ConceptNode "sound-perception"))
 		)
 	)
 )
