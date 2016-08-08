@@ -319,6 +319,16 @@
 (DefineLink
 	(DefinedPredicateNode "Did someone recognizable arrive?")
 	(SatisfactionLink
+		(VariableList
+			(TypedVariableLink
+				(VariableNode "$face-id")
+				(TypeNode "ConceptNode"))
+			(TypedVariableLink
+				(VariableNode "$recog-id")
+				(TypeNode "ConceptNode"))
+			(TypedVariableLink
+				(VariableNode "$face-id-nn")
+				(TypeNode "NumberNode")))
 		(AndLink
 			; If someone is visible...
 			(PresentLink (EvaluationLink (PredicateNode "visible face")
@@ -332,31 +342,14 @@
 					(VariableNode "$face-id")
 					(VariableNode "$recog-id"))))
 			(Not (Equal (VariableNode "$recog-id") (ConceptNode "0")))
-			; check the ConceptNode and NumberNode for the face-id in
+			; Check the ConceptNode and NumberNode for the face-id in
 			; two EvaluationLinks are equal
-			(Put
-				(DefinedPredicate "is_nn_equal_cn?")
+			(EvaluationLink
+				(GroundedPredicate "scm: is_nn_equal_cn?")
 				(ListLink
 					(VariableNode "$face-id-nn")
 					(VariableNode "$face-id")))
 			)))
-
-;; Check if a NumberNode is equal to a ConceptNode referring to the same
-;; number.
-; (cog-evaluate! ; Tested for integers which is the type of face-ids from ros
-;    (Put
-;        (DefinedPredicate "is_nn_equal_cn?")
-;        (ListLink (NumberNode 1) (ConceptNode (number->string 1))))
-; )
-(Define
-	(DefinedPredicate "is_nn_equal_cn?")
-    (LambdaLink
-        (VariableList (VariableNode "number") (VariableNode "concept"))
-        (EvaluationLink
-            (GroundedPredicate "scm: is_nn_equal_cn?")
-            (ListLink
-                (VariableNode "number")
-                (VariableNode "concept")))))
 
 (define-public (is_nn_equal_cn? number-node concept-node)
     (if (equal? (string->number (cog-name number-node))
