@@ -20,7 +20,7 @@
 ; -----------------------------------------------------------------------------
 ; For recording sound coordinates, create octomap with 10hz, 10 second or
 ; 100 frames buffer and 1 cm spatial resolution.
-(create-map "sounds" 0.01 100 100)
+(create-map "sounds" 0.01 66 150)
 ; Initialize  the map
 (step-time-unit "sounds")
 ; Make the stepping take place automatically
@@ -73,11 +73,11 @@
 
 ;;scm code
 (define (get-face face-id-node)
- (get-last-xyz "faces" face-id-node 200)
+ (get-last-xyz "faces" face-id-node 500)
 )
 
 (define (get-snd-loc snd-id-node)
- (get-last-xyz "sounds" snd-id-node 400)
+ (get-last-xyz "sounds" snd-id-node 5000)
 )
 ;;sound id 1
 (define (save-snd-1 x y z)
@@ -184,12 +184,14 @@
 
 ;;below creates say atom for face if sound came from it
 (define (who-said? sent)
-	(let ((fid (snd1-nearest-face)))
+	(let* ((fid (snd1-nearest-face)))
 		(if (> fid 0)
-			(EvaluationLink
-				(PredicateNode "say")
-				(ListLink (ConceptNode (number->string fid))
-				(SentenceNode sent)))
+			(AtTimeLink
+				(TimeNode (number->string (current-time)))
+				(EvaluationLink
+					(PredicateNode "say")
+					(ListLink (ConceptNode (number->string fid))(SentenceNode sent)))
+					(ConceptNode "sound-perception"))
 		)
 	)
 )

@@ -144,7 +144,7 @@ class FaceTrack:
 
 		# Which face to look at
 		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
-		rospy.Subscriber("/robot/perceived_text", String,
+		rospy.Subscriber("perceived_text", String,
 			self.user_said_cb)
 		# Where to look
 		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
