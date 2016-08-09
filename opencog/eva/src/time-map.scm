@@ -14,7 +14,8 @@
 (auto-step-time-on "faces")
 ; time-span is the amount of time in milliseconds to be considered for locating
 ; a face. The time limit for spatial memory for faces :-). The value is
-; dependent on the frequency of update of the map and the number of frames.
+; dependent on the frequency of update of the map and the number of frames, and
+; is set as half the size of the total buffer.
 (define face-loc-time-span 5000) ; (/ (* (/ 1000.0 15) 150) 2)
 
 ; -----------------------------------------------------------------------------

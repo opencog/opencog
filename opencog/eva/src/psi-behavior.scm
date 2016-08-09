@@ -84,6 +84,7 @@
 	(DefinedSchemaNode "Nothing is happening")
 	face-demand-satisfied (stv 1 1) face-demand)
 
+; TODO: Enable after further testing with HEAD.
 ;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 ;		(Not (DefinedPredicate "chatbot started talking?"))
 ;		(Not (DefinedPredicate "Is interacting with someone?"))
