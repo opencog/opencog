@@ -161,7 +161,7 @@
 (define (who-said? sent)
 	(let* ((fid (snd1-nearest-face)))
 		(if (> fid 0)
-			(
+			(begin
 			;;request eye contact
 			(StateLink request-eye-contact-state (NumberNode fid))
 			;;generate info
