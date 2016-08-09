@@ -132,6 +132,11 @@ def say_text(text_node):
 	evl.say_text(text)
 	return TruthValue(1, 1)
 
+def greet_recognized_face(recog_id_node):
+	text = "Hello " + recog_id_node.name
+	evl.say_text(text)
+	return TruthValue(1, 1)
+
 # Return true as long as ROS is running.
 def ros_is_running():
 	if (rospy.is_shutdown()):
