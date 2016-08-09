@@ -45,12 +45,13 @@ WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBase
 }
 
 Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
+    int sz = (_tournamentSize >  population.size() ? population.size() : _tournamentSize);
+    Handle tournament[sz];
 
-    Handle tournament[_tournamentSize];
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0,population.size()-1);
 
-    for(int i = 0; i < _tournamentSize; i++){
+    for(int i = 0; i < sz ; i++){
         int idx = distribution(generator);
         tournament[i] = population[idx];
     }
