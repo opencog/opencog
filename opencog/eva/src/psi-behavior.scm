@@ -72,11 +72,12 @@
 	(DefinedSchemaNode "Someone left action")
 	face-demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-		(DefinedPredicate "Someone visible?")))
-	(DefinedSchemaNode "Interact with people")
-	face-demand-satisfied (stv 1 1) face-demand)
-
+;;;Temporary disabled, to test sound localization
+;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+;		(DefinedPredicate "Someone visible?")))
+;	(DefinedSchemaNode "Interact with people")
+;	face-demand-satisfied (stv 1 1) face-demand)
+;;;
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Nothing happening?")))
 	(DefinedSchemaNode "Nothing is happening")
