@@ -36,6 +36,18 @@
 			)
 		)
 )
+;;get first occurence in map
+(define (get-first-xyz map-name id-node elapse)
+		(let* ((loc-atom (get-first-locs-ato map-name id-node elapse) ))
+			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom) ""
+				(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+					(xx (number->string (loc-link-x loc-link)))
+					(yy (number->string (loc-link-y loc-link)))
+					(zz (number->string (loc-link-z loc-link))))
+						(string-append xx " " yy " " zz))
+			)
+		)
+)
 
 ;;returns null string if atom not found, number x y z string if okay
 (define (get-xyz map-name id-node)
@@ -56,7 +68,8 @@
 )
 
 (define (get-snd-loc snd-id-node)
- (get-last-xyz "sounds" snd-id-node 5000)
+ ;(get-last-xyz "sounds" snd-id-node 5000)
+ (get-first-xyz "sounds" snd-id-node 1200)
 )
 ;;sound id 1
 (define (save-snd-1 x y z)
@@ -148,12 +161,17 @@
 (define (who-said? sent)
 	(let* ((fid (snd1-nearest-face)))
 		(if (> fid 0)
+			(
+			;;request eye contact
+			(StateLink request-eye-contact-state (NumberNode fid))
+			;;generate info
 			(AtTimeLink
 				(TimeNode (number->string (current-time)))
 				(EvaluationLink
 					(PredicateNode "say")
 					(ListLink (ConceptNode (number->string fid))(SentenceNode sent)))
 					(ConceptNode "sound-perception"))
+			)
 		)
 	)
 )
