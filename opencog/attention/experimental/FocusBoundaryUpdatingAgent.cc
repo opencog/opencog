@@ -48,6 +48,7 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
     setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE, true));
 
     afbSize         = config().get_double("ECAN_AFB_SIZE", 0.2);
+    decay           = config().get_double("ECAN_AFB_DECAY", 0.1);
     bottomBoundary  = config().get_int("ECAN_AFB_BOTTOM", 100);
 }
 
@@ -59,8 +60,6 @@ void FocusBoundaryUpdatingAgent::run()
         AttentionValue::sti_t minsti = _as->get_min_STI();
 
         AttentionValue::sti_t range = maxsti - minsti;
-
-        double decay = 0.1;
 
         int newafb = maxsti - (range * afbSize);
         //int oldafb = afboundary;
