@@ -48,6 +48,7 @@ class FocusBoundaryUpdatingAgent : public Agent
 {
 private:
     double afbSize;
+    double decay;
     AttentionValue::sti_t bottomBoundary;
 
 public:
