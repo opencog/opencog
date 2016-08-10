@@ -64,8 +64,6 @@ void AFImportanceDiffusionAgent::spreadImportance()
     for (Handle atomSource : diffusionSourceVector)
     {
         // Check the decision function to determine if spreading will occur
-
-
         if (spreadDecider->spreadDecision(atomSource->getSTI())) {
 #ifdef DEBUG
             std::cout << "Calling diffuseAtom." << std::endl;
