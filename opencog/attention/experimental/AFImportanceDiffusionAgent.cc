@@ -32,6 +32,10 @@
 
 using namespace opencog;
 
+#ifdef DEBUG
+#undef DEBUG
+#endif
+
 AFImportanceDiffusionAgent::AFImportanceDiffusionAgent(CogServer& cs) :
     ImportanceDiffusionBase(cs)
 {
@@ -60,6 +64,8 @@ void AFImportanceDiffusionAgent::spreadImportance()
     for (Handle atomSource : diffusionSourceVector)
     {
         // Check the decision function to determine if spreading will occur
+
+
         if (spreadDecider->spreadDecision(atomSource->getSTI())) {
 #ifdef DEBUG
             std::cout << "Calling diffuseAtom." << std::endl;

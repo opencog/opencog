@@ -33,6 +33,9 @@
 #include "AFRentCollectionAgent.h"
 
 //#define DEBUG
+#ifdef DEBUG
+#undef DEBUG
+#endif
 
 using namespace opencog;
 
