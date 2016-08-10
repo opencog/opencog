@@ -25,6 +25,7 @@ import math
 import logging
 
 from std_msgs.msg import Int32, String
+from chatbot.msg import ChatMessage
 from pi_face_tracker.msg import FaceEvent, Faces
 from blender_api_msgs.msg import Target
 
@@ -144,7 +145,9 @@ class FaceTrack:
 
 		# Which face to look at
 		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
-		rospy.Subscriber("perceived_text", String,
+		#rospy.Subscriber("perceived_text", String,
+		#	self.user_said_cb)
+		rospy.Subscriber("chatbot_speech", ChatMessage,
 			self.user_said_cb)
 		# Where to look
 		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
@@ -393,7 +396,8 @@ class FaceTrack:
 	# ----------------------------------------------------------
 
 	def user_said_cb(self,msg):
-		self.atomo.who_spoke(msg.data)
+		if msg.confidence >= 50:
+			self.atomo.who_spoke(msg.utterance.lower())
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,
