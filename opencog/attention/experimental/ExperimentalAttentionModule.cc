@@ -109,10 +109,10 @@ std::string ExperimentalAttentionModule::do_start_ecan(Request *req, std::list<s
     _cogserver.startAgent(_afImportanceAgentPtr, true, afImportance);
     _cogserver.startAgent(_waImportanceAgentPtr, true, waImportance);
 
-   // _cogserver.startAgent(_afRentAgentPtr, true, afRent);
-   // _cogserver.startAgent(_waRentAgentPtr, true, waRent);
+    _cogserver.startAgent(_afRentAgentPtr, true, afRent);
+    _cogserver.startAgent(_waRentAgentPtr, true, waRent);
 
-   //_cogserver.startAgent(_forgetting_agentptr,true,"attention");
+    _cogserver.startAgent(_forgetting_agentptr,true,"attention");
     _cogserver.startAgent(_minmaxstiupdating_agentptr,true,"attention");
     _cogserver.startAgent(_focusupdating_agentptr,true,"attention");
 
