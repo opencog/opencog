@@ -33,6 +33,8 @@
 #include <opencog/atomutils/Neighbors.h>
 #include "HebbianUpdatingAgent.h"
 
+#include <chrono>
+#include <thread>
 //#define DEBUG
 #ifdef DEBUG
 #undef DEBUG
@@ -55,7 +57,12 @@ void HebbianUpdatingAgent::run()
     std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
 
     _as->get_handle_set_in_attentional_focus(out_hi);
-
+     /*Without adding this sleep code right below the above method call,
+     * nlp-parse evaluation thread waits for minutes before it gets a chance to
+     * run.
+     */
+    std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+    
     size = atoms.size();
 
     if (size == 0)
@@ -90,6 +97,7 @@ void HebbianUpdatingAgent::run()
   //    TruthValuePtr newtv = SimpleTruthValue::createTV(new_tc, 0.1);
   //    link->merge(newtv);
   //}
+
 }
 
 void HebbianUpdatingAgent::updateHebbianLinks(Handle source)

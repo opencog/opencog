@@ -32,6 +32,8 @@
 
 #include "AFRentCollectionAgent.h"
 
+#include <chrono>
+#include <thread>
 //#define DEBUG
 #ifdef DEBUG
 #undef DEBUG
@@ -49,6 +51,11 @@ AFRentCollectionAgent::~AFRentCollectionAgent() {
 
 void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
-        std::back_insert_iterator< std::vector<Handle> > out_hi(targetSetOut);
-        _as->get_handle_set_in_attentional_focus(out_hi);
+    std::back_insert_iterator< std::vector<Handle> > out_hi(targetSetOut);
+    _as->get_handle_set_in_attentional_focus(out_hi);
+    /* Without adding this sleep code right below the above method call,
+     * nlp-parse evaluation thread waits for minutes before it gets a chance to
+     * run.
+     */
+    std::this_thread::sleep_for(std::chrono::nanoseconds(1));
 }
