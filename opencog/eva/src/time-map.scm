@@ -168,7 +168,7 @@
 			(AtTimeLink
 				(TimeNode (number->string (current-time)))
 				(EvaluationLink
-					(PredicateNode "say")
+					(PredicateNode "say_face")
 					(ListLink (ConceptNode (number->string fid))(SentenceNode sent)))
 					(ConceptNode "sound-perception"))
 			)
