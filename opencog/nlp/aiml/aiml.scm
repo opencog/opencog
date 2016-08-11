@@ -73,8 +73,8 @@
   form of \"key=value\".
 "
 	(define (set-bot STR VAL-STR)
-		(State (Concept (string-append "AIML-bot-" STR))
-			(string-words VAL-STR)))
+		(State (Concept (string-append "AIML-bot-" (string-trim-both STR)))
+			(string-words (string-trim-both VAL-STR))))
 
 	(define in-port (open-file-input-port PROP-FILE))
 	(define line (get-line in-port))
