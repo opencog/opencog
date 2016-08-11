@@ -62,6 +62,21 @@
 
 ; ==============================================================
 
+(define-public (set-bot-prop PROP-FILE)
+"
+  set-bot-prop PROP-FILE -- Set the bot properties as defined in
+  PROP-FILE
+
+  Each of the properties corresponds to the \"bot\" keyword in AIML.
+"
+	(define (set-bot STR VAL-STR)
+		(State (Concept (string-append "AIML-bot-" STR))
+			(string-words VAL-STR)))
+	(load PROP-FILE)
+)
+
+; ==============================================================
+
 (define (string-words SENT-STR)
 "
   string-words SENT-STR -- chop up SENT-STR string into word-nodes
