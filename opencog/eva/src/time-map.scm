@@ -4,7 +4,7 @@
 (use-modules (opencog python))
 ;;initialize octomap with 15hz, 10 second or 150 frames buffer ; 1 cm spatial resolution
 (create-map "faces" 0.01 66 150) (step-time-unit "faces") (auto-step-time-on "faces")
-(create-map "sounds" 0.01 66 150) (step-time-unit "sounds") (auto-step-time-on "sounds")
+(create-map "sounds" 0.01 100 100) (step-time-unit "sounds") (auto-step-time-on "sounds")
 
 ;(map-ato "faces" (NumberNode "1") 1 2 3)
 ;(map-ato "sounds" (NumberNode "1") 1 2 3)
@@ -110,7 +110,7 @@
 	))
 )
 (define (angle_face_snd1 face-id)
-	(angle_face_snd face-id (get-snd-1))
+	(angle_face_snd face-id 1)
 )
 ;;get all face-ids and only one sound id 1.0, compare them
 
