@@ -972,7 +972,8 @@ sub psi_tail
 {
 	my $num_stars = $_[0];
 	my $word_count = $_[1];
-	my $wadjust = $_[2];
+	my $num_choices = $_[2];
+	my $wadjust = $_[3];
 	my $chat_goal = "   (Concept \"AIML chat subsystem goal\")\n";
 	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
 
@@ -1140,7 +1141,7 @@ while (my $line = <FIN>)
 				my @choicelist = split /<li>/, $choices;
 				shift @choicelist;
 				my $i = 1;
-				my $nc = $#choicelist + 1;
+				my $num_choices = $#choicelist + 1;
 				foreach my $ch (@choicelist)
 				{
 					$ch =~ s/<\/li>//;
@@ -1149,7 +1150,7 @@ while (my $line = <FIN>)
 					my $catty = $preplate . $ch . $postplate;
 					my $wadj = &get_weight($cattext);
 
-					$rule .= ";;; random choice $i of $nc: ";
+					$rule .= ";;; random choice $i of $num_choices: ";
 					$rule .= $cattext . "\n";
 					$rule .= "(psi-rule-nocheck\n";
 					$rule .= "   ; context\n";
@@ -1158,8 +1159,8 @@ while (my $line = <FIN>)
 					$rule .= "   (ListLink\n";
 					$rule .= &process_category("      ", $catty);
 					$rule .= "   )\n";
-					$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
-					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
+					$rule .= &psi_tail($num_stars, $pat_word_count, $num_choices, $wadj);
+					$rule .= ") ; random choice $i of $num_choices\n\n";  # close category section
 					$i = $i + 1;
 				}
 			}
@@ -1175,7 +1176,7 @@ while (my $line = <FIN>)
 				$rule .= "   (ListLink\n";
 				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";
-				$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
+				$rule .= &psi_tail($num_stars, $pat_word_count, 1, $wadj);
 				$rule .= ")\n";
 			}
 			$have_raw_code = 0;
@@ -1190,7 +1191,7 @@ while (my $line = <FIN>)
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
 			$rule .= $psi_goal;
-			$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
+			$rule .= &psi_tail($num_stars, $pat_word_count, 1, $wadj);
 			$rule .= ") ; CATEND\n";     # close category section
 
 			$psi_goal = "";
