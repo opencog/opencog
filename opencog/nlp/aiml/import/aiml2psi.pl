@@ -418,6 +418,7 @@ close(FOUT);
 # Second pass utilities
 
 my $star_index = 1;  # First star has index of one.
+my $word_count = 0;
 my $pat_word_count = 0;
 
 my $wordnode = "(Word ";
@@ -472,7 +473,7 @@ sub split_string
 		else
 		{
 			$tout .= $indent . $wordnode . "\"$wrd\")\n";
-			$pat_word_count ++;
+			$word_count ++;
 		}
 	}
 	$tout;
@@ -972,7 +973,8 @@ sub psi_tail
 {
 	my $num_stars = $_[0];
 	my $word_count = $_[1];
-	my $wadjust = $_[2];
+	my $num_choices = $_[2];
+	my $wadjust = $_[3];
 	my $chat_goal = "   (Concept \"AIML chat subsystem goal\")\n";
 	my $demand = "   (psi-demand \"AIML chat demand\" 0.97)\n";
 
@@ -985,12 +987,20 @@ sub psi_tail
 	# motivated.  Of course, this breaks the AIML spec, which does
 	# not use randomness or weighting in it; however, we want to avoid
 	# strict determinism here, as its not very realistic.  Note that
-	# this kind of randomness will break any sort of customer-support
-	# system that insists on eexactly a given fixed answer to a given
-	# situation.  Oh well; that's not what we're after, here.
-	#`
-	my $weight = 1.0 / (0.5 + $word_count);
-	$weight = $base_priority / (1.0 + $num_stars * $num_stars + $weight);
+	# this kind of randomness will break the use of opencog aiml for
+	# any sort of customer-support system that insists on exactly a
+	# given fixed answer to a given situation.  Oh well; that's not
+	# what we're after, here.
+	#
+	# The $kill= &exp() formula is attempting to kill the probability
+	# of very short star-matches, e.g. so that "YOU ARE *" is strongly
+	# prefered to "YOU *".  The formula below yeilds:
+	# YOU *       $word_count=1 $num_stars=1 $weight= 6.81e-6
+	# YOU ARE *   $word_count=2 $num_stars=1 $weight= 8.39e-5
+	my $kill= (0.5 + $word_count) * 0.1 * exp(2.0 * $num_stars * ($word_count - 6.0));
+	if (1.0 < $kill) { $kill = 1.0; }
+	my $weight = $base_priority * $kill;
+	$weight = $weight / $num_choices;
 
 	# Adjust the weight by the desired adjustment.
 	$weight *= $wadjust;
@@ -1140,7 +1150,7 @@ while (my $line = <FIN>)
 				my @choicelist = split /<li>/, $choices;
 				shift @choicelist;
 				my $i = 1;
-				my $nc = $#choicelist + 1;
+				my $num_choices = $#choicelist + 1;
 				foreach my $ch (@choicelist)
 				{
 					$ch =~ s/<\/li>//;
@@ -1149,7 +1159,7 @@ while (my $line = <FIN>)
 					my $catty = $preplate . $ch . $postplate;
 					my $wadj = &get_weight($cattext);
 
-					$rule .= ";;; random choice $i of $nc: ";
+					$rule .= ";;; random choice $i of $num_choices: ";
 					$rule .= $cattext . "\n";
 					$rule .= "(psi-rule-nocheck\n";
 					$rule .= "   ; context\n";
@@ -1158,8 +1168,8 @@ while (my $line = <FIN>)
 					$rule .= "   (ListLink\n";
 					$rule .= &process_category("      ", $catty);
 					$rule .= "   )\n";
-					$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
-					$rule .= ") ; random choice $i of $nc\n\n";  # close category section
+					$rule .= &psi_tail($num_stars, $pat_word_count, $num_choices, $wadj);
+					$rule .= ") ; random choice $i of $num_choices\n\n";  # close category section
 					$i = $i + 1;
 				}
 			}
@@ -1175,7 +1185,7 @@ while (my $line = <FIN>)
 				$rule .= "   (ListLink\n";
 				$rule .= &process_category("      ", $curr_raw_code);
 				$rule .= "   )\n";
-				$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
+				$rule .= &psi_tail($num_stars, $pat_word_count, 1, $wadj);
 				$rule .= ")\n";
 			}
 			$have_raw_code = 0;
@@ -1190,7 +1200,7 @@ while (my $line = <FIN>)
 			$rule .= $psi_ctxt;
 			$rule .= "   ;; action\n";
 			$rule .= $psi_goal;
-			$rule .= &psi_tail($num_stars, $pat_word_count, $wadj);
+			$rule .= &psi_tail($num_stars, $pat_word_count, 1, $wadj);
 			$rule .= ") ; CATEND\n";     # close category section
 
 			$psi_goal = "";
@@ -1235,8 +1245,9 @@ while (my $line = <FIN>)
 	{
 		my $curr_pattern = $arg;
 		$star_index = 1;
-		$pat_word_count = 0;
+		$word_count = 0;
 		$psi_ctxt .= &print_predicate_tag("pattern", "      ", lc $curr_pattern);
+		$pat_word_count = $word_count;
 	}
 
 	#TOPIC

@@ -42,6 +42,9 @@
 
 #define DEBUG
 #define _unused(x) ((void)x)
+#ifdef DEBUG
+#undef DEBUG
+#endif
 
 using namespace opencog;
 
