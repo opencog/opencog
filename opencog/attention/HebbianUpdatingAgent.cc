@@ -53,6 +53,12 @@ void HebbianUpdatingAgent::run()
 
     _as->get_handle_set_in_attentional_focus(out_hi);
 
+     /*Without adding this sleep code right below the above method call,
+     * nlp-parse evaluation thread waits for minutes before it gets a chance to
+     * run.
+     */
+    std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+
     size = atoms.size();
 
     if (size == 0)
