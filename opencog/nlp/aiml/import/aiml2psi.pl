@@ -418,6 +418,7 @@ close(FOUT);
 # Second pass utilities
 
 my $star_index = 1;  # First star has index of one.
+my $word_count = 0;
 my $pat_word_count = 0;
 
 my $wordnode = "(Word ";
@@ -472,7 +473,7 @@ sub split_string
 		else
 		{
 			$tout .= $indent . $wordnode . "\"$wrd\")\n";
-			$pat_word_count ++;
+			$word_count ++;
 		}
 	}
 	$tout;
@@ -775,7 +776,6 @@ sub process_category
 	$text =~ s/^\s*//;
 	$text =~ s/\s*$//;
 
-	$pat_word_count = 0;
 	my $tout = &process_aiml_tags($indent, $text);
 	$tout;
 }
@@ -1245,8 +1245,9 @@ while (my $line = <FIN>)
 	{
 		my $curr_pattern = $arg;
 		$star_index = 1;
-		$pat_word_count = 0;
+		$word_count = 0;
 		$psi_ctxt .= &print_predicate_tag("pattern", "      ", lc $curr_pattern);
+		$pat_word_count = $word_count;
 	}
 
 	#TOPIC
