@@ -41,3 +41,18 @@
                     (Concept "visual priority")
                     (Variable "face-id"))
                 (Variable "priority")))))
+
+(define (set-priority face-id priority)
+    (cog-evaluate! (PutLink
+        (DefinedPredicate "Set face priority")
+        (List (Number face-id) (Number priority))))
+)
+
+(define (get-priority face-id)
+    (gar (cog-execute! (Get
+        (StateLink
+            (List
+                (Concept "visual priority")
+                (Number face-id))
+            (Variable "priority")))))
+)

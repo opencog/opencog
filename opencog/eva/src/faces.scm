@@ -79,7 +79,7 @@
 
 (define-public (show-acked-faces)
 	(define acked-face (PredicateNode "acked face"))
-	(filter (lambda(y) (equal? (cog-type y) 'ConceptNode))
+	(filter (lambda(y) (equal? (cog-type y) 'NumberNode))
 	(map (lambda (x) (car (cog-outgoing-set x)))
 	(cog-chase-link 'EvaluationLink 'ListLink acked-face))))
 
@@ -154,6 +154,17 @@
 "
 	(make-mapped-face face-id x y z)
 	(make-recognized-face face-id recog-id)
+)
+
+(define-public (ack-face face-id)
+"
+  ackno-face FACE-ID
+
+  Returns the atom that represents an acknowledged face with FACE-ID.
+"
+	(Evaluation
+		(Predicate "acked face")
+		(ListLink (Number face-id)))
 )
 
 (define-public (remove-face id)
