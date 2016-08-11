@@ -32,6 +32,9 @@
 #include <opencog/attention/atom_types.h>
 #include <opencog/util/Config.h>
 #include "ForgettingAgent.h"
+#ifdef DEBUG
+#undef DEBUG
+#endif
 
 using namespace opencog;
 

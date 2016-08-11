@@ -32,6 +32,9 @@
 #include <opencog/cogserver/server/CogServer.h>
 
 #include "HebbianCreationAgent.h"
+#ifdef DEBUG
+#undef DEBUG
+#endif
 
 using namespace opencog;
 

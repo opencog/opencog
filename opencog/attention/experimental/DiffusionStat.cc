@@ -27,6 +27,9 @@
 #include <cassert>
 
 #include "DiffusionStat.h"
+#ifdef DEBUG
+#undef DEBUG
+#endif
 
 using namespace opencog;
 using namespace opencog::ecan;
