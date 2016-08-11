@@ -775,6 +775,7 @@ sub process_category
 	$text =~ s/^\s*//;
 	$text =~ s/\s*$//;
 
+	$pat_word_count = 0;
 	my $tout = &process_aiml_tags($indent, $text);
 	$tout;
 }
