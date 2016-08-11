@@ -209,4 +209,18 @@
 	))
 
 ; -------------------------------------------------------------
+; Say "Hello recog-id"
+; TODO: Add a request to chat psi-rules. That way actions of psi-rules will
+; be composable by the planner/action-orchestrator.
+(DefineLink
+	(DefinedPredicate "Greet recognized person")
+	(LambdaLink
+		(VariableList (VariableNode "face-id") (VariableNode "recog-id"))
+		(EvaluationLink
+			(GroundedPredicate "py: greet_recognized_face")
+			(ListLink
+				(VariableNode "recog-id")))))
+
+
+; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent

@@ -6,6 +6,7 @@
 (add-to-load-path "/usr/local/share/opencog/scm")
 
 (use-modules (opencog))
+(use-modules (opencog ato pointmem))
 (use-modules (opencog exec))
 (use-modules (opencog query))
 
@@ -64,21 +65,30 @@
 ; Assorted debugging utilities.
 ;
 ;; Display the current room state
-(define (show-visible-faces)
+(define-public (show-visible-faces)
 	(define visible-face (PredicateNode "visible face"))
+	(filter (lambda(y) (equal? (cog-type y) 'NumberNode))
 	(map (lambda (x) (car (cog-outgoing-set x)))
-	(cog-chase-link 'EvaluationLink 'ListLink visible-face)))
+	(cog-chase-link 'EvaluationLink 'ListLink visible-face))))
 
-(define (show-acked-faces)
+(define-public (show-acked-faces)
 	(define acked-face (PredicateNode "acked face"))
+	(filter (lambda(y) (equal? (cog-type y) 'ConceptNode))
 	(map (lambda (x) (car (cog-outgoing-set x)))
-	(cog-chase-link 'EvaluationLink 'ListLink acked-face)))
+	(cog-chase-link 'EvaluationLink 'ListLink acked-face))))
 
-(define (show-room-state)
+(define-public (show-recognized-faces)
+"
+ Show face-id recognized-face name pairs in atomese
+"
+	(cog-outgoing-set (cog-execute! (DefinedSchema "Get recognized faces")))
+)
+
+(define-public (show-room-state)
 	(car (cog-chase-link 'StateLink 'ConceptNode room-state)))
 
 
-(define (show-eye-contact-state)
+(define-public (show-eye-contact-state)
 	(define e-c-state (Anchor "Eye Contact State"))
 	(car (cog-chase-link 'StateLink 'NumberNode e-c-state)))
 
@@ -95,7 +105,50 @@
  the ROS tf2 will not be able to make the robot turn to look...
 "
 	(EvaluationLink (PredicateNode "visible face")
-		(ListLink (ConceptNode id))))
+		(ListLink (NumberNode id))))
+
+(define-public (make-mapped-face face-id x y z)
+"
+  make-mapped-face FACE-ID X Y Z
+
+  FACE-ID is a number that represents the face ID, and RECOG-ID is a number that
+  represents the recognition ID. X, Y and Z are the coordinate numbers
+  associated with the face that represented by FACE-ID. It returns the atomese
+  representation of a visible face that was added to the octomap.
+"
+	(map-ato "faces" (NumberNode face-id (av 5 0 0)) x y z)
+	(make-new-face (number->string face-id))
+)
+
+(define-public (make-recognized-face face-id recog-id)
+"
+  make-recognized-face FACE-ID RECOG-ID
+
+  FACE-ID is a number that represents the face ID and RECOG-ID is a string that
+  represents the recognition ID for the visible face. It returns the atomese
+  representation of the recognized face.
+"
+	(EvaluationLink
+		(PredicateNode "name")
+		(ListLink
+			(ConceptNode (number->string face-id))
+			(ConceptNode recog-id)))
+)
+
+(define-public (make-mapped-recognized-face face-id recog-id x y z)
+"
+  make-mapped-recognized-face FACE-ID RECOG-ID X Y Z
+
+  FACE-ID is a number that represents the face ID, and RECOG-ID is a string that
+  represents the recognition ID. X, Y and Z are the coordinate numbers
+  associated with the face that represented by FACE-ID. It returns the atomese
+  representation of the recognized face that was added to the octomap.
+
+  If RECOG-ID is `0` then it is an unrecognized face.
+"
+	(make-mapped-face face-id x y z)
+	(make-recognized-face face-id recog-id)
+)
 
 (define-public (remove-face id)
 "

@@ -315,6 +315,50 @@
 					(ListLink (VariableNode "$face-id"))))
 		)))
 
+;; Return true if someone recognizable but not yet acknowledged face appears.
+(DefineLink
+	(DefinedPredicateNode "Did someone recognizable arrive?")
+	(SatisfactionLink
+		(VariableList
+			(TypedVariableLink
+				(VariableNode "$face-id")
+				(TypeNode "ConceptNode"))
+			(TypedVariableLink
+				(VariableNode "$recog-id")
+				(TypeNode "ConceptNode"))
+			(TypedVariableLink
+				(VariableNode "$face-id-nn")
+				(TypeNode "NumberNode")))
+		(AndLink
+			; If someone is visible...
+			(PresentLink (EvaluationLink (PredicateNode "visible face")
+					(ListLink (VariableNode "$face-id-nn"))))
+			; but not yet acknowledged...
+			(AbsentLink (EvaluationLink (PredicateNode "acked face")
+					(ListLink (VariableNode "$face-id-nn"))))
+			; and is recognizable
+			(PresentLink (EvaluationLink (PredicateNode "name")
+					(ListLink
+					(VariableNode "$face-id")
+					(VariableNode "$recog-id"))))
+			(Not (Equal (VariableNode "$recog-id") (ConceptNode "0")))
+			; Check the ConceptNode and NumberNode for the face-id in
+			; two EvaluationLinks are equal
+			(EvaluationLink
+				(GroundedPredicate "scm: is_nn_equal_cn?")
+				(ListLink
+					(VariableNode "$face-id-nn")
+					(VariableNode "$face-id")))
+			)))
+
+(define-public (is_nn_equal_cn? number-node concept-node)
+    (if (equal? (string->number (cog-name number-node))
+            (exact->inexact (string->number (cog-name concept-node))))
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
 ;; Return the set of newly-arrived faces.
 ;; Will return a SetLink holding zero, one or more face id's
 (DefineLink
@@ -403,15 +447,54 @@
 		(DefinedSchemaNode "Num visible faces")
 		(NumberNode 1)))
 
+;; Get the face-id of all the acknowledged faces.
+(DefineLink
+	(DefinedSchema "Get acknowledged faces")
+	(Get
+	   (TypedVariable (Variable "$face-id") (Type "NumberNode"))
+	   (Evaluation (Predicate "acked face")
+		   (ListLink (Variable "$face-id")))
+	))
+
+; Get recognized persons
+(DefineLink
+	(DefinedSchema "Get recognized faces")
+	(Get
+		(VariableList
+			(TypedVariable
+				(Variable "face-id")
+				(TypeNode "ConceptNode"))
+			(TypedVariable
+				(Variable "recog-id")
+				(TypeNode "ConceptNode")))
+		(AndLink
+			(Not (Equal (VariableNode "recog-id") (ConceptNode "0")))
+			(EvaluationLink (PredicateNode "name")
+				(ListLink
+					(VariableNode "face-id")
+					(VariableNode "recog-id"))))))
+
+(DefineLink ; This is required because interaction states are using NumberNode
+	(DefinedSchema "Get recognized face's face id")
+	(LambdaLink
+		(VariableList (VariableNode "face-id") (VariableNode "recog-id"))
+		(ExecutionOutputLink ;
+			(GroundedSchemaNode "scm: get-face-id")
+			(ListLink
+				(VariableNode "face-id")))))
+
+
+(define-public (get-face-id face-concept)
+"
+  For casting ConceptNode to NumberNode
+"
+	(NumberNode (cog-name face-concept))
+)
 
 ;; Randomly select a face out of the crowd.
 (DefineLink
 	(DefinedSchema "Select random face")
-	(RandomChoice (Get
-		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
-		(Evaluation (Predicate "acked face")
-			(ListLink (Variable "$face-id")))
-	)))
+	(RandomChoice (DefinedSchema "Get acknowledged faces")))
 
 ;; Randomly glance at someone (who we are not currently making
 ;; eye-contact with)
@@ -496,11 +579,12 @@
 
 ;; Send ROS message to actually make eye-contact with the person
 ;; we should be making eye-contact with.
+;; Call (DefinedPredicate "Set interaction target") before calling this.
 (DefineLink
 	(DefinedPredicate "look at person")
 	(SequentialAnd
 		;; Issue the look-at command, only if there is someone to
-		;; make eye conact with.
+		;; make eye contact with.
 		(NotLink (Equal
 			(Get (State eye-contact-state (Variable "$x")))
 			(SetLink no-interaction)))

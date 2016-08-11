@@ -23,10 +23,10 @@
 ; use of.
 ;
 ; A general OpenPsi rule has the form of if(context) then take(action);
-; these can contain variables, adn can also be classed into different
+; these can contain variables, and can also be classed into different
 ; groups based on the demands that they are fulfilling.
 ;
-; The content below consits entirely of actions to nbe taken; the
+; The content below consits entirely of actions to be taken; the
 ; contexts are in the `self-model.scm` file.  The structure of the
 ; conexts is fairly rigid; these could probably be loosened to a
 ; large degree.
@@ -71,7 +71,7 @@
 ; --------------------------------------------------------
 ; Character engine notes
 ; The character engine is an older incarnation of this code, predating
-; the owyl behavior trees.  The below are notes abouit some of the
+; the owyl behavior trees.  The below are notes about some of the
 ; things it did, and where to look for equivalents here.
 ;
 ; 1) Room-state transtions
@@ -201,6 +201,29 @@
 		(True (DefinedSchema "glance at new person"))
 		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "--- Glance at new person")))
+	))
+
+;; New recognized person sequence
+(DefineLink
+	(DefinedPredicate "Interacting Sequence for recognized person")
+	(SequentialAnd
+		;(True (DefinedSchema "glance at new person"))
+		(True (Put ; Setting interaction target for "look at person"
+			(DefinedPredicate "Set interaction target")
+			(RandomChoice (Put; FIXME Replace by multiple face tracking.
+				(DefinedSchemaNode "Get recognized face's face id")
+				(DefinedSchema "Get recognized faces")))))
+		(DefinedPredicate "look at person")
+		(True (Put
+			(DefinedPredicate "Greet recognized person")
+			(Get
+				(EvaluationLink
+					(PredicateNode "name")
+					(ListLink
+						(VariableNode "face-id")
+						(VariableNode "recog-id"))))))
+		(Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Glance at and greet new recognized person")))
 	))
 
 ;; Respond to a new face becoming visible.

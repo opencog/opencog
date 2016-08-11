@@ -37,6 +37,7 @@
 (pred-2-schema "Listening ongoing")
 (pred-2-schema "Listening ended")
 (pred-2-schema "Keep alive")
+;(pred-2-schema "Interacting Sequence for recognized person")
 ;;
 ;(DefineLink (DefinedPredicateNode "do-noop") (True))
 ;(pred-2-schema "do-noop")
@@ -72,16 +73,24 @@
 	(DefinedSchemaNode "Someone left action")
 	face-demand-satisfied (stv 1 1) face-demand)
 
-;;;Temporary disabled, to test sound localization
-;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-;		(DefinedPredicate "Someone visible?")))
-;	(DefinedSchemaNode "Interact with people")
-;	face-demand-satisfied (stv 1 1) face-demand)
-;;;
+; This rule is the old multiple-face tracking rule
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+		(DefinedPredicate "Someone visible?")))
+	(DefinedSchemaNode "Interact with people")
+	face-demand-satisfied (stv 1 1) face-demand)
+
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Nothing happening?")))
 	(DefinedSchemaNode "Nothing is happening")
 	face-demand-satisfied (stv 1 1) face-demand)
+
+; TODO: Enable after further testing with HEAD.
+;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+;		(Not (DefinedPredicate "chatbot started talking?"))
+;		(Not (DefinedPredicate "Is interacting with someone?"))
+;		(DefinedPredicateNode "Did someone recognizable arrive?")))
+;	(DefinedSchemaNode "Interacting Sequence for recognized person")
+;	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot started talking?")))
