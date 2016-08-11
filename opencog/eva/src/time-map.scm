@@ -211,6 +211,7 @@
 						(ConceptNode (number->string fid))
 						(SentenceNode sent)))
 				(ConceptNode "sound-perception"))
+			)
 		)
 	)
 )
