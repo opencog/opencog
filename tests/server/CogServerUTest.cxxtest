@@ -46,13 +46,13 @@ public:
         return _ci;
     }
 
-    MyAgent(CogServer& cs) : Agent(cs) { _count = 0; }
+    MyAgent(CogServer& cs) : Agent(cs) { _count = 0; setLogger(&logger()); }
     void setFrequency(int f) { _frequency = f; }
     void setName(const std::string& n) { _name = n; }
     unsigned int count() { return _count; }
     virtual void run()
     {
-        logger().debug("%ld: executed %s", _cogserver.getCycleCount(), _name.c_str());
+        _log->debug("%ld: executed %s", _cogserver.getCycleCount(), _name.c_str());
         _count++;
 
         // add some nodes to test the SystemActivityTable

@@ -42,13 +42,10 @@ Agent::Agent(CogServer& cs, const unsigned int f) :
 Agent::~Agent()
 {
     resetUtilizedHandleSets();
-
-    if (_log) delete _log;
 }
 
 void Agent::setLogger(Logger* l)
 {
-    if (_log) delete _log;
     _log = l;
 }
 
@@ -56,7 +53,6 @@ Logger* Agent::getLogger()
 {
     return _log;
 }
-
 
 void Agent::setParameters(const std::vector<std::string>& params)
 {
