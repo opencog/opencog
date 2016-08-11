@@ -3,7 +3,7 @@
 ;
 (define-module (opencog nlp aiml))
 
-(use-modules (srfi srfi-1))
+(use-modules (srfi srfi-1) (rnrs io ports))
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
 
 ; (load "aiml/bot.scm")
@@ -58,6 +58,34 @@
         ))
 "
 	(map token-seq-of-parse (sentence-get-parses SENT))
+)
+
+; ==============================================================
+
+(define-public (aiml-set-bot-prop PROP-FILE)
+"
+  set-bot-prop PROP-FILE -- Set the bot properties as defined in
+  PROP-FILE
+
+  Each of the properties corresponds to the \"bot\" keyword in AIML.
+
+  Each line of the PROP-FILE should store a single property, in the
+  form of \"key=value\".
+"
+	(define (set-bot STR VAL-STR)
+		(State (Concept (string-append "AIML-bot-" (string-trim-both STR)))
+			(string-words (string-trim-both VAL-STR))))
+
+	(define in-port (open-file-input-port PROP-FILE))
+	(define line (get-line in-port))
+	(define prop (list))
+
+	(while (not (eof-object? line))
+		(set! prop (string-split line #\=))
+		(set-bot (car prop) (cadr prop))
+		(set! line (get-line in-port)))
+
+	(close-port in-port)
 )
 
 ; ==============================================================
