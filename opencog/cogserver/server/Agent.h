@@ -111,9 +111,6 @@ class CogServer;
 class Agent
 {
 
-private:
-    boost::signals2::connection conn;
-
 protected:
     /**
      * Set the agent's logger object.
@@ -129,18 +126,6 @@ protected:
 
     CogServer& _cogserver;
     AtomSpace* _as;
-
-    /*
-     * Note: AttentionValue itself is read-only(!??).
-     * However, shared pointers are not thread-safe, see
-     * http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-     * http://cppwisdom.quora.com/shared_ptr-is-almost-thread-safe
-     * and so the pointer itself must be protected.
-     */
-#if !defined SHARED_PTR_ATOMIC_OPS
-    mutable std::mutex _attentionValueMutex;
-#endif
-    AttentionValuePtr _attentionValue;
 
     /**
      * The agent's frequency. Determines how often the opencog server should
@@ -166,13 +151,6 @@ protected:
      */
     std::vector<UnorderedHandleSet> _utilizedHandleSets;
     mutable std::mutex _handleSetMutex;
-
-    /** Total stimulus given out to atoms. */
-    long _totalStimulus;
-
-    /** Hash table of atoms given stimulus since reset. */
-    AtomStimHashMap _stimulatedAtoms;
-    mutable std::mutex _stimulatedAtomsMutex;
 
     /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(const AtomPtr&);
@@ -229,68 +207,6 @@ public:
     /** Resets the utilized handle sets */
     void resetUtilizedHandleSets();
 
-    /**
-     * Stimulate a Handle's atom.
-     *
-     * @param h atom handle
-     * @param amount of stimulus to give.
-     * @return total stimulus given since last reset.
-     */
-    long stimulateAtom(const Handle&, stim_t amount);
-
-    /**
-     * Stimulate all atoms in HandleSeq evenly with a given amount of stimulus.
-     *
-     * @param hs set of atoms to spread stimulus across.
-     * @param amount amount of stimulus to share.
-     * @return remainder stimulus after equal spread between atoms.
-     */
-    stim_t stimulateAtom(const HandleSeq&, stim_t amount);
-
-    /**
-     * Remove stimulus from a Handle's atom.
-     *
-     * @param atom handle
-     */
-    void removeAtomStimulus(const Handle&);
-
-    /** Reset stimulus.  */
-    void resetStimulus(void);
-
-    /**
-     * Get total stimulus.
-     *
-     * @return total stimulus since last reset.
-     */
-    long getTotalStimulus() const;
-
-    /**
-     * Get stimulus for Atom.
-     *
-     * @param h handle of atom to get stimulus for.
-     * @return total stimulus since last reset.
-     */
-    stim_t getAtomStimulus(const Handle&) const;
-
-    AttentionValuePtr getAV(void)
-    {
-#ifdef SHARED_PTR_ATOMIC_OPS
-        return std::atomic_load(&_attentionValue);
-#else
-        std::lock_guard<std::mutex> lock(_attentionValueMutex);
-        return _attentionValue;
-#endif
-    }
-
-    void setAV(AttentionValuePtr new_av)
-    {
-#ifdef SHARED_PTR_ATOMIC_OPS
-        std::atomic_store(&_attentionValue, new_av);
-#else
-        std::lock_guard<std::mutex> lock(_attentionValueMutex);
-        _attentionValue = new_av;
-#endif
-    }
 }; // class
 
 typedef std::shared_ptr<Agent> AgentPtr;

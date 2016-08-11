@@ -40,7 +40,6 @@ AFImportanceDiffusionAgent::AFImportanceDiffusionAgent(CogServer& cs) :
 
 void AFImportanceDiffusionAgent::run()
 {
-    spreadDecider->setFocusBoundary(0);
     spreadImportance();
 
     //some sleep code
@@ -59,19 +58,7 @@ void AFImportanceDiffusionAgent::spreadImportance()
     // event in a stack
     for (Handle atomSource : diffusionSourceVector)
     {
-        // Check the decision function to determine if spreading will occur
-        if (spreadDecider->spreadDecision(atomSource->getSTI())) {
-#ifdef DEBUG
-            std::cout << "Calling diffuseAtom." << std::endl;
-#endif
-            diffuseAtom(atomSource);
-        }
-#ifdef DEBUG
-        else
-        {
-            std::cout << "Did not call diffuseAtom." << std::endl;
-        }
-#endif
+        diffuseAtom(atomSource);
     }
 
     // Now, process all of the outstanding diffusion events in the diffusion

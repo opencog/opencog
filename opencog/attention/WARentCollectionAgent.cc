@@ -46,6 +46,7 @@ WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBase
 
 Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
     int sz = (_tournamentSize >  population.size() ? population.size() : _tournamentSize);
+
     Handle tournament[sz];
 
     std::default_random_engine generator;
@@ -56,7 +57,7 @@ Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
         tournament[i] = population[idx];
     }
 
-    auto result = std::max_element(tournament, tournament + (_tournamentSize - 1), []
+    auto result = std::max_element(tournament, tournament + (sz - 1), []
                               (const Handle& h1, const Handle & h2)
     {
         return (h1->getSTI() > h2->getSTI());

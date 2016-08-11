@@ -34,26 +34,14 @@ using namespace opencog;
 Agent::Agent(CogServer& cs, const unsigned int f) :
     _log(nullptr), _cogserver(cs), _frequency(f)
 {
-    _attentionValue = AttentionValue::DEFAULT_AV();
-
     setParameters({""});
-
-    _totalStimulus = 0;
-
-    conn = _cogserver.getAtomSpace().removeAtomSignal(
-            boost::bind(&Agent::atomRemoved, this, _1));
 
     _as = &cs.getAtomSpace();
 }
 
 Agent::~Agent()
 {
-    // give back funds
-    _as->update_STI_funds(_attentionValue->getSTI());
-    _as->update_LTI_funds(_attentionValue->getLTI());
-
     resetUtilizedHandleSets();
-    conn.disconnect();
 
     if (_log) delete _log;
 }
@@ -101,7 +89,6 @@ void Agent::atomRemoved(const AtomPtr& atom)
         for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
             _utilizedHandleSets[i].erase(h);
     }
-    removeAtomStimulus(h);
 }
 
 void Agent::resetUtilizedHandleSets(void)
@@ -110,76 +97,4 @@ void Agent::resetUtilizedHandleSets(void)
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
         _utilizedHandleSets[i].clear();
     _utilizedHandleSets.clear();
-}
-
-long Agent::stimulateAtom(const Handle& h, stim_t amount)
-{
-    {
-        std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
-
-        // Add atom to the map of atoms with stimulus
-        // and add stimulus to it
-        _stimulatedAtoms[h] += amount;
-    }
-
-    // Update record of total stimulus given out.
-    // XXX FIXME: This could overflow and you'd never know it!
-    _totalStimulus += amount;
-
-    logger().fine("Atom %s received stimulus of %d, total now %ld",
-                  h->toString().c_str(), amount, _totalStimulus);
-
-    return _totalStimulus;
-}
-
-void Agent::removeAtomStimulus(const Handle& h)
-{
-    std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
-
-    // if handle not in map then return
-    auto pr = _stimulatedAtoms.find(h);
-    if (pr == _stimulatedAtoms.end()) return;
-
-    stim_t amount = pr->second;
-    _stimulatedAtoms.erase(h);
-
-    // Update record of total stimulus given out.
-    // XXX FIXME: This could underflow and you'd never know it!
-    _totalStimulus -= amount;
-}
-
-stim_t Agent::stimulateAtom(const HandleSeq& hs, stim_t amount)
-{
-    // How much to give each atom.
-    stim_t split = amount / hs.size();
-
-    for (const Handle& handle : hs)
-        stimulateAtom(handle, split);
-
-    // Return unused stimulus.
-    return amount - (split * hs.size());
-}
-
-void Agent::resetStimulus(void)
-{
-    std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
-    _stimulatedAtoms.clear();
-
-    // reset stimulus counter
-    _totalStimulus = 0;
-}
-
-long Agent::getTotalStimulus(void) const
-{
-    return _totalStimulus;
-}
-
-stim_t Agent::getAtomStimulus(const Handle& h) const
-{
-    std::lock_guard<std::mutex> lock(_stimulatedAtomsMutex);
-    auto pr = _stimulatedAtoms.find(h);
-    if (pr == _stimulatedAtoms.end())
-        return 0;
-    else
-        return pr->second;
 }

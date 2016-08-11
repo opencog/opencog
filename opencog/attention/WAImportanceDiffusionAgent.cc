@@ -41,7 +41,6 @@ WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
 
 void WAImportanceDiffusionAgent::run()
 {
-    spreadDecider->setFocusBoundary(0);
     spreadImportance();
 
     //some sleep code
@@ -82,18 +81,7 @@ void WAImportanceDiffusionAgent::spreadImportance()
     Handle target = tournamentSelect(diffusionSourceVector);
 
     // Check the decision function to determine if spreading will occur
-    if (spreadDecider->spreadDecision(target->getSTI())) {
-#ifdef DEBUG
-        std::cout << "Calling diffuseAtom." << std::endl;
-#endif
-        diffuseAtom(target);
-    }
-#ifdef DEBUG
-    else
-    {
-        std::cout << "Did not call diffuseAtom." << std::endl;
-    }
-#endif
+    diffuseAtom(target);
 
     // Now, process all of the outstanding diffusion events in the diffusion
     // stack

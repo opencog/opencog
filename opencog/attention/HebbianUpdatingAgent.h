@@ -1,8 +1,7 @@
 /*
  * opencog/attention/HebbianUpdatingAgent.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,10 +20,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_HEBBIAN_LEARNING_AGENT_H
-#define _OPENCOG_HEBBIAN_LEARNING_AGENT_H
+#ifndef _OPENCOG_HEBBIAN_UPDATING_AGENT_H
+#define _OPENCOG_HEBBIAN_UPDATING_AGENT_H
 
 #include <string>
+#include <iostream>
+#include <sstream>
+
+#include <opencog/util/RandGen.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
@@ -36,49 +39,24 @@ namespace opencog
  *  @{
  */
 
-/** Agent that carries out simple Hebbian learning.
+/**
+ * This Agent randomly picks an Atom and updates all the outgoing HebbianLinks
  *
- * @note Only updates existing HebbianLinks.
- * @todo Support SymmetricInverseHebbianLinks and AsymmetricHebbianLinks
- * @todo Support Hebbian links with arity > 2
+ * This Agents is supposed to run in it's own Thread.
+ *
+ * XXX: If there are to few Links they get updated to oft -> fast
+ * TODO: The exact way to calculate the new/target TV might be improved
  */
 class HebbianUpdatingAgent : public Agent
 {
-protected:
 
-	/** Work out the conjunction between a series of handles.
-	 *
-	 * The returned value is the correlation between distance in/out of
-	 * the attentional focus. STI of atoms are normalised (separately
-	 * for atoms within the attentional focus and those below it) and then
-	 * multiplied. Only returns a non zero value if at least one atom
-	 * is in the attentional focus.
-	 *
-	 * @param handles A vector of handles to calculate the conjunction for.
-	 * @return conjunction between -1 and 1.
-	 * @todo create a method for working out conjunction between more than
-	 * two atoms.
-	 */
-    double targetConjunction(HandleSeq);
+private:
 
-	/** Transform STI into a normalised STI value between -1 and 1.
-	 *
-	 * @param s STI to normalise.
-	 * @return the normalised STI between -1.0 and 1.0
-	 */
-    double getNormSTI(AttentionValue::sti_t);
-
-	/** Rearrange the the vector so that the one with a positive normalised
-	 * STI is at the front.
-	 *
-	 * @param outgoing Vector to rearrange.
-	 * @return rearranged vector.
-	 */
-    HandleSeq& moveSourceToFront(HandleSeq&);
-
-    void setMean(Handle, double tc);
+    double targetConjunction(HandleSeq handles);
+    void updateHebbianLinks(Handle source);
 
 public:
+
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::HebbianUpdatingAgent");
@@ -86,27 +64,13 @@ public:
     }
 
     HebbianUpdatingAgent(CogServer&);
-    virtual ~HebbianUpdatingAgent();
     virtual void run();
-
-    //! Whether to convert links to/from InverseHebbianLinks as necessary.
-    bool convertLinks;
-
-    //! Maximum allowable LTI of a link to be converted.
-    AttentionValue::lti_t conversionThreshold;
-
-	/** Update the TruthValues of the HebbianLinks in the AtomSpace.
-     *
-     * @todo Make link strength decay parameter configurable. Currently
-     * hard-code, ugh.
-     */
-    void hebbianUpdatingUpdate();
 
 }; // class
 
 typedef std::shared_ptr<HebbianUpdatingAgent> HebbianUpdatingAgentPtr;
 
 /** @}*/
-} // namespace
+}  // namespace
 
-#endif // _OPENCOG_HEBBIAN_LEARNING_AGENT_H
+#endif // _OPENCOG_IMPORTANCE_UPDATING_AGENT_H

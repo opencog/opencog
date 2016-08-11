@@ -48,8 +48,6 @@ using namespace opencog;
 
 ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
 {
-    spreadDecider = NULL;
-    setSpreadDecider(config().get_int("SPREAD_DECIDER_TYPE"));
     setMaxSpreadPercentage(
                 config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
     setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
@@ -131,30 +129,8 @@ void ImportanceDiffusionBase::setSpreadHebbianOnly(bool option)
     spreadHebbianOnly = option;
 }
 
-void ImportanceDiffusionBase::setSpreadDecider(int type, double shape)
-{
-    if (spreadDecider) {
-        delete spreadDecider;
-        spreadDecider = NULL;
-    }
-    switch (type) {
-    case HYPERBOLIC:
-        spreadDecider =
-                (SpreadDecider*) new HyperbolicDecider(_cogserver, shape);
-        break;
-    case STEP:
-        spreadDecider = (SpreadDecider*) new StepDecider(_cogserver);
-        break;
-    }
-
-}
-
 ImportanceDiffusionBase::~ImportanceDiffusionBase()
 {
-    if (spreadDecider) {
-        delete spreadDecider;
-        spreadDecider = NULL;
-    }
 }
 
 /*
