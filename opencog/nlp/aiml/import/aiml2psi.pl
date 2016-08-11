@@ -996,8 +996,8 @@ sub psi_tail
 	# prefered to "YOU *".  The formula below yeilds:
 	# YOU *       $word_count=1 $num_stars=1 $weight= 6.81e-6
 	# YOU ARE *   $word_count=2 $num_stars=1 $weight= 8.39e-5
-	my $kill= (0.5 + $word_count) * 0.1 * &exp(2.0 * $num_stars * ($word_count - 6.0));
-	if (1.0 < $kill) $kill = 1.0;
+	my $kill= (0.5 + $word_count) * 0.1 * exp(2.0 * $num_stars * ($word_count - 6.0));
+	if (1.0 < $kill) { $kill = 1.0; }
 	my $weight = $base_priority * $kill;
 	$weight = $weight / $num_choices;
 
