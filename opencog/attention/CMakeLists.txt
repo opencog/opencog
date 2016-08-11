@@ -26,8 +26,6 @@ TARGET_LINK_LIBRARIES(attention-types
 )
 
 # --------------------------------------------------
-#FixMe when moving the AttentionBank
-#ADD_SUBDIRECTORY (scm)
 
 # AttentionModule
 ADD_LIBRARY(attention SHARED
