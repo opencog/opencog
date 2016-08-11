@@ -19,6 +19,8 @@
 
 import time
 
+import datetime
+
 import rospy
 import tf
 import math
@@ -147,8 +149,8 @@ class FaceTrack:
 		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
 		#rospy.Subscriber("perceived_text", String,
 		#	self.user_said_cb)
-		self.speech_start_at=time.clock()
-		self.speech_end_at=time.clock()
+		self.speech_start_at=datetime.datetime.now()
+		self.speech_end_at=datetime.datetime.now()
 		self.speech_elapse_ms=0.0
 		self.speech_end_elapse_ms=0.0;
 		rospy.Subscriber("chatbot_speech", ChatMessage,
@@ -404,15 +406,17 @@ class FaceTrack:
 
 	def speech_event_cb(self,msg):
 		if msg.data == "speechstart":
-			self.speech_start_at = time.clock()
+			self.speech_start_at = datetime.datetime.now()
 		if msg.data == "speechend":
-			self.speech_end_at = time.clock()
+			self.speech_end_at = datetime.datetime.now()
 			#self.speech_elapse_ms = (self.speech_end_at - self.speech_start_at) * 1000
 
 	def user_said_cb(self,msg):
 		if msg.confidence >= 50:
-			self.speech_elapse_ms = (time.clock() - self.speech_start_at) * 1000
-			self.speech_end_elapse_ms = (time.clock() - self.speech_end_at)*1000
+			t1 = (datetime.datetime.now() - self.speech_start_at)
+			t2 = (datetime.datetime.now() - self.speech_end_at)
+			self.speech_elapse_ms =  t1.total_seconds()* 1000
+			self.speech_end_elapse_ms = t2.total_seconds()*1000
 			self.atomo.who_spoke(msg.utterance.lower(),
 				self.speech_elapse_ms, self.speech_end_elapse_ms)
 	# pi_vision ROS callbacks
