@@ -19,7 +19,7 @@
 ; -----------------------------------------------------------------------------
 ; For recording sound coordinates, create octomap with 10hz, 10 second or
 ; 100 frames buffer and 0.1 cm spatial resolution.
-(create-map "sounds" 0.001 100 100)
+(create-map "sounds" 0.001 50 200)
 ; Initialize  the map
 (step-time-unit "sounds")
 ; Make the stepping take place automatically
@@ -83,20 +83,20 @@
 )
 
 ;;scm code
-(define (get-face face-id-node)
- (get-last-xyz "faces" face-id-node 500)
+(define (get-face face-id-node e-start)
+ (get-last-xyz "faces" face-id-node (round e-start))
 )
 
-(define (get-snd-loc snd-id-node)
+(define (get-snd-loc snd-id-node e-start e-stop)
  ;(get-last-xyz "sounds" snd-id-node 5000)
- (get-first-xyz "sounds" snd-id-node 1200)
+ (get-first-xyz "sounds" snd-id-node (round (/ (+ e-stop e-start) 2.0)) )
 )
 ;;sound id 1
 (define (save-snd-1 x y z)
 	(map-ato "sounds" (NumberNode "1") x y z)
 )
-(define (get-snd-1)
-	(get-snd-loc (NumberNode "1"))
+(define (get-snd-1 e-start e-stop)
+	(get-snd-loc (NumberNode "1") e-start e-stop)
 )
 
 ;;math
@@ -127,9 +127,9 @@
 ;assuming common zero in coordinates
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
-(define (angle_face_snd face-id snd-id)
-	(let* ((fc (get-face (NumberNode face-id)))
-			(sn (get-snd-1)))
+(define (angle_face_snd face-id snd-id e-start e-stop)
+	(let* ((fc (get-face (NumberNode face-id) e-start))
+			(sn (get-snd-1 e-start e-stop)))
 		(if (equal? fc "")
 			(* 2 3.142)
 			(if (equal? sn "")
@@ -140,8 +140,8 @@
 	)
 )
 
-(define (angle_face_snd1 face-id)
-	(angle_face_snd face-id 1)
+(define (angle_face_snd1 face-id e-start e-stop)
+	(angle_face_snd face-id 1 e-start e-stop)
 )
 
 (define (look-at-face face-id-node)
@@ -172,19 +172,20 @@
 ;0 face id
 
 ;;get all face-ids and only one sound id 1.0, compare them
-(define (snd1-nearest-face)
+;;threshold = sound in +-15 degrees of face
+(define (snd1-nearest-face e-start e-stop)
 	(let* ((lst (get-visible-faces))
 			(falist (map
 				(lambda (x) (list
 					(string->number (cog-name x))
-					(angle_face_snd1 (cog-name x))))
+					(angle_face_snd1 (cog-name x) e-start e-stop)))
 				lst)))
 		(if (< (length falist) 1)
 			0
 			(let* ((alist (append-map (lambda (x)(cdr x)) falist))
 					(amin (fold (lambda (n p) (min (abs p) (abs n)))
 						(car alist) alist)))
-				(if (> (/ (* 3.142 10.0) 180.0) amin)
+				(if (> (/ (* 3.142 15.0) 180.0) amin)
 					(car (car (filter
 						(lambda (x) (> (+ amin 0.0001) (abs (cadr x)))) falist)))
 					0
@@ -195,8 +196,8 @@
 )
 
 ;;below creates say atom for face if sound came from it
-(define (who-said? sent)
-	(let* ((fid (snd1-nearest-face)))
+(define (who-said? sent e-start e-stop)
+	(let* ((fid (snd1-nearest-face e-start e-stop)))
 		(if (> fid 0)
 			(begin
 			;;request eye contact

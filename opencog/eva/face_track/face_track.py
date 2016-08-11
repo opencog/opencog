@@ -147,8 +147,15 @@ class FaceTrack:
 		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
 		#rospy.Subscriber("perceived_text", String,
 		#	self.user_said_cb)
+		self.speech_start_at=time.clock()
+		self.speech_end_at=time.clock()
+		self.speech_elapse_ms=0.0
+		self.speech_end_elapse_ms=0.0;
 		rospy.Subscriber("chatbot_speech", ChatMessage,
 			self.user_said_cb)
+		rospy.Subscriber("chat_events", String,
+			self.speech_event_cb)
+
 		# Where to look
 		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
 			Target, queue_size=10)
@@ -395,9 +402,19 @@ class FaceTrack:
 
 	# ----------------------------------------------------------
 
+	def speech_event_cb(self,msg):
+		if msg.data == "speechstart":
+			self.speech_start_at = time.clock()
+		if msg.data == "speechend":
+			self.speech_end_at = time.clock()
+			#self.speech_elapse_ms = (self.speech_end_at - self.speech_start_at) * 1000
+
 	def user_said_cb(self,msg):
 		if msg.confidence >= 50:
-			self.atomo.who_spoke(msg.utterance.lower())
+			self.speech_elapse_ms = (time.clock() - self.speech_start_at) * 1000
+			self.speech_end_elapse_ms = (time.clock() - self.speech_end_at)*1000
+			self.atomo.who_spoke(msg.utterance.lower(),
+				self.speech_elapse_ms, self.speech_end_elapse_ms)
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,

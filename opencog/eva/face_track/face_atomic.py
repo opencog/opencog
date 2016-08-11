@@ -37,8 +37,9 @@ class FaceAtomic:
 		#face = "(NumberNode \"" + str(faceid) + "\" (av 5 0 0))\n"
 		#netcat(self.hostname, self.port, face + "\n")
 
-	def who_spoke(self,stt):
-		spoke = "(who-said? \""+stt+"\")\n"
+	def who_spoke(self,stt,strt,stp):
+		spoke = "(who-said? \""+stt+"\" "+str(strt)+" "+str(stp)+")\n"
+		print spoke
 		netcat(self.hostname, self.port, spoke + "\n")
 
 	def save_snd1(self,x,y,z):
