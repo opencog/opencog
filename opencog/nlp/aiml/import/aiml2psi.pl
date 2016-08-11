@@ -986,12 +986,20 @@ sub psi_tail
 	# motivated.  Of course, this breaks the AIML spec, which does
 	# not use randomness or weighting in it; however, we want to avoid
 	# strict determinism here, as its not very realistic.  Note that
-	# this kind of randomness will break any sort of customer-support
-	# system that insists on eexactly a given fixed answer to a given
-	# situation.  Oh well; that's not what we're after, here.
-	#`
-	my $weight = 1.0 / (0.5 + $word_count);
-	$weight = $base_priority / (1.0 + $num_stars * $num_stars + $weight);
+	# this kind of randomness will break the use of opencog aiml for
+	# any sort of customer-support system that insists on exactly a
+	# given fixed answer to a given situation.  Oh well; that's not
+	# what we're after, here.
+	#
+	# The $kill= &exp() formula is attempting to kill the probability
+	# of very short star-matches, e.g. so that "YOU ARE *" is strongly
+	# prefered to "YOU *".  The formula below yeilds:
+	# YOU *       $word_count=1 $num_stars=1 $weight= 6.81e-6
+	# YOU ARE *   $word_count=2 $num_stars=1 $weight= 8.39e-5
+	my $kill= (0.5 + $word_count) * 0.1 * &exp(2.0 * $num_stars * ($word_count - 6.0));
+	if (1.0 < $kill) $kill = 1.0;
+	my $weight = $base_priority * $kill;
+	$weight = $weight / $num_choices;
 
 	# Adjust the weight by the desired adjustment.
 	$weight *= $wadjust;
