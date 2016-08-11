@@ -32,11 +32,12 @@
 using namespace opencog;
 
 Agent::Agent(CogServer& cs, const unsigned int f) :
-    _log(nullptr), _cogserver(cs), _frequency(f)
+    _cogserver(cs), _frequency(f)
 {
     setParameters({""});
 
     _as = &cs.getAtomSpace();
+    _log = &logger();
 }
 
 Agent::~Agent()

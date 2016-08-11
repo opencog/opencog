@@ -46,7 +46,7 @@ public:
         return _ci;
     }
 
-    MyAgent(CogServer& cs) : Agent(cs) { _count = 0; setLogger(&logger()); }
+    MyAgent(CogServer& cs) : Agent(cs) { _count = 0; }
     void setFrequency(int f) { _frequency = f; }
     void setName(const std::string& n) { _name = n; }
     unsigned int count() { return _count; }
