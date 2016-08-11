@@ -47,6 +47,9 @@ WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBase
 Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
     int sz = (_tournamentSize >  population.size() ? population.size() : _tournamentSize);
 
+    if (sz <= 0)
+        throw RuntimeException(TRACE_INFO,"PopulationSize must be >0");
+
     Handle tournament[sz];
 
     std::default_random_engine generator;

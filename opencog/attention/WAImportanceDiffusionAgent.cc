@@ -48,17 +48,21 @@ void WAImportanceDiffusionAgent::run()
 }
 
 Handle WAImportanceDiffusionAgent::tournamentSelect(HandleSeq population){
+    int sz = (_tournamentSize >  population.size() ? population.size() : _tournamentSize);
 
-    Handle tournament[_tournamentSize];
+    if (sz <= 0)
+        throw RuntimeException(TRACE_INFO,"PopulationSize must be >0");
+
+    Handle tournament[sz];
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution(0,population.size()-1);
 
-    for(int i = 0; i < _tournamentSize; i++){
+    for(int i = 0; i < sz; i++){
         int idx = distribution(generator);
         tournament[i] = population[idx];
     }
 
-    auto result = std::max_element(tournament, tournament + (_tournamentSize - 1), []
+    auto result = std::max_element(tournament, tournament + (sz - 1), []
                               (const Handle& h1, const Handle & h2)
     {
         return (h1->getSTI() > h2->getSTI());
