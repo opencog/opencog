@@ -106,10 +106,10 @@ public:
         static const ClassInfo _ci("opencog::MyAgentWithDefaults");
         return _ci;
     }
-    
+
     MyAgentWithDefaults(CogServer& cs) : Agent(cs) {
         _count = 0;
-     
+
         setParameters({
             "MYAGENT_USE_BAYES", "true",
             "MYAGENT_ENERGY", "12345",
@@ -150,7 +150,7 @@ public:
             std::remove(logger().get_filename().c_str());
     }
 
-    void setUp() {    
+    void setUp() {
         CogServer& cogserver = static_cast<CogServer&>(server(CogServer::createInstance));
         cogserver.registerAgent(MyAgentWithDefaults::info().id, &factory);
     }
@@ -169,7 +169,7 @@ public:
         // create a MyAgentWithDefaults instance
         MyAgentWithDefaultsPtr agent;
         agent = cogserver.createAgent<MyAgentWithDefaults>();
-        
+
         logger().debug(config().to_string());
         // the first endl is to put this on a line after "Running 2 tests"
         cout << endl << agent->to_string() << endl;
@@ -231,96 +231,7 @@ public:
 
         // finally, remove the temporary file and free the string with its name
         std::remove(config_file_name);
-        
+
         logger().debug("END TEST: Agent default and specified parameters");
-    }
-
-    /**
-     * Method tested:
-     *
-     * Stimulate a Handle's atom.
-     *
-     * @param atom handle
-     * @param amount of stimulus to give.
-     * @return total stimulus given since last reset.
-     */
-    void testStimulateAtom() {
-        stim_t stimValue;
-        HandleSeq atoms;
-        logger().debug("BEGIN TEST: stimulateAtom");
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        MyAgentWithDefaultsPtr agent =
-                    cogserver.createAgent<MyAgentWithDefaults>();
-        AtomSpace *atomSpace = &cogserver.getAtomSpace();
-        atoms = createSimpleGraph(atomSpace, "stim_atom\0");
-
-        stimValue = 10;
-
-        for (unsigned int i = 0; i < atoms.size(); i++) {
-            agent->stimulateAtom(atoms[i], stimValue);
-            //av = (EconomicAttentionValue) atoms[i]->getAttentionValue();
-            TS_ASSERT(agent->getAtomStimulus(atoms[i]) == stimValue);
-        }
-        TS_ASSERT(agent->getTotalStimulus() ==  (stimValue * (stim_t) atoms.size()));
-        logger().debug("END TEST: stimulateAtom");
-    }
-
-    /**
-     * Method tested:
-     *
-     * Stimulate all atoms in HandleEntry list.
-     *
-     * @param linked list of atoms to spread stimulus across.
-     * @param amount of stimulus to share.
-     * @return remainder stimulus after equal spread between atoms.
-     */
-    void testStimulateList() {
-        stim_t stimValue;
-        HandleSeq atoms;
-        logger().debug("BEGIN TEST: stimulateList");
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        MyAgentWithDefaultsPtr agent = 
-                cogserver.createAgent<MyAgentWithDefaults>();
-        AtomSpace *atomSpace = &cogserver.getAtomSpace();
-        atoms = createSimpleGraph(atomSpace, "stim_list");
-        stimValue = 100;
-
-        agent->stimulateAtom(atoms, stimValue);
-        for (unsigned int i = 0; i < atoms.size(); i++) {
-            TS_ASSERT(agent->getAtomStimulus(atoms[i]) == 20);
-        }
-
-        TS_ASSERT(agent->getTotalStimulus() == stimValue);
-
-        logger().debug("END TEST: stimulateList");
-    }
-
-    /**
-     * Method tested:
-     *
-     * Reset stimulus.
-     *
-     * @return new stimulus since reset, usually zero unless another
-     * thread adds more.
-     */
-    void testResetStimulus() {
-        stim_t stimValue;
-        HandleSeq atoms;
-        logger().debug("BEGIN TEST: resetStimulus");
-        CogServer& cogserver = static_cast<CogServer&>(server());
-        MyAgentWithDefaultsPtr agent = 
-                cogserver.createAgent<MyAgentWithDefaults>();
-        AtomSpace *atomSpace = &cogserver.getAtomSpace();
-        atoms = createSimpleGraph(atomSpace, "stim_reset");
-
-        stimValue = 100;
-
-        agent->stimulateAtom(atoms, stimValue);
-        agent->resetStimulus();
-        for (unsigned int i = 0; i < atoms.size(); i++) {
-            TS_ASSERT(agent->getAtomStimulus(atoms[i]) == 0);
-        }
-
-        logger().debug("END TEST: resetStimulus");
     }
 };

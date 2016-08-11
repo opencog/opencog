@@ -27,46 +27,28 @@ TARGET_LINK_LIBRARIES(attention-types
 
 # --------------------------------------------------
 
-ADD_SUBDIRECTORY (experimental)
-ADD_SUBDIRECTORY (scm)
-
 # AttentionModule
 ADD_LIBRARY(attention SHARED
-	AttentionModule
-	ForgettingAgent
-	HebbianUpdatingAgent
-	ImportanceDiffusionAgent
-	ImportanceSpreadingAgent
-	ImportanceUpdatingAgent
-	SimpleHebbianUpdatingAgent
-	SimpleImportanceDiffusionAgent
-	scm/StimulationAgent
+    AttentionModule
+    ImportanceDiffusionBase
+    AFImportanceDiffusionAgent
+    WAImportanceDiffusionAgent
+    RentCollectionBaseAgent
+    AFRentCollectionAgent
+    WARentCollectionAgent
+
+    ForgettingAgent
+    MinMaxSTIUpdatingAgent
+    FocusBoundaryUpdatingAgent
+    HebbianCreationAgent
+    HebbianUpdatingAgent
+
+    #scm/StimulationAgent
 )
 
 ADD_DEPENDENCIES(attention attention-types)
 
 TARGET_LINK_LIBRARIES(attention server ${ATOMSPACE_LIBRARIES})
-
-# HebbianCreationModule
-IF (TBB_FOUND)
-	INCLUDE_DIRECTORIES (
-		${TBB_INCLUDE_DIR}
-	)
-
-	LINK_DIRECTORIES(
-		${TBB_INCLUDE_DIR}
-		${TBB_LIBRARY_DIRS}
-	)
-
-	ADD_LIBRARY(hebbiancreation SHARED
-		HebbianCreationModule
-	)
-
-	TARGET_LINK_LIBRARIES(hebbiancreation
-		server
-		tbb
-	)
-ENDIF (TBB_FOUND)
 
 INSTALL (TARGETS attention
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"

@@ -1,8 +1,7 @@
 /*
  * opencog/attention/ForgettingAgent.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Written by Joel Pitt <joel@fruitionnz.com>
+ * Written by Roman Treutlein
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,8 +28,9 @@
 #include <math.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/cogserver/server/Agent.h>
 #include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/cogserver/server/Agent.h>
+#include <opencog/util/Logger.h>
 
 namespace opencog
 {
@@ -56,17 +56,19 @@ namespace opencog
  *
  * Forgetting can be tuned via two parameters:
  *
- * 1. the maximum LTI value that can be forgotten, and
- * 2. the percentage of the AtomSpace to forget (typically this would be very low!) 
+ * 1. The ammount of Atoms the AtomSpace should contain.
+ * 2. A range value of what is an accepteable deviation from that. (Allows the agent to run less often and delete more atoms in one go)
  *
- * These work in concert to limit how much and what atoms are forgotten. If only
- * one parameter is set, then the other has free reign. I.e. a certain percentage
- * of the AtomSpace will always be forgotten regardless of their LTI, or, any atom
- * that drops below the maximum forgetting LTI will be forgotten. 
+ * These work in concert to limit how much and what atoms are forgotten.
+ * TODO: Improve Recursive Remove to work with links outher then HebbianLinks
  */
 class ForgettingAgent : public Agent
 {
+
+private:
+
 public:
+
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
         static const ClassInfo _ci("opencog::ForgettingAgent");
@@ -75,14 +77,18 @@ public:
 
     //! Maximum LTI of an atom that can be forgot.
     AttentionValue::lti_t forgetThreshold;
-    //! Percentage of AtomSpace to forget.
-    double forgetPercentage;
+
+    //!targetSize of AtomSpace
+    int maxSize;
+    //!acceptable diviation from maxSize;
+    int accDivSize;
 
     ForgettingAgent(CogServer&);
     virtual ~ForgettingAgent();
     virtual void run();
 
-    void forget(double);
+    void forget();
+
 }; // class
 
 typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
@@ -94,14 +100,14 @@ typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
  */
 struct ForgettingLTIThenTVAscendingSort
 {
-    ForgettingLTIThenTVAscendingSort(AtomSpace*) {};
+    ForgettingLTIThenTVAscendingSort(AtomSpace* _a) {};
 
     bool operator()(const Handle& h1, const Handle& h2)
     {
         AttentionValue::lti_t lti1, lti2;
 
-        lti1 = h1->getLTI();
-        lti2 = h2->getLTI();
+        lti1 = h1->getAttentionValue()->getLTI();
+        lti2 = h2->getAttentionValue()->getLTI();
         if (lti1 != lti2) return lti1 < lti2;
         else {
             double tv1, tv2;

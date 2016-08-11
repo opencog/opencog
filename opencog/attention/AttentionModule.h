@@ -22,19 +22,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ATTENTION_MODULE_H
-#define _OPENCOG_ATTENTION_MODULE_H
+#ifndef _OPENCOG_EXPERIMENTAL_ATTENTION_MODULE_H
+#define _OPENCOG_EXPERIMENTAL_ATTENTION_MODULE_H
 
-#include <opencog/attention/ForgettingAgent.h>
-#include <opencog/attention/scm/StimulationAgent.h>
-#include <opencog/attention/HebbianUpdatingAgent.h>
-#include <opencog/attention/SimpleHebbianUpdatingAgent.h>
-#include <opencog/attention/ImportanceSpreadingAgent.h>
-#include <opencog/attention/ImportanceDiffusionAgent.h>
-#include <opencog/attention/SimpleImportanceDiffusionAgent.h>
-#include <opencog/attention/ImportanceUpdatingAgent.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/Module.h>
+#include <opencog/cogserver/server/CogServer.h>
+
+#include "AFImportanceDiffusionAgent.h"
+#include "AFRentCollectionAgent.h"
+
+#include "WAImportanceDiffusionAgent.h"
+#include "WARentCollectionAgent.h"
+
+#include "ForgettingAgent.h"
+#include "MinMaxSTIUpdatingAgent.h"
+#include "FocusBoundaryUpdatingAgent.h"
+#include "HebbianUpdatingAgent.h"
+#include "HebbianCreationAgent.h"
 
 namespace opencog
 {
@@ -46,18 +51,49 @@ class AttentionModule : public Module
 {
 
 private:
-    Factory<StimulationAgent, Agent>  stimulationFactory;
-    Factory<ForgettingAgent, Agent>          forgettingFactory;
-    Factory<HebbianUpdatingAgent, Agent>     hebbianFactory;
-    Factory<SimpleHebbianUpdatingAgent, Agent>     simpleHebbianFactory;
-    Factory<ImportanceSpreadingAgent, Agent> spreadingFactory;
-#ifdef HAVE_GSL
-    Factory<ImportanceDiffusionAgent, Agent> diffusionFactory;
-#endif
-    Factory<ImportanceUpdatingAgent, Agent>  updatingFactory;
-    Factory<SimpleImportanceDiffusionAgent, Agent> simpleDiffusionFactory;
+
+    Factory<AFImportanceDiffusionAgent, Agent>  afImportanceFactory;
+    Factory<WAImportanceDiffusionAgent, Agent>  waImportanceFactory;
+
+    Factory<AFRentCollectionAgent, Agent>  afRentFactory;
+    Factory<WARentCollectionAgent, Agent>  waRentFactory;
+
+    Factory<ForgettingAgent, Agent> forgettingFactory;
+
+    Factory<MinMaxSTIUpdatingAgent, Agent>  minMaxSTIUpdatingFactory;
+
+    Factory<FocusBoundaryUpdatingAgent, Agent>  focusUpdatingFactory;
+
+    Factory<HebbianUpdatingAgent, Agent> hebbianUpdatingFactory;
+    Factory<HebbianCreationAgent, Agent> hebbianCreationFactory;
+
+    AgentPtr _forgetting_agentptr;
+
+    AgentPtr _minmaxstiupdating_agentptr;
+
+    AgentPtr _focusupdating_agentptr;
+
+    AgentPtr _hebbianupdating_agentptr;
+    AgentPtr _hebbiancreation_agentptr;
+
+    AgentPtr _afImportanceAgentPtr;
+    AgentPtr _waImportanceAgentPtr;
+
+    AgentPtr _waRentAgentPtr;
+    AgentPtr _afRentAgentPtr;
+
+    boost::signals2::connection addAFConnection;
+
+    void addAFSignal(const Handle& h, const AttentionValuePtr& av_old,
+                     const AttentionValuePtr& av_new);
+    void addAFSignalHandler(const Handle& h, const AttentionValuePtr& av_old,
+                            const AttentionValuePtr& av_new);
 
 public:
+
+    DECLARE_CMD_REQUEST(AttentionModule, "start-ecan", do_start_ecan,
+                        "Starts main ECAN agents\n",
+                        "Usage: ecan-start\n", false, true)
 
     static inline const char* id();
 
@@ -70,4 +106,4 @@ public:
 /** @}*/
 }  // namespace
 
-#endif // _OPENCOG_ATTENTION_MODULE_H
+#endif // _OPENCOG_EXPERMENTAL_ATTENTION_MODULE_H

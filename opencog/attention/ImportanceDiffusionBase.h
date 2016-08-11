@@ -34,7 +34,6 @@
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
-#include <opencog/attention/SpreadDecider.h>
 
 namespace opencog
 {
@@ -54,7 +53,6 @@ protected:
     double maxSpreadPercentage;
     double hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;
-    SpreadDecider* spreadDecider;
 
     typedef struct DiffusionEventType
     {
@@ -85,8 +83,6 @@ protected:
     virtual void spreadImportance() = 0;
 
 public:
-    enum { HYPERBOLIC, STEP };
-    void setSpreadDecider(int type, double shape = 30);
     void setMaxSpreadPercentage(double);
     void setHebbianMaxAllocationPercentage(double);
     void setSpreadHebbianOnly(bool);

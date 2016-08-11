@@ -101,9 +101,9 @@ void SentenceGenStimulateAgent::generate_stimulate_sentence()
     }
 
     for (Handle h : hwords)
-        experimentalStimulateAtom(h,2);
+        _as->stimulate(h,2);
     for (Handle h : hword_instances)
-        experimentalStimulateAtom(h,0.5);
+        _as->stimulate(h,0.5);
     this_thread::sleep_for(milliseconds(400));
 
     printf("stifunds: %ld \n",_as->get_STI_funds());

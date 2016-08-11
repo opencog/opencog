@@ -13,6 +13,5 @@ TARGET_LINK_LIBRARIES(attentionexperiment
 
 
 ADD_DEPENDENCIES(attentionexperiment attention)
-ADD_DEPENDENCIES(attentionexperiment attention-experimental)
 ADD_DEPENDENCIES(attentionexperiment server)
 ADD_DEPENDENCIES(attentionexperiment cogserver)

@@ -4,7 +4,7 @@
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Gustavo Gama <gama@vettalabs.com>
+ * Written by Misgana Bayetta && Roman Treutlein
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -30,38 +30,107 @@
 
 using namespace opencog;
 
+concurrent_queue<Handle> opencog::newAtomsInAV;
+
 DECLARE_MODULE(AttentionModule)
 
 AttentionModule::AttentionModule(CogServer& cs) :
     Module(cs)
 {
-    _cogserver.registerAgent(StimulationAgent::info().id,  &stimulationFactory);
+    // New Thread based ECAN agents.
+    _cogserver.registerAgent(AFImportanceDiffusionAgent::info().id, &afImportanceFactory);
+    _cogserver.registerAgent(WAImportanceDiffusionAgent::info().id, &waImportanceFactory);
+
+    _cogserver.registerAgent(AFRentCollectionAgent::info().id, &afRentFactory);
+    _cogserver.registerAgent(WARentCollectionAgent::info().id, &waRentFactory);
+
     _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
-    _cogserver.registerAgent(HebbianUpdatingAgent::info().id,     &hebbianFactory);
-    _cogserver.registerAgent(SimpleHebbianUpdatingAgent::info().id,     &simpleHebbianFactory);
-#ifdef HAVE_GSL
-    _cogserver.registerAgent(ImportanceDiffusionAgent::info().id, &diffusionFactory);
-#endif
-    _cogserver.registerAgent(ImportanceSpreadingAgent::info().id, &spreadingFactory);
-    _cogserver.registerAgent(ImportanceUpdatingAgent::info().id,  &updatingFactory);
-    _cogserver.registerAgent(SimpleImportanceDiffusionAgent::info().id, &simpleDiffusionFactory);
+    _cogserver.registerAgent(MinMaxSTIUpdatingAgent::info().id,&minMaxSTIUpdatingFactory);
+    _cogserver.registerAgent(HebbianCreationAgent::info().id,&hebbianCreationFactory);
+    _cogserver.registerAgent(FocusBoundaryUpdatingAgent::info().id,&focusUpdatingFactory);
+    _cogserver.registerAgent(HebbianUpdatingAgent::info().id,&hebbianUpdatingFactory);
+
+    _forgetting_agentptr =
+        _cogserver.createAgent(ForgettingAgent::info().id, false);
+    _minmaxstiupdating_agentptr =
+        _cogserver.createAgent(MinMaxSTIUpdatingAgent::info().id,false);
+    _hebbiancreation_agentptr =
+        _cogserver.createAgent(HebbianCreationAgent::info().id,false);
+    _focusupdating_agentptr =
+        _cogserver.createAgent(FocusBoundaryUpdatingAgent::info().id,false);
+    _hebbianupdating_agentptr =
+        _cogserver.createAgent(HebbianUpdatingAgent::info().id,false);
+
+    _afImportanceAgentPtr = _cogserver.createAgent(AFImportanceDiffusionAgent::info().id,false);
+    _waImportanceAgentPtr = _cogserver.createAgent(WAImportanceDiffusionAgent::info().id,false);
+
+    _afRentAgentPtr = _cogserver.createAgent(AFRentCollectionAgent::info().id, false);
+    _waRentAgentPtr = _cogserver.createAgent(WARentCollectionAgent::info().id, false);
+
+
+     addAFConnection =_cogserver.getAtomSpace().AddAFSignal(
+                       boost::bind(&AttentionModule::addAFSignalHandler,
+                                   this, _1, _2, _3));
+    do_start_ecan_register();
 }
 
 AttentionModule::~AttentionModule()
 {
     logger().debug("[AttentionModule] enter destructor");
-    _cogserver.unregisterAgent(StimulationAgent::info().id);
+
+    _cogserver.unregisterAgent(AFImportanceDiffusionAgent::info().id);
+    _cogserver.unregisterAgent(WAImportanceDiffusionAgent::info().id);
+
     _cogserver.unregisterAgent(ForgettingAgent::info().id);
+    _cogserver.unregisterAgent(MinMaxSTIUpdatingAgent::info().id);
+    _cogserver.unregisterAgent(FocusBoundaryUpdatingAgent::info().id);
     _cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
-    _cogserver.unregisterAgent(ImportanceSpreadingAgent::info().id);
-#ifdef HAVE_GSL
-    _cogserver.unregisterAgent(ImportanceDiffusionAgent::info().id);
-#endif
-    _cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
-    _cogserver.unregisterAgent(SimpleImportanceDiffusionAgent::info().id);
+    _cogserver.unregisterAgent(HebbianCreationAgent::info().id);
+
+    do_start_ecan_unregister();
+
+    addAFConnection.disconnect();
+
     logger().debug("[AttentionModule] exit destructor");
 }
 
 void AttentionModule::init()
 {
+}
+
+std::string AttentionModule::do_start_ecan(Request *req, std::list<std::string> args)
+{
+    std::string afImportance = AFImportanceDiffusionAgent::info().id;
+    std::string waImportance = WAImportanceDiffusionAgent::info().id;
+
+    std::string afRent = AFRentCollectionAgent::info().id;
+    std::string waRent = WARentCollectionAgent::info().id;
+
+    _cogserver.startAgent(_afImportanceAgentPtr, true, afImportance);
+    _cogserver.startAgent(_waImportanceAgentPtr, true, waImportance);
+
+    _cogserver.startAgent(_afRentAgentPtr, true, afRent);
+    _cogserver.startAgent(_waRentAgentPtr, true, waRent);
+
+    _cogserver.startAgent(_forgetting_agentptr,true,"attention");
+    _cogserver.startAgent(_minmaxstiupdating_agentptr,true,"attention");
+    _cogserver.startAgent(_focusupdating_agentptr,true,"attention");
+
+    _cogserver.startAgent(_hebbiancreation_agentptr,true,"hca");
+    _cogserver.startAgent(_hebbianupdating_agentptr,true,"hua");
+
+    return ("Started the following agents:\n" + afImportance + "\n" + waImportance +
+         "\n" + afRent + "\n" + waRent + "\n");
+}
+
+/*
+ * When an atom enters the AttentionalFocus, it is added to a concurrent_queue
+ * so that the HebbianCreationAgent know to check it and create HebbianLinks if
+ * neccesary
+ */
+void AttentionModule::addAFSignalHandler(const Handle& source,
+                                        const AttentionValuePtr& av_old,
+                                        const AttentionValuePtr& av_new)
+{
+    newAtomsInAV.push(source);
 }

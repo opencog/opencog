@@ -5,7 +5,6 @@
  *      Author: misgana
  */
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/attention/AttentionAgent.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 #ifndef _SENTENCEGENAGENT_H_
