@@ -29,21 +29,21 @@ TARGET_LINK_LIBRARIES(attention-types
 
 # AttentionModule
 ADD_LIBRARY(attention SHARED
-    AttentionModule
-    ImportanceDiffusionBase
-    AFImportanceDiffusionAgent
-    WAImportanceDiffusionAgent
-    RentCollectionBaseAgent
-    AFRentCollectionAgent
-    WARentCollectionAgent
+	AttentionModule
+	ImportanceDiffusionBase
+	AFImportanceDiffusionAgent
+	WAImportanceDiffusionAgent
+	RentCollectionBaseAgent
+	AFRentCollectionAgent
+	WARentCollectionAgent
 
-    ForgettingAgent
-    MinMaxSTIUpdatingAgent
-    FocusBoundaryUpdatingAgent
-    HebbianCreationAgent
-    HebbianUpdatingAgent
+	ForgettingAgent
+	MinMaxSTIUpdatingAgent
+	FocusBoundaryUpdatingAgent
+	HebbianCreationAgent
+	HebbianUpdatingAgent
 
-    #scm/StimulationAgent
+	#scm/StimulationAgent
 )
 
 ADD_DEPENDENCIES(attention attention-types)
@@ -63,13 +63,7 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	AttentionModule.h
 	ForgettingAgent.h
-	HebbianCreationModule.h
 	HebbianUpdatingAgent.h
-	ImportanceSpreadingAgent.h
-	ImportanceDiffusionAgent.h
-	SpreadDecider.h
-	SimpleImportanceDiffusionAgent.h
-	ImportanceUpdatingAgent.h
 	DESTINATION "include/${PROJECT_NAME}/attention"
 )
 
