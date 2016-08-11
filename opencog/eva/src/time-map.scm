@@ -1,15 +1,7 @@
 (use-modules (srfi srfi-1) )
-(use-modules (opencog) (opencog atom-types) (opencog eva-behavior))
+(use-modules (opencog) (opencog atom-types) (opencog eva-model) (opencog eva-behavior))
 (use-modules (opencog ato pointmem)); needed for maps
 (use-modules (opencog python))
-<<<<<<< HEAD
-;;initialize octomap with 15hz, 10 second or 150 frames buffer ; 1 cm spatial resolution
-(create-map "faces" 0.01 66 150) (step-time-unit "faces") (auto-step-time-on "faces")
-(create-map "sounds" 0.01 100 100) (step-time-unit "sounds") (auto-step-time-on "sounds")
-=======
-(use-modules (opencog eva-model) (opencog eva-behavior)) ; For utility function
->>>>>>> 56a7bf88b1f9992b0bc5d8684735d4914d10350e
-
 ; -----------------------------------------------------------------------------
 ; For recording facial coordinates, create octomap with 15hz, 10 second or
 ; 150 frames buffer and 1 cm spatial resolution.
@@ -26,8 +18,8 @@
 
 ; -----------------------------------------------------------------------------
 ; For recording sound coordinates, create octomap with 10hz, 10 second or
-; 100 frames buffer and 1 cm spatial resolution.
-(create-map "sounds" 0.01 66 150)
+; 100 frames buffer and 0.1 cm spatial resolution.
+(create-map "sounds" 0.001 100 100)
 ; Initialize  the map
 (step-time-unit "sounds")
 ; Make the stepping take place automatically
