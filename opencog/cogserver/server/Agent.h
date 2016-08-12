@@ -31,8 +31,6 @@
 #include <unordered_map>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/AttentionValue.h>
-
 #include <opencog/cogserver/server/Factory.h>
 
 #if __GNUC__ >= 5
