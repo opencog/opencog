@@ -28,31 +28,96 @@
 (define highest-face-priority 1.0)
 
 ; -----------------------------------------------------------------------------
-; usage:
-;(cog-evaluate! (PutLink
-;    (DefinedPredicate "Set face priority")
-;    (List (Number "12") (Number ".12"))))
-(DefineLink
-	(DefinedPredicate "Set face priority")
+; TODO: Make the set, get, & delete of properites into a utility template
+; similar ot change-template and timestamp-template, as similar patterns
+; will be used for modeling the world. It should also make moving to protoatoms
+; simplier when they are ready.
+
+; Usage:
+; (cog-evaluate! (Put
+;     (DefinedPredicate "Set face priority")
+;     (List (Number "12") (Number ".12"))))
+(Define
+    (DefinedPredicate "Set face priority")
     (Lambda
         (VariableList (Variable "face-id") (Variable "priority"))
-        (True (StateLink
+        (True (State
                 (List
                     (Concept "visual priority")
                     (Variable "face-id"))
                 (Variable "priority")))))
 
-(define (set-priority face-id priority)
+(define (set-priority! face-id priority)
     (cog-evaluate! (PutLink
         (DefinedPredicate "Set face priority")
         (List (Number face-id) (Number priority))))
 )
 
-(define (get-priority face-id)
-    (gar (cog-execute! (Get
-        (StateLink
-            (List
-                (Concept "visual priority")
-                (Number face-id))
-            (Variable "priority")))))
+; -----------------------------------------------------------------------------
+; Usage:
+; (cog-execute! (Put
+;     (DefinedSchema "Get face priority")
+;     (Number 1)))
+(Define
+    (DefinedSchema "Get face priority")
+    (Lambda
+        (TypedVariable
+            (Variable "filter-face-id")
+            (Type "NumberNode"))
+        (Get
+            (VariableList (Variable "face-id") (Variable "priority"))
+            (And
+                (Identical (Variable "filter-face-id") (Variable "face-id"))
+                (State
+                    (List
+                        (Concept "visual priority")
+                        (Variable "face-id"))
+                    (Variable "priority"))))
+    ))
+
+(define (get-priority! face-id)
+    (gdar (cog-execute!
+        (PutLink
+            (DefinedSchema "Get face priority")
+            (Number face-id))))
 )
+
+; -----------------------------------------------------------------------------
+; Usage:
+; (cog-evaluate! (PutLink
+;     (DefinedPredicate "Delete face priority")
+;     (Number 1)))
+(DefineLink
+    (DefinedPredicate "Delete face priority")
+    (Lambda
+        (TypedVariable
+            (Variable "del-face-id")
+            (Type "NumberNode"))
+        (True (Put
+            (Delete
+                (State
+                    (List
+                        (Concept "visual priority")
+                        (Variable "face-id"))
+                    (Variable "priority")))
+            ; The GetLink is structuraly the same as
+            ; (DefinedSchema "Get face priority")
+            (Get
+                (VariableList (Variable "face-id") (Variable "priority"))
+                (And
+                    (Identical (Variable "del-face-id") (Variable "face-id"))
+                    (State
+                        (List
+                            (Concept "visual priority")
+                            (Variable "face-id"))
+                        (Variable "priority"))))
+        ))))
+
+
+(define (delete-priority! face-id)
+     (cog-evaluate! (PutLink
+         (DefinedPredicate "Delete face priority")
+         (Number face-id)))
+)
+
+; -----------------------------------------------------------------------------
