@@ -60,7 +60,7 @@ class WAImportanceDiffusionAgent : public ImportanceDiffusionBase
 private:
     HandleSeq diffusionSourceVector();
     unsigned int SAMPLE_SIZE = 1;
-    int _tournamentSize;
+    unsigned int _tournamentSize;
 
     void spreadImportance();
     Handle tournamentSelect(HandleSeq population);
