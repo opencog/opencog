@@ -153,10 +153,10 @@ class FaceTrack:
 		self.speech_end_at=datetime.datetime.now()
 		self.speech_elapse_ms=0.0
 		self.speech_end_elapse_ms=0.0;
-		rospy.Subscriber("chatbot_speech", ChatMessage,
-			self.user_said_cb)
-		rospy.Subscriber("chat_events", String,
-			self.speech_event_cb)
+		# rospy.Subscriber("chatbot_speech", ChatMessage,
+		# 	self.user_said_cb)
+		# rospy.Subscriber("chat_events", String,
+		# 	self.speech_event_cb)
 
 		# Where to look
 		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
@@ -404,21 +404,23 @@ class FaceTrack:
 
 	# ----------------------------------------------------------
 
-	def speech_event_cb(self,msg):
-		if msg.data == "speechstart":
-			self.speech_start_at = datetime.datetime.now()
-		if msg.data == "speechend":
-			self.speech_end_at = datetime.datetime.now()
+	# def speech_event_cb(self,msg):
+	# 	if msg.data == "speechstart":
+	# 		self.speech_start_at = datetime.datetime.now()
+	# 	if msg.data == "speechend":
+	# 		self.speech_end_at = datetime.datetime.now()
 			#self.speech_elapse_ms = (self.speech_end_at - self.speech_start_at) * 1000
 
-	def user_said_cb(self,msg):
-		if msg.confidence >= 50:
-			t1 = (datetime.datetime.now() - self.speech_start_at)
-			t2 = (datetime.datetime.now() - self.speech_end_at)
-			self.speech_elapse_ms =  t1.total_seconds()* 1000
-			self.speech_end_elapse_ms = t2.total_seconds()*1000
-			self.atomo.who_spoke(msg.utterance.lower(),
-				self.speech_elapse_ms, self.speech_end_elapse_ms)
+	# def user_said_cb(self,msg):
+	# 	if msg.confidence >= 50:
+	# 		t1 = (datetime.datetime.now() - self.speech_start_at)
+	# 		t2 = (datetime.datetime.now() - self.speech_end_at)
+	# 		self.speech_elapse_ms =  t1.total_seconds()* 1000
+	# 		self.speech_end_elapse_ms = t2.total_seconds()*1000
+	# 		self.atomo.who_spoke(msg.utterance.lower(),
+	# 			3000,300)
+			#self.atomo.who_spoke(msg.utterance.lower(),
+			#	self.speech_elapse_ms, self.speech_end_elapse_ms)
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,

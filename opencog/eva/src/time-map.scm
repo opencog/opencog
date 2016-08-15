@@ -124,9 +124,29 @@
 		(angle ax ay az bx by bz)
 	)
 )
+
+(define (angle_bw_sf xyz-a xx yy zz)
+	(let* ((sta (string-split xyz-a #\ ))
+		(ax (string->number(car sta)))
+		(ay (string->number(cadr sta)))
+		(az (string->number(caddr sta))))
+		(angle ax ay az xx yy zz)
+	)
+)
+
 ;assuming common zero in coordinates
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
+
+(define (angle_face_id_snd face-id xx yy zz)
+	(let* ((fc (get-face (NumberNode face-id) 600)))
+		(if (equal? fc "")
+			(* 2 3.142)
+			(angle_bw_sf fc xx yy zz)
+		)
+	)
+)
+
 (define (angle_face_snd face-id snd-id e-start e-stop)
 	(let* ((fc (get-face (NumberNode face-id) e-start))
 			(sn (get-snd-1 e-start e-stop)))
@@ -211,6 +231,44 @@
 						(ConceptNode (number->string fid))
 						(SentenceNode sent)))
 				(ConceptNode "sound-perception"))
+			)
+		)
+	)
+)
+
+;;;;
+(define (snd-nearest-face xx yy zz)
+	(let* ((lst (get-visible-faces))
+			(falist (map
+				(lambda (x) (list
+					(string->number (cog-name x))
+					(angle_face_id_snd (cog-name x) xx yy zz)))
+				lst)))
+		(if (< (length falist) 1)
+			0
+			(let* ((alist (append-map (lambda (x)(cdr x)) falist))
+					(amin (fold (lambda (n p) (min (abs p) (abs n)))
+						(car alist) alist)))
+				(if (> (/ (* 3.142 15.0) 180.0) amin)
+					(car (car (filter
+						(lambda (x) (> (+ amin 0.0001) (abs (cadr x)))) falist)))
+					0
+				)
+			)
+		)
+	)
+)
+
+
+(define (map-sound xx yy zz)
+	(save-snd-1 xx yy zz)
+	(let* ((fid (snd-nearest-face xx yy zz)))
+		(if (> fid 0)
+			(begin
+			;;request eye contact
+			(StateLink request-eye-contact-state (NumberNode fid))
+			;;generate info
+			(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
 			)
 		)
 	)

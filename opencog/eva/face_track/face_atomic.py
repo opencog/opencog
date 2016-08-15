@@ -43,7 +43,8 @@ class FaceAtomic:
 		netcat(self.hostname, self.port, spoke + "\n")
 
 	def save_snd1(self,x,y,z):
-		snd="(map-ato \"sounds\" (NumberNode \"1\") "+str(x)+" "+str(y)+" "+str(z)+")\n"
+		#snd="(map-ato \"sounds\" (NumberNode \"1\") "+str(x)+" "+str(y)+" "+str(z)+")\n"
+		snd="(map-sound "+str(x)+" "+str(y)+" "+str(z)+")\n"
 		netcat(self.hostname, self.port, snd + "\n")
 
 	def face_recognition(self,tracker_id,rec_id):
