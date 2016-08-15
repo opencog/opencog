@@ -316,7 +316,7 @@
 
 	;; Return #t for the first rule in the RULE-LIST for which the
 	;; accumulated weight is above THRESH.
-	(define accum 0.000000001)
+	(define accum 0.0)
 	(define (pick-first ATOM THRESH)
 		(set! accum (+ accum (get-weight ATOM)))
 		(< THRESH accum))
