@@ -413,7 +413,7 @@ class FaceTrack:
 	# 	if msg.data == "speechend":
 	# 		self.speech_end_at = datetime.datetime.now()
 			#self.speech_elapse_ms = (self.speech_end_at - self.speech_start_at) * 1000
- 	def user_said_cb(self,msg):
+ 	def stt_cb(self,msg):
 		if msg.confidence >= 50:
 			self.atomo.who_said(msg.utterance)
 
