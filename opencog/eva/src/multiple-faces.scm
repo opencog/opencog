@@ -73,6 +73,26 @@
     )
 )
 
+(define (transition-priority face-id-1 face-id-2)
+"
+  Transtion priority, T(face-id-2|face-id-1), represents if the system is
+  looking at face-id-1, then how likely should it be to shift gaze to
+  face-id-2.
+
+  A transition priority of 1 means that the system is very likely to shift from
+  face-id-1 to face-id-2 , while a transition priority of 0 means that the
+  system is very unlikely to shift from face-id-1 to face-id-2.
+"
+    (let ((d (distance-in-plane-yz face-id-1 face-id-2)))
+        ; This check is for (inf). If d is not (inf) and is greater than
+        ; the width-of-yz-plane, then something fishy is going on.
+        (if (> d  width-of-yz-plane)
+            0
+            (- 1 (/ d width-of-yz-plane))
+        )
+    )
+)
+
 ; -----------------------------------------------------------------------------
 ; TODO: Make the set, get, & delete of properites into a utility template
 ; similar ot change-template and timestamp-template, as similar patterns
