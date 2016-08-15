@@ -236,10 +236,23 @@
 				))))
 		)))
 
+	(define (get-rules)
+		; For getting those "wildcard" rules
+		; TODO: Maybe it is better to get these rules using GetLink + SignatureLink,
+		; but at the moment it does not support unordered link, and doing it this
+		; way is fast...
+		(define wildcard-rule-context
+			(And (Evaluation (Predicate "*-AIML-pattern-*") (List (Glob "$star-1")))))
+
+		(concatenate! (list
+			(psi-get-dual-match SENT)
+			(cog-get-root wildcard-rule-context)))
+	)
+
 	; Get all of the rules that might apply to this sentence,
 	; and are inexact matches (i.e. have a variable in it)
 	(filter is-usable-rule?
-		(map gar (psi-get-dual-match SENT)))
+		(map gar (get-rules)))
 )
 
 ; Given a pattern-based rule, run it. Given that it has variables
