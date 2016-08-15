@@ -2,6 +2,8 @@
 (use-modules (opencog) (opencog atom-types) (opencog eva-model) (opencog eva-behavior))
 (use-modules (opencog ato pointmem)); needed for maps
 (use-modules (opencog python))
+
+(StateLink (ConceptNode "last person who spoke") (NumberNode "0"))
 ; -----------------------------------------------------------------------------
 ; For recording facial coordinates, create octomap with 15hz, 10 second or
 ; 150 frames buffer and 1 cm spatial resolution.
