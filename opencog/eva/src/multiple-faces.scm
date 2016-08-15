@@ -1,5 +1,7 @@
 (use-modules (opencog))
 
+(load "time-map.scm")
+
 ; -----------------------------------------------------------------------------
 ; Parameters are not published by cmt_tracker and have to be pre-set, so see
 ; /HEAD/src/vision/cmt_tracker/src/cmt_tracker_node.cpp#L486
@@ -21,11 +23,34 @@
 ; The dimenstion of a plane at the given distance.
 (define width-of-yz-plane (/ (* camera-width  distance)  k-const))
 (define height-of-yz-plane (/ (* camera-height  distance)  k-const))
+(define diagonal-of-yz-plane
+    (sqrt (+ (expt width-of-yz-plane 2.0) (expt height-of-yz-plane 2.0))))
 
 ; Priority scale used for faces.
 (define lowest-face-priority  0.0)
 (define ordinary-face-priority 0.5)
 (define highest-face-priority 1.0)
+
+; -----------------------------------------------------------------------------
+(define (get-face-coordinate face-id)
+"
+  Returns a list (x y z)
+"
+    (map string->number (string-split
+        (get-last-xyz "faces" (Number face-id) face-loc-time-span) #\ ))
+)
+
+(define (distance-in-plane-yz face-id-1 face-id-2)
+"
+  Distance between the two faces in the yz plane.
+"
+    (let ((coord-1 (get-face-coordinate face-id-1))
+          (coord-2 (get-face-coordinate face-id-2)))
+        (sqrt (+
+            (expt (- (list-ref coord-1 1) (list-ref coord-2 1)) 2.0)
+            (expt (- (list-ref coord-1 2) (list-ref coord-2 2)) 2.0)))
+    )
+)
 
 ; -----------------------------------------------------------------------------
 ; TODO: Make the set, get, & delete of properites into a utility template
