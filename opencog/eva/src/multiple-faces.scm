@@ -1,6 +1,7 @@
 (use-modules (opencog))
 
 (load "time-map.scm")
+(load "self-model.scm")
 
 ; -----------------------------------------------------------------------------
 ; Parameters are not published by cmt_tracker and have to be pre-set, so see
@@ -36,19 +37,39 @@
 "
   Returns a list (x y z)
 "
-    (map string->number (string-split
-        (get-last-xyz "faces" (Number face-id) face-loc-time-span) #\ ))
+    (let ((coord (get-last-xyz "faces" (Number face-id) face-loc-time-span)))
+        (if (equal? "" coord)
+            '()
+            (map string->number (string-split coord #\ ))
+        )
+    )
+)
+
+(define (get-face-coordinate-in-plane-yz face-id)
+    (let ((new-x distance)
+          (xyz (get-face-coordinate face-id)))
+        (if (null? xyz)
+            '()
+            (list
+                new-x
+                (/ (* (list-ref xyz 1) new-x) (list-ref xyz 0))
+                (/ (* (list-ref xyz 2) new-x) (list-ref xyz 0)))
+        )
+    )
 )
 
 (define (distance-in-plane-yz face-id-1 face-id-2)
 "
   Distance between the two faces in the yz plane.
 "
-    (let ((coord-1 (get-face-coordinate face-id-1))
-          (coord-2 (get-face-coordinate face-id-2)))
-        (sqrt (+
-            (expt (- (list-ref coord-1 1) (list-ref coord-2 1)) 2.0)
-            (expt (- (list-ref coord-1 2) (list-ref coord-2 2)) 2.0)))
+    (let ((coord-1 (get-face-coordinate-in-plane-yz face-id-1))
+          (coord-2 (get-face-coordinate-in-plane-yz face-id-2)))
+        (if (or (null? coord-1) (null? coord-1))
+            (inf)
+            (sqrt (+
+                (expt (- (list-ref coord-1 1) (list-ref coord-2 1)) 2.0)
+                (expt (- (list-ref coord-1 2) (list-ref coord-2 2)) 2.0)))
+        )
     )
 )
 
