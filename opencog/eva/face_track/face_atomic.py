@@ -37,10 +37,16 @@ class FaceAtomic:
 		#face = "(NumberNode \"" + str(faceid) + "\" (av 5 0 0))\n"
 		#netcat(self.hostname, self.port, face + "\n")
 
-	def who_spoke(self,stt,strt,stp):
-		spoke = "(who-said? \""+stt+"\" "+str(strt)+" "+str(stp)+")\n"
+	# def who_spoke(self,stt,strt,stp):
+	# 	spoke = "(who-said? \""+stt+"\" "+str(strt)+" "+str(stp)+")\n"
+	# 	print spoke
+	# 	netcat(self.hostname, self.port, spoke + "\n")
+
+	def who_said(self,stt):
+		spoke = "(who-said? \""+stt+"\")\n"
 		print spoke
 		netcat(self.hostname, self.port, spoke + "\n")
+
 
 	def save_snd1(self,x,y,z):
 		#snd="(map-ato \"sounds\" (NumberNode \"1\") "+str(x)+" "+str(y)+" "+str(z)+")\n"

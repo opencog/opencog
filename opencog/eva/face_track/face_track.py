@@ -153,6 +153,9 @@ class FaceTrack:
 		self.speech_end_at=datetime.datetime.now()
 		self.speech_elapse_ms=0.0
 		self.speech_end_elapse_ms=0.0;
+		rospy.Subscriber("chatbot_speech", ChatMessage,
+			self.stt_cb)
+
 		# rospy.Subscriber("chatbot_speech", ChatMessage,
 		# 	self.user_said_cb)
 		# rospy.Subscriber("chat_events", String,
@@ -410,6 +413,9 @@ class FaceTrack:
 	# 	if msg.data == "speechend":
 	# 		self.speech_end_at = datetime.datetime.now()
 			#self.speech_elapse_ms = (self.speech_end_at - self.speech_start_at) * 1000
+ 	def user_said_cb(self,msg):
+		if msg.confidence >= 50:
+			self.atomo.who_said(msg.utterance)
 
 	# def user_said_cb(self,msg):
 	# 	if msg.confidence >= 50:

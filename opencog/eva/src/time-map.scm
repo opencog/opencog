@@ -216,27 +216,48 @@
 )
 
 ;;below creates say atom for face if sound came from it
-(define (who-said? sent e-start e-stop)
-	(let* ((fid (snd1-nearest-face e-start e-stop)))
-		(if (> fid 0)
-			(begin
-			;;request eye contact
-			(StateLink request-eye-contact-state (NumberNode fid))
-			;;generate info
-			(AtTimeLink
-				(TimeNode (number->string (current-time)))
-				(EvaluationLink
-					(PredicateNode "say_face")
-					(ListLink
-						(ConceptNode (number->string fid))
-						(SentenceNode sent)))
-				(ConceptNode "sound-perception"))
-			)
-		)
+;(define (who-said? sent e-start e-stop)
+;	(let* ((fid (snd1-nearest-face e-start e-stop)))
+;		(if (> fid 0)
+;			(begin
+;			;;request eye contact
+;			(StateLink request-eye-contact-state (NumberNode fid))
+;			;;generate info
+;			(AtTimeLink
+;				(TimeNode (number->string (current-time)))
+;				(EvaluationLink
+;					(PredicateNode "say_face")
+;					(ListLink
+;						(ConceptNode (number->string fid))
+;						(SentenceNode sent)))
+;				(ConceptNode "sound-perception"))
+;			)
+;		)
+;	)
+;)
+
+;;;;
+(define (who-said? sent)
+	;;request eye contact
+	(PutLink
+		(StateLink request-eye-contact-state (VariableNode "$fid"))
+		(GetLink (StateLink (ConceptNode "last person who spoke") (VariableNode "$fid")))
+	)
+	;;generate info
+	(PutLink
+	(AtTimeLink
+		(TimeNode (number->string (current-time)))
+		(EvaluationLink
+			(PredicateNode "say_face")
+				(ListLink
+					(ConceptNode (cog-name (VariableNode "$fid")))
+					(SentenceNode sent)))
+			(ConceptNode "sound-perception"))
+	(GetLink (StateLink (ConceptNode "last person who spoke") (VariableNode "$fid")))
 	)
 )
 
-;;;;
+
 (define (snd-nearest-face xx yy zz)
 	(let* ((lst (get-visible-faces))
 			(falist (map
@@ -266,7 +287,7 @@
 		(if (> fid 0)
 			(begin
 			;;request eye contact
-			(StateLink request-eye-contact-state (NumberNode fid))
+			;;(StateLink request-eye-contact-state (NumberNode fid))
 			;;generate info
 			(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
 			)
