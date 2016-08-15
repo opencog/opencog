@@ -37,6 +37,8 @@
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
 
+(load "faces.scm")
+
 ; ------------------------------------------------------
 ; State variables
 ; XXX FIXME There are a bunch of define-publics in here, they probably
