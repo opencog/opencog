@@ -20,8 +20,7 @@
     (cond
         ((equal? '() temp) "Sorry, I don't know the answer.")
         ; Return all of them, for now
-        (else (map string-join temp))
-        ; (else (string-join (car temp)))
+        (else temp)
 
 ))
 ;--------------------------------------------------------------------
@@ -80,7 +79,7 @@
             )
         )
         (lambda (key . parameters)
-            ; (display key) (newline) (display parameters) (newline)
+            (display key) (newline) (display parameters) (newline)
             (display "Sorry, I don't understand it\n")
         )
     ))
