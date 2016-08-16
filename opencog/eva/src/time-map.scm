@@ -28,60 +28,33 @@
 (auto-step-time-on "sounds")
 
 ; -----------------------------------------------------------------------------
-;;returns null string if atom not found, number x y z string if okay
-;;these functions assume only one location for one atom in a map at a time
-(define (get-past-xyz map-name id-node elapse)
-	(let* ((loc-atom (get-past-locs-ato map-name id-node elapse) ))
-		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
-			""
-			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-				(xx (number->string (loc-link-x loc-link)))
-				(yy (number->string (loc-link-y loc-link)))
-				(zz (number->string (loc-link-z loc-link))))
-					(string-append xx " " yy " " zz))
-		)
-	)
-)
 
 ;;returns null string if atom not found, number x y z string if okay
 ;;these functions assume only one location for one atom in a map at a time
 (define (get-last-xyz map-name id-node elapse)
 	(let* ((loc-atom (get-last-locs-ato map-name id-node elapse) ))
 		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
-			""
+			(list )
 			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-				(xx (number->string (loc-link-x loc-link)))
-				(yy (number->string (loc-link-y loc-link)))
-				(zz (number->string (loc-link-z loc-link))))
-					(string-append xx " " yy " " zz))
+				(xx (loc-link-x loc-link))
+				(yy (loc-link-y loc-link))
+				(zz (loc-link-z loc-link)))
+					(list xx yy zz))
 		)
 	)
 )
 ;;get first occurence in map
 (define (get-first-xyz map-name id-node elapse)
 		(let* ((loc-atom (get-first-locs-ato map-name id-node elapse) ))
-			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom) ""
+			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
+				(list )
 				(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-					(xx (number->string (loc-link-x loc-link)))
-					(yy (number->string (loc-link-y loc-link)))
-					(zz (number->string (loc-link-z loc-link))))
-						(string-append xx " " yy " " zz))
+					(xx (loc-link-x loc-link))
+					(yy (loc-link-y loc-link))
+					(zz (loc-link-z loc-link)))
+						(list xx yy zz))
 			)
 		)
-)
-
-;;returns null string if atom not found, number x y z string if okay
-(define (get-xyz map-name id-node)
-	(let* ((loc-atom (get-locs-ato map-name id-node) ))
-		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
-			""
-			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-				(xx (number->string (loc-link-x loc-link)))
-				(yy (number->string (loc-link-y loc-link)))
-				(zz (number->string (loc-link-z loc-link))))
-					(string-append xx " " yy " " zz))
-		)
-	)
 )
 
 ;;scm code
@@ -107,37 +80,15 @@
 	)
 )
 
-(define (angle_bw xyz-a xyz-b)
-	(let* ((sta (string-split xyz-a #\ ))
-		(stb (string-split xyz-b #\ ))
-		(ax (string->number(car sta)))
-		(ay (string->number(cadr sta)))
-		(az (string->number(caddr sta)))
-		(bx (string->number(car stb)))
-		(by (string->number(cadr stb)))
-		(bz (string->number(caddr stb))))
-		(angle ax ay az bx by bz)
-	)
-)
-
-(define (angle_bw_sf xyz-a xx yy zz)
-	(let* ((sta (string-split xyz-a #\ ))
-		(ax (string->number(car sta)))
-		(ay (string->number(cadr sta)))
-		(az (string->number(caddr sta))))
-		(angle ax ay az xx yy zz)
-	)
-)
-
 ;assuming common zero in coordinates
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
 
 (define (angle_face_id_snd face-id xx yy zz)
 	(let* ((fc (get-face (NumberNode face-id) 600)))
-		(if (equal? fc "")
+		(if (null? fc)
 			(* 2 3.142)
-			(angle_bw_sf fc xx yy zz)
+			(angle (car fc) (cadr fc) (caddr fc) xx yy zz)
 		)
 	)
 )
