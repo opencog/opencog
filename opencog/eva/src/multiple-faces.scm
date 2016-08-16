@@ -151,7 +151,7 @@
         (begin
             (set-priority! face-id ordinary-face-priority)
             ordinary-face-priority)
-        (gdar result)
+        (string->number (cog-name (gdar result)))
     )
 )
 
