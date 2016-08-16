@@ -341,8 +341,12 @@
 	(let ((thresh (random sum)))
 		(if (null? RULE-LIST)
 			'()
-			(list-ref RULE-LIST (list-index
-				(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST))
+			(let ((idx (list-index
+					(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST)))
+				; Returns the last rule in the list if idx is #f
+				(if idx
+					(list-ref RULE-LIST idx)
+					(car (last-pair RULE-LIST))))
 	))
 )
 
