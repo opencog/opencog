@@ -19,8 +19,6 @@
 
 import time
 
-import datetime
-
 import rospy
 import tf
 import math
@@ -147,19 +145,8 @@ class FaceTrack:
 
 		# Which face to look at
 		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
-		#rospy.Subscriber("perceived_text", String,
-		#	self.user_said_cb)
-		self.speech_start_at=datetime.datetime.now()
-		self.speech_end_at=datetime.datetime.now()
-		self.speech_elapse_ms=0.0
-		self.speech_end_elapse_ms=0.0;
 		rospy.Subscriber("chatbot_speech", ChatMessage,
 			self.stt_cb)
-
-		# rospy.Subscriber("chatbot_speech", ChatMessage,
-		# 	self.user_said_cb)
-		# rospy.Subscriber("chat_events", String,
-		# 	self.speech_event_cb)
 
 		# Where to look
 		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
@@ -407,26 +394,10 @@ class FaceTrack:
 
 	# ----------------------------------------------------------
 
-	# def speech_event_cb(self,msg):
-	# 	if msg.data == "speechstart":
-	# 		self.speech_start_at = datetime.datetime.now()
-	# 	if msg.data == "speechend":
-	# 		self.speech_end_at = datetime.datetime.now()
-			#self.speech_elapse_ms = (self.speech_end_at - self.speech_start_at) * 1000
  	def stt_cb(self,msg):
 		if msg.confidence >= 50:
 			self.atomo.who_said(msg.utterance)
 
-	# def user_said_cb(self,msg):
-	# 	if msg.confidence >= 50:
-	# 		t1 = (datetime.datetime.now() - self.speech_start_at)
-	# 		t2 = (datetime.datetime.now() - self.speech_end_at)
-	# 		self.speech_elapse_ms =  t1.total_seconds()* 1000
-	# 		self.speech_end_elapse_ms = t2.total_seconds()*1000
-	# 		self.atomo.who_spoke(msg.utterance.lower(),
-	# 			3000,300)
-			#self.atomo.who_spoke(msg.utterance.lower(),
-			#	self.speech_elapse_ms, self.speech_end_elapse_ms)
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,
@@ -458,16 +429,6 @@ class FaceTrack:
 
 		for face in data.faces:
 			self.update_face_loc(face)
-		#below causes error in cmt .. mandeep
-		#for face in data.faces:
-			#fid = face.id
-			#loc = face.point
-			## Sanity check.  Sometimes pi_vision sends us faces with
-			## location (0,0,0). Discard these.
-			#if loc.x < 0.05:
-				#continue
-			#self.add_face(fid)
-		#above causes error in cmt
 		# Now perform all the various looking-at actions
 		self.do_look_at_actions()
 

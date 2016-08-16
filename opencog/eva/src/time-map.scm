@@ -89,16 +89,9 @@
  (get-last-xyz "faces" face-id-node (round e-start))
 )
 
-(define (get-snd-loc snd-id-node e-start e-stop)
- ;(get-last-xyz "sounds" snd-id-node 5000)
- (get-first-xyz "sounds" snd-id-node (round (/ (+ e-stop e-start) 2.0)) )
-)
 ;;sound id 1
 (define (save-snd-1 x y z)
 	(map-ato "sounds" (NumberNode "1") x y z)
-)
-(define (get-snd-1 e-start e-stop)
-	(get-snd-loc (NumberNode "1") e-start e-stop)
 )
 
 ;;math
@@ -149,23 +142,6 @@
 	)
 )
 
-(define (angle_face_snd face-id snd-id e-start e-stop)
-	(let* ((fc (get-face (NumberNode face-id) e-start))
-			(sn (get-snd-1 e-start e-stop)))
-		(if (equal? fc "")
-			(* 2 3.142)
-			(if (equal? sn "")
-				(* 2 3.142)
-				(angle_bw fc sn)
-			)
-		)
-	)
-)
-
-(define (angle_face_snd1 face-id e-start e-stop)
-	(angle_face_snd face-id 1 e-start e-stop)
-)
-
 (define (look-at-face face-id-node)
 	(let ((loc-atom
 			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
@@ -187,57 +163,9 @@
 ;;in scheme itself list of number nodes
 (define (get-visible-faces)
   (cog-filter 'NumberNode (show-visible-faces))
-	;;(string-concatenate (map (lambda (x)(string-append (cog-name x) " ")) (cog-filter 'NumberNode (show-visible-faces)) ))
-)
-;(define (get-visible-faces)(list (NumberNode "1")(NumberNode "2")))
-;below returns face id of face nearest to sound vector atleast 10 degrees, or
-;0 face id
-
-;;get all face-ids and only one sound id 1.0, compare them
-;;threshold = sound in +-15 degrees of face
-(define (snd1-nearest-face e-start e-stop)
-	(let* ((lst (get-visible-faces))
-			(falist (map
-				(lambda (x) (list
-					(string->number (cog-name x))
-					(angle_face_snd1 (cog-name x) e-start e-stop)))
-				lst)))
-		(if (< (length falist) 1)
-			0
-			(let* ((alist (append-map (lambda (x)(cdr x)) falist))
-					(amin (fold (lambda (n p) (min (abs p) (abs n)))
-						(car alist) alist)))
-				(if (> (/ (* 3.142 15.0) 180.0) amin)
-					(car (car (filter
-						(lambda (x) (> (+ amin 0.0001) (abs (cadr x)))) falist)))
-					0
-				)
-			)
-		)
-	)
 )
 
 ;;below creates say atom for face if sound came from it
-;(define (who-said? sent e-start e-stop)
-;	(let* ((fid (snd1-nearest-face e-start e-stop)))
-;		(if (> fid 0)
-;			(begin
-;			;;request eye contact
-;			(StateLink request-eye-contact-state (NumberNode fid))
-;			;;generate info
-;			(AtTimeLink
-;				(TimeNode (number->string (current-time)))
-;				(EvaluationLink
-;					(PredicateNode "say_face")
-;					(ListLink
-;						(ConceptNode (number->string fid))
-;						(SentenceNode sent)))
-;				(ConceptNode "sound-perception"))
-;			)
-;		)
-;	)
-;)
-
 ;;;;
 (define (who-said? sent)
 	;;request eye contact
@@ -261,7 +189,10 @@
 	))
 )
 
-
+;;get all face-ids and only one sound id 1.0, compare them
+;;threshold = sound in +-15 degrees of face
+;below returns face id of face nearest to sound vector atleast 10 degrees, or
+;0 face id
 (define (snd-nearest-face xx yy zz)
 	(let* ((lst (get-visible-faces))
 			(falist (map
