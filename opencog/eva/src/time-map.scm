@@ -241,11 +241,13 @@
 ;;;;
 (define (who-said? sent)
 	;;request eye contact
+	(cog-execute!
 	(PutLink
 		(StateLink request-eye-contact-state (VariableNode "$fid"))
 		(GetLink (StateLink (ConceptNode "last person who spoke") (VariableNode "$fid")))
-	)
+	))
 	;;generate info
+	(cog-execute!
 	(PutLink
 	(AtTimeLink
 		(TimeNode (number->string (current-time)))
@@ -256,7 +258,7 @@
 					(SentenceNode sent)))
 			(ConceptNode "sound-perception"))
 	(GetLink (StateLink (ConceptNode "last person who spoke") (VariableNode "$fid")))
-	)
+	))
 )
 
 
