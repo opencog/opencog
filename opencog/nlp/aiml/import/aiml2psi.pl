@@ -418,6 +418,7 @@ close(FOUT);
 # Second pass utilities
 
 my $star_index = 1;  # First star has index of one.
+my $do_count_stars = 0;  # do not count stars, if this is not set.
 my $word_count = 0;
 my $pat_word_count = 0;
 
@@ -468,7 +469,7 @@ sub split_string
 		elsif ($wrd eq "*" or $wrd eq "_")
 		{
 			$tout .= $indent . "(Glob \"\$star-$star_index\")\n";
-			$star_index ++;
+			if (0 < $do_count_stars) { $star_index ++; }
 		}
 		else
 		{
@@ -638,14 +639,20 @@ sub print_predicate_tag
 	if ($tag eq "pattern")
 	{
 		$anchor = "*-AIML-pattern-*";
+		$do_count_stars = 1;
+		$star_index = 1;
 	}
 	elsif ($tag eq "that")
 	{
 		$anchor = "*-AIML-that-*";
+		$do_count_stars = 1;
+		$star_index = 1;
 	}
 	elsif ($tag eq "topic")
 	{
 		$anchor = "*-AIML-topic-*";
+		$do_count_stars = 1;
+		$star_index = 1;
 	}
 	my $tout = "";
 	$tout .= $indent . "(Evaluation\n";
@@ -653,6 +660,9 @@ sub print_predicate_tag
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= &process_aiml_tags($indent . "      ", $arg);
 	$tout .= $indent . "   ))\n";
+
+	$do_count_stars = 0;
+	$star_index = 1;
 	$tout;
 }
 
