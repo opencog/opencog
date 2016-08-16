@@ -98,8 +98,8 @@
 	(define e-c-state (Anchor "Eye Contact State"))
 	(car (cog-chase-link 'StateLink 'NumberNode e-c-state)))
 
-(define-public (show-interaction-state)
-	(car (cog-chase-link 'StateLink 'ConceptNode interaction-state)))
+(define-public (show-interaction-target)
+	(gar (cog-execute! (DefinedSchema "Current interaction target"))))
 
 ; define-public because `unit-test.scm` uses it.
 (define-public (make-new-face id)
