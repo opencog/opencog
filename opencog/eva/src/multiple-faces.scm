@@ -2,6 +2,7 @@
 
 (load "time-map.scm")
 (load "self-model.scm")
+(load "primitives.scm")
 
 ; -----------------------------------------------------------------------------
 ; Parameters are not published by cmt_tracker and have to be pre-set, so see
@@ -142,10 +143,16 @@
     ))
 
 (define (get-priority! face-id)
-    (gdar (cog-execute!
-        (PutLink
-            (DefinedSchema "Get face priority")
-            (Number face-id))))
+    (define result (cog-execute!
+                        (PutLink
+                            (DefinedSchema "Get face priority")
+                            (Number face-id))))
+    (if (equal? (Set) result)
+        (begin
+            (set-priority! face-id ordinary-face-priority)
+            ordinary-face-priority)
+        (gdar result)
+    )
 )
 
 ; -----------------------------------------------------------------------------
