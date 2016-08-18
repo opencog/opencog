@@ -60,7 +60,7 @@ SchemeShell::~SchemeShell()
 
 GenericEval* SchemeShell::get_evaluator(void)
 {
-	return SchemeEval::get_evaluator();
+	return SchemeEval::get_evaluator(&cogserver().getAtomSpace());
 }
 
 /**
