@@ -10,7 +10,7 @@
 (load "aiml/gender.scm")
 
 ; Default topic
-(State (Concept (string-append "AIML state topic")) (List))
+(State (Concept "AIML state topic") (List))
 
 ; ==============================================================
 
