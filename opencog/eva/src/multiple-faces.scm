@@ -65,7 +65,7 @@
 "
     (let ((coord-1 (get-face-coordinate-in-plane-yz face-id-1))
           (coord-2 (get-face-coordinate-in-plane-yz face-id-2)))
-        (if (or (null? coord-1) (null? coord-1))
+        (if (or (null? coord-1) (null? coord-2))
             (inf)
             (sqrt (+
                 (expt (- (list-ref coord-1 1) (list-ref coord-2 1)) 2.0)
@@ -194,3 +194,50 @@
 )
 
 ; -----------------------------------------------------------------------------
+; The psi-rule Context
+(Define
+    (DefinedPredicate "Has person being intracted with changed?")
+    (SequentialOr
+        (Not (Equal
+            (GetLink (State prev-interaction-state (Variable "value")))
+            (DefinedSchema "Current interaction target")))
+    ))
+
+; The psi-rule action
+(Define
+    (DefinedPredicate "Update face priorities")
+    (SequentialAnd
+        (True (Put
+            (Evaluation
+                (GroundedPredicate "scm: calculate-and-set-priority")
+                (List (Variable "face-id")))
+            (DefinedSchema "Get acknowledged faces")))
+        (True (Put
+            (DefinedSchema "Set previous interaction value")
+            (DefinedSchema "Current interaction target")))
+    ))
+
+(define (calculate-and-set-priority face-id-node)
+"
+  Returns a NumberNode for the prioirity of the face-id-node.
+"
+; Checks are not required b/c this function wouldn't be called
+; without the context being satisfied
+    (let* ((current-face-id (cog-name (gar
+           (cog-execute! (DefinedSchema "Current interaction target")))))
+           (face-id (string->number (cog-name face-id-node))))
+       ; This is for when the room goes empty
+        (if (equal? "none" current-face-id)
+            (set-priority! face-id 0.5)
+            (set-priority! face-id
+                (transition-priority face-id (string->number current-face-id)))
+        )
+    )
+)
+
+(Define
+    (DefinedSchema "Set previous interaction value")
+    (Lambda
+        (Variable "value")
+        (State prev-interaction-state (Variable "value"))
+    ))

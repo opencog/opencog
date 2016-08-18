@@ -38,15 +38,17 @@
 (pred-2-schema "Listening ended")
 (pred-2-schema "Keep alive")
 ;(pred-2-schema "Interacting Sequence for recognized person")
+;(pred-2-schema "Update face priorities")
 ;;
 ;(DefineLink (DefinedPredicateNode "do-noop") (True))
 ;(pred-2-schema "do-noop")
 
 (define face-demand-satisfied (True))
 (define speech-demand-satisfied (True))
+;(define update-demand-satisfied (True))
 (define face-demand (psi-demand "face interaction" 1))
 (define speech-demand (psi-demand "speech interaction" 1))
-; (define run-demand (psi-demand "run demand" 1))
+;(define update-demand (psi-demand "update demand" 1))
 
 (DefineLink
 	(DefinedPredicate "Nothing happening?")
@@ -126,6 +128,11 @@
 	(DefinedSchemaNode "Keep alive")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
+; ----------------------------------------------------------------------
+;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+;		(DefinedPredicate "Has person being intracted with changed?")))
+;		(DefinedSchema "Update face priorities")
+;		update-demand-satisfied (stv 1 1) update-demand)
 ; ----------------------------------------------------------------------
 
 ; There MUST be a DefinedPredicateNode with exactly the name

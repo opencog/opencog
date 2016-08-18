@@ -115,6 +115,11 @@
 (define-public interaction-state (AnchorNode "Interaction State"))
 (StateLink interaction-state no-interaction)
 
+;; Record with whome she was previously intracting with.
+;; TODO Remove this when the time-server is ready.
+(define-public prev-interaction-state (AnchorNode "Previous Interaction State"))
+(StateLink prev-interaction-state no-interaction)
+
 ; --------------------------------------------------------
 ; Chatbot-related stuff.  In the current design, the chatbot talks
 ; whenever it feels like it; we are simply told when it is talking
