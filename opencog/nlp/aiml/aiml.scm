@@ -9,6 +9,9 @@
 ; (load "aiml/bot.scm")
 (load "aiml/gender.scm")
 
+; Default topic
+(State (Concept (string-append "AIML state topic")) (List))
+
 ; ==============================================================
 
 (define-public (token-seq-of-parse PARSE)
