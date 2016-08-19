@@ -700,8 +700,10 @@ sub process_that
 
 	$tout .= &split_string($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
-	$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
-	$tout .= $indent . "   (ListLink))\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag get\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "      (Concept \"that\")\n";
+	$tout .= $indent . "   ))\n";
 	if ($2 ne "")
 	{
 		$tout .= &process_aiml_tags($indent, $2);
