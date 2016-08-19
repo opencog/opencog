@@ -30,6 +30,9 @@
 (DefineLink
 	(DefinedPredicateNode "Check if room non-empty")
 	(SatisfactionLink
+			(TypedVariable
+				(VariableNode "$face-id")
+				(TypeNode "NumberNode"))
 		(SequentialAndLink
 			; If someone is visible...
 			(PresentLink (EvaluationLink (PredicateNode "visible face")
@@ -43,6 +46,9 @@
 (DefineLink
 	(DefinedPredicateNode "Check if room empty")
 	(SatisfactionLink
+		(TypedVariable
+			(VariableNode "$face-id")
+			(TypeNode "NumberNode"))
 		(SequentialAndLink
 			; If no-one is visible...
 			(AbsentLink (EvaluationLink (PredicateNode "visible face")
