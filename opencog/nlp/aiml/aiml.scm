@@ -9,8 +9,11 @@
 ; (load "aiml/bot.scm")
 (load "aiml/gender.scm")
 
-; Default topic
+; ==============================================================
+
+; Default states
 (State (Concept "AIML state topic") (List))
+(State (Concept "AIML state that") (List))
 
 ; ==============================================================
 
@@ -290,7 +293,14 @@
 	)
 )
 
-;; XXX FIXME Handle THAT sections too ... same way as topic ...
+; Return #t if 'that' in the RULE context is actually equal
+; to the current AIML that state.
+(define (satisfy-that? RULE)
+	(define pred (get-pred RULE "*-AIML-that-*"))
+	(if (null? pred) #t
+		(equal? (do-aiml-get (Concept "that")) (gdr pred)))
+)
+
 (define-public (aiml-get-applicable-rules SENT)
 "
   aiml-get-applicable-rules SENT - Get all AIML rules that are suitable
@@ -304,7 +314,10 @@
 	(define top-rules
 		(filter is-topical-rule? all-rules))
 
-	top-rules
+	(define tht-rules
+		(filter satisfy-that? top-rules))
+
+	tht-rules
 )
 
 ; --------------------------------------------------------------
