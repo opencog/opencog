@@ -9,8 +9,11 @@
 ; (load "aiml/bot.scm")
 (load "aiml/gender.scm")
 
-; Default topic
+; ==============================================================
+
+; Default states
 (State (Concept "AIML state topic") (List))
+(State (Concept "AIML state that") (List))
 
 ; ==============================================================
 
