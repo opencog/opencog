@@ -1375,7 +1375,11 @@
 )
 
 ; Example: "The books are published."
-(define-public (passive-rule2 verb verb_instance obj obj_instance)
+(define-public (passive-rule2 verb_lemma verb_inst obj_lemma obj_inst)
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1384,10 +1388,10 @@
 			(r2l-wordinst-predicate verb_instance)
 			(EvaluationLink
 				(PredicateNode verb_instance)
-					(ListLink
-						(VariableNode var_name)
-						(ConceptNode obj_instance)
-					)
+				(ListLink
+					(VariableNode var_name)
+					(ConceptNode obj_instance)
+				)
 			)
 		)
 	)
