@@ -695,14 +695,15 @@ sub process_that
 	my $indent = $_[0];
 	my $text = $_[1];
 	my $tout = "";
+	my $idx = $_[2];
 
 	$text =~ /(.*?)<that\/>(.*)/;
 
 	$tout .= &split_string($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
-	$tout .= $indent . "   (DefinedSchema \"AIML-tag get\")\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
 	$tout .= $indent . "   (ListLink\n";
-	$tout .= $indent . "      (Concept \"that\")\n";
+	$tout .= $indent . "      (Number $idx)\n";
 	$tout .= $indent . "   ))\n";
 	if ($2 ne "")
 	{
@@ -840,7 +841,7 @@ sub process_aiml_tags
 		}
 		elsif ($tag =~ /^that\/>/)
 		{
-			$tout .= &process_that($indent, $text);
+			$tout .= &process_that($indent, $text, 1);
 		}
 		elsif ($tag =~ /^input/)
 		{

@@ -14,6 +14,7 @@
 ; Default states
 (State (Concept "AIML state topic") (List))
 (State (Concept "AIML state that") (List))
+(State (Concept "AIML state that-2") (List))
 
 ; ==============================================================
 
@@ -540,6 +541,16 @@
 	(define rekey (Concept (string-append "AIML-bot-" (cog-name KEY))))
 	; gar discards the SetLink that the GetLink returns.
 	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
+
+(DefineLink
+	(DefinedSchemaNode "AIML-tag that")
+	(GroundedSchemaNode "scm: do-aiml-that"))
+
+(define-public (do-aiml-that idx)
+	(if (> (string->number (cog-name idx)) 1)
+		(do-aiml-get (Concept (string-append "that-" (cog-name idx))))
+		(do-aiml-get (Concept "that")))
+)
 
 ;; -------------------------
 ; AIML-tag person -- Convert 1st to third person, and back.
