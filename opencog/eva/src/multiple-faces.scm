@@ -107,7 +107,13 @@
 (Define
     (DefinedPredicate "Set face priority")
     (Lambda
-        (VariableList (Variable "face-id") (Variable "priority"))
+        (VariableList
+            (TypedVariable
+                (Variable "face-id")
+                (Type "NumberNode"))
+            (TypedVariable
+                (Variable "priority")
+                (Type "NumberNode")))
         (True (State
                 (List
                     (Concept "visual priority")
