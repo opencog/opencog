@@ -25,6 +25,7 @@ import math
 import logging
 
 from std_msgs.msg import Int32, String
+from chatbot.msg import ChatMessage
 from pi_face_tracker.msg import FaceEvent, Faces
 from blender_api_msgs.msg import Target
 
@@ -144,8 +145,9 @@ class FaceTrack:
 
 		# Which face to look at
 		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
-		rospy.Subscriber("perceived_text", String,
-			self.user_said_cb)
+		rospy.Subscriber("chatbot_speech", ChatMessage,
+			self.stt_cb)
+
 		# Where to look
 		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
 			Target, queue_size=10)
@@ -392,8 +394,10 @@ class FaceTrack:
 
 	# ----------------------------------------------------------
 
-	def user_said_cb(self,msg):
-		self.atomo.who_spoke(msg.data)
+ 	def stt_cb(self,msg):
+		if msg.confidence >= 50:
+			self.atomo.who_said(msg.utterance)
+
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,
@@ -425,16 +429,6 @@ class FaceTrack:
 
 		for face in data.faces:
 			self.update_face_loc(face)
-		#below causes error in cmt .. mandeep
-		#for face in data.faces:
-			#fid = face.id
-			#loc = face.point
-			## Sanity check.  Sometimes pi_vision sends us faces with
-			## location (0,0,0). Discard these.
-			#if loc.x < 0.05:
-				#continue
-			#self.add_face(fid)
-		#above causes error in cmt
 		# Now perform all the various looking-at actions
 		self.do_look_at_actions()
 

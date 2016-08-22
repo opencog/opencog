@@ -287,8 +287,8 @@ class EvaControl():
 	# Unit test by saying
 	#   rostopic pub --once perceived_text std_msgs/String "Look afraid!"
 	#
-	def language_perceived_text_cb(self, text_heard):
-		self.puta.perceived_text(text_heard.data)
+	#def language_perceived_text_cb(self, text_heard):
+	#	self.puta.perceived_text(text_heard.data)
 
 	# The chat_heard message is of type chatbot/ChatMessage
 	# from chatbot.msg import ChatMessage
@@ -402,8 +402,9 @@ class EvaControl():
 
 			self.puta.evaluate_scm(scm_str)
 
-	def pub_snd_face_id(faceid):
-		self.face_sound_pub.publish(faceid)
+	#not needed anymore
+	#def pub_snd_face_id(faceid):
+	#	self.face_sound_pub.publish(faceid)
 
 	def __init__(self):
 
@@ -451,8 +452,9 @@ class EvaControl():
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
 
-		self.face_sound_pub = rospy.Publisher("/manyyears/face_id",
-			Int32, queue_size=1)
+		#method shifted
+		#self.face_sound_pub = rospy.Publisher("/manyyears/face_id",
+		#	Int32, queue_size=1)
 
 
 		# ----------------
@@ -477,8 +479,10 @@ class EvaControl():
 		                                  String, queue_size=1)
 
 		# String text of what the robot heard (from TTS)
-		rospy.Subscriber("perceived_text", String,
-			self.language_perceived_text_cb)
+		#no longer needed as chatbot_speech is Used
+		#chatbot ai.py no longer usd so not published
+		#rospy.Subscriber("perceived_text", String,
+		#	self.language_perceived_text_cb)
 
 		# Chat infrastructure text.
 		rospy.Subscriber("chatbot_speech", ChatMessage,
