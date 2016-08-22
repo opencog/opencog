@@ -7,7 +7,7 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog openpsi))
-;
+(load "multiple-faces.scm")
 ;; ------------------------------------------------------------------
 
 ; XXX FIXME -- terrible errible hack -- mostly because OpenPsi
@@ -38,17 +38,17 @@
 (pred-2-schema "Listening ended")
 (pred-2-schema "Keep alive")
 ;(pred-2-schema "Interacting Sequence for recognized person")
-;(pred-2-schema "Update face priorities")
+(pred-2-schema "Update face priorities")
 ;;
 ;(DefineLink (DefinedPredicateNode "do-noop") (True))
 ;(pred-2-schema "do-noop")
 
 (define face-demand-satisfied (True))
 (define speech-demand-satisfied (True))
-;(define update-demand-satisfied (True))
+(define update-demand-satisfied (True))
 (define face-demand (psi-demand "face interaction" 1))
 (define speech-demand (psi-demand "speech interaction" 1))
-;(define update-demand (psi-demand "update demand" 1))
+(define update-demand (psi-demand "update demand" 1))
 
 (DefineLink
 	(DefinedPredicate "Nothing happening?")
@@ -129,10 +129,12 @@
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 ; ----------------------------------------------------------------------
-;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-;		(DefinedPredicate "Has person being intracted with changed?")))
-;		(DefinedSchema "Update face priorities")
-;		update-demand-satisfied (stv 1 1) update-demand)
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+		; Hack to make it run in every psi-loop as the priority depends
+		; on the position of faces.
+		(True)))
+		(DefinedSchema "Update face priorities")
+		update-demand-satisfied (stv 1 1) update-demand)
 ; ----------------------------------------------------------------------
 
 ; There MUST be a DefinedPredicateNode with exactly the name
