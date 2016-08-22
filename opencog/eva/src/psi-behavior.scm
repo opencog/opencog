@@ -37,8 +37,8 @@
 (pred-2-schema "Listening ongoing")
 (pred-2-schema "Listening ended")
 (pred-2-schema "Keep alive")
-;(pred-2-schema "Interacting Sequence for recognized person")
-(pred-2-schema "Update face priorities")
+;(pred-2-schema "Interacting Sequence for recognized person"
+(pred-2-schema "Update face transition-priorities")
 ;;
 ;(DefineLink (DefinedPredicateNode "do-noop") (True))
 ;(pred-2-schema "do-noop")
@@ -129,11 +129,9 @@
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 ; ----------------------------------------------------------------------
-(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-		; Hack to make it run in every psi-loop as the priority depends
-		; on the position of faces.
-		(True)))
-		(DefinedSchema "Update face priorities")
+(psi-rule (list (SequentialAnd
+		(NotLink (DefinedPredicate "Skip Interaction?"))))
+		(DefinedSchema "Update face transition-priorities")
 		update-demand-satisfied (stv 1 1) update-demand)
 ; ----------------------------------------------------------------------
 

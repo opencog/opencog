@@ -126,6 +126,28 @@
         (List (Number face-id) (Number priority))))
 )
 
+(Define
+    (DefinedPredicate "Set face transition-priority")
+    (Lambda
+        (VariableList
+            (TypedVariable
+                (Variable "face-id")
+                (Type "NumberNode"))
+            (TypedVariable
+                (Variable "priority")
+                (Type "NumberNode")))
+        (True (State
+                (List
+                    (Concept "transition-priority")
+                    (Variable "face-id"))
+                (Variable "priority")))))
+
+(define (set-transition-priority! face-id priority)
+    (cog-evaluate! (PutLink
+        (DefinedPredicate "Set face transition-priority")
+        (List (Number face-id) (Number priority))))
+)
+
 ; -----------------------------------------------------------------------------
 ; Usage:
 ; (cog-execute! (Put
@@ -161,6 +183,36 @@
     )
 )
 
+(Define
+    (DefinedSchema "Get face transition-priority")
+    (Lambda
+        (TypedVariable
+            (Variable "filter-face-id")
+            (Type "NumberNode"))
+        (Get
+            (VariableList (Variable "face-id") (Variable "priority"))
+            (And
+                (Identical (Variable "filter-face-id") (Variable "face-id"))
+                (State
+                    (List
+                        (Concept "transition-priority")
+                        (Variable "face-id"))
+                    (Variable "priority"))))
+    ))
+
+(define (get-transition-priority! face-id)
+    (define result (cog-execute!
+                        (PutLink
+                            (DefinedSchema "Get face transition-priority")
+                            (Number face-id))))
+    (if (equal? (Set) result)
+        (begin
+            (set-transition-priority! face-id ordinary-face-priority)
+            ordinary-face-priority)
+        (string->number (cog-name (gdar result)))
+    )
+)
+
 ; -----------------------------------------------------------------------------
 ; Usage:
 ; (cog-evaluate! (PutLink
@@ -179,8 +231,6 @@
                         (Concept "visual priority")
                         (Variable "face-id"))
                     (Variable "priority")))
-            ; The GetLink is structuraly the same as
-            ; (DefinedSchema "Get face priority")
             (Get
                 (VariableList (Variable "face-id") (Variable "priority"))
                 (And
@@ -199,6 +249,39 @@
          (Number face-id)))
 )
 
+(DefineLink
+    (DefinedPredicate "Delete face transition-priority")
+    (Lambda
+        (TypedVariable
+            (Variable "del-face-id")
+            (Type "NumberNode"))
+        (True (Put
+            (Delete
+                (State
+                    (List
+                        (Concept "transition-priority")
+                        (Variable "face-id"))
+                    (Variable "priority")))
+            ; The GetLink is structuraly the same as
+            ; (DefinedSchema "Get face priority")
+            (Get
+                (VariableList (Variable "face-id") (Variable "priority"))
+                (And
+                    (Identical (Variable "del-face-id") (Variable "face-id"))
+                    (State
+                        (List
+                            (Concept "transition-priority")
+                            (Variable "face-id"))
+                        (Variable "priority"))))
+        ))))
+
+
+(define (delete-priority! face-id)
+     (cog-evaluate! (PutLink
+         (DefinedPredicate "Delete face transition-priority")
+         (Number face-id)))
+)
+
 ; -----------------------------------------------------------------------------
 ; The psi-rule Context
 (Define
@@ -211,21 +294,23 @@
 
 ; The psi-rule action
 (Define
-    (DefinedPredicate "Update face priorities")
+    (DefinedPredicate "Update face transition-priorities")
     (SequentialAnd
         (True (Put
             (Evaluation
-                (GroundedPredicate "scm: calculate-and-set-priority")
+                (GroundedPredicate "scm: calculate-and-set-transition-priority")
                 (List (Variable "face-id")))
             (DefinedSchema "Get acknowledged faces")))
         (True (Put
             (DefinedSchema "Set previous interaction value")
             (DefinedSchema "Current interaction target")))
+        (True (Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "@@@@@@ updated transition-priority"))))
     ))
 
-(define (calculate-and-set-priority face-id-node)
+(define (calculate-and-set-transition-priority face-id-node)
 "
-  Returns a NumberNode for the prioirity of the face-id-node.
+  Returns a NumberNode for the transition-priority of the face-id-node.
 "
 ; Checks are not required b/c this function wouldn't be called
 ; without the context being satisfied
@@ -234,8 +319,8 @@
            (face-id (string->number (cog-name face-id-node))))
        ; This is for when the room goes empty
         (if (equal? "none" current-face-id)
-            (set-priority! face-id 0.5)
-            (set-priority! face-id
+            (set-transition-priority! face-id 0.5)
+            (set-transition-priority! face-id
                 (transition-priority face-id (string->number current-face-id)))
         )
     )
