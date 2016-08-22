@@ -697,7 +697,7 @@ sub process_that
 	my $tout = "";
 	my $idx = $_[2];
 
-	$text =~ /(.*?)<that\/>(.*)/;
+	$text =~ /(.*?)<that( index='$idx(.*)?')?\/>(.*)/;
 
 	$tout .= &split_string($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
@@ -705,9 +705,9 @@ sub process_that
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= $indent . "      (Number $idx)\n";
 	$tout .= $indent . "   ))\n";
-	if ($2 ne "")
+	if ($4 ne "")
 	{
-		$tout .= &process_aiml_tags($indent, $2);
+		$tout .= &process_aiml_tags($indent, $4);
 	}
 	$tout;
 }
@@ -842,6 +842,10 @@ sub process_aiml_tags
 		elsif ($tag =~ /^that\/>/)
 		{
 			$tout .= &process_that($indent, $text, 1);
+		}
+		elsif ($tag =~ /^that index='([1-2])(.*)?'\/>/)
+		{
+			$tout .= &process_that($indent, $text, $1);
 		}
 		elsif ($tag =~ /^input/)
 		{
