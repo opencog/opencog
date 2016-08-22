@@ -1,4 +1,5 @@
 (use-modules (opencog))
+(use-modules (ice-9 threads))
 
 (load "time-map.scm")
 (load "self-model.scm")
@@ -330,3 +331,41 @@
         (Variable "value")
         (State prev-interaction-state (Variable "value"))
     ))
+
+; -----------------------------------------------------------------------------
+; psi-action for it is time to change the face being interacted with.
+(Define
+    (DefinedSchema "Select face by priority")
+    (ExecutionOutput
+        (GroundedSchema "scm: choose-next-face")
+        (List)))
+
+(define-public (choose-next-face)
+"
+  Returns the face-id Node with the highest (* priority transition-priority)
+  from among the faces that are not being interacted with.
+"
+    (define (get-maximum lst)
+        ;Get the maximum from a list of numbers.
+        (fold (lambda (prev next) (if (> prev next) prev next)) 0 lst))
+
+    (define (weighted-priority x)
+        (let ((p (get-priority! x))
+              (tp (get-transition-priority! x)))
+            (* p tp)
+        ))
+
+    (define (faces-not-interacted-with lst)
+        ; TODO: Should this be removed when face-recogniztion and who-said rules
+        ; are added.
+        (let ((interaction-face (gar (cog-execute!
+                (DefinedSchema "Current interaction target")))))
+            (remove (lambda (x) (equal? interaction-face x)) lst)))
+
+    (let* ((faces (faces-not-interacted-with (show-acked-faces)))
+           (face-ids (par-map (lambda (x) (string->number (cog-name x))) faces))
+           (wp (par-map (lambda (x) (weighted-priority x)) face-ids))
+           (max-wp (get-maximum wp)))
+        (car (par-map (lambda (w f) (if (equal? w max-wp) f #f)) wp faces))
+    )
+)
