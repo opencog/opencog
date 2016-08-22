@@ -120,10 +120,20 @@
 ;;;;
 (define (who-said? sent)
 	;;request eye contact
+
+	;;Debug below
+	;(display "###### WHO SAID: ")
+	;(display (cog-name
+	;	(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+	;		(StateLink
+	;			(ConceptNode "last person who spoke")(VariableNode "$fid")))))
+
 	(cog-execute!
 	(PutLink
 		(StateLink request-eye-contact-state (VariableNode "$fid"))
-		(GetLink (StateLink (ConceptNode "last person who spoke") (VariableNode "$fid")))
+		(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+			(StateLink
+				(ConceptNode "last person who spoke") (VariableNode "$fid")))
 	))
 	;;generate info
 	(cog-execute!
@@ -136,7 +146,9 @@
 					(ConceptNode (cog-name (VariableNode "$fid")))
 					(SentenceNode sent)))
 			(ConceptNode "sound-perception"))
-	(GetLink (StateLink (ConceptNode "last person who spoke") (VariableNode "$fid")))
+	(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+		(StateLink
+			(ConceptNode "last person who spoke") (VariableNode "$fid")))
 	))
 )
 
