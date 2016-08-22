@@ -137,7 +137,7 @@
 	(let ((loc-atom
 			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
 		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
-			(stv 0 1)
+			(stv 1 1) ; FIXME: How should it be handled when (stv 0 1) is returned
 			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
 					(xx (number->string (loc-link-x loc-link)))
 					(yy (number->string (loc-link-y loc-link)))
