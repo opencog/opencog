@@ -304,8 +304,6 @@
         (True (Put
             (DefinedSchema "Set previous interaction value")
             (DefinedSchema "Current interaction target")))
-        (True (Evaluation (GroundedPredicate "scm: print-msg")
-			(ListLink (Node "@@@@@@ updated transition-priority"))))
     ))
 
 (define (calculate-and-set-transition-priority face-id-node)
