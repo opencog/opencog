@@ -100,7 +100,7 @@
 
 ;; Linked to face-id that needs immediate interaction.
 ;; Currently it is set from ROS
-(define request-eye-contact-state (AnchorNode "Request Interaction"))
+(define-public request-eye-contact-state (AnchorNode "Request Interaction"))
 (StateLink request-eye-contact-state no-interaction)
 
 ;; The "look at neutral position" face. Used to tell the eye/head
@@ -684,6 +684,12 @@
 
 			; Record a timestamp
 			(True (DefinedSchema "set interaction timestamp"))
+
+			;;Debug Below
+			;(Evaluation (GroundedPredicate "scm: print-msg")
+			;(ListLink (Node "!@@#$%^^&*$ face-id")))
+			;(Evaluation (GroundedPredicate "scm: print-msg")
+				;(ListLink (Variable "$face-id")))
 		)))
 
 ;; Change the eye-contact target to a face picked randomly from the
@@ -731,7 +737,8 @@
 	(DefinedPredicate "interact with requested person")
 	(SequentialAnd
 		(True (Put (DefinedPredicate "Set interaction target")
-			(Get (State request-eye-contact-state (Variable "$x")))))
+			(Get (TypedVariable (Variable "$x") (TypeNode "NumberNode"))
+				 (State request-eye-contact-state (Variable "$x")))))
 		; Now, clear the request.
 		(True (Put (State request-eye-contact-state (Variable "$face-id"))
 			no-interaction))
