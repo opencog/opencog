@@ -276,7 +276,7 @@
         ))))
 
 
-(define (delete-priority! face-id)
+(define (delete-transition-priority! face-id)
      (cog-evaluate! (PutLink
          (DefinedPredicate "Delete face transition-priority")
          (Number face-id)))
