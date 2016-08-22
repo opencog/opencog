@@ -13,6 +13,9 @@
 
 ; Default states
 (State (Concept "AIML state topic") (List))
+
+; Store previous outputs
+; FIXME: Use AtTimeLink to record the chat history
 (State (Concept "AIML state that") (List))
 (State (Concept "AIML state that-2") (List))
 
@@ -470,7 +473,10 @@
 
 		; The robots response is the current "that".
 		(if (valid-response? response)
-			(do-aiml-set (Concept "that") response))
+			(begin
+				(do-aiml-set (Concept "that-2")
+					(do-aiml-get (Concept "that")))
+				(do-aiml-set (Concept "that") response)))
 
 		; Return the response.
 		response
@@ -548,7 +554,7 @@
 
 (define-public (do-aiml-that idx)
 	(if (> (string->number (cog-name idx)) 1)
-		(do-aiml-get (Concept (string-append "that-" (cog-name idx))))
+		(do-aiml-get (Concept "that-2"))
 		(do-aiml-get (Concept "that")))
 )
 
