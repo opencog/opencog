@@ -177,6 +177,8 @@
                             (DefinedSchema "Get face priority")
                             (Number face-id))))
     (if (equal? (Set) result)
+        ; FIXME: There should never be an empty set. Perception pipeline
+        ; should add a default priority.
         (begin
             (set-priority! face-id ordinary-face-priority)
             ordinary-face-priority)
@@ -334,6 +336,7 @@
 
 ; -----------------------------------------------------------------------------
 ; psi-action for it is time to change the face being interacted with.
+; Only to be used in case more than one face.
 (Define
     (DefinedSchema "Select face by priority")
     (ExecutionOutput
