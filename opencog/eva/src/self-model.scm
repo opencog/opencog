@@ -720,23 +720,6 @@
 			(ListLink (Node "--- Start new interaction")))
 	))
 
-(DefineLink
-	(DefinedPredicate "Change interaction target by priority")
-	(SequentialAnd
-		; Pick a face by priority
-		;(True (Put
-		;	(DefinedPredicate "Set interaction target")
-		;	(DefinedSchema "Select face by priority")))
-		(True (Put
-			(StateLink request-eye-contact-state (VariableNode "$fid"))
-			(DefinedPredicate "Set interaction target")
-			(DefinedSchema "Select face by priority")))
-
-		; Diagnostic print
-		(Evaluation (GroundedPredicate "scm: print-msg-face")
-			(ListLink (Node "#####--- Start new interaction")))
-	))
-
 ;; Start interacting with a newly-visible face.
 ;;
 ;; This only sets the eye-contact state variable; this does NOT
