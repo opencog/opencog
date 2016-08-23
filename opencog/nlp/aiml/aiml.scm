@@ -248,7 +248,7 @@
 		; but at the moment it does not support unordered link, and doing it this
 		; way is fast...
 		(define wildcard-rule-context
-			(And (Evaluation (Predicate "*-AIML-pattern-*") (List (Glob "$star-1")))))
+			(Evaluation (Predicate "*-AIML-pattern-*") (List (Glob "$star-1"))))
 
 		(concatenate! (list
 			(psi-get-dual-match SENT)
