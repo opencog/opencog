@@ -298,7 +298,9 @@
 (define (satisfy-that? RULE)
 	(define pred (get-pred RULE "*-AIML-that-*"))
 	(if (null? pred) #t
-		(equal? (do-aiml-get (Concept "that")) (gdr pred)))
+		(or (equal? (do-aiml-get (Concept "that")) (gdr pred))
+			(not (null? (gar (cog-execute! (MapLink (gdr pred)
+				(Set (do-aiml-get (Concept "that"))))))))))
 )
 
 (define-public (aiml-get-applicable-rules SENT)
