@@ -335,7 +335,6 @@
     ))
 
 ; -----------------------------------------------------------------------------
-; psi-action for it is time to change the face being interacted with.
 ; Only to be used in case more than one face.
 (Define
     (DefinedSchema "Select face by priority")
@@ -372,3 +371,16 @@
         (car (par-map (lambda (w f) (if (equal? w max-wp) f #f)) wp faces))
     )
 )
+
+; psi-action for it is time to change the face being interacted with.
+(DefineLink
+	(DefinedPredicate "Change interaction target by priority")
+	(SequentialAnd
+		(True (Put
+			(StateLink request-eye-contact-state (VariableNode "$fid"))
+			(DefinedSchema "Select face by priority")))
+
+		; Diagnostic print
+		(Evaluation (GroundedPredicate "scm: print-msg-face")
+			(ListLink (Node "Requested new interaction")))
+	))

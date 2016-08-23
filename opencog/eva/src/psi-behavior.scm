@@ -39,6 +39,7 @@
 (pred-2-schema "Keep alive")
 ;(pred-2-schema "Interacting Sequence for recognized person"
 (pred-2-schema "Update face transition-priorities")
+(pred-2-schema "Change interaction target by priority")
 ;;
 ;(DefineLink (DefinedPredicateNode "do-noop") (True))
 ;(pred-2-schema "do-noop")
@@ -79,6 +80,12 @@
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone visible?")))
 	(DefinedSchemaNode "Interact with people")
+	face-demand-satisfied (stv 1 1) face-demand)
+
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+		(DefinedPredicate "More than one face visible")
+		(DefinedPredicate "Time to change interaction")))
+	(DefinedSchemaNode "Change interaction target by priority")
 	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
