@@ -3,13 +3,14 @@
 ;-------------------------------------------------------------------------------
 
 (define (get-word-list sent-node)
-    (List
-        (append-map
-            (lambda (w)
-                (if (not (string-prefix? "LEFT-WALL" (cog-name w)))
-                    (cog-chase-link 'ReferenceLink 'WordNode w)
-                    '()))
-            (car (sent-get-words-in-order sent-node))))
+    (List (append-map
+        (lambda (w)
+            (if (or (string-prefix? "LEFT-WALL" (cog-name w))
+                    (equal? "punctuation" (cog-name (car (cog-chase-link
+                        'PartOfSpeechLink 'DefinedLinguisticConceptNode w)))))
+                '()
+                (cog-chase-link 'ReferenceLink 'WordNode w)))
+        (car (sent-get-words-in-order sent-node))))
 )
 
 (define-public (get-input-word-list)
