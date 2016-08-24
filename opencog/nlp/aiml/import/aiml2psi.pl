@@ -17,7 +17,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.5.1";
+my $ver = "0.5.2";
 my $debug;
 my $help;
 my $version;
@@ -694,19 +694,26 @@ sub process_that
 {
 	my $indent = $_[0];
 	my $text = $_[1];
+	my $idx = 1;
 	my $tout = "";
 
-	$text =~ /(.*?)<that\/>(.*)/;
+	# For example, <that/>, <that index="1,1"/> and <that index="2"/>
+	# index is optional, 2nd dimension of the index is ignored as we
+	# don't support it right now and nobody is really using it
+	$text =~ /(.*?)<that( index\s*=\s*'(\d+)(.*)?')?\s*\/>(.*)/;
 
 	$tout .= &split_string($indent, $1);
-	$tout .= $indent . "(ExecutionOutput\n";
-	$tout .= $indent . "   (DefinedSchema \"AIML-tag get\")\n";
-	$tout .= $indent . "   (ListLink\n";
-	$tout .= $indent . "      (Concept \"that\")\n";
-	$tout .= $indent . "   ))\n";
-	if ($2 ne "")
+	if ($3 ne "")
 	{
-		$tout .= &process_aiml_tags($indent, $2);
+		$idx = $3;
+	}
+	$tout .= $indent . "(ExecutionOutput\n";
+	$tout .= $indent . "   (DefinedSchema \"AIML-tag that\")\n";
+	$tout .= $indent . "   (ListLink\n";
+	$tout .= $indent . "      (Number \"$idx\")))\n";
+	if ($5 ne "")
+	{
+		$tout .= &process_aiml_tags($indent, $5);
 	}
 	$tout;
 }
@@ -719,13 +726,25 @@ sub process_input
 {
 	my $indent = $_[0];
 	my $text = $_[1];
+	my $idx = 1;
 	my $tout = "";
 
-	$text =~ /<input\s*index\s*=\s*'(\d+)'\s*\/>/;
+	# For example, <input/> and <input index="2">
+	$text =~ /(.*?)<input( index\s*=\s*'(\d+)')?\s*\/>(.*)/;
+
+	$tout .= &split_string($indent, $1);
+	if ($3 ne "")
+	{
+		$idx = $3;
+	}
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag input\")\n";
 	$tout .= $indent . "   (ListLink\n";
-	$tout .= $indent . "       (Number \"$1\")))\n";
+	$tout .= $indent . "       (Number \"$idx\")))\n";
+	if ($4 ne "")
+	{
+		$tout .= &process_aiml_tags($indent, $4);
+	}
 	$tout;
 }
 
@@ -838,7 +857,7 @@ sub process_aiml_tags
 			print "$text\n";
 			$tout .= &process_aiml_tags($indent, $preplate . " " . $1);
 		}
-		elsif ($tag =~ /^that\/>/)
+		elsif ($tag =~ /^that/)
 		{
 			$tout .= &process_that($indent, $text);
 		}

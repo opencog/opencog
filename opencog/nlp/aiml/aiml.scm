@@ -13,7 +13,6 @@
 
 ; Default states
 (State (Concept "AIML state topic") (List))
-(State (Concept "AIML state that") (List))
 
 ; ==============================================================
 
@@ -468,8 +467,19 @@
 	(let ((response (word-list-flatten (do-while-same SENT 5))))
 
 		; The robots response is the current "that".
+		; Store up to two previous inputs and outputs
+		; XXX TODO: Would be better to log and retrieve the chat
+		;           history using AtTimeLink and the time server
 		(if (valid-response? response)
-			(do-aiml-set (Concept "that") response))
+			(let ((that (do-aiml-get (Concept "that"))))
+				(if (not (null? that))
+					(do-aiml-set (Concept "that-2") that))
+				(do-aiml-set (Concept "that") response)))
+
+		(let ((input (do-aiml-get (Concept "input"))))
+			(if (not (null? input))
+				(do-aiml-set (Concept "input-2") input))
+			(do-aiml-set (Concept "input") SENT))
 
 		; Return the response.
 		response
@@ -540,6 +550,28 @@
 	(define rekey (Concept (string-append "AIML-bot-" (cog-name KEY))))
 	; gar discards the SetLink that the GetLink returns.
 	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
+
+(DefineLink
+	(DefinedSchemaNode "AIML-tag input")
+	(GroundedSchemaNode "scm: do-aiml-input"))
+
+(define-public (do-aiml-input idx)
+	(if (= (string->number (cog-name idx)) 1)
+		(do-aiml-get (Concept "input"))
+		(do-aiml-get (Concept (string-append "input-"
+			(car (string-split (cog-name idx) #\.))))))
+)
+
+(DefineLink
+	(DefinedSchemaNode "AIML-tag that")
+	(GroundedSchemaNode "scm: do-aiml-that"))
+
+(define-public (do-aiml-that idx)
+	(if (= (string->number (cog-name idx)) 1)
+		(do-aiml-get (Concept "that"))
+		(do-aiml-get (Concept (string-append "that-"
+			(car (string-split (cog-name idx) #\.))))))
+)
 
 ;; -------------------------
 ; AIML-tag person -- Convert 1st to third person, and back.
