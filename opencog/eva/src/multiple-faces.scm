@@ -35,21 +35,9 @@
 (define highest-face-priority 1.0)
 
 ; -----------------------------------------------------------------------------
-(define (get-face-coordinate face-id)
-"
-  Returns a list (x y z)
-"
-    (let ((coord (get-last-xyz "faces" (Number face-id) face-loc-time-span)))
-        (if (equal? "" coord)
-            '()
-            (map string->number (string-split coord #\ ))
-        )
-    )
-)
-
 (define (get-face-coordinate-in-plane-yz face-id)
     (let ((new-x distance)
-          (xyz (get-face-coordinate face-id)))
+          (xyz (get-last-xyz "faces" (Number face-id) face-loc-time-span)))
         (if (null? xyz)
             '()
             (list
