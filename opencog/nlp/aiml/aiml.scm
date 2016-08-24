@@ -464,6 +464,11 @@
 					response
 				))))
 
+	; AIML pattern matching is case insensitive
+	(set! SENT (List (map (lambda (w)
+		(Word (string-downcase (cog-name w))))
+			(cog-outgoing-set SENT))))
+
 	(let ((response (word-list-flatten (do-while-same SENT 5))))
 
 		; The robots response is the current "that".
