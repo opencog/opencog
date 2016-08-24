@@ -79,6 +79,10 @@ def look_at_point(x_node, y_node, z_node):
 
 def look_at_face_point(x, y, z):
 	evl.look_at_point(x, y, z)
+	#evl.gaze_at_point(x, y, z)
+	return TruthValue(1, 1)
+
+def gaze_at_face_point(x, y, z):
 	evl.gaze_at_point(x, y, z)
 	return TruthValue(1, 1)
 

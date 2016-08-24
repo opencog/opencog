@@ -110,6 +110,22 @@
 	)
 )
 
+(define (gaze-at-face face-id-node)
+	(let ((loc-atom
+			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
+		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
+			(stv 1 1) ; FIXME: How should it be handled when (stv 0 1) is returned
+			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+					(xx (number->string (loc-link-x loc-link)))
+					(yy (number->string (loc-link-y loc-link)))
+					(zz (number->string (loc-link-z loc-link))))
+				(python-eval
+					(string-append "gaze_at_face_point(" xx "," yy "," zz ")"))
+				(stv 1 1)
+			)
+		)
+	)
+)
 ;;get string of face-id's seperated by space - call python split() function
 ;;in scheme itself list of number nodes
 (define (get-visible-faces)

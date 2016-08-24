@@ -631,7 +631,7 @@
 	(LambdaLink
 		(Variable "$face-id")
 		(SequentialAndLink
-			(Evaluation (GroundedPredicate "py:glance_at_face")
+			(Evaluation (GroundedPredicate "scm:gaze-at-face");py:glance_at_face
 				(ListLink (Variable "$face-id")))
 			;; Mark it as acked, othwerwise, we'll keep glancing there,
 			(Evaluation (Predicate "acked face")
@@ -660,12 +660,12 @@
 
 ;; Glance at the last known location of a face that is no longer
 ;; visible.
-(DefineLink
-	(DefinedSchema "glance at lost face")
-	(Put
-		(Evaluation (GroundedPredicateNode "py:glance_at_face")
-			(ListLink (Variable "$face-id")))
-		(DefinedSchema "New departures")))
+;(DefineLink
+;	(DefinedSchema "glance at lost face")
+;	(Put
+;		(Evaluation (GroundedPredicateNode "py:glance_at_face")
+;			(ListLink (Variable "$face-id")))
+;		(DefinedSchema "New departures")))
 
 ; ------------------------------------------------------
 
