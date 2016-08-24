@@ -583,6 +583,7 @@
 (DefineLink
 	(DefinedPredicate "look at person")
 	(SequentialAnd
+		(DefinedPredicate "Time to change gaze")
 		;; Issue the look-at command, only if there is someone to
 		;; make eye contact with.
 		(NotLink (Equal
@@ -631,8 +632,9 @@
 	(LambdaLink
 		(Variable "$face-id")
 		(SequentialAndLink
-			(Evaluation (GroundedPredicate "py:glance_at_face")
+			(Evaluation (GroundedPredicate "scm:gaze-at-face");py:glance_at_face
 				(ListLink (Variable "$face-id")))
+			(True (DefinedSchemaNode "set attn-search timestamp"))
 			;; Mark it as acked, othwerwise, we'll keep glancing there,
 			(Evaluation (Predicate "acked face")
 				(ListLink (Variable "$face-id")))
@@ -660,12 +662,12 @@
 
 ;; Glance at the last known location of a face that is no longer
 ;; visible.
-(DefineLink
-	(DefinedSchema "glance at lost face")
-	(Put
-		(Evaluation (GroundedPredicateNode "py:glance_at_face")
-			(ListLink (Variable "$face-id")))
-		(DefinedSchema "New departures")))
+;(DefineLink
+;	(DefinedSchema "glance at lost face")
+;	(Put
+;		(Evaluation (GroundedPredicateNode "py:glance_at_face")
+;			(ListLink (Variable "$face-id")))
+;		(DefinedSchema "New departures")))
 
 ; ------------------------------------------------------
 

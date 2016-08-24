@@ -430,7 +430,7 @@ class FaceTrack:
 		for face in data.faces:
 			self.update_face_loc(face)
 		# Now perform all the various looking-at actions
-		self.do_look_at_actions()
+		####self.do_look_at_actions()
 
 	# Queries tf_listener to get latest available position
 	# Throws TF exceptions if transform cannot be returned

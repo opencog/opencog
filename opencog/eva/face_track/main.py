@@ -27,9 +27,9 @@ from face_track import FaceTrack
 
 print "Start face-tracking node"
 ft = FaceTrack()
-
+ft.do_look_at_actions()
 while not rospy.is_shutdown():
-	ft.do_look_at_actions()
+	#ft.do_look_at_actions()
 	time.sleep(0.1)
 
 print "Exit face-tracking node"
