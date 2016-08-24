@@ -3,6 +3,7 @@
 (use-modules (srfi srfi-1)) ; For `append-map`
 
 (use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
+(use-modules (opencog logger))
 
 (load "action-selector.scm")
 (load "demand.scm")
@@ -76,12 +77,21 @@
                (goals (psi-related-goals action))
                (context-atoms (get-context-grounding-atoms rule)))
 
+           (cog-logger-debug
+                "[OpenPsi] Starting evaluation psi-rule = ~a"
+                (psi-rule-alias rule))
+        ;   (display (psi-get-loop-count))
+        ;   (newline)
+        ;   (display (cog-name (car (psi-rule-alias rule))))
+        ;   (newline)
             (if (null? context-atoms)
                 (cog-execute! action)
                 (cog-execute! (PutLink action context-atoms))
             )
             (map cog-evaluate! goals)
         ))
+
+    (cog-logger-debug "[OpenPsi] loop-count = ~a" (psi-get-loop-count))
 
     ; Run the controler that updates the weight.
     (psi-controller-update-weights)
