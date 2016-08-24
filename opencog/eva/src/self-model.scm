@@ -583,6 +583,7 @@
 (DefineLink
 	(DefinedPredicate "look at person")
 	(SequentialAnd
+		(DefinedPredicate "Time to change gaze")
 		;; Issue the look-at command, only if there is someone to
 		;; make eye contact with.
 		(NotLink (Equal
@@ -633,6 +634,7 @@
 		(SequentialAndLink
 			(Evaluation (GroundedPredicate "scm:gaze-at-face");py:glance_at_face
 				(ListLink (Variable "$face-id")))
+			(True (DefinedSchemaNode "set attn-search timestamp"))
 			;; Mark it as acked, othwerwise, we'll keep glancing there,
 			(Evaluation (Predicate "acked face")
 				(ListLink (Variable "$face-id")))
