@@ -17,7 +17,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.5.2";
+my $ver = "0.5.3";
 my $debug;
 my $help;
 my $version;
@@ -775,6 +775,8 @@ sub process_category
 	# there is no actual star, so its broken/invalid sytax.
 	$text =~ s/<person\/>/<person><star\/><\/person>/g;
 	$text =~ s/<person \/>/<person><star\/><\/person>/g;
+	$text =~ s/<person2\/>/<person2><star\/><\/person2>/g;
+	$text =~ s/<person2 \/>/<person2><star\/><\/person2>/g;
 
 	# Convert mangled commas, from pass 1
 	$text =~ s/#Comma/,/g;
@@ -850,6 +852,10 @@ sub process_aiml_tags
 		elsif ($tag =~ /^person>/)
 		{
 			$tout .= &process_tag("person", $indent, $text);
+		}
+		elsif ($tag =~ /^person2>/)
+		{
+			$tout .= &process_tag("person2", $indent, $text);
 		}
 		elsif ($tag =~ /^person.*>(.*?)/)
 		{
