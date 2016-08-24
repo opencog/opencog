@@ -42,6 +42,7 @@
 ;; Load PLN rule implication direct evaluation
 (load-from-path "opencog/pln/rules/implication-direct-evaluation-rule.scm")
 
+
 ;;;;;;;;;;;;;;;
 ;; HEAD mock ;;
 ;;;;;;;;;;;;;;;
@@ -416,6 +417,49 @@
       unary-predicate-speech-act-l2s-pattern
       unary-predicate-speech-act-l2s-rewrite))
 
+
+;; Rule base
+(define rb1 (ConceptNode "rb1"))
+(InheritanceLink
+   rb1
+   (ConceptNode "URE")
+)
+(define rb2 (ConceptNode "rb2"))
+(InheritanceLink
+   rb2
+   (ConceptNode "URE")
+)
+(define rb3 (ConceptNode "rb3"))
+(InheritanceLink
+   rb3
+   (ConceptNode "URE")
+)
+(ure-set-num-parameter rb1 "URE:maximum-iterations" 2)
+(ure-set-fuzzy-bool-parameter rb1 "URE:attention-allocation" 0) 
+(ure-set-num-parameter rb2 "URE:maximum-iterations" 2)
+(ure-set-fuzzy-bool-parameter rb2 "URE:attention-allocation" 0) 
+(ure-set-num-parameter rb3 "URE:maximum-iterations" 2)
+(ure-set-fuzzy-bool-parameter rb3 "URE:attention-allocation" 0) 
+
+;; Associate a name to the rule
+(define rule1 (DefinedSchemaNode "rule1"))
+(DefineLink
+  rule1
+  sentiment-sentence-to-person-l2s-rule)
+(define rule2 (DefinedSchemaNode "rule2"))
+(DefineLink
+  rule2
+  unary-predicate-speech-act-l2s-rule)
+(define rule3 (DefinedSchemaNode "rule3"))
+(DefineLink
+  rule3
+  implication-direct-evaluation-rule)
+
+;; Add rules to rule bases
+(ure-add-rules rb1 (list (list rule1 0.8)) )
+(ure-add-rules rb2 (list (list rule2 0.8)) )
+(ure-add-rules rb3 (list (list rule3 0.8)) )
+
 ;;;;;;;;;;
 ;; Main ;;
 ;;;;;;;;;;
@@ -426,9 +470,13 @@
     (let (
           (name-on-last-sentence (put-name-on-the-last-sentence))
           (sentiment-sentence-to-person-l2s-results
-           (cog-bind sentiment-sentence-to-person-l2s-rule))
+           ;(cog-bind sentiment-sentence-to-person-l2s-rule)
+           (cog-fc (SetLink) rb1 (SetLink))
+           )
           (unary-predicate-speech-act-l2s-results
-           (cog-bind unary-predicate-speech-act-l2s-rule)))
+           ;(cog-bind unary-predicate-speech-act-l2s-rule)
+           (cog-fc (SetLink) rb2 (SetLink))
+           ))
       ;; (cog-logger-debug "[PLN-Reasoner] StateLinks = ~a" (cog-get-atoms 'StateLink))
       ;; (cog-logger-debug "[PLN-Reasoner] PredicateNodes = ~a" (map cog-incoming-set (cog-get-atoms 'PredicateNode)))
       (cog-logger-debug "[PLN-Reasoner] name-on-last-sentence = ~a" name-on-last-sentence)
@@ -437,7 +485,7 @@
 
     ;; Apply Implication direct evaluation (and put the result in
     ;; pln-inferred-atoms state)
-    (let* ((direct-eval-results (cog-bind implication-direct-evaluation-rule))
+    (let* ((direct-eval-results (cog-fc (SetLink) rb3 (SetLink)) );(cog-bind implication-direct-evaluation-rule))
           ;; Filter only inferred result containing "happy". This is a
           ;; temporary hack to make it up for the lack of attentional
           ;; allocation
@@ -458,3 +506,4 @@
   (begin-thread (pln-loop)))
 
 (pln-run)
+
