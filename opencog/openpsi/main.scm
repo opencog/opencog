@@ -80,10 +80,7 @@
            (cog-logger-debug
                 "[OpenPsi] Starting evaluation psi-rule = ~a"
                 (psi-rule-alias rule))
-        ;   (display (psi-get-loop-count))
-        ;   (newline)
-        ;   (display (cog-name (car (psi-rule-alias rule))))
-        ;   (newline)
+
             (if (null? context-atoms)
                 (cog-execute! action)
                 (cog-execute! (PutLink action context-atoms))
