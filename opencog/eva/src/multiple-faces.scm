@@ -352,15 +352,20 @@
     (define faces
         (remove (lambda (x) (equal? interaction-face x)) (show-acked-faces)))
 
+    ; If their is only one face being interacted with then continue
+    ; interacting.
     (if (null? faces)
-        ; TODO: if the ineteraction face has been lost then choose from other
-        ; faces.
         interaction-face
         (let* ((face-ids
                     (par-map (lambda (x) (string->number (cog-name x))) faces))
                (wp (par-map (lambda (x) (weighted-priority x)) face-ids))
-               (max-wp (get-maximum wp)))
-            (car (par-map (lambda (w f) (if (equal? w max-wp) f #f)) wp faces))
+               (max-wp (get-maximum wp))
+               (max-faces
+                    (remove (lambda (x) (equal? 0 x))
+                        (par-map (lambda (w f) (if (equal? w max-wp) f 0))
+                            wp faces))))
+            (list-ref max-faces
+                    (random (length max-faces) (random-state-from-platform)))
         )
     )
 )
