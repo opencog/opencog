@@ -8,6 +8,7 @@
 
 ; (load "aiml/bot.scm")
 (load "aiml/gender.scm")
+(load "aiml/subs.scm")
 
 ; ==============================================================
 
