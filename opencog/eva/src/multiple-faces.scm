@@ -345,18 +345,23 @@
             (* p tp)
         ))
 
-    (define (faces-not-interacted-with lst)
-        ; TODO: Should this be removed when face-recogniztion and who-said rules
-        ; are added.
-        (let ((interaction-face (gar (cog-execute!
-                (DefinedSchema "Current interaction target")))))
-            (remove (lambda (x) (equal? interaction-face x)) lst)))
+    (define interaction-face
+        (gar (cog-execute! (DefinedSchema "Current interaction target"))))
 
-    (let* ((faces (faces-not-interacted-with (show-acked-faces)))
-           (face-ids (par-map (lambda (x) (string->number (cog-name x))) faces))
-           (wp (par-map (lambda (x) (weighted-priority x)) face-ids))
-           (max-wp (get-maximum wp)))
-        (car (par-map (lambda (w f) (if (equal? w max-wp) f #f)) wp faces))
+    ; Faces not interacted with
+    (define faces
+        (remove (lambda (x) (equal? interaction-face x)) (show-acked-faces)))
+
+    (if (null? faces)
+        ; TODO: if the ineteraction face has been lost then choose from other
+        ; faces.
+        interaction-face
+        (let* ((face-ids
+                    (par-map (lambda (x) (string->number (cog-name x))) faces))
+               (wp (par-map (lambda (x) (weighted-priority x)) face-ids))
+               (max-wp (get-maximum wp)))
+            (car (par-map (lambda (w f) (if (equal? w max-wp) f #f)) wp faces))
+        )
     )
 )
 
@@ -369,6 +374,6 @@
 			(DefinedSchema "Select face by priority")))
 
 		; Diagnostic print
-		(Evaluation (GroundedPredicate "scm: print-msg-face")
+		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "Requested new interaction")))
 	))

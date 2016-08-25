@@ -40,6 +40,7 @@
 ;(pred-2-schema "Interacting Sequence for recognized person"
 (pred-2-schema "Update face transition-priorities")
 (pred-2-schema "Change interaction target by priority")
+(pred-2-schema "Interact with face")
 ;;
 ;(DefineLink (DefinedPredicateNode "do-noop") (True))
 ;(pred-2-schema "do-noop")
@@ -47,9 +48,11 @@
 (define face-demand-satisfied (True))
 (define speech-demand-satisfied (True))
 (define update-demand-satisfied (True))
+(define track-demand-satisfied (True))
 (define face-demand (psi-demand "face interaction" 1))
 (define speech-demand (psi-demand "speech interaction" 1))
 (define update-demand (psi-demand "update demand" 1))
+(define track-demand (psi-demand "track demand" 1))
 
 (DefineLink
 	(DefinedPredicate "Nothing happening?")
@@ -77,13 +80,21 @@
 	face-demand-satisfied (stv 1 1) face-demand)
 
 ; This rule is the old multiple-face tracking rule
+;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+;		(DefinedPredicate "Someone visible?")))
+;	(DefinedSchemaNode "Interact with people")
+;	face-demand-satisfied (stv 1 1) face-demand "face 4")
+
+; TODO: How should rules that could run concurrently be represented, when
+; we have action compostion(aka Planning/Orchestration)?
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone visible?")))
-	(DefinedSchemaNode "Interact with people")
-	face-demand-satisfied (stv 1 1) face-demand)
+	(DefinedSchemaNode "Interact with face")
+	track-demand-satisfied (stv .5 .5) track-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-		(DefinedPredicate "More than one face visible")
+		;(Not (DefinedPredicate "Is interacting with someone?"))
+		(DefinedPredicate "Someone visible?")
 		(DefinedPredicate "Time to change interaction")))
 	(DefinedSchemaNode "Change interaction target by priority")
 	face-demand-satisfied (stv 1 1) face-demand)
