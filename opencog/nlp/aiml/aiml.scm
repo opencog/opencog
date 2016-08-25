@@ -8,6 +8,7 @@
 
 ; (load "aiml/bot.scm")
 (load "aiml/gender.scm")
+(load "aiml/subs.scm")
 
 ; ==============================================================
 
@@ -463,6 +464,9 @@
 					(do-while-same SENT (- CNT 1))
 					response
 				))))
+
+	; Do simple substitution, for example "I'll" -> "I will"
+	(set! SENT (do-aiml-subs SENT))
 
 	; AIML pattern matching is case insensitive
 	(set! SENT (List (map (lambda (w)
