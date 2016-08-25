@@ -465,6 +465,9 @@
 					response
 				))))
 
+	; Do simple substitution, for example "I'll" -> "I will"
+	(set! SENT (do-aiml-subs SENT))
+
 	; AIML pattern matching is case insensitive
 	(set! SENT (List (map (lambda (w)
 		(Word (string-downcase (cog-name w))))
