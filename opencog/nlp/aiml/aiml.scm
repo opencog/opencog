@@ -226,7 +226,7 @@
 )
 
 ; -----------------------------------------------------------
-; Return all of the rules that match the input SENT via a patern
+; Return all of the rules that match the input SENT via a pattern
 ; (i.e. use variables in the pattern)
 (define (get-pattern-rules SENT)
 
@@ -241,6 +241,23 @@
 						(cog-execute! (MapLink (gdr pred) (SetLink SENT)))
 				))))
 		)))
+
+	(define (check-common RULES)
+		(define common 0)
+		(define rtn-rules (list))
+
+		(for-each
+			(lambda (r)
+				(define rule-pat (gdr (get-pred r "*-AIML-pattern-*")))
+				(define cnt (list-index (lambda (x y) (not (equal? x y)))
+					(cog-outgoing-set rule-pat) (cog-outgoing-set SENT)))
+				(cond
+					((> cnt common) (set! common cnt) (set! rtn-rules (list r)))
+					((= cnt common) (set! rtn-rules (append rtn-rules (list r))))))
+			RULES)
+
+		rtn-rules
+	)
 
 	(define (get-rules)
 		; For getting those "wildcard" rules
@@ -257,8 +274,9 @@
 
 	; Get all of the rules that might apply to this sentence,
 	; and are inexact matches (i.e. have a variable in it)
-	(filter is-usable-rule?
-		(map gar (get-rules)))
+	; and then select those that shares the most common words with
+	; words at the beginning of the input sentence
+	(check-common (filter is-usable-rule? (map gar (get-rules))))
 )
 
 ; Given a pattern-based rule, run it. Given that it has variables
