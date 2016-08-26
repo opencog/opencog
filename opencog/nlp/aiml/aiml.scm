@@ -326,13 +326,11 @@
   aiml-get-applicable-rules SENT - Get all AIML rules that are suitable
   for generating a reply to the givven sentence.
 "
-	(define all-rules
-		(concatenate! (list
-			(get-exact-rules SENT)
-			(get-pattern-rules SENT))))
+	(define exact-rules (get-exact-rules SENT))
 
 	(define top-rules
-		(filter is-topical-rule? all-rules))
+		(filter is-topical-rule?
+			(if (null? exact-rules) (get-pattern-rules SENT) exact-rules)))
 
 	(define tht-rules
 		(filter satisfy-that? top-rules))
