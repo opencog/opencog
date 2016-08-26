@@ -165,8 +165,8 @@
                             (DefinedSchema "Get face priority")
                             (Number face-id))))
     (if (equal? (Set) result)
-        ; FIXME: There should never be an empty set. Perception pipeline
-        ; should add a default priority.
+        ; FIXME: There should never be an empty set. The value should be set
+        ; during acknowledgment.
         (begin
             (set-priority! face-id ordinary-face-priority)
             ordinary-face-priority)
@@ -196,12 +196,9 @@
                         (PutLink
                             (DefinedSchema "Get face transition-priority")
                             (Number face-id))))
-    (if (equal? (Set) result)
-        (begin
-            (set-transition-priority! face-id ordinary-face-priority)
-            ordinary-face-priority)
-        (string->number (cog-name (gdar result)))
-    )
+    ; As long as the state updating psi-rule is executed, result shouldn't be
+    ; (SetLink)
+    (string->number (cog-name (gdar result)))
 )
 
 ; -----------------------------------------------------------------------------
@@ -292,9 +289,6 @@
                 (GroundedPredicate "scm: calculate-and-set-transition-priority")
                 (List (Variable "face-id")))
             (DefinedSchema "Get acknowledged faces")))
-        (True (Put
-            (DefinedSchema "Set previous interaction value")
-            (DefinedSchema "Current interaction target")))
     ))
 
 (define (calculate-and-set-transition-priority face-id-node)
@@ -304,11 +298,11 @@
 ; Checks are not required b/c this function wouldn't be called
 ; without the context being satisfied
     (let* ((current-face-id (cog-name (gar
-           (cog-execute! (DefinedSchema "Current interaction target")))))
+                (cog-execute! (DefinedSchema "Current interaction target")))))
            (face-id (string->number (cog-name face-id-node))))
        ; This is for when the room goes empty
         (if (equal? "none" current-face-id)
-            (set-transition-priority! face-id 0.5)
+            (set-transition-priority! face-id ordinary-face-priority)
             (set-transition-priority! face-id
                 (transition-priority face-id (string->number current-face-id)))
         )
@@ -323,7 +317,6 @@
     ))
 
 ; -----------------------------------------------------------------------------
-; Only to be used in case more than one face.
 (Define
     (DefinedSchema "Select face by priority")
     (ExecutionOutput
