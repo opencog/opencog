@@ -110,9 +110,17 @@
                 (Variable "priority")))))
 
 (define (set-priority! face-id priority)
-    (cog-evaluate! (PutLink
-        (DefinedPredicate "Set face priority")
-        (List (Number face-id) (Number priority))))
+    ;(cog-evaluate! (Evaluation
+    ;    (DefinedPredicate "Set face priority")
+    ;    (List (Number face-id) (Number priority))))
+
+    (State
+        (List
+            (Concept "visual priority")
+            (Number face-id))
+        (Number priority))
+
+    (stv 1 1)
 )
 
 (Define
@@ -132,9 +140,18 @@
                 (Variable "priority")))))
 
 (define (set-transition-priority! face-id priority)
-    (cog-evaluate! (PutLink
-        (DefinedPredicate "Set face transition-priority")
-        (List (Number face-id) (Number priority))))
+    ; FIXME: Don't know why this works sometimes and not other times.
+    ; Replacing EvaluationLink with PutLink has no difference in behavior
+    ;(cog-evaluate! (Evaluation
+    ;    (DefinedPredicate "Set face transition-priority")
+    ;    (List (Number face-id) (Number priority))))
+
+    (State
+        (List
+            (Concept "transition-priority")
+            (Number face-id))
+        (Number priority))
+    (stv 1 1)
 )
 
 ; -----------------------------------------------------------------------------
@@ -297,14 +314,15 @@
 "
 ; Checks are not required b/c this function wouldn't be called
 ; without the context being satisfied
-    (let* ((current-face-id (cog-name (gar
-                (cog-execute! (DefinedSchema "Current interaction target")))))
+    (let* ((current-face-id (string->number (cog-name (gar
+                (cog-execute!
+                    (DefinedSchema "Current interaction target"))))))
            (face-id (string->number (cog-name face-id-node))))
        ; This is for when the room goes empty
         (if (equal? "none" current-face-id)
             (set-transition-priority! face-id ordinary-face-priority)
             (set-transition-priority! face-id
-                (transition-priority face-id (string->number current-face-id)))
+                (transition-priority face-id current-face-id))
         )
     )
 )
@@ -364,9 +382,11 @@
 )
 
 ; psi-action for it is time to change the face being interacted with.
+; Update transition-priority and select face to interact with.
 (DefineLink
 	(DefinedPredicate "Change interaction target by priority")
 	(SequentialAnd
+        (DefinedPredicate "Update face transition-priorities")
 		(True (Put
 			(StateLink request-eye-contact-state (VariableNode "$fid"))
 			(DefinedSchema "Select face by priority")))

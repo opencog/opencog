@@ -47,11 +47,9 @@
 
 (define face-demand-satisfied (True))
 (define speech-demand-satisfied (True))
-(define update-demand-satisfied (True))
 (define track-demand-satisfied (True))
 (define face-demand (psi-demand "face interaction" 1))
 (define speech-demand (psi-demand "speech interaction" 1))
-(define update-demand (psi-demand "update demand" 1))
 (define track-demand (psi-demand "track demand" 1))
 
 (DefineLink
@@ -146,11 +144,6 @@
 	(DefinedSchemaNode "Keep alive")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-; ----------------------------------------------------------------------
-(psi-rule (list (SequentialAnd
-		(NotLink (DefinedPredicate "Skip Interaction?"))))
-		(DefinedSchema "Update face transition-priorities")
-		update-demand-satisfied (stv 1 1) update-demand)
 ; ----------------------------------------------------------------------
 
 ; There MUST be a DefinedPredicateNode with exactly the name
