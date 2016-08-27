@@ -110,10 +110,10 @@
                 (Variable "priority")))))
 
 (define (set-priority! face-id priority)
-    ;(cog-evaluate! (Evaluation
-    ;    (DefinedPredicate "Set face priority")
-    ;    (List (Number face-id) (Number priority))))
-
+"
+  Returns (stv 1 1) after setting the visual-priority property for the face
+  with id equaling face-id.
+"
     (State
         (List
             (Concept "visual priority")
@@ -140,12 +140,10 @@
                 (Variable "priority")))))
 
 (define (set-transition-priority! face-id priority)
-    ; FIXME: Don't know why this works sometimes and not other times.
-    ; Replacing EvaluationLink with PutLink has no difference in behavior
-    ;(cog-evaluate! (Evaluation
-    ;    (DefinedPredicate "Set face transition-priority")
-    ;    (List (Number face-id) (Number priority))))
-
+"
+  Returns (stv 1 1) after setting the transition-priority property for the face
+  with id equaling face-id.
+"
     (State
         (List
             (Concept "transition-priority")
