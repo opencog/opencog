@@ -323,8 +323,9 @@
 
 (define-public (aiml-get-applicable-rules SENT)
 "
-  aiml-get-applicable-rules SENT - Get all AIML rules that are suitable
-  for generating a reply to the givven sentence.
+  aiml-get-applicable-rules SENT - Get AIML rules that are suitable
+  for generating a reply to the given sentence. Return pattern-based
+  rules only if there are no exact matches.
 "
 	(define exact-rules (get-exact-rules SENT))
 
