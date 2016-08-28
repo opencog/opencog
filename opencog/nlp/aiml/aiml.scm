@@ -242,6 +242,15 @@
 				))))
 		)))
 
+	; AIML spec compatibility:
+	; AIML uses a trie, and only accepts the longest-possible match -- that is,
+	; it matches the 1st word, and then 2nd, 3rd... and so on until there is a
+	; mismatch. So for example if there are two rules
+	;     <pattern>THERE IS A *</pattern>
+	;     <pattern>THERE IS *</pattern>
+	; and the input is "There is a cat", it will always choose the first one
+	; and never choose the second. The below makes sure that OC AIML behaves
+	; the same way.
 	(define (check-common RULES)
 		(define common 0)
 		(define rtn-rules (list))
