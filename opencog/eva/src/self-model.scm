@@ -37,6 +37,8 @@
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
 
+(load "faces.scm")
+
 ; ------------------------------------------------------
 ; State variables
 ; XXX FIXME There are a bunch of define-publics in here, they probably
@@ -112,6 +114,11 @@
 ;; told to look the other way (i.e. break off eye contact)
 (define-public interaction-state (AnchorNode "Interaction State"))
 (StateLink interaction-state no-interaction)
+
+;; Record with whome she was previously intracting with.
+;; TODO Remove this when the time-server is ready.
+(define-public prev-interaction-state (AnchorNode "Previous Interaction State"))
+(StateLink prev-interaction-state no-interaction)
 
 ; --------------------------------------------------------
 ; Chatbot-related stuff.  In the current design, the chatbot talks

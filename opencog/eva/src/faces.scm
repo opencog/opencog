@@ -79,7 +79,7 @@
 
 (define-public (show-acked-faces)
 	(define acked-face (PredicateNode "acked face"))
-	(filter (lambda(y) (equal? (cog-type y) 'ConceptNode))
+	(filter (lambda(y) (equal? (cog-type y) 'NumberNode))
 	(map (lambda (x) (car (cog-outgoing-set x)))
 	(cog-chase-link 'EvaluationLink 'ListLink acked-face))))
 
@@ -98,6 +98,8 @@
 	(define e-c-state (Anchor "Eye Contact State"))
 	(car (cog-chase-link 'StateLink 'NumberNode e-c-state)))
 
+(define-public (show-interaction-target)
+	(gar (cog-execute! (DefinedSchema "Current interaction target"))))
 
 ; define-public because `unit-test.scm` uses it.
 (define-public (make-new-face id)
@@ -154,6 +156,17 @@
 "
 	(make-mapped-face face-id x y z)
 	(make-recognized-face face-id recog-id)
+)
+
+(define-public (ack-face face-id)
+"
+  ackno-face FACE-ID
+
+  Returns the atom that represents an acknowledged face with FACE-ID.
+"
+	(Evaluation
+		(Predicate "acked face")
+		(ListLink (Number face-id)))
 )
 
 (define-public (remove-face id)

@@ -7,7 +7,7 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog openpsi))
-;
+(load "face-priority.scm")
 ;; ------------------------------------------------------------------
 
 ; XXX FIXME -- terrible errible hack -- mostly because OpenPsi
@@ -37,16 +37,20 @@
 (pred-2-schema "Listening ongoing")
 (pred-2-schema "Listening ended")
 (pred-2-schema "Keep alive")
-;(pred-2-schema "Interacting Sequence for recognized person")
+;(pred-2-schema "Interacting Sequence for recognized person"
+(pred-2-schema "Update face transition-priorities")
+(pred-2-schema "Change interaction target by priority")
+(pred-2-schema "Interact with face")
 ;;
 ;(DefineLink (DefinedPredicateNode "do-noop") (True))
 ;(pred-2-schema "do-noop")
 
 (define face-demand-satisfied (True))
 (define speech-demand-satisfied (True))
+(define track-demand-satisfied (True))
 (define face-demand (psi-demand "face interaction" 1))
 (define speech-demand (psi-demand "speech interaction" 1))
-; (define run-demand (psi-demand "run demand" 1))
+(define track-demand (psi-demand "track demand" 1))
 
 (DefineLink
 	(DefinedPredicate "Nothing happening?")
@@ -74,9 +78,25 @@
 	face-demand-satisfied (stv 1 1) face-demand)
 
 ; This rule is the old multiple-face tracking rule
+; TODO Remove after thoroughly testing behavior on robot.
+;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+;		(DefinedPredicate "Someone visible?")))
+;	(DefinedSchemaNode "Interact with people")
+;	face-demand-satisfied (stv 1 1) face-demand)
+
+; TODO: How should rules that could run concurrently be represented, when
+; we have action compostion(aka Planning/Orchestration)?
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone visible?")))
-	(DefinedSchemaNode "Interact with people")
+	(DefinedSchemaNode "Interact with face")
+	track-demand-satisfied (stv .5 .5) track-demand)
+
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+		; FIXME always (stv 0 1)
+		; (Not (DefinedPredicate "Is interacting with someone?"))
+		(DefinedPredicate "Someone visible?")
+		(DefinedPredicate "Time to change interaction")))
+	(DefinedSchemaNode "Change interaction target by priority")
 	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
