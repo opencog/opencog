@@ -7,7 +7,7 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog openpsi))
-(load "multiple-faces.scm")
+(load "face-priority.scm")
 ;; ------------------------------------------------------------------
 
 ; XXX FIXME -- terrible errible hack -- mostly because OpenPsi
@@ -78,10 +78,11 @@
 	face-demand-satisfied (stv 1 1) face-demand)
 
 ; This rule is the old multiple-face tracking rule
+; TODO Remove after thoroughly testing behavior on robot.
 ;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 ;		(DefinedPredicate "Someone visible?")))
 ;	(DefinedSchemaNode "Interact with people")
-;	face-demand-satisfied (stv 1 1) face-demand "face 4")
+;	face-demand-satisfied (stv 1 1) face-demand)
 
 ; TODO: How should rules that could run concurrently be represented, when
 ; we have action compostion(aka Planning/Orchestration)?
