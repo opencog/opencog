@@ -291,17 +291,17 @@
 			)
 			;; Were we interacting with someone else?  If so, then
 			;; maybe glance at the location of the person who left.
-			;(SequentialAnd
-			;	(DefinedPredicate "Is interacting with someone?")
-			;	(SequentialOr
-			;		(NotLink (DefinedPredicate "dice-roll: glance lost face"))
-			;		(FalseLink (DefinedSchema "glance at lost face"))
-			;		(Evaluation (GroundedPredicate "scm: print-msg")
-			;			(ListLink (Node "--- Glance at lost face"))))
-			;	(TrueLink)
-			;)
-			;(Evaluation (GroundedPredicate "scm: print-msg")
-			;	(ListLink (Node "--- Ignoring lost face")))
+			(SequentialAnd
+				(DefinedPredicate "Is interacting with someone?")
+				(SequentialOr
+					(NotLink (DefinedPredicate "dice-roll: glance lost face"))
+					(FalseLink (DefinedSchema "glance at lost face"))
+					(Evaluation (GroundedPredicate "scm: print-msg")
+						(ListLink (Node "--- Glance at lost face"))))
+				(TrueLink)
+			)
+			(Evaluation (GroundedPredicate "scm: print-msg")
+				(ListLink (Node "--- Ignoring lost face")))
 			(TrueLink)
 		)
 		;; Clear the lost face target

@@ -237,6 +237,9 @@
 (State (Schema "time_search_attn_min") (Number 1.0))
 (State (Schema "time_search_attn_max") (Number 4.0))
 
+(State (Schema "time_search_glance_min") (Number 0.5))
+(State (Schema "time_search_glance_max") (Number 2.0))
+
 ;; During search-for-attention, how far to look to left or right.
 ;; XXX Right now, search for attention turns the whole head;
 ;; perhaps only the eyes should move?

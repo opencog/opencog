@@ -16,7 +16,7 @@
 ; a face. The time limit for spatial memory for faces :-). The value is
 ; dependent on the frequency of update of the map and the number of frames, and
 ; is set as half the size of the total buffer.
-(define face-loc-time-span 5000) ; (/ (* (/ 1000.0 15) 150) 2)
+(define face-loc-time-span 8000) ; (8000 milliseconds or 8 seconds)
 
 ; -----------------------------------------------------------------------------
 ; For recording sound coordinates, create octomap with 10hz, 10 second or
@@ -93,6 +93,11 @@
 	)
 )
 
+;;;searches for last face id location observed in previous 8 seconds
+;;if face id is present in past 1 and 2 seconds then past 1 second id will be recovered
+;;then python look at point function is called which calls blender api to look at face
+;;look at face also sets gaze at face
+;; expects face-id number node
 (define (look-at-face face-id-node)
 	(let ((loc-atom
 			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
@@ -110,6 +115,11 @@
 	)
 )
 
+;;;searches for last face id location observed in previous 8 seconds
+;;if face id is present in past 1 and 2 seconds then past 1 second id will be recovered
+;;then python gaze at point function is called which calls blender api to gaze at face
+;;gaze at face only moves the eyes
+;; expects face-id number node
 (define (gaze-at-face face-id-node)
 	(let ((loc-atom
 			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))

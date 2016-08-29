@@ -169,7 +169,7 @@ class EvaControl():
 	# Turn only the eyes towards the given target point.
 	# Coordinates: meters; x==forward, y==to Eva's left.
 	def gaze_at_point(self, x, y, z):
-		#print "gaze at point: ", x, y, z
+		print "gaze at point: ", x, y, z
 
 		trg = Target()
 		trg.x = x
@@ -180,7 +180,7 @@ class EvaControl():
 	# Turn head towards the given target point.
 	# Coordinates: meters; x==forward, y==to Eva's left.
 	def look_at_point(self, x, y, z):
-		#print "look at point: ", x, y, z
+		print "look at point: ", x, y, z
 
 		trg = Target()
 		trg.x = x
