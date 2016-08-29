@@ -6,6 +6,117 @@
 (load "primitives.scm")
 
 ; -----------------------------------------------------------------------------
+; TODO: Make the set, get, & delete of properites into a utility template
+; similar ot change-template and timestamp-template, as similar patterns
+; will be used for modeling the world. It should also make moving to protoatoms
+; simplier when they are ready.
+
+; Usage:
+; (cog-evaluate! (Put
+;     (DefinedPredicate "Set face priority")
+;     (List (Number "12") (Number ".12"))))
+(Define
+    (DefinedPredicate "Set face priority")
+    (Lambda
+        (VariableList
+            (TypedVariable
+                (Variable "face-id")
+                (Type "NumberNode"))
+            (TypedVariable
+                (Variable "priority")
+                (Type "NumberNode")))
+        (True (State
+                (List
+                    (Concept "visual priority")
+                    (Variable "face-id"))
+                (Variable "priority")))))
+
+(define (set-priority! face-id priority)
+"
+  Returns (stv 1 1) after setting the visual-priority property for the face
+  with id equaling face-id.
+"
+    (State
+        (List
+            (Concept "visual priority")
+            (Number face-id))
+        (Number priority))
+
+    (stv 1 1)
+)
+
+; Usage:
+; (cog-execute! (Put
+;     (DefinedSchema "Get face priority")
+;     (Number 1)))
+(Define
+    (DefinedSchema "Get face priority")
+    (Lambda
+        (TypedVariable
+            (Variable "filter-face-id")
+            (Type "NumberNode"))
+        (Get
+            (VariableList (Variable "face-id") (Variable "priority"))
+            (And
+                (Identical (Variable "filter-face-id") (Variable "face-id"))
+                (State
+                    (List
+                        (Concept "visual priority")
+                        (Variable "face-id"))
+                    (Variable "priority"))))
+    ))
+
+(define (get-priority! face-id)
+    (define result (cog-execute!
+                        (PutLink
+                            (DefinedSchema "Get face priority")
+                            (Number face-id))))
+    (if (equal? (Set) result)
+        ; FIXME: There should never be an empty set. The value should be set
+        ; during acknowledgment.
+        (begin
+            (set-priority! face-id ordinary-face-priority)
+            ordinary-face-priority)
+        (string->number (cog-name (gdar result)))
+    )
+)
+
+; Usage:
+; (cog-evaluate! (PutLink
+;     (DefinedPredicate "Delete face priority")
+;     (Number 1)))
+(DefineLink
+    (DefinedPredicate "Delete face priority")
+    (Lambda
+        (TypedVariable
+            (Variable "del-face-id")
+            (Type "NumberNode"))
+        (True (Put
+            (Delete
+                (State
+                    (List
+                        (Concept "visual priority")
+                        (Variable "face-id"))
+                    (Variable "priority")))
+            (Get
+                (VariableList (Variable "face-id") (Variable "priority"))
+                (And
+                    (Identical (Variable "del-face-id") (Variable "face-id"))
+                    (State
+                        (List
+                            (Concept "visual priority")
+                            (Variable "face-id"))
+                        (Variable "priority"))))
+        ))))
+
+
+(define (delete-priority! face-id)
+     (cog-evaluate! (PutLink
+         (DefinedPredicate "Delete face priority")
+         (Number face-id)))
+)
+
+; -----------------------------------------------------------------------------
 ; Parameters are not published by cmt_tracker and have to be pre-set, so see
 ; /HEAD/src/vision/cmt_tracker/src/cmt_tracker_node.cpp#L486
 ; /HEAD/src/vision/pi_vision/pi_face_tracker/nodes/face_tracker.py#L271
@@ -34,7 +145,6 @@
 (define ordinary-face-priority 0.5)
 (define highest-face-priority 1.0)
 
-; -----------------------------------------------------------------------------
 (define (get-face-coordinate-in-plane-yz face-id)
     (let ((new-x distance)
           (xyz (get-last-xyz "faces" (Number face-id) face-loc-time-span)))
@@ -83,46 +193,6 @@
     )
 )
 
-; -----------------------------------------------------------------------------
-; TODO: Make the set, get, & delete of properites into a utility template
-; similar ot change-template and timestamp-template, as similar patterns
-; will be used for modeling the world. It should also make moving to protoatoms
-; simplier when they are ready.
-
-; Usage:
-; (cog-evaluate! (Put
-;     (DefinedPredicate "Set face priority")
-;     (List (Number "12") (Number ".12"))))
-(Define
-    (DefinedPredicate "Set face priority")
-    (Lambda
-        (VariableList
-            (TypedVariable
-                (Variable "face-id")
-                (Type "NumberNode"))
-            (TypedVariable
-                (Variable "priority")
-                (Type "NumberNode")))
-        (True (State
-                (List
-                    (Concept "visual priority")
-                    (Variable "face-id"))
-                (Variable "priority")))))
-
-(define (set-priority! face-id priority)
-"
-  Returns (stv 1 1) after setting the visual-priority property for the face
-  with id equaling face-id.
-"
-    (State
-        (List
-            (Concept "visual priority")
-            (Number face-id))
-        (Number priority))
-
-    (stv 1 1)
-)
-
 (Define
     (DefinedPredicate "Set face transition-priority")
     (Lambda
@@ -152,43 +222,6 @@
     (stv 1 1)
 )
 
-; -----------------------------------------------------------------------------
-; Usage:
-; (cog-execute! (Put
-;     (DefinedSchema "Get face priority")
-;     (Number 1)))
-(Define
-    (DefinedSchema "Get face priority")
-    (Lambda
-        (TypedVariable
-            (Variable "filter-face-id")
-            (Type "NumberNode"))
-        (Get
-            (VariableList (Variable "face-id") (Variable "priority"))
-            (And
-                (Identical (Variable "filter-face-id") (Variable "face-id"))
-                (State
-                    (List
-                        (Concept "visual priority")
-                        (Variable "face-id"))
-                    (Variable "priority"))))
-    ))
-
-(define (get-priority! face-id)
-    (define result (cog-execute!
-                        (PutLink
-                            (DefinedSchema "Get face priority")
-                            (Number face-id))))
-    (if (equal? (Set) result)
-        ; FIXME: There should never be an empty set. The value should be set
-        ; during acknowledgment.
-        (begin
-            (set-priority! face-id ordinary-face-priority)
-            ordinary-face-priority)
-        (string->number (cog-name (gdar result)))
-    )
-)
-
 (Define
     (DefinedSchema "Get face transition-priority")
     (Lambda
@@ -214,42 +247,6 @@
     ; As long as the state updating psi-rule is executed, result shouldn't be
     ; (SetLink)
     (string->number (cog-name (gdar result)))
-)
-
-; -----------------------------------------------------------------------------
-; Usage:
-; (cog-evaluate! (PutLink
-;     (DefinedPredicate "Delete face priority")
-;     (Number 1)))
-(DefineLink
-    (DefinedPredicate "Delete face priority")
-    (Lambda
-        (TypedVariable
-            (Variable "del-face-id")
-            (Type "NumberNode"))
-        (True (Put
-            (Delete
-                (State
-                    (List
-                        (Concept "visual priority")
-                        (Variable "face-id"))
-                    (Variable "priority")))
-            (Get
-                (VariableList (Variable "face-id") (Variable "priority"))
-                (And
-                    (Identical (Variable "del-face-id") (Variable "face-id"))
-                    (State
-                        (List
-                            (Concept "visual priority")
-                            (Variable "face-id"))
-                        (Variable "priority"))))
-        ))))
-
-
-(define (delete-priority! face-id)
-     (cog-evaluate! (PutLink
-         (DefinedPredicate "Delete face priority")
-         (Number face-id)))
 )
 
 (DefineLink
@@ -285,16 +282,6 @@
          (Number face-id)))
 )
 
-; -----------------------------------------------------------------------------
-; The psi-rule Context
-(Define
-    (DefinedPredicate "Has person being intracted with changed?")
-    (SequentialOr
-        (Not (Equal
-            (GetLink (State prev-interaction-state (Variable "value")))
-            (DefinedSchema "Current interaction target")))
-    ))
-
 ; The psi-rule action
 (Define
     (DefinedPredicate "Update face transition-priorities")
@@ -325,14 +312,6 @@
     )
 )
 
-(Define
-    (DefinedSchema "Set previous interaction value")
-    (Lambda
-        (Variable "value")
-        (State prev-interaction-state (Variable "value"))
-    ))
-
-; -----------------------------------------------------------------------------
 (Define
     (DefinedSchema "Select face by priority")
     (ExecutionOutput
@@ -393,3 +372,20 @@
 		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "Requested new interaction")))
 	))
+
+; -----------------------------------------------------------------------------
+; The psi-rule Context
+(Define
+    (DefinedPredicate "Has person being intracted with changed?")
+    (SequentialOr
+        (Not (Equal
+            (GetLink (State prev-interaction-state (Variable "value")))
+            (DefinedSchema "Current interaction target")))
+    ))
+
+(Define
+    (DefinedSchema "Set previous interaction value")
+    (Lambda
+        (Variable "value")
+        (State prev-interaction-state (Variable "value"))
+    ))
