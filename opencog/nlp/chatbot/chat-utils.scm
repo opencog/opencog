@@ -27,7 +27,11 @@
 (python-eval "
 from opencog.atomspace import AtomSpace, types, TruthValue
 
-import basic_sentiment_analysis
+have_sentiment_analysis = True
+try:
+      import basic_sentiment_analysis
+except ImportError:
+      have_sentiment_analysis = False
 
 atomspace = ''
 
@@ -38,6 +42,10 @@ def set_atomspace(atsp):
 
 def call_sentiment_parse(text_node, sent_node):
       global atomspace
+      global have_sentiment_analysis
+
+      if not have_sentiment_analysis:
+          return TruthValue(1, 1)
 
       sentiment_score = basic_sentiment_analysis.sentiment_parse(text_node.name)
       if sentiment_score > 0:
