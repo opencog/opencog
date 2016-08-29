@@ -92,7 +92,8 @@
 	track-demand-satisfied (stv .5 .5) track-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-		;(Not (DefinedPredicate "Is interacting with someone?"))
+		; FIXME always (stv 0 1)
+		; (Not (DefinedPredicate "Is interacting with someone?"))
 		(DefinedPredicate "Someone visible?")
 		(DefinedPredicate "Time to change interaction")))
 	(DefinedSchemaNode "Change interaction target by priority")
