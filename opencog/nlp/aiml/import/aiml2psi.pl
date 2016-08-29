@@ -569,7 +569,7 @@ sub process_set
 	my $text = $_[1];
 	my $tout = "";
 
-	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*?)/;
+	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/;
 
 	$tout .= &split_string($indent, $1);
 	$tout .= $indent . "(ExecutionOutput\n";
