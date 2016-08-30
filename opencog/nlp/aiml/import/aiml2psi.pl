@@ -569,17 +569,37 @@ sub process_set
 	my $text = $_[1];
 	my $tout = "";
 
-	$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/;
+	$text =~ /(.*?)<set name='(.*?)'>(.*?)<\/set>(.*)/;
 
-	$tout .= &split_string($indent, $1);
+	my $n1 = $1;
+	my $n2 = $2;
+	my $n3 = $3;
+	my $n4 = $4;
+
+	# For nested <set> tags like:
+	# "<set name='it'> <set name='topic'> test </set> </set>"
+	# $3 will be "<set name='topic'> test" using the above regex,
+	# which is invalid as it doesn't include the "</set>"
+	if (index($3, "<set name") != -1)
+	{
+		# For handling nested <set> tag
+		$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/;
+
+		$n1 = $1;
+		$n2 = $2;
+		$n3 = $3;
+		$n4 = $4;
+	}
+
+	$tout .= &split_string($indent, $n1);
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag set\")\n";
 	$tout .= $indent . "   (ListLink\n";
-	$tout .= $indent . "      (Concept \"" . $2 . "\")\n";
+	$tout .= $indent . "      (Concept \"" . $n2 . "\")\n";
 	$tout .= $indent . "      (ListLink\n";
-	$tout .= &process_aiml_tags($indent . "         ", $3);
+	$tout .= &process_aiml_tags($indent . "         ", $n3);
 	$tout .= $indent . "   )))\n";
-	if ($4 ne "")
+	if ($n4 ne "")
 	{
 		$tout .= &process_aiml_tags($indent, $4);
 	}
