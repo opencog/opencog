@@ -576,6 +576,10 @@ sub process_set
 	my $n3 = $3;
 	my $n4 = $4;
 
+	# For nested <set> tags like:
+	# "<set name='it'> <set name='topic'> test </set> </set>"
+	# $3 will be "<set name='topic'> test" using the above regex,
+	# which is invalid as it doesn't include the "</set>"
 	if (index($3, "<set name") != -1)
 	{
 		# For handling nested <set> tag
