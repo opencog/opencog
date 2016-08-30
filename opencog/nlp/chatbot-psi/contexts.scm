@@ -306,12 +306,6 @@
 )
 
 (Define
-    (DefinedPredicate "has-pickup-sentence?")
-    (GreaterThan (Arity (Get (TypedVariable (Variable "$S") (Type "SentenceNode"))
-        (Inheritance (Variable "$S") pickup-sentence))) (Number 0))
-)
-
-(Define
     (DefinedPredicate "chatbot-eva-not-started?")
     (process-not-started? chatbot-eva)
 )
