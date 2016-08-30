@@ -531,6 +531,10 @@ sub process_star
 	$tout;
 }
 
+my @pt1 = ();
+my @pt2 = ();
+my @pt3 = ();
+
 # process_tag -- process a generic, un-named tag
 #
 # First argument: the tag name
@@ -545,17 +549,24 @@ sub process_tag
 
 	$text =~ /(.*?)<$tag>(.*?)<\/$tag>(.*)/;
 
-	$tout .= &process_aiml_tags($indent, $1);
+	push(@pt1, $1);
+	push(@pt2, $2);
+	push(@pt3, $3);
+
+	$tout .= &process_aiml_tags($indent, pop(@pt1));
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= $indent . "      (ListLink\n";
-	$tout .= &process_aiml_tags($indent . "         ", $2);
+	$tout .= &process_aiml_tags($indent . "         ", pop(@pt2));
 	$tout .= $indent . "   )))\n";
-	if ($3 ne "")
+
+	my $t3 = pop(@pt3);
+	if ($t3 ne "")
 	{
-		$tout .= &process_aiml_tags($indent, $3);
+		$tout .= &process_aiml_tags($indent, $t3);
 	}
+
 	$tout;
 }
 
