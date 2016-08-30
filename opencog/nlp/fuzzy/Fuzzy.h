@@ -38,7 +38,7 @@ class Fuzzy :
 {
     public:
         Fuzzy(AtomSpace*);
-        Fuzzy(AtomSpace*, Type, const HandleSeq&);
+        Fuzzy(AtomSpace*, Type, const HandleSeq&, bool af_only = false);
         virtual ~Fuzzy();
 
         // Compare two hypergraphs and return a similarity score
@@ -57,6 +57,9 @@ class Fuzzy :
         double LINGUISTIC_RELATION_WEIGHT = 0.3;
 
         AtomSpace* as;
+
+        // Whether matching should be only in AF or not
+        bool _af_only;
 
         // The type of atom that we want
         Type rtn_type;
