@@ -40,10 +40,11 @@ using namespace opencog;
  * @param tt  The type of atoms we are looking for
  * @param ll  A list of atoms that we don't want them to exist in the results
  */
-Fuzzy::Fuzzy(AtomSpace* a, Type tt, const HandleSeq& ll) :
+Fuzzy::Fuzzy(AtomSpace* a, Type tt, const HandleSeq& ll, bool af_only) :
     as(a),
     rtn_type(tt),
-    excl_list(ll)
+    excl_list(ll),
+    _af_only(af_only)
 {
 }
 
@@ -220,6 +221,10 @@ bool Fuzzy::accept_starter(const Handle& hp)
  */
 bool Fuzzy::try_match(const Handle& soln)
 {
+    AttentionValue::sti_t afboundary = as->get_attentional_focus_boundary();
+    
+    if(_af_only and  (soln->getSTI() < afboundary))  return false;
+    
     if (target == soln) return false;
 
     // Keep exploring if this is not the type of atom that we want,

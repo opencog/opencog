@@ -90,11 +90,12 @@ void FuzzySCM::init()
  * @return           A list of solutions and their similarity scores
  */
 Handle FuzzySCM::do_nlp_fuzzy_match(Handle pat, Type rtn_type,
-                                    const HandleSeq& excl_list)
+                                    const HandleSeq& excl_list,
+                                    bool af_only)
 {
     AtomSpace* as = SchemeSmob::ss_get_env_as("nlp-fuzzy-match");
 
-    Fuzzy fpm(as, rtn_type, excl_list);
+    Fuzzy fpm(as, rtn_type, excl_list, af_only);
 
     // A vector of solutions sorted in descending order of similarity
     RankedHandleSeq solns = fpm.perform_search(pat);
