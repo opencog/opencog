@@ -235,9 +235,10 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-filter-rule-with-alias alias-name psi-rule-list)
+(define-public (psi-partition-rule-with-alias alias-name psi-rule-list)
 "
-  Returns a list with rules which have alias equaling `alias-name`
+  Returns multiple values of lists with rules which have alias equaling
+  `alias-name` as the first value and those that don't as second value.
 
   alias-name:
   - string used for a psi-rule alias.
@@ -245,7 +246,7 @@ there are 100K rules!
   psi-rule-list:
   - a list with psi-rules.
 "
-    (filter
+    (partition
         (lambda (psi-rule)
             (equal?
                 (Concept (string-append psi-prefix-str alias-name))
