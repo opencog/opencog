@@ -1,5 +1,7 @@
 ; Copyright (C) 2016 OpenCog Foundation
 
+(use-modules (ice-9 receive))
+
 (use-modules (opencog) (opencog exec) (opencog query))
 
 (load "demand.scm")
@@ -140,6 +142,46 @@
 
     (map update-weight-from-atomese-weight
         (psi-get-rules psi-controller-demand))
+)
+
+; --------------------------------------------------------------
+(define-public (psi-rule-disable rule-alias psi-rule-list)
+"
+  Disable the psi-rule which is aliased as `rule-alias`. A disabled rule is
+  one with weight of zero.
+
+  rule-alias:
+  - string used for a psi-rule alias.
+
+  psi-rule-list:
+  - a list with psi-rules.
+"
+    (receive (filtered other)
+        (psi-partition-rule-with-alias rule-alias psi-rule-list)
+        (map
+            (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.0))
+            filtered)
+    )
+)
+
+; --------------------------------------------------------------
+(define-public (psi-rule-enable rule-alias psi-rule-list)
+"
+  Disable the psi-rule which is aliased as `rule-alias`. An enabled rule is
+  one with weight greater than zero. Here the weight is set to 0.9
+
+  rule-alias:
+  - string used for a psi-rule alias.
+
+  psi-rule-list:
+  - a list with psi-rules.
+"
+    (receive (filtered other)
+        (psi-partition-rule-with-alias rule-alias psi-rule-list)
+        (map
+            (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.9))
+            filtered)
+    )
 )
 
 ; --------------------------------------------------------------

@@ -79,6 +79,10 @@
 
   DEMAND is a Node, representing the demand that this rule affects.
 "
+; TODO: aliases shouldn't be used to create a subset, as is done in chatbot-psi
+; It should be done at the demand level. The purpose of an aliase should only
+; be for controlling a SINGLE rule during testing/demoing, and not a set
+; of rules.
     (define func-name "psi-rule") ; For use in error reporting
 
     ; Check arguments
@@ -235,12 +239,12 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-partition-rule-with-alias alias-name psi-rule-list)
+(define-public (psi-partition-rule-with-alias rule-alias psi-rule-list)
 "
   Returns multiple values of lists with rules which have alias equaling
-  `alias-name` as the first value and those that don't as second value.
+  `rule-alias` as the first value and those that don't as second value.
 
-  alias-name:
+  rule-alias:
   - string used for a psi-rule alias.
 
   psi-rule-list:
@@ -249,7 +253,7 @@ there are 100K rules!
     (partition
         (lambda (psi-rule)
             (equal?
-                (Concept (string-append psi-prefix-str alias-name))
+                (Concept (string-append psi-prefix-str rule-alias))
                 (car (psi-rule-alias psi-rule))))
         psi-rule-list)
 )
