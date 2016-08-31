@@ -78,9 +78,10 @@
                 )
             )
         )
+        ; Catch the exception, if any, and display what it is.
         (lambda (key . parameters)
             (display key) (newline) (display parameters) (newline)
-            (display "Sorry, I don't understand it\n")
+            (display "Sorry, I caught an exception\n")
         )
     ))
 
