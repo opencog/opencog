@@ -43,6 +43,24 @@
 (define psi-controller-demand (psi-demand "controller" .000000000))
 
 ; --------------------------------------------------------------
+(define-public (psi-rule-set-atomese-weight psi-rule weight)
+"
+  Returns the StateLink that is used to represent the weight of an psi-rule.
+
+  psi-rule:
+  - An ImplicationLink whose weight is going to be modified.
+
+  weight:
+  - A number signifiying the weight of the rule.
+"
+    (StateLink ; FIXME should use AtTimeLink
+        (ListLink
+            (psi-rule-alias psi-rule)
+            (ConceptNode (string-append psi-prefix-str "weight")))
+        (NumberNode weight))
+)
+
+; --------------------------------------------------------------
 (define-public (psi-set-controlled-rule psi-rule)
 "
   Specify that the psi-rule is to be controled. Controlling means modifying the
@@ -52,11 +70,9 @@
   - An ImplicationLink whose weight is going to be modified.
 "
     (MemberLink psi-rule psi-controller-demand)
-    (StateLink ; FIXME should use AtTimeLink
-        (ListLink
-            (psi-rule-alias psi-rule)
-            (ConceptNode (string-append psi-prefix-str "weight")))
-        (NumberNode (tv-mean (cog-tv psi-rule))))
+
+    (psi-rule-set-atomese-weight psi-rule (tv-mean (cog-tv psi-rule)))
+
     psi-rule
 )
 
