@@ -749,6 +749,129 @@ sub process_that
 	$tout;
 }
 
+my @all_choices = ();
+
+# process_random -- process a random tag
+#
+# First argument: The to-be-processed text that contains random tags
+sub process_random
+{
+	my $rules = "";
+	my $raw_code = $_[0];
+	my $cattext = $_[1];
+	my $num_stars = $_[2];
+	my $psi_ctxt = $_[3];
+
+# JJJ
+print "~~~~~~~~~~~~~~~~~~~~ Processing: $raw_code\n";
+
+	&generate_choices($raw_code);
+
+# JJJ
+print "Going to generate these:\n";
+foreach my $ccc (@all_choices)
+{
+	print $ccc;
+	print "\n";
+}
+print "\n\n";
+
+	my $i = 1;
+	my $num_choices = $#all_choices + 1;
+	foreach my $catty (@all_choices)
+	{
+		my $wadj = &get_weight($cattext);
+
+		$rules .= ";;; random choice $i of $num_choices: ";
+		$rules .= $cattext . "\n";
+		$rules .= "(psi-rule-nocheck\n";
+		$rules .= "   ; context\n";
+		$rules .= $psi_ctxt;
+		$rules .= "   ; action\n";
+		$rules .= "   (ListLink\n";
+		$rules .= &process_category("      ", $catty);
+		$rules .= "   )\n";
+		$rules .= &psi_tail($num_stars, $pat_word_count, $num_choices, $wadj);
+		$rules .= ") ; random choice $i of $num_choices\n\n";  # close category section
+		$i = $i + 1;
+	}
+
+	# Reset @all_choices
+	@all_choices = ();
+
+	$rules;
+}
+
+sub generate_choices
+{
+	my $text = $_[0];
+	$text =~ /(.*?)<random>(.*?)<\/random>(.*)/;
+
+	# $1 should never has any random tag
+	my @one = ($1);
+	&generate_combinations(\@one);
+
+	# If $2 has a random tag, they are probably nested random tags
+	if (index($2, "<random>") != -1)
+	{
+		$text =~ /(.*?)<random>(.*)<\/random>(.*)/;
+		# TODO
+	}
+	else
+	{
+		my $two = $2;
+		$two =~ s/^\s+//;
+		my @choicelist = split /<li>/, $two;
+
+		foreach my $ch (@choicelist)
+		{
+			$ch =~ s/<\/li>//;
+			$ch =~ s/\s+$//;
+		}
+
+		&generate_combinations(\@choicelist);
+	}
+
+	# If $3 has a random tag, it means there are more than one
+	# random tags
+	if (index($3, "<random>") != -1)
+	{
+		# TODO
+		# my $postplate = $3;
+	}
+	else
+	{
+		my @three = ($3);
+		&generate_combinations(\@three);
+	}
+}
+
+sub generate_combinations
+{
+	my @choices = @{$_[0]};
+	my @new_choices = ();
+
+	foreach my $ac (@all_choices)
+	{
+		foreach my $ch (@choices)
+		{
+			if ($ch ne "")
+			{
+				push(@new_choices, ($ac . $ch));
+			}
+		}
+	}
+
+	if ($#all_choices == -1)
+	{
+		@all_choices = @choices;
+	}
+	else
+	{
+		@all_choices = @new_choices;
+	}
+}
+
 # process_input -- process a input tag
 #
 # First argument: white-space indentation to insert on each line.
@@ -1211,35 +1334,8 @@ while (my $line = <FIN>)
 			# premise template, but each with a diffrerent output.
 			if ($curr_raw_code =~ /(.*?)<random>(.*?)<\/random>(.*)/)
 			{
-				my $preplate = $1;
-				my $choices = $2;
-				my $postplate = $3;
-				$choices =~ s/^\s+//;
-				my @choicelist = split /<li>/, $choices;
-				shift @choicelist;
-				my $i = 1;
-				my $num_choices = $#choicelist + 1;
-				foreach my $ch (@choicelist)
-				{
-					$ch =~ s/<\/li>//;
-					$ch =~ s/\s+$//;
-
-					my $catty = $preplate . $ch . $postplate;
-					my $wadj = &get_weight($cattext);
-
-					$rule .= ";;; random choice $i of $num_choices: ";
-					$rule .= $cattext . "\n";
-					$rule .= "(psi-rule-nocheck\n";
-					$rule .= "   ; context\n";
-					$rule .= $psi_ctxt;
-					$rule .= "   ; action\n";
-					$rule .= "   (ListLink\n";
-					$rule .= &process_category("      ", $catty);
-					$rule .= "   )\n";
-					$rule .= &psi_tail($num_stars, $pat_word_count, $num_choices, $wadj);
-					$rule .= ") ; random choice $i of $num_choices\n\n";  # close category section
-					$i = $i + 1;
-				}
+				$rule .= &process_random($curr_raw_code, $cattext,
+							$num_stars, $psi_ctxt);
 			}
 			else
 			{
