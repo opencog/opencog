@@ -807,19 +807,31 @@ sub discover_choices
 	my $text = $_[0];
 	$text =~ /(.*?)<random>(.*?)<\/random>(.*)/;
 
+	my $n1 = $1;
+	my $n2 = $2;
+	my $n3 = $3;
+
 	# $1 should never has any random tag
-	my @one = ($1);
-	&generate_choices(\@one);
+	if ($n1 ne "")
+	{
+		my @one = ($n1);
+		&generate_choices(\@one);
+	}
 
 	# If $2 has a random tag, they are probably nested random tags
-	if (index($2, "<random>") != -1)
+	if (index($n2, "<random>") != -1)
 	{
 		$text =~ /(.*?)<random>(.*)<\/random>(.*)/;
-		# TODO
+
+# JJJ
+print "--- S1: $1\n";
+print "--- S2: $2\n";
+print "--- S3: $3\n";
+
 	}
 	else
 	{
-		my $two = $2;
+		my $two = $n2;
 		$two =~ s/^\s+//;
 		my @choicelist = split /<li>/, $two;
 
@@ -829,18 +841,21 @@ sub discover_choices
 			$ch =~ s/\s+$//;
 		}
 
+		# Remove empty elements
+		@choicelist = grep($_, @choicelist);
+
 		&generate_choices(\@choicelist);
 	}
 
 	# If $3 has a random tag, it means there are more than one
 	# random tags
-	if (index($3, "<random>") != -1)
+	if (index($n3, "<random>") != -1)
 	{
-		&discover_choices($3);
+		&discover_choices($n3);
 	}
-	else
+	elsif ($n3 ne "")
 	{
-		my @three = ($3);
+		my @three = ($n3);
 		&generate_choices(\@three);
 	}
 }
