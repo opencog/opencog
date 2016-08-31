@@ -765,7 +765,7 @@ sub process_random
 # JJJ
 print "~~~~~~~~~~~~~~~~~~~~ Processing: $raw_code\n";
 
-	&generate_choices($raw_code);
+	&discover_choices($raw_code);
 
 # JJJ
 print "Going to generate these:\n";
@@ -802,14 +802,14 @@ print "\n\n";
 	$rules;
 }
 
-sub generate_choices
+sub discover_choices
 {
 	my $text = $_[0];
 	$text =~ /(.*?)<random>(.*?)<\/random>(.*)/;
 
 	# $1 should never has any random tag
 	my @one = ($1);
-	&generate_combinations(\@one);
+	&generate_choices(\@one);
 
 	# If $2 has a random tag, they are probably nested random tags
 	if (index($2, "<random>") != -1)
@@ -829,24 +829,23 @@ sub generate_choices
 			$ch =~ s/\s+$//;
 		}
 
-		&generate_combinations(\@choicelist);
+		&generate_choices(\@choicelist);
 	}
 
 	# If $3 has a random tag, it means there are more than one
 	# random tags
 	if (index($3, "<random>") != -1)
 	{
-		# TODO
-		# my $postplate = $3;
+		&discover_choices($3);
 	}
 	else
 	{
 		my @three = ($3);
-		&generate_combinations(\@three);
+		&generate_choices(\@three);
 	}
 }
 
-sub generate_combinations
+sub generate_choices
 {
 	my @choices = @{$_[0]};
 	my @new_choices = ();
