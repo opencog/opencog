@@ -823,29 +823,29 @@ sub discover_choices
 	{
 		$text =~ /(.*?)<random>(.*)<\/random>(.*)/;
 
-# JJJ
-print "--- S1: $1\n";
-print "--- S2: $2\n";
-print "--- S3: $3\n";
+		# Update $n2 and $n3
+		$n2 = $2;
+		$n3 = $3;
 
+		# XXX TODO: This removes all of the nested random tags and
+		# hence is treating those elements as if they were under the
+		# same random tag. May need to find a way to correct the weight
+		$n2 =~ s/<li><random>//g;
+		$n2 =~ s/<\/random><\/li>//g;
 	}
-	else
+
+	$n2 =~ s/^\s+//;
+	my @choicelist = split /<li>/, $n2;
+
+	foreach my $ch (@choicelist)
 	{
-		my $two = $n2;
-		$two =~ s/^\s+//;
-		my @choicelist = split /<li>/, $two;
-
-		foreach my $ch (@choicelist)
-		{
-			$ch =~ s/<\/li>//;
-			$ch =~ s/\s+$//;
-		}
-
-		# Remove empty elements
-		@choicelist = grep($_, @choicelist);
-
-		&generate_choices(\@choicelist);
+		$ch =~ s/<\/li>//;
+		$ch =~ s/\s+$//;
 	}
+
+	# Remove empty elements
+	@choicelist = grep($_, @choicelist);
+	&generate_choices(\@choicelist);
 
 	# If $3 has a random tag, it means there are more than one
 	# random tags
