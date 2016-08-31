@@ -235,6 +235,25 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
+(define-public (psi-filter-rule-with-alias alias-name psi-rule-list)
+"
+  Returns a list with rules which have alias equaling `alias-name`
+
+  alias-name:
+  - string used for a psi-rule alias.
+
+  psi-rule-list:
+  - a list with psi-rules.
+"
+    (filter
+        (lambda (psi-rule)
+            (equal?
+                (Concept (string-append psi-prefix-str alias-name))
+                (car (psi-rule-alias psi-rule))))
+        psi-rule-list)
+)
+
+; --------------------------------------------------------------
 (define-public (psi-related-goals action)
 "
   Return a list of all the goals that are associated by an action. Associated
