@@ -501,6 +501,15 @@
 
 	(let ((response (word-list-flatten (do-while-same SENT 5))))
 
+		; Try to look for any pickup responses if "response" is empty.
+		; This may happen occasionally if it get stuck at a rule
+		; that contains unsupported tags (e.g. condition), or a rule
+		; that is broken in some way. Maybe it's better to trigger the
+		; "pickup search" manually for now, than giving no responses
+		(if (equal? response (List)) (begin
+			(display "no response has been generated, looking for a pickup\n")
+			(set! response (word-list-flatten (do-while-same (List) 5)))))
+
 		; The robots response is the current "that".
 		; Store up to two previous inputs and outputs
 		; XXX TODO: Would be better to log and retrieve the chat
