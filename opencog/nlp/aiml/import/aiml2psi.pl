@@ -17,7 +17,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.5.3";
+my $ver = "0.5.4";
 my $debug;
 my $help;
 my $version;
@@ -749,6 +749,144 @@ sub process_that
 	$tout;
 }
 
+my @all_choices = ();
+
+# process_random -- process a random tag
+#
+# First argument: the to-be-processed text that contains random tags
+# Second argument: the CATTEXT
+# Third argument: number of stars in the pattern
+# Fourth argument: the context of the psi-rule
+sub process_random
+{
+	my $rules = "";
+	my $raw_code = $_[0];
+	my $cattext = $_[1];
+	my $num_stars = $_[2];
+	my $psi_ctxt = $_[3];
+
+	&discover_choices($raw_code);
+
+	my $i = 1;
+	my $num_choices = $#all_choices + 1;
+	foreach my $catty (@all_choices)
+	{
+		my $wadj = &get_weight($cattext);
+
+		$rules .= ";;; random choice $i of $num_choices: ";
+		$rules .= $cattext . "\n";
+		$rules .= "(psi-rule-nocheck\n";
+		$rules .= "   ; context\n";
+		$rules .= $psi_ctxt;
+		$rules .= "   ; action\n";
+		$rules .= "   (ListLink\n";
+		$rules .= &process_category("      ", $catty);
+		$rules .= "   )\n";
+		$rules .= &psi_tail($num_stars, $pat_word_count, $num_choices, $wadj);
+		$rules .= ") ; random choice $i of $num_choices\n\n";  # close category section
+		$i = $i + 1;
+	}
+
+	# Reset @all_choices
+	@all_choices = ();
+
+	$rules;
+}
+
+# discover_choices -- unpack the random tag and get the items
+#
+# First argument: text that contains random tags
+sub discover_choices
+{
+	my $text = $_[0];
+	$text =~ /(.*?)<random>(.*?)<\/random>(.*)/;
+
+	my $n1 = $1;
+	my $n2 = $2;
+	my $n3 = $3;
+
+	# $1 should never has any random tag
+	if ($n1 ne "")
+	{
+		my @one = ($n1);
+		&generate_choices(\@one);
+	}
+
+	# If $2 has a random tag, they are probably nested random tags
+	if (index($n2, "<random>") != -1)
+	{
+		$text =~ /(.*?)<random>(.*)<\/random>(.*)/;
+
+		# Update $n2 and $n3
+		$n2 = $2;
+		$n3 = $3;
+
+		# XXX TODO: This removes all of the nested random tags and
+		# hence is treating those elements as if they were under the
+		# same random tag. May need to correct the weight?
+		# Also this is wrong as it ignores the text between <li> &
+		# <random>, and </li> & </random>, if any, but it doesn't seem
+		# to be a big deal in our use case at the moment, would be better
+		# to actually do recursive calls
+		$n2 =~ s/<li>.*?<random>//g;
+		$n2 =~ s/<\/random>.*?<\/li>//g;
+	}
+
+	$n2 =~ s/^\s+//;
+	my @choicelist = split /<li>/, $n2;
+
+	foreach my $ch (@choicelist)
+	{
+		$ch =~ s/<\/li>//;
+		$ch =~ s/\s+$//;
+	}
+
+	# Remove empty elements
+	@choicelist = grep($_, @choicelist);
+	&generate_choices(\@choicelist);
+
+	# If $3 has a random tag, it means there are more than one
+	# random tags
+	if (index($n3, "<random>") != -1)
+	{
+		&discover_choices($n3);
+	}
+	elsif ($n3 ne "")
+	{
+		my @three = ($n3);
+		&generate_choices(\@three);
+	}
+}
+
+# generate_choices -- generate the combinations
+#
+# First argument: a list of items from a random tag
+sub generate_choices
+{
+	my @choices = @{$_[0]};
+	my @new_choices = ();
+
+	foreach my $ac (@all_choices)
+	{
+		foreach my $ch (@choices)
+		{
+			if ($ch ne "")
+			{
+				push(@new_choices, ($ac . $ch));
+			}
+		}
+	}
+
+	if ($#all_choices == -1)
+	{
+		@all_choices = @choices;
+	}
+	else
+	{
+		@all_choices = @new_choices;
+	}
+}
+
 # process_input -- process a input tag
 #
 # First argument: white-space indentation to insert on each line.
@@ -1211,35 +1349,8 @@ while (my $line = <FIN>)
 			# premise template, but each with a diffrerent output.
 			if ($curr_raw_code =~ /(.*?)<random>(.*?)<\/random>(.*)/)
 			{
-				my $preplate = $1;
-				my $choices = $2;
-				my $postplate = $3;
-				$choices =~ s/^\s+//;
-				my @choicelist = split /<li>/, $choices;
-				shift @choicelist;
-				my $i = 1;
-				my $num_choices = $#choicelist + 1;
-				foreach my $ch (@choicelist)
-				{
-					$ch =~ s/<\/li>//;
-					$ch =~ s/\s+$//;
-
-					my $catty = $preplate . $ch . $postplate;
-					my $wadj = &get_weight($cattext);
-
-					$rule .= ";;; random choice $i of $num_choices: ";
-					$rule .= $cattext . "\n";
-					$rule .= "(psi-rule-nocheck\n";
-					$rule .= "   ; context\n";
-					$rule .= $psi_ctxt;
-					$rule .= "   ; action\n";
-					$rule .= "   (ListLink\n";
-					$rule .= &process_category("      ", $catty);
-					$rule .= "   )\n";
-					$rule .= &psi_tail($num_stars, $pat_word_count, $num_choices, $wadj);
-					$rule .= ") ; random choice $i of $num_choices\n\n";  # close category section
-					$i = $i + 1;
-				}
+				$rule .= &process_random($curr_raw_code, $cattext,
+							$num_stars, $psi_ctxt);
 			}
 			else
 			{
