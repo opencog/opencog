@@ -491,10 +491,13 @@
 )
 
 (define (pln-run)
-    (begin-thread (pln-loop))
-    (set! enable-pln-loop #t)
+    (if (not (pln-running?))
+        (begin
+            (set! enable-pln-loop #t)
+            (begin-thread (pln-loop))))
 )
 
 (define (pln-halt) (set! enable-pln-loop #f))
 
-(if enable-pln-loop (pln-run))
+; Start pln loop
+(pln-run)
