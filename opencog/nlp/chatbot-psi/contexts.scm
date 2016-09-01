@@ -215,8 +215,10 @@
     (DefinedPredicate "no-result-from-other-sources?")
     (And (process-finished? duckduckgo)
          (process-finished? wolframalpha)
+         (process-finished? pln-qa)
          (no-result? duckduckgo-answer)
-         (no-result? wolframalpha-answer))
+         (no-result? wolframalpha-answer)
+         (no-result? pln-answers))
 )
 
 (Define
