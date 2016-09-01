@@ -35,6 +35,7 @@
 (use-modules (opencog))
 (use-modules (opencog logger))
 (use-modules (opencog query))
+(use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
 
 ;; (cog-logger-set-level! "debug")
@@ -418,47 +419,25 @@
       unary-predicate-speech-act-l2s-rewrite))
 
 
-;; Rule base
+;; Define rulebases
+;XXX Why separate rulebases?
 (define rb1 (ConceptNode "rb1"))
-(InheritanceLink
-   rb1
-   (ConceptNode "URE")
-)
-(define rb2 (ConceptNode "rb2"))
-(InheritanceLink
-   rb2
-   (ConceptNode "URE")
-)
-(define rb3 (ConceptNode "rb3"))
-(InheritanceLink
-   rb3
-   (ConceptNode "URE")
-)
-(ure-set-num-parameter rb1 "URE:maximum-iterations" 2)
+(ure-define-rbs rb1 1)
+; Not sure why
 (ure-set-fuzzy-bool-parameter rb1 "URE:attention-allocation" 0)
-(ure-set-num-parameter rb2 "URE:maximum-iterations" 2)
+
+(define rb2 (ConceptNode "rb2"))
+(ure-define-rbs rb2 1)
 (ure-set-fuzzy-bool-parameter rb2 "URE:attention-allocation" 0)
-(ure-set-num-parameter rb3 "URE:maximum-iterations" 2)
+
+(define rb3 (ConceptNode "rb3"))
+(ure-define-rbs rb3 1)
 (ure-set-fuzzy-bool-parameter rb3 "URE:attention-allocation" 0)
 
-;; Associate a name to the rule
-(define rule1 (DefinedSchemaNode "rule1"))
-(DefineLink
-  rule1
-  sentiment-sentence-to-person-l2s-rule)
-(define rule2 (DefinedSchemaNode "rule2"))
-(DefineLink
-  rule2
-  unary-predicate-speech-act-l2s-rule)
-(define rule3 (DefinedSchemaNode "rule3"))
-(DefineLink
-  rule3
-  implication-direct-evaluation-rule)
-
-;; Add rules to rule bases
-(ure-add-rules rb1 (list (list rule1 0.8)) )
-(ure-add-rules rb2 (list (list rule2 0.8)) )
-(ure-add-rules rb3 (list (list rule3 0.8)) )
+;; Add rules to rulebases.
+(ure-define-add-rule rb1 "rule1" sentiment-sentence-to-person-l2s-rule .8)
+(ure-define-add-rule rb2 "rule2" unary-predicate-speech-act-l2s-rule .8)
+(ure-define-add-rule rb3 "rule3" implication-direct-evaluation-rule .8)
 
 ;;;;;;;;;;
 ;; Main ;;
