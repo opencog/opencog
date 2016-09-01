@@ -1,6 +1,8 @@
 (use-modules (ice-9 receive))
 (use-modules (opencog) (opencog openpsi))
 
+;TODO: control this using chatbot-eva.
+
 (define-public (enable-pln-demo-only)
 "
   Enables the openpsi-pln rules and the openpsi-aiml rules only.
