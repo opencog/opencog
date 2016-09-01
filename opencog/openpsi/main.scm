@@ -139,9 +139,10 @@
             (null? (cog-chase-link 'DefineLink 'SatisfactionLink loop-node)))
         (define-psi-loop))
 
-    (set! psi-do-run-loop #t)
-    (call-with-new-thread
-        (lambda () (cog-evaluate! loop-node)))
+    (if (not (psi-running?))
+        (begin
+            (set! psi-do-run-loop #t)
+            (call-with-new-thread (lambda () (cog-evaluate! loop-node)))))
 )
 
 ; -------------------------------------------------------------

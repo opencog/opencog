@@ -35,6 +35,7 @@
 (use-modules (opencog))
 (use-modules (opencog logger))
 (use-modules (opencog query))
+(use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
 
 ;; (cog-logger-set-level! "debug")
@@ -418,92 +419,85 @@
       unary-predicate-speech-act-l2s-rewrite))
 
 
-;; Rule base
+;; Define rulebases
+;XXX Why separate rulebases?
 (define rb1 (ConceptNode "rb1"))
-(InheritanceLink
-   rb1
-   (ConceptNode "URE")
-)
+(ure-define-rbs rb1 1)
+; Not sure why
+(ure-set-fuzzy-bool-parameter rb1 "URE:attention-allocation" 0)
+
 (define rb2 (ConceptNode "rb2"))
-(InheritanceLink
-   rb2
-   (ConceptNode "URE")
-)
+(ure-define-rbs rb2 1)
+(ure-set-fuzzy-bool-parameter rb2 "URE:attention-allocation" 0)
+
 (define rb3 (ConceptNode "rb3"))
-(InheritanceLink
-   rb3
-   (ConceptNode "URE")
-)
-(ure-set-num-parameter rb1 "URE:maximum-iterations" 2)
-(ure-set-fuzzy-bool-parameter rb1 "URE:attention-allocation" 0) 
-(ure-set-num-parameter rb2 "URE:maximum-iterations" 2)
-(ure-set-fuzzy-bool-parameter rb2 "URE:attention-allocation" 0) 
-(ure-set-num-parameter rb3 "URE:maximum-iterations" 2)
-(ure-set-fuzzy-bool-parameter rb3 "URE:attention-allocation" 0) 
+(ure-define-rbs rb3 1)
+(ure-set-fuzzy-bool-parameter rb3 "URE:attention-allocation" 0)
 
-;; Associate a name to the rule
-(define rule1 (DefinedSchemaNode "rule1"))
-(DefineLink
-  rule1
-  sentiment-sentence-to-person-l2s-rule)
-(define rule2 (DefinedSchemaNode "rule2"))
-(DefineLink
-  rule2
-  unary-predicate-speech-act-l2s-rule)
-(define rule3 (DefinedSchemaNode "rule3"))
-(DefineLink
-  rule3
-  implication-direct-evaluation-rule)
-
-;; Add rules to rule bases
-(ure-add-rules rb1 (list (list rule1 0.8)) )
-(ure-add-rules rb2 (list (list rule2 0.8)) )
-(ure-add-rules rb3 (list (list rule3 0.8)) )
+;; Add rules to rulebases.
+(ure-define-add-rule rb1 "rule1" sentiment-sentence-to-person-l2s-rule .8)
+(ure-define-add-rule rb2 "rule2" unary-predicate-speech-act-l2s-rule .8)
+(ure-define-add-rule rb3 "rule3" implication-direct-evaluation-rule .8)
 
 ;;;;;;;;;;
 ;; Main ;;
 ;;;;;;;;;;
+; TODO: Remove this loop by integrating the pln-demo to openpsi
+(define enable-pln-loop #f)
+(define (pln-running?) enable-pln-loop)
+
+(define pln-loop-count 0)
+(define (pln-get-loop-count) pln-loop-count)
+
+(define (pln-loop)
+  ;; Apply l2s rules
+  (let (
+        (name-on-last-sentence (put-name-on-the-last-sentence))
+        (sentiment-sentence-to-person-l2s-results
+         ;(cog-bind sentiment-sentence-to-person-l2s-rule)
+         (cog-fc (SetLink) rb1 (SetLink))
+         )
+        (unary-predicate-speech-act-l2s-results
+         ;(cog-bind unary-predicate-speech-act-l2s-rule)
+         (cog-fc (SetLink) rb2 (SetLink))
+         ))
+    ;; (cog-logger-debug "[PLN-Reasoner] StateLinks = ~a" (cog-get-atoms 'StateLink))
+    ;; (cog-logger-debug "[PLN-Reasoner] PredicateNodes = ~a" (map cog-incoming-set (cog-get-atoms 'PredicateNode)))
+    (cog-logger-debug "[PLN-Reasoner] name-on-last-sentence = ~a" name-on-last-sentence)
+    (cog-logger-debug "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a" sentiment-sentence-to-person-l2s-results)
+    (cog-logger-debug "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a" unary-predicate-speech-act-l2s-results))
+
+  ;; Apply Implication direct evaluation (and put the result in
+  ;; pln-inferred-atoms state)
+  (let* ((direct-eval-results (cog-fc (SetLink) rb3 (SetLink)) );(cog-bind implication-direct-evaluation-rule))
+        ;; Filter only inferred result containing "happy". This is a
+        ;; temporary hack to make it up for the lack of attentional
+        ;; allocation
+        (must-contain (list (Predicate "happy")))
+        (ff (lambda (x) (lset<= equal? must-contain (cog-get-all-nodes x))))
+        (filtered-results (filter ff (cog-outgoing-set direct-eval-results))))
+    (add-to-pln-inferred-atoms (Set filtered-results)))
+
+  (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
+                    (search-inferred-atoms))
+
+  ;; sleep a bit, to not overload the CPU too much
+  (cog-logger-debug "[PLN-Reasoner] Sleep for a second")
+  (set! pln-loop-count (+ pln-loop-count 1))
+  (sleep 1)
+
+  ;; Loop
+  (if enable-pln-loop (pln-loop))
+)
 
 (define (pln-run)
-  (define (pln-loop)
-    ;; Apply l2s rules
-    (let (
-          (name-on-last-sentence (put-name-on-the-last-sentence))
-          (sentiment-sentence-to-person-l2s-results
-           ;(cog-bind sentiment-sentence-to-person-l2s-rule)
-           (cog-fc (SetLink) rb1 (SetLink))
-           )
-          (unary-predicate-speech-act-l2s-results
-           ;(cog-bind unary-predicate-speech-act-l2s-rule)
-           (cog-fc (SetLink) rb2 (SetLink))
-           ))
-      ;; (cog-logger-debug "[PLN-Reasoner] StateLinks = ~a" (cog-get-atoms 'StateLink))
-      ;; (cog-logger-debug "[PLN-Reasoner] PredicateNodes = ~a" (map cog-incoming-set (cog-get-atoms 'PredicateNode)))
-      (cog-logger-debug "[PLN-Reasoner] name-on-last-sentence = ~a" name-on-last-sentence)
-      (cog-logger-debug "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a" sentiment-sentence-to-person-l2s-results)
-      (cog-logger-debug "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a" unary-predicate-speech-act-l2s-results))
+    (if (not (pln-running?))
+        (begin
+            (set! enable-pln-loop #t)
+            (begin-thread (pln-loop))))
+)
 
-    ;; Apply Implication direct evaluation (and put the result in
-    ;; pln-inferred-atoms state)
-    (let* ((direct-eval-results (cog-fc (SetLink) rb3 (SetLink)) );(cog-bind implication-direct-evaluation-rule))
-          ;; Filter only inferred result containing "happy". This is a
-          ;; temporary hack to make it up for the lack of attentional
-          ;; allocation
-          (must-contain (list (Predicate "happy")))
-          (ff (lambda (x) (lset<= equal? must-contain (cog-get-all-nodes x))))
-          (filtered-results (filter ff (cog-outgoing-set direct-eval-results))))
-      (add-to-pln-inferred-atoms (Set filtered-results)))
+(define (pln-halt) (set! enable-pln-loop #f))
 
-    (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
-                      (search-inferred-atoms))
-
-    ;; sleep a bit, to not overload the CPU too much
-    (cog-logger-debug "[PLN-Reasoner] Sleep for a second")
-    (sleep 1)
-
-    ;; Loop
-    (pln-loop))
-  (begin-thread (pln-loop)))
-
+; Start pln loop
 (pln-run)
-
