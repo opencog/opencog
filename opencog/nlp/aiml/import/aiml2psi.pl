@@ -17,7 +17,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.5.3";
+my $ver = "0.5.4";
 my $debug;
 my $help;
 my $version;
@@ -753,7 +753,10 @@ my @all_choices = ();
 
 # process_random -- process a random tag
 #
-# First argument: The to-be-processed text that contains random tags
+# First argument: the to-be-processed text that contains random tags
+# Second argument: the CATTEXT
+# Third argument: number of stars in the pattern
+# Fourth argument: the context of the psi-rule
 sub process_random
 {
 	my $rules = "";
@@ -762,19 +765,7 @@ sub process_random
 	my $num_stars = $_[2];
 	my $psi_ctxt = $_[3];
 
-# JJJ
-print "~~~~~~~~~~~~~~~~~~~~ Processing: $raw_code\n";
-
 	&discover_choices($raw_code);
-
-# JJJ
-print "Going to generate these:\n";
-foreach my $ccc (@all_choices)
-{
-	print $ccc;
-	print "\n";
-}
-print "\n\n";
 
 	my $i = 1;
 	my $num_choices = $#all_choices + 1;
@@ -802,6 +793,9 @@ print "\n\n";
 	$rules;
 }
 
+# discover_choices -- unpack the random tag and get the items
+#
+# First argument: text that contains random tags
 sub discover_choices
 {
 	my $text = $_[0];
@@ -829,9 +823,13 @@ sub discover_choices
 
 		# XXX TODO: This removes all of the nested random tags and
 		# hence is treating those elements as if they were under the
-		# same random tag. May need to find a way to correct the weight
-		$n2 =~ s/<li><random>//g;
-		$n2 =~ s/<\/random><\/li>//g;
+		# same random tag. May need to correct the weight?
+		# Also this is wrong as it ignores the text between <li> &
+		# <random>, and </li> & </random>, if any, but it doesn't seem
+		# to be a big deal in our use case at the moment, would be better
+		# to actually do recursive calls
+		$n2 =~ s/<li>.*?<random>//g;
+		$n2 =~ s/<\/random>.*?<\/li>//g;
 	}
 
 	$n2 =~ s/^\s+//;
@@ -860,6 +858,9 @@ sub discover_choices
 	}
 }
 
+# generate_choices -- generate the combinations
+#
+# First argument: a list of items from a random tag
 sub generate_choices
 {
 	my @choices = @{$_[0]};
