@@ -4,6 +4,7 @@
 (use-modules (opencog python))
 
 (StateLink (ConceptNode "last person who spoke") (NumberNode "0"))
+(define new-person-spoke 0)
 ; -----------------------------------------------------------------------------
 ; For recording facial coordinates, create octomap with 15hz, 10 second or
 ; 150 frames buffer and 1 cm spatial resolution.
@@ -17,15 +18,6 @@
 ; dependent on the frequency of update of the map and the number of frames, and
 ; is set as half the size of the total buffer.
 (define face-loc-time-span 8000) ; (8000 milliseconds or 8 seconds)
-
-; -----------------------------------------------------------------------------
-; For recording sound coordinates, create octomap with 10hz, 10 second or
-; 100 frames buffer and 0.1 cm spatial resolution.
-(create-map "sounds" 0.001 50 200)
-; Initialize  the map
-(step-time-unit "sounds")
-; Make the stepping take place automatically
-(auto-step-time-on "sounds")
 
 ; -----------------------------------------------------------------------------
 
@@ -62,11 +54,6 @@
  (get-last-xyz "faces" face-id-node (round e-start))
 )
 
-;;sound id 1
-(define (save-snd-1 x y z)
-	(map-ato "sounds" (NumberNode "1") x y z)
-)
-
 ;;math
 (define (dot-prod ax ay az bx by bz) (+ (* ax bx) (* ay by)(* az bz)))
 (define (magnitude ax ay az) (sqrt (+ (* ax ax) (* ay ay) (* az az))))
@@ -85,7 +72,7 @@
 ;angle in radians
 
 (define (angle_face_id_snd face-id xx yy zz)
-	(let* ((fc (get-face (NumberNode face-id) 600)))
+	(let* ((fc (get-face (NumberNode face-id) face-loc-time-span)))
 		(if (null? fc)
 			(* 2 3.142)
 			(angle (car fc) (cadr fc) (caddr fc) xx yy zz)
@@ -204,9 +191,13 @@
 	)
 )
 
+;;TODO: change this function to psi-rule later
+(define (request-attention fid)
+	(set! new-person-spoke fid)
+	(StateLink request-eye-contact-state (NumberNode fid))
+)
 
 (define (map-sound xx yy zz)
-	(save-snd-1 xx yy zz)
 	(let* ((fid (snd-nearest-face xx yy zz)))
 		(if (> fid 0)
 			(begin
@@ -214,6 +205,7 @@
 			;;(StateLink request-eye-contact-state (NumberNode fid))
 			;;generate info
 			(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
+			(if (equal? fid new-person-spoke) #t (request-attention fid))
 			)
 		)
 	)
