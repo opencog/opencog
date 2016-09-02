@@ -522,8 +522,7 @@ class EvaControl():
 		# Frame in which coordinates will be returned from transformation
 		self.LOCATION_FRAME = "blender"
 		# Transform Listener. Tracks history for RECENT_INTERVAL.
-		self.tf_listener = tf.TransformListener(False, \
-			rospy.Duration(self.RECENT_INTERVAL))
+		self.tf_listener = tf.TransformListener()
 		try:
 			self.tf_listener.waitForTransform('camera', 'world', \
 				rospy.Time(0), rospy.Duration(3.0))
