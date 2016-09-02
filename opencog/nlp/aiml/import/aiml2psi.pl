@@ -531,10 +531,6 @@ sub process_star
 	$tout;
 }
 
-my @pt1 = ();
-my @pt2 = ();
-my @pt3 = ();
-
 # process_tag -- process a generic, un-named tag
 #
 # First argument: the tag name
@@ -549,19 +545,17 @@ sub process_tag
 
 	$text =~ /(.*?)<$tag>(.*?)<\/$tag>(.*)/;
 
-	push(@pt1, $1);
-	push(@pt2, $2);
-	push(@pt3, $3);
+	my $t1 = $1;
+	my $t2 = $2;
+	my $t3 = $3;
 
-	$tout .= &process_aiml_tags($indent, pop(@pt1));
+	$tout .= &process_aiml_tags($indent, $t1);
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag $tag\")\n";
 	$tout .= $indent . "   (ListLink\n";
 	$tout .= $indent . "      (ListLink\n";
-	$tout .= &process_aiml_tags($indent . "         ", pop(@pt2));
+	$tout .= &process_aiml_tags($indent . "         ", $t2);
 	$tout .= $indent . "   )))\n";
-
-	my $t3 = pop(@pt3);
 	if ($t3 ne "")
 	{
 		$tout .= &process_aiml_tags($indent, $t3);
@@ -582,37 +576,37 @@ sub process_set
 
 	$text =~ /(.*?)<set name='(.*?)'>(.*?)<\/set>(.*)/;
 
-	my $n1 = $1;
-	my $n2 = $2;
-	my $n3 = $3;
-	my $n4 = $4;
+	my $t1 = $1;
+	my $t2 = $2;
+	my $t3 = $3;
+	my $t4 = $4;
 
 	# For nested <set> tags like:
 	# "<set name='it'> <set name='topic'> test </set> </set>"
 	# $3 will be "<set name='topic'> test" using the above regex,
 	# which is invalid as it doesn't include the "</set>"
-	if (index($3, "<set name") != -1)
+	if (index($t3, "<set name") != -1)
 	{
 		# For handling nested <set> tag
 		$text =~ /(.*?)<set name='(.*?)'>(.*)<\/set>(.*)/;
 
-		$n1 = $1;
-		$n2 = $2;
-		$n3 = $3;
-		$n4 = $4;
+		$t1 = $1;
+		$t2 = $2;
+		$t3 = $3;
+		$t4 = $4;
 	}
 
-	$tout .= &split_string($indent, $n1);
+	$tout .= &split_string($indent, $t1);
 	$tout .= $indent . "(ExecutionOutput\n";
 	$tout .= $indent . "   (DefinedSchema \"AIML-tag set\")\n";
 	$tout .= $indent . "   (ListLink\n";
-	$tout .= $indent . "      (Concept \"" . $n2 . "\")\n";
+	$tout .= $indent . "      (Concept \"" . $t2 . "\")\n";
 	$tout .= $indent . "      (ListLink\n";
-	$tout .= &process_aiml_tags($indent . "         ", $n3);
+	$tout .= &process_aiml_tags($indent . "         ", $t3);
 	$tout .= $indent . "   )))\n";
-	if ($n4 ne "")
+	if ($t4 ne "")
 	{
-		$tout .= &process_aiml_tags($indent, $4);
+		$tout .= &process_aiml_tags($indent, $t4);
 	}
 	$tout;
 }
@@ -711,9 +705,13 @@ sub process_named_tag
 
 	$text =~ /(.*?)<$tag name='(.*?)'\/>(.*)/;
 
-	$tout .= &split_string($indent, $1);
-	$tout .= &print_named_tag($tag, $indent, $2);
-	$tout .= &process_aiml_tags($indent, $3);
+	my $t1 = $1;
+	my $t2 = $2;
+	my $t3 = $3;
+
+	$tout .= &split_string($indent, $t1);
+	$tout .= &print_named_tag($tag, $indent, $t2);
+	$tout .= &process_aiml_tags($indent, $t3);
 	$tout;
 }
 
@@ -801,25 +799,25 @@ sub discover_choices
 	my $text = $_[0];
 	$text =~ /(.*?)<random>(.*?)<\/random>(.*)/;
 
-	my $n1 = $1;
-	my $n2 = $2;
-	my $n3 = $3;
+	my $t1 = $1;
+	my $t2 = $2;
+	my $t3 = $3;
 
-	# $1 should never has any random tag
-	if ($n1 ne "")
+	# $t1 should never has any random tag
+	if ($t1 ne "")
 	{
-		my @one = ($n1);
+		my @one = ($t1);
 		&generate_choices(\@one);
 	}
 
-	# If $2 has a random tag, they are probably nested random tags
-	if (index($n2, "<random>") != -1)
+	# If $t2 has a random tag, they are probably nested random tags
+	if (index($t2, "<random>") != -1)
 	{
 		$text =~ /(.*?)<random>(.*)<\/random>(.*)/;
 
-		# Update $n2 and $n3
-		$n2 = $2;
-		$n3 = $3;
+		# Update $t2 and $t3
+		$t2 = $2;
+		$t3 = $3;
 
 		# XXX TODO: This removes all of the nested random tags and
 		# hence is treating those elements as if they were under the
@@ -828,12 +826,12 @@ sub discover_choices
 		# <random>, and </li> & </random>, if any, but it doesn't seem
 		# to be a big deal in our use case at the moment, would be better
 		# to actually do recursive calls
-		$n2 =~ s/<li>.*?<random>//g;
-		$n2 =~ s/<\/random>.*?<\/li>//g;
+		$t2 =~ s/<li>.*?<random>//g;
+		$t2 =~ s/<\/random>.*?<\/li>//g;
 	}
 
-	$n2 =~ s/^\s+//;
-	my @choicelist = split /<li>/, $n2;
+	$t2 =~ s/^\s+//;
+	my @choicelist = split /<li>/, $t2;
 
 	foreach my $ch (@choicelist)
 	{
@@ -845,15 +843,15 @@ sub discover_choices
 	@choicelist = grep($_, @choicelist);
 	&generate_choices(\@choicelist);
 
-	# If $3 has a random tag, it means there are more than one
+	# If $t3 has a random tag, it means there are more than one
 	# random tags
-	if (index($n3, "<random>") != -1)
+	if (index($t3, "<random>") != -1)
 	{
-		&discover_choices($n3);
+		&discover_choices($t3);
 	}
-	elsif ($n3 ne "")
+	elsif ($t3 ne "")
 	{
-		my @three = ($n3);
+		my @three = ($t3);
 		&generate_choices(\@three);
 	}
 }
