@@ -568,11 +568,12 @@
 
 (define-public (do-aiml-set KEY VALUE)
 	(define flat-val (word-list-flatten VALUE))
+	(define reval (if (equal? '() flat-val) (WordNode "") flat-val))
 	; (display "Perform AIML set key=") (display KEY) (newline)
-	; (display "set value=") (display flat-val) (newline)
+	; (display "set value=") (display reval) (newline)
 	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
-	(State rekey flat-val)
-	flat-val
+	(State rekey reval)
+	reval
 )
 
 ; AIML-tag get -- Fetch value from a StateLink key-value pair
