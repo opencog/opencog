@@ -24,6 +24,8 @@ import time
 import logging
 import random
 import yaml
+import tf
+import numpy
 # Eva ROS message imports
 from std_msgs.msg import String, Int32
 from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
@@ -169,23 +171,25 @@ class EvaControl():
 	# Turn only the eyes towards the given target point.
 	# Coordinates: meters; x==forward, y==to Eva's left.
 	def gaze_at_point(self, x, y, z):
-		#print "gaze at point: ", x, y, z
-
+		xyz1=numpy.array([x,y,z,1.0])
+		xyz=numpy.dot(self.conv_mat,xyz1)
 		trg = Target()
-		trg.x = x
-		trg.y = y
-		trg.z = z
+		trg.x = xyz[0]
+		trg.y = xyz[1]
+		trg.z = xyz[2]
+		print "gaze at point: ", trg.x, trg.y, trg.z
 		self.gaze_pub.publish(trg)
 
 	# Turn head towards the given target point.
 	# Coordinates: meters; x==forward, y==to Eva's left.
 	def look_at_point(self, x, y, z):
-		#print "look at point: ", x, y, z
-
+		xyz1=numpy.array([x,y,z,1.0])
+		xyz=numpy.dot(self.conv_mat,xyz1)
 		trg = Target()
-		trg.x = x
-		trg.y = y
-		trg.z = z
+		trg.x = xyz[0]
+		trg.y = xyz[1]
+		trg.z = xyz[2]
+		print "look at point: ", trg.x, trg.y, trg.z
 		self.turn_pub.publish(trg)
 
 	# ----------------------------------------------------------
@@ -515,6 +519,20 @@ class EvaControl():
 		rospy.Subscriber("/behavior_control", Int32, \
 			self.behavior_control_callback)
 
+		# Frame in which coordinates will be returned from transformation
+		self.LOCATION_FRAME = "blender"
+		# Transform Listener. Tracks history for RECENT_INTERVAL.
+		self.tf_listener = tf.TransformListener()
+		try:
+			self.tf_listener.waitForTransform('camera', 'world', \
+				rospy.Time(0), rospy.Duration(3.0))
+		except Exception:
+			print("No camera transforms!")
+			exit(1)
+		(trans,rot) = self.tf_listener.lookupTransform( \
+			self.LOCATION_FRAME, 'camera', rospy.Time(0))
+		a=tf.listener.TransformerROS()
+		self.conv_mat=a.fromTranslationRotation(trans,rot)
 		# Full control by default
 		self.control_mode = 255
 		self.running = True

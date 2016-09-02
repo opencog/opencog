@@ -177,6 +177,8 @@ except:
 (change-template "Time to change gaze" "attn-search"
 	"time_search_attn_min" "time_search_attn_max")
 
+  (change-template "Time to reset glance" "glance"
+  	"time_search_glance_min" "time_search_glance_max")
 ; ----------------------------------------------------------------------
 ; Return true if ROS is still running.
 (DefineLink

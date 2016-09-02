@@ -4,6 +4,7 @@
 (use-modules (opencog python))
 
 (StateLink (ConceptNode "last person who spoke") (NumberNode "0"))
+(define new-person-spoke 0)
 ; -----------------------------------------------------------------------------
 ; For recording facial coordinates, create octomap with 15hz, 10 second or
 ; 150 frames buffer and 1 cm spatial resolution.
@@ -16,16 +17,7 @@
 ; a face. The time limit for spatial memory for faces :-). The value is
 ; dependent on the frequency of update of the map and the number of frames, and
 ; is set as half the size of the total buffer.
-(define face-loc-time-span 5000) ; (/ (* (/ 1000.0 15) 150) 2)
-
-; -----------------------------------------------------------------------------
-; For recording sound coordinates, create octomap with 10hz, 10 second or
-; 100 frames buffer and 0.1 cm spatial resolution.
-(create-map "sounds" 0.001 50 200)
-; Initialize  the map
-(step-time-unit "sounds")
-; Make the stepping take place automatically
-(auto-step-time-on "sounds")
+(define face-loc-time-span 8000) ; (8000 milliseconds or 8 seconds)
 
 ; -----------------------------------------------------------------------------
 
@@ -62,11 +54,6 @@
  (get-last-xyz "faces" face-id-node (round e-start))
 )
 
-;;sound id 1
-(define (save-snd-1 x y z)
-	(map-ato "sounds" (NumberNode "1") x y z)
-)
-
 ;;math
 (define (dot-prod ax ay az bx by bz) (+ (* ax bx) (* ay by)(* az bz)))
 (define (magnitude ax ay az) (sqrt (+ (* ax ax) (* ay ay) (* az az))))
@@ -85,7 +72,7 @@
 ;angle in radians
 
 (define (angle_face_id_snd face-id xx yy zz)
-	(let* ((fc (get-face (NumberNode face-id) 600)))
+	(let* ((fc (get-face (NumberNode face-id) face-loc-time-span)))
 		(if (null? fc)
 			(* 2 3.142)
 			(angle (car fc) (cadr fc) (caddr fc) xx yy zz)
@@ -93,6 +80,11 @@
 	)
 )
 
+;;;searches for last face id location observed in previous 8 seconds
+;;if face id is present in past 1 and 2 seconds then past 1 second id will be recovered
+;;then python look at point function is called which calls blender api to look at face
+;;look at face also sets gaze at face
+;; expects face-id number node
 (define (look-at-face face-id-node)
 	(let ((loc-atom
 			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
@@ -110,6 +102,11 @@
 	)
 )
 
+;;;searches for last face id location observed in previous 8 seconds
+;;if face id is present in past 1 and 2 seconds then past 1 second id will be recovered
+;;then python gaze at point function is called which calls blender api to gaze at face
+;;gaze at face only moves the eyes
+;; expects face-id number node
 (define (gaze-at-face face-id-node)
 	(let ((loc-atom
 			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
@@ -194,9 +191,13 @@
 	)
 )
 
+;;TODO: change this function to psi-rule later
+(define (request-attention fid)
+	(set! new-person-spoke fid)
+	(StateLink request-eye-contact-state (NumberNode fid))
+)
 
 (define (map-sound xx yy zz)
-	(save-snd-1 xx yy zz)
 	(let* ((fid (snd-nearest-face xx yy zz)))
 		(if (> fid 0)
 			(begin
@@ -204,6 +205,7 @@
 			;;(StateLink request-eye-contact-state (NumberNode fid))
 			;;generate info
 			(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
+			(if (equal? fid new-person-spoke) #t (request-attention fid))
 			)
 		)
 	)
