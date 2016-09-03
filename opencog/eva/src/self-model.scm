@@ -554,8 +554,8 @@
 (DefineLink
 	(DefinedPredicate "Is interacting with someone?")
 	(OrLink
-		; true if talking not listening.
-		(NotLink (DefinedPredicate "chatbot is listening?"))
+		; true if talking.
+		(DefinedPredicate "chatbot is talking?")
 		; true if not not-making eye-contact.
 		(NotLink (Equal
 			(SetLink no-interaction)
