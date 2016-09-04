@@ -92,7 +92,7 @@
 ;; If told to look away, she will break eye-contact but not break
 ;; interaction.
 (define-public eye-contact-state (AnchorNode "Eye Contact State"))
-(define-public no-interaction (ConceptNode "none"))
+(define-public no-interaction (NumberNode 0.0))
 
 (StateLink eye-contact-state no-interaction)
 

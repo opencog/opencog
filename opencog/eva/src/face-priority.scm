@@ -303,8 +303,8 @@
                 (cog-execute!
                     (DefinedSchema "Current interaction target"))))))
            (face-id (string->number (cog-name face-id-node))))
-       ; This is for when the room goes empty
-        (if (equal? "none" current-face-id)
+       ; This is for when the room is empty. When room is empty the
+        (if (equal? 0.0 current-face-id)
             (set-transition-priority! face-id ordinary-face-priority)
             (set-transition-priority! face-id
                 (transition-priority face-id current-face-id))
