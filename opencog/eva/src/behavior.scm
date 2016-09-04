@@ -228,6 +228,10 @@
 					(ListLink
 						(VariableNode "face-id")
 						(VariableNode "recog-id"))))))
+		;TODO: Separate out room-state into separate demands that occur before
+		; or after other demands are handled. How should order of execution
+		; be represented?
+		(DefinedPredicate "Update status")
 		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "--- Glance at and greet new recognized person")))
 	))
