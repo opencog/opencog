@@ -17,7 +17,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.5.4";
+my $ver = "0.5.5";
 my $debug;
 my $help;
 my $version;
