@@ -456,7 +456,12 @@
 			(let* ((rule (aiml-select-rule all-rules))
 					(response (aiml-run-rule SENT rule)))
 				(if (valid-response? response)
-					(begin (set! selected-rule rule) response)
+;					(begin (set! selected-rule rule) response)
+
+; JJJ
+(begin (display "----- selected-rule:\n") (display rule) (newline)
+(set! selected-rule rule) response)
+
 					(do-while-null SENT (- CNT 1))
 				))))
 
@@ -584,7 +589,8 @@
 (define-public (do-aiml-get KEY)
 	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
 	; gar discards the SetLink that the GetLink returns.
-	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
+	(gar (cog-execute! (Get (TypedVariable (Variable "$x") (Type "ListLink"))
+		(State rekey (Variable "$x"))))))
 
 ; AIML-tag bot -- Just like get, but for bot values.
 (DefineLink
@@ -594,7 +600,8 @@
 (define-public (do-aiml-bot-get KEY)
 	(define rekey (Concept (string-append "AIML-bot-" (cog-name KEY))))
 	; gar discards the SetLink that the GetLink returns.
-	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
+	(gar (cog-execute! (Get (TypedVariable (Variable "$x") (Type "ListLink"))
+		(State rekey (Variable "$x"))))))
 
 (DefineLink
 	(DefinedSchemaNode "AIML-tag input")
