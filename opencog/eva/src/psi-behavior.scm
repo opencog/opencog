@@ -37,7 +37,7 @@
 (pred-2-schema "Listening ongoing")
 (pred-2-schema "Listening ended")
 (pred-2-schema "Keep alive")
-;(pred-2-schema "Interacting Sequence for recognized person"
+(pred-2-schema "Interacting Sequence for recognized person"
 (pred-2-schema "Update face transition-priorities")
 (pred-2-schema "Change interaction target by priority")
 (pred-2-schema "Interact with face")
@@ -92,8 +92,8 @@
 	track-demand-satisfied (stv .5 .5) track-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-		; FIXME always (stv 0 1)
-		; (Not (DefinedPredicate "Is interacting with someone?"))
+		; TODO: test the behabior when talking.
+		; (Not (DefinedPredicate "chatbot is talking?"))
 		(DefinedPredicate "Someone visible?")
 		(DefinedPredicate "Time to change interaction")))
 	(DefinedSchemaNode "Change interaction target by priority")
@@ -104,13 +104,12 @@
 	(DefinedSchemaNode "Nothing is happening")
 	face-demand-satisfied (stv 1 1) face-demand)
 
-; TODO: Enable after further testing with HEAD.
-;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-;		(Not (DefinedPredicate "chatbot started talking?"))
-;		(Not (DefinedPredicate "Is interacting with someone?"))
-;		(DefinedPredicateNode "Did someone recognizable arrive?")))
-;	(DefinedSchemaNode "Interacting Sequence for recognized person")
-;	face-demand-satisfied (stv 1 1) face-demand)
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+		(Not (DefinedPredicate "chatbot started talking?"))
+		(Not (DefinedPredicate "Is interacting with someone?"))
+		(DefinedPredicateNode "Did someone recognizable arrive?")))
+	(DefinedSchemaNode "Interacting Sequence for recognized person")
+	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot started talking?")))

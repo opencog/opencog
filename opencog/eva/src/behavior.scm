@@ -207,7 +207,6 @@
 (DefineLink
 	(DefinedPredicate "Interacting Sequence for recognized person")
 	(SequentialAnd
-		;(True (DefinedSchema "glance at new person"))
 		(True (Put ; Setting interaction target for "look at person"
 			(DefinedPredicate "Set interaction target")
 			(RandomChoice (Put; FIXME Replace by multiple face tracking.
@@ -217,11 +216,22 @@
 		(True (Put
 			(DefinedPredicate "Greet recognized person")
 			(Get
+				(VariableList
+					(TypedVariable
+						(VariableNode "face-id")
+						(Type "ConceptNode"))
+					(TypedVariable
+						(VariableNode "recog-id")
+						(Type "ConceptNode")))
 				(EvaluationLink
 					(PredicateNode "name")
 					(ListLink
 						(VariableNode "face-id")
 						(VariableNode "recog-id"))))))
+		;TODO: Separate out room-state into separate demands that occur before
+		; or after other demands are handled. How should order of execution
+		; be represented?
+		(DefinedPredicate "Update status")
 		(Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "--- Glance at and greet new recognized person")))
 	))

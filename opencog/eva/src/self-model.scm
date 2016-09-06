@@ -92,7 +92,7 @@
 ;; If told to look away, she will break eye-contact but not break
 ;; interaction.
 (define-public eye-contact-state (AnchorNode "Eye Contact State"))
-(define-public no-interaction (ConceptNode "none"))
+(define-public no-interaction (NumberNode 0.0))
 
 (StateLink eye-contact-state no-interaction)
 
@@ -147,11 +147,6 @@
 (DefineLink
 	(DefinedPredicate "chatbot started talking?")
 	(Equal (Set chat-start)
-		(Get (State chat-state (Variable "$x")))))
-
-(DefineLink
-	(DefinedPredicate "chatbot started listening")
-	(Equal (Set chat-listen-start)
 		(Get (State chat-state (Variable "$x")))))
 
 (DefineLink
@@ -559,8 +554,8 @@
 (DefineLink
 	(DefinedPredicate "Is interacting with someone?")
 	(OrLink
-		; true if talking not listening.
-		(NotLink (DefinedPredicate "chatbot is listening?"))
+		; true if talking.
+		(DefinedPredicate "chatbot is talking?")
 		; true if not not-making eye-contact.
 		(NotLink (Equal
 			(SetLink no-interaction)
