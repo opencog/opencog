@@ -1,8 +1,8 @@
-
 #
 # Cogita is just a simple, staind-alone binary,
 # it translates between IRC protocol and the cog-server
-ADD_EXECUTABLE(cogita 
+#
+ADD_EXECUTABLE(cogita
 	CogitaConfig
 	IRC
 	go-irc
@@ -13,9 +13,6 @@ LINK_DIRECTORIES (
 	${PROJECT_BINARY_DIR}/opencog/util
 )
 
-ADD_DEPENDENCIES(cogita utils)
-
 TARGET_LINK_LIBRARIES (cogita
 	${COGUTIL_LIBRARY}
 )
-
