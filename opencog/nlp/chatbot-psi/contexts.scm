@@ -16,27 +16,41 @@
 )
 
 (define (setup-done? anchor)
-    (Not (Equal (Set setup-not-done) (Get (State anchor (Variable "$s")))))
+    (Not (Equal (Set setup-not-done) (Get
+        (TypedVariable (Variable "$s") (Type "ConceptNode"))
+            (State anchor (Variable "$s")))))
 )
 
 (define (process-not-started? anchor)
-    (Equal (Set default-state) (Get (State anchor (Variable "$s"))))
+    (Equal (Set default-state) (Get
+        (TypedVariable (Variable "$s") (Type "ConceptNode"))
+            (State anchor (Variable "$s"))))
 )
 
 (define (process-finished? anchor)
-    (Equal (Set process-finished) (Get (State anchor (Variable "$s"))))
+    (Equal (Set process-finished) (Get
+        (TypedVariable (Variable "$s") (Type "ConceptNode"))
+            (State anchor (Variable "$s"))))
 )
 
 (define (any-result? anchor)
     (Not (Or
-        (Equal (Set setup-not-done) (Get (State anchor (Variable "$f"))))
-        (Equal (Set default-state) (Get (State anchor (Variable "$f"))))
-        (Equal (Set no-result) (Get (State anchor (Variable "$f"))))
+        (Equal (Set setup-not-done) (Get
+            (TypedVariable (Variable "$f") (Type "ConceptNode"))
+                (State anchor (Variable "$f"))))
+        (Equal (Set default-state) (Get
+            (TypedVariable (Variable "$f") (Type "ConceptNode"))
+                (State anchor (Variable "$f"))))
+        (Equal (Set no-result) (Get
+            (TypedVariable (Variable "$f") (Type "ConceptNode"))
+                (State anchor (Variable "$f"))))
     ))
 )
 
 (define (no-result? anchor)
-    (Equal (Set no-result) (Get (State anchor (Variable "$r"))))
+    (Equal (Set no-result) (Get
+        (TypedVariable (Variable "$r") (Type "ConceptNode"))
+            (State anchor (Variable "$r"))))
 )
 
 (define (check-aiml-reply num-node)
@@ -62,7 +76,8 @@
 (define (long-time-elapsed)
     (if (> (- (current-time) (string->number (get-input-time)))
             (string->number (cog-name (gar (cog-execute!
-                (Get (State max-waiting-time (Variable "$t"))))))))
+                (Get (TypedVariable (Variable "$t") (Type "TimeNode"))
+                    (State max-waiting-time (Variable "$t"))))))))
         (stv 1 1)
         (stv 0 1)
     )
@@ -121,7 +136,8 @@
 (Define
     (DefinedPredicate "is-input-utterance?")
     (Not (Equal (Set no-input-utterance)
-                (Get (State input-utterance (Variable "$x")))))
+        (Get (TypedVariable (Variable "$x") (Type "ConceptNode"))
+            (State input-utterance (Variable "$x")))))
 )
 
 (Define
@@ -181,7 +197,8 @@
 (Define
     (DefinedPredicate "fuzzy-reply-is-declarative?")
     (Equal (Set (DefinedLinguisticConcept "DeclarativeSpeechAct"))
-        (Get (State fuzzy-reply-type (Variable "$s"))))
+        (Get (TypedVariable (Variable "$s") (Type "DefinedLinguisticConceptNode"))
+            (State fuzzy-reply-type (Variable "$s"))))
 )
 
 (Define
@@ -319,11 +336,15 @@
 
 (Define
     (DefinedPredicate "going-to-do-the-action?")
-    (Not (Equal (Set no-result) (Get (State chatbot-eva-action (Variable "$s")))))
+    (Not (Equal (Set no-result) (Get
+        (TypedVariable (Variable "$s") (Type "ConceptNode"))
+            (State chatbot-eva-action (Variable "$s")))))
 )
 
 (Define
     (DefinedPredicate "don't-know-how-to-do-it?")
     (Or (Evaluation (GroundedPredicate "scm: long-time-elapsed") (List))
-        (Equal (Set no-result) (Get (State chatbot-eva-action (Variable "$s")))))
+        (Equal (Set no-result) (Get
+            (TypedVariable (Variable "$s") (Type "ConceptNode"))
+                (State chatbot-eva-action (Variable "$s")))))
 )
