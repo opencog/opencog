@@ -58,15 +58,21 @@ namespace opencog
 class WAImportanceDiffusionAgent : public ImportanceDiffusionBase
 {
 private:
-    HandleSeq diffusionSourceVector();
     unsigned int SAMPLE_SIZE = 1;
     unsigned int _tournamentSize;
 
     void spreadImportance();
     Handle tournamentSelect(HandleSeq population);
+    void atomAddedSignalHandler(const Handle& atom);
+    void atomRemovedSignalHandler(const AtomPtr& aptr);
 
+    HandleSeq _diffusionSources;
+    
+    boost::signals2::connection atomAddedConnection;
+    boost::signals2::connection atomRemovedConnection;
 public:
     WAImportanceDiffusionAgent(CogServer&);
+   ~WAImportanceDiffusionAgent();
 
     virtual void run();
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -74,6 +80,8 @@ public:
     static const ClassInfo _ci("opencog::WAImportanceDiffusionAgent");
         return _ci;
     }
+
+    HandleSeq diffusionSourceVector(void);
 };
 
 /** @}*/
