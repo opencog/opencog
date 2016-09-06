@@ -456,12 +456,7 @@
 			(let* ((rule (aiml-select-rule all-rules))
 					(response (aiml-run-rule SENT rule)))
 				(if (valid-response? response)
-;					(begin (set! selected-rule rule) response)
-
-; JJJ
-(begin (display "----- selected-rule:\n") (display rule) (newline)
-(set! selected-rule rule) response)
-
+					(begin (set! selected-rule rule) response)
 					(do-while-null SENT (- CNT 1))
 				))))
 
