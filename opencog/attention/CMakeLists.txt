@@ -18,7 +18,6 @@ ADD_LIBRARY(attention-types SHARED
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(attention-types opencog_atom_types)
 ADD_DEPENDENCIES(attention-types attention_atom_types)
 
 TARGET_LINK_LIBRARIES(attention-types

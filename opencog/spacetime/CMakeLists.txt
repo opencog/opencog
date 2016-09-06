@@ -14,7 +14,6 @@ TARGET_LINK_LIBRARIES(spacetime-types
 	${ATOMSPACE_atombase_LIBRARY}
 )
 
-ADD_DEPENDENCIES(spacetime-types opencog_atom_types)
 ADD_DEPENDENCIES(spacetime-types spacetime_atom_types)
 
 INSTALL (TARGETS spacetime-types

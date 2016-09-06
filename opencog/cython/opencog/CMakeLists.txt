@@ -55,7 +55,7 @@ IF (HAVE_ATOMSPACE)
 	ADD_DEPENDENCIES(cogserver_type_constructors nlp_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors attention_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors spacetime_atom_types)
-	ADD_DEPENDENCIES(cogserver_type_constructors pln_atom_types)
+	# ADD_DEPENDENCIES(cogserver_type_constructors pln_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors embodiment_atom_types)
 	ADD_DEPENDENCIES(cogserver_type_constructors spacetime_atom_types)
 
