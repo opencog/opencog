@@ -37,7 +37,7 @@
 (pred-2-schema "Listening ongoing")
 (pred-2-schema "Listening ended")
 (pred-2-schema "Keep alive")
-(pred-2-schema "Interacting Sequence for recognized person"
+(pred-2-schema "Interacting Sequence for recognized person")
 (pred-2-schema "Update face transition-priorities")
 (pred-2-schema "Change interaction target by priority")
 (pred-2-schema "Interact with face")
