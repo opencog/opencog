@@ -1,10 +1,3 @@
-IF(CMAKE_COMPILER_IS_GNUCXX)
-	# Best compromise between compile time and performance:
-	# SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -finline-functions")
-
-	# Fastest:
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -g -fno-inline")
-ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 ADD_LIBRARY(SpaceMap SHARED
 	LocalSpaceMap2DUtil
@@ -39,7 +32,6 @@ ADD_LIBRARY(SpaceMap SHARED
 )
 
 ADD_DEPENDENCIES(SpaceMap
-	opencog_atom_types
 	spacetime_atom_types
 	spacetime-types
 )
