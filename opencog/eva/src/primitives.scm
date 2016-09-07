@@ -111,13 +111,18 @@ except:
 			(GreaterThan
 				; Minus computes number of seconds since interaction start.
 				(Minus (TimeLink) (DefinedSchema get-ts))
-				(Get (State (Schema max-name) (Variable "$max")))
+				(Get
+					(TypedVariable (Variable "$max") (Type "NumberNode"))
+					(State (Schema max-name) (Variable "$max")))
 			)
 			(SequentialAnd
 				; Delta is the time since the last check.
 				(True (Put (State (Schema delta-ts) (Variable "$x"))
 						(Minus (TimeLink)
-							(Get (State (Schema prev-ts) (Variable "$p"))))))
+							(Get
+								(TypedVariable
+									(Variable "$p") (Type "NumberNode"))
+								(State (Schema prev-ts) (Variable "$p"))))))
 				; Update time of last check to now. Must record this
 				; timestamp before the min-time rejection, below.
 				(True (Put (State (Schema prev-ts) (Variable "$x")) (TimeLink)))
@@ -126,7 +131,9 @@ except:
 				(GreaterThan
 					; Minus computes number of seconds since interaction start.
 					(Minus (TimeLink) (DefinedSchema get-ts))
-					(Get (State (Schema min-name) (Variable "$min")))
+					(Get
+						(TypedVariable (Variable "$min") (Type "NumberNode"))
+						(State (Schema min-name) (Variable "$min")))
 				)
 
 				; Compute integral: how long since last check?
@@ -136,13 +143,22 @@ except:
 				; been a long time, then very likely the coin will come up
 				; heads.
 				(GreaterThan
-					(Get (State (Schema delta-ts) (Variable "$delta")))
+					(Get
+						(TypedVariable (Variable "$delta") (Type "NumberNode"))
+						(State
+							(Schema delta-ts) (Variable "$delta")))
 					; Random number in the configured range.
 					(RandomNumber
 						(Number 0)
 						(Minus
-							(Get (State (Schema max-name) (Variable "$max")))
-							(Get (State (Schema min-name) (Variable "$min")))))
+							(Get
+								(TypedVariable
+									(Variable "$max") (Type "NumberNode"))
+								(State (Schema max-name) (Variable "$max")))
+							(Get
+								(TypedVariable
+									(Variable "$min") (Type "NumberNode"))
+								(State (Schema min-name) (Variable "$min")))))
 				)
 			)
 	)))
