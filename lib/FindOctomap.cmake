@@ -5,11 +5,11 @@ set(OCTOMAP_LIBPATH
 
 find_library(OCTOMAP_LIBRARY octomap
 	PATH ${OCTOMAP_LIBPATH})
-message("Find octomap lib ${OCTOMAP_LIBRARY}")
+message("-- Find octomap lib ${OCTOMAP_LIBRARY}")
 
 find_library(OCTOMAP_OCTOMATH_LIBRARY octomath
 	PATH ${OCTOMAP_LIBPATH})
-message("Find octomath lib ${OCTOMAP_OCTOMATH_LIBRARY}")
+message("-- Find octomath lib ${OCTOMAP_OCTOMATH_LIBRARY}")
 
 
 set(OCTOMAP_LIBRARIES
