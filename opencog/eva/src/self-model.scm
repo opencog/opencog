@@ -66,13 +66,17 @@
 (DefineLink
 	(DefinedPredicate "Is sleeping?")
 	(Equal (SetLink soma-sleeping)
-		(Get (State soma-state (Variable "$x")))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State soma-state (Variable "$x")))))
 
 ;; True if bored, else false
 (DefineLink
 	(DefinedPredicate "Is bored?")
 	(Equal (SetLink soma-bored)
-		(Get (State soma-state (Variable "$x")))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State soma-state (Variable "$x")))))
 
 ; -----------
 ; The "emotional state" of the robot.  Corresponds to states declared
@@ -147,32 +151,44 @@
 (DefineLink
 	(DefinedPredicate "chatbot started talking?")
 	(Equal (Set chat-start)
-		(Get (State chat-state (Variable "$x")))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State chat-state (Variable "$x")))))
 
 (DefineLink
 	(DefinedPredicate "chatbot is talking?")
 	(Equal (Set chat-talk)
-		(Get (State chat-state (Variable "$x")))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State chat-state (Variable "$x")))))
 
 (DefineLink
 	(DefinedPredicate "chatbot stopped talking?")
 	(Equal (Set chat-stop)
-		(Get (State chat-state (Variable "$x")))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State chat-state (Variable "$x")))))
 
 (DefineLink
 	(DefinedPredicate "chatbot started listening?")
 	(Equal (Set chat-listen-start)
-		(Get (State chat-state (Variable "$x")))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State chat-state (Variable "$x")))))
 
 (DefineLink
 	(DefinedPredicate "chatbot is listening?")
 	(Equal (Set chat-listen)
-		(Get (State chat-state (Variable "$x")))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State chat-state (Variable "$x")))))
 
 (DefineLink
 	(DefinedPredicate "chatbot stopped listening?")
 	(Equal (Set chat-listen-stop)
-		(Get (State chat-state (Variable "$x")))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State chat-state (Variable "$x")))))
 
 ; Chat affect. Is the robot happy about what its saying?
 ; Right now, there are only two affects: happy and not happy.
@@ -190,13 +206,17 @@
 	(DefinedPredicate "chatbot is happy")
 	(Equal
 		(Set chat-happy)
-		(Get (State chat-affect (Variable "$x")))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State chat-affect (Variable "$x")))))
 
 (DefineLink
 	(DefinedPredicate "chatbot is negative")
 	(Equal
 		(Set chat-negative)
-		(Get (State chat-affect (Variable "$x")))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State chat-affect (Variable "$x")))))
 
 ; --------------------------------------------------------
 ; Speech-to-text (STT) related stuff.
@@ -235,7 +255,9 @@
 	(DefinedPredicate "Heard Something?")
 	(SequentialAnd
 		(NotLink (Equal (SetLink heard-nothing)
-			(Get (State heard-sound (Variable "$x")))))
+			(Get
+				(TypedVariable (Variable "$x") (Type "SentenceNode"))
+				(State heard-sound (Variable "$x")))))
 		(True (Put (State heard-sound (Variable "$x")) heard-nothing))
 	))
 
@@ -263,7 +285,9 @@
 	; timestamp getter
 	(DefineLink
 		(DefinedSchema (string-append "get " name " timestamp"))
-		(Get (State (Schema ts-name) (Variable "$x"))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "NumberNode"))
+			(State (Schema ts-name) (Variable "$x"))))
 
 	; Additional state, used for computing integral, for probabilities.
 	; See below, in the time-to-change template.
@@ -310,6 +334,7 @@
 (DefineLink
 	(DefinedPredicateNode "Did someone arrive?")
 	(SatisfactionLink
+		(TypedVariable (Variable "$face-id") (TypeNode "NumberNode"))
 		(AndLink
 			; If someone is visible...
 			(PresentLink (EvaluationLink (PredicateNode "visible face")
@@ -367,7 +392,8 @@
 ;; Will return a SetLink holding zero, one or more face id's
 (DefineLink
 	(DefinedSchemaNode "New arrivals")
-	(GetLink
+	(Get
+		(TypedVariable (Variable "$face-id") (Type "NumberNode"))
 		(AndLink
 			; If someone is visible...
 			(PresentLink (EvaluationLink (PredicateNode "visible face")
@@ -380,7 +406,9 @@
 ;; Return the person with whom we are currently interacting.
 (DefineLink
 	(DefinedSchema "Current interaction target")
-	(Get (State interaction-state (Variable "$x"))))
+	(Get
+		(TypedVariable (Variable "$x") (TypeNode "NumberNode"))
+		(State interaction-state (Variable "$x"))))
 
 ;; Return true if some face has is no longer visible (has left the room)
 ;; We detect this by looking for "acked" faces tat are not also visible.
@@ -421,7 +449,9 @@
 	(DefinedPredicateNode "was room empty?")
 	(EqualLink
 		(SetLink room-empty)
-		(GetLink (StateLink room-state (VariableNode "$x")))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(StateLink room-state (VariableNode "$x")))
 	))
 
 ;; Is there someone present?  We check for acked faces.
@@ -481,7 +511,13 @@
 (DefineLink ; This is required because interaction states are using NumberNode
 	(DefinedSchema "Get recognized face's face id")
 	(LambdaLink
-		(VariableList (VariableNode "face-id") (VariableNode "recog-id"))
+		(VariableList
+			(TypedVariable
+				(Variable "face-id")
+				(TypeNode "ConceptNode"))
+			(TypedVariable
+				(Variable "recog-id")
+				(TypeNode "ConceptNode")))
 		(ExecutionOutputLink ;
 			(GroundedSchemaNode "scm: get-face-id")
 			(ListLink
@@ -511,8 +547,12 @@
 			(PutLink (StateLink glance-state (VariableNode "$face-id"))
 				(DefinedSchemaNode "Select random face")))
 		(EqualLink
-			(GetLink (StateLink glance-state (VariableNode "$face-id")))
-			(GetLink (StateLink eye-contact-state (VariableNode "$face-id")))
+			(Get
+				(TypedVariable (Variable "$face-id") (Type "NumberNode"))
+				(StateLink glance-state (VariableNode "$face-id")))
+			(Get
+				(TypedVariable (Variable "$face-id") (Type "NumberNode"))
+				(StateLink eye-contact-state (VariableNode "$face-id")))
 		)
 		(DefinedPredicateNode "More than one face visible")
 		(DefinedPredicateNode "Select random glance target")
@@ -532,7 +572,9 @@
 		(True (Put
 				(Evaluation (Predicate "acked face")
 						(ListLink (Variable "$face-id")))
-				(Get (State eye-contact-state (Variable "$x")))))
+				(Get
+					(TypedVariable (Variable "$x") (Type "NumberNode"))
+					(State eye-contact-state (Variable "$x")))))
 	))
 
 ;; Remove the lost faces from "acked face" (so that "acked face" accurately
@@ -559,7 +601,9 @@
 		; true if not not-making eye-contact.
 		(NotLink (Equal
 			(SetLink no-interaction)
-			(Get (State interaction-state (Variable "$x"))))
+			(Get
+				(TypedVariable (Variable "$x") (Type "NumberNode"))
+				(State interaction-state (Variable "$x"))))
 	)))
 
 
@@ -569,7 +613,9 @@
 	(DefinedPredicate "Skip Interaction?")
 	(Equal
 		(SetLink face-tracking-off)
-		(Get (State face-tracking-state (Variable "$x"))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "ConceptNode"))
+			(State face-tracking-state (Variable "$x"))))
 	)
 
 ;; Return true if someone requests interaction.  This person will
@@ -578,7 +624,9 @@
 	(DefinedPredicate "Someone requests interaction?")
 	(NotLink (Equal
 		(SetLink no-interaction)
-		(Get (State request-eye-contact-state (Variable "$x"))))
+		(Get
+			(TypedVariable (Variable "$x") (Type "NumberNode"))
+			(State request-eye-contact-state (Variable "$x"))))
 	))
 
 ;; Send ROS message to actually make eye-contact with the person
@@ -591,12 +639,16 @@
 		;; Issue the look-at command, only if there is someone to
 		;; make eye contact with.
 		(NotLink (Equal
-			(Get (State eye-contact-state (Variable "$x")))
+			(Get
+				(TypedVariable (Variable "$x") (Type "NumberNode"))
+				(State eye-contact-state (Variable "$x")))
 			(SetLink no-interaction)))
 		(True (Put
 			(Evaluation (GroundedPredicate "scm:look-at-face")
 				(ListLink (Variable "$face")))
-			(Get (State eye-contact-state (Variable "$x")))))
+			(Get
+				(TypedVariable (Variable "$x") (Type "NumberNode"))
+				(State eye-contact-state (Variable "$x")))))
 	))
 
 ;; Break eye contact; this does not change the interaction state.
@@ -610,7 +662,9 @@
 (DefineLink
 	(DefinedPredicate "make eye contact")
 	(True (Put (State eye-contact-state (Variable "$face-id"))
-		(Get (State interaction-state (Variable "$x"))) ))
+		(Get
+			(TypedVariable (Variable "$x") (Type "NumberNode"))
+			(State interaction-state (Variable "$x"))) ))
 )
 
 ;; Move to a neutral head position.
@@ -651,7 +705,9 @@
 		(DefinedPredicate "Select random glance target")
 		(Put
 			(DefinedPredicate "glance and ack")
-			(Get (State glance-state (Variable "$face-id")))
+			(Get
+				(TypedVariable (Variable "$face-id") (Type "NumberNode"))
+				(State glance-state (Variable "$face-id")))
 		)
 	))
 

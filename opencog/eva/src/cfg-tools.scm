@@ -84,7 +84,9 @@
 	(DefineLink
 		(DefinedPredicateNode (string-append "dice-roll: " action))
 		(GreaterThan
-			(Get (State (Schema prob-name) (Variable "$x")))
+			(Get
+				(TypedVariable (Variable "$x") (Type "NumberNode"))
+				(State (Schema prob-name) (Variable "$x")))
 			(RandomNumber (Number 0) (Number 1)))))
 
 ; --------------------------------------------------------

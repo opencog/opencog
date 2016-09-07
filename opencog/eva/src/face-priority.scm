@@ -56,7 +56,9 @@
             (Variable "filter-face-id")
             (Type "NumberNode"))
         (Get
-            (VariableList (Variable "face-id") (Variable "priority"))
+            (VariableList
+                (TypedVariable (Variable "face-id") (Type "NumberNode"))
+                (TypedVariable (Variable "priority") (Type "NumberNode")))
             (And
                 (Identical (Variable "filter-face-id") (Variable "face-id"))
                 (State
@@ -99,7 +101,9 @@
                         (Variable "face-id"))
                     (Variable "priority")))
             (Get
-                (VariableList (Variable "face-id") (Variable "priority"))
+                (VariableList
+                    (TypedVariable (Variable "face-id") (Type "NumberNode"))
+                    (TypedVariable (Variable "priority") (Type "NumberNode")))
                 (And
                     (Identical (Variable "del-face-id") (Variable "face-id"))
                     (State
@@ -229,7 +233,9 @@
             (Variable "filter-face-id")
             (Type "NumberNode"))
         (Get
-            (VariableList (Variable "face-id") (Variable "priority"))
+            (VariableList
+                (TypedVariable (Variable "face-id") (Type "NumberNode"))
+                (TypedVariable (Variable "priority") (Type "NumberNode")))
             (And
                 (Identical (Variable "filter-face-id") (Variable "face-id"))
                 (State
@@ -265,7 +271,9 @@
             ; The GetLink is structuraly the same as
             ; (DefinedSchema "Get face priority")
             (Get
-                (VariableList (Variable "face-id") (Variable "priority"))
+                (VariableList
+                    (TypedVariable (Variable "face-id") (Type "NumberNode"))
+                    (TypedVariable (Variable "priority") (Type "NumberNode")))
                 (And
                     (Identical (Variable "del-face-id") (Variable "face-id"))
                     (State
@@ -379,13 +387,15 @@
     (DefinedPredicate "Has person being intracted with changed?")
     (SequentialOr
         (Not (Equal
-            (GetLink (State prev-interaction-state (Variable "value")))
+            (GetLink
+                (TypedVariable (Variable "value") (Type "NumberNode"))
+                (State prev-interaction-state (Variable "value")))
             (DefinedSchema "Current interaction target")))
     ))
 
 (Define
     (DefinedSchema "Set previous interaction value")
     (Lambda
-        (Variable "value")
+        (TypedVariable (Variable "value") (Type "NumberNode"))
         (State prev-interaction-state (Variable "value"))
     ))

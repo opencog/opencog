@@ -295,7 +295,9 @@
 			(SequentialAnd
 				(Equal
 					(DefinedSchema "New departures")
-					(Get (State eye-contact-state (Variable "$x"))))
+					(Get
+						(TypedVariable (Variable "$x") (Type "NumberNode"))
+						(State eye-contact-state (Variable "$x"))))
 				(DefinedPredicate "Show frustrated expression")
 				(DefinedPredicate "return to neutral")
 			)
