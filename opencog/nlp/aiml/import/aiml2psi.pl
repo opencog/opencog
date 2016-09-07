@@ -17,7 +17,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.5.4";
+my $ver = "0.5.5";
 my $debug;
 my $help;
 my $version;
@@ -1288,7 +1288,10 @@ while (my $line = <FIN>)
 	if (length($line) < 1) { next; }
 	my @parms = split(/\,/, $line);
 	my $cmd = $parms[0] || "";
-	my $arg = $parms[1] || "";
+
+	# To accept a pattern like this "<pattern>0</pattern>" as well
+	my $arg = ($parms[1] || $parms[1] eq 0)? $parms[1] : "";
+
 	if (length($cmd) < 1) { next; }
 
 	# Un-do the comma-damage up above.
