@@ -482,7 +482,16 @@
 	; previous response. Right now, we just check one level deep.
 	; XXX FIXME .. Maybe check a much longer list??
 	(define (same-as-before? SENT)
-		(equal? SENT (do-aiml-get (Concept "that")))
+		(define that (do-aiml-get (Concept "that")))
+		(define that-len
+			(if (null? that) 0
+				(string-length (string-join
+					(map cog-name (cog-outgoing-set that)) " "))
+			))
+
+		; It is OK to repeat the last response if it is
+		; shorter than 15 characters
+		(and (equal? SENT that) (> that-len 15))
 	)
 
 	(define (do-while-same SENT CNT)
