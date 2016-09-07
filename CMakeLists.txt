@@ -409,16 +409,6 @@ ELSE (TBB_FOUND)
 ENDIF (TBB_FOUND)
 MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
 
-FIND_PACKAGE(TCL)
-
-# /usr/bin/tclsh is expected for some embodiment tests, but is
-# not otherwise important for anything...
-IF (TCL_TCLSH)
-	MESSAGE(STATUS "TCL shell was found here: ${TCL_TCLSH}")
-ELSE (TCL_TCLSH)
-	MESSAGE(STATUS "TCL shell missing: needed for some embodiment tests.")
-ENDIF (TCL_TCLSH)
-
 # Optional, currently needed only to hush up DRD in util/Logger.cc
 FIND_PACKAGE(VALGRIND)
 IF (VALGRIND_FOUND)
