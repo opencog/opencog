@@ -312,7 +312,7 @@ ENDIF (OPENGL_FOUND)
 
 # Google Protobuf library
 # The protocol buffer compiler is a separately installable package, and
-# it is also needed for building embodiment PAI. So check for that, too.
+# it is needed for building the ZMQ messaging subsystem.
 FIND_PACKAGE(Protobuf)
 IF (PROTOBUF_FOUND
 		AND PROTOBUF_LIBRARY
@@ -333,7 +333,7 @@ ELSE (PROTOBUF_FOUND
 	IF (PROTOBUF_PROTOC_EXECUTABLE)
 		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n   To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
 	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; embodiment PAI can't be built without it.\n   To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; ZMQ messaging can't be built without it.\n   To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
 	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
 
 ENDIF (PROTOBUF_FOUND
