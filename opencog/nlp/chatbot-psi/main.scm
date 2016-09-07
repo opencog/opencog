@@ -69,10 +69,3 @@
 (define aiml-chat-demand (psi-demand "AIML chat demand" .8))
 (psi-demand-skip aiml-chat-demand)
 (psi-reset-valid-demand-cache)
-
-;-------------------------------------------------------------------------------
-; Run OpenPsi if it's not already running
-
-(if (not (psi-running?))
-    (psi-run)
-)
