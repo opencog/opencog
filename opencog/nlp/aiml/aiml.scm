@@ -326,6 +326,8 @@
 	(define pred (get-pred RULE "*-AIML-that-*"))
 	(if (null? pred) #t
 		(or (equal? (do-aiml-get (Concept "that")) (gdr pred))
+			; There may be a '*' in the 'that' tag of a rule as
+			; well -- use a MapLink to check the satisfiability
 			(not (null? (gar (cog-execute! (MapLink (gdr pred)
 				(Set (do-aiml-get (Concept "that"))))))))))
 )
