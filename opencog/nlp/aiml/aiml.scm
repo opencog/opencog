@@ -510,7 +510,8 @@
 		; "pickup search" manually for now, than giving no responses
 		(if (equal? response (List)) (begin
 			(display "no response has been generated, looking for a pickup\n")
-			(set! response (word-list-flatten (do-while-same (List) 5)))))
+			(set! response (word-list-flatten
+				(do-while-same (List (Glob "$star-1")) 5)))))
 
 		; The robots response is the current "that".
 		; Store up to two previous inputs and outputs
