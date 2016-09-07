@@ -334,6 +334,7 @@
 (DefineLink
 	(DefinedPredicateNode "Did someone arrive?")
 	(SatisfactionLink
+		(TypedVariable (Variable "$face-id") (TypeNode "NumberNode"))
 		(AndLink
 			; If someone is visible...
 			(PresentLink (EvaluationLink (PredicateNode "visible face")
