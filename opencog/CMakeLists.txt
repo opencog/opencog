@@ -16,7 +16,7 @@ IF (HAVE_SERVER)
 	ADD_SUBDIRECTORY (cogserver)
 	# attention builds *after* cogserver.
 	ADD_SUBDIRECTORY (attention)
-	# Octomap checking will be done inside
+
 	# Will always build types
 	ADD_SUBDIRECTORY (spacetime)
 	IF (HAVE_OCTOMAP)
