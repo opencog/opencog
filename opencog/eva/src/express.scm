@@ -32,7 +32,9 @@
 		(RandomChoice
 			(GetLink
 				; Return a bunch of probability-expr pairs.
-				(VariableList (Variable "$prob") (Variable "$expr"))
+				(VariableList
+					(TypedVariable (Variable "$prob") (Type "NumberNode"))
+					(TypedVariable (Variable "$expr") (Type "ConceptNode")))
 				(AndLink
 					(Evaluation
 						(Predicate "Emotion-expression")
@@ -52,7 +54,9 @@
 		(Variable "$emo")
 		(RandomChoice
 			(GetLink
-				(VariableList (Variable "$prob") (Variable "$expr"))
+				(VariableList
+					(TypedVariable (Variable "$prob") (Type "NumberNode"))
+					(TypedVariable (Variable "$expr") (Type "ConceptNode")))
 				(AndLink
 					(Evaluation
 						(Predicate "Emotion-gesture")
@@ -72,11 +76,13 @@
 	(LambdaLink
 		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
 		(RandomNumberLink
-			(GetLink (VariableNode "$int-min")
+			(GetLink
+				(TypedVariable (Variable "$int-min") (Type "NumberNode"))
 				(StateLink (ListLink
 					(VariableNode "$emo") (VariableNode "$expr")
 					(SchemaNode min-name)) (VariableNode "$int-min")))
-			(GetLink (VariableNode "$int-max")
+			(GetLink
+				(TypedVariable (Variable "$int-max") (Type "NumberNode"))
 				(StateLink (ListLink
 					(VariableNode "$emo") (VariableNode "$expr")
 					(SchemaNode max-name)) (VariableNode "$int-max")))
