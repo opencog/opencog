@@ -955,7 +955,7 @@ sub process_category
 	$text =~ s/\\/\\\\/g;
 
 	# strip out HTML markup. <a href> tag
-	$text =~ s/<a target=.*?>//g;
+	$text =~ s/<a (target|href)=.*?>//g;
 	$text =~ s/<\/a>//g;
 	$text =~ s/<ul>//g;
 	$text =~ s/<\/ul>//g;
