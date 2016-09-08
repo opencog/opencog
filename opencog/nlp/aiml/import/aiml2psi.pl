@@ -499,11 +499,12 @@ sub process_star
 	$star =~ s/^\s*//;
 	$star =~ s/\s*$//;
 	$star =~ s/\\'/'/g;
-	if ($star =~ /^index='(\d+)'\s*\/>(.*)/)
+	# Handle both <star index='1'/> and <star index='1'></star>
+	if ($star =~ /^index='(\d+)'(\s*\/>|>\s*<\/star>)(.*)/)
 	{
 		$tout .= $indent . "(Glob \"\$star-$1\")\n";
 
-		my $t = $2;
+		my $t = $3;
 		$t =~ s/^\s*//;
 		$t =~ s/\s*$//;
 		if ($t ne "")
