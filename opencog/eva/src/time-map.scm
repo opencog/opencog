@@ -1,57 +1,60 @@
 (use-modules (srfi srfi-1) )
-(use-modules (opencog) (opencog atom-types) (opencog eva-model) (opencog eva-behavior))
+(use-modules (opencog) (opencog atom-types)
+	(opencog eva-model) (opencog eva-behavior))
 (use-modules (opencog ato pointmem)); needed for maps
 (use-modules (opencog python))
 
 (StateLink (ConceptNode "last person who spoke") (NumberNode "0"))
 (define new-person-spoke 0)
-; -----------------------------------------------------------------------------
-; For recording facial coordinates, create octomap with 15hz, 10 second or
-; 150 frames buffer and 1 cm spatial resolution.
+; --------------------------------------------------------------------
+; For recording facial coordinates, create octomap with 15hz,
+; 10 second or 150 frames buffer and 1 cm spatial resolution.
 (create-map "faces" 0.01 66 150)
 ; Initialize  the map
 (step-time-unit "faces")
 ; Make the stepping take place automatically
 (auto-step-time-on "faces")
-; time-span is the amount of time in milliseconds to be considered for locating
-; a face. The time limit for spatial memory for faces :-). The value is
-; dependent on the frequency of update of the map and the number of frames, and
-; is set as half the size of the total buffer.
+; time-span is the amount of time in milliseconds to be considered
+; for locating a face. The time limit for spatial memory for faces :-).
+; The value is dependent on the frequency of update of the map and
+; the number of frames, and is set as half the size of the total buffer.
 (define face-loc-time-span 8000) ; (8000 milliseconds or 8 seconds)
 
-; -----------------------------------------------------------------------------
+; ---------------------------------------------------------------------
 
-;;returns null string if atom not found, number x y z string if okay
-;;these functions assume only one location for one atom in a map at a time
+;; Returns null string if atom not found, number x y z string if okay.
+;; These functions assume only one location for one atom in a map at
+;; a time.
 (define (get-last-xyz map-name id-node elapse)
 	(let* ((loc-atom (get-last-locs-ato map-name id-node elapse) ))
-		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
-			(list )
+		(if (cog-atom? loc-atom)
 			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-				(xx (loc-link-x loc-link))
-				(yy (loc-link-y loc-link))
-				(zz (loc-link-z loc-link)))
-					(list xx yy zz))
-		)
-	)
-)
-;;get first occurence in map
-(define (get-first-xyz map-name id-node elapse)
-		(let* ((loc-atom (get-first-locs-ato map-name id-node elapse) ))
-			(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
-				(list )
-				(let* ((loc-link (car (cog-outgoing-set loc-atom)))
 					(xx (loc-link-x loc-link))
 					(yy (loc-link-y loc-link))
 					(zz (loc-link-z loc-link)))
-						(list xx yy zz))
-			)
+				(list xx yy zz))
+			(list)
 		)
+	)
+)
+
+;; Get first occurence in map
+(define (get-first-xyz map-name id-node elapse)
+	(let* ((loc-atom (get-first-locs-ato map-name id-node elapse) ))
+		(if (cog-atom? loc-atom)
+			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+					(xx (loc-link-x loc-link))
+					(yy (loc-link-y loc-link))
+					(zz (loc-link-z loc-link)))
+				(list xx yy zz))
+			(list)
+		)
+	)
 )
 
 ;;scm code
 (define (get-face face-id-node e-start)
- (get-last-xyz "faces" face-id-node (round e-start))
+	(get-last-xyz "faces" face-id-node (round e-start))
 )
 
 ;;math
@@ -80,16 +83,16 @@
 	)
 )
 
-;;;searches for last face id location observed in previous 8 seconds
-;;if face id is present in past 1 and 2 seconds then past 1 second id will be recovered
-;;then python look at point function is called which calls blender api to look at face
-;;look at face also sets gaze at face
-;; expects face-id number node
+;; Searches for last face id location observed in previous 8 seconds.
+;; If face id is present in past 1 and 2 seconds, then past 1 second id
+;; will be recovered then python look at point function is called which
+;; calls blender api to look at face look at face also sets gaze at
+;; face.
+;; Expects face-id NumberNode
 (define (look-at-face face-id-node)
 	(let ((loc-atom
 			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
-		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
-			(stv 1 1) ; FIXME: How should it be handled when (stv 0 1) is returned
+		(if (cog-atom? loc-atom)
 			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
 					(xx (number->string (loc-link-x loc-link)))
 					(yy (number->string (loc-link-y loc-link)))
@@ -98,20 +101,21 @@
 					(string-append "look_at_face_point(" xx "," yy "," zz ")"))
 				(stv 1 1)
 			)
+			(stv 1 1) ; FIXME: How should it be handled when (stv 0 1) is returned
 		)
 	)
 )
 
-;;;searches for last face id location observed in previous 8 seconds
-;;if face id is present in past 1 and 2 seconds then past 1 second id will be recovered
-;;then python gaze at point function is called which calls blender api to gaze at face
-;;gaze at face only moves the eyes
-;; expects face-id number node
+;; Searches for last face id location observed in previous 8 seconds.
+;; If face id is present in past 1 and 2 seconds, then past 1 second
+;; id will be recovered then python gaze at point function is called
+;; which calls blender api to gaze at face gaze at face only moves
+;; the eyes.
+;; Expects face-id NumberNode
 (define (gaze-at-face face-id-node)
 	(let ((loc-atom
 			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
-		(if (equal? (cog-atom (cog-undefined-handle)) loc-atom)
-			(stv 1 1) ; FIXME: How should it be handled when (stv 0 1) is returned
+		(if (cog-atom? loc-atom)
 			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
 					(xx (number->string (loc-link-x loc-link)))
 					(yy (number->string (loc-link-y loc-link)))
@@ -120,13 +124,14 @@
 					(string-append "gaze_at_face_point(" xx "," yy "," zz ")"))
 				(stv 1 1)
 			)
+			(stv 1 1) ; FIXME: How should it be handled when (stv 0 1) is returned
 		)
 	)
 )
 ;;get string of face-id's seperated by space - call python split() function
 ;;in scheme itself list of number nodes
 (define (get-visible-faces)
-  (cog-filter 'NumberNode (show-visible-faces))
+	(cog-filter 'NumberNode (show-visible-faces))
 )
 
 ;;below creates say atom for face if sound came from it
@@ -165,10 +170,10 @@
 	))
 )
 
-;;get all face-ids and only one sound id 1.0, compare them
-;;threshold = sound in +-15 degrees of face
-;below returns face id of face nearest to sound vector atleast 10 degrees, or
-;0 face id
+;; Get all face-ids and only one sound id 1.0, compare them.
+;; threshold = sound in +-15 degrees of face
+;; below returns face id of face nearest to sound vector at least
+;; 10 degrees, or 0 face id
 (define (snd-nearest-face xx yy zz)
 	(let* ((lst (get-visible-faces))
 			(falist (map
@@ -191,7 +196,7 @@
 	)
 )
 
-;;TODO: change this function to psi-rule later
+;; TODO: change this function to psi-rule later
 (define (request-attention fid)
 	(set! new-person-spoke fid)
 	(StateLink request-eye-contact-state (NumberNode fid))
