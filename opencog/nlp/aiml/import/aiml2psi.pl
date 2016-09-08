@@ -969,6 +969,7 @@ sub process_category
 	$text =~ s/<\/img>//g;
 	$text =~ s/<property.*?>//g;
 	$text =~ s/<id\/>//g;
+	$text =~ s/<id>\s*<\/id>//g;
 	$text =~ s/<br\/>//g;
 	$text =~ s/<em>//g;
 	$text =~ s/<\/em>//g;
