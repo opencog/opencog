@@ -17,7 +17,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.5.5";
+my $ver = "0.5.6";
 my $debug;
 my $help;
 my $version;
@@ -973,6 +973,9 @@ sub process_category
 	$text =~ s/<br\/>//g;
 	$text =~ s/<em>//g;
 	$text =~ s/<\/em>//g;
+
+	# Backward compatible with '<get_*', turn it into <get name='*'/>
+	$text =~ s/<get_(.*?)(\s*\/>|>\s*<\/get_.*?>)/<get name='$1'\/>/g;
 
 	# Trim leading and trailing whtespace.
 	$text =~ s/^\s*//;
