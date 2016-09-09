@@ -81,6 +81,14 @@
                 "[OpenPsi] Starting evaluation psi-rule = ~a"
                 (psi-rule-alias rule))
 
+            ; The #t condition is for evaluatable-contexts. These are
+            ; contexts that only have evaluatable-terms that return TRUE_TV
+            ; or FALSE_TV.
+            ; The #f condition is for groundable-contexts. These are contexts,
+            ; that are similar to the implicant of a BindLink. The contexts are
+            ; grounded and the groudning atoms are put into the action (that is
+            ; equivalent to the implicand of the BindLink)
+            Evaluatable-context
             (if (null? context-atoms)
                 (cog-execute! action)
                 (cog-execute! (PutLink action context-atoms))
