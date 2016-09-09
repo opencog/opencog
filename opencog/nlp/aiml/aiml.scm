@@ -322,6 +322,8 @@
 			(define rule-pat (gdr (get-pred r "*-AIML-pattern-*")))
 			(define cnt (list-index (lambda (x y) (not (equal? x y)))
 				(cog-outgoing-set rule-pat) (cog-outgoing-set SENT)))
+			; If cnt is false, that's an exact match
+			(if (equal? cnt #f) (set! cnt (cog-arity SENT)))
 			(cond
 				((> cnt common) (set! common cnt) (set! rtn-rules (list r)))
 				((= cnt common) (set! rtn-rules (append rtn-rules (list r))))))
@@ -338,9 +340,10 @@
 "
 	(define exact-rules (get-exact-rules SENT))
 
-	(define top-rules
-		(filter is-topical-rule?
-			(if (null? exact-rules) (get-pattern-rules SENT) exact-rules)))
+	(define pat-rules (get-pattern-rules SENT))
+
+	(define top-rules (filter is-topical-rule?
+		(append exact-rules pat-rules)))
 
 	(define tht-rules
 		(filter satisfy-that? top-rules))
