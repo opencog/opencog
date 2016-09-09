@@ -87,8 +87,7 @@
             ; The #f condition is for groundable-contexts. These are contexts,
             ; that are similar to the implicant of a BindLink. The contexts are
             ; grounded and the groudning atoms are put into the action (that is
-            ; equivalent to the implicand of the BindLink)
-            Evaluatable-context
+            ; equivalent to the implicand of the BindLink).
             (if (null? context-atoms)
                 (cog-execute! action)
                 (cog-execute! (PutLink action context-atoms))
