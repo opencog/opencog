@@ -86,7 +86,7 @@
             ; or FALSE_TV.
             ; The #f condition is for groundable-contexts. These are contexts,
             ; that are similar to the implicant of a BindLink. The contexts are
-            ; grounded and the groudning atoms are put into the action (that is
+            ; grounded and the grounding atoms are put into the action (that is
             ; equivalent to the implicand of the BindLink).
             (if (null? context-atoms)
                 (cog-execute! action)
