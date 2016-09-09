@@ -242,32 +242,6 @@
 				))))
 		)))
 
-	; AIML spec compatibility:
-	; AIML uses a trie, and only accepts the longest-possible match -- that is,
-	; it matches the 1st word, and then 2nd, 3rd... and so on until there is a
-	; mismatch. So for example if there are two rules
-	;     <pattern>THERE IS A *</pattern>
-	;     <pattern>THERE IS *</pattern>
-	; and the input is "There is a cat", it will always choose the first one
-	; and never choose the second. The below makes sure that OC AIML behaves
-	; the same way.
-	(define (check-common RULES)
-		(define common 0)
-		(define rtn-rules (list))
-
-		(for-each
-			(lambda (r)
-				(define rule-pat (gdr (get-pred r "*-AIML-pattern-*")))
-				(define cnt (list-index (lambda (x y) (not (equal? x y)))
-					(cog-outgoing-set rule-pat) (cog-outgoing-set SENT)))
-				(cond
-					((> cnt common) (set! common cnt) (set! rtn-rules (list r)))
-					((= cnt common) (set! rtn-rules (append rtn-rules (list r))))))
-			RULES)
-
-		rtn-rules
-	)
-
 	(define (get-rules)
 		; For getting those "wildcard" rules
 		; TODO: Maybe it is better to get these rules using GetLink + SignatureLink,
@@ -283,9 +257,7 @@
 
 	; Get all of the rules that might apply to this sentence,
 	; and are inexact matches (i.e. have a variable in it)
-	; and then select those that shares the most common words with
-	; words at the beginning of the input sentence
-	(check-common (filter is-usable-rule? (map gar (get-rules))))
+	(filter is-usable-rule? (map gar (get-rules)))
 )
 
 ; Given a pattern-based rule, run it. Given that it has variables
@@ -332,6 +304,32 @@
 				(Set (do-aiml-get (Concept "that"))))))))))
 )
 
+; AIML spec compatibility:
+; AIML uses a trie, and only accepts the longest-possible match -- that is,
+; it matches the 1st word, and then 2nd, 3rd... and so on until there is a
+; mismatch. So for example if there are two rules
+;     <pattern>THERE IS A *</pattern>
+;     <pattern>THERE IS *</pattern>
+; and the input is "There is a cat", it will always choose the first one
+; and never choose the second. The below makes sure that OC AIML behaves
+; the same way.
+(define (get-longest-match RULES SENT)
+	(define common 0)
+	(define rtn-rules (list))
+
+	(for-each
+		(lambda (r)
+			(define rule-pat (gdr (get-pred r "*-AIML-pattern-*")))
+			(define cnt (list-index (lambda (x y) (not (equal? x y)))
+				(cog-outgoing-set rule-pat) (cog-outgoing-set SENT)))
+			(cond
+				((> cnt common) (set! common cnt) (set! rtn-rules (list r)))
+				((= cnt common) (set! rtn-rules (append rtn-rules (list r))))))
+		RULES)
+
+	rtn-rules
+)
+
 (define-public (aiml-get-applicable-rules SENT)
 "
   aiml-get-applicable-rules SENT - Get AIML rules that are suitable
@@ -347,7 +345,7 @@
 	(define tht-rules
 		(filter satisfy-that? top-rules))
 
-	tht-rules
+	(get-longest-match tht-rules SENT)
 )
 
 ; --------------------------------------------------------------
