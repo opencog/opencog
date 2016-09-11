@@ -1,0 +1,630 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{url} 
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman times
+\font_sans helvet
+\font_typewriter courier
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_amsmath 2
+\use_esint 0
+\use_mhchem 0
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+World Models
+\end_layout
+
+\begin_layout Abstract
+A description of how OpenCog currently implements self-awareness and world-aware
+ness, together with a sketch of how this could be improved and expanded.
+ The short-term goal is to create a robot (embodied chatbot) that can hear
+ and see, and carry on conversations about perceived objects, as well as
+ to carry out conversations about the self.
+ These conversations can be verbal, and can also have physical-body performance
+ components: body and face expressive movements, such as smiling or waving
+ a hand.
+ 
+\end_layout
+
+\begin_layout Section*
+Overview
+\end_layout
+
+\begin_layout Standard
+The basic premise that will be elaborated here is that interacting with
+ the world requires the creation of an 
+\begin_inset CommandInset href
+LatexCommand href
+name "internal model"
+target "https://en.wikipedia.org/wiki/Internal_model_(motor_control)"
+
+\end_inset
+
+ of the world: in systems theory, this is sometimes called 
+\begin_inset Quotes eld
+\end_inset
+
+the 
+\begin_inset CommandInset href
+LatexCommand href
+name "good regulator theorem"
+target "https://en.wikipedia.org/wiki/Good_regulator"
+
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+ An internal model provides the system software with a natural API, a natural
+ representation, that various different software components can agree on,
+ and use, and manipulate, and reason with.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+AtomSpace
+\end_layout
+
+\begin_layout Standard
+To acheive a unification of speech, behavior and perception, one must have
+ a software infrastructure that allows these to be represented in a unified
+ way: that is, the data and algorithms must reside in some unified location.
+ From here on out, it is assumed that this unified location is the 
+\begin_inset CommandInset href
+LatexCommand href
+name "OpenCog AtomSpace"
+target "http://wiki.opencog.org/w/AtomSpace"
+
+\end_inset
+
+.
+ This is stated explicitly, because, in the course of discussion, various
+ other technology platforms have been nominated.
+ Although one could debate the merits of alternative technologies, this
+ will not be done here.
+\end_layout
+
+\begin_layout Subsubsection*
+Self Model
+\end_layout
+
+\begin_layout Standard
+The self-model, and together with it, the controversial term 
+\begin_inset Quotes eld
+\end_inset
+
+self-awareness
+\begin_inset Quotes erd
+\end_inset
+
+, is here defined to simply be an internal model of the robot itself: both
+ of low-level physical variables, such as motor angles, as well as higher-order
+ concepts such as 
+\begin_inset Quotes eld
+\end_inset
+
+I smiled just a few seconds ago
+\begin_inset Quotes erd
+\end_inset
+
+, or 
+\begin_inset Quotes eld
+\end_inset
+
+I just said this-and-such
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A basic assumption taken in the following is that the engineering and design
+ of the self-model is not any different than the engineering and design
+ of the world-model: the data types and access methods are the same for
+ both.
+ Thus, ideas like 
+\begin_inset Quotes eld
+\end_inset
+
+I know that my arm is raised
+\begin_inset Quotes erd
+\end_inset
+
+ are represented in much the same way as 
+\begin_inset Quotes eld
+\end_inset
+
+I know that there is a box in the corner of the room.
+\begin_inset Quotes erd
+\end_inset
+
+ Thus, in what follows, the expression 
+\begin_inset Quotes eld
+\end_inset
+
+internal model
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+model
+\begin_inset Quotes erd
+\end_inset
+
+ will refer to both the self-model and the world model, there being no particula
+r difference.
+\end_layout
+
+\begin_layout Subsubsection*
+State
+\end_layout
+
+\begin_layout Standard
+The model is meant to implemented as 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "program state"
+target "https://en.wikipedia.org/wiki/State_(computer_science)"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In the context of OpenCog, this means that state is represented as set
+ of 
+\begin_inset CommandInset href
+LatexCommand href
+name "Atoms"
+target "http://wiki.opencog.org/w/Atom"
+
+\end_inset
+
+ in the AtomSpace: the AtomSpace is, by definition, a container designed
+ specifically for the purpose of holding and storing Atoms.
+ Much of this state is to be represented with the 
+\begin_inset CommandInset href
+LatexCommand href
+name "StateLink"
+target "http://wiki.opencog.org/w/StateLink"
+
+\end_inset
+
+, and much of the rest with 
+\begin_inset CommandInset href
+LatexCommand href
+name "EvaluationLinks"
+target "http://wiki.opencog.org/w/EvaluationLink"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "PredicateNodes"
+target "http://wiki.opencog.org/w/PredicateNode"
+
+\end_inset
+
+.
+ The precise details follow what is currently the standard best-practices
+ in OpenCog.
+ That is, there is no particular proposal here to change how things are
+ already handled and coded in OpenCog, although a goal here is to clarify
+ numerous issues.
+\end_layout
+
+\begin_layout Standard
+It is critically important that state be represented as Atoms, as, otherwise,
+ there is no other practical way of providing access to that state by all
+ of the various subsystems that need to examine and manipulate that state.
+ This is an absolutely key insight that often seems to be lost: if the state
+ data is placed in some C++ or Python or Scheme or Haskel class, it is essential
+ly 
+\begin_inset Quotes eld
+\end_inset
+
+invisible
+\begin_inset Quotes erd
+\end_inset
+
+ to the very system that needs to work with it.
+ This applies to any kind of state: it could be chat state (words and sentences)
+ or visual state (pixels, 3D coordinate locations): if it is not represented
+ as Atoms, then the myriad learning and reasoning algorithms cannot effectively
+ act on this state.
+ This is an absolutely key point, and is one reason why non-AtomSpace infrastruc
+tures are not being considered: they lack the representational uniformity
+ and infrastructure needed for implementing learning and reasoning.
+\end_layout
+
+\begin_layout Standard
+However, the AtomSpace does have certain peculiar performance characteristics
+ and limitations that make it not suitable for all data: for example, one
+ would never want to put raw video or audio into it.
+ Yet, one does need access to such data, and so specific subsystems can
+ be created to efficiently handle special-purpose data.
+ A primary example of this is the 
+\begin_inset CommandInset href
+LatexCommand href
+name "SpaceTime"
+target "http://wiki.opencog.org/w/SpaceServer"
+
+\end_inset
+
+ subsystem, which represents the 3D locations of objects in an 
+\begin_inset CommandInset href
+LatexCommand href
+name "OctTree"
+target "https://en.wikipedia.org/wiki/Octree"
+
+\end_inset
+
+ format, as well as offering a time component.
+ Although the SpaceTime subsystem can store data in a compact internal format,
+ it is not, however, exempt from having to work with Atoms: data must be
+ accessible as Atoms, and suitable query API's must be provided.
+ In this example: it is possible to query for nearby time-like events, or
+ to answer questions about whether one object is nearer or farther, or maybe
+ bigger or smaller, than another.
+\end_layout
+
+\begin_layout Subsubsection*
+Model and Control
+\end_layout
+
+\begin_layout Standard
+It is not sufficient to create an internal model of the world, and represent
+ it as state: a control API to manipulate that state must also be provided.
+ The control is the active snippet of code that performs the actions needed
+ to update the internal model.
+ It can be thought of as the 
+\begin_inset Quotes eld
+\end_inset
+
+control
+\begin_inset Quotes erd
+\end_inset
+
+ aspect of the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "model-view-controller"
+target "https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ (MVC) paradigm from GUI programming.
+ There are both engineering and philosophical reasons for having a control
+ API.
+ The engineering reasons include things like code-reuse, error-checking
+ and ease-of-use.
+ The philosophical reason is that a control API provides a shim between
+ the world of static data, and the world of action and movement.
+ That is, as events occur in time, and as the world is in flux, so must
+ also be the internal model.
+ 
+\end_layout
+
+\begin_layout Standard
+It is useful to think of the control API as a collections of 
+\begin_inset Quotes eld
+\end_inset
+
+actions
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+verbs
+\begin_inset Quotes erd
+\end_inset
+
+ that can be applied to 
+\begin_inset Quotes eld
+\end_inset
+
+objects
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In object-oriented programming, these 
+\begin_inset Quotes eld
+\end_inset
+
+actions
+\begin_inset Quotes erd
+\end_inset
+
+ are usually called 
+\begin_inset Quotes eld
+\end_inset
+
+methods
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+messages
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In what follows, these will often be called 
+\begin_inset Quotes eld
+\end_inset
+
+verbs
+\begin_inset Quotes erd
+\end_inset
+
+, or possibly 
+\begin_inset Quotes eld
+\end_inset
+
+meta-verbs
+\begin_inset Quotes erd
+\end_inset
+
+ (XXX TODO: we need a good name for this).
+ There is an important reason for this choice of terminology.
+ First, due to the nature of how data is represented in the AtomSpace, it
+ is the case that some given action can be applied to a large swath of the
+ data.
+ That is, most actions are NOT tightly coupled to the data they are manipulating
+, but are quite general.
+ This means that the object-oriented paradigm does not work well with our
+ concept of 
+\begin_inset Quotes eld
+\end_inset
+
+internal model
+\begin_inset Quotes erd
+\end_inset
+
+: its not like there are many different kinds of objects, and they all need
+ to have methods.
+ More accurately, there are only a few kinds, and many (most?) actions are
+ in principle (defacto?) capable of manipulating many (most?) kinds of state.
+ The OO paradigm does not provide a good way of thinking about what goes
+ on in the atomspace.
+\end_layout
+
+\begin_layout Standard
+Another handy reason for why these 
+\begin_inset Quotes eld
+\end_inset
+
+actions
+\begin_inset Quotes erd
+\end_inset
+
+ can be called 
+\begin_inset Quotes eld
+\end_inset
+
+verbs
+\begin_inset Quotes erd
+\end_inset
+
+ is that they are really 
+\begin_inset Quotes eld
+\end_inset
+
+potential actions
+\begin_inset Quotes erd
+\end_inset
+
+: nothing happens until they are performed.
+ However, they can still be talked about, and reasoned about, and even learned:
+ that is, the actions themselves can also be represented with Atoms, thus
+ allowing the reasoning subsystem to make inferences such as 
+\begin_inset Quotes eld
+\end_inset
+
+if I do X, thn Y will happen
+\begin_inset Quotes erd
+\end_inset
+
+ e.g.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+if I stick out my ongue, people will laugh, or maybe they will get offended
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+*language
+\end_layout
+
+\begin_layout Standard
+* in atomese
+\end_layout
+
+\begin_layout Subsubsection*
+Stuff
+\end_layout
+
+\begin_layout Standard
+prediction
+\end_layout
+
+\begin_layout Standard
+forward model
+\end_layout
+
+\begin_layout Section*
+Items
+\end_layout
+
+\begin_layout Itemize
+a person walks into room, who she recognizes.
+ Depending on psi, she whould do non-verbal greetings (play one of 3-4 different
+ animations (look at, chin push, nod)) and verbal greetings (
+\begin_inset Quotes eld
+\end_inset
+
+hello, what's up, yo dawg
+\begin_inset Quotes erd
+\end_inset
+
+).
+ split up the state and the psi rule stuff properly.
+ See comments here: https://github.com/opencog/ros-behavior-scripting/pull/80
+ 
+\end_layout
+
+\begin_layout Itemize
+extract keywords/key-topics from sentence, and remember them, then apply
+ fuzzy matcher to see which of these come up.
+\end_layout
+
+\begin_layout Section*
+Random ideas
+\end_layout
+
+\begin_layout Itemize
+Why did you smile? Output: have her explain recent opensi decision-making.
+\end_layout
+
+\begin_layout Itemize
+I'm so sorry about that.
+ Output: a small cute pout (blend of frown and ???)
+\end_layout
+
+\begin_layout Itemize
+Look at me.
+ (verify look-at location or report visibility)
+\end_layout
+
+\begin_layout Itemize
+What are you doing? 
+\end_layout
+
+\begin_layout Itemize
+(When last person leaves, she should say goodbye.
+ If did not say goodbye, then say 
+\begin_inset Quotes eld
+\end_inset
+
+hey where did everybopdy go?
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+If no one isvisibile, and no one has been visible for many minutes, she
+ should say 
+\begin_inset Quotes eld
+\end_inset
+
+hey where did everybody go?
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Behavior -- she should not get sleepy, as long as someone is visible.
+\end_layout
+
+\begin_layout Itemize
+Behavior -- she should complain, if no one is visible, but there is a chat
+ session going on.
+\end_layout
+
+\end_body
+\end_document
