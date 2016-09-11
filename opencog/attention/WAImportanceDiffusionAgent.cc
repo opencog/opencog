@@ -25,6 +25,7 @@
  */
 
 #include <opencog/util/Config.h>
+#include <opencog/attention/atom_types.h>
 
 #include "WAImportanceDiffusionAgent.h"
 
@@ -37,6 +38,12 @@ WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
     _tournamentSize = config().get_int("ECAN_DIFFUSION_TOURNAMENT_SIZE", 5);
 
     set_sleep_time(300);
+}
+
+
+WAImportanceDiffusionAgent::~WAImportanceDiffusionAgent()
+{
+    atomAddedConnection.disconnect();
 }
 
 void WAImportanceDiffusionAgent::run()
@@ -77,12 +84,12 @@ Handle WAImportanceDiffusionAgent::tournamentSelect(HandleSeq population){
  */
 void WAImportanceDiffusionAgent::spreadImportance()
 {
-    HandleSeq diffusionSourceVector = ImportanceDiffusionBase::diffusionSourceVector(false);
+    HandleSeq sourceVec = diffusionSourceVector();
 
-    if (diffusionSourceVector.size() == 0)
+    if (sourceVec.size() == 0)
         return;
 
-    Handle target = tournamentSelect(diffusionSourceVector);
+    Handle target = tournamentSelect(sourceVec);
 
     // Check the decision function to determine if spreading will occur
     diffuseAtom(target);
@@ -90,4 +97,110 @@ void WAImportanceDiffusionAgent::spreadImportance()
     // Now, process all of the outstanding diffusion events in the diffusion
     // stack
     processDiffusionStack();
+}
+
+/*
+ * Returns a vector of atom handles that will diffuse STI
+ *
+ * Calculated as all atoms in the attentional focus (nodes and links)
+ * excluding any hebbian links
+ */
+HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
+{
+    static bool first_time = true;
+    HandleSeq  sources;
+
+    if(first_time){
+        _as->get_all_atoms(sources);
+#ifdef DEBUG
+    std::cout << "Calculating diffusionSourceVector." << std::endl;
+    std::cout << "AF Size before removing hebbian links: " <<
+        sources.size() << "\n";
+#endif
+
+    // Remove the hebbian links
+    auto it_end =
+        std::remove_if(sources.begin(), sources.end(),
+                [=](const Handle& h)
+                {
+                Type type = h->getType();
+
+#ifdef DEBUG
+                std::cout << "Checking atom of type: " <<
+                classserver().getTypeName(type) << "\n";
+#endif
+
+                if (type == ASYMMETRIC_HEBBIAN_LINK ||
+                    type == HEBBIAN_LINK ||
+                    type == SYMMETRIC_HEBBIAN_LINK ||
+                    type == INVERSE_HEBBIAN_LINK ||
+                    type == SYMMETRIC_INVERSE_HEBBIAN_LINK)
+                {
+#ifdef DEBUG
+                std::cout << "Atom is hebbian" << "\n";
+#endif
+                return true;
+                }
+                else
+                {
+#ifdef DEBUG
+                    std::cout << "Atom is not hebbian" << "\n";
+#endif
+                    return false;
+                }
+                });
+    sources.erase(it_end, sources.end());
+
+#ifdef DEBUG
+    std::cout << "AF Size after removing hebbian links: " <<
+        sources.size() << "\n";
+#endif
+
+    _diffusionSources = sources;
+    first_time = false;
+
+    } else if(not atomAddedConnection.connected() or
+              not atomRemovedConnection.connected()) {
+        atomAddedConnection =_cogserver.getAtomSpace().addAtomSignal(
+                boost::bind(&WAImportanceDiffusionAgent::atomAddedSignalHandler,
+                    this, _1));
+        
+        atomRemovedConnection =_cogserver.getAtomSpace().removeAtomSignal(
+                boost::bind(&WAImportanceDiffusionAgent::atomRemovedSignalHandler,
+                    this, _1));
+ 
+    }
+
+    return _diffusionSources;
+}
+
+
+void WAImportanceDiffusionAgent::atomAddedSignalHandler(const Handle& h)
+{
+    Type type = h->getType();
+
+#ifdef DEBUG
+    std::cout << "Checking atom of type: " <<
+               classserver().getTypeName(type) << "\n";
+#endif
+
+    if (type == ASYMMETRIC_HEBBIAN_LINK ||
+        type == HEBBIAN_LINK ||
+        type == SYMMETRIC_HEBBIAN_LINK ||
+        type == INVERSE_HEBBIAN_LINK ||
+        type == SYMMETRIC_INVERSE_HEBBIAN_LINK){
+       
+        return;
+    }
+
+    _diffusionSources.push_back(h);
+}
+
+void WAImportanceDiffusionAgent::atomRemovedSignalHandler(const AtomPtr& aptr)
+{
+     Handle h = aptr->getHandle();
+    _diffusionSources.erase(std::remove_if(_diffusionSources.begin(), 
+                            _diffusionSources.end(),
+                             [=](Handle& hi){ return hi == h ;}),
+                            _diffusionSources.end());
 }

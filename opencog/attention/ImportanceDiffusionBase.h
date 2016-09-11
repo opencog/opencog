@@ -66,7 +66,7 @@ protected:
 
     virtual void diffuseAtom(Handle);
 
-    HandleSeq diffusionSourceVector(bool af_only);
+    HandleSeq diffusionSourceVector(void);
     HandleSeq incidentAtoms(Handle);
     HandleSeq hebbianAdjacentAtoms(Handle);
     std::map<Handle, double> probabilityVector(HandleSeq);

@@ -72,12 +72,19 @@ Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
 
 void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
-    HandleSeq atoms;
+    AttentionValue::sti_t AFBoundarySTI = _as->get_attentional_focus_boundary();
+    AttentionValue::sti_t minSTISeen  = AttentionValue::MINSTI;
+   
+    std::default_random_engine generator;
+    // randomly select a bin 
+    std::uniform_int_distribution<AttentionValue::sti_t> dist(minSTISeen,AFBoundarySTI);
+    auto sti = dist(generator);
 
-    _as->get_all_atoms(atoms);
+    HandleSeq candidates;
+    _as->get_handles_by_AV(std::back_inserter(candidates),sti,sti+5);
+        
+    if (candidates.size() == 0) return;
 
-    if (atoms.size() == 0) return;
-
-    Handle h = tournamentSelect(atoms);
+    Handle h = tournamentSelect(candidates);
     targetSetOut.push_back(h);
 }
