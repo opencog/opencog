@@ -375,8 +375,8 @@ target "https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller"
  (MVC) paradigm from GUI programming.
  There are both engineering and philosophical reasons for having a control
  API.
- The engineering reasons include things like code-reuse, error-checking
- and ease-of-use.
+ The engineering reasons include things like code-reuse, error-checking,
+ encapsulation and ease-of-use.
  The philosophical reason is that a control API provides a shim between
  the world of static data, and the world of action and movement.
  That is, as events occur in time, and as the world is in flux, so must
@@ -507,7 +507,7 @@ potential actions
 \begin_inset Quotes eld
 \end_inset
 
-if I do X, thn Y will happen
+if I do X, then Y will happen
 \begin_inset Quotes erd
 \end_inset
 
@@ -516,7 +516,7 @@ if I do X, thn Y will happen
 \begin_inset Quotes eld
 \end_inset
 
-if I stick out my ongue, people will laugh, or maybe they will get offended
+if I stick out my tongue, people will laugh, or maybe they will get offended
 \begin_inset Quotes erd
 \end_inset
 
@@ -541,6 +541,34 @@ prediction
 
 \begin_layout Standard
 forward model
+\end_layout
+
+\begin_layout Subsubsection*
+Free will
+\end_layout
+
+\begin_layout Standard
+Free will, as defined here, is the over-riding of default behavior (as computed
+ by psi-rules) by means of a logically, rationally reasoned course of action.
+ For example, the default of the psi rules might be 
+\begin_inset Quotes eld
+\end_inset
+
+lolly-gag about
+\begin_inset Quotes erd
+\end_inset
+
+, while a rational decision would be 
+\begin_inset Quotes eld
+\end_inset
+
+go and do that important thing
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Free wil is then the act of picking between these two alternatives, of
+ balancing them out (at a critical phase-transition point).
 \end_layout
 
 \begin_layout Section*
