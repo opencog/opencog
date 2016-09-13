@@ -345,7 +345,8 @@ Model and Control
 
 \begin_layout Standard
 It is not sufficient to create an internal model of the world, and represent
- it as state: a control API to manipulate that state must also be provided.
+ it as state: a control API or control language to manipulate that state
+ must also be provided.
  The control is the active snippet of code that performs the actions needed
  to update the internal model.
  It can be thought of as the 
@@ -409,7 +410,14 @@ objects
 \begin_inset Quotes erd
 \end_inset
 
-.
+ (see 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Model-and-Control"
+
+\end_inset
+
+).
  In object-oriented programming, these 
 \begin_inset Quotes eld
 \end_inset
@@ -479,7 +487,7 @@ internal model
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -487,6 +495,13 @@ status open
 
 \begin_layout Plain Layout
 Model and Control
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Model-and-Control"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -592,11 +607,273 @@ if I stick out my tongue, people will laugh, or maybe they will get offended
 \end_layout
 
 \begin_layout Standard
-*language
+In the same way that it was argued that model state must be represented
+ in terms of OpenCog Atoms, or 
+\begin_inset Quotes eld
+\end_inset
+
+atomese
+\begin_inset Quotes erd
+\end_inset
+
+, so too must be the verbs.
+ That is, the 
+\begin_inset Quotes eld
+\end_inset
+
+control API
+\begin_inset Quotes erd
+\end_inset
+
+ is not some C++ code (or python or scheme or haskel...) but rather, it is
+ also a collection of Atoms.
+ Again, the reson for this is to allow the system to automatically generate
+ new verbs, by means of learning, as well as to reason about the results
+ of actions.
+ Another key idea is that this allows actions to be combined and composed,
+ in sequential or parallel order, with different timing.
+ That is, the actions are primitives that can be composd into performances,
+ that play out over time.
+ Representing these as atomese how such composition and performance-scripting
+ can be acheived.
+\end_layout
+
+\begin_layout Subsubsection*
+Control language
 \end_layout
 
 \begin_layout Standard
-* in atomese
+Following the idea of needing to script actions to control behaviors leads
+ one naturally to the need for concepts such as modifiers, which come in
+ various forms, including 
+\begin_inset Quotes eld
+\end_inset
+
+adjectives
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+adverbs
+\begin_inset Quotes erd
+\end_inset
+
+.
+ So for example, if 
+\begin_inset Quotes eld
+\end_inset
+
+arm
+\begin_inset Quotes erd
+\end_inset
+
+ corresponds to the atomese describing a robot arm, and 
+\begin_inset Quotes eld
+\end_inset
+
+raise
+\begin_inset Quotes erd
+\end_inset
+
+ is an action that can be applied to 
+\begin_inset Quotes eld
+\end_inset
+
+arm
+\begin_inset Quotes erd
+\end_inset
+
+ (that is, the atomese for performing that action), then it is plausible
+ to want to say 
+\begin_inset Quotes eld
+\end_inset
+
+raise the left arm quickly
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Here, 
+\begin_inset Quotes eld
+\end_inset
+
+quickly
+\begin_inset Quotes erd
+\end_inset
+
+ is the atomese needed for modulating the rate at which the motors controlling
+ the arm are run.
+ Likewise, 
+\begin_inset Quotes eld
+\end_inset
+
+left
+\begin_inset Quotes erd
+\end_inset
+
+ is the atomese specifier indicating which collection of motors are to be
+ controlled.
+\end_layout
+
+\begin_layout Standard
+Thus, the concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ arises naturally within the system.
+ Tghe control langauge is NOT English! Although it does have a grammar,
+ the grammar is NOT that of English.
+ 
+\end_layout
+
+\begin_layout Standard
+The need for a control language seems to be unavoidable: it is important
+ to be able to specify motor speeds, etc.
+ Now, if one had an object-oriented system, then one would have a 
+\begin_inset Quotes eld
+\end_inset
+
+motor
+\begin_inset Quotes erd
+\end_inset
+
+ object (or an 
+\begin_inset Quotes eld
+\end_inset
+
+arm
+\begin_inset Quotes erd
+\end_inset
+
+ object composed of 
+\begin_inset Quotes eld
+\end_inset
+
+motor
+\begin_inset Quotes erd
+\end_inset
+
+ objects), which had a 
+\begin_inset Quotes eld
+\end_inset
+
+slot
+\begin_inset Quotes erd
+\end_inset
+
+ (or 
+\begin_inset Quotes eld
+\end_inset
+
+method
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+message
+\begin_inset Quotes erd
+\end_inset
+
+) called 
+\begin_inset Quotes eld
+\end_inset
+
+speed
+\begin_inset Quotes erd
+\end_inset
+
+, and to control the arm, one would send the 
+\begin_inset Quotes eld
+\end_inset
+
+fast
+\begin_inset Quotes erd
+\end_inset
+
+ message to the 
+\begin_inset Quotes eld
+\end_inset
+
+speed
+\begin_inset Quotes erd
+\end_inset
+
+ slot (or 
+\begin_inset Quotes eld
+\end_inset
+
+speed
+\begin_inset Quotes erd
+\end_inset
+
+ method) on the 
+\begin_inset Quotes eld
+\end_inset
+
+arm
+\begin_inset Quotes erd
+\end_inset
+
+ instance.
+ There's nothing particularly wrong with this view, except for the following
+ points.
+ If the OO language was C++, then the classes and methods must be known
+ at compile time: new classes, methods and messages cannot be dynamically
+ created, at run-time.
+ If the OO language was Javascript, then many of these issues go away: Javascrip
+t does allow new methods to be added, at run-time, to pre-existing objects.
+ Indeed, in many ways, OpenCog Atomese resembles JavaScript.
+ In particular, the Javascipt members are very similiar to OpenCog Atoms,
+ in that, at run-time, new members and methods can be added to objects.
+ One could also say that OpenCog Atomese is a lot like JSON, in that one
+ can specify arbitrary state structures in JSON.
+\end_layout
+
+\begin_layout Standard
+There are also some important ways in which atomese differs from JavaScript
+ or JSON: atomese allows introspection, i.e.
+ it allows for some atoms to control and operate on other atoms, which is
+ not possible in JSON.
+ Atomese also provides a query language, which JSON does not provide (To
+ understand what atomese does, one might imagine writing a SparQL or SQL
+ wrapper to query the contents of giant blobs of JSON, or possibly dumping
+ large blobs of JSON into Apache Solr or Lucene or Cassandra).
+ Atomese also has other language features (it is Prolog-like, it is ML-like)
+ that are lacking in Javascript.
+ 
+\end_layout
+
+\begin_layout Standard
+Anyway, the goal here is not to debate the design of atomese, but rather
+ to indicate that motor-control directives behave more like a language,
+ than like an API: thus, it is more correct to think of the system as offering
+ a 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ rather than a 
+\begin_inset Quotes eld
+\end_inset
+
+control API
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -609,6 +886,10 @@ prediction
 
 \begin_layout Standard
 forward model
+\end_layout
+
+\begin_layout Standard
+why openpsi
 \end_layout
 
 \begin_layout Subsubsection*
