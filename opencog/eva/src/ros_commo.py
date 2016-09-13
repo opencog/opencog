@@ -308,30 +308,19 @@ class EvaControl():
 	# started, or stopped vocalizing.  This message might be published
 	# by either the TTS module itself, or by some external chatbot.
 	#
-	# Unit test by saying
-	#    rostopic pub --once chat_events std_msgs/String speechstart
-	#    rostopic pub --once chat_events std_msgs/String speechend
-	def chat_event_cb(self, chat_event):
-		print('chat_event, type ' + chat_event.data)
-		if chat_event.data == "start":
-			rospy.loginfo("webui starting speech")
+	def speech_event_cb(self, speech_event):
+		print('speech_event, type ' + speech_event.data)
+		if speech_event.data == "start":
+			rospy.loginfo("starting speech")
 			self.puta.vocalization_started()
-
-		elif chat_event.data == "stop":
+		elif speech_event.data == "stop":
+			rospy.loginfo("ending speech")
 			self.puta.vocalization_ended()
-			rospy.loginfo("webui ending speech")
-
-		elif chat_event.data == "listen_start":
-			self.puta.listening_started()
-			rospy.loginfo("webui ending speech")
-
-		elif chat_event.data == "listen_stop":
-			self.puta.listening_ended()
-			rospy.loginfo("webui ending speech")
-
-
+		elif speech_event.data.startswith("duration"):
+			rospy.loginfo(
+                            "speech_event.data {}".format(speech_event.data))
 		else:
-			rospy.logerr("unknown chat_events message: " + chat_event.data)
+			rospy.logerr("unknown speech_events message: " + speech_event.data)
 
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):
@@ -501,7 +490,7 @@ class EvaControl():
 
 		# Receive messages that indicate that TTS (or chatbot) has started
 		# or finished vocalizing.
-		rospy.Subscriber("speech_events", String, self.chat_event_cb)
+		rospy.Subscriber("speech_events", String, self.speech_event_cb)
 
 		# ----------------
 		# chatbot-psi controls
