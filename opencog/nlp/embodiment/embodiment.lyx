@@ -476,6 +476,74 @@ internal model
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Model and Control
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename MVC.eps
+	width 70col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The control API alters the model.
+ It does so by applying 
+\begin_inset Quotes eld
+\end_inset
+
+verbs
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+actions
+\begin_inset Quotes erd
+\end_inset
+
+ to the model state.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Another handy reason for why these 
 \begin_inset Quotes eld
 \end_inset
