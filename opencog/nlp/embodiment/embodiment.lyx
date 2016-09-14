@@ -2025,16 +2025,6 @@ Lines 570-680 (end of file) repeat the previous structures, but are used
 \end_layout
 
 \begin_layout Subsubsection*
-DRAFT VERSION 0.02
-\end_layout
-
-\begin_layout Standard
-This is a draft.
- Everything above is in some mostly-finished state.
- Everything below is in outline format.
-\end_layout
-
-\begin_layout Subsubsection*
 Translation prototype
 \end_layout
 
@@ -2143,13 +2133,157 @@ big picture
 \end_layout
 
 \begin_layout Standard
-There are several technical issues that crop up, at this point.
- These are central to later development, and so are discussed in detail
- here.
+Lines 221-249 implement a utility for handling single-word imperative sentences,
+ and lines 251-268 handle the various single-word imperatives.
 \end_layout
 
 \begin_layout Standard
-One is that the
+Lines 272-286 implement a rule for sentences of the form 
+\begin_inset Quotes eld
+\end_inset
+
+look happy
+\begin_inset Quotes erd
+\end_inset
+
+, while lines 290-308 implement a rule for sentences of the form 
+\begin_inset Quotes eld
+\end_inset
+
+show happiness
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The difference here is that 
+\begin_inset Quotes eld
+\end_inset
+
+happy
+\begin_inset Quotes erd
+\end_inset
+
+ is an adjective, while 
+\begin_inset Quotes eld
+\end_inset
+
+happiness
+\begin_inset Quotes erd
+\end_inset
+
+ is a noun.
+ The sentences, although short, are syntactically different: in English,
+ one cannot correctly say 
+\begin_inset Quotes eld
+\end_inset
+
+look happiness
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+show happy
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Translation, part two
+\end_layout
+
+\begin_layout Standard
+The above section was a bit glib: currently, translation proceeds in two
+ steps.
+ First, the English form is converted into an intermediate, 
+\begin_inset Quotes eld
+\end_inset
+
+normalized
+\begin_inset Quotes erd
+\end_inset
+
+ form, and then the intermediate form is converted into the final control
+ language.
+ This second conversion is done in the file 
+\begin_inset CommandInset href
+LatexCommand href
+name "semantics.scm"
+target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/semantics.scm"
+
+\end_inset
+
+.
+ The reason for such a dual-stage conversion is discussed in greater detail
+ below.
+ In breif, though: Link Grammar itself remains rather close to the surface
+ syntax of the input text, whereas the actual semantic content can be abstracted
+ away a little bit.
+ The abstraction done here is a bit more abstract than what RelEx provides,
+ and yet is different from Relex2Logic.
+ It seemed to be the easiest, most natural step for the prototype.
+\end_layout
+
+\begin_layout Standard
+So, given the intermediate, normalized form, conversion to the final control
+ language is done with sseveral more rules: a generic rule template is construct
+ed in lines 55-92, and then three specific rules are built: one to communicate
+ with the action orchestrator (which issues Blender animations) and two
+ more to update the self-model: see lines 94-133.
+\end_layout
+
+\begin_layout Subsubsection*
+DRAFT VERSION 0.02
+\end_layout
+
+\begin_layout Standard
+This is a draft.
+ Everything above is in some mostly-finished state.
+ Everything below is in outline format.
+\end_layout
+
+\begin_layout Subsubsection*
+Self-model
+\end_layout
+
+\begin_layout Standard
+See self-model.scm Its in the behavior-tree repo, because that is where the
+ sensory I/O is located.
+\end_layout
+
+\begin_layout Subsubsection*
+Rule engine
+\end_layout
+
+\begin_layout Standard
+See imperative.scm to be replaced by open-psi.
+\end_layout
+
+\begin_layout Subsubsection*
+Glue code
+\end_layout
+
+\begin_layout Standard
+See bot-api.scm and chatbot-eva.scm this code is adhoc and to be replaced
+ by appropriate scaffolding and integration code.
+\end_layout
+
+\begin_layout Section*
+Design Issues
+\end_layout
+
+\begin_layout Subsubsection*
+Translation issues
+\end_layout
+
+\begin_layout Standard
+There are several technical issues that crop up, at this point.
+ These are central to later development, and so are discussed in detail
+ here.
 \end_layout
 
 \begin_layout Standard
@@ -2159,6 +2293,11 @@ issue: learning vs.
 
 \begin_layout Standard
 issue: its LG not R2L
+\end_layout
+
+\begin_layout Standard
+issue: dual-stage conversion.
+ It looks more like relex or MTT.
 \end_layout
 
 \begin_layout Standard
