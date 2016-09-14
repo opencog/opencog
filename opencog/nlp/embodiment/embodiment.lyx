@@ -1561,15 +1561,100 @@ target "http://www.abisource.com/projects/link-grammar/"
  The Link Grammar parser discovers relationships between the words in a
  sentence, and marks up those relationships with links connecting pairs
  of words.
- These links are marked up with link types, indicating the kind of the relations
-hip.
+ These links have a type or kind, indicating the relationship between the
+ words -- typically, subject, object, adjectival-modifier, adverbial-modifier,
+ prepositional-object and so on.
+ This is illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+.
+ The relationships, taken together, can be understood to form a directed
+ graph, often a tree.
+ Most links have an implicit directionality in them.
+ The graph does sometimes have cycles: these constrain the parse choices.
+ The main point here is that the graph obtained by parsing, 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+ can be converted into an equivalent control-language graph, such as in
+ figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+.
+ The conversion of one graph into another is accomplished via 
+\begin_inset CommandInset href
+LatexCommand href
+name "graph-rewriting"
+target "https://en.wikipedia.org/wiki/Graph_rewriting"
+
+\end_inset
+
+.
+ The Opencog AtomSpace has a powerful and sophisticated graph-rewriting
+ engine built into it, called the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "pattern matcher"
+target "http://wiki.opencog.org/w/Pattern_matching"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+; it can easily convert graphs of one shape into another, even when the
+ graphs contain variables in them (that is, use variables to represent subgraphs
+).
+ The graph rewriting is specified by writing down 
+\begin_inset Quotes eld
+\end_inset
+
+rules
+\begin_inset Quotes erd
+\end_inset
+
+ that indicate the shape of the expected input graph, and the kind of output
+ graph that should be generated, when a match is found.
+ These rules are usually specified in the form of a 
+\begin_inset CommandInset href
+LatexCommand href
+name "BindLink"
+target "http://wiki.opencog.org/w/SatisfactionLink_and_BindLink"
+
+\end_inset
+
+, which can be thought of as an if-statement: 
+\begin_inset Quotes eld
+\end_inset
+
+if graph p is recognized, then generate graph q
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -1648,7 +1733,7 @@ Look to the left
 \begin_inset Quotes erd
 \end_inset
 
-.
+ (as post-script and ascii-graphics).
  It consists of a collection of typed links or edges connecting pairs of
  words.
  The 
@@ -1772,16 +1857,70 @@ look-rule-2
  Both of these patterns specify several synonyms for the English verb.
  The pattern of the English sentences is recognized in lines 186-188 and
  lines 205-206.
- The lg-links MVa, MVp, Js, Ju come from the Link Grammar parse of the sentence;
+ The lg-links 
+\family typewriter
+MVa
+\family default
+, 
+\family typewriter
+MVp
+\family default
+, 
+\family typewriter
+Js
+\family default
+, 
+\family typewriter
+Ju
+\family default
+ come from the Link Grammar parse of the sentence; these are already illustrated
+ in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+.
+ There is a fair amount of monkey-business being done to make these rules
+ relatively easy to write.
+ One issue is that the atomese representation of the Link Grammar perses
+ is fairly turgid (the 
+\begin_inset CommandInset href
+LatexCommand href
+name "RelEx Atomese format"
+target "http://wiki.opencog.org/w/RelEx_OpenCog_format"
+
+\end_inset
+
+); complexities arise due to the need to represent multiple distinct sentences,
+ as well as to distinguish the use of the same word in two different places
+ in a sentence: these are 
+\begin_inset Quotes eld
+\end_inset
+
+word instances
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Thus, an imperative-sentence utility is provided in lines 130-172; if that
+ utility is not used, then the two look-rules are more verbose, and are
+ shown in lines 48-90 and 92-128.
+ It is useful to compare these, to get the 
+\begin_inset Quotes eld
+\end_inset
+
+big picture
+\begin_inset Quotes erd
+\end_inset
+
+ of the rule format.
  
 \end_layout
 
 \begin_layout Standard
-92-128.
-\end_layout
 
-\begin_layout Standard
-48-90
 \end_layout
 
 \begin_layout Standard
