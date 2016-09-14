@@ -77,7 +77,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.01 - 13 Sept 2016
+Draft Version 0.02 - 14 Sept 2016
 \end_layout
 
 \begin_layout Abstract
@@ -93,7 +93,26 @@ ness, together with a sketch of how this could be improved and expanded.
 \end_layout
 
 \begin_layout Section*
-Overview
+Introduction
+\end_layout
+
+\begin_layout Standard
+The paper proceeds in several steps.
+ The first step is to review the overall concept of an 
+\begin_inset Quotes eld
+\end_inset
+
+internal model
+\begin_inset Quotes erd
+\end_inset
+
+, and how one can, in principle, interface with it.
+ This is followed by a section reviewing the current prototype.
+ After this, difficuklties with language are discussed.
+\end_layout
+
+\begin_layout Section*
+Internal Models
 \end_layout
 
 \begin_layout Standard
@@ -1134,6 +1153,44 @@ pretend you're happy!
 \end_layout
 
 \begin_layout Subsubsection*
+Next steps
+\end_layout
+
+\begin_layout Standard
+There are several more important concepts that are required to correctly
+ implement a fully working system.
+ Before discussing these, it is worth reviewing the current prototype, as
+ it illustrates the above concepts in a specific, concrete manner.
+ The issues encountered during prototyping also serve as an introduction
+ to problems that must be solved in the full system.
+\end_layout
+
+\begin_layout Section*
+Prototype Review
+\end_layout
+
+\begin_layout Standard
+The prototype naturally splits into three pieces.
+ These are:
+\end_layout
+
+\begin_layout Itemize
+An implementation of the self-model and the control language.
+\end_layout
+
+\begin_layout Itemize
+An English-to-control-language translation layer.
+\end_layout
+
+\begin_layout Itemize
+A rule engine, to drive the system.
+\end_layout
+
+\begin_layout Standard
+These are each reviewed, below.
+\end_layout
+
+\begin_layout Subsubsection*
 Control language prototype
 \end_layout
 
@@ -1468,7 +1525,7 @@ Lines 570-680 (end of file) repeat the previous structures, but are used
 \end_layout
 
 \begin_layout Subsubsection*
-DRAFT VERSION 0.01
+DRAFT VERSION 0.02
 \end_layout
 
 \begin_layout Standard
@@ -1482,23 +1539,259 @@ Translation prototype
 \end_layout
 
 \begin_layout Standard
-The prototype includes a module that translates English language to the
- control language.
- Translation consists conceptually of two distinct aspects: mapping the
- syntax of the English language (grammar) to the control-language syntax
- (grammar), and mapping specific English-language words to control-language
- atoms (this second part having already been reviewed above).
+Translation from the English language to the control language consists conceptua
+lly of two distinct aspects: mapping the syntax of the English language
+ (grammar) to the control-language syntax (grammar), and mapping specific
+ English-language words to control-language atoms (this second part having
+ already been reviewed above).
+\end_layout
+
+\begin_layout Standard
+To perform the translation, the syntax of the English-language sentence
+ must first be extracted.
+ This is done by running the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Link Grammar parser"
+target "http://www.abisource.com/projects/link-grammar/"
+
+\end_inset
+
+ on the input sentence.
+ The Link Grammar parser discovers relationships between the words in a
+ sentence, and marks up those relationships with links connecting pairs
+ of words.
+ These links are marked up with link types, indicating the kind of the relations
+hip.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Example Link Grammar Parse
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Example-Link-Grammar"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align left
+\begin_inset Graphics
+	filename lg.eps
+	width 80col%
+	BoundingBox 0bp -20bp 500bp 80bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+                        +----Js---+
+\end_layout
+
+\begin_layout Plain Layout
+
+         +---Wi---+-MVp-+   +Ds**c+
+\end_layout
+
+\begin_layout Plain Layout
+
+         |        |     |   |     |
+\end_layout
+
+\begin_layout Plain Layout
+
+     LEFT-WALL look.v to.r the left.n
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The above illustrates a parse of the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+Look to the left
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It consists of a collection of typed links or edges connecting pairs of
+ words.
+ The 
+\family typewriter
+Wi
+\family default
+ link points at the main verb of the sentence, and indicates that it is
+ an imperative.
+ The 
+\family typewriter
+MVp
+\family default
+ link attaches the verb to a verb-modifier, in this case, to the preposition
+ 
+\begin_inset Quotes eld
+\end_inset
+
+to
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The 
+\family typewriter
+Js
+\family default
+ link connects the preposition to it's object, in this case, the noun 
+\begin_inset Quotes eld
+\end_inset
+
+left
+\begin_inset Quotes erd
+\end_inset
+
+ (prepositions always have objects).
+ The 
+\family typewriter
+Ds**c
+\family default
+ link joins the noun to the determiner 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Both 
+\family typewriter
+Js
+\family default
+ and 
+\family typewriter
+Ds
+\family default
+ indicate that the nouns is singular, and the 
+\family typewriter
+**c
+\family default
+ indicates that it begins with a consonant (that is, phonetic analysis is
+ also provided).
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 The translation consists of a set of hand-crafted rules that can recognize
- specific kinds of English-language sentences, and that convert these into
- the internal-language forms.
+ specific kinds of English-language sentences, and convert these into the
+ internal-language forms.
+ These are implemented in the file 
+\begin_inset CommandInset href
+LatexCommand href
+name "imperative-rules.scm"
+target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/imperative-rules.scm"
+
+\end_inset
+
+.
+ For example, the English sentence 
+\begin_inset Quotes eld
+\end_inset
+
+look left
+\begin_inset Quotes erd
+\end_inset
+
+ is recognized by the 
+\family typewriter
+look-rule-1
+\family default
+ pattern, lines 176-189.
+ The sentence 
+\begin_inset Quotes eld
+\end_inset
+
+look to the left
+\begin_inset Quotes erd
+\end_inset
+
+ is recognized by the 
+\family typewriter
+look-rule-2
+\family default
+ pattern, lines 191-208.
+ Both of these patterns specify several synonyms for the English verb.
+ The pattern of the English sentences is recognized in lines 186-188 and
+ lines 205-206.
+ The lg-links MVa, MVp, Js, Ju come from the Link Grammar parse of the sentence;
+ 
+\end_layout
+
+\begin_layout Standard
+92-128.
+\end_layout
+
+\begin_layout Standard
+48-90
 \end_layout
 
 \begin_layout Standard
 There are several technical issues that crop up, at this point.
- One is that the
+ These are central to later development, and so are discussed in detail
+ here.
+\end_layout
+
+\begin_layout Standard
+One is that the
 \end_layout
 
 \begin_layout Standard
@@ -1522,6 +1815,11 @@ issue: fuzzy matching, partial matching
 \begin_layout Standard
 issue: picking out sentences attached to an anchor, vs other processing
  pipeline designs.
+\end_layout
+
+\begin_layout Standard
+todo -- the verb synonyms shouyld not be needed!? as they can be gotten
+ from the synonym lists for tha control-action language...
 \end_layout
 
 \begin_layout Subsubsection*

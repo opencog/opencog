@@ -1,0 +1,369 @@
+%!PS-Adobe-2.0 EPSF-1.2
+%%Pages: 1
+%%BoundingBox: 0 -20 400 100
+%%EndComments
+%%BeginDocument: 
+
+% compute size of diagram by adding
+% #rows x 8.5
+% (#rows -1) x 10
+% \sum maxheight x 10
+/nulllink () def                     % The symbol of a null link
+/wordfontsize 22 def      % the size of the word font
+/labelfontsize 18 def      % the size of the connector label font
+/ex 20 def  % the horizontal radius of all the links
+/ey 20 def  % the height of the level 0 links
+/ed 20 def  % amount to add to this height per level
+/radius 20 def % radius for rounded arcs
+/row-spacing 20 def % the space between successive rows of the diagram
+
+/gap wordfontsize .5 mul def  % the gap between words
+/top-of-words wordfontsize .85 mul def
+             % the delta y above where the text is written where
+             % the major axis of the ellipse is located
+/label-gap labelfontsize .1 mul def
+
+/xwordfontsize 20 def      % the size of the word font
+/xlabelfontsize 20 def      % the size of the connector label font
+/xex 20 def  % the horizontal radius of all the links
+/xey 20 def  % the height of the level 0 links
+/xed 20 def  % amount to add to this height per level
+/xradius 20 def % radius for rounded arcs
+/xrow-spacing 20 def % the space between successive rows of the diagram
+/xgap wordfontsize .5 mul def  % the gap between words
+
+/centerpage 6.5 72 mul 2 div def
+  % this number of points from the left margin is the center of page
+
+/rightpage 6.5 72 mul def
+  % number of points from the left margin is the right margin
+
+/show-string-centered-dict 5 dict def
+
+/show-string-centered {
+  show-string-centered-dict begin
+  /string exch def
+  /ycenter exch def
+  /xcenter exch def
+  xcenter string stringwidth pop 2 div sub
+  ycenter labelfontsize .3 mul sub
+  moveto
+  string show
+  end
+} def
+
+/clear-word-box {
+  show-string-centered-dict begin
+  /string exch def
+  /ycenter exch def
+  /xcenter exch def
+  newpath
+  /urx string stringwidth pop 2 div def
+  /ury labelfontsize .3 mul def
+  xcenter urx sub ycenter ury sub moveto
+  xcenter urx add ycenter ury sub lineto
+  xcenter urx add ycenter ury add lineto
+  xcenter urx sub ycenter ury add lineto
+  closepath
+  1 setgray fill
+  0 setgray
+  end
+} def
+
+/diagram-sentence-dict 20 dict def
+
+/diagram-sentence-circle
+{diagram-sentence-dict begin  
+   /links exch def
+   /words exch def
+   /n words length def
+   /Times-Roman findfont wordfontsize scalefont setfont
+   /x 0 def
+   /y 0 def
+
+   /left-ends [x dup words {stringwidth pop add gap add dup}
+	                     forall pop pop] def
+   /right-ends [x words {stringwidth pop add dup gap add} forall pop]
+def
+   /centers [0 1 n 1 sub {/i exch def
+		      left-ends i get
+		      right-ends i get
+		      add 2 div
+		    } for ] def
+
+   x y moveto
+   words {show gap 0 rmoveto} forall
+
+   .5 setlinewidth 
+
+   links {dup 0 get /leftword exch def
+          dup 1 get /rightword exch def
+          dup 2 get /level exch def
+          3 get /string exch def
+          newpath
+          string nulllink eq {[2] 1 setdash}{[] 0 setdash} ifelse
+%          string nulllink eq {.8 setgray}{0 setgray} ifelse
+          centers leftword get
+	  y top-of-words add
+          moveto
+      
+          centers rightword get
+          centers leftword get
+          sub 2  div dup
+          radius 
+          lt {/radiusx exch def}{pop /radiusx radius def} ifelse
+  
+          
+ 
+          centers leftword get
+	  y top-of-words add ey ed level mul add add
+          centers rightword get
+	  y top-of-words add ey ed level mul add add
+	  radiusx
+          arcto
+          4 {pop} repeat
+	  centers rightword get
+          y top-of-words add ey ed level mul add add
+	  centers rightword get
+	  y top-of-words add
+	  radiusx
+	  arcto
+          4 {pop} repeat
+	  centers rightword get
+	  y top-of-words add
+	  lineto
+
+	  stroke
+
+          /radius-y    ey ed level mul add	  def
+
+	  /center-arc-x
+	     centers leftword get centers rightword get add 2 div
+	  def
+	  
+          /center-arc-y
+             y top-of-words radius-y add add
+	  def
+
+          /Courier-Bold findfont labelfontsize scalefont setfont 
+	  center-arc-x center-arc-y string clear-word-box
+	  center-arc-x center-arc-y string show-string-centered
+          } forall
+	  end
+  } def
+
+/diagramdict 20 dict def
+
+/diagram
+{diagramdict begin
+   /break-words exch def
+   /links exch def
+   /words exch def
+   /n words length def
+   /n-rows break-words length def
+   /Times-Roman findfont wordfontsize scalefont setfont
+
+   /left-ends [0 dup words {stringwidth pop add gap add dup}
+	                     forall pop pop] def
+   /right-ends [0 words {stringwidth pop add dup gap add} forall pop]
+def
+
+   /lwindows [ break-words {left-ends exch get gap 2 div sub } forall ]
+def
+   /rwindows [1 1 n-rows 1 sub {/i exch def
+		      lwindows i get } for
+	              right-ends n 1 sub get gap 2 div add
+	      ] def
+
+
+    /max 0 def
+    0 1 links length 1 sub {
+	/i exch def
+	/t links i get 2 get def
+	t max gt {/max t def} if
+      } for
+
+    /max-height ed max mul ey add top-of-words add row-spacing add def
+    /total-height n-rows max-height mul row-spacing sub def
+
+    /max-width 0 def            % compute the widest window
+    0 1 n-rows 1 sub {
+        /i exch def
+        /t rwindows i get lwindows i get sub def
+        t max-width gt {/max-width t def} if
+      } for
+
+    centerpage max-width 2 div sub 0 translate  % centers it
+   % rightpage max-width sub 0 translate      % right justified
+                        % Delete both of these to make it left justified
+
+   n-rows 1 sub -1 0
+     {/i exch def
+	gsave
+	newpath
+        %/centering centerpage rwindows i get lwindows i get sub 2 div
+        %sub def
+               % this line causes each row to be centered
+        /centering 0 def
+               % set centering to 0 to prevent centering of each row 
+
+	centering -100 moveto  % -100 because some letters go below zero
+        centering max-height n-rows mul lineto
+        rwindows i get lwindows i get sub centering add
+                       max-height n-rows mul lineto
+        rwindows i get lwindows i get sub centering add
+                       -100 lineto
+	closepath
+        clip
+	lwindows i get neg n-rows i sub 1 sub max-height mul translate
+        centerpage centering 0 translate
+        words links diagram-sentence-circle
+	grestore
+     } for
+     end
+} def 
+
+/diagramx
+{diagramdict begin
+   /break-words exch def
+   /links exch def
+   /words exch def
+   /n words length def
+   /n-rows break-words length def
+   /Times-Roman findfont xwordfontsize scalefont setfont
+
+   /left-ends [0 dup words {stringwidth pop add gap add dup}
+	                     forall pop pop] def
+   /right-ends [0 words {stringwidth pop add dup gap add} forall pop]
+def
+
+   /lwindows [ break-words {left-ends exch get gap 2 div sub } forall ]
+def
+   /rwindows [1 1 n-rows 1 sub {/i exch def
+		      lwindows i get } for
+	              right-ends n 1 sub get xgap 2 div add
+	      ] def
+
+
+    /max 0 def
+    0 1 links length 1 sub {
+	/i exch def
+	/t links i get 2 get def
+	t max gt {/max t def} if
+      } for
+
+    /max-height xed max mul xey add top-of-words add xrow-spacing add
+def
+    /total-height n-rows max-height mul xrow-spacing sub def
+
+    /max-width 0 def            % compute the widest window
+    0 1 n-rows 1 sub {
+        /i exch def
+        /t rwindows i get lwindows i get sub def
+        t max-width gt {/max-width t def} if
+      } for
+
+    centerpage max-width 2 div sub 0 translate  % centers it
+   % rightpage max-width sub 0 translate      % right justified
+                        % Delete both of these to make it left justified
+
+   n-rows 1 sub -1 0
+     {/i exch def
+	gsave
+	newpath
+        %/centering centerpage rwindows i get lwindows i get sub 2 div
+        %sub def
+               % this line causes each row to be centered
+        /centering 0 def
+               % set centering to 0 to prevent centering of each row 
+
+	centering -100 moveto  % -100 because some letters go below zero
+        centering max-height n-rows mul lineto
+        rwindows i get lwindows i get sub centering add
+                       max-height n-rows mul lineto
+        rwindows i get lwindows i get sub centering add
+                       -100 lineto
+	closepath
+        clip
+	lwindows i get neg n-rows i sub 1 sub max-height mul translate
+        centerpage centering 0 translate
+        words links diagram-sentence-circle
+	grestore
+     } for
+     end
+} def 
+
+/ldiagram
+{diagramdict begin
+   /break-words exch def
+   /links exch def
+   /words exch def
+   /n words length def
+   /n-rows break-words length def
+   /Times-Roman findfont wordfontsize scalefont setfont
+
+   /left-ends [0 dup words {stringwidth pop add gap add dup}
+	                     forall pop pop] def
+   /right-ends [0 words {stringwidth pop add dup gap add} forall pop]
+def
+
+   /lwindows [ break-words {left-ends exch get gap 2 div sub } forall ]
+def
+   /rwindows [1 1 n-rows 1 sub {/i exch def
+		      lwindows i get } for
+	              right-ends n 1 sub get gap 2 div add
+	      ] def
+
+
+    /max 0 def
+    0 1 links length 1 sub {
+	/i exch def
+	/t links i get 2 get def
+	t max gt {/max t def} if
+      } for
+
+    /max-height ed max mul ey add top-of-words add row-spacing add def
+    /total-height n-rows max-height mul row-spacing sub def
+
+    /max-width 0 def            % compute the widest window
+    0 1 n-rows 1 sub {
+        /i exch def
+        /t rwindows i get lwindows i get sub def
+        t max-width gt {/max-width t def} if
+      } for
+
+   % centerpage max-width 2 div sub 0 translate  % centers it
+   % rightpage max-width sub 0 translate      % right justified
+                        % Delete both of these to make it left justified
+
+   n-rows 1 sub -1 0
+     {/i exch def
+	gsave
+	newpath
+        %/centering centerpage rwindows i get lwindows i get sub 2 div
+        %sub def
+               % this line causes each row to be centered
+        /centering 0 def
+               % set centering to 0 to prevent centering of each row 
+
+	centering -100 moveto  % -100 because some letters go below zero
+        centering max-height n-rows mul lineto
+        rwindows i get lwindows i get sub centering add
+                       max-height n-rows mul lineto
+        rwindows i get lwindows i get sub centering add
+                       -100 lineto
+	closepath
+        clip
+	lwindows i get neg n-rows i sub 1 sub max-height mul translate
+        centerpage centering 0 translate
+        words links diagram-sentence-circle
+	grestore
+     } for
+     end
+} def 
+[(LEFT-WALL)(look.v)(to.r)(the)(left.n)]
+[[0 1 0 (Wi)][1 2 0 (MVp)][2 4 1 (Js)][3 4 0 (Ds**c)]]
+[0]
+diagram
+
+%%EndDocument
