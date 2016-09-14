@@ -89,8 +89,10 @@
             ; grounded and the grounding atoms are put into the action (that is
             ; equivalent to the implicand of the BindLink).
             (if (null? context-atoms)
-                (cog-execute! action)
-                (cog-execute! (PutLink action context-atoms))
+                (cog-evaluate! action)
+                ; FIXME Since the PutLink is wrapped in a TrueLink any
+                ; information due to the evaluation of the action is lost.
+                (cog-evaluate! (True (PutLink action context-atoms)))
             )
             (map cog-evaluate! goals)
         ))
