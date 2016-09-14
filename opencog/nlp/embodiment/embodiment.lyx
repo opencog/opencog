@@ -734,6 +734,100 @@ control language
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Control Language
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Control-Language"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename language.eps
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The control language can have a non-trivial grammar associated with it;
+ for example, one can 
+\begin_inset Quotes eld
+\end_inset
+
+turn to the left
+\begin_inset Quotes erd
+\end_inset
+
+, but one cannot 
+\begin_inset Quotes eld
+\end_inset
+
+turn to the eyeblink
+\begin_inset Quotes erd
+\end_inset
+
+ -- they eye-blink animation not being valid with the turn directive.
+ The language can control different systems: the physical body or 
+\begin_inset Quotes eld
+\end_inset
+
+plant
+\begin_inset Quotes erd
+\end_inset
+
+, the internal model (or self-model, in this case), as well as models representi
+ng hypothetical future behavior, or even models that represent memories
+ of the past.
+ This is possible because the plant and models all use the same representation
+ scheme, and thus, the language can act on each equally well.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 The need for a control language seems to be unavoidable: it is important
  to be able to specify motor speeds, etc.
  Now, if one had an object-oriented system, then one would have a 
@@ -893,7 +987,15 @@ raise the left arm
 \end_inset
 
  can be used to update the internal model, and it can also be used to control
- the motors on the actual physical body.
+ the motors on the actual physical body (
+\begin_inset Quotes eld
+\end_inset
+
+the plant
+\begin_inset Quotes erd
+\end_inset
+
+, in control-theory terminology).
  There may also be more than one internal model: in control theory, it is
  not uncommon to have a 
 \begin_inset Quotes eld
@@ -932,6 +1034,19 @@ Rather than inventing a new language for each of these different systems,
  be moved; in another case, the model must be updated.
  In either case, the verbs, nouns, adjectives and adverbs should be the
  same.
+ (In control theory, this is termed the 
+\begin_inset Quotes eld
+\end_inset
+
+efference copy
+\begin_inset Quotes erd
+\end_inset
+
+).
+ This is possible as long as the differnt systems use the same underlying
+ design scheme: as long as the underlying hypergraphs have the same structure,
+ they can be manipulated the same way, never mond that one might represent
+ the physical body, and another the self-model.
 \end_layout
 
 \begin_layout Subsubsection*
