@@ -243,6 +243,41 @@ r difference.
 \end_layout
 
 \begin_layout Subsubsection*
+World Model
+\end_layout
+
+\begin_layout Standard
+Although the above argues that both the self-model and the world-model are
+ special cases of the internal model, this is worth more discussion.
+ The world model describes not only inanimate objects, such as boxes seen
+ in the corner of the room, but includes models of other people.
+ In the current software base, this is quite shallow: it is just a list
+ of the human faces currently visible to the video camera, and thier 3D
+ coordinates.
+ The model could include a lot more information: names to be associated
+ with the faces, memories of past conversations with those faces, a personality
+ profile associated with each face.
+ This can be expanded to a general model of 
+\begin_inset Quotes eld
+\end_inset
+
+other
+\begin_inset Quotes erd
+\end_inset
+
+, including stereotypes of profession, gender, cultural and geographical
+ background, and so on.
+\end_layout
+
+\begin_layout Standard
+For most of this document, the distinction between models of self, other,
+ and the rest of the world does not matter: rather, the discussion centers
+ on how to interface such models to perceptions and to actions.
+ An vitaly important side topic is how to automatically learn and update
+ the model: this is discussed breifly, later, but is not a primary topic.
+\end_layout
+
+\begin_layout Subsubsection*
 State
 \end_layout
 
@@ -1109,11 +1144,514 @@ control language
 
 , one can now imagine that controlling the robot using the English language
  might not be too hard: just translate English to the internal control language,
- and one is done! 
+ and one is done! Thus, for example, it is easy to imagine that simple English
+ sentences, such as 
+\begin_inset Quotes eld
+\end_inset
+
+look left!
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+pretend you're happy!
+\begin_inset Quotes erd
+\end_inset
+
+, can be converted to the control langauge.
+ 
 \end_layout
 
 \begin_layout Standard
-There is a prototype of this, located in 
+There are several ways to accomplish this.
+ There is a simple, brute-force approach: create templates such as 
+\begin_inset Quotes eld
+\end_inset
+
+Look ____
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+Pretend you're ____
+\begin_inset Quotes erd
+\end_inset
+
+ and implement a fill-in-the-blanks algorithm.
+ Simple string matching will suffice, and (for example) AIML excels at this
+ kind of string-search and string-matching.
+ This approach is sufficient to tell the robot to look in different directions,
+ and to make different facial expressions.
+\end_layout
+
+\begin_layout Standard
+A core premise of what follows is that brute-force string-matching or string-tem
+plating is NOT sufficient for more complex, more abstract conversations.
+ For that, a syntactic analysis of the sentence is needed.
+ Thus, although there is plenty of room and utility for string-matching
+ in the natural-language subsystem, this will NOT be the primary focus of
+ this document (nor is it used in the prototype).
+ Complex conversational abilities are anticipated, and so are planned for,
+ from the start.
+\end_layout
+
+\begin_layout Standard
+The prototye does perform syntactic analysis using the Link Grammar parser.
+ It could have used RelEx or Relex2Logic, but does not, for reasons explained
+ later.
+\end_layout
+
+\begin_layout Standard
+If one has a syntactic analyzer, then translation can be performed by extracting
+ the syntax of a given English-language sentence, and re-writing it into
+ an equivalent control-language structure.
+ Along the way, specific English-language words and phrases are remapped
+ to equivalent control-language atoms.
+\end_layout
+
+\begin_layout Subsubsection*
+Link Grammar
+\end_layout
+
+\begin_layout Standard
+The syntax of the English-language sentence is extracted by parsing the
+ input sentence with the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Link Grammar parser"
+target "http://www.abisource.com/projects/link-grammar/"
+
+\end_inset
+
+ (
+\begin_inset CommandInset href
+LatexCommand href
+name "wikipedia"
+target "https://en.wikipedia.org/wiki/Link_grammar"
+
+\end_inset
+
+).
+ There are certainly many other natural-language parsers out there, including
+ famously the Stanford parser, Google's Parsey-McParseface, and any number
+ of phrase-structure parsers.
+ Link Grammar is used because it fits particularly well with the theory
+ of Atomese, and because it has particularly high accuracy and very broad
+ coverage.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Example Link Grammar Parse
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Example-Link-Grammar"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align left
+\begin_inset Graphics
+	filename lg.eps
+	width 80col%
+	BoundingBox 0bp -20bp 500bp 80bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+                        +----Js---+
+\end_layout
+
+\begin_layout Plain Layout
+
+         +---Wi---+-MVp-+   +Ds**c+
+\end_layout
+
+\begin_layout Plain Layout
+
+         |        |     |   |     |
+\end_layout
+
+\begin_layout Plain Layout
+
+     LEFT-WALL look.v to.r the left.n
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The above illustrates a parse of the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+Look to the left
+\begin_inset Quotes erd
+\end_inset
+
+ (as post-script and ascii-graphics).
+ It consists of a collection of typed links or edges connecting pairs of
+ words.
+ The 
+\family typewriter
+Wi
+\family default
+ link points at the main verb of the sentence, and indicates that it is
+ an imperative.
+ The 
+\family typewriter
+MVp
+\family default
+ link attaches the verb to a verb-modifier, in this case, to the preposition
+ 
+\begin_inset Quotes eld
+\end_inset
+
+to
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The 
+\family typewriter
+Js
+\family default
+ link connects the preposition to it's object, in this case, the noun 
+\begin_inset Quotes eld
+\end_inset
+
+left
+\begin_inset Quotes erd
+\end_inset
+
+ (prepositions always have objects).
+ The 
+\family typewriter
+Ds**c
+\family default
+ link joins the noun to the determiner 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Both 
+\family typewriter
+Js
+\family default
+ and 
+\family typewriter
+Ds
+\family default
+ indicate that the nouns is singular, and the 
+\family typewriter
+**c
+\family default
+ indicates that it begins with a consonant (that is, phonetic analysis is
+ also provided).
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Link Grammar parser discovers relationships between the words in a sentence,
+ and marks up those relationships with links connecting pairs of words.
+ These links have a type or kind, indicating the relationship between the
+ words -- typically, subject, object, adjectival-modifier, adverbial-modifier,
+ prepositional-object and so on.
+ This is illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+.
+ The relationships, taken together, can be understood to form a directed
+ graph, often a tree.
+ Most links have an implicit directionality in them.
+ The graph does sometimes have cycles: these constrain the parse choices.
+ 
+\end_layout
+
+\begin_layout Standard
+The graph fully encodes the syntactic structure of the parsed sentence,
+ as well as a fair amount of the semantic structure, encoded in the so-called
+ 
+\begin_inset Quotes eld
+\end_inset
+
+disjuncts
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The disjuncts are the graph-duals to the linkages.
+ Thus, in the figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+, it can be seen that the word 
+\begin_inset Quotes eld
+\end_inset
+
+look
+\begin_inset Quotes erd
+\end_inset
+
+ has a link 
+\family typewriter
+Wi
+\family default
+ to the left, and a link 
+\family typewriter
+MVp
+\family default
+ to the right: these two form a disjunct 
+\family typewriter
+Wi- & MVp+
+\family default
+, with the plus and minus signs indicating linkage to the right and left.
+ Given only this disjunct, and nothing else - not even the word itself,
+ one can already deduce that the word must be a verb, and that it must be
+ an imperative, and that it will take a preposition, and thus, a prepositional
+ object.
+ Thus, the disjunct 
+\family typewriter
+Wi- & MVp+
+\family default
+ acts as a fine-grained part-of-speech, and this carries semantic information.
+ That is, the meaning of a word is correlated with the part-of-speech: this
+ is obvious simply by observing that dictionaries organize word-meanings
+ by parts-of-speech.
+ The disjunct offers a particularly fine-grained distinction, and thus is
+ more strongly correlated with meaning.
+\end_layout
+
+\begin_layout Standard
+Note that there are 
+\begin_inset Quotes eld
+\end_inset
+
+costs
+\begin_inset Quotes erd
+\end_inset
+
+ or weights associated with different disjuncts.
+ These can be interpreted as log-probabilities, and so the parse system,
+ as a whole, has probabilistic or Markovian aspects associated with it.
+ This play a minor role, at this stage.
+\end_layout
+
+\begin_layout Subsubsection*
+Graph rewriting
+\end_layout
+
+\begin_layout Standard
+The translation process proceeds by taking the syntactic-parse graph, such
+ as 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+, and converting it into an equivalent control-language graph, such as in
+ figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+.
+ The conversion of one graph into another is accomplished via 
+\begin_inset CommandInset href
+LatexCommand href
+name "graph-rewriting"
+target "https://en.wikipedia.org/wiki/Graph_rewriting"
+
+\end_inset
+
+.
+ The Opencog AtomSpace has a powerful and sophisticated graph-rewriting
+ engine built into it, called the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "pattern matcher"
+target "http://wiki.opencog.org/w/Pattern_matching"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+; it can easily convert graphs of one shape into another, even when the
+ graphs contain variables in them (that is, use variables to represent subgraphs
+).
+ 
+\end_layout
+
+\begin_layout Standard
+The graph rewriting is specified by writing down 
+\begin_inset Quotes eld
+\end_inset
+
+rules
+\begin_inset Quotes erd
+\end_inset
+
+ that indicate the shape of the expected input graph, and the kind of output
+ graph that should be generated, when a match is found.
+ These rules are usually specified in the form of a 
+\begin_inset CommandInset href
+LatexCommand href
+name "BindLink"
+target "http://wiki.opencog.org/w/SatisfactionLink_and_BindLink"
+
+\end_inset
+
+, which can be thought of as an if-statement: 
+\begin_inset Quotes eld
+\end_inset
+
+if graph p is recognized, then generate graph q
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Alternately, they can be thought of as an implication 
+\begin_inset Formula $p\to q$
+\end_inset
+
+, or, with variables, 
+\begin_inset Formula $p(x)\to q(x)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+To provide a worked example: to rewrite figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+ into figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+, one creates a rule 
+\begin_inset Quotes eld
+\end_inset
+
+IF word x has disjunct 
+\family typewriter
+Wi- & MVp+
+\family default
+ and word x is 'turn' and word y has disjunct 
+\family typewriter
+Ds**c- & Js-
+\family default
+, THEN create control-language graph 'turn(y)'
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The prototype contains a rule of roughly this form.
+\end_layout
+
+\begin_layout Subsubsection*
+Next steps
+\end_layout
+
+\begin_layout Standard
+There are additional important concepts that are required to correctly implement
+ a fully working system.
+ Before discussing these, it is worth reviewing the current prototype, as
+ it illustrates the above concepts in a specific, concrete manner.
+ The issues encountered during prototyping also serve as an introduction
+ to problems that must be solved in the full system.
+\end_layout
+
+\begin_layout Section*
+Prototype Review
+\end_layout
+
+\begin_layout Standard
+The prototype of the above-described system is located in 
 \begin_inset CommandInset href
 LatexCommand href
 name "github"
@@ -1130,47 +1668,7 @@ target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0a
 \end_inset
 
  directory.
- As a prototype, it has issues: these will be discussed later.
- The prototype implements commands for the robot to look in different directions
-, and to make different facial expressions.
- This includes imperatives such as 
-\begin_inset Quotes eld
-\end_inset
-
-look left!
-\begin_inset Quotes erd
-\end_inset
-
- and 
-\begin_inset Quotes eld
-\end_inset
-
-pretend you're happy!
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection*
-Next steps
-\end_layout
-
-\begin_layout Standard
-There are several more important concepts that are required to correctly
- implement a fully working system.
- Before discussing these, it is worth reviewing the current prototype, as
- it illustrates the above concepts in a specific, concrete manner.
- The issues encountered during prototyping also serve as an introduction
- to problems that must be solved in the full system.
-\end_layout
-
-\begin_layout Section*
-Prototype Review
-\end_layout
-
-\begin_layout Standard
-The prototype naturally splits into three pieces.
+ It naturally splits into three pieces.
  These are:
 \end_layout
 
@@ -1188,6 +1686,8 @@ A rule engine, to drive the system.
 
 \begin_layout Standard
 These are each reviewed, below.
+ There are assorted issues, especially in the translation layer; these serve
+ to anchor later discussion.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1539,283 +2039,6 @@ Translation prototype
 \end_layout
 
 \begin_layout Standard
-Translation from the English language to the control language consists conceptua
-lly of two distinct aspects: mapping the syntax of the English language
- (grammar) to the control-language syntax (grammar), and mapping specific
- English-language words to control-language atoms (this second part having
- already been reviewed above).
-\end_layout
-
-\begin_layout Standard
-To perform the translation, the syntax of the English-language sentence
- must first be extracted.
- This is done by running the 
-\begin_inset CommandInset href
-LatexCommand href
-name "Link Grammar parser"
-target "http://www.abisource.com/projects/link-grammar/"
-
-\end_inset
-
- on the input sentence.
- The Link Grammar parser discovers relationships between the words in a
- sentence, and marks up those relationships with links connecting pairs
- of words.
- These links have a type or kind, indicating the relationship between the
- words -- typically, subject, object, adjectival-modifier, adverbial-modifier,
- prepositional-object and so on.
- This is illustrated in figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Example-Link-Grammar"
-
-\end_inset
-
-.
- The relationships, taken together, can be understood to form a directed
- graph, often a tree.
- Most links have an implicit directionality in them.
- The graph does sometimes have cycles: these constrain the parse choices.
- The main point here is that the graph obtained by parsing, 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Example-Link-Grammar"
-
-\end_inset
-
- can be converted into an equivalent control-language graph, such as in
- figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Control-Language"
-
-\end_inset
-
-.
- The conversion of one graph into another is accomplished via 
-\begin_inset CommandInset href
-LatexCommand href
-name "graph-rewriting"
-target "https://en.wikipedia.org/wiki/Graph_rewriting"
-
-\end_inset
-
-.
- The Opencog AtomSpace has a powerful and sophisticated graph-rewriting
- engine built into it, called the 
-\begin_inset Quotes eld
-\end_inset
-
-
-\begin_inset CommandInset href
-LatexCommand href
-name "pattern matcher"
-target "http://wiki.opencog.org/w/Pattern_matching"
-
-\end_inset
-
-
-\begin_inset Quotes erd
-\end_inset
-
-; it can easily convert graphs of one shape into another, even when the
- graphs contain variables in them (that is, use variables to represent subgraphs
-).
- The graph rewriting is specified by writing down 
-\begin_inset Quotes eld
-\end_inset
-
-rules
-\begin_inset Quotes erd
-\end_inset
-
- that indicate the shape of the expected input graph, and the kind of output
- graph that should be generated, when a match is found.
- These rules are usually specified in the form of a 
-\begin_inset CommandInset href
-LatexCommand href
-name "BindLink"
-target "http://wiki.opencog.org/w/SatisfactionLink_and_BindLink"
-
-\end_inset
-
-, which can be thought of as an if-statement: 
-\begin_inset Quotes eld
-\end_inset
-
-if graph p is recognized, then generate graph q
-\begin_inset Quotes erd
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-Example Link Grammar Parse
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Example-Link-Grammar"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset VSpace defskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\align left
-\begin_inset Graphics
-	filename lg.eps
-	width 80col%
-	BoundingBox 0bp -20bp 500bp 80bp
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset listings
-inline false
-status open
-
-\begin_layout Plain Layout
-
-                        +----Js---+
-\end_layout
-
-\begin_layout Plain Layout
-
-         +---Wi---+-MVp-+   +Ds**c+
-\end_layout
-
-\begin_layout Plain Layout
-
-         |        |     |   |     |
-\end_layout
-
-\begin_layout Plain Layout
-
-     LEFT-WALL look.v to.r the left.n
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-The above illustrates a parse of the sentence 
-\begin_inset Quotes eld
-\end_inset
-
-Look to the left
-\begin_inset Quotes erd
-\end_inset
-
- (as post-script and ascii-graphics).
- It consists of a collection of typed links or edges connecting pairs of
- words.
- The 
-\family typewriter
-Wi
-\family default
- link points at the main verb of the sentence, and indicates that it is
- an imperative.
- The 
-\family typewriter
-MVp
-\family default
- link attaches the verb to a verb-modifier, in this case, to the preposition
- 
-\begin_inset Quotes eld
-\end_inset
-
-to
-\begin_inset Quotes erd
-\end_inset
-
-.
- The 
-\family typewriter
-Js
-\family default
- link connects the preposition to it's object, in this case, the noun 
-\begin_inset Quotes eld
-\end_inset
-
-left
-\begin_inset Quotes erd
-\end_inset
-
- (prepositions always have objects).
- The 
-\family typewriter
-Ds**c
-\family default
- link joins the noun to the determiner 
-\begin_inset Quotes eld
-\end_inset
-
-the
-\begin_inset Quotes erd
-\end_inset
-
-.
- Both 
-\family typewriter
-Js
-\family default
- and 
-\family typewriter
-Ds
-\family default
- indicate that the nouns is singular, and the 
-\family typewriter
-**c
-\family default
- indicates that it begins with a consonant (that is, phonetic analysis is
- also provided).
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset CommandInset line
-LatexCommand rule
-offset "0.5ex"
-width "100col%"
-height "1pt"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 The translation consists of a set of hand-crafted rules that can recognize
  specific kinds of English-language sentences, and convert these into the
  internal-language forms.
@@ -1917,10 +2140,6 @@ big picture
 
  of the rule format.
  
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Standard
