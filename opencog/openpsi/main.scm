@@ -77,7 +77,7 @@
                (goals (psi-related-goals action))
                (context-atoms (get-context-grounding-atoms rule)))
 
-           (cog-logger-debug
+           (cog-logger-info
                 "[OpenPsi] Starting evaluation psi-rule = ~a"
                 (psi-rule-alias rule))
 
@@ -94,10 +94,13 @@
                 ; information due to the evaluation of the action is lost.
                 (cog-evaluate! (True (PutLink action context-atoms)))
             )
+            ; An evaluation of an action that is common in mulitple rules
+            ; results in the achievement of the goals, even if the context of
+            ; the other rules aren't not satisfied.
             (map cog-evaluate! goals)
         ))
 
-    (cog-logger-debug "[OpenPsi] loop-count = ~a" (psi-get-loop-count))
+    (cog-logger-info "[OpenPsi] loop-count = ~a" (psi-get-loop-count))
 
     ; Run the controler that updates the weight.
     (psi-controller-update-weights)
