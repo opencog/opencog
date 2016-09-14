@@ -133,7 +133,7 @@ AtomSpace
 \end_layout
 
 \begin_layout Standard
-To acheive a unification of speech, behavior and perception, one must have
+To achieve a unification of speech, behavior and perception, one must have
  a software infrastructure that allows these to be represented in a unified
  way: that is, the data and algorithms must reside in some unified location.
  From here on out, it is assumed that this unified location is the 
@@ -482,7 +482,8 @@ internal model
 : its not like there are many different kinds of objects, and they all need
  to have methods.
  More accurately, there are only a few kinds, and many (most?) actions are
- in principle (defacto?) capable of manipulating many (most?) kinds of state.
+ in principle (de facto?) capable of manipulating many (most?) kinds of
+ state.
  The OO paradigm does not provide a good way of thinking about what goes
  on in the atomspace.
 \end_layout
@@ -629,17 +630,17 @@ control API
 \begin_inset Quotes erd
 \end_inset
 
- is not some C++ code (or python or scheme or haskel...) but rather, it is
+ is not some C++ code (or python or scheme or Haskel...) but rather, it is
  also a collection of Atoms.
- Again, the reson for this is to allow the system to automatically generate
+ Again, the reason for this is to allow the system to automatically generate
  new verbs, by means of learning, as well as to reason about the results
  of actions.
  Another key idea is that this allows actions to be combined and composed,
  in sequential or parallel order, with different timing.
- That is, the actions are primitives that can be composd into performances,
+ That is, the actions are primitives that can be composed into performances,
  that play out over time.
  Representing these as atomese how such composition and performance-scripting
- can be acheived.
+ can be achieved.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -732,8 +733,8 @@ control language
 \end_inset
 
  arises naturally within the system.
- Tghe control langauge is NOT English! Although it does have a grammar,
- the grammar is NOT that of English.
+ The control language is NOT English! Although it does have a grammar, the
+ grammar is NOT that of English.
  
 \end_layout
 
@@ -794,7 +795,7 @@ turn to the left
 \begin_inset Quotes eld
 \end_inset
 
-turn to the eyeblink
+turn to the eye-blink
 \begin_inset Quotes erd
 \end_inset
 
@@ -928,10 +929,10 @@ arm
  If the OO language was C++, then the classes and methods must be known
  at compile time: new classes, methods and messages cannot be dynamically
  created, at run-time.
- If the OO language was Javascript, then many of these issues go away: Javascrip
+ If the OO language was JavaScript, then many of these issues go away: JavaScrip
 t does allow new methods to be added, at run-time, to pre-existing objects.
  Indeed, in many ways, OpenCog Atomese resembles JavaScript.
- In particular, the Javascipt members are very similiar to OpenCog Atoms,
+ In particular, the JavaScript members are very similar to OpenCog Atoms,
  in that, at run-time, new members and methods can be added to objects.
  One could also say that OpenCog Atomese is a lot like JSON, in that one
  can specify arbitrary state structures in JSON.
@@ -947,7 +948,7 @@ There are also some important ways in which atomese differs from JavaScript
  wrapper to query the contents of giant blobs of JSON, or possibly dumping
  large blobs of JSON into Apache Solr or Lucene or Cassandra).
  Atomese also has other language features (it is Prolog-like, it is ML-like)
- that are lacking in Javascript.
+ that are lacking in JavaScript.
  
 \end_layout
 
@@ -1060,9 +1061,9 @@ efference copy
 \end_inset
 
 ).
- This is possible as long as the differnt systems use the same underlying
- design scheme: as long as the underlying hypergraphs have the same structure,
- they can be manipulated the same way, never mond that one might represent
+ This is possible as long as the different systems use the same underlying
+ design scheme: as long as the underlying hyper-graphs have the same structure,
+ they can be manipulated the same way, never mind that one might represent
  the physical body, and another the self-model.
 \end_layout
 
@@ -1162,7 +1163,7 @@ rubber meets the road
 \begin_layout Standard
 Lines 80 thru 120 illustrate how spatial directions are grounded in specific
  x,y,z coordinates.
- Lines 127 thru 132 associate specific English-langauge words to these direction
+ Lines 127 thru 132 associate specific English-language words to these direction
 s.
  Lines 135-139 group the control-language direction names into a single
  kind (in this case, into the class 
@@ -1206,7 +1207,7 @@ turn your head to face in the happy direction
 
 \begin_layout Standard
 Lines 145-149 give the two kinds to looking-turning control verbs.
- Lines 166-170 define the control-langauge grammar: the only valid way to
+ Lines 166-170 define the control-language grammar: the only valid way to
  move the robot head is to specify either the 
 \begin_inset Quotes eld
 \end_inset
@@ -1253,11 +1254,11 @@ self-model
 \begin_inset Quotes erd
 \end_inset
 
-, because it is modelling the robot itself).
+, because it is modeling the robot itself).
 \end_layout
 
 \begin_layout Standard
-Lines 216-306 define the control-adverbs, in one-to-one correspondance to
+Lines 216-306 define the control-adverbs, in one-to-one correspondence to
  the Blender animation names for facial expressions.
  There is exactly *one* control-adverb for each animation: it is not desirable
  to have synonyms in this layer.
@@ -1318,7 +1319,7 @@ Portray happiness!
 \end_inset
 
  and mean the same thing.
- Thus, all of these diferent English-language words are mapped to the same
+ Thus, all of these different English-language words are mapped to the same
  control-verb.
 \end_layout
 
@@ -1361,7 +1362,7 @@ confused
 \end_layout
 
 \begin_layout Standard
-Lines 520-531 group together the different Blender facial-exopression animations
+Lines 520-531 group together the different Blender facial-expression animations
  into a single animation-kind.
  
 \end_layout
@@ -1370,7 +1371,7 @@ Lines 520-531 group together the different Blender facial-exopression animations
 Lines 534-538 define the control-grammar for performing a facial animation:
  it must necessarily consist of the single perform-facial-animation control-verb
 , and one of the fifteen Blender facial-animation adverbs.
- No other compbination is possible: thus one cannot make the control-language
+ No other combination is possible: thus one cannot make the control-language
  statement 
 \begin_inset Quotes eld
 \end_inset
@@ -1421,11 +1422,11 @@ look
 \end_inset
 
  is intended becomes clear only after the English has been translated into
- conttrol-language.
+ control-language.
  The control grammar allows only one, or the other meaning, depending on
  how it is combined with the other control-words.
  In particular, this means that (in this prototype), the control-words are
- always and necessarily unique and unambiguous in thier 
+ always and necessarily unique and unambiguous in their 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1491,8 +1492,8 @@ The prototype includes a module that translates English language to the
 
 \begin_layout Standard
 The translation consists of a set of hand-crafted rules that can recognize
- specific kinds of English-langauge sentences, and that convert these into
- the internal-langauge forms.
+ specific kinds of English-language sentences, and that convert these into
+ the internal-language forms.
 \end_layout
 
 \begin_layout Standard
@@ -1503,6 +1504,10 @@ There are several technical issues that crop up, at this point.
 \begin_layout Standard
 issue: learning vs.
  hand-crafting, obtaining synonymous phrases, not just synonymous words.
+\end_layout
+
+\begin_layout Standard
+issue: its LG not R2L
 \end_layout
 
 \begin_layout Standard
@@ -1560,7 +1565,7 @@ standardized state queries
 
 \begin_layout Standard
 There are two translation layers that are needed here: first, to convert
- English to the internal query language, second, to conver the response
+ English to the internal query language, second, to convert the response
  back to English.
  If the response is of the right form, then SuReal can be used to perform
  the final conversion.
@@ -1629,10 +1634,23 @@ A second type of memory would be remembering past states of the world.
 \end_layout
 
 \begin_layout Standard
-One techical challenge is that we will need a management layer for the Postgres
- DB interfaces, so that memories are not lost during power-off.
+One technical challenge is that we will need a management layer for the
+ Postgres DB interfaces, so that memories are not lost during power-off.
  Those memories need to be segregated: there are somethings that need to
- be rememebered, others that should not be.
+ be remembered, others that should not be.
+\end_layout
+
+\begin_layout Subsubsection*
+Learning from sensory input
+\end_layout
+
+\begin_layout Standard
+Creating atomese representations of sensory input processing pipelines,
+ so that specific sensory inputs can be recognized e.g.
+ if the audio volume suddenly got loud, and the visual field is suddenly
+ moving, then maybe ...
+ everyone is clapping? booing? getting up to leave? ...I'm no longer the center
+ of attention?
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1659,7 +1677,7 @@ go and do that important thing
 \end_inset
 
 .
- Free wil is then the act of picking between these two alternatives, of
+ Free will is then the act of picking between these two alternatives, of
  balancing them out (at a critical phase-transition point).
 \end_layout
 
@@ -1669,7 +1687,7 @@ Items
 
 \begin_layout Itemize
 a person walks into room, who she recognizes.
- Depending on psi, she whould do non-verbal greetings (play one of 3-4 different
+ Depending on psi, she should do non-verbal greetings (play one of 3-4 different
  animations (look at, chin push, nod)) and verbal greetings (
 \begin_inset Quotes eld
 \end_inset
@@ -1694,7 +1712,7 @@ Random ideas
 \end_layout
 
 \begin_layout Itemize
-Why did you smile? Output: have her explain recent opensi decision-making.
+Why did you smile? Output: have her explain recent openpsi decision-making.
 \end_layout
 
 \begin_layout Itemize
@@ -1717,7 +1735,7 @@ What are you doing?
 \begin_inset Quotes eld
 \end_inset
 
-hey where did everybopdy go?
+hey where did everybody go?
 \begin_inset Quotes erd
 \end_inset
 
@@ -1725,7 +1743,7 @@ hey where did everybopdy go?
 \end_layout
 
 \begin_layout Itemize
-If no one isvisibile, and no one has been visible for many minutes, she
+If no one is visible, and no one has been visible for many minutes, she
  should say 
 \begin_inset Quotes eld
 \end_inset
