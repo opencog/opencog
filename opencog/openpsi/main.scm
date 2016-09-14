@@ -77,7 +77,7 @@
                (goals (psi-related-goals action))
                (context-atoms (get-context-grounding-atoms rule)))
 
-           (cog-logger-debug
+           (cog-logger-info
                 "[OpenPsi] Starting evaluation psi-rule = ~a"
                 (psi-rule-alias rule))
 
@@ -89,13 +89,18 @@
             ; grounded and the grounding atoms are put into the action (that is
             ; equivalent to the implicand of the BindLink).
             (if (null? context-atoms)
-                (cog-execute! action)
-                (cog-execute! (PutLink action context-atoms))
+                (cog-evaluate! action)
+                ; FIXME Since the PutLink is wrapped in a TrueLink any
+                ; information due to the evaluation of the action is lost.
+                (cog-evaluate! (True (PutLink action context-atoms)))
             )
+            ; An evaluation of an action that is common in mulitple rules
+            ; results in the achievement of the goals, even if the context of
+            ; the other rules aren't not satisfied.
             (map cog-evaluate! goals)
         ))
 
-    (cog-logger-debug "[OpenPsi] loop-count = ~a" (psi-get-loop-count))
+    (cog-logger-info "[OpenPsi] loop-count = ~a" (psi-get-loop-count))
 
     ; Run the controler that updates the weight.
     (psi-controller-update-weights)

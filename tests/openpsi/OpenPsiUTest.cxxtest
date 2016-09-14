@@ -231,13 +231,14 @@ public:
     }
 
 
-    // Check the scheme function `psi-step`
-    void test_psi_step()
+    // Check the scheme function `psi-step`. There are multiple tests
+    // so as to use tearDown function to clean the atomspace.
+    // Test 1:
+    // Test that actions and goals are not evaluated.
+    void test_psi_step_1()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-        // Test 1:
-        // Test that actions are not executed and goal are not evaluated.
         _scm->eval("(setup_test_psi_step_1)");
         CHKERR
 
@@ -257,9 +258,16 @@ public:
         CHKERR
         TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_1_4);
 
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
 
-        // Test 2:
-        // Test that action-1 is executed, and goal-1 is evaluated.
+    // Continue checking the scheme function `psi-step`.
+    // Test 2:
+    // Test that action-1 and goal-1 are not evaluated.
+    void test_psi_step_2()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
         _scm->eval("(setup_test_psi_step_2)");
         CHKERR
 
@@ -279,18 +287,24 @@ public:
         auto result_2_4 = _scm->eval("(demand-value demand-2)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `0.87`", "0.87\n", result_2_4);
-        logger().info("END TEST: %s", __FUNCTION__);
 
-        // Test 3:
-        // Test that action-2 is executed, and both goal-1 and goal-2 are
-        // evaluated.
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
+    // Continue checking the scheme function `psi-step`.
+    // Test 3:
+    // Test that action-2, goal-1 and goal-2 are evaluated.
+    void test_psi_step_3()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
         _scm->eval("(setup_test_psi_step_3)");
         CHKERR
 
         // For rule-2 or rule-3
         auto result_3_1 = _scm->eval("(test_psi_step_3_1)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "#t\n", result_3_1);
+        TSM_ASSERT_EQUALS("Expected #t", "#t\n", result_3_1);
         auto result_3_2 = _scm->eval("(demand-value demand-2)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_2);
@@ -298,7 +312,7 @@ public:
         // For rule-1
         auto result_3_3 = _scm->eval("(test_psi_step_2_1)");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected ()", "#f\n", result_3_3);
+        TSM_ASSERT_EQUALS("Expected #f", "#f\n", result_3_3);
         auto result_3_4 = _scm->eval("(demand-value demand-1)");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_4);
@@ -306,9 +320,31 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
+    // Continue checking the scheme function `psi-step`.
+    // Test 4:
+    // Test that action-4 and goal-4 are evaluated. This tests that evaluatable
+    // contexts are handled properly.
+    void test_psi_step_4()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        _scm->eval("(setup_test_psi_step_4)");
+        CHKERR
+
+        // For rule-4 only
+        auto result_3_1 = _scm->eval("(test_psi_step_4)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected #t", "#t\n", result_3_1);
+        auto result_3_2 = _scm->eval("(demand-value demand-4)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected `0.5`", "0.5\n", result_3_2);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
     // Check the scheme function `psi-get-dual-rules`
     // NOTE: The function `psi-get-dual-rules` has been removed but something
-    // similar will be added. This test is not removed the test may come in
+    // similar will be added. This test is not removed as the test may come in
     // handy.
     void psi_get_dual_rules()
     {
@@ -388,7 +424,7 @@ public:
         auto result_2_1 = _scm->eval("(length \
             (psi-get-all-valid-demands))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected `3`", "3\n", result_2_1);
+        TSM_ASSERT_EQUALS("Expected `2`", "2\n", result_2_1);
         auto result_2_2 = _scm->eval("(member demand-1 \
             (psi-get-all-valid-demands))");
         CHKERR
