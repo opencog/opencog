@@ -8,49 +8,20 @@
 (use-modules (opencog exec))
 (use-modules (opencog openpsi))
 (load "face-priority.scm")
+
 ;; ------------------------------------------------------------------
-
-; XXX FIXME -- terrible errible hack -- mostly because OpenPsi
-; is expecting actions to be schema, and not predicates.
-(define (foobar x)
-; (display "duuuuuuuude foobar pred-schema wrapper\n")
-; (display x) (newline)
-	(cog-evaluate! x)
- (Node "bad value"))
-;;
-(define (pred-2-schema pnode-str)
-	(DefineLink
-		(DefinedSchemaNode pnode-str)
-		(ExecutionOutputLink (GroundedSchemaNode "scm: foobar")
-			(ListLink (DefinedPredicateNode pnode-str))
-)))
-;;
-(pred-2-schema "Interaction requested action")
-(pred-2-schema "New arrival sequence")
-(pred-2-schema "Someone left action")
-(pred-2-schema "Interact with people")
-(pred-2-schema "Nothing is happening")
-(pred-2-schema "Speech started")
-(pred-2-schema "Speech ongoing")
-(pred-2-schema "Speech ended")
-(pred-2-schema "Listening started")
-(pred-2-schema "Listening ongoing")
-(pred-2-schema "Listening ended")
-(pred-2-schema "Keep alive")
-(pred-2-schema "Interacting Sequence for recognized person")
-(pred-2-schema "Update face transition-priorities")
-(pred-2-schema "Change interaction target by priority")
-(pred-2-schema "Interact with face")
-;;
-;(DefineLink (DefinedPredicateNode "do-noop") (True))
-;(pred-2-schema "do-noop")
-
-(define face-demand-satisfied (True))
-(define speech-demand-satisfied (True))
-(define track-demand-satisfied (True))
+; Demand associated with faces
 (define face-demand (psi-demand "face interaction" 1))
+(define face-demand-satisfied (True))
+
+; Demand associated with speech interaction
 (define speech-demand (psi-demand "speech interaction" 1))
+(define speech-demand-satisfied (True))
+
+; Demand for tracking faces
+; TODO: make generic for orchestration.
 (define track-demand (psi-demand "track demand" 1))
+(define track-demand-satisfied (True))
 
 (DefineLink
 	(DefinedPredicate "Nothing happening?")
@@ -64,31 +35,31 @@
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone requests interaction?")))
-	(DefinedSchemaNode "Interaction requested action")
+	(DefinedPredicate "Interaction requested action")
 	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Did someone arrive?")))
-	(DefinedSchemaNode "New arrival sequence")
+	(DefinedPredicate "New arrival sequence")
 	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Did someone leave?")))
-	(DefinedSchemaNode "Someone left action")
+	(DefinedPredicate "Someone left action")
 	face-demand-satisfied (stv 1 1) face-demand)
 
 ; This rule is the old multiple-face tracking rule
 ; TODO Remove after thoroughly testing behavior on robot.
 ;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 ;		(DefinedPredicate "Someone visible?")))
-;	(DefinedSchemaNode "Interact with people")
+;	(DefinedPredicate "Interact with people")
 ;	face-demand-satisfied (stv 1 1) face-demand)
 
 ; TODO: How should rules that could run concurrently be represented, when
 ; we have action compostion(aka Planning/Orchestration)?
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone visible?")))
-	(DefinedSchemaNode "Interact with face")
+	(DefinedPredicate "Interact with face")
 	track-demand-satisfied (stv .5 .5) track-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
@@ -96,72 +67,51 @@
 		; (Not (DefinedPredicate "chatbot is talking?"))
 		(DefinedPredicate "Someone visible?")
 		(DefinedPredicate "Time to change interaction")))
-	(DefinedSchemaNode "Change interaction target by priority")
+	(DefinedPredicate "Change interaction target by priority")
 	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Nothing happening?")))
-	(DefinedSchemaNode "Nothing is happening")
+	(DefinedPredicate "Nothing is happening")
 	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(Not (DefinedPredicate "chatbot started talking?"))
 		(Not (DefinedPredicate "Is interacting with someone?"))
 		(DefinedPredicateNode "Did someone recognizable arrive?")))
-	(DefinedSchemaNode "Interacting Sequence for recognized person")
+	(DefinedPredicate "Interacting Sequence for recognized person")
 	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot started talking?")))
-	(DefinedSchemaNode "Speech started")
+	(DefinedPredicate "Speech started")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot is talking?")))
-	(DefinedSchemaNode "Speech ongoing")
+	(DefinedPredicate "Speech ongoing")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot stopped talking?")))
-	(DefinedSchemaNode "Speech ended")
+	(DefinedPredicate "Speech ended")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot started listening?")))
-	(DefinedSchemaNode "Listening started")
+	(DefinedPredicate "Listening started")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot is listening?")))
-	(DefinedSchemaNode "Listening ongoing")
+	(DefinedPredicate "Listening ongoing")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "chatbot stopped listening?")))
-	(DefinedSchemaNode "Listening ended")
+	(DefinedPredicate "Listening ended")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (DefinedPredicate "Skip Interaction?"))
-	(DefinedSchemaNode "Keep alive")
+	(DefinedPredicate "Keep alive")
 	speech-demand-satisfied (stv 1 1) speech-demand)
-
-; ----------------------------------------------------------------------
-
-; There MUST be a DefinedPredicateNode with exactly the name
-; below in order for psi-run to work. Or we could just blow
-; that off, and use our own loop...
-(define loop-name (string-append psi-prefix-str "loop"))
-(DefineLink
-	(DefinedPredicate loop-name)
-	(SatisfactionLink
-		(SequentialAnd
-			(Evaluation (GroundedPredicate "scm: psi-step")
-				(ListLink))
-			(Evaluation (GroundedPredicate "scm: psi-run-continue?")
-				(ListLink))
-			; If ROS is dead, or the continue flag not set,
-			; then stop running the behavior loop.
-			(DefinedPredicate "ROS is running?")
-			(DefinedPredicate loop-name))))
-
-; ----------------------------------------------------------------------
