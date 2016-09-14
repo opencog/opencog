@@ -308,6 +308,8 @@ class EvaControl():
 	# started, or stopped vocalizing.  This message might be published
 	# by either the TTS module itself, or by some external chatbot.
 	#
+	#    rostopic pub --once speech_events std_msgs/String start
+	#    rostopic pub --once speech_events std_msgs/String stop
 	def speech_event_cb(self, speech_event):
 		print('speech_event, type ' + speech_event.data)
 		if speech_event.data == "start":
