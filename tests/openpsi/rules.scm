@@ -132,7 +132,7 @@
 )
 
 ; --------------------------------------------------------------
-; Helper functions for `OpenPsiUTest::test_psi_step`
+; Helper functions for `OpenPsiUTest::test_psi_step_*
 (define (setup_test_psi_step_1)
     ; Load rules
     (rule-1)
@@ -212,7 +212,34 @@
 (define (rule-4)
     (psi-rule (groundable-content-4) action-4 goal-4 (stv 1 1) demand-4))
 
-(define demand-5 (psi-demand  "demand-5" .87))
+; --------------------------------------------------------------
+; This doesn't have any groudings and as such is a rule of the
+; evaluatable form.
+(define (rule-6)
+    (psi-rule (list (True)) action-6 goal-4 (stv 1 1) demand-4)
+)
+
+(define action-6
+    (EvaluationLink
+        (GroundedPredicate "scm: act-6")
+        (ListLink)))
+
+(define (act-6)
+    (ConceptNode "act-6")
+    (stv 1 1)
+)
+
+(define (setup_test_psi_step_4)
+    ; Load rule
+    (rule-6)
+    ; Make one step
+    (psi-step)
+)
+
+(define (test_psi_step_4) (cog-node? (cog-node 'ConceptNode "act-6")))
+
+; --------------------------------------------------------------
+;(define demand-5 (psi-demand  "demand-5" .87))
 
 ;(define (rule-5)
 ;    (psi-rule
