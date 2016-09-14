@@ -76,6 +76,10 @@
 World Models
 \end_layout
 
+\begin_layout Date
+Draft Version 0.01 - 13 Sept 2016
+\end_layout
+
 \begin_layout Abstract
 A description of how OpenCog currently implements self-awareness and world-aware
 ness, together with a sketch of how this could be improved and expanded.
@@ -1028,6 +1032,19 @@ inverse model
 \end_layout
 
 \begin_layout Standard
+Other models are possible: this includes memories of past events, where
+ some remembered actions might be re-enacted: in this case, the remembered
+ actions can be replayed on a remembered model, to reconstruct what happened
+ (for example, to answer questions about those events).
+ Another possibility is that of predicting the future, where a sequence
+ of actions are played out on a model of the hypothetical future, to see
+ what might happen.
+ In such a case, there might be a model of the audience, as well as a model
+ of the self: one is interested in predicting how the audience might react
+ to a particular action.
+\end_layout
+
+\begin_layout Standard
 Rather than inventing a new language for each of these different systems,
  it is convenient to be able to use the same language.
  The under-the-covers implementation is different: in one case, motors must
@@ -1450,19 +1467,172 @@ Lines 570-680 (end of file) repeat the previous structures, but are used
 \end_layout
 
 \begin_layout Subsubsection*
-Stuff
+DRAFT VERSION 0.01
 \end_layout
 
 \begin_layout Standard
-prediction
+This is a draft.
+ Everything above is in some mostly-finished state.
+ Everything below is in outline format.
+\end_layout
+
+\begin_layout Subsubsection*
+Translation prototype
 \end_layout
 
 \begin_layout Standard
-why openpsi
+The prototype includes a module that translates English language to the
+ control language.
+ Translation consists conceptually of two distinct aspects: mapping the
+ syntax of the English language (grammar) to the control-language syntax
+ (grammar), and mapping specific English-language words to control-language
+ atoms (this second part having already been reviewed above).
 \end_layout
 
 \begin_layout Standard
-action orch
+The translation consists of a set of hand-crafted rules that can recognize
+ specific kinds of English-langauge sentences, and that convert these into
+ the internal-langauge forms.
+\end_layout
+
+\begin_layout Standard
+There are several technical issues that crop up, at this point.
+ One is that the
+\end_layout
+
+\begin_layout Standard
+issue: learning vs.
+ hand-crafting, obtaining synonymous phrases, not just synonymous words.
+\end_layout
+
+\begin_layout Standard
+issue: using openpsi to discover and apply rules.
+ This is like using openpsi in general, to pick through non-verbal stimulus.
+\end_layout
+
+\begin_layout Standard
+issue: fuzzy matching, partial matching
+\end_layout
+
+\begin_layout Standard
+issue: picking out sentences attached to an anchor, vs other processing
+ pipeline designs.
+\end_layout
+
+\begin_layout Subsubsection*
+Question-answering
+\end_layout
+
+\begin_layout Standard
+Answering questions about self and the world.
+ Also has been prototyped.
+ Its like the 
+\begin_inset Quotes eld
+\end_inset
+
+view
+\begin_inset Quotes erd
+\end_inset
+
+ part of MVC -- the internal state has to be 
+\begin_inset Quotes eld
+\end_inset
+
+viewed
+\begin_inset Quotes erd
+\end_inset
+
+ easily, in order to be queried.
+ Thus, there are a set of 
+\begin_inset Quotes eld
+\end_inset
+
+standardized state queries
+\begin_inset Quotes erd
+\end_inset
+
+, analogous to the control language.
+ Running these queries returns yes/no answers (truth queries) or multi-valued
+ data (e.g.
+ look-at direction) or more complex structures (sequences of actions that
+ had been performed in the past) 
+\end_layout
+
+\begin_layout Standard
+There are two translation layers that are needed here: first, to convert
+ English to the internal query language, second, to conver the response
+ back to English.
+ If the response is of the right form, then SuReal can be used to perform
+ the final conversion.
+ Right now, the query language is not generating SuReal-compatible results.
+\end_layout
+
+\begin_layout Subsubsection*
+World model
+\end_layout
+
+\begin_layout Standard
+Right now, there is only a self-model.
+ A world-model is needed, so we can talk about that.
+ Well --there is a world model -- currently, it consists of the visible
+ faces in the environment.
+ It needs to get bigger.
+\end_layout
+
+\begin_layout Subsubsection*
+Action Orchestration
+\end_layout
+
+\begin_layout Standard
+Carrying out multiple things at once; using the internal model to do this.
+\end_layout
+
+\begin_layout Subsubsection*
+Memory
+\end_layout
+
+\begin_layout Standard
+Multiple types of memory are needed.
+ Most important (for demo purposes) is memory consisting of imperatives:
+ when she is told to do this and say that, she needs to remember this, and
+ later on, play that back as a performance.
+\end_layout
+
+\begin_layout Standard
+This should be 
+\begin_inset Quotes eld
+\end_inset
+
+straight-forward
+\begin_inset Quotes erd
+\end_inset
+
+: one can record the control-language directives.
+ They need to be marked up with timing information.
+\end_layout
+
+\begin_layout Standard
+Implementing acting-coaching is interesting, and in particular, implementing
+ directives such as 
+\begin_inset Quotes eld
+\end_inset
+
+do that performance again, except this time, make xyz go more slowly
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+A second type of memory would be remembering past states of the world.
+\end_layout
+
+\begin_layout Standard
+One techical challenge is that we will need a management layer for the Postgres
+ DB interfaces, so that memories are not lost during power-off.
+ Those memories need to be segregated: there are somethings that need to
+ be rememebered, others that should not be.
 \end_layout
 
 \begin_layout Subsubsection*
