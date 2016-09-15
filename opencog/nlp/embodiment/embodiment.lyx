@@ -1152,7 +1152,7 @@ control language
 \begin_inset Quotes eld
 \end_inset
 
-look left!
+Look left!
 \begin_inset Quotes erd
 \end_inset
 
@@ -1160,7 +1160,7 @@ look left!
 \begin_inset Quotes eld
 \end_inset
 
-pretend you're happy!
+Pretend you're happy!
 \begin_inset Quotes erd
 \end_inset
 
@@ -1254,7 +1254,7 @@ target "https://en.wikipedia.org/wiki/Link_grammar"
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -1336,6 +1336,12 @@ Look to the left
  (as post-script and ASCII-graphics).
  It consists of a collection of typed links or edges connecting pairs of
  words.
+ 
+\family typewriter
+LEFT-WALL
+\family default
+ is simply the start of the setence; it is a pseudo-word, simply the first
+ word of the sentence.
  The 
 \family typewriter
 Wi
