@@ -1686,8 +1686,10 @@ A rule engine, to drive the system.
 
 \begin_layout Standard
 These are each reviewed, below.
- There are assorted issues, especially in the translation layer; these serve
- to anchor later discussion.
+ There are assorted design issues in each of these subsystems; these issues
+ serve to anchor the next stage of the design discussion.
+ Thus, it is important to understand how the current prototype works, as
+ it makes clear both the how and the why of a more sophisticated design.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -2239,17 +2241,76 @@ d in lines 55-92, and then three specific rules are built: one to communicate
 \end_layout
 
 \begin_layout Subsubsection*
-DRAFT VERSION 0.02
+Rule engine
 \end_layout
 
 \begin_layout Standard
-This is a draft.
- Everything above is in some mostly-finished state.
- Everything below is in outline format.
+The file 
+\begin_inset CommandInset href
+LatexCommand href
+name "imperative.scm"
+target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/imperative.scm"
+
+\end_inset
+
+ implements an 
+\emph on
+ad hoc
+\emph default
+ mini-rule-engine.
+ It very simply cycles through all of the rules described above, applying
+ each in turn.
+ It is invoked whenever the language subsystem detects that an imperative
+ sentence has been uttered.
+\end_layout
+
+\begin_layout Standard
+It is intended that this ad-ho arrangement of rules be replaced by the OpenPsi
+ rule system.
+ OpenPsi is described in greater detail further on in this document, at
+ which point the reason for it's superiority as a rule-engine management
+ system will become apparent.
 \end_layout
 
 \begin_layout Subsubsection*
-Self-model
+Glue code
+\end_layout
+
+\begin_layout Standard
+Assorted 
+\emph on
+ad hoc
+\emph default
+ scaffolding is required to integrate the above systems into the generic
+ chat framework.
+ it has no particular significance, other than that it is needed to make
+ things work.
+ See, for example, 
+\begin_inset CommandInset href
+LatexCommand href
+name "bot-api.scm"
+target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/bot-api.scm"
+
+\end_inset
+
+ for this scaffolding.
+ 
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset CommandInset href
+LatexCommand href
+name "chatbot-eva.scm"
+target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/chatbot-eva.scm"
+
+\end_inset
+
+ file defines a loadable scheme module that encapsulates all of this code.
+\end_layout
+
+\begin_layout Subsubsection*
+Self-model, World-model
 \end_layout
 
 \begin_layout Standard
@@ -2458,25 +2519,18 @@ control language
  
 \end_layout
 
-\begin_layout Subsubsection*
-Rule engine
-\end_layout
-
-\begin_layout Standard
-See imperative.scm to be replaced by open-psi.
-\end_layout
-
-\begin_layout Subsubsection*
-Glue code
-\end_layout
-
-\begin_layout Standard
-See bot-api.scm and chatbot-eva.scm this code is adhoc and to be replaced
- by appropriate scaffolding and integration code.
-\end_layout
-
 \begin_layout Section*
 Design Issues
+\end_layout
+
+\begin_layout Subsubsection*
+DRAFT VERSION 0.02
+\end_layout
+
+\begin_layout Standard
+This is a draft.
+ Everything above is in some mostly-finished state.
+ Everything below is in outline format.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -2500,7 +2554,7 @@ issue: its LG not R2L
 
 \begin_layout Standard
 issue: dual-stage conversion.
- It looks more like relex or MTT.
+ Normal form looks more like relex or MTT.
 \end_layout
 
 \begin_layout Standard
@@ -2520,6 +2574,14 @@ issue: picking out sentences attached to an anchor, vs other processing
 \begin_layout Standard
 todo -- the verb synonyms shouyld not be needed!? as they can be gotten
  from the synonym lists for tha control-action language...
+\end_layout
+
+\begin_layout Subsubsection*
+OpenPsi
+\end_layout
+
+\begin_layout Standard
+OpenPsi as a flexible rule-selection system
 \end_layout
 
 \begin_layout Subsubsection*
