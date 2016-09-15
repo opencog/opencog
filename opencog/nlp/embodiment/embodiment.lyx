@@ -77,7 +77,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.02 - 14 Sept 2016
+Draft Version 0.03 - 15 Sept 2016
 \end_layout
 
 \begin_layout Abstract
@@ -1643,14 +1643,117 @@ Ds**c- & Js-
 \end_layout
 
 \begin_layout Subsubsection*
-The Language Pipeline
+Rule engine
+\end_layout
+
+\begin_layout Standard
+A collection of rules require a rule engine to manage and apply them.
+ OpenCog has several forms of these, that can be used in various different
+ situations.
+ Rules can be applied, one-by-one, on an 
+\emph on
+ad hoc
+\emph default
+ basis, by calling 
+\family typewriter
+cog-execute!
+\family default
+, for example.
+ 
+\end_layout
+
+\begin_layout Standard
+The OpenPsi subsystem maintains classes of rules, enabling goal-driven behavior.
+ Although the rules that OpenPsi manages are only applied one by one (one
+ at a time), the sorting of rules into distinct classes allows distinct
+ goals, with distinct priorities to be assigned to each.
+ Thus, to reach a certain goal, it is possible to select rules that are
+ most likely to acheive that goal.
+ As the importance of various goals change dynamically over time, different
+ rules-sets can come into play.
+\end_layout
+
+\begin_layout Standard
+The forward and backward chainers can be used to discover sequences of rules
+ that connect two graphs.
+ That is, given a particular starting graph, and a particular ending graph,
+ the chainers can explore different sequences of rules that might result
+ in a valid path between these two end-points.
+ These use traditional search algorithms, although an A-star search algorithm
+ variant is envisioned.
+ Currently, the forward-backwards chainers are employed primarily for probabilis
+tic reasoning (PLN).
+\end_layout
+
+\begin_layout Standard
+Rules can also be assembled by means of parsing.
+ Currently, OpenCog only implements only one, a very special-purpose parser.
+ It is envisioned that a generic parser, replacing or supplementing the
+ forward and backwards chainers, will be created.
+ This idea is explored further in Appendix A 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Appendix-A"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+The language pipeline
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Language-Pipeline"
+
+\end_inset
+
+ illustrates the complete language pipeline, assembling together figures
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+ for a typical imperative sentence.
+ This illustrates only the 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ side; so questions, for example, will also generate a verbal output; the
+ output side is not shown, although it can roughly be imagined to be the
+ 
+\begin_inset Quotes eld
+\end_inset
+
+reverse
+\begin_inset Quotes erd
+\end_inset
+
+ of this figure.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
@@ -1694,7 +1797,22 @@ name "fig:Language-Pipeline"
 \end_layout
 
 \begin_layout Plain Layout
-The complete language pipeline, for imperatives.
+The complete language pipeline, for imperative English sentences.
+ This combines figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+ into one.
  The input sentence, 
 \begin_inset Quotes eld
 \end_inset
@@ -1703,7 +1821,42 @@ Turn to the left!
 \begin_inset Quotes erd
 \end_inset
 
+, is parsed by a dependency parser, thus generating a graph that shows the
+ syntactic relations between words.
+ Because syntax is correlated with semantics, it becomes relatively straight-for
+ward to transform the syntactic graph into a normalized, semantic form.
+ The semantic form can be understood as being a kind of 
+\begin_inset Quotes eld
+\end_inset
 
+control language
+\begin_inset Quotes erd
+\end_inset
+
+, and thus can be used directly to perform actions, such as moving motors
+ or updating the self-model.
+ The three steps shown here, dependency parsing, semantic normalization,
+ and action performance, can each be taken to rule-driven re-writes of graphs.
+ That is, they are each acheived by applying graph-rewriting to each graph,
+ in turn.
+ The labels on the right, MorphR, SyntR and SemR are the standard names
+ that are given to each representation by Mel'čuk's 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Meaning-Text Theory"
+target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Plain Layout
@@ -2355,8 +2508,11 @@ ad hoc
 \end_layout
 
 \begin_layout Standard
-It is intended that this ad-ho arrangement of rules be replaced by the OpenPsi
- rule system.
+It is intended that this 
+\emph on
+ad hoc
+\emph default
+ arrangement of rules be replaced by the OpenPsi rule system.
  OpenPsi is described in greater detail further on in this document, at
  which point the reason for it's superiority as a rule-engine management
  system will become apparent.
@@ -2930,6 +3086,21 @@ Behavior -- she should not get sleepy, as long as someone is visible.
 \begin_layout Itemize
 Behavior -- she should complain, if no one is visible, but there is a chat
  session going on.
+\end_layout
+
+\begin_layout Section*
+Appendix A
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Appendix-A"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+adsf
 \end_layout
 
 \end_body
