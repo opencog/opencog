@@ -77,7 +77,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.01 - 13 Sept 2016
+Draft Version 0.02 - 14 Sept 2016
 \end_layout
 
 \begin_layout Abstract
@@ -93,7 +93,26 @@ ness, together with a sketch of how this could be improved and expanded.
 \end_layout
 
 \begin_layout Section*
-Overview
+Introduction
+\end_layout
+
+\begin_layout Standard
+The paper proceeds in several steps.
+ The first step is to review the overall concept of an 
+\begin_inset Quotes eld
+\end_inset
+
+internal model
+\begin_inset Quotes erd
+\end_inset
+
+, and how one can, in principle, interface with it.
+ This is followed by a section reviewing the current prototype.
+ After this, difficulties with language are discussed.
+\end_layout
+
+\begin_layout Section*
+Internal Models
 \end_layout
 
 \begin_layout Standard
@@ -133,7 +152,7 @@ AtomSpace
 \end_layout
 
 \begin_layout Standard
-To acheive a unification of speech, behavior and perception, one must have
+To achieve a unification of speech, behavior and perception, one must have
  a software infrastructure that allows these to be represented in a unified
  way: that is, the data and algorithms must reside in some unified location.
  From here on out, it is assumed that this unified location is the 
@@ -221,6 +240,41 @@ model
 
  will refer to both the self-model and the world model, there being no particula
 r difference.
+\end_layout
+
+\begin_layout Subsubsection*
+World Model
+\end_layout
+
+\begin_layout Standard
+Although the above argues that both the self-model and the world-model are
+ special cases of the internal model, this is worth more discussion.
+ The world model describes not only inanimate objects, such as boxes seen
+ in the corner of the room, but includes models of other people.
+ In the current software base, this is quite shallow: it is just a list
+ of the human faces currently visible to the video camera, and their 3D
+ coordinates.
+ The model could include a lot more information: names to be associated
+ with the faces, memories of past conversations with those faces, a personality
+ profile associated with each face.
+ This can be expanded to a general model of 
+\begin_inset Quotes eld
+\end_inset
+
+other
+\begin_inset Quotes erd
+\end_inset
+
+, including stereotypes of profession, gender, cultural and geographical
+ background, and so on.
+\end_layout
+
+\begin_layout Standard
+For most of this document, the distinction between models of self, other,
+ and the rest of the world does not matter: rather, the discussion centers
+ on how to interface such models to perceptions and to actions.
+ An vitally important side topic is how to automatically learn and update
+ the model: this is discussed briefly, later, but is not a primary topic.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -482,7 +536,11 @@ internal model
 : its not like there are many different kinds of objects, and they all need
  to have methods.
  More accurately, there are only a few kinds, and many (most?) actions are
- in principle (defacto?) capable of manipulating many (most?) kinds of state.
+ in principle (
+\emph on
+de facto
+\emph default
+?) capable of manipulating many (most?) kinds of state.
  The OO paradigm does not provide a good way of thinking about what goes
  on in the atomspace.
 \end_layout
@@ -629,17 +687,17 @@ control API
 \begin_inset Quotes erd
 \end_inset
 
- is not some C++ code (or python or scheme or haskel...) but rather, it is
+ is not some C++ code (or python or scheme or Haskel...) but rather, it is
  also a collection of Atoms.
- Again, the reson for this is to allow the system to automatically generate
+ Again, the reason for this is to allow the system to automatically generate
  new verbs, by means of learning, as well as to reason about the results
  of actions.
  Another key idea is that this allows actions to be combined and composed,
  in sequential or parallel order, with different timing.
- That is, the actions are primitives that can be composd into performances,
+ That is, the actions are primitives that can be composed into performances,
  that play out over time.
  Representing these as atomese how such composition and performance-scripting
- can be acheived.
+ can be achieved.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -732,8 +790,8 @@ control language
 \end_inset
 
  arises naturally within the system.
- Tghe control langauge is NOT English! Although it does have a grammar,
- the grammar is NOT that of English.
+ The control language is NOT English! Although it does have a grammar, the
+ grammar is NOT that of English.
  
 \end_layout
 
@@ -794,7 +852,7 @@ turn to the left
 \begin_inset Quotes eld
 \end_inset
 
-turn to the eyeblink
+turn to the eye-blink
 \begin_inset Quotes erd
 \end_inset
 
@@ -928,10 +986,10 @@ arm
  If the OO language was C++, then the classes and methods must be known
  at compile time: new classes, methods and messages cannot be dynamically
  created, at run-time.
- If the OO language was Javascript, then many of these issues go away: Javascrip
+ If the OO language was JavaScript, then many of these issues go away: JavaScrip
 t does allow new methods to be added, at run-time, to pre-existing objects.
  Indeed, in many ways, OpenCog Atomese resembles JavaScript.
- In particular, the Javascipt members are very similiar to OpenCog Atoms,
+ In particular, the JavaScript members are very similar to OpenCog Atoms,
  in that, at run-time, new members and methods can be added to objects.
  One could also say that OpenCog Atomese is a lot like JSON, in that one
  can specify arbitrary state structures in JSON.
@@ -947,7 +1005,7 @@ There are also some important ways in which atomese differs from JavaScript
  wrapper to query the contents of giant blobs of JSON, or possibly dumping
  large blobs of JSON into Apache Solr or Lucene or Cassandra).
  Atomese also has other language features (it is Prolog-like, it is ML-like)
- that are lacking in Javascript.
+ that are lacking in JavaScript.
  
 \end_layout
 
@@ -1060,9 +1118,9 @@ efference copy
 \end_inset
 
 ).
- This is possible as long as the differnt systems use the same underlying
- design scheme: as long as the underlying hypergraphs have the same structure,
- they can be manipulated the same way, never mond that one might represent
+ This is possible as long as the different systems use the same underlying
+ design scheme: as long as the underlying hyper-graphs have the same structure,
+ they can be manipulated the same way, never mind that one might represent
  the physical body, and another the self-model.
 \end_layout
 
@@ -1089,11 +1147,514 @@ control language
 
 , one can now imagine that controlling the robot using the English language
  might not be too hard: just translate English to the internal control language,
- and one is done! 
+ and one is done! Thus, for example, it is easy to imagine that simple English
+ sentences, such as 
+\begin_inset Quotes eld
+\end_inset
+
+look left!
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+pretend you're happy!
+\begin_inset Quotes erd
+\end_inset
+
+, can be converted to the control language.
+ 
 \end_layout
 
 \begin_layout Standard
-There is a prototype of this, located in 
+There are several ways to accomplish this.
+ There is a simple, brute-force approach: create templates such as 
+\begin_inset Quotes eld
+\end_inset
+
+Look ____
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+Pretend you're ____
+\begin_inset Quotes erd
+\end_inset
+
+ and implement a fill-in-the-blanks algorithm.
+ Simple string matching will suffice, and (for example) AIML excels at this
+ kind of string-search and string-matching.
+ This approach is sufficient to tell the robot to look in different directions,
+ and to make different facial expressions.
+\end_layout
+
+\begin_layout Standard
+A core premise of what follows is that brute-force string-matching or string-tem
+plating is NOT sufficient for more complex, more abstract conversations.
+ For that, a syntactic analysis of the sentence is needed.
+ Thus, although there is plenty of room and utility for string-matching
+ in the natural-language subsystem, this will NOT be the primary focus of
+ this document (nor is it used in the prototype).
+ Complex conversational abilities are anticipated, and so are planned for,
+ from the start.
+\end_layout
+
+\begin_layout Standard
+The prototype does perform syntactic analysis using the Link Grammar parser.
+ It could have used RelEx or Relex2Logic, but does not, for reasons explained
+ later.
+\end_layout
+
+\begin_layout Standard
+If one has a syntactic analyzer, then translation can be performed by extracting
+ the syntax of a given English-language sentence, and re-writing it into
+ an equivalent control-language structure.
+ Along the way, specific English-language words and phrases are remapped
+ to equivalent control-language atoms.
+\end_layout
+
+\begin_layout Subsubsection*
+Link Grammar
+\end_layout
+
+\begin_layout Standard
+The syntax of the English-language sentence is extracted by parsing the
+ input sentence with the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Link Grammar parser"
+target "http://www.abisource.com/projects/link-grammar/"
+
+\end_inset
+
+ (
+\begin_inset CommandInset href
+LatexCommand href
+name "wikipedia"
+target "https://en.wikipedia.org/wiki/Link_grammar"
+
+\end_inset
+
+).
+ There are certainly many other natural-language parsers out there, including
+ famously the Stanford parser, Google's Parsey-McParseface, and any number
+ of phrase-structure parsers.
+ Link Grammar is used because it fits particularly well with the theory
+ of Atomese, and because it has particularly high accuracy and very broad
+ coverage.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Example Link Grammar Parse
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Example-Link-Grammar"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align left
+\begin_inset Graphics
+	filename lg.eps
+	width 80col%
+	BoundingBox 0bp -20bp 500bp 80bp
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+                        +----Js---+
+\end_layout
+
+\begin_layout Plain Layout
+
+         +---Wi---+-MVp-+   +Ds**c+
+\end_layout
+
+\begin_layout Plain Layout
+
+         |        |     |   |     |
+\end_layout
+
+\begin_layout Plain Layout
+
+     LEFT-WALL look.v to.r the left.n
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The above illustrates a parse of the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+Look to the left
+\begin_inset Quotes erd
+\end_inset
+
+ (as post-script and ASCII-graphics).
+ It consists of a collection of typed links or edges connecting pairs of
+ words.
+ The 
+\family typewriter
+Wi
+\family default
+ link points at the main verb of the sentence, and indicates that it is
+ an imperative.
+ The 
+\family typewriter
+MVp
+\family default
+ link attaches the verb to a verb-modifier, in this case, to the preposition
+ 
+\begin_inset Quotes eld
+\end_inset
+
+to
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The 
+\family typewriter
+Js
+\family default
+ link connects the preposition to it's object, in this case, the noun 
+\begin_inset Quotes eld
+\end_inset
+
+left
+\begin_inset Quotes erd
+\end_inset
+
+ (prepositions always have objects).
+ The 
+\family typewriter
+Ds**c
+\family default
+ link joins the noun to the determiner 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Both 
+\family typewriter
+Js
+\family default
+ and 
+\family typewriter
+Ds
+\family default
+ indicate that the nouns is singular, and the 
+\family typewriter
+**c
+\family default
+ indicates that it begins with a consonant (that is, phonetic analysis is
+ also provided).
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The Link Grammar parser discovers relationships between the words in a sentence,
+ and marks up those relationships with links connecting pairs of words.
+ These links have a type or kind, indicating the relationship between the
+ words -- typically, subject, object, adjectival-modifier, adverbial-modifier,
+ prepositional-object and so on.
+ This is illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+.
+ The relationships, taken together, can be understood to form a directed
+ graph, often a tree.
+ Most links have an implicit directionality in them.
+ The graph does sometimes have cycles: these constrain the parse choices.
+ 
+\end_layout
+
+\begin_layout Standard
+The graph fully encodes the syntactic structure of the parsed sentence,
+ as well as a fair amount of the semantic structure, encoded in the so-called
+ 
+\begin_inset Quotes eld
+\end_inset
+
+disjuncts
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The disjuncts are the graph-duals to the linkages.
+ Thus, in the figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+, it can be seen that the word 
+\begin_inset Quotes eld
+\end_inset
+
+look
+\begin_inset Quotes erd
+\end_inset
+
+ has a link 
+\family typewriter
+Wi
+\family default
+ to the left, and a link 
+\family typewriter
+MVp
+\family default
+ to the right: these two form a disjunct 
+\family typewriter
+Wi- & MVp+
+\family default
+, with the plus and minus signs indicating linkage to the right and left.
+ Given only this disjunct, and nothing else - not even the word itself,
+ one can already deduce that the word must be a verb, and that it must be
+ an imperative, and that it will take a preposition, and thus, a prepositional
+ object.
+ Thus, the disjunct 
+\family typewriter
+Wi- & MVp+
+\family default
+ acts as a fine-grained part-of-speech, and this carries semantic information.
+ That is, the meaning of a word is correlated with the part-of-speech: this
+ is obvious simply by observing that dictionaries organize word-meanings
+ by parts-of-speech.
+ The disjunct offers a particularly fine-grained distinction, and thus is
+ more strongly correlated with meaning.
+\end_layout
+
+\begin_layout Standard
+Note that there are 
+\begin_inset Quotes eld
+\end_inset
+
+costs
+\begin_inset Quotes erd
+\end_inset
+
+ or weights associated with different disjuncts.
+ These can be interpreted as log-probabilities, and so the parse system,
+ as a whole, has probabilistic or Markovian aspects associated with it.
+ This play a minor role, at this stage.
+\end_layout
+
+\begin_layout Subsubsection*
+Graph rewriting
+\end_layout
+
+\begin_layout Standard
+The translation process proceeds by taking the syntactic-parse graph, such
+ as 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+, and converting it into an equivalent control-language graph, such as in
+ figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+.
+ The conversion of one graph into another is accomplished via 
+\begin_inset CommandInset href
+LatexCommand href
+name "graph-rewriting"
+target "https://en.wikipedia.org/wiki/Graph_rewriting"
+
+\end_inset
+
+.
+ The OpenCog AtomSpace has a powerful and sophisticated graph-rewriting
+ engine built into it, called the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "pattern matcher"
+target "http://wiki.opencog.org/w/Pattern_matching"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+; it can easily convert graphs of one shape into another, even when the
+ graphs contain variables in them (that is, use variables to represent subgraphs
+).
+ 
+\end_layout
+
+\begin_layout Standard
+The graph rewriting is specified by writing down 
+\begin_inset Quotes eld
+\end_inset
+
+rules
+\begin_inset Quotes erd
+\end_inset
+
+ that indicate the shape of the expected input graph, and the kind of output
+ graph that should be generated, when a match is found.
+ These rules are usually specified in the form of a 
+\begin_inset CommandInset href
+LatexCommand href
+name "BindLink"
+target "http://wiki.opencog.org/w/SatisfactionLink_and_BindLink"
+
+\end_inset
+
+, which can be thought of as an if-statement: 
+\begin_inset Quotes eld
+\end_inset
+
+if graph p is recognized, then generate graph q
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Alternately, they can be thought of as an implication 
+\begin_inset Formula $p\to q$
+\end_inset
+
+, or, with variables, 
+\begin_inset Formula $p(x)\to q(x)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+To provide a worked example: to rewrite figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+ into figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+, one creates a rule 
+\begin_inset Quotes eld
+\end_inset
+
+IF word x has disjunct 
+\family typewriter
+Wi- & MVp+
+\family default
+ and word x is 'turn' and word y has disjunct 
+\family typewriter
+Ds**c- & Js-
+\family default
+, THEN create control-language graph 'turn(y)'
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The prototype contains a rule of roughly this form.
+\end_layout
+
+\begin_layout Subsubsection*
+Next steps
+\end_layout
+
+\begin_layout Standard
+There are additional important concepts that are required to correctly implement
+ a fully working system.
+ Before discussing these, it is worth reviewing the current prototype, as
+ it illustrates the above concepts in a specific, concrete manner.
+ The issues encountered during prototyping also serve as an introduction
+ to problems that must be solved in the full system.
+\end_layout
+
+\begin_layout Section*
+Prototype Review
+\end_layout
+
+\begin_layout Standard
+The prototype of the above-described system is located in 
 \begin_inset CommandInset href
 LatexCommand href
 name "github"
@@ -1110,26 +1671,28 @@ target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0a
 \end_inset
 
  directory.
- As a prototype, it has issues: these will be discussed later.
- The prototype implements commands for the robot to look in different directions
-, and to make different facial expressions.
- This includes imperatives such as 
-\begin_inset Quotes eld
-\end_inset
+ It naturally splits into three pieces.
+ These are:
+\end_layout
 
-look left!
-\begin_inset Quotes erd
-\end_inset
+\begin_layout Itemize
+An implementation of the self-model and the control language.
+\end_layout
 
- and 
-\begin_inset Quotes eld
-\end_inset
+\begin_layout Itemize
+An English-to-control-language translation layer.
+\end_layout
 
-pretend you're happy!
-\begin_inset Quotes erd
-\end_inset
+\begin_layout Itemize
+A rule engine, to drive the system.
+\end_layout
 
-
+\begin_layout Standard
+These are each reviewed, below.
+ There are assorted design issues in each of these subsystems; these issues
+ serve to anchor the next stage of the design discussion.
+ Thus, it is important to understand how the current prototype works, as
+ it makes clear both the how and the why of a more sophisticated design.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1162,7 +1725,7 @@ rubber meets the road
 \begin_layout Standard
 Lines 80 thru 120 illustrate how spatial directions are grounded in specific
  x,y,z coordinates.
- Lines 127 thru 132 associate specific English-langauge words to these direction
+ Lines 127 thru 132 associate specific English-language words to these direction
 s.
  Lines 135-139 group the control-language direction names into a single
  kind (in this case, into the class 
@@ -1206,7 +1769,7 @@ turn your head to face in the happy direction
 
 \begin_layout Standard
 Lines 145-149 give the two kinds to looking-turning control verbs.
- Lines 166-170 define the control-langauge grammar: the only valid way to
+ Lines 166-170 define the control-language grammar: the only valid way to
  move the robot head is to specify either the 
 \begin_inset Quotes eld
 \end_inset
@@ -1253,11 +1816,11 @@ self-model
 \begin_inset Quotes erd
 \end_inset
 
-, because it is modelling the robot itself).
+, because it is modeling the robot itself).
 \end_layout
 
 \begin_layout Standard
-Lines 216-306 define the control-adverbs, in one-to-one correspondance to
+Lines 216-306 define the control-adverbs, in one-to-one correspondence to
  the Blender animation names for facial expressions.
  There is exactly *one* control-adverb for each animation: it is not desirable
  to have synonyms in this layer.
@@ -1318,7 +1881,7 @@ Portray happiness!
 \end_inset
 
  and mean the same thing.
- Thus, all of these diferent English-language words are mapped to the same
+ Thus, all of these different English-language words are mapped to the same
  control-verb.
 \end_layout
 
@@ -1361,7 +1924,7 @@ confused
 \end_layout
 
 \begin_layout Standard
-Lines 520-531 group together the different Blender facial-exopression animations
+Lines 520-531 group together the different Blender facial-expression animations
  into a single animation-kind.
  
 \end_layout
@@ -1370,7 +1933,7 @@ Lines 520-531 group together the different Blender facial-exopression animations
 Lines 534-538 define the control-grammar for performing a facial animation:
  it must necessarily consist of the single perform-facial-animation control-verb
 , and one of the fifteen Blender facial-animation adverbs.
- No other compbination is possible: thus one cannot make the control-language
+ No other combination is possible: thus one cannot make the control-language
  statement 
 \begin_inset Quotes eld
 \end_inset
@@ -1421,11 +1984,11 @@ look
 \end_inset
 
  is intended becomes clear only after the English has been translated into
- conttrol-language.
+ control-language.
  The control grammar allows only one, or the other meaning, depending on
  how it is combined with the other control-words.
  In particular, this means that (in this prototype), the control-words are
- always and necessarily unique and unambiguous in thier 
+ always and necessarily unique and unambiguous in their 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1467,7 +2030,504 @@ Lines 570-680 (end of file) repeat the previous structures, but are used
 \end_layout
 
 \begin_layout Subsubsection*
-DRAFT VERSION 0.01
+Translation prototype
+\end_layout
+
+\begin_layout Standard
+The translation consists of a set of hand-crafted rules that can recognize
+ specific kinds of English-language sentences, and convert these into the
+ internal-language forms.
+ These are implemented in the file 
+\begin_inset CommandInset href
+LatexCommand href
+name "imperative-rules.scm"
+target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/imperative-rules.scm"
+
+\end_inset
+
+.
+ For example, the English sentence 
+\begin_inset Quotes eld
+\end_inset
+
+look left
+\begin_inset Quotes erd
+\end_inset
+
+ is recognized by the 
+\family typewriter
+look-rule-1
+\family default
+ pattern, lines 176-189.
+ The sentence 
+\begin_inset Quotes eld
+\end_inset
+
+look to the left
+\begin_inset Quotes erd
+\end_inset
+
+ is recognized by the 
+\family typewriter
+look-rule-2
+\family default
+ pattern, lines 191-208.
+ Both of these patterns specify several synonyms for the English verb.
+ The pattern of the English sentences is recognized in lines 186-188 and
+ lines 205-206.
+ The lg-links 
+\family typewriter
+MVa
+\family default
+, 
+\family typewriter
+MVp
+\family default
+, 
+\family typewriter
+Js
+\family default
+, 
+\family typewriter
+Ju
+\family default
+ come from the Link Grammar parse of the sentence; these are already illustrated
+ in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+.
+ There is a fair amount of monkey-business being done to make these rules
+ relatively easy to write.
+ One issue is that the atomese representation of the Link Grammar parses
+ is fairly turgid (the 
+\begin_inset CommandInset href
+LatexCommand href
+name "RelEx Atomese format"
+target "http://wiki.opencog.org/w/RelEx_OpenCog_format"
+
+\end_inset
+
+); complexities arise due to the need to represent multiple distinct sentences,
+ as well as to distinguish the use of the same word in two different places
+ in a sentence: these are 
+\begin_inset Quotes eld
+\end_inset
+
+word instances
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Thus, an imperative-sentence utility is provided in lines 130-172; if that
+ utility is not used, then the two look-rules are more verbose, and are
+ shown in lines 48-90 and 92-128.
+ It is useful to compare these, to get the 
+\begin_inset Quotes eld
+\end_inset
+
+big picture
+\begin_inset Quotes erd
+\end_inset
+
+ of the rule format.
+ 
+\end_layout
+
+\begin_layout Standard
+Lines 221-249 implement a utility for handling single-word imperative sentences,
+ and lines 251-268 handle the various single-word imperatives.
+\end_layout
+
+\begin_layout Standard
+Lines 272-286 implement a rule for sentences of the form 
+\begin_inset Quotes eld
+\end_inset
+
+look happy
+\begin_inset Quotes erd
+\end_inset
+
+, while lines 290-308 implement a rule for sentences of the form 
+\begin_inset Quotes eld
+\end_inset
+
+show happiness
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The difference here is that 
+\begin_inset Quotes eld
+\end_inset
+
+happy
+\begin_inset Quotes erd
+\end_inset
+
+ is an adjective, while 
+\begin_inset Quotes eld
+\end_inset
+
+happiness
+\begin_inset Quotes erd
+\end_inset
+
+ is a noun.
+ The sentences, although short, are syntactically different: in English,
+ one cannot correctly say 
+\begin_inset Quotes eld
+\end_inset
+
+look happiness
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+show happy
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Translation, normalized form
+\end_layout
+
+\begin_layout Standard
+The above section was a bit glib: currently, translation proceeds in two
+ steps.
+ First, the English form is converted into an intermediate, 
+\begin_inset Quotes eld
+\end_inset
+
+normalized
+\begin_inset Quotes erd
+\end_inset
+
+ form, and then the intermediate form is converted into the final control
+ language.
+ This second conversion is done in the file 
+\begin_inset CommandInset href
+LatexCommand href
+name "semantics.scm"
+target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/semantics.scm"
+
+\end_inset
+
+.
+ The reason for such a dual-stage conversion is discussed in greater detail
+ below.
+ In brief, though: Link Grammar itself remains rather close to the surface
+ syntax of the input text, whereas the actual semantic content can be abstracted
+ away a little bit.
+ The abstraction done here is a bit more abstract than what RelEx provides,
+ and yet is different from Relex2Logic.
+ It seemed to be the easiest, most natural step for the prototype.
+\end_layout
+
+\begin_layout Standard
+So, given the intermediate, normalized form, conversion to the final control
+ language is done with several more rules: a generic rule template is constructe
+d in lines 55-92, and then three specific rules are built: one to communicate
+ with the action orchestrator (which issues Blender animations) and two
+ more to update the self-model: see lines 94-133.
+ The overall structure of the code is similar to that reviewed earlier:
+ it consists of a set of rules, each implemented in a BindLink.
+\end_layout
+
+\begin_layout Subsubsection*
+Rule engine
+\end_layout
+
+\begin_layout Standard
+The file 
+\begin_inset CommandInset href
+LatexCommand href
+name "imperative.scm"
+target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/imperative.scm"
+
+\end_inset
+
+ implements an 
+\emph on
+ad hoc
+\emph default
+ mini-rule-engine.
+ It very simply cycles through all of the rules described above, applying
+ each in turn.
+ It is invoked whenever the language subsystem detects that an imperative
+ sentence has been uttered.
+\end_layout
+
+\begin_layout Standard
+It is intended that this ad-ho arrangement of rules be replaced by the OpenPsi
+ rule system.
+ OpenPsi is described in greater detail further on in this document, at
+ which point the reason for it's superiority as a rule-engine management
+ system will become apparent.
+\end_layout
+
+\begin_layout Subsubsection*
+Glue code
+\end_layout
+
+\begin_layout Standard
+Assorted 
+\emph on
+ad hoc
+\emph default
+ scaffolding is required to integrate the above systems into the generic
+ chat framework.
+ it has no particular significance, other than that it is needed to make
+ things work.
+ See, for example, 
+\begin_inset CommandInset href
+LatexCommand href
+name "bot-api.scm"
+target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/bot-api.scm"
+
+\end_inset
+
+ for this scaffolding.
+ 
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset CommandInset href
+LatexCommand href
+name "chatbot-eva.scm"
+target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/chatbot-eva.scm"
+
+\end_inset
+
+ file defines a loadable scheme module that encapsulates all of this code.
+\end_layout
+
+\begin_layout Subsubsection*
+Self-model, World-model
+\end_layout
+
+\begin_layout Standard
+The self-model is not in the OpenCog repo, but in the 
+\begin_inset CommandInset href
+LatexCommand href
+name "ros-behavior-scripting"
+target "https://github.com/opencog/ros-behavior-scripting"
+
+\end_inset
+
+ repo.
+ The file 
+\begin_inset CommandInset href
+LatexCommand href
+name "self-model.scm"
+target "tps://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0aef97242c/opencog/nlp/chatbot-eva/self-model.scm"
+
+\end_inset
+
+ simply redirects there.
+ The reason for this is that the self-model is directly hooked up to the
+ sensory and motor systems, and all of those are in the ros-behavior-scripting
+ repo; only the language-processing parts are in the OpenCog repo.
+ The self-model, together with the world-model, are central to the robot's
+ current behavior subsystem.
+ The combined self+world models encode only a small amount of internal state:
+ the visibility of faces in the video feed, and knowledge of the robots
+ current emotional state.
+\end_layout
+
+\begin_layout Standard
+The file 
+\begin_inset CommandInset href
+LatexCommand href
+name "faces.scm"
+target "https://github.com/opencog/ros-behavior-scripting/blob/a00847af2ef07dfbc7769970fa6ca7a5cd192b69/src/faces.scm"
+
+\end_inset
+
+ contains several predicates, used to check if the the 
+\begin_inset Quotes eld
+\end_inset
+
+room is empty
+\begin_inset Quotes erd
+\end_inset
+
+ or not.
+ At this time, 
+\begin_inset Quotes eld
+\end_inset
+
+the room
+\begin_inset Quotes erd
+\end_inset
+
+ consists only of that part of the world that is immediately visible to
+ the video camera, and extends no further than that.
+ It is intended that this model is to be replaced by a more significant
+ one.
+\end_layout
+
+\begin_layout Standard
+The file 
+\begin_inset CommandInset href
+LatexCommand href
+name "self-model.scm"
+target "https://github.com/opencog/ros-behavior-scripting/blob/a00847af2ef07dfbc7769970fa6ca7a5cd192b69/src/self-model.scm"
+
+\end_inset
+
+ contains the self-model, as well as a significant portion of the room model.
+ Notable portions include the following:
+\end_layout
+
+\begin_layout Itemize
+Lines 57-60 indicating if the robot is asleep, awake or bored -- the 
+\begin_inset Quotes eld
+\end_inset
+
+some state
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The actual state is stored in line 63.
+ Lines 65-76 are predicates that return true or false, in answer to questions:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+is the robot sleeping?
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+is the robot bored?
+\begin_inset Quotes erd
+\end_inset
+
+ In principle, one could say that these predicates are part of the control
+ language for the soma state.
+ In practice, they are not very language-like: they are indivisible, rather
+ than having any grammatical structure to them.
+\end_layout
+
+\begin_layout Itemize
+Lines 77-87 deal with the 
+\begin_inset Quotes eld
+\end_inset
+
+current emotional state
+\begin_inset Quotes erd
+\end_inset
+
+, but, more accurately, should be called 
+\begin_inset Quotes eld
+\end_inset
+
+current facial expression.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Lines 88-122 deal with eye-contact state.
+\end_layout
+
+\begin_layout Itemize
+Lines 124-176 deal with the chatbot state: is it talking, or listening?
+\end_layout
+
+\begin_layout Itemize
+Lines 177-200 deal with the chatbot affect: was the last thing that the
+ chatbot heard friendly and positive, or is it negative?
+\end_layout
+
+\begin_layout Itemize
+Lines 201-242 deal with whether anything has been heard.
+ Currently, the robot can only hear speech, and not other arbitrary noises
+ in the room.
+\end_layout
+
+\begin_layout Itemize
+Lines 244-294 deal with the setting of timestamps on the internal state.
+ One needs to know when, or, more importantly, how recently something happened.
+ The are candidates for being moved into the TimeServer, which offers greater
+ time-related capabilities.
+\end_layout
+
+\begin_layout Itemize
+Lines 305-763 deal with the interaction with visible faces in the room.
+ The names of the various predicates are more-or-less self-explanatory.
+ So, 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+line 324: "Did someone recognizable arrive?" 
+\end_layout
+
+\begin_layout Itemize
+line 388: "Did someone leave?"
+\end_layout
+
+\begin_layout Itemize
+line 421: "was room empty?"
+\end_layout
+
+\begin_layout Itemize
+line 506: "Select random glance target"
+\end_layout
+
+\begin_layout Itemize
+line 555: "Is interacting with someone?"
+\end_layout
+
+\begin_layout Standard
+...
+ and so on.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+One major issue with the current design of these predicates is that they
+ do not really follow the conception of the control system being a 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+: each of these predicates is an indivisible whole, rather than a control-word
+ that can be combined with other control-words to achieve a desired effect.
+ That's OK for now, but is a potential stumbling block for the future, as
+ a true language would be more compact, and more flexible, than some arbitrary
+ grab-back hard-coded predicates.
+ 
+\end_layout
+
+\begin_layout Section*
+Design Issues
+\end_layout
+
+\begin_layout Subsubsection*
+DRAFT VERSION 0.02
 \end_layout
 
 \begin_layout Standard
@@ -1477,32 +2537,27 @@ This is a draft.
 \end_layout
 
 \begin_layout Subsubsection*
-Translation prototype
-\end_layout
-
-\begin_layout Standard
-The prototype includes a module that translates English language to the
- control language.
- Translation consists conceptually of two distinct aspects: mapping the
- syntax of the English language (grammar) to the control-language syntax
- (grammar), and mapping specific English-language words to control-language
- atoms (this second part having already been reviewed above).
-\end_layout
-
-\begin_layout Standard
-The translation consists of a set of hand-crafted rules that can recognize
- specific kinds of English-langauge sentences, and that convert these into
- the internal-langauge forms.
+Translation issues
 \end_layout
 
 \begin_layout Standard
 There are several technical issues that crop up, at this point.
- One is that the
+ These are central to later development, and so are discussed in detail
+ here.
 \end_layout
 
 \begin_layout Standard
 issue: learning vs.
  hand-crafting, obtaining synonymous phrases, not just synonymous words.
+\end_layout
+
+\begin_layout Standard
+issue: its LG not R2L
+\end_layout
+
+\begin_layout Standard
+issue: dual-stage conversion.
+ Normal form looks more like relex or MTT.
 \end_layout
 
 \begin_layout Standard
@@ -1517,6 +2572,37 @@ issue: fuzzy matching, partial matching
 \begin_layout Standard
 issue: picking out sentences attached to an anchor, vs other processing
  pipeline designs.
+\end_layout
+
+\begin_layout Standard
+todo -- the verb synonyms should not be needed!? as they can be gotten from
+ the synonym lists for the control-action language...
+\end_layout
+
+\begin_layout Subsubsection*
+OpenPsi
+\end_layout
+
+\begin_layout Standard
+OpenPsi as a flexible rule-selection system
+\end_layout
+
+\begin_layout Subsubsection*
+Self-model issues
+\end_layout
+
+\begin_layout Standard
+The various predicates: e.g.
+ (DefinedPredicate "Is sleeping?") do not really fit the 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ concept described above.
+ Ditto for lines 305-547 of self-model.scm
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1560,7 +2646,7 @@ standardized state queries
 
 \begin_layout Standard
 There are two translation layers that are needed here: first, to convert
- English to the internal query language, second, to conver the response
+ English to the internal query language, second, to convert the response
  back to English.
  If the response is of the right form, then SuReal can be used to perform
  the final conversion.
@@ -1629,10 +2715,23 @@ A second type of memory would be remembering past states of the world.
 \end_layout
 
 \begin_layout Standard
-One techical challenge is that we will need a management layer for the Postgres
- DB interfaces, so that memories are not lost during power-off.
+One technical challenge is that we will need a management layer for the
+ Postgres DB interfaces, so that memories are not lost during power-off.
  Those memories need to be segregated: there are somethings that need to
- be rememebered, others that should not be.
+ be remembered, others that should not be.
+\end_layout
+
+\begin_layout Subsubsection*
+Learning from sensory input
+\end_layout
+
+\begin_layout Standard
+Creating atomese representations of sensory input processing pipelines,
+ so that specific sensory inputs can be recognized e.g.
+ if the audio volume suddenly got loud, and the visual field is suddenly
+ moving, then maybe ...
+ everyone is clapping? booing? getting up to leave? ...I'm no longer the center
+ of attention?
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1659,7 +2758,7 @@ go and do that important thing
 \end_inset
 
 .
- Free wil is then the act of picking between these two alternatives, of
+ Free will is then the act of picking between these two alternatives, of
  balancing them out (at a critical phase-transition point).
 \end_layout
 
@@ -1669,7 +2768,7 @@ Items
 
 \begin_layout Itemize
 a person walks into room, who she recognizes.
- Depending on psi, she whould do non-verbal greetings (play one of 3-4 different
+ Depending on psi, she should do non-verbal greetings (play one of 3-4 different
  animations (look at, chin push, nod)) and verbal greetings (
 \begin_inset Quotes eld
 \end_inset
@@ -1694,7 +2793,7 @@ Random ideas
 \end_layout
 
 \begin_layout Itemize
-Why did you smile? Output: have her explain recent opensi decision-making.
+Why did you smile? Output: have her explain recent openpsi decision-making.
 \end_layout
 
 \begin_layout Itemize
@@ -1717,7 +2816,7 @@ What are you doing?
 \begin_inset Quotes eld
 \end_inset
 
-hey where did everybopdy go?
+hey where did everybody go?
 \begin_inset Quotes erd
 \end_inset
 
@@ -1725,7 +2824,7 @@ hey where did everybopdy go?
 \end_layout
 
 \begin_layout Itemize
-If no one isvisibile, and no one has been visible for many minutes, she
+If no one is visible, and no one has been visible for many minutes, she
  should say 
 \begin_inset Quotes eld
 \end_inset
