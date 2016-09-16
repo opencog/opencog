@@ -1850,19 +1850,12 @@ Turn to the left!
  syntactic relations between words.
  Because syntax is correlated with semantics, it becomes relatively straight-for
 ward to transform the syntactic graph into a normalized, semantic form.
- The semantic form can be understood as being a kind of 
-\begin_inset Quotes eld
-\end_inset
-
-control language
-\begin_inset Quotes erd
-\end_inset
-
-, and thus can be used directly to perform actions, such as moving motors
- or updating the self-model.
- The three steps shown here, dependency parsing, semantic normalization,
- and action performance, can each be taken to be rule-driven re-writes of
- graphs.
+ The semantic form is close to the control language, but not the same.
+ The control language is used to directly to perform actions, such as moving
+ motors or updating the self-model.
+ The four steps shown here, dependency parsing, semantic normalization,
+ and action orchestration, can each be taken to be rule-driven re-writes
+ of graphs.
  That is, they are each acheived by applying graph-rewriting to each graph,
  in turn.
  
@@ -1891,27 +1884,20 @@ target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
 \end_inset
 
  (MTT).
- That is, SemR is essentially the same thing as 
+ In MTT, SemR is short for 
 \begin_inset Quotes eld
 \end_inset
 
-the internal control language
+semantic representation
 \begin_inset Quotes erd
 \end_inset
 
-.
- SyntR is just a fancy name for 
-\begin_inset Quotes eld
-\end_inset
-
-the dependency parse
-\begin_inset Quotes erd
-\end_inset
-
-, while MorphR implies a time-linear sequence of morphemes.
+, while SyntR stands for the dependency parse, and MorphR refer to a time-linear
+ sequence of morphemes.
  Although MTT develops the relationships between these three acronyms in
  considerable detail and precision, it almost completely ignores the relationshi
 p between SemR and behavior, the actual performance of actions.
+ Thus, the label ControlL is new and specific to this document.
  One very powerful concept in MTT, the 
 \begin_inset Quotes eld
 \end_inset
@@ -1928,7 +1914,7 @@ target "https://en.wikipedia.org/wiki/Lexical_function"
 \begin_inset Quotes erd
 \end_inset
 
-, can be generalized to the idea of performing actions.
+, can be and should be generalized to the idea of performing actions.
 \end_layout
 
 \begin_layout Plain Layout
