@@ -240,6 +240,87 @@ model
 
  will refer to both the self-model and the world model, there being no particula
 r difference.
+ A simplified model of the concept of a model is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Self-and-World"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Self and World Models
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Self-and-World"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename think9.jpg
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The internal model is a highly simplified representation of the world and
+ of the self.
+ It provides the software with a specific data structure that can be reasoned
+ about and manipulated.
+ Here, the robot Sophia thinks simplified thoughts, much as this illustration
+ simplifies the idea of a representation.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1814,7 +1895,7 @@ name "fig:Language-Pipeline"
 \align center
 \begin_inset Graphics
 	filename pipe.eps
-	width 60col%
+	width 50col%
 
 \end_inset
 
@@ -1957,18 +2038,27 @@ reference "fig:Language-Pipeline"
 
 \end_inset
 
- provides a new name, SemR, to the 
+ distingusihes a semantic representation layer SemR, and a control-language
+ layer ContrL.
+ The SemR layer provides a 
 \begin_inset Quotes eld
 \end_inset
 
-control language
+normalized
 \begin_inset Quotes erd
 \end_inset
 
-.
- In doing so, it conflates two important ideas: semantic representation
- and action control.
- The term SemR comes from 
+ description of the meaning of some natural language expression, independent
+ of the precise surface form of the sentence.
+ It provide a representation that is easier to work with, moving away from
+ less important syntactic details.
+ Also, unlike the control langauge, it can avoid being closely tied to the
+ state representation.
+ 
+\end_layout
+
+\begin_layout Standard
+The label SemR comes from 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1984,24 +2074,16 @@ target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
 \begin_inset Quotes erd
 \end_inset
 
- (MTT), where it is a short-hand for 
-\begin_inset Quotes eld
-\end_inset
-
-semantic representation
-\begin_inset Quotes erd
-\end_inset
-
-, and has a very specific and well-defined meaning in that theory.
- In MTT, it is a graphical network, elucidating all of the relationships
- between concepts and ideas in some natural language text; it is supposed
- to capture 
+ (MTT), where it has a very specific and well-defined meaning.
+ There, it is a graphical network, showing all of the relationships between
+ concepts and ideas in some natural language text; it is supposed to capture
+ 
 \emph on
 all
 \emph default
  of the semantic content of that text.
- So, MTT elucidates, in considerable detail, exactly how to move from text
- (the MorphR format) to meaning (the SemR format).
+ MTT elaborates, in considerable detail, exactly how to move from text (the
+ MorphR format) to meaning (the SemR format).
  However, there is are several things that MTT completely ignores: action,
  and reasoning.
 \end_layout
