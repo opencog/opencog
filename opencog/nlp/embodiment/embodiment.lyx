@@ -77,7 +77,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.02 - 14 Sept 2016
+Draft Version 0.03 - 15 Sept 2016
 \end_layout
 
 \begin_layout Abstract
@@ -1152,7 +1152,7 @@ control language
 \begin_inset Quotes eld
 \end_inset
 
-look left!
+Look left!
 \begin_inset Quotes erd
 \end_inset
 
@@ -1160,7 +1160,7 @@ look left!
 \begin_inset Quotes eld
 \end_inset
 
-pretend you're happy!
+Pretend you're happy!
 \begin_inset Quotes erd
 \end_inset
 
@@ -1254,7 +1254,7 @@ target "https://en.wikipedia.org/wiki/Link_grammar"
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -1336,6 +1336,12 @@ Look to the left
  (as post-script and ASCII-graphics).
  It consists of a collection of typed links or edges connecting pairs of
  words.
+ 
+\family typewriter
+LEFT-WALL
+\family default
+ is simply the start of the sentence; it is a pseudo-word, simply the first
+ word of the sentence.
  The 
 \family typewriter
 Wi
@@ -1637,7 +1643,454 @@ Ds**c- & Js-
 \end_layout
 
 \begin_layout Subsubsection*
-Next steps
+Rule engine
+\end_layout
+
+\begin_layout Standard
+A collection of rules require a rule engine to manage and apply them.
+ OpenCog has several forms of these, that can be used in various different
+ situations.
+ Rules can be applied, one-by-one, on an 
+\emph on
+ad hoc
+\emph default
+ basis, by calling 
+\family typewriter
+cog-execute!
+\family default
+, for example.
+ 
+\end_layout
+
+\begin_layout Standard
+The OpenPsi subsystem maintains classes of rules, enabling goal-driven behavior.
+ Although the rules that OpenPsi manages are only applied one by one (one
+ at a time), the sorting of rules into distinct classes allows distinct
+ goals, with distinct priorities to be assigned to each.
+ Thus, to reach a certain goal, it is possible to select rules that are
+ most likely to achieve that goal.
+ As the importance of various goals change dynamically over time, different
+ rules-sets can come into play; that is, the goals modulate the selection
+ of the rule-sets.
+\end_layout
+
+\begin_layout Standard
+The forward and backward chainers can be used to discover sequences of rules
+ that connect two graphs.
+ That is, given a particular starting graph, and a particular ending graph,
+ the chainers can explore different sequences of rules that might result
+ in a valid path between these two end-points.
+ These use traditional search algorithms, although an A-star search algorithm
+ variant is envisioned.
+ Currently, the forward-backwards chainers are employed primarily for probabilis
+tic reasoning (PLN).
+\end_layout
+
+\begin_layout Standard
+Rules can also be assembled by means of parsing.
+ Currently, OpenCog only implements only one, a very special-purpose parser.
+ It is envisioned that a generic parser, replacing or supplementing the
+ forward and backwards chainers, will be created.
+ This idea is explored further in 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hypertarget{appendix-a}{Appendix A}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Action performance
+\end_layout
+
+\begin_layout Standard
+Once a natural language utterance has been converted into the internal language
+ form, a decision must be made as to what the robot should do next, if anything,
+ as a result of hearing that utterance.
+ This decision, of what do do next, is modulated by OpenPsi.
+ If multiple actions are selected, they must be coordinated, in terms of
+ timing, as well as resolving any conflicts between them.
+ This is meant to be done by the incompletely-developed 
+\begin_inset Quotes eld
+\end_inset
+
+Action Orchestrator
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+The language pipeline
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Language-Pipeline"
+
+\end_inset
+
+ illustrates the complete language pipeline, assembling together figures
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+ for a typical imperative sentence.
+ This illustrates only the 
+\begin_inset Quotes eld
+\end_inset
+
+input
+\begin_inset Quotes erd
+\end_inset
+
+ side; so questions, for example, will also generate a verbal output; the
+ output side is not shown, although it can roughly be imagined to be the
+ 
+\begin_inset Quotes eld
+\end_inset
+
+reverse
+\begin_inset Quotes erd
+\end_inset
+
+ of this figure.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Language Pipeline
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Language-Pipeline"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename pipe.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The complete language pipeline, for imperative English sentences.
+ This combines figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Example-Link-Grammar"
+
+\end_inset
+
+ into one.
+ The input sentence, 
+\begin_inset Quotes eld
+\end_inset
+
+Turn to the left!
+\begin_inset Quotes erd
+\end_inset
+
+, is parsed by a dependency parser, generating a graph that shows the syntactic
+ relations between words.
+ Because syntax is correlated with semantics, it becomes relatively straight-for
+ward to transform the syntactic graph into a normalized, semantic form.
+ The semantic form is close to the control language, but not the same.
+ The control language is used to directly to perform actions, such as moving
+ motors or updating the self-model.
+ The four steps shown here, dependency parsing, semantic normalization,
+ and action orchestration, can each be taken to be rule-driven re-writes
+ of graphs.
+ That is, they are each achieved by applying graph-rewriting to each graph,
+ in turn.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset space \hspace{}
+\length 4em
+\end_inset
+
+The labels on the right, MorphR, SyntR and SemR are the standard names that
+ are given to each representation by Mel'čuk's 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Meaning-Text Theory"
+target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ (MTT).
+ In MTT, SemR is short for 
+\begin_inset Quotes eld
+\end_inset
+
+semantic representation
+\begin_inset Quotes erd
+\end_inset
+
+, while SyntR stands for the dependency parse, and MorphR refer to a time-linear
+ sequence of morphemes.
+ Although MTT develops the relationships between these three acronyms in
+ considerable detail and precision, it almost completely ignores the relationshi
+p between SemR and behavior, the actual performance of actions.
+ Thus, the label ControlL is new and specific to this document.
+ One very powerful concept in MTT, the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Lexical Function"
+target "https://en.wikipedia.org/wiki/Lexical_function"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+, can be and should be generalized to the idea of performing actions.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Semantics
+\end_layout
+
+\begin_layout Standard
+The figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Language-Pipeline"
+
+\end_inset
+
+ provides a new name, SemR, to the 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In doing so, it conflates two important ideas: semantic representation
+ and action control.
+ The term SemR comes from 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Meaning-Text Theory"
+target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ (MTT), where it is a short-hand for 
+\begin_inset Quotes eld
+\end_inset
+
+semantic representation
+\begin_inset Quotes erd
+\end_inset
+
+, and has a very specific and well-defined meaning in that theory.
+ In MTT, it is a graphical network, elucidating all of the relationships
+ between concepts and ideas in some natural language text; it is supposed
+ to capture 
+\emph on
+all
+\emph default
+ of the semantic content of that text.
+ So, MTT elucidates, in considerable detail, exactly how to move from text
+ (the MorphR format) to meaning (the SemR format).
+ However, there is are several things that MTT completely ignores: action,
+ and reasoning.
+\end_layout
+
+\begin_layout Standard
+In order to perform actions, the semantic network must be re-interpreted
+ as a 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+, and that is exactly what is being done here.
+ At this point in the design, these two ideas are being intentionally conflated:
+ it is not exactly clear how to untangle the different requirements and
+ needs.
+ Note, however, the prototype 
+\emph on
+does
+\emph default
+ currently distinguish the internal, 
+\begin_inset Quotes eld
+\end_inset
+
+semantically normalized
+\begin_inset Quotes erd
+\end_inset
+
+ from from the control language.
+ 
+\end_layout
+
+\begin_layout Standard
+Another deficiency of MTT is that it ignores logical reasoning.
+ That is, given a specific form of SemR, one would like to perform deductions
+ and inferences.
+ In the case of OpenCog, this is to be done by PLN.
+ However, the specific semantic representation that seems to fit the needs
+ of PLN the best, is NOT the specific semantic representation that seems
+ to fit the needs of performing embodied actions.
+ This will be hotly debated in the months (years) to come; the exact nature
+ of the best design remains a research project.
+\end_layout
+
+\begin_layout Standard
+Thus, within the system, there are really three distinct forms of semantic
+ representation: the one that PLN uses, and is generated by the Relex2Logic
+ component; the one that the embodiment subsystem uses, currently somewhat
+ ad hoc in design, and referred to as a 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ in this document; and finally, external, academic conceptions of what a
+ semantic representation should be, ranging from Mel'čuk's MTT, to John
+ Sowa's 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Conceptual graphs"
+target "https://en.wikipedia.org/wiki/Conceptual_graph"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+, to many other proposals for 
+\begin_inset CommandInset href
+LatexCommand href
+name "semantic networks"
+target "https://en.wikipedia.org/wiki/Semantic_network"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Summary
 \end_layout
 
 \begin_layout Standard
@@ -1697,10 +2150,30 @@ These are each reviewed, below.
 
 \begin_layout Subsubsection*
 Control language prototype
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Control-language-prototype"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-The control language is implemented in 
+The 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hypertarget{proto-control}{control language}
+\end_layout
+
+\end_inset
+
+ is implemented in 
 \begin_inset CommandInset href
 LatexCommand href
 name "knowledge.scm"
@@ -2035,8 +2508,16 @@ Translation prototype
 
 \begin_layout Standard
 The translation consists of a set of hand-crafted rules that can recognize
- specific kinds of English-language sentences, and convert these into the
- internal-language forms.
+ specific kinds of English-language sentences, and convert these into internal
+ 
+\begin_inset Quotes eld
+\end_inset
+
+semantic representations
+\begin_inset Quotes erd
+\end_inset
+
+.
  These are implemented in the file 
 \begin_inset CommandInset href
 LatexCommand href
@@ -2198,23 +2679,12 @@ show happy
 \end_layout
 
 \begin_layout Subsubsection*
-Translation, normalized form
+Action Performance
 \end_layout
 
 \begin_layout Standard
-The above section was a bit glib: currently, translation proceeds in two
- steps.
- First, the English form is converted into an intermediate, 
-\begin_inset Quotes eld
-\end_inset
-
-normalized
-\begin_inset Quotes erd
-\end_inset
-
- form, and then the intermediate form is converted into the final control
- language.
- This second conversion is done in the file 
+The connection between the semantic representation and the control language
+ is made in the file 
 \begin_inset CommandInset href
 LatexCommand href
 name "semantics.scm"
@@ -2223,24 +2693,82 @@ target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0a
 \end_inset
 
 .
- The reason for such a dual-stage conversion is discussed in greater detail
- below.
- In brief, though: Link Grammar itself remains rather close to the surface
- syntax of the input text, whereas the actual semantic content can be abstracted
- away a little bit.
- The abstraction done here is a bit more abstract than what RelEx provides,
- and yet is different from Relex2Logic.
- It seemed to be the easiest, most natural step for the prototype.
+ There are not one, but two implementations here, exactly as suggested by
+ figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+.
+ One implementation converts the semantic representation into the control
+ language that is capable of 
+\begin_inset Quotes eld
+\end_inset
+
+making motors turn
+\begin_inset Quotes erd
+\end_inset
+
+ viz, launching Blender animations.
+ The other directly updates the self-model.
+ The implementation is, once again, in the form of a set of rules, that
+ is, as 
+\family typewriter
+BindLinks
+\family default
+.
 \end_layout
 
 \begin_layout Standard
-So, given the intermediate, normalized form, conversion to the final control
- language is done with several more rules: a generic rule template is constructe
-d in lines 55-92, and then three specific rules are built: one to communicate
- with the action orchestrator (which issues Blender animations) and two
- more to update the self-model: see lines 94-133.
- The overall structure of the code is similar to that reviewed earlier:
- it consists of a set of rules, each implemented in a BindLink.
+To simplify this dual implementation (to share common code), a generic rule
+ template is constructed in lines 55-92, and then three specific rules are
+ built.
+ Lines 94-111 generate the 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ that was carefully reviewed in the section above, titled 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hyperlink{proto-control}{"control language"}
+\end_layout
+
+\end_inset
+
+.
+ The control-language snippet is attached to an anchor-point called 
+\family typewriter
+(AnchorNode "*-action-*")
+\family default
+, which the Action orchestrator can pick up, and perform, if desired (at
+ this time, it is always performed, without question).
+\end_layout
+
+\begin_layout Standard
+The self-model is updated directly, with two rules, at lines 113-133.
+ When executed, these two directly set a 
+\family typewriter
+StateLink
+\family default
+, recording the the robots current facial expression and look-at direction.
+ These later two rules are, strictly speaking, a bug: the internal state
+ should only be updated 
+\emph on
+if
+\emph default
+ the action orchestrator actually decided to perform the action.
+ 
 \end_layout
 
 \begin_layout Subsubsection*
@@ -2268,8 +2796,11 @@ ad hoc
 \end_layout
 
 \begin_layout Standard
-It is intended that this ad-ho arrangement of rules be replaced by the OpenPsi
- rule system.
+It is intended that this 
+\emph on
+ad hoc
+\emph default
+ arrangement of rules be replaced by the OpenPsi rule system.
  OpenPsi is described in greater detail further on in this document, at
  which point the reason for it's superiority as a rule-engine management
  system will become apparent.
@@ -2527,7 +3058,7 @@ Design Issues
 \end_layout
 
 \begin_layout Subsubsection*
-DRAFT VERSION 0.02
+DRAFT VERSION 0.03
 \end_layout
 
 \begin_layout Standard
@@ -2577,6 +3108,10 @@ issue: picking out sentences attached to an anchor, vs other processing
 \begin_layout Standard
 todo -- the verb synonyms should not be needed!? as they can be gotten from
  the synonym lists for the control-action language...
+\end_layout
+
+\begin_layout Standard
+internal language is kind of like MTT SemR
 \end_layout
 
 \begin_layout Subsubsection*
@@ -2843,6 +3378,359 @@ Behavior -- she should not get sleepy, as long as someone is visible.
 \begin_layout Itemize
 Behavior -- she should complain, if no one is visible, but there is a chat
  session going on.
+\end_layout
+
+\begin_layout Section*
+Appendix A - Reasoning
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hypertarget{appendix-a}{relationship}
+\end_layout
+
+\end_inset
+
+ between rules, rule application and reasoning continue to be a point of
+ on-going confusion in the community.
+ This appendix attempts to provide an abstract, but mathematically precise,
+ view of what it means 
+\begin_inset Quotes eld
+\end_inset
+
+to perform reasoning
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The desire here is to move past the current conception of reasoning as
+ a kind-of forward/backward chaining, and bring it into a more modern era
+ of reasoning as parsing.
+ This change of viewpoint is required in order to be able to formulate faster,
+ more robust reasoning algorithms, and thus to be able to perform far more
+ complex inferences and deductions.
+\end_layout
+
+\begin_layout Subsubsection*
+Jigsaw puzzle pieces and dominoes
+\end_layout
+
+\begin_layout Standard
+One particularly direct way in which reasoning-as-parsing can be understood,
+ is as the assembly of a jigsaw puzzle.
+ Here, each rule is represented by a jigsaw puzzle piece, and rule application
+ can be imagined as a chaining together of jigsaw puzzle pieces.
+ Thus, for example, if a particular rule requires, say, an input of a particular
+ kind, and generates an output of a particular kind, then each of these
+ can be envisioned as a distinct connector on a jigsaw puzzle piece.
+ A rule requiring a particular input can 
+\emph on
+only
+\emph default
+ be mated to something that provides that actual shape.
+ The next rule to run, must, of course, also be of a kind that can properly
+ mate.
+\end_layout
+
+\begin_layout Standard
+Unlike an ordinary jigsaw, there can be many different puzzle pieces having
+ the same exact shape.
+ This allows the reasoner a lot of latitude, a lot of discretion, as to
+ which pieces might be chosen and used next, during this chaining operation.
+ Perhaps the game of dominoes offers a more accurate model: for one's next
+ move, one can lay down any one of a number of different dominoes, in any
+ one of a number of different locations, and one has many choices as to
+ what to play next.
+ However, those choices are constrained: one cannot just lay down any domino
+ anywhere; one must follow certain mating rules.
+ Unfortunately, the game of dominoes is not widely known, and so the model
+ of many identically-shaped jigsaw puzzle pieces will have to do.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Combinatoric explosion
+\end_layout
+
+\begin_layout Standard
+The large number of choices as to which jigsaw piece to lay down next leads
+ to the infamous problem of 
+\begin_inset Quotes eld
+\end_inset
+
+combinatoric explosion
+\begin_inset Quotes erd
+\end_inset
+
+ during chaining.
+ At every step of the chain, there seem to be ever more choices possible,
+ and the sheer number of these choices appears to overwhelm any hope of
+ straight-ahead chaining.
+\end_layout
+
+\begin_layout Standard
+When met with this problem, one commonly proposed solution is some form
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+inference control
+\begin_inset Quotes erd
+\end_inset
+
+, some way of whacking down the number of possible choices.
+ A different approach, that of adding more constraints to the system, is
+ almost never considered.
+ I believe that is because the actual mechanics of reasoning is not generally
+ understood, and thus obscures algorithmic possibilities.
+ However, before embarking on an exploration of constraints and inference
+ control, some additional general concepts must be laid down.
+\end_layout
+
+\begin_layout Standard
+Side-note: there are extremely simply rule systems with horrific combinatoric
+ explosion properties.
+ See the Azimuth blog on racks, quandles, shelves, and Laver tables for
+ more.
+\end_layout
+
+\begin_layout Subsubsection*
+Chaining
+\end_layout
+
+\begin_layout Standard
+The use of the word 
+\begin_inset Quotes eld
+\end_inset
+
+chaining
+\begin_inset Quotes erd
+\end_inset
+
+ is very misleading: it very strongly suggests a linear sequence of events,
+ like a chain.
+ Nothing could be further from the truth, and this one word alone is the
+ source of huge conceptual stumbling blocks.
+ Real-world puzzle-pieces are two-dimensional, and, just like the case of
+ dominoes, there is no particular constraint that pieces must be laid out
+ in linear order.
+ Attachments can be made in any number of different directions.
+\end_layout
+
+\begin_layout Standard
+At first, one might imagine that the combinatoric explosion can be even
+ worse.
+ In fact, this can serve to constrain the problem.
+ There are three distinct ways in which this is done: one way is statically,
+ by means of systemic constraints; another way is dynamically, by means
+ of consistency; a third way is to enforce completeness.
+\end_layout
+
+\begin_layout Subsubsection*
+Systemic constraints
+\end_layout
+
+\begin_layout Standard
+In real-world dominoes and puzzle assembly, there are two constraints: a
+ finite-sized table, whose edges cannot be crossed, and the constraint that
+ pieces must not be laid on top of one-another.
+ In the assembly of abstract rule systems, there are other constraints that
+ can come into play.
+ One is a no-crossing constraint, often used in theories of grammar (e.g
+ Link Grammar).
+ This is essentially the same as saying 
+\begin_inset Quotes eld
+\end_inset
+
+two pieces must not be laid on top of one-another
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Another is a relaxation of this constraint to use landmark transitivity
+ (e.g.
+ in Word Grammar).
+\end_layout
+
+\begin_layout Subsubsection*
+Consistency
+\end_layout
+
+\begin_layout Standard
+Another way to constrain a puzzle assembly problem is by requiring consistency.
+ This can be achieved with an 
+\emph on
+a priori
+\emph default
+ boundary condition: one might have some edge, or boundary, and require
+ that the final assembly 
+\emph on
+must
+\emph default
+ meet that boundary, without violating it.
+ Imagine, for example, a string or chain of puzzle pieces, given 
+\emph on
+a priori
+\emph default
+.
+ As new pieces are added, they 
+\emph on
+must
+\emph default
+ fit into the given chain.
+\end_layout
+
+\begin_layout Standard
+An example of a consistency constraint is the link-grammar parse of a sentence:
+ A list of words, the sentence, is given 
+\emph on
+a priori
+\emph default
+, and one must assemble puzzle pieces in such a way that these words, and
+ only these words, are connected to.
+\end_layout
+
+\begin_layout Standard
+A looser example might be the constraints of evidence in a crime: the evidence
+ is given 
+\emph on
+a priori
+\emph default
+, and the detective must show that the suspects behavior is consistent with
+ each of the points of evidence.
+ Here, the puzzle-pieces correspond to the grouping (suspect, time, place,
+ capability, opportunity); each element of the grouping is like a connector
+ in the puzzle-piece, and it must connect appropriately with other pieces,
+ or with the evidence.
+ In criminology, this consistency constraint tends to very sharply narrow
+ the list of suspects: combinatoric explosion is mitigated by constraint.
+\end_layout
+
+\begin_layout Subsubsection*
+Completeness
+\end_layout
+
+\begin_layout Standard
+Yet another way to constrain a puzzle assembly is to require completeness:
+ there must not be any connector tabs left unconnected! If a connector is
+ left unconnected, one is not allowed to ignore it, or cut it off, or pretend
+ its not there: instead, one declares the arrangement incomplete, and discards
+ it.
+\end_layout
+
+\begin_layout Standard
+The completeness constraint is well-known in proof theory; it corresponds
+ to the idea that both contraction (
+\begin_inset CommandInset href
+LatexCommand href
+name "idempotency of entailment"
+target "https://en.wikipedia.org/wiki/Idempotency_of_entailment"
+
+\end_inset
+
+) and weakening (
+\begin_inset CommandInset href
+LatexCommand href
+name "monotonicity of entailment"
+target "https://en.wikipedia.org/wiki/Monotonicity_of_entailment"
+
+\end_inset
+
+) are forbidden.
+ 
+\end_layout
+
+\begin_layout Standard
+The completeness constraint is employed both in link-grammar parsing, and
+ in criminology (all criminal evidence must be explained; it cannot be arbitrari
+ly ignored).
+\end_layout
+
+\begin_layout Subsubsection*
+Unfinished stuff
+\end_layout
+
+\begin_layout Standard
+---
+\end_layout
+
+\begin_layout Standard
+practical examples, for PLN.
+\end_layout
+
+\begin_layout Standard
+---
+\end_layout
+
+\begin_layout Standard
+so how is assembly to be performed?
+\end_layout
+
+\begin_layout Standard
+----
+\end_layout
+
+\begin_layout Standard
+difference between counting (performing the assembly) and linkage parsing
+ (evaluating the truth values, i.e.
+ applying the actual the PLN formulas) which is done only after a valid
+ (complete, consistent) assembly has been obtained.
+\end_layout
+
+\begin_layout Standard
+---
+\end_layout
+
+\begin_layout Standard
+A universe is like a partially assembled puzzle.
+\end_layout
+
+\begin_layout Standard
+---
+\end_layout
+
+\begin_layout Standard
+Relationship between 
+\end_layout
+
+\begin_layout Standard
+---
+\end_layout
+
+\begin_layout Standard
+Andre Joyal lemma
+\end_layout
+
+\begin_layout Standard
+--- 
+\end_layout
+
+\begin_layout Standard
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+choice
+\begin_inset Quotes erd
+\end_inset
+
+ in the above is not an accident ...
+ ditto for contraction and weakening in the 
+\begin_inset Quotes eld
+\end_inset
+
+completeness
+\begin_inset Quotes erd
+\end_inset
+
+ section -- linear logic .
 \end_layout
 
 \end_body
