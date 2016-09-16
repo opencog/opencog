@@ -1822,6 +1822,13 @@ name "fig:Language-Pipeline"
 \end_layout
 
 \begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
 The complete language pipeline, for imperative English sentences.
  This combines figures 
 \begin_inset CommandInset ref
@@ -1846,8 +1853,8 @@ Turn to the left!
 \begin_inset Quotes erd
 \end_inset
 
-, is parsed by a dependency parser, thus generating a graph that shows the
- syntactic relations between words.
+, is parsed by a dependency parser, generating a graph that shows the syntactic
+ relations between words.
  Because syntax is correlated with semantics, it becomes relatively straight-for
 ward to transform the syntactic graph into a normalized, semantic form.
  The semantic form is close to the control language, but not the same.
@@ -3051,7 +3058,7 @@ Design Issues
 \end_layout
 
 \begin_layout Subsubsection*
-DRAFT VERSION 0.02
+DRAFT VERSION 0.03
 \end_layout
 
 \begin_layout Standard
@@ -3374,11 +3381,11 @@ Behavior -- she should complain, if no one is visible, but there is a chat
 \end_layout
 
 \begin_layout Section*
-Appendix A
+Appendix A - Reasoning
 \end_layout
 
 \begin_layout Standard
-adsf 
+The 
 \begin_inset ERT
 status open
 
@@ -3386,12 +3393,344 @@ status open
 
 
 \backslash
-hypertarget{appendix-a}{foo}
+hypertarget{appendix-a}{relationship}
 \end_layout
 
 \end_inset
 
- adsf
+ between rules, rule application and reasoning continue to be a point of
+ on-going confusion in the community.
+ This appendix attempts to provide an abstract, but mathematically precise,
+ view of what it means 
+\begin_inset Quotes eld
+\end_inset
+
+to perform reasoning
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The desire here is to move past the current conception of reasoning as
+ a kind-of foreward/backward chaining, and bring it into a more modern era
+ of reasoning as parsing.
+ This change of viewpoint is required in order to be able to formulate faster,
+ more robust reasoning algorithms, and thus to be able to perform far more
+ complex inferences and deductions.
+\end_layout
+
+\begin_layout Subsubsection*
+Jigsaw puzzle pieces and dominoes
+\end_layout
+
+\begin_layout Standard
+One particularly direct way in which reasoning-as-parsing can be understood,
+ is as the assembly of a jigsaw puzzle.
+ Here, each rule is represented by a jigsaw puzzle piece, and rule application
+ can be imagined as a chaining together of jigsaw puzle pieces.
+ Thus, for example, if a particular rule requires, say, an input of a particular
+ kind, and generates an output of a particular kind, then each of these
+ can be envisioned as a distinct connector on a jigsaw puzzle piece.
+ A rule requiring a particular input can 
+\emph on
+only
+\emph default
+ be mated to something that provides that actual shape.
+ The next rule to run, must, of course, also be of a kind that can properly
+ mate.
+\end_layout
+
+\begin_layout Standard
+Unlike an ordinary jigsaw, there can be many different puzzle pieces having
+ the same exact shape.
+ This allows the reasoner a lot of latitude, a lot of disgression, as to
+ which pieces might be chosen and used next, during this chaining operation.
+ Perhaps the game of dominoes offers a more accurate model: for one's next
+ move, one can lay down any one of a number of differenet dominoes, in any
+ one of a number of different locations, and one has many choices as to
+ what to play next.
+ However, those choices are constrained: one cannot just lay down any domino
+ anywhere; one must follow certain mating rules.
+ Unfortunately, the game of domonoes is not widely known, and so the model
+ of many identically-shaped jigsaw puzzle pieces will have to do.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Combinatoric explosion
+\end_layout
+
+\begin_layout Standard
+The large number of choices as to which jigsaw piece to lay down next leads
+ to the infamous problem of 
+\begin_inset Quotes eld
+\end_inset
+
+combinatoric explosion
+\begin_inset Quotes erd
+\end_inset
+
+ during chaining.
+ At every step of the chain, there seem to be ever more choices possible,
+ and the sheer number of these choices appears to overwhelm any hope of
+ straight-ahead chaining.
+\end_layout
+
+\begin_layout Standard
+When met with this problem, one commonly proposed solution is some form
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+inference control
+\begin_inset Quotes erd
+\end_inset
+
+, some way of whacking down the number of possible choices.
+ A different approach, that of adding more constraints to the system, is
+ almost never considered.
+ I beleive that is because the actual mechanics of reasoning is not generally
+ understood, and thus obscures algorithmic possibilities.
+ However, before embarking on an exploration of constraints and inference
+ control, some additional general concepts must be laid down.
+\end_layout
+
+\begin_layout Standard
+Side-note: there are extremely simply rule systems with horrific combinatoric
+ explosion properties.
+ See the Azimuth blog on racks, quandles, shelves, and laver tables for
+ more.
+\end_layout
+
+\begin_layout Subsubsection*
+Chaining
+\end_layout
+
+\begin_layout Standard
+The use of the word 
+\begin_inset Quotes eld
+\end_inset
+
+chaining
+\begin_inset Quotes erd
+\end_inset
+
+ is very misleading: it very strongly suggests a linear sequence of events,
+ like a chain.
+ Nothing could be further from the truth, and this one word alone is the
+ source of huge conceptual stumbling blocks.
+ Real-world puzzle-pieces are two-dimensional, and, just like the case of
+ dominoes, there is no particular constraint that pieces must be layed out
+ in linear order.
+ Attachements can be made in any number of different directions.
+\end_layout
+
+\begin_layout Standard
+At first, one might imagine that the combinatoric explosion can be even
+ worse.
+ In fact, this can serve to constrain the problem.
+ There are three distinct ways in which this is done: one way is statically,
+ by means of systemic constraints; another way is dynamically, by means
+ of consistency; a thid way is to enforce completeness.
+\end_layout
+
+\begin_layout Subsubsection*
+Systemic constraints
+\end_layout
+
+\begin_layout Standard
+In real-world dominos and puzzle assembly, there are two constraints: a
+ finite-sized table, whose edges cannot be crossed, and the constraint that
+ pieces must not be laid on top of one-another.
+ In the assembly of abstract rule systems, there are other constraints that
+ can come into play.
+ One is a no-crossing constraint, often used in theories of grammar (e.g
+ Link Grammar).
+ This is essentially the same as saying 
+\begin_inset Quotes eld
+\end_inset
+
+two pieces must not be laid on top of one-another
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Another is a relaxation of this constraint to use landmark transitivity
+ (e.g.
+ in Word Grammar).
+\end_layout
+
+\begin_layout Subsubsection*
+Consistency
+\end_layout
+
+\begin_layout Standard
+Another way to constrain a puzzle assembly problem is by requiring consistency.
+ This can be acheived with an 
+\emph on
+a priori
+\emph default
+ boundary condition: one might have some edge, or boundary, and require
+ that the final assembly 
+\emph on
+must
+\emph default
+ meet that boundary, without violating it.
+ Imagine, for example, a string or chain of puzzle pieces, given 
+\emph on
+a priori
+\emph default
+.
+ As new pieces are added, they 
+\emph on
+must
+\emph default
+ fit into the given chain.
+\end_layout
+
+\begin_layout Standard
+An example of a consistency constraint is the link-grammar parse of a sentence:
+ A list of words, the sentence, is given 
+\emph on
+a priori
+\emph default
+, and one must assemble puzzle pieces in such a way that these words, and
+ nly these words, are connected to.
+\end_layout
+
+\begin_layout Standard
+A looser example might be the constraints of evidence in a crime: the evidence
+ is given 
+\emph on
+a priori
+\emph default
+, and the detective must show that the suspects behavior is consistent with
+ each of the points of evidence.
+ Here, the puzzle-pieces correspond to the grouping (suspect, time, place,
+ capability, opportunity); each element of the grouping is like a connector
+ in the puzzle-piece, and it must connect appropriately with other pieces,
+ or with the evidence.
+ In criminology, this consistency constraint tends to very sharply narrow
+ the list of suspects: combinatoric explosion is mitigated by constraint.
+\end_layout
+
+\begin_layout Subsubsection*
+Completeness
+\end_layout
+
+\begin_layout Standard
+Yet another way to constrain a puzzle assembly is to require completeness:
+ there must not be any connector tabs left unconnected! If a connector is
+ left unconnected, one is not allowed to ignore it, or cut it off, or pretend
+ its not there: instead, one declares the arrangement incomplete, and discards
+ it.
+\end_layout
+
+\begin_layout Standard
+The completeness constraint is well-known in proof theory; it corresponds
+ to the idea that both contraction (
+\begin_inset CommandInset href
+LatexCommand href
+name "idempotency of entailment"
+target "https://en.wikipedia.org/wiki/Idempotency_of_entailment"
+
+\end_inset
+
+) and weaking (
+\begin_inset CommandInset href
+LatexCommand href
+name "monotonicity of entailment"
+target "https://en.wikipedia.org/wiki/Monotonicity_of_entailment"
+
+\end_inset
+
+) are forbidden.
+ 
+\end_layout
+
+\begin_layout Standard
+The completeness constraint is employed both in link-grammar parsing, and
+ in criminology (all criminal evidence must be explained; it cannot be arbitrari
+ly ignored).
+\end_layout
+
+\begin_layout Subsubsection*
+Unfinished stuff
+\end_layout
+
+\begin_layout Standard
+---
+\end_layout
+
+\begin_layout Standard
+practical examples, for PLN.
+\end_layout
+
+\begin_layout Standard
+---
+\end_layout
+
+\begin_layout Standard
+so how is assembly to be performed?
+\end_layout
+
+\begin_layout Standard
+----
+\end_layout
+
+\begin_layout Standard
+difference between counting (performing the assembly) and linkage parsing
+ (evaluating the truth values, i.e.
+ applying the actual the PLN formulas) which is done only after a valid
+ (complete, consistent) assembly has been obtained.
+\end_layout
+
+\begin_layout Standard
+---
+\end_layout
+
+\begin_layout Standard
+A universe is like a partially assembled puzzle.
+\end_layout
+
+\begin_layout Standard
+---
+\end_layout
+
+\begin_layout Standard
+Relationship between 
+\end_layout
+
+\begin_layout Standard
+---
+\end_layout
+
+\begin_layout Standard
+Andre Joyal lemma
+\end_layout
+
+\begin_layout Standard
+--- 
+\end_layout
+
+\begin_layout Standard
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+choice
+\begin_inset Quotes erd
+\end_inset
+
+ in the above is not an accident ...
+ ditto for contraction and weakening in the 
+\begin_inset Quotes eld
+\end_inset
+
+completeness
+\begin_inset Quotes erd
+\end_inset
+
+ section -- linear logic .
 \end_layout
 
 \end_body
