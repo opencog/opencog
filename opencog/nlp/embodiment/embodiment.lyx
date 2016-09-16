@@ -1670,7 +1670,8 @@ The OpenPsi subsystem maintains classes of rules, enabling goal-driven behavior.
  Thus, to reach a certain goal, it is possible to select rules that are
  most likely to acheive that goal.
  As the importance of various goals change dynamically over time, different
- rules-sets can come into play.
+ rules-sets can come into play; that is, the goals modulate the selection
+ of the rule-sets.
 \end_layout
 
 \begin_layout Standard
@@ -1690,11 +1691,39 @@ Rules can also be assembled by means of parsing.
  Currently, OpenCog only implements only one, a very special-purpose parser.
  It is envisioned that a generic parser, replacing or supplementing the
  forward and backwards chainers, will be created.
- This idea is explored further in Appendix A 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sec:Appendix-A"
+ This idea is explored further in 
+\begin_inset ERT
+status open
 
+\begin_layout Plain Layout
+
+
+\backslash
+hypertarget{appendix-a}{Appendix A}
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Action performance
+\end_layout
+
+\begin_layout Standard
+Once a natural langauge utterance has been converted into the internal language
+ form, a decision must be made as to what the robot should do next, if anything,
+ as a result of hearing that utterance.
+ This decision, of what do do next, is modulated by OpenPsi.
+ If multiple actions are selected, they must be coordinated, in terms of
+ timing, as well as resolving any conflicts between them.
+ This is meant to be done by the incompletely-developed 
+\begin_inset Quotes eld
+\end_inset
+
+Action Orchestrator
+\begin_inset Quotes erd
 \end_inset
 
 .
@@ -1753,11 +1782,7 @@ reverse
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
-
-\begin_layout Plain Layout
-
-\end_layout
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -1836,11 +1861,20 @@ control language
 , and thus can be used directly to perform actions, such as moving motors
  or updating the self-model.
  The three steps shown here, dependency parsing, semantic normalization,
- and action performance, can each be taken to rule-driven re-writes of graphs.
+ and action performance, can each be taken to be rule-driven re-writes of
+ graphs.
  That is, they are each acheived by applying graph-rewriting to each graph,
  in turn.
- The labels on the right, MorphR, SyntR and SemR are the standard names
- that are given to each representation by Mel'čuk's 
+ 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset space \hspace{}
+\length 4em
+\end_inset
+
+The labels on the right, MorphR, SyntR and SemR are the standard names that
+ are given to each representation by Mel'čuk's 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1856,7 +1890,45 @@ target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
 \begin_inset Quotes erd
 \end_inset
 
+ (MTT).
+ That is, SemR is essentially the same thing as 
+\begin_inset Quotes eld
+\end_inset
+
+the internal control language
+\begin_inset Quotes erd
+\end_inset
+
 .
+ SyntR is just a fancy name for 
+\begin_inset Quotes eld
+\end_inset
+
+the dependency parse
+\begin_inset Quotes erd
+\end_inset
+
+, while MorphR implies a time-linear sequence of morphemes.
+ Although MTT develops the relationships between these three acronyms in
+ considerable detail and precision, it almost completely ignores the relationshi
+p between SemR and behavior, the actual performance of actions.
+ One very powerful concept in MTT, the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Lexical Function"
+target "https://en.wikipedia.org/wiki/Lexical_function"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+, can be generalized to the idea of performing actions.
 \end_layout
 
 \begin_layout Plain Layout
@@ -1878,6 +1950,154 @@ height "1pt"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsubsection*
+Semantics
+\end_layout
+
+\begin_layout Standard
+The figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Language-Pipeline"
+
+\end_inset
+
+ provides a new name, SemR, to the 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In doing so, it conflates two important ideas: semantic representation
+ and action control.
+ The term SemR comes from 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Meaning-Text Theory"
+target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ (MTT), where it is a short-hand for 
+\begin_inset Quotes eld
+\end_inset
+
+semantic representation
+\begin_inset Quotes erd
+\end_inset
+
+, and has a very specific and well-defined meaning in that theory.
+ In MTT, it is a graphical network, elucidating all of the relationships
+ between concepts and ideas in some natural language text; it is supposed
+ to capture 
+\emph on
+all
+\emph default
+ of the semantic content of that text.
+ So, MTT elucidates, in considerable detail, exactly how to move from text
+ (the MorphR format) to meaning (the SemR format).
+ However, there is are several things that MTT completely ignores: action,
+ and reasoning.
+\end_layout
+
+\begin_layout Standard
+In order to perform actions, the semantic network must be re-interpreted
+ as a 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+, and that is exactly what is being done here.
+ At this point in the design, these two ideas are being intentionally conflated:
+ it is not exactly clear how to untangle the different requirements and
+ needs.
+ Note, however, the prototype 
+\emph on
+does
+\emph default
+ currently distinguish the internal, 
+\begin_inset Quotes eld
+\end_inset
+
+semantically normalized
+\begin_inset Quotes erd
+\end_inset
+
+ from from the control language.
+ 
+\end_layout
+
+\begin_layout Standard
+Another deficiency of MTT is that it ignores logical reasoning.
+ That is, given a specific form of SemR, one would like to perform deductions
+ and inferences.
+ In the case of OpenCog, this is to be done by PLN.
+ However, the specific semantic representation that seems to fit the needs
+ of PLN the best, is NOT the specific semantic representation that seems
+ to fit the needs of performing embodied actions.
+ This will be hotly debated in the months (years) to come; the exact nature
+ of the best design remains a research project.
+\end_layout
+
+\begin_layout Standard
+Thus, within the system, there are really three distinct forms of semantic
+ representation: the one that PLN uses, and is generated by the Relex2Logic
+ component; the one that the embodiment subsystem uses, currently somewhat
+ ad hoc in design, and refered to as a 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ in this document; and finally, external, academic conceptions of what a
+ semantic representation should be, ranging from Mel'čuk's MTT, to John
+ Sowa's 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Conceptual graphs"
+target "https://en.wikipedia.org/wiki/Conceptual_graph"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+, to many other proposals for 
+\begin_inset CommandInset href
+LatexCommand href
+name "semantic networks"
+target "https://en.wikipedia.org/wiki/Semantic_network"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Summary
 \end_layout
 
 \begin_layout Standard
@@ -1937,10 +2157,30 @@ These are each reviewed, below.
 
 \begin_layout Subsubsection*
 Control language prototype
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Control-language-prototype"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-The control language is implemented in 
+The 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hypertarget{proto-control}{control language}
+\end_layout
+
+\end_inset
+
+ is implemented in 
 \begin_inset CommandInset href
 LatexCommand href
 name "knowledge.scm"
@@ -2275,8 +2515,16 @@ Translation prototype
 
 \begin_layout Standard
 The translation consists of a set of hand-crafted rules that can recognize
- specific kinds of English-language sentences, and convert these into the
- internal-language forms.
+ specific kinds of English-language sentences, and convert these into internal
+ 
+\begin_inset Quotes eld
+\end_inset
+
+semantic representations
+\begin_inset Quotes erd
+\end_inset
+
+.
  These are implemented in the file 
 \begin_inset CommandInset href
 LatexCommand href
@@ -2438,23 +2686,12 @@ show happy
 \end_layout
 
 \begin_layout Subsubsection*
-Translation, normalized form
+Action Performance
 \end_layout
 
 \begin_layout Standard
-The above section was a bit glib: currently, translation proceeds in two
- steps.
- First, the English form is converted into an intermediate, 
-\begin_inset Quotes eld
-\end_inset
-
-normalized
-\begin_inset Quotes erd
-\end_inset
-
- form, and then the intermediate form is converted into the final control
- language.
- This second conversion is done in the file 
+The connection between the semantic representation and the control language
+ is made in the file 
 \begin_inset CommandInset href
 LatexCommand href
 name "semantics.scm"
@@ -2463,24 +2700,82 @@ target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0a
 \end_inset
 
 .
- The reason for such a dual-stage conversion is discussed in greater detail
- below.
- In brief, though: Link Grammar itself remains rather close to the surface
- syntax of the input text, whereas the actual semantic content can be abstracted
- away a little bit.
- The abstraction done here is a bit more abstract than what RelEx provides,
- and yet is different from Relex2Logic.
- It seemed to be the easiest, most natural step for the prototype.
+ There are not one, but two implementations here, exactly as suggested by
+ figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Control-Language"
+
+\end_inset
+
+.
+ One implementation converts the semantic representation into the control
+ language that is capable of 
+\begin_inset Quotes eld
+\end_inset
+
+making motors turn
+\begin_inset Quotes erd
+\end_inset
+
+ viz, launching Blender animations.
+ The other directly updates the self-model.
+ The implementation is, once again, in the form of a set of rules, that
+ is, as 
+\family typewriter
+BindLinks
+\family default
+.
 \end_layout
 
 \begin_layout Standard
-So, given the intermediate, normalized form, conversion to the final control
- language is done with several more rules: a generic rule template is constructe
-d in lines 55-92, and then three specific rules are built: one to communicate
- with the action orchestrator (which issues Blender animations) and two
- more to update the self-model: see lines 94-133.
- The overall structure of the code is similar to that reviewed earlier:
- it consists of a set of rules, each implemented in a BindLink.
+To simplify this dual implementation (to share common code), a generic rule
+ template is constructed in lines 55-92, and then three specific rules are
+ built.
+ Lines 94-111 generate the 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ that was carefully reviewed in the section above, titled 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hyperlink{proto-control}{"control language"}
+\end_layout
+
+\end_inset
+
+.
+ The control-language snippet is attached to an anchor-point called 
+\family typewriter
+(AnchorNode "*-action-*")
+\family default
+, which the Action orchestrator can pick up, and perform, if desired (at
+ this time, it is always performed, without question).
+\end_layout
+
+\begin_layout Standard
+The self-model is updated directly, with two rules, at lines 113-133.
+ When executed, these two directly set a 
+\family typewriter
+StateLink
+\family default
+, recording the the robots current facial expression and look-at direction.
+ These later two rules are, strictly speaking, a bug: the internal state
+ should only be updated 
+\emph on
+if
+\emph default
+ the action orchestrator actually decided to perform the action.
+ 
 \end_layout
 
 \begin_layout Subsubsection*
@@ -2822,6 +3117,10 @@ todo -- the verb synonyms should not be needed!? as they can be gotten from
  the synonym lists for the control-action language...
 \end_layout
 
+\begin_layout Standard
+internal langauge is kind of like MTT SemR
+\end_layout
+
 \begin_layout Subsubsection*
 OpenPsi
 \end_layout
@@ -3090,17 +3389,23 @@ Behavior -- she should complain, if no one is visible, but there is a chat
 
 \begin_layout Section*
 Appendix A
-\begin_inset CommandInset label
-LatexCommand label
-name "sec:Appendix-A"
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
-adsf
+adsf 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hypertarget{appendix-a}{foo}
+\end_layout
+
+\end_inset
+
+ adsf
 \end_layout
 
 \end_body
