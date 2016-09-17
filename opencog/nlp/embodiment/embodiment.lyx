@@ -77,7 +77,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.03 - 15 Sept 2016
+Draft Version 0.04 - 16 Sept 2016
 \end_layout
 
 \begin_layout Abstract
@@ -109,6 +109,106 @@ internal model
 , and how one can, in principle, interface with it.
  This is followed by a section reviewing the current prototype.
  After this, difficulties with language are discussed.
+\end_layout
+
+\begin_layout Standard
+The work described here has been chartered by Hanson Robotics, and is specifical
+ly intended to interface with the robots manufactured by Hanson, such as
+ Sophia and others.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Robot archtitecture overview
+\end_layout
+
+\begin_layout Standard
+XXX This section to be written in a later version.
+ XXX.
+ A conceptual diagram of the system is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:The-PUMA-Architecture"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+The PUMA Architecture
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:The-PUMA-Architecture"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename PUMA-Overview.png
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This diagram shows the Hanson Robotics PUMA architecture: it offers a hint
+ of what an embodied artificial intelligence architecture might look like.
+ The architecture described in this document is a horizontal slice through
+ the above diagram; it is focused primarily on how natural language interacts
+ with models of the self, and of the world, to drive behavior and conversation.
+ 
+\size scriptsize
+(Diagram credit: 
+\begin_inset CommandInset href
+LatexCommand href
+name "Hanson Robotics"
+target "http://www.hansonrobotics.com/"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*
@@ -144,7 +244,21 @@ target "https://en.wikipedia.org/wiki/Good_regulator"
  An internal model provides the system software with a natural API, a natural
  representation, that various different software components can agree on,
  and use, and manipulate, and reason with.
- 
+ Two depcitions of models are given in figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Self-and-World"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:A-Control-Theory"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -240,6 +354,102 @@ model
 
  will refer to both the self-model and the world model, there being no particula
 r difference.
+ A simplified model of the concept of a model is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Self-and-World"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Self and World Models
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Self-and-World"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename think9.jpg
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The internal model is a highly simplified representation of the world and
+ of the self.
+ It provides the software with a specific data structure that can be reasoned
+ about and manipulated.
+ Here, the robot Sophia thinks simplified thoughts, much as this illustration
+ simplifies the idea of a representation.
+ 
+\size scriptsize
+(Robot credit: 
+\begin_inset CommandInset href
+LatexCommand href
+name "Hanson Robotics Sophia"
+target "http://www.hansonrobotics.com/robot/sophia/"
+
+\end_inset
+
+.
+ House image credit: Small House Bliss, 
+\begin_inset CommandInset href
+LatexCommand href
+name "The Cypress Laneway House "
+target "https://smallhousebliss.com/2016/02/02/smallworks-cypress-laneway-house/"
+
+\end_inset
+
+.)
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection*
@@ -275,6 +485,93 @@ For most of this document, the distinction between models of self, other,
  on how to interface such models to perceptions and to actions.
  An vitally important side topic is how to automatically learn and update
  the model: this is discussed briefly, later, but is not a primary topic.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+A Control Theory Model
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:A-Control-Theory"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Basic_Forward_Model.png
+	width 50col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+A typical depiction of a model, as described in control theory.
+ This is considerably narrower than the intended meaning here, but serves
+ to illlustrate the general idea.
+ Here, a forward model of an arm movement is shown.
+ The motor command, u(t), of the arm movement is input to a model of the
+ arm and it's motors and the predicted position of the arm, x̃(t), is output.
+ This shows how a model can be used to predict hypothesized future movements.
+ Inverse models can be used to convert desired positions into motor commands,
+ or, more generally, desired outcomes can be converted into specific actions
+ to take, to acheive those outcomes.
+ In this document, both uses, and many more, are anticipated.
+ In control theory, 
+\begin_inset Quotes eld
+\end_inset
+
+plant
+\begin_inset Quotes erd
+\end_inset
+
+ refers to the device under control.
+ 
+\size scriptsize
+(Image credit: Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "By Katie Amenabar, Brian Baum - Theories of Motor Control Class UMD Spring 2008"
+target "https://commons.wikimedia.org/w/index.php?curid=4350561"
+
+\end_inset
+
+, CC BY-SA 3.0.)
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1814,7 +2111,7 @@ name "fig:Language-Pipeline"
 \align center
 \begin_inset Graphics
 	filename pipe.eps
-	width 60col%
+	width 50col%
 
 \end_inset
 
@@ -1957,18 +2254,27 @@ reference "fig:Language-Pipeline"
 
 \end_inset
 
- provides a new name, SemR, to the 
+ distingusihes a semantic representation layer SemR, and a control-language
+ layer ContrL.
+ The SemR layer provides a 
 \begin_inset Quotes eld
 \end_inset
 
-control language
+normalized
 \begin_inset Quotes erd
 \end_inset
 
-.
- In doing so, it conflates two important ideas: semantic representation
- and action control.
- The term SemR comes from 
+ description of the meaning of some natural language expression, independent
+ of the precise surface form of the sentence.
+ It provide a representation that is easier to work with, moving away from
+ less important syntactic details.
+ Also, unlike the control langauge, it can avoid being closely tied to the
+ state representation.
+ 
+\end_layout
+
+\begin_layout Standard
+The label SemR comes from 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1984,24 +2290,16 @@ target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
 \begin_inset Quotes erd
 \end_inset
 
- (MTT), where it is a short-hand for 
-\begin_inset Quotes eld
-\end_inset
-
-semantic representation
-\begin_inset Quotes erd
-\end_inset
-
-, and has a very specific and well-defined meaning in that theory.
- In MTT, it is a graphical network, elucidating all of the relationships
- between concepts and ideas in some natural language text; it is supposed
- to capture 
+ (MTT), where it has a very specific and well-defined meaning.
+ There, it is a graphical network, showing all of the relationships between
+ concepts and ideas in some natural language text; it is supposed to capture
+ 
 \emph on
 all
 \emph default
  of the semantic content of that text.
- So, MTT elucidates, in considerable detail, exactly how to move from text
- (the MorphR format) to meaning (the SemR format).
+ MTT elaborates, in considerable detail, exactly how to move from text (the
+ MorphR format) to meaning (the SemR format).
  However, there is are several things that MTT completely ignores: action,
  and reasoning.
 \end_layout
@@ -3057,8 +3355,123 @@ control language
 Design Issues
 \end_layout
 
+\begin_layout Standard
+During the prototype development, a number of design issues were encountered.
+ These are discussed here.
+ All of these should be addressed in some way, either through architecture
+ changes or implementation improvements.
+\end_layout
+
+\begin_layout Subsection*
+Translation Issues
+\end_layout
+
+\begin_layout Standard
+A fair number of issues crop up in the middle layers of the language input
+ system.
+ These are reviewed in order from narrowest and most specific, to broadest
+ and most general.
+\end_layout
+
 \begin_layout Subsubsection*
-DRAFT VERSION 0.03
+What is the correct semantic representation?
+\end_layout
+
+\begin_layout Standard
+Although the label SemR was appropriated from MTT, that is not what is actually
+ implemented: its entirely ad hoc.
+ During early stages of prototyping, it was assumed that the surface representat
+ion would be provided by RelEx and the deep interface would be generated
+ by R2L; that is, that the output of R2L would provide the normalized 
+\begin_inset Quotes eld
+\end_inset
+
+semantic
+\begin_inset Quotes erd
+\end_inset
+
+ format.
+ This did not work out as hoped, for two different reasons.
+ 
+\end_layout
+
+\begin_layout Standard
+First, semantically similar sentences were converted into very different
+ R2L outputs.
+ Examples include 
+\begin_inset Quotes eld
+\end_inset
+
+Look to the left!
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Look leftwards!
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Attempts to mitigate this became quickly stuck in the morass of R2L rules.
+ It seemed like an aweful lot of effort for very little return, so that
+ approach was abandoned for the prototype.
+\end_layout
+
+\begin_layout Standard
+Next, it was hoped that RelEx would provide the surface format, but that
+ also did not work out.
+ RelEx failed in two disstinct ways: it sometimes generated highly variable
+ outputs for semantically similar sentences e.g.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Look up!
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Look down!
+\begin_inset Quotes erd
+\end_inset
+
+ gave very different outputs.
+ Other times, there were unexpected similarities, when outputs should have
+ been semantically diffent.
+ On top of this, pattern matching to RelEx was cumbersome: the patterns
+ quickly became complex, requiring many different check to many sub-parts.
+ The large complex patterns proved fragile and hard to maintain.
+ In the end, using Link Grammar as the surface representation proved to
+ be a LOT easier; the patterns became much smaller and more regular.
+\end_layout
+
+\begin_layout Standard
+Side comment: now that LG indicates the head-verbs of sentences and clauses,
+ the primary raison-d'etre for RelEx goes away.
+ It does not provide a lot of value-add any more.
+\end_layout
+
+\begin_layout Subsubsection*
+AnchorNodes, or something else?
+\end_layout
+
+\begin_layout Standard
+The current parsing pipeline (used by R2L as well as the prototype here)
+ drops off recently-parsed sentences, and leaves them attached to an AnchorNode,
+ where they can be picked up by the next stage of processing.
+ Thus, to process a sentence, either every rule must specify the AnchorNode,
+ so that the rule only applies to the curent sentence, or ...XXX how does R2L
+ work? 
+\end_layout
+
+\begin_layout Subsubsection*
+DRAFT VERSION 0.04
 \end_layout
 
 \begin_layout Standard
@@ -3072,23 +3485,8 @@ Translation issues
 \end_layout
 
 \begin_layout Standard
-There are several technical issues that crop up, at this point.
- These are central to later development, and so are discussed in detail
- here.
-\end_layout
-
-\begin_layout Standard
 issue: learning vs.
  hand-crafting, obtaining synonymous phrases, not just synonymous words.
-\end_layout
-
-\begin_layout Standard
-issue: its LG not R2L
-\end_layout
-
-\begin_layout Standard
-issue: dual-stage conversion.
- Normal form looks more like relex or MTT.
 \end_layout
 
 \begin_layout Standard
@@ -3108,10 +3506,6 @@ issue: picking out sentences attached to an anchor, vs other processing
 \begin_layout Standard
 todo -- the verb synonyms should not be needed!? as they can be gotten from
  the synonym lists for the control-action language...
-\end_layout
-
-\begin_layout Standard
-internal language is kind of like MTT SemR
 \end_layout
 
 \begin_layout Subsubsection*
