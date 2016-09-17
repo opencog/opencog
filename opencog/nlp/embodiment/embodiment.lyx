@@ -168,7 +168,7 @@ name "fig:The-PUMA-Architecture"
 \align center
 \begin_inset Graphics
 	filename PUMA-Overview.png
-	width 90text%
+	width 95text%
 
 \end_inset
 
@@ -181,6 +181,17 @@ This diagram shows the Hanson Robotics PUMA architecture: it offers a hint
  The architecture described in this document is a horizontal slice through
  the above diagram; it is focused primarily on how natural language interacts
  with models of the self, and of the world, to drive behavior and conversation.
+ 
+\size scriptsize
+(Diagram credit: 
+\begin_inset CommandInset href
+LatexCommand href
+name "Hanson Robotics"
+target "http://www.hansonrobotics.com/"
+
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Plain Layout
@@ -357,7 +368,7 @@ reference "fig:Self-and-World"
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption
@@ -403,6 +414,25 @@ The internal model is a highly simplified representation of the world and
  Here, the robot Sophia thinks simplified thoughts, much as this illustration
  simplifies the idea of a representation.
  
+\size scriptsize
+(Robot credit: 
+\begin_inset CommandInset href
+LatexCommand href
+name "Hanson Robotics Sophia"
+target "http://www.hansonrobotics.com/robot/sophia/"
+
+\end_inset
+
+.
+ House image credit: Small House Bliss, 
+\begin_inset CommandInset href
+LatexCommand href
+name "The Cypress Laneway House "
+target "https://smallhousebliss.com/2016/02/02/smallworks-cypress-laneway-house/"
+
+\end_inset
+
+.)
 \end_layout
 
 \begin_layout Plain Layout
@@ -516,7 +546,7 @@ plant
  refers to the device under control.
  
 \size scriptsize
-Image credit: Wikipedia, 
+(Image credit: Wikipedia, 
 \begin_inset CommandInset href
 LatexCommand href
 name "By Katie Amenabar, Brian Baum - Theories of Motor Control Class UMD Spring 2008"
@@ -524,7 +554,7 @@ target "https://commons.wikimedia.org/w/index.php?curid=4350561"
 
 \end_inset
 
-, CC BY-SA 3.0.
+, CC BY-SA 3.0.)
 \end_layout
 
 \begin_layout Plain Layout
@@ -3325,8 +3355,123 @@ control language
 Design Issues
 \end_layout
 
+\begin_layout Standard
+During the prototype development, a number of design issues were encountered.
+ These are discussed here.
+ All of these should be addressed in some way, either through architecture
+ changes or implementation improvements.
+\end_layout
+
+\begin_layout Subsection*
+Translation Issues
+\end_layout
+
+\begin_layout Standard
+A fair number of issues crop up in the middle layers of the language input
+ system.
+ These are reviewed in order from narrowest and most specific, to broadest
+ and most general.
+\end_layout
+
 \begin_layout Subsubsection*
-DRAFT VERSION 0.03
+What is the correct semantic representation?
+\end_layout
+
+\begin_layout Standard
+Although the label SemR was appropriated from MTT, that is not what is actually
+ implemented: its entirely ad hoc.
+ During early stages of prototyping, it was assumed that the surface representat
+ion would be provided by RelEx and the deep interface would be generated
+ by R2L; that is, that the output of R2L would provide the normalized 
+\begin_inset Quotes eld
+\end_inset
+
+semantic
+\begin_inset Quotes erd
+\end_inset
+
+ format.
+ This did not work out as hoped, for two different reasons.
+ 
+\end_layout
+
+\begin_layout Standard
+First, semantically similar sentences were converted into very different
+ R2L outputs.
+ Examples include 
+\begin_inset Quotes eld
+\end_inset
+
+Look to the left!
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Look leftwards!
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Attempts to mitigate this became quickly stuck in the morass of R2L rules.
+ It seemed like an aweful lot of effort for very little return, so that
+ approach was abandoned for the prototype.
+\end_layout
+
+\begin_layout Standard
+Next, it was hoped that RelEx would provide the surface format, but that
+ also did not work out.
+ RelEx failed in two disstinct ways: it sometimes generated highly variable
+ outputs for semantically similar sentences e.g.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Look up!
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Look down!
+\begin_inset Quotes erd
+\end_inset
+
+ gave very different outputs.
+ Other times, there were unexpected similarities, when outputs should have
+ been semantically diffent.
+ On top of this, pattern matching to RelEx was cumbersome: the patterns
+ quickly became complex, requiring many different check to many sub-parts.
+ The large complex patterns proved fragile and hard to maintain.
+ In the end, using Link Grammar as the surface representation proved to
+ be a LOT easier; the patterns became much smaller and more regular.
+\end_layout
+
+\begin_layout Standard
+Side comment: now that LG indicates the head-verbs of sentences and clauses,
+ the primary raison-d'etre for RelEx goes away.
+ It does not provide a lot of value-add any more.
+\end_layout
+
+\begin_layout Subsubsection*
+AnchorNodes, or something else?
+\end_layout
+
+\begin_layout Standard
+The current parsing pipeline (used by R2L as well as the prototype here)
+ drops off recently-parsed sentences, and leaves them attached to an AnchorNode,
+ where they can be picked up by the next stage of processing.
+ Thus, to process a sentence, either every rule must specify the AnchorNode,
+ so that the rule only applies to the curent sentence, or ...XXX how does R2L
+ work? 
+\end_layout
+
+\begin_layout Subsubsection*
+DRAFT VERSION 0.04
 \end_layout
 
 \begin_layout Standard
@@ -3340,23 +3485,8 @@ Translation issues
 \end_layout
 
 \begin_layout Standard
-There are several technical issues that crop up, at this point.
- These are central to later development, and so are discussed in detail
- here.
-\end_layout
-
-\begin_layout Standard
 issue: learning vs.
  hand-crafting, obtaining synonymous phrases, not just synonymous words.
-\end_layout
-
-\begin_layout Standard
-issue: its LG not R2L
-\end_layout
-
-\begin_layout Standard
-issue: dual-stage conversion.
- Normal form looks more like relex or MTT.
 \end_layout
 
 \begin_layout Standard
@@ -3376,10 +3506,6 @@ issue: picking out sentences attached to an anchor, vs other processing
 \begin_layout Standard
 todo -- the verb synonyms should not be needed!? as they can be gotten from
  the synonym lists for the control-action language...
-\end_layout
-
-\begin_layout Standard
-internal language is kind of like MTT SemR
 \end_layout
 
 \begin_layout Subsubsection*
