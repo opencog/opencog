@@ -72,10 +72,10 @@ so we may as well start using it right away. So, set that up:
 4) Install link-grammar-4.8.4 or newer.
 5) Copy the RelEx opencog-server.sh shell script to some other name.
    Edit it, and replace the final line with this:
-   java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --lang any -n 99 --link
+   java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --lang any -n 16 --link
    Run the new shell script.
 
-   The above tells relex to use the 'any' language, and return up to 99
+   The above tells relex to use the 'any' language, and return up to 16
    different parses. This should generate plenty of word-pairs.
 
 6) Copy one of the opencog-??.conf files from the misc-scripts directory

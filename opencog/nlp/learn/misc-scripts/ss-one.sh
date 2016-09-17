@@ -9,8 +9,6 @@
 # Example usage:
 #    ./ss-one.sh en Barbara localhost 17001
 #
-# Two directories must exist before using this script: the $splitdir,
-# below, and $subdir
 
 # Set up assorted constants needed to run.
 lang=$1
@@ -46,6 +44,10 @@ base=`echo $filename | cut -d \/ -f 1`
 rest=`echo $filename | cut -d \/ -f 2-6`
 
 echo "Processing file $rest"
+
+# Create directories if missed
+mkdir -p $(dirname "$splitdir/$rest")
+mkdir -p $(dirname "$subdir/$rest")
 
 # Sentence split the article itself
 cat "$filename" | $splitter -l $lang >  "$splitdir/$rest"
