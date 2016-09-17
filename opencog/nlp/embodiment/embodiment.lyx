@@ -77,7 +77,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.03 - 15 Sept 2016
+Draft Version 0.04 - 16 Sept 2016
 \end_layout
 
 \begin_layout Abstract
@@ -109,6 +109,95 @@ internal model
 , and how one can, in principle, interface with it.
  This is followed by a section reviewing the current prototype.
  After this, difficulties with language are discussed.
+\end_layout
+
+\begin_layout Standard
+The work described here has been chartered by Hanson Robotics, and is specifical
+ly intended to interface with the robots manufactured by Hanson, such as
+ Sophia and others.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Robot archtitecture overview
+\end_layout
+
+\begin_layout Standard
+XXX This section to be written in a later version.
+ XXX.
+ A conceptual diagram of the system is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:The-PUMA-Architecture"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+The PUMA Architecture
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:The-PUMA-Architecture"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename PUMA-Overview.png
+	width 90text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This diagram shows the Hanson Robotics PUMA architecture: it offers a hint
+ of what an embodied artificial intelligence architecture might look like.
+ The architecture described in this document is a horizontal slice through
+ the above diagram; it is focused primarily on how natural language interacts
+ with models of the self, and of the world, to drive behavior and conversation.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*
@@ -144,7 +233,21 @@ target "https://en.wikipedia.org/wiki/Good_regulator"
  An internal model provides the system software with a natural API, a natural
  representation, that various different software components can agree on,
  and use, and manipulate, and reason with.
- 
+ Two depcitions of models are given in figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Self-and-World"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:A-Control-Theory"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -257,10 +360,6 @@ sideways false
 status collapsed
 
 \begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
 \begin_inset Caption
 
 \begin_layout Plain Layout
@@ -356,6 +455,93 @@ For most of this document, the distinction between models of self, other,
  on how to interface such models to perceptions and to actions.
  An vitally important side topic is how to automatically learn and update
  the model: this is discussed briefly, later, but is not a primary topic.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+A Control Theory Model
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:A-Control-Theory"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename Basic_Forward_Model.png
+	width 50col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+A typical depiction of a model, as described in control theory.
+ This is considerably narrower than the intended meaning here, but serves
+ to illlustrate the general idea.
+ Here, a forward model of an arm movement is shown.
+ The motor command, u(t), of the arm movement is input to a model of the
+ arm and it's motors and the predicted position of the arm, x̃(t), is output.
+ This shows how a model can be used to predict hypothesized future movements.
+ Inverse models can be used to convert desired positions into motor commands,
+ or, more generally, desired outcomes can be converted into specific actions
+ to take, to acheive those outcomes.
+ In this document, both uses, and many more, are anticipated.
+ In control theory, 
+\begin_inset Quotes eld
+\end_inset
+
+plant
+\begin_inset Quotes erd
+\end_inset
+
+ refers to the device under control.
+ 
+\size scriptsize
+Image credit: Wikipedia, 
+\begin_inset CommandInset href
+LatexCommand href
+name "By Katie Amenabar, Brian Baum - Theories of Motor Control Class UMD Spring 2008"
+target "https://commons.wikimedia.org/w/index.php?curid=4350561"
+
+\end_inset
+
+, CC BY-SA 3.0.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection*
