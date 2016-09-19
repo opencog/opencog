@@ -43,8 +43,8 @@ using namespace opencog;
 Fuzzy::Fuzzy(AtomSpace* a, Type tt, const HandleSeq& ll, bool af_only) :
     as(a),
     rtn_type(tt),
-    excl_list(ll),
-    _af_only(af_only)
+    _af_only(af_only),
+    excl_list(ll)
 {
 }
 

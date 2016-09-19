@@ -35,10 +35,10 @@
 //#include <assert.h>
 #include "opencog/util/oc_assert.h"
 
-TimeOctomap::TimeOctomap(unsigned int num_time_units,
-                         double map_res_meters,
-                         duration_c time_resolution):
-             auto_step(false),map_res(map_res_meters),time_res(time_resolution),created_once(false),time_circle(num_time_units)
+TimeOctomap::TimeOctomap(unsigned int num_time_units, double map_res_meters,
+                         duration_c time_resolution) : map_res(map_res_meters)
+                                ,time_res(time_resolution), time_circle(num_time_units)
+                                ,created_once(false),auto_step(false)
 {
 
 }
