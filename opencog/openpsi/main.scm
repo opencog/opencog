@@ -77,7 +77,7 @@
                (goals (psi-related-goals action))
                (context-atoms (get-context-grounding-atoms rule)))
 
-            (cog-logger-info "[OpenPsi] Starting evaluation psi-rule = ~a"
+            (cog-logger-info "[OpenPsi] Starting evaluation of psi-rule ~a"
                 rule)
 
             ; The #t condition is for evaluatable-contexts. These are
@@ -97,6 +97,8 @@
             ; results in the achievement of the goals, even if the context of
             ; the other rules aren't not satisfied.
             (map cog-evaluate! goals)
+            (cog-logger-info "[OpenPsi] Finished evaluating of psi-rule ~a"
+                rule)
         ))
 
     (cog-logger-info "[OpenPsi] Starting psi-step, loop-count = ~a"
