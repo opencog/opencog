@@ -58,7 +58,6 @@ namespace opencog
 class WAImportanceDiffusionAgent : public ImportanceDiffusionBase
 {
 private:
-    HandleSeq diffusionSourceVector();
     unsigned int SAMPLE_SIZE = 1;
     unsigned int _tournamentSize;
 
@@ -67,6 +66,7 @@ private:
 
 public:
     WAImportanceDiffusionAgent(CogServer&);
+   ~WAImportanceDiffusionAgent();
 
     virtual void run();
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -74,6 +74,8 @@ public:
     static const ClassInfo _ci("opencog::WAImportanceDiffusionAgent");
         return _ci;
     }
+
+    HandleSeq diffusionSourceVector(void);
 };
 
 /** @}*/

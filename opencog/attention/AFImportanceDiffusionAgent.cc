@@ -56,7 +56,7 @@ void AFImportanceDiffusionAgent::run()
  */
 void AFImportanceDiffusionAgent::spreadImportance()
 {
-    HandleSeq diffusionSourceVector =  ImportanceDiffusionBase::diffusionSourceVector(true);
+    HandleSeq diffusionSourceVector =  ImportanceDiffusionBase::diffusionSourceVector();
 
     // Calculate the diffusion for each source atom, and store the diffusion
     // event in a stack
