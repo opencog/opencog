@@ -256,17 +256,17 @@ class FaceTrack:
 		  0          0          0          1
 		'''
 
-		cmat = [[0.943789,0.129327,0.304204,0.00736024],
-				[-0.131484,0.991228,-0.0134787,0.00895614],
-				[-0.303278,-0.0272767,0.952513,0.0272001],
-				[0, 0, 0, 1]]
-		for i in range(0,3):
-			for j in range(0,3):
-				r[i][0]+=cmat[i][j]*vs[j][0]
-		xc=r[0][0]
-		yc=r[1][0]
-		zc=r[2][0]
-		self.atomo.save_snd1(xc,yc,zc)
+		robot_name = rospy.get_param("/robot_name")
+		parameter_name = robot_name + "/" + "sound_localization/mapping_matrix"
+		if rospy.has_param(parameter_name):
+			cmat = rospy.has_param(parameter_name)
+			for i in range(0,3):
+				for j in range(0,3):
+					r[i][0]+=cmat[i][j]*vs[j][0]
+			xc=r[0][0]
+			yc=r[1][0]
+			zc=r[2][0]
+			self.atomo.save_snd1(xc,yc,zc)
 
 	def add_face(self, faceid):
 		if faceid in self.visible_faces:
