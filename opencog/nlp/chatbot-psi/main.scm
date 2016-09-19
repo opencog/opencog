@@ -48,14 +48,18 @@
     (reset-all-chatbot-states)
 
     (let ((sent-node (car (nlp-parse utterance))))
-        ; This is for keeping track of whether we have input that has not
-        ; been handled
-        (State input-utterance sent-node)
-
         ; These are for the contexts
         (State input-utterance-sentence sent-node)
         (State input-utterance-text (Node utterance))
         (State input-utterance-words (get-word-list sent-node))
+
+        ; This is for keeping track of whether we have input that has not
+        ; been handled
+        ; This set (DefinedPredicate "is-input-utterance?") to be true,
+        ; doing this after updating the above states so as to make sure
+        ; atoms that some chat-related rules are expecting will be created
+        ; before the rules get evaluated
+        (State input-utterance sent-node)
     )
 
     *unspecified*
