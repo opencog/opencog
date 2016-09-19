@@ -77,9 +77,8 @@
                (goals (psi-related-goals action))
                (context-atoms (get-context-grounding-atoms rule)))
 
-           (cog-logger-info
-                "[OpenPsi] Starting evaluation psi-rule = ~a"
-                (psi-rule-alias rule))
+            (cog-logger-info "[OpenPsi] Starting evaluation of psi-rule ~a"
+                rule)
 
             ; The #t condition is for evaluatable-contexts. These are
             ; contexts that only have evaluatable-terms that return TRUE_TV
@@ -98,9 +97,12 @@
             ; results in the achievement of the goals, even if the context of
             ; the other rules aren't not satisfied.
             (map cog-evaluate! goals)
+            (cog-logger-info "[OpenPsi] Finished evaluating of psi-rule ~a"
+                rule)
         ))
 
-    (cog-logger-info "[OpenPsi] loop-count = ~a" (psi-get-loop-count))
+    (cog-logger-info "[OpenPsi] Starting psi-step, loop-count = ~a"
+        (psi-get-loop-count))
 
     ; Run the controler that updates the weight.
     (psi-controller-update-weights)
@@ -122,6 +124,9 @@
 
         (psi-get-all-valid-demands)
     )
+
+    (cog-logger-info "[OpenPsi] Ending psi-step, loop-count = ~a"
+        (psi-get-loop-count))
 
     (stv 1 1) ; For continuing psi-run loop.
 )
