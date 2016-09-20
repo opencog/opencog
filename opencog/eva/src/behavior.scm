@@ -784,5 +784,9 @@
         ))
 		(TrueLink)
 	))
+;; Actions for loud sound	
+(DefineLink
+	(DefinedPredicate "Say whoa!")
+	(Put (DefinedPredicate "Say") (Node "whoa!")))
 
 ; ----------------------------------------------------------------------

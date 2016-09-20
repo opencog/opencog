@@ -115,3 +115,8 @@
 (psi-rule (list (DefinedPredicate "Skip Interaction?"))
 	(DefinedPredicate "Keep alive")
 	speech-demand-satisfied (stv 1 1) speech-demand)
+	
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+        (DefinedPredicate "Heard Loud Voice?")))
+    (DefinedPredicate "Say whoa!")
+    speech-demand-satisfied (stv 1 1) speech-demand)
