@@ -205,8 +205,6 @@
 (define arousal->voice
 	(psi-create-interaction-rule arousal changed voice-width -.5))
 
-
-
 ; --------------------------------------------------------------
 ; Psi Emotion Representations
 ; Todo: move to psi-emotions.scm file?
@@ -236,12 +234,10 @@
 (define psi-excited (psi-create-emotion "excited"))
 (define psi-tired (psi-create-emotion "tired"))
 
-
 ; ------------------------------------------------------------------
 ; Run the dyanmics updater loop. Eventually this will be part of the main
 ; OpenPsi loop.
 (psi-updater-run)
-
 
 ; ------------------------------------------------------------------
 ; Shortcuts for dev and testing purposes
@@ -259,17 +255,3 @@
 	(define sentence (SentenceNode (number->string (random 1000000000))))
 	(State (Anchor "Chatbot: InputUtteranceSentence")  sentence)
 	(Inheritance sentence (Concept "Positive")))
-
-(define pos place-pos-dialog)
-(define neg place-neg-dialog)
-
-
-; ---------------------------------------------------------------------
-; for testing/dev when chatbot-psi files are not already loaded
-(if (not (defined? 'get-input-sent-node))
-    (begin
-        (display "Loading support files for testing\n")
-        (load "../../opencog/opencog/nlp/chatbot-psi/utils.scm")
-        (load "../../opencog/opencog/nlp/chatbot-psi/states.scm")
-        (load "../../opencog/opencog/nlp/chatbot-eva/imperative-rules.scm"))
-        (python-eval "execfile('atomic.py')"))
