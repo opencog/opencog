@@ -706,11 +706,14 @@
     ;    #f ; Nothing to do already defined
     ;)
 
-	(psi-updater-init)
-    (set! psi-updater-is-running #t)
-    (cog-set-tv! updater-continue-pred (stv 1 1))
-    (call-with-new-thread
-        (lambda () (cog-evaluate! (loop-node))))
+    (if (not psi-updater-is-running)
+        (begin
+            (psi-updater-init)
+            (set! psi-updater-is-running #t)
+            (cog-set-tv! updater-continue-pred (stv 1 1))
+            (call-with-new-thread
+                (lambda () (cog-evaluate! (loop-node)))))
+    )
 )
 
 (define-public (psi-updater-halt)
