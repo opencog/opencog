@@ -6,7 +6,7 @@
 (use-modules (opencog) (opencog exec) (opencog openpsi) (opencog python))
 
 ; needed for nlp parsing
-(use-modules (opencog nlp) (opencog nlp chatbot))
+(use-modules (opencog nlp) (opencog nlp chatbot) (opencog nlp chatbot-psi))
 
 (load "express.scm") ; For random pos and neg expressions
 (load "faces.scm")
@@ -132,14 +132,12 @@
 ; ------------------------------------------------------------------
 ; Event detection callbacks
 
-(define no-input-utterance (ConceptNode "Chatbot: NoInputUtterance"))
-
 ; Callback functions for positive and negative chat sentiment detection
 (define (psi-detect-dialog-sentiment)
 	(define current-input (get-input-sent-node))
 	(define previous-input (psi-get-value current-sentence-node))
 	;(format #t "current-input: ~a\n" current-input)
-	(if (and (not (equal? current-input no-input-utterance))
+	(if (and (not (equal? current-input '()))
 	         (not (equal? current-input previous-input)))
 		; We have a new input sentence
 		(begin
@@ -207,8 +205,6 @@
 (define arousal->voice
 	(psi-create-interaction-rule arousal changed voice-width -.5))
 
-
-
 ; --------------------------------------------------------------
 ; Psi Emotion Representations
 ; Todo: move to psi-emotions.scm file?
@@ -238,12 +234,10 @@
 (define psi-excited (psi-create-emotion "excited"))
 (define psi-tired (psi-create-emotion "tired"))
 
-
 ; ------------------------------------------------------------------
 ; Run the dyanmics updater loop. Eventually this will be part of the main
 ; OpenPsi loop.
 (psi-updater-run)
-
 
 ; ------------------------------------------------------------------
 ; Shortcuts for dev and testing purposes
@@ -261,19 +255,3 @@
 	(define sentence (SentenceNode (number->string (random 1000000000))))
 	(State (Anchor "Chatbot: InputUtteranceSentence")  sentence)
 	(Inheritance sentence (Concept "Positive")))
-
-(define pos place-pos-dialog)
-(define neg place-neg-dialog)
-
-
-; ---------------------------------------------------------------------
-; for testing/dev when chatbot-psi files are not already loaded
-(if (not (defined? 'get-input-sent-node))
-    (begin
-        (display "Loading support files for testing\n")
-        (load "../../opencog/opencog/nlp/chatbot-psi/utils.scm")
-        (load "../../opencog/opencog/nlp/chatbot-psi/states.scm")
-        (load "../../opencog/opencog/nlp/chatbot-eva/imperative-rules.scm"))
-        (python-eval "execfile('atomic.py')"))
-
-
