@@ -191,7 +191,10 @@
         ; This check is for (inf). If d is not (inf) and is greater than
         ; the width-of-yz-plane, then something fishy is going on.
         (if (> d  width-of-yz-plane)
-            0
+            ; FIXME: Sometimes d is larger than the width-of-yz-plane
+            ; and returning 0 is causing a problem in 'choose-next-face'
+            ; Recalculate the width-of-yz-plane?
+            0.0001
             (- 1 (/ d width-of-yz-plane))
         )
     )
