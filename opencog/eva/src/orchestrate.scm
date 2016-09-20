@@ -223,4 +223,15 @@
 
 
 ; -------------------------------------------------------------
+; Say something. To test run,
+; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
+(DefineLink
+	(DefinedPredicate "Say")
+	(LambdaLink (Variable "sentence")
+		(Evaluation
+			(GroundedPredicate "py: say_text")
+			(List (Variable "sentence")))
+	))
+	
+; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent
