@@ -6,7 +6,7 @@
 (use-modules (opencog) (opencog exec) (opencog openpsi) (opencog python))
 
 ; needed for nlp parsing
-(use-modules (opencog nlp) (opencog nlp chatbot))
+(use-modules (opencog nlp) (opencog nlp chatbot) (opencog nlp chatbot-psi))
 
 (load "express.scm") ; For random pos and neg expressions
 (load "faces.scm")
@@ -132,14 +132,12 @@
 ; ------------------------------------------------------------------
 ; Event detection callbacks
 
-(define no-input-utterance (ConceptNode "Chatbot: NoInputUtterance"))
-
 ; Callback functions for positive and negative chat sentiment detection
 (define (psi-detect-dialog-sentiment)
 	(define current-input (get-input-sent-node))
 	(define previous-input (psi-get-value current-sentence-node))
 	;(format #t "current-input: ~a\n" current-input)
-	(if (and (not (equal? current-input no-input-utterance))
+	(if (and (not (equal? current-input '()))
 	         (not (equal? current-input previous-input)))
 		; We have a new input sentence
 		(begin
@@ -275,5 +273,3 @@
         (load "../../opencog/opencog/nlp/chatbot-psi/states.scm")
         (load "../../opencog/opencog/nlp/chatbot-eva/imperative-rules.scm"))
         (python-eval "execfile('atomic.py')"))
-
-
