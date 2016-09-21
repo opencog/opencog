@@ -239,6 +239,6 @@
          (Evaluation
             (GroundedPredicate "py: do_emotion")
            (List (Concept "happy")(NumberNode 3) (NumberNode 0.5)))
-    )
+    ))
 ; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent
