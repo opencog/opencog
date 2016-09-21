@@ -48,7 +48,8 @@
 using namespace opencog;
 using namespace std;
 
-static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
+static const char* DEFAULT_CONFIG_FILENAME = "cogserver.conf";
+static const char* DEFAULT_CONFIG_ALT_FILENAME = "opencog.conf";
 static const char* DEFAULT_CONFIG_PATHS[] = 
 {
     // Search order for the config file:
@@ -142,6 +143,7 @@ int main(int argc, char *argv[])
 
     }
 
+    // First, search for the standard config file.
     if (configFiles.size() == 0) {
         // search for configuration file on default locations
         for (int i = 0; DEFAULT_CONFIG_PATHS[i] != NULL; ++i) {
@@ -153,11 +155,26 @@ int main(int argc, char *argv[])
             }
         }
     }
+
+    // Next, search for alternate config file.
+    if (configFiles.size() == 0) {
+        // search for configuration file on default locations
+        for (int i = 0; DEFAULT_CONFIG_PATHS[i] != NULL; ++i) {
+            boost::filesystem::path configPath(DEFAULT_CONFIG_PATHS[i]);
+            configPath /= DEFAULT_CONFIG_ALT_FILENAME;
+            if (boost::filesystem::exists(configPath)) {
+                cerr << "Using default config at " << configPath.string() << endl;
+                configFiles.push_back(configPath.string());
+            }
+        }
+    }
+
     config().reset();
     if (configFiles.size() == 0) {
         cerr << "No config files could be found!" << endl;
         exit(-1);
     }
+
     // Each config file sequentially overwrites the next
     for (const string& configFile : configFiles) {
         try {
@@ -168,6 +185,7 @@ int main(int argc, char *argv[])
             exit(1);
         }
     }
+
     // Each specific option
     for (const auto& optionPair : configPairs) {
         //cerr << optionPair.first << " = " << optionPair.second << endl;
