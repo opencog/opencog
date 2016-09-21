@@ -592,9 +592,15 @@ Module* CogServer::getModule(const std::string& moduleId)
 
 void CogServer::loadModules(std::vector<std::string> module_paths)
 {
-    if (module_paths.empty()) {
-        // Sometimes paths are given without the "opencog" part.
-        for (auto p : get_module_paths()) {
+    if (module_paths.empty())
+    {
+        // Give priority search oorder to the build directories
+        module_paths.push_back("./opencog/cogserver/server/");
+        module_paths.push_back("./opencog/cogserver/shell/");
+
+        // If not found at above locations, search the install paths
+        for (auto p : get_module_paths())
+        {
             module_paths.push_back(p);
             module_paths.push_back(p + "/opencog");
             module_paths.push_back(p + "/opencog/modules");
@@ -606,10 +612,11 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
     if (config().has("MODULES"))
         modlist = config().get("MODULES");
     else
+        // Defaults: search the build dirs first, then the install dirs.
         modlist =
-            "opencog/cogserver/server/libbuiltinreqs.so, "
-            "opencog/cogserver/shell/libscheme-shell.so, "
-            "opencog/cogserver/shell/libpy-shell.so";
+            "libbuiltinreqs.so, "
+            "libscheme-shell.so, "
+            "libpy-shell.so";
     std::vector<std::string> modules;
     tokenize(modlist, std::back_inserter(modules), ", ");
     bool load_failure = false;
