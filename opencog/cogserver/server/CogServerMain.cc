@@ -48,7 +48,8 @@
 using namespace opencog;
 using namespace std;
 
-static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
+static const char* DEFAULT_CONFIG_FILENAME = "cogserver.conf";
+static const char* DEFAULT_CONFIG_ALT_FILENAME = "opencog.conf";
 static const char* DEFAULT_CONFIG_PATHS[] = 
 {
     // Search order for the config file:
@@ -142,6 +143,7 @@ int main(int argc, char *argv[])
 
     }
 
+    // First, search for the standard config file.
     if (configFiles.size() == 0) {
         // search for configuration file on default locations
         for (int i = 0; DEFAULT_CONFIG_PATHS[i] != NULL; ++i) {
@@ -150,14 +152,45 @@ int main(int argc, char *argv[])
             if (boost::filesystem::exists(configPath)) {
                 cerr << "Using default config at " << configPath.string() << endl;
                 configFiles.push_back(configPath.string());
+
+                // Use the *first* config file found! We don't want to
+                // load both the installed system config file, and also
+                // any config file found in the build directory. We
+                // ESPECIALLY don't want to load the system config file
+                // after the development config file, thus clobbering
+                // the contents of the devel config file!
+                break;
             }
         }
     }
+
+    // Next, search for alternate config file.
+    if (configFiles.size() == 0) {
+        // search for configuration file on default locations
+        for (int i = 0; DEFAULT_CONFIG_PATHS[i] != NULL; ++i) {
+            boost::filesystem::path configPath(DEFAULT_CONFIG_PATHS[i]);
+            configPath /= DEFAULT_CONFIG_ALT_FILENAME;
+            if (boost::filesystem::exists(configPath)) {
+                cerr << "Using default config at " << configPath.string() << endl;
+                configFiles.push_back(configPath.string());
+
+                // Use the *first* config file found! We don't want to
+                // load both the installed system config file, and also
+                // any config file found in the build directory. We
+                // ESPECIALLY don't want to load the system config file
+                // after the development config file, thus clobbering
+                // the contents of the devel config file!
+                break;
+            }
+        }
+    }
+
     config().reset();
     if (configFiles.size() == 0) {
         cerr << "No config files could be found!" << endl;
         exit(-1);
     }
+
     // Each config file sequentially overwrites the next
     for (const string& configFile : configFiles) {
         try {
@@ -168,23 +201,12 @@ int main(int argc, char *argv[])
             exit(1);
         }
     }
+
     // Each specific option
     for (const auto& optionPair : configPairs) {
         //cerr << optionPair.first << " = " << optionPair.second << endl;
         config().set(optionPair.first, optionPair.second);
     }
-
-    // setup global logger
-    if (logger().get_filename() != config().get("LOG_FILE", "opencog.log")) {
-	    logger().info() << "Subsequent logging will be redirected to file: "
-	                    << config().get("LOG_FILE", "opencog.log");
-    }
-    logger().set_filename(config().get("LOG_FILE", "opencog.log"));
-    logger().set_level(Logger::get_level_from_string(config().get("LOG_LEVEL", "info")));
-    auto level = Logger::get_level_from_string(config().get("BACK_TRACE_LOG_LEVEL", "error"));
-    logger().set_backtrace_level(level);
-    logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT", false));
-    //logger().set_level(Logger::DEBUG);
 
     // Start catching signals
     signal(SIGSEGV, sighand);
