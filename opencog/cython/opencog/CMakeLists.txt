@@ -73,7 +73,7 @@ IF (HAVE_ATOMSPACE)
 		OUTPUT_NAME cogserver_type_constructors)
 
 	INSTALL (TARGETS cogserver_type_constructors
-		DESTINATION "${DATADIR}/python/opencog")
+		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 
 	IF (HAVE_OCTOMAP)
 
@@ -99,7 +99,7 @@ IF (HAVE_ATOMSPACE)
 			OUTPUT_NAME spacetime)
 
 		INSTALL (TARGETS spacetime_cython
-			DESTINATION "${DATADIR}/python/opencog")
+			DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 
 		############################ spatial #########################
 		CYTHON_ADD_MODULE_PYX(spatial
@@ -125,7 +125,7 @@ IF (HAVE_ATOMSPACE)
 			OUTPUT_NAME spatial)
 
 		INSTALL (TARGETS spatial_cython
-			DESTINATION "${DATADIR}/python/opencog")
+			DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 	ENDIF (HAVE_OCTOMAP)
 ENDIF (HAVE_ATOMSPACE)
 
@@ -158,7 +158,7 @@ IF (HAVE_SERVER)
 		OUTPUT_NAME cogserver)
 
 	INSTALL (TARGETS cogserver_cython
-		DESTINATION "${DATADIR}/python/opencog")
+		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 
 	####################### agent finder ########################
 	CYTHON_ADD_MODULE_PYX(agent_finder
@@ -188,7 +188,7 @@ IF (HAVE_SERVER)
 		OUTPUT_NAME agent_finder)
 
 	INSTALL (TARGETS agent_finder
-		DESTINATION "${DATADIR}/python/opencog")
+		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 ENDIF(HAVE_SERVER)
 
 IF (HAVE_STATISTICS)
@@ -216,9 +216,9 @@ IF (HAVE_STATISTICS)
 		OUTPUT_NAME statistics)
 
 	INSTALL (TARGETS statistics_cython
-		DESTINATION "${DATADIR}/python/opencog")
+		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 ENDIF (HAVE_STATISTICS)
 
 INSTALL (FILES
 	__init__.py
-	DESTINATION "${DATADIR}/python/opencog")
+	DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
