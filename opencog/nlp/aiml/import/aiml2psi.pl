@@ -221,8 +221,8 @@ foreach my $af (sort @aimlFiles)
 			my $path="";
 			if ($c !~ /<topic>/)
 			{
-				my $tpat = "\<\/pattern\> \<topic\>". $topicx ."\<\/topic\> \<that\>";
-				$c =~ s/\<\/pattern\> \<that\>/$tpat/;
+				my $tpat = "\<\/pattern\> \<topic\>". $topicx ."\<\/topic\>";
+				$c =~ s/\<\/pattern\>/$tpat/;
 			}
 			my @pat = $c =~ m/\<pattern\>(.*?)\<\/pattern\>/;
 			my @top = $c =~ m/\<topic\>(.*?)\<\/topic\>/;
