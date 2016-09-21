@@ -1,6 +1,7 @@
 ; Copyright (C) 2015-2016 OpenCog Foundation
 
 (use-modules (srfi srfi-1)) ; For `append-map`
+(use-modules (ice-9 threads)) ; For par-map
 
 (use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
 (use-modules (opencog logger))
