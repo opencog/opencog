@@ -152,6 +152,14 @@ int main(int argc, char *argv[])
             if (boost::filesystem::exists(configPath)) {
                 cerr << "Using default config at " << configPath.string() << endl;
                 configFiles.push_back(configPath.string());
+
+                // Use the *first* config file found! We don't want to
+                // load both the installed system config file, and also
+                // any config file found in the build directory. We
+                // ESPECIALLY don't want to load the system config file
+                // after the development config file, thus clobbering
+                // the contents of the devel config file!
+                break;
             }
         }
     }
@@ -165,6 +173,14 @@ int main(int argc, char *argv[])
             if (boost::filesystem::exists(configPath)) {
                 cerr << "Using default config at " << configPath.string() << endl;
                 configFiles.push_back(configPath.string());
+
+                // Use the *first* config file found! We don't want to
+                // load both the installed system config file, and also
+                // any config file found in the build directory. We
+                // ESPECIALLY don't want to load the system config file
+                // after the development config file, thus clobbering
+                // the contents of the devel config file!
+                break;
             }
         }
     }
