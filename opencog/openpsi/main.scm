@@ -1,6 +1,7 @@
 ; Copyright (C) 2015-2016 OpenCog Foundation
 
 (use-modules (srfi srfi-1)) ; For `append-map`
+(use-modules (ice-9 threads)) ; For par-map
 
 (use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
 (use-modules (opencog logger))
@@ -42,9 +43,9 @@
 "
     (set! psi-loop-count (+ psi-loop-count 1))
 
-    ; Pause for 101 millisecs, to keep the number of loops
+    ; Pause for 10 millisecs, to keep the number of loops
     ; within a reasonable range.
-    (usleep 101000)
+    (usleep 10000)
     (if psi-do-run-loop (stv 1 1) (stv 0 1))
 )
 
@@ -119,7 +120,7 @@
                 ; FIXME: Once action-orchestrator is available then a modified
                 ; `psi-select-rules` should be used insted of
                 ; `psi-select-rules-per-demand`
-                (map act-and-evaluate (psi-select-rules-per-demand d))
+                (par-map act-and-evaluate (psi-select-rules-per-demand d))
             ))
 
         (psi-get-all-valid-demands)
