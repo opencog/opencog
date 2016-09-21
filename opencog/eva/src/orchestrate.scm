@@ -235,6 +235,7 @@
 ;show happy emotion	
 (DefineLink
     (DefinedPredicate "Quiet")
+    (LambdaLink (Concept "happy")
          (Evaluation
             (GroundedPredicate "py: do_emotion")
            (List (Concept "happy")(NumberNode 3) (NumberNode 0.5)))
