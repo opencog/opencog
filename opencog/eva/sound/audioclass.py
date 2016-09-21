@@ -14,8 +14,7 @@ from audiosysneeds.msg import audiodata
     topics, and based on the different range of values of the Decibel classifies
      the input sound into Quiet, Normal Conversation, Loud conversation,critical
       sound and when there is a transfer from one range to another based on the 
-      value difference considers it as sudden change.And according to the type of
-       sound, various gestures and expressions are sent to the cogserver.
+      value difference considers it as sudden change.And according to the type of sound, various gestures and expressions are sent to the cogserver.
    
 '''
 
