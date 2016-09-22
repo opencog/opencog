@@ -124,3 +124,7 @@
         (DefinedPredicate "very low sound?")))
    (DefinedPredicate "Quiet:happy")
     speech-demand-satisfied (stv 1 1) speech-demand)
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+        (DefinedPredicate  "normal conversation?")))
+   (DefinedPredicate "Normal:amused")
+    speech-demand-satisfied (stv 1 1) speech-demand)
