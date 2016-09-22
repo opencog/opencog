@@ -12,6 +12,9 @@
 (load "rule.scm")
 (load "utilities.scm")
 
+; --------------------------------------------------------------
+; Don't log output to stdout on running psi-step
+(cog-logger-set-stdout! #f)
 
 ; --------------------------------------------------------------
 ; Variable for controlling whether to keep on running the loop or not.
