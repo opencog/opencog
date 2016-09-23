@@ -261,7 +261,31 @@
 		(True (Put (State heard-sound (Variable "$x")) heard-nothing))
 	))
 
-
+;; Loud sound value.
+(define loud-sound  (AnchorNode "Sudden sound change value"))
+(State loud-sound (Number 0)) ; There isn't any sudden change in sound Decibel
+(define very-low-sound (AnchorNode "Decibel value"))
+(State very-low-sound (Number 35)) 
+(define normal-conversation (AnchorNode "Decibel value"))
+(State normal-conversation (Number 65)) 
+;; Return true if a loud voice is heard
+(DefineLink
+	(DefinedPredicate "Heard Loud Voice?")
+	(GreaterThan
+		(Get (State loud-sound (Variable "$x")))
+		(Number 0)))
+;;Return true if low sound is heard
+(DefineLink
+    (DefinedPredicate "very low sound?")
+    (NotLink (GreaterThan
+        (Get (State very-low-sound (Variable "$y")))
+        (Number 35))))
+;;Return true for normal conversation
+(DefineLink
+    (DefinedPredicate  "normal conversation?")
+    (NotLink (GreaterThan
+        (Get (State normal-conversation (Variable "$z")))
+        (Number 65))))
 ; --------------------------------------------------------
 ; Time-stamp-related stuff.
 
