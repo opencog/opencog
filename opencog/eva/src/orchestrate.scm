@@ -232,20 +232,25 @@
 			(GroundedPredicate "py: say_text")
 			(List (Variable "sentence")))
 	))
-;show happy emotion	
+
+; Show happy emotion.
+; XXX FIXME -- these have hard-coded length-of-time values in them.
+; Most other similar behaviors have randomized values, which are
+; controlled by bounds in the config files - cfg-sophia and cfg-eva.scm
 (DefineLink
     (DefinedPredicate "Quiet:happy")
- ;   (LambdaLink (Concept "happy")
-         (Evaluation
-            (GroundedPredicate "py: do_emotion")
-           (List (Concept "happy")(NumberNode 3) (NumberNode 0.5)))
-    )
- ;show amused emotion	
+    (Evaluation
+        (GroundedPredicate "py: do_emotion")
+        (List (Concept "happy") (NumberNode 3) (NumberNode 0.5))
+    ))
+
+; Show amused emotion
 (DefineLink
     (DefinedPredicate "Normal:amused")
-         (Evaluation
-            (GroundedPredicate "py: do_emotion")
-           (List (Concept "amused")(NumberNode 3) (NumberNode 0.5)))
-    )
+    (Evaluation
+        (GroundedPredicate "py: do_emotion")
+        (List (Concept "amused") (NumberNode 3) (NumberNode 0.5))
+    ))
+
 ; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent
