@@ -239,13 +239,13 @@
          (Evaluation
             (GroundedPredicate "py: do_emotion")
            (List (Concept "happy")(NumberNode 3) (NumberNode 0.5)))
-    ))
+    )
  ;show amused emotion	
 (DefineLink
     (DefinedPredicate "Normal:amused")
          (Evaluation
             (GroundedPredicate "py: do_emotion")
            (List (Concept "amused")(NumberNode 3) (NumberNode 0.5)))
-    ))
+    )
 ; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent
