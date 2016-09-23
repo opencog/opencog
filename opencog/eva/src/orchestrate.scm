@@ -223,4 +223,29 @@
 
 
 ; -------------------------------------------------------------
+; Say something. To test run,
+; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
+(DefineLink
+	(DefinedPredicate "Say")
+	(LambdaLink (Variable "sentence")
+		(Evaluation
+			(GroundedPredicate "py: say_text")
+			(List (Variable "sentence")))
+	))
+;show happy emotion	
+(DefineLink
+    (DefinedPredicate "Quiet:happy")
+ ;   (LambdaLink (Concept "happy")
+         (Evaluation
+            (GroundedPredicate "py: do_emotion")
+           (List (Concept "happy")(NumberNode 3) (NumberNode 0.5)))
+    ))
+ ;show amused emotion	
+(DefineLink
+    (DefinedPredicate "Normal:amused")
+         (Evaluation
+            (GroundedPredicate "py: do_emotion")
+           (List (Concept "amused")(NumberNode 3) (NumberNode 0.5)))
+    ))
+; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent
