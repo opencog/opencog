@@ -267,15 +267,10 @@ void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
  * Calculated as all atoms in the attentional focus (nodes and links)
  * excluding any hebbian links
  */
-HandleSeq ImportanceDiffusionBase::diffusionSourceVector(bool af_only)
+HandleSeq ImportanceDiffusionBase::diffusionSourceVector(void)
 {
-
     HandleSeq resultSet;
-
-    if(af_only)
-        _as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
-    else
-        _as->get_all_atoms(resultSet);
+    _as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
 
 #ifdef DEBUG
     std::cout << "Calculating diffusionSourceVector." << std::endl;

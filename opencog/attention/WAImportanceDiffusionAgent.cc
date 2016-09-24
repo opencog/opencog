@@ -25,6 +25,7 @@
  */
 
 #include <opencog/util/Config.h>
+#include <opencog/attention/atom_types.h>
 
 #include "WAImportanceDiffusionAgent.h"
 
@@ -37,6 +38,10 @@ WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
     _tournamentSize = config().get_int("ECAN_DIFFUSION_TOURNAMENT_SIZE", 5);
 
     set_sleep_time(300);
+}
+
+WAImportanceDiffusionAgent::~WAImportanceDiffusionAgent()
+{
 }
 
 void WAImportanceDiffusionAgent::run()
@@ -77,12 +82,12 @@ Handle WAImportanceDiffusionAgent::tournamentSelect(HandleSeq population){
  */
 void WAImportanceDiffusionAgent::spreadImportance()
 {
-    HandleSeq diffusionSourceVector = ImportanceDiffusionBase::diffusionSourceVector(false);
+    HandleSeq sourceVec = diffusionSourceVector();
 
-    if (diffusionSourceVector.size() == 0)
+    if (sourceVec.size() == 0)
         return;
 
-    Handle target = tournamentSelect(diffusionSourceVector);
+    Handle target = tournamentSelect(sourceVec);
 
     // Check the decision function to determine if spreading will occur
     diffuseAtom(target);
@@ -91,3 +96,74 @@ void WAImportanceDiffusionAgent::spreadImportance()
     // stack
     processDiffusionStack();
 }
+
+/*
+ * Returns a vector of atom handles that will diffuse STI
+ *
+ * Calculated as all atoms in the attentional focus (nodes and links)
+ * excluding any hebbian links
+ */
+HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
+{
+    HandleSeq  sources;
+    
+    AttentionValue::sti_t AFBoundarySTI = _as->get_attentional_focus_boundary();
+    AttentionValue::sti_t lowerSTI  =   AFBoundarySTI - 15;
+
+    std::default_random_engine generator;
+    // randomly select a bin 
+    std::uniform_int_distribution<AttentionValue::sti_t> dist(lowerSTI,AFBoundarySTI);
+    auto sti = dist(generator);
+    _as->get_handles_by_AV(std::back_inserter(sources),sti,sti+5);
+    
+    if(sources.size() > 100){ sources.resize(100); } //Resize to 100 elements.
+
+#ifdef DEBUG
+    std::cout << "Calculating diffusionSourceVector." << std::endl;
+    std::cout << "AF Size before removing hebbian links: " <<
+        sources.size() << "\n";
+#endif
+
+    // Remove the hebbian links
+    auto it_end =
+        std::remove_if(sources.begin(), sources.end(),
+                [=](const Handle& h)
+                {
+                Type type = h->getType();
+
+#ifdef DEBUG
+                std::cout << "Checking atom of type: " <<
+                classserver().getTypeName(type) << "\n";
+#endif
+
+                if (type == ASYMMETRIC_HEBBIAN_LINK ||
+                    type == HEBBIAN_LINK ||
+                    type == SYMMETRIC_HEBBIAN_LINK ||
+                    type == INVERSE_HEBBIAN_LINK ||
+                    type == SYMMETRIC_INVERSE_HEBBIAN_LINK)
+                {
+#ifdef DEBUG
+                std::cout << "Atom is hebbian" << "\n";
+#endif
+                return true;
+                }
+                else
+                {
+#ifdef DEBUG
+                    std::cout << "Atom is not hebbian" << "\n";
+#endif
+                    return false;
+                }
+                });
+    sources.erase(it_end, sources.end());
+
+#ifdef DEBUG
+    std::cout << "AF Size after removing hebbian links: " <<
+        sources.size() << "\n";
+#endif
+
+    return sources;
+}
+
+
+
