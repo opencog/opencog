@@ -59,7 +59,8 @@ private:
 
 public:
 
-    PyEvalUTest() {
+    PyEvalUTest()
+    {
         logger().set_level(Logger::DEBUG);
         logger().set_print_to_stdout_flag(true);
 
@@ -67,16 +68,16 @@ public:
         config().set("SERVER_CYCLE_DURATION", "10");  // in milliseconds
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
 
+        // This path is relative to the build diretory, not the install dir...
         config().set("MODULES", "opencog/cogserver/shell/libpy-shell.so");
         cogserver.loadModules();
     }
 
-    ~PyEvalUTest() {
-        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
+    ~PyEvalUTest()
+    {
 	    // erase the log file if no assertions failed
 	    if (!CxxTest::TestTracker::tracker().suiteFailed())
             std::remove(logger().get_filename().c_str());
-        cogserver.unloadModule("opencog::py-shell");
     }
 
     void setUp() {
@@ -85,7 +86,8 @@ public:
     void tearDown() {
     }
 
-    void testPyEvalScript() {
+    void testPyEvalScript()
+    {
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
 
         //  Create the py-eval request.
