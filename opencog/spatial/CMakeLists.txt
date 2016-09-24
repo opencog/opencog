@@ -136,6 +136,11 @@ TARGET_LINK_LIBRARIES(astartest
  #	)
  #ENDIF(HAVE_SPATIAL_TOOLS)
  #
+
+INSTALL (TARGETS SpaceMap
+	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+)
+
 INSTALL (FILES
 	Agent.h
 	AStarController.h
@@ -161,6 +166,7 @@ INSTALL (FILES
 	VisibilityMap.h
 	DESTINATION "include/${PROJECT_NAME}/spatial"
 )
+
 INSTALL (FILES
 	math/BoundingBox.h
 	math/Dimension2.h

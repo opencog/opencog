@@ -58,7 +58,8 @@ private:
 
 public:
 
-    PythonModuleUTest() {
+    PythonModuleUTest()
+   {
         logger().set_level(Logger::DEBUG);
         logger().set_print_to_stdout_flag(true);
 
@@ -70,12 +71,11 @@ public:
         cogserver.loadModules();
     }
 
-    ~PythonModuleUTest() {
-        TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
+    ~PythonModuleUTest()
+    {
 	    // erase the log file if no assertions failed
 	    if (!CxxTest::TestTracker::tracker().suiteFailed())
             std::remove(logger().get_filename().c_str());
-        cogserver.unloadModule("opencog::PythonModule");
     }
 
     void setUp() {
@@ -84,7 +84,8 @@ public:
     void tearDown() {
     }
 
-    void testLoadExceptionAgent() {
+    void testLoadExceptionAgent()
+    {
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
         // test loading a module
         Request* loadpyRequest = cogserver.createRequest("loadpy");
@@ -96,10 +97,12 @@ public:
         // process request
         cogserver.runLoopStep();
         // ensure that the exception is reported
+        printf("Got >>>%s<<<\n", srr->result.c_str());
         TS_ASSERT_DIFFERS(srr->result.find("TypeError"), std::string::npos);
     }
 
-    void testAgentWithRunException() {
+    void testAgentWithRunException()
+    {
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
 
         // test loading a module
@@ -121,7 +124,8 @@ public:
         TS_ASSERT_THROWS_ANYTHING(pythonTestAgent->run());
     }
 
-    void testPreloadAgent () {
+    void testPreloadAgent ()
+    {
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
         // agent is actually loaded from python module in test constructor
         // just check it actually can be created though
@@ -135,7 +139,8 @@ public:
         TS_ASSERT(pythonTestAgent != NULL);
     }
 
-    void testProcessAgents() {
+    void testProcessAgents()
+    {
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance));
 
         // test loading a module
@@ -146,7 +151,7 @@ public:
         cogserver.runLoopStep();
 
         // create agent
-        AgentPtr pythonTestAgent = cogserver.createAgent("test_agent.TestAgent",true);
+        AgentPtr pythonTestAgent = cogserver.createAgent("test_agent.TestAgent", true);
         TS_ASSERT(pythonTestAgent != NULL);
 
         cogserver.runLoopStep();
@@ -177,7 +182,6 @@ public:
                 // and one handle in the set
                 TS_ASSERT(act->utilizedHandleSets[0]->getSize() == 1);
             }
-            */
+        */
     }
-
 };
