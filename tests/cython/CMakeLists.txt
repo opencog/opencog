@@ -27,8 +27,6 @@ ENDIF (HAVE_SERVER)
 # cannot be tested unless the cogserver is actually being built!
 IF (HAVE_SERVER)
 	ADD_CXXTEST(PyEvalUTest)
-	CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/cython/pyeval.conf
-		${PROJECT_BINARY_DIR}/tests/cython/pyeval.conf)
 
 	TARGET_LINK_LIBRARIES(PyEvalUTest
 		py-shell
