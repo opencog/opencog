@@ -1,5 +1,6 @@
 __author__ = 'Cosmo Harrigan'
 
+import socket
 import opencog.cogserver
 from web.api.apimain import RESTAPI
 from threading import Thread
@@ -42,4 +43,14 @@ class Start(opencog.cogserver.Request):
 
     def invoke(self):
         self.api = RESTAPI(self.atomspace)
-        self.api.run(host=IP_ADDRESS, port=PORT)
+
+        # OK, so if the remote end closes the pipe, we get a SIGPIPE
+        # error, and the server dies.  So just restart the server in
+        # that situation. See bug opencog/ros-behavior-scripting/issues/108
+        try_again = True
+        while try_again:
+            try_again = False
+            try:
+                self.api.run(host=IP_ADDRESS, port=PORT)
+            except socket.error, e:
+                try_again = True
