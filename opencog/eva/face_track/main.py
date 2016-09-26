@@ -21,11 +21,19 @@
 
 
 import rospy
-import time
 from face_track import FaceTrack
 
 print "Start face-tracking node"
 ft = FaceTrack()
+
+# Check if sound-localization is being used
+# TODO: move audio & sound related logic to sound directory.
+try:
+    ft.sl_matrix
+    print "Sound localization is enabled"
+except AttributeError:
+    print "Sound localization is disabled"
+
 ft.do_look_at_actions()
 rospy.spin()
 print "Exit face-tracking node"
