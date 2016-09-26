@@ -166,14 +166,10 @@ class FaceTrack:
 		# Control Eeys and face by default
 		#self.control_mode = 255
 
-		# Name of robot
-		self.robot_name = rospy.get_param("/robot_name")
-
 		# Sound localization
-		parameter_name = self.robot_name + "/" + \
-							"sound_localization/mapping_matrix"
+		parameter_name = "sound_localization/mapping_matrix"
 		if rospy.has_param(parameter_name):
-			self.sl_matrix = rospy.has_param(parameter_name)
+			self.sl_matrix = rospy.get_param(parameter_name)
 
 	# ---------------------------------------------------------------
 	# Public API. Use these to get things done.
