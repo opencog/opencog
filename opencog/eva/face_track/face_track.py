@@ -165,6 +165,12 @@ class FaceTrack:
 			self.behavior_control_callback)
 		# Control Eeys and face by default
 		#self.control_mode = 255
+
+		# Sound localization
+		parameter_name = "sound_localization/mapping_matrix"
+		if rospy.has_param(parameter_name):
+			self.sl_matrix = rospy.get_param(parameter_name)
+
 	# ---------------------------------------------------------------
 	# Public API. Use these to get things done.
 
@@ -256,13 +262,9 @@ class FaceTrack:
 		  0          0          0          1
 		'''
 
-		cmat = [[0.943789,0.129327,0.304204,0.00736024],
-				[-0.131484,0.991228,-0.0134787,0.00895614],
-				[-0.303278,-0.0272767,0.952513,0.0272001],
-				[0, 0, 0, 1]]
 		for i in range(0,3):
 			for j in range(0,3):
-				r[i][0]+=cmat[i][j]*vs[j][0]
+				r[i][0]+=self.sl_matrix[i][j]*vs[j][0]
 		xc=r[0][0]
 		yc=r[1][0]
 		zc=r[2][0]
