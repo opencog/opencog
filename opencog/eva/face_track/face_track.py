@@ -165,6 +165,16 @@ class FaceTrack:
 			self.behavior_control_callback)
 		# Control Eeys and face by default
 		#self.control_mode = 255
+
+		# Name of robot
+		self.robot_name = rospy.get_param("/robot_name")
+
+		# Sound localization
+		parameter_name = self.robot_name + "/" + \
+							"sound_localization/mapping_matrix"
+		if rospy.has_param(parameter_name):
+			self.sl_matrix = rospy.has_param(parameter_name)
+
 	# ---------------------------------------------------------------
 	# Public API. Use these to get things done.
 
@@ -256,17 +266,13 @@ class FaceTrack:
 		  0          0          0          1
 		'''
 
-		robot_name = rospy.get_param("/robot_name")
-		parameter_name = robot_name + "/" + "sound_localization/mapping_matrix"
-		if rospy.has_param(parameter_name):
-			cmat = rospy.has_param(parameter_name)
-			for i in range(0,3):
-				for j in range(0,3):
-					r[i][0]+=cmat[i][j]*vs[j][0]
-			xc=r[0][0]
-			yc=r[1][0]
-			zc=r[2][0]
-			self.atomo.save_snd1(xc,yc,zc)
+		for i in range(0,3):
+			for j in range(0,3):
+				r[i][0]+=self.sl_matrix[i][j]*vs[j][0]
+		xc=r[0][0]
+		yc=r[1][0]
+		zc=r[2][0]
+		self.atomo.save_snd1(xc,yc,zc)
 
 	def add_face(self, faceid):
 		if faceid in self.visible_faces:
