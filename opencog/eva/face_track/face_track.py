@@ -130,8 +130,6 @@ class FaceTrack:
 		rospy.Subscriber(self.TOPIC_GLANCE_FACE, Int32, self.glance_at_cb)
 		rospy.Subscriber(self.TOPIC_LOOKAT_FACE, Int32, self.look_at_cb)
 		rospy.Subscriber(self.TOPIC_GAZEAT_FACE, Int32, self.gaze_at_cb)
-		rospy.Subscriber("/manyears/source_pose",PoseStamped, \
-			self.snd1_cb)
 
 		# Published blender_api topics
 		self.TOPIC_FACE_TARGET = "/blender_api/set_face_target"
@@ -170,6 +168,8 @@ class FaceTrack:
 		parameter_name = "sound_localization/mapping_matrix"
 		if rospy.has_param(parameter_name):
 			self.sl_matrix = rospy.get_param(parameter_name)
+			rospy.Subscriber("/manyears/source_pose",PoseStamped, \
+				self.snd1_cb)
 
 	# ---------------------------------------------------------------
 	# Public API. Use these to get things done.
