@@ -59,6 +59,30 @@
 (define-public soma-awake (ConceptNode "Awake"))
 (define-public soma-bored (ConceptNode "Bored"))
 
+;;Check if someone new spoke something
+(DefineLink
+	(DefinedPredicate "Did Someone New Speak?")
+	(SequentialAnd
+		(NotLink
+			(Equal
+				(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+					(StateLink (ConceptNode "last person who spoke") (VariableNode "$fid"))
+				)
+				(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+					(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
+				)
+			)
+		)
+		(True
+		(PutLink
+			(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
+			(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+				(StateLink (ConceptNode "last person who spoke") (VariableNode "$fid"))
+			)
+		))
+	)
+)
+
 ;; Assume Eva is sleeping at first
 (StateLink soma-state soma-sleeping)
 
