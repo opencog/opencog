@@ -206,13 +206,7 @@
 (define (map-sound xx yy zz)
 	(let* ((fid (snd-nearest-face xx yy zz)))
 		(if (> fid 0)
-			;;;;(begin
-			;;request eye contact
-			;;(StateLink request-eye-contact-state (NumberNode fid))
-			;;generate info
 			(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
-			;;;;(if (equal? fid new-person-spoke) #t (request-attention fid))
-			;;;;)
 		)
 	)
 )
