@@ -5,6 +5,7 @@
 (use-modules (opencog python))
 
 (StateLink (ConceptNode "last person who spoke") (NumberNode "0"))
+(StateLink (ConceptNode "previous person who spoke") (NumberNode "0"))
 (define new-person-spoke 0)
 ; --------------------------------------------------------------------
 ; For recording facial coordinates, create octomap with 15hz,
@@ -205,13 +206,13 @@
 (define (map-sound xx yy zz)
 	(let* ((fid (snd-nearest-face xx yy zz)))
 		(if (> fid 0)
-			(begin
+			;;;;(begin
 			;;request eye contact
 			;;(StateLink request-eye-contact-state (NumberNode fid))
 			;;generate info
 			(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
-			(if (equal? fid new-person-spoke) #t (request-attention fid))
-			)
+			;;;;(if (equal? fid new-person-spoke) #t (request-attention fid))
+			;;;;)
 		)
 	)
 )
