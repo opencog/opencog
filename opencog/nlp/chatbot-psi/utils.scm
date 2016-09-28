@@ -38,7 +38,7 @@
 
 ;-------------------------------------------------------------------------------
 
-(define do-sentiment-analysis #f)
-(define-public (set-sentiment-analysis val)
-    (set! do-sentiment-analysis val)
+(define sentiment-analysis #f)
+(define-public (do-sentiment-analysis val)
+    (set! sentiment-analysis val)
 )
