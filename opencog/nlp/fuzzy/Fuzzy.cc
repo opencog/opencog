@@ -141,7 +141,7 @@ void Fuzzy::calculate_tfidf(const HandleSeq& words)
 
     for (const Handle& w : words)
     {
-        if (tfidf_words.count(w.value())) continue;
+        if (tfidf_words.count(w)) continue;
 
         // No. of times this word exists in the sentence
         int word_cnt = std::count(words.begin(), words.end(), w);
@@ -163,7 +163,7 @@ void Fuzzy::calculate_tfidf(const HandleSeq& words)
         double idf = log2((double) num_of_sents / num_sents_contains_it);
         double tfidf = tf * idf;
 
-        tfidf_words[w.value()] = tfidf;
+        tfidf_words[w] = tfidf;
 
         if (tfidf < min) min = tfidf;
         if (tfidf > max) max = tfidf;
@@ -222,9 +222,9 @@ bool Fuzzy::accept_starter(const Handle& hp)
 bool Fuzzy::try_match(const Handle& soln)
 {
     AttentionValue::sti_t afboundary = as->get_attentional_focus_boundary();
-    
-    if(_af_only and  (soln->getSTI() < afboundary))  return false;
-    
+
+    if (_af_only and (soln->getSTI() < afboundary)) return false;
+
     if (target == soln) return false;
 
     // Keep exploring if this is not the type of atom that we want,
@@ -362,7 +362,7 @@ void Fuzzy::compare(HandleSeq& hs1, HandleSeq& hs2,
  */
 double Fuzzy::get_score(const Handle& h1, const Handle& h2, bool target_at_first)
 {
-    std::pair<UUID, UUID> p(h1.value(), h2.value());
+    std::pair<Handle, Handle> p(h1, h2);
 
     if (scores.find(p) != scores.end())
         return scores.at(p);
@@ -408,7 +408,7 @@ double Fuzzy::get_score(const Handle& h1, const Handle& h2, bool target_at_first
         // but they are connected by a SimilarityLink
         const Handle& tn = (target_at_first)? h1 : h2;
 
-        score += tfidf_words[tn.value()] * RARENESS_WEIGHT;
+        score += tfidf_words[tn] * RARENESS_WEIGHT;
 
         size_t idx = std::find(target_words.begin(), target_words.end(), tn) - target_words.begin();
         Handle& winst = target_winsts[idx];

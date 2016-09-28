@@ -76,8 +76,8 @@ class Fuzzy :
         OrderedHandleSet solns_seen;
 
         // Some caches
-        std::map<UUID, double> tfidf_words;
-        std::map<std::pair<UUID, UUID>, double> scores;
+        std::map<Handle, double> tfidf_words;
+        std::map<std::pair<Handle, Handle>, double> scores;
 
         void calculate_tfidf(const HandleSeq&);
 
