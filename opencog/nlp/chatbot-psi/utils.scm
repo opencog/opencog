@@ -35,3 +35,10 @@
             (AtTime (Variable "$t") (get-input-sent-node)
                 (TimeDomain "Dialogue-System"))))))
 )
+
+;-------------------------------------------------------------------------------
+
+(define do-sentiment-analysis #f)
+(define-public (set-sentiment-analysis val)
+    (set! do-sentiment-analysis val)
+)
