@@ -77,13 +77,11 @@ class Fuzzy :
 
         // Some caches
         std::map<Handle, double> tfidf_words;
-        std::map<std::pair<Handle, Handle>, double> scores;
+        std::map<Handle, double> scores;
 
         void calculate_tfidf(const HandleSeq&);
 
-        void compare(HandleSeq&, HandleSeq&, double, double&, bool);
-
-        double get_score(const Handle&, const Handle&, bool);
+        double get_score(const Handle&);
 };
 
 }
