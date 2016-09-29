@@ -73,8 +73,7 @@ static void get_all_words(const Handle& h, HandleSeq& words, HandleSeq& winsts)
     {
         for (const Handle& wi : get_target_neighbors(h, REFERENCE_LINK))
         {
-            if (wi->isNode() and h->getName() == wi->getName() and
-                    wi->getType() == WORD_INSTANCE_NODE)
+            if (wi->getType() == WORD_INSTANCE_NODE and h->getName() == wi->getName())
             {
                 for (const Handle& w : get_target_neighbors(wi, LEMMA_LINK))
                 {
@@ -200,10 +199,13 @@ void Fuzzy::start_search(const Handle& trg)
  */
 bool Fuzzy::accept_starter(const Handle& hp)
 {
-    if (hp->isLink()) return false;
+    if (hp->isLink())
+        return false;
 
-    return (hp->getType() == CONCEPT_NODE or hp->getType() == PREDICATE_NODE)
-            and (hp->getName().find("@") == std::string::npos);
+    Type t = hp->getType();
+
+    return (t == CONCEPT_NODE or t == PREDICATE_NODE) and
+           hp->getName().find("@") == std::string::npos;
 }
 
 /**
@@ -221,11 +223,11 @@ bool Fuzzy::accept_starter(const Handle& hp)
  */
 bool Fuzzy::try_match(const Handle& soln)
 {
-    AttentionValue::sti_t afboundary = as->get_attentional_focus_boundary();
+    if (_af_only and soln->getSTI() < as->get_attentional_focus_boundary())
+        return false;
 
-    if (_af_only and (soln->getSTI() < afboundary)) return false;
-
-    if (target == soln) return false;
+    if (target == soln)
+        return false;
 
     // Keep exploring if this is not the type of atom that we want,
     // until it reaches its root
@@ -320,7 +322,7 @@ bool Fuzzy::try_match(const Handle& soln)
  *
  * @param hs1, hs2   The two trees being compared
  * @param score      The score of the current combination
- * @param h_score  The highest score among the explored combinations
+ * @param h_score    The highest score among the explored combinations
  * @param taf        A flag indicating which tree is from the target
  */
 void Fuzzy::compare(HandleSeq& hs1, HandleSeq& hs2,
