@@ -57,33 +57,22 @@ Fuzzy::~Fuzzy()
 }
 
 /**
- * Examine a tree and get all the words from it.
+ * Examine a tree and get all the word instance nodes associate with its nodes.
  *
- * Words are the ones that are connected to their WordInstanceNodes by
- * ReferenceLinks. Those WordInstanceNodes should also connect to
- * their lemmas by LemmaLinks.
- *
- * @param h       The tree being examined
- * @param words   A list of WordNodes
- * @param winsts  A list of WordInstanceNodes
+ * @param h           The tree being examined
+ * @param word_insts  A list of WordInstanceNodes
  */
-static void get_all_words(const Handle& h, HandleSeq& words, HandleSeq& winsts)
+static void get_all_word_insts(const Handle& h, HandleSeq& wi)
 {
     if (h->isNode())
     {
-        for (const Handle& wi : get_target_neighbors(h, REFERENCE_LINK))
+        for (const Handle& w : get_target_neighbors(h, REFERENCE_LINK))
         {
-            if (wi->getType() == WORD_INSTANCE_NODE and h->getName() == wi->getName())
+            if (w->getType() == WORD_INSTANCE_NODE and
+                h->getName() == w->getName() and
+                std::find(wi.begin(), wi.end(), w) == wi.end())
             {
-                for (const Handle& w : get_target_neighbors(wi, LEMMA_LINK))
-                {
-                    if (w->getType() == WORD_NODE and
-                        std::find(winsts.begin(), winsts.end(), wi) == winsts.end())
-                    {
-                        winsts.emplace_back(wi);
-                        words.emplace_back(w);
-                    }
-                }
+                wi.emplace_back(w);
             }
         }
 
@@ -91,7 +80,32 @@ static void get_all_words(const Handle& h, HandleSeq& words, HandleSeq& winsts)
     }
 
     for (const Handle& o : h->getOutgoingSet())
-        get_all_words(o, words, winsts);
+        get_all_word_insts(o, wi);
+}
+
+/**
+ * Get the WordNode associates with the WordInstanceNode via a LemmaLink,
+ * assuming that it's in this form:
+ *
+ * LemmaLink
+ *   WordInstanceNode "like@123"
+ *   WordNode "like"
+ *
+ * @param h  The WordInstanceNode
+ */
+static Handle get_word(const Handle& h)
+{
+    return get_target_neighbors(h, LEMMA_LINK)[0];
+}
+
+/**
+ * Compare the WordNode associates with the WordInstanceNode
+ *
+ * @param h1, h2  Handles of the nodes being compared
+ */
+static bool compare_word(const Handle& h1, const Handle& h2)
+{
+    return get_word(h1) < get_word(h2);
 }
 
 /**
@@ -104,9 +118,11 @@ double Fuzzy::fuzzy_compare(const Handle& h1, const Handle& h2)
 {
     start_search(h1);
 
-    HandleSeq h2_words;
-    HandleSeq h2_winsts;
-    get_all_words(h2, h2_words, h2_winsts);
+    HandleSeq h2_word_insts;
+    get_all_word_insts(h2, h2_word_insts);
+
+    // TODO
+    // std::sort(h2_word_insts.begin(), h2_word_insts.end());
 
     double score = 0;
 
@@ -129,32 +145,34 @@ double Fuzzy::fuzzy_compare(const Handle& h1, const Handle& h2)
  *
  * @param words  A list of words (WordNode) of a sentence
  */
-void Fuzzy::calculate_tfidf(const HandleSeq& words)
+void Fuzzy::calculate_tfidf(const HandleSeq& word_insts)
 {
     double min = 0;
     double max = 0;
 
     // No. of words in the sentence
-    int num_of_words = words.size();
+    int num_of_words = word_insts.size();
 
     // Total no. of sentences in the AtomSpace
     size_t num_of_sents = (size_t) as->get_num_atoms_of_type(SENTENCE_NODE);
 
-    for (const Handle& w : words)
+    for (const Handle& wi : word_insts)
     {
-        if (tfidf_words.count(w)) continue;
+        if (tfidf_word_insts.count(wi)) continue;
+
+        auto word_match = [&](const Handle& h)
+        {
+            return get_word(wi) == get_word(h);
+        };
 
         // No. of times this word exists in the sentence
-        int word_cnt = std::count(words.begin(), words.end(), w);
+        int word_cnt = std::count_if(word_insts.begin(), word_insts.end(), word_match);
 
         OrderedHandleSet hs;
-        for (const Handle& l : get_source_neighbors(w, LEMMA_LINK))
+        for (const Handle& p : get_target_neighbors(wi, WORD_INSTANCE_LINK))
         {
-            for (const Handle& p : get_target_neighbors(l, WORD_INSTANCE_LINK))
-            {
-                const HandleSeq& sent_nodes = get_target_neighbors(p, PARSE_LINK);
-                hs.insert(sent_nodes.begin(), sent_nodes.end());
-            }
+            const HandleSeq& sent_nodes = get_target_neighbors(p, PARSE_LINK);
+            hs.insert(sent_nodes.begin(), sent_nodes.end());
         }
 
         // No. of sentences that contain this word
@@ -164,7 +182,7 @@ void Fuzzy::calculate_tfidf(const HandleSeq& words)
         double idf = log2((double) num_of_sents / num_sents_contains_it);
         double tfidf = tf * idf;
 
-        tfidf_words[w] = tfidf;
+        tfidf_word_insts[wi] = tfidf;
 
         if (tfidf < min) min = tfidf;
         if (tfidf > max) max = tfidf;
@@ -172,7 +190,7 @@ void Fuzzy::calculate_tfidf(const HandleSeq& words)
 
     // Normalize the values
     if (min != max)
-        for (auto i = tfidf_words.begin(); i != tfidf_words.end(); i++)
+        for (auto i = tfidf_word_insts.begin(); i != tfidf_word_insts.end(); i++)
             i->second = (i->second - min) / (max - min);
 }
 
@@ -184,9 +202,9 @@ void Fuzzy::calculate_tfidf(const HandleSeq& words)
 void Fuzzy::start_search(const Handle& trg)
 {
     target = trg;
-    get_all_words(target, target_words, target_winsts);
-    std::sort(target_words.begin(), target_words.end());
-    calculate_tfidf(target_words);
+    get_all_word_insts(target, target_word_insts);
+    std::sort(target_word_insts.begin(), target_word_insts.end(), compare_word);
+    calculate_tfidf(target_word_insts);
 }
 
 /**
@@ -247,19 +265,19 @@ bool Fuzzy::try_match(const Handle& soln)
         if (is_atom_in_tree(soln, excl))
             return false;
 
-    HandleSeq soln_words;
-    HandleSeq soln_winsts;
-    get_all_words(soln, soln_words, soln_winsts);
-    std::sort(soln_words.begin(), soln_words.end());
-
-    // Reject if it's identical to the input
-    if (soln_words == target_words)
-        return false;
+    HandleSeq soln_word_insts;
+    get_all_word_insts(soln, soln_word_insts);
+    std::sort(soln_word_insts.begin(), soln_word_insts.end(), compare_word);
 
     HandleSeq common_words;
-    std::set_intersection(target_words.begin(), target_words.end(),
-                          soln_words.begin(), soln_words.end(),
-                          std::back_inserter(common_words));
+    std::set_intersection(target_word_insts.begin(), target_word_insts.end(),
+                          soln_word_insts.begin(), soln_word_insts.end(),
+                          std::back_inserter(common_words), compare_word);
+
+    // Reject if it's identical to the input
+    if (common_words.size() == target_word_insts.size() and
+        common_words.size() == soln_word_insts.size())
+        return false;
 
     // Initial value
     double score = 0;
@@ -267,7 +285,7 @@ bool Fuzzy::try_match(const Handle& soln)
     for (const Handle& c : common_words)
         score += get_score(c);
 
-    score /= std::max(target_words.size(), soln_words.size());
+    score /= std::max(target_word_insts.size(), soln_word_insts.size());
 
     // Accept and store the solution
     if (score > 0)
@@ -279,7 +297,7 @@ bool Fuzzy::try_match(const Handle& soln)
 /**
  * Get the score of a node that exists in both the target and potential solution
  *
- * @param h  The node for getting the score
+ * @param h  The node for getting the score, should be a WordInstanceNode
  * @return   The score of the node
  */
 double Fuzzy::get_score(const Handle& h)
@@ -290,11 +308,9 @@ double Fuzzy::get_score(const Handle& h)
     // The default value for a node
     double score = NODE_WEIGHT;
 
-    score += tfidf_words[h] * RARENESS_WEIGHT;
+    score += tfidf_word_insts[h] * RARENESS_WEIGHT;
 
-    size_t idx = std::find(target_words.begin(), target_words.end(), h) - target_words.begin();
-    Handle& winst = target_winsts[idx];
-    HandleSeq evals = get_predicates(winst, DEFINED_LINGUISTIC_RELATIONSHIP_NODE);
+    HandleSeq evals = get_predicates(h, DEFINED_LINGUISTIC_RELATIONSHIP_NODE);
 
     for (const Handle& el : evals)
     {

@@ -68,15 +68,14 @@ class Fuzzy :
         HandleSeq excl_list;
 
         // The target (input)
-        HandleSeq target_words;
-        HandleSeq target_winsts;
+        HandleSeq target_word_insts;
 
         // The solutions
         RankedHandleSeq solns;
         OrderedHandleSet solns_seen;
 
         // Some caches
-        std::map<Handle, double> tfidf_words;
+        std::map<Handle, double> tfidf_word_insts;
         std::map<Handle, double> scores;
 
         void calculate_tfidf(const HandleSeq&);
