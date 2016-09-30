@@ -118,22 +118,22 @@ double Fuzzy::fuzzy_compare(const Handle& h1, const Handle& h2)
 {
     start_search(h1);
 
-    HandleSeq h2_word_insts;
-    get_all_word_insts(h2, h2_word_insts);
+    HandleSeq soln_word_insts;
+    get_all_word_insts(h2, soln_word_insts);
+    std::sort(soln_word_insts.begin(), soln_word_insts.end(), compare_word);
 
-    // TODO
-    // std::sort(h2_word_insts.begin(), h2_word_insts.end());
+    HandleSeq common_words;
+    std::set_intersection(target_word_insts.begin(), target_word_insts.end(),
+                          soln_word_insts.begin(), soln_word_insts.end(),
+                          std::back_inserter(common_words), compare_word);
 
+    // Initial value
     double score = 0;
 
-    /* TODO
-    if (target_words.size() > h2_words.size())
-        compare(h2_words, target_words, 0, score, false);
-    else
-        compare(target_words, h2_words, 0, score, true);
+    for (const Handle& c : common_words)
+        score += get_score(c);
 
-    score /= std::max(target_words.size(), h2_words.size());
-    */
+    score /= std::max(target_word_insts.size(), soln_word_insts.size());
 
     return score;
 }
