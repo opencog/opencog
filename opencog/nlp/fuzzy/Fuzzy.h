@@ -75,11 +75,12 @@ class Fuzzy :
         OrderedHandleSet solns_seen;
 
         // Some caches
-        std::map<Handle, double> tfidf_word_insts;
+        std::map<Handle, double> tfidf_weights;
+        std::map<Handle, double> ling_rel_weights;
         std::map<Handle, double> scores;
 
         void calculate_tfidf(const HandleSeq&);
-
+        void get_ling_rel(const HandleSeq&);
         double get_score(const Handle&);
 };
 

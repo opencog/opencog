@@ -158,7 +158,7 @@ void Fuzzy::calculate_tfidf(const HandleSeq& word_insts)
 
     for (const Handle& wi : word_insts)
     {
-        if (tfidf_word_insts.count(wi)) continue;
+        if (tfidf_weights.count(wi)) continue;
 
         auto word_match = [&](const Handle& h)
         {
@@ -182,7 +182,7 @@ void Fuzzy::calculate_tfidf(const HandleSeq& word_insts)
         double idf = log2((double) num_of_sents / num_sents_contains_it);
         double tfidf = tf * idf;
 
-        tfidf_word_insts[wi] = tfidf;
+        tfidf_weights[wi] = tfidf;
 
         if (tfidf < min) min = tfidf;
         if (tfidf > max) max = tfidf;
@@ -190,8 +190,31 @@ void Fuzzy::calculate_tfidf(const HandleSeq& word_insts)
 
     // Normalize the values
     if (min != max)
-        for (auto i = tfidf_word_insts.begin(); i != tfidf_word_insts.end(); i++)
+        for (auto i = tfidf_weights.begin(); i != tfidf_weights.end(); i++)
             i->second = (i->second - min) / (max - min);
+}
+
+void Fuzzy::get_ling_rel(const HandleSeq& hs)
+{
+    for (const Handle& h : hs)
+    {
+        HandleSeq evals = get_predicates(h, DEFINED_LINGUISTIC_RELATIONSHIP_NODE);
+
+        for (const Handle& el : evals)
+        {
+            // Extract the relation
+            std::string ling_rel = (el->getOutgoingSet()[0])->getName();
+
+            // Assign weights accordingly, subject to change
+            if (ling_rel.compare("_subj") == 0 or
+                ling_rel.compare("_obj") == 0 or
+                ling_rel.compare("_predadj") == 0)
+            {
+                ling_rel_weights[h] = LINGUISTIC_RELATION_WEIGHT;
+                break;
+            }
+        }
+    }
 }
 
 /**
@@ -203,8 +226,9 @@ void Fuzzy::start_search(const Handle& trg)
 {
     target = trg;
     get_all_word_insts(target, target_word_insts);
-    std::sort(target_word_insts.begin(), target_word_insts.end(), compare_word);
     calculate_tfidf(target_word_insts);
+    get_ling_rel(target_word_insts);
+    std::sort(target_word_insts.begin(), target_word_insts.end(), compare_word);
 }
 
 /**
@@ -307,25 +331,8 @@ double Fuzzy::get_score(const Handle& h)
 
     // The default value for a node
     double score = NODE_WEIGHT;
-
-    score += tfidf_word_insts[h] * RARENESS_WEIGHT;
-
-    HandleSeq evals = get_predicates(h, DEFINED_LINGUISTIC_RELATIONSHIP_NODE);
-
-    for (const Handle& el : evals)
-    {
-        // Extract the relation
-        std::string ling_rel = (el->getOutgoingSet()[0])->getName();
-
-        // Assign weights accordingly, subject to change
-        if (ling_rel.compare("_subj") == 0 or
-            ling_rel.compare("_obj") == 0 or
-            ling_rel.compare("_predadj") == 0)
-        {
-            score += LINGUISTIC_RELATION_WEIGHT;
-            break;
-        }
-    }
+    score += tfidf_weights[h] * RARENESS_WEIGHT;
+    score += ling_rel_weights[h];
 
     scores[h] = score;
 
