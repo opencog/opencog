@@ -46,6 +46,7 @@ Fuzzy::Fuzzy(AtomSpace* a, Type tt, const HandleSeq& ll, bool af_only) :
     _af_only(af_only),
     excl_list(ll)
 {
+// TODO: Fix compilation warning
 }
 
 Fuzzy::Fuzzy(AtomSpace* a) : as(a)
@@ -147,7 +148,7 @@ double Fuzzy::fuzzy_compare(const Handle& h1, const Handle& h2)
  */
 void Fuzzy::calculate_tfidf(const HandleSeq& word_insts)
 {
-    double min = 0;
+    double min = std::numeric_limits<double>::max();
     double max = 0;
 
     // No. of words in the sentence
@@ -160,19 +161,24 @@ void Fuzzy::calculate_tfidf(const HandleSeq& word_insts)
     {
         if (tfidf_weights.count(wi)) continue;
 
+        Handle w = get_word(wi);
+
         auto word_match = [&](const Handle& h)
         {
-            return get_word(wi) == get_word(h);
+            return w == get_word(h);
         };
 
         // No. of times this word exists in the sentence
         int word_cnt = std::count_if(word_insts.begin(), word_insts.end(), word_match);
 
         OrderedHandleSet hs;
-        for (const Handle& p : get_target_neighbors(wi, WORD_INSTANCE_LINK))
+        for (const Handle& l : get_source_neighbors(w, LEMMA_LINK))
         {
-            const HandleSeq& sent_nodes = get_target_neighbors(p, PARSE_LINK);
-            hs.insert(sent_nodes.begin(), sent_nodes.end());
+            for (const Handle& p : get_target_neighbors(l, WORD_INSTANCE_LINK))
+            {
+                const HandleSeq& sent_nodes = get_target_neighbors(p, PARSE_LINK);
+                hs.insert(sent_nodes.begin(), sent_nodes.end());
+            }
         }
 
         // No. of sentences that contain this word
@@ -189,6 +195,7 @@ void Fuzzy::calculate_tfidf(const HandleSeq& word_insts)
     }
 
     // Normalize the values
+    // TODO?
     if (min != max)
         for (auto i = tfidf_weights.begin(); i != tfidf_weights.end(); i++)
             i->second = (i->second - min) / (max - min);
