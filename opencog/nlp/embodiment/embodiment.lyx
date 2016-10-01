@@ -3898,18 +3898,228 @@ face types
 
  that are recognized by the system, perhaps a few dozen, but less than one
  hundred.
- Because the training is unsupervised, its not clear quite what common features
+ Because the training is unsupervised, its not clear what common features
  are being learned: perhaps they are facial expressions (happy, sad), perhaps
  they facial types (round, square-jawed), perhaps they are racial (asian,
  european, african), perhaps they are mouth-centered (open, closed-mouth,
  speaking vs listening), and perhaps they include face orientations (direct
  full-face, three-quarters face, profile).
+ Perhaps the recognized types aredata characteristics (well-lit, distinct,
+ poorly-lit, blurry, distant, small).
  The point here is to somehow reduce the data rate of thousands of floats
- per second, to maybe 1 byte (256 different face recognitions) per second.
+ per second, to maybe 1 byte (256 different face recognitions) per second,
+ and to have some sort of reasonable fidelity to the input image, including
+ stability (low noise).
+\end_layout
+
+\begin_layout Standard
+This appears to be a research task.
+ Exactly how hard or easy it is to accomplish this is not clear.
 \end_layout
 
 \begin_layout Subsubsection
 Imitation learning
+\end_layout
+
+\begin_layout Standard
+If the above can be accomplished, the next step would consist of imitation
+ learning.
+ That is, the robot would be set up to look at itself, using the same (trained)
+ analysis pipeline.
+ One would then embark on a search of the rather large space of possible
+ motor settings, with the goal of associating certain particular motor settings
+ and movements to the different types or classes being identified.
+ If a motor setting is found that corresponds to known characteristic, then
+ that motor setting is memorized, and associated with that type.
+ An exploration of the size and shape of the motor paramter space needs
+ to be performed: Similar motor settings should trigger the same recognition,
+ but what, exactly, are the boundaries of what can be recognized? 
+\end_layout
+
+\begin_layout Standard
+The goal of this stage is to discover how to make the specific types of
+ facial gestures that were learned.
+ That is, the goal is to get a software API whose messages are of the format:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+make facial expression type 7, or anything close to that
+\begin_inset Quotes erd
+\end_inset
+
+, as well as 
+\begin_inset Quotes eld
+\end_inset
+
+now make a similar, but different expression of type 7
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Such automated exploration and definition of boundaries should be relatively
+ straight-forward.
+ What is not clear is whether the results will be significant in human terms:
+ it may turn out that 
+\begin_inset Quotes eld
+\end_inset
+
+expression type 7
+\begin_inset Quotes erd
+\end_inset
+
+ encompases everything from smiling to frowning in profile, while rasing
+ one eyebrow: it might turn out that 
+\begin_inset Quotes eld
+\end_inset
+
+type 7
+\begin_inset Quotes erd
+\end_inset
+
+ is a grab-bag of nonsense expressions.
+ This makes it clear that a form of feedback to the classification stage
+ will ultimately be needed, later if not sooner.
+\end_layout
+
+\begin_layout Standard
+Some, possibly many or most expression classifications might not be reproducible
+ on the robot.
+ For example, 
+\begin_inset Quotes eld
+\end_inset
+
+type 7
+\begin_inset Quotes erd
+\end_inset
+
+ might correspond to 
+\begin_inset Quotes eld
+\end_inset
+
+poorly-lit and square-jawed european male
+\begin_inset Quotes erd
+\end_inset
+
+ which is not something that any motor setting on a well-lit female face
+ would be able to acheive.
+ 
+\end_layout
+
+\begin_layout Standard
+Again, this appears to be a research task.
+\end_layout
+
+\begin_layout Subsubsection
+Language association
+\end_layout
+
+\begin_layout Standard
+The goal of this stage is to associate specific words with specific facial
+ expression classes.
+ This would be done through natural language dialog.
+ An example dialog might be:
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Human: Can you see me?
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Robot: Yes.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Human: I am smiling.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Robot: OK.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Human: Can you imitate smiling?
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Robot: (Performs animation)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Human: That's good 
+\shape slanted
+(or)
+\shape default
+ No, that's wrong.
+\end_layout
+
+\begin_layout Standard
+If a positive response can be elicited, then that particular word or phrase
+ (smiling, turning away, hanging head down, etc.) can be associated with
+ some confidence to two distinct things: the perceived feature vector, and
+ also the motor settings.
+ One learned, these referents can be used in other language dialog and discussio
+n.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Feedback and continuous learning
+\end_layout
+
+\begin_layout Standard
+It is possible, or even likely, that there will be serious data flaws at
+ every step: landmark extraction may fail spectacularly in all but the best
+ of lighting conditions.
+ Feature classification may group together features in a way that is not
+ natural to humans.
+ Imitation learning may fail to find a motor match to most expressions.
+ Language association may appear to work, but later fail, because the word
+ 
+\begin_inset Quotes eld
+\end_inset
+
+smile
+\begin_inset Quotes erd
+\end_inset
+
+ was associated with a feature set that includes turning away and opening
+ the mouth, while shutting the eyes.
+ Thus, mechanisms for un-learning word associations are required, or of
+ transfering them to new classifications, as these are learned.
+\end_layout
+
+\begin_layout Standard
+Because all of tese are hypothetical issues, proposing distinct solutions
+ for these seems premature, at this point, with the exception of language
+ association.
+ That is because the creation of associations between perceptions and words
+ is a broader task than merely that of perceiving facial expressions.
+ This is discussed in greater detail in section XXX (where?)
 \end_layout
 
 \begin_layout Section*
