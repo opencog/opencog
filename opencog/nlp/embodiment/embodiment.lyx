@@ -77,7 +77,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.04 - 16 Sept 2016
+Draft Version 0.05 - 30 Sept 2016
 \end_layout
 
 \begin_layout Abstract
@@ -92,7 +92,7 @@ ness, together with a sketch of how this could be improved and expanded.
  
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Introduction
 \end_layout
 
@@ -118,7 +118,7 @@ ly intended to interface with the robots manufactured by Hanson, such as
  
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Robot archtitecture overview
 \end_layout
 
@@ -211,7 +211,7 @@ height "1pt"
 
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Internal Models
 \end_layout
 
@@ -261,7 +261,7 @@ reference "fig:A-Control-Theory"
 .
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 AtomSpace
 \end_layout
 
@@ -284,7 +284,7 @@ target "http://wiki.opencog.org/w/AtomSpace"
  will not be done here.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Self Model
 \end_layout
 
@@ -452,7 +452,7 @@ height "1pt"
 
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 World Model
 \end_layout
 
@@ -574,7 +574,7 @@ height "1pt"
 
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 State
 \end_layout
 
@@ -694,7 +694,7 @@ target "https://en.wikipedia.org/wiki/Octree"
  bigger or smaller, than another.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Model and Control
 \end_layout
 
@@ -997,7 +997,7 @@ control API
  can be achieved.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Control language
 \end_layout
 
@@ -1329,7 +1329,7 @@ control API
 .
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Internal model vs.
  physical body
 \end_layout
@@ -1421,7 +1421,7 @@ efference copy
  the physical body, and another the self-model.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 English language interfaces
 \end_layout
 
@@ -1515,7 +1515,7 @@ If one has a syntactic analyzer, then translation can be performed by extracting
  to equivalent control-language atoms.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Link Grammar
 \end_layout
 
@@ -1811,7 +1811,7 @@ costs
  This play a minor role, at this stage.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Graph rewriting
 \end_layout
 
@@ -1939,7 +1939,7 @@ Ds**c- & Js-
  The prototype contains a rule of roughly this form.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Rule engine
 \end_layout
 
@@ -2004,7 +2004,7 @@ hypertarget{appendix-a}{Appendix A}
 .
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Action performance
 \end_layout
 
@@ -2026,7 +2026,7 @@ Action Orchestrator
 .
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 The language pipeline
 \end_layout
 
@@ -2242,7 +2242,7 @@ height "1pt"
 
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Semantics
 \end_layout
 
@@ -2387,7 +2387,7 @@ target "https://en.wikipedia.org/wiki/Semantic_network"
 .
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsubsection
 Summary
 \end_layout
 
@@ -2400,7 +2400,7 @@ There are additional important concepts that are required to correctly implement
  to problems that must be solved in the full system.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Prototype Review
 \end_layout
 
@@ -2446,7 +2446,7 @@ These are each reviewed, below.
  it makes clear both the how and the why of a more sophisticated design.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Control language prototype
 \begin_inset CommandInset label
 LatexCommand label
@@ -2800,7 +2800,7 @@ Lines 570-680 (end of file) repeat the previous structures, but are used
  
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Translation prototype
 \end_layout
 
@@ -2976,7 +2976,7 @@ show happy
 .
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Action Performance
 \end_layout
 
@@ -3069,7 +3069,7 @@ if
  
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Rule engine
 \end_layout
 
@@ -3104,7 +3104,7 @@ ad hoc
  system will become apparent.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Glue code
 \end_layout
 
@@ -3141,7 +3141,7 @@ target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0a
  file defines a loadable scheme module that encapsulates all of this code.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Self-model, World-model
 \end_layout
 
@@ -3351,7 +3351,7 @@ control language
  
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Design Issues
 \end_layout
 
@@ -3362,7 +3362,7 @@ During the prototype development, a number of design issues were encountered.
  changes or implementation improvements.
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsection
 Translation Issues
 \end_layout
 
@@ -3373,7 +3373,7 @@ A fair number of issues crop up in the middle layers of the language input
  and most general.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 What is the correct semantic representation?
 \end_layout
 
@@ -3457,7 +3457,7 @@ Side comment: now that LG indicates the head-verbs of sentences and clauses,
  It does not provide a lot of value-add any more.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 AnchorNodes, or something else?
 \end_layout
 
@@ -3471,7 +3471,7 @@ The current parsing pipeline (used by R2L as well as the prototype here)
 \end_layout
 
 \begin_layout Subsubsection*
-DRAFT VERSION 0.04
+DRAFT VERSION 0.05
 \end_layout
 
 \begin_layout Standard
@@ -3691,6 +3691,48 @@ go and do that important thing
  balancing them out (at a critical phase-transition point).
 \end_layout
 
+\begin_layout Section
+Associating words and meanings to visual cues
+\end_layout
+
+\begin_layout Standard
+Interaction with humans requires the ability to read facial expressions
+ and gestural cues.
+ This ability needs to be integrated with language abilities.
+ This section proposes one possible way in which this could be done.
+\end_layout
+
+\begin_layout Subsection
+Imitation learning of facial expressions
+\end_layout
+
+\begin_layout Standard
+Here's a proposal for imitation learning of facial expressions.
+ The goal is to be able to perceive different facial expressions, via analysis
+ of incoming video, to remember what was seen, to mimic what was seen, and
+ to associate words and language with the perceptions and memories.
+\end_layout
+
+\begin_layout Standard
+Such a system needs to start with some way of perceiving human faces.
+ One such system, for example is 
+\begin_inset CommandInset href
+LatexCommand href
+name "ci2cv"
+target "http://face.ci2cv.net/"
+
+\end_inset
+
+, although there are others.
+ Ci2cv is intersting, because it has an impressive-looking web
+\end_layout
+
+\begin_layout Standard
+Many of the details here could be done in a different way, so this is a
+ sketch.
+ 
+\end_layout
+
 \begin_layout Section*
 Items
 \end_layout
@@ -3719,6 +3761,10 @@ extract keywords/key-topics from sentence, and remember them, then apply
 
 \begin_layout Section*
 Random ideas
+\end_layout
+
+\begin_layout Itemize
+Sophia, bark like a dog!
 \end_layout
 
 \begin_layout Itemize
