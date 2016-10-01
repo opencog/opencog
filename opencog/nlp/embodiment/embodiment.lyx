@@ -3714,6 +3714,95 @@ Here's a proposal for imitation learning of facial expressions.
 \end_layout
 
 \begin_layout Standard
+Many of the details here could be done in a different way, so this is a
+ sketch.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Landmark discovery
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Facial landmark discovery
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Facial-landmark-discovery"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ci2cv-demo-cropped.jpg
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Example of facial landmark discovery.
+ Software extracts boundaries of a face from an image, identifying significant
+ landmarks, such as the eyes, nose and lips.
+ These are refered to as 
+\begin_inset Quotes eld
+\end_inset
+
+landmarks
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The relational structure of the landmarks is also presented: that is, neighbori
+ng points are identified by means of a triangular mesh.
+ Knowing this relational structure is important, as it helps disambiguate
+ points that (for instance) indicate the nose from points that indicate
+ the mouth.
+ This is a demo image taken directly from the 
+\begin_inset CommandInset href
+LatexCommand href
+name "ci2cv website"
+target "http://face.ci2cv.net/"
+
+\end_inset
+
+; it is meant only to be illustrative of the general idea, rather than promoting
+ this technology over any other.
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Such a system needs to start with some way of perceiving human faces.
  One such system, for example is 
 \begin_inset CommandInset href
@@ -3724,13 +3813,103 @@ target "http://face.ci2cv.net/"
 \end_inset
 
 , although there are others.
- Ci2cv is intersting, because it has an impressive-looking web
+ This system is able to recognize facial landmarks, such as eyes, nose,
+ lips and boundary of the head, and stitch these together into a mesh showing
+ the relative relationship between these points.
+ This is illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Facial-landmark-discovery"
+
+\end_inset
+
+.
+ The goal of the landmark discovery system is to 
+\begin_inset Quotes eld
+\end_inset
+
+dimensionally reduce
+\begin_inset Quotes erd
+\end_inset
+
+ high-dimension data, i.e.
+ the raw video pixels, to a much lower amount of data (dozens or hundreds
+ of 2D or 3D floating-point numbers at 10 to 30 frames per second: that
+ is, 500 floats per second to 15K floats per second) in such a way that
+ the reduced data is still meaningful, and has some sort of reasonable fidelity
+ to the input image.
 \end_layout
 
 \begin_layout Standard
-Many of the details here could be done in a different way, so this is a
- sketch.
+There are a large number of reasons why this is a difficult task, including
+ poor lighting, fast motion, and distant or blurry faces.
+\end_layout
+
+\begin_layout Subsubsection
+Expression recognition by classification and clustering
+\end_layout
+
+\begin_layout Standard
+With a such dimensional reduction system in place, the next step would be
+ to perform training and analysis of 
+\begin_inset Quotes eld
+\end_inset
+
+typical
+\begin_inset Quotes erd
+\end_inset
+
+ facial expressions.
+ That is, working with a large collection of visual data, consisting of
+ many different types of facial expressions on many different faces, the
+ goal is to extract 
+\begin_inset Quotes eld
+\end_inset
+
+typical
+\begin_inset Quotes erd
+\end_inset
+
+ feature vectors.
+ This does NOT have to be a labelled dataset; it would be beter if it was
+ not labelled, as the goal is to extract commonalities in the dataset, rather
+ than to extract labels.
+ Labelling comes at a later stage.
+\end_layout
+
+\begin_layout Standard
+To extract unlabelled but classified and clustered data, it might be possible
+ to use one of several relatively simple data analysis tools, such as principal
+ component analysis (PCA), possibly other kernel methods, or possibly non-linear
+ tools.
+ Because unsupervised training is being proposed here, its not clear how
+ to apply deep-learning neural net techiques.
  
+\end_layout
+
+\begin_layout Standard
+The goal of this stage is to have a relatively small set of 
+\begin_inset Quotes eld
+\end_inset
+
+face types
+\begin_inset Quotes erd
+\end_inset
+
+ that are recognized by the system, perhaps a few dozen, but less than one
+ hundred.
+ Because the training is unsupervised, its not clear quite what common features
+ are being learned: perhaps they are facial expressions (happy, sad), perhaps
+ they facial types (round, square-jawed), perhaps they are racial (asian,
+ european, african), perhaps they are mouth-centered (open, closed-mouth,
+ speaking vs listening), and perhaps they include face orientations (direct
+ full-face, three-quarters face, profile).
+ The point here is to somehow reduce the data rate of thousands of floats
+ per second, to maybe 1 byte (256 different face recognitions) per second.
+\end_layout
+
+\begin_layout Subsubsection
+Imitation learning
 \end_layout
 
 \begin_layout Section*
