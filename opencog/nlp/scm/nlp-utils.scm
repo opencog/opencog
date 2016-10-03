@@ -324,7 +324,7 @@
 ; --------------------------------------------------------------------
 (define-public (interp-get-parse interp)
 "
-  interp-get-parse    Get the Interpretation of a Parse.
+  interp-get-parse    Get the parse that resulted in the given interpretation.
 
   Returns the ParseNode associated with an InterpretationNode.
 "
