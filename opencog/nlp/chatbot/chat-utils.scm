@@ -81,7 +81,7 @@ def call_sentiment_parse(text_node, sent_node):
 
 (define-public (get-last-said-sent)
 "
-  Returns the last said sentence or return empty list.
+  Returns the SentenceNode of the last said sentence or returns an empty list.
 "
     (define query
         (Get
