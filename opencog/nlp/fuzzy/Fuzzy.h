@@ -58,11 +58,11 @@ class Fuzzy :
 
         AtomSpace* as;
 
-        // Whether matching should be only in AF or not
-        bool _af_only;
-
         // The type of atom that we want
         Type rtn_type;
+
+        // Whether matching should be only in AF or not
+        bool _af_only;
 
         // The atoms that we don't want in the solutions
         HandleSeq excl_list;

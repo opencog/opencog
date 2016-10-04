@@ -46,7 +46,6 @@ Fuzzy::Fuzzy(AtomSpace* a, Type tt, const HandleSeq& ll, bool af_only) :
     _af_only(af_only),
     excl_list(ll)
 {
-// TODO: Fix compilation warning
 }
 
 Fuzzy::Fuzzy(AtomSpace* a) : as(a)
