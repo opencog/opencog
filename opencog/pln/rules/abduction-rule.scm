@@ -1,6 +1,6 @@
 ;; =============================================================================
 ;; AbductionRule
-;; 
+;;
 ;; <LinkType>
 ;;   A
 ;;   B
@@ -72,10 +72,10 @@
          (cAB (cog-stv-confidence AB))
          (sCB (cog-stv-strength CB))
          (cCB (cog-stv-confidence CB)))
-        (cog-set-tv! 
+        (cog-set-tv!
             AC
-            (stv 
-                (simple-deduction-strength formula sA sB sC sAB
+            (stv
+                (simple-deduction-strength-formula sA sB sC sAB
                                            (inversion-strength-formula sCB sC sB))
                 (min cAB cCB)))))
 

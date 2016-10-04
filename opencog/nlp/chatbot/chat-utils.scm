@@ -62,6 +62,60 @@ def call_sentiment_parse(text_node, sent_node):
 ")
 
 ; -----------------------------------------------------------------------
+; TODO: Replace these time related utilities with one from TimeMap, when it is
+; ready.
+(define time-domain (TimeDomainNode "Dialogue-System"))
+
+(define (sent-set-time sent)
+"
+  Associate time to the last sentence
+"
+    (AtTimeLink
+        ; FIXME: maybe opencog's internal time octime should
+        ; be used. Will do for now, assuming a single instance
+        ; deals with a single conversation.
+        (TimeNode (number->string (current-time)))
+        sent
+        time-domain)
+)
+
+(define-public (get-last-said-sent)
+"
+  Returns the SentenceNode of the last said sentence or returns an empty list.
+"
+    (define query
+        (Get
+            (VariableList
+                (TypedVariableLink
+                    (Variable "tn")
+                    (TypeNode "TimeNode"))
+                (TypedVariableLink
+                    (Variable "s")
+                    (TypeNode "SentenceNode")))
+            (AtTimeLink
+                (Variable "tn")
+                (Variable "s")
+                time-domain)))
+
+    (define last-time 0)
+    (define result '())
+    (define (last-sent sent)
+        (let ((sent-time (string->number (cog-name (gar sent)))))
+            (if (>= sent-time last-time)
+                (begin
+                    (set! last-time sent-time)
+                    (set! result (gdr sent)))
+            )
+        ))
+
+    (let ((sents (cog-execute! query)))
+        (for-each last-sent (cog-outgoing-set sents))
+        (cog-delete sents)
+        result
+    )
+)
+
+; -----------------------------------------------------------------------
 (define (r2l-parse sent)
 "
   r2l-parse SENT -- perform relex2logic processing on sentence SENT.
@@ -128,13 +182,7 @@ def call_sentiment_parse(text_node, sent_node):
             (ReferenceLink interp-node result)
 
             ; Time stamp the parse
-            (AtTimeLink
-                ; FIXME: maybe opencog's internal time octime should
-                ; be used. Will do for now, assuming a single instance
-                ; deals with a single conversation.
-                (TimeNode (number->string (current-time)))
-                sent
-                (TimeDomainNode "Dialogue-System"))
+            (sent-set-time sent)
 
             result
         )

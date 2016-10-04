@@ -46,9 +46,11 @@
              (Concept "people")
              (Concept P-name)))))
 
-;; Fetch the semantics with the highest strength*confidence that
-;; contains words in common with the query
 (define-public (do-pln-QA)
+"
+  Fetch the semantics with the highest strength*confidence that
+  contains words in common with the query
+"
     (cog-logger-debug "[PLN-Action] do-pln-QA")
 
     (State pln-qa process-started)
@@ -86,4 +88,3 @@
       (State pln-qa process-finished)
     )
 )
-

@@ -311,6 +311,16 @@
 )
 
 ; --------------------------------------------------------------------
+(define-public (parse-get-interp parse-node)
+"
+  parse-get-interp    Get the interpretations of the parse.
+
+  Returns the InterpretationNodes associated with a ParseNode.
+"
+    (cog-chase-link 'InterpretationLink 'InterpretationNode parse-node)
+)
+
+; --------------------------------------------------------------------
 (define-public (interp-get-r2l-outputs interp-node)
 "
   interp-get-r2l-outputs    Get all R2L outputs in an Interpretation.
@@ -324,7 +334,7 @@
 ; --------------------------------------------------------------------
 (define-public (interp-get-parse interp)
 "
-  interp-get-parse    Get the Interpretation of a Parse.
+  interp-get-parse    Get the parse that resulted in the given interpretation.
 
   Returns the ParseNode associated with an InterpretationNode.
 "
