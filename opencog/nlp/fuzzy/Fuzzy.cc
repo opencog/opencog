@@ -339,6 +339,7 @@ bool Fuzzy::try_match(const Handle& soln)
     HandleSeq soln_simlks;
     examine(soln, soln_word_insts, soln_simlks);
     std::sort(soln_word_insts.begin(), soln_word_insts.end(), compare_word);
+    std::sort(soln_simlks.begin(), soln_simlks.end());
 
     // Get the common words
     HandleSeq common_words;
