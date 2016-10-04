@@ -69,6 +69,7 @@ class Fuzzy :
 
         // The target (input)
         HandleSeq target_word_insts;
+        HandleSeq target_simlks;
 
         // The solutions
         RankedHandleSeq solns;
