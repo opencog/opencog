@@ -491,10 +491,10 @@
 ;;;;;;;;;;
 ; TODO: Remove this loop by integrating the pln-demo to openpsi
 (define enable-pln-loop #f)
-(define (pln-running?) enable-pln-loop)
+(define-public (pln-running?) enable-pln-loop)
 
 (define pln-loop-count 0)
-(define (pln-get-loop-count) pln-loop-count)
+(define-public (pln-get-loop-count) pln-loop-count)
 
 (define (pln-loop)
     ;; Apply l2s rules
@@ -540,14 +540,14 @@
     (if enable-pln-loop (pln-loop))
 )
 
-(define (pln-run)
+(define-public (pln-run)
     (if (not (pln-running?))
         (begin
             (set! enable-pln-loop #t)
             (begin-thread (pln-loop))))
 )
 
-(define (pln-halt) (set! enable-pln-loop #f))
+(define-public (pln-halt) (set! enable-pln-loop #f))
 
 ; Start pln loop
 (pln-run)
