@@ -3,6 +3,9 @@
 ;
 ; Assorted utilties for checking R2L outputs.
 ;
+(use-modules (opencog))
+(use-modules (opencog atom-types))
+(use-modules (opencog exec))
 
 ; -----------------------------------------------------------------------
 (define-public (r2l-get-root atom)
@@ -13,7 +16,7 @@
   in the case where RelEx2Logic is called with the r2l(...) function.
 "
 	(define iset (cog-incoming-set atom))
-	
+
 	; Halt when the SetLink that wraps around R2L outputs is reached.
 	; The SetLink is created by r2l(...)
 	(if (and (= (length iset) 1) (equal? 'SetLink (cog-type (car iset))))
@@ -106,6 +109,54 @@
   Return #t or #f depends on whether the node is the abstract version.
 "
 	(has-word? node)
+)
+
+; -----------------------------------------------------------------------
+(define-public (filter-for-pln a-list)
+"
+  Takes a list of atoms and return a SetLink containing atoms that pln can
+  reason on. The that make the SetLink comprise of atoms with signatures,
+          (Inheritance
+              (Type \"ConceptNode\")
+              (Type \"ConceptNode\"))
+          (Evaluation
+              (Type \"PredicateNode\")
+              (ListLink
+                  (Type \"ConceptNode\")
+                  (Type \"ConceptNode\")))
+          (Evaluation
+              (Type \"PredicateNode\")
+              (ListLink
+                  (Type \"ConceptNode\"))))
+
+  a-list:
+  - This is a list of atoms, for example a list of r2l outputs
+"
+; TODO: Move this to an (opencog pln) module, when there is one.
+    (cog-execute!
+        (MapLink
+            (ScopeLink
+                (TypedVariable
+                    (Variable "$x")
+                    (TypeChoice
+                        (Signature
+                            (Inheritance
+                                (Type "ConceptNode")
+                                (Type "ConceptNode")))
+                        (Signature
+                            (Evaluation
+                                (Type "PredicateNode")
+                                (ListLink
+                                    (Type "ConceptNode")
+                                    (Type "ConceptNode"))))
+                        (Signature
+                            (Evaluation
+                                (Type "PredicateNode")
+                                (ListLink
+                                    (Type "ConceptNode"))))))
+                    (Variable "$x"))
+            (SetLink  a-list))
+    )
 )
 
 ; -----------------------------------------------------------------------
