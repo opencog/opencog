@@ -141,8 +141,20 @@
                     (TypeChoice
                         (Signature
                             (Inheritance
-                                (Type "ConceptNode")
-                                (Type "ConceptNode")))
+                                (TypeChoice
+                                    (Type "ConceptNode")
+                                    (Type "SatisfyingSetLink"))
+                                (TypeChoice
+                                    (Type "ConceptNode")
+                                    (Type "SatisfyingSetLink"))))
+                        (Signature
+                            (Member
+                                (TypeChoice
+                                    (Type "ConceptNode")
+                                    (Type "SatisfyingSetLink"))
+                                (TypeChoice
+                                    (Type "ConceptNode")
+                                    (Type "SatisfyingSetLink"))))
                         (Signature
                             (Evaluation
                                 (Type "PredicateNode")
