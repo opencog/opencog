@@ -87,6 +87,7 @@ IF (HAVE_ATOMSPACE)
 		)
 
 		TARGET_LINK_LIBRARIES(spacetime_cython
+			${CMAKE_INSTALL_PREFIX}/lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog/atomspace.so
 			SpaceMap
 			spacetime
 			${ATOMSPACE_LIBRARIES}
@@ -112,6 +113,7 @@ IF (HAVE_ATOMSPACE)
 		)
 
 		TARGET_LINK_LIBRARIES(spatial_cython
+			${CMAKE_INSTALL_PREFIX}/lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog/atomspace.so
 			SpaceMap
 			SpaceMapUtil
 			spacetime
