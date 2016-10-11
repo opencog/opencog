@@ -77,15 +77,15 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.05 - 30 Sept 2016
+Draft Version 0.06 - 7 Oct 2016
 \end_layout
 
 \begin_layout Abstract
 A description of how OpenCog currently implements self-awareness and world-aware
 ness, together with a sketch of how this could be improved and expanded.
  The short-term goal is to create a robot (embodied chatbot) that can hear
- and see, and carry on conversations about perceived objects, as well as
- to carry out conversations about the self.
+ and see, and carry on conversations about what it can see and hear, as
+ well as to carry out conversations about the self.
  These conversations can be verbal, and can also have physical-body performance
  components: body and face expressive movements, such as smiling or waving
  a hand.
@@ -97,7 +97,203 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-The paper proceeds in several steps.
+In order for a robot to have reasonably competent conversations about the
+ world around it, three things need to happen: the robot has to be able
+ to see and hear; the robot needs to have an internal model of the world
+ around it; and, finally the robot needs to have some basic language capability.
+ The internal model and it's relationship to the senses and to language
+ is the primary topic of this review.
+\end_layout
+
+\begin_layout Standard
+The core idea of the internal model is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Self-and-World"
+
+\end_inset
+
+.
+ More abstractly, it is a set of software structures that describe the the
+ world that the robot sees.
+ The description must be sufficiently abstract that the robot can perform
+ basic reasoning about the world.
+ Consider, for example, spatial reasoning: if Alice is standing behind Bob,
+ and Carol is in front of Bob, then Alice is farther away than Carol.
+ All of this needs to be represented such that basic rational reasoning
+ about distances can take place.
+ Almost any example will do: if cats are animals, and animals are things,
+ then cats are things.
+ 
+\end_layout
+
+\begin_layout Standard
+The internal model must also be abstracted in such a way that it is not
+ too hard to map natural language onto the model.
+ Words in a sentence or question need to be matched up to specific objects
+ in the model, so that the different parts of the model provide a 
+\begin_inset Quotes eld
+\end_inset
+
+meaning
+\begin_inset Quotes erd
+\end_inset
+
+ or a 
+\begin_inset Quotes eld
+\end_inset
+
+grounding
+\begin_inset Quotes erd
+\end_inset
+
+ for the words.
+ There needs to be a correspondance between nouns and objects, and also
+ between prepositions (
+\begin_inset Quotes eld
+\end_inset
+
+in
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+near
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+next to
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+of
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+with
+\begin_inset Quotes erd
+\end_inset
+
+, ...) and the relationships between the objects in the internal model.
+ That is, the internal model must also have a natural 
+\begin_inset Quotes eld
+\end_inset
+
+prepositional
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+relational
+\begin_inset Quotes erd
+\end_inset
+
+ structure.
+ This extends to all word classes in natural language: verbs must correspond
+ to actions that might be performed on objects in the internal model.
+ Adjectives must correspond to attributes that an internal object might
+ posses.
+ And so on.
+ The internal model needs to naturally correspond to natural language, so
+ that basic reasoning and basic language are possible.
+\end_layout
+
+\begin_layout Standard
+The internal model must also be abstracted in such a way that it can be
+ kept up to date as new sensory information comes in.
+ This means that raw video must be converted into a representational form,
+ with objects (people, thier position, movement, and facial expressions)
+ picked out from the raw video.
+ Similarly, raw audio must be converted into representations of the form
+ 
+\begin_inset Quotes eld
+\end_inset
+
+heard a loud bang
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+there is a quiet rushing sound
+\begin_inset Quotes erd
+\end_inset
+
+, etc.
+\end_layout
+
+\begin_layout Standard
+There needs to be explicit software that can access, query and update the
+ internal model, borth from the langauge side, and the sensory side.
+ The overall architecture is similar to the widely-known 
+\begin_inset Quotes eld
+\end_inset
+
+model-view-controller
+\begin_inset Quotes erd
+\end_inset
+
+ paradigm.
+ Software 
+\begin_inset Quotes eld
+\end_inset
+
+controllers
+\begin_inset Quotes erd
+\end_inset
+
+ can change and edit the model, while a structured query system can present
+ 
+\begin_inset Quotes eld
+\end_inset
+
+views
+\begin_inset Quotes erd
+\end_inset
+
+ of the model to the language subsystem.
+ 
+\end_layout
+
+\begin_layout Standard
+This document proceeds by fleshing out the above definitions in greater
+ detail.
+ Some of the early statements may seem overly simplistic or pedantic; however,
+ some clarity and precision is needed, in order to move on to the later
+ stages.
+\end_layout
+
+\begin_layout Standard
+xxx
+\end_layout
+
+\begin_layout Standard
+There are multiple software issues encountered in the development of the
+ above.
+\end_layout
+
+\begin_layout Standard
+he developmment proceeds paper proceeds in several steps.
  The first step is to review the overall concept of an 
 \begin_inset Quotes eld
 \end_inset
