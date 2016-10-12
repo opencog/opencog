@@ -63,7 +63,6 @@ class TestRESTApi():
                                          data=json.dumps(atom),
                                          headers=self.headers)
         post_result = json.loads(post_response.data)['atoms']
-        print "duuuuuude reso=", post_result
 
         # Verify values returned by the POST request
         assert post_result['type'] == atom['type']
@@ -77,15 +76,14 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
 
         # Compare to the values created in the AtomSpace
-        atomspace_result = Atom(post_result['handle'], self.atomspace)
-        assert Atom(post_result['handle'], self.atomspace).value() == \
-            atomspace_result.value()
+        frog = self.atomspace.add_node(
+            types.ConceptNode, 'giant_frog', TruthValue(.08, 0.2))
+        atomspace_result = frog
         assert post_result['name'] == atomspace_result.name
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            count_to_confidence(
-                float(post_result['truthvalue']['details']['count']))) \
+            float(post_result['truthvalue']['details']['count'])) \
             == atomspace_result.tv
 
         # Get by handle and compare
@@ -94,6 +92,10 @@ class TestRESTApi():
             self.client.get(self.uri + 'atoms/' + str(handle))
         get_result_handle = \
             json.loads(get_response_handle.data)['result']['atoms'][0]
+        print "duuuuudeski nday", handle
+        print "duuuuudeski respo", get_response_handle
+        print "duuuuudeski poster=", post_result
+        print "duuuuudeski repost=", get_result_handle
         assert post_result == get_result_handle
 
         # Get by name and compare

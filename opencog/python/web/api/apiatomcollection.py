@@ -558,8 +558,7 @@ the atom. Example:
                        'parameters.')
 
         dictoid = marshal(atom, atom_fields)
-        # dictoid['handle'] = uid
-#### XXX xxxxxxxxxxxxx above almost works but crashes
+        dictoid['handle'] = uid
         return {'atoms': dictoid}
 
     @swagger.operation(
