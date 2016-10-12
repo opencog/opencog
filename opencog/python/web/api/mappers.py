@@ -94,7 +94,8 @@ av_fields = {
 # Atom helpers
 class FormatHandleList(fields.Raw):
     def format(self, values):
-        return [elem.value() for elem in values]
+        print "duuuuuuuuuuude horma tht hands", values
+        return [global_atom_map.get_uid(elem) for elem in values]
 
 
 class AtomListResponse(object):
@@ -135,7 +136,6 @@ class AtomMap:
         self.uid_from_atom = dict()
 
     def get_uid(self, atom):
-        print "duuuuude the getter", atom
         if (atom in self.uid_from_atom):
             uid = self.uid_from_atom[atom]
             return uid
@@ -147,7 +147,6 @@ class AtomMap:
         return uid
 
     def get_atom(self, uid):
-        # print "duuuuude ask for the uid", uid
         if (uid in self.atom_from_uid):
             return self.atom_from_uid[uid]
         return None

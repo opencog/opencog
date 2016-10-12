@@ -531,8 +531,8 @@ the atom. Example:
             print data
             print "duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuude data", data
             if len(data['outgoing']) > 0:
-                outgoing = [Atom(uuid, self.atomspace)
-                                for uuid in data['outgoing']]
+                outgoing = [self.atom_map.get_atom(uid)
+                                for uid in data['outgoing']]
         else:
             outgoing = None
 

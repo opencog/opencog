@@ -51,22 +51,30 @@ class TestRESTApi():
         del self.api
         del self.client
 
+
+    def mkatom(self, json_atom):
+        post_response = self.client.post(self.uri + 'atoms',
+                                         data=json.dumps(json_atom),
+                                         headers=self.headers)
+        post_result = json.loads(post_response.data)['atoms']
+        return post_result
+
     def test_a_post_and_get_node(self):
         # Create a test node
         truthvalue = {'type': 'simple',
                       'details': {'strength': 0.08, 'count': 0.2}}
-        atom = {'type': 'ConceptNode',
+        jatom = {'type': 'ConceptNode',
                 'name': 'giant_frog',
                 'truthvalue': truthvalue}
 
         post_response = self.client.post(self.uri + 'atoms',
-                                         data=json.dumps(atom),
+                                         data=json.dumps(jatom),
                                          headers=self.headers)
         post_result = json.loads(post_response.data)['atoms']
 
         # Verify values returned by the POST request
-        assert post_result['type'] == atom['type']
-        assert post_result['name'] == atom['name']
+        assert post_result['type'] == jatom['type']
+        assert post_result['name'] == jatom['name']
         assert post_result['truthvalue']['type'] == truthvalue['type']
         assert_almost_equals(
             float(post_result['truthvalue']['details']['strength']),
@@ -112,11 +120,21 @@ class TestRESTApi():
         assert post_result == get_result_name_type
 
     def test_b_post_and_get_link(self):
+        self.jswan = self.mkatom(
+                {'type': 'ConceptNode', 'name': 'swan',
+                'truthvalue': {'type': 'simple',
+                'details': {'strength': 0.001, 'count': 0.9}}})
+
+        self.janimal = self.mkatom(
+                {'type': 'ConceptNode', 'name': 'animal',
+                'truthvalue': {'type': 'simple',
+                'details': {'strength': 0.1, 'count': 0.95}}})
+
         # Create a test link between swan and animal
         truthvalue = \
             {'type': 'simple', 'details': {'strength': 0.5, 'count': 0.4}}
         atom = {'type': 'InheritanceLink', 'truthvalue': truthvalue,
-                'outgoing': [self.swan.value(), self.animal.value()]}
+                'outgoing': [self.jswan['handle'], self.janimal['handle']]}
 
         post_response = self.client.post(
             self.uri + 'atoms', data=json.dumps(atom), headers=self.headers)
@@ -131,8 +149,9 @@ class TestRESTApi():
         assert_almost_equals(
             float(post_result['truthvalue']['details']['count']),
             truthvalue['details']['count'], places=5)
-        assert self.swan.value() in post_result['outgoing']
-        assert self.animal.value() in post_result['outgoing']
+        assert self.jswan['handle'] in post_result['outgoing']
+        assert self.janimal['handle'] in post_result['outgoing']
+        print "duuuuuuuuu"
 
         # Compare to the values created in the AtomSpace
         atomspace_result = Atom(post_result['handle'], self.atomspace)
