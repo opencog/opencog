@@ -78,12 +78,12 @@ class TestRESTApi():
                 'details': {'strength': 0.1, 'count': 0.95}}})
 
     def mkbird_animal(self):
-        jswan = self.mkswan()
+        jbird = self.mkbird()
         janimal = self.mkanimal()
         return self.mkatom(
             {'type': 'InheritanceLink', 'truthvalue':
             {'type': 'simple', 'details': {'strength': 1.0, 'count': 0.9}},
-             'outgoing': [jswan['handle'], janimal['handle']]})
+             'outgoing': [jbird['handle'], janimal['handle']]})
 
     def get_atom(self, handle):
         get_response_handle = \
@@ -277,12 +277,11 @@ class TestRESTApi():
         # Compare to the values updated in the AtomSpace
         atomspace_result = self.bird_animal
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
-        batv = TruthValue(0.9, count_to_confidence(0.95))
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
             count_to_confidence(
                 float(put_result['truthvalue']['details']['count']))) \
-            == batv
+            == atomspace_result.tv
         assert put_result['attentionvalue'] == attentionvalue
 
         # Get by handle and compare
@@ -326,9 +325,10 @@ class TestRESTApi():
         # and outgoing set.
         # Should revise existing link.
         existing_atom = self.bird_animal
+        jbird_animal = self.mkbird_animal()
         truthvalue = \
             {'type': 'simple', 'details': {'strength': 0.1, 'count': 0.95}}
-        outgoing = [a.value() for a in existing_atom.out]
+        outgoing = jbird_animal['outgoing']
         atom = {'type': 'InheritanceLink',
                 'truthvalue': truthvalue,
                 'outgoing': outgoing}
@@ -347,7 +347,6 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
 
         # Compare to the values updated in the AtomSpace
-        assert post_result['handle'] == existing_atom.value()
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
             count_to_confidence(
@@ -355,7 +354,7 @@ class TestRESTApi():
                == existing_atom.tv
 
     # @raises(IndexError)
-    def xtest_g_delete_node(self):
+    def test_g_delete_node(self):
         atom = self.swan
         handle = atom.value()
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))
@@ -372,7 +371,7 @@ class TestRESTApi():
         assert self.atomspace.get_atom_with_uuid(handle) == None
 
     # @raises(IndexError)
-    def xtest_h_delete_link(self):
+    def test_h_delete_link(self):
         atom = self.bird_animal
         handle = atom.value()
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))
