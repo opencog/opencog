@@ -127,6 +127,34 @@ class DeleteAtomResponse(object):
             'success': self.status
         }
 
+# Map associating integer uid to actual atom.
+class AtomMap:
+    def __init__(self):
+        self.next_unused_uid = 1;
+        self.atom_from_uid = dict()
+        self.uid_from_atom = dict()
+
+    def get_uid(self, atom):
+        if (atom in self.uid_from_atom):
+            uid = self.uid_from_atom[atom]
+            return uid
+
+        uid = self.next_unused_uid
+        self.next_unused_uid = self.next_unused_uid + 1
+        self.atom_from_uid[uid] = atom
+        self.uid_from_atom[atom] = uid
+        return uid
+
+    def get_atom(self, uid):
+        if (uid in self.atom_from_uid):
+            return self.atom_from_uid[uid]
+        return None
+
+    def remove(self, atom, uid):
+        del self.atom_from_uid[uid]
+        del self.uid_from_atom[atom]
+
+
 atom_fields = {
     'handle': FormatHandleValue(attribute='uuid'),
     'type': fields.String(attribute='type_name'),

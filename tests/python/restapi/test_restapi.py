@@ -63,6 +63,7 @@ class TestRESTApi():
                                          data=json.dumps(atom),
                                          headers=self.headers)
         post_result = json.loads(post_response.data)['atoms']
+        print "duuuuuude reso=", post_result
 
         # Verify values returned by the POST request
         assert post_result['type'] == atom['type']

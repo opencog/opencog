@@ -29,6 +29,7 @@ class AtomCollectionAPI(Resource):
         return cls
 
     def __init__(self):
+        self.atom_map = AtomMap()
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
             'type', type=str, location='args', choices=types.__dict__.keys())
@@ -299,7 +300,7 @@ class AtomCollectionAPI(Resource):
 
         if id != "":
             try:
-                atom = self.atomspace.get_atom_with_uuid(id)
+                atom = self.atom_map.atom_from_uid(id)
                 atoms = [atom]
             except IndexError:
                 atoms = []
@@ -695,7 +696,7 @@ containing the atom.
             (sti, lti, vlti) = ParseAttentionValue.parse(data)
             Atom(id, self.atomspace).av = {'sti': sti, 'lti': lti, 'vlti': vlti}
 
-        atom = self.atomspace.get_atom_with_uuid(id)
+        atom = self.atom_map.atom_from_uid(id)
         return {'atoms': marshal(atom, atom_fields)}
 
     @swagger.operation(
@@ -735,11 +736,11 @@ Returns a JSON representation of the result, indicating success or failure.
         Removes an atom from the AtomSpace
         """
 
-        if not Atom(id, self.atomspace):
+        atom = self.atom_map.atom_from_uid(id)
+        if not atom == None
             abort(404, 'Atom not found')
-        else:
-            atom = self.atomspace.get_atom_with_uuid(id)
 
         status = self.atomspace.remove(atom)
+        self.atom_map.remove(atom, id)
         response = DeleteAtomResponse(id, status)
         return {'result': response.format()}
