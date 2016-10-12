@@ -378,20 +378,25 @@ class TestRESTApi():
 
     # @raises(IndexError)
     def test_h_delete_link(self):
-        atom = self.bird_animal
-        handle = atom.value()
+        jatom = self.mkbird_animal()
+        handle = jatom['handle']
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))
         get_result = json.loads(get_response.data)['result']['atoms'][0]
 
+        old_size = self.atomspace.size()
         delete_response = \
-            self.client.delete(self.uri + 'atoms/' + str(atom.value()))
+            self.client.delete(self.uri + 'atoms/' + str(handle))
         delete_result = json.loads(delete_response.data)['result']
 
         assert delete_result['success']
         assert delete_result['handle'] == get_result['handle']
 
         # Confirm the atom isn't contained in the AtomSpace anymore
-        assert self.atomspace.get_atom_with_uuid(handle) == None
+        # Actually, the python bindings don't provide a way to ask
+        # this question. So we check the size, instead.  Should shrink
+        # by 1, since only the inhertance link gets deleted.
+        new_size = self.atomspace.size()
+        assert new_size + 1 == old_size
 
     def test_i_get_atoms_by_av(self):
         # Assign some STI values
