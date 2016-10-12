@@ -743,7 +743,7 @@ Returns a JSON representation of the result, indicating success or failure.
         """
 
         atom = self.atom_map.get_atom(id)
-        if not atom == None:
+        if atom == None:
             abort(404, 'Atom not found')
 
         status = self.atomspace.remove(atom)
