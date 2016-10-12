@@ -282,7 +282,7 @@ class TestRESTApi():
             count_to_confidence(
                 float(put_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
-        assert put_result['attentionvalue'] == attentionvalue
+        assert put_result['attentionvalue'] == atomspace_result.av
 
         # Get by handle and compare
         get_response = \
