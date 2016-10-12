@@ -188,20 +188,24 @@ class TestRESTApi():
             assert post_result['handle'] in self.janimal['incoming']
 
     def test_c_put_and_get_tv_av_node(self):
-        atom = self.swan
+        jswan = self.mkatom(
+                {'type': 'ConceptNode', 'name': 'swan',
+                'truthvalue': {'type': 'simple',
+                'details': {'strength': 0.001, 'count': 0.9}}})
+
         truthvalue = \
             {'type': 'simple', 'details': {'strength': 0.005, 'count': 0.8}}
         attentionvalue = {'sti': 9, 'lti': 2, 'vlti': True}
         atom_update = \
             {'truthvalue': truthvalue, 'attentionvalue': attentionvalue}
         put_response = self.client.put(
-            self.uri + 'atoms/' + str(atom.value()),
+            self.uri + 'atoms/' + str(jswan['handle']),
             data=json.dumps(atom_update),
             headers=self.headers)
         put_result = json.loads(put_response.data)['atoms']
 
         # Verify values returned by the PUT request
-        assert put_result['handle'] == atom.value()
+        assert put_result['handle'] == jswan['handle']
         assert_almost_equals(
             float(put_result['truthvalue']['details']['strength']),
             truthvalue['details']['strength'], places=5)
@@ -212,10 +216,10 @@ class TestRESTApi():
         assert put_result['attentionvalue']['lti'] == attentionvalue['lti']
         assert put_result['attentionvalue']['vlti'] == attentionvalue['vlti']
 
+        print "duuuude cccc"
         # Compare to the values updated in the AtomSpace
         atomspace_result = Atom(put_result['handle'], self.atomspace)
-        assert Atom(put_result['handle'], self.atomspace).value() == \
-            atomspace_result.value()
+        atomspace_result = self.swan
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
@@ -224,9 +228,10 @@ class TestRESTApi():
             == atomspace_result.tv
         assert put_result['attentionvalue'] == atomspace_result.av
 
+        print "duuuude cccc"
         # Get by handle and compare
         get_response = \
-            self.client.get(self.uri + 'atoms/' + str(atom.value()))
+            self.client.get(self.uri + 'atoms/' + str(jswan['handle']))
         get_result = json.loads(get_response.data)['result']['atoms'][0]
         assert put_result == get_result
 

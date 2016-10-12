@@ -94,7 +94,6 @@ av_fields = {
 # Atom helpers
 class FormatHandleList(fields.Raw):
     def format(self, values):
-        print "duuuuuuuuuuude horma tht hands", values
         return [global_atom_map.get_uid(elem) for elem in values]
 
 

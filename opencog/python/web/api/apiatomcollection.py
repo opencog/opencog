@@ -529,7 +529,6 @@ the atom. Example:
         # Outgoing set
         if 'outgoing' in data:
             print data
-            print "duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuude data", data
             if len(data['outgoing']) > 0:
                 outgoing = [self.atom_map.get_atom(uid)
                                 for uid in data['outgoing']]
@@ -702,7 +701,9 @@ containing the atom.
             (sti, lti, vlti) = ParseAttentionValue.parse(data)
             the_atom.av = {'sti': sti, 'lti': lti, 'vlti': vlti}
 
-        return {'atoms': marshal(the_atom, atom_fields)}
+        dicty = marshal(the_atom, atom_fields)
+        dicty['handle'] = self.atom_map.get_uid(the_atom)
+        return {'atoms': dicty}
 
     @swagger.operation(
 	notes='''
