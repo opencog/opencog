@@ -405,28 +405,31 @@ class TestRESTApi():
         self.bird_animal.sti = 15
         self.animal.sti = 0
 
+        jswan = self.mkswan()
+        jbird = self.mkbird()
+        jbird_animal = self.mkbird_animal()
         get_response = \
             self.client.get(self.uri + 'atoms?filterby=attentionalfocus')
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 3
         assert set([atom['handle'] for atom in get_result]) \
-            == {self.bird.value(),
-                self.swan.value(),
-                self.bird_animal.value()}
+            == {jbird['handle'],
+                jswan['handle'],
+                jbird_animal['handle']}
 
         get_response = \
             self.client.get(self.uri + 'atoms?filterby=stirange&stimin=15')
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 2
         assert set([atom['handle'] for atom in get_result]) \
-            == {self.swan.value(), self.bird_animal.value()}
+            == {jswan['handle'], jbird_animal['handle']}
 
         get_response = self.client.get(
             self.uri + 'atoms?filterby=stirange&stimin=15&stimax=18')
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 1
         assert set([atom['handle'] for atom in get_result]) \
-            == {self.bird_animal.value()}
+            == {jbird_animal['handle']}
 
     def test_j_get_types(self):
         # Verify that a list of valid atom types was returned
