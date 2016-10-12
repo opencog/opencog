@@ -94,10 +94,6 @@ class TestRESTApi():
             self.client.get(self.uri + 'atoms/' + str(handle))
         get_result_handle = \
             json.loads(get_response_handle.data)['result']['atoms'][0]
-        print "duuuuudeski nday", handle
-        print "duuuuudeski respo", get_response_handle
-        print "duuuuudeski poster=", post_result
-        print "duuuuudeski repost=", get_result_handle
         assert post_result == get_result_handle
 
         # Get by name and compare

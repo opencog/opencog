@@ -102,14 +102,17 @@ class AtomListResponse(object):
         self.atoms = atoms
 
     def format(self):
-        dictoid = marshal(self.atoms, atom_fields)
-        # xxxxxxxxxxxx need to add handles here!
+        alist = []
+        for atom in self.atoms:
+            matom = marshal(atom, atom_fields)
+            matom['handle'] = global_atom_map.get_uid(atom)
+            alist.append(matom)
         return {
             # @todo: Add pagination (http://flask.pocoo.org/snippets/44/)
             'complete': True,
             'skipped': 0,
             'total': len(self.atoms),
-            'atoms': dictoid
+            'atoms': alist
         }
 
 
