@@ -82,7 +82,7 @@ class TestRESTApi():
         janimal = self.mkanimal()
         return self.mkatom(
             {'type': 'InheritanceLink', 'truthvalue':
-            {'type': 'simple', 'details': {'strength': 0.5, 'count': 0.4}},
+            {'type': 'simple', 'details': {'strength': 1.0, 'count': 0.9}},
              'outgoing': [jswan['handle'], janimal['handle']]})
 
     def get_atom(self, handle):
@@ -277,12 +277,13 @@ class TestRESTApi():
         # Compare to the values updated in the AtomSpace
         atomspace_result = self.bird_animal
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
+        batv = TruthValue(0.9, count_to_confidence(0.95))
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
             count_to_confidence(
                 float(put_result['truthvalue']['details']['count']))) \
-            == atomspace_result.tv
-        assert put_result['attentionvalue'] == atomspace_result.av
+            == batv
+        assert put_result['attentionvalue'] == attentionvalue
 
         # Get by handle and compare
         get_response = \
@@ -314,7 +315,6 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
 
         # Compare to the values updated in the AtomSpace
-        assert post_result['handle'] == existing_atom.value()
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
             count_to_confidence(
