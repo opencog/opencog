@@ -310,7 +310,7 @@ class TestRESTApi():
                == existing_atom.tv
 
     # @raises(IndexError)
-    def test_g_delete_node(self):
+    def xtest_g_delete_node(self):
         atom = self.swan
         handle = atom.value()
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))
@@ -327,7 +327,7 @@ class TestRESTApi():
         assert self.atomspace.get_atom_with_uuid(handle) == None
 
     # @raises(IndexError)
-    def test_h_delete_link(self):
+    def xtest_h_delete_link(self):
         atom = self.bird_animal
         handle = atom.value()
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))

@@ -94,7 +94,7 @@ av_fields = {
 # Atom helpers
 class FormatHandleValue(fields.Raw):
     def format(self, value):
-        return value
+        return 0
 
 
 class FormatHandleList(fields.Raw):
@@ -135,6 +135,7 @@ class AtomMap:
         self.uid_from_atom = dict()
 
     def get_uid(self, atom):
+        print "duuuuude the gtter", atom
         if (atom in self.uid_from_atom):
             uid = self.uid_from_atom[atom]
             return uid
@@ -156,7 +157,7 @@ class AtomMap:
 
 
 atom_fields = {
-    'handle': FormatHandleValue(attribute='uuid'),
+    # 'handle': FormatHandleValue(attribute='uuid'),
     'type': fields.String(attribute='type_name'),
     'name': fields.String,
     'outgoing': FormatHandleList(attribute='out'),

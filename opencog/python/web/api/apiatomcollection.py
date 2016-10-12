@@ -300,7 +300,7 @@ class AtomCollectionAPI(Resource):
 
         if id != "":
             try:
-                atom = self.atom_map.atom_from_uid(id)
+                atom = self.atom_map.get_atom(id)
                 atoms = [atom]
             except IndexError:
                 atoms = []
@@ -365,6 +365,7 @@ class AtomCollectionAPI(Resource):
         # DOT return format is also supported
         if dot_format not in ['True', 'true', '1']:
             atom_list = AtomListResponse(atoms)
+            # xxxxxxxxxxxx here add atoms
             json_data = {'result': atom_list.format()}
 
             # if callback function supplied, pad the JSON data (i.e. JSONP):
@@ -528,6 +529,7 @@ the atom. Example:
         # Outgoing set
         if 'outgoing' in data:
             print data
+            print "duuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuude data", data
             if len(data['outgoing']) > 0:
                 outgoing = [Atom(uuid, self.atomspace)
                                 for uuid in data['outgoing']]
@@ -550,11 +552,15 @@ the atom. Example:
 
         try:
             atom = self.atomspace.add(t=type, name=name, tv=tv, out=outgoing)
+            uid = self.atom_map.get_uid(atom)
         except TypeError:
             abort(500, 'Error while processing your request. Check your '
                        'parameters.')
 
-        return {'atoms': marshal(atom, atom_fields)}
+        dictoid = marshal(atom, atom_fields)
+        # dictoid['handle'] = uid
+#### XXX xxxxxxxxxxxxx above almost works but crashes
+        return {'atoms': dictoid}
 
     @swagger.operation(
 	notes='''
@@ -678,7 +684,8 @@ containing the atom.
         """
 
         # If the atom is not found in the atomspace.
-        if not Atom(id , self.atomspace):
+        the_atom = self.atom_map.get_atom(id)
+        if the_atom == None:
             abort(404, 'Atom not found')
 
         # Prepare the atom data
@@ -690,14 +697,13 @@ containing the atom.
 
         if 'truthvalue' in data:
             tv = ParseTruthValue.parse(data)
-            Atom(id, self.atomspace).tv = tv
+            the_atom.tv = tv
 
         if 'attentionvalue' in data:
             (sti, lti, vlti) = ParseAttentionValue.parse(data)
-            Atom(id, self.atomspace).av = {'sti': sti, 'lti': lti, 'vlti': vlti}
+            the_atom.av = {'sti': sti, 'lti': lti, 'vlti': vlti}
 
-        atom = self.atom_map.atom_from_uid(id)
-        return {'atoms': marshal(atom, atom_fields)}
+        return {'atoms': marshal(the_atom, atom_fields)}
 
     @swagger.operation(
 	notes='''
@@ -736,8 +742,8 @@ Returns a JSON representation of the result, indicating success or failure.
         Removes an atom from the AtomSpace
         """
 
-        atom = self.atom_map.atom_from_uid(id)
-        if not atom == None
+        atom = self.atom_map.get_atom(id)
+        if not atom == None:
             abort(404, 'Atom not found')
 
         status = self.atomspace.remove(atom)
