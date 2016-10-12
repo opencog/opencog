@@ -77,13 +77,15 @@ class TestRESTApi():
 
         # Compare to the values created in the AtomSpace
         frog = self.atomspace.add_node(
-            types.ConceptNode, 'giant_frog', TruthValue(.08, 0.2))
+            types.ConceptNode, 'giant_frog',
+            TruthValue(.08, count_to_confidence(0.2)))
         atomspace_result = frog
         assert post_result['name'] == atomspace_result.name
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
-            float(post_result['truthvalue']['details']['count'])) \
+            count_to_confidence(
+                float(post_result['truthvalue']['details']['count']))) \
             == atomspace_result.tv
 
         # Get by handle and compare

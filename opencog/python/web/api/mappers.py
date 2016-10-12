@@ -34,7 +34,7 @@ class ParseTruthValue(object):
         # (see: opencog\cython\opencog\atomspace_details.pyx,
         #       opencog\cython\opencog\atomspace.pxd)
         if tv_type != 'simple':
-            if tv_type in ['composite', 'count', 'indefinite']:
+            if tv_type in ['count', 'indefinite']:
                 # @todo: check error type
                 abort(400, 'Invalid request: truthvalue type \'' +
                            tv_type + '\' is not supported')
@@ -92,11 +92,6 @@ av_fields = {
 
 
 # Atom helpers
-class FormatHandleValue(fields.Raw):
-    def format(self, value):
-        return 0
-
-
 class FormatHandleList(fields.Raw):
     def format(self, values):
         return [elem.value() for elem in values]
@@ -107,12 +102,14 @@ class AtomListResponse(object):
         self.atoms = atoms
 
     def format(self):
+        dictoid = marshal(self.atoms, atom_fields)
+        # xxxxxxxxxxxx need to add handles here!
         return {
             # @todo: Add pagination (http://flask.pocoo.org/snippets/44/)
             'complete': True,
             'skipped': 0,
             'total': len(self.atoms),
-            'atoms': marshal(self.atoms, atom_fields)
+            'atoms': dictoid
         }
 
 
@@ -135,7 +132,7 @@ class AtomMap:
         self.uid_from_atom = dict()
 
     def get_uid(self, atom):
-        print "duuuuude the gtter", atom
+        print "duuuuude the getter", atom
         if (atom in self.uid_from_atom):
             uid = self.uid_from_atom[atom]
             return uid
@@ -147,6 +144,7 @@ class AtomMap:
         return uid
 
     def get_atom(self, uid):
+        # print "duuuuude ask for the uid", uid
         if (uid in self.atom_from_uid):
             return self.atom_from_uid[uid]
         return None
@@ -155,9 +153,9 @@ class AtomMap:
         del self.atom_from_uid[uid]
         del self.uid_from_atom[atom]
 
+global_atom_map = AtomMap()
 
 atom_fields = {
-    # 'handle': FormatHandleValue(attribute='uuid'),
     'type': fields.String(attribute='type_name'),
     'name': fields.String,
     'outgoing': FormatHandleList(attribute='out'),

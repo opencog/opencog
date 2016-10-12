@@ -29,7 +29,7 @@ class AtomCollectionAPI(Resource):
         return cls
 
     def __init__(self):
-        self.atom_map = AtomMap()
+        self.atom_map = global_atom_map
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument(
             'type', type=str, location='args', choices=types.__dict__.keys())
@@ -300,7 +300,7 @@ class AtomCollectionAPI(Resource):
 
         if id != "":
             try:
-                atom = self.atom_map.get_atom(id)
+                atom = self.atom_map.get_atom(int(id))
                 atoms = [atom]
             except IndexError:
                 atoms = []
