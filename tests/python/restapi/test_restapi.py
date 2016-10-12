@@ -59,6 +59,13 @@ class TestRESTApi():
         post_result = json.loads(post_response.data)['atoms']
         return post_result
 
+    def get_atom(self, handle):
+        get_response_handle = \
+            self.client.get(self.uri + 'atoms/' + str(handle))
+        get_result_handle = \
+            json.loads(get_response_handle.data)['result']['atoms'][0]
+        return get_result_handle
+
     def test_a_post_and_get_node(self):
         # Create a test node
         truthvalue = {'type': 'simple',
@@ -151,12 +158,13 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
         assert self.jswan['handle'] in post_result['outgoing']
         assert self.janimal['handle'] in post_result['outgoing']
-        print "duuuuuuuuu"
 
         # Compare to the values created in the AtomSpace
-        atomspace_result = Atom(post_result['handle'], self.atomspace)
-        assert Atom(post_result['handle'], self.atomspace).value() == \
-            atomspace_result.value()
+        self.swan_animal = self.atomspace.add_link(
+            types.InheritanceLink, [self.swan, self.animal],
+            TruthValue(0.5, count_to_confidence(0.4)))
+
+        atomspace_result = self.swan_animal
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
@@ -173,9 +181,11 @@ class TestRESTApi():
         assert post_result == get_result_handle
 
         # Check if the link is in the incoming set of each of the nodes
+        self.jswan = self.get_atom(self.jswan['handle'])
+        self.janimal = self.get_atom(self.janimal['handle'])
         for h in post_result['outgoing']:
-            assert post_result['handle'] \
-                in [atom.value() for atom in Atom(h, self.atomspace).incoming]
+            assert post_result['handle'] in self.jswan['incoming']
+            assert post_result['handle'] in self.janimal['incoming']
 
     def test_c_put_and_get_tv_av_node(self):
         atom = self.swan
