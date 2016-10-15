@@ -374,9 +374,9 @@
     Get the current numerical values for a list of psi-related variables.
     This function is written originally for calling via the REST API interface,
     so the list of variables consist of string values of the variable names
-    (rather than variables themselves).
+    (rather than the variables themselves).
 
-    vars - a list of psi-related variable names in string format
+    vars - psi-related variable names as string values (rest arguments)
 
     Returns string with comma delimited key-value pairs in the form of
     'var_name': value, 'var_name2': value, ...
@@ -394,9 +394,9 @@
     )
 
     ; If vars is not a list, put it into a list (e.g., if single variable name
-    ; is passed.)
-    (if (not (list? vars))
-        (set! vars (list vars)))
+    ; is passed.) Not needed when using rest argument.
+    ;(if (not (list? vars))
+    ;    (set! vars (list vars)))
 
     ;(format "vars: ~a" vars)
     (for-each append-var-value vars)
