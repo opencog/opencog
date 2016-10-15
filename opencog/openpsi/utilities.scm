@@ -369,7 +369,7 @@
 (define executionlink "ExecutionLink") ; ditto
 (define undefined "Undefined")
 
-(define (psi-get-number-values-for-vars vars)
+(define (psi-get-number-values-for-vars . vars)
 "
     Get the current numerical values for a list of psi-related variables.
     This function is written originally for calling via the REST API interface,
@@ -379,7 +379,8 @@
     vars - a list of psi-related variable names in string format
 
     Returns string with comma delimited key-value pairs in the form of
-    var_name: value, var_name2: value, ...
+    'var_name': value, 'var_name2': value, ...
+    If a psi variable with varname is not defined, #f is returned for the value.
 "
     (define return '())
 
@@ -389,7 +390,7 @@
         (define var-node (Concept (string-append psi-prefix-str varname)))
         (define value (psi-get-number-value var-node))
         (set! return
-            (append return (list (format #f "~a: ~a" varname value))))
+            (append return (list (format #f "'~a': ~a" varname value))))
     )
 
     ; If vars is not a list, put it into a list (e.g., if single variable name
