@@ -312,7 +312,7 @@
 (define (psi-get-value entity)
 "
   Get the current value of a psi-related entity. For entities with numerical
-  values, and NumberNode is returned.
+  values a NumberNode is returned.
 "
 	;(define result #f)
 
@@ -368,6 +368,40 @@
 (define evaluationlink "EvaluationLink") ; not sure if we need this yet
 (define executionlink "ExecutionLink") ; ditto
 (define undefined "Undefined")
+
+(define (psi-get-number-values-for-vars vars)
+"
+    Get the current numerical values for a list of psi-related variables.
+    This function is written originally for calling via the REST API interface,
+    so the list of variables consist of string values of the variable names
+    (rather than variables themselves).
+
+    vars - a list of psi-related variable names in string format
+
+    Returns string with comma delimited key-value pairs in the form of
+    var_name: value, var_name2: value, ...
+"
+    (define return '())
+
+    ; Internal function to add the variable value of varname to the return list
+    (define (append-var-value varname)
+    ;
+        (define var-node (Concept (string-append psi-prefix-str varname)))
+        (define value (psi-get-number-value var-node))
+        (set! return
+            (append return (list (format #f "~a: ~a" varname value))))
+    )
+
+    ; If vars is not a list, put it into a list (e.g., if single variable name
+    ; is passed.)
+    (if (not (list? vars))
+        (set! vars (list vars)))
+
+    ;(format "vars: ~a" vars)
+    (for-each append-var-value vars)
+
+    (string-join return ", ")
+)
 
 
 (define (psi-set-value! entity value)
