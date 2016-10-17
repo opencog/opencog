@@ -128,6 +128,13 @@
               (Type \"PredicateNode\")
               (ListLink
                   (Type \"ConceptNode\"))))
+          (Member
+              (TypeChoice
+                  (Type \"ConceptNode\")
+                  (Type \"SatisfyingSetLink\"))
+              (TypeChoice
+                  (Type \"ConceptNode\")
+                  (Type \"SatisfyingSetLink\")))
 
   a-list:
   - This is a list of atoms, for example a list of r2l outputs
