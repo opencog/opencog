@@ -127,12 +127,13 @@
 	(psi-create-monitored-event "positive-sentiment-dialog"))
 (define negative-sentiment-dialog
 	(psi-create-monitored-event "negative-sentiment-dialog"))
-
+(define loud-noise-event
+    (psi-create-monitored-event "loud-noise"))
 
 ; ------------------------------------------------------------------
 ; Event detection callbacks
 
-; Callback functions for positive and negative chat sentiment detection
+; Callback function for positive and negative chat sentiment detection
 (define (psi-detect-dialog-sentiment)
 	(define current-input (get-input-sent-node))
 	(define previous-input (psi-get-value current-sentence-node))
@@ -141,7 +142,7 @@
 	         (not (equal? current-input previous-input)))
 		; We have a new input sentence
 		(begin
-            (if psi-verbose (format #t "\n* New input sentance detected *\n"))
+            (if psi-verbose (format #t "\n* New input sentence detected *\n"))
             ;(format #t "previous-input: ~a   current-input: ~a\n"
             ;    previous-input current-input)
             (StateLink current-sentence-node current-input)
@@ -165,10 +166,25 @@
 ; Callback checks for both positive and negative sentiment
 (psi-set-event-callback! psi-detect-dialog-sentiment)
 
+; Callback for loud noise detected
+(define new-loud-noise? #f) ; indicates a loud noise just occurred
+(define (psi-check-for-loud-noise)
+    ; This step is a temp hack for development purpose. Need to replace this
+    ; with the method for actual event detection, which I think will be through
+    ; ROS messaging.
+    (if new-loud-noise?
+        (begin
+            (psi-set-event-occurrence! loud-noise-event)
+            (set! new-loud-noise? #f))))
+
+; Register the callback with the openpsi dynamics updater
+(psi-set-event-callback! psi-check-for-loud-noise)
+
+
 ; ------------------------------------------------------------------
 ; OpenPsi Dynamics Interaction Rules
 
-; Todo: move to own file probably
+; Todo: move to own file?
 
 ; The following change-predicate types have been defined in
 ; opencog/opencog/openpsi/interaction-rule.scm:
@@ -176,6 +192,16 @@
 ;(define increased "increased")
 ;(define decreased "decreased")
 
+;--------------------------------
+; Internal dynamic interactions
+
+(define power->arousal
+	(psi-create-interaction-rule agent-state-power changed arousal .3))
+
+;-----------------------
+; Event-based triggers
+
+; User dialog sentiment
 (define pos-sentiment->pos-valence
 	(psi-create-interaction-rule positive-sentiment-dialog
 		increased pos-valence .3))
@@ -189,21 +215,34 @@
 	(psi-create-interaction-rule negative-sentiment-dialog
 		increased pos-valence -.3))
 
+; Speech giving starts
 (define speech->power
     (psi-create-interaction-rule speech-giving-starts increased
         agent-state-power .5))
 
-(define power->voice
-	(psi-create-interaction-rule agent-state-power changed voice-width 1))
+; Loud noise occurs
+(define loud-noise->arousal (psi-create-interaction-rule loud-noise-event
+    increased arousal 1))
+(define loud-noise->neg-valence (psi-create-interaction-rule loud-noise-event
+    increased neg-valence .7))
 
+; New face
 (define new-face->arousal
     (psi-create-interaction-rule new-face increased arousal .3))
 
-(define power->arousal
-	(psi-create-interaction-rule agent-state-power changed arousal .3))
+
+;-------------------------------------
+; Internal vars to physiology mapping
+
+(define power->voice
+	(psi-create-interaction-rule agent-state-power changed voice-width 1))
 
 (define arousal->voice
 	(psi-create-interaction-rule arousal changed voice-width -.5))
+
+
+
+
 
 ; --------------------------------------------------------------
 ; Psi Emotion Representations
