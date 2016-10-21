@@ -261,14 +261,30 @@
 		(True (Put (State heard-sound (Variable "$x")) heard-nothing))
 	))
 
-;; Loud sound value.
-(define loud-sound  (AnchorNode "Sudden sound change value"))
+;; For sound
+(define very-loud-sound  (AnchorNode "Decibel value"))
+(State very-loud-sound (Number 90)) 
+(define loud-sound (AnchorNode "Sudden sound change value"))
 (State loud-sound (Number 0)) ; There isn't any sudden change in sound Decibel
 (define very-low-sound (AnchorNode "Decibel value"))
 (State very-low-sound (Number 35)) 
 (define normal-conversation (AnchorNode "Decibel value"))
 (State normal-conversation (Number 65)) 
-;; Return true if a loud voice is heard
+;;For Saliency
+(define-public salient-loc  (AnchorNode "locations"))
+(define-public initial-loc (list (NumberNode 1.0)(NumberNode 0.0)(NumberNode 0.0)))
+(StateLink salient-loc (List initial-loc))
+;;For Luminance
+(define luminance (AnchorNode "bright"))
+(State luminance (Number 40)) 
+
+;; Return true if a very loud sound is heard
+(DefineLink
+	(DefinedPredicate "Heard very loud sound?")
+	(GreaterThan
+		(Get (State very-loud-sound (Variable "$x")))
+		(Number 90)))
+;; Return true if a sudden change is heard
 (DefineLink
 	(DefinedPredicate "Heard Loud Voice?")
 	(GreaterThan
@@ -287,6 +303,38 @@
         (Get (State normal-conversation (Variable "$z")))
         (Number 65))))
 ; --------------------------------------------------------
+;;For Luminance
+(DefineLink
+	(DefinedPredicate "Room bright?")
+	(GreaterThan
+		(Get (State luminance (Variable "$x")))
+		(Number 40)))
+
+;-----------------------------------------------------------
+;;for saliency
+
+(define salient (AnchorNode "Degree value"))
+(State salient (Number 5))
+
+(DefineLink 
+(DefinedPredicate "saliency")
+(GreaterThan
+(Get (State salient (Variable"$S")))
+(Number 13)))
+
+(DefineLink
+(DefinedPredicate "no faces")
+(EqualLink
+(DefinedSchemaNode "Num visible faces")
+(NumberNode 0)))
+
+(DefineLink 
+   (DefinedPredicate "saliency required?")
+(SequentialAnd
+(DefinedPredicate "no faces")
+(DefinedPredicate "saliency")))
+
+;-------------------------------------------------------
 ; Time-stamp-related stuff.
 
 ;; Define setters and getters for timestamps. Perhaps this should
