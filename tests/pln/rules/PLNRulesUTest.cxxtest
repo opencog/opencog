@@ -214,7 +214,7 @@ void PLNRulesUTest::test_forall_full_instantiation()
 	Handle results = bindlink(&as, rule);
 
 	/**
-	 * It should contain 3 groundings:
+	 * It should contain 4 groundings:
 	 *
 	 * 1. EvaluationLink
 	 *       PredicateNode "is-predicate"
@@ -229,6 +229,14 @@ void PLNRulesUTest::test_forall_full_instantiation()
 	 *       ListLink
 	 *          <some-concept>
 	 *          <some-predicate>
+	 *
+	 * 4. ImplicationLink
+	 *       EvaluationLink
+	 *          PredicateNode "P"
+	 *          <some-concept>
+	 *       EvaluationLink
+	 *          PredicateNode "P"
+	 *          <some-concept>
 	 */
 	TS_ASSERT_EQUALS(4, getarity(results));
 }
