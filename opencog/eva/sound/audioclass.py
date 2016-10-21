@@ -22,6 +22,7 @@ from audiosysneeds.msg import audiodata
 class AudioStrength:
   d = 0
   Decibel = None
+  value = 0
 
   def __init__(self):
     
