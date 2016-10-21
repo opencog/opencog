@@ -232,20 +232,54 @@
 			(GroundedPredicate "py: say_text")
 			(List (Variable "sentence")))
 	))
+
 ;show happy emotion	
 (DefineLink
     (DefinedPredicate "Quiet:happy")
- ;   (LambdaLink (Concept "happy")
          (Evaluation
             (GroundedPredicate "py: do_emotion")
            (List (Concept "happy")(NumberNode 3) (NumberNode 0.5)))
     )
- ;show amused emotion	
+;show amused emotion	
 (DefineLink
     (DefinedPredicate "Normal:amused")
          (Evaluation
             (GroundedPredicate "py: do_emotion")
            (List (Concept "amused")(NumberNode 3) (NumberNode 0.5)))
+    )
+;show afraid emotion    
+ (DefineLink
+    (DefinedPredicate "Loud:afraid")
+         (Evaluation
+            (GroundedPredicate "py: do_emotion")
+           (List (Concept "afraid")(NumberNode 3) (NumberNode 0.5)))
+    )
+;show curious emotion    
+ (DefineLink
+    (DefinedPredicate "Curious")
+         (Evaluation
+            (GroundedPredicate "py: do_gesture")
+              (ListLink (Concept "think-browsDown.002")(NumberNode 0.2) (NumberNode 2) (NumberNode 0.8))))
+; for salient
+(DefineLink
+    (DefinedPredicate "look at salient point")
+    (AndLink
+	  (DefinedPredicate "Curious")
+    (True (Put
+        (DefinedPredicate "Look at point")
+        (Get
+            (State
+                salient-loc
+                (List (Variable "$x") (Variable "$y") (Variable "$z")))
+        )))))
+        
+
+;for luminance
+(DefineLink
+    (DefinedPredicate "Bright:happy")
+         (Evaluation
+            (GroundedPredicate "py: do_emotion")
+           (List (Concept "happy")(NumberNode 3) (NumberNode 0.5)))
     )
 ; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent
