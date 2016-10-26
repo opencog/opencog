@@ -34,6 +34,12 @@
 
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+		(DefinedPredicate "Did Someone New Speak?")))
+	(DefinedPredicate "Request interaction with person who spoke")
+	face-demand-satisfied (stv 1 1) face-demand)
+
+
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
 		(DefinedPredicate "Someone requests interaction?")))
 	(DefinedPredicate "Interaction requested action")
 	face-demand-satisfied (stv 1 1) face-demand)
@@ -115,28 +121,38 @@
 (psi-rule (list (DefinedPredicate "Skip Interaction?"))
 	(DefinedPredicate "Keep alive")
 	speech-demand-satisfied (stv 1 1) speech-demand)
-	
+
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-        (DefinedPredicate "Heard Loud Voice?")))
-    (DefinedPredicate "Say whoa!")
-    speech-demand-satisfied (stv 1 1) speech-demand)
+		(DefinedPredicate "Heard Loud Voice?")))
+	(DefinedPredicate "Say whoa!")
+	speech-demand-satisfied (stv 1 1) speech-demand)
+
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
         (DefinedPredicate "Heard very loud sound?")))
     (DefinedPredicate "Loud:afraid")
     speech-demand-satisfied (stv 1 1) speech-demand)
-(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-        (DefinedPredicate "very low sound?")))
-   (DefinedPredicate "Quiet:happy")
-    speech-demand-satisfied (stv 1 1) speech-demand)
-(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-        (DefinedPredicate  "normal conversation?")))
-   (DefinedPredicate "Normal:amused")
-    speech-demand-satisfied (stv 1 1) speech-demand)
+
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
         (DefinedPredicate  "saliency required?")))
   (DefinedPredicate "look at salient point")
    face-demand-satisfied (stv 1 1) face-demand)
+   
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
         (DefinedPredicate "Room bright?")))
   (DefinedPredicate "Bright:happy")
    face-demand-satisfied (stv 1 1) face-demand)
+
+; XXX FIXME
+; The following two rules cause the (DefinedPredicate "Normal:amused")
+; to run as fast as possible -- something like 30 times a second.
+; Something is wrong here, see bug
+; opencog/ros-behavior-scripting/issues/110
+;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+;		(DefinedPredicate "very low sound?")))
+;	(DefinedPredicate "Quiet:happy")
+;	speech-demand-satisfied (stv 1 1) speech-demand)
+;
+;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+;		(DefinedPredicate  "normal conversation?")))
+;	(DefinedPredicate "Normal:amused")
+;	speech-demand-satisfied (stv 1 1) speech-demand)

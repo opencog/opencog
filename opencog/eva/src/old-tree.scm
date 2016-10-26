@@ -24,6 +24,10 @@
 				(DefinedPredicate "Skip Interaction?")
 
 				(SequentialAnd
+					(DefinedPredicate "Did Someone New Speak?")
+					(DefinedPredicate "Request interaction with person who spoke"))
+
+				(SequentialAnd
 					(DefinedPredicate "Someone requests interaction?")
 					(DefinedPredicate "Interaction requested action"))
 

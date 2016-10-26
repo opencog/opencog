@@ -59,6 +59,30 @@
 (define-public soma-awake (ConceptNode "Awake"))
 (define-public soma-bored (ConceptNode "Bored"))
 
+;;Check if someone new spoke something
+(DefineLink
+	(DefinedPredicate "Did Someone New Speak?")
+	(SequentialAnd
+		(NotLink
+			(Equal
+				(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+					(StateLink (ConceptNode "last person who spoke") (VariableNode "$fid"))
+				)
+				(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+					(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
+				)
+			)
+		)
+		(True
+		(PutLink
+			(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
+			(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+				(StateLink (ConceptNode "last person who spoke") (VariableNode "$fid"))
+			)
+		))
+	)
+)
+
 ;; Assume Eva is sleeping at first
 (StateLink soma-state soma-sleeping)
 
@@ -261,57 +285,53 @@
 		(True (Put (State heard-sound (Variable "$x")) heard-nothing))
 	))
 
-;; For sound
-(define very-loud-sound  (AnchorNode "Decibel value"))
-(State very-loud-sound (Number 90)) 
-(define loud-sound (AnchorNode "Sudden sound change value"))
-(State loud-sound (Number 0)) ; There isn't any sudden change in sound Decibel
-(define very-low-sound (AnchorNode "Decibel value"))
-(State very-low-sound (Number 35)) 
-(define normal-conversation (AnchorNode "Decibel value"))
-(State normal-conversation (Number 65)) 
-;;For Saliency
-(define-public salient-loc  (AnchorNode "locations"))
-(define-public initial-loc (list (NumberNode 1.0)(NumberNode 0.0)(NumberNode 0.0)))
-(StateLink salient-loc (List initial-loc))
-;;For Luminance
-(define luminance (AnchorNode "bright"))
-(State luminance (Number 40)) 
+;; Loud sound value.
+(define loud-sound  (AnchorNode "Sudden sound change value"))
+(define no-loud-sound (Number 0.0))
+; There isn't any sudden change in sound Decibel
+(State loud-sound no-loud-sound)
 
-;; Return true if a very loud sound is heard
-(DefineLink
-	(DefinedPredicate "Heard very loud sound?")
-	(GreaterThan
-		(Get (State very-loud-sound (Variable "$x")))
-		(Number 90)))
-;; Return true if a sudden change is heard
+;; Current decibel value.
+(define decibel-value (AnchorNode "Decibel value"))
+(define very-low-sound (Number 35))
+(define normal-conversation (Number 65))
+(define very-loud-sound (Number 90)) 
+
+; The default decibel value.
+(State decibel-value normal-conversation)
+
+;; Return true if a loud voice is heard
 (DefineLink
 	(DefinedPredicate "Heard Loud Voice?")
 	(GreaterThan
 		(Get (State loud-sound (Variable "$x")))
-		(Number 0)))
-;;Return true if low sound is heard
+		no-loud-sound))
+
+;; Return true if low sound is heard
 (DefineLink
     (DefinedPredicate "very low sound?")
     (NotLink (GreaterThan
-        (Get (State very-low-sound (Variable "$y")))
-        (Number 35))))
-;;Return true for normal conversation
+        (Get (State decibel-value (Variable "$y")))
+        very-low-sound)))
+
+;; Return true for normal conversation
 (DefineLink
     (DefinedPredicate  "normal conversation?")
     (NotLink (GreaterThan
-        (Get (State normal-conversation (Variable "$z")))
-        (Number 65))))
-; --------------------------------------------------------
-;;For Luminance
+        (Get (State decibel-value (Variable "$z")))
+        normal-conversation)))
+        
+;; Return true if a very loud sound is heard
 (DefineLink
-	(DefinedPredicate "Room bright?")
-	(GreaterThan
-		(Get (State luminance (Variable "$x")))
-		(Number 40)))
-
-;-----------------------------------------------------------
-;;for saliency
+	(DefinedPredicate "Heard very loud sound?")
+	(NotLink (GreaterThan
+		(Get (State decibel-value (Variable "$a")))
+		very-loud-sound)))
+;--------------------------------------------
+;;For Saliency
+(define-public salient-loc  (AnchorNode "locations"))
+(define-public initial-loc (list (NumberNode 1.0)(NumberNode 0.0)(NumberNode 0.0)))
+(State salient-loc (List initial-loc))
 
 (define salient (AnchorNode "Degree value"))
 (State salient (Number 5))
@@ -334,7 +354,17 @@
 (DefinedPredicate "no faces")
 (DefinedPredicate "saliency")))
 
-;-------------------------------------------------------
+;---------------------------------------------------------
+;;For Luminance
+(define luminance-value (AnchorNode "luminance"))
+(State bright (Number 40)) 
+(DefineLink
+	(DefinedPredicate "Room bright?")
+	(GreaterThan
+		(Get (State luminance (Variable "$x")))
+		(Number 40)))
+
+; --------------------------------------------------------
 ; Time-stamp-related stuff.
 
 ;; Define setters and getters for timestamps. Perhaps this should

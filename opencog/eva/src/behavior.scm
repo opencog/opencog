@@ -127,6 +127,21 @@
 ; ------------------------------------------------------
 ; More complex interaction sequences.
 
+;;request interaction with previous person who spoke
+;;[is set to last person in "Did someone new speak?""]
+(DefineLink
+	(DefinedPredicate "Request interaction with person who spoke")
+	(True
+		(PutLink
+			(StateLink request-eye-contact-state (VariableNode "$fid"))
+			(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+				(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
+			)
+		)
+	)
+)
+
+
 ;; Interact with the current face target.
 ;; XXX Needs to be replaced by OpenPsi emotional state modelling.
 (DefineLink
@@ -784,12 +799,12 @@
         ))
 		(TrueLink)
 	))
-;; Actions for loud sound	
+;; Actions for loud sound
 (DefineLink
 	(DefinedPredicate "Say whoa!")
 	(Put (DefinedPredicate "Say") (Node "whoa!")))
 
-;; Actions for low sound	
+;; Actions for low sound
 ;(DefineLink
 ;	(DefinedPredicate "Quiet:happy")
 ;	(Put (DefinedPredicate "Quiet") (Concept "happy") ))
