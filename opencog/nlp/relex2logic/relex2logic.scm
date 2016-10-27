@@ -7,6 +7,7 @@
 
 (load "relex2logic/rule-utils.scm")
 (load "relex2logic/r2l-utilities.scm")
+(load "relex2logic/post-processing.scm")
 
 ; -----------------------------------------------------------------------
 ; This loads all the rules into the cogserver shell.

@@ -406,13 +406,31 @@
 )
 
 ; -----------------------------------------------------------------------
-; create-abstract-version -- Create the abstracted representation
-;
-; Given an 'interpretation-node', find out which words can be abstracted
-; and call the above helper function to create them. Both the partial and
-; fully abstracted version are created.  The new partially abstracted
-; version will have new UUID for each non-abstract node.
-(define (create-abstract-version interpretation-node)
+(define-public (create-abstract-version interpretation-node)
+"
+  Given an 'interpretation-node', it finds out which r2l links can be
+  abstracted and returns the newly abstracted atoms. For example, the
+  following link which is part of the an r2l output for the sentence,
+  \"Men breathe air\"
+
+	(EvaluationLink
+		(PredicateNode \"breathe@959e0d2f-dcb2-4105-b897-faefbe4d5149\")
+		(ListLink
+			(ConceptNode \"men@728c977c-2b4e-4b53-aeca-4a9d4d751357\")
+			(ConceptNode \"air@2d2b04b1-4502-4ffa-ac36-1c83006c6f4f\")
+		)
+	)
+
+	is converted to
+
+	(EvaluationLink
+		(PredicateNode \"breathe\")
+		(ListLink
+			(ConceptNode \"man\")
+			(ConceptNode \"air\")
+		)
+	)
+"
 	(define r2l-set (cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'SetLink interpretation-node))))
 
 	; remove all unary links
