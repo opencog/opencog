@@ -51,7 +51,7 @@
 ;
 (define (r2l-is-unary? link)
 	(define nodes (cog-get-all-nodes link))
-	
+
 	(<= (count is-r2l-inst? nodes) 1)
 )
 
@@ -72,7 +72,7 @@
 			)
 		)
 	)
-	
+
 	(recursive-helper (car sets) (cdr sets))
 )
 
@@ -345,6 +345,7 @@
 ; is an a-list whose keys are nodes that should be cloned with new instance
 ; name, and whose data values are the new instance name.
 ;
+; 'ilink' a link to be abstracted should it have the 'lone-nodes'
 ; XXX FIXME using the hacky word-get-r2l-node, bad idea!
 ;
 (define (rebuild ilink lone-nodes non-lone-alist)
@@ -352,41 +353,49 @@
 	(define old-oset (cog-outgoing-set ilink))
 	(define (replace-old old-atom)
 		(define a-pair (assoc old-atom non-lone-alist))
-		(cond ((cog-link? old-atom) (rebuild old-atom lone-nodes non-lone-alist))
+		(cond ((cog-link? old-atom)
+					(rebuild old-atom lone-nodes non-lone-alist))
 		      ; if node needed to be abstracted
 		      ((member? old-atom lone-nodes)
-			(if (equal? 'VariableNode (cog-type old-atom))
-				; XXX what would an abstracted VariableNode be like?
-				old-atom
-				; fail-safe for when R2L rule is incomplete and never created the abstract node
-				(if (null? (word-get-r2l-node (word-inst-get-lemma (r2l-get-word-inst old-atom))))
-					(cog-new-node (cog-type old-atom) (cog-name (word-inst-get-lemma (r2l-get-word-inst old-atom))))
-					(word-get-r2l-node (word-inst-get-lemma (r2l-get-word-inst old-atom)))
-				)
-			)
-		      )
-		      ; if node needed to be cloned with new instance name
-		      (a-pair
-			(let ((abstract-node
-				; fail-safe for when R2L rule is incomplete and never created the abstract node
-				(if (null? (word-get-r2l-node (word-inst-get-lemma (r2l-get-word-inst old-atom))))
-					(cog-new-node (cog-type old-atom) (cog-name (word-inst-get-lemma (r2l-get-word-inst old-atom))))
-					(word-get-r2l-node (word-inst-get-lemma (r2l-get-word-inst old-atom)))
-				)
-			     ))
-				(if (equal? 'PredicateNode (cog-type old-atom))
-					(ImplicationLink
-						(cog-new-node (cog-type old-atom) (cdr a-pair) (cog-tv old-atom))
-						abstract-node
+					(if (equal? 'VariableNode (cog-type old-atom))
+						; XXX what would an abstracted VariableNode be like?
+						old-atom
+						; fail-safe for when R2L rule is incomplete and
+						; never created the abstract node
+						(if (null? (word-get-r2l-node
+								(word-inst-get-lemma (r2l-get-word-inst old-atom))))
+							(cog-new-node
+								(cog-type old-atom)
+								(cog-name (word-inst-get-lemma
+									(r2l-get-word-inst old-atom))))
+							(word-get-r2l-node (word-inst-get-lemma
+								(r2l-get-word-inst old-atom)))
+						)
 					)
-					(InheritanceLink
-						(cog-new-node (cog-type old-atom) (cdr a-pair) (cog-tv old-atom))
-						abstract-node
-					)
-				)
-				(cog-node (cog-type old-atom) (cdr a-pair))
-			)
 		      )
+			;  ; FIXME: Why create a node with new-instance name?
+		    ;  ; If node needed to be cloned with new instance name
+		    ;  (a-pair
+			;(let ((abstract-node
+			;	; fail-safe for when R2L rule is incomplete and never created the abstract node
+			;	(if (null? (word-get-r2l-node (word-inst-get-lemma (r2l-get-word-inst old-atom))))
+			;		(cog-new-node (cog-type old-atom) (cog-name (word-inst-get-lemma (r2l-get-word-inst old-atom))))
+			;		(word-get-r2l-node (word-inst-get-lemma (r2l-get-word-inst old-atom)))
+			;	)
+			;     ))
+			;	(if (equal? 'PredicateNode (cog-type old-atom))
+			;		(ImplicationLink
+			;			(cog-new-node (cog-type old-atom) (cdr a-pair) (cog-tv old-atom))
+			;			abstract-node
+			;		)
+			;		(InheritanceLink
+			;			(cog-new-node (cog-type old-atom) (cdr a-pair) (cog-tv old-atom))
+			;			abstract-node
+			;		)
+			;	)
+			;	(cog-node (cog-type old-atom) (cdr a-pair))
+			;)
+		    ;  )
 		      (else old-atom)
 		)
 	)
@@ -403,22 +412,16 @@
 ; and call the above helper function to create them. Both the partial and
 ; fully abstracted version are created.  The new partially abstracted
 ; version will have new UUID for each non-abstract node.
-;
-; XXX FIXME the usage of this function is poorly defined.  It needs a new
-; R2L's structure redesign, and a clearer idea of what it is trying to
-; achieve.
-;
-; XXX I cannot find any callers of this function. Is this dead code ???
-; If so, it should be removed .. its confusing ...
-;
 (define (create-abstract-version interpretation-node)
 	(define r2l-set (cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'SetLink interpretation-node))))
-	
+
 	; remove all unary links
 	(define r2l-cleaned-set (remove r2l-is-unary? r2l-set))
-	
+
 	; for each link, retrieve its nodes
-	(define r2l-set-nodes (append-map (lambda (lnk) (delete-duplicates (cog-get-all-nodes lnk))) r2l-cleaned-set))
+	(define r2l-set-nodes (append-map
+		(lambda (lnk) (delete-duplicates (cog-get-all-nodes lnk)))
+		r2l-cleaned-set))
 
 	; partition the set of nodes: one set all lone nodes and the other the rest
 	(receive (lone-nodes other-nodes)
@@ -426,20 +429,36 @@
 			(lambda (n)
 				(and
 					(is-r2l-inst? n)
-					(= (count (lambda (x) (equal? x n)) r2l-set-nodes) 1)
+					;FIXME: Why occurence of a node in more than one relation
+					; matter? One reason is if the instance-node is renamed
+					; then one wouldn't want to rename the same instance to
+					; different nodes, but then again why create new
+					; instance-nodes.
+					;(= (count (lambda (x) (equal? x n)) r2l-set-nodes) 1)
+					; Because a definite article may imply that the noun is,
+					; known in current context, and as such might not
+					; necessarily be a generializable(aka fully-abstracted)
+					; concept.
 					(not (definite? n))
 				)
 			)
 			r2l-set-nodes
 		)
-		(let ((non-lone-alist
-			(filter-map
-				(lambda (n) (if (is-r2l-inst? n) (cons n (create-unique-word-name n)) #f))
-				(delete-duplicates other-nodes))))
-			(append
-				(map (lambda (lnk) (rebuild lnk lone-nodes non-lone-alist)) r2l-cleaned-set)
-				(map (lambda (lnk) (rebuild lnk (filter is-r2l-inst? (delete-duplicates r2l-set-nodes)) '())) r2l-cleaned-set)
-			)
-		)
+
+		;(let ((non-lone-alist
+		;		(filter-map
+		;			(lambda (n)
+		;				(if (is-r2l-inst? n)
+		;					(cons n (create-unique-word-name n))
+		;					#f
+		;				)
+		;			)
+		;			(delete-duplicates other-nodes))))
+		;	(append
+		;		(map (lambda (lnk) (rebuild lnk lone-nodes non-lone-alist)) r2l-cleaned-set)
+		;		(map (lambda (lnk) (rebuild lnk (filter is-r2l-inst? (delete-duplicates r2l-set-nodes)) '())) r2l-cleaned-set)
+		;	)
+		;)
+		(map (lambda (lnk) (rebuild lnk lone-nodes '())) r2l-cleaned-set)
 	)
 )
