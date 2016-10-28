@@ -266,14 +266,26 @@ def call_sentiment_parse(text_node, sent_node):
             ; (2) delete duplicates
             ; (3) get the corresponding abstract nodes
             ; (4) update count
-            (let* ((all-nodes (append-map cog-get-all-nodes (parse-get-r2l-outputs p)))
-                   ; XXX FIXME this is undercounting since each abstract node can have
-                   ; multiple instances in a sentence.  Since there is no clean way
-                   ; to get to the abstracted node from an instanced node yet, such
-                   ; repeatition are ignored for now
-                   (abst-nodes (delete-duplicates (filter is-r2l-abstract? all-nodes)))
-                   (word-nodes (append-map word-inst-get-word (parse-get-words p))))
-                (update-tv abst-nodes)
+            (let* ((all-nodes
+                    (append-map cog-get-all-nodes (parse-get-r2l-outputs p)))
+                    ; XXX FIXME this is undercounting since each abstract
+                    ; node can have multiple instances in a sentence.  Since
+                    ; there is no clean way to get to the abstracted node
+                    ; from an instanced node yet, such repeatition are
+                    ; ignored for now
+                    (abst-nodes (delete-duplicates
+                        (filter is-r2l-abstract? all-nodes)))
+                    (word-nodes
+                        (append-map word-inst-get-word (parse-get-words p))))
+
+                ; Updating all-nodes without deleting multiple occurence of
+                ; a node is made so as to count every relation an atom is
+                ; involved in as a separate observation of the concept.
+                ; This form of counting is not precise but is assumed
+                ; to be proptional to the size of the incoming-set.This is a
+                ; crude fix for the issue raised in the FIXME on abst-nodes,
+                ; above.
+                (update-tv all-nodes)
                 (update-tv word-nodes)
             )
         )
