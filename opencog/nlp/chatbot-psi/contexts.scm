@@ -112,13 +112,18 @@
         (let ((rand-idx (list-ref idx (random (length idx)))))
             (if (equal? (length input-wl) 1)
                 (set! rsg-input (cog-name (car input-wl)))
-                (if (equal? rand-idx 0)
-                    (set! rsg-input (string-append
-                        (cog-name (list-ref input-wl rand-idx))
-                            " " (cog-name (list-ref input-wl (+ rand-idx 1)))))
-                    (set! rsg-input (string-append
-                        (cog-name (list-ref input-wl (- rand-idx 1)))
-                            " " (cog-name (list-ref input-wl rand-idx))))
+                ; Feed the keyword directly to the generator, or with the
+                ; word either before or after that keyword
+                (if (> .7 (random 1.0))
+                    (set! rsg-input (cog-name (list-ref input-wl rand-idx)))
+                    (if (equal? rand-idx 0)
+                        (set! rsg-input (string-append
+                            (cog-name (list-ref input-wl rand-idx))
+                                " " (cog-name (list-ref input-wl (+ rand-idx 1)))))
+                        (set! rsg-input (string-append
+                            (cog-name (list-ref input-wl (- rand-idx 1)))
+                                " " (cog-name (list-ref input-wl rand-idx))))
+                    )
                 )
             )
             (stv 1 1)
