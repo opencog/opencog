@@ -122,6 +122,9 @@
    (Predicate "happy")
    (Concept "Peter"))
 
+;; This is required for SuReal to generate the answer
+(nlp-parse "small cats are cute")
+
 ;;;;;;;;;;;;;;;
 ;; L2S rules ;;
 ;;;;;;;;;;;;;;;
