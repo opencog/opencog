@@ -116,6 +116,44 @@ def call_sentiment_parse(text_node, sent_node):
 )
 
 ; -----------------------------------------------------------------------
+(define-public (get-previous-said-sents from-time)
+"
+  Returns a list of SentenceNodes that are inputed after the given time.
+
+  from-time:
+  - The time in seconds since 1970-01-01 00:00:00 UTC. (current-time) gives
+    such time.
+"
+    (define query
+        (Get
+            (VariableList
+                (TypedVariableLink
+                    (Variable "tn")
+                    (TypeNode "TimeNode"))
+                (TypedVariableLink
+                    (Variable "s")
+                    (TypeNode "SentenceNode")))
+            (AtTimeLink
+                (Variable "tn")
+                (Variable "s")
+                time-domain)))
+
+    (define result '())
+    (define (last-sent sent)
+        (let ((sent-time (string->number (cog-name (gar sent)))))
+            (if (>= sent-time from-time)
+                (set! result (append result (list (gdr sent))))
+            )
+        ))
+
+    (let ((sents (cog-execute! query)))
+        (for-each last-sent (cog-outgoing-set sents))
+        (cog-delete sents)
+        result
+    )
+)
+
+; -----------------------------------------------------------------------
 (define (r2l-parse sent)
 "
   r2l-parse SENT -- perform relex2logic processing on sentence SENT.
