@@ -76,3 +76,17 @@
 )
 
 ; --------------------------------------------------------------
+(define-public (show-demo-state)
+"
+  Returns an a-list with rule aliases for keys and their weights for values.
+"
+    (define result '())
+    (let ((rules (psi-get-controlled-rules)))
+        (for-each (lambda (x) (set! result
+            (assoc-set! result
+                (psi-suffix-str (cog-name  (car (psi-rule-alias x))))
+                (cog-stv-strength x))))
+            rules)
+        result
+    )
+)
