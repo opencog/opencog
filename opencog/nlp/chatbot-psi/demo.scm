@@ -93,3 +93,20 @@
 )
 
 ; --------------------------------------------------------------
+(define-public (enable-philosophy-demo)
+"
+  Enables the random_sentence_pkd and random_sentence_blogs rules.
+"
+    ; Stop the loops.
+    (psi-halt)
+    (pln-halt)
+
+    ; Make the weight changes needed for configuration.
+    (disable-all-demos)
+    (psi-rule-enable "random_sentence_pkd" (psi-get-controlled-rules))
+    (psi-rule-enable "random_sentence_blogs" (psi-get-controlled-rules))
+
+    ; Start the loops.
+    (pln-run)
+    (psi-run)
+)
