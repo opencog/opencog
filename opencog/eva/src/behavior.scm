@@ -804,4 +804,38 @@
 	(DefinedPredicate "Say whoa!")
 	(Put (DefinedPredicate "Say") (Node "whoa!")))
 
+; Show happy emotion.
+; XXX FIXME -- these have hard-coded length-of-time values in them.
+; Most other similar behaviors have randomized values, which are
+; controlled by bounds in the config files - cfg-sophia and cfg-eva.scm
+(DefineLink
+    (DefinedPredicate "Quiet:happy")
+    (Put (DefinedPredicateNode "Show random expression")
+                (ConceptNode "sound-happy")))
+
+; Show amused emotion
+(DefineLink
+    (DefinedPredicate "Normal:amused")
+    (Put (DefinedPredicateNode "Show random expression")
+                (ConceptNode "sound-amused")))
+    
+;show afraid emotion    
+(DefineLink
+    (DefinedPredicate "Loud:afraid")
+         (Put (DefinedPredicateNode "Show random expression")
+                (ConceptNode "sound-afraid")))
+           
+;show curious emotion    
+ (DefineLink
+    (DefinedPredicate "Curious")
+          (Put (DefinedPredicate "Show random gesture")
+                    (ConceptNode "salient-curious")))
+              
+;for luminance
+(DefineLink
+    (DefinedPredicate "Bright:happy")
+          (Put (DefinedPredicateNode "Show random expression")
+                (ConceptNode "luminance-happy")))
+
+
 ; ----------------------------------------------------------------------
