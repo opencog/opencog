@@ -378,30 +378,24 @@
 
     vars - psi-related variable names as string values (rest arguments)
 
-    Returns string with comma delimited key-value pairs in the form of
-    'var_name': value, 'var_name2': value, ...
+    Returns a JSON representation of key-value pairs in the form of
+    {"var_name": value, "var_name2": value, ... }
     If a psi variable with varname is not defined, #f is returned for the value.
 "
     (define return '())
 
     ; Internal function to add the variable value of varname to the return list
     (define (append-var-value varname)
-    ;
         (define var-node (Concept (string-append psi-prefix-str varname)))
         (define value (psi-get-number-value var-node))
         (set! return
-            (append return (list (format #f "'~a': ~a" varname value))))
+            (append return (list (format #f "\"~a\": ~a" varname value))))
     )
 
-    ; If vars is not a list, put it into a list (e.g., if single variable name
-    ; is passed.) Not needed when using rest argument.
-    ;(if (not (list? vars))
-    ;    (set! vars (list vars)))
-
-    ;(format "vars: ~a" vars)
     (for-each append-var-value vars)
 
-    (string-join return ", ")
+    ; return a string JSON object
+    (string-append "{" (string-join return ", ") "}")
 )
 
 
