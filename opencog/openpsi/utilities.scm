@@ -379,7 +379,7 @@
     vars - psi-related variable names as string values (rest arguments)
 
     Returns a JSON representation of key-value pairs in the form of
-    {"var_name": value, "var_name2": value, ... }
+    {var_name: value, var_name2: value, ... }
     If a psi variable with varname is not defined, #f is returned for the value.
 "
     (define return '())
