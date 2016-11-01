@@ -148,6 +148,7 @@
 (emo-expr-spec "imperative"  "surprised"     1  0.6 0.9 6 12)
 (emo-expr-spec "imperative"  "worry"         1  0.7 1.0 6 12)
 
+
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
 ; (for example, happy, bored, excited) this specifies a range of
@@ -270,6 +271,7 @@
 (emo-gest-spec "gest-keep-alive-neg-think" "think-DWN"            0.02 0.5 0.9 1 1 0.6 1.1)
 (emo-gest-spec "gest-keep-alive-neg-think" "think-R.DWN"          0.02 0.5 0.9 1 1 0.6 1.1)
 (emo-gest-spec "gest-keep-alive-neg-think" "noop"                 0.42 0   0   1 1 0   0  )
+
 
 ; gestures look
 (emo-gest-spec "gest-keep-alive-look" "look-L"            0.05 0.2 0.9 1 1 0.6 1.1)

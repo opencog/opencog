@@ -129,7 +129,7 @@
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
         (DefinedPredicate "Heard very loud sound?")))
-    (DefinedPredicate "Loud:afraid")
+   (DefinedPredicate "Loud:afraid")
     speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
@@ -142,17 +142,12 @@
   (DefinedPredicate "Bright:happy")
    face-demand-satisfied (stv 1 1) face-demand)
 
-; XXX FIXME
-; The following two rules cause the (DefinedPredicate "Normal:amused")
-; to run as fast as possible -- something like 30 times a second.
-; Something is wrong here, see bug
-; opencog/ros-behavior-scripting/issues/110
-;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-;		(DefinedPredicate "very low sound?")))
-;	(DefinedPredicate "Quiet:happy")
-;	speech-demand-satisfied (stv 1 1) speech-demand)
-;
-;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-;		(DefinedPredicate  "normal conversation?")))
-;	(DefinedPredicate "Normal:amused")
-;	speech-demand-satisfied (stv 1 1) speech-demand)
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+		(DefinedPredicate "very low sound?")))
+	(DefinedPredicate "Quiet:happy")
+	speech-demand-satisfied (stv 1 1) speech-demand)
+
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+		(DefinedPredicate  "normal conversation?")))
+	(DefinedPredicate "Normal:amused")
+	speech-demand-satisfied (stv 1 1) speech-demand)

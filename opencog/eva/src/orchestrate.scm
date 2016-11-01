@@ -246,20 +246,20 @@
     ))
 
 ; Show amused emotion
-(DefineLink
-    (DefinedPredicate "Normal:amused")
-    (Evaluation
-        (GroundedPredicate "py: do_emotion")
-        (List (Concept "amused") (NumberNode 3) (NumberNode 0.5))
-    ))
+;(DefineLink
+ ;   (DefinedPredicate "Normal:amused")
+ ;   (Evaluation
+ ;       (GroundedPredicate "py: do_emotion")
+ ;       (List (Concept "amused") (NumberNode 3) (NumberNode 0.5))
+ ;   ))
     
 ;show afraid emotion    
- (DefineLink
+(DefineLink
     (DefinedPredicate "Loud:afraid")
          (Evaluation
             (GroundedPredicate "py: do_emotion")
-           (List (Concept "afraid")(NumberNode 3) (NumberNode 0.5))
-           ))
+           (List (Concept "afraid")(NumberNode 5) (NumberNode 0.3))
+          ))
            
 ;show curious emotion    
  (DefineLink

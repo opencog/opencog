@@ -298,7 +298,7 @@
 (define very-loud-sound (Number 90)) 
 
 ; The default decibel value.
-(State decibel-value normal-conversation)
+;(State decibel-value very-low-sound)
 
 ;; Return true if a loud voice is heard
 (DefineLink
@@ -357,12 +357,13 @@
 ;---------------------------------------------------------
 ;;For Luminance
 (define luminance-value (AnchorNode "luminance"))
-(State bright (Number 40)) 
+(define bright (Number 40)) 
+(State luminance-value (Number 25))
 (DefineLink
 	(DefinedPredicate "Room bright?")
 	(GreaterThan
-		(Get (State luminance (Variable "$x")))
-		(Number 40)))
+		(Get (State luminance-value (Variable "$x")))
+		bright))
 
 ; --------------------------------------------------------
 ; Time-stamp-related stuff.
