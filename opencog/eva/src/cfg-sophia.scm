@@ -148,7 +148,11 @@
 (emo-expr-spec "imperative"  "surprised"     1  0.6 0.9 6 12)
 (emo-expr-spec "imperative"  "worry"         1  0.7 1.0 6 12)
 
-
+; for sound reaction
+(emo-expr-spec "sound-happy" "happy"              1 0.5 0.9 3 6)
+(emo-expr-spec "sound-amused" "amused"              1 0.5 0.9 3 6)
+(emo-expr-spec "sound-afraid" "afraid"              1 0.5 0.9 3 6)
+(emo-expr-spec "luminance-happy" "happy"              1 0.5 0.9 3 6)
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
 ; (for example, happy, bored, excited) this specifies a range of
@@ -303,6 +307,9 @@
 (emo-gest-spec "imperative"   "shake-3"       0.1 0.6 0.9 1 1 1 1)
 (emo-gest-spec "imperative"   "thoughtful"    0.1 0.2 0.4 1 1 1 1)
 (emo-gest-spec "imperative"   "yawn-1"        0.1 0.6 0.9 1 1 1 1)
+
+;salient-gesture
+(emo-gest-spec "salient-curious" "think-browsUp.002"    1 0.5 0.9 1 1 0.4 1)
 
 ; --------------------------------------------------------
 ; Dice-roll.  Probability of performing some action as the result of
