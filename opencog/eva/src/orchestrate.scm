@@ -234,40 +234,7 @@
 	))
 
 
-; Show happy emotion.
-; XXX FIXME -- these have hard-coded length-of-time values in them.
-; Most other similar behaviors have randomized values, which are
-; controlled by bounds in the config files - cfg-sophia and cfg-eva.scm
-(DefineLink
-    (DefinedPredicate "Quiet:happy")
-    (Evaluation
-        (GroundedPredicate "py: do_emotion")
-        (List (Concept "happy") (NumberNode 3) (NumberNode 0.5))
-    ))
 
-; Show amused emotion
-;(DefineLink
- ;   (DefinedPredicate "Normal:amused")
- ;   (Evaluation
- ;       (GroundedPredicate "py: do_emotion")
- ;       (List (Concept "amused") (NumberNode 3) (NumberNode 0.5))
- ;   ))
-    
-;show afraid emotion    
-(DefineLink
-    (DefinedPredicate "Loud:afraid")
-         (Evaluation
-            (GroundedPredicate "py: do_emotion")
-           (List (Concept "afraid")(NumberNode 5) (NumberNode 0.3))
-          ))
-           
-;show curious emotion    
- (DefineLink
-    (DefinedPredicate "Curious")
-         (Evaluation
-            (GroundedPredicate "py: do_gesture")
-              (ListLink (Concept "think-browsDown.002")(NumberNode 0.2) (NumberNode 2) (NumberNode 0.8))))
-              
 ; for salient
 (DefineLink
     (DefinedPredicate "look at salient point")
@@ -281,13 +248,6 @@
                 (List (Variable "$x") (Variable "$y") (Variable "$z")))
         )))))
         
-;for luminance
-(DefineLink
-    (DefinedPredicate "Bright:happy")
-         (Evaluation
-            (GroundedPredicate "py: do_emotion")
-           (List (Concept "happy")(NumberNode 3) (NumberNode 0.5)))
-    )
 
 ; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent
