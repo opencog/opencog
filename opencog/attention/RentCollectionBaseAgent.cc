@@ -63,22 +63,8 @@ void RentCollectionBaseAgent::run()
 
     if (targetSet.size() == 0) return;
 
-    for (Handle& h : targetSet) {
-        int sti = h->getAttentionValue()->getSTI();
-        int lti = h->getAttentionValue()->getLTI();
-        int stiRent = calculate_STI_Rent();
-        int ltiRent = calculate_LTI_Rent();
-
-        if (stiRent > sti)
-            stiRent = sti;
-
-        if (ltiRent > lti)
-            ltiRent = lti;
-
-        h->setSTI(sti - stiRent);
-        h->setLTI(lti - ltiRent);
-    }
-
+    collectRent(targetSet);
+   
     std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 

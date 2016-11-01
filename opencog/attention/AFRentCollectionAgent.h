@@ -68,6 +68,7 @@ namespace opencog {
         AFRentCollectionAgent(CogServer&);
         virtual ~AFRentCollectionAgent();
         virtual void selectTargets(HandleSeq &targetSetOut);
+        void collectRent(HandleSeq& targetSet);
     }; // class
 
     /** @}*/

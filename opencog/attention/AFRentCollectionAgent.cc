@@ -58,4 +58,22 @@ void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
      * run.
      */
     std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+
+void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
+{
+    for (Handle& h : targetSet) {
+        int sti = h->getAttentionValue()->getSTI();
+        int lti = h->getAttentionValue()->getLTI();
+        int stiRent = calculate_STI_Rent();
+        int ltiRent = calculate_LTI_Rent();
+
+        if (stiRent > sti)
+            stiRent = sti;
+
+        if (ltiRent > lti)
+            ltiRent = lti;
+
+        h->setSTI(sti - stiRent);
+        h->setLTI(lti - ltiRent);
+    }
 }

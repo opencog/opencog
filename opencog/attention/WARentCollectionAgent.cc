@@ -89,3 +89,22 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
     Handle h = tournamentSelect(candidates);
     targetSetOut.push_back(h);
 }
+
+void WARentCollectionAgent::collectRent(HandleSeq& targetSet)
+{
+    for (Handle& h : targetSet) {
+        int sti = h->getAttentionValue()->getSTI();
+        int lti = h->getAttentionValue()->getLTI();
+        int stiRent = calculate_STI_Rent();
+        int ltiRent = calculate_LTI_Rent();
+
+        if (stiRent > sti)
+            stiRent = sti;
+
+        if (ltiRent > lti)
+            ltiRent = lti;
+
+        h->setSTI(sti - stiRent);
+        h->setLTI(lti - ltiRent);
+    }
+}
