@@ -1,6 +1,7 @@
 (use-modules (ice-9 receive))
 (use-modules (opencog) (opencog openpsi))
 
+(load "pln-reasoner.scm")
 ; --------------------------------------------------------------
 ; NOTE: Disable the high-level loop that integrates multiple components before
 ; disabling sub-component, i.e. (psi-halt) first. When starting do the opposite.
@@ -70,7 +71,6 @@
         result
     )
 )
-
 
 ; --------------------------------------------------------------
 (define-public (enable-pln-demo)
