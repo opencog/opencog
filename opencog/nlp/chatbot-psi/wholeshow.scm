@@ -8,6 +8,24 @@
 ; This hasn't been tested.
 
 ; --------------------------------------------------------------
+; Node used to communicate what the type of wholeshow is.
+(define wholeshow-state (Anchor "wholeshow-state"))
+; Set default state
+(State wholeshow-state (Node "default"))
+
+; --------------------------------------------------------------
+(define-public (wholeshow-modes)
+"
+  Returns a a-list of lowercase names of the avilable modes for keys and
+  procedures for values.
+"
+    (list
+        (cons "reasoning" enable-pln-demo)
+        (cons "philosophy" enable-philosophy-demo)
+        (cons "default" enable-all-demos))
+)
+
+; --------------------------------------------------------------
 (define-public (enable-all-demos)
 "
   This is the default mode. All the rules are given a weight of 0.9.
@@ -109,4 +127,86 @@
     ; Start the loops.
     (pln-run)
     (psi-run)
+)
+
+; --------------------------------------------------------------
+; Define helper functions
+(define (enable-pattern)
+"
+  The command pattern used for enabling a demo.
+"
+    (List
+        (Word "let")
+        (Word "us")
+        (Word "show")
+        (Glob "wholeshow-mode"))
+)
+
+(define (disable-pattern)
+"
+  The command pattern used for switching to default demo mode.
+"
+    (List
+        (Word "we")
+        (Word "are")
+        (Word "done")
+        (Glob "wholeshow-mode"))
+)
+
+(define (get-utterance-pattern pattern-list)
+    (cog-execute! (Get
+        (State input-utterance-words pattern-list)))
+)
+
+(define (get-words list-link)
+    (map
+        (lambda (x) (string-downcase (cog-name x)))
+        (cog-outgoing-set list-link))
+)
+
+(define (has-word? word list) (if (member word list) #t #f))
+
+(define (get-self-name)
+    (string-downcase (cog-name (gar
+        (cog-execute! (DefinedSchema "Get self name")))))
+)
+
+(define (get-chosen-mode set-link)
+    (let ((possible-mode (get-words (gar set-link))))
+        (filter (lambda (x) (member x possible-mode))
+            (map car (wholeshow-modes)))
+    )
+)
+
+(define (is-wholeshow-action-possible? set-link)
+    (if  (and (not (null? (gar set-link)))
+            (not (null? (get-chosen-mode set-link))))
+        #t
+        #f
+    )
+)
+
+(define-public (utterance-matches-wholeshow-pattern?)
+"
+  Checks if utterance m
+"
+    (let ((d-result (get-utterance-pattern (disable-pattern)))
+        (e-result (get-utterance-pattern (enable-pattern))))
+
+        (cond
+            ((not (equal? (Set) d-result))
+                (if (is-wholeshow-action-possible? d-result)
+                    (State wholeshow-state (Node "default"))
+                    (stv 1 1)
+                ))
+            ((not (equal? (Set) e-result))
+                (if (is-wholeshow-action-possible? e-result)
+                    (State
+                        wholeshow-state
+                        (Node (car (get-chosen-mode e-result))))
+                    (stv 1 1)
+                ))
+            (else (stv 0 1))
+        )
+    )
 )
