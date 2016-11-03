@@ -2,6 +2,7 @@
 (use-modules (opencog) (opencog openpsi))
 
 (load "pln-reasoner.scm")
+
 ; --------------------------------------------------------------
 ; NOTE: Disable the high-level loop that integrates multiple components before
 ; disabling sub-component, i.e. (psi-halt) first. When starting do the opposite.
@@ -130,8 +131,9 @@
     (pln-run)
     (psi-run)
 )
+
 ; --------------------------------------------------------------
-(define (switch-wholeshow-mode)
+(define-public (switch-wholeshow-mode)
     (let ((ws-mode (cog-name (car
             (cog-chase-link 'StateLink 'Node wholeshow-state)))))
 
@@ -198,25 +200,22 @@
 )
 
 (define-public (utterance-matches-wholeshow-pattern?)
-"
-  Checks if utterance m
-"
     (let ((d-result (get-utterance-pattern (disable-pattern)))
         (e-result (get-utterance-pattern (enable-pattern))))
 
         (cond
-            ((not (equal? (Set) d-result))
-                (if (is-wholeshow-action-possible? d-result)
+            ((and (not (equal? (Set) d-result))
+                (is-wholeshow-action-possible? d-result))
                     (State wholeshow-state (Node "default"))
                     (stv 1 1)
-                ))
-            ((not (equal? (Set) e-result))
-                (if (is-wholeshow-action-possible? e-result)
+                )
+            ((and (not (equal? (Set) e-result))
+                (is-wholeshow-action-possible? e-result))
                     (State
                         wholeshow-state
                         (Node (car (get-chosen-mode e-result))))
                     (stv 1 1)
-                ))
+                )
             (else (stv 0 1))
         )
     )
