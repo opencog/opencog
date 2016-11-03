@@ -15,7 +15,7 @@
 (State wholeshow-state (Node "default"))
 
 ; --------------------------------------------------------------
-; Define helper functions for psi actions
+; Define helper functions for updating weight of controlled-rules
 ; --------------------------------------------------------------
 (define-public (wholeshow-modes)
 "
@@ -33,10 +33,6 @@
 "
   This is the default mode. All the rules are given a weight of 0.9.
 "
-    ; Stop the loops.
-    (psi-halt)
-    (pln-halt)
-
     ; Make the weight changes needed for configuration.
     (disable-all-demos)
     (receive (filtered other)
@@ -45,10 +41,6 @@
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.9))
             other)
     )
-
-    ; Start the loops.
-    (pln-run)
-    (psi-run)
 )
 
 ; --------------------------------------------------------------
@@ -60,10 +52,6 @@
   When adding new demo modes, make sure you run (psi-halt) after calling
   this function.
 "
-    ; Stop the loops.
-    (psi-halt)
-    (pln-halt)
-
     ; Make the weight changes needed for configuration.
     (receive (filtered other)
         (psi-partition-rule-with-alias "" (psi-get-controlled-rules))
@@ -71,10 +59,6 @@
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.0))
             other)
     )
-
-    ; OpenPsi is restarted because there might be rules that are not controlled
-    ; that should keep on running.
-    (psi-run)
 )
 
 ; --------------------------------------------------------------
@@ -99,18 +83,10 @@
   Enables the openpsi-pln rules and the openpsi-aiml rules only. The aiml rules
   are enalbed b/c they are the primary chat interface.
 "
-    ; Stop the loops.
-    (psi-halt)
-    (pln-halt)
-
     ; Make the weight changes needed for configuration.
     (disable-all-demos)
     (psi-rule-enable "select_pln_answer" (psi-get-controlled-rules))
     (psi-rule-enable "aiml" (psi-get-controlled-rules))
-
-    ; Start the loops.
-    (pln-run)
-    (psi-run)
 )
 
 ; --------------------------------------------------------------
@@ -118,18 +94,10 @@
 "
   Enables the random_sentence_pkd and random_sentence_blogs rules.
 "
-    ; Stop the loops.
-    (psi-halt)
-    (pln-halt)
-
     ; Make the weight changes needed for configuration.
     (disable-all-demos)
     (psi-rule-enable "random_sentence_pkd" (psi-get-controlled-rules))
     (psi-rule-enable "random_sentence_blogs" (psi-get-controlled-rules))
-
-    ; Start the loops.
-    (pln-run)
-    (psi-run)
 )
 
 ; --------------------------------------------------------------
@@ -138,11 +106,12 @@
             (cog-chase-link 'StateLink 'Node wholeshow-state)))))
 
         ((assoc-ref (wholeshow-modes) ws-mode))
+        (stv 1 1)
     )
 )
 
 ; --------------------------------------------------------------
-; Define helper functions for psi context
+; Define helper functions for context checking
 ; --------------------------------------------------------------
 (define (enable-pattern)
 "
@@ -219,4 +188,27 @@
             (else (stv 0 1))
         )
     )
+)
+
+; --------------------------------------------------------------
+; Used for checking if the input utterance is a wholeshow command
+(Define
+    (DefinedPredicate "utterance-matches-wholeshow-pattern?")
+    (Evaluation
+        (GroundedPredicate "scm: utterance-matches-wholeshow-pattern?")
+        (List))
+)
+
+(Define
+    (DefinedPredicate "wholeshow-action")
+    (Evaluation
+        (GroundedPredicate "scm: switch-wholeshow-mode")
+        (List))
+)
+
+(Define
+    (DefinedPredicate "wholeshow-updater")
+    (SequentialAnd
+        (DefinedPredicate "utterance-matches-wholeshow-pattern?")
+        (DefinedPredicate "wholeshow-action"))
 )
