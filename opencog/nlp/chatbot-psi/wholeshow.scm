@@ -14,6 +14,8 @@
 (State wholeshow-state (Node "default"))
 
 ; --------------------------------------------------------------
+; Define helper functions for psi actions
+; --------------------------------------------------------------
 (define-public (wholeshow-modes)
 "
   Returns a a-list of lowercase names of the avilable modes for keys and
@@ -128,9 +130,18 @@
     (pln-run)
     (psi-run)
 )
+; --------------------------------------------------------------
+(define (switch-wholeshow-mode)
+    (let ((ws-mode (cog-name (car
+            (cog-chase-link 'StateLink 'Node wholeshow-state)))))
+
+        ((assoc-ref (wholeshow-modes) ws-mode))
+    )
+)
 
 ; --------------------------------------------------------------
-; Define helper functions
+; Define helper functions for psi context
+; --------------------------------------------------------------
 (define (enable-pattern)
 "
   The command pattern used for enabling a demo.
