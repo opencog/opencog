@@ -114,10 +114,9 @@ static void get_all_unique_nodes(const Handle& h,
  * Implement the "reset-sureal-cache" scheme primitive.
  *
  */
-HandleSeqSeq SuRealSCM::reset_cache(Handle dummy)
+void SuRealSCM::reset_cache(void)
 {
     SuRealCache::instance().reset();
-    return HandleSeqSeq();
 }
 
 /**
