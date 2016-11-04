@@ -35,30 +35,15 @@ class AudioStrength:
   def AudioEnergy(self, value):
     # A StateLink is used b/c evaluation of psi-rules should only depend on
     # the most value.
-    deci = "(StateLink (AnchorNode \"Decibel value\")" + \
-                "(ListLink (NumberNode {})))\n".format(value)
-
+    
+    deci = '(StateLink decibel-value (NumberNode "' + \
+		       str(value) + '"))'
+    
     netcat(self.hostname, self.port, deci + "\n")
-
+    print deci   
+    #netcat(self.hostname, self.port, deci2 + "\n")
     # TODO: Convert each if/elif clause into a psi-rule.
-    if value < 35:
-        print "very low sound", value
-        
-        return 'Quiet Whisper'
-
-    elif value < 65:
-        print "Normal conversation:", value
-
-        return 'Normal Conversation'
-
-    elif value < 90:
-        print "high sound:", value
-       
-        return 'Loud: Shouted Conversation'
-    else:
-        print 'critical:', value
-       
-        return 'Loud: Critical'
+    
 
   def GetAudioClass(self, data):
     try:
@@ -84,11 +69,8 @@ class AudioStrength:
              "(ListLink(NumberNode {})))\n".format(msg.data)
     
     netcat(self.hostname, self.port, loud + "\n")
-    
-    if int(change) >= 10:
-       print "Sudden change"
-    else:
-        self.AudioEnergy(self.Decibel)
+        
+    self.AudioEnergy(self.Decibel)
 
 if __name__ == '__main__':
     global d
