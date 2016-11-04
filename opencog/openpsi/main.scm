@@ -117,7 +117,7 @@
             (let ((updater (psi-get-updater d)))
                 ; Run the updater for the demand.
                 (if (not (null? updater))
-                    (cog-evaluate! updater)
+                    (cog-evaluate! (car updater))
                 )
                 ; The assumption is that the rules can be run concurrently.
                 ; FIXME: Once action-orchestrator is available then a modified
