@@ -358,17 +358,20 @@ class EvaControl():
 		rospy.logwarn('publishing affect to chatbot ' + emo.data)
 		self.affect_pub.publish(emo.data)
 
-	# Turn behaviors on and off.
-	# Do not to clean visible faces as these can still be added/removed
-	# while tree is paused
+	# Turn behaviors on and off and set wholeshow configuration
+	# NOTE
+	# 1. Do not to clean visible faces as these can still be added/removed
+	#    while tree is paused
+	# 2. 'btree_on' and 'btree_off' data-strings shouldn't be used, as they are
+	#    meant for switching on and off non-opencog demos.
 	def behavior_switch_callback(self, data):
-		if data.data == "btree_on":
+		if data.data == "opencog_on":
 			if not self.running:
-				self.puta.btree_run()
+				self.puta.wholeshow_start()
 				self.running = True
-		if data.data == "btree_off":
+		if data.data == "opencog_off":
 			if self.running:
-				self.puta.btree_stop()
+				self.puta.wholeshow_stop()
 				self.look_at(0)
 				self.gaze_at(0)
 				self.running = False
