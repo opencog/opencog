@@ -359,8 +359,11 @@ class EvaControl():
 		self.affect_pub.publish(emo.data)
 
 	# Turn behaviors on and off and set wholeshow configuration
-	# Do not to clean visible faces as these can still be added/removed
-	# while tree is paused
+	# NOTE
+	# 1. Do not to clean visible faces as these can still be added/removed
+	#    while tree is paused
+	# 2. 'btree_on' and 'btree_off' data-strings shouldn't be used, as they are
+	#    meant for switching on and off non-opencog demos.
 	def behavior_switch_callback(self, data):
 		if data.data == "opencog_on":
 			if not self.running:
