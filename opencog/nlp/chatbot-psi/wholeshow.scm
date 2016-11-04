@@ -11,8 +11,13 @@
 ; --------------------------------------------------------------
 ; Node used to communicate what the type of wholeshow is.
 (define wholeshow-state (Anchor "wholeshow-state"))
+
+; Node used to communicate what the previous wholeshow type was.
+(define previous-wholeshow-state (Anchor "previous-wholeshow-state"))
+
 ; Set default state
 (State wholeshow-state (Node "default"))
+(State previous-wholeshow-state (Node "default"))
 
 ; --------------------------------------------------------------
 ; Define helper functions for updating weight of controlled-rules
@@ -106,6 +111,7 @@
             (cog-chase-link 'StateLink 'Node wholeshow-state)))))
 
         ((assoc-ref (wholeshow-modes) ws-mode))
+        (State previous-wholeshow-state (Node ws-mode))
         (stv 1 1)
     )
 )
@@ -195,6 +201,18 @@
 )
 
 (Define
+    (DefinedPredicate "wholeshow-change-requested?")
+    (Not (Equal
+        (Get
+            (TypedVariable (Variable "current-state") (Type "Node"))
+            (State wholeshow-state (Variable "current-state")))
+        (Get
+            (TypedVariable (Variable "previous-state") (Type "Node"))
+            (State previous-wholeshow-state (Variable "previous-state")))
+    ))
+)
+
+(Define
     (DefinedPredicate "wholeshow-action")
     (Evaluation
         (GroundedPredicate "scm: switch-wholeshow-mode")
@@ -205,5 +223,6 @@
     (DefinedPredicate "wholeshow-updater")
     (SequentialAnd
         (DefinedPredicate "utterance-matches-wholeshow-pattern?")
+        (DefinedPredicate "wholeshow-change-requested?")
         (DefinedPredicate "wholeshow-action"))
 )
