@@ -148,11 +148,6 @@
 
 (define (has-word? word list) (if (member word list) #t #f))
 
-(define (get-self-name)
-    (string-downcase (cog-name (gar
-        (cog-execute! (DefinedSchema "Get self name")))))
-)
-
 (define (get-chosen-mode set-link)
     (let ((possible-mode (get-words (gar set-link))))
         (filter (lambda (x) (member x possible-mode))
