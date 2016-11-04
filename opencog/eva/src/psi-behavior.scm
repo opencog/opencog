@@ -128,11 +128,6 @@
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-        (DefinedPredicate "Heard very loud sound?")))
-   (DefinedPredicate "Loud:afraid")
-    speech-demand-satisfied (stv 1 1) speech-demand)
-
-(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
         (DefinedPredicate  "saliency required?")))
   (DefinedPredicate "look at salient point")
    face-demand-satisfied (stv 1 1) face-demand)
@@ -143,11 +138,7 @@
    face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-		(DefinedPredicate "very low sound?")))
-	(DefinedPredicate "Quiet:happy")
-	speech-demand-satisfied (stv 1 1) speech-demand)
+        (DefinedPredicate "Heard Sound?")))
+  (DefinedPredicate "React to Sound")
+   speech-demand-satisfied (stv 1 1) speech-demand)
 
-(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-		(DefinedPredicate  "normal conversation?")))
-	(DefinedPredicate "Normal:amused")
-	speech-demand-satisfied (stv 1 1) speech-demand)

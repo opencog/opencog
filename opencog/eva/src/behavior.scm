@@ -665,7 +665,7 @@
 				(SequentialOr
 					(Not (DefinedPredicate "Time to change expression"))
 					(Put (DefinedPredicateNode "Show random expression")
-						(ConceptNode "neutral-speech")))
+						(ConceptNode "neutral-speech"))) 
 
 				; ... nod slowly ...
 				(SequentialOr
@@ -683,7 +683,7 @@
 							(ListLink
 								(DefinedSchema "blink chat fast mean")
 								(DefinedSchema "blink chat fast var")))
-				))
+				)) 
 			)
 			(SequentialAnd
 				; If chatbot is not happy ...
@@ -804,28 +804,27 @@
 	(DefinedPredicate "Say whoa!")
 	(Put (DefinedPredicate "Say") (Node "whoa!")))
 
-; Show happy emotion.
-; XXX FIXME -- these have hard-coded length-of-time values in them.
-; Most other similar behaviors have randomized values, which are
-; controlled by bounds in the config files - cfg-sophia and cfg-eva.scm
-(DefineLink
-    (DefinedPredicate "Quiet:happy")
-    (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "sound-happy")))
 
-; Show amused emotion
-(DefineLink
-    (DefinedPredicate "Normal:amused")
-    (Put (DefinedPredicateNode "Show random expression")
+
+(DefineLink 
+	(DefinedPredicate "React to Sound")
+	(SequentialOr
+	     (SequentialAnd
+         (DefinedPredicate "very low sound?")
+          (Put (DefinedPredicateNode "Show random expression")
+                (ConceptNode "sound-happy")))
+       (SequentialAnd
+         (DefinedPredicate "normal conversation?")
+         (Put (DefinedPredicateNode "Show random expression")
                 (ConceptNode "sound-amused")))
-    
-;show afraid emotion    
-(DefineLink
-    (DefinedPredicate "Loud:afraid")
+         (SequentialAnd
+          (DefinedPredicate "Heard very loud sound?")
          (Put (DefinedPredicateNode "Show random expression")
                 (ConceptNode "sound-afraid")))
+ ))
+
            
-;show curious emotion    
+;for salient    
  (DefineLink
     (DefinedPredicate "Curious")
           (Put (DefinedPredicate "Show random gesture")
@@ -834,7 +833,8 @@
 ;for luminance
 (DefineLink
     (DefinedPredicate "Bright:happy")
-          (Put (DefinedPredicateNode "Show random expression")
+   
+         (Put (DefinedPredicateNode "Show random expression")
                 (ConceptNode "luminance-happy")))
 
 

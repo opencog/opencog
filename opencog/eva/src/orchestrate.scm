@@ -233,8 +233,6 @@
 			(List (Variable "sentence")))
 	))
 
-
-
 ; for salient
 (DefineLink
     (DefinedPredicate "look at salient point")

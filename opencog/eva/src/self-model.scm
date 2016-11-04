@@ -285,20 +285,30 @@
 		(True (Put (State heard-sound (Variable "$x")) heard-nothing))
 	))
 
-;; Loud sound value.
+;; Sudden change value.
 (define loud-sound  (AnchorNode "Sudden sound change value"))
 (define no-loud-sound (Number 0.0))
 ; There isn't any sudden change in sound Decibel
 (State loud-sound no-loud-sound)
 
 ;; Current decibel value.
-(define decibel-value (AnchorNode "Decibel value"))
+(define-public decibel-value (AnchorNode "Decibel value"))
 (define very-low-sound (Number 35))
 (define normal-conversation (Number 65))
 (define very-loud-sound (Number 90)) 
+(define no-sound (Number 0.0))
 
 ; The default decibel value.
-;(State decibel-value very-low-sound)
+(State decibel-value no-sound)
+
+(DefineLink
+	(DefinedPredicate "Heard Sound?")
+	(NotLink (Equal
+		(SetLink no-sound)
+		(Get
+			(TypedVariable (Variable "$b") (Type "NumberNode"))
+			(State decibel-value (Variable "$b"))))
+	))
 
 ;; Return true if a loud voice is heard
 (DefineLink
@@ -310,13 +320,13 @@
 ;; Return true if low sound is heard
 (DefineLink
     (DefinedPredicate "very low sound?")
-    (NotLink (GreaterThan
+      (NotLink (GreaterThan
         (Get (State decibel-value (Variable "$y")))
         very-low-sound)))
-
+        
 ;; Return true for normal conversation
 (DefineLink
-    (DefinedPredicate  "normal conversation?")
+   (DefinedPredicate "normal conversation?")
     (NotLink (GreaterThan
         (Get (State decibel-value (Variable "$z")))
         normal-conversation)))
@@ -337,22 +347,22 @@
 (State salient (Number 5))
 
 (DefineLink 
-(DefinedPredicate "saliency")
-(GreaterThan
-(Get (State salient (Variable"$S")))
-(Number 13)))
+	(DefinedPredicate "saliency")
+	(GreaterThan
+		(Get (State salient (Variable"$S")))
+		(Number 13)))
 
 (DefineLink
-(DefinedPredicate "no faces")
-(EqualLink
-(DefinedSchemaNode "Num visible faces")
-(NumberNode 0)))
+	(DefinedPredicate "no faces")
+	(EqualLink
+		(DefinedSchemaNode "Num visible faces")
+		(NumberNode 0)))
 
 (DefineLink 
-   (DefinedPredicate "saliency required?")
-(SequentialAnd
-(DefinedPredicate "no faces")
-(DefinedPredicate "saliency")))
+	(DefinedPredicate "saliency required?")
+	(SequentialAnd
+		(DefinedPredicate "no faces")
+		(DefinedPredicate "saliency")))
 
 ;---------------------------------------------------------
 ;;For Luminance
