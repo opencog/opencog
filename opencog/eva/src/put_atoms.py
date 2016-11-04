@@ -85,11 +85,14 @@ class PutAtoms:
 			'(cog-evaluate! (PutLink (DefinedPredicate "heard text")' +
 			' (SentenceNode "' + text + '")))')
 
-	# Start or stop the behavior tree.
-	def btree_stop(self):
+	# Start or stop openpsi and set the default configuration for the weight of
+	# the psi-rules.
+	def wholeshow_stop(self):
+		scheme_eval(self.atomspace, "(disable-all-demos)")
 		scheme_eval(self.atomspace, "(halt)")
 
-	def btree_run(self):
+	def wholeshow_start(self):
+		scheme_eval(self.atomspace, "(enable-all-demos)")
 		scheme_eval(self.atomspace, "(run)")
 
 	# Generic function for experimentation and with use with different robots
