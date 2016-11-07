@@ -1,6 +1,6 @@
 ;; Define implication with extra variable in the implicand
 
-(ImplicationLink (stv 1 1)
+(ImplicationScopeLink (stv 1 1)
    (VariableList
       (TypedVariableLink
         (VariableNode "$X")
