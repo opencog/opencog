@@ -449,7 +449,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (ImplicationLink (stv 0.13281251 0.5)
+;; (ImplicationScopeLink (stv 0.13281251 0.5)
 ;;    (VariableList
 ;;       (TypedVariableLink
 ;;          (VariableNode "$X")
@@ -577,7 +577,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (ImplicationLink (stv 0.82352942 0.89999998)
+;; (ImplicationScopeLink (stv 0.82352942 0.89999998)
 ;;    (TypedVariableLink
 ;;       (VariableNode "$X")
 ;;       (TypeNode "ConceptNode")

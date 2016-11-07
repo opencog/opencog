@@ -484,7 +484,7 @@
 ;; like chicken feet. For now the rule has a full strength and
 ;; confidence.
 
-(ImplicationLink (stv 1 1)
+(ImplicationScopeLink (stv 1 1)
    ;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;; Variable declaration ;;
    ;;;;;;;;;;;;;;;;;;;;;;;;;;

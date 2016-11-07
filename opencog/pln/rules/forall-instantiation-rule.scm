@@ -43,9 +43,9 @@
      (VariableNode "$B")))
 
 (define forall-instantiation-body
-  (ForAllLink
-     (VariableNode "$TyVs")
-     (VariableNode "$B")))
+  (QuoteLink (ForAllLink
+     (UnquoteLink (VariableNode "$TyVs"))
+     (UnquoteLink (VariableNode "$B")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Forall full instantiation rule ;;
