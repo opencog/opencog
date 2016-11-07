@@ -2,7 +2,7 @@
 ; rules.scm
 ; Copyright (c) 2009 Linas Vepstas
 ;
-; A set of routines for constructing ImplicationLinks and 
+; A set of routines for constructing ImplicationScopeLinks and
 ; BindLinks in a "simplified" manner. The goal here is
 ; to make it easier to write, read and debug hand-written 
 ; Implication/VarScope links.
@@ -12,7 +12,7 @@
 ; called an "r-expression".  The "r-expression" is a very simple object:
 ; it is just a scheme association-list with three items: "clauses", 
 ; "vardecls" and "freevars".  The "clauses" are just a list of clauses
-; that will eventually be and'ed together to create an ImplicationLink.
+; that will eventually be and'ed together to create an ImplicationScopeLink.
 ; The "vardecls" is a list of variable declarations that will appear in
 ; the final BindLink that is constructed.  The "freevars" is a 
 ; list of variables that were found along the way; these will be promoted
@@ -85,7 +85,7 @@
 ; Given an input string, this returns a new, more-or-less unique
 ; new string.  Only minimal measures are taken to ensure uniqueness;
 ; so the result is not "strong". This is intended for use in generating
-; "unique" variable names in ImplicatinLinks
+; "unique" variable names in ImplicationScopeLinks
 ;
 ; Example usage:
 ;     > (get-anon-var-id! "beee")

@@ -214,7 +214,7 @@
 ;
 ;	ForAllLink
 ;		VariableNode "$X"
-;		ImplicationLink
+;		ImplicationScopeLink
 ;			InheritanceLink "$X" noun_instance
 ;			AndLink
 ;				** links involving noun_instance **
@@ -252,7 +252,7 @@
 		(list
 			(ForAllLink
 				(VariableNode "$X")
-				(ImplicationLink
+				(ImplicationScopeLink
 					(InheritanceLink
 						(VariableNode "$X")
 						word

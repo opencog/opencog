@@ -48,7 +48,7 @@ of tasks are set out and solved here:
    unambiguous RelEx input.
 
 The result is the defintion of an IF..THEN.. syntax that can be converted
-to OpenCog ImplicationLinks, and then used (via the query system) to
+to OpenCog ImplicationScopeLinks, and then used (via the query system) to
 process RelEx input and generate triples output.  The IF..THEN.. syntax
 very closely resembles that used by the RelEx framing code, with the 
 intention that someday, it will be possible to use this code to port the
@@ -304,14 +304,14 @@ created.
 
 The core OpenCog nodes and links to be used to represent such rules are:
    VariableNode  -- to indicate a variable
-   ImplicationLink -- to represent an if..then.. relationship.
+   ImplicationScopeLink -- to represent an if..then.. relationship.
 
-Below is an example of the use of the ImplicationLink.
+Below is an example of the use of the ImplicationScopeLink.
 
    "If the case is near the mouse and the cat is hungry, the cat will
    eat the mouse".
 
-   ImplicationLink
+   ImplicationScopeLink
    ___ANDLink
    ______ Inheritance $var0 cat
    ______ Inheritance $var0 hungry
@@ -470,16 +470,16 @@ everything *sooo* much easier. Note that the chainers do not have
 support for lambda at this time.
 
 
-Encoding as an ImplicationLink
-------------------------------
-The above rules are to be encoded as ImplicationLinks. Thus, the rule
+Encoding as an ImplicationScopeLink
+-----------------------------------
+The above rules are to be encoded as ImplicationScopeLinks. Thus, the rule
 
    # IF _subj(be,$var0) ^ _obj(be,$var1) ^ $prep($var0,$var2) THEN 
      ^3_$var0_$prep($var2, $var1)
 
 is meant to be a short-hand for:
 
-   ImplicationLink
+   ImplicationScopeLink
       AndLink
          EvaluationLink
             DefinedLinguisticRelationshipNode "_subj"
@@ -512,7 +512,7 @@ the atomspace would contain a relation:
          ConceptNode "capital"
          DefinedLinguisticRelationshipNode "of"
 
-The above ImplicationLink would then include a fourth clause in the
+The above ImplicationScopeLink would then include a fourth clause in the
 predicate:
 
    EvaluationLink
@@ -561,7 +561,7 @@ The word instances are related to their lemmatized forms:
 Thus, the implication predicate needs to bind word-instances to word
 nodes. 
 
-There is another problem: ImplicationLinks cannot be used to change 
+There is another problem: ImplicationScopeLinks cannot be used to change
 the type of a node. Thus, while the examples above made reference to
 ConceptNodes, the actual RelEx LemmaLinks specify WordNodes.  There's 
 no immediate, direct way to turn WordNodes into ConceptNodes; this 
@@ -596,7 +596,7 @@ they don't provide enough flexibility to work well in OpenCog, and so
 extesnions sub as %WordInstanceLink and %LemmaLink and so on are needed.
 
 The  perl script "rules-to-implications.pl" will convert rules written
-in this syntax into OpenCog ImplicationLinks.  This script could be 
+in this syntax into OpenCog ImplicationScopeLinks.  This script could be
 useful for importing the Frame rules into OpenCog.
 
 However, even with these extensions, problems arose. The most serious 
@@ -618,7 +618,7 @@ To step around these problems, a variant of the above was written in
 pure scheme, and is encoded in the file "rules.scm".  RelEx expressions
 are converted into "r-expressions" which hold both clauses and lists of
 variables. As a final step, an r-expression is converted into a
-BindLink contiaing variable declarations and an ImplicationLink.
+BindLink contiaing variable declarations and an ImplicationScopeLink.
 
 New code should use "rules.scm". The perl script "rules-to-implications.pl"
 should be avoided, except possibly during a port of RelEx to OpenCog.

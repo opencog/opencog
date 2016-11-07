@@ -12,7 +12,7 @@
 		(VariableNode "$var-isa-B" (stv 1 0))
 		(VariableNode "$var-isa-C" (stv 1 0))
 	)
-	(ImplicationLink (stv 1 0)
+	(ImplicationScopeLink (stv 1 0)
 		; "If ..." part of the implcation
 		(AndLink (stv 1 0)
 			(EvaluationLink (stv 1 0)

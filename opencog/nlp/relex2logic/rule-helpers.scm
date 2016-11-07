@@ -631,7 +631,7 @@
 	(cond
 		((or (string=? determiner "those") (string=? determiner "these"))
 			(ListLink
-				(ImplicationLink
+				(ImplicationScopeLink
 					(MemberLink (VariableNode var_name) (ConceptNode instance))
 					(InheritanceLink (VariableNode var_name) (ConceptNode concept))))
 			(r2l-wordinst-concept instance)

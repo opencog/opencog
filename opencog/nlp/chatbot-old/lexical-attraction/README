@@ -152,7 +152,7 @@ doesn't match any accidentally similar hypergraphs.
             TypedVariableLink
                VariableNode "$word-b"
                TypeNode "WordNode"
-         ImplicationLink
+         ImplicationScopeLink
             AndLink
                EvaluationLink
                   VariableNode "$rel-var"
@@ -176,7 +176,7 @@ doesn't match any accidentally similar hypergraphs.
 Once the pattern has been recognized, we need to maintain a count of
 the number of times that it's been seen.  For this, another new link
 type is introduced: the CountLink.  Above, it is used as the implicand
-of the ImplicationLink.  Upon running the the implication, the count
+of the ImplicationScopeLink.  Upon running the implication, the count
 on the implicand should be incremented. In this example, CountLink
 inherits from EvaluationLink.
 
@@ -204,7 +204,7 @@ the following:
          TypedVariableLink
             VariableNode "$word-b"
             TypeNode "WordNode"
-         ImplicationLink
+         ImplicationScopeLink
             EvaluationLink
                DefinedPatternNode "word-pairs"
                ListLink
@@ -354,7 +354,7 @@ is shown below.
             TypedVariableLink
                VariableNode "$parse"
                TypeNode "ParseNode"
-         ImplicationLink
+         ImplicationScopeLink
             AndLink
                ;; The pattern matcher operates more efficiently if
                ;; we first ask for three words belonging to the same

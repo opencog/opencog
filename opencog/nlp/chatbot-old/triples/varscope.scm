@@ -2,7 +2,7 @@
 ; varscope.scm
 ;
 ; Wrapper to create proper BindLinks from the naked
-; ImplicationLinks that the perl files generate.
+; ImplicationScopeLinks that the perl files generate.
 ;
 ; XXX This is not used any more, because the perl script is not used any
 ; more.  This is currently kept here because it might still come in 
@@ -15,9 +15,9 @@
 ; ---------------------------------------------------------------------
 ; varscope-wrap-inplication implication
 ;
-; Create a BindLink wrapping the ImplicationLink
+; Create a BindLink wrapping the ImplicationScopeLink
 ; This just simply locates all of the VariableNodes in the
-; ImplicationLink, and declares them up-front in the BindLink.
+; ImplicationScopeLink, and declares them up-front in the BindLink.
 ;
 (define (varscope-wrap-implication impl)
 
