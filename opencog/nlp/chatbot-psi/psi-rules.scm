@@ -4,8 +4,12 @@
 
 ;-------------------------------------------------------------------------------
 ; Define the demands
-
 (define sociality (psi-demand "Sociality" .8))
+
+; Define an updater for sociality
+; NOTE: It uses verbal input to update the truth-value of the controlled
+; rules.
+(psi-set-updater!  (DefinedPredicate "wholeshow-updater") sociality)
 
 ;-------------------------------------------------------------------------------
 ; Define the psi-rules

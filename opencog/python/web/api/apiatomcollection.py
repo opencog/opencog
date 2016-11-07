@@ -31,8 +31,8 @@ class AtomCollectionAPI(Resource):
     def __init__(self):
         self.atom_map = global_atom_map
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument(
-            'type', type=str, location='args', choices=types.__dict__.keys())
+        self.reqparse.add_argument('type', type=str, action='append',
+                     location='args', choices=types.__dict__.keys())
         self.reqparse.add_argument('name', type=str, location='args')
         self.reqparse.add_argument('callback', type=str, location='args')
         self.reqparse.add_argument('filterby', type=str, location='args',
@@ -327,8 +327,10 @@ class AtomCollectionAPI(Resource):
                 if type is None and name is None:
                     atoms = self.atomspace.get_atoms_by_type(types.Atom)
                 elif name is None:
-                    atoms = self.atomspace.get_atoms_by_type(
-                        types.__dict__.get(type))
+                    atoms = []
+                    for t in type:
+                         atoms = atoms + self.atomspace.get_atoms_by_type(
+                                           types.__dict__.get(t))
                 else:
                     if type is None:
                         type = 'Node'

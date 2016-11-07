@@ -4,7 +4,7 @@
 
 ;; If X takes Y and Y contains Z, then X takes Z
 (define if-X-takes-Y-and-Y-contains-Z-then-X-takes-Z
-   (ImplicationLink (stv 1 1)
+   (ImplicationScopeLink (stv 1 1)
       (VariableList
          (TypedVariableLink
             (VariableNode "$X")
@@ -177,7 +177,7 @@
 
 ;; Being well hydrated tends to speed up injury recovery
 (define being-well-hydrated-tends-to-speed-up-injury-recovery
-   (ImplicationLink (stv 0.7 0.95)
+   (ImplicationScopeLink (stv 0.7 0.95)
       (TypedVariableLink
          (VariableNode "$X")
          (TypeNode "PredicateNode"))

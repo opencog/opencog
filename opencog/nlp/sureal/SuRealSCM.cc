@@ -114,10 +114,9 @@ static void get_all_unique_nodes(const Handle& h,
  * Implement the "reset-sureal-cache" scheme primitive.
  *
  */
-HandleSeqSeq SuRealSCM::reset_cache(Handle dummy)
+void SuRealSCM::reset_cache(void)
 {
     SuRealCache::instance().reset();
-    return HandleSeqSeq();
 }
 
 /**
@@ -194,16 +193,27 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
             n->getType() == DEFINED_LINGUISTIC_PREDICATE_NODE)
            continue;
 
-        std::string sName = NodeCast(n)->getName();
+        std::string sName = n->getName();
+
+        // if it is an instance, check if it has the LG relationships
+        if (sName.find("@") != std::string::npos)
+        {
+            Handle hWordInstNode = pAS->get_handle(WORD_INSTANCE_NODE, sName);
+
+            // no corresponding WordInstanceNode found
+            if (hWordInstNode == Handle::UNDEFINED)
+                continue;
+
+            // if no LG link generated for the instance
+            if (get_target_neighbors(hWordInstNode, LG_WORD_CSET).empty())
+                continue;
+        }
+
         std::string sWord = sName.substr(0, sName.find_first_of('@'));
         Handle hWordNode = pAS->get_handle(WORD_NODE, sWord);
 
         // no WordNode found
         if (hWordNode == Handle::UNDEFINED)
-            continue;
-
-        // if no LG dictionary entry
-        if (get_target_neighbors(hWordNode, LG_DISJUNCT).empty())
             continue;
 
         sVars.insert(n);

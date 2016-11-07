@@ -33,8 +33,8 @@
 ; Load pln reasoner
 (load "pln-reasoner.scm")
 
-; Load demo configuration files.
-(load "demo.scm")
+; Load wholeshow functions and atoms.
+(load "wholeshow.scm")
 
 ; Set relex-server-host
 ; (use-relex-server "localhost" 4444)

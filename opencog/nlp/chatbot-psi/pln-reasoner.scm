@@ -33,11 +33,16 @@
 ;; (mock-HEAD-chat "p-1" "Eddie" "What do you know about happy?")
 
 (use-modules (opencog))
+(use-modules (opencog atom-types))
 (use-modules (opencog logger))
 (use-modules (opencog query))
 (use-modules (opencog rule-engine))
+(use-modules (opencog nlp))
+(use-modules (opencog nlp chatbot))
+(use-modules (opencog nlp relex2logic))
 (use-modules (srfi srfi-1))
 
+(load "pln-utils.scm")
 ;; (cog-logger-set-level! "debug")
 
 ;; Load PLN rule implication direct evaluation
@@ -121,6 +126,9 @@
 (Evaluation (stv 1 0.1)
    (Predicate "happy")
    (Concept "Peter"))
+
+;; This is required for SuReal to generate the answer
+(nlp-parse "small cats are cute")
 
 ;;;;;;;;;;;;;;;
 ;; L2S rules ;;
