@@ -2,11 +2,11 @@
 #
 # rules-to-implications.pl
 #
-# Convert Relex framing rule files to OpenCog ImplicationLinks
+# Convert Relex framing rule files to OpenCog ImplicationScopeLinks
 #
 # This perl script takes, as input, implication rules, in the IF .. THEN
 # format used by the RelEx framing code, and generates equivalent
-# OpenCog ImplicationLinks.
+# OpenCog ImplicationScopeLinks.
 #
 # To use, do the following:
 #
@@ -406,7 +406,8 @@ sub print_word_instances
 }
 
 # --------------------------------------------------------------------
-# Parse a single rule, generate the equivalent OpenCog ImplicationLink.
+# Parse a single rule, generate the equivalent OpenCog
+# ImplicationScopeLink.
 #
 # For example, expected input is of the form
 #
@@ -427,7 +428,7 @@ sub parse_rule
 	# Clear the word-to-word-instance map.
 	%word_map = ();
 
-	print "(ImplicationLink\n";
+	print "(ImplicationScopeLink\n";
 	print "   (AndLink\n";
 	foreach (@clauses)
 	{

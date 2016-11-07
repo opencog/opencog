@@ -425,7 +425,7 @@ psi-get-dual-rules calls psi-get-member-links
 ))
 
 (cog-execute! (Map
-	(Implication
+	(ImplicationScope
 		(ListLink (Word "who") (Word "supports") (Glob "$star-1"))
 		(ExecutionOutput (DefinedSchema "AIML-tag srai")
 			(ListLink

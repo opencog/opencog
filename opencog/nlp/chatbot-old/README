@@ -90,7 +90,7 @@ concepts of "is_a", "has_a", "part_of" and "uses" to more general
 relations.
 
 Importantly, this directory contains code to convert plain-text
-IF...THEN... relations into OpenCog ImplicationLinks. This is one
+IF...THEN... relations into OpenCog ImplicationScopeLinks. This is one
 of the primary achievements of the code here.  Note that the IF...THEN..
 structure used is almost identical to the RelEx Frame rules, and so
 should be usable for porting RelEx frames to OpenCog.

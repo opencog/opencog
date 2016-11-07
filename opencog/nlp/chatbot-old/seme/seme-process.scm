@@ -290,9 +290,9 @@
 ; routine should probably not be "fixed", and instead, a new, more 
 ; sophisticated promoter should be created.
 ;
-; Anyway, seme promotion should not be done in scheme, but with opencog
-; pattern-matching. So, for example, the following ImplicationLink is a 
-; step in that direction:
+; Anyway, seme promotion should not be done in scheme, but with
+; opencog pattern-matching. So, for example, the following
+; ImplicationScopeLink is a step in that direction:
 ;
 ; IF   %InheritanceLink(word-inst $word-seme)
 ;    ^ $modtype (word-inst, $attr-inst)

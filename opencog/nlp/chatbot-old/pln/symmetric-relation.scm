@@ -41,7 +41,7 @@
         (VariableNode "Y008" (stv 1 0))
         (VariableNode "R000" (stv 1 0))  ;; the relation
     )
-    (ImplicationLink (stv 1 0)
+    (ImplicationScopeLink (stv 1 0)
         (AndLink (stv 1 0)
             (InheritanceLink (stv 1 0)
                 (VariableNode "R000")   
@@ -140,13 +140,13 @@
         (VariableNode "Y008")
         (VariableNode "R000")
     )
-    (ImplicationLink (stv 1 0)
+    (ImplicationScopeLink (stv 1 0)
         a b
     )
 )
 
 
-(ImplicationLink 
+(ImplicationScopeLink
 (mtv (stv 1 0)(vh "CONTEXTUAL" 96).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 188).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 207).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 134).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 196).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 162).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 109).(stv 0.99000001 0.99000001)(vh "CONTEXTUAL" 203).(stv 0.99000001 0.99000001)) 
 
 (AndLink (mtv (stv 1 0)(vh "CONTEXTUAL" 96).(stv 0.7992 0.3996)) 

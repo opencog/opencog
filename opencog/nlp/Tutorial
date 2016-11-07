@@ -301,7 +301,7 @@ Semantic normalization aka Semantic Triples
          THEN ^3_$phrase($var2, $var1)
 
    Above is actual rule: it is converted to an OpenCog 
-   ImplicationLink (quite verbose!) and run through pattern matcher.
+   ImplicationScopeLink (quite verbose!) and run through pattern matcher.
 
 -- Noteworthy: Makes use of "processing anchors" i.e.
    the sentence $sent MUST be connected, via ListLink to 

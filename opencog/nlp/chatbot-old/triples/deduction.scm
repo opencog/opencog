@@ -6,7 +6,7 @@
 ; Linas Vepstas August 2009
 ;
 ; -----------------------------------------------------------------------
-; Make an implication link, which can, by pattern amtching, validate 
+; Make an implication link, which can, by pattern matching, validate
 ; the indicated hypothesis. The hypothesis is assumed to be a particular
 ; EvaluationLink.  This essentially creates a simple deductive
 ; inheritance chain, i.e. if we want to prove P->Q then we explore

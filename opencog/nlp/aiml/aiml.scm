@@ -265,7 +265,7 @@
 ; XXX Need to handle that, topic rules as appropriate.
 (define (run-pattern-rule RULE SENT)
 	(define maplk (MapLink
-		(ImplicationLink
+		(ImplicationScopeLink
 			(gdr (get-pred RULE "*-AIML-pattern-*"))
 			(cadr (get-ctxt-act RULE)))
 		(SetLink SENT)
