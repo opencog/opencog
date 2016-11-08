@@ -46,7 +46,8 @@
 ;; (cog-logger-set-level! "debug")
 
 ;; Load PLN rule implication direct evaluation
-(load-from-path "opencog/pln/rules/implication-direct-evaluation-rule.scm")
+; FIXME: Doesn't return anything when confidence is low, don't use for now
+;(load-from-path "opencog/pln/rules/implication-direct-evaluation-rule.scm")
 
 
 ;;;;;;;;;;;;;;;
@@ -91,41 +92,41 @@
 
 ;; Add knowledge about happy. The strenght is set low so that the new
 ;; inferred knowledge can get easily expressed.
-(Word "playful")
-(add-to-pln-inferred-atoms
- (Set
-    (Implication (stv 0.51 0.0001)
-       (Predicate "happy")
-       (Predicate "playful"))))
-(Word "funny")
-(add-to-pln-inferred-atoms
- (Set
-    (Implication (stv 0.51 0.0001)
-       (Predicate "funny")
-       (Predicate "happy"))))
-(Word "pleasant")
-(add-to-pln-inferred-atoms
- (Set
-    (Implication (stv 0.51 0.0001)
-       (Predicate "happy")
-       (Predicate "pleasant"))))
-(Word "free")
-(add-to-pln-inferred-atoms
- (Set
-    (Implication (stv 0.51 0.0001)
-       (Predicate "happy")
-       (Predicate "free"))))
-(Word "healthy")
-(add-to-pln-inferred-atoms
- (Set
-    (Implication (stv 0.51 0.0001)
-       (Predicate "happy")
-       (Predicate "healthy"))))
-
-;; Peter is happy
-(Evaluation (stv 1 0.1)
-   (Predicate "happy")
-   (Concept "Peter"))
+;(Word "playful")
+;(add-to-pln-inferred-atoms
+; (Set
+;    (Implication (stv 0.51 0.0001)
+;       (Predicate "happy")
+;       (Predicate "playful"))))
+;(Word "funny")
+;(add-to-pln-inferred-atoms
+; (Set
+;    (Implication (stv 0.51 0.0001)
+;       (Predicate "funny")
+;       (Predicate "happy"))))
+;(Word "pleasant")
+;(add-to-pln-inferred-atoms
+; (Set
+;    (Implication (stv 0.51 0.0001)
+;       (Predicate "happy")
+;       (Predicate "pleasant"))))
+;(Word "free")
+;(add-to-pln-inferred-atoms
+; (Set
+;    (Implication (stv 0.51 0.0001)
+;       (Predicate "happy")
+;       (Predicate "free"))))
+;(Word "healthy")
+;(add-to-pln-inferred-atoms
+; (Set
+;    (Implication (stv 0.51 0.0001)
+;       (Predicate "happy")
+;       (Predicate "healthy"))))
+;
+;;; Peter is happy
+;(Evaluation (stv 1 0.1)
+;   (Predicate "happy")
+;   (Concept "Peter"))
 
 ;; This is required for SuReal to generate the answer
 (nlp-parse "small cats are cute")
@@ -308,8 +309,8 @@
                 (exact->inexact (/ pos-count total-count))
                 0))
          (c (exact->inexact (/ total-count K))))
-    ;; (cog-logger-debug "[PLN-Reasoner] pos-count = ~a" pos-count)
-    ;; (cog-logger-debug "[PLN-Reasoner] pos-count = ~a" neg-count)
+    ;; (cog-logger-info "[PLN-Reasoner] pos-count = ~a" pos-count)
+    ;; (cog-logger-info "[PLN-Reasoner] pos-count = ~a" neg-count)
     (Evaluation (stv s c)
        (Predicate "happy")
        (Concept (cog-name Name)))))
@@ -427,6 +428,44 @@
       unary-predicate-speech-act-l2s-rewrite))
 
 
+; NOTE: Temporary replacement
+(define implication-direct-evaluation-vardecl
+  (VariableList
+     (TypedVariable
+        (Variable "$P")
+        (Type "PredicateNode"))
+     (TypedVariable
+        (Variable "$Q")
+        (Type "PredicateNode"))
+     ;; Current hack to limit X as concepts
+     (TypedVariable
+        (Variable "$X")
+        (Type "ConceptNode"))))
+
+(define implication-direct-evaluation-pattern
+  (And
+     (Evaluation
+        (Variable "$P")
+        (Variable "$X"))
+     (Evaluation
+        (Variable "$Q")
+        (Variable "$X"))
+     (Not
+        (Equal
+           (Variable "$P")
+           (Variable "$Q")))))
+
+(define implication-direct-evaluation-rewrite
+  (Implication
+        (Variable "$P")
+        (Variable "$Q")))
+
+(define implication-direct-evaluation-rule
+  (Bind
+     implication-direct-evaluation-vardecl
+     implication-direct-evaluation-pattern
+     implication-direct-evaluation-rewrite))
+
 ;; Define rulebases
 ;XXX Why separate rulebases?
 (define rb1 (ConceptNode "rb1"))
@@ -458,26 +497,27 @@
 (define (pln-get-loop-count) pln-loop-count)
 
 (define (pln-loop)
-  ;; Apply l2s rules
-    (let ((name-on-last-sentence (put-name-on-the-last-sentence))
-        (sentiment-sentence-to-person-l2s-results
-            (cog-fc (SetLink) rb1 (SetLink)))
+    ;; Apply l2s rules
+    (let (;(name-on-last-sentence (put-name-on-the-last-sentence))
+        ;(sentiment-sentence-to-person-l2s-results
+        ;    (cog-fc (SetLink) rb1 (SetLink)))
         (unary-predicate-speech-act-l2s-results
             (cog-fc (SetLink) rb2 (SetLink)))
         )
 
-    (cog-logger-debug "[PLN-Reasoner] name-on-last-sentence = ~a"
-        name-on-last-sentence)
-    (cog-logger-debug
-        "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a"
-        sentiment-sentence-to-person-l2s-results)
-    (cog-logger-debug
-        "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a"
-        unary-predicate-speech-act-l2s-results))
+        ;(cog-logger-debug "[PLN-Reasoner] name-on-last-sentence = ~a"
+        ;    name-on-last-sentence)
+        ;(cog-logger-debug
+        ;    "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a"
+        ;    sentiment-sentence-to-person-l2s-results)
+        (cog-logger-info
+            "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a"
+            unary-predicate-speech-act-l2s-results)
+    )
 
-  ;; Apply Implication direct evaluation (and put the result in
-  ;; pln-inferred-atoms state)
-    (let* ((direct-eval-results (cog-fc (SetLink) rb3 (SetLink)) )
+    ;; Apply Implication direct evaluation (and put the result in
+    ;; pln-inferred-atoms state)
+    (let* ((direct-eval-results (cog-fc (SetLink) rb3 (SetLink)))
         ;; Filter only inferred result containing "happy". This is a
         ;; temporary hack to make it up for the lack of attentional
         ;; allocation
@@ -488,11 +528,11 @@
         (add-to-pln-inferred-atoms (Set filtered-results))
     )
 
-    (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
+    (cog-logger-info "[PLN-Reasoner] pln-inferred-atoms = ~a"
         (search-inferred-atoms))
 
     ;; sleep a bit, to not overload the CPU too much
-    (cog-logger-debug "[PLN-Reasoner] Sleep for a second")
+    (cog-logger-info "[PLN-Reasoner] Sleep for a second")
     (set! pln-loop-count (+ pln-loop-count 1))
     (sleep 1)
 
