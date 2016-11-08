@@ -25,17 +25,6 @@ IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 	)
 ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
-# Build the query (pattern-matching) cogserver module
-ADD_LIBRARY(QueryModule SHARED
-	QueryModule.cc
-)
-TARGET_LINK_LIBRARIES(QueryModule
-	${ATOMSPACE_LIBRARIES}
-)
-
-INSTALL (TARGETS QueryModule
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-)
 # ----------------------------------------
 # The SQL persistence module
 
