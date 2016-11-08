@@ -48,17 +48,3 @@ IF (HAVE_ZMQ AND HAVE_PROTOBUF)
 ENDIF (HAVE_ZMQ AND HAVE_PROTOBUF)
 
 # ----------------------------------------
-# Build the RuleEngine cogserver module
-
-ADD_LIBRARY(RuleEngineModule SHARED
-	RuleEngineModule.cc
-)
-
-TARGET_LINK_LIBRARIES(RuleEngineModule
-	${ATOMSPACE_LIBRARIES}
-)
-
-INSTALL (TARGETS RuleEngineModule
-	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-)
-# ----------------------------------------
