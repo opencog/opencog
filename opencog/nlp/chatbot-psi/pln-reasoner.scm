@@ -459,43 +459,45 @@
 
 (define (pln-loop)
   ;; Apply l2s rules
-  (let (
-        (name-on-last-sentence (put-name-on-the-last-sentence))
+    (let ((name-on-last-sentence (put-name-on-the-last-sentence))
         (sentiment-sentence-to-person-l2s-results
-         ;(cog-bind sentiment-sentence-to-person-l2s-rule)
-         (cog-fc (SetLink) rb1 (SetLink))
-         )
+            (cog-fc (SetLink) rb1 (SetLink)))
         (unary-predicate-speech-act-l2s-results
-         ;(cog-bind unary-predicate-speech-act-l2s-rule)
-         (cog-fc (SetLink) rb2 (SetLink))
-         ))
-    ;; (cog-logger-debug "[PLN-Reasoner] StateLinks = ~a" (cog-get-atoms 'StateLink))
-    ;; (cog-logger-debug "[PLN-Reasoner] PredicateNodes = ~a" (map cog-incoming-set (cog-get-atoms 'PredicateNode)))
-    (cog-logger-debug "[PLN-Reasoner] name-on-last-sentence = ~a" name-on-last-sentence)
-    (cog-logger-debug "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a" sentiment-sentence-to-person-l2s-results)
-    (cog-logger-debug "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a" unary-predicate-speech-act-l2s-results))
+            (cog-fc (SetLink) rb2 (SetLink)))
+        )
+
+    (cog-logger-debug "[PLN-Reasoner] name-on-last-sentence = ~a"
+        name-on-last-sentence)
+    (cog-logger-debug
+        "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a"
+        sentiment-sentence-to-person-l2s-results)
+    (cog-logger-debug
+        "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a"
+        unary-predicate-speech-act-l2s-results))
 
   ;; Apply Implication direct evaluation (and put the result in
   ;; pln-inferred-atoms state)
-  (let* ((direct-eval-results (cog-fc (SetLink) rb3 (SetLink)) );(cog-bind implication-direct-evaluation-rule))
+    (let* ((direct-eval-results (cog-fc (SetLink) rb3 (SetLink)) )
         ;; Filter only inferred result containing "happy". This is a
         ;; temporary hack to make it up for the lack of attentional
         ;; allocation
         (must-contain (list (Predicate "happy")))
         (ff (lambda (x) (lset<= equal? must-contain (cog-get-all-nodes x))))
         (filtered-results (filter ff (cog-outgoing-set direct-eval-results))))
-    (add-to-pln-inferred-atoms (Set filtered-results)))
 
-  (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
-                    (search-inferred-atoms))
+        (add-to-pln-inferred-atoms (Set filtered-results))
+    )
 
-  ;; sleep a bit, to not overload the CPU too much
-  (cog-logger-debug "[PLN-Reasoner] Sleep for a second")
-  (set! pln-loop-count (+ pln-loop-count 1))
-  (sleep 1)
+    (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
+        (search-inferred-atoms))
 
-  ;; Loop
-  (if enable-pln-loop (pln-loop))
+    ;; sleep a bit, to not overload the CPU too much
+    (cog-logger-debug "[PLN-Reasoner] Sleep for a second")
+    (set! pln-loop-count (+ pln-loop-count 1))
+    (sleep 1)
+
+    ;; Loop
+    (if enable-pln-loop (pln-loop))
 )
 
 (define (pln-run)
