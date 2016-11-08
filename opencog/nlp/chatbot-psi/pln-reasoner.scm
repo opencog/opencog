@@ -510,7 +510,7 @@
         ;(cog-logger-debug
         ;    "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a"
         ;    sentiment-sentence-to-person-l2s-results)
-        (cog-logger-info
+        (cog-logger-debug
             "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a"
             unary-predicate-speech-act-l2s-results)
     )
@@ -528,11 +528,11 @@
         (add-to-pln-inferred-atoms (Set filtered-results))
     )
 
-    (cog-logger-info "[PLN-Reasoner] pln-inferred-atoms = ~a"
+    (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
         (search-inferred-atoms))
 
     ;; sleep a bit, to not overload the CPU too much
-    (cog-logger-info "[PLN-Reasoner] Sleep for a second")
+    (cog-logger-debug "[PLN-Reasoner] Sleep for a second")
     (set! pln-loop-count (+ pln-loop-count 1))
     (sleep 1)
 
