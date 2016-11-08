@@ -11,21 +11,6 @@ IF (HAVE_REST)
 ENDIF (HAVE_REST)
 
 # ----------------------------------------
-# Link-grammar cogserver module
-
-IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
-	ADD_LIBRARY (LGDictModule SHARED
-		LGDictModule
-	)
-
-	TARGET_LINK_LIBRARIES (LGDictModule lg-dict server)
-
-	INSTALL (TARGETS LGDictModule
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-	)
-ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
-
-# ----------------------------------------
 # The SQL persistence module
 
 IF (HAVE_PERSIST_SQL)
@@ -77,22 +62,3 @@ INSTALL (TARGETS RuleEngineModule
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
 )
 # ----------------------------------------
-# Surface realization cogserver module
-
-IF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
-	ADD_LIBRARY (SuRealModule SHARED
-		SuRealModule
-	)
-
-	ADD_DEPENDENCIES (SuRealModule
-		nlp_atom_types
-	)
-
-	TARGET_LINK_LIBRARIES(SuRealModule
-		sureal
-	)
-
-	INSTALL (TARGETS SuRealModule
-		LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog/modules"
-	)
-ENDIF (HAVE_GUILE AND HAVE_LINK_GRAMMAR)
