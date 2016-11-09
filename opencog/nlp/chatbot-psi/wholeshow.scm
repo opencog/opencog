@@ -67,6 +67,42 @@
 )
 
 ; --------------------------------------------------------------
+; Returns a SetLink with ListLink of psi-controled-rule aliases and their
+; atomese-weight.
+(Define
+    (DefinedSchema "get-demo-state")
+    (BindLink
+        (VariableList
+            (TypedVariableLink
+                (VariableNode "controled-rule")
+                (TypeNode "ImplicationLink"))
+            (TypedVariableLink
+                (VariableNode "psi-rule-weight")
+                (TypeNode "NumberNode"))
+            (TypedVariableLink
+                (VariableNode "psi-rule-alias")
+                (TypeNode "ConceptNode")))
+        (And
+            (EvaluationLink
+                psi-rule-name-predicate-node
+                (ListLink
+                    (Variable "controled-rule")
+                    (VariableNode "psi-rule-alias")))
+            (MemberLink
+                (Variable "controled-rule")
+                psi-controller-demand)
+            (StateLink ; FIXME should use AtTimeLink
+                (ListLink
+                    (VariableNode "psi-rule-alias")
+                    (ConceptNode (string-append psi-prefix-str "weight")))
+                (VariableNode "psi-rule-weight")))
+        (List
+            (VariableNode "psi-rule-alias")
+            (VariableNode "psi-rule-weight"))
+    )
+)
+
+; --------------------------------------------------------------
 (define-public (show-demo-state)
 "
   Returns an a-list with rule aliases for keys and their weights for values.
