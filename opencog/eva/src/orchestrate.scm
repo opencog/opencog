@@ -253,4 +253,29 @@
     ))
 
 ; -------------------------------------------------------------
+; For updating web-ui
+(DefineLink
+    (DefinedPredicate "update-opencog-control-parameter")
+    (LambdaLink
+        (VariableList
+            (TypedVariableLink
+                (VariableNode "psi-rule-alias")
+                (TypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "psi-rule-weight")
+                (TypeNode "NumberNode")))
+        (Evaluation
+            (GroundedPredicate "py: update_opencog_control_parameter")
+            (List
+                (VariableNode "psi-rule-alias")
+                (VariableNode "psi-rule-weight")))
+    ))
+
+(Define
+    (DefinedPredicate "update-web-ui")
+    (True (PutLink
+        (DefinedPredicate "update-opencog-control-parameter")
+        (DefinedSchema "psi-controlled-rule-state"))
+    ))
+; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent

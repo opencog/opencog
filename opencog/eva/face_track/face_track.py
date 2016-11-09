@@ -293,7 +293,7 @@ class FaceTrack:
 	# Update face location in octomap if it is in visible faces list
 	def update_face_loc(self,face):
 		if face.id in self.visible_faces:
-			self.atomo.update_face_octomap(face.id,face.point.x,face.point.y,face.point.z)
+			self.atomo.(face.id,face.point.x,face.point.y,face.point.z)
 
 	# ----------------------------------------------------------
 	# Main look-at action driver.  Should be called at least a few times

@@ -23,6 +23,10 @@
 (define track-demand (psi-demand "track demand" 1))
 (define track-demand-satisfied (True))
 
+; Demand for contorl with web-ui
+(define update-demand (psi-demand "update demand" 1))
+(define update-demand-satisfied (True))
+
 (DefineLink
 	(DefinedPredicate "Nothing happening?")
 	(NotLink
@@ -141,3 +145,9 @@
 ;		(DefinedPredicate  "normal conversation?")))
 ;	(DefinedPredicate "Normal:amused")
 ;	speech-demand-satisfied (stv 1 1) speech-demand)
+
+
+;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+;	(DefinedPredicate "ROS is running?")))
+;	(DefinedPredicate "update-web-ui")
+;		update-demand-satisfied (stv 1 1) update-demand)
