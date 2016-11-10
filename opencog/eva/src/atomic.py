@@ -146,6 +146,7 @@ def ros_is_running():
 		return TruthValue(0, 1)
 	return TruthValue(1, 1)
 
+# Update dynamic paramater cache
 def update_opencog_control_parameter(name_node, value_node):
 	try:
 		name = name_node.name
@@ -154,3 +155,8 @@ def update_opencog_control_parameter(name_node, value_node):
 		return TruthValue(1, 1)
 	except:
 		return TruthValue(0, 1)
+
+# Update dynamic parameters
+def push_parameter_update():
+	evl.push_parameter_update()
+	return TruthValue(1, 1)

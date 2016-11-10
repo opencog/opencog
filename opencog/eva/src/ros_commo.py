@@ -282,13 +282,15 @@ class EvaControl():
 		psi_prefix = self.puta.evaluate_scm("psi-prefix-str")
 		param_name = name[len(psi_prefix) - 1:]
 
-		# Check if all controled rules are controlable from web-ui
-		for i in self.param_list:
-			if i["name"] == param_name:
-				update = True
+		# Update parameter
+		if (param_name in self.param_dict):
+			# and (self.param_dict[param_name] != value):
+			self.param_dict[param_name] = value
 
-		if update and not rospy.is_shutdown():
-			self.client.update_configuration({param_name: value})
+
+	def push_parameter_update(self):
+		if not rospy.is_shutdown():
+			self.client.update_configuration(self.param_dict)
 
 
 	# ----------------------------------------------------------
@@ -411,6 +413,10 @@ class EvaControl():
 		self.param_list = yaml.load(param_yaml)
 
 		for i in self.param_list:
+			# Populate the parameter dictionary
+			if i["name"] not in self.param_dict:
+				self.param_dict[i["name"]] = i["value"]
+
 			if i["name"] == "max_waiting_time":
 				scm_str = '''(StateLink
 				                 (AnchorNode "Chatbot: MaxWaitingTime")
@@ -437,9 +443,14 @@ class EvaControl():
 		print("Starting OpenCog Behavior Node")
 
 		# ----------------
-		# Parameter list that are mirrored in opencog for controling
+		# A list of parameter names that are mirrored in opencog for controling
 		# psi-rules
 		self.param_list = []
+		# Parameter dictionary that is used for updating states recorede in
+		# the atomspace. It is used to cache the atomspace values, thus updating
+		# of the dictionary is only made from opencog side (openpsi
+		# updating rule)
+		self.param_dict = {}
 
 		# For web ui based control of openpsi contorled-psi-rules
 		self.client = dynamic_reconfigure.client.Client("/opencog_control")
