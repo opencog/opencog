@@ -131,7 +131,7 @@
 ;	(DefinedPredicate "Normal:amused")
 ;	speech-demand-satisfied (stv 1 1) speech-demand)
 
-
-(psi-rule (list (DefinedPredicate "ROS is running?"))
-	(DefinedPredicate "update-web-ui")
-		update-demand-satisfied (stv 1 1) update-demand)
+;
+;(psi-rule (list (DefinedPredicate "ROS is running?"))
+;	(DefinedPredicate "update-web-ui")
+;		update-demand-satisfied (stv 1 1) update-demand)
