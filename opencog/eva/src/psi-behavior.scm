@@ -131,7 +131,9 @@
 ;	(DefinedPredicate "Normal:amused")
 ;	speech-demand-satisfied (stv 1 1) speech-demand)
 
-;
-;(psi-rule (list (DefinedPredicate "ROS is running?"))
-;	(DefinedPredicate "update-web-ui")
-;		update-demand-satisfied (stv 1 1) update-demand)
+
+; Any changes to the weight for controlled-psi-rules are pushed to ros
+; dynamic-parameters. Thus the web-ui mirrors the opencog wholeshow state.
+(psi-rule (list (DefinedPredicate "ROS is running?"))
+	(DefinedPredicate "update-web-ui")
+		update-demand-satisfied (stv 1 1) update-demand)
