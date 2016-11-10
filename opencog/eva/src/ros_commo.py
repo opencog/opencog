@@ -26,6 +26,7 @@ import random
 import yaml
 import tf
 import numpy
+import dynamic_reconfigure.client
 # Eva ROS message imports
 from std_msgs.msg import String, Int32
 from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
@@ -271,6 +272,26 @@ class EvaControl():
 		self.blink_pub.publish(msg)
 
 	# ----------------------------------------------------------
+	def update_opencog_control_parameter(self, name, value):
+		"""
+		This function is used for updating ros parameters that are used to
+		modify the weight of openpsi rules. When the changes in weight occur
+		independent of changes in HEAD's web-ui.
+		"""
+		update =  False
+		psi_prefix = self.puta.evaluate_scm("psi-prefix-str")
+		param_name = name[len(psi_prefix) - 1:]
+
+		# Check if all controled rules are controlable from web-ui
+		for i in self.param_list:
+			if i["name"] == param_name:
+				update = True
+
+		if update and not rospy.is_shutdown():
+			self.client.update_configuration({param_name: value})
+
+
+	# ----------------------------------------------------------
 	# Subscription callbacks
 	# Get the list of available gestures.
 	def get_gestures_cb(self, msg):
@@ -380,13 +401,16 @@ class EvaControl():
 	def behavior_control_callback(self, data):
 		self.control_mode = data.data
 
+	# For web-ui interface
 	def openpsi_control_cb(self, data):
 		"""
 		This function is used for interactively modifying the weight of openpsi
 		rules.
 		"""
-		param_list = yaml.load(rosmsg.get_yaml_for_msg(data.doubles + data.ints))
-		for i in param_list:
+		param_yaml = rosmsg.get_yaml_for_msg(data.doubles + data.ints)
+		self.param_list = yaml.load(param_yaml)
+
+		for i in self.param_list:
 			if i["name"] == "max_waiting_time":
 				scm_str = '''(StateLink
 				                 (AnchorNode "Chatbot: MaxWaitingTime")
@@ -411,6 +435,14 @@ class EvaControl():
 		# The below will hang until roscore is started!
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
+
+		# ----------------
+		# Parameter list that are mirrored in opencog for controling
+		# psi-rules
+		self.param_list = []
+
+		# For web ui based control of openpsi contorled-psi-rules
+		self.client = dynamic_reconfigure.client.Client("/opencog_control")
 
 		# ----------------
 		# Get the available animations

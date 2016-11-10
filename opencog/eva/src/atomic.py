@@ -145,3 +145,12 @@ def ros_is_running():
 	if (rospy.is_shutdown()):
 		return TruthValue(0, 1)
 	return TruthValue(1, 1)
+
+def update_opencog_control_parameter(name_node, value_node):
+	try:
+		name = name_node.name
+		value = float(value_node.name)
+		evl.update_opencog_control_parameter(name, value)
+		return TruthValue(1, 1)
+	except:
+		return TruthValue(0, 1)
