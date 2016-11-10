@@ -257,8 +257,8 @@
 ; NOTE: updating of parameters is divided into steps of upating the parameter
 ; cache and then pushing the update, so as to simply syncing the values.
 ; If one pushes a partial updated cache results in the publishing of the change
-; to /opencog_control topic thus resulting in an undesirable state in the
-; atomspace.
+; to /opencog_control/parameter_updates topic thus resulting in an undesirable
+; state in the atomspace.
 
 ; Update dynamic parameter cache
 (DefineLink

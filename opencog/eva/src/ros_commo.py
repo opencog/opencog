@@ -283,14 +283,16 @@ class EvaControl():
 		param_name = name[len(psi_prefix) - 1:]
 
 		# Update parameter
-		if (param_name in self.param_dict):
-			# and (self.param_dict[param_name] != value):
+		if (param_name in self.param_dict) and \
+		   (self.param_dict[param_name] != value):
 			self.param_dict[param_name] = value
+			self.update_parameters = True
 
 
 	def push_parameter_update(self):
-		if not rospy.is_shutdown():
+		if self.update_parameters and not rospy.is_shutdown():
 			self.client.update_configuration(self.param_dict)
+			self.update_parameters = False
 
 
 	# ----------------------------------------------------------
@@ -451,6 +453,9 @@ class EvaControl():
 		# of the dictionary is only made from opencog side (openpsi
 		# updating rule)
 		self.param_dict = {}
+
+		# For controlling when to push updates, for saving bandwidth.
+		self.update_parameters = False
 
 		# For web ui based control of openpsi contorled-psi-rules
 		self.client = dynamic_reconfigure.client.Client("/opencog_control")
