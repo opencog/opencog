@@ -53,6 +53,9 @@
     (cog-outgoing-set
         (cog-execute! (Get (Inheritance (Variable "$sec") psi-sec-node)))))
 
+(define-public (psi-is-sec? atom)
+    (member atom (psi-get-secs)))
+
 ; Todo: add variable names (?) and add getters for agent-state secs
 
 ; =============================================================================
