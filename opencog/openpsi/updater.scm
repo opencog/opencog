@@ -749,6 +749,10 @@
             (set! var-node (List
                 (ConceptNode "OpenPsi: agent-state") var-node)))
         (set! value (psi-get-number-value var-node))
+        ; If value is not set (iow, equal to #f), set it to null for javascript
+        ; compatibility.
+        (if (eq? value #f)
+            (set! value "null"))
         (set! return
             (append return (list (format #f "\"~a\": ~a" varname value))))
     )
