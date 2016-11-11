@@ -69,17 +69,6 @@ bool ListRequest::execute()
             handle = Handle::UNDEFINED;
             subtypes = false;
             break;
-        } else if (*it == "-h") { // filter by handle
-            ++it;
-            if (it == _parameters.end()) return syntaxError();
-            UUID uuid = strtol(it->c_str(), NULL, 0);
-            handle = Handle(uuid);
-            if (!as.is_valid_handle(handle)) {
-                _error << "Error: Invalid handle" << std::endl;
-                sendError();
-                return false;
-            }
-            _handles.push_back(handle);
         } else if (*it == "-n")  { // filter by name
             ++it;
             if (it == _parameters.end()) return syntaxError();
