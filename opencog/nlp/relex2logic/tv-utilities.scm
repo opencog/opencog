@@ -1,5 +1,35 @@
 (use-modules (ice-9 threads))
 
+(use-modules (opencog))
+
+; -----------------------------------------------------------------------
+; From TruthValue::DEFAULT_TV()
+(define default-stv (stv 1 0))
+
+(define (update-stv atom)
+"
+  Used to update the stv of an atom
+
+  atom:
+  - An atom with stv for tv type.
+"
+    (let ((default-k 800)) ; From TruthValue::DEFAULT_K
+        (if (equal? (cog-tv atom) default-stv)
+            (let ((new-mean (/ 1 (cog-count-atoms (cog-type atom))))
+                  (new-conf (/ 1 (+ 1 default-k))))
+                (cog-set-tv! atom (cog-new-stv new-mean new-conf))
+            )
+            (let* ((current-count (round
+                        (assoc-ref (cog-tv->alist (cog-tv atom)) 'count)))
+                   (new-count (+ current-count 1))
+                   (new-mean (/ new-count (cog-count-atoms (cog-type atom))))
+                   (new-conf (/ new-count (+ new-count default-k))))
+                (cog-set-tv! atom (cog-new-stv new-mean new-conf))
+            )
+        )
+    )
+)
+
 ; -----------------------------------------------------------------------
 (define-public (r2l-count sent-list)
 "
@@ -9,27 +39,7 @@
   - A list of SentenceNodes
 "
     (define (update-tv nodes)
-        ; DEFAULT_TV and DEFAULT_K as defined in TruthValue.cc
-        (let ((default-stv (stv 1 0))
-              (default-k 800))
-            (par-map
-                (lambda (n)
-                    (if (equal? (cog-tv n) default-stv)
-                        (let ((new-mean (/ 1 (cog-count-atoms (cog-type n))))
-                              (new-conf (/ 1 (+ 1 default-k))))
-                            (cog-set-tv! n (cog-new-stv new-mean new-conf))
-                        )
-                        (let* ((current-count (round (assoc-ref (cog-tv->alist (cog-tv n)) 'count)))
-                               (new-count (+ current-count 1))
-                               (new-mean (/ new-count (cog-count-atoms (cog-type n))))
-                               (new-conf (/ new-count (+ new-count default-k))))
-                            (cog-set-tv! n (cog-new-stv new-mean new-conf))
-                        )
-                    )
-                )
-                nodes
-            )
-        )
+        (par-map update-stv nodes)
     )
 
     ; Increment the R2L's node count value
