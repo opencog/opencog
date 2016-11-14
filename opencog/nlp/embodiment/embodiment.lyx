@@ -1,7 +1,9 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass article
 \begin_preamble
 \usepackage{url} 
@@ -12,16 +14,16 @@
 \language_package default
 \inputencoding utf8
 \fontencoding global
-\font_roman times
-\font_sans helvet
-\font_typewriter courier
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
-
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -41,15 +43,24 @@
 \pdf_pdfusetitle true
 \papersize default
 \use_geometry false
-\use_amsmath 2
-\use_esint 0
-\use_mhchem 0
-\use_mathdots 1
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date false
+\justification true
 \use_refstyle 0
 \index Index
 \shortcut idx
@@ -342,7 +353,7 @@ status open
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 The PUMA Architecture
@@ -567,7 +578,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Self and World Models
@@ -690,7 +701,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 A Control Theory Model
@@ -1046,7 +1057,7 @@ status collapsed
 
 \begin_layout Plain Layout
 \align center
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Model and Control
@@ -1295,7 +1306,7 @@ sideways false
 status collapsed
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Control Language
@@ -1349,7 +1360,7 @@ turn to the eye-blink
 \begin_inset Quotes erd
 \end_inset
 
- -- they eye-blink animation not being valid with the turn directive.
+ – they eye-blink animation not being valid with the turn directive.
  The language can control different systems: the physical body or 
 \begin_inset Quotes eld
 \end_inset
@@ -1750,7 +1761,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Example Link Grammar Parse
@@ -1918,7 +1929,7 @@ height "1pt"
 The Link Grammar parser discovers relationships between the words in a sentence,
  and marks up those relationships with links connecting pairs of words.
  These links have a type or kind, indicating the relationship between the
- words -- typically, subject, object, adjectival-modifier, adverbial-modifier,
+ words – typically, subject, object, adjectival-modifier, adverbial-modifier,
  prepositional-object and so on.
  This is illustrated in figure 
 \begin_inset CommandInset ref
@@ -2278,7 +2289,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Language Pipeline
@@ -2646,7 +2657,7 @@ These are each reviewed, below.
 Control language prototype
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Control-language-prototype"
+name "subsec:Control-language-prototype"
 
 \end_inset
 
@@ -3416,7 +3427,7 @@ target "https://github.com/opencog/ros-behavior-scripting/blob/a00847af2ef07dfbc
 \end_layout
 
 \begin_layout Itemize
-Lines 57-60 indicating if the robot is asleep, awake or bored -- the 
+Lines 57-60 indicating if the robot is asleep, awake or bored – the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3499,6 +3510,10 @@ Lines 244-294 deal with the setting of timestamps on the internal state.
 Lines 305-763 deal with the interaction with visible faces in the room.
  The names of the various predicates are more-or-less self-explanatory.
  So, 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3700,7 +3715,7 @@ issue: picking out sentences attached to an anchor, vs other processing
 \end_layout
 
 \begin_layout Standard
-todo -- the verb synonyms should not be needed!? as they can be gotten from
+todo – the verb synonyms should not be needed!? as they can be gotten from
  the synonym lists for the control-action language...
 \end_layout
 
@@ -3745,7 +3760,7 @@ view
 \begin_inset Quotes erd
 \end_inset
 
- part of MVC -- the internal state has to be 
+ part of MVC – the internal state has to be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3785,8 +3800,8 @@ World model
 \begin_layout Standard
 Right now, there is only a self-model.
  A world-model is needed, so we can talk about that.
- Well --there is a world model -- currently, it consists of the visible
- faces in the environment.
+ Well –there is a world model – currently, it consists of the visible faces
+ in the environment.
  It needs to get bigger.
 \end_layout
 
@@ -3930,7 +3945,7 @@ status open
 \end_layout
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Facial landmark discovery
@@ -4409,11 +4424,11 @@ hey where did everybody go?
 \end_layout
 
 \begin_layout Itemize
-Behavior -- she should not get sleepy, as long as someone is visible.
+Behavior – she should not get sleepy, as long as someone is visible.
 \end_layout
 
 \begin_layout Itemize
-Behavior -- she should complain, if no one is visible, but there is a chat
+Behavior – she should complain, if no one is visible, but there is a chat
  session going on.
 \end_layout
 
@@ -4695,7 +4710,7 @@ Unfinished stuff
 \end_layout
 
 \begin_layout Standard
----
+—
 \end_layout
 
 \begin_layout Standard
@@ -4703,7 +4718,7 @@ practical examples, for PLN.
 \end_layout
 
 \begin_layout Standard
----
+—
 \end_layout
 
 \begin_layout Standard
@@ -4711,7 +4726,7 @@ so how is assembly to be performed?
 \end_layout
 
 \begin_layout Standard
-----
+—-
 \end_layout
 
 \begin_layout Standard
@@ -4722,7 +4737,7 @@ difference between counting (performing the assembly) and linkage parsing
 \end_layout
 
 \begin_layout Standard
----
+—
 \end_layout
 
 \begin_layout Standard
@@ -4730,7 +4745,7 @@ A universe is like a partially assembled puzzle.
 \end_layout
 
 \begin_layout Standard
----
+—
 \end_layout
 
 \begin_layout Standard
@@ -4738,7 +4753,7 @@ Relationship between
 \end_layout
 
 \begin_layout Standard
----
+—
 \end_layout
 
 \begin_layout Standard
@@ -4746,7 +4761,7 @@ Andre Joyal lemma
 \end_layout
 
 \begin_layout Standard
---- 
+— 
 \end_layout
 
 \begin_layout Standard
@@ -4767,7 +4782,7 @@ completeness
 \begin_inset Quotes erd
 \end_inset
 
- section -- linear logic .
+ section – linear logic .
 \end_layout
 
 \end_body
