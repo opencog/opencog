@@ -6,6 +6,37 @@
 ; From TruthValue::DEFAULT_TV()
 (define default-stv (stv 1 0))
 
+; -----------------------------------------------------------------------
+; An alist from atom-types to the number of times they are encountered
+; in the r2l step of the nlp pipeline. This gives a resonable estimate
+; of the type, as compared to just doing a count of the types from other
+; inputs.
+; NOTE: StateLink isn't used so as to avoid putting garbage NumberNodes.
+(define r2l-type-counts '())
+
+(define (get-type-count atom)
+"
+"
+    (let* ((type (cog-type atom))
+        (count (assoc-ref r2l-type-counts type)))
+
+        (if count
+            (begin
+                (set! r2l-type-counts
+                    (assoc-set! r2l-type-counts type (+ 1 count)))
+                (assoc-ref r2l-type-counts type)
+            )
+            (begin
+                (set! r2l-type-counts
+                    (assoc-set! r2l-type-counts type
+                        (cog-count-atoms (cog-type atom))))
+                (assoc-ref r2l-type-counts type)
+            )
+        )
+    )
+)
+
+; -----------------------------------------------------------------------
 (define (update-stv atom)
 "
   Used to update the stv of an atom
@@ -13,16 +44,18 @@
   atom:
   - An atom with stv for tv type.
 "
-    (let ((default-k 800)) ; From TruthValue::DEFAULT_K
+    (let ((default-k 800) ; From TruthValue::DEFAULT_K
+        (type-count (get-type-count atom)))
+
         (if (equal? (cog-tv atom) default-stv)
-            (let ((new-mean (/ 1 (cog-count-atoms (cog-type atom))))
+            (let ((new-mean (/ 1 type-count))
                   (new-conf (/ 1 (+ 1 default-k))))
                 (cog-set-tv! atom (cog-new-stv new-mean new-conf))
             )
             (let* ((current-count (round
                         (assoc-ref (cog-tv->alist (cog-tv atom)) 'count)))
                    (new-count (+ current-count 1))
-                   (new-mean (/ new-count (cog-count-atoms (cog-type atom))))
+                   (new-mean (/ new-count type-count))
                    (new-conf (/ new-count (+ new-count default-k))))
                 (cog-set-tv! atom (cog-new-stv new-mean new-conf))
             )
