@@ -23,6 +23,7 @@
 ; -- sentence-get-utterance-type  Get the speech act of a sentence.
 ; -- sent-list-get-parses   Get parses of a list of sentences.
 ; -- sent-get-words-in-order  Get all words occuring in a sentence in order.
+; -- sent-get-interp Get all the InterpretationNodes of a sentence.
 ; -- parse-get-words        Get all words occuring in a parse.
 ; -- parse-get-words-in-order  Get all words occuring in a parse in order.
 ; -- parse-get-relations    Get all RelEx relations in a parse.
