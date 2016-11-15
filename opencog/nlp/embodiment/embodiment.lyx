@@ -163,7 +163,7 @@ grounding
 \end_inset
 
  for the words.
- There needs to be a correspondance between nouns and objects, and also
+ There needs to be a correspondence between nouns and objects, and also
  between prepositions (
 \begin_inset Quotes eld
 \end_inset
@@ -235,7 +235,7 @@ relational
 The internal model must also be abstracted in such a way that it can be
  kept up to date as new sensory information comes in.
  This means that raw video must be converted into a representational form,
- with objects (people, thier position, movement, and facial expressions)
+ with objects (people, their position, movement, and facial expressions)
  picked out from the raw video.
  Similarly, raw audio must be converted into representations of the form
  
@@ -353,8 +353,8 @@ Symbolic Representation
 It is assumed that everything described here can be accomplished with a
  symbolic representation.
  That is, there is an explicit network of vertexes and edges, joined to
- form a graph, that encodes the knowledge, explictly and overtly.
- Thus, it is assumed that the core architeture is 
+ form a graph, that encodes the knowledge, explicitly and overtly.
+ Thus, it is assumed that the core architecture is 
 \emph on
 not
 \emph default
@@ -426,7 +426,7 @@ target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
 
 .
  Note that each circle and arrow may itself be a graph with additional structure
-: for example, the circle labelled 
+: for example, the circle labeled 
 \begin_inset Quotes eld
 \end_inset
 
@@ -484,7 +484,7 @@ height "1pt"
 \begin_layout Standard
 In the end, this assumption may not matter very much: a symbolic representation
  can still have floating point numerical weights and probabilities attached,
- and result in a network that is so complex that it challanges easy comprehensio
+ and result in a network that is so complex that it challenges easy comprehensio
 n: the distinction between neural and symbolic can be blurry.
  None-the-less, by picking a symbolic representation, the goal is to have
  a system whose internal state can be examined, reviewed, debugged and manipulat
@@ -582,7 +582,7 @@ ly intended to interface with the robots manufactured by Hanson, such as
 \end_layout
 
 \begin_layout Subsection
-Robot archtitecture overview
+Robot architecture overview
 \end_layout
 
 \begin_layout Standard
@@ -901,7 +901,7 @@ name "fig:A-Control-Theory"
 \begin_layout Plain Layout
 A typical depiction of a model, as described in control theory.
  This is considerably narrower than the intended meaning for this document,
- but serves to illlustrate the general idea.
+ but serves to illustrate the general idea.
  Here, a forward model of an arm movement is shown.
  The motor command, u(t), of the arm movement is input to a model of the
  arm and it's motors and the predicted position of the arm, x̃(t), is output.
@@ -1096,7 +1096,7 @@ target "https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_mod
  Although there are numerous design issues related to graph and EAV stores,
  this is outside of the domain of this document.
  The OpenCog AtomSpace is able to, under the covers, connect to various
- different databses.
+ different databases.
  It is sufficient to imagine that graph components are stored as JSON-like
  fragments.
 \end_layout
@@ -2071,7 +2071,7 @@ target "http://wiki.opencog.org/w/RelEx2Logic_rules"
 \end_inset
 
  (R2L), for reasons explained later.
- RelEx is a depedency parser layered on top of LG, generating 
+ RelEx is a dependency parser layered on top of LG, generating 
 \begin_inset CommandInset href
 LatexCommand href
 name "standard CoNLL-style DG markup"
@@ -2082,7 +2082,7 @@ target "http://wiki.opencog.org/w/Dependency_relations"
 .
  R2L is a layer on top of RelEx, used to extract logical relationships from
  factual English-language statements.
- Both are OpenCog subystems.
+ Both are OpenCog subsystems.
  The R2L subsystem is used in OpenCog to perform natural reasoning on English
  statements, using the PLN subsystem.
 \end_layout
@@ -2527,7 +2527,7 @@ The next section describes the OpenCog rule selection and rule chaining
 \begin_layout Standard
 Classic examples of rule engines, and why they are needed, are provided
  by AIML and ChatScript.
- These systems allow autors to script a large number of rules that, when
+ These systems allow authors to script a large number of rules that, when
  matched against a specific input pattern, provide a specific (verbal) response.
  Because there are a large number of rules (often tens of thousands), it
  is impractical to 
@@ -2538,7 +2538,7 @@ try them all
 \begin_inset Quotes erd
 \end_inset
 
-; instead, these must be pruned down to a managable set, usually to only
+; instead, these must be pruned down to a manageable set, usually to only
  one, or a small set, and then applied.
  
 \end_layout
@@ -2573,7 +2573,7 @@ backward chaining
 \end_inset
 
 : a desired end-result is specified, and the rule system must discover the
- rules that can acheive those results.
+ rules that can achieve those results.
  
 \end_layout
 
@@ -2581,7 +2581,7 @@ backward chaining
 An example of goal-oriented behavior is this: the robot seeks to make the
  audience laugh (the goal).
  Which, of the myriad performance rules it has available, are suitable for
- acheiving this goal? 
+ achieving this goal? 
 \end_layout
 
 \begin_layout Standard
@@ -2612,16 +2612,16 @@ mumble mumble turn left mumble
 : a reasonable action for the robot is to turn left).
  In these cases, one could try to write a rule that covers every eventuality,
  every situation: but of course, this is legendarily impossible.
- Yet, a resposnse is required.
+ Yet, a response is required.
  
 \end_layout
 
 \begin_layout Standard
-In this case, it is important to be able to pick out a set of fragementary
+In this case, it is important to be able to pick out a set of fragmentary
  rules, all of which might be partially appropriate for the situation, and
  then assemble a consistent, non-conflicting subset of them, for performance.
  If several subsets of consistent rules are available, the one with the
- highest liklihood or confidence can then be selected for performance.
+ highest likelihood or confidence can then be selected for performance.
  This scenario is neither forward nor backward chaining; it is rather the
  assembly of a fallback plan to (gracefully?) handle a new, unexpected scenario.
 \end_layout
@@ -2737,9 +2737,9 @@ target "https://en.wikipedia.org/wiki/Hidden_Markov_model"
  modulation of behavior based on the current model state and desires.
  Hidden Markov Models can be thought of as probabilistic state machines:
  they add a statistical component to behavior.
- They are paricularly useful and popular for automatically discerning patterns
+ They are particularly useful and popular for automatically discerning patterns
  in data.
- Thus, they are usefule for learning.
+ Thus, they are useful for learning.
  For the expression and selection of rules, though, they offer no particular
  advantage.
 \end_layout
@@ -2764,7 +2764,7 @@ ns of compatible rules can be discovered and assembled by applying parser
 \end_layout
 
 \begin_layout Standard
-A proposal for a generic parser, sutiable for rule selection and chaining,
+A proposal for a generic parser, suitable for rule selection and chaining,
  is given in 
 \begin_inset ERT
 status open
@@ -3039,7 +3039,7 @@ reference "fig:Language-Pipeline"
 
 \end_inset
 
- distingusihes a semantic representation layer SemR, and a control-language
+ distinguishes a semantic representation layer SemR, and a control-language
  layer ContrL.
  The SemR layer provides a 
 \begin_inset Quotes eld
@@ -4205,14 +4205,14 @@ Look leftwards!
 
 .
  Attempts to mitigate this became quickly stuck in the morass of R2L rules.
- It seemed like an aweful lot of effort for very little return, so that
- approach was abandoned for the prototype.
+ It seemed like an awful lot of effort for very little return, so that approach
+ was abandoned for the prototype.
 \end_layout
 
 \begin_layout Standard
 Next, it was hoped that RelEx would provide the surface format, but that
  also did not work out.
- RelEx failed in two disstinct ways: it sometimes generated highly variable
+ RelEx failed in two distinct ways: it sometimes generated highly variable
  outputs for semantically similar sentences e.g.
  
 \begin_inset Quotes eld
@@ -4232,7 +4232,7 @@ Look down!
 
  gave very different outputs.
  Other times, there were unexpected similarities, when outputs should have
- been semantically diffent.
+ been semantically different.
  On top of this, pattern matching to RelEx was cumbersome: the patterns
  quickly became complex, requiring many different check to many sub-parts.
  The large complex patterns proved fragile and hard to maintain.
@@ -4255,12 +4255,12 @@ The current parsing pipeline (used by R2L as well as the prototype here)
  drops off recently-parsed sentences, and leaves them attached to an AnchorNode,
  where they can be picked up by the next stage of processing.
  Thus, to process a sentence, either every rule must specify the AnchorNode,
- so that the rule only applies to the curent sentence, or ...XXX how does R2L
- work? 
+ so that the rule only applies to the current sentence, or ...XXX how does
+ R2L work? 
 \end_layout
 
 \begin_layout Subsubsection*
-DRAFT VERSION 0.05
+DRAFT VERSION 0.07
 \end_layout
 
 \begin_layout Standard
@@ -4556,7 +4556,7 @@ name "fig:Facial-landmark-discovery"
 Example of facial landmark discovery.
  Software extracts boundaries of a face from an image, identifying significant
  landmarks, such as the eyes, nose and lips.
- These are refered to as 
+ These are referred to as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4672,19 +4672,19 @@ typical
 \end_inset
 
  feature vectors.
- This does NOT have to be a labelled dataset; it would be beter if it was
- not labelled, as the goal is to extract commonalities in the dataset, rather
+ This does NOT have to be a labeled dataset; it would be better if it was
+ not labeled, as the goal is to extract commonalities in the dataset, rather
  than to extract labels.
- Labelling comes at a later stage.
+ Labeling comes at a later stage.
 \end_layout
 
 \begin_layout Standard
-To extract unlabelled but classified and clustered data, it might be possible
+To extract unlabeled but classified and clustered data, it might be possible
  to use one of several relatively simple data analysis tools, such as principal
  component analysis (PCA), possibly other kernel methods, or possibly non-linear
  tools.
  Because unsupervised training is being proposed here, its not clear how
- to apply deep-learning neural net techiques.
+ to apply deep-learning neural net techniques.
  
 \end_layout
 
@@ -4701,11 +4701,11 @@ face types
  hundred.
  Because the training is unsupervised, its not clear what common features
  are being learned: perhaps they are facial expressions (happy, sad), perhaps
- they facial types (round, square-jawed), perhaps they are racial (asian,
- european, african), perhaps they are mouth-centered (open, closed-mouth,
+ they facial types (round, square-jawed), perhaps they are racial (Asian,
+ European, African), perhaps they are mouth-centered (open, closed-mouth,
  speaking vs listening), and perhaps they include face orientations (direct
  full-face, three-quarters face, profile).
- Perhaps the recognized types aredata characteristics (well-lit, distinct,
+ Perhaps the recognized types are data characteristics (well-lit, distinct,
  poorly-lit, blurry, distant, small).
  The point here is to somehow reduce the data rate of thousands of floats
  per second, to maybe 1 byte (256 different face recognitions) per second,
@@ -4732,7 +4732,7 @@ If the above can be accomplished, the next step would consist of imitation
  and movements to the different types or classes being identified.
  If a motor setting is found that corresponds to known characteristic, then
  that motor setting is memorized, and associated with that type.
- An exploration of the size and shape of the motor paramter space needs
+ An exploration of the size and shape of the motor parameter space needs
  to be performed: Similar motor settings should trigger the same recognition,
  but what, exactly, are the boundaries of what can be recognized? 
 \end_layout
@@ -4772,7 +4772,7 @@ expression type 7
 \begin_inset Quotes erd
 \end_inset
 
- encompases everything from smiling to frowning in profile, while rasing
+ encompasses everything from smiling to frowning in profile, while raising
  one eyebrow: it might turn out that 
 \begin_inset Quotes eld
 \end_inset
@@ -4801,12 +4801,12 @@ type 7
 \begin_inset Quotes eld
 \end_inset
 
-poorly-lit and square-jawed european male
+poorly-lit and square-jawed European male
 \begin_inset Quotes erd
 \end_inset
 
  which is not something that any motor setting on a well-lit female face
- would be able to acheive.
+ would be able to achieve.
  
 \end_layout
 
@@ -4911,11 +4911,11 @@ smile
  was associated with a feature set that includes turning away and opening
  the mouth, while shutting the eyes.
  Thus, mechanisms for un-learning word associations are required, or of
- transfering them to new classifications, as these are learned.
+ transferring them to new classifications, as these are learned.
 \end_layout
 
 \begin_layout Standard
-Because all of tese are hypothetical issues, proposing distinct solutions
+Because all of these are hypothetical issues, proposing distinct solutions
  for these seems premature, at this point, with the exception of language
  association.
  That is because the creation of associations between perceptions and words
@@ -5304,7 +5304,7 @@ so how is assembly to be performed?
 \end_layout
 
 \begin_layout Standard
-—-
+—
 \end_layout
 
 \begin_layout Standard
