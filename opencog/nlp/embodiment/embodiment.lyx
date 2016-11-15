@@ -88,7 +88,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.06 - 7 Oct 2016
+Draft Version 0.07 - 14 Nov 2016
 \end_layout
 
 \begin_layout Abstract
@@ -366,7 +366,7 @@ not
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -503,7 +503,8 @@ reference "fig:Concept-Graph"
 
 \end_inset
 
-.By having an explicit symbolic representation, one has the benefit, and
+.
+ By having an explicit symbolic representation, one has the benefit, and
  requirement, of having an explicit software layer that can access, query
  and update the internal model, both from the language side, and the sensory
  side.
@@ -558,9 +559,17 @@ internal model
 \begin_inset Quotes erd
 \end_inset
 
-, and how one can, in principle, interface with it.
+, and the 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ used to interface with it.
  This is followed by a section reviewing the current prototype.
- After this, difficulties with language are discussed.
+ After this, difficulties with natural language are discussed.
  There are multiple software issues encountered during development; these
  are discussed, and possible solutions are proposed.
 \end_layout
@@ -669,8 +678,8 @@ Internal Models
 \end_layout
 
 \begin_layout Standard
-The basic premise that will be elaborated here is that interacting with
- the world requires the creation of an 
+The basic premise elaborated here is that interacting with the world requires
+ the creation of an 
 \begin_inset CommandInset href
 LatexCommand href
 name "internal model"
@@ -697,7 +706,7 @@ target "https://en.wikipedia.org/wiki/Good_regulator"
  An internal model provides the system software with a natural API, a natural
  representation, that various different software components can agree on,
  and use, and manipulate, and reason with.
- Two depcitions of models are given in figures 
+ Two depictions of models are given in figures 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Self-and-World"
@@ -785,7 +794,7 @@ I know that my arm is raised
 \begin_inset Quotes eld
 \end_inset
 
-I know that there is a box in the corner of the room.
+I know that there is a person standing in front of me.
 \begin_inset Quotes erd
 \end_inset
 
@@ -823,9 +832,10 @@ World Model
 
 \begin_layout Standard
 Although the above argues that both the self-model and the world-model are
- special cases of the internal model, this is worth more discussion.
- The world model describes not only inanimate objects, such as boxes seen
- in the corner of the room, but includes models of other people.
+ special cases of the internal model, this is merits discussion.
+ The world model describes not only inanimate objects, such as stacks of
+ boxes seen in the corner of a room, but includes models of people and moving
+ things.
  In the current software base, this is quite shallow: it is just a list
  of the human faces currently visible to the video camera, and their 3D
  coordinates.
@@ -890,8 +900,8 @@ name "fig:A-Control-Theory"
 
 \begin_layout Plain Layout
 A typical depiction of a model, as described in control theory.
- This is considerably narrower than the intended meaning here, but serves
- to illlustrate the general idea.
+ This is considerably narrower than the intended meaning for this document,
+ but serves to illlustrate the general idea.
  Here, a forward model of an arm movement is shown.
  The motor command, u(t), of the arm movement is input to a model of the
  arm and it's motors and the predicted position of the arm, x̃(t), is output.
@@ -1060,13 +1070,44 @@ target "https://en.wikipedia.org/wiki/Octree"
 \end_layout
 
 \begin_layout Subsubsection
+Data
+\end_layout
+
+\begin_layout Standard
+When the system is turned off, the data encoded in the conceptual graphs
+ of figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Concept-Graph"
+
+\end_inset
+
+ must be stored in some way.
+ This is accomplished by tying the system to a database.
+ The most natural encoding is that of an 
+\begin_inset CommandInset href
+LatexCommand href
+name "Entity-Attribute-Value"
+target "https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model"
+
+\end_inset
+
+ (EAV) model: that is, a graph database.
+ Although there are numerous design issues related to graph and EAV stores,
+ this is outside of the domain of this document.
+ The OpenCog AtomSpace is able to, under the covers, connect to various
+ different databses.
+ It is sufficient to imagine that graph components are stored as JSON-like
+ fragments.
+\end_layout
+
+\begin_layout Subsubsection
 Model and Control
 \end_layout
 
 \begin_layout Standard
-It is not sufficient to create an internal model of the world, and represent
- it as state: a control API or control language to manipulate that state
- must also be provided.
+It is not enough to create an internal model of the world, and represent
+ it as state: a control API or control language must also be provided.
  The control is the active snippet of code that performs the actions needed
  to update the internal model.
  It can be thought of as the 
@@ -1096,10 +1137,10 @@ target "https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller"
  (MVC) paradigm from GUI programming.
  There are both engineering and philosophical reasons for having a control
  API.
- The engineering reasons include things like code-reuse, error-checking,
- encapsulation and ease-of-use.
+ The engineering reasons include code-reuse, error-checking, encapsulation
+ and ease-of-use.
  The philosophical reason is that a control API provides a shim between
- the world of static data, and the world of action and movement.
+ the world of (static) data, and the dynamics of action and movement.
  That is, as events occur in time, and as the world is in flux, so must
  also be the internal model.
  
@@ -1163,7 +1204,7 @@ messages
 \end_inset
 
 .
- In what follows, these will often be called 
+ In what follows, these will be called 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1171,18 +1212,10 @@ verbs
 \begin_inset Quotes erd
 \end_inset
 
-, or possibly 
-\begin_inset Quotes eld
-\end_inset
-
-meta-verbs
-\begin_inset Quotes erd
-\end_inset
-
- (XXX TODO: we need a good name for this).
- There is an important reason for this choice of terminology.
- First, due to the nature of how data is represented in the AtomSpace, it
- is the case that some given action can be applied to a large swath of the
+.
+ There is a reason for this (non-standard) term.
+ Due to the nature of how data is represented in the AtomSpace, it is the
+ case that some given action can often be applied to a large swath of the
  data.
  That is, most actions are NOT tightly coupled to the data they are manipulating
 , but are quite general.
@@ -1195,8 +1228,9 @@ internal model
 \begin_inset Quotes erd
 \end_inset
 
-: its not like there are many different kinds of objects, and they all need
- to have methods.
+.
+ It is not as-if there are many different kinds of objects, and they all
+ need to have methods.
  More accurately, there are only a few kinds, and many (most?) actions are
  in principle (
 \emph on
@@ -1205,6 +1239,9 @@ de facto
 ?) capable of manipulating many (most?) kinds of state.
  The OO paradigm does not provide a good way of thinking about what goes
  on in the atomspace.
+ More generally, the OO paradigm does not naturally lend itself to the idea
+ of editing graphs.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1283,7 +1320,7 @@ height "1pt"
 \end_layout
 
 \begin_layout Standard
-Another handy reason for why these 
+Another reason for why these 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1328,11 +1365,13 @@ if I stick out my tongue, people will laugh, or maybe they will get offended
 \end_inset
 
 .
+ 
 \end_layout
 
 \begin_layout Standard
-In the same way that it was argued that model state must be represented
- in terms of OpenCog Atoms, or 
+Verbs are themselves a form of data.
+ In the same way that model state must be represented graphically (in terms
+ of OpenCog Atoms, or 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1340,7 +1379,7 @@ atomese
 \begin_inset Quotes erd
 \end_inset
 
-, so too must be the verbs.
+), so too must the verbs.
  That is, the 
 \begin_inset Quotes eld
 \end_inset
@@ -1350,15 +1389,15 @@ control API
 \end_inset
 
  is not some C++ code (or python or scheme or Haskel...) but rather, it is
- also a collection of Atoms.
- Again, the reason for this is to allow the system to automatically generate
- new verbs, by means of learning, as well as to reason about the results
- of actions.
- Another key idea is that this allows actions to be combined and composed,
- in sequential or parallel order, with different timing.
+ also a collection of Atoms (a graph).
+ The reason for this is to allow the system to automatically generate new
+ verbs, by means of learning, as well as to reason about the results of
+ actions.
+ This allows actions to be combined and composed, in sequential or parallel
+ order, with different timing.
  That is, the actions are primitives that can be composed into performances,
  that play out over time.
- Representing these as atomese how such composition and performance-scripting
+ Representing these as atomese is how such composition and performance-scripting
  can be achieved.
 \end_layout
 
@@ -1367,9 +1406,8 @@ Control language
 \end_layout
 
 \begin_layout Standard
-Following the idea of needing to script actions to control behaviors leads
- one naturally to the need for concepts such as modifiers, which come in
- various forms, including 
+The idea of scripting actions to control behaviors leads naturally to modifiers,
+ which come in various forms, including 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1553,7 +1591,7 @@ height "1pt"
 
 \begin_layout Standard
 The need for a control language seems to be unavoidable: it is important
- to be able to specify motor speeds, etc.
+ to be able to specify motor speeds, arm heights, etc.
  Now, if one had an object-oriented system, then one would have a 
 \begin_inset Quotes eld
 \end_inset
@@ -1610,7 +1648,8 @@ speed
 \begin_inset Quotes erd
 \end_inset
 
-, and to control the arm, one would send the 
+.
+ To control the arm, one would send the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1651,8 +1690,8 @@ arm
  If the OO language was JavaScript, then many of these issues go away: JavaScrip
 t does allow new methods to be added, at run-time, to pre-existing objects.
  Indeed, in many ways, OpenCog Atomese resembles JavaScript.
- In particular, the JavaScript members are very similar to OpenCog Atoms,
- in that, at run-time, new members and methods can be added to objects.
+ In particular, JavaScript members are similar to OpenCog Atoms, in that,
+ at run-time, new members and methods can be added to objects.
  One could also say that OpenCog Atomese is a lot like JSON, in that one
  can specify arbitrary state structures in JSON.
 \end_layout
@@ -1662,13 +1701,47 @@ There are also some important ways in which atomese differs from JavaScript
  or JSON: atomese allows introspection, i.e.
  it allows for some atoms to control and operate on other atoms, which is
  not possible in JSON.
- Atomese also provides a query language, which JSON does not provide (To
- understand what atomese does, one might imagine writing a SparQL or SQL
- wrapper to query the contents of giant blobs of JSON, or possibly dumping
- large blobs of JSON into Apache Solr or Lucene or Cassandra).
- Atomese also has other language features (it is Prolog-like, it is ML-like)
- that are lacking in JavaScript.
- 
+ Atomese also provides a query language, which JSON does not provide.
+ To understand the atomese query system, one might imagine writing a SparQL
+ or SQL wrapper to query the contents of giant blobs of JSON, or possibly
+ dumping large blobs of JSON into Apache Solr or Lucene or Cassandra.
+ Postgres is able to do the former (with the 
+\begin_inset CommandInset href
+LatexCommand href
+name "JSONB column type"
+target "https://www.postgresql.org/docs/current/static/datatype-json.html"
+
+\end_inset
+
+); however, SQL is itself not JSON, and there is no natural way to convert
+ the one into the other.
+ Atomese also has other language features that are lacking in JavaScript.
+ It is ProLog-like, and has a 
+\begin_inset CommandInset href
+LatexCommand href
+name "DataLog"
+target "https://en.wikipedia.org/wiki/Datalog"
+
+\end_inset
+
+-like subset.
+ It is 
+\begin_inset CommandInset href
+LatexCommand href
+name "ML-like"
+target "https://en.wikipedia.org/wiki/ML_(programming_language)"
+
+\end_inset
+
+ (CaML, Haskel) in that it has a 
+\begin_inset CommandInset href
+LatexCommand href
+name "type system"
+target "https://en.wikipedia.org/wiki/Type_system"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1738,7 +1811,7 @@ target "https://en.wikipedia.org/wiki/Internal_model_(motor_control)#Forward_mod
 \end_inset
 
 , which is used to estimate what might happen if an action was performed,
- or an 
+ and an 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1746,9 +1819,10 @@ inverse model
 \begin_inset Quotes erd
 \end_inset
 
- as an interface to the physical body.
+ as the interface to the physical body.
  Both of these are distinct from the internal model, which models the current
- state, as opposed to some hypothetical future state.
+ state.
+ This is, in turn, distinct from a model of some hypothetical future state.
 \end_layout
 
 \begin_layout Standard
@@ -1767,8 +1841,8 @@ Other models are possible: this includes memories of past events, where
 \begin_layout Standard
 Rather than inventing a new language for each of these different systems,
  it is convenient to be able to use the same language.
- The under-the-covers implementation is different: in one case, motors must
- be moved; in another case, the model must be updated.
+ The endpoints will be different: in one case, motors must be moved; in
+ another case, the model must be updated.
  In either case, the verbs, nouns, adjectives and adverbs should be the
  same.
  (In control theory, this is termed the 
@@ -1866,18 +1940,151 @@ plating is NOT sufficient for more complex, more abstract conversations.
  from the start.
 \end_layout
 
-\begin_layout Standard
-The prototype does perform syntactic analysis using the Link Grammar parser.
- It could have used RelEx or Relex2Logic, but does not, for reasons explained
- later.
+\begin_layout Subsubsection
+Dependency Grammar
 \end_layout
 
 \begin_layout Standard
-If one has a syntactic analyzer, then translation can be performed by extracting
- the syntax of a given English-language sentence, and re-writing it into
- an equivalent control-language structure.
+When one has a syntactic analyzer, then translation, from a natural language
+ (e.g.
+ English) to the control language can be performed.
+ This can be done by extracting the syntax of a given English-language sentence,
+ and re-writing it into an equivalent control-language structure.
  Along the way, specific English-language words and phrases are remapped
  to equivalent control-language atoms.
+ But what syntactic analyzer, and what theory of natural language should
+ be used?
+\end_layout
+
+\begin_layout Standard
+It appears that the most natural theory of morphology and grammar, in relation
+ to conceptual graphs, such as those of figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Concept-Graph"
+
+\end_inset
+
+, is one or another form of 
+\begin_inset CommandInset href
+LatexCommand href
+name "dependency grammar"
+target "https://en.wikipedia.org/wiki/Dependency_grammar"
+
+\end_inset
+
+ (DG).
+ This is in contrast to 
+\begin_inset CommandInset href
+LatexCommand href
+name "phrase structure grammar"
+target "https://en.wikipedia.org/wiki/Phrase_structure_grammar"
+
+\end_inset
+
+ (PSG), which, although very popular in the United States, seems less suitable
+ for practical use in concept and action extraction.
+ Particularly inspirational forms of dependency grammars include Igor Mel’čuk's
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "Meaning-Text Theory"
+target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
+
+\end_inset
+
+ (MTT) and Dick Hudson's 
+\begin_inset CommandInset href
+LatexCommand href
+name "Word Grammar"
+target "https://en.wikipedia.org/wiki/Word_grammar"
+
+\end_inset
+
+ (WG).
+ A benefit of MTT is that it offers a clear, direct articulation of the
+ relationship between syntax and semantics, and how these can be transformed
+ into one another.
+ Another key concept in MTT is the idea of a 
+\begin_inset CommandInset href
+LatexCommand href
+name "Lexical Function"
+target "https://en.wikipedia.org/wiki/Lexical_function"
+
+\end_inset
+
+ (LF): that is, a function that tells you which word one should use to express
+ a certain idea or relation.
+ A benefit of WG is that it offers the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+landmarks
+\begin_inset Quotes erd
+\end_inset
+
+, which control word-order relationships in English.
+\end_layout
+
+\begin_layout Standard
+De facto, the prototype uses the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Link Grammar"
+target "https://en.wikipedia.org/wiki/Link_grammar"
+
+\end_inset
+
+ (LG) parser.
+ This is done for several reasons.
+ It is a strong, stable, mature parser of English that works well, and is
+ easy to integrate, today.
+ It also has a particularly elegant mathematical grounding, closely related
+ to that of categorial grammars and category theory.
+ This grounding in category theory helps make clear exactly how natural
+ language morpho-syntax can be manipulated into graphical representations
+ using abstract theories and algorithms.
+\end_layout
+
+\begin_layout Standard
+The model and control interfaces of the prototype connect directly to Link
+ Grammar.
+ This is called out here, because the prototype explicitly and intentionally
+ does 
+\emph on
+not
+\emph default
+ use 
+\begin_inset CommandInset href
+LatexCommand href
+name "RelEx"
+target "http://wiki.opencog.org/w/RelEx_Dependency_Relationship_Extractor"
+
+\end_inset
+
+ or 
+\begin_inset CommandInset href
+LatexCommand href
+name "Relex2Logic"
+target "http://wiki.opencog.org/w/RelEx2Logic_rules"
+
+\end_inset
+
+ (R2L), for reasons explained later.
+ RelEx is a depedency parser layered on top of LG, generating 
+\begin_inset CommandInset href
+LatexCommand href
+name "standard CoNLL-style DG markup"
+target "http://wiki.opencog.org/w/Dependency_relations"
+
+\end_inset
+
+.
+ R2L is a layer on top of RelEx, used to extract logical relationships from
+ factual English-language statements.
+ Both are OpenCog subystems.
+ The R2L subsystem is used in OpenCog to perform natural reasoning on English
+ statements, using the PLN subsystem.
 \end_layout
 
 \begin_layout Subsubsection
@@ -1885,8 +2092,8 @@ Link Grammar
 \end_layout
 
 \begin_layout Standard
-The syntax of the English-language sentence is extracted by parsing the
- input sentence with the 
+The syntax of English-language sentences is extracted by parsing the input
+ sentence with the 
 \begin_inset CommandInset href
 LatexCommand href
 name "Link Grammar parser"
