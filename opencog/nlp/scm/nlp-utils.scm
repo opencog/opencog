@@ -219,6 +219,14 @@
 )
 
 ; ---------------------------------------------------------------------
+(define-public (sent-get-interp sent-node)
+"
+  sent-get-interp - Given a SentenceNode returns a list of InterpretationNodes
+"
+    (parse-get-interp (car (sentence-get-parses sent-node)))
+)
+
+; ---------------------------------------------------------------------
 (define-public (parse-get-words parse-node)
 "
   parse-get-words - Given a parse, return a list of all words in the parse
