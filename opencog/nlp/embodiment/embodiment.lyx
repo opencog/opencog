@@ -2110,8 +2110,8 @@ target "https://en.wikipedia.org/wiki/Link_grammar"
 \end_inset
 
 ).
- There are certainly many other natural-language parsers out there, including
- famously the Stanford parser, Google's Parsey-McParseface, and any number
+ There are certainly many other natural-language parsers out there, including,
+ famously, the Stanford parser, Google's Parsey-McParseface, and any number
  of phrase-structure parsers.
  Link Grammar is used because it fits particularly well with the theory
  of Atomese, and because it has particularly high accuracy and very broad
@@ -2123,7 +2123,7 @@ target "https://en.wikipedia.org/wiki/Link_grammar"
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -2307,7 +2307,8 @@ reference "fig:Example-Link-Grammar"
  The relationships, taken together, can be understood to form a directed
  graph, often a tree.
  Most links have an implicit directionality in them.
- The graph does sometimes have cycles: these constrain the parse choices.
+ The graph does sometimes have cycles: these serve to constrain the parse
+ choices.
  
 \end_layout
 
@@ -2362,8 +2363,8 @@ Wi- & MVp+
 \family default
  acts as a fine-grained part-of-speech, and this carries semantic information.
  That is, the meaning of a word is correlated with the part-of-speech: this
- is obvious simply by observing that dictionaries organize word-meanings
- by parts-of-speech.
+ is obvious simply by observing that dictionaries (Webster's, OED) organize
+ word-meanings by parts-of-speech.
  The disjunct offers a particularly fine-grained distinction, and thus is
  more strongly correlated with meaning.
 \end_layout
@@ -2380,7 +2381,7 @@ costs
  or weights associated with different disjuncts.
  These can be interpreted as log-probabilities, and so the parse system,
  as a whole, has probabilistic or Markovian aspects associated with it.
- This play a minor role, at this stage.
+ This plays a minor role, at this stage, but is important in the long-run.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2512,6 +2513,128 @@ Ds**c- & Js-
 \end_layout
 
 \begin_layout Subsubsection
+Planning and rule selection
+\end_layout
+
+\begin_layout Standard
+The next section describes the OpenCog rule selection and rule chaining
+ subsystems.
+ Before doing so, it seems important to motivate these, and to provide several
+ concrete examples to keep in mind.
+ 
+\end_layout
+
+\begin_layout Standard
+Classic examples of rule engines, and why they are needed, are provided
+ by AIML and ChatScript.
+ These systems allow autors to script a large number of rules that, when
+ matched against a specific input pattern, provide a specific (verbal) response.
+ Because there are a large number of rules (often tens of thousands), it
+ is impractical to 
+\begin_inset Quotes eld
+\end_inset
+
+try them all
+\begin_inset Quotes erd
+\end_inset
+
+; instead, these must be pruned down to a managable set, usually to only
+ one, or a small set, and then applied.
+ 
+\end_layout
+
+\begin_layout Standard
+AIML/Chatscript rules usually go only 
+\begin_inset Quotes eld
+\end_inset
+
+one level deep
+\begin_inset Quotes erd
+\end_inset
+
+, or (with AIML SRAI) they 
+\begin_inset Quotes eld
+\end_inset
+
+forward-chain
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This essentially means that they are deterministic and reactionary: they
+ can only react to a given input.
+ This should be contrasted to goal-seeking behavior, which typically requires
+ 
+\begin_inset Quotes eld
+\end_inset
+
+backward chaining
+\begin_inset Quotes erd
+\end_inset
+
+: a desired end-result is specified, and the rule system must discover the
+ rules that can acheive those results.
+ 
+\end_layout
+
+\begin_layout Standard
+An example of goal-oriented behavior is this: the robot seeks to make the
+ audience laugh (the goal).
+ Which, of the myriad performance rules it has available, are suitable for
+ acheiving this goal? 
+\end_layout
+
+\begin_layout Standard
+A very different rule application scenario arises when only partial inputs
+ are available to an ordinary forward-chaining system.
+ For example, someone said something to the robot, but it was not fully
+ understood – possibly due to noise, bad speech-to-text conversion, mumbling.
+ It may be possible that the full text is available, but it is not clear
+ what the speaker meant.
+ In this case, one needs a selection of fallback actions: perhaps the statement
+ cannot be responded to directly or in full (
+\begin_inset Quotes eld
+\end_inset
+
+raise your arm
+\begin_inset Quotes erd
+\end_inset
+
+ except that the robots arm is already raised: a reasonable action is to
+ raise it even higher), or only various sub-parts are understood (
+\begin_inset Quotes eld
+\end_inset
+
+mumble mumble turn left mumble
+\begin_inset Quotes erd
+\end_inset
+
+: a reasonable action for the robot is to turn left).
+ In these cases, one could try to write a rule that covers every eventuality,
+ every situation: but of course, this is legendarily impossible.
+ Yet, a resposnse is required.
+ 
+\end_layout
+
+\begin_layout Standard
+In this case, it is important to be able to pick out a set of fragementary
+ rules, all of which might be partially appropriate for the situation, and
+ then assemble a consistent, non-conflicting subset of them, for performance.
+ If several subsets of consistent rules are available, the one with the
+ highest liklihood or confidence can then be selected for performance.
+ This scenario is neither forward nor backward chaining; it is rather the
+ assembly of a fallback plan to (gracefully?) handle a new, unexpected scenario.
+\end_layout
+
+\begin_layout Standard
+However, in the default mode of robot operation, a simple, direct stimulus-respo
+nse reaction chain is sufficient for most situations.
+ Almost all of the prototype runs in the forward-chained mode.
+ Simple, direct rule application is sufficient for many or most cases.
+ Its just not enough to handle all cases.
+\end_layout
+
+\begin_layout Subsubsection
 Rule engine
 \end_layout
 
@@ -2519,16 +2642,30 @@ Rule engine
 A collection of rules require a rule engine to manage and apply them.
  OpenCog has several forms of these, that can be used in various different
  situations.
- Rules can be applied, one-by-one, on an 
+ These are an ad-hoc system, OpenPsi, and the chainers.
+\end_layout
+
+\begin_layout Standard
+Rules can be applied, one-by-one, on an 
 \emph on
 ad hoc
 \emph default
  basis, by calling 
 \family typewriter
-cog-execute!
+
+\begin_inset CommandInset href
+LatexCommand href
+name "cog-execute!"
+target "http://wiki.opencog.org/w/Cog-execute!"
+
+\end_inset
+
+
 \family default
 , for example.
- 
+ Typically one has already selected some rule; the rule is typically some
+ pattern or query, and if the query is satisfied, then the specified action
+ is performed.
 \end_layout
 
 \begin_layout Standard
@@ -2536,31 +2673,99 @@ The OpenPsi subsystem maintains classes of rules, enabling goal-driven behavior.
  Although the rules that OpenPsi manages are only applied one by one (one
  at a time), the sorting of rules into distinct classes allows distinct
  goals, with distinct priorities to be assigned to each.
- Thus, to reach a certain goal, it is possible to select rules that are
- most likely to achieve that goal.
+ Thus, to reach a certain goal, it is possible to select sets of rules that
+ are most likely to achieve that goal.
  As the importance of various goals change dynamically over time, different
  rules-sets can come into play; that is, the goals modulate the selection
  of the rule-sets.
+ In more poetic, psychologically-colored terms, the OpenPsi subsystem allows
+ the internal model to have a set of desires and 
+\begin_inset Quotes eld
+\end_inset
+
+hopes
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+emotions
+\begin_inset Quotes erd
+\end_inset
+
+, which can be used to control the rule-sets being deployed at a given moment.
+\end_layout
+
+\begin_layout Standard
+The OpenPsi subsystem was explicitly developed to offer more powerful and
+ more flexible rule management than several other popular control systems:
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "behavior trees"
+target "https://en.wikipedia.org/wiki/Behavior_tree"
+
+\end_inset
+
+, 
+\begin_inset CommandInset href
+LatexCommand href
+name "state machines"
+target "https://en.wikipedia.org/wiki/Automata-based_programming"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "hidden Markov models"
+target "https://en.wikipedia.org/wiki/Hidden_Markov_model"
+
+\end_inset
+
+.
+ Behavior trees are popular in game AI systems; they allow game developers
+ to craft explicit behaviors for game avatars.
+ In the end, though, behavior trees prove difficult to work with, because
+ of the lack of goal-directed behavior (which OpenPsi can provide).
+ State machines are popular among Hollywood animators, as they allow the
+ animator to create responsive animations in a modular fashion, that can
+ be composed together to obtain new, surprising and effective behaviors.
+ They do not provide a way of specifying goal-directed behavior, nor the
+ modulation of behavior based on the current model state and desires.
+ Hidden Markov Models can be thought of as probabilistic state machines:
+ they add a statistical component to behavior.
+ They are paricularly useful and popular for automatically discerning patterns
+ in data.
+ Thus, they are usefule for learning.
+ For the expression and selection of rules, though, they offer no particular
+ advantage.
 \end_layout
 
 \begin_layout Standard
 The forward and backward chainers can be used to discover sequences of rules
- that connect two graphs.
+ that connect two endpoint-graphs.
  That is, given a particular starting graph, and a particular ending graph,
  the chainers can explore different sequences of rules that might result
  in a valid path between these two end-points.
- These use traditional search algorithms, although an A-star search algorithm
- variant is envisioned.
+ The chainers use traditional search algorithms, essentially a variant of
+ an A-star search algorithm variant.
  Currently, the forward-backwards chainers are employed primarily for probabilis
-tic reasoning (PLN).
+tic reasoning (PLN), and not in the robot control subsystem.
 \end_layout
 
 \begin_layout Standard
-Rules can also be assembled by means of parsing.
- Currently, OpenCog only implements only one, a very special-purpose parser.
- It is envisioned that a generic parser, replacing or supplementing the
- forward and backwards chainers, will be created.
- This idea is explored further in 
+More efficient rule chaining can be done by means of parsing; that is, collectio
+ns of compatible rules can be discovered and assembled by applying parser
+ theory (as opposed to blind A-star search).
+ 
+\end_layout
+
+\begin_layout Standard
+A proposal for a generic parser, sutiable for rule selection and chaining,
+ is given in 
 \begin_inset ERT
 status open
 
@@ -2574,6 +2779,14 @@ hypertarget{appendix-a}{Appendix A}
 \end_inset
 
 .
+ It is hoped that this approach can provide a more performant, more directed
+ and principled manner of making plans: that is, of discovering routes through
+ sets of rules that accomplish certain goals.
+ Properly implemented, it can not only replace blind search and rule chaining,
+ but can also enable reasoning about plans.
+ More colloquially, it allows thinking about the future, and planning for
+ it.
+ In practical terms, it allows faster responses to current situations.
 \end_layout
 
 \begin_layout Subsubsection
@@ -2634,7 +2847,7 @@ input
 \begin_inset Quotes erd
 \end_inset
 
- side; so questions, for example, will also generate a verbal output; the
+ side; so, questions, for example, will also generate a verbal output; the
  output side is not shown, although it can roughly be imagined to be the
  
 \begin_inset Quotes eld
@@ -2840,7 +3053,7 @@ normalized
  of the precise surface form of the sentence.
  It provide a representation that is easier to work with, moving away from
  less important syntactic details.
- Also, unlike the control langauge, it can avoid being closely tied to the
+ Also, unlike the control language, it can avoid being closely tied to the
  state representation.
  
 \end_layout
