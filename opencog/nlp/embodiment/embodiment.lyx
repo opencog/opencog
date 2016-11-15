@@ -116,6 +116,10 @@ In order for a robot to have reasonably competent conversations about the
  is the primary topic of this review.
 \end_layout
 
+\begin_layout Subsubsection*
+The internal model
+\end_layout
+
 \begin_layout Standard
 The core idea of the internal model is shown in figure 
 \begin_inset CommandInset ref
@@ -133,8 +137,8 @@ reference "fig:Self-and-World"
  and Carol is in front of Bob, then Alice is farther away than Carol.
  All of this needs to be represented such that basic rational reasoning
  about distances can take place.
- Almost any example will do: if cats are animals, and animals are things,
- then cats are things.
+ Almost any example of reasoning will do: 'if cats are animals, and animals
+ are things, then cats are things'.
  
 \end_layout
 
@@ -253,9 +257,53 @@ there is a quiet rushing sound
 , etc.
 \end_layout
 
+\begin_layout Subsubsection*
+Symbolic Representation
+\end_layout
+
 \begin_layout Standard
-There needs to be explicit software that can access, query and update the
- internal model, borth from the langauge side, and the sensory side.
+It is assumed that everything described here can be accomplished with a
+ symbolic representation.
+ That is, there is an explicit network of vertexes and edges, joined to
+ form a graph, that encodes the knowledge, explictly and overtly.
+ Thus, it is assumed that the core architeture is 
+\emph on
+not
+\emph default
+ a neural net, nor that the basic process is that of deep learning, where
+ data is represented implicitly, not explicitly.
+\end_layout
+
+\begin_layout Standard
+In the end, this assumption may not matter very much: a symbolic representation
+ can still have floating point numerical weights and probabilities attached,
+ and result in a network that is so complex that it challanges easy comprehensio
+n: the distinction between neural and symbolic can be blurry.
+ None-the-less, by picking a symbolic representation, the goal is to have
+ a system whose internal state can be examined, reviewed, debugged and manipulat
+ed.
+ In the end, some of that manipulation might employ deep-learning techniques;
+ however, that is not the starting point.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, the core symbolic representation should be thought of as a large,
+ complex graph, such as that shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Concept-Graph"
+
+\end_inset
+
+, although likely far more complex.
+\end_layout
+
+\begin_layout Standard
+By having an explicit symbolic representation, one has the benefit, and
+ requirement, of having an explicit software layer that can access, query
+ and update the internal model, both from the language side, and the sensory
+ side.
  The overall architecture is similar to the widely-known 
 \begin_inset Quotes eld
 \end_inset
@@ -489,6 +537,103 @@ target "http://wiki.opencog.org/w/AtomSpace"
  other technology platforms have been nominated.
  Although one could debate the merits of alternative technologies, this
  will not be done here.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Concept Graph
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Concept-Graph"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename concept-graph.svg
+	width 90col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+An example of a symbolic representation of conceptual data.
+ This kind of representation is commonly employed in symbolic knowledge
+ representation systems, such as in John Sowa's 
+\begin_inset CommandInset href
+LatexCommand href
+name "Concept Graphs"
+target "https://en.wikipedia.org/wiki/Conceptual_graph"
+
+\end_inset
+
+, or in 
+\begin_inset CommandInset href
+LatexCommand href
+name "Meaning-Text Theory"
+target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
+
+\end_inset
+
+.
+ This image is somewhat misleading: the circles themselves may be graphs,
+ so that the circle labelled 
+\begin_inset Quotes eld
+\end_inset
+
+Drama
+\begin_inset Quotes erd
+\end_inset
+
+ may in fact be abstract concept 4258 Typical graphs are more complex, and
+ the relationships are assigned probabilistic weights.
+ .
+
+\size scriptsize
+ (Image credit: Unknown)
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection
