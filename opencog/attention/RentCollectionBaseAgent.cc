@@ -44,7 +44,7 @@ RentCollectionBaseAgent::RentCollectionBaseAgent(CogServer& cs) :
 {
     // init starting wages/rents. these should quickly change and reach
     // stable values, which adapt to the system dynamics
-    STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT", 10);
+    STIAtomRent = config().get_int("ECAN_STARTING_ATOM_STI_RENT", 1);
     LTIAtomRent = config().get_int("ECAN_STARTING_ATOM_LTI_RENT", 1);
 
     targetSTI = config().get_int("TARGET_STI_FUNDS", 10000);

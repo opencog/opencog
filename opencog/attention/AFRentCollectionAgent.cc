@@ -43,6 +43,8 @@ using namespace opencog;
 
 AFRentCollectionAgent::AFRentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
 {
+    af_sti_rent_rate = config().get_int("AF_STI_RENT_RATE", 1);
+    af_lti_rent_rate = config().get_int("AF_LTI_RENT_RATE", 1);
     set_sleep_time(500);
 }
 
@@ -58,9 +60,13 @@ void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
      * run.
      */
     std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+    //std::this_thread::sleep_for(std::chrono::seconds(1));
+}
 
 void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
+    std::map<Handle, chrono_t<hr_clock>> new_last_update;
+
     for (Handle& h : targetSet) {
         int sti = h->getAttentionValue()->getSTI();
         int lti = h->getAttentionValue()->getLTI();
@@ -73,7 +79,20 @@ void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
         if (ltiRent > lti)
             ltiRent = lti;
 
-        h->setSTI(sti - stiRent);
-        h->setLTI(lti - ltiRent);
+        chrono_t<hr_clock>  now = hr_clock::now(); //seconds ago
+        double time = 1;
+
+        if(last_update.find(h) != last_update.end()){
+            chrono_d diff = now - last_update[h];
+            time = std::chrono::duration_cast<chrono_d>(diff).count();
+        }
+
+        h->setSTI(sti - stiRent*time);  // Assuming STI rent is rent/sec
+        h->setLTI(lti - ltiRent*time);
+
+        new_last_update[h] = now;
     }
+
+    last_update = new_last_update;
 }
+
