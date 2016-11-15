@@ -117,7 +117,7 @@ In order for a robot to have reasonably competent conversations about the
 \end_layout
 
 \begin_layout Subsubsection*
-The internal model
+Internal model
 \end_layout
 
 \begin_layout Standard
@@ -257,6 +257,94 @@ there is a quiet rushing sound
 , etc.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Self and World Models
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Self-and-World"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename think9.jpg
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The internal model is a highly simplified representation of the world and
+ of the self.
+ It provides the software with a specific data structure that can be reasoned
+ about and manipulated.
+ Here, the robot Sophia thinks simplified thoughts, much as this illustration
+ simplifies the idea of a representation.
+ 
+\size scriptsize
+(Robot credit: 
+\begin_inset CommandInset href
+LatexCommand href
+name "Hanson Robotics Sophia"
+target "http://www.hansonrobotics.com/robot/sophia/"
+
+\end_inset
+
+.
+ House image credit: Small House Bliss, 
+\begin_inset CommandInset href
+LatexCommand href
+name "The Cypress Laneway House "
+target "https://smallhousebliss.com/2016/02/02/smallworks-cypress-laneway-house/"
+
+\end_inset
+
+.)
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsubsection*
 Symbolic Representation
 \end_layout
@@ -272,6 +360,125 @@ not
 \emph default
  a neural net, nor that the basic process is that of deep learning, where
  data is represented implicitly, not explicitly.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Concept Graph
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Concept-Graph"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename concept-graph.svg
+	width 91col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+An example of a symbolic representation of conceptual data.
+ This kind of representation is commonly employed in symbolic knowledge
+ representation systems, such as in John Sowa's 
+\begin_inset CommandInset href
+LatexCommand href
+name "Concept Graphs"
+target "https://en.wikipedia.org/wiki/Conceptual_graph"
+
+\end_inset
+
+, Dick Hudson's 
+\begin_inset CommandInset href
+LatexCommand href
+name "Word Grammar"
+target "https://en.wikipedia.org/wiki/Word_grammar"
+
+\end_inset
+
+ or in Igor Mel’čuk's 
+\begin_inset CommandInset href
+LatexCommand href
+name "Meaning-Text Theory"
+target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
+
+\end_inset
+
+.
+ Note that each circle and arrow may itself be a graph with additional structure
+: for example, the circle labelled 
+\begin_inset Quotes eld
+\end_inset
+
+Drama
+\begin_inset Quotes erd
+\end_inset
+
+ may be represented by the abstract concept 42, which can be expressed as
+ English or Chinese words, each of these possibly having multiple synonyms,
+ grammatical properties and relationships to other words and concepts.
+ Thus, properly speaking, the graph is a hypergraph.
+ The point is that labelled bubbles, such as 
+\begin_inset Quotes eld
+\end_inset
+
+Drama
+\begin_inset Quotes erd
+\end_inset
+
+, or arrow relationships, such as 
+\begin_inset Quotes eld
+\end_inset
+
+Acted in
+\begin_inset Quotes erd
+\end_inset
+
+, are themselves undefined and have no meaning, unless they are themselves
+ expressed (grounded) by thier relationships to yet other objects, some
+ of which may be concrete, sensory entities or physical (motor) movements.
+ Typical graphs are more complex, and the relationships may be assigned
+ probabilistic strength and confidence weights.
+
+\size scriptsize
+ (Image credit: Unknown)
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -296,15 +503,12 @@ reference "fig:Concept-Graph"
 
 \end_inset
 
-, although likely far more complex.
-\end_layout
-
-\begin_layout Standard
-By having an explicit symbolic representation, one has the benefit, and
+.By having an explicit symbolic representation, one has the benefit, and
  requirement, of having an explicit software layer that can access, query
  and update the internal model, both from the language side, and the sensory
  side.
- The overall architecture is similar to the widely-known 
+ Such conceptual graphs can be manipulated in a style similar to the widely-know
+n 
 \begin_inset Quotes eld
 \end_inset
 
@@ -334,26 +538,19 @@ views
  
 \end_layout
 
+\begin_layout Subsubsection*
+Outline
+\end_layout
+
 \begin_layout Standard
 This document proceeds by fleshing out the above definitions in greater
  detail.
- Some of the early statements may seem overly simplistic or pedantic; however,
- some clarity and precision is needed, in order to move on to the later
- stages.
+ Some of the early statements may seem overly simplistic or pedantic; this
+ seems needed, so that the later stages are clear.
 \end_layout
 
 \begin_layout Standard
-xxx
-\end_layout
-
-\begin_layout Standard
-There are multiple software issues encountered in the development of the
- above.
-\end_layout
-
-\begin_layout Standard
-he developmment proceeds paper proceeds in several steps.
- The first step is to review the overall concept of an 
+The first step is to review the overall concept of an 
 \begin_inset Quotes eld
 \end_inset
 
@@ -364,6 +561,8 @@ internal model
 , and how one can, in principle, interface with it.
  This is followed by a section reviewing the current prototype.
  After this, difficulties with language are discussed.
+ There are multiple software issues encountered during development; these
+ are discussed, and possible solutions are proposed.
 \end_layout
 
 \begin_layout Standard
@@ -378,8 +577,7 @@ Robot archtitecture overview
 \end_layout
 
 \begin_layout Standard
-XXX This section to be written in a later version.
- XXX.
+XXX TODO: This section to be written in a later version.
  A conceptual diagram of the system is shown in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -539,103 +737,6 @@ target "http://wiki.opencog.org/w/AtomSpace"
  will not be done here.
 \end_layout
 
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Concept Graph
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Concept-Graph"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename concept-graph.svg
-	width 90col%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-An example of a symbolic representation of conceptual data.
- This kind of representation is commonly employed in symbolic knowledge
- representation systems, such as in John Sowa's 
-\begin_inset CommandInset href
-LatexCommand href
-name "Concept Graphs"
-target "https://en.wikipedia.org/wiki/Conceptual_graph"
-
-\end_inset
-
-, or in 
-\begin_inset CommandInset href
-LatexCommand href
-name "Meaning-Text Theory"
-target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
-
-\end_inset
-
-.
- This image is somewhat misleading: the circles themselves may be graphs,
- so that the circle labelled 
-\begin_inset Quotes eld
-\end_inset
-
-Drama
-\begin_inset Quotes erd
-\end_inset
-
- may in fact be abstract concept 4258 Typical graphs are more complex, and
- the relationships are assigned probabilistic weights.
- .
-
-\size scriptsize
- (Image credit: Unknown)
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset CommandInset line
-LatexCommand rule
-offset "0.5ex"
-width "100col%"
-height "1pt"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Subsubsection
 Self Model
 \end_layout
@@ -714,94 +815,6 @@ reference "fig:Self-and-World"
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Self and World Models
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Self-and-World"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset VSpace defskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename think9.jpg
-	width 100text%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-The internal model is a highly simplified representation of the world and
- of the self.
- It provides the software with a specific data structure that can be reasoned
- about and manipulated.
- Here, the robot Sophia thinks simplified thoughts, much as this illustration
- simplifies the idea of a representation.
- 
-\size scriptsize
-(Robot credit: 
-\begin_inset CommandInset href
-LatexCommand href
-name "Hanson Robotics Sophia"
-target "http://www.hansonrobotics.com/robot/sophia/"
-
-\end_inset
-
-.
- House image credit: Small House Bliss, 
-\begin_inset CommandInset href
-LatexCommand href
-name "The Cypress Laneway House "
-target "https://smallhousebliss.com/2016/02/02/smallworks-cypress-laneway-house/"
-
-\end_inset
-
-.)
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset CommandInset line
-LatexCommand rule
-offset "0.5ex"
-width "100col%"
-height "1pt"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Subsubsection
