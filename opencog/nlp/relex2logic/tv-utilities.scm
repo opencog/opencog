@@ -52,14 +52,25 @@
                   (new-conf (/ 1 (+ 1 default-k))))
                 (cog-set-tv! atom (cog-new-stv new-mean new-conf))
             )
-            (let* ((current-count (round
-                        (assoc-ref (cog-tv->alist (cog-tv atom)) 'count)))
+            (let* ((current-count (tv-count (cog-tv atom)))
                    (new-count (+ current-count 1))
                    (new-mean (/ new-count type-count))
                    (new-conf (/ new-count (+ new-count default-k))))
                 (cog-set-tv! atom (cog-new-stv new-mean new-conf))
             )
         )
+    )
+)
+
+; -----------------------------------------------------------------------
+(define (create-or-update-etv atom)
+"
+  Used to replace stv tv-type to etv, or update the etv of the given atom.
+  The positive-evidence of the atom is incremented by one and then returned.
+"
+    (let ((tv (cog-tv atom)))
+
+        (cog-set-tv! atom (etv (+ 1 (tv-positive-count tv)) (tv-count tv)))
     )
 )
 

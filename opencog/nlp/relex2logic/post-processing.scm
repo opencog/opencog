@@ -6,6 +6,7 @@
 
 (use-modules (ice-9 receive) (srfi srfi-1))
 (load "r2l-utilities.scm")
+(load "tv-utilities.scm")
 
 ; =======================================================================
 ; Helper utilities for post-processing.
@@ -399,10 +400,13 @@
 		      (else old-atom)
 		)
 	)
+	; Create new outgoing-set
 	(define new-oset (map replace-old old-oset))
 
-	; create a new link with the new node list, using same TV
-	(apply cog-new-link (append (list (cog-type ilink) (cog-tv ilink)) new-oset))
+	; Create a new link with the new outgoing-set
+	(define new-link
+		(apply cog-new-link (append (list (cog-type ilink)) new-oset)))
+	(create-or-update-etv new-link)
 )
 
 ; -----------------------------------------------------------------------
