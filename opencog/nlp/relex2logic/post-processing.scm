@@ -5,6 +5,10 @@
 ;
 
 (use-modules (ice-9 receive) (srfi srfi-1))
+
+(use-modules (opencog))
+(use-modules (opencog exec))
+
 (load "r2l-utilities.scm")
 (load "tv-utilities.scm")
 
@@ -338,24 +342,30 @@
 ; =======================================================================
 
 ; -----------------------------------------------------------------------
-; rebuild -- Main recursive function to build the new abstracted links
-;
-; A helper function for building a new version of 'ilink' with abstraction.
-;
-; 'lone-nodes' contains nodes that should be abstracted, while 'non-lone-alist'
-; is an a-list whose keys are nodes that should be cloned with new instance
-; name, and whose data values are the new instance name.
-;
-; 'ilink' a link to be abstracted should it have the 'lone-nodes'
-; XXX FIXME using the hacky word-get-r2l-node, bad idea!
-;
-(define (rebuild ilink lone-nodes non-lone-alist)
+(define (rebuild ilink lone-nodes non-lone-alist update)
+"
+  rebuild -- Main recursive function to build the new abstracted links
+
+  A helper function for building a new version of 'ilink' with abstraction.
+
+  ilink:
+  - a link to be abstracted should it have the 'lone-nodes'
+
+  lone-nodes:
+  - contains nodes that should be abstracted, while 'non-lone-alist'
+    is an a-list whose keys are nodes that should be cloned with new instance
+    name, and whose data values are the new instance name.
+
+  update:
+  - #t or #f to signal the update of etv in the abstracted r2l outputs returned
+"
+;XXX FIXME using the hacky word-get-r2l-node, bad idea!
 	; get all the nodes linked by this link
 	(define old-oset (cog-outgoing-set ilink))
 	(define (replace-old old-atom)
 		(define a-pair (assoc old-atom non-lone-alist))
 		(cond ((cog-link? old-atom)
-					(rebuild old-atom lone-nodes non-lone-alist))
+					(rebuild old-atom lone-nodes non-lone-alist update))
 		      ; if node needed to be abstracted
 		      ((member? old-atom lone-nodes)
 					(if (equal? 'VariableNode (cog-type old-atom))
@@ -374,7 +384,8 @@
 						)
 					)
 		      )
-			;  ; FIXME: Why create a node with new-instance name?
+			;  ; FIXME: Why create a node with new-instance name? Is this for
+			; anaphora-resolution?
 		    ;  ; If node needed to be cloned with new instance name
 		    ;  (a-pair
 			;(let ((abstract-node
@@ -406,11 +417,20 @@
 	; Create a new link with the new outgoing-set
 	(define new-link
 		(apply cog-new-link (append (list (cog-type ilink)) new-oset)))
-	(create-or-update-etv new-link)
+
+	(if update
+		(create-or-update-etv new-link)
+		new-link
+	)
 )
 
 ; -----------------------------------------------------------------------
-(define-public (create-abstract-version interpretation-node)
+; Represents the set of InterpretationNodes with their abstracted r2l-outputs
+; counted.
+(define abstracted-interp-node (Concept "r2l-abstracted-interp"))
+
+; -----------------------------------------------------------------------
+(define (create-abstract-version interpretation-node update)
 "
   Given an 'interpretation-node', it finds out which r2l links can be
   abstracted and returns the newly abstracted atoms. For example, the
@@ -434,8 +454,15 @@
 			(ConceptNode \"air\")
 		)
 	)
+
+  interpretation-node:
+  - An InterpretationNode
+
+  update:
+  - #t or #f to signal the update of etv in the abstracted r2l outputs returned
 "
-	(define r2l-set (cog-outgoing-set (car (cog-chase-link 'ReferenceLink 'SetLink interpretation-node))))
+	(define r2l-set (cog-outgoing-set
+		(car (cog-chase-link 'ReferenceLink 'SetLink interpretation-node))))
 
 	; remove all unary links
 	(define r2l-cleaned-set (remove r2l-is-unary? r2l-set))
@@ -481,6 +508,39 @@
 		;		(map (lambda (lnk) (rebuild lnk (filter is-r2l-inst? (delete-duplicates r2l-set-nodes)) '())) r2l-cleaned-set)
 		;	)
 		;)
-		(map (lambda (lnk) (rebuild lnk lone-nodes '())) r2l-cleaned-set)
+
+		(if update (Member interpretation-node  abstracted-interp-node))
+
+		(map (lambda (lnk) (rebuild lnk lone-nodes '() update)) r2l-cleaned-set)
 	)
+)
+
+
+
+(define (has-been-counted? interp)
+"
+  Check if the abstracted-version of the given InterpretationNode's r2l output
+  has been counted or not.
+"
+	(define interp-list
+		(cog-chase-link 'MemberLink 'InterpretationNode abstracted-interp-node))
+
+	(if (member? interp interp-list)
+		#t
+		#f
+	)
+)
+
+
+(define-public (get-abstract-version interp)
+"
+  Returns a list with the abstracted-version of the r2l outputs. The returned
+  atoms are counted only once.
+
+  The abstracted r2l outputs are primarily used for reasoning.
+
+  interp:
+  - An InterpretationNode
+"
+	(create-abstract-version interp (not (has-been-counted? interp)))
 )
