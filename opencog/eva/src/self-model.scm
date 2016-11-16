@@ -339,12 +339,17 @@
 		very-loud-sound)))
 ;--------------------------------------------
 ;;For Saliency
-(define-public salient-loc  (AnchorNode "locations"))
-(define-public initial-loc (list (NumberNode 1.0)(NumberNode 0.0)(NumberNode 0.0)))
+;;if there are no faces and the degree value is greater than 13, 
+;;then it's considered as salient and The robot is supposed to 
+;;look at the salient position and show curious expression when something salient happens.
+(define-public salient-loc  (AnchorNode "locations"));;obtain the coordinates for the salient location
+(define-public initial-loc (list (NumberNode 1.0)(NumberNode 0)(NumberNode 0)))
 (State salient-loc (List initial-loc))
 
-(define salient (AnchorNode "Degree value"))
-(State salient (Number 5))
+(define salient (AnchorNode "Degree value"));;obtain the degree of the salient point
+(define initial-degree (Number 0))
+(State salient initial-degree)
+
 
 (DefineLink 
 	(DefinedPredicate "saliency")
@@ -361,8 +366,9 @@
 (DefineLink 
 	(DefinedPredicate "saliency required?")
 	(SequentialAnd
-		(DefinedPredicate "no faces")
-		(DefinedPredicate "saliency")))
+		(DefinedPredicateNode "no faces")
+		 (DefinedPredicate "saliency")))
+		
 
 ;---------------------------------------------------------
 ;;For Luminance
@@ -763,6 +769,8 @@
 				(TypedVariable (Variable "$x") (Type "NumberNode"))
 				(State eye-contact-state (Variable "$x")))))
 	))
+	
+	
 
 ;; Break eye contact; this does not change the interaction state.
 (DefineLink

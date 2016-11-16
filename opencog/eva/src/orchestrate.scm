@@ -106,8 +106,9 @@
 			(EvaluationLink (GroundedPredicate "py:look_at_point")
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
+		
+;---------------------------------------------------------------
 
-; -------------------------------------------------------------
 ; Request robot to turn eyes at a specific coordinate point.
 ; Currently, a very thin wrapper around py:gaze_at_point
 
@@ -233,18 +234,20 @@
 			(List (Variable "sentence")))
 	))
 
-; for salient
+;Salient
 (DefineLink
     (DefinedPredicate "look at salient point")
-    (AndLink
-	  (DefinedPredicate "Curious")
-    (True (Put
+   
+	 (True (Put
+     (Evaluation
+
         (DefinedPredicate "Look at point")
-        (Get
-            (State
-                salient-loc
-                (List (Variable "$x") (Variable "$y") (Variable "$z")))
-        )))))
+         (ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+        (Get (State salient-loc
+
+                (ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+        )))
+        )
         
 
 ; -------------------------------------------------------------

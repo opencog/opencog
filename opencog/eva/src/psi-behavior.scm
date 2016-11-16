@@ -129,7 +129,7 @@
 
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
         (DefinedPredicate  "saliency required?")))
-  (DefinedPredicate "look at salient point")
+  (DefinedPredicate "Salient:Curious")
    face-demand-satisfied (stv 1 1) face-demand)
    
 (psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))

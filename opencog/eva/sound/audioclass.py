@@ -2,11 +2,14 @@
 from collections import deque
 import rospy
 import math
+import numpy as np
 import time
 import sys
+import struct
+from std_msgs.msg import UInt8MultiArray, MultiArrayDimension
 from std_msgs.msg import Float32
 from netcat import netcat
-from audiosysneeds.msg import audiodata
+from audio_stream.msg import audiodata
 
 
 '''
@@ -30,8 +33,7 @@ class AudioStrength:
     self.port = 17020
     self.loop = 0
     rospy.Subscriber("/opencog/AudioFeature", audiodata, self.GetAudioClass)
-    rospy.Subscriber("/opencog/suddenchange", Float32, self.GetSuddenClass)
-
+ 
   def AudioEnergy(self, value):
     # A StateLink is used b/c evaluation of psi-rules should only depend on
     # the most value.
@@ -40,10 +42,9 @@ class AudioStrength:
 		       str(value) + '"))'
     
     netcat(self.hostname, self.port, deci + "\n")
-    print deci   
+    print deci
     #netcat(self.hostname, self.port, deci2 + "\n")
-    # TODO: Convert each if/elif clause into a psi-rule.
-    
+
 
   def GetAudioClass(self, data):
     try:
@@ -57,28 +58,26 @@ class AudioStrength:
         else:
             d.popleft();d.append(self.Decibel)
             self.loop += 1
+        change = data.suddenchange
+        print "sudden sound change value {}".format(data.suddenchange)
+    	loud = "(StateLink (AnchorNode \"Sudden sound change value\")" + \
+             "(ListLink(NumberNode {})))\n".format(data.suddenchange)
+
+    	netcat(self.hostname, self.port, loud + "\n")
+
+    	self.AudioEnergy(self.Decibel)
+
 
     except ArithmeticError as e:
         print(e)
     return self.Decibel
 
-  def GetSuddenClass(self, msg):
-    change = msg.data
-    print "sudden sound change value {}".format(msg.data)
-    loud = "(StateLink (AnchorNode \"Sudden sound change value\")" + \
-             "(ListLink(NumberNode {})))\n".format(msg.data)
-    
-    netcat(self.hostname, self.port, loud + "\n")
-        
-    self.AudioEnergy(self.Decibel)
-
 if __name__ == '__main__':
-    global d
     d =deque()
-
     try:
         rospy.init_node('AudioClass', anonymous=True)
         AudioStrength()
+
         rospy.spin()
     except rospy.ROSInterruptException as e:
         print(e)

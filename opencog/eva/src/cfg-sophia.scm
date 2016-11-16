@@ -309,7 +309,7 @@
 (emo-gest-spec "imperative"   "yawn-1"        0.1 0.6 0.9 1 1 1 1)
 
 ;salient-gesture
-(emo-gest-spec "salient-curious" "think-browsUp.002"    1 0.5 0.9 1 1 0.4 1)
+(emo-gest-spec "salient-curious" "think-browsDown.002"    1 0.5 0.9 1 1 0.4 1)
 
 ; --------------------------------------------------------
 ; Dice-roll.  Probability of performing some action as the result of

@@ -804,8 +804,7 @@
 	(DefinedPredicate "Say whoa!")
 	(Put (DefinedPredicate "Say") (Node "whoa!")))
 
-
-
+;;Actions for various levels of sound
 (DefineLink 
 	(DefinedPredicate "React to Sound")
 	(SequentialOr
@@ -829,7 +828,13 @@
     (DefinedPredicate "Curious")
           (Put (DefinedPredicate "Show random gesture")
                     (ConceptNode "salient-curious")))
-              
+
+(DefineLink
+    (DefinedPredicate "Salient:Curious")
+     (SequentialAnd
+           (DefinedPredicate "look at salient point")
+           (DefinedPredicate "Curious")))
+             
 ;for luminance
 (DefineLink
     (DefinedPredicate "Bright:happy")
