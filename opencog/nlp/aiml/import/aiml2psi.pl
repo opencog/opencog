@@ -17,7 +17,7 @@
 use Getopt::Long qw(GetOptions);
 use strict;
 
-my $ver = "0.5.6";
+my $ver = "0.5.7";
 my $debug;
 my $help;
 my $version;
@@ -221,17 +221,17 @@ foreach my $af (sort @aimlFiles)
 			my $path="";
 			if ($c !~ /<topic>/)
 			{
-				my $tpat = "\<\/pattern\> \<topic\>". $topicx ."\<\/topic\> \<that\>";
-				$c =~ s/\<\/pattern\> \<that\>/$tpat/;
+				my $tpat = "\<\/pattern\> \<topic\>". $topicx ."\<\/topic\>";
+				$c =~ s/\<\/pattern\>/$tpat/;
 			}
 			my @pat = $c =~ m/\<pattern\>(.*?)\<\/pattern\>/;
 			my @top = $c =~ m/\<topic\>(.*?)\<\/topic\>/;
-			my @that  = $c =~ m/\<that\>(.*?)\<\/that\>/;
-			my @template  = $c =~ m/\<template\>(.*?)\<\/template\>/;
-			if( @pat == 0) {next;}
-			if( @template == 0) {next;}
-			if (@that == 0) { push(@that,"");}
-			if (@top == 0) { push(@top,"");}
+			my @that = $c =~ m/\<that\>(.*?)\<\/that\>/;
+			my @template = $c =~ m/\<template\>(.*?)\<\/template\>/;
+			if (@pat == 0) { next; }
+			if (@template == 0) { next; }
+			if (@that == 0) { push(@that,""); }
+			if (@top == 0) { push(@top,""); }
 
 			# Special cases.
 			#	pattern side <set>{NAME}</set> and <bot name=""/>
@@ -239,7 +239,7 @@ foreach my $af (sort @aimlFiles)
 			if (@pat >0) {$pat[0]=~ s/\<bot name/\<bot_name/gi; }
 			if (@pat >0) {$pat[0]=~ s/\<set> /<set>/gi; }
 			if (@top >0) {$top[0]=~ s/\<set> /<set>/gi; }
-			if (@that >0) {$that[0]=~ s/\<set> /<set>/gi; }#
+			if (@that >0) {$that[0]=~ s/\<set> /<set>/gi; }
 
 			if (@pat >0)  {$pat[0]=~ s/ <\/set>/<\/set>/gi; }
 			if (@top >0)  {$top[0]=~ s/ <\/set>/<\/set>/gi; }
@@ -247,7 +247,7 @@ foreach my $af (sort @aimlFiles)
 
 			my @PWRDS = split(/ /,$pat[0]);
 			my @TWRDS = split(/ /,$that[0]);
-			my @TPWRDS = split(/ /,$top[0]); #
+			my @TPWRDS = split(/ /,$top[0]);
 			my $pstars=0;
 			my $tstars=0;
 			my $topicstars=0;

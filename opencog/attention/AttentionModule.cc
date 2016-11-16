@@ -112,12 +112,12 @@ std::string AttentionModule::do_start_ecan(Request *req, std::list<std::string> 
     _cogserver.startAgent(_afRentAgentPtr, true, afRent);
     _cogserver.startAgent(_waRentAgentPtr, true, waRent);
 
-    _cogserver.startAgent(_forgetting_agentptr,true,"attention");
-    _cogserver.startAgent(_minmaxstiupdating_agentptr,true,"attention");
+   // _cogserver.startAgent(_forgetting_agentptr,true,"attention");
+   // _cogserver.startAgent(_minmaxstiupdating_agentptr,true,"attention");
     _cogserver.startAgent(_focusupdating_agentptr,true,"attention");
 
-    _cogserver.startAgent(_hebbiancreation_agentptr,true,"hca");
-    _cogserver.startAgent(_hebbianupdating_agentptr,true,"hua");
+   // _cogserver.startAgent(_hebbiancreation_agentptr,true,"hca");
+   // _cogserver.startAgent(_hebbianupdating_agentptr,true,"hua");
 
     return ("Started the following agents:\n" + afImportance + "\n" + waImportance +
          "\n" + afRent + "\n" + waRent + "\n");

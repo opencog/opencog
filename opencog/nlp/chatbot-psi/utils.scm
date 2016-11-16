@@ -5,9 +5,9 @@
 (define (get-word-list sent-node)
     (List (append-map
         (lambda (w)
+            ; Ignore LEFT-WALL and punctuations
             (if (or (string-prefix? "LEFT-WALL" (cog-name w))
-                    (equal? "punctuation" (cog-name (car (cog-chase-link
-                        'PartOfSpeechLink 'DefinedLinguisticConceptNode w)))))
+                    (word-inst-match-pos? w "punctuation"))
                 '()
                 (cog-chase-link 'ReferenceLink 'WordNode w)))
         (car (sent-get-words-in-order sent-node))))
@@ -34,4 +34,11 @@
         (TypedVariable (Variable "$t") (Type "TimeNode"))
             (AtTime (Variable "$t") (get-input-sent-node)
                 (TimeDomain "Dialogue-System"))))))
+)
+
+;-------------------------------------------------------------------------------
+
+(define sentiment-analysis #f)
+(define-public (do-sentiment-analysis val)
+    (set! sentiment-analysis val)
 )

@@ -34,7 +34,7 @@ class ParseTruthValue(object):
         # (see: opencog\cython\opencog\atomspace_details.pyx,
         #       opencog\cython\opencog\atomspace.pxd)
         if tv_type != 'simple':
-            if tv_type in ['composite', 'count', 'indefinite']:
+            if tv_type in ['count', 'indefinite']:
                 # @todo: check error type
                 abort(400, 'Invalid request: truthvalue type \'' +
                            tv_type + '\' is not supported')
@@ -92,14 +92,9 @@ av_fields = {
 
 
 # Atom helpers
-class FormatHandleValue(fields.Raw):
-    def format(self, value):
-        return value
-
-
 class FormatHandleList(fields.Raw):
     def format(self, values):
-        return [elem.value() for elem in values]
+        return [global_atom_map.get_uid(elem) for elem in values]
 
 
 class AtomListResponse(object):
@@ -107,12 +102,17 @@ class AtomListResponse(object):
         self.atoms = atoms
 
     def format(self):
+        alist = []
+        for atom in self.atoms:
+            matom = marshal(atom, atom_fields)
+            matom['handle'] = global_atom_map.get_uid(atom)
+            alist.append(matom)
         return {
             # @todo: Add pagination (http://flask.pocoo.org/snippets/44/)
             'complete': True,
             'skipped': 0,
             'total': len(self.atoms),
-            'atoms': marshal(self.atoms, atom_fields)
+            'atoms': alist
         }
 
 
@@ -127,8 +127,36 @@ class DeleteAtomResponse(object):
             'success': self.status
         }
 
+# Map associating integer uid to actual atom.
+class AtomMap:
+    def __init__(self):
+        self.next_unused_uid = 1;
+        self.atom_from_uid = dict()
+        self.uid_from_atom = dict()
+
+    def get_uid(self, atom):
+        if (atom in self.uid_from_atom):
+            uid = self.uid_from_atom[atom]
+            return uid
+
+        uid = self.next_unused_uid
+        self.next_unused_uid = self.next_unused_uid + 1
+        self.atom_from_uid[uid] = atom
+        self.uid_from_atom[atom] = uid
+        return uid
+
+    def get_atom(self, uid):
+        if (uid in self.atom_from_uid):
+            return self.atom_from_uid[uid]
+        return None
+
+    def remove(self, atom, uid):
+        del self.atom_from_uid[uid]
+        del self.uid_from_atom[atom]
+
+global_atom_map = AtomMap()
+
 atom_fields = {
-    'handle': FormatHandleValue(attribute='uuid'),
     'type': fields.String(attribute='type_name'),
     'name': fields.String,
     'outgoing': FormatHandleList(attribute='out'),

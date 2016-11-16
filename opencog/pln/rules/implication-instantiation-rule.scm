@@ -2,7 +2,7 @@
 ;; Implication Instantiation rule
 ;; (TODO add wiki page)
 ;;
-;; ImplicationLink
+;; ImplicationScopeLink
 ;;    V
 ;;    P
 ;;    Q
@@ -40,10 +40,10 @@
      (VariableNode "$Q")))
 
 (define implication-instantiation-body
-  (ImplicationLink
-     (VariableNode "$TyVs")
-     (VariableNode "$P")
-     (VariableNode "$Q")))
+  (QuoteLink (ImplicationScopeLink
+     (UnquoteLink (VariableNode "$TyVs"))
+     (UnquoteLink (VariableNode "$P"))
+     (UnquoteLink (VariableNode "$Q")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Implication full instantiation rule ;;
@@ -55,8 +55,8 @@
      (ListLink
         implication-instantiation-body)))
 
-;; Only try to match an ImplicationLink with a type restricted
-;; variable in the ImplicationLink variable definition. The choice of
+;; Only try to match an ImplicationScopeLink with a type restricted
+;; variable in the ImplicationScopeLink variable definition. The choice of
 ;; the substitution term is done randomly in
 ;; implication-full-instantiation-formula. All scoped variables are
 ;; instantiated.
@@ -69,7 +69,7 @@
 ;; This function
 ;;
 ;; 1. randomly selects a substitution term (or a tuple of substitution
-;;    terms, if the ImplicationLink has multiple variables in scope)
+;;    terms, if the ImplicationScopeLink has multiple variables in scope)
 ;;    that meets the implication's condition (the implicant),
 ;;
 ;; 2. performs the substitution.
@@ -298,7 +298,7 @@
                                         ; left, rebuild the
                                         ; ImplicationLink with the
                                         ; remaining variables
-               (ImplicationLink TyVs-remain P-inst Q-inst)
+               (ImplicationScopeLink TyVs-remain P-inst Q-inst)
                                         ; Otherwise just return the
                                         ; Q instance
                Q-inst))

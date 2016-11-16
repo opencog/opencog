@@ -58,5 +58,4 @@ def load_sentiment_list(atomspace):
       return TruthValue(1, 1)
 ")
 
-(define-public loadSentimentWords
-      (python-call-with-as "load_sentiment_list" (cog-atomspace)))
+(python-call-with-as "load_sentiment_list" (cog-atomspace))

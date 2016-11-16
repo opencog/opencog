@@ -3,6 +3,7 @@ ADD_GUILE_MODULE (relex2logic.scm
     rule-helpers.scm
     rule-utils.scm
     r2l-utilities.scm
+    tv-utilities.scm
 )
 
 ADD_SUBDIRECTORY (loader)

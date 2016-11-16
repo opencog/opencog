@@ -69,3 +69,10 @@ INSTALL (FILES
 	rules/similarity-rule.scm
 	DESTINATION "${DATADIR}/scm/opencog/pln/rules"
 )
+
+# TODO: The following rules are temporary hacks; remove them as the bugs are
+# fixed.
+INSTALL (FILES
+	rules/temp-deduction-rule.scm
+	DESTINATION "${DATADIR}/scm/opencog/pln/rules"
+)

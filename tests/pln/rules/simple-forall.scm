@@ -57,5 +57,5 @@
          (PredicateNode "P")
          (VariableNode "$X"))
       (EvaluationLink
-         (PredicateNode "Q")
+         (PredicateNode "P")
          (VariableNode "$X"))))

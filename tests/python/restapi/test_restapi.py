@@ -51,22 +51,63 @@ class TestRESTApi():
         del self.api
         del self.client
 
-    def test_post_and_get_node(self):
+
+    def mkatom(self, json_atom):
+        post_response = self.client.post(self.uri + 'atoms',
+                                         data=json.dumps(json_atom),
+                                         headers=self.headers)
+        post_result = json.loads(post_response.data)['atoms']
+        return post_result
+
+    def mkswan(self):
+        return self.mkatom(
+                {'type': 'ConceptNode', 'name': 'swan',
+                'truthvalue': {'type': 'simple',
+                'details': {'strength': 0.001, 'count': 0.9}}})
+
+    def mkbird(self):
+        return self.mkatom(
+                {'type': 'ConceptNode', 'name': 'bird',
+                'truthvalue': {'type': 'simple',
+                'details': {'strength': 0.01, 'count': 0.9}}})
+
+    def mkanimal(self):
+        return self.mkatom(
+                {'type': 'ConceptNode', 'name': 'animal',
+                'truthvalue': {'type': 'simple',
+                'details': {'strength': 0.1, 'count': 0.95}}})
+
+    def mkbird_animal(self):
+        jbird = self.mkbird()
+        janimal = self.mkanimal()
+        return self.mkatom(
+            {'type': 'InheritanceLink', 'truthvalue':
+            {'type': 'simple', 'details': {'strength': 1.0, 'count': 0.9}},
+             'outgoing': [jbird['handle'], janimal['handle']]})
+
+    def get_atom(self, handle):
+        get_response_handle = \
+            self.client.get(self.uri + 'atoms/' + str(handle))
+        get_result_handle = \
+            json.loads(get_response_handle.data)['result']['atoms'][0]
+        return get_result_handle
+
+    def test_a_post_and_get_node(self):
         # Create a test node
         truthvalue = {'type': 'simple',
                       'details': {'strength': 0.08, 'count': 0.2}}
-        atom = {'type': 'ConceptNode',
+        jatom = {'type': 'ConceptNode',
                 'name': 'giant_frog',
                 'truthvalue': truthvalue}
 
         post_response = self.client.post(self.uri + 'atoms',
-                                         data=json.dumps(atom),
+                                         data=json.dumps(jatom),
                                          headers=self.headers)
         post_result = json.loads(post_response.data)['atoms']
 
         # Verify values returned by the POST request
-        assert post_result['type'] == atom['type']
-        assert post_result['name'] == atom['name']
+        assert post_result['type'] == jatom['type']
+        assert post_result['name'] == jatom['name']
         assert post_result['truthvalue']['type'] == truthvalue['type']
         assert_almost_equals(
             float(post_result['truthvalue']['details']['strength']),
@@ -76,9 +117,10 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
 
         # Compare to the values created in the AtomSpace
-        atomspace_result = Atom(post_result['handle'], self.atomspace)
-        assert Atom(post_result['handle'], self.atomspace).value() == \
-            atomspace_result.value()
+        frog = self.atomspace.add_node(
+            types.ConceptNode, 'giant_frog',
+            TruthValue(.08, count_to_confidence(0.2)))
+        atomspace_result = frog
         assert post_result['name'] == atomspace_result.name
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
@@ -110,12 +152,15 @@ class TestRESTApi():
             json.loads(get_response_name_type.data)['result']['atoms'][0]
         assert post_result == get_result_name_type
 
-    def test_post_and_get_link(self):
+    def test_b_post_and_get_link(self):
+        jswan = self.mkswan()
+        janimal = self.mkanimal()
+
         # Create a test link between swan and animal
         truthvalue = \
             {'type': 'simple', 'details': {'strength': 0.5, 'count': 0.4}}
         atom = {'type': 'InheritanceLink', 'truthvalue': truthvalue,
-                'outgoing': [self.swan.value(), self.animal.value()]}
+                'outgoing': [jswan['handle'], janimal['handle']]}
 
         post_response = self.client.post(
             self.uri + 'atoms', data=json.dumps(atom), headers=self.headers)
@@ -130,13 +175,15 @@ class TestRESTApi():
         assert_almost_equals(
             float(post_result['truthvalue']['details']['count']),
             truthvalue['details']['count'], places=5)
-        assert self.swan.value() in post_result['outgoing']
-        assert self.animal.value() in post_result['outgoing']
+        assert jswan['handle'] in post_result['outgoing']
+        assert janimal['handle'] in post_result['outgoing']
 
         # Compare to the values created in the AtomSpace
-        atomspace_result = Atom(post_result['handle'], self.atomspace)
-        assert Atom(post_result['handle'], self.atomspace).value() == \
-            atomspace_result.value()
+        swan_animal = self.atomspace.add_link(
+            types.InheritanceLink, [self.swan, self.animal],
+            TruthValue(0.5, count_to_confidence(0.4)))
+
+        atomspace_result = swan_animal
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
@@ -153,25 +200,28 @@ class TestRESTApi():
         assert post_result == get_result_handle
 
         # Check if the link is in the incoming set of each of the nodes
+        jswan = self.get_atom(jswan['handle'])
+        janimal = self.get_atom(janimal['handle'])
         for h in post_result['outgoing']:
-            assert post_result['handle'] \
-                in [atom.value() for atom in Atom(h, self.atomspace).incoming]
+            assert post_result['handle'] in jswan['incoming']
+            assert post_result['handle'] in janimal['incoming']
 
-    def test_put_and_get_tv_av_node(self):
-        atom = self.swan
+    def test_c_put_and_get_tv_av_node(self):
+        jswan = self.mkswan()
+
         truthvalue = \
             {'type': 'simple', 'details': {'strength': 0.005, 'count': 0.8}}
         attentionvalue = {'sti': 9, 'lti': 2, 'vlti': True}
         atom_update = \
             {'truthvalue': truthvalue, 'attentionvalue': attentionvalue}
         put_response = self.client.put(
-            self.uri + 'atoms/' + str(atom.value()),
+            self.uri + 'atoms/' + str(jswan['handle']),
             data=json.dumps(atom_update),
             headers=self.headers)
         put_result = json.loads(put_response.data)['atoms']
 
         # Verify values returned by the PUT request
-        assert put_result['handle'] == atom.value()
+        assert put_result['handle'] == jswan['handle']
         assert_almost_equals(
             float(put_result['truthvalue']['details']['strength']),
             truthvalue['details']['strength'], places=5)
@@ -183,9 +233,7 @@ class TestRESTApi():
         assert put_result['attentionvalue']['vlti'] == attentionvalue['vlti']
 
         # Compare to the values updated in the AtomSpace
-        atomspace_result = Atom(put_result['handle'], self.atomspace)
-        assert Atom(put_result['handle'], self.atomspace).value() == \
-            atomspace_result.value()
+        atomspace_result = self.swan
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
@@ -196,12 +244,12 @@ class TestRESTApi():
 
         # Get by handle and compare
         get_response = \
-            self.client.get(self.uri + 'atoms/' + str(atom.value()))
+            self.client.get(self.uri + 'atoms/' + str(jswan['handle']))
         get_result = json.loads(get_response.data)['result']['atoms'][0]
         assert put_result == get_result
 
-    def test_put_and_get_tv_av_link(self):
-        atom = self.bird_animal
+    def test_d_put_and_get_tv_av_link(self):
+        jatom = self.mkbird_animal()
         truthvalue = \
             {'type': 'simple', 'details': {'strength': 0.9, 'count': 0.95}}
         attentionvalue = {'sti': 6, 'lti': 3, 'vlti': True}
@@ -209,13 +257,13 @@ class TestRESTApi():
             {'truthvalue': truthvalue, 'attentionvalue': attentionvalue}
         put_response =\
             self.client.put(
-                self.uri + 'atoms/' + str(atom.value()),
+                self.uri + 'atoms/' + str(jatom['handle']),
                 data=json.dumps(atom_update),
                 headers=self.headers)
         put_result = json.loads(put_response.data)['atoms']
 
         # Verify values returned by the PUT request
-        assert put_result['handle'] == atom.value()
+        assert put_result['handle'] == jatom['handle']
         assert_almost_equals(
             float(put_result['truthvalue']['details']['strength']),
             truthvalue['details']['strength'], places=5)
@@ -227,9 +275,7 @@ class TestRESTApi():
         assert put_result['attentionvalue']['vlti'] == attentionvalue['vlti']
 
         # Compare to the values updated in the AtomSpace
-        atomspace_result = Atom(put_result['handle'], self.atomspace)
-        assert Atom(put_result['handle'], self.atomspace).value() == \
-            atomspace_result.value()
+        atomspace_result = self.bird_animal
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
         assert TruthValue(
             float(put_result['truthvalue']['details']['strength']),
@@ -240,11 +286,11 @@ class TestRESTApi():
 
         # Get by handle and compare
         get_response = \
-            self.client.get(self.uri + 'atoms/' + str(atom.value()))
+            self.client.get(self.uri + 'atoms/' + str(jatom['handle']))
         get_result = json.loads(get_response.data)['result']['atoms'][0]
         assert put_result == get_result
 
-    def test_post_revise_existing_node(self):
+    def test_e_post_revise_existing_node(self):
         # Attempt to create a node, where a node already exists with that name
         # and type. Should revise existing node.
         existing_atom = self.bird
@@ -268,21 +314,21 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
 
         # Compare to the values updated in the AtomSpace
-        assert post_result['handle'] == existing_atom.value()
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
             count_to_confidence(
                 float(post_result['truthvalue']['details']['count']))) \
                == existing_atom.tv
 
-    def test_post_revise_existing_link(self):
+    def test_f_post_revise_existing_link(self):
         # Attempt to create a link, where a link already exists with that name
         # and outgoing set.
         # Should revise existing link.
         existing_atom = self.bird_animal
+        jbird_animal = self.mkbird_animal()
         truthvalue = \
             {'type': 'simple', 'details': {'strength': 0.1, 'count': 0.95}}
-        outgoing = [a.value() for a in existing_atom.out]
+        outgoing = jbird_animal['outgoing']
         atom = {'type': 'InheritanceLink',
                 'truthvalue': truthvalue,
                 'outgoing': outgoing}
@@ -301,7 +347,6 @@ class TestRESTApi():
             truthvalue['details']['count'], places=5)
 
         # Compare to the values updated in the AtomSpace
-        assert post_result['handle'] == existing_atom.value()
         assert TruthValue(
             float(post_result['truthvalue']['details']['strength']),
             count_to_confidence(
@@ -309,77 +354,91 @@ class TestRESTApi():
                == existing_atom.tv
 
     # @raises(IndexError)
-    def test_delete_node(self):
-        atom = self.swan
-        handle = atom.value()
+    def test_g_delete_node(self):
+        jswan = self.mkswan()
+        handle = jswan['handle']
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))
         get_result = json.loads(get_response.data)['result']['atoms'][0]
 
+        old_size = self.atomspace.size()
         delete_response = \
-            self.client.delete(self.uri + 'atoms/' + str(atom.value()))
+            self.client.delete(self.uri + 'atoms/' + str(handle))
         delete_result = json.loads(delete_response.data)['result']
 
         assert delete_result['success']
         assert delete_result['handle'] == get_result['handle']
 
         # Confirm the atom isn't contained in the AtomSpace anymore
-        assert self.atomspace.get_atom_with_uuid(handle) == None
+        # Actually, the python bindings don't provide a way to ask
+        # this question. So we check the size, instead.  Should shrink
+        # by 2, since both the swan, and the inhertance link get
+        # deleted.
+        new_size = self.atomspace.size()
+        assert new_size + 2 == old_size
 
     # @raises(IndexError)
-    def test_delete_link(self):
-        atom = self.bird_animal
-        handle = atom.value()
+    def test_h_delete_link(self):
+        jatom = self.mkbird_animal()
+        handle = jatom['handle']
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))
         get_result = json.loads(get_response.data)['result']['atoms'][0]
 
+        old_size = self.atomspace.size()
         delete_response = \
-            self.client.delete(self.uri + 'atoms/' + str(atom.value()))
+            self.client.delete(self.uri + 'atoms/' + str(handle))
         delete_result = json.loads(delete_response.data)['result']
 
         assert delete_result['success']
         assert delete_result['handle'] == get_result['handle']
 
         # Confirm the atom isn't contained in the AtomSpace anymore
-        assert self.atomspace.get_atom_with_uuid(handle) == None
+        # Actually, the python bindings don't provide a way to ask
+        # this question. So we check the size, instead.  Should shrink
+        # by 1, since only the inhertance link gets deleted.
+        new_size = self.atomspace.size()
+        assert new_size + 1 == old_size
 
-    def test_get_atoms_by_av(self):
+    def test_i_get_atoms_by_av(self):
         # Assign some STI values
         self.bird.sti = 9
         self.swan.sti = 20
         self.bird_animal.sti = 15
         self.animal.sti = 0
 
+        jswan = self.mkswan()
+        jbird = self.mkbird()
+        jbird_animal = self.mkbird_animal()
         get_response = \
             self.client.get(self.uri + 'atoms?filterby=attentionalfocus')
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 3
         assert set([atom['handle'] for atom in get_result]) \
-            == {self.bird.value(),
-                self.swan.value(),
-                self.bird_animal.value()}
+            == {jbird['handle'],
+                jswan['handle'],
+                jbird_animal['handle']}
 
         get_response = \
             self.client.get(self.uri + 'atoms?filterby=stirange&stimin=15')
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 2
         assert set([atom['handle'] for atom in get_result]) \
-            == {self.swan.value(), self.bird_animal.value()}
+            == {jswan['handle'], jbird_animal['handle']}
 
         get_response = self.client.get(
             self.uri + 'atoms?filterby=stirange&stimin=15&stimax=18')
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 1
         assert set([atom['handle'] for atom in get_result]) \
-            == {self.bird_animal.value()}
+            == {jbird_animal['handle']}
 
-    def test_get_types(self):
+    def test_j_get_types(self):
         # Verify that a list of valid atom types was returned
         get_response = self.client.get(self.uri + 'types')
         get_result = json.loads(get_response.data)['types']
         assert len(get_result) > 0
         assert get_result.__contains__('ConceptNode')
 
-    def test_tv_filter(self):
+    def test_k_tv_filter(self):
         # Should return animal, swan_bird, bird_animal (3 atoms)
         get_response = self.client.get(self.uri + 'atoms?tvStrengthMin=0.1')
         get_result = json.loads(get_response.data)['result']['atoms']
@@ -395,7 +454,7 @@ class TestRESTApi():
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 1
 
-    def test_include_incoming_outgoing(self):
+    def test_l_include_incoming_outgoing(self):
         # Should return bird and swan (2 atoms)
         get_response = self.client.get(
             self.uri +
@@ -417,7 +476,7 @@ class TestRESTApi():
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 5
 
-    def test_scheme_command(self):
+    def test_m_scheme_command(self):
         # Test an arbitrary Scheme command to ensure the binding is working
         # properly
 
@@ -446,7 +505,7 @@ class TestRESTApi():
         # Verify that it matches the previous response
         assert post_result == "5\n"
 
-    def test_dot_export(self):
+    def test_n_dot_export(self):
         # Export the atomspace to DOT format and ensure that there is a
         # properly defined DOT header created and the correct atoms are
         # included in the description

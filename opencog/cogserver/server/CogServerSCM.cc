@@ -39,8 +39,8 @@ private:
     static void init_in_module(void*);
     void init(void);
 
-    const std::string& start_server(AtomSpace*, const std::string&);
-    const std::string& stop_server(void);
+    std::string start_server(AtomSpace*, const std::string&);
+    std::string stop_server(void);
 
     CogServer* srvr = NULL;
     std::thread * main_loop = NULL;
@@ -115,8 +115,8 @@ void opencog_cogserver_init(void)
 
 // --------------------------------------------------------------
 
-const std::string& CogServerSCM::start_server(AtomSpace* as,
-                                              const std::string& cfg)
+std::string CogServerSCM::start_server(AtomSpace* as,
+                                       const std::string& cfg)
 {
     static std::string rc;
     // Singleton instance. Maybe we should throw, here?
@@ -149,7 +149,7 @@ const std::string& CogServerSCM::start_server(AtomSpace* as,
     return rc;
 }
 
-const std::string& CogServerSCM::stop_server(void)
+std::string CogServerSCM::stop_server(void)
 {
     static std::string rc;
     // delete singleton instance

@@ -48,9 +48,6 @@ public:
             std::cerr << e.get_message() << std::endl;
         }
         logger().set_timestamp_flag(false);
-        logger().set_filename(config()["LOG_FILE"]);
-        logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
-        logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
     }
 
     ~MicroplanningUTest()

@@ -49,17 +49,13 @@ class ViterbiUTest: public CxxTest::TestSuite
 			{
 				std::cerr << e.get_message() << std::endl;
 			}
-			logger().set_filename(config()["LOG_FILE"]);
-			logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
-			logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
 
 			server(CogServer::createInstance);
 			as = &cogserver().getAtomSpace();
 
 			// Load the required data
 			config().set("MODULES",
-				"opencog/nlp/types/libnlp-types.so, "
-				"opencog/cogserver/modules/libQueryModule.so");
+				"opencog/nlp/types/libnlp-types.so");
 
 			cogserver().loadModules();
 

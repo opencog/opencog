@@ -1,6 +1,7 @@
 ; Copyright (C) 2015-2016 OpenCog Foundation
 
 (use-modules (srfi srfi-1)) ; For `append-map`
+(use-modules (ice-9 threads)) ; For par-map
 
 (use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
 (use-modules (opencog logger))
@@ -11,6 +12,9 @@
 (load "rule.scm")
 (load "utilities.scm")
 
+; --------------------------------------------------------------
+; Don't log output to stdout on running psi-step
+(cog-logger-set-stdout! #f)
 
 ; --------------------------------------------------------------
 ; Variable for controlling whether to keep on running the loop or not.
@@ -42,9 +46,9 @@
 "
     (set! psi-loop-count (+ psi-loop-count 1))
 
-    ; Pause for 101 millisecs, to keep the number of loops
+    ; Pause for 10 millisecs, to keep the number of loops
     ; within a reasonable range.
-    (usleep 101000)
+    (usleep 10000)
     (if psi-do-run-loop (stv 1 1) (stv 0 1))
 )
 
@@ -77,9 +81,8 @@
                (goals (psi-related-goals action))
                (context-atoms (get-context-grounding-atoms rule)))
 
-           (cog-logger-debug
-                "[OpenPsi] Starting evaluation psi-rule = ~a"
-                (psi-rule-alias rule))
+            (cog-logger-info "[OpenPsi] Starting evaluation of psi-rule ~a"
+                rule)
 
             ; The #t condition is for evaluatable-contexts. These are
             ; contexts that only have evaluatable-terms that return TRUE_TV
@@ -89,13 +92,21 @@
             ; grounded and the grounding atoms are put into the action (that is
             ; equivalent to the implicand of the BindLink).
             (if (null? context-atoms)
-                (cog-execute! action)
-                (cog-execute! (PutLink action context-atoms))
+                (cog-evaluate! action)
+                ; FIXME Since the PutLink is wrapped in a TrueLink any
+                ; information due to the evaluation of the action is lost.
+                (cog-evaluate! (True (PutLink action context-atoms)))
             )
+            ; An evaluation of an action that is common in mulitple rules
+            ; results in the achievement of the goals, even if the context of
+            ; the other rules aren't not satisfied.
             (map cog-evaluate! goals)
+            (cog-logger-info "[OpenPsi] Finished evaluating of psi-rule ~a"
+                rule)
         ))
 
-    (cog-logger-debug "[OpenPsi] loop-count = ~a" (psi-get-loop-count))
+    (cog-logger-info "[OpenPsi] Starting psi-step, loop-count = ~a"
+        (psi-get-loop-count))
 
     ; Run the controler that updates the weight.
     (psi-controller-update-weights)
@@ -106,17 +117,20 @@
             (let ((updater (psi-get-updater d)))
                 ; Run the updater for the demand.
                 (if (not (null? updater))
-                    (cog-evaluate! updater)
+                    (cog-evaluate! (car updater))
                 )
                 ; The assumption is that the rules can be run concurrently.
                 ; FIXME: Once action-orchestrator is available then a modified
                 ; `psi-select-rules` should be used insted of
                 ; `psi-select-rules-per-demand`
-                (map act-and-evaluate (psi-select-rules-per-demand d))
+                (par-map act-and-evaluate (psi-select-rules-per-demand d))
             ))
 
         (psi-get-all-valid-demands)
     )
+
+    (cog-logger-info "[OpenPsi] Ending psi-step, loop-count = ~a"
+        (psi-get-loop-count))
 
     (stv 1 1) ; For continuing psi-run loop.
 )

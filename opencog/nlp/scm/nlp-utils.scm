@@ -23,6 +23,7 @@
 ; -- sentence-get-utterance-type  Get the speech act of a sentence.
 ; -- sent-list-get-parses   Get parses of a list of sentences.
 ; -- sent-get-words-in-order  Get all words occuring in a sentence in order.
+; -- sent-get-interp Get all the InterpretationNodes of a sentence.
 ; -- parse-get-words        Get all words occuring in a parse.
 ; -- parse-get-words-in-order  Get all words occuring in a parse in order.
 ; -- parse-get-relations    Get all RelEx relations in a parse.
@@ -219,6 +220,14 @@
 )
 
 ; ---------------------------------------------------------------------
+(define-public (sent-get-interp sent-node)
+"
+  sent-get-interp - Given a SentenceNode returns a list of InterpretationNodes
+"
+    (parse-get-interp (car (sentence-get-parses sent-node)))
+)
+
+; ---------------------------------------------------------------------
 (define-public (parse-get-words parse-node)
 "
   parse-get-words - Given a parse, return a list of all words in the parse
@@ -311,6 +320,16 @@
 )
 
 ; --------------------------------------------------------------------
+(define-public (parse-get-interp parse-node)
+"
+  parse-get-interp    Get the interpretations of the parse.
+
+  Returns the InterpretationNodes associated with a ParseNode.
+"
+    (cog-chase-link 'InterpretationLink 'InterpretationNode parse-node)
+)
+
+; --------------------------------------------------------------------
 (define-public (interp-get-r2l-outputs interp-node)
 "
   interp-get-r2l-outputs    Get all R2L outputs in an Interpretation.
@@ -324,7 +343,7 @@
 ; --------------------------------------------------------------------
 (define-public (interp-get-parse interp)
 "
-  interp-get-parse    Get the Interpretation of a Parse.
+  interp-get-parse    Get the parse that resulted in the given interpretation.
 
   Returns the ParseNode associated with an InterpretationNode.
 "
