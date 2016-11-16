@@ -102,4 +102,4 @@ class PutAtoms:
 		This is a generic function for passing strings of scheme expressions to
 		be evaluated over the atomspace.
 		"""
-		scheme_eval(self.atomspace, scm_string)
+		return scheme_eval(self.atomspace, scm_string)
