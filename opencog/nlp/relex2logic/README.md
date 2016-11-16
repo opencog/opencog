@@ -37,7 +37,7 @@ To use R2L:
 4. :smile: Simle at the wonderous results.
 
 
-## Relex2Logic: The Main Predicate-Argument Patterns
+# Relex2Logic: Review of the Rules & Status Report
 [A. Nitzkin](https://github.com/anitzkin), June 2015
 
 
@@ -418,29 +418,29 @@ th branching rules make it difficult for automating rule application.
 ### The “plug-n-play” solution
 
 Much more efficient would be to insert the right constituents into
-templates.  One rule (or perhaps in some cases 2-3 for whatever reasons)
-for each argument type (subject, object, and various phrasal or clausal
-complements, and “who” and “what”)  and one rule for each
-predicate-argument template including two-predicate patterns; I'm pretty
-sure there are no more than two-dozen common templates total.
+templates.  One rule (or perhaps, in some cases, 2-3 rules) for each
+argument type (subject, object, and various phrasal or clausal
+complements, and “who” and “what”),  and one rule for each
+predicate-argument template, including two-predicate patterns.  I'm
+pretty sure there are no more than two-dozen common templates in total.
 
 A model for this is the way modifiers of all kinds are currently
-processed—adverbials and adjectivals.   Adverbial phrases for example,
-can have many many superficially diffferent forms, including, e.g.
-complementized sentences, like “when I get there. . .”, “However
+processed — adverbials and adjectivals.   Adverbial phrases, for
+example, can have many superficially different forms, including
+complementized sentences, like “When I get there. . .”, “However
 difficult it is . . .”, and “As much as I like you . . . ,”;
-prepositional phrases such as “in the best case scenario . . . “; and
+prepositional phrases, such as “In the best case scenario . . . “; and
 simple adverbs, such as “quickly.”  In the current implementation, all
-of these “adverbials” and more are just plugged into one “advmod rule,”
-and their internal structures are handled by other rules.
+of these “adverbials”, and more, are just plugged into one “advmod
+rule,” and their internal structures are handled by other rules.
 
 To conclude about the “redundancy issue” . . .  the above discussion
 pretty much is the whole story.  What I want to do now, before moving on
-to talk about other aspects of R2L is give you a list of all of the
+to talk about other aspects of R2L, is give you a list of all of the
 patterns that seem to play into this issue.  In other words, you will be
 completing some version of Relex2Logic that should probably cover all of
-the patterns below, and preferably all of their combinations, which if
-you don't re-factor would definitely require 100,s of rules.
+the patterns below, and preferably all of their combinations, which, if
+you don't re-factor, would definitely require 100's of rules.
 
 
 #### List of Main Predicate-Argument Patterns
@@ -484,7 +484,7 @@ I put in bold the patterns for which there are no rules at all yet in R2L
     1. Question word questions, except “which” (handled in branching scheme
        helpers so far)
         1. “who” / “what”
-            - Who ate the pizza.
+            - Who ate the pizza?
             - What did he do?
             - What did he eat?
         2. “when” / “where” / “how”-manner
@@ -498,19 +498,19 @@ I put in bold the patterns for which there are no rules at all yet in R2L
             - How much does it cost?
             - How many books have you read?
     2. “which” questions
-        1. “which/what”+noun = who / what
+        1. “which/what” + noun = who / what
             - Which book is better?
             - Which man did you see?
     3. “question determiner” questions
-        1. prep+“which/what”+noun = when / where / how-manner
+        1. prep + “which/what” + noun = when / where / how-manner
             - At what/which time . . .
             - At what/which location . . .
             - In what/which way . . .
-        2. prep+“which”what+noun = why
+        2. prep + “which/what” + noun = why
             - For what reason . . .
-        3. prep+“which”+noun = how-degree
+        3. prep + “what/which” + noun = how-degree
             - to what/which extent . . .
-    4. y/n questions
+    4. yes/no questions
         - Is this a question?
 
 ### Final Super Important Note about the “to-do” or “two-predicate” patterns
@@ -518,24 +518,24 @@ I put in bold the patterns for which there are no rules at all yet in R2L
 Most of these patterns represent some variation of a kind of logical
 relationship mostly not yet recognized by R2L (except see discussion).
 This is essential for reasoning correctly about these sentences.  Most
-of these patterns might be called a “sentential complements” among other
+of these patterns might be called a “sentential complements”, among other
 things.
 
 Most sentential complements are either wholly or completely “opaque” to
-logical inference relative to the context “reality”; i.e., if “Mary
-thinks that she is a wombat.” It does not imply that “Mary is a wombat.”
-I have already incorporated logical opacity into R2L for “that-clauses”
-in sense, since the “that” becomes part of the R2L output; it is
-signaled in Relex by the `_rep()` relation (for 'representation').
+logical inference, relative to the context “reality”; i.e., if “Mary
+thinks that she is a wombat”, it does not imply that “Mary is a wombat.”
+I have already incorporated logical opacity into R2L for “that-clauses”,
+since the “that” becomes part of the R2L output; it is signaled in
+RelEx by the `_rep()` relation (for 'representation').
 
-But it also applies to nearly all of the “to-do” patterns; for example,
-“Mary wants to be a wombat” also does not imply that “Mary is a wombat.”
-I haven't incorporated logical-opacity into “to-do” patterns yet
+This also applies to nearly all of the “to-do” patterns; for example,
+“Mary wants to be a wombat” does not imply that “Mary is a wombat.”
+I haven't incorporated logical-opacity into “to-do” patterns yet,
 because, as I said, I stopped working on them when I realized that we
 needed a discussion about how to re-factor the whole rule-base.
 
-As far as logical-opacity goes, be aware that eventually the system
-needs to be able to infer that if “Mary thinks she is a wombat” then
+As far as logical-opacity goes, be aware that eventually, the system
+needs to be able to infer that if “Mary thinks she is a wombat”, then
 Mary is a wombat in Mary's mind.  The resolution of logical-opacity is
 that the truth of the situations in the opaque clauses must be evaluated
 relative to some context indicated by earlier words in the sentence, or
@@ -559,7 +559,7 @@ these contexts seems best left for a higher level of processing than
 R2L, but as usual, I urge you all to consider what R2L needs to do, to
 make this later processing possible and efficient, rather than waiting
 for the problem to come up and then revising everything again . . . E.g.
-is it sufficient that the “be” in “Mary is a wombat” is in the out-going
-set of “Mary thinks” or would it be wise to tag “Mary is a wombat” in
-some other way, to ensure that PLN doesn't work on it in the same way as
-predications which are part of “reality”?
+is it sufficient that the “be” in “Mary is a wombat” be placed in the
+out-going set of “Mary thinks”, or would it be wise to tag “Mary is a
+wombat” in some other way, to ensure that PLN doesn't work on it in the
+same way as predications which are part of “reality”?
