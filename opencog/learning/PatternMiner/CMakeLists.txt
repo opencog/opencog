@@ -1,5 +1,3 @@
-
-
 # Pattern miner build file.
 
 ADD_LIBRARY (PatternMiner SHARED
@@ -18,7 +16,10 @@ ADD_DEPENDENCIES(PatternMiner spacetime_atom_types)
 TARGET_LINK_LIBRARIES (PatternMiner
 	${COGUTIL_LIBRARY}
 	${ATOMSPACE_LIBRARIES}
-	cpprest.so
+    ${cpprest_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ssl
+    crypto
 )
 
 ADD_LIBRARY(TestPatternMinerAgent SHARED
@@ -50,5 +51,5 @@ INSTALL (FILES
 	HTree.h
 	PatternMiner.h
 
-	DESTINATION "include/${PROJECT_NAME}/PatternMiner"
+	DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"
 )
