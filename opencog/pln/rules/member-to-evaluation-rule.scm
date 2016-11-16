@@ -1,27 +1,27 @@
-; ============================================================================= 
+; =============================================================================
 ; TODO generalize MemberToEvaluationRule that works with any length argument
 ;
 ; MemberToEvaluationRule
 ;
-; MemberLink 
-;   B 
+; MemberLink
+;   B
 ;   SatisfyingSetLink
-;       X 
+;       X
 ;		EvaluationLink
 ;           D
-;           ListLink 
-;               X 
+;           ListLink
+;               X
 ;               C
 ; |-
 ; EvaluationLink
-;   D 
-;   ListLink 
-;       B 
+;   D
+;   ListLink
+;       B
 ;       C
 ;
 
 
-(include "formulas.scm")
+(load "formulas.scm")
 
 ; No ListLink, 1 argument in EvaluationLink
 (define member-to-evaluation-0-rule
