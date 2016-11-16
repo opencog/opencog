@@ -27,6 +27,10 @@ means of the
 (URE), together with some minor modifications. It is essentially a
 simple forward-chainer.
 
+After the quick-start, below, there is a quick sketch of how the R2L
+rules are applied to sentences in the AtomSpace. This is followed by
+a long report describing the status of the actual rules.
+
 
 ###Quick-start
 To use R2L:
@@ -35,6 +39,11 @@ To use R2L:
 2. Start scheme as `guile -l run-r2l.scm`
 3. At the scheme repl, enter `(nlp-parse "some complete sentence")`
 4. :smile: Smile at the wondrous results.
+
+## Algorithmic review
+This section sketches out the mechanics of how the rules are applied.
+
+* `nlp-parse` calls
 
 
 # Relex2Logic: Review of the Rules & Status Report

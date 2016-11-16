@@ -158,7 +158,7 @@ def call_sentiment_parse(text_node, sent_node):
 "
   r2l-parse SENT -- perform relex2logic processing on sentence SENT.
 
-  Runs the rules found in R2L-en-RuleBase over the RelEx output
+  Runs the rules found in R2L-en-RuleBase over the RelEx output,
   creating the logical representation of sentence in the atomspace.
   Returns a list containing SetLinks that are the r2l-interpretations
   for individual parses.
@@ -169,52 +169,58 @@ def call_sentiment_parse(text_node, sent_node):
 
   SENT must be a SentenceNode.
 "
-    (define (cog-extract-parent a-link is-from-fc)
-        ; Many rules return a ListLink of results that they
-        ; generated. Some rules return singletons. And the
+    (define (unwrap-list-link A-LINK IS-FROM-FC)
+        ; Many rules return a ListLink of the results that
+        ; they generated. Some rules return singletons. The
         ; Forward Chainer uses a SetLink to wrap all these
-        ; results. So if A-LINK is a ListLink or is directly
+        ; results. So, if A-LINK is a ListLink or is directly
         ; from the FC, then delete it and return a list of
         ; its contents, else return a list holding A-LINK.
         ;
         ; XXX maybe this should be part of the ure module??
-        (if (or (equal? 'ListLink (cog-type a-link)) is-from-fc)
-            (let ((returned-list (cog-outgoing-set a-link)))
-                    (cog-extract a-link)
+        (if (or (equal? 'ListLink (cog-type A-LINK)) IS-FROM-FC)
+            (let ((returned-list (cog-outgoing-set A-LINK)))
+                    (cog-extract A-LINK)
                     returned-list)
-            (list a-link))
+            (list A-LINK))
     )
 
-    (define (run-fc parse-node interp-link)
-        ; This runs all the rules of R2L-en-RuleBase over relex parse
-        ; outputs, and returns a cleaned and de-duplicated list. The
-        ; relex outputs associated with 'parse-node' make the focus-set.
-        ; This is done so that, IF there are multiple parses, then
-        ; each is handled independently by passing it seperately, as
-        ; each is likely to exist in a seperate semantic-universe.
+    (define (apply-r2l-rules PARSE-NODE INTERP-LINK)
+        ; This applies all the rules in the R2L-en-RuleBase to the
+        ; RelEx parse, and returns a cleaned and de-duplicated list.
+        ; The RelEx outputs associated with `PARSE-NODE` are the
+        ; focus-set. Thus, if there are multiple parses, then
+        ; each is handled independently, by passing it seperately,
+        ; since each is likely to exist in a seperate semantic-universe.
         (define focus-set
-            (SetLink (parse-get-relex-outputs parse-node) interp-link))
+            (SetLink (parse-get-relex-outputs PARSE-NODE) INTERP-LINK))
         (define outputs
-            (cog-extract-parent (cog-fc (SetLink) r2l-rules focus-set) #t))
+            (unwrap-list-link (cog-fc (SetLink) r2l-rules focus-set) #t))
 
-        (append-map (lambda (o) (cog-extract-parent o #f)) outputs)
+        (append-map (lambda (o) (unwrap-list-link o #f)) outputs)
     )
 
-    (define (interpret parse-node)
-        ; FIXME: Presently only a single interpretation is created for
+    (define (interpret PARSE-NODE)
+        ; FIXME: Presently, only a single interpretation is created for
         ; each parse. Multiple interpreation should be handled, when
         ; word-sense-disambiguation, anaphora-resolution and other
         ; post-processing are added to the pipeline.
-        (let* ((interp-name (string-append(cog-name parse-node) "_interpretation_$X"))
-               (interp-node (InterpretationNode interp-name))
-               ; Associate the interpretation with a parse, as there
-               ; could be multiplie interpretations for the same parse.
-               (interp-link (InterpretationLink interp-node parse-node))
-               (pre-result
-                   (remove
-                       (lambda (a) (equal? (cog-type a) 'ReferenceLink))
-                       (delete-duplicates (run-fc parse-node interp-link))))
-               (result (SetLink pre-result)))
+        (let* (
+                (interp-name (string-append
+                    (cog-name PARSE-NODE) "_interpretation_$X"))
+
+                (interp-node (InterpretationNode interp-name))
+
+                ; Associate the interpretation with a parse, as there
+                ; could be multiplie interpretations for the same parse.
+                (interp-link (InterpretationLink interp-node PARSE-NODE))
+
+                (pre-result (remove
+                    (lambda (a) (equal? (cog-type a) 'ReferenceLink))
+                    (delete-duplicates
+                        (apply-r2l-rules PARSE-NODE interp-link))))
+
+                (result (SetLink pre-result)))
 
             ; Construct a ReferenceLink to the output
             (ReferenceLink interp-node result)
@@ -226,6 +232,7 @@ def call_sentiment_parse(text_node, sent_node):
         )
     )
 
+    ;; Can this safely be made parallel ???
     (map interpret (sentence-get-parses sent))
 )
 
