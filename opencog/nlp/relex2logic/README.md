@@ -246,48 +246,49 @@ which are described below . . .
 
 #### The “to-do” statements
 
-e.g.
+Consider these sentences:
+
     - She wants to sing.
     - She wants you to sing.
 
-These rules seem to describe a sub-set of what are known as “sentential
-complements” or “propositional attitudes.” In other words verbs which
-accept sentences, or verb-phrases with implicit subjects, as their
-complements.  There were five “to-do” rules in the old r2l rule-set. I
-ported three of them.  I didn't port the “be able to” rule because
-“able” is only one example of many predicates that could fit in the same
-pattern (e.g. “ready,” “possible,” “glad”), which is also the same
-pattern that appears in the other rule I didn't port, which erroneously
-enshrines “must” as a key element of the pattern . . .  “must” is a
-modal verb, and all the modals could be handled by one rule of their
-own.  Anyway, to summarize, the two “to-do”rules that I didn't port are
-too specific, and there need to be two more rules to handle those
-patterns instead—a rule for modals (can, must, will), and a rule for
-this:
+The RelEx to-do rules seem to describe a sub-set of what are known as
+“sentential complements” or “propositional attitudes.” In other words,
+verbs which accept sentences, or verb-phrases with implicit subjects,
+as their complements.  There were five “to-do” rules in the old R2L
+rule-set. I ported three of them.  I didn't port the “be able to” rule,
+because “able” is only one example of many predicates that could fit
+in the same pattern (e.g. “ready”, “possible”, “glad”), which is also
+the same pattern that appears in the other rule I didn't port, which
+erroneously enshrines “must” as a key element of the pattern . . .
+“must” is a modal verb, and all the modals could be handled by one rule
+of their own.  Anyway, to summarize, the two “to-do”rules that I didn't
+port are too specific, and there need to be two more rules to handle
+those patterns instead — a rule for modals (can, must, will), and a
+rule for this:
 
 **A predadj-to-do rule**
 
-e.g.
+For example,
 
     - She seems to be able to sing.
     - He intends to be ready to leave.
     - It must be possible to fix this.
 
 It is also worth noting that these three sentences make a good example
-the redundancy issue that needs to be solved in that one would prefer
-not to have to write three rules for the above examples – a
+of the redundancy issue that needs to be solved, in that one would
+prefer not to have to write three rules for the above examples – a
 “TOBE-predadj-todo” rule for the first one, a “SVO-predadj-to-do” rule
 for the second one, and a “modal-predadj-todo” rule for the third one
 (plus all the other combinations with other rules)!  There seems no
 difficulty in doing it by assigning the two two-predicate relations
-separately; I only didn't do it yet, because it needs to be done for the
-whole rule-base or not at all, and because there are other more tricky
-issues that might impact on how this is done (read on!)
+separately; I only didn't do it yet, because it needs to be done for
+the whole rule-base or not at all, and because there are other more
+tricky issues that might impact on how this is done (read on!)
 
-To continue with the to-do rules . . . .The current selection “to-do”
-rules seems arbitrary. They don't cover most of the 8 basic structures
-described previously, nor many other two-predicate patterns that we have
-no rules for, such as:
+To continue with the to-do rules . . . .The current set of “to-do”
+rules seems arbitrary. They don't cover most of the eight basic
+structures described above, nor many other two-predicate patterns that
+we have no rules for, such as:
 
     - “I made her happy.”
     - “I consider him (to be) a fool.”
@@ -296,16 +297,16 @@ no rules for, such as:
 (see further on for a more complete list)
 
 I didn't create all the necessary rules yet, because of the redundancy
-problem. If I started writing rules to cover all combinations of the 8
-basic structures with every 2-predicate pattern, plus question-patterns,
-it would definitely extend into 100's of rules, whereas there are
-probably no more than a dozen of these two-predicate templates.  So, I
-started this discussion about doing the rules in a different way.
-Probably all of the two-predicate (“to-do”) rules can be done simply
-–just assigning the second predicate as an argument of the first, and
-leaving the other argument assignments for other rules to fill in.  I
-didn't see this immediately because I was porting the old R2L “to-do”
-rules which were all done as whole-sentence structures.
+problem. If I started writing rules to cover all combinations of the
+eight basic structures with every 2-predicate pattern, plus
+question-patterns, it would definitely extend into 100's of rules,
+whereas there are probably no more than a dozen of these two-predicate
+templates.  So, I started this discussion about doing the rules in a
+different way.  Probably all of the two-predicate (“to-do”) rules can
+be done simply – just assigning the second predicate as an argument of
+the first, and leaving the other argument assignments for other rules
+to fill in.  I didn't see this immediately because I was porting the
+old R2L “to-do” rules which were all done as whole-sentence structures.
 
 #### The “Which” Problem
 
@@ -326,13 +327,13 @@ question types in the current implementation, as follows:
     - In what way can we solve this problem?
 
 Really, the “which” rules are also “question-determiners” but I needed
-different names for the two sets.  And the “question-determiners” are
-not the problem because they refer to constituents answered by adverbial
+different names for the two sets.  The “question-determiners” are not
+the problem, because they refer to constituents answered by adverbial
 phrases (i.e.  how, when, where, and why).  There are many “which” rules
-already, and there would need to be many many more to hit all the
-combinations possible with the 8 basic patterns multiplied by the
-two-predicate patterms multiplied by the choice of which argument is
-getting the “which”; just for a few examples:
+already, and there would need to be many many more, to hit all the
+combinations possible with the eight basic patterns, multiplied by the
+two-predicate patterns, multiplied by the choice of which argument is
+getting the “which”.  Just a few examples:
 
     - Which girl told you to send a bomb to the White House?
     (which-subject + “to-do2” + “SVIO” pattern)
@@ -346,9 +347,11 @@ getting the “which”; just for a few examples:
     etc. etc.
 
 Under the current implementation, no “which”-type can be implemented
-without the entire predicate-argument structure of the sentence because
+without the entire predicate-argument structure of the sentence, because
 the whole sentence defines the set satisfying the variable referred to
-by the question-word—using the SatisfyingSetLink.
+by the question-word. That is, the SatisfyingSetLink requires the entire
+definition to define the set.  An alternative would be to compose the
+SatisfyingSetLink out of parts, using set intersection and set union.
 
 ### One Solution of Limited Value: Branching Scheme Helpers
 
@@ -356,48 +359,41 @@ This is probably a good place to bring the “what” / “who” questions into
 the discussion, since “which” questions are very similar conceptually,
 but treated very differently by R2L.  How, why, when, and where can wait
 because they are very different.  I avoided making separate rules for
-who and what questions, by making the scheme-helpers for the 8 main
-sentence-types branch conditionally upon detection of variables as their
+who and what questions, by making the scheme-helpers for the eight main
+sentence-types branch conditionally, upon detection of variables as their
 main arguments, e.g.:
 
 ```
 (define (SV-rule subj_concept subj_instance verb verb_instance)
-        (cond ((string=? subj_concept "_$qVar")
-                (let ((var_name (choose-var-name)))
-                        (list
-                                (ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-                                (EvaluationLink
-                                        (PredicateNode verb_instance)
-                                        (ListLink
-                                                (VariableNode var_name)
-                                        )
-                                )
-                        )
-                ))
-                ((string=? verb "_$qVar")
-                        (let ((var_name (choose-var-name)))
-                                (list
-                                        (InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-                                        (EvaluationLink
-                                                (PredicateNode var_name)
-                                                (ListLink
-                                                        (ConceptNode subj_instance)
-                                                )
-                                        )
-                                )
-                        )
-                )
-                (else (list
-                        (ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
-                        (InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
-                        (EvaluationLink
-                                (PredicateNode verb_instance)
-                                (ListLink
-                                        (ConceptNode subj_instance)
-                                )
-                        )
-                )
-        ))
+   (cond ((string=? subj_concept "_$qVar")
+      (let ((var_name (choose-var-name)))
+         (list
+            (ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
+            (EvaluationLink
+               (PredicateNode verb_instance)
+               (ListLink (VariableNode var_name)))
+         )
+      ))
+      ((string=? verb "_$qVar")
+         (let ((var_name (choose-var-name)))
+            (list
+               (InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
+               (EvaluationLink
+                  (PredicateNode var_name)
+                  (ListLink (ConceptNode subj_instance)))
+            )
+         )
+      )
+      (else (list
+         (ImplicationLink
+            (PredicateNode verb_instance) (PredicateNode verb))
+         (InheritanceLink
+            (ConceptNode subj_instance) (ConceptNode subj_concept))
+         (EvaluationLink
+            (PredicateNode verb_instance)
+            (ListLink (ConceptNode subj_instance)))
+      )
+   ))
 )
 ```
 
@@ -406,16 +402,18 @@ I haven't done this for “to-do” sentences yet, so they can't handle
 
 I'm not sure why “which”-questions require satisfying-set logic but
 “what” and “who” questions don't.  This difference was defined before I
-got here. It seems to me as if either both types require satisfying set
-logic, or none of them do.  Which would seem to depend on what PLN and
+got here. It seems to me as if either both types require satisfying-set
+logic, or none of them do.  This would seem to depend on what PLN and
 the fuzzy pattern matcher do with those sentences.  If PLN and the fuzzy
 pattern matcher can search for the “who” that “ate the pizza” without a
 SatisfyingSetLink to tell them that, why can't they also search for the
 “which guy” who “ate the pizza” in “which guy ate the pizza?”  I assume
-there is a good reason for this that I don't understand . . .
+there is a good reason for this, that I don't understand . . .
+(There might not be a good reason. It might be an accident of history.)
 
-Secondly, the branching rules really aren't much more efficient
-code-wise than just having separate rules for each case, anyway.
+Secondly, the branching rules really aren't much more efficient,
+code-wise, than just having separate rules for each case. In fact,
+th branching rules make it difficult for automating rule application.
 
 ### The “plug-n-play” solution
 
