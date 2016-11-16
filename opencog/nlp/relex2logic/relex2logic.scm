@@ -24,10 +24,4 @@
 	*unspecified*  ; no return value, avoids printing gunk.
 )
 
-; XXX TODO FIXME Currently, the statement below fails to have the
-; expected effect: although it loads the rules, it loads them where
-; the URE can't find them.  Its actually a URE bug, the URE is looking
-; for rules in the wrong places. See bug
-; https://github.com/opencog/opencog/issues/2021
-; for the tracking status.
 (load-r2l-rulebase)
