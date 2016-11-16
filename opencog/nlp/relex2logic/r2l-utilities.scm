@@ -117,10 +117,14 @@
 (define-public (filter-for-pln a-list)
 "
   Takes a list of atoms and return a SetLink containing atoms that pln can
-  reason on. The that make the SetLink comprise of atoms with signatures,
+  reason on. Some of the patterns that make the returned SetLink are,
           (Inheritance
-              (Type \"ConceptNode\")
-              (Type \"ConceptNode\"))
+              (TypeChoice
+                  (Type \"ConceptNode\")
+                  (Type \"SatisfyingSetLink\"))
+              (TypeChoice
+                  (Type \"ConceptNode\")
+                  (Type \"SatisfyingSetLink\")))
           (Evaluation
               (Type \"PredicateNode\")
               (ListLink
@@ -129,7 +133,7 @@
           (Evaluation
               (Type \"PredicateNode\")
               (ListLink
-                  (Type \"ConceptNode\"))))
+                  (Type \"ConceptNode\")))
           (Member
               (TypeChoice
                   (Type \"ConceptNode\")
@@ -137,6 +141,9 @@
               (TypeChoice
                   (Type \"ConceptNode\")
                   (Type \"SatisfyingSetLink\")))
+          (Implication
+              (Type \"PredicateNode\")
+              (Type \"PredicateNode\"))
 
   a-list:
   - This is a list of atoms, for example a list of r2l outputs
@@ -156,6 +163,10 @@
                                 (TypeChoice
                                     (Type "ConceptNode")
                                     (Type "SatisfyingSetLink"))))
+                        (Signature
+                            (Implication
+                                (Type "PredicateNode")
+                                (Type "PredicateNode")))
                         (Signature
                             (Member
                                 (TypeChoice
