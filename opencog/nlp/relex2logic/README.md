@@ -43,7 +43,21 @@ To use R2L:
 ## Algorithmic review
 This section sketches out the mechanics of how the rules are applied.
 
-* `nlp-parse` calls
+1. The `nlp-parse` function, from the `chatbot` guile module, sends the
+   plan-text to the RelEx server.
+2. RelEx returns the parsed sentence attached to an `AnchorNode`, so that
+   it can be easily found, and identified as being brand-new.
+3. The `nlp-parse` function unties the newly parse sentence from the
+   `AnchorNode`, and passes it to the `r2l-parse` function in this
+   directory.
+4. The parsed sentence, here, is actually a `SentenceNode`.  By
+   following the various links attached to it, all of the various
+   words in the sentence, and the various depedency grammar markup can
+   be found. See the
+   [RelEx OpenCog format](http://wiki.opencog.org/w/RelEx_OpenCog_format)
+   for documentation of this format.
+5. The `r2l-parse` invoked the Unified Rule Engine (URE) to apply the
+   varous R2L rules to the parse.
 
 
 # Relex2Logic: Review of the Rules & Status Report
