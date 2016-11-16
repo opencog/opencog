@@ -82,9 +82,6 @@
             ; Construct a ReferenceLink to the output
             (ReferenceLink interp-node result)
 
-            ; Time stamp the parse
-            (sent-set-time SENT)
-
             result
         )
     )

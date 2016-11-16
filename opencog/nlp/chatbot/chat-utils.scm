@@ -70,13 +70,13 @@ def call_sentiment_parse(text_node, sent_node):
 "
   Associate time to the last sentence
 "
-    (AtTimeLink
-        ; FIXME: maybe opencog's internal time octime should
-        ; be used. Will do for now, assuming a single instance
-        ; deals with a single conversation.
-        (TimeNode (number->string (current-time)))
-        sent
-        time-domain)
+	(AtTimeLink
+		; FIXME: maybe opencog's internal time octime should
+		; be used. Will do for now, assuming a single instance
+		; deals with a single conversation.
+		(TimeNode (number->string (current-time)))
+		sent
+		time-domain)
 )
 
 (define-public (get-last-said-sent)
@@ -219,23 +219,31 @@ def call_sentiment_parse(text_node, sent_node):
 	; Call the RelEx server
 	(relex-parse plain-text)
 
-	(let ((sent-list (get-new-parsed-sentences)))
+	(let* ((sent-list (get-new-parsed-sentences))
+			(sent-node (car sent-list)))
+
 		; Unhook the anchor. MUST do this before r2l-parse, as
 		; otherwise, parse-get-relex-outputs will wrap it in a
 		; SetLink! Ouch!!
 		(release-new-parsed-sents)
 
+		; Tage the sentence with the wall-clock time.
+		(sent-set-time sent-node)
+
 		; Perform the R2L processing.
-		(r2l-parse (car sent-list))
+		(r2l-parse sent-node)
 
-        ; Stimulate WordNodes and WordInstanceNodes
-        (if nlp-stimulate-parses
-            (nlp-stimulate (car sent-list) nlp-stimulation-value))
+		; Stimulate WordNodes and WordInstanceNodes
+		(if nlp-stimulate-parses
+			(nlp-stimulate sent-node nlp-stimulation-value))
 
-    ; Testing the Sentiment_eval function
-    (cog-logger-info "nlp-parse: testing Sentiment_eval")
-    (python-call-with-as "set_atomspace" (cog-atomspace))
-    (cog-evaluate! (Evaluation (GroundedPredicate "py: call_sentiment_parse") (List (Node plain-text) (car sent-list))))
+		; Call the Sentiment_eval function
+		(cog-logger-info "nlp-parse: testing Sentiment_eval")
+		(python-call-with-as "set_atomspace" (cog-atomspace))
+		(cog-evaluate!
+			(Evaluation
+				(GroundedPredicate "py: call_sentiment_parse")
+				(List (Node plain-text) sent-node)))
 
 		; Track some counts needed by R2L.
 		(r2l-count sent-list)

@@ -22,10 +22,8 @@ This converter is called [RelEx](http://wiki.opencog.org/w/RelEx).
 
 Step 3 extracts the predicate-argument logical structure.  This is done
 by applying a set of rules to the RelEx format.  These are applied by
-means of the
-[unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
-(URE), together with some minor modifications. It is essentially a
-simple forward-chainer.
+using the forward chainer provided by the 
+[unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine).
 
 After the quick-start, below, there is a quick sketch of how the R2L
 rules are applied to sentences in the AtomSpace. This is followed by
@@ -57,7 +55,11 @@ This section sketches out the mechanics of how the rules are applied.
    [RelEx OpenCog format](http://wiki.opencog.org/w/RelEx_OpenCog_format)
    for documentation of this format.
 5. The `r2l-parse` invoked the Unified Rule Engine (URE) to apply the
-   varous R2L rules to the parse.
+   varous R2L rules to the parse. It does this by explicitly calling
+   the `cog-fc` function that the URE provides, together with the name
+   of the rulebase, and one giant `SetLink` holding all the various
+   bits and pieces of the parse.
+6. By using this interface
 
 
 # Relex2Logic: Review of the Rules & Status Report
