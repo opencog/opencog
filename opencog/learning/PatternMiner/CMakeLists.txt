@@ -10,7 +10,6 @@ ADD_LIBRARY (PatternMiner SHARED
 	PatternMinerCentralServer
 )
 
-ADD_DEPENDENCIES(PatternMiner opencog_atom_types)
 ADD_DEPENDENCIES(PatternMiner embodiment_atom_types)
 ADD_DEPENDENCIES(PatternMiner spacetime_atom_types)
 
