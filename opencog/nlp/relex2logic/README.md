@@ -4,7 +4,7 @@ RelEx2Logic (R2L) produces a certain form of predicate-argument
 structure for an English-language sentence.  That structure roughly
 resembles classical propositional or predicate logic, thus the name.
 
-The proccessing pipeline for a sentence is
+The processing pipeline for a sentence is
 
 1. sentence => link-grammar
 2. link-grammar => relex
@@ -28,13 +28,13 @@ means of the
 simple forward-chainer.
 
 
-###Quickstart
+###Quick-start
 To use R2L:
 
 1. Start the relex server using the `opencog-server.sh` script.
 2. Start scheme as `guile -l run-r2l.scm`
 3. At the scheme repl, enter `(nlp-parse "some complete sentence")`
-4. :smile: Simle at the wonderous results.
+4. :smile: Smile at the wondrous results.
 
 
 # Relex2Logic: Review of the Rules & Status Report
@@ -200,7 +200,7 @@ Indirect Object:
 
 On the other hand, it's hard to think of how it would do the logic any
 harm if you just classified all the to-indirect-objects as adverbial
-modifers . . . ?  Speaking form the POV of linguistic semantics, the
+modifiers . . . ?  Speaking form the POV of linguistic semantics, the
 indirect object of a verb gets the thematic role “goal” or “recipient”
 and, since locations are otherwise usually indicated by adverbial
 phrases, it probably wouldn't hurt to forget entirely about the idea of
