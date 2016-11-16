@@ -22,7 +22,7 @@ This converter is called [RelEx](http://wiki.opencog.org/w/RelEx).
 
 Step 3 extracts the predicate-argument logical structure.  This is done
 by applying a set of rules to the RelEx format.  These are applied by
-means of the 
+means of the
 [unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
 (URE), together with some minor modifications. It is essentially a
 simple forward-chainer.
@@ -42,15 +42,15 @@ To use R2L:
 
 
 ### Overview:
-Currently the linguistic structures which R2L translates into logic
+Currently, the linguistic structures which R2L translates into logic
 atoms can be divided into roughly three classes,
 
-1. predicate-argument structures (the main structure of any clause)
+1. Predicate-argument structures (the main structure of any clause)
    such as SVO etc.,
-2. a variety of types of constituents that can take the place of a
+2. A variety of types of constituents that can take the place of a
    predicate or its arguments, e.g. different parts of speech,
    variables, or clauses.
-3. “unary” rules -- attributions of some property or modifying clause
+3. Features -- attributions of some property or modifying clause
    to an argument or predicate, such as an adjective, or a grammatical
    property, such as gender, or definiteness, or an adjectival or
    adverbial clause, such as “When I get to Memphis . . . .”
@@ -59,43 +59,44 @@ There are also, more-or-less, three kinds of rule, or aspects of
 rule-structure (since some rules combine these approaches), which
 roughly correspond to the three types of linguistic phenomena described
 above, although this was never thought out ahead of time in that way;
-it just sort-of coalesced.  The three kinds of rule are,
+it just sort-of coalesced.  The three kinds of rule are:
 
-1. rules which assign an entire predicate-argument structure at one
-   time,
-2. rules which contain conditional branching in order to assign
+1. Rules which assign an entire predicate-argument structure at one
+   time.
+2. Rules which contain conditional branching in order to assign
    different types of arguments or predicates to a particular
-   structural “slot”, and
-3. rules which simply assign some property to a constituent, pretty
+   structural “slot”.
+3. Rules which simply assign some property to a constituent, pretty
    much always using an InheritanceLink or ImplicationLink.
 
 The currently evident 'issues' with Relex2Logic are also threefold
 (why not, it's a magic number, right?):
 
-1. a lot of redundancy (to be discussed in excruciating detail below)
-2. relex output which is inadequate for the creation of 'good' R2L
-   rules, and
-3. the question of whether R2L should be more or less specific in terms
-   of its semantic classification of argument-roles and relationships;
+1. A lot of redundancy (to be discussed in excruciating detail below).
+2. RelEx output which is inadequate for the creation of 'good' R2L
+   rules.
+3. The question of whether R2L should be more or less specific in terms
+   of its semantic classification of argument-roles and relationships.
 
 I probably won't discuss (2) and (3) much in this document, except in
 terms of why I didn't port certain rules from the old R2L, or have
 replaced them with something else.  In general I agree with Ben's idea
-of keeping R2L as general as possible to leave room for accurate
-semantic interpretation later; I just question it sometimes because it
-ends up meaning that R2L just becomes a translation of the Relex output
+of keeping R2L as general as possible, to leave room for accurate
+semantic interpretation later; I just question it sometimes, because it
+ends up meaning that R2L just becomes a translation of the RelEx output
 into a slightly different language; in fact, it does more merging of
-relex categories than differentiating; however, it also does some
+RelEx categories than differentiating; however, it also does some
 important work in terms of hooking up certain relationships that are
-merely listed in the relex output rather than being inter-related.
+merely listed in the RelEx output, that weren't explicitly marked
+as being inter-related in RelEx.
 
 ### The Redundancy Problem
 First I'm going to go over the sets of linguistic relationships that
 play into the redundancy problem, with some comments on the issues with
-each of them; then by the time we get through that, the problems and
+each of them; then, by the time we get through that, the problems and
 possibilities with the current rule set will be much clearer.
 
-#### The 8 main predicate-argument structures:
+#### The eight main predicate-argument structures:
 
     1. Be-inheritance     – “Bill is the teacher.”
     2. Copula             – “When is the meeting?”
@@ -103,63 +104,66 @@ possibilities with the current rule set will be much clearer.
 These two seem confused from the point of linguistics, but perhaps that
 is just a matter of labeling, so OpenCog may not care.  Pretty much
 anything that gets the be-inheritance rule in R2L is what most
-grammarians would call a “copula” as in the example above (“copula” is
-said to be equivalent to an “=”) and the stuff which does get the
-“copula” relation instead is pretty arbitrary, which I am given to
-understand is simply because it was never fully installed in RelEx.
-I used the when-example above because I am unable to find any
-declarative examples right now; you have to fish around for them.  The
-R2L copula rule is triggered by anything that gets a `_%copula()`
-relation from relex, and that doesn't seem to happen all that much
-anymore if it ever did. Anyway, at the moment, both of these R2L rules
-call the same scheme-helper – which inherits the complement to the
-subject, producing:
+grammarians would call a “copula”, as in the example above (“copula” is
+said to be equivalent to equality: the “=” sign).  The stuff which does
+get the “copula” relation instead instead of be-inheritance is pretty
+arbitrary, which I am given to understand is simply because it was never
+fully installed in RelEx.  I used the when-example above because I am
+unable to find any declarative examples right now; you have to fish
+around for them.  The R2L copula rule is triggered by anything that
+gets a `_%copula()` relation from RelEx, and that doesn't seem to
+happen all that much anymore, if it ever did. Anyway, at the moment,
+both of these R2L rules call the same scheme-helper – which inherits
+the complement to the subject, producing:
 ```
     (InheritanceLink (ConceptNode “Subject”) (ConceptNode “complement”))
 ```
 As another issue, one might question whether copula-relations such as
 that shown in (1) above are properly classified as cases of
-“inheritance” but the idea, as explained to me, is that “being the
+“inheritance”, but the idea, as explained to me, is that “being the
 teacher is a property of Bill.”  I think there may be an ambiguity being
 abused here between the linguistic usage of “being a property” and the
 logical meaning of being a property.
 
 The other structures which seem closely related to these are:
 
-    3. SP or “predadj” (predicate adjective) – “Bill is smart.”
+    3. SP or “predadj” (predicative adjective) – “Bill is smart.”
     4. PREP or predicate preposition(al phrase) – “The book is on the table.”
     5. SV – subject-verb – “Bill sleeps.”
 
 Linguistically, these make pretty good sense.  But when you go to the
-scheme-helpers you realize that not all of these distinctions are
+scheme-helpers, you realize that not all of these distinctions are
 necessary.  If you represent prepositions and adjectives as
 PredicateNodes (which I did) then all three can use the same scheme
 helper, producing:
 ```
     (EvaluationLink (PredicateNode “X”) (ListLink (ConceptNode “subject”))
 ```
-where X could be a verb, predicate adjective, or preposition.
+where X could be a verb, a predicative adjective, or a preposition.
 
-Or, SP and PREP could use the same rule as be-inheritance, producing:
+Another possibility is that SP and PREP could use the same rule as
+be-inheritance, producing:
 ```
     (InheritanceLink (ConceptNode “subject”) (ConceptNode “Y”))
 ```
-where Y could be a nominal complement ('be-inheritance'), a
-predicate-adjective, or a preposition.
+where `Y` could be a nominal complement ('be-inheritance'), a
+predicative-adjective, or a preposition.
 
 I didn't fully realize this at first, so right now, SV and SP both call
-the SV scheme helper, and PREP goes to the SVO scheme helper because the
-existence of the `_pobj` (preposition object relation) made this seem
+the SV scheme helper, and PREP goes to the SVO scheme helper, because
+the existence of the `_pobj` (preposition object relation) made this seem
 natural at the time.  But since `_pobj` also gets assigned by its own
 rule, regardless of these rules, PREP structures could be handled by SV
 or be-inheritance.
 
-**This discussion is most important because if you continue with the old
+**This discussion is important, because if you continued with the old
 design of R2L, then you need to write five different rules when you
 combine these patterns with each of the question-types or other
 sentence-types that require separate rules; so reducing the need for
 five scheme helpers to two could save a lot of work and processing
-time**
+time.**
+
+Two more structures:
 
     6. SVO  –    “Bill ate a peach.”
     7. SVIO –    “Bill sent a bomb to the White House.”
@@ -173,7 +177,7 @@ can tell the difference because you can say “Bill sent the White House a
 bomb.” but you can't say “Bill flew the White House a plane.”
 
 The difference may be important, because the “adverbial” modifies the
-predicate, while the IO is a nuclear argument of the predicate—the
+predicate, while the IO is a nuclear argument of the predicate — the
 structure is fundamentally different (taking a lot of short-cuts with
 the presentation of the code here ...):
 
@@ -193,11 +197,12 @@ Indirect Object:
         (PredicateNode “verb”)
         (ListLink (Subject) (Object) (“to the white house”)))
 ```
+
 On the other hand, it's hard to think of how it would do the logic any
 harm if you just classified all the to-indirect-objects as adverbial
 modifers . . . ?  Speaking form the POV of linguistic semantics, the
 indirect object of a verb gets the thematic role “goal” or “recipient”
-and since locations are otherwise usually indicated by adverbial
+and, since locations are otherwise usually indicated by adverbial
 phrases, it probably wouldn't hurt to forget entirely about the idea of
 indirect object in the R2L output, and just treat them exactly like
 adverbial modifiers (a predicate of which the modified verb is an
@@ -208,7 +213,9 @@ the White House a bomb” and another for “Bill sent a bomb to the White
 House.” And they rely on relex not to mis-classify a “to” adverbial as
 an indirect object.  I think it gets it right most of the time.  I used
 to have a third rule to catch IO's which were mis-classified as
-`_advmod`, but it doesn't seem necessary anymore.
+`_advmod`, but it doesn't seem necessary anymore. (Note:
+mis-classifications should always be treated as bugs in LG or RelEx,
+and should never be patched over in R2L. Just open a bug report.)
 
     8. TOBE – “Bill seems to be happy.”
 
@@ -217,7 +224,7 @@ there are a couple of things about it worth being aware of.  “to be
 happy” here is known as an intensional complement, same as “Bill is
 happy.”  The difference of course is that “seems” or similar verbs such
 as “appears” or “looks” imply that Bill's being happy is not reality; it
-“is” within the “world” of appearances.
+“is” within the world of appearances.
 
 My favorite theory for modeling the logic of this kind of thing is
 Fauconnier and Turner's “mental spaces” but I am sure there are other
@@ -225,8 +232,8 @@ ways; see the discussion further below about `_rep()`.  Also note that
 the “to be” can be elided in most cases: “Bill seems happy.”
 
 To summarize the above . . . these are the eight main sentence types
-that were recognized by R2L when I started at Opencog and still are,
-except that really be-inheritance and copula now go to the same scheme
+that were recognized by R2L when I started, and there still are,
+except that be-inheritance and copula now go to the same scheme
 helper, SVO and PREP go to the same scheme helper, and SP and SV go to
 the same scheme helper, and actually, as far as I can tell, PREP could
 just as well go with the same scheme helper as SP, and both of them

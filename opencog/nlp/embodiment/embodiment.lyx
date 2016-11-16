@@ -4413,7 +4413,9 @@ OpenPsi
 \end_layout
 
 \begin_layout Standard
-OpenPsi as a flexible rule-selection system
+OpenPsi as a flexible rule-selection system.
+ But its not used in the prototype.
+ HOw should it be used?
 \end_layout
 
 \begin_layout Subsubsection*
