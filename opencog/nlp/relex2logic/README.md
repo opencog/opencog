@@ -1,28 +1,43 @@
 # RelEx2Logic
 
-RelEx2Logic (R2L) aims to produce the semantic representation of some
-input sentence.  This is done by creating a
-[unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
-rule base to be processed by a slightly modified forward chainer.
+RelEx2Logic (R2L) produces a certain form of predicate-argument
+structure for an English-language sentence.  That structure roughly
+resembles classical propositional or predicate logic, thus the name.
 
-The current pipeline for a sentence is
+The proccessing pipeline for a sentence is
 
 1. sentence => link-grammar
 2. link-grammar => relex
 3. relex => relex2logic
 
-Step 1 & 2 are done by the relex server in https://github.com/opencog/relex,
-while step 3 is done by the URE.
+Step 1 performs a syntactic parse of a sentence, using the
+[Link Grammar](http://www.abisource.com/projects/link-grammar/) (LG)
+parser.
 
+Step 2 converts the LG output into a dependency grammar (DG) format
+that is more closely aligned with de-facto DG standards. This includes
+the unpacking of some of the LG output into standard linguistic feature
+classifications, e.g. for person, number, tense, aspect, mood, voice.
+This converter is called [RelEx](http://wiki.opencog.org/w/RelEx).
+
+Step 3 extracts the predicate-argument logical structure.  This is done
+by applying a set of rules to the RelEx format.  These are applied by
+means of the 
+[unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine)
+(URE), together with some minor modifications. It is essentially a
+simple forward-chainer.
+
+
+###Quickstart
 To use R2L:
 
 1. Start the relex server using the `opencog-server.sh` script.
 2. Start scheme as `guile -l run-r2l.scm`
 3. At the scheme repl, enter `(nlp-parse "some complete sentence")`
-4. :smile:
+4. :smile: Simle at the wonderous results.
 
 
-## The Relex2Logic Report – part 1: The Main Predicate-Argument Patterns
+## Relex2Logic: The Main Predicate-Argument Patterns
 [A. Nitzkin](https://github.com/anitzkin), June 2015
 
 
