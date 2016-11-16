@@ -16,6 +16,13 @@
 
 (define (get-type-count atom)
 "
+  Returns the number of times an atom of same type had been encountered.
+  If it the first type this function is called then it makes a crude estimate
+  by counting the number of atoms of same type.
+
+  atom:
+  - An atom is taken as a whole instead of its type, because in the future we
+  might want to count by pattern for more accuracy(for learning for eg).
 "
     (let* ((type (cog-type atom))
         (count (assoc-ref r2l-type-counts type)))
