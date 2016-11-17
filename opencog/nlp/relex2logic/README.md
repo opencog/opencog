@@ -22,7 +22,7 @@ This converter is called [RelEx](http://wiki.opencog.org/w/RelEx).
 
 Step 3 extracts the predicate-argument logical structure.  This is done
 by applying a set of rules to the RelEx format.  These are applied by
-using the forward chainer provided by the 
+using the forward chainer provided by the
 [unified rule engine](https://github.com/opencog/atomspace/tree/master/opencog/rule-engine).
 
 After the quick-start, below, there is a quick sketch of how the R2L
@@ -41,25 +41,62 @@ To use R2L:
 ## Algorithmic review
 This section sketches out the mechanics of how the rules are applied.
 
+The primary (sole) interface to the Relex2Logic module is the
+`r2l-parse` function. It is given a single `SentenceNode`, and it
+returns a `SetLink` holding all of the results from applying the R2L
+rules.
+
+The steps of the quick-start above unfold into the below:
+
 1. The `nlp-parse` function, from the `chatbot` guile module, sends the
-   plan-text to the RelEx server.
+   plain-text to the RelEx server.
+
 2. RelEx returns the parsed sentence attached to an `AnchorNode`, so that
    it can be easily found, and identified as being brand-new.
+
 3. The `nlp-parse` function unties the newly parse sentence from the
    `AnchorNode`, and passes it to the `r2l-parse` function in this
-   directory.
+   directory (in this scheme module).
+
 4. The parsed sentence, here, is actually a `SentenceNode`.  By
    following the various links attached to it, all of the various
-   words in the sentence, and the various depedency grammar markup can
-   be found. See the
+   words in the sentence, and the assorted depedency grammar markup
+   can be found. See the
    [RelEx OpenCog format](http://wiki.opencog.org/w/RelEx_OpenCog_format)
    for documentation of this format.
-5. The `r2l-parse` invoked the Unified Rule Engine (URE) to apply the
-   varous R2L rules to the parse. It does this by explicitly calling
-   the `cog-fc` function that the URE provides, together with the name
-   of the rulebase, and one giant `SetLink` holding all the various
-   bits and pieces of the parse.
-6. By using this interface
+
+5. The `r2l-parse` function invokes the Unified Rule Engine (URE) to
+   apply the varous R2L rules to the parse. It does this by explicitly
+   calling the `cog-fc` function that the URE provides, together with
+   the name of the rulebase, and one giant `SetLink` holding all the
+   various bits and pieces of the parse.
+
+5.a. The `cog-fc` interface is such that the rules are applied only to
+     the contents of the giant SetLink, and to no other part of the
+     AtomSpace. The good news is that the application of the rules are
+     limited in scope. The bad news is that a giant SetLink needs to be
+     created.
+
+5.b. Other good news with this interface is that individual R2L rules
+     do not need to be told which sentence they are meant to be applied
+     to. That is, the individual rules can omit having to link back to
+     a specific `SentenceNode`. That makes the rules smaller.
+
+6. The name of the rulebase is `R2L-en-RuleBase` and it is handed over
+   to the forward chainer as `(ConceptNode "R2L-en-RuleBase")`.
+
+7. There is little or no sophistication in the application of the rules.
+   All of the rules are applied to all of the contents given to the
+   chainer.  The chainer does not attempt to trim down the set of rules,
+   before running them.  This is a potential performance bottleneck,
+   but does not appear to be an issue at this time.
+
+8. The result of calling `r2l-parse` is a list of `SetLink`s containing
+   everything that the rules generated. There is one `SetLink` for each
+   parse of the sentence.
+
+9. This is handed back to the caller, `nlp-parse`, that does whatever
+   it needs to do.
 
 
 # Relex2Logic: Review of the Rules & Status Report

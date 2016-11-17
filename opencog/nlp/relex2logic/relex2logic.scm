@@ -15,14 +15,14 @@
 "
   r2l-parse SENT -- perform relex2logic processing on sentence SENT.
 
-  Runs the rules found in R2L-en-RuleBase over the RelEx output,
+  Runs the rules found in `R2L-en-RuleBase` over the RelEx output,
   creating the logical representation of sentence in the atomspace.
-  Returns a list containing SetLinks that are the r2l-interpretations
-  for individual parses.
+  Returns a list of `SetLinks`, each `SetLink` holding the R2L
+  interpretation of one parse of the sentence.
 
-  This can't handle  mutliple thread execution (Why???). Thus, mapping
-  this function over a list of sentences, even though possible, is not
-  advised.
+  This can't handle  mutliple thread execution (Why??? This is a bug,
+  I would think ...). Thus, mapping this function over a list of
+  sentences, even though possible, is not advised.
 
   SENT must be a SentenceNode.
 "
@@ -82,6 +82,7 @@
             ; Construct a ReferenceLink to the output
             (ReferenceLink interp-node result)
 
+            ; Return the SetLink of R2L rule outputs.
             result
         )
     )
