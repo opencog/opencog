@@ -50,7 +50,7 @@ private:
     double afbSize;
     double decay;
     AttentionValue::sti_t bottomBoundary;
-    int minAFSize, maxAFSize;
+    unsigned int minAFSize, maxAFSize;
 
     AttentionValue::sti_t get_cutoff(HandleSeq& );
 
