@@ -70,13 +70,13 @@ def call_sentiment_parse(text_node, sent_node):
 "
   Associate time to the last sentence
 "
-    (AtTimeLink
-        ; FIXME: maybe opencog's internal time octime should
-        ; be used. Will do for now, assuming a single instance
-        ; deals with a single conversation.
-        (TimeNode (number->string (current-time)))
-        sent
-        time-domain)
+	(AtTimeLink
+		; FIXME: maybe opencog's internal time octime should
+		; be used. Will do for now, assuming a single instance
+		; deals with a single conversation.
+		(TimeNode (number->string (current-time)))
+		sent
+		time-domain)
 )
 
 (define-public (get-last-said-sent)
@@ -154,83 +154,6 @@ def call_sentiment_parse(text_node, sent_node):
 )
 
 ; -----------------------------------------------------------------------
-(define (r2l-parse sent)
-"
-  r2l-parse SENT -- perform relex2logic processing on sentence SENT.
-
-  Runs the rules found in R2L-en-RuleBase over the RelEx output
-  creating the logical representation of sentence in the atomspace.
-  Returns a list containing SetLinks that are the r2l-interpretations
-  for individual parses.
-
-  This can't handle  mutliple thread execution (Why???). Thus, mapping
-  this function over a list of sentences, even though possible, is not
-  advised.
-
-  SENT must be a SentenceNode.
-"
-    (define (cog-extract-parent a-link is-from-fc)
-        ; Many rules return a ListLink of results that they
-        ; generated. Some rules return singletons. And the
-        ; Forward Chainer uses a SetLink to wrap all these
-        ; results. So if A-LINK is a ListLink or is directly
-        ; from the FC, then delete it and return a list of
-        ; its contents, else return a list holding A-LINK.
-        ;
-        ; XXX maybe this should be part of the ure module??
-        (if (or (equal? 'ListLink (cog-type a-link)) is-from-fc)
-            (let ((returned-list (cog-outgoing-set a-link)))
-                    (cog-extract a-link)
-                    returned-list)
-            (list a-link))
-    )
-
-    (define (run-fc parse-node interp-link)
-        ; This runs all the rules of R2L-en-RuleBase over relex parse
-        ; outputs, and returns a cleaned and de-duplicated list. The
-        ; relex outputs associated with 'parse-node' make the focus-set.
-        ; This is done so that, IF there are multiple parses, then
-        ; each is handled independently by passing it seperately, as
-        ; each is likely to exist in a seperate semantic-universe.
-        (define focus-set
-            (SetLink (parse-get-relex-outputs parse-node) interp-link))
-        (define outputs
-            (cog-extract-parent (cog-fc (SetLink) r2l-rules focus-set) #t))
-
-        (append-map (lambda (o) (cog-extract-parent o #f)) outputs)
-    )
-
-    (define (interpret parse-node)
-        ; FIXME: Presently only a single interpretation is created for
-        ; each parse. Multiple interpreation should be handled, when
-        ; word-sense-disambiguation, anaphora-resolution and other
-        ; post-processing are added to the pipeline.
-        (let* ((interp-name (string-append(cog-name parse-node) "_interpretation_$X"))
-               (interp-node (InterpretationNode interp-name))
-               ; Associate the interpretation with a parse, as there
-               ; could be multiplie interpretations for the same parse.
-               (interp-link (InterpretationLink interp-node parse-node))
-               (pre-result
-                   (remove
-                       (lambda (a) (equal? (cog-type a) 'ReferenceLink))
-                       (delete-duplicates (run-fc parse-node interp-link))))
-               (result (SetLink pre-result)))
-
-            ; Construct a ReferenceLink to the output
-            (ReferenceLink interp-node result)
-
-            ; Time stamp the parse
-            (sent-set-time sent)
-
-            result
-        )
-    )
-
-    (map interpret (sentence-get-parses sent))
-)
-
-
-; -----------------------------------------------------------------------
 ; Control variable used to switch stimulation of WordNodes and
 ; WordInstanceNodes on parsing. This shouldn't be public.
 (define nlp-stimulate-parses #f)
@@ -296,23 +219,31 @@ def call_sentiment_parse(text_node, sent_node):
 	; Call the RelEx server
 	(relex-parse plain-text)
 
-	(let ((sent-list (get-new-parsed-sentences)))
+	(let* ((sent-list (get-new-parsed-sentences))
+			(sent-node (car sent-list)))
+
 		; Unhook the anchor. MUST do this before r2l-parse, as
 		; otherwise, parse-get-relex-outputs will wrap it in a
 		; SetLink! Ouch!!
 		(release-new-parsed-sents)
 
+		; Tage the sentence with the wall-clock time.
+		(sent-set-time sent-node)
+
 		; Perform the R2L processing.
-		(r2l-parse (car sent-list))
+		(r2l-parse sent-node)
 
-        ; Stimulate WordNodes and WordInstanceNodes
-        (if nlp-stimulate-parses
-            (nlp-stimulate (car sent-list) nlp-stimulation-value))
+		; Stimulate WordNodes and WordInstanceNodes
+		(if nlp-stimulate-parses
+			(nlp-stimulate sent-node nlp-stimulation-value))
 
-    ; Testing the Sentiment_eval function
-    (cog-logger-info "nlp-parse: testing Sentiment_eval")
-    (python-call-with-as "set_atomspace" (cog-atomspace))
-    (cog-evaluate! (Evaluation (GroundedPredicate "py: call_sentiment_parse") (List (Node plain-text) (car sent-list))))
+		; Call the Sentiment_eval function
+		(cog-logger-info "nlp-parse: testing Sentiment_eval")
+		(python-call-with-as "set_atomspace" (cog-atomspace))
+		(cog-evaluate!
+			(Evaluation
+				(GroundedPredicate "py: call_sentiment_parse")
+				(List (Node plain-text) sent-node)))
 
 		; Track some counts needed by R2L.
 		(r2l-count sent-list)

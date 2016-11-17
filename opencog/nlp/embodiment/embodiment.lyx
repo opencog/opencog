@@ -88,7 +88,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.07 - 14 Nov 2016
+Draft Version 0.08 - 16 Nov 2016
 \end_layout
 
 \begin_layout Abstract
@@ -4213,7 +4213,11 @@ Look leftwards!
 Next, it was hoped that RelEx would provide the surface format, but that
  also did not work out.
  RelEx failed in two distinct ways: it sometimes generated highly variable
- outputs for semantically similar sentences e.g.
+ outputs for semantically similar sentences 
+\emph on
+e.g.
+
+\emph default
  
 \begin_inset Quotes eld
 \end_inset
@@ -4234,33 +4238,220 @@ Look down!
  Other times, there were unexpected similarities, when outputs should have
  been semantically different.
  On top of this, pattern matching to RelEx was cumbersome: the patterns
- quickly became complex, requiring many different check to many sub-parts.
+ quickly became complex, requiring many different checks to many sub-parts.
  The large complex patterns proved fragile and hard to maintain.
  In the end, using Link Grammar as the surface representation proved to
  be a LOT easier; the patterns became much smaller and more regular.
 \end_layout
 
+\begin_layout Subsubsection
+RelEx issues
+\end_layout
+
+\begin_layout Standard
+The prototype made clear that the RelEx output is actually more complex
+ than the LG output, and it is more difficult to use, in practice.
+ It does not align well with semantics.
+ The reason that it is more complex is that it tries to re-package the LG
+ data into 
+\begin_inset Quotes eld
+\end_inset
+
+orthogonal
+\begin_inset Quotes erd
+\end_inset
+
+ linguistic classifications: person, number, tense, aspect, mood, voice.
+ This is a laudable goal, but for several problems:
+\end_layout
+
+\begin_layout Itemize
+Many semantically equivalent sentences have completely different values
+ for number, tense, mood.
+\end_layout
+
+\begin_layout Itemize
+This unpacking into into distinct classifications behaves like a data decompress
+or: it makes the atomese graphs larger, without actually increasing the
+ information content.
+ 
+\end_layout
+
+\begin_layout Itemize
+RelEx has poor coverage, and makes a fair amount of errors in what it does.
+ This makes it's output unreliable and undependable.
+\end_layout
+
+\begin_layout Standard
+The end-goal is to have a system that can recognize semantically-similar
+ sentences.
+ There are ways to do this: the old and oft-quoted work from Dekang Lin,
+ Poon&Domingos show how that can be acheived.
+ It should be possible to harness the 
+\begin_inset Quotes eld
+\end_inset
+
+Patten Miner
+\begin_inset Quotes erd
+\end_inset
+
+ to perform this work.
+ However, there's now a strong hint that the RelEx output is inappropriate,
+ a poor choice for this.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Important Note
+\emph default
+: Although the above paragraphs use the word 
+\begin_inset Quotes eld
+\end_inset
+
+RelEx
+\begin_inset Quotes erd
+\end_inset
+
+, the same comments and complaints can be levelled against the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Stanford Parser"
+target "http://nlp.stanford.edu/software/lex-parser.shtml"
+
+\end_inset
+
+, and against Google's 
+\begin_inset CommandInset href
+LatexCommand href
+name "SyntaxNet (McParseFace)"
+target "https://research.googleblog.com/2016/05/announcing-syntaxnet-worlds-most.html"
+
+\end_inset
+
+.
+ Both suffer from the same issues listed above: that is because they both
+ assume the same theory, and generate the same kind of output.
+ They might be more accurate than RelEx, thus alleviating one of the problems,
+ but even this is not entirely clear.
+\end_layout
+
+\begin_layout Standard
+The point here is that traditional dependency parsing, whether by RelEx,
+ Stanford or SyntaxNet, seems to be appealing, especially if you are a linguist.
+ However, the resulting graphs contain too much fluff to be useful for efficient
+ computing.
+ They unpack a lot of information, making it easy for a linguist to examine
+ their output, and verify it's correctness.
+ But the result of this unpacking is a large graph, and that graph becomes
+ unweildy and inefficient for automated processing.
+ It is large, but it does not seem to contain more data than the more compact
+ LG output.
+ Its large and awkward to work with.
+\end_layout
+
 \begin_layout Standard
 Side comment: now that LG indicates the head-verbs of sentences and clauses,
- the primary raison-d'etre for RelEx goes away.
- It does not provide a lot of value-add any more.
+ the primary raison-d'etre for RelEx, the major reason for it's complexity,
+ goes away.
+ It does not seem to provide a lot of value-add any more.
 \end_layout
 
 \begin_layout Subsubsection
-AnchorNodes, or something else?
+AnchorNodes, BindLinks, MapLinks
 \end_layout
 
 \begin_layout Standard
-The current parsing pipeline (used by R2L as well as the prototype here)
- drops off recently-parsed sentences, and leaves them attached to an AnchorNode,
- where they can be picked up by the next stage of processing.
- Thus, to process a sentence, either every rule must specify the AnchorNode,
- so that the rule only applies to the current sentence, or ...XXX how does
- R2L work? 
+The way that information is passed around, from subsystem to subsystem,
+ and the way that it interacts with the pattern matcher can be at times
+ awkward.
+ Some general improvements are needed in this area.
+ They should not be hard, but they are significant, architecturally.
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+AnchorNode
+\family default
+ was invented to be an attachment point, where different subsystems could
+ leave collections of atoms that other subsystems could pick up.
+ This works OK, in some situations, but has issues.
+ The RelEx subsystem drops off the reesults of a parse at an AnchorNode.
+ This is OK, because RelEx is a process external to the AtomSpace, and new,
+ incoming sentences are infrequent.
+ However, the 
+\family typewriter
+AnchorNode
+\family default
+ mechanism provides no hint of order or priority: if two things are attached,
+ there's no hint of which came first, which is more important.
+ Another issue is that its not thread-local, thread-atomic: two different
+ racing threads could pick up the same work unit; currently there is no
+ mechanism to avoid this.
+\end_layout
+
+\begin_layout Standard
+A more serious problem is how the current prototype uses (abuses) the 
+\family typewriter
+AnchorNode
+\family default
+.
+ The current prototype defines a number of rules (see the review above)
+ but does not use the URE to apply them.
+ Instead, it uses an 
+\emph on
+ad hoc
+\emph default
+ mechanism: different processing steps look for input attached to assorted
+ anchors, and 
+\begin_inset Quotes eld
+\end_inset
+
+return
+\begin_inset Quotes erd
+\end_inset
+
+ thier results by attaching them to yet other anchor points.
+ The informal goal of this 
+\emph on
+ad hoc
+\emph default
+ process is to be able to designate sequences of processing steps: that
+ certain rules should run only after other rules that ran earlier, and that
+ certain rules should limit thier scope of applicability only to certain
+ situations.
+\end_layout
+
+\begin_layout Standard
+This is just fine, you might think, except that each rule is more complex:
+ it has to specify both the input anchor and the output anchor.
+ In addition, one has to write some 
+\emph on
+ad hoc
+\emph default
+ scheme code wastching each anchor point, and triggering if something arrives
+ there.
+ After running, it has to clear the anchor.
+ It ends up being clumsy, cut-n-paste blobs of utility code.
+\end_layout
+
+\begin_layout Standard
+The current URE, specifically, the forward chainer part of the URE, does
+ not provide any interfaces for specifying this kind of chaining of rule-classes.
+ It probably should.
+\end_layout
+
+\begin_layout Standard
+If the URE is altered to provide this, then how should it be implemented?
+\end_layout
+
+\begin_layout Standard
+(How does the URE currently limit the scope of its search?)
 \end_layout
 
 \begin_layout Subsubsection*
-DRAFT VERSION 0.07
+DRAFT VERSION 0.08
 \end_layout
 
 \begin_layout Standard
@@ -4302,7 +4493,10 @@ OpenPsi
 \end_layout
 
 \begin_layout Standard
-OpenPsi as a flexible rule-selection system
+OpenPsi as a flexible rule-selection system.
+ But its not used in the prototype.
+ How should it be used? Should the above ruminations about AnchorNodes really
+ be ruminations about OpenPsi?
 \end_layout
 
 \begin_layout Subsubsection*
