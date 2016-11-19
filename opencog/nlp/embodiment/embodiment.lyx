@@ -88,7 +88,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.08 - 16 Nov 2016
+Draft Version 0.09 - 19 Nov 2016
 \end_layout
 
 \begin_layout Abstract
@@ -4141,7 +4141,7 @@ control language
 \end_layout
 
 \begin_layout Section
-Design Issues
+Design Issues and Enhancements
 \end_layout
 
 \begin_layout Standard
@@ -4149,17 +4149,18 @@ During the prototype development, a number of design issues were encountered.
  These are discussed here.
  All of these should be addressed in some way, either through architecture
  changes or implementation improvements.
+ A number of enhancments also suggest themselves: these ask for additional
+ development and pursuit.
 \end_layout
 
 \begin_layout Subsection
-Translation Issues
+Language Processing Issues
 \end_layout
 
 \begin_layout Standard
 A fair number of issues crop up in the middle layers of the language input
  system.
- These are reviewed in order from narrowest and most specific, to broadest
- and most general.
+ These are reviewed here.
 \end_layout
 
 \begin_layout Subsubsection
@@ -4357,6 +4358,17 @@ Side comment: now that LG indicates the head-verbs of sentences and clauses,
  It does not seem to provide a lot of value-add any more.
 \end_layout
 
+\begin_layout Subsection
+Process Flow Issues
+\end_layout
+
+\begin_layout Standard
+Several issues arise in the design of rules, and in the control of their
+ application.
+ Specifically, there has been little or no design effort invested in managing
+ processing pipeline.
+\end_layout
+
 \begin_layout Subsubsection
 AnchorNodes vs.
  URE
@@ -4475,81 +4487,101 @@ target "https://github.com/opencog/atomspace/issues/1004"
  tracks this.
 \end_layout
 
-\begin_layout Subsubsection*
-DRAFT VERSION 0.08
+\begin_layout Subsubsection
+Rule selection
 \end_layout
 
 \begin_layout Standard
-This is a draft.
- Everything above is in some mostly-finished state.
- Everything below is in outline format.
-\end_layout
-
-\begin_layout Subsubsection*
-Translation issues
-\end_layout
-
-\begin_layout Standard
-issue: learning vs.
- hand-crafting, obtaining synonymous phrases, not just synonymous words.
+The current prototype applies all rules to all inputs.
+ This is fine, as long as there are only a few rules, but this will not
+ scale, in general.
+ A better solution is to first limit the number of possible rules to apply,
+ based on the input.
+ There already is infrastructure to do this, it's just not used in the prototype.
 \end_layout
 
 \begin_layout Standard
-issue: using openpsi to discover and apply rules.
- This is like using openpsi in general, to pick through non-verbal stimulus.
+The existing infrastructure is a combination of 
+\family typewriter
+DualLink
+\family default
+ and the 
+\family typewriter
+cog-recognize
+\family default
+ function.
+ It's already deployed in the AIML subsystem, where it is used to pick out
+ a set of appropriate AIML rules.
+ It is partly integrated into OpenPsi, but this could be improved.
+\end_layout
+
+\begin_layout Subsection
+Enhancements
 \end_layout
 
 \begin_layout Standard
-issue: fuzzy matching, partial matching
+The prototype ignores various established OpenCog subsystems and technologies.
+ It also ignores several architectural directions that have been discussed,
+ but have not been acted on.
+ These are breifly reviewed here.
 \end_layout
 
-\begin_layout Standard
-issue: picking out sentences attached to an anchor, vs other processing
- pipeline designs.
-\end_layout
-
-\begin_layout Standard
-todo – the verb synonyms should not be needed!? as they can be gotten from
- the synonym lists for the control-action language...
-\end_layout
-
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 OpenPsi
 \end_layout
 
 \begin_layout Standard
 OpenPsi as a flexible rule-selection system.
- But its not used in the prototype.
- How should it be used? Should the above ruminations about AnchorNodes really
- be ruminations about OpenPsi?
+ It is not used in the prototype.
+ How should it be used (aside from the rule-selection issue mentioned above?)
 \end_layout
 
-\begin_layout Subsubsection*
-Self-model issues
+\begin_layout Subsubsection
+Fuzzy matching
 \end_layout
 
 \begin_layout Standard
-The various predicates: e.g.
- (DefinedPredicate "Is sleeping?") do not really fit the 
+The current system does not tolerate failures in the speech-to-text and
+ the text-to-parse stages.
+ Use of fuzzy matching during rule application should be able to make up
+ for this fragility.
+ Thus, for example, if the input is 
 \begin_inset Quotes eld
 \end_inset
 
-control language
+
+\emph on
+garbled garbled mumbmle turn left mumble
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
- concept described above.
- Ditto for lines 305-547 of self-model.scm
+, then the robot should still be able to latch onto the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+turn left
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ portion of the input, and respond to that.
+ Since there may be multiple fuzzy matches, some sort of confidence ranking
+ would be required, as well.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Question-answering
 \end_layout
 
 \begin_layout Standard
-Answering questions about self and the world.
- Also has been prototyped.
- Its like the 
+The robot needs to be able to answer questions about self and the world.
+ This has been prototyped, but very incompletely.
+ From the architectural perspective, question-answering resembles the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4578,51 +4610,111 @@ standardized state queries
  Running these queries returns yes/no answers (truth queries) or multi-valued
  data (e.g.
  look-at direction) or more complex structures (sequences of actions that
- had been performed in the past) 
+ had been performed in the past).
+ 
 \end_layout
 
 \begin_layout Standard
-There are two translation layers that are needed here: first, to convert
- English to the internal query language, second, to convert the response
- back to English.
+However, the current prototype does not fit well with this idea.
+ For example, the various predicates: 
+\emph on
+e.g.
+
+\emph default
+ 
+\family typewriter
+(DefinedPredicate "Is sleeping?")
+\family default
+ do not really fit the 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ concept described above.
+ Ditto for lines 305-547 of 
+\family typewriter
+self-model.scm
+\family default
+.
+ These need rework.
+\end_layout
+
+\begin_layout Standard
+Question answering requires a second pipeline, beyond that shown in figure
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Language-Pipeline"
+
+\end_inset
+
+.
+ Of course, there must first be a conversion from English to the internal
+ query language.
+ The response must then be converted back into English.
  If the response is of the right form, then SuReal can be used to perform
  the final conversion.
  Right now, the query language is not generating SuReal-compatible results.
 \end_layout
 
-\begin_layout Subsubsection*
-World model
+\begin_layout Subsubsection
+Enlarged world model
 \end_layout
 
 \begin_layout Standard
-Right now, there is only a self-model.
- A world-model is needed, so we can talk about that.
- Well –there is a world model – currently, it consists of the visible faces
- in the environment.
+The current model of the self, and the world, is tiny.
+ It consists entirely of emotional state, and the visible faces in the envronmen
+t.
  It needs to get bigger.
 \end_layout
 
-\begin_layout Subsubsection*
-Action Orchestration
+\begin_layout Subsubsection
+Action orchestration
 \end_layout
 
 \begin_layout Standard
-Carrying out multiple things at once; using the internal model to do this.
+One must be able to carry out multiple things at once.
+ Ben has written about this.
+ How it should fit in remains a unclear, although it is obviously needed.
+ 
 \end_layout
 
-\begin_layout Subsubsection*
-Memory
+\begin_layout Subsubsection
+Acting memory and performance
 \end_layout
 
 \begin_layout Standard
 Multiple types of memory are needed.
  Most important (for demo purposes) is memory consisting of imperatives:
- when she is told to do this and say that, she needs to remember this, and
- later on, play that back as a performance.
+ when she is told to do this and say that, she needs to remember what she
+ was told, and what she did, and later on, be able to play that back as
+ a performance.
+ That is, there must be a mode where the robot behaves as an actor under
+ directorial control: the actor can be instructed by the director, given
+ stage notes, and respond to these.
 \end_layout
 
 \begin_layout Standard
-This should be 
+Examples of such directives might be: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+do that performance again, except this time, do xyz more slowly
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Initiali protoptypes of this level of function should be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4632,30 +4724,96 @@ straight-forward
 
 : one can record the control-language directives.
  They need to be marked up with timing information.
-\end_layout
-
-\begin_layout Standard
-Implementing acting-coaching is interesting, and in particular, implementing
- directives such as 
+ Verbal editing might be harder, as portions of a directive, such as 
 \begin_inset Quotes eld
 \end_inset
 
-do that performance again, except this time, make xyz go more slowly
+
+\emph on
+do xyz more slowly
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
+ require associating the word
+\emph on
+ 
+\begin_inset Quotes eld
+\end_inset
+
+xyz
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+ with some portion of the performance.
+ This brings up a number of reference resolution issues, discussed previously.
+\end_layout
+
+\begin_layout Subsubsection
+General memory
+\end_layout
+
+\begin_layout Standard
+A second, distinct type of memory is being able to remember past states
+ of the world.
+ A basic prototype of this should be relatively straight-forward.
+ This memory would need to be made accessible to the question-answering
+ subsystem, so that questions about the immediate past can be answered.
+\end_layout
+
+\begin_layout Standard
+One minor associated infrastructure challenge is that a management layer
+ for the Postgres DB interfaces is needed.
+ The basic idea is that memories should not be lost during power-off or
+ reboot.
+ Progress on this infrastructure is tracked in 
+\begin_inset CommandInset href
+LatexCommand href
+name "issue #734"
+target "https://github.com/opencog/atomspace/issues/734"
+
+\end_inset
+
 .
+ 
 \end_layout
 
 \begin_layout Standard
-A second type of memory would be remembering past states of the world.
+Memories must be segregated into classes: there are some things that need
+ to be remembered, others that should not be.
+\end_layout
+
+\begin_layout Section*
+Learning
 \end_layout
 
 \begin_layout Standard
-One technical challenge is that we will need a management layer for the
- Postgres DB interfaces, so that memories are not lost during power-off.
- Those memories need to be segregated: there are somethings that need to
- be remembered, others that should not be.
+A major design issue is that 
+\end_layout
+
+\begin_layout Subsubsection*
+Translation issues
+\end_layout
+
+\begin_layout Standard
+issue: learning vs.
+ hand-crafting,
+\end_layout
+
+\begin_layout Standard
+Synonymous phrases
+\end_layout
+
+\begin_layout Standard
+obtaining synonymous phrases, not just synonymous words.
+\end_layout
+
+\begin_layout Standard
+todo – the verb synonyms should not be needed!? as they can be gotten from
+ the synonym lists for the control-action language...
 \end_layout
 
 \begin_layout Subsubsection*
@@ -4697,6 +4855,16 @@ go and do that important thing
 .
  Free will is then the act of picking between these two alternatives, of
  balancing them out (at a critical phase-transition point).
+\end_layout
+
+\begin_layout Subsubsection*
+DRAFT VERSION 0.09
+\end_layout
+
+\begin_layout Standard
+This is a draft.
+ Everything above is in some mostly-finished state.
+ Everything below is in outline format.
 \end_layout
 
 \begin_layout Section
