@@ -4358,7 +4358,8 @@ Side comment: now that LG indicates the head-verbs of sentences and clauses,
 \end_layout
 
 \begin_layout Subsubsection
-AnchorNodes, BindLinks, MapLinks
+AnchorNodes vs.
+ URE
 \end_layout
 
 \begin_layout Standard
@@ -4430,7 +4431,7 @@ This is just fine, you might think, except that each rule is more complex:
 \emph on
 ad hoc
 \emph default
- scheme code wastching each anchor point, and triggering if something arrives
+ scheme code watching each anchor point, and triggering if something arrives
  there.
  After running, it has to clear the anchor.
  It ends up being clumsy, cut-n-paste blobs of utility code.
@@ -4444,6 +4445,16 @@ The current URE, specifically, the forward chainer part of the URE, does
 
 \begin_layout Standard
 If the URE is altered to provide this, then how should it be implemented?
+\end_layout
+
+\begin_layout Standard
+At any rate, even without adding chaining support to the URE, the current
+ prototype should be altered to remove most uses of the AnchorNodes, and
+ replaced by the URE, instead.
+\end_layout
+
+\begin_layout Subsubsection
+URE bottlenecks
 \end_layout
 
 \begin_layout Standard
