@@ -4447,7 +4447,21 @@ If the URE is altered to provide this, then how should it be implemented?
 \end_layout
 
 \begin_layout Standard
-(How does the URE currently limit the scope of its search?)
+The URE currently limits the scope of its search by creating a new, stand-alone
+ AtomSpace, copying all of the focus set into it, copying all of the rules
+ into it, and only then applying the rules.
+ This has the desired effect of limiting rule application to only the desired
+ focus set.
+ However, it surely has poor performance, as a result.
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "Issue #1004"
+target "https://github.com/opencog/atomspace/issues/1004"
+
+\end_inset
+
+ tracks this.
 \end_layout
 
 \begin_layout Subsubsection*
