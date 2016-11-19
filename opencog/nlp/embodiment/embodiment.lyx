@@ -88,7 +88,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.09 - 19 Nov 2016
+Draft Version 0.2 - 19 Nov 2016
 \end_layout
 
 \begin_layout Abstract
@@ -5276,86 +5276,184 @@ Because all of these are hypothetical issues, proposing distinct solutions
 \end_layout
 
 \begin_layout Section
-Unorganized text
+Ideas 
 \end_layout
 
 \begin_layout Standard
-Draft text, to be edited.
-\end_layout
-
-\begin_layout Subsubsection*
-DRAFT VERSION 0.09
-\end_layout
-
-\begin_layout Standard
-This is a draft.
- Everything above is in some mostly-finished state.
- Everything below is in outline format.
-\end_layout
-
-\begin_layout Section*
-Items
+This section provides some breif sketches of interesting behaviors that
+ should be acheivable within the current prototype framework, or are suitable
+ for the next step of prototyping.
+ Some of these are very easy, but simply have not been explored or done.
 \end_layout
 
 \begin_layout Itemize
-a person walks into room, who she recognizes.
- Depending on psi, she should do non-verbal greetings (play one of 3-4 different
- animations (look at, chin push, nod)) and verbal greetings (
+A person walks into room, who she recognizes.
+ Depending on the current emotional state, she should perform non-verbal
+ greetings, acknowledgements (play one of 3-4 different animations, such
+ as breif look-at glance, chin push, nod) and verbal greetings (
 \begin_inset Quotes eld
 \end_inset
 
-hello, what's up, yo dawg
+
+\emph on
+hello, what's up?
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
 ).
- split up the state and the psi rule stuff properly.
- See comments here: https://github.com/opencog/ros-behavior-scripting/pull/80
+ The current interplay between state and psi rules is a mess, these need
+ to be split up properly.
+ There are addtional comments in 
+\begin_inset CommandInset href
+LatexCommand href
+name "issue #80"
+target "https://github.com/opencog/ros-behavior-scripting/pull/80"
+
+\end_inset
+
+, which see.
+\end_layout
+
+\begin_layout Itemize
+Someone asks: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+so what are we talking about?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ This requires the robot to have some rudimentary memory of the conversation,
+ and have the ability to recapitulate it.
+ A simple prototype mock-up would be to extract keywords/key-topics from
+ sentence, and remember them.
+ These can be be queried with the fuzzy matcher, and used to recapitulate
+ the conversation.
  
 \end_layout
 
 \begin_layout Itemize
-extract keywords/key-topics from sentence, and remember them, then apply
- fuzzy matcher to see which of these come up.
-\end_layout
-
-\begin_layout Section*
-Random ideas
-\end_layout
-
-\begin_layout Itemize
-Sophia, bark like a dog!
-\end_layout
-
-\begin_layout Itemize
-Why did you smile? Output: have her explain recent openpsi decision-making.
-\end_layout
-
-\begin_layout Itemize
-I'm so sorry about that.
- Output: a small cute pout (blend of frown and ???)
-\end_layout
-
-\begin_layout Itemize
-Look at me.
- (verify look-at location or report visibility)
-\end_layout
-
-\begin_layout Itemize
-What are you doing? 
-\end_layout
-
-\begin_layout Itemize
-(When last person leaves, she should say goodbye.
- If did not say goodbye, then say 
+Someone says 
 \begin_inset Quotes eld
 \end_inset
 
-hey where did everybody go?
+
+\emph on
+Sophia, bark like a dog!
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
-)
+ A barking dog animation is needed.
+\end_layout
+
+\begin_layout Itemize
+Someone asks: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Why did you smile?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ Output: have her explain the most recent OpenPsi decision-making.
+ This requires recording that decision-making into a set of atoms, queriable
+ using the above-described question-answering subsystem.
+\end_layout
+
+\begin_layout Itemize
+Someone says: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+I'm so sorry about that
+\emph default
+.
+\begin_inset Quotes erd
+\end_inset
+
+ Output: have her perform a small, cute pout (a frown, but without the eyebrow
+ animation).
+\end_layout
+
+\begin_layout Itemize
+Someone says: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Look at me.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ The robot should determine the number of visible faces.
+ If only one, then it could say 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+I see only one face, and I am looking at it now
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ If there are two faces, then either change the gaze, or use the audio localizat
+ion to determine the audio source, and resspond appropriately, by changing
+ gaze, or keeping it, and appropriate verbal remarks.
+\end_layout
+
+\begin_layout Itemize
+Someone says: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+What are you doing?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Describe a the recent past, indicating the presence of memory.
+ The verbal reply should show that the robot is sentient of it's surroundings.
+\end_layout
+
+\begin_layout Itemize
+When last person leaves, she should say goodbye.
+ If no goodbyes were exchanged, then remark loudly, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Hey, where did everybody go?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
@@ -5364,7 +5462,11 @@ If no one is visible, and no one has been visible for many minutes, she
 \begin_inset Quotes eld
 \end_inset
 
-hey where did everybody go?
+
+\emph on
+Hey where did everybody go?
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
@@ -5372,12 +5474,34 @@ hey where did everybody go?
 \end_layout
 
 \begin_layout Itemize
-Behavior – she should not get sleepy, as long as someone is visible.
+If no one is visible, but there is an ongoing chat session, she should complain
+ about the visibility of the chat partners.
+ If there is no ongoing chat session, but there loud noises (and she cannot
+ see any faces), she should say something like 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Hey, what's going on? Who's there?
+\emph default
+ 
+\emph on
+Show yourself!
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
-\begin_layout Itemize
-Behavior – she should complain, if no one is visible, but there is a chat
- session going on.
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+To be written.
 \end_layout
 
 \begin_layout Section*
@@ -5655,6 +5779,16 @@ ly ignored).
 
 \begin_layout Subsubsection*
 Unfinished stuff
+\end_layout
+
+\begin_layout Subsubsection*
+DRAFT VERSION 0.2
+\end_layout
+
+\begin_layout Standard
+This is a draft.
+ Everything above is in some mostly-finished state.
+ Everything below is in outline format.
 \end_layout
 
 \begin_layout Standard
