@@ -88,7 +88,7 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.08 - 16 Nov 2016
+Draft Version 0.2 - 19 Nov 2016
 \end_layout
 
 \begin_layout Abstract
@@ -4141,7 +4141,7 @@ control language
 \end_layout
 
 \begin_layout Section
-Design Issues
+Design Issues and Enhancements
 \end_layout
 
 \begin_layout Standard
@@ -4149,17 +4149,18 @@ During the prototype development, a number of design issues were encountered.
  These are discussed here.
  All of these should be addressed in some way, either through architecture
  changes or implementation improvements.
+ A number of enhancments also suggest themselves: these ask for additional
+ development and pursuit.
 \end_layout
 
 \begin_layout Subsection
-Translation Issues
+Language Processing Issues
 \end_layout
 
 \begin_layout Standard
 A fair number of issues crop up in the middle layers of the language input
  system.
- These are reviewed in order from narrowest and most specific, to broadest
- and most general.
+ These are reviewed here.
 \end_layout
 
 \begin_layout Subsubsection
@@ -4358,7 +4359,31 @@ Side comment: now that LG indicates the head-verbs of sentences and clauses,
 \end_layout
 
 \begin_layout Subsubsection
-AnchorNodes, BindLinks, MapLinks
+Synonymous phrases
+\end_layout
+
+\begin_layout Standard
+The infrastructure needs to support synonymous phrases, not just synonymous
+ words.
+ A proper definition of the problem, together with prototyping is required.
+ The current architecture is inadequate.
+ 
+\end_layout
+
+\begin_layout Subsection
+Process Flow Issues
+\end_layout
+
+\begin_layout Standard
+Several issues arise in the design of rules, and in the control of their
+ application.
+ Specifically, there has been little or no design effort invested in managing
+ processing pipeline.
+\end_layout
+
+\begin_layout Subsubsection
+AnchorNodes vs.
+ URE
 \end_layout
 
 \begin_layout Standard
@@ -4430,7 +4455,7 @@ This is just fine, you might think, except that each rule is more complex:
 \emph on
 ad hoc
 \emph default
- scheme code wastching each anchor point, and triggering if something arrives
+ scheme code watching each anchor point, and triggering if something arrives
  there.
  After running, it has to clear the anchor.
  It ends up being clumsy, cut-n-paste blobs of utility code.
@@ -4447,84 +4472,128 @@ If the URE is altered to provide this, then how should it be implemented?
 \end_layout
 
 \begin_layout Standard
-(How does the URE currently limit the scope of its search?)
+At any rate, even without adding chaining support to the URE, the current
+ prototype should be altered to remove most uses of the AnchorNodes, and
+ replaced by the URE, instead.
 \end_layout
 
-\begin_layout Subsubsection*
-DRAFT VERSION 0.08
-\end_layout
-
-\begin_layout Standard
-This is a draft.
- Everything above is in some mostly-finished state.
- Everything below is in outline format.
-\end_layout
-
-\begin_layout Subsubsection*
-Translation issues
+\begin_layout Subsubsection
+URE bottlenecks
 \end_layout
 
 \begin_layout Standard
-issue: learning vs.
- hand-crafting, obtaining synonymous phrases, not just synonymous words.
+The URE currently limits the scope of its search by creating a new, stand-alone
+ AtomSpace, copying all of the focus set into it, copying all of the rules
+ into it, and only then applying the rules.
+ This has the desired effect of limiting rule application to only the desired
+ focus set.
+ However, it surely has poor performance, as a result.
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "Issue #1004"
+target "https://github.com/opencog/atomspace/issues/1004"
+
+\end_inset
+
+ tracks this.
+\end_layout
+
+\begin_layout Subsubsection
+Rule selection
 \end_layout
 
 \begin_layout Standard
-issue: using openpsi to discover and apply rules.
- This is like using openpsi in general, to pick through non-verbal stimulus.
+The current prototype applies all rules to all inputs.
+ This is fine, as long as there are only a few rules, but this will not
+ scale, in general.
+ A better solution is to first limit the number of possible rules to apply,
+ based on the input.
+ There already is infrastructure to do this, it's just not used in the prototype.
 \end_layout
 
 \begin_layout Standard
-issue: fuzzy matching, partial matching
+The existing infrastructure is a combination of 
+\family typewriter
+DualLink
+\family default
+ and the 
+\family typewriter
+cog-recognize
+\family default
+ function.
+ It's already deployed in the AIML subsystem, where it is used to pick out
+ a set of appropriate AIML rules.
+ It is partly integrated into OpenPsi, but this could be improved.
+\end_layout
+
+\begin_layout Subsection
+Enhancements
 \end_layout
 
 \begin_layout Standard
-issue: picking out sentences attached to an anchor, vs other processing
- pipeline designs.
+The prototype ignores various established OpenCog subsystems and technologies.
+ It also ignores several architectural directions that have been discussed,
+ but have not been acted on.
+ These are breifly reviewed here.
 \end_layout
 
-\begin_layout Standard
-todo – the verb synonyms should not be needed!? as they can be gotten from
- the synonym lists for the control-action language...
-\end_layout
-
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 OpenPsi
 \end_layout
 
 \begin_layout Standard
 OpenPsi as a flexible rule-selection system.
- But its not used in the prototype.
- How should it be used? Should the above ruminations about AnchorNodes really
- be ruminations about OpenPsi?
+ It is not used in the prototype.
+ How should it be used (aside from the rule-selection issue mentioned above?)
 \end_layout
 
-\begin_layout Subsubsection*
-Self-model issues
+\begin_layout Subsubsection
+Fuzzy matching
 \end_layout
 
 \begin_layout Standard
-The various predicates: e.g.
- (DefinedPredicate "Is sleeping?") do not really fit the 
+The current system does not tolerate failures in the speech-to-text and
+ the text-to-parse stages.
+ Use of fuzzy matching during rule application should be able to make up
+ for this fragility.
+ Thus, for example, if the input is 
 \begin_inset Quotes eld
 \end_inset
 
-control language
+
+\emph on
+garbled garbled mumbmle turn left mumble
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
- concept described above.
- Ditto for lines 305-547 of self-model.scm
+, then the robot should still be able to latch onto the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+turn left
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ portion of the input, and respond to that.
+ Since there may be multiple fuzzy matches, some sort of confidence ranking
+ would be required, as well.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Question-answering
 \end_layout
 
 \begin_layout Standard
-Answering questions about self and the world.
- Also has been prototyped.
- Its like the 
+The robot needs to be able to answer questions about self and the world.
+ This has been prototyped, but very incompletely.
+ From the architectural perspective, question-answering resembles the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4553,51 +4622,132 @@ standardized state queries
  Running these queries returns yes/no answers (truth queries) or multi-valued
  data (e.g.
  look-at direction) or more complex structures (sequences of actions that
- had been performed in the past) 
+ had been performed in the past).
+ 
 \end_layout
 
 \begin_layout Standard
-There are two translation layers that are needed here: first, to convert
- English to the internal query language, second, to convert the response
- back to English.
+However, the current prototype does not fit well with this idea.
+ For example, the various predicates: 
+\emph on
+e.g.
+
+\emph default
+ 
+\family typewriter
+(DefinedPredicate "Is sleeping?")
+\family default
+ do not really fit the 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ concept described above.
+ Ditto for lines 305-547 of 
+\family typewriter
+self-model.scm
+\family default
+.
+ These need rework.
+\end_layout
+
+\begin_layout Standard
+Question answering requires a second pipeline, beyond that shown in figure
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Language-Pipeline"
+
+\end_inset
+
+.
+ Of course, there must first be a conversion from English to the internal
+ query language.
+ The response must then be converted back into English.
  If the response is of the right form, then SuReal can be used to perform
  the final conversion.
  Right now, the query language is not generating SuReal-compatible results.
 \end_layout
 
-\begin_layout Subsubsection*
-World model
+\begin_layout Subsubsection
+Enlarged world model
 \end_layout
 
 \begin_layout Standard
-Right now, there is only a self-model.
- A world-model is needed, so we can talk about that.
- Well –there is a world model – currently, it consists of the visible faces
- in the environment.
+The current model of the self, and the world, is tiny.
+ It consists entirely of emotional state, and the visible faces in the envronmen
+t.
  It needs to get bigger.
 \end_layout
 
-\begin_layout Subsubsection*
-Action Orchestration
+\begin_layout Subsubsection
+More sensory input
 \end_layout
 
 \begin_layout Standard
-Carrying out multiple things at once; using the internal model to do this.
+The robot is currently almost completely starved for sensory input: it can
+ see faces, and it can access the text that cam from speech-to-text.
+ The speech-to-text does not provide any audio cues: was it a whisper? A
+ shout?
 \end_layout
 
-\begin_layout Subsubsection*
-Memory
+\begin_layout Standard
+Raw sensory input needs to be converted into ensory perceptions: atomese
+ representations of processed sensory input is needed.
+ For example, if the audio volume suddenly got loud, and the visual field
+ is suddenly moving, then maybe ...
+ everyone is clapping? booing? getting up to leave? How should the robot
+ react to these events? The reaction for an interrupted discussion must
+ be different from that occuring at the end of a speech.
+\end_layout
+
+\begin_layout Subsubsection
+Action orchestration
+\end_layout
+
+\begin_layout Standard
+One must be able to carry out multiple things at once.
+ Ben has written about this.
+ How it should fit in remains a unclear, although it is obviously needed.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Acting memory and performance
 \end_layout
 
 \begin_layout Standard
 Multiple types of memory are needed.
  Most important (for demo purposes) is memory consisting of imperatives:
- when she is told to do this and say that, she needs to remember this, and
- later on, play that back as a performance.
+ when she is told to do this and say that, she needs to remember what she
+ was told, and what she did, and later on, be able to play that back as
+ a performance.
+ That is, there must be a mode where the robot behaves as an actor under
+ directorial control: the actor can be instructed by the director, given
+ stage notes, and respond to these.
 \end_layout
 
 \begin_layout Standard
-This should be 
+Examples of such directives might be: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+do that performance again, except this time, do xyz more slowly
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Initiali protoptypes of this level of function should be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4607,71 +4757,78 @@ straight-forward
 
 : one can record the control-language directives.
  They need to be marked up with timing information.
-\end_layout
-
-\begin_layout Standard
-Implementing acting-coaching is interesting, and in particular, implementing
- directives such as 
+ Verbal editing might be harder, as portions of a directive, such as 
 \begin_inset Quotes eld
 \end_inset
 
-do that performance again, except this time, make xyz go more slowly
+
+\emph on
+do xyz more slowly
+\emph default
+
 \begin_inset Quotes erd
+\end_inset
+
+ require associating the word
+\emph on
+ 
+\begin_inset Quotes eld
+\end_inset
+
+xyz
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+ with some portion of the performance.
+ This brings up a number of reference resolution issues, discussed previously.
+\end_layout
+
+\begin_layout Subsubsection
+General memory
+\end_layout
+
+\begin_layout Standard
+A second, distinct type of memory is being able to remember past states
+ of the world.
+ A basic prototype of this should be relatively straight-forward.
+ This memory would need to be made accessible to the question-answering
+ subsystem, so that questions about the immediate past can be answered.
+\end_layout
+
+\begin_layout Standard
+One minor associated infrastructure challenge is that a management layer
+ for the Postgres DB interfaces is needed.
+ The basic idea is that memories should not be lost during power-off or
+ reboot.
+ Progress on this infrastructure is tracked in 
+\begin_inset CommandInset href
+LatexCommand href
+name "issue #734"
+target "https://github.com/opencog/atomspace/issues/734"
+
 \end_inset
 
 .
+ 
 \end_layout
 
 \begin_layout Standard
-A second type of memory would be remembering past states of the world.
+Memories must be segregated into classes: there are some things that need
+ to be remembered, others that should not be.
+\end_layout
+
+\begin_layout Subsubsection
+Learning
 \end_layout
 
 \begin_layout Standard
-One technical challenge is that we will need a management layer for the
- Postgres DB interfaces, so that memories are not lost during power-off.
- Those memories need to be segregated: there are somethings that need to
- be remembered, others that should not be.
-\end_layout
-
-\begin_layout Subsubsection*
-Learning from sensory input
-\end_layout
-
-\begin_layout Standard
-Creating atomese representations of sensory input processing pipelines,
- so that specific sensory inputs can be recognized e.g.
- if the audio volume suddenly got loud, and the visual field is suddenly
- moving, then maybe ...
- everyone is clapping? booing? getting up to leave? ...I'm no longer the center
- of attention?
-\end_layout
-
-\begin_layout Subsubsection*
-Free will
-\end_layout
-
-\begin_layout Standard
-Free will, as defined here, is the over-riding of default behavior (as computed
- by psi-rules) by means of a logically, rationally reasoned course of action.
- For example, the default of the psi rules might be 
-\begin_inset Quotes eld
-\end_inset
-
-lolly-gag about
-\begin_inset Quotes erd
-\end_inset
-
-, while a rational decision would be 
-\begin_inset Quotes eld
-\end_inset
-
-go and do that important thing
-\begin_inset Quotes erd
-\end_inset
-
-.
- Free will is then the act of picking between these two alternatives, of
- balancing them out (at a critical phase-transition point).
+A deep, fundamental design issue is that, right now, essentially all of
+ the rules are hand-authored, and not learned.
+ Ultimately, the ability to learn is an imperative.
+ This is a large topic that will not be covered here, with one exception.
+ The next section describes a design proposal for expressive imitation learning.
 \end_layout
 
 \begin_layout Section
@@ -4798,8 +4955,9 @@ height "1pt"
 \end_layout
 
 \begin_layout Standard
-Such a system needs to start with some way of perceiving human faces.
- One such system, for example is 
+An imitation learning system needs to start with some way of perceiving
+ human faces.
+ One such system, for example, is 
 \begin_inset CommandInset href
 LatexCommand href
 name "ci2cv"
@@ -5117,69 +5275,185 @@ Because all of these are hypothetical issues, proposing distinct solutions
  This is discussed in greater detail in section XXX (where?)
 \end_layout
 
-\begin_layout Section*
-Items
+\begin_layout Section
+Ideas 
+\end_layout
+
+\begin_layout Standard
+This section provides some breif sketches of interesting behaviors that
+ should be acheivable within the current prototype framework, or are suitable
+ for the next step of prototyping.
+ Some of these are very easy, but simply have not been explored or done.
 \end_layout
 
 \begin_layout Itemize
-a person walks into room, who she recognizes.
- Depending on psi, she should do non-verbal greetings (play one of 3-4 different
- animations (look at, chin push, nod)) and verbal greetings (
+A person walks into room, who she recognizes.
+ Depending on the current emotional state, she should perform non-verbal
+ greetings, acknowledgements (play one of 3-4 different animations, such
+ as breif look-at glance, chin push, nod) and verbal greetings (
 \begin_inset Quotes eld
 \end_inset
 
-hello, what's up, yo dawg
+
+\emph on
+hello, what's up?
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
 ).
- split up the state and the psi rule stuff properly.
- See comments here: https://github.com/opencog/ros-behavior-scripting/pull/80
+ The current interplay between state and psi rules is a mess, these need
+ to be split up properly.
+ There are addtional comments in 
+\begin_inset CommandInset href
+LatexCommand href
+name "issue #80"
+target "https://github.com/opencog/ros-behavior-scripting/pull/80"
+
+\end_inset
+
+, which see.
+\end_layout
+
+\begin_layout Itemize
+Someone asks: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+so what are we talking about?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ This requires the robot to have some rudimentary memory of the conversation,
+ and have the ability to recapitulate it.
+ A simple prototype mock-up would be to extract keywords/key-topics from
+ sentence, and remember them.
+ These can be be queried with the fuzzy matcher, and used to recapitulate
+ the conversation.
  
 \end_layout
 
 \begin_layout Itemize
-extract keywords/key-topics from sentence, and remember them, then apply
- fuzzy matcher to see which of these come up.
-\end_layout
-
-\begin_layout Section*
-Random ideas
-\end_layout
-
-\begin_layout Itemize
-Sophia, bark like a dog!
-\end_layout
-
-\begin_layout Itemize
-Why did you smile? Output: have her explain recent openpsi decision-making.
-\end_layout
-
-\begin_layout Itemize
-I'm so sorry about that.
- Output: a small cute pout (blend of frown and ???)
-\end_layout
-
-\begin_layout Itemize
-Look at me.
- (verify look-at location or report visibility)
-\end_layout
-
-\begin_layout Itemize
-What are you doing? 
-\end_layout
-
-\begin_layout Itemize
-(When last person leaves, she should say goodbye.
- If did not say goodbye, then say 
+Someone says 
 \begin_inset Quotes eld
 \end_inset
 
-hey where did everybody go?
+
+\emph on
+Sophia, bark like a dog!
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
-)
+ A barking dog animation is needed.
+\end_layout
+
+\begin_layout Itemize
+Someone asks: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Why did you smile?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ Output: have her explain the most recent OpenPsi decision-making.
+ This requires recording that decision-making into a set of atoms, queriable
+ using the above-described question-answering subsystem.
+\end_layout
+
+\begin_layout Itemize
+Someone says: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+I'm so sorry about that
+\emph default
+.
+\begin_inset Quotes erd
+\end_inset
+
+ Output: have her perform a small, cute pout (a frown, but without the eyebrow
+ animation).
+\end_layout
+
+\begin_layout Itemize
+Someone says: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Look at me.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ The robot should determine the number of visible faces.
+ If only one, then it could say 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+I see only one face, and I am looking at it now
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ If there are two faces, then either change the gaze, or use the audio localizat
+ion to determine the audio source, and resspond appropriately, by changing
+ gaze, or keeping it, and appropriate verbal remarks.
+\end_layout
+
+\begin_layout Itemize
+Someone says: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+What are you doing?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Describe a the recent past, indicating the presence of memory.
+ The verbal reply should show that the robot is sentient of it's surroundings.
+\end_layout
+
+\begin_layout Itemize
+When last person leaves, she should say goodbye.
+ If no goodbyes were exchanged, then remark loudly, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Hey, where did everybody go?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
@@ -5188,7 +5462,11 @@ If no one is visible, and no one has been visible for many minutes, she
 \begin_inset Quotes eld
 \end_inset
 
-hey where did everybody go?
+
+\emph on
+Hey where did everybody go?
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
@@ -5196,12 +5474,34 @@ hey where did everybody go?
 \end_layout
 
 \begin_layout Itemize
-Behavior – she should not get sleepy, as long as someone is visible.
+If no one is visible, but there is an ongoing chat session, she should complain
+ about the visibility of the chat partners.
+ If there is no ongoing chat session, but there loud noises (and she cannot
+ see any faces), she should say something like 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Hey, what's going on? Who's there?
+\emph default
+ 
+\emph on
+Show yourself!
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
-\begin_layout Itemize
-Behavior – she should complain, if no one is visible, but there is a chat
- session going on.
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+To be written.
 \end_layout
 
 \begin_layout Section*
@@ -5479,6 +5779,16 @@ ly ignored).
 
 \begin_layout Subsubsection*
 Unfinished stuff
+\end_layout
+
+\begin_layout Subsubsection*
+DRAFT VERSION 0.2
+\end_layout
+
+\begin_layout Standard
+This is a draft.
+ Everything above is in some mostly-finished state.
+ Everything below is in outline format.
 \end_layout
 
 \begin_layout Standard
