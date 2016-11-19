@@ -4358,6 +4358,18 @@ Side comment: now that LG indicates the head-verbs of sentences and clauses,
  It does not seem to provide a lot of value-add any more.
 \end_layout
 
+\begin_layout Subsubsection
+Synonymous phrases
+\end_layout
+
+\begin_layout Standard
+The infrastructure needs to support synonymous phrases, not just synonymous
+ words.
+ A proper definition of the problem, together with prototyping is required.
+ The current architecture is inadequate.
+ 
+\end_layout
+
 \begin_layout Subsection
 Process Flow Issues
 \end_layout
@@ -4672,6 +4684,27 @@ t.
 \end_layout
 
 \begin_layout Subsubsection
+More sensory input
+\end_layout
+
+\begin_layout Standard
+The robot is currently almost completely starved for sensory input: it can
+ see faces, and it can access the text that cam from speech-to-text.
+ The speech-to-text does not provide any audio cues: was it a whisper? A
+ shout?
+\end_layout
+
+\begin_layout Standard
+Raw sensory input needs to be converted into ensory perceptions: atomese
+ representations of processed sensory input is needed.
+ For example, if the audio volume suddenly got loud, and the visual field
+ is suddenly moving, then maybe ...
+ everyone is clapping? booing? getting up to leave? How should the robot
+ react to these events? The reaction for an interrupted discussion must
+ be different from that occuring at the end of a speech.
+\end_layout
+
+\begin_layout Subsubsection
 Action orchestration
 \end_layout
 
@@ -4786,85 +4819,16 @@ Memories must be segregated into classes: there are some things that need
  to be remembered, others that should not be.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Subsubsection
 Learning
 \end_layout
 
 \begin_layout Standard
-A major design issue is that 
-\end_layout
-
-\begin_layout Subsubsection*
-Translation issues
-\end_layout
-
-\begin_layout Standard
-issue: learning vs.
- hand-crafting,
-\end_layout
-
-\begin_layout Standard
-Synonymous phrases
-\end_layout
-
-\begin_layout Standard
-obtaining synonymous phrases, not just synonymous words.
-\end_layout
-
-\begin_layout Standard
-todo – the verb synonyms should not be needed!? as they can be gotten from
- the synonym lists for the control-action language...
-\end_layout
-
-\begin_layout Subsubsection*
-Learning from sensory input
-\end_layout
-
-\begin_layout Standard
-Creating atomese representations of sensory input processing pipelines,
- so that specific sensory inputs can be recognized e.g.
- if the audio volume suddenly got loud, and the visual field is suddenly
- moving, then maybe ...
- everyone is clapping? booing? getting up to leave? ...I'm no longer the center
- of attention?
-\end_layout
-
-\begin_layout Subsubsection*
-Free will
-\end_layout
-
-\begin_layout Standard
-Free will, as defined here, is the over-riding of default behavior (as computed
- by psi-rules) by means of a logically, rationally reasoned course of action.
- For example, the default of the psi rules might be 
-\begin_inset Quotes eld
-\end_inset
-
-lolly-gag about
-\begin_inset Quotes erd
-\end_inset
-
-, while a rational decision would be 
-\begin_inset Quotes eld
-\end_inset
-
-go and do that important thing
-\begin_inset Quotes erd
-\end_inset
-
-.
- Free will is then the act of picking between these two alternatives, of
- balancing them out (at a critical phase-transition point).
-\end_layout
-
-\begin_layout Subsubsection*
-DRAFT VERSION 0.09
-\end_layout
-
-\begin_layout Standard
-This is a draft.
- Everything above is in some mostly-finished state.
- Everything below is in outline format.
+A deep, fundamental design issue is that, right now, essentially all of
+ the rules are hand-authored, and not learned.
+ Ultimately, the ability to learn is an imperative.
+ This is a large topic that will not be covered here, with one exception.
+ The next section describes a design proposal for expressive imitation learning.
 \end_layout
 
 \begin_layout Section
@@ -4991,8 +4955,9 @@ height "1pt"
 \end_layout
 
 \begin_layout Standard
-Such a system needs to start with some way of perceiving human faces.
- One such system, for example is 
+An imitation learning system needs to start with some way of perceiving
+ human faces.
+ One such system, for example, is 
 \begin_inset CommandInset href
 LatexCommand href
 name "ci2cv"
@@ -5308,6 +5273,24 @@ Because all of these are hypothetical issues, proposing distinct solutions
  That is because the creation of associations between perceptions and words
  is a broader task than merely that of perceiving facial expressions.
  This is discussed in greater detail in section XXX (where?)
+\end_layout
+
+\begin_layout Section
+Unorganized text
+\end_layout
+
+\begin_layout Standard
+Draft text, to be edited.
+\end_layout
+
+\begin_layout Subsubsection*
+DRAFT VERSION 0.09
+\end_layout
+
+\begin_layout Standard
+This is a draft.
+ Everything above is in some mostly-finished state.
+ Everything below is in outline format.
 \end_layout
 
 \begin_layout Section*
