@@ -23,6 +23,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/util/Logger.h>
@@ -230,7 +231,7 @@ void PLNRulesUTest::test_forall_full_instantiation()
 	 *          <some-concept>
 	 *          <some-predicate>
 	 *
-	 * 4. ImplicationLink
+	 * 4. ImplicationScopeLink
 	 *       EvaluationLink
 	 *          PredicateNode "P"
 	 *          <some-concept>
@@ -299,7 +300,7 @@ void PLNRulesUTest::test_forall_implication_to_higher_order()
 		 "            (VariableNode \"$X\")"
 		 "            (TypeNode \"ConceptNode\"))"
 		 "         (EvaluationLink"
-		 "            (PredicateNode \"Q\")"
+		 "            (PredicateNode \"P\")"
 		 "            (VariableNode \"$X\")))))");
 
 	logger().debug() << "results = " << results->toString();
@@ -392,7 +393,7 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 	// (partial instantiation occurs on $X or $Y).
 	Handle possible_results_1 = eval.eval_h
 		("(SetLink"
-		 "   (ImplicationLink"
+		 "   (ImplicationScopeLink"
 		 "      (TypedVariableLink"
 		 "         (VariableNode \"$X\")"
 		 "         (TypeNode \"ConceptNode\"))"
@@ -408,7 +409,7 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 		 "            (VariableNode \"$X\")))))");
 	Handle possible_results_2 = eval.eval_h
 		("(SetLink"
-		 "   (ImplicationLink"
+		 "   (ImplicationScopeLink"
 		 "      (TypedVariableLink"
 		 "         (VariableNode \"$Y\")"
 		 "         (TypeNode \"ConceptNode\"))"
@@ -423,6 +424,10 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 		 "            (VariableNode \"$Y\")"
 		 "            (ConceptNode \"A\")))))");
 
+	logger().debug() << "results = " << results->toString();
+	logger().debug() << "possible_results_1 = " << possible_results_1->toString();
+	logger().debug() << "possible_results_2 = " << possible_results_2->toString();
+	
 	TS_ASSERT((results == possible_results_1)
 	          or (results == possible_results_2));
 }
@@ -666,6 +671,16 @@ void PLNRulesUTest::test_equivalence_to_double_implication()
 		"    (ImplicationLink"
 		"      (PredicateNode \"Q\")"
 		"      (PredicateNode \"P\")"
+		"    )"
+		"  )"
+		"  (ListLink"
+		"    (ImplicationLink"
+		"      (PredicateNode \"Q\")"
+		"      (PredicateNode \"P\")"
+		"    )"
+		"    (ImplicationLink"
+		"      (PredicateNode \"P\")"
+		"      (PredicateNode \"Q\")"
 		"    )"
 		"  )"
 		")");

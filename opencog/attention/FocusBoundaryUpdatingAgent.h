@@ -50,6 +50,9 @@ private:
     double afbSize;
     double decay;
     AttentionValue::sti_t bottomBoundary;
+    unsigned int minAFSize, maxAFSize;
+
+    AttentionValue::sti_t get_cutoff(HandleSeq& );
 
 public:
     virtual const ClassInfo& classinfo() const { return info(); }

@@ -1,7 +1,9 @@
-#LyX 2.0 created this file. For more info see http://www.lyx.org/
-\lyxformat 413
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass article
 \begin_preamble
 \usepackage{url} 
@@ -12,16 +14,16 @@
 \language_package default
 \inputencoding utf8
 \fontencoding global
-\font_roman times
-\font_sans helvet
-\font_typewriter courier
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
-
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -41,15 +43,24 @@
 \pdf_pdfusetitle true
 \papersize default
 \use_geometry false
-\use_amsmath 2
-\use_esint 0
-\use_mhchem 0
-\use_mathdots 1
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
 \use_indices false
 \paperorientation portrait
 \suppress_date false
+\justification true
 \use_refstyle 0
 \index Index
 \shortcut idx
@@ -77,270 +88,128 @@ World Models
 \end_layout
 
 \begin_layout Date
-Draft Version 0.04 - 16 Sept 2016
+Draft Version 0.2 - 19 Nov 2016
 \end_layout
 
 \begin_layout Abstract
 A description of how OpenCog currently implements self-awareness and world-aware
 ness, together with a sketch of how this could be improved and expanded.
  The short-term goal is to create a robot (embodied chatbot) that can hear
- and see, and carry on conversations about perceived objects, as well as
- to carry out conversations about the self.
+ and see, and carry on conversations about what it can see and hear, as
+ well as to carry out conversations about the self.
  These conversations can be verbal, and can also have physical-body performance
  components: body and face expressive movements, such as smiling or waving
  a hand.
  
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Introduction
 \end_layout
 
 \begin_layout Standard
-The paper proceeds in several steps.
- The first step is to review the overall concept of an 
-\begin_inset Quotes eld
-\end_inset
+In order for a robot to have reasonably competent conversations about the
+ world around it, three things need to happen: the robot has to be able
+ to see and hear; the robot needs to have an internal model of the world
+ around it; and, finally the robot needs to have some basic language capability.
+ The internal model and it's relationship to the senses and to language
+ is the primary topic of this review.
+\end_layout
 
-internal model
-\begin_inset Quotes erd
-\end_inset
-
-, and how one can, in principle, interface with it.
- This is followed by a section reviewing the current prototype.
- After this, difficulties with language are discussed.
+\begin_layout Subsubsection*
+Internal model
 \end_layout
 
 \begin_layout Standard
-The work described here has been chartered by Hanson Robotics, and is specifical
-ly intended to interface with the robots manufactured by Hanson, such as
- Sophia and others.
- 
-\end_layout
-
-\begin_layout Subsection*
-Robot archtitecture overview
-\end_layout
-
-\begin_layout Standard
-XXX This section to be written in a later version.
- XXX.
- A conceptual diagram of the system is shown in figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:The-PUMA-Architecture"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-The PUMA Architecture
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:The-PUMA-Architecture"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename PUMA-Overview.png
-	width 95text%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-This diagram shows the Hanson Robotics PUMA architecture: it offers a hint
- of what an embodied artificial intelligence architecture might look like.
- The architecture described in this document is a horizontal slice through
- the above diagram; it is focused primarily on how natural language interacts
- with models of the self, and of the world, to drive behavior and conversation.
- 
-\size scriptsize
-(Diagram credit: 
-\begin_inset CommandInset href
-LatexCommand href
-name "Hanson Robotics"
-target "http://www.hansonrobotics.com/"
-
-\end_inset
-
-).
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset CommandInset line
-LatexCommand rule
-offset "0.5ex"
-width "100col%"
-height "1pt"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section*
-Internal Models
-\end_layout
-
-\begin_layout Standard
-The basic premise that will be elaborated here is that interacting with
- the world requires the creation of an 
-\begin_inset CommandInset href
-LatexCommand href
-name "internal model"
-target "https://en.wikipedia.org/wiki/Internal_model_(motor_control)"
-
-\end_inset
-
- of the world: in systems theory, this is sometimes called 
-\begin_inset Quotes eld
-\end_inset
-
-the 
-\begin_inset CommandInset href
-LatexCommand href
-name "good regulator theorem"
-target "https://en.wikipedia.org/wiki/Good_regulator"
-
-\end_inset
-
-.
-\begin_inset Quotes erd
-\end_inset
-
- An internal model provides the system software with a natural API, a natural
- representation, that various different software components can agree on,
- and use, and manipulate, and reason with.
- Two depcitions of models are given in figures 
+The core idea of the internal model is shown in figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Self-and-World"
 
 \end_inset
 
- and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:A-Control-Theory"
-
-\end_inset
-
 .
-\end_layout
-
-\begin_layout Subsubsection*
-AtomSpace
+ More abstractly, it is a set of software structures that describe the the
+ world that the robot sees.
+ The description must be sufficiently abstract that the robot can perform
+ basic reasoning about the world.
+ Consider, for example, spatial reasoning: if Alice is standing behind Bob,
+ and Carol is in front of Bob, then Alice is farther away than Carol.
+ All of this needs to be represented such that basic rational reasoning
+ about distances can take place.
+ Almost any example of reasoning will do: 'if cats are animals, and animals
+ are things, then cats are things'.
+ 
 \end_layout
 
 \begin_layout Standard
-To achieve a unification of speech, behavior and perception, one must have
- a software infrastructure that allows these to be represented in a unified
- way: that is, the data and algorithms must reside in some unified location.
- From here on out, it is assumed that this unified location is the 
-\begin_inset CommandInset href
-LatexCommand href
-name "OpenCog AtomSpace"
-target "http://wiki.opencog.org/w/AtomSpace"
-
-\end_inset
-
-.
- This is stated explicitly, because, in the course of discussion, various
- other technology platforms have been nominated.
- Although one could debate the merits of alternative technologies, this
- will not be done here.
-\end_layout
-
-\begin_layout Subsubsection*
-Self Model
-\end_layout
-
-\begin_layout Standard
-The self-model, and together with it, the controversial term 
+The internal model must also be abstracted in such a way that it is not
+ too hard to map natural language onto the model.
+ Words in a sentence or question need to be matched up to specific objects
+ in the model, so that the different parts of the model provide a 
 \begin_inset Quotes eld
 \end_inset
 
-self-awareness
+meaning
 \begin_inset Quotes erd
 \end_inset
 
-, is here defined to simply be an internal model of the robot itself: both
- of low-level physical variables, such as motor angles, as well as higher-order
- concepts such as 
+ or a 
 \begin_inset Quotes eld
 \end_inset
 
-I smiled just a few seconds ago
+grounding
 \begin_inset Quotes erd
 \end_inset
 
-, or 
+ for the words.
+ There needs to be a correspondence between nouns and objects, and also
+ between prepositions (
 \begin_inset Quotes eld
 \end_inset
 
-I just said this-and-such
+in
 \begin_inset Quotes erd
 \end_inset
 
-.
- A basic assumption taken in the following is that the engineering and design
- of the self-model is not any different than the engineering and design
- of the world-model: the data types and access methods are the same for
- both.
- Thus, ideas like 
+, 
 \begin_inset Quotes eld
 \end_inset
 
-I know that my arm is raised
+near
 \begin_inset Quotes erd
 \end_inset
 
- are represented in much the same way as 
+, 
 \begin_inset Quotes eld
 \end_inset
 
-I know that there is a box in the corner of the room.
+next to
 \begin_inset Quotes erd
 \end_inset
 
- Thus, in what follows, the expression 
+, 
 \begin_inset Quotes eld
 \end_inset
 
-internal model
+of
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+with
+\begin_inset Quotes erd
+\end_inset
+
+, ...) and the relationships between the objects in the internal model.
+ That is, the internal model must also have a natural 
+\begin_inset Quotes eld
+\end_inset
+
+prepositional
 \begin_inset Quotes erd
 \end_inset
 
@@ -348,30 +217,54 @@ internal model
 \begin_inset Quotes eld
 \end_inset
 
-model
+relational
 \begin_inset Quotes erd
 \end_inset
 
- will refer to both the self-model and the world model, there being no particula
-r difference.
- A simplified model of the concept of a model is shown in figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:Self-and-World"
+ structure.
+ This extends to all word classes in natural language: verbs must correspond
+ to actions that might be performed on objects in the internal model.
+ Adjectives must correspond to attributes that an internal object might
+ posses.
+ And so on.
+ The internal model needs to naturally correspond to natural language, so
+ that basic reasoning and basic language are possible.
+\end_layout
 
+\begin_layout Standard
+The internal model must also be abstracted in such a way that it can be
+ kept up to date as new sensory information comes in.
+ This means that raw video must be converted into a representational form,
+ with objects (people, their position, movement, and facial expressions)
+ picked out from the raw video.
+ Similarly, raw audio must be converted into representations of the form
+ 
+\begin_inset Quotes eld
 \end_inset
 
-.
+heard a loud bang
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+there is a quiet rushing sound
+\begin_inset Quotes erd
+\end_inset
+
+, etc.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Self and World Models
@@ -453,14 +346,496 @@ height "1pt"
 \end_layout
 
 \begin_layout Subsubsection*
+Symbolic Representation
+\end_layout
+
+\begin_layout Standard
+It is assumed that everything described here can be accomplished with a
+ symbolic representation.
+ That is, there is an explicit network of vertexes and edges, joined to
+ form a graph, that encodes the knowledge, explicitly and overtly.
+ Thus, it is assumed that the core architecture is 
+\emph on
+not
+\emph default
+ a neural net, nor that the basic process is that of deep learning, where
+ data is represented implicitly, not explicitly.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Concept Graph
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Concept-Graph"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename concept-graph.svg
+	width 91col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+An example of a symbolic representation of conceptual data.
+ This kind of representation is commonly employed in symbolic knowledge
+ representation systems, such as in John Sowa's 
+\begin_inset CommandInset href
+LatexCommand href
+name "Concept Graphs"
+target "https://en.wikipedia.org/wiki/Conceptual_graph"
+
+\end_inset
+
+, Dick Hudson's 
+\begin_inset CommandInset href
+LatexCommand href
+name "Word Grammar"
+target "https://en.wikipedia.org/wiki/Word_grammar"
+
+\end_inset
+
+ or in Igor Mel’čuk's 
+\begin_inset CommandInset href
+LatexCommand href
+name "Meaning-Text Theory"
+target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
+
+\end_inset
+
+.
+ Note that each circle and arrow may itself be a graph with additional structure
+: for example, the circle labeled 
+\begin_inset Quotes eld
+\end_inset
+
+Drama
+\begin_inset Quotes erd
+\end_inset
+
+ may be represented by the abstract concept 42, which can be expressed as
+ English or Chinese words, each of these possibly having multiple synonyms,
+ grammatical properties and relationships to other words and concepts.
+ Thus, properly speaking, the graph is a hypergraph.
+ The point is that labelled bubbles, such as 
+\begin_inset Quotes eld
+\end_inset
+
+Drama
+\begin_inset Quotes erd
+\end_inset
+
+, or arrow relationships, such as 
+\begin_inset Quotes eld
+\end_inset
+
+Acted in
+\begin_inset Quotes erd
+\end_inset
+
+, are themselves undefined and have no meaning, unless they are themselves
+ expressed (grounded) by thier relationships to yet other objects, some
+ of which may be concrete, sensory entities or physical (motor) movements.
+ Typical graphs are more complex, and the relationships may be assigned
+ probabilistic strength and confidence weights.
+
+\size scriptsize
+ (Image credit: Unknown)
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the end, this assumption may not matter very much: a symbolic representation
+ can still have floating point numerical weights and probabilities attached,
+ and result in a network that is so complex that it challenges easy comprehensio
+n: the distinction between neural and symbolic can be blurry.
+ None-the-less, by picking a symbolic representation, the goal is to have
+ a system whose internal state can be examined, reviewed, debugged and manipulat
+ed.
+ In the end, some of that manipulation might employ deep-learning techniques;
+ however, that is not the starting point.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, the core symbolic representation should be thought of as a large,
+ complex graph, such as that shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Concept-Graph"
+
+\end_inset
+
+.
+ By having an explicit symbolic representation, one has the benefit, and
+ requirement, of having an explicit software layer that can access, query
+ and update the internal model, both from the language side, and the sensory
+ side.
+ Such conceptual graphs can be manipulated in a style similar to the widely-know
+n 
+\begin_inset Quotes eld
+\end_inset
+
+model-view-controller
+\begin_inset Quotes erd
+\end_inset
+
+ paradigm.
+ Software 
+\begin_inset Quotes eld
+\end_inset
+
+controllers
+\begin_inset Quotes erd
+\end_inset
+
+ can change and edit the model, while a structured query system can present
+ 
+\begin_inset Quotes eld
+\end_inset
+
+views
+\begin_inset Quotes erd
+\end_inset
+
+ of the model to the language subsystem.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Outline
+\end_layout
+
+\begin_layout Standard
+This document proceeds by fleshing out the above definitions in greater
+ detail.
+ Some of the early statements may seem overly simplistic or pedantic; this
+ seems needed, so that the later stages are clear.
+\end_layout
+
+\begin_layout Standard
+The first step is to review the overall concept of an 
+\begin_inset Quotes eld
+\end_inset
+
+internal model
+\begin_inset Quotes erd
+\end_inset
+
+, and the 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ used to interface with it.
+ This is followed by a section reviewing the current prototype.
+ After this, difficulties with natural language are discussed.
+ There are multiple software issues encountered during development; these
+ are discussed, and possible solutions are proposed.
+\end_layout
+
+\begin_layout Standard
+The work described here has been chartered by Hanson Robotics, and is specifical
+ly intended to interface with the robots manufactured by Hanson, such as
+ Sophia and others.
+ 
+\end_layout
+
+\begin_layout Subsection
+Robot architecture overview
+\end_layout
+
+\begin_layout Standard
+XXX TODO: This section to be written in a later version.
+ A conceptual diagram of the system is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:The-PUMA-Architecture"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The PUMA Architecture
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:The-PUMA-Architecture"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename PUMA-Overview.png
+	width 95text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This diagram shows the Hanson Robotics PUMA architecture: it offers a hint
+ of what an embodied artificial intelligence architecture might look like.
+ The architecture described in this document is a horizontal slice through
+ the above diagram; it is focused primarily on how natural language interacts
+ with models of the self, and of the world, to drive behavior and conversation.
+ 
+\size scriptsize
+(Diagram credit: 
+\begin_inset CommandInset href
+LatexCommand href
+name "Hanson Robotics"
+target "http://www.hansonrobotics.com/"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Internal Models
+\end_layout
+
+\begin_layout Standard
+The basic premise elaborated here is that interacting with the world requires
+ the creation of an 
+\begin_inset CommandInset href
+LatexCommand href
+name "internal model"
+target "https://en.wikipedia.org/wiki/Internal_model_(motor_control)"
+
+\end_inset
+
+ of the world: in systems theory, this is sometimes called 
+\begin_inset Quotes eld
+\end_inset
+
+the 
+\begin_inset CommandInset href
+LatexCommand href
+name "good regulator theorem"
+target "https://en.wikipedia.org/wiki/Good_regulator"
+
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+ An internal model provides the system software with a natural API, a natural
+ representation, that various different software components can agree on,
+ and use, and manipulate, and reason with.
+ Two depictions of models are given in figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Self-and-World"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:A-Control-Theory"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+AtomSpace
+\end_layout
+
+\begin_layout Standard
+To achieve a unification of speech, behavior and perception, one must have
+ a software infrastructure that allows these to be represented in a unified
+ way: that is, the data and algorithms must reside in some unified location.
+ From here on out, it is assumed that this unified location is the 
+\begin_inset CommandInset href
+LatexCommand href
+name "OpenCog AtomSpace"
+target "http://wiki.opencog.org/w/AtomSpace"
+
+\end_inset
+
+.
+ This is stated explicitly, because, in the course of discussion, various
+ other technology platforms have been nominated.
+ Although one could debate the merits of alternative technologies, this
+ will not be done here.
+\end_layout
+
+\begin_layout Subsubsection
+Self Model
+\end_layout
+
+\begin_layout Standard
+The self-model, and together with it, the controversial term 
+\begin_inset Quotes eld
+\end_inset
+
+self-awareness
+\begin_inset Quotes erd
+\end_inset
+
+, is here defined to simply be an internal model of the robot itself: both
+ of low-level physical variables, such as motor angles, as well as higher-order
+ concepts such as 
+\begin_inset Quotes eld
+\end_inset
+
+I smiled just a few seconds ago
+\begin_inset Quotes erd
+\end_inset
+
+, or 
+\begin_inset Quotes eld
+\end_inset
+
+I just said this-and-such
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A basic assumption taken in the following is that the engineering and design
+ of the self-model is not any different than the engineering and design
+ of the world-model: the data types and access methods are the same for
+ both.
+ Thus, ideas like 
+\begin_inset Quotes eld
+\end_inset
+
+I know that my arm is raised
+\begin_inset Quotes erd
+\end_inset
+
+ are represented in much the same way as 
+\begin_inset Quotes eld
+\end_inset
+
+I know that there is a person standing in front of me.
+\begin_inset Quotes erd
+\end_inset
+
+ Thus, in what follows, the expression 
+\begin_inset Quotes eld
+\end_inset
+
+internal model
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+model
+\begin_inset Quotes erd
+\end_inset
+
+ will refer to both the self-model and the world model, there being no particula
+r difference.
+ A simplified model of the concept of a model is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Self-and-World"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
 World Model
 \end_layout
 
 \begin_layout Standard
 Although the above argues that both the self-model and the world-model are
- special cases of the internal model, this is worth more discussion.
- The world model describes not only inanimate objects, such as boxes seen
- in the corner of the room, but includes models of other people.
+ special cases of the internal model, this is merits discussion.
+ The world model describes not only inanimate objects, such as stacks of
+ boxes seen in the corner of a room, but includes models of people and moving
+ things.
  In the current software base, this is quite shallow: it is just a list
  of the human faces currently visible to the video camera, and their 3D
  coordinates.
@@ -494,7 +869,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 A Control Theory Model
@@ -525,8 +900,8 @@ name "fig:A-Control-Theory"
 
 \begin_layout Plain Layout
 A typical depiction of a model, as described in control theory.
- This is considerably narrower than the intended meaning here, but serves
- to illlustrate the general idea.
+ This is considerably narrower than the intended meaning for this document,
+ but serves to illustrate the general idea.
  Here, a forward model of an arm movement is shown.
  The motor command, u(t), of the arm movement is input to a model of the
  arm and it's motors and the predicted position of the arm, x̃(t), is output.
@@ -574,7 +949,7 @@ height "1pt"
 
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 State
 \end_layout
 
@@ -694,14 +1069,45 @@ target "https://en.wikipedia.org/wiki/Octree"
  bigger or smaller, than another.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
+Data
+\end_layout
+
+\begin_layout Standard
+When the system is turned off, the data encoded in the conceptual graphs
+ of figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Concept-Graph"
+
+\end_inset
+
+ must be stored in some way.
+ This is accomplished by tying the system to a database.
+ The most natural encoding is that of an 
+\begin_inset CommandInset href
+LatexCommand href
+name "Entity-Attribute-Value"
+target "https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model"
+
+\end_inset
+
+ (EAV) model: that is, a graph database.
+ Although there are numerous design issues related to graph and EAV stores,
+ this is outside of the domain of this document.
+ The OpenCog AtomSpace is able to, under the covers, connect to various
+ different databases.
+ It is sufficient to imagine that graph components are stored as JSON-like
+ fragments.
+\end_layout
+
+\begin_layout Subsubsection
 Model and Control
 \end_layout
 
 \begin_layout Standard
-It is not sufficient to create an internal model of the world, and represent
- it as state: a control API or control language to manipulate that state
- must also be provided.
+It is not enough to create an internal model of the world, and represent
+ it as state: a control API or control language must also be provided.
  The control is the active snippet of code that performs the actions needed
  to update the internal model.
  It can be thought of as the 
@@ -731,10 +1137,10 @@ target "https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller"
  (MVC) paradigm from GUI programming.
  There are both engineering and philosophical reasons for having a control
  API.
- The engineering reasons include things like code-reuse, error-checking,
- encapsulation and ease-of-use.
+ The engineering reasons include code-reuse, error-checking, encapsulation
+ and ease-of-use.
  The philosophical reason is that a control API provides a shim between
- the world of static data, and the world of action and movement.
+ the world of (static) data, and the dynamics of action and movement.
  That is, as events occur in time, and as the world is in flux, so must
  also be the internal model.
  
@@ -798,7 +1204,7 @@ messages
 \end_inset
 
 .
- In what follows, these will often be called 
+ In what follows, these will be called 
 \begin_inset Quotes eld
 \end_inset
 
@@ -806,18 +1212,10 @@ verbs
 \begin_inset Quotes erd
 \end_inset
 
-, or possibly 
-\begin_inset Quotes eld
-\end_inset
-
-meta-verbs
-\begin_inset Quotes erd
-\end_inset
-
- (XXX TODO: we need a good name for this).
- There is an important reason for this choice of terminology.
- First, due to the nature of how data is represented in the AtomSpace, it
- is the case that some given action can be applied to a large swath of the
+.
+ There is a reason for this (non-standard) term.
+ Due to the nature of how data is represented in the AtomSpace, it is the
+ case that some given action can often be applied to a large swath of the
  data.
  That is, most actions are NOT tightly coupled to the data they are manipulating
 , but are quite general.
@@ -830,8 +1228,9 @@ internal model
 \begin_inset Quotes erd
 \end_inset
 
-: its not like there are many different kinds of objects, and they all need
- to have methods.
+.
+ It is not as-if there are many different kinds of objects, and they all
+ need to have methods.
  More accurately, there are only a few kinds, and many (most?) actions are
  in principle (
 \emph on
@@ -840,6 +1239,9 @@ de facto
 ?) capable of manipulating many (most?) kinds of state.
  The OO paradigm does not provide a good way of thinking about what goes
  on in the atomspace.
+ More generally, the OO paradigm does not naturally lend itself to the idea
+ of editing graphs.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -850,7 +1252,7 @@ status collapsed
 
 \begin_layout Plain Layout
 \align center
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Model and Control
@@ -918,7 +1320,7 @@ height "1pt"
 \end_layout
 
 \begin_layout Standard
-Another handy reason for why these 
+Another reason for why these 
 \begin_inset Quotes eld
 \end_inset
 
@@ -963,11 +1365,13 @@ if I stick out my tongue, people will laugh, or maybe they will get offended
 \end_inset
 
 .
+ 
 \end_layout
 
 \begin_layout Standard
-In the same way that it was argued that model state must be represented
- in terms of OpenCog Atoms, or 
+Verbs are themselves a form of data.
+ In the same way that model state must be represented graphically (in terms
+ of OpenCog Atoms, or 
 \begin_inset Quotes eld
 \end_inset
 
@@ -975,7 +1379,7 @@ atomese
 \begin_inset Quotes erd
 \end_inset
 
-, so too must be the verbs.
+), so too must the verbs.
  That is, the 
 \begin_inset Quotes eld
 \end_inset
@@ -985,26 +1389,25 @@ control API
 \end_inset
 
  is not some C++ code (or python or scheme or Haskel...) but rather, it is
- also a collection of Atoms.
- Again, the reason for this is to allow the system to automatically generate
- new verbs, by means of learning, as well as to reason about the results
- of actions.
- Another key idea is that this allows actions to be combined and composed,
- in sequential or parallel order, with different timing.
+ also a collection of Atoms (a graph).
+ The reason for this is to allow the system to automatically generate new
+ verbs, by means of learning, as well as to reason about the results of
+ actions.
+ This allows actions to be combined and composed, in sequential or parallel
+ order, with different timing.
  That is, the actions are primitives that can be composed into performances,
  that play out over time.
- Representing these as atomese how such composition and performance-scripting
+ Representing these as atomese is how such composition and performance-scripting
  can be achieved.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Control language
 \end_layout
 
 \begin_layout Standard
-Following the idea of needing to script actions to control behaviors leads
- one naturally to the need for concepts such as modifiers, which come in
- various forms, including 
+The idea of scripting actions to control behaviors leads naturally to modifiers,
+ which come in various forms, including 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1099,7 +1502,7 @@ sideways false
 status collapsed
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Control Language
@@ -1153,7 +1556,7 @@ turn to the eye-blink
 \begin_inset Quotes erd
 \end_inset
 
- -- they eye-blink animation not being valid with the turn directive.
+ – they eye-blink animation not being valid with the turn directive.
  The language can control different systems: the physical body or 
 \begin_inset Quotes eld
 \end_inset
@@ -1188,7 +1591,7 @@ height "1pt"
 
 \begin_layout Standard
 The need for a control language seems to be unavoidable: it is important
- to be able to specify motor speeds, etc.
+ to be able to specify motor speeds, arm heights, etc.
  Now, if one had an object-oriented system, then one would have a 
 \begin_inset Quotes eld
 \end_inset
@@ -1245,7 +1648,8 @@ speed
 \begin_inset Quotes erd
 \end_inset
 
-, and to control the arm, one would send the 
+.
+ To control the arm, one would send the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1286,8 +1690,8 @@ arm
  If the OO language was JavaScript, then many of these issues go away: JavaScrip
 t does allow new methods to be added, at run-time, to pre-existing objects.
  Indeed, in many ways, OpenCog Atomese resembles JavaScript.
- In particular, the JavaScript members are very similar to OpenCog Atoms,
- in that, at run-time, new members and methods can be added to objects.
+ In particular, JavaScript members are similar to OpenCog Atoms, in that,
+ at run-time, new members and methods can be added to objects.
  One could also say that OpenCog Atomese is a lot like JSON, in that one
  can specify arbitrary state structures in JSON.
 \end_layout
@@ -1297,13 +1701,47 @@ There are also some important ways in which atomese differs from JavaScript
  or JSON: atomese allows introspection, i.e.
  it allows for some atoms to control and operate on other atoms, which is
  not possible in JSON.
- Atomese also provides a query language, which JSON does not provide (To
- understand what atomese does, one might imagine writing a SparQL or SQL
- wrapper to query the contents of giant blobs of JSON, or possibly dumping
- large blobs of JSON into Apache Solr or Lucene or Cassandra).
- Atomese also has other language features (it is Prolog-like, it is ML-like)
- that are lacking in JavaScript.
- 
+ Atomese also provides a query language, which JSON does not provide.
+ To understand the atomese query system, one might imagine writing a SparQL
+ or SQL wrapper to query the contents of giant blobs of JSON, or possibly
+ dumping large blobs of JSON into Apache Solr or Lucene or Cassandra.
+ Postgres is able to do the former (with the 
+\begin_inset CommandInset href
+LatexCommand href
+name "JSONB column type"
+target "https://www.postgresql.org/docs/current/static/datatype-json.html"
+
+\end_inset
+
+); however, SQL is itself not JSON, and there is no natural way to convert
+ the one into the other.
+ Atomese also has other language features that are lacking in JavaScript.
+ It is ProLog-like, and has a 
+\begin_inset CommandInset href
+LatexCommand href
+name "DataLog"
+target "https://en.wikipedia.org/wiki/Datalog"
+
+\end_inset
+
+-like subset.
+ It is 
+\begin_inset CommandInset href
+LatexCommand href
+name "ML-like"
+target "https://en.wikipedia.org/wiki/ML_(programming_language)"
+
+\end_inset
+
+ (CaML, Haskel) in that it has a 
+\begin_inset CommandInset href
+LatexCommand href
+name "type system"
+target "https://en.wikipedia.org/wiki/Type_system"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1329,7 +1767,7 @@ control API
 .
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Internal model vs.
  physical body
 \end_layout
@@ -1373,7 +1811,7 @@ target "https://en.wikipedia.org/wiki/Internal_model_(motor_control)#Forward_mod
 \end_inset
 
 , which is used to estimate what might happen if an action was performed,
- or an 
+ and an 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1381,9 +1819,10 @@ inverse model
 \begin_inset Quotes erd
 \end_inset
 
- as an interface to the physical body.
+ as the interface to the physical body.
  Both of these are distinct from the internal model, which models the current
- state, as opposed to some hypothetical future state.
+ state.
+ This is, in turn, distinct from a model of some hypothetical future state.
 \end_layout
 
 \begin_layout Standard
@@ -1402,8 +1841,8 @@ Other models are possible: this includes memories of past events, where
 \begin_layout Standard
 Rather than inventing a new language for each of these different systems,
  it is convenient to be able to use the same language.
- The under-the-covers implementation is different: in one case, motors must
- be moved; in another case, the model must be updated.
+ The endpoints will be different: in one case, motors must be moved; in
+ another case, the model must be updated.
  In either case, the verbs, nouns, adjectives and adverbs should be the
  same.
  (In control theory, this is termed the 
@@ -1421,7 +1860,7 @@ efference copy
  the physical body, and another the self-model.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 English language interfaces
 \end_layout
 
@@ -1501,27 +1940,160 @@ plating is NOT sufficient for more complex, more abstract conversations.
  from the start.
 \end_layout
 
-\begin_layout Standard
-The prototype does perform syntactic analysis using the Link Grammar parser.
- It could have used RelEx or Relex2Logic, but does not, for reasons explained
- later.
+\begin_layout Subsubsection
+Dependency Grammar
 \end_layout
 
 \begin_layout Standard
-If one has a syntactic analyzer, then translation can be performed by extracting
- the syntax of a given English-language sentence, and re-writing it into
- an equivalent control-language structure.
+When one has a syntactic analyzer, then translation, from a natural language
+ (e.g.
+ English) to the control language can be performed.
+ This can be done by extracting the syntax of a given English-language sentence,
+ and re-writing it into an equivalent control-language structure.
  Along the way, specific English-language words and phrases are remapped
  to equivalent control-language atoms.
+ But what syntactic analyzer, and what theory of natural language should
+ be used?
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Standard
+It appears that the most natural theory of morphology and grammar, in relation
+ to conceptual graphs, such as those of figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Concept-Graph"
+
+\end_inset
+
+, is one or another form of 
+\begin_inset CommandInset href
+LatexCommand href
+name "dependency grammar"
+target "https://en.wikipedia.org/wiki/Dependency_grammar"
+
+\end_inset
+
+ (DG).
+ This is in contrast to 
+\begin_inset CommandInset href
+LatexCommand href
+name "phrase structure grammar"
+target "https://en.wikipedia.org/wiki/Phrase_structure_grammar"
+
+\end_inset
+
+ (PSG), which, although very popular in the United States, seems less suitable
+ for practical use in concept and action extraction.
+ Particularly inspirational forms of dependency grammars include Igor Mel’čuk's
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "Meaning-Text Theory"
+target "https://en.wikipedia.org/wiki/Meaning%E2%80%93text_theory"
+
+\end_inset
+
+ (MTT) and Dick Hudson's 
+\begin_inset CommandInset href
+LatexCommand href
+name "Word Grammar"
+target "https://en.wikipedia.org/wiki/Word_grammar"
+
+\end_inset
+
+ (WG).
+ A benefit of MTT is that it offers a clear, direct articulation of the
+ relationship between syntax and semantics, and how these can be transformed
+ into one another.
+ Another key concept in MTT is the idea of a 
+\begin_inset CommandInset href
+LatexCommand href
+name "Lexical Function"
+target "https://en.wikipedia.org/wiki/Lexical_function"
+
+\end_inset
+
+ (LF): that is, a function that tells you which word one should use to express
+ a certain idea or relation.
+ A benefit of WG is that it offers the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+landmarks
+\begin_inset Quotes erd
+\end_inset
+
+, which control word-order relationships in English.
+\end_layout
+
+\begin_layout Standard
+De facto, the prototype uses the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Link Grammar"
+target "https://en.wikipedia.org/wiki/Link_grammar"
+
+\end_inset
+
+ (LG) parser.
+ This is done for several reasons.
+ It is a strong, stable, mature parser of English that works well, and is
+ easy to integrate, today.
+ It also has a particularly elegant mathematical grounding, closely related
+ to that of categorial grammars and category theory.
+ This grounding in category theory helps make clear exactly how natural
+ language morpho-syntax can be manipulated into graphical representations
+ using abstract theories and algorithms.
+\end_layout
+
+\begin_layout Standard
+The model and control interfaces of the prototype connect directly to Link
+ Grammar.
+ This is called out here, because the prototype explicitly and intentionally
+ does 
+\emph on
+not
+\emph default
+ use 
+\begin_inset CommandInset href
+LatexCommand href
+name "RelEx"
+target "http://wiki.opencog.org/w/RelEx_Dependency_Relationship_Extractor"
+
+\end_inset
+
+ or 
+\begin_inset CommandInset href
+LatexCommand href
+name "Relex2Logic"
+target "http://wiki.opencog.org/w/RelEx2Logic_rules"
+
+\end_inset
+
+ (R2L), for reasons explained later.
+ RelEx is a dependency parser layered on top of LG, generating 
+\begin_inset CommandInset href
+LatexCommand href
+name "standard CoNLL-style DG markup"
+target "http://wiki.opencog.org/w/Dependency_relations"
+
+\end_inset
+
+.
+ R2L is a layer on top of RelEx, used to extract logical relationships from
+ factual English-language statements.
+ Both are OpenCog subsystems.
+ The R2L subsystem is used in OpenCog to perform natural reasoning on English
+ statements, using the PLN subsystem.
+\end_layout
+
+\begin_layout Subsubsection
 Link Grammar
 \end_layout
 
 \begin_layout Standard
-The syntax of the English-language sentence is extracted by parsing the
- input sentence with the 
+The syntax of English-language sentences is extracted by parsing the input
+ sentence with the 
 \begin_inset CommandInset href
 LatexCommand href
 name "Link Grammar parser"
@@ -1538,8 +2110,8 @@ target "https://en.wikipedia.org/wiki/Link_grammar"
 \end_inset
 
 ).
- There are certainly many other natural-language parsers out there, including
- famously the Stanford parser, Google's Parsey-McParseface, and any number
+ There are certainly many other natural-language parsers out there, including,
+ famously, the Stanford parser, Google's Parsey-McParseface, and any number
  of phrase-structure parsers.
  Link Grammar is used because it fits particularly well with the theory
  of Atomese, and because it has particularly high accuracy and very broad
@@ -1551,10 +2123,10 @@ target "https://en.wikipedia.org/wiki/Link_grammar"
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Example Link Grammar Parse
@@ -1722,7 +2294,7 @@ height "1pt"
 The Link Grammar parser discovers relationships between the words in a sentence,
  and marks up those relationships with links connecting pairs of words.
  These links have a type or kind, indicating the relationship between the
- words -- typically, subject, object, adjectival-modifier, adverbial-modifier,
+ words – typically, subject, object, adjectival-modifier, adverbial-modifier,
  prepositional-object and so on.
  This is illustrated in figure 
 \begin_inset CommandInset ref
@@ -1735,7 +2307,8 @@ reference "fig:Example-Link-Grammar"
  The relationships, taken together, can be understood to form a directed
  graph, often a tree.
  Most links have an implicit directionality in them.
- The graph does sometimes have cycles: these constrain the parse choices.
+ The graph does sometimes have cycles: these serve to constrain the parse
+ choices.
  
 \end_layout
 
@@ -1790,8 +2363,8 @@ Wi- & MVp+
 \family default
  acts as a fine-grained part-of-speech, and this carries semantic information.
  That is, the meaning of a word is correlated with the part-of-speech: this
- is obvious simply by observing that dictionaries organize word-meanings
- by parts-of-speech.
+ is obvious simply by observing that dictionaries (Webster's, OED) organize
+ word-meanings by parts-of-speech.
  The disjunct offers a particularly fine-grained distinction, and thus is
  more strongly correlated with meaning.
 \end_layout
@@ -1808,10 +2381,10 @@ costs
  or weights associated with different disjuncts.
  These can be interpreted as log-probabilities, and so the parse system,
  as a whole, has probabilistic or Markovian aspects associated with it.
- This play a minor role, at this stage.
+ This plays a minor role, at this stage, but is important in the long-run.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Graph rewriting
 \end_layout
 
@@ -1939,7 +2512,129 @@ Ds**c- & Js-
  The prototype contains a rule of roughly this form.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
+Planning and rule selection
+\end_layout
+
+\begin_layout Standard
+The next section describes the OpenCog rule selection and rule chaining
+ subsystems.
+ Before doing so, it seems important to motivate these, and to provide several
+ concrete examples to keep in mind.
+ 
+\end_layout
+
+\begin_layout Standard
+Classic examples of rule engines, and why they are needed, are provided
+ by AIML and ChatScript.
+ These systems allow authors to script a large number of rules that, when
+ matched against a specific input pattern, provide a specific (verbal) response.
+ Because there are a large number of rules (often tens of thousands), it
+ is impractical to 
+\begin_inset Quotes eld
+\end_inset
+
+try them all
+\begin_inset Quotes erd
+\end_inset
+
+; instead, these must be pruned down to a manageable set, usually to only
+ one, or a small set, and then applied.
+ 
+\end_layout
+
+\begin_layout Standard
+AIML/Chatscript rules usually go only 
+\begin_inset Quotes eld
+\end_inset
+
+one level deep
+\begin_inset Quotes erd
+\end_inset
+
+, or (with AIML SRAI) they 
+\begin_inset Quotes eld
+\end_inset
+
+forward-chain
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This essentially means that they are deterministic and reactionary: they
+ can only react to a given input.
+ This should be contrasted to goal-seeking behavior, which typically requires
+ 
+\begin_inset Quotes eld
+\end_inset
+
+backward chaining
+\begin_inset Quotes erd
+\end_inset
+
+: a desired end-result is specified, and the rule system must discover the
+ rules that can achieve those results.
+ 
+\end_layout
+
+\begin_layout Standard
+An example of goal-oriented behavior is this: the robot seeks to make the
+ audience laugh (the goal).
+ Which, of the myriad performance rules it has available, are suitable for
+ achieving this goal? 
+\end_layout
+
+\begin_layout Standard
+A very different rule application scenario arises when only partial inputs
+ are available to an ordinary forward-chaining system.
+ For example, someone said something to the robot, but it was not fully
+ understood – possibly due to noise, bad speech-to-text conversion, mumbling.
+ It may be possible that the full text is available, but it is not clear
+ what the speaker meant.
+ In this case, one needs a selection of fallback actions: perhaps the statement
+ cannot be responded to directly or in full (
+\begin_inset Quotes eld
+\end_inset
+
+raise your arm
+\begin_inset Quotes erd
+\end_inset
+
+ except that the robots arm is already raised: a reasonable action is to
+ raise it even higher), or only various sub-parts are understood (
+\begin_inset Quotes eld
+\end_inset
+
+mumble mumble turn left mumble
+\begin_inset Quotes erd
+\end_inset
+
+: a reasonable action for the robot is to turn left).
+ In these cases, one could try to write a rule that covers every eventuality,
+ every situation: but of course, this is legendarily impossible.
+ Yet, a response is required.
+ 
+\end_layout
+
+\begin_layout Standard
+In this case, it is important to be able to pick out a set of fragmentary
+ rules, all of which might be partially appropriate for the situation, and
+ then assemble a consistent, non-conflicting subset of them, for performance.
+ If several subsets of consistent rules are available, the one with the
+ highest likelihood or confidence can then be selected for performance.
+ This scenario is neither forward nor backward chaining; it is rather the
+ assembly of a fallback plan to (gracefully?) handle a new, unexpected scenario.
+\end_layout
+
+\begin_layout Standard
+However, in the default mode of robot operation, a simple, direct stimulus-respo
+nse reaction chain is sufficient for most situations.
+ Almost all of the prototype runs in the forward-chained mode.
+ Simple, direct rule application is sufficient for many or most cases.
+ Its just not enough to handle all cases.
+\end_layout
+
+\begin_layout Subsubsection
 Rule engine
 \end_layout
 
@@ -1947,16 +2642,30 @@ Rule engine
 A collection of rules require a rule engine to manage and apply them.
  OpenCog has several forms of these, that can be used in various different
  situations.
- Rules can be applied, one-by-one, on an 
+ These are an ad-hoc system, OpenPsi, and the chainers.
+\end_layout
+
+\begin_layout Standard
+Rules can be applied, one-by-one, on an 
 \emph on
 ad hoc
 \emph default
  basis, by calling 
 \family typewriter
-cog-execute!
+
+\begin_inset CommandInset href
+LatexCommand href
+name "cog-execute!"
+target "http://wiki.opencog.org/w/Cog-execute!"
+
+\end_inset
+
+
 \family default
 , for example.
- 
+ Typically one has already selected some rule; the rule is typically some
+ pattern or query, and if the query is satisfied, then the specified action
+ is performed.
 \end_layout
 
 \begin_layout Standard
@@ -1964,31 +2673,99 @@ The OpenPsi subsystem maintains classes of rules, enabling goal-driven behavior.
  Although the rules that OpenPsi manages are only applied one by one (one
  at a time), the sorting of rules into distinct classes allows distinct
  goals, with distinct priorities to be assigned to each.
- Thus, to reach a certain goal, it is possible to select rules that are
- most likely to achieve that goal.
+ Thus, to reach a certain goal, it is possible to select sets of rules that
+ are most likely to achieve that goal.
  As the importance of various goals change dynamically over time, different
  rules-sets can come into play; that is, the goals modulate the selection
  of the rule-sets.
+ In more poetic, psychologically-colored terms, the OpenPsi subsystem allows
+ the internal model to have a set of desires and 
+\begin_inset Quotes eld
+\end_inset
+
+hopes
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+emotions
+\begin_inset Quotes erd
+\end_inset
+
+, which can be used to control the rule-sets being deployed at a given moment.
+\end_layout
+
+\begin_layout Standard
+The OpenPsi subsystem was explicitly developed to offer more powerful and
+ more flexible rule management than several other popular control systems:
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "behavior trees"
+target "https://en.wikipedia.org/wiki/Behavior_tree"
+
+\end_inset
+
+, 
+\begin_inset CommandInset href
+LatexCommand href
+name "state machines"
+target "https://en.wikipedia.org/wiki/Automata-based_programming"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset href
+LatexCommand href
+name "hidden Markov models"
+target "https://en.wikipedia.org/wiki/Hidden_Markov_model"
+
+\end_inset
+
+.
+ Behavior trees are popular in game AI systems; they allow game developers
+ to craft explicit behaviors for game avatars.
+ In the end, though, behavior trees prove difficult to work with, because
+ of the lack of goal-directed behavior (which OpenPsi can provide).
+ State machines are popular among Hollywood animators, as they allow the
+ animator to create responsive animations in a modular fashion, that can
+ be composed together to obtain new, surprising and effective behaviors.
+ They do not provide a way of specifying goal-directed behavior, nor the
+ modulation of behavior based on the current model state and desires.
+ Hidden Markov Models can be thought of as probabilistic state machines:
+ they add a statistical component to behavior.
+ They are particularly useful and popular for automatically discerning patterns
+ in data.
+ Thus, they are useful for learning.
+ For the expression and selection of rules, though, they offer no particular
+ advantage.
 \end_layout
 
 \begin_layout Standard
 The forward and backward chainers can be used to discover sequences of rules
- that connect two graphs.
+ that connect two endpoint-graphs.
  That is, given a particular starting graph, and a particular ending graph,
  the chainers can explore different sequences of rules that might result
  in a valid path between these two end-points.
- These use traditional search algorithms, although an A-star search algorithm
- variant is envisioned.
+ The chainers use traditional search algorithms, essentially a variant of
+ an A-star search algorithm variant.
  Currently, the forward-backwards chainers are employed primarily for probabilis
-tic reasoning (PLN).
+tic reasoning (PLN), and not in the robot control subsystem.
 \end_layout
 
 \begin_layout Standard
-Rules can also be assembled by means of parsing.
- Currently, OpenCog only implements only one, a very special-purpose parser.
- It is envisioned that a generic parser, replacing or supplementing the
- forward and backwards chainers, will be created.
- This idea is explored further in 
+More efficient rule chaining can be done by means of parsing; that is, collectio
+ns of compatible rules can be discovered and assembled by applying parser
+ theory (as opposed to blind A-star search).
+ 
+\end_layout
+
+\begin_layout Standard
+A proposal for a generic parser, suitable for rule selection and chaining,
+ is given in 
 \begin_inset ERT
 status open
 
@@ -2002,9 +2779,17 @@ hypertarget{appendix-a}{Appendix A}
 \end_inset
 
 .
+ It is hoped that this approach can provide a more performant, more directed
+ and principled manner of making plans: that is, of discovering routes through
+ sets of rules that accomplish certain goals.
+ Properly implemented, it can not only replace blind search and rule chaining,
+ but can also enable reasoning about plans.
+ More colloquially, it allows thinking about the future, and planning for
+ it.
+ In practical terms, it allows faster responses to current situations.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Action performance
 \end_layout
 
@@ -2026,7 +2811,7 @@ Action Orchestrator
 .
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 The language pipeline
 \end_layout
 
@@ -2062,7 +2847,7 @@ input
 \begin_inset Quotes erd
 \end_inset
 
- side; so questions, for example, will also generate a verbal output; the
+ side; so, questions, for example, will also generate a verbal output; the
  output side is not shown, although it can roughly be imagined to be the
  
 \begin_inset Quotes eld
@@ -2082,7 +2867,7 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-\begin_inset Caption
+\begin_inset Caption Standard
 
 \begin_layout Plain Layout
 Language Pipeline
@@ -2242,7 +3027,7 @@ height "1pt"
 
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Semantics
 \end_layout
 
@@ -2254,7 +3039,7 @@ reference "fig:Language-Pipeline"
 
 \end_inset
 
- distingusihes a semantic representation layer SemR, and a control-language
+ distinguishes a semantic representation layer SemR, and a control-language
  layer ContrL.
  The SemR layer provides a 
 \begin_inset Quotes eld
@@ -2268,7 +3053,7 @@ normalized
  of the precise surface form of the sentence.
  It provide a representation that is easier to work with, moving away from
  less important syntactic details.
- Also, unlike the control langauge, it can avoid being closely tied to the
+ Also, unlike the control language, it can avoid being closely tied to the
  state representation.
  
 \end_layout
@@ -2387,7 +3172,7 @@ target "https://en.wikipedia.org/wiki/Semantic_network"
 .
 \end_layout
 
-\begin_layout Subsection*
+\begin_layout Subsubsection
 Summary
 \end_layout
 
@@ -2400,7 +3185,7 @@ There are additional important concepts that are required to correctly implement
  to problems that must be solved in the full system.
 \end_layout
 
-\begin_layout Section*
+\begin_layout Section
 Prototype Review
 \end_layout
 
@@ -2446,11 +3231,11 @@ These are each reviewed, below.
  it makes clear both the how and the why of a more sophisticated design.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Control language prototype
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Control-language-prototype"
+name "subsec:Control-language-prototype"
 
 \end_inset
 
@@ -2800,7 +3585,7 @@ Lines 570-680 (end of file) repeat the previous structures, but are used
  
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Translation prototype
 \end_layout
 
@@ -2976,7 +3761,7 @@ show happy
 .
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Action Performance
 \end_layout
 
@@ -3069,7 +3854,7 @@ if
  
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Rule engine
 \end_layout
 
@@ -3104,7 +3889,7 @@ ad hoc
  system will become apparent.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Glue code
 \end_layout
 
@@ -3141,7 +3926,7 @@ target "https://github.com/opencog/opencog/blob/21ad879d85d31013e59870b895bb0a0a
  file defines a loadable scheme module that encapsulates all of this code.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Self-model, World-model
 \end_layout
 
@@ -3220,7 +4005,7 @@ target "https://github.com/opencog/ros-behavior-scripting/blob/a00847af2ef07dfbc
 \end_layout
 
 \begin_layout Itemize
-Lines 57-60 indicating if the robot is asleep, awake or bored -- the 
+Lines 57-60 indicating if the robot is asleep, awake or bored – the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3303,6 +4088,10 @@ Lines 244-294 deal with the setting of timestamps on the internal state.
 Lines 305-763 deal with the interaction with visible faces in the room.
  The names of the various predicates are more-or-less self-explanatory.
  So, 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3351,8 +4140,8 @@ control language
  
 \end_layout
 
-\begin_layout Section*
-Design Issues
+\begin_layout Section
+Design Issues and Enhancements
 \end_layout
 
 \begin_layout Standard
@@ -3360,20 +4149,21 @@ During the prototype development, a number of design issues were encountered.
  These are discussed here.
  All of these should be addressed in some way, either through architecture
  changes or implementation improvements.
+ A number of enhancments also suggest themselves: these ask for additional
+ development and pursuit.
 \end_layout
 
-\begin_layout Subsection*
-Translation Issues
+\begin_layout Subsection
+Language Processing Issues
 \end_layout
 
 \begin_layout Standard
 A fair number of issues crop up in the middle layers of the language input
  system.
- These are reviewed in order from narrowest and most specific, to broadest
- and most general.
+ These are reviewed here.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 What is the correct semantic representation?
 \end_layout
 
@@ -3416,15 +4206,19 @@ Look leftwards!
 
 .
  Attempts to mitigate this became quickly stuck in the morass of R2L rules.
- It seemed like an aweful lot of effort for very little return, so that
- approach was abandoned for the prototype.
+ It seemed like an awful lot of effort for very little return, so that approach
+ was abandoned for the prototype.
 \end_layout
 
 \begin_layout Standard
 Next, it was hoped that RelEx would provide the surface format, but that
  also did not work out.
- RelEx failed in two disstinct ways: it sometimes generated highly variable
- outputs for semantically similar sentences e.g.
+ RelEx failed in two distinct ways: it sometimes generated highly variable
+ outputs for semantically similar sentences 
+\emph on
+e.g.
+
+\emph default
  
 \begin_inset Quotes eld
 \end_inset
@@ -3443,105 +4237,363 @@ Look down!
 
  gave very different outputs.
  Other times, there were unexpected similarities, when outputs should have
- been semantically diffent.
+ been semantically different.
  On top of this, pattern matching to RelEx was cumbersome: the patterns
- quickly became complex, requiring many different check to many sub-parts.
+ quickly became complex, requiring many different checks to many sub-parts.
  The large complex patterns proved fragile and hard to maintain.
  In the end, using Link Grammar as the surface representation proved to
  be a LOT easier; the patterns became much smaller and more regular.
 \end_layout
 
+\begin_layout Subsubsection
+RelEx issues
+\end_layout
+
+\begin_layout Standard
+The prototype made clear that the RelEx output is actually more complex
+ than the LG output, and it is more difficult to use, in practice.
+ It does not align well with semantics.
+ The reason that it is more complex is that it tries to re-package the LG
+ data into 
+\begin_inset Quotes eld
+\end_inset
+
+orthogonal
+\begin_inset Quotes erd
+\end_inset
+
+ linguistic classifications: person, number, tense, aspect, mood, voice.
+ This is a laudable goal, but for several problems:
+\end_layout
+
+\begin_layout Itemize
+Many semantically equivalent sentences have completely different values
+ for number, tense, mood.
+\end_layout
+
+\begin_layout Itemize
+This unpacking into into distinct classifications behaves like a data decompress
+or: it makes the atomese graphs larger, without actually increasing the
+ information content.
+ 
+\end_layout
+
+\begin_layout Itemize
+RelEx has poor coverage, and makes a fair amount of errors in what it does.
+ This makes it's output unreliable and undependable.
+\end_layout
+
+\begin_layout Standard
+The end-goal is to have a system that can recognize semantically-similar
+ sentences.
+ There are ways to do this: the old and oft-quoted work from Dekang Lin,
+ Poon&Domingos show how that can be acheived.
+ It should be possible to harness the 
+\begin_inset Quotes eld
+\end_inset
+
+Patten Miner
+\begin_inset Quotes erd
+\end_inset
+
+ to perform this work.
+ However, there's now a strong hint that the RelEx output is inappropriate,
+ a poor choice for this.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Important Note
+\emph default
+: Although the above paragraphs use the word 
+\begin_inset Quotes eld
+\end_inset
+
+RelEx
+\begin_inset Quotes erd
+\end_inset
+
+, the same comments and complaints can be levelled against the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Stanford Parser"
+target "http://nlp.stanford.edu/software/lex-parser.shtml"
+
+\end_inset
+
+, and against Google's 
+\begin_inset CommandInset href
+LatexCommand href
+name "SyntaxNet (McParseFace)"
+target "https://research.googleblog.com/2016/05/announcing-syntaxnet-worlds-most.html"
+
+\end_inset
+
+.
+ Both suffer from the same issues listed above: that is because they both
+ assume the same theory, and generate the same kind of output.
+ They might be more accurate than RelEx, thus alleviating one of the problems,
+ but even this is not entirely clear.
+\end_layout
+
+\begin_layout Standard
+The point here is that traditional dependency parsing, whether by RelEx,
+ Stanford or SyntaxNet, seems to be appealing, especially if you are a linguist.
+ However, the resulting graphs contain too much fluff to be useful for efficient
+ computing.
+ They unpack a lot of information, making it easy for a linguist to examine
+ their output, and verify it's correctness.
+ But the result of this unpacking is a large graph, and that graph becomes
+ unweildy and inefficient for automated processing.
+ It is large, but it does not seem to contain more data than the more compact
+ LG output.
+ Its large and awkward to work with.
+\end_layout
+
 \begin_layout Standard
 Side comment: now that LG indicates the head-verbs of sentences and clauses,
- the primary raison-d'etre for RelEx goes away.
- It does not provide a lot of value-add any more.
+ the primary raison-d'etre for RelEx, the major reason for it's complexity,
+ goes away.
+ It does not seem to provide a lot of value-add any more.
 \end_layout
 
-\begin_layout Subsubsection*
-AnchorNodes, or something else?
-\end_layout
-
-\begin_layout Standard
-The current parsing pipeline (used by R2L as well as the prototype here)
- drops off recently-parsed sentences, and leaves them attached to an AnchorNode,
- where they can be picked up by the next stage of processing.
- Thus, to process a sentence, either every rule must specify the AnchorNode,
- so that the rule only applies to the curent sentence, or ...XXX how does R2L
- work? 
-\end_layout
-
-\begin_layout Subsubsection*
-DRAFT VERSION 0.04
+\begin_layout Subsubsection
+Synonymous phrases
 \end_layout
 
 \begin_layout Standard
-This is a draft.
- Everything above is in some mostly-finished state.
- Everything below is in outline format.
+The infrastructure needs to support synonymous phrases, not just synonymous
+ words.
+ A proper definition of the problem, together with prototyping is required.
+ The current architecture is inadequate.
+ 
 \end_layout
 
-\begin_layout Subsubsection*
-Translation issues
-\end_layout
-
-\begin_layout Standard
-issue: learning vs.
- hand-crafting, obtaining synonymous phrases, not just synonymous words.
+\begin_layout Subsection
+Process Flow Issues
 \end_layout
 
 \begin_layout Standard
-issue: using openpsi to discover and apply rules.
- This is like using openpsi in general, to pick through non-verbal stimulus.
+Several issues arise in the design of rules, and in the control of their
+ application.
+ Specifically, there has been little or no design effort invested in managing
+ processing pipeline.
+\end_layout
+
+\begin_layout Subsubsection
+AnchorNodes vs.
+ URE
 \end_layout
 
 \begin_layout Standard
-issue: fuzzy matching, partial matching
+The way that information is passed around, from subsystem to subsystem,
+ and the way that it interacts with the pattern matcher can be at times
+ awkward.
+ Some general improvements are needed in this area.
+ They should not be hard, but they are significant, architecturally.
 \end_layout
 
 \begin_layout Standard
-issue: picking out sentences attached to an anchor, vs other processing
- pipeline designs.
+The 
+\family typewriter
+AnchorNode
+\family default
+ was invented to be an attachment point, where different subsystems could
+ leave collections of atoms that other subsystems could pick up.
+ This works OK, in some situations, but has issues.
+ The RelEx subsystem drops off the reesults of a parse at an AnchorNode.
+ This is OK, because RelEx is a process external to the AtomSpace, and new,
+ incoming sentences are infrequent.
+ However, the 
+\family typewriter
+AnchorNode
+\family default
+ mechanism provides no hint of order or priority: if two things are attached,
+ there's no hint of which came first, which is more important.
+ Another issue is that its not thread-local, thread-atomic: two different
+ racing threads could pick up the same work unit; currently there is no
+ mechanism to avoid this.
 \end_layout
 
 \begin_layout Standard
-todo -- the verb synonyms should not be needed!? as they can be gotten from
- the synonym lists for the control-action language...
+A more serious problem is how the current prototype uses (abuses) the 
+\family typewriter
+AnchorNode
+\family default
+.
+ The current prototype defines a number of rules (see the review above)
+ but does not use the URE to apply them.
+ Instead, it uses an 
+\emph on
+ad hoc
+\emph default
+ mechanism: different processing steps look for input attached to assorted
+ anchors, and 
+\begin_inset Quotes eld
+\end_inset
+
+return
+\begin_inset Quotes erd
+\end_inset
+
+ thier results by attaching them to yet other anchor points.
+ The informal goal of this 
+\emph on
+ad hoc
+\emph default
+ process is to be able to designate sequences of processing steps: that
+ certain rules should run only after other rules that ran earlier, and that
+ certain rules should limit thier scope of applicability only to certain
+ situations.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Standard
+This is just fine, you might think, except that each rule is more complex:
+ it has to specify both the input anchor and the output anchor.
+ In addition, one has to write some 
+\emph on
+ad hoc
+\emph default
+ scheme code watching each anchor point, and triggering if something arrives
+ there.
+ After running, it has to clear the anchor.
+ It ends up being clumsy, cut-n-paste blobs of utility code.
+\end_layout
+
+\begin_layout Standard
+The current URE, specifically, the forward chainer part of the URE, does
+ not provide any interfaces for specifying this kind of chaining of rule-classes.
+ It probably should.
+\end_layout
+
+\begin_layout Standard
+If the URE is altered to provide this, then how should it be implemented?
+\end_layout
+
+\begin_layout Standard
+At any rate, even without adding chaining support to the URE, the current
+ prototype should be altered to remove most uses of the AnchorNodes, and
+ replaced by the URE, instead.
+\end_layout
+
+\begin_layout Subsubsection
+URE bottlenecks
+\end_layout
+
+\begin_layout Standard
+The URE currently limits the scope of its search by creating a new, stand-alone
+ AtomSpace, copying all of the focus set into it, copying all of the rules
+ into it, and only then applying the rules.
+ This has the desired effect of limiting rule application to only the desired
+ focus set.
+ However, it surely has poor performance, as a result.
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "Issue #1004"
+target "https://github.com/opencog/atomspace/issues/1004"
+
+\end_inset
+
+ tracks this.
+\end_layout
+
+\begin_layout Subsubsection
+Rule selection
+\end_layout
+
+\begin_layout Standard
+The current prototype applies all rules to all inputs.
+ This is fine, as long as there are only a few rules, but this will not
+ scale, in general.
+ A better solution is to first limit the number of possible rules to apply,
+ based on the input.
+ There already is infrastructure to do this, it's just not used in the prototype.
+\end_layout
+
+\begin_layout Standard
+The existing infrastructure is a combination of 
+\family typewriter
+DualLink
+\family default
+ and the 
+\family typewriter
+cog-recognize
+\family default
+ function.
+ It's already deployed in the AIML subsystem, where it is used to pick out
+ a set of appropriate AIML rules.
+ It is partly integrated into OpenPsi, but this could be improved.
+\end_layout
+
+\begin_layout Subsection
+Enhancements
+\end_layout
+
+\begin_layout Standard
+The prototype ignores various established OpenCog subsystems and technologies.
+ It also ignores several architectural directions that have been discussed,
+ but have not been acted on.
+ These are breifly reviewed here.
+\end_layout
+
+\begin_layout Subsubsection
 OpenPsi
 \end_layout
 
 \begin_layout Standard
-OpenPsi as a flexible rule-selection system
+OpenPsi as a flexible rule-selection system.
+ It is not used in the prototype.
+ How should it be used (aside from the rule-selection issue mentioned above?)
 \end_layout
 
-\begin_layout Subsubsection*
-Self-model issues
+\begin_layout Subsubsection
+Fuzzy matching
 \end_layout
 
 \begin_layout Standard
-The various predicates: e.g.
- (DefinedPredicate "Is sleeping?") do not really fit the 
+The current system does not tolerate failures in the speech-to-text and
+ the text-to-parse stages.
+ Use of fuzzy matching during rule application should be able to make up
+ for this fragility.
+ Thus, for example, if the input is 
 \begin_inset Quotes eld
 \end_inset
 
-control language
+
+\emph on
+garbled garbled mumbmle turn left mumble
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
- concept described above.
- Ditto for lines 305-547 of self-model.scm
+, then the robot should still be able to latch onto the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+turn left
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ portion of the input, and respond to that.
+ Since there may be multiple fuzzy matches, some sort of confidence ranking
+ would be required, as well.
 \end_layout
 
-\begin_layout Subsubsection*
+\begin_layout Subsubsection
 Question-answering
 \end_layout
 
 \begin_layout Standard
-Answering questions about self and the world.
- Also has been prototyped.
- Its like the 
+The robot needs to be able to answer questions about self and the world.
+ This has been prototyped, but very incompletely.
+ From the architectural perspective, question-answering resembles the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3549,7 +4601,7 @@ view
 \begin_inset Quotes erd
 \end_inset
 
- part of MVC -- the internal state has to be 
+ part of MVC – the internal state has to be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3570,51 +4622,132 @@ standardized state queries
  Running these queries returns yes/no answers (truth queries) or multi-valued
  data (e.g.
  look-at direction) or more complex structures (sequences of actions that
- had been performed in the past) 
+ had been performed in the past).
+ 
 \end_layout
 
 \begin_layout Standard
-There are two translation layers that are needed here: first, to convert
- English to the internal query language, second, to convert the response
- back to English.
+However, the current prototype does not fit well with this idea.
+ For example, the various predicates: 
+\emph on
+e.g.
+
+\emph default
+ 
+\family typewriter
+(DefinedPredicate "Is sleeping?")
+\family default
+ do not really fit the 
+\begin_inset Quotes eld
+\end_inset
+
+control language
+\begin_inset Quotes erd
+\end_inset
+
+ concept described above.
+ Ditto for lines 305-547 of 
+\family typewriter
+self-model.scm
+\family default
+.
+ These need rework.
+\end_layout
+
+\begin_layout Standard
+Question answering requires a second pipeline, beyond that shown in figure
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Language-Pipeline"
+
+\end_inset
+
+.
+ Of course, there must first be a conversion from English to the internal
+ query language.
+ The response must then be converted back into English.
  If the response is of the right form, then SuReal can be used to perform
  the final conversion.
  Right now, the query language is not generating SuReal-compatible results.
 \end_layout
 
-\begin_layout Subsubsection*
-World model
+\begin_layout Subsubsection
+Enlarged world model
 \end_layout
 
 \begin_layout Standard
-Right now, there is only a self-model.
- A world-model is needed, so we can talk about that.
- Well --there is a world model -- currently, it consists of the visible
- faces in the environment.
+The current model of the self, and the world, is tiny.
+ It consists entirely of emotional state, and the visible faces in the envronmen
+t.
  It needs to get bigger.
 \end_layout
 
-\begin_layout Subsubsection*
-Action Orchestration
+\begin_layout Subsubsection
+More sensory input
 \end_layout
 
 \begin_layout Standard
-Carrying out multiple things at once; using the internal model to do this.
+The robot is currently almost completely starved for sensory input: it can
+ see faces, and it can access the text that cam from speech-to-text.
+ The speech-to-text does not provide any audio cues: was it a whisper? A
+ shout?
 \end_layout
 
-\begin_layout Subsubsection*
-Memory
+\begin_layout Standard
+Raw sensory input needs to be converted into ensory perceptions: atomese
+ representations of processed sensory input is needed.
+ For example, if the audio volume suddenly got loud, and the visual field
+ is suddenly moving, then maybe ...
+ everyone is clapping? booing? getting up to leave? How should the robot
+ react to these events? The reaction for an interrupted discussion must
+ be different from that occuring at the end of a speech.
+\end_layout
+
+\begin_layout Subsubsection
+Action orchestration
+\end_layout
+
+\begin_layout Standard
+One must be able to carry out multiple things at once.
+ Ben has written about this.
+ How it should fit in remains a unclear, although it is obviously needed.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Acting memory and performance
 \end_layout
 
 \begin_layout Standard
 Multiple types of memory are needed.
  Most important (for demo purposes) is memory consisting of imperatives:
- when she is told to do this and say that, she needs to remember this, and
- later on, play that back as a performance.
+ when she is told to do this and say that, she needs to remember what she
+ was told, and what she did, and later on, be able to play that back as
+ a performance.
+ That is, there must be a mode where the robot behaves as an actor under
+ directorial control: the actor can be instructed by the director, given
+ stage notes, and respond to these.
 \end_layout
 
 \begin_layout Standard
-This should be 
+Examples of such directives might be: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+do that performance again, except this time, do xyz more slowly
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Initiali protoptypes of this level of function should be 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3624,15 +4757,355 @@ straight-forward
 
 : one can record the control-language directives.
  They need to be marked up with timing information.
-\end_layout
-
-\begin_layout Standard
-Implementing acting-coaching is interesting, and in particular, implementing
- directives such as 
+ Verbal editing might be harder, as portions of a directive, such as 
 \begin_inset Quotes eld
 \end_inset
 
-do that performance again, except this time, make xyz go more slowly
+
+\emph on
+do xyz more slowly
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ require associating the word
+\emph on
+ 
+\begin_inset Quotes eld
+\end_inset
+
+xyz
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+ with some portion of the performance.
+ This brings up a number of reference resolution issues, discussed previously.
+\end_layout
+
+\begin_layout Subsubsection
+General memory
+\end_layout
+
+\begin_layout Standard
+A second, distinct type of memory is being able to remember past states
+ of the world.
+ A basic prototype of this should be relatively straight-forward.
+ This memory would need to be made accessible to the question-answering
+ subsystem, so that questions about the immediate past can be answered.
+\end_layout
+
+\begin_layout Standard
+One minor associated infrastructure challenge is that a management layer
+ for the Postgres DB interfaces is needed.
+ The basic idea is that memories should not be lost during power-off or
+ reboot.
+ Progress on this infrastructure is tracked in 
+\begin_inset CommandInset href
+LatexCommand href
+name "issue #734"
+target "https://github.com/opencog/atomspace/issues/734"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Memories must be segregated into classes: there are some things that need
+ to be remembered, others that should not be.
+\end_layout
+
+\begin_layout Subsubsection
+Learning
+\end_layout
+
+\begin_layout Standard
+A deep, fundamental design issue is that, right now, essentially all of
+ the rules are hand-authored, and not learned.
+ Ultimately, the ability to learn is an imperative.
+ This is a large topic that will not be covered here, with one exception.
+ The next section describes a design proposal for expressive imitation learning.
+\end_layout
+
+\begin_layout Section
+Associating words and meanings to visual cues
+\end_layout
+
+\begin_layout Standard
+Interaction with humans requires the ability to read facial expressions
+ and gestural cues.
+ This ability needs to be integrated with language abilities.
+ This section proposes one possible way in which this could be done.
+\end_layout
+
+\begin_layout Subsection
+Imitation learning of facial expressions
+\end_layout
+
+\begin_layout Standard
+Here's a proposal for imitation learning of facial expressions.
+ The goal is to be able to perceive different facial expressions, via analysis
+ of incoming video, to remember what was seen, to mimic what was seen, and
+ to associate words and language with the perceptions and memories.
+\end_layout
+
+\begin_layout Standard
+Many of the details here could be done in a different way, so this is a
+ sketch.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Landmark discovery
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Facial landmark discovery
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Facial-landmark-discovery"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ci2cv-demo-cropped.jpg
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Example of facial landmark discovery.
+ Software extracts boundaries of a face from an image, identifying significant
+ landmarks, such as the eyes, nose and lips.
+ These are referred to as 
+\begin_inset Quotes eld
+\end_inset
+
+landmarks
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The relational structure of the landmarks is also presented: that is, neighbori
+ng points are identified by means of a triangular mesh.
+ Knowing this relational structure is important, as it helps disambiguate
+ points that (for instance) indicate the nose from points that indicate
+ the mouth.
+ This is a demo image taken directly from the 
+\begin_inset CommandInset href
+LatexCommand href
+name "ci2cv website"
+target "http://face.ci2cv.net/"
+
+\end_inset
+
+; it is meant only to be illustrative of the general idea, rather than promoting
+ this technology over any other.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+An imitation learning system needs to start with some way of perceiving
+ human faces.
+ One such system, for example, is 
+\begin_inset CommandInset href
+LatexCommand href
+name "ci2cv"
+target "http://face.ci2cv.net/"
+
+\end_inset
+
+, although there are others.
+ This system is able to recognize facial landmarks, such as eyes, nose,
+ lips and boundary of the head, and stitch these together into a mesh showing
+ the relative relationship between these points.
+ This is illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Facial-landmark-discovery"
+
+\end_inset
+
+.
+ The goal of the landmark discovery system is to 
+\begin_inset Quotes eld
+\end_inset
+
+dimensionally reduce
+\begin_inset Quotes erd
+\end_inset
+
+ high-dimension data, i.e.
+ the raw video pixels, to a much lower amount of data (dozens or hundreds
+ of 2D or 3D floating-point numbers at 10 to 30 frames per second: that
+ is, 500 floats per second to 15K floats per second) in such a way that
+ the reduced data is still meaningful, and has some sort of reasonable fidelity
+ to the input image.
+\end_layout
+
+\begin_layout Standard
+There are a large number of reasons why this is a difficult task, including
+ poor lighting, fast motion, and distant or blurry faces.
+\end_layout
+
+\begin_layout Subsubsection
+Expression recognition by classification and clustering
+\end_layout
+
+\begin_layout Standard
+With a such dimensional reduction system in place, the next step would be
+ to perform training and analysis of 
+\begin_inset Quotes eld
+\end_inset
+
+typical
+\begin_inset Quotes erd
+\end_inset
+
+ facial expressions.
+ That is, working with a large collection of visual data, consisting of
+ many different types of facial expressions on many different faces, the
+ goal is to extract 
+\begin_inset Quotes eld
+\end_inset
+
+typical
+\begin_inset Quotes erd
+\end_inset
+
+ feature vectors.
+ This does NOT have to be a labeled dataset; it would be better if it was
+ not labeled, as the goal is to extract commonalities in the dataset, rather
+ than to extract labels.
+ Labeling comes at a later stage.
+\end_layout
+
+\begin_layout Standard
+To extract unlabeled but classified and clustered data, it might be possible
+ to use one of several relatively simple data analysis tools, such as principal
+ component analysis (PCA), possibly other kernel methods, or possibly non-linear
+ tools.
+ Because unsupervised training is being proposed here, its not clear how
+ to apply deep-learning neural net techniques.
+ 
+\end_layout
+
+\begin_layout Standard
+The goal of this stage is to have a relatively small set of 
+\begin_inset Quotes eld
+\end_inset
+
+face types
+\begin_inset Quotes erd
+\end_inset
+
+ that are recognized by the system, perhaps a few dozen, but less than one
+ hundred.
+ Because the training is unsupervised, its not clear what common features
+ are being learned: perhaps they are facial expressions (happy, sad), perhaps
+ they facial types (round, square-jawed), perhaps they are racial (Asian,
+ European, African), perhaps they are mouth-centered (open, closed-mouth,
+ speaking vs listening), and perhaps they include face orientations (direct
+ full-face, three-quarters face, profile).
+ Perhaps the recognized types are data characteristics (well-lit, distinct,
+ poorly-lit, blurry, distant, small).
+ The point here is to somehow reduce the data rate of thousands of floats
+ per second, to maybe 1 byte (256 different face recognitions) per second,
+ and to have some sort of reasonable fidelity to the input image, including
+ stability (low noise).
+\end_layout
+
+\begin_layout Standard
+This appears to be a research task.
+ Exactly how hard or easy it is to accomplish this is not clear.
+\end_layout
+
+\begin_layout Subsubsection
+Imitation learning
+\end_layout
+
+\begin_layout Standard
+If the above can be accomplished, the next step would consist of imitation
+ learning.
+ That is, the robot would be set up to look at itself, using the same (trained)
+ analysis pipeline.
+ One would then embark on a search of the rather large space of possible
+ motor settings, with the goal of associating certain particular motor settings
+ and movements to the different types or classes being identified.
+ If a motor setting is found that corresponds to known characteristic, then
+ that motor setting is memorized, and associated with that type.
+ An exploration of the size and shape of the motor parameter space needs
+ to be performed: Similar motor settings should trigger the same recognition,
+ but what, exactly, are the boundaries of what can be recognized? 
+\end_layout
+
+\begin_layout Standard
+The goal of this stage is to discover how to make the specific types of
+ facial gestures that were learned.
+ That is, the goal is to get a software API whose messages are of the format:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+make facial expression type 7, or anything close to that
+\begin_inset Quotes erd
+\end_inset
+
+, as well as 
+\begin_inset Quotes eld
+\end_inset
+
+now make a similar, but different expression of type 7
 \begin_inset Quotes erd
 \end_inset
 
@@ -3640,116 +5113,347 @@ do that performance again, except this time, make xyz go more slowly
 \end_layout
 
 \begin_layout Standard
-A second type of memory would be remembering past states of the world.
-\end_layout
-
-\begin_layout Standard
-One technical challenge is that we will need a management layer for the
- Postgres DB interfaces, so that memories are not lost during power-off.
- Those memories need to be segregated: there are somethings that need to
- be remembered, others that should not be.
-\end_layout
-
-\begin_layout Subsubsection*
-Learning from sensory input
-\end_layout
-
-\begin_layout Standard
-Creating atomese representations of sensory input processing pipelines,
- so that specific sensory inputs can be recognized e.g.
- if the audio volume suddenly got loud, and the visual field is suddenly
- moving, then maybe ...
- everyone is clapping? booing? getting up to leave? ...I'm no longer the center
- of attention?
-\end_layout
-
-\begin_layout Subsubsection*
-Free will
-\end_layout
-
-\begin_layout Standard
-Free will, as defined here, is the over-riding of default behavior (as computed
- by psi-rules) by means of a logically, rationally reasoned course of action.
- For example, the default of the psi rules might be 
+Such automated exploration and definition of boundaries should be relatively
+ straight-forward.
+ What is not clear is whether the results will be significant in human terms:
+ it may turn out that 
 \begin_inset Quotes eld
 \end_inset
 
-lolly-gag about
+expression type 7
 \begin_inset Quotes erd
 \end_inset
 
-, while a rational decision would be 
+ encompasses everything from smiling to frowning in profile, while raising
+ one eyebrow: it might turn out that 
 \begin_inset Quotes eld
 \end_inset
 
-go and do that important thing
+type 7
 \begin_inset Quotes erd
 \end_inset
 
-.
- Free will is then the act of picking between these two alternatives, of
- balancing them out (at a critical phase-transition point).
+ is a grab-bag of nonsense expressions.
+ This makes it clear that a form of feedback to the classification stage
+ will ultimately be needed, later if not sooner.
 \end_layout
 
-\begin_layout Section*
-Items
+\begin_layout Standard
+Some, possibly many or most expression classifications might not be reproducible
+ on the robot.
+ For example, 
+\begin_inset Quotes eld
+\end_inset
+
+type 7
+\begin_inset Quotes erd
+\end_inset
+
+ might correspond to 
+\begin_inset Quotes eld
+\end_inset
+
+poorly-lit and square-jawed European male
+\begin_inset Quotes erd
+\end_inset
+
+ which is not something that any motor setting on a well-lit female face
+ would be able to achieve.
+ 
+\end_layout
+
+\begin_layout Standard
+Again, this appears to be a research task.
+\end_layout
+
+\begin_layout Subsubsection
+Language association
+\end_layout
+
+\begin_layout Standard
+The goal of this stage is to associate specific words with specific facial
+ expression classes.
+ This would be done through natural language dialog.
+ An example dialog might be:
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Human: Can you see me?
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Robot: Yes.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Human: I am smiling.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Robot: OK.
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Human: Can you imitate smiling?
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Robot: (Performs animation)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\family typewriter
+Human: That's good 
+\shape slanted
+(or)
+\shape default
+ No, that's wrong.
+\end_layout
+
+\begin_layout Standard
+If a positive response can be elicited, then that particular word or phrase
+ (smiling, turning away, hanging head down, etc.) can be associated with
+ some confidence to two distinct things: the perceived feature vector, and
+ also the motor settings.
+ One learned, these referents can be used in other language dialog and discussio
+n.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Feedback and continuous learning
+\end_layout
+
+\begin_layout Standard
+It is possible, or even likely, that there will be serious data flaws at
+ every step: landmark extraction may fail spectacularly in all but the best
+ of lighting conditions.
+ Feature classification may group together features in a way that is not
+ natural to humans.
+ Imitation learning may fail to find a motor match to most expressions.
+ Language association may appear to work, but later fail, because the word
+ 
+\begin_inset Quotes eld
+\end_inset
+
+smile
+\begin_inset Quotes erd
+\end_inset
+
+ was associated with a feature set that includes turning away and opening
+ the mouth, while shutting the eyes.
+ Thus, mechanisms for un-learning word associations are required, or of
+ transferring them to new classifications, as these are learned.
+\end_layout
+
+\begin_layout Standard
+Because all of these are hypothetical issues, proposing distinct solutions
+ for these seems premature, at this point, with the exception of language
+ association.
+ That is because the creation of associations between perceptions and words
+ is a broader task than merely that of perceiving facial expressions.
+ This is discussed in greater detail in section XXX (where?)
+\end_layout
+
+\begin_layout Section
+Ideas 
+\end_layout
+
+\begin_layout Standard
+This section provides some breif sketches of interesting behaviors that
+ should be acheivable within the current prototype framework, or are suitable
+ for the next step of prototyping.
+ Some of these are very easy, but simply have not been explored or done.
 \end_layout
 
 \begin_layout Itemize
-a person walks into room, who she recognizes.
- Depending on psi, she should do non-verbal greetings (play one of 3-4 different
- animations (look at, chin push, nod)) and verbal greetings (
+A person walks into room, who she recognizes.
+ Depending on the current emotional state, she should perform non-verbal
+ greetings, acknowledgements (play one of 3-4 different animations, such
+ as breif look-at glance, chin push, nod) and verbal greetings (
 \begin_inset Quotes eld
 \end_inset
 
-hello, what's up, yo dawg
+
+\emph on
+hello, what's up?
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
 ).
- split up the state and the psi rule stuff properly.
- See comments here: https://github.com/opencog/ros-behavior-scripting/pull/80
+ The current interplay between state and psi rules is a mess, these need
+ to be split up properly.
+ There are addtional comments in 
+\begin_inset CommandInset href
+LatexCommand href
+name "issue #80"
+target "https://github.com/opencog/ros-behavior-scripting/pull/80"
+
+\end_inset
+
+, which see.
+\end_layout
+
+\begin_layout Itemize
+Someone asks: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+so what are we talking about?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ This requires the robot to have some rudimentary memory of the conversation,
+ and have the ability to recapitulate it.
+ A simple prototype mock-up would be to extract keywords/key-topics from
+ sentence, and remember them.
+ These can be be queried with the fuzzy matcher, and used to recapitulate
+ the conversation.
  
 \end_layout
 
 \begin_layout Itemize
-extract keywords/key-topics from sentence, and remember them, then apply
- fuzzy matcher to see which of these come up.
-\end_layout
-
-\begin_layout Section*
-Random ideas
-\end_layout
-
-\begin_layout Itemize
-Why did you smile? Output: have her explain recent openpsi decision-making.
-\end_layout
-
-\begin_layout Itemize
-I'm so sorry about that.
- Output: a small cute pout (blend of frown and ???)
-\end_layout
-
-\begin_layout Itemize
-Look at me.
- (verify look-at location or report visibility)
-\end_layout
-
-\begin_layout Itemize
-What are you doing? 
-\end_layout
-
-\begin_layout Itemize
-(When last person leaves, she should say goodbye.
- If did not say goodbye, then say 
+Someone says 
 \begin_inset Quotes eld
 \end_inset
 
-hey where did everybody go?
+
+\emph on
+Sophia, bark like a dog!
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
-)
+ A barking dog animation is needed.
+\end_layout
+
+\begin_layout Itemize
+Someone asks: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Why did you smile?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ Output: have her explain the most recent OpenPsi decision-making.
+ This requires recording that decision-making into a set of atoms, queriable
+ using the above-described question-answering subsystem.
+\end_layout
+
+\begin_layout Itemize
+Someone says: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+I'm so sorry about that
+\emph default
+.
+\begin_inset Quotes erd
+\end_inset
+
+ Output: have her perform a small, cute pout (a frown, but without the eyebrow
+ animation).
+\end_layout
+
+\begin_layout Itemize
+Someone says: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Look at me.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ The robot should determine the number of visible faces.
+ If only one, then it could say 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+I see only one face, and I am looking at it now
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ If there are two faces, then either change the gaze, or use the audio localizat
+ion to determine the audio source, and resspond appropriately, by changing
+ gaze, or keeping it, and appropriate verbal remarks.
+\end_layout
+
+\begin_layout Itemize
+Someone says: 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+What are you doing?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Describe a the recent past, indicating the presence of memory.
+ The verbal reply should show that the robot is sentient of it's surroundings.
+\end_layout
+
+\begin_layout Itemize
+When last person leaves, she should say goodbye.
+ If no goodbyes were exchanged, then remark loudly, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Hey, where did everybody go?
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
@@ -3758,7 +5462,11 @@ If no one is visible, and no one has been visible for many minutes, she
 \begin_inset Quotes eld
 \end_inset
 
-hey where did everybody go?
+
+\emph on
+Hey where did everybody go?
+\emph default
+
 \begin_inset Quotes erd
 \end_inset
 
@@ -3766,12 +5474,34 @@ hey where did everybody go?
 \end_layout
 
 \begin_layout Itemize
-Behavior -- she should not get sleepy, as long as someone is visible.
+If no one is visible, but there is an ongoing chat session, she should complain
+ about the visibility of the chat partners.
+ If there is no ongoing chat session, but there loud noises (and she cannot
+ see any faces), she should say something like 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Hey, what's going on? Who's there?
+\emph default
+ 
+\emph on
+Show yourself!
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
-\begin_layout Itemize
-Behavior -- she should complain, if no one is visible, but there is a chat
- session going on.
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+To be written.
 \end_layout
 
 \begin_layout Section*
@@ -4051,8 +5781,18 @@ ly ignored).
 Unfinished stuff
 \end_layout
 
+\begin_layout Subsubsection*
+DRAFT VERSION 0.2
+\end_layout
+
 \begin_layout Standard
----
+This is a draft.
+ Everything above is in some mostly-finished state.
+ Everything below is in outline format.
+\end_layout
+
+\begin_layout Standard
+—
 \end_layout
 
 \begin_layout Standard
@@ -4060,7 +5800,7 @@ practical examples, for PLN.
 \end_layout
 
 \begin_layout Standard
----
+—
 \end_layout
 
 \begin_layout Standard
@@ -4068,7 +5808,7 @@ so how is assembly to be performed?
 \end_layout
 
 \begin_layout Standard
-----
+—
 \end_layout
 
 \begin_layout Standard
@@ -4079,7 +5819,7 @@ difference between counting (performing the assembly) and linkage parsing
 \end_layout
 
 \begin_layout Standard
----
+—
 \end_layout
 
 \begin_layout Standard
@@ -4087,7 +5827,7 @@ A universe is like a partially assembled puzzle.
 \end_layout
 
 \begin_layout Standard
----
+—
 \end_layout
 
 \begin_layout Standard
@@ -4095,7 +5835,7 @@ Relationship between
 \end_layout
 
 \begin_layout Standard
----
+—
 \end_layout
 
 \begin_layout Standard
@@ -4103,7 +5843,7 @@ Andre Joyal lemma
 \end_layout
 
 \begin_layout Standard
---- 
+— 
 \end_layout
 
 \begin_layout Standard
@@ -4124,7 +5864,7 @@ completeness
 \begin_inset Quotes erd
 \end_inset
 
- section -- linear logic .
+ section – linear logic .
 \end_layout
 
 \end_body

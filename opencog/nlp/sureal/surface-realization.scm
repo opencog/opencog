@@ -35,7 +35,7 @@
 
 ; ---------------------------------------------------------------------
 (define-public (reset-sureal-cache dummy)
-    (reset-cache dummy)
+    (reset-cache)
 )
 
 (define-public (sureal a-set-link)

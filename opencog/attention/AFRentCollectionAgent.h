@@ -51,23 +51,31 @@ namespace opencog {
      * This Agent is supposed to run in it's own Thread.
      */
     class AFRentCollectionAgent : public RentCollectionBaseAgent {
-    private:
+        private:
+            using hr_clock = std::chrono::high_resolution_clock;
+            using chrono_d = std::chrono::duration<double>;
+            template<class T>
+            using chrono_t = std::chrono::time_point<T>;
 
+            int af_sti_rent_rate ;
+            int af_lti_rent_rate ;
+            std::map<Handle, chrono_t<hr_clock>> last_update;
 
-    public:
+        public:
 
-        virtual const ClassInfo& classinfo() const {
-            return info();
-        }
+            virtual const ClassInfo& classinfo() const {
+                return info();
+            }
 
-        static const ClassInfo& info() {
-            static const ClassInfo _ci("opencog::AFRentCollectionAgent");
-            return _ci;
-        }
+            static const ClassInfo& info() {
+                static const ClassInfo _ci("opencog::AFRentCollectionAgent");
+                return _ci;
+            }
 
-        AFRentCollectionAgent(CogServer&);
-        virtual ~AFRentCollectionAgent();
-        virtual void selectTargets(HandleSeq &targetSetOut);
+            AFRentCollectionAgent(CogServer&);
+            virtual ~AFRentCollectionAgent();
+            virtual void selectTargets(HandleSeq &targetSetOut);
+            void collectRent(HandleSeq& targetSet);
     }; // class
 
     /** @}*/

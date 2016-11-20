@@ -31,8 +31,8 @@ class AtomCollectionAPI(Resource):
     def __init__(self):
         self.atom_map = global_atom_map
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument(
-            'type', type=str, location='args', choices=types.__dict__.keys())
+        self.reqparse.add_argument('type', type=str, action='append',
+                     location='args', choices=types.__dict__.keys())
         self.reqparse.add_argument('name', type=str, location='args')
         self.reqparse.add_argument('callback', type=str, location='args')
         self.reqparse.add_argument('filterby', type=str, location='args',
@@ -266,6 +266,7 @@ class AtomCollectionAPI(Resource):
 	    {'code': 400, 'message': 'Invalid request: stirange filter requires stimin parameter'}
 	]
     )
+
     def get(self, id=""):
         retval = jsonify({'error':'Internal error'})
         try:
@@ -273,6 +274,7 @@ class AtomCollectionAPI(Resource):
         except Exception,e:
            retval = jsonify({'error':str(e)})
         return retval
+
     def _get(self, id=""):
         """
         Returns a list of atoms matching the specified criteria
@@ -327,13 +329,16 @@ class AtomCollectionAPI(Resource):
                 if type is None and name is None:
                     atoms = self.atomspace.get_atoms_by_type(types.Atom)
                 elif name is None:
-                    atoms = self.atomspace.get_atoms_by_type(
-                        types.__dict__.get(type))
+                    atoms = []
+                    for t in type:
+                         atoms = atoms + self.atomspace.get_atoms_by_type(
+                                           types.__dict__.get(t))
                 else:
                     if type is None:
-                        type = 'Node'
-                    atoms = get_atoms_by_name(types.__dict__.get(type),
-                                name, self.atomspace)
+                        type = ['Node']
+                    for t in type:
+                        atoms = get_atoms_by_name(types.__dict__.get(t),
+                                    name, self.atomspace)
 
             # Optionally, filter by TruthValue
             if tv_strength_min is not None:

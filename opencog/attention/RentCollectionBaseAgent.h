@@ -69,6 +69,8 @@ public:
     int calculate_LTI_Rent();
 
     virtual void selectTargets(HandleSeq &targetSetOut) = 0;
+    virtual void collectRent(HandleSeq& targetSet) = 0;
+
     void run();
 
     int get_sleep_time() { return sleep_time_ms; };

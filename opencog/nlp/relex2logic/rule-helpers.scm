@@ -631,7 +631,11 @@
 	(cond
 		((or (string=? determiner "those") (string=? determiner "these"))
 			(ListLink
-				(ImplicationLink
+				;; XXX FIXME: right now, this says ImplicationScopeLink
+				;; But I think the intended meaning is a for-all link:
+				;; (ForAllLink (VariableNode var_name) (ImplicationLink ...))
+				;; Right?
+				(ImplicationScopeLink
 					(MemberLink (VariableNode var_name) (ConceptNode instance))
 					(InheritanceLink (VariableNode var_name) (ConceptNode concept))))
 			(r2l-wordinst-concept instance)

@@ -1,5 +1,7 @@
 (use-modules (opencog query))
 
+(load "states.scm")
+
 (define (search-inferred-atoms)
   (let* (
         (ia-query (Get (State pln-inferred-atoms (Variable "$x"))))
@@ -23,7 +25,7 @@
          (slia (delete-duplicates (append sl ia))))
     (State pln-inferred-atoms (SetLink slia))))
 
-;; Return a list of pairs (inferred atom, name list) 
+;; Return a list of pairs (inferred atom, name list)
 (define (get-assoc-inferred-names)
   (let ((inferred-atoms-list (cog-outgoing-set (search-inferred-atoms)))
         (gen-assoc (lambda (x) (list x (get-names (cog-get-all-nodes x)))))

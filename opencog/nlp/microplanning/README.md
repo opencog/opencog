@@ -16,7 +16,7 @@ generation (NLG) pipeline.
 - chunks-set.scm
 
     Definition of the `<chunks-set>` class for storing one set of
-    chunking reuslt.
+    chunking result.
 
 - helpers.scm
 
