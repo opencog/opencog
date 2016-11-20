@@ -109,3 +109,4 @@ std::string LojbanModule::do_load_lojban(Request *req, std::list<std::string> ar
     }
 
     return "";
+}

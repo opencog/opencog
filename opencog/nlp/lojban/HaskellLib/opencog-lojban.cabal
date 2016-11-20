@@ -3,11 +3,8 @@ version:             0.1.0.0
 synopsis:            Initial project template from stack
 description:         Please see README.md
 homepage:            http://github.com/githubuser/new-template#readme
-license:             BSD3
-license-file:        LICENSE
 author:              Author name here
 maintainer:          example@example.com
-copyright:           2010 Author Here
 category:            Web
 build-type:          Simple
 cabal-version:       >=1.10
