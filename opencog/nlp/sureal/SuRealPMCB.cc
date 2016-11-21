@@ -448,11 +448,11 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                     if (hPatPredNode != Handle::UNDEFINED)
                     {
                         IncomingSet qPatIS = hPatPredNode->getIncomingSetByType(INHERITANCE_LINK);
-	                    for (LinkPtr lpInhLk : qPatIS)
-	                    {
-		                    HandleSeq qInhOS = lpInhLk->getOutgoingSet();
-		                    if (qInhOS[0] == hPatPredNode and
-		                        qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE) {
+                        for (LinkPtr lpInhLk : qPatIS)
+                        {
+                            HandleSeq qInhOS = lpInhLk->getOutgoingSet();
+                            if (qInhOS[0] == hPatPredNode and
+                                qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE) {
                                 has_tense = true;
                                 eq_tense = sTense == qInhOS[1]->getName();
                                 break;
