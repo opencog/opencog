@@ -99,14 +99,13 @@ void SuRealSCM::init()
 static void get_all_unique_nodes(const Handle& h,
                                  UnorderedHandleSet& node_set)
 {
-   LinkPtr lll(LinkCast(h));
-   if (nullptr == lll)
+   if (h->isNode())
    {
       node_set.insert(h);
       return;
    }
 
-   for (const Handle& o : lll->getOutgoingSet())
+   for (const Handle& o : h->getOutgoingSet())
       get_all_unique_nodes(o, node_set);
 }
 
@@ -164,7 +163,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
     // It is possible to keep the clauses in a SetLink and override the PM's
     // link_match() callback to skip SetLink's arity check , but that would
     // be assuming R2L will never use SetLink for other purposes.
-    const HandleSeq& qClauses = LinkCast(h)->getOutgoingSet();
+    const HandleSeq& qClauses = h->getOutgoingSet();
 
     // get all the nodes to be treated as variable in the Pattern Matcher
     // XXX perhaps it's better to write a eval_q in SchemeEval to convert
@@ -264,7 +263,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 
         // assuming each InterpretationNode is only linked to one SetLink
         // and compare using arity
-        return LinkCast(qi[0])->getArity() < LinkCast(qj[0])->getArity();
+        return qi[0]->getArity() < qj[0]->getArity();
     };
 
     std::sort(keys.begin(), keys.end(), itprComp);
