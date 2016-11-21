@@ -294,7 +294,6 @@ class EvaControl():
 			if self.client is None:
 				return
 			self.client.update_configuration(self.param_dict)
-			self.client.update_configuration(self.param_dict)
 			self.update_parameters = False
 
 
