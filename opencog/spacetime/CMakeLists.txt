@@ -24,7 +24,7 @@ INSTALL (FILES
 	DESTINATION "${DATADIR}/scm/spacetime"
 )
 
-# FIXME -- actually, the timeserver does not depend on ocotomap,
+# FIXME -- actually, the timeserver does not depend on octomap,
 # and could be built just fine without it. However, its not clear
 # why we need to fix this just right now.
 IF (HAVE_OCTOMAP)
