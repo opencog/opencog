@@ -4,19 +4,22 @@
 
 (use-modules (opencog)  (opencog openpsi))
 
-(define (situation atom)
-	(display "Hello situation\n")
+(define (check-situation atom)
+	(display "Checking the current situation: ")
+	(display atom)
 	(stv 1 1)
 )
 
-(define (doit atom)
-	(display "going to do it\n")
+(define (action-doit atom)
+	(display "Taking the action: ")
+	(display atom)
 	(stv 1 1)
 )
 
-(define (demand-it atom)
-	(display "Hello demand\n")
-	(stv 1 1)
+(define (goal-update atom)
+	(display "Updating the goal for: ")
+	(display atom)
+	(stv 0.1 1)
 )
 
 (define demand-foo (psi-demand "foo" 0.8))
@@ -25,14 +28,29 @@
 (Member
 	(psi-rule
 		(list
-			(Evaluation (GroundedPredicate "scm: situation")
-				(List (Concept "foobar"))))
-		(Evaluation (GroundedPredicate "scm: doit")
-				(List (Concept "barfoo")))
-		(Evaluation (GroundedPredicate "scm: demand-it")
-				(List (Concept "demndoid")))
+			(Evaluation (GroundedPredicate "scm: check-situation")
+				(List (Concept "foo"))))
+		(Evaluation (GroundedPredicate "scm: action-doit")
+				(List (Concept "foo-action")))
+		(Evaluation (GroundedPredicate "scm: goal-update")
+				(List (Concept "foo-goal")))
 		(stv 0.9 1)
 		demand-foo
+	)
+	(Concept "demo rule")
+)
+
+(Member
+	(psi-rule
+		(list
+			(Evaluation (GroundedPredicate "scm: check-situation")
+				(List (Concept "bar"))))
+		(Evaluation (GroundedPredicate "scm: action-doit")
+				(List (Concept "bar-action")))
+		(Evaluation (GroundedPredicate "scm: goal-update")
+				(List (Concept "bar-goal")))
+		(stv 0.9 1)
+		demand-bar
 	)
 	(Concept "demo rule")
 )
@@ -40,12 +58,12 @@
 
 ; Single-step the psi rule-selection engine.
 ; This will print a message, single-step the psi rule engine, and
-; then sleep for one second.  The loop repeats until the loop count
+; then sleep for three seconds.  The loop repeats until the loop count
 ; reaches zero.
 (define (step-psi n)
 	(display "\n=================== Stepping psi one step\n")
 	(psi-step)
-	(sleep 1)
+	(sleep 3)
 	(if (< 0 n) (step-psi (- n 1))))
 
 (step-psi 4)

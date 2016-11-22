@@ -65,10 +65,12 @@
   where:
   CONTEXT is a scheme list containing all of the terms that should
     be met for the ACTION to be taken. These are atoms that, when
-    evaluated, should result in a true or false TV.
+    evaluated, should return a true or false TV.  The action is taken
+    only if the boolean-AND of the return values is true.
 
-  ACTION is an evaluatable atom, i.e. returns a TV when evaluated by
-    `cog-evaluate!`.  It should return a true or false TV.
+  ACTION is an evaluatable atom, i.e. it should return a TV when
+    evaluated by `cog-evaluate!`.  The return value is currently
+    ignored.
 
   GOAL is an evaluatable atom, i.e. returns a TV when evaluated by
     `cog-evaluate!`.  The returned TV is used as a formula to rank
