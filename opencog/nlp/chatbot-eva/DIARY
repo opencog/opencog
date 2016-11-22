@@ -1225,3 +1225,25 @@ LEFT-WALL look.v to.r the right.n-u
 clobbers it
 
 (load "imperative-rules.scm")
+
+================================================
+
+(psi-rule-nocheck
+	;; context
+	(list (AndLink
+		(Predicate "input thing")
+		(List args)
+	))
+	;; action
+	(List
+		(ExecutionOutput
+			(DefinedSchema "thing to do")
+			(List args)))
+	(Concept "demo goal")
+	(stv 1 0.8181)
+	(psi-demand "want a demo" 0.97)
+)
+
+
+
+Either incorrect or not implemented yet. Cannot evaluate (

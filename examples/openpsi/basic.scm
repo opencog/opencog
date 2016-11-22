@@ -11,7 +11,7 @@
 
 (define (doit atom)
 	(display "going to do it\n")
-	(Concept "done it")
+	(stv 1 1)
 )
 
 (define (demand-it atom)
@@ -27,7 +27,7 @@
 		(list
 			(Evaluation (GroundedPredicate "scm: situation")
 				(List (Concept "foobar"))))
-		(ExecutionOutput (GroundedSchema "scm: doit")
+		(Evaluation (GroundedPredicate "scm: doit")
 				(List (Concept "barfoo")))
 		(Evaluation (GroundedPredicate "scm: demand-it")
 				(List (Concept "demndoid")))
@@ -38,5 +38,21 @@
 )
 
 
-(psi-run)
+; Single-step the psi rule-selection engine.
+; This will print a message, single-step the psi rule engine, and
+; then sleep for one second.  The loop repeats until the loop count
+; reaches zero.
+(define (step-psi n)
+	(display "\n=================== Stepping psi one step\n")
+	(psi-step)
+	(sleep 1)
+	(if (< 0 n) (step-psi (- n 1))))
+
+(step-psi 4)
+(display "Done running psi")
+
+; Alternately, one can run the psi engine as fast as possible. This
+; is not recommended for this demo, because it will clog the output
+; with print statements.
+; (psi-run)
 
