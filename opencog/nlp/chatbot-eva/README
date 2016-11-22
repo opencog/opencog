@@ -54,23 +54,30 @@ There are two ways to run this thing: embodied, and disembodied.
 The disembodied setup is simpler.
 
 ## Disembodied HOWTO
-This version can be run in IRC only, or even at the guile prompt,
-without requiring a full hookup to the blender head.  It just prints
-(in parenthetical English) the actions that would be performed.
+This version does not require the full robotics pipeline (which
+includes 3D visualization via blender): it can be run in IRC, or
+even at the guile prompt.  This version just prints (in English)
+the actions that the robot would perform.  A webcam is recommended,
+so that she can see you.
 
+ * build and install both the atomspace, and opencog. Ask for help
+   if you don't know how to do this.
  * `git clone https://github.com/opencog/ros-behavior-scripting`
-   and `sudo make install` This is needed for the action orchestrator!
- * make install -- This step is important!
- * Start the relex server on port 4444
- * Start the cogita IRC bot
- * Start a guile shell.
- * Enter (load "run-chatbot.scm") at the guile prompt.
- * Talk to her via IRC.  Alternately, use
-   (process-query "foo" "This is a test")
+   and `sudo make install`  -- This step is important, it is needed
+   for the action orchestrator!
+ * Start the RelEx server on port 4444 (`git clone` relex, build it,
+   and run `./opencog-server.sh` in the relex main directory.)
+ * (needed only for IRC) Start the cogita IRC bridge, in the
+   irc directoy -- the `opencog/nlp/irc/cogita` binary.
+ * Start a guile shell: just say `guile` in this directory.
+ * Enter `(load "run-chatbot.scm")` at the guile prompt.
+ * Talk to her via IRC.  Alternately, from the guile prompt, you
+   can say: `(process-query "Adam" "Hello, Eva!")`
 
 
 ## Embodied HOWTO
-There is a fair amount of setup needed to run this thing:
+There is a fair amount of setup needed to run the fully-embodied
+version.
 
  * The animation is done in blender; you have to install blender
    and get the blender rig.
