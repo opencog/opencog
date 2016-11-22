@@ -214,10 +214,16 @@ def call_sentiment_parse(text_node, sent_node):
 
 	; Check input to ensure that not-empty string isn't passed.
 	(if (string=? plain-text "")
-		(error "Please enter a valid sentence, not empty string"))
+		(error "Please enter a valid sentence, not an empty string"))
 
 	; Call the RelEx server
-	(relex-parse plain-text)
+	(catch #t (lambda () (relex-parse plain-text))
+		(lambda (key . rest)
+			(display "Error: Cannot connect to RelEx server: ")
+			(display key) (newline) (display rest) (newline)))
+
+	(if (nil? (get-new-parsed-sentences))
+		(error "The RelEx server seems to have crashed!"))
 
 	(let* ((sent-list (get-new-parsed-sentences))
 			(sent-node (car sent-list)))
