@@ -18,9 +18,6 @@
 (define implication-implicant-disjunction-rule
   (BindLink
      (VariableList
-        (VariableNode "$A")
-        (VariableNode "$B")
-        (VariableNode "$C")
         (TypedVariableLink
            (VariableNode "$A")
            (TypeNode "PredicateNode"))
@@ -48,13 +45,6 @@
         (GroundedSchemaNode "scm: implication-implicant-disjunction-formula")
         (ListLink
            (ImplicationLink
-              (cog-new-flattened-link 'OrLink
-                 (VariableNode "$A")
-                 (VariableNode "$B")
-              )
-              (VariableNode "$C")
-           )
-           (ImplicationLink
               (VariableNode "$A")
               (VariableNode "$C")
            )
@@ -62,17 +52,16 @@
               (VariableNode "$B")
               (VariableNode "$C")
            )
-           (VariableNode "$A")
-           (VariableNode "$B")
-           (VariableNode "$C")
-        )
-     )
-  )
-)
+           (ImplicationLink
+              (OrLink
+                 (VariableNode "$A")
+                 (VariableNode "$B")
+              )
+              (VariableNode "$C"))))))
 
-(define (implication-implicant-disjunction-formula ABC AC BC A B C)
+(define (implication-implicant-disjunction-formula AC BC ABC)
   (cog-set-tv! ABC
-   (implication-implicant-disjunction-side-effect-free-formula AC BC A B C))
+   (implication-implicant-disjunction-side-effect-free-formula AC BC))
 )
 
 ;; Computing the strength is based on
@@ -91,9 +80,13 @@
 ;; P(C|A U B) = (P(C|A)*P(A) + P(C|B)*P(B) - P(C|A)*P(A)*P(C|B)*P(B)
 ;;            / (P(A) + P(B) - P(A)*P(B))
 ;;
-(define (implication-implicant-disjunction-side-effect-free-formula AC BC A B C)
+(define (implication-implicant-disjunction-side-effect-free-formula AC BC)
   (let* 
-      ((sAC (cog-stv-strength AC))
+      (
+       (A (gar AC))
+       (B (gar BC))
+       (C (gdr AC))
+       (sAC (cog-stv-strength AC))
        (sBC (cog-stv-strength BC))
        (sA (cog-stv-strength A))
        (sB (cog-stv-strength B))
