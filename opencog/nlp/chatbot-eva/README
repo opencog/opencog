@@ -2,10 +2,10 @@
                      Eva Chatbot
                      -----------
 
-Prototype that attaches the chatbot to the behavior trees that
+Prototype that attaches the chatbot to the behavior psi-rules that
 control the Hanson Robotics Eva robot emulator.
 
-The Eva simulator emulates an animated human head, able to see
+The Eva simulator emulates an animated human head, able to see,
 listen and respond.
 
 Goals
@@ -47,6 +47,9 @@ decisions made here are not appropriate, and miss the mark.  There's
 also a bunch of scaffolding, that is meant to be replaced.  Large parts
 may, or may not be redesigned in the (near-term?) future.
 
+A detailed description of the current architecture is given in the
+`embodiment` directory.
+
 
 HOWTO
 -----
@@ -72,7 +75,7 @@ so that she can see you.
  * Start a guile shell: just say `guile` in this directory.
  * Enter `(load "run-chatbot.scm")` at the guile prompt.
  * Talk to her via IRC.  Alternately, from the guile prompt, you
-   can say: `(process-query "Adam" "Hello, Eva!")`
+   can say: `(process-query "Adam" "Look happy!")`
 
 
 ## Embodied HOWTO
@@ -414,3 +417,9 @@ OpenPsi:
             ExecuteOutputLink
                 Obey the command
         Goal- "Obey user"
+
+* Replace rules with psi-rules
+
+* Provide simple string-matching API.
+
+
