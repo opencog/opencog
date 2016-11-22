@@ -34,5 +34,5 @@ extra-package-dbs: []
 # arch: x86_64
 
 # Extra directories used by stack for building
-# extra-include-dirs: [/path/to/dir]
-extra-lib-dirs: [/usr/local/lib/opencog]
+# extra-include-dirs: [/usr/local/lib/opencog]
+# extra-lib-dirs: [/usr/local/lib/opencog]

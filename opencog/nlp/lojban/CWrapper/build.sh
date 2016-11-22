@@ -1,5 +1,7 @@
 SOURCE_DIR=$1
 
+sudo ldconfig /usr/local/lib/opencog/
+
 libname=$(stack query | awk 'NR==5' | sed 's/://g'| sed 's/ //g')
 libver=$(stack query | awk 'NR==7' | sed 's/version: //g' | sed "s/'//g" | sed "s/ //g")
 
@@ -9,7 +11,7 @@ then
     rm -f "$SOURCE_DIR/lib$libname-$libver.so"
 
     # Build haskell bindings package.
-    stack build
+    stack build --allow-different-user
 
     LIB=$(find . -name "*$libname*.so" | awk 'NR==1')
 
