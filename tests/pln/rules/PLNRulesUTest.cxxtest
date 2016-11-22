@@ -34,6 +34,7 @@
 
 using namespace std;
 using namespace opencog;
+using namespace std;
 
 class PLNRulesUTest: public CxxTest::TestSuite
 {
@@ -74,7 +75,7 @@ public:
 	void test_implication_implicant_distribution();
 	void test_implication_construction();
 	void test_lambda_grounded_construction();
-	void test_equivalence_to_double_implication();
+	void test_equivalence_to_implication();
 	void test_implication_and_lambda_factorization();
 	void test_implication_implicant_conjunction();
 	void test_implication_direct_evaluation();
@@ -645,46 +646,34 @@ void PLNRulesUTest::test_lambda_grounded_construction()
 }
 
 /**
- * Test equivalence-to-double-implication-rule defined in:
- * opencog/pln/rules/equivalence-to-double-implication-rule.scm
+ * Test equivalence-to-implication-rule defined in:
+ * opencog/pln/rules/equivalence-to-implication-rule.scm
  */
-void PLNRulesUTest::test_equivalence_to_double_implication()
+void PLNRulesUTest::test_equivalence_to_implication()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-equivalence.scm",
-	                "opencog/pln/rules/equivalence-to-double-implication-rule.scm"});
+	                "opencog/pln/rules/equivalence-to-implication-rule.scm"});
 
 	// Apply the rule
 	Handle rule_alias =
-		eval.eval_h("equivalence-to-double-implication-rule-name"),
+		eval.eval_h("equivalence-to-implication-rule-name"),
 		rbs = as.add_node(CONCEPT_NODE, "dummy rbs"),
 		rule_ml = as.add_link(MEMBER_LINK, rule_alias, rbs);
 	Rule rule(rule_ml);
 	Handle results = bindlink(&as, rule.get_forward_rule());
 	Handle expected = eval.eval_h(
 		"(SetLink"
-		"  (ListLink"
-		"    (ImplicationLink"
-		"      (PredicateNode \"P\")"
-		"      (PredicateNode \"Q\")"
-		"    )"
-		"    (ImplicationLink"
-		"      (PredicateNode \"Q\")"
-		"      (PredicateNode \"P\")"
-		"    )"
+		"  (ImplicationLink"
+		"    (PredicateNode \"P\")"
+		"    (PredicateNode \"Q\")"
 		"  )"
-		"  (ListLink"
-		"    (ImplicationLink"
-		"      (PredicateNode \"Q\")"
-		"      (PredicateNode \"P\")"
-		"    )"
-		"    (ImplicationLink"
-		"      (PredicateNode \"P\")"
-		"      (PredicateNode \"Q\")"
-		"    )"
+		"  (ImplicationLink"
+		"    (PredicateNode \"Q\")"
+		"    (PredicateNode \"P\")"
 		"  )"
 		")");
 
