@@ -1225,6 +1225,3 @@ LEFT-WALL look.v to.r the right.n-u
 clobbers it
 
 (load "imperative-rules.scm")
-
-
-
