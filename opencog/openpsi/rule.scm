@@ -313,8 +313,9 @@ there are 100K rules!
   have a non-zero strength
 "
     (filter
-        (lambda (x) (and (> (cog-stv-strength x) 0)
-            (equal? (stv 1 1) (psi-satisfiable? x))))
+        (lambda (x)
+            (and (> (cog-stv-strength x) 0)
+                (equal? (stv 1 1) (psi-satisfiable? x))))
         (psi-get-rules demand-node))
 )
 
