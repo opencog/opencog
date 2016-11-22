@@ -27,6 +27,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
+#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -68,6 +69,9 @@ public:
 
 	// Test the MOSES PLN synergy using the URE's Forward Chainer
 	void test_moses_pln_synergy_fc();
+
+	// Test the MOSES PLN synergy using the URE's Backward Chainer
+	void test_moses_pln_synergy_bc();
 };
 
 void MOSESPLNSynergyUTest::tearDown()
@@ -168,6 +172,42 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_fc()
 	// SimpleTruthValue expected_tv(expected_strength, expected_confidence);
 	// TS_ASSERT(target->getTruthValue()->operator==(expected_tv));
 	TS_ASSERT(true);
+}
+
+// This takes too long (3 to 4 days), disabled until it gets severely
+// optimized
+void MOSESPLNSynergyUTest::test_moses_pln_synergy_bc()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval.eval("(add-to-load-path \"..\")");
+	eval.eval("(add-to-load-path \"../../..\")");
+	eval.eval("(load-from-path \"examples/pln/moses-pln-synergy/scm/moses-pln-synergy-pm.scm\")");
+	eval.eval("(load-from-path \"examples/pln/moses-pln-synergy/scm/background-knowledge.scm\")");
+	eval.eval("(load-from-path \"examples/pln/moses-pln-synergy/scm/pln-bc-config.scm\")");
+
+	Handle target = eval.eval_h("moses-model");
+	Handle rbs = eval.eval_h("pln-rbs");
+	BackwardChainer bc(as, rbs, target);
+    bc.do_chain();
+
+	// Query the TV of the inference target, which should be
+	//
+	// (ImplicationLink (stv 0.60357851 0.69999999)
+	//    (OrLink
+	//       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
+	//       (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
+	//    )
+	//    (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
+	// )
+	std::cout << "target = " << target->toString() << std::endl;
+
+	TS_ASSERT_DIFFERS(target, Handle::UNDEFINED);
+
+	strength_t expected_strength = 0.603579;
+	confidence_t expected_confidence = 0.64125;
+	SimpleTruthValue expected_tv(expected_strength, expected_confidence);
+	TS_ASSERT(target->getTruthValue()->operator==(expected_tv));
 }
 
 #undef gl
