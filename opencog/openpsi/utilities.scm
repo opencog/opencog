@@ -1,6 +1,8 @@
-; Copyright (C) 2015-2016 OpenCog Foundation
 ;
+; utilities.scm
 ; Helper functions for OpenPsi
+;
+; Copyright (C) 2015-2016 OpenCog Foundation
 
 (use-modules (ice-9 regex)) ; For string-match
 (use-modules (srfi srfi-1)) ; For fold, delete-duplicates
@@ -13,11 +15,9 @@
 ; --------------------------------------------------------------
 (define-public (psi-suffix-str a-string)
 "
-  Returns the suffix of that follows `psi-prefix-str` sub-string.
+  psi-suffix-str STRING
 
-  a-string:
-    - a string that should have the`psi-prefix-str`
-
+  Given the string STRING, this removes the psi prefix string.
 "
     (let ((z-match (string-match psi-prefix-str a-string)))
         (if z-match
@@ -31,16 +31,17 @@
 ; --------------------------------------------------------------
 (define-public (satisfaction-level rule)
 "
-  Returns the probability of satisfaction of the given rule's context as a
-  SimpleTruthValue.
+  satisfaction-level RULE
 
-  rule:
-  - A psi-rule with context to be evaluated.
+  Given the RULE, return the probability that the RULE can be satisfied.
+  XXX Except this doesn't return a probability, it just returns TRUE_TV
+  or FALSE_TV. What is this supposed to really do???
 "
 ; NOTE
-; 1. This is the same as the `psi-satisfiable?`
+; 1. The code here is identical to `psi-satisfiable?`
 ; 2. Should a context evaluator be added here?????
-; 3. What is the "right" way of communicating the level of information.
+; 3. What is the "right" way of communicating the level of information ?
+; Huh?
     (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
            (result (cog-evaluate! pattern)))
           (cog-delete pattern)
@@ -51,12 +52,19 @@
 ; --------------------------------------------------------------
 (define-public (most-weighted-atoms atom-list)
 "
-  It returns a list with non-duplicating atoms with the highest weight. If an
-  empty list is passed an empty list is returned. Weight of an atom is the
-  product of the stength and confidence of the atom.
+  most-weighted-atoms ATOM-LIST
 
-  atom-list:
-  - A list of atoms to be compared.
+  Return a list of atoms with the highest weight. Any duplicate atoms
+  in the list are removed.
+  The weight of an atom is the product of the stength and confidence
+  of the atom.
+
+  XXX FIXME: I think this is trying to sort the list of atoms by weight.
+  However, the algorithm is a bit opaque, and seems to be inefficient.
+  Surely, there is a better way.
+
+  XXX FIXME: if teh goal is a siderted list, then a better name is
+  possible: e.g. sort-by-weight, or something like that.
 "
     (define (weight x)
         (let ((rule-stv (cog-tv x))
@@ -66,6 +74,12 @@
 
     (define (pick atom lst) ; prev is a `lst` and next `atom`
         (cond
+            ; If the weight of the atom is less than the weight of the
+            ; head of the list, then return the list.
+            ; If the weight of the atom is greater than the weight of
+            ; the head of the list, then return the atom.
+            ; If the two weights are equal, place the atom at the end
+            ; of the list, and return the list.
             ((> (weight (car lst)) (weight atom)) lst)
             ((= (weight (car lst)) (weight atom)) (append lst (list atom)))
             (else (list atom))))
@@ -79,12 +93,10 @@
 ; --------------------------------------------------------------
 (define-public (most-important-weighted-atoms atom-list)
 "
-  It returns a list with non-duplicating atoms with the highest
-  important-weight. If an empty list is passed an empty list is returned.
-  Weight of an atom is the product of the stength and confidence of the atom.
+  most-important-weighted-atoms ATOMs-LIST
 
-  atom-list:
-  - A list of atoms to be compared.
+  Return a list atoms sorted according to attention-value times
+  truth-value weight.
 "
     (define (weight x)
         (let ((a-stv (cog-tv x))
@@ -219,20 +231,21 @@
 (define-public
     (psi-set-functionality functionlity is-eval tag-node functionality-name)
 "
-  This function is used to add a functionality to a particular demand/modulator.
+  psi-set-functionality FUNC IS-EVAL TAG FUNC-NAME
 
-  functionlity:
-  - A DefinedPredicateNode/DefinedSchemaNode that is evaluated for performing
-    the functionality over the particular demand/modulator.
+  Add a functionality to a particular demand/modulator.
 
-  is-eval:
-  - #t if the functionality is evaluatable and #f if not.
+  FUNC is a DefinedPredicateNode/DefinedSchemaNode that is
+    evaluated/executed to perform the functionality for the
+    particular demand/modulator.
 
-  tag-node:
-  - A demand/modulator node that the functionality is being added to.
+  Set IS-EVAL to #t if the functionality is evaluatable and #f if
+    it is executable.
 
-  functionality-name:
-  - The type of functionality.
+  TAG should be a demand/modulator node that the functionality is
+    being added to.
+
+  FUNC-NAME is the type of functionality.
 "
     (define (check-alias a-name)
         (if is-eval
@@ -264,14 +277,15 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-functionality tag-node functionality-name)
 "
-  Returns a list with the node that represents the functionality for the given
+  psi-get-functionality TAG FUNC-NAME
+
+  Return a list with the node that represents the functionality for the given
   demand/modulator or nil if it doesn't exist.
 
-  tag-node:
-  - A demand/modulator node that the functionality is being added to.
+  TAG should be a demand/modulator node that the functionality is
+  being added to.
 
-  functionality-name:
-  - The type of functionality.
+  FUNC-NAME should be the type of functionality.
 "
 ; The assumption is that there will be only one element in the returned list.
 ; This is a weak. Need a better way of using DefineLink short of defining

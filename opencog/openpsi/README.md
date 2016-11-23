@@ -17,6 +17,8 @@ taking appropriate action.
 * `main.scm` -- Defines the main function for single-stepping the
    psi rule engine, as well as the main-loop to run the stepper.
 
+* `utilities.scm` -- Msicellaneous utilities.
+
 ## Status and TODO List
 
 The code currently works at a basic level, and is used to control the

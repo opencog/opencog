@@ -1267,3 +1267,11 @@ controled rules get a weight that is the tv-mean of the rule.
 
 demands are ConceptNodes, mean is a value-weight.
 
+
+
+this crashes:
+ (define a (Concept "A" (stv 1 1)))
+ (define b (Concept "B" (stv 0.9 0.9)))
+ (define c (Concept "C" (stv 0.8 0.8)))
+ (most-weighted-atoms (list a b c))
+
