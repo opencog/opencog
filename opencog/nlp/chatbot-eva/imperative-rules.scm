@@ -279,10 +279,16 @@
 			(Equal (Variable "$verb") (WordNode "play"))
 		)
 		'()                ; DECL
-		(ChoiceLink        ; LINKS
-			(lg-link "MVa" "$verb-inst" "$obj-inst")
-			(lg-link "MVp" "$verb-inst" "$obj-inst")
-			(lg-link "Pa" "$verb-inst" "$obj-inst"))
+		(list              ; LINKS
+			(ChoiceLink
+				(lg-link "MVa" "$verb-inst" "$obj-inst")
+				(lg-link "MVp" "$verb-inst" "$obj-inst")
+				(lg-link "Pa" "$verb-inst" "$obj-inst"))
+			; Without this constraint, this rule will clobber
+			; the "look to the left" command. The prep "to" will
+			; be taken as an object, giving nonsense.
+			(word-pos "$obj-inst" "adjective")
+		)
 	))
 
 ; Direct-object imperatives: "feign happiness", "mimic fear",

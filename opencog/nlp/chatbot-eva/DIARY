@@ -1201,3 +1201,30 @@ todo: random expresion context is really part of self-model.
 	(stv 1 0.8181)
 	(psi-demand "want a demo" 0.97)
 )
+
+============================================
+Look to the left doesn't work
+
+                   +----Ju----+
+    +---Wi---+-MVp-+   +--Dmu-+
+    |        |     |   |      |
+LEFT-WALL look.v to.r the right.n-u 
+
+(use-modules (opencog query))
+(relex-parse "look to the right")
+
+(define imp (car (get-new-parsed-sentences)))
+; (imperative-process imp)
+
+(define current-sentence (AnchorNode "*-eva-current-sent-*"))
+
+(StateLink current-sentence imp)
+(load "imperative-rules.scm")
+
+   (cog-bind show-rule-1)
+clobbers it
+
+(load "imperative-rules.scm")
+
+
+
