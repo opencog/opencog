@@ -12,6 +12,14 @@
 ; bag to be searched for the desired bits. If instead, an ordered link
 ; was used, and the action was made first, it could be found very
 ; quickly. FIXME -- this should be fixed someday.
+;
+; Aliases: Rules can be given a "name", called an "alias", below.
+; Certain parts of the design assume that a rule has only one name,
+; but other parts of the code pass around lists of names. This can
+; lead to crazy bugs, due to a lack of checking or enforcement of a
+; one-name-per-rule policy.  Also -- each rule should, in principle
+; have a unique name; however, the current chatbot uses the same name
+; for all chat rules.
 
 
 (use-modules (ice-9 threads)) ; For `par-map`
@@ -31,7 +39,8 @@
 (define*-public (psi-rule-nocheck context action goal a-stv demand
      #:optional name)
 "
-  psi-rule-nocheck -- same as psi-rule, but no checking
+  psi-rule-nocheck -- same as psi-rule, but does not check the arguments
+  for proper structure.
 "
 
     ; Note that the AndLink is an unordered link -- so the context
@@ -66,11 +75,11 @@
 ; --------------------------------------------------------------
 (define*-public (psi-rule context action goal a-stv demand  #:optional name)
 "
-  psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
+  psi-rule CONTEXT ACTION GOAL TV DEMAND [NAME] - create a psi-rule.
 
   Associate an action with a context such that, if the action is
   taken, then the goal will be satisfied.  The structure of a rule
-  is in the form of an `ImplicationLink`,
+  is in the form of an `ImplicationLink`:
 
     (ImplicationLink TV
         (AndLink
@@ -96,11 +105,14 @@
     be a SimpleTruthValue.
 
   DEMAND is a Node, representing the demand that this rule affects.
+
+  NAME is an optional argument; if it is provided, then it should be
+    a string that will be associated with the rule.
 "
-; TODO: aliases shouldn't be used to create a subset, as is done in chatbot-psi
-; It should be done at the demand level. The purpose of an aliase should only
-; be for controlling a SINGLE rule during testing/demoing, and not a set
-; of rules.
+; TODO: aliases shouldn't be used to create a subset, as is done in
+; chatbot-psi.  Subsets should be created at the demand level. The
+; purpose of an alias is only for controlling a SINGLE rule during 
+; testing/demoing, and not a set of rules.
     (define func-name "psi-rule") ; For use in error reporting
 
     ; Check arguments
@@ -248,9 +260,12 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 "
   psi-rule-alias RULE
 
-  Returns a list of the aliases of the psi-rule RULE.
-XXX what is a rule alias???
+  Returns a list of the aliases associated with the psi-rule RULE.
+  An alias is just a name that is associated with the rule; it
+  just provides an easy way to refer to a rule.
 "
+    ;; Using a GetLink here is quite inefficient; this would run much
+    ;; faster if cog-chase-link was used instead. FIXME.
     (cog-outgoing-set (cog-execute!
         (GetLink
             (TypedVariableLink

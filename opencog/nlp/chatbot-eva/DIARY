@@ -1258,3 +1258,12 @@ Implication stv
    goal
 
 one rule is selected per demand
+
+psi-controller-update-weights
+
+each rule has a weight.
+
+controled rules get a weight that is the tv-mean of the rule.
+
+demands are ConceptNodes, mean is a value-weight.
+

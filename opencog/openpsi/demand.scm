@@ -1,4 +1,17 @@
+;
+; demand.scm
+; Methods to define and work with demands.
+;
 ; Copyright (C) 2015-2016 OpenCog Foundation
+;
+; Design Notes:
+; Demands are associated with demand values. There are two different,
+; conflicting ways in which this is done in the code below: one place
+; where the value is stored is as the mean of the TV; another place
+; is as a NumberNode attached to the ConceptNode. Having two places
+; to store this info is just asking for hard-to-find bugs to pop up.
+; The long-term solution is probably to associate the value to the
+; demand using a protoatom.
 
 (use-modules (rnrs sorting)) ; For sorting demands by their values.
 
@@ -58,37 +71,37 @@
 ; --------------------------------------------------------------
 (define-public (psi-demand demand-name desired-value)
 "
-  Returns the ConceptNode that represents an OpenPsi demand
+  psi-demand NAME VALUE
 
-  demand-name:
-  - The name of the demand that is created.
-
-  desired-value:
-  - The desired demand-value. This is used for setting goals.
+  Create and return a ConceptNode that represents an OpenPsi demand.
+  The NAME should be a string. The VALUE should be a floating-point
+  number in the range [0,1].
 "
 
     ; Check arguments
     (if (not (string? demand-name))
-        (error (string-append "In procedure psi-demand, expected first argument "
-            "to be a string got: ") demand-name))
+        (error "ERROR: psi-demand, expected first argument to be a string"))
+
     (if (or (> 0 desired-value) (< 1 desired-value))
-       (error (string-append "In procedure psi-demand, expected second argument "
-            "the to be within [0, 1] interval, got:") desired-value))
+       (error (string-append
+            "ERROR: psi-demand, expected second argument to be a number "
+            "in the range [0,1], got:") desired-value))
 
     (let* ((demand-str (string-append psi-prefix-str demand-name))
            (demand-node (ConceptNode demand-str (stv desired-value 1))))
 
-            (InheritanceLink demand-node psi-demand-node)
+        (InheritanceLink demand-node psi-demand-node)
 
-            ; NOTE: Not sure this is needed. Possibly use is if one wants
-            ; to measure how the demand-value has changed.
-            (EvaluationLink
-                (PredicateNode (string-append psi-prefix-str "desired_value"))
-                (ListLink
-                    demand-node
-                    (NumberNode desired-value)))
+        ; NOTE: Not sure that this link is needed. One possible use is
+        ; to measure how the demand-value has changed over time.  XXX
+        ; Is this actaully used anywhere?
+        (EvaluationLink
+            (PredicateNode (string-append psi-prefix-str "desired_value"))
+            (ListLink
+                demand-node
+                (NumberNode desired-value)))
 
-            demand-node
+        demand-node
     )
 )
 
