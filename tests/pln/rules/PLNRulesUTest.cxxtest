@@ -29,7 +29,10 @@
 #include <opencog/util/Logger.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <cxxtest/TestSuite.h>
+#include <string>
+#include <vector>
 
+using namespace std;
 using namespace opencog;
 
 class PLNRulesUTest: public CxxTest::TestSuite
@@ -116,19 +119,19 @@ void PLNRulesUTest::test_deduction()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
-    
+
 	load_scm_files({"tests/pln/rules/simple-assertions.scm",
 	               "opencog/pln/rules/deduction-rule.scm"});
-    
+
 	Handle results;
-    
+
 	// To start with, it should only know that men are humans
 	results = eval.eval_h("(cog-bind find-humans)");
 	TS_ASSERT_EQUALS(1, getarity(results));
-    
+
 	// Apply the rule
 	eval.eval_h("(cog-bind deduction-inheritance-rule)");
-       
+
 	// After applying the deduction rule, it should know that all 3 of the
 	// instances of men are also humans (Socrates, Einstein, and Peirce)
 	results = eval.eval_h("(cog-bind find-humans)");
@@ -427,7 +430,7 @@ void PLNRulesUTest::test_implication_partial_instantiation()
 	logger().debug() << "results = " << results->toString();
 	logger().debug() << "possible_results_1 = " << possible_results_1->toString();
 	logger().debug() << "possible_results_2 = " << possible_results_2->toString();
-	
+
 	TS_ASSERT((results == possible_results_1)
 	          or (results == possible_results_2));
 }
