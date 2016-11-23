@@ -222,7 +222,7 @@ def call_sentiment_parse(text_node, sent_node):
 			(display "Error: Cannot connect to RelEx server: ")
 			(display key) (newline) (display rest) (newline)))
 
-	(if (nil? (get-new-parsed-sentences))
+	(if (null? (get-new-parsed-sentences))
 		(error "The RelEx server seems to have crashed!"))
 
 	(let* ((sent-list (get-new-parsed-sentences))
