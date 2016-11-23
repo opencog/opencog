@@ -275,6 +275,30 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
+; An alist used to cache the result of evaluating psi-satisfiable?. The keys
+; are psi-rules and value is TRUE_TV or FALSE_TV.
+(define psi-satisfiablity-alist '())
+
+; --------------------------------------------------------------
+(define (update-satisfiablity-alist rule)
+"
+  Updates the psi-satisfiablity-alist
+
+  rule:
+  - A psi-rule to be checked if its context is satisfiable.
+"
+    ; NOTE: stv are choosen as the return values so as to make the function
+    ; usable in evaluatable-terms.
+    (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
+           (result (cog-evaluate! pattern)))
+
+        (set! psi-satisfiablity-alist
+            (assoc-set! psi-satisfiablity-alist rule result))
+        result
+    )
+)
+
+; --------------------------------------------------------------
 (define-public (psi-satisfiable? rule)
 "
   Check if the rule is satisfiable and return TRUE_TV or FALSE_TV. A rule is
@@ -285,13 +309,7 @@ there are 100K rules!
   rule:
   - A psi-rule to be checked if its context is satisfiable.
 "
-    ; NOTE: stv are choosen as the return values so as to make the function
-    ; usable in evaluatable-terms.
-    (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
-           (result (cog-evaluate! pattern)))
-          (cog-delete pattern)
-          result
-    )
+    (assoc-ref psi-satisfiablity-alist rule)
 )
 
 ; --------------------------------------------------------------
@@ -310,12 +328,12 @@ there are 100K rules!
 (define-public (psi-get-weighted-satisfiable-rules demand-node)
 "
   Returns a list of all the psi-rules that are satisfiable and
-  have a non-zero strength
+  have a non-zero strength.
 "
     (filter
         (lambda (x)
             (and (> (cog-stv-strength x) 0)
-                (equal? (stv 1 1) (psi-satisfiable? x))))
+                (equal? (stv 1 1) (update-satisfiablity-alist x))))
         (psi-get-rules demand-node))
 )
 

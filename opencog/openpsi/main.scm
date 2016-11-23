@@ -64,6 +64,7 @@
     (define (get-context-grounding-atoms rule)
         #!
         (let* ((pattern (GetLink (AndLink (psi-get-context rule))))
+        ; clean this
                 ;FIXME: Cache `results` during `psi-select-rules` stage
                (results (cog-execute! pattern)))
             (cog-delete pattern)
