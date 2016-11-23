@@ -5,10 +5,17 @@ the top-level behavior control mechanism for robots.  It is loosely
 inspired by Joscha Bach's MicroPsi.
 
 Each rule takes the form of if(context) then take(action).  These are
-classified into different goals (demands) theat they can fullfil. The
+classified into different goals (demands) that they can fullfil. The
 main loop is an action-selection mechanism, examining the context to
 see if any of the current demands/goals can be fullfilled, and then
-taking apropriate action.
+taking appropriate action.
+
+## Files
+* `rules.scm` -- Functions for defining openpsi-rules, and fetching
+  thier various components.
+
+* `main.scm` -- Defines the main function for single-stepping the
+   psi rule engine, as well as the main-loop to run the stepper.
 
 ## Status and TODO List
 

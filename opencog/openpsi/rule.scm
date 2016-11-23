@@ -202,7 +202,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 "
   Get context and action list from ImplicationLink.
 "
-    (cog-outgoing-set (list-ref (cog-outgoing-set impl-link) 0))
+    (cog-outgoing-set (cog-outgoing-atom impl-link 0))
 )
 
 ; --------------------------------------------------------------
@@ -246,11 +246,10 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ; --------------------------------------------------------------
 (define-public (psi-rule-alias psi-rule)
 "
-  Returns a list with the node that aliases the psi-rule if it has a an alias,
-  or Returns null if it doesn't.
+  psi-rule-alias RULE
 
-  psi-rule:
-  - An ImplicationLink whose weight is going to be modified.
+  Returns a list of the aliases of the psi-rule RULE.
+XXX what is a rule alias???
 "
     (cog-outgoing-set (cog-execute!
         (GetLink
@@ -260,40 +259,37 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
             (EvaluationLink
                 psi-rule-name-predicate-node
                 (ListLink
-                    (QuoteLink psi-rule)
+                    (QuoteLink psi-rule)  ;; ?? why is a Quote needed here?
                     (VariableNode "rule-alias"))))))
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-partition-rule-with-alias rule-alias psi-rule-list)
 "
-  Returns multiple values of lists with rules which have alias equaling
-  `rule-alias` as the first value and those that don't as second value.
+  psi-partition-rule-with-alias ALIAS RULE-LIST
 
-  rule-alias:
-  - string used for a psi-rule alias.
-
-  psi-rule-list:
-  - a list with psi-rules.
+  Partitions the RULE-LIST into two lists: the first list will
+  contain all rules that are tagged with the name ALIAS; the second
+  list are all the other rules.  ALIAS should be a string.
 "
+    (define cali (Concept (string-append psi-prefix-str rule-alias)))
     (partition
-        (lambda (psi-rule)
-            (equal?
-                (Concept (string-append psi-prefix-str rule-alias))
-                (car (psi-rule-alias psi-rule))))
+        (lambda (rule) (equal? cali (car (psi-rule-alias rule))))
         psi-rule-list)
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-related-goals action)
 "
-  Return a list of all the goals that are associated by an action. Associated
-  goals are those that are the implicand of the psi-rules that have the given
-  action in the implicant.
+  psi-related-goals ACTION
 
-  action:
-  - An action that is part of a psi-rule.
+  Return a list of all of the goals that are associated with the ACTION.
+  A goal is associated with an action whenever the goal appears in
+  a psi-rule with that action in it.
 "
+    ;; XXX this is not an efficient way of searching for goals.  If
+    ;; this method is used a lot, we should convert to SequentialAnd,
+    ;; and search for the goals directly.
     (let* ((and-links (cog-filter 'AndLink (cog-incoming-set action)))
            (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
            (delete-duplicates (map psi-get-goal rules))
@@ -303,13 +299,15 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ; --------------------------------------------------------------
 (define-public (psi-satisfiable? rule)
 "
-  Check if the rule is satisfiable and return TRUE_TV or FALSE_TV. A rule is
-  satisfiable when it's context is fully groundable. The idea is only
-  valid when ranking of context grounding isn't consiedered. This is being
-  replaced.
+  psi-satisfiable? RULE
 
-  rule:
-  - A psi-rule to be checked if its context is satisfiable.
+  Check if the RULE is satisfiable; return TRUE_TV if it is, else return
+  FALSE_TV. A rule is satisfiable when it's context contains variables,
+  and that context can be grounded in the atompace (i.e. if the context
+  is satisfiable in using a SatisfactionLink.) 
+
+  The idea is only valid when ranking of context grounding isn't considered.
+  This is being replaced.  Huh??? What does this mean?
 "
     ; NOTE: stv are choosen as the return values so as to make the function
     ; usable in evaluatable-terms.
@@ -323,10 +321,10 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ; --------------------------------------------------------------
 (define-public (psi-get-satisfiable-rules demand-node)
 "
-  Returns a list of psi-rules of the given demand that are satisfiable.
+  psi-get-satisfiable-rules DEMAND
 
-  demand-node:
-  - The node that represents the demand.
+  Returns a list of all of the psi-rules associated with the DEMAND
+  that are also satisfiable.
 "
     (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
         (psi-get-rules demand-node))
@@ -335,8 +333,10 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ; --------------------------------------------------------------
 (define-public (psi-get-weighted-satisfiable-rules demand-node)
 "
+  psi-get-weighted-satisfiable-rules DEMAND
+
   Returns a list of all the psi-rules that are satisfiable and
-  have a non-zero strength
+  have a non-zero strength.
 "
     (filter
         (lambda (x) (and (> (cog-stv-strength x) 0)
@@ -347,6 +347,8 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ; --------------------------------------------------------------
 (define-public (psi-get-all-satisfiable-rules)
 "
+  psi-get-all-satisfiable-rules
+
   Returns a list of all the psi-rules that are satisfiable.
 "
     (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
@@ -356,8 +358,10 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ; --------------------------------------------------------------
 (define-public (psi-get-all-weighted-satisfiable-rules)
 "
+  psi-get-all-weighted-satisfiable-rules
+
   Returns a list of all the psi-rules that are satisfiable and
-  have a non-zero strength
+  have a non-zero strength.
 "
     (filter
         (lambda (x) (and (> (cog-stv-strength x) 0)
