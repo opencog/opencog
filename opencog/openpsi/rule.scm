@@ -1,4 +1,18 @@
+;
+; rule.scm
+; Utilities for defining and working with OpenPsi rules.
+;
 ; Copyright (C) 2016 OpenCog Foundation
+;
+; Design Notes:
+; The design below uses AndLinks instead of SequentialAndLinks to hold
+; the context and the action. Recall that the AndLink is an unordered
+; link, and so the context and action is stored in arbitrary order.
+; This makes several of the methods inefficeint, as it requires this
+; bag to be searched for the desired bits. If instead, an ordered link
+; was used, and the action was made first, it could be found very
+; quickly. FIXME -- this should be fixed someday.
+
 
 (use-modules (ice-9 threads)) ; For `par-map`
 (use-modules (ice-9 optargs)) ; For `define*-public`
@@ -19,22 +33,24 @@
 "
   psi-rule-nocheck -- same as psi-rule, but no checking
 "
-    (let ((implication (Implication a-stv (And context action) goal)))
 
-    ; These memberships are needed for making filtering and searching simpler..
-    ; If GlobNode had worked with GetLink at the time of coding this,
-    ; that might have been; better, (or not as it might need as much chasing)
-    ; TODO: Remove this when ExecutionLinks are used as that can be used
-    ; for filtering.
+    ; Note that the AndLink is an unordered link -- so the context
+    ; and the action will appear in an arbitrary order.  It would
+    ; almost surely be better to use a SequentialAndLink here;
+    ; this would use less resources and have lower complexity.
+    (let ((implication (Implication a-stv (AndLink context action) goal)))
+
+        ; The membership below is used to simplify filtering and searching.
+        ; Other alternative designs are possible.
+        ; TODO: Remove this, when ExecutionLinks are used, as that can be used
+        ; for filtering. (?? Huh? Please explain...)
         (MemberLink action psi-action)
 
-    ; This memberLink is added so as to minimize the tree walking needed to get
-    ; from a goal to a psi-rule. For example, if the goal is a DefinedPredicate.
+        ; This MemberLink is used to make it easy to find rules that
+        ; fulfil demands. (and also to find goals that meet demands).
         (MemberLink implication demand)
 
-        ; Give name this is used for control/feedback purposes
-        ; Why EvaluationLink? B/c we can't use DefineLink. Maybe when protoatom
-        ; are ready that could be used????
+        ; If a name is given, its used for control/feedback purposes.
         (if name
             (EvaluationLink
                 psi-rule-name-predicate-node
@@ -134,12 +150,13 @@ there are 100K rules!
 ; --------------------------------------------------------------
 (define-public (psi-rule? atom)
 "
-  Returns `#t` or `#f` depending on whether the passed argument
-  is a valid psi-rule or not. An ImplicationLink that is a member
-  of the demand sets is a psi-rule.
+  psi-rule? ATOM
 
-  atom:
-  - An atom passed for checking.
+  Returns `#t` or `#f`, depending on whether the passed argument
+  is a valid psi-rule or not. A psi-rule is any ImplicationLink that
+  is a member of a demand set.
+
+  ATOM is the atom to check.
 "
     (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
 
@@ -154,10 +171,14 @@ there are 100K rules!
 (define-public (psi-get-all-actions)
 "
   Returns a list of all openpsi actions.
+
+XXX FIXME this is borken, and does not work.
+actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 "
-    (append
-        (cog-chase-link 'MemberLink 'ExecutionOutputLink psi-action)
-        (cog-chase-link 'MemberLink 'DefinedSchemaNode psi-action))
+    ;(append
+    ;    (cog-chase-link 'MemberLink 'ExecutionOutputLink psi-action)
+    ;    (cog-chase-link 'MemberLink 'DefinedSchemaNode psi-action))
+    (list)
 )
 
 ; --------------------------------------------------------------
@@ -187,36 +208,39 @@ there are 100K rules!
 ; --------------------------------------------------------------
 (define-public (psi-get-context rule)
 "
-  Get the context of an openpsi-rule.
+  psi-get-context RULE
 
-  rule:
-  - An openpsi-rule.
+  Get the context of the openpsi-rule RULE.  Returns a scheme
+  list of all of the atoms that form the context.
 "
+    ;; FIXME: This is not an efficient way to get the context.
+    ;; If this needs to be called a lot, it should be fixed.
     (remove psi-action? (get-c&a rule))
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-get-action rule)
 "
-  Get the action of an openpsi-rule.
+  psi-get-action RULE
 
-  rule:
-  - An openpsi-rule.
+  Get the action of the openpsi-rule RULE.  Returns the single
+  atom that is the action.
 "
+    ;; FIXME: This is not an efficient way to get the action.
+    ;; If this needs to be called a lot, it should be fixed.
     (car (filter psi-action? (get-c&a rule)))
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-get-goal rule)
 "
-  Get the goal of an openpsi-rule.
+  psi-get-goal RULE
 
-  rule:
-  - An openpsi-rule.
+  Get the goal of the openpsi-rule RULE.
 "
     ; NOTE: Why this function? -> For consisentency and to accomodate future
     ; changes
-     (cadr (cog-outgoing-set rule))
+    (cadr (cog-outgoing-set rule))
 )
 
 ; --------------------------------------------------------------

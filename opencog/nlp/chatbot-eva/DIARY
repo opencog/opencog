@@ -1247,3 +1247,14 @@ clobbers it
 
 
 Either incorrect or not implemented yet. Cannot evaluate (
+
+psi-action ConceptNode OpenPsi: action
+MemberLink
+
+Implication stv
+   And
+      context
+      action
+   goal
+
+

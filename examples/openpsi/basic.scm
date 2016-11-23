@@ -1,6 +1,24 @@
 ;
 ; Basic example of OpenPsi usage
 ;
+;
+; Psi rules have the general form
+;
+;     ImplicationLink  <TV>
+;        AndLink
+;           <context>
+;           <action>
+;        <goal>
+;
+; The intended meaning of these rules is that if the context is
+; applicable, and the action is taken, then the goal is fulfilled.
+;
+; The context is meant to be one or more EvaluationLinks (or boolean
+; combinations thereof).  If these evaluate to ture, then the action
+; will be taken.  The action must also be of the form of a predicate,
+; (that is, myst be an EvaluationLink, or a b oolean combination
+; thereof).  If the action also evaluates to true, then the goal is
+; considered to be fulfilled.
 
 (use-modules (opencog)  (opencog openpsi))
 
@@ -10,6 +28,8 @@
 	(stv 1 1)
 )
 
+;; Return true only if the result of performing the action
+;; actually fulfilled the goal.
 (define (action-doit atom)
 	(display "Taking the action: ")
 	(display atom)
