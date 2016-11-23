@@ -6,9 +6,9 @@
 ;
 ; Design Notes:
 ; Demands are associated with demand values. There are two different,
-; conflicting ways in which this is done in the code below: one place
-; where the value is stored is as the mean of the TV; another place
-; is as a NumberNode attached to the ConceptNode. Having two places
+; conflicting ways in which this is done in the code below: in some
+; cases, the value is stored as the mean of the TV; in other cases, the
+; value is a NumberNode attached to the ConceptNode. Having two places
 ; to store this info is just asking for hard-to-find bugs to pop up.
 ; The long-term solution is probably to associate the value to the
 ; demand using a protoatom.
@@ -20,14 +20,10 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-; Name of variables for common functions in this file-scope
-; NOTE: Shouldn't be exported to prevent modification.
-(define demand-var (VariableNode "Demand"))
-
 (define psi-demand-node (ConceptNode (string-append psi-prefix-str "Demand")))
 
 ; --------------------------------------------------------------
-; A cache of the demands for performance.
+; A cache of the demands, used to improve performance.
 (define psi-valid-demand-cache '())
 
 ; --------------------------------------------------------------
@@ -140,80 +136,84 @@
     (cog-set-tv! demand-node (stv demand-value (tv-conf (cog-tv demand-node))))
 )
 
+; ; --------------------------------------------------------------
+; Not used anywhere.
+;
+; (define (psi-demand-value-term< threshold)
+; "
+;   Returns an evaluatable term that checks if a demand has value less than
+;   the given threshold number.
+;
+;   threshold:
+;   - The boundary of the demand-value to be checked at.
+; "
+;     (EvaluationLink
+;         (GroundedPredicateNode "scm: psi-demand-value<")
+;         (ListLink
+;             (VariableNode "Demand")
+;             (NumberNode threshold)))
+; )
+;
+; (define (psi-demand-value< demand-node threshold-node)
+; "
+;   Returns True-TruthValue if a given demand-node has value less than the
+;   given threshold-node number value else False-TruthValue. This doesn't
+;   check if the node given actually defines a demand. And is primarily to be
+;   used as evaluatable term.
+;
+;   demand-node:
+;   - The node representing the demand.
+;
+;   threshold-node:
+;   - A NumberNode representing the boundary of the demand-value to be checked
+;     at.
+; "
+;     (if (< (tv-mean (cog-tv demand-node))
+;            (string->number (cog-name threshold-node)))
+;         (stv 1 1)
+;         (stv 0 1)
+;     )
+; )
+;
 ; --------------------------------------------------------------
-(define (psi-demand-value-term< threshold)
-"
-  Returns an evaluatable term that checks if a demand has value less than
-  the given threshold number.
-
-  threshold:
-  - The boundary of the demand-value to be checked at.
-"
-    (EvaluationLink
-        (GroundedPredicateNode "scm: psi-demand-value<")
-        (ListLink
-            demand-var
-            (NumberNode threshold)))
-)
-
-(define (psi-demand-value< demand-node threshold-node)
-"
-  Returns True-TruthValue if a given demand-node has value less than the
-  given threshold-node number value else False-TruthValue. This doesn't
-  check if the node given actually defines a demand. And is primarily to be
-  used as evaluatable term.
-
-  demand-node:
-  - The node representing the demand.
-
-  threshold-node:
-  - A NumberNode representing the boundary of the demand-value to be checked
-    at.
-"
-    (if (< (tv-mean (cog-tv demand-node))
-           (string->number (cog-name threshold-node)))
-        (stv 1 1)
-        (stv 0 1)
-    )
-)
-
-; --------------------------------------------------------------
-(define (psi-demand-value-term> threshold)
-"
-  Returns an evaluatable term that checks if a demand has value greater than
-  the given threshold number.
-
-  threshold:
-  - The boundary of the demand-value to be checked at.
-"
-    (EvaluationLink
-        (GroundedPredicateNode "scm: psi-demand-value>")
-        (ListLink
-            demand-var
-            (NumberNode threshold)))
-)
-
-(define (psi-demand-value> demand-node threshold-node)
-"
-  Returns True-TruthValue if a given demand-node has value greater than the
-  given threshold-node number value else False-TruthValue. This doesn't
-  check if the node given actually defines a demand. And is primarily to be
-  used as evaluatable term.
-
-  demand-node:
-  - The node representing the demand.
-
-  threshold-node:
-  - A NumberNode representing the boundary of the demand-value to be checked
-    at.
-"
-    (if (> (tv-mean (cog-tv demand-node))
-           (string->number (cog-name threshold-node)))
-        (stv 1 1)
-        (stv 0 1)
-    )
-)
-
+; Not used anywhere.
+;
+; (define (psi-demand-value-term> threshold)
+; "
+;   Returns an evaluatable term that checks if a demand has value greater than
+;   the given threshold number.
+;
+;   threshold:
+;   - The boundary of the demand-value to be checked at.
+; "
+;     (EvaluationLink
+;         (GroundedPredicateNode "scm: psi-demand-value>")
+;         (ListLink
+;             (VariableNode "Demand")
+;             (NumberNode threshold)))
+; )
+;
+; (define (psi-demand-value> demand-node threshold-node)
+; "
+;   Returns True-TruthValue if a given demand-node has value greater than the
+;   given threshold-node number value else False-TruthValue. This doesn't
+;   check if the node given actually defines a demand. And is primarily to be
+;   used as evaluatable term.
+;
+;   demand-node:
+;   - The node representing the demand.
+;
+;   threshold-node:
+;   - A NumberNode representing the boundary of the demand-value to be checked
+;     at.
+; "
+;     (if (> (tv-mean (cog-tv demand-node))
+;            (string->number (cog-name threshold-node)))
+;         (stv 1 1)
+;         (stv 0 1)
+;     )
+; )
+;
 ; --------------------------------------------------------------
 (define (psi-lowest-demand? atom)
 "
