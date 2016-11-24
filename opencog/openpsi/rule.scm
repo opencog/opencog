@@ -111,7 +111,7 @@
 "
 ; TODO: aliases shouldn't be used to create a subset, as is done in
 ; chatbot-psi.  Subsets should be created at the demand level. The
-; purpose of an alias is only for controlling a SINGLE rule during 
+; purpose of an alias is only for controlling a SINGLE rule during
 ; testing/demoing, and not a set of rules.
     (define func-name "psi-rule") ; For use in error reporting
 
@@ -319,7 +319,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   Check if the RULE is satisfiable; return TRUE_TV if it is, else return
   FALSE_TV. A rule is satisfiable when it's context contains variables,
   and that context can be grounded in the atompace (i.e. if the context
-  is satisfiable in using a SatisfactionLink.) 
+  is satisfiable in using a SatisfactionLink.)
 
   The idea is only valid when ranking of context grounding isn't considered.
   This is being replaced.  Huh??? What does this mean?
@@ -408,24 +408,48 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
     (context-stv (map-in-order cog-evaluate! (psi-get-context rule)))
 )
 
-; --------------------------------------------------------------
-(define-public (psi-action-weight rule)
-"
-  psi-action-weight RULE
-
-  Return the weight Wcagi of the action of the psi-rule RULE.
-"
-    ; NOTE: This check is required as ecan isn't being used continuously.
-    ; Remove `most-weighted-atoms` version once ecan is integrated.
-    ; XXX FIXME this is just-plain wrong. ECAN and OpenPsi have nothing
-    ; to do with each other. Nothing in OpenPsi should depend on ECAN.
-    (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
-        ; Wcagi = Scga * Sc * 1 (assuming every rule is important)
-        (* (tv-mean (cog-tv rule)) ;Scga
-           (tv-mean (psi-context-weight rule))) ; Sc
-        ; Wcagi = Scga * Sc * STIcga
-        (* (tv-mean (cog-tv rule)) ;Scga
-           (tv-mean (psi-context-weight rule)) ; Sc
-           (assoc-ref (cog-av->alist (cog-av rule)) 'sti)) ; STIcga
-    )
-)
+;; --------------------------------------------------------------
+;; DEAD CODE not used anywhere
+;;
+;; (define-public (psi-action-weight rule)
+;; "
+;;   psi-action-weight RULE
+;;
+;;   Return the weight Wcagi of the action of the psi-rule RULE.
+;; "
+;;     ; NOTE: This check is required as ecan isn't being used continuously.
+;;     ; Remove `most-weighted-atoms` version once ecan is integrated.
+;;     ; XXX FIXME this is just-plain wrong. ECAN and OpenPsi have nothing
+;;     ; to do with each other. Nothing in OpenPsi should depend on ECAN.
+;;     (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
+;;         ; Wcagi = Scga * Sc * 1 (assuming every rule is important)
+;;         (* (tv-mean (cog-tv rule)) ;Scga
+;;            (tv-mean (psi-context-weight rule))) ; Sc
+;;         ; Wcagi = Scga * Sc * STIcga
+;;         (* (tv-mean (cog-tv rule)) ;Scga
+;;            (tv-mean (psi-context-weight rule)) ; Sc
+;;            (assoc-ref (cog-av->alist (cog-av rule)) 'sti)) ; STIcga
+;;     )
+;; )
+;;
+;; --------------------------------------------------------------
+;; DEAD CODE not used anywhere
+;;
+;; (define (psi-most-weighted-rule rule-list)
+;; "
+;;   psi-most-weighted-rule RULE-LIST
+;;
+;;   Return the single rule from hte list having the highest weight.
+;;   The weight of an psi-rule is as defined in `psi-action-weight` function
+;; "
+;;     (define (pick rule lst) ; prev is a `lst` and next `atom`
+;;         (cond
+;;             ((> (psi-action-weight (car lst)) (psi-action-weight rule)) lst)
+;;             ((= (psi-action-weight (car lst)) (psi-action-weight rule)) lst)
+;;             (else (list rule))))
+;;
+;;     (if (null? rule-list)
+;;         '()
+;;         (delete-duplicates (fold pick (list (car rule-list)) rule-list))
+;;     )
+;; )

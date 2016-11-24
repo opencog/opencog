@@ -137,7 +137,8 @@ Coming soon :smile:
     returned it means that is it satisifiable. See function `psi-satisfiable?`
     [here](main.scm).
   * The formula for the weight of an action that will be used for
-    action-selection is,
+    action-selection is:
+    XXX FIXME: this is not actually used anywhere.
     ```
     Wa = 1/Na * sum ( Wcagi ...)
     Wcagi = Scga * Sc * STIcga

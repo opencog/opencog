@@ -129,27 +129,6 @@
 )
 
 ; --------------------------------------------------------------
-(define (psi-most-weighted-rule rule-list)
-"
-  psi-most-weighted-rule RULE-LIST
-
-  Return the single rule from hte list having the highest weight.
-  The weight of an psi-rule is as defined in `psi-action-weight` function
-"
-    (define (pick rule lst) ; prev is a `lst` and next `atom`
-        (cond
-            ((> (psi-action-weight (car lst)) (psi-action-weight rule)) lst)
-            ((= (psi-action-weight (car lst)) (psi-action-weight rule))
-                (append lst (list rule)))
-            (else (list rule))))
-
-    (if (null? rule-list)
-        '()
-        (delete-duplicates (fold pick (list (car rule-list)) rule-list))
-    )
-)
-
-; --------------------------------------------------------------
 (define-public (psi-default-action-selector a-random-state)
 "
   Returns a list of one of the most-important-weighted and satisfiable psi-rule
