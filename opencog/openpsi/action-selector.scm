@@ -205,24 +205,27 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-select-rules)
-"
-  Returns a list of psi-rules that are satisfiable by using the action-selector
-  you defined or the default-action-selector predefined if you haven't defined
-  a different action-selector.
-"
-    (let ((dsn (psi-get-action-selector-generic)))
-        (if (null? dsn)
-            (psi-default-action-selector (random-state-from-platform))
-            (let ((result (cog-execute! (car dsn))))
-                (if (equal? (cog-type result) 'SetLink)
-                    (cog-outgoing-set result)
-                    (list result)
-                )
-            )
-        )
-    )
-)
+; Dead code, not used anywhere.
+;
+;; (define-public (psi-select-rules)
+;; "
+;;   psi-select-rules
+;; 
+;;   Return a list of psi-rules that are satisfiable by using the
+;;   current action-selector.
+;; "
+;;     (let ((dsn (psi-get-action-selector-generic)))
+;;         (if (null? dsn)
+;;             (psi-default-action-selector (random-state-from-platform))
+;;             (let ((result (cog-execute! (car dsn))))
+;;                 (if (equal? (cog-type result) 'SetLink)
+;;                     (cog-outgoing-set result)
+;;                     (list result)
+;;                 )
+;;             )
+;;         )
+;;     )
+;; )
 
 ; --------------------------------------------------------------
 (define-public (psi-default-action-selector-per-demand a-random-state demand)
