@@ -42,7 +42,7 @@
 ;   psi-satisfiable? is used
 ; 2. Should a context evaluator be added here?????
 ; 3. What is the "right" way of communicating the level of information.
-    (psi-satisfiable? rule)
+    (satisfiable? rule)
 )
 
 ; --------------------------------------------------------------

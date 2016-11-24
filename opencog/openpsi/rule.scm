@@ -280,9 +280,26 @@ there are 100K rules!
 (define psi-satisfiablity-alist '())
 
 ; --------------------------------------------------------------
-(define (update-satisfiablity-alist rule)
+(define (satisfiable? rule)
 "
-  Updates the psi-satisfiablity-alist
+  Returns the satisfiablity result of the rule from cache. `psi-satisfiable?`
+  should have been run for the given rule somewhere in the control flow before
+  calling this function.
+
+  rule:
+  - A psi-rule to be checked if its context is satisfiable.
+"
+    (assoc-ref psi-satisfiablity-alist rule)
+)
+
+; --------------------------------------------------------------
+(define-public (psi-satisfiable? rule)
+"
+  Check if the rule is satisfiable and return TRUE_TV or FALSE_TV. A rule is
+  satisfiable when it's context is fully groundable. The idea is only
+  valid when ranking of context grounding isn't considered.
+
+  It also updates the internal cache.
 
   rule:
   - A psi-rule to be checked if its context is satisfiable.
@@ -299,22 +316,6 @@ there are 100K rules!
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-satisfiable? rule)
-"
-  Check if the rule is satisfiable and return TRUE_TV or FALSE_TV. A rule is
-  satisfiable when it's context is fully groundable. The idea is only
-  valid when ranking of context grounding isn't consiedered. This is being
-  replaced.
-
-  rule:
-  - A psi-rule to be checked if its context is satisfiable.
-"
-    ; NOTE `update-satisfiablity-alist` should be run before
-    ; `psi-satisfiable?``, so as to populate the psi-satisfiablity-alist.
-    (assoc-ref psi-satisfiablity-alist rule)
-)
-
-; --------------------------------------------------------------
 (define-public (psi-get-satisfiable-rules demand-node)
 "
   Returns a list of psi-rules of the given demand that are satisfiable.
@@ -322,7 +323,7 @@ there are 100K rules!
   demand-node:
   - The node that represents the demand.
 "
-    (filter  (lambda (x) (equal? (stv 1 1) (update-satisfiablity-alist x)))
+    (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
         (psi-get-rules demand-node))
 )
 
@@ -335,7 +336,7 @@ there are 100K rules!
     (filter
         (lambda (x)
             (and (> (cog-stv-strength x) 0)
-                (equal? (stv 1 1) (update-satisfiablity-alist x))))
+                (equal? (stv 1 1) (psi-satisfiable? x))))
         (psi-get-rules demand-node))
 )
 
@@ -344,7 +345,7 @@ there are 100K rules!
 "
   Returns a list of all the psi-rules that are satisfiable.
 "
-    (filter  (lambda (x) (equal? (stv 1 1) (update-satisfiablity-alist x)))
+    (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
         (psi-get-all-rules))
 )
 

@@ -99,9 +99,9 @@ public:
         _scm = nullptr;
     }
 
-    // Check the scheme function `psi-satisfiable?`` and
-    // `(update-satisfiablity-alist`
-    void test_psi_satisfiable_and_update_satisfiablity_alist()
+    // Check the scheme function `psi-satisfiable?`` and `satisfiable?`
+    // NOTE: The name of the test function uses `__predicate` in place of `?`
+    void test_psi_satisfiable_and_satisfiable__predicate()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
         // Load the file to get access to update-satisfiablity-alist procedure
@@ -111,11 +111,13 @@ public:
 
         // Test 1:
         // Test unsatisfaiability
-        auto result_1_1 = _scm->eval("(update-satisfiablity-alist (rule-1))");
+        auto result_1_1 = _scm->eval("(psi-satisfiable? (rule-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1_1);
 
-        auto result_1_2 = _scm->eval("(psi-satisfiable? (rule-1))");
+        // Check result from cache is consistent with that of the actual
+        // execution.
+        auto result_1_2 = _scm->eval("(satisfiable? (rule-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1_2);
 
@@ -123,13 +125,16 @@ public:
         // Test satisfaiability
         _scm->eval("(groundable-content-1)");
         CHKERR
-        auto result_2_1 = _scm->eval("(update-satisfiablity-alist (rule-1))");
+        auto result_2_1 = _scm->eval("(psi-satisfiable? (rule-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2_1);
 
-        auto result_2_2 = _scm->eval("(psi-satisfiable? (rule-1))");
+        // Check result from cache is consistent with that of the actual
+        // execution.
+        auto result_2_2 = _scm->eval("(satisfiable? (rule-1))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2_2);
+
 
         logger().info("END TEST: %s", __FUNCTION__);
     }
