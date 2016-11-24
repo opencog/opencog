@@ -25,6 +25,8 @@ import Text.Syntax
 
 import OpenCog.Lojban.Syntax.Types
 
+import qualified Data.ListTrie.Patricia.Set.Ord as TS
+
 -------------------------------------------------------------------------------
 --Iso Util
 -------------------------------------------------------------------------------
@@ -43,17 +45,19 @@ first  a = a *** id
 insert :: a -> Iso () a
 insert = inverse . ignore
 
+iunit = inverse unit
+
 addfst :: a -> Iso b (a,b)
-addfst a = first (insert a) . commute . unit
+addfst a = inverse $ rmfst a
 
 addsnd :: a -> Iso b (b,a)
-addsnd a = second (insert a) . unit
+addsnd a = inverse $ rmsnd a
 
 rmfst :: a -> Iso (a,b) b
-rmfst a = inverse (addfst a)
+rmfst a = iunit . commute .< ignore a
 
 rmsnd :: a -> Iso (b,a) b
-rmsnd a = inverse (addsnd a)
+rmsnd a = iunit .> ignore a
 
 
 choice :: (a -> Iso a b) -> (b -> Iso a b) -> Iso a b
@@ -244,7 +248,7 @@ letter  =  subset isLetter <$> token
 digit   =  subset isDigit <$> token
 
 anyWord :: Syntax delta => delta String
-anyWord = many1 letter <* optSpace
+anyWord = many1 letter <* sepSpace
 
 --any :: Syntax delta => delta String
 --any = many token
@@ -256,34 +260,59 @@ string [] =  pure []
 string (x:xs) = cons <$> (subset (== x) <$> token) <*> string xs
 
 word :: Syntax delta => String -> delta String
-word s = string s <* text " " <* optext " "
+word s = string s <* sepSpace
 
 mytext :: Syntax delta => String -> delta ()
-mytext s = text s <* text " " <* optext " "
+mytext s = text s <* sepSpace
 
 --For text that is both optional and should be parsed into ()
 optext :: Syntax delta => String -> delta ()
-optext t = ((text t <* text " ") <|> text "") <* optSpace
+optext t = (text t <* sepSpace) <|> (text "" <* optSpace)
 
 --Handles 1 of many options from a list
-oneOf :: Syntax delta => (a -> delta b) -> [a] -> delta b
-oneOf f [e] = f e
-oneOf f (x:xs) = f x <|> oneOf f xs
+oneOfS :: Syntax delta => (a -> delta b) -> [a] -> delta b
+oneOfS f [e] = f e
+oneOfS f (x:xs) = f x <|> oneOfS f xs
+
+oneOf :: Syntax delta => StringSet -> delta String
+oneOf ss = memberIso ss <$> anyWord
+
+memberIso :: StringSet -> Iso String String
+memberIso ss = Iso f f where
+    f e = if TS.member e ss
+             then Just e
+             else Nothing
+
+oneOf2 :: Syntax delta => StringSet -> delta String
+oneOf2 ss = memberIso2 ss <$> anyWord
+
+memberIso2 :: StringSet -> Iso String String
+memberIso2 ss = Iso (f ss []) (f ss []) where
+    f ss l [] = if TS.member l ss
+                     then Just l
+                     else Nothing
+    f ss l (x:xs) = let key= l++[x]
+                        ns = TS.lookupPrefix key ss
+                    in case TS.size ns of
+                          0 -> Nothing
+                          1 -> Just key
+                          _ -> f ns key xs
 
 gismu :: SyntaxReader String
-gismu = ReaderT (\(_,gismus,_,_) -> oneOf word gismus)
+gismu = ReaderT (\(_,gismus,_,_) -> oneOf gismus)
 
 selmaho :: String -> SyntaxReader String
-selmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf word $ cmavo M.! s)
+selmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf (cmavo M.! s))
 
 joiSelmaho :: String -> SyntaxReader String
-joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf string $ cmavo M.! s)
-               <* optext " "
+joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf2 (cmavo M.! s))
 
 sepSelmaho :: String -> SyntaxReader ()
-sepSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf mytext $ cmavo M.! s)
+sepSelmaho s = ReaderT (\(cmavo,_,_,_) ->  oneOfS mytext (TS.toList $ cmavo M.! s))
 
 optSelmaho :: String -> SyntaxReader ()
-optSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf optext $ cmavo M.! s)
-
+optSelmaho s = handle <$> optional (selmaho s)
+    where handle = Iso f g where
+            f _ = Just ()
+            g () = Just Nothing
 

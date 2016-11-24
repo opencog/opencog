@@ -21,6 +21,7 @@ import Control.Monad.Trans.Reader
 import Control.Category (id,(.))
 
 import Control.Isomorphism.Partial
+import qualified Data.ListTrie.Patricia.Set.Ord as TS
 
 import Data.Maybe
 

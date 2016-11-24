@@ -28,6 +28,7 @@ import qualified Text.Syntax.Printer.Naive as P
 initParserPrinter :: IO (String -> Maybe Atom, Atom -> Maybe String)
 initParserPrinter = do
     wordlist <- loadWordLists
+    
     return (lojbanToAtomese wordlist,atomeseToLojban wordlist)
 
 lojbanToAtomese :: WordList -> String -> Maybe Atom

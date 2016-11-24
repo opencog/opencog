@@ -1,23 +1,27 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module OpenCog.Lojban.WordList where
 
+import Prelude hiding (map)
 import Text.XML.HXT.Core
 import qualified Data.Map as M
 import Data.List
 import System.Random
 
-loadWordLists :: IO (M.Map String [String],[String],[(String,String)],Int)
+import Data.ListTrie.Patricia.Set.Ord
+
+type StringSet = TrieSet Char
+
+loadWordLists :: IO (M.Map String StringSet,StringSet,[(String,String)],Int)
 loadWordLists = do
     let src = "/usr/local/share/opencog/lojban.xml"
     gismu <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getGismu)
     cmavo <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getCmavo)
     bai   <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getBAI)
-    let selmahos = M.fromListWith (++) $ map f cmavo
+    let selmahos = M.fromListWith (++) $ fmap f cmavo
         f (s,c) = (takeWhile p s,[c])
         p e = e `notElem` "1234567890*"
-        src = "/usr/local/share/opencog/lojban.xml"
     (seed :: Int) <- randomIO
-    return (selmahos,gismu,map handleBAIprefix bai,seed)
+    return (fmap fromList selmahos,fromList gismu,fmap handleBAIprefix bai,seed)
 
 handleBAIprefix :: (String,String) -> (String,String)
 handleBAIprefix (b,d) = if t2 `elem` se then (b,t2 ++ ' ' : nd) else (b,nd)

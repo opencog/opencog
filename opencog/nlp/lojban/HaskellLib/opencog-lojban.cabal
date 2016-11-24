@@ -34,6 +34,7 @@ library
                        , hxt
                        , split
                        , hashable
+                       , list-tries
   default-language:    Haskell2010
 
 executable lojbanChatBot
