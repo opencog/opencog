@@ -383,3 +383,49 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
             (equal? (stv 1 1) (psi-satisfiable? x))))
         (psi-get-all-rules))
 )
+
+; --------------------------------------------------------------
+(define-public (psi-context-weight rule)
+"
+  psi-context-weight RULE
+
+  Return a TruthValue containing the weight Sc of the context of the
+  psi-rule RULE.  The strength of the TV will contain the weight.
+"
+    (define (context-stv stv-list)
+        ; See and-side-effect-free-formula in pln-and-construction-rule
+        ; XXX FIXME explain what is being computed here.
+        (stv
+            (fold * 1 (map (lambda (x) (tv-mean x)) stv-list))
+            (fold min 1 (map (lambda (x) (tv-conf x)) stv-list)))
+    )
+
+    ; map-in-order is used to simulate SequentialAndLink assuming
+    ; psi-get-context maintains, which is unlikely. What other options
+    ; are there?
+    ; XXX FIXME How about actually using a SequentialAndLink?
+    ; then teh code will be faster, and tehre won't be this problem.
+    (context-stv (map-in-order cog-evaluate! (psi-get-context rule)))
+)
+
+; --------------------------------------------------------------
+(define-public (psi-action-weight rule)
+"
+  psi-action-weight RULE
+
+  Return the weight Wcagi of the action of the psi-rule RULE.
+"
+    ; NOTE: This check is required as ecan isn't being used continuously.
+    ; Remove `most-weighted-atoms` version once ecan is integrated.
+    ; XXX FIXME this is just-plain wrong. ECAN and OpenPsi have nothing
+    ; to do with each other. Nothing in OpenPsi should depend on ECAN.
+    (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
+        ; Wcagi = Scga * Sc * 1 (assuming every rule is important)
+        (* (tv-mean (cog-tv rule)) ;Scga
+           (tv-mean (psi-context-weight rule))) ; Sc
+        ; Wcagi = Scga * Sc * STIcga
+        (* (tv-mean (cog-tv rule)) ;Scga
+           (tv-mean (psi-context-weight rule)) ; Sc
+           (assoc-ref (cog-av->alist (cog-av rule)) 'sti)) ; STIcga
+    )
+)
