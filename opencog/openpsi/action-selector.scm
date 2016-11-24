@@ -133,8 +133,8 @@
 "
   psi-context-weight RULE
 
-  Returns the TruthValue of an evaluated context. The strength is known as
-  the weight(Sc) of the context.
+  Return a TruthValue containing the weight Sc of the context of the
+  psi-rule RULE.  The strength of the TV will contain the weight.
 "
     (define (context-stv stv-list)
         ; See and-side-effect-free-formula in pln-and-construction-rule
@@ -155,14 +155,14 @@
 ; --------------------------------------------------------------
 (define-public (psi-action-weight rule)
 "
-  Retruns the weight of an action in a single psi-rule(Wcagi)
+  psi-action-weight RULE
 
-  rule:
-  - The psi-rule that has the action, for which the action weight is being
-  calcualated.
+  Return the weight Wcagi of the action of the psi-rule RULE.
 "
-    ; NOTE: This check is required as ecan isn't being used continuesely.
+    ; NOTE: This check is required as ecan isn't being used continuously.
     ; Remove `most-weighted-atoms` version once ecan is integrated.
+    ; XXX FIXME this is just-plain wrong. ECAN and OpenPsi have nothing
+    ; to do with each other. Nothing in OpenPsi should depend on ECAN.
     (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
         ; Wcagi = Scga * Sc * 1 (assuming every rule is important)
         (* (tv-mean (cog-tv rule)) ;Scga
