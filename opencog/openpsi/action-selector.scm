@@ -131,27 +131,25 @@
 ; --------------------------------------------------------------
 (define-public (psi-context-weight rule)
 "
+  psi-context-weight RULE
+
   Returns the TruthValue of an evaluated context. The strength is known as
   the weight(Sc) of the context.
-
-  rule:
-  - A psi-rule with context to be evaluated.
 "
     (define (context-stv stv-list)
-    ; See and-side-effect-free-formula in pln-and-construction-rule
+        ; See and-side-effect-free-formula in pln-and-construction-rule
+        ; XXX FIXME explain what is being computed here.
         (stv
             (fold * 1 (map (lambda (x) (tv-mean x)) stv-list))
             (fold min 1 (map (lambda (x) (tv-conf x)) stv-list)))
     )
 
-    (let* ((context (psi-get-context rule))
-        ; map-in-order is used to simulate SequentialAndLink assuming
-        ; psi-get-context maintaines, which is unlikely. What other options
-        ; are there?
-           (stvs (map-in-order cog-evaluate! context)))
-
-           (context-stv stvs)
-   )
+    ; map-in-order is used to simulate SequentialAndLink assuming
+    ; psi-get-context maintains, which is unlikely. What other options
+    ; are there?
+    ; XXX FIXME How about actually using a SequentialAndLink?
+    ; then teh code will be faster, and tehre won't be this problem.
+    (context-stv (map-in-order cog-evaluate! (psi-get-context rule)))
 )
 
 ; --------------------------------------------------------------
