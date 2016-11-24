@@ -129,14 +129,12 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-most-weighted-rules rule-list)
+(define (psi-most-weighted-rule rule-list)
 "
-  It returns a list with non-duplicating rules with the highest weight. If an
-  empty list is passed an empty list is returned. Weight of an psi-rule is as
-  defined in `psi-action-weight` function
+  psi-most-weighted-rule RULE-LIST
 
-  rule-list:
-  - A list of psi-rules to be compared.
+  Return the single rule from hte list having the highest weight.
+  The weight of an psi-rule is as defined in `psi-action-weight` function
 "
     (define (pick rule lst) ; prev is a `lst` and next `atom`
         (cond
