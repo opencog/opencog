@@ -276,7 +276,7 @@ there are 100K rules!
 
 ; --------------------------------------------------------------
 ; An alist used to cache the result of evaluating psi-satisfiable?. The keys
-; are psi-rules and value is TRUE_TV or FALSE_TV.
+; are psi-rules and value is TRUE_TV or FALSE_TV. This is a cache of results.
 (define psi-satisfiablity-alist '())
 
 ; --------------------------------------------------------------
@@ -309,6 +309,8 @@ there are 100K rules!
   rule:
   - A psi-rule to be checked if its context is satisfiable.
 "
+    ; NOTE `update-satisfiablity-alist` should be run before
+    ; `psi-satisfiable?``, so as to populate the psi-satisfiablity-alist.
     (assoc-ref psi-satisfiablity-alist rule)
 )
 
@@ -320,7 +322,7 @@ there are 100K rules!
   demand-node:
   - The node that represents the demand.
 "
-    (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
+    (filter  (lambda (x) (equal? (stv 1 1) (update-satisfiablity-alist x)))
         (psi-get-rules demand-node))
 )
 

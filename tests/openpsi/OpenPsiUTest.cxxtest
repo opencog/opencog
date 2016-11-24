@@ -99,24 +99,38 @@ public:
         _scm = nullptr;
     }
 
-    // Check the scheme function `psi-satisfiable?``
-    void test_psi_satisfiable()
+    // Check the scheme function `psi-satisfiable?`` and
+    // `(update-satisfiablity-alist`
+    void test_psi_satisfiable_and_update_satisfiablity_alist()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
+        // Load the file to get access to update-satisfiablity-alist procedure
+        // as it isn't exported.
+        _scm->eval("(load \"" PROJECT_SOURCE_DIR
+                   "/opencog/openpsi/rule.scm\")");
 
         // Test 1:
         // Test unsatisfaiability
-        auto result_1 = _scm->eval("(psi-satisfiable? (rule-1))");
+        auto result_1_1 = _scm->eval("(update-satisfiablity-alist (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1);
+        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1_1);
+
+        auto result_1_2 = _scm->eval("(psi-satisfiable? (rule-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1_2);
 
         // Test 2:
         // Test satisfaiability
         _scm->eval("(groundable-content-1)");
         CHKERR
-        auto result_2 = _scm->eval("(psi-satisfiable? (rule-1))");
+        auto result_2_1 = _scm->eval("(update-satisfiablity-alist (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2);
+        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2_1);
+
+        auto result_2_2 = _scm->eval("(psi-satisfiable? (rule-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2_2);
+
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
@@ -183,6 +197,7 @@ public:
     }
 
     // Check the scheme function `psi-get-satisfiable-rules`
+    // NOTE The function being tested isn't being used
     void test_psi_get_satisfiable_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
