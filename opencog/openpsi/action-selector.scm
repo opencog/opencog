@@ -1,3 +1,6 @@
+;
+; action-selector.scm
+;
 ; Copyright (C) 2016 OpenCog Foundation
 
 (use-modules (opencog) (opencog exec))
@@ -5,23 +8,6 @@
 (load "demand.scm")
 (load "rule.scm")
 (load "utilities.scm")
-
-; --------------------------------------------------------------
-(define-public (psi-action-selector-pattern)
-"
-  This returns the StateLink that is used for specifying the action selecting
-  evaluatable term.
-
-  A StateLink is used instead of an InheritanceLink because there could only
-  be one active action-rule-selector at a time even though there could be
-  multiple possible action-rule-selectors. And this enables dynamically
-  changing the action-rule-selector through learning.
-"
-    (StateLink
-        (ConceptNode (string-append psi-prefix-str "action-selector"))
-        (VariableNode "$dpn")
-    )
-)
 
 ; --------------------------------------------------------------
 (define-public (psi-action-selector-set! dsn)
@@ -80,12 +66,23 @@
     )
 )
 
+; --------------------------------------------------------------
 (define-public (psi-get-action-selector-generic)
 "
   Returns a list containing the user-defined action-selector.
 "
-    (cog-outgoing-set (cog-execute!
-        (GetLink (psi-action-selector-pattern))))
+    (define action-selector-pattern
+        ; Use a StateLink instead of an InheritanceLink because there
+        ; should only be one active action-rule-selector at a time,
+        ; even though there could be multiple possible action-rule
+        ; selectors.  This enables dynamically changing the
+        ; action-rule-selector through learning.
+        (GetLink
+            (StateLink
+                (ConceptNode (string-append psi-prefix-str "action-selector"))
+                (VariableNode "$dpn"))))
+
+    (cog-outgoing-set (cog-execute! action-selector-pattern))
 )
 
 ; ----------------------------------------------------------------------
