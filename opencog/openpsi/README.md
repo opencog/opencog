@@ -119,12 +119,13 @@ Coming soon :smile:
     the proceedures described below. It is implemented [here](main.scm).
 
 2. choose action-selector:
-  * If you have defined an action selector then it will be used; else the
+  * If you have defined an action selector, then it will be used; else the
     default action selector is used. See function `(psi-select-rules)`
     [here](main.scm).
+
   * Only one action-selector is used in each step, for all demands. See
     `psi-add-action-selector` and `psi-action-selector-set!`
-    [here](action-selector.scm) for adding and setting your an action-selector.
+    [here](action-selector.scm) for adding and setting your own action-selector.
 
 3. default action selector:
   * Most-weighted-satisfiable psi-rules of each demand are filtered out. If

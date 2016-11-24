@@ -9,23 +9,43 @@
 (load "rule.scm")
 (load "utilities.scm")
 
+(define *-act-sel-node-*
+    (ConceptNode (string-append psi-prefix-str "action-selector")))
+
 ; --------------------------------------------------------------
 (define-public (psi-action-selector-set! dsn)
 "
-  Sets the given DefinedSchemaNode to be used for selecting actions.
+  psi-action-selector-set! EXE
 
-  dsn:
-  - The DefinedSchemaNode that represents the executable-term used for
-    selecting the psi-rules that should have their actions and goals executed.
+  Sets the executable atom to be used for selecting actions.
+
+  EXE can be either an ExecutionOutputLink or a DefinedSchemaNode that
+  represents an executable link. It will be used fto select the psi-rules
+  that will have their actions and goals executed.
 "
     ; Check arguments
-    (if (not (equal? (cog-type dsn) 'DefinedSchemaNode))
-        (error "Expected DefinedSchemaNode got: " dsn))
+    (if (and
+            (not (equal? (cog-type dsn) 'DefinedSchemaNode))
+            (not (equal? (cog-type dsn) 'ExecutionOutputLink)))
+        (error "Expected an executable link, got: " dsn))
 
-    (StateLink
-        (ConceptNode (string-append psi-prefix-str "action-selector"))
-        dsn
-    )
+    (StateLink *-act-sel-node-* dsn)
+)
+
+; --------------------------------------------------------------
+(define-public (psi-get-action-selector-generic)
+"
+  Returns a list containing the user-defined action-selector.
+"
+    (define action-selector-pattern
+        ; Use a StateLink instead of an InheritanceLink because there
+        ; should only be one active action-rule-selector at a time,
+        ; even though there could be multiple possible action-rule
+        ; selectors.  This enables dynamically changing the
+        ; action-rule-selector through learning.
+        (GetLink (StateLink *-act-sel-node-* (Variable "$dpn"))))
+
+    (cog-outgoing-set (cog-execute! action-selector-pattern))
 )
 
 ; --------------------------------------------------------------
@@ -64,25 +84,6 @@
            selector-dsn
        )
     )
-)
-
-; --------------------------------------------------------------
-(define-public (psi-get-action-selector-generic)
-"
-  Returns a list containing the user-defined action-selector.
-"
-    (define action-selector-pattern
-        ; Use a StateLink instead of an InheritanceLink because there
-        ; should only be one active action-rule-selector at a time,
-        ; even though there could be multiple possible action-rule
-        ; selectors.  This enables dynamically changing the
-        ; action-rule-selector through learning.
-        (GetLink
-            (StateLink
-                (ConceptNode (string-append psi-prefix-str "action-selector"))
-                (VariableNode "$dpn"))))
-
-    (cog-outgoing-set (cog-execute! action-selector-pattern))
 )
 
 ; ----------------------------------------------------------------------

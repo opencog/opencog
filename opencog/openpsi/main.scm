@@ -133,9 +133,9 @@
                     (cog-evaluate! (car updater))
                 )
                 ; The assumption is that the rules can be run concurrently.
-                ; FIXME: Once action-orchestrator is available then a modified
-                ; `psi-select-rules` should be used insted of
-                ; `psi-select-rules-per-demand`
+                ; FIXME: Once action-orchestrator is available, then
+                ; a modified `psi-select-rules` should be used instead of
+                ; `psi-select-rules-per-demand` (huh? why?)
                 (par-map act-and-evaluate (psi-select-rules-per-demand d))
             ))
 

@@ -1275,3 +1275,6 @@ this crashes:
  (define c (Concept "C" (stv 0.8 0.8)))
  (most-weighted-atoms (list a b c))
 
+
+psi-select-rules is not used anywhere.
+psi-select-rules-per-demand is used instead;
