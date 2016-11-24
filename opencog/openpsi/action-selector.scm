@@ -1,6 +1,8 @@
 ;
 ; action-selector.scm
 ;
+; The action selector chooses one (or more) rules to run.
+;
 ; Copyright (C) 2016 OpenCog Foundation
 
 (use-modules (opencog) (opencog exec))
@@ -62,7 +64,7 @@
 ;; "
 ;;     (let ((dsn (psi-get-action-selector-generic)))
 ;;         (if (null? dsn)
-;;             (psi-default-action-selector (random-state-from-platform))
+;;             (psi-default-action-selector)
 ;;             (let ((result (cog-execute! (car dsn))))
 ;;                 (if (equal? (cog-type result) 'SetLink)
 ;;                     (cog-outgoing-set result)
@@ -154,26 +156,18 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-default-action-selector-per-demand a-random-state demand)
+(define (default-per-demand-action-selector demand)
 "
-  Returns a list of one of the most-important-weighted and satisfiable psi-rule
-  or an empty list. A single psi-rule is returned so as help avoid mulitple
-  actions of the same effect or type(aka semantic of the action) from being
-  executed. If a satisfiable rule doesn't exist then the empty list is returned.
-
-  a-random-state:
-  - A random-state object used as a seed for choosing how multiple satisfiable
-  psi-rules with the same weight are to be choosen.
+  Return a list containing a single psi-rule, the one psi-rule that has
+  the highest weight and is also satisfiable.  If a satisfiable rule
+  doesn't exist, then the empty list is returned.
 "
+    ; This function does NOT examine the attention value, nor does it
+    ; use ECAN in any way. And it shouldn't.  The attention-value and
+    ; ECAN subsystem should use the psi-set-action-selector function
+    ; above, and define a customer selector, as desired.
     (define (choose-rules)
-        ; NOTE: This check is required as ecan isn't being used continuesely.
-        ; Remove `most-weighted-atoms` version once ecan is integrated.
-        ; FIXME; Replace by
-        ; (psi-most-weighted-rules (psi-get-satisfiable-rules demand))
-        ;(if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
-            (most-weighted-atoms (psi-get-weighted-satisfiable-rules demand))
-            ;(most-important-weighted-atoms (psi-get-all-satisfiable-rules))
-        ;)
+        (most-weighted-atoms (psi-get-weighted-satisfiable-rules demand))
     )
 
     (let ((rules (choose-rules)))
@@ -181,7 +175,8 @@
             ((null? rules) '())
             ((equal? (tv-mean (cog-tv (car rules))) 0.0) '())
             (else
-                (list (list-ref rules (random (length rules) a-random-state))))
+                (list (list-ref rules
+                    (random (length rules)))))
         )
     )
 )
@@ -191,13 +186,19 @@
 "
   psi-select-rules-per-demand DEMAND
 
-  Returnxs a list of psi-rules that can be satisfied by the current
-  action-selector.
+  Run the action selector associated with DEMAND, and return a list
+  of psi-rules.  If no custom action selector was specified, then
+  a list containing a single rule will be returned; that rule will
+  be highest-weight rule that is also satsisfiable.  If there is no
+  such rule, then the empty list is returned.
 "
     (let ((as (psi-get-action-selector d)))
         (if (null? as)
-            (psi-default-action-selector-per-demand
-                       (random-state-from-platform) d)
+            ; If the user didn't specify a custom selector, then
+            ; run the default selector
+            (default-per-demand-action-selector d)
+
+            ; Else run the user's selector.
             (let ((result (cog-execute! (car as))))
                 (if (equal? (cog-type result) 'SetLink)
                     (cog-outgoing-set result)
