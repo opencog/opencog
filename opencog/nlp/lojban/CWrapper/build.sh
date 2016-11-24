@@ -1,6 +1,6 @@
 SOURCE_DIR=$1
 
-sudo ldconfig /usr/local/lib/opencog/
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib/opencog"
 
 libname=$(stack query --allow-different-user | awk 'NR==5' | sed 's/://g'| sed 's/ //g')
 libver=$(stack query --allow-different-user | awk 'NR==7' | sed 's/version: //g' | sed "s/'//g" | sed "s/ //g")

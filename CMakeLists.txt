@@ -434,6 +434,17 @@ ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 
+# Glasgow Haskell compiler
+FIND_PACKAGE(Stack)
+IF (STACK_FOUND)
+	ADD_DEFINITIONS(-DHAVE_STACK)
+	SET(HAVE_STACK 1)
+	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack found.")
+ELSE (STACK_FOUND)
+	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack not found.")
+ENDIF (STACK_FOUND)
+MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
+
 # ==========================================================
 # Decide what to build, based on the packages found.
 
@@ -707,4 +718,6 @@ SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS AND 
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("NLP" "Natural Language Processing" HAVE_NLP)
 SUMMARY_ADD("PatternMiner" "Pattern Miner" HAVE_cpprest)
+SUMMARY_ADD("Haskell codes" "Logic via Lojban" HAVE_STACK)
+
 SUMMARY_SHOW()
