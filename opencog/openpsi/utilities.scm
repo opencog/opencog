@@ -38,14 +38,11 @@
   - A psi-rule with context to be evaluated.
 "
 ; NOTE
-; 1. This is the same as the `psi-satisfiable?`
+; 1. See https://github.com/opencog/atomspace/issues/823 for why
+;   psi-satisfiable? is used
 ; 2. Should a context evaluator be added here?????
 ; 3. What is the "right" way of communicating the level of information.
-    (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
-           (result (cog-evaluate! pattern)))
-          (cog-delete pattern)
-          result
-    )
+    (satisfiable? rule)
 )
 
 ; --------------------------------------------------------------
