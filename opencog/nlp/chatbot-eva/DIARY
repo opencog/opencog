@@ -1278,3 +1278,5 @@ this crashes:
 
 psi-select-rules is not used anywhere.
 psi-select-rules-per-demand is used instead;
+
+psi-add-action-selector is not used anywhere

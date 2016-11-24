@@ -120,10 +120,10 @@ Coming soon :smile:
 
 2. choose action-selector:
   * If you have defined an action selector, then it will be used; else the
-    default action selector is used. See function `(psi-select-rules)`
-    [here](main.scm).
+    default action selector is used. See function
+    `(psi-select-rules-per-demand)` [here](main.scm).
 
-  * Only one action-selector is used in each step, for all demands. See
+  * Each demand can have it's own action-selector.  See
     `psi-add-action-selector` and `psi-action-selector-set!`
     [here](action-selector.scm) for adding and setting your own action-selector.
 

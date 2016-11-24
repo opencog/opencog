@@ -201,81 +201,60 @@
 )
 
 ; --------------------------------------------------------------
-(define (functionality-pattern tag-node functionlity functionality-name)
-"
-  Returns a StateLink with the following structure
-    (StateLink
-      (ListLink
-          (Node (string-append psi-prefix-str functionality-name))
-           tag-node)
-       functionlity)
-
-  tag-node:
-  - A demand/modulator node that the functionality is being added to.
-
-  functionlity:
-  - A DefinedPredicateNode/DefinedSchemaNode that is evaluated for performing
-    the functionality over the particular demand/modulator.
-
-  functionality-name:
-  - The type of functionality.
-"
-    (StateLink
-        (ListLink
-            (Node (string-append psi-prefix-str functionality-name))
-             tag-node)
-         functionlity)
-)
-
-; --------------------------------------------------------------
-(define-public
+(define
     (psi-set-functionality functionlity is-eval tag-node functionality-name)
 "
   psi-set-functionality FUNC IS-EVAL TAG FUNC-NAME
 
-  Add a functionality to a particular demand/modulator.
+  Associate a function with a particular demand or modulator.
 
-  FUNC is a DefinedPredicateNode/DefinedSchemaNode that is
-    evaluated/executed to perform the functionality for the
-    particular demand/modulator.
+  FUNC is an atom that can be executed or evaluated. It will perform
+    the functionality for the particular demand/modulator.
 
   Set IS-EVAL to #t if the functionality is evaluatable and #f if
     it is executable.
 
-  TAG should be a demand/modulator node that the functionality is
-    being added to.
+  TAG should be a demand or modulator node that the functionality will
+    be assocaited with.
 
   FUNC-NAME is the type of functionality.
 "
+    ;; XXX FIXME -- there is no need to force the use of DPN's or DSN's
+    ;; here. Any excutable or evaluatable atom should be allowed.
     (define (check-alias a-name)
         (if is-eval
             (cog-node 'DefinedPredicateNode a-name)
             (cog-node 'DefinedSchemaNode a-name)))
 
-    (let* ((name (string-append
+    (let* ( (name (string-append
                         psi-prefix-str functionality-name "-"
                         (cog-name tag-node)))
-           (alias (check-alias name)))
+            (alias (check-alias name)))
 
-       (if (null? alias)
-           (begin
-               (set! alias
-                    (if is-eval
-                        (DefinedPredicateNode name)
-                        (DefinedSchemaNode name)
-                    )
-                )
-               (DefineLink alias functionlity)
-               (functionality-pattern tag-node alias functionality-name)
+        (if (null? alias)
+            (begin
+                (set! alias
+                     (if is-eval
+                         (DefinedPredicateNode name)
+                         (DefinedSchemaNode name)))
+
+                ;; XXX FIXME why do we need a DefineLink here???
+                ;; why is an alias needed? what is the point of this?
+                (DefineLink alias functionlity)
+                (StateLink
+                    (ListLink
+                        (Node (string-append psi-prefix-str functionality-name))
+                         tag-node)
+                     alias)
                 alias
-           )
-            alias ; The assumption is that the EvaluationLink is already created
-       )
+            )
+        )
+        alias
     )
 )
 
 ; --------------------------------------------------------------
-(define-public (psi-get-functionality tag-node functionality-name)
+(define (psi-get-functionality tag-node functionality-name)
 "
   psi-get-functionality TAG FUNC-NAME
 
@@ -287,12 +266,13 @@
 
   FUNC-NAME should be the type of functionality.
 "
-; The assumption is that there will be only one element in the returned list.
-; This is a weak. Need a better way of using DefineLink short of defining
-; the relationship in the DefinedSchema/Predicate as a part of the alias-node
-; name.
-    (cog-outgoing-set (cog-execute! (GetLink
-        (functionality-pattern tag-node (Variable "$x") functionality-name))))
+    (define state
+       (ListLink
+           (Node (string-append psi-prefix-str functionality-name))
+           tag-node))
+
+    (cog-outgoing-set (cog-execute!
+        (GetLink (StateLink state (Variable "$x")))))
 )
 
 ; --------------------------------------------------------------

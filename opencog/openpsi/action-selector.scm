@@ -21,8 +21,7 @@
 ;;
 ;;   Sets the executable atom to be used for selecting actions.
 ;;
-;;   EXE can be either an ExecutionOutputLink or a DefinedSchemaNode that
-;;   represents an executable link. It will be used fto select the psi-rules
+;;   EXE can be any executable atom. It will be used to select the psi-rules
 ;;   that will have their actions and goals executed.
 ;; "
 ;;     ; Check arguments
@@ -73,50 +72,49 @@
 ;;         )
 ;;     )
 ;; )
-
-; --------------------------------------------------------------
-(define-public (psi-add-action-selector exec-term name)
-"
-  Returns the DefinedSchemaNode that represents the executable term
-  after defining it as an openpsi action-selector.
-
-  exec-term:
-  - An executable term.
-
-  name:
-  -  A string for naming the action-rule-selector. The name will be prefixed
-     by the following string `OpenPsi: action-rule-selector-`.
-"
-    ; Check arguments
-    (if (not (string? name))
-        (error "Expected second argument to be a string, got: " name))
-
-    ; TODO: Add checks to ensure the exec-term argument is actually executable
-    (let* ((z-name (string-append
-                        psi-prefix-str "action-selector-" name))
-           (selector-dsn (cog-node 'DefinedSchemaNode z-name)))
-       (if (null? selector-dsn)
-           (begin
-               (set! selector-dsn (DefinedSchemaNode z-name))
-               (DefineLink selector-dsn exec-term)
-
-                (EvaluationLink
-                    (PredicateNode "action-selector-for")
-                    (ListLink selector-dsn (ConceptNode psi-prefix-str)))
-
-                selector-dsn
-           )
-
-           selector-dsn
-       )
-    )
-)
-
+;;
+;; --------------------------------------------------------------
+;; (define-public (psi-add-action-selector exec-term name)
+;; "
+;;   psi-add-action-selector EXE NAME
+;;
+;;   Return the executable atom that is defined ad the atcion selector.
+;;
+;;   NAME should be a string naming the action-rule-selector.
+;; "
+;;     ; Check arguments
+;;     (if (not (string? name))
+;;         (error "Expected second argument to be a string, got: " name))
+;;
+;;     ; TODO: Add checks to ensure the exec-term argument is actually executable
+;;     (let* ((z-name (string-append
+;;                         psi-prefix-str "action-selector-" name))
+;;            (selector-dsn (cog-node 'DefinedSchemaNode z-name)))
+;;        (if (null? selector-dsn)
+;;            (begin
+;;                (set! selector-dsn (DefinedSchemaNode z-name))
+;;                (DefineLink selector-dsn exec-term)
+;;
+;;                 (EvaluationLink
+;;                     (PredicateNode "action-selector-for")
+;;                     (ListLink selector-dsn (ConceptNode psi-prefix-str)))
+;;
+;;                 selector-dsn
+;;            )
+;;
+;;            selector-dsn
+;;        )
+;;     )
+;; )
+;;
 ; ----------------------------------------------------------------------
 (define-public (psi-set-action-selector exec-term demand-node)
 "
-  psi-set-action-selector EXEC-TERM DEMAND-NODE - Sets EXEC-TERM as the
-  the function to be used as action-selector for the rules of DEMAND-NODE.
+  psi-set-action-selector EXEC-TERM DEMAND-NODE - Sets EXEC-TERM as
+  the function used to select rules for the DEMAND-NODE.
+
+  EXEC-TERM should be an executable atom.
+  DEMAND-NODE should be any demand that has been defined.
 "
     (psi-set-functionality exec-term #f demand-node "action-selector")
 )
