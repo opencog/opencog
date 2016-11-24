@@ -9,44 +9,70 @@
 (load "rule.scm")
 (load "utilities.scm")
 
-(define *-act-sel-node-*
-    (ConceptNode (string-append psi-prefix-str "action-selector")))
-
-; --------------------------------------------------------------
-(define-public (psi-action-selector-set! dsn)
-"
-  psi-action-selector-set! EXE
-
-  Sets the executable atom to be used for selecting actions.
-
-  EXE can be either an ExecutionOutputLink or a DefinedSchemaNode that
-  represents an executable link. It will be used fto select the psi-rules
-  that will have their actions and goals executed.
-"
-    ; Check arguments
-    (if (and
-            (not (equal? (cog-type dsn) 'DefinedSchemaNode))
-            (not (equal? (cog-type dsn) 'ExecutionOutputLink)))
-        (error "Expected an executable link, got: " dsn))
-
-    (StateLink *-act-sel-node-* dsn)
-)
-
-; --------------------------------------------------------------
-(define-public (psi-get-action-selector-generic)
-"
-  Returns a list containing the user-defined action-selector.
-"
-    (define action-selector-pattern
-        ; Use a StateLink instead of an InheritanceLink because there
-        ; should only be one active action-rule-selector at a time,
-        ; even though there could be multiple possible action-rule
-        ; selectors.  This enables dynamically changing the
-        ; action-rule-selector through learning.
-        (GetLink (StateLink *-act-sel-node-* (Variable "$dpn"))))
-
-    (cog-outgoing-set (cog-execute! action-selector-pattern))
-)
+;; --------------------------------------------------------------
+;; Dead code, not used anywhere.
+;;
+;; (define *-act-sel-node-*
+;;     (ConceptNode (string-append psi-prefix-str "action-selector")))
+;;
+;; (define-public (psi-action-selector-set! dsn)
+;; "
+;;   psi-action-selector-set! EXE
+;;
+;;   Sets the executable atom to be used for selecting actions.
+;;
+;;   EXE can be either an ExecutionOutputLink or a DefinedSchemaNode that
+;;   represents an executable link. It will be used fto select the psi-rules
+;;   that will have their actions and goals executed.
+;; "
+;;     ; Check arguments
+;;     (if (and
+;;             (not (equal? (cog-type dsn) 'DefinedSchemaNode))
+;;             (not (equal? (cog-type dsn) 'ExecutionOutputLink)))
+;;         (error "Expected an executable link, got: " dsn))
+;;
+;;     (StateLink *-act-sel-node-* dsn)
+;; )
+;;
+;; --------------------------------------------------------------
+;; (define-public (psi-get-action-selector-generic)
+;; "
+;;   Returns a list containing the user-defined action-selector.
+;; "
+;;     (define action-selector-pattern
+;;         ; Use a StateLink instead of an InheritanceLink because there
+;;         ; should only be one active action-rule-selector at a time,
+;;         ; even though there could be multiple possible action-rule
+;;         ; selectors.  This enables dynamically changing the
+;;         ; action-rule-selector through learning.
+;;         (GetLink (StateLink *-act-sel-node-* (Variable "$dpn"))))
+;; FIXME -- use cog-chase-link instead of GetLik, here, it is more
+;; efficient.
+;;
+;;     (cog-outgoing-set (cog-execute! action-selector-pattern))
+;; )
+;;
+;; --------------------------------------------------------------
+;;
+;; (define-public (psi-select-rules)
+;; "
+;;   psi-select-rules
+;;
+;;   Return a list of psi-rules that are satisfiable by using the
+;;   current action-selector.
+;; "
+;;     (let ((dsn (psi-get-action-selector-generic)))
+;;         (if (null? dsn)
+;;             (psi-default-action-selector (random-state-from-platform))
+;;             (let ((result (cog-execute! (car dsn))))
+;;                 (if (equal? (cog-type result) 'SetLink)
+;;                     (cog-outgoing-set result)
+;;                     (list result)
+;;                 )
+;;             )
+;;         )
+;;     )
+;; )
 
 ; --------------------------------------------------------------
 (define-public (psi-add-action-selector exec-term name)
@@ -205,29 +231,6 @@
 )
 
 ; --------------------------------------------------------------
-; Dead code, not used anywhere.
-;
-;; (define-public (psi-select-rules)
-;; "
-;;   psi-select-rules
-;; 
-;;   Return a list of psi-rules that are satisfiable by using the
-;;   current action-selector.
-;; "
-;;     (let ((dsn (psi-get-action-selector-generic)))
-;;         (if (null? dsn)
-;;             (psi-default-action-selector (random-state-from-platform))
-;;             (let ((result (cog-execute! (car dsn))))
-;;                 (if (equal? (cog-type result) 'SetLink)
-;;                     (cog-outgoing-set result)
-;;                     (list result)
-;;                 )
-;;             )
-;;         )
-;;     )
-;; )
-
-; --------------------------------------------------------------
 (define-public (psi-default-action-selector-per-demand a-random-state demand)
 "
   Returns a list of one of the most-important-weighted and satisfiable psi-rule
@@ -263,9 +266,10 @@
 ; --------------------------------------------------------------
 (define-public (psi-select-rules-per-demand d)
 "
-  Returns a list of psi-rules that are satisfiable by using the action-selector
-  you defined or the default-action-selector predefined if you haven't defined
-  a different action-selector.
+  psi-select-rules-per-demand DEMAND
+
+  Returnxs a list of psi-rules that can be satisfied by the current
+  action-selector.
 "
     (let ((as (psi-get-action-selector d)))
         (if (null? as)
