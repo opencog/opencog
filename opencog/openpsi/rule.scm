@@ -344,7 +344,7 @@ there are 100K rules!
 "
   Returns a list of all the psi-rules that are satisfiable.
 "
-    (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
+    (filter  (lambda (x) (equal? (stv 1 1) (update-satisfiablity-alist x)))
         (psi-get-all-rules))
 )
 
