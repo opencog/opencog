@@ -10,15 +10,6 @@ main loop is an action-selection mechanism, examining the context to
 see if any of the current demands/goals can be fullfilled, and then
 taking appropriate action.
 
-## Files
-* `rules.scm` -- Functions for defining openpsi-rules, and fetching
-  thier various components.
-
-* `main.scm` -- Defines the main function for single-stepping the
-   psi rule engine, as well as the main-loop to run the stepper.
-
-* `utilities.scm` -- Msicellaneous utilities.
-
 ## Status and TODO List
 
 The code currently works at a basic level, and is used to control the
@@ -71,35 +62,28 @@ are used).
                 (demand-goal))
     ```
     An ImplicationLink was choosen because it allows PLN to be employed
-    to perform reasoning in the face of uncertan contexts.
+    to perform reasoning in the face of uncertain contexts.
   * The function `psi-rule` that is defined [here](main.scm). Is to be used
     in adding new rules.
 
 2. Context:
-  * The context must be in the form of a set of predicates, i.e. when
-    evaluated, these return true/false to indicate if the context
-    applies. A conjunction is taken, so that the action is performed
+  * The context part of the rule must be a set of predicates, i.e. atoms
+    that can be evaluated, and, when evaluated, return TRUE_TV or
+    FALSE_TV to indicate if the rule's action can be applied.
+    A boolean conjunction is taken, so that the action is performed
     only if the entire context applies.
 
 3. Action:
-  * An action is an `ExecutionOutputLink` or any atom that could be
-    executed by running `(cog-execute! your-action)`. An action is the
-    means for interacting with the atomspace or other systems.
+  * The action part of the rule will be evaluated if the context part
+    of the rule evaluated to TRUE_TV, i.e. if the rule is applicable
+    to that context. The action can be any evaluatable atom; the intent
+    is that the action will alter the atomspace, or send messages to
+    some external system.
 
-XXX FIXME the action should be TV-valued, e.g. should probobably be
-wrapped inside a TrueLink.  That is because the SequentaialAndLink
-assumes that all of its elements are evaluatable; i.e. are TV-valued.
-Either that, or we need some other mechanism for grabbing the TV
-from the resulting execution of the action.
-
-Note also: the SequentialAnd is used instead of AndLink, because the
-AndLink is an unordered link, and thus cannot distinguish its first
-and second elements!
-
-4. Goal/Demand-goal:
-  * A goal is an `EvaluationLink` or any atom that could be evaluated by
-    running `(cog-evaluate! your-goal)`.  The goal indicates the degree
-    to which the action, if taken, can satisfy the demand or meet the goal.
+4. Goal:
+  * The goal indicates the degree to which the action, if taken, can
+    satisfy the demand or meet the goal.  It can be any atom that,
+    when evaluated, returns a truth value.
 
 5. Demand:
   * A demand is collection of state that must be maximized during
@@ -184,6 +168,19 @@ generalized and ported over here.
     is satisfied, then there is nothing that prevents the action from
     executing.  _This assumption might not work when ECAN or some other
     process that modifies the context is running in parallel.__
+
+## File overview
+* `main.scm` -- Defines the main function for single-stepping the
+   psi rule engine, as well as the main-loop to run the stepper.
+
+* `rules.scm` -- Functions for defining openpsi-rules, and fetching
+  thier various components.
+
+* `action-selector.scm` -- Implementation of a default action-selector,
+  as well as functions that allow a user to specify a custom action
+  selector.
+
+* `utilities.scm` -- Miscellaneous utilities.
 
 ## OpenPsi examples
 * The examples [here](../../examples/openpsi) are currently broken.
