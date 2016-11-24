@@ -38,15 +38,11 @@
   or FALSE_TV. What is this supposed to really do???
 "
 ; NOTE
-; 1. The code here is identical to `psi-satisfiable?`
+; 1. See https://github.com/opencog/atomspace/issues/823 for why
+;   psi-satisfiable? is used
 ; 2. Should a context evaluator be added here?????
-; 3. What is the "right" way of communicating the level of information ?
-; Huh?
-    (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
-           (result (cog-evaluate! pattern)))
-          (cog-delete pattern)
-          result
-    )
+; 3. What is the "right" way of communicating the level of information.
+    (satisfiable? rule)
 )
 
 ; --------------------------------------------------------------

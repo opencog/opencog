@@ -312,6 +312,24 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 )
 
 ; --------------------------------------------------------------
+; An alist used to cache the result of evaluating psi-satisfiable?. The keys
+; are psi-rules and value is TRUE_TV or FALSE_TV. This is a cache of results.
+(define psi-satisfiablity-alist '())
+
+; --------------------------------------------------------------
+(define (satisfiable? rule)
+"
+  Returns the satisfiablity result of the rule from cache. `psi-satisfiable?`
+  should have been run for the given rule somewhere in the control flow before
+  calling this function.
+
+  rule:
+  - A psi-rule to be checked if its context is satisfiable.
+"
+    (assoc-ref psi-satisfiablity-alist rule)
+)
+
+; --------------------------------------------------------------
 (define-public (psi-satisfiable? rule)
 "
   psi-satisfiable? RULE
@@ -328,8 +346,10 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
     ; usable in evaluatable-terms.
     (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
            (result (cog-evaluate! pattern)))
-          (cog-delete pattern)
-          result
+
+        (set! psi-satisfiablity-alist
+            (assoc-set! psi-satisfiablity-alist rule result))
+        result
     )
 )
 
@@ -354,8 +374,9 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   have a non-zero strength.
 "
     (filter
-        (lambda (x) (and (> (cog-stv-strength x) 0)
-            (equal? (stv 1 1) (psi-satisfiable? x))))
+        (lambda (x)
+            (and (> (cog-stv-strength x) 0)
+                (equal? (stv 1 1) (psi-satisfiable? x))))
         (psi-get-rules demand-node))
 )
 

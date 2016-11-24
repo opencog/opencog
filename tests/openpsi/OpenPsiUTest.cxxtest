@@ -99,24 +99,43 @@ public:
         _scm = nullptr;
     }
 
-    // Check the scheme function `psi-satisfiable?``
-    void test_psi_satisfiable()
+    // Check the scheme function `psi-satisfiable?`` and `satisfiable?`
+    // NOTE: The name of the test function uses `__predicate` in place of `?`
+    void test_psi_satisfiable_and_satisfiable__predicate()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
+        // Load the file to get access to update-satisfiablity-alist procedure
+        // as it isn't exported.
+        _scm->eval("(load \"" PROJECT_SOURCE_DIR
+                   "/opencog/openpsi/rule.scm\")");
 
         // Test 1:
         // Test unsatisfaiability
-        auto result_1 = _scm->eval("(psi-satisfiable? (rule-1))");
+        auto result_1_1 = _scm->eval("(psi-satisfiable? (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1);
+        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1_1);
+
+        // Check result from cache is consistent with that of the actual
+        // execution.
+        auto result_1_2 = _scm->eval("(satisfiable? (rule-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1_2);
 
         // Test 2:
         // Test satisfaiability
         _scm->eval("(groundable-content-1)");
         CHKERR
-        auto result_2 = _scm->eval("(psi-satisfiable? (rule-1))");
+        auto result_2_1 = _scm->eval("(psi-satisfiable? (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2);
+        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2_1);
+
+        // Check result from cache is consistent with that of the actual
+        // execution.
+        auto result_2_2 = _scm->eval("(satisfiable? (rule-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2_2);
+
+
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
@@ -160,6 +179,56 @@ public:
         logger().info("END TEST: %s", __FUNCTION__);
     }
 
+    // Check the scheme function `psi-select-rules-per-demand`
+    void test_psi_select_rules_per_demand()
+    {
+        logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+        // Add the rules
+        auto rule_1 = _scm->eval_h("(rule-1)");
+        CHKERR
+        auto rule_2 = _scm->eval_h("(rule-2)");
+        CHKERR
+
+        // Test 1:
+        auto result_1_1 = _scm->eval("(psi-select-rules-per-demand demand-1)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_1);
+
+        auto result_1_2 = _scm->eval("(psi-select-rules-per-demand demand-2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_1_2);
+
+        // Test 2:
+        _scm->eval("(groundable-content-1)");
+        CHKERR
+        auto result_2_1 = \
+            _scm->eval_h("(car (psi-select-rules-per-demand demand-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected a single rule", rule_1 , result_2_1);
+
+        auto result_2_2 = _scm->eval("(psi-select-rules-per-demand demand-2)");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected ()", "()\n", result_2_2);
+        CHKERR
+
+        // Test 3:
+        // Double checking
+        _scm->eval("(groundable-content-2)");
+        CHKERR
+        auto result_3_1 = \
+            _scm->eval_h("(car (psi-select-rules-per-demand demand-1))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected a single rule", rule_1 , result_3_1);
+
+        auto result_3_2 = \
+            _scm->eval_h("(car (psi-select-rules-per-demand demand-2))");
+        CHKERR
+        TSM_ASSERT_EQUALS("Expected a single rule", rule_2 , result_3_2);
+
+        logger().info("END TEST: %s", __FUNCTION__);
+    }
+
     // Check the scheme function `psi-related-goals`
     void test_psi_related_goals()
     {
@@ -183,6 +252,7 @@ public:
     }
 
     // Check the scheme function `psi-get-satisfiable-rules`
+    // NOTE The function being tested isn't being used
     void test_psi_get_satisfiable_rules()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
