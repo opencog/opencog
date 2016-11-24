@@ -349,7 +349,6 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         return false;
     }
 
-
     // shrink var_soln to only contain solution for the variables
     std::map<Handle, Handle> shrinked_soln;
 
@@ -372,15 +371,14 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             return false;
         }
 
+        std::string sName = kv.first->getName();
+        std::string sWord = sName.substr(0, sName.find_first_of('@'));
+        Handle hPatWord = m_as->get_handle(WORD_NODE, sWord);
+        Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->getName());
+
         // do a disjunct match for PredicateNodes as well
         if (kv.first->getType() == PREDICATE_NODE and kv.second->getType() == PREDICATE_NODE)
         {
-            std::string sName = kv.first->getName();
-            std::string sWord = sName.substr(0, sName.find_first_of('@'));
-            Handle hPatWord = m_as->get_handle(WORD_NODE, sWord);
-
-            Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->getName());
-
             IncomingSet qLemmaLinks = hPatWord->getIncomingSetByType(LEMMA_LINK);
 
             // if there is no LemmaLink conntecting to it, it's probably
@@ -491,7 +489,15 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             }
         }
 
-        else shrinked_soln[kv.first] = kv.second;
+        else
+        {
+            // depends on what the input is, clause_match() may not always be called,
+            // do the same kind of checking here to make sure the disjuncts match
+            if (disjunct_match(hPatWord, hSolnWordInst))
+                shrinked_soln[kv.first] = kv.second;
+
+            else return false;
+        }
     }
 
     OrderedHandleSet qSolnSetLinks;
