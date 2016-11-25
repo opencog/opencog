@@ -1,4 +1,26 @@
+;
+; rule.scm
+; Utilities for defining and working with OpenPsi rules.
+;
 ; Copyright (C) 2016 OpenCog Foundation
+;
+; Design Notes:
+; The design below uses AndLinks instead of SequentialAndLinks to hold
+; the context and the action. Recall that the AndLink is an unordered
+; link, and so the context and action is stored in arbitrary order.
+; This makes several of the methods inefficeint, as it requires this
+; bag to be searched for the desired bits. If instead, an ordered link
+; was used, and the action was made first, it could be found very
+; quickly. FIXME -- this should be fixed someday.
+;
+; Aliases: Rules can be given a "name", called an "alias", below.
+; Certain parts of the design assume that a rule has only one name,
+; but other parts of the code pass around lists of names. This can
+; lead to crazy bugs, due to a lack of checking or enforcement of a
+; one-name-per-rule policy.  Also -- each rule should, in principle
+; have a unique name; however, the current chatbot uses the same name
+; for all chat rules.
+
 
 (use-modules (ice-9 threads)) ; For `par-map`
 (use-modules (ice-9 optargs)) ; For `define*-public`
@@ -17,24 +39,27 @@
 (define*-public (psi-rule-nocheck context action goal a-stv demand
      #:optional name)
 "
-  psi-rule-nocheck -- same as psi-rule, but no checking
+  psi-rule-nocheck -- same as psi-rule, but does not check the arguments
+  for proper structure.
 "
-    (let ((implication (Implication a-stv (And context action) goal)))
 
-    ; These memberships are needed for making filtering and searching simpler..
-    ; If GlobNode had worked with GetLink at the time of coding this,
-    ; that might have been; better, (or not as it might need as much chasing)
-    ; TODO: Remove this when ExecutionLinks are used as that can be used
-    ; for filtering.
+    ; Note that the AndLink is an unordered link -- so the context
+    ; and the action will appear in an arbitrary order.  It would
+    ; almost surely be better to use a SequentialAndLink here;
+    ; this would use less resources and have lower complexity.
+    (let ((implication (Implication a-stv (AndLink context action) goal)))
+
+        ; The membership below is used to simplify filtering and searching.
+        ; Other alternative designs are possible.
+        ; TODO: Remove this, when ExecutionLinks are used, as that can be used
+        ; for filtering. (?? Huh? Please explain...)
         (MemberLink action psi-action)
 
-    ; This memberLink is added so as to minimize the tree walking needed to get
-    ; from a goal to a psi-rule. For example, if the goal is a DefinedPredicate.
+        ; This MemberLink is used to make it easy to find rules that
+        ; fulfil demands. (and also to find goals that meet demands).
         (MemberLink implication demand)
 
-        ; Give name this is used for control/feedback purposes
-        ; Why EvaluationLink? B/c we can't use DefineLink. Maybe when protoatom
-        ; are ready that could be used????
+        ; If a name is given, its used for control/feedback purposes.
         (if name
             (EvaluationLink
                 psi-rule-name-predicate-node
@@ -50,11 +75,11 @@
 ; --------------------------------------------------------------
 (define*-public (psi-rule context action goal a-stv demand  #:optional name)
 "
-  psi-rule CONTEXT ACTION GOAL TV DEMAND - create a psi-rule.
+  psi-rule CONTEXT ACTION GOAL TV DEMAND [NAME] - create a psi-rule.
 
   Associate an action with a context such that, if the action is
   taken, then the goal will be satisfied.  The structure of a rule
-  is in the form of an `ImplicationLink`,
+  is in the form of an `ImplicationLink`:
 
     (ImplicationLink TV
         (AndLink
@@ -65,10 +90,12 @@
   where:
   CONTEXT is a scheme list containing all of the terms that should
     be met for the ACTION to be taken. These are atoms that, when
-    evaluated, should result in a true or false TV.
+    evaluated, should return a true or false TV.  The action is taken
+    only if the boolean-AND of the return values is true.
 
-  ACTION is an evaluatable atom, i.e. returns a TV when evaluated by
-    `cog-evaluate!`.  It should return a true or false TV.
+  ACTION is an evaluatable atom, i.e. it should return a TV when
+    evaluated by `cog-evaluate!`.  The return value is currently
+    ignored.
 
   GOAL is an evaluatable atom, i.e. returns a TV when evaluated by
     `cog-evaluate!`.  The returned TV is used as a formula to rank
@@ -78,11 +105,14 @@
     be a SimpleTruthValue.
 
   DEMAND is a Node, representing the demand that this rule affects.
+
+  NAME is an optional argument; if it is provided, then it should be
+    a string that will be associated with the rule.
 "
-; TODO: aliases shouldn't be used to create a subset, as is done in chatbot-psi
-; It should be done at the demand level. The purpose of an aliase should only
-; be for controlling a SINGLE rule during testing/demoing, and not a set
-; of rules.
+; TODO: aliases shouldn't be used to create a subset, as is done in
+; chatbot-psi.  Subsets should be created at the demand level. The
+; purpose of an alias is only for controlling a SINGLE rule during
+; testing/demoing, and not a set of rules.
     (define func-name "psi-rule") ; For use in error reporting
 
     ; Check arguments
@@ -132,12 +162,13 @@ there are 100K rules!
 ; --------------------------------------------------------------
 (define-public (psi-rule? atom)
 "
-  Returns `#t` or `#f` depending on whether the passed argument
-  is a valid psi-rule or not. An ImplicationLink that is a member
-  of the demand sets is a psi-rule.
+  psi-rule? ATOM
 
-  atom:
-  - An atom passed for checking.
+  Returns `#t` or `#f`, depending on whether the passed argument
+  is a valid psi-rule or not. A psi-rule is any ImplicationLink that
+  is a member of a demand set.
+
+  ATOM is the atom to check.
 "
     (let ((candidates (cog-chase-link 'MemberLink 'ConceptNode atom)))
 
@@ -152,10 +183,14 @@ there are 100K rules!
 (define-public (psi-get-all-actions)
 "
   Returns a list of all openpsi actions.
+
+XXX FIXME this is borken, and does not work.
+actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 "
-    (append
-        (cog-chase-link 'MemberLink 'ExecutionOutputLink psi-action)
-        (cog-chase-link 'MemberLink 'DefinedSchemaNode psi-action))
+    ;(append
+    ;    (cog-chase-link 'MemberLink 'ExecutionOutputLink psi-action)
+    ;    (cog-chase-link 'MemberLink 'DefinedSchemaNode psi-action))
+    (list)
 )
 
 ; --------------------------------------------------------------
@@ -179,53 +214,58 @@ there are 100K rules!
 "
   Get context and action list from ImplicationLink.
 "
-    (cog-outgoing-set (list-ref (cog-outgoing-set impl-link) 0))
+    (cog-outgoing-set (cog-outgoing-atom impl-link 0))
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-get-context rule)
 "
-  Get the context of an openpsi-rule.
+  psi-get-context RULE
 
-  rule:
-  - An openpsi-rule.
+  Get the context of the openpsi-rule RULE.  Returns a scheme
+  list of all of the atoms that form the context.
 "
+    ;; FIXME: This is not an efficient way to get the context.
+    ;; If this needs to be called a lot, it should be fixed.
     (remove psi-action? (get-c&a rule))
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-get-action rule)
 "
-  Get the action of an openpsi-rule.
+  psi-get-action RULE
 
-  rule:
-  - An openpsi-rule.
+  Get the action of the openpsi-rule RULE.  Returns the single
+  atom that is the action.
 "
+    ;; FIXME: This is not an efficient way to get the action.
+    ;; If this needs to be called a lot, it should be fixed.
     (car (filter psi-action? (get-c&a rule)))
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-get-goal rule)
 "
-  Get the goal of an openpsi-rule.
+  psi-get-goal RULE
 
-  rule:
-  - An openpsi-rule.
+  Get the goal of the openpsi-rule RULE.
 "
     ; NOTE: Why this function? -> For consisentency and to accomodate future
     ; changes
-     (cadr (cog-outgoing-set rule))
+    (cadr (cog-outgoing-set rule))
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-rule-alias psi-rule)
 "
-  Returns a list with the node that aliases the psi-rule if it has a an alias,
-  or Returns null if it doesn't.
+  psi-rule-alias RULE
 
-  psi-rule:
-  - An ImplicationLink whose weight is going to be modified.
+  Returns a list of the aliases associated with the psi-rule RULE.
+  An alias is just a name that is associated with the rule; it
+  just provides an easy way to refer to a rule.
 "
+    ;; Using a GetLink here is quite inefficient; this would run much
+    ;; faster if cog-chase-link was used instead. FIXME.
     (cog-outgoing-set (cog-execute!
         (GetLink
             (TypedVariableLink
@@ -234,40 +274,37 @@ there are 100K rules!
             (EvaluationLink
                 psi-rule-name-predicate-node
                 (ListLink
-                    (QuoteLink psi-rule)
+                    (QuoteLink psi-rule)  ;; ?? why is a Quote needed here?
                     (VariableNode "rule-alias"))))))
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-partition-rule-with-alias rule-alias psi-rule-list)
 "
-  Returns multiple values of lists with rules which have alias equaling
-  `rule-alias` as the first value and those that don't as second value.
+  psi-partition-rule-with-alias ALIAS RULE-LIST
 
-  rule-alias:
-  - string used for a psi-rule alias.
-
-  psi-rule-list:
-  - a list with psi-rules.
+  Partitions the RULE-LIST into two lists: the first list will
+  contain all rules that are tagged with the name ALIAS; the second
+  list are all the other rules.  ALIAS should be a string.
 "
+    (define cali (Concept (string-append psi-prefix-str rule-alias)))
     (partition
-        (lambda (psi-rule)
-            (equal?
-                (Concept (string-append psi-prefix-str rule-alias))
-                (car (psi-rule-alias psi-rule))))
+        (lambda (rule) (equal? cali (car (psi-rule-alias rule))))
         psi-rule-list)
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-related-goals action)
 "
-  Return a list of all the goals that are associated by an action. Associated
-  goals are those that are the implicand of the psi-rules that have the given
-  action in the implicant.
+  psi-related-goals ACTION
 
-  action:
-  - An action that is part of a psi-rule.
+  Return a list of all of the goals that are associated with the ACTION.
+  A goal is associated with an action whenever the goal appears in
+  a psi-rule with that action in it.
 "
+    ;; XXX this is not an efficient way of searching for goals.  If
+    ;; this method is used a lot, we should convert to SequentialAnd,
+    ;; and search for the goals directly.
     (let* ((and-links (cog-filter 'AndLink (cog-incoming-set action)))
            (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
            (delete-duplicates (map psi-get-goal rules))
@@ -295,14 +332,15 @@ there are 100K rules!
 ; --------------------------------------------------------------
 (define-public (psi-satisfiable? rule)
 "
-  Check if the rule is satisfiable and return TRUE_TV or FALSE_TV. A rule is
-  satisfiable when it's context is fully groundable. The idea is only
-  valid when ranking of context grounding isn't considered.
+  psi-satisfiable? RULE
 
-  It also updates the internal cache.
+  Check if the RULE is satisfiable; return TRUE_TV if it is, else return
+  FALSE_TV. A rule is satisfiable when it's context contains variables,
+  and that context can be grounded in the atompace (i.e. if the context
+  is satisfiable in using a SatisfactionLink.)
 
-  rule:
-  - A psi-rule to be checked if its context is satisfiable.
+  The idea is only valid when ranking of context grounding isn't considered.
+  This is being replaced.  Huh??? What does this mean?
 "
     ; NOTE: stv are choosen as the return values so as to make the function
     ; usable in evaluatable-terms.
@@ -318,10 +356,10 @@ there are 100K rules!
 ; --------------------------------------------------------------
 (define-public (psi-get-satisfiable-rules demand-node)
 "
-  Returns a list of psi-rules of the given demand that are satisfiable.
+  psi-get-satisfiable-rules DEMAND
 
-  demand-node:
-  - The node that represents the demand.
+  Returns a list of all of the psi-rules associated with the DEMAND
+  that are also satisfiable.
 "
     (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
         (psi-get-rules demand-node))
@@ -330,6 +368,8 @@ there are 100K rules!
 ; --------------------------------------------------------------
 (define-public (psi-get-weighted-satisfiable-rules demand-node)
 "
+  psi-get-weighted-satisfiable-rules DEMAND
+
   Returns a list of all the psi-rules that are satisfiable and
   have a non-zero strength.
 "
@@ -343,6 +383,8 @@ there are 100K rules!
 ; --------------------------------------------------------------
 (define-public (psi-get-all-satisfiable-rules)
 "
+  psi-get-all-satisfiable-rules
+
   Returns a list of all the psi-rules that are satisfiable.
 "
     (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
@@ -352,11 +394,83 @@ there are 100K rules!
 ; --------------------------------------------------------------
 (define-public (psi-get-all-weighted-satisfiable-rules)
 "
+  psi-get-all-weighted-satisfiable-rules
+
   Returns a list of all the psi-rules that are satisfiable and
-  have a non-zero strength
+  have a non-zero strength.
 "
     (filter
         (lambda (x) (and (> (cog-stv-strength x) 0)
             (equal? (stv 1 1) (psi-satisfiable? x))))
         (psi-get-all-rules))
 )
+
+; --------------------------------------------------------------
+(define-public (psi-context-weight rule)
+"
+  psi-context-weight RULE
+
+  Return a TruthValue containing the weight Sc of the context of the
+  psi-rule RULE.  The strength of the TV will contain the weight.
+"
+    (define (context-stv stv-list)
+        ; See and-side-effect-free-formula in pln-and-construction-rule
+        ; XXX FIXME explain what is being computed here.
+        (stv
+            (fold * 1 (map (lambda (x) (tv-mean x)) stv-list))
+            (fold min 1 (map (lambda (x) (tv-conf x)) stv-list)))
+    )
+
+    ; map-in-order is used to simulate SequentialAndLink assuming
+    ; psi-get-context maintains, which is unlikely. What other options
+    ; are there?
+    ; XXX FIXME How about actually using a SequentialAndLink?
+    ; then teh code will be faster, and tehre won't be this problem.
+    (context-stv (map-in-order cog-evaluate! (psi-get-context rule)))
+)
+
+;; --------------------------------------------------------------
+;; DEAD CODE not used anywhere
+;;
+;; (define-public (psi-action-weight rule)
+;; "
+;;   psi-action-weight RULE
+;;
+;;   Return the weight Wcagi of the action of the psi-rule RULE.
+;; "
+;;     ; NOTE: This check is required as ecan isn't being used continuously.
+;;     ; Remove `most-weighted-atoms` version once ecan is integrated.
+;;     ; XXX FIXME this is just-plain wrong. ECAN and OpenPsi have nothing
+;;     ; to do with each other. Nothing in OpenPsi should depend on ECAN.
+;;     (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
+;;         ; Wcagi = Scga * Sc * 1 (assuming every rule is important)
+;;         (* (tv-mean (cog-tv rule)) ;Scga
+;;            (tv-mean (psi-context-weight rule))) ; Sc
+;;         ; Wcagi = Scga * Sc * STIcga
+;;         (* (tv-mean (cog-tv rule)) ;Scga
+;;            (tv-mean (psi-context-weight rule)) ; Sc
+;;            (assoc-ref (cog-av->alist (cog-av rule)) 'sti)) ; STIcga
+;;     )
+;; )
+;;
+;; --------------------------------------------------------------
+;; DEAD CODE not used anywhere
+;;
+;; (define (psi-most-weighted-rule rule-list)
+;; "
+;;   psi-most-weighted-rule RULE-LIST
+;;
+;;   Return the single rule from hte list having the highest weight.
+;;   The weight of an psi-rule is as defined in `psi-action-weight` function
+;; "
+;;     (define (pick rule lst) ; prev is a `lst` and next `atom`
+;;         (cond
+;;             ((> (psi-action-weight (car lst)) (psi-action-weight rule)) lst)
+;;             ((= (psi-action-weight (car lst)) (psi-action-weight rule)) lst)
+;;             (else (list rule))))
+;;
+;;     (if (null? rule-list)
+;;         '()
+;;         (delete-duplicates (fold pick (list (car rule-list)) rule-list))
+;;     )
+;; )
