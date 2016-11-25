@@ -5,14 +5,6 @@
 ; Copyright (C) 2016 OpenCog Foundation
 ;
 ; Design Notes:
-; The design below uses AndLinks instead of SequentialAndLinks to hold
-; the context and the action. Recall that the AndLink is an unordered
-; link, and so the context and action is stored in arbitrary order.
-; This makes several of the methods inefficeint, as it requires this
-; bag to be searched for the desired bits. If instead, an ordered link
-; was used, and the action was made first, it could be found very
-; quickly. FIXME -- this should be fixed someday.
-;
 ; Aliases: Rules can be given a "name", called an "alias", below.
 ; Certain parts of the design assume that a rule has only one name,
 ; but other parts of the code pass around lists of names. This can
@@ -43,16 +35,13 @@
   for proper structure.
 "
 
-    ; Note that the AndLink is an unordered link -- so the context
-    ; and the action will appear in an arbitrary order.  It would
-    ; almost surely be better to use a SequentialAndLink here;
-    ; this would use less resources and have lower complexity.
-    (let ((implication (Implication a-stv (AndLink context action) goal)))
+    (let ((implication
+            (Implication a-stv (SequentialAndLink context action) goal)))
 
         ; The membership below is used to simplify filtering and searching.
         ; Other alternative designs are possible.
-        ; TODO: Remove this, when ExecutionLinks are used, as that can be used
-        ; for filtering. (?? Huh? Please explain...)
+        ; TODO: Remove this, when ExecutionLinks are used, as that can
+        ; be used for filtering. (?? Huh? Please explain...)
         (MemberLink action psi-action)
 
         ; This MemberLink is used to make it easy to find rules that
@@ -82,7 +71,7 @@
   is in the form of an `ImplicationLink`:
 
     (ImplicationLink TV
-        (AndLink
+        (SequentialAndLink
             CONTEXT
             ACTION)
         GOAL)
@@ -305,7 +294,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
     ;; XXX this is not an efficient way of searching for goals.  If
     ;; this method is used a lot, we should convert to SequentialAnd,
     ;; and search for the goals directly.
-    (let* ((and-links (cog-filter 'AndLink (cog-incoming-set action)))
+    (let* ((and-links (cog-filter 'SequentialAndLink (cog-incoming-set action)))
            (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
            (delete-duplicates (map psi-get-goal rules))
     )

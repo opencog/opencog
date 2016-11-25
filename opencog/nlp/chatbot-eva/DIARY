@@ -1297,3 +1297,9 @@ psi-reset-valid-demand-cache
 * why two different functions, one for up, one for down?
   why not just use negative numbers?
 * demand-changes per step, instead of per unit time?
+
+TODO:
+sequnatialAnd
+
+modulators don't belong in this directory
+

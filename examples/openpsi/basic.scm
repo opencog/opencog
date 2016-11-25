@@ -5,7 +5,7 @@
 ; Psi rules have the general form
 ;
 ;     ImplicationLink  <TV>
-;        AndLink
+;        SequentialAndLink
 ;           <context>
 ;           <action>
 ;        <goal>
