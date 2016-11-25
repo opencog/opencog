@@ -733,6 +733,7 @@
    (SentenceNode "sentence@dcf4acc4-45e1-4787-9a67-5e0c326b0fa7")
    (ConceptNode "Negative")
 )
+(AnchorNode "# New Parsed Sentence")
 (ReferenceLink
    (ConceptNode "slowly@6abf64e4-4a58-4b46-b61e-9c3b57a24a7e" (stv 0.11764706 0.0024937654))
    (WordInstanceNode "slowly@6abf64e4-4a58-4b46-b61e-9c3b57a24a7e")
@@ -757,7 +758,6 @@
    (PredicateNode "ran@c77c0ad2-9cb9-41e7-9f09-9e607c8c1bca" (stv 0.39999998 0.0049751243))
    (WordInstanceNode "ran@c77c0ad2-9cb9-41e7-9f09-9e607c8c1bca")
 )
-(AnchorNode "# New Parsed Sentence")
 (ReferenceLink
    (InterpretationNode "sentence@dcf4acc4-45e1-4787-9a67-5e0c326b0fa7_parse_0_interpretation_$X" (stv 1 0.0012484394))
    (SetLink
