@@ -274,10 +274,10 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     // next disconnected clause in the pattern, if any
     m_interp.insert(qTempInterpNodes.begin(), qTempInterpNodes.end());
 
-
     if (m_use_cache) {
         SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, true);
     }
+
     return true;
 }
 
@@ -627,6 +627,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     if (m_use_cache) {
         SuRealCache::instance().add_grounding_match(var_soln, pred_soln, false);
     }
+
     return false;
 }
 
@@ -660,12 +661,12 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
     auto sortLeftInsts = [](const Handle& h1, const Handle& h2)
     {
         // get the ListLinks from the EvaluationLinks
-        const Handle& hListLink1 = h1->getOutgoingSet()[1];
-        const Handle& hListLink2 = h2->getOutgoingSet()[1];
+        const Handle& hListLink1 = h1->getOutgoingAtom(1);
+        const Handle& hListLink2 = h2->getOutgoingAtom(1);
 
         // get the first WordInstanceNodes from the ListLinks
-        const Handle& hWordInst1 = hListLink1->getOutgoingSet()[0];
-        const Handle& hWordInst2 = hListLink2->getOutgoingSet()[0];
+        const Handle& hWordInst1 = hListLink1->getOutgoingAtom(0);
+        const Handle& hWordInst2 = hListLink2->getOutgoingAtom(0);
 
         // get the NumberNodes from the WordSequenceLinks
         Handle hNumNode1 = get_target_neighbors(hWordInst1, WORD_SEQUENCE_LINK)[0];
@@ -679,12 +680,12 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
     auto sortRightInsts = [](const Handle& h1, const Handle& h2)
     {
         // get the ListLinks from the EvaluationLinks
-        const Handle& hListLink1 = h1->getOutgoingSet()[1];
-        const Handle& hListLink2 = h2->getOutgoingSet()[1];
+        const Handle& hListLink1 = h1->getOutgoingAtom(1);
+        const Handle& hListLink2 = h2->getOutgoingAtom(1);
 
         // get the second WordInstanceNodes from the ListLinks
-        const Handle& hWordInst1 = hListLink1->getOutgoingSet()[1];
-        const Handle& hWordInst2 = hListLink2->getOutgoingSet()[1];
+        const Handle& hWordInst1 = hListLink1->getOutgoingAtom(1);
+        const Handle& hWordInst2 = hListLink2->getOutgoingAtom(1);
 
         // get the NumberNodes from the WordSequenceLinks
         Handle hNumNode1 = get_target_neighbors(hWordInst1, WORD_SEQUENCE_LINK)[0];
@@ -703,7 +704,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
     // get the LG connectors for those in the qLGInstsLeft
     for (Handle& hEvalLink : qLGInstsLeft)
     {
-        const Handle& hLinkInstNode = hEvalLink->getOutgoingSet()[0];
+        const Handle& hLinkInstNode = hEvalLink->getOutgoingAtom(0);
 
         HandleSeq qLGConns = get_all_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
 
@@ -714,7 +715,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
     // get the LG connectors for those in the qLGInstsRight
     for (Handle& hEvalLink : qLGInstsRight)
     {
-        const Handle& hLinkInstNode = hEvalLink->getOutgoingSet()[0];
+        const Handle& hLinkInstNode = hEvalLink->getOutgoingAtom(0);
 
         HandleSeq qLGConns = get_all_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
 
