@@ -487,7 +487,7 @@ public:
         TSM_ASSERT_EQUALS("Expected no difference", result_1_2, result_1_1);
 
         // Test 2:
-        // Reset the cache then the valid set of demands should be updated to
+        // Reset the cache; then the valid set of demands should be updated to
         // include one less demand.
         _scm->eval("(psi-reset-valid-demand-cache)");
         CHKERR

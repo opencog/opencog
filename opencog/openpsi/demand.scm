@@ -37,7 +37,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-all-demands)
 "
-  Returns a list containing all the demand-nodes.
+  psi-get-all-demands - Return a list of all demand-nodes.
 "
     (filter
         (lambda (x) (not (equal? x psi-demand-node)))
@@ -48,7 +48,9 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-all-valid-demands)
 "
-  Returns a list containing all the demand-nodes that are valid. A valid demand
+  psi-get-all-valid-demands -
+
+  Return a list of all demands that are currently valid. A valid demand
   is one which is not a member of the set defined by
   (ConceptNode \"OpenPsi: skip\").
 "
@@ -104,12 +106,10 @@
 ; --------------------------------------------------------------
 (define-public (psi-demand? node)
 "
-  Checks whether an atom is a node that satisfies the pattern used
-  to define an OpenPsi-demand and returns `#t` if it does and `#f` if not.
+  psi-demand? NODE - Return #t if NODE is a demand, else return #f.
 
-  node:
-  - The node that is being checked to see if it is a ConceptNode that represents
-    a demand type.
+  The NODE is a demand only if it was previously added to the set of
+  demands.
 "
     (let ((candidates (cog-chase-link 'InheritanceLink 'ConceptNode node)))
 
@@ -123,16 +123,11 @@
 ; --------------------------------------------------------------
 (define-public (psi-set-demand-value demand-node demand-value)
 "
-  Sets the demand-value of demand-node.
+  psi-set-demand-value DEMAND VALUE - Set the DEMAND to VALUE.
 
-  demand-node:
-  - The node representing the demand.
-
-  demand-value:
-  - A number between [0, 1] that is used to set the demand-value.
+  The DEMAND must be a demand node that was previously declared to
+  the system. The VALUE must be a floating-point number between [0, 1].
 "
-; NOTE: This function is added to simplify the process of setting demand-value
-; when the move is made to represent that in atomese rather than stv.
     (cog-set-tv! demand-node (stv demand-value (tv-conf (cog-tv demand-node))))
 )
 
@@ -214,45 +209,45 @@
 ;     )
 ; )
 ;
-; --------------------------------------------------------------
-(define (psi-lowest-demand? atom)
-"
-  Returns #t if the atom passed is a demand that has the lowest demand-value.
-
-  atom:
-  - The atom that is being checked to see if it is the Node that represents
-    a demand type, with a lowest demand-value.
-"
-    ; check if atom is a demand-node
-    (if (not (psi-demand? atom))
-        (error "Expected argument to be a demand-node, got: " atom))
-
-    (let ((atom-strength (tv-mean (cog-tv atom)))
-          (lowest-demand-value (car (list-sort < (delete-duplicates
-              (map (lambda (x) (tv-mean (cog-tv x)))
-                   (psi-get-all-demands))))))
-         )
-         (if (<= atom-strength lowest-demand-value)
-            (stv 1 1)
-            (stv 0 1)
-         )
-    )
-)
-
+;; --------------------------------------------------------------
+;;
+;; Not used anywhere. Not clear how this could even be useful.
+;;
+;; (define (psi-lowest-demand? atom)
+;; "
+;;   psi-lowest-demand? ATOM - Return #t if ATOM is a demand, and has a
+;;   demand-value as low or lower than any other demand.
+;; "
+;;     ; check if atom is a demand-node
+;;     (if (not (psi-demand? atom))
+;;         (error "Expected argument to be a demand-node, got: " atom))
+;;
+;;     (let ((atom-strength (tv-mean (cog-tv atom)))
+;;           (lowest-demand-value (car (list-sort < (delete-duplicates
+;;               (map (lambda (x) (tv-mean (cog-tv x)))
+;;                    (psi-get-all-demands))))))
+;;          )
+;;          (if (<= atom-strength lowest-demand-value)
+;;             (stv 1 1)
+;;             (stv 0 1)
+;;          )
+;;     )
+;; )
+;;
 ; --------------------------------------------------------------
 ; Functions to help define standard action-rules
 ; --------------------------------------------------------------
 (define-public (psi-goal-increase demand-node rate)
 "
-  Returns an ExecutionOutputLink(the action) that increases the demand-value.
-  It has an increasing effect on the demand-value.
+  psi-goal-increase DEMAND RATE
 
-  demand-node:
-  - A node representing a demand.
+  Return an action that increases the satsifaction of a demand.
+  That is, if the action is performed, then the value of the demand
+  goes up.  XXX WTF?? this seems backward.
 
   rate:
   - A number for the percentage of change that a demand-value will be updated
-    with, on each step.
+    with, on each step. XXX WTF ???
 "
     (EvaluationLink
         (GroundedPredicateNode "scm: psi-demand-value-increase")
@@ -263,14 +258,12 @@
 
 (define-public (psi-demand-value-increase demand-node rate-node)
 "
-  Increases the strength of the demand by the given percentage rate.
+  psi-demand-value-increase DEMAND RATE
 
-  demand-node:
-  - A node representing a demand.
+  Increases the strength of DEMAND by the given percentage RATE.
 
-  rate-node:
-  - A NumberNode for the percentage of change that a demand-value will be
-    updated with, on each step.
+  RATE must be a NumberNode, holding the percentage change by which
+  the demand-value will be updated with, on each step.
 "
     (let* ((strength (tv-mean (cog-tv  demand-node)))
            (rate (/ (string->number (cog-name rate-node)) 100))
@@ -283,15 +276,13 @@
 ; --------------------------------------------------------------
 (define-public (psi-goal-decrease demand-node rate)
 "
-  Returns an ExecutionOutputLink(the action) that decreases the demand-value.
-  It has a decreasing effect on the demand value.
+  psi-goal-decrease DEMAND RATE
 
-  demand-node:
-  - A node representing a demand.
+  Returns an action that, if performed, will decrease the value of
+  DEMAND.
 
-  rate:
-  - A number for the percentage of change that a demand-value will be updated
-    with, on each step.
+  RATE must be a floating-point number, holding a percentage value
+  by which the demand will be changed on each step.
 "
     (EvaluationLink
         (GroundedPredicateNode "scm: psi-demand-value-decrease")
@@ -302,14 +293,12 @@
 
 (define-public (psi-demand-value-decrease demand-node rate-node)
 "
+  psi-demand-value-decrease DEMAND RATE
+
   Decreases the strength of the demand by the given percentage rate.
 
-  demand-node:
-  - A node representing a demand.
-
-  rate-node:
-  - A NumberNode for the percentage of change that a demand-value will be
-    updated with, on each step.
+  RATE must be a NumberNode holding the percentage change by which
+  the demand-value will be updated with, on each step.
 "
     (let* ((strength (tv-mean (cog-tv  demand-node)))
            (rate (/ (string->number (cog-name rate-node)) 100))

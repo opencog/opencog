@@ -1287,3 +1287,13 @@ psi-default-action-selector is not used anywhere
 most-weighted-atoms really does return a list.
 but the action seldctor only looks at the TV for the top one.
 
+Ben -- PLN & Sequential=And
+
+valid demands?
+psi-reset-valid-demand-cache
+
+* demand value -- which direction is up, down? what does it mean?
+* percentage???
+* why two different functions, one for up, one for down?
+  why not just use negative numbers?
+* demand-changes per step, instead of per unit time?
