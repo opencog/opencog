@@ -18,7 +18,7 @@ import System.Process
 
 main :: IO ()
 main = do
-    (parser,printer) <- initParserPrinter
+    (parser,printer) <- initParserPrinter "lojban.xml"
     mainloop parser printer
 
 camxesPath = "/home/roman/OpenCog/Lojban/ilmentufa"

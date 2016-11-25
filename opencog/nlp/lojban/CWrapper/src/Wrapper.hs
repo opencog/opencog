@@ -19,13 +19,14 @@ foreign export ccall "lojban_print" c_print :: Ptr AtomSpaceRef
                                      -> Handle
                                      -> IO (CString)
 
-foreign export ccall "lojban_init" c_init :: IO (StablePtr WordList)
+foreign export ccall "lojban_init" c_init :: CString -> IO (StablePtr WordList)
 
 foreign export ccall "lojban_exit" c_exit :: StablePtr WordList -> IO ()
 
-c_init :: IO (StablePtr WordList)
-c_init = do
-    wl <- loadWordLists
+c_init :: CString -> IO (StablePtr WordList)
+c_init cpath = do
+    path <- peekCString cpath
+    wl <- loadWordLists path
     newStablePtr wl
 
 c_exit :: StablePtr WordList -> IO ()

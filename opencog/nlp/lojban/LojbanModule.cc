@@ -26,6 +26,7 @@
 #include <boost/algorithm/string/join.hpp>
 
 #include <fstream>
+#include <sys/stat.h>
 
 
 using namespace opencog::nlp;
@@ -41,7 +42,16 @@ DECLARE_MODULE(LojbanModule);
 LojbanModule::LojbanModule(CogServer& cs) :
         Module(cs) , _cs(cs) , _as(&cs.getAtomSpace()) , scmeval(_as)
 {
-    _wordlist = lojban_init();
+    const char * name = "lojban.xml";
+    std::string url = "https://raw.githubusercontent.com/rTreutlein"
+                      "/lojban-data/master/lojban.xml";
+    struct stat buffer;
+    if (stat (name,&buffer) != 0) {
+        int i = system(("wget " + url).c_str());
+        std::cout << i << "\n";
+    }
+
+    _wordlist = lojban_init(name);
 
     scmeval.eval("(use-modules (opencog) (opencog nlp))");
     scmeval.eval("(use-modules (opencog nlp chatbot))");

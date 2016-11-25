@@ -25,9 +25,9 @@ import qualified Data.Map as M
 import Text.Syntax.Parser.Naive
 import qualified Text.Syntax.Printer.Naive as P
 
-initParserPrinter :: IO (String -> Maybe Atom, Atom -> Maybe String)
-initParserPrinter = do
-    wordlist <- loadWordLists
+initParserPrinter :: String -> IO (String -> Maybe Atom, Atom -> Maybe String)
+initParserPrinter path = do
+    wordlist <- loadWordLists path
     return (lojbanToAtomese wordlist,atomeseToLojban wordlist)
 
 lojbanToAtomese :: WordList -> String -> Maybe Atom
