@@ -16,7 +16,7 @@
 
 (use-modules (ice-9 threads)) ; For `par-map`
 (use-modules (ice-9 optargs)) ; For `define*-public`
-(use-modules (srfi srfi-1)) ; For `append-map`
+(use-modules (srfi srfi-1)) ; For `drop-right`, `append-map`, etc.
 (use-modules (opencog) (opencog query))
 
 (load "demand.scm")
@@ -209,14 +209,11 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ; --------------------------------------------------------------
 (define-public (psi-get-context rule)
 "
-  psi-get-context RULE
+  psi-get-context RULE - Get the context of the openpsi-rule RULE.
 
-  Get the context of the openpsi-rule RULE.  Returns a scheme
-  list of all of the atoms that form the context.
+  Returns a scheme list of all of the atoms that form the context.
 "
-    ;; FIXME: This is not an efficient way to get the context.
-    ;; If this needs to be called a lot, it should be fixed.
-    (remove psi-action? (get-c&a rule))
+    (drop-right (get-c&a rule) 1)
 )
 
 ; --------------------------------------------------------------
@@ -227,9 +224,10 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   Get the action of the openpsi-rule RULE.  Returns the single
   atom that is the action.
 "
-    ;; FIXME: This is not an efficient way to get the action.
-    ;; If this needs to be called a lot, it should be fixed.
-    (car (filter psi-action? (get-c&a rule)))
+    ; Instead of doing this, it might be more efficient to get
+    ; the size of the outgoing set, and ask for the last element
+    ; directly, using (cog-outgoing-atom n-1).
+    (car (take-right (get-c&a rule) 1))
 )
 
 ; --------------------------------------------------------------
