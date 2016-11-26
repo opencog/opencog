@@ -267,23 +267,21 @@ optext t = ((text t <* text " ") <|> text "") <* optSpace
 
 --Handles 1 of many options from a list
 oneOf :: Syntax delta => (a -> delta b) -> [a] -> delta b
-oneOf f [e] = f e
+oneOf f [] = empty
 oneOf f (x:xs) = f x <|> oneOf f xs
 
 gismu :: SyntaxReader String
 gismu = ReaderT (\(_,gismus,_,_) -> oneOf word gismus)
 
 selmaho :: String -> SyntaxReader String
-selmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf word $ cmavo M.! s)
+selmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf word $ M.findWithDefault [] s cmavo)
 
 joiSelmaho :: String -> SyntaxReader String
-joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf string $ cmavo M.! s)
+joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf string $ M.findWithDefault [] s cmavo)
                <* optext " "
 
 sepSelmaho :: String -> SyntaxReader ()
-sepSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf mytext $ cmavo M.! s)
+sepSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf mytext $ M.findWithDefault [] s cmavo)
 
 optSelmaho :: String -> SyntaxReader ()
-optSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf optext $ cmavo M.! s)
-
-
+optSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf optext $ M.findWithDefault [] s cmavo)

@@ -6,9 +6,8 @@ import qualified Data.Map as M
 import Data.List
 import System.Random
 
-loadWordLists :: IO (M.Map String [String],[String],[(String,String)],Int)
-loadWordLists = do
-    let src = "/usr/local/share/opencog/lojban.xml"
+loadWordLists :: String -> IO (M.Map String [String],[String],[(String,String)],Int)
+loadWordLists src = do
     gismu <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getGismu)
     cmavo <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getCmavo)
     bai   <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getBAI)
