@@ -78,7 +78,7 @@ public:
                         "Parse a Lojban Sentence to Atomese.\n",
                         "Usage: parse-lojban sentence\n", false, true)
 
-    LojbanModule(CogServer&);
+    LojbanModule(CogServer&,bool test = false);
     virtual ~LojbanModule();
 
     const char * id(void);
