@@ -11,9 +11,8 @@ import Data.ListTrie.Patricia.Set.Ord
 
 type StringSet = TrieSet Char
 
-loadWordLists :: IO (M.Map String StringSet,StringSet,[(String,String)],Int)
-loadWordLists = do
-    let src = "/usr/local/share/opencog/lojban.xml"
+loadWordLists :: String -> IO (M.Map String StringSet,StringSet,[(String,String)],Int)
+loadWordLists src = do
     gismu <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getGismu)
     cmavo <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getCmavo)
     bai   <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getBAI)

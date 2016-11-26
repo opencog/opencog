@@ -1226,5 +1226,74 @@ clobbers it
 
 (load "imperative-rules.scm")
 
+================================================
+
+(psi-rule-nocheck
+	;; context
+	(list (AndLink
+		(Predicate "input thing")
+		(List args)
+	))
+	;; action
+	(List
+		(ExecutionOutput
+			(DefinedSchema "thing to do")
+			(List args)))
+	(Concept "demo goal")
+	(stv 1 0.8181)
+	(psi-demand "want a demo" 0.97)
+)
 
 
+
+Either incorrect or not implemented yet. Cannot evaluate (
+
+psi-action ConceptNode OpenPsi: action
+MemberLink
+
+Implication stv
+   And
+      context
+      action
+   goal
+
+one rule is selected per demand
+
+psi-controller-update-weights
+
+each rule has a weight.
+
+controled rules get a weight that is the tv-mean of the rule.
+
+demands are ConceptNodes, mean is a value-weight.
+
+
+
+this crashes:
+ (define a (Concept "A" (stv 1 1)))
+ (define b (Concept "B" (stv 0.9 0.9)))
+ (define c (Concept "C" (stv 0.8 0.8)))
+ (most-weighted-atoms (list a b c))
+
+
+psi-select-rules is not used anywhere.
+psi-select-rules-per-demand is used instead;
+
+psi-add-action-selector is not used anywhere
+psi-select-rules not used anywhere
+psi-default-action-selector is not used anywhere
+
+
+most-weighted-atoms really does return a list.
+but the action seldctor only looks at the TV for the top one.
+
+Ben -- PLN & Sequential=And
+
+valid demands?
+psi-reset-valid-demand-cache
+
+* demand value -- which direction is up, down? what does it mean?
+* percentage???
+* why two different functions, one for up, one for down?
+  why not just use negative numbers?
+* demand-changes per step, instead of per unit time?
