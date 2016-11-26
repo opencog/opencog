@@ -271,7 +271,7 @@ optext t = (text t <* sepSpace) <|> (text "" <* optSpace)
 
 --Handles 1 of many options from a list
 oneOfS :: Syntax delta => (a -> delta b) -> [a] -> delta b
-oneOfS f [e] = f e
+oneOfS f [] = empty
 oneOfS f (x:xs) = f x <|> oneOfS f xs
 
 oneOf :: Syntax delta => StringSet -> delta String
@@ -302,17 +302,17 @@ gismu :: SyntaxReader String
 gismu = ReaderT (\(_,gismus,_,_) -> oneOf gismus)
 
 selmaho :: String -> SyntaxReader String
-selmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf (cmavo M.! s))
+selmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf (M.findWithDefault TS.empty s cmavo))
 
 joiSelmaho :: String -> SyntaxReader String
-joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf2 (cmavo M.! s))
+joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf2 (M.findWithDefault TS.empty s cmavo))
 
 sepSelmaho :: String -> SyntaxReader ()
-sepSelmaho s = ReaderT (\(cmavo,_,_,_) ->  oneOfS mytext (TS.toList $ cmavo M.! s))
+sepSelmaho s = ReaderT (\(cmavo,_,_,_) ->
+    oneOfS mytext (TS.toList $ M.findWithDefault TS.empty s cmavo))
 
 optSelmaho :: String -> SyntaxReader ()
 optSelmaho s = handle <$> optional (selmaho s)
     where handle = Iso f g where
             f _ = Just ()
             g () = Just Nothing
-
