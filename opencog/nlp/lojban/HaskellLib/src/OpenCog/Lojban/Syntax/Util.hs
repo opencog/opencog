@@ -125,8 +125,16 @@ partitionIso p = Iso f g where
 isoConcat :: String -> Iso [String] String
 isoConcat x = Iso (Just . intercalate x) (Just . S.splitOn x)
 
+isoConcat2 :: Iso [[a]] [a]
+isoConcat2 = Iso f g where
+    f = Just . concat
+    g = Just . map (\x -> [x])
+
 isoDrop :: Int -> Iso String String
 isoDrop i = Iso (Just . drop i) (Just . id)
+
+isoReverse :: Iso [a] [a]
+isoReverse = Iso (Just . reverse) (Just . reverse)
 
 stripSpace :: Iso String String
 stripSpace = Iso (Just . f) (Just . g) where
@@ -244,7 +252,7 @@ withSeedState r = ReaderT (\e@(_,_,_,seed) ->
 
 ------------------------------------------------------------------------
 letter, digit :: Syntax delta => delta Char
-letter  =  subset isLetter <$> token
+letter  =  subset (\x -> isLetter x || x=='\'') <$> token
 digit   =  subset isDigit <$> token
 
 anyWord :: Syntax delta => delta String
@@ -283,20 +291,26 @@ memberIso ss = Iso f f where
              then Just e
              else Nothing
 
-oneOf2 :: Syntax delta => StringSet -> delta String
-oneOf2 ss = memberIso2 ss <$> anyWord
+multipleOf :: Syntax delta => StringSet -> delta [String]
+multipleOf ss = isoReverse . memberIso2 ss <$> anyWord
 
-memberIso2 :: StringSet -> Iso String String
-memberIso2 ss = Iso (f ss []) (f ss []) where
-    f ss l [] = if TS.member l ss
-                     then Just l
+memberIso2 :: StringSet -> Iso String [String]
+memberIso2 sss = Iso (f sss [] []) (g) where
+    f ss [] erg [] = Just erg
+    f ss l erg [] = if TS.member l ss
+                     then Just (l:erg)
                      else Nothing
-    f ss l (x:xs) = let key= l++[x]
-                        ns = TS.lookupPrefix key ss
-                    in case TS.size ns of
-                          0 -> Nothing
-                          1 -> Just key
-                          _ -> f ns key xs
+    f ss l erg (x:xs) = let key= l++[x]
+                            ns = TS.lookupPrefix key ss
+                        in case TS.size ns of
+                              0 -> if TS.member l ss
+                                      then f sss [] (l:erg) (x:xs)
+                                      else Nothing
+                              1 -> if TS.member key ns
+                                      then f sss [] (key:erg) xs
+                                      else f ns key erg xs
+                              _ -> f ns key erg xs
+    g ls = Just $ concat ls --FIXME
 
 gismu :: SyntaxReader String
 gismu = ReaderT (\(_,gismus,_,_) -> oneOf gismus)
@@ -304,8 +318,8 @@ gismu = ReaderT (\(_,gismus,_,_) -> oneOf gismus)
 selmaho :: String -> SyntaxReader String
 selmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf (M.findWithDefault TS.empty s cmavo))
 
-joiSelmaho :: String -> SyntaxReader String
-joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf2 (M.findWithDefault TS.empty s cmavo))
+joiSelmaho :: String -> SyntaxReader [String]
+joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> multipleOf (M.findWithDefault TS.empty s cmavo))
 
 sepSelmaho :: String -> SyntaxReader ()
 sepSelmaho s = ReaderT (\(cmavo,_,_,_) ->

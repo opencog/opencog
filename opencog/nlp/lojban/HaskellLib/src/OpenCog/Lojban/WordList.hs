@@ -6,6 +6,9 @@ import Text.XML.HXT.Core
 import qualified Data.Map as M
 import Data.List
 import System.Random
+import System.Directory
+import qualified Data.ByteString as BS
+import Data.Serialize
 
 import Data.ListTrie.Patricia.Set.Ord
 
@@ -13,14 +16,26 @@ type StringSet = TrieSet Char
 
 loadWordLists :: String -> IO (M.Map String StringSet,StringSet,[(String,String)],Int)
 loadWordLists src = do
-    gismu <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getGismu)
-    cmavo <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getCmavo)
-    bai   <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getBAI)
-    let selmahos = M.fromListWith (++) $ fmap f cmavo
-        f (s,c) = (takeWhile p s,[c])
-        p e = e `notElem` "1234567890*"
-    (seed :: Int) <- randomIO
-    return (fmap fromList selmahos,fromList gismu,fmap handleBAIprefix bai,seed)
+    let ser = src ++ ".dat"
+    dfe <- doesFileExist ser
+    case dfe of
+        True -> do
+            bs <- BS.readFile ser
+            (seed :: Int) <- randomIO
+            let (Right (selmahos,gismu,bai)) = decode bs
+            return (fmap fromList selmahos,fromList gismu,bai,seed)
+        False -> do
+            gismu <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getGismu)
+            cmavo <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getCmavo)
+            bai   <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getBAI)
+            (seed :: Int) <- randomIO
+            let selmahos = M.fromListWith (++) $ fmap f cmavo
+                f (s,c) = (takeWhile p s,[c])
+                p e = e `notElem` "1234567890*"
+                res = (fmap fromList selmahos,fromList gismu,fmap handleBAIprefix bai,seed)
+                bs = encode (selmahos,gismu,fmap handleBAIprefix bai)
+            BS.writeFile ser bs
+            return res
 
 handleBAIprefix :: (String,String) -> (String,String)
 handleBAIprefix (b,d) = if t2 `elem` se then (b,t2 ++ ' ' : nd) else (b,nd)

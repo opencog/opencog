@@ -24,5 +24,11 @@ import Control.Isomorphism.Partial
 import qualified Data.ListTrie.Patricia.Set.Ord as TS
 
 import Data.Maybe
+import qualified Data.Map as M
 
 --import Text.XML.HXT.Core
+
+init = do
+    wl <- loadWordLists "lojban.xml"
+    let mpa x y = rawparse (runReaderT x wl) y
+    return (wl,mpa)

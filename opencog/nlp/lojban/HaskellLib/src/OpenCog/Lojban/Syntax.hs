@@ -149,7 +149,7 @@ pa :: SyntaxReader (State Atom)
 pa = reorder0
     . (         number       |||    concept   )
     . (showReadIso . paToNum |^| isoConcat " ")
-    <$> many1 (joiSelmaho "PA")
+    . isoConcat2 <$> many1 (joiSelmaho "PA")
     where paToNum :: Iso [String] Int
           paToNum = foldl (digitsToNum . second paToDigit) . addfst 0
 
@@ -528,7 +528,7 @@ preGOI = goiToNoi <$> selmaho "GOI"
           ,("no'u","noi du ")]
 
 prePA :: SyntaxReader String
-prePA = ptp (pa <*> selbri) id (addLE . isoConcat "" <$> many1 (joiSelmaho "PA"))
+prePA = ptp (pa <*> selbri) id (addLE . isoConcat "" <$> joiSelmaho "PA")
     where addLE = Iso (Just . f) (Just . g)
           f s = s ++ " lo "
           g s = take (length s - 4) s

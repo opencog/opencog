@@ -35,6 +35,7 @@ library
                        , split
                        , hashable
                        , list-tries
+                       , directory
   default-language:    Haskell2010
 
 executable lojbanChatBot
