@@ -21,6 +21,10 @@ import OpenCog.Lojban.Util
 
 import Control.Monad.Trans.Reader
 
+import qualified Data.ListTrie.Patricia.Set.Ord as TS
+
+type StringSet = TS.TrieSet Char
+
 --The firs element of the tuple is a Atom that is part of the main Sentence/Link
 --The List are other atoms which have to be added to the Atomspace or are needed for printing
 type State a = (a,[Atom])
@@ -29,7 +33,7 @@ type Sumti = Tagged Atom
 type Selbri = (TruthVal,Atom) --STring represents TV
 type Tagged a = (a,Maybe Tag)
 
-type WordList = (M.Map String [String],[String],[(String,String)],Int)
+type WordList = (M.Map String StringSet,StringSet,[(String,String)],Int)
 type SyntaxReader a = forall delta. Syntax delta => ReaderT WordList delta a
 
 instance IsoFunctor f => IsoFunctor (ReaderT a f) where

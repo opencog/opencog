@@ -25,6 +25,8 @@ import Text.Syntax
 
 import OpenCog.Lojban.Syntax.Types
 
+import qualified Data.ListTrie.Patricia.Set.Ord as TS
+
 -------------------------------------------------------------------------------
 --Iso Util
 -------------------------------------------------------------------------------
@@ -43,17 +45,19 @@ first  a = a *** id
 insert :: a -> Iso () a
 insert = inverse . ignore
 
+iunit = inverse unit
+
 addfst :: a -> Iso b (a,b)
-addfst a = first (insert a) . commute . unit
+addfst a = inverse $ rmfst a
 
 addsnd :: a -> Iso b (b,a)
-addsnd a = second (insert a) . unit
+addsnd a = inverse $ rmsnd a
 
 rmfst :: a -> Iso (a,b) b
-rmfst a = inverse (addfst a)
+rmfst a = iunit . commute .< ignore a
 
 rmsnd :: a -> Iso (b,a) b
-rmsnd a = inverse (addsnd a)
+rmsnd a = iunit .> ignore a
 
 
 choice :: (a -> Iso a b) -> (b -> Iso a b) -> Iso a b
@@ -121,8 +125,16 @@ partitionIso p = Iso f g where
 isoConcat :: String -> Iso [String] String
 isoConcat x = Iso (Just . intercalate x) (Just . S.splitOn x)
 
+isoConcat2 :: Iso [[a]] [a]
+isoConcat2 = Iso f g where
+    f = Just . concat
+    g = Just . map (\x -> [x])
+
 isoDrop :: Int -> Iso String String
 isoDrop i = Iso (Just . drop i) (Just . id)
+
+isoReverse :: Iso [a] [a]
+isoReverse = Iso (Just . reverse) (Just . reverse)
 
 stripSpace :: Iso String String
 stripSpace = Iso (Just . f) (Just . g) where
@@ -240,11 +252,11 @@ withSeedState r = ReaderT (\e@(_,_,_,seed) ->
 
 ------------------------------------------------------------------------
 letter, digit :: Syntax delta => delta Char
-letter  =  subset isLetter <$> token
+letter  =  subset (\x -> isLetter x || x=='\'') <$> token
 digit   =  subset isDigit <$> token
 
 anyWord :: Syntax delta => delta String
-anyWord = many1 letter <* optSpace
+anyWord = many1 letter <* sepSpace
 
 --any :: Syntax delta => delta String
 --any = many token
@@ -256,32 +268,65 @@ string [] =  pure []
 string (x:xs) = cons <$> (subset (== x) <$> token) <*> string xs
 
 word :: Syntax delta => String -> delta String
-word s = string s <* text " " <* optext " "
+word s = string s <* sepSpace
 
 mytext :: Syntax delta => String -> delta ()
-mytext s = text s <* text " " <* optext " "
+mytext s = text s <* sepSpace
 
 --For text that is both optional and should be parsed into ()
 optext :: Syntax delta => String -> delta ()
-optext t = ((text t <* text " ") <|> text "") <* optSpace
+optext t = (text t <* sepSpace) <|> (text "" <* optSpace)
 
 --Handles 1 of many options from a list
-oneOf :: Syntax delta => (a -> delta b) -> [a] -> delta b
-oneOf f [] = empty
-oneOf f (x:xs) = f x <|> oneOf f xs
+oneOfS :: Syntax delta => (a -> delta b) -> [a] -> delta b
+oneOfS f [] = empty
+oneOfS f (x:xs) = f x <|> oneOfS f xs
+
+oneOf :: Syntax delta => StringSet -> delta String
+oneOf ss = memberIso ss <$> anyWord
+
+memberIso :: StringSet -> Iso String String
+memberIso ss = Iso f f where
+    f e = if TS.member e ss
+             then Just e
+             else Nothing
+
+multipleOf :: Syntax delta => StringSet -> delta [String]
+multipleOf ss = isoReverse . memberIso2 ss <$> anyWord
+
+memberIso2 :: StringSet -> Iso String [String]
+memberIso2 sss = Iso (f sss [] []) (g) where
+    f ss [] erg [] = Just erg
+    f ss l erg [] = if TS.member l ss
+                     then Just (l:erg)
+                     else Nothing
+    f ss l erg (x:xs) = let key= l++[x]
+                            ns = TS.lookupPrefix key ss
+                        in case TS.size ns of
+                              0 -> if TS.member l ss
+                                      then f sss [] (l:erg) (x:xs)
+                                      else Nothing
+                              1 -> if TS.member key ns
+                                      then f sss [] (key:erg) xs
+                                      else f ns key erg xs
+                              _ -> f ns key erg xs
+    g ls = Just $ concat ls --FIXME
 
 gismu :: SyntaxReader String
-gismu = ReaderT (\(_,gismus,_,_) -> oneOf word gismus)
+gismu = ReaderT (\(_,gismus,_,_) -> oneOf gismus)
 
 selmaho :: String -> SyntaxReader String
-selmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf word $ M.findWithDefault [] s cmavo)
+selmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf (M.findWithDefault TS.empty s cmavo))
 
-joiSelmaho :: String -> SyntaxReader String
-joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf string $ M.findWithDefault [] s cmavo)
-               <* optext " "
+joiSelmaho :: String -> SyntaxReader [String]
+joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> multipleOf (M.findWithDefault TS.empty s cmavo))
 
 sepSelmaho :: String -> SyntaxReader ()
-sepSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf mytext $ M.findWithDefault [] s cmavo)
+sepSelmaho s = ReaderT (\(cmavo,_,_,_) ->
+    oneOfS mytext (TS.toList $ M.findWithDefault TS.empty s cmavo))
 
 optSelmaho :: String -> SyntaxReader ()
-optSelmaho s = ReaderT (\(cmavo,_,_,_) -> oneOf optext $ M.findWithDefault [] s cmavo)
+optSelmaho s = handle <$> optional (selmaho s)
+    where handle = Iso f g where
+            f _ = Just ()
+            g () = Just Nothing

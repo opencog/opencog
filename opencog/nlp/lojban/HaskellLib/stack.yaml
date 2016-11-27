@@ -14,7 +14,7 @@ packages:
    commit: a8d1b86de0a1e1a85c20a25937f50a173b0a990d
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
-extra-deps: [opencog-atomspace-0.1.0.7]
+extra-deps: [opencog-atomspace-0.1.0.7,list-tries-0.6.3]
 
 # Override default flag values for local packages and extra-deps
 flags: {}
@@ -35,4 +35,4 @@ extra-package-dbs: []
 
 # Extra directories used by stack for building
 # extra-include-dirs: [/usr/local/lib/opencog]
-# extra-lib-dirs: [/usr/local/lib/opencog]
+extra-lib-dirs: [/usr/local/lib/opencog]
