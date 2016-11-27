@@ -196,7 +196,7 @@
 ; Internal dynamic interactions
 
 (define power->arousal
-	(psi-create-interaction-rule agent-state-power changed arousal .3))
+	(psi-create-interaction-rule power changed arousal .3))
 
 ;-----------------------
 ; Event-based triggers
@@ -218,7 +218,7 @@
 ; Speech giving starts
 (define speech->power
     (psi-create-interaction-rule speech-giving-starts increased
-        agent-state-power .5))
+        power .5))
 
 ; Loud noise occurs
 (define loud-noise->arousal (psi-create-interaction-rule loud-noise-event
@@ -235,7 +235,7 @@
 ; Internal vars to physiology mapping
 
 (define power->voice
-	(psi-create-interaction-rule agent-state-power changed voice-width 1))
+	(psi-create-interaction-rule power changed voice-width 1))
 
 (define arousal->voice
 	(psi-create-interaction-rule arousal changed voice-width -.5))
