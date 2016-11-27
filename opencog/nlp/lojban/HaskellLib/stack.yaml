@@ -8,7 +8,7 @@ packages:
 - '.'
 - location:
    git: https://github.com/rTreutlein/invertible-syntax
-   commit: 2fbc868a9e74f27eac0f856326385d654455fc0b
+   commit: f96e20609efc3328689b4e9f64fe97763ba67b96
 - location:
    git: https://github.com/rTreutlein/partial-isomorphisms
    commit: a8d1b86de0a1e1a85c20a25937f50a173b0a990d

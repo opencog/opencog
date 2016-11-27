@@ -155,6 +155,14 @@ tolist2 = Iso (\(a1,a2) -> Just [a1,a2])
 isoZip :: Iso ([a],[b]) [(a,b)]
 isoZip = Iso (Just . uncurry zip) (Just . unzip)
 
+isoDistribute :: Iso (a,[b]) [(a,b)]
+isoDistribute = isoZip . reorder
+    where reorder = Iso f g
+          f (a,b)   = Just (replicate (length b) a,b)
+          g (a:_,b) = Just (a,b)
+          g ([],_)  = error $ "This can't happen can it?"
+
+
 mapIso :: Iso a b -> Iso [a] [b]
 mapIso iso = Iso f g where
     f = mapM $ apply iso
