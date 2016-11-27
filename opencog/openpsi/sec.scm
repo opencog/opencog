@@ -10,7 +10,7 @@
 (define agent-state-sec-init-value .5)
 
 ; Agent State (iow system state)
-(define agent-state (Concept (string-append psi-prefix-str "agent-state")))
+;(define agent-state (Concept (string-append psi-prefix-str "agent-state")))
 
 (define psi-sec-node (Concept (string-append psi-prefix-str "SEC")))
 
@@ -22,16 +22,21 @@
 "
     (define sec
         (Concept (string-append psi-prefix-str name)))
-    (define agent-state-var-name (string-append "agent-state-" name))
     (Inheritance
         sec
         psi-sec-node)
 
-    ;create the agent/system-state variable for this sec
-	(psi-create-stimulus-sec agent-state sec agent-state-sec-init-value)
+    ; For now, assuming the sec alone represents the overall system/agent state,
+    ; for consi1stency with psi var representations. Code below can be used if we
+    ; decide we want this represented explicitly as agent-state.
+    ; Create the agent/system-state variable for this sec
+	;(psi-create-stimulus-sec agent-state sec agent-state-sec-init-value)
+	; Dynamic variable name creation needs working out.
+    ;(define agent-state-var-name (string-append "agent-state-" name))
     ;(eval `(define ,(string->symbol agent-state-var-name)
    	;    ,(psi-create-stimulus-sec agent-state sec agent-state-sec-init-value)))
    	;(export (string->symbol agent-state-var-name))
+
     sec)
 
 (define-public (psi-create-stimulus-sec stimulus sec initial-value)
@@ -88,5 +93,5 @@
 
 ; Temp for development, until this assignment happens in the create function
 ; Create Stimulus-SEC Associations
-(define agent-state-power
-       (psi-create-stimulus-sec agent-state power .5))
+;(define agent-state-power
+;       (psi-create-stimulus-sec agent-state power .5))

@@ -343,7 +343,7 @@
                     (highlight-display arousal)
                     (highlight-display pos-valence)
                     (highlight-display neg-valence)
-                    (highlight-display agent-state-power)
+                    (highlight-display power)
                     (highlight-display voice-width)
 				)
 				(close-output-port output-port))))
@@ -815,7 +815,7 @@
 (define-public t psi-set-pred-true)
 (define f psi-set-pred-false)
 
-(define-public p agent-state-power)
+(define-public p power)
 (define-public a arousal)
 
 (define voice voice-width)
