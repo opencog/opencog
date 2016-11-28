@@ -289,7 +289,7 @@ vector<TimeDomain> TimeServer::getTimeDomains() const
     return result;
 }
 
-void TimeServer::atomAdded(Handle h)
+void TimeServer::atomAdded(const Handle& h)
 {
     Type type = h->getType();
     if (type != AT_TIME_LINK) return;
@@ -333,7 +333,7 @@ void TimeServer::atomAdded(Handle h)
     add(timed_h, t, timeDomain);
 }
 
-void TimeServer::atomRemoved(AtomPtr atom)
+void TimeServer::atomRemoved(const AtomPtr& atom)
 {
     Type type = atom->getType();
     if (type != AT_TIME_LINK) return;
