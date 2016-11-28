@@ -303,33 +303,34 @@ void TimeServer::atomAdded(Handle h)
         return;
     }
 
-    // Add corresponding TimeServer entry
     const Handle& timeNode = h->getOutgoingAtom(0);
-    if (timeNode->getType() == TIME_NODE) {
-        const string& timeNodeName = timeNode->getName();
-        const Handle& timed_h = h->getOutgoingAtom(1);
-        Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
-        TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
-        if (arityOfTimeLink == 3) {
-            const Handle& timeDomainNode = h->getOutgoingAtom(2);
-            if (timeDomainNode->getType() == TIME_DOMAIN_NODE) {
-                timeDomain = timeDomainNode->getName();
-            }
-            else {
-                logger().warn("TimeServer::atomAdded: Invalid atom type "
-                      "at the third element in an AtTimeLink's outgoing: "
-                      "%s\n",
-                      classserver().getTypeName(timeDomainNode->getType()).c_str());
-                return;
-            }
-        }
-        add(timed_h, t, timeDomain);
-    } else {
+    if (timeNode->getType() != TIME_NODE) {
         logger().warn("TimeServer::atomAdded: Invalid atom type "
              "at the first element in an AtTimeLink's outgoing: "
              "%s\n",
              classserver().getTypeName(timeNode->getType()).c_str());
+        return;
     }
+
+    // Add corresponding TimeServer entry
+    const string& timeNodeName = timeNode->getName();
+    const Handle& timed_h = h->getOutgoingAtom(1);
+    Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
+    TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
+    if (arityOfTimeLink == 3) {
+        const Handle& timeDomainNode = h->getOutgoingAtom(2);
+        if (timeDomainNode->getType() == TIME_DOMAIN_NODE) {
+            timeDomain = timeDomainNode->getName();
+        }
+        else {
+            logger().warn("TimeServer::atomAdded: Invalid atom type "
+                  "at the third element in an AtTimeLink's outgoing: "
+                  "%s\n",
+                  classserver().getTypeName(timeDomainNode->getType()).c_str());
+            return;
+        }
+    }
+    add(timed_h, t, timeDomain);
 }
 
 void TimeServer::atomRemoved(AtomPtr atom)
