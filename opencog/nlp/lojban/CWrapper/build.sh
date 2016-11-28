@@ -8,6 +8,9 @@ libver=$(stack query --allow-different-user | awk 'NR==7' | sed 's/version: //g'
 #Cleanup of last build if it exists
 rm -f "$SOURCE_DIR/lib$libname-$libver.so"
 
+#Force Rebuild
+rm -fr ".stack-work/"
+
 # Build haskell bindings package.
 stack build --allow-different-user
 

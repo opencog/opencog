@@ -152,6 +152,9 @@ nodeIso n t = node . Iso (\l -> Just (n,(l,t)))
 concept :: Iso String Atom
 concept = nodeIso "ConceptNode" noTv
 
+wordNode :: Iso String Atom
+wordNode = nodeIso "WordNode" noTv
+
 predicate :: Iso String Atom
 predicate = nodeIso "PredicateNode" noTv
 
@@ -163,11 +166,7 @@ number = nodeIso "VariableNode" noTv
 
 
 _frames :: Iso (Tagged Selbri,[Sumti]) Atom
-_frames = andl . mapIso _frame . isoZip . reorder . handleTAG
-    where reorder = Iso f g
-          f (a,b)   = Just (replicate (length b) a,b)
-          g (a:_,b) = Just (a,b)
-          g ([],_)  = error $ "This can't happen can it?"
+_frames = andl . mapIso _frame . isoDistribute . handleTAG
 
 handleTAG :: Iso (Tagged Selbri,[Sumti]) (Selbri,[(Atom,Tag)])
 handleTAG = handleTAGupdater . second tagger
