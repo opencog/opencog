@@ -26,6 +26,7 @@ import random
 import yaml
 import tf
 import numpy
+import dynamic_reconfigure.client
 # Eva ROS message imports
 from std_msgs.msg import String, Int32
 from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
@@ -271,6 +272,32 @@ class EvaControl():
 		self.blink_pub.publish(msg)
 
 	# ----------------------------------------------------------
+	def update_opencog_control_parameter(self, name, value):
+		"""
+		This function is used for updating ros parameters that are used to
+		modify the weight of openpsi rules. When the changes in weight occur
+		independent of changes in HEAD's web-ui.
+		"""
+		update =  False
+		psi_prefix = self.puta.evaluate_scm("psi-prefix-str")
+		param_name = name[len(psi_prefix) - 1:]
+
+		# Update parameter
+		if (param_name in self.param_dict) and \
+		   (self.param_dict[param_name] != value):
+			self.param_dict[param_name] = value
+			self.update_parameters = True
+
+
+	def push_parameter_update(self):
+		if self.update_parameters and not rospy.is_shutdown():
+			if self.client is None:
+				return
+			self.client.update_configuration(self.param_dict)
+			self.update_parameters = False
+
+
+	# ----------------------------------------------------------
 	# Subscription callbacks
 	# Get the list of available gestures.
 	def get_gestures_cb(self, msg):
@@ -358,17 +385,20 @@ class EvaControl():
 		rospy.logwarn('publishing affect to chatbot ' + emo.data)
 		self.affect_pub.publish(emo.data)
 
-	# Turn behaviors on and off.
-	# Do not to clean visible faces as these can still be added/removed
-	# while tree is paused
+	# Turn behaviors on and off and set wholeshow configuration
+	# NOTE
+	# 1. Do not to clean visible faces as these can still be added/removed
+	#    while tree is paused
+	# 2. 'btree_on' and 'btree_off' data-strings shouldn't be used, as they are
+	#    meant for switching on and off non-opencog demos.
 	def behavior_switch_callback(self, data):
-		if data.data == "btree_on":
+		if data.data == "opencog_on":
 			if not self.running:
-				self.puta.btree_run()
+				self.puta.wholeshow_start()
 				self.running = True
-		if data.data == "btree_off":
+		if data.data == "opencog_off":
 			if self.running:
-				self.puta.btree_stop()
+				self.puta.wholeshow_stop()
 				self.look_at(0)
 				self.gaze_at(0)
 				self.running = False
@@ -377,13 +407,20 @@ class EvaControl():
 	def behavior_control_callback(self, data):
 		self.control_mode = data.data
 
+	# For web-ui interface
 	def openpsi_control_cb(self, data):
 		"""
 		This function is used for interactively modifying the weight of openpsi
 		rules.
 		"""
-		param_list = yaml.load(rosmsg.get_yaml_for_msg(data.doubles + data.ints))
-		for i in param_list:
+		param_yaml = rosmsg.get_yaml_for_msg(data.doubles + data.ints)
+		self.param_list = yaml.load(param_yaml)
+
+		for i in self.param_list:
+			# Populate the parameter dictionary
+			if i["name"] not in self.param_dict:
+				self.param_dict[i["name"]] = i["value"]
+
 			if i["name"] == "max_waiting_time":
 				scm_str = '''(StateLink
 				                 (AnchorNode "Chatbot: MaxWaitingTime")
@@ -408,6 +445,25 @@ class EvaControl():
 		# The below will hang until roscore is started!
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
+
+		# ----------------
+		# A list of parameter names that are mirrored in opencog for controling
+		# psi-rules
+		self.param_list = []
+		# Parameter dictionary that is used for updating states recorede in
+		# the atomspace. It is used to cache the atomspace values, thus updating
+		# of the dictionary is only made from opencog side (openpsi
+		# updating rule)
+		self.param_dict = {}
+
+		# For controlling when to push updates, for saving bandwidth.
+		self.update_parameters = False
+
+		# For web ui based control of openpsi contorled-psi-rules
+		try:
+			self.client = dynamic_reconfigure.client.Client("/opencog_control", timeout=2)
+		except Exception:
+			self.client = None
 
 		# ----------------
 		# Get the available animations

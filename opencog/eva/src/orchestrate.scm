@@ -253,4 +253,46 @@
     ))
 
 ; -------------------------------------------------------------
+; For updating web-ui
+; NOTE: updating of parameters is divided into steps of upating the parameter
+; cache and then pushing the update, so as to simply syncing the values.
+; If one pushes a partial updated cache results in the publishing of the change
+; to /opencog_control/parameter_updates topic thus resulting in an undesirable
+; state in the atomspace.
+
+; Update dynamic parameter cache
+(DefineLink
+    (DefinedPredicate "update-opencog-control-parameter")
+    (LambdaLink
+        (VariableList
+            (TypedVariableLink
+                (VariableNode "psi-rule-alias")
+                (TypeNode "ConceptNode"))
+            (TypedVariableLink
+                (VariableNode "psi-rule-weight")
+                (TypeNode "NumberNode")))
+        (Evaluation
+            (GroundedPredicate "py: update_opencog_control_parameter")
+            (List
+                (VariableNode "psi-rule-alias")
+                (VariableNode "psi-rule-weight")))
+    ))
+
+; Push dynamic parameter cache values
+(Define
+	(DefinedPredicate "push-parameter-update")
+	(Evaluation
+		(GroundedPredicate "py: push_parameter_update")
+		(List))
+	)
+
+(Define
+	(DefinedPredicate "update-web-ui")
+	(SequentialAnd
+		(True (PutLink
+			(DefinedPredicate "update-opencog-control-parameter")
+			(DefinedSchema "psi-controlled-rule-state")))
+		(DefinedPredicate "push-parameter-update")
+	))
+; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent

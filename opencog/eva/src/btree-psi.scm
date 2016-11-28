@@ -86,7 +86,3 @@
 
 ; Silence the output.
 *unspecified*
-
-;; Actually set it running, by default.
-(all-threads)  ; print out the curent threads.
-(run)
