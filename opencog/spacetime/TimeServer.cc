@@ -317,18 +317,18 @@ void TimeServer::atomAdded(Handle h)
     const Handle& timed_h = h->getOutgoingAtom(1);
     Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
     TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
-    if (arityOfTimeLink == 3) {
+    if (arityOfTimeLink == 3)
+    {
         const Handle& timeDomainNode = h->getOutgoingAtom(2);
-        if (timeDomainNode->getType() == TIME_DOMAIN_NODE) {
-            timeDomain = timeDomainNode->getName();
-        }
-        else {
+        if (timeDomainNode->getType() != TIME_DOMAIN_NODE)
+        {
             logger().warn("TimeServer::atomAdded: Invalid atom type "
                   "at the third element in an AtTimeLink's outgoing: "
                   "%s\n",
                   classserver().getTypeName(timeDomainNode->getType()).c_str());
             return;
         }
+        timeDomain = timeDomainNode->getName();
     }
     add(timed_h, t, timeDomain);
 }
