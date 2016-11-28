@@ -63,6 +63,7 @@ namespace opencog {
 
         WARentCollectionAgent(CogServer&);
         void selectTargets(HandleSeq &targetSetOut);
+        void collectRent(HandleSeq& targetSet);
     }; // class
 
     /** @}*/

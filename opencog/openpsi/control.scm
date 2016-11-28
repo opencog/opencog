@@ -1,4 +1,12 @@
+;
+; control.scm
+;
 ; Copyright (C) 2016 OpenCog Foundation
+;
+; Design Notes:
+; Weights are associated to rules using a StateLink.  However, the
+; design calls for the use of an AtTimeLink instead. Why is this needed?
+; If it really is needed, then this neeeds to be fixed.
 
 (use-modules (ice-9 receive))
 
@@ -11,14 +19,13 @@
 ; --------------------------------------------------------------
 (define-public (psi-set-updater! updater tag-node)
 "
-  Returns the alias node that represents the updater.
+  psi-set-updater! UPDATER TAG
 
-  updater:
-  - An evaluatable link/node which when evaluated will updater the values for
-    the given demand/modulator.
+  Returns the alias node that represents the updater UPDATER.  An
+  updater is an evaluatable atom that, when evaluated, updates the
+  values for a given demand/modulator.
 
-  tag-node:
-  - A demand/modulator node that the updater is being added to.
+  The TAG is a demand/modulator node that the updater is being added to.
 "
     (psi-set-functionality updater #t tag-node "updater")
 )
@@ -26,11 +33,10 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-updater tag-node)
 "
-  Returns a list containing the updater for the given tag-node. Null is returned
-  if it doesn't have one.
+  psi-get-updater TAG
 
-  tag-node:
-  - A demand/modulator node that has the updater.
+  Returns a list containing the updater for the given tag-node TAG.
+  Null is returned if there is no updater for TAG.
 "
     (psi-get-functionality tag-node "updater")
 )
@@ -45,31 +51,43 @@
 (define psi-controller-demand (psi-demand "controller" .000000000))
 
 ; --------------------------------------------------------------
+; FIXME -- can we have a shorter/better name for this method?
+;
 (define-public (psi-rule-set-atomese-weight psi-rule weight)
 "
-  Returns the StateLink that is used to represent the weight of an psi-rule.
+  psi-rule-set-atomese-weight RULE WEIGHT
 
-  psi-rule:
-  - An ImplicationLink whose weight is going to be modified.
+  Give the indicated RULE the weight WEIGHT.  The WEIGHT should be
+  a floating-point number.  This returns a StateLink that associates
+  the weight to the rule.  The use of a StateLink means that a rule
+  can have only one weight at any given time.
 
-  weight:
-  - A number signifiying the weight of the rule.
+  The current design associates the weight with the rule name, so that
+  if multiple rules have the same name, then all of thise rules will
+  also have the same weight.
 "
-    (StateLink ; FIXME should use AtTimeLink
-        (ListLink
-            (psi-rule-alias psi-rule)
-            (ConceptNode (string-append psi-prefix-str "weight")))
+    ; FIXME - the long-term design calls for the use of an AtTimeLink
+    ; instead of a StateLink, here.
+    ;
+    ; FIXME -- if there are multiple names for a rule, this will
+    ; use all of those names in the StateLink.  If a rule is given
+    ; a second or third name later on, this will cause dead StateLinks
+    ; to linger in the atomspace. FIXME -- make sure that a rule can
+    ; have only one name.
+    ;
+    (define wn (ConceptNode (string-append psi-prefix-str "weight")))
+    (StateLink
+        (ListLink (psi-rule-alias psi-rule) wn)
         (NumberNode weight))
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-set-controlled-rule psi-rule)
 "
-  Specify that the psi-rule is to be controled. Controlling means modifying the
-  weight of the rule, thus affecting the likelyhood of it being choosen.
+  psi-set-controlled-rule RULE
 
-  psi-rule:
-  - An ImplicationLink whose weight is going to be modified.
+  Specify that RULE is to be controled. Controlling means modifying the
+  weight of the rule, thus affecting the likelyhood of it being choosen.
 "
     (MemberLink psi-rule psi-controller-demand)
 
@@ -181,6 +199,42 @@
         (map
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.9))
             filtered)
+    )
+)
+
+; --------------------------------------------------------------
+; Returns a SetLink with ListLink of psi-controled-rule aliases and their
+; atomese-weight.
+(Define
+    (DefinedSchema "psi-controlled-rule-state")
+    (BindLink
+        (VariableList
+            (TypedVariableLink
+                (VariableNode "controled-rule")
+                (TypeNode "ImplicationLink"))
+            (TypedVariableLink
+                (VariableNode "psi-rule-weight")
+                (TypeNode "NumberNode"))
+            (TypedVariableLink
+                (VariableNode "psi-rule-alias")
+                (TypeNode "ConceptNode")))
+        (And
+            (EvaluationLink
+                psi-rule-name-predicate-node
+                (ListLink
+                    (Variable "controled-rule")
+                    (VariableNode "psi-rule-alias")))
+            (MemberLink
+                (Variable "controled-rule")
+                psi-controller-demand)
+            (StateLink ; FIXME should use AtTimeLink
+                (ListLink
+                    (VariableNode "psi-rule-alias")
+                    (ConceptNode (string-append psi-prefix-str "weight")))
+                (VariableNode "psi-rule-weight")))
+        (List
+            (VariableNode "psi-rule-alias")
+            (VariableNode "psi-rule-weight"))
     )
 )
 

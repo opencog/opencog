@@ -1,3 +1,9 @@
+;
+; main.scm
+;
+; Defines the method to single-step the rule engine, and the main loop
+; to call it.
+;
 ; Copyright (C) 2015-2016 OpenCog Foundation
 
 (use-modules (srfi srfi-1)) ; For `append-map`
@@ -13,16 +19,14 @@
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-; Don't log output to stdout on running psi-step
-(cog-logger-set-stdout! #f)
-
-; --------------------------------------------------------------
 ; Variable for controlling whether to keep on running the loop or not.
 (define psi-do-run-loop #f)
 
 ; --------------------------------------------------------------
 (define-public (psi-running?)
 "
+  psi-running?
+
   Return #t if the openpsi loop is running, else return #f.
 "
     psi-do-run-loop
@@ -33,7 +37,9 @@
 
 (define-public (psi-get-loop-count)
 "
-  Returns how many times psi-step have been executed.
+  psi-get-loop-count
+
+  Returns the number of times that psi-step has been executed.
 "
     psi-loop-count
 )
@@ -41,13 +47,14 @@
 ; --------------------------------------------------------------
 (define-public (psi-run-continue?)  ; public only because its in a GPN
 "
-  Function used for checking whether the thread that is executing the
-  psi-loop should continue doing so.
-"
-    (set! psi-loop-count (+ psi-loop-count 1))
+  psi-run-continue?
 
-    ; Pause for 10 millisecs, to keep the number of loops
-    ; within a reasonable range.
+  Return TRUE_TV if the the main psi loop should continue running,
+  else returns FALSE_TV.
+"
+    ; Pause for 10 millisecs, so that the psi engine doesn't hog
+    ; all CPU. FIXME -- this is obviously a hack, awaiting some sort
+    ; of better way of scehduling psi rules.
     (usleep 10000)
     (if psi-do-run-loop (stv 1 1) (stv 0 1))
 )
@@ -55,11 +62,15 @@
 ; ----------------------------------------------------------------------
 (define-public (psi-step)
 "
-  The main function that defines the steps to be taken in every cycle.
+  psi-step
+
+  Take one step of the OpenPsi rule engine.
+
+  Returns TRUE_TV, always.
 "
 ; TODO: Add reinforcement signal in psi-step
-; 1. Record which rule-was selected per demand on the previous run.
-; 2. Update the rule strength depndeing on the reinforcement signal.
+; 1. Record which rule was selected, per demand, on the previous run.
+; 2. Update the rule strength, depending on the reinforcement signal.
 ; 3. Define the representation for the reinforcement signal.
     (define (get-context-grounding-atoms rule)
         #!
@@ -105,8 +116,10 @@
                 rule)
         ))
 
-    (cog-logger-info "[OpenPsi] Starting psi-step, loop-count = ~a"
-        (psi-get-loop-count))
+    (set! psi-loop-count (+ psi-loop-count 1))
+
+    (cog-logger-info "[OpenPsi] Taking one psi-step, loop-count = ~a"
+        psi-loop-count)
 
     ; Run the controler that updates the weight.
     (psi-controller-update-weights)
@@ -120,9 +133,9 @@
                     (cog-evaluate! (car updater))
                 )
                 ; The assumption is that the rules can be run concurrently.
-                ; FIXME: Once action-orchestrator is available then a modified
-                ; `psi-select-rules` should be used insted of
-                ; `psi-select-rules-per-demand`
+                ; FIXME: Once action-orchestrator is available, then
+                ; a modified `psi-select-rules` should be used instead of
+                ; `psi-select-rules-per-demand` (huh? why?)
                 (par-map act-and-evaluate (psi-select-rules-per-demand d))
             ))
 
@@ -136,9 +149,19 @@
 )
 
 ; --------------------------------------------------------------
+;
+; XXX FIXME -- right now, this assumes that a single thread, running
+; at no more than 100 steps per second, is sufficient to run all of the
+; psi rules.  For now, this is OK, but at some point, this will become
+; a bottleneck, as we will need to evaluate more rules more often.
+;
 (define-public (psi-run)
 "
-  Run `psi-step` in a new thread. Call (psi-halt) to exit the loop.
+  psi-run
+
+  Create a new thread, and repeatedly invoke `psi-step` in it.
+  This thread can be halted by calling `(psi-halt)`, which will exit
+  the loop (and kill the thread).
 "
     (define loop-name (string-append psi-prefix-str "loop"))
     (define loop-node (DefinedPredicateNode loop-name))
@@ -167,9 +190,13 @@
 )
 
 ; -------------------------------------------------------------
+
 (define-public (psi-halt)
 "
-  Tells the psi loop thread, that is started by running `(psi-run)`, to exit.
+  psi-halt
+
+  Halts a previously-started psi loop thread. The thread is started
+  by calling `(psi-run)`.
 "
     (set! psi-do-run-loop #f)
 )
