@@ -336,40 +336,36 @@ void TimeServer::atomAdded(Handle h)
 void TimeServer::atomRemoved(AtomPtr atom)
 {
     Type type = atom->getType();
-    if (type != AT_TIME_LINK) {
-        return;
-    }
+    if (type != AT_TIME_LINK) return;
 
-    LinkPtr lll(LinkCast(atom));
-    int arityOfTimeLink = lll->getArity();
+    int arityOfTimeLink = atom->getArity();
     OC_ASSERT(arityOfTimeLink != 3 || arityOfTimeLink != 2,
 	      "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n",
 	      arityOfTimeLink);
 
-    AtomPtr timeNode = lll->getOutgoingAtom(0);
+    const Handle& timeNode = atom->getOutgoingAtom(0);
     // If it's not a TimeNode, then it's a VariableNode which can stand
     // in for a TimeNode. So we can ignore it here.
-    if (timeNode->getType() != TIME_NODE) {
-        return;
-    }
-    AtomPtr timedAtom = lll->getOutgoingAtom(1);
+    if (timeNode->getType() != TIME_NODE) return;
+
+    const Handle& timedAtom = atom->getOutgoingAtom(1);
 
     TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
     if (arityOfTimeLink == 3) {
-        AtomPtr timeDomainNode = lll->getOutgoingAtom(2);
+        const Handle& timeDomainNode = atom->getOutgoingAtom(2);
         if (timeNode->getType() != TIME_DOMAIN_NODE) {
             return;
         }
-        timeDomain = NodeCast(timeDomainNode)->getName();
+        timeDomain = timeDomainNode->getName();
     }
 
 #if DOES_NOT_COMPILE_RIGHT_NOW
     // We have to do the check here instead of in the spaceServer
     // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
-    if (a->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom->getHandle())
+    if (a->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom)
         spaceServer->removeMap(atom->getHandle());
 #endif
-    NodePtr nnn(NodeCast(timeNode));
-    remove(timedAtom->getHandle(), Temporal::getFromTimeNodeName(nnn->getName().c_str()), TemporalTable::EXACT, timeDomain);
+    remove(timedAtom,
+        Temporal::getFromTimeNodeName(timeNode->getName().c_str()), TemporalTable::EXACT, timeDomain);
 
 }
