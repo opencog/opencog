@@ -89,11 +89,11 @@ void SpaceServer::atomAdded(const Handle& h)
 void SpaceServer::atomRemoved(const AtomPtr& atom)
 {
     Type type = atom->getType();
-    if (classserver().isA(type, OBJECT_NODE)) {
-        std::vector<std::string> timeDomains = timeser->getTimeDomains();
-        for (auto timeDomain: timeDomains) {
-            removeSpaceInfo(atom->getHandle(), curSpaceMapHandle, 0, timeDomain);
-        }
+    if (not classserver().isA(type, OBJECT_NODE)) return;
+
+    std::vector<std::string> timeDomains = timeser->getTimeDomains();
+    for (auto timeDomain: timeDomains) {
+        removeSpaceInfo(atom->getHandle(), curSpaceMapHandle, 0, timeDomain);
     }
 }
 
