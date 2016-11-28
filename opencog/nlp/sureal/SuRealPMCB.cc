@@ -493,10 +493,19 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         {
             // depends on what the input is, clause_match() may not always be called,
             // do the same kind of checking here to make sure the disjuncts match
-            if (disjunct_match(hPatWord, hSolnWordInst))
-                shrinked_soln[kv.first] = kv.second;
+            if (hPatWord != Handle::UNDEFINED and hSolnWordInst != Handle::UNDEFINED)
+            {
+                if (disjunct_match(hPatWord, hSolnWordInst))
+                    shrinked_soln[kv.first] = kv.second;
 
-            else return false;
+                else return false;
+            }
+
+            // the above only takes care of the words, for nodes that do not correspond
+            // to any words, they should have gone through the node_match/variable_match
+            // callbacks. Since they get all the way here, that means they are good,
+            // so accept them directly
+            shrinked_soln[kv.first] = kv.second;
         }
     }
 
