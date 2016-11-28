@@ -295,37 +295,38 @@ void TimeServer::atomAdded(Handle h)
     if (type != AT_TIME_LINK) return;
 
     // Add corresponding TimeServer entry
-    LinkPtr lll = LinkCast(h);
-    int arityOfTimeLink = lll->getArity();
+    int arityOfTimeLink = h->getArity();
     if (arityOfTimeLink == 2 || arityOfTimeLink == 3) {
-        Handle timeNode = lll->getOutgoingAtom(0);
+        const Handle& timeNode = h->getOutgoingAtom(0);
         if (timeNode->getType() == TIME_NODE) {
-            NodePtr nnn = NodeCast(timeNode);
-            const string& timeNodeName = nnn->getName();
-            Handle timed_h = lll->getOutgoingAtom(1);
+            const string& timeNodeName = timeNode->getName();
+            const Handle& timed_h = h->getOutgoingAtom(1);
             Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
             TimeDomain timeDomain = DEFAULT_TIMEDOMAIN;
             if (arityOfTimeLink == 3) {
-                Handle timeDomainNode = lll->getOutgoingAtom(2);
+                const Handle& timeDomainNode = h->getOutgoingAtom(2);
                 if (timeDomainNode->getType() == TIME_DOMAIN_NODE) {
-                    timeDomain = NodeCast(timeDomainNode)->getName();
+                    timeDomain = timeDomainNode->getName();
                 }
                 else {
                     logger().warn("TimeServer::atomAdded: Invalid atom type "
                           "at the third element in an AtTimeLink's outgoing: "
-                          "%s\n", classserver().getTypeName(timeDomainNode->getType()).c_str());
+                          "%s\n",
+                          classserver().getTypeName(timeDomainNode->getType()).c_str());
                     return;
                 }
             }
             add(timed_h, t, timeDomain);
         } else {
             logger().warn("TimeServer::atomAdded: Invalid atom type "
-                          "at the first element in an AtTimeLink's outgoing: "
-                          "%s\n", classserver().getTypeName(timeNode->getType()).c_str());
+                 "at the first element in an AtTimeLink's outgoing: "
+                 "%s\n", 
+                 classserver().getTypeName(timeNode->getType()).c_str());
         }
     } else {
         logger().warn("TimeServer::atomAdded: Invalid arity for an "
-                      "AtTimeLink: %d (expected: 2 (for default time domain) or 3 (for multiple time domains))\n", arityOfTimeLink);
+            "AtTimeLink: %d (expected: 2 (for default time domain) "
+            "or 3 (for multiple time domains))\n", arityOfTimeLink);
     }
 }
 
