@@ -8,6 +8,10 @@ libver=$(stack query --allow-different-user | awk 'NR==7' | sed 's/version: //g'
 #Cleanup of last build if it exists
 rm -f "$SOURCE_DIR/lib$libname-$libver.so"
 
+#Force Rebuild 
+LIB=$(find . -name "*$libname*.so" | awk 'NR==1')
+rm -f $LIB
+
 # Build haskell bindings package.
 stack build --allow-different-user
 
