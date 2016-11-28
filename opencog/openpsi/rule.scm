@@ -237,9 +237,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 
   Get the goal of the openpsi-rule RULE.
 "
-    ; NOTE: Why this function? -> For consisentency and to accomodate future
-    ; changes
-    (cadr (cog-outgoing-set rule))
+    (cog-outgoing-atom rule 1)
 )
 
 ; --------------------------------------------------------------
@@ -290,8 +288,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   a psi-rule with that action in it.
 "
     ;; XXX this is not an efficient way of searching for goals.  If
-    ;; this method is used a lot, we should convert to SequentialAnd,
-    ;; and search for the goals directly.
+    ;; this method is used a lot, we should search for the goals directly.
     (let* ((and-links (cog-filter 'SequentialAndLink (cog-incoming-set action)))
            (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
            (delete-duplicates (map psi-get-goal rules))

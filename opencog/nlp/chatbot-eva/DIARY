@@ -1299,7 +1299,5 @@ psi-reset-valid-demand-cache
 * demand-changes per step, instead of per unit time?
 
 TODO:
-sequnatialAnd
-
 modulators don't belong in this directory
 
