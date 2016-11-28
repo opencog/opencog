@@ -81,12 +81,12 @@ void SpaceServer::setTimeServer(TimeServer* ts)
 }
 
 //TODO
-void SpaceServer::atomAdded(Handle h)
+void SpaceServer::atomAdded(const Handle& h)
 {
 
 }
 
-void SpaceServer::atomRemoved(AtomPtr atom)
+void SpaceServer::atomRemoved(const AtomPtr& atom)
 {
     Type type = atom->getType();
     if (classserver().isA(type, OBJECT_NODE)) {
