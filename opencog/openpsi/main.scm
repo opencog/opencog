@@ -62,9 +62,7 @@
 ; ----------------------------------------------------------------------
 (define-public (psi-step)
 "
-  psi-step
-
-  Take one step of the OpenPsi rule engine.
+  psi-step - Take one step of the OpenPsi rule engine.
 
   Returns TRUE_TV, always.
 "
@@ -133,9 +131,6 @@
                     (cog-evaluate! (car updater))
                 )
                 ; The assumption is that the rules can be run concurrently.
-                ; FIXME: Once action-orchestrator is available, then
-                ; a modified `psi-select-rules` should be used instead of
-                ; `psi-select-rules-per-demand` (huh? why?)
                 (par-map act-and-evaluate (psi-select-rules-per-demand d))
             ))
 

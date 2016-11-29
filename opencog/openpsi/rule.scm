@@ -320,7 +320,10 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 "
   psi-satisfiable? RULE
 
-  Check if the RULE is satisfiable; return TRUE_TV if it is, else return
+  Determine if the context of the RULE is satisfiable, based on the
+  current AtomSpace contents.  Satisfaction is determined by trying
+  to ground RULE
+  atomspace return TRUE_TV if it is, else return
   FALSE_TV. A rule is satisfiable when it's context contains variables,
   and that context can be grounded in the atompace (i.e. if the context
   is satisfiable in using a SatisfactionLink.)
@@ -328,10 +331,11 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   The idea is only valid when ranking of context grounding isn't considered.
   This is being replaced.  Huh??? What does this mean?
 "
+    (define gnded-pat (SatisfactionLink (AndLink (psi-get-context rule))))
+
     ; NOTE: stv are choosen as the return values so as to make the function
     ; usable in evaluatable-terms.
-    (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
-           (result (cog-evaluate! pattern)))
+    (let* ((result (cog-evaluate! gnded-pat)))
 
         (set! psi-satisfiablity-alist
             (assoc-set! psi-satisfiablity-alist rule result))
@@ -339,6 +343,10 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
     )
 )
 
+; Utility wrapper for above; returns crisp #t or #f
+(define (is-satisfiable? RULE)
+    (equal? (stv 1 1) (psi-satisfiable? RULE))
+)
 ; --------------------------------------------------------------
 (define-public (psi-get-satisfiable-rules demand-node)
 "
@@ -347,8 +355,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   Returns a list of all of the psi-rules associated with the DEMAND
   that are also satisfiable.
 "
-    (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
-        (psi-get-rules demand-node))
+    (filter is-satisfiable? (psi-get-rules demand-node))
 )
 
 ; --------------------------------------------------------------
@@ -356,13 +363,13 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 "
   psi-get-weighted-satisfiable-rules DEMAND
 
-  Returns a list of all the psi-rules that are satisfiable and
-  have a non-zero strength.
+  Returns a list of all the psi-rules associated with DEMAND
+  that are satisfiable and have a non-zero strength.
 "
     (filter
         (lambda (x)
             (and (> (cog-stv-strength x) 0)
-                (equal? (stv 1 1) (psi-satisfiable? x))))
+                (is-satisfiable? x)))
         (psi-get-rules demand-node))
 )
 
@@ -373,8 +380,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 
   Returns a list of all the psi-rules that are satisfiable.
 "
-    (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
-        (psi-get-all-rules))
+    (filter is-satisfiable? (psi-get-all-rules))
 )
 
 ; --------------------------------------------------------------
@@ -387,7 +393,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 "
     (filter
         (lambda (x) (and (> (cog-stv-strength x) 0)
-            (equal? (stv 1 1) (psi-satisfiable? x))))
+            (is-satisfiable? x)))
         (psi-get-all-rules))
 )
 
