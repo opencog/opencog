@@ -46,12 +46,12 @@
 
 
 ; --------------------------------------------------------------
-(define-public (psi-get-all-valid-demands)
+(define-public (psi-get-all-enabled-demands)
 "
-  psi-get-all-valid-demands -
+  psi-get-all-enabled-demands -
 
-  Return a list of all demands that are currently valid. A valid demand
-  is one which is not a member of the set defined by
+  Return a list of all demands that are currently enabled. A demand
+  can be disabled by adding it, as a member, to the set defined by
   (ConceptNode \"OpenPsi: skip\").
 "
     (if (null? psi-valid-demand-cache)
@@ -65,6 +65,11 @@
         psi-valid-demand-cache
     )
 )
+
+; Backwards-compat wrapper
+(define-public (psi-get-all-valid-demands)
+"  Do not use this, use psi-get-all-enabled-demands instead "
+(psi-get-all-enabled-demands))
 
 ; --------------------------------------------------------------
 (define-public (psi-demand demand-name desired-value)

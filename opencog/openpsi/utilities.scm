@@ -150,7 +150,7 @@
     (define inset (cog-get-trunk ATOM))
 
     ;; Keep only those links that are of type MemberLink...
-    ;; and, more precisely, a MmeberLink that is of a valid
+    ;; and, more precisely, a MemberLink that is of a valid
     ;; psi-fule form.
     (filter psi-member?
         (delete-duplicates (cog-filter 'MemberLink inset)))
@@ -176,7 +176,7 @@
     (cog-delete set-of-duals)
 
     ;; Keep only those links that are of type MemberLink...
-    ;; and, more precisely, a MmeberLink that is of a valid
+    ;; and, more precisely, a MemberLink that is of a valid
     ;; psi-fule form.
     (filter psi-member?
         (delete-duplicates (cog-filter 'MemberLink duset)))

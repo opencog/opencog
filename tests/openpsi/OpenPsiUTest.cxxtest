@@ -470,7 +470,7 @@ public:
     }
 
     // Check the scheme function `psi-demand-skip` and
-    // `psi-get-all-valid-demands`.
+    // `psi-get-all-enabled-demands`.
     void test_psi_demand_skip_and_psi_get_all_valid_demands()
     {
         logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -478,11 +478,11 @@ public:
         // Test 1:
         // Set the cache and then try to label a demand to be skipped. There
         // shouldn't be any difference.
-        auto result_1_1 = _scm->eval("(length (psi-get-all-valid-demands))");
+        auto result_1_1 = _scm->eval("(length (psi-get-all-enabled-demands))");
         CHKERR
         _scm->eval("(psi-demand-skip demand-1)");
         CHKERR
-        auto result_1_2 = _scm->eval("(length (psi-get-all-valid-demands))");
+        auto result_1_2 = _scm->eval("(length (psi-get-all-enabled-demands))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected no difference", result_1_2, result_1_1);
 
@@ -492,11 +492,11 @@ public:
         _scm->eval("(psi-reset-valid-demand-cache)");
         CHKERR
         auto result_2_1 = _scm->eval("(length \
-            (psi-get-all-valid-demands))");
+            (psi-get-all-enabled-demands))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `2`", "2\n", result_2_1);
         auto result_2_2 = _scm->eval("(member demand-1 \
-            (psi-get-all-valid-demands))");
+            (psi-get-all-enabled-demands))");
         CHKERR
         TSM_ASSERT_EQUALS("Expected `#f`", "#f\n", result_2_2);
         logger().info("END TEST: %s", __FUNCTION__);

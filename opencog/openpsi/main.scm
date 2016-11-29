@@ -124,7 +124,7 @@
     ; Run the controler that updates the weight.
     (psi-controller-update-weights)
 
-    ; Do action-selection & orchesteration.
+    ; Do action-selection.
     (map
         (lambda (d)
             (let ((updater (psi-get-updater d)))
@@ -139,7 +139,7 @@
                 (par-map act-and-evaluate (psi-select-rules-per-demand d))
             ))
 
-        (psi-get-all-valid-demands)
+        (psi-get-all-enabled-demands)
     )
 
     (cog-logger-info "[OpenPsi] Ending psi-step, loop-count = ~a"
