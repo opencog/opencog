@@ -1,5 +1,5 @@
-(use-modules (ice-9 threads))
-(use-modules (opencog) (opencog exec)(opencog python))
+(use-modules (ice-9 threads) (srfi srfi-1) (sxml simple) (web client) (web response))
+(use-modules (opencog) (opencog exec) (opencog python))
 
 ;-------------------------------------------------------------------------------
 (python-eval "
@@ -17,35 +17,6 @@ def set_atomspace(atsp):
     global atomspace
     atomspace = atsp
     return TruthValue(1, 1)
-
-# TODO: Attribution!
-def to_duckduckgo(qq):
-    global atomspace
-
-    nltk_splitter = nltk.data.load('tokenizers/punkt/english.pickle')
-
-    # Anchor for the result
-    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: DuckDuckGoAnswer')
-
-    # Avoid HTTP Error 400: Bad Request
-    query = qq.name.replace(' ', '+')
-
-    # Send the query
-    response = urllib2.urlopen('http://api.duckduckgo.com/?q=' + query + '&format=json').read()
-    result = json.loads(response)
-    abstract_text = result['AbstractText']
-
-    if abstract_text:
-        word_nodes = []
-        sentences = nltk_splitter.tokenize(abstract_text)
-        words = sentences[0].split(' ')
-        for word in words:
-            word_nodes.append(atomspace.add_node(types.WordNode, word))
-        ans = atomspace.add_link(types.ListLink, word_nodes)
-        atomspace.add_link(types.StateLink, [answer_anchor, ans])
-    else:
-        no_result = atomspace.add_node(types.ConceptNode, 'Chatbot: NoResult')
-        atomspace.add_link(types.StateLink, [answer_anchor, no_result])
 
 def to_wolframalpha(qq, aid):
     global atomspace
@@ -105,11 +76,6 @@ def to_wolframalpha(qq, aid):
     else:
         atomspace.add_link(types.StateLink, [answer_anchor, no_result])
 
-def call_duckduckgo(qq):
-    t = threading.Thread(target=to_duckduckgo, args=(qq,))
-    t.start()
-    return TruthValue(1, 1)
-
 def call_wolframalpha(qq, aid):
     t = threading.Thread(target=to_wolframalpha, args=(qq, aid))
     t.start()
@@ -132,14 +98,30 @@ def call_wolframalpha(qq, aid):
 (define (ask-duckduckgo)
     (State duckduckgo process-started)
 
-    ; TODO: We may want to actually nlp-parse the answer, but a typical answer
-    ; of this type seems to be very long (a paragraph), split into sentences
-    ; and then parse?
     (begin-thread
-        (cog-evaluate! (Evaluation (GroundedPredicate "py: call_duckduckgo")
-            (List (get-input-text-node))))
+        (define query (string-downcase (cog-name (get-input-text-node))))
+        (define url (string-append "http://api.duckduckgo.com/?q=" query "&format=xml"))
+        (define body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
+        (define resp (car (last-pair body)))
+        (define abstract
+            (find (lambda (i)
+                (and (pair? i) (equal? 'Abstract (car i)))) resp))
+
+        (if (equal? (length abstract) 1)
+            (State duckduckgo-answer no-result)
+            (let* ((ans (car (cdr abstract)))
+                   ; TODO: Do something better for getting the first sentence
+                   (first-sent (substring ans 0 (string-index ans #\.)))
+                   (ans-in-words (string-split first-sent #\ ))
+                 )
+                (State duckduckgo-answer (List (map Word ans-in-words)))
+            )
+        )
+
         (State duckduckgo process-finished)
     )
+
+    ; TODO: Parse the ans
 )
 
 (define (ask-wolframalpha)
