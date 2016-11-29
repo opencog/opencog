@@ -29,23 +29,6 @@
 )
 
 ; --------------------------------------------------------------
-(define-public (satisfaction-level rule)
-"
-  satisfaction-level RULE
-
-  Given the RULE, return the probability that the RULE can be satisfied.
-  XXX Except this doesn't return a probability, it just returns TRUE_TV
-  or FALSE_TV. What is this supposed to really do???
-"
-; NOTE
-; 1. See https://github.com/opencog/atomspace/issues/823 for why
-;   psi-satisfiable? is used
-; 2. Should a context evaluator be added here?????
-; 3. What is the "right" way of communicating the level of information.
-    (satisfiable? rule)
-)
-
-; --------------------------------------------------------------
 (define-public (most-weighted-atoms atom-list)
 "
   most-weighted-atoms ATOM-LIST
@@ -59,12 +42,12 @@
   However, the algorithm is a bit opaque, and seems to be inefficient.
   Surely, there is a better way.
 
-  XXX FIXME: if teh goal is a siderted list, then a better name is
+  XXX FIXME: if teh goal is a sorted list, then a better name is
   possible: e.g. sort-by-weight, or something like that.
 "
     (define (weight x)
         (let ((rule-stv (cog-tv x))
-              (context-stv (satisfaction-level x)))
+              (context-stv (psi-rule-satisfiability x)))
             (* (tv-conf rule-stv) (tv-mean rule-stv)
                (tv-conf context-stv) (tv-conf context-stv))))
 

@@ -346,6 +346,24 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 (define (is-satisfiable? RULE)
     (equal? (stv 1 1) (psi-satisfiable? RULE))
 )
+
+(define-public (psi-rule-satisfiability rule)
+"
+  psi-rule-satisfiability RULE
+
+  Given the RULE, return the probability that the RULE can be satisfied.
+  XXX Except this doesn't return a probability, it just returns TRUE_TV
+  or FALSE_TV.
+  XXX fixme - this replaces psi-satsifiable?
+"
+; NOTE
+; 1. See https://github.com/opencog/atomspace/issues/823 for why
+;   psi-satisfiable? is used
+; 2. Should a context evaluator be added here?????
+; 3. What is the "right" way of communicating the level of information.
+    (satisfiable? rule)
+)
+
 ; --------------------------------------------------------------
 (define-public (psi-get-satisfiable-rules demand-node)
 "
