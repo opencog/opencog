@@ -24,16 +24,14 @@
 
 ; --------------------------------------------------------------
 ; A cache of the demands, used to improve performance.
-(define psi-valid-demand-cache '())
+(define psi-demand-cache '())
 
 ; --------------------------------------------------------------
-(define-public (psi-reset-valid-demand-cache)
-"
-  Reset the cache for psi-demand-cache.
-"
-    (set! psi-valid-demand-cache '())
+; reset the cache
+(define (reset-demand-cache)
+    (set! psi-demand-cache '())
 )
-; --------------------------------------------------------------
+
 ; --------------------------------------------------------------
 (define-public (psi-get-all-demands)
 "
@@ -54,16 +52,13 @@
   can be disabled by adding it, as a member, to the set defined by
   (ConceptNode \"OpenPsi: skip\").
 "
-    (if (null? psi-valid-demand-cache)
-        (begin
-            (set! psi-valid-demand-cache
-                (filter (lambda (x) (not (psi-demand-skip? x)))
-                    (psi-get-all-demands))
-            )
-            psi-valid-demand-cache
+    (if (null? psi-demand-cache)
+        (set! psi-demand-cache
+            (filter (lambda (x) (not (psi-demand-skip? x)))
+                (psi-get-all-demands))
         )
-        psi-valid-demand-cache
     )
+    psi-demand-cache
 )
 
 ; Backwards-compat wrapper
@@ -320,11 +315,10 @@
 ; --------------------------------------------------------------
 (define-public (psi-demand-skip demand)
 "
-  This is used to label a demand as one to be skipped during action-selection.
+  psi-demand-skip DEMAND - Disable DEMAND.
 
-  demand:
-  - A ConceptNode, representing a demand that should be skipped during
-   action-selection.
+  Use this to disable the DEMAND from being considered during action
+  selection.  The DEMAND should be a valid demand node.
 "
     ; Check arguments
     (if (not (psi-demand? demand))
@@ -332,6 +326,7 @@
             "argument to be a node representing a demand, got:") demand))
 
     (MemberLink demand psi-label-skip)
+    (reset-demand-cache)
 )
 
 ; --------------------------------------------------------------
@@ -358,6 +353,6 @@
             "argument to be a node representing a demand, got:") demand))
 
     (let ((candidates (get-skipped-demands)))
-        (if (member demand candidates) #t #f)
+        (member demand candidates)
     )
 )
