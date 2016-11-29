@@ -1,4 +1,4 @@
-SOURCE_DIR=$1
+BUILD_DIR=$1
 
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/lib/opencog"
 
@@ -12,4 +12,4 @@ LIB=$(find . -name "*$libname*.so" | awk 'NR==1')
 
 patchelf --set-soname "lib$libname-$libver.so" $LIB
 
-cp $LIB "$SOURCE_DIR/lib$libname-$libver.so"
+cp $LIB "$BUILD_DIR/lib$libname-$libver.so"
