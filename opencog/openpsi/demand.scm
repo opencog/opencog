@@ -14,6 +14,7 @@
 ; demand using a protoatom.
 
 (use-modules (rnrs sorting)) ; For sorting demands by their values.
+(use-modules (srfi srfi-1)) ; for `lset-difference`
 
 (use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
 
@@ -28,8 +29,32 @@
 
 ; --------------------------------------------------------------
 ; reset the cache
-(define (reset-demand-cache)
+(define (clear-demand-cache)
     (set! psi-demand-cache '())
+)
+
+(define (make-demand-cache)
+
+    ; Get the set of demands that are currently disabled.
+    (define skip-set
+        (cog-execute!
+            (GetLink
+                (TypedVariableLink
+                    (VariableNode "demand")
+                    (TypeNode "ConceptNode"))
+                (AndLink
+                    (InheritanceLink (VariableNode "demand") psi-demand-node)
+                    (MemberLink (VariableNode "demand") psi-label-skip)))
+        ))
+
+    ; Compute the list of enabled deamnds, and cache it.
+    (set! psi-demand-cache
+        (lset-difference! eq? (psi-get-all-demands)
+            (cog-outgoing-set skip-set))
+    )
+
+    ; Delete the SetLink, so it does not pollute the atomspace.
+    (cog-delete! skip-set)
 )
 
 ; --------------------------------------------------------------
@@ -48,12 +73,7 @@
 "
   psi-get-all-enabled-demands - Return list of all demands that are enabled.
 "
-    (if (null? psi-demand-cache)
-        (set! psi-demand-cache
-            (filter (lambda (x) (not (psi-demand-skip? x)))
-                (psi-get-all-demands))
-        )
-    )
+    (if (null? psi-demand-cache) (make-demand-cache))
     psi-demand-cache
 )
 
@@ -322,7 +342,7 @@
             "argument to be a node representing a demand, got:") demand))
 
     (MemberLink demand psi-label-skip)
-    (reset-demand-cache)
+    (clear-demand-cache)
 )
 
 ; --------------------------------------------------------------
@@ -330,23 +350,10 @@
 "
   psi-demand-skip? DEMAND - return #t if DEMAND should be skipped.
 "
-    (define (get-skipped-demands)
-        (cog-outgoing-set (cog-execute!
-            (GetLink
-                (TypedVariableLink
-                    (VariableNode "demand")
-                    (TypeNode "ConceptNode"))
-                (AndLink
-                    (InheritanceLink (VariableNode "demand") psi-demand-node)
-                    (MemberLink (VariableNode "demand") psi-label-skip)))
-        )))
-
     ; Check arguments
     (if (not (psi-demand? demand))
         (error (string-append "In procedure psi-demand-skip?, expected "
             "argument to be a node representing a demand, got:") demand))
 
-    (let ((candidates (get-skipped-demands)))
-        (member demand candidates)
-    )
+    (not (member demand (psi-get-all-enabled-demands)))
 )
