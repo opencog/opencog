@@ -291,6 +291,8 @@ class EvaControl():
 
 	def push_parameter_update(self):
 		if self.update_parameters and not rospy.is_shutdown():
+			if self.client is None:
+				return
 			self.client.update_configuration(self.param_dict)
 			self.update_parameters = False
 
@@ -458,7 +460,10 @@ class EvaControl():
 		self.update_parameters = False
 
 		# For web ui based control of openpsi contorled-psi-rules
-		self.client = dynamic_reconfigure.client.Client("/opencog_control")
+		try:
+			self.client = dynamic_reconfigure.client.Client("/opencog_control", timeout=2)
+		except Exception:
+			self.client = None
 
 		# ----------------
 		# Get the available animations
