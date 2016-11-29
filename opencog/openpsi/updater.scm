@@ -744,10 +744,12 @@
     (define (append-var-value varname)
         (define value)
         (define var-node (Concept (string-append psi-prefix-str varname)))
-        (if (psi-is-sec? var-node)
-            ; for SEC's, we want the value of the agent state for that SEC
-            (set! var-node (List
-                (ConceptNode "OpenPsi: agent-state") var-node)))
+        ; For now assuming sec alone represents the agent state, but can add
+        ; code directly below if this gets changed.
+        ;(if (psi-is-sec? var-node)
+        ;    ; for SEC's, we want the value of the agent state for that SEC
+        ;    (set! var-node (List
+        ;        (ConceptNode "OpenPsi: agent-state") var-node)))
         (set! value (psi-get-number-value var-node))
         ; If value is not set (iow, equal to #f), set it to null for javascript
         ; compatibility.
@@ -795,7 +797,7 @@
 ;(define r1 speech->power)
 ;(define r2 power->voice)
 (define value psi-get-number-value)
-(define rules (psi-get-interaction-rules))
+(define rules psi-get-interaction-rules)
 
 (define (psi-decrease-value target)
 	(psi-set-value! target

@@ -51,6 +51,7 @@
 (define resolution-level (psi-create-modulator "resolution-level" .5))
 (define selection-threshold (psi-create-modulator "selection-threshold" .5))
 (define securing-threshold (psi-create-modulator "securing-threshold" .5))
+(define goal-directedness (psi-create-modulator "goal-directedness" .5))
 
 
 ; -------------------------------------------------------------

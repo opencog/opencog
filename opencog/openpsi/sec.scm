@@ -14,7 +14,7 @@
 
 (define psi-sec-node (Concept (string-append psi-prefix-str "SEC")))
 
-(define-public (psi-create-sec name)
+(define-public (psi-create-sec name initial-value)
 "
 	Create a new SEC
 
@@ -25,6 +25,8 @@
     (Inheritance
         sec
         psi-sec-node)
+    (psi-set-value! sec initial-value)
+
 
     ; For now, assuming the sec alone represents the overall system/agent state,
     ; for consi1stency with psi var representations. Code below can be used if we
@@ -80,16 +82,16 @@
 
 ;(for-each (lambda (sec) (psi-create-sec sec)) secs)
 
-(define novelty (psi-create-sec "novelty"))
-(define goal-relevance (psi-create-sec "goal-relevance"))
-(define pleasantness (psi-create-sec "pleasantness"))
-(define outcome-probability (psi-create-sec "outcome-probability"))
-(define surprise (psi-create-sec "surprise"))
-(define agent-and-intention (psi-create-sec "agent-and-intention"))
-(define control (psi-create-sec "control"))
-(define power (psi-create-sec "power"))
-(define adjustment (psi-create-sec "adjustment"))
-(define standards (psi-create-sec "standards"))
+(define novelty (psi-create-sec "novelty" agent-state-sec-init-value))
+(define goal-relevance (psi-create-sec "goal-relevance" agent-state-sec-init-value))
+(define pleasantness (psi-create-sec "pleasantness" agent-state-sec-init-value))
+(define outcome-probability (psi-create-sec "outcome-probability" agent-state-sec-init-value))
+(define surprise (psi-create-sec "surprise" agent-state-sec-init-value))
+(define agent-and-intention (psi-create-sec "agent-and-intention" agent-state-sec-init-value))
+(define control (psi-create-sec "control" agent-state-sec-init-value))
+(define power (psi-create-sec "power" agent-state-sec-init-value))
+(define adjustment (psi-create-sec "adjustment" agent-state-sec-init-value))
+(define standards (psi-create-sec "standards" agent-state-sec-init-value))
 
 ; Temp for development, until this assignment happens in the create function
 ; Create Stimulus-SEC Associations
