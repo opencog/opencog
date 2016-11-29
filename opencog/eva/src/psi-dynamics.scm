@@ -8,10 +8,12 @@
 ; needed for nlp parsing
 (use-modules (opencog nlp) (opencog nlp chatbot) (opencog nlp chatbot-psi))
 
+(add-to-load-path "/usr/local/share/opencog/scm/opencog/eva-model")
+
 (load "express.scm") ; For random pos and neg expressions
-(load "faces.scm")
-(load "self-model.scm") ; For soma-state def
-(load "orchestrate.scm") ; For DefinedPredicate "Show expression"
+(load-from-path "faces.scm")
+(load-from-path "self-model.scm") ; For soma-state def
+(load-from-path "orchestrate.scm") ; For DefinedPredicate "Show expression"
 
 ; Param setting
 (define valence-activation-level .5)
@@ -197,6 +199,15 @@
 
 (define power->arousal
 	(psi-create-interaction-rule power changed arousal .3))
+
+; arousal decreases resolution
+(psi-create-interaciton-rule arousal changed resolution-level .5)
+
+; arousal increases goal directedness
+(psi-create-interaciton-rule arousal changed goal-directedness .5)
+
+
+
 
 ;-----------------------
 ; Event-based triggers
