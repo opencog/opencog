@@ -46,11 +46,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-get-all-enabled-demands)
 "
-  psi-get-all-enabled-demands -
-
-  Return a list of all demands that are currently enabled. A demand
-  can be disabled by adding it, as a member, to the set defined by
-  (ConceptNode \"OpenPsi: skip\").
+  psi-get-all-enabled-demands - Return list of all demands that are enabled.
 "
     (if (null? psi-demand-cache)
         (set! psi-demand-cache
@@ -332,9 +328,7 @@
 ; --------------------------------------------------------------
 (define-public (psi-demand-skip? demand)
 "
-  Check if the passed atom is skippable demand and return `#t`, if it is,
-  and `#f` otherwise. An atom is an skippable if it a member of the set
-  represented by (ConceptNode \"OpenPsi: skip\").
+  psi-demand-skip? DEMAND - return #t if DEMAND should be skipped.
 "
     (define (get-skipped-demands)
         (cog-outgoing-set (cog-execute!
