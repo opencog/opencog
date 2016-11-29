@@ -201,10 +201,10 @@
 	(psi-create-interaction-rule power changed arousal .3))
 
 ; arousal decreases resolution
-(psi-create-interaciton-rule arousal changed resolution-level .5)
+(psi-create-interaction-rule arousal changed resolution-level .5)
 
 ; arousal increases goal directedness
-(psi-create-interaciton-rule arousal changed goal-directedness .5)
+(psi-create-interaction-rule arousal changed goal-directedness .5)
 
 
 
