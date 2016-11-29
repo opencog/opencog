@@ -14,9 +14,9 @@
 ; applicable, and the action is taken, then the goal is fulfilled.
 ;
 ; The context is meant to be one or more EvaluationLinks (or boolean
-; combinations thereof).  If these evaluate to ture, then the action
+; combinations thereof).  If these evaluate to true, then the action
 ; will be taken.  The action must also be of the form of a predicate,
-; (that is, myst be an EvaluationLink, or a b oolean combination
+; (that is, myst be an EvaluationLink, or a boolean combination
 ; thereof).  If the action also evaluates to true, then the goal is
 ; considered to be fulfilled.
 
@@ -76,7 +76,7 @@
 )
 
 
-; Single-step the psi rule-selection engine.
+; Single-step the psi rule-selection engine `n` times.
 ; This will print a message, single-step the psi rule engine, and
 ; then sleep for three seconds.  The loop repeats until the loop count
 ; reaches zero.
