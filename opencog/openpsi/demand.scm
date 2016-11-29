@@ -54,7 +54,7 @@
     )
 
     ; Delete the SetLink, so it does not pollute the atomspace.
-    (cog-delete! skip-set)
+    (cog-delete skip-set)
 )
 
 ; --------------------------------------------------------------
