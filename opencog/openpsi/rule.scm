@@ -318,29 +318,28 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ; --------------------------------------------------------------
 (define-public (psi-satisfiable? rule)
 "
-  psi-satisfiable? RULE
+  psi-satisfiable? RULE - Return a TV indicating if the context of
+  the RULE is satisfiable.
 
-  Determine if the context of the RULE is satisfiable, based on the
-  current AtomSpace contents.  Satisfaction is determined by trying
-  to ground RULE
-  atomspace return TRUE_TV if it is, else return
-  FALSE_TV. A rule is satisfiable when it's context contains variables,
-  and that context can be grounded in the atompace (i.e. if the context
-  is satisfiable in using a SatisfactionLink.)
+  Satisfaction is determined by evaluating the context part of the
+  rule. If the context requires grounding in the atomspace, then
+  this is performed. That is, if the context contains variables
+  that require grounding, then this is performed; if the context is
+  not groundable, then the rule is not satisfiable.
 
-  The idea is only valid when ranking of context grounding isn't considered.
-  This is being replaced.  Huh??? What does this mean?
+  The current implementation returns TRUE_TV if the context is
+  satisfiable, else it returns FALSE_TV. A later design point
+  is to have a weighted, probabilistic value to be returned.
 "
-    (define gnded-pat (SatisfactionLink (AndLink (psi-get-context rule))))
+    (define result (cog-evaluate!
+        (SatisfactionLink (AndLink (psi-get-context rule)))))
 
     ; NOTE: stv are choosen as the return values so as to make the function
     ; usable in evaluatable-terms.
-    (let* ((result (cog-evaluate! gnded-pat)))
+    (set! psi-satisfiablity-alist
+        (assoc-set! psi-satisfiablity-alist rule result))
 
-        (set! psi-satisfiablity-alist
-            (assoc-set! psi-satisfiablity-alist rule result))
-        result
-    )
+    result
 )
 
 ; Utility wrapper for above; returns crisp #t or #f
