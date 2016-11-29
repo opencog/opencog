@@ -3,7 +3,7 @@ ADD_SUBDIRECTORY (CWrapper)
 # ----------------------------------------
 # Lojban cogserver module
 
-LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/opencog/nlp/lojban/CWrapper/)
+LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/CWrapper/)
 
 ADD_LIBRARY (LojbanModule SHARED
     LojbanModule
