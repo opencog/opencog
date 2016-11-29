@@ -49,7 +49,7 @@
 
     ; Compute the list of enabled deamnds, and cache it.
     (set! psi-demand-cache
-        (lset-difference! eq? (psi-get-all-demands)
+        (lset-difference! equal? (psi-get-all-demands)
             (cog-outgoing-set skip-set))
     )
 
