@@ -289,8 +289,10 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 "
     ;; XXX this is not an efficient way of searching for goals.  If
     ;; this method is used a lot, we should search for the goals directly.
-    (let* ((and-links (cog-filter 'SequentialAndLink (cog-incoming-set action)))
-           (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
+    (let* ((and-links (cog-incoming-by-type action 'SequentialAndLink))
+           (rules (filter psi-rule?  (append-map
+                    (lambda (sand) (cog-incoming-by-type sand 'ImplicationLink))
+                  and-links))))
            (delete-duplicates (map psi-get-goal rules))
     )
 )
