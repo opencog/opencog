@@ -156,6 +156,57 @@
 )
 
 ; --------------------------------------------------------------
+
+(define (sort-by-weight RULE-LIST WEIGHT-FN)
+"
+  sort-by-weight RULE-LIST WEIGHT-FN
+
+  Take RULE-LIST and sort it, according to the weights assigned by
+  the WEIGHT-FN.
+"
+    ; Return #t if the weight of rule RA is less than the weight of RB
+    (define (rule-less RA RB)
+        (> (WEIGHT-FN RA) (WEIGHT-FN RB)))
+
+    (sort! RULE-LIST rule-less)
+)
+
+; --------------------------------------------------------------
+(define-public (most-weighted-atoms RULE-LIST)
+"
+  most-weighted-atoms RULE-LIST
+
+  Return a list of atoms with the highest weight. Any duplicate atoms
+  in the list are removed.
+  The weight of an atom is the product of the stength and confidence
+  of the atom.
+"
+    ; Compute the weight of RULE
+    (define (rule-weight RULE)
+        (let ((rule-stv (cog-tv RULE))
+              (context-stv (psi-rule-satisfiability RULE)))
+            (* (tv-conf rule-stv) (tv-mean rule-stv)
+               (tv-conf context-stv) (tv-conf context-stv))))
+
+    (sort-by-weight RULE-LIST rule-weight)
+)
+
+; --------------------------------------------------------------
+(define-public (most-important-weighted-atoms RULE-LIST)
+"
+  most-important-weighted-atoms RULE-LIST
+
+  Sort the RULE-LIST according to a weight given by attention-value
+  times truth-value.
+"
+    (define (rule-weight RULE)
+        (let ((a-stv (cog-tv RULE))
+              (sti (assoc-ref (cog-av->alist (cog-av RULE)) 'sti)))
+            (* (tv-conf a-stv) (tv-mean a-stv) sti)))
+
+    (sort-by-weight RULE-LIST rule-weight)
+)
+; --------------------------------------------------------------
 (define (default-per-demand-action-selector demand)
 "
   Return a list containing a single psi-rule, the one psi-rule that has
