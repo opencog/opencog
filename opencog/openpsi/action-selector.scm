@@ -179,9 +179,14 @@
 ; --------------------------------------------------------------
 (define (default-per-demand-action-selector demand)
 "
-  Return a list containing a single psi-rule, the one psi-rule that has
-  the highest weight and is also satisfiable.  If a satisfiable rule
-  doesn't exist, then the empty list is returned.
+  default-per-demand-action-selector DEMAND
+
+  Return a list containing zero or more psi-rules that can satisfy
+  the DEMAND.  Zero rules are returned only if there are no rules
+  that can satisfy the demand.  Usually, only one rule is returned;
+  it is choosen randomly from the set of rules that could satsify
+  the demand. The choice function is weighted, so that the most
+  heavily-weighted rule is the one most likely to eb chosen.
 "
     ; The weighting function we will use here.
     (define weighting-func rule-sc-weight)
