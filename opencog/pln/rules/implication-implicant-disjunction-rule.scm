@@ -47,7 +47,7 @@
 
 (define (implication-implicant-disjunction-formula premises ABC)
   (let* ((AC (gar premises))
-         (BC (cdr premises)))
+         (BC (gdr premises)))
     (cog-set-tv! ABC
                  (implication-implicant-disjunction-side-effect-free-formula AC BC))))
 
