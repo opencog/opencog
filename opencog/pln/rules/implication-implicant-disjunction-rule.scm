@@ -16,53 +16,40 @@
 ;;----------------------------------------------------------------------
 
 (define implication-implicant-disjunction-rule
+  (let* ((A (VariableNode "$A"))
+         (B (VariableNode "$B"))
+         (C (VariableNode "$C"))
+         (AC (ImplicationLink A C))
+         (BC (ImplicationLink B C))
+         (PredicateT (TypeNode "PredicateNode")))
   (BindLink
-     (VariableList
-        (TypedVariableLink
-           (VariableNode "$A")
-           (TypeNode "PredicateNode"))
-        (TypedVariableLink
-           (VariableNode "$B")
-           (TypeNode "PredicateNode"))
-        (TypedVariableLink
-           (VariableNode "$C")
-           (TypeNode "PredicateNode"))
-     )
-     (AndLink
-        (ImplicationLink
-           (VariableNode "$A")
-           (VariableNode "$C")
-        )
-        (ImplicationLink
-           (VariableNode "$B")
-           (VariableNode "$C")
-        )
-        (NotLink (EqualLink (VariableNode "$A") (VariableNode "$B")))
-        ;; (NotLink (ImplicationLink (VariableNode "$A") (VariableNode "$B")))
-        ;; (NotLink (ImplicationLink (VariableNode "$B") (VariableNode "$A")))
-     )
-     (ExecutionOutputLink
-        (GroundedSchemaNode "scm: implication-implicant-disjunction-formula")
-        (ListLink
-           (ImplicationLink
-              (VariableNode "$A")
-              (VariableNode "$C")
-           )
-           (ImplicationLink
-              (VariableNode "$B")
-              (VariableNode "$C")
-           )
-           (ImplicationLink
-              (OrLink
-                 (VariableNode "$A")
-                 (VariableNode "$B")
-              )
-              (VariableNode "$C"))))))
+    (VariableList
+      (TypedVariableLink A PredicateT)
+      (TypedVariableLink B PredicateT)
+      (TypedVariableLink C PredicateT))
+    (AndLink
+      AC
+      BC
+      ;; (NotLink (ImplicationLink A B))
+      ;; (NotLink (ImplicationLink B A))
+      (NotLink (IdenticalLink A B)))
+    (ExecutionOutputLink
+      (GroundedSchemaNode "scm: implication-implicant-disjunction-formula")
+       (ListLink
+         ;; Premises, wrapped in a SetLink cause they are unordered
+         (SetLink
+           AC
+           BC)
+         ;; Conclusion
+         (ImplicationLink
+           (OrLink A B)
+           C))))))
 
-(define (implication-implicant-disjunction-formula AC BC ABC)
-  (cog-set-tv! ABC
-   (implication-implicant-disjunction-side-effect-free-formula AC BC))
-)
+(define (implication-implicant-disjunction-formula premises ABC)
+  (let* ((AC (gar premises))
+         (BC (cdr premises)))
+    (cog-set-tv! ABC
+                 (implication-implicant-disjunction-side-effect-free-formula AC BC))))
 
 ;; Computing the strength is based on
 ;;
