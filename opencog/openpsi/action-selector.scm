@@ -119,10 +119,9 @@
 ;; "
 ;;     (define (choose-rules)
 ;;         ; NOTE: This check is required as ecan isn't being used continuesely.
-;;         ; Remove `most-weighted-atoms` version once ecan is integrated.
 ;;         (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
-;;             (most-weighted-atoms (psi-get-all-satisfiable-rules))
-;;             (most-important-weighted-atoms (psi-get-all-satisfiable-rules))
+;;             (sort-by-weight (psi-get-all-satisfiable-rules) rule-sc-weight)
+;;             (sort-by-weight (psi-get-all-satisfiable-rules) rule-sa-weight)
 ;;         )
 ;;     )
 ;;
@@ -157,55 +156,28 @@
 
 ; --------------------------------------------------------------
 
+; Sort RULE-LIST, according to the weights assigned by the WEIGHT-FN.
 (define (sort-by-weight RULE-LIST WEIGHT-FN)
-"
-  sort-by-weight RULE-LIST WEIGHT-FN
 
-  Take RULE-LIST and sort it, according to the weights assigned by
-  the WEIGHT-FN.
-"
-    ; Return #t if the weight of rule RA is less than the weight of RB
-    (define (rule-less RA RB)
-        (> (WEIGHT-FN RA) (WEIGHT-FN RB)))
-
-    (sort! RULE-LIST rule-less)
+    (sort! RULE-LIST (lambda (RA RB)
+        (> (WEIGHT-FN RA) (WEIGHT-FN RB))))
 )
 
 ; --------------------------------------------------------------
-(define-public (most-weighted-atoms RULE-LIST)
-"
-  most-weighted-atoms RULE-LIST
+; Compute the weight of RULE, as product of strength times confidence.
+(define (rule-sc-weight RULE)
+    (let ((rule-stv (cog-tv RULE))
+          (context-stv (psi-rule-satisfiability RULE)))
+        (* (tv-conf rule-stv) (tv-mean rule-stv)
+           (tv-conf context-stv) (tv-conf context-stv))))
 
-  Return a list of atoms with the highest weight. Any duplicate atoms
-  in the list are removed.
-  The weight of an atom is the product of the stength and confidence
-  of the atom.
-"
-    ; Compute the weight of RULE
-    (define (rule-weight RULE)
-        (let ((rule-stv (cog-tv RULE))
-              (context-stv (psi-rule-satisfiability RULE)))
-            (* (tv-conf rule-stv) (tv-mean rule-stv)
-               (tv-conf context-stv) (tv-conf context-stv))))
+; Compute the weight of RULE, as product of strength times
+; confidence times attention-value.
+(define (rule-sa-weight RULE)
+    (let ((a-stv (cog-tv RULE))
+          (sti (assoc-ref (cog-av->alist (cog-av RULE)) 'sti)))
+        (* (tv-conf a-stv) (tv-mean a-stv) sti)))
 
-    (sort-by-weight RULE-LIST rule-weight)
-)
-
-; --------------------------------------------------------------
-(define-public (most-important-weighted-atoms RULE-LIST)
-"
-  most-important-weighted-atoms RULE-LIST
-
-  Sort the RULE-LIST according to a weight given by attention-value
-  times truth-value.
-"
-    (define (rule-weight RULE)
-        (let ((a-stv (cog-tv RULE))
-              (sti (assoc-ref (cog-av->alist (cog-av RULE)) 'sti)))
-            (* (tv-conf a-stv) (tv-mean a-stv) sti)))
-
-    (sort-by-weight RULE-LIST rule-weight)
-)
 ; --------------------------------------------------------------
 (define (default-per-demand-action-selector demand)
 "
@@ -218,7 +190,9 @@
     ; ECAN subsystem should use the psi-set-action-selector function
     ; above, and define a custom selector, as desired.
     (define (choose-rules)
-        (most-weighted-atoms (psi-get-weighted-satisfiable-rules demand))
+        (sort-by-weight
+              (psi-get-weighted-satisfiable-rules demand)
+              rule-sc-weight)
     )
 
     (let ((rules (choose-rules)))
