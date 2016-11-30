@@ -7,7 +7,7 @@ ADD_GUILE_MODULE(
 	and-simplification-rule.scm
 	deduction-rule.scm
 	equivalence-scope-distribution-rule.scm
-	equivalence-to-double-implication-rule.scm
+	equivalence-to-implication-rule.scm
 	formulas.scm
 	implication-and-lambda-factorization-rule.scm
 	implication-implicant-conjunction-rule.scm

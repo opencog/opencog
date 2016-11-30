@@ -548,7 +548,7 @@
 (cog-bind equivalence-scope-distribution-rule)
 
 ;; (14) Infer that if X is funny, then X is amusing. Apply the
-;; equivalence-to-double-implication-rule on (13).
+;; equivalence-to-implication-rule on (13).
 ;;
 ;; Result should be:
 ;;
