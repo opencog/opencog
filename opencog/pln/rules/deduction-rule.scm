@@ -25,21 +25,21 @@
 
 ;; Generate the corresponding deduction rule given its link-type.
 (define (gen-deduction-rule link-type)
-  (let* ((A (VariableNode "$A"))
-         (B (VariableNode "$B"))
-         (C (VariableNode "$C"))
+  (let* ((A (Variable "$A"))
+         (B (Variable "$B"))
+         (C (Variable "$C"))
          (AB (link-type A B))
          (BC (link-type B C))
-         (AC (link-type B C)))
-    (BindLink
+         (AC (link-type A C)))
+    (Bind
       (VariableList A B C)
-      (AndLink
+      (And
         AB
         BC
-        (NotLink (IdenticalLink A C)))
-      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: deduction-formula")
-          (ListLink
+        (Not (Identical A C)))
+      (ExecutionOutput
+        (GroundedSchema "scm: deduction-formula")
+          (List
             ;; Premises
             AB
             BC
