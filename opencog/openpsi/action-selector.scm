@@ -183,23 +183,47 @@
   the highest weight and is also satisfiable.  If a satisfiable rule
   doesn't exist, then the empty list is returned.
 "
-    ; This function does NOT examine the attention value, nor does it
-    ; use ECAN in any way. And it shouldn't.  The attention-value and
-    ; ECAN subsystem should use the psi-set-action-selector function
-    ; above, and define a custom selector, as desired.
-    (define rules
+    ; The weighting function we will use here.
+    (define weighting-func rule-sc-weight)
+
+    ; Create a list of rules sorted by weight.
+    (define sorted-rules
         (sort-by-weight
               (psi-get-weighted-satisfiable-rules demand)
-              rule-sc-weight)
+              weighting-func)
     )
 
+    ; Function to sum up the total weights on  the rule list.
+    (define (accum-weight rule-list)
+        (if (null? rule-list) 0.0
+            (+ (weighting-func (car rule-list))
+                 (accum-weight (cdr rule-list)))))
+
+    ; The total weight of the rule-list.
+    (define total-weight (accum-weight sorted-rules))
+
+    ; Pick a number from 0.0 to total-weight
+    (define cutoff (* total-weight (random:uniform)))
+
+    (define (pick-rule accw rule-list)
+        ; Accumulate the weights.
+        (define sum (+ accw (weighting-func (car rule-list))))
+
+        ; If we are past the cutoff, then we are done.
+        ; Else recurse, accumulating the weights.
+        (if (<= cutoff sum)
+            (car rule-list)
+            (pick-rule sum (cdr rule-list))))
+
     (cond
-        ((null? rules) '())
-        ((equal? (tv-mean (cog-tv (car rules))) 0.0) '())
-        (else
-            (list (list-ref rules
-                (random (length rules)))))
-    )
+        ; If the list is empty, we can't do anything.
+        ((null? sorted-rules) '())
+
+        ; If there's only one rule in the list, return it.
+        ((null? (cdr sorted-rules)) sorted-rules)
+
+        ; Else randomly pick among the most-weighted rules.
+        (else (list (pick-rule 0.0 sorted-rules))))
 )
 
 ; --------------------------------------------------------------
