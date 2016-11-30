@@ -165,7 +165,7 @@
     ; This function does NOT examine the attention value, nor does it
     ; use ECAN in any way. And it shouldn't.  The attention-value and
     ; ECAN subsystem should use the psi-set-action-selector function
-    ; above, and define a customer selector, as desired.
+    ; above, and define a custom selector, as desired.
     (define (choose-rules)
         (most-weighted-atoms (psi-get-weighted-satisfiable-rules demand))
     )
