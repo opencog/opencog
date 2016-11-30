@@ -137,6 +137,8 @@ void PLNRulesUTest::test_deduction()
 	// instances of men are also humans (Socrates, Einstein, and Peirce)
 	results = eval.eval_h("(cog-bind find-humans)");
 
+	logger().debug() << "results = " << results;
+
 	// 4 in total, man, Peirce, Einstein, Socrates
 	TS_ASSERT_EQUALS(4, getarity(results));
 }
