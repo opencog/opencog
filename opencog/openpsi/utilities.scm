@@ -31,6 +31,21 @@
 )
 
 ; --------------------------------------------------------------
+(define (sort-by-weight RULE-LIST WEIGHT-FN)
+"
+  sort-by-weight RULE-LIST WEIGHT-FN
+
+  Take RULE-LIST and sort it, according to the weights assigned by
+  the WEIGHT-FN.
+"
+    ; Return #t if the weight of rule RA is less than the weight of RB
+    (define (rule-less RA RB)
+        (> (WEIGHT-FN RA) (WEIGHT-FN RB)))
+
+    (sort! RULE-LIST rule-less)
+)
+
+; --------------------------------------------------------------
 (define-public (most-weighted-atoms RULE-LIST)
 "
   most-weighted-atoms RULE-LIST
@@ -47,36 +62,23 @@
             (* (tv-conf rule-stv) (tv-mean rule-stv)
                (tv-conf context-stv) (tv-conf context-stv))))
 
-    ; Return #t if the weight of rule RA is less than the weight of RB
-    (define (rule-less RA RB)
-        (> (rule-weight RA) (rule-weight RB)))
-
-    (sort RULE-LIST rule-less)
+    (sort-by-weight RULE-LIST rule-weight)
 )
 
 ; --------------------------------------------------------------
-(define-public (most-important-weighted-atoms atom-list)
+(define-public (most-important-weighted-atoms RULE-LIST)
 "
-  most-important-weighted-atoms ATOMs-LIST
+  most-important-weighted-atoms RULE-LIST
 
-  Return a list atoms sorted according to attention-value times
-  truth-value weight.
+  Sort the RULE-LIST according to a weight given by attention-value
+  times truth-value.
 "
-    (define (weight x)
-        (let ((a-stv (cog-tv x))
-              (sti (assoc-ref (cog-av->alist (cog-av x)) 'sti)))
+    (define (rule-weight RULE)
+        (let ((a-stv (cog-tv RULE))
+              (sti (assoc-ref (cog-av->alist (cog-av RULE)) 'sti)))
             (* (tv-conf a-stv) (tv-mean a-stv) sti)))
 
-    (define (pick atom lst) ; prev is a `lst` and next `atom`
-        (cond
-            ((> (weight (car lst)) (weight atom)) lst)
-            ((= (weight (car lst)) (weight atom)) (append lst (list atom)))
-            (else (list atom))))
-
-    (if (null? atom-list)
-        '()
-        (delete-duplicates (fold pick (list (car atom-list)) atom-list))
-    )
+    (sort-by-weight RULE-LIST rule-weight)
 )
 
 ; --------------------------------------------------------------
