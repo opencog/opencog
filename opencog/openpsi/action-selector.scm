@@ -117,18 +117,16 @@
 ;;   Return highest--weighted psi-rule that is also satisfiable.
 ;;   If a satisfiable rule doesn't exist then the empty list is returned.
 ;; "
-;;     (define rules
-;;         ; NOTE: This check is required as ecan isn't being used continuesely.
+;;     (define (rule-weight RULE)
 ;;         (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
-;;             (sort-by-weight (psi-get-all-satisfiable-rules) rule-sc-weight)
-;;             (sort-by-weight (psi-get-all-satisfiable-rules) rule-sa-weight)
+;;             (rule-sc-weight RULE)
+;;             (rule-sa-weight RULE)
 ;;         )
 ;;     )
 ;;
-;;     (if (null? rules)
-;;         '()
-;;         (list (list-ref rules (random (length rules))))
-;;     )
+;;    (pick-from-weighted-list
+;;        (psi-get-all-satisfiable-rules)
+;;        rule-weight)
 ;; )
 ;;
 ; ----------------------------------------------------------------------
@@ -177,48 +175,43 @@
         (* (tv-conf a-stv) (tv-mean a-stv) sti)))
 
 ; --------------------------------------------------------------
-(define (default-per-demand-action-selector demand)
+(define (pick-from-weighted-list ALIST WEIGHT-FUNC)
 "
-  default-per-demand-action-selector DEMAND
+  pick-from-weighted-list ALIST WEIGHT-FUNC
 
-  Return a list containing zero or more psi-rules that can satisfy
-  the DEMAND.  Zero rules are returned only if there are no rules
-  that can satisfy the demand.  Usually, only one rule is returned;
-  it is choosen randomly from the set of rules that could satsify
-  the demand. The choice function is weighted, so that the most
-  heavily-weighted rule is the one most likely to eb chosen.
+  Return a list containing an item picked from ALIST, based
+  on the WEIGHT-FUNC. If ALIST is empty, then return the empty
+  list. If ALIST is not empty, then randomly select from the list,
+  with the most heavily weighted item being the most likely to be
+  picked.  The random distribution is the uniform weighted interval
+  distribution.
 "
-    ; The weighting function we will use here.
-    (define weighting-func rule-sc-weight)
-
     ; Create a list of rules sorted by weight.
-    (define sorted-rules
-        (sort-by-weight
-              (psi-get-weighted-satisfiable-rules demand)
-              weighting-func)
-    )
+    (define sorted-rules (sort-by-weight ALIST WEIGHT-FUNC))
 
-    ; Function to sum up the total weights on  the rule list.
+    ; Function to sum up the total weights in the list.
     (define (accum-weight rule-list)
         (if (null? rule-list) 0.0
-            (+ (weighting-func (car rule-list))
+            (+ (WEIGHT-FUNC (car rule-list))
                  (accum-weight (cdr rule-list)))))
 
     ; The total weight of the rule-list.
     (define total-weight (accum-weight sorted-rules))
 
-    ; Pick a number from 0.0 to total-weight
+    ; Pick a number from 0.0 to total-weight.
     (define cutoff (* total-weight (random:uniform)))
 
-    (define (pick-rule accw rule-list)
-        ; Accumulate the weights.
-        (define sum (+ accw (weighting-func (car rule-list))))
+    ; Recursively move through the list of rules, until the
+    ; sum of the weights of the rules exceeds the cutoff.
+    (define (pick-rule wcut rule-list)
+        ; Subtract weight of the first rule.
+        (define ncut (- wcut (WEIGHT-FUNC (car rule-list))))
 
         ; If we are past the cutoff, then we are done.
         ; Else recurse, accumulating the weights.
-        (if (<= cutoff sum)
+        (if (<= ncut 0.0)
             (car rule-list)
-            (pick-rule sum (cdr rule-list))))
+            (pick-rule ncut (cdr rule-list))))
 
     (cond
         ; If the list is empty, we can't do anything.
@@ -228,7 +221,23 @@
         ((null? (cdr sorted-rules)) sorted-rules)
 
         ; Else randomly pick among the most-weighted rules.
-        (else (list (pick-rule 0.0 sorted-rules))))
+        (else (list (pick-rule cutoff sorted-rules))))
+)
+
+(define (default-per-demand-action-selector demand)
+"
+  default-per-demand-action-selector DEMAND
+
+  Return a list containing zero or more psi-rules that can satisfy
+  the DEMAND.  Zero rules are returned only if there are no rules
+  that can satisfy the demand.  Usually, only one rule is returned;
+  it is choosen randomly from the set of rules that could satsify
+  the demand. The choice function is weighted, so that the most
+  heavily-weighted rule is the one most likely to be chosen.
+"
+    (pick-from-weighted-list
+        (psi-get-weighted-satisfiable-rules demand)
+        rule-sc-weight)
 )
 
 ; --------------------------------------------------------------
