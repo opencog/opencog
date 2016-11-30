@@ -117,7 +117,7 @@
 ;;   Return highest--weighted psi-rule that is also satisfiable.
 ;;   If a satisfiable rule doesn't exist then the empty list is returned.
 ;; "
-;;     (define (choose-rules)
+;;     (define rules
 ;;         ; NOTE: This check is required as ecan isn't being used continuesely.
 ;;         (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
 ;;             (sort-by-weight (psi-get-all-satisfiable-rules) rule-sc-weight)
@@ -125,11 +125,9 @@
 ;;         )
 ;;     )
 ;;
-;;     (let ((rules (choose-rules)))
-;;         (if (null? rules)
-;;             '()
-;;             (list (list-ref rules (random (length rules))))
-;;         )
+;;     (if (null? rules)
+;;         '()
+;;         (list (list-ref rules (random (length rules))))
 ;;     )
 ;; )
 ;;
@@ -189,20 +187,18 @@
     ; use ECAN in any way. And it shouldn't.  The attention-value and
     ; ECAN subsystem should use the psi-set-action-selector function
     ; above, and define a custom selector, as desired.
-    (define (choose-rules)
+    (define rules
         (sort-by-weight
               (psi-get-weighted-satisfiable-rules demand)
               rule-sc-weight)
     )
 
-    (let ((rules (choose-rules)))
-        (cond
-            ((null? rules) '())
-            ((equal? (tv-mean (cog-tv (car rules))) 0.0) '())
-            (else
-                (list (list-ref rules
-                    (random (length rules)))))
-        )
+    (cond
+        ((null? rules) '())
+        ((equal? (tv-mean (cog-tv (car rules))) 0.0) '())
+        (else
+            (list (list-ref rules
+                (random (length rules)))))
     )
 )
 
