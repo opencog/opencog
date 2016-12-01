@@ -2,6 +2,7 @@
 ; mock-interaction-rules.scm
 ;
 ; mock interaction rules for openpsi dynamics development
+; XXX This needs to move to the ros-behavior-scripting repo
 
 ; The following change-predicate types have been defined in
 ; interaction-rule.scm:

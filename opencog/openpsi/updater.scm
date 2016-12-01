@@ -26,7 +26,6 @@
 (load "utilities.scm")
 (load "modulator.scm")
 (load "sec.scm")
-;(load "entity-defs.scm")
 (load "interaction-rule.scm")
 
 (define logging #t)
@@ -725,27 +724,6 @@
     (cog-set-tv! updater-continue-pred (stv 0 1))
 )
 
-; ------------------------------------------------------------------
-; THIS IS TEMPORARY FOR DEVELOPMENT/TESTING - PAU'S WILL NOT LIVE IN THIS DICTORY
-; PAU Predicates
-; Actually these will be defined somewhere else in the system
-; PAU(Physiological Action Unit) is a kind of physiological command to the
-; robot.
-(define pau-prefix-str "PAU: ")
-(define (create-pau name initial-value)
-	(define pau
-		(Predicate (string-append pau-prefix-str name)))
-	(Inheritance
-		pau
-		(Concept "PAU"))
-	(psi-set-value! pau initial-value)
-	;(hash-set! prev-value-table pau initial-value)
-	pau)
-
-(define voice-width
-	(create-pau "voice width" .2))
-
-
 ; --------------------------------------------------------------
 ; Shortcuts for dev use
 
@@ -776,8 +754,3 @@
 
 (define-public t psi-set-pred-true)
 (define f psi-set-pred-false)
-
-(define-public p agent-state-power)
-(define-public a arousal)
-
-(define voice voice-width)

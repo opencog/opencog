@@ -1347,4 +1347,8 @@ a demand, picks the one with the highest weight, and returns that.
 The weight is based on tv-mean right now.
 
 TODO:
-modulators don't belong in this directory
+* modulators need to be documented
+* wtf is in control.scm ???
+* updater.scm
+
+* mock-interaction-rules.scm needs to move to ros-behavior
