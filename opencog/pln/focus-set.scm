@@ -9,7 +9,7 @@
 ; ----------------------------------------------------------------------------
 (define-public (pln-get-nlp-inputs sn-list)
 "
-  get-nlp-inference-input SN-LIST
+  pln-get-nlp-inputs SN-LIST
 
   Given a list of SentenceNodes SN-LIST, it returns a list with their
   abstracted-version of r2l outputs.
