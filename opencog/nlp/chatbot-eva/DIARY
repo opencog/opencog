@@ -1208,7 +1208,7 @@ Look to the left doesn't work
                    +----Ju----+
     +---Wi---+-MVp-+   +--Dmu-+
     |        |     |   |      |
-LEFT-WALL look.v to.r the right.n-u 
+LEFT-WALL look.v to.r the right.n-u
 
 (use-modules (opencog query))
 (relex-parse "look to the right")
@@ -1240,7 +1240,7 @@ clobbers it
 			(DefinedSchema "thing to do")
 			(List args)))
 	(Concept "demo goal")
-	(stv 1 0.8181)
+	(stv 1 0.8181)  ; placed o  the impl
 	(psi-demand "want a demo" 0.97)
 )
 
@@ -1267,8 +1267,6 @@ controled rules get a weight that is the tv-mean of the rule.
 
 demands are ConceptNodes, mean is a value-weight.
 
-
-
 this crashes:
  (define a (Concept "A" (stv 1 1)))
  (define b (Concept "B" (stv 0.9 0.9)))
@@ -1292,12 +1290,74 @@ Ben -- PLN & Sequential=And
 valid demands?
 psi-reset-valid-demand-cache
 
+
+The random choice of these are bogus-like.a DONE
+----------------------------------------------------
+
+OK, so redo the fetch of weights, and the sorting, in util*scm - DONE
+
+most-important-weighted-atoms in action
+
+---------
+psi-get-weighted-satisfiable-rules
+-------------
+
+wtf
+
+psi-satisfiable? gets the context, runs satsifactionlink to get the
+grounded pattern.
+
+satisfaction-level -- who calls this its bogus.  rename.  DONE
+
+rename satisfaction-level psi-rule-satisfiability DONE
+--------------
+
+wtf
+
+cog-satisfiable is not being called
+
+psi-satisfiable? should return #t not a TV
+
+
+rename psi-get-all-valid-demands psi-get-all-enabled-demands DONE
+
+rename, hide psi-reset-valid-demand-cache   DONE
+
+psi-demand-skip?  FIXED
+
+(MemberLink
+   DEM   ; aso a conceptn
+   psi-label-skip ; (ConceptNode "OpenPsi: skip")
+)
+
+-------------------------------------------------------------
 * demand value -- which direction is up, down? what does it mean?
 * percentage???
 * why two different functions, one for up, one for down?
   why not just use negative numbers?
 * demand-changes per step, instead of per unit time?
 
-TODO:
-modulators don't belong in this directory
+------------------------------------------------------
 
+
+there is a settable action selector per demand
+
+the default action selector finds all rules associated with
+a demand, picks the one with the highest weight, and returns that.
+The weight is based on tv-mean right now.
+
+split:
+rules.scm is core
+action-selector is core
+
+
+TODO:
+* wtf is in control.scm ???
+* updater.scm what is this, how does it work.
+
+* sec.scm is actual psi code
+* event.scm is ... psi code for now.
+* interaction-rule.scm is psi code of some kind.
+* modulesator.scm is part of psi.
+* modulators need to be documented
+* mock-interaction-rules.scm needs to move
