@@ -30,7 +30,7 @@
 (load "interaction-rule.scm")
 
 (define logging #t)
-(define verbose #t)
+(define verbose #f)
 (define slo-mo #f)
 (define single-step #f)
 
@@ -50,6 +50,10 @@
 ; callback. This is needed to allow the effects of interaction rules to
 ; propagate through the system after an event has occurred.
 (define psi-expression-loop-delay 4)
+
+; Ultradian rhythm parameters
+(define-public ultradian_B .05)
+(define-public ultradian_w .1)
 
 ; --------------------------------------------------------------
 
@@ -177,6 +181,7 @@
        because the current value of the trigger might change as a result of a
        previous rule.
    (3) Execute the interaction rules
+ (3.5) Add endogenous ultradian rhythm
    (4) Update the previous values of the changed monitored params
   (4b) Set the previous values of the event predicates to 0, because each
        particular instance of an event should only fire rules at a single step.
@@ -279,7 +284,26 @@
             ; value is not a number, just return it
             value))
 
-	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
+    ; Ultradian rhythm update function
+	(define (ultradian-update val)
+	    ; Defining these globally so we can tweak on the fly
+	    ;(define B .01)
+	    ;(define w .1)
+	   ; (max 0 (+ (* B (sin (* w psi-updater-loop-count))) val))
+
+	    ;(+ (* B (sin (* w psi-updater-loop-count))) val)
+
+	    (set! val (+ (* ultradian_B ultradian_w (cos (* ultradian_w psi-updater-loop-count))) val))
+
+	    (set! val (min (max 0 val) 1))
+
+	    val
+
+	)
+
+
+   	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
+
 
 	; Event Detection
 	; First call the event detection callback functions
@@ -354,6 +378,9 @@
 		(map psi-evaluate-interaction-rule rules)
 	)
 
+    ; Update ultradian rhythm
+	(psi-set-value! arousal (ultradian-update (psi-get-number-value arousal)))
+
 	; Have OpenPsi trigger emotion expression updates after events are detected
 	; that impact modulator and sec variables
 	; Trigger an expression update after n loop steps have occurred following an
@@ -402,6 +429,9 @@
 	(if single-step
 		(psi-updater-halt))
 	(stv 1 1)
+
+   	;(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
+
 )
 
 
@@ -656,12 +686,12 @@
 ; Todo: Integrate this into the main OpenPsi loop
 
 (define psi-updater-is-running #f)
-(define psi-updater-loop-count 0)
+(define psi-updater-loop-count 1)
 (define continue-psi-updater-loop (stv 1 1))
 
-(define-public (psi-running?)
+(define-public (psi-updater-running?)
 "
-  Return #t if the openpsi loop is running, else return #f.
+  Return #t if the openpsi dynamics updater loop is running, else return #f.
 "
     psi-updater-is-running
 )
