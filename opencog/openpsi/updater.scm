@@ -288,7 +288,7 @@
 	; First call the event detection callback functions
 	;(format #t "psi-event-detection-callbacks: ~a\n"
 	;	psi-event-detection-callbacks)
-    (for-each (lambda (f) (apply f '())) psi-event-detection-callbacks)
+	(for-each (lambda (f) (apply f '())) psi-event-detection-callbacks)
 
 	; Evaluate the monitored events and set "new-event" predicates
 	; This needs to happen before evaluating the monitored params so the
@@ -303,9 +303,10 @@
 	; Check for changed PAUs, just for highlighting in test output
 	; Todo: Change this to a callback function
 	(set! monitored-pau (list voice-width))
-	(for-each (lambda (pau)
-			    (let* ((previous (hash-ref prev-value-table pau))
-                       (current (psi-get-number-value pau)))
+	(for-each
+		(lambda (pau)
+			(let* ((previous (hash-ref prev-value-table pau))
+				(current (psi-get-number-value pau)))
                     ;(format #t "pau: ~a  prev: ~a  current: ~a\n" pau previous
                     ;    current)
                     ; if previous is #f, means it has not been set yet
