@@ -1346,12 +1346,19 @@ the default action selector finds all rules associated with
 a demand, picks the one with the highest weight, and returns that.
 The weight is based on tv-mean right now.
 
+split:
+rules.scm is core
+action-selector is core
+
+
 TODO:
-* modulators need to be documented
 * wtf is in control.scm ???
 * updater.scm what is this, how does it work.
 
 * sec.scm is actual psi code
 * event.scm is ... psi code for now.
+* interaction-rule.scm is psi code of some kind.
+* modulesator.scm is part of psi.
+* modulators need to be documented
 
 * mock-interaction-rules.scm needs to move to ros-behavior

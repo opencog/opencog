@@ -1,17 +1,19 @@
 ;
 ; updater.scm
 ;
-; Code responsible for updating various openpsi related entities, modulators,
-; and parameters based on interaction rules governing the dynamic relationships
-; between them.
+; Copyright 2106 OpenCog Foundation`
+;
+; Code responsible for updating various openpsi related entities,
+; modulators, and parameters based on interaction rules governing the
+; dynamic relationships between them.
 ;
 ; The interaction rules specify internal dynamic relationships of the form:
 ; "change in trigger-entity causes change in target-entity with strength s"
-; See interaction-rule.scm for more information
+; See interaction-rule.scm for more information.
 ;
-; The updater runs in a loop, and for each change in a trigger entity, it should
-; execute each and every rule containing that trigger as an antecedent, and each
-; of those rules should be executed once and only once for a given change.
+; The updater runs in a loop, and, for each change in a trigger entity,
+; it will execute every rule containing that trigger as an antecedent.
+; Each rule will be executed once, for a given change.
 ;
 ; To run:
 ; (load "updater.scm")
@@ -71,27 +73,30 @@
 (define psi-monitored-events '())
 
 
-; Todo: Change this to DSN atomese
+; Todo: Change this to DSN atomese. XXX But why? What's wrong with
+; how it is now?
 (define (psi-set-expression-callback! callback)
 "
-    Callback function that triggers emotion expression update.
+  psi-set-expression-callback! CALLBACK - set the callback that
+  triggers emotion expression update. (? Huh? please explain.)
 
-    This callback function is supplied by the client and gets called when
-    OpenPsi believes a change of emotion expression based on psi values would be
-    good to do (e.g., after a new event is detected and psi params have been
-    updated)
+  CALLBACK is supplied by the client and gets called when OpenPsi 
+  believes a change of emotional expression based on psi values
+  would be good to do (e.g. after a new event is detected and psi
+  params have been updated).
 "
-	(set! psi-expression-callback callback))
-
+	(set! psi-expression-callback callback)
+)
 
 (define-public (psi-set-event-callback! callback)
 "
-    Callback functions for event detection
+  psi-set-event-callback! CALLBACK - Set function for event detection.
 "
 	; Save callback function for event detection
-	; Todo: change this to DSN's?
+	; Todo: change this to DSN's? Why?
 	(set! psi-event-detection-callbacks
-		(append psi-event-detection-callbacks (list callback))))
+		(append psi-event-detection-callbacks (list callback)))
+)
 
 ; Todo: Add a general callback function that is called once each loop
 
@@ -99,13 +104,13 @@
 "
   Initialization of the updater. Called by psi-updater-run.
 
-  Initializes list of monitered entities and events, and table of their previous
-  values.
+  Initializes list of monitered entities and events, and table of
+  their previous values.
 "
-	; Grab all variables in the antecedents of the interaction rules that are
-	; arguments to (Predicate "psi-changed") and put them in
-	; psi-montored-params. Populate the prev-value-table with their current
-	; values.
+	; Grab all variables in the antecedents of the interaction rules
+	; that are arguments to (Predicate "psi-changed") and put them in
+	; psi-montored-params. Populate the prev-value-table with their
+	; current values.
 	(define rules (psi-get-interaction-rules))
 	(define evals-with-change-pred
 		(cog-filter-hypergraph psi-changed-eval? (Set rules)))
@@ -113,7 +118,7 @@
 
 	(if verbose (display "psi-updater-init\n"))
 
-    ; Init previous value table for the monitored entities
+	; Init previous value table for the monitored entities
 	(for-each (lambda (eval-link)
 				(define key (gadr eval-link))
 				(define value (psi-get-number-value key))
@@ -123,31 +128,31 @@
 			  )
 			evals-with-change-pred)
 
-	; If we are logging for debugging, then add all the modulators and sec's to
-	; the list of entities that get monitored so they will be flagged as changed
-	; in the output.
+	; If we are logging for debugging, then add all the modulators and
+	; sec's to the list of entities that get monitored so they will be
+	; flagged as changed in the output.
 	; Todo: not sure if this is the best way to handle this
 	(if logging
-	    (begin
-            (set! psi-monitored-entities (delete-duplicates
-                (append (psi-get-modulators) (append (psi-get-secs)
-                psi-monitored-entities))))
-        )
-    )
+		(set! psi-monitored-entities
+			(delete-duplicates
+				(append!
+					(psi-get-modulators) (psi-get-secs) psi-monitored-entities)))
+	)
 
 	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
 	(if verbose (format #t "monitored entities: ~a\n" psi-monitored-entities))
 
-    ; Set most-recent timestamps for events
+	; Set most-recent timestamps for events
 	(set! psi-monitored-events (psi-get-monitored-events))
 	(if verbose (format #t "monitored events: ~a\n" psi-monitored-events))
-	(for-each (lambda (event)
-				(define most-recent-ts (psi-get-most-recent-ts event))
-				(hash-set! prev-most-recent-ts-table event most-recent-ts)
-				;(set! psi-monitored-events (append psi-monitored-events
-				;								(list event)))
-			  )
-			  psi-monitored-events)
+	(for-each
+		(lambda (event)
+			(hash-set! prev-most-recent-ts-table
+				 event (psi-get-most-recent-ts event))
+			;(set! psi-monitored-events (append psi-monitored-events
+			;								(list event)))
+		)
+		psi-monitored-events)
 
 	; Set event detected loop count to 0
 	(psi-set-value! psi-event-at-loop-num-node 0)
@@ -157,7 +162,6 @@
 			(format output-port "\n\n\n--- New Session ---\n\n")))
 
 	;(format #t "psi-evals-with-change-pred: ~a\n" evals-with-change-pred)
-
 )
 
 ; ----------------------------------------------------------------------
@@ -185,8 +189,8 @@
 	(define value-at-step-start (make-hash-table 20))
 
 	; These are used just for display highlighting for debug output
-    (define monitored-pau '())
-    (define changed-pau '())
+	(define monitored-pau '())
+	(define changed-pau '())
 
 	(define (set-param-change-status param)
 		(define changed-tv)
@@ -197,7 +201,7 @@
 		;(format #t "set-param-change-status: ~a  psi-change-in?: ~a\n"
 		;	param (psi-change-in? param))
 		(if (psi-change-in? param)
-            (begin
+			(begin
                 (if verbose
                     (format #t "\n*** Found change in : ~a   loop ~a\n" param
                         psi-updater-loop-count))
