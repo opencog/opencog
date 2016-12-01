@@ -95,6 +95,7 @@ are used).
   * The goal indicates the degree to which the action, if taken, can
     satisfy the demand or meet the goal.  It can be any atom that,
     when evaluated, returns a truth value.
+    (Huh ?? Deamnds are not goals? How do these interact?)
 
 5. Demand:
   * A demand is collection of state that must be maximized during
@@ -108,43 +109,64 @@ are used).
 6. Modulator and Feeling representation:
 Coming soon :smile:
 
-## OpenPsi algorithm
-1. `psi-step`:
-  * A function that performs a single iteration of the system. It wraps
-    the proceedures described below. It is implemented [here](main.scm).
+## Algorithmic overview:
 
-2. choose action-selector:
-  * If you have defined an action selector, then it will be used; else the
-    default action selector is used. See function
-    `(psi-select-rules-per-demand)` [here](main.scm).
+1. Main loop
+  * The `psi-step` function performs a single iteration of the system.
+    It performs the steps described below. It is implemented
+    [here](main.scm). The main loop just calls the single-step
+    function repeatedly.
 
-  * Each demand can have it's own action-selector.  See
-    `psi-add-action-selector` and `psi-action-selector-set!`
-    [here](action-selector.scm) for adding and setting your own action-selector.
+2. Action selection
+  * Action selection chooses one (or more) rules associated with a
+    demand. It is implemented in the `psi-select-rules-per-demand`
+    function, [here](main.scm).
 
-3. default action selector:
-  * Most-weighted-satisfiable psi-rules of each demand are filtered out. If
-    there are more than one of them, then one is randomly selected.
-  * The weight is calculated as the product of strength and confidence of the
-    psi-rule.
-  * The satsifiability of a rule is checked by extracting the context and
-    wrapping it in a `SatisfactionLink` before evaluating it. If TRUE_TV is
-    returned it means that is it satisifiable. See function `psi-satisfiable?`
-    [here](main.scm).
-  * The formula for the weight of an action that will be used for
-    action-selection is:
-    XXX FIXME: this is not actually used anywhere.
+  * The default action selector finds all satisfiable rules that are
+    associated with a demand, and then randomly picks one, according
+    to the weight associated with the rule (so that more heavily
+    weighted rules are more likely to be picked).
+
+  * A rule is "satisfiable" if the context part of the rule is
+    consistent with the current contents of the atomspace. The
+    current implementation assumes that satisfiability is a crisp
+    true/false value, although it is meant to be fractional, in
+    general.
+
+  * The rule weight is currently encoded in the TV in the
+    ImplicationLink (see below for details).
+
+  * Each demand can have it's own custom action-selector. The
+    user can set these with the `psi-add-action-selector` and
+    `psi-action-selector-set!` functions [here](action-selector.scm).
+
+3. Default action selector
+  * The default action selector randomly picks one satsifiable rule
+    associated with a demand.  If there is more than one rule that
+    is satisfiable, then one is selected randomly.
+
+  * The weight of a rule is currently defined as the product of
+    the strength and confidence of the ImplicationLink of the rule.
+
+  * The satsifiability of a rule is checked by extracting the context
+    and wrapping it in a `SatisfactionLink`, and then evaluating it.
+    A rule is satisfiable if the result of evaluation is TRUE_TV.
+    See the `psi-satisfiable?` function [here](main.scm).
+
+  * In the future, the weight of a rule will be defined as:
+    XXX FIXME: the below is not currently used.
     ```
     Wa = 1/Na * sum ( Wcagi ...)
     Wcagi = Scga * Sc * STIcga
     ```
-    where,
+    where
     Wa = weight of an action
-    Wcagi = weight of an action in a single psi-rule 'i' (An action 'a' could be
-            part of multiple psi-rules achieving multiple goals, so if an
-            action is likely to achieve multiple goals then it should have a
-            higher weight). It is implemented in `psi-action-weight`.
-            (Present value = Scga * Sc * confidence(cga) * confidence(context))
+    Wcagi = weight of an action in a single psi-rule 'i' (An action 'a'
+            could be part of multiple psi-rules achieving multiple goals,
+            so if an action is likely to achieve multiple goals then it
+            should have a higher weight). It is implemented in
+            `psi-action-weight`.  (Present value =
+            Scga * Sc * confidence(cga) * confidence(context))
     Na = Number of rules that have action `a` (Present value =1 )
     Scga = Strength of psi-rule
     Sc = Strength of context that is partially implemented in
@@ -153,17 +175,35 @@ Coming soon :smile:
         (Present value = 0 or 1)
     STIcga = short-term-importance of the psi-rule (Present value = 1)
 
-XXX FIXME -- this needs fixing, as contexts may contain variables whose
-groundings can carry over into the action.  In addition, it is extremely
-inefficient if there are many rules; thus the DualLink can be (should
-be) used to narrow down the search for contextts.  A crude prototype of
-this has been implemented in the nlp/aiml subsysgtem, and needs to be
-generalized and ported over here.
+4. Action Selection bugs. XXX FIXME -- The current implementation has
+   multiple implementation issues. These include:
 
-4. action execution and goal evaluation:
-  * After the rules are selected, then the action and goals are extracted.
-    During the goal extraction, every goal that is related through the
-    action are choosen.
+ * If a context contains variables that also appear in the action,
+   then these are not handled correctly. For example, if the context
+   is "variable $X is flying towards me", and the action is "catch
+   variable $X", the current satisfiability code can determine if
+   the context holds true, by grounding variable $X, but that
+   grounding is not passed to the action. That is, when the action is
+   executed, teh variable $X is not known/grounded.
+
+ * The default action selector is extremely inefficient if there
+   are more than a few hundred rules, as it attempts to find and
+   work with all of them. This overhead can be avoided by using the
+   DualLink for narrowing the search for applicable contexts.  There
+   is a protottype showing the DualLink in action, in the nlp/aiml
+   subsystem. (There are more than 100K AIML rules; the DualLink
+   narrows these down to the handful of rules applicable to the
+   current context). This code needs to be prted here.
+
+5. Action execution and goal evaluation
+  * After a set of rules are selected, then the actions and goals
+    attached to these rules are extracted.
+
+  * Given a set of actions, all goals that associated to these
+    actions are located (even if those goals belong to rules that
+    did not trigger in the current context).  The idea here is that
+    performing the action may advance those goals, even though those
+    goals were not a part of the selected rules.
 
   * Related/associated goals are those that are the implicand of the
     psi-rules that have the given action in the implicand. That is, if
@@ -173,12 +213,12 @@ generalized and ported over here.
     regardless of whether the rules that resulted in the association
     are selected or not. See `psi-related-goals` [here](main.scm).
 
-  * Then actions are executed followed by the evaluation of the goals.
-    No check is made before evaluating of goals to see if the action
-    has suceeded.  That is because it is assumed that if the context
-    is satisfied, then there is nothing that prevents the action from
-    executing.  _This assumption might not work when ECAN or some other
-    process that modifies the context is running in parallel.__
+  * The actions are executed, followed by the evaluation of the goals.
+
+  * Bugs: The current implementation fails to check if the action was
+    successful, before updating goals.  Just because an action is
+    attempted does not imply that the action was acheived. XXX FIXME.
+
 
 ## File overview
 * `main.scm` -- Defines the main function for single-stepping the
@@ -269,8 +309,7 @@ Todo: Interaction rule sets, events, and entities should be specified
 
 Open Issues:
 ------------
-* Can a rule satisfy multiple goals?
-* Can a rule partially satisfy a goal?  How is the partial satisfaction
-  indicated?
-* Demand update is confused/confusing
-*
+ * Can a rule satisfy multiple goals?
+ * Can a rule partially satisfy a goal?  How is the partial satisfaction
+   indicated?
+ * Demand update is confused/confusing

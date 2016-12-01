@@ -1208,7 +1208,7 @@ Look to the left doesn't work
                    +----Ju----+
     +---Wi---+-MVp-+   +--Dmu-+
     |        |     |   |      |
-LEFT-WALL look.v to.r the right.n-u 
+LEFT-WALL look.v to.r the right.n-u
 
 (use-modules (opencog query))
 (relex-parse "look to the right")
@@ -1360,5 +1360,4 @@ TODO:
 * interaction-rule.scm is psi code of some kind.
 * modulesator.scm is part of psi.
 * modulators need to be documented
-
-* mock-interaction-rules.scm needs to move to ros-behavior
+* mock-interaction-rules.scm needs to move
