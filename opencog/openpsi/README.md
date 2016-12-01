@@ -4,11 +4,13 @@ OpenPsi is a rule-selection framework intended to provide provide
 the top-level behavior control mechanism for robots.  It is loosely
 inspired by Joscha Bach's MicroPsi.
 
-Each rule takes the form of if(context) then take(action).  These are
-classified into different goals (demands) that they can fullfil. The
-main loop is an action-selection mechanism, examining the context to
-see if any of the current demands/goals can be fullfilled, and then
-taking appropriate action.
+Each rule has the abstract form
+   if (context) and (action is taken) then (goal is fulfilled).
+
+These rules are classified according to the different demands that
+the goals can fulfill.  The main loop is an action-selection mechanism,
+examining the current demands, and selecting among the rules that can
+satisfy that demand, and also be applicable in the current context.
 
 ## Status and TODO List
 
@@ -37,6 +39,9 @@ are used).
   "small-data" learning system, so that the robot can learn
   from only a handful of situations/examples.
 
+* The demand-update code is undocumented, confusing, and does not
+  belong in this directory.
+
 
 ### References
 * OpenCog Wiki - [OpenPsi](http://wiki.opencog.org/w/OpenPsi)
@@ -55,30 +60,36 @@ are used).
 1. Psi-rule:
   * A rule is an ImplicationLink structured as
     ```scheme
-            (ImplicationLink
+            (ImplicationLink  <TV>
                 (SequentialAndLink
                     (context)
                     (action))
-                (demand-goal))
+                (goal))
     ```
     An ImplicationLink was choosen because it allows PLN to be employed
-    to perform reasoning in the face of uncertain contexts.
+    to perform reasoning in the face of uncertain contexts.  A
+    SequentialAndLink is used, so that the goal is always placed
+    unambiguously last in the sequence.
   * The function `psi-rule` that is defined [here](main.scm). Is to be used
     in adding new rules.
 
 2. Context:
   * The context part of the rule must be a set of predicates, i.e. atoms
-    that can be evaluated, and, when evaluated, return TRUE_TV or
-    FALSE_TV to indicate if the rule's action can be applied.
-    A boolean conjunction is taken, so that the action is performed
-    only if the entire context applies.
+    that can be evaluated, and, when evaluated, return truth values
+    (typically a crisp TRUE_TV or FALSE_TV) to indicate if the rules
+    is applicable in the current context.  In the current
+    implementation, the truth values are assumed to be crisp true/false
+    values; thier boolean conjunction is taken to determine the validity
+    of the context. The action can then be taken if the resulting truth
+    value is strong enough (i.e. is TRUE_TV).
 
 3. Action:
-  * The action part of the rule will be evaluated if the context part
-    of the rule evaluated to TRUE_TV, i.e. if the rule is applicable
-    to that context. The action can be any evaluatable atom; the intent
-    is that the action will alter the atomspace, or send messages to
-    some external system.
+  * The action part of the rule will be evaluated if the rule has
+    triggered, i.e. if the rule was selected by the action selector.
+
+    The action can be any evaluatable atom; the intent is that the
+    action will alter the atomspace, or send messages to some external
+    system.
 
 4. Goal:
   * The goal indicates the degree to which the action, if taken, can
@@ -240,18 +251,26 @@ Files:
 
 Instructions:
 
-* Create interaction rules with the psi-create-interaction-rule function in 
+* Create interaction rules with the psi-create-interaction-rule function in
   interaction-rule.scm
 * Create monitored events with psi-create-monitored-event function in event.scm.
 * Create event detection callback(s) with (psi-set-event-callback! callback) in
   updater.scm. The callback function should indicate that a particular event has
   occurred by calling (psi-set-event-occurrence! event), which uses a StateLink
   to represent the most recent occurrence of the event.
-* Create "expression" callback function with (psi-set-expression-callback! 
+* Create "expression" callback function with (psi-set-expression-callback!
   callback) in updater.scm. This function should handle implementation-specific
   expression of emotion and/or physiology based on the OpenPsi dynamic variables.
-* Todo: Create general callback that is called at each loop step.   
-   
+* Todo: Create general callback that is called at each loop step.
+
 Todo: Interaction rule sets, events, and entities should be specified
       via config file
 
+
+Open Issues:
+------------
+* Can a rule satisfy multiple goals?
+* Can a rule partially satisfy a goal?  How is the partial satisfaction
+  indicated?
+* Demand update is confused/confusing
+*
