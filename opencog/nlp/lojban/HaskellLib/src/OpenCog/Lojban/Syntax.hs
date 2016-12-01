@@ -34,7 +34,9 @@ mytrace a = traceShow a a
 mytrace2 s a = trace (s ++(' ':show a)) a
 
 --TODO
--- da , gi'e , mu'i
+-- FIX: pa
+--      da
+--      GIhA only gi'e is correct
 
 -------------------------------------------------------------------------------
 --Sumti
@@ -120,10 +122,10 @@ setOf itype = setTypeL . tolist2 . makeSet <. genInstance itype
 
 --Handle anykind of LA phrase
 laP :: SyntaxReader (State Atom)
-laP = handleName . first concept <$> withSeed (between (sepSelmaho "LA")
-                                                       (optSelmaho "KU")
-                                                       anyWord
-                                              )
+laP = handleName . first wordNode <$> withSeed (between (sepSelmaho "LA")
+                                                        (optSelmaho "KU")
+                                                        anyWord
+                                               )
     where handleName :: Iso (Atom,Int) (State Atom)
           handleName = Iso (\(a,i) -> let na = nodeName a
                                           name = (randName i na) ++ "___"++ na
@@ -177,6 +179,12 @@ kohaP = reorder0 <$> (ma <|> koha)
 noiP :: SyntaxReader (State Atom)
 noiP = sepSelmaho "NOI" *> bridi <* optSelmaho "KUhO"
 
+noi_short :: SyntaxReader (State Atom)
+noi_short = sepSelmaho "NOI" *> ptp selbriUI addKEhA bridi <* optSelmaho "KUhO"
+    where addKEhA = Iso (Just . f) (Just . g)
+          f s = "ke'a " ++ s
+          g s = drop 4 s
+
 goiP :: SyntaxReader (State Atom)
 goiP = ptp (selmaho "GOI") goiToNoi noiP
     where goiToNoi = mkSynonymIso [("pe"  ,"poi ke'a srana ")
@@ -192,7 +200,7 @@ sumti = kohaP <|> leP <|> laP <|> liP
 
 sumtiNoi :: SyntaxReader (State Atom)
 sumtiNoi = (kehaToSesku  ||| id) . reorder <$> sumti
-                                           <&> optState (noiP <|> goiP)
+                                           <&> optState (noiP <|> noi_short <|> goiP)
     where reorder = Iso (Just . f) (Just . g)
           f ((a,Just n ),s) = Left (a,n:s)
           f ((a,Nothing),s) = Right (a,s)
@@ -269,7 +277,7 @@ modalSumti = reorder . first handleFIhO <$> (fihoP <|> baiP)
     where handleFIhO = (fi'otag &&& _frame) . second (inverse tolist1)
                                             . handleTAG . second tolist1
           fi'otag = Iso (Just . f) (Just . g)
-              where f ((tv,PN name),(s,tag)) = (s,Just $ name++tag++ show tv)
+              where f ((tv,PN name),(s,tag)) = (s,Just $ name++tag)
                     g (s,Just nametag) =
                         let [name,tag,tv] = S.split (S.oneOf "12345") nametag
                         in ((read tv,cPN name lowTv),(s,tag))
@@ -374,28 +382,40 @@ _trati = first handleTrati <$> stateMany (_PU <|> _ZI)
 _NA :: SyntaxReader (State String)
 _NA = reorder0 <$> selmaho "NA"
 
+
+bridi_tail = _trati
+           <&> optState _NA
+           <&> selbriUI
+           <&> stateMany sumtiAll
+
+bridi_tails = stateList <$> sepBy bridi_tail (sepSelmaho "GIhA")
+
 --THis Handles compelte sentences
 -- Remark: Handle the modal Sumti before handleBRIDI
-bridi :: SyntaxReader (Atom,[Atom])
+{-bridi :: SyntaxReader (Atom,[Atom])
 bridi = handleBRIDI . first mergeSumti <$> stateMany1 sumtiAll
-                                       <*   optext "cu"
-                                       <&> _trati
-                                       <&> optState _NA
-                                       <&> selbriUI
-                                       <&> stateMany sumtiAll
+                                       <*  optext "cu"
+                                       <&> bridi_tail
+-}
+
+bridi :: SyntaxReader (Atom,[Atom])
+bridi = first (andl . mapIso (handleBRIDI . mergeSumti) . isoDistribute)
+        <$> stateMany1 sumtiAll
+        <*   optext "cu"
+        <&> bridi_tails
 
 -- (a,(mp,(ma,(s,aa))))
 -- (mp,(ma,(s,a++aa)))
 -- ((mp,(ma,(s,a))),as)
 -- (bridi,as)
 
-handleBRIDI :: Iso ((Maybe Atom,(Maybe String,(Tagged Selbri,[Sumti]))),[Atom]) (Atom,[Atom])
-handleBRIDI = first $ handleNA
-                    . second _ctx
-                    . inverse associate
-                    . first commute
-                    . second _frames
-                    . associate
+handleBRIDI :: Iso (Maybe Atom,(Maybe String,(Tagged Selbri,[Sumti]))) Atom
+handleBRIDI = handleNA
+            . second _ctx
+            . inverse associate
+            . first commute
+            . second _frames
+            . associate
 
 -- ((MPU,(MNA,(Selbri,Args)))   ,Atoms)
 -- (((MPU,MNA),(Selbri,Args))   ,Atoms)

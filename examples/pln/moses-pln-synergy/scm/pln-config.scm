@@ -57,7 +57,7 @@
         "implication-implicant-distribution-rule.scm"
         "implication-and-lambda-factorization-rule.scm"
         "deduction-rule.scm"
-        "equivalence-to-double-implication-rule.scm"
+        "equivalence-to-implication-rule.scm"
         "implication-implicant-disjunction-rule.scm"
         )
   )
@@ -78,7 +78,7 @@
         (list implication-and-lambda-factorization-rule-name 1)
         (list deduction-implication-rule-name 1)
         (list implication-full-instantiation-rule-name 1)
-        (list equivalence-to-double-implication-rule-name 1)
+        (list equivalence-to-implication-rule-name 1)
         (list implication-implicant-disjunction-rule-name 1)
         )
   )

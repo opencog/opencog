@@ -46,7 +46,7 @@
 (cog-bind implication-full-instantiation-rule)
 
 ;; (11)
-(cog-bind (ure-get-forward-rule equivalence-to-double-implication-rule))
+(cog-bind equivalence-to-implication-rule)
 
 ;; (12)
 (cog-bind deduction-implication-rule)
