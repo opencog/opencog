@@ -149,7 +149,7 @@ scheme@(guile-user)> (for-each (lambda (i) (cog-bind implication-partial-instant
 scheme@(guile-user)> (cog-prt-atomspace)
 And search for the following
 ...
-   (ImplicationLink (stv 1 1)
+   (ImplicationScopeLink (stv 1 1)
       (TypedVariableLink
          (VariableNode "$X")
          (TypeNode "ConceptNode")
