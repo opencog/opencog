@@ -72,4 +72,3 @@
 ; loading the aiml psi-rules
 (define aiml-chat-demand (psi-demand "AIML chat demand" .8))
 (psi-demand-skip aiml-chat-demand)
-(psi-reset-valid-demand-cache)

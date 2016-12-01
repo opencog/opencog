@@ -5,14 +5,6 @@
 ; Copyright (C) 2016 OpenCog Foundation
 ;
 ; Design Notes:
-; The design below uses AndLinks instead of SequentialAndLinks to hold
-; the context and the action. Recall that the AndLink is an unordered
-; link, and so the context and action is stored in arbitrary order.
-; This makes several of the methods inefficeint, as it requires this
-; bag to be searched for the desired bits. If instead, an ordered link
-; was used, and the action was made first, it could be found very
-; quickly. FIXME -- this should be fixed someday.
-;
 ; Aliases: Rules can be given a "name", called an "alias", below.
 ; Certain parts of the design assume that a rule has only one name,
 ; but other parts of the code pass around lists of names. This can
@@ -24,7 +16,7 @@
 
 (use-modules (ice-9 threads)) ; For `par-map`
 (use-modules (ice-9 optargs)) ; For `define*-public`
-(use-modules (srfi srfi-1)) ; For `append-map`
+(use-modules (srfi srfi-1)) ; For `drop-right`, `append-map`, etc.
 (use-modules (opencog) (opencog query))
 
 (load "demand.scm")
@@ -43,16 +35,13 @@
   for proper structure.
 "
 
-    ; Note that the AndLink is an unordered link -- so the context
-    ; and the action will appear in an arbitrary order.  It would
-    ; almost surely be better to use a SequentialAndLink here;
-    ; this would use less resources and have lower complexity.
-    (let ((implication (Implication a-stv (AndLink context action) goal)))
+    (let ((implication
+            (Implication a-stv (SequentialAndLink context action) goal)))
 
         ; The membership below is used to simplify filtering and searching.
         ; Other alternative designs are possible.
-        ; TODO: Remove this, when ExecutionLinks are used, as that can be used
-        ; for filtering. (?? Huh? Please explain...)
+        ; TODO: Remove this, when ExecutionLinks are used, as that can
+        ; be used for filtering. (?? Huh? Please explain...)
         (MemberLink action psi-action)
 
         ; This MemberLink is used to make it easy to find rules that
@@ -82,7 +71,7 @@
   is in the form of an `ImplicationLink`:
 
     (ImplicationLink TV
-        (AndLink
+        (SequentialAndLink
             CONTEXT
             ACTION)
         GOAL)
@@ -220,14 +209,11 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ; --------------------------------------------------------------
 (define-public (psi-get-context rule)
 "
-  psi-get-context RULE
+  psi-get-context RULE - Get the context of the openpsi-rule RULE.
 
-  Get the context of the openpsi-rule RULE.  Returns a scheme
-  list of all of the atoms that form the context.
+  Returns a scheme list of all of the atoms that form the context.
 "
-    ;; FIXME: This is not an efficient way to get the context.
-    ;; If this needs to be called a lot, it should be fixed.
-    (remove psi-action? (get-c&a rule))
+    (drop-right (get-c&a rule) 1)
 )
 
 ; --------------------------------------------------------------
@@ -238,9 +224,10 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   Get the action of the openpsi-rule RULE.  Returns the single
   atom that is the action.
 "
-    ;; FIXME: This is not an efficient way to get the action.
-    ;; If this needs to be called a lot, it should be fixed.
-    (car (filter psi-action? (get-c&a rule)))
+    ; Instead of doing this, it might be more efficient to get
+    ; the size of the outgoing set, and ask for the last element
+    ; directly, using (cog-outgoing-atom n-1).
+    (car (take-right (get-c&a rule) 1))
 )
 
 ; --------------------------------------------------------------
@@ -250,9 +237,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 
   Get the goal of the openpsi-rule RULE.
 "
-    ; NOTE: Why this function? -> For consisentency and to accomodate future
-    ; changes
-    (cadr (cog-outgoing-set rule))
+    (cog-outgoing-atom rule 1)
 )
 
 ; --------------------------------------------------------------
@@ -303,10 +288,11 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   a psi-rule with that action in it.
 "
     ;; XXX this is not an efficient way of searching for goals.  If
-    ;; this method is used a lot, we should convert to SequentialAnd,
-    ;; and search for the goals directly.
-    (let* ((and-links (cog-filter 'AndLink (cog-incoming-set action)))
-           (rules (filter psi-rule? (append-map cog-incoming-set and-links))))
+    ;; this method is used a lot, we should search for the goals directly.
+    (let* ((and-links (cog-incoming-by-type action 'SequentialAndLink))
+           (rules (filter psi-rule?  (append-map
+                    (lambda (sand) (cog-incoming-by-type sand 'ImplicationLink))
+                  and-links))))
            (delete-duplicates (map psi-get-goal rules))
     )
 )
@@ -332,25 +318,50 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 ; --------------------------------------------------------------
 (define-public (psi-satisfiable? rule)
 "
-  psi-satisfiable? RULE
+  psi-satisfiable? RULE - Return a TV indicating if the context of
+  the RULE is satisfiable.
 
-  Check if the RULE is satisfiable; return TRUE_TV if it is, else return
-  FALSE_TV. A rule is satisfiable when it's context contains variables,
-  and that context can be grounded in the atompace (i.e. if the context
-  is satisfiable in using a SatisfactionLink.)
+  Satisfaction is determined by evaluating the context part of the
+  rule. If the context requires grounding in the atomspace, then
+  this is performed. That is, if the context contains variables
+  that require grounding, then this is performed; if the context is
+  not groundable, then the rule is not satisfiable.
 
-  The idea is only valid when ranking of context grounding isn't considered.
-  This is being replaced.  Huh??? What does this mean?
+  The current implementation returns TRUE_TV if the context is
+  satisfiable, else it returns FALSE_TV. A later design point
+  is to have a weighted, probabilistic value to be returned.
 "
+    (define result (cog-evaluate!
+        (SatisfactionLink (AndLink (psi-get-context rule)))))
+
     ; NOTE: stv are choosen as the return values so as to make the function
     ; usable in evaluatable-terms.
-    (let* ((pattern (SatisfactionLink (AndLink (psi-get-context rule))))
-           (result (cog-evaluate! pattern)))
+    (set! psi-satisfiablity-alist
+        (assoc-set! psi-satisfiablity-alist rule result))
 
-        (set! psi-satisfiablity-alist
-            (assoc-set! psi-satisfiablity-alist rule result))
-        result
-    )
+    result
+)
+
+; Utility wrapper for above; returns crisp #t or #f
+(define (is-satisfiable? RULE)
+    (equal? (stv 1 1) (psi-satisfiable? RULE))
+)
+
+(define-public (psi-rule-satisfiability rule)
+"
+  psi-rule-satisfiability RULE
+
+  Given the RULE, return the probability that the RULE can be satisfied.
+  XXX Except this doesn't return a probability, it just returns TRUE_TV
+  or FALSE_TV.
+  XXX fixme - this replaces psi-satsifiable?
+"
+; NOTE
+; 1. See https://github.com/opencog/atomspace/issues/823 for why
+;   psi-satisfiable? is used
+; 2. Should a context evaluator be added here?????
+; 3. What is the "right" way of communicating the level of information.
+    (satisfiable? rule)
 )
 
 ; --------------------------------------------------------------
@@ -361,8 +372,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   Returns a list of all of the psi-rules associated with the DEMAND
   that are also satisfiable.
 "
-    (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
-        (psi-get-rules demand-node))
+    (filter is-satisfiable? (psi-get-rules demand-node))
 )
 
 ; --------------------------------------------------------------
@@ -370,13 +380,13 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 "
   psi-get-weighted-satisfiable-rules DEMAND
 
-  Returns a list of all the psi-rules that are satisfiable and
-  have a non-zero strength.
+  Returns a list of all the psi-rules associated with DEMAND
+  that are satisfiable and have a non-zero strength.
 "
     (filter
         (lambda (x)
             (and (> (cog-stv-strength x) 0)
-                (equal? (stv 1 1) (psi-satisfiable? x))))
+                (is-satisfiable? x)))
         (psi-get-rules demand-node))
 )
 
@@ -387,8 +397,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 
   Returns a list of all the psi-rules that are satisfiable.
 "
-    (filter  (lambda (x) (equal? (stv 1 1) (psi-satisfiable? x)))
-        (psi-get-all-rules))
+    (filter is-satisfiable? (psi-get-all-rules))
 )
 
 ; --------------------------------------------------------------
@@ -401,7 +410,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
 "
     (filter
         (lambda (x) (and (> (cog-stv-strength x) 0)
-            (equal? (stv 1 1) (psi-satisfiable? x))))
+            (is-satisfiable? x)))
         (psi-get-all-rules))
 )
 

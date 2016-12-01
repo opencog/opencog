@@ -10,9 +10,11 @@
 (use-modules (opencog) (opencog exec))
 
 ; --------------------------------------------------------------
+; XXX TODO: does this really need to be public?
 (define-public psi-prefix-str "OpenPsi: ")
 
 ; --------------------------------------------------------------
+; XXX TODO: does this really need to be public?
 (define-public (psi-suffix-str a-string)
 "
   psi-suffix-str STRING
@@ -25,89 +27,6 @@
             (error (string-append "The string argument must have the prefix: "
                 "\"" psi-prefix-str "\". " "Instead got:" a-string) )
         )
-    )
-)
-
-; --------------------------------------------------------------
-(define-public (satisfaction-level rule)
-"
-  satisfaction-level RULE
-
-  Given the RULE, return the probability that the RULE can be satisfied.
-  XXX Except this doesn't return a probability, it just returns TRUE_TV
-  or FALSE_TV. What is this supposed to really do???
-"
-; NOTE
-; 1. See https://github.com/opencog/atomspace/issues/823 for why
-;   psi-satisfiable? is used
-; 2. Should a context evaluator be added here?????
-; 3. What is the "right" way of communicating the level of information.
-    (satisfiable? rule)
-)
-
-; --------------------------------------------------------------
-(define-public (most-weighted-atoms atom-list)
-"
-  most-weighted-atoms ATOM-LIST
-
-  Return a list of atoms with the highest weight. Any duplicate atoms
-  in the list are removed.
-  The weight of an atom is the product of the stength and confidence
-  of the atom.
-
-  XXX FIXME: I think this is trying to sort the list of atoms by weight.
-  However, the algorithm is a bit opaque, and seems to be inefficient.
-  Surely, there is a better way.
-
-  XXX FIXME: if teh goal is a siderted list, then a better name is
-  possible: e.g. sort-by-weight, or something like that.
-"
-    (define (weight x)
-        (let ((rule-stv (cog-tv x))
-              (context-stv (satisfaction-level x)))
-            (* (tv-conf rule-stv) (tv-mean rule-stv)
-               (tv-conf context-stv) (tv-conf context-stv))))
-
-    (define (pick atom lst) ; prev is a `lst` and next `atom`
-        (cond
-            ; If the weight of the atom is less than the weight of the
-            ; head of the list, then return the list.
-            ; If the weight of the atom is greater than the weight of
-            ; the head of the list, then return the atom.
-            ; If the two weights are equal, place the atom at the end
-            ; of the list, and return the list.
-            ((> (weight (car lst)) (weight atom)) lst)
-            ((= (weight (car lst)) (weight atom)) (append lst (list atom)))
-            (else (list atom))))
-
-    (if (null? atom-list)
-        '()
-       (delete-duplicates (fold pick (list (car atom-list)) atom-list))
-    )
-)
-
-; --------------------------------------------------------------
-(define-public (most-important-weighted-atoms atom-list)
-"
-  most-important-weighted-atoms ATOMs-LIST
-
-  Return a list atoms sorted according to attention-value times
-  truth-value weight.
-"
-    (define (weight x)
-        (let ((a-stv (cog-tv x))
-              (sti (assoc-ref (cog-av->alist (cog-av x)) 'sti)))
-            (* (tv-conf a-stv) (tv-mean a-stv) sti)))
-
-    (define (pick atom lst) ; prev is a `lst` and next `atom`
-        (cond
-            ((> (weight (car lst)) (weight atom)) lst)
-            ((= (weight (car lst)) (weight atom)) (append lst (list atom)))
-            (else (list atom))))
-
-    (if (null? atom-list)
-        '()
-        (delete-duplicates (fold pick (list (car atom-list)) atom-list))
     )
 )
 
@@ -150,7 +69,7 @@
     (define inset (cog-get-trunk ATOM))
 
     ;; Keep only those links that are of type MemberLink...
-    ;; and, more precisely, a MmeberLink that is of a valid
+    ;; and, more precisely, a MemberLink that is of a valid
     ;; psi-fule form.
     (filter psi-member?
         (delete-duplicates (cog-filter 'MemberLink inset)))
@@ -176,7 +95,7 @@
     (cog-delete set-of-duals)
 
     ;; Keep only those links that are of type MemberLink...
-    ;; and, more precisely, a MmeberLink that is of a valid
+    ;; and, more precisely, a MemberLink that is of a valid
     ;; psi-fule form.
     (filter psi-member?
         (delete-duplicates (cog-filter 'MemberLink duset)))
