@@ -18,7 +18,6 @@
 ; atom-types module for PredictiveImplicationLink
     (load-from-path "opencog/openpsi/modulator.scm")
     (load-from-path "opencog/openpsi/sec.scm")
-(load-from-path "opencog/openpsi/entity-defs")
     (load-from-path "opencog/openpsi/interaction-rule.scm")
     (load-from-path "opencog/openpsi/updater.scm")
 )
