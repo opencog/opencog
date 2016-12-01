@@ -26,7 +26,6 @@
 (load "utilities.scm")
 (load "modulator.scm")
 (load "sec.scm")
-;(load "entity-defs.scm")
 (load "interaction-rule.scm")
 
 (define logging #t)

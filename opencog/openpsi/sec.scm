@@ -27,7 +27,6 @@
         psi-sec-node)
     (psi-set-value! sec initial-value)
 
-
     ; For now, assuming the sec alone represents the overall system/agent state,
     ; for consi1stency with psi var representations. Code below can be used if we
     ; decide we want this represented explicitly as agent-state.
