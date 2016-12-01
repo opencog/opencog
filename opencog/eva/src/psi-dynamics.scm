@@ -9,6 +9,7 @@
 (use-modules (opencog nlp) (opencog nlp chatbot) (opencog nlp chatbot-psi))
 
 (add-to-load-path "/usr/local/share/opencog/scm/opencog/eva-model")
+(add-to-load-path ".")
 
 (load "express.scm") ; For random pos and neg expressions
 (load-from-path "faces.scm")
