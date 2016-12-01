@@ -132,19 +132,6 @@ void AFImportanceDiffusionAgent::diffuseAtom(Handle source)
     if (totalDiffusionAmount == 0)
         return;
 
-    // Used for calculating decay amount. Since we will be using per time unit
-    // decay, we need to calculated elapsed time unit since last spreading for
-    // adjusting the decay exponent.
-    opencog::ecan::chrono_d elapsed_seconds;
-    auto now = hr_clock::now();
-
-    if (first_time) {
-        elapsed_seconds = now - now;
-        last_spreading_time = now;
-    } else {
-        elapsed_seconds = now - last_spreading_time;
-    }
-
     // Perform diffusion from the source to each atom target
     typedef std::map<Handle, double>::iterator it_type;
     for(it_type iterator = probabilityVector.begin();
@@ -157,12 +144,6 @@ void AFImportanceDiffusionAgent::diffuseAtom(Handle source)
         diffusionEvent.amount = (AttentionValue::sti_t)
                 floor(totalDiffusionAmount * iterator->second);
 
-        // TODO Use elapsed seconds and to calculate the diffusion amount.
-        // (r_WA)^elapsed_seconds
-        // Maintain STI freq bin.
-        /*diffusionEvent.amount = (AttentionValue::sti_t)
-                floor(pow ((totalDiffusionAmount * iterator->second),elapsed_seconds));*/
-
         diffusionEvent.source = source;
         diffusionEvent.target = iterator->first;
 
@@ -173,9 +154,6 @@ void AFImportanceDiffusionAgent::diffuseAtom(Handle source)
         diffusionStack.push(diffusionEvent);
     }
 
-
-    last_spreading_time = now;
-    first_time = false;
 
     /* ===================================================================== */
 
