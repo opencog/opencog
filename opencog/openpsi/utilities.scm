@@ -235,9 +235,10 @@
 		result
 		; else check if entity is an evaluation or predicate or schema
 		(let ((type (cog-type entity)))
-			(if (or (equal? type 'GroundedPredicateNode)
-				   (equal? type 'DefinedPredicateNode))
+			(if (equal? type 'GroundedPredicateNode)
 				(set! result (cog-evaluate! (Evaluation entity (List)))))
+			(if  (equal? type 'DefinedPredicateNode)
+				(set! result (cog-evaluate! entity)))
 			(if (equal? type 'PredicateNode)
 				(set! result (cog-tv entity)))
 			(if (or (equal? type 'GroundedSchemaNode)

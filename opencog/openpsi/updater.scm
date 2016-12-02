@@ -55,7 +55,7 @@
 ; Ultradian rhythm parameters
 (define-public ultradian_B .05)
 (define-public ultradian_w .02)
-(define-public ultradian_noise .02)
+(define-public ultradian_noise .01)
 
 ; --------------------------------------------------------------
 
