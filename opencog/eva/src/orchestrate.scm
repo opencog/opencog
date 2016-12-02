@@ -233,7 +233,7 @@
 			(List (Variable "sentence")))
 	))
 
-; Show happy emotion.
+; Show happy facial expression.
 ; XXX FIXME -- these have hard-coded length-of-time values in them.
 ; Most other similar behaviors have randomized values, which are
 ; controlled by bounds in the config files - cfg-sophia and cfg-eva.scm
@@ -244,7 +244,7 @@
         (List (Concept "happy") (NumberNode 3) (NumberNode 0.5))
     ))
 
-; Show amused emotion
+; Show amused facial expression
 (DefineLink
     (DefinedPredicate "Normal:amused")
     (Evaluation
