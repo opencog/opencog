@@ -115,6 +115,14 @@
 
 (StateLink face-expression-state expression-neutral)
 
+; Get the current facial expression.
+(DefineLink
+	(DefinedSchema "Get Facial Expression")
+	(Get
+		(TypedVariable (Variable "$x") (Type "ConceptNode"))
+		(State face-expression-state (Variable "$x")))
+)
+
 ; -----------
 ;; The eye-contact-state will be linked to the face-id of
 ;; person with whom we are making eye-contact with.
