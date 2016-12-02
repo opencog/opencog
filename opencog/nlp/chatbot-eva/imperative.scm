@@ -113,12 +113,15 @@
 
 		; At this time, a ListLink is used to anchor suggested
 		; actions to the current-action anchor. Wipe these out.
+		; (because we have already performed the actions).
+		; XXX FIXME we need a better way of marking actions as having
+		; been performed, already.
 		(for-each (lambda (x)
 			(cog-extract-recursive (ListLink current-action x)))
 				action-list)
 
-		; XXX replace this by AIML or something.
-		(if (eq? '() action-list)
+		; XXX replace the dont-know reply by ChatScript or something.
+		(if (null? action-list)
 			(begin
 				(State (Anchor "Chatbot: ChatbotEvaAction")
 					(Concept "Chatbot: NoResult"))
