@@ -102,7 +102,7 @@
     ; Do the filtering
     (define result (cog-execute! (MapLink filter-in-pattern filter-from)))
 
-    ; Cleanup garbage
+    ; Delete the filter-from SetLink and its encompasing MapLink.
     (cog-delete-recursive filter-from)
 
     result
