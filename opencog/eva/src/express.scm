@@ -139,7 +139,7 @@
 	(LambdaLink
 		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
 		;; Send it off to the action-orchestrator to actually do it.
-		(PutLink (DefinedPredicate "Show expression")
+		(PutLink (DefinedPredicate "Show facial expression")
 			(ListLink
 				(VariableNode "$expr")
 				(PutLink

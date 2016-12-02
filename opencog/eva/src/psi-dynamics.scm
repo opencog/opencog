@@ -11,7 +11,7 @@
 (load "express.scm") ; For random pos and neg expressions
 (load "faces.scm")
 (load "self-model.scm") ; For soma-state def
-(load "orchestrate.scm") ; For DefinedPredicate "Show expression"
+(load "orchestrate.scm") ; For DefinedPredicate "Show facial expression"
 
 ; Param setting
 (define valence-activation-level .5)
@@ -84,7 +84,7 @@
        (cog-execute!
           (PutLink (DefinedSchemaNode "Pick random expression")
              (ConceptNode "positive"))))
-     (cog-evaluate! (Put (DefinedPredicate "Show expression")
+     (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
          (ListLink expression (Number 8) (Number intensity)))))
 
 (define (do-random-negative-expression intensity)
@@ -92,17 +92,17 @@
        (cog-execute!
           (PutLink (DefinedSchemaNode "Pick random expression")
              (ConceptNode "frustrated"))))
-     (cog-evaluate! (Put (DefinedPredicate "Show expression")
+     (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
          (ListLink expression (Number 8) (Number intensity)))))
 
 (define (be-happy intensity)
     ;(display "in (be-happy)\n")
-    (cog-evaluate! (Put (DefinedPredicate "Show expression")
+    (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
         (ListLink (Concept "happy") (Number 8) (Number intensity)))))
 
 (define (be-sad intensity)
     ;(display "in (be-sad)\n")
-    (cog-evaluate! (Put (DefinedPredicate "Show expression")
+    (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
         (ListLink (Concept "sad") (Number 8) (Number intensity)))))
 
 ; Temp error catching for when blender not running

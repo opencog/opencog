@@ -33,7 +33,7 @@
 ; The expression name should be one of the supported blender animations.
 ;
 ; Example usage:
-;    (cog-evaluate! (Put (DefinedPredicate "Show expression")
+;    (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
 ;         (ListLink (Concept "happy") (Number 6) (Number 0.6))))
 ;
 ; As of right now, there is nothing to "orchestrate" here, since each
@@ -50,7 +50,7 @@
 ; TimeServer, instead.
 ;
 (DefineLink
-	(DefinedPredicate "Show expression")
+	(DefinedPredicate "Show facial expression")
 	(LambdaLink
 		(VariableList
 			(Variable "$expr")
