@@ -583,7 +583,7 @@
 
 (define-public (get-face-id face-concept)
 "
-  For casting ConceptNode to NumberNode
+  get-face-id FACE-CONCEPT - Cast ConceptNode to NumberNode
 "
 	(NumberNode (cog-name face-concept))
 )

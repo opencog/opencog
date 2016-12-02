@@ -125,7 +125,7 @@
 
 ; -------------------------------------------------------------
 ; As above, but (momentarily) break eye contact, first.
-; Otherwise, the behavior tree forces eye contact to be continueally
+; Otherwise, the behavior tree forces eye contact to be continually
 ; running, and the turn-look command is promptly over-ridden.
 ; XXX FIXME, this is still broken during search for attention.
 
