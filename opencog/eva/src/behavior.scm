@@ -100,6 +100,7 @@
 ; -- prior emotions when interacting with that face were positive
 ; -- prior emotions when interacting with that face were negative
 ; -- prior emotions when interacting with that face were neutral
+; We conflate "emotion" and "facial expression" here.
 ;
 ; 4) Introduction sequence
 ;    If the robot is talking to someone with whom it has not previously
@@ -175,7 +176,7 @@
 	(SequentialAnd
 		(DefinedPredicate "was room empty?")
 		; Record a new emotional state (for self-awareness)
-		; XXX FIXME this should be a prt of "Show random expression"
+		; XXX FIXME this should be a part of "Show random expression"
 		; below ...
 		(Put (DefinedPredicate "Request Set Face Expression")
 			(ListLink bhv-source (Concept "new-arrival")))
