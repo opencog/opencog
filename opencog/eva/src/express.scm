@@ -14,14 +14,16 @@
 ; (not implemented yet).
 ;
 ; --------------------------------------------------------
-; Given the name of a emotion, pick one of the allowed emotional
-; expressions at random. Example usage:
+; Given the name of an emotional-expression class, randomly pick one
+; of the facial expression animations in that class, at random.
+;
+; Example usage:
 ;
 ;   (cog-execute!
 ;      (PutLink (DefinedSchemaNode "Pick random expression")
 ;         (ConceptNode "positive")))
 ;
-; This will pick out one of the "positive" emotions (defined in the
+; This will pick out one of the "positive" expressions (defined in the
 ; previously-loaded `cfg-*.scm` file) and return it, as a `Concept`.
 ; For example: `(ConceptNode "comprehending")`
 ;
@@ -70,8 +72,8 @@
 				)))))
 
 ; Pick a random numeric value, lying in the range between min and max.
-; The range min and max depends on an emotion-expression pair. For an
-; example usage, see below.
+; The range min and max depends on a emotion-class+facial-expression
+; pair. For an example usage, see below.
 (define (pick-value-in-range min-name max-name)
 	(LambdaLink
 		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
@@ -88,10 +90,10 @@
 					(SchemaNode max-name)) (VariableNode "$int-max")))
 		)))
 
-; Get a random intensity value for the indicated emotion-expression.
-; That is, given an emotion-expression pair, this wil look up the
-; min and max allowed intensity levels, and return a random number
-; betwee these min and max values.
+; Get a random intensity value for the indicated emotion-class +
+; facial-expression. That is, given an emotion-class+facial-expression
+; pair, this wil look up the min and max allowed intensity levels, and
+; return a random number between these min and max values.
 ;
 ; Example usage:
 ;    (cog-execute!
@@ -122,10 +124,10 @@
 	(DefinedSchemaNode "get random speed")
 	(pick-value-in-range "speed-min" "speed-max"))
 
-; Show an expression from a given emotional class. Sends the expression
-; to the action orchestrator for display.  The intensity and duration
-; of the expression is picked randomly from the configuration
-; parameters for the emotion-expression class.
+; Show a facial expression from a given emotional class. Sends the
+; expression to the action orchestrator for display.  The intensity
+; and duration of the expression is picked randomly from the configuration
+; parameters for the emotion class.
 ;
 ; Example usage:
 ;    (cog-evaluate!
@@ -149,9 +151,9 @@
 		))
 	))
 
-; Show a gesture for a given emotional class. Sends the gesture
-; to ROS for display.  The intensity, repetition and speed of the
-; gesture is picked randomly from the parameters for the emotion-gesture.
+; Show a gesture for a given emotional-expression class. Sends the
+; gesture to ROS for display.  The intensity, repetition and speed of the
+; gesture is picked randomly from the parameters for the facial-gesture.
 ;
 ; Example usage:
 ;    (cog-evaluate!
@@ -179,8 +181,8 @@
 	))
 
 ;
-; Pick an expression out of the given emotional class, and send it to
-; the action orchestrator for display.
+; Pick a facial expression out of the given emotional-expression class,
+; and send it to the action orchestrator for display.
 ; The expression is picked randomly from the class of expressions for
 ; the given emotion.  Likewise, the strength of display, and the
 ; duration are picked randomly.
@@ -190,7 +192,8 @@
 ;       (PutLink (DefinedPredicateNode "Show random expression")
 ;          (ConceptNode "positive")))
 ;
-; will pick one of the "positive" emotions, and send it off to ROS.
+; The above will pick one of the "positive" facial expressions, and
+; send it off to ROS.
 ;
 (DefineLink
 	(DefinedPredicateNode "Show random expression")
@@ -224,7 +227,7 @@
 ; --------------------------------------------------------
 ; Show facial expressions and gestures suitable for a given emotional
 ; state. These are random selectors, picking some expression randomly
-; from a meu of choices, ad displaying it.
+; from a menu of choices, and displaying it.
 
 ;; Pick random expression, and display it.
 (DefineLink
