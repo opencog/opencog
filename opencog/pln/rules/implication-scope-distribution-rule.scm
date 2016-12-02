@@ -30,16 +30,25 @@
      (VariableNode "$Q")))
 
 (define implication-scope-distribution-body
-  (QuoteLink (ImplicationScopeLink
-     (UnquoteLink (VariableNode "$TyVs"))
-     (UnquoteLink (VariableNode "$P"))
-     (UnquoteLink (VariableNode "$Q")))))
+  (Quote (ImplicationScopeLink
+     (Unquote (VariableNode "$TyVs"))
+     (Unquote (VariableNode "$P"))
+     (Unquote (VariableNode "$Q")))))
 
 (define implication-scope-distribution-rewrite
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: implication-scope-distribution-formula")
      (ListLink
-        implication-scope-distribution-body)))
+        implication-scope-distribution-body
+        (Implication
+           (LocalQuote
+           (Lambda
+              (VariableNode "$TyVs")
+              (VariableNode "$P")))
+           (LocalQuote
+           (Lambda
+              (VariableNode "$TyVs")
+              (VariableNode "$Q")))))))
 
 (define implication-scope-distribution-rule
   (BindLink
@@ -47,18 +56,8 @@
      implication-scope-distribution-body
      implication-scope-distribution-rewrite))
 
-(define (implication-scope-distribution-formula Impl)
-  (let* (
-         (Impl-outgoings (cog-outgoing-set Impl))
-         (SV (car Impl-outgoings))
-         (P (cadr Impl-outgoings))
-         (Q (caddr Impl-outgoings))
-         (Impl-tv (cog-tv Impl)))
-    (cog-set-tv!
-     (ImplicationLink
-        (LambdaLink SV P)
-        (LambdaLink SV Q))
-     Impl-tv)))
+(define (implication-scope-distribution-formula ImplSc Impl)
+  (cog-set-tv! Impl (cog-tv ImplSc)))
 
 ;; Name the rule
 (define implication-scope-distribution-rule-name
