@@ -177,7 +177,7 @@
 		; Record a new emotional state (for self-awareness)
 		; XXX FIXME this should be a prt of "Show random expression"
 		; below ...
-		(Put (DefinedPredicate "Request Set Emotion State")
+		(Put (DefinedPredicate "Request Set Face Expression")
 			(ListLink bhv-source (Concept "new-arrival")))
 
 		(DefinedPredicate "interact with new person")
@@ -408,7 +408,7 @@
 	(DefinedPredicateNode "Search for attention")
 	(SequentialAndLink
 		; Proceed only if we are allowed to.
-		(Put (DefinedPredicate "Request Set Emotion State")
+		(Put (DefinedPredicate "Request Set Face Expression")
 			(ListLink bhv-source (ConceptNode "bored")))
 
 		; If the room is empty, but we hear people talking ...
@@ -460,7 +460,7 @@
 	(DefinedPredicate "Go to sleep")
 	(SequentialAnd
 		; Proceed only if we are allowed to.
-		(Put (DefinedPredicate "Request Set Emotion State")
+		(Put (DefinedPredicate "Request Set Face Expression")
 			(ListLink bhv-source (ConceptNode "sleepy")))
 
 		; Proceed with the sleep animation only if the state
@@ -494,7 +494,7 @@
 			(ListLink bhv-source soma-awake))
 
 		; Proceed only if we are allowed to.
-		(Put (DefinedPredicate "Request Set Emotion State")
+		(Put (DefinedPredicate "Request Set Face Expression")
 			(ListLink bhv-source (ConceptNode "wake-up")))
 
 		(Evaluation (GroundedPredicate "scm: print-msg-time")

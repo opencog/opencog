@@ -200,7 +200,7 @@
 ; request source or on other factors.
 
 (DefineLink
-	(DefinedPredicate "Request Set Emotion State")
+	(DefinedPredicate "Request Set Face Expression")
 	(LambdaLink
 		(VariableList
 			(Variable "$requestor")
