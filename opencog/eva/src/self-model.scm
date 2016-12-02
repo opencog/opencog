@@ -292,7 +292,7 @@
 (State loud-sound no-loud-sound)
 
 ;; Current decibel value.
-(define-public decibel-value (AnchorNode "Decibel value"))
+(define decibel-value (AnchorNode "Decibel value"))
 (define very-low-sound (Number 35))
 (define normal-conversation (Number 65))
 (define very-loud-sound (Number 90)) 
@@ -301,41 +301,43 @@
 ; The default decibel value.
 (State decibel-value no-sound)
 
+;;Return true if sound is heard
 (DefineLink
 	(DefinedPredicate "Heard Sound?")
-	(NotLink (Equal
-		(SetLink no-sound)
-		(Get
-			(TypedVariable (Variable "$b") (Type "NumberNode"))
-			(State decibel-value (Variable "$b"))))
+	(SequentialAnd
+		(NotLink (Equal (SetLink no-sound)
+			(Get
+				(TypedVariable (Variable "$x") (Type "NumberNode"))
+				(State decibel-value (Variable "$x")))))
+		(True (Put (State decibel-value (Variable "$x")) no-sound))
 	))
 
 ;; Return true if a loud voice is heard
 (DefineLink
 	(DefinedPredicate "Heard Loud Voice?")
 	(GreaterThan
-		(Get (State loud-sound (Variable "$x")))
+        (Get (State loud-sound (Variable "$x")))
 		no-loud-sound))
 
 ;; Return true if low sound is heard
 (DefineLink
     (DefinedPredicate "very low sound?")
-      (NotLink (GreaterThan
+    (NotLink (GreaterThan
         (Get (State decibel-value (Variable "$y")))
         very-low-sound)))
         
 ;; Return true for normal conversation
 (DefineLink
-   (DefinedPredicate "normal conversation?")
+    (DefinedPredicate "normal conversation?")
     (NotLink (GreaterThan
         (Get (State decibel-value (Variable "$z")))
         normal-conversation)))
         
 ;; Return true if a very loud sound is heard
 (DefineLink
-	(DefinedPredicate "Heard very loud sound?")
-	(NotLink (GreaterThan
-		(Get (State decibel-value (Variable "$a")))
+    (DefinedPredicate "Heard very loud sound?")
+    (NotLink (GreaterThan
+	    (Get (State decibel-value (Variable "$a")))
 		very-loud-sound)))
 ;--------------------------------------------
 ;;For Saliency
@@ -350,26 +352,20 @@
 (define initial-degree (Number 0))
 (State salient initial-degree)
 
-
 (DefineLink 
-	(DefinedPredicate "saliency")
-	(GreaterThan
-		(Get (State salient (Variable"$S")))
-		(Number 13)))
-
-(DefineLink
-	(DefinedPredicate "no faces")
-	(EqualLink
-		(DefinedSchemaNode "Num visible faces")
-		(NumberNode 0)))
+    (DefinedPredicate "saliency")
+    (GreaterThan
+	    (Get (State salient (Variable"$S")))
+	    (Number 13)))
 
 (DefineLink 
 	(DefinedPredicate "saliency required?")
 	(SequentialAnd
-		(DefinedPredicateNode "no faces")
-		 (DefinedPredicate "saliency")))
+		(EqualLink
+		    (DefinedSchemaNode "Num visible faces")
+		    (NumberNode 0))
+		(DefinedPredicate "saliency")))
 		
-
 ;---------------------------------------------------------
 ;;For Luminance
 (define luminance-value (AnchorNode "luminance"))
@@ -770,8 +766,6 @@
 				(State eye-contact-state (Variable "$x")))))
 	))
 	
-	
-
 ;; Break eye contact; this does not change the interaction state.
 (DefineLink
 	(DefinedPredicate "break eye contact")

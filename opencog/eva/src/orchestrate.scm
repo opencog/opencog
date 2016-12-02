@@ -229,7 +229,7 @@
 (DefineLink
 	(DefinedPredicate "Say")
 	(LambdaLink (Variable "sentence")
-		(Evaluation
+	    (Evaluation
 			(GroundedPredicate "py: say_text")
 			(List (Variable "sentence")))
 	))
@@ -237,18 +237,13 @@
 ;Salient
 (DefineLink
     (DefinedPredicate "look at salient point")
-   
-	 (True (Put
-     (Evaluation
-
+    (True (Put (Evaluation
         (DefinedPredicate "Look at point")
-         (ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
-        (Get (State salient-loc
-
-                (ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+        (ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+            (Get (State salient-loc
+            (ListLink (Variable "$x") (Variable "$y") (Variable "$z"))))
         )))
-        )
-        
+               
 
 ; -------------------------------------------------------------
 ; For updating web-ui
