@@ -364,7 +364,8 @@
 						"pos-dialog: ~a  neg-dialog: ~a  "
 						"\n\n"
 						"arousal: ~a  pos-valence: ~a  neg-valence: ~a  "
-						"agent power: ~a  voice: ~a  "
+						"agent power: ~a  "
+						;"voice: ~a  "
 						"\n\n")
 					(highlight-display speech-giving-starts)
 					(highlight-display new-face)
@@ -374,7 +375,7 @@
 					(highlight-display pos-valence)
 					(highlight-display neg-valence)
 					(highlight-display power)
-					(highlight-display voice-width)
+					;(highlight-display voice-width)
 				)
 				(close-output-port output-port))))
 
