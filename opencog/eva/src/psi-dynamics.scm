@@ -2,6 +2,7 @@
 ; psi-dynamics.scm
 ;
 ; OpenPsi dynamics control for Hanson robot
+; XXX FIXME. Does not actually use OpenPsi, yet.
 
 (use-modules (opencog) (opencog exec) (opencog openpsi) (opencog python))
 
@@ -77,23 +78,42 @@
 (psi-set-expression-callback! psi-expression-callback)
 
 ; ------------------------------------------------------------------
-; Functions to initiate random positive and negative epxerssions
+; Functions to initiate random positive and negative expressions
 
+; XXX FIXME -- this is hacky -- and has multiple design flaws.
+; These are:
+;
+; * This should not use cog-evaluate! to force execution. Instead,
+;   this should be placed in the action part of an open-psi rule.
+;   Then, when that psi-rule triggers, the action will automatically
+;   triggered, and the actin will be performed. No cog-execute! is
+;   needed, because it will happen automatically.
+;
+; * This should used the defined predicates in express.scm, which
+;   will automatically provide an appropriate, configurable, random
+;   duration for the expression, instead of the hard-coded 8 seconds
+;   below.
+;
+; * There are a hell of a lot more valencies than just "positive"
+;   and "negative". Take a look at cfg-sophia.scm to see some of them:
+;   these include: bored, sleeping, aroused, listening (attentive),
+;   speaking (active). A full list of nine valencies are given in
+;   the `README-affects.md` in the base directory.
 (define (do-random-positive-expression intensity)
-    (define expression
-       (cog-execute!
-          (PutLink (DefinedSchemaNode "Pick random expression")
-             (ConceptNode "positive"))))
-     (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
-         (ListLink expression (Number 8) (Number intensity)))))
+     (cog-evaluate!
+         (Put (DefinedPredicate "Show facial expression")
+             (ListLink
+                 (PutLink (DefinedSchemaNode "Pick random expression")
+                     (ConceptNode "positive"))
+                 (Number 8) (Number intensity)))))
 
 (define (do-random-negative-expression intensity)
-    (define expression
-       (cog-execute!
-          (PutLink (DefinedSchemaNode "Pick random expression")
-             (ConceptNode "frustrated"))))
-     (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
-         (ListLink expression (Number 8) (Number intensity)))))
+     (cog-evaluate!
+         (Put (DefinedPredicate "Show facial expression")
+             (ListLink
+                 (PutLink (DefinedSchemaNode "Pick random expression")
+                     (ConceptNode "frustrated"))
+                 (Number 8) (Number intensity)))))
 
 (define (be-happy intensity)
     ;(display "in (be-happy)\n")
