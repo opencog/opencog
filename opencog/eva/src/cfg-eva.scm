@@ -11,7 +11,7 @@
 ;
 ; --------------------------------------------------------
 ; Emotional-state to expression mapping. For a given emotional state
-; (for example, happy, bored, excited) this specifies a range of
+; (for example, happy, bored, excited), this specifies a range of
 ; expressions to display for that emotional state, as well as the
 ; intensities and durations.
 
@@ -99,7 +99,7 @@
 
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
-; (for example, happy, bored, excited) this specifies a range of
+; (for example, happy, bored, excited), this specifies a range of
 ; gestures to display for that emotional state, as well as the
 ; intensities and durations.
 ;

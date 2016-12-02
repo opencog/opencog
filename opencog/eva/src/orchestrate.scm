@@ -56,7 +56,7 @@
 			;; Record the time
 			(TrueLink (DefinedSchema "set expression timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:do_emotion")
+			(EvaluationLink (GroundedPredicate "py:do_face_expression")
 				(ListLink
 					(Variable "$expr")
 					(Variable "$duration")
@@ -126,7 +126,7 @@
 
 ; -------------------------------------------------------------
 ; As above, but (momentarily) break eye contact, first.
-; Otherwise, the behavior tree forces eye contact to be continueally
+; Otherwise, the behavior tree forces eye contact to be continually
 ; running, and the turn-look command is promptly over-ridden.
 ; XXX FIXME, this is still broken during search for attention.
 
@@ -191,7 +191,7 @@
 	))
 
 ; -------------------------------------------------------------
-; Request to change the emotion state.
+; Request to change the facial expression state.
 ; Takes two arguments: the requestor, and the proposed state.
 ;
 ; Currently, this always honors all requests.
@@ -201,12 +201,12 @@
 ; request source or on other factors.
 
 (DefineLink
-	(DefinedPredicate "Request Set Emotion State")
+	(DefinedPredicate "Request Set Face Expression")
 	(LambdaLink
 		(VariableList
 			(Variable "$requestor")
 			(Variable "$state"))
-		(True (State emotion-state (Variable "$state")))
+		(True (State face-expression-state (Variable "$state")))
 	))
 
 ; -------------------------------------------------------------

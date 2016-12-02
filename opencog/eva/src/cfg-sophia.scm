@@ -11,7 +11,7 @@
 ;
 ; --------------------------------------------------------
 ; Emotional-state to expression mapping. For a given emotional state
-; (for example, happy, bored, excited) this specifies a range of
+; (for example, happy, bored, excited), this specifies a range of
 ; expressions to display for that emotional state, as well as the
 ; intensities and durations.
 ;
@@ -25,7 +25,8 @@
 ; * max duration of expression
 ;
 ; To view the available expressions, do this:
-; rostopic echo /blender_api/available_emotion_states
+;   `rostopic echo /blender_api/available_emotion_states`
+; You should see a response similar to the below:
 ; ['worry', 'happySurprise', 'happy.001', 'recoil', 'happyDisgust', 'happy',
 ; 'surprisedSad', 'surprised', 'sad', 'irritated', 'happy.002', 'fearSuprise',
 ; 'fear', 'engaged', 'disgustSurprise', 'disgust.Sad', 'disgust', 'contempt',
@@ -155,7 +156,7 @@
 (emo-expr-spec "luminance-happy" "happy"     1 0.5 0.9 3 6)
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
-; (for example, happy, bored, excited) this specifies a range of
+; (for example, happy, bored, excited), this specifies a range of
 ; gestures to display for that emotional state, as well as the
 ; intensities and durations.
 ;

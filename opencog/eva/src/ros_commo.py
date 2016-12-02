@@ -105,7 +105,7 @@ class EvaControl():
 		self.soma_state('normal', 0.1, 1, 3)
 
 	# ----------------------------------------------------------
-	# Wrapper for emotional expressions
+	# Wrapper for facial expressions
 	def expression(self, name, intensity, duration):
 		if 'noop' == name or (not self.control_mode & self.C_EXPRESSION):
 			return
@@ -115,8 +115,8 @@ class EvaControl():
 		exp.magnitude = intensity
 		exp.duration.secs = int(duration)
 		exp.duration.nsecs = 1000000000 * (duration - int(duration))
-		self.emotion_pub.publish(exp)
-		print "Publish expression:", exp.name
+		self.expression_pub.publish(exp)
+		print "Publish facial expression:", exp.name
 
 	# Wrapper for Soma state expressions
 	def soma_state(self, name, intensity, rate, ease_in=0.0):
@@ -303,9 +303,9 @@ class EvaControl():
 	def get_gestures_cb(self, msg):
 		print("Available Gestures:" + str(msg.data))
 
-	# Get the list of available emotional expressions.
-	def get_emotion_states_cb(self, msg):
-		print("Available Emotion States:" + str(msg.data))
+	# Get the list of available facial expressions.
+	def get_expressions_cb(self, msg):
+		print("Available Facial Expressions:" + str(msg.data))
 
 	# ----------------------------------------------------------
 
@@ -466,15 +466,15 @@ class EvaControl():
 			self.client = None
 
 		# ----------------
-		# Get the available animations
+		# Get the available facial animations
 		rospy.Subscriber("/blender_api/available_emotion_states",
-		       AvailableEmotionStates, self.get_emotion_states_cb)
+		       AvailableEmotionStates, self.get_expressions_cb)
 
 		rospy.Subscriber("/blender_api/available_gestures",
 		       AvailableGestures, self.get_gestures_cb)
 
 		# Send out facial expressions and gestures.
-		self.emotion_pub = rospy.Publisher("/blender_api/set_emotion_state",
+		self.expression_pub = rospy.Publisher("/blender_api/set_emotion_state",
 		                                   EmotionState, queue_size=1)
 		self.gesture_pub = rospy.Publisher("/blender_api/set_gesture",
 		                                   SetGesture, queue_size=1)

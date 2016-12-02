@@ -8,7 +8,7 @@
 ;
 ; --------------------------------------------------------
 ; Emotional-state to expression mapping. For a given emotional state
-; (for example, happy, bored, excited) this specifies a range of
+; (for example, happy, bored, excited), this specifies a range of
 ; expressions to display for that emotional state, as well as the
 ; intensities and durations.  `emo-set` adds an expression to an
 ; emotional state, while `emo-map` is used to set parameters.
@@ -35,7 +35,7 @@
 
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
-; (for example, happy, bored, excited) this specifies a range of
+; (for example, happy, bored, excited), this specifies a range of
 ; gestures to display for that emotional state, as well as the
 ; intensities and durations.  `ges-set` adds a gesture to an
 ; emotional state, while `ges-map` is used to set parameters.

@@ -85,12 +85,12 @@ def gaze_at_face_point(x, y, z):
 	evl.gaze_at_point(x, y, z)
 	return TruthValue(1, 1)
 
-def do_emotion(emotion_node, duration_node, intensity_node):
-	emotion = emotion_node.name
+def do_face_expression(face_expression_node, duration_node, intensity_node):
+	face_expression = face_expression_node.name
 	intensity = float(intensity_node.name)
 	duration = float(duration_node.name)
-	# print "Python emotion: ", emotion, " for ", duration, " int ", intensity
-	evl.expression(emotion, intensity, duration)
+	# print "Python facial expression: ", face_expression, " for ", duration, " int ", intensity
+	evl.expression(face_expression, intensity, duration)
 	return TruthValue(1, 1)
 
 def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):
