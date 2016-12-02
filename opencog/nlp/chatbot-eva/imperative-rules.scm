@@ -2,7 +2,7 @@
 ; imperative-rules.scm
 ;
 ; Rules for converting English-langauge imperatives into an
-; intermediate, simplified form. 
+; intermediate, simplified form.
 ;
 ; Language processing runs in multiple steps: the rules here are the
 ; first step: they convert parsed (link-grammar, relex) sentences into
@@ -56,6 +56,11 @@
 ; when in both cases the correct result would be _to-do(look,left)
 ; So instead of trusting relex, we are just going to drop back
 ; to link-grammar, and look for the MVa/Pa link instead.
+;
+; FYI: This definition (the next 30+ lines) is just an example, and is
+; not used - this definition is over-ridden, below, by a shorter, more
+; abstract variant that does the same thing. This example is easier to
+; understand.
 (define look-rule-1
 	(BindLink
 		(VariableList
@@ -91,6 +96,11 @@
 
 ; Matches sentences of the form "look to the right" and
 ; "look to the left".
+;
+; FYI: This definition (the next 30+ lines) is just an example, and is
+; not used - this definition is over-ridden, below, by a shorter, more
+; abstract variant that does the same thing. This example is easier to
+; understand.
 (define look-rule-2
 	(BindLink
 		(VariableList
@@ -175,7 +185,7 @@
 ; Handles sentences such as "Turn left", "Look up" and also "look happy"
 (define look-rule-1
 	(imperative-object-rule-template
-		; VERB-LIST
+		; VERB-LIST -- a list of synonyms
 		(OrLink
 			(Equal (Variable "$verb") (WordNode "face"))
 			(Equal (Variable "$verb") (WordNode "look"))
@@ -191,7 +201,7 @@
 ; Handles directional sentences with "to", such as "turn to the left".
 (define look-rule-2
 	(imperative-object-rule-template
-		; VERB-LIST
+		; VERB-LIST -- a list of synonyms
 		(OrLink
 			(Equal (Variable "$verb") (WordNode "face"))
 			(Equal (Variable "$verb") (WordNode "look"))
@@ -213,8 +223,8 @@
 ;
 ; (1) implement fuzzy matching, so that anything vaguely close to the
 ;     desired imperative will get matched.
-; (2) implement synonymous phrases, rather than listing syonymous verbs
-;     explicitly
+; (2) implement synonymous phrases, rather than listing synonymous
+;     verbs explicitly.
 ; (3) implement automated learning of new rules, and refinement of
 ;     existing rules.
 
@@ -292,7 +302,8 @@
 	))
 
 ; Direct-object imperatives: "feign happiness", "mimic fear",
-; "portray confusion", etc.
+; "portray confusion", etc. This is nothing more than a list of
+; synonyms.
 (define show-rule-2
 	(imperative-object-rule-template
 		(OrLink
