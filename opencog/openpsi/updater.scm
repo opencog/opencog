@@ -52,7 +52,8 @@
 
 ; Ultradian rhythm parameters
 (define-public ultradian_B .05)
-(define-public ultradian_w .1)
+(define-public ultradian_w .02)
+(define-public ultradian_noise .02)
 
 ; --------------------------------------------------------------
 
@@ -78,19 +79,19 @@
 ; Todo: Change this to DSN atomese
 (define (psi-set-expression-callback! callback)
 "
-    Callback function that triggers emotion expression update.
+	Callback function that triggers emotion expression update.
 
-    This callback function is supplied by the client and gets called when
-    OpenPsi believes a change of emotion expression based on psi values would be
-    good to do (e.g., after a new event is detected and psi params have been
-    updated)
+	This callback function is supplied by the client and gets called when
+	OpenPsi believes a change of emotion expression based on psi values would be
+	good to do (e.g., after a new event is detected and psi params have been
+	updated)
 "
 	(set! psi-expression-callback callback))
 
 
 (define-public (psi-set-event-callback! callback)
 "
-    Callback functions for event detection
+	Callback functions for event detection
 "
 	; Save callback function for event detection
 	; Todo: change this to DSN's?
@@ -117,7 +118,7 @@
 
 	(if verbose (display "psi-updater-init\n"))
 
-    ; Init previous value table for the monitored entities
+	; Init previous value table for the monitored entities
 	(for-each (lambda (eval-link)
 				(define key (gadr eval-link))
 				(define value (psi-get-number-value key))
@@ -132,17 +133,17 @@
 	; in the output.
 	; Todo: not sure if this is the best way to handle this
 	(if logging
-	    (begin
-            (set! psi-monitored-entities (delete-duplicates
-                (append (psi-get-modulators) (append (psi-get-secs)
-                psi-monitored-entities))))
-        )
-    )
+		(begin
+			(set! psi-monitored-entities (delete-duplicates
+				(append (psi-get-modulators) (append (psi-get-secs)
+				psi-monitored-entities))))
+		)
+	)
 
 	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
 	(if verbose (format #t "monitored entities: ~a\n" psi-monitored-entities))
 
-    ; Set most-recent timestamps for events
+	; Set most-recent timestamps for events
 	(set! psi-monitored-events (psi-get-monitored-events))
 	(if verbose (format #t "monitored events: ~a\n" psi-monitored-events))
 	(for-each (lambda (event)
@@ -172,26 +173,26 @@
   At each step:
   (1a) Evaluate the monitored events and set their 'event-detected' predicates
    (1) Evaluate the monitored entities and set their 'changed' predicates, and
-       for each changed entity store it's value in a value-at-step-start (this,
-       or otherwise storing the change magnitude, is needed because the current
-       value of a trigger entity might change because of application of a
-       previous rule.)
+	   for each changed entity store it's value in a value-at-step-start (this,
+	   or otherwise storing the change magnitude, is needed because the current
+	   value of a trigger entity might change because of application of a
+	   previous rule.)
    (2) Store the current value or change magnitude before firing the rules
-       because the current value of the trigger might change as a result of a
-       previous rule.
+	   because the current value of the trigger might change as a result of a
+	   previous rule.
    (3) Execute the interaction rules
  (3.5) Add endogenous ultradian rhythm
    (4) Update the previous values of the changed monitored params
   (4b) Set the previous values of the event predicates to 0, because each
-       particular instance of an event should only fire rules at a single step.
+	   particular instance of an event should only fire rules at a single step.
 "
 	(define changed-params '())
 	(define detected-events '())
 	(define value-at-step-start (make-hash-table 20))
 
 	; These are used just for display highlighting for debug output
-    (define monitored-pau '())
-    (define changed-pau '())
+	(define monitored-pau '())
+	(define changed-pau '())
 
 	(define (set-param-change-status param)
 		(define changed-tv)
@@ -202,113 +203,114 @@
 		;(format #t "set-param-change-status: ~a  psi-change-in?: ~a\n"
 		;	param (psi-change-in? param))
 		(if (psi-change-in? param)
-            (begin
-                (if verbose
-                    (format #t "\n*** Found change in : ~a   loop ~a\n" param
-                        psi-updater-loop-count))
-                (set! changed-params
-                    (append changed-params (list param)))
-                (set! previous-val (hash-ref prev-value-table param))
-                (set! current-val (psi-get-number-value param))
-                (if verbose
-                    (format #t "previous: ~a  current: ~a\n" previous-val
-                        current-val))
-                ;Todo: If previous-val was #f (iow not set), assume previous
-                ;value to be 0? Doing that for now, but not sure if this is best.
-                (if (eq? previous-val #f)
-                    (set! previous-val 0))
-                (hash-set! value-at-step-start param
-                    (psi-get-number-value param))
-                (set! changed-tv (stv 1 1))
-                (if (> current-val previous-val)
-                    (begin
-	                    (set! pos-change-tv (stv 1 1))
-	                    (set! neg-change-tv (stv 0 1)))
-	                (begin
-	                    (set! pos-change-tv (stv 0 1))
-	                    (set! neg-change-tv (stv 1 1)))))
+			(begin
+				(if verbose
+					(format #t "\n*** Found change in : ~a   loop ~a\n" param
+						psi-updater-loop-count))
+				(set! changed-params
+					(append changed-params (list param)))
+				(set! previous-val (hash-ref prev-value-table param))
+				(set! current-val (psi-get-number-value param))
+				(if verbose
+					(format #t "previous: ~a  current: ~a\n" previous-val
+						current-val))
+				;Todo: If previous-val was #f (iow not set), assume previous
+				;value to be 0? Doing that for now, but not sure if this is best.
+				(if (eq? previous-val #f)
+					(set! previous-val 0))
+				(hash-set! value-at-step-start param
+					(psi-get-number-value param))
+				(set! changed-tv (stv 1 1))
+				(if (> current-val previous-val)
+					(begin
+						(set! pos-change-tv (stv 1 1))
+						(set! neg-change-tv (stv 0 1)))
+					(begin
+						(set! pos-change-tv (stv 0 1))
+						(set! neg-change-tv (stv 1 1)))))
 
-            (begin ; no change in the param
-                (set! changed-tv (stv 0 1))
-                (set! pos-change-tv (stv 0 1))
-                (set! neg-change-tv (stv 0 1))))
+			(begin ; no change in the param
+				(set! changed-tv (stv 0 1))
+				(set! pos-change-tv (stv 0 1))
+				(set! neg-change-tv (stv 0 1))))
 
-        (Evaluation changed-tv
-            (Predicate "psi-changed")
-            (List
-                param))
+		(Evaluation changed-tv
+			(Predicate "psi-changed")
+			(List
+				param))
 
-        (Evaluation pos-change-tv
-            (Predicate "psi-increased")
-            (List
-                param))
+		(Evaluation pos-change-tv
+			(Predicate "psi-increased")
+			(List
+				param))
 
-        (Evaluation neg-change-tv
-            (Predicate "psi-decreased")
-            (List
-                param))
-    )
+		(Evaluation neg-change-tv
+			(Predicate "psi-decreased")
+			(List
+				param))
+	)
 
-    (define (set-new-event-status event)
-        (define prev-most-recent-ts (hash-ref prev-most-recent-ts-table event))
-        (define curr-most-recent-ts (psi-get-most-recent-ts event))
-        (define new-event-tv)
-        ;(format #t "set-new-event-status event: ~a" event)
-        ;(format #t "prev-most-recent-ts: ~a   curr-most-recent-ts: ~a\n" prev-most-recent-ts
-        ;    curr-most-recent-ts)
-        (if (not (equal? prev-most-recent-ts curr-most-recent-ts))
-            (begin
-                (if verbose
-                    (format #t "\n*** Detected event occurrence: ~a  loop ~a\n"
-                        event psi-updater-loop-count))
-                (set! detected-events
-                    (append detected-events (list event)))
+	(define (set-new-event-status event)
+		(define prev-most-recent-ts (hash-ref prev-most-recent-ts-table event))
+		(define curr-most-recent-ts (psi-get-most-recent-ts event))
+		(define new-event-tv)
+		;(format #t "set-new-event-status event: ~a" event)
+		;(format #t "prev-most-recent-ts: ~a   curr-most-recent-ts: ~a\n" prev-most-recent-ts
+		;    curr-most-recent-ts)
+		(if (not (equal? prev-most-recent-ts curr-most-recent-ts))
+			(begin
+				(if verbose
+					(format #t "\n*** Detected event occurrence: ~a  loop ~a\n"
+						event psi-updater-loop-count))
+				(set! detected-events
+					(append detected-events (list event)))
 
-                ; set the event value to one
+				; set the event value to one
 				(psi-set-value! event 1)
-                ; replace previous-latest-ts with current-latest-ts
-                (hash-set! prev-most-recent-ts-table event curr-most-recent-ts)
+				; replace previous-latest-ts with current-latest-ts
+				(hash-set! prev-most-recent-ts-table event curr-most-recent-ts)
 			)
 		)
 	)
 
 	(define (highlight-display var)
-        ; add astericks to highlight changed values
-        (define value (psi-get-number-value var))
-        (if (number? value)
-            (if (or (member var changed-params)
-                    (member var changed-pau))
-                (format #f "*~1,2f*" value)
-                (format #f "~1,2f" value))
-            ; value is not a number, just return it
-            value))
+		; add astericks to highlight changed values
+		(define value (psi-get-number-value var))
+		(if (number? value)
+			(if (or (member var changed-params)
+					(member var changed-pau))
+				(format #f "*~1,2f*" value)
+				(format #f "~1,2f" value))
+			; value is not a number, just return it
+			value))
 
-    ; Ultradian rhythm update function
+	; Ultradian rhythm update function
 	(define (ultradian-update val)
-	    ; Defining these globally so we can tweak on the fly
-	    ;(define B .01)
-	    ;(define w .1)
-	   ; (max 0 (+ (* B (sin (* w psi-updater-loop-count))) val))
+		; Defining these globally so we can tweak on the fly
+		;(define B .01)
+		;(define w .1)
+		;(max 0 (+ (* B (sin (* w psi-updater-loop-count))) val))
 
-	    ;(+ (* B (sin (* w psi-updater-loop-count))) val)
+		;(+ (* B (sin (* w psi-updater-loop-count))) val)
 
-	    (set! val (+ (* ultradian_B ultradian_w (cos (* ultradian_w psi-updater-loop-count))) val))
+		(define ultradian-rhythm (* ultradian_B ultradian_w (cos
+			(* ultradian_w psi-updater-loop-count))))
+		(define noise (- (random ultradian_noise) (/ ultradian_noise 2)))
+		;(set! noise 0)
+		(set! val (+ val ultradian-rhythm noise))
 
-	    (set! val (min (max 0 val) 1))
-
-	    val
-
+		(set! val (min (max 0 val) 1))
+		val
 	)
 
-
-   	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
+	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 
 
 	; Event Detection
 	; First call the event detection callback functions
 	;(format #t "psi-event-detection-callbacks: ~a\n"
 	;	psi-event-detection-callbacks)
-    (for-each (lambda (f) (apply f '())) psi-event-detection-callbacks)
+	(for-each (lambda (f) (apply f '())) psi-event-detection-callbacks)
 
 	; Evaluate the monitored events and set "new-event" predicates
 	; This needs to happen before evaluating the monitored params so the
@@ -324,17 +326,17 @@
 	; Todo: Change this to a callback function
 	(set! monitored-pau (list voice-width))
 	(for-each (lambda (pau)
-			    (let* ((previous (hash-ref prev-value-table pau))
-                       (current (psi-get-number-value pau)))
-                    ;(format #t "pau: ~a  prev: ~a  current: ~a\n" pau previous
-                    ;    current)
-                    ; if previous is #f, means it has not been set yet
-                    (if (equal? previous #f)
-                        (begin
-                            (hash-set! prev-value-table pau current)
-	                        (set! previous current)))
-                    (if (not (equal? previous current))
-                        (begin
+				(let* ((previous (hash-ref prev-value-table pau))
+					   (current (psi-get-number-value pau)))
+					;(format #t "pau: ~a  prev: ~a  current: ~a\n" pau previous
+					;    current)
+					; if previous is #f, means it has not been set yet
+					(if (equal? previous #f)
+						(begin
+							(hash-set! prev-value-table pau current)
+							(set! previous current)))
+					(if (not (equal? previous current))
+						(begin
 							(set! changed-pau (append changed-pau (list pau)))
 							(hash-set! value-at-step-start pau current)
 						))))
@@ -342,10 +344,10 @@
 			;(format #t "Changed PAU's: ~a\n" changed-pau)
 
 	(if logging
-	    (if (or (not (null? changed-params))
-	            (not (null? detected-events))
-	            (not (null? changed-pau)))
-		    (let ((output-port (open-file "psilog.txt" "a")))
+		(if (or (not (null? changed-params))
+				(not (null? detected-events))
+				(not (null? changed-pau)))
+			(let ((output-port (open-file "psilog.txt" "a")))
 				(format output-port
 					(string-append "-------------------------------------------"
 						"-------------------------------- Loop ~a\n")
@@ -353,21 +355,21 @@
 
 				(format output-port
 					(string-append
-                        "speech: ~a  new-face: ~a  "
+						"speech: ~a  new-face: ~a  "
 						"pos-dialog: ~a  neg-dialog: ~a  "
 						"\n\n"
 						"arousal: ~a  pos-valence: ~a  neg-valence: ~a  "
 						"agent power: ~a  voice: ~a  "
 						"\n\n")
 					(highlight-display speech-giving-starts)
-                    (highlight-display new-face)
-                    (highlight-display positive-sentiment-dialog)
-                    (highlight-display negative-sentiment-dialog)
-                    (highlight-display arousal)
-                    (highlight-display pos-valence)
-                    (highlight-display neg-valence)
-                    (highlight-display power)
-                    (highlight-display voice-width)
+					(highlight-display new-face)
+					(highlight-display positive-sentiment-dialog)
+					(highlight-display negative-sentiment-dialog)
+					(highlight-display arousal)
+					(highlight-display pos-valence)
+					(highlight-display neg-valence)
+					(highlight-display power)
+					(highlight-display voice-width)
 				)
 				(close-output-port output-port))))
 
@@ -377,7 +379,7 @@
 		(map psi-evaluate-interaction-rule rules)
 	)
 
-    ; Update ultradian rhythm
+	; Update ultradian rhythm
 	(psi-set-value! arousal (ultradian-update (psi-get-number-value arousal)))
 
 	; Have OpenPsi trigger emotion expression updates after events are detected
@@ -395,9 +397,9 @@
 
 			; else, event at loop count is already set, so check if it's time
 			; to fire off the expression callback
-            (if (= (+ event-at-loop-num psi-expression-loop-delay)
-                   psi-updater-loop-count)
-                (begin
+			(if (= (+ event-at-loop-num psi-expression-loop-delay)
+				   psi-updater-loop-count)
+				(begin
 					(if (not (unspecified? psi-expression-callback))
 						(apply psi-expression-callback '()))
 					(psi-set-value! psi-event-at-loop-num-node 0)))))
@@ -429,7 +431,7 @@
 		(psi-updater-halt))
 	(stv 1 1)
 
-   	;(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
+	;(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 
 )
 
@@ -471,7 +473,7 @@
 		; If current value is not a number (e.g., #f for not previously set),
 		; set it to .5.
 		(if (not (number? current-value))
-		    (set! current-value .5))
+			(set! current-value .5))
 
 		; Determine normalized value for the alpha for the change function.
 		; Alpha is based on the strength of the interaction and the
@@ -518,7 +520,7 @@
 		; Increasing slope increases the degree change at all levels
 		(set! slope 10000)
 		;(format #t "current value: ~a\n" current-value)
-        ; TODO: handle current value = #f (or not number in general)
+		; TODO: handle current value = #f (or not number in general)
 		; finagle the extreme cases because the curve is not exactly how we want
 		(if (> alpha 0)
 			(if (>= alpha .5)
@@ -576,26 +578,26 @@
 		#f))
 
 (define (psi-change-in? target)
-    ;(display "psi-change-in? target: \n")(display target)
-    (let* ((previous (hash-ref prev-value-table target))
-           (current (psi-get-number-value target)))
+	;(display "psi-change-in? target: \n")(display target)
+	(let* ((previous (hash-ref prev-value-table target))
+		   (current (psi-get-number-value target)))
 
-        ; If no previous value set, attempt to set it based on current
-        (if (equal? previous #f)
-            (hash-set! prev-value-table target current))
+		; If no previous value set, attempt to set it based on current
+		(if (equal? previous #f)
+			(hash-set! prev-value-table target current))
 
-        ;(format #t "previous value: ~a   current value: ~a\n" previous current)
-        (if (and
-                ; current value is defined
-                (not (equal? #f current))
-                (not (equal? #f previous))
-                (not (= previous current))
-                (not (and (equal? previous #f)
-                          (= current 0))))
-            #t
-            #f
-        )
-    )
+		;(format #t "previous value: ~a   current value: ~a\n" previous current)
+		(if (and
+				; current value is defined
+				(not (equal? #f current))
+				(not (equal? #f previous))
+				(not (= previous current))
+				(not (and (equal? previous #f)
+						  (= current 0))))
+			#t
+			#f
+		)
+	)
 )
 
 (define (psi-monitored-event? target)
@@ -606,8 +608,8 @@
   Returns the normalized magnitude change in target from its previous value.
   Assumes (for now) that the values are normalized in [0,1]
   "
-    (define return)
-    ;(format #t "psi-get-change-magnitude target: ~a" target)
+	(define return)
+	;(format #t "psi-get-change-magnitude target: ~a" target)
 	(let* ((previous (hash-ref prev-value-table target))
 		   (current (psi-get-number-value target)))
 		(if (and (number? previous) (number? current))
@@ -667,10 +669,10 @@
 
 ; ----------------------------------------------------------------------
 (define (psi-get-most-recent-ts event)
-    (cog-get-state-value
-        (List
-            event
-            psi-most-recent-occurrence-pred)))
+	(cog-get-state-value
+		(List
+			event
+			psi-most-recent-occurrence-pred)))
 
 ; --------------------------------------------------------------
 ; Load the events and interaction rules
@@ -692,22 +694,22 @@
 "
   Return #t if the openpsi dynamics updater loop is running, else return #f.
 "
-    psi-updater-is-running
+	psi-updater-is-running
 )
 
 (define updater-continue-pred
 	(Evaluation (stv 1 1)
-	    (Predicate "continue-psi-updater-loop")
-	    (ListLink)))
+		(Predicate "continue-psi-updater-loop")
+		(ListLink)))
 
 (define (psi-pause)
-    ; Pause for 100 millisecs, to keep the number of loops within a reasonable
-    ; range.
-    ; todo: is this needed?
-    (define pause-time 100000)
-    (if slo-mo
-        (set! pause-time 1000000))
-    (usleep pause-time))
+	; Pause for 100 millisecs, to keep the number of loops within a reasonable
+	; range.
+	; todo: is this needed?
+	(define pause-time 100000)
+	(if slo-mo
+		(set! pause-time 1000000))
+	(usleep pause-time))
 
 
 ; --------------------------------------------------------------
@@ -715,34 +717,34 @@
 "
   Run `psi-step` in a new thread. Call (psi-updater-halt) to exit the loop.
 "
-    (define loop-name (string-append psi-prefix-str "updater-loop"))
-    (define (loop-node) (DefinedPredicateNode loop-name))
-    (define (define-psi-loop)
-        (DefineLink
-            (loop-node)
-            (SatisfactionLink
-                (SequentialAnd
-                    (Evaluation
-                        (Predicate "continue-psi-updater-loop")
-                        (ListLink))
-                    (Evaluation
-                        (GroundedPredicate "scm: do-psi-updater-step")
-                        (ListLink))
-                    (loop-node)))))
+	(define loop-name (string-append psi-prefix-str "updater-loop"))
+	(define (loop-node) (DefinedPredicateNode loop-name))
+	(define (define-psi-loop)
+		(DefineLink
+			(loop-node)
+			(SatisfactionLink
+				(SequentialAnd
+					(Evaluation
+						(Predicate "continue-psi-updater-loop")
+						(ListLink))
+					(Evaluation
+						(GroundedPredicate "scm: do-psi-updater-step")
+						(ListLink))
+					(loop-node)))))
 
-    ;(if (null? (cog-node 'DefinedPredicateNode loop-name))
-        (define-psi-loop)
-    ;    #f ; Nothing to do already defined
-    ;)
+	;(if (null? (cog-node 'DefinedPredicateNode loop-name))
+		(define-psi-loop)
+	;    #f ; Nothing to do already defined
+	;)
 
-    (if (not psi-updater-is-running)
-        (begin
-            (psi-updater-init)
-            (set! psi-updater-is-running #t)
-            (cog-set-tv! updater-continue-pred (stv 1 1))
-            (call-with-new-thread
-                (lambda () (cog-evaluate! (loop-node)))))
-    )
+	(if (not psi-updater-is-running)
+		(begin
+			(psi-updater-init)
+			(set! psi-updater-is-running #t)
+			(cog-set-tv! updater-continue-pred (stv 1 1))
+			(call-with-new-thread
+				(lambda () (cog-evaluate! (loop-node)))))
+	)
 )
 
 (define-public (psi-updater-halt)
@@ -750,48 +752,48 @@
   Tells the psi loop thread, that is started by running `(psi-update-run)`, to
   exit.
 "
-    (set! psi-updater-is-running #f)
-    (cog-set-tv! updater-continue-pred (stv 0 1))
+	(set! psi-updater-is-running #f)
+	(cog-set-tv! updater-continue-pred (stv 0 1))
 )
 
 (define (psi-get-number-values-for-vars . vars)
 "
-    Get the current numerical values for a list of psi-related internal
-    variables. This function is written for calling via the REST API interface,
-    so the list of variables consist of string values of the variable names
-    (rather than the variables themselves).
+	Get the current numerical values for a list of psi-related internal
+	variables. This function is written for calling via the REST API interface,
+	so the list of variables consist of string values of the variable names
+	(rather than the variables themselves).
 
-    vars - psi-related variable names as string values (rest arguments)
+	vars - psi-related variable names as string values (rest arguments)
 
-    Returns a JSON representation of key-value pairs in the form of
-    {var_name: value, var_name2: value, ... }
-    If a psi variable with varname is not defined, #f is returned for the value.
+	Returns a JSON representation of key-value pairs in the form of
+	{var_name: value, var_name2: value, ... }
+	If a psi variable with varname is not defined, #f is returned for the value.
 "
-    (define return '())
+	(define return '())
 
-    ; Internal function to add the variable value of varname to the return list
-    (define (append-var-value varname)
-        (define value)
-        (define var-node (Concept (string-append psi-prefix-str varname)))
-        ; For now assuming sec alone represents the agent state, but can add
-        ; code directly below if this gets changed.
-        ;(if (psi-is-sec? var-node)
-        ;    ; for SEC's, we want the value of the agent state for that SEC
-        ;    (set! var-node (List
-        ;        (ConceptNode "OpenPsi: agent-state") var-node)))
-        (set! value (psi-get-number-value var-node))
-        ; If value is not set (iow, equal to #f), set it to null for javascript
-        ; compatibility.
-        (if (eq? value #f)
-            (set! value "null"))
-        (set! return
-            (append return (list (format #f "\"~a\": ~a" varname value))))
-    )
+	; Internal function to add the variable value of varname to the return list
+	(define (append-var-value varname)
+		(define value)
+		(define var-node (Concept (string-append psi-prefix-str varname)))
+		; For now assuming sec alone represents the agent state, but can add
+		; code directly below if this gets changed.
+		;(if (psi-is-sec? var-node)
+		;    ; for SEC's, we want the value of the agent state for that SEC
+		;    (set! var-node (List
+		;        (ConceptNode "OpenPsi: agent-state") var-node)))
+		(set! value (psi-get-number-value var-node))
+		; If value is not set (iow, equal to #f), set it to null for javascript
+		; compatibility.
+		(if (eq? value #f)
+			(set! value "null"))
+		(set! return
+			(append return (list (format #f "\"~a\": ~a" varname value))))
+	)
 
-    (for-each append-var-value vars)
+	(for-each append-var-value vars)
 
-    ; return a string JSON object
-    (string-append "{" (string-join return ", ") "}")
+	; return a string JSON object
+	(string-append "{" (string-join return ", ") "}")
 )
 
 ; ------------------------------------------------------------------
