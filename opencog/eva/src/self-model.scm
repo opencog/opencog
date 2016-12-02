@@ -106,12 +106,11 @@
 ; The "emotional state" of the robot.  Corresponds to states declared
 ; in the `cfg-*.scm` file.
 ;
-; XXX this should be renamed "current facial expression", see the
-; README-affects.md for general discussion.
-(define-public emotion-state (AnchorNode "Emotion State"))
-(define-public emotion-neutral (ConceptNode "neutral"))
+; See the README-affects.md for general discussion.
+(define-public face-expression-state (AnchorNode "Facial Expression State"))
+(define-public expression-neutral (ConceptNode "neutral"))
 
-(StateLink emotion-state emotion-neutral)
+(StateLink face-expression-state expression-neutral)
 
 ; -----------
 ;; The eye-contact-state will be linked to the face-id of

@@ -190,7 +190,7 @@
 	))
 
 ; -------------------------------------------------------------
-; Request to change the emotion state.
+; Request to change the facial expression state.
 ; Takes two arguments: the requestor, and the proposed state.
 ;
 ; Currently, this always honors all requests.
@@ -205,7 +205,7 @@
 		(VariableList
 			(Variable "$requestor")
 			(Variable "$state"))
-		(True (State emotion-state (Variable "$state")))
+		(True (State face-expression-state (Variable "$state")))
 	))
 
 ; -------------------------------------------------------------
