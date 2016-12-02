@@ -103,8 +103,11 @@
 			(State soma-state (Variable "$x")))))
 
 ; -----------
-; The "emotional state" of the robot.  Corresponds to states declared
-; in the `cfg-*.scm` file.
+; The facial expression state of the robot.  The set of possible values
+; correspond to states declared in the `cfg-*.scm` file.  The facial
+; expression state records what the robot is currently doing, so that
+; questions such as "what are you doing?" get answered correctly:
+; e.g. "I am smiling", etc.
 ;
 ; See the README-affects.md for general discussion.
 (define-public face-expression-state (AnchorNode "Facial Expression State"))
@@ -149,9 +152,10 @@
 
 ; --------------------------------------------------------
 ; Chatbot-related stuff.  In the current design, the chatbot talks
-; whenever it feels like it; we are simply told when it is talking
-; when it has stopped talking, and what emotions we should display,
-; so that it's consistent with the speech emotions.
+; whenever it feels like it; we are simply told when it is talking,
+; when it has stopped talking, and what facial expressions we should
+; display, so that it's consistent with the emotional content of what
+; is being said.
 
 ; Chat state. Is the robot talking (vocalizing), or not, right now?
 ; NB the python code in put_atoms.py uses these defines!
