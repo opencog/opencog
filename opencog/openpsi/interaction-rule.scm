@@ -1,6 +1,8 @@
 ;
 ; interaction-rule.scm
 ;
+; Copyright 2016 OpenCog Foundation
+;
 ; Rules specfying the dynamic interactions between different OpenPsi related
 ; entities.
 ;

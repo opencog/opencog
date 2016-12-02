@@ -62,9 +62,7 @@
 ; ----------------------------------------------------------------------
 (define-public (psi-step)
 "
-  psi-step
-
-  Take one step of the OpenPsi rule engine.
+  psi-step - Take one step of the OpenPsi rule engine.
 
   Returns TRUE_TV, always.
 "
@@ -124,7 +122,7 @@
     ; Run the controler that updates the weight.
     (psi-controller-update-weights)
 
-    ; Do action-selection & orchesteration.
+    ; Do action-selection.
     (map
         (lambda (d)
             (let ((updater (psi-get-updater d)))
@@ -133,13 +131,10 @@
                     (cog-evaluate! (car updater))
                 )
                 ; The assumption is that the rules can be run concurrently.
-                ; FIXME: Once action-orchestrator is available, then
-                ; a modified `psi-select-rules` should be used instead of
-                ; `psi-select-rules-per-demand` (huh? why?)
                 (par-map act-and-evaluate (psi-select-rules-per-demand d))
             ))
 
-        (psi-get-all-valid-demands)
+        (psi-get-all-enabled-demands)
     )
 
     (cog-logger-info "[OpenPsi] Ending psi-step, loop-count = ~a"

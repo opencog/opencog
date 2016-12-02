@@ -255,7 +255,6 @@
 ;(psi-set-updater! controller-updater psi-controller-demand)
 
 ; --------------------------------------------------------------
-; Skip controller-demand as it is only used to update weight of the rules that
-; are associated with it.
+; Skip controller-demand, as it is only used to update weight of the
+; rules that are associated with it.  (??? Huh ???)
 (psi-demand-skip psi-controller-demand)
-(psi-reset-valid-demand-cache)

@@ -117,21 +117,16 @@
 ;;   Return highest--weighted psi-rule that is also satisfiable.
 ;;   If a satisfiable rule doesn't exist then the empty list is returned.
 ;; "
-;;     (define (choose-rules)
-;;         ; NOTE: This check is required as ecan isn't being used continuesely.
-;;         ; Remove `most-weighted-atoms` version once ecan is integrated.
+;;     (define (rule-weight RULE)
 ;;         (if (or (equal? 0 (cog-af-boundary)) (equal? 1 (cog-af-boundary)))
-;;             (most-weighted-atoms (psi-get-all-satisfiable-rules))
-;;             (most-important-weighted-atoms (psi-get-all-satisfiable-rules))
+;;             (rule-sc-weight RULE)
+;;             (rule-sa-weight RULE)
 ;;         )
 ;;     )
 ;;
-;;     (let ((rules (choose-rules)))
-;;         (if (null? rules)
-;;             '()
-;;             (list (list-ref rules (random (length rules))))
-;;         )
-;;     )
+;;    (pick-from-weighted-list
+;;        (psi-get-all-satisfiable-rules)
+;;        rule-weight)
 ;; )
 ;;
 ; ----------------------------------------------------------------------
@@ -156,29 +151,93 @@
 )
 
 ; --------------------------------------------------------------
+
+; Sort RULE-LIST, according to the weights assigned by the WEIGHT-FN.
+(define (sort-by-weight RULE-LIST WEIGHT-FN)
+
+    (sort! RULE-LIST (lambda (RA RB)
+        (> (WEIGHT-FN RA) (WEIGHT-FN RB))))
+)
+
+; --------------------------------------------------------------
+; Compute the weight of RULE, as product of strength times confidence.
+(define (rule-sc-weight RULE)
+    (let ((rule-stv (cog-tv RULE))
+          (context-stv (psi-rule-satisfiability RULE)))
+        (* (tv-conf rule-stv) (tv-mean rule-stv)
+           (tv-conf context-stv) (tv-conf context-stv))))
+
+; Compute the weight of RULE, as product of strength times
+; confidence times attention-value.
+(define (rule-sa-weight RULE)
+    (let ((a-stv (cog-tv RULE))
+          (sti (assoc-ref (cog-av->alist (cog-av RULE)) 'sti)))
+        (* (tv-conf a-stv) (tv-mean a-stv) sti)))
+
+; --------------------------------------------------------------
+(define (pick-from-weighted-list ALIST WEIGHT-FUNC)
+"
+  pick-from-weighted-list ALIST WEIGHT-FUNC
+
+  Return a list containing an item picked from ALIST, based
+  on the WEIGHT-FUNC. If ALIST is empty, then return the empty
+  list. If ALIST is not empty, then randomly select from the list,
+  with the most heavily weighted item being the most likely to be
+  picked.  The random distribution is the uniform weighted interval
+  distribution.
+"
+    ; Create a list of rules sorted by weight.
+    (define sorted-rules (sort-by-weight ALIST WEIGHT-FUNC))
+
+    ; Function to sum up the total weights in the list.
+    (define (accum-weight rule-list)
+        (if (null? rule-list) 0.0
+            (+ (WEIGHT-FUNC (car rule-list))
+                 (accum-weight (cdr rule-list)))))
+
+    ; The total weight of the rule-list.
+    (define total-weight (accum-weight sorted-rules))
+
+    ; Pick a number from 0.0 to total-weight.
+    (define cutoff (* total-weight (random:uniform)))
+
+    ; Recursively move through the list of rules, until the
+    ; sum of the weights of the rules exceeds the cutoff.
+    (define (pick-rule wcut rule-list)
+        ; Subtract weight of the first rule.
+        (define ncut (- wcut (WEIGHT-FUNC (car rule-list))))
+
+        ; If we are past the cutoff, then we are done.
+        ; Else recurse, accumulating the weights.
+        (if (<= ncut 0.0)
+            (car rule-list)
+            (pick-rule ncut (cdr rule-list))))
+
+    (cond
+        ; If the list is empty, we can't do anything.
+        ((null? sorted-rules) '())
+
+        ; If there's only one rule in the list, return it.
+        ((null? (cdr sorted-rules)) sorted-rules)
+
+        ; Else randomly pick among the most-weighted rules.
+        (else (list (pick-rule cutoff sorted-rules))))
+)
+
 (define (default-per-demand-action-selector demand)
 "
-  Return a list containing a single psi-rule, the one psi-rule that has
-  the highest weight and is also satisfiable.  If a satisfiable rule
-  doesn't exist, then the empty list is returned.
-"
-    ; This function does NOT examine the attention value, nor does it
-    ; use ECAN in any way. And it shouldn't.  The attention-value and
-    ; ECAN subsystem should use the psi-set-action-selector function
-    ; above, and define a customer selector, as desired.
-    (define (choose-rules)
-        (most-weighted-atoms (psi-get-weighted-satisfiable-rules demand))
-    )
+  default-per-demand-action-selector DEMAND
 
-    (let ((rules (choose-rules)))
-        (cond
-            ((null? rules) '())
-            ((equal? (tv-mean (cog-tv (car rules))) 0.0) '())
-            (else
-                (list (list-ref rules
-                    (random (length rules)))))
-        )
-    )
+  Return a list containing zero or more psi-rules that can satisfy
+  the DEMAND.  Zero rules are returned only if there are no rules
+  that can satisfy the demand.  Usually, only one rule is returned;
+  it is choosen randomly from the set of rules that could satsify
+  the demand. The choice function is weighted, so that the most
+  heavily-weighted rule is the one most likely to be chosen.
+"
+    (pick-from-weighted-list
+        (psi-get-weighted-satisfiable-rules demand)
+        rule-sc-weight)
 )
 
 ; --------------------------------------------------------------

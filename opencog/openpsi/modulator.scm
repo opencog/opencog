@@ -1,3 +1,8 @@
+;
+; modulator.scm
+;
+; Modulators - where is this documented?
+;
 ; Copyright (C) 2016 OpenCog Foundation
 
 (use-modules (opencog) (opencog exec))
