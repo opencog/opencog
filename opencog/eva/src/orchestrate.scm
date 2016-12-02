@@ -56,7 +56,7 @@
 			;; Record the time
 			(TrueLink (DefinedSchema "set expression timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:do_emotion")
+			(EvaluationLink (GroundedPredicate "py:do_face_expression")
 				(ListLink
 					(Variable "$expr")
 					(Variable "$duration")
@@ -240,7 +240,7 @@
 (DefineLink
     (DefinedPredicate "Quiet:happy")
     (Evaluation
-        (GroundedPredicate "py: do_emotion")
+        (GroundedPredicate "py: do_face_expression")
         (List (Concept "happy") (NumberNode 3) (NumberNode 0.5))
     ))
 
@@ -248,7 +248,7 @@
 (DefineLink
     (DefinedPredicate "Normal:amused")
     (Evaluation
-        (GroundedPredicate "py: do_emotion")
+        (GroundedPredicate "py: do_face_expression")
         (List (Concept "amused") (NumberNode 3) (NumberNode 0.5))
     ))
 
