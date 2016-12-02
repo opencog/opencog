@@ -246,6 +246,22 @@
 ;-------------------------------------
 ; Internal vars to physiology mapping
 
+; PAU's
+(define pau-prefix-str "PAU: ")
+(define (create-pau name initial-value)
+	(define pau
+		(Predicate (string-append pau-prefix-str name)))
+	(Inheritance
+		pau
+		(Concept "PAU"))
+	(psi-set-value! pau initial-value)
+	;(hash-set! prev-value-table pau initial-value)
+	pau)
+
+
+(define voice-width
+	(create-pau "voice width" .2))
+
 (define power->voice
 	(psi-create-interaction-rule power changed voice-width 1))
 
@@ -306,3 +322,10 @@
 	(define sentence (SentenceNode (number->string (random 1000000000))))
 	(State (Anchor "Chatbot: InputUtteranceSentence")  sentence)
 	(Inheritance sentence (Concept "Positive")))
+
+
+(define p power)
+(define a arousal)
+
+(define voice voice-width)
+
