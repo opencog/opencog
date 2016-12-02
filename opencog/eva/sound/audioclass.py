@@ -43,13 +43,10 @@ class AudioStrength:
     
     netcat(self.hostname, self.port, deci + "\n")
     print deci
-    #netcat(self.hostname, self.port, deci2 + "\n")
-
-
+    
   def GetAudioClass(self, data):
     try:
         
-        #self.Decibel = data.data
         self.Decibel = data.Decibel
         if self.loop <=2:
             d.append(self.Decibel)
@@ -60,8 +57,9 @@ class AudioStrength:
             self.loop += 1
         change = data.suddenchange
         print "sudden sound change value {}".format(data.suddenchange)
-    	loud = "(StateLink (AnchorNode \"Sudden sound change value\")" + \
-             "(ListLink(NumberNode {})))\n".format(data.suddenchange)
+    	
+        loud = '(StateLink Sudden sound change value (NumberNode "' + \
+		       str(change) + '"))'
 
     	netcat(self.hostname, self.port, loud + "\n")
 
