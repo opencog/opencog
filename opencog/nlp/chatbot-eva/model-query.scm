@@ -91,12 +91,17 @@
 	(StateLink current-sentence QUERY)
 
 	(let* ((r2l-set (cog-bind where-look-rule))
-			(string-seq (sureal (car (cog-outgoing-set r2l-set))))
+			(sus (cog-outgoing-set r2l-set))
 		)
 		; (display r2l-set)
-		; (display string-seq) (newline)
-
-		string-seq
+		(if (null? sus)
+			(list (list "Sorry I didn't understand the question.\n"))
+			(let
+				((string-seq (sureal (car sus))))
+				(display string-seq) (newline)
+				string-seq
+			)
+		)
 	)
 )
 
