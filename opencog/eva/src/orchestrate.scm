@@ -37,13 +37,17 @@
 ;         (ListLink (Concept "happy") (Number 6) (Number 0.6))))
 ;
 ; As of right now, there is nothing to "orchestrate" here, since each
-; animation fades out pretty quickly (the "duration" seems to be
-; ignored!?) and its very unlikely that we'll get conflicting
-; expression directives at a rate of more than one every few seconds.
-; So basically, we accept all directives, and show them immedaitely.
+; animation fades out pretty quickly, and its very unlikely that we'll
+; get conflicting expression directives at a rate of more than one
+; every few seconds. So basically, we accept all directives, and show
+; them immediately.
 ;
 ; If we wanted to rate-limit this, then make a copy of "change-template"
 ; and edit it to provide a minimum elapsed time predicate.
+;
+; XXX FIXME: this records the animation that was chosen, and a
+; timestamp in some StateLinks. These need to be replaced by the
+; TimeServer, instead.
 ;
 (DefineLink
 	(DefinedPredicate "Show expression")
@@ -55,6 +59,8 @@
 		(SequentialAndLink
 			;; Record the time
 			(TrueLink (DefinedSchema "set expression timestamp"))
+			;; Record the expression itself
+			(TrueLink (State face-expression-state (Variable "$expr")))
 			;; Send it off to ROS to actually do it.
 			(EvaluationLink (GroundedPredicate "py:do_face_expression")
 				(ListLink
@@ -196,8 +202,10 @@
 ; Currently, this always honors all requests.
 ; Currently, the requestor is ignored.
 ;
-; Some future version may deny change requests, depending on the
-; request source or on other factors.
+; XXX Currently, this does nothing at all. Some future version may
+; deny change requests, depending on the request source or on other
+; factors.  XXX This is incompletely thought out and maybe should be
+; removed.
 
 (DefineLink
 	(DefinedPredicate "Request Set Face Expression")
@@ -205,7 +213,7 @@
 		(VariableList
 			(Variable "$requestor")
 			(Variable "$state"))
-		(True (State face-expression-state (Variable "$state")))
+		(True)
 	))
 
 ; -------------------------------------------------------------
