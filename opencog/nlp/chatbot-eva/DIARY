@@ -1361,3 +1361,25 @@ TODO:
 * modulesator.scm is part of psi.
 * modulators need to be documented
 * mock-interaction-rules.scm needs to move
+
+===========================================================
+   Where are you looking?   XXX this got broken, and the fix is hard.
+   What are you doing?
+   What happened just now?
+   What are you doing
+
+where-look-rule
+
+
+(define current-imperative (AnchorNode "*-imperative-*"))
+      (State current-imperative
+         (ActionLink
+            (Variable "$verb")
+            (ListLink (Variable "$object"))
+      ))
+
+action-rule-ao
+Look command does it ... but no memory of it
+
+XXX correct version of "looking" requires using the space server.
+

@@ -3,6 +3,7 @@
 ;
 ; Processing of query-questions about the robot self-model.
 ;
+(use-modules (opencog query))
 (use-modules (opencog nlp sureal))
 
 ; Rule-utils needed for defintion of var-decl, etc.
@@ -26,7 +27,7 @@
 			(var-decl "$verb-inst" "WordInstanceNode")
 			(var-decl "$qvar-inst" "WordInstanceNode")
 			(var-decl "$subj-inst" "WordInstanceNode")
-			(var-decl "$direction" "ConceptNode")
+;			(var-decl "$direction" "ConceptNode")
 		)
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
@@ -43,12 +44,13 @@
 ; XXX FIXME This is wrong; this has been replaced by the eva-model
 ; code in the ros-behavior-scripting tree. Unfortunately, it does
 ; not offer any easy way of querying.
-			(State (Anchor "*-gaze-direction-*") (Variable "$direction"))
+			; (State (Anchor "*-gaze-direction-*") (Variable "$direction"))
 		)
 		(SetLink
 			(Evaluation (Predicate "looking") (ListLink (Concept "I")))
-			(InheritanceLink
-				(SatisfyingSet (Predicate "looking")) (Variable "$direction"))
+(VariableNode "$verb-inst")
+;			(InheritanceLink
+;				(SatisfyingSet (Predicate "looking")) (Variable "$direction"))
 		)
 	)
 )
@@ -93,7 +95,8 @@
 	(let* ((r2l-set (cog-bind where-look-rule))
 			(sus (cog-outgoing-set r2l-set))
 		)
-		; (display r2l-set)
+(display "duuuude fooo")
+		(display r2l-set)
 		(if (null? sus)
 			(list (list "Sorry I didn't understand the question.\n"))
 			(let
