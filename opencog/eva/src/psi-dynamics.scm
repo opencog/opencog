@@ -23,7 +23,7 @@
 (define no-blender #f)
 
 (if no-blender
-    (python-eval "execfile('/usr/local/share/opencog/python/atomic-dbg.py')"))
+	(python-eval "execfile('/usr/local/share/opencog/python/atomic-dbg.py')"))
 
 
 (define prev-value-node (Concept "previous value"))
@@ -47,26 +47,26 @@
 	; both for now, which may or may not be a good thing, but probably
 	; interesting nonetheless.
 	(if (>= pos-valence valence-activation-level)
-	    (begin
-            ;( (do-catch do-random-positive-expression))
-            (if psi-verbose
-                (display "psi-dynamics: doing positive expression\n"))
-            (if (not no-blender)
-                (be-happy pos-valence)
-                ;(do-random-positive-expression)
-            )
-        )
+		(begin
+			;( (do-catch do-random-positive-expression))
+			(if psi-verbose
+				(display "psi-dynamics: doing positive expression\n"))
+			(if (not no-blender)
+				(be-happy pos-valence)
+				;(do-random-positive-expression)
+			)
+		)
 	)
 	(if (>= neg-valence valence-activation-level)
-	    (begin
-            ;( (do-catch do-random-negative-expression))
-            (if psi-verbose
-                (display "psi-dynamics: doing negative expression\n"))
-            (if (not no-blender)
-                (be-sad neg-valence)
-                ;(do-random-negative-expression)
-		    )
-	    )
+		(begin
+			;( (do-catch do-random-negative-expression))
+			(if psi-verbose
+				(display "psi-dynamics: doing negative expression\n"))
+			(if (not no-blender)
+				(be-sad neg-valence)
+				;(do-random-negative-expression)
+			)
+		)
 	)
 
 	; Update psi-emotion-states
@@ -83,40 +83,40 @@
 ; Functions to initiate random positive and negative epxerssions
 
 (define (do-random-positive-expression intensity)
-    (define expression
-       (cog-execute!
-          (PutLink (DefinedSchemaNode "Pick random expression")
-             (ConceptNode "positive"))))
-     (cog-evaluate! (Put (DefinedPredicate "Show expression")
-         (ListLink expression (Number 8) (Number intensity)))))
+	(define expression
+	   (cog-execute!
+		  (PutLink (DefinedSchemaNode "Pick random expression")
+			 (ConceptNode "positive"))))
+	 (cog-evaluate! (Put (DefinedPredicate "Show expression")
+		 (ListLink expression (Number 8) (Number intensity)))))
 
 (define (do-random-negative-expression intensity)
-    (define expression
-       (cog-execute!
-          (PutLink (DefinedSchemaNode "Pick random expression")
-             (ConceptNode "frustrated"))))
-     (cog-evaluate! (Put (DefinedPredicate "Show expression")
-         (ListLink expression (Number 8) (Number intensity)))))
+	(define expression
+	   (cog-execute!
+		  (PutLink (DefinedSchemaNode "Pick random expression")
+			 (ConceptNode "frustrated"))))
+	 (cog-evaluate! (Put (DefinedPredicate "Show expression")
+		 (ListLink expression (Number 8) (Number intensity)))))
 
 (define (be-happy intensity)
-    ;(display "in (be-happy)\n")
-    (cog-evaluate! (Put (DefinedPredicate "Show expression")
-        (ListLink (Concept "happy") (Number 8) (Number intensity)))))
+	;(display "in (be-happy)\n")
+	(cog-evaluate! (Put (DefinedPredicate "Show expression")
+		(ListLink (Concept "happy") (Number 8) (Number intensity)))))
 
 (define (be-sad intensity)
-    ;(display "in (be-sad)\n")
-    (cog-evaluate! (Put (DefinedPredicate "Show expression")
-        (ListLink (Concept "sad") (Number 8) (Number intensity)))))
+	;(display "in (be-sad)\n")
+	(cog-evaluate! (Put (DefinedPredicate "Show expression")
+		(ListLink (Concept "sad") (Number 8) (Number intensity)))))
 
 ; Temp error catching for when blender not running
 (define (do-catch function . params)
 	(catch #t
 	  (lambda ()
-	    (apply function params))
+		(apply function params))
 	(lambda (key . parameters)
 		(format (current-error-port)
-	              "\nUncaught throw to '~a: ~a\n" key parameters)
-	    )
+				  "\nUncaught throw to '~a: ~a\n" key parameters)
+		)
 	)
 )
 
@@ -130,8 +130,9 @@
 	(psi-create-monitored-event "positive-sentiment-dialog"))
 (define negative-sentiment-dialog
 	(psi-create-monitored-event "negative-sentiment-dialog"))
-(define loud-noise-event
-    (psi-create-monitored-event "loud-noise"))
+; Using the self-model defined predicate for this instead
+;(define loud-noise-event
+;	(psi-create-monitored-event "loud-noise"))
 
 ; ------------------------------------------------------------------
 ; Event detection callbacks
@@ -142,46 +143,48 @@
 	(define previous-input (psi-get-value current-sentence-node))
 	;(format #t "current-input: ~a\n" current-input)
 	(if (and (not (equal? current-input '()))
-	         (not (equal? current-input previous-input)))
+			 (not (equal? current-input previous-input)))
 		; We have a new input sentence
 		(begin
-            (if psi-verbose (format #t "\n* New input sentence detected *\n"))
-            ;(format #t "previous-input: ~a   current-input: ~a\n"
-            ;    previous-input current-input)
-            (StateLink current-sentence-node current-input)
-            ; Check for positive and/or negative sentimement
-            ; Sentence sentiment is put in the atomspace as
-            ;   (Inheritance (Sentence "blah") (Concept "Positive")) or "Negative"
-            ;   or "Neutral"
-            (let ((inher-super (cog-chase-link 'InheritanceLink 'ConceptNode
-                    current-input)))
-                ;(format #t "inher-super: ~a\n" inher-super)
-                (for-each (lambda (concept)
-                            (if psi-verbose (format #t "sentiment: ~a\n" concept))
-                            (if (equal? concept (Concept "Positive"))
-                       		    (psi-set-event-occurrence!
-                       		        positive-sentiment-dialog))
-                            (if (equal? concept (Concept "Negative"))
-                                (psi-set-event-occurrence!
-                                    negative-sentiment-dialog)))
-                        inher-super)))))
+			(if psi-verbose (format #t "\n* New input sentence detected *\n"))
+			;(format #t "previous-input: ~a   current-input: ~a\n"
+			;    previous-input current-input)
+			(StateLink current-sentence-node current-input)
+			; Check for positive and/or negative sentimement
+			; Sentence sentiment is put in the atomspace as
+			;   (Inheritance (Sentence "blah") (Concept "Positive")) or "Negative"
+			;   or "Neutral"
+			(let ((inher-super (cog-chase-link 'InheritanceLink 'ConceptNode
+					current-input)))
+				;(format #t "inher-super: ~a\n" inher-super)
+				(for-each (lambda (concept)
+							(if psi-verbose (format #t "sentiment: ~a\n" concept))
+							(if (equal? concept (Concept "Positive"))
+								(psi-set-event-occurrence!
+									positive-sentiment-dialog))
+							(if (equal? concept (Concept "Negative"))
+								(psi-set-event-occurrence!
+									negative-sentiment-dialog)))
+						inher-super)))))
 
 ; Callback checks for both positive and negative sentiment
 (psi-set-event-callback! psi-detect-dialog-sentiment)
 
+
 ; Callback for loud noise detected
-(define new-loud-noise? #f) ; indicates a loud noise just occurred
-(define (psi-check-for-loud-noise)
-    ; This step is a temp hack for development purpose. Need to replace this
-    ; with the method for actual event detection, which I think will be through
-    ; ROS messaging.
-    (if new-loud-noise?
-        (begin
-            (psi-set-event-occurrence! loud-noise-event)
-            (set! new-loud-noise? #f))))
+; Using the self-model defined predicate for this instead of the below
+;(define new-loud-noise? #f) ; indicates a loud noise just occurred
+;(define (psi-check-for-loud-noise)
+;	; This step is a temp hack for development purpose. Need to replace this
+;	; with the method for actual event detection, which I think will be through
+;	; ROS messaging.
+;	(if new-loud-noise?
+;		(begin
+;			(psi-set-event-occurrence! loud-noise-event)
+;			(set! new-loud-noise? #f))))
 
 ; Register the callback with the openpsi dynamics updater
-(psi-set-event-callback! psi-check-for-loud-noise)
+;(psi-set-event-callback! psi-check-for-loud-noise)
 
 
 ; ------------------------------------------------------------------
@@ -229,18 +232,24 @@
 
 ; Speech giving starts
 (define speech->power
-    (psi-create-interaction-rule speech-giving-starts increased
-        power .5))
+	(psi-create-interaction-rule speech-giving-starts increased
+		power .5))
 
 ; Loud noise occurs
-(define loud-noise->arousal (psi-create-interaction-rule loud-noise-event
-    increased arousal 1))
-(define loud-noise->neg-valence (psi-create-interaction-rule loud-noise-event
-    increased neg-valence .7))
+(define loud-noise (DefinedPredicate "Heard Loud Voice?"))
+(psi-create-interaction-rule loud-noise increased arousal 1)
+(psi-create-interaction-rule loud-noise increased neg-valence .7)
+
+;(define loud-noise->arousal (psi-create-interaction-rule loud-noise-event
+;	increased arousal 1))
+;(define loud-noise->neg-valence (psi-create-interaction-rule loud-noise-event
+;	increased neg-valence .7))
+
+
 
 ; New face
 (define new-face->arousal
-    (psi-create-interaction-rule new-face increased arousal .3))
+	(psi-create-interaction-rule new-face increased arousal .3))
 
 
 ;-------------------------------------
@@ -290,9 +299,9 @@
 "
   Returns a list of all psi emotions.
 "
-    (filter
-        (lambda (x) (not (equal? x psi-emotion-node)))
-        (cog-chase-link 'InheritanceLink 'ConceptNode psi-emotion-node))
+	(filter
+		(lambda (x) (not (equal? x psi-emotion-node)))
+		(cog-chase-link 'InheritanceLink 'ConceptNode psi-emotion-node))
 )
 
 ; Create emotions
@@ -323,9 +332,19 @@
 	(State (Anchor "Chatbot: InputUtteranceSentence")  sentence)
 	(Inheritance sentence (Concept "Positive")))
 
+(define (sim-loud-noise)
+	(define sudden-sound-change (AnchorNode "Sudden sound change value"))
+	(call-with-new-thread
+		(lambda ()
+			(psi-set-value! sudden-sound-change 1)
+			(sleep 1)
+			(psi-set-value! sudden-sound-change 0))))
 
+; Shortcuts
+(define voice voice-width)
 (define p power)
 (define a arousal)
+(define n simulate-loud-noise)
 
-(define voice voice-width)
+
 
