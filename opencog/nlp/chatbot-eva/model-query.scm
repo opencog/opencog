@@ -10,6 +10,7 @@
 (load "../relex2logic/rule-utils.scm")
 
 (define current-sentence (AnchorNode "*-eva-current-sent-*"))
+(define current-reply (AnchorNode "*-reply-*"))
 
 ;--------------------------------------------------------------------
 ; Word-associations with state are already hard-coded in imperative.scm
@@ -46,11 +47,59 @@
 ; not offer any easy way of querying.
 			; (State (Anchor "*-gaze-direction-*") (Variable "$direction"))
 		)
-		(SetLink
-			(Evaluation (Predicate "looking") (ListLink (Concept "I")))
+		(ListLink
+			current-reply
+			(SetLink
+				(Evaluation (Predicate "looking") (ListLink (Concept "I")))
 (VariableNode "$verb-inst")
-;			(InheritanceLink
-;				(SatisfyingSet (Predicate "looking")) (Variable "$direction"))
+;				(InheritanceLink
+;					(SatisfyingSet (Predicate "looking")) (Variable "$direction"))
+			)
+		)
+	)
+)
+
+;--------------------------------------------------------------------
+
+; Recognize copular sentence "what are you doing?"
+; This is insane overkill for the mere task of recognizing a sentence.
+; The whole point of such complex analysis is to ...???
+(define what-doing-rule
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$interp" "InterpretationNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
+			(var-decl "$qvar-inst" "WordInstanceNode")
+			(var-decl "$subj-inst" "WordInstanceNode")
+;			(var-decl "$direction" "ConceptNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			(interp-of-parse "$interp" "$parse")
+			(word-in-parse   "$verb-inst" "$parse")
+			(word-in-parse   "$qvar-inst" "$parse")
+			(LemmaLink (VariableNode "$qvar-inst") (WordNode "what"))
+			(LemmaLink (VariableNode "$verb-inst") (WordNode "do"))
+			(word-pos "$verb-inst" "verb")
+			(dependency "_subj" "$verb-inst" "$subj-inst")
+			(LemmaLink (VariableNode "$usbj-inst") (WordNode "you"))
+
+; XXX FIXME This is wrong; this has been replaced by the eva-model
+; code in the ros-behavior-scripting tree. Unfortunately, it does
+; not offer any easy way of querying.
+			; (State (Anchor "*-gaze-direction-*") (Variable "$direction"))
+		)
+		(ListLink
+			current-reply
+			(SetLink
+				(Evaluation (Predicate "looking") (ListLink (Concept "I")))
+(VariableNode "$verb-inst")
+;				(InheritanceLink
+;					(SatisfyingSet (Predicate "looking")) (Variable "$direction"))
+			)
 		)
 	)
 )
@@ -92,7 +141,15 @@
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence QUERY)
 
-	(let* ((r2l-set (cog-bind where-look-rule))
+	; (cog-bind where-look-rule)
+	(cog-bind what-doing-rule)
+
+(display "duuuude bar")
+(display (cog-incoming-set current-reply))
+
+	; hack fixme
+	(let* ((rep-lnk (cog-incoming-set current-reply))
+			(r2l-set (cog-outgoing-atom rep-lnk 1))
 			(sus (cog-outgoing-set r2l-set))
 		)
 (display "duuuude fooo")
