@@ -60,6 +60,34 @@
 )
 
 ;--------------------------------------------------------------------
+(define prt-sent
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			; (var-decl "$interp" "InterpretationNode")
+			(var-decl "$word-inst" "WordInstanceNode")
+			(var-decl "$word" "WordNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			; (interp-of-parse "$interp" "$parse")
+			(word-in-parse   "$word-inst" "$parse")
+			(LemmaLink (Variable "$word-inst") (Variable "$word"))
+		)
+		(ListLink
+			(Variable "$word")
+		)
+	)
+)
+
+(define (prt-curr-sent) (cog-bind prt-sent))
+
+;--------------------------------------------------------------------
+; XXX hack
+(define face-expression-state (AnchorNode "Facial Expression State"))
+
 
 ; Recognize copular sentence "what are you doing?"
 ; This is insane overkill for the mere task of recognizing a sentence.
@@ -69,16 +97,16 @@
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
 			(var-decl "$parse" "ParseNode")
-			(var-decl "$interp" "InterpretationNode")
+			; (var-decl "$interp" "InterpretationNode")
 			(var-decl "$verb-inst" "WordInstanceNode")
 			(var-decl "$qvar-inst" "WordInstanceNode")
 			(var-decl "$subj-inst" "WordInstanceNode")
-;			(var-decl "$direction" "ConceptNode")
+			(var-decl "$expression" "ConceptNode")
 		)
 		(AndLink
 			(StateLink current-sentence (Variable "$sent"))
 			(parse-of-sent   "$parse" "$sent")
-			(interp-of-parse "$interp" "$parse")
+			; (interp-of-parse "$interp" "$parse")
 			(word-in-parse   "$verb-inst" "$parse")
 			(word-in-parse   "$qvar-inst" "$parse")
 			(LemmaLink (VariableNode "$qvar-inst") (WordNode "what"))
@@ -87,16 +115,15 @@
 			(dependency "_subj" "$verb-inst" "$subj-inst")
 			(LemmaLink (VariableNode "$usbj-inst") (WordNode "you"))
 
-; XXX FIXME This is wrong; this has been replaced by the eva-model
-; code in the ros-behavior-scripting tree. Unfortunately, it does
-; not offer any easy way of querying.
-			; (State (Anchor "*-gaze-direction-*") (Variable "$direction"))
+; placeholder
+			(State face-expression-state (Variable "$expression"))
+
 		)
 		(ListLink
 			current-reply
 			(SetLink
-				(Evaluation (Predicate "looking") (ListLink (Concept "I")))
-(VariableNode "$verb-inst")
+				(Evaluation (Predicate "doing") (ListLink (Concept "I")))
+(VariableNode "$expression")
 ;				(InheritanceLink
 ;					(SatisfyingSet (Predicate "looking")) (Variable "$direction"))
 			)
