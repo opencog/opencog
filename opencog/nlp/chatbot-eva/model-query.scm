@@ -148,16 +148,18 @@
 (display (cog-incoming-set current-reply))
 
 	; hack fixme
+; problem here is that incoming set may have more than one.
 	(let* ((rep-lnk (cog-incoming-set current-reply))
-			(r2l-set (cog-outgoing-atom rep-lnk 1))
-			(sus (cog-outgoing-set r2l-set))
+			(r2l-set (cog-outgoing-atom (car rep-lnk) 1))
 		)
+		; Free up anything attached to the anchor.
+		(map cog-delete (cog-incoming-set current-reply))
 (display "duuuude fooo")
 		(display r2l-set)
-		(if (null? sus)
+		(if (equal? 0 cog-arity r2l-set)
 			(list (list "Sorry I didn't understand the question.\n"))
 			(let
-				((string-seq (sureal (car sus))))
+				((string-seq (sureal r2l-set)))
 				(display string-seq) (newline)
 				string-seq
 			)

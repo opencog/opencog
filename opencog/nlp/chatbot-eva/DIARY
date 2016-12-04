@@ -1383,3 +1383,8 @@ Look command does it ... but no memory of it
 
 XXX correct version of "looking" requires using the space server.
 
+
+ (cog-bind show-rule-1)
+(define current-action (AnchorNode "*-action-*"))
+(StateLink current-action (WordNode "foobar"))
+
