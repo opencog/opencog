@@ -33,20 +33,24 @@
 ; The expression name should be one of the supported blender animations.
 ;
 ; Example usage:
-;    (cog-evaluate! (Put (DefinedPredicate "Show expression")
+;    (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
 ;         (ListLink (Concept "happy") (Number 6) (Number 0.6))))
 ;
 ; As of right now, there is nothing to "orchestrate" here, since each
-; animation fades out pretty quickly (the "duration" seems to be
-; ignored!?) and its very unlikely that we'll get conflicting
-; expression directives at a rate of more than one every few seconds.
-; So basically, we accept all directives, and show them immedaitely.
+; animation fades out pretty quickly, and its very unlikely that we'll
+; get conflicting expression directives at a rate of more than one
+; every few seconds. So basically, we accept all directives, and show
+; them immediately.
 ;
 ; If we wanted to rate-limit this, then make a copy of "change-template"
 ; and edit it to provide a minimum elapsed time predicate.
 ;
+; XXX FIXME: this records the animation that was chosen, and a
+; timestamp in some StateLinks. These need to be replaced by the
+; TimeServer, instead.
+;
 (DefineLink
-	(DefinedPredicate "Show expression")
+	(DefinedPredicate "Show facial expression")
 	(LambdaLink
 		(VariableList
 			(Variable "$expr")
@@ -55,8 +59,10 @@
 		(SequentialAndLink
 			;; Record the time
 			(TrueLink (DefinedSchema "set expression timestamp"))
+			;; Record the expression itself
+			(TrueLink (State face-expression-state (Variable "$expr")))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:do_emotion")
+			(EvaluationLink (GroundedPredicate "py:do_face_expression")
 				(ListLink
 					(Variable "$expr")
 					(Variable "$duration")
@@ -125,7 +131,7 @@
 
 ; -------------------------------------------------------------
 ; As above, but (momentarily) break eye contact, first.
-; Otherwise, the behavior tree forces eye contact to be continueally
+; Otherwise, the behavior tree forces eye contact to be continually
 ; running, and the turn-look command is promptly over-ridden.
 ; XXX FIXME, this is still broken during search for attention.
 
@@ -190,22 +196,24 @@
 	))
 
 ; -------------------------------------------------------------
-; Request to change the emotion state.
+; Request to change the facial expression state.
 ; Takes two arguments: the requestor, and the proposed state.
 ;
 ; Currently, this always honors all requests.
 ; Currently, the requestor is ignored.
 ;
-; Some future version may deny change requests, depending on the
-; request source or on other factors.
+; XXX Currently, this does nothing at all. Some future version may
+; deny change requests, depending on the request source or on other
+; factors.  XXX This is incompletely thought out and maybe should be
+; removed.
 
 (DefineLink
-	(DefinedPredicate "Request Set Emotion State")
+	(DefinedPredicate "Request Set Face Expression")
 	(LambdaLink
 		(VariableList
 			(Variable "$requestor")
 			(Variable "$state"))
-		(True (State emotion-state (Variable "$state")))
+		(True)
 	))
 
 ; -------------------------------------------------------------
@@ -233,22 +241,22 @@
 			(List (Variable "sentence")))
 	))
 
-; Show happy emotion.
+; Show happy facial expression.
 ; XXX FIXME -- these have hard-coded length-of-time values in them.
 ; Most other similar behaviors have randomized values, which are
 ; controlled by bounds in the config files - cfg-sophia and cfg-eva.scm
 (DefineLink
     (DefinedPredicate "Quiet:happy")
     (Evaluation
-        (GroundedPredicate "py: do_emotion")
+        (GroundedPredicate "py: do_face_expression")
         (List (Concept "happy") (NumberNode 3) (NumberNode 0.5))
     ))
 
-; Show amused emotion
+; Show amused facial expression
 (DefineLink
     (DefinedPredicate "Normal:amused")
     (Evaluation
-        (GroundedPredicate "py: do_emotion")
+        (GroundedPredicate "py: do_face_expression")
         (List (Concept "amused") (NumberNode 3) (NumberNode 0.5))
     ))
 

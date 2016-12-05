@@ -11,7 +11,7 @@
 ;
 ; --------------------------------------------------------
 ; Emotional-state to expression mapping. For a given emotional state
-; (for example, happy, bored, excited) this specifies a range of
+; (for example, happy, bored, excited), this specifies a range of
 ; expressions to display for that emotional state, as well as the
 ; intensities and durations.
 
@@ -33,7 +33,7 @@
 ; 'afraid' ... when could we use this?
 ;
 ; Cheat sheet: to display just one of these:
-; (cog-evaluate! (Evaluation  (DefinedPredicate "Show expression")
+; (cog-evaluate! (Evaluation  (DefinedPredicate "Show facial expression")
 ;      (ListLink (Concept "worry") (Number 5) (Number 1))))
 
 ; The animations are weird: if the time is too short, then no animation
@@ -99,7 +99,7 @@
 
 ; --------------------------------------------------------
 ; Emotional-state to gesture mapping. For a given emotional state
-; (for example, happy, bored, excited) this specifies a range of
+; (for example, happy, bored, excited), this specifies a range of
 ; gestures to display for that emotional state, as well as the
 ; intensities and durations.
 ;

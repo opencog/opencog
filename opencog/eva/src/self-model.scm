@@ -103,15 +103,34 @@
 			(State soma-state (Variable "$x")))))
 
 ; -----------
-; The "emotional state" of the robot.  Corresponds to states declared
-; in the `cfg-*.scm` file.
+; The facial expression state of the robot.  The set of possible values
+; correspond to states declared in the `cfg-*.scm` file.  The facial
+; expression state records what the robot is currently doing, so that
+; questions such as "what are you doing?" get answered correctly:
+; e.g. "I am smiling", etc.
 ;
-; XXX this should be renamed "current facial expression", see the
-; README-affects.md for general discussion.
-(define-public emotion-state (AnchorNode "Emotion State"))
-(define-public emotion-neutral (ConceptNode "neutral"))
+; See the README-affects.md for general discussion.
+(define-public face-expression-state (AnchorNode "Facial Expression State"))
+(define-public expression-neutral (ConceptNode "neutral"))
 
-(StateLink emotion-state emotion-neutral)
+(StateLink face-expression-state expression-neutral)
+
+; Get the current facial expression.
+; XXX FIXME -- this should return neutral, if the timestamp is more
+; than 8 seconds in the past. Well, actually, it should probably
+; reset the face expression state after 8 seconds or so --
+; or maybe use the timeserver....
+(DefineLink
+	(DefinedSchema "Get Facial Expression")
+	(Get
+		(TypedVariable (Variable "$x") (Type "ConceptNode"))
+		(AndLink
+			(State face-expression-state (Variable "$x"))
+			; (GreaterThan
+			; 	(NumberNode 8)
+			; 	(Minus (TimeLink) (DefinedSchema "get expression timestamp")))
+		))
+)
 
 ; -----------
 ;; The eye-contact-state will be linked to the face-id of
@@ -150,9 +169,10 @@
 
 ; --------------------------------------------------------
 ; Chatbot-related stuff.  In the current design, the chatbot talks
-; whenever it feels like it; we are simply told when it is talking
-; when it has stopped talking, and what emotions we should display,
-; so that it's consistent with the speech emotions.
+; whenever it feels like it; we are simply told when it is talking,
+; when it has stopped talking, and what facial expressions we should
+; display, so that it's consistent with the emotional content of what
+; is being said.
 
 ; Chat state. Is the robot talking (vocalizing), or not, right now?
 ; NB the python code in put_atoms.py uses these defines!
@@ -583,7 +603,9 @@
 
 (define-public (get-face-id face-concept)
 "
-  For casting ConceptNode to NumberNode
+  get-face-id FACE-CONCEPT - Cast ConceptNode to NumberNode
+XXX FIXME this is a nasty ugly hack, and shold be replaced by
+proper atomese.
 "
 	(NumberNode (cog-name face-concept))
 )
