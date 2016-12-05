@@ -107,28 +107,36 @@
 	)
 )
 
-;; Searches for last face id location observed in previous 8 seconds.
-;; If face id is present in past 1 and 2 seconds, then past 1 second
-;; id will be recovered then python gaze at point function is called
-;; which calls blender api to gaze at face gaze at face only moves
-;; the eyes.
-;; Expects face-id NumberNode
-(define (gaze-at-face face-id-node)
-	(let ((loc-atom
-			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
-		(if (cog-atom? loc-atom)
-			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-					(xx (number->string (loc-link-x loc-link)))
-					(yy (number->string (loc-link-y loc-link)))
-					(zz (number->string (loc-link-z loc-link))))
-				(python-eval
-					(string-append "gaze_at_face_point(" xx "," yy "," zz ")"))
-				(stv 1 1)
-			)
-			(stv 1 1) ; FIXME: How should it be handled when (stv 0 1) is returned
+;; glance-at-face - Turn the eyes to look at the given face-id.
+;; `face-id-node` should be a NumberNode holding an integer face-id.
+;; Returns TRUE_TV if the face-id was found, else returns FALSE_TV.
+;;
+;; Given a face-id, this will get the last-known 3D (x,y,z) location
+;; for that face from the space server. This 3D coordinate is then
+;; published as a ROS gaze-at command.  The robot (currently, the
+;; blender model) listens to this topic, and will move the eyes to
+;; look at that 3D coordinate.
+;;
+(define (glance-at-face face-id-node)
+	(define loc-atom
+			(get-last-locs-ato "faces" face-id-node face-loc-time-span))
+	; XXX TODO wtf is loc-atom? what is being erturned here? where
+	; is the get-last-locs-ato function documented?
+	(if (cog-atom? loc-atom)
+		(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+				(xx (number->string (loc-link-x loc-link)))
+				(yy (number->string (loc-link-y loc-link)))
+				(zz (number->string (loc-link-z loc-link))))
+			(python-eval
+				(string-append "gaze_at_face_point(" xx "," yy "," zz ")"))
+			(stv 1 1)
 		)
+
+		; There was no location, return false.
+		(stv 0 1)
 	)
 )
+
 ;;get string of face-id's seperated by space - call python split() function
 ;;in scheme itself list of number nodes
 (define (get-visible-faces)
