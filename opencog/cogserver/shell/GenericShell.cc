@@ -135,8 +135,7 @@ void GenericShell::set_socket(ConsoleSocket *s)
 
 /* ============================================================== */
 
-static std::mutex _stdout_redirect_mutex;
-static GenericShell* _redirector = nullptr;
+
 
 // Implementation requirements:
 //
@@ -201,26 +200,7 @@ void GenericShell::eval(const std::string &expr)
 	// then attach stdout to a pipe, perform the evaluation, then
 	// restore stdout from the backup. Finally, drain the pipe,
 	// printing both to stdout and to the shell socket.
-// #define PERFORM_STDOUT_DUPLICATION 1
-#ifdef PERFORM_STDOUT_DUPLICATION
-	// What used to be stdout will now go to the pipe.
-	int pipefd[2];
-	int stdout_backup = -1;
-	if (show_output and show_prompt)
-	{
-		std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
-		if (nullptr == _redirector)
-		{
-			_redirector = this;
-			int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
-			OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
-			stdout_backup = dup(fileno(stdout));
-			OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
-			rc = dup2(pipefd[1], fileno(stdout));
-			OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
-		}
-	}
-#endif // PERFORM_STDOUT_DUPLICATION
+
 
 	// Run the evaluator (in a different thread)
 	poll_needed = false;
@@ -260,50 +240,6 @@ void GenericShell::eval(const std::string &expr)
 		pollthr = new std::thread(poll_wrapper);
 	}
 
-#ifdef PERFORM_STDOUT_DUPLICATION
-	if (show_output and show_prompt)
-	{
-		std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
-		if (this == _redirector)
-		{
-			_redirector = nullptr;
-			// Restore stdout
-			fflush(stdout);
-			int rc = write(pipefd[1], "", 1); // null-terminated string!
-			OC_ASSERT(0 < rc, "GenericShell pipe termination failure");
-			rc = close(pipefd[1]);
-			OC_ASSERT(0 == rc, "GenericShell pipe close failure");
-			rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
-			OC_ASSERT(0 < rc, "GenericShell restore stdout failure");
-
-			// Drain the pipe
-			auto drain_wrapper = [&](void)
-			{
-				char buf[4097];
-				int nr = read(pipefd[0], buf, sizeof(buf)-1);
-				OC_ASSERT(0 < rc, "GenericShell pipe read failure");
-				while (0 < nr)
-				{
-					buf[nr] = 0;
-					if (1 < nr or 0 != buf[0])
-					{
-						printf("hey hye hey %s", buf); // print to the cogservers stdout.
-						socket->Send(buf);
-					}
-					nr = read(pipefd[0], buf, sizeof(buf)-1);
-					OC_ASSERT(0 < rc, "GenericShell pipe read failure");
-				}
-
-				// Cleanup.
-				close(pipefd[0]);
-				close(stdout_backup);
-			};
-
-			drain_wrapper();
-			// stdout_thr = new std::thread(drain_wrapper);
-		}
-	}
-#endif // PERFORM_STDOUT_DUPLICATION
 
 	// The user is exiting the shell. No one will ever call a method on
 	// this instance ever again. So stop hogging space, and self-destruct.
