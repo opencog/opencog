@@ -6,28 +6,32 @@
 (define appid "")
 (define has-wolframalpha-setup #f)
 
+; AppID for OpenWeatherMap
+(define owm-appid "")
+(define has-openweathermap-setup #f)
+
 (define-public (set-appid id)
     (set! appid id)
     (State wolframalpha default-state)
     (set! has-wolframalpha-setup #t)
 )
 
-; TODO: Do something better for getting the first sentence of a paragraph, though
-; it isn't that critical here
-(define (get-first-sentence str)
-    (define default-length 50)
-
-    (if (< (string-length str) default-length)
-        (substring str 0 (string-index str #\.))
-        (substring str 0 (+ default-length
-            (string-index (substring str default-length) #\.)))
-    )
-)
-
 (define (ask-duckduckgo)
     (State duckduckgo process-started)
 
     (begin-thread
+        ; TODO: Do something better for getting the first sentence of a paragraph, though
+        ; it isn't that critical here
+        (define (get-first-sentence str)
+            (define default-length 50)
+
+            (if (< (string-length str) default-length)
+                (substring str 0 (string-index str #\.))
+                (substring str 0 (+ default-length
+                    (string-index (substring str default-length) #\.)))
+            )
+        )
+
         (define query (string-downcase (cog-name (get-input-text-node))))
         (define url (string-append "http://api.duckduckgo.com/?q=" query "&format=xml"))
         (define body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
@@ -96,5 +100,25 @@
                 (State wolframalpha process-finished)
             )
         )
+    )
+)
+
+(define (ask-weather)
+    (begin-thread
+        (define ip-api "http://ip-api.com/xml")
+        (define ip-body (xml->sxml (response-body-port (http-get ip-api #:streaming? #t))))
+        (define ip-resp (car (last-pair ip-body)))
+        (define country-code
+            (cadr (find (lambda (i) (and (pair? i) (equal? 'countryCode (car i)))) ip-resp)))
+
+        (define owm-url (string-append "http://api.openweathermap.org/data/2.5/weather?q="
+            country-code "&appid=" owm-key "&mode=xml&units=metric"))
+        (define owm-body (xml->sxml (response-body-port (http-get owm-url #:streaming? #t))))
+        (define owm-resp (car (last-pair owm-body)))
+        (define weather (find (lambda (d) (and (pair? d) (equal? 'weather (car d)))) owm-resp))
+        (define weather-val (cadr (cadr (cadr weather))))
+
+        ; TODO
+        (display weather-val)
     )
 )
