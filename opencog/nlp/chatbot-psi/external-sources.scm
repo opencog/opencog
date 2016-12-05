@@ -16,6 +16,12 @@
     (set! has-wolframalpha-setup #t)
 )
 
+(define-public (set-owm-appid id)
+    (set! owm-appid id)
+    (State openweathermap default-state)
+    (set! has-openweathermap-setup #t)
+)
+
 (define (ask-duckduckgo)
     (State duckduckgo process-started)
 
@@ -104,21 +110,30 @@
 )
 
 (define (ask-weather)
-    (begin-thread
-        (define ip-api "http://ip-api.com/xml")
-        (define ip-body (xml->sxml (response-body-port (http-get ip-api #:streaming? #t))))
-        (define ip-resp (car (last-pair ip-body)))
-        (define country-code
-            (cadr (find (lambda (i) (and (pair? i) (equal? 'countryCode (car i)))) ip-resp)))
+    (if (not (equal? owm-appid ""))
+        (begin
+            (State openweathermap process-started)
+            (begin-thread
+                (define ip-api "http://ip-api.com/xml")
+                (define ip-body (xml->sxml (response-body-port (http-get ip-api #:streaming? #t))))
+                (define ip-resp (car (last-pair ip-body)))
+                (define country-code
+                    (cadr (find (lambda (i) (and (pair? i) (equal? 'countryCode (car i)))) ip-resp)))
 
-        (define owm-url (string-append "http://api.openweathermap.org/data/2.5/weather?q="
-            country-code "&appid=" owm-key "&mode=xml&units=metric"))
-        (define owm-body (xml->sxml (response-body-port (http-get owm-url #:streaming? #t))))
-        (define owm-resp (car (last-pair owm-body)))
-        (define weather (find (lambda (d) (and (pair? d) (equal? 'weather (car d)))) owm-resp))
-        (define weather-val (cadr (cadr (cadr weather))))
+                (define owm-url (string-append "http://api.openweathermap.org/data/2.5/weather?q="
+                    country-code "&appid=" owm-appid "&mode=xml&units=metric"))
+                (define owm-body (xml->sxml (response-body-port (http-get owm-url #:streaming? #t))))
+                (define owm-resp (car (last-pair owm-body)))
+                (define weather (find (lambda (d) (and (pair? d) (equal? 'weather (car d)))) owm-resp))
+                (define weather-val (cadr (cadr (cadr weather))))
 
-        ; TODO
-        (display weather-val)
+                (if (equal? weather-val #f)
+                    (State openweathermap-answer no-result)
+                    (State openweathermap-answer (List (map Word (string-split weather-val #\ ))))
+                )
+
+                (State openweathermap process-finished)
+            )
+        )
     )
 )
