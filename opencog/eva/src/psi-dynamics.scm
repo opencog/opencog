@@ -332,7 +332,7 @@
 	(State (Anchor "Chatbot: InputUtteranceSentence")  sentence)
 	(Inheritance sentence (Concept "Positive")))
 
-(define (sim-loud-noise)
+(define (simulate-loud-noise)
 	(define sudden-sound-change (AnchorNode "Sudden sound change value"))
 	(call-with-new-thread
 		(lambda ()
