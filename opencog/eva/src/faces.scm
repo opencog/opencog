@@ -1,4 +1,6 @@
 ;
+; faces.scm
+;
 ; Assorted utilities for supporting face tracking
 ; XXX most of face-tracking is now in self-model.scm
 ; Perhaps this file is not needed any more? XXX FIXME
@@ -68,39 +70,6 @@
 			(DefinedPredicateNode "Check if room empty"))))
 
 ; -----------------------------------------------------------------
-; Assorted debugging utilities.
-;
-;; Display the current room state
-(define-public (show-visible-faces)
-	(define visible-face (PredicateNode "visible face"))
-	(filter (lambda(y) (equal? (cog-type y) 'NumberNode))
-	(map (lambda (x) (car (cog-outgoing-set x)))
-	(cog-chase-link 'EvaluationLink 'ListLink visible-face))))
-
-(define-public (show-acked-faces)
-	(define acked-face (PredicateNode "acked face"))
-	(filter (lambda(y) (equal? (cog-type y) 'NumberNode))
-	(map (lambda (x) (car (cog-outgoing-set x)))
-	(cog-chase-link 'EvaluationLink 'ListLink acked-face))))
-
-(define-public (show-recognized-faces)
-"
- Show face-id recognized-face name pairs in atomese
-"
-	(cog-outgoing-set (cog-execute! (DefinedSchema "Get recognized faces")))
-)
-
-(define-public (show-room-state)
-	(car (cog-chase-link 'StateLink 'ConceptNode room-state)))
-
-
-(define-public (show-eye-contact-state)
-	(define e-c-state (Anchor "Eye Contact State"))
-	(car (cog-chase-link 'StateLink 'NumberNode e-c-state)))
-
-(define-public (show-interaction-target)
-	(gar (cog-execute! (DefinedSchema "Current interaction target"))))
-
 ; define-public because `unit-test.scm` uses it.
 (define-public (make-new-face id)
 "
@@ -115,6 +84,7 @@
 	(EvaluationLink (PredicateNode "visible face")
 		(ListLink (NumberNode id))))
 
+; -----------------------------------------------------------------
 (define-public (make-mapped-face face-id x y z)
 "
   make-mapped-face FACE-ID X Y Z
@@ -178,6 +148,41 @@
 	(cog-delete (EvaluationLink (PredicateNode "visible face")
 		(ListLink (ConceptNode id)))))
 
+; -----------------------------------------------------------------
+; Assorted debugging utilities.
+;
+;; Display the current room state
+(define (show-visible-faces)
+	(define visible-face (PredicateNode "visible face"))
+	(filter (lambda(y) (equal? (cog-type y) 'NumberNode))
+	(map (lambda (x) (car (cog-outgoing-set x)))
+	(cog-chase-link 'EvaluationLink 'ListLink visible-face))))
+
+(define (show-acked-faces)
+	(define acked-face (PredicateNode "acked face"))
+	(filter (lambda(y) (equal? (cog-type y) 'NumberNode))
+	(map (lambda (x) (car (cog-outgoing-set x)))
+	(cog-chase-link 'EvaluationLink 'ListLink acked-face))))
+
+(define (show-recognized-faces)
+"
+ Show face-id recognized-face name pairs in atomese
+"
+	(cog-outgoing-set (cog-execute! (DefinedSchema "Get recognized faces")))
+)
+
+(define (show-room-state)
+	(car (cog-chase-link 'StateLink 'ConceptNode room-state)))
+
+
+(define (show-eye-contact-state)
+	(define e-c-state (Anchor "Eye Contact State"))
+	(car (cog-chase-link 'StateLink 'NumberNode e-c-state)))
+
+(define (show-interaction-target)
+	(gar (cog-execute! (DefinedSchema "Current interaction target"))))
+
+;; ----
 (define (undefine def)
 	(cog-delete (car (cog-incoming-set def))))
 

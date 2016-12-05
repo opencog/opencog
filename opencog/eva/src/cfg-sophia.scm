@@ -35,7 +35,7 @@
 
 ;
 ; Cheat sheet: to display just one of these:
-; (cog-evaluate! (Evaluation  (DefinedPredicate "Show expression")
+; (cog-evaluate! (Evaluation  (DefinedPredicate "Show facial expression")
 ;      (ListLink (Concept "worry") (Number 5) (Number 1))))
 
 ; new-arrival face tracking

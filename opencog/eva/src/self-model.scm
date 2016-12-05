@@ -115,6 +115,23 @@
 
 (StateLink face-expression-state expression-neutral)
 
+; Get the current facial expression.
+; XXX FIXME -- this should return neutral, if the timestamp is more
+; than 8 seconds in the past. Well, actually, it should probably
+; reset the face expression state after 8 seconds or so --
+; or maybe use the timeserver....
+(DefineLink
+	(DefinedSchema "Get Facial Expression")
+	(Get
+		(TypedVariable (Variable "$x") (Type "ConceptNode"))
+		(AndLink
+			(State face-expression-state (Variable "$x"))
+			; (GreaterThan
+			; 	(NumberNode 8)
+			; 	(Minus (TimeLink) (DefinedSchema "get expression timestamp")))
+		))
+)
+
 ; -----------
 ;; The eye-contact-state will be linked to the face-id of
 ;; person with whom we are making eye-contact with.
@@ -587,6 +604,8 @@
 (define-public (get-face-id face-concept)
 "
   get-face-id FACE-CONCEPT - Cast ConceptNode to NumberNode
+XXX FIXME this is a nasty ugly hack, and shold be replaced by
+proper atomese.
 "
 	(NumberNode (cog-name face-concept))
 )
