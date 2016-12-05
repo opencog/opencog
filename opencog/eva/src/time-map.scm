@@ -1,12 +1,19 @@
+;
+; time-map.scm
+;
+; Copyright 2016 Hanson Robotics
+;
 (use-modules (srfi srfi-1) )
 (use-modules (opencog) (opencog atom-types)
 	(opencog eva-model) (opencog eva-behavior))
+
 (use-modules (opencog ato pointmem)); needed for maps
 (use-modules (opencog python))
 
 (StateLink (ConceptNode "last person who spoke") (NumberNode "0"))
 (StateLink (ConceptNode "previous person who spoke") (NumberNode "0"))
 (define new-person-spoke 0)
+
 ; --------------------------------------------------------------------
 ; For recording facial coordinates, create octomap with 15hz,
 ; 10 second or 150 frames buffer and 1 cm spatial resolution.
@@ -22,7 +29,94 @@
 (define face-loc-time-span 8000) ; (8000 milliseconds or 8 seconds)
 
 ; ---------------------------------------------------------------------
+;; look-turn-at-face - Publish ROS message to turn or look at face.
+;;
+;; `FACE-ID-NODE` should be a Node holding a face-id.
+;; `PY-CMD` should be the name of the python function to call to
+;;     publish the ROS message. (This is hacky, because there are
+;;     currently to scheme bindings to ROS. Alternately, this entire
+;;     routine should have been written in python... XXX FIXME.)
+;; Returns TRUE_TV if the face-id was found, else returns FALSE_TV.
+;;
+;; Given a face-id, this will get the last-known 3D (x,y,z) location
+;; for that face from the space server. This 3D coordinate is then
+;; published, via a python wrapper, as a ROS gaze-at or look-at command.
+;; The robot (currently, the blender model) listens to this ROS topic,
+;; and will move the robot.
+;;
+;; The python `gaze_at_face_point` function will move only the eyes,
+;; while the python `look_at_face_point` will turn the neck+head.
+;;
+(define (look-turn-at-face FACE-ID-NODE PY-CMD)
+	(define loc-atom
+			(get-last-locs-ato "faces" FACE-ID-NODE face-loc-time-span))
+	; XXX TODO wtf is loc-atom? what is being erturned here? where
+	; is the get-last-locs-ato function documented?
+	(if (cog-atom? loc-atom)
+		(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+				(xx (number->string (loc-link-x loc-link)))
+				(yy (number->string (loc-link-y loc-link)))
+				(zz (number->string (loc-link-z loc-link))))
+			(python-eval
+				(string-append PY-CMD "(" xx "," yy "," zz ")"))
+			(stv 1 1)
+		)
 
+		; There was no location, return false.
+		(stv 0 1)
+	)
+)
+
+;; glance-at-face - Turn the eyes to look at the given face-id.
+;; look-at-face - Turn entire head to look at the given face-id.
+;; See the `look-turn-at-face` for complete documentation.
+;;
+(define (glance-at-face FACE-ID-NODE)
+	(look-turn-at-face FACE-ID-NODE "gaze_at_face_point")
+)
+
+(define (look-at-face FACE-ID-NODE)
+	(look-turn-at-face FACE-ID-NODE "look_at_face_point")
+)
+
+; ---------------------------------------------------------------------
+;; below creates say atom for face if sound came from it
+;; XXX FIXME huh? this needs documentation.
+(define (who-said? sent)
+	;;request eye contact
+
+	;;Debug below
+	;(display "###### WHO SAID: ")
+	;(display (cog-name
+	;	(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+	;		(StateLink
+	;			(ConceptNode "last person who spoke")(VariableNode "$fid")))))
+
+	(cog-execute!
+	(PutLink
+		(StateLink request-eye-contact-state (VariableNode "$fid"))
+		(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+			(StateLink
+				(ConceptNode "last person who spoke") (VariableNode "$fid")))
+	))
+	;;generate info
+	(cog-execute!
+	(PutLink
+	(AtTimeLink
+		(TimeNode (number->string (current-time)))
+		(EvaluationLink
+			(PredicateNode "say_face")
+				(ListLink
+					(ConceptNode (cog-name (VariableNode "$fid")))
+					(SentenceNode sent)))
+			(ConceptNode "sound-perception"))
+	(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+		(StateLink
+			(ConceptNode "last person who spoke") (VariableNode "$fid")))
+	))
+)
+
+; ---------------------------------------------------------------------
 ;; Returns null string if atom not found, number x y z string if okay.
 ;; These functions assume only one location for one atom in a map at
 ;; a time.
@@ -84,100 +178,12 @@
 	)
 )
 
-;; Searches for last face id location observed in previous 8 seconds.
-;; If face id is present in past 1 and 2 seconds, then past 1 second id
-;; will be recovered then python look at point function is called which
-;; calls blender api to look at face look at face also sets gaze at
-;; face.
-;; Expects face-id NumberNode
-(define (look-at-face face-id-node)
-	(let ((loc-atom
-			(get-last-locs-ato "faces" face-id-node face-loc-time-span)))
-		(if (cog-atom? loc-atom)
-			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-					(xx (number->string (loc-link-x loc-link)))
-					(yy (number->string (loc-link-y loc-link)))
-					(zz (number->string (loc-link-z loc-link))))
-				(python-eval
-					(string-append "look_at_face_point(" xx "," yy "," zz ")"))
-				(stv 1 1)
-			)
-			(stv 1 1) ; FIXME: How should it be handled when (stv 0 1) is returned
-		)
-	)
-)
-
-;; glance-at-face - Turn the eyes to look at the given face-id.
-;; `face-id-node` should be a NumberNode holding an integer face-id.
-;; Returns TRUE_TV if the face-id was found, else returns FALSE_TV.
-;;
-;; Given a face-id, this will get the last-known 3D (x,y,z) location
-;; for that face from the space server. This 3D coordinate is then
-;; published as a ROS gaze-at command.  The robot (currently, the
-;; blender model) listens to this topic, and will move the eyes to
-;; look at that 3D coordinate.
-;;
-(define (glance-at-face face-id-node)
-	(define loc-atom
-			(get-last-locs-ato "faces" face-id-node face-loc-time-span))
-	; XXX TODO wtf is loc-atom? what is being erturned here? where
-	; is the get-last-locs-ato function documented?
-	(if (cog-atom? loc-atom)
-		(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-				(xx (number->string (loc-link-x loc-link)))
-				(yy (number->string (loc-link-y loc-link)))
-				(zz (number->string (loc-link-z loc-link))))
-			(python-eval
-				(string-append "gaze_at_face_point(" xx "," yy "," zz ")"))
-			(stv 1 1)
-		)
-
-		; There was no location, return false.
-		(stv 0 1)
-	)
-)
-
 ;;get string of face-id's seperated by space - call python split() function
 ;;in scheme itself list of number nodes
 (define (get-visible-faces)
 	(cog-filter 'NumberNode (show-visible-faces))
 )
 
-;;below creates say atom for face if sound came from it
-;;;;
-(define (who-said? sent)
-	;;request eye contact
-
-	;;Debug below
-	;(display "###### WHO SAID: ")
-	;(display (cog-name
-	;	(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-	;		(StateLink
-	;			(ConceptNode "last person who spoke")(VariableNode "$fid")))))
-
-	(cog-execute!
-	(PutLink
-		(StateLink request-eye-contact-state (VariableNode "$fid"))
-		(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-			(StateLink
-				(ConceptNode "last person who spoke") (VariableNode "$fid")))
-	))
-	;;generate info
-	(cog-execute!
-	(PutLink
-	(AtTimeLink
-		(TimeNode (number->string (current-time)))
-		(EvaluationLink
-			(PredicateNode "say_face")
-				(ListLink
-					(ConceptNode (cog-name (VariableNode "$fid")))
-					(SentenceNode sent)))
-			(ConceptNode "sound-perception"))
-	(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-		(StateLink
-			(ConceptNode "last person who spoke") (VariableNode "$fid")))
-	))
-)
 
 ;; Get all face-ids and only one sound id 1.0, compare them.
 ;; threshold = sound in +-15 degrees of face
