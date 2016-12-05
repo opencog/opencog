@@ -1385,7 +1385,10 @@ Surreal meta-issues:
     (requires recency in time-server)
 --> I just turned my head
 --> I just heard a loud sound.
+--> There was a loud sound.
 --> Nothing.
+--> Someone just entered the room.
+--> You waved your hand in front of me.
 
 
    What are you doing?
@@ -1431,9 +1434,9 @@ Surreal meta-issues:
 --> (Internet search of weather based on location)
 
 
+=============================================================
 
 where-look-rule
-
 
 (define current-imperative (AnchorNode "*-imperative-*"))
       (State current-imperative
@@ -1446,7 +1449,6 @@ action-rule-ao
 Look command does it ... but no memory of it
 
 XXX correct version of "looking" requires using the space server.
-
 
  (cog-bind show-rule-1)
 (define current-action (AnchorNode "*-action-*"))

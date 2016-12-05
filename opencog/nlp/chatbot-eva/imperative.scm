@@ -47,7 +47,8 @@
 
 ;--------------------------------------------------------------------
 ; Action schema
-; This is wrong, but a hack for now.
+; This is temporary scaffolding, it simply returns the list
+; of actions that were requested, and need to be performed.
 
 ; action-rule-ao uses the Action Orchestrator (in orchestrate.scm)
 (define action-rule-ao
@@ -68,8 +69,14 @@
 ))
 
 ;--------------------------------------------------------------------
-
+; Main, top-level imperative processing function.
+;
 ; Stove-pipe hack to perform an action associated with an imperative.
+; Its a "stove-pipe", because it hard-codes a sequence of steps that
+; are performed every time an imperative command is received. A better
+; design would be to replace the sequence of bind-links, below, by
+; open-psi rules (and/or the forward chainer).  For now, the stove-pipe
+; is OK, because there are so few rules that are used.
 (define-public (imperative-process imp)
 "
   Process imperative IMP, which should be a SentenceNode.
