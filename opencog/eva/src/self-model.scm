@@ -117,7 +117,7 @@
 
 ; Get the current facial expression.
 ; XXX FIXME -- this should return neutral, if the timestamp is more
-; than 8 seconds in the past. Well, actally, it should probably
+; than 8 seconds in the past. Well, actually, it should probably
 ; reset the face expression state after 8 seconds or so --
 ; or maybe use the timeserver....
 (DefineLink
