@@ -40,7 +40,7 @@
 			(LemmaLink (VariableNode "$verb-inst") (WordNode "look"))
 			(word-pos "$verb-inst" "verb")
 			(dependency "_subj" "$verb-inst" "$subj-inst")
-			(LemmaLink (VariableNode "$usbj-inst") (WordNode "you"))
+			(LemmaLink (VariableNode "$subj-inst") (WordNode "you"))
 
 ; XXX FIXME This is wrong; this has been replaced by the eva-model
 ; code in the ros-behavior-scripting tree. Unfortunately, it does
@@ -60,6 +60,8 @@
 )
 
 ;--------------------------------------------------------------------
+;
+; Debug utility to print the current sentence.
 (define prt-sent
 	(BindLink
 		(VariableList
@@ -113,7 +115,7 @@
 			(LemmaLink (VariableNode "$verb-inst") (WordNode "do"))
 			(word-pos "$verb-inst" "verb")
 			(dependency "_subj" "$verb-inst" "$subj-inst")
-			(LemmaLink (VariableNode "$usbj-inst") (WordNode "you"))
+			(LemmaLink (VariableNode "$subj-inst") (WordNode "you"))
 
 ; placeholder
 			(State face-expression-state (Variable "$expression"))
@@ -130,6 +132,7 @@
 		)
 	)
 )
+
 
 ;--------------------------------------------------------------------
 
@@ -168,8 +171,8 @@
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence QUERY)
 
-	; (cog-bind where-look-rule)
-	(cog-bind what-doing-rule)
+	(cog-bind where-look-rule)
+	; (cog-bind what-doing-rule)
 
 (display "duuuude bar")
 (display (cog-incoming-set current-reply))
@@ -181,7 +184,7 @@
 		)
 		; Free up anything attached to the anchor.
 		(map cog-delete (cog-incoming-set current-reply))
-(display "duuuude fooo")
+(display "duuuude wfooo")
 		(display r2l-set)
 		(if (equal? 0 cog-arity r2l-set)
 			(list (list "Sorry I didn't understand the question.\n"))

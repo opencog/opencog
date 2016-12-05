@@ -1358,15 +1358,79 @@ TODO:
 * sec.scm is actual psi code
 * event.scm is ... psi code for now.
 * interaction-rule.scm is psi code of some kind.
-* modulesator.scm is part of psi.
+* modulators.scm is part of psi.
 * modulators need to be documented
 * mock-interaction-rules.scm needs to move
 
 ===========================================================
+
+Surreal meta-issues:
+-- which of several word-chocies get used?
+
    Where are you looking?   XXX this got broken, and the fix is hard.
-   What are you doing?
+--> I am looking to the left
+--> I am looking to the right
+--> I am looking at you
+
+   What direction are you looking?
+--> I am looking to the left
+--> I am looking to the right
+
+   Turn your head.
+
+   Look away.
+
+
    What happened just now?
-   What are you doing
+    (requires recency in time-server)
+--> I just turned my head
+--> I just heard a loud sound.
+--> Nothing.
+
+
+   What are you doing?
+--> I am smiling
+--> I am looking at you
+--> I just smiled at you
+--> I am listening to you
+--> I am talking to you.
+--> I am talking to you (but only if talking for a while)
+--> I am entertaining a room-full of people (if >1 person)
+
+   How many people can you see?
+
+   How do you feel?
+--> I feel happy
+--> I'm happy
+--> I feel sad.
+
+   How are you feeling?
+--> I feel good.
+--> I feel OK.
+--> I'm
+
+  What was the last thing that made you sad?
+  What was the last thing that frightened you?
+  Who is the nicest person you met last?
+
+  What is my name?  (multi-person)
+
+  Where is Ben?
+--> Ben is on my left.
+--> Ben is on my right.
+
+  Where am I?
+--> You are in front of me.
+--> you are in the same room as I am
+--> You are in Hong Kong.
+
+  Where are you?
+--> I am in Hong Kong
+
+  What is the weather like today?
+--> (Internet search of weather based on location)
+
+
 
 where-look-rule
 
@@ -1387,4 +1451,3 @@ XXX correct version of "looking" requires using the space server.
  (cog-bind show-rule-1)
 (define current-action (AnchorNode "*-action-*"))
 (StateLink current-action (WordNode "foobar"))
-
