@@ -92,8 +92,6 @@ class FaceTrack:
 
 		# List of currently visible faces
 		self.visible_faces = []
-		# List of locations of currently visible faces
-		self.face_locations = {}
 
 		# List of no longer visible faces, but seen recently.
 		self.recent_locations = {}
@@ -254,13 +252,6 @@ class FaceTrack:
 
 		logger.info("Lost face; visibile faces now: " + str(self.visible_faces))
 
-	# Update location of a face. The location is stored in the
-	# OpenCog space server (octomap).
-	def update_face_loc(self, face):
-		if face.id in self.visible_faces:
-			self.atomo.update_face_octomap(face.id,
-			                face.point.x, face.point.y, face.point.z)
-
 	# ----------------------------------------------------------
 
 	# Adds given face to atomspace as requested face
@@ -307,7 +298,12 @@ class FaceTrack:
 			return
 
 		for face in data.faces:
-			self.update_face_loc(face)
+			# Update location of a face. The location is stored in the
+			# OpenCog space server (octomap).
+			if face.id in self.visible_faces:
+				self.atomo.update_face_octomap(face.id,
+				            face.point.x, face.point.y, face.point.z)
+
 
 	def behavior_control_callback(self, data):
 		# Were there facetracking enabled
