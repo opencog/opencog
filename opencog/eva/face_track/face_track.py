@@ -20,10 +20,9 @@
 import time
 
 import rospy
-import math
 import logging
 
-from std_msgs.msg import Int32, String
+from std_msgs.msg import Int32
 from chatbot.msg import ChatMessage
 from pi_face_tracker.msg import FaceEvent, Faces
 
@@ -111,7 +110,6 @@ class FaceTrack:
 		#   -0.303278 -0.0272767   0.952513  0.0272001
 		#   0          0          0          1
 		#
-
 		vs = [msg.pose.position.x, \
 		      msg.pose.position.y, \
 		      msg.pose.position.z, \
