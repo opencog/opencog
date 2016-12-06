@@ -101,9 +101,6 @@ class FaceTrack:
 		# lost face. tf does the tracking for us.
 		self.RECENT_INTERVAL = 20
 
-		# Current look-at-target
-		self.gaze_at = 0
-
 		# Last time that the list of active faces was vacuumed out.
 		self.last_vacuum = 0
 		self.VACUUM_INTERVAL = 1
@@ -179,12 +176,6 @@ class FaceTrack:
 			trg.z = 0.0
 			if self.control_mode & self.C_EYES:
 				self.gaze_pub.publish(trg)
-
-		if faceid not in self.visible_faces :
-			self.gaze_at = 0
-			return
-
-		self.gaze_at = faceid
 
 	# Turn entire head to look at the given target face. The head-turn is
 	# performed only once per call; after that, the eyes will then
