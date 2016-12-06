@@ -126,10 +126,8 @@ class FaceTrack:
 		self.control_mode = 255
 
 		# Subscribed OpenCog commands
-		self.TOPIC_GLANCE_FACE = "/opencog/glance_at"
 		self.TOPIC_LOOKAT_FACE = "/opencog/look_at"
 		self.TOPIC_GAZEAT_FACE = "/opencog/gaze_at"
-		rospy.Subscriber(self.TOPIC_GLANCE_FACE, Int32, self.glance_at_cb)
 		rospy.Subscriber(self.TOPIC_LOOKAT_FACE, Int32, self.look_at_cb)
 		rospy.Subscriber(self.TOPIC_GAZEAT_FACE, Int32, self.gaze_at_cb)
 
@@ -220,9 +218,6 @@ class FaceTrack:
 
 		self.look_at = faceid
 
-	def glance_at_face(self, faceid, howlong):
-		logger.info("glance at: " + str(faceid) + " for " + str(howlong) + " seconds")
-
 	def study_face(self, faceid, howlong):
 		logger.info("study: " + str(faceid) + " for " + str(howlong) + " seconds")
 
@@ -234,9 +229,6 @@ class FaceTrack:
 
 	def gaze_at_cb(self, msg):
 		self.gaze_at_face(msg.data)
-
-	def glance_at_cb(self, msg):
-		self.glance_at_face(msg.data, 0.5)
 
 	def sound_cb(self, msg):
 		self.store_sound_pos(msg.pose.position.x,

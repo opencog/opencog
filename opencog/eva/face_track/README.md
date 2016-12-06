@@ -84,7 +84,6 @@ OpenCog cogserver, using class `FaceAtomic`, implemented in
 FaceTrack has methods:
    `gaze_at_face(face_id)`
 	`look_at_face(face_id)`
-	`glance_at_face(face_id)`
 
 When invoked, these issue messsages to blender to eithr glance at the
 corresponding face location, or "servo" it: move the blender face/eyes
