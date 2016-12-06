@@ -215,13 +215,14 @@ class FaceTrack:
 	def store_sound_pos(self, x, y, z):
 		# Convert to camera coordinates, using an affine matrix
 		# (which combines a rotation and translation).
-		# Fill cmat correctly from icp results
-		'''
-		  0.943789   0.129327   0.304204 0.00736024
-		  -0.131484   0.991228 -0.0134787 0.00895614
-		  -0.303278 -0.0272767   0.952513  0.0272001
-		  0          0          0          1
-		'''
+		#
+		# A typical sl_matrix looks like this:
+		#
+		#   0.943789   0.129327   0.304204 0.00736024
+		#   -0.131484   0.991228 -0.0134787 0.00895614
+		#   -0.303278 -0.0272767   0.952513  0.0272001
+		#   0          0          0          1
+		#
 
 		vs = [x, y, z, 1]
 		r = [0, 0, 0, 0]
