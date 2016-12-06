@@ -12,7 +12,7 @@
 (add-to-load-path "/usr/local/share/opencog/scm/opencog/eva-model")
 (add-to-load-path ".")
 
-(load "express.scm") ; For random pos and neg expressions
+;(load "express.scm") ; For random pos and neg expressions
 (load-from-path "faces.scm")
 (load-from-path "self-model.scm") ; For soma-state def
 (load-from-path "orchestrate.scm") ; For DefinedPredicate "Show expression"
@@ -207,6 +207,24 @@
 ;(psi-set-event-callback! psi-check-for-loud-noise)
 
 
+;-------------------------------------
+; Internal vars to physiology mapping
+
+; PAU's
+;(define pau-prefix-str "PAU: ")
+; temp change for compatibility with psi graphing
+(define pau-prefix-str psi-prefix-str)
+(define (create-pau name initial-value)
+	(define pau
+		(Concept (string-append pau-prefix-str name)))
+	(Inheritance
+		pau
+		(Concept "PAU"))
+	(psi-set-value! pau initial-value)
+	;(hash-set! prev-value-table pau initial-value)
+	pau)
+
+
 ; ------------------------------------------------------------------
 ; OpenPsi Dynamics Interaction Rules
 
@@ -221,8 +239,9 @@
 ;--------------------------------
 ; Internal dynamic interactions
 
-(define power->arousal
-	(psi-create-interaction-rule power changed arousal .3))
+; power increases arousal
+;(define power->arousal
+;	(psi-create-interaction-rule power changed arousal .3))
 
 ; arousal decreases resolution
 (psi-create-interaction-rule arousal changed resolution-level .5)
@@ -230,7 +249,14 @@
 ; arousal increases goal directedness
 (psi-create-interaction-rule arousal changed goal-directedness .5)
 
+; power decreases neg valence
+(psi-create-interaction-rule power changed neg-valence -.2)
 
+; arousal increases pos valence
+(psi-create-interaction-rule arousal changed pos-valence .2)
+
+; pos valence increases power
+(psi-create-interaction-rule pos-valence changed power .2)
 
 
 ;-----------------------
@@ -257,48 +283,30 @@
 
 ; Loud noise occurs
 (define loud-noise (DefinedPredicate "Heard Loud Voice?"))
-(psi-create-interaction-rule loud-noise increased arousal 1)
+(psi-create-interaction-rule loud-noise increased arousal .9)
 (psi-create-interaction-rule loud-noise increased neg-valence .7)
 
+; Loud noise - previous approach that uses event callback approach
 ;(define loud-noise->arousal (psi-create-interaction-rule loud-noise-event
 ;	increased arousal 1))
 ;(define loud-noise->neg-valence (psi-create-interaction-rule loud-noise-event
 ;	increased neg-valence .7))
 
-
-
 ; New face
 (define new-face->arousal
 	(psi-create-interaction-rule new-face increased arousal .3))
 
-
-;-------------------------------------
-; Internal vars to physiology mapping
-
-; PAU's
-(define pau-prefix-str "PAU: ")
-(define (create-pau name initial-value)
-	(define pau
-		(Predicate (string-append pau-prefix-str name)))
-	(Inheritance
-		pau
-		(Concept "PAU"))
-	(psi-set-value! pau initial-value)
-	;(hash-set! prev-value-table pau initial-value)
-	pau)
-
-
+; Voice width
 (define voice-width
 	(create-pau "voice width" .2))
 
+; power increases voice-width
 (define power->voice
-	(psi-create-interaction-rule power changed voice-width 1))
+	(psi-create-interaction-rule power changed voice-width .7))
 
+; arousal decreases voice-width
 (define arousal->voice
-	(psi-create-interaction-rule arousal changed voice-width -.5))
-
-
-
+	(psi-create-interaction-rule arousal changed voice-width -.3))
 
 
 ; --------------------------------------------------------------
@@ -335,12 +343,40 @@
 ; OpenPsi loop.
 (psi-updater-run)
 
+
 ; ------------------------------------------------------------------
 ; Shortcuts for dev and testing purposes
-(define s speech-giving-starts)
-(define pos positive-sentiment-dialog)
-(define neg negative-sentiment-dialog)
-(define nf new-face)
+; --------------------------------------------------------------
+(define e psi-set-event-occurrence!)
+
+(define halt psi-updater-halt)
+(define h halt)
+(define r psi-updater-run)
+;(define r1 speech->power)
+;(define r2 power->voice)
+(define value psi-get-number-value)
+(define rules psi-get-interaction-rules)
+
+(define (psi-decrease-value target)
+	(psi-set-value! target
+		(max 0 (- (psi-get-number-value target) .1))))
+(define (psi-increase-value target)
+	(psi-set-value! target
+		(min 1 (+ (psi-get-number-value target) .1))))
+
+(define d psi-decrease-value)
+(define i psi-increase-value)
+
+(define (psi-set-pred-true target)
+	(Evaluation target (List) (stv 1 1)))
+(define (psi-set-pred-false target)
+	(Evaluation target (List) (stv 0 1)))
+
+(define t psi-set-pred-true)
+(define f psi-set-pred-false)
+
+(define nv neg-valence)
+(define pv pos-valence)
 
 (define (place-neg-dialog)
 	(define sentence (SentenceNode (number->string (random 1000000000))))
@@ -357,14 +393,30 @@
 	(call-with-new-thread
 		(lambda ()
 			(psi-set-value! sudden-sound-change 1)
-			(sleep 1)
+			(sleep 2)
 			(psi-set-value! sudden-sound-change 0))))
 
 ; Shortcuts
-(define voice voice-width)
-(define p power)
-(define a arousal)
-(define n simulate-loud-noise)
+(define-public v voice-width)
+(define-public p power)
+(define-public a arousal)
+
+(define-public n simulate-loud-noise)
+(define-public ln simulate-loud-noise)
+
+(define-public nd place-neg-dialog)   ; nd neg dialog
+(define-public pd place-pos-dialog)   ; pd pos dialog
+
+(define s speech-giving-starts)
+(define pos positive-sentiment-dialog)
+(define neg negative-sentiment-dialog)
+(define nf new-face)
+
+
+
+
+
+
 
 
 
