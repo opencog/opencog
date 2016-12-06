@@ -40,10 +40,10 @@ c_parse asRef swl ctext = do
     text <- peekCString ctext
     print "Parsing: "
     print text
-    case lojbanToAtomese wl text of
+    case lojbanToAtomeseRaw wl text of
         Nothing -> pure nullPtr
-        Just res -> do
-            printAtom res
+        Just r@(res,_) -> do
+            print r
             mres <- as <: insertAndGetHandle res
             case mres of
                 Nothing  -> pure nullPtr

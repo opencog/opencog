@@ -59,10 +59,6 @@ LojbanModule::LojbanModule(CogServer& cs,bool test) :
 
     _wordlist = lojban_init(name.c_str());
 
-    scmeval.eval("(use-modules (opencog) (opencog nlp))");
-    scmeval.eval("(use-modules (opencog nlp chatbot))");
-    scmeval.eval("(use-modules (opencog) (opencog nlp relex2logic))");
-    scmeval.eval("(use-modules (opencog) (opencog nlp fuzzy))");
 }
 
 /**
@@ -104,24 +100,14 @@ std::string LojbanModule::do_load_lojban(Request *req, std::list<std::string> ar
     std::ifstream file(path);
     std::string line;
 
-    std::string english;
     std::string lojban;
-
 
     while (std::getline(file, line))
     {
         std::size_t pos = line.find(",");
         lojban = line.substr(0,pos);
-        english  = line.substr(pos+1,std::string::npos);
-
-        Handle answer = scmeval.eval_h("(car (nlp-parse \"" + english + "\"))");
 
         Handle * hptr = lojban_parse(_as,_wordlist,lojban.c_str());
-
-        if (!hptr or (*hptr) == Handle::UNDEFINED)
-            continue;
-        else
-            _as->add_link(EQUIVALENCE_LINK,answer,(*hptr));
     }
 
     return "";
