@@ -133,20 +133,6 @@
 	)
 )
 
-;; Get first occurence in map
-(define (get-first-xyz map-name id-node elapse)
-	(let* ((loc-atom (get-first-locs-ato map-name id-node elapse) ))
-		(if (cog-atom? loc-atom)
-			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-					(xx (loc-link-x loc-link))
-					(yy (loc-link-y loc-link))
-					(zz (loc-link-z loc-link)))
-				(list xx yy zz))
-			(list)
-		)
-	)
-)
-
 ;;scm code
 (define (get-face face-id-node e-start)
 	(get-last-xyz "faces" face-id-node (round e-start))
@@ -178,11 +164,6 @@
 	)
 )
 
-;;get string of face-id's seperated by space - call python split() function
-;;in scheme itself list of number nodes
-(define (get-visible-faces)
-	(cog-filter 'NumberNode (show-visible-faces))
-)
 
 
 ;; Get all face-ids and only one sound id 1.0, compare them.
@@ -190,22 +171,33 @@
 ;; below returns face id of face nearest to sound vector at least
 ;; 10 degrees, or 0 face id
 (define (snd-nearest-face xx yy zz)
-	(let* ((lst (get-visible-faces))
-			(falist (map
-				(lambda (x) (list
-					(string->number (cog-name x))
+
+	; The visible faces are stored as EvaluationLinks, attached
+	; to the predicate "visible face". This function returns a
+	; list of nodes (NumberNodes, actually) holding the face id's.
+	(define (get-visible-faces)
+	   (define visible-face (PredicateNode "visible face"))
+		(filter (lambda(y) (equal? (cog-type y) 'NumberNode))
+			(map (lambda (x) (car (cog-outgoing-set x)))
+				(cog-chase-link 'EvaluationLink 'ListLink visible-face))))
+
+	; This converts the list of visible faces into ???
+	(define face-list
+		(map
+			(lambda (x)
+				(list (string->number (cog-name x))
 					(angle_face_id_snd (cog-name x) xx yy zz)))
-				lst)))
-		(if (< (length falist) 1)
-			0
-			(let* ((alist (append-map (lambda (x)(cdr x)) falist))
-					(amin (fold (lambda (n p) (min (abs p) (abs n)))
-						(car alist) alist)))
-				(if (> (/ (* 3.142 15.0) 180.0) amin)
-					(car (car (filter
-						(lambda (x) (> (+ amin 0.0001) (abs (cadr x)))) falist)))
-					0
-				)
+			 (get-visible-faces) ))
+
+	(if (< (length face-list) 1)
+		0
+		(let* ((alist (append-map (lambda (x)(cdr x)) face-list))
+				(amin (fold (lambda (n p) (min (abs p) (abs n)))
+					(car alist) alist)))
+			(if (> (/ (* 3.142 15.0) 180.0) amin)
+				(car (car (filter
+					(lambda (x) (> (+ amin 0.0001) (abs (cadr x)))) face-list)))
+				0
 			)
 		)
 	)
