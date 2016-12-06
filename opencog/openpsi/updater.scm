@@ -55,7 +55,7 @@
 ; Ultradian rhythm parameters
 (define-public ultradian_B .05)
 (define-public ultradian_w .02)
-(define-public ultradian_noise .01)
+(define-public ultradian_noise .03)
 
 ; --------------------------------------------------------------
 
@@ -328,7 +328,7 @@
 
 	; Check for changed PAUs, just for highlighting in test output
 	; Todo: Change this to a callback function
-	(set! monitored-pau (list voice-width))
+	; (set! monitored-pau (list voice-width))
 	(for-each
 		(lambda (pau)
 			(let* ((previous (hash-ref prev-value-table pau))
@@ -711,11 +711,11 @@
 (define (psi-pause)
 	; Pause for 100 millisecs, to keep the number of loops within a reasonable
 	; range.
-	; todo: is this needed?
 	(define pause-time 100000)
 	(if slo-mo
 		(set! pause-time 1000000))
-	(usleep pause-time))
+	(usleep pause-time)
+)
 
 
 ; --------------------------------------------------------------
@@ -801,36 +801,5 @@
 	; return a string JSON object
 	(string-append "{" (string-join return ", ") "}")
 )
-
-; --------------------------------------------------------------
-; Shortcuts for dev use
-
-(define e psi-set-event-occurrence!)
-
-(define halt psi-updater-halt)
-(define-public h halt)
-(define-public r psi-updater-run)
-;(define r1 speech->power)
-;(define r2 power->voice)
-(define value psi-get-number-value)
-(define rules psi-get-interaction-rules)
-
-(define (psi-decrease-value target)
-	(psi-set-value! target
-		(max 0 (- (psi-get-number-value target) .1))))
-(define (psi-increase-value target)
-	(psi-set-value! target
-		(min 1 (+ (psi-get-number-value target) .1))))
-
-(define-public d psi-decrease-value)
-(define-public i psi-increase-value)
-
-(define (psi-set-pred-true target)
-	(Evaluation target (List) (stv 1 1)))
-(define (psi-set-pred-false target)
-	(Evaluation target (List) (stv 0 1)))
-
-(define-public t psi-set-pred-true)
-(define f psi-set-pred-false)
 
 
