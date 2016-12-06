@@ -763,13 +763,18 @@ proper atomese.
 	))
 
 ; --------------------------------------------------------
-; Glancing at people.
+; Glancing at people.  Glancing moves the eyes only, not the whole neck.
+; The glancing movement is temporary; the eyes soon revert back to thier
+; original target.
+
+; Glance at a face.
+; Expects a NumberNode holding the face id in it.
 (DefineLink
 	(DefinedPredicate "glance and ack")
 	(LambdaLink
 		(Variable "$face-id")
 		(SequentialAndLink
-			(Evaluation (GroundedPredicate "scm:gaze-at-face");py:glance_at_face
+			(Evaluation (GroundedPredicate "scm: glance-at-face")
 				(ListLink (Variable "$face-id")))
 			(True (DefinedSchemaNode "set glance timestamp"))
 			;; Mark it as acked, othwerwise, we'll keep glancing there,
@@ -805,7 +810,7 @@ proper atomese.
 	(LambdaLink
 		(Variable "$face-id")
 		(SequentialAndLink
-			(Evaluation (GroundedPredicate "scm:gaze-at-face")
+			(Evaluation (GroundedPredicate "scm: glance-at-face")
 				(ListLink (Variable "$face-id")))
 			(True (DefinedSchemaNode "set glance timestamp"))
 		)))

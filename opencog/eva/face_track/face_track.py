@@ -60,21 +60,26 @@ class Face:
 # These messages are currently sent as scheme strings.
 #
 # This class also subscribes to several /opencog topics, which is where
-# the CogServer will send commands. These includes commands to stare
-# at a given face_id, to glance at a face_id, and so on.  The handling
-# is done here, and not in OpenCog, because right now, we don't want to
-# track dynamic 3D locations in OpenCog. That is, we don't want to
-# implement the analog of TF inside the CogServer.
+# the CogServer sends commands. These includes commands to turn and
+# face a given face_id, to (momentarily) glance at a face_id, and so on.
+# The handling is done here, and not in OpenCog, because right now, we
+# don't want to track dynamic 3D locations in OpenCog. That is, we don't
+# want to implement the analog of TF inside the CogServer.
+#
+# XXX The above is not longer true!!! FIXME
 #
 # Upon receiving messages on /opencog, it then obeys these, and servos
 # blender appropriately.
 #
 class FaceTrack:
 
-	# Control flags. Ideally FaceTrack should publish targets using ros_commo EvaControl class.
+	# Control flags. Ideally, FaceTrack should publish targets using
+	# ros_commo EvaControl class.
 	C_EYES = 16
 	C_FACE = 32
-	# Facetracking will be disabled if neither of those flags are set
+	# Face tracking will be disabled if neither of these flags are set.
+	# (this allows for a manual over-ride of face-tracking by other
+	# control processes.)
 	C_FACE_TRACKING = C_FACE | C_EYES
 
 	def __init__(self):
@@ -168,8 +173,8 @@ class FaceTrack:
 		parameter_name = "sound_localization/mapping_matrix"
 		if rospy.has_param(parameter_name):
 			self.sl_matrix = rospy.get_param(parameter_name)
-			rospy.Subscriber("/manyears/source_pose",PoseStamped, \
-				self.snd1_cb)
+			rospy.Subscriber("/manyears/source_pose", PoseStamped, \
+				self.sound_cb)
 
 	# ---------------------------------------------------------------
 	# Public API. Use these to get things done.
@@ -242,19 +247,21 @@ class FaceTrack:
 	def glance_at_cb(self, msg):
 		self.glance_at_face(msg.data, 0.5)
 
-	def snd1_cb(self,msg):
-		self.save_snd1(msg.pose.position.x,msg.pose.position.y,msg.pose.position.z)
+	def sound_cb(self, msg):
+		self.store_sound_pos(msg.pose.position.x,
+		                     msg.pose.position.y,
+		                     msg.pose.position.z)
 
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
-	#
-	# Start tracking a face
-	def save_snd1(self,x,y,z):
-		#correct by translation and rotation for camera space
-		r = [[0],[0],[0],[0]]
-		vs = [[x],[y],[z],[1]]
-		n=0
-		#fill cmat correctly from icp results
+
+	# Store the location of the strongest sound-source in the
+	# OpenCog space server.  This data arrives at a rate of about
+	# 30 Hz, currently, from ManyEars.
+	def store_sound_pos(self, x, y, z):
+		# Convert to camera coordinates, using an affine matrix
+		# (which combines a rotation and translation).
+		# Fill cmat correctly from icp results
 		'''
 		  0.943789   0.129327   0.304204 0.00736024
 		  -0.131484   0.991228 -0.0134787 0.00895614
@@ -262,14 +269,15 @@ class FaceTrack:
 		  0          0          0          1
 		'''
 
+		vs = [x, y, z, 1]
+		r = [0, 0, 0, 0]
 		for i in range(0,3):
 			for j in range(0,3):
-				r[i][0]+=self.sl_matrix[i][j]*vs[j][0]
-		xc=r[0][0]
-		yc=r[1][0]
-		zc=r[2][0]
-		self.atomo.save_snd1(xc,yc,zc)
+				r[i] += self.sl_matrix[i][j] * vs[j]
 
+		self.atomo.save_snd1(r[0], r[1], r[2])
+
+	# Start tracking a face
 	def add_face(self, faceid):
 		if faceid in self.visible_faces:
 			return
@@ -290,10 +298,12 @@ class FaceTrack:
 
 		logger.info("Lost face; visibile faces now: " + str(self.visible_faces))
 
-	# Update face location in octomap if it is in visible faces list
-	def update_face_loc(self,face):
+	# Update location of a face. The location is stored in the
+	# OpenCog space server (octomap).
+	def update_face_loc(self, face):
 		if face.id in self.visible_faces:
-			self.atomo.update_face_octomap(face.id,face.point.x,face.point.y,face.point.z)
+			self.atomo.update_face_octomap(face.id,
+			                face.point.x, face.point.y, face.point.z)
 
 	# ----------------------------------------------------------
 	# Main look-at action driver.  Should be called at least a few times
@@ -396,7 +406,8 @@ class FaceTrack:
 
 	# ----------------------------------------------------------
 
- 	def stt_cb(self,msg):
+	# Speech-to-text callback
+	def stt_cb(self, msg):
 		if msg.confidence >= 50:
 			self.atomo.who_said(msg.utterance)
 
@@ -431,6 +442,7 @@ class FaceTrack:
 
 		for face in data.faces:
 			self.update_face_loc(face)
+
 		# Now perform all the various looking-at actions
 		####self.do_look_at_actions()
 
