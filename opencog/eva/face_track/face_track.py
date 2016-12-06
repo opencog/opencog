@@ -20,7 +20,6 @@
 import time
 
 import rospy
-import tf
 import math
 import logging
 
@@ -76,10 +75,6 @@ class FaceTrack:
 		# List of currently visible faces
 		self.visible_faces = []
 
-		# How long (in seconds) to keep around a recently seen, but now
-		# lost face. tf does the tracking for us.
-		self.RECENT_INTERVAL = 20
-
 		# Subscribed pi_vision topics and events
 		self.TOPIC_FACE_EVENT = "/camera/face_event"
 		self.EVENT_NEW_FACE = "new_face"
@@ -102,9 +97,6 @@ class FaceTrack:
 
 		# Frame in which coordinates will be returned from transformation
 		self.LOCATION_FRAME = "blender"
-		# Transform Listener. Tracks history for RECENT_INTERVAL.
-		self.tf_listener = tf.TransformListener(False, \
-		                        rospy.Duration(self.RECENT_INTERVAL))
 
 		rospy.Subscriber("/behavior_control", Int32, \
 			self.behavior_control_callback)
