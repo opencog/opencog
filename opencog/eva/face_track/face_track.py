@@ -158,9 +158,7 @@ class FaceTrack:
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,
-	# or a face is lost.  Note: I don't think this is really needed,
-	# the face_loc_cb accomplishes the same thing. So maybe should
-	# remove this someday.
+	# or a face is lost.
 	def face_event_cb(self, data):
 		if not self.control_mode & self.C_FACE_TRACKING:
 			return
