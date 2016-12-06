@@ -26,32 +26,16 @@ import logging
 from std_msgs.msg import Int32, String
 from chatbot.msg import ChatMessage
 from pi_face_tracker.msg import FaceEvent, Faces
-from blender_api_msgs.msg import Target
 
 from face_atomic import FaceAtomic
-from geometry_msgs.msg import PoseStamped #for sound
+from geometry_msgs.msg import PoseStamped # for sound localization
 
 logger = logging.getLogger('hr.eva_behavior.face_track')
 
-# A registery (in-memory database) of all human faces that are currently
-# visible, or have been recently seen.
-#
-# It does this by subscribing to pi_vision topics, to get face ID's and
-# 3D locations.  It maintains a database of 3D locations in ROS TF. It
-# then sends face_id's to the CogServer, using the FaceAtomic class.
-# These messages are currently sent as scheme strings.
-#
-# This class also subscribes to several /opencog topics, which is where
-# the CogServer sends commands. These includes commands to turn and
-# face a given face_id, to (momentarily) glance at a face_id, and so on.
-# The handling is done here, and not in OpenCog, because right now, we
-# don't want to track dynamic 3D locations in OpenCog. That is, we don't
-# want to implement the analog of TF inside the CogServer.
-#
-# XXX The above is not longer true!!! FIXME
-#
-# Upon receiving messages on /opencog, it then obeys these, and servos
-# blender appropriately.
+# Thin python wrapper, to subscribe to face-tracking ROS messages,
+# (face ID's, 3D face locations, and 3D sound localization)
+# and ttehn re-wrap these as opencog atoms, via FaceAtomic, and
+# forward them on into the OpenCog space-time server.
 #
 class FaceTrack:
 
@@ -108,6 +92,11 @@ class FaceTrack:
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
 
+	# Speech-to-text callback
+	def stt_cb(self, msg):
+		if msg.confidence >= 50:
+			self.atomo.who_said(msg.utterance)
+
 	# Store the location of the strongest sound-source in the
 	# OpenCog space server.  This data arrives at a rate of about
 	# 30 Hz, currently, from ManyEars.
@@ -135,6 +124,8 @@ class FaceTrack:
 
 		self.atomo.save_snd1(r[0], r[1], r[2])
 
+	# ----------------------------------------------------------
+
 	# Start tracking a face
 	def add_face(self, faceid):
 		if faceid in self.visible_faces:
@@ -156,21 +147,13 @@ class FaceTrack:
 
 		logger.info("Lost face; visibile faces now: " + str(self.visible_faces))
 
-	# ----------------------------------------------------------
-
 	# Adds given face to atomspace as requested face
 	def track_face(self, faceid):
 		if faceid in self.visible_faces:
 			logger.info("Face requested interaction: " + str(faceid))
 			self.atomo.add_tracked_face_to_atomspace(faceid)
-		return
 
 	# ----------------------------------------------------------
-
-	# Speech-to-text callback
-	def stt_cb(self, msg):
-		if msg.confidence >= 50:
-			self.atomo.who_said(msg.utterance)
 
 	# pi_vision ROS callbacks
 
@@ -195,9 +178,7 @@ class FaceTrack:
 			self.atomo.face_recognition(data.face_id, data.recognized_id)
 
 	# pi_vision ROS callback, called when pi_vision has new face
-	# location data for us. Because this happens frequently (10x/second)
-	# we also use this as the main update loop, and drive all look-at
-	# actions from here.
+	# location data for us. This happens frequently (about 10x/second)
 	def face_loc_cb(self, data):
 		if not self.control_mode & self.C_FACE_TRACKING:
 			return
@@ -210,15 +191,20 @@ class FaceTrack:
 				            face.point.x, face.point.y, face.point.z)
 
 
+	# Enable/disable Opencog face-tracking.  This is driven by the
+	# master control GUI.
 	def behavior_control_cb(self, data):
-		# Were there facetracking enabled
+		# Is facetracking currently enabled?
 		facetracking = self.control_mode & self.C_FACE_TRACKING
 		self.control_mode = data.data
 		print("New Control mode %i" % self.control_mode )
+
+		# If face-tracking was enabled, and is now disabled ...
 		if facetracking > 0 and self.control_mode & self.C_FACE_TRACKING == 0:
 			self.atomo.update_ft_state_to_atomspace(False)
 			# Need to clear faces:
 			for face in self.visible_faces[:]:
 				self.remove_face(face)
+
 		elif self.control_mode & self.C_FACE_TRACKING > 0:
 			self.atomo.update_ft_state_to_atomspace(True)
