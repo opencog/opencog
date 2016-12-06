@@ -85,8 +85,6 @@ class FaceTrack:
 
 		self.TOPIC_FACE_LOCATIONS = "/camera/face_locations"
 
-		self.control_mode = 255
-
 		# Face appearance/disappearance from pi_vision
 		rospy.Subscriber(self.TOPIC_FACE_EVENT, FaceEvent, self.face_event_cb)
 
@@ -95,13 +93,10 @@ class FaceTrack:
 
 		rospy.Subscriber("chatbot_speech", ChatMessage, self.stt_cb)
 
-		# Frame in which coordinates will be returned from transformation
-		self.LOCATION_FRAME = "blender"
+		rospy.Subscriber("/behavior_control", Int32, self.behavior_control_cb)
 
-		rospy.Subscriber("/behavior_control", Int32, \
-			self.behavior_control_callback)
-		# Control Eeys and face by default
-		#self.control_mode = 255
+		# Control Eyes and face by default
+		self.control_mode = 255
 
 		# Sound localization
 		parameter_name = "sound_localization/mapping_matrix"
@@ -216,7 +211,7 @@ class FaceTrack:
 				            face.point.x, face.point.y, face.point.z)
 
 
-	def behavior_control_callback(self, data):
+	def behavior_control_cb(self, data):
 		# Were there facetracking enabled
 		facetracking = self.control_mode & self.C_FACE_TRACKING
 		self.control_mode = data.data
