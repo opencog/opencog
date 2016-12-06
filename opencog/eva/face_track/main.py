@@ -34,6 +34,5 @@ try:
 except AttributeError:
     print "Sound localization is disabled"
 
-ft.do_look_at_actions()
 rospy.spin()
 print "Exit face-tracking node"
