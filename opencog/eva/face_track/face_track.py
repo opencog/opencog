@@ -92,16 +92,6 @@ class FaceTrack:
 
 		self.control_mode = 255
 
-		# Subscribed OpenCog commands
-		self.TOPIC_LOOKAT_FACE = "/opencog/look_at"
-		self.TOPIC_GAZEAT_FACE = "/opencog/gaze_at"
-		rospy.Subscriber(self.TOPIC_LOOKAT_FACE, Int32, self.look_at_cb)
-		rospy.Subscriber(self.TOPIC_GAZEAT_FACE, Int32, self.gaze_at_cb)
-
-		# Published blender_api topics
-		self.TOPIC_FACE_TARGET = "/blender_api/set_face_target"
-		self.TOPIC_GAZE_TARGET = "/blender_api/set_gaze_target"
-
 		# Face appearance/disappearance from pi_vision
 		rospy.Subscriber(self.TOPIC_FACE_EVENT, FaceEvent, self.face_event_cb)
 
@@ -109,10 +99,6 @@ class FaceTrack:
 		rospy.Subscriber(self.TOPIC_FACE_LOCATIONS, Faces, self.face_loc_cb)
 
 		rospy.Subscriber("chatbot_speech", ChatMessage, self.stt_cb)
-
-		# Where to look
-		self.gaze_pub = rospy.Publisher(self.TOPIC_GAZE_TARGET,
-			Target, queue_size=10)
 
 		# Frame in which coordinates will be returned from transformation
 		self.LOCATION_FRAME = "blender"
@@ -133,45 +119,12 @@ class FaceTrack:
 				self.sound_cb)
 
 	# ---------------------------------------------------------------
-	# Public API. Use these to get things done.
-
-	# Turn only the eyes towards the given target face; track that face.
-	def gaze_at_face(self, faceid):
-		logger.info("gaze at: " + str(faceid))
-
-		# Look at neutral position, 1 meter in front
-		if 0 == faceid :
-			trg = Target()
-			trg.x = 1.0
-			trg.y = 0.0
-			trg.z = 0.0
-			if self.control_mode & self.C_EYES:
-				self.gaze_pub.publish(trg)
-
-	# Turn entire head to look at the given target face. The head-turn is
-	# performed only once per call; after that, the eyes will then
-	# automatically track that face, but the head will not.  Call again,
-	# to make the head move again.
-	#
-	def look_at_face(self, faceid):
-		logger.info("look at: " + str(faceid))
-
-	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
-
-	def look_at_cb(self, msg):
-		self.look_at_face(msg.data)
-
-	def gaze_at_cb(self, msg):
-		self.gaze_at_face(msg.data)
 
 	def sound_cb(self, msg):
 		self.store_sound_pos(msg.pose.position.x,
 		                     msg.pose.position.y,
 		                     msg.pose.position.z)
-
-	# ---------------------------------------------------------------
-	# Private functions, not for use outside of this class.
 
 	# Store the location of the strongest sound-source in the
 	# OpenCog space server.  This data arrives at a rate of about
