@@ -1,7 +1,7 @@
 #
 # face_track.py -  Registery and tracking of visible human faces
-# Copyright (C) 2014,2015  Hanson Robotics
-# Copyright (C) 2015 Linas Vepstas
+# Copyright (C) 2014,2015,2016  Hanson Robotics
+# Copyright (C) 2015,2016 Linas Vepstas
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -93,15 +93,9 @@ class FaceTrack:
 		# List of currently visible faces
 		self.visible_faces = []
 
-		# List of no longer visible faces, but seen recently.
-		self.recent_locations = {}
 		# How long (in seconds) to keep around a recently seen, but now
 		# lost face. tf does the tracking for us.
 		self.RECENT_INTERVAL = 20
-
-		# Last time that the list of active faces was vacuumed out.
-		self.last_vacuum = 0
-		self.VACUUM_INTERVAL = 1
 
 		# Subscribed pi_vision topics and events
 		self.TOPIC_FACE_EVENT = "/camera/face_event"
@@ -278,6 +272,7 @@ class FaceTrack:
 	def face_event_cb(self, data):
 		if not self.control_mode & self.C_FACE_TRACKING:
 			return
+
 		if data.face_event == self.EVENT_NEW_FACE:
 			self.add_face(data.face_id)
 
@@ -288,7 +283,7 @@ class FaceTrack:
 			self.track_face(data.face_id)
 
 		elif data.face_event == self.EVENT_RECOGNIZED_FACE:
-			self.atomo.face_recognition(data.face_id,data.recognized_id)
+			self.atomo.face_recognition(data.face_id, data.recognized_id)
 
 	# pi_vision ROS callback, called when pi_vision has new face
 	# location data for us. Because this happens frequently (10x/second)
