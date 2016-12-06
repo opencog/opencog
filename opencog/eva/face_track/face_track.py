@@ -141,8 +141,6 @@ class FaceTrack:
 		# Face location information from pi_vision
 		rospy.Subscriber(self.TOPIC_FACE_LOCATIONS, Faces, self.face_loc_cb)
 
-		# Which face to look at
-		# rospy.Subscriber(self.TOPIC_FACE_TARGET, xxxFaceEvent, xxxself.face_event_cb)
 		rospy.Subscriber("chatbot_speech", ChatMessage,
 			self.stt_cb)
 
@@ -217,9 +215,6 @@ class FaceTrack:
 			return
 
 		self.look_at = faceid
-
-	def study_face(self, faceid, howlong):
-		logger.info("study: " + str(faceid) + " for " + str(howlong) + " seconds")
 
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
@@ -335,20 +330,6 @@ class FaceTrack:
 
 		for face in data.faces:
 			self.update_face_loc(face)
-
-		# Now perform all the various looking-at actions
-		####self.do_look_at_actions()
-
-	# Queries tf_listener to get latest available position
-	# Throws TF exceptions if transform cannot be returned
-	def face_target(self, faceid):
-		(trans, rot) = self.tf_listener.lookupTransform( \
-			self.LOCATION_FRAME, 'Face' + str(faceid), rospy.Time(0))
-		t = Target()
-		t.x = trans[0]
-		t.y = trans[1]
-		t.z = trans[2]
-		return t
 
 	def behavior_control_callback(self, data):
 		# Were there facetracking enabled
