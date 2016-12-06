@@ -104,9 +104,6 @@ class FaceTrack:
 		# Current look-at-target
 		self.look_at = 0
 		self.gaze_at = 0
-		self.glance_at = 0
-		self.first_glance = -1
-		self.glance_howlong = -1
 
 		# How often we update the look-at target.
 		self.LOOKAT_INTERVAL = 0.1
@@ -225,15 +222,9 @@ class FaceTrack:
 
 	def glance_at_face(self, faceid, howlong):
 		logger.info("glance at: " + str(faceid) + " for " + str(howlong) + " seconds")
-		self.glance_at = faceid
-		self.glance_howlong = howlong
-		self.first_glance = -1
 
 	def study_face(self, faceid, howlong):
 		logger.info("study: " + str(faceid) + " for " + str(howlong) + " seconds")
-		self.glance_at = faceid
-		self.glance_howlong = howlong
-		self.first_glance = -1
 
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
