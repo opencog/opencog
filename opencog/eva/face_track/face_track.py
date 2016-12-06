@@ -102,12 +102,7 @@ class FaceTrack:
 		self.RECENT_INTERVAL = 20
 
 		# Current look-at-target
-		self.look_at = 0
 		self.gaze_at = 0
-
-		# How often we update the look-at target.
-		self.LOOKAT_INTERVAL = 0.1
-		self.last_lookat = 0
 
 		# Last time that the list of active faces was vacuumed out.
 		self.last_vacuum = 0
@@ -185,7 +180,6 @@ class FaceTrack:
 			if self.control_mode & self.C_EYES:
 				self.gaze_pub.publish(trg)
 
-		self.last_lookat = 0
 		if faceid not in self.visible_faces :
 			self.gaze_at = 0
 			return
@@ -208,13 +202,6 @@ class FaceTrack:
 			trg.z = 0.0
 			if self.control_mode & self.C_FACE:
 				self.look_pub.publish(trg)
-
-		self.last_lookat = 0
-		if faceid not in self.visible_faces :
-			self.look_at = 0
-			return
-
-		self.look_at = faceid
 
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
