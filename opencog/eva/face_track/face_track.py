@@ -111,9 +111,6 @@ class FaceTrack:
 		rospy.Subscriber("chatbot_speech", ChatMessage, self.stt_cb)
 
 		# Where to look
-		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
-			Target, queue_size=10)
-
 		self.gaze_pub = rospy.Publisher(self.TOPIC_GAZE_TARGET,
 			Target, queue_size=10)
 
@@ -158,15 +155,6 @@ class FaceTrack:
 	#
 	def look_at_face(self, faceid):
 		logger.info("look at: " + str(faceid))
-
-		# Look at neutral position, 1 meter in front
-		if 0 == faceid :
-			trg = Target()
-			trg.x = 1.0
-			trg.y = 0.0
-			trg.z = 0.0
-			if self.control_mode & self.C_FACE:
-				self.look_pub.publish(trg)
 
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
