@@ -108,15 +108,10 @@ class FaceTrack:
 	# ---------------------------------------------------------------
 	# Private functions, not for use outside of this class.
 
-	def sound_cb(self, msg):
-		self.store_sound_pos(msg.pose.position.x,
-		                     msg.pose.position.y,
-		                     msg.pose.position.z)
-
 	# Store the location of the strongest sound-source in the
 	# OpenCog space server.  This data arrives at a rate of about
 	# 30 Hz, currently, from ManyEars.
-	def store_sound_pos(self, x, y, z):
+	def sound_cb(self, msg):
 		# Convert to camera coordinates, using an affine matrix
 		# (which combines a rotation and translation).
 		#
@@ -128,7 +123,11 @@ class FaceTrack:
 		#   0          0          0          1
 		#
 
-		vs = [x, y, z, 1]
+		vs = [msg.pose.position.x, \
+		      msg.pose.position.y, \
+		      msg.pose.position.z, \
+		      1]
+
 		r = [0, 0, 0, 0]
 		for i in range(0,3):
 			for j in range(0,3):
