@@ -34,25 +34,8 @@ from geometry_msgs.msg import PoseStamped #for sound
 
 logger = logging.getLogger('hr.eva_behavior.face_track')
 
-# A Face. Currently consists only of an ID number, a 3D location,
-# and the time it was last seen.  Should be extended to include
-# the size of the face, possibly the location of the eyes, and,
-# if possible, the name of the human attached to it ...
-class Face:
-	def __init__(self, fid, point):
-		self.faceid = fid
-		self.x = point.x
-		self.y = point.y
-		self.z = point.z
-		self.t = time.time()
-
 # A registery (in-memory database) of all human faces that are currently
-# visible, or have been recently seen.  Implements various basic look-at
-# actions, including:
-# *) turning to face a given face
-# *) tracking a face with the eyes
-# *) glancing at a currrently-visible face, or at a location where a
-#    face that was recently seen.
+# visible, or have been recently seen.
 #
 # It does this by subscribing to pi_vision topics, to get face ID's and
 # 3D locations.  It maintains a database of 3D locations in ROS TF. It
@@ -125,8 +108,7 @@ class FaceTrack:
 		# Face location information from pi_vision
 		rospy.Subscriber(self.TOPIC_FACE_LOCATIONS, Faces, self.face_loc_cb)
 
-		rospy.Subscriber("chatbot_speech", ChatMessage,
-			self.stt_cb)
+		rospy.Subscriber("chatbot_speech", ChatMessage, self.stt_cb)
 
 		# Where to look
 		self.look_pub = rospy.Publisher(self.TOPIC_FACE_TARGET,
