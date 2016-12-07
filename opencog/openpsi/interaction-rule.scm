@@ -106,3 +106,19 @@
 	;	strength target-entity rule)
 	rule
 )
+
+
+(define-public (psi-create-general-rule antecedent consequent-function
+	consequent-params)
+	(define rule
+		(PredictiveImplication
+			(TimeNode 1)
+            antecedent
+		    (ExecutionOutputLink
+	            consequent-function
+	            consequent-params)))
+	(Member rule psi-interaction-rule)
+	(display rule)
+	rule
+)
+
