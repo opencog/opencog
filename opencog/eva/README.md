@@ -22,6 +22,10 @@ robot is here:
 * https://github.com/hansonrobotics/blender_api
 * https://github.com/opencog/docker/tree/master/indigo/eva
 
+This directory also contains an assortment of ROS nodes that subscribe
+to ROS visual and audio sensory inputs, and forward these to the
+opencog spactime server (performing the needed format conversion).
+
 
 Design Goals
 ------------
