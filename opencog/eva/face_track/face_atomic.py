@@ -25,8 +25,6 @@ from netcat import netcat
 # visible faces into the cogserver atomspace. It opens a socket to
 # the cogserver, and sends some atoms across.
 #
-# TODO: Send the face location as well.
-#
 class FaceAtomic:
 
 	def __init__(self):
@@ -89,18 +87,25 @@ class FaceAtomic:
 		return face
 
 	# Build string to delete the face, and also to garbage-collect
-	# the ListLink NumberNode.
+	# the ListLink and NumberNode.  In the long run, explicit deletes
+	# should not be needed, because the attention-allocation code
+	# should do this.  However, attention-alloc does not yet work.
 	def delete_face(self, faceid):
-		pattern = "(EvaluationLink (Predicate \"name\") (ListLink (ConceptNode \""
-			+ str(faceid) + "\") (VariableNode \"f\")))"
 
-		del_face = "(cog-execute! (PutLink (DeleteLink "+pattern+") (GetLink "+pattern+")))"
-		face = "(cog-delete " + \
-				"(EvaluationLink (PredicateNode \"visible face\") " + \
-				"(ListLink (NumberNode \"" + str(faceid) + "\"))))\n" + \
-				del_face + "\n" + \
+		# Delete the association between the recognized and tracked face.
+		reco_pattern = "(EvaluationLink (Predicate \"name\") " +
+			"(ListLink (ConceptNode \"" + str(faceid) + "\") " +
+			"(VariableNode \"reco-id\")))"
+
+		# XXX FIXME -- need to also delete the ListLink above.
+		del_reco = "(cog-execute! (PutLink (DeleteLink " + pattern +
+				") (GetLink " + pattern + ")))\n"
+		face = del_reco + \
 				"(cog-delete " + \
-				"(ListLink (NumberNode \"" + str(faceid) + "\")))\n" + \
+				"  (EvaluationLink (PredicateNode \"visible face\") " + \
+				"    (ListLink (NumberNode \"" + str(faceid) + "\"))))\n" + \
+				"(cog-delete " + \
+				"  (ListLink (NumberNode \"" + str(faceid) + "\")))\n" + \
 				"(cog-delete (NumberNode \"" + str(faceid) + "\"))\n"
 		return face
 
@@ -112,7 +117,7 @@ class FaceAtomic:
 		       str(faceid) + '"))\n'
 		return face
 
-	# Sets facetracking state in atomspace
+	# Set the facetracking state in atomspace
 	def update_ft_state_to_atomspace(self, ft_enabled):
 		str = self.set_face_tracking_state(ft_enabled)
 		netcat(self.hostname, self.port, str + "\n")
