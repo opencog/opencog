@@ -2,7 +2,6 @@
 ; psi-dynamics.scm
 ;
 ; OpenPsi dynamics control for Hanson robot
-; XXX FIXME. Does not actually use OpenPsi, yet.
 
 (use-modules (opencog) (opencog exec) (opencog openpsi) (opencog python))
 
@@ -224,12 +223,25 @@
 	;(hash-set! prev-value-table pau initial-value)
 	pau)
 
+; arousal ultradian rhythm rule
+(define arousal_B .05)
+(define arousal_B .05)
+(define arousal_w .02)
+(define arousal_offset (get-random-cycle-offset arousal_w))
+(define arousal_noise .03)
+
+; arousal rhythm rule
+(psi-create-general-rule (TrueLink)
+	(GroundedSchemaNode "scm: psi-ultradian-update")
+	(List arousal (Number arousal_B) (Number arousal_w) (Number arousal_offset)))
+
+; arousal noise rule
+(psi-create-general-rule (TrueLink)
+	(GroundedSchemaNode "scm: psi-noise-update" arousal arousal_noise)
+	(List arousal (Number arousal_noise)))
 
 ; ------------------------------------------------------------------
 ; OpenPsi Dynamics Interaction Rules
-
-; Todo: move to own file?
-
 ; The following change-predicate types have been defined in
 ; opencog/opencog/openpsi/interaction-rule.scm:
 ;(define changed "changed")
