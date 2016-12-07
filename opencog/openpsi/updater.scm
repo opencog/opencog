@@ -52,11 +52,6 @@
 ; propagate through the system after an event has occurred.
 (define psi-expression-loop-delay 4)
 
-; Ultradian rhythm parameters
-(define-public ultradian_B .05)
-(define-public ultradian_w .02)
-(define-public ultradian_noise .03)
-
 ; --------------------------------------------------------------
 
 ; Todo: implement these tables in the atomspace
@@ -85,7 +80,7 @@
   psi-set-expression-callback! CALLBACK - set the callback that
   triggers emotion expression update. (? Huh? please explain.)
 
-  CALLBACK is supplied by the client and gets called when OpenPsi 
+  CALLBACK is supplied by the client and gets called when OpenPsi
   believes a change of emotional expression based on psi values
   would be good to do (e.g. after a new event is detected and psi
   params have been updated).
@@ -175,19 +170,18 @@
 "
   Main function that executes the actions to be taken in every cycle.
   At each step:
-  (1a) Evaluate the monitored events and set their 'event-detected' predicates
-   (1) Evaluate the monitored entities and set their 'changed' predicates, and
+   (1) Evaluate the monitored events and set their 'event-detected' predicates
+   (2) Evaluate the monitored entities and set their 'changed' predicates, and
 	   for each changed entity store it's value in a value-at-step-start (this,
 	   or otherwise storing the change magnitude, is needed because the current
 	   value of a trigger entity might change because of application of a
 	   previous rule.)
-   (2) Store the current value or change magnitude before firing the rules
+   (3) Store the current value or change magnitude before firing the rules
 	   because the current value of the trigger might change as a result of a
 	   previous rule.
-   (3) Execute the interaction rules
- (3.5) Add endogenous ultradian rhythm
-   (4) Update the previous values of the changed monitored params
-  (4b) Set the previous values of the event predicates to 0, because each
+   (4) Execute the interaction rules
+   (5) Update the previous values of the changed monitored params
+   (6) Set the previous values of the event predicates to 0, because each
 	   particular instance of an event should only fire rules at a single step.
 "
 	(define changed-params '())
@@ -288,24 +282,6 @@
 			; value is not a number, just return it
 			value))
 
-	; Ultradian rhythm update function
-	(define (ultradian-update val)
-		; Defining these globally so we can tweak on the fly
-		;(define B .01)
-		;(define w .1)
-		;(max 0 (+ (* B (sin (* w psi-updater-loop-count))) val))
-
-		;(+ (* B (sin (* w psi-updater-loop-count))) val)
-
-		(define ultradian-rhythm (* ultradian_B ultradian_w (cos
-			(* ultradian_w psi-updater-loop-count))))
-		(define noise (- (random ultradian_noise) (/ ultradian_noise 2)))
-		;(set! noise 0)
-		(set! val (+ val ultradian-rhythm noise))
-
-		(set! val (min (max 0 val) 1))
-		val
-	)
 
 	(set! psi-updater-loop-count (+ psi-updater-loop-count 1))
 
@@ -384,9 +360,6 @@
 	(let ((rules (psi-get-interaction-rules)))
 		(map psi-evaluate-interaction-rule rules)
 	)
-
-	; Update ultradian rhythm
-	(psi-set-value! arousal (ultradian-update (psi-get-number-value arousal)))
 
 	; Have OpenPsi trigger emotion expression updates after events are detected
 	; that impact modulator and sec variables
@@ -561,6 +534,55 @@
 		;(cog-set-tv! target (cog-new-stv new-strength confidence))
 	)
 )
+
+; Ultradian rhythm update function
+; Updates value of var based on cos wave function
+(define-public (psi-ultradian-update var Beta omega offset)
+"
+  var - psi variable as Atom
+  Beta - amplitude as NumberNode
+  omega - frequency in radians (iow frequency per 2*pi timesteps) as NumberNode
+  offset - period offset as NumberNode
+"
+	(define val (psi-get-number-value var))
+	(define ultradian-rhythm)
+
+	; Convert NumberNodes to numbers
+	(set! Beta (string->number (cog-name Beta)))
+	(set! omega (string->number (cog-name omega)))
+	(set! offset (string->number (cog-name offset)))
+
+	(if val
+		(begin
+			(set! ultradian-rhythm (* Beta omega (cos
+				(* omega (+ psi-updater-loop-count offset)))))
+			(set! val (+ val ultradian-rhythm))
+			(set! val (min (max 0 val) 1))
+			(psi-set-value! var val)))
+
+	;(format #t "~a: ~a\n" var val)
+)
+
+; Adjust openpsi variable by adding noise
+(define-public (psi-noise-update var width)
+"
+  var - psi variable as Atom
+  width - width of the random number adjustement range as NumberNode. Noise to
+          add will be in the range of [-width/2, width/2]
+"
+	(define val (psi-get-number-value var))
+	(define noise)
+	(set! width (string->number (cog-name width)))
+	(set! noise (- (random width) (/ width 2)))
+	(set! val (+ val noise))
+	(set! val (min (max 0 val) 1))
+	(psi-set-value! var val)
+	;(format #t "post-noise ~a: ~a\n" var val)
+)
+
+; Return random offset based on cycle frequence
+(define-public (get-random-cycle-offset omega)
+	(random (/ (* 2 3.14) omega)))
 
 ; --------------------------------------------------------------
 ; Helper functions
