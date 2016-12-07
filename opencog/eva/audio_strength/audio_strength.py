@@ -2,7 +2,6 @@
 #
 # audio_strength.py -- ROS node to send audio to the Cogserver.
 #
-from collections import deque
 import rospy
 from std_msgs.msg import Float32
 from netcat import netcat
@@ -23,14 +22,11 @@ from audiosysneeds.msg import audiodata
 '''
 
 class AudioStrength:
-  d = 0
   Decibel = None
 
   def __init__(self):
     self.hostname = "localhost"
     self.port = 17020
-    self.loop = 0
-    self.d = deque()
     rospy.Subscriber("/opencog/AudioFeature", audiodata, self.GetAudioClass)
     rospy.Subscriber("/opencog/suddenchange", Float32, self.GetSuddenClass)
 
@@ -93,22 +89,11 @@ class AudioStrength:
         netcat(self.hostname, self.port, t)
         return 'Loud: Critical'
 
+  # Just record the loudness, but don't do anything.
+  # XXX FIXME -- we should be sending this data (30 Hz, I presume)
+  # to the time-server, and handling it just like the face data.
   def GetAudioClass(self, data):
-    # Implement a short FIFO, for recognizing sudden sound changes.
-    # The FIFO simply records the last two sound values.
-    # XXX This is not used anywhere ...
-    # XXX anyway, sudden-change should be done inside of opencog,
-    # in the time-server, and not here. FIXME.
-    try:
-        self.Decibel = data.Decibel
-        if self.loop > 2:
-            self.d.popleft()
-
-        self.d.append(self.Decibel)
-        self.loop += 1
-
-    except ArithmeticError as e:
-        print(e)
+    self.Decibel = data.Decibel
     return self.Decibel
 
   def GetSuddenClass(self, msg):
