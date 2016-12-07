@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# main.py - Main entry point for face tracker
+# main.py - Main entry point for the ROS-to-OpenCog converter
 # Copyright (C) 2015  Hanson Robotics
 #
 # This program is free software; you can redistribute it and/or modify
