@@ -810,18 +810,28 @@
 (DefineLink 
     (DefinedPredicate "React to Sound")
 	(SequentialOr
+	
 	    (SequentialAnd
             (DefinedPredicate "very low sound?")
             (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "sound-happy")))
+                (ConceptNode "sound-happy"))
+            (Evaluation (GroundedPredicate "scm: print-msg") 
+                (ListLink (Node "--- low sound"))))
+     
         (SequentialAnd
             (DefinedPredicate "normal conversation?")
             (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "sound-amused")))
+                (ConceptNode "sound-amused"))
+            (Evaluation (GroundedPredicate "scm: print-msg")
+                (ListLink (Node "--- normal sound"))))
+     
         (SequentialAnd
             (DefinedPredicate "Heard very loud sound?")
             (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "sound-afraid")))
+                (ConceptNode "sound-afraid"))
+            (Evaluation (GroundedPredicate "scm: print-msg") 
+                (ListLink (Node "--- very high sound"))))
+                
  ))
            
 ;for salient    

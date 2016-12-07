@@ -126,7 +126,7 @@
    (DefinedPredicate "Bright:happy")
    face-demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (DefinedPredicate "Heard Sound?"))
+(psi-rule (list (DefinedPredicate "Heard Something?"))
    (DefinedPredicate "React to Sound")
    speech-demand-satisfied (stv 1 1) speech-demand)
 

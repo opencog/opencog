@@ -304,17 +304,6 @@
 ; The default decibel value.
 (State decibel-value no-sound)
 
-;;Return true if sound is heard
-(DefineLink
-	(DefinedPredicate "Heard Sound?")
-	(SequentialAnd
-		(NotLink (Equal (SetLink no-sound)
-			(Get
-				(TypedVariable (Variable "$x") (Type "NumberNode"))
-				(State decibel-value (Variable "$x")))))
-		(True (Put (State decibel-value (Variable "$x")) no-sound))
-	))
-
 ;; Return true if a loud voice is heard
 (DefineLink
 	(DefinedPredicate "Heard Loud Voice?")
