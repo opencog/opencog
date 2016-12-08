@@ -4,18 +4,23 @@ import sys
 import rospy
 from std_msgs.msg import Float32
 from netcat import netcat
+
+# XXX FIXME -- where the heck is audio_stream.msg defined ?????
 from audio_stream.msg import audiodata
 
-CWD = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(CWD, '..', 'face_track'))
+# CWD = os.path.dirname(os.path.abspath(__file__))
+# sys.path.insert(0, os.path.join(CWD, '..', 'face_track'))
+
 
 '''
-    This class subscribes to topic audio_sensors and based on the different
-    range of values of the Decibel classifies the input sound into Quiet,
-    Normal Conversation, Loud conversation,critical sound and when there is
-    a transfer from one range to another based on the value difference
-    considers it as sudden change.And according to the type of sound, various
-    gestures and expressions are sent to the cogserver.
+    This implements a ROS node that subscribes to the `audio_sensors`
+    topic, and passes the audio power data to the cogserver. This is
+    used by OpenCog to react to loud sounds, sudden changes, and
+    general background noise levels.
+
+    An enhancement would be a a neural net that responded to clapping,
+    cheering, or other common sound events, identified them, labelled
+    them, and passed them on into the atomspace.
 '''
 
 class AudioStrength:
@@ -27,15 +32,15 @@ class AudioStrength:
     def AudioEnergy(self, value):
         # A StateLink is used because evaluation of psi-rules should
         # only depend on the most recent value.
-        deci = '(StateLink decibel-value (NumberNode "' + str(value) + '"))\n'
+        deci = '(StateLink (AnchorNode "Decibel value") (NumberNode "' + str(value) + '"))\n'
         netcat(self.hostname, self.port, deci)
         print deci
 
     def GetAudioClass(self, data):
         self.Decibel = data.Decibel
-        print "sudden sound change value {}".format(data.suddenchange)
+        print "Sudden sound change {}".format(data.suddenchange)
 
-        loud = '(StateLink \"Sudden sound change value\" (NumberNode ' + \
+        loud = '(StateLink (AnchorNode \"Sudden sound change value\") (NumberNode ' + \
              str(data.suddenchange) + '))\n'
         netcat(self.hostname, self.port, loud)
 
