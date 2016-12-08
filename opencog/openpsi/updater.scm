@@ -566,7 +566,7 @@
 "
   var - psi variable as Atom
   width - width of the random number adjustement range as NumberNode. Noise to
-          add will be in the range of [-width/2, width/2]
+		  add will be in the range of [-width/2, width/2]
 "
 	(define val (psi-get-number-value var))
 	(define noise)
