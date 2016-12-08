@@ -15,8 +15,8 @@
 ; it will execute every rule containing that trigger as an antecedent.
 ; Each rule will be executed once, for a given change.
 ;
-; To run:
-; (load "updater.scm")
+; To use:
+; (use-modules (opencog openpsi))
 ; (psi-updater-run)  ; to start the loop
 ; (psi-updater-halt) ; to stop the loop
 ;
@@ -24,11 +24,16 @@
 ; > tail -f "psilog.txt"
 ; can be used to monitor changes in some select events and variables. (It's
 ; pretty crude.)
+;
+; Instructions on using this module, including creation of rules and event
+; event detection, are in README.md under the section "Modulators and Internal
+; Dynamics."
 
 (load "utilities.scm")
 (load "modulator.scm")
 (load "sec.scm")
 (load "interaction-rule.scm")
+(load "event.scm")
 
 (define logging #t)
 (define verbose #f)
@@ -72,9 +77,6 @@
 (define psi-monitored-entities '())
 (define psi-monitored-events '())
 
-
-; Todo: Change this to DSN atomese. XXX But why? What's wrong with
-; how it is now?
 (define (psi-set-expression-callback! callback)
 "
   psi-set-expression-callback! CALLBACK - set the callback that
@@ -93,7 +95,6 @@
   psi-set-event-callback! CALLBACK - Set function for event detection.
 "
 	; Save callback function for event detection
-	; Todo: change this to DSN's? Why?
 	(set! psi-event-detection-callbacks
 		(append psi-event-detection-callbacks (list callback)))
 )
@@ -115,7 +116,6 @@
 	(define evals-with-change-pred
 		(cog-filter-hypergraph psi-changed-eval? (Set rules)))
 
-
 	(if verbose (display "psi-updater-init\n"))
 
 	; Init previous value table for the monitored entities
@@ -131,7 +131,6 @@
 	; If we are logging for debugging, then add all the modulators and
 	; sec's to the list of entities that get monitored so they will be
 	; flagged as changed in the output.
-	; Todo: not sure if this is the best way to handle this
 	(if logging
 		(set! psi-monitored-entities
 			(delete-duplicates
@@ -212,8 +211,8 @@
 				(if verbose
 					(format #t "previous: ~a  current: ~a\n" previous-val
 						current-val))
-				;Todo: If previous-val was #f (iow not set), assume previous
-				;value to be 0? Doing that for now, but not sure if this is best.
+				; If previous-val was #f (iow not set), assume previous value
+				; to be 0? Doing that for now, but not sure if this is best.
 				(if (eq? previous-val #f)
 					(set! previous-val 0))
 				(hash-set! value-at-step-start param
@@ -253,8 +252,8 @@
 		(define curr-most-recent-ts (psi-get-most-recent-ts event))
 		(define new-event-tv)
 		;(format #t "set-new-event-status event: ~a" event)
-		;(format #t "prev-most-recent-ts: ~a   curr-most-recent-ts: ~a\n" prev-most-recent-ts
-		;    curr-most-recent-ts)
+		;(format #t "prev-most-recent-ts: ~a   curr-most-recent-ts: ~a\n"
+		;	prev-most-recent-ts curr-most-recent-ts)
 		(if (not (equal? prev-most-recent-ts curr-most-recent-ts))
 			(begin
 				(if verbose
@@ -303,7 +302,6 @@
 	;(format #t "\nchanged-params: ~a\n\n" changed-params)
 
 	; Check for changed PAUs, just for highlighting in test output
-	; Todo: Change this to a callback function
 	; (set! monitored-pau (list voice-width))
 	(for-each
 		(lambda (pau)
@@ -355,7 +353,7 @@
 				)
 				(close-output-port output-port))))
 
-	; grab and evaluate the interaction rules
+	; Grab and evaluate the interaction rules
 	; todo: Could optimize by only calling rules containing the changed params
 	(let ((rules (psi-get-interaction-rules)))
 		(map psi-evaluate-interaction-rule rules)
@@ -370,7 +368,6 @@
 		;(format #t "\nevent-at-loop-num: ~a\n" event-at-loop-num)
 		(if (= event-at-loop-num 0)
 			; If a new event has been detected, set the loop count for it.
-			; Todo: probably want to account for "overlapping" events here
 			(if (> (length detected-events) 0)
 				(psi-set-value! psi-event-at-loop-num-node psi-updater-loop-count))
 
@@ -405,7 +402,7 @@
 			detected-events)
 
 	(psi-pause)
-	; This didn't seem to work well
+	; Single step below didn't seem to work well
 	(if single-step
 		(psi-updater-halt))
 	(stv 1 1)
@@ -531,12 +528,12 @@
 				new-value))
 
 		(psi-set-value! target new-value)
-		;(cog-set-tv! target (cog-new-stv new-strength confidence))
 	)
 )
 
 ; Ultradian rhythm update function
 ; Updates value of var based on cos wave function
+; Called via GroundedSchemaNodes in Implication rules
 (define-public (psi-ultradian-update var Beta omega offset)
 "
   var - psi variable as Atom
@@ -564,6 +561,7 @@
 )
 
 ; Adjust openpsi variable by adding noise
+; Called via GSN's in Implication rules
 (define-public (psi-noise-update var width)
 "
   var - psi variable as Atom
@@ -703,16 +701,10 @@
 			psi-most-recent-occurrence-pred)))
 
 ; --------------------------------------------------------------
-; Load the events and interaction rules
-; Todo: This should be a config setting to specify the rule set or a list of
-;       rulesets in scheme.
-(load "event.scm")
-;(load "mock-interaction-rules.scm")
-
-; --------------------------------------------------------------
 ; Updater Loop Control
 ; --------------------------------------------------------------
-; Todo: Integrate this into the main OpenPsi loop
+; Todo: Perhaps will want to integrate this into the main OpenPsi loop, but OTOH
+; we may want them running at different frequencies.
 
 (define psi-updater-is-running #f)
 (define psi-updater-loop-count 1)
