@@ -112,8 +112,9 @@
 			(EvaluationLink (GroundedPredicate "py:look_at_point")
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
+		
+;---------------------------------------------------------------
 
-; -------------------------------------------------------------
 ; Request robot to turn eyes at a specific coordinate point.
 ; Currently, a very thin wrapper around py:gaze_at_point
 
@@ -236,29 +237,21 @@
 (DefineLink
 	(DefinedPredicate "Say")
 	(LambdaLink (Variable "sentence")
-		(Evaluation
+	    (Evaluation
 			(GroundedPredicate "py: say_text")
 			(List (Variable "sentence")))
 	))
 
-; Show happy facial expression.
-; XXX FIXME -- these have hard-coded length-of-time values in them.
-; Most other similar behaviors have randomized values, which are
-; controlled by bounds in the config files - cfg-sophia and cfg-eva.scm
+;Salient
 (DefineLink
-    (DefinedPredicate "Quiet:happy")
-    (Evaluation
-        (GroundedPredicate "py: do_face_expression")
-        (List (Concept "happy") (NumberNode 3) (NumberNode 0.5))
-    ))
-
-; Show amused facial expression
-(DefineLink
-    (DefinedPredicate "Normal:amused")
-    (Evaluation
-        (GroundedPredicate "py: do_face_expression")
-        (List (Concept "amused") (NumberNode 3) (NumberNode 0.5))
-    ))
+    (DefinedPredicate "look at salient point")
+    (True (Put (Evaluation
+        (DefinedPredicate "Look at point")
+        (ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+            (Get (State salient-loc
+            (ListLink (Variable "$x") (Variable "$y") (Variable "$z"))))
+        )))
+               
 
 ; -------------------------------------------------------------
 ; For updating web-ui

@@ -305,7 +305,7 @@
 		(True (Put (State heard-sound (Variable "$x")) heard-nothing))
 	))
 
-;; Loud sound value.
+;; Sudden change value.
 (define loud-sound  (AnchorNode "Sudden sound change value"))
 (define no-loud-sound (Number 0.0))
 ; There isn't any sudden change in sound Decibel
@@ -315,14 +315,17 @@
 (define decibel-value (AnchorNode "Decibel value"))
 (define very-low-sound (Number 35))
 (define normal-conversation (Number 65))
+(define very-loud-sound (Number 90)) 
+(define no-sound (Number 0.0))
+
 ; The default decibel value.
-(State decibel-value normal-conversation)
+(State decibel-value no-sound)
 
 ;; Return true if a loud voice is heard
 (DefineLink
 	(DefinedPredicate "Heard Loud Voice?")
 	(GreaterThan
-		(Get (State loud-sound (Variable "$x")))
+        (Get (State loud-sound (Variable "$x")))
 		no-loud-sound))
 
 ;; Return true if low sound is heard
@@ -331,13 +334,57 @@
     (NotLink (GreaterThan
         (Get (State decibel-value (Variable "$y")))
         very-low-sound)))
-
+        
 ;; Return true for normal conversation
 (DefineLink
-    (DefinedPredicate  "normal conversation?")
+    (DefinedPredicate "normal conversation?")
     (NotLink (GreaterThan
         (Get (State decibel-value (Variable "$z")))
         normal-conversation)))
+        
+;; Return true if a very loud sound is heard
+(DefineLink
+    (DefinedPredicate "Heard very loud sound?")
+    (NotLink (GreaterThan
+	    (Get (State decibel-value (Variable "$a")))
+		very-loud-sound)))
+;--------------------------------------------
+;;For Saliency
+;;if there are no faces and the degree value is greater than 13, 
+;;then it's considered as salient and The robot is supposed to 
+;;look at the salient position and show curious expression when something salient happens.
+(define-public salient-loc  (AnchorNode "locations"));;obtain the coordinates for the salient location
+(define-public initial-loc (list (NumberNode 1.0)(NumberNode 0)(NumberNode 0)))
+(State salient-loc (List initial-loc))
+
+(define salient (AnchorNode "Degree value"));;obtain the degree of the salient point
+(define initial-degree (Number 0))
+(State salient initial-degree)
+
+(DefineLink 
+    (DefinedPredicate "saliency")
+    (GreaterThan
+	    (Get (State salient (Variable"$S")))
+	    (Number 13)))
+
+(DefineLink 
+	(DefinedPredicate "saliency required?")
+	(SequentialAnd
+		(EqualLink
+		    (DefinedSchemaNode "Num visible faces")
+		    (NumberNode 0))
+		(DefinedPredicate "saliency")))
+		
+;---------------------------------------------------------
+;;For Luminance
+(define luminance-value (AnchorNode "luminance"))
+(define bright (Number 40)) 
+(State luminance-value (Number 25))
+(DefineLink
+	(DefinedPredicate "Room bright?")
+	(GreaterThan
+		(Get (State luminance-value (Variable "$x")))
+		bright))
 
 ; --------------------------------------------------------
 ; Time-stamp-related stuff.
@@ -729,7 +776,7 @@ proper atomese.
 				(TypedVariable (Variable "$x") (Type "NumberNode"))
 				(State eye-contact-state (Variable "$x")))))
 	))
-
+	
 ;; Break eye contact; this does not change the interaction state.
 (DefineLink
 	(DefinedPredicate "break eye contact")
