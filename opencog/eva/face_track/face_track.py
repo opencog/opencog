@@ -120,7 +120,7 @@ class FaceTrack:
 			for j in range(0,3):
 				r[i] += self.sl_matrix[i][j] * vs[j]
 
-		self.atomo.save_snd1(r[0], r[1], r[2])
+		self.atomo.update_sound(r[0], r[1], r[2])
 
 	# ----------------------------------------------------------
 

@@ -3,8 +3,9 @@ Robot Performance Scripting
 This repo contains performance, personality and self-awareness scripts
 for controlling the Hanson Robotics Eva robot emulator.  The emulator
 is a Blender animation of a female head.  These scripts unite, in one
-place, a visual subsystem, a chatbot, and an expressive face capable
-of a wide range of emotional expressions and facial gestures.
+place, a visual subsystem, an audio subsystem, a chatbot, and an
+expressive face capable of a wide range of emotional expressions and
+facial gestures.
 
 The scripts are written in OpenCog "atomese", with the intent that this
 enables integration with high-level cognitive, emotional and natural
@@ -20,6 +21,10 @@ robot is here:
 
 * https://github.com/hansonrobotics/blender_api
 * https://github.com/opencog/docker/tree/master/indigo/eva
+
+This directory also contains an assortment of ROS nodes that subscribe
+to ROS visual and audio sensory inputs, and forward these to the
+opencog spactime server (performing the needed format conversion).
 
 
 Design Goals
@@ -40,15 +45,18 @@ Current Architecture and Design
 -------------------------------
 The this time, the code here integrates three subsystems:
 
- * A visual subsystem, capable of detecting and tracking human faces
-   visible in the room. These faces are localized in 3D space, and
-   issued a numeric ID.
+ * Several ROS nodes that forward visual and sound data to the
+   OpenCog spacetime server. This includes 3D locations of visible
+   faces, the names of any recognized faces (as recognized by some
+   external software), the direction from which sounds are coming
+   from, and audio-power samples.
 
    (This needs to be replaced by a (much) better visual system.)
 
- * A collection of "behavior tree" scripts that react to people entering
-   and leaving the room.  The scripts attempt to interact with the
-   people who are visible, by displaying assorted facial expressions.
+ * A collection of behavior rules that react to people entering
+   and leaving the room, react to sounds, etc. The scripts attempt
+   to interact with the people who are visible, by displaying
+   assorted facial expressions.
 
    (This needs to be replaced by a library of selections, as described
    in [README-affects.md](README-affects.md).
@@ -73,12 +81,8 @@ Some things it currently doesn't do, but should:
    alpha stages.
 
  * Integrate superior face-tracking and face recognition tools.
-   Right now, the face tracker is completely unable to recognize known
-   faces.
-
- * Have a GUI tools for editing behavior trees. This could be
-   accomplised by using the
-   [behavior3js](http://behavior3js.guineashots.com/) tool.
+   Right now, the face tracker is recognizes known faces only with
+   difficulty.
 
  * Integration with OpenPsi behavior system. However, see also the
    [affects proposal](README-affects.md), which is almost(?) more
@@ -93,13 +97,14 @@ Some things it currently doesn't do, but should:
  * Additional sensory systems and sensory inputs.  A perception
    synthesizer to coordinate all sensory input. High priority:
 
-  ++ Audio power envelope, fundamental frequency (of voice),
-     rising/falling tone.  Background audio power. Length of silent
-     pauses.  Detection of applause, laughter, load background
-     speech, loug bangs.
+  ++ Audio power envelope (half-done, see `audio_strenght.py`),
+     fundamental frequency (of voice), rising/falling tone.
+     Background audio power. Length of silent pauses.  Detection
+     of applause, laughter, loud voices in the background, loug
+     bangs.
 
-  ++ Video-chaos: is there lots of random motion in the visual field,
-     or are things visually settled?
+  ++ Video-chaos: Is it light or dark? Is there lots of random
+     motion in the visual field, or are things visually settled?
 
  * Have a much more sophisticated model of the world around it,
    including the humans in it. It should also have better model
@@ -144,7 +149,7 @@ behaviors.
 
 Status
 ------
-This is version 0.9.1 of the scripts. All of the old Owyl behavior
+This is version 0.9.2 of the scripts. All of the old Owyl behavior
 tree has been implemented.  Some initial work towards future goals
 has been barely started.
 
@@ -157,10 +162,11 @@ Running
 * Use the `scripts/eva.sh` file, after adjusting paths in it for your
   installation. Or use the below:
 
-* Start the webcam, pi_vision, and tf2 tracking nodes as usual.
+* Start the webcam, and `pi_vision` nodes as usual.
 * Start the Eva blender node, as usual.
-* Load the scripts shown in scripts/eva.sh
-* Start the opencog face-tracking node in the `face_track` directory.
+* Load the scripts shown in `scripts/eva.sh`
+* Start the face-tracking node in the `face_track` directory.
+* Start the audio node in the `audio_strength` directory.
 
 
 Unit Testing
