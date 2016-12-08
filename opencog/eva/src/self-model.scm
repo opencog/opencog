@@ -346,18 +346,21 @@
 		(Get (State decibel-value (Variable "$a"))) very-loud-sound)))
 
 ;--------------------------------------------
-;; For Saliency
-;; if there are no faces and the degree value is greater than 13,
-;; then it's considered as salient and The robot is supposed to
-;; look at the salient position and show curious expression when
-;; something salient happens.
-(define-public salient-loc  (AnchorNode "locations"));;obtain the coordinates for the salient location
-(define-public initial-loc (list (NumberNode 1.0)(NumberNode 0)(NumberNode 0)))
-(State salient-loc (List initial-loc))
+;; Visual "Saliency"
+;;
+;; If there are no visible faces, and something "salient" is seen, with
+;; a degree greater than 13, then it's considered as salient. The robot
+;; should then look at the salient position and show curious expression.
+;; XXX FIXME -- the psi subsystem should be performing this action,
+;; instead of hard-coding it here.
 
-(define salient (AnchorNode "Degree value"));;obtain the degree of the salient point
-(define initial-degree (Number 0))
-(State salient initial-degree)
+;; Coordinates for the salient location
+(define salient-loc  (AnchorNode "locations"))
+(State salient-loc (List (NumberNode 1.0) (NumberNode 0) (NumberNode 0)))
+
+;; Degree of the salient point
+(define salient (AnchorNode "Degree value"))
+(State salient (Number 0))
 
 (DefineLink 
 	(DefinedPredicate "saliency")
@@ -373,7 +376,8 @@
 		(DefinedPredicate "saliency")))
 		
 ;---------------------------------------------------------
-;;For Luminance
+;; Luminance --  overall perceived brightness of the scene.
+
 (define luminance-value (AnchorNode "luminance"))
 (define bright (Number 40)) 
 (State luminance-value (Number 25))
