@@ -315,7 +315,7 @@
 (define decibel-value (AnchorNode "Decibel value"))
 (define very-low-sound (Number 35))
 (define normal-conversation (Number 65))
-(define very-loud-sound (Number 90)) 
+(define very-loud-sound (Number 90))
 (define no-sound (Number 0.0))
 
 ; The default decibel value.
@@ -325,34 +325,32 @@
 (DefineLink
 	(DefinedPredicate "Heard Loud Voice?")
 	(GreaterThan
-        (Get (State loud-sound (Variable "$x")))
-		no-loud-sound))
+		(Get (State loud-sound (Variable "$x"))) no-loud-sound))
 
 ;; Return true if low sound is heard
 (DefineLink
-    (DefinedPredicate "very low sound?")
-    (NotLink (GreaterThan
-        (Get (State decibel-value (Variable "$y")))
-        very-low-sound)))
-        
+	(DefinedPredicate "very low sound?")
+	(NotLink (GreaterThan
+		(Get (State decibel-value (Variable "$y"))) very-low-sound)))
+
 ;; Return true for normal conversation
 (DefineLink
-    (DefinedPredicate "normal conversation?")
-    (NotLink (GreaterThan
-        (Get (State decibel-value (Variable "$z")))
-        normal-conversation)))
-        
+	(DefinedPredicate "normal conversation?")
+	(NotLink (GreaterThan
+		(Get (State decibel-value (Variable "$z"))) normal-conversation)))
+
 ;; Return true if a very loud sound is heard
 (DefineLink
-    (DefinedPredicate "Heard very loud sound?")
-    (NotLink (GreaterThan
-	    (Get (State decibel-value (Variable "$a")))
-		very-loud-sound)))
+	(DefinedPredicate "Heard very loud sound?")
+	(NotLink (GreaterThan
+		(Get (State decibel-value (Variable "$a"))) very-loud-sound)))
+
 ;--------------------------------------------
-;;For Saliency
-;;if there are no faces and the degree value is greater than 13, 
-;;then it's considered as salient and The robot is supposed to 
-;;look at the salient position and show curious expression when something salient happens.
+;; For Saliency
+;; if there are no faces and the degree value is greater than 13,
+;; then it's considered as salient and The robot is supposed to
+;; look at the salient position and show curious expression when
+;; something salient happens.
 (define-public salient-loc  (AnchorNode "locations"));;obtain the coordinates for the salient location
 (define-public initial-loc (list (NumberNode 1.0)(NumberNode 0)(NumberNode 0)))
 (State salient-loc (List initial-loc))
@@ -362,17 +360,16 @@
 (State salient initial-degree)
 
 (DefineLink 
-    (DefinedPredicate "saliency")
-    (GreaterThan
-	    (Get (State salient (Variable"$S")))
-	    (Number 13)))
+	(DefinedPredicate "saliency")
+	(GreaterThan
+		(Get (State salient (Variable"$S"))) (Number 13)))
 
 (DefineLink 
 	(DefinedPredicate "saliency required?")
 	(SequentialAnd
 		(EqualLink
-		    (DefinedSchemaNode "Num visible faces")
-		    (NumberNode 0))
+			(DefinedSchemaNode "Num visible faces")
+			(NumberNode 0))
 		(DefinedPredicate "saliency")))
 		
 ;---------------------------------------------------------
@@ -505,11 +502,11 @@
 			)))
 
 (define-public (is_nn_equal_cn? number-node concept-node)
-    (if (equal? (string->number (cog-name number-node))
-            (exact->inexact (string->number (cog-name concept-node))))
-        (stv 1 1)
-        (stv 0 1)
-    )
+	(if (equal? (string->number (cog-name number-node))
+			(exact->inexact (string->number (cog-name concept-node))))
+		(stv 1 1)
+		(stv 0 1)
+	)
 )
 
 ;; Return the set of newly-arrived faces.

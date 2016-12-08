@@ -226,8 +226,6 @@
 (emo-gest-spec "listening" "think-L.up"         0.3 0.8 1.0 1 1 0.6 1.0)
 
 
-
-
 ; Gestures keep-alive
 ; ===================
 

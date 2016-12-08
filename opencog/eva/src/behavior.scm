@@ -667,7 +667,7 @@
 					(Not (DefinedPredicate "Time to change expression"))
 					(Put (DefinedPredicateNode "Show random expression")
 						(ConceptNode "neutral-speech")))
-						
+
 				; ... nod slowly ...
 				(SequentialOr
 					(Not (DefinedPredicate "Time to make gesture"))
@@ -684,7 +684,7 @@
 							(ListLink
 								(DefinedSchema "blink chat fast mean")
 								(DefinedSchema "blink chat fast var")))
-				)) 
+				))
 			)
 			(SequentialAnd
 				; If chatbot is not happy ...
@@ -803,38 +803,38 @@
 ;; Actions for loud sound
 (DefineLink
     (DefinedPredicate "Say whoa!")
-	    (Put (DefinedPredicate "Say") 
+	    (Put (DefinedPredicate "Say")
 	        (Node "whoa!")))
 
 ;;Actions for various levels of sound
-(DefineLink 
-    (DefinedPredicate "React to Sound")
+(DefineLink
+	(DefinedPredicate "React to Sound")
 	(SequentialOr
-	
+
 	    (SequentialAnd
             (DefinedPredicate "very low sound?")
             (Put (DefinedPredicateNode "Show random expression")
                 (ConceptNode "sound-happy"))
-            (Evaluation (GroundedPredicate "scm: print-msg") 
+            (Evaluation (GroundedPredicate "scm: print-msg")
                 (ListLink (Node "--- low sound"))))
-     
+
         (SequentialAnd
             (DefinedPredicate "normal conversation?")
             (Put (DefinedPredicateNode "Show random expression")
                 (ConceptNode "sound-amused"))
             (Evaluation (GroundedPredicate "scm: print-msg")
                 (ListLink (Node "--- normal sound"))))
-     
+
         (SequentialAnd
             (DefinedPredicate "Heard very loud sound?")
             (Put (DefinedPredicateNode "Show random expression")
                 (ConceptNode "sound-afraid"))
-            (Evaluation (GroundedPredicate "scm: print-msg") 
+            (Evaluation (GroundedPredicate "scm: print-msg")
                 (ListLink (Node "--- very high sound"))))
-                
- ))
-           
-;for salient    
+
+))
+
+;for salient
 (DefineLink
     (DefinedPredicate "Curious")
         (Put (DefinedPredicate "Show random gesture")
@@ -845,7 +845,7 @@
     (SequentialAnd
         (DefinedPredicate "look at salient point")
         (DefinedPredicate "Curious")))
-             
+
 ;for luminance
 (DefineLink
     (DefinedPredicate "Bright:happy")

@@ -112,7 +112,7 @@
 			(EvaluationLink (GroundedPredicate "py:look_at_point")
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
-		
+
 ;---------------------------------------------------------------
 
 ; Request robot to turn eyes at a specific coordinate point.
@@ -237,7 +237,7 @@
 (DefineLink
 	(DefinedPredicate "Say")
 	(LambdaLink (Variable "sentence")
-	    (Evaluation
+		(Evaluation
 			(GroundedPredicate "py: say_text")
 			(List (Variable "sentence")))
 	))
@@ -251,7 +251,7 @@
             (Get (State salient-loc
             (ListLink (Variable "$x") (Variable "$y") (Variable "$z"))))
         )))
-               
+
 
 ; -------------------------------------------------------------
 ; For updating web-ui
