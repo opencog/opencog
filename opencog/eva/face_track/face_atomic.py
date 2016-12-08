@@ -41,7 +41,7 @@ class FaceAtomic:
 		spoke = "(who-said? \"" + stt + "\")\n\n"
 		netcat(self.hostname, self.port, spoke)
 
-	def save_snd1(self, x, y, z):
+	def update_sound(self, x, y, z):
 		snd = "(map-sound " + str(x) + " " + str(y) + " " + str(z) + ")\n\n"
 		netcat(self.hostname, self.port, snd)
 
