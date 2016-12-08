@@ -759,23 +759,23 @@
 (DefineLink
 	(DefinedPredicate "Listening ongoing")
 	(SequentialAnd
-        ; Show one of the neutral-speech expressions
-        (SequentialOr
-            (Not (DefinedPredicate "Time to change expression"))
-            (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "neutral-listen")))
+		; Show one of the neutral-speech expressions
+		(SequentialOr
+			(Not (DefinedPredicate "Time to change expression"))
+			(Put (DefinedPredicateNode "Show random expression")
+				(ConceptNode "neutral-listen")))
 
-        ; ... nod slowly ...
-        (SequentialOr
-            (Not (DefinedPredicate "Time to make gesture"))
-            (SequentialAnd
-                (Put (DefinedPredicate "Show random gesture")
-                    (ConceptNode "chat-positive-nod"))
+		; ... nod slowly ...
+		(SequentialOr
+			(Not (DefinedPredicate "Time to make gesture"))
+			(SequentialAnd
+				(Put (DefinedPredicate "Show random gesture")
+					(ConceptNode "chat-positive-nod"))
 
-                ; ... raise eyebrows ...
-                (Put (DefinedPredicate "Show random gesture")
-                    (ConceptNode "chat-pos-think"))
-        ))
+				; ... raise eyebrows ...
+				(Put (DefinedPredicate "Show random gesture")
+					(ConceptNode "chat-pos-think"))
+		))
 		(TrueLink)
 	))
 
@@ -783,73 +783,73 @@
 	(DefinedPredicate "Keep alive")
 	(SequentialAnd
 		; If the chatbot stopped talking ...
-        (SequentialOr
-            (Not (DefinedPredicate "Time to change expression"))
-            (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "neutral-listen")))
+		(SequentialOr
+			(Not (DefinedPredicate "Time to change expression"))
+			(Put (DefinedPredicateNode "Show random expression")
+				(ConceptNode "neutral-listen")))
 
-        ; ... nod slowly ...
-        (SequentialOr
-            (Not (DefinedPredicate "Time to make gesture"))
-            (SequentialAnd
-                (Put (DefinedPredicate "Show random gesture")
-                    (ConceptNode "chat-positive-nod"))
-                ; ... raise eyebrows ...
-                (Put (DefinedPredicate "Show random gesture")
-                    (ConceptNode "chat-pos-think"))
-        ))
+		; ... nod slowly ...
+		(SequentialOr
+			(Not (DefinedPredicate "Time to make gesture"))
+			(SequentialAnd
+				(Put (DefinedPredicate "Show random gesture")
+					(ConceptNode "chat-positive-nod"))
+				; ... raise eyebrows ...
+				(Put (DefinedPredicate "Show random gesture")
+					(ConceptNode "chat-pos-think"))
+		))
 		(TrueLink)
 	))
 ;; Actions for loud sound
 (DefineLink
-    (DefinedPredicate "Say whoa!")
-	    (Put (DefinedPredicate "Say")
-	        (Node "whoa!")))
+	(DefinedPredicate "Say whoa!")
+		(Put (DefinedPredicate "Say")
+			(Node "whoa!")))
 
 ;;Actions for various levels of sound
 (DefineLink
 	(DefinedPredicate "React to Sound")
 	(SequentialOr
 
-	    (SequentialAnd
-            (DefinedPredicate "very low sound?")
-            (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "sound-happy"))
-            (Evaluation (GroundedPredicate "scm: print-msg")
-                (ListLink (Node "--- low sound"))))
+		(SequentialAnd
+			(DefinedPredicate "very low sound?")
+			(Put (DefinedPredicateNode "Show random expression")
+				(ConceptNode "sound-happy"))
+			(Evaluation (GroundedPredicate "scm: print-msg")
+				(ListLink (Node "--- low sound"))))
 
-        (SequentialAnd
-            (DefinedPredicate "normal conversation?")
-            (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "sound-amused"))
-            (Evaluation (GroundedPredicate "scm: print-msg")
-                (ListLink (Node "--- normal sound"))))
+		(SequentialAnd
+			(DefinedPredicate "normal conversation?")
+			(Put (DefinedPredicateNode "Show random expression")
+				(ConceptNode "sound-amused"))
+			(Evaluation (GroundedPredicate "scm: print-msg")
+				(ListLink (Node "--- normal sound"))))
 
-        (SequentialAnd
-            (DefinedPredicate "Heard very loud sound?")
-            (Put (DefinedPredicateNode "Show random expression")
-                (ConceptNode "sound-afraid"))
-            (Evaluation (GroundedPredicate "scm: print-msg")
-                (ListLink (Node "--- very high sound"))))
+		(SequentialAnd
+			(DefinedPredicate "Heard very loud sound?")
+			(Put (DefinedPredicateNode "Show random expression")
+				(ConceptNode "sound-afraid"))
+			(Evaluation (GroundedPredicate "scm: print-msg")
+				(ListLink (Node "--- very high sound"))))
 
 ))
 
 ;for salient
 (DefineLink
-    (DefinedPredicate "Curious")
-        (Put (DefinedPredicate "Show random gesture")
-            (ConceptNode "salient-curious")))
+	(DefinedPredicate "Curious")
+		(Put (DefinedPredicate "Show random gesture")
+			(ConceptNode "salient-curious")))
 
 (DefineLink
-    (DefinedPredicate "Salient:Curious")
-    (SequentialAnd
-        (DefinedPredicate "look at salient point")
-        (DefinedPredicate "Curious")))
+	(DefinedPredicate "Salient:Curious")
+	(SequentialAnd
+		(DefinedPredicate "look at salient point")
+		(DefinedPredicate "Curious")))
 
-;for luminance
+; Room luminance
 (DefineLink
-    (DefinedPredicate "Bright:happy")
-    (Put (DefinedPredicateNode "Show random expression")
-        (ConceptNode "luminance-happy")))
+	(DefinedPredicate "Bright:happy")
+	(Put (DefinedPredicateNode "Show random expression")
+		(ConceptNode "luminance-happy")))
 
 ; ----------------------------------------------------------------------
