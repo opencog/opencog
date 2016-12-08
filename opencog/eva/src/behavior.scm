@@ -800,7 +800,9 @@
 		))
 		(TrueLink)
 	))
+
 ;; Actions for loud sound
+;; XXX FIXME -- this should not be hard-coded here!
 (DefineLink
 	(DefinedPredicate "Say whoa!")
 		(Put (DefinedPredicate "Say")
@@ -834,7 +836,7 @@
 
 ))
 
-;for salient
+; Salient-activity reactions -- look curious and look in that direction.
 (DefineLink
 	(DefinedPredicate "Curious")
 		(Put (DefinedPredicate "Show random gesture")
@@ -846,7 +848,7 @@
 		(DefinedPredicate "look at salient point")
 		(DefinedPredicate "Curious")))
 
-; Room luminance
+; Room luminance (brightness) reactions - be happy in a bright room.
 (DefineLink
 	(DefinedPredicate "Bright:happy")
 	(Put (DefinedPredicateNode "Show random expression")
