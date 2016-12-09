@@ -28,10 +28,7 @@ from atomic_msgs import AtomicMsgs
 class ChatTrack:
 
 	def __init__(self):
-
-		# The OpenCog API. This is used to send face data to OpenCog.
 		self.atomo = AtomicMsgs()
-
 		rospy.Subscriber("chatbot_speech", ChatMessage, self.stt_cb)
 
 	# ---------------------------------------------------------------

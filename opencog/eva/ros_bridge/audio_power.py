@@ -44,5 +44,3 @@ class AudioPower:
 
 		self.atomo.audio_bang(data.suddenchange)
 		self.atomo.audio_energy(data.Decibel)
-
-		return data.Decibel
