@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# main.py - Main entry point for face tracker
+# main.py - Main entry point for the ROS-to-OpenCog converter
 # Copyright (C) 2015  Hanson Robotics
 #
 # This program is free software; you can redistribute it and/or modify
@@ -34,6 +34,5 @@ try:
 except AttributeError:
     print "Sound localization is disabled"
 
-ft.do_look_at_actions()
 rospy.spin()
 print "Exit face-tracking node"
