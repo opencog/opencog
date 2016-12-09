@@ -45,13 +45,18 @@ class AtomicMsgs:
 
 	# Add a newly visible face to the atomspace.
 	def add_face_to_atomspace(self, faceid):
-		face = self.define_face(faceid)
+		face = "(EvaluationLink (PredicateNode \"visible face\") " + \
+		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n"
 		netcat(self.hostname, self.port, face)
 		print "New visible face in atomspace: ", faceid
 
 	# Focus attention on specific face.
+	# Build string to force attention to focus on the requested face.
+	# This bypasses the normal "new face is visible" sequence, and
+	# immediately shifts Eva's attention to this face.
 	def add_tracked_face_to_atomspace(self, faceid):
-		face = self.set_tracked_face(faceid)
+		face = '(StateLink request-eye-contact-state (NumberNode "' + \
+		       str(faceid) + '"))\n'
 		netcat(self.hostname, self.port, face)
 		print "Force focus of attention on face: ", faceid
 
@@ -62,20 +67,6 @@ class AtomicMsgs:
 		msg = self.delete_face(faceid)
 		netcat(self.hostname, self.port, msg)
 		print "Removed face from atomspace: ", faceid
-
-	# Build a simple string to define a face
-	def define_face(self, faceid):
-		face = "(EvaluationLink (PredicateNode \"visible face\") " + \
-		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n\n"
-		return face
-
-	# Build string to force attention to focus on the requested face.
-	# This bypasses the normal "new face is visible" sequence, and
-	# immediately shifts Eva's attention to this face.
-	def set_tracked_face(self, faceid):
-		face = '(StateLink request-eye-contact-state (NumberNode "' + \
-		       str(faceid) + '"))\n'
-		return face
 
 	# Build string to delete the face, and also to garbage-collect
 	# the ListLink and NumberNode.  In the long run, explicit deletes
