@@ -21,7 +21,6 @@ import rospy
 import logging
 
 from std_msgs.msg import Int32
-from chatbot.msg import ChatMessage
 from pi_face_tracker.msg import FaceEvent, Faces
 
 from atomic_msgs import AtomicMsgs
@@ -29,7 +28,7 @@ from atomic_msgs import AtomicMsgs
 logger = logging.getLogger('hr.eva_behavior.face_track')
 
 # Thin python wrapper, to subscribe to face-tracking ROS messages,
-# (face ID's, 3D face locations) and then re-wrap these as opencog
+# (face ID's, 3D face locations) and then re-wrap these as OpenCog
 # atoms, via AtomicMsgs, and forward them on into the OpenCog
 # space-time server.
 #
@@ -68,18 +67,10 @@ class FaceTrack:
 		# Face location information from pi_vision
 		rospy.Subscriber(self.TOPIC_FACE_LOCATIONS, Faces, self.face_loc_cb)
 
-		rospy.Subscriber("chatbot_speech", ChatMessage, self.stt_cb)
-
 		rospy.Subscriber("/behavior_control", Int32, self.behavior_control_cb)
 
 		# Control Eyes and face by default
 		self.control_mode = 255
-
-	# ---------------------------------------------------------------
-	# Speech-to-text callback
-	def stt_cb(self, msg):
-		if msg.confidence >= 50:
-			self.atomo.who_said(msg.utterance)
 
 	# ----------------------------------------------------------
 	# Start tracking a face

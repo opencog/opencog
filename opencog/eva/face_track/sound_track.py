@@ -18,14 +18,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import rospy
-import logging
-
-from std_msgs.msg import Int32
-
 from atomic_msgs import AtomicMsgs
 from geometry_msgs.msg import PoseStamped # for sound localization
-
-logger = logging.getLogger('hr.eva_behavior.sound_track')
 
 # Thin python wrapper, to subscribe to ManyEars sound-source ROS
 # messages, and then re-wrap these as opencog atoms, via AtomicMsgs,
