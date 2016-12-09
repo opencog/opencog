@@ -8,23 +8,16 @@
 ; needed for nlp parsing
 (use-modules (opencog nlp) (opencog nlp chatbot) (opencog nlp chatbot-psi))
 
-(add-to-load-path "/usr/local/share/opencog/scm/opencog/eva-model")
-(add-to-load-path ".")
-
-;(load "express.scm") ; For random pos and neg expressions
-(load-from-path "faces.scm")
-(load-from-path "self-model.scm") ; For soma-state def
-(load-from-path "orchestrate.scm") ; For DefinedPredicate "Show expression"
-
 ; Param setting
 (define valence-activation-level .5)
 
 (define psi-verbose #t)
 (define no-blender #f)
 
+(define single-dimension-valence #t)
+
 (if no-blender
 	(python-eval "execfile('/usr/local/share/opencog/python/atomic-dbg.py')"))
-
 
 (define prev-value-node (Concept "previous value"))
 (define current-sentence-node (Concept "current sentence"))
@@ -139,7 +132,6 @@
 	)
 )
 
-
 ; ------------------------------------------------------------------
 ; Create Monitored Events
 (define new-face (psi-create-monitored-event "new-face"))
@@ -189,7 +181,6 @@
 ; Callback checks for both positive and negative sentiment
 (psi-set-event-callback! psi-detect-dialog-sentiment)
 
-
 ; Callback for loud noise detected
 ; Using the self-model defined predicate for this instead of the below
 ;(define new-loud-noise? #f) ; indicates a loud noise just occurred
@@ -235,7 +226,7 @@
 	(GroundedSchemaNode "scm: psi-ultradian-update")
 	(List arousal (Number arousal_B) (Number arousal_w) (Number arousal_offset)))
 
-; arousal noise rule
+; arousal (stochastic) noise rule
 (psi-create-general-rule (TrueLink)
 	(GroundedSchemaNode "scm: psi-noise-update" arousal arousal_noise)
 	(List arousal (Number arousal_noise)))
