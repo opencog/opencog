@@ -27,6 +27,33 @@ Similarly, we have:
  * `chat_track.py` - speech-to-text messages
  * `sound_track.py` - sound source localization (3D direction)
 
+General Intent
+--------------
+The general intention here is that there are many special-purpose
+sensory systems (microphones, cameras) and sensory-processing systems
+(deep neural nets, speech-to-text) that are not part of the core
+OpenCog framework. The code here is responsible for getting that data
+to the Cogserver.  Some specifics:
+
+## Audio:
+ * Sudden changes in loudness, e.g. bangs crashes, shouts, claps.
+ * Audio power:
+   ** loud noises: clapping hands, loud background noises (construction
+      machinery, convention-hall chaos, street traffic), laughing,
+      cheering, whistling, booing.
+   ** normal volume: speech, background music, background muttering,
+   ** quiet sounds: squeaking chairs, footsteps, whispering, wind noise,
+      rustling leaves, distant traffic, distant children playing, etc.
+  * Audio frequency:
+   ** High piches: whistling, motorcycle whines.
+   ** Low frequency: rumbling trucks, construction.
+  * Sound localization:
+   ** What direction is the sound coming from?
+  * References:
+    - [Root Mean Square (RMS)](http://www.gaussianwaves.com/2015/07/significance-of-rms-root-mean-square-value/)
+    - [Frequency Detection] (https://gist.github.com/endolith/255291)
+
+
 Running
 -------
 Just start `main.py` in a terminal.  This does not have any of the
