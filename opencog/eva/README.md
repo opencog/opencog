@@ -65,11 +65,11 @@ The this time, the code here integrates three subsystems:
    the human faces visible in the room). The goal of this model is
    two-fold:
 
-  **  Allow the robot to be self-aware, and engage in natural language
-      dialog about what it is doing.
+   * Allow the robot to be self-aware, and engage in natural language
+     dialog about what it is doing.
 
-  ** Enable an "action orchestrater" to manage behaviors coming from
-      multiple sources.
+   * Enable an "action orchestrater" to manage behaviors coming from
+     multiple sources.
 
 Some things it currently doesn't do, but should:
 
@@ -97,10 +97,10 @@ Some things it currently doesn't do, but should:
  * Additional sensory systems and sensory inputs.  A perception
    synthesizer to coordinate all sensory input. High priority:
 
-  ++ Audio power envelope (half-done, see `audio_strenght.py`),
+  ++ Audio power envelope (half-done, see `ros_bridge/audio_power.py`),
      fundamental frequency (of voice), rising/falling tone.
      Background audio power. Length of silent pauses.  Detection
-     of applause, laughter, loud voices in the background, loug
+     of applause, laughter, loud voices in the background, loud
      bangs.
 
   ++ Video-chaos: Is it light or dark? Is there lots of random
@@ -136,15 +136,22 @@ behaviors.
    the departure.
 
  * While interacting with someone:
+
    -- Randomly display one of: happy, comprehending, engaged.
+
    -- Occasionally glance at other faces in the room.
+
    -- If the interaction has been long-running, then switch and pay
       attention to someone new.
 
  * If the room is empty:
+
    -- Show bored expression (one of bored, sad, happy).
+
    -- Look around the room, seeking attention.
+
    -- If the room is still empty, yawn, blink-sleepy, and go to sleep.
+
    -- Periodically wake. Wake gestures: shake-2, shake-3, blink.
 
 Status
