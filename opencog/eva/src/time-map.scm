@@ -209,7 +209,9 @@
 	(StateLink request-eye-contact-state (NumberNode fid))
 )
 
-(define (map-sound xx yy zz)
+;; This needs to be define-public, so that ros-bridge can send this
+;; to the cogserver.
+(define-public (map-sound xx yy zz)
 	(let* ((fid (snd-nearest-face xx yy zz)))
 		(if (> fid 0)
 			(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
