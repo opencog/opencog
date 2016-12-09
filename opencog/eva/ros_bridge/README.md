@@ -22,6 +22,11 @@ As an example, face-detected events are converted to atoms of the form
         (NumberNode "12")))  ;; the face id is currently an integer.
 ```
 
+Similarly, we have:
+ * `audio_power.py` - general loudness and sudden sounds (bangs, shouts)
+ * `chat_track.py` - speech-to-text messages
+ * `sound_track.py` - sound source localization (3D direction)
+
 Running
 -------
 Just start `main.py` in a terminal.  This does not have any of the
