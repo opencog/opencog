@@ -22,13 +22,11 @@ import sys
 import rospy
 from std_msgs.msg import Float32
 from netcat import netcat
+from atomic_msgs import AtomicMsgs
+
 
 # XXX FIXME -- where the heck is audio_stream.msg defined ?????
 from audio_stream.msg import audiodata
-
-# CWD = os.path.dirname(os.path.abspath(__file__))
-# sys.path.insert(0, os.path.join(CWD, '..', 'face_track'))
-
 
 '''
     This implements a ROS node that subscribes to the `audio_sensors`
@@ -43,18 +41,12 @@ from audio_stream.msg import audiodata
 
 class AudioPower:
     def __init__(self):
+        self.atomo = AtomicMsgs()
         self.hostname = "localhost"
         self.port = 17020
-        rospy.Subscriber("audio_sensors", audiodata, self.GetAudioClass)
+        rospy.Subscriber("audio_sensors", audiodata, self.audio_cb)
 
-    def AudioEnergy(self, value):
-        # A StateLink is used because evaluation of psi-rules should
-        # only depend on the most recent value.
-        deci = '(StateLink (AnchorNode "Decibel value") (NumberNode "' + str(value) + '"))\n'
-        netcat(self.hostname, self.port, deci)
-        print deci
-
-    def GetAudioClass(self, data):
+    def audio_cb(self, data):
         self.Decibel = data.Decibel
         print "Sudden sound change {}".format(data.suddenchange)
 
@@ -62,5 +54,5 @@ class AudioPower:
              str(data.suddenchange) + '))\n'
         netcat(self.hostname, self.port, loud)
 
-        self.AudioEnergy(self.Decibel)
+        self.atomo.audio_energy(self.Decibel)
         return self.Decibel

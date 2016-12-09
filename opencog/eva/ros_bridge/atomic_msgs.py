@@ -134,3 +134,11 @@ class AtomicMsgs:
 	def update_sound(self, x, y, z):
 		snd = "(map-sound " + str(x) + " " + str(y) + " " + str(z) + ")\n\n"
 		netcat(self.hostname, self.port, snd)
+
+	def audio_energy(self, decib):
+		# A StateLink is used because evaluation of psi-rules should
+		# only depend on the most recent value.
+		deci = '(StateLink (AnchorNode "Decibel value") (NumberNode "' + \
+			str(value) + '"))\n'
+
+		netcat(self.hostname, self.port, deci)
