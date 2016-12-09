@@ -94,7 +94,8 @@ class FaceTrack:
 
 		logger.info("Lost face; visibile faces now: " + str(self.visible_faces))
 
-	# Adds given face to atomspace as requested face
+	# Force the robot to turn its attention to the given
+	# face (to interact with, talk with) that face.
 	def track_face(self, faceid):
 		if faceid in self.visible_faces:
 			logger.info("Face requested interaction: " + str(faceid))
