@@ -35,9 +35,6 @@ class SoundTrack:
 
 	def __init__(self):
 
-		rospy.init_node("OpenCog_Facetracker")
-		logger.info("Starting OpenCog Face Tracker ROS Node")
-
 		# The OpenCog API. This is used to send face data to OpenCog.
 		self.atomo = FaceAtomic()
 
@@ -47,6 +44,9 @@ class SoundTrack:
 			self.sl_matrix = rospy.get_param(parameter_name)
 			rospy.Subscriber("/manyears/source_pose", PoseStamped, \
 				self.sound_cb)
+			print "Sound localization is enabled"
+		else :
+			print "Sound localization is disabled"
 
 	# ---------------------------------------------------------------
 	# Store the location of the strongest sound-source in the
