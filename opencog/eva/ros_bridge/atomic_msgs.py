@@ -135,10 +135,17 @@ class AtomicMsgs:
 		snd = "(map-sound " + str(x) + " " + str(y) + " " + str(z) + ")\n\n"
 		netcat(self.hostname, self.port, snd)
 
-	def audio_energy(self, decib):
+	def audio_energy(self, decibel):
 		# A StateLink is used because evaluation of psi-rules should
 		# only depend on the most recent value.
-		deci = '(StateLink (AnchorNode "Decibel value") (NumberNode "' + \
-			str(value) + '"))\n'
+		deci = '(StateLink (AnchorNode "Decibel value") ' + \
+			'(NumberNode ' + str(decibel) + '))\n'
 
 		netcat(self.hostname, self.port, deci)
+
+	# Louds bands, explosions, hand-claps, shouts.
+	def audio_bang(self, decibel):
+		loud = '(StateLink (AnchorNode \"Sudden sound change value\")' + \
+			'(NumberNode ' + str(decibel) + '))\n'
+
+		netcat(self.hostname, self.port, loud)

@@ -17,13 +17,8 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301  USA
 
-import os
-import sys
 import rospy
-from std_msgs.msg import Float32
-from netcat import netcat
 from atomic_msgs import AtomicMsgs
-
 
 # XXX FIXME -- where the heck is audio_stream.msg defined ?????
 from audio_stream.msg import audiodata
@@ -42,17 +37,12 @@ from audio_stream.msg import audiodata
 class AudioPower:
 	def __init__(self):
 		self.atomo = AtomicMsgs()
-		self.hostname = "localhost"
-		self.port = 17020
 		rospy.Subscriber("audio_sensors", audiodata, self.audio_cb)
 
 	def audio_cb(self, data):
-		self.Decibel = data.Decibel
 		print "Sudden sound change {}".format(data.suddenchange)
 
-		loud = '(StateLink (AnchorNode \"Sudden sound change value\") (NumberNode ' + \
-			 str(data.suddenchange) + '))\n'
-		netcat(self.hostname, self.port, loud)
+		self.atomo.audio_bang(data.suddenchange)
+		self.atomo.audio_energy(data.Decibel)
 
-		self.atomo.audio_energy(self.Decibel)
-		return self.Decibel
+		return data.Decibel
