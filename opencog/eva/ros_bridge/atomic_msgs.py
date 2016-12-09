@@ -131,7 +131,7 @@ class AtomicMsgs:
 		netcat(self.hostname, self.port, spoke)
 
 	# --------------------------------------------------------
-	# Sound localization
+	# Sound localization -- send 3D xyz coordinate of sound source
 	def update_sound(self, x, y, z):
 		snd = "(map-sound " + str(x) + " " + str(y) + " " + str(z) + ")\n"
 		netcat(self.hostname, self.port, snd)
