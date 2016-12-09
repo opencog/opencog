@@ -108,14 +108,13 @@
 )
 
 
-(define-public (psi-create-general-rule antecedent consequent-function
-	consequent-params)
+(define-public (psi-create-general-rule antecedent consequent consequent-params)
 	(define rule
 		(PredictiveImplication
 			(TimeNode 1)
 			antecedent
 			(ExecutionOutputLink
-				consequent-function
+				consequent
 				consequent-params)))
 	(Member rule psi-interaction-rule)
 	;(display rule)
