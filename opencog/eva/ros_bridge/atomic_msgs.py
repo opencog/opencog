@@ -84,12 +84,12 @@ class AtomicMsgs:
 	def delete_face(self, faceid):
 
 		# Delete the association between the recognized and tracked face.
-		reco_pattern = "(EvaluationLink (Predicate \"name\") " +
-			"(ListLink (ConceptNode \"" + str(faceid) + "\") " +
+		pattern = "(EvaluationLink (Predicate \"name\") " + \
+			"(ListLink (ConceptNode \"" + str(faceid) + "\") " + \
 			"(VariableNode \"reco-id\")))"
 
 		# XXX FIXME -- need to also delete the ListLink above.
-		del_reco = "(cog-execute! (PutLink (DeleteLink " + pattern +
+		del_reco = "(cog-execute! (PutLink (DeleteLink " + pattern + \
 				") (GetLink " + pattern + ")))\n"
 		face = del_reco + \
 				"(cog-delete " + \
@@ -102,9 +102,9 @@ class AtomicMsgs:
 
 	# Face postions in the space-server
 	def update_face_octomap(self, faceid, xx, yy, zz):
-		face = "(map-ato \"faces\" (NumberNode \"" + str(faceid) +
-		        "\" (av 5 0 0)) " + str(xx) + " " + str(yy) +
-		        " " + str(zz) + ")\n\n"
+		face = "(map-ato \"faces\" (NumberNode \"" + str(faceid) + \
+		        "\" (av 5 0 0)) " + str(xx) + " " + str(yy) + \
+		        " " + str(zz) + ")\n"
 		netcat(self.hostname, self.port, face)
 
 	# --------------------------------------------------------
@@ -119,20 +119,21 @@ class AtomicMsgs:
 		`rec_id` is "0" for an unrecognized face and some other string
 		for a recognized face. It is currently stored as a ConceptNode.
 		'''
-		stl = "(EvaluationLink (Predicate \"name\") (ListLink (ConceptNode \""
-			 + str(tracker_id) + "\") (ConceptNode \"" + rec_id + "\")))\n"
-		netcat(self.hostname, self.port, stl + "\n")
+		stl = "(EvaluationLink (Predicate \"name\") " + \
+			"(ListLink (ConceptNode \"" + \
+			str(tracker_id) + "\") (ConceptNode \"" + rec_id + "\")))\n"
+		netcat(self.hostname, self.port, stl)
 
 	# --------------------------------------------------------
 	# Speech-to-text stuff
 	def who_said(self, stt):
-		spoke = "(who-said? \"" + stt + "\")\n\n"
+		spoke = "(who-said? \"" + stt + "\")\n"
 		netcat(self.hostname, self.port, spoke)
 
 	# --------------------------------------------------------
 	# Sound localization
 	def update_sound(self, x, y, z):
-		snd = "(map-sound " + str(x) + " " + str(y) + " " + str(z) + ")\n\n"
+		snd = "(map-sound " + str(x) + " " + str(y) + " " + str(z) + ")\n"
 		netcat(self.hostname, self.port, snd)
 
 	def audio_energy(self, decibel):
@@ -140,12 +141,10 @@ class AtomicMsgs:
 		# only depend on the most recent value.
 		deci = '(StateLink (AnchorNode "Decibel value") ' + \
 			'(NumberNode ' + str(decibel) + '))\n'
-
 		netcat(self.hostname, self.port, deci)
 
 	# Louds bands, explosions, hand-claps, shouts.
 	def audio_bang(self, decibel):
 		loud = '(StateLink (AnchorNode \"Sudden sound change value\")' + \
 			'(NumberNode ' + str(decibel) + '))\n'
-
 		netcat(self.hostname, self.port, loud)
