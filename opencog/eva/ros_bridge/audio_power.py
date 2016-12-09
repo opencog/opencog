@@ -40,19 +40,19 @@ from audio_stream.msg import audiodata
 '''
 
 class AudioPower:
-    def __init__(self):
-        self.atomo = AtomicMsgs()
-        self.hostname = "localhost"
-        self.port = 17020
-        rospy.Subscriber("audio_sensors", audiodata, self.audio_cb)
+	def __init__(self):
+		self.atomo = AtomicMsgs()
+		self.hostname = "localhost"
+		self.port = 17020
+		rospy.Subscriber("audio_sensors", audiodata, self.audio_cb)
 
-    def audio_cb(self, data):
-        self.Decibel = data.Decibel
-        print "Sudden sound change {}".format(data.suddenchange)
+	def audio_cb(self, data):
+		self.Decibel = data.Decibel
+		print "Sudden sound change {}".format(data.suddenchange)
 
-        loud = '(StateLink (AnchorNode \"Sudden sound change value\") (NumberNode ' + \
-             str(data.suddenchange) + '))\n'
-        netcat(self.hostname, self.port, loud)
+		loud = '(StateLink (AnchorNode \"Sudden sound change value\") (NumberNode ' + \
+			 str(data.suddenchange) + '))\n'
+		netcat(self.hostname, self.port, loud)
 
-        self.atomo.audio_energy(self.Decibel)
-        return self.Decibel
+		self.atomo.audio_energy(self.Decibel)
+		return self.Decibel
