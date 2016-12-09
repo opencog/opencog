@@ -22,21 +22,22 @@ import logging
 
 from std_msgs.msg import Int32
 
-from face_atomic import FaceAtomic
+from atomic_msgs import AtomicMsgs
 from geometry_msgs.msg import PoseStamped # for sound localization
 
 logger = logging.getLogger('hr.eva_behavior.sound_track')
 
 # Thin python wrapper, to subscribe to ManyEars sound-source ROS
-# messages, and then re-wrap these as opencog atoms, via FaceAtomic,
-#a and forward them on into the OpenCog space-time server.
+# messages, and then re-wrap these as opencog atoms, via AtomicMsgs,
+# and forward them on into the OpenCog space-time server.
 #
 class SoundTrack:
 
 	def __init__(self):
 
-		# The OpenCog API. This is used to send face data to OpenCog.
-		self.atomo = FaceAtomic()
+		# The OpenCog API. This is used to send sound localization
+		# data to OpenCog.
+		self.atomo = AtomicMsgs()
 
 		# Sound localization
 		parameter_name = "sound_localization/mapping_matrix"

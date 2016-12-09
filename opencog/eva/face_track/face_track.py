@@ -17,8 +17,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import time
-
 import rospy
 import logging
 
@@ -26,13 +24,13 @@ from std_msgs.msg import Int32
 from chatbot.msg import ChatMessage
 from pi_face_tracker.msg import FaceEvent, Faces
 
-from face_atomic import FaceAtomic
+from atomic_msgs import AtomicMsgs
 
 logger = logging.getLogger('hr.eva_behavior.face_track')
 
 # Thin python wrapper, to subscribe to face-tracking ROS messages,
 # (face ID's, 3D face locations) and then re-wrap these as opencog
-# atoms, via FaceAtomic, and forward them on into the OpenCog
+# atoms, via AtomicMsgs, and forward them on into the OpenCog
 # space-time server.
 #
 class FaceTrack:
@@ -49,7 +47,7 @@ class FaceTrack:
 	def __init__(self):
 
 		# The OpenCog API. This is used to send face data to OpenCog.
-		self.atomo = FaceAtomic()
+		self.atomo = AtomicMsgs()
 
 		# List of currently visible faces
 		self.visible_faces = []
