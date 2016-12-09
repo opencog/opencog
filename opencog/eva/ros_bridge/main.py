@@ -20,6 +20,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import rospy
+from audio_power import AudioPower
 from chat_track import ChatTrack
 from face_track import FaceTrack
 from sound_track import SoundTrack
@@ -28,9 +29,14 @@ rospy.init_node("OpenCog_ROS_bridge")
 logger.info("Starting the OpenCog ROS Bridge")
 print "Starting the OpenCog ROS Bridge"
 
+ap = AudioPower()
 ct = ChatTrack()
 ft = FaceTrack()
 st = SoundTrack()
 
-rospy.spin()
+try:
+	rospy.spin()
+except rospy.ROSInterruptException as e:
+	print(e)
+
 print "Exit OpenCog ROS bridge"

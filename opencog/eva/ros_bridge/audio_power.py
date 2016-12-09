@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import os
 import sys
 import rospy
@@ -23,7 +22,7 @@ from audio_stream.msg import audiodata
     them, and passed them on into the atomspace.
 '''
 
-class AudioStrength:
+class AudioPower:
     def __init__(self):
         self.hostname = "localhost"
         self.port = 17020
@@ -46,12 +45,3 @@ class AudioStrength:
 
         self.AudioEnergy(self.Decibel)
         return self.Decibel
-
-if __name__ == '__main__':
-    try:
-        rospy.init_node('AudioClass', anonymous=True)
-        AudioStrength()
-        rospy.spin()
-
-    except rospy.ROSInterruptException as e:
-        print(e)
