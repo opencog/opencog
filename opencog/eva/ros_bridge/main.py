@@ -19,20 +19,24 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
 import rospy
+from audio_power import AudioPower
+from chat_track import ChatTrack
 from face_track import FaceTrack
+from sound_track import SoundTrack
 
-print "Start face-tracking node"
+rospy.init_node("OpenCog_ROS_bridge")
+logger.info("Starting the OpenCog ROS Bridge")
+print "Starting the OpenCog ROS Bridge"
+
+ap = AudioPower()
+ct = ChatTrack()
 ft = FaceTrack()
+st = SoundTrack()
 
-# Check if sound-localization is being used
-# TODO: move audio & sound related logic to sound directory.
 try:
-    ft.sl_matrix
-    print "Sound localization is enabled"
-except AttributeError:
-    print "Sound localization is disabled"
+	rospy.spin()
+except rospy.ROSInterruptException as e:
+	print(e)
 
-rospy.spin()
-print "Exit face-tracking node"
+print "Exit OpenCog ROS bridge"

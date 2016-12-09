@@ -165,8 +165,7 @@ Running
 * Start the webcam, and `pi_vision` nodes as usual.
 * Start the Eva blender node, as usual.
 * Load the scripts shown in `scripts/eva.sh`
-* Start the face-tracking node in the `face_track` directory.
-* Start the audio node in the `audio_strength` directory.
+* Start the ros-bridge node in the `ros_bridge` directory.
 
 
 Unit Testing

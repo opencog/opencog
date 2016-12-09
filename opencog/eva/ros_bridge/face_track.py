@@ -17,24 +17,20 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import time
-
 import rospy
 import logging
 
 from std_msgs.msg import Int32
-from chatbot.msg import ChatMessage
 from pi_face_tracker.msg import FaceEvent, Faces
 
-from face_atomic import FaceAtomic
-from geometry_msgs.msg import PoseStamped # for sound localization
+from atomic_msgs import AtomicMsgs
 
 logger = logging.getLogger('hr.eva_behavior.face_track')
 
 # Thin python wrapper, to subscribe to face-tracking ROS messages,
-# (face ID's, 3D face locations, and 3D sound localization)
-# and ttehn re-wrap these as opencog atoms, via FaceAtomic, and
-# forward them on into the OpenCog space-time server.
+# (face ID's, 3D face locations) and then re-wrap these as OpenCog
+# atoms, via AtomicMsgs, and forward them on into the OpenCog
+# space-time server.
 #
 class FaceTrack:
 
@@ -49,11 +45,8 @@ class FaceTrack:
 
 	def __init__(self):
 
-		rospy.init_node("OpenCog_Facetracker")
-		logger.info("Starting OpenCog Face Tracker ROS Node")
-
 		# The OpenCog API. This is used to send face data to OpenCog.
-		self.atomo = FaceAtomic()
+		self.atomo = AtomicMsgs()
 
 		# List of currently visible faces
 		self.visible_faces = []
@@ -74,56 +67,12 @@ class FaceTrack:
 		# Face location information from pi_vision
 		rospy.Subscriber(self.TOPIC_FACE_LOCATIONS, Faces, self.face_loc_cb)
 
-		rospy.Subscriber("chatbot_speech", ChatMessage, self.stt_cb)
-
 		rospy.Subscriber("/behavior_control", Int32, self.behavior_control_cb)
 
 		# Control Eyes and face by default
 		self.control_mode = 255
 
-		# Sound localization
-		parameter_name = "sound_localization/mapping_matrix"
-		if rospy.has_param(parameter_name):
-			self.sl_matrix = rospy.get_param(parameter_name)
-			rospy.Subscriber("/manyears/source_pose", PoseStamped, \
-				self.sound_cb)
-
-	# ---------------------------------------------------------------
-	# Private functions, not for use outside of this class.
-
-	# Speech-to-text callback
-	def stt_cb(self, msg):
-		if msg.confidence >= 50:
-			self.atomo.who_said(msg.utterance)
-
-	# Store the location of the strongest sound-source in the
-	# OpenCog space server.  This data arrives at a rate of about
-	# 30 Hz, currently, from ManyEars.
-	def sound_cb(self, msg):
-		# Convert to camera coordinates, using an affine matrix
-		# (which combines a rotation and translation).
-		#
-		# A typical sl_matrix looks like this:
-		#
-		#   0.943789   0.129327   0.304204 0.00736024
-		#   -0.131484   0.991228 -0.0134787 0.00895614
-		#   -0.303278 -0.0272767   0.952513  0.0272001
-		#   0          0          0          1
-		#
-		vs = [msg.pose.position.x, \
-		      msg.pose.position.y, \
-		      msg.pose.position.z, \
-		      1]
-
-		r = [0, 0, 0, 0]
-		for i in range(0,3):
-			for j in range(0,3):
-				r[i] += self.sl_matrix[i][j] * vs[j]
-
-		self.atomo.update_sound(r[0], r[1], r[2])
-
 	# ----------------------------------------------------------
-
 	# Start tracking a face
 	def add_face(self, faceid):
 		if faceid in self.visible_faces:
