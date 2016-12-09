@@ -197,3 +197,9 @@ but we are not actually using all of these at this time ...
 ```
   (cog-evaluate! (DefinedPredicateNode "Show frustrated expression"))
 ```
+
+* Need major overhaul of the time-space server API's. Need to be able
+  to query them with pattern matcher -- need to create time-query atoms
+  -- need to move atom factory to the classserver. Need to place
+  sound-source direction into the space-server. (i.e. currently
+  in time-map.scm map-sound)
