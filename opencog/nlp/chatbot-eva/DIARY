@@ -1365,7 +1365,44 @@ TODO:
 ===========================================================
 
 Surreal meta-issues:
--- which of several word-chocies get used?
+-- which of several word-choices get used?
+
+   Where are you looking?   XXX this got broken, and the fix is hard.
+The fix requires that the space server track this info, and
+as well as time-stamp
+
+Space-time server meta-issues:
+self-model: what direction am I looking at? (left, right up down)
+(vs. what direction are other things pointing at?)
+
+
+   Look at me
+--> use the sound server
+
+ROS topic: /manyears/source_pose
+subscribe to topic in sound_track.py
+send message (map-sound  x y z) to cogserver
+(map-sound is in time-map.scm in ros-behavior-scripting
+sets:
+(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
+
+look-rule-2
+
+
+Look at me
+turn towards me
+face me
+don't look at me
+turn away
+
+
+    what are you looking at
+--> I am looking at you
+--> I am looking at a person
+--> I am looking at a man/woman (assume gender rec works)
+--> I am looking at an old man
+--> (closes eyes) I am not looking at anything
+
 
    Where are you looking?   XXX this got broken, and the fix is hard.
 --> I am looking to the left
@@ -1379,6 +1416,10 @@ Surreal meta-issues:
    Turn your head.
 
    Look away.
+
+   Look at me.
+
+   Where are you looking?
 
 
    What happened just now?
@@ -1446,9 +1487,17 @@ where-look-rule
       ))
 
 action-rule-ao
+... ends up calling
+(DefinedPredicate "Look command")
+
 Look command does it ... but no memory of it
 
 XXX correct version of "looking" requires using the space server.
+
+(DefinedPredicate "Look at point")
+(DefinedPredicate "Gaze at point") calls
+py:gaze_at_point
+prints "(Eva looks to the left)"
 
  (cog-bind show-rule-1)
 (define current-action (AnchorNode "*-action-*"))

@@ -199,6 +199,7 @@
 	))
 
 ; Handles directional sentences with "to", such as "turn to the left".
+; Js and Ju links handle left, right, etc. J link handles "me"
 (define look-rule-2
 	(imperative-object-rule-template
 		; VERB-LIST -- a list of synonyms

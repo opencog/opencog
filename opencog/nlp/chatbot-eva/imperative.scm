@@ -29,7 +29,7 @@
 ;     Eva, show happiness!
 ;
 ;
-; This is a hard-code ad-hoc pipeline. Subject to change.
+; This is a hard-coded, ad-hoc pipeline. Subject to change.
 ;
 
 (use-modules (opencog) (opencog query) (opencog exec))
