@@ -265,6 +265,25 @@
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
+            (DefinedPredicate "is-random-kurzweil-sentence-generator-ready?")
+            (DefinedPredicate "random-kurzweil-sentence-generator-not-started?")
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "has-kurzweil-related-words?")
+            (SequentialOr
+                (Not (DefinedPredicate "input-type-is-imperative?"))
+                (DefinedPredicate "don't-know-how-to-do-it?"))
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "kurzweil"))))
+        (True)
+        (stv .9 .9)
+        sociality
+        "random_sentence_kurzweil"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
             (DefinedPredicate "random-pkd-sentence-generated?")
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
@@ -287,6 +306,20 @@
         (stv .9 .9)
         sociality
         "random_sentence_blogs"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "random-kurzweil-sentence-generated?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-kurzweil-sentence-generated)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "random_sentence_kurzweil"
     )
 )
 
