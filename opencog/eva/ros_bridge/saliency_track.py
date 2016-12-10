@@ -1,5 +1,5 @@
 #
-# room_brightness.py - Sound energy and power.
+# saliency_track.py - Sound energy and power.
 # Copyright (C) 2016  Hanson Robotics
 #
 # This library is free software; you can redistribute it and/or
@@ -20,19 +20,19 @@
 import rospy
 from atomic_msgs import AtomicMsgs
 
-# XXX defined in head/src/vision/room_luminance/msg
-from room_luminance.msg import Luminance
+# XXX defined in head/src/vision/ros_nmpt_saliency
+from ros_nmpt_saliency.msg import targets
 
 '''
-    This implements a ROS node that subscribes to the `/opencog/room_luminance`
-    sets brightness
-
+	This implements a ROS node that subscribes to the `/nmpt_saliency_point`
+	updates saliency
 '''
 
-class RoomBrightness:
+class SaliencyTrack:
 	def __init__(self):
 		self.atomo = AtomicMsgs()
-		rospy.Subscriber('/opencog/room_luminance', Luminance, self.bright_cb)
+		rospy.Subscriber('/nmpt_saliency_point', targets, self.sal_cb)
 
-	def bright_cb(self, data):
-		self.atomo.room_brightness(data.value)
+	def sal_cb(self, data):
+		loc = data.positions[0]
+		self.atomo.saliency(loc.x,loc.y,loc.z,data.degree)
