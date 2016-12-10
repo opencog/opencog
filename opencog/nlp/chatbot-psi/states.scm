@@ -55,13 +55,17 @@
 
 (define random-pkd-sentence-generator (Anchor (chat-prefix "RandomPKDSentenceGenerator")))
 (define random-blogs-sentence-generator (Anchor (chat-prefix "RandomBlogsSentenceGenerator")))
+(define random-kurzweil-sentence-generator (Anchor (chat-prefix "RandomBlogsSentenceGenerator")))
 (define random-pkd-sentence-generated (Anchor (chat-prefix "RandomPKDSentenceGenerated")))
 (define random-blogs-sentence-generated (Anchor (chat-prefix "RandomBlogsSentenceGenerated")))
+(define random-kurzweil-sentence-generated (Anchor (chat-prefix "RandomBlogsSentenceGenerated")))
 ; Need to do (markov-setup ...) once for both generators
 (State random-pkd-sentence-generator setup-not-done)
 (State random-blogs-sentence-generator setup-not-done)
+(State random-kurzweil-sentence-generator setup-not-done)
 (State random-pkd-sentence-generated default-state)
 (State random-blogs-sentence-generated default-state)
+(State random-kurzweil-sentence-generated default-state)
 
 (define chatbot-eva (Anchor (chat-prefix "ChatbotEva")))
 (define chatbot-eva-action (Anchor (chat-prefix "ChatbotEvaAction")))
@@ -93,9 +97,11 @@
     (State wolframalpha-answer default-state)
     (if has-markov-setup (begin
         (State random-pkd-sentence-generator default-state)
-        (State random-blogs-sentence-generator default-state)))
+        (State random-blogs-sentence-generator default-state)
+        (State random-kurzweil-sentence-generator default-state)))
     (State random-pkd-sentence-generated default-state)
     (State random-blogs-sentence-generated default-state)
+    (State random-kurzweil-sentence-generated default-state)
     (State chatbot-eva default-state)
     (State chatbot-eva-action default-state)
     (State pln-answers default-state)
