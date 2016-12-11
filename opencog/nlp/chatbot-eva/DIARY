@@ -1380,11 +1380,31 @@ self-model: what direction am I looking at? (left, right up down)
 --> use the sound server
 
 ROS topic: /manyears/source_pose
-subscribe to topic in sound_track.py
-send message (map-sound  x y z) to cogserver
-(map-sound is in time-map.scm in ros-behavior-scripting
-sets:
+in ros-behavior-scripting the ros_bridge node subscribes to the ROS
+  topic in sound_track.py
+sends message (map-sound  x y z) to cogserver
+(map-sound is defined in time-map.scm in ros-behavior-scripting
+It sets this in the cogserver:
 (StateLink (ConceptNode "last person who spoke") (NumberNode fid))
+
+How to fake it:
+
+; Add face to the atomspace
+(EvaluationLink (PredicateNode "visible face") (ListLink (NumberNode 42)))
+aka 
+(use-modules (opencog eva-model))
+(make-new-face 42)
+
+; Put it somewhere:   x y z x=forward y=left z=up
+(use-modules (opencog ato pointmem))
+(map-ato "faces" (NumberNode 42 (av 5 0 0)) 2  1 0)
+
+Kaaa rashhhh null pointer deref issue #2517
+
+map-ato is defined in
+
+
+(StateLink (ConceptNode "last person who spoke") (NumberNode 42))
 
 look-rule-2
 
@@ -1394,6 +1414,12 @@ turn towards me
 face me
 don't look at me
 turn away
+
+--> No
+--> You're not the boss of me.
+--> OK, you're ugly anyway
+--> Darling, I never looked away
+--> Sure, whatever.
 
 
     what are you looking at
