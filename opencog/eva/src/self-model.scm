@@ -362,24 +362,24 @@
 (define salient (AnchorNode "Degree value"))
 (State salient (Number 0))
 
-(DefineLink 
+(DefineLink
 	(DefinedPredicate "saliency")
 	(GreaterThan
 		(Get (State salient (Variable"$S"))) (Number 13)))
 
-(DefineLink 
+(DefineLink
 	(DefinedPredicate "saliency required?")
 	(SequentialAnd
 		(EqualLink
 			(DefinedSchemaNode "Num visible faces")
 			(NumberNode 0))
 		(DefinedPredicate "saliency")))
-		
+
 ;---------------------------------------------------------
 ;; Luminance --  overall perceived brightness of the scene.
 
 (define luminance-value (AnchorNode "luminance"))
-(define bright (Number 40)) 
+(define bright (Number 40))
 (State luminance-value (Number 25))
 (DefineLink
 	(DefinedPredicate "Room bright?")
@@ -777,7 +777,7 @@ proper atomese.
 				(TypedVariable (Variable "$x") (Type "NumberNode"))
 				(State eye-contact-state (Variable "$x")))))
 	))
-	
+
 ;; Break eye contact; this does not change the interaction state.
 (DefineLink
 	(DefinedPredicate "break eye contact")

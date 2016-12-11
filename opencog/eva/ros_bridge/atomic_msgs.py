@@ -136,6 +136,23 @@ class AtomicMsgs:
 
 	# Louds bands, explosions, hand-claps, shouts.
 	def audio_bang(self, decibel):
-		loud = '(StateLink (AnchorNode \"Sudden sound change value\")' + \
+		loud = '(StateLink (AnchorNode "Sudden sound change value")' + \
 			'(NumberNode ' + str(decibel) + '))\n'
 		netcat(self.hostname, self.port, loud)
+
+	#saliency location
+	#Degree of the salient point
+	def saliency(self,x,y,z,deg):
+		sal = '(StateLink (AnchorNode "locations")' + \
+			'(List (NumberNode '+ str(x)+ ')' + \
+			'(NumberNode '+ str(y)+ ')' + \
+			'(NumberNode '+ str(z) + ')))\n' + \
+			'(StateLink (AnchorNode "Degree value")' + \
+			'(NumberNode '+ str(deg)+'))\n'
+		netcat(self.hostname,self.port,sal)
+
+	#room luminance <=25 - dark, <=40 - normal, >40 - bright
+	def room_brightness(self,bright):
+		room = '(StateLink (AnchorNode "luminance")' +\
+			' (NumberNode ' + str(bright) +'))\n'
+		netcat(self.hostname,self.port,room)
