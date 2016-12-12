@@ -282,7 +282,8 @@ int PointMemorySCM::is_auto_step_on(const string& map_name)
 bool PointMemorySCM::map_ato(const string& map_name, Handle ato,
                              double x, double y, double z)
 {
-    return tsa[map_name]->put_atom_at_current_time(point3d(x, y, z), ato);
+    tsa[map_name]->insert_atom(point3d(x, y, z), ato);
+    return true;
 }
 
 // Tag the atom `ato` with the timepoint `tp`, using an AtTimeLink

@@ -108,17 +108,13 @@ TimeOctomap::auto_timer()
         });
 }
 
-bool
-TimeOctomap::put_atom_at_current_time(const point3d& location,
-                                      const Handle& ato)
+void TimeOctomap::insert_atom(const point3d& location, const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-    //if (!time_circle[i].has_map(handle)) return false;//may assert too
     time_circle[i].map_tree.updateNode(location, true);
     time_circle[i].map_tree.setNodeData(location, ato);
-    return true;
 }
 
 bool

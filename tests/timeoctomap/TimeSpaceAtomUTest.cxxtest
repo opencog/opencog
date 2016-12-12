@@ -70,16 +70,16 @@ public:
         time_pt t1 = tsa.get_current_time();
         duration_c dd = tsa.get_time_resolution();
 
-        // insert some measurements of occupied cells
-
+        // Insert some measurements of occupied cells
         for (double x=-1; x<1; x += 0.05) {
             for (double y=-1; y<1; y += 0.05) {
                 for (double z=-1; z<1; z += 0.05) {
                     point3d endpoint (x,  y,  z);
-                    TS_ASSERT(tsa.put_atom_at_current_time(endpoint, testHandle));
+                    tsa.insert_atom(endpoint, testHandle));
                 }
             }
         }
+
         /*//removal is probabilistic (huh???)
           for (int x=-20; x<20; x++) {
             for (int y=-20; y<20; y++) {
@@ -93,12 +93,11 @@ public:
 
         // insert some measurements of free cells
         // Need to put something to delete atom
-        for (int x=-30; x<30; x++) {
-            for (int y=-30; y<30; y++) {
-                for (int z=-30; z<30; z++) {
-                    point3d endpoint ((float) x*0.02f-1.0f, (float) y*0.02f-1.0f, (float) z*0.02f-1.0f);
+        for (double x = -1.6; x < 0.6; x += 0.02) {
+            for (double y = -1.6; y < 0.6; y += 0.02) {
+                for (double z = -1.6; z < 0.6; z += 0.02) {
+                    point3d endpoint (x, y, z);
                     tsa.remove_atom_at_current_time_by_location(endpoint);
-                    //tree.updateNode(endpoint, false);  // integrate 'free' measurement
                 }
             }
         }

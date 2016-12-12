@@ -108,9 +108,11 @@ public:
 
     bool is_auto_step_time_on();
     void auto_step_time(bool astep);
-    //store an atom at coordinates in map
-    bool put_atom_at_current_time(const point3d& location,
-                              const opencog::Handle& ato);
+
+    // Store an atom at the indicated coordinates, for the current
+    // timeslice
+    void insert_atom(const point3d& location, const opencog::Handle& ato);
+
     bool remove_atom_at_current_time_by_location(const point3d& location);
     bool remove_atom_at_time_by_location(time_pt tp, const point3d& location);
     void remove_atom_at_current_time(const opencog::Handle& ato);
