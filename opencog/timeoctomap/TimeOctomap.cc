@@ -117,15 +117,13 @@ void TimeOctomap::insert_atom(const point3d& location, const Handle& ato)
     time_circle[i].map_tree.setNodeData(location, ato);
 }
 
-bool
-TimeOctomap::remove_atom_at_current_time_by_location(
-                                       const point3d& location)
+void
+TimeOctomap::remove_atoms_at_location(const point3d& location)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
     time_circle[i].map_tree.updateNode(location, false);
-    return true;
 }
 
 bool
