@@ -393,14 +393,14 @@ Handle PointMemorySCM::get_last_locs_ato(const string& map_name, Handle ato, int
 
 Handle PointMemorySCM::get_locs_ato(const string& map_name, Handle ato)// listlink atLocationLink
 {
-    point3d_list pl = tsa[map_name]->get_locations_of_atom_occurence_now(ato);
+    point3d_list pl = tsa[map_name]->get_locations_of_atom(ato);
     return tag_atom_with_locs(map_name, ato, pl);
 }
 
 Handle PointMemorySCM::get_past_locs_ato(const string& map_name, Handle ato, int elapse)
 {
     time_pt tpt = get_map_time(map_name, elapse);
-    point3d_list pl = tsa[map_name]->get_locations_of_atom_occurence_at_time(tpt, ato);
+    point3d_list pl = tsa[map_name]->get_locations_of_atom_at_time(tpt, ato);
     return tag_atom_with_locs(map_name, ato, pl);
 }
 

@@ -87,6 +87,9 @@ struct TimeSlice
 
     // Get the atom at location
     Handle get_atom_at_location(const point3d&);
+
+    // Get the locations of an atom.
+    point3d_list get_locations(const Handle&);
 };
 
 class TimeOctomap
@@ -138,8 +141,8 @@ public:
                                                const point3d&,
                                                const Handle& ato);
     time_list get_times_of_atom_occurence_in_map(const Handle& ato);
-    point3d_list get_locations_of_atom_occurence_now(const Handle&);
-    point3d_list get_locations_of_atom_occurence_at_time(const time_pt&,
+    point3d_list get_locations_of_atom(const Handle&);
+    point3d_list get_locations_of_atom_at_time(const time_pt&,
                                                          const Handle&);
     //get the first atom observation after a time point
     bool get_oldest_time_elapse_atom_observed(const Handle& ato,const time_pt& from_d,time_pt& result);//?return location too?

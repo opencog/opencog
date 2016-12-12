@@ -72,6 +72,24 @@ Handle TimeSlice::get_atom_at_location(const point3d& location)
     return (static_cast<AtomOcTreeNode*>(result))->getData();
 }
 
+point3d_list TimeSlice::get_locations(const Handle& ato)
+{
+    point3d_list pl;
+    for (AtomOcTree::tree_iterator ita =
+        it->map_tree.begin_tree(),
+        end = it->map_tree.end_tree();
+        ita != end;
+        ++ita)
+    {
+        if (ita->getData() == ato)
+            pl.push_back(ita.getCoordinate());
+    }
+    return pl;
+}
+
+
+// ================================================================
+
 TimeOctomap::TimeOctomap(unsigned int num_time_units,
                          double map_res_meters,
                          duration_c time_resolution) :
@@ -253,7 +271,7 @@ bool TimeOctomap::get_oldest_time_locations_atom_observed(const Handle& ato,
     time_pt tpt;
     if (!get_oldest_time_elapse_atom_observed(ato, from_d, tpt))
         return false;
-    result = get_locations_of_atom_occurence_at_time(tpt, ato);
+    result = get_locations_of_atom_at_time(tpt, ato);
     if (0 == result.size()) return false;
     return true;
 }
@@ -303,29 +321,20 @@ bool TimeOctomap::get_last_locations_of_atom_observed(const Handle& ato,
   time_pt tpt;
   if (not get_last_time_elapse_atom_observed(ato, till_d, tpt))
      return false;
-  result = get_locations_of_atom_occurence_at_time(tpt, ato);
-  if (0 == result.size())return false;
+  result = get_locations_of_atom_at_time(tpt, ato);
+  if (0 == result.size()) return false;
   return true;
 }
 
-point3d_list TimeOctomap::get_locations_of_atom_occurence_now(
-                                              const Handle& ato)
+point3d_list TimeOctomap::get_locations_of_atom(const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     point3d_list pl;
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity())
         i = time_circle.size() - 1;
-    for (AtomOcTree::tree_iterator it =
-        time_circle[i].map_tree.begin_tree(),
-        end = time_circle[i].map_tree.end_tree();
-        it != end;
-        ++it)
-    {
-        if (it->getData() == ato)
-            pl.push_back(it.getCoordinate());
-    }
-    return pl;
+
+    return time_circle[i].get_locations(ato);
 }
 
 TimeSlice *
@@ -336,24 +345,13 @@ TimeOctomap::find(const time_pt& time_p)
     return nullptr;
 }
 
-point3d_list
-TimeOctomap::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
-                                                     const Handle& ato)
+point3d_list TimeOctomap::get_locations_of_atom_at_time(const time_pt& time_p,
+                                                        const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    point3d_list pl;
     TimeSlice * it = find(time_p);
     if (it == nullptr) return point3d_list();
-    for (AtomOcTree::tree_iterator ita =
-        it->map_tree.begin_tree(),
-        end = it->map_tree.end_tree();
-        ita != end;
-        ++ita)
-    {
-        if (ita->getData() == ato)
-            pl.push_back(ita.getCoordinate());
-    }
-    return pl;
+    return it->get_locations(ato);
 }
 
 void
@@ -390,7 +388,7 @@ bool
 TimeOctomap::get_a_location(const time_pt& time_p,const Handle& ato_target,point3d& location)
 {
     //get atom location
-    point3d_list target_list = get_locations_of_atom_occurence_at_time(time_p,ato_target);
+    point3d_list target_list = get_locations_of_atom_at_time(time_p, ato_target);
     if (target_list.size() < 1)
         return false;
     location = target_list.front();
