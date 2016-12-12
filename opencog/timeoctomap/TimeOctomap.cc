@@ -76,8 +76,8 @@ point3d_list TimeSlice::get_locations(const Handle& ato)
 {
     point3d_list pl;
     for (AtomOcTree::tree_iterator ita =
-        it->map_tree.begin_tree(),
-        end = it->map_tree.end_tree();
+        map_tree.begin_tree(),
+        end = map_tree.end_tree();
         ita != end;
         ++ita)
     {
@@ -311,16 +311,13 @@ bool TimeOctomap::get_last_time_before_elapse_atom_observed(const Handle& ato,
     return false;
 }
 
-bool TimeOctomap::get_last_locations_of_atom_observed(const Handle& ato,
-                                            const time_pt& till_d,
-                                            point3d_list& result)
+point3d_list TimeOctomap::get_newest_locations(const Handle& ato,
+                                               const time_pt& till_d)
 {
   time_pt tpt;
   if (not get_last_time_elapse_atom_observed(ato, till_d, tpt))
-     return false;
-  result = get_locations_of_atom_at_time(tpt, ato);
-  if (0 == result.size()) return false;
-  return true;
+     return point3d_list();
+  return get_locations_of_atom_at_time(tpt, ato);
 }
 
 point3d_list TimeOctomap::get_locations_of_atom(const Handle& ato)

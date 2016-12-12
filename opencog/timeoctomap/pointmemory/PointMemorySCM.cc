@@ -382,10 +382,7 @@ Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
 Handle PointMemorySCM::get_last_locs_ato(const string& map_name, Handle ato, int elapse)
 {
     time_pt tpt = get_map_time(map_name, elapse);
-
-    point3d_list pl;
-    tsa[map_name]->get_last_locations_of_atom_observed(ato, tpt, pl);
-
+    point3d_list pl = tsa[map_name]->get_newest_locations(ato, tpt);
     return tag_atom_with_locs(map_name, ato, pl);
 }
 

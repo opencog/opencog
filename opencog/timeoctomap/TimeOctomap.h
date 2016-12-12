@@ -155,9 +155,8 @@ public:
                                                   time_pt& result);
 
     point3d_list get_oldest_locations(const Handle&, const time_pt&);
-    bool get_last_locations_of_atom_observed(const Handle& ato,
-                                                          const time_pt& till_d,
-                                                          point3d_list& result);
+    point3d_list get_newest_locations(const Handle&, const time_pt&);
+
     //AtomList& GetAtomsInLocationBBXatTime();//BBX = bounding box
     //insert point cloud
     //find ray intersection
