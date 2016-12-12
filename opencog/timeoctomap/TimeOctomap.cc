@@ -252,7 +252,7 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const Handle& ato,
 
     for (auto& tp : tl)
     {
-       if (tp >= from_d or is_time_point_in_range(from_d, tp, time_res))
+       if (tp >= from_d)
        {
          result = tp;
          return true;
@@ -282,8 +282,7 @@ bool TimeOctomap::get_last_time_elapse_atom_observed(const Handle& ato,
 
     // XXX FIXME -- when would this ever NOT be sorted??
     tl.sort();
-    if (from_d > tl.back() and
-        not is_time_point_in_range(from_d,tl.back(), time_res))
+    if (from_d > tl.back() and tl.back() != from_d)
     {
         return false;
     }
@@ -348,12 +347,9 @@ point3d_list TimeOctomap::get_locations_of_atom_occurence_now(
 TimeSlice *
 TimeOctomap::find(const time_pt& time_p)
 {
-  for (TimeSlice& tu : time_circle)
-  {
-    if (is_time_point_in_range(time_p, tu.t, tu.duration))
-    return &tu;
-  }
-  return nullptr;
+    for (TimeSlice& tu : time_circle)
+        if (tu == time_p) return &tu;
+    return nullptr;
 }
 
 point3d_list

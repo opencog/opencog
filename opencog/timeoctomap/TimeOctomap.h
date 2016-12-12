@@ -66,6 +66,7 @@ struct TimeSlice
     AtomOcTree map_tree;
     TimeSlice(time_pt tp, duration_c d): t(tp), duration(d) {}
 
+    // Return true if time-point is within this interval.
     bool operator==(time_pt tp)
     {
         return (tp >= t and tp <= t + duration);
@@ -95,10 +96,6 @@ public:
     bool get_current_time_range(time_pt& time_p, duration_c& duration);
 
     //helper function to check if a time point is within the Time unit time range
-    bool is_time_point_in_range(const time_pt& time_to_check, const time_pt& t, const duration_c& duration)
-    {
-        return (time_to_check >= t and time_to_check < t + duration);
-    }
     // Create a new time-slice, and make it the current time-slice,
     // closing off the previous one. It will come immediately after the
     // previous slice, and will not overlap with it.
