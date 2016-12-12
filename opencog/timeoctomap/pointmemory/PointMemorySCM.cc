@@ -246,23 +246,25 @@ Handle PointMemorySCM::get_past_loc_ato(const string& map_name, int elapse,
     return UndefinedHandle;
 }
 
+// Convert a pointlist to a SetLink of AtLocationLink's
+// Returns an empty SetLink if the pointlist is empty.
 static Handle pointlist_to_atom(const point3d_list& pl)
 {
-  HandleSeq loc_links;
-  for (const point3d& pt: pl)
-  {
-      loc_links.push_back(Handle(createLink(AT_LOCATION_LINK,
-          Handle(createNode(OBJECT_NODE, map_name)),
-          Handle(createLink(LIST_LINK, ato,
-              Handle(createLink(LIST_LINK,
-                  Handle(createNode(NUMBER_NODE, to_string(pt.x()))),
-                  Handle(createNode(NUMBER_NODE, to_string(pt.y()))),
-                  Handle(createNode(NUMBER_NODE, to_string(pt.z())))
-              ))
-          ))
-      )));
-  }
-  return Handle(createLink(SET_LINK, loc_links));
+    HandleSeq loc_links;
+    for (const point3d& pt: pl)
+    {
+        loc_links.push_back(Handle(createLink(AT_LOCATION_LINK,
+            Handle(createNode(OBJECT_NODE, map_name)),
+            Handle(createLink(LIST_LINK, ato,
+                Handle(createLink(LIST_LINK,
+                    Handle(createNode(NUMBER_NODE, to_string(pt.x()))),
+                    Handle(createNode(NUMBER_NODE, to_string(pt.y()))),
+                    Handle(createNode(NUMBER_NODE, to_string(pt.z())))
+                ))
+            ))
+        )));
+    }
+    return Handle(createLink(SET_LINK, loc_links));
 }
 
 Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
@@ -273,9 +275,7 @@ Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
         return UndefinedHandle;
 
     point3d_list pl;
-    if (!(tsa[map_name]->get_oldest_time_locations_atom_observed(ato, tpt, pl))) 
-        return UndefinedHandle;
-
+    tsa[map_name]->get_oldest_time_locations_atom_observed(ato, tpt, pl);
     return pointlist_to_atom(pl);
 }
 
@@ -287,8 +287,7 @@ Handle PointMemorySCM::get_last_locs_ato(const string& map_name, Handle ato, int
         return UndefinedHandle;
 
     point3d_list pl;
-    if (!(tsa[map_name]->get_last_locations_of_atom_observed(ato, tpt, pl)))
-        return UndefinedHandle;
+    tsa[map_name]->get_last_locations_of_atom_observed(ato, tpt, pl);
 
     return pointlist_to_atom(pl);
 }
@@ -377,12 +376,12 @@ PointMemorySCM::get_map_time(const string& map_name, int elapse, time_pt& tpt)
     if (!tsa[map_name]->get_current_time_range(tpt, dr))
         return false;
     dr = std::chrono::milliseconds(elapse);
-    tpt- = dr;
+    tpt -= dr;
     return true;
 }
-// //spatial query api assuming 1 ato in 1 map at 1 location.
-// for multi-map need to add features to main api to provide more raw data results
-// -ve for unknown
+// Spatial query api assuming 1 atom in 1 map at 1 location.
+// For multi-map support, need to add features to main API, to provide
+// more raw data results -ve for unknown
 double
 PointMemorySCM::get_distance_between(const string& map_name, Handle ato1, Handle ato2, int elapse)
 {
