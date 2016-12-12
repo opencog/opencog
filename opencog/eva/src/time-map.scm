@@ -33,6 +33,8 @@
 
 ; Run the map in a new thread. This will autoamtically create a new
 ; time-slice every 66 milliseconds.
+; XXX FIXME Is it wise to start this, just because the guile module got
+; loaded? or should we have a distinct "start running it now" function?
 (auto-step-time-on "faces")
 
 ; time-span is the amount of time in milliseconds to be considered
