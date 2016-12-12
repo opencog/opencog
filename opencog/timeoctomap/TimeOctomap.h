@@ -78,8 +78,15 @@ struct TimeSlice
         return *this;
     }
 
+    // Store an atom at `location`, for this timeslice
+    void insert_atom(const point3d&, const Handle&);
+
     // Remove the atom from this time-slice.
     void remove_atom(const Handle&);
+    void remove_atoms_at_location(const point3d&);
+
+    // Get the atom at location
+    Handle get_atom_at_location(const point3d&);
 };
 
 class TimeOctomap

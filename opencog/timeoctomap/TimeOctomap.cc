@@ -34,6 +34,12 @@
 
 using namespace opencog;
 
+void TimeSlice::insert_atom(const point3d& location, const Handle& ato)
+{
+    map_tree.updateNode(location, true);
+    map_tree.setNodeData(location, ato);
+}
+
 void TimeSlice::remove_atom(const Handle& ato)
 {
     point3d_list pl;
@@ -51,6 +57,19 @@ void TimeSlice::remove_atom(const Handle& ato)
 
     for (auto& p : pl)
         map_tree.deleteNode(p);
+}
+
+void TimeSlice::remove_atoms_at_location(const point3d& location)
+{
+    map_tree.updateNode(location, false);
+}
+
+Handle TimeSlice::get_atom_at_location(const point3d& location)
+{
+    OcTreeNode* result = map_tree.search(location);
+    if (result == nullptr) return Handle();
+
+    return (static_cast<AtomOcTreeNode*>(result))->getData();
 }
 
 TimeOctomap::TimeOctomap(unsigned int num_time_units,
@@ -132,27 +151,25 @@ void TimeOctomap::insert_atom(const point3d& location, const Handle& ato)
     std::lock_guard<std::mutex> lgm(mtx);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-    time_circle[i].map_tree.updateNode(location, true);
-    time_circle[i].map_tree.setNodeData(location, ato);
+
+    time_circle[i].insert_atom(location, ato);
 }
 
-void
-TimeOctomap::remove_atoms_at_location(const point3d& location)
+void TimeOctomap::remove_atoms_at_location(const point3d& location)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-    time_circle[i].map_tree.updateNode(location, false);
+    time_circle[i].remove_atoms_at_location(location);
 }
 
-void
-TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
+void TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
                                 const point3d& location)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     auto tu = find(tp);
     if (tu == nullptr) return;
-    tu->map_tree.updateNode(location, false);
+    tu->remove_atoms_at_location(location);
 }
 
 Handle TimeOctomap::get_atom_at_location(const point3d& location)
@@ -160,22 +177,17 @@ Handle TimeOctomap::get_atom_at_location(const point3d& location)
     std::lock_guard<std::mutex> lgm(mtx);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-    OcTreeNode* result = time_circle[i].map_tree.search(location);
-    if (result == nullptr) return Handle();
 
-    return (static_cast<AtomOcTreeNode*>(result))->getData();
+    return time_circle[i].get_atom_at_location(location);
 }
 
 Handle TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
                                                  const point3d& location)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    auto it = find(time_p);
-    if (it == nullptr) return Handle();
-    OcTreeNode* result = it->map_tree.search(location);
-    if (result == nullptr) return Handle();
-
-    return (static_cast<AtomOcTreeNode*>(result))->getData();
+    auto tu = find(time_p);
+    if (tu == nullptr) return Handle();
+    return tu->get_atom_at_location(location);
 }
 
 time_list
@@ -185,22 +197,15 @@ TimeOctomap::get_times_of_atom_occurence_at_location(
 {
     std::lock_guard<std::mutex> lgm(mtx);
     time_list tl;
-    for (auto tu = std::begin(time_circle), end = std::end(time_circle); (tu != end); tu++)
+    for (auto& tu : time_circle)
     {
-        OcTreeNode* result = tu->map_tree.search(location);
-        if (result == nullptr) {
-            cout << "null ret by search" << endl;
-            continue;
-        }
-        Handle ato_t = (static_cast<AtomOcTreeNode*>(result))->getData();
-        if (ato_t != ato) {
-            cout << "incorrect atom=" << ato_t;
-            continue;
-        }
+        Handle ato_t = tu->get_atom_at_location(location);
+        if (ato_t != ato) continue;
+
         tl.push_back(tu->t);
     }
     return tl;
-}//ok time_circle.begin is causing problem
+}
 
 time_list
 TimeOctomap::get_times_of_atom_occurence_in_map(const Handle& ato)
