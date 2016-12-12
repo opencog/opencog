@@ -95,30 +95,30 @@
 ;   speaking (active). A full list of nine valencies are given in
 ;   the `README-affects.md` in the base directory.
 (define (do-random-positive-expression intensity)
-     (cog-evaluate!
-         (Put (DefinedPredicate "Show facial expression")
-             (ListLink
-                 (PutLink (DefinedSchemaNode "Pick random expression")
-                     (ConceptNode "positive"))
-                 (Number 8) (Number intensity)))))
+	 (cog-evaluate!
+		 (Put (DefinedPredicate "Show facial expression")
+			 (ListLink
+				 (PutLink (DefinedSchemaNode "Pick random expression")
+					 (ConceptNode "positive"))
+				 (Number 8) (Number intensity)))))
 
 (define (do-random-negative-expression intensity)
-     (cog-evaluate!
-         (Put (DefinedPredicate "Show facial expression")
-             (ListLink
-                 (PutLink (DefinedSchemaNode "Pick random expression")
-                     (ConceptNode "frustrated"))
-                 (Number 8) (Number intensity)))))
+	 (cog-evaluate!
+		 (Put (DefinedPredicate "Show facial expression")
+			 (ListLink
+				 (PutLink (DefinedSchemaNode "Pick random expression")
+					 (ConceptNode "frustrated"))
+				 (Number 8) (Number intensity)))))
 
 (define (be-happy intensity)
-    ;(display "in (be-happy)\n")
-    (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
-        (ListLink (Concept "happy") (Number 8) (Number intensity)))))
+	;(display "in (be-happy)\n")
+	(cog-evaluate! (Put (DefinedPredicate "Show facial expression")
+		(ListLink (Concept "happy") (Number 8) (Number intensity)))))
 
 (define (be-sad intensity)
-    ;(display "in (be-sad)\n")
-    (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
-        (ListLink (Concept "sad") (Number 8) (Number intensity)))))
+	;(display "in (be-sad)\n")
+	(cog-evaluate! (Put (DefinedPredicate "Show facial expression")
+		(ListLink (Concept "sad") (Number 8) (Number intensity)))))
 
 ; Temp error catching for when blender not running
 (define (do-catch function . params)
