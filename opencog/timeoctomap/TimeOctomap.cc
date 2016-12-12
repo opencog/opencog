@@ -71,23 +71,18 @@ TimeOctomap::step_time_unit()
 {
     std::lock_guard<std::mutex> lgm(mtx);
     time_pt time_p;
-    duration_c duration = time_res;
     // XXX FIXME a greater than check should be done (?)
     if (created_once)
-        time_p = curr_time + duration;
+        time_p = curr_time + time_res;
     else
         time_p = std::chrono::system_clock::now();
 
-    TimeUnit temp(time_p, duration);
-    time_circle.push_back(temp);
-
-    int i = time_circle.capacity() - 1;
-    if (time_circle.size() < time_circle.capacity())
-        i = time_circle.size() - 1;
-    time_circle[i].map_tree.setResolution(map_res);
+    TimeUnit tu(time_p, time_res);
+    tu.map_tree.setResolution(map_res);
+    time_circle.push_back(tu);
 
     curr_time = time_p;
-    curr_duration = duration;
+    curr_duration = time_res;
     created_once = true;
     return true;
 }
