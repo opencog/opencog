@@ -61,15 +61,18 @@ public:
     int is_auto_step_on(const std::string&);
     // Add an atom at location on current time step
     bool map_ato(const std::string&, Handle ato, double x, double y, double z);
+
     // Get time of first atom in past elapsed time
     Handle get_first_ato(const std::string&, Handle ato, int elapse);
     // Get time of last atom in past elapsed time
     Handle get_last_ato(const std::string&, Handle ato, int elapse);
+
     // Get atom at location
     Handle get_at_loc_ato(const std::string&, double x, double y, double z);
     // Get atom at location in elapsed past
     Handle get_past_loc_ato(const std::string&, int elapse,
                             double x, double y, double z);
+
     // Get location of atom at current time
     Handle get_locs_ato(const std::string&, Handle);//listlink atLocationLink
     //AtLocationLink
@@ -231,8 +234,8 @@ bool PointMemorySCM::create_map(const string& name,
         return false;
 
     // Reject if name already exists
-    std::map<string, TimeOctomap*>::iterator it = tsa.find(name);
-    if (it ! = tsa.end())
+    std::map<std::string, TimeOctomap*>::iterator it = tsa.find(name);
+    if (it != tsa.end())
         return false;
 
     tsa[name] = new TimeOctomap(time_units, space_res_mtr, std::chrono::milliseconds(time_res_milli_sec));
@@ -353,9 +356,11 @@ Handle PointMemorySCM::get_past_loc_ato(const string& map_name, int elapse,
     return UndefinedHandle;
 }
 
-// Convert a pointlist to a SetLink of AtLocationLink's
+// Tag an atom with SetLink of locations (AtLocationLink)
 // Returns an empty SetLink if the pointlist is empty.
-static Handle pointlist_to_atom(const point3d_list& pl)
+static Handle tag_atom_with_locs(const std::string& map_name,
+                                 const Handle& ato,
+                                 const point3d_list& pl)
 {
     HandleSeq loc_links;
     for (const point3d& pt: pl)
@@ -383,7 +388,7 @@ Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
 
     point3d_list pl;
     tsa[map_name]->get_oldest_time_locations_atom_observed(ato, tpt, pl);
-    return pointlist_to_atom(pl);
+    return tag_atom_with_locs(map_name, ato, pl);
 }
 
 
@@ -396,13 +401,13 @@ Handle PointMemorySCM::get_last_locs_ato(const string& map_name, Handle ato, int
     point3d_list pl;
     tsa[map_name]->get_last_locations_of_atom_observed(ato, tpt, pl);
 
-    return pointlist_to_atom(pl);
+    return tag_atom_with_locs(map_name, ato, pl);
 }
 
 Handle PointMemorySCM::get_locs_ato(const string& map_name, Handle ato)// listlink atLocationLink
 {
     point3d_list pl = tsa[map_name]->get_locations_of_atom_occurence_now(ato);
-    return pointlist_to_atom(pl);
+    return tag_atom_with_locs(map_name, ato, pl);
 }
 
 Handle PointMemorySCM::get_past_locs_ato(const string& map_name, Handle ato, int elapse)
@@ -411,7 +416,7 @@ Handle PointMemorySCM::get_past_locs_ato(const string& map_name, Handle ato, int
     if (!get_map_time(map_name, elapse, tpt))
         return UndefinedHandle;
     point3d_list pl = tsa[map_name]->get_locations_of_atom_occurence_at_time(tpt, ato);
-    return pointlist_to_atom(pl);
+    return tag_atom_with_locs(map_name, ato, pl);
 }
 
 Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name,
