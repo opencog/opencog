@@ -21,13 +21,116 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PointMemorySCM.h"
-#include <opencog/guile/SchemePrimitive.h>
+
 #include <iomanip>
+#include <map>
+#include <vector>
+
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/guile/SchemePrimitive.h>
 #include <opencog/spacetime/atom_types.h>
+#include <opencog/timeoctomap/TimeOctomap.h>
+
+namespace opencog
+{
+class PointMemorySCM
+{
+private:
+    static void* init_in_guile(void*);
+    static void init_in_module(void*);
+    void init(void);
+
+public:
+    // Create a map
+    bool create_map(const std::string& map_name,
+                    double space_res_mtr,
+                    int time_res_milli_sec,
+                    int time_units);
+    // Get time resolution milli-sec
+    int get_time_res(const std::string&);
+    // Get space resolution meters
+    double get_space_res(const std::string&);
+    // Get time units
+    int get_time_units(const std::string&);
+    // Step time before adding atoms
+    void step_time_unit(const std::string&);
+    void auto_step_time_on(const std::string&);
+    void auto_step_time_off(const std::string&);
+    int is_auto_step_on(const std::string&);
+    // Add an atom at location on current time step
+    bool map_ato(const std::string&, Handle ato, double x, double y, double z);
+    // Get time of first atom in past elapsed time
+    Handle get_first_ato(const std::string&, Handle ato, int elapse);
+    // Get time of last atom in past elapsed time
+    Handle get_last_ato(const std::string&, Handle ato, int elapse);
+    // Get atom at location
+    Handle get_at_loc_ato(const std::string&, double x, double y, double z);
+    // Get atom at location in elapsed past
+    Handle get_past_loc_ato(const std::string&, int elapse,
+                            double x, double y, double z);
+    // Get location of atom at current time
+    Handle get_locs_ato(const std::string&, Handle);//listlink atLocationLink
+    //AtLocationLink
+    //   Atom
+    //   ListLink
+    //     ConceptNode "map name"
+    //     ListLink
+    //       NumberNode x
+    //       NumberNode y
+    //       NumberNode z
+
+    // Get locations of atom in elapsed past
+    Handle get_past_locs_ato(const std::string&, Handle ato, int elapse);
+    Handle get_first_locs_ato(const std::string&, Handle ato, int elapse);
+    Handle get_last_locs_ato(const std::string&, Handle ato, int elapse);
+    //AtTimeLink
+    //  TimeNode "Date Time millisec"
+    //  Atom
+    // Get time points of atom occuring at a location
+    Handle get_elapse_list_at_loc_ato(const std::string&, Handle ato,
+              double x, double y, double z);//listlink atTimeLink
+    // Get time points of atom occuring in map
+    Handle get_elapse_list_ato(const std::string&, Handle ato);//listlink atTimeLink
+    // Remove atom from location at currrent time
+    bool remove_location_ato(const std::string&, double x, double y, double z);
+    // Remove atom from location at elapsed past time
+    bool remove_past_location_ato(const std::string&, int elapse,
+         double x, double y, double z);
+    // Remove all specific atoms from map at current time
+    void remove_curr_ato(const std::string&, Handle ato);
+    // Remove all specific atoms from map in elapsed past
+    void remove_past_ato(const std::string&, Handle ato, int elapse);
+    // Remove all specific atoms in all time points and all locations
+    void remove_all_ato(const std::string&, Handle ato);
+
+    ////spatial query api assuming 1 ato in 1 map at 1 location.
+    //for multi-map need to add features to main api to provide more raw data results
+    //-ve for unknown
+    double get_distance_between(const std::string&, Handle ato1, Handle ato2, int elapse);
+    // 2=far, 1=near, 0=touching, -1=unknown
+    int get_angular_nearness(const std::string&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+    // 2=right, 1=left, 0=aligned, -1=unknown
+    int get_target_is_right_left(const std::string&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+    // 2=above, 1=below, 0=aligned, -1=unknown
+    int get_target_is_above_below(const std::string&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+    // 2=ahead, 1=behind, 0=aligned, -1=unknown
+    int get_target_is_front_back(const std::string&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+private:
+    map<std::string, TimeOctomap*> tsa;
+    bool get_map_time(const std::string&, int elapse, time_pt& tpt);
+public:
+    PointMemorySCM();
+    ~PointMemorySCM();
+};
+}
+
+extern "C" {
+void opencog_ato_pointmem_init(void);
+};
 
 using namespace std;
-using namespace opencog::ato;
 using namespace opencog;
 
 /**
