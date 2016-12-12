@@ -434,8 +434,7 @@ Handle PointMemorySCM::get_elapse_list_ato(const string& map_name, Handle ato)//
     return opencog::Handle(createLink(SET_LINK, LL));
 }
 
-bool PointMemorySCM::remove_location_ato(const string& map_name,
-                                         double x, double y, double z)
+bool PointMemorySCM::remove_location_ato(const string& map_name, double x, double y, double z)
 {
     tsa[map_name]->remove_atoms_at_location(point3d(x, y, z));
     return true;

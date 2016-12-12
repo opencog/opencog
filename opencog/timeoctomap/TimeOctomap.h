@@ -79,6 +79,8 @@ struct TimeSlice
         map_tree.clear();
         return *this;
     }
+
+    void remove_atom(const Handle&);
 };
 
 class TimeOctomap
@@ -114,9 +116,13 @@ public:
 
     void remove_atoms_at_location(const point3d& location);
     bool remove_atom_at_time_by_location(time_pt tp, const point3d& location);
+
+    // Remove the atom from the current timeslice
     void remove_atom_at_current_time(const opencog::Handle& ato);
-    void remove_atom_at_time(const time_pt& time_p, const opencog::Handle& ato);
-    void remove_atom(const opencog::Handle& ato);
+    void remove_atom_at_time(const time_pt&, const opencog::Handle&);
+
+    // Remove all occurences of atom in all time-slices
+    void remove_atom(const opencog::Handle&);
     //get atom at current time unit
     bool get_atom_current_time_at_location(const point3d& location,
                             opencog::Handle& ato);
@@ -133,7 +139,7 @@ public:
     //get the last atom observation before a time point
     bool get_last_time_elapse_atom_observed(const opencog::Handle& ato,
                                             const time_pt& till_d,
-                                            time_pt& result);//throw
+                                            time_pt& result);
     bool get_last_time_before_elapse_atom_observed(const opencog::Handle& ato,
                                                   const time_pt& till_d,
                                                   time_pt& result);
@@ -153,9 +159,9 @@ public:
     //assuming z orientation is fixed i.e. sky relative to ground
     //assuming observer is looking towards reference
     //target is $x of reference
-    //y=2-right,1-left,0-aligned,-1-unknown (>elipson,<-elipson)
-    //z=2-above,1-below,0-aligned, -1 unknown
-    //x=2-ahead,1-behind,0 - aligned, -1 unknown
+    //y=2-right,1-left,0-aligned (>elipson,<-elipson)
+    //z=2-above,1-below,0-aligned
+    //x=2-ahead,1-behind,0 - aligned
     point3d get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
     //not normalized: direction vector -> (target-observer)
     bool get_direction_vector(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,point3d&);

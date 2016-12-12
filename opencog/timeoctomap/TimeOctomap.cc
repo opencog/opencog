@@ -34,6 +34,25 @@
 
 using namespace opencog;
 
+TimeSlice::remove_atom(const Handle& ato)
+{
+    point3d_list pl;
+    for (AtomOcTree::tree_iterator it2 = map_tree.begin_tree(),
+                endit2 = >map_tree.end_tree();
+                it2 != endit2;
+                ++it2)
+    {
+        if (it2->getData() == ato)
+        {
+            pl.push_back(it2.getCoordinate());
+            it2->setData(UndefinedHandle);
+        }
+    }
+
+    for (auto& p : pl)
+        map_tree.deleteNode(p);
+}
+
 TimeOctomap::TimeOctomap(unsigned int num_time_units,
                          double map_res_meters,
                          duration_c time_resolution) :
@@ -359,26 +378,8 @@ TimeOctomap::remove_atom_at_current_time(const Handle& ato)
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity())
         i = time_circle.size() - 1;
-    auto * tu = &time_circle[i];
 
-    point3d_list pl;
-            for(AtomOcTree::tree_iterator it2 =
-                tu->map_tree.begin_tree(),
-                endit2 = tu->map_tree.end_tree();
-                it2 != endit2;
-                ++it2) {
-                if (it2->getData() == ato) {
-                    pl.push_back(it2.getCoordinate());
-                    it2->setData(UndefinedHandle);
-                }
-            }
-
-            //cout<<"remove size="<<pl.size()<<endl;
-            for(auto it3 = std::begin(pl), endit3 = std::end(pl);
-                it3 != endit3;
-                it3++) {
-                tu->map_tree.deleteNode(*it3);
-            }
+    time_circle[i].remove_atom(ato);
 }
 
 void
@@ -388,54 +389,15 @@ TimeOctomap::remove_atom_at_time(const time_pt& time_p,
     std::lock_guard<std::mutex> lgm(mtx);
     auto tu = find(time_p);
     if (tu == nullptr) return;
-
-    point3d_list pl;
-    for (AtomOcTree::tree_iterator it2 = tu->map_tree.begin_tree(),
-                endit2 = tu->map_tree.end_tree();
-                it2 != endit2;
-                ++it2)
-    {
-        if (it2->getData() == ato)
-        {
-            pl.push_back(it2.getCoordinate());
-            it2->setData(UndefinedHandle);
-        }
-    }
-
-    for (auto& p : pl)
-        tu->map_tree.deleteNode(p);
+    tu->remove_atom(ato);
 }
 
-void
-TimeOctomap::remove_atom(const Handle& ato)
+/// Remove all occurences of atom in all time-slices
+void TimeOctomap::remove_atom(const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    //remove all occurences of atom in all maps at all times
-    point3d_list pl;
-    for(auto tu = std::begin(time_circle),
-        end = std::end(time_circle);
-        (tu != end);
-        tu++)
-    {
-        pl.clear();
-        for(AtomOcTree::tree_iterator it2 =
-            tu->map_tree.begin_tree(),
-            endit2 = tu->map_tree.end_tree();
-            it2 != endit2;
-            ++it2) {
-            if (it2->getData() == ato) {
-                pl.push_back(it2.getCoordinate());
-                it2->setData(UndefinedHandle);
-            }
-        }
-
-        //cout<<"remove size="<<pl.size()<<endl;
-        for(auto it3 = std::begin(pl), endit3 = std::end(pl);
-            it3 != endit3;
-            it3++) {
-            tu->map_tree.deleteNode(*it3);
-        }
-    }
+    for (auto& tu : time_circle)
+        tu->remove_atom(ato);
 }
 
 //////spatial relations
@@ -444,10 +406,10 @@ bool
 TimeOctomap::get_a_location(const time_pt& time_p,const Handle& ato_target,point3d& location)
 {
     //get atom location
-    point3d_list target_list=get_locations_of_atom_occurence_at_time(time_p,ato_target);
-    if (target_list.size()<1)
+    point3d_list target_list = get_locations_of_atom_occurence_at_time(time_p,ato_target);
+    if (target_list.size() < 1)
         return false;
-    location=target_list.front();
+    location = target_list.front();
     return true;
 }
 
