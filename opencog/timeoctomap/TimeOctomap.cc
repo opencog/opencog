@@ -103,13 +103,14 @@ TimeOctomap::auto_step_time(bool astep)
 void
 TimeOctomap::auto_timer()
 {
-    TimeOctomap *tp=this;
-    duration_c tr=time_res;
-    g_thread=std::thread( [tr,tp] () {
+    TimeOctomap *tp = this;
+    duration_c tr = time_res;
+
+    // In a separate thread, step the circular buffer.
+    g_thread = std::thread( [tr,tp] () {
         while(tp->is_auto_step_time_on())
         {
             std::this_thread::sleep_for(tr);
-
             tp->step_time_unit();
         }
     });
@@ -244,7 +245,7 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const Handle& ato,
                                             const time_pt& from_d,
                                             time_pt& result)
 {
-    time_list tl=get_times_of_atom_occurence_in_map(ato);
+    time_list tl = get_times_of_atom_occurence_in_map(ato);
     //sort
     int sz=tl.size();
     if (sz<1){
@@ -253,14 +254,17 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const Handle& ato,
     tl.sort();
     //check the list
 
-    if ((from_d>tl.back()) && (! is_time_point_in_range(from_d,tl.back(),curr_duration))){
+    if (from_d > tl.back() and
+        not is_time_point_in_range(from_d,tl.back(), curr_duration))
+    {
         return false;
     }
+
     for (int i=0;i<sz;i++)
     {
        result=tl.front();
        tl.pop_front();
-       if (result>=from_d || (is_time_point_in_range(from_d,result,curr_duration)))
+       if (result >= from_d or is_time_point_in_range(from_d, result, curr_duration))
        {
          return true;
        }
