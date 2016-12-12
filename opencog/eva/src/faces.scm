@@ -85,20 +85,6 @@
 		(ListLink (NumberNode id))))
 
 ; -----------------------------------------------------------------
-(define-public (make-mapped-face face-id x y z)
-"
-  make-mapped-face FACE-ID X Y Z
-
-  FACE-ID should be an integer, the face ID.
-  X, Y and Z are the 3D coordinates of the face.
-  This returns the atomese representation of a visible face.
-
-  XXX FIXME -- this is wrong. Should split into two aprts.
-"
-	(map-ato "faces" (NumberNode face-id (av 5 0 0)) x y z)
-	(make-new-face (number->string face-id))
-)
-
 (define-public (make-recognized-face face-id recog-id)
 "
   make-recognized-face FACE-ID RECOG-ID
