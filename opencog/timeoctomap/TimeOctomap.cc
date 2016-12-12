@@ -475,68 +475,65 @@ TimeOctomap::remove_atom_at_current_time(const opencog::Handle& ato)
 }
 
 void
-TimeOctomap::remove_atom_at_time(const time_pt& time_p,const opencog::Handle& ato)
+TimeOctomap::remove_atom_at_time(const time_pt& time_p,
+                                 const opencog::Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     point3d_list pl;
-    /*
-    auto tu = std::find(std::begin(time_circle),
-                        std::end(time_circle),
-                        time_p); //time_circle.begin(),time_circle.end()
-    if (tu == std::end(time_circle)) return;
-    */
     auto tu = find(time_p);
     if (tu == nullptr) return;
-            for(AtomOcTree::tree_iterator it2 =
-                tu->map_tree.begin_tree(),
+
+    for (AtomOcTree::tree_iterator it2 = tu->map_tree.begin_tree(),
                 endit2 = tu->map_tree.end_tree();
                 it2 != endit2;
-                ++it2) {
-                if (it2->getData() == ato) {
-                    pl.push_back(it2.getCoordinate());
-                    it2->setData(UndefinedHandle);
-                }
-            }
+                ++it2)
+    {
+        if (it2->getData() == ato)
+        {
+            pl.push_back(it2.getCoordinate());
+            it2->setData(UndefinedHandle);
+        }
+    }
 
-            //cout<<"remove size="<<pl.size()<<endl;
-            for(auto it3 = std::begin(pl), endit3 = std::end(pl);
-                it3 != endit3;
-                it3++) {
-                tu->map_tree.deleteNode(*it3);
-            }
+    for (auto it3 = std::begin(pl), endit3 = std::end(pl);
+        it3 != endit3;
+        it3++)
+    {
+        tu->map_tree.deleteNode(*it3);
+    }
 }
 
 void
 TimeOctomap::remove_atom(const opencog::Handle& ato)
 {
-  std::lock_guard<std::mutex> lgm(mtx);
+    std::lock_guard<std::mutex> lgm(mtx);
     //remove all occurences of atom in all maps at all times
     point3d_list pl;
     for(auto tu = std::begin(time_circle),
         end = std::end(time_circle);
         (tu != end);
-        tu++) {
-            pl.clear();
-            for(AtomOcTree::tree_iterator it2 =
-                tu->map_tree.begin_tree(),
-                endit2 = tu->map_tree.end_tree();
-                it2 != endit2;
-                ++it2) {
-                if (it2->getData() == ato) {
-                    pl.push_back(it2.getCoordinate());
-                    it2->setData(UndefinedHandle);
-                }
+        tu++)
+    {
+        pl.clear();
+        for(AtomOcTree::tree_iterator it2 =
+            tu->map_tree.begin_tree(),
+            endit2 = tu->map_tree.end_tree();
+            it2 != endit2;
+            ++it2) {
+            if (it2->getData() == ato) {
+                pl.push_back(it2.getCoordinate());
+                it2->setData(UndefinedHandle);
             }
+        }
 
-            //cout<<"remove size="<<pl.size()<<endl;
-            for(auto it3 = std::begin(pl), endit3 = std::end(pl);
-                it3 != endit3;
-                it3++) {
-                tu->map_tree.deleteNode(*it3);
-            }
-
+        //cout<<"remove size="<<pl.size()<<endl;
+        for(auto it3 = std::begin(pl), endit3 = std::end(pl);
+            it3 != endit3;
+            it3++) {
+            tu->map_tree.deleteNode(*it3);
+        }
     }
-}//hacked not perfect
+}
 
 //////spatial relations
 //later instead of get a location, use get nearest location or get furthest location
