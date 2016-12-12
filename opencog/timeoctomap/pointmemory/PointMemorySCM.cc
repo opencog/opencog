@@ -298,27 +298,7 @@ Handle PointMemorySCM::get_last_locs_ato(const string& map_name, Handle ato, int
 Handle PointMemorySCM::get_locs_ato(const string& map_name, Handle ato)// listlink atLocationLink
 {
     point3d_list pl = tsa[map_name]->get_locations_of_atom_occurence_now(ato);
-    if (pl.size() < 1)
-        return UndefinedHandle;
-    // HandleSeq loc_links(pl.size());
-    HandleSeq loc_links;
-    while (pl.size() > 0)
-    {
-        point3d pt = pl.front();
-        loc_links.push_back(Handle(createLink(AT_LOCATION_LINK,
-            Handle(createNode(OBJECT_NODE, map_name)),
-            Handle(createLink(LIST_LINK, ato,
-                Handle(createLink(LIST_LINK,
-                    Handle(createNode(NUMBER_NODE, to_string(pt.x()))),
-                    Handle(createNode(NUMBER_NODE, to_string(pt.y()))),
-                    Handle(createNode(NUMBER_NODE, to_string(pt.z())))
-                ))
-            ))
-        )));
-        pl.pop_front();
-    }// while
-
-    return Handle(createLink(SET_LINK, loc_links));
+    return pointlist_to_atom(pl);
 }
 
 Handle PointMemorySCM::get_past_locs_ato(const string& map_name, Handle ato, int elapse)
@@ -327,31 +307,12 @@ Handle PointMemorySCM::get_past_locs_ato(const string& map_name, Handle ato, int
     if (!get_map_time(map_name, elapse, tpt))
         return UndefinedHandle;
     point3d_list pl = tsa[map_name]->get_locations_of_atom_occurence_at_time(tpt, ato);
-    if (pl.size() < 1)
-        return UndefinedHandle;
-    // HandleSeq loc_links(pl.size());
-    HandleSeq loc_links;
-    while (pl.size() > 0)
-    {
-        point3d pt = pl.front();
-        loc_links.push_back(Handle(createLink(AT_LOCATION_LINK,
-            Handle(createNode(OBJECT_NODE, map_name)),
-            Handle(createLink(LIST_LINK, ato,
-                Handle(createLink(LIST_LINK,
-                    Handle(createNode(NUMBER_NODE, to_string(pt.x()))),
-                    Handle(createNode(NUMBER_NODE, to_string(pt.y()))),
-                    Handle(createNode(NUMBER_NODE, to_string(pt.z())))
-                ))
-            ))
-        )));
-        pl.pop_front();
-    }// while
-
-    return Handle(createLink(SET_LINK, loc_links));
+    return pointlist_to_atom(pl);
 }
 
-Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name, Handle ato,
-              double x, double y, double z)// listlink atTimeLink
+Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name,
+              Handle ato,
+              double x, double y, double z)
 {
     time_list tl = tsa[map_name]->get_times_of_atom_occurence_at_location(point3d(x, y, z), ato);
     if (tl.size() < 1)
