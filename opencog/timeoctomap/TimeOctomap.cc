@@ -199,39 +199,37 @@ TimeOctomap::get_times_of_atom_occurence_at_location(
     time_list tl;
     for (auto& tu : time_circle)
     {
-        Handle ato_t = tu->get_atom_at_location(location);
+        Handle ato_t = tu.get_atom_at_location(location);
         if (ato_t != ato) continue;
 
-        tl.push_back(tu->t);
+        tl.push_back(tu.t);
     }
     return tl;
 }
 
-time_list
-TimeOctomap::get_times_of_atom_occurence_in_map(const Handle& ato)
+time_list TimeOctomap::get_times_of_atom_occurence_in_map(const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     time_list tl;
-    for(auto tu = std::begin(time_circle), end = std::end(time_circle);
-        (tu != end);
-        tu++) {
-        bool found = false;
+    for (auto& tu : time_circle)
+    {
         //go through all nodes and leafs of octomap to search atom
-        for(AtomOcTree::tree_iterator it =
-            tu->map_tree.begin_tree(),
-            end = tu->map_tree.end_tree();
+        for (AtomOcTree::tree_iterator it =
+            tu.map_tree.begin_tree(),
+            end = tu.map_tree.end_tree();
             it != end;
-            ++it) {
-            //
-            if (it->getData() == ato) {
-                found = true;
+            ++it)
+        {
+            if (it->getData() == ato)
+            {
+                tl.push_back(tu.t);
                 break;
             }
         }
-        if (found) tl.push_back(tu->t);
     }
     return tl;
-}//ok
+}
+
 //get the first atom from the elapse from now
 //FIXME: check time point within time duration and not just greater or less
 bool TimeOctomap::get_oldest_time_elapse_atom_observed(const Handle& ato,
