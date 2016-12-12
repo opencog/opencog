@@ -34,6 +34,11 @@
 (State aiml default-state)
 (State aiml-reply default-state)
 
+(define chatscript (Anchor (chat-prefix "ChatScript")))
+(define chatscript-reply (Anchor (chat-prefix "ChatScriptReply")))
+(State chatscript default-state)
+(State chatscript-reply default-state)
+
 (define fuzzy (Anchor (chat-prefix "Fuzzy")))
 (define fuzzy-reply (Anchor (chat-prefix "FuzzyReply")))
 (define fuzzy-reply-type (Anchor (chat-prefix "FuzzyReplyType")))
@@ -86,6 +91,8 @@
     (State input-utterance no-input-utterance)
     (State aiml default-state)
     (State aiml-reply default-state)
+    (State chatscript default-state)
+    (State chatscript-reply default-state)
     (State fuzzy default-state)
     (State fuzzy-reply default-state)
     (State fuzzy-reply-type default-state)
