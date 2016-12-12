@@ -135,7 +135,7 @@ public:
         TS_ASSERT_EQUALS(tl.size(), 1);
 
         cout << "get locations at current time:";
-        point3d_list pl = tsa.get_locations_of_atom_occurence_now(testHandle);
+        point3d_list pl = tsa.get_locations_of_atom(testHandle);
         cout << pl.size() << endl;
         TS_ASSERT(pl.size() > 6000);
 
@@ -144,10 +144,10 @@ public:
         query = point3d(0.0, 0.0, 0.0);
         result = tsa.get_atom_at_location(query);
         print_query_info(query, result);
-        TS_ASSERT_EQUALS(result,UndefinedHandle);
+        TS_ASSERT_EQUALS(result, UndefinedHandle);
 
         cout << "get locations at time:";
-        pl = tsa.get_locations_of_atom_occurence_at_time(t1,testHandle);
+        pl = tsa.get_locations_of_atom_at_time(t1, testHandle);
         cout<<pl.size() << endl;
         TS_ASSERT_EQUALS(pl.size(), 0);
 
@@ -157,9 +157,9 @@ public:
         tsa.step_time_unit();
 
         cout << "get locations at time:";
-        pl = tsa.get_locations_of_atom_occurence_at_time(t1, testHandle);
+        pl = tsa.get_locations_of_atom_at_time(t1, testHandle);
         cout << pl.size() << endl;
-        TS_ASSERT_EQUALS(pl.size(),0);
+        TS_ASSERT_EQUALS(pl.size(), 0);
         cout << endl;
     }
 };
