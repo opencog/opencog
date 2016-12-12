@@ -92,9 +92,9 @@ public:
 
         // insert some measurements of free cells
         // Need to put something to delete atom
-        for (double x = -1.6; x < 0.6; x += 0.02) {
-            for (double y = -1.6; y < 0.6; y += 0.02) {
-                for (double z = -1.6; z < 0.6; z += 0.02) {
+        for (double x = -1.6; x < -0.4; x += 0.02) {
+            for (double y = -1.6; y < -0.4; y += 0.02) {
+                for (double z = -1.6; z < -0.4; z += 0.02) {
                     point3d endpoint (x, y, z);
                     tsa.remove_atoms_at_location(endpoint);
                 }
