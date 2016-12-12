@@ -145,15 +145,14 @@ TimeOctomap::remove_atoms_at_location(const point3d& location)
     time_circle[i].map_tree.updateNode(location, false);
 }
 
-bool
+void
 TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
                                 const point3d& location)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     auto tu = find(tp);
-    if (tu == nullptr) return false;
+    if (tu == nullptr) return;
     tu->map_tree.updateNode(location, false);
-    return true;
 }
 
 bool

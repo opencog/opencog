@@ -115,7 +115,7 @@ public:
     void insert_atom(const point3d& location, const opencog::Handle& ato);
 
     void remove_atoms_at_location(const point3d& location);
-    bool remove_atom_at_time_by_location(time_pt tp, const point3d& location);
+    void remove_atom_at_time_by_location(time_pt tp, const point3d& location);
 
     // Remove the atom from the current timeslice
     void remove_atom_at_current_time(const opencog::Handle& ato);
