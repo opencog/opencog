@@ -80,7 +80,6 @@ TimeOctomap::step_time_unit()
     tu.map_tree.setResolution(map_res);
     time_circle.push_back(tu);
 
-    curr_duration = time_res;
     created_once = true;
 }
 
@@ -252,7 +251,7 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const Handle& ato,
 
     for (auto& tp : tl)
     {
-       if (tp >= from_d or is_time_point_in_range(from_d, tp, curr_duration))
+       if (tp >= from_d or is_time_point_in_range(from_d, tp, time_res))
        {
          result = tp;
          return true;
@@ -283,7 +282,7 @@ bool TimeOctomap::get_last_time_elapse_atom_observed(const Handle& ato,
     // XXX FIXME -- when would this ever NOT be sorted??
     tl.sort();
     if (from_d > tl.back() and
-        not is_time_point_in_range(from_d,tl.back(),curr_duration))
+        not is_time_point_in_range(from_d,tl.back(), time_res))
     {
         return false;
     }

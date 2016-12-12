@@ -197,11 +197,10 @@ private:
     duration_c time_res;
     boost::circular_buffer<TimeUnit> time_circle;
     time_pt curr_time;
-    duration_c curr_duration;
     bool created_once;
     void auto_timer();
     bool auto_step;
-    std::mutex mtx,mtx_auto;
+    std::mutex mtx, mtx_auto;
     std::thread g_thread;
 };
 #endif
