@@ -1361,3 +1361,5 @@ TODO:
 * modulesator.scm is part of psi.
 * modulators need to be documented
 * mock-interaction-rules.scm needs to move
+
+%s/,\(\S\)/, \1/g

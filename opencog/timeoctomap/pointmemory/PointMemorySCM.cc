@@ -372,8 +372,7 @@ PointMemorySCM::get_map_time(const string& map_name, int elapse, time_pt& tpt)
     duration_c dr;
     if (!tsa[map_name]->get_current_time_range(tpt, dr))
         return false;
-    dr = std::chrono::milliseconds(elapse);
-    tpt -= dr;
+    tpt -= std::chrono::milliseconds(elapse);
     return true;
 }
 // Spatial query api assuming 1 atom in 1 map at 1 location.
