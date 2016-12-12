@@ -16,11 +16,6 @@ INSTALL (TARGETS point_memory
 )
 
 INSTALL (FILES
-	PointMemorySCM.h
-	DESTINATION "include/${PROJECT_NAME}/timeoctomap"
-)
-
-INSTALL (FILES
 	pointmem.scm
 	DESTINATION "share/${PROJECT_NAME}/scm/opencog/ato"
 )

@@ -139,6 +139,10 @@
     (check-theme blog-relevant-words)
 )
 
+(define (check-kurzweil-words)
+    (check-theme kurzweil-relevant-words)
+)
+
 ;-------------------------------------------------------------------------------
 
 (Define
@@ -258,6 +262,21 @@
 )
 
 (Define
+    (DefinedPredicate "chatscript-not-started?")
+    (process-not-started? chatscript)
+)
+
+(Define
+    (DefinedPredicate "chatscript-finished?")
+    (process-finished? chatscript)
+)
+
+(Define
+    (DefinedPredicate "is-chatscript-reply?")
+    (any-result? chatscript-reply)
+)
+
+(Define
     (DefinedPredicate "duckduckgo-not-started?")
     (process-not-started? duckduckgo)
 )
@@ -303,6 +322,11 @@
 )
 
 (Define
+    (DefinedPredicate "is-random-kurzweil-sentence-generator-ready?")
+    (setup-done? random-kurzweil-sentence-generator)
+)
+
+(Define
     (DefinedPredicate "random-pkd-sentence-generator-not-started?")
     (process-not-started? random-pkd-sentence-generator)
 )
@@ -310,6 +334,11 @@
 (Define
     (DefinedPredicate "random-blogs-sentence-generator-not-started?")
     (process-not-started? random-blogs-sentence-generator)
+)
+
+(Define
+    (DefinedPredicate "random-kurzweil-sentence-generator-not-started?")
+    (process-not-started? random-kurzweil-sentence-generator)
 )
 
 (Define
@@ -323,6 +352,11 @@
 )
 
 (Define
+    (DefinedPredicate "random-kurzweil-sentence-generated?")
+    (any-result? random-kurzweil-sentence-generated)
+)
+
+(Define
     (DefinedPredicate "has-pkd-related-words?")
     (Evaluation (GroundedPredicate "scm: check-pkd-words") (List))
 )
@@ -330,6 +364,11 @@
 (Define
     (DefinedPredicate "has-blog-related-words?")
     (Evaluation (GroundedPredicate "scm: check-blog-words") (List))
+)
+
+(Define
+    (DefinedPredicate "has-kurzweil-related-words?")
+    (Evaluation (GroundedPredicate "scm: check-kurzweil-words") (List))
 )
 
 (Define

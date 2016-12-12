@@ -72,7 +72,7 @@
          (cAB (cog-stv-confidence AB))
          (sCB (cog-stv-strength CB))
          (cCB (cog-stv-confidence CB)))
-        (cog-set-tv!
+        (cog-merge-hi-conf-tv!
             AC
             (stv
                 (simple-deduction-strength-formula sA sB sC sAB
