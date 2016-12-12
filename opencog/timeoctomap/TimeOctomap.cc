@@ -246,30 +246,19 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const Handle& ato,
                                             time_pt& result)
 {
     time_list tl = get_times_of_atom_occurence_in_map(ato);
-    //sort
-    int sz=tl.size();
-    if (sz<1){
-        return false;
-    }
+
+    // XXX FIXME when/why would this ever NOT be sorted?
     tl.sort();
-    //check the list
 
-    if (from_d > tl.back() and
-        not is_time_point_in_range(from_d,tl.back(), curr_duration))
+    for (auto& tp : tl)
     {
-        return false;
-    }
-
-    for (int i=0;i<sz;i++)
-    {
-       result=tl.front();
-       tl.pop_front();
-       if (result >= from_d or is_time_point_in_range(from_d, result, curr_duration))
+       if (tp >= from_d or is_time_point_in_range(from_d, tp, curr_duration))
        {
+         result = tp;
          return true;
        }
     }
-    return true;
+    return false;
 }
 
 bool TimeOctomap::get_oldest_time_locations_atom_observed(const Handle& ato,
