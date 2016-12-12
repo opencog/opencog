@@ -29,35 +29,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-//TimeOctomap.cpp
 #include "TimeOctomap.h"
-//#include "octomap/OcTreeKey.h"
-//#include <assert.h>
 #include "opencog/util/oc_assert.h"
+
+using namespace opencog;
 
 TimeOctomap::TimeOctomap(unsigned int num_time_units, double map_res_meters,
                          duration_c time_resolution) : map_res(map_res_meters)
                                 ,time_res(time_resolution), time_circle(num_time_units)
                                 ,created_once(false),auto_step(false)
 {
-
 }
+
 TimeOctomap::~TimeOctomap()
 {
     auto_step_time(false);
-    //duration_c td=std::chrono::milliseconds(500);//magic number of acceptable time
-    //std::this_thread::sleep_for(td);
-    //std::this_thread::sleep_for(time_res);//only if time res is small enough to be acceptable
 }
 
-double
-TimeOctomap::get_space_resolution()
+double TimeOctomap::get_space_resolution()
 {
     return map_res;
 }
 
-duration_c
-TimeOctomap::get_time_resolution()
+duration_c TimeOctomap::get_time_resolution()
 {
     return time_res;
 }
@@ -77,32 +71,19 @@ TimeOctomap::step_time_unit()
 {
     std::lock_guard<std::mutex> lgm(mtx);
     time_pt time_p;
-    duration_c duration=time_res;
-    //ideally greater than check should be done
-    if (created_once) {
-        //get_current_time_range(time_p,duration);//uniform time
-        time_p = curr_time;
-        time_p+= duration;//uniform time duration
-        /* do not delete this, may be useful in future
-        if (is_time_point_in_range(time_p, curr_time, curr_duration) ||
-                is_time_point_in_range(time_p + duration, curr_time, curr_duration)) {
-            return false;
-        }
-        */
-    }else{
-         time_p=std::chrono::system_clock::now();
-    }
+    duration_c duration = time_res;
+    // XXX FIXME a greater than check should be done (?)
+    if (created_once)
+        time_p = curr_time + duration;
+    else
+        time_p = std::chrono::system_clock::now();
 
     TimeUnit temp(time_p, duration);
     time_circle.push_back(temp);
+
     int i = time_circle.capacity() - 1;
-    if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-    /*
-    for_each( map_res.begin(), map_res.end(), [&](pair<int, double> handle) {
-        time_circle[i].map_tree[handle.first].setResolution(handle.second);
-    }
-    );
-    */
+    if (time_circle.size() < time_circle.capacity())
+        i = time_circle.size() - 1;
     time_circle[i].map_tree.setResolution(map_res);
 
     curr_time = time_p;
@@ -139,12 +120,12 @@ TimeOctomap::auto_timer()
 
             tp->step_time_unit();
         }
-    });//.detach();
+    });
 }
 
 bool
 TimeOctomap::put_atom_at_current_time(const point3d& location,
-                                      const opencog::Handle& ato)
+                                      const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     OC_ASSERT(created_once);
@@ -182,7 +163,7 @@ TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
 
 bool
 TimeOctomap::get_atom_current_time_at_location(
-                                  const point3d& location, opencog::Handle& ato)
+                                  const point3d& location, Handle& ato)
 {
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
@@ -200,7 +181,7 @@ TimeOctomap::get_atom_current_time_at_location(
 
 bool
 TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
-                             const point3d& location, opencog::Handle& ato)
+                             const point3d& location, Handle& ato)
 {
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
@@ -220,7 +201,7 @@ TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
 time_list
 TimeOctomap::get_times_of_atom_occurence_at_location(
                                                  const point3d& location,
-                                                 const opencog::Handle& ato)
+                                                 const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     time_list tl;
@@ -230,7 +211,7 @@ TimeOctomap::get_times_of_atom_occurence_at_location(
             cout << "null ret by search" << endl;
             continue;
         }
-        opencog::Handle ato_t = (static_cast<AtomOcTreeNode*>(result))->getData();
+        Handle ato_t = (static_cast<AtomOcTreeNode*>(result))->getData();
         if (ato_t != ato) {
             cout << "incorrect atom=" << ato_t;
             continue;
@@ -241,7 +222,7 @@ TimeOctomap::get_times_of_atom_occurence_at_location(
 }//ok time_circle.begin is causing problem
 
 time_list
-TimeOctomap::get_times_of_atom_occurence_in_map(const opencog::Handle& ato)
+TimeOctomap::get_times_of_atom_occurence_in_map(const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     time_list tl;
@@ -267,7 +248,7 @@ TimeOctomap::get_times_of_atom_occurence_in_map(const opencog::Handle& ato)
 }//ok
 //get the first atom from the elapse from now
 //FIXME: check time point within time duration and not just greater or less
-bool TimeOctomap::get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,
+bool TimeOctomap::get_oldest_time_elapse_atom_observed(const Handle& ato,
                                             const time_pt& from_d,
                                             time_pt& result)
 {
@@ -295,7 +276,7 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const opencog::Handle& at
     return true;
 }
 
-bool TimeOctomap::get_oldest_time_locations_atom_observed(const opencog::Handle& ato,
+bool TimeOctomap::get_oldest_time_locations_atom_observed(const Handle& ato,
                                             const time_pt& from_d,
                                             point3d_list& result)
 {
@@ -312,7 +293,7 @@ bool TimeOctomap::get_oldest_time_locations_atom_observed(const opencog::Handle&
   return true;
 }
 
-bool TimeOctomap::get_last_time_elapse_atom_observed(const opencog::Handle& ato,
+bool TimeOctomap::get_last_time_elapse_atom_observed(const Handle& ato,
                                             const time_pt& from_d,
                                             time_pt& result)
 {
@@ -340,7 +321,7 @@ bool TimeOctomap::get_last_time_elapse_atom_observed(const opencog::Handle& ato,
     */
 }
 
-bool TimeOctomap::get_last_time_before_elapse_atom_observed(const opencog::Handle& ato,
+bool TimeOctomap::get_last_time_before_elapse_atom_observed(const Handle& ato,
                                             const time_pt& till_d,
                                             time_pt& result)
 {
@@ -364,7 +345,7 @@ bool TimeOctomap::get_last_time_before_elapse_atom_observed(const opencog::Handl
     return false;
 }
 
-bool TimeOctomap::get_last_locations_of_atom_observed(const opencog::Handle& ato,
+bool TimeOctomap::get_last_locations_of_atom_observed(const Handle& ato,
                                             const time_pt& till_d,
                                             point3d_list& result)
 {
@@ -377,7 +358,7 @@ bool TimeOctomap::get_last_locations_of_atom_observed(const opencog::Handle& ato
 
 point3d_list
 TimeOctomap::get_locations_of_atom_occurence_now(
-                                              const opencog::Handle& ato)
+                                              const Handle& ato)
 {
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
@@ -410,7 +391,7 @@ TimeOctomap::find(const time_pt& time_p)
 
 point3d_list
 TimeOctomap::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
-                                                       const opencog::Handle& ato)
+                                                       const Handle& ato)
 {
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
@@ -430,7 +411,7 @@ TimeOctomap::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
 }
 
 void
-TimeOctomap::remove_atom_at_current_time(const opencog::Handle& ato)
+TimeOctomap::remove_atom_at_current_time(const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     int i = time_circle.capacity() - 1;
@@ -460,7 +441,7 @@ TimeOctomap::remove_atom_at_current_time(const opencog::Handle& ato)
 
 void
 TimeOctomap::remove_atom_at_time(const time_pt& time_p,
-                                 const opencog::Handle& ato)
+                                 const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     auto tu = find(time_p);
@@ -484,7 +465,7 @@ TimeOctomap::remove_atom_at_time(const time_pt& time_p,
 }
 
 void
-TimeOctomap::remove_atom(const opencog::Handle& ato)
+TimeOctomap::remove_atom(const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     //remove all occurences of atom in all maps at all times
@@ -518,7 +499,7 @@ TimeOctomap::remove_atom(const opencog::Handle& ato)
 //////spatial relations
 //later instead of get a location, use get nearest location or get furthest location
 bool
-TimeOctomap::get_a_location(const time_pt& time_p,const opencog::Handle& ato_target,point3d& location)
+TimeOctomap::get_a_location(const time_pt& time_p,const Handle& ato_target,point3d& location)
 {
     //get atom location
     point3d_list target_list=get_locations_of_atom_occurence_at_time(time_p,ato_target);
@@ -529,7 +510,7 @@ TimeOctomap::get_a_location(const time_pt& time_p,const opencog::Handle& ato_tar
 }
 
 point3d
-TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
+TimeOctomap::get_spatial_relations(const time_pt& time_p,const Handle& ato_obs,const Handle& ato_target,const Handle& ato_ref)
 {
     //reference and observer cant be the same location
     point3d res(-1.0,-1.0,-1.0);
@@ -566,12 +547,6 @@ TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& 
     otv=point3d(dx,otv.y(),dy);
     res=otv-orv;
 
-    //Debug
-    //cout<<otv<<endl;
-    //cout<<orv<<endl;
-    //cout<<res<<endl;
-    //Debug
-
     //x .. ahead=2, behind=1,aligned=0
     //y .. right,left,align
     //z .. above,below,align
@@ -579,27 +554,32 @@ TimeOctomap::get_spatial_relations(const time_pt& time_p,const opencog::Handle& 
     if (res.x()>eps)
         px=1.0;
     else if (res.x()<-1.0*eps)
-             px=2.0;
-         else
-             px=0.0;
+        px=2.0;
+    else
+        px=0.0;
+
     if (res.y()>eps)
         py=2.0;
     else if (res.y()<-1.0*eps)
-             py=1.0;
-         else
-             py=0.0;
+        py=1.0;
+    else
+        py=0.0;
+
     if (res.z()>eps)
         pz=2.0;
     else if (res.z()<-1.0*eps)
-             pz=1.0;
-         else
-             pz=0.0;
+        pz=1.0;
+    else
+        pz=0.0;
     res=point3d(px,py,pz);
     return res;
 }
 
-bool //not normalized
-TimeOctomap::get_direction_vector(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,point3d& dir)
+//not normalized
+bool TimeOctomap::get_direction_vector(const time_pt& time_p,
+                                       const Handle& ato_obs,
+                                       const Handle& ato_target,
+                                       point3d& dir)
 {
     //direction vector
     point3d tarh;
@@ -608,37 +588,41 @@ TimeOctomap::get_direction_vector(const time_pt& time_p,const opencog::Handle& a
         return false;
     if (!get_a_location(time_p,ato_obs,refh))
         return false;
-    dir= (tarh-refh);
+    dir = (tarh-refh);
     return true;
 }
 
-//2=far,1=near,0=touching, -1 unknown
-int
-TimeOctomap::get_angular_nearness(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
+// 2=far,1=near,0=touching, -1 unknown
+int TimeOctomap::get_angular_nearness(const time_pt& time_p,
+                                      const Handle& ato_obs,
+                                      const Handle& ato_target,
+                                      const Handle& ato_ref)
 {
     point3d dir1,dir2;
-    if (!get_direction_vector(time_p,ato_obs,ato_target,dir1))
+    if (not get_direction_vector(time_p, ato_obs, ato_target, dir1))
         return -1;
-    if (!get_direction_vector(time_p,ato_obs,ato_ref,dir2))
+    if (not get_direction_vector(time_p, ato_obs, ato_ref, dir2))
         return -1;
-    double ang=ang_vec(dir1,dir2);
-    if (ang<=TOUCH_ANGLE)
+    double ang = ang_vec(dir1,dir2);
+    if (ang <= TOUCH_ANGLE)
         return 0;
-    else if (ang<=NEAR_ANGLE)
-             return 1;
+    else if (ang <= NEAR_ANGLE)
+        return 1;
     return 2;
 }
 
 //<-elipson=unknown,>=0 distance
 double
-TimeOctomap::get_distance_between(const time_pt& time_p,const opencog::Handle& ato_target,const opencog::Handle& ato_ref)
+TimeOctomap::get_distance_between(const time_pt& time_p,
+                                  const Handle& ato_target,
+                                  const Handle& ato_ref)
 {
     //get atom location
     point3d tarh;
     point3d refh;
-    if (!get_a_location(time_p,ato_target,tarh))
+    if (!get_a_location(time_p, ato_target, tarh))
         return (-1.0);
-    if (!get_a_location(time_p,ato_ref,refh))
+    if (!get_a_location(time_p, ato_ref, refh))
         return (-1.0);
 
     double dist=sqrt(sqr(tarh.x()-refh.x())+sqr(tarh.y()-refh.y())+sqr(tarh.z()-refh.z()));
