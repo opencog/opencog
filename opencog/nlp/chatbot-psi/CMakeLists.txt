@@ -8,6 +8,7 @@ ADD_GUILE_MODULE (chatbot-psi.scm
 	utils.scm
 	random-sentence-generator.scm
 	pln-actions.scm
+	chatscript.scm
 	pln-contexts.scm
 	pln-psi-rules.scm
 	pln-reasoner.scm
