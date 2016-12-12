@@ -6,10 +6,10 @@
 (define bot-name "rose")
 
 (define-public (setup-chatscript robot)
-    (call-chatscript (string-append ":build " robot) #f)
+    (shutdown (car (send-to-chatscript (string-append ":build " robot))) 2)
 )
 
-(define (call-chatscript msg rec)
+(define (send-to-chatscript msg)
     (define bv (make-bytevector 10000))
     (define s (socket AF_INET SOCK_STREAM 6))
 
@@ -17,14 +17,22 @@
 
     (send s (string->utf8 (string-append username "\0" bot-name "\0" msg "\0")))
 
-    (if rec (begin
-        (recv! s bv)
-        ; TODO: Store in the AtomSpace
-        (display (utf8->string bv))
-    ))
+    (cons s bv)
+)
+
+(define (call-chatscript msg)
+    (define prtn (send-to-chatscript msg))
+    (define s (car prtn))
+    (define bv (cdr prtn))
+
+    (recv! s bv)
+
+    ; TODO: Store in the AtomSpace
+    (display (utf8->string bv))
+    (newline)
 
     (shutdown s 2)
 )
 
 (setup-chatscript "han")
-(call-chatscript "what is your name" #t)
+(call-chatscript "what is your name")
