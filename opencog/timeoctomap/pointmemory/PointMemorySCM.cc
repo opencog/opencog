@@ -176,6 +176,22 @@ bool PointMemorySCM::map_ato(const string& map_name, Handle ato,
     return tsa[map_name]->put_atom_at_current_time(point3d(x, y, z), ato);
 }
 
+// Create a string that encodes the timestamp `tp`.
+static std::string timestamp_to_string(const time_pt& tp)
+{
+    std::time_t ttp = std::chrono::system_clock::to_time_t(tp);
+    char buff[31];
+    strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
+    std::string ts(buff);
+    // time_since_epoch gives duration, duration to seconds and
+    // milliseconds then subtract [millisec - sec to millisec]
+    // add milli sec to ts
+    long d_sec = chrono::duration_cast<chrono::seconds>(tp.time_since_epoch()).count();
+    long d_mil = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
+    long mil_diff = d_mil-d_sec * 1000;
+    ts += to_string(mil_diff);
+    return ts;
+}
 Handle PointMemorySCM::get_first_ato(const string& map_name, Handle ato, int elapse)
 {
     time_pt tpt, tp;
@@ -184,18 +200,9 @@ Handle PointMemorySCM::get_first_ato(const string& map_name, Handle ato, int ela
     bool r = tsa[map_name]->get_oldest_time_elapse_atom_observed(ato, tpt, tp);
     if (!r)
         return UndefinedHandle;
+
     // Make and return atTimeLink
-    std::time_t ttp = std::chrono::system_clock::to_time_t(tp);
-    // string ts = std::put_time(std::localtime(&ttp), "%F %T ");
-    char buff[31];
-    strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
-    string ts(buff);
-    // time_since_epoch gives duration, duration to seconds and milliseconds then subtract [millisec - sec to millisec]
-    // add milli sec to ts
-    long d_sec = chrono::duration_cast<chrono::seconds>(tp.time_since_epoch()).count();
-    long d_mil = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
-    long mil_diff = d_mil-d_sec * 1000;
-    ts += to_string(mil_diff);
+    std::string ts = timestamp_to_string(tp);
     return Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato));
 }
 
