@@ -122,7 +122,7 @@ public:
     int get_target_is_front_back(const std::string&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
 private:
     map<std::string, TimeOctomap*> tsa;
-    bool get_map_time(const std::string&, int elapse, time_pt& tpt);
+    time_pt get_map_time(const std::string&, int elapse);
 public:
     PointMemorySCM();
     ~PointMemorySCM();
@@ -308,10 +308,9 @@ static Handle timestamp_tag_atom(const time_pt& tp, const Handle& ato)
 Handle PointMemorySCM::get_first_ato(const string& map_name,
                                      Handle ato, int elapse)
 {
-    time_pt tpt, tp;
-    if (not get_map_time(map_name, elapse, tpt))
-        return UndefinedHandle;
+    time_pt tpt = get_map_time(map_name, elapse);
 
+    time_pt tp;
     bool r = tsa[map_name]->get_oldest_time_elapse_atom_observed(ato, tpt, tp);
     if (not r)
         return UndefinedHandle;
@@ -323,10 +322,9 @@ Handle PointMemorySCM::get_first_ato(const string& map_name,
 Handle PointMemorySCM::get_last_ato(const string& map_name,
                                     Handle ato, int elapse)
 {
-    time_pt tpt, tp;
-    if (not get_map_time(map_name, elapse, tpt))
-        return UndefinedHandle;
+    time_pt tpt = get_map_time(map_name, elapse);
 
+    time_pt tp;
     bool r = tsa[map_name]->get_last_time_elapse_atom_observed(ato, tpt, tp);
     if (not r)
         return UndefinedHandle;
@@ -347,9 +345,9 @@ Handle PointMemorySCM::get_at_loc_ato(const string& map_name,
 Handle PointMemorySCM::get_past_loc_ato(const string& map_name, int elapse,
                             double x, double y, double z)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return UndefinedHandle;
+    time_pt tpt = get_map_time(map_name, elapse);
+
+    time_pt tp;
     Handle ato;
     if (tsa[map_name]->get_atom_at_time_by_location(tpt, point3d(x, y, z), ato))
         return ato;
@@ -382,9 +380,7 @@ static Handle tag_atom_with_locs(const std::string& map_name,
 Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
                                           Handle ato, int elapse)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return UndefinedHandle;
+    time_pt tpt = get_map_time(map_name, elapse);
 
     point3d_list pl;
     tsa[map_name]->get_oldest_time_locations_atom_observed(ato, tpt, pl);
@@ -394,9 +390,7 @@ Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
 
 Handle PointMemorySCM::get_last_locs_ato(const string& map_name, Handle ato, int elapse)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return UndefinedHandle;
+    time_pt tpt = get_map_time(map_name, elapse);
 
     point3d_list pl;
     tsa[map_name]->get_last_locations_of_atom_observed(ato, tpt, pl);
@@ -412,9 +406,7 @@ Handle PointMemorySCM::get_locs_ato(const string& map_name, Handle ato)// listli
 
 Handle PointMemorySCM::get_past_locs_ato(const string& map_name, Handle ato, int elapse)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return UndefinedHandle;
+    time_pt tpt = get_map_time(map_name, elapse);
     point3d_list pl = tsa[map_name]->get_locations_of_atom_occurence_at_time(tpt, ato);
     return tag_atom_with_locs(map_name, ato, pl);
 }
@@ -449,9 +441,7 @@ bool PointMemorySCM::remove_location_ato(const string& map_name, double x, doubl
 bool PointMemorySCM::remove_past_location_ato(const string& map_name, int elapse,
          double x, double y, double z)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return false;
+    time_pt tpt = get_map_time(map_name, elapse);
     return tsa[map_name]->remove_atom_at_time_by_location(tpt, point3d(x, y, z));
 }
 
@@ -462,9 +452,7 @@ void PointMemorySCM::remove_curr_ato(const string& map_name, Handle ato)
 
 void PointMemorySCM::remove_past_ato(const string& map_name, Handle ato, int elapse)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return;
+    time_pt tpt = get_map_time(map_name, elapse);
     tsa[map_name]->remove_atom_at_time(tpt, ato);
 }
 
@@ -474,21 +462,18 @@ void PointMemorySCM::remove_all_ato(const string& map_name, Handle ato)
 }
 
 
-bool
-PointMemorySCM::get_map_time(const string& map_name, int elapse, time_pt& tpt)
+time_pt PointMemorySCM::get_map_time(const string& map_name, int elapse)
 {
-    tpt = tsa[map_name]->get_current_time() - std::chrono::milliseconds(elapse);
-    return true;
+    return = tsa[map_name]->get_current_time() - std::chrono::milliseconds(elapse);
 }
 // Spatial query api assuming 1 atom in 1 map at 1 location.
+// elapse is in milliseconds (in the past)
 // For multi-map support, need to add features to main API, to provide
 // more raw data results -ve for unknown
 double
 PointMemorySCM::get_distance_between(const string& map_name, Handle ato1, Handle ato2, int elapse)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return -1.0;
+    time_pt tpt = get_map_time(map_name, elapse);
     return tsa[map_name]->get_distance_between(tpt, ato1, ato2);
 }
 
@@ -496,41 +481,33 @@ PointMemorySCM::get_distance_between(const string& map_name, Handle ato1, Handle
 int
 PointMemorySCM::get_angular_nearness(const string& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return -1.0;
+    time_pt tpt = get_map_time(map_name, elapse);
     return tsa[map_name]->get_angular_nearness(tpt, ato_obs, ato_tgt, ato_ref);
 }
 
-// 2 = right, 1 = left, 0 = aligned, -1 = unknown
+// 2 = right, 1 = left, 0 = aligned
 int
 PointMemorySCM::get_target_is_right_left(const string& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return -1.0;
+    time_pt tpt = get_map_time(map_name, elapse);
     point3d res = tsa[map_name]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
     return lround(res.y());
 }
 
-// 2 = above, 1 = below, 0 = aligned, -1 = unknown
+// 2 = above, 1 = below, 0 = aligned
 int
 PointMemorySCM::get_target_is_above_below(const string& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return -1.0;
+    time_pt tpt = get_map_time(map_name, elapse);
     point3d res = tsa[map_name]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
     return lround(res.z());
 }
 
-// 2 = ahead/front, 1 = behind/back, 0 = aligned, -1 = unknown
+// 2 = ahead/front, 1 = behind/back, 0 = aligned
 int
 PointMemorySCM::get_target_is_front_back(const string& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
 {
-    time_pt tpt;
-    if (!get_map_time(map_name, elapse, tpt))
-        return -1.0;
+    time_pt tpt = get_map_time(map_name, elapse);
     point3d res = tsa[map_name]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
     return lround(res.x());
 }
