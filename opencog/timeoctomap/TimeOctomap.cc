@@ -214,18 +214,12 @@ time_list TimeOctomap::get_times_of_atom_occurence_in_map(const Handle& ato)
     for (auto& tu : time_circle)
     {
         //go through all nodes and leafs of octomap to search atom
-        for (AtomOcTree::tree_iterator it =
-            tu.map_tree.begin_tree(),
-            end = tu.map_tree.end_tree();
-            it != end;
-            ++it)
-        {
-            if (it->getData() == ato)
+        for (auto& nod : tu.map_tree)
+            if (nod.getData() == ato)
             {
                 tl.push_back(tu.t);
                 break;
             }
-        }
     }
     return tl;
 }
