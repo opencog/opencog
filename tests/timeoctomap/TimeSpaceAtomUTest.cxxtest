@@ -68,14 +68,13 @@ public:
         double res = 0.1;
         TimeOctomap tsa(3, res, std::chrono::seconds(10));
         time_pt t1 = tsa.get_current_time();
-        duration_c dd = tsa.get_time_resolution();
 
         // Insert some measurements of occupied cells
         for (double x=-1; x<1; x += 0.05) {
             for (double y=-1; y<1; y += 0.05) {
                 for (double z=-1; z<1; z += 0.05) {
                     point3d endpoint (x,  y,  z);
-                    tsa.insert_atom(endpoint, testHandle));
+                    tsa.insert_atom(endpoint, testHandle);
                 }
             }
         }
@@ -97,7 +96,7 @@ public:
             for (double y = -1.6; y < 0.6; y += 0.02) {
                 for (double z = -1.6; z < 0.6; z += 0.02) {
                     point3d endpoint (x, y, z);
-                    tsa.remove_atom_at_current_time_by_location(endpoint);
+                    tsa.remove_atoms_at_location(endpoint);
                 }
             }
         }
