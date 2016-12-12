@@ -100,22 +100,6 @@
 			(ConceptNode recog-id)))
 )
 
-(define-public (make-mapped-recognized-face face-id recog-id x y z)
-"
-  make-mapped-recognized-face FACE-ID RECOG-ID X Y Z
-
-  FACE-ID is a number that represents the face ID, and RECOG-ID is a string that
-  represents the recognition ID. X, Y and Z are the coordinate numbers
-  associated with the face that represented by FACE-ID. It returns the atomese
-  representation of the recognized face that was added to the octomap.
-
-  If RECOG-ID is `0` then it is an unrecognized face.
-"
-	(map-ato "faces" (NumberNode face-id (av 5 0 0)) x y z)
-	(make-new-face (number->string face-id))
-	(make-recognized-face face-id recog-id)
-)
-
 (define-public (ack-face face-id)
 "
   ackno-face FACE-ID
