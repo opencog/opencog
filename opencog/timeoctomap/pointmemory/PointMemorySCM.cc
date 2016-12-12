@@ -249,9 +249,8 @@ Handle PointMemorySCM::get_past_loc_ato(const string& map_name, int elapse,
 static Handle pointlist_to_atom(const point3d_list& pl)
 {
   HandleSeq loc_links;
-  while (pl.size() > 0)
+  for (const point3d& pt: pl)
   {
-      point3d pt = pl.front();
       loc_links.push_back(Handle(createLink(AT_LOCATION_LINK,
           Handle(createNode(OBJECT_NODE, map_name)),
           Handle(createLink(LIST_LINK, ato,
@@ -262,7 +261,6 @@ static Handle pointlist_to_atom(const point3d_list& pl)
               ))
           ))
       )));
-      pl.pop_front();
   }
   return Handle(createLink(SET_LINK, loc_links));
 }
@@ -315,16 +313,13 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name,
               double x, double y, double z)
 {
     time_list tl = tsa[map_name]->get_times_of_atom_occurence_at_location(point3d(x, y, z), ato);
-    if (tl.size() < 1)
-        return UndefinedHandle;
 
     HandleSeq LL;
-    while (tl.size() > 0)
+    for (const time_pt& tp: tl)
     {
-        time_pt tp = tl.front();
-        tl.pop_front();
         std::string ts = timestamp_to_string(tp);
-        LL.push_back(Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato)));
+        LL.push_back(Handle(createLink(AT_TIME_LINK,
+                     Handle(createNode(TIME_NODE, ts)), ato)));
     }
     return opencog::Handle(createLink(SET_LINK, LL));
 }
@@ -332,15 +327,12 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name,
 Handle PointMemorySCM::get_elapse_list_ato(const string& map_name, Handle ato)// listlink atTimeLink
 {
     time_list tl = tsa[map_name]->get_times_of_atom_occurence_in_map(ato);
-    if (tl.size() < 1)
-        return UndefinedHandle;
     HandleSeq LL;
-    while (tl.size() > 0)
+    for (const time_pt& tp: tl)
     {
-        time_pt tp = tl.front();
-        tl.pop_front();
         std::string ts = timestamp_to_string(tp);
-        LL.push_back(Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato)));
+        LL.push_back(Handle(createLink(AT_TIME_LINK,
+                     Handle(createNode(TIME_NODE, ts)), ato)));
     }
     return opencog::Handle(createLink(SET_LINK, LL));
 }
