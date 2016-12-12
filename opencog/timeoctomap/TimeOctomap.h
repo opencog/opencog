@@ -101,6 +101,11 @@ public:
     // previous slice, and will not overlap with it.
     void step_time_unit();
 
+    // Return a pointer to the time-slice containing the point in time.
+    // Return nullptr if the time-point is not within the range of this
+    // map.
+    TimeSlice *find(const time_pt& time_p);
+
     bool is_auto_step_time_on();
     void auto_step_time(bool astep);
     //store an atom at coordinates in map
@@ -187,7 +192,6 @@ public:
         rx=x*cos(th)-y*sin(th);
         ry=x*sin(th)+y*cos(th);
     }
-    TimeSlice *find(const time_pt& time_p);
 private:
     // Each different map may have translation and rotation (orientation)
     // co-ordinates managed by user
