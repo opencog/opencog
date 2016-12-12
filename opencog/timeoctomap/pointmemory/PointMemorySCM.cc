@@ -192,13 +192,16 @@ static std::string timestamp_to_string(const time_pt& tp)
     ts += to_string(mil_diff);
     return ts;
 }
-Handle PointMemorySCM::get_first_ato(const string& map_name, Handle ato, int elapse)
+
+Handle PointMemorySCM::get_first_ato(const string& map_name,
+                                     Handle ato, int elapse)
 {
     time_pt tpt, tp;
-    if (!get_map_time(map_name, elapse, tpt))
+    if (not get_map_time(map_name, elapse, tpt))
         return UndefinedHandle;
+
     bool r = tsa[map_name]->get_oldest_time_elapse_atom_observed(ato, tpt, tp);
-    if (!r)
+    if (not r)
         return UndefinedHandle;
 
     // Make and return atTimeLink
@@ -206,12 +209,15 @@ Handle PointMemorySCM::get_first_ato(const string& map_name, Handle ato, int ela
     return Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato));
 }
 
-Handle PointMemorySCM::get_last_ato(const string& map_name, Handle ato, int elapse)
+Handle PointMemorySCM::get_last_ato(const string& map_name,
+                                    Handle ato, int elapse)
 {
     time_pt tpt, tp;
-    if (!get_map_time(map_name, elapse, tpt)) return UndefinedHandle;
+    if (not get_map_time(map_name, elapse, tpt))
+        return UndefinedHandle;
+
     bool r = tsa[map_name]->get_last_time_elapse_atom_observed(ato, tpt, tp);
-    if (!r)
+    if (not r)
         return UndefinedHandle;
 
     // make and return atTimeLink
@@ -240,16 +246,10 @@ Handle PointMemorySCM::get_past_loc_ato(const string& map_name, int elapse,
     return UndefinedHandle;
 }
 
-Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
-                                          Handle ato, int elapse)
+static Handle pointlist_to_atom(const point3d_list& pl)
 {
-  point3d_list pl;
-  time_pt tpt;
-  if (!get_map_time(map_name, elapse, tpt))
-      return UndefinedHandle;
-  if (!(tsa[map_name]->get_oldest_time_locations_atom_observed(ato, tpt, pl))) return UndefinedHandle;
   HandleSeq loc_links;
-  while (pl.size()>0)
+  while (pl.size() > 0)
   {
       point3d pt = pl.front();
       loc_links.push_back(Handle(createLink(AT_LOCATION_LINK,
@@ -263,35 +263,36 @@ Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
           ))
       )));
       pl.pop_front();
-  }// while
+  }
   return Handle(createLink(SET_LINK, loc_links));
+}
+
+Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
+                                          Handle ato, int elapse)
+{
+    time_pt tpt;
+    if (!get_map_time(map_name, elapse, tpt))
+        return UndefinedHandle;
+
+    point3d_list pl;
+    if (!(tsa[map_name]->get_oldest_time_locations_atom_observed(ato, tpt, pl))) 
+        return UndefinedHandle;
+
+    return pointlist_to_atom(pl);
 }
 
 
 Handle PointMemorySCM::get_last_locs_ato(const string& map_name, Handle ato, int elapse)
 {
-  point3d_list pl;
-  time_pt tpt;
-  if (!get_map_time(map_name, elapse, tpt))
-      return UndefinedHandle;
-  if (!(tsa[map_name]->get_last_locations_of_atom_observed(ato, tpt, pl))) return UndefinedHandle;
-  HandleSeq loc_links;
-  while (pl.size()>0)
-  {
-      point3d pt = pl.front();
-      loc_links.push_back(Handle(createLink(AT_LOCATION_LINK,
-          Handle(createNode(OBJECT_NODE, map_name)),
-          Handle(createLink(LIST_LINK, ato,
-              Handle(createLink(LIST_LINK,
-                  Handle(createNode(NUMBER_NODE, to_string(pt.x()))),
-                  Handle(createNode(NUMBER_NODE, to_string(pt.y()))),
-                  Handle(createNode(NUMBER_NODE, to_string(pt.z())))
-              ))
-          ))
-      )));
-      pl.pop_front();
-  }// while
-  return Handle(createLink(SET_LINK, loc_links));
+    time_pt tpt;
+    if (!get_map_time(map_name, elapse, tpt))
+        return UndefinedHandle;
+
+    point3d_list pl;
+    if (!(tsa[map_name]->get_last_locations_of_atom_observed(ato, tpt, pl)))
+        return UndefinedHandle;
+
+    return pointlist_to_atom(pl);
 }
 
 Handle PointMemorySCM::get_locs_ato(const string& map_name, Handle ato)// listlink atLocationLink
