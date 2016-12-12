@@ -213,19 +213,9 @@ Handle PointMemorySCM::get_last_ato(const string& map_name, Handle ato, int elap
     bool r = tsa[map_name]->get_last_time_elapse_atom_observed(ato, tpt, tp);
     if (!r)
         return UndefinedHandle;
-    // make and return atTimeLink
-    std::time_t ttp = std::chrono::system_clock::to_time_t(tp);
-    // string ts = std::put_time(std::localtime(&ttp), "%F %T ");
-    char buff[31];
-    strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
-    string ts(buff);
 
-    // time_since_epoch gives duration, duration to seconds and milliseconds then subtract [millisec - sec to millisec]
-    // add milli sec to ts
-    long d_sec = chrono::duration_cast<chrono::seconds>(tp.time_since_epoch()).count();
-    long d_mil = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
-    long mil_diff = d_mil-d_sec * 1000;
-    ts += to_string(mil_diff);
+    // make and return atTimeLink
+    std::string ts = timestamp_to_string(tp);
     return Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato));
 }
 
@@ -365,23 +355,13 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name, Handle
     time_list tl = tsa[map_name]->get_times_of_atom_occurence_at_location(point3d(x, y, z), ato);
     if (tl.size() < 1)
         return UndefinedHandle;
+
     HandleSeq LL;
     while (tl.size() > 0)
     {
         time_pt tp = tl.front();
         tl.pop_front();
-        std::time_t ttp = std::chrono::system_clock::to_time_t(tp);
-        // string ts = std::put_time(std::localtime(&ttp), "%F %T ");
-        char buff[31];
-        strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
-        string ts(buff);
-
-        // time_since_epoch gives duration, duration to seconds and milliseconds then subtract [millisec - sec to millisec]
-        // add milli sec to ts
-        long d_sec = chrono::duration_cast<chrono::seconds>(tp.time_since_epoch()).count();
-        long d_mil = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
-        long mil_diff = d_mil-d_sec*1000;
-        ts += to_string(mil_diff);
+        std::string ts = timestamp_to_string(tp);
         LL.push_back(Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato)));
     }
     return opencog::Handle(createLink(SET_LINK, LL));
@@ -397,18 +377,7 @@ Handle PointMemorySCM::get_elapse_list_ato(const string& map_name, Handle ato)//
     {
         time_pt tp = tl.front();
         tl.pop_front();
-        std::time_t ttp = std::chrono::system_clock::to_time_t(tp);
-        // string ts = std::put_time(std::localtime(&ttp), "%F %T ");
-        char buff[31];
-        strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
-        string ts(buff);
-
-        // time_since_epoch gives duration, duration to seconds and milliseconds then subtract [millisec - sec to millisec]
-        // add milli sec to ts
-        long d_sec = chrono::duration_cast<chrono::seconds>(tp.time_since_epoch()).count();
-        long d_mil = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
-        long mil_diff = d_mil-d_sec*1000;
-        ts += to_string(mil_diff);
+        std::string ts = timestamp_to_string(tp);
         LL.push_back(Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato)));
     }
     return opencog::Handle(createLink(SET_LINK, LL));
@@ -511,7 +480,6 @@ PointMemorySCM::get_target_is_front_back(const string& map_name, Handle ato_obs,
     point3d res = tsa[map_name]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
     return lround(res.x());
 }
-
 
 void opencog_ato_pointmem_init(void)
 {
