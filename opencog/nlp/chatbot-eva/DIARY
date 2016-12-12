@@ -1502,6 +1502,7 @@ turn away
 
 
 =============================================================
+%s/,\(\S\)/, \1/g
 
 where-look-rule
 
@@ -1528,3 +1529,4 @@ prints "(Eva looks to the left)"
  (cog-bind show-rule-1)
 (define current-action (AnchorNode "*-action-*"))
 (StateLink current-action (WordNode "foobar"))
+

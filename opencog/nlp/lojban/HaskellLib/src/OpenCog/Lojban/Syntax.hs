@@ -401,7 +401,7 @@ bridi = handleBRIDI . first mergeSumti <$> stateMany1 sumtiAll
 bridi :: SyntaxReader (Atom,[Atom])
 bridi = first (andl . mapIso (handleBRIDI . mergeSumti) . isoDistribute)
         <$> stateMany1 sumtiAll
-        <*   optext "cu"
+        <*  optext "cu"
         <&> bridi_tails
 
 -- (a,(mp,(ma,(s,aa))))
