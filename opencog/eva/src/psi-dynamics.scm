@@ -157,7 +157,7 @@
 			 (not (equal? current-input previous-input)))
 		; We have a new input sentence
 		(begin
-			(if psi-verbose (format #t "\n* New input sentence detected *\n"))
+			;(if psi-verbose (format #t "\n* New input sentence detected *\n"))
 			;(format #t "previous-input: ~a   current-input: ~a\n"
 			;    previous-input current-input)
 			(StateLink current-sentence-node current-input)
@@ -169,7 +169,9 @@
 					current-input)))
 				;(format #t "inher-super: ~a\n" inher-super)
 				(for-each (lambda (concept)
-							(if psi-verbose (format #t "sentiment: ~a\n" concept))
+							(if psi-verbose
+								(format #t "Dialog sentiment detected: ~a\n"
+									concept))
 							(if (equal? concept (Concept "Positive"))
 								(psi-set-event-occurrence!
 									positive-sentiment-dialog))
