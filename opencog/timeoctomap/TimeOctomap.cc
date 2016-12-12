@@ -76,7 +76,7 @@ TimeOctomap::step_time_unit()
     else
         curr_time = std::chrono::system_clock::now();
 
-    TimeUnit tu(curr_time, time_res);
+    TimeSlice tu(curr_time, time_res);
     tu.map_tree.setResolution(map_res);
     time_circle.push_back(tu);
 
@@ -345,10 +345,10 @@ point3d_list TimeOctomap::get_locations_of_atom_occurence_now(
     return pl;
 }
 
-TimeUnit *
+TimeSlice *
 TimeOctomap::find(const time_pt& time_p)
 {
-  for (TimeUnit& tu : time_circle)
+  for (TimeSlice& tu : time_circle)
   {
     if (is_time_point_in_range(time_p, tu.t, tu.duration))
     return &tu;
@@ -363,7 +363,7 @@ TimeOctomap::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
     point3d_list pl;
-    TimeUnit * it = find(time_p);
+    TimeSlice * it = find(time_p);
     if (it == nullptr) return point3d_list();
     for (AtomOcTree::tree_iterator ita =
         it->map_tree.begin_tree(),

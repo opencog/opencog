@@ -59,19 +59,19 @@ typedef list<time_pt> time_list;
 #define TOUCH_ANGLE DEG2RAD(10.0)
 #define NEAR_ANGLE DEG2RAD(20.0)
 
-struct TimeUnit
+struct TimeSlice
 {
     time_pt t;
     duration_c duration;
     AtomOcTree map_tree;
-    TimeUnit(time_pt tp, duration_c d): t(tp), duration(d) {}
+    TimeSlice(time_pt tp, duration_c d): t(tp), duration(d) {}
 
     bool operator==(time_pt tp)
     {
         return (tp >= t and tp <= t + duration);
     }
 
-    TimeUnit& operator=(const TimeUnit& tu)
+    TimeSlice& operator=(const TimeSlice& tu)
     {
         t = tu.t;
         duration = tu.duration;
@@ -190,13 +190,13 @@ public:
         rx=x*cos(th)-y*sin(th);
         ry=x*sin(th)+y*cos(th);
     }
-    TimeUnit *find(const time_pt& time_p);
+    TimeSlice *find(const time_pt& time_p);
 private:
     // Each different map may have translation and rotation (orientation)
     // co-ordinates managed by user
     double map_res; // spetial resolution of the map
     duration_c time_res;
-    boost::circular_buffer<TimeUnit> time_circle;
+    boost::circular_buffer<TimeSlice> time_circle;
     time_pt curr_time;
     bool created_once;
     void auto_timer();
