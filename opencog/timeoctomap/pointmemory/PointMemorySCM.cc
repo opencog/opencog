@@ -99,7 +99,7 @@ public:
     // Remove atom from location at currrent time
     bool remove_location_ato(const std::string&, double x, double y, double z);
     // Remove atom from location at elapsed past time
-    void remove_past_location_ato(const std::string&, int elapse,
+    bool remove_past_location_ato(const std::string&, int elapse,
          double x, double y, double z);
     // Remove all specific atoms from map at current time
     void remove_curr_ato(const std::string&, Handle ato);

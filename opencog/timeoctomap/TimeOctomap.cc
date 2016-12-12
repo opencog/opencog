@@ -34,11 +34,11 @@
 
 using namespace opencog;
 
-TimeSlice::remove_atom(const Handle& ato)
+void TimeSlice::remove_atom(const Handle& ato)
 {
     point3d_list pl;
     for (AtomOcTree::tree_iterator it2 = map_tree.begin_tree(),
-                endit2 = >map_tree.end_tree();
+                endit2 = map_tree.end_tree();
                 it2 != endit2;
                 ++it2)
     {
@@ -395,8 +395,7 @@ TimeOctomap::remove_atom_at_time(const time_pt& time_p,
 void TimeOctomap::remove_atom(const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    for (auto& tu : time_circle)
-        tu->remove_atom(ato);
+    for (auto& tu : time_circle) tu.remove_atom(ato);
 }
 
 //////spatial relations

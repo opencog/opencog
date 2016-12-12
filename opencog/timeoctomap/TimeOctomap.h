@@ -1,4 +1,5 @@
 /*
+ * TimeOctomap.h -- circular buffer of time+octomap array holding atoms
  *
  * Copyright (c) 2016, Mandeep Singh Bhatia, OpenCog Foundation
  * All rights reserved.
@@ -29,33 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// TimeOctomap.h
-// make cicular buffer of struct of time+octomap array holding atom values
-// api to put time space atom
-// api to query time space for atom
-// api to search and delete all atom occurences
-
 #ifndef TimeOctomap_H
 #define TimeOctomap_H
+
+#include <math.h>
+
+#include <chrono>
+#include <cmath>
 #include <iostream>
-#include <boost/circular_buffer.hpp>
 #include <list>
 #include <map>
 #include <string>
-#include <chrono>
-#include <algorithm>
-#include <cmath>
+
+#include <boost/circular_buffer.hpp>
 #include "AtomOcTree.h"
 
 using namespace std;
 using namespace octomap;
+using namespace opencog;
 
 typedef std::chrono::system_clock::time_point time_pt;
 typedef std::chrono::system_clock::duration duration_c;
-typedef list<time_pt> time_list;
-//constants below require tweaking or better logic
-#define PI 3.142
-#define DEG2RAD(deg) (PI/180.0)*deg
+typedef std::list<time_pt> time_list;
+
+#define DEG2RAD(deg) (M_PI/180.0)*deg
 #define TOUCH_ANGLE DEG2RAD(10.0)
 #define NEAR_ANGLE DEG2RAD(20.0)
 
@@ -80,6 +78,7 @@ struct TimeSlice
         return *this;
     }
 
+    // Remove the atom from this time-slice.
     void remove_atom(const Handle&);
 };
 
@@ -112,42 +111,43 @@ public:
     void auto_step_time(bool astep);
 
     // Store an atom at `location`, for the current timeslice
-    void insert_atom(const point3d& location, const opencog::Handle& ato);
+    void insert_atom(const point3d&, const Handle&);
 
-    void remove_atoms_at_location(const point3d& location);
-    void remove_atom_at_time_by_location(time_pt tp, const point3d& location);
+    void remove_atoms_at_location(const point3d&);
+    void remove_atom_at_time_by_location(time_pt, const point3d&);
 
     // Remove the atom from the current timeslice
-    void remove_atom_at_current_time(const opencog::Handle& ato);
-    void remove_atom_at_time(const time_pt&, const opencog::Handle&);
+    void remove_atom_at_current_time(const Handle&);
+    void remove_atom_at_time(const time_pt&, const Handle&);
 
     // Remove all occurences of atom in all time-slices
-    void remove_atom(const opencog::Handle&);
+    void remove_atom(const Handle&);
     //get atom at current time unit
-    bool get_atom_current_time_at_location(const point3d& location,
-                            opencog::Handle& ato);
-    bool get_atom_at_time_by_location(const time_pt& time_p,
-                       const point3d& location, opencog::Handle& ato);
+    bool get_atom_current_time_at_location(const point3d&,
+                            Handle&);
+    bool get_atom_at_time_by_location(const time_pt&,
+                       const point3d&, Handle& ato);
     time_list get_times_of_atom_occurence_at_location(
-                                               const point3d& location,
-                                               const opencog::Handle& ato);
-    time_list get_times_of_atom_occurence_in_map(const opencog::Handle& ato);
-    point3d_list get_locations_of_atom_occurence_now(const opencog::Handle& ato);
-    point3d_list get_locations_of_atom_occurence_at_time(const time_pt& time_p,const opencog::Handle& ato);
+                                               const point3d&,
+                                               const Handle& ato);
+    time_list get_times_of_atom_occurence_in_map(const Handle& ato);
+    point3d_list get_locations_of_atom_occurence_now(const Handle&);
+    point3d_list get_locations_of_atom_occurence_at_time(const time_pt&,
+                                                         const Handle&);
     //get the first atom observation after a time point
-    bool get_oldest_time_elapse_atom_observed(const opencog::Handle& ato,const time_pt& from_d,time_pt& result);//?return location too?
+    bool get_oldest_time_elapse_atom_observed(const Handle& ato,const time_pt& from_d,time_pt& result);//?return location too?
     //get the last atom observation before a time point
-    bool get_last_time_elapse_atom_observed(const opencog::Handle& ato,
+    bool get_last_time_elapse_atom_observed(const Handle& ato,
                                             const time_pt& till_d,
                                             time_pt& result);
-    bool get_last_time_before_elapse_atom_observed(const opencog::Handle& ato,
+    bool get_last_time_before_elapse_atom_observed(const Handle& ato,
                                                   const time_pt& till_d,
                                                   time_pt& result);
 
-    bool get_oldest_time_locations_atom_observed(const opencog::Handle& ato,
+    bool get_oldest_time_locations_atom_observed(const Handle& ato,
                                                 const time_pt& from_d,
                                                 point3d_list& result);
-    bool get_last_locations_of_atom_observed(const opencog::Handle& ato,
+    bool get_last_locations_of_atom_observed(const Handle& ato,
                                                           const time_pt& till_d,
                                                           point3d_list& result);
     //AtomList& GetAtomsInLocationBBXatTime();//BBX = bounding box
@@ -162,15 +162,15 @@ public:
     //y=2-right,1-left,0-aligned (>elipson,<-elipson)
     //z=2-above,1-below,0-aligned
     //x=2-ahead,1-behind,0 - aligned
-    point3d get_spatial_relations(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
+    point3d get_spatial_relations(const time_pt& time_p, const Handle& ato_obs,const Handle& ato_target,const Handle& ato_ref);
     //not normalized: direction vector -> (target-observer)
-    bool get_direction_vector(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,point3d&);
+    bool get_direction_vector(const time_pt& time_p,const Handle& ato_obs,const Handle& ato_target,point3d&);
     //got to another nearness for physical distance, this one is angular
     //2=far,1=near,0=touching, -1 unknown
-    int get_angular_nearness(const time_pt& time_p,const opencog::Handle& ato_obs,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
+    int get_angular_nearness(const time_pt&, const Handle& ato_obs, const Handle& ato_target, const Handle& ato_ref);
     //<-elipson=unknown,>=0 distance
-    double get_distance_between(const time_pt& time_p,const opencog::Handle& ato_target,const opencog::Handle& ato_ref);
-    bool get_a_location(const time_pt& time_p,const opencog::Handle& ato_target,point3d&);
+    double get_distance_between(const time_pt&, const Handle&, const Handle&);
+    bool get_a_location(const time_pt&, const Handle&, point3d&);
 public:
     //constructor
     TimeOctomap(unsigned int num_time_units, double map_res_meters,
@@ -185,12 +185,12 @@ public:
         double num=dot(a,b);
         double den=mag(a)*mag(b);
         double diff=abs(mag(a)-mag(b));
-        if (den<1e-9)//num might be greater or equal to space_res
+        if (den<1e-9) // num might be greater or equal to space_res
         {
             if (diff<1e-3)
-                return 0;//magic number
+                return 0.0; // magic number
             else
-                return PI;//Pi radians
+                return M_PI;
         }
         return acos(num/den);
     }
