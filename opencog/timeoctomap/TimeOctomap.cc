@@ -93,8 +93,8 @@ void
 TimeOctomap::auto_step_time(bool astep)
 {
     std::lock_guard<std::mutex> t_mtx(mtx_auto);
-    if (auto_step==astep) return;
-    auto_step=astep;
+    if (auto_step == astep) return;
+    auto_step = astep;
     if (astep) auto_timer();
     else g_thread.join();
 }
@@ -102,17 +102,18 @@ TimeOctomap::auto_step_time(bool astep)
 void
 TimeOctomap::auto_timer()
 {
-    TimeOctomap *tp = this;
     duration_c tr = time_res;
 
     // In a separate thread, step the circular buffer.
-    g_thread = std::thread( [tr,tp] () {
-        while(tp->is_auto_step_time_on())
+    g_thread = std::thread(
+        [tr, this] ()
         {
-            std::this_thread::sleep_for(tr);
-            tp->step_time_unit();
-        }
-    });
+            while (this->is_auto_step_time_on())
+            {
+                std::this_thread::sleep_for(tr);
+                this->step_time_unit();
+            }
+        });
 }
 
 bool
@@ -383,7 +384,7 @@ TimeOctomap::remove_atom_at_current_time(const Handle& ato)
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity())
         i = time_circle.size() - 1;
-    auto* tu=&time_circle[i];
+    auto * tu = &time_circle[i];
 
     point3d_list pl;
             for(AtomOcTree::tree_iterator it2 =

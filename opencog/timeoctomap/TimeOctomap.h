@@ -87,23 +87,27 @@ struct TimeUnit
 class TimeOctomap
 {
 public:
-    //API
-    double get_space_resolution();//map resolution in meters
+    // Return the spatial resolutionof the map, in meters
+    double get_space_resolution();
+    // Return the time-resolution of the map (in what units???)
     duration_c get_time_resolution();
-    int get_time_units(){
-      return time_circle.capacity();
-    }
-    //current time unit time point and time duration are queried
+
+    // Get ... ??? something.
+    int get_time_units() { return time_circle.capacity(); }
+
+    // Get the start-time time point and length of the current time-slice
     bool get_current_time_range(time_pt& time_p, duration_c& duration);
+
     //helper function to check if a time point is within the Time unit time range
     bool is_time_point_in_range(const time_pt& time_to_check, const time_pt& t, const duration_c& duration)
     {
         return (time_to_check >= t and time_to_check < t + duration);
     }
-    //make a new time unit for storage,
-    //should not overlap a previous time unit
-    //and should fall after the previous time unit
-    void step_time_unit();//step_time_unit
+    // Create a new time-slice, and make it the current time-slice,
+    // closing off the previous one. It will come immediately after the
+    // previous slice, and will not overlap with it.
+    void step_time_unit();
+
     bool is_auto_step_time_on();
     void auto_step_time(bool astep);
     //store an atom at coordinates in map
