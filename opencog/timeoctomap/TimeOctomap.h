@@ -98,12 +98,12 @@ public:
     //helper function to check if a time point is within the Time unit time range
     bool is_time_point_in_range(const time_pt& time_to_check, const time_pt& t, const duration_c& duration)
     {
-        return (time_to_check >= t && time_to_check < t + duration);
+        return (time_to_check >= t and time_to_check < t + duration);
     }
     //make a new time unit for storage,
     //should not overlap a previous time unit
     //and should fall after the previous time unit
-    bool step_time_unit();//step_time_unit
+    void step_time_unit();//step_time_unit
     bool is_auto_step_time_on();
     void auto_step_time(bool astep);
     //store an atom at coordinates in map
@@ -196,7 +196,8 @@ private:
     double map_res; //resolution of maps
     duration_c time_res;
     boost::circular_buffer<TimeUnit> time_circle;
-    time_pt curr_time; duration_c curr_duration;
+    time_pt curr_time;
+    duration_c curr_duration;
     bool created_once;
     void auto_timer();
     bool auto_step;

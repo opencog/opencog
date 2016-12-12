@@ -66,25 +66,22 @@ TimeOctomap::get_current_time_range(time_pt& time_p, duration_c& duration)
     return true;
 }
 
-bool
+void
 TimeOctomap::step_time_unit()
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    time_pt time_p;
-    // XXX FIXME a greater than check should be done (?)
-    if (created_once)
-        time_p = curr_time + time_res;
-    else
-        time_p = std::chrono::system_clock::now();
 
-    TimeUnit tu(time_p, time_res);
+    if (created_once)
+        curr_time += time_res;
+    else
+        curr_time = std::chrono::system_clock::now();
+
+    TimeUnit tu(curr_time, time_res);
     tu.map_tree.setResolution(map_res);
     time_circle.push_back(tu);
 
-    curr_time = time_p;
     curr_duration = time_res;
     created_once = true;
-    return true;
 }
 
 bool
