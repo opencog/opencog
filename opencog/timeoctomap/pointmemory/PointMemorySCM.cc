@@ -113,25 +113,24 @@ void PointMemorySCM::init()
 }
 
 bool PointMemorySCM::create_map(const string& name,
-                    double space_res_mtr,
-                    int time_res_milli_sec,
-                    int time_units)
+                                double space_res_mtr,
+                                int time_res_milli_sec,
+                                int time_units)
 {
-    //reject if name already exists
+    // Reject if name already exists
     if (name.length()<1)
         return false;
-    //reject if time units < 1
+    // Reject if time units < 1
     if (time_units<1)
         return false;
-    //reject if time res,space_res <=0
-    if ((time_res_milli_sec<=0)||(space_res_mtr)<=0.0)
+    // Reject if time res,space_res <= 0
+    if (time_res_milli_sec <= 0 || space_res_mtr <= 0.0)
         return false;
 
-    std::map<string,TimeOctomap*>::iterator it;
-    it=tsa.find(name);
+    std::map<string,TimeOctomap*>::iterator it = tsa.find(name);
     if (it != tsa.end())
         return false;
-    tsa[name]=new TimeOctomap(time_units,space_res_mtr,std::chrono::milliseconds(time_res_milli_sec));
+    tsa[name] = new TimeOctomap(time_units,space_res_mtr,std::chrono::milliseconds(time_res_milli_sec));
     return true;
 }
 //add point clouds later
@@ -169,12 +168,13 @@ void PointMemorySCM::auto_step_time_off(const string& map_name)
 
 int PointMemorySCM::is_auto_step_on(const string& map_name)
 {
-    return (tsa[map_name]->is_auto_step_time_on())?1:0;
+    return (tsa[map_name]->is_auto_step_time_on()) ? 1 : 0;
 }
 
-bool PointMemorySCM::map_ato(const string& map_name,Handle ato,double x,double y,double z)
+bool PointMemorySCM::map_ato(const string& map_name, Handle ato,
+                             double x, double y, double z)
 {
-    return tsa[map_name]->put_atom_at_current_time(point3d(x,y,z),ato);
+    return tsa[map_name]->put_atom_at_current_time(point3d(x, y, z), ato);
 }
 
 Handle PointMemorySCM::get_first_ato(const string& map_name,Handle ato,int elapse)
@@ -182,7 +182,29 @@ Handle PointMemorySCM::get_first_ato(const string& map_name,Handle ato,int elaps
     time_pt tpt,tp;
     if (!get_map_time(map_name,elapse,tpt))
         return UndefinedHandle;
-    bool r=tsa[map_name]->get_oldest_time_elapse_atom_observed(ato,tpt,tp);
+    bool r = tsa[map_name]->get_oldest_time_elapse_atom_observed(ato,tpt,tp);
+    if (!r)
+        return UndefinedHandle;
+    // Make and return atTimeLink
+    std::time_t ttp = std::chrono::system_clock::to_time_t(tp);
+    //string ts = std::put_time(std::localtime(&ttp), "%F %T ");
+    char buff[31];
+    strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
+    string ts(buff);
+    //time_since_epoch gives duration, duration to seconds and milliseconds then subtract [millisec - sec to millisec]
+    //add milli sec to ts
+    long d_sec = chrono::duration_cast<chrono::seconds>(tp.time_since_epoch()).count();
+    long d_mil = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
+    long mil_diff = d_mil-d_sec * 1000;
+    ts += to_string(mil_diff);
+    return Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato));
+}
+
+Handle PointMemorySCM::get_last_ato(const string& map_name,Handle ato,int elapse)
+{
+    time_pt tpt,tp;
+    if (!get_map_time(map_name,elapse,tpt)) return UndefinedHandle;
+    bool r = tsa[map_name]->get_last_time_elapse_atom_observed(ato,tpt,tp);
     if (!r)
         return UndefinedHandle;
     //make and return atTimeLink
@@ -191,39 +213,18 @@ Handle PointMemorySCM::get_first_ato(const string& map_name,Handle ato,int elaps
     char buff[31];
     strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
     string ts(buff);
-    //time_since_epoch gives duration, duration to seconds and milliseconds then subtract [millisec - sec to millisec]
-    //add milli sec to ts
-    long d_sec=chrono::duration_cast<chrono::seconds>(tp.time_since_epoch()).count();
-    long d_mil=chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
-    long mil_diff=d_mil-d_sec*1000;
-    ts+=to_string(mil_diff);
-    return Handle(createLink(AT_TIME_LINK,Handle(createNode(TIME_NODE,ts)),ato));
-}
-
-Handle PointMemorySCM::get_last_ato(const string& map_name,Handle ato,int elapse)
-{
-    time_pt tpt,tp;
-    if (!get_map_time(map_name,elapse,tpt))return UndefinedHandle;
-    bool r=tsa[map_name]->get_last_time_elapse_atom_observed(ato,tpt,tp);
-    if (!r)
-        return UndefinedHandle;
-    //make and return atTimeLink
-    std::time_t ttp=std::chrono::system_clock::to_time_t(tp);
-    //string ts = std::put_time(std::localtime(&ttp), "%F %T ");
-    char buff[31];
-    strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
-    string ts(buff);
 
     //time_since_epoch gives duration, duration to seconds and milliseconds then subtract [millisec - sec to millisec]
     //add milli sec to ts
-    long d_sec=chrono::duration_cast<chrono::seconds>(tp.time_since_epoch()).count();
-    long d_mil=chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
-    long mil_diff=d_mil-d_sec*1000;
-    ts+=to_string(mil_diff);
-    return Handle(createLink(AT_TIME_LINK,Handle(createNode(TIME_NODE,ts)),ato));
+    long d_sec = chrono::duration_cast<chrono::seconds>(tp.time_since_epoch()).count();
+    long d_mil = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
+    long mil_diff = d_mil-d_sec * 1000;
+    ts += to_string(mil_diff);
+    return Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato));
 }
 
-Handle PointMemorySCM::get_at_loc_ato(const string& map_name,double x,double y,double z)
+Handle PointMemorySCM::get_at_loc_ato(const string& map_name,
+                                      double x, double y, double z)
 {
     Handle ato;
     if (tsa[map_name]->get_atom_current_time_at_location(point3d(x,y,z),ato))
@@ -232,18 +233,19 @@ Handle PointMemorySCM::get_at_loc_ato(const string& map_name,double x,double y,d
 }
 
 Handle PointMemorySCM::get_past_loc_ato(const string& map_name,int elapse,
-                            double x,double y,double z)
+                            double x, double y, double z)
 {
     time_pt tpt;
-    if (!get_map_time(map_name,elapse,tpt))
+    if (!get_map_time(map_name, elapse, tpt))
         return UndefinedHandle;
     Handle ato;
-    if (tsa[map_name]->get_atom_at_time_by_location(tpt,point3d(x,y,z),ato))
+    if (tsa[map_name]->get_atom_at_time_by_location(tpt, point3d(x, y, z), ato))
         return ato;
     return UndefinedHandle;
 }
 
-Handle PointMemorySCM::get_first_locs_ato(const string& map_name,Handle ato,int elapse)
+Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
+                                          Handle ato, int elapse)
 {
   point3d_list pl;
   time_pt tpt;

@@ -144,7 +144,7 @@ TimeOctomap::auto_timer()
 
 bool
 TimeOctomap::put_atom_at_current_time(const point3d location,
-                                        const opencog::Handle& ato)
+                                      const opencog::Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     OC_ASSERT(created_once);
