@@ -195,7 +195,6 @@ private:
     duration_c time_res;
     boost::circular_buffer<TimeSlice> time_circle;
     time_pt curr_time;
-    bool created_once;
     void auto_timer();
     bool auto_step;
     std::mutex mtx, mtx_auto;

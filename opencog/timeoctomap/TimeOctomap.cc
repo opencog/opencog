@@ -34,11 +34,19 @@
 
 using namespace opencog;
 
-TimeOctomap::TimeOctomap(unsigned int num_time_units, double map_res_meters,
-                         duration_c time_resolution) : map_res(map_res_meters)
-                                ,time_res(time_resolution), time_circle(num_time_units)
-                                ,created_once(false),auto_step(false)
+TimeOctomap::TimeOctomap(unsigned int num_time_units,
+                         double map_res_meters,
+                         duration_c time_resolution) :
+  map_res(map_res_meters),
+  time_res(time_resolution),
+  time_circle(num_time_units),
+  auto_step(false)
 {
+    curr_time = std::chrono::system_clock::now();
+
+    TimeSlice tu(curr_time, time_res);
+    tu.map_tree.setResolution(map_res);
+    time_circle.push_back(tu);
 }
 
 TimeOctomap::~TimeOctomap()
@@ -61,16 +69,10 @@ TimeOctomap::step_time_unit()
 {
     std::lock_guard<std::mutex> lgm(mtx);
 
-    if (created_once)
-        curr_time += time_res;
-    else
-        curr_time = std::chrono::system_clock::now();
-
+    curr_time += time_res;
     TimeSlice tu(curr_time, time_res);
     tu.map_tree.setResolution(map_res);
     time_circle.push_back(tu);
-
-    created_once = true;
 }
 
 bool
@@ -111,7 +113,6 @@ TimeOctomap::put_atom_at_current_time(const point3d& location,
                                       const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    OC_ASSERT(created_once);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
     //if (!time_circle[i].has_map(handle)) return false;//may assert too
@@ -124,7 +125,6 @@ bool
 TimeOctomap::remove_atom_at_current_time_by_location(
                                        const point3d& location)
 {
-    OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
@@ -136,7 +136,6 @@ bool
 TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
                                 const point3d& location)
 {
-    OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
     auto tu = find(tp);
     if (tu == nullptr) return false;
@@ -148,7 +147,6 @@ bool
 TimeOctomap::get_atom_current_time_at_location(
                                   const point3d& location, Handle& ato)
 {
-    OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
@@ -166,7 +164,6 @@ bool
 TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
                              const point3d& location, Handle& ato)
 {
-    OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
     //find time in time circle time unit
     auto it = find(time_p);
@@ -316,7 +313,6 @@ bool TimeOctomap::get_last_locations_of_atom_observed(const Handle& ato,
 point3d_list TimeOctomap::get_locations_of_atom_occurence_now(
                                               const Handle& ato)
 {
-    OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
     point3d_list pl;
     int i = time_circle.capacity() - 1;
@@ -346,7 +342,6 @@ point3d_list
 TimeOctomap::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
                                                      const Handle& ato)
 {
-    OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
     point3d_list pl;
     TimeSlice * it = find(time_p);
