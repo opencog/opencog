@@ -116,19 +116,22 @@ bool PointMemorySCM::create_map(const string& name,
                                 int time_res_milli_sec,
                                 int time_units)
 {
-    // Reject if name already exists
     if (name.length() < 1)
         return false;
+
     // Reject if time units < 1
     if (time_units < 1)
         return false;
+
     // Reject if time res, space_res <= 0
     if (time_res_milli_sec <= 0 || space_res_mtr <= 0.0)
         return false;
 
+    // Reject if name already exists
     std::map<string, TimeOctomap*>::iterator it = tsa.find(name);
     if (it ! = tsa.end())
         return false;
+
     tsa[name] = new TimeOctomap(time_units, space_res_mtr, std::chrono::milliseconds(time_res_milli_sec));
     return true;
 }
@@ -176,9 +179,12 @@ bool PointMemorySCM::map_ato(const string& map_name, Handle ato,
     return tsa[map_name]->put_atom_at_current_time(point3d(x, y, z), ato);
 }
 
-// Create a string that encodes the timestamp `tp`.
-static std::string timestamp_to_string(const time_pt& tp)
+// Tag the atom `ato` with the timepoint `tp`, using an AtTimeLink
+static Handle timestamp_tag_atom(const time_pt& tp, const Handle& ato)
 {
+    // XXX FIXME - there should be a TimeNode c++ class that will
+    // store timestamps internally, and avoid or minimize this nasty
+    // string conversion.
     std::time_t ttp = std::chrono::system_clock::to_time_t(tp);
     char buff[31];
     strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
@@ -190,7 +196,7 @@ static std::string timestamp_to_string(const time_pt& tp)
     long d_mil = chrono::duration_cast<chrono::milliseconds>(tp.time_since_epoch()).count();
     long mil_diff = d_mil-d_sec * 1000;
     ts += to_string(mil_diff);
-    return ts;
+    return Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato));
 }
 
 Handle PointMemorySCM::get_first_ato(const string& map_name,
@@ -205,8 +211,7 @@ Handle PointMemorySCM::get_first_ato(const string& map_name,
         return UndefinedHandle;
 
     // Make and return atTimeLink
-    std::string ts = timestamp_to_string(tp);
-    return Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato));
+    return timestamp_tag_atom(tp, ato);
 }
 
 Handle PointMemorySCM::get_last_ato(const string& map_name,
@@ -221,8 +226,7 @@ Handle PointMemorySCM::get_last_ato(const string& map_name,
         return UndefinedHandle;
 
     // make and return atTimeLink
-    std::string ts = timestamp_to_string(tp);
-    return Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato));
+    return timestamp_tag_atom(tp, ato);
 }
 
 Handle PointMemorySCM::get_at_loc_ato(const string& map_name,
@@ -315,11 +319,8 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name,
 
     HandleSeq LL;
     for (const time_pt& tp: tl)
-    {
-        std::string ts = timestamp_to_string(tp);
-        LL.push_back(Handle(createLink(AT_TIME_LINK,
-                     Handle(createNode(TIME_NODE, ts)), ato)));
-    }
+        LL.push_back(timestamp_tag_atom(tp, ato));
+
     return opencog::Handle(createLink(SET_LINK, LL));
 }
 
@@ -328,11 +329,7 @@ Handle PointMemorySCM::get_elapse_list_ato(const string& map_name, Handle ato)//
     time_list tl = tsa[map_name]->get_times_of_atom_occurence_in_map(ato);
     HandleSeq LL;
     for (const time_pt& tp: tl)
-    {
-        std::string ts = timestamp_to_string(tp);
-        LL.push_back(Handle(createLink(AT_TIME_LINK,
-                     Handle(createNode(TIME_NODE, ts)), ato)));
-    }
+        LL.push_back(timestamp_tag_atom(tp, ato));
     return opencog::Handle(createLink(SET_LINK, LL));
 }
 
