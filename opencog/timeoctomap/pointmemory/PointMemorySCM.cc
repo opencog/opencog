@@ -337,10 +337,7 @@ Handle PointMemorySCM::get_last_ato(const string& map_name,
 Handle PointMemorySCM::get_at_loc_ato(const string& map_name,
                                       double x, double y, double z)
 {
-    Handle ato;
-    if (tsa[map_name]->get_atom_current_time_at_location(point3d(x, y, z), ato))
-        return ato;
-    return UndefinedHandle;
+    return tsa[map_name]->get_atom_at_location(point3d(x, y, z));
 }
 
 Handle PointMemorySCM::get_past_loc_ato(const string& map_name, int elapse,

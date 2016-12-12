@@ -103,20 +103,18 @@ public:
 
         cout << endl;
         cout << "performing some queries:" << endl;
-        opencog::Handle result;
         point3d query (0.0, 0.0, 0.0);
-        //tsa.RemoveAtomAtCurrentTime(1,query);
-        tsa.get_atom_current_time_at_location(query, result);
+        opencog::Handle result = tsa.get_atom_at_location(query);
         print_query_info(query, result);
         TS_ASSERT_EQUALS(result, testHandle);
 
         query = point3d(-1.0, -1.0, -1.0);
-        tsa.get_atom_current_time_at_location(query, result);
+        result = tsa.get_atom_at_location(query);
         print_query_info(query, result);
         TS_ASSERT_EQUALS(result, UndefinedHandle);
 
         query = point3d(100.0, 1.0, 1.0);
-        tsa.get_atom_current_time_at_location(query, result);
+        result = tsa.get_atom_at_location(query);
         print_query_info(query, result);
         TS_ASSERT_EQUALS(result, UndefinedHandle);
 
@@ -145,10 +143,10 @@ public:
           pl=tsa.GetLocationsOfAtomOccurenceAtTime(t1,1,testHandle);
           cout<<pl.size()<<endl;
         */
-        cout<<"removing atom=21"<<endl;
+        cout << "removing atom=21" << endl;
         tsa.remove_atom(testHandle);
-        query = point3d(0., 0., 0.);
-        tsa.get_atom_current_time_at_location(query,result);
+        query = point3d(0.0, 0.0, 0.0);
+        result = tsa.get_atom_at_location(query);
         print_query_info(query, result);
         TS_ASSERT_EQUALS(result,UndefinedHandle);
 

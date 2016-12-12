@@ -155,21 +155,15 @@ TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
     tu->map_tree.updateNode(location, false);
 }
 
-bool
-TimeOctomap::get_atom_current_time_at_location(
-                                  const point3d& location, Handle& ato)
+Handle TimeOctomap::get_atom_at_location(const point3d& location)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
     OcTreeNode* result = time_circle[i].map_tree.search(location);
-    if (result == nullptr) {
-        ato = UndefinedHandle;
-        return false;
-    }
-    ato = (static_cast<AtomOcTreeNode*>(result))->getData();
-    if (ato == UndefinedHandle) return false;
-    return true;
+    if (result == nullptr) return Handle();
+
+    return (static_cast<AtomOcTreeNode*>(result))->getData();
 }
 
 bool

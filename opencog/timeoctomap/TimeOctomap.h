@@ -122,9 +122,10 @@ public:
 
     // Remove all occurences of atom in all time-slices
     void remove_atom(const Handle&);
-    //get atom at current time unit
-    bool get_atom_current_time_at_location(const point3d&,
-                            Handle&);
+
+    // Get atom at the given location in the current time-slice.
+    Handle get_atom_at_location(const point3d&);
+
     bool get_atom_at_time_by_location(const time_pt&,
                        const point3d&, Handle& ato);
     time_list get_times_of_atom_occurence_at_location(
