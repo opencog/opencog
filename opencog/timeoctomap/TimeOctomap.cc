@@ -56,16 +56,6 @@ duration_c TimeOctomap::get_time_resolution()
     return time_res;
 }
 
-bool
-TimeOctomap::get_current_time_range(time_pt& time_p, duration_c& duration)
-{
-    std::lock_guard<std::mutex> lgm(mtx);
-    if (time_circle.size() < 1) return false;
-    time_p = curr_time;
-    duration = time_res;
-    return true;
-}
-
 void
 TimeOctomap::step_time_unit()
 {

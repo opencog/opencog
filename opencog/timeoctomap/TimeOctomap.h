@@ -93,7 +93,7 @@ public:
     int get_time_units() { return time_circle.capacity(); }
 
     // Get the start-time time point and length of the current time-slice
-    bool get_current_time_range(time_pt& time_p, duration_c& duration);
+    time_pt get_current_time() { return curr_time; }
 
     //helper function to check if a time point is within the Time unit time range
     // Create a new time-slice, and make it the current time-slice,

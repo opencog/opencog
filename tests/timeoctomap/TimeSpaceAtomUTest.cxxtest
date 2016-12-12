@@ -68,10 +68,10 @@ public:
         double res=0.1;//0.2 failed
         TimeOctomap tsa(3,res,std::chrono::seconds(10));  // create empty tree with resolution 0.1
         time_pt t1;//=std::chrono::system_clock::now();
-        duration_c dd;//=std::chrono::seconds(10);
+        duration_c dd;
         tsa.step_time_unit();
-        tsa.get_current_time_range(t1,dd);
-
+        t1 = tsa.get_current_time();
+        dd = tsa.get_time_resolution();
 
         // insert some measurements of occupied cells
 

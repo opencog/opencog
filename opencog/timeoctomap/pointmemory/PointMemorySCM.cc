@@ -477,10 +477,7 @@ void PointMemorySCM::remove_all_ato(const string& map_name, Handle ato)
 bool
 PointMemorySCM::get_map_time(const string& map_name, int elapse, time_pt& tpt)
 {
-    duration_c dr;
-    if (!tsa[map_name]->get_current_time_range(tpt, dr))
-        return false;
-    tpt -= std::chrono::milliseconds(elapse);
+    tpt = tsa[map_name]->get_current_time() - std::chrono::milliseconds(elapse);
     return true;
 }
 // Spatial query api assuming 1 atom in 1 map at 1 location.
