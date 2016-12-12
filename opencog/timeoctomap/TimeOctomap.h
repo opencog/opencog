@@ -46,12 +46,9 @@
 #include <algorithm>
 #include <cmath>
 #include "AtomOcTree.h"
-//#include "AtomOcTreeNode.h"
+
 using namespace std;
 using namespace octomap;
-//high_resolution_clock
-//typedef std::chrono::high_resolution_clock::time_point time_pt;
-//typedef std::chrono::high_resolution_clock::duration duration_c;
 
 typedef std::chrono::system_clock::time_point time_pt;
 typedef std::chrono::system_clock::duration duration_c;
@@ -62,26 +59,25 @@ typedef list<time_pt> time_list;
 #define TOUCH_ANGLE DEG2RAD(10.0)
 #define NEAR_ANGLE DEG2RAD(20.0)
 
-//data structures
 struct TimeUnit
 {
-    time_pt t; duration_c duration;
+    time_pt t;
+    duration_c duration;
     AtomOcTree map_tree;
-    TimeUnit(time_pt tp, duration_c d): t(tp), duration(d)
-    {}
+    TimeUnit(time_pt tp, duration_c d): t(tp), duration(d) {}
+
     bool operator==(time_pt tp)
     {
-        return ((tp >= t) && (tp <= (t + duration)));
+        return (tp >= t and tp <= t + duration);
     }
 
     TimeUnit& operator=(const TimeUnit& tu)
     {
-        t=tu.t; duration=tu.duration;
+        t = tu.t;
+        duration = tu.duration;
         map_tree.clear();
         return *this;
     }
-
-    //>,< not needed as only == search happens although created buffer should always be sorted, just simplifies a bit over search speed cost
 };
 
 class TimeOctomap
