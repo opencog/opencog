@@ -1,6 +1,16 @@
 ;
 ; time-map.scm
 ;
+; Functions that localize the current person who is speaking --
+; these assign a face-id to the "who spoke" state, based on the
+; direction the sound is coming from, as compared to the position
+; of the face.
+;
+; XXX FIXME -- some of the below should be handled as psi-rules,
+; instead of being hard-coded, here.  That is, we are interested
+; in the locations of sound events in general, not just for determing
+; who is speaking.
+;
 ; Copyright 2016 Hanson Robotics
 ;
 (use-modules (srfi srfi-1) )
