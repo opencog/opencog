@@ -15,25 +15,32 @@
     (cons s bv)
 )
 
-(define (call-chatscript msg)
-    ; Returns a pair -- the socket and the byte-vector (the reply generated)
-    (define rtn (send-to-chatscript msg))
-    (define s (car rtn))
-    (define bv (cdr rtn))
+(define (call-chatscript)
+    (State chatscript process-started)
 
-    (recv! s bv)
+    (begin-thread
+        ; Returns a pair -- the socket and the byte-vector (the reply generated)
+        (define rtn (send-to-chatscript (cog-name (get-input-text-node))))
+        (define s (car rtn))
+        (define bv (cdr rtn))
 
-    ; TODO: Store in the AtomSpace
-    (display (utf8->string bv))
-    (newline)
+        (recv! s bv)
 
-    (shutdown s 2)
+        ; TODO: Store in the AtomSpace
+        (display (utf8->string bv))
+        (newline)
+
+        ; TODO: Parse the reply?
+        (State chatscript-reply (List (map Word (string-split (utf8->string bv) #\ ))))
+        (State chatscript process-finished)
+
+        (shutdown s 2)
+    )
 )
 
 (define-public (setup-chatscript robot)
     (shutdown (car (send-to-chatscript (string-append ":build " robot))) 2)
 )
 
+; TODO: Move to HR
 (setup-chatscript "han")
-(call-chatscript "what is your name")
-(call-chatscript "how old are you")

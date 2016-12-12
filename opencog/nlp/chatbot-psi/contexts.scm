@@ -262,6 +262,21 @@
 )
 
 (Define
+    (DefinedPredicate "chatscript-not-started?")
+    (process-not-started? chatscript)
+)
+
+(Define
+    (DefinedPredicate "chatscript-finished?")
+    (process-finished? chatscript)
+)
+
+(Define
+    (DefinedPredicate "is-chatscript-reply?")
+    (any-result? chatscript-reply)
+)
+
+(Define
     (DefinedPredicate "duckduckgo-not-started?")
     (process-not-started? duckduckgo)
 )

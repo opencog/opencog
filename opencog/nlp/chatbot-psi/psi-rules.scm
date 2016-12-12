@@ -130,6 +130,59 @@
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
+            (DefinedPredicate "chatscript-not-started?")
+            (DefinedPredicate "is-input-utterance?")
+            (SequentialOr
+                (Not (DefinedPredicate "input-type-is-imperative?"))
+                (DefinedPredicate "don't-know-how-to-do-it?"))
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: call-chatscript") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "chatscript"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "chatscript-finished?")
+            (DefinedPredicate "is-chatscript-reply?")
+            (SequentialOr
+                (DefinedPredicate "input-is-about-the-robot?")
+                (Not (DefinedPredicate "input-is-a-question?")))
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List chatscript-reply)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "chatscript"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "chatscript-finished?")
+            (DefinedPredicate "is-chatscript-reply?")
+            (DefinedPredicate "input-is-a-question?")
+            (Not (DefinedPredicate "input-is-about-the-robot?"))
+            (DefinedPredicate "no-good-fast-answer?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List chatscript-reply)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "chatscript"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
             (DefinedPredicate "duckduckgo-not-started?")
             (DefinedPredicate "is-input-utterance?")
             (DefinedPredicate "input-is-a-question?")
