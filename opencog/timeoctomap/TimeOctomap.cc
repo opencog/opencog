@@ -265,67 +265,49 @@ bool TimeOctomap::get_oldest_time_locations_atom_observed(const Handle& ato,
                                             const time_pt& from_d,
                                             point3d_list& result)
 {
-  time_pt tpt;
-  if (!get_oldest_time_elapse_atom_observed(ato,from_d,tpt)) return false;
-  result=get_locations_of_atom_occurence_at_time(tpt,ato);
-  //std::cout << result.size()<<"\n ";//<<from_d;
-  //std::time_t ttp=std::chrono::system_clock::to_time_t(tpt);
-  //char buff[31];
-  //strftime(buff, 30, "%Y-%m-%d %H:%M:%S ", std::localtime(&ttp));
-  //string ts(buff);
-  //std::cout << ts <<endl;
-  if (result.size()<1)return false;
-  return true;
+    time_pt tpt;
+    if (!get_oldest_time_elapse_atom_observed(ato, from_d, tpt))
+        return false;
+    result = get_locations_of_atom_occurence_at_time(tpt, ato);
+    if (0 == result.size()) return false;
+    return true;
 }
 
 bool TimeOctomap::get_last_time_elapse_atom_observed(const Handle& ato,
                                             const time_pt& from_d,
                                             time_pt& result)
 {
-    time_list tl=get_times_of_atom_occurence_in_map(ato);
-    //sort
-    int sz=tl.size();
-    if (sz<1)
-        return false;
+    time_list tl = get_times_of_atom_occurence_in_map(ato);
+    if (0 == tl.size()) return false;
+
+    // XXX FIXME -- when would this ever NOT be sorted??
     tl.sort();
-    if ((from_d>tl.back())&&(!is_time_point_in_range(from_d,tl.back(),curr_duration)))
-        return false;
-    result=tl.back();
-    return true;
-    /*
-    for (int i=0;i<sz;i++)
+    if (from_d > tl.back() and
+        not is_time_point_in_range(from_d,tl.back(),curr_duration))
     {
-       result=tl.back();
-       tl.pop_back();
-       if (result<=till_d)
-       {
-         return true;
-       }
+        return false;
     }
-    return false;
-    */
+    result = tl.back();
+    return true;
 }
 
 bool TimeOctomap::get_last_time_before_elapse_atom_observed(const Handle& ato,
                                             const time_pt& till_d,
                                             time_pt& result)
 {
-    time_list tl=get_times_of_atom_occurence_in_map(ato);
-    //sort
-    int sz=tl.size();
-    if (sz<1)
-        return false;
+    time_list tl = get_times_of_atom_occurence_in_map(ato);
+    if (0 == tl.size()) return false;
     tl.sort();
-    if (till_d<tl.front())
-        return false;
-    for (int i=0;i<sz;i++)
+
+    if (till_d < tl.front()) return false;
+
+    for (auto& tp : tl)
     {
-       result=tl.back();
-       tl.pop_back();
-       if (result<=till_d)
-       {
-         return true;
-       }
+        if (tp <= till_d)
+        {
+            result = tp;
+            return true;
+        }
     }
     return false;
 }
@@ -335,14 +317,14 @@ bool TimeOctomap::get_last_locations_of_atom_observed(const Handle& ato,
                                             point3d_list& result)
 {
   time_pt tpt;
-  if (!get_last_time_elapse_atom_observed(ato, till_d, tpt)) return false;
+  if (not get_last_time_elapse_atom_observed(ato, till_d, tpt))
+     return false;
   result = get_locations_of_atom_occurence_at_time(tpt, ato);
-  if (result.size() < 1)return false;
+  if (0 == result.size())return false;
   return true;
 }
 
-point3d_list
-TimeOctomap::get_locations_of_atom_occurence_now(
+point3d_list TimeOctomap::get_locations_of_atom_occurence_now(
                                               const Handle& ato)
 {
     OC_ASSERT(created_once);
@@ -351,12 +333,12 @@ TimeOctomap::get_locations_of_atom_occurence_now(
     int i = time_circle.capacity() - 1;
     if (time_circle.size() < time_circle.capacity())
         i = time_circle.size() - 1;
-    for(AtomOcTree::tree_iterator it =
+    for (AtomOcTree::tree_iterator it =
         time_circle[i].map_tree.begin_tree(),
         end = time_circle[i].map_tree.end_tree();
         it != end;
-        ++it) {
-        //
+        ++it)
+    {
         if (it->getData() == ato)
             pl.push_back(it.getCoordinate());
     }
