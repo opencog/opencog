@@ -6,6 +6,7 @@
 (define cs-username "opencog")
 (define cs-bot-name "rose")
 
+; Send a message to the ChatScript server
 (define (send-to-chatscript msg)
     (define bv (make-bytevector 10000))
     (define s (socket AF_INET SOCK_STREAM 6))
@@ -15,6 +16,7 @@
     (cons s bv)
 )
 
+; Send the input to the ChatScript server and store the reply into the AtomSpace
 (define (call-chatscript)
     (State chatscript process-started)
 
@@ -26,10 +28,6 @@
 
         (recv! s bv)
 
-        ; TODO: Store in the AtomSpace
-        (display (utf8->string bv))
-        (newline)
-
         ; TODO: Parse the reply?
         (State chatscript-reply (List (map Word (string-split (utf8->string bv) #\ ))))
         (State chatscript process-finished)
@@ -38,9 +36,8 @@
     )
 )
 
-(define-public (setup-chatscript robot)
+; Initial setup for the ChatScript server, to load different set of rules for
+; different robots
+(define-public (chatscript-setup robot)
     (shutdown (car (send-to-chatscript (string-append ":build " robot))) 2)
 )
-
-; TODO: Move to HR
-(setup-chatscript "han")
