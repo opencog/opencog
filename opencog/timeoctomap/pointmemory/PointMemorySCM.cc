@@ -99,7 +99,7 @@ public:
     // Remove atom from location at currrent time
     bool remove_location_ato(const std::string&, double x, double y, double z);
     // Remove atom from location at elapsed past time
-    bool remove_past_location_ato(const std::string&, int elapse,
+    void remove_past_location_ato(const std::string&, int elapse,
          double x, double y, double z);
     // Remove all specific atoms from map at current time
     void remove_curr_ato(const std::string&, Handle ato);
@@ -442,7 +442,8 @@ bool PointMemorySCM::remove_past_location_ato(const string& map_name, int elapse
          double x, double y, double z)
 {
     time_pt tpt = get_map_time(map_name, elapse);
-    return tsa[map_name]->remove_atom_at_time_by_location(tpt, point3d(x, y, z));
+    tsa[map_name]->remove_atom_at_time_by_location(tpt, point3d(x, y, z));
+    return true;
 }
 
 void PointMemorySCM::remove_curr_ato(const string& map_name, Handle ato)
