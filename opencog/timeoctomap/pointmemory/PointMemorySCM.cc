@@ -344,12 +344,7 @@ Handle PointMemorySCM::get_past_loc_ato(const string& map_name, int elapse,
                             double x, double y, double z)
 {
     time_pt tpt = get_map_time(map_name, elapse);
-
-    time_pt tp;
-    Handle ato;
-    if (tsa[map_name]->get_atom_at_time_by_location(tpt, point3d(x, y, z), ato))
-        return ato;
-    return UndefinedHandle;
+    return tsa[map_name]->get_atom_at_time_by_location(tpt, point3d(x, y, z));
 }
 
 // Tag an atom with SetLink of locations (AtLocationLink)

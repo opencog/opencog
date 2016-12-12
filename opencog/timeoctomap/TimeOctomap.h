@@ -126,8 +126,7 @@ public:
     // Get atom at the given location in the current time-slice.
     Handle get_atom_at_location(const point3d&);
 
-    bool get_atom_at_time_by_location(const time_pt&,
-                       const point3d&, Handle& ato);
+    Handle get_atom_at_time_by_location(const time_pt&, const point3d&);
     time_list get_times_of_atom_occurence_at_location(
                                                const point3d&,
                                                const Handle& ato);

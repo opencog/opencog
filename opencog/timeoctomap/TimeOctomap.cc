@@ -166,22 +166,16 @@ Handle TimeOctomap::get_atom_at_location(const point3d& location)
     return (static_cast<AtomOcTreeNode*>(result))->getData();
 }
 
-bool
-TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
-                             const point3d& location, Handle& ato)
+Handle TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
+                                                 const point3d& location)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    //find time in time circle time unit
     auto it = find(time_p);
-    if (it == nullptr) return false;
+    if (it == nullptr) return Handle();
     OcTreeNode* result = it->map_tree.search(location);
-    if (result == nullptr) {
-        ato = UndefinedHandle;
-        return false;
-    }
-    ato = (static_cast<AtomOcTreeNode*>(result))->getData();
-    if (ato == UndefinedHandle) return false;
-    return true;
+    if (result == nullptr) return Handle();
+
+    return (static_cast<AtomOcTreeNode*>(result))->getData();
 }
 
 time_list
@@ -191,7 +185,8 @@ TimeOctomap::get_times_of_atom_occurence_at_location(
 {
     std::lock_guard<std::mutex> lgm(mtx);
     time_list tl;
-    for(auto tu = std::begin(time_circle), end = std::end(time_circle); (tu != end); tu++) {
+    for (auto tu = std::begin(time_circle), end = std::end(time_circle); (tu != end); tu++)
+    {
         OcTreeNode* result = tu->map_tree.search(location);
         if (result == nullptr) {
             cout << "null ret by search" << endl;
