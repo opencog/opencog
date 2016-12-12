@@ -264,16 +264,13 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const Handle& ato,
     return false;
 }
 
-bool TimeOctomap::get_oldest_time_locations_atom_observed(const Handle& ato,
-                                            const time_pt& from_d,
-                                            point3d_list& result)
+point3d_list TimeOctomap::get_oldest_locations(const Handle& ato,
+                                            const time_pt& from_d)
 {
     time_pt tpt;
-    if (!get_oldest_time_elapse_atom_observed(ato, from_d, tpt))
-        return false;
-    result = get_locations_of_atom_at_time(tpt, ato);
-    if (0 == result.size()) return false;
-    return true;
+    if (not get_oldest_time_elapse_atom_observed(ato, from_d, tpt))
+        return point3d_list();
+    return get_locations_of_atom_at_time(tpt, ato);
 }
 
 bool TimeOctomap::get_last_time_elapse_atom_observed(const Handle& ato,

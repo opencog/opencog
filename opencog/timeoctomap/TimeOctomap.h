@@ -154,9 +154,7 @@ public:
                                                   const time_pt& till_d,
                                                   time_pt& result);
 
-    bool get_oldest_time_locations_atom_observed(const Handle& ato,
-                                                const time_pt& from_d,
-                                                point3d_list& result);
+    point3d_list get_oldest_locations(const Handle&, const time_pt&);
     bool get_last_locations_of_atom_observed(const Handle& ato,
                                                           const time_pt& till_d,
                                                           point3d_list& result);
