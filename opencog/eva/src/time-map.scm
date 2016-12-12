@@ -15,13 +15,16 @@
 (define new-person-spoke 0)
 
 ; --------------------------------------------------------------------
-; For recording facial coordinates, create octomap with 15hz,
-; 10 second or 150 frames buffer and 1 cm spatial resolution.
+; Create an opencog space-time map, for storing locations of faces.
+; This map will be udates every 66 millisdeconds (about 15 Hz), and
+; will buffer 150 frames (about 10 seconds), and work with a one
+; centimeter resolution (the native coords of the map are meters).
 (create-map "faces" 0.01 66 150)
-; Initialize  the map
-(step-time-unit "faces")
-; Make the stepping take place automatically
+
+; Run the map in a new thread. This will autoamtically create a new
+; time-slice every 66 milliseconds.
 (auto-step-time-on "faces")
+
 ; time-span is the amount of time in milliseconds to be considered
 ; for locating a face. The time limit for spatial memory for faces :-).
 ; The value is dependent on the frequency of update of the map and
@@ -117,9 +120,16 @@
 )
 
 ; ---------------------------------------------------------------------
-;; Returns null string if atom not found, number x y z string if okay.
-;; These functions assume only one location for one atom in a map at
-;; a time.
+;; Given the atom `id-node`, this fetches the last known location
+;; (3D xyz coordinates) for that atom in the map `map-name`.
+;; The `elapse` parameter should be how many millisconds in the past
+;; that the query should be made.
+;;
+;; Returns a list of three floating-point numbers, or a null list
+;; if the atom is not found.
+;;
+;; This function assumes that an atom can have only one location at a
+;; time.
 (define (get-last-xyz map-name id-node elapse)
 	(let* ((loc-atom (get-last-locs-ato map-name id-node elapse) ))
 		(if (cog-atom? loc-atom)
@@ -133,7 +143,7 @@
 	)
 )
 
-;;scm code
+;; Get the xyz coords, as a list, for `face-id-node`
 (define (get-face face-id-node e-start)
 	(get-last-xyz "faces" face-id-node (round e-start))
 )
