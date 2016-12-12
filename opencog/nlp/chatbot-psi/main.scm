@@ -22,6 +22,7 @@
 (load "external-sources.scm")
 (load "random-sentence-generator.scm")
 (load "pln-actions.scm")
+(load "chatscript.scm")
 
 ; Load the psi-rules
 (load "psi-rules.scm")
