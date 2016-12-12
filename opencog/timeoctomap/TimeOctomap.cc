@@ -357,14 +357,14 @@ TimeOctomap::find(const time_pt& time_p)
 
 point3d_list
 TimeOctomap::get_locations_of_atom_occurence_at_time(const time_pt& time_p,
-                                                       const Handle& ato)
+                                                     const Handle& ato)
 {
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
     point3d_list pl;
     TimeUnit * it = find(time_p);
     if (it == nullptr) return point3d_list();
-    for(AtomOcTree::tree_iterator ita =
+    for (AtomOcTree::tree_iterator ita =
         it->map_tree.begin_tree(),
         end = it->map_tree.end_tree();
         ita != end;

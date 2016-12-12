@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 2016, Mandeep Singh Bhatia, OpenCog Foundation
  * All rights reserved.
  * License: AGPL
@@ -166,14 +165,14 @@ public:
         cout<<pl.size()<<endl;
         TS_ASSERT_EQUALS(pl.size(),0);
 
-        cout<<"adding units.."<<endl;
-        TS_ASSERT(tsa.step_time_unit());
-        TS_ASSERT(tsa.step_time_unit());
-        TS_ASSERT(tsa.step_time_unit());
+        cout << "adding units.." << endl;
+        tsa.step_time_unit();
+        tsa.step_time_unit();
+        tsa.step_time_unit();
 
-        cout<<"get locations at time:";
-        pl=tsa.get_locations_of_atom_occurence_at_time(t1,testHandle);
-        cout<<pl.size()<<endl;
+        cout << "get locations at time:";
+        pl = tsa.get_locations_of_atom_occurence_at_time(t1, testHandle);
+        cout << pl.size()<<endl;
         TS_ASSERT_EQUALS(pl.size(),0);
         /*
           cout<<"removing atom=21"<<endl;

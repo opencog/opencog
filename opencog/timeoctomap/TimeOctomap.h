@@ -192,8 +192,9 @@ public:
     }
     TimeUnit *find(const time_pt& time_p);
 private:
-    //each map may have translation rotation (orientation) co-ordinates managed by user
-    double map_res; //resolution of maps
+    // Each different map may have translation and rotation (orientation)
+    // co-ordinates managed by user
+    double map_res; // spetial resolution of the map
     duration_c time_res;
     boost::circular_buffer<TimeUnit> time_circle;
     time_pt curr_time;
