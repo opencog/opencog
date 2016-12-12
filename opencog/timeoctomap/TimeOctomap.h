@@ -117,6 +117,8 @@ public:
     // map.
     TimeSlice *find(const time_pt& time_p);
 
+    TimeSlice& get_current_timeslice();
+
     bool is_auto_step_time_on();
     void auto_step_time(bool astep);
 

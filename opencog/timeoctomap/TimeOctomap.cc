@@ -164,21 +164,27 @@ TimeOctomap::auto_timer()
         });
 }
 
+TimeSlice& TimeOctomap::get_current_timeslice()
+{
+    // XXX FIXME - can't we just use size() always ???
+    int i = time_circle.capacity() - 1;
+    if (time_circle.size() < time_circle.capacity())
+        i = time_circle.size() - 1;
+    return time_circle[i];
+}
+
 void TimeOctomap::insert_atom(const point3d& location, const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    int i = time_circle.capacity() - 1;
-    if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-
-    time_circle[i].insert_atom(location, ato);
+    TimeSlice& tu = get_current_timeslice();
+    tu.insert_atom(location, ato);
 }
 
 void TimeOctomap::remove_atoms_at_location(const point3d& location)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    int i = time_circle.capacity() - 1;
-    if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-    time_circle[i].remove_atoms_at_location(location);
+    TimeSlice& tu = get_current_timeslice();
+    tu.remove_atoms_at_location(location);
 }
 
 void TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
@@ -193,10 +199,8 @@ void TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
 Handle TimeOctomap::get_atom_at_location(const point3d& location)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    int i = time_circle.capacity() - 1;
-    if (time_circle.size() < time_circle.capacity()) i = time_circle.size() - 1;
-
-    return time_circle[i].get_atom_at_location(location);
+    TimeSlice& tu = get_current_timeslice();
+    return tu.get_atom_at_location(location);
 }
 
 Handle TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
@@ -323,12 +327,8 @@ point3d_list TimeOctomap::get_newest_locations(const Handle& ato,
 point3d_list TimeOctomap::get_locations_of_atom(const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    point3d_list pl;
-    int i = time_circle.capacity() - 1;
-    if (time_circle.size() < time_circle.capacity())
-        i = time_circle.size() - 1;
-
-    return time_circle[i].get_locations(ato);
+    TimeSlice& tu = get_current_timeslice();
+    return tu.get_locations(ato);
 }
 
 TimeSlice *
@@ -352,11 +352,8 @@ void
 TimeOctomap::remove_atom_at_current_time(const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
-    int i = time_circle.capacity() - 1;
-    if (time_circle.size() < time_circle.capacity())
-        i = time_circle.size() - 1;
-
-    time_circle[i].remove_atom(ato);
+    TimeSlice& tu = get_current_timeslice();
+    tu.remove_atom(ato);
 }
 
 void
