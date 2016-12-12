@@ -89,10 +89,11 @@
 "
   make-mapped-face FACE-ID X Y Z
 
-  FACE-ID is a number that represents the face ID, and RECOG-ID is a number that
-  represents the recognition ID. X, Y and Z are the coordinate numbers
-  associated with the face that represented by FACE-ID. It returns the atomese
-  representation of a visible face that was added to the octomap.
+  FACE-ID should be an integer, the face ID.
+  X, Y and Z are the 3D coordinates of the face.
+  This returns the atomese representation of a visible face.
+
+  XXX FIXME -- this is wrong. Should split into two aprts.
 "
 	(map-ato "faces" (NumberNode face-id (av 5 0 0)) x y z)
 	(make-new-face (number->string face-id))
@@ -124,7 +125,8 @@
 
   If RECOG-ID is `0` then it is an unrecognized face.
 "
-	(make-mapped-face face-id x y z)
+	(map-ato "faces" (NumberNode face-id (av 5 0 0)) x y z)
+	(make-new-face (number->string face-id))
 	(make-recognized-face face-id recog-id)
 )
 
