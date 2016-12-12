@@ -211,6 +211,10 @@
 
 ;; This needs to be define-public, so that ros-bridge can send this
 ;; to the cogserver.
+;; XXX TODO -- this should eventually be a psi-rule, so that we can
+;; associate spoken sounds with speakers, but also know the locations
+;; of loud sounds.  That is, the time-server needs to get sound
+;; direction, no matter what.
 (define-public (map-sound xx yy zz)
 	(let* ((fid (snd-nearest-face xx yy zz)))
 		(if (> fid 0)

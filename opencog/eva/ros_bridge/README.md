@@ -38,18 +38,30 @@ to the Cogserver.  Some specifics:
 ## Audio:
  * Sudden changes in loudness, e.g. bangs crashes, shouts, claps.
  * Audio power:
-   ** loud noises: clapping hands, loud background noises (construction
+    * loud noises: clapping hands, loud background noises (construction
       machinery, convention-hall chaos, street traffic), laughing,
       cheering, whistling, booing.
-   ** normal volume: speech, background music, background muttering,
-   ** quiet sounds: squeaking chairs, footsteps, whispering, wind noise,
+    * normal volume: speech, background music, background muttering,
+    * quiet sounds: squeaking chairs, footsteps, whispering, wind noise,
       rustling leaves, distant traffic, distant children playing, etc.
-  * Audio frequency:
-   ** High piches: whistling, motorcycle whines.
-   ** Low frequency: rumbling trucks, construction.
-  * Sound localization:
-   ** What direction is the sound coming from?
-  * References:
+ * Audio frequency:
+    * High piches: whistling, motorcycle whines.
+    * Low frequency: rumbling trucks, construction.
+    * Fundammental frequency of voice - this helps distinguish male and
+      female speakers.
+    * Voice rising and falling pitch - is the speaker excited?
+      Distracted? Bored? Sad? Shy?
+ * Audio chaos:
+    * Are there lots of rapid sound changes (typical of voices)?
+    * Length of pauses in speech: is speech rapid and clipped, or slow?
+    * Is speech being interrupted by other noises?
+    * Is there drumming, tapping?
+    * Is there fairly quiet but chatoic noise in the backgground
+      (e.g. people talking in another room)?
+ * Sound localization:
+    * What direction is the sound coming from?
+    * loud-bang-noise -- what direction was it from?
+ * References:
     - [Root Mean Square (RMS)](http://www.gaussianwaves.com/2015/07/significance-of-rms-root-mean-square-value/)
     - [Frequency Detection] (https://gist.github.com/endolith/255291)
 
@@ -63,9 +75,9 @@ pretty ROS rosrun, config, setup.py stuff in it yet.  Its a quick hack.
 TODO
 ----
 Maybe the `pi_vision` subsystem should be replaced by this:
-http://wiki.ros.org/face_detection_tracking
-https://github.com/phil333/face_detection
-http://www.phil.lu/?page_id=328
+* http://wiki.ros.org/face_detection_tracking
+* https://github.com/phil333/face_detection
+* http://www.phil.lu/?page_id=328
 
 
 Design discussion

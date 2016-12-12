@@ -45,13 +45,18 @@ class AtomicMsgs:
 
 	# Add a newly visible face to the atomspace.
 	def add_face_to_atomspace(self, faceid):
-		face = self.define_face(faceid)
+		face = "(EvaluationLink (PredicateNode \"visible face\") " + \
+		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n"
 		netcat(self.hostname, self.port, face)
 		print "New visible face in atomspace: ", faceid
 
 	# Focus attention on specific face.
+	# Build string to force attention to focus on the requested face.
+	# This bypasses the normal "new face is visible" sequence, and
+	# immediately shifts Eva's attention to this face.
 	def add_tracked_face_to_atomspace(self, faceid):
-		face = self.set_tracked_face(faceid)
+		face = '(StateLink request-eye-contact-state (NumberNode "' + \
+		       str(faceid) + '"))\n'
 		netcat(self.hostname, self.port, face)
 		print "Force focus of attention on face: ", faceid
 
@@ -62,20 +67,6 @@ class AtomicMsgs:
 		msg = self.delete_face(faceid)
 		netcat(self.hostname, self.port, msg)
 		print "Removed face from atomspace: ", faceid
-
-	# Build a simple string to define a face
-	def define_face(self, faceid):
-		face = "(EvaluationLink (PredicateNode \"visible face\") " + \
-		       "(ListLink (NumberNode \"" + str(faceid) + "\")))\n\n"
-		return face
-
-	# Build string to force attention to focus on the requested face.
-	# This bypasses the normal "new face is visible" sequence, and
-	# immediately shifts Eva's attention to this face.
-	def set_tracked_face(self, faceid):
-		face = '(StateLink request-eye-contact-state (NumberNode "' + \
-		       str(faceid) + '"))\n'
-		return face
 
 	# Build string to delete the face, and also to garbage-collect
 	# the ListLink and NumberNode.  In the long run, explicit deletes
@@ -145,6 +136,23 @@ class AtomicMsgs:
 
 	# Louds bands, explosions, hand-claps, shouts.
 	def audio_bang(self, decibel):
-		loud = '(StateLink (AnchorNode \"Sudden sound change value\")' + \
+		loud = '(StateLink (AnchorNode "Sudden sound change value")' + \
 			'(NumberNode ' + str(decibel) + '))\n'
 		netcat(self.hostname, self.port, loud)
+
+	#saliency location
+	#Degree of the salient point
+	def saliency(self,x,y,z,deg):
+		sal = '(StateLink (AnchorNode "locations")' + \
+			'(List (NumberNode '+ str(x)+ ')' + \
+			'(NumberNode '+ str(y)+ ')' + \
+			'(NumberNode '+ str(z) + ')))\n' + \
+			'(StateLink (AnchorNode "Degree value")' + \
+			'(NumberNode '+ str(deg)+'))\n'
+		netcat(self.hostname,self.port,sal)
+
+	#room luminance <=25 - dark, <=40 - normal, >40 - bright
+	def room_brightness(self,bright):
+		room = '(StateLink (AnchorNode "luminance")' +\
+			' (NumberNode ' + str(bright) +'))\n'
+		netcat(self.hostname,self.port,room)

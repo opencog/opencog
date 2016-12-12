@@ -122,9 +122,9 @@
 	(DefinedPredicate "Salient:Curious")
 	face-demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (DefinedPredicate "Room bright?"))
-	(DefinedPredicate "Bright:happy")
-	face-demand-satisfied (stv 1 1) face-demand)
+;(psi-rule (list (DefinedPredicate "Room bright?"))
+;	(DefinedPredicate "Bright:happy")
+;	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (DefinedPredicate "Heard Something?"))
 	(DefinedPredicate "React to Sound")
@@ -135,4 +135,3 @@
 (psi-rule (list (DefinedPredicate "ROS is running?"))
 	(DefinedPredicate "update-web-ui")
 		update-demand-satisfied (stv 1 1) update-demand)
-
