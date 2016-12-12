@@ -143,7 +143,7 @@ TimeOctomap::auto_timer()
 }
 
 bool
-TimeOctomap::put_atom_at_current_time(const point3d location,
+TimeOctomap::put_atom_at_current_time(const point3d& location,
                                       const opencog::Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
@@ -158,7 +158,7 @@ TimeOctomap::put_atom_at_current_time(const point3d location,
 
 bool
 TimeOctomap::remove_atom_at_current_time_by_location(
-                                       const point3d location)
+                                       const point3d& location)
 {
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
@@ -171,7 +171,7 @@ TimeOctomap::remove_atom_at_current_time_by_location(
 
 bool
 TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
-                                const point3d location)
+                                const point3d& location)
 {
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
@@ -188,7 +188,7 @@ TimeOctomap::remove_atom_at_time_by_location(time_pt tp,
 
 bool
 TimeOctomap::get_atom_current_time_at_location(
-                                  const point3d location, opencog::Handle& ato)
+                                  const point3d& location, opencog::Handle& ato)
 {
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
@@ -206,7 +206,7 @@ TimeOctomap::get_atom_current_time_at_location(
 
 bool
 TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
-                             const point3d location, opencog::Handle& ato)
+                             const point3d& location, opencog::Handle& ato)
 {
     OC_ASSERT(created_once);
     std::lock_guard<std::mutex> lgm(mtx);
@@ -215,7 +215,7 @@ TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
     auto it = std::find(std::begin(time_circle), std::end(time_circle), time_p); //time_circle.begin(),time_circle.end()
     if (it == std::end(time_circle)) return false;
     */
-    auto it = find (time_p);
+    auto it = find(time_p);
     if (it == nullptr) return false;
     OcTreeNode* result = it->map_tree.search(location);
     if (result == nullptr) {
@@ -225,11 +225,11 @@ TimeOctomap::get_atom_at_time_by_location(const time_pt& time_p,
     ato = (static_cast<AtomOcTreeNode*>(result))->getData();
     if (ato == UndefinedHandle) return false;
     return true;
-}//ok
+}
 
 time_list
 TimeOctomap::get_times_of_atom_occurence_at_location(
-                                                 const point3d location,
+                                                 const point3d& location,
                                                  const opencog::Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);

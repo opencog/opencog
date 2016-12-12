@@ -107,20 +107,20 @@ public:
     bool is_auto_step_time_on();
     void auto_step_time(bool astep);
     //store an atom at coordinates in map
-    bool put_atom_at_current_time(const point3d location,
+    bool put_atom_at_current_time(const point3d& location,
                               const opencog::Handle& ato);
-    bool remove_atom_at_current_time_by_location(const point3d location);
-    bool remove_atom_at_time_by_location(time_pt tp,const point3d location);
+    bool remove_atom_at_current_time_by_location(const point3d& location);
+    bool remove_atom_at_time_by_location(time_pt tp, const point3d& location);
     void remove_atom_at_current_time(const opencog::Handle& ato);
-    void remove_atom_at_time(const time_pt& time_p,const opencog::Handle& ato);
+    void remove_atom_at_time(const time_pt& time_p, const opencog::Handle& ato);
     void remove_atom(const opencog::Handle& ato);
     //get atom at current time unit
-    bool get_atom_current_time_at_location(const point3d location,
+    bool get_atom_current_time_at_location(const point3d& location,
                             opencog::Handle& ato);
     bool get_atom_at_time_by_location(const time_pt& time_p,
-                       const point3d location, opencog::Handle& ato);
+                       const point3d& location, opencog::Handle& ato);
     time_list get_times_of_atom_occurence_at_location(
-                                               const point3d location,
+                                               const point3d& location,
                                                const opencog::Handle& ato);
     time_list get_times_of_atom_occurence_in_map(const opencog::Handle& ato);
     point3d_list get_locations_of_atom_occurence_now(const opencog::Handle& ato);
