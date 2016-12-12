@@ -495,12 +495,8 @@ TimeOctomap::remove_atom_at_time(const time_pt& time_p,
         }
     }
 
-    for (auto it3 = std::begin(pl), endit3 = std::end(pl);
-        it3 != endit3;
-        it3++)
-    {
-        tu->map_tree.deleteNode(*it3);
-    }
+    for (auto& p : pl)
+        tu->map_tree.deleteNode(p);
 }
 
 void
