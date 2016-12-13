@@ -64,10 +64,13 @@ struct TimeSlice
     AtomOcTree map_tree;
     TimeSlice(time_pt tp, duration_c d): t(tp), duration(d) {}
 
-    // Return true if time-point is within this interval.
+    /// Return true if time-point is within this interval.
+    /// The end-point is NOT considfrered to be a part of the interval,
+    /// and this is important: otherwise, a time-point could be in two
+    /// adjacent intervals, and this will mess up search queries.
     bool operator==(time_pt tp)
     {
-        return (tp >= t and tp <= t + duration);
+        return (t <= tp and tp < t + duration);
     }
 
     TimeSlice& operator=(const TimeSlice& tu)
@@ -142,7 +145,7 @@ public:
     time_list get_times_of_atom_occurence_at_location(
                                                const point3d&,
                                                const Handle& ato);
-    time_list get_times_of_atom_occurence_in_map(const Handle& ato);
+    time_list get_timeline(const Handle&);
     point3d_list get_locations_of_atom(const Handle&);
     point3d_list get_locations_of_atom_at_time(const time_pt&,
                                                          const Handle&);

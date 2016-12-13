@@ -99,7 +99,7 @@ public:
     Handle get_elapse_list_at_loc_ato(const std::string&, Handle ato,
               double x, double y, double z);//listlink atTimeLink
     // Get time points of atom occuring in map
-    Handle get_elapse_list_ato(const std::string&, Handle ato);//listlink atTimeLink
+    Handle get_timeline(const std::string&, Handle ato);//listlink atTimeLink
     // Remove atom from location at currrent time
     bool remove_location_ato(const std::string&, double x, double y, double z);
     // Remove atom from location at elapsed past time
@@ -205,7 +205,7 @@ void PointMemorySCM::init()
     define_scheme_primitive("get-locs-ato", &PointMemorySCM::get_locs_ato, this, "ato pointmem");// h_sh
     define_scheme_primitive("get-past-locs-ato", &PointMemorySCM::get_past_locs_ato, this, "ato pointmem");// h_shi
     define_scheme_primitive("get-elapse-list-at-loc-ato", &PointMemorySCM::get_elapse_list_at_loc_ato, this, "ato pointmem");// h_shddd
-    define_scheme_primitive("get-elapse-list-ato", &PointMemorySCM::get_elapse_list_ato, this, "ato pointmem");// h_sh
+    define_scheme_primitive("get-elapse-list-ato", &PointMemorySCM::get_timeline, this, "ato pointmem");// h_sh
     define_scheme_primitive("remove-location-ato", &PointMemorySCM::remove_location_ato, this, "ato pointmem");// b_sddd
     define_scheme_primitive("remove-past-location-ato", &PointMemorySCM::remove_past_location_ato, this, "ato pointmem");// b_siddd
     define_scheme_primitive("remove-curr-ato", &PointMemorySCM::remove_curr_ato, this, "ato pointmem");// v_sh
@@ -436,10 +436,12 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name,
     return opencog::Handle(createLink(SET_LINK, LL));
 }
 
-Handle PointMemorySCM::get_elapse_list_ato(const string& map_name, Handle ato)// listlink atTimeLink
+// Get the timeline of the atom.  That is, get a sequence of
+// time-points, at which the atom is in the map.
+Handle PointMemorySCM::get_timeline(const string& map_name, Handle ato)
 {
     if (not have_map(map_name)) return Handle();
-    time_list tl = tsa[map_name]->get_times_of_atom_occurence_in_map(ato);
+    time_list tl = tsa[map_name]->get_timeline(ato);
     HandleSeq LL;
     for (const time_pt& tp: tl)
         LL.push_back(timestamp_tag_atom(tp, ato));

@@ -1411,6 +1411,10 @@ aka
 (get-face 
 
 
+get_locations
+
+get_timeline
+
 
 (StateLink (ConceptNode "last person who spoke") (NumberNode 42))
 

@@ -87,9 +87,7 @@ point3d_list TimeSlice::get_locations(const Handle& ato)
         ++ita)
     {
         if (ita->getData() == ato)
-        {
             pl.push_back(ita.getCoordinate());
-        }
     }
     return pl;
 }
@@ -236,13 +234,18 @@ TimeOctomap::get_times_of_atom_occurence_at_location(
     return tl;
 }
 
-time_list TimeOctomap::get_times_of_atom_occurence_in_map(const Handle& ato)
+/// get_timeline - Get the sequence of points in time at which the
+/// atom appears in the map.  There will be one time-point for each
+/// time-slice in which the atom appears.
+time_list TimeOctomap::get_timeline(const Handle& ato)
 {
     std::lock_guard<std::mutex> lgm(mtx);
     time_list tl;
     for (auto& tu : time_circle)
     {
-        //go through all nodes and leafs of octomap to search atom
+        // Go through all nodes of the octomap, searching for the atom
+        // FIXME -- the octomap should provide this as a method.
+        // We should not have to search for this ourselves.
         for (auto& nod : tu.map_tree)
             if (nod.getData() == ato)
             {
@@ -259,7 +262,7 @@ bool TimeOctomap::get_oldest_time_elapse_atom_observed(const Handle& ato,
                                             const time_pt& from_d,
                                             time_pt& result)
 {
-    time_list tl = get_times_of_atom_occurence_in_map(ato);
+    time_list tl = get_timeline(ato);
 
     // XXX FIXME when/why would this ever NOT be sorted?
     tl.sort();
@@ -284,11 +287,18 @@ point3d_list TimeOctomap::get_oldest_locations(const Handle& ato,
     return get_locations_of_atom_at_time(tpt, ato);
 }
 
+/// get_last_time_elapse_atom_observed -- get the latest time that
+/// the atom was obsserved, as long as it was observed more recently
+/// than `from_d`.  XXX FIXME -- this is a kind-of pointless
+/// operation to do, as the user is quite capable of doing the math,
+/// themselves, to perform the subtraction.  So this method, and the
+/// others like it, should be removed from the API.  This will simplify
+/// the API a lot. todo -- fixme later.
 bool TimeOctomap::get_last_time_elapse_atom_observed(const Handle& ato,
                                             const time_pt& from_d,
                                             time_pt& result)
 {
-    time_list tl = get_times_of_atom_occurence_in_map(ato);
+    time_list tl = get_timeline(ato);
     if (0 == tl.size()) return false;
 
     // XXX FIXME -- when would this ever NOT be sorted??
@@ -305,7 +315,7 @@ bool TimeOctomap::get_last_time_before_elapse_atom_observed(const Handle& ato,
                                             const time_pt& till_d,
                                             time_pt& result)
 {
-    time_list tl = get_times_of_atom_occurence_in_map(ato);
+    time_list tl = get_timeline(ato);
     if (0 == tl.size()) return false;
     tl.sort();
 
