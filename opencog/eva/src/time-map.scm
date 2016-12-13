@@ -63,15 +63,29 @@
 ;; while the python `look_at_face_point` will turn the neck+head.
 ;;
 (define (look-turn-at-face FACE-ID-NODE PY-CMD)
+	;
+	; get-last-locs-ato returns a SetLink holding AtLocationLinks
+	; of the form below:
+	;
+	;    (AtLocationLink
+	;      (ObjectNode "faces")
+	;      (ListLink
+	;         (NumberNode "42.000000" (av 5 0 0))
+	;         (ListLink
+	;            (NumberNode "2.005000")
+	;            (NumberNode "1.005000")
+	;            (NumberNode "0.005000"))))
+	;
+	; Here, `map-name` is "faces"
+	; `id-node` is "(NumberNode 42)" (the face id)
+	;
 	(define loc-atom
-			(get-last-locs-ato "faces" FACE-ID-NODE face-loc-time-span))
-	; XXX TODO wtf is loc-atom? what is being erturned here? where
-	; is the get-last-locs-ato function documented?
-	(if (cog-atom? loc-atom)
-		(let* ((loc-link (car (cog-outgoing-set loc-atom)))
-				(xx (number->string (loc-link-x loc-link)))
-				(yy (number->string (loc-link-y loc-link)))
-				(zz (number->string (loc-link-z loc-link))))
+			(gar (get-last-locs-ato "faces" FACE-ID-NODE face-loc-time-span)))
+	; The SetLink might be empty, in which case loc-atom is null.
+	(if (not (null? loc-atom))
+		(let* ((xx (number->string (loc-link-x loc-atom)))
+				(yy (number->string (loc-link-y loc-atom)))
+				(zz (number->string (loc-link-z loc-atom))))
 			(python-eval
 				(string-append PY-CMD "(" xx "," yy "," zz ")"))
 			(stv 1 1)
@@ -160,7 +174,7 @@
 	; `id-node` is "(NumberNode 42)" (the face id)
 	;
 	(let* ((loc-atom (gar (get-last-locs-ato map-name id-node elapse))))
-		(if (cog-atom? loc-atom)
+		(if (not (null? loc-atom))
 			(let* ((xx (loc-link-x loc-atom))
 					(yy (loc-link-y loc-atom))
 					(zz (loc-link-z loc-atom)))
