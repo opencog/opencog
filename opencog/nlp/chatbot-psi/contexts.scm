@@ -311,6 +311,28 @@
     (any-result? wolframalpha-answer)
 )
 
+; Usually ChatScript is faster than the random sentence generator, so if the input has
+; some of the keywords that will trigger either the PKD or Kurzweil generator, do not
+; reply until the generator has finished or timeout
+(Define
+    (DefinedPredicate "has-random-sentence-generator-done-with-the-keywords?")
+    (Or (SequentialAnd
+            (DefinedPredicate "has-pkd-related-words?")
+            (DefinedPredicate "random-pkd-sentence-generated?"))
+        (SequentialAnd
+            (DefinedPredicate "has-kurzweil-related-words?")
+            (DefinedPredicate "random-kurzweil-sentence-generated?"))
+        (DefinedPredicate "no-other-fast-reply?")
+    )
+)
+
+(Define
+    (DefinedPredicate "no-random-sentence-generator-keywords?")
+    (Not (Or
+        (DefinedPredicate "has-pkd-related-words?")
+        (DefinedPredicate "has-kurzweil-related-words?")))
+)
+
 (Define
     (DefinedPredicate "is-random-pkd-sentence-generator-ready?")
     (setup-done? random-pkd-sentence-generator)
