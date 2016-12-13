@@ -776,44 +776,5 @@
 	(cog-set-tv! updater-continue-pred (stv 0 1))
 )
 
-(define (psi-get-number-values-for-vars . vars)
-"
-	Get the current numerical values for a list of psi-related internal
-	variables. This function is written for calling via the REST API interface,
-	so the list of variables consist of string values of the variable names
-	(rather than the variables themselves).
-
-	vars - psi-related variable names as string values (rest arguments)
-
-	Returns a JSON representation of key-value pairs in the form of
-	{var_name: value, var_name2: value, ... }
-	If a psi variable with varname is not defined, #f is returned for the value.
-"
-	(define return '())
-
-	; Internal function to add the variable value of varname to the return list
-	(define (append-var-value varname)
-		(define value)
-		(define var-node (Concept (string-append psi-prefix-str varname)))
-		; For now assuming sec alone represents the agent state, but can add
-		; code directly below if this gets changed.
-		;(if (psi-is-sec? var-node)
-		;    ; for SEC's, we want the value of the agent state for that SEC
-		;    (set! var-node (List
-		;        (ConceptNode "OpenPsi: agent-state") var-node)))
-		(set! value (psi-get-number-value var-node))
-		; If value is not set (iow, equal to #f), set it to null for javascript
-		; compatibility.
-		(if (eq? value #f)
-			(set! value "null"))
-		(set! return
-			(append return (list (format #f "\"~a\": ~a" varname value))))
-	)
-
-	(for-each append-var-value vars)
-
-	; return a string JSON object
-	(string-append "{" (string-join return ", ") "}")
-)
 
 
