@@ -125,7 +125,7 @@ public:
     // 2=ahead, 1=behind, 0=aligned, -1=unknown
     int get_target_is_front_back(const std::string&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
 private:
-    map<std::string, TimeOctomap*> tsa;
+    std::map<std::string, TimeOctomap*> tsa;
     time_pt get_map_time(const std::string&, int elapse);
 public:
     PointMemorySCM();
