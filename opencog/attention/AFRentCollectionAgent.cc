@@ -32,7 +32,6 @@
 
 #include "AFRentCollectionAgent.h"
 
-#include <chrono>
 #include <thread>
 //#define DEBUG
 #ifdef DEBUG
@@ -43,9 +42,8 @@ using namespace opencog;
 
 AFRentCollectionAgent::AFRentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
 {
-    af_sti_rent_rate = config().get_int("AF_STI_RENT_RATE", 1);
-    af_lti_rent_rate = config().get_int("AF_LTI_RENT_RATE", 1);
-    set_sleep_time(500);
+    update_cycle     = 1 / config().get_double("ECAN_AF_RENT_FREQUENCY", 2); // per second.
+    last_update      = high_resolution_clock::now();
 }
 
 AFRentCollectionAgent::~AFRentCollectionAgent() {
@@ -65,7 +63,11 @@ void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 
 void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
-    std::map<Handle, chrono_t<hr_clock>> new_last_update;
+    // calculate elapsed time Et
+    seconds elapsed_time = duration_cast<seconds>
+                           (high_resolution_clock::now() - last_update);
+    if (elapsed_time.count() <  update_cycle )
+        return;
 
     for (Handle& h : targetSet) {
         int sti = h->getAttentionValue()->getSTI();
@@ -73,26 +75,14 @@ void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
         int stiRent = calculate_STI_Rent();
         int ltiRent = calculate_LTI_Rent();
 
-        if (stiRent > sti)
-            stiRent = sti;
+        if (stiRent > sti) stiRent = sti;
+        if (ltiRent > lti) ltiRent = lti;
 
-        if (ltiRent > lti)
-            ltiRent = lti;
-
-        chrono_t<hr_clock>  now = hr_clock::now(); //seconds ago
-        double time = 1;
-
-        if(last_update.find(h) != last_update.end()){
-            chrono_d diff = now - last_update[h];
-            time = std::chrono::duration_cast<chrono_d>(diff).count();
-        }
-
-        h->setSTI(sti - stiRent*time);  // Assuming STI rent is rent/sec
-        h->setLTI(lti - ltiRent*time);
-
-        new_last_update[h] = now;
+        h->setSTI(sti - stiRent);  
+        h->setLTI(lti - ltiRent);
     }
 
-    last_update = new_last_update;
+    //update elapsed time
+    last_update = high_resolution_clock::now();
 }
 
