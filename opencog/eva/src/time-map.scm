@@ -44,6 +44,50 @@
 (define face-loc-time-span 8000) ; (8000 milliseconds or 8 seconds)
 
 ; ---------------------------------------------------------------------
+;; Given the atom `id-node`, this fetches the last known location
+;; (3D xyz coordinates) for that atom in the map `map-name`.
+;; The search will be made only in the most recent time interval of
+;; `elapse` millisconds.
+;;
+;; Returns a list of three floating-point numbers, or a null list
+;; if the atom is not found.
+;;
+;; This function assumes that an atom can have only one location at a
+;; time.
+(define (get-last-xyz map-name id-node elapse)
+	;
+	; get-last-locs-ato returns a SetLink holding AtLocationLinks
+	; of the form below:
+	;
+	;    (AtLocationLink
+	;      (ObjectNode "faces")
+	;      (ListLink
+	;         (NumberNode "42.000000" (av 5 0 0))
+	;         (ListLink
+	;            (NumberNode "2.005000")
+	;            (NumberNode "1.005000")
+	;            (NumberNode "0.005000"))))
+	;
+	; Here, `map-name` is "faces"
+	; `id-node` is "(NumberNode 42)" (the face id)
+	;
+	(let* ((loc-atom (gar (get-last-locs-ato map-name id-node elapse))))
+		(if (not (null? loc-atom))
+			(let* ((xx (loc-link-x loc-atom))
+					(yy (loc-link-y loc-atom))
+					(zz (loc-link-z loc-atom)))
+				(list xx yy zz))
+			(list)
+		)
+	)
+)
+
+;; Get the xyz coords, as a list, for `face-id-node`
+(define (get-face face-id-node e-start)
+	(get-last-xyz "faces" face-id-node (round e-start))
+)
+
+; ---------------------------------------------------------------------
 ;; look-turn-at-face - Publish ROS message to turn or look at face.
 ;;
 ;; `FACE-ID-NODE` should be a Node holding a face-id.
@@ -63,29 +107,13 @@
 ;; while the python `look_at_face_point` will turn the neck+head.
 ;;
 (define (look-turn-at-face FACE-ID-NODE PY-CMD)
-	;
-	; get-last-locs-ato returns a SetLink holding AtLocationLinks
-	; of the form below:
-	;
-	;    (AtLocationLink
-	;      (ObjectNode "faces")
-	;      (ListLink
-	;         (NumberNode "42.000000" (av 5 0 0))
-	;         (ListLink
-	;            (NumberNode "2.005000")
-	;            (NumberNode "1.005000")
-	;            (NumberNode "0.005000"))))
-	;
-	; Here, `map-name` is "faces"
-	; `id-node` is "(NumberNode 42)" (the face id)
-	;
-	(define loc-atom
-			(gar (get-last-locs-ato "faces" FACE-ID-NODE face-loc-time-span)))
-	; The SetLink might be empty, in which case loc-atom is null.
-	(if (not (null? loc-atom))
-		(let* ((xx (number->string (loc-link-x loc-atom)))
-				(yy (number->string (loc-link-y loc-atom)))
-				(zz (number->string (loc-link-z loc-atom))))
+	; Get the x,y,z coords.
+	(define xyz-list (get-face FACE-ID-NODE face-loc-time-span))
+	; The list might be empty, in which case ther is no face.
+	(if (not (null? xyz-list))
+		(let* ((xx (number->string (car xyz-list)))
+				(yy (number->string (cadr xyz-list)))
+				(zz (number->string (caddr xyz-list))))
 			(python-eval
 				(string-append PY-CMD "(" xx "," yy "," zz ")"))
 			(stv 1 1)
@@ -143,50 +171,6 @@
 		(StateLink
 			(ConceptNode "last person who spoke") (VariableNode "$fid")))
 	))
-)
-
-; ---------------------------------------------------------------------
-;; Given the atom `id-node`, this fetches the last known location
-;; (3D xyz coordinates) for that atom in the map `map-name`.
-;; The search will be made only in the most recent time interval of
-;; `elapse` millisconds.
-;;
-;; Returns a list of three floating-point numbers, or a null list
-;; if the atom is not found.
-;;
-;; This function assumes that an atom can have only one location at a
-;; time.
-(define (get-last-xyz map-name id-node elapse)
-	;
-	; get-last-locs-ato returns a SetLink holding AtLocationLinks
-	; of the form below:
-	;
-	;    (AtLocationLink
-	;      (ObjectNode "faces")
-	;      (ListLink
-	;         (NumberNode "42.000000" (av 5 0 0))
-	;         (ListLink
-	;            (NumberNode "2.005000")
-	;            (NumberNode "1.005000")
-	;            (NumberNode "0.005000"))))
-	;
-	; Here, `map-name` is "faces"
-	; `id-node` is "(NumberNode 42)" (the face id)
-	;
-	(let* ((loc-atom (gar (get-last-locs-ato map-name id-node elapse))))
-		(if (not (null? loc-atom))
-			(let* ((xx (loc-link-x loc-atom))
-					(yy (loc-link-y loc-atom))
-					(zz (loc-link-z loc-atom)))
-				(list xx yy zz))
-			(list)
-		)
-	)
-)
-
-;; Get the xyz coords, as a list, for `face-id-node`
-(define (get-face face-id-node e-start)
-	(get-last-xyz "faces" face-id-node (round e-start))
 )
 
 ;;math
