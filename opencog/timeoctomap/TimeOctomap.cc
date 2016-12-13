@@ -513,7 +513,7 @@ namespace std {
 std::ostream& operator<<(std::ostream& out, const opencog::time_pt& pt)
 {
     // XXX FIXME -- make this print milliseconds
-    // out << std::chrono::system_clock::to_time_t(pt);
+    out << std::chrono::system_clock::to_time_t(pt);
     return out;
 }
 
