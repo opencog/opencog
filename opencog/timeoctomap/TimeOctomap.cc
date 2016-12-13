@@ -505,3 +505,37 @@ TimeOctomap::get_distance_between(const time_pt& time_p,
     double dist=sqrt(sqr(tarh.x()-refh.x())+sqr(tarh.y()-refh.y())+sqr(tarh.z()-refh.z()));
     return dist;
 }
+
+// -----------------------------------------------------------------
+//
+
+std::ostream& operator<<(std::ostream& out, const opencog::time_pt& pt)
+{
+    // XXX FIXME -- make this print milliseconds
+    out << std::chrono::system_clock::to_time_t(pt);
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const opencog::duration_c& du)
+{
+    out << "foooo duration";
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const opencog::time_list& tl)
+{
+    out << "(";
+    for (const opencog::time_pt& pt : tl)
+        out << std::chrono::system_clock::to_time_t(pt) << " ";
+    out << ")";
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const octomap::point3d_list& pl)
+{
+    out << "(";
+    for (const auto& pt : pl)
+        out << pt << " ";
+    out << ")";
+    return out;
+}
