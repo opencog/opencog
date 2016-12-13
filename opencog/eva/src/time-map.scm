@@ -203,11 +203,10 @@
 )
 
 
-;; face-nearest-sound -- get all face ide's near the sound direction.
-;; Get all face-ids and only one sound id 1.0, compare them.
-;; threshold = sound in +-15 degrees of face
-;; below returns face id of face nearest to sound vector at least
-;; 10 degrees, or 0 face id
+;; face-nearest-sound -- get the face-id atom nearest the sound direction.
+;;
+;; A face is near if the sound direction is within 15 degrees of
+;; the face.  Returns the atom for the face, or the emtpy list.
 (define (face-nearest-sound xx yy zz)
 
 	; The visible faces are stored as EvaluationLinks, attached
@@ -219,23 +218,27 @@
 			(map (lambda (x) (car (cog-outgoing-set x)))
 				(cog-chase-link 'EvaluationLink 'ListLink visible-face))))
 
-	; This converts the list of visible faces into ???
+	; This converts the list of visible faces into a list of faces
+	; followed by thier curent 3D xyz coordinates.
 	(define face-list
 		(map
 			(lambda (ATOM)
-				(list ATOM
-					(angle_face_id_snd ATOM xx yy zz)))
-			 (get-visible-faces) ))
+				(list ATOM (angle_face_id_snd ATOM xx yy zz)))
+			 (get-visible-faces)))
 
+	; If there are several faces, pick the nearest.
+	; This code is squirrly, there must be a more elegant,
+	; easier-to-understand way of doing this.
 	(if (< (length face-list) 1)
-		0
+		(list) ; zero faces
 		(let* ((alist (append-map (lambda (x)(cdr x)) face-list))
 				(amin (fold (lambda (n p) (min (abs p) (abs n)))
 					(car alist) alist)))
+			; discard faces that are more than 15 degrees away
 			(if (> (* 3.1415926 (/ 15.0 180.0)) amin)
 				(car (car (filter
 					(lambda (x) (> (+ amin 0.0001) (abs (cadr x)))) face-list)))
-				0
+				(list)
 			)
 		)
 	)
@@ -254,9 +257,8 @@
 ;; of loud sounds.  That is, the time-server needs to get sound
 ;; direction, no matter what.
 (define-public (map-sound xx yy zz)
-	(let* ((fid (face-nearest-sound xx yy zz)))
-		(if (> fid 0)
-			(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
-		)
+	(define fid (face-nearest-sound xx yy zz))
+	(if (not (null? fid))
+		(StateLink (ConceptNode "last person who spoke") fid)
 	)
 )
