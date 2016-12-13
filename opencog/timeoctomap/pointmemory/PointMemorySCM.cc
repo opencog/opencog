@@ -67,9 +67,9 @@ public:
     bool map_ato(const std::string&, Handle ato, double x, double y, double z);
 
     // Get time of first atom in past elapsed time
-    Handle get_first_ato(const std::string&, Handle ato, int elapse);
+    Handle get_first_time(const std::string&, Handle ato, int elapse);
     // Get time of last atom in past elapsed time
-    Handle get_last_ato(const std::string&, Handle ato, int elapse);
+    Handle get_last_time(const std::string&, Handle ato, int elapse);
 
     // Get atom at location
     Handle get_at_loc_ato(const std::string&, double x, double y, double z);
@@ -90,8 +90,8 @@ public:
 
     // Get locations of atom in elapsed past
     Handle get_past_locs_ato(const std::string&, Handle ato, int elapse);
-    Handle get_first_locs_ato(const std::string&, Handle ato, int elapse);
-    Handle get_last_locs_ato(const std::string&, Handle ato, int elapse);
+    Handle get_first_location(const std::string&, Handle ato, int elapse);
+    Handle get_last_location(const std::string&, Handle ato, int elapse);
     //AtTimeLink
     //  TimeNode "Date Time millisec"
     //  Atom
@@ -196,10 +196,10 @@ void PointMemorySCM::init()
     define_scheme_primitive("auto-step-time-off", &PointMemorySCM::auto_step_time_off, this, "ato pointmem");// v_s
     define_scheme_primitive("is-auto-step-on", &PointMemorySCM::is_auto_step_on, this, "ato pointmem");// i_s
     define_scheme_primitive("map-ato", &PointMemorySCM::map_ato, this, "ato pointmem");// b_shddd
-    define_scheme_primitive("get-first-ato", &PointMemorySCM::get_first_ato, this, "ato pointmem");// h_shi
-    define_scheme_primitive("get-last-ato", &PointMemorySCM::get_last_ato, this, "ato pointmem");// h_shi
-    define_scheme_primitive("get-first-locs-ato", &PointMemorySCM::get_first_locs_ato, this, "ato pointmem");// h_shi
-    define_scheme_primitive("get-last-locs-ato", &PointMemorySCM::get_last_locs_ato, this, "ato pointmem");// h_shi
+    define_scheme_primitive("get-first-ato", &PointMemorySCM::get_first_time, this, "ato pointmem");// h_shi
+    define_scheme_primitive("get-last-ato", &PointMemorySCM::get_last_time, this, "ato pointmem");// h_shi
+    define_scheme_primitive("get-first-locs-ato", &PointMemorySCM::get_first_location, this, "ato pointmem");// h_shi
+    define_scheme_primitive("get-last-locs-ato", &PointMemorySCM::get_last_location, this, "ato pointmem");// h_shi
     define_scheme_primitive("get-at-loc-ato", &PointMemorySCM::get_at_loc_ato, this, "ato pointmem");// h_sddd
     define_scheme_primitive("get-past-loc-ato", &PointMemorySCM::get_past_loc_ato, this, "ato pointmem");// h_siddd
     define_scheme_primitive("get-locs-ato", &PointMemorySCM::get_locs_ato, this, "ato pointmem");// h_sh
@@ -321,7 +321,7 @@ static Handle timestamp_tag_atom(const time_pt& tp, const Handle& ato)
     return Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato));
 }
 
-Handle PointMemorySCM::get_first_ato(const string& map_name,
+Handle PointMemorySCM::get_first_time(const string& map_name,
                                      Handle ato, int elapse)
 {
     if (not have_map(map_name)) return Handle();
@@ -330,14 +330,13 @@ Handle PointMemorySCM::get_first_ato(const string& map_name,
 
     time_pt tp;
     bool r = tsa[map_name]->get_oldest_time_elapse_atom_observed(ato, tpt, tp);
-    if (not r)
-        return UndefinedHandle;
+    if (not r) return Handle();
 
     // Make and return atTimeLink
     return timestamp_tag_atom(tp, ato);
 }
 
-Handle PointMemorySCM::get_last_ato(const string& map_name,
+Handle PointMemorySCM::get_last_time(const string& map_name,
                                     Handle ato, int elapse)
 {
     if (not have_map(map_name)) return Handle();
@@ -390,7 +389,7 @@ static Handle tag_atom_with_locs(const std::string& map_name,
     return Handle(createLink(SET_LINK, loc_links));
 }
 
-Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
+Handle PointMemorySCM::get_first_location(const string& map_name,
                                           Handle ato, int elapse)
 {
     if (not have_map(map_name)) return Handle();
@@ -400,7 +399,7 @@ Handle PointMemorySCM::get_first_locs_ato(const string& map_name,
 }
 
 
-Handle PointMemorySCM::get_last_locs_ato(const string& map_name, Handle ato, int elapse)
+Handle PointMemorySCM::get_last_location(const string& map_name, Handle ato, int elapse)
 {
     if (not have_map(map_name)) return Handle();
     time_pt tpt = get_map_time(map_name, elapse);

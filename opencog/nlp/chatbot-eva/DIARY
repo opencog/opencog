@@ -1395,13 +1395,21 @@ aka
 (use-modules (opencog eva-model))
 (make-new-face 42)
 
-; Put it somewhere:   x y z x=forward y=left z=up
 (use-modules (opencog ato pointmem))
+; Record facial coordinates in an octomap, at 15hz (66 mmillisecs per
+; frame), a 150 frame circular buuffer (about 10 seconds) and a 1cm
+; spatial resolution.
+(create-map "faces" 0.01 66 150)
+
+; Put it somewhere:   x y z x=forward y=left z=up; position in meters.
 (map-ato "faces" (NumberNode 42 (av 5 0 0)) 2  1 0)
 
-Kaaa rashhhh null pointer deref issue #2517
+; Pretend that the sound is coming from there, too.
+(map-sound  2.01  1.01 0.01)
 
-map-ato is defined in
+(get-last-locs-ato "faces"  (NumberNode 42) 8000)
+(get-face 
+
 
 
 (StateLink (ConceptNode "last person who spoke") (NumberNode 42))
