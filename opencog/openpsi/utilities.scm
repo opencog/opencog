@@ -427,5 +427,3 @@
 	; return a string JSON object
 	(string-append "{" (string-join return ", ") "}")
 )
-
-(define-public (psi-testing something) (display "test"))
