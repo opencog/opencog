@@ -102,7 +102,6 @@ class FaceTrack:
 			self.atomo.add_tracked_face_to_atomspace(faceid)
 
 	# ----------------------------------------------------------
-
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,

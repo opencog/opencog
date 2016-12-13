@@ -21,6 +21,7 @@ INSTALL (FILES
 	self-model.scm
 	faces.scm
 	orchestrate.scm
+	time-map.scm
 	DESTINATION "${DATADIR}/scm/opencog/eva-model"
 )
 
