@@ -508,11 +508,12 @@ TimeOctomap::get_distance_between(const time_pt& time_p,
 
 // -----------------------------------------------------------------
 //
+namespace std {
 
 std::ostream& operator<<(std::ostream& out, const opencog::time_pt& pt)
 {
     // XXX FIXME -- make this print milliseconds
-    out << std::chrono::system_clock::to_time_t(pt);
+    // out << std::chrono::system_clock::to_time_t(pt);
     return out;
 }
 
@@ -538,4 +539,5 @@ std::ostream& operator<<(std::ostream& out, const octomap::point3d_list& pl)
         out << pt << " ";
     out << ")";
     return out;
+}
 }
