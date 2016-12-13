@@ -134,8 +134,8 @@
 ; ---------------------------------------------------------------------
 ;; Given the atom `id-node`, this fetches the last known location
 ;; (3D xyz coordinates) for that atom in the map `map-name`.
-;; The `elapse` parameter should be how many millisconds in the past
-;; that the query should be made.
+;; The search will be made only in the most recent time interval of
+;; `elapse` millisconds.
 ;;
 ;; Returns a list of three floating-point numbers, or a null list
 ;; if the atom is not found.
@@ -143,9 +143,25 @@
 ;; This function assumes that an atom can have only one location at a
 ;; time.
 (define (get-last-xyz map-name id-node elapse)
-	(let* ((loc-atom (get-last-locs-ato map-name id-node elapse) ))
+	;
+	; get-last-locs-ato returns a SetLink holding AtLocationLinks
+	; of the form below:
+	;
+	;    (AtLocationLink
+	;      (ObjectNode "faces")
+	;      (ListLink
+	;         (NumberNode "42.000000" (av 5 0 0))
+	;         (ListLink
+	;            (NumberNode "2.005000")
+	;            (NumberNode "1.005000")
+	;            (NumberNode "0.005000"))))
+	;
+	; Here, `map-name` is "faces"
+	; `id-node` is "(NumberNode 42)" (the face id)
+	;
+	(let* ((loc-atom (gar (get-last-locs-ato map-name id-node elapse))))
 		(if (cog-atom? loc-atom)
-			(let* ((loc-link (car (cog-outgoing-set loc-atom)))
+			(let* ((loc-link (gar loc-atom))
 					(xx (loc-link-x loc-link))
 					(yy (loc-link-y loc-link))
 					(zz (loc-link-z loc-link)))
