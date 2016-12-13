@@ -152,6 +152,26 @@
             (SequentialOr
                 (DefinedPredicate "input-is-about-the-robot?")
                 (Not (DefinedPredicate "input-is-a-question?")))
+            (DefinedPredicate "no-random-sentence-generator-keywords?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List chatscript-reply)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "chatscript"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "chatscript-finished?")
+            (DefinedPredicate "is-chatscript-reply?")
+            (SequentialOr
+                (DefinedPredicate "input-is-about-the-robot?")
+                (Not (DefinedPredicate "input-is-a-question?")))
+            (DefinedPredicate "has-random-sentence-generator-done-with-the-keywords?")
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List chatscript-reply)))
@@ -170,6 +190,26 @@
             (DefinedPredicate "input-is-a-question?")
             (Not (DefinedPredicate "input-is-about-the-robot?"))
             (DefinedPredicate "no-good-fast-answer?")
+            (DefinedPredicate "no-random-sentence-generator-keywords?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List chatscript-reply)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "chatscript"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "chatscript-finished?")
+            (DefinedPredicate "is-chatscript-reply?")
+            (DefinedPredicate "input-is-a-question?")
+            (Not (DefinedPredicate "input-is-about-the-robot?"))
+            (DefinedPredicate "no-good-fast-answer?")
+            (DefinedPredicate "has-random-sentence-generator-done-with-the-keywords?")
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List chatscript-reply)))
