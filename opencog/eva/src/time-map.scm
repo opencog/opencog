@@ -161,10 +161,9 @@
 	;
 	(let* ((loc-atom (gar (get-last-locs-ato map-name id-node elapse))))
 		(if (cog-atom? loc-atom)
-			(let* ((loc-link (gar loc-atom))
-					(xx (loc-link-x loc-link))
-					(yy (loc-link-y loc-link))
-					(zz (loc-link-z loc-link)))
+			(let* ((xx (loc-link-x loc-atom))
+					(yy (loc-link-y loc-atom))
+					(zz (loc-link-z loc-atom)))
 				(list xx yy zz))
 			(list)
 		)
@@ -189,19 +188,19 @@
 	)
 )
 
+; FACE-ID should be an atom identifying a face (currently,
+; a NumberNode)
 ;assuming common zero in coordinates
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
-
-(define (angle_face_id_snd face-id xx yy zz)
-	(let* ((fc (get-face (NumberNode face-id) face-loc-time-span)))
+(define (angle_face_id_snd FACE-ID xx yy zz)
+	(let* ((fc (get-face FACE-ID face-loc-time-span)))
 		(if (null? fc)
-			(* 2 3.142)
+			6.2831853 ; two-pi
 			(angle (car fc) (cadr fc) (caddr fc) xx yy zz)
 		)
 	)
 )
-
 
 
 ;; face-nearest-sound -- get all face ide's near the sound direction.
@@ -223,9 +222,9 @@
 	; This converts the list of visible faces into ???
 	(define face-list
 		(map
-			(lambda (x)
-				(list (string->number (cog-name x))
-					(angle_face_id_snd (cog-name x) xx yy zz)))
+			(lambda (ATOM)
+				(list ATOM
+					(angle_face_id_snd ATOM xx yy zz)))
 			 (get-visible-faces) ))
 
 	(if (< (length face-list) 1)
@@ -233,7 +232,7 @@
 		(let* ((alist (append-map (lambda (x)(cdr x)) face-list))
 				(amin (fold (lambda (n p) (min (abs p) (abs n)))
 					(car alist) alist)))
-			(if (> (/ (* 3.142 15.0) 180.0) amin)
+			(if (> (* 3.1415926 (/ 15.0 180.0)) amin)
 				(car (car (filter
 					(lambda (x) (> (+ amin 0.0001) (abs (cadr x)))) face-list)))
 				0
