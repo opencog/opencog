@@ -83,7 +83,7 @@
         ))
         (True (ExecutionOutput (GroundedSchema "scm: call-aiml") (List)))
         (True)
-        (stv .9 .9)
+        (stv 0 .9)
         sociality
         "aiml"
     )
@@ -101,7 +101,7 @@
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-reply)))
         (True)
-        (stv .9 .9)
+        (stv 0 .9)
         sociality
         "aiml"
     )
@@ -121,7 +121,7 @@
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-reply)))
         (True)
-        (stv .9 .9)
+        (stv 0 .9)
         sociality
         "aiml"
     )
@@ -309,7 +309,7 @@
         ))
         (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "blogs"))))
         (True)
-        (stv .9 .9)
+        (stv 0 .9)
         sociality
         "random_sentence_blogs"
     )
@@ -356,7 +356,7 @@
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-blogs-sentence-generated)))
         (True)
-        (stv .9 .9)
+        (stv 0 .9)
         sociality
         "random_sentence_blogs"
     )
