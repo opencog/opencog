@@ -204,11 +204,12 @@
 
 
 
+;; face-nearest-sound -- get all face ide's near the sound direction.
 ;; Get all face-ids and only one sound id 1.0, compare them.
 ;; threshold = sound in +-15 degrees of face
 ;; below returns face id of face nearest to sound vector at least
 ;; 10 degrees, or 0 face id
-(define (snd-nearest-face xx yy zz)
+(define (face-nearest-sound xx yy zz)
 
 	; The visible faces are stored as EvaluationLinks, attached
 	; to the predicate "visible face". This function returns a
@@ -254,7 +255,7 @@
 ;; of loud sounds.  That is, the time-server needs to get sound
 ;; direction, no matter what.
 (define-public (map-sound xx yy zz)
-	(let* ((fid (snd-nearest-face xx yy zz)))
+	(let* ((fid (face-nearest-sound xx yy zz)))
 		(if (> fid 0)
 			(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
 		)
