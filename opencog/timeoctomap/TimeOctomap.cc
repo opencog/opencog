@@ -72,6 +72,11 @@ Handle TimeSlice::get_atom_at_location(const point3d& location)
     return (static_cast<AtomOcTreeNode*>(result))->getData();
 }
 
+/// get_locations -- get zero, one or more locations (3D coordinates)
+/// of an atom in this time-slice.  A time-slice does allow a single
+/// atom to be present at multiple locations, and this will return all
+/// of them.  This returns an empty list if teh atom does not appear
+/// in the timeslice.
 point3d_list TimeSlice::get_locations(const Handle& ato)
 {
     point3d_list pl;
@@ -82,7 +87,9 @@ point3d_list TimeSlice::get_locations(const Handle& ato)
         ++ita)
     {
         if (ita->getData() == ato)
+        {
             pl.push_back(ita.getCoordinate());
+        }
     }
     return pl;
 }
@@ -339,6 +346,11 @@ TimeOctomap::find(const time_pt& time_p)
     return nullptr;
 }
 
+/// get_locations_of_atom_at_time -- get zero, one or more locations
+/// (3D coordinates) of an atom at the given time.  The map does allow
+/// a single atom to be present at multiple locations, and this will
+/// retreive all of them.  If the atom is not present at this time,
+/// an empty list will be reserved.
 point3d_list TimeOctomap::get_locations_of_atom_at_time(const time_pt& time_p,
                                                         const Handle& ato)
 {
