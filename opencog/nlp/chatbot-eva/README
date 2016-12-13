@@ -401,6 +401,11 @@ adjectives should trigger these.
 Self-awareness questions:
 
    Where are you looking?   XXX this got broken, and the fix is hard.
+      The correct fix is to wire up to the space server.
+   What are you doing?
+   What did you just do?
+   What happened just now?
+
 
 ===========================
 TODO
@@ -412,13 +417,13 @@ ActionLink could be/should be renamed ExecutionLink
 
 OpenPsi:
     ImplicationLink
-        AndLink
+        SequentialAndLink
             Predicate - Is there a new verbal command?
             ExecuteOutputLink
                 Obey the command
         Goal- "Obey user"
 
-* Replace rules with psi-rules
+* Replace rules with psi-rules (or with forward chainer)
 
 * Provide simple string-matching API.
 

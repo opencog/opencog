@@ -45,9 +45,9 @@
 #include <boost/circular_buffer.hpp>
 #include "AtomOcTree.h"
 
-using namespace std;
+namespace opencog
+{
 using namespace octomap;
-using namespace opencog;
 
 typedef std::chrono::system_clock::time_point time_pt;
 typedef std::chrono::system_clock::duration duration_c;
@@ -220,4 +220,14 @@ private:
     std::mutex mtx, mtx_auto;
     std::thread g_thread;
 };
+}
+
+namespace std
+{
+ostream& operator<<(ostream&, const opencog::time_pt&);
+ostream& operator<<(ostream&, const opencog::duration_c&);
+ostream& operator<<(ostream&, const opencog::time_list&);
+ostream& operator<<(ostream&, const octomap::point3d_list&);
+}
+
 #endif

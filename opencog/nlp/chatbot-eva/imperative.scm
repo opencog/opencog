@@ -29,7 +29,7 @@
 ;     Eva, show happiness!
 ;
 ;
-; This is a hard-code ad-hoc pipeline. Subject to change.
+; This is a hard-coded, ad-hoc pipeline. Subject to change.
 ;
 
 (use-modules (opencog) (opencog query) (opencog exec))
@@ -47,7 +47,8 @@
 
 ;--------------------------------------------------------------------
 ; Action schema
-; This is wrong, but a hack for now.
+; This is temporary scaffolding, it simply returns the list
+; of actions that were requested, and need to be performed.
 
 ; action-rule-ao uses the Action Orchestrator (in orchestrate.scm)
 (define action-rule-ao
@@ -68,8 +69,14 @@
 ))
 
 ;--------------------------------------------------------------------
-
+; Main, top-level imperative processing function.
+;
 ; Stove-pipe hack to perform an action associated with an imperative.
+; Its a "stove-pipe", because it hard-codes a sequence of steps that
+; are performed every time an imperative command is received. A better
+; design would be to replace the sequence of bind-links, below, by
+; open-psi rules (and/or the forward chainer).  For now, the stove-pipe
+; is OK, because there are so few rules that are used.
 (define-public (imperative-process imp)
 "
   Process imperative IMP, which should be a SentenceNode.
@@ -113,12 +120,15 @@
 
 		; At this time, a ListLink is used to anchor suggested
 		; actions to the current-action anchor. Wipe these out.
+		; (because we have already performed the actions).
+		; XXX FIXME we need a better way of marking actions as having
+		; been performed, already.
 		(for-each (lambda (x)
 			(cog-extract-recursive (ListLink current-action x)))
 				action-list)
 
-		; XXX replace this by AIML or something.
-		(if (eq? '() action-list)
+		; XXX replace the dont-know reply by ChatScript or something.
+		(if (null? action-list)
 			(begin
 				(State (Anchor "Chatbot: ChatbotEvaAction")
 					(Concept "Chatbot: NoResult"))

@@ -77,6 +77,9 @@
 ; extent to the current gaze direction.  Problem: the gaze direction
 ; is buried in the tf2 tree for the chest-camera face detector, where
 ; we cannot easily query it.
+;
+; As of Autumn 2016, the space server supposedly works. Thus, the
+; following should be handled by the space server.
 (DefineLink
 	(DefinedSchema "rightwards")
 	(ListLink ;; three numbers: x,y,z

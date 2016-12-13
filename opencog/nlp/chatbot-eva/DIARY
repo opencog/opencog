@@ -1358,11 +1358,183 @@ TODO:
 * sec.scm is actual psi code
 * event.scm is ... psi code for now.
 * interaction-rule.scm is psi code of some kind.
-* modulesator.scm is part of psi.
+* modulators.scm is part of psi.
 * modulators need to be documented
 * mock-interaction-rules.scm needs to move
 
-%s/,\(\S\)/, \1/g
-tag_atom_with_locs
+===========================================================
 
-remove_atom_at_time vs. remove_atom_at_current_time
+Surreal meta-issues:
+-- which of several word-choices get used?
+
+   Where are you looking?   XXX this got broken, and the fix is hard.
+The fix requires that the space server track this info, and
+as well as time-stamp
+
+Space-time server meta-issues:
+self-model: what direction am I looking at? (left, right up down)
+(vs. what direction are other things pointing at?)
+
+
+   Look at me
+--> use the sound server
+
+ROS topic: /manyears/source_pose
+in ros-behavior-scripting the ros_bridge node subscribes to the ROS
+  topic in sound_track.py
+sends message (map-sound  x y z) to cogserver
+(map-sound is defined in time-map.scm in ros-behavior-scripting
+It sets this in the cogserver:
+(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
+
+How to fake it:
+
+; Add face to the atomspace
+(EvaluationLink (PredicateNode "visible face") (ListLink (NumberNode 42)))
+aka 
+(use-modules (opencog eva-model))
+(make-new-face 42)
+
+(use-modules (opencog ato pointmem))
+; Record facial coordinates in an octomap, at 15hz (66 mmillisecs per
+; frame), a 150 frame circular buuffer (about 10 seconds) and a 1cm
+; spatial resolution.
+(create-map "faces" 0.01 66 150)
+
+; Put it somewhere:   x y z x=forward y=left z=up; position in meters.
+(map-ato "faces" (NumberNode 42 (av 5 0 0)) 2  1 0)
+
+; Pretend that the sound is coming from there, too.
+(map-sound  2.01  1.01 0.01)
+
+(get-last-locs-ato "faces"  (NumberNode 42) 8000)
+(get-face 
+
+
+
+(StateLink (ConceptNode "last person who spoke") (NumberNode 42))
+
+look-rule-2
+
+
+Look at me
+turn towards me
+face me
+don't look at me
+turn away
+
+--> No
+--> You're not the boss of me.
+--> OK, you're ugly anyway
+--> Darling, I never looked away
+--> Sure, whatever.
+
+
+    what are you looking at
+--> I am looking at you
+--> I am looking at a person
+--> I am looking at a man/woman (assume gender rec works)
+--> I am looking at an old man
+--> (closes eyes) I am not looking at anything
+
+
+   Where are you looking?   XXX this got broken, and the fix is hard.
+--> I am looking to the left
+--> I am looking to the right
+--> I am looking at you
+
+   What direction are you looking?
+--> I am looking to the left
+--> I am looking to the right
+
+   Turn your head.
+
+   Look away.
+
+   Look at me.
+
+   Where are you looking?
+
+
+   What happened just now?
+    (requires recency in time-server)
+--> I just turned my head
+--> I just heard a loud sound.
+--> There was a loud sound.
+--> Nothing.
+--> Someone just entered the room.
+--> You waved your hand in front of me.
+
+
+   What are you doing?
+--> I am smiling
+--> I am looking at you
+--> I just smiled at you
+--> I am listening to you
+--> I am talking to you.
+--> I am talking to you (but only if talking for a while)
+--> I am entertaining a room-full of people (if >1 person)
+
+   How many people can you see?
+
+   How do you feel?
+--> I feel happy
+--> I'm happy
+--> I feel sad.
+
+   How are you feeling?
+--> I feel good.
+--> I feel OK.
+--> I'm
+
+  What was the last thing that made you sad?
+  What was the last thing that frightened you?
+  Who is the nicest person you met last?
+
+  What is my name?  (multi-person)
+
+  Where is Ben?
+--> Ben is on my left.
+--> Ben is on my right.
+
+  Where am I?
+--> You are in front of me.
+--> you are in the same room as I am
+--> You are in Hong Kong.
+
+  Where are you?
+--> I am in Hong Kong
+
+  What is the weather like today?
+--> (Internet search of weather based on location)
+
+
+=============================================================
+%s/,\(\S\)/, \1/g
+
+where-look-rule
+
+(define current-imperative (AnchorNode "*-imperative-*"))
+      (State current-imperative
+         (ActionLink
+            (Variable "$verb")
+            (ListLink (Variable "$object"))
+      ))
+
+action-rule-ao
+... ends up calling
+(DefinedPredicate "Look command")
+
+Look command does it ... but no memory of it
+
+XXX correct version of "looking" requires using the space server.
+
+(DefinedPredicate "Look at point")
+(DefinedPredicate "Gaze at point") calls
+py:gaze_at_point
+prints "(Eva looks to the left)"
+
+ (cog-bind show-rule-1)
+(define current-action (AnchorNode "*-action-*"))
+(StateLink current-action (WordNode "foobar"))
+
