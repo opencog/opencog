@@ -208,7 +208,7 @@
 	;(format #t "new emotion: ~a\n" emotion-concept)
 	emotion-concept)
 
-(define-public (psi-get-emotion)
+(define-public (psi-get-emotions)
 "
   Returns a list of all psi emotions.
 "
@@ -233,14 +233,21 @@
 	(define pos-valence (psi-get-pos-valence))
 	(define neg-valence (psi-get-neg-valence))
 
+	; Multiplier for emotion level calculations
+	(define emotionality-factor 1.2)
+	(define e emotionality-factor)
+
+	(define (limit value)
+		(min value 1))
+
 	(psi-set-value! psi-happy
-		(* pos-valence arousal))
+		(limit (* pos-valence arousal e)))
 	(psi-set-value! psi-angry
-		(* neg-valence arousal))
+		(limit (* neg-valence arousal e)))
 	(psi-set-value! psi-sad
-		(* neg-valence (- 1 arousal)))
+		(limit (* neg-valence (- 1 arousal) e)))
 	(psi-set-value! psi-relaxed
-		(* pos-valence (- 1 arousal)))
+		(limit (* pos-valence (- 1 arousal) e)))
 
 	; Alternative formulas
 	;(psi-set-value! psi-happy
@@ -251,7 +258,33 @@
 	;	(max (min (- neg-valence (/ (- arousal .5) 2)) 1) 0) )
 	;(psi-set-value! psi-relaxed
 	;	(max (min (- pos-valence (/ (- arousal .5) 2)) 1) 0) )
+
+	(psi-set-current-emotion-state)
+
 )
+
+; Current emotion state
+(define current-emotion-state (Concept "current emotion state"))
+(define (psi-set-current-emotion-state)
+	; Find the emotion with the highest level and set as current emotion
+	(define emotions (psi-get-emotions))
+	(define strongest-emotion)
+	(define highest-emotion-value -1)
+	(for-each
+		(lambda (emotion)
+			(define emotion-value (psi-get-number-value emotion))
+			(if (> emotion-value highest-emotion-value)
+				(begin
+					(set! strongest-emotion emotion)
+					(set! highest-emotion-value emotion-value))))
+		emotions)
+	(if (not (equal? (psi-get-value current-emotion-state) strongest-emotion))
+		(begin
+			(StateLink current-emotion-state strongest-emotion)
+			(format #t "Current emotion state: ~a\n" strongest-emotion))))
+
+(define-public (psi-get-current-emotion)
+	(psi-get-value current-emotion-state))
 
 ;-------------------------------------
 ; Internal vars to physiology mapping
@@ -314,10 +347,14 @@
 (psi-create-interaction-rule power changed neg-valence -.2)
 
 ; arousal increases pos valence
-(psi-create-interaction-rule arousal increased pos-valence .2)
+(psi-create-interaction-rule arousal increased pos-valence .1)
 
 ; pos valence increases power
 (psi-create-interaction-rule pos-valence changed power .2)
+
+; ^ arousal >>>> pos valence
+; pos valence >>> power
+; power <<< neg valence
 
 
 ;-----------------------
