@@ -1386,6 +1386,10 @@ sends message (map-sound  x y z) to cogserver
 (map-sound is defined in time-map.scm in ros-behavior-scripting
 It sets this in the cogserver:
 (StateLink (ConceptNode "last person who spoke") (NumberNode fid))
+The location of the face can be gotten by querying:
+(get-last-locs-ato "faces"  (NumberNode fid) 8000)
+
+-----
 
 How to fake it:
 
@@ -1419,6 +1423,7 @@ aka
 ; The above will materialize the below in the atomsapce:
 (StateLink (ConceptNode "last person who spoke") (NumberNode 42))
 
+(process-query 'luser "Look at me")
 
 
 Look at me
@@ -1516,14 +1521,33 @@ turn away
 =============================================================
 %s/,\(\S\)/, \1/g
 
-where-look-rule
+(map-ato "faces" (NumberNode 42 (av 5 0 0)) 2  1 0)
+(map-sound  2.01  -1.01 0.01)
+(process-query 'luser "Look at me")
 
-(define current-imperative (AnchorNode "*-imperative-*"))
-      (State current-imperative
-         (ActionLink
-            (Variable "$verb")
-            (ListLink (Variable "$object"))
-      ))
+(use-modules (opencog query))
+ (load "imperative-rules.scm")
+
+(define sent-node (car (nlp-parse "Look at me")))
+ (imperative-process sent-node)
+
+look-rule-2 triggers, sets
+((StateLink
+   (AnchorNode "*-imperative-*")
+   (ActionLink
+      (WordNode "look" (stv 0.0043478259 0.0012484394))
+      (ListLink
+         (WordNode "me" (stv 0.0043290043 0.0012484394))
+      )
+   )
+)
+
+obj-semantics-rule-1-ao
+obj-semantic-model-rule-1
+obj-semantic-model-rule-2
+
+
+where-look-rule
 
 action-rule-ao
 ... ends up calling

@@ -209,12 +209,13 @@
 			(Equal (Variable "$verb") (WordNode "turn"))
 		)
 		(var-decl "$prep-inst" "WordInstanceNode")  ; DECL
-		; "turn to the left
+		; "turn to the left"
 		(list ; turn --MVp-> to --Ju-> object       ; LINKS
 			(lg-link "MVp" "$verb-inst" "$prep-inst")
 			(ChoiceLink
 				(lg-link "Js" "$prep-inst" "$obj-inst")
-				(lg-link "Ju" "$prep-inst" "$obj-inst"))
+				(lg-link "Ju" "$prep-inst" "$obj-inst")
+				(lg-link "J" "$prep-inst" "$obj-inst"))
 		)
 	))
 
