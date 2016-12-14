@@ -130,7 +130,7 @@ public:
         TS_ASSERT_EQUALS(tl.size(),1);
 
         cout << "get times in Map:";
-        tl = tsa.get_times_of_atom_occurence_in_map(testHandle);
+        tl = tsa.get_timeline(testHandle);
         cout << tl.size() << endl;
         TS_ASSERT_EQUALS(tl.size(), 1);
 
