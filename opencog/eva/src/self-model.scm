@@ -59,29 +59,6 @@
 (define-public soma-awake (ConceptNode "Awake"))
 (define-public soma-bored (ConceptNode "Bored"))
 
-;;Check if someone new spoke something
-(DefineLink
-	(DefinedPredicate "Did Someone New Speak?")
-	(SequentialAnd
-		(NotLink
-			(Equal
-				(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-					(StateLink (ConceptNode "last person who spoke") (VariableNode "$fid"))
-				)
-				(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-					(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
-				)
-			)
-		)
-		(True
-		(PutLink
-			(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
-			(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-				(StateLink (ConceptNode "last person who spoke") (VariableNode "$fid"))
-			)
-		))
-	)
-)
 
 ;; Assume Eva is sleeping at first
 (StateLink soma-state soma-sleeping)
@@ -167,6 +144,34 @@
 ;; TODO Remove this when the time-server is ready.
 (define-public prev-interaction-state (AnchorNode "Previous Interaction State"))
 (StateLink prev-interaction-state no-interaction)
+
+; --------------------------------------------------------
+; Identification of speakers
+;
+;; Check if someone new (someone other than the previous speaker)
+;; said something
+(DefineLink
+	(DefinedPredicate "Did Someone New Speak?")
+	(SequentialAnd
+		(NotLink
+			(Equal
+				(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+					(StateLink (ConceptNode "last person who spoke") (VariableNode "$fid"))
+				)
+				(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+					(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
+				)
+			)
+		)
+		(True
+		(PutLink
+			(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
+			(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
+				(StateLink (ConceptNode "last person who spoke") (VariableNode "$fid"))
+			)
+		))
+	)
+)
 
 ; --------------------------------------------------------
 ; Chatbot-related stuff.  In the current design, the chatbot talks
