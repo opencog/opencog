@@ -1394,6 +1394,7 @@ How to fake it:
 aka 
 (use-modules (opencog eva-model))
 (make-new-face 42)
+(make-new-face 69)
 
 (use-modules (opencog ato pointmem))
 ; Record facial coordinates in an octomap, at 15hz (66 mmillisecs per
@@ -1403,22 +1404,21 @@ aka
 
 ; Put it somewhere:   x y z x=forward y=left z=up; position in meters.
 (map-ato "faces" (NumberNode 42 (av 5 0 0)) 2  1 0)
+(map-ato "faces" (NumberNode 69 (av 5 0 0)) 1.5  -1 0.1)
+
+(get-last-locs-ato "faces"  (NumberNode 42) 8000)
+
+(get-face (NumberNode 42) 8000)
+(face-nearest-sound  2.01  1.01 0.01)
+(face-nearest-sound  2.01  -1.01 -0.01)
 
 ; Pretend that the sound is coming from there, too.
 (map-sound  2.01  1.01 0.01)
+(map-sound  2.01  -1.01 0.01)
 
-(get-last-locs-ato "faces"  (NumberNode 42) 8000)
-(get-face 
-
-
-get_locations
-
-get_timeline
-
-
+; The above will materialize the below in the atomsapce:
 (StateLink (ConceptNode "last person who spoke") (NumberNode 42))
 
-look-rule-2
 
 
 Look at me
