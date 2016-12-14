@@ -119,58 +119,6 @@
 	))
 
 ;--------------------------------------------------------------------
-
-;; XXX FIXME -- this routine is a hack and should be eliminated
-;; We need it for now, because we need to be able to call the
-;; `get-last-locs-ato` scheme binding to the space-time server.
-;; However, the `get-last-locs-ato` function needs to be replaced
-;; by a proper atom that works with the query engine. Until that
-;; is done, we will need this method.
-(define (get-speaker-direction FACE-ID-SET)
-	; Arghh. We get passsed the face-id wrapped in a set-link
-	; So, unwrap that ... and make sure we were actually given
-	; a face.
-	(define face-id-list (cog-outgoing-set FACE-ID-SET))
-	(if (not (null? face-id-list))
-		(let* ((face-id (car face-id-list))
-				(loc-set (cog-outgoing-set
-					(get-last-locs-ato "faces" face-id 8000))))
-			; loc-set is either an empty SetLink, or its a SetLink
-			; that contains this:
-			;
-			;    (AtLocationLink
-			;      (ObjectNode "faces")
-			;      (ListLink
-			;         (NumberNode "42.000000" (av 5 0 0))
-			;         (ListLink
-			;            (NumberNode "2.005000")
-			;            (NumberNode "1.005000")
-			;            (NumberNode "0.005000"))))
-			;
-			; the `dir` below just sucks out the ListLink from above.
-			;
-			(if (not (null? loc-set))
-				(let* ((loc-lnk (car loc-set))
-						(fac-loc (cog-outgoing-atom loc-lnk 1))
-						(dir (cog-outgoing-atom fac-loc 1)))
-					dir)
-				(ListLink (Number 0) (Number 0) (Number 0)) ; unknown!
-			))
-		(ListLink (Number 0) (Number 0) (Number 0)) ; unknown!
-	)
-)
-
-; Just like the above, but for the spatial direction of the person
-; who is speaking.  This is more complex than above, because we
-; have to query the space-time server to obtain the speaker location.
-(DefineLink
-	(DefinedSchema "speaker-direction")
-	(ExecutionOutputLink
-		(GroundedSchema "scm: get-speaker-direction")
-		(Get (State (Concept "last person who spoke") (Variable "$x")))
-	))
-
-;--------------------------------------------------------------------
 ; Global knowledge about word-meaning.
 ; Specific words have very concrete associations with physical objects
 ; or actions.
