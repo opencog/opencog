@@ -129,17 +129,11 @@
 ;; See the `look-turn-at-face` for complete documentation.
 ;;
 (define (glance-at-face FACE-ID-NODE)
-	(if (not(equal? (cog-name FACE-ID-NODE) "0"))
-		(look-turn-at-face FACE-ID-NODE "gaze_at_face_point")
-		(stv 0 1)
-	)
+	(look-turn-at-face FACE-ID-NODE "gaze_at_face_point")
 )
 
 (define (look-at-face FACE-ID-NODE)
-	(if (not(equal? (cog-name FACE-ID-NODE) "0"))
-		(look-turn-at-face FACE-ID-NODE "look_at_face_point")
-		(stv 0 1)
-	)
+	(look-turn-at-face FACE-ID-NODE "look_at_face_point")
 )
 
 ; ---------------------------------------------------------------------
