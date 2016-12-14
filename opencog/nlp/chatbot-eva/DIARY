@@ -1548,12 +1548,16 @@ obj-semantic-model-rule-2
 
 (Get (State (Concept "last person who spoke") (Variable "$x")))
 
-(cog-delete-recursive (DefinedSchema "speaker-direction"))
+(load "semantics.scm")
+(cog-bind obj-semantics-rule-1-ao)
+(load "fu.scm")
+(cog-bind wtf)
 
-(use-modules (opencog exec))
-(cog-execute! (DefinedSchemaNode "speaker-direction"))
+(Define (DefinedSchema "current-speaker") (Concept "foo"))
+(cog-delete-recursive (DefinedSchema "current-speaker"))
+(Define (DefinedSchema "current-speaker") (List (Concept "barf")))
 
-
+(Define (DefinedPredicate "Look-at-thing cmd")
 
 
 where-look-rule

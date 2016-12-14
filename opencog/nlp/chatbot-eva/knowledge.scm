@@ -215,7 +215,10 @@
 ;--------------------------------------------------------------------
 ;--------------------------------------------------------------------
 ; Similar to above, but for sentences such as "look at me" or "turn
-; towards me".
+; towards me". As before, this is able to convert from these English
+; sentences, into a structured command language. It makes use of the
+; (DefinedSchema "current-speaker") in self-model.scm, and also of
+; (DefinedPredicate "Look-at-thing cmd") to perform that action.
 
 ; Global knowledge about word-meaning.
 ; Knowledge about things in the environemnt.
@@ -230,14 +233,14 @@
 (ReferenceLink (WordNode "turn") (DefinedPredicate "Look-at-thing cmd"))
 
 ; Syntactic category of imperative look-at-thing verbs.
-(Inheritance (DefinedPredicate "Look-at-thing cmd") (Concept "pred-look-at"))
+(Inheritance (DefinedPredicate "Look-at-thing cmd") (Concept "look-at-cmd"))
 
 ; Syntactic structure of "look at thing" action-knowledge --
 ; Specifies the syntactic structure for physical motor-control commands.
 (EvaluationLink
 	(PredicateNode "look-at-action")
 	(ListLink
-		(ConceptNode "pred-look-at")
+		(ConceptNode "look-at-cmd")
 		(ConceptNode "schema-thing")))
 
 ;--------------------------------------------------------------------

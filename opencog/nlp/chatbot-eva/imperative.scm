@@ -94,8 +94,6 @@
 	(cog-bind show-rule-1)
 	(cog-bind show-rule-2)
 
-(display "duuuuude post rule\n")
-(display (cog-incoming-set current-imperative))
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
@@ -108,7 +106,8 @@
 	(let* ((act-do-do (cog-bind action-rule-ao))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-		; (display act-do-do) (newline)
+(display "duuuude ho ho\n")
+		(display act-do-do) (newline)
 
 		; Evaluate can throw if we give it bad args. Which happens during
 		; development. So report any errors.
