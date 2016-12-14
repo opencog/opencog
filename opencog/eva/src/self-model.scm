@@ -132,7 +132,7 @@
 ;; The "look at neutral position" direction. Used to tell the eye/head
 ;; movement subsystem to move to a neutral position.
 ;; Currently, straight-ahead.
-(define neutral-direction (ListLink (Number 1) (Number 0) (Number 0))
+(define neutral-direction (ListLink (Number 1) (Number 0) (Number 0)))
 
 ;; The person she is interacting with.
 ;; Not the same as eye-contact state, because she may have been
