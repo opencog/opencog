@@ -3,6 +3,22 @@
 (use-modules (opencog))
 
 ; -----------------------------------------------------------------------
+(define-public (load-gtwc)
+"
+  Populate the atomspace with ConceptNodes drived from Google's Trillion Word
+  Corpus.
+"
+; TODO: move this to (opencog data) module when it is created.
+    (let ((path (string-append (getenv "HOME")
+                    "/.opencog/gtwc-en-333333-words.scm")))
+        (if (file-exists? path)
+            (primitive-load path)
+            (display "The data file hasn't been downloaded.")
+        )
+    )
+)
+
+; -----------------------------------------------------------------------
 ; From TruthValue::DEFAULT_TV()
 (define default-stv (stv 1 0))
 
