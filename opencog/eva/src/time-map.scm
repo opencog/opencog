@@ -143,7 +143,7 @@
 )
 
 ; ---------------------------------------------------------------------
-;; below creates say atom for face if sound came from it
+;; Below creates say atom for face if sound came from it
 ;; XXX FIXME huh? this needs documentation.
 (define (who-said? sent)
 	;;request eye contact

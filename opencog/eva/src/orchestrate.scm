@@ -158,6 +158,15 @@
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
 
+; The language-subsystem can understand commands such as "look at me"
+; or, more generally, "look at this thing". In the end, the "thing"
+; is resolved into a 3D direction vector, and so the look-at-thing
+; command is really the same as the look-at-direction command. That
+; is, we just piggy-back on the above definitions.
+(DefineLink
+	(DefinedPredicate "Look-at-thing cmd")
+	(DefinedPredicate "Look command"))
+
 ; -------------------------------------------------------------
 ; Publish the current behavior.
 ; Cheap hack to allow external ROS nodes to know what we are doing.

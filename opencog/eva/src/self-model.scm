@@ -767,6 +767,8 @@ proper atomese.
 		;; make eye contact with.
 		(NotLink (Equal
 			(Get
+				; XXX FIXME - using TypedVariable for (Get (State
+				; is wrong -- wtf.
 				(TypedVariable (Variable "$x") (Type "NumberNode"))
 				(State eye-contact-state (Variable "$x")))
 			(SetLink no-interaction)))
@@ -774,6 +776,8 @@ proper atomese.
 			(Evaluation (GroundedPredicate "scm:look-at-face")
 				(ListLink (Variable "$face")))
 			(Get
+				; XXX FIXME - using TypedVariable for (Get (State
+				; is wrong -- wtf.
 				(TypedVariable (Variable "$x") (Type "NumberNode"))
 				(State eye-contact-state (Variable "$x")))))
 	))
