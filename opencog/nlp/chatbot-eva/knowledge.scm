@@ -214,6 +214,34 @@
 
 ;--------------------------------------------------------------------
 ;--------------------------------------------------------------------
+; Similar to above, but for sentences such as "look at me" or "turn
+; towards me".
+
+; Global knowledge about word-meaning.
+; Knowledge about things in the environemnt.
+; "me" refers to the person who last spoke (and said "look at me")
+(ReferenceLink (WordNode "me")       (DefinedSchema "current-speaker"))
+
+; Syntactic category of schema. Used for contextual understanding.
+(Inheritance (DefinedSchema "current-speaker")  (Concept "schema-thing"))
+
+; Physical (motor control) knowledge about imperative look-at-thing verbs.
+(ReferenceLink (WordNode "look") (DefinedPredicate "Look-at-thing cmd"))
+(ReferenceLink (WordNode "turn") (DefinedPredicate "Look-at-thing cmd"))
+
+; Syntactic category of imperative look-at-thing verbs.
+(Inheritance (DefinedPredicate "Look-at-thing cmd") (Concept "pred-look-at"))
+
+; Syntactic structure of "look at thing" action-knowledge --
+; Specifies the syntactic structure for physical motor-control commands.
+(EvaluationLink
+	(PredicateNode "look-at-action")
+	(ListLink
+		(ConceptNode "pred-look-at")
+		(ConceptNode "schema-thing")))
+
+;--------------------------------------------------------------------
+;--------------------------------------------------------------------
 ; Emotional expression semantics (groundings) for robot control
 ;
 ; The ListLink provides the arguments to the
