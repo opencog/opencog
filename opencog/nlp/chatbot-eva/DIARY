@@ -1546,6 +1546,46 @@ obj-semantics-rule-1-ao
 obj-semantic-model-rule-1
 obj-semantic-model-rule-2
 
+;; XXX FIXME -- this routine is a hack and should be eliminated
+;; We need it for now, because we need to be able to call the
+;; `get-last-locs-ato` scheme binding to the space-time server.
+;; However, the `get-last-locs-ato` function needs to be replaced
+;; by a proper atom that works with the query engine. Until that
+;; is done, we will need this method.
+(define (get-speaker-direction FACE-ID-SET)
+	; Arghh. We get passsed the face-id wrapped in a set-link
+	; So, unwrap that ... and make sure we were actually given
+	; a face.
+	(define face-id-list (cog-outgoing-set FACE-ID-SET))
+	(if (not (null? face-id-list))
+		(let* ((face-id (car face-id-list))
+				(loc-set (cog-outgoing-set
+					(get-last-locs-ato "faces" face-id 8000))))
+			(if (not (null? loc-set))
+				(let* ((loc-lnk (car loc-set))
+						(fac-loc (cog-outgoing-atom loc-lnk 1))
+						(dir (cog-outgoing-atom fac-loc 1)))
+					dir)
+      		(ListLink (Number 0) (Number 0) (Number 0)) ; unknown!
+			))
+      (ListLink (Number 0) (Number 0) (Number 0)) ; unknown!
+	)
+)
+
+(DefineLink
+   (DefinedSchema "speaker-direction")
+   (ExecutionOutputLink
+		(GroundedSchema "scm: get-speaker-direction")
+		(Get (State (Concept "last person who spoke") (Variable "$x")))
+	))
+
+(cog-delete-recursive (DefinedSchema "speaker-direction"))
+
+(use-modules (opencog exec))
+(cog-execute! (DefinedSchemaNode "speaker-direction"))
+
+
+
 
 where-look-rule
 
