@@ -147,29 +147,22 @@
 
 ; --------------------------------------------------------
 ; Identification of speakers
+
+(define last-speaker (ConceptNode "last person who spoke"))
+(define prev-speaker (ConceptNode "previous person who spoke"))
 ;
-;; Check if someone new (someone other than the previous speaker)
-;; said something
+;; Check if someone new (someone other than the last speaker)
+;; said something.
 (DefineLink
 	(DefinedPredicate "Did Someone New Speak?")
 	(SequentialAnd
 		(NotLink
 			(Equal
-				(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-					(StateLink (ConceptNode "last person who spoke") (VariableNode "$fid"))
-				)
-				(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-					(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
-				)
-			)
-		)
+				(Get (State last-speaker (Variable "$fid")))
+				(Get (State prev-speaker (Variable "$fid")))))
 		(True
-		(PutLink
-			(StateLink (ConceptNode "previous person who spoke") (VariableNode "$fid"))
-			(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-				(StateLink (ConceptNode "last person who spoke") (VariableNode "$fid"))
-			)
-		))
+			(Put (State prev-speaker (Variable "$fid"))
+				(Get (State last-speaker (Variable "$fid")))))
 	)
 )
 
