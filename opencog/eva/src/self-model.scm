@@ -315,7 +315,7 @@
 (define decibel-value (AnchorNode "Decibel value"))
 (define very-low-sound (Number 35))
 (define normal-conversation (Number 65))
-(define very-loud-sound (Number 90))
+(define very-loud-sound (Number 84))
 (define no-sound (Number 0.0))
 
 ; The default decibel value.
@@ -331,7 +331,7 @@
 (DefineLink
 	(DefinedPredicate "Heard Loud Sound?")
 	(GreaterThan
-		(Get (State decibel-value (Variable "$y"))) normal-conversation))
+		(Get (State decibel-value (Variable "$y"))) very-loud-sound))
 
 ;; Return true if low sound is heard
 (DefineLink
