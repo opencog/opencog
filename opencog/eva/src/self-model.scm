@@ -166,6 +166,11 @@
 	)
 )
 
+; Obtain the current speaker.
+(DefineLink
+	(DefinedSchema "current-speaker")
+   (Get (State last-speaker (Variable "$x"))))
+
 ; --------------------------------------------------------
 ; Chatbot-related stuff.  In the current design, the chatbot talks
 ; whenever it feels like it; we are simply told when it is talking,
