@@ -327,6 +327,12 @@
 	(GreaterThan
 		(Get (State loud-sound (Variable "$x"))) no-loud-sound))
 
+;;changed Voice as it seems sudden change is not working properly
+(DefineLink
+	(DefinedPredicate "Heard Loud Sound?")
+	(GreaterThan
+		(Get (State decibel-value (Variable "$y"))) normal-conversation))
+
 ;; Return true if low sound is heard
 (DefineLink
 	(DefinedPredicate "very low sound?")

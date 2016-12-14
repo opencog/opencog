@@ -114,7 +114,11 @@
 	(DefinedPredicate "Keep alive")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-(psi-rule (list (DefinedPredicate "Heard Loud Voice?"))
+;(psi-rule (list (DefinedPredicate "Heard Loud Voice?"))
+;	(DefinedPredicate "Say whoa!")
+;	speech-demand-satisfied (stv 1 1) speech-demand)
+
+(psi-rule (list (DefinedPredicate "Heard Loud Sound?"))
 	(DefinedPredicate "Say whoa!")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
