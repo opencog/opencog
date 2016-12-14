@@ -114,6 +114,7 @@
 	(DefinedPredicate "Keep alive")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
+;heard loud voice not working
 ;(psi-rule (list (DefinedPredicate "Heard Loud Voice?"))
 ;	(DefinedPredicate "Say whoa!")
 ;	speech-demand-satisfied (stv 1 1) speech-demand)
@@ -122,17 +123,18 @@
 	(DefinedPredicate "Say whoa!")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-(psi-rule (list (DefinedPredicate  "saliency required?"))
-	(DefinedPredicate "Salient:Curious")
-	face-demand-satisfied (stv 1 1) face-demand)
-
-;(psi-rule (list (DefinedPredicate "Room bright?"))
-;	(DefinedPredicate "Bright:happy")
+;(psi-rule (list (DefinedPredicate  "saliency required?"));;
+;	(DefinedPredicate "Salient:Curious")
 ;	face-demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (DefinedPredicate "Heard Something?"))
-	(DefinedPredicate "React to Sound")
-	speech-demand-satisfied (stv 1 1) speech-demand)
+(psi-rule (list (DefinedPredicate "Room bright?"))
+	(DefinedPredicate "Bright:happy")
+	face-demand-satisfied (stv 1 1) face-demand)
+
+;below doesn't work
+;(psi-rule (list (DefinedPredicate "Heard Something?"))
+;	(DefinedPredicate "React to Sound")
+;	speech-demand-satisfied (stv 1 1) speech-demand)
 
 ; Any changes to the weight for controlled-psi-rules are pushed to ros
 ; dynamic-parameters. Thus the web-ui mirrors the opencog wholeshow state.

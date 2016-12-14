@@ -327,7 +327,7 @@
 	(GreaterThan
 		(Get (State loud-sound (Variable "$x"))) no-loud-sound))
 
-;;changed Voice as it seems sudden change is not working properly
+;;changed Voice as it seems sudden change is not working proper
 (DefineLink
 	(DefinedPredicate "Heard Loud Sound?")
 	(GreaterThan
