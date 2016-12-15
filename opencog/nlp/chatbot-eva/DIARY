@@ -1542,7 +1542,13 @@ look-rule-2 triggers, sets
    )
 )
 
-obj-semantics-rule-1-ao
+obj-semantics-rule-1-ao triggers, and binds:
+$verb -> (WordNode "look"
+"$object" ->  (WordNode "me"
+"$verb-ground" -> (DefinedPredicate "Look-at-thing cmd"
+ "$obj-ground" -> (DefinedSchema "current-speaker")
+
+
 obj-semantic-model-rule-1
 obj-semantic-model-rule-2
 

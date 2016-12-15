@@ -94,10 +94,16 @@
 	(cog-bind show-rule-1)
 	(cog-bind show-rule-2)
 
+	(display "The current-imperative is\n")
+	(display (cog-execute! (Get (State current-imperative (Variable "$x")))))
+
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
 	(cog-bind obj-semantics-rule-1-ao)
+
+	(display "The current-action is\n")
+	(display (cog-execute! (Get (List current-action (Variable "$x")))))
 
 	(cog-bind obj-semantic-model-rule-1)
 	(cog-bind obj-semantic-model-rule-2)
