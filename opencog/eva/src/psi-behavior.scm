@@ -131,10 +131,12 @@
 	(DefinedPredicate "Say whoa!")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-(psi-rule (list (SequentialOr (DefinedPredicate "Is bored?")
-	(DefinedPredicate "Nothing happening?")));;"saliency required?"));;
-	(DefinedPredicate "Salient:Curious")
-	face-demand-satisfied (stv 1 1) face-demand)
+;; saliency
+(psi-set-controlled-rule
+	(psi-rule (list (True))
+			(DefinedPredicate "Salient:Curious")
+			(True) (stv 0.0 0.0) face-demand "saliency-tracking")
+)
 
 (psi-rule (list (DefinedPredicate "Room bright?"))
 	(DefinedPredicate "Bright:happy")
