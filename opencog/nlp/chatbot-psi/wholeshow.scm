@@ -91,7 +91,6 @@
     ; Make the weight changes needed for configuration.
     (disable-all-demos)
     (psi-rule-enable "select_pln_answer" (psi-get-controlled-rules))
-    (psi-rule-enable "aiml" (psi-get-controlled-rules))
 )
 
 ; --------------------------------------------------------------
