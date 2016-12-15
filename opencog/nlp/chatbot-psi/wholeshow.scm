@@ -2,6 +2,7 @@
 (use-modules (opencog) (opencog openpsi))
 
 (load "pln-reasoner.scm")
+(load "contexts.scm")
 
 ; --------------------------------------------------------------
 ; NOTE: Disable the high-level loop that integrates multiple components before
@@ -229,6 +230,7 @@
 (Define
     (DefinedPredicate "wholeshow-updater")
     (SequentialAnd
+        (DefinedPredicate "is-input-utterance?")
         (DefinedPredicate "utterance-matches-wholeshow-pattern?")
         (DefinedPredicate "wholeshow-change-requested?")
         (DefinedPredicate "wholeshow-action"))
