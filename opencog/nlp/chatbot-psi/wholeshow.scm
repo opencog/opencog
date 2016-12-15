@@ -96,7 +96,6 @@
     ; Make the weight changes needed for configuration.
     (disable-all-demos)
     (psi-rule-enable "select_pln_answer" (psi-get-controlled-rules))
-    (psi-rule-enable "aiml" (psi-get-controlled-rules))
 )
 
 ; --------------------------------------------------------------
@@ -107,7 +106,7 @@
     ; Make the weight changes needed for configuration.
     (disable-all-demos)
     (psi-rule-enable "random_sentence_pkd" (psi-get-controlled-rules))
-    (psi-rule-enable "random_sentence_blogs" (psi-get-controlled-rules))
+    (psi-rule-enable "random_sentence_kurzweil" (psi-get-controlled-rules))
 )
 
 ; --------------------------------------------------------------
@@ -206,6 +205,14 @@
     )
 )
 
+(define (is-in-wholeshow-mode? mode)
+    (define current-mode (gar (cog-execute! (Get (State wholeshow-state (Variable "m"))))))
+    (if (equal? mode current-mode)
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
 ; --------------------------------------------------------------
 ; Used for checking if the input utterance is a wholeshow command
 (Define
@@ -240,4 +247,11 @@
         (DefinedPredicate "utterance-matches-wholeshow-pattern?")
         (DefinedPredicate "wholeshow-change-requested?")
         (DefinedPredicate "wholeshow-action"))
+)
+
+(Define
+    (DefinedPredicate "is-in-reasoning-mode?")
+    (Evaluation
+        (GroundedPredicate "scm: is-in-wholeshow-mode?")
+        (List (Node "reasoning")))
 )
