@@ -57,7 +57,7 @@
      implication-scope-distribution-rewrite))
 
 (define (implication-scope-distribution-formula ImplSc Impl)
-  (cog-set-tv! Impl (cog-tv ImplSc)))
+  (cog-merge-hi-conf-tv! Impl (cog-tv ImplSc)))
 
 ;; Name the rule
 (define implication-scope-distribution-rule-name

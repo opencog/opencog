@@ -13,7 +13,7 @@
 ;;
 ;;----------------------------------------------------------------------
 
-(define implication-implicant-distribution-variables
+(define implication-implicant-distribution-vardecl
   (VariableList
      (TypedVariableLink
         (VariableNode "$P")
@@ -26,33 +26,42 @@
            (TypeNode "PredicateNode")
            (TypeNode "LambdaLink")))))
 
-(define implication-implicant-distribution-body
-  (ImplicationLink
-     (VariableNode "$P")
-     (VariableNode "$Q")))
+(define implication-implicant-distribution-pattern
+  (And
+     (ImplicationLink
+        (VariableNode "$P")
+        (VariableNode "$Q"))
+     (EvaluationLink
+        (GroundedPredicateNode "scm: non-null-confidence")
+        (ImplicationLink
+           (VariableNode "$P")
+           (VariableNode "$Q")))))
 
 (define implication-implicant-distribution-rewrite
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: implication-implicant-distribution-formula")
      (ListLink
-        implication-implicant-distribution-body)))
+        (ImplicationLink
+           (VariableNode "$P")
+           (VariableNode "$Q"))
+        (ImplicationLink
+           (VariableNode "$P")
+           (And
+              (VariableNode "$P")
+              (VariableNode "$Q"))))))
 
 (define implication-implicant-distribution-rule
   (BindLink
-     implication-implicant-distribution-variables
-     implication-implicant-distribution-body
+     implication-implicant-distribution-vardecl
+     implication-implicant-distribution-pattern
      implication-implicant-distribution-rewrite))
 
-(define (implication-implicant-distribution-formula impl)
-  (let* (
-         (impl-outgoings (cog-outgoing-set impl))
-         (P (car impl-outgoings))
-         (Q (cadr impl-outgoings)))
-    (cog-set-tv!
-     (ImplicationLink
-        P
-        (cog-new-flattened-link 'AndLink P Q))
-     (cog-tv impl))))
+;; Return true the atom has a non null confidence
+(define (non-null-confidence atom)
+  (bool->tv (> (cog-stv-confidence atom) 0)))
+
+(define (implication-implicant-distribution-formula Impl DImpl)
+  (cog-merge-hi-conf-tv! DImpl (cog-tv Impl)))
 
 ;; Name the rule
 (define implication-implicant-distribution-rule-name
