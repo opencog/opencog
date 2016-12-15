@@ -16,14 +16,30 @@
 "
     (append-map
         (lambda (sent-node)
-            (get-abstract-version (car (sent-get-interp sent-node))))
+            (let* ((r2l-outputs (interp-get-r2l-outputs
+                    (car (sent-get-interp sent-node))))
+                  (nodes (delete-duplicates
+                      (append-map cog-get-all-nodes r2l-outputs)))
+                  (cn-and-pn (delete-duplicates
+                        (filter
+                            (lambda (x)
+                                (or (equal? 'ConceptNode (cog-type x))
+                                    (equal? 'PredicateNode (cog-type x))))
+                            nodes))))
+                (append
+                    r2l-outputs
+                    (append-map
+                        ; For sog-hack-decomposition-rule
+                        (lambda (x) (cog-incoming-by-type x 'ReferenceLink))
+                        cn-and-pn))
+            ))
         sn-list)
 )
 
 ; ----------------------------------------------------------------------------
 ; Time based means of choosing focus-set content, from nlp-pipeline.
 ; ----------------------------------------------------------------------------
-(define start-of-chat-recording (Anchor "start-of-chat-recording"))
+(define start-of-chat-recording 0)
 
 (define-public (pln-record-current-time)
 "
