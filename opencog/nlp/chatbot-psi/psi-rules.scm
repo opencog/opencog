@@ -39,9 +39,7 @@
             (SequentialOr
                 (Not (DefinedPredicate "input-is-a-question?"))
                 (DefinedPredicate "fuzzy-reply-is-declarative?"))
-            (SequentialOr
-                (DefinedPredicate "is-fuzzy-reply-good?")
-                (DefinedPredicate "no-other-fast-reply?"))
+            (DefinedPredicate "no-other-fast-reply?")
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-reply)))
@@ -59,9 +57,7 @@
             (DefinedPredicate "is-fuzzy-reply?")
             (DefinedPredicate "input-is-a-question?")
             (Not (DefinedPredicate "fuzzy-reply-is-declarative?"))
-            (SequentialOr
-                (DefinedPredicate "is-fuzzy-reply-good?")
-                (DefinedPredicate "no-good-fast-answer?"))
+            (DefinedPredicate "no-good-fast-answer?")
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List fuzzy-reply)))
@@ -83,7 +79,7 @@
         ))
         (True (ExecutionOutput (GroundedSchema "scm: call-aiml") (List)))
         (True)
-        (stv .9 .9)
+        (stv 0 .9)
         sociality
         "aiml"
     )
@@ -101,7 +97,7 @@
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-reply)))
         (True)
-        (stv .9 .9)
+        (stv 0 .9)
         sociality
         "aiml"
     )
@@ -121,7 +117,7 @@
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List aiml-reply)))
         (True)
-        (stv .9 .9)
+        (stv 0 .9)
         sociality
         "aiml"
     )
@@ -152,6 +148,26 @@
             (SequentialOr
                 (DefinedPredicate "input-is-about-the-robot?")
                 (Not (DefinedPredicate "input-is-a-question?")))
+            (DefinedPredicate "no-random-sentence-generator-keywords?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List chatscript-reply)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "chatscript"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "chatscript-finished?")
+            (DefinedPredicate "is-chatscript-reply?")
+            (SequentialOr
+                (DefinedPredicate "input-is-about-the-robot?")
+                (Not (DefinedPredicate "input-is-a-question?")))
+            (DefinedPredicate "has-random-sentence-generator-done-with-the-keywords?")
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List chatscript-reply)))
@@ -170,6 +186,26 @@
             (DefinedPredicate "input-is-a-question?")
             (Not (DefinedPredicate "input-is-about-the-robot?"))
             (DefinedPredicate "no-good-fast-answer?")
+            (DefinedPredicate "no-random-sentence-generator-keywords?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List chatscript-reply)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "chatscript"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "chatscript-finished?")
+            (DefinedPredicate "is-chatscript-reply?")
+            (DefinedPredicate "input-is-a-question?")
+            (Not (DefinedPredicate "input-is-about-the-robot?"))
+            (DefinedPredicate "no-good-fast-answer?")
+            (DefinedPredicate "has-random-sentence-generator-done-with-the-keywords?")
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List chatscript-reply)))
@@ -309,7 +345,7 @@
         ))
         (True (ExecutionOutput (GroundedSchema "scm: call-random-sentence-generator") (List (Node "blogs"))))
         (True)
-        (stv .9 .9)
+        (stv 0 .9)
         sociality
         "random_sentence_blogs"
     )
@@ -356,7 +392,7 @@
         ))
         (True (ExecutionOutput (GroundedSchema "scm: reply") (List random-blogs-sentence-generated)))
         (True)
-        (stv .9 .9)
+        (stv 0 .9)
         sociality
         "random_sentence_blogs"
     )

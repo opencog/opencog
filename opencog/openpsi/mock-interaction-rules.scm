@@ -14,10 +14,10 @@
 
 
 (define power->voice
-	(psi-create-interaction-rule agent-state-power changed voice-width 1))
+	(psi-create-interaction-rule power changed voice-width 1))
 
 (define power->arousal
-	(psi-create-interaction-rule agent-state-power changed arousal .1))
+	(psi-create-interaction-rule power changed arousal .1))
 
 (define arousal->voice
 	(psi-create-interaction-rule arousal changed voice-width -.9))
@@ -30,7 +30,7 @@
 ; speech giving starts -> increased power
 (define speech->power
 	(psi-create-interaction-rule speech-giving-starts increased
-		agent-state-power .5))
+		power .5))
 
 ; positive sentiment dialog -> increased pos-valence
 (define pos-dialog->pos-valence

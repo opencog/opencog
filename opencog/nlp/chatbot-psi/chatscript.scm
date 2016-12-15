@@ -25,11 +25,20 @@
         (define rtn (send-to-chatscript (cog-name (get-input-text-node))))
         (define s (car rtn))
         (define bv (cdr rtn))
+        (define br (recv! s bv))
+        (define reply (utf8->string bv))
+        (define regex "\\[callback=.+\\] ")
 
-        (recv! s bv)
+        ; Remove any null char before doing regexp-substitute
+        (set! reply (string-delete (lambda (c) (char=? #\nul c)) reply))
+
+        ; Sometimes the reply may have some unwanted string at the beginning
+        ; e.g. "[callback=3000 ] Greetings!"
+        ; Ignore the first part of it
+        (set! reply (regexp-substitute/global #f regex reply 'pre "" 'post))
 
         ; TODO: Parse the reply?
-        (State chatscript-reply (List (map Word (string-split (utf8->string bv) #\ ))))
+        (State chatscript-reply (List (map Word (string-split reply #\ ))))
         (State chatscript process-finished)
 
         (shutdown s 2)
@@ -40,4 +49,9 @@
 ; different robots
 (define-public (chatscript-setup robot)
     (shutdown (car (send-to-chatscript (string-append ":build " robot))) 2)
+)
+
+; Change the IP of the server
+(define-public (set-chatscript-server ip)
+    (set! cs-server ip)
 )

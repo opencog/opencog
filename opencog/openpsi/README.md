@@ -301,10 +301,11 @@ Instructions:
 * Create "expression" callback function with (psi-set-expression-callback!
   callback) in updater.scm. This function should handle implementation-specific
   expression of emotion and/or physiology based on the OpenPsi dynamic variables.
-* Todo: Create general callback that is called at each loop step.
 
-Todo: Interaction rule sets, events, and entities should be specified
-      via config file
+For a concrete example of using this model, see 
+https://github.com/opencog/ros-behavior-scripting/blob/master/src/psi-dynamics.scm
+
+Todo: Create general callback that is called at each loop step.
 
 
 Open Issues:

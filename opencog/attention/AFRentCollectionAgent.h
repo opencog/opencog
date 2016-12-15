@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_AFRENT_COLLECTION_AGENT_H
 #define _OPENCOG_AFRENT_COLLECTION_AGENT_H
 
+#include <chrono>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -35,6 +36,8 @@
 #include <opencog/cogserver/server/Agent.h>
 
 #include "RentCollectionBaseAgent.h"
+
+using namespace std::chrono;
 
 namespace opencog {
     /** \addtogroup grp_attention
@@ -52,14 +55,8 @@ namespace opencog {
      */
     class AFRentCollectionAgent : public RentCollectionBaseAgent {
         private:
-            using hr_clock = std::chrono::high_resolution_clock;
-            using chrono_d = std::chrono::duration<double>;
-            template<class T>
-            using chrono_t = std::chrono::time_point<T>;
-
-            int af_sti_rent_rate ;
-            int af_lti_rent_rate ;
-            std::map<Handle, chrono_t<hr_clock>> last_update;
+            time_point<high_resolution_clock> last_update;
+            float update_cycle;
 
         public:
 
