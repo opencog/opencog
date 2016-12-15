@@ -101,7 +101,7 @@
     ; Make the weight changes needed for configuration.
     (disable-all-demos)
     (psi-rule-enable "random_sentence_pkd" (psi-get-controlled-rules))
-    (psi-rule-enable "random_sentence_blogs" (psi-get-controlled-rules))
+    (psi-rule-enable "random_sentence_kurzweil" (psi-get-controlled-rules))
 )
 
 ; --------------------------------------------------------------
