@@ -14,6 +14,37 @@
 ;-------------------------------------------------------------------------------
 ; Define the psi-rules
 
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "is-in-reasoning-mode?")
+        (Not (DefinedPredicate "input-is-a-question?"))
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: say") (List (Word "alright"))))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "is-in-reasoning-mode?")
+        (DefinedPredicate "input-is-a-question?")
+        (SequentialOr
+            (Not (DefinedPredicate "is-pln-inferred-related?"))
+            (SequentialAnd
+                (DefinedPredicate "pln-qa-finished?")
+                (Not (DefinedPredicate "is-pln-answer?"))
+            ))
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: say")
+        (List (Word "I") (Word "don't") (Word "know"))))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
