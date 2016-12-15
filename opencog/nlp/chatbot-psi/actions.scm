@@ -138,3 +138,21 @@
         )
     )
 )
+
+;-------------------------------------------------------------------------------
+
+(for-each
+    (lambda (w)
+        (Evaluation (Predicate "quick reply")
+            (List (map Word (string-split w #\ ))))
+    )
+    (list "ok" "alright" "sure" "keep going" "go ahead" "carry on")
+)
+
+(define (ack-the-statement)
+    (define qr (cog-execute! (RandomChoice (Get
+        (TypedVariable (Glob "$reply") (Type "WordNode"))
+            (Evaluation (Predicate "quick reply")
+                (List (Glob "$reply")))))))
+    (apply say (cog-outgoing-set qr))
+)
