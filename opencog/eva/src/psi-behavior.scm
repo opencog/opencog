@@ -36,6 +36,14 @@
 			(DefinedPredicate "Did someone leave?")
 			(DefinedPredicate "Someone visible?"))))
 
+(DefineLink
+	(DefinedPredicate "Nothing New?")
+	(NotLink
+		(SequentialOr
+			(DefinedPredicate "Someone requests interaction?")
+			(DefinedPredicate "Did someone arrive?")
+			(DefinedPredicate "Did someone leave?")
+			)))
 
 (psi-rule (list (DefinedPredicate "Did Someone New Speak?"))
 	(DefinedPredicate "Request interaction with person who spoke")
@@ -56,10 +64,10 @@
 
 ; This rule is the old multiple-face tracking rule
 ; TODO Remove after thoroughly testing behavior on robot.
-;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-;		(DefinedPredicate "Someone visible?")))
-;	(DefinedPredicate "Interact with people")
-;	face-demand-satisfied (stv 1 1) face-demand)
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+		(DefinedPredicate "Someone visible?")))
+	(DefinedPredicate "Interact with people")
+	face-demand-satisfied (stv 1 1) face-demand)
 
 ; TODO: How should rules that could run concurrently be represented, when
 ; we have action compostion(aka Planning/Orchestration)?
@@ -75,9 +83,9 @@
 	(DefinedPredicate "Change interaction target by priority")
 	face-demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (DefinedPredicate "Nothing happening?"))
-	(DefinedPredicate "Nothing is happening")
-	face-demand-satisfied (stv 1 1) face-demand)
+;(psi-rule (list (DefinedPredicate "Nothing happening?"))
+;	(DefinedPredicate "Nothing is happening")
+;	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd
 		(Not (DefinedPredicate "chatbot started talking?"))
@@ -123,9 +131,10 @@
 	(DefinedPredicate "Say whoa!")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-;(psi-rule (list (DefinedPredicate  "saliency required?"));;
-;	(DefinedPredicate "Salient:Curious")
-;	face-demand-satisfied (stv 1 1) face-demand)
+(psi-rule (list (SequentialOr (DefinedPredicate "Is bored?")
+	(DefinedPredicate "Nothing happening?")));;"saliency required?"));;
+	(DefinedPredicate "Salient:Curious")
+	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (DefinedPredicate "Room bright?"))
 	(DefinedPredicate "Bright:happy")
