@@ -440,3 +440,17 @@
         "chatbot_eva"
     )
 )
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "input-type-is-imperative?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: say") (List (Word "ok"))))
+        (True)
+        (stv .9 .9)
+        sociality
+        "saliency"
+    )
+)

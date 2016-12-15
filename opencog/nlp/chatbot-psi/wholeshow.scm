@@ -30,6 +30,7 @@
     (list
         (cons "reasoning" enable-pln-demo)
         (cons "philosophy" enable-philosophy-demo)
+        (cons "saliency" enable-saliency-demo)
         (cons "default" enable-all-demos))
 )
 
@@ -103,6 +104,15 @@
     (disable-all-demos)
     (psi-rule-enable "random_sentence_pkd" (psi-get-controlled-rules))
     (psi-rule-enable "random_sentence_blogs" (psi-get-controlled-rules))
+)
+; --------------------------------------------------------------
+(define-public (enable-saliency-demo)
+"
+  Enables the random_sentence_pkd and random_sentence_blogs rules.
+"
+    ; Make the weight changes needed for configuration.
+    (disable-all-demos)
+    (psi-rule-enable "saliency" (psi-get-controlled-rules))
 )
 
 ; --------------------------------------------------------------
