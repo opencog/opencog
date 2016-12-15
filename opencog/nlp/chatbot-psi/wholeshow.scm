@@ -191,6 +191,14 @@
     )
 )
 
+(define (is-in-wholeshow-mode? mode)
+    (define current-mode (gar (cog-execute! (Get (State wholeshow-state (Variable "m"))))))
+    (if (equal? mode current-mode)
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
 ; --------------------------------------------------------------
 ; Used for checking if the input utterance is a wholeshow command
 (Define
@@ -225,4 +233,11 @@
         (DefinedPredicate "utterance-matches-wholeshow-pattern?")
         (DefinedPredicate "wholeshow-change-requested?")
         (DefinedPredicate "wholeshow-action"))
+)
+
+(Define
+    (DefinedPredicate "is-in-reasoning-mode?")
+    (Evaluation
+        (GroundedPredicate "scm: is-in-wholeshow-mode?")
+        (List (Node "reasoning")))
 )
