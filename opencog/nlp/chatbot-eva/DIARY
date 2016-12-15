@@ -1546,18 +1546,19 @@ obj-semantics-rule-1-ao
 obj-semantic-model-rule-1
 obj-semantic-model-rule-2
 
-(Get (State (Concept "last person who spoke") (Variable "$x")))
-
 (load "semantics.scm")
 (cog-bind obj-semantics-rule-1-ao)
-(load "fu.scm")
-(cog-bind wtf)
-
-(Define (DefinedSchema "current-speaker") (Concept "foo"))
-(cog-delete-recursive (DefinedSchema "current-speaker"))
-(Define (DefinedSchema "current-speaker") (List (Concept "barf")))
 
 (Define (DefinedPredicate "Look-at-thing cmd")
+ (DefinedPredicate "look at person"))
+
+(Define (DefinedSchema "current-speaker") 
+	(Get (State (Concept "last person who spoke") (Variable "$x"))))
+
+well, (Concept "last person who spoke") isn't being set.
+(map-sound should be setting it.
+
+(cog-incoming-set (Concept "last person who spoke"))
 
 
 where-look-rule
