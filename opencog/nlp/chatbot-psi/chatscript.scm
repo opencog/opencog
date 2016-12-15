@@ -50,3 +50,8 @@
 (define-public (chatscript-setup robot)
     (shutdown (car (send-to-chatscript (string-append ":build " robot))) 2)
 )
+
+; Change the IP of the server
+(define-public (set-chatscript-server ip)
+    (set! cs-server ip)
+)
