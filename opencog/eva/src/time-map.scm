@@ -20,9 +20,11 @@
 (use-modules (opencog ato pointmem)); needed for maps
 (use-modules (opencog python))
 
-(StateLink (ConceptNode "last person who spoke") (NumberNode "0"))
-(StateLink (ConceptNode "previous person who spoke") (NumberNode "0"))
-(define new-person-spoke 0)
+(define last-speaker (ConceptNode "last person who spoke"))
+(define prev-speaker (ConceptNode "previous person who spoke"))
+
+(StateLink last-speaker (NumberNode "0"))
+(StateLink prev-speaker (NumberNode "0"))
 
 ; --------------------------------------------------------------------
 ; Create an opencog space-time map, for storing locations of faces.
@@ -129,14 +131,19 @@
 ;; See the `look-turn-at-face` for complete documentation.
 ;;
 (define (glance-at-face FACE-ID-NODE)
-	(if (not(equal? (cog-name FACE-ID-NODE) "0"))
+	; XXX FIXME this if-check is totally bogus, but that is only
+	; because the new time-server code broke the old face-handling
+	; code. Fix the face-handling code, and this totally bogus check
+	; would not be needed. Arghhh. I despise sloppy-ass bullshit code.
+	(if (not (equal? (cog-name FACE-ID-NODE) "0"))
 		(look-turn-at-face FACE-ID-NODE "gaze_at_face_point")
 		(stv 0 1)
 	)
 )
 
 (define (look-at-face FACE-ID-NODE)
-	(if (not(equal? (cog-name FACE-ID-NODE) "0"))
+	; XXX FIXME this if-check is totally bogus, see above. Arghhh.
+	(if (not (equal? (cog-name FACE-ID-NODE) "0"))
 		(look-turn-at-face FACE-ID-NODE "look_at_face_point")
 		(stv 0 1)
 	)
@@ -152,8 +159,11 @@
 ;	)
 ;)
 ; ---------------------------------------------------------------------
-;; below creates say atom for face if sound came from it
+;; Below creates say atom for face if sound came from it
 ;; XXX FIXME huh? this needs documentation.
+;; XXX FIXME elminiate the use of cog-execute! -- that is not how
+;; this should be designed -- these need to be learnable; and
+;; cog-execute prevents learning.
 (define (who-said? sent)
 	;;request eye contact
 
@@ -161,31 +171,26 @@
 	;(display "###### WHO SAID: ")
 	;(display (cog-name
 	;	(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-	;		(StateLink
-	;			(ConceptNode "last person who spoke")(VariableNode "$fid")))))
+	;		(State last-speaker (Variable "$fid")))))
 
 	(cog-execute!
-	(PutLink
-		(StateLink request-eye-contact-state (VariableNode "$fid"))
-		(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-			(StateLink
-				(ConceptNode "last person who spoke") (VariableNode "$fid")))
+	(Put
+		(State request-eye-contact-state (VariableNode "$fid"))
+		(Get (State last-speaker (Variable "$fid")))
 	))
 	;;generate info
 	(cog-execute!
 	(PutLink
-	(AtTimeLink
-		(TimeNode (number->string (current-time)))
-		(EvaluationLink
-			(PredicateNode "say_face")
-				(ListLink
-					(ConceptNode (cog-name (VariableNode "$fid")))
-					(SentenceNode sent)))
-			(ConceptNode "sound-perception"))
-	(GetLink (TypedVariable (Variable "$fid") (TypeNode "NumberNode"))
-		(StateLink
-			(ConceptNode "last person who spoke") (VariableNode "$fid")))
-	))
+		(AtTimeLink
+			(TimeNode (number->string (current-time)))
+			(EvaluationLink
+				(PredicateNode "say_face")
+					(ListLink
+						(Concept (cog-name (VariableNode "$fid")))
+						(Sentence sent)))
+				(Concept "sound-perception"))
+			(Get (State last-speaker (Variable "$fid")))
+		))
 )
 
 ;;math
@@ -257,12 +262,6 @@
 	)
 )
 
-;; TODO: change this function to psi-rule later
-(define (request-attention fid)
-	(set! new-person-spoke fid)
-	(StateLink request-eye-contact-state (NumberNode fid))
-)
-
 ;; This needs to be define-public, so that ros-bridge can send this
 ;; to the cogserver.
 ;; XXX TODO -- this should eventually be a psi-rule, so that we can
@@ -271,7 +270,5 @@
 ;; direction, no matter what.
 (define-public (map-sound xx yy zz)
 	(define fid (face-nearest-sound xx yy zz))
-	(if (not (null? fid))
-		(StateLink (ConceptNode "last person who spoke") fid)
-	)
+	(if (not (null? fid)) (StateLink last-speaker fid))
 )

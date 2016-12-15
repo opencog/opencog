@@ -158,6 +158,14 @@
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
 
+; The language-subsystem can understand commands such as "look at me"
+; or, more generally, "look at this thing". At the moment, the only
+; thing we can look at are faces, and so we just recycle the
+; definition for look-at-person (from self-model.scm)
+(DefineLink
+	(DefinedPredicate "Look-at-thing cmd")
+	(DefinedPredicate "look at person"))
+
 ; -------------------------------------------------------------
 ; Publish the current behavior.
 ; Cheap hack to allow external ROS nodes to know what we are doing.
