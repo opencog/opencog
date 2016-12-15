@@ -16,8 +16,8 @@
 ;; Load the PLN configuration for this demo
 (load "pln-bc-config.scm")
 
-;; ;; First target
-;; (define first-target
+;; Target (1)
+;; (define target-1
 ;;    (ImplicationScopeLink
 ;;       (TypedVariableLink
 ;;          (VariableNode "$X")
@@ -48,17 +48,157 @@
 ;;       )
 ;;    )
 ;; )
-;; (pln-bc first-target)
+;; (pln-bc target-1)
 
-;; Second target
-(define second-target
+;; Target (2)
+;; (define target-2
+;;    (ImplicationLink
+;;       (LambdaLink
+;;          (TypedVariableLink
+;;             (VariableNode "$X")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;          (AndLink
+;;             (EvaluationLink
+;;                (PredicateNode "take")
+;;                (ListLink
+;;                   (VariableNode "$X")
+;;                   (ConceptNode "treatment-1")
+;;                )
+;;             )
+;;             (EvaluationLink (stv 1 1)
+;;                (PredicateNode "contain")
+;;                (ListLink
+;;                   (ConceptNode "treatment-1")
+;;                   (ConceptNode "compound-A")
+;;                )
+;;             )
+;;          )
+;;       )
+;;       (LambdaLink
+;;          (TypedVariableLink
+;;             (VariableNode "$X")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;          (EvaluationLink
+;;             (PredicateNode "take")
+;;             (ListLink
+;;                (VariableNode "$X")
+;;                (ConceptNode "compound-A")
+;;             )
+;;          )
+;;       )
+;;    )
+;; )
+;; (pln-bc target-2)
+
+;; Target (3) is not useful for the BC
+
+;; Target (4)
+;; (define target-4
+;;    (LambdaLink
+;;       (TypedVariableLink
+;;          (VariableNode "$X")
+;;          (TypeNode "ConceptNode")
+;;       )
+;;       (EvaluationLink
+;;          (PredicateNode "contain")
+;;          (ListLink
+;;             (ConceptNode "treatment-1")
+;;             (ConceptNode "compound-A")
+;;          )
+;;       )
+;;    )
+;; )
+;; (pln-bc target-4)
+
+;; (define target-5
+;;    (ImplicationLink
+;;       (LambdaLink
+;;          (TypedVariableLink
+;;             (VariableNode "$X")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;          (EvaluationLink
+;;             (PredicateNode "take")
+;;             (ListLink
+;;                (VariableNode "$X")
+;;                (ConceptNode "treatment-1")
+;;             )
+;;          )
+;;       )
+;;       (LambdaLink
+;;          (TypedVariableLink
+;;             (VariableNode "$X")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;          (EvaluationLink
+;;             (PredicateNode "contain")
+;;             (ListLink
+;;                (ConceptNode "treatment-1")
+;;                (ConceptNode "compound-A")
+;;             )
+;;          )
+;;       )
+;;    )
+;; )
+;; (pln-bc target-5)
+
+;; (define target-6
+;;    (ImplicationLink
+;;       (LambdaLink
+;;          (TypedVariableLink
+;;             (VariableNode "$X")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;          (EvaluationLink
+;;             (PredicateNode "take")
+;;             (ListLink
+;;                (VariableNode "$X")
+;;                (ConceptNode "treatment-1")
+;;             )
+;;          )
+;;       )
+;;       (AndLink
+;;          (LambdaLink
+;;             (TypedVariableLink
+;;                (VariableNode "$X")
+;;                (TypeNode "ConceptNode")
+;;             )
+;;             (EvaluationLink
+;;                (PredicateNode "take")
+;;                (ListLink
+;;                   (VariableNode "$X")
+;;                   (ConceptNode "treatment-1")
+;;                )
+;;             )
+;;          )
+;;          (LambdaLink
+;;             (TypedVariableLink
+;;                (VariableNode "$X")
+;;                (TypeNode "ConceptNode")
+;;             )
+;;             (EvaluationLink
+;;                (PredicateNode "contain")
+;;                (ListLink
+;;                   (ConceptNode "treatment-1")
+;;                   (ConceptNode "compound-A")
+;;                )
+;;             )
+;;          )
+;;       )
+;;    )
+;; )
+;; (pln-bc target-6)
+
+(define target-7
    (ImplicationLink
-      (LambdaLink
-         (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-         )
-         (AndLink
+      (AndLink
+         (LambdaLink
+            (TypedVariableLink
+               (VariableNode "$X")
+               (TypeNode "ConceptNode")
+            )
             (EvaluationLink
                (PredicateNode "take")
                (ListLink
@@ -66,7 +206,13 @@
                   (ConceptNode "treatment-1")
                )
             )
-            (EvaluationLink (stv 1 1)
+         )
+         (LambdaLink
+            (TypedVariableLink
+               (VariableNode "$X")
+               (TypeNode "ConceptNode")
+            )
+            (EvaluationLink
                (PredicateNode "contain")
                (ListLink
                   (ConceptNode "treatment-1")
@@ -80,17 +226,26 @@
             (VariableNode "$X")
             (TypeNode "ConceptNode")
          )
-         (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-               (VariableNode "$X")
-               (ConceptNode "compound-A")
+         (AndLink
+            (EvaluationLink
+               (PredicateNode "take")
+               (ListLink
+                  (VariableNode "$X")
+                  (ConceptNode "treatment-1")
+               )
+            )
+            (EvaluationLink
+               (PredicateNode "contain")
+               (ListLink
+                  (ConceptNode "treatment-1")
+                  (ConceptNode "compound-A")
+               )
             )
          )
       )
    )
 )
-(pln-bc second-target)
+(pln-bc target-7)
 
 ;; Final target
 ;; (pln-bc moses-model)

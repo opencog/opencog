@@ -51,7 +51,6 @@
 
 (define rule-filenames
   (list "conditional-partial-instantiation-meta-rule.scm"
-        "implication-instantiation-rule.scm"
         "implication-scope-distribution-rule.scm"
         "and-lambda-distribution-rule.scm"
         "lambda-grounded-construction-rule.scm"
@@ -73,13 +72,12 @@
 (define rules
   (list
         (list conditional-partial-instantiation-meta-rule-name 1)
-        ;; (list implication-partial-instantiation-rule-name 1)
         (list implication-scope-distribution-rule-name 1)
         ;; (list and-lambda-distribution-rule-name 1)
-        ;; (list lambda-grounded-construction-rule-name 1)
-        ;; (list implication-construction-rule-name 1)
-        ;; (list implication-implicant-distribution-rule-name 1)
-        ;; (list implication-and-lambda-factorization-rule-name 1)
+        (list lambda-grounded-construction-rule-name 1)
+        (list implication-construction-rule-name 1)
+        (list implication-implicant-distribution-rule-name 1)
+        (list implication-and-lambda-factorization-rule-name 1)
         ;; (list deduction-implication-rule-name 1)
         ;; (list implication-full-instantiation-rule-name 1)
         ;; (list equivalence-to-implication-rule-name 1)
@@ -95,7 +93,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 10)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 20)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
