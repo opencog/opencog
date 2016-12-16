@@ -11,8 +11,8 @@
 "
   pln-get-nlp-inputs SN-LIST
 
-  Given a list of SentenceNodes SN-LIST, it returns a list with their
-  abstracted-version of r2l outputs.
+  Given a list of SentenceNodes ,sn-list, it returns a list with atoms that
+  can be inferred on.
 "
     (append-map
         (lambda (sent-node)
