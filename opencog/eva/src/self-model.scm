@@ -176,9 +176,10 @@
 	(DefinedSchema "other-speaker")
    (Get (State last-speaker (Variable "$x"))))
 
+; hard-code -- salient point
 (DefineLink
 	(DefinedSchema "current-salient")
-   (Get (State last-speaker (Variable "$x"))))
+   (Concept "salient-point"))
 
 ; --------------------------------------------------------
 ; Chatbot-related stuff.  In the current design, the chatbot talks
