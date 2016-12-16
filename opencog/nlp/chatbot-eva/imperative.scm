@@ -82,6 +82,8 @@
 "
   Process imperative IMP, which should be a SentenceNode.
 "
+	(define do-dbg-prt #t)
+
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence imp)
 
@@ -95,16 +97,20 @@
 	(cog-bind show-rule-1)
 	(cog-bind show-rule-2)
 
-	; (display "The current-imperative is\n")
-	; (display (cog-execute! (Get (State current-imperative (Variable "$x")))))
+	(if do-dbg-prt (begin
+		(display "The current-imperative is\n")
+		(display (cog-execute! (Get (State current-imperative (Variable "$x")))))
+	))
 
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
 	(cog-bind obj-semantics-rule-1-ao)
 
-	(display "The current-action is\n")
-	(display (cog-execute! (Get (List current-action (Variable "$x")))))
+	(if do-dbg-prt (begin
+		(display "The current-action is\n")
+		(display (cog-execute! (Get (List current-action (Variable "$x")))))
+	))
 
 	(cog-bind obj-semantic-model-rule-1)
 	(cog-bind obj-semantic-model-rule-2)
@@ -113,8 +119,10 @@
 	(let* ((act-do-do (cog-bind action-rule-ao))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-		(display "The set of actions to be performed are:\n")
-		(display act-do-do) (newline)
+		(if do-dbg-prt (begin
+			(display "The set of actions to be performed are:\n")
+			(display act-do-do) (newline)
+		))
 
 		; Evaluate can throw if we give it bad args. Which happens during
 		; development. So report any errors.
