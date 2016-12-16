@@ -845,6 +845,8 @@
 (DefineLink
 	(DefinedPredicate "Salient:Curious")
 	(SequentialAnd
+		(True (Evaluation (GroundedPredicate "scm: print-msg")
+			(ListLink (Node "--- Saliency Tracking"))))
 		(DefinedPredicate "look at salient point")
 		(DefinedPredicate "Curious")))
 
