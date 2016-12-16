@@ -231,6 +231,7 @@
 ; Physical (motor control) knowledge about imperative look-at-thing verbs.
 (ReferenceLink (WordNode "look") (DefinedPredicate "Look-at-thing cmd"))
 (ReferenceLink (WordNode "turn") (DefinedPredicate "Look-at-thing cmd"))
+(ReferenceLink (WordNode "face") (DefinedPredicate "Look-at-thing cmd"))
 
 ; Syntactic category of imperative look-at-thing verbs.
 (Inheritance (DefinedPredicate "Look-at-thing cmd") (Concept "look-at-cmd"))
