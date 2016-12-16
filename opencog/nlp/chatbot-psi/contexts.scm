@@ -184,6 +184,23 @@
         (List (Word "you") (Word "your") (Word "yours") (Word "robot")))
 )
 
+(Define
+    (DefinedPredicate "asking-how-robot-feels?")
+    (And (DefinedPredicate "input-type-is-interrogative")
+         (GroundedPredicate "scm: asking-how-robot-feels?")
+    )
+)
+
+(define (asking-how-robot-feels?)
+    (list?
+        (member (cog-name (get-input-text-node)) (list
+            "how are you feeling"
+            "how are you"
+            "how do you feel")
+        )
+    )
+)
+
 ; Essentially equivalent to "is-input-utterance", as the states
 ; will be reset after giving a reply by default
 (Define
