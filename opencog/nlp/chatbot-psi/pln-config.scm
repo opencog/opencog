@@ -62,3 +62,14 @@
     (ure-define-add-rule rb "sog-hack-decomposition-rule"
         sog-hack-decomposition-rule .8)
 )
+
+(define (infer-on-r2l r2l-outputs steps)
+    (configure-pln)
+    (let* ((inference-results (simple-forward-chain rb r2l-outputs steps))
+          (clean-results (lset-difference equal? inference-results r2l-outputs))
+          (results-for-sureal
+              (cog-outgoing-set (filter-for-sureal clean-results)))
+          )
+        results-for-sureal
+    )
+)
