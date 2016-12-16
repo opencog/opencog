@@ -149,6 +149,7 @@
 
   Returns a list containing both the FOCUS-SET and the inference results.
 "
+    ; TODO: Add an optional argument for filtering results b/n steps using.
     ; Create the next focus-set.
     (define (create-next-fs prev-fs chaining-result)
             (delete-duplicates (append chaining-result prev-fs)))
