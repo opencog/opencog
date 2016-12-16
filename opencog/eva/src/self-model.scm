@@ -171,6 +171,15 @@
 	(DefinedSchema "current-speaker")
    (Get (State last-speaker (Variable "$x"))))
 
+; XXX quick hack
+(DefineLink
+	(DefinedSchema "other-speaker")
+   (Get (State last-speaker (Variable "$x"))))
+
+(DefineLink
+	(DefinedSchema "current-salient")
+   (Get (State last-speaker (Variable "$x"))))
+
 ; --------------------------------------------------------
 ; Chatbot-related stuff.  In the current design, the chatbot talks
 ; whenever it feels like it; we are simply told when it is talking,
