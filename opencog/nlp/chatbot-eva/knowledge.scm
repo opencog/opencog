@@ -71,15 +71,13 @@
 ; object the chest is facing.
 ;
 ; XXX This is incorrect, just right now; its too simple, and interacts
-; badly with the tf2 face tracker.  The directions need to be general
+; badly with the face tracker.  The directions need to be general
 ; 2D areas.  For imperative commands, we need to pick some random point
 ; out of the 2D area. To answer questions, we need to compare the 2D
-; extent to the current gaze direction.  Problem: the gaze direction
-; is buried in the tf2 tree for the chest-camera face detector, where
-; we cannot easily query it.
+; extent to the current gaze direction.  The gaze direction can be
+; gotten from the space-time server, (octree server) -- someone needs
+; to hook this up.  XXX FIXME.
 ;
-; As of Autumn 2016, the space server supposedly works. Thus, the
-; following should be handled by the space server.
 (DefineLink
 	(DefinedSchema "rightwards")
 	(ListLink ;; three numbers: x,y,z
@@ -213,6 +211,37 @@
 	(ListLink
 		(ConceptNode "model-direction")
 		(ConceptNode "concept-direction")))
+
+;--------------------------------------------------------------------
+;--------------------------------------------------------------------
+; Similar to above, but for sentences such as "look at me" or "turn
+; towards me". As before, this is able to convert from these English
+; sentences, into a structured command language. It makes use of the
+; (DefinedSchema "current-speaker") in self-model.scm, and also of
+; (DefinedPredicate "Look-at-thing cmd") to perform that action.
+
+; Global knowledge about word-meaning.
+; Knowledge about things in the environemnt.
+; "me" refers to the person who last spoke (and said "look at me")
+(ReferenceLink (WordNode "me")       (DefinedSchema "current-speaker"))
+
+; Syntactic category of schema. Used for contextual understanding.
+(Inheritance (DefinedSchema "current-speaker")  (Concept "schema-thing"))
+
+; Physical (motor control) knowledge about imperative look-at-thing verbs.
+(ReferenceLink (WordNode "look") (DefinedPredicate "Look-at-thing cmd"))
+(ReferenceLink (WordNode "turn") (DefinedPredicate "Look-at-thing cmd"))
+
+; Syntactic category of imperative look-at-thing verbs.
+(Inheritance (DefinedPredicate "Look-at-thing cmd") (Concept "look-at-cmd"))
+
+; Syntactic structure of "look at thing" action-knowledge --
+; Specifies the syntactic structure for physical motor-control commands.
+(EvaluationLink
+	(PredicateNode "look-at-action")
+	(ListLink
+		(ConceptNode "look-at-cmd")
+		(ConceptNode "schema-thing")))
 
 ;--------------------------------------------------------------------
 ;--------------------------------------------------------------------
