@@ -17,8 +17,8 @@
     )
 )
 
-; If it's in the PLN reasoning mode and the reasoner doesn't have an
-; answer for the question being asked within a certain period of time,
+; If it's in the PLN reasoning mode and the reasoner hasn't have an
+; answer for the question being asked after a certain period of time,
 ; say "Sorry I don't know"
 (psi-set-controlled-rule
     (psi-rule
@@ -27,12 +27,11 @@
             (DefinedPredicate "is-input-utterance?")
             (DefinedPredicate "input-is-a-question?")
             (SequentialOr
-                (Not (DefinedPredicate "is-pln-inferred-related?"))
                 (SequentialAnd
                     (DefinedPredicate "pln-qa-finished?")
-                    (Not (DefinedPredicate "is-pln-answer?"))
-                ))
-            (DefinedPredicate "no-other-fast-reply?")
+                    (Not (DefinedPredicate "is-pln-answer?")))
+                (DefinedPredicate "no-other-fast-reply?"))
+            (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: say")
             (List (Word "sorry") (Word "I") (Word "don't") (Word "know"))))
