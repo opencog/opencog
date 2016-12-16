@@ -31,6 +31,7 @@
     (list
         (cons "reasoning" enable-pln-demo)
         (cons "philosophy" enable-philosophy-demo)
+        (cons "tracking" enable-saliency-demo)
         (cons "default" enable-all-demos))
 )
 
@@ -39,14 +40,18 @@
 "
   This is the default mode. All the rules are given a weight of 0.9.
 "
+    (define controlled-rules (psi-get-controlled-rules))
     ; Make the weight changes needed for configuration.
+    ; All rules are disabled before enabling them so as to reset all
+    ; weight to 0.9.
     (disable-all-demos)
     (receive (filtered other)
-        (psi-partition-rule-with-alias "" (psi-get-controlled-rules))
+        (psi-partition-rule-with-alias "" controlled-rules)
         (map
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.9))
             other)
     )
+    (psi-rule-disable "saliency-tracking" controlled-rules)
 )
 
 ; --------------------------------------------------------------
@@ -103,6 +108,16 @@
     (disable-all-demos)
     (psi-rule-enable "random_sentence_pkd" (psi-get-controlled-rules))
     (psi-rule-enable "random_sentence_kurzweil" (psi-get-controlled-rules))
+)
+
+; --------------------------------------------------------------
+(define-public (enable-saliency-demo)
+"
+  Enables the visual saliency rule only.
+"
+    ; Make the weight changes needed for configuration.
+    (disable-all-demos)
+    (psi-rule-enable "saliency-tracking" (psi-get-controlled-rules))
 )
 
 ; --------------------------------------------------------------
