@@ -755,9 +755,7 @@ proper atomese.
 	(DefinedPredicate "Someone requests interaction?")
 	(NotLink (Equal
 		(SetLink no-interaction)
-		(Get
-			(TypedVariable (Variable "$x") (Type "NumberNode"))
-			(State request-eye-contact-state (Variable "$x"))))
+		(Get (State request-eye-contact-state (Variable "$x"))))
 	))
 
 ;; Send ROS message to actually make eye-contact with the person
@@ -770,20 +768,12 @@ proper atomese.
 		;; Issue the look-at command, only if there is someone to
 		;; make eye contact with.
 		(NotLink (Equal
-			(Get
-				; XXX FIXME - using TypedVariable for (Get (State
-				; is wrong -- wtf.
-				(TypedVariable (Variable "$x") (Type "NumberNode"))
-				(State eye-contact-state (Variable "$x")))
+			(Get (State eye-contact-state (Variable "$x")))
 			(SetLink no-interaction)))
 		(True (Put
 			(Evaluation (GroundedPredicate "scm:look-at-face")
 				(ListLink (Variable "$face")))
-			(Get
-				; XXX FIXME - using TypedVariable for (Get (State
-				; is wrong -- wtf.
-				(TypedVariable (Variable "$x") (Type "NumberNode"))
-				(State eye-contact-state (Variable "$x")))))
+			(Get (State eye-contact-state (Variable "$x")))))
 	))
 
 ;; Break eye contact; this does not change the interaction state.
@@ -797,9 +787,7 @@ proper atomese.
 (DefineLink
 	(DefinedPredicate "make eye contact")
 	(True (Put (State eye-contact-state (Variable "$face-id"))
-		(Get
-			(TypedVariable (Variable "$x") (Type "NumberNode"))
-			(State interaction-state (Variable "$x"))) ))
+		(Get (State interaction-state (Variable "$x"))) ))
 )
 
 ;; Move to a neutral head position.
@@ -949,8 +937,7 @@ proper atomese.
 	(DefinedPredicate "interact with requested person")
 	(SequentialAnd
 		(True (Put (DefinedPredicate "Set interaction target")
-			(Get (TypedVariable (Variable "$x") (TypeNode "NumberNode"))
-				 (State request-eye-contact-state (Variable "$x")))))
+			(Get (State request-eye-contact-state (Variable "$x")))))
 		; Now, clear the request.
 		(True (Put (State request-eye-contact-state (Variable "$face-id"))
 			no-interaction))
