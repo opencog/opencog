@@ -4,9 +4,7 @@
 (use-modules (opencog rule-engine))
 
 ;-------------------------------------------------------------------------------
-; Define a rule-base.
-(define rb (ConceptNode "r2l-pln"))
-
+; Define a rule-base for a particular infernece-trail.
 (define sog-hack-decomposition-rule
   (Bind
     (VariableList
@@ -45,8 +43,11 @@
         (Variable "$A-subset")
         (Variable "$B")))))
 
+; TODO: Record the acutal inference trails that have been learned and apply
+; them instead of trying to randomly try different permutations.
+(define (configure-pln-rbs-2)
+    (define rb (ConceptNode "r2l-pln-1"))
 
-(define (configure-pln)
     (pln-load-rules "deduction")
     (pln-load-rules "abduction")
 
@@ -61,15 +62,7 @@
         deduction-inheritance-rule .8)
     (ure-define-add-rule rb "sog-hack-decomposition-rule"
         sog-hack-decomposition-rule .8)
-)
 
-(define (infer-on-r2l r2l-outputs steps)
-    (configure-pln)
-    (let* ((inference-results (simple-forward-chain rb r2l-outputs steps))
-          (clean-results (lset-difference equal? inference-results r2l-outputs))
-          (results-for-sureal
-              (cog-outgoing-set (filter-for-sureal clean-results)))
-          )
-        results-for-sureal
-    )
+    ; Return the rule-base
+    rb
 )
