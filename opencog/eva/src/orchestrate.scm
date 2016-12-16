@@ -166,9 +166,11 @@
 	(LambdaLink
 		(Variable "$object-id")
 		(SequentialOr
-			;(SequentialAnd
-			;	(Equal (Variable "$object-id") (Concept "salient-point"))
-			;	(DefinedPredicate "look at salient point"))
+			(SequentialAnd
+				(Equal (Variable "$object-id") (Concept "salient-point"))
+				(Evaluation
+					(DefinedPredicate "look at salient point")
+					(ListLink (Variable "$object-id"))))
 			(Evaluation
 				(DefinedPredicate "Set interaction target")
 				(ListLink (Variable "$object-id")))
