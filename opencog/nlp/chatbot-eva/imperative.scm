@@ -59,7 +59,8 @@
 				(Signature
 					(EvaluationLink
 						(Type "DefinedPredicateNode")
-						(Type "ListLink"))))
+						(TypeChoice
+						   (Type "ListLink") (Type "SetLink")))))
 		)
 		(AndLink
 			(ListLink current-action (Variable "$action"))
@@ -86,7 +87,7 @@
 
 	; Apply rules that analyze sentences -- if the current sentence
 	; is an imperative of some sort, it will pick it apart into a
-	; simplfied form, and glue the simplified from to an anchor.
+	; simplfied form, and glue the simplified form to an anchor.
 	(cog-bind look-rule-1)
 	(cog-bind look-rule-2)
 	(cog-bind single-word-express-rule)
@@ -94,8 +95,8 @@
 	(cog-bind show-rule-1)
 	(cog-bind show-rule-2)
 
-	(display "The current-imperative is\n")
-	(display (cog-execute! (Get (State current-imperative (Variable "$x")))))
+	; (display "The current-imperative is\n")
+	; (display (cog-execute! (Get (State current-imperative (Variable "$x")))))
 
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
@@ -112,7 +113,7 @@
 	(let* ((act-do-do (cog-bind action-rule-ao))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-(display "duuuude ho ho\n")
+		(display "The set of actions to be performed are:\n")
 		(display act-do-do) (newline)
 
 		; Evaluate can throw if we give it bad args. Which happens during

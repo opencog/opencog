@@ -1548,6 +1548,16 @@ $verb -> (WordNode "look"
 "$verb-ground" -> (DefinedPredicate "Look-at-thing cmd"
  "$obj-ground" -> (DefinedSchema "current-speaker")
 
+(cog-evaluate!    (EvaluationLink
+      (DefinedPredicateNode "Look-at-thing cmd")
+      (ListLink (NumberNode "0.000000"))))
+
+(cog-evaluate!    (EvaluationLink
+      (DefinedPredicateNode "Look-at-thing cmd")
+      (SetLink (NumberNode "0.000000"))))
+
+... look-at-person is running off of eye-contact-state
+
 
 obj-semantic-model-rule-1
 obj-semantic-model-rule-2
