@@ -354,7 +354,7 @@ actions are EvaluationLinks, not schemas or ExecutionOutputLinks.
   Given the RULE, return the probability that the RULE can be satisfied.
   XXX Except this doesn't return a probability, it just returns TRUE_TV
   or FALSE_TV.
-  XXX fixme - this replaces psi-satsifiable?
+  XXX fixme - this replaces psi-satisfiable?
 "
 ; NOTE
 ; 1. See https://github.com/opencog/atomspace/issues/823 for why
