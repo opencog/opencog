@@ -120,10 +120,9 @@
 				(string-append PY-CMD "(" xx "," yy "," zz ")"))
 			(stv 1 1)
 		)
-
+	)
 		; There was no location, return false.
 		(stv 0 1)
-	)
 )
 
 ;; glance-at-face - Turn the eyes to look at the given face-id.
