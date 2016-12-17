@@ -40,3 +40,4 @@ class SaliencyTrack:
 		y=-1.0*(loc.x*2.0-1.0)
 		#print "locations x="+str(x)+" y="+str(y)+" z="+str(z)+"\n"
 		self.atomo.saliency(x,y,z,data.degree)
+

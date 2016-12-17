@@ -45,4 +45,5 @@ class AudioPower:
 			self.atomo.audio_bang(1.0)
 		else:
 			self.atomo.audio_bang(0.0)
+
 		self.atomo.audio_energy(data.Decibel)

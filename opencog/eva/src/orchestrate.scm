@@ -164,7 +164,7 @@
 ; definition for look-at-person (from self-model.scm)
 (DefineLink
 	(DefinedPredicate "Look-at-thing cmd")
-	(DefinedPredicate "look at person"))
+	(DefinedPredicate "Set interaction target"))
 
 ; -------------------------------------------------------------
 ; Publish the current behavior.
