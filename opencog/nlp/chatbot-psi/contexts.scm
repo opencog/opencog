@@ -186,19 +186,25 @@
 
 (Define
     (DefinedPredicate "asking-how-robot-feels?")
-    (And (DefinedPredicate "input-type-is-interrogative")
-         (GroundedPredicate "scm: asking-how-robot-feels?")
+    (Evaluation (GroundedPredicate "scm: check-emotion-state-inquiry") (List))
+)
+
+(define (check-emotion-state-inquiry)
+    (define inputwords (get-input-word-list))
+    (if (not (null? inputwords))
+        (if (list? (member (cog-outgoing-set inputwords) (map text2words (list
+                        "how are you feeling"
+                        "how are you"
+                        "how do you feel"))))
+            (stv 1 1)
+            (stv 0 1)
+        )
     )
 )
 
-(define (asking-how-robot-feels?)
-    (list?
-        (member (cog-name (get-input-text-node)) (list
-            "how are you feeling"
-            "how are you"
-            "how do you feel")
-        )
-    )
+; Convert text string to list of WordNodes
+(define (text2words text)
+    (map (lambda (word) (Word word)) (string-split text #\ ))
 )
 
 ; Essentially equivalent to "is-input-utterance", as the states

@@ -15,17 +15,6 @@
 ; Define the psi-rules
 
 (psi-set-controlled-rule
-	(psi-rule
-		(list (DefinedPredicate "asking-how-robot-feels"))
-		(True (ExecutionOutput (GroundedSchema "scm: say")
-			(List (Word "I") (Word "am") (Word "feeling") (Word "unsure"))))
-		(True)
-		(stv .9 .9)
-		sociality
-	)
-)
-
-(psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
             (DefinedPredicate "fuzzy-not-started?")
@@ -39,6 +28,21 @@
         (stv .9 .9)
         sociality
         "fuzzy_matcher"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+        	(DefinedPredicate "is-input-utterance?")
+         	(DefinedPredicate "input-is-a-question?")
+        	(DefinedPredicate "asking-how-robot-feels?")))
+        (True (ExecutionOutput (GroundedSchema "scm: say")
+            (List (Word "I") (Word "am") (Word "feeling") (Word "unsure"))))
+        (True)
+        (stv .9 .9)
+        sociality
+        "emotion_state"
     )
 )
 
