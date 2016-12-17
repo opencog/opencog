@@ -27,6 +27,26 @@
 (define update-demand (psi-demand "update demand" 1))
 (define update-demand-satisfied (True))
 
+(State (ConceptNode "saliency-tracking") (NumberNode "0"))
+
+(DefineLink
+	(DefinedPredicate "tracking-salient?")
+	(GreaterThan
+		(Get (State (ConceptNode "saliency-tracking")(VariableNode "$x")))
+		(NumberNode "0.5")))
+
+(DefineLink
+	(DefinedPredicate "salient-flag-off")
+  (True
+		(Put (State (ConceptNode "saliency-tracking")(Variable "$x")) (NumberNode "0")))
+)
+
+(DefineLink
+	(DefinedPredicate "salient-flag-on")
+  (True
+		(Put (State (ConceptNode "saliency-tracking")(Variable "$x")) (NumberNode "1.0")))
+)
+
 (DefineLink
 	(DefinedPredicate "Nothing happening?")
 	(NotLink
@@ -36,13 +56,25 @@
 			(DefinedPredicate "Did someone leave?")
 			(DefinedPredicate "Someone visible?"))))
 
+(DefineLink
+	(DefinedPredicate "Nothing New?")
+	(NotLink
+		(SequentialOr
+			(DefinedPredicate "Someone requests interaction?")
+			(DefinedPredicate "Did someone arrive?")
+			(DefinedPredicate "Did someone leave?")
+			)))
 
 (psi-rule (list (DefinedPredicate "Did Someone New Speak?"))
 	(DefinedPredicate "Request interaction with person who spoke")
 	face-demand-satisfied (stv 1 1) face-demand)
 
 
-(psi-rule (list (DefinedPredicate "Someone requests interaction?"))
+(psi-rule (list
+		(SequentialAnd
+		(NotLink (DefinedPredicate "tracking-salient?"))
+		(DefinedPredicate "Someone requests interaction?"))
+	)
 	(DefinedPredicate "Interaction requested action")
 	face-demand-satisfied (stv 1 1) face-demand)
 
@@ -56,28 +88,31 @@
 
 ; This rule is the old multiple-face tracking rule
 ; TODO Remove after thoroughly testing behavior on robot.
-;(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
-;		(DefinedPredicate "Someone visible?")))
-;	(DefinedPredicate "Interact with people")
-;	face-demand-satisfied (stv 1 1) face-demand)
+(psi-rule (list (SequentialAnd (NotLink (DefinedPredicate "Skip Interaction?"))
+		(NotLink (DefinedPredicate "tracking-salient?"))
+		(DefinedPredicate "Someone visible?")))
+	(DefinedPredicate "Interact with people")
+	face-demand-satisfied (stv 1 1) face-demand)
 
 ; TODO: How should rules that could run concurrently be represented, when
 ; we have action compostion(aka Planning/Orchestration)?
-(psi-rule (list (DefinedPredicate "Someone visible?"))
+(psi-rule (list (SequentialAnd (DefinedPredicate "Someone visible?")
+	(NotLink (DefinedPredicate "tracking-salient?"))))
 	(DefinedPredicate "Interact with face")
 	track-demand-satisfied (stv .5 .5) track-demand)
 
 (psi-rule (list (SequentialAnd
 		; TODO: test the behabior when talking.
 		; (Not (DefinedPredicate "chatbot is talking?"))
+		(NotLink (DefinedPredicate "tracking-salient?"))
 		(DefinedPredicate "Someone visible?")
 		(DefinedPredicate "Time to change interaction")))
 	(DefinedPredicate "Change interaction target by priority")
 	face-demand-satisfied (stv 1 1) face-demand)
 
-(psi-rule (list (DefinedPredicate "Nothing happening?"))
-	(DefinedPredicate "Nothing is happening")
-	face-demand-satisfied (stv 1 1) face-demand)
+;(psi-rule (list (DefinedPredicate "Nothing happening?"))
+;	(DefinedPredicate "Nothing is happening")
+;	face-demand-satisfied (stv 1 1) face-demand)
 
 (psi-rule (list (SequentialAnd
 		(Not (DefinedPredicate "chatbot started talking?"))
@@ -123,9 +158,18 @@
 	(DefinedPredicate "Say whoa!")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-;(psi-rule (list (DefinedPredicate  "saliency required?"));;
-;	(DefinedPredicate "Salient:Curious")
-;	face-demand-satisfied (stv 1 1) face-demand)
+;; saliency
+(psi-set-controlled-rule
+	(psi-rule (list (True))
+			(DefinedPredicate "Salient:Curious")
+			(True) (stv 0.9 0.9) face-demand "saliency-tracking")
+)
+;; stop tracking
+(psi-set-controlled-rule
+	(psi-rule (list (True))
+			(DefinedPredicate "salient-flag-off")
+			(True) (stv 0.9 0.9) face-demand "not-saliency-tracking")
+)
 
 (psi-rule (list (DefinedPredicate "Room bright?"))
 	(DefinedPredicate "Bright:happy")

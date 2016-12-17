@@ -253,12 +253,20 @@
 ;Salient
 (DefineLink
     (DefinedPredicate "look at salient point")
+		(SequentialAnd
     (True (Put (Evaluation
         (DefinedPredicate "Look at point")
         (ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
             (Get (State salient-loc
             (ListLink (Variable "$x") (Variable "$y") (Variable "$z"))))
-        )))
+        ))
+		(True (Put (Evaluation
+        (DefinedPredicate "Gaze at point")
+        (ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
+            (Get (State salient-loc
+            (ListLink (Variable "$x") (Variable "$y") (Variable "$z"))))
+        ))
+		))
 
 
 ; -------------------------------------------------------------

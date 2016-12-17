@@ -131,13 +131,13 @@ class AtomicMsgs:
 		# A StateLink is used because evaluation of psi-rules should
 		# only depend on the most recent value.
 		deci = '(StateLink (AnchorNode "Decibel value") ' + \
-			'(NumberNode ' + str(decibel) + '))\n'
+			' (NumberNode ' + str(decibel) + '))\n'
 		netcat(self.hostname, self.port, deci)
 
 	# Louds bands, explosions, hand-claps, shouts.
 	def audio_bang(self, decibel):
 		loud = '(StateLink (AnchorNode "Sudden sound change value")' + \
-			'(NumberNode ' + str(decibel) + '))\n'
+			' (NumberNode ' + str(decibel) + '))\n'
 		netcat(self.hostname, self.port, loud)
 
 	#saliency location
