@@ -223,14 +223,27 @@
 ; Global knowledge about word-meaning.
 ; Knowledge about things in the environemnt.
 ; "me" refers to the person who last spoke (and said "look at me")
+; "him"/"her" - any other visible person in the room
+; this/that - best-guess salient point
 (ReferenceLink (WordNode "me")       (DefinedSchema "current-speaker"))
+
+(ReferenceLink (WordNode "her")      (DefinedSchema "other-speaker"))
+(ReferenceLink (WordNode "him")      (DefinedSchema "other-speaker"))
+
+(ReferenceLink (WordNode "this")     (DefinedSchema "current-salient"))
+(ReferenceLink (WordNode "that")     (DefinedSchema "current-salient"))
+(ReferenceLink (WordNode "here")     (DefinedSchema "current-salient"))
+(ReferenceLink (WordNode "there")    (DefinedSchema "current-salient"))
 
 ; Syntactic category of schema. Used for contextual understanding.
 (Inheritance (DefinedSchema "current-speaker")  (Concept "schema-thing"))
+(Inheritance (DefinedSchema "other-speaker")    (Concept "schema-thing"))
+(Inheritance (DefinedSchema "current-salient")  (Concept "schema-thing"))
 
 ; Physical (motor control) knowledge about imperative look-at-thing verbs.
 (ReferenceLink (WordNode "look") (DefinedPredicate "Look-at-thing cmd"))
 (ReferenceLink (WordNode "turn") (DefinedPredicate "Look-at-thing cmd"))
+(ReferenceLink (WordNode "face") (DefinedPredicate "Look-at-thing cmd"))
 
 ; Syntactic category of imperative look-at-thing verbs.
 (Inheritance (DefinedPredicate "Look-at-thing cmd") (Concept "look-at-cmd"))
@@ -243,6 +256,8 @@
 		(ConceptNode "look-at-cmd")
 		(ConceptNode "schema-thing")))
 
+; XXX FIXME -- need to do the above, but for the self-model, rather
+; than the direct robot action.
 ;--------------------------------------------------------------------
 ;--------------------------------------------------------------------
 ; Emotional expression semantics (groundings) for robot control
