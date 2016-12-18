@@ -51,7 +51,7 @@
   Fetch the semantics with the highest strength*confidence that
   contains words in common with the query
 "
-    (cog-logger-debug "[PLN-Action] do-pln-QA")
+    (cog-logger-info "[PLN-Action] do-pln-QA")
 
     (State pln-qa process-started)
 
@@ -72,14 +72,14 @@
            (word-list (if (null? sureal-result) '() (first sureal-result)))
           )
 
-      (cog-logger-debug "[PLN-Action] assoc-inferred-names = ~a"
+      (cog-logger-info "[PLN-Action] assoc-inferred-names = ~a"
                         assoc-inferred-names)
-      (cog-logger-debug "[PLN-Action] filtered-in = ~a" filtered-in)
-      (cog-logger-debug "[PLN-Action] semantics-list = ~a" semantics-list)
-      (cog-logger-debug "[PLN-Action] semantics = ~a" semantics)
-      (cog-logger-debug "[PLN-Action] logic = ~a" logic)
-      (cog-logger-debug "[PLN-Action] sureal-result = ~a" sureal-result)
-      (cog-logger-debug "[PLN-Action] word-list = ~a" word-list)
+      (cog-logger-info "[PLN-Action] filtered-in = ~a" filtered-in)
+      (cog-logger-info "[PLN-Action] semantics-list = ~a" semantics-list)
+      (cog-logger-info "[PLN-Action] semantics = ~a" semantics)
+      (cog-logger-info "[PLN-Action] logic = ~a" logic)
+      (cog-logger-info "[PLN-Action] sureal-result = ~a" sureal-result)
+      (cog-logger-info "[PLN-Action] word-list = ~a" word-list)
 
       (State pln-answers (if (null? word-list)
                              no-result
