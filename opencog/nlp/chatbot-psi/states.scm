@@ -83,7 +83,7 @@
 (define pln-inferred-atoms (Anchor (chat-prefix "PLNInferredAtoms")))
 (State pln-answers default-state)
 (State pln-qa default-state)
-(State pln-inferred-atoms default-state) ;; should not be reset
+(State pln-inferred-atoms (Set)) ;; should not be reset
 
 (define emotion-state (Anchor (chat-prefix "EmotionState")))
 (define emotion-state-reply (Anchor (chat-prefix "EmotionStateReply")))

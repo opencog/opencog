@@ -62,65 +62,19 @@
 ;;;;;;;;;;
 ;; Main ;;
 ;;;;;;;;;;
-; TODO: Remove this loop by integrating the pln-demo to openpsi
-(define enable-pln-loop #f)
-(define-public (pln-running?) enable-pln-loop)
+; FIXME: The reocrding starts on loading. Should only recored inputs used
+; for inference.
+(pln-record-current-time)
 
-(define pln-loop-count 0)
-(define-public (pln-get-loop-count) pln-loop-count)
 
-(define (pln-loop)
-    ;; Apply l2s rules
-    (let (;(name-on-last-sentence (put-name-on-the-last-sentence))
-        ;(sentiment-sentence-to-person-l2s-results
-        ;    (cog-fc (SetLink) rb1 (SetLink)))
-        (unary-predicate-speech-act-l2s-results
-            (cog-fc (SetLink) rb2 (SetLink)))
-        )
-
-        ;(cog-logger-info "[PLN-Reasoner] name-on-last-sentence = ~a"
-        ;    name-on-last-sentence)
-        ;(cog-logger-info
-        ;    "[PLN-Reasoner] sentiment-sentence-to-person-l2s-results = ~a"
-        ;    sentiment-sentence-to-person-l2s-results)
-        (cog-logger-info
-            "[PLN-Reasoner] unary-predicate-speech-act-l2s-results = ~a"
-            unary-predicate-speech-act-l2s-results)
-    )
-
+(define (update-inferences)
     ;; Apply Implication direct evaluation (and put the result in
     ;; pln-inferred-atoms state)
-    (let* ((direct-eval-results (cog-fc (SetLink) rb3 (SetLink)))
-        ;; Filter only inferred result containing "happy". This is a
-        ;; temporary hack to make it up for the lack of attentional
-        ;; allocation
-        (must-contain (list (Predicate "happy")))
-        (ff (lambda (x) (lset<= equal? must-contain (cog-get-all-nodes x))))
-        (filtered-results (filter ff (cog-outgoing-set direct-eval-results))))
+    (let* ((inputs (pln-get-nlp-inputs
+                (get-previous-said-sents (pln-get-recorded-time))))
+        (inferences (infer-on-r2l rb-trail-1 inputs 3)))
 
-        (add-to-pln-inferred-atoms (Set filtered-results))
+        (if (not (null? inferences))
+            (add-to-pln-inferred-atoms inferences))
     )
-
-    (cog-logger-info "[PLN-Reasoner] pln-inferred-atoms = ~a"
-        (search-inferred-atoms))
-
-    ;; sleep a bit, to not overload the CPU too much
-    (cog-logger-info "[PLN-Reasoner] Sleep for a second")
-    (set! pln-loop-count (+ pln-loop-count 1))
-    (sleep 1)
-
-    ;; Loop
-    ;(if enable-pln-loop (pln-loop))
 )
-
-(define-public (pln-run)
-    (if (not (pln-running?))
-        (begin
-            (set! enable-pln-loop #t)
-            (begin-thread (pln-loop))))
-)
-
-(define-public (pln-halt) (set! enable-pln-loop #f))
-
-; Start pln loop
-;(pln-run)

@@ -1,4 +1,9 @@
 ;; Load PLN rule implication direct evaluation
+
+(use-modules (opencog))
+(use-modules (opencog atom-types))
+(use-modules (opencog pln))
+(use-modules (opencog rule-engine))
 ; FIXME: Doesn't return anything when confidence is low, don't use for now
 ;(load-from-path "opencog/pln/rules/implication-direct-evaluation-rule.scm")
 
@@ -331,25 +336,6 @@
      implication-direct-evaluation-pattern
      implication-direct-evaluation-rewrite))
 
-;; Define rulebases
-;XXX Why separate rulebases?
-(define rb1 (ConceptNode "rb1"))
-(ure-define-rbs rb1 1)
-; Not sure why
-(ure-set-fuzzy-bool-parameter rb1 "URE:attention-allocation" 0)
-
-(define rb2 (ConceptNode "rb2"))
-(ure-define-rbs rb2 1)
-(ure-set-fuzzy-bool-parameter rb2 "URE:attention-allocation" 0)
-
-(define rb3 (ConceptNode "rb3"))
-(ure-define-rbs rb3 1)
-(ure-set-fuzzy-bool-parameter rb3 "URE:attention-allocation" 0)
-
-;; Add rules to rulebases.
-(ure-define-add-rule rb1 "rule1" sentiment-sentence-to-person-l2s-rule .8)
-(ure-define-add-rule rb2 "rule2" unary-predicate-speech-act-l2s-rule .8)
-(ure-define-add-rule rb3 "rule3" implication-direct-evaluation-rule .8)
 
 ;-------------------------------------------------------------------------------
 (define (configure-pln-rbs-1)
@@ -371,3 +357,6 @@
     ; Return the rule-base
     rb
 )
+
+;; Define rulebases
+(define rb-trail-1 (configure-pln-rbs-1))

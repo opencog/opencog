@@ -38,11 +38,11 @@
 (define (implication-to-evaluation-s2l P Q)
 ; TODO: Replace by microplanner.
     (let ((P-name (cog-name P)))
-       (Word "people")
        (Set
           (Evaluation
              Q
              (List
+                 ; NOTE: The concept is driven from must-have-names.
                 (Concept "people")))
           (Inheritance
              (Concept "people")
@@ -71,6 +71,29 @@
         inferences)
 )
 
+(define (choose-response-for-trail-1 impl-links)
+"
+  impl-links: A list of ImplicationLinks
+"
+    (let* ((semantics-list (shuffle impl-links))
+        (semantics (select-highest-tv-semantics semantics-list))
+        (logic (if (equal? 'ImplicationLink (cog-type semantics))
+                   (implication-to-evaluation-s2l (gar semantics)
+                                                  (gdr semantics))
+                   '()))
+        (sureal-result (if (null? logic) '() (sureal logic)))
+        )
+
+        (State
+            pln-answers
+            (if (null? sureal-result)
+                no-result
+                (List (map Word (first sureal-result)))
+            )
+        )
+    )
+)
+
 (define-public (do-pln-QA)
 "
   Fetch the semantics with the highest strength*confidence that
@@ -79,35 +102,15 @@
     (cog-logger-info "[PLN-Action] do-pln-QA")
 
     (State pln-qa process-started)
-    ; FIXME Why does the first call of (pln-loop) work?
-    (pln-loop)
-    (pln-loop)
-    (let* ((filtered-in
-                (filter-using-query-words
-                    (cog-outgoing-set (search-inferred-atoms))
-                    (get-input-utterance-names)))
-           (semantics-list (shuffle  filtered-in))
-           (semantics (select-highest-tv-semantics semantics-list))
-           (semantics-type (cog-type semantics))
-           (logic (if (equal? 'ImplicationLink semantics-type)
-                      (implication-to-evaluation-s2l (gar semantics)
-                                                     (gdr semantics))
-                      '()))
-           (sureal-result (if (null? logic) '() (sureal logic)))
-           (word-list (if (null? sureal-result) '() (first sureal-result)))
-          )
-
-      (cog-logger-info "[PLN-Action] filtered-in = ~a" filtered-in)
-      (cog-logger-info "[PLN-Action] semantics-list = ~a" semantics-list)
-      (cog-logger-info "[PLN-Action] semantics = ~a" semantics)
-      (cog-logger-info "[PLN-Action] logic = ~a" logic)
-      (cog-logger-info "[PLN-Action] sureal-result = ~a" sureal-result)
-      (cog-logger-info "[PLN-Action] word-list = ~a" word-list)
-
-      (State pln-answers (if (null? word-list)
-                             no-result
-                             (List (map Word word-list))))
-
-      (State pln-qa process-finished)
+    ; FIXME Why doesn't the first call of (update-inferences) work?
+    (update-inferences)
+    (update-inferences)
+    (let ((inferences (search-inferred-atoms)))
+        (if (null? inferences)
+            (State pln-answers no-result)
+            (choose-response-for-trail-1 (filter-using-query-words
+                (cog-outgoing-set inferences) (get-input-utterance-names)))
+        )
+        (State pln-qa process-finished)
     )
 )

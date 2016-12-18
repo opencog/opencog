@@ -20,10 +20,11 @@
 ;; Insert the elements of a given Set to the elements of the Set
 ;; associated to the Anchor pln-inferred-atoms
 (define (add-to-pln-inferred-atoms s)
-  (let* ((sl (cog-outgoing-set s))
-         (ia (cog-outgoing-set (search-inferred-atoms)))
-         (slia (delete-duplicates (append sl ia))))
-    (State pln-inferred-atoms (SetLink slia))))
+    (let* ((ia (cog-outgoing-set (search-inferred-atoms)))
+           (sia (delete-duplicates (append s ia))))
+       (State pln-inferred-atoms (SetLink sia))
+    )
+)
 
 (define (search-input-utterance-words)
   (let* ((results (cog-chase-link 'StateLink 'ListLink input-utterance-words)))
