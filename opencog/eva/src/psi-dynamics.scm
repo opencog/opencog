@@ -164,9 +164,9 @@
 					current-input)))
 				;(format #t "inher-super: ~a\n" inher-super)
 				(for-each (lambda (concept)
-							(if psi-verbose
-								(format #t "Dialog sentiment detected: ~a\n"
-									concept))
+							;(if psi-verbose
+							;    (format #t "Dialog sentiment detected: ~a\n"
+							;        concept))
 							(if (equal? concept (Concept "Positive"))
 								(psi-set-event-occurrence!
 									positive-sentiment-dialog))
@@ -264,7 +264,9 @@
 )
 
 ; Current emotion state
-(define current-emotion-state (Concept "current emotion state"))
+(define-public psi-current-emotion-state
+	(Concept (string-append psi-prefix-str "current emotion state")))
+
 (define (psi-set-current-emotion-state)
 	; Find the emotion with the highest level and set as current emotion
 	(define emotions (psi-get-emotions))
@@ -278,14 +280,20 @@
 					(set! strongest-emotion emotion)
 					(set! highest-emotion-value emotion-value))))
 		emotions)
-	(if (not (equal? (psi-get-value current-emotion-state) strongest-emotion))
+	(if (not (equal? (psi-get-value psi-current-emotion-state) strongest-emotion))
 		(begin
-			(StateLink current-emotion-state strongest-emotion)
-			(format #t "Current emotion state: ~a\n" strongest-emotion))))
+			(StateLink psi-current-emotion-state strongest-emotion)
+			;(format #t "Current emotion state: ~a\n" strongest-emotion)
+		)
+	)
+)
 
+; Returns the current emotion state of the agent as an atom of the form
+; (ConceptNode "OpenPsi: happy")
 (define-public (psi-get-current-emotion)
-	(psi-get-value current-emotion-state))
+	(psi-get-value psi-current-emotion-state))
 
+;
 ;-------------------------------------
 ; Internal vars to physiology mapping
 
