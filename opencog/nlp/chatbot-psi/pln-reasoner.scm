@@ -110,7 +110,7 @@
     (sleep 1)
 
     ;; Loop
-    (if enable-pln-loop (pln-loop))
+    ;(if enable-pln-loop (pln-loop))
 )
 
 (define-public (pln-run)
@@ -123,4 +123,4 @@
 (define-public (pln-halt) (set! enable-pln-loop #f))
 
 ; Start pln loop
-(pln-run)
+;(pln-run)

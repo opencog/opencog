@@ -1,6 +1,7 @@
 ;; PLN actions
 
 (load "pln-utils.scm")
+(load "pln-reasoner.scm")
 
 (use-modules (srfi srfi-1))
 (use-modules (opencog logger))
@@ -54,7 +55,7 @@
     (cog-logger-info "[PLN-Action] do-pln-QA")
 
     (State pln-qa process-started)
-
+    (pln-loop)
     (let* (
            (assoc-inferred-names (get-assoc-inferred-names))
            (iu-names (get-input-utterance-names))
