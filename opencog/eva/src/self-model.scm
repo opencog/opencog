@@ -454,7 +454,10 @@
 ; --------------------------------------------------------
 ; Some debug prints.
 
-(define (print-msg node) (display (cog-name node)) (newline) (stv 1 1))
+(define (print-msg node) 
+	;(display (cog-name node)) (newline) ; XXX FIXME disable printing
+	; until blocking fix.
+	(stv 1 1))
 (define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
 
 ; --------------------------------------------------------
