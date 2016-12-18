@@ -1,10 +1,10 @@
 ;; PLN actions
+(use-modules (srfi srfi-1))
+(use-modules (opencog logger))
 
 (load "pln-utils.scm")
 (load "pln-reasoner.scm")
 
-(use-modules (srfi srfi-1))
-(use-modules (opencog logger))
 
 ;; return atom.tv.s^2*atom.tv.c
 (define (higest-tv-fitness atom)
@@ -36,7 +36,7 @@
 ;;       (Concept "people")
 ;;       (Concept P-name)))))
 (define (implication-to-evaluation-s2l P Q)
-   (let ((P-name (cog-name P)))
+    (let ((P-name (cog-name P)))
        (Word "people")
        (Set
           (Evaluation
@@ -45,7 +45,30 @@
                 (Concept "people")))
           (Inheritance
              (Concept "people")
-             (Concept P-name)))))
+             (Concept P-name)))
+    )
+)
+
+(define (get-node-names x)
+    (get-names (cog-get-all-nodes x))
+)
+
+(define (filter-using-query-words inferences query-words)
+"
+  Returns a list containing inferences that might be possible response to
+  the query or empty list if there aren't any.
+
+  query-words: A list of lower-case words that make the sentence that signals
+    query, and that specify about what we want to know about.
+  inferences: a list with inference results that are accumulated by
+    chaining on the sentences that signaled the start of input.
+"
+
+    (filter
+        (lambda (x) (not (null?
+            (lset-intersection equal? (get-node-names x) query-words))))
+        inferences)
+)
 
 (define-public (do-pln-QA)
 "
@@ -55,6 +78,8 @@
     (cog-logger-info "[PLN-Action] do-pln-QA")
 
     (State pln-qa process-started)
+    ; FIXME Why does the first call of (pln-loop) work?
+    (pln-loop)
     (pln-loop)
     (let* (
            (assoc-inferred-names (get-assoc-inferred-names))
