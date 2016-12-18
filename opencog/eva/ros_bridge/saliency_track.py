@@ -35,5 +35,9 @@ class SaliencyTrack:
 
 	def sal_cb(self, data):
 		loc = data.positions[0]
-		print "locations x="+str(loc.x)+" y="+str(loc.y)+"\n"
-		self.atomo.saliency(loc.x,loc.y,loc.z,data.degree)
+		z=-(loc.y*2.0-1.0)
+		x=1.0
+		y=-1.0*(loc.x*2.0-1.0)
+		#print "locations x="+str(x)+" y="+str(y)+" z="+str(z)+"\n"
+		self.atomo.saliency(x,y,z,data.degree)
+

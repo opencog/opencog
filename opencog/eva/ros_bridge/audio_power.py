@@ -40,7 +40,10 @@ class AudioPower:
 		rospy.Subscriber("audio_sensors", audiodata, self.audio_cb)
 
 	def audio_cb(self, data):
-		print "Audio Power {}".format(data.Decibel)
+		#print "SuddenChange {}".format(data.SuddenChange)
+		if data.SuddenChange:
+			self.atomo.audio_bang(1.0)
+		else:
+			self.atomo.audio_bang(0.0)
 
-		self.atomo.audio_bang(data.SuddenChange)
 		self.atomo.audio_energy(data.Decibel)

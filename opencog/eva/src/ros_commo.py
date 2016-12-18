@@ -439,13 +439,34 @@ class EvaControl():
 	#	self.face_sound_pub.publish(faceid)
 
 	def __init__(self):
-
+		# Full control by default
+		self.control_mode = 255
+		self.running = True
 		self.puta = PutAtoms()
 
 		# The below will hang until roscore is started!
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
 
+		self.LOCATION_FRAME = "blender"
+		# Transform Listener. Tracks history for RECENT_INTERVAL.
+		self.tf_listener = tf.TransformListener()
+		print "**1\n"
+		try:
+			self.tf_listener.waitForTransform('camera', self.LOCATION_FRAME, \
+				rospy.Time(0), rospy.Duration(3.0))#world
+			print "***2\n"
+		except Exception:
+			print("No camera transforms!\n")
+			exit(1)
+		print "***3\n"
+		(trans,rot) = self.tf_listener.lookupTransform( \
+			self.LOCATION_FRAME, 'camera', rospy.Time(0))
+		print "***4\n"
+		a=tf.listener.TransformerROS()
+		print "***5\n"
+		self.conv_mat=a.fromTranslationRotation(trans,rot)
+		print "hello! ***********"
 		# ----------------
 		# A list of parameter names that are mirrored in opencog for controling
 		# psi-rules
@@ -565,24 +586,5 @@ class EvaControl():
 		# expressions and gestures.
 		rospy.Subscriber("/behavior_control", Int32, \
 			self.behavior_control_callback)
-
-		# Frame in which coordinates will be returned from transformation
-		self.LOCATION_FRAME = "blender"
-		# Transform Listener. Tracks history for RECENT_INTERVAL.
-		self.tf_listener = tf.TransformListener()
-		try:
-			self.tf_listener.waitForTransform('camera', 'world', \
-				rospy.Time(0), rospy.Duration(3.0))
-		except Exception:
-			print("No camera transforms!")
-			exit(1)
-		(trans,rot) = self.tf_listener.lookupTransform( \
-			self.LOCATION_FRAME, 'camera', rospy.Time(0))
-		a=tf.listener.TransformerROS()
-		self.conv_mat=a.fromTranslationRotation(trans,rot)
-		# Full control by default
-		self.control_mode = 255
-		self.running = True
-
 
 # ----------------------------------------------------------------
