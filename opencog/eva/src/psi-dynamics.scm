@@ -62,11 +62,6 @@
 		)
 	)
 
-	; Update psi-emotion-states
-	; Keeping it simple for now
-	; For happy perhaps pos-valence * arousal or weighted average?
-	; Todo: Map out other emotions
-	(psi-set-value! psi-happy (* pos-valence arousal))
 )
 
 ; Register the expression callback function with OpenPsi
@@ -199,6 +194,98 @@
 ;(psi-set-event-callback! psi-check-for-loud-noise)
 
 
+; ===========================================================================
+; Psi Emotion Representations
+; Todo: move to psi-emotions.scm file?
+
+(define psi-emotion-node (Concept (string-append psi-prefix-str "emotion")))
+
+(define (psi-create-emotion emotion)
+	(define emotion-concept (Concept (string-append psi-prefix-str emotion)))
+	(Inheritance emotion-concept psi-emotion-node)
+	; initialize value ?
+	(psi-set-value! emotion-concept 0)
+	;(format #t "new emotion: ~a\n" emotion-concept)
+	emotion-concept)
+
+(define-public (psi-get-emotions)
+"
+  Returns a list of all psi emotions.
+"
+	(filter
+		(lambda (x) (not (equal? x psi-emotion-node)))
+		(cog-chase-link 'InheritanceLink 'ConceptNode psi-emotion-node))
+)
+
+; Create emotions
+(define psi-happy (psi-create-emotion "happy"))
+(define psi-sad (psi-create-emotion "sad"))
+(define psi-angry (psi-create-emotion "angry"))
+(define psi-relaxed (psi-create-emotion "relaxed"))
+(define psi-excited (psi-create-emotion "excited"))
+(define psi-tired (psi-create-emotion "tired"))
+
+; Update emotion state values and current dominant emotion state
+(define (psi-update-emotion-states)
+	; Using 2-dimensional Wundt model of emotions based on arousal and valence
+	; for now
+	(define arousal (psi-get-arousal))
+	(define pos-valence (psi-get-pos-valence))
+	(define neg-valence (psi-get-neg-valence))
+
+	; Multiplier for emotion level calculations
+	(define emotionality-factor 1.2)
+	(define e emotionality-factor)
+
+	(define (limit value)
+		(min value 1))
+
+	(psi-set-value! psi-happy
+		(limit (* pos-valence arousal e)))
+	(psi-set-value! psi-angry
+		(limit (* neg-valence arousal e)))
+	(psi-set-value! psi-sad
+		(limit (* neg-valence (- 1 arousal) e)))
+	(psi-set-value! psi-relaxed
+		(limit (* pos-valence (- 1 arousal) e)))
+
+	; Alternative formulas
+	;(psi-set-value! psi-happy
+	;	(max (min (+ pos-valence (/ (- arousal .5) 2)) 1) 0) )
+	;(psi-set-value! psi-angry
+	;	(max (min (+ neg-valence (/ (- arousal .5) 2)) 1) 0) )
+	;(psi-set-value! psi-sad
+	;	(max (min (- neg-valence (/ (- arousal .5) 2)) 1) 0) )
+	;(psi-set-value! psi-relaxed
+	;	(max (min (- pos-valence (/ (- arousal .5) 2)) 1) 0) )
+
+	(psi-set-current-emotion-state)
+
+)
+
+; Current emotion state
+(define current-emotion-state (Concept "current emotion state"))
+(define (psi-set-current-emotion-state)
+	; Find the emotion with the highest level and set as current emotion
+	(define emotions (psi-get-emotions))
+	(define strongest-emotion)
+	(define highest-emotion-value -1)
+	(for-each
+		(lambda (emotion)
+			(define emotion-value (psi-get-number-value emotion))
+			(if (> emotion-value highest-emotion-value)
+				(begin
+					(set! strongest-emotion emotion)
+					(set! highest-emotion-value emotion-value))))
+		emotions)
+	(if (not (equal? (psi-get-value current-emotion-state) strongest-emotion))
+		(begin
+			(StateLink current-emotion-state strongest-emotion)
+			(format #t "Current emotion state: ~a\n" strongest-emotion))))
+
+(define-public (psi-get-current-emotion)
+	(psi-get-value current-emotion-state))
+
 ;-------------------------------------
 ; Internal vars to physiology mapping
 
@@ -233,16 +320,18 @@
 	(GroundedSchemaNode "scm: psi-noise-update" arousal arousal_noise)
 	(List arousal (Number arousal_noise)))
 
-; ------------------------------------------------------------------
+;=============================================================
 ; OpenPsi Dynamics Interaction Rules
+;=============================================================
+
 ; The following change-predicate types have been defined in
 ; opencog/opencog/openpsi/interaction-rule.scm:
 ;(define changed "changed")
 ;(define increased "increased")
 ;(define decreased "decreased")
 
-;--------------------------------
-; Internal dynamic interactions
+;--------------------------------------
+; Internal dynamic interactions rules
 
 ; power increases arousal
 ;(define power->arousal
@@ -258,10 +347,14 @@
 (psi-create-interaction-rule power changed neg-valence -.2)
 
 ; arousal increases pos valence
-(psi-create-interaction-rule arousal changed pos-valence .2)
+(psi-create-interaction-rule arousal increased pos-valence .1)
 
 ; pos valence increases power
 (psi-create-interaction-rule pos-valence changed power .2)
+
+; ^ arousal >>>> pos valence
+; pos valence >>> power
+; power <<< neg valence
 
 
 ;-----------------------
@@ -314,37 +407,16 @@
 	(psi-create-interaction-rule arousal changed voice-width -.3))
 
 
-; --------------------------------------------------------------
-; Psi Emotion Representations
-; Todo: move to psi-emotions.scm file?
+; --------------------------------------------------------
+; Rule to update emotion states each loop
+(define psi-update-emotions-rule
+	(psi-create-general-rule (TrueLink)
+		(GroundedSchemaNode "scm: psi-update-emotion-states")
+		(List)))
 
-(define psi-emotion-node (Concept (string-append psi-prefix-str "emotion")))
-
-(define (psi-create-emotion emotion)
-	(define emotion-concept (Concept (string-append psi-prefix-str emotion)))
-	(Inheritance emotion-concept psi-emotion-node)
-	; initialize value ?
-	(psi-set-value! emotion-concept 0)
-	;(format #t "new emotion: ~a\n" emotion-concept)
-	emotion-concept)
-
-(define-public (psi-get-emotion)
-"
-  Returns a list of all psi emotions.
-"
-	(filter
-		(lambda (x) (not (equal? x psi-emotion-node)))
-		(cog-chase-link 'InheritanceLink 'ConceptNode psi-emotion-node))
-)
-
-; Create emotions
-(define psi-happy (psi-create-emotion "happy"))
-(define psi-sad (psi-create-emotion "sad"))
-(define psi-excited (psi-create-emotion "excited"))
-(define psi-tired (psi-create-emotion "tired"))
 
 ; ------------------------------------------------------------------
-; Run the dyanmics updater loop. Eventually this will be part of the main
+; Run the dyanmics updater loop. Eventually might be part of the main
 ; OpenPsi loop.
 (psi-updater-run)
 
