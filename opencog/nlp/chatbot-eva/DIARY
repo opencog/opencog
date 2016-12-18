@@ -1421,16 +1421,27 @@ aka
 (map-sound  2.01  -1.01 0.01)
 
 ; The above will materialize the below in the atomsapce:
-(StateLink (ConceptNode "last person who spoke") (NumberNode 42))
+; iun time-map.scm
+(define last-speaker (Concept "last person who spoke"))
+(State last-speaker (Number 42))
+
+(cog-execute! (Get (State last-speaker (Variable "$x"))))
+(cog-execute! (DefinedSchema "current-speaker"))
 
 (process-query 'luser "Look at me")
 
 
-Look at me
-turn towards me
-face me
+Look at me   -- done
+turn towards me -- done
+face me     Wi Ox -- done
+look at him
+look at her
 don't look at me
 turn away
+
+me
+her
+him
 
 --> No
 --> You're not the boss of me.
@@ -1557,6 +1568,8 @@ $verb -> (WordNode "look"
       (SetLink (NumberNode "0.000000"))))
 
 ... look-at-person is running off of eye-contact-state
+
+
 
 
 obj-semantic-model-rule-1

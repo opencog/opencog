@@ -183,6 +183,7 @@
 
 ; Re-implementation of look-rule-1 and 2, using the shorter template.
 ; Handles sentences such as "Turn left", "Look up" and also "look happy"
+; Ox link: "face me"
 (define look-rule-1
 	(imperative-object-rule-template
 		; VERB-LIST -- a list of synonyms
@@ -195,7 +196,8 @@
 		(ChoiceLink        ; LINKS
 			(lg-link "MVa" "$verb-inst" "$obj-inst")
 			(lg-link "MVp" "$verb-inst" "$obj-inst")
-			(lg-link "Pa" "$verb-inst" "$obj-inst"))
+			(lg-link "Pa" "$verb-inst" "$obj-inst")
+			(lg-link "Ox" "$verb-inst" "$obj-inst"))
 	))
 
 ; Handles directional sentences with "to", such as "turn to the left".
