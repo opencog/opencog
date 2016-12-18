@@ -25,13 +25,6 @@
          (slia (delete-duplicates (append sl ia))))
     (State pln-inferred-atoms (SetLink slia))))
 
-;; Return a list of pairs (inferred atom, name list)
-(define (get-assoc-inferred-names)
-  (let ((inferred-atoms-list (cog-outgoing-set (search-inferred-atoms)))
-        (gen-assoc (lambda (x) (list x (get-names (cog-get-all-nodes x)))))
-        )
-    (map gen-assoc inferred-atoms-list)))
-
 (define (search-input-utterance-words)
   (let* ((results (cog-chase-link 'StateLink 'ListLink input-utterance-words)))
     (if (null? results) '() (cog-outgoing-set (first results)))))

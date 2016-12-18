@@ -36,6 +36,7 @@
 ;;       (Concept "people")
 ;;       (Concept P-name)))))
 (define (implication-to-evaluation-s2l P Q)
+; TODO: Replace by microplanner.
     (let ((P-name (cog-name P)))
        (Word "people")
        (Set
@@ -81,13 +82,11 @@
     ; FIXME Why does the first call of (pln-loop) work?
     (pln-loop)
     (pln-loop)
-    (let* (
-           (assoc-inferred-names (get-assoc-inferred-names))
-           (iu-names (get-input-utterance-names))
-           (iu-inter (lambda (x) (lset-intersection equal? x iu-names)))
-           (not-null-iu-inter? (lambda (x) (not (null? (iu-inter (second x))))))
-           (filtered-in (filter not-null-iu-inter? assoc-inferred-names))
-           (semantics-list (shuffle (map first filtered-in)))
+    (let* ((filtered-in
+                (filter-using-query-words
+                    (cog-outgoing-set (search-inferred-atoms))
+                    (get-input-utterance-names)))
+           (semantics-list (shuffle  filtered-in))
            (semantics (select-highest-tv-semantics semantics-list))
            (semantics-type (cog-type semantics))
            (logic (if (equal? 'ImplicationLink semantics-type)
@@ -98,8 +97,6 @@
            (word-list (if (null? sureal-result) '() (first sureal-result)))
           )
 
-      (cog-logger-info "[PLN-Action] assoc-inferred-names = ~a"
-                        assoc-inferred-names)
       (cog-logger-info "[PLN-Action] filtered-in = ~a" filtered-in)
       (cog-logger-info "[PLN-Action] semantics-list = ~a" semantics-list)
       (cog-logger-info "[PLN-Action] semantics = ~a" semantics)
