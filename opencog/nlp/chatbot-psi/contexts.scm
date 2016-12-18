@@ -192,7 +192,8 @@
 (define (check-emotion-state-inquiry)
     (define inputwords (get-input-word-list))
     (if (not (null? inputwords))
-        (if (list? (member (cog-outgoing-set inputwords) (map text2words (list
+        (if (list? (member (cog-outgoing-set inputwords) (map text2wordnodes
+                    (list
                         "how are you feeling"
                         "how are you"
                         "how do you feel"))))
@@ -203,9 +204,10 @@
 )
 
 ; Convert text string to list of WordNodes
-(define (text2words text)
+(define (text2wordnodes text)
     (map (lambda (word) (Word word)) (string-split text #\ ))
 )
+
 
 ; Essentially equivalent to "is-input-utterance", as the states
 ; will be reset after giving a reply by default
@@ -440,3 +442,20 @@
             (TypedVariable (Variable "$s") (Type "ConceptNode"))
                 (State chatbot-eva-action (Variable "$s")))))
 )
+
+(Define
+    (DefinedPredicate "emotion-state-not-started?")
+    (process-not-started? emotion-state)
+)
+
+(Define
+    (DefinedPredicate "emotion-state-finished?")
+    (process-finished? emotion-state)
+)
+
+(Define
+    (DefinedPredicate "is-emotion-state-reply?")
+    (any-result? emotion-state-reply)
+)
+
+
