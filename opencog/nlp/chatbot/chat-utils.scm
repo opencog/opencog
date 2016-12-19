@@ -197,7 +197,7 @@ def call_sentiment_parse(text_node, sent_node):
     (let* ((word-inst-list
                 (append-map parse-get-words (sentence-get-parses SENT)))
            (word-list (append-map word-inst-get-word word-inst-list)))
-        (map stimulate word-inst-list)
+;        (map stimulate word-inst-list)
         (map stimulate word-list)
     )
 )
