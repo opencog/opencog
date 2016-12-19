@@ -66,15 +66,22 @@
 ; for inference.
 (pln-record-current-time)
 
+(define pln-update-count 0)
+(define-public (pln-get-update-count) pln-update-count)
 
 (define (update-inferences)
+    (cog-logger-info "[PLN-Action] Started (update-inferences)")
+
     ;; Apply Implication direct evaluation (and put the result in
     ;; pln-inferred-atoms state)
-    (let* ((inputs (pln-get-nlp-inputs
-                (get-previous-said-sents (pln-get-recorded-time))))
+    (let* ((inputs (pln-get-nlp-inputs (get-previous-said-sents
+                (pln-get-recorded-time))))
         (inferences (infer-on-r2l rb-trail-1 inputs 3)))
 
         (if (not (null? inferences))
             (add-to-pln-inferred-atoms inferences))
     )
+
+    (set! pln-update-count (+ pln-update-count 1))
+    (cog-logger-info "[PLN-Action] Finished (update-inferences)")
 )

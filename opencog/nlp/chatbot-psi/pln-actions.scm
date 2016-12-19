@@ -75,31 +75,34 @@
 "
   impl-links: A list of ImplicationLinks
 "
-    (let* ((semantics-list (shuffle impl-links))
-        (semantics (select-highest-tv-semantics semantics-list))
-        (logic (if (equal? 'ImplicationLink (cog-type semantics))
-                   (implication-to-evaluation-s2l (gar semantics)
-                                                  (gdr semantics))
-                   '()))
-        (sureal-result (if (null? logic) '() (sureal logic)))
-        )
+    (if (null? impl-links)
+        (State pln-answers no-result)
+        (let* ((semantics (select-highest-tv-semantics (shuffle impl-links)))
+            (logic
+                (if (equal? 'ImplicationLink (cog-type semantics))
+                    (implication-to-evaluation-s2l
+                        (gar semantics) (gdr semantics))
+                    '()))
+            (sureal-result (if (null? logic) '() (sureal logic)))
+            )
 
-        (State
-            pln-answers
-            (if (null? sureal-result)
-                no-result
-                (List (map Word (first sureal-result)))
+            (State
+                pln-answers
+                (if (null? sureal-result)
+                    no-result
+                    (List (map Word (first sureal-result)))
+                )
             )
         )
     )
 )
 
-(define-public (do-pln-QA)
+(define-public (do-pln-qa)
 "
   Fetch the semantics with the highest strength*confidence that
   contains words in common with the query
 "
-    (cog-logger-info "[PLN-Action] do-pln-QA")
+    (cog-logger-info "[PLN-Action] Started (do-pln-QA)")
 
     (State pln-qa process-started)
     ; FIXME Why doesn't the first call of (update-inferences) work?
@@ -108,9 +111,11 @@
     (let ((inferences (search-inferred-atoms)))
         (if (null? inferences)
             (State pln-answers no-result)
-            (choose-response-for-trail-1 (filter-using-query-words
-                (cog-outgoing-set inferences) (get-input-utterance-names)))
+            (choose-response-for-trail-1
+                (filter-using-query-words
+                    inferences (get-input-utterance-names)))
         )
+        (cog-logger-info "[PLN-Action] Finishing (do-pln-QA)")
         (State pln-qa process-finished)
     )
 )

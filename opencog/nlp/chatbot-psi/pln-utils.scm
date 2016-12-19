@@ -1,18 +1,14 @@
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 (load "states.scm")
 
 (define (search-inferred-atoms)
-  (let* (
-        (ia-query (Get (State pln-inferred-atoms (Variable "$x"))))
-        (ia (gar (cog-satisfying-set ia-query))))
-    ia))
+    (let ((inferences (cog-execute!
+            (Get (Member pln-inferred-atoms (Variable "$x"))))))
 
-(define (get-inferred-atoms)
-  (delete-duplicates (cog-get-all-nodes (search-inferred-atoms))))
-
-(define (get-inferred-names)
-  (get-names (get-inferred-atoms)))
+        (cog-outgoing-set inferences)
+    )
+)
 
 (define (get-names atom-list)
   (map cog-name atom-list))
@@ -20,10 +16,8 @@
 ;; Insert the elements of a given Set to the elements of the Set
 ;; associated to the Anchor pln-inferred-atoms
 (define (add-to-pln-inferred-atoms s)
-    (let* ((ia (cog-outgoing-set (search-inferred-atoms)))
-           (sia (delete-duplicates (append s ia))))
-       (State pln-inferred-atoms (SetLink sia))
-    )
+; FIXME: Why is it not adding somethimes?
+   (map (lambda (x) (Member pln-inferred-atoms x)) s)
 )
 
 (define (search-input-utterance-words)
