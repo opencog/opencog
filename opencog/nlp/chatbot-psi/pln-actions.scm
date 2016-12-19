@@ -64,7 +64,8 @@
            (filtered-in (filter not-null-iu-inter? assoc-inferred-names))
            (semantics-list (shuffle (map first filtered-in)))
            (semantics (select-highest-tv-semantics semantics-list))
-           (semantics-type (cog-type semantics))
+           (semantics-type
+                (if (null? semantics) semantics (cog-type semantics)))
            (logic (if (equal? 'ImplicationLink semantics-type)
                       (implication-to-evaluation-s2l (gar semantics)
                                                      (gdr semantics))
