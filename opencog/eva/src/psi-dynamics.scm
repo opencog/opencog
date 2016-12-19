@@ -140,6 +140,90 @@
 ;(define loud-noise-event
 ;	(psi-create-monitored-event "loud-noise"))
 
+
+; Room Luminance
+; Room got bright and room got dark
+(define room-got-bright-event (psi-create-monitored-event "room-got-bright"))
+(define room-got-dark-event (psi-create-monitored-event "room-got-dark"))
+
+(define room-was-bright #f)
+(define room-was-dark #f)
+(define (psi-detect-room-got-bright)
+	(if (room-is-bright?)
+		(if (not room-was-bright)
+			(begin
+				(psi-set-event-occurrence! room-got-bright-event)
+				(set! room-was-bright #t)
+				(if verbose (display "**** Room got bright *****\n"))
+			)
+		)
+		(if room-was-bright
+			(set! room-was-bright #f))
+	)
+)
+
+(define (psi-detect-room-got-dark)
+	(if (room-is-dark?)
+		(if (not room-was-dark)
+			(begin
+				(psi-set-event-occurrence! room-got-dark-event)
+				(set! room-was-dark #t)
+				(if verbose (display "**** Room got dark *****\n"))
+			)
+		)
+		(if room-was-dark
+			(set! room-was-dark #f))
+	)
+)
+
+(psi-set-event-callback! psi-detect-room-got-bright)
+(psi-set-event-callback! psi-detect-room-got-dark)
+
+; Luminance rules
+(define room-got-bright->arousal
+	(psi-create-interaction-rule room-got-bright-event changed arousal .7))
+
+(define room-got-dark->arousal
+	(psi-create-interaction-rule room-got-dark-event changed arousal -.5))
+
+(define (get-luminance-value)
+    (define result (cog-outgoing-set (cog-execute!
+        (Get (State (Anchor "luminance") (Variable "$x"))))))
+    (if (not (null? result))
+		(set! result (string->number (cog-name (car result))))
+		(set! result #f))
+    ;(format #t "~a\n" result)
+    result
+)
+
+(define (room-is-bright?)
+	(define val (get-luminance-value))
+	(define return)
+	(if val
+		(if (> val 40)
+			(set! return #t)
+			(set! return #f) )
+		; no val set for luminance value
+		(set! return room-was-bright)
+	)
+	;(format #t "~a\n" return)
+	return
+)
+
+(define (room-is-dark?)
+	(define val (get-luminance-value))
+	(define return)
+	(if val
+		(if (< val 25)
+			(set! return #t)
+			(set! return #f) )
+		; no val set for luminance value
+		(set! return room-was-bright)
+	)
+	;(format #t "~a\n" return)
+	return
+)
+
 ; ------------------------------------------------------------------
 ; Event detection callbacks
 
@@ -179,7 +263,6 @@
 (psi-set-event-callback! psi-detect-dialog-sentiment)
 
 ; Callback for loud noise detected
-; Using the self-model defined predicate for this instead of the below
 ;(define new-loud-noise? #f) ; indicates a loud noise just occurred
 ;(define (psi-check-for-loud-noise)
 ;	; This step is a temp hack for development purpose. Need to replace this
@@ -192,6 +275,8 @@
 
 ; Register the callback with the openpsi dynamics updater
 ;(psi-set-event-callback! psi-check-for-loud-noise)
+
+
 
 
 ; ===========================================================================
@@ -388,15 +473,17 @@
 		power .5))
 
 ; Loud noise occurs
-(define loud-noise (DefinedPredicate "Heard Loud Voice?"))
-(psi-create-interaction-rule loud-noise increased arousal .9)
-(psi-create-interaction-rule loud-noise increased neg-valence .7)
+;(define loud-noise (DefinedPredicate "Heard Loud Voice?"))
+;(define loud-noise (DefinedPredicate "Heard Loud Sound?"))
+;(psi-create-interaction-rule loud-noise increased arousal .9)
+;(psi-create-interaction-rule loud-noise increased neg-valence .7)
 
 ; Loud noise - previous approach that uses event callback approach
 ;(define loud-noise->arousal (psi-create-interaction-rule loud-noise-event
 ;	increased arousal 1))
 ;(define loud-noise->neg-valence (psi-create-interaction-rule loud-noise-event
 ;	increased neg-valence .7))
+
 
 ; New face
 (define new-face->arousal
