@@ -136,9 +136,29 @@
 	(psi-create-monitored-event "positive-sentiment-dialog"))
 (define negative-sentiment-dialog
 	(psi-create-monitored-event "negative-sentiment-dialog"))
-; Using the self-model defined predicate for this instead
-;(define loud-noise-event
-;	(psi-create-monitored-event "loud-noise"))
+
+
+; Loud Noise
+(define loud-noise-event
+	(psi-create-monitored-event "loud-noise"))
+
+; Callback for loud noise detected
+(use-modules (opencog eva-model))
+(define loud-noise (DefinedPredicate "Heard Loud Sound?"))
+(define new-loud-noise? #f) ; indicates a loud noise just occurred
+(define (psi-check-for-loud-noise)
+	(if (equal? (cog-evaluate! loud-noise)
+				(stv 1 1))
+		(psi-set-event-occurrence! loud-noise-event)))
+
+; Register the callback with the openpsi dynamics updater
+(psi-set-event-callback! psi-check-for-loud-noise)
+
+; Loud noise rules
+(define loud-noise->arousal
+	(psi-create-interaction-rule loud-noise-event increased arousal .9))
+(define loud-noise->neg-valence
+	(psi-create-interaction-rule loud-noise-event increased neg-valence .7))
 
 
 ; Room Luminance
@@ -184,7 +204,7 @@
 	(psi-create-interaction-rule room-got-bright-event changed arousal .7))
 
 (define room-got-dark->arousal
-	(psi-create-interaction-rule room-got-dark-event changed arousal -.5))
+	(psi-create-interaction-rule room-got-dark-event changed arousal -.4))
 
 (define (get-luminance-value)
     (define result (cog-outgoing-set (cog-execute!
@@ -261,21 +281,6 @@
 
 ; Callback checks for both positive and negative sentiment
 (psi-set-event-callback! psi-detect-dialog-sentiment)
-
-; Callback for loud noise detected
-;(define new-loud-noise? #f) ; indicates a loud noise just occurred
-;(define (psi-check-for-loud-noise)
-;	; This step is a temp hack for development purpose. Need to replace this
-;	; with the method for actual event detection, which I think will be through
-;	; ROS messaging.
-;	(if new-loud-noise?
-;		(begin
-;			(psi-set-event-occurrence! loud-noise-event)
-;			(set! new-loud-noise? #f))))
-
-; Register the callback with the openpsi dynamics updater
-;(psi-set-event-callback! psi-check-for-loud-noise)
-
 
 
 
@@ -472,19 +477,6 @@
 	(psi-create-interaction-rule speech-giving-starts increased
 		power .5))
 
-; Loud noise occurs
-;(define loud-noise (DefinedPredicate "Heard Loud Voice?"))
-;(define loud-noise (DefinedPredicate "Heard Loud Sound?"))
-;(psi-create-interaction-rule loud-noise increased arousal .9)
-;(psi-create-interaction-rule loud-noise increased neg-valence .7)
-
-; Loud noise - previous approach that uses event callback approach
-;(define loud-noise->arousal (psi-create-interaction-rule loud-noise-event
-;	increased arousal 1))
-;(define loud-noise->neg-valence (psi-create-interaction-rule loud-noise-event
-;	increased neg-valence .7))
-
-
 ; New face
 (define new-face->arousal
 	(psi-create-interaction-rule new-face increased arousal .3))
@@ -561,12 +553,18 @@
 	(Inheritance sentence (Concept "Positive")))
 
 (define (simulate-loud-noise)
-	(define sudden-sound-change (AnchorNode "Sudden sound change value"))
-	(call-with-new-thread
-		(lambda ()
-			(psi-set-value! sudden-sound-change 1)
-			(sleep 2)
-			(psi-set-value! sudden-sound-change 0))))
+	(cog-execute!
+		(Put (State (AnchorNode "Decibel value") (Variable "$y")) (Number "100")))
+	(sleep 1)
+	(cog-execute! (Put (State (AnchorNode "Decibel value") (Variable "$y")) (Number "50")))
+)
+; Sudden sound change value seems to not be working anymore
+;	(define sudden-sound-change (AnchorNode "Sudden sound change value"))
+;	(call-with-new-thread
+;		(lambda ()
+;			(psi-set-value! sudden-sound-change 1)
+;			(sleep 2)
+;			(psi-set-value! sudden-sound-change 0))))
 
 ; Shortcuts
 (define-public v voice-width)
