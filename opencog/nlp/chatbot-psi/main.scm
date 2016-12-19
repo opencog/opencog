@@ -36,6 +36,7 @@
 
 ; Load wholeshow functions and atoms.
 (load "wholeshow.scm")
+(load "intro.scm")
 
 ; Set relex-server-host
 ; (use-relex-server "localhost" 4444)
