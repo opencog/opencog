@@ -128,6 +128,7 @@
         (list (SequentialAnd
             (DefinedPredicate "chatscript-not-started?")
             (DefinedPredicate "is-input-utterance?")
+            (Not (DefinedPredicate "asking-how-robot-feels?"))
             (SequentialOr
                 (Not (DefinedPredicate "input-type-is-imperative?"))
                 (DefinedPredicate "don't-know-how-to-do-it?"))
@@ -438,5 +439,38 @@
         (stv .9 .9)
         sociality
         "chatbot_eva"
+    )
+)
+
+; Emotion state inquiry
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+           (DefinedPredicate "emotion-state-not-started?")
+           (DefinedPredicate "is-input-utterance?")
+           ;(DefinedPredicate "input-is-a-question?")
+           (DefinedPredicate "asking-how-robot-feels?")
+        ))
+        (True (ExecutionOutput
+                (GroundedSchema "scm: call-emotion-state-response") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "emotion_state"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "emotion-state-finished?")
+            (DefinedPredicate "is-emotion-state-reply?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List emotion-state-reply)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "emotion-state"
     )
 )

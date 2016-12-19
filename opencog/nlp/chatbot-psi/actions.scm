@@ -81,6 +81,32 @@
     )
 )
 
+(define (call-emotion-state-response)
+    (State emotion-state-reply (emotion-state-inquiry-reply))
+    (State emotion-state process-finished))
+
+(define (emotion-state-inquiry-reply)
+    ; psi-current-emotion-state node below gets defined in ros-behavior-scripting
+    ; in psi-dyanmics.scm, but that might not be loaded, so defining it here as
+    ; well. Perhaps this should be defined in openpsi/psi-updater.scm and made
+    ; part of the openpsi module.
+    (define psi-current-emotion-state
+        (Concept (string-append psi-prefix-str "current emotion state")))
+    ;(define current-emotion (psi-get-value psi-current-emotion-state))
+    (define current-emotion (cog-outgoing-set (cog-execute! (Get
+        (TypedVariable (Variable "$f") (Type "ConceptNode"))
+        (State psi-current-emotion-state (Variable "$f"))))))
+
+    ;(display "in emotion-state-inquiry-response \n")
+    (if (not (null? current-emotion))
+        (let ((current-emotion-word (substring (cog-name (car current-emotion))
+                (string-length psi-prefix-str))))
+            (List (text2wordnodes
+                (string-append "I feel " current-emotion-word))))
+        (List (text2wordnodes "I am doing okay"))
+    )
+)
+
 (define-public (say . words)
     (define utterance "")
 
