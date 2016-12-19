@@ -28,40 +28,22 @@
 ; Function called by OpenPsi when it believes expression command updates should
 ; occur based on event detection and subsequent OpenPsi variable updating
 (define (psi-expression-callback)
-	(define arousal (psi-get-arousal))
-	(define pos-valence (psi-get-pos-valence))
-	(define neg-valence (psi-get-neg-valence))
+	;(define arousal-value (psi-get-arousal))
+	;(define pos-valence-value (psi-get-pos-valence))
+	;(define neg-valence-value (psi-get-neg-valence))
 	;(if psi-verbose (display "psi-dynamics expression callback called\n"))
 
-	; For now we are doing something simple - do a random positive or negative
-	; expression based on valence and arousal.
-	; Later arousal will be used to modulate intensity of the expression
-	; Todo: How to handle when both pos and neg valence are high ? Expressing
-	; both for now, which may or may not be a good thing, but probably
-	; interesting nonetheless.
-	(if (>= pos-valence valence-activation-level)
-		(begin
-			;( (do-catch do-random-positive-expression))
-			(if psi-verbose
-				(display "psi-dynamics: doing positive expression\n"))
-			(if (not no-blender)
-				(be-happy pos-valence)
-				;(do-random-positive-expression)
-			)
-		)
-	)
-	(if (>= neg-valence valence-activation-level)
-		(begin
-			;( (do-catch do-random-negative-expression))
-			(if psi-verbose
-				(display "psi-dynamics: doing negative expression\n"))
-			(if (not no-blender)
-				(be-sad neg-valence)
-				;(do-random-negative-expression)
-			)
-		)
-	)
-
+	(define dominant-emotion (psi-get-current-emotion))
+	(define emotion-value (psi-get-number-value dominant-emotion))
+	;(show-emotion (cog-name dominant-emotion) emotion-value)
+	(if (equal? dominant-emotion psi-happy)
+		(be-happy emotion-value))
+	(if (equal? dominant-emotion psi-sad)
+		(be-sad emotion-value))
+	(if (equal? dominant-emotion psi-angry)
+		(be-angry emotion-value))
+	(if (equal? dominant-emotion psi-relaxed)
+		(be-comprehending emotion-value))
 )
 
 ; Register the expression callback function with OpenPsi
@@ -105,6 +87,11 @@
 					 (ConceptNode "frustrated"))
 				 (Number 8) (Number intensity)))))
 
+(define (show-emotion emotion intensity)
+	(cog-evaluate! (Put (DefinedPredicate "Show facial expression")
+		(ListLink (Concept emotion) (Number 8) (Number intensity)))))
+
+
 (define (be-happy intensity)
 	;(display "in (be-happy)\n")
 	(cog-evaluate! (Put (DefinedPredicate "Show facial expression")
@@ -114,6 +101,16 @@
 	;(display "in (be-sad)\n")
 	(cog-evaluate! (Put (DefinedPredicate "Show facial expression")
 		(ListLink (Concept "sad") (Number 8) (Number intensity)))))
+
+(define (be-irritated intensity)
+	;(display "in (be-irritated)\n")
+	(cog-evaluate! (Put (DefinedPredicate "Show facial expression")
+		(ListLink (Concept "irritated") (Number 8) (Number intensity)))))
+
+(define (be-comprehending intensity)
+	;(display "in (be-comprehending)\n")
+	(cog-evaluate! (Put (DefinedPredicate "Show facial expression")
+		(ListLink (Concept "comprehending") (Number 8) (Number intensity)))))
 
 ; Temp error catching for when blender not running
 (define (do-catch function . params)
@@ -129,6 +126,7 @@
 
 ; ------------------------------------------------------------------
 ; Create Monitored Events
+;-------------------------------------------------------------------
 (define new-face (psi-create-monitored-event "new-face"))
 (define speech-giving-starts
 	(psi-create-monitored-event "speech-giving-starts"))
@@ -283,7 +281,6 @@
 (psi-set-event-callback! psi-detect-dialog-sentiment)
 
 
-
 ; ===========================================================================
 ; Psi Emotion Representations
 ; Todo: move to psi-emotions.scm file?
@@ -350,7 +347,6 @@
 	;	(max (min (- pos-valence (/ (- arousal .5) 2)) 1) 0) )
 
 	(psi-set-current-emotion-state)
-
 )
 
 ; Current emotion state
