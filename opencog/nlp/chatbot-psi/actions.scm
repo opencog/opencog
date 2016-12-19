@@ -90,8 +90,7 @@
     ; in psi-dyanmics.scm, but that might not be loaded, so defining it here as
     ; well. Perhaps this should be defined in openpsi/psi-updater.scm and made
     ; part of the openpsi module.
-    (define psi-current-emotion-state
-        (Concept (string-append psi-prefix-str "current emotion state")))
+    (define psi-current-emotion-state (Concept "current emotion state"))
     ;(define current-emotion (psi-get-value psi-current-emotion-state))
     (define current-emotion (cog-outgoing-set (cog-execute! (Get
         (TypedVariable (Variable "$f") (Type "ConceptNode"))
