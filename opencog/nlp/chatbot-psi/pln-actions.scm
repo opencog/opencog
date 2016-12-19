@@ -108,7 +108,7 @@
     ; FIXME Why doesn't the first call of (update-inferences) work?
     (update-inferences)
     (update-inferences)
-    (let ((inferences (search-inferred-atoms)))
+    (let ((inferences (get-inferred-atoms)))
         (if (null? inferences)
             (State pln-answers no-result)
             (choose-response-for-trail-1
