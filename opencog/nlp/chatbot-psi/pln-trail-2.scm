@@ -66,3 +66,6 @@
     ; Return the rule-base
     rb
 )
+
+;; Define rulebases
+(define rb-trail-2 (configure-pln-rbs-2))
