@@ -128,6 +128,7 @@
         (list (SequentialAnd
             (DefinedPredicate "chatscript-not-started?")
             (DefinedPredicate "is-input-utterance?")
+            (Not (DefinedPredicate "asking-how-robot-feels?"))
             (SequentialOr
                 (Not (DefinedPredicate "input-type-is-imperative?"))
                 (DefinedPredicate "don't-know-how-to-do-it?"))
