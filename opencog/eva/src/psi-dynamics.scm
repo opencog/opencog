@@ -199,7 +199,7 @@
 
 ; Luminance rules
 (define room-got-bright->arousal
-	(psi-create-interaction-rule room-got-bright-event changed arousal .7))
+	(psi-create-interaction-rule room-got-bright-event changed arousal .5))
 
 (define room-got-dark->arousal
 	(psi-create-interaction-rule room-got-dark-event changed arousal -.4))
@@ -218,7 +218,7 @@
 	(define val (get-luminance-value))
 	(define return)
 	(if val
-		(if (> val 40)
+		(if (> val 50)
 			(set! return #t)
 			(set! return #f) )
 		; no val set for luminance value
@@ -232,7 +232,7 @@
 	(define val (get-luminance-value))
 	(define return)
 	(if val
-		(if (< val 25)
+		(if (< val 20)
 			(set! return #t)
 			(set! return #f) )
 		; no val set for luminance value
@@ -426,6 +426,12 @@
 
 ;--------------------------------------
 ; Internal dynamic interactions rules
+
+; pos valence up decreases neg valence
+(psi-create-interaction-rule pos-valence increased neg-valence -.2)
+
+; neg valence up decreases pos valence
+(psi-create-interaction-rule neg-valence increased pos-valence -.2)
 
 ; power increases arousal
 ;(define power->arousal
