@@ -55,7 +55,7 @@
     ; Pause for 10 millisecs, so that the psi engine doesn't hog
     ; all CPU. FIXME -- this is obviously a hack, awaiting some sort
     ; of better way of scehduling psi rules.
-    (usleep 10000)
+    (usleep 40000)
     (if psi-do-run-loop (stv 1 1) (stv 0 1))
 )
 
