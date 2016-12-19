@@ -106,8 +106,8 @@ std::string AttentionModule::do_start_ecan(Request *req, std::list<std::string> 
     std::string afRent = AFRentCollectionAgent::info().id;
     std::string waRent = WARentCollectionAgent::info().id;
 
-    _cogserver.startAgent(_afImportanceAgentPtr, true, afImportance);
-    _cogserver.startAgent(_waImportanceAgentPtr, true, waImportance);
+   // _cogserver.startAgent(_afImportanceAgentPtr, true, afImportance);
+   // _cogserver.startAgent(_waImportanceAgentPtr, true, waImportance);
 
     _cogserver.startAgent(_afRentAgentPtr, true, afRent);
     _cogserver.startAgent(_waRentAgentPtr, true, waRent);
