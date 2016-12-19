@@ -59,7 +59,8 @@
            (assoc-inferred-names (get-assoc-inferred-names))
            (iu-names (get-input-utterance-names))
            (iu-inter (lambda (x) (lset-intersection equal? x iu-names)))
-           (not-null-iu-inter? (lambda (x) (not (null? (iu-inter (second x))))))
+           (not-null-iu-inter?
+                (lambda (x) (not (null? (iu-inter (list (first (second x))))))))
            (filtered-in (filter not-null-iu-inter? assoc-inferred-names))
            (semantics-list (shuffle (map first filtered-in)))
            (semantics (select-highest-tv-semantics semantics-list))
