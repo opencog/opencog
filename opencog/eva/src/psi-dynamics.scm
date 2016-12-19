@@ -41,7 +41,7 @@
 	(if (equal? dominant-emotion psi-sad)
 		(be-sad emotion-value))
 	(if (equal? dominant-emotion psi-angry)
-		(be-angry emotion-value))
+		(be-irritated emotion-value))
 	(if (equal? dominant-emotion psi-relaxed)
 		(be-comprehending emotion-value))
 )
