@@ -21,8 +21,12 @@
 ;; associated to the Anchor pln-inferred-atoms
 (define (add-to-pln-inferred-atoms s)
   (let* ((sl (cog-outgoing-set s))
+         (no-be (filter
+            (lambda(x)
+                (if (member (Predicate "be") (cog-get-all-nodes x)) #f #t))
+            sl))
          (ia (cog-outgoing-set (search-inferred-atoms)))
-         (slia (delete-duplicates (append sl ia))))
+         (slia (delete-duplicates (append no-be ia))))
     (State pln-inferred-atoms (SetLink slia))))
 
 ;; Return a list of pairs (inferred atom, name list)
