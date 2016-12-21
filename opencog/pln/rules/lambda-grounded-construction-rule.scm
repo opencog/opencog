@@ -26,11 +26,10 @@
 
 (define lambda-grounded-construction-pattern
   (AndLink
-     (QuoteLink (LambdaLink
-        (UnquoteLink (VariableNode "$V"))
-        (UnquoteLink (VariableNode "$B"))))
+     (VariableNode "$V")
+     (VariableNode "$B")
      (EvaluationLink
-        (GroundedPredicateNode "scm: closed?")
+        (GroundedPredicateNode "scm: lambda-grounded-construction-precondition")
         (VariableNode "$B"))))
 
 (define lambda-grounded-construction-rewrite
@@ -51,8 +50,8 @@
 (define (lambda-grounded-construction-formula body lamb)
   (cog-set-tv! lamb (cog-tv body)))
 
-(define (closed? atom)
-  (bool->tv (cog-closed? atom)))
+(define (lambda-grounded-construction-precondition atom)
+  (bool->tv (and (cog-closed? atom) (tv-positive-conf? (cog-tv atom)))))
 
 ;; Name the rule
 (define lambda-grounded-construction-rule-name
