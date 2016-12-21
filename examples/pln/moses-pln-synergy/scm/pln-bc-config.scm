@@ -78,7 +78,7 @@
         (list implication-construction-rule-name 1)
         (list implication-implicant-distribution-rule-name 1)
         (list implication-and-lambda-factorization-rule-name 1)
-        ;; (list deduction-implication-rule-name 1)
+        (list deduction-implication-rule-name 1)
         ;; (list implication-full-instantiation-rule-name 1)
         ;; (list equivalence-to-implication-rule-name 1)
         ;; (list implication-implicant-disjunction-rule-name 1)
@@ -93,7 +93,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 20)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 1000)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
