@@ -76,7 +76,13 @@
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: implication-and-lambda-factorization-formula")
      (ImplicationLink
-        implication-and-lambda-factorization-pattern
+        (AndLink
+           (QuoteLink (LambdaLink
+              (UnquoteLink (VariableNode "$TyVs"))
+              (UnquoteLink (VariableNode "$A1"))))
+           (QuoteLink (LambdaLink
+              (UnquoteLink (VariableNode "$TyVs"))
+              (UnquoteLink (VariableNode "$A2")))))
         (QuoteLink (LambdaLink
            (UnquoteLink (VariableNode "$TyVs"))
            (UnquoteLink (AndLink
