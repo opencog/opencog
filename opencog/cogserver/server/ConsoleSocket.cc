@@ -210,13 +210,8 @@ void ConsoleSocket::OnLine(const std::string& line)
 
         // Force a drain of the request queue, because we *must* enter
         // shell mode before handling any additional input from the
-        // socket (since the next input is almost surely intended for
-        // the new shell, not for the cogserver command processor).
-        //
-        // NOTE: Calling this method for non-shell requests may
-        // cause cogserver to crash due to concurrency issues, since
-        // this runs in a separate thread (for socket handler) instead
-        // of the main thread (where the server loop runs).
+        // socket (since all subsequent input will be for the new shell,
+        // not for the cogserver command processor).
         cogserver.processRequests();
     }
 }

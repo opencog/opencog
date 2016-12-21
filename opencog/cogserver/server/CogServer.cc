@@ -255,7 +255,7 @@ bool CogServer::customLoopRun(void)
 
 void CogServer::processRequests(void)
 {
-    std::unique_lock<std::mutex> lock(processRequestsMutex);
+    std::lock_guard<std::mutex> lock(processRequestsMutex);
     while (0 < getRequestQueueSize()) {
         Request* request = popRequest();
         request->execute();
