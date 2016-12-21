@@ -147,27 +147,9 @@ void ConsoleSocket::OnLine(const std::string& line)
         return;
     }
 
-    logger().debug("[ConsoleSocket] OnLine [%s]", line.c_str());
-
-    // parse command line
-    std::list<std::string> params;
-    tokenize(line, std::back_inserter(params), " \t\v\f");
-    logger().debug("params.size(): %d", params.size());
-    if (params.empty()) {
-        // return on empty/blank line
-        sendPrompt();
-        return;
-    }
-    std::string cmdName = params.front();
-    params.pop_front();
-
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    Request* request = cogserver.createRequest(cmdName);
-
     // If the command starts with an open-paren, or a semi-colon, assume
     // its a scheme command. Pop into the scheme shell, and try again.
-    if (nullptr == request and
-        (cmdName[0] == '(' or cmdName[0] == ';'))
+    if (line[0] == '(' or line[0] == ';')
     {
         OnLine("scm");
 
@@ -179,6 +161,24 @@ void ConsoleSocket::OnLine(const std::string& line)
         }
     }
 
+    logger().debug("[ConsoleSocket] OnLine [%s]", line.c_str());
+
+    // Parse command line
+    std::list<std::string> params;
+    tokenize(line, std::back_inserter(params), " \t\v\f");
+    logger().debug("params.size(): %d", params.size());
+    if (params.empty()) {
+        // return on empty/blank line
+        sendPrompt();
+        return;
+    }
+
+    std::string cmdName = params.front();
+    params.pop_front();
+
+    CogServer& cogserver = static_cast<CogServer&>(server());
+    Request* request = cogserver.createRequest(cmdName);
+
     // Command not found.
     if (nullptr == request)
     {
@@ -187,7 +187,7 @@ void ConsoleSocket::OnLine(const std::string& line)
         logger().warn(msg);
         Send(msg);
 
-        // try to send "help" command response
+        // Try to send "help" command response
         request = cogserver.createRequest("help");
         if (nullptr == request)
         {
@@ -200,19 +200,18 @@ void ConsoleSocket::OnLine(const std::string& line)
     request->set_console(this);
     request->setParameters(params);
 
-    // We only add the command to the processing queue
-    // if it hasn't disabled the line protocol
+    // Add the command to the processing queue.
     cogserver.pushRequest(request);
 
     if (request->isShell())
     {
-        logger().debug("[ConsoleSocket] OnLine request %s is a shell",
+        logger().debug("ConsoleSocket::OnLine() request %s is a shell",
                        line.c_str());
 
-        // Force a drain of this request, because we *must* enter
+        // Force a drain of the request queue, because we *must* enter
         // shell mode before handling any additional input from the
         // socket (since the next input is almost surely intended for
-        // the new shell, not for the cogserver one).
+        // the new shell, not for the cogserver command processor).
         //
         // NOTE: Calling this method for non-shell requests may
         // cause cogserver to crash due to concurrency issues, since
