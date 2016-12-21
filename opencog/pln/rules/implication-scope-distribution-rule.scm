@@ -41,14 +41,12 @@
      (ListLink
         implication-scope-distribution-body
         (Implication
-           (LocalQuote
-           (Lambda
-              (VariableNode "$TyVs")
-              (VariableNode "$P")))
-           (LocalQuote
-           (Lambda
-              (VariableNode "$TyVs")
-              (VariableNode "$Q")))))))
+           (Quote (Lambda
+              (Unquote (VariableNode "$TyVs"))
+              (Unquote (VariableNode "$P"))))
+           (Quote (Lambda
+              (Unquote (VariableNode "$TyVs"))
+              (Unquote (VariableNode "$Q"))))))))
 
 (define implication-scope-distribution-rule
   (BindLink
