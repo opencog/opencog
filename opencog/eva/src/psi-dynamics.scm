@@ -199,7 +199,7 @@
 
 ; Luminance rules
 (define room-got-bright->arousal
-	(psi-create-interaction-rule room-got-bright-event changed arousal .7))
+	(psi-create-interaction-rule room-got-bright-event changed arousal .5))
 
 (define room-got-dark->arousal
 	(psi-create-interaction-rule room-got-dark-event changed arousal -.4))
@@ -218,7 +218,7 @@
 	(define val (get-luminance-value))
 	(define return)
 	(if val
-		(if (> val 40)
+		(if (> val 50)
 			(set! return #t)
 			(set! return #f) )
 		; no val set for luminance value
@@ -232,7 +232,7 @@
 	(define val (get-luminance-value))
 	(define return)
 	(if val
-		(if (< val 25)
+		(if (< val 20)
 			(set! return #t)
 			(set! return #f) )
 		; no val set for luminance value
@@ -397,8 +397,18 @@
 	;(hash-set! prev-value-table pau initial-value)
 	pau)
 
-; arousal ultradian rhythm rule
-(define arousal_B .05)
+
+;---------------------------------------------------
+; Modulator and emotion cyclical rhythms and nose
+;---------------------------------------------------
+
+; default utradian rhythm and noise params
+(define default_B .05)
+(define default_w .02)
+;(define default_offset (get-random-cycle-offset arousal_w))
+(define default_noise .015)
+
+; arousal ultradian rhythm params
 (define arousal_B .05)
 (define arousal_w .02)
 (define arousal_offset (get-random-cycle-offset arousal_w))
@@ -411,8 +421,31 @@
 
 ; arousal (stochastic) noise rule
 (psi-create-general-rule (TrueLink)
-	(GroundedSchemaNode "scm: psi-noise-update" arousal arousal_noise)
+	(GroundedSchemaNode "scm: psi-noise-update")
 	(List arousal (Number arousal_noise)))
+
+; pos-valence rhythm rule
+(psi-create-general-rule (TrueLink)
+	(GroundedSchemaNode "scm: psi-ultradian-update")
+	(List pos-valence (Number default_B) (Number default_w)
+		(Number (get-random-cycle-offset default_w))))
+
+; pos-valence (stochastic) noise rule
+(psi-create-general-rule (TrueLink)
+	(GroundedSchemaNode "scm: psi-noise-update")
+	(List pos-valence (Number default_noise)))
+
+; neg-valence rhythm rule
+(psi-create-general-rule (TrueLink)
+	(GroundedSchemaNode "scm: psi-ultradian-update")
+	(List neg-valence (Number default_B) (Number default_w)
+		(Number (get-random-cycle-offset default_w))))
+
+; neg-valence (stochastic) noise rule
+(psi-create-general-rule (TrueLink)
+	(GroundedSchemaNode "scm: psi-noise-update")
+	(List neg-valence (Number default_noise)))
+
 
 ;=============================================================
 ; OpenPsi Dynamics Interaction Rules
@@ -426,6 +459,12 @@
 
 ;--------------------------------------
 ; Internal dynamic interactions rules
+
+; pos valence up decreases neg valence
+(psi-create-interaction-rule pos-valence increased neg-valence -.2)
+
+; neg valence up decreases pos valence
+(psi-create-interaction-rule neg-valence increased pos-valence -.2)
 
 ; power increases arousal
 ;(define power->arousal
