@@ -111,9 +111,8 @@ void SuRealUTest::test_basic(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD",
-                 "tests/nlp/sureal/r2l-atomspace1.scm");
-    cogserver().loadSCMModules();
+    _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
+                 "/tests/nlp/sureal/r2l-atomspace1.scm\")");
 
     // Sentences in r2l-atomspace1.scm
     // - He runs.
@@ -138,9 +137,8 @@ void SuRealUTest::test_complex(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD",
-                 "tests/nlp/sureal/r2l-atomspace3.scm");
-    cogserver().loadSCMModules();
+    _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
+                 "/tests/nlp/sureal/r2l-atomspace3.scm\")");
 
     // Sentences in r2l-atomspace3.scm
     // - The yellow dog hates the cat.
@@ -168,9 +166,8 @@ void SuRealUTest::test_disconnected(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD",
-                 "tests/nlp/sureal/r2l-atomspace4.scm");
-    cogserver().loadSCMModules();
+    _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
+                 "/tests/nlp/sureal/r2l-atomspace4.scm\")");
 
     // Sentences in r2l-atomspace4.scm
     // - He walked slowly and she ran quickly.
@@ -214,9 +211,8 @@ void SuRealUTest::test_multiconn(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD",
-                 "tests/nlp/sureal/r2l-atomspace5.scm");
-    cogserver().loadSCMModules();
+    _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
+                 "/tests/nlp/sureal/r2l-atomspace5.scm\")");
 
     // Sentences in r2l-atomspace5.scm
     // - He ate a big round olive.
@@ -268,10 +264,10 @@ void SuRealUTest::test_good_enough(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD",
-                 "tests/nlp/sureal/r2l-atomspace1.scm,"
-                 "tests/nlp/sureal/r2l-atomspace6.scm");
-    cogserver().loadSCMModules();
+    _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
+                 "/tests/nlp/sureal/r2l-atomspace1.scm\")");
+    _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
+                 "/tests/nlp/sureal/r2l-atomspace6.scm\")");
 
     // Sentences in r2l-atomspace1.scm and r2l-atomspace6.scm
     // - He runs.
@@ -296,9 +292,8 @@ void SuRealUTest::test_tense(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD",
-                 "tests/nlp/sureal/r2l-atomspace7.scm");
-    cogserver().loadSCMModules();
+    _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
+                 "/tests/nlp/sureal/r2l-atomspace7.scm\")");
 
     // Sentences in r2l-atomspace7.scm
     // - "John drinks and she spoke."
