@@ -96,12 +96,12 @@ void MicroplanningUTest::setUp(void)
     _evaluator->eval("(use-modules (opencog nlp relex2logic))");
     _evaluator->eval("(use-modules (opencog nlp sureal))");
 
-    config().set("SCM_PRELOAD",
-                 "tests/nlp/microplanning/r2l-atomspace.scm,"
-                 "tests/nlp/microplanning/test-atomspace.scm,"
-                 "tests/nlp/microplanning/test-results.scm");
-
-    cogserver().loadSCMModules();
+    _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
+                 "/tests/nlp/microplanning/r2l-atomspace.scm\")");
+    _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
+                 "/tests/nlp/microplanning/test-atomspace.scm\")");
+    _evaluator->eval("(load  \"" PROJECT_SOURCE_DIR
+                 "/tests/nlp/microplanning/test-results.scm\")");
 }
 
 void MicroplanningUTest::tearDown(void)
