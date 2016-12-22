@@ -29,15 +29,15 @@
 
 using namespace opencog;
 
-void gargleblast(int tid, int secs)
+void gargleblast(int tid, int reps)
 {
-	for (int i=0; i<secs; i++)
+	for (int i=0; i<reps; i++)
 	{
 		char buf[1000];
 		sprintf(buf, "echo '(Evaluation (Predicate \"visible face\") (List (Number %d)))\n' | nc -q 1 localhost 17333", i);
 		int rc = system(buf);
 		OC_ASSERT(rc==0, "system call failure");
-		usleep(500000);
+		usleep(50000);
 
 		if (20 <= i)
 		{
@@ -46,7 +46,7 @@ void gargleblast(int tid, int secs)
 			OC_ASSERT(rc==0, "system call failure");
 
 		}
-		usleep(500000);
+		usleep(50000);
 	}
 }
 
@@ -97,10 +97,12 @@ public:
 		for (j=0; j<NT; j++)
 		{
 			pangalactic[j]->join();
+			delete pangalactic[j];
 		}
-		sleep(3);
+		sleep(5);
 		csrv->stop();
 		main_loop->join();
+		delete main_loop;
 		delete csrv;
 	}
 };

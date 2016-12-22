@@ -58,16 +58,16 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 	SchemeShell *sh = new SchemeShell();
 	sh->set_socket(con);
 
-	bool hush = false;
 	if (!args.empty())
 	{
+		bool hush = false;
 		std::string &arg = args.front();
 		if (arg == "quiet" || arg == "hush") hush = true;
-	}
-	sh->hush_prompt(hush);
-	sh->hush_output(hush);
+		sh->hush_prompt(hush);
+		sh->hush_output(hush);
 
-	if (hush) return "";
+		if (hush) return "";
+	}
 
 	std::string rv =
 		"Entering scheme shell; use ^D or a single . on a "
