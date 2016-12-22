@@ -1,0 +1,57 @@
+
+/*
+ * tests/atomspace/AttentionUTest.cxxtest
+ *
+ * Copyright (C) 2002-2007 Novamente LLC
+ * All Rights Reserved
+ *
+ * Written by Misgana Bayetta <misgana.bayetta@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/util/Config.h>
+
+using namespace opencog;
+
+class AttentionUTest :  public CxxTest::TestSuite
+{
+    private:
+        AtomSpace _as;
+
+    public:
+        AttentionUTest() {
+            config().set("ECAN_MIN_AF_SIZE", "10");
+        }
+
+        void testTopSTIValues() {
+            AttentionBank _ab(&_as);
+            for(int i = 0; i < 50; i++) {
+                Handle h = _as.add_node(CONCEPT_NODE, "cnode-"+ std::to_string(i));
+                _ab.set_sti(h, i*10);
+            } 
+            
+            HandleSeq hseq = _ab.getTopSTIValuedHandles();
+           
+            TS_ASSERT_EQUALS(_as.get_size(), 50);
+            TS_ASSERT_EQUALS(hseq.size(), 10);
+            TS_ASSERT_EQUALS(_ab.get_sti(hseq[0]), 400);
+        }
+
+};
+
