@@ -199,11 +199,15 @@ void ConsoleSocket::OnLine(const std::string& line)
 
     request->set_console(this);
     request->setParameters(params);
+    bool is_shell = request->isShell();
 
     // Add the command to the processing queue.
+    // Caution: after the pushRequest, the request might be executed
+    // and then deleted in a different thread. It must NOT be accessed
+    // after the push!
     cogserver.pushRequest(request);
 
-    if (request->isShell())
+    if (is_shell)
     {
         logger().debug("ConsoleSocket::OnLine() request %s is a shell",
                        line.c_str());
