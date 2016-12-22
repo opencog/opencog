@@ -24,6 +24,7 @@
 #include <boost/range/adaptor/reversed.hpp>
 
 #include <opencog/util/functional.h>
+#include <opencog/util/Config.h>
 
 #include <opencog/attentionbank/ImportanceIndex.h>
 #include <opencog/attentionbank/AttentionBank.h>
@@ -49,6 +50,7 @@ using namespace opencog;
 ImportanceIndex::ImportanceIndex(AttentionBank& bank)
     : _bank(bank), _index(IMPORTANCE_INDEX_SIZE+1)
 {
+    minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
 }
 
 unsigned int ImportanceIndex::importanceBin(short importance)
@@ -84,12 +86,41 @@ void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
 
     _index.remove(oldbin, atom);
     _index.insert(newbin, atom);
+    
+    updateTopStiValues(atom);
 }
 
 void ImportanceIndex::removeAtom(Atom* atom, int bin)
 {
     _index.remove(bin, atom);
+    
+    // Also remove from topKSTIValueHandles vector
+    auto it = std::find(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end()
+                       , atom->getHandle());
+    topKSTIValuedHandles.erase(it);
+    //TODO Find the next highest STI valued atom to replace the removed one.
 }
+
+void ImportanceIndex::updateTopStiValues(Atom* atom)
+{
+    AttentionValue::sti_t sti = _bank.get_av(atom->getHandle())->getSTI();
+    auto insertHandle = [this](Handle h){
+        auto it = std::lower_bound(topKSTIValuedHandles.begin(),
+                                   topKSTIValuedHandles.end(), h,
+                [=](const Handle& h1, const Handle& h2){
+                return _bank.get_av(h1)->getSTI() < _bank.get_av(h2)->getSTI();
+                });
+        topKSTIValuedHandles.insert(it, h);
+    };
+
+    if(static_cast<int>(topKSTIValuedHandles.size()) < minAFSize){
+        insertHandle(atom->getHandle());
+    } else if (_bank.get_av(*(topKSTIValuedHandles.begin()))->getSTI() < sti) {
+        topKSTIValuedHandles.erase(topKSTIValuedHandles.begin());
+        insertHandle(atom->getHandle());
+    }
+}
+
 
 UnorderedHandleSet ImportanceIndex::getHandleSet(
         AttentionValue::sti_t lowerBound,
@@ -171,6 +202,11 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
         }
     }
     return ret;
+}
+
+HandleSeq ImportanceIndex::getTopSTIValuedHandles()
+{
+    return  topKSTIValuedHandles;
 }
 
 size_t ImportanceIndex::size(int i) const

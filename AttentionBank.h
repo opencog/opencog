@@ -349,6 +349,10 @@ public:
                                  AttentionValue::AttentionValue::MAXSTI);
     }
 
+    HandleSeq getTopSTIValuedHandles(void)
+    {
+         return _importanceIndex.getTopSTIValuedHandles();
+    }
     /**
      * Updates the importance index for the given atom. According to the
      * new importance of the atom, it may change importance bins.

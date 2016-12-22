@@ -42,6 +42,10 @@ class ImportanceIndex
 private:
     AttentionBank& _bank;
     ThreadSafeFixedIntegerIndex _index;
+    HandleSeq topKSTIValuedHandles; // TOP K STI values
+    int minAFSize;
+
+    void updateTopStiValues(Atom* atom);
 
 public:
     ImportanceIndex(AttentionBank&);
@@ -79,7 +83,12 @@ public:
      * Get the lowest bin which contains Atoms
      */
     UnorderedHandleSet getMinBinContents();
- 
+    
+    /**
+     * Get latest top K sti values.
+     */
+     HandleSeq getTopSTIValuedHandles();
+
     /**
      * Get the size of the bin at the given index.
      */
