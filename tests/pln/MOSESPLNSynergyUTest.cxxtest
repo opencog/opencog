@@ -133,11 +133,10 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_fc()
 {
 	// logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// config().set("SCM_PRELOAD",
+	// eval.eval("(load \"" PROJECT_SOURCE_DIR
 	//              "examples/pln/moses-pln-synergy/scm/moses-model.scm,"
 	//              "examples/pln/moses-pln-synergy/scm/background-knowledge.scm,"
 	//              "examples/pln/moses-pln-synergy/scm/pln-config.scm");
-	// load_scm_files_from_config(as);
 
 	// Handle hsources =
 	// 	al(SET_LINK,

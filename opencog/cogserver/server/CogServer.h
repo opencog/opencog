@@ -258,13 +258,6 @@ public:
     virtual void loadModules(std::vector<std::string> module_paths =
                              std::vector<std::string>());
 
-    /** Load all Scheme modules specified in configuration file. If
-        module_paths is empty then DEFAULT_MODULE_PATHS is used
-        instead, which is why it is passed as copy instead of const
-        ref. */
-    virtual void loadSCMModules(std::vector<std::string> module_paths =
-                                std::vector<std::string>());
-
     /** Open database specified in configuration file */
     virtual void openDatabase();
 
