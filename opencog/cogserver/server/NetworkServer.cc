@@ -85,6 +85,9 @@ void NetworkServer::listen()
         boost::asio::ip::tcp::socket* sock = new boost::asio::ip::tcp::socket(_io_service);
         _acceptor.accept(*sock);
 
+        // The total number of concurrently open sockets is managed by
+        // keeping a count in ConsoleSocket, and blocking when there are
+        // too many.
         ConsoleSocket* ss = new ConsoleSocket();
         ss->set_connection(sock);
         std::thread(&ConsoleSocket::handle_connection, ss).detach();
