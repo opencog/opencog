@@ -34,10 +34,28 @@
 
 using namespace opencog;
 
+// _max_open_sockets is the largest number of concurrently open
+// sockets we will allow in the cogserver. Currently set to 60.
+// Note that each SchemeShell (actually, SchemeEval) will open
+// another half-dozen pipes and what-not, so actually, the number
+// of open files will increase by 4 or 6 or so for each network
+// connection. With the default `ulimit -a` of 1024 open files,
+// this should work OK (including open files for the logger, the
+// databases, etc.).
+unsigned int ConsoleSocket::_max_open_sockets = 60;
+volatile unsigned int ConsoleSocket::_num_open_sockets = 0;
+std::mutex ConsoleSocket::_max_mtx;
+std::condition_variable ConsoleSocket::_max_cv;
+
 ConsoleSocket::ConsoleSocket(void)
 {
     _use_count = 0;
     _shell = nullptr;
+
+    // Block here, if there are too many concurrently-open sockets.
+    std::unique_lock<std::mutex> lck(_max_mtx);
+    _num_open_sockets++;
+    while (_max_open_sockets < _num_open_sockets) _max_cv.wait(lck);
 }
 
 ConsoleSocket::~ConsoleSocket()
@@ -58,11 +76,17 @@ ConsoleSocket::~ConsoleSocket()
     // these requests have completed.  boost:asio notices that the
     // remote socket has closed, and so decides its a good day to call
     // destructors. But of course, its not ...
-    std::unique_lock<std::mutex> lck(_mtx);
-    while (_use_count) _cv.wait(lck);
+    std::unique_lock<std::mutex> lck(_in_use_mtx);
+    while (_use_count) _in_use_cv.wait(lck);
+    lck.unlock();
 
     // If there's a shell, kill it.
     if (_shell) delete _shell;
+
+    std::unique_lock<std::mutex> mxlck(_max_mtx);
+    _num_open_sockets--;
+    _max_cv.notify_all();
+    mxlck.unlock();
 
     logger().debug("[ConsoleSocket] destructor finished");
 }

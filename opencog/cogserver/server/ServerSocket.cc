@@ -54,12 +54,14 @@ void ServerSocket::Send(const std::string& cmd)
 
     // The most likely cause of an error is that the remote side has
     // closed the socket, even though we still had stuff to send.
-    // I beleive this is a ENOTCON errno, maybe its another one as well.
+    // I beleive this is a ENOTCON errno, maybe others as well.
+    // (for example, ECONNRESET `Connection reset by peer`)
     // Don't log these harmless errors.
     if (error.value() != boost::system::errc::success and
         error.value() != boost::asio::error::not_connected and
         error.value() != boost::asio::error::broken_pipe and
-        error.value() != boost::asio::error::bad_descriptor)
+        error.value() != boost::asio::error::bad_descriptor and
+        error.value() != boost::asio::error::connection_reset)
         logger().warn("ServerSocket::Send(): %s on thread 0x%x",
              error.message().c_str(), pthread_self());
 }
