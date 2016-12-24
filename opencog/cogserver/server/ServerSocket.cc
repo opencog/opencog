@@ -86,7 +86,8 @@ void ServerSocket::SetCloseAndDelete()
     }
     catch (const boost::system::system_error& e)
     {
-        if (e.code() != boost::asio::error::not_connected)
+        if (e.code() != boost::asio::error::not_connected and
+            e.code() != boost::asio::error::bad_descriptor)
         {
             logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
         }
@@ -174,21 +175,19 @@ void ServerSocket::handle_connection(void)
     }
 
     logger().debug("ServerSocket::exiting handle_connection()");
+    SetCloseAndDelete();
 
-    std::lock_guard<std::mutex> lock(_asio_crash);
-    try
-    {
-        _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-        _socket->close();
-    }
-    catch (const boost::system::system_error& e)
-    {
-        if (e.code() != boost::asio::error::not_connected and
-            e.code() != boost::asio::error::bad_descriptor)
-        {
-            logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
-        }
-    }
-
+    // In the standard scenario, ConsoleSocket inherits from this, and
+    // so deleting this will cause the ConsoleSocket dtor to run. This
+    // will, in turn, try to delete the shell, which will typically
+    // stall until the current evaluation is done. If the current
+    // evaluation is an infinite loop, then it will hang forever, and
+    // gdb will show a stack trace stuck in GenericShell::while_not_done()
+    // This is perfectly normal, and nothing can be done about it; we
+    // can't kill it without hurting users who launch long-running but
+    // finite commands via netcat. Nor can we magically unwind all the
+    // C++ state and stacks, to leave only some very naked evaluator
+    // running. The hang here, in the dtor, while_not_done(), really
+    // must be thought of as the normal sync point for completion.
     delete this;
 }
