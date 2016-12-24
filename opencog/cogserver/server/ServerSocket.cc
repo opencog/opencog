@@ -86,7 +86,8 @@ void ServerSocket::SetCloseAndDelete()
     }
     catch (const boost::system::system_error& e)
     {
-        if (e.code() != boost::asio::error::not_connected)
+        if (e.code() != boost::asio::error::not_connected and
+            e.code() != boost::asio::error::bad_descriptor)
         {
             logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
         }
@@ -174,21 +175,6 @@ void ServerSocket::handle_connection(void)
     }
 
     logger().debug("ServerSocket::exiting handle_connection()");
-
-    std::lock_guard<std::mutex> lock(_asio_crash);
-    try
-    {
-        _socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-        _socket->close();
-    }
-    catch (const boost::system::system_error& e)
-    {
-        if (e.code() != boost::asio::error::not_connected and
-            e.code() != boost::asio::error::bad_descriptor)
-        {
-            logger().error("ServerSocket::handle_connection(): Error closing socket: %s", e.what());
-        }
-    }
-
+    SetCloseAndDelete();
     delete this;
 }
