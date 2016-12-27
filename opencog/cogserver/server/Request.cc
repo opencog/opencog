@@ -26,6 +26,8 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
+#include <opencog/cogserver/server/ConsoleSocket.h>
+
 #include "Request.h"
 
 using namespace opencog;

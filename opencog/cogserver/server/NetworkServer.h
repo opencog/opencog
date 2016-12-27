@@ -31,14 +31,11 @@
 
 #include <boost/asio.hpp>
 
-#include <opencog/cogserver/server/ConsoleSocket.h>
-
 namespace opencog
 {
 /** \addtogroup grp_server
  *  @{
  */
-
 
 /**
  * This class implements the entity responsible for managing the

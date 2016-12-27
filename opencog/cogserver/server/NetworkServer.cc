@@ -24,9 +24,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NetworkServer.h"
-
 #include <opencog/util/Logger.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
+
+#include "NetworkServer.h"
 
 using namespace opencog;
 
