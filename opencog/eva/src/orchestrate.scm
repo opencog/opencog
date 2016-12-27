@@ -160,11 +160,21 @@
 
 ; The language-subsystem can understand commands such as "look at me"
 ; or, more generally, "look at this thing". At the moment, the only
-; thing we can look at are faces, and so we just recycle the
-; definition for look-at-person (from self-model.scm)
+; thing we can look at are faces, and the "salient point"
 (DefineLink
 	(DefinedPredicate "Look-at-thing cmd")
-	(DefinedPredicate "Set interaction target"))
+	(LambdaLink
+		(Variable "$object-id")
+		(SequentialOr
+			(SequentialAnd
+				(Equal (Variable "$object-id") (Concept "salient-point"))
+				(Evaluation
+					(DefinedPredicate "look at salient point")
+					(ListLink (Variable "$object-id"))))
+			(Evaluation
+				(DefinedPredicate "Set interaction target")
+				(ListLink (Variable "$object-id")))
+		)))
 
 ; -------------------------------------------------------------
 ; Publish the current behavior.
