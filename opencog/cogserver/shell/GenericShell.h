@@ -69,7 +69,7 @@ class GenericShell
 		std::string pending_prompt;
 		bool show_output;
 		bool show_prompt;
-		bool self_destruct;
+		volatile bool self_destruct;
 
 		virtual GenericEval* get_evaluator(void) = 0;
 		virtual void thread_init(void);

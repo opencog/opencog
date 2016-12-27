@@ -349,6 +349,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	    ((EOT == expr[len-1]) or ((1 == len) and ('.' == expr[0]))))
 	{
 		self_destruct = true;
+		evalque.cancel();
 		put_output("");
 		if (show_prompt)
 			put_output("Exiting the shell\n");
@@ -418,12 +419,19 @@ void GenericShell::eval_loop(void)
 	thread_init();
 
 	std::string in;
-	while (true)
+	while (not self_destruct)
 	{
-		evalque.pop(in);
-		start_eval();
-		_evaluator->begin_eval();
-		_evaluator->eval_expr(in);
+		try
+		{
+			evalque.pop(in);
+			start_eval();
+			_evaluator->begin_eval();
+			_evaluator->eval_expr(in);
+		}
+		catch (const concurrent_queue<std::string>::Canceled& ex)
+		{
+			break;
+		}
 	}
 }
 
@@ -432,7 +440,7 @@ void GenericShell::poll_loop(void)
 	_init_done = true;
 
 	// Poll for output from the evaluator, and send back results.
-	while (true)
+	while (not self_destruct)
 	{
 		std::string retstr = poll_output();
 		if (0 < retstr.size())
