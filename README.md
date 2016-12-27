@@ -1,7 +1,7 @@
 OpenCog
 =======
 
-build status:
+Build status:
 [![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-opencog-master)](http://61.92.69.39:8080/job/ci-opencog-master)
 
 OpenCog is a framework for developing AI systems, especially appropriate
@@ -27,7 +27,7 @@ it is) but rather, it is a language for representing knowledge and
 algorithms, on which (automated) reasoning and learning can be performed.
 The AtomSpace also provides Scheme (guile) and Python bindings. The
 AtomSpace is maintained in a separate git repo:
-> http://github.com/opencog/atomspace
+http://github.com/opencog/atomspace
 
 This git repository contains assorted projects that are central to the
 OpenCog project, but are not yet mature or stable, and are subject to
@@ -67,9 +67,25 @@ like any laboratory, things are a bit fluid and chaotic.
 
 Building and Running
 --------------------
-For platform dependent instruction on dependencies and building the code as
-well as other options for setting up development environment more details are
-found at: http://wiki.opencog.org/wikihome/index.php/Building_OpenCog
+For platform dependent instruction on dependencies and building the
+code, as well as other options for setting up development environments,
+more details are found on the [Building Opencog
+wiki](http://wiki.opencog.org/wikihome/index.php/Building_OpenCog).
+
+There is no single "demo" or system that can be "run"; rather, the
+various subsystems can be run individually, or together. The single
+most-fully-integrated, complete demo would be the embodied [Hanson
+Robotics](http://github.com/hansonrobotics) chat subsystem.  This
+can be run *without* having an actual robot; a virtual Blender
+animation may be used instead; a webcam and microphones are required
+for sensory input. Portions of this system can be found in the `nlp`
+directory, in this repo, as well as the
+[ROS Behavior Scripting](https://github.com/opencog/ros-behavior-scripting)
+repo. The full setup is located in the Hanson Robotics
+[HEAD](https://github.com/hansonrobotics/HEAD) repo, and ready-to-run
+Docker images can be found in the [OpenCog Docker
+repo](https://github.com/opencog/docker).
+
 
 Prerequisites
 -------------
