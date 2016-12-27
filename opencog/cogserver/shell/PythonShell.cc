@@ -51,7 +51,7 @@ PythonShell::~PythonShell()
     // to flush pending input in the python shell, as otherwise,
     // there is no way to know that no more python input will
     // arrive!
-    GenericShell::do_eval("");
+    GenericShell::eval("");
 
     // Don't delete, its currently set to a singleton instance.
     //	if (evaluator) delete evaluator;
@@ -78,7 +78,7 @@ void PythonShell::eval(const std::string &expr)
         // to flush pending input in the python shell, as otherwise,
         // there is no way to know that no more python input will
         // arrive!
-        GenericShell::do_eval("");
+        GenericShell::eval("");
     }
 }
 

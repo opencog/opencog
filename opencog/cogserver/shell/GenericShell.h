@@ -28,6 +28,8 @@
 #include <string>
 #include <thread>
 
+#include <opencog/util/concurrent_queue.h>
+
 /**
  * The GenericShell class implements an "escape" from the default cogserver
  * command processor. It is useful when a module has a large number of
@@ -58,6 +60,8 @@ class GenericShell
 		ConsoleSocket* socket;
 		std::thread* evalthr;
 		std::thread* pollthr;
+		concurrent_queue<std::string> evalque;
+		volatile bool _init_done;
 
 	protected:
 		std::string abort_prompt;
@@ -70,9 +74,10 @@ class GenericShell
 		virtual GenericEval* get_evaluator(void) = 0;
 		virtual void thread_init(void);
 		virtual void line_discipline(const std::string &expr);
-		virtual void do_eval(const std::string &expr);
 
 		// Concurrency handling
+		void eval_loop();
+		void poll_loop();
 		bool _eval_done;
 		std::condition_variable _cv;
 		std::mutex _mtx;
@@ -82,7 +87,6 @@ class GenericShell
 		void while_not_done();
 
 		// Output handling.
-		bool poll_needed;
 		virtual void put_output(const std::string&);
 		virtual std::string poll_output();
 
