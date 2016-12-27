@@ -6,12 +6,13 @@
 	(define input "")
 
 ; Extracts the word from the word instance
-(define (trim-list-item word)
+(define (process-word-item word)
 	(define n (string-trim-right (string-trim-right (cog-name word) (lambda (x) (not (eqv? #\@ x)))) #\@))
 		(vector-set! trimed-lists count n)
-		(set! count (+ count 1)))
+		(set! count (+ count 1))
+		)
 
-(walk-list word-lists trim-list-item)
+(walk-list word-lists process-word-item)
 (set! count 0)
 
 ; trimed-lists contains list of words in sent, 

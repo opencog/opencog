@@ -113,12 +113,13 @@
 
 ; check if input is in allowedStrings list
 (define (validate-string input)
+
   (define allowedStrings (list "zero" "one" "two" "three" "four" "five" "six" "seven" "eight" 
                              "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
                              "sixteen" "seventeen" "eighteen" "nineteen" "twenty" "thirty" 
                              "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
                              "thousand" "million" "billion" "trillion"))
-  
+
   (define isValidInput #t)
   (if (eqv? #f (member input allowedStrings))
       (begin (set! isValidInput #f) 
@@ -135,3 +136,12 @@
   (cond ((not (eqv? index #f)) (string-set! input index replaceWith) 
                                (string-replace-char input findChar replaceWith))
         (else input)))
+
+(define (validate input)
+   (set! input (string-downcase input))             ; convert to lower case
+                            (set! input (string-replace-char input #\- #\ )) ; replace '-' with space ' '
+                            (set! input (string-trim-both input))            ; omit leading and trailing whitespace
+                            (set! input (string-tokenize input))             ; create a list tokenized by white space
+                            (set! input (delete "and" input))                ; delete the "and" string from input list
+                            ;(set! input (remove* (list "and") input))        
+                            (walk-list input validate-string))                ; validate input
