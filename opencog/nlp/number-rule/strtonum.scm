@@ -111,6 +111,9 @@
             (walk-list (car lst) fun)
             (walk-list (cdr lst) fun))))))
 
+;Needed for checking validation
+(define isValidInput #t)
+
 ; check if input is in allowedStrings list
 (define (validate-string input)
 
@@ -118,14 +121,13 @@
                              "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
                              "sixteen" "seventeen" "eighteen" "nineteen" "twenty" "thirty" 
                              "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
-                             "thousand" "million" "billion" "trillion"))
+                             "thousand" "million" "billion" "trillion" "and"))
 
-  (define isValidInput #t)
-  (if (eqv? #f (member input allowedStrings))
+  
+  (if (and (eqv? #f (member input allowedStrings)) (eqv? #f (string-> number input)))
       (begin (set! isValidInput #f) 
              (set! continueLoop #f))
-        (set! isValidInput #t))
-  isValidInput)
+        (set! isValidInput #t)))
 
 ; replace every instance of a character with another
 (define (string-replace-char input findChar replaceWith)
@@ -143,5 +145,7 @@
                             (set! input (string-trim-both input))            ; omit leading and trailing whitespace
                             (set! input (string-tokenize input))             ; create a list tokenized by white space
                             (set! input (delete "and" input))                ; delete the "and" string from input list
-                            ;(set! input (remove* (list "and") input))        
+                            (set! x (string-replace-char x #\] #\ )) ; replace ']' with space ' '
+                            (set! x (string-replace-char x #\[ #\ )) ; replace '[' with space ' '    
                             (walk-list input validate-string))                ; validate input
+
