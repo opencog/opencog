@@ -18,8 +18,32 @@
 ; 
 ; -> (strtonum "12345")
 ; -> 12345
-;
-; Iterates list applying fun to each item
+
+; Validates a word instance if it is a valid number 
+(define isValidInput #t)
+(define allowedStrings (list "zero" "one" "two" "three" "four" "five" "six" "seven" "eight" 
+                             "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
+                             "sixteen" "seventeen" "eighteen" "nineteen" "twenty" "thirty" 
+                             "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
+                             "thousand" "million" "billion" "trillion"))
+(define (validate-string input)
+    (if (eqv? #f (member input allowedStrings))
+      (set! isValidInput #f) 
+      (set! isValidInput #t))
+    (if (eqv? #t (string->number input)) (set! isValidInput #t)))
+
+
+; replace every instance of a character with another
+(define (string-replace-char input findChar replaceWith) ; --- Should take in an array of chars to be removed and remove them in one go
+  (define index #f)
+    (set! input (substring input 0)) ; change to mutable string
+    (set! index (string-index input (lambda (x) 
+                                    (eqv? x findChar))))
+    (cond ((not (eqv? index #f)) (string-set! input index replaceWith) 
+                               (string-replace-char input findChar replaceWith))
+        (else input)))
+
+; Iterates list applying a procedure "fun" to each item
 (define (walk-list lst fun)
    (if (not (list? lst))
       (fun lst)

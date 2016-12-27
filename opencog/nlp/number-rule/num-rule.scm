@@ -1,26 +1,3 @@
-; replace every instance of a character with another
-(define (string-replace-char input findChar replaceWith)
-	(define index #f)
-  	(set! input (substring input 0)) ; change to mutable string
-  	(set! index (string-index input (lambda (x) 
-                                    (eqv? x findChar))))
-  	(cond ((not (eqv? index #f)) (string-set! input index replaceWith) 
-                               (string-replace-char input findChar replaceWith))
-        (else input)))
-
-; Validates a word instance if it is a valid number 
-(define isValidInput #t) 
-(define allowedStrings (list "zero" "one" "two" "three" "four" "five" "six" "seven" "eight" 
-                             "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
-                             "sixteen" "seventeen" "eighteen" "nineteen" "twenty" "thirty" 
-                             "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
-                             "thousand" "million" "billion" "trillion"))
-(define (validate-string input)
-  	(if (eqv? #f (member input allowedStrings))
-     	(set! isValidInput #f) 
-     	(set! isValidInput #t))
-  	(if (eqv? #t (string->number input)) (set! isValidInput #t)))
-
 ; Creates a NumberNode and associate a ReferenceLink to the WordInstance
 (define-public (num-rule sent)
 	(define word-lists (cdr (car (sent-get-words-in-order sent))))
@@ -52,7 +29,6 @@
  	(set! x (string-replace-char x #\[ #\ )) ; replace '[' with space ' '
  	(set! x (string-trim-both x))            ; omit leading and trailing whitespace
  	(validate-string x)
-	(if (number? (string->number x)) (set! isValidInput #t))
  	(if (eqv? #t isValidInput)
      	(begin
      	(vector-set! prep-list count x)
