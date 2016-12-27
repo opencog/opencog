@@ -28,7 +28,7 @@ installer at `/scripts/octool`.  Users of any version of Linux may
 use the Dockerfile to quickly build a container in which OpenCog will
 be built and run.
 
-###### cogutil
+###### cogutils
 > Common OpenCog C++ utilities
 > http://github.com/opencog/cogutils
 > It uses exactly the same build procedure as this package. Be sure
@@ -48,33 +48,34 @@ the build, will be more precise as to which parts will not be built.
 
 ###### Link Grammar
 > Natural Language Parser for English, Russian, other languages.
-> Required for experimental Viterbi parser.
+> Required for natural language generation, and the chatbot.
 > http://www.abisource.com/projects/link-grammar/
 
 ###### MOSES
 > MOSES Machine Learning
 > http://github.com/opencog/moses
-> It uses exactly the same build proceedure as this pakcage. Be sure
+> It uses exactly the same build proceedure as this package. Be sure
   to `sudo make install` at the end.
 
 ###### OpenGL
 > Open Graphics Library
-> Used by opencog/spatial/MapTool
+> Used by opencog/spatial/MapTool (which is now deprecated/obsolete !?)
 > http://www.opengl.org
 > Commonly provided with your video card driver
 
 ###### SDL
 > Simple DirectMedia Layer
-> Used by opencog/spatial/MapTool
+> Used by opencog/spatial/MapTool (which is now deprecated/obsolete !?)
 > http://www.libsdl.org | libsdl1.2-dev
 
 ###### SDL_gfx
 > Simple DirectMedia Layer extension
-> Used by opencog/spatial/MapTool
+> Used by opencog/spatial/MapTool (which is now deprecated/obsolete !?)
 > http://www.ferzkopp.net/joomla/content/view/19/14/ | libsdl-gfx1.2-dev
 
 ###### Threading Building Blocks
 > C++ template library for parallel programming
+> Used to implement the optional REST API. (should be refactored to not use TBB)
 > https://www.threadingbuildingblocks.org/download | libtbb-dev
 
 ###### ZeroMQ (version 3.2.4 or higher)
