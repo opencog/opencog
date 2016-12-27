@@ -93,7 +93,11 @@ class PutAtoms:
 
 	def wholeshow_start(self):
 		scheme_eval(self.atomspace, "(enable-all-demos)")
-		scheme_eval(self.atomspace, "(run)")
+		# pipe stdout to /dev/null, as otherwise the the stdout pipe
+		# attached to the evaluator will fill up with messages, (which
+		# no one, i.e. python, ever fetches) and then stall.
+		scheme_eval(self.atomspace, \
+			'(set-current-output-port (%make-void-port "w"))(run)')
 
 	# Generic function for experimentation and with use with different robots
 	# or game-worlds like minecraft.
