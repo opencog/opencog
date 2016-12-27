@@ -3,8 +3,9 @@
 ;
 ; It also handles strings that are already numbers like "225" -> 225
 ;
-; It cleans the input string provided by removing leading and trailing white spaces,
-;
+; It cleans the input string provided by removing leading and trailing white spaces, 
+; removing the word "and", and removing the character  '-'. 
+; 
 ; It also changes every character into lower case.
 ;
 ; You can acess the procedure as follows:
@@ -13,44 +14,12 @@
 ; 
 ; example:
 ;
-; -> (strtonum "Two hundred twenty five thousand six hundred and one")
+; -> (strtonum "Two hundred twenty-five thousand six hundred and one")
 ; -> 225601.0
 ; 
 ; -> (strtonum "12345")
 ; -> 12345
-
-; Validates a word instance if it is a valid number 
-(define isValidInput #t)
-(define allowedStrings (list "zero" "one" "two" "three" "four" "five" "six" "seven" "eight" 
-                             "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
-                             "sixteen" "seventeen" "eighteen" "nineteen" "twenty" "thirty" 
-                             "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
-                             "thousand" "million" "billion" "trillion"))
-(define (validate-string input)
-    (if (eqv? #f (member input allowedStrings))
-      (set! isValidInput #f) 
-      (set! isValidInput #t))
-    (if (eqv? #t (string->number input)) (set! isValidInput #t)))
-
-
-; replace every instance of a character with another
-(define (string-replace-char input findChar replaceWith) ; --- Should take in an array of chars to be removed and remove them in one go
-  (define index #f)
-    (set! input (substring input 0)) ; change to mutable string
-    (set! index (string-index input (lambda (x) 
-                                    (eqv? x findChar))))
-    (cond ((not (eqv? index #f)) (string-set! input index replaceWith) 
-                               (string-replace-char input findChar replaceWith))
-        (else input)))
-
-; Iterates list applying a procedure "fun" to each item
-(define (walk-list lst fun)
-   (if (not (list? lst))
-      (fun lst)
-      (if (not (null? lst))
-         (begin
-            (walk-list (car lst) fun)
-            (walk-list (cdr lst) fun)))))
+;
 
 (define (strtonum input)
   (if (not (eqv? #f (string->number input))) ; if string is in number form. i,e "1234" 
@@ -60,6 +29,11 @@
 (define (string->number-words input)
 (define result 0)
 (define finalResult 0.0)
+(define allowedStrings (list "zero" "one" "two" "three" "four" "five" "six" "seven" "eight" 
+                             "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
+                             "sixteen" "seventeen" "eighteen" "nineteen" "twenty" "thirty" 
+                             "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
+                             "thousand" "million" "billion" "trillion"))
 
 ; if(input != null && input.length()> 0)
 (define (check-null input)
@@ -69,7 +43,40 @@
          #t)
         (else #f)))
 
- ; converts string to number
+
+; replace every instance of a character with another
+(define (string-replace-char input findChar replaceWith)
+  (define index #f)
+  (set! input (substring input 0)) ; change to mutable string
+  (set! index (string-index input (lambda (x) 
+                                    (eqv? x findChar))))
+  (cond ((not (eqv? index #f)) (string-set! input index replaceWith) 
+                               (string-replace-char input findChar replaceWith))
+        (else input)))
+  
+ (define continueLoop #t)
+  ; Iterates list applying fun to each item
+(define (walk-list lst fun)
+   (if (not (list? lst))
+      (fun lst)
+      (cond ((and continueLoop (not (null? lst)))
+         (begin
+            (walk-list (car lst) fun)
+            (walk-list (cdr lst) fun))))))
+  
+(define isValidInput #t)
+
+; check if input is in allowedStrings list
+(define (validate-string input)
+  (if (eqv? #f (member input allowedStrings))
+      (begin (set! isValidInput #f) 
+             (display "Invalid word found : ")
+             (display input)
+             (newline)
+             (set! continueLoop #f))
+        (set! isValidInput #t)))
+  
+  ; converts string to number
 (define (calc-result string) 
   (cond ((equal? string "zero") (set! result (+ result 0)))
         ((equal? "one" string) (set! result (+ result 1)))
@@ -117,6 +124,7 @@
 ; if input != null or not empty
 (cond ((check-null input) (begin 
                             (set! input (string-downcase input))             ; convert to lower case
+                            (set! input (string-replace-char input #\- #\ )) ; replace '-' with space ' '
                             (set! input (string-trim-both input))            ; omit leading and trailing whitespace
                             (set! input (string-tokenize input))             ; create a list tokenized by white space
                             (set! input (delete "and" input))                ; delete the "and" string from input list
