@@ -25,15 +25,12 @@
   (if (not (eqv? #f (string->number input))) ; if string is in number form. i,e "1234" 
       (string->number input)
       (string->number-words input)))
-  
+
+(define continueLoop #t)
+
 (define (string->number-words input)
 (define result 0)
 (define finalResult 0.0)
-(define allowedStrings (list "zero" "one" "two" "three" "four" "five" "six" "seven" "eight" 
-                             "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
-                             "sixteen" "seventeen" "eighteen" "nineteen" "twenty" "thirty" 
-                             "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
-                             "thousand" "million" "billion" "trillion"))
 
 ; if(input != null && input.length()> 0)
 (define (check-null input)
@@ -42,39 +39,7 @@
           (> (string-length input) 0))
          #t)
         (else #f)))
-
-
-; replace every instance of a character with another
-(define (string-replace-char input findChar replaceWith)
-  (define index #f)
-  (set! input (substring input 0)) ; change to mutable string
-  (set! index (string-index input (lambda (x) 
-                                    (eqv? x findChar))))
-  (cond ((not (eqv? index #f)) (string-set! input index replaceWith) 
-                               (string-replace-char input findChar replaceWith))
-        (else input)))
   
- (define continueLoop #t)
-  ; Iterates list applying fun to each item
-(define (walk-list lst fun)
-   (if (not (list? lst))
-      (fun lst)
-      (cond ((and continueLoop (not (null? lst)))
-         (begin
-            (walk-list (car lst) fun)
-            (walk-list (cdr lst) fun))))))
-  
-(define isValidInput #t)
-
-; check if input is in allowedStrings list
-(define (validate-string input)
-  (if (eqv? #f (member input allowedStrings))
-      (begin (set! isValidInput #f) 
-             (display "Invalid word found : ")
-             (display input)
-             (newline)
-             (set! continueLoop #f))
-        (set! isValidInput #t)))
   
   ; converts string to number
 (define (calc-result string) 
@@ -136,3 +101,37 @@
 ;------
 ;(set! input (delete "and" input)) ;You should use this instead in Guile
 ;--------
+
+  ; Iterates list applying fun to each item
+(define (walk-list lst fun)
+   (if (not (list? lst))
+      (fun lst)
+      (cond ((and continueLoop (not (null? lst)))
+         (begin
+            (walk-list (car lst) fun)
+            (walk-list (cdr lst) fun))))))
+
+; check if input is in allowedStrings list
+(define (validate-string input)
+  (define allowedStrings (list "zero" "one" "two" "three" "four" "five" "six" "seven" "eight" 
+                             "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
+                             "sixteen" "seventeen" "eighteen" "nineteen" "twenty" "thirty" 
+                             "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
+                             "thousand" "million" "billion" "trillion"))
+  
+  (define isValidInput #t)
+  (if (eqv? #f (member input allowedStrings))
+      (begin (set! isValidInput #f) 
+             (set! continueLoop #f))
+        (set! isValidInput #t))
+  isValidInput)
+
+; replace every instance of a character with another
+(define (string-replace-char input findChar replaceWith)
+  (define index #f)
+  (set! input (substring input 0)) ; change to mutable string
+  (set! index (string-index input (lambda (x) 
+                                    (eqv? x findChar))))
+  (cond ((not (eqv? index #f)) (string-set! input index replaceWith) 
+                               (string-replace-char input findChar replaceWith))
+        (else input)))
