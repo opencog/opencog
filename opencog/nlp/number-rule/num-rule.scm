@@ -1,10 +1,6 @@
 ; Creates a NumberNode and associate a ReferenceLink to the WordInstance
 (define-public (num-rule sent)
 	(define word-lists (cdr (car (sent-get-words-in-order sent))))
-	(define l (length word-lists))
-	(define trimed-lists (make-vector l)) 	
-	(define v (make-vector l))		
-	(define valid-str-index (make-vector l))
 	(define prep-list (make-vector l))
 	(define count 0)
 	(define input "")
@@ -29,6 +25,7 @@
  	(set! x (string-replace-char x #\[ #\ )) ; replace '[' with space ' '
  	(set! x (string-trim-both x))            ; omit leading and trailing whitespace
  	(validate-string x)
+	(if (number? (string->number x)) (set! isValidInput #t))
  	(if (eqv? #t isValidInput)
      	(begin
      	(vector-set! prep-list count x)
@@ -57,10 +54,15 @@
 ) 
 (array->list valid-str-index))
 
-(set! input (string-trim-both input)) 
 (ReferenceLink
 	(NumberNode (strtonum input)) ; Converts input to NumberNode and create ReferenceLink
 	(ListLink
 		(array->list v)
 	))
 )
+
+(define (mReferenceLink number mListLink)
+	(ReferenceLink
+		(NumberNode number) ; Converts input to NumberNode and create ReferenceLink
+		(ListLink
+			(array->list mListLink))))
