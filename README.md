@@ -1,10 +1,8 @@
 OpenCog
 =======
 
-master:
+build status:
 [![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-opencog-master)](http://61.92.69.39:8080/job/ci-opencog-master)
-stable:
-[![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-opencog-stable)](http://61.92.69.39:8080/job/ci-opencog-stable)
 
 OpenCog is a framework for developing AI systems, especially appropriate
 for integrative multi-algorithm systems, and artificial general intelligence
@@ -15,6 +13,60 @@ alone and in combination.
 
 The main project site is at http://opencog.org
 
+Overview
+--------
+OpenCog consists of multiple components. At its core is a (hyper-)graph
+database, the [AtomSpace](http://github.com/opencog/atomspace), which is
+used for representing knowledge and algorithms, providing a surface on
+which learning and reasoning algorithms are implemented. The AtomSpace
+consists of an in-RAM database, a "query language" aka "pattern matcher",
+a (ProLog-like) rule system, including forward and backward chainers,
+and an evaluator for the internal "programming langauge", Atomese. This
+language is not really meant to be used by humans (although, defacto,
+it is) but rather, it is a language for representing knowledge and
+algorithms, on which (automated) reasoning and learning can be performed.
+The AtomSpace also provides Scheme (guile) and Python bindings. The
+AtomSpace is maintained in a separate git repo:
+> http://github.com/opencog/atomspace
+
+This git repository contains assorted projects that are central to the
+OpenCog project, but are not yet mature or stable, and are subject to
+active development and experimentation. These include:
+* An assortment of natural language processing subsystems, including:
+-- Natural language generation (for expressiong thoughts as sentences).
+-- Natural language input (for reading and hearing).
+-- Assorted chatbots, some of which are embodied.
+* PLN, a probabilistic reasoning and inference system.
+* Attention Allocation, for managing combinatoric explosion during
+  reasoning and language generation.
+* Space-time servers, for managing spatial and time data (grounding
+  common-sense natural language concepts such as "next-to", "nearby",
+  and "soon".)
+* An embodiment subsystem, attaching language to visual and auditory
+  senses.  This is primarily located in the
+  [ROS Behavior Scripting](https://github.com/opencog/ros-behavior-scripting)
+  repository.
+* OpenPsi, a model of psychological states. Its currently a mashup of
+  two unrelated ideas: a generic rule-class selection and plannning
+  system, and a model of human psychological states. An open to-do item
+  is to untangle these two.
+* An unsupervised learning system or "pattern miner", for extracting
+  "surprising" patterns.
+* A supervised learning system, MOSES, for extracting patterns from
+  tabular data. This is located in a seprate repository,
+  [MOSES](https://github.com/opencog/moses).
+* The CogServer, a network server providing shell access and a REST API.
+* Several (obsolete!?) data visualization subsystems.
+
+With the exception of MOSES and the CogServer, all of the above are in
+active development, are half-baked, poorly documented, mis-designed,
+subject to experimentation, and generally in need of love an attention.
+This is where experimentation and integration are taking place, and,
+like any laboratory, things are a bit fluid and chaotic.
+
+
+Building and Running
+--------------------
 For platform dependent instruction on dependencies and building the code as
 well as other options for setting up development environment more details are
 found at: http://wiki.opencog.org/wikihome/index.php/Building_OpenCog
@@ -103,42 +155,6 @@ To build and run the unit tests, from the `./build` directory enter
 ```
     make test
 ```
-
-Using OpenCog
--------------
-OpenCog can be used in one of three ways, or a mixture of all three:
-By using the GNU Guile scheme interface, by using Python, or by running
-the cogserver.
-
-Guile provides the easiest interface for creating atoms, loading them
-into the AtomSpace, and performing various processing operations on
-them.  For examples, see the `/examples/guile` and the
-`/examples/pattern-matcher` directories.
-
-Python is more familiar than scheme (guile) to most programmers, and
-it offers another way of interfacing to the atomspace. See the
-`/examples/python` directory for how to use python with OpenCog.
-
-The cogserver provides a network server interface to OpenCog. It is
-requires for running embodiment, some of the reasoning agents, and some
-of the natural-language processing agents.
-
-Running the server
-------------------
-The cogserver provides a network server interface to the various
-components and agents.  After building everything, change directory
-to your `opencog/build` folder and execute `opencog/cogserver/server/cogserver`.
-Then, from another terminal, run `rlwrap telnet localhost 17001`
-The `help` command will list all of the other available commands.
-Notable among these are the commands to attach to a (Postgres) database,
-and networked scheme and python interfaces (i.e. scheme and python
-shells that are usable over the network, if you are logged in remotely
-to the cogserver).
-
-The operation of the server can be altered by means of a config file.
-This config file is in `lib/opencog.conf`. To make use of it, say
-`cogserver -c <config-filename>` when starting the server.
-
 
 CMake notes
 -----------
