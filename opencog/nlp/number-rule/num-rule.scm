@@ -44,6 +44,7 @@
 
 	(set! createReference #f)
 
+	(set! input (string-trim-both input))
 	(set! number (strtonum input)) ; Converts input to NumberNode and create ReferenceLink
 	
 	(ReferenceLink
