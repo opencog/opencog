@@ -251,6 +251,9 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
 AttentionBank& opencog::attentionbank(AtomSpace* asp)
 {
     static std::map<AtomSpace*, AttentionBank*> banksy;
+    static std::mutex art;
+
+    std::unique_lock<std::mutex> graffiti(art);
 
     auto pr = banksy.find(asp);
     if (pr != banksy.end()) return *(pr->second);
