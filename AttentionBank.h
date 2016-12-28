@@ -358,6 +358,9 @@ public:
 
 };
 
+/* Singleton instance (for now) */
+AttentionBank& attentionbank();
+
 /** @}*/
 } //namespace opencog
 

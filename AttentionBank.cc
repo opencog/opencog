@@ -247,3 +247,10 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
     if (clip) return std::max(0.0, std::min(val, 1.0));
     return val;
 }
+
+/** Unique singleton instance (for now) */
+AttentionBank& attentionbank()
+{
+    static std::unique_ptr<AttentionBank> instance(new AttentionBank());
+    return *instance;
+}
