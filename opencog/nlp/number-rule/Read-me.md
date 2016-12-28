@@ -61,8 +61,14 @@ More Example Sentences:
 	guile > (define sent (nlp-parse "I have 210 Pandas."))
 	guile > (num-rule sent)
 	Result: 
+	(ReferenceLink
+   		(NumberNode "210.000000")
+   		(ListLink
+      			(WordInstanceNode "210@7a21f0d6-1ba1-45fe-9ff2-88e9ba43bf14")
+   		)
+	)
 	
-	guile > (define sent (nlp-parse "I have two hundred ten Pandas."))
+	#guile > (define sent (nlp-parse "I have two hundred ten Pandas."))
 	guile > (num-rule sent)
 	Result: 
 	(ReferenceLink
