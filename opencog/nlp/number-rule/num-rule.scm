@@ -1,13 +1,13 @@
 ; Creates a NumberNode and associate a ReferenceLink to the WordInstance
 (define-public (num-rule sent)
-	(define word-lists (cdr (car (sent-get-words-in-order sent))))
+	(define word_lists (cdr (car (sent-get-words-in-order sent))))
+	(define l (length word_lists))
 	(define prep-list (make-vector l))
 	(define count 0)
 	(define input "")
 	(define len 0)
 	(define createReference #f)
 
-; Extracts the word from the word instance
 (define (process_word_item word)
 	(define word_item (string-trim-right (string-trim-right (cog-name word) (lambda (x) (not (eqv? #\@ x)))) #\@))
 ;		(vector-set! trimmed_lists count word_item)
@@ -18,21 +18,44 @@
 	     		(set! len (+ 1 len))
 	     		(set! createReference #t))
 
-	     	(if createReference 
+	     	(begin
+	     		(if createReference 
 	     			(begin 
 	     				(mReferenceLink)
-	     				(set! len 0)))
-		)
+	     				(set! len 0)))))
 		(set! count (+ count 1)))
 
+(define (mReferenceLink)
+	(define i 0)
+	(define mListLink (make-vector len))
+	(define number (strtonum input))
+	(set! createReference #f)
+
+	(if (> len 0)
+		(begin
+			(set! input (string-append input " " vector-ref prep-list i))
+			(vector-set! mListLink i (list-ref word_lists (- (+ count 1) len)))
+			(set! i (+ 1 i))
+			(set! len (- 1 len))
+		))
+	
 	
 
-(walk-list word-lists process_word_item)
-(set! count 0)
+	(ReferenceLink
+		(NumberNode number) ; Converts input to NumberNode and create ReferenceLink
+		(ListLink
+			(array->list mListLink))))
+
+(walk-list word_lists process_word_item))
+
+; Extracts the word from the word instance
+
+
+;(set! count 0)
 
 ; trimmed_lists contains list of words in sent, 
 ; prep-list contains number inputs,
-; valid-str-index contains the index of the valid inputs from the word-lists.
+; valid-str-index contains the index of the valid inputs from the word_lists.
 
 ;(for-each (lambda (x)
 ;	(if (number? x) (set! x (number->string x)))
@@ -66,7 +89,7 @@
 ;(set! v (make-vector count))
 ;(set! count 0)
 ;(for-each (lambda (x) (if (not (eqv? #f x)) 
-;	(begin (vector-set! v count (list-ref word-lists x)) (set! count (+ count 1)) ) )
+;	(begin (vector-set! v count (list-ref word_lists x)) (set! count (+ count 1)) ) )
 ;) 
 ;(array->list valid-str-index))
 
@@ -76,23 +99,3 @@
 ;		(array->list v)
 ;	))
 ;)
-
-(define (mReferenceLink)
-	(set! createReference #f)
-	(define i 0)
-	(define mListLink (make-vector len))
-
-	if ((> len 0)
-		(begin
-			(set! input (string-append input " " vector-ref prep-list i))
-			(vector-set! mListLink i (list-ref word-lists (- (+ count 1) len)))
-			(set! i (+ 1 i))
-			(set! len (- 1 len))
-		))
-	
-	(define number (strtonum input))
-
-	(ReferenceLink
-		(NumberNode number) ; Converts input to NumberNode and create ReferenceLink
-		(ListLink
-			(array->list mListLink))))
