@@ -2,7 +2,7 @@
 ; imperative-rules.scm
 ;
 ; Rules for converting English-langauge imperatives into an
-; intermediate, simplified form. 
+; intermediate, simplified form.
 ;
 ; Language processing runs in multiple steps: the rules here are the
 ; first step: they convert parsed (link-grammar, relex) sentences into
@@ -56,6 +56,11 @@
 ; when in both cases the correct result would be _to-do(look,left)
 ; So instead of trusting relex, we are just going to drop back
 ; to link-grammar, and look for the MVa/Pa link instead.
+;
+; FYI: This definition (the next 30+ lines) is just an example, and is
+; not used - this definition is over-ridden, below, by a shorter, more
+; abstract variant that does the same thing. This example is easier to
+; understand.
 (define look-rule-1
 	(BindLink
 		(VariableList
@@ -91,6 +96,11 @@
 
 ; Matches sentences of the form "look to the right" and
 ; "look to the left".
+;
+; FYI: This definition (the next 30+ lines) is just an example, and is
+; not used - this definition is over-ridden, below, by a shorter, more
+; abstract variant that does the same thing. This example is easier to
+; understand.
 (define look-rule-2
 	(BindLink
 		(VariableList
@@ -173,9 +183,10 @@
 
 ; Re-implementation of look-rule-1 and 2, using the shorter template.
 ; Handles sentences such as "Turn left", "Look up" and also "look happy"
+; Ox link: "face me"
 (define look-rule-1
 	(imperative-object-rule-template
-		; VERB-LIST
+		; VERB-LIST -- a list of synonyms
 		(OrLink
 			(Equal (Variable "$verb") (WordNode "face"))
 			(Equal (Variable "$verb") (WordNode "look"))
@@ -185,25 +196,28 @@
 		(ChoiceLink        ; LINKS
 			(lg-link "MVa" "$verb-inst" "$obj-inst")
 			(lg-link "MVp" "$verb-inst" "$obj-inst")
-			(lg-link "Pa" "$verb-inst" "$obj-inst"))
+			(lg-link "Pa" "$verb-inst" "$obj-inst")
+			(lg-link "Ox" "$verb-inst" "$obj-inst"))
 	))
 
 ; Handles directional sentences with "to", such as "turn to the left".
+; Js and Ju links handle left, right, etc. J link handles "me"
 (define look-rule-2
 	(imperative-object-rule-template
-		; VERB-LIST
+		; VERB-LIST -- a list of synonyms
 		(OrLink
 			(Equal (Variable "$verb") (WordNode "face"))
 			(Equal (Variable "$verb") (WordNode "look"))
 			(Equal (Variable "$verb") (WordNode "turn"))
 		)
 		(var-decl "$prep-inst" "WordInstanceNode")  ; DECL
-		; "turn to the left
+		; "turn to the left"
 		(list ; turn --MVp-> to --Ju-> object       ; LINKS
 			(lg-link "MVp" "$verb-inst" "$prep-inst")
 			(ChoiceLink
 				(lg-link "Js" "$prep-inst" "$obj-inst")
-				(lg-link "Ju" "$prep-inst" "$obj-inst"))
+				(lg-link "Ju" "$prep-inst" "$obj-inst")
+				(lg-link "J" "$prep-inst" "$obj-inst"))
 		)
 	))
 
@@ -213,8 +227,8 @@
 ;
 ; (1) implement fuzzy matching, so that anything vaguely close to the
 ;     desired imperative will get matched.
-; (2) implement synonymous phrases, rather than listing syonymous verbs
-;     explicitly
+; (2) implement synonymous phrases, rather than listing synonymous
+;     verbs explicitly.
 ; (3) implement automated learning of new rules, and refinement of
 ;     existing rules.
 
@@ -279,14 +293,21 @@
 			(Equal (Variable "$verb") (WordNode "play"))
 		)
 		'()                ; DECL
-		(ChoiceLink        ; LINKS
-			(lg-link "MVa" "$verb-inst" "$obj-inst")
-			(lg-link "MVp" "$verb-inst" "$obj-inst")
-			(lg-link "Pa" "$verb-inst" "$obj-inst"))
+		(list              ; LINKS
+			(ChoiceLink
+				(lg-link "MVa" "$verb-inst" "$obj-inst")
+				(lg-link "MVp" "$verb-inst" "$obj-inst")
+				(lg-link "Pa" "$verb-inst" "$obj-inst"))
+			; Without this constraint, this rule will clobber
+			; the "look to the left" command. The prep "to" will
+			; be taken as an object, giving nonsense.
+			(word-pos "$obj-inst" "adjective")
+		)
 	))
 
 ; Direct-object imperatives: "feign happiness", "mimic fear",
-; "portray confusion", etc.
+; "portray confusion", etc. This is nothing more than a list of
+; synonyms.
 (define show-rule-2
 	(imperative-object-rule-template
 		(OrLink

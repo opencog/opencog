@@ -71,12 +71,13 @@
 ; object the chest is facing.
 ;
 ; XXX This is incorrect, just right now; its too simple, and interacts
-; badly with the tf2 face tracker.  The directions need to be general
+; badly with the face tracker.  The directions need to be general
 ; 2D areas.  For imperative commands, we need to pick some random point
 ; out of the 2D area. To answer questions, we need to compare the 2D
-; extent to the current gaze direction.  Problem: the gaze direction
-; is buried in the tf2 tree for the chest-camera face detector, where
-; we cannot easily query it.
+; extent to the current gaze direction.  The gaze direction can be
+; gotten from the space-time server, (octree server) -- someone needs
+; to hook this up.  XXX FIXME.
+;
 (DefineLink
 	(DefinedSchema "rightwards")
 	(ListLink ;; three numbers: x,y,z
@@ -211,6 +212,52 @@
 		(ConceptNode "model-direction")
 		(ConceptNode "concept-direction")))
 
+;--------------------------------------------------------------------
+;--------------------------------------------------------------------
+; Similar to above, but for sentences such as "look at me" or "turn
+; towards me". As before, this is able to convert from these English
+; sentences, into a structured command language. It makes use of the
+; (DefinedSchema "current-speaker") in self-model.scm, and also of
+; (DefinedPredicate "Look-at-thing cmd") to perform that action.
+
+; Global knowledge about word-meaning.
+; Knowledge about things in the environemnt.
+; "me" refers to the person who last spoke (and said "look at me")
+; "him"/"her" - any other visible person in the room
+; this/that - best-guess salient point
+(ReferenceLink (WordNode "me")       (DefinedSchema "current-speaker"))
+
+(ReferenceLink (WordNode "her")      (DefinedSchema "other-speaker"))
+(ReferenceLink (WordNode "him")      (DefinedSchema "other-speaker"))
+
+(ReferenceLink (WordNode "this")     (DefinedSchema "current-salient"))
+(ReferenceLink (WordNode "that")     (DefinedSchema "current-salient"))
+(ReferenceLink (WordNode "here")     (DefinedSchema "current-salient"))
+(ReferenceLink (WordNode "there")    (DefinedSchema "current-salient"))
+
+; Syntactic category of schema. Used for contextual understanding.
+(Inheritance (DefinedSchema "current-speaker")  (Concept "schema-thing"))
+(Inheritance (DefinedSchema "other-speaker")    (Concept "schema-thing"))
+(Inheritance (DefinedSchema "current-salient")  (Concept "schema-thing"))
+
+; Physical (motor control) knowledge about imperative look-at-thing verbs.
+(ReferenceLink (WordNode "look") (DefinedPredicate "Look-at-thing cmd"))
+(ReferenceLink (WordNode "turn") (DefinedPredicate "Look-at-thing cmd"))
+(ReferenceLink (WordNode "face") (DefinedPredicate "Look-at-thing cmd"))
+
+; Syntactic category of imperative look-at-thing verbs.
+(Inheritance (DefinedPredicate "Look-at-thing cmd") (Concept "look-at-cmd"))
+
+; Syntactic structure of "look at thing" action-knowledge --
+; Specifies the syntactic structure for physical motor-control commands.
+(EvaluationLink
+	(PredicateNode "look-at-action")
+	(ListLink
+		(ConceptNode "look-at-cmd")
+		(ConceptNode "schema-thing")))
+
+; XXX FIXME -- need to do the above, but for the self-model, rather
+; than the direct robot action.
 ;--------------------------------------------------------------------
 ;--------------------------------------------------------------------
 ; Emotional expression semantics (groundings) for robot control

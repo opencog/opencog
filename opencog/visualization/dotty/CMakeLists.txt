@@ -1,8 +1,6 @@
 ADD_LIBRARY (dotty SHARED
-	DottyModule.cc 
+	DottyModule.cc
 )
-
-ADD_DEPENDENCIES(dotty opencog_atom_types)
 
 INCLUDE_DIRECTORIES (
 	${ODBC_INCLUDE_DIRS}

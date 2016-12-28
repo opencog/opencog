@@ -41,7 +41,7 @@ using namespace opencog;
 
 ImprintAgent::ImprintAgent(CogServer& cs) : Agent(cs), epsilon(Pattern(0,0))
 {
-    static const std::string defaultConfig[] = {
+    static const std::vector<std::string> defaultConfig = {
 //        "ECAN_CONVERT_LINKS","false",
         "",""
     };

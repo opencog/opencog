@@ -13,12 +13,18 @@ python          - Python usage examples.  Most of these are probably
                   obsolete, or mis-categorized, or unmaintained. Needs
                   cleanup.
 
-atomtypes       - Shows how to define custom atom types.
-
 sureal          - Demonstrates how to use the Surface Realization
                   system, for generating grammatically valid English
                   language sentences from abstract conceptual
                   diagrams.
+
+openpsi        - An example implementation of openpsi to control a simple
+                  agent.
+
+Stale Examples:
+---------------
+The following examples illustrate subsystems that are not currently
+maintained, and may be broken or non-operational.
 
 conceptual_blending - Blending together of similar concepts.
 
@@ -28,9 +34,6 @@ hopfield        - Provides a toy example for Economic Attention
 
 visual_demos    - A number of demos to visually represent the dynamics
                   of OpenCog.
-
-openppsi        - An example implementation of openpsi to control a simple
-                  agent.
 
 Deprecated examples:
 --------------------

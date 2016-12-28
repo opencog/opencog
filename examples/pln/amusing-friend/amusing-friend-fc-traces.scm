@@ -383,7 +383,7 @@
 
 ;; (10)
 (define target-10
-(ImplicationLink
+(ImplicationScopeLink
    (VariableList
       (TypedVariableLink
          (VariableNode "$X")
@@ -490,7 +490,7 @@
 
 ;; (15)
 (define target-15
-(ImplicationLink
+(ImplicationScopeLink
    (TypedVariableLink
       (VariableNode "$X")
       (TypeNode "ConceptNode")

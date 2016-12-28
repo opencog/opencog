@@ -1,200 +1,269 @@
+;
+; demand.scm
+; Methods to define and work with demands.
+;
 ; Copyright (C) 2015-2016 OpenCog Foundation
+;
+; Design Notes:
+; Demands are associated with demand values. There are two different,
+; conflicting ways in which this is done in the code below: in some
+; cases, the value is stored as the mean of the TV; in other cases, the
+; value is a NumberNode attached to the ConceptNode. Having two places
+; to store this info is just asking for hard-to-find bugs to pop up.
+; The long-term solution is probably to associate the value to the
+; demand using a protoatom.
 
 (use-modules (rnrs sorting)) ; For sorting demands by their values.
+(use-modules (srfi srfi-1)) ; for `lset-difference`
 
 (use-modules (opencog) (opencog exec) (opencog query) (opencog rule-engine))
 
 (load "utilities.scm")
 
 ; --------------------------------------------------------------
-; Name of variables for common functions in this file-scope
-; NOTE: Shouldn't be exported to prevent modification.
-(define demand-var (VariableNode "Demand"))
-
 (define psi-demand-node (ConceptNode (string-append psi-prefix-str "Demand")))
+
+; --------------------------------------------------------------
+; A cache of the demands, used to improve performance.
+(define psi-demand-cache '())
+
+; --------------------------------------------------------------
+; reset the cache
+(define (clear-demand-cache)
+    (set! psi-demand-cache '())
+)
+
+(define (make-demand-cache)
+
+    ; Get the set of demands that are currently disabled.
+    (define skip-set
+        (cog-execute!
+            (GetLink
+                (TypedVariableLink
+                    (VariableNode "demand")
+                    (TypeNode "ConceptNode"))
+                (AndLink
+                    (InheritanceLink (VariableNode "demand") psi-demand-node)
+                    (MemberLink (VariableNode "demand") psi-label-skip)))
+        ))
+
+    ; Compute the list of enabled deamnds, and cache it.
+    (set! psi-demand-cache
+        (lset-difference! equal? (psi-get-all-demands)
+            (cog-outgoing-set skip-set))
+    )
+
+    ; Delete the SetLink, so it does not pollute the atomspace.
+    (cog-delete skip-set)
+)
 
 ; --------------------------------------------------------------
 (define-public (psi-get-all-demands)
 "
-  Returns a SetLink containing the nodes that carry the demand-value. The
-  strength of their stv is the demand value.
+  psi-get-all-demands - Return a list of all demand-nodes.
 "
     (filter
         (lambda (x) (not (equal? x psi-demand-node)))
         (cog-chase-link 'InheritanceLink 'ConceptNode psi-demand-node))
 )
 
+
+; --------------------------------------------------------------
+(define-public (psi-get-all-enabled-demands)
+"
+  psi-get-all-enabled-demands - Return list of all demands that are enabled.
+"
+    (if (null? psi-demand-cache) (make-demand-cache))
+    psi-demand-cache
+)
+
+; Backwards-compat wrapper
+(define-public (psi-get-all-valid-demands)
+"  Do not use this, use psi-get-all-enabled-demands instead "
+(psi-get-all-enabled-demands))
+
 ; --------------------------------------------------------------
 (define-public (psi-demand demand-name desired-value)
 "
-  Returns the ConceptNode that represents an OpenPsi demand
+  psi-demand NAME VALUE
 
-  demand-name:
-  - The name of the demand that is created.
-
-  desired-value:
-  - The desired demand-value. This is used for setting goals.
+  Create and return a ConceptNode that represents an OpenPsi demand.
+  The NAME should be a string. The VALUE should be a floating-point
+  number in the range [0,1].
 "
 
     ; Check arguments
     (if (not (string? demand-name))
-        (error (string-append "In procedure psi-demand, expected first argument "
-            "to be a string got: ") demand-name))
+        (error "ERROR: psi-demand, expected first argument to be a string"))
+
     (if (or (> 0 desired-value) (< 1 desired-value))
-       (error (string-append "In procedure psi-demand, expected second argument "
-            "the to be within [0, 1] interval, got:") desired-value))
+       (error (string-append
+            "ERROR: psi-demand, expected second argument to be a number "
+            "in the range [0,1], got:") desired-value))
 
     (let* ((demand-str (string-append psi-prefix-str demand-name))
            (demand-node (ConceptNode demand-str (stv desired-value 1))))
 
-            (InheritanceLink demand-node psi-demand-node)
+        (InheritanceLink demand-node psi-demand-node)
 
-            ; NOTE: Not sure this is needed. Possibly use is if one wants
-            ; to measure how the demand-value has changed.
-            (EvaluationLink
-                (PredicateNode (string-append psi-prefix-str "desired_value"))
-                (ListLink
-                    demand-node
-                    (NumberNode desired-value)))
+        ; NOTE: Not sure that this link is needed. One possible use is
+        ; to measure how the demand-value has changed over time.  XXX
+        ; Is this actaully used anywhere?
+        (EvaluationLink
+            (PredicateNode (string-append psi-prefix-str "desired_value"))
+            (ListLink
+                demand-node
+                (NumberNode desired-value)))
 
-            demand-node
+        demand-node
     )
 )
 
 ; --------------------------------------------------------------
 (define-public (psi-demand? node)
 "
-  Checks whether an atom is a node that satisfies the pattern used
-  to define an OpenPsi-demand and returns `#t` if it does and `#f` if not.
+  psi-demand? NODE - Return #t if NODE is a demand, else return #f.
 
-  node:
-  - The node that is being checked to see if it is a ConceptNode that represents
-    a demand type.
+  The NODE is a demand only if it was previously added to the set of
+  demands.
 "
-    (define (demand-names)
-        (map cog-name (psi-get-all-demands)))
+    (let ((candidates (cog-chase-link 'InheritanceLink 'ConceptNode node)))
 
-    (if (and (cog-node? node)
-             (member (cog-name node) (demand-names))
-             (equal? (cog-type node) 'ConceptNode))
-        #t
-        #f
+        ; A filter is used to account for empty list as well as
+        ; cog-chase-link returning multiple results, just in case.
+        (not (null?
+            (filter (lambda (x) (equal? x psi-demand-node)) candidates)))
     )
 )
 
 ; --------------------------------------------------------------
-(define (psi-demand-value-term< threshold)
+(define-public (psi-set-demand-value demand-node demand-value)
 "
-  Returns an evaluatable term that checks if a demand has value less than
-  the given threshold number.
+  psi-set-demand-value DEMAND VALUE - Set the DEMAND to VALUE.
 
-  threshold:
-  - The boundary of the demand-value to be checked at.
+  The DEMAND must be a demand node that was previously declared to
+  the system. The VALUE must be a floating-point number between [0, 1].
 "
-    (EvaluationLink
-        (GroundedPredicateNode "scm: psi-demand-value<")
-        (ListLink
-            demand-var
-            (NumberNode threshold)))
+    (cog-set-tv! demand-node (stv demand-value (tv-conf (cog-tv demand-node))))
 )
 
-(define (psi-demand-value< demand-node threshold-node)
-"
-  Returns True-TruthValue if a given demand-node has value less than the
-  given threshold-node number value else False-TruthValue. This doesn't
-  check if the node given actually defines a demand. And is primarily to be
-  used as evaluatable term.
-
-  demand-node:
-  - The node representing the demand.
-
-  threshold-node:
-  - A NumberNode representing the boundary of the demand-value to be checked
-    at.
-"
-    (if (< (tv-mean (cog-tv demand-node))
-           (string->number (cog-name threshold-node)))
-        (stv 1 1)
-        (stv 0 1)
-    )
-)
-
+; ; --------------------------------------------------------------
+; Not used anywhere.
+;
+; (define (psi-demand-value-term< threshold)
+; "
+;   Returns an evaluatable term that checks if a demand has value less than
+;   the given threshold number.
+;
+;   threshold:
+;   - The boundary of the demand-value to be checked at.
+; "
+;     (EvaluationLink
+;         (GroundedPredicateNode "scm: psi-demand-value<")
+;         (ListLink
+;             (VariableNode "Demand")
+;             (NumberNode threshold)))
+; )
+;
+; (define (psi-demand-value< demand-node threshold-node)
+; "
+;   Returns True-TruthValue if a given demand-node has value less than the
+;   given threshold-node number value else False-TruthValue. This doesn't
+;   check if the node given actually defines a demand. And is primarily to be
+;   used as evaluatable term.
+;
+;   demand-node:
+;   - The node representing the demand.
+;
+;   threshold-node:
+;   - A NumberNode representing the boundary of the demand-value to be checked
+;     at.
+; "
+;     (if (< (tv-mean (cog-tv demand-node))
+;            (string->number (cog-name threshold-node)))
+;         (stv 1 1)
+;         (stv 0 1)
+;     )
+; )
+;
 ; --------------------------------------------------------------
-(define (psi-demand-value-term> threshold)
-"
-  Returns an evaluatable term that checks if a demand has value greater than
-  the given threshold number.
-
-  threshold:
-  - The boundary of the demand-value to be checked at.
-"
-    (EvaluationLink
-        (GroundedPredicateNode "scm: psi-demand-value>")
-        (ListLink
-            demand-var
-            (NumberNode threshold)))
-)
-
-(define (psi-demand-value> demand-node threshold-node)
-"
-  Returns True-TruthValue if a given demand-node has value greater than the
-  given threshold-node number value else False-TruthValue. This doesn't
-  check if the node given actually defines a demand. And is primarily to be
-  used as evaluatable term.
-
-  demand-node:
-  - The node representing the demand.
-
-  threshold-node:
-  - A NumberNode representing the boundary of the demand-value to be checked
-    at.
-"
-    (if (> (tv-mean (cog-tv demand-node))
-           (string->number (cog-name threshold-node)))
-        (stv 1 1)
-        (stv 0 1)
-    )
-)
-
-; --------------------------------------------------------------
-(define (psi-lowest-demand? atom)
-"
-  Returns #t if the atom passed is a demand that has the lowest demand-value.
-
-  atom:
-  - The atom that is being checked to see if it is the Node that represents
-    a demand type, with a lowest demand-value.
-"
-    ; check if atom is a demand-node
-    (if (not (psi-demand? atom))
-        (error "Expected argument to be a demand-node, got: " atom))
-
-    (let ((atom-strength (tv-mean (cog-tv atom)))
-          (lowest-demand-value (car (list-sort < (delete-duplicates
-              (map (lambda (x) (tv-mean (cog-tv x)))
-                   (psi-get-all-demands))))))
-         )
-         (if (<= atom-strength lowest-demand-value)
-            (stv 1 1)
-            (stv 0 1)
-         )
-    )
-)
-
+; Not used anywhere.
+;
+; (define (psi-demand-value-term> threshold)
+; "
+;   Returns an evaluatable term that checks if a demand has value greater than
+;   the given threshold number.
+;
+;   threshold:
+;   - The boundary of the demand-value to be checked at.
+; "
+;     (EvaluationLink
+;         (GroundedPredicateNode "scm: psi-demand-value>")
+;         (ListLink
+;             (VariableNode "Demand")
+;             (NumberNode threshold)))
+; )
+;
+; (define (psi-demand-value> demand-node threshold-node)
+; "
+;   Returns True-TruthValue if a given demand-node has value greater than the
+;   given threshold-node number value else False-TruthValue. This doesn't
+;   check if the node given actually defines a demand. And is primarily to be
+;   used as evaluatable term.
+;
+;   demand-node:
+;   - The node representing the demand.
+;
+;   threshold-node:
+;   - A NumberNode representing the boundary of the demand-value to be checked
+;     at.
+; "
+;     (if (> (tv-mean (cog-tv demand-node))
+;            (string->number (cog-name threshold-node)))
+;         (stv 1 1)
+;         (stv 0 1)
+;     )
+; )
+;
+;; --------------------------------------------------------------
+;;
+;; Not used anywhere. Not clear how this could even be useful.
+;;
+;; (define (psi-lowest-demand? atom)
+;; "
+;;   psi-lowest-demand? ATOM - Return #t if ATOM is a demand, and has a
+;;   demand-value as low or lower than any other demand.
+;; "
+;;     ; check if atom is a demand-node
+;;     (if (not (psi-demand? atom))
+;;         (error "Expected argument to be a demand-node, got: " atom))
+;;
+;;     (let ((atom-strength (tv-mean (cog-tv atom)))
+;;           (lowest-demand-value (car (list-sort < (delete-duplicates
+;;               (map (lambda (x) (tv-mean (cog-tv x)))
+;;                    (psi-get-all-demands))))))
+;;          )
+;;          (if (<= atom-strength lowest-demand-value)
+;;             (stv 1 1)
+;;             (stv 0 1)
+;;          )
+;;     )
+;; )
+;;
 ; --------------------------------------------------------------
 ; Functions to help define standard action-rules
 ; --------------------------------------------------------------
 (define-public (psi-goal-increase demand-node rate)
 "
-  Returns an ExecutionOutputLink(the action) that increases the demand-value.
-  It has an increasing effect on the demand-value.
+  psi-goal-increase DEMAND RATE
 
-  demand-node:
-  - A node representing a demand.
+  Return an action that increases the satsifaction of a demand.
+  That is, if the action is performed, then the value of the demand
+  goes up.  XXX WTF?? this seems backward.
 
   rate:
   - A number for the percentage of change that a demand-value will be updated
-    with, on each step.
+    with, on each step. XXX WTF ???
 "
     (EvaluationLink
         (GroundedPredicateNode "scm: psi-demand-value-increase")
@@ -205,19 +274,17 @@
 
 (define-public (psi-demand-value-increase demand-node rate-node)
 "
-  Increases the strength of the demand by the given percentage rate.
+  psi-demand-value-increase DEMAND RATE
 
-  demand-node:
-  - A node representing a demand.
+  Increases the strength of DEMAND by the given percentage RATE.
 
-  rate-node:
-  - A NumberNode for the percentage of change that a demand-value will be
-    updated with, on each step.
+  RATE must be a NumberNode, holding the percentage change by which
+  the demand-value will be updated with, on each step.
 "
-    (let ((strength (tv-mean (cog-tv  demand-node)))
-          (conf (tv-conf (cog-tv demand-node)))
-          (rate (/ (string->number (cog-name rate-node)) 100)))
-        (cog-set-tv! demand-node (stv (+ strength (* strength rate)) conf))
+    (let* ((strength (tv-mean (cog-tv  demand-node)))
+           (rate (/ (string->number (cog-name rate-node)) 100))
+           (demand-value (+ strength (* strength rate))))
+        (psi-set-demand-value demand-node demand-value)
         (stv 1 1)
     )
 )
@@ -225,15 +292,13 @@
 ; --------------------------------------------------------------
 (define-public (psi-goal-decrease demand-node rate)
 "
-  Returns an ExecutionOutputLink(the action) that decreases the demand-value.
-  It has a decreasing effect on the demand value.
+  psi-goal-decrease DEMAND RATE
 
-  demand-node:
-  - A node representing a demand.
+  Returns an action that, if performed, will decrease the value of
+  DEMAND.
 
-  rate:
-  - A number for the percentage of change that a demand-value will be updated
-    with, on each step.
+  RATE must be a floating-point number, holding a percentage value
+  by which the demand will be changed on each step.
 "
     (EvaluationLink
         (GroundedPredicateNode "scm: psi-demand-value-decrease")
@@ -244,19 +309,51 @@
 
 (define-public (psi-demand-value-decrease demand-node rate-node)
 "
+  psi-demand-value-decrease DEMAND RATE
+
   Decreases the strength of the demand by the given percentage rate.
 
-  demand-node:
-  - A node representing a demand.
-
-  rate-node:
-  - A NumberNode for the percentage of change that a demand-value will be
-    updated with, on each step.
+  RATE must be a NumberNode holding the percentage change by which
+  the demand-value will be updated with, on each step.
 "
-    (let ((strength (tv-mean (cog-tv  demand-node)))
-          (conf (tv-conf (cog-tv demand-node)))
-          (rate (/ (string->number (cog-name rate-node)) 100)))
-        (cog-set-tv! demand-node (stv (- strength (* strength rate)) conf))
+    (let* ((strength (tv-mean (cog-tv  demand-node)))
+           (rate (/ (string->number (cog-name rate-node)) 100))
+           (demand-value (- strength (* strength rate))))
+        (psi-set-demand-value demand-node demand-value)
         (stv 1 1)
     )
+)
+
+; --------------------------------------------------------------
+; This is used to label a demand for skipping. During actions-selection.
+(define psi-label-skip (ConceptNode (string-append psi-prefix-str "skip")))
+
+; --------------------------------------------------------------
+(define-public (psi-demand-skip demand)
+"
+  psi-demand-skip DEMAND - Disable DEMAND.
+
+  Use this to disable the DEMAND from being considered during action
+  selection.  The DEMAND should be a valid demand node.
+"
+    ; Check arguments
+    (if (not (psi-demand? demand))
+        (error (string-append "In procedure psi-demand-skip, expected "
+            "argument to be a node representing a demand, got:") demand))
+
+    (MemberLink demand psi-label-skip)
+    (clear-demand-cache)
+)
+
+; --------------------------------------------------------------
+(define-public (psi-demand-skip? demand)
+"
+  psi-demand-skip? DEMAND - return #t if DEMAND should be skipped.
+"
+    ; Check arguments
+    (if (not (psi-demand? demand))
+        (error (string-append "In procedure psi-demand-skip?, expected "
+            "argument to be a node representing a demand, got:") demand))
+
+    (not (member demand (psi-get-all-enabled-demands)))
 )

@@ -25,6 +25,7 @@
 #include <cstring>
 #include <cassert>
 
+#include <boost/type_traits/remove_cv.hpp>
 #include <boost/variant/get.hpp>
 
 #include <opencog/spatial/Entity.h>

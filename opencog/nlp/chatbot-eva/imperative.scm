@@ -29,7 +29,7 @@
 ;     Eva, show happiness!
 ;
 ;
-; This is a hard-code ad-hoc pipeline. Subject to change.
+; This is a hard-coded, ad-hoc pipeline. Subject to change.
 ;
 
 (use-modules (opencog) (opencog query) (opencog exec))
@@ -47,7 +47,8 @@
 
 ;--------------------------------------------------------------------
 ; Action schema
-; This is wrong, but a hack for now.
+; This is temporary scaffolding, it simply returns the list
+; of actions that were requested, and need to be performed.
 
 ; action-rule-ao uses the Action Orchestrator (in orchestrate.scm)
 (define action-rule-ao
@@ -58,7 +59,8 @@
 				(Signature
 					(EvaluationLink
 						(Type "DefinedPredicateNode")
-						(Type "ListLink"))))
+						(TypeChoice
+						   (Type "ListLink") (Type "SetLink")))))
 		)
 		(AndLink
 			(ListLink current-action (Variable "$action"))
@@ -68,18 +70,26 @@
 ))
 
 ;--------------------------------------------------------------------
-
+; Main, top-level imperative processing function.
+;
 ; Stove-pipe hack to perform an action associated with an imperative.
-(define (imperative-process imp)
+; Its a "stove-pipe", because it hard-codes a sequence of steps that
+; are performed every time an imperative command is received. A better
+; design would be to replace the sequence of bind-links, below, by
+; open-psi rules (and/or the forward chainer).  For now, the stove-pipe
+; is OK, because there are so few rules that are used.
+(define-public (imperative-process imp)
 "
   Process imperative IMP, which should be a SentenceNode.
 "
+	(define do-dbg-prt #t)
+
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence imp)
 
 	; Apply rules that analyze sentences -- if the current sentence
 	; is an imperative of some sort, it will pick it apart into a
-	; simplfied form, and glue the simplified from to an anchor.
+	; simplfied form, and glue the simplified form to an anchor.
 	(cog-bind look-rule-1)
 	(cog-bind look-rule-2)
 	(cog-bind single-word-express-rule)
@@ -87,10 +97,20 @@
 	(cog-bind show-rule-1)
 	(cog-bind show-rule-2)
 
+	(if do-dbg-prt (begin
+		(display "The current-imperative is\n")
+		(display (cog-execute! (Get (State current-imperative (Variable "$x")))))
+	))
+
 	; Apply semantics-rule-1 -- if the current-imperative
 	; anchor is a word we understand in a physical grounded
 	; sense, then attach that sense to the current-action anchor.
 	(cog-bind obj-semantics-rule-1-ao)
+
+	(if do-dbg-prt (begin
+		(display "The current-action is\n")
+		(display (cog-execute! (Get (List current-action (Variable "$x")))))
+	))
 
 	(cog-bind obj-semantic-model-rule-1)
 	(cog-bind obj-semantic-model-rule-2)
@@ -99,7 +119,10 @@
 	(let* ((act-do-do (cog-bind action-rule-ao))
 			(action-list (cog-outgoing-set act-do-do))
 		)
-		; (display act-do-do) (newline)
+		(if do-dbg-prt (begin
+			(display "The set of actions to be performed are:\n")
+			(display act-do-do) (newline)
+		))
 
 		; Evaluate can throw if we give it bad args. Which happens during
 		; development. So report any errors.
@@ -113,13 +136,22 @@
 
 		; At this time, a ListLink is used to anchor suggested
 		; actions to the current-action anchor. Wipe these out.
+		; (because we have already performed the actions).
+		; XXX FIXME we need a better way of marking actions as having
+		; been performed, already.
 		(for-each (lambda (x)
 			(cog-extract-recursive (ListLink current-action x)))
 				action-list)
 
-		; XXX replace this by AIML or something.
-		(if (eq? '() action-list)
-			(display "I don't know how to do that.\n"))
+		; XXX replace the dont-know reply by ChatScript or something.
+		(if (null? action-list)
+			(begin
+				(State (Anchor "Chatbot: ChatbotEvaAction")
+					(Concept "Chatbot: NoResult"))
+				(display "I don't know how to do that.\n")))
+
+		(State (Anchor "Chatbot: ChatbotEva")
+			(Concept "Chatbot: ProcessFinished"))
 	)
 
 	; Reset the current-imperative state, as otherwise, any subsequent

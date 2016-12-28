@@ -1,0 +1,77 @@
+/*
+ * opencog/tests/learning/PatternMiner/PatternMiner.cxxtest
+ *
+ * Copyright (C) 2016 by OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by Shujing Ke, Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/util/Config.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/learning/PatternMiner/PatternMiner.h>
+
+using namespace opencog;
+using namespace opencog::PatternMining;
+
+class PatternMinerUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace as;
+
+public:
+	PatternMinerUTest();
+	~PatternMinerUTest();
+
+	void setUp();
+	void tearDown();
+
+	// Test extracted from opencog/learning/PatternMiner/TestPatternMinerAgent.cc
+	void testPatternMiner();
+};
+
+PatternMinerUTest::PatternMinerUTest() {}
+PatternMinerUTest::~PatternMinerUTest() {}
+
+void PatternMinerUTest::setUp()
+{
+	config().set("Pattern_Max_Gram", "4");
+	config().set("Enable_Frequent_Pattern", "true");
+	config().set("Enable_Interesting_Pattern", "true");
+	config().set("Interestingness_Evaluation_method", "surprisingness");
+	config().set("enable_filter_leaves_should_not_be_vars", "true");
+	config().set("enable_filter_links_should_connect_by_vars", "true");
+	config().set("enable_filter_not_inheritant_from_same_var", "true");
+	config().set("enable_filter_not_same_var_from_same_predicate", "true");
+	config().set("enable_filter_not_all_first_outgoing_const", "true");
+	config().set("enable_filter_first_outgoing_evallink_should_be_var", "true");
+	config().set("enable_filter_node_types_should_not_be_vars", "true");
+	config().set("node_types_should_not_be_vars", "PredicateNode");
+	config().set("Pattern_mining_mode", "Depth_First");
+}
+
+void PatternMinerUTest::tearDown() {}
+
+void PatternMinerUTest::testPatternMiner()
+{
+	PatternMiner pm(&as);
+	pm.runPatternMiner(1);
+	TS_ASSERT(true);
+}

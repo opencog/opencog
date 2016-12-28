@@ -1,6 +1,6 @@
 ;; Define simple implications to test implication instantiation rules
 
-(ImplicationLink (stv 1 1)
+(ImplicationScopeLink (stv 1 1)
    (TypedVariableLink
       (VariableNode "$X")
       (TypeNode "ConceptNode"))
@@ -15,7 +15,7 @@
    (PredicateNode "P")
    (ConceptNode "A"))
 
-(ImplicationLink (stv 1 1)
+(ImplicationScopeLink (stv 1 1)
    (VariableList
       (TypedVariableLink
          (VariableNode "$X")
@@ -42,7 +42,7 @@
 
 ;; This one is to test the implication instantiation rule when the
 ;; precondition cannot be satisfied
-(ImplicationLink (stv 1 1)
+(ImplicationScopeLink (stv 1 1)
    (TypedVariableLink
       (VariableNode "$X")
       (TypeNode "ConceptNode"))

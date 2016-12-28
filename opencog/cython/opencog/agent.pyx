@@ -9,8 +9,6 @@ from cython.operator cimport dereference as deref
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
-        cHandle(UUID)
-        UUID value()
         cHandle UNDEFINED
 
 cdef class MindAgent:

@@ -16,7 +16,7 @@ IF (HAVE_SERVER)
 	ADD_SUBDIRECTORY (cogserver)
 	# attention builds *after* cogserver.
 	ADD_SUBDIRECTORY (attention)
-	# Octomap checking will be done inside
+
 	# Will always build types
 	ADD_SUBDIRECTORY (spacetime)
 	IF (HAVE_OCTOMAP)
@@ -28,10 +28,12 @@ ENDIF(HAVE_SERVER)
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	ADD_SUBDIRECTORY (scm)
 	ADD_SUBDIRECTORY (openpsi)
+	ADD_SUBDIRECTORY (pln)
 ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
 IF (HAVE_CYTHON)
 	ADD_SUBDIRECTORY (cython)
+	ADD_SUBDIRECTORY (python)
 ENDIF (HAVE_CYTHON)
 
 ADD_SUBDIRECTORY (embodiment)

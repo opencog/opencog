@@ -101,7 +101,7 @@
 
 		; We only "suggest" this as one possible action.  A later stage
 		; picks the most likely action, based on some semantic liklihood
-		; analysis... or soemthing like that.  Thus, we use a ListLink
+		; analysis... or something like that.  Thus, we use a ListLink
 		; here, not a StateLink, since the ListLink allows multiple
 		; suggestions to be made.
 		(ListLink current-action                         ; ACTION

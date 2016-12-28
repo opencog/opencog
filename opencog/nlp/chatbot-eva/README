@@ -2,10 +2,10 @@
                      Eva Chatbot
                      -----------
 
-Prototype that attaches the chatbot to the behavior trees that
+Prototype that attaches the chatbot to the behavior psi-rules that
 control the Hanson Robotics Eva robot emulator.
 
-The Eva simulator emulates an animated human head, able to see
+The Eva simulator emulates an animated human head, able to see,
 listen and respond.
 
 Goals
@@ -47,6 +47,9 @@ decisions made here are not appropriate, and miss the mark.  There's
 also a bunch of scaffolding, that is meant to be replaced.  Large parts
 may, or may not be redesigned in the (near-term?) future.
 
+A detailed description of the current architecture is given in the
+`embodiment` directory.
+
 
 HOWTO
 -----
@@ -54,23 +57,30 @@ There are two ways to run this thing: embodied, and disembodied.
 The disembodied setup is simpler.
 
 ## Disembodied HOWTO
-This version can be run in IRC only, or even at the guile prompt,
-without requiring a full hookup to the blender head.  It just prints
-(in parenthetical English) the actions that would be performed.
+This version does not require the full robotics pipeline (which
+includes 3D visualization via blender): it can be run in IRC, or
+even at the guile prompt.  This version just prints (in English)
+the actions that the robot would perform.  A webcam is recommended,
+so that she can see you.
 
+ * build and install both the atomspace, and opencog. Ask for help
+   if you don't know how to do this.
  * `git clone https://github.com/opencog/ros-behavior-scripting`
-   and `sudo make install` This is needed for the action orchestrator!
- * make install -- This step is important!
- * Start the relex server on port 4444
- * Start the cogita IRC bot
- * Start a guile shell.
- * Enter (load "run-chatbot.scm") at the guile prompt.
- * Talk to her via IRC.  Alternately, use
-   (process-query "foo" "This is a test")
+   and `sudo make install`  -- This step is important, it is needed
+   for the action orchestrator!
+ * Start the RelEx server on port 4444 (`git clone` relex, build it,
+   and run `./opencog-server.sh` in the relex main directory.)
+ * (needed only for IRC) Start the cogita IRC bridge, in the
+   irc directoy -- the `opencog/nlp/irc/cogita` binary.
+ * Start a guile shell: just say `guile` in this directory.
+ * Enter `(load "run-chatbot.scm")` at the guile prompt.
+ * Talk to her via IRC.  Alternately, from the guile prompt, you
+   can say: `(process-query "Adam" "Look happy!")`
 
 
 ## Embodied HOWTO
-There is a fair amount of setup needed to run this thing:
+There is a fair amount of setup needed to run the fully-embodied
+version.
 
  * The animation is done in blender; you have to install blender
    and get the blender rig.
@@ -391,6 +401,11 @@ adjectives should trigger these.
 Self-awareness questions:
 
    Where are you looking?   XXX this got broken, and the fix is hard.
+      The correct fix is to wire up to the space server.
+   What are you doing?
+   What did you just do?
+   What happened just now?
+
 
 ===========================
 TODO
@@ -402,8 +417,14 @@ ActionLink could be/should be renamed ExecutionLink
 
 OpenPsi:
     ImplicationLink
-        AndLink
+        SequentialAndLink
             Predicate - Is there a new verbal command?
             ExecuteOutputLink
                 Obey the command
         Goal- "Obey user"
+
+* Replace rules with psi-rules (or with forward chainer)
+
+* Provide simple string-matching API.
+
+

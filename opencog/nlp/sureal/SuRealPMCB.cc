@@ -122,14 +122,13 @@ bool SuRealPMCB::variable_match(const Handle &hPat, const Handle &hSoln)
  */
 static void get_nodes(const Handle& h, HandleSeq& node_list)
 {
-   LinkPtr lll(LinkCast(h));
-   if (nullptr == lll)
+   if (h->isNode())
    {
       node_list.emplace_back(h);
       return;
    }
 
-   for (const Handle& o : lll->getOutgoingSet())
+   for (const Handle& o : h->getOutgoingSet())
       get_nodes(o, node_list);
 }
 
@@ -239,7 +238,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         auto it = m_words.find(hPatNode);
         if (it == m_words.end())
         {
-            std::string sPat = NodeCast(hPatNode)->getName();
+            std::string sPat = hPatNode->getName();
             std::string sPatWord = sPat.substr(0, sPat.find_first_of('@'));
 
             // Get the WordNode associated with the word
@@ -251,7 +250,7 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
         else hPatWordNode = it->second;
 
         // get the corresponding WordInstanceNode of the solution node
-        std::string sSoln = NodeCast(hSolnNode)->getName();
+        std::string sSoln = hSolnNode->getName();
         Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, sSoln);
 
         // if the node is a variable, it would have matched to a node with
@@ -275,10 +274,10 @@ bool SuRealPMCB::clause_match(const Handle &pattrn_link_h, const Handle &grnd_li
     // next disconnected clause in the pattern, if any
     m_interp.insert(qTempInterpNodes.begin(), qTempInterpNodes.end());
 
-
     if (m_use_cache) {
         SuRealCache::instance().add_clause_match(pattrn_link_h, grnd_link_h, true);
     }
+
     return true;
 }
 
@@ -350,7 +349,6 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         return false;
     }
 
-
     // shrink var_soln to only contain solution for the variables
     std::map<Handle, Handle> shrinked_soln;
 
@@ -373,15 +371,14 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             return false;
         }
 
+        std::string sName = kv.first->getName();
+        std::string sWord = sName.substr(0, sName.find_first_of('@'));
+        Handle hPatWord = m_as->get_handle(WORD_NODE, sWord);
+        Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, kv.second->getName());
+
         // do a disjunct match for PredicateNodes as well
         if (kv.first->getType() == PREDICATE_NODE and kv.second->getType() == PREDICATE_NODE)
         {
-            std::string sName = NodeCast(kv.first)->getName();
-            std::string sWord = sName.substr(0, sName.find_first_of('@'));
-            Handle hPatWord = m_as->get_handle(WORD_NODE, sWord);
-
-            Handle hSolnWordInst = m_as->get_handle(WORD_INSTANCE_NODE, NodeCast(kv.second)->getName());
-
             IncomingSet qLemmaLinks = hPatWord->getIncomingSetByType(LEMMA_LINK);
 
             // if there is no LemmaLink conntecting to it, it's probably
@@ -415,7 +412,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                     if (qOS[0]->getType() != WORD_INSTANCE_NODE)
                         continue;
 
-                    std::string sName = NodeCast(qOS[0])->getName();
+                    std::string sName = qOS[0]->getName();
                     std::string sWord = sName.substr(0, sName.find_first_of('@'));
 
                     // Skip if we have seen it before
@@ -437,29 +434,32 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
                         if (qInhOS[0] == kv.second and
                                 qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE)
                         {
-                            sTense = NodeCast(qInhOS[1])->getName();
+                            sTense = qInhOS[1]->getName();
                             break;
                         }
                     }
 
                     // then get the tense of the one in this LemmaLink and see if they match
                     Handle hPatPredNode = m_as->get_handle(PREDICATE_NODE, sName);
-                    IncomingSet qPatIS = hPatPredNode->getIncomingSetByType(INHERITANCE_LINK);
-                    bool tense = false;
-                    for (LinkPtr lpInhLk : qPatIS)
+                    bool has_tense = false;
+                    bool eq_tense = false;
+                    if (hPatPredNode != Handle::UNDEFINED)
                     {
-                        HandleSeq qInhOS = lpInhLk->getOutgoingSet();
-                        if (qInhOS[0] == hPatPredNode and
-                                qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE and
-                                    sTense.compare(NodeCast(qInhOS[1])->getName()) == 0)
+                        IncomingSet qPatIS = hPatPredNode->getIncomingSetByType(INHERITANCE_LINK);
+                        for (LinkPtr lpInhLk : qPatIS)
                         {
-                            tense = true;
-                            break;
+                            HandleSeq qInhOS = lpInhLk->getOutgoingSet();
+                            if (qInhOS[0] == hPatPredNode and
+                                qInhOS[1]->getType() == DEFINED_LINGUISTIC_CONCEPT_NODE) {
+                                has_tense = true;
+                                eq_tense = sTense == qInhOS[1]->getName();
+                                break;
+                            }
                         }
                     }
 
                     // reject if their tenses don't match
-                    if (not tense) continue;
+                    if (has_tense and not eq_tense) continue;
 
                     Handle hWordNode = m_as->get_handle(WORD_NODE, sWord);
 
@@ -489,7 +489,24 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             }
         }
 
-        else shrinked_soln[kv.first] = kv.second;
+        else
+        {
+            // depends on what the input is, clause_match() may not always be called,
+            // do the same kind of checking here to make sure the disjuncts match
+            if (hPatWord != Handle::UNDEFINED and hSolnWordInst != Handle::UNDEFINED)
+            {
+                if (disjunct_match(hPatWord, hSolnWordInst))
+                    shrinked_soln[kv.first] = kv.second;
+
+                else return false;
+            }
+
+            // the above only takes care of the words, for nodes that do not correspond
+            // to any words, they should have gone through the node_match/variable_match
+            // callbacks. Since they get all the way here, that means they are good,
+            // so accept them directly
+            shrinked_soln[kv.first] = kv.second;
+        }
     }
 
     OrderedHandleSet qSolnSetLinks;
@@ -516,8 +533,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
         bool isGoodEnough = true;
 
         // extract the leftovers from the solution SetLink
-        LinkPtr lp(LinkCast(hSetLink));
-        HandleSeq qLeftover = lp->getOutgoingSet();
+        HandleSeq qLeftover = hSetLink->getOutgoingSet();
         for (auto it = pred_soln.begin(); it != pred_soln.end(); it++)
         {
             auto itc = std::find(qLeftover.begin(), qLeftover.end(), it->second);
@@ -554,8 +570,8 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
             {
                 auto matchWordInst = [&](Handle& w)
                 {
-                    std::string wordInstName = NodeCast(w)->getName();
-                    std::string nodeName = NodeCast(n)->getName();
+                    std::string wordInstName = w->getName();
+                    std::string nodeName = n->getName();
 
                     if (wordInstName.compare(nodeName) == 0)
                     {
@@ -620,6 +636,7 @@ bool SuRealPMCB::grounding(const std::map<Handle, Handle> &var_soln, const std::
     if (m_use_cache) {
         SuRealCache::instance().add_grounding_match(var_soln, pred_soln, false);
     }
+
     return false;
 }
 
@@ -641,8 +658,8 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
     HandleSeq qLGInstsRight;
     for (Handle& hSolnEvalLink : qSolnEvalLinks)
     {
-        HandleSeq qOS = LinkCast(hSolnEvalLink)->getOutgoingSet();
-        HandleSeq qWordInsts = LinkCast(qOS[1])->getOutgoingSet();
+        HandleSeq qOS = hSolnEvalLink->getOutgoingSet();
+        HandleSeq qWordInsts = qOS[1]->getOutgoingSet();
 
         // divide them into two groups, assuming there are only two WordInstanceNodes in the ListLink
         if (qWordInsts[0] == hSolnWordInst) qLGInstsRight.push_back(hSolnEvalLink);
@@ -653,38 +670,38 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
     auto sortLeftInsts = [](const Handle& h1, const Handle& h2)
     {
         // get the ListLinks from the EvaluationLinks
-        const Handle& hListLink1 = LinkCast(h1)->getOutgoingSet()[1];
-        const Handle& hListLink2 = LinkCast(h2)->getOutgoingSet()[1];
+        const Handle& hListLink1 = h1->getOutgoingAtom(1);
+        const Handle& hListLink2 = h2->getOutgoingAtom(1);
 
         // get the first WordInstanceNodes from the ListLinks
-        const Handle& hWordInst1 = LinkCast(hListLink1)->getOutgoingSet()[0];
-        const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[0];
+        const Handle& hWordInst1 = hListLink1->getOutgoingAtom(0);
+        const Handle& hWordInst2 = hListLink2->getOutgoingAtom(0);
 
         // get the NumberNodes from the WordSequenceLinks
         Handle hNumNode1 = get_target_neighbors(hWordInst1, WORD_SEQUENCE_LINK)[0];
         Handle hNumNode2 = get_target_neighbors(hWordInst2, WORD_SEQUENCE_LINK)[0];
 
         // compare their word sequences
-        return NodeCast(hNumNode1)->getName() > NodeCast(hNumNode2)->getName();
+        return hNumNode1->getName() > hNumNode2->getName();
     };
 
     // helper for sorting EvaluationLinks in word sequence order
     auto sortRightInsts = [](const Handle& h1, const Handle& h2)
     {
         // get the ListLinks from the EvaluationLinks
-        const Handle& hListLink1 = LinkCast(h1)->getOutgoingSet()[1];
-        const Handle& hListLink2 = LinkCast(h2)->getOutgoingSet()[1];
+        const Handle& hListLink1 = h1->getOutgoingAtom(1);
+        const Handle& hListLink2 = h2->getOutgoingAtom(1);
 
         // get the second WordInstanceNodes from the ListLinks
-        const Handle& hWordInst1 = LinkCast(hListLink1)->getOutgoingSet()[1];
-        const Handle& hWordInst2 = LinkCast(hListLink2)->getOutgoingSet()[1];
+        const Handle& hWordInst1 = hListLink1->getOutgoingAtom(1);
+        const Handle& hWordInst2 = hListLink2->getOutgoingAtom(1);
 
         // get the NumberNodes from the WordSequenceLinks
         Handle hNumNode1 = get_target_neighbors(hWordInst1, WORD_SEQUENCE_LINK)[0];
         Handle hNumNode2 = get_target_neighbors(hWordInst2, WORD_SEQUENCE_LINK)[0];
 
         // compare their word sequences
-        return NodeCast(hNumNode1)->getName() < NodeCast(hNumNode2)->getName();
+        return hNumNode1->getName() < hNumNode2->getName();
     };
 
     // sort the qLGInstsLeft in reverse word sequence order
@@ -696,7 +713,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
     // get the LG connectors for those in the qLGInstsLeft
     for (Handle& hEvalLink : qLGInstsLeft)
     {
-        const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
+        const Handle& hLinkInstNode = hEvalLink->getOutgoingAtom(0);
 
         HandleSeq qLGConns = get_all_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
 
@@ -707,7 +724,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
     // get the LG connectors for those in the qLGInstsRight
     for (Handle& hEvalLink : qLGInstsRight)
     {
-        const Handle& hLinkInstNode = LinkCast(hEvalLink)->getOutgoingSet()[0];
+        const Handle& hLinkInstNode = hEvalLink->getOutgoingAtom(0);
 
         HandleSeq qLGConns = get_all_neighbors(hLinkInstNode, LG_LINK_INSTANCE_LINK);
 
@@ -740,7 +757,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
         // check if hDisjunct is LgAnd or just a lone connector
         if (hDisjunct->getType() == LG_AND)
         {
-            const HandleSeq& q = LinkCast(hDisjunct)->getOutgoingSet();
+            const HandleSeq& q = hDisjunct->getOutgoingSet();
             sourceConns = std::list<Handle>(q.begin(), q.end());
         }
         else
@@ -783,7 +800,7 @@ bool SuRealPMCB::disjunct_match(const Handle& hPatWordNode, const Handle& hSolnW
 
             // dumb hacky way of checking of the connector is
             // a multi-connector
-            if (LinkCast(sourceConns.front())->getArity() == 3)
+            if (sourceConns.front()->getArity() == 3)
                 hMultiConn = sourceConns.front();
 
             sourceConns.pop_front();
@@ -874,7 +891,7 @@ bool SuRealPMCB::initiate_search(PatternMatchEngine* pPME)
             size_t maxSize = 0;
             for (Handle& q : qISet)
             {
-                size_t s = LinkCast(q)->getArity();
+                size_t s = q->getArity();
                 if (s > maxSize) maxSize = s;
             }
 

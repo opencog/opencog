@@ -43,7 +43,7 @@ const opencog::Handle UndefinedHandle = opencog::Handle::UNDEFINED;
 class AtomOcTreeNode : public OcTreeNode
 {
 public:
-    AtomOcTreeNode() : OcTreeNode(), dat(0)
+    AtomOcTreeNode() : OcTreeNode()
     {} //dat gets default value from prunning
 
     AtomOcTreeNode(const AtomOcTreeNode& rhs) : OcTreeNode(rhs), dat(rhs.dat)

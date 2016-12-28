@@ -2622,7 +2622,7 @@ void PatternMiner::testPatternMatcher1()
 
     // The first EvaluationLink
     HandleSeq listlinkOutgoings1, evalLinkOutgoings1;
-    Handle bobNode = originalAtomSpace->add_node(opencog::OBJECT_NODE, "Bob" );
+    Handle bobNode = originalAtomSpace->add_node(opencog::NODE, "Bob" );
     listlinkOutgoings1.push_back(bobNode);
     listlinkOutgoings1.push_back(varHandle2);
     Handle listlink1 = originalAtomSpace->add_link(LIST_LINK, listlinkOutgoings1);
@@ -2750,7 +2750,7 @@ void PatternMiner::testPatternMatcher2()
 
     // The first EvaluationLink
     HandleSeq listlinkOutgoings1, evalLinkOutgoings1;
-    Handle LiMingNode = originalAtomSpace->add_node(opencog::OBJECT_NODE, "LiMing" );
+    Handle LiMingNode = originalAtomSpace->add_node(opencog::NODE, "LiMing" );
     listlinkOutgoings1.push_back(LiMingNode);
     Handle teaNode = originalAtomSpace->add_node(opencog::CONCEPT_NODE, "tea" );
     listlinkOutgoings1.push_back(teaNode);

@@ -99,14 +99,13 @@ void SuRealSCM::init()
 static void get_all_unique_nodes(const Handle& h,
                                  UnorderedHandleSet& node_set)
 {
-   LinkPtr lll(LinkCast(h));
-   if (nullptr == lll)
+   if (h->isNode())
    {
       node_set.insert(h);
       return;
    }
 
-   for (const Handle& o : lll->getOutgoingSet())
+   for (const Handle& o : h->getOutgoingSet())
       get_all_unique_nodes(o, node_set);
 }
 
@@ -114,10 +113,9 @@ static void get_all_unique_nodes(const Handle& h,
  * Implement the "reset-sureal-cache" scheme primitive.
  *
  */
-HandleSeqSeq SuRealSCM::reset_cache(Handle dummy)
+void SuRealSCM::reset_cache(void)
 {
     SuRealCache::instance().reset();
-    return HandleSeqSeq();
 }
 
 /**
@@ -165,7 +163,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
     // It is possible to keep the clauses in a SetLink and override the PM's
     // link_match() callback to skip SetLink's arity check , but that would
     // be assuming R2L will never use SetLink for other purposes.
-    const HandleSeq& qClauses = LinkCast(h)->getOutgoingSet();
+    const HandleSeq& qClauses = h->getOutgoingSet();
 
     // get all the nodes to be treated as variable in the Pattern Matcher
     // XXX perhaps it's better to write a eval_q in SchemeEval to convert
@@ -194,16 +192,27 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
             n->getType() == DEFINED_LINGUISTIC_PREDICATE_NODE)
            continue;
 
-        std::string sName = NodeCast(n)->getName();
+        std::string sName = n->getName();
+
+        // if it is an instance, check if it has the LG relationships
+        if (sName.find("@") != std::string::npos)
+        {
+            Handle hWordInstNode = pAS->get_handle(WORD_INSTANCE_NODE, sName);
+
+            // no corresponding WordInstanceNode found
+            if (hWordInstNode == Handle::UNDEFINED)
+                continue;
+
+            // if no LG link generated for the instance
+            if (get_target_neighbors(hWordInstNode, LG_WORD_CSET).empty())
+                continue;
+        }
+
         std::string sWord = sName.substr(0, sName.find_first_of('@'));
         Handle hWordNode = pAS->get_handle(WORD_NODE, sWord);
 
         // no WordNode found
         if (hWordNode == Handle::UNDEFINED)
-            continue;
-
-        // if no LG dictionary entry
-        if (get_target_neighbors(hWordNode, LG_DISJUNCT).empty())
             continue;
 
         sVars.insert(n);
@@ -254,7 +263,7 @@ HandleSeqSeq SuRealSCM::do_sureal_match(Handle h, bool use_cache)
 
         // assuming each InterpretationNode is only linked to one SetLink
         // and compare using arity
-        return LinkCast(qi[0])->getArity() < LinkCast(qj[0])->getArity();
+        return qi[0]->getArity() < qj[0]->getArity();
     };
 
     std::sort(keys.begin(), keys.end(), itprComp);

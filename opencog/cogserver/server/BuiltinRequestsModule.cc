@@ -24,8 +24,9 @@
 
 #include <iomanip>
 
-#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/ansi.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
 
 #include "BuiltinRequestsModule.h"
 
@@ -64,6 +65,7 @@ void BuiltinRequestsModule::registerAgentRequests()
     do_quit_register();
     do_q_register();
     do_ctrld_register();
+    do_dot_register();
 
     do_startAgents_register();
     do_stopAgents_register();
@@ -83,6 +85,7 @@ void BuiltinRequestsModule::unregisterAgentRequests()
     do_quit_unregister();
     do_q_unregister();
     do_ctrld_unregister();
+    do_dot_unregister();
 
     do_startAgents_unregister();
     do_stopAgents_unregister();
@@ -99,13 +102,17 @@ void BuiltinRequestsModule::init()
 
 // ====================================================================
 // Various flavors of closing the connection
-std::string BuiltinRequestsModule::do_exit(Request *req, std::list<std::string> args)
+std::string BuiltinRequestsModule::do_exit(Request* req, std::list<std::string> args)
 {
-    RequestResult* rr = req->getRequestResult();
-    if (rr) {
-        rr->Exit();
-        req->setRequestResult(NULL);
-    }
+    ConsoleSocket* con = req->get_console();
+    OC_ASSERT(con, "Bad request state");
+
+    con->Exit();
+
+    // After the exit, the pointer to the console will be invalid,
+    // so zero it out now, to avoid a bad dereference.  (Note that
+    // this call may trigger the ConsoleSocket dtor to run).
+    req->set_console(nullptr);
     return "";
 }
 
@@ -120,6 +127,11 @@ std::string BuiltinRequestsModule::do_q(Request *req, std::list<std::string> arg
 }
 
 std::string BuiltinRequestsModule::do_ctrld(Request *req, std::list<std::string> args)
+{
+    return do_exit(req, args);
+}
+
+std::string BuiltinRequestsModule::do_dot(Request *req, std::list<std::string> args)
 {
     return do_exit(req, args);
 }

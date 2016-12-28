@@ -29,12 +29,13 @@
         ))
 
 (define action-1
-    (ExecutionOutputLink
-        (GroundedSchemaNode "scm: act-1")
-        (ListLink)))
+    (EvaluationLink
+        (GroundedPredicate "scm: act-1")
+        (ListLink (Variable "$abc"))))
 
-(define (act-1)
+(define (act-1 groundings)
     (ConceptNode "act-1")
+    (stv 1 1)
 )
 
 (define demand-1 (psi-demand  "demand-1" .87))
@@ -82,12 +83,13 @@
         ))
 
 (define action-2
-    (ExecutionOutputLink
-        (GroundedSchemaNode "scm: act-2")
-        (ListLink)))
+    (EvaluationLink
+        (GroundedPredicate "scm: act-2")
+        (ListLink (Variable "$abc"))))
 
-(define (act-2)
+(define (act-2 groundings)
     (ConceptNode "act-2")
+    (stv 1 1)
 )
 
 (define demand-2 (psi-demand  "demand-2" .87))
@@ -130,7 +132,7 @@
 )
 
 ; --------------------------------------------------------------
-; Helper functions for `OpenPsiUTest::test_psi_step`
+; Helper functions for `OpenPsiUTest::test_psi_step_*
 (define (setup_test_psi_step_1)
     ; Load rules
     (rule-1)
@@ -148,7 +150,11 @@
 )
 
 (define (setup_test_psi_step_2)
-    ; Load groundable contents for satisfying rule-2 only
+    ; Load rules
+    (rule-1)
+    (rule-2)
+    (rule-3)
+    ; Load groundable contents for satisfying rule-1 only
     (groundable-content-1)
     ; Make one step
     (psi-step)
@@ -157,11 +163,10 @@
 (define (test_psi_step_2_1) (cog-node? (cog-node 'ConceptNode "act-1")))
 
 (define (setup_test_psi_step_3)
-    ; Clean the atomspace so that only rule-2 and rule-3 are selectable
-    (map cog-delete (groundable-content-1))
-    (cog-delete (act-1))
-    ; Change the strength of demand-1 to its initial value
-    (cog-set-tv! demand-1 (stv .87 1))
+    ; Load rules
+    (rule-1)
+    (rule-2)
+    (rule-3)
     ; Load groundable contents for satisfying rule-2 or rule 3
     (groundable-content-2)
     ; Make one step
@@ -175,12 +180,13 @@
 (define demand-4 (psi-demand  "demand-4" .87))
 
 (define action-4
-    (ExecutionOutputLink
-        (GroundedSchemaNode "scm: act-4")
-        (ListLink)))
+    (EvaluationLink
+        (GroundedPredicate "scm: act-4")
+        (ListLink (Variable "$abc"))))
 
-(define (act-4)
+(define (act-4 groundings)
     (ConceptNode "act-4")
+    (stv 1 1)
 )
 
 (define goal-4
@@ -201,16 +207,45 @@
             (NumberNode 2)))
 )
 
+; (rule-4) & (rule-5) are for usage with DualLink version of action-selection
+; i.e. psi-satisfiable? should use DualLink
 (define (rule-4)
     (psi-rule (groundable-content-4) action-4 goal-4 (stv 1 1) demand-4))
 
-(define demand-5 (psi-demand  "demand-5" .87))
-
-(define (rule-5)
-    (psi-rule
-        (list context-1 (groundable-content-4))
-        action-1 goal-2 (stv 1 1) demand-5)
+; --------------------------------------------------------------
+; This doesn't have any groudings and as such is a rule of the
+; evaluatable form.
+(define (rule-6)
+    (psi-rule (list (True)) action-6 goal-4 (stv 1 1) demand-4)
 )
+
+(define action-6
+    (EvaluationLink
+        (GroundedPredicate "scm: act-6")
+        (ListLink)))
+
+(define (act-6)
+    (ConceptNode "act-6")
+    (stv 1 1)
+)
+
+(define (setup_test_psi_step_4)
+    ; Load rule
+    (rule-6)
+    ; Make one step
+    (psi-step)
+)
+
+(define (test_psi_step_4) (cog-node? (cog-node 'ConceptNode "act-6")))
+
+; --------------------------------------------------------------
+;(define demand-5 (psi-demand  "demand-5" .87))
+
+;(define (rule-5)
+;    (psi-rule
+;        (list context-1 (groundable-content-4))
+;        action-1 goal-2 (stv 1 1) demand-5)
+;)
 
 ;(define (test_psi_get_dual_rules_1_1)
 ;    (equal? (car (psi-get-dual-rules (car (groundable-content-4)))) (rule-4))

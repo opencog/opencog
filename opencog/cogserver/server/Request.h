@@ -31,7 +31,6 @@
 #include <string>
 
 #include <opencog/cogserver/server/Factory.h>
-#include <opencog/cogserver/server/RequestResult.h>
 
 namespace opencog
 {
@@ -40,6 +39,7 @@ namespace opencog
  */
 
 class CogServer;
+class ConsoleSocket;
 
 /**
  * The DECLARE_CMD_REQUEST macro provides a simple, easy-to-use interface
@@ -80,16 +80,16 @@ class CogServer;
  * - mod_type:Typename of the class that implements the module.
  * - cmd_str: The string name of the command
  * - do_cmd:  Name of the method to call to run the command.
- *            The signature of the method mus be as follows (see also
- *            exmple):
- *            std::string mod_type::do_cmd(Request *, std::list<std::string>)
+ *            The signature of the method must be as follows (see also
+ *            the example, below):
+ *            `std::string mod_type::do_cmd(Request *, std::list<std::string>)`
  *            The first arg is the original request; most users will not
  *            need this. The second arg is the parsed command line,
  *            presented as a list of strings.
- * - cmd_sum: A short string to be printed as a command summary.
- * - cmd_desc:A long string describing the command in detail.
- * - shell_cmd:A boolean value that indicates the command is for entering a
- *            shell.
+ * - cmd_sum: A short string to be printed as a command help summary.
+ * - cmd_desc:A long help string describing the command in detail.
+ * - shell_cmd:A boolean value that indicates the command will create a
+ *            shell (REPL loop, e.g. for scheme, python).
  * - hidden:  A boolean value that indicates the command is not listed
  *            when 'help' is used to list commands.
  *
@@ -146,28 +146,24 @@ class CogServer;
                                                  shell_cmd,           \
                                                  hidden);             \
               return _cci;                                            \
-    }                                                                 \
-    do_cmd##Request(CogServer& cs) : Request(cs) {};                  \
-    virtual ~do_cmd##Request() {};                                    \
-    virtual bool execute(void) {                                      \
-        logger().debug("[" cmd_str " Request] execute");              \
-        std::ostringstream oss;                                       \
+          }                                                           \
+          do_cmd##Request(CogServer& cs) : Request(cs) {};            \
+          virtual ~do_cmd##Request() {};                              \
+          virtual bool execute(void) {                                \
+              logger().debug("[" cmd_str " Request] execute");        \
                                                                       \
-        mod_type* mod =                                               \
-            static_cast<mod_type *>(_cogserver.getModule(             \
-                 "opencog::" #mod_type));                             \
+              mod_type* mod =                                         \
+                  static_cast<mod_type *>(_cogserver.getModule(       \
+                       "opencog::" #mod_type));                       \
                                                                       \
-        std::string rs = mod->do_cmd(this, _parameters);              \
-        oss << rs;                                                    \
-                                                                      \
-        if (_mimeType == "text/plain")                                \
-            send(oss.str());                                          \
-        return true;                                                  \
-    }                                                                 \
-    virtual bool isShell(void) {                                      \
-        return info().is_shell;                                       \
-    }                                                                 \
-};                                                                    \
+              std::string rs = mod->do_cmd(this, _parameters);        \
+              send(rs);                                               \
+              return true;                                            \
+          }                                                           \
+          virtual bool isShell(void) {                                \
+              return info().is_shell;                                 \
+          }                                                           \
+    };                                                                \
                                                                       \
     /* Declare the factory to manage this request */                  \
     Factory<do_cmd##Request, Request> do_cmd##Factory;                \
@@ -186,9 +182,9 @@ class CogServer;
 
 
 /**
- * This class defines the base abstract class that should be extended
- * by all opencog requests. It provides common members used by most requests,
- * such as the list of request parameters.
+ * This class defines the abstract base class that should be extended
+ * by all cogserver command requests. It provides common members used
+ * by most requests, such as the list of request parameters.
  *
  * A typical derived request only has to override/implement two methods:
  * 'info' and 'execute'.
@@ -197,13 +193,13 @@ class CogServer;
  * Registry+Factory pattern, request classes must implement a static
  * 'info' method which uniquely identifies its class. Note that the
  * Request class uses an extended 'info' class (RequestClassInfo)
- * which should add a description attribute and some text about the
- * request's usage.
+ * which should add a description attribute and some help text about
+ * the request's usage.
  *
  * The 'execute' method must be overriden by derived requests and
  * implement the actual request behavior. It should retrieve the set of
  * parameters from the '_parameters' member and use the 'send()' method
- * to send its output (or error message) back to the client.
+ * to send its output (or an error message) back to the client.
  *
  * A typical derived Request declaration and initialization would thus
  * look as follows:
@@ -249,16 +245,14 @@ class CogServer;
  */
 class Request
 {
+private:
+    ConsoleSocket*         _console;
 
 protected:
-
     CogServer&             _cogserver;
-    RequestResult*         _requestResult;
     std::list<std::string> _parameters;
-    std::string            _mimeType;
 
 public:
-
     /** Request's constructor */
     Request(CogServer&);
 
@@ -274,18 +268,17 @@ public:
     virtual bool isShell(void) = 0;
 
     /** Send the command output back to the client. */
-    virtual void send(const std::string& msg) const;
+    void send(const std::string& msg) const;
 
-    /** Stores the RequestResult that makes interface with the requesting client. */
-    virtual void setRequestResult(RequestResult*);
-    virtual RequestResult *getRequestResult(void) {return _requestResult; }
+    /** Stores the socket on which to return results. */
+    void set_console(ConsoleSocket*);
+    ConsoleSocket *get_console(void) const { return _console; }
 
     /** sets the command's parameter list. */
-    virtual void setParameters(const std::list<std::string>& params);
+    virtual void setParameters(const std::list<std::string>&);
 
     /** adds a parameter to the commands parameter list. */
-    virtual void addParameter(const std::string& param);
-
+    virtual void addParameter(const std::string&);
 };
 
 /** @}*/

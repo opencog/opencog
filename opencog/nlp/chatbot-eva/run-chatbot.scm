@@ -39,5 +39,10 @@
 (nlp-parse "I am looking rightwards")
 (nlp-parse "I am looking forward")
 
+; XXX temp hack to run in module context, for debugging
+(add-to-load-path ".")
+(add-to-load-path "..")
+(load "chatbot-eva.scm")
+
 ; Hush the output on load.
 *unspecified*
