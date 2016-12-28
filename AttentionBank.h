@@ -223,7 +223,8 @@ public:
      * Get the maximum STI observed in the AtomSpace.
      *
      * @param average If true, return an exponentially decaying
-     * average of maximum STI, otherwise return the actual maximum.
+     *        average of maximum STI, otherwise return the actual
+     *        maximum.
      * @return Maximum STI
      */
     AttentionValue::sti_t getMaxSTI(bool average=true) const;
@@ -232,7 +233,8 @@ public:
      * Get the minimum STI observed in the AtomSpace.
      *
      * @param average If true, return an exponentially decaying
-     * average of minimum STI, otherwise return the actual maximum.
+     *        average of minimum STI, otherwise return the actual
+     *        minimum.
      * @return Minimum STI
      */
     AttentionValue::sti_t getMinSTI(bool average=true) const;
@@ -309,6 +311,29 @@ public:
                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
         return _importanceIndex.getHandleSet(lowerBound, upperBound);
+    }
+
+    /** Same as above, different API */
+    template <typename OutputIterator> OutputIterator
+    get_handles_by_AV(OutputIterator result,
+                      AttentionValue::sti_t lowerBound,
+                      AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
+    {
+        UnorderedHandleSet hs = _bank.getHandlesByAV(lowerBound, upperBound);
+        return std::copy(hs.begin(), hs.end(), result);
+    }
+
+    /**
+     * Gets the set of all handles in the Attentional Focus
+     *
+     * @return The set of all atoms in the Attentional Focus
+     * @note: This method utilizes the ImportanceIndex
+     */
+    template <typename OutputIterator> OutputIterator
+    get_handle_set_in_attentional_focus(OutputIterator result) const
+    {
+        return get_handles_by_AV(result, get_attentional_focus_boundary(),
+                                 AttentionValue::AttentionValue::MAXSTI);
     }
 
     /**
