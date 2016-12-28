@@ -31,15 +31,10 @@
 
 using namespace opencog;
 
-AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
-    : _as(asp)
-    , _index_insert_queue(this, &AttentionBank::put_atom_into_index, transient?0:4)
-    , _index_remove_queue(this, &AttentionBank::remove_atom_from_index, transient?0:4)
+AttentionBank::AttentionBank(void)
+    _index_insert_queue(this, &AttentionBank::put_atom_into_index, 4),
+    _index_remove_queue(this, &AttentionBank::remove_atom_from_index, 4)
 {
-    /* Do not boether with initialization, if this is transient */
-    if (transient) { _zombie = true; return; }
-    _zombie = false;
-
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS", 100000);
     startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS", 100000);
     stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER", 10000);
@@ -84,7 +79,6 @@ AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
 /// tacky hack to fix a design bug.
 void AttentionBank::shutdown(void)
 {
-    if (_zombie) return;  /* no-op, if a zombie */
     _AVChangedConnection.disconnect();
     _addAtomConnection.disconnect();
     _removeAtomConnection.disconnect();
@@ -99,8 +93,8 @@ void AttentionBank::AVChanged(const Handle& h,
 {
     AttentionValue::sti_t newSti = new_av->getSTI();
     
-    // Add the old attention values to the AtomSpace funds and
-    // subtract the new attention values from the AtomSpace funds
+    // Add the old attention values to the AttentionBank funds and
+    // subtract the new attention values from the AttentionBank funds
     updateSTIFunds(old_av->getSTI() - newSti);
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
@@ -121,8 +115,8 @@ void AttentionBank::AVChanged(const Handle& h,
         minSTISeen = maxSTISeen;
     }
 
-    _as->update_max_STI(maxSTISeen);
-    _as->update_min_STI(minSTISeen);
+    updateMaxSTI(maxSTISeen);
+    updateMinSTI(minSTISeen);
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI.load(), old_av->getSTI(), new_av->getSTI());

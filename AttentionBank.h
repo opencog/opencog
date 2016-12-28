@@ -54,20 +54,9 @@ typedef boost::signals2::signal<void (const Handle&,
                                       const AttentionValuePtr&,
                                       const AttentionValuePtr&)> AFCHSigl;
 
-class AtomSpace;
-
 class AttentionBank
 {
     friend class ecan::StochasticDiffusionAmountCalculator; //need to access _importanceIndex
-
-    AtomSpace* _as;
-    /**
-     * If true, then this AttentionBank is not being used.
-     * Yes, this is totally bogus, but is needed, due to design
-     * flaws related to attention allocation.
-     */
-    bool _zombie;
-    
 
     /** The connection by which we are notified of AV changes */
     boost::signals2::connection _AVChangedConnection;
@@ -127,11 +116,10 @@ class AttentionBank
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
 
-public:
-    /** The table notifies us about AV changes */
-    AttentionBank(AtomSpace*, bool);
-    ~AttentionBank();
     void shutdown(void);
+public:
+    AttentionBank(void);
+    ~AttentionBank();
 
     /**
      * Provide ability for others to find out about atoms that cross in or
@@ -153,34 +141,34 @@ public:
     void stimulate(Handle&, double stimulus);
 
     /**
-     * Get the total amount of STI in the AtomSpace, sum of
+     * Get the total amount of STI in the AttentionBank, sum of
      * STI across all atoms.
      *
-     * @return total STI in AtomSpace
+     * @return total STI in the AttentionBank
      */
     long getTotalSTI() const {
         return startingFundsSTI - fundsSTI;
     }
 
     /**
-     * Get the total amount of LTI in the AtomSpace, sum of
+     * Get the total amount of LTI in the AttentionBank, sum of
      * all LTI across atoms.
      *
-     * @return total LTI in AtomSpace
+     * @return total LTI in the AttentionBank
      */
     long getTotalLTI() const {
         return startingFundsLTI - fundsLTI;
     }
 
     /**
-     * Get the STI funds available in the AtomSpace pool.
+     * Get the STI funds available in the AttentionBank pool.
      *
      * @return STI funds available
      */
     long getSTIFunds() const { return fundsSTI; }
 
     /**
-     * Get the LTI funds available in the AtomSpace pool.
+     * Get the LTI funds available in the AttentionBank pool.
      *
      * @return LTI funds available
      */
@@ -220,7 +208,7 @@ public:
     }
 
     /**
-     * Get the maximum STI observed in the AtomSpace.
+     * Get the maximum STI observed in the AttentionBank.
      *
      * @param average If true, return an exponentially decaying
      *        average of maximum STI, otherwise return the actual
@@ -230,7 +218,7 @@ public:
     AttentionValue::sti_t getMaxSTI(bool average=true) const;
 
     /**
-     * Get the minimum STI observed in the AtomSpace.
+     * Get the minimum STI observed in the AttentionBank.
      *
      * @param average If true, return an exponentially decaying
      *        average of minimum STI, otherwise return the actual
@@ -244,7 +232,7 @@ public:
     AttentionValue::sti_t calculateLTIWage(void);
 
     /**
-     * Update the minimum STI observed in the connected AtomSpace.
+     * Update the minimum STI observed in the AttentionBank.
      * Min/max are not updated on setSTI because average is calculate
      * by lobe cycle, although this could potentially also be handled
      * by the cogServer.
@@ -255,7 +243,7 @@ public:
     void updateMinSTI(AttentionValue::sti_t m);
 
     /**
-     * Update the maximum STI observed in the connected AtomSpace.
+     * Update the maximum STI observed in the AttentionBank.
      * Min/max are not updated on setSTI because average is calculate
      * by lobe cycle, although this could potentially also be handled
      * by the cogServer.
