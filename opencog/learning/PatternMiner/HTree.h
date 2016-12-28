@@ -27,6 +27,7 @@
 #include <map>
 #include <vector>
 
+#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Pattern.h"
