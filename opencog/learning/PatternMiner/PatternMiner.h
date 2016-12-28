@@ -32,7 +32,6 @@
 #include <cpprest/http_client.h>
 #include <cpprest/http_listener.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Pattern.h"
