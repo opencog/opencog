@@ -22,9 +22,9 @@
 ;
 
 (define (strtonum input)
-  (if (not (eqv? #f (string->number input))) ; if string is in number form. i,e "1234" 
-      (string->number input)
-      (string->number-words input)))
+  (if (eqv? #f (string->number input)) ; if string is not in number form. i,e "123" 
+      (string->number-words input)
+      (string->number input)))
 
 (define continueLoop #t)
 
