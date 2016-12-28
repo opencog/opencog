@@ -20,7 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <assert.h>
 #include <thread>
 #include <unistd.h>
 
@@ -39,7 +38,7 @@ void gargleblast(int tid, int reps)
 		if (rc != 0)
 			printf("Error: Create rep %d of %d in thread %d failed\n",
 				i, reps, tid);
-		assert(rc==0);
+		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
 		if (20 <= i)
@@ -49,7 +48,7 @@ void gargleblast(int tid, int reps)
 			if (rc != 0)
 				printf("Error: Delete rep %d of %d in thread %d failed\n",
 					i, reps, tid);
-			assert(rc==0);
+			TS_ASSERT_EQUALS(rc, 0);
 		}
 		usleep(50000);
 	}
