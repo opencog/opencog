@@ -11,15 +11,17 @@
 (define (process_word_item word)
 	(define word_item (string-trim-right (string-trim-right (cog-name word) (lambda (x) (not (eqv? #\@ x)))) #\@))
 		(validate word_item)
+		;(display word_item)
+		;(newline)
 		(if (eqv? #t isValidInput)
 	     	(begin
-	     		(vector-set! prep-list count word_item)
+	     		(vector-set! prep-list len word_item)
 	     		(set! len (+ 1 len))
 	     		(set! createReference #t))
 	     	(begin
 	     		(if createReference 
 	     			(begin 
-	     				(mReferenceLink)
+	     				(display (mReferenceLink))
 	     				(set! len 0)))))
 		(set! count (+ count 1))
 		)
@@ -27,21 +29,23 @@
 (define (mReferenceLink)
 	(define i 0)
 	(define mListLink (make-vector len))
-	(define number (strtonum input))
+	(define number 0)
 	(set! createReference #f)
-
 	(if (> len 0)
 		(begin
 			(set! input (string-append input " " (vector-ref prep-list i)))
-			(vector-set! mListLink i (list-ref word_lists (- (+ count 1) len)))
+			(vector-set! mListLink i (list-ref word_lists (- count len)))
 			(set! i (+ 1 i))
 			(set! len (- 1 len))
 		))
 
+	(set! number (strtonum input)) ; Converts input to NumberNode and create ReferenceLink
+
 	(ReferenceLink
-		(NumberNode number) ; Converts input to NumberNode and create ReferenceLink
+		(NumberNode number) 
 		(ListLink
 			(array->list mListLink))))
+
 (walk-list word_lists process_word_item))
 
 ; Extracts the word from the word instance
