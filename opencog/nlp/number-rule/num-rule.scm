@@ -30,22 +30,26 @@
 	(define i 0)
 	(define mListLink (make-vector len))
 	(define number 0)
-	(set! createReference #f)
+	
+
+	(define (create-input)
 	(if (> len 0)
 		(begin
 			(set! input (string-append input " " (vector-ref prep-list i)))
 			(vector-set! mListLink i (list-ref word_lists (- count len)))
 			(set! i (+ 1 i))
-			(set! len (- 1 len))
-		))
+			(set! len (- len 1))
+			(create-input))))
+	(create-input)
+
+	(set! createReference #f)
 
 	(set! number (strtonum input)) ; Converts input to NumberNode and create ReferenceLink
-
+	
 	(ReferenceLink
 		(NumberNode number) 
 		(ListLink
 			(array->list mListLink))))
-
 (walk-list word_lists process_word_item))
 
 ; Extracts the word from the word instance
