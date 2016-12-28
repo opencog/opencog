@@ -55,7 +55,8 @@ class GenericEval;
 class GenericShell
 {
 	private:
-		std::string pending_output;
+		std::mutex _pending_mtx;
+		std::string _pending_output;
 
 		ConsoleSocket* socket;
 		std::thread* evalthr;
@@ -88,6 +89,7 @@ class GenericShell
 
 		// Output handling.
 		virtual void put_output(const std::string&);
+		virtual std::string get_output();
 		virtual std::string poll_output();
 
 	public:

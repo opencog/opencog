@@ -312,9 +312,13 @@ void GenericShell::line_discipline(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
+				_eval_done = true;
+// xxx should call eval_finished()?
+				// Must write the abort prompt, first, because telnet will
+				// silently ignore any bytes that come before it.
+				put_output(abort_prompt);
 				_evaluator->interrupt();
 				_evaluator->clear_pending();
-				put_output(abort_prompt);
 				return;
 			}
 
@@ -334,8 +338,10 @@ void GenericShell::line_discipline(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
+		_eval_done = true;
 		_evaluator->interrupt();
 		_evaluator->clear_pending();
+
 		put_output("\n");
 		put_output(normal_prompt);
 		return;
@@ -350,7 +356,6 @@ void GenericShell::line_discipline(const std::string &expr)
 	{
 		self_destruct = true;
 		evalque.cancel();
-		put_output("");
 		if (show_prompt)
 			put_output("Exiting the shell\n");
 		return;
@@ -375,14 +380,14 @@ void GenericShell::line_discipline(const std::string &expr)
 
 void GenericShell::start_eval()
 {
-	OC_ASSERT(_eval_done, "Bad evaluator flag state!");
+	// OC_ASSERT(_eval_done, "Bad evaluator flag state!");
 	std::unique_lock<std::mutex> lck(_mtx);
 	_eval_done = false;
 }
 
 void GenericShell::finish_eval()
 {
-	OC_ASSERT(not _eval_done, "Bad evaluator flag state!");
+	// OC_ASSERT(not _eval_done, "Bad evaluator flag state!");
 	std::unique_lock<std::mutex> lck(_mtx);
 	_eval_done = true;
 	_cv.notify_all();
@@ -442,7 +447,7 @@ void GenericShell::poll_loop(void)
 	// Poll for output from the evaluator, and send back results.
 	while (not self_destruct)
 	{
-		std::string retstr = poll_output();
+		std::string retstr(poll_output());
 		if (0 < retstr.size())
 			socket->Send(retstr);
 usleep(10000);
@@ -458,25 +463,30 @@ void GenericShell::thread_init(void)
 
 void GenericShell::put_output(const std::string& s)
 {
-	pending_output += s;	
+	std::lock_guard<std::mutex> lock(_pending_mtx);
+	_pending_output += s;
+}
+
+std::string GenericShell::get_output()
+{
+	std::lock_guard<std::mutex> lock(_pending_mtx);
+	std::string result = _pending_output;
+	_pending_output.clear();
+	return result;
 }
 
 std::string GenericShell::poll_output()
 {
 	// If there's pending output, return that.
-	if (0 < pending_output.size())
-	{
-		std::string result = pending_output;
-		pending_output.clear();
-		return result;
-	}
+	std::string pend(get_output());
+	if (0 < pend.size()) return pend;
 
 	// If we are here, there's no pending output. Does the evaluator
 	// have anything for us?  Note that the ->poll_result() method
 	// will block, if the evaluator is not done.
-	std::string result = _evaluator->poll_result();
+	std::string result(_evaluator->poll_result());
 	if (0 < result.size())
-		return result;
+		return get_output() + result;
 
 	// If we are here, the evaluator is done. Return shell prompts.
 	if (_eval_done) return "";
