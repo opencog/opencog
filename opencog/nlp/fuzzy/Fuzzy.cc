@@ -1,5 +1,5 @@
 /*
- * Fuzzy.cc
+ * nlp/fuzzy/Fuzzy.cc
  *
  * Copyright (C) 2015, 2016 OpenCog Foundation
  * All Rights Reserved
@@ -26,6 +26,7 @@
 #include <opencog/atomutils/AtomUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Neighbors.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/nlp/types/atom_types.h>
 
 #include "Fuzzy.h"
@@ -313,7 +314,7 @@ bool Fuzzy::accept_starter(const Handle& hp)
  */
 bool Fuzzy::try_match(const Handle& soln)
 {
-    if (_af_only and soln->getSTI() < as->get_attentional_focus_boundary())
+    if (_af_only and soln->getSTI() < attentionbank(as).getAttentionalFocusBoundary())
         return false;
 
     if (target == soln)
