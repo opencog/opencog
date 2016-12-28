@@ -307,7 +307,7 @@ public:
                       AttentionValue::sti_t lowerBound,
                       AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
-        UnorderedHandleSet hs = _bank.getHandlesByAV(lowerBound, upperBound);
+        UnorderedHandleSet hs = getHandlesByAV(lowerBound, upperBound);
         return std::copy(hs.begin(), hs.end(), result);
     }
 
@@ -320,7 +320,7 @@ public:
     template <typename OutputIterator> OutputIterator
     get_handle_set_in_attentional_focus(OutputIterator result) const
     {
-        return get_handles_by_AV(result, get_attentional_focus_boundary(),
+        return get_handles_by_AV(result, getAttentionalFocusBoundary(),
                                  AttentionValue::AttentionValue::MAXSTI);
     }
 

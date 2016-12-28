@@ -31,7 +31,7 @@
 
 using namespace opencog;
 
-AttentionBank::AttentionBank(void)
+AttentionBank::AttentionBank(void) :
     _index_insert_queue(this, &AttentionBank::put_atom_into_index, 4),
     _index_remove_queue(this, &AttentionBank::remove_atom_from_index, 4)
 {
