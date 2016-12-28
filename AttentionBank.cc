@@ -253,7 +253,8 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
 // One of the issues is that access via this function can be CPU-wasteful.
 AttentionBank& opencog::attentionbank(AtomSpace* asp)
 {
-    static AttentionBank* instance = nullptr;
+    static AttentionBank* _instance = nullptr;
+    static AtomSpace* _as = nullptr;
 
     // Protect setting and getting against thread races.
     // This is probably not needed.
@@ -261,7 +262,14 @@ AttentionBank& opencog::attentionbank(AtomSpace* asp)
     static std::mutex art;
     std::unique_lock<std::mutex> graffiti(art);
 
-    if (asp and nullptr == instance) instance = new AttentionBank(asp);
-    if (nullptr == asp and instance) { delete instance; instance = nullptr; }
-    return *instance;
+    if (_as != asp and _instance) {
+        delete _instance;
+        _instance = nullptr;
+        _as = nullptr;
+    }
+    if (asp and nullptr == _instance) {
+        _instance = new AttentionBank(asp);
+        _as = asp;
+    }
+    return *_instance;
 }
