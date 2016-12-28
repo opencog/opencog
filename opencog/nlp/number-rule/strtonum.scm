@@ -114,21 +114,6 @@
 ;Needed for checking validation
 (define isValidInput #t)
 
-; check if input is in allowedStrings list
-(define (validate-string input)
-
-  (define allowedStrings (list "zero" "one" "two" "three" "four" "five" "six" "seven" "eight" 
-                             "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
-                             "sixteen" "seventeen" "eighteen" "nineteen" "twenty" "thirty" 
-                             "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
-                             "thousand" "million" "billion" "trillion" "and"))
-
-  
-  (if (and (eqv? #f (member input allowedStrings)) (eqv? #f (string-> number input)))
-      (begin (set! isValidInput #f) 
-             (set! continueLoop #f))
-        (set! isValidInput #t)))
-
 ; replace every instance of a character with another
 (define (string-replace-char input findChar replaceWith)
   (define index #f)
@@ -140,12 +125,27 @@
         (else input)))
 
 (define (validate input)
-   (set! input (string-downcase input))             ; convert to lower case
-                            (set! input (string-replace-char input #\- #\ )) ; replace '-' with space ' '
-                            (set! input (string-trim-both input))            ; omit leading and trailing whitespace
-                            (set! input (string-tokenize input))             ; create a list tokenized by white space
-                            (set! input (delete "and" input))                ; delete the "and" string from input list
-                            (set! x (string-replace-char x #\] #\ )) ; replace ']' with space ' '
-                            (set! x (string-replace-char x #\[ #\ )) ; replace '[' with space ' '    
-                            (walk-list input validate-string))                ; validate input
+    (set! input (string-downcase input))             ; convert to lower case
+    (set! input (string-replace-char input #\- #\ )) ; replace '-' with space ' '
+    (set! input (string-trim-both input))            ; omit leading and trailing whitespace
+    (set! input (string-replace-char input #\] #\ )) ; replace ']' with space ' '
+    (set! input (string-replace-char input #\[ #\ )) ; replace '[' with space ' '
+    (set! input (string-tokenize input))             ; create a list tokenized by white space
+    (set! input (delete "and" input))                ; delete the "and" string from input list
+
+    (walk-list input validate-string))                ; validate input
+
+; check if input is in allowedStrings list
+(define (validate-string input)
+
+  (define allowedStrings (list "zero" "one" "two" "three" "four" "five" "six" "seven" "eight" 
+                             "nine" "ten" "eleven" "twelve" "thirteen" "fourteen" "fifteen"
+                             "sixteen" "seventeen" "eighteen" "nineteen" "twenty" "thirty" 
+                             "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
+                             "thousand" "million" "billion" "trillion" "and"))
+
+  (if (and (eqv? #f (member input allowedStrings)) (eqv? #f (string->number input)))
+      (begin (set! isValidInput #f) 
+             (set! continueLoop #f))
+        (set! isValidInput #t)))
 
