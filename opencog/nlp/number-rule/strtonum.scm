@@ -106,7 +106,7 @@
 (define (walk-list lst fun)
    (if (not (list? lst))
       (fun lst)
-      (cond ((and continueLoop (not (null? lst)))
+      (cond ((not (null? lst))
          (begin
             (walk-list (car lst) fun)
             (walk-list (cdr lst) fun))))))
@@ -144,6 +144,7 @@
                              "forty" "fifty" "sixty" "seventy" "eighty" "ninety"  "hundred" 
                              "thousand" "million" "billion" "trillion" "and"))
 
+  
   (if (and (eqv? #f (member input allowedStrings)) (eqv? #f (string->number input)))
       (begin (set! isValidInput #f) 
              (set! continueLoop #f))
