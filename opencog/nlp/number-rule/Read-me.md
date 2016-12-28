@@ -56,7 +56,7 @@ Example:
 
 The `ReferenceLink` will just link the word instances to the NumberNode.
 
-Example Sentences:
+More Example Sentences:
 	
 	guile > (define sent (nlp-parse "I have 210 Pandas."))
 	guile > (num-rule sent)
@@ -84,10 +84,24 @@ Example Sentences:
    		)
 	)
 	
+	guile > (define sent (nlp-parse "I have two hundred and ten Pandas."))
+	guile > (num-rule sent)
+	Result: 
+	(ReferenceLink
+   	(NumberNode "210.000000")
+   		(ListLink
+      			(WordInstanceNode "two@6f4bd0b6-b3d6-49b1-ad9d-84c4f265a8e4")
+      			(WordInstanceNode "hundred@411431d2-9d5e-4164-9a99-5f6c30ce28a6")
+      			(WordInstanceNode "and@2698aa4a-1e10-4d07-937f-ef45103a0fe1")
+      			(WordInstanceNode "ten@40990568-bc84-4081-88f5-9c821b17d482")
+   		)
+	)
+
+	
 
 ###LIMITATIONS
 
-Currently it can only be used to convert one number in a sentence. It can identify the numbers but gives wrong answer. We are working on it.
+Currently it can only be used to convert only one appearance of a number in a sentence. It can identify multiple numbers but it gives a wrong answer. (Working on it)
 
 guile> (define sent2 (nlp-parse "Two fridges should cost no more than fifteen thousand dollars"))
 
