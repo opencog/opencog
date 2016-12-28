@@ -54,6 +54,7 @@ typedef boost::signals2::signal<void (const Handle&,
                                       const AttentionValuePtr&,
                                       const AttentionValuePtr&)> AFCHSigl;
 
+class AtomSpace;
 class AttentionBank
 {
     friend class ecan::StochasticDiffusionAmountCalculator; //need to access _importanceIndex
@@ -118,7 +119,7 @@ class AttentionBank
 
     void shutdown(void);
 public:
-    AttentionBank(void);
+    AttentionBank(AtomSpace*);
     ~AttentionBank();
 
     /**
@@ -359,7 +360,7 @@ public:
 };
 
 /* Singleton instance (for now) */
-AttentionBank& attentionbank();
+AttentionBank& attentionbank(AtomSpace*);
 
 /** @}*/
 } //namespace opencog

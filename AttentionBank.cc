@@ -31,7 +31,7 @@
 
 using namespace opencog;
 
-AttentionBank::AttentionBank(void) :
+AttentionBank::AttentionBank(AtomSpace* asp) :
     _index_insert_queue(this, &AttentionBank::put_atom_into_index, 4),
     _index_remove_queue(this, &AttentionBank::remove_atom_from_index, 4)
 {
@@ -44,8 +44,6 @@ AttentionBank::AttentionBank(void) :
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
 
-    bool async = config().get_bool("ATTENTION_BANK_ASYNC",false);
-
     _attentionalFocusBoundary = 1;
 
     // Subscribe to my own changes. This is insane and hacky; must move
@@ -54,20 +52,21 @@ AttentionBank::AttentionBank(void) :
         _AVChangedSignal.connect(
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
 
+    bool async = config().get_bool("ATTENTION_BANK_ASYNC", false);
     if (async) {
      _addAtomConnection =
-        addAtomSignal(
+        asp->addAtomSignal(
             boost::bind(&AttentionBank::add_atom_to_indexInsertQueue, this, _1));
     _removeAtomConnection =
-        removeAtomSignal(
+        asp->removeAtomSignal(
             boost::bind(&AttentionBank::add_atom_to_indexRemoveQueue, this, _1));
     }
     else {
      _addAtomConnection =
-        addAtomSignal(
+        asp->addAtomSignal(
             boost::bind(&AttentionBank::put_atom_into_index, this, _1));
     _removeAtomConnection =
-        removeAtomSignal(
+        asp->removeAtomSignal(
             boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
 
     }
@@ -249,8 +248,14 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
 }
 
 /** Unique singleton instance (for now) */
-AttentionBank& attentionbank()
+AttentionBank& attentionbank(AtomSpace* asp)
 {
-    static std::unique_ptr<AttentionBank> instance(new AttentionBank());
-    return *instance;
+    static std::map<AtomSpace*, AttentionBank*> banksy;
+
+    auto pr = banksy.find(asp);
+    if (pr != banksy.end()) return *(pr->second);
+
+    AttentionBank* ab = new AttentionBank(asp);
+    banksy[asp] = ab;
+    return *ab;
 }

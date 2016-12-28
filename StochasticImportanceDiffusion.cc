@@ -34,13 +34,13 @@ using namespace opencog::ecan;
 
 unsigned int StochasticDiffusionAmountCalculator::bin_index(const Handle& h)
 {
-    return attentionbank()._importanceIndex.
+    return attentionbank(_as)._importanceIndex.
                      importanceBin(h->getAttentionValue()->getSTI());
 }
 
 size_t StochasticDiffusionAmountCalculator::bin_size(unsigned int index)
 {
-   return attentionbank()._importanceIndex.size(index);
+   return attentionbank(_as)._importanceIndex.size(index);
 }
 
 void StochasticDiffusionAmountCalculator::update_bin(const Handle& h)
@@ -65,7 +65,8 @@ void StochasticDiffusionAmountCalculator::update_bin(const Handle& h)
     bin.size = bin_size(index);
 }
 
-StochasticDiffusionAmountCalculator::StochasticDiffusionAmountCalculator(void)
+StochasticDiffusionAmountCalculator::StochasticDiffusionAmountCalculator
+                                     (AtomSpace * as) : _as(as)
 {
 }
 

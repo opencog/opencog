@@ -33,6 +33,7 @@ using namespace std::chrono;
 namespace opencog
 {
     class Handle;
+    class AtomSpace;
     namespace ecan
     {
         struct DiffusionRecordBin {
@@ -60,6 +61,7 @@ namespace opencog
          */
         class StochasticDiffusionAmountCalculator
         {
+            AtomSpace * _as;
             std::vector<DiffusionRecordBin> _bins; 
 
             unsigned int bin_index(const Handle& h);
@@ -67,7 +69,7 @@ namespace opencog
             void update_bin(const Handle& h);
 
             public:
-            StochasticDiffusionAmountCalculator(void);
+            StochasticDiffusionAmountCalculator(AtomSpace * as);
             ~StochasticDiffusionAmountCalculator();
 
             std::vector<DiffusionRecordBin> merge_bins(const std::vector<DiffusionRecordBin>& past,
