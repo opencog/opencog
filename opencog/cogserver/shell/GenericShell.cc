@@ -465,7 +465,14 @@ void GenericShell::poll_loop(void)
 		std::string retstr(poll_output());
 		if (0 < retstr.size())
 			socket->Send(retstr);
-usleep(10000);
+
+		// Continue polling, about 100 times per second, even if
+		// evaluation of the the previous expr is completed. It
+		// might have started some long-running thread/agent that
+		// is continuing to print, and we want to forward those
+		// prints to the user. (Its pointless to poll faster or
+		// slower than this...)
+		if (_eval_done) usleep(10000);
 	}
 }
 
@@ -498,7 +505,9 @@ std::string GenericShell::poll_output()
 
 	// If we are here, there's no pending output. Does the evaluator
 	// have anything for us?  Note that the ->poll_result() method
-	// will block, if the evaluator is not done.
+	// will block, if the evaluator is not done. Note that we must
+	// do the get_output() again, else ctrl-C's will not be returned
+	// in proper order to a telnet connection.
 	std::string result(_evaluator->poll_result());
 	if (0 < result.size())
 		return get_output() + result;
