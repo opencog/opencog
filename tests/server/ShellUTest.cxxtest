@@ -20,11 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <assert.h>
 #include <thread>
 #include <unistd.h>
 
 #include <opencog/util/Config.h>
-#include <opencog/util/oc_assert.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
@@ -36,15 +36,20 @@ void gargleblast(int tid, int reps)
 		char buf[1000];
 		sprintf(buf, "echo '(Evaluation (Predicate \"visible face\") (List (Number %d)))\n' | nc -q 1 localhost 17333", i);
 		int rc = system(buf);
-		OC_ASSERT(rc==0, "system call failure");
+		if (rc != 0)
+			printf("Error: Create rep %d of %d in thread %d failed\n",
+				i, reps, tid);
+		assert(rc==0);
 		usleep(50000);
 
 		if (20 <= i)
 		{
 			sprintf(buf, "echo '(cog-delete (Evaluation (Predicate \"visible face\") (List (Number %d))))\n' | nc -q 1 localhost 17333", i-20);
 			rc = system(buf);
-			OC_ASSERT(rc==0, "system call failure");
-
+			if (rc != 0)
+				printf("Error: Delete rep %d of %d in thread %d failed\n",
+					i, reps, tid);
+			assert(rc==0);
 		}
 		usleep(50000);
 	}
