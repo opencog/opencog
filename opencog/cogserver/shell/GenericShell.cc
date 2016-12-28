@@ -69,6 +69,9 @@ GenericShell::GenericShell(void)
 
 GenericShell::~GenericShell()
 {
+	self_destruct = true;
+	evalque.cancel();
+
 	if (evalthr)
 	{
 		logger().debug("[GenericShell] dtor, wait for eval thread 0x%x.",
@@ -166,22 +169,17 @@ static GenericShell* _redirector = nullptr;
 //
 void GenericShell::eval(const std::string &expr)
 {
-	// The first time through, there might not be an evaluator yet.
-	// Create one now. We cannot do this in the constructor, for a
-	// rather subtle reason: multiple calls to the constructor may
-	// run in the same thread, resulting in multiple shells sharing
-	// the same evaluator, which leads to a badness. We really want
-	// each unique instance of the shell to have it's own evaluator,
-	// and so we defer allocation until this point.
-	//
-	// The ctor runs in the main cogserver request-processor thread.
-	// Calling get_evaluator() there would always return the same
-	// single instance of the evaluator (because there can be at most
-	// just one evaluator per thread).
+	// First time through, initialize the evaluator.  We can't do this
+	// in the ctor, since we can't get the evaluator until after the
+	// derived-class ctor has run, and thus informed us as to whether
+	// the evaluator will be guile (scheme) or python.
 	if (nullptr == _evaluator)
 	{
-		_evaluator = get_evaluator();
-		_evaluator->clear_pending();
+		_init_done = false;
+		// Run the evaluation loop in a distinct thread.
+		auto eval_wrapper = [&](void) { eval_loop(); };
+		evalthr = new std::thread(eval_wrapper);
+		while (not _init_done) { sched_yield(); }
 	}
 
 	// Work-around some printing madness. See issue
@@ -222,43 +220,8 @@ void GenericShell::eval(const std::string &expr)
 	}
 #endif // PERFORM_STDOUT_DUPLICATION
 
-	// Run the evaluator (in a different thread)
-	poll_needed = false;
+	// Queue up the expr, where it will be evaluated in another thread.
 	line_discipline(expr);
-
-	// Avoid polling, if an evaluation thread was not created. This is
-	// used to handle interrupts (control-c's).
-	if (not poll_needed)
-	{
-		std::string retstr = poll_output();
-		socket->Send(retstr);
-	}
-	else
-	{
-		// Poll for output from the evaluator, and send back results.
-		auto poll_wrapper = [&](void)
-		{
-			std::string retstr = poll_output();
-			while (0 < retstr.size())
-			{
-				socket->Send(retstr);
-				retstr = poll_output();
-			}
-		};
-
-		// Always wait for the previous poll of results to complete, before
-		// starting the next one.  The goal here is to keep results
-		// serialized on the socket, so that chronologically-earlier
-		// results are written to the socket in order, before the newer
-		// results.
-		if (pollthr)
-		{
-			pollthr->join();
-			delete pollthr;
-		}
-		sched_yield();
-		pollthr = new std::thread(poll_wrapper);
-	}
 
 #ifdef PERFORM_STDOUT_DUPLICATION
 	if (show_output and show_prompt)
@@ -329,7 +292,7 @@ void GenericShell::line_discipline(const std::string &expr)
 
 	if (0 == len)
 	{
-		do_eval("\n");
+		evalque.push("\n");
 		return;
 	}
 
@@ -352,9 +315,18 @@ void GenericShell::line_discipline(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
+				// Discard all pending, unevaluated junk in the queue.
+				// Failure to do so will typically result in confusing
+				// the shell user.
+				while (not evalque.is_empty()) evalque.pop();
+
+				// Must write the abort prompt, first, because
+				// telnet will silently ignore any bytes that
+				// come before it.
+				put_output(abort_prompt);
 				_evaluator->interrupt();
 				_evaluator->clear_pending();
-				put_output(abort_prompt);
+				finish_eval();
 				return;
 			}
 
@@ -374,9 +346,14 @@ void GenericShell::line_discipline(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
+		// Discard all pending, unevaluated junk in the queue.
+		while (not evalque.is_empty()) evalque.pop();
+
 		_evaluator->interrupt();
 		_evaluator->clear_pending();
+
 		put_output("\n");
+		finish_eval();
 		put_output(normal_prompt);
 		return;
 	}
@@ -389,7 +366,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	    ((EOT == expr[len-1]) or ((1 == len) and ('.' == expr[0]))))
 	{
 		self_destruct = true;
-		put_output("");
+		evalque.cancel();
 		if (show_prompt)
 			put_output("Exiting the shell\n");
 		return;
@@ -399,10 +376,8 @@ void GenericShell::line_discipline(const std::string &expr)
 	 * The newline is always cut. Re-insert it; otherwise, comments
 	 * within procedures will have the effect of commenting out the
 	 * rest of the procedure, leading to garbage.
-	 * (This is a pointless string copy, it should be eliminated.)
 	 */
-	std::string input = expr + "\n";
-	do_eval(input);
+	evalque.push(expr + "\n");
 }
 
 /* ============================================================== */
@@ -436,47 +411,72 @@ void GenericShell::while_not_done()
 }
 
 /* ============================================================== */
-/**
- * Evaluate the expression. Assumes line discipline was already done.
- */
-void GenericShell::do_eval(const std::string &input)
+
+/// eval_loop. Dequeue and run each queued evaluation request.
+/// Assumes line discipline has already been done (as it must be:
+/// it is impossible to queue OOB interrupts.)
+void GenericShell::eval_loop(void)
 {
-	// Always wait for the previous evaluation to complete, before
-	// starting the next one.  That is, evaluations are always
-	// explicitly serialized.
-	//
-	// ... and even if they were not, we cannot use the same evaluator
-	// in two different threads at the same time; a single evaluator is
-	// not thread-safe against itself. So always wait for the previous
-	// evaluation thread to finish, before we go at it again.
-	if (evalthr)
+	OC_ASSERT(nullptr == _evaluator, "Bad evaluator state!");
+
+	// Per-shell evaluator.  We do this here, not in the ctor, because
+	// we want a unique, private evaluator for this thread. By contrast,
+	// the ctor might be called many times within one thread, and thus,
+	// each invocation would end up with the same evaluator.
+	_evaluator = get_evaluator();
+	_evaluator->clear_pending();
+
+	// Poll for output from the evaluator, and send back results.
+	auto poll_wrapper = [&](void) { poll_loop(); };
+	pollthr = new std::thread(poll_wrapper);
+
+	// Derived-class initializer. (The scheme shell uses this to set the
+	// atomspace).
+	thread_init();
+
+	std::string in;
+	while (not self_destruct)
 	{
-		evalthr->join();
-		delete evalthr;
-		evalthr = nullptr;
+		try
+		{
+			// Do not begin the next queued expr until the last
+			// has finished. Failure to do this can result in
+			// weird crashes in the SchemeEval class.
+			while_not_done();
+
+			// Note that this pop will wait until the queue
+			// becomes non-empty.
+			evalque.pop(in);
+			start_eval();
+			_evaluator->begin_eval();
+			_evaluator->eval_expr(in);
+		}
+		catch (const concurrent_queue<std::string>::Canceled& ex)
+		{
+			break;
+		}
 	}
+}
 
-	// Wait for the polling thread to finish also, as otherwise a new
-	// evaluation might be started before polling for the last one has
-	// finished.  The new evaluation might clobber previous results.
-	if (pollthr)
+void GenericShell::poll_loop(void)
+{
+	_init_done = true;
+
+	// Poll for output from the evaluator, and send back results.
+	while (not self_destruct)
 	{
-		pollthr->join();
-		delete pollthr;
-		pollthr = nullptr;
+		std::string retstr(poll_output());
+		if (0 < retstr.size())
+			socket->Send(retstr);
+
+		// Continue polling, about 100 times per second, even if
+		// evaluation of the the previous expr is completed. It
+		// might have started some long-running thread/agent that
+		// is continuing to print, and we want to forward those
+		// prints to the user. (Its pointless to poll faster or
+		// slower than this...)
+		if (_eval_done) usleep(10000);
 	}
-
-	start_eval();
-	poll_needed = true;
-
-	auto eval_wrapper = [&](const std::string& in)
-	{
-		thread_init();
-		_evaluator->begin_eval();
-		_evaluator->eval_expr(in);
-	};
-
-	evalthr = new std::thread(eval_wrapper, input);
 }
 
 void GenericShell::thread_init(void)
@@ -488,24 +488,32 @@ void GenericShell::thread_init(void)
 
 void GenericShell::put_output(const std::string& s)
 {
-	pending_output += s;	
+	std::lock_guard<std::mutex> lock(_pending_mtx);
+	_pending_output += s;
+}
+
+std::string GenericShell::get_output()
+{
+	std::lock_guard<std::mutex> lock(_pending_mtx);
+	std::string result = _pending_output;
+	_pending_output.clear();
+	return result;
 }
 
 std::string GenericShell::poll_output()
 {
 	// If there's pending output, return that.
-	if (0 < pending_output.size())
-	{
-		std::string result = pending_output;
-		pending_output.clear();
-		return result;
-	}
+	std::string pend(get_output());
+	if (0 < pend.size()) return pend;
 
-	// If we are here, there's no pending output. Does the
-	// evaluator have anything for us?
-	std::string result = _evaluator->poll_result();
+	// If we are here, there's no pending output. Does the evaluator
+	// have anything for us?  Note that the ->poll_result() method
+	// will block, if the evaluator is not done. Note that we must
+	// do the get_output() again, else ctrl-C's will not be returned
+	// in proper order to a telnet connection.
+	std::string result(_evaluator->poll_result());
 	if (0 < result.size())
-		return result;
+		return get_output() + result;
 
 	// If we are here, the evaluator is done. Return shell prompts.
 	if (_eval_done) return "";
