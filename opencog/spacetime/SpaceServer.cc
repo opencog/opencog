@@ -43,7 +43,7 @@
 //#define DPRINTF printf
 #define DPRINTF(...)
 // To simplify debug log output
-#define ATOM_AS_STRING(h) (atomspace->atom_as_string(h).c_str())
+#define ATOM_AS_STRING(h) (h->toShortString().c_str())
 
 using namespace opencog;
 using namespace opencog::spatial;
@@ -291,7 +291,7 @@ void SpaceServer::removeSpaceInfo(Handle objectNode, Handle spaceMapHandle, octi
         entityRecorder.removeNoneBlockEntity(objectNode);
     }
 
-    logger().debug("%s(%s)\n", __FUNCTION__, atomspace->get_name(objectNode).c_str());
+    logger().debug("%s(%s)\n", __FUNCTION__, objectNode->getName().c_str());
 
 }
 
@@ -314,7 +314,7 @@ std::string SpaceServer::getMapIdString(Handle mapHandle) const
     // So, just get the name of the TimeNode as its string representation
     // return atomspace->get_name(mapHandle->getOutgoingSet()[0])->get_result();
 
-    return atomspace->get_name(mapHandle);
+    return mapHandle->getName();
 }
 
 // TODO
