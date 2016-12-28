@@ -24,7 +24,6 @@
 
 #include <opencog/atoms/base/Node.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/TimeServer.h>
 #include <opencog/spacetime/atom_types.h>
