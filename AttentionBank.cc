@@ -56,18 +56,18 @@ AttentionBank::AttentionBank(void) :
 
     if (async) {
      _addAtomConnection =
-        asp->addAtomSignal(
+        addAtomSignal(
             boost::bind(&AttentionBank::add_atom_to_indexInsertQueue, this, _1));
     _removeAtomConnection =
-        asp->removeAtomSignal(
+        removeAtomSignal(
             boost::bind(&AttentionBank::add_atom_to_indexRemoveQueue, this, _1));
     }
     else {
      _addAtomConnection =
-        asp->addAtomSignal(
+        addAtomSignal(
             boost::bind(&AttentionBank::put_atom_into_index, this, _1));
     _removeAtomConnection =
-        asp->removeAtomSignal(
+        removeAtomSignal(
             boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
 
     }
