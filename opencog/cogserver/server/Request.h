@@ -30,7 +30,6 @@
 #include <list>
 #include <string>
 
-#include <opencog/cogserver/server/ConsoleSocket.h>
 #include <opencog/cogserver/server/Factory.h>
 
 namespace opencog
@@ -40,6 +39,7 @@ namespace opencog
  */
 
 class CogServer;
+class ConsoleSocket;
 
 /**
  * The DECLARE_CMD_REQUEST macro provides a simple, easy-to-use interface

@@ -24,8 +24,9 @@
 
 #include <iomanip>
 
-#include <opencog/cogserver/server/CogServer.h>
 #include <opencog/util/ansi.h>
+#include <opencog/cogserver/server/CogServer.h>
+#include <opencog/cogserver/server/ConsoleSocket.h>
 
 #include "BuiltinRequestsModule.h"
 

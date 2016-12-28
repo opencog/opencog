@@ -8,7 +8,8 @@ ADD_SUBDIRECTORY (types)
 ADD_SUBDIRECTORY (wsd)
 
 IF (HAVE_STACK)
-	ADD_SUBDIRECTORY (lojban)
+	# Currently, lojban fails to build, so comment it out.
+	# ADD_SUBDIRECTORY (lojban)
 ENDIF (HAVE_STACK)
 
 IF (HAVE_NLP)
