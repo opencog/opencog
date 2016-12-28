@@ -312,13 +312,13 @@ void GenericShell::line_discipline(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
-				_eval_done = true;
-// xxx should call eval_finished()?
-				// Must write the abort prompt, first, because telnet will
-				// silently ignore any bytes that come before it.
+				// Must write the abort prompt, first, because
+				// telnet will silently ignore any bytes that
+				// come before it.
 				put_output(abort_prompt);
 				_evaluator->interrupt();
 				_evaluator->clear_pending();
+				finish_eval();
 				return;
 			}
 
@@ -380,14 +380,14 @@ void GenericShell::line_discipline(const std::string &expr)
 
 void GenericShell::start_eval()
 {
-	// OC_ASSERT(_eval_done, "Bad evaluator flag state!");
+	OC_ASSERT(_eval_done, "Bad evaluator flag state!");
 	std::unique_lock<std::mutex> lck(_mtx);
 	_eval_done = false;
 }
 
 void GenericShell::finish_eval()
 {
-	// OC_ASSERT(not _eval_done, "Bad evaluator flag state!");
+	OC_ASSERT(not _eval_done, "Bad evaluator flag state!");
 	std::unique_lock<std::mutex> lck(_mtx);
 	_eval_done = true;
 	_cv.notify_all();
@@ -428,6 +428,7 @@ void GenericShell::eval_loop(void)
 	{
 		try
 		{
+			while_not_done();
 			evalque.pop(in);
 			start_eval();
 			_evaluator->begin_eval();
