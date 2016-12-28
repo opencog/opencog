@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/AttentionBank.h
+ * opencog/attentionbank/AttentionBank.h
  *
  * Copyright (C) 2011 OpenCog Foundation
  * Copyright (C) 2016 Linas Vepstas <linasvepstas@gmail.com>
@@ -35,9 +35,8 @@
 #include <opencog/util/recent_val.h>
 
 #include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/atomspace/ImportanceIndex.h>
-
-#include "StochasticImportanceDiffusion.h"
+#include <opencog/attentionbank/ImportanceIndex.h>
+#include <opencog/attentionbank/StochasticImportanceDiffusion.h>
 
 namespace opencog
 {

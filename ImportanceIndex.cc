@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ImportanceIndex.cc
+ * opencog/attentionbank/ImportanceIndex.cc
  *
  * Copyright (C) 2008-2011 OpenCog Foundation
  * All Rights Reserved
@@ -21,14 +21,12 @@
  */
 
 #include <algorithm>
+#include <boost/range/adaptor/reversed.hpp>
 
 #include <opencog/util/functional.h>
 
-#include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atomspace/AtomTable.h>
-
-#include <boost/range/adaptor/reversed.hpp>
+#include <opencog/attentionbank/ImportanceIndex.h>
 
 using namespace opencog;
 

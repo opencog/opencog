@@ -1,5 +1,5 @@
 /*
- * StochasticImportanceDiffusion.h
+ * opencog/attentionbank/StochasticImportanceDiffusion.h
  *
  * Copyright (C) 2016 Opencog Foundation
  * 
@@ -30,10 +30,12 @@
 #include <vector>
 
 using namespace std::chrono;
-namespace opencog{
+namespace opencog
+{
     class Handle;
     class AtomSpace;
-    namespace ecan{
+    namespace ecan
+    {
         struct DiffusionRecordBin {
             unsigned int count = 0; // Number of atoms diffused.
             unsigned int index = 0; // The index of this Bin in ImportanceIndex vec.
@@ -57,7 +59,8 @@ namespace opencog{
          * for an atom will be claculated as total in the bin divided by update rate
          * ( count of diffused atoms divided by duration of time).
          */
-        class StochasticDiffusionAmountCalculator{
+        class StochasticDiffusionAmountCalculator
+        {
             const AtomSpace * _as;
             std::vector<DiffusionRecordBin> _bins; 
 
@@ -76,4 +79,4 @@ namespace opencog{
     }
 }
 
-#endif
+#endif // _OPENCOG_STOCHASTIC_DIFFUSION_H

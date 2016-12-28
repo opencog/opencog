@@ -1,5 +1,5 @@
 /*
- * StochasticImportanceDiffusion.h
+ * opencog/attentionbank/StochasticImportanceDiffusion.h
  *
  * Copyright (C) 2016 Opencog Foundation
  * 
@@ -25,7 +25,7 @@
 
 #include <algorithm>
 
-#include "AtomSpace.h"
+#include <opencog/atomspace/AtomSpace.h>
 #include "StochasticImportanceDiffusion.h"
 
 using namespace opencog;

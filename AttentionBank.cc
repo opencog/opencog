@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/AttentionBank.cc
+ * opencog/attentionbank/AttentionBank.cc
  *
  * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -26,8 +26,8 @@
 #include <opencog/util/Config.h>
 
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include "AttentionBank.h"
-#include "AtomSpace.h"
 
 using namespace opencog;
 

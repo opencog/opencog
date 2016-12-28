@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ImportanceIndex.h
+ * opencog/attentionbank/ImportanceIndex.h
  *
  * Copyright (C) 2008-2011 OpenCog Foundation
  * All Rights Reserved
