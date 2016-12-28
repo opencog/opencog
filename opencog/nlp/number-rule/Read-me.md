@@ -29,15 +29,16 @@ Example:
 	opencog> scm
 - Load nlp modules	
 	guile> (use-modules (opencog) (opencog nlp) (opencog nlp chatbot) (opencog nlp relex2logic))
-- Parse the following sentence
-
-  guile> (define sent (nlp-parse "The fridge should cost no more than fifteen thousand dollars"))
 - Load the number rule procedures, apply it to sent and see the result
 
 	guile> (load-scm-from-file "opencog-master/opencog/opencog/nlp/Number-rule/strtonum.scm")
   
 	guile> (load-scm-from-file "opencog-master/opencog/opencog/nlp/Number-rule/num-rule.scm")
   
+- Parse the following sentence and apply num-rule to it
+
+  	guile> (define sent (nlp-parse "The fridge should cost no more than fifteen thousand dollars"))
+	
 	guile> (num-rule sent)
 
 ###Result:
@@ -54,6 +55,35 @@ Example:
 )
 
 The `ReferenceLink` will just link the word instances to the NumberNode.
+
+Example Sentences:
+	
+	guile > (define sent (nlp-parse "I have 210 Pandas."))
+	guile > (num-rule sent)
+	Result: 
+	
+	guile > (define sent (nlp-parse "I have two hundred ten Pandas."))
+	guile > (num-rule sent)
+	Result: 
+	(ReferenceLink
+   		(NumberNode "210.000000")
+   		(ListLink
+      			(WordInstanceNode "two@b4431c38-1500-4020-9070-6a54cb001a72")
+      			(WordInstanceNode "hundred@853f72c2-e2ba-4476-96ae-da845ace82ef")
+      			(WordInstanceNode "ten@772cf570-6d8d-473f-a488-2ea0a71c32db")
+   		)
+	)
+
+	guile > (define sent (nlp-parse "I have two-hundred-ten Pandas."))
+	guile > (num-rule sent)
+	Result:
+	(ReferenceLink
+   		(NumberNode "210.000000")
+   		(ListLink
+		      	(WordInstanceNode "two-hundred-ten@67622c33-d36e-4332-86b8-b4065379bb49")
+   		)
+	)
+	
 
 ###LIMITATIONS
 
