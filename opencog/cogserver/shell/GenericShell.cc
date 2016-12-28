@@ -69,6 +69,9 @@ GenericShell::GenericShell(void)
 
 GenericShell::~GenericShell()
 {
+	self_destruct = true;
+	evalque.cancel();
+
 	if (evalthr)
 	{
 		logger().debug("[GenericShell] dtor, wait for eval thread 0x%x.",
