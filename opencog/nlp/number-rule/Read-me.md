@@ -75,6 +75,10 @@ guile> (num-rule sent2)
    )
 )
 
+###Next Steps
+Sentences containing compund words such as "four-by-two" "two-way" etc...
+should be handled differently
+
 
 
 
