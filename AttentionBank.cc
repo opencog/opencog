@@ -248,7 +248,7 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
 }
 
 /** Unique singleton instance (for now) */
-AttentionBank& attentionbank(AtomSpace* asp)
+AttentionBank& opencog::attentionbank(AtomSpace* asp)
 {
     static std::map<AtomSpace*, AttentionBank*> banksy;
 
