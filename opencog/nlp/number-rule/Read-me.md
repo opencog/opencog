@@ -1,6 +1,6 @@
 # Number rule for OpenCog nlp pipeline
 
-The need for this rule
+###The need for this rule
 - The relex and relex2logic result of sentences (with numeric values) parsed through OpenCog nlp pipeline is not recognizing a number as a NumberNode
 
 Given a SentenceNode sent, (num-rule sent) identifies any number (in string or numeric representation) 
@@ -41,7 +41,7 @@ Example:
 	
 	guile> (num-rule sent)
 
-###Result:
+####Result:
 (ReferenceLink
 
    (NumberNode "15000.000000")
@@ -56,11 +56,11 @@ Example:
 
 The `ReferenceLink` will just link the word instances to the NumberNode.
 
-More Example Sentences:
+###More Example Sentences:
 	
 	guile > (define sent (nlp-parse "I have 210 Pandas."))
 	guile > (num-rule sent)
-	Result: 
+	####Result: 
 	(ReferenceLink
    		(NumberNode "210.000000")
    		(ListLink
@@ -68,9 +68,9 @@ More Example Sentences:
    		)
 	)
 	
-	#guile > (define sent (nlp-parse "I have two hundred ten Pandas."))
+	guile > (define sent (nlp-parse "I have two hundred ten Pandas."))
 	guile > (num-rule sent)
-	Result: 
+	####Result: 
 	(ReferenceLink
    		(NumberNode "210.000000")
    		(ListLink
@@ -82,7 +82,7 @@ More Example Sentences:
 
 	guile > (define sent (nlp-parse "I have two-hundred-ten Pandas."))
 	guile > (num-rule sent)
-	Result:
+	####Result:
 	(ReferenceLink
    		(NumberNode "210.000000")
    		(ListLink
@@ -92,7 +92,7 @@ More Example Sentences:
 	
 	guile > (define sent (nlp-parse "I have two hundred and ten Pandas."))
 	guile > (num-rule sent)
-	Result: 
+	####Result: 
 	(ReferenceLink
    	(NumberNode "210.000000")
    		(ListLink
@@ -127,7 +127,8 @@ guile> (num-rule sent2)
 
 ###Next Steps
 Sentences containing compund words such as "four-by-two" "two-way" etc...
-should be handled differently
+should be handled differently.
+	For example, "four-by-two" may be represented as 8.0
 
 
 
