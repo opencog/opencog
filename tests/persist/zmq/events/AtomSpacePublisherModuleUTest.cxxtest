@@ -76,10 +76,6 @@ public:
         config().set("MODULES",
                      "opencog/cogserver/modules/events/libatomspacepublishermodule.so");
 
-        logger().set_filename(config()["LOG_FILE"]);
-        logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
-        logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
-
         cogserver().loadModules();
         this->as = &cogserver().getAtomSpace();
     }

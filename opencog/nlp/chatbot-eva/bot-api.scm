@@ -12,7 +12,7 @@
 (define (wh_query_process query)
 "
   Process wh-question in a cascade of attempts by different subsystems.
-  FIrst, try to see if its a self-awarenes question; if not, then use
+  First, try to see if its a self-awarenes question; if not, then use
   the fuzzy hypergraph Matcher.
 
   QUERY should be a SentenceNode.
@@ -20,7 +20,7 @@
 	; self-wh-query provided by self-model.scm
 	(define ans (self-wh-query query))
 	(cond
-		((not (equal? '() ans)) (string-join (car ans)))
+		((not (null? ans)) (string-join (car ans)))
 		(else
 			(display "Looking for a fuzzy answer.")
 			(let

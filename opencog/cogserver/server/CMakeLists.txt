@@ -114,19 +114,14 @@ INSTALL (FILES
 	CogServer.h
 	ConsoleSocket.h
 	Factory.h
-	IHasMimeType.h
-	IRequestComplete.h
 	ListRequest.h
 	LoadModuleRequest.h
 	Module.h
 	NetworkServer.h
-	SocketListener.h
-	SocketPort.h
 	SystemActivityTable.h
 	Registry.h
 	Request.h
 	RequestClassInfo.h
-	RequestResult.h
 	ShutdownRequest.h
 	UnloadModuleRequest.h
 	DESTINATION "include/${PROJECT_NAME}/cogserver/server"

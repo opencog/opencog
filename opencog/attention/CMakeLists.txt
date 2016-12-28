@@ -18,7 +18,6 @@ ADD_LIBRARY(attention-types SHARED
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(attention-types opencog_atom_types)
 ADD_DEPENDENCIES(attention-types attention_atom_types)
 
 TARGET_LINK_LIBRARIES(attention-types
@@ -27,45 +26,28 @@ TARGET_LINK_LIBRARIES(attention-types
 
 # --------------------------------------------------
 
-ADD_SUBDIRECTORY (scm)
-
 # AttentionModule
 ADD_LIBRARY(attention SHARED
 	AttentionModule
+	ImportanceDiffusionBase
+	AFImportanceDiffusionAgent
+	WAImportanceDiffusionAgent
+	RentCollectionBaseAgent
+	AFRentCollectionAgent
+	WARentCollectionAgent
+
 	ForgettingAgent
-        scm/StimulationAgent
+	MinMaxSTIUpdatingAgent
+	FocusBoundaryUpdatingAgent
+	HebbianCreationAgent
 	HebbianUpdatingAgent
-	SimpleHebbianUpdatingAgent
-	ImportanceSpreadingAgent
-	ImportanceDiffusionAgent
-	SimpleImportanceDiffusionAgent
-	ImportanceUpdatingAgent
+
+	#scm/StimulationAgent
 )
 
 ADD_DEPENDENCIES(attention attention-types)
 
 TARGET_LINK_LIBRARIES(attention server ${ATOMSPACE_LIBRARIES})
-
-# HebbianCreationModule
-IF (TBB_FOUND)
-	INCLUDE_DIRECTORIES (
-		${TBB_INCLUDE_DIR}
-	)
-
-	LINK_DIRECTORIES(
-		${TBB_INCLUDE_DIR}
-		${TBB_LIBRARY_DIRS}
-	)
-
-	ADD_LIBRARY(hebbiancreation SHARED
-		HebbianCreationModule
-	)
-
-	TARGET_LINK_LIBRARIES(hebbiancreation
-		server
-		tbb
-	)
-ENDIF (TBB_FOUND)
 
 INSTALL (TARGETS attention
 	LIBRARY DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
@@ -80,13 +62,7 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	AttentionModule.h
 	ForgettingAgent.h
-	HebbianCreationModule.h
 	HebbianUpdatingAgent.h
-	ImportanceSpreadingAgent.h
-	ImportanceDiffusionAgent.h
-	SpreadDecider.h
-	SimpleImportanceDiffusionAgent.h
-	ImportanceUpdatingAgent.h
 	DESTINATION "include/${PROJECT_NAME}/attention"
 )
 

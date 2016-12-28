@@ -20,8 +20,7 @@
     (cond
         ((equal? '() temp) "Sorry, I don't know the answer.")
         ; Return all of them, for now
-        (else (map string-join temp))
-        ; (else (string-join (car temp)))
+        (else temp)
 
 ))
 ;--------------------------------------------------------------------
@@ -34,7 +33,7 @@
   the user-name (currently, the user's IRC nick). The QUERY is the
   string holding what the user said.
 "
-    (catch #t
+    (with-throw-handler #t
         (lambda ()
             ; nlp-parse returns (SentenceNode "sentence@45c470a6-29...")
             (define sent-node (car (nlp-parse query)))
@@ -79,10 +78,10 @@
                 )
             )
         )
-        (lambda (key . parameters)
-            ; (display key) (newline) (display parameters) (newline)
-            (display "Sorry, I don't understand it\n")
-        )
+        ; Catch the exception, if any, and display what it is.
+        (lambda args
+            (backtrace)
+            (display "Sorry, I caught an exception\n"))
     ))
 
 ;--------------------------------------------------------------------
@@ -92,8 +91,8 @@
 ;
 ; should also put the sentence's output atom into the focus set
 ;
-; It Use backward chaning to process Truth query
-; Depending on the backward chaning generate the answer (using SuRel)
+; Use backward chaining to process Truth query
+; Depending on the backward chaining, generate the answer (using SuReal)
 ;--------------------------------------------------------------------
 (define (truth_query_process query)
     (define tmp)

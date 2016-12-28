@@ -10,7 +10,7 @@
 ;;       V
 ;;       Q
 ;; |-
-;; ImplicationLink
+;; ImplicationScopeLink
 ;;    V
 ;;    P
 ;;    Q
@@ -31,22 +31,22 @@
 
 (define implication-scope-factorization-body
   (ImplicationLink
-     (LambdaLink
-        (VariableNode "$TyVs")
-        (VariableNode "$P"))
-     (LambdaLink
-        (VariableNode "$TyVs")
-        (VariableNode "$Q"))))
+     (QuoteLink (LambdaLink
+        (UnquoteLink (VariableNode "$TyVs"))
+        (UnquoteLink (VariableNode "$P"))))
+     (QuoteLink (LambdaLink
+        (UnquoteLink (VariableNode "$TyVs"))
+        (UnquoteLink (VariableNode "$Q"))))))
 
 (define implication-scope-factorization-rewrite
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: implication-scope-factorization-formula")
      (ListLink
         implication-scope-factorization-body
-        (ImplicationLink
-           (VariableNode "$TyVs")
-           (VariableNode "$P")
-           (VariableNode "$Q")))))
+        (QuoteLink (ImplicationScopeLink
+           (UnquoteLink (VariableNode "$TyVs"))
+           (UnquoteLink (VariableNode "$P"))
+           (UnquoteLink (VariableNode "$Q")))))))
 
 (define implication-scope-factorization-rule
   (BindLink
@@ -62,7 +62,7 @@
          (Q (caddr Impl-outgoings))
          (lamb-Impl-tv (cog-tv lamb-Impl)))
     (cog-set-tv!
-     (ImplicationLink
+     (ImplicationScopeLink
         SV
         P
         Q)

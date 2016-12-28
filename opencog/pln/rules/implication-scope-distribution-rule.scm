@@ -2,7 +2,7 @@
 ;; Implication Scope Distribution Rule
 ;; (TODO add wiki page)
 ;;
-;; ImplicationLink
+;; ImplicationScopeLink
 ;;    V
 ;;    P
 ;;    Q
@@ -30,10 +30,10 @@
      (VariableNode "$Q")))
 
 (define implication-scope-distribution-body
-  (ImplicationLink
-     (VariableNode "$TyVs")
-     (VariableNode "$P")
-     (VariableNode "$Q")))
+  (QuoteLink (ImplicationScopeLink
+     (UnquoteLink (VariableNode "$TyVs"))
+     (UnquoteLink (VariableNode "$P"))
+     (UnquoteLink (VariableNode "$Q")))))
 
 (define implication-scope-distribution-rewrite
   (ExecutionOutputLink

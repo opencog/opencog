@@ -1183,3 +1183,429 @@ irc_reply_data
 
 todo: AO to get source of the command.
 todo: random expresion context is really part of self-model.
+
+================================================
+
+(psi-rule-nocheck
+	;; context
+	(list (AndLink
+		(Predicate "input thing")
+		(List args)
+	))
+	;; action
+	(List
+		(ExecutionOutput
+			(DefinedSchema "thing to do")
+			(List args)))
+	(Concept "demo goal")
+	(stv 1 0.8181)
+	(psi-demand "want a demo" 0.97)
+)
+
+============================================
+Look to the left doesn't work
+
+                   +----Ju----+
+    +---Wi---+-MVp-+   +--Dmu-+
+    |        |     |   |      |
+LEFT-WALL look.v to.r the right.n-u
+
+(use-modules (opencog query))
+(relex-parse "look to the right")
+
+(define imp (car (get-new-parsed-sentences)))
+; (imperative-process imp)
+
+(define current-sentence (AnchorNode "*-eva-current-sent-*"))
+
+(StateLink current-sentence imp)
+(load "imperative-rules.scm")
+
+   (cog-bind show-rule-1)
+clobbers it
+
+(load "imperative-rules.scm")
+
+================================================
+
+(psi-rule-nocheck
+	;; context
+	(list (AndLink
+		(Predicate "input thing")
+		(List args)
+	))
+	;; action
+	(List
+		(ExecutionOutput
+			(DefinedSchema "thing to do")
+			(List args)))
+	(Concept "demo goal")
+	(stv 1 0.8181)  ; placed o  the impl
+	(psi-demand "want a demo" 0.97)
+)
+
+
+
+Either incorrect or not implemented yet. Cannot evaluate (
+
+psi-action ConceptNode OpenPsi: action
+MemberLink
+
+Implication stv
+   And
+      context
+      action
+   goal
+
+one rule is selected per demand
+
+psi-controller-update-weights
+
+each rule has a weight.
+
+controled rules get a weight that is the tv-mean of the rule.
+
+demands are ConceptNodes, mean is a value-weight.
+
+this crashes:
+ (define a (Concept "A" (stv 1 1)))
+ (define b (Concept "B" (stv 0.9 0.9)))
+ (define c (Concept "C" (stv 0.8 0.8)))
+ (most-weighted-atoms (list a b c))
+
+
+psi-select-rules is not used anywhere.
+psi-select-rules-per-demand is used instead;
+
+psi-add-action-selector is not used anywhere
+psi-select-rules not used anywhere
+psi-default-action-selector is not used anywhere
+
+
+most-weighted-atoms really does return a list.
+but the action seldctor only looks at the TV for the top one.
+
+Ben -- PLN & Sequential=And
+
+valid demands?
+psi-reset-valid-demand-cache
+
+
+The random choice of these are bogus-like.a DONE
+----------------------------------------------------
+
+OK, so redo the fetch of weights, and the sorting, in util*scm - DONE
+
+most-important-weighted-atoms in action
+
+---------
+psi-get-weighted-satisfiable-rules
+-------------
+
+wtf
+
+psi-satisfiable? gets the context, runs satsifactionlink to get the
+grounded pattern.
+
+satisfaction-level -- who calls this its bogus.  rename.  DONE
+
+rename satisfaction-level psi-rule-satisfiability DONE
+--------------
+
+wtf
+
+cog-satisfiable is not being called
+
+psi-satisfiable? should return #t not a TV
+
+
+rename psi-get-all-valid-demands psi-get-all-enabled-demands DONE
+
+rename, hide psi-reset-valid-demand-cache   DONE
+
+psi-demand-skip?  FIXED
+
+(MemberLink
+   DEM   ; aso a conceptn
+   psi-label-skip ; (ConceptNode "OpenPsi: skip")
+)
+
+-------------------------------------------------------------
+* demand value -- which direction is up, down? what does it mean?
+* percentage???
+* why two different functions, one for up, one for down?
+  why not just use negative numbers?
+* demand-changes per step, instead of per unit time?
+
+------------------------------------------------------
+
+
+there is a settable action selector per demand
+
+the default action selector finds all rules associated with
+a demand, picks the one with the highest weight, and returns that.
+The weight is based on tv-mean right now.
+
+split:
+rules.scm is core
+action-selector is core
+
+
+TODO:
+* wtf is in control.scm ???
+* updater.scm what is this, how does it work.
+
+* sec.scm is actual psi code
+* event.scm is ... psi code for now.
+* interaction-rule.scm is psi code of some kind.
+* modulators.scm is part of psi.
+* modulators need to be documented
+* mock-interaction-rules.scm needs to move
+
+===========================================================
+
+Surreal meta-issues:
+-- which of several word-choices get used?
+
+   Where are you looking?   XXX this got broken, and the fix is hard.
+The fix requires that the space server track this info, and
+as well as time-stamp
+
+Space-time server meta-issues:
+self-model: what direction am I looking at? (left, right up down)
+(vs. what direction are other things pointing at?)
+
+
+   Look at me
+--> use the sound server
+
+ROS topic: /manyears/source_pose
+in ros-behavior-scripting the ros_bridge node subscribes to the ROS
+  topic in sound_track.py
+sends message (map-sound  x y z) to cogserver
+(map-sound is defined in time-map.scm in ros-behavior-scripting
+It sets this in the cogserver:
+(StateLink (ConceptNode "last person who spoke") (NumberNode fid))
+The location of the face can be gotten by querying:
+(get-last-locs-ato "faces"  (NumberNode fid) 8000)
+
+-----
+
+How to fake it:
+
+; Add face to the atomspace
+(EvaluationLink (PredicateNode "visible face") (ListLink (NumberNode 42)))
+aka 
+(use-modules (opencog eva-model))
+(make-new-face 42)
+(make-new-face 69)
+
+(use-modules (opencog ato pointmem))
+; Record facial coordinates in an octomap, at 15hz (66 mmillisecs per
+; frame), a 150 frame circular buuffer (about 10 seconds) and a 1cm
+; spatial resolution.
+(create-map "faces" 0.01 66 150)
+
+; Put it somewhere:   x y z x=forward y=left z=up; position in meters.
+(map-ato "faces" (NumberNode 42 (av 5 0 0)) 2  1 0)
+(map-ato "faces" (NumberNode 69 (av 5 0 0)) 1.5  -1 0.1)
+
+(get-last-locs-ato "faces"  (NumberNode 42) 8000)
+
+(get-face (NumberNode 42) 8000)
+(face-nearest-sound  2.01  1.01 0.01)
+(face-nearest-sound  2.01  -1.01 -0.01)
+
+; Pretend that the sound is coming from there, too.
+(map-sound  2.01  1.01 0.01)
+(map-sound  2.01  -1.01 0.01)
+
+; The above will materialize the below in the atomsapce:
+; iun time-map.scm
+(define last-speaker (Concept "last person who spoke"))
+(State last-speaker (Number 42))
+
+(cog-execute! (Get (State last-speaker (Variable "$x"))))
+(cog-execute! (DefinedSchema "current-speaker"))
+
+(process-query 'luser "Look at me")
+
+
+Look at me   -- done
+turn towards me -- done
+face me     Wi Ox -- done
+look at him
+look at her
+don't look at me
+turn away
+
+me
+her
+him
+
+--> No
+--> You're not the boss of me.
+--> OK, you're ugly anyway
+--> Darling, I never looked away
+--> Sure, whatever.
+
+
+    what are you looking at
+--> I am looking at you
+--> I am looking at a person
+--> I am looking at a man/woman (assume gender rec works)
+--> I am looking at an old man
+--> (closes eyes) I am not looking at anything
+
+
+   Where are you looking?   XXX this got broken, and the fix is hard.
+--> I am looking to the left
+--> I am looking to the right
+--> I am looking at you
+
+   What direction are you looking?
+--> I am looking to the left
+--> I am looking to the right
+
+   Turn your head.
+
+   Look away.
+
+   Look at me.
+
+   Where are you looking?
+
+
+   What happened just now?
+    (requires recency in time-server)
+--> I just turned my head
+--> I just heard a loud sound.
+--> There was a loud sound.
+--> Nothing.
+--> Someone just entered the room.
+--> You waved your hand in front of me.
+
+
+   What are you doing?
+--> I am smiling
+--> I am looking at you
+--> I just smiled at you
+--> I am listening to you
+--> I am talking to you.
+--> I am talking to you (but only if talking for a while)
+--> I am entertaining a room-full of people (if >1 person)
+
+   How many people can you see?
+
+   How do you feel?
+--> I feel happy
+--> I'm happy
+--> I feel sad.
+
+   How are you feeling?
+--> I feel good.
+--> I feel OK.
+--> I'm
+
+  What was the last thing that made you sad?
+  What was the last thing that frightened you?
+  Who is the nicest person you met last?
+
+  What is my name?  (multi-person)
+
+  Where is Ben?
+--> Ben is on my left.
+--> Ben is on my right.
+
+  Where am I?
+--> You are in front of me.
+--> you are in the same room as I am
+--> You are in Hong Kong.
+
+  Where are you?
+--> I am in Hong Kong
+
+  What is the weather like today?
+--> (Internet search of weather based on location)
+
+
+=============================================================
+%s/,\(\S\)/, \1/g
+
+(map-ato "faces" (NumberNode 42 (av 5 0 0)) 2  1 0)
+(map-sound  2.01  -1.01 0.01)
+(process-query 'luser "Look at me")
+
+(use-modules (opencog query))
+ (load "imperative-rules.scm")
+
+(define sent-node (car (nlp-parse "Look at me")))
+ (imperative-process sent-node)
+
+look-rule-2 triggers, sets
+((StateLink
+   (AnchorNode "*-imperative-*")
+   (ActionLink
+      (WordNode "look" (stv 0.0043478259 0.0012484394))
+      (ListLink
+         (WordNode "me" (stv 0.0043290043 0.0012484394))
+      )
+   )
+)
+
+obj-semantics-rule-1-ao triggers, and binds:
+$verb -> (WordNode "look"
+"$object" ->  (WordNode "me"
+"$verb-ground" -> (DefinedPredicate "Look-at-thing cmd"
+ "$obj-ground" -> (DefinedSchema "current-speaker")
+
+(cog-evaluate!    (EvaluationLink
+      (DefinedPredicateNode "Look-at-thing cmd")
+      (ListLink (NumberNode "0.000000"))))
+
+(cog-evaluate!    (EvaluationLink
+      (DefinedPredicateNode "Look-at-thing cmd")
+      (SetLink (NumberNode "0.000000"))))
+
+... look-at-person is running off of eye-contact-state
+
+
+
+
+obj-semantic-model-rule-1
+obj-semantic-model-rule-2
+
+(load "semantics.scm")
+(cog-bind obj-semantics-rule-1-ao)
+
+(Define (DefinedPredicate "Look-at-thing cmd")
+ (DefinedPredicate "look at person"))
+
+(Define (DefinedSchema "current-speaker") 
+	(Get (State (Concept "last person who spoke") (Variable "$x"))))
+
+well, (Concept "last person who spoke") isn't being set.
+(map-sound should be setting it.
+
+(cog-incoming-set (Concept "last person who spoke"))
+
+
+where-look-rule
+
+action-rule-ao
+... ends up calling
+(DefinedPredicate "Look command")
+
+Look command does it ... but no memory of it
+
+XXX correct version of "looking" requires using the space server.
+
+(DefinedPredicate "Look at point")
+(DefinedPredicate "Gaze at point") calls
+py:gaze_at_point
+prints "(Eva looks to the left)"
+
+ (cog-bind show-rule-1)
+(define current-action (AnchorNode "*-action-*"))
+(StateLink current-action (WordNode "foobar"))
+

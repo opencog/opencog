@@ -8,13 +8,10 @@ cdef extern from "<string>" namespace "std":
         int size()
 
 # Handle
-ctypedef public long UUID
 
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
-        cHandle(UUID)
-        UUID value()
         bint operator==(cHandle h)
         bint operator!=(cHandle h)
         bint operator<(cHandle h)

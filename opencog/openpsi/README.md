@@ -4,11 +4,13 @@ OpenPsi is a rule-selection framework intended to provide provide
 the top-level behavior control mechanism for robots.  It is loosely
 inspired by Joscha Bach's MicroPsi.
 
-Each rule takes the form of if(context) then take(action).  These are
-classified into different goals (demands) theat they can fullfil. The
-main loop is an action-selection mechanism, examining the context to
-see if any of the current demands/goals can be fullfilled, and then
-taking apropriate action.
+Each rule has the abstract form
+   if (context) and (action is taken) then (goal is fulfilled).
+
+These rules are classified according to the different demands that
+the goals can fulfill.  The main loop is an action-selection mechanism,
+examining the current demands, and selecting among the rules that can
+satisfy that demand, and also be applicable in the current context.
 
 ## Status and TODO List
 
@@ -37,6 +39,9 @@ are used).
   "small-data" learning system, so that the robot can learn
   from only a handful of situations/examples.
 
+* The demand-update code is undocumented, confusing, and does not
+  belong in this directory.
+
 
 ### References
 * OpenCog Wiki - [OpenPsi](http://wiki.opencog.org/w/OpenPsi)
@@ -55,42 +60,42 @@ are used).
 1. Psi-rule:
   * A rule is an ImplicationLink structured as
     ```scheme
-            (ImplicationLink
+            (ImplicationLink  <TV>
                 (SequentialAndLink
                     (context)
                     (action))
-                (demand-goal))
+                (goal))
     ```
     An ImplicationLink was choosen because it allows PLN to be employed
-    to perform reasoning in the face of uncertan contexts.
+    to perform reasoning in the face of uncertain contexts.  A
+    SequentialAndLink is used, so that the goal is always placed
+    unambiguously last in the sequence.
   * The function `psi-rule` that is defined [here](main.scm). Is to be used
     in adding new rules.
 
 2. Context:
-  * The context must be in the form of a set of predicates, i.e. when
-    evaluated, these return true/false to indicate if the context
-    applies. A conjunction is taken, so that the action is performed
-    only if the entire context applies.
+  * The context part of the rule must be a set of predicates, i.e. atoms
+    that can be evaluated, and, when evaluated, return truth values
+    (typically a crisp TRUE_TV or FALSE_TV) to indicate if the rules
+    is applicable in the current context.  In the current
+    implementation, the truth values are assumed to be crisp true/false
+    values; thier boolean conjunction is taken to determine the validity
+    of the context. The action can then be taken if the resulting truth
+    value is strong enough (i.e. is TRUE_TV).
 
 3. Action:
-  * An action is an `ExecutionOutputLink` or any atom that could be
-    executed by running `(cog-execute! your-action)`. An action is the
-    means for interacting with the atomspace or other systems.
+  * The action part of the rule will be evaluated if the rule has
+    triggered, i.e. if the rule was selected by the action selector.
 
-XXX FIXME the action should be TV-valued, e.g. should probobably be
-wrapped inside a TrueLink.  That is because the SequentaialAndLink
-assumes that all of its elements are evaluatable; i.e. are TV-valued.
-Either that, or we need some other mechanism for grabbing the TV
-from the resulting execution of the action.
+    The action can be any evaluatable atom; the intent is that the
+    action will alter the atomspace, or send messages to some external
+    system.
 
-Note also: the SequentialAnd is used instead of AndLink, because the
-AndLink is an unordered link, and thus cannot distinguish its first
-and second elements!
-
-4. Goal/Demand-goal:
-  * A goal is an `EvaluationLink` or any atom that could be evaluated by
-    running `(cog-evaluate! your-goal)`.  The goal indicates the degree
-    to which the action, if taken, can satisfy the demand or meet the goal.
+4. Goal:
+  * The goal indicates the degree to which the action, if taken, can
+    satisfy the demand or meet the goal.  It can be any atom that,
+    when evaluated, returns a truth value.
+    (Huh ?? Deamnds are not goals? How do these interact?)
 
 5. Demand:
   * A demand is collection of state that must be maximized during
@@ -104,40 +109,101 @@ and second elements!
 6. Modulator and Feeling representation:
 Coming soon :smile:
 
-## OpenPsi algorithm
-1. `psi-step`:
-  * A function that performs a single iteration of the system. It wraps
-    the proceedures described below. It is implemented [here](main.scm).
+## Algorithmic overview:
 
-2. choose action-selector:
-  * If you have defined an action selector then it will be used; else the
-    default action selector is used. See function `(psi-select-rules)`
-    [here](main.scm).
-  * Only one action-selector is used in each step, for all demands. See
-    `psi-add-action-selector` and `psi-action-selector-set!`
-    [here](action-selector.scm) for adding and setting your an action-selector.
+1. Main loop
+  * The `psi-step` function performs a single iteration of the system.
+    It performs the steps described below. It is implemented
+    [here](main.scm). The main loop just calls the single-step
+    function repeatedly.
 
-3. default action selector:
-  * Most-weighted-satisfiable psi-rules of each demand are filtered out. If
-    there are more than one of them, then one is randomly selected.
-  * The weight is calculated as the product of strength and confidence of the
-    psi-rule.
-  * The satsifiability of a rule is checked by extracting the context and
-    wrapping it in a `SatisfactionLink` before evaluating it. If TRUE_TV is
-    returned it means that is it satisifiable. See function `psi-satisfiable?`
-    [here](main.scm).
+2. Action selection
+  * Action selection chooses one (or more) rules associated with a
+    demand. It is implemented in the `psi-select-rules-per-demand`
+    function, [here](main.scm).
 
-XXX FIXME -- this needs fixing, as contexts may contain variables whose
-groundings can carry over into the action.  In addition, it is extremely
-inefficient if there are many rules; thus the DualLink can be (should
-be) used to narrow down the search for contextts.  A crude prototype of
-this has been implemented in the nlp/aiml subsysgtem, and needs to be
-generalized and ported over here.
+  * The default action selector finds all satisfiable rules that are
+    associated with a demand, and then randomly picks one, according
+    to the weight associated with the rule (so that more heavily
+    weighted rules are more likely to be picked).
 
-4. action execution and goal evaluation:
-  * After the rules are selected, then the action and goals are extracted.
-    During the goal extraction, every goal that is related through the
-    action are choosen.
+  * A rule is "satisfiable" if the context part of the rule is
+    consistent with the current contents of the atomspace. The
+    current implementation assumes that satisfiability is a crisp
+    true/false value, although it is meant to be fractional, in
+    general.
+
+  * The rule weight is currently encoded in the TV in the
+    ImplicationLink (see below for details).
+
+  * Each demand can have it's own custom action-selector. The
+    user can set these with the `psi-add-action-selector` and
+    `psi-action-selector-set!` functions [here](action-selector.scm).
+
+3. Default action selector
+  * The default action selector randomly picks one satsifiable rule
+    associated with a demand.  If there is more than one rule that
+    is satisfiable, then one is selected randomly.
+
+  * The weight of a rule is currently defined as the product of
+    the strength and confidence of the ImplicationLink of the rule.
+
+  * The satsifiability of a rule is checked by extracting the context
+    and wrapping it in a `SatisfactionLink`, and then evaluating it.
+    A rule is satisfiable if the result of evaluation is TRUE_TV.
+    See the `psi-satisfiable?` function [here](main.scm).
+
+  * In the future, the weight of a rule will be defined as:
+    XXX FIXME: the below is not currently used.
+    ```
+    Wa = 1/Na * sum ( Wcagi ...)
+    Wcagi = Scga * Sc * STIcga
+    ```
+    where
+    Wa = weight of an action
+    Wcagi = weight of an action in a single psi-rule 'i' (An action 'a'
+            could be part of multiple psi-rules achieving multiple goals,
+            so if an action is likely to achieve multiple goals then it
+            should have a higher weight). It is implemented in
+            `psi-action-weight`.  (Present value =
+            Scga * Sc * confidence(cga) * confidence(context))
+    Na = Number of rules that have action `a` (Present value =1 )
+    Scga = Strength of psi-rule
+    Sc = Strength of context that is partially implemented in
+        `psi-context-weight`. Implementation details are being discussed
+        [here](https://github.com/opencog/atomspace/issues/823).
+        (Present value = 0 or 1)
+    STIcga = short-term-importance of the psi-rule (Present value = 1)
+
+4. Action Selection bugs. XXX FIXME -- The current implementation has
+   multiple implementation issues. These include:
+
+ * If a context contains variables that also appear in the action,
+   then these are not handled correctly. For example, if the context
+   is "variable $X is flying towards me", and the action is "catch
+   variable $X", the current satisfiability code can determine if
+   the context holds true, by grounding variable $X, but that
+   grounding is not passed to the action. That is, when the action is
+   executed, teh variable $X is not known/grounded.
+
+ * The default action selector is extremely inefficient if there
+   are more than a few hundred rules, as it attempts to find and
+   work with all of them. This overhead can be avoided by using the
+   DualLink for narrowing the search for applicable contexts.  There
+   is a protottype showing the DualLink in action, in the nlp/aiml
+   subsystem. (There are more than 100K AIML rules; the DualLink
+   narrows these down to the handful of rules applicable to the
+   current context). This code needs to be prted here.
+
+5. Action execution and goal evaluation
+  * After a set of rules are selected, then the actions and goals
+    attached to these rules are extracted.
+
+  * Given a set of actions, all goals that associated to these
+    actions are located (even if those goals belong to rules that
+    did not trigger in the current context).  The idea here is that
+    performing the action may advance those goals, even though those
+    goals were not a part of the selected rules.
 
   * Related/associated goals are those that are the implicand of the
     psi-rules that have the given action in the implicand. That is, if
@@ -147,17 +213,104 @@ generalized and ported over here.
     regardless of whether the rules that resulted in the association
     are selected or not. See `psi-related-goals` [here](main.scm).
 
-  * Then actions are executed followed by the evaluation of the goals.
-    No check is made before evaluating of goals to see if the action
-    has suceeded.  That is because it is assumed that if the context
-    is satisfied, then there is nothing that prevents the action from
-    executing.  _This assumption might not work when ECAN or some other
-    process that modifies the context is running in parallel.__
+  * The actions are executed, followed by the evaluation of the goals.
+
+  * Bugs: The current implementation fails to check if the action was
+    successful, before updating goals.  Just because an action is
+    attempted does not imply that the action was acheived. XXX FIXME.
+
+
+## File overview
+* `main.scm` -- Defines the main function for single-stepping the
+   psi rule engine, as well as the main-loop to run the stepper.
+
+* `rules.scm` -- Functions for defining openpsi-rules, and fetching
+  thier various components.
+
+* `action-selector.scm` -- Implementation of a default action-selector,
+  as well as functions that allow a user to specify a custom action
+  selector.
+
+* `utilities.scm` -- Miscellaneous utilities.
 
 ## OpenPsi examples
 * The examples [here](../../examples/openpsi) are currently broken.
-* The AIML interpreter [here](../nlpe/aiml) uses Opensi and currently
+* The AIML interpreter [here](../nlp/aiml) uses Opensi and currently
   works.
 * The ROS behavior scripts
   [here](http://github.com/opencog/ros-behavior-scripting) use OpenPsi
-  and are currently wrking.
+  and are currently working.
+
+## Modulators and Internal Dynamics
+
+OpenPsi includes a dynamical system of interacting modulator variables.
+The model contains varying parameters that regulate processes such as
+stimulus evaluation, action selection, and emotional expression.
+Modulators are based on MicroPsi, and SECs are based on Component
+Process Model theory (see references for  more info). These and other
+OpenPsi-related entities dynamically interact with each other according
+to rules that specify how a change in a "trigger" entity cause a change
+in a "target" entity.
+
+The interaction rules have the logical form of:
+
+    change in trigger entity --> change in target entity
+
+The change in the target is a function of the magnitude of change in the
+trigger, the strength of the interaction rule, and the current value of
+the target.
+
+The rules in Atomese have the form:
+
+    (PredictiveImplication
+        (TimeNode 1)
+            (Evaluation
+                  (Predicate "psi-changed")
+                  (List
+                      trigger))
+            (ExecutionOutputLink
+                (GroundedSchema "scm: adjust-psi-var-level")
+                (List
+                    target
+                    (NumberNode strength)
+                    trigger))))
+
+The antecedent predicate can be one of "psi-changed", "psi-increased"
+or "psi-decreased".
+
+Files:
+
+* updater.scm - the main control file that handles the dynamic updating
+  of entity values based on the interaction rules.
+* interaction-rule.scm - code for creating the rules specifying
+  interaction dynamics between entities.
+* modulator.scm - internal openpsi modulator variables
+* sec.scm - internal openpsi Stimulus Evaluation Check variables
+* events.scm - defines perceived events that are monitored and that
+  trigger changes in openpsi variables.
+
+Instructions:
+
+* Create interaction rules with the psi-create-interaction-rule function in
+  interaction-rule.scm
+* Create monitored events with psi-create-monitored-event function in event.scm.
+* Create event detection callback(s) with (psi-set-event-callback! callback) in
+  updater.scm. The callback function should indicate that a particular event has
+  occurred by calling (psi-set-event-occurrence! event), which uses a StateLink
+  to represent the most recent occurrence of the event.
+* Create "expression" callback function with (psi-set-expression-callback!
+  callback) in updater.scm. This function should handle implementation-specific
+  expression of emotion and/or physiology based on the OpenPsi dynamic variables.
+
+For a concrete example of using this model, see 
+https://github.com/opencog/ros-behavior-scripting/blob/master/src/psi-dynamics.scm
+
+Todo: Create general callback that is called at each loop step.
+
+
+Open Issues:
+------------
+ * Can a rule satisfy multiple goals?
+ * Can a rule partially satisfy a goal?  How is the partial satisfaction
+   indicated?
+ * Demand update is confused/confusing

@@ -17,6 +17,10 @@ IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0005 OLD)
 ENDIF (COMMAND CMAKE_POLICY)
 
+IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
+	CMAKE_POLICY(SET CMP0037 OLD)
+ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
+
 PROJECT(opencog)
 
 # To supress Cygwin warning "CMake no longer defines WIN32 on Cygwin!"
@@ -308,7 +312,7 @@ ENDIF (OPENGL_FOUND)
 
 # Google Protobuf library
 # The protocol buffer compiler is a separately installable package, and
-# it is also needed for building embodiment PAI. So check for that, too.
+# it is needed for building the ZMQ messaging subsystem.
 FIND_PACKAGE(Protobuf)
 IF (PROTOBUF_FOUND
 		AND PROTOBUF_LIBRARY
@@ -329,7 +333,7 @@ ELSE (PROTOBUF_FOUND
 	IF (PROTOBUF_PROTOC_EXECUTABLE)
 		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n   To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
 	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; embodiment PAI can't be built without it.\n   To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; ZMQ messaging can't be built without it.\n   To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
 	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
 
 ENDIF (PROTOBUF_FOUND
@@ -405,16 +409,6 @@ ELSE (TBB_FOUND)
 ENDIF (TBB_FOUND)
 MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
 
-FIND_PACKAGE(TCL)
-
-# /usr/bin/tclsh is expected for some embodiment tests, but is
-# not otherwise important for anything...
-IF (TCL_TCLSH)
-	MESSAGE(STATUS "TCL shell was found here: ${TCL_TCLSH}")
-ELSE (TCL_TCLSH)
-	MESSAGE(STATUS "TCL shell missing: needed for some embodiment tests.")
-ENDIF (TCL_TCLSH)
-
 # Optional, currently needed only to hush up DRD in util/Logger.cc
 FIND_PACKAGE(VALGRIND)
 IF (VALGRIND_FOUND)
@@ -439,6 +433,17 @@ ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the AtomSpace Publisher module, and the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
 ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
+
+# Glasgow Haskell compiler
+FIND_PACKAGE(Stack)
+IF (STACK_FOUND)
+	ADD_DEFINITIONS(-DHAVE_STACK)
+	SET(HAVE_STACK 1)
+	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack found.")
+ELSE (STACK_FOUND)
+	SET(STACK_FOUND_MESSAGE "The Haskell Tool Stack not found.")
+ENDIF (STACK_FOUND)
+MESSAGE(STATUS "${STACK_FOUND_MESSAGE}")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -590,6 +595,23 @@ ADD_CUSTOM_TARGET(cscope
 	COMMENT "Generating CScope database"
 )
 
+ADD_SUBDIRECTORY(experiments EXCLUDE_FROM_ALL)
+
+IF (NOT WIN32)
+	ADD_CUSTOM_TARGET (experiments
+		# using CMAKE_BUILD_TOOL results in teh cryptic error message
+		# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
+		# This is because make doesn't know how to pass jobserver args to
+		# the submake.  So, instead, just use $(MAKE) (with round parens)
+		# -- that will do the right thing.
+		# COMMAND ${CMAKE_BUILD_TOOL}
+		COMMAND $(MAKE)
+		WORKING_DIRECTORY experiments
+		COMMENT "Building experiments"
+	)
+ENDIF (NOT WIN32)
+
+
 # packaging
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Open Cognition Framework")
 SET(CPACK_PACKAGE_NAME "opencog")
@@ -691,7 +713,11 @@ SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("REST" "REST Atomspace Publisher module" HAVE_REST)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
+SUMMARY_ADD("SpaceTime" "3D Space-Time object tracker" HAVE_OCTOMAP)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS AND HAVE_OCTOMAP)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("NLP" "Natural Language Processing" HAVE_NLP)
+SUMMARY_ADD("PatternMiner" "Pattern Miner" HAVE_cpprest)
+SUMMARY_ADD("Haskell codes" "Logic via Lojban" HAVE_STACK)
+
 SUMMARY_SHOW()

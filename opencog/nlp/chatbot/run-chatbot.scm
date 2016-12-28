@@ -1,4 +1,6 @@
-
+#! /usr/local/bin/guile \
+  -L /usr/local/share/opencog/scm --
+!#
 ; For users who are not aware of readline ...
 (use-modules (ice-9 readline))
 (activate-readline)

@@ -22,45 +22,57 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Request.h"
-
-#include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
+
+#include <opencog/cogserver/server/ConsoleSocket.h>
+
+#include "Request.h"
 
 using namespace opencog;
 
 Request::Request(CogServer& cs) :
-    _cogserver(cs), _requestResult(NULL), _mimeType("text/plain")
+    _console(nullptr), _cogserver(cs)
 {
 }
 
 Request::~Request()
 {
     logger().debug("[Request] destructor");
-    if (_requestResult) {
-        _requestResult->OnRequestComplete();
-        _requestResult->put();  // dec use count we are done with it.
+    if (_console)
+    {
+        _console->OnRequestComplete();
+        _console->put();  // dec use count we are done with it.
     }
 }
 
-void Request::setRequestResult(RequestResult* rr)
+void Request::set_console(ConsoleSocket* con)
 {
-    logger().debug("[Request] setting requestResult: %p", rr);
-    if (NULL == _requestResult) {
-        rr->get();  // inc use count -- we plan to use the req res
-        _requestResult = rr;
-        _mimeType = _requestResult->mimeType();
-    } else if (NULL == rr) {
-        if (_requestResult) _requestResult->put();  // dec use count; we are done with it.
-        _requestResult = NULL;  // used by exit/quit commands to not send any result.
-    } else
-        throw RuntimeException(TRACE_INFO,
-            "Bad idea to try to set the RequestResult more than once.");
+    // The "exit" request causes the console to be destroyed,
+    // rendering the _console pointer invalid. However, generic
+    // code will try to call Request::send() afterwards. So
+    // prevent the invalid reference by zeroing he pointer.
+    if (nullptr == con)
+    {
+        _console->put();  // dec use count -- we are done with socket.
+        _console = nullptr;
+        return;
+    }
+
+    OC_ASSERT(nullptr == _console, "Setting console twice!");
+
+    logger().debug("[Request] setting socket: %p", con);
+    con->get();  // inc use count -- we plan to use the socket
+    _console = con;
 }
 
 void Request::send(const std::string& msg) const
 {
-    if (_requestResult) _requestResult->SendResult(msg);
+    // The _console might be zero for the exit request, because the
+    // exit command destroys the socket, and then tries to send a
+    // reply on the socket it just destroyed.
+    if (_console) _console->SendResult(msg);
 }
 
 void Request::setParameters(const std::list<std::string>& params)

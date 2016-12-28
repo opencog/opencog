@@ -162,14 +162,15 @@
 
 
 (define (evaluation-to-member-2-formula MAXDXB MBXDAX DAB)
-	(cog-set-tv! MAXDXB
+  (List
+    (cog-set-tv! MAXDXB
 		(evaluation-to-member-side-effect-free-formula
 			MAXDXB
 			DAB))
 	(cog-set-tv! MBXDAX 
 		(evaluation-to-member-side-effect-free-formula
 			MBXDAX
-			DAB)))
+			DAB))))
 
 (define (evaluation-to-member-side-effect-free-formula MD ED)
 	(stv

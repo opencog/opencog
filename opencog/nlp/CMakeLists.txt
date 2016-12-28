@@ -7,11 +7,17 @@ ADD_SUBDIRECTORY (scm)
 ADD_SUBDIRECTORY (types)
 ADD_SUBDIRECTORY (wsd)
 
+IF (HAVE_STACK)
+	# Currently, lojban fails to build, so comment it out.
+	# ADD_SUBDIRECTORY (lojban)
+ENDIF (HAVE_STACK)
+
 IF (HAVE_NLP)
 	ADD_SUBDIRECTORY (relex2logic)
 	ADD_SUBDIRECTORY (aiml)
 	ADD_SUBDIRECTORY (chatbot)
 	ADD_SUBDIRECTORY (chatbot-eva)
+	ADD_SUBDIRECTORY (chatbot-psi)
 	# fuzzy depends on sureal
 	ADD_SUBDIRECTORY (fuzzy)
 	ADD_SUBDIRECTORY (lg-dict)

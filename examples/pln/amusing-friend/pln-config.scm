@@ -49,7 +49,7 @@
 (define rule-basenames
   (list "implication-instantiation-rule.scm"
         "implication-scope-distribution-rule.scm"
-        "equivalence-to-double-implication-rule.scm"
+        "equivalence-to-implication-rule.scm"
         "lambda-predicate-construction-rule.scm"
         "inversion-rule.scm"
         "implication-implicant-conjunction-rule.scm"
@@ -71,7 +71,7 @@
 (define rules
   (list (list implication-scope-distribution-rule-name 1)
         (list implication-full-instantiation-rule-name 1)
-        (list equivalence-to-double-implication-rule-name 1)
+        (list equivalence-to-implication-rule-name 1)
         (list lambda-predicate-construction-rule-name 1)
         (list inversion-implication-rule-name 1)
         (list implication-implicant-conjunction-rule-name 1)

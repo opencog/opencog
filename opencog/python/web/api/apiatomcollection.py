@@ -29,9 +29,10 @@ class AtomCollectionAPI(Resource):
         return cls
 
     def __init__(self):
+        self.atom_map = global_atom_map
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument(
-            'type', type=str, location='args', choices=types.__dict__.keys())
+        self.reqparse.add_argument('type', type=str, action='append',
+                     location='args', choices=types.__dict__.keys())
         self.reqparse.add_argument('name', type=str, location='args')
         self.reqparse.add_argument('callback', type=str, location='args')
         self.reqparse.add_argument('filterby', type=str, location='args',
@@ -265,6 +266,7 @@ class AtomCollectionAPI(Resource):
 	    {'code': 400, 'message': 'Invalid request: stirange filter requires stimin parameter'}
 	]
     )
+
     def get(self, id=""):
         retval = jsonify({'error':'Internal error'})
         try:
@@ -272,6 +274,7 @@ class AtomCollectionAPI(Resource):
         except Exception,e:
            retval = jsonify({'error':str(e)})
         return retval
+
     def _get(self, id=""):
         """
         Returns a list of atoms matching the specified criteria
@@ -299,7 +302,7 @@ class AtomCollectionAPI(Resource):
 
         if id != "":
             try:
-                atom = self.atomspace.get_atom_with_uuid(id)
+                atom = self.atom_map.get_atom(int(id))
                 atoms = [atom]
             except IndexError:
                 atoms = []
@@ -326,13 +329,16 @@ class AtomCollectionAPI(Resource):
                 if type is None and name is None:
                     atoms = self.atomspace.get_atoms_by_type(types.Atom)
                 elif name is None:
-                    atoms = self.atomspace.get_atoms_by_type(
-                        types.__dict__.get(type))
+                    atoms = []
+                    for t in type:
+                         atoms = atoms + self.atomspace.get_atoms_by_type(
+                                           types.__dict__.get(t))
                 else:
                     if type is None:
-                        type = 'Node'
-                    atoms = get_atoms_by_name(types.__dict__.get(type),
-                                name, self.atomspace)
+                        type = ['Node']
+                    for t in type:
+                        atoms = get_atoms_by_name(types.__dict__.get(t),
+                                    name, self.atomspace)
 
             # Optionally, filter by TruthValue
             if tv_strength_min is not None:
@@ -364,6 +370,7 @@ class AtomCollectionAPI(Resource):
         # DOT return format is also supported
         if dot_format not in ['True', 'true', '1']:
             atom_list = AtomListResponse(atoms)
+            # xxxxxxxxxxxx here add atoms
             json_data = {'result': atom_list.format()}
 
             # if callback function supplied, pad the JSON data (i.e. JSONP):
@@ -528,8 +535,8 @@ the atom. Example:
         if 'outgoing' in data:
             print data
             if len(data['outgoing']) > 0:
-                outgoing = [Atom(uuid, self.atomspace)
-                                for uuid in data['outgoing']]
+                outgoing = [self.atom_map.get_atom(uid)
+                                for uid in data['outgoing']]
         else:
             outgoing = None
 
@@ -549,11 +556,14 @@ the atom. Example:
 
         try:
             atom = self.atomspace.add(t=type, name=name, tv=tv, out=outgoing)
+            uid = self.atom_map.get_uid(atom)
         except TypeError:
             abort(500, 'Error while processing your request. Check your '
                        'parameters.')
 
-        return {'atoms': marshal(atom, atom_fields)}
+        dictoid = marshal(atom, atom_fields)
+        dictoid['handle'] = uid
+        return {'atoms': dictoid}
 
     @swagger.operation(
 	notes='''
@@ -677,7 +687,8 @@ containing the atom.
         """
 
         # If the atom is not found in the atomspace.
-        if not Atom(id , self.atomspace):
+        the_atom = self.atom_map.get_atom(id)
+        if the_atom == None:
             abort(404, 'Atom not found')
 
         # Prepare the atom data
@@ -689,14 +700,15 @@ containing the atom.
 
         if 'truthvalue' in data:
             tv = ParseTruthValue.parse(data)
-            Atom(id, self.atomspace).tv = tv
+            the_atom.tv = tv
 
         if 'attentionvalue' in data:
             (sti, lti, vlti) = ParseAttentionValue.parse(data)
-            Atom(id, self.atomspace).av = {'sti': sti, 'lti': lti, 'vlti': vlti}
+            the_atom.av = {'sti': sti, 'lti': lti, 'vlti': vlti}
 
-        atom = self.atomspace.get_atom_with_uuid(id)
-        return {'atoms': marshal(atom, atom_fields)}
+        dicty = marshal(the_atom, atom_fields)
+        dicty['handle'] = self.atom_map.get_uid(the_atom)
+        return {'atoms': dicty}
 
     @swagger.operation(
 	notes='''
@@ -735,11 +747,11 @@ Returns a JSON representation of the result, indicating success or failure.
         Removes an atom from the AtomSpace
         """
 
-        if not Atom(id, self.atomspace):
+        atom = self.atom_map.get_atom(id)
+        if atom == None:
             abort(404, 'Atom not found')
-        else:
-            atom = self.atomspace.get_atom_with_uuid(id)
 
         status = self.atomspace.remove(atom)
+        self.atom_map.remove(atom, id)
         response = DeleteAtomResponse(id, status)
         return {'result': response.format()}

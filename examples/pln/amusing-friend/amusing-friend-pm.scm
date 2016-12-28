@@ -449,7 +449,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (ImplicationLink (stv 0.13281251 0.5)
+;; (ImplicationScopeLink (stv 0.13281251 0.5)
 ;;    (VariableList
 ;;       (TypedVariableLink
 ;;          (VariableNode "$X")
@@ -548,7 +548,7 @@
 (cog-bind equivalence-scope-distribution-rule)
 
 ;; (14) Infer that if X is funny, then X is amusing. Apply the
-;; equivalence-to-double-implication-rule on (13).
+;; equivalence-to-implication-rule on (13).
 ;;
 ;; Result should be:
 ;;
@@ -577,7 +577,7 @@
 ;;
 ;; Result should be:
 ;;
-;; (ImplicationLink (stv 0.82352942 0.89999998)
+;; (ImplicationScopeLink (stv 0.82352942 0.89999998)
 ;;    (TypedVariableLink
 ;;       (VariableNode "$X")
 ;;       (TypeNode "ConceptNode")

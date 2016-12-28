@@ -30,7 +30,8 @@ For details, run:
 ```
 perl aiml2psi.pl --help
 ```
-For aiml files, see https://github.com/jstnhuang/chatbot/tree/master/aiml
+For aiml files, see
+https://github.com/hansonrobotics/HEAD/tree/master/src/chatbot/aiml/
 
 ### Overview
 Conversion is done in a two-pass process.  The first pass flattens
@@ -70,3 +71,33 @@ The output format is in the form of OpenPsi rules, which have the format:
 ```
 
 The scheme functions `psi-rule` and `psi-demand` create these.
+
+### Known Bugs and Issues
+This is NOT a complete or standards-compliant implementation of AIML!
+It was never meant to be, and if the only thing you want is AIML, then
+one of the many AIML engines out there will better suit your needs!
+The code here is only enough to get some chat scaffolding working.
+
+Known issues include:
+* No support for that-star and topic-star
+* No support for `<condition>` tags.
+* No support for nested `<random>` tags.
+* Misc recursion bugs with the `<set>` tag.
+* The perl script is a hack, and is NOT an example of good engineering.
+
+In addition, there are some important deviations from the AIML spec
+with regard to which rules are chosen. Opencog uses a probabilistic
+weighting over rules, and, as a result, it lacks the determinism of
+the standard AIML chat engines. It can easily make poor choices of
+rules, leading to a disappointing conversation.  Some of this might
+be alleviated by messing with the weights in the import script. However,
+the entire idea of weight-based rule selection is a bit contrary to
+the core philosophy of AIML, and so the behavior of this chat engine
+may be a disappointment, when compared to standard AIML engines running
+standard rule sets.
+
+Even if behavior is satisfactory, performance might not be.  The
+OpenCog system is based on a generic hypergraph infrastructure for
+operating on AIML-like structures.  However, because of its generic
+nature, it will not be all that efficient for AIML, although
+performance should be adequate for one-on-one chat.

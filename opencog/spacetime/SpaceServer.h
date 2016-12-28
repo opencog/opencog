@@ -246,8 +246,8 @@ namespace opencog
         boost::signals2::connection removedAtomConnection;
         boost::signals2::connection addedAtomConnection;
 
-        void atomRemoved(AtomPtr);
-        void atomAdded(Handle);
+        void atomRemoved(const AtomPtr&);
+        void atomAdded(const Handle&);
 
         Handle addPropertyPredicate(std::string predicateName,
                                     Handle,

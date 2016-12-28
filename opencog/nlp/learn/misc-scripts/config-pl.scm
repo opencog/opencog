@@ -11,5 +11,5 @@
 
 ;--------------------------------------------------------------
 ; The relex server host and port
-(define relex-server-host "10.0.3.182")
+(define relex-server-host "127.0.0.1")
 (define relex-server-port 4445)

@@ -69,7 +69,38 @@ this will be developed as time goes.
 
 ## Backward Chainer
 
-WIP
+To run the demo using the forward chainer load the following script
+
+```
+$ guile
+scheme@(guile-user)> (load "moses-pln-synergy-bc.scm")
+```
+
+in guile. It will load the model, the background knowledge, the PLN
+config file and run the inference. Beware that it's gonna take a
+really long time (say 3 to 4 days depending on your hardware) as it
+runs 1M of inference steps, and that each step combines many atoms
+(one source + one rule + all possible other premises).
+
+Once the inference finished you can check that the final target (the
+MOSES model is infered with the correct TV
+
+```scheme
+(ImplicationLink (stv 0.60357851 0.69999999)
+   (OrLink
+      (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
+      (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
+   )
+   (PredicateNode "recovery-speed-of-injury-alpha" (stv 0.30000001 0.80000001))
+)
+```
+
+to check the TV merely enter that hypergraph without the TVs. You may
+of course check each step detailed in subsection `Step-by-step` below
+as well, similarily by entering them without their TVs.
+
+There are currently no method to query the trace of the inference but
+this will be developed as time goes.
 
 ## Pattern Matcher
 
@@ -541,7 +572,7 @@ scheme@(guile-user)> (cog-bind implication-full-instantiation-rule)
 ##### (11) - Turn equivalences such as between `\x take(x, treatment-1)` and `take-treatment-1` into implications
 
 ```scheme
-scheme@(guile-user)> (cog-bind (ure-get-forward-rule equivalence-to-double-implication-rule))
+scheme@(guile-user)> (cog-bind equivalence-to-implication-rule)
 ...
       (ImplicationLink (stv 1 1)
          (LambdaLink

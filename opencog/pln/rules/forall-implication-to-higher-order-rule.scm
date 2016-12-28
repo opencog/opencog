@@ -37,9 +37,9 @@
         (TypeNode "ImplicationLink"))))
 
 (define forall-implication-to-higher-order-body
-  (ForAllLink
-     (VariableNode "$TyVs")
-     (VariableNode "$Impl")))
+  (QuoteLink (ForAllLink
+     (UnquoteLink (VariableNode "$TyVs"))
+     (UnquoteLink (VariableNode "$Impl")))))
 
 (define forall-implication-to-higher-order-rewrite
   (ExecutionOutputLink

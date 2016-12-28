@@ -3,11 +3,17 @@
 ;
 (define-module (opencog nlp aiml))
 
-(use-modules (srfi srfi-1))
+(use-modules (srfi srfi-1) (rnrs io ports))
 (use-modules (opencog) (opencog nlp) (opencog exec) (opencog openpsi))
 
 ; (load "aiml/bot.scm")
 (load "aiml/gender.scm")
+(load "aiml/subs.scm")
+
+; ==============================================================
+
+; Default states
+(State (Concept "AIML state topic") (List))
 
 ; ==============================================================
 
@@ -58,6 +64,34 @@
         ))
 "
 	(map token-seq-of-parse (sentence-get-parses SENT))
+)
+
+; ==============================================================
+
+(define-public (aiml-set-bot-prop PROP-FILE)
+"
+  set-bot-prop PROP-FILE -- Set the bot properties as defined in
+  PROP-FILE
+
+  Each of the properties corresponds to the \"bot\" keyword in AIML.
+
+  Each line of the PROP-FILE should store a single property, in the
+  form of \"key=value\".
+"
+	(define (set-bot STR VAL-STR)
+		(State (Concept (string-append "AIML-bot-" (string-trim-both STR)))
+			(string-words (string-trim-both VAL-STR))))
+
+	(define in-port (open-file-input-port PROP-FILE))
+	(define line (get-line in-port))
+	(define prop (list))
+
+	(while (not (eof-object? line))
+		(set! prop (string-split line #\=))
+		(set-bot (car prop) (cadr prop))
+		(set! line (get-line in-port)))
+
+	(close-port in-port)
 )
 
 ; ==============================================================
@@ -192,7 +226,7 @@
 )
 
 ; -----------------------------------------------------------
-; Return all of the rules that match the input SENT via a patern
+; Return all of the rules that match the input SENT via a pattern
 ; (i.e. use variables in the pattern)
 (define (get-pattern-rules SENT)
 
@@ -208,10 +242,22 @@
 				))))
 		)))
 
+	(define (get-rules)
+		; For getting those "wildcard" rules
+		; TODO: Maybe it is better to get these rules using GetLink + SignatureLink,
+		; but at the moment it does not support unordered link, and doing it this
+		; way is fast...
+		(define wildcard-rule-context
+			(Evaluation (Predicate "*-AIML-pattern-*") (List (Glob "$star-1"))))
+
+		(concatenate! (list
+			(psi-get-dual-match SENT)
+			(cog-get-root wildcard-rule-context)))
+	)
+
 	; Get all of the rules that might apply to this sentence,
 	; and are inexact matches (i.e. have a variable in it)
-	(filter is-usable-rule?
-		(map gar (psi-get-dual-match SENT)))
+	(filter is-usable-rule? (map gar (get-rules)))
 )
 
 ; Given a pattern-based rule, run it. Given that it has variables
@@ -246,21 +292,63 @@
 	)
 )
 
-;; XXX FIXME Handle THAT sections too ... same way as topic ...
+; Return #t if 'that' in the RULE context is actually equal
+; to the current AIML that state.
+(define (satisfy-that? RULE)
+	(define pred (get-pred RULE "*-AIML-that-*"))
+	(if (null? pred) #t
+		(or (equal? (do-aiml-get (Concept "that")) (gdr pred))
+			; There may be a '*' in the 'that' tag of a rule as
+			; well -- use a MapLink to check the satisfiability
+			(not (null? (gar (cog-execute! (MapLink (gdr pred)
+				(Set (do-aiml-get (Concept "that"))))))))))
+)
+
+; AIML spec compatibility:
+; AIML uses a trie, and only accepts the longest-possible match -- that is,
+; it matches the 1st word, and then 2nd, 3rd... and so on until there is a
+; mismatch. So for example if there are two rules
+;     <pattern>THERE IS A *</pattern>
+;     <pattern>THERE IS *</pattern>
+; and the input is "There is a cat", it will always choose the first one
+; and never choose the second. The below makes sure that OC AIML behaves
+; the same way.
+(define (get-longest-match RULES SENT)
+	(define common 0)
+	(define rtn-rules (list))
+
+	(for-each
+		(lambda (r)
+			(define rule-pat (gdr (get-pred r "*-AIML-pattern-*")))
+			(define cnt (list-index (lambda (x y) (not (equal? x y)))
+				(cog-outgoing-set rule-pat) (cog-outgoing-set SENT)))
+			; If cnt is false, that's an exact match
+			(if (equal? cnt #f) (set! cnt (cog-arity SENT)))
+			(cond
+				((> cnt common) (set! common cnt) (set! rtn-rules (list r)))
+				((= cnt common) (set! rtn-rules (append rtn-rules (list r))))))
+		RULES)
+
+	rtn-rules
+)
+
 (define-public (aiml-get-applicable-rules SENT)
 "
-  aiml-get-applicable-rules SENT - Get all AIML rules that are suitable
-  for generating a reply to the givven sentence.
+  aiml-get-applicable-rules SENT - Get AIML rules that are suitable
+  for generating a reply to the given sentence. Return pattern-based
+  rules only if there are no exact matches.
 "
-	(define all-rules
-		(concatenate! (list
-			(get-exact-rules SENT)
-			(get-pattern-rules SENT))))
+	(define exact-rules (get-exact-rules SENT))
 
-	(define top-rules
-		(filter is-topical-rule? all-rules))
+	(define pat-rules (get-pattern-rules SENT))
 
-	top-rules
+	(define top-rules (filter is-topical-rule?
+		(append exact-rules pat-rules)))
+
+	(define tht-rules
+		(filter satisfy-that? top-rules))
+
+	(get-longest-match tht-rules SENT)
 )
 
 ; --------------------------------------------------------------
@@ -288,7 +376,7 @@
 
 	;; Return #t for the first rule in the RULE-LIST for which the
 	;; accumulated weight is above THRESH.
-	(define accum 0.000000001)
+	(define accum 0.0)
 	(define (pick-first ATOM THRESH)
 		(set! accum (+ accum (get-weight ATOM)))
 		(< THRESH accum))
@@ -300,8 +388,12 @@
 	(let ((thresh (random sum)))
 		(if (null? RULE-LIST)
 			'()
-			(list-ref RULE-LIST (list-index
-				(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST))
+			(let ((idx (list-index
+					(lambda (ATOM) (pick-first ATOM thresh)) RULE-LIST)))
+				; Returns the last rule in the list if idx is #f
+				(if idx
+					(list-ref RULE-LIST idx)
+					(car (last-pair RULE-LIST))))
 	))
 )
 
@@ -341,6 +433,15 @@
 			(not (null? (gaar RESP))))
 		(not (null? (gar RESP)))))
 
+(define selected-rule "")
+(define-public (aiml-get-selected-rule)
+"
+  aiml-get-selected-rule - Return the AIML rule that has been selected
+  by the engine
+"
+	selected-rule
+)
+
 ;; get-response-step SENT -- get an AIML response to the sentence
 ;; SENT.  Recursive, i.e. it will recursively handle the SRAI's,
 ;; but is not necessarily the outermost response generator. That
@@ -358,7 +459,7 @@
 			(let* ((rule (aiml-select-rule all-rules))
 					(response (aiml-run-rule SENT rule)))
 				(if (valid-response? response)
-					response
+					(begin (set! selected-rule rule) response)
 					(do-while-null SENT (- CNT 1))
 				))))
 
@@ -382,7 +483,16 @@
 	; previous response. Right now, we just check one level deep.
 	; XXX FIXME .. Maybe check a much longer list??
 	(define (same-as-before? SENT)
-		(equal? SENT (do-aiml-get (Concept "that")))
+		(define that (do-aiml-get (Concept "that")))
+		(define that-len
+			(if (null? that) 0
+				(string-length (string-join
+					(map cog-name (cog-outgoing-set that)) " "))
+			))
+
+		; It is OK to repeat the last response if it is
+		; shorter than 15 characters
+		(and (equal? SENT that) (> that-len 15))
 	)
 
 	(define (do-while-same SENT CNT)
@@ -393,11 +503,40 @@
 					response
 				))))
 
+	; Do simple substitution, for example "I'll" -> "I will"
+	(set! SENT (do-aiml-subs SENT))
+
+	; AIML pattern matching is case insensitive
+	(set! SENT (List (map (lambda (w)
+		(Word (string-downcase (cog-name w))))
+			(cog-outgoing-set SENT))))
+
 	(let ((response (word-list-flatten (do-while-same SENT 5))))
 
+		; Try to look for any pickup responses if "response" is empty.
+		; This may happen occasionally if it get stuck at a rule
+		; that contains unsupported tags (e.g. condition), or a rule
+		; that is broken in some way. Maybe it's better to trigger the
+		; "pickup search" manually for now, than giving no responses
+		(if (equal? response (List)) (begin
+			(display "no response has been generated, looking for a pickup\n")
+			(set! response (word-list-flatten
+				(do-while-same (List (Glob "$star-1")) 5)))))
+
 		; The robots response is the current "that".
+		; Store up to two previous inputs and outputs
+		; XXX TODO: Would be better to log and retrieve the chat
+		;           history using AtTimeLink and the time server
 		(if (valid-response? response)
-			(do-aiml-set (Concept "that") response))
+			(let ((that (do-aiml-get (Concept "that"))))
+				(if (not (null? that))
+					(do-aiml-set (Concept "that-2") that))
+				(do-aiml-set (Concept "that") response)))
+
+		(let ((input (do-aiml-get (Concept "input"))))
+			(if (not (null? input))
+				(do-aiml-set (Concept "input-2") input))
+			(do-aiml-set (Concept "input") SENT))
 
 		; Return the response.
 		response
@@ -442,11 +581,12 @@
 
 (define-public (do-aiml-set KEY VALUE)
 	(define flat-val (word-list-flatten VALUE))
+	(define reval (if (equal? '() flat-val) (WordNode "") flat-val))
 	; (display "Perform AIML set key=") (display KEY) (newline)
-	; (display "set value=") (display flat-val) (newline)
+	; (display "set value=") (display reval) (newline)
 	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
-	(State rekey flat-val)
-	flat-val
+	(State rekey reval)
+	reval
 )
 
 ; AIML-tag get -- Fetch value from a StateLink key-value pair
@@ -457,7 +597,8 @@
 (define-public (do-aiml-get KEY)
 	(define rekey (Concept (string-append "AIML state " (cog-name KEY))))
 	; gar discards the SetLink that the GetLink returns.
-	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
+	(gar (cog-execute! (Get (TypedVariable (Variable "$x") (Type "ListLink"))
+		(State rekey (Variable "$x"))))))
 
 ; AIML-tag bot -- Just like get, but for bot values.
 (DefineLink
@@ -467,7 +608,30 @@
 (define-public (do-aiml-bot-get KEY)
 	(define rekey (Concept (string-append "AIML-bot-" (cog-name KEY))))
 	; gar discards the SetLink that the GetLink returns.
-	(gar (cog-execute! (Get (State rekey (Variable "$x"))))))
+	(gar (cog-execute! (Get (TypedVariable (Variable "$x") (Type "ListLink"))
+		(State rekey (Variable "$x"))))))
+
+(DefineLink
+	(DefinedSchemaNode "AIML-tag input")
+	(GroundedSchemaNode "scm: do-aiml-input"))
+
+(define-public (do-aiml-input idx)
+	(if (= (string->number (cog-name idx)) 1)
+		(do-aiml-get (Concept "input"))
+		(do-aiml-get (Concept (string-append "input-"
+			(car (string-split (cog-name idx) #\.))))))
+)
+
+(DefineLink
+	(DefinedSchemaNode "AIML-tag that")
+	(GroundedSchemaNode "scm: do-aiml-that"))
+
+(define-public (do-aiml-that idx)
+	(if (= (string->number (cog-name idx)) 1)
+		(do-aiml-get (Concept "that"))
+		(do-aiml-get (Concept (string-append "that-"
+			(car (string-split (cog-name idx) #\.))))))
+)
 
 ;; -------------------------
 ; AIML-tag person -- Convert 1st to third person, and back.

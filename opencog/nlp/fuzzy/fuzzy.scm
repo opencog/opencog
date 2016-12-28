@@ -126,7 +126,7 @@
 "
     ; Return the set of similar sets.
     (define r2l-set (get-r2l-set-of-sent sent-node))
-    (nlp-fuzzy-match r2l-set 'SetLink exclude-list)
+    (nlp-fuzzy-match r2l-set 'SetLink exclude-list #f)
 )
 
 ; ----------------------------------------------------------
@@ -186,7 +186,7 @@
             (r2l-set (get-r2l-set-of-sent sent-node))
 
             ; fzset is the set of similar r2l-sets.
-            (fzset (nlp-fuzzy-match r2l-set 'SetLink exclude-list))
+            (fzset (nlp-fuzzy-match r2l-set 'SetLink exclude-list #f))
 
             ; ppset is a set of atoms that will be used for sentence generation
             ; after doing some post-processing

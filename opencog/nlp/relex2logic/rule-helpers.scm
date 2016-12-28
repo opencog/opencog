@@ -631,7 +631,11 @@
 	(cond
 		((or (string=? determiner "those") (string=? determiner "these"))
 			(ListLink
-				(ImplicationLink
+				;; XXX FIXME: right now, this says ImplicationScopeLink
+				;; But I think the intended meaning is a for-all link:
+				;; (ForAllLink (VariableNode var_name) (ImplicationLink ...))
+				;; Right?
+				(ImplicationScopeLink
 					(MemberLink (VariableNode var_name) (ConceptNode instance))
 					(InheritanceLink (VariableNode var_name) (ConceptNode concept))))
 			(r2l-wordinst-concept instance)
@@ -788,7 +792,22 @@
 ; Example: "She wants you to help us." -- assigns wrong subject in
 ; second clause. XXX FIXME
 ;
-(define-public (to-do-rule-2 v1 v1_instance v2 v2_instance s1 s1_instance s2 s2_instance o o_instance)
+(define-public (to-do-rule-2
+                verb1_lemma verb1_inst
+                verb2_lemma verb2_inst
+                subj1_lemma subj1_inst
+                subj2_lemma subj2_inst
+                obj_lemma obj_inst)
+	(define v1 (cog-name verb1_lemma))
+	(define v1_instance (cog-name verb1_inst))
+	(define v2 (cog-name verb2_lemma))
+	(define v2_instance (cog-name verb2_inst))
+	(define s1 (cog-name subj1_lemma))
+	(define s1_instance (cog-name subj1_inst))
+	(define s2 (cog-name subj2_lemma))
+	(define s2_instance (cog-name subj2_inst))
+	(define o (cog-name obj_lemma))
+	(define o_instance (cog-name obj_inst))
 	(ListLink
 		(InheritanceLink (ConceptNode s1_instance) (ConceptNode s1))
 		(InheritanceLink (ConceptNode s2_instance) (ConceptNode s2))
@@ -946,8 +965,10 @@
 ; Example: "When did jazz die?","When did you bake the cake?",
 ; "When did you give him the money?" etc.
 ;
-(define-public (when-rule verb verb_instance)
-	(let ((var_name (choose-var-name)))
+(define-public (when-rule lemma verb-inst)
+	(let ((verb (cog-name lemma))
+			(verb_instance (cog-name verb-inst))
+			(var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
 			(r2l-wordinst-predicate verb_instance)
@@ -961,8 +982,11 @@
 ;
 ; Example "When is the party?" etc.
 ;
-(define-public (whencop-Q-rule subj_concept subj_instance)
-	(let ((var_name (choose-var-name)))
+(define-public (whencop-Q-rule subj-concept-node subj-instance-node)
+	(let ((var_name (choose-var-name))
+			(subj_concept (cog-name subj-concept-node))
+			(subj_instance (cog-name subj-instance-node))
+		)
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
 			(r2l-wordinst-concept subj_instance)
@@ -1096,19 +1120,29 @@
 )
 ;
 ;-------------------------------------------
-; CHOICE-TYPE QUESTIONS (also known as question-determiners) -- what and which
+; CHOICE-TYPE QUESTIONS (also known as question-determiners)
+; -- what and which questions
 ;
-; NB: I don't think these rules could be made to plug into the setence templates because of the
-; SatisfyingSet logic . . .
+; NB: I don't think these rules could be made to plug into the
+; setence templates because of the SatisfyingSet logic . . .
 ;
-; Therefore still need to write SV, prep, to-do, and to-be versions of these if we want that functionality --
-; or do them without the satisfying set logic, so they can just plug into the templates . . .
+; Therefore still need to write SV, prep, to-do, and to-be versions
+; of these if we want that functionality -- or do them without the
+; satisfying set logic, so they can just plug into the templates . . .
 ;
 ;-------------------------------------------
 ;
 ; Example: "Which girl do you like?" "What book are you reading?"
 ;
-(define-public (whichobjQ-rule obj_concept obj_instance verb verb_instance subj_concept subj_instance)
+(define-public (whichobjQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1133,7 +1167,15 @@
 ;
 ; Example: "Which girl likes you?" "What fool said that?"
 ;
-(define-public (whichsubjSVOQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance)
+(define-public (whichsubjSVOQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1158,7 +1200,17 @@
 ;
 ; Example: "To which address did you send the email?"
 ;
-(define-public (whichiobjQ-rule subj_concept subj_instance verb verb_instance obj_concept obj_instance iobj_concept iobj_instance)
+(define-public (whichiobjQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst iobj_lemma iobj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+	(define iobj_concept (cog-name iobj_lemma))
+	(define iobj_instance (cog-name iobj_inst))
+
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1186,7 +1238,12 @@
 ;
 ; Example: "Which girl is crazy?"
 ;
-(define-public (whichpredadjQ-rule subj_concept subj_instance pred_concept pred_instance)
+(define-public (whichpredadjQ-rule
+	subj_lemma subj_inst pred_lemma pred_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define pred_concept (cog-name pred_lemma))
+	(define pred_instance (cog-name pred_inst))
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
@@ -1195,18 +1252,85 @@
 			(r2l-wordinst-concept subj_instance)
 			(r2l-wordinst-predicate pred_instance)
 			(SatisfyingSetLink
-				; (ScopeLink ;; not yet supported !? Huhh ??
-					(VariableNode var_name)
-					(EvaluationLink
-						(PredicateNode pred_instance)
-						(ListLink
-							(VariableNode var_name))
-					)
-				; )
+				(VariableNode var_name)
+				(EvaluationLink
+					(PredicateNode pred_instance)
+					(ListLink
+						(VariableNode var_name))
+				)
 			)
 		)
 	)
 )
+
+(define-public (whichsubjQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+	(throw 'not-implemented)
+)
+
+(define-public (whichsubjSVIOQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst iobj_lemma iobj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+	(define iobj_concept (cog-name iobj_lemma))
+	(define iobj_instance (cog-name iobj_inst))
+	(throw 'not-implemented)
+)
+
+(define-public (whichobjSVIOQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst obj_lemma obj_inst iobj_lemma iobj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj_concept (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
+	(define iobj_concept (cog-name iobj_lemma))
+	(define iobj_instance (cog-name iobj_inst))
+	(throw 'not-implemented)
+)
+
+(define-public (whichpobjQ-rule
+	subj_lemma subj_inst prep_lemma prep_inst pobj_lemma pobj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define prep (cog-name prep_lemma))
+	(define prep_instance (cog-name prep_inst))
+	(define pobj_concept (cog-name pobj_lemma))
+	(define pobj_instance (cog-name pobj_inst))
+	(throw 'not-implemented)
+)
+
+(define-public (whichsubjpobjQ-rule
+	subj_lemma subj_inst prep_lemma prep_inst pobj_lemma pobj_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define prep (cog-name prep_lemma))
+	(define prep_instance (cog-name prep_inst))
+	(define pobj_concept (cog-name pobj_lemma))
+	(define pobj_instance (cog-name pobj_inst))
+	(throw 'not-implemented)
+)
+
+(define-public (whichsubjSVQ-rule
+	subj_lemma subj_inst verb_lemma verb_inst)
+	(define subj_concept (cog-name subj_lemma))
+	(define subj_instance (cog-name subj_inst))
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(throw 'not-implemented)
+)
+
 ;
 ; -----------------------------------------------------------------------
 ; all rules
@@ -1255,7 +1379,11 @@
 )
 
 ; Example: "The books are published."
-(define-public (passive-rule2 verb verb_instance obj obj_instance)
+(define-public (passive-rule2 verb_lemma verb_inst obj_lemma obj_inst)
+	(define verb (cog-name verb_lemma))
+	(define verb_instance (cog-name verb_inst))
+	(define obj (cog-name obj_lemma))
+	(define obj_instance (cog-name obj_inst))
 	(let ((var_name (choose-var-name)))
 		(ListLink
 			(ImplicationLink (PredicateNode verb_instance) (PredicateNode verb))
@@ -1264,10 +1392,10 @@
 			(r2l-wordinst-predicate verb_instance)
 			(EvaluationLink
 				(PredicateNode verb_instance)
-					(ListLink
-						(VariableNode var_name)
-						(ConceptNode obj_instance)
-					)
+				(ListLink
+					(VariableNode var_name)
+					(ConceptNode obj_instance)
+				)
 			)
 		)
 	)

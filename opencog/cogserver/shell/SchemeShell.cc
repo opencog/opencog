@@ -35,28 +35,32 @@ using namespace opencog;
 SchemeShell::SchemeShell(void)
 {
 	normal_prompt = "guile> ";
-	if (config().get_bool("ANSI_ENABLED"))
-		normal_prompt = config()["ANSI_SCM_PROMPT"];
+	// Prompt with ANSI color codes, if possible.
+	if (config().get_bool("ANSI_ENABLED", true))
+		normal_prompt = config().get("ANSI_SCM_PROMPT", "[0;34mguile[1;34m> [0m");
 	else
-		normal_prompt = config()["SCM_PROMPT"];
+		normal_prompt = config().get("SCM_PROMPT", "guile> ");
 
 	abort_prompt += normal_prompt;
 
 	pending_prompt = "... ";
 
-	do_async_output = true;
-
-	evaluator = SchemeEval::get_evaluator();
-
 	// Set the inital atomspace for this thread.
 	SchemeEval::set_scheme_as(&cogserver().getAtomSpace());
-	evaluator->begin_eval();
-	evaluator->eval_expr("(setlocale LC_CTYPE \"\")");
-	evaluator->poll_result();
 }
 
 SchemeShell::~SchemeShell()
 {
+	// We must stall until after the evaluator has finished
+	// evaluating. Otherwise, the thread_init() method (below)
+	// might never get a chance to run, leading to a NULL
+	// atomspace, leading to a crash.  Bug #2328.
+	while_not_done();
+}
+
+GenericEval* SchemeShell::get_evaluator(void)
+{
+	return SchemeEval::get_evaluator(&cogserver().getAtomSpace());
 }
 
 /**

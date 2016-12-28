@@ -23,10 +23,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
 
 using namespace opencog;
 
@@ -78,14 +76,13 @@ public:
         _scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR  "/opencog\")");
         CHKERR
 
-        config().set("SCM_PRELOAD",
-                    "scm/opencog/rule-engine/rule-engine-utils.scm");
-        load_scm_files_from_config(*_as);
 
         _as->clear();
         _scm->eval("(use-modules (opencog))");
         _scm->eval("(use-modules (opencog atom-types))");
         _scm->eval("(use-modules (opencog rule-engine))");
+
+        _scm->eval("load-from-path \"scm/opencog/rule-engine/rule-engine-utils.scm\")");
     }
 
     void tearDown()
