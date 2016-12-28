@@ -248,17 +248,20 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
 }
 
 /** Unique singleton instance (for now) */
+// This implementation is pretty hokey, and is a stop-gap until some
+// sort of moreelegant way of managing the attentionbank is found.
+// One of the issues is that access via this function can be CPU-wasteful.
 AttentionBank& opencog::attentionbank(AtomSpace* asp)
 {
+    static AttentionBank* instance = nullptr;
+
+    // Protect setting and getting against thread races.
+    // This is probably not needed.
     static std::map<AtomSpace*, AttentionBank*> banksy;
     static std::mutex art;
-
     std::unique_lock<std::mutex> graffiti(art);
 
-    auto pr = banksy.find(asp);
-    if (pr != banksy.end()) return *(pr->second);
-
-    AttentionBank* ab = new AttentionBank(asp);
-    banksy[asp] = ab;
-    return *ab;
+    if (asp and nullptr == instance) instance = new AttentionBank(asp);
+    if (nullptr == asp and instance) { delete instance; instance = nullptr; }
+    return *instance;
 }
