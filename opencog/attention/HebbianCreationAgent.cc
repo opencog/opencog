@@ -29,6 +29,7 @@
 #include <opencog/atomutils/Neighbors.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 #include "HebbianCreationAgent.h"
@@ -61,12 +62,12 @@ void HebbianCreationAgent::run()
         return;
 
     HandleSeq notAttentionalFocus;
-    int afb = _as->get_attentional_focus_boundary();
-    _as->get_handles_by_AV(back_inserter(notAttentionalFocus),0,afb);
+    int afb = attentionbank(_as).getAttentionalFocusBoundary();
+    attentionbank(_as).get_handles_by_AV(back_inserter(notAttentionalFocus), 0, afb);
 
-   // Retrieve the atoms in the AttentionalFocus
+    // Retrieve the atoms in the AttentionalFocus
     OrderedHandleSet attentionalFocus;
-    _as->get_handle_set_in_attentional_focus(std::inserter(attentionalFocus,attentionalFocus.begin()));
+    attentionbank(_as).get_handle_set_in_attentional_focus(std::inserter(attentionalFocus,attentionalFocus.begin()));
 
     // Exclude the source atom
     attentionalFocus.erase(source);

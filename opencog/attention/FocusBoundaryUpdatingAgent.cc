@@ -34,6 +34,7 @@
 #include <opencog/attention/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include "FocusBoundaryUpdatingAgent.h"
 
 //#define DEBUG
@@ -53,12 +54,12 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
     minAFSize = config().get_int("MIN_AF_SIZE", 100);
     maxAFSize = config().get_int("MAX_AF_SIZE", 500);
 
-   _as->set_attentional_focus_boundary(bottomBoundary);
+    attentionbank(_as).setAttentionalFocusBoundary(bottomBoundary);
 }
 
 void FocusBoundaryUpdatingAgent::run()
 {
-        AttentionValue::sti_t afboundary = _as->get_attentional_focus_boundary();
+        AttentionValue::sti_t afboundary = attentionbank(_as).getAttentionalFocusBoundary();
 
        /*
         AttentionValue::sti_t maxsti = _as->get_max_STI();
@@ -71,20 +72,20 @@ void FocusBoundaryUpdatingAgent::run()
 
         afboundary = newafb * decay + (1.0 - decay) * afboundary;
 
-        afboundary = std::max(afboundary,bottomBoundary);
+        afboundary = std::max(afboundary, bottomBoundary);
 
         //printf("NewAfb: %d OldAfb: %d Afb: %d \n",newafb,oldafb,afboundary);
         */
        
         HandleSeq afset;
-        _as->get_handle_set_in_attentional_focus(std::back_inserter(afset));
+        attentionbank(_as).get_handle_set_in_attentional_focus(std::back_inserter(afset));
         
         if(afset.size() > minAFSize ){
             afboundary = get_cutoff(afset);
         }
 
         // Set the AF boundary
-        _as->set_attentional_focus_boundary(afboundary);
+        attentionbank(_as).setAttentionalFocusBoundary(afboundary);
        
 }
 

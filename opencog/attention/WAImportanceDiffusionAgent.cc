@@ -1,5 +1,5 @@
 /*
- * WAImportanceDiffusionAgent.cc
+ * opencog/attention/WAImportanceDiffusionAgent.cc
  *
  * Copyright (C) 2016 Opencog Foundation
  *
@@ -26,6 +26,7 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/attention/atom_types.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 #include "WAImportanceDiffusionAgent.h"
 
@@ -107,14 +108,14 @@ HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
 {
     HandleSeq  sources;
     
-    AttentionValue::sti_t AFBoundarySTI = _as->get_attentional_focus_boundary();
+    AttentionValue::sti_t AFBoundarySTI = attentionbank(_as).getAttentionalFocusBoundary();
     AttentionValue::sti_t lowerSTI  =   AFBoundarySTI - 15;
 
     std::default_random_engine generator;
     // randomly select a bin 
     std::uniform_int_distribution<AttentionValue::sti_t> dist(lowerSTI,AFBoundarySTI);
     auto sti = dist(generator);
-    _as->get_handles_by_AV(std::back_inserter(sources),sti,sti+5);
+    attentionbank(_as).get_handles_by_AV(std::back_inserter(sources),sti,sti+5);
     
     if(sources.size() > 100){ sources.resize(100); } //Resize to 100 elements.
 

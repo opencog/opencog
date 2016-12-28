@@ -29,6 +29,7 @@
 #include <opencog/attention/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/cogserver/server/Agent.h>
 #include "MinMaxSTIUpdatingAgent.h"
 
@@ -73,6 +74,6 @@ void MinMaxSTIUpdatingAgent::run()
         minSTISeen = maxSTISeen;
     }
 
-    _as->update_max_STI(maxSTISeen);
-    _as->update_min_STI(minSTISeen);
+    attentionbank(_as).updateMaxSTI(maxSTISeen);
+    attentionbank(_as).updateMinSTI(minSTISeen);
 }
