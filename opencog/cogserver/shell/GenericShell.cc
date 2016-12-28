@@ -312,6 +312,11 @@ void GenericShell::line_discipline(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
+				// Discard all pending, unevaluated junk in the queue.
+				// Failure to do so will typically result in confusing
+				// the shell user.
+				while (not evalque.is_empty()) evalque.pop();
+
 				// Must write the abort prompt, first, because
 				// telnet will silently ignore any bytes that
 				// come before it.
@@ -338,11 +343,14 @@ void GenericShell::line_discipline(const std::string &expr)
 	unsigned char c = expr[len-1];
 	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
-		_eval_done = true;
+		// Discard all pending, unevaluated junk in the queue.
+		while (not evalque.is_empty()) evalque.pop();
+
 		_evaluator->interrupt();
 		_evaluator->clear_pending();
 
 		put_output("\n");
+		finish_eval();
 		put_output(normal_prompt);
 		return;
 	}
@@ -428,7 +436,13 @@ void GenericShell::eval_loop(void)
 	{
 		try
 		{
+			// Do not begin the next queued expr until the last
+			// has finished. Failure to do this can result in
+			// weird crashes in the SchemeEval class.
 			while_not_done();
+
+			// Note that this pop will wait until the queue
+			// becomes non-empty.
 			evalque.pop(in);
 			start_eval();
 			_evaluator->begin_eval();
