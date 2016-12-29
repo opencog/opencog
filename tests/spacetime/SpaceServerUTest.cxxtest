@@ -67,8 +67,11 @@ public:
     {
         Handle testmaphandle = testspaceserver->addOrGetSpaceMap(123456, "testmap", 1);
 
-        TS_ASSERT(testatomspace.is_valid_handle(testmaphandle));
-        TS_ASSERT_EQUALS(testatomspace.get_node(SPACE_MAP_NODE, "testmap"), testmaphandle);
+        TS_ASSERT(testmaphandle != nullptr);
+        Handle expected = testatomspace.get_node(SPACE_MAP_NODE, "testmap");
+        printf("expected=%s\n got=%s\n", expected->toString().c_str(),
+              testmaphandle->->toString().c_str());
+        TS_ASSERT_EQUALS(expected, testmaphandle);
     }
 
     void test_addAndRemoveSpaceInfo()
@@ -81,9 +84,14 @@ public:
                                       234567,
                                       9, 10, 11);
         const SpaceServer::SpaceMap& testmap = testspaceserver->getMap(testmaphandle);
-        TS_ASSERT_EQUALS(testmap.getBlock(BlockVector(9, 10, 11)), testobjecthandle);
+        Handle expected = testmap.getBlock(BlockVector(9, 10, 11));
+        printf("expected=%s\n got=%s\n", expected->toString().c_str(),
+              testobjecthandle->->toString().c_str());
+        TS_ASSERT_EQUALS(expected, testobjecthandle);
+
         testspaceserver->removeSpaceInfo(testobjecthandle,testmaphandle);
-        TS_ASSERT_EQUALS(testmap.getBlock(BlockVector(9, 10, 11)), Handle::UNDEFINED);
+        expected = testmap.getBlock(BlockVector(9, 10, 11));
+        printf("Expect null ptr: %p\n", (void*) expected);
+        TS_ASSERT_EQUALS(expected, Handle::UNDEFINED);
     }
 };
-
