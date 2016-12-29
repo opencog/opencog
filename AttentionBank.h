@@ -123,6 +123,7 @@ class AttentionBank
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
 
+    void change_vlti(const Handle&, int);
 public:
     AttentionBank(AtomSpace*);
     ~AttentionBank();
@@ -141,6 +142,15 @@ public:
      * Get the attention value of an atom.
      */
     AttentionValuePtr get_av(const Handle&);
+    AttentionValue::sti_t get_sti(const Handle& h) {
+        return get_av(h)->getSTI();
+    }
+    AttentionValue::lti_t get_lti(const Handle& h) {
+        return get_av(h)->getLTI();
+    }
+    AttentionValue::vlti_t get_vlti(const Handle& h) {
+        return get_av(h)->getVLTI();
+    }
 
     /**
      * change the attention value of an atom.
@@ -148,7 +158,8 @@ public:
     void change_av(const Handle&, AttentionValuePtr);
     void set_sti(const Handle&, AttentionValue::sti_t);
     void set_lti(const Handle&, AttentionValue::lti_t);
-    void change_vlti(const Handle&, int);
+    void inc_vlti(const Handle& h) { change_vlti(h, +1); }
+    void dec_vlti(const Handle& h) { change_vlti(h, -1); }
 
     /**
      * Stimulate an atom.
