@@ -32,7 +32,6 @@
 using namespace opencog;
 
 AttentionBank::AttentionBank(AtomSpace* asp) :
-    _index_insert_queue(this, &AttentionBank::put_atom_into_index, 4),
     _index_remove_queue(this, &AttentionBank::remove_atom_from_index, 4)
 {
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS", 100000);
@@ -48,17 +47,11 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
 
     bool async = config().get_bool("ATTENTION_BANK_ASYNC", false);
     if (async) {
-     _addAtomConnection =
-        asp->addAtomSignal(
-            boost::bind(&AttentionBank::add_atom_to_indexInsertQueue, this, _1));
     _removeAtomConnection =
         asp->removeAtomSignal(
             boost::bind(&AttentionBank::add_atom_to_indexRemoveQueue, this, _1));
     }
     else {
-     _addAtomConnection =
-        asp->addAtomSignal(
-            boost::bind(&AttentionBank::put_atom_into_index, this, _1));
     _removeAtomConnection =
         asp->removeAtomSignal(
             boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
@@ -68,7 +61,6 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
 
 AttentionBank::~AttentionBank()
 {
-    _addAtomConnection.disconnect();
     _removeAtomConnection.disconnect();
 }
 

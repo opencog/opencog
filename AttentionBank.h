@@ -65,11 +65,9 @@ class AttentionBank
     std::mutex _idx_mtx;
     std::unordered_map<Handle, AttentionValuePtr> _atom_index;
 
-    /** The connection by which we are notified of AV changes */
-    boost::signals2::connection _AVChangedConnection;
+    /** AV changes */
     void AVChanged(const Handle&, const AttentionValuePtr&, const AttentionValuePtr&);
 
-    boost::signals2::connection _addAtomConnection;
     boost::signals2::connection _removeAtomConnection;
 
     /**
@@ -87,7 +85,8 @@ class AttentionBank
     AFCHSigl _RemoveAFSignal;
 
     /**
-     * Running average min and max STI, together with locks to pretect updates.
+     * Running average min and max STI, together with locks to
+     * protect updates.
      */
     opencog::recent_val<AttentionValue::sti_t> _maxSTI;
     opencog::recent_val<AttentionValue::sti_t> _minSTI;
@@ -117,7 +116,6 @@ class AttentionBank
     /** The importance index */
     ImportanceIndex _importanceIndex;
 
-    async_caller<AttentionBank,Handle> _index_insert_queue;
     async_caller<AttentionBank,AtomPtr> _index_remove_queue;
 
     /** Signal emitted when the AV changes. */
@@ -366,19 +364,9 @@ public:
         _importanceIndex.updateImportance(h.operator->(), oldbin, newbin);
     }
 
-    void add_atom_to_indexInsertQueue(const Handle& h)
-    {
-        _index_insert_queue.enqueue(h);
-    }
-
     void add_atom_to_indexRemoveQueue(const AtomPtr& atom)
     {
         _index_remove_queue.enqueue(atom);
-    }
-
-    void put_atom_into_index(const Handle& h)
-    {
-        _importanceIndex.insertAtom(h.operator->());
     }
 
     void remove_atom_from_index(const AtomPtr& atom)
