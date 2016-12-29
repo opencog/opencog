@@ -34,9 +34,11 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
+
 extern "C" {
 #include <opencog/util/cluster.h>
 }
+
 #include "DimEmbedModule.h"
 
 using namespace opencog;
@@ -49,7 +51,9 @@ DECLARE_MODULE(DimEmbedModule)
 DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
 {
     logger().info("[DimEmbedModule] constructor");
-    this->as = &_cogserver.getAtomSpace();
+    as = &_cogserver.getAtomSpace();
+    _bank = &attentionbank(as);
+
     addedAtomConnection = as->
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
     removedAtomConnection = as->
@@ -218,7 +222,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
-    if (!fanin) h->incVLTI();//We don't want pivot atoms to be forgotten...
+    if (!fanin) _bank->inc_vlti(h); //We don't want pivot atoms to be forgotten...
     HandleSeq nodes;
     as->get_handles_by_type(std::back_inserter(nodes), NODE, true);
 
@@ -605,7 +609,7 @@ void DimEmbedModule::clearEmbedding(Type linkType)
 
     HandleSeq pivots  = pivotsMap[linkType];
     for (HandleSeq::iterator it = pivots.begin(); it!=pivots.end(); ++it) {
-        if (as->is_valid_handle(*it)) (*it)->decVLTI();
+        if (as->is_valid_handle(*it)) _bank->dec_vlti(*it);
     }
     if (symmetric) {
         atomMaps.erase(linkType);

@@ -54,16 +54,16 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
     minAFSize = config().get_int("MIN_AF_SIZE", 100);
     maxAFSize = config().get_int("MAX_AF_SIZE", 500);
 
-    attentionbank(_as).setAttentionalFocusBoundary(bottomBoundary);
+    _bank->setAttentionalFocusBoundary(bottomBoundary);
 }
 
 void FocusBoundaryUpdatingAgent::run()
 {
-        AttentionValue::sti_t afboundary = attentionbank(_as).getAttentionalFocusBoundary();
+        AttentionValue::sti_t afboundary = _bank->getAttentionalFocusBoundary();
 
        /*
-        AttentionValue::sti_t maxsti = _as->get_max_STI();
-        AttentionValue::sti_t minsti = _as->get_min_STI();
+        AttentionValue::sti_t maxsti = _bank->get_max_STI();
+        AttentionValue::sti_t minsti = _bank->get_min_STI();
 
         AttentionValue::sti_t range = maxsti - minsti;
 
@@ -78,15 +78,14 @@ void FocusBoundaryUpdatingAgent::run()
         */
        
         HandleSeq afset;
-        attentionbank(_as).get_handle_set_in_attentional_focus(std::back_inserter(afset));
+        _bank->get_handle_set_in_attentional_focus(std::back_inserter(afset));
         
-        if(afset.size() > minAFSize ){
+        if(afset.size() > minAFSize ) {
             afboundary = get_cutoff(afset);
         }
 
         // Set the AF boundary
-        attentionbank(_as).setAttentionalFocusBoundary(afboundary);
-       
+        _bank->setAttentionalFocusBoundary(afboundary);
 }
 
 /**
@@ -100,9 +99,12 @@ void FocusBoundaryUpdatingAgent::run()
  */
 AttentionValue::sti_t FocusBoundaryUpdatingAgent::get_cutoff(HandleSeq& afset)
 {
-    auto getSTI = [](const Handle& h) { return h->getAttentionValue()->getSTI();};
-    std::sort(afset.begin(), afset.end(),[&](const Handle& h1, const Handle& h2){
-            return getSTI(h1) > getSTI(h2);
+    auto getSTI = [&](const Handle& h)->AttentionValue::sti_t {
+        return _bank->get_sti(h);
+    };
+    std::sort(afset.begin(), afset.end(),
+            [&](const Handle& h1, const Handle& h2)->bool {
+                return getSTI(h1) > getSTI(h2);
             });
     HandleSeq afAtoms = HandleSeq(afset.begin() + minAFSize, afset.begin() + maxAFSize);
 

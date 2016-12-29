@@ -42,55 +42,6 @@ using namespace std;
 #define AV2_LTI 30000
 #define AV3_LTI 700
 
-HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
-{
-    char buf[256];
-    HandleSeq testAtoms;
-    int baseNameLength;
-
-    memset(buf, 0, 256);
-    baseNameLength = strlen(baseName);
-    strcpy(buf, baseName);
-
-    TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
-    TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
-    TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
-    buf[baseNameLength] = '1';
-    Handle h1 = atomSpace->add_node(CONCEPT_NODE, buf);
-    h1->setTruthValue(tv1);
-    h1->setSTI(AV1_STI);
-    h1->setLTI(AV1_LTI);
-    buf[baseNameLength] = '2';
-    Handle h2 = atomSpace->add_node(CONCEPT_NODE, buf);
-    h2->setTruthValue(tv2);
-    h2->setSTI(AV2_STI);
-    h2->setLTI(AV2_LTI);
-    buf[baseNameLength] = '3';
-    Handle h3 = atomSpace->add_node(CONCEPT_NODE, buf);
-    h3->setTruthValue(tv3);
-    h3->setSTI(AV3_STI);
-    h3->setLTI(AV3_LTI);
-
-    HandleSeq outgoing1;
-    outgoing1.push_back(h2);
-    outgoing1.push_back(h3);
-    Handle l1 = atomSpace->add_link(LIST_LINK, outgoing1);
-    l1->setTruthValue(tv1);
-    HandleSeq outgoing2;
-    outgoing2.push_back(h1);
-    outgoing2.push_back(l1);
-    Handle l2 = atomSpace->add_link(EVALUATION_LINK, outgoing2);
-    l2->setTruthValue(tv2);
-
-    testAtoms.push_back(h1);
-    testAtoms.push_back(h2);
-    testAtoms.push_back(h3);
-    testAtoms.push_back(l1);
-    testAtoms.push_back(l2);
-
-    return testAtoms;
-}
-
 class MyAgentWithDefaults : public Agent
 {
 

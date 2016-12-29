@@ -42,6 +42,8 @@ using namespace opencog;
 HebbianCreationAgent::HebbianCreationAgent(CogServer& cs) :
     Agent(cs)
 {
+    _bank = &attentionbank(_as);
+
     // Provide a logger, but disable it initially
     setLogger(new opencog::Logger("HebbianCreationAgent.log", Logger::FINE, true));
 
@@ -54,20 +56,20 @@ void HebbianCreationAgent::run()
     Handle source;
     newAtomsInAV.pop(source);
 
-    //HebbianLinks should not normally enter to the AF boundary since they
-    //should not normally have STI values.The below check will avoid such
-    //Scenarios from happening which could lead to HebbianLink creation
-    //bn atoms containing HebbianLink.
+    // HebbianLinks should not normally enter to the AF boundary since they
+    // should not normally have STI values.The below check will avoid such
+    // Scenarios from happening which could lead to HebbianLink creation
+    // bn atoms containing HebbianLink.
     if (classserver().isA(source->getType(), HEBBIAN_LINK))
         return;
 
     HandleSeq notAttentionalFocus;
-    int afb = attentionbank(_as).getAttentionalFocusBoundary();
-    attentionbank(_as).get_handles_by_AV(back_inserter(notAttentionalFocus), 0, afb);
+    int afb = _bank->getAttentionalFocusBoundary();
+    _bank->get_handles_by_AV(back_inserter(notAttentionalFocus), 0, afb);
 
     // Retrieve the atoms in the AttentionalFocus
     OrderedHandleSet attentionalFocus;
-    attentionbank(_as).get_handle_set_in_attentional_focus(std::inserter(attentionalFocus,attentionalFocus.begin()));
+    _bank->get_handle_set_in_attentional_focus(std::inserter(attentionalFocus,attentionalFocus.begin()));
 
     // Exclude the source atom
     attentionalFocus.erase(source);
@@ -139,5 +141,5 @@ void HebbianCreationAgent::addHebbian(Handle source,Handle target)
 {
     Handle link = _as->add_link(ASYMMETRIC_HEBBIAN_LINK, source, target);
     link->setTruthValue(SimpleTruthValue::createTV(0.5, 0.1));
-    link->setVLTI(1);
+    _bank->inc_vlti(link);
 }

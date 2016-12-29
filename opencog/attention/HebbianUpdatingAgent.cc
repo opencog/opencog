@@ -41,6 +41,7 @@ using namespace opencog;
 HebbianUpdatingAgent::HebbianUpdatingAgent(CogServer& cs) :
         Agent(cs)
 {
+    _bank = &attentionbank(_as);
     // Provide a logger
     setLogger(new opencog::Logger("HebbianUpdatingAgent.log", Logger::FINE, true));
 }
@@ -52,7 +53,7 @@ void HebbianUpdatingAgent::run()
 
     std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
 
-    attentionbank(_as).get_handle_set_in_attentional_focus(out_hi);
+    _bank->get_handle_set_in_attentional_focus(out_hi);
 
      /*Without adding this sleep code right below the above method call,
      * nlp-parse evaluation thread waits for minutes before it gets a chance to
@@ -129,8 +130,8 @@ double HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
                 "Size of outgoing set of a hebbian link must be 2.");
     }
 
-    auto normsti_i = attentionbank(_as).getNormalisedZeroToOneSTI(handles[0]->getAttentionValue(), true, true);
-    auto normsti_j = attentionbank(_as).getNormalisedZeroToOneSTI(handles[1]->getAttentionValue(), true, true);
+    auto normsti_i = _bank->getNormalisedZeroToOneSTI(_bank->get_av(handles[0]), true, true);
+    auto normsti_j = _bank->getNormalisedZeroToOneSTI(_bank->get_av(handles[1]), true, true);
     double conj = (normsti_i * normsti_j) + ((normsti_j - normsti_i) * std::abs(normsti_j -normsti_i));
 
     conj = (conj + 1.0) / 2.0;
