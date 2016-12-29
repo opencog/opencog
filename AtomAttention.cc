@@ -47,16 +47,6 @@ void Atom::setAttentionValue(AttentionValuePtr av)
     attentionbank(_atomTable->getAtomSpace()).change_av(getHandle(), av);
 }
 
-void Atom::chgVLTI(int unit)
-{
-    AttentionValuePtr old_av = getAttentionValue();
-    AttentionValuePtr new_av = createAV(
-        old_av->getSTI(),
-        old_av->getLTI(),
-        old_av->getVLTI() + unit);
-    setAttentionValue(new_av);
-}
-
 // ==============================================================
 
 } // ~namespace opencog
