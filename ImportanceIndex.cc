@@ -95,7 +95,6 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
         AttentionValue::sti_t lowerBound,
         AttentionValue::sti_t upperBound) const
 {
-    AtomSet set;
     UnorderedHandleSet ret;
 
     if (lowerBound < 0 || upperBound < 0)
@@ -116,6 +115,7 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
             return (lowerBound <= sti and sti <= upperBound);
         };
 
+    AtomSet set;
     _index.getContentIf(lowerBin, inserter(set), pred);
 
     // If both lower and upper bounds are in the same bin,
@@ -128,12 +128,11 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
 
     // For every index within lowerBound and upperBound,
     // add to the list.
-    while (++lowerBin < upperBin) {
-        _index.getContent(lowerBin,inserter(set));
-    }
+    while (++lowerBin < upperBin)
+        _index.getContent(lowerBin, inserter(set));
 
     // The two lists are concatenated.
-    _index.getContentIf(upperBin,inserter(set),pred);
+    _index.getContentIf(upperBin, inserter(set), pred);
 
     std::transform(set.begin(), set.end(), inserter(ret),
                    [](Atom* atom)->Handle { return atom->getHandle(); });
@@ -176,5 +175,5 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
 
 size_t ImportanceIndex::size(int i) const
 {
-      return _index.size(i);
+    return _index.size(i);
 }
