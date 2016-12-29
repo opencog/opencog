@@ -5,6 +5,7 @@ ADD_LIBRARY (attentionbank
 	AttentionBank.cc
 	ImportanceIndex.cc
 	StochasticImportanceDiffusion.cc
+	ThreadSafeFixedIntegerIndex.cc
 )
 
 TARGET_LINK_LIBRARIES(attentionbank
@@ -23,5 +24,6 @@ INSTALL (FILES
 	AttentionBank.h
 	ImportanceIndex.h
 	StochasticImportanceDiffusion.h
+	ThreadSafeFixedIntegerIndex.h
 	DESTINATION "include/opencog/attentionbank"
 )

@@ -24,7 +24,7 @@
 #define _OPENCOG_IMPORTANCEINDEX_H
 
 #include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/atomspace/ThreadSafeFixedIntegerIndex.h>
+#include <opencog/attentionbank/ThreadSafeFixedIntegerIndex.h>
 
 namespace opencog
 {
