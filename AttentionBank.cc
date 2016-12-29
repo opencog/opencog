@@ -80,6 +80,13 @@ void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
     auto pr = _atom_index.find(h);
     if (pr != _atom_index.end()) oldav = pr->second;
 
+    _atom_index[h] = newav;
+    lck.unlock();
+
+    // XXX FIXME the code below could be made more efficient,
+    // by avoiding the calls to atom->getAttentionValue() in
+    // the ImportanceIndex code.
+
     // Get old and new bins.
     int oldBin = ImportanceIndex::importanceBin(oldav->getSTI());
     int newBin = ImportanceIndex::importanceBin(newav->getSTI());
@@ -88,12 +95,8 @@ void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
     // update the importance index.
     if (oldBin != newBin) updateImportanceIndex(h, oldBin);
 
-    _atom_index[h] = newav;
-
-    lck.unlock();
-
     // Notify any interested parties that the AV changed.
-    getAVChangedSignal()(h, oldav, newav);
+    _AVChangedSignal(h, oldav, newav);
 }
 
 AttentionValuePtr AttentionBank::get_av(const Handle& h)
