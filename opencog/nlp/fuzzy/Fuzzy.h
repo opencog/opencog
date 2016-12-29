@@ -26,6 +26,7 @@
 #define FUZZY_H
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atomutils/FuzzyMatchBasic.h>
 
 namespace opencog
@@ -57,6 +58,7 @@ class Fuzzy :
         double LINGUISTIC_RELATION_WEIGHT = 0.3;
 
         AtomSpace* as;
+        AttentionBank* bank;
 
         // The type of atom that we want
         Type rtn_type;
