@@ -153,7 +153,7 @@ public:
     }
 
     /**
-     * change the attention value of an atom.
+     * Change the attention value of an atom.
      */
     void change_av(const Handle&, AttentionValuePtr);
     void set_sti(const Handle&, AttentionValue::sti_t);

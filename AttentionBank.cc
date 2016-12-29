@@ -46,12 +46,6 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
 
     _attentionalFocusBoundary = 1;
 
-    // Subscribe to my own changes. This is insane and hacky; must move
-    // the AV stuf out of the Atom itself.  XXX FIXME.
-    _AVChangedConnection =
-        _AVChangedSignal.connect(
-            boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
-
     bool async = config().get_bool("ATTENTION_BANK_ASYNC", false);
     if (async) {
      _addAtomConnection =
@@ -95,13 +89,12 @@ void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
     // update the importance index.
     if (oldBin != newBin) updateImportanceIndex(h, oldBin);
 
-    // Notify any interested parties that the AV changed.
-    _AVChangedSignal(h, oldav, newav);
+    AVChanged(h, oldav, newav);
 }
 
 void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
 {
-    std::lock_guard<std::mutex> lck(_idx_mtx);
+    std::unique_lock<std::mutex> lck(_idx_mtx);
 
     AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
     auto pr = _atom_index.find(h);
@@ -110,11 +103,14 @@ void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
     AttentionValuePtr new_av = createAV(
         stiValue, old_av->getLTI(), old_av->getVLTI());
     _atom_index[h] = new_av;
+    lck.unlock();
+
+    AVChanged(h, old_av, new_av);
 }
 
 void AttentionBank::set_lti(const Handle& h, AttentionValue::lti_t ltiValue)
 {
-    std::lock_guard<std::mutex> lck(_idx_mtx);
+    std::unique_lock<std::mutex> lck(_idx_mtx);
 
     AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
     auto pr = _atom_index.find(h);
@@ -123,11 +119,14 @@ void AttentionBank::set_lti(const Handle& h, AttentionValue::lti_t ltiValue)
     AttentionValuePtr new_av = createAV(
         old_av->getSTI(), ltiValue, old_av->getVLTI());
     _atom_index[h] = new_av;
+    lck.unlock();
+
+    AVChanged(h, old_av, new_av);
 }
 
 void AttentionBank::change_vlti(const Handle& h, int unit)
 {
-    std::lock_guard<std::mutex> lck(_idx_mtx);
+    std::unique_lock<std::mutex> lck(_idx_mtx);
 
     AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
     auto pr = _atom_index.find(h);
@@ -139,6 +138,9 @@ void AttentionBank::change_vlti(const Handle& h, int unit)
         old_av->getVLTI() + unit);
 
     _atom_index[h] = new_av;
+    lck.unlock();
+
+    AVChanged(h, old_av, new_av);
 }
 
 AttentionValuePtr AttentionBank::get_av(const Handle& h)
@@ -152,7 +154,6 @@ AttentionValuePtr AttentionBank::get_av(const Handle& h)
 
 AttentionBank::~AttentionBank()
 {
-    _AVChangedConnection.disconnect();
     _addAtomConnection.disconnect();
     _removeAtomConnection.disconnect();
 }
@@ -191,6 +192,9 @@ void AttentionBank::AVChanged(const Handle& h,
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI.load(), old_av->getSTI(), new_av->getSTI());
+
+    // Notify any interested parties that the AV changed.
+    _AVChangedSignal(h, old_av, new_av);
 
     // Check if the atom crossed into or out of the AttentionalFocus
     // and notify any interested parties
