@@ -26,9 +26,9 @@ using namespace opencog;
 size_t ThreadSafeFixedIntegerIndex::size() const
 {
     size_t cnt = 0;
-	for (unsigned int i = 0; i < idx.size(); i++)
-		cnt += size(i);
-	return cnt;
+    for (unsigned int i = 0; i < idx.size(); i++)
+        cnt += size(i);
+    return cnt;
 }
 
 // ================================================================
