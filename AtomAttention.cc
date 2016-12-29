@@ -38,38 +38,19 @@ namespace opencog {
 
 AttentionValuePtr Atom::getAttentionValue() const
 {
-    // OK. The atomic thread-safety of shared-pointers is subtle. See
-    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    // and http://cppwisdom.quora.com/shared_ptr-is-almost-thread-safe
-    // What it boils down to here is that we must *always* make a copy
-    // of _attentionValue before we use it, since it can go out of scope
-    // because it can get set in another thread.  Viz, using it to
-    // dereference can return a raw pointer to an object that has been
-    // deconstructed. Furthermore, we must make a copy while holding
-    // the lock! Got that?
-
-    std::lock_guard<std::mutex> lck(_mtx);
-    AttentionValuePtr local(_attentionValue);
-    return local;
+    if (NULL == _atomTable) return AttentionValue::DEFAULT_AV();
+    Atom* a = (Atom*) this;
+    return attentionbank(_atomTable->getAtomSpace()).get_av(a->getHandle());
 }
 
 // XXX TODO This is insane. All this needs to be moved to the attention bank.
 void Atom::setAttentionValue(AttentionValuePtr av)
 {
-    // Must obtain a local copy of the AV, since there may be
-    // parallel writers in other threads.
-    AttentionValuePtr local(getAttentionValue());
-    if (av == local) return;
-    if (*av == *local) return;
-
-    // Need to lock, shared_ptr is NOT atomic!
-    std::unique_lock<std::mutex> lck (_avmtx);
-    local = _attentionValue; // Get it again, to avoid races.
-    _attentionValue = av;
-    lck.unlock();
-
     // If the atom free-floating, we are done.
     if (NULL == _atomTable) return;
+
+    AttentionValuePtr local(getAttentionValue());
+    attentionbank(_atomTable->getAtomSpace()).add_atom(getHandle(), av);
 
     // Get old and new bins.
     int oldBin = ImportanceIndex::importanceBin(local->getSTI());
