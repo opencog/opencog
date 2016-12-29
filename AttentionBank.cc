@@ -74,13 +74,16 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
 
 void AttentionBank::add_atom(const Handle& h, AttentionValuePtr av)
 {
+    std::lock_guard<std::mutex> lck(_idx_mtx);
     _atom_index[h] = av;
 }
 
 AttentionValuePtr AttentionBank::get_av(const Handle& h)
 {
+    std::lock_guard<std::mutex> lck(_idx_mtx);
     auto pr = _atom_index.find(h);
     if (pr == _atom_index.end()) return AttentionValue::DEFAULT_AV();
+
     return pr->second;
 }
 

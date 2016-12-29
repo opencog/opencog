@@ -62,6 +62,7 @@ class AttentionBank
     friend class ecan::StochasticDiffusionAmountCalculator; //need to access _importanceIndex
 
     /** The attention values of all the atoms in the attention bank */
+    std::mutex _idx_mtx;
     std::unordered_map<Handle, AttentionValuePtr> _atom_index;
     void add_atom(const Handle&, AttentionValuePtr);
     AttentionValuePtr get_av(const Handle&);
