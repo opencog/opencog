@@ -171,16 +171,16 @@ void AttentionBank::AVChanged(const Handle& h,
 
     // Update MinMax STI values
    UnorderedHandleSet minbin = _importanceIndex.getMinBinContents();
-    AttentionValue::sti_t minSTISeen = (*std::min_element(minbin.begin(),minbin.end(),
-            [](const Handle& h1, const Handle& h2) {
-            return h1->getAttentionValue()->getSTI() < h2->getAttentionValue()->getSTI();
-            }))->getAttentionValue()->getSTI();
+    AttentionValue::sti_t minSTISeen = get_sti(*std::min_element(minbin.begin(),minbin.end(),
+            [&](const Handle& h1, const Handle& h2) {
+                return get_sti(h1) < get_sti(h2);
+            }));
 
     UnorderedHandleSet maxbin = _importanceIndex.getMaxBinContents();
-    AttentionValue::sti_t maxSTISeen = (*std::max_element(maxbin.begin(),maxbin.end(),
-            [](const Handle& h1, const Handle& h2) {
-            return h1->getAttentionValue()->getSTI() > h2->getAttentionValue()->getSTI();
-            }))->getAttentionValue()->getSTI();
+    AttentionValue::sti_t maxSTISeen = get_sti(*std::max_element(maxbin.begin(),maxbin.end(),
+            [&](const Handle& h1, const Handle& h2) {
+                return get_sti(h1) > get_sti(h2);
+            }));
 
     if (minSTISeen > maxSTISeen) {
         minSTISeen = maxSTISeen;
@@ -210,18 +210,18 @@ void AttentionBank::AVChanged(const Handle& h,
 
 void AttentionBank::stimulate(const Handle& h, double stimulus)
 {
-    // XXX This is not protected and made atomic in any way ...
-    // If two different threads stiumlate the same atom at the same
-    // time, then the calculations could get wonky. Does it matter?
-    AttentionValue::sti_t sti   = h->getAttentionValue()->getSTI();
-    AttentionValue::lti_t lti   = h->getAttentionValue()->getLTI();
-    AttentionValue::vlti_t vlti = h->getAttentionValue()->getVLTI();
+    // XXX This is not protected or made atomic in any way ...
+    // If two different threads stimulate the same atom at the same
+    // time, then the calculations will be bad. Does it matter?
+    AttentionValue::sti_t sti   = get_sti(h);
+    AttentionValue::lti_t lti   = get_lti(h);
+    AttentionValue::vlti_t vlti = get_vlti(h);
 
     int stiWage = calculateSTIWage() * stimulus;
     int ltiWage = calculateLTIWage() * stimulus;
 
     AttentionValuePtr new_av = createAV(sti + stiWage, lti + ltiWage, vlti);
-    h->setAttentionValue(new_av);
+    change_av(h, new_av);
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
