@@ -56,7 +56,16 @@ AttentionBank::~AttentionBank()
 
 void AttentionBank::remove_atom_from_index(const AtomPtr& atom)
 {
-    _importanceIndex.removeAtom(atom.operator->());
+    std::unique_lock<std::mutex> lck(_idx_mtx);
+
+    auto pr = _atom_index.find(Handle(atom));
+    if (pr == _atom_index.end()) return;
+    lck.unlock();
+
+    AttentionValuePtr av = pr->second;
+    int bin = ImportanceIndex::importanceBin(av->getSTI());
+
+    _importanceIndex.removeAtom(atom.operator->(), bin);
 }
 
 void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)

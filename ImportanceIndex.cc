@@ -97,10 +97,8 @@ void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
     _index.insert(newbin, atom);
 }
 
-void ImportanceIndex::removeAtom(Atom* atom)
+void ImportanceIndex::removeAtom(Atom* atom, int bin)
 {
-    int sti = atom->getAttentionValue()->getSTI();
-    int bin = importanceBin(sti);
     _index.remove(bin, atom);
 }
 
@@ -130,7 +128,7 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
             return (lowerBound <= sti and sti <= upperBound);
         };
 
-    _index.getContentIf(lowerBin,inserter(set),pred);
+    _index.getContentIf(lowerBin, inserter(set), pred);
 
     // If both lower and upper bounds are in the same bin,
     // Then we are done.
