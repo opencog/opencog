@@ -72,10 +72,18 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
     }
 }
 
-/// This must be called before the AtomTable is destroyed. Which
-/// means that it cannot be in the destructor (since the AtomTable
-/// is gone by then, leading to a crash.  XXX FIXME yes this is a
-/// tacky hack to fix a design bug.
+void AttentionBank::add_atom(const Handle& h, AttentionValuePtr av)
+{
+    _atom_index[h] = av;
+}
+
+AttentionValuePtr AttentionBank::get_av(const Handle& h)
+{
+    auto pr = _atom_index.find(h);
+    if (pr == _atom_index.end()) return AttentionValue::DEFAULT_AV();
+    return pr->second;
+}
+
 void AttentionBank::shutdown(void)
 {
     _AVChangedConnection.disconnect();
@@ -83,7 +91,10 @@ void AttentionBank::shutdown(void)
     _removeAtomConnection.disconnect();
 }
 
-AttentionBank::~AttentionBank() {}
+AttentionBank::~AttentionBank()
+{
+    shutdown();
+}
 
 
 void AttentionBank::AVChanged(const Handle& h,

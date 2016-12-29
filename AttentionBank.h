@@ -28,6 +28,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <unordered_map>
 
 #include <boost/signals2.hpp>
 
@@ -57,7 +58,13 @@ typedef boost::signals2::signal<void (const Handle&,
 class AtomSpace;
 class AttentionBank
 {
+    friend class Atom;
     friend class ecan::StochasticDiffusionAmountCalculator; //need to access _importanceIndex
+
+    /** The attention values of all the atoms in the attention bank */
+    std::unordered_map<Handle, AttentionValuePtr> _atom_index;
+    void add_atom(const Handle&, AttentionValuePtr);
+    AttentionValuePtr get_av(const Handle&);
 
     /** The connection by which we are notified of AV changes */
     boost::signals2::connection _AVChangedConnection;
