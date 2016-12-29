@@ -44,10 +44,10 @@ private:
 
 public:
     ImportanceIndex(void);
-    void insertAtom(Atom*);
     void removeAtom(Atom*);
 
-    /** Updates the importance index for the given atom.
+    /**
+     * Updates the importance index for the given atom.
      * According to the new importance of the atom, it may change importance
      * bins.
      *

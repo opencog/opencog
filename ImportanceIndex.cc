@@ -55,13 +55,6 @@ AttentionValuePtr Atom::getAttentionValue() const
     return attentionbank(_atomTable->getAtomSpace()).get_av(a->getHandle());
 }
 
-void Atom::setAttentionValue(AttentionValuePtr av)
-{
-    // If the atom free-floating, we are done.
-    if (NULL == _atomTable) return;
-    attentionbank(_atomTable->getAtomSpace()).change_av(getHandle(), av);
-}
-
 // ==============================================================
 
 ImportanceIndex::ImportanceIndex()
@@ -102,13 +95,6 @@ void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
 
     _index.remove(oldbin, atom);
     _index.insert(newbin, atom);
-}
-
-void ImportanceIndex::insertAtom(Atom* atom)
-{
-    int sti = atom->getAttentionValue()->getSTI();
-    int bin = importanceBin(sti);
-    _index.insert(bin, atom);
 }
 
 void ImportanceIndex::removeAtom(Atom* atom)
