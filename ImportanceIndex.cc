@@ -25,10 +25,8 @@
 
 #include <opencog/util/functional.h>
 
-#include <opencog/atoms/base/Atom.h>
 #include <opencog/attentionbank/ImportanceIndex.h>
 #include <opencog/attentionbank/AttentionBank.h>
-#include <opencog/atomspace/AtomTable.h>
 
 using namespace opencog;
 
@@ -48,17 +46,8 @@ using namespace opencog;
 
 // ==============================================================
 
-AttentionValuePtr Atom::getAttentionValue() const
-{
-    if (NULL == _atomTable) return AttentionValue::DEFAULT_AV();
-    Atom* a = (Atom*) this;
-    return attentionbank(_atomTable->getAtomSpace()).get_av(a->getHandle());
-}
-
-// ==============================================================
-
-ImportanceIndex::ImportanceIndex()
-    : _index(IMPORTANCE_INDEX_SIZE+1)
+ImportanceIndex::ImportanceIndex(AttentionBank& bank)
+    : _bank(bank), _index(IMPORTANCE_INDEX_SIZE+1)
 {
 }
 
@@ -123,8 +112,7 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
     // upperBound.
     std::function<bool(Atom *)> pred =
         [&](Atom* atom)->bool {
-            AttentionValue::sti_t sti =
-                atom->getAttentionValue()->getSTI();
+            AttentionValue::sti_t sti = _bank.get_sti(atom->getHandle());
             return (lowerBound <= sti and sti <= upperBound);
         };
 

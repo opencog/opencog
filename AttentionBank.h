@@ -58,7 +58,6 @@ typedef boost::signals2::signal<void (const Handle&,
 class AtomSpace;
 class AttentionBank
 {
-    friend class Atom;
     friend class ecan::StochasticDiffusionAmountCalculator; //need to access _importanceIndex
 
     /** The attention values of all the atoms in the attention bank */

@@ -32,18 +32,20 @@ namespace opencog
  *  @{
  */
 
+class AttentionBank;
 /**
  * Implements an index with additional routines needed for managing
  * short-term importance.  This index is not thread-safe, by itself.
- * Users of this class must gauarantee single-threaded access!
+ * Users of this class must gaurantee single-threaded access!
  */
 class ImportanceIndex
 {
 private:
+    AttentionBank& _bank;
     ThreadSafeFixedIntegerIndex _index;
 
 public:
-    ImportanceIndex(void);
+    ImportanceIndex(AttentionBank&);
     void removeAtom(Atom*, int);
 
     /**
