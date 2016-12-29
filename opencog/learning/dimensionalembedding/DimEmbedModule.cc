@@ -218,7 +218,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
             "DimensionalEmbedding requires link type, not %s",
             classserver().getTypeName(linkType).c_str());
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
-    if (!fanin) h->incVLTI();//We don't want pivot atoms to be forgotten...
+    // if (!fanin) h->incVLTI();//We don't want pivot atoms to be forgotten...
     HandleSeq nodes;
     as->get_handles_by_type(std::back_inserter(nodes), NODE, true);
 
@@ -604,9 +604,9 @@ void DimEmbedModule::clearEmbedding(Type linkType)
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
 
     HandleSeq pivots  = pivotsMap[linkType];
-    for (HandleSeq::iterator it = pivots.begin(); it!=pivots.end(); ++it) {
-        if (as->is_valid_handle(*it)) (*it)->decVLTI();
-    }
+    // for (HandleSeq::iterator it = pivots.begin(); it!=pivots.end(); ++it) {
+    //     if (as->is_valid_handle(*it)) (*it)->decVLTI();
+    // }
     if (symmetric) {
         atomMaps.erase(linkType);
         embedTreeMap.erase(linkType);
