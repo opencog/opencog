@@ -256,7 +256,7 @@ Handle SpaceServer::addOrGetSpaceMap(octime_t timestamp, std::string _mapName, d
     // There is not a space map node for this map in the atomspace, so create a new one
     if (spaceMapHandle == Handle::UNDEFINED) {
         spaceMapHandle = atomspace->add_node(SPACE_MAP_NODE,_mapName);
-        spaceMapHandle->setLTI(1);
+        // spaceMapHandle->setLTI(1);
         timeser->addTimeInfo(spaceMapHandle, timestamp, timeDomain);
         scenes.emplace(std::piecewise_construct, std::make_tuple(spaceMapHandle),
                        std::make_tuple(_mapName, _resolution));
@@ -305,7 +305,7 @@ void SpaceServer::mapPersisted(Handle mapId)
 {
     // set LTI to a value that prevents the corresponding atom to be removed
     // from AtomSpace
-    mapId->setLTI(1);
+    // mapId->setLTI(1);
 }
 
 std::string SpaceServer::getMapIdString(Handle mapHandle) const
