@@ -116,8 +116,6 @@ class AttentionBank
     /** The importance index */
     ImportanceIndex _importanceIndex;
 
-    async_caller<AttentionBank,AtomPtr> _index_remove_queue;
-
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
 
@@ -364,16 +362,7 @@ public:
         _importanceIndex.updateImportance(h.operator->(), oldbin, newbin);
     }
 
-    void add_atom_to_indexRemoveQueue(const AtomPtr& atom)
-    {
-        _index_remove_queue.enqueue(atom);
-    }
-
-    void remove_atom_from_index(const AtomPtr& atom)
-    {
-        _importanceIndex.removeAtom(atom.operator->());
-    }
-
+    void remove_atom_from_index(const AtomPtr& atom);
 };
 
 /* Singleton instance (for now) */
