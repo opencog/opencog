@@ -72,10 +72,28 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
     }
 }
 
-void AttentionBank::change_av(const Handle& h, AttentionValuePtr av)
+void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
 {
-    std::lock_guard<std::mutex> lck(_idx_mtx);
-    _atom_index[h] = av;
+    std::unique_lock<std::mutex> lck(_idx_mtx);
+
+    AttentionValuePtr oldav = AttentionValue::DEFAULT_AV();
+    auto pr = _atom_index.find(h);
+    if (pr != _atom_index.end()) oldav = pr->second;
+
+    // Get old and new bins.
+    int oldBin = ImportanceIndex::importanceBin(oldav->getSTI());
+    int newBin = ImportanceIndex::importanceBin(newav->getSTI());
+
+    // If the atom importance has changed its bin,
+    // update the importance index.
+    if (oldBin != newBin) updateImportanceIndex(h, oldBin);
+
+    _atom_index[h] = newav;
+
+    lck.unlock();
+
+    // Notify any interested parties that the AV changed.
+    getAVChangedSignal()(h, oldav, newav);
 }
 
 AttentionValuePtr AttentionBank::get_av(const Handle& h)

@@ -28,11 +28,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/attentionbank/AttentionBank.h>
-#include <opencog/attentionbank/ImportanceIndex.h>
 
 namespace opencog {
-
-#define _avmtx _mtx
 
 // ==============================================================
 
@@ -43,28 +40,11 @@ AttentionValuePtr Atom::getAttentionValue() const
     return attentionbank(_atomTable->getAtomSpace()).get_av(a->getHandle());
 }
 
-// XXX TODO This is insane. All this needs to be moved to the attention bank.
 void Atom::setAttentionValue(AttentionValuePtr av)
 {
     // If the atom free-floating, we are done.
     if (NULL == _atomTable) return;
-
-    AttentionValuePtr local(getAttentionValue());
     attentionbank(_atomTable->getAtomSpace()).change_av(getHandle(), av);
-
-    // Get old and new bins.
-    int oldBin = ImportanceIndex::importanceBin(local->getSTI());
-    int newBin = ImportanceIndex::importanceBin(av->getSTI());
-
-    // If the atom importance has changed its bin,
-    // update the importance index.
-    if (oldBin != newBin) {
-        attentionbank(_atomTable->getAtomSpace()).updateImportanceIndex(getHandle(), oldBin);
-    }
-
-    // Notify any interested parties that the AV changed.
-    AVCHSigl& avch = attentionbank(_atomTable->getAtomSpace()).getAVChangedSignal();
-    avch(getHandle(), local, av);
 }
 
 void Atom::chgVLTI(int unit)
