@@ -27,6 +27,8 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/attentionbank/ImportanceIndex.h>
+#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/atomspace/AtomTable.h>
 
 using namespace opencog;
 
@@ -43,6 +45,24 @@ using namespace opencog;
 #define GROUP_SIZE 8
 #define GROUP_NUM 12
 #define IMPORTANCE_INDEX_SIZE (GROUP_NUM*GROUP_SIZE)+GROUP_NUM //104
+
+// ==============================================================
+
+AttentionValuePtr Atom::getAttentionValue() const
+{
+    if (NULL == _atomTable) return AttentionValue::DEFAULT_AV();
+    Atom* a = (Atom*) this;
+    return attentionbank(_atomTable->getAtomSpace()).get_av(a->getHandle());
+}
+
+void Atom::setAttentionValue(AttentionValuePtr av)
+{
+    // If the atom free-floating, we are done.
+    if (NULL == _atomTable) return;
+    attentionbank(_atomTable->getAtomSpace()).change_av(getHandle(), av);
+}
+
+// ==============================================================
 
 ImportanceIndex::ImportanceIndex()
     : _index(IMPORTANCE_INDEX_SIZE+1)
