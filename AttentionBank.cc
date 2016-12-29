@@ -99,6 +99,22 @@ void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
     _AVChangedSignal(h, oldav, newav);
 }
 
+void AttentionBank::change_vlti(const Handle& h, int unit)
+{
+    std::lock_guard<std::mutex> lck(_idx_mtx);
+
+    AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
+    auto pr = _atom_index.find(h);
+    if (pr != _atom_index.end()) old_av = pr->second;
+
+    AttentionValuePtr new_av = createAV(
+        old_av->getSTI(),
+        old_av->getLTI(),
+        old_av->getVLTI() + unit);
+
+    _atom_index[h] = new_av;
+}
+
 AttentionValuePtr AttentionBank::get_av(const Handle& h)
 {
     std::lock_guard<std::mutex> lck(_idx_mtx);

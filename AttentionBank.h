@@ -146,6 +146,7 @@ public:
      * change the attention value of an atom.
      */
     void change_av(const Handle&, AttentionValuePtr);
+    void change_vlti(const Handle&, int);
 
     /**
      * Stimulate an atom.
