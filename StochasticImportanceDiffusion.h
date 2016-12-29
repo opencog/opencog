@@ -34,6 +34,7 @@ namespace opencog
 {
     class Handle;
     class AtomSpace;
+    class AttentionBank;
     namespace ecan
     {
         struct DiffusionRecordBin {
@@ -61,7 +62,8 @@ namespace opencog
          */
         class StochasticDiffusionAmountCalculator
         {
-            AtomSpace * _as;
+            AtomSpace* _as;
+            AttentionBank* _ab;
             std::vector<DiffusionRecordBin> _bins; 
 
             unsigned int bin_index(const Handle& h);

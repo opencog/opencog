@@ -2,7 +2,7 @@
  * opencog/attentionbank/StochasticImportanceDiffusion.h
  *
  * Copyright (C) 2016 Opencog Foundation
- * 
+ *
  * All Rights Reserved
  *
  * Written by Misgana Bayetta <misgana.bayetta@gmail.com>
@@ -34,13 +34,12 @@ using namespace opencog::ecan;
 
 unsigned int StochasticDiffusionAmountCalculator::bin_index(const Handle& h)
 {
-    return attentionbank(_as)._importanceIndex.
-                     importanceBin(h->getAttentionValue()->getSTI());
+    return _ab->_importanceIndex.importanceBin(_ab->get_sti(h));
 }
 
 size_t StochasticDiffusionAmountCalculator::bin_size(unsigned int index)
 {
-   return attentionbank(_as)._importanceIndex.size(index);
+   return _ab->_importanceIndex.size(index);
 }
 
 void StochasticDiffusionAmountCalculator::update_bin(const Handle& h)
@@ -66,7 +65,8 @@ void StochasticDiffusionAmountCalculator::update_bin(const Handle& h)
 }
 
 StochasticDiffusionAmountCalculator::StochasticDiffusionAmountCalculator
-                                     (AtomSpace * as) : _as(as)
+                                     (AtomSpace * as) :
+    _as(as), _ab(&attentionbank(as))
 {
 }
 
@@ -108,11 +108,9 @@ float StochasticDiffusionAmountCalculator::diffusion_amount(const Handle& h,
     auto index = bin_index(h);
     auto it = std::find_if(_bins.begin(), _bins.end(),
             [index](const DiffusionRecordBin& b){ return (b.index == index); });
-    if (it != _bins.end() )   average_elapsed_time = (*it).size / (*it).update_rate;   
+    if (it != _bins.end() )   average_elapsed_time = (*it).size / (*it).update_rate;
 
     update_bin(h); // Update DiffusionRecordBin.
 
-    return h->getAttentionValue()->getSTI() * pow((1 - decay_rate), average_elapsed_time);                
+    return _ab->get_sti(h) * pow((1 - decay_rate), average_elapsed_time);
 }
-
-
