@@ -91,7 +91,7 @@ public:
 
         testspaceserver->removeSpaceInfo(testobjecthandle,testmaphandle);
         expected = testmap.getBlock(BlockVector(9, 10, 11));
-        printf("Expect null ptr: %p\n", (void*) expected);
+        printf("Expect null ptr: %p\n", (void*) expected.operator->());
         TS_ASSERT_EQUALS(expected, Handle::UNDEFINED);
     }
 };
