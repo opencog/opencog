@@ -29,6 +29,7 @@
 #include <opencog/attention/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomutils/Neighbors.h>
 #include "HebbianUpdatingAgent.h"
@@ -51,7 +52,7 @@ void HebbianUpdatingAgent::run()
 
     std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
 
-    _as->get_handle_set_in_attentional_focus(out_hi);
+    attentionbank(_as).get_handle_set_in_attentional_focus(out_hi);
 
      /*Without adding this sleep code right below the above method call,
      * nlp-parse evaluation thread waits for minutes before it gets a chance to
@@ -128,8 +129,8 @@ double HebbianUpdatingAgent::targetConjunction(HandleSeq handles)
                 "Size of outgoing set of a hebbian link must be 2.");
     }
 
-    auto normsti_i = _as->get_normalised_zero_to_one_STI(handles[0],true,true);
-    auto normsti_j = _as->get_normalised_zero_to_one_STI(handles[1],true,true);
+    auto normsti_i = attentionbank(_as).getNormalisedZeroToOneSTI(handles[0]->getAttentionValue(), true, true);
+    auto normsti_j = attentionbank(_as).getNormalisedZeroToOneSTI(handles[1]->getAttentionValue(), true, true);
     double conj = (normsti_i * normsti_j) + ((normsti_j - normsti_i) * std::abs(normsti_j -normsti_i));
 
     conj = (conj + 1.0) / 2.0;

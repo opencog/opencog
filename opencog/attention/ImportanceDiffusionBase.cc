@@ -1,5 +1,5 @@
 /*
- * ImportanceDiffusionBase.h
+ * attention/ImportanceDiffusionBase.h
  *
  * Copyright (C) 2014-2016 Cosmo Harrigan
  * All Rights Reserved
@@ -33,10 +33,11 @@
 #include <opencog/atomutils/FollowLink.h>
 #include <opencog/atomutils/Neighbors.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/attention/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
+#include <opencog/attention/atom_types.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 #include "ImportanceDiffusionBase.h"
 
@@ -270,7 +271,7 @@ void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
 HandleSeq ImportanceDiffusionBase::diffusionSourceVector(void)
 {
     HandleSeq resultSet;
-    _as->get_handle_set_in_attentional_focus(back_inserter(resultSet));
+    attentionbank(_as).get_handle_set_in_attentional_focus(back_inserter(resultSet));
 
 #ifdef DEBUG
     std::cout << "Calculating diffusionSourceVector." << std::endl;

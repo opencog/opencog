@@ -53,6 +53,7 @@ BaseServer* BaseServer::createInstance(AtomSpace* as)
 BaseServer::BaseServer(AtomSpace* as)
 {
     atomSpace = as;
+    attentionbank(as);
     // Set this server as the current server.
     set_current_server(this);
 }
@@ -66,6 +67,11 @@ BaseServer::~BaseServer()
 AtomSpace& BaseServer::getAtomSpace()
 {
     return *atomSpace;
+}
+
+AttentionBank& BaseServer::getAttentionBank()
+{
+    return attentionbank(atomSpace);
 }
 
 BaseServer& opencog::server(BaseServer* (*factoryFunction)(AtomSpace*),

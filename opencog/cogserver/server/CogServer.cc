@@ -43,6 +43,7 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 #ifdef HAVE_CYTHON
 #include <opencog/cython/PythonEval.h>
@@ -147,6 +148,8 @@ CogServer::CogServer(AtomSpace* as) :
         atomSpace = new AtomSpace();
     else
         atomSpace = as;
+
+    attentionbank(atomSpace);
 
 #ifdef HAVE_GUILE
     // Tell scheme which atomspace to use.

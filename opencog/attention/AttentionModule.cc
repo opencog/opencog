@@ -68,7 +68,7 @@ AttentionModule::AttentionModule(CogServer& cs) :
     _waRentAgentPtr = _cogserver.createAgent(WARentCollectionAgent::info().id, false);
 
 
-     addAFConnection =_cogserver.getAtomSpace().AddAFSignal(
+    addAFConnection = _cogserver.getAttentionBank().AddAFSignal().connect(
                        boost::bind(&AttentionModule::addAFSignalHandler,
                                    this, _1, _2, _3));
     do_start_ecan_register();

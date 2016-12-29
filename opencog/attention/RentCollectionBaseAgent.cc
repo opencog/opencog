@@ -29,6 +29,7 @@
 #include <opencog/attention/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 #include "RentCollectionBaseAgent.h"
 
@@ -70,7 +71,7 @@ void RentCollectionBaseAgent::run()
 
 int RentCollectionBaseAgent::calculate_STI_Rent()
 {
-    int funds = _as->get_STI_funds();
+    int funds = attentionbank(_as).getSTIFunds();
     double diff  = targetSTI - funds;
     double ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);
@@ -88,7 +89,7 @@ int RentCollectionBaseAgent::calculate_STI_Rent()
 
 int RentCollectionBaseAgent::calculate_LTI_Rent()
 {
-    int funds = _as->get_LTI_funds();
+    int funds = attentionbank(_as).getLTIFunds();
     double diff  = targetLTI - funds;
     double ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);

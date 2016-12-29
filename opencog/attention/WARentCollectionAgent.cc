@@ -29,6 +29,7 @@
 #include <opencog/attention/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 #include "WARentCollectionAgent.h"
 
@@ -72,7 +73,7 @@ Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
 
 void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
-    AttentionValue::sti_t AFBoundarySTI = _as->get_attentional_focus_boundary();
+    AttentionValue::sti_t AFBoundarySTI = attentionbank(_as).getAttentionalFocusBoundary();
     AttentionValue::sti_t lowerSTI  = AFBoundarySTI - 15;
     
     std::default_random_engine generator;
@@ -81,7 +82,7 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
     auto sti = dist(generator);
 
     HandleSeq candidates;
-    _as->get_handles_by_AV(std::back_inserter(candidates),sti,sti+5);
+    attentionbank(_as).get_handles_by_AV(std::back_inserter(candidates),sti,sti+5);
     if(candidates.size() > 100) candidates.resize(100); //Resize to 100 elements.
 
     if (candidates.size() == 0) return;
