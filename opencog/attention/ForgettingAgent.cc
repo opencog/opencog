@@ -38,6 +38,8 @@ using namespace opencog;
 ForgettingAgent::ForgettingAgent(CogServer& cs) :
     Agent(cs)
 {
+    _bank = &attentionbank(_as);
+
     // No limit to lti of removed atoms
     // Convert MAXLTI to a string for storing in the configuration
     std::ostringstream buf;
@@ -88,10 +90,10 @@ void ForgettingAgent::forget()
 
     for (unsigned int i = 0; i < atomsVector.size(); i++)
     {
-        if (atomsVector[i]->getAttentionValue()->getLTI() <= forgetThreshold
-                && count < removalAmount)
+        if (_bank->get_lti(atomsVector[i]) <= forgetThreshold
+                and count < removalAmount)
         {
-            if (atomsVector[i]->getAttentionValue()->getVLTI() == AttentionValue::DISPOSABLE )
+            if (_bank->get_vlti(atomsVector[i]) == AttentionValue::DISPOSABLE )
             {
                 std::string atomName = atomsVector[i]->toString();
                 _log->fine("Removing atom %s", atomName.c_str());
@@ -108,8 +110,8 @@ void ForgettingAgent::forget()
                 if (!recursive)
                     continue;
 
-                atomsVector[i]->setSTI(0);
-                atomsVector[i]->setLTI(0);
+                _bank->set_sti(atomsVector[i], 0);
+                _bank->set_lti(atomsVector[i], 0);
                 if (!_as->remove_atom(atomsVector[i],recursive)) {
                     // Atom must have already been removed through having
                     // previously removed atoms in it's outgoing set.

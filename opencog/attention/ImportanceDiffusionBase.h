@@ -40,7 +40,7 @@ namespace opencog
 /** \addtogroup grp_attention
  *  @{
  */
-
+class AttentionBank;
 /**
  * Common methods and variables used for Importance diffusion.
  */
@@ -50,6 +50,7 @@ private:
     int sleep_time_ms;
 
 protected:
+    AttentionBank* _bank;
     double maxSpreadPercentage;
     double hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;

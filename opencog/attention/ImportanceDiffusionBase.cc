@@ -52,6 +52,8 @@ using namespace opencog;
 
 ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
 {
+    _bank = &attentionbank(_as);
+
     setMaxSpreadPercentage(
                 config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
     setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
@@ -239,8 +241,8 @@ void ImportanceDiffusionBase::diffuseAtom(Handle source)
 void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
 {
     // Trade STI between the source and target atoms
-    event.source->setSTI(event.source->getSTI() - event.amount);
-    event.target->setSTI(event.target->getSTI() + event.amount);
+    _bank->set_sti(event.source, _bank->get_sti(event.source) - event.amount);
+    _bank->set_sti(event.target, _bank->get_sti(event.target) + event.amount);
 
 #ifdef DEBUG
     std::cout << "tradeSTI: " << event.amount << " from " << event.source
@@ -271,7 +273,7 @@ void ImportanceDiffusionBase::tradeSTI(DiffusionEventType event)
 HandleSeq ImportanceDiffusionBase::diffusionSourceVector(void)
 {
     HandleSeq resultSet;
-    attentionbank(_as).get_handle_set_in_attentional_focus(back_inserter(resultSet));
+    _bank->get_handle_set_in_attentional_focus(back_inserter(resultSet));
 
 #ifdef DEBUG
     std::cout << "Calculating diffusionSourceVector." << std::endl;
@@ -529,7 +531,7 @@ AttentionValue::sti_t ImportanceDiffusionBase::calculateDiffusionAmount(
 {
     updateMaxSpreadPercentage();
 
-    return (AttentionValue::sti_t) round(h->getSTI() * maxSpreadPercentage);
+    return (AttentionValue::sti_t) round(_bank->get_sti(h) * maxSpreadPercentage);
 
     // TODO: Using integers for STI values can cause strange consequences.
     // For example, if the amount to diffuse is 0.4, it will become 0, causing

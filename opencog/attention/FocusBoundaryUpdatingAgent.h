@@ -38,6 +38,7 @@ namespace opencog
  *  @{
  */
 
+class AttentionBank;
 /**
  * This agent updates the Boundary of the AttentionalFocus to equal the top 25%
  * of the STI Range.
@@ -47,6 +48,7 @@ namespace opencog
 class FocusBoundaryUpdatingAgent : public Agent
 {
 private:
+    AttentionBank* _bank;
     double afbSize;
     double decay;
     AttentionValue::sti_t bottomBoundary;
@@ -71,4 +73,4 @@ typedef std::shared_ptr<FocusBoundaryUpdatingAgent> FocusBoundaryUpdatingAgentPt
 /** @}*/
 }  // namespace
 
-#endif // _OPENCOG_IMPORTANCE_UPDATING_AGENT_H
+#endif // _OPENCOG_FOCUS_BOUNDARY_UPDATING_AGENT_H

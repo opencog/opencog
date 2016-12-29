@@ -61,10 +61,10 @@ Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
         tournament[i] = population[idx];
     }
 
-    auto result = std::max_element(tournament, tournament + (sz - 1), []
-                              (const Handle& h1, const Handle & h2)
+    auto result = std::max_element(tournament, tournament + (sz - 1),
+         [&](const Handle& h1, const Handle & h2) -> bool
     {
-        return (h1->getSTI() > h2->getSTI());
+        return _bank->get_sti(h1) > _bank->get_sti(h2);
     });
 
     return *result;
@@ -75,9 +75,9 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
     AttentionValue::sti_t AFBoundarySTI = attentionbank(_as).getAttentionalFocusBoundary();
     AttentionValue::sti_t lowerSTI  = AFBoundarySTI - 15;
-    
+
     std::default_random_engine generator;
-    // randomly select a bin 
+    // randomly select a bin
     std::uniform_int_distribution<AttentionValue::sti_t> dist(lowerSTI,AFBoundarySTI);
     auto sti = dist(generator);
 
@@ -93,9 +93,9 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 
 void WARentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
-    for (Handle& h : targetSet) {
-        int sti = h->getAttentionValue()->getSTI();
-        int lti = h->getAttentionValue()->getLTI();
+    for (const Handle& h : targetSet) {
+        int sti = _bank->get_sti(h);
+        int lti = _bank->get_lti(h);
         int stiRent = calculate_STI_Rent();
         int ltiRent = calculate_LTI_Rent();
 
@@ -105,7 +105,7 @@ void WARentCollectionAgent::collectRent(HandleSeq& targetSet)
         if (ltiRent > lti)
             ltiRent = lti;
 
-        h->setSTI(sti - stiRent);
-        h->setLTI(lti - ltiRent);
+        _bank->set_sti(h, sti - stiRent);
+        _bank->set_lti(h, lti - ltiRent);
     }
 }
