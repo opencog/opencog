@@ -176,7 +176,7 @@ UnorderedHandleSet ImportanceIndex::getMaxBinContents()
     {
         if (_index.size(i) > 0)
         {
-            _index.getContent(i,inserter(set));
+            _index.getContent(i, inserter(set));
             std::transform(set.begin(), set.end(), inserter(ret),
                    [](Atom* atom)->Handle { return atom->getHandle(); });
             return ret;
@@ -193,7 +193,7 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
     {
         if (_index.size(i) > 0)
         {
-            _index.getContent(i,inserter(set));
+            _index.getContent(i, inserter(set));
             std::transform(set.begin(), set.end(), inserter(ret),
                    [](Atom* atom)->Handle { return atom->getHandle(); });
             return ret;

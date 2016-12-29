@@ -66,6 +66,12 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
     }
 }
 
+AttentionBank::~AttentionBank()
+{
+    _addAtomConnection.disconnect();
+    _removeAtomConnection.disconnect();
+}
+
 void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
 {
     std::unique_lock<std::mutex> lck(_idx_mtx);
@@ -160,13 +166,6 @@ AttentionValuePtr AttentionBank::get_av(const Handle& h)
     return pr->second;
 }
 
-AttentionBank::~AttentionBank()
-{
-    _addAtomConnection.disconnect();
-    _removeAtomConnection.disconnect();
-}
-
-
 void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& old_av,
                               const AttentionValuePtr& new_av)
@@ -180,24 +179,28 @@ void AttentionBank::AVChanged(const Handle& h,
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
     // Update MinMax STI values
-   UnorderedHandleSet minbin = _importanceIndex.getMinBinContents();
-    AttentionValue::sti_t minSTISeen = get_sti(*std::min_element(minbin.begin(),minbin.end(),
+    AttentionValue::sti_t minSTISeen = 0;
+    UnorderedHandleSet minbin = _importanceIndex.getMinBinContents();
+    auto minit = std::min_element(minbin.begin(), minbin.end(),
             [&](const Handle& h1, const Handle& h2) {
                 return get_sti(h1) < get_sti(h2);
-            }));
+            });
+    if (minit != minbin.end()) minSTISeen = get_sti(*minit);
 
-    UnorderedHandleSet maxbin = _importanceIndex.getMaxBinContents();
-    AttentionValue::sti_t maxSTISeen = get_sti(*std::max_element(maxbin.begin(),maxbin.end(),
+    AttentionValue::sti_t maxSTISeen = 0;
+    UnorderedHandleSet maxbin = _importanceIndex.getMinBinContents();
+    auto maxit = std::max_element(maxbin.begin(), maxbin.end(),
             [&](const Handle& h1, const Handle& h2) {
-                return get_sti(h1) > get_sti(h2);
-            }));
+                return get_sti(h1) < get_sti(h2);
+            });
+    if (maxit != maxbin.end()) maxSTISeen = get_sti(*maxit);
 
     if (minSTISeen > maxSTISeen) {
         minSTISeen = maxSTISeen;
     }
 
-    updateMaxSTI(maxSTISeen);
     updateMinSTI(minSTISeen);
+    updateMaxSTI(maxSTISeen);
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI.load(), oldSti, newSti);

@@ -70,12 +70,12 @@ public:
     static unsigned int importanceBin(short);
 
     /**
-     * Get the highest bin which containsAtoms
+     * Get the highest bin which contains Atoms
      */
     UnorderedHandleSet getMaxBinContents();
 
     /**
-     * Get the lowest bin which containsAtoms
+     * Get the lowest bin which contains Atoms
      */
     UnorderedHandleSet getMinBinContents();
  
