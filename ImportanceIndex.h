@@ -54,7 +54,7 @@ public:
      * @param The atom whose importance index will be updated.
      * @param The old importance bin where the atom originally was.
      */
-    void updateImportance(Atom*, int);
+    void updateImportance(Atom*, int, int);
 
     UnorderedHandleSet getHandleSet(AttentionValue::sti_t,
                                     AttentionValue::sti_t) const;

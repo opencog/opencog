@@ -96,12 +96,11 @@ unsigned int ImportanceIndex::importanceBin(short importance)
     return bin;
 }
 
-void ImportanceIndex::updateImportance(Atom* atom, int bin)
+void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
 {
-    int newbin = importanceBin(atom->getAttentionValue()->getSTI());
-    if (bin == newbin) return;
+    if (oldbin == newbin) return;
 
-    _index.remove(bin, atom);
+    _index.remove(oldbin, atom);
     _index.insert(newbin, atom);
 }
 

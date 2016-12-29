@@ -87,7 +87,7 @@ void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
 
     // If the atom importance has changed its bin,
     // update the importance index.
-    if (oldBin != newBin) updateImportanceIndex(h, oldBin);
+    if (oldBin != newBin) updateImportanceIndex(h, oldBin, newBin);
 
     AVChanged(h, oldav, newav);
 }
@@ -104,6 +104,14 @@ void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
         stiValue, old_av->getLTI(), old_av->getVLTI());
     _atom_index[h] = new_av;
     lck.unlock();
+
+    // Get old and new bins.
+    int oldBin = ImportanceIndex::importanceBin(old_av->getSTI());
+    int newBin = ImportanceIndex::importanceBin(new_av->getSTI());
+
+    // If the atom importance has changed its bin,
+    // update the importance index.
+    if (oldBin != newBin) updateImportanceIndex(h, oldBin, newBin);
 
     AVChanged(h, old_av, new_av);
 }
@@ -163,11 +171,12 @@ void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& old_av,
                               const AttentionValuePtr& new_av)
 {
+    AttentionValue::sti_t oldSti = old_av->getSTI();
     AttentionValue::sti_t newSti = new_av->getSTI();
     
     // Add the old attention values to the AttentionBank funds and
     // subtract the new attention values from the AttentionBank funds
-    updateSTIFunds(old_av->getSTI() - newSti);
+    updateSTIFunds(oldSti - newSti);
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
     // Update MinMax STI values
@@ -191,21 +200,21 @@ void AttentionBank::AVChanged(const Handle& h,
     updateMinSTI(minSTISeen);
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
-                   fundsSTI.load(), old_av->getSTI(), new_av->getSTI());
+                   fundsSTI.load(), oldSti, newSti);
 
     // Notify any interested parties that the AV changed.
     _AVChangedSignal(h, old_av, new_av);
 
     // Check if the atom crossed into or out of the AttentionalFocus
     // and notify any interested parties
-    if (old_av->getSTI() < getAttentionalFocusBoundary() and
-        new_av->getSTI() >= getAttentionalFocusBoundary())
+    if (oldSti < getAttentionalFocusBoundary() and
+        newSti >= getAttentionalFocusBoundary())
     {
         AFCHSigl& afch = AddAFSignal();
         afch(h, old_av, new_av);
     }
-    else if (new_av->getSTI() < getAttentionalFocusBoundary() and
-             old_av->getSTI() >= getAttentionalFocusBoundary())
+    else if (newSti < getAttentionalFocusBoundary() and
+             oldSti >= getAttentionalFocusBoundary())
     {
         AFCHSigl& afch = RemoveAFSignal();
         afch(h, old_av, new_av);

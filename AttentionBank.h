@@ -361,9 +361,9 @@ public:
      * @param The atom whose importance index will be updated.
      * @param The old importance bin where the atom originally was.
      */
-    void updateImportanceIndex(AtomPtr a, int bin)
+    void updateImportanceIndex(const Handle& h, int oldbin, int newbin)
     {
-        _importanceIndex.updateImportance(a.operator->(), bin);
+        _importanceIndex.updateImportance(h.operator->(), oldbin, newbin);
     }
 
     void add_atom_to_indexInsertQueue(const Handle& h)
