@@ -2,14 +2,15 @@
 
 ###The need for this rule
 
-- When a sentence that contains a number is parsed and goes through the OpenCog nlp pipeline, the number is not recognized as a NumberNode.
-	For example: “I want to buy two refrigerators each costing less than fifty dollars.”
-- Here, "two" and "fifty" should have a reference to NumberNodes "2" and "50" respectively.
+When a sentence that contains a number is parsed and goes through the OpenCog nlp pipeline, the number is not recognized as a NumberNode.</br> </br>
+	For example: “I want to buy two refrigerators each costing less than fifty dollars.” </br></br>
+	Here, "two" and "fifty" should have a reference to NumberNodes "2" and "50" respectively.</br></br>
 
 ###What Number-Rule does 
 Given a SentenceNode sent, (num-rule sent) identifies every number (in string or numeric representation), creates a NumberNode for those numbers and creates a `ReferenceLink` to Word Instances reffering to the numbers in that sentence.
 
 ###Number-rule contains two Scheme Files
+
 ####num-rule.scm
 - accepts a SentenceNode
 - get the words (in their order) of a sentence
@@ -17,6 +18,7 @@ Given a SentenceNode sent, (num-rule sent) identifies every number (in string or
 - validate if that word is a number or not
 - gather all words that validate as numbers
 - create a Reference link for a list of the word instances that are numbers with a corresponding NumberNode
+
 ####strtonum.scm
 - Provides utilities such as list iterators for num-rule to work with
 - Does string manipulations
@@ -41,27 +43,28 @@ Given a SentenceNode sent, (num-rule sent) identifies every number (in string or
 - Parse the following sentence and apply num-rule to it
 
   	guile> (define sent (nlp-parse "Two fridges should cost no more than One thousand five hundred and forty dollars"))
-	
 	guile> (num-rule sent)
+	
+####Result:
 
-	####Result:
 	(ReferenceLink
 	   (NumberNode "2.000000")
 	   (ListLink
-	      (WordInstanceNode "two@6bfa91d4-c857-4f7e-9041-92cb4bc76f75")
+	      (WordInstanceNode "two@5548dc12-ceac-45d9-a869-1768a5cef4c5")
 	   )
 	)
 	(ReferenceLink
 	   (NumberNode "1540.000000")
 	   (ListLink
-	      (WordInstanceNode "One@4f9f0cb2-2006-41c8-a824-1454922bf914")
-	      (WordInstanceNode "thousand@fa4a23aa-5f8d-4ca0-bce6-64eb687e776c")
-	      (WordInstanceNode "five@0d11c185-015d-412f-bfb6-c16ddc4d3143")
-	      (WordInstanceNode "hundred@a336a6ae-1cfc-42c0-a64d-68b07ef1c887")
-	      (WordInstanceNode "and@131cfab4-2123-402b-b76e-2ab9b5c6b69d")
-	      (WordInstanceNode "forty@e04f7093-f82a-44db-8be7-9214fda768a1")
+	      (WordInstanceNode "One@239b5a62-f610-4de4-812d-76bc6d3abd5c")
+	      (WordInstanceNode "thousand@2ba05746-0766-44c2-9b01-dbbe884b6d80")
+	      (WordInstanceNode "five@07eb066e-08a2-406b-97e3-47fba0b8d038")
+	      (WordInstanceNode "hundred@a3882137-10b1-4502-8dd7-e6b5e03ff88d")
+	      (WordInstanceNode "and@45cb780f-af98-43ed-be7a-d320a62d2e23")
+	      (WordInstanceNode "forty@63a48a2a-06b8-4f9e-9203-ddffd68f284b")
 	   )
 	)
+	
 	The `ReferenceLink` will just link the word instances to the NumberNode.
 
 ###More Examples:
