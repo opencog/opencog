@@ -61,9 +61,10 @@ void AttentionBank::remove_atom_from_index(const AtomPtr& atom)
 
     auto pr = _atom_index.find(Handle(atom));
     if (pr == _atom_index.end()) return;
+    AttentionValuePtr av = pr->second;
+    _atom_index.erase(pr->first);
     lck.unlock();
 
-    AttentionValuePtr av = pr->second;
     int bin = ImportanceIndex::importanceBin(av->getSTI());
 
     _importanceIndex.removeAtom(atom.operator->(), bin);
