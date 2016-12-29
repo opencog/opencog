@@ -105,4 +105,4 @@ Given a SentenceNode sent, (num-rule sent) identifies every number (in string or
 ###Next Steps
 Sentences containing compund words such as "four-by-two" "two-way" etc...
 should be handled differently.
-	For example, "four-by-two" should perhaps be represented as 8.0
+	For example, "four-by-two" should also perhaps be linked to 8.0
