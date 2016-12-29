@@ -50,7 +50,7 @@ void Atom::setAttentionValue(AttentionValuePtr av)
     if (NULL == _atomTable) return;
 
     AttentionValuePtr local(getAttentionValue());
-    attentionbank(_atomTable->getAtomSpace()).add_atom(getHandle(), av);
+    attentionbank(_atomTable->getAtomSpace()).change_av(getHandle(), av);
 
     // Get old and new bins.
     int oldBin = ImportanceIndex::importanceBin(local->getSTI());

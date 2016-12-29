@@ -64,8 +64,6 @@ class AttentionBank
     /** The attention values of all the atoms in the attention bank */
     std::mutex _idx_mtx;
     std::unordered_map<Handle, AttentionValuePtr> _atom_index;
-    void add_atom(const Handle&, AttentionValuePtr);
-    AttentionValuePtr get_av(const Handle&);
 
     /** The connection by which we are notified of AV changes */
     boost::signals2::connection _AVChangedConnection;
@@ -125,7 +123,6 @@ class AttentionBank
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
 
-    void shutdown(void);
 public:
     AttentionBank(AtomSpace*);
     ~AttentionBank();
@@ -141,13 +138,23 @@ public:
     AVCHSigl& getAVChangedSignal() { return _AVChangedSignal; }
 
     /**
+     * Get the attention value of an atom.
+     */
+    AttentionValuePtr get_av(const Handle&);
+
+    /**
+     * change the attention value of an atom.
+     */
+    void change_av(const Handle&, AttentionValuePtr);
+
+    /**
      * Stimulate an atom.
      *
      * @warning Should only be used by attention allocation system.
      * @param  h Handle to be stimulated
      * @param stimulus stimulus amount
      */
-    void stimulate(Handle&, double stimulus);
+    void stimulate(const Handle&, double stimulus);
 
     /**
      * Get the total amount of STI in the AttentionBank, sum of

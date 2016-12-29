@@ -72,7 +72,7 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
     }
 }
 
-void AttentionBank::add_atom(const Handle& h, AttentionValuePtr av)
+void AttentionBank::change_av(const Handle& h, AttentionValuePtr av)
 {
     std::lock_guard<std::mutex> lck(_idx_mtx);
     _atom_index[h] = av;
@@ -87,16 +87,11 @@ AttentionValuePtr AttentionBank::get_av(const Handle& h)
     return pr->second;
 }
 
-void AttentionBank::shutdown(void)
+AttentionBank::~AttentionBank()
 {
     _AVChangedConnection.disconnect();
     _addAtomConnection.disconnect();
     _removeAtomConnection.disconnect();
-}
-
-AttentionBank::~AttentionBank()
-{
-    shutdown();
 }
 
 
@@ -150,7 +145,7 @@ void AttentionBank::AVChanged(const Handle& h,
     }
 }
 
-void AttentionBank::stimulate(Handle& h, double stimulus)
+void AttentionBank::stimulate(const Handle& h, double stimulus)
 {
     // XXX This is not protected and made atomic in any way ...
     // If two different threads stiumlate the same atom at the same
