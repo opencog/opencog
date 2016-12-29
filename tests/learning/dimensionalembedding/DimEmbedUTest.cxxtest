@@ -201,10 +201,10 @@ public:
         dimEmbed.embedAtomSpace(SIMILARITY_LINK, 7);
         TS_ASSERT(dimEmbed.isEmbedded(SIMILARITY_LINK));
         // Every node is a pivot, so every node should be nondisposable
-        // for (int i=0;i<7;i++) {
-        //   TS_ASSERT(bank->get_vlti(handles[i])
-        //              != AttentionValue::DISPOSABLE);
-        //}
+        for (int i=0;i<7;i++) {
+            TS_ASSERT(bank->get_vlti(handles[i])
+                     != AttentionValue::DISPOSABLE);
+        }
         //dimEmbed.logAtomEmbedding(SIMILARITY_LINK);
         //We have no guarantee on the order that the pivots
         //were picked in, but since numDimensions=numNodes,
