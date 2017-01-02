@@ -91,7 +91,6 @@ GenericShell::~GenericShell()
 		pollthr = nullptr;
 	}
 
-	if (_evaluator) _evaluator->clear_pending();
 	logger().debug("[GenericShell] dtor finished.");
 }
 
