@@ -46,6 +46,24 @@
              (Concept "people")
              (Concept P-name)))))
 
+(define (get-sureal-result semantics-list)
+    (define semantics (select-highest-tv-semantics semantics-list))
+
+    ; Assuming 'semantics' is an ImplicationLink
+    (define logic (implication-to-evaluation-s2l (gar semantics) (gdr semantics)))
+
+    (define sureal-result (sureal logic))
+
+    (if (null? sureal-result)
+        ; Try again until the semantics-list is empty
+        (if (eq? 1 (length semantics-list))
+            '()
+            (get-sureal-result (delete semantics semantics-list))
+        )
+        (first sureal-result)
+    )
+)
+
 (define-public (do-pln-QA)
 "
   Fetch the semantics with the highest strength*confidence that
@@ -63,29 +81,18 @@
                 (lambda (x) (not (null? (iu-inter (list (first (second x))))))))
            (filtered-in (filter not-null-iu-inter? assoc-inferred-names))
            (semantics-list (shuffle (map first filtered-in)))
-           (semantics (select-highest-tv-semantics semantics-list))
-           (semantics-type
-                (if (null? semantics) semantics (cog-type semantics)))
-           (logic (if (equal? 'ImplicationLink semantics-type)
-                      (implication-to-evaluation-s2l (gar semantics)
-                                                     (gdr semantics))
-                      '()))
-           (sureal-result (if (null? logic) '() (sureal logic)))
-           (word-list (if (null? sureal-result) '() (first sureal-result)))
+           (sureal-word-list (get-sureal-result semantics-list))
           )
 
       (cog-logger-debug "[PLN-Action] assoc-inferred-names = ~a"
                         assoc-inferred-names)
       (cog-logger-debug "[PLN-Action] filtered-in = ~a" filtered-in)
       (cog-logger-debug "[PLN-Action] semantics-list = ~a" semantics-list)
-      (cog-logger-debug "[PLN-Action] semantics = ~a" semantics)
-      (cog-logger-debug "[PLN-Action] logic = ~a" logic)
-      (cog-logger-debug "[PLN-Action] sureal-result = ~a" sureal-result)
-      (cog-logger-debug "[PLN-Action] word-list = ~a" word-list)
+      (cog-logger-debug "[PLN-Action] sureal-word-list = ~a" sureal-word-list)
 
-      (State pln-answers (if (null? word-list)
+      (State pln-answers (if (null? sureal-word-list)
                              no-result
-                             (List (map Word word-list))))
+                             (List (map Word sureal-word-list))))
 
       (State pln-qa process-finished)
     )
