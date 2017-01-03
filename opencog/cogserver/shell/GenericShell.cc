@@ -70,7 +70,10 @@ GenericShell::GenericShell(void)
 GenericShell::~GenericShell()
 {
 	self_destruct = true;
-	evalque.cancel();
+
+	// It can happen that we are already canelling.
+	try { evalque.cancel(); }
+	catch (const std::exception& ex) {}
 
 	if (evalthr)
 	{
