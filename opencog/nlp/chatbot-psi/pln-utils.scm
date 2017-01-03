@@ -58,5 +58,6 @@
 
 (define (shuffle l)
   (map cdr
-    (sort (map (lambda (x) (cons (random 1.0) x)) l)
-          (lambda (x y) (< (car x) (car y))))))
+    (sort
+        (map (lambda (x) (cons (random 1.0 (random-state-from-platform)) x)) l)
+         (lambda (x y) (< (car x) (car y))))))

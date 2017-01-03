@@ -517,15 +517,8 @@
 
     ;; Apply Implication direct evaluation (and put the result in
     ;; pln-inferred-atoms state)
-    (let* ((direct-eval-results (cog-fc (SetLink) rb3 (SetLink)))
-        ;; Filter only inferred result containing "happy". This is a
-        ;; temporary hack to make it up for the lack of attentional
-        ;; allocation
-        (must-contain (list (Predicate "happy")))
-        (ff (lambda (x) (lset<= equal? must-contain (cog-get-all-nodes x))))
-        (filtered-results (filter ff (cog-outgoing-set direct-eval-results))))
-
-        (add-to-pln-inferred-atoms (Set filtered-results))
+    (let* ((direct-eval-results (cog-fc (SetLink) rb3 (SetLink))))
+        (add-to-pln-inferred-atoms direct-eval-results)
     )
 
     (cog-logger-debug "[PLN-Reasoner] pln-inferred-atoms = ~a"
