@@ -55,7 +55,14 @@
     (define sureal-result (sureal logic))
 
     (if (null? sureal-result)
-        ; Try again until the semantics-list is empty
+        ; SuReal may give nothing because sometimes R2L generates the same pattern
+        ; (that PLN is looking for) for words that have very different disjuncts.
+        ; This introduces 'noise' and confuses SuReal so it generates nothing if
+        ; the 'noisy' one got chosen. So try again with other implications in the
+        ; semantics-list until the list is empty.
+        ; This is kind of like a workaround, would be better to fix in R2L, but
+        ; that requires too much work and R2L may be replaced by something better
+        ; shortly in the future...
         (if (eq? 1 (length semantics-list))
             '()
             (get-sureal-result (delete semantics semantics-list))
