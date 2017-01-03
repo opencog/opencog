@@ -70,7 +70,10 @@ GenericShell::GenericShell(void)
 GenericShell::~GenericShell()
 {
 	self_destruct = true;
-	evalque.cancel();
+
+	// It can happen that we are already canelling.
+	try { evalque.cancel(); }
+	catch (const std::exception& ex) {}
 
 	if (evalthr)
 	{
@@ -134,7 +137,7 @@ static GenericShell* _redirector = nullptr;
 // Implementation requirements:
 //
 // 1) We want all evaluations to be carried out in serial order,
-//    so that the previous expression is full evaluated before the
+//    so that the previous expression is fully evaluated before the
 //    next one is started.
 // 2) We want all evaluations to be interruptible, so that if an
 //    expression is an infinite loop (or simply is taking too long)
@@ -159,6 +162,7 @@ static GenericShell* _redirector = nullptr;
 //
 void GenericShell::eval(const std::string &expr)
 {
+	assert (not self_destruct);
 	// First time through, initialize the evaluator.  We can't do this
 	// in the ctor, since we can't get the evaluator until after the
 	// derived-class ctor has run, and thus informed us as to whether
