@@ -134,7 +134,7 @@ static GenericShell* _redirector = nullptr;
 // Implementation requirements:
 //
 // 1) We want all evaluations to be carried out in serial order,
-//    so that the previous expression is full evaluated before the
+//    so that the previous expression is fully evaluated before the
 //    next one is started.
 // 2) We want all evaluations to be interruptible, so that if an
 //    expression is an infinite loop (or simply is taking too long)
