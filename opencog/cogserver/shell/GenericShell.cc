@@ -162,6 +162,7 @@ static GenericShell* _redirector = nullptr;
 //
 void GenericShell::eval(const std::string &expr)
 {
+	assert (not self_destruct);
 	// First time through, initialize the evaluator.  We can't do this
 	// in the ctor, since we can't get the evaluator until after the
 	// derived-class ctor has run, and thus informed us as to whether
