@@ -78,19 +78,10 @@ GenericShell::~GenericShell()
 		               evalthr->native_handle());
 		evalthr->join();
 		logger().debug("[GenericShell] dtor, joined eval thread");
+
 		delete evalthr;
 		evalthr = nullptr;
 	}
-
-	if (pollthr)
-	{
-		logger().debug("[GenericShell] dtor, wait for writer thread 0x%x.",
-		               pollthr->native_handle());
-		pollthr->join();
-		delete pollthr;
-		pollthr = nullptr;
-	}
-
 	logger().debug("[GenericShell] dtor finished.");
 }
 
@@ -455,6 +446,14 @@ void GenericShell::eval_loop(void)
 			break;
 		}
 	}
+
+	// On exit, make sure the polling thread dies first.
+	// After we exit, the _evaluator will be reclaimed by the
+	// thread dtor running in the evaluator pool.
+	pollthr->join();
+	delete pollthr;
+	pollthr = nullptr;
+	_evaluator = nullptr;
 }
 
 void GenericShell::poll_loop(void)
