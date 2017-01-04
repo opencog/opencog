@@ -3,15 +3,15 @@
 
 ;-------------------------------------------------------------------------------
 ; AppID for Wolfram|Alpha Webservice API
-(define appid "")
+(define wa-appid "")
 (define has-wolframalpha-setup #f)
 
 ; AppID for OpenWeatherMap
 (define owm-appid "")
 (define has-openweathermap-setup #f)
 
-(define-public (set-appid id)
-    (set! appid id)
+(define-public (set-wa-appid id)
+    (set! wa-appid id)
     (State wolframalpha default-state)
     (set! has-wolframalpha-setup #t)
 )
@@ -61,14 +61,14 @@
 )
 
 (define (ask-wolframalpha)
-    (if (not (equal? appid ""))
+    (if (not (equal? wa-appid ""))
         (begin
             (State wolframalpha process-started)
             (begin-thread
                 (define query (string-downcase (cog-name (get-input-text-node))))
                 (define query-no-spaces (regexp-substitute/global #f " " query 'pre "+" 'post))
                 (define url (string-append
-                    "http://api.wolframalpha.com/v2/query?appid=" appid
+                    "http://api.wolframalpha.com/v2/query?appid=" wa-appid
                         "&input=" query-no-spaces "&format=plaintext"))
                 (define body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
                 (define resp (car (last-pair body)))
