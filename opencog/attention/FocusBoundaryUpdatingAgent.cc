@@ -43,7 +43,7 @@ using namespace opencog;
 using namespace std::chrono;
 
 FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
-        Agent(cs)
+    Agent(cs)
 {
     // Provide a logger
     setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE, true));
@@ -54,6 +54,7 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
     minAFSize = config().get_int("MIN_AF_SIZE", 100);
     maxAFSize = config().get_int("MAX_AF_SIZE", 500);
 
+    _bank = &attentionbank(_as);
     _bank->setAttentionalFocusBoundary(bottomBoundary);
 }
 
