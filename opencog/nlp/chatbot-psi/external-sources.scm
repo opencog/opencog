@@ -1,157 +1,148 @@
-(use-modules (ice-9 threads))
-(use-modules (opencog) (opencog exec)(opencog python))
+(use-modules (opencog))
+(use-modules (ice-9 threads) (srfi srfi-1) (sxml simple) (web client) (web response))
 
 ;-------------------------------------------------------------------------------
-(python-eval "
-from opencog.atomspace import AtomSpace, types, TruthValue
-
-import urllib2
-import json
-import nltk
-import threading
-import xml.etree.ElementTree as ET
-
-atomspace = ''
-
-def set_atomspace(atsp):
-    global atomspace
-    atomspace = atsp
-    return TruthValue(1, 1)
-
-# TODO: Attribution!
-def to_duckduckgo(qq):
-    global atomspace
-
-    nltk_splitter = nltk.data.load('tokenizers/punkt/english.pickle')
-
-    # Anchor for the result
-    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: DuckDuckGoAnswer')
-
-    # Avoid HTTP Error 400: Bad Request
-    query = qq.name.replace(' ', '+')
-
-    # Send the query
-    response = urllib2.urlopen('http://api.duckduckgo.com/?q=' + query + '&format=json').read()
-    result = json.loads(response)
-    abstract_text = result['AbstractText']
-
-    if abstract_text:
-        word_nodes = []
-        sentences = nltk_splitter.tokenize(abstract_text)
-        words = sentences[0].split(' ')
-        for word in words:
-            word_nodes.append(atomspace.add_node(types.WordNode, word))
-        ans = atomspace.add_link(types.ListLink, word_nodes)
-        atomspace.add_link(types.StateLink, [answer_anchor, ans])
-    else:
-        no_result = atomspace.add_node(types.ConceptNode, 'Chatbot: NoResult')
-        atomspace.add_link(types.StateLink, [answer_anchor, no_result])
-
-def to_wolframalpha(qq, aid):
-    global atomspace
-    appid = aid.name
-
-    # Check if we have an AppID
-    if appid == '':
-        raise ValueError('AppID for Wolfram|Alpha Webservice API is missing!')
-
-    # Anchor for the result
-    answer_anchor = atomspace.add_node(types.AnchorNode, 'Chatbot: WolframAlphaAnswer')
-    no_result = atomspace.add_node(types.ConceptNode, 'Chatbot: NoResult')
-
-    # Avoid HTTP Error 400: Bad Request
-    query = qq.name.replace(' ', '+')
-
-    url_1 = 'http://api.wolframalpha.com/v2/query?appid='
-    url_2 = '&input='
-    url_3 = '&format=plaintext'
-    full_url = url_1 + appid + url_2 + query + url_3
-
-    response = ET.fromstring(urllib2.urlopen(full_url).read())
-    result = ''
-
-    # List of pod titles it's currently checking:
-    # - Result
-    # - Definition
-    # - Basic definition
-    # Usually the answer is in 'Result', if not, usually one of
-    # them has the answer
-    # TODO: Expand to cover more if needed
-    for pod in response.iter('pod'):
-        title = pod.get('title')
-        if title == 'Result' or title == 'Definition' or title == 'Basic definition':
-            result = pod.find('subpod').find('plaintext').text
-
-    # Post-process the result a bit
-    if result:
-        # Sometimes '|' exists in the result
-        # Also skip brackets
-        result = result.replace('|', '').replace('(', '').replace(')', '')
-
-        # For common punctuations, to turn them into actual WordNode later
-        result = result.replace(',', ' ,').replace('.', ' .').replace('?', ' ?').replace('!', ' !')
-    else:
-        atomspace.add_link(types.StateLink, [answer_anchor, no_result])
-
-    # Write to AtomSpace
-    if result:
-        word_nodes = []
-        words = result.split(' ')
-        for word in words:
-            if word:
-                word_nodes.append(atomspace.add_node(types.WordNode, word))
-        ans = atomspace.add_link(types.ListLink, word_nodes)
-        atomspace.add_link(types.StateLink, [answer_anchor, ans])
-    else:
-        atomspace.add_link(types.StateLink, [answer_anchor, no_result])
-
-def call_duckduckgo(qq):
-    t = threading.Thread(target=to_duckduckgo, args=(qq,))
-    t.start()
-    return TruthValue(1, 1)
-
-def call_wolframalpha(qq, aid):
-    t = threading.Thread(target=to_wolframalpha, args=(qq, aid))
-    t.start()
-    return TruthValue(1, 1)
-")
-
-; Get the current atomspace from guile
-(python-call-with-as "set_atomspace" (cog-atomspace))
-
 ; AppID for Wolfram|Alpha Webservice API
-(define appid "")
+(define wa-appid "")
 (define has-wolframalpha-setup #f)
 
-(define-public (set-appid id)
-    (set! appid id)
+; AppID for OpenWeatherMap
+(define owm-appid "")
+(define has-openweathermap-setup #f)
+
+(define-public (set-wa-appid id)
+    (set! wa-appid id)
     (State wolframalpha default-state)
     (set! has-wolframalpha-setup #t)
+)
+
+(define-public (set-owm-appid id)
+    (set! owm-appid id)
+    (State openweathermap default-state)
+    (set! has-openweathermap-setup #t)
 )
 
 (define (ask-duckduckgo)
     (State duckduckgo process-started)
 
-    ; TODO: We may want to actually nlp-parse the answer, but a typical answer
-    ; of this type seems to be very long (a paragraph), split into sentences
-    ; and then parse?
     (begin-thread
-        (cog-evaluate! (Evaluation (GroundedPredicate "py: call_duckduckgo")
-            (List (get-input-text-node))))
+        ; TODO: Do something better for getting the first sentence of a paragraph, though
+        ; it isn't that critical here
+        (define (get-first-sentence str)
+            (define default-length 50)
+
+            (if (< (string-length str) default-length)
+                (substring str 0 (string-index str #\.))
+                (substring str 0 (+ default-length
+                    (string-index (substring str default-length) #\.)))
+            )
+        )
+
+        (define query (string-downcase (cog-name (get-input-text-node))))
+        (define url (string-append "http://api.duckduckgo.com/?q=" query "&format=xml"))
+        (define body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
+        (define resp (car (last-pair body)))
+        (define abstract
+            (find (lambda (i)
+                (and (pair? i) (equal? 'Abstract (car i)))) resp))
+
+        (if (equal? (length abstract) 1)
+            (State duckduckgo-answer no-result)
+            (let* ((ans (car (cdr abstract)))
+                   (first-sent (get-first-sentence ans))
+                   (ans-in-words (string-split first-sent #\ ))
+                  )
+                (State duckduckgo-answer (List (map Word ans-in-words)))
+            )
+        )
+
         (State duckduckgo process-finished)
     )
 )
 
 (define (ask-wolframalpha)
-    (if (not (equal? appid ""))
-        (begin-thread
-            (define appid_node (Node appid))
+    (if (not (equal? wa-appid ""))
+        (begin
             (State wolframalpha process-started)
+            (begin-thread
+                (define query (string-downcase (cog-name (get-input-text-node))))
+                (define query-no-spaces (regexp-substitute/global #f " " query 'pre "+" 'post))
+                (define url (string-append
+                    "http://api.wolframalpha.com/v2/query?appid=" wa-appid
+                        "&input=" query-no-spaces "&format=plaintext"))
+                (define body (xml->sxml (response-body-port (http-get url #:streaming? #t))))
+                (define resp (car (last-pair body)))
 
-            (cog-evaluate! (Evaluation (GroundedPredicate "py: call_wolframalpha")
-                (List (get-input-text-node) appid_node)))
-            (State wolframalpha process-finished)
-            (cog-extract appid_node)
+                (define ans
+                    (find (lambda (i)
+                            (and (pair? i)
+                                 (equal? 'pod (car i))
+                                 (equal? 'title (car (cadr (cadr i))))
+                                 ; The tags we are looking for
+                                 (not (equal? (member (cadr (cadr (cadr i)))
+                                     (list "Result" "Definition" "Definitions"
+                                           "Basic definition" "Basic information"))
+                                     #f))))
+                    resp)
+                )
+
+                (if (equal? ans #f)
+                    (State wolframalpha-answer no-result)
+                    (let* ((text-ans (cadr (cadddr (cadddr ans))))
+                           ; Remove '(', ')', and '|' from the answer, if any
+                           (cleaned-ans (string-trim (string-filter
+                               (lambda (c) (not (or (char=? #\( c)
+                                                    (char=? #\) c)
+                                                    (char=? #\| c)))) text-ans)))
+                           ; Remove newline and split them into words
+                           (ans-lines (string-split cleaned-ans #\newline))
+                           (ans-in-words (append-map (lambda (l) (string-split l #\ )) ans-lines)))
+                        ; Turn the answer into WordNodes, ignore the empty strings
+                        (State wolframalpha-answer (List (map Word
+                            (remove (lambda (w) (equal? w "")) ans-in-words))))
+                    )
+                )
+
+                (State wolframalpha process-finished)
+            )
+        )
+    )
+)
+
+(define (ask-weather)
+    (if (not (equal? owm-appid ""))
+        (begin
+            (State openweathermap process-started)
+            (begin-thread
+                (define ip-api "http://freegeoip.net/xml/")
+                (define ip-body (xml->sxml (response-body-port (http-get ip-api #:streaming? #t))))
+                (define ip-resp (car (last-pair ip-body)))
+                (define country-code
+                    (cadr (find (lambda (i) (and (pair? i) (equal? 'CountryCode (car i)))) ip-resp)))
+
+                (define owm-url (string-append "http://api.openweathermap.org/data/2.5/weather?q="
+                    country-code "&appid=" owm-appid "&mode=xml&units=imperial"))
+                (define owm-body (xml->sxml (response-body-port (http-get owm-url #:streaming? #t))))
+                (define owm-resp (car (last-pair owm-body)))
+                (define temp (find (lambda (d) (and (pair? d) (equal? 'temperature (car d)))) owm-resp))
+                (define humidity (find (lambda (d) (and (pair? d) (equal? 'humidity (car d)))) owm-resp))
+                (define weather (find (lambda (d) (and (pair? d) (equal? 'weather (car d)))) owm-resp))
+                (define temp-val (cadr (cadr (cadr temp))))
+                (define humidity-val (cadr (cadr (cadr humidity))))
+                (define weather-val (cadr (cadr (cadr weather))))
+
+                (if (equal? weather-val #f)
+                    (State openweathermap-answer no-result)
+                    (State openweathermap-answer (List (append
+                        (list (Word "it's"))
+                        (map Word (string-split weather-val #\ ))
+                        (list (Word "temperature") (Word temp-val) (Word "fahrenheit"))
+                        (list (Word "humidity") (Word humidity-val) (Word "percent"))
+                    )))
+                )
+
+                (State openweathermap process-finished)
+            )
         )
     )
 )

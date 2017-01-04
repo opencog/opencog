@@ -58,6 +58,11 @@
 (State wolframalpha setup-not-done)  ; An AppID is required to use WolframAlpha
 (State wolframalpha-answer default-state)
 
+(define openweathermap (Anchor (chat-prefix "OpenWeatherMap")))
+(define openweathermap-answer (Anchor (chat-prefix "OpenWeatherMapAnswer")))
+(State openweathermap setup-not-done)  ; An AppID is required to use OpenWeatherMap
+(State openweathermap-answer default-state)
+
 (define random-pkd-sentence-generator (Anchor (chat-prefix "RandomPKDSentenceGenerator")))
 (define random-blogs-sentence-generator (Anchor (chat-prefix "RandomBlogsSentenceGenerator")))
 (define random-kurzweil-sentence-generator (Anchor (chat-prefix "RandomBlogsSentenceGenerator")))
@@ -107,6 +112,9 @@
     (if has-wolframalpha-setup
         (State wolframalpha default-state))
     (State wolframalpha-answer default-state)
+    (if has-openweathermap-setup
+        (State openweathermap default-state))
+    (State openweathermap-answer default-state)
     (if has-markov-setup (begin
         (State random-pkd-sentence-generator default-state)
         (State random-blogs-sentence-generator default-state)

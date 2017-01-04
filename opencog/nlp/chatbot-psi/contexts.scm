@@ -336,6 +336,31 @@
     (any-result? wolframalpha-answer)
 )
 
+(Define
+    (DefinedPredicate "is-openweathermap-ready?")
+    (setup-done? openweathermap)
+)
+
+(Define
+    (DefinedPredicate "openweathermap-not-started?")
+    (process-not-started? openweathermap)
+)
+
+(Define
+    (DefinedPredicate "is-weather-related?")
+    (Evaluation (GroundedPredicate "scm: check-words") (List (Word "weather")))
+)
+
+(Define
+    (DefinedPredicate "openweathermap-finished?")
+    (process-finished? openweathermap)
+)
+
+(Define
+    (DefinedPredicate "is-openweathermap-answer?")
+    (any-result? openweathermap-answer)
+)
+
 ; Usually ChatScript is faster than the random sentence generator, so if the input has
 ; some of the keywords that will trigger either the PKD or Kurzweil generator, do not
 ; reply until the generator has finished or timeout
@@ -457,5 +482,3 @@
     (DefinedPredicate "is-emotion-state-reply?")
     (any-result? emotion-state-reply)
 )
-
-
