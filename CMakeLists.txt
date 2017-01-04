@@ -470,7 +470,7 @@ IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 IF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
-	SET(HAVE_REST 1)
+	SET(HAVE_EVENT_PUBLISHING_DEPENDENCIES 1)
 ENDIF(HAVE_SERVER AND HAVE_TBB AND HAVE_ZMQ)
 
 # ===================================================================
@@ -711,7 +711,8 @@ SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HA
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
-SUMMARY_ADD("REST" "REST Atomspace Publisher module" HAVE_REST)
+SUMMARY_ADD("REST Events" "REST Atomspace Event Publisher module"
+	HAVE_EVENT_PUBLISHING_DEPENDENCIES)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("SpaceTime" "3D Space-Time object tracker" HAVE_OCTOMAP)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS AND HAVE_OCTOMAP)
