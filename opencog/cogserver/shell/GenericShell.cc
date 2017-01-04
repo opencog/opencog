@@ -320,6 +320,8 @@ void GenericShell::line_discipline(const std::string &expr)
 				put_output(abort_prompt);
 				_evaluator->interrupt();
 				_evaluator->clear_pending();
+
+				_eval_done = false; // finish_eval will set it to true.
 				finish_eval();
 				return;
 			}
