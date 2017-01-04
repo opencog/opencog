@@ -320,8 +320,6 @@ void GenericShell::line_discipline(const std::string &expr)
 				put_output(abort_prompt);
 				_evaluator->interrupt();
 				_evaluator->clear_pending();
-
-				_eval_done = false; // finish_eval will set it to true.
 				finish_eval();
 				return;
 			}
@@ -394,7 +392,7 @@ void GenericShell::start_eval()
 
 void GenericShell::finish_eval()
 {
-	OC_ASSERT(not _eval_done, "Bad evaluator flag state!");
+	// Repeated control-C will send us here with _eval_done already set..
 	std::unique_lock<std::mutex> lck(_mtx);
 	_eval_done = true;
 	_cv.notify_all();
