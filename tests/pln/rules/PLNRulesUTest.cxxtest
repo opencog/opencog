@@ -666,7 +666,7 @@ void PLNRulesUTest::test_equivalence_to_implication()
 		rbs = as.add_node(CONCEPT_NODE, "dummy rbs"),
 		rule_ml = as.add_link(MEMBER_LINK, rule_alias, rbs);
 	Rule rule(rule_ml);
-	Handle results = bindlink(&as, rule.get_forward_rule());
+	Handle results = bindlink(&as, rule.get_rule());
 	Handle expected = eval.eval_h(
 		"(SetLink"
 		"  (ImplicationLink"
