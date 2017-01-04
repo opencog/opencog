@@ -179,10 +179,11 @@ Wikipedia processing
 Notes below are for four languages: French, Lithuanian, Polish, and
 "Simple English".  Adjust as desired.
 
-Set up distinct databases, one for each language:
-    createdb fr_pairs lt_pairs pl_pairs simple_pairs
-    cat opencog/persist/sql/atom.sql | psql
-    vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
+Download wikipedia database dumps:
+https://dumps.wikimedia.org/ltwiki/
+https://dumps.wikimedia.org/frwiki/
+https://dumps.wikimedia.org/zhwiki/ (Mandarin)
+https://dumps.wikimedia.org/zh_yuewiki/ (Cantonese)
 
 The wikipedia articles need to be scrubbed of stray wiki markup, so
 that we send (mostly) plain text into the system.  There's a set of
@@ -246,15 +247,21 @@ Verify that it works: e.g.
    cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
 
 Some typical sentence-splitting concerns:
-A question mark or exclamation mark always ends a sentence.  A period followed by an
-upper-case letter generally ends a sentence, but there are a number of exceptions.  For
-example, if the period is part of an abbreviated title ("Mr.", "Gen.", ...), it does not end a
-sentence.  A period following a single capitalized letter is assumed to be a person's initial,
-and is not considered the end of a sentence.
+A question mark or exclamation mark always ends a sentence.  A period
+followed by an upper-case letter generally ends a sentence, but there
+are a number of exceptions.  For example, if the period is part of an
+abbreviated title ("Mr.", "Gen.", ...), it does not end a sentence.
+A period following a single capitalized letter is assumed to be a
+person's initial, and is not considered the end of a sentence.
 
 
 Wikipedia Parsing, part II
 --------------------------
+Set up distinct databases, one for each language:
+    createdb fr_pairs lt_pairs pl_pairs simple_pairs
+    cat opencog/persist/sql/atom.sql | psql
+    vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
+
 Now, build some working directories (so that we don't mess up
 alpha-pages after all that work)
 
