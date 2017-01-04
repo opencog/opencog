@@ -121,15 +121,24 @@
                     (cadr (find (lambda (i) (and (pair? i) (equal? 'CountryCode (car i)))) ip-resp)))
 
                 (define owm-url (string-append "http://api.openweathermap.org/data/2.5/weather?q="
-                    country-code "&appid=" owm-appid "&mode=xml&units=metric"))
+                    country-code "&appid=" owm-appid "&mode=xml&units=imperial"))
                 (define owm-body (xml->sxml (response-body-port (http-get owm-url #:streaming? #t))))
                 (define owm-resp (car (last-pair owm-body)))
+                (define temp (find (lambda (d) (and (pair? d) (equal? 'temperature (car d)))) owm-resp))
+                (define humidity (find (lambda (d) (and (pair? d) (equal? 'humidity (car d)))) owm-resp))
                 (define weather (find (lambda (d) (and (pair? d) (equal? 'weather (car d)))) owm-resp))
+                (define temp-val (cadr (cadr (cadr temp))))
+                (define humidity-val (cadr (cadr (cadr humidity))))
                 (define weather-val (cadr (cadr (cadr weather))))
 
                 (if (equal? weather-val #f)
                     (State openweathermap-answer no-result)
-                    (State openweathermap-answer (List (map Word (string-split weather-val #\ ))))
+                    (State openweathermap-answer (List (append
+                        (list (Word "it's"))
+                        (map Word (string-split weather-val #\ ))
+                        (list (Word "temperature") (Word temp-val) (Word "fahrenheit"))
+                        (list (Word "humidity") (Word humidity-val) (Word "percent"))
+                    )))
                 )
 
                 (State openweathermap process-finished)
