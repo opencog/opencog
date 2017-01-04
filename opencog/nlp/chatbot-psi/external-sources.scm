@@ -114,11 +114,11 @@
         (begin
             (State openweathermap process-started)
             (begin-thread
-                (define ip-api "http://ip-api.com/xml")
+                (define ip-api "http://freegeoip.net/xml/")
                 (define ip-body (xml->sxml (response-body-port (http-get ip-api #:streaming? #t))))
                 (define ip-resp (car (last-pair ip-body)))
                 (define country-code
-                    (cadr (find (lambda (i) (and (pair? i) (equal? 'countryCode (car i)))) ip-resp)))
+                    (cadr (find (lambda (i) (and (pair? i) (equal? 'CountryCode (car i)))) ip-resp)))
 
                 (define owm-url (string-append "http://api.openweathermap.org/data/2.5/weather?q="
                     country-code "&appid=" owm-appid "&mode=xml&units=metric"))
