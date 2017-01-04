@@ -56,7 +56,6 @@
     (gen-deduction-rule SubsetLink))
 
 
-
 (define (deduction-formula AB BC AC)
     (let*
         ((sA (cog-stv-strength (gar AB)))
