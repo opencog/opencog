@@ -54,6 +54,7 @@ AtomSpacePublisherModule::AtomSpacePublisherModule(CogServer& cs) : Module(cs)
 {
     logger().info("[AtomSpacePublisherModule] constructor");
     this->as = &cs.getAtomSpace();
+    _attention_bank = &attentionbank(as);
 
     enableSignals();
 
@@ -107,18 +108,21 @@ void AtomSpacePublisherModule::enableSignals()
     }
     if (!AVChangedConnection.connected())
     {
-        AVChangedConnection = as->AVChangedSignal(boost::bind(
-            &AtomSpacePublisherModule::AVChangedSignal, this, _1, _2, _3));
+        AVChangedConnection = _attention_bank->getAVChangedSignal().connect(
+            boost::bind(&AtomSpacePublisherModule::AVChangedSignal,
+                        this, _1, _2, _3));
     }
     if (!AddAFConnection.connected())
     {
-        AddAFConnection = as->AddAFSignal(boost::bind(
-            &AtomSpacePublisherModule::addAFSignal, this, _1, _2, _3));
+        AddAFConnection = _attention_bank->AddAFSignal().connect(
+            boost::bind(&AtomSpacePublisherModule::addAFSignal,
+                        this, _1, _2, _3));
     }
     if (!RemoveAFConnection.connected())
     {
-        RemoveAFConnection = as->RemoveAFSignal(boost::bind(
-            &AtomSpacePublisherModule::removeAFSignal, this, _1, _2, _3));
+        RemoveAFConnection = _attention_bank->RemoveAFSignal().connect(
+            boost::bind(&AtomSpacePublisherModule::removeAFSignal,
+                        this, _1, _2, _3));
     }
 }
 
@@ -279,7 +283,7 @@ void AtomSpacePublisherModule::removeAFSignal(const Handle& h,
 Object AtomSpacePublisherModule::atomToJSON(Handle h)
 {
     // Type
-    Type type = as->get_type(h);
+    Type type = h->getType();
     std::string typeNameString = classserver().getTypeName(type);
 
     // Name
@@ -289,7 +293,7 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
     std::string handle = std::to_string(h.value());
 
     // AttentionValue
-    AttentionValuePtr av = h->getAttentionValue();
+    AttentionValuePtr av = _attention_bank->get_av(h);
     Object jsonAV;
     jsonAV = avToJSON(av);
 
