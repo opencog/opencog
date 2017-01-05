@@ -719,6 +719,6 @@ SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS AND 
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_ADD("NLP" "Natural Language Processing" HAVE_NLP)
 SUMMARY_ADD("PatternMiner" "Pattern Miner" HAVE_cpprest)
-SUMMARY_ADD("Haskell codes" "Logic via Lojban" HAVE_STACK)
+SUMMARY_ADD("Haskell codes" "Logic via Lojban" HAVE_STACK AND BUILD_LOJBAN)
 
 SUMMARY_SHOW()
