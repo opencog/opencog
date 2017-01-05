@@ -4,8 +4,8 @@
 #
 # This script starts a RelEx server that listens for plain-text input
 # (for the ANY langauge) on port 4445.  The any langauge generates
-# random parses. The resultig random parse is returned in opencog format
-# on the same socket. The end of the parse is # demarcated with an 
+# random parses. The resulting random parse is returned in opencog format
+# on the same socket. The end of the parse is demarcated with an
 # ; END OF SENTENCE token.
 #
 # It is intended that this server be used entirely from within OpenCog

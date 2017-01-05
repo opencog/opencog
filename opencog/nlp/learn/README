@@ -259,7 +259,7 @@ Wikipedia Parsing, part II
 --------------------------
 Set up distinct databases, one for each language:
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
-    cat opencog/persist/sql/atom.sql | psql
+    cat opencog/persist/sql/odbc/atom.sql | psql foobar_pairs
     vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
 
 Now, build some working directories (so that we don't mess up

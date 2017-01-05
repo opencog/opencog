@@ -43,9 +43,9 @@ fi
 base=`echo $filename | cut -d \/ -f 1`
 rest=`echo $filename | cut -d \/ -f 2-6`
 
-echo "Processing file $rest"
+echo "Processing file >>>$rest<<<"
 
-# Create directories if missed
+# Create directories if missing
 mkdir -p $(dirname "$splitdir/$rest")
 mkdir -p $(dirname "$subdir/$rest")
 
