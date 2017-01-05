@@ -77,7 +77,7 @@ a) it already works; little or no new code required. b) later processing
 steps will require passing text through the link-grammar parser anyway,
 so we may as well start using it right away. So, set that up:
 
-4) Install `link-grammar-4.8.4` or newer.
+4) Install `link-grammar-5.3.13` or newer.
 5) Copy the RelEx opencog-server.sh shell script to some other name.
    Edit it, and replace the final line with this:
 ```
