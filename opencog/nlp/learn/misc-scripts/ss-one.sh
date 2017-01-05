@@ -19,14 +19,15 @@ coghost="$3"
 cogport=$4
 
 
-splitter=/home/linas/src/relex/src/split-sentences/split-sentences.pl
+splitter=/home/ubuntu/src/relex/src/split-sentences/split-sentences.pl
 splitter=/usr/local/bin/split-sentences.pl
 splitter=./split-sentences.pl
 
 splitdir=split-articles
 subdir=submitted-articles
 
-# Punt if the cogserver has crashed.
+# Punt if the cogserver has crashed. The grep is looking for the
+# config file.
 haveserver=`ps aux |grep cogserver |grep opencog-$lang`
 if [[ -z "$haveserver" ]] ; then
 	exit 1

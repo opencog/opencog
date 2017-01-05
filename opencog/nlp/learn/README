@@ -268,7 +268,19 @@ alpha-pages after all that work)
     cp -pr alpha-pages beta-pages
 
 * Copy scripts from opencog/nlp/learn/misc-scripts into working dir.
-* Modify as needed for chosen language. 
+* Modify as needed for chosen language. Most of these don't need
+  modification:
+  -- run-all-servers.sh -- select a conf file...
+  -- `relex-server-any.sh` performs random-syntax parsing for languages
+     that do not need morphological analysis. Edit this, and verify that
+     the relex server is running on the desired port number.
+  -- `wiki-ss-en.sh` performs batch processing of wikipedia articles.
+     Edit this, and set the correct language and cogserver port number.
+     This calls `ss-one.sh` to process one wikipedia article.
+  -- `ss-one.sh` calls `split-sentences.pl` to split the article into
+     sentences, and then calls `submit-one.pl` to send the sentences
+     to relex for parsing. None of these should need any modification.
+
 * Make sure the scripts point at the RelEx parse server.
   (The RelEx location is given in config-*.scm Make sure that its right,
   and that its loaded... i.e. is listed in opencog-*.conf)
