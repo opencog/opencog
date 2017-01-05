@@ -2,9 +2,10 @@
                    Language Learning
                    -----------------
              Linas Vepstas December 2013
+                 Updated January 2017
 
-Current project, under construction. See the wiki page here:
-http://wiki.opencog.org/w/Language_learning
+Current project, under construction.  See the [language learning wiki]
+(http://wiki.opencog.org/w/Language_learning)
 for an alternate overview.
 
 Summary
@@ -14,10 +15,11 @@ dictionaries for different languages, and possibly do some rudimentary
 semantic extraction.  The primary design point is that the learning is
 to be done in an unsupervised fashion.  A sketch of the theory that
 enables this can be found in the paper "Language Learning", B. Goertzel
-and L, Vepstas (2014) on ArXiv abs/1401.3372  An even shorter sketch is
-given below.  Most of this README concerns the practical details of
-operating the system, and some diary-like notes about partial and
-preliminary results.
+and L. Vepstas (2014) on [ArXiv abs/1401.3372](https://arxiv.org/abs/1401.3372)
+A shorter sketch is given below.  Most of this README concerns the
+practical details of configuring and operating the system, and some
+diary-like notes about system configurtion and operation. A diary of
+scientific notes and results is in the `learn-lang-diary` directory.
 
 The basic algorithmic steps, as implemented so far, are as follows:
 A) Ingest a lot of raw text, such as Wikipedia articles, and count the
@@ -52,46 +54,78 @@ months of CPU effort. Thus, SQL persistance is used to store the atoms.
 So, set that up:
 
 1) Set up and configure postgres, as described in 
-   opencog/persist/sql/README
-2) createdb learn-pairs
+   `opencog/persist/sql/odbc/README`
+
+2) Create and initialize the database
+```
+   createdb learn-pairs
    cat atom.sql | psql learn-pairs
-   Edit and setup ~/.odbc.ini
+```
+   Edit and setup `~/.odbc.ini`
+
 3) Start the cogserver, verify that connections to the database work.
+   (see steps 6,7,8 below, for more on how to do this.)
 
 Obtaining word-pair counts requires digesting a lot of text, and
 counting the word-pairs that occur in the text.  The easiest way of
 doing this, at the moment, is to parse the text with link-grammar and
-RelEx, using the "any" language.  This pseudo-language will ink any
+RelEx, using the "any" language.  This pseudo-language will link any
 word to any other, and is simply a convenient way of extracting word
-pairs from text.  Although this might seem to be a very concoluted way
+pairs from text.  Although this might seem to be a very convoluted way
 of extracting word pairs, it actually "make sense", for two reasons:
 a) it already works; little or no new code required. b) later processing
 steps will require passing text through the link-grammar parser anyway,
 so we may as well start using it right away. So, set that up:
 
-4) Install link-grammar-4.8.4 or newer.
+4) Install `link-grammar-4.8.4` or newer.
 5) Copy the RelEx opencog-server.sh shell script to some other name.
    Edit it, and replace the final line with this:
+```
    java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --lang any -n 16 --link
+```
    Run the new shell script.
 
    The above tells relex to use the 'any' language, and return up to 16
    different parses. This should generate plenty of word-pairs.
 
-6) Copy one of the opencog-??.conf files from the misc-scripts directory
-   to the cogserver directory. Modify as desired.  (current experiments
-   are being run on French, Polish and Lithuanian. Try other languages,
-   if desired.
+6) Create/edit the `~/.guile` file and add the following content:
+```
+   (use-modules (ice-9 readline))
+   (activate-readline)
+   (debug-enable 'backtrace)
+   (read-enable 'positions)
+   (add-to-load-path "/usr/local/share/opencog/scm")
+   (add-to-load-path ".")
+```
 
-7) telnet localhost 17001
-   opencog> sql-open learn-pairs linas asdf
-   opencog> scm
+7) Copy one of the `opencog-??.conf` files from the `misc-scripts`
+   directory to your working directory. Modify as needed. This file
+   specifies the cogserver port number, and the prompt to use; this
+   can be changed so that it does not conflict with other cogservers
+   that might be running at the same time.
+
+8) Chose the corresponding `learn-pairs-??.scm` file, and review and
+   edit the configuration as necessary. It contains the database 
+   credentials.
+
+9) Start the cogserver, as follows:
+```
+   guile -l learn-pairs-??.scm
+```
+   There are other ways of starting the cogserver; the above is handy.
+
+10) Verify that the language processing pipeline works:
+```
+   telnet localhost 17002  # or wherever your cogserver is configured.
    guile> (observe-text "this is a test")
+```
 
    Better yet:
+```
    echo -e "scm\n (observe-text \"this is a another test\")" |nc localhost 17001
    echo -e "scm\n (observe-text \"Bernstein () (1876\")" |nc localhost 17001
    echo -e "scm\n (observe-text \"Lietuvos žydų kilmės žurnalistas\")" |nc localhost 17001
+```
 
    This should result in activity on the RelEx server, on the cogserver,
    and on the database: the "observe text" scheme code sends the text to
@@ -99,9 +133,10 @@ so we may as well start using it right away. So, set that up:
    the database.
 
 8) Verify that the above resulted in data sent to the SQL database. So:
+```
    psql learn-pairs
    learn-pairs=# SELECT * from atoms;
-
+```
    The above shows that the database now contains word-counts for
    pair-wise linkages for the above sentences.
 
@@ -189,7 +224,7 @@ The wikipedia articles need to be scrubbed of stray wiki markup, so
 that we send (mostly) plain text into the system.  There's a set of
 cleanup files in the RelEx source distribution, in the src/perl
 directory.  Use these as follows:
-
+```
     cd /storage/wikipedia
 
     mkdir wiki-stripped
@@ -202,6 +237,7 @@ directory.  Use these as follows:
     mkdir alpha-pages
     cd alpha-pages
     /home/linas/src/relex/src/perl/wiki-alpha.sh
+```
 
 simple:
 find |wc     gives 131434 total files
@@ -239,13 +275,13 @@ Maybe use NLTK ? ... OK, but not today, ... you can experiment.
 
 Here's a simple one, easy-to-use:
 https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
-Has french, polish, latvian
-Its LGPL.  Copy this over into RelEx, for now. (Its now in the RelEx sources)
+Has french, polish, latvian, more.  Its LGPL. It has been copied over
+into RelEx, for now. (Its should be here, I guess, not in relex!?)
 
 Verify that it works: e.g.
-
+```
    cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
-
+```
 Some typical sentence-splitting concerns:
 A question mark or exclamation mark always ends a sentence.  A period
 followed by an upper-case letter generally ends a sentence, but there
@@ -264,10 +300,11 @@ Set up distinct databases, one for each language:
 
 Now, build some working directories (so that we don't mess up
 alpha-pages after all that work)
-
+```
     cp -pr alpha-pages beta-pages
-
-* Copy scripts from opencog/nlp/learn/misc-scripts into working dir.
+```
+* Review the README file in the `opencog/nlp/learn/misc-scripts`
+  directory, and then copy the scripts into your working dir.
 * Modify as needed for chosen language. Most of these don't need
   modification:
   -- run-all-servers.sh -- select a conf file...
@@ -297,11 +334,15 @@ alpha-pages after all that work)
   below.
 
 Some handy SQL commands:
+```
 SELECT count(uuid) FROM Atoms;
 select count(uuid) from  atoms where type = 77;
+```
 
 type 77 is WordNode for me; verify with
+```
 SELECT * FROM Typecodes;
+```
 
 
 Mutual Information
