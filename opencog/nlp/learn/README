@@ -135,7 +135,8 @@ so we may as well start using it right away. So, set that up:
 8) Verify that the above resulted in data sent to the SQL database. So:
 ```
    psql learn-pairs
-   learn-pairs=# SELECT * from atoms;
+   learn-pairs=# SELECT * FROM atoms;
+   learn-pairs=# SELECT COUNT(*) FROM atoms;
 ```
    The above shows that the database now contains word-counts for
    pair-wise linkages for the above sentences.
@@ -307,13 +308,19 @@ alpha-pages after all that work)
   directory, and then copy the scripts into your working dir.
 * Modify as needed for chosen language. Most of these don't need
   modification:
-  -- run-all-servers.sh -- select a conf file...
+  -- `run-all-servers.sh` runs (almost) all of the servers, at once,
+     in a multi-paneled byobu window. Edit this, and manually configure
+     the relex port-number to use. After starting, the batch script
+     `./wiki-ss-en.sh` needs to be started by hand.
+
   -- `relex-server-any.sh` performs random-syntax parsing for languages
      that do not need morphological analysis. Edit this, and verify that
      the relex server is running on the desired port number.
+
   -- `wiki-ss-en.sh` performs batch processing of wikipedia articles.
      Edit this, and set the correct language and cogserver port number.
      This calls `ss-one.sh` to process one wikipedia article.
+
   -- `ss-one.sh` calls `split-sentences.pl` to split the article into
      sentences, and then calls `submit-one.pl` to send the sentences
      to relex for parsing. None of these should need any modification.
