@@ -121,14 +121,15 @@
 )
 
 ; ---------------------------------------------------------------------
-; observe-text -- update word and word-pair counts by observing raw text.
-;
-; This is the first part of the learning algo: simply count the words
-; and word-pairs oberved in incoming text. This takes in raw text, gets
-; it parsed, and then updates the counts for the observed words and word
-; pairs.
-(define (observe-text plain-text)
+(define-public (observe-text plain-text)
+"
+ observe-text -- update word and word-pair counts by observing raw text.
 
+ This is the first part of the learning algo: simply count the words
+ and word-pairs oberved in incoming text. This takes in raw text, gets
+ it parsed, and then updates the counts for the observed words and word
+ pairs.
+"
 	(begin
 		(relex-parse plain-text) ;; send plain-text to server
 		(update-link-counts (get-new-parsed-sentences))
