@@ -16,6 +16,8 @@
 ; flushed to the SQL database so that they're not forgotten.
 ;
 ; As of 10 December 2013, this seems to work fine. Deploying ...
+
+(use-modules (opencog) (opencog nlp) (opencog persist))
 ;
 ; ---------------------------------------------------------------------
 ; map-lg-links -- loop over all link-grammar links in sentences.

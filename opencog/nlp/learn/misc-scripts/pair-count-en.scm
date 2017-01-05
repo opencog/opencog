@@ -8,6 +8,10 @@
 (use-modules (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
 
+; Tell opencog where the relex server is located.
+; The port should match that in `relex-server-any.sh`
+(use-relex-server "127.0.0.1" 4445)
+
 ; Start the cogserver.
 ; Edit the below, setting it to the desired langauge.
 ; This has almost no effect, other than to set the cogserver
