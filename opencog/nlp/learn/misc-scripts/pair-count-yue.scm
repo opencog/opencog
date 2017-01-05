@@ -6,6 +6,7 @@
 ;
 (use-modules (opencog) (opencog cogserver))
 (use-modules (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
 
 ; Start the cogserver.
 ; Edit the below, setting it to the desired langauge.
