@@ -59,6 +59,7 @@ private:
 
     void spreadImportance();
     void diffuseAtom(Handle source);
+    AttentionValue::sti_t calculateDiffusionAmount(Handle);
 
 public:
      AFImportanceDiffusionAgent(CogServer&);

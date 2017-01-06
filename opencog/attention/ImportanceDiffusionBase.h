@@ -65,23 +65,27 @@ protected:
     std::stack<DiffusionEventType> diffusionStack;
     void processDiffusionStack();
 
-    virtual void diffuseAtom(Handle);
-
     HandleSeq diffusionSourceVector(void);
+    
     HandleSeq incidentAtoms(Handle);
     HandleSeq hebbianAdjacentAtoms(Handle);
+    void      removeHebbianLinks(HandleSeq& hseq);
+
     std::map<Handle, double> probabilityVector(HandleSeq);
-    AttentionValue::sti_t calculateDiffusionAmount(Handle);
-    double calculateHebbianDiffusionPercentage(Handle);
-    double calculateIncidentDiffusionPercentage(Handle);
     std::map<Handle, double> probabilityVectorIncident(HandleSeq);
     std::map<Handle, double> probabilityVectorHebbianAdjacent(Handle, HandleSeq);
     std::map<Handle, double> combineIncidentAdjacentVectors(
             std::map<Handle, double>, std::map<Handle, double>);
+
+    double calculateHebbianDiffusionPercentage(Handle);
+    double calculateIncidentDiffusionPercentage(Handle);
+    
     void tradeSTI(DiffusionEventType);
     void updateMaxSpreadPercentage();
 
+    void diffuseAtom(Handle);
     virtual void spreadImportance() = 0;
+    virtual AttentionValue::sti_t calculateDiffusionAmount(Handle) = 0;
 
 public:
     void setMaxSpreadPercentage(double);
