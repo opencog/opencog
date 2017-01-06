@@ -99,9 +99,18 @@
 
     (for-each
         (lambda (w)
-            (if (not (equal? #f (regexp-exec
-                    (make-regexp (string-append "\\b" w "\\b") regexp/icase) input-text)))
-                (set! matched-keywords (append matched-keywords (list w)))
+            (let ((r1 (regexp-exec (make-regexp
+                          (string-append "\\b" w "\\b") regexp/icase) input-text))
+                  (r2 (regexp-exec (make-regexp
+                          (string-append "\\w+\\s+\\b" w "\\b") regexp/icase) input-text))
+                  (r3 (regexp-exec (make-regexp
+                          (string-append "\\b" w "\\b\\s+\\w+") regexp/icase) input-text)))
+                (if (not (equal? #f r1))
+                    (set! matched-keywords (append matched-keywords (list w))))
+                (if (not (equal? #f r2))
+                    (set! matched-keywords (append matched-keywords (list (match:substring r2)))))
+                (if (not (equal? #f r3))
+                    (set! matched-keywords (append matched-keywords (list (match:substring r3)))))
             )
         )
         target-words
@@ -113,17 +122,6 @@
             (stv 1 1))
         (stv 0 1)
     )
-
-(display "matched-keywords = ")
-(display (length matched-keywords))
-(newline)
-(display matched-keywords)
-(newline)
-(display "rsg-input\n")
-(display rsg-input)
-(newline)
-
-(stv 0 1)
 )
 
 (define (check-pkd-words)
