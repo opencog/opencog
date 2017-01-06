@@ -162,6 +162,7 @@
 	(cog-map-type delone 'ParseLink)
 	(cog-map-type delone 'ReferenceLink)
 	(cog-map-type delone 'LgLinkInstanceLink)
+	(cog-map-type delone 'WordSequenceLink)
 
 	(cog-map-type delone 'CosenseLink)
 
