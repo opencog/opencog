@@ -94,41 +94,36 @@
 
 (define rsg-input "")
 (define (check-theme target-words)
-    (define idx '())
-    (define cnt 0)
-    (define input-wl (cog-outgoing-set (get-input-word-list)))
+    (define input-text (cog-name (get-input-text-node)))
+    (define matched-keywords '())
 
-    ; target-words is a list of strings
-    (filter
+    (for-each
         (lambda (w)
-            (if (list? (member (cog-name w) target-words))
-                (set! idx (append idx (list cnt))))
-            (set! cnt (+ cnt 1)))
-        input-wl
+            (if (not (equal? #f (regexp-exec
+                    (make-regexp (string-append "\\b" w "\\b") regexp/icase) input-text)))
+                (set! matched-keywords (append matched-keywords (list w)))
+            )
+        )
+        target-words
     )
 
-    (if (null? idx)
+    (if (> (length matched-keywords) 0)
+        (begin
+            (set! rsg-input (list-ref matched-keywords (random (length matched-keywords))))
+            (stv 1 1))
         (stv 0 1)
-        (let ((rand-idx (list-ref idx (random (length idx)))))
-            (if (equal? (length input-wl) 1)
-                (set! rsg-input (cog-name (car input-wl)))
-                ; Feed the keyword directly to the generator, or with the
-                ; word either before or after that keyword
-                (if (> .7 (random 1.0))
-                    (set! rsg-input (cog-name (list-ref input-wl rand-idx)))
-                    (if (equal? rand-idx 0)
-                        (set! rsg-input (string-append
-                            (cog-name (list-ref input-wl rand-idx))
-                                " " (cog-name (list-ref input-wl (+ rand-idx 1)))))
-                        (set! rsg-input (string-append
-                            (cog-name (list-ref input-wl (- rand-idx 1)))
-                                " " (cog-name (list-ref input-wl rand-idx))))
-                    )
-                )
-            )
-            (stv 1 1)
-        )
     )
+
+(display "matched-keywords = ")
+(display (length matched-keywords))
+(newline)
+(display matched-keywords)
+(newline)
+(display "rsg-input\n")
+(display rsg-input)
+(newline)
+
+(stv 0 1)
 )
 
 (define (check-pkd-words)
