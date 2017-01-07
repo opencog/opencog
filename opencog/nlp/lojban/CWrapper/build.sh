@@ -8,8 +8,6 @@ libver=$(stack query --allow-different-user | awk 'NR==7' | sed 's/version: //g'
 
 if [ "$(id -u)" -ne 0 ];
 then
-    #Force Rebuild
-    rm -fr ".stack-work/"
 
     # Build haskell bindings package.
     stack build --allow-different-user

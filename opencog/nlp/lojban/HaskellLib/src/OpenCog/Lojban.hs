@@ -33,11 +33,11 @@ initParserPrinter path = do
 
 lojbanToAtomese :: WordList -> String -> Maybe Atom
 lojbanToAtomese state text =
-    wrapAtom <$> listToMaybe (parse (runReaderT preti state) (text++" "))
+    wrapAtom <$> listToMaybe (parse (runReaderT lojban state) (text++" "))
 
 lojbanToAtomeseRaw :: WordList -> String -> Maybe (Atom,String)
 lojbanToAtomeseRaw state text =
-    listToMaybe (rawparse (runReaderT preti state) (text++" "))
+    listToMaybe (rawparse (runReaderT lojban state) (text++" "))
 
 wrapAtom :: Atom -> Atom
 wrapAtom atom@(Link "SatisfactionLink" _ _) = cLL [cAN "QuestionAnchor" , atom]

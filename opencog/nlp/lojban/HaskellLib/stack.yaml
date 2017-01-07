@@ -9,12 +9,17 @@ packages:
 - location:
    git: https://github.com/rTreutlein/invertible-syntax
    commit: f96e20609efc3328689b4e9f64fe97763ba67b96
+  extra-dep: true
 - location:
    git: https://github.com/rTreutlein/partial-isomorphisms
    commit: a8d1b86de0a1e1a85c20a25937f50a173b0a990d
+  extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
-extra-deps: [opencog-atomspace-0.1.0.7,list-tries-0.6.3]
+extra-deps: [opencog-atomspace-0.1.0.7
+            ,list-tries-0.6.3]
+           #,invertible-syntax-0.2.2
+           #,partial-isomorphisms-0.2.2]
 
 # Override default flag values for local packages and extra-deps
 flags: {}
