@@ -654,7 +654,7 @@ void CogServer::openDatabase(void)
 #ifdef HAVE_PERSIST_SQL
     // No-op if the user has not configured a storage backend
     if (!config().has("STORAGE")) {
-        logger().warn("No database persistant storage configured! "
+        logger().info("No database persistant storage configured! "
                       "Use the STORAGE config keyword to define.");
         return;
     }

@@ -16,6 +16,8 @@
 ; flushed to the SQL database so that they're not forgotten.
 ;
 ; As of 10 December 2013, this seems to work fine. Deploying ...
+
+(use-modules (opencog) (opencog nlp) (opencog persist))
 ;
 ; ---------------------------------------------------------------------
 ; map-lg-links -- loop over all link-grammar links in sentences.
@@ -121,19 +123,91 @@
 )
 
 ; ---------------------------------------------------------------------
-; observe-text -- update word and word-pair counts by observing raw text.
-;
-; This is the first part of the learning algo: simply count the words
-; and word-pairs oberved in incoming text. This takes in raw text, gets
-; it parsed, and then updates the counts for the observed words and word
-; pairs.
-(define (observe-text plain-text)
 
+(define (delete-sentence-junk)
+"
+  delete-sentences       Delete all atoms that occur in sentences
+
+  Private copy of the (delete-sentences) function in the base nlp
+  module, for private use by the langaue-learning pipeline. Avoids
+  conflict with more mainstream users.
+
+  Delete atoms that belong to particular sentence instances; we don't
+  want to clog up the atomspace with old junk we don't want any more.
+
+  Only the atoms in the atomspace are removed; if any are in the
+  backingstore (database), they are untouched.
+"
+	(let ((n 0))
+	; (define (delit atom) (set! n (+ n 1)) #f)
+	; (define (delit atom) (cog-extract-recursive atom) #f)
+	(define (delit atom) (cog-extract-recursive atom) (set! n (+ n 1)) #f)
+
+	; (define (delone atom) (cog-extract atom) #f)
+	; (define (delone atom) (cog-extract atom) (set! n (+ n 1)) #f)
+	(define (delone atom) (extract-hypergraph atom) (set! n (+ n 1)) #f)
+
+	; Can't delete InheritanceLink, its used to mark wsd completed...
+	; (cog-map-type delone 'InheritanceLink)
+	; Can't delete EvaluationLink, these are used elsewhere.
+	; (cog-map-type delone 'EvaluationLink)
+	; Can't delete ListLink, these are used in EvaluationLinks.
+	; (cog-map-type delone 'ListLink)
+
+	; These two are used by other subsystems. Currently, it is safe to
+	; clobber them here.
+	(cog-map-type delone 'PartOfSpeechLink)
+	(cog-map-type delone 'LemmaLink)
+
+	(cog-map-type delone 'ParseLink)
+	(cog-map-type delone 'ReferenceLink)
+	(cog-map-type delone 'LgLinkInstanceLink)
+	(cog-map-type delone 'WordSequenceLink)
+
+	(cog-map-type delone 'CosenseLink)
+
+	; Its sort of a shame to delete the SimilarityLinks, but these
+	; do make the server bloat after a while.
+	(cog-map-type delone 'SimilarityLink)
+
+	; We do delete all the test-processing nodes, recursively.
+	; This should make any links that contain these to go "poof",
+	; and so the above link deletions should not really be needed
+	; (except for the similarity links).
+	(cog-map-type delit 'DocumentNode)
+	(cog-map-type delit 'SentenceNode)
+	(cog-map-type delit 'ParseNode)
+	(cog-map-type delit 'WordInstanceNode)
+	(cog-map-type delit 'LgLinkInstanceNode)
+
+	; Pointless to delete these, since there should only be
+	; a few hundred of these, total.
+	; (cog-map-type delit 'LinkGrammarRelationshipNode)
+	; (cog-map-type delit 'DefinedLinguisticConceptNode)
+	; (cog-map-type delit 'DefinedLinguisticRelationshipNode)
+
+	; Lots of junk NumberNodes get created. Remove these last, after
+	; the various owners have been deleted.
+	(cog-map-type delone 'NumberNode)
+
+(system (string-join (list "echo deleted: " (number->string n) )))
+	)
+)
+; ---------------------------------------------------------------------
+(define-public (observe-text plain-text)
+"
+ observe-text -- update word and word-pair counts by observing raw text.
+
+ This is the first part of the learning algo: simply count the words
+ and word-pairs oberved in incoming text. This takes in raw text, gets
+ it parsed, and then updates the counts for the observed words and word
+ pairs.
+"
 	(begin
 		(relex-parse plain-text) ;; send plain-text to server
 		(update-link-counts (get-new-parsed-sentences))
 		(release-new-parsed-sents)
-		(delete-sentences)
+		(delete-sentence-junk)
 	)
 )
 

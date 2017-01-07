@@ -19,16 +19,22 @@ coghost="$3"
 cogport=$4
 
 
-splitter=/home/linas/src/relex/src/split-sentences/split-sentences.pl
+splitter=/home/ubuntu/src/relex/src/split-sentences/split-sentences.pl
 splitter=/usr/local/bin/split-sentences.pl
 splitter=./split-sentences.pl
 
 splitdir=split-articles
 subdir=submitted-articles
 
-# Punt if the cogserver has crashed.
-haveserver=`ps aux |grep cogserver |grep opencog-$lang`
-if [[ -z "$haveserver" ]] ; then
+# Punt if the cogserver has crashed. The grep is looking for the
+# uniquely-named config file.
+# haveserver=`ps aux |grep cogserver |grep opencog-$lang`
+# if [[ -z "$haveserver" ]] ; then
+# 	exit 1
+# fi
+# Alternate cogserver test: use netcat to ping it.
+haveping=`echo foo | nc $coghost $cogport`
+if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
 
@@ -43,9 +49,9 @@ fi
 base=`echo $filename | cut -d \/ -f 1`
 rest=`echo $filename | cut -d \/ -f 2-6`
 
-echo "Processing file $rest"
+echo "Processing file >>>$rest<<<"
 
-# Create directories if missed
+# Create directories if missing
 mkdir -p $(dirname "$splitdir/$rest")
 mkdir -p $(dirname "$subdir/$rest")
 
@@ -57,8 +63,12 @@ cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport
 
 # Punt if the cogserver has crashed (second test,
 # before doing the mv and rm below)
-haveserver=`ps aux |grep cogserver |grep opencog-$lang`
-if [[ -z "$haveserver" ]] ; then
+# haveserver=`ps aux |grep cogserver |grep opencog-$lang`
+# if [[ -z "$haveserver" ]] ; then
+# 	exit 1
+# fi
+haveping=`echo foo | nc $coghost $cogport`
+if [[ $? -ne 0 ]] ; then
 	exit 1
 fi
 haveserver=`ps aux |grep relex |grep linkgram`
