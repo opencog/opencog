@@ -1,0 +1,91 @@
+/*
+ * AttentionParamQueryUTest.cxxtest
+ *
+ * Copyright (C) 2017 by OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by Misgana Bayetta<misgana.bayetta@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/util/Config.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/attention/AttentionParamQuery.h>
+
+using namespace opencog;
+
+class AttentionParamQueryUTest : public CxxTest::TestSuite
+{
+private:
+AtomSpace as;
+AttentionParamQuery _atq;
+
+std::vector<std::string> params = {"param-1", "param-2", "param-3", "param-4"};
+Handle h1,h2,h3,h4;
+
+public:
+AttentionParamQueryUTest(): _atq(&as){
+    _atq.add_param(params[0], true);
+    _atq.add_param(params[1], 2.5f);
+    _atq.add_param(params[2], 4.5);
+    _atq.add_param(params[3], 2);
+
+    h1 = as.add_node(CONCEPT_NODE, params[0]);
+    h2 = as.add_node(CONCEPT_NODE, params[1]);
+    h3 = as.add_node(CONCEPT_NODE, params[2]);
+    h4 = as.add_node(CONCEPT_NODE, params[3]);
+}
+
+~AttentionParamQueryUTest(){}
+
+void test_get_param_value();
+void test_set_param_value();
+void test_get_params();
+};
+
+
+void AttentionParamQueryUTest::test_get_param_value()
+{
+    TS_ASSERT_EQUALS("1", _atq.get_param_value(h1));
+    TS_ASSERT_EQUALS("2.5", _atq.get_param_value(h2));
+    TS_ASSERT_EQUALS("4.5", _atq.get_param_value(h3));
+    TS_ASSERT_EQUALS("2", _atq.get_param_value(h4));
+}
+
+void AttentionParamQueryUTest::test_set_param_value()
+{
+    _atq.set_param_value(h1, false);
+    TS_ASSERT_EQUALS("0", _atq.get_param_value(h1));
+    _atq.set_param_value(h2, 4);
+    TS_ASSERT_EQUALS("4", _atq.get_param_value(h2));
+}
+
+void AttentionParamQueryUTest::test_get_params()
+{
+    HandleSeq hseq = _atq.get_params();
+    TS_ASSERT_EQUALS(4, hseq.size());
+    for(const std::string& pname : params){
+        Handle h = as.add_node(CONCEPT_NODE, pname);
+        auto it = std::find(hseq.begin(), hseq.end(), h);
+        TS_ASSERT_DIFFERS(hseq.end(), it);
+    }
+}
+
+
