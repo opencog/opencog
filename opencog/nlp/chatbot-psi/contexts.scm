@@ -475,3 +475,27 @@
     (DefinedPredicate "is-emotion-state-reply?")
     (any-result? emotion-state-reply)
 )
+
+(Define
+    (DefinedPredicate "is-asking-about-how-many-visible-faces")
+    (Satisfaction
+        (VariableList
+            (var-decl "$sent" "SentenceNode")
+            (var-decl "$parse" "ParseNode")
+            (var-decl "$how-inst" "WordInstanceNode")
+            (var-decl "$many-inst" "WordInstanceNode")
+            (var-decl "$ppl-inst" "WordInstanceNode"))
+        (And
+            (State input-utterance-sentence (Variable "$sent"))
+            (parse-of-sent "$parse" "$sent")
+            (word-in-parse "$how-inst" "$parse")
+            (word-in-parse "$many-inst" "$parse")
+            (word-in-parse "$ppl-inst" "$parse")
+            (Evaluation (LinkGrammarRelationship "H")
+                (List (Variable "$how-inst") (Variable "$many-inst")))
+            (word-pos "$ppl-inst" "noun")
+            (Choice (Lemma (Variable "$ppl-inst") (Word "people"))
+                    (Lemma (Variable "$ppl-inst") (Word "face")))
+        )
+    )
+)
