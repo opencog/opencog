@@ -3,6 +3,9 @@
 (load "states.scm")
 (load "utils.scm")
 
+; For var-decl etc
+(load "../relex2logic/rule-utils.scm")
+
 ;-------------------------------------------------------------------------------
 ; Useful functions for the contexts
 
