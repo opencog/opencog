@@ -506,3 +506,17 @@
         "emotion-state"
     )
 )
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "input-type-is-interrogative?")
+        (DefinedPredicate "is-asking-about-how-many-visible-faces")
+        (DefinedPredicate "has-not-replied-anything-yet?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: count-and-reply")
+        (List (DefinedSchema "Num visible faces"))))
+    (True)
+    (stv .9 .9)
+    sociality
+)
