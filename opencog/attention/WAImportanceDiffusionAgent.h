@@ -61,8 +61,7 @@ class WAImportanceDiffusionAgent : public ImportanceDiffusionBase
 private:
     unsigned int SAMPLE_SIZE = 1;
     unsigned int _tournamentSize;
-    float  _decayRate; // percentage decay
-    AtomSpace*  _as;
+    float  _decayPercentage;
 
     void spreadImportance();
     Handle tournamentSelect(HandleSeq population);

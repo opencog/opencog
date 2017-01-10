@@ -36,10 +36,10 @@ using namespace opencog;
 
 
 WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
-    ImportanceDiffusionBase(cs), _as(opencog::server_atomspace())
+    ImportanceDiffusionBase(cs)
 {
     _tournamentSize = config().get_int("ECAN_DIFFUSION_TOURNAMENT_SIZE", 5);
-    _decayRate  = config().get_double("ECAN_MAX_SPREAD_PERCENTAGE", 0.4);
+    _decayPercentage  = config().get_double("ECAN_MAX_SPREAD_PERCENTAGE", 0.4);
 
     set_sleep_time(300);
 }
@@ -147,7 +147,7 @@ HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
 AttentionValue::sti_t WAImportanceDiffusionAgent::calculateDiffusionAmount(Handle h)
 {
     static ecan::StochasticDiffusionAmountCalculator sdac(_as);
-    float amount = sdac.diffusion_amount(h, _decayRate);
+    float amount = sdac.diffusion_amount(h, _decayPercentage);
    
     return amount;
 }

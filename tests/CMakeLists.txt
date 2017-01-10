@@ -19,6 +19,8 @@ IF (CXXTEST_FOUND)
 
     IF (HAVE_ATOMSPACE)
         # Persistence is for saving/restoring atomspace to disk.
+        ADD_SUBDIRECTORY (attention)
+
         ADD_SUBDIRECTORY (persist)
 
         # The cogserver exposes the atomspace to outside users.
