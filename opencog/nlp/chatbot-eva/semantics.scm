@@ -9,7 +9,7 @@
 ; In the second step, this simplified form is compared to the ontology
 ; of grounded knowledge, to see if anything matches.  The result of
 ; such matching is a grounded action (verb, or subroutine call) and the
-; associated subroutine parameters. 
+; associated subroutine parameters.
 ;
 ; At this time, the "simplfied form" is completely ad-hoc and poorly
 ; defined.  It exists only because the mapping of parsed sentences to
@@ -28,7 +28,7 @@
 ;--------------------------------------------------------------------
 
 ; Rule-utils needed for defintion of var-decl, etc.
-(load "../relex2logic/rule-utils.scm")
+(use-modules (opencog nlp relex2logic))
 
 (define current-action (AnchorNode "*-action-*"))
 (define current-imperative (AnchorNode "*-imperative-*"))
@@ -38,7 +38,7 @@
 ; contains a verb that we know, and an "object" it refers to, then suggest
 ; a grounded action.  Here, 'object' is used loosely: it can be a direct
 ; object, a prepositional object, or even an adjective. For example,
-; if the verb is "turn", then we expect the "object" to be a 
+; if the verb is "turn", then we expect the "object" to be a
 ; predicative adjective; possibly a prepositional object.  If the verb
 ; is "express", then we expect the "adverb" to be an emotion-adjective
 ; (sad, happy, etc.)

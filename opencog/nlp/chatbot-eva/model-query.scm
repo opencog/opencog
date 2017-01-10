@@ -7,7 +7,7 @@
 (use-modules (opencog nlp sureal))
 
 ; Rule-utils needed for defintion of var-decl, etc.
-(load "../relex2logic/rule-utils.scm")
+(use-modules (opencog nlp relex2logic))
 
 (define current-sentence (AnchorNode "*-eva-current-sent-*"))
 (define current-reply (AnchorNode "*-reply-*"))
