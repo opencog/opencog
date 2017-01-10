@@ -107,6 +107,12 @@
     )
 )
 
+(define (count-and-reply schema)
+    (define num (cog-name (cog-execute! schema)))
+    (define num-no-dot (string-take num (string-index num #\.)))
+    (apply say (text2wordnodes (string-append "I see " num-no-dot)))
+)
+
 (define-public (say . words)
     (define utterance "")
 
