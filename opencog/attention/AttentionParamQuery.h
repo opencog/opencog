@@ -72,7 +72,7 @@ namespace opencog
                 for(Handle h : hseq){
                     if(h->getType() == STATE_LINK ){
                         Handle hvalue = h->getOutgoingSet()[1];
-                        std::string str = NodeCast(hvalue)->getName();
+                        std::string str = hvalue->getName();
                         str.erase (str.find_last_not_of('0') + 1,
                                    std::string::npos);
 
