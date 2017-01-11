@@ -1,6 +1,6 @@
 ;
 ; link-pipeline.scm
-; 
+;
 ; Link-grammar processing pipeline. Currently, just counts word pairs.
 ;
 ; Copyright (c) 2013 Linas Vepstas <linasvepstas@gmail.com>
@@ -111,7 +111,7 @@
 	; (WordNode "(") ... Either that, some paren-counter somewhere
 	; gets confused. Beats me why. We should fix this. In the meanhile,
 	; we hack around this here by catching.  What happens is that the
-	; call (word-inst-get-word ...) returns nothing, so the car in 
+	; call (word-inst-get-word ...) returns nothing, so the car in
 	; make-lg-rel throws 'wrong-type-arg and everything gets borken.
 	(define (try-count-one-link link)
 		(catch 'wrong-type-arg
@@ -203,12 +203,18 @@
  it parsed, and then updates the counts for the observed words and word
  pairs.
 "
-	(begin
-		(relex-parse plain-text) ;; send plain-text to server
-		(update-link-counts (get-new-parsed-sentences))
-		(release-new-parsed-sents)
-		(delete-sentence-junk)
-	)
+	; Loop -- process any that we find. This will typically race
+	; against other threads, but I think that's OK.
+	(define (process-sents)
+		(let ((sent (get-one-new-sentence)))
+			(if (null? sent) '()
+				(begin
+					(update-link-counts (list sent))
+					(delete-sentence sent)
+					(process-sents)))))
+
+	(relex-parse plain-text) ;; send plain-text to server
+	(process-sents)
 )
 
 ; ---------------------------------------------------------------------
@@ -216,22 +222,22 @@
 ; Some generic hand-testing code for this stuff:
 ;
 ; (define (prt x) (display x))
-; 
+;
 ; (relex-parse "this is")
 ; (get-new-parsed-sentences)
-; 
+;
 ; (map-lg-links prt (get-new-parsed-sentences))
-; 
+;
 ; (map-lg-links (lambda (x) (prt (make-lg-rel x)))
 ; 	(get-new-parsed-sentences)
 ; )
-; 
+;
 ; (map-lg-links (lambda (x) (prt (gddr (make-lg-rel x))))
 ; 	(get-new-parsed-sentences)
 ; )
-; 
+;
 ; (map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
 ; 	(get-new-parsed-sentences)
 ; )
-; 
+;
 ; (observe-text "abcccccccccc  defffffffffffffffff")
