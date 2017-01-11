@@ -19,7 +19,7 @@
           (iota 2))
 
 ;; (2)
-(cog-bind implication-scope-distribution-rule)
+(cog-bind implication-scope-to-implication-rule)
 
 ;; (3)
 (cog-bind and-lambda-distribution-rule)

@@ -13,7 +13,7 @@ ADD_GUILE_MODULE(
 	implication-implicant-conjunction-rule.scm
 	implication-implicant-disjunction-rule.scm
 	implication-implicant-distribution-rule.scm
-	implication-scope-distribution-rule.scm
+	implication-scope-to-implication-rule.scm
 	implication-scope-factorization-rule.scm
 	inversion-rule.scm
 	lambda-grounded-construction-rule.scm

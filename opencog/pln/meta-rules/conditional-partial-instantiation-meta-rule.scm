@@ -80,14 +80,14 @@
                             (GroundedSchema "scm: conditional-partial-instantiation-formula")
                             (Unquote
                               (List
-                                ;; Premise
-                                implication
                                 ;; Conclusion
                                 (LocalQuote
                                   (ImplicationScope
                                     (TypedVariable V1 V1Type) ; only V1 remains
                                     P
-                                    Q))))))
+                                    Q))
+                                ;; Premise
+                                implication))))
          ;; Meta rule rewrite
          (meta-rewrite (Quote (Bind
                           (Unquote produced-vardecl)
@@ -106,7 +106,7 @@
 (define (gt-zero-confidence A)
   (bool->tv (> (cog-stv-confidence A) 0)))
 
-(define (conditional-partial-instantiation-formula Impl PImpl)
+(define (conditional-partial-instantiation-formula PImpl Impl)
   ;; For now merely put the TV of Impl on PImpl
   (cog-set-tv! PImpl (cog-tv Impl)))
 

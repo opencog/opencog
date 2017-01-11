@@ -190,7 +190,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind implication-scope-distribution-rule)
+scheme@(guile-user)> (cog-bind implication-scope-to-implication-rule)
 ...
    (ImplicationLink (stv 1 1)
       (LambdaLink

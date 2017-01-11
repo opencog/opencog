@@ -50,7 +50,7 @@
 
 (define rule-filenames
   (list "implication-instantiation-rule.scm"
-        "implication-scope-distribution-rule.scm"
+        "implication-scope-to-implication-rule.scm"
         "and-lambda-distribution-rule.scm"
         "lambda-grounded-construction-rule.scm"
         "implication-construction-rule.scm"
@@ -70,7 +70,7 @@
 ; List the rules and their weights.
 (define rules
   (list (list implication-partial-instantiation-rule-name 1)
-        (list implication-scope-distribution-rule-name 1)
+        (list implication-scope-to-implication-rule-name 1)
         (list and-lambda-distribution-rule-name 1)
         (list lambda-grounded-construction-rule-name 1)
         (list implication-construction-rule-name 1)

@@ -48,7 +48,7 @@
 (define (append-rule-dir basename) (string-append pln-rules-dir basename))
 (define rule-basenames
   (list "implication-instantiation-rule.scm"
-        "implication-scope-distribution-rule.scm"
+        "implication-scope-to-implication-rule.scm"
         "equivalence-to-implication-rule.scm"
         "lambda-predicate-construction-rule.scm"
         "inversion-rule.scm"
@@ -69,7 +69,7 @@
 
 ; List the rules and their weights.
 (define rules
-  (list (list implication-scope-distribution-rule-name 1)
+  (list (list implication-scope-to-implication-rule-name 1)
         (list implication-full-instantiation-rule-name 1)
         (list equivalence-to-implication-rule-name 1)
         (list lambda-predicate-construction-rule-name 1)
