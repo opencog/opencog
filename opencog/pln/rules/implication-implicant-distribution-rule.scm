@@ -43,12 +43,12 @@
      (ListLink
         (ImplicationLink
            (VariableNode "$P")
-           (VariableNode "$Q"))
-        (ImplicationLink
-           (VariableNode "$P")
            (And
               (VariableNode "$P")
-              (VariableNode "$Q"))))))
+              (VariableNode "$Q")))
+        (ImplicationLink
+           (VariableNode "$P")
+           (VariableNode "$Q")))))
 
 (define implication-implicant-distribution-rule
   (BindLink
@@ -60,7 +60,7 @@
 (define (non-null-confidence atom)
   (bool->tv (> (cog-stv-confidence atom) 0)))
 
-(define (implication-implicant-distribution-formula Impl DImpl)
+(define (implication-implicant-distribution-formula DImpl Impl)
   (cog-merge-hi-conf-tv! DImpl (cog-tv Impl)))
 
 ;; Name the rule

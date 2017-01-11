@@ -48,11 +48,11 @@
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: implication-construction-formula")
      (ListLink
-        (VariableNode "$P")
-        (VariableNode "$Q")
         (ImplicationLink
            (VariableNode "$P")
-           (VariableNode "$Q")))))
+           (VariableNode "$Q"))
+        (VariableNode "$P")
+        (VariableNode "$Q"))))
 
 (define implication-construction-rule
   (BindLink
@@ -78,7 +78,7 @@
                                         ; formula sucks
     (stv Impl-s Impl-c)))
 
-(define (implication-construction-formula P Q Impl)
+(define (implication-construction-formula Impl P Q)
   (let ((Impl-tv (implication-construction-stv-formula P Q)))
     (if (tv-positive-conf? Impl-tv) ; Try to avoid constructing informationless
                                     ; knowledge

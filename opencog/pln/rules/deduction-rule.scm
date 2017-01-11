@@ -40,11 +40,11 @@
       (ExecutionOutput
         (GroundedSchema "scm: deduction-formula")
           (List
+            ;; Conclusion
+            AC
             ;; Premises
             AB
-            BC
-            ;; Conclusion
-            AC)))))
+            BC)))))
 
 (define deduction-inheritance-rule
     (gen-deduction-rule InheritanceLink))
@@ -56,7 +56,7 @@
     (gen-deduction-rule SubsetLink))
 
 
-(define (deduction-formula AB BC AC)
+(define (deduction-formula AC AB BC)
     (let*
         ((sA (cog-stv-strength (gar AB)))
          (cA (cog-stv-confidence (gar AB)))

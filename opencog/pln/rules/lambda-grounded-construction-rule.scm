@@ -36,10 +36,10 @@
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: lambda-grounded-construction-formula")
      (ListLink
-        (VariableNode "$B")
         (QuoteLink (LambdaLink
            (UnquoteLink (VariableNode "$V"))
-           (UnquoteLink (VariableNode "$B")))))))
+           (UnquoteLink (VariableNode "$B"))))
+        (VariableNode "$B"))))
 
 (define lambda-grounded-construction-rule
   (BindLink
@@ -47,7 +47,7 @@
      lambda-grounded-construction-pattern
      lambda-grounded-construction-rewrite))
 
-(define (lambda-grounded-construction-formula body lamb)
+(define (lambda-grounded-construction-formula lamb body)
   (cog-set-tv! lamb (cog-tv body)))
 
 (define (lambda-grounded-construction-precondition atom)

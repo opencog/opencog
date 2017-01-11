@@ -38,14 +38,14 @@
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: implication-scope-to-implication-formula")
      (ListLink
-        implication-scope-to-implication-body
         (Implication
            (Quote (Lambda
               (Unquote (VariableNode "$TyVs"))
               (Unquote (VariableNode "$P"))))
            (Quote (Lambda
               (Unquote (VariableNode "$TyVs"))
-              (Unquote (VariableNode "$Q"))))))))
+              (Unquote (VariableNode "$Q")))))
+        implication-scope-to-implication-body)))
 
 (define implication-scope-to-implication-rule
   (BindLink
@@ -53,7 +53,7 @@
      implication-scope-to-implication-body
      implication-scope-to-implication-rewrite))
 
-(define (implication-scope-to-implication-formula ImplSc Impl)
+(define (implication-scope-to-implication-formula Impl ImplSc)
   ((cog-merge-hi-conf-tv! Impl (cog-tv ImplSc)))
 
 ;; Name the rule
