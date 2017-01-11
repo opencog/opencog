@@ -3,7 +3,8 @@
 ;
 (define-module (opencog nlp chatbot-eva))
 
-(load "chatbot/chat-utils.scm")
+(use-modules (opencog) (opencog nlp chatbot))
+
 (load "chatbot-eva/self-model.scm")
 (load "chatbot-eva/knowledge.scm")
 (load "chatbot-eva/semantics.scm")
