@@ -11,23 +11,50 @@
 ;
 
 (use-modules (ice-9 popen)    ; needed for open-pipe, close-pipe
+             (ice-9 threads)  ; needed for with-mutex
              (rnrs io ports)  ; needed for get-line
              (srfi srfi-1)
              (opencog)
              (opencog atom-types))
 
 ; -----------------------------------------------------------------------
+; See below for the docs.
+(define-public get-one-anchored-item
+	(let ((mtx (make-mutex)))
+		(lambda (ANCHOR)
+			(with-mutex mtx
+				(let ((iset (cog-incoming-by-type ANCHOR 'ListLink)))
+					(if (null? iset) '()
+						(let* ((lnk (car iset))
+								(item (cog-get-partner lnk ANCHOR)))
+							(cog-extract-recursive lnk)
+							item))))))
+)
+
+(set-procedure-property! get-one-anchored-item 'documentation
+"
+  get-one-anchored item ANCHOR - dettach one item from the ANCHOR
+
+  Each call to this will return one (or zero) items attached to
+  the ANCHOR. It will do so quasi-atomically, in that one and only
+  one caller will get the item; it is dettached from the anchor after
+  this call. Its only \"quasi-atomic\", because non-scheme users (e.g.
+  C++, python) will still race against this, as this uses a scheme
+  mutex for protection.  Ideally, we should invent a new atom-type
+  to do this, I guess .. some rainy day.
+")
+
 (define-public (release-from-anchor anchor)
 "
   release-from-anchor ANCHOR
 
-  Release items attached to ANCHOR.
+  Release all items attached to ANCHOR.
 "
 
-	; Arghh Some bit of asshole code is wrapping the anchor in
-	; a SetLink. Basically, someone somewhere is running a
-	; badly-scoped search pattern.  However, we need this to work,
-	; so break out using cog-extract-recursive not cog-extract.
+	; Use cog-extract-recursive, not cog-extract, because some poorly
+	; written code somewhere is running a badly-scoped search pattern,
+	; which results in links getting wrapped in a SetLink. So the
+	; recursive-extract forcibly breaks such mal-formed usages.
 	(for-each (lambda (x) (cog-extract-recursive x))
 		(cog-incoming-set anchor)
 	)
@@ -41,6 +68,10 @@
   freshly-parsed anchor.  This list will be non-empty if relex-parse
   has been recently run. This list can be emptied with the call
   release-new-parsed-sent below.
+
+  CAUTION: This is NOT thread-safe -- two different threads that
+  are trying to get them all, and then using `release-new-parsed-sents`
+  will typically step on each-other.  Use `get-one-new-sentence` instead.
 "
 	(cog-chase-link 'ListLink 'SentenceNode (AnchorNode "# New Parsed Sentence"))
 )
@@ -51,6 +82,19 @@
   to new-parsed-sent anchor.
 "
 	(release-from-anchor (AnchorNode "# New Parsed Sentence"))
+)
+
+(define-public (get-one-new-sentence)
+"
+  get-one-new-sentence - get one recently parsed sentence, uniquely.
+
+  Each call to this will return one (or zero) sentences attached to
+  the parse-anchor. It will do so quasi-atomically, that is, two
+  different guile threads are guaranteed to get different sentences.
+  Its only quasiatomic, because there is no protection against C++
+  or python racing to do the same thing.
+"
+	(get-one-anchored-item (AnchorNode "# New Parsed Sentence"))
 )
 
 ; -----------------------------------------------------------------------
