@@ -11,24 +11,15 @@
 ;
 
 (use-modules (ice-9 popen)    ; needed for open-pipe, close-pipe
+             (ice-9 threads)  ; needed for with-mutex
              (rnrs io ports)  ; needed for get-line
              (srfi srfi-1)
              (opencog)
              (opencog atom-types))
 
 ; -----------------------------------------------------------------------
+; See below for the docs.
 (define-public get-one-anchored-item
-"
-  get-one-anchored item ANCHOR - dettach one item from the ANCHOR
-
-  Each call to this will return one (or zero) items attached to
-  the ANCHOR. It will do so quasi-atomically, in that one and only
-  one caller will get the item; it is dettached from the anchor after
-  this call. Its only \"quasi-atomic\", because non-scheme users (e.g.
-  C++, python) will still race against this, as this uses a scheme
-  mutex for protection.  Ideally, we should invent a new atom-type
-  to do this, I guess .. some rainy day.
-"
 	(let ((mtx (make-mutex)))
 		(lambda (ANCHOR)
 			(with-mutex mtx
@@ -39,6 +30,19 @@
 							(cog-extract-recursive lnk)
 							item))))))
 )
+
+(set-procedure-property! get-one-anchored-item 'documentation
+"
+  get-one-anchored item ANCHOR - dettach one item from the ANCHOR
+
+  Each call to this will return one (or zero) items attached to
+  the ANCHOR. It will do so quasi-atomically, in that one and only
+  one caller will get the item; it is dettached from the anchor after
+  this call. Its only \"quasi-atomic\", because non-scheme users (e.g.
+  C++, python) will still race against this, as this uses a scheme
+  mutex for protection.  Ideally, we should invent a new atom-type
+  to do this, I guess .. some rainy day.
+")
 
 (define-public (release-from-anchor anchor)
 "
@@ -80,13 +84,13 @@
 	(release-from-anchor (AnchorNode "# New Parsed Sentence"))
 )
 
-(define-public get-one-new-sentence
+(define-public (get-one-new-sentence)
 "
   get-one-new-sentence - get one recently parsed sentence, uniquely.
 
   Each call to this will return one (or zero) sentences attached to
   the parse-anchor. It will do so quasi-atomically, that is, two
-  different guile threads are gauranteed to get different sentences.
+  different guile threads are guaranteed to get different sentences.
   Its only quasiatomic, because there is no protection against C++
   or python racing to do the same thing.
 "
