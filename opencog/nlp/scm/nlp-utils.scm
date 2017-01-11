@@ -786,7 +786,7 @@
 "
 	; Purge stuff associated with a single LgLinkInstanceNode
 	(define (extract-link-instance li)
-		(cog-extract-recursive li)
+		(if (not (null? li)) (cog-extract-recursive li))
 	)
 
 	; Purge stuff associated with a single word-instance
@@ -800,11 +800,15 @@
 	;               WordInstanceNode
 	;
 	; and so we have to track those down and extract them.
+	;
 	; They also appear in WordSequenceLinks:
 	;     WordSequenceLink
 	;         WordInstanceNode
 	;         NumberNode
 	; and so we need to get rid of the NumberNodes too.
+	;
+	; WordInstanceNodes also appear in lots of other things:
+	; the extract-recursive will blow all of those away.
 
 	(define (extract-word-instance wi)
 		(for-each
@@ -814,7 +818,7 @@
 					(cog-extract (cadr (cog-outgoing-set x)))
 				)
 				(if (eq? 'ListLink (cog-type x))
-					(extract-link-instance
+					(for-each extract-link-instance
 						(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x))
 				)
 			)
