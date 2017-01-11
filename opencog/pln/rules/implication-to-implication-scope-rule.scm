@@ -1,5 +1,5 @@
 ;; =======================================================================
-;; Implication Scope Factorization Rule
+;; Implication Scope to Implication Rule
 ;; (TODO add wiki page)
 ;;
 ;; ImplicationLink
@@ -19,7 +19,7 @@
 ;; implicant and implicand bodies.
 ;; -----------------------------------------------------------------------
 
-(define implication-scope-factorization-variables
+(define implication-to-implication-scope-variables
   (VariableList
      (TypedVariableLink
         (VariableNode "$TyVs")
@@ -29,7 +29,7 @@
      (VariableNode "$P")
      (VariableNode "$Q")))
 
-(define implication-scope-factorization-body
+(define implication-to-implication-scope-body
   (ImplicationLink
      (QuoteLink (LambdaLink
         (UnquoteLink (VariableNode "$TyVs"))
@@ -38,23 +38,23 @@
         (UnquoteLink (VariableNode "$TyVs"))
         (UnquoteLink (VariableNode "$Q"))))))
 
-(define implication-scope-factorization-rewrite
+(define implication-to-implication-scope-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: implication-scope-factorization-formula")
+     (GroundedSchemaNode "scm: implication-to-implication-scope-formula")
      (ListLink
-        implication-scope-factorization-body
+        implication-to-implication-scope-body
         (QuoteLink (ImplicationScopeLink
            (UnquoteLink (VariableNode "$TyVs"))
            (UnquoteLink (VariableNode "$P"))
            (UnquoteLink (VariableNode "$Q")))))))
 
-(define implication-scope-factorization-rule
+(define implication-to-implication-scope-rule
   (BindLink
-     implication-scope-factorization-variables
-     implication-scope-factorization-body
-     implication-scope-factorization-rewrite))
+     implication-to-implication-scope-variables
+     implication-to-implication-scope-body
+     implication-to-implication-scope-rewrite))
 
-(define (implication-scope-factorization-formula lamb-Impl Impl)
+(define (implication-to-implication-scope-formula lamb-Impl Impl)
   (let* (
          (Impl-outgoings (cog-outgoing-set Impl))
          (SV (car Impl-outgoings))
@@ -69,7 +69,7 @@
      lamb-Impl-tv)))
 
 ;; Name the rule
-(define implication-scope-factorization-rule-name
-  (DefinedSchemaNode "implication-scope-factorization-rule"))
-(DefineLink implication-scope-factorization-rule-name
-  implication-scope-factorization-rule)
+(define implication-to-implication-scope-rule-name
+  (DefinedSchemaNode "implication-to-implication-scope-rule"))
+(DefineLink implication-to-implication-scope-rule-name
+  implication-to-implication-scope-rule)

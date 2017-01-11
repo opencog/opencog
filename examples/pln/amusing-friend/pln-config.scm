@@ -55,7 +55,7 @@
         "implication-implicant-conjunction-rule.scm"
         "and-lambda-factorization-double-implication-rule.scm"
         "deduction-rule.scm"
-        "implication-scope-factorization-rule.scm"
+        "implication-to-implication-scope-rule.scm"
         "equivalence-scope-distribution-rule.scm"
         "and-construction-rule.scm"
         )
@@ -77,7 +77,7 @@
         (list implication-implicant-conjunction-rule-name 1)
         (list and-lambda-factorization-double-implication-rule-name 1)
         (list deduction-implication-rule-name 1)
-        (list implication-scope-factorization-rule-name 1)
+        (list implication-to-implication-scope-rule-name 1)
         (list equivalence-scope-distribution-rule-name 1)
         (list and-construction-grounded-evaluation-rule-name 1)
         )
