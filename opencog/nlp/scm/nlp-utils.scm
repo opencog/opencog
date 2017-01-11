@@ -789,10 +789,13 @@
 		(if (not (null? li)) (cog-extract-recursive li))
 	)
 
-	; Purge stuff associated with a single word-instance
-	; Expects wi to be a WordInstanceNode
+	; Purge stuff associated with a single word-instance.
+	; Expects wi to be a WordInstanceNode.
+	; Calling extract-recursive will blow away most of the junk
+	; that the WordInstance appear in, but a few have to be removed
+	; manually. These are:
 	;
-	; Note that WordInstances appear in LgLinkInstances:
+	; The WordInstances that appear in LgLinkInstances:
 	;     EvaluationLink
 	;           LgLinkInstanceNode
 	;           ListLink
@@ -805,21 +808,23 @@
 	;     WordSequenceLink
 	;         WordInstanceNode
 	;         NumberNode
-	; and so we need to get rid of the NumberNodes too.
+	; and so we need to get rid of the NumberNode's too.
 	;
-	; WordInstanceNodes also appear in lots of other things:
-	; the extract-recursive will blow all of those away.
+	; The extract-recursive will blow away everything else --
+	; the LemmaLinks, ReferenceLinks, etc.
 
 	(define (extract-word-instance wi)
 		(for-each
 			(lambda (x)
-				; extract the NumberNode
-				(if (eq? 'WordSequenceLink (cog-type x))
-					(cog-extract (cadr (cog-outgoing-set x)))
-				)
 				(if (eq? 'ListLink (cog-type x))
 					(for-each extract-link-instance
 						(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x))
+				)
+				; Extract the NumberNode
+				(if (eq? 'WordSequenceLink (cog-type x))
+					(let ((oset (cog-outgoing-set x)))
+						(cog-extract x)
+						(cog-extract (cadr oset)))
 				)
 			)
 			(cog-incoming-set wi)
@@ -856,6 +861,12 @@
 			(if (eq? 'ParseLink (cog-type x))
 				; The car will be a ParseNode
 				(extract-parse (car (cog-outgoing-set x)))
+			)
+			; Extract the NumberNode
+			(if (eq? 'SentenceSequenceLink (cog-type x))
+				(let ((oset (cog-outgoing-set x)))
+					(cog-extract x)
+					(cog-extract (cadr oset)))
 			)
 		)
 		(cog-incoming-set sent)
