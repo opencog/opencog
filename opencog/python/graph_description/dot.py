@@ -69,11 +69,11 @@ def get_dot_representation(atomset, duplicated_types=DEFAULT_DUPLICATED_TYPES):
     return dot_output
 
 
-def get_vertex(vertices, handle):
+def get_vertex(vertices, atom):
     """
     Finds a vertex identified by a specific identifier in the list of dicts
     """
-    return next((item for item in vertices if item['handle'] == handle), None)
+    return next((item for item in vertices if item['atom'] == atom), None)
 
 
 def make_duplicate_vertex(vertex):
@@ -81,7 +81,7 @@ def make_duplicate_vertex(vertex):
     Constructs a new vertex from a given vertex, with a unique identifier
     """
     new_vertex = {
-        'handle': 'vertex_{0}'.format(uuid.uuid4().int),
+        'atom': 'vertex_{0}'.format(uuid.uuid4().int),
         'name': vertex['name'],
         'type': vertex['type']
     }
@@ -96,9 +96,9 @@ def vertices_from_atomset(atomset):
     vertices = []
     for atom in atomset:
         vertex = {
-            'type': get_type_name(atom.type),
+            'type': atom.type_name,
             'name': atom.name,
-            'handle': atom.value()
+            'atom': atom
         }
         vertices.append(vertex)
     return vertices
@@ -114,8 +114,8 @@ def edges_from_atomset(atomset):
         sequence_number = 0
         for outgoing_atom in atom.out:
             edge = {
-                'source': atom.value(),
-                'target': outgoing_atom.value(),
+                'source': atom,
+                'target': outgoing_atom,
                 'sequence_number': sequence_number
             }
             edges.append(edge)
@@ -154,11 +154,11 @@ def process_graph(vertices, edges, duplicated_types):
 
             # Make a duplicate copy of the source vertex
             new_vertex = make_duplicate_vertex(source)
-            processed_edge['source'] = new_vertex['handle']
+            processed_edge['source'] = new_vertex['atom']
         else:
 
             # Otherwise, go ahead and use the original vertex
-            processed_edge['source'] = source['handle']
+            processed_edge['source'] = source['atom']
             processed_vertices.append(source)
 
         target = get_vertex(vertices, edge['target'])
@@ -168,19 +168,19 @@ def process_graph(vertices, edges, duplicated_types):
 
             # Make a duplicate copy of the target vertex
             new_vertex = make_duplicate_vertex(target)
-            processed_edge['target'] = new_vertex['handle']
+            processed_edge['target'] = new_vertex['atom']
             processed_vertices.append(new_vertex)
         else:
 
             # Otherwise, go ahead and use the original vertex
-            processed_edge['target'] = target['handle']
+            processed_edge['target'] = target['atom']
             processed_vertices.append(target)
 
         processed_edge['sequence_number'] = edge['sequence_number']
         processed_edges.append(processed_edge)
 
-        vertices_visited.append(source['handle'])
-        vertices_visited.append(target['handle'])
+        vertices_visited.append(source['atom'])
+        vertices_visited.append(target['atom'])
 
     # Add any disconnected vertices
     [processed_vertices.append(vertex)
@@ -229,7 +229,7 @@ def make_dot_vertex(dot, vertex):
 
     name = "[{0}] {1}".format(vertex['type'], vertex['name'])
 
-    dot.node(name=str(vertex['handle']),
+    dot.node(name=str(vertex['atom']),
              label=name,
              shape=shape)
 
