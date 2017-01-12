@@ -35,6 +35,8 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 
+#include "AttentionParamQuery.h"
+
 namespace opencog
 {
 /** \addtogroup grp_attention
@@ -54,6 +56,7 @@ protected:
     double maxSpreadPercentage;
     double hebbianMaxAllocationPercentage;
     bool spreadHebbianOnly;
+    AttentionParamQuery _atq;
 
     typedef struct DiffusionEventType
     {
@@ -88,10 +91,6 @@ protected:
     virtual AttentionValue::sti_t calculateDiffusionAmount(Handle) = 0;
 
 public:
-    void setMaxSpreadPercentage(double);
-    void setHebbianMaxAllocationPercentage(double);
-    void setSpreadHebbianOnly(bool);
-
     ImportanceDiffusionBase(CogServer&);
     virtual ~ImportanceDiffusionBase();
 

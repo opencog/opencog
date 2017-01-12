@@ -51,31 +51,13 @@ using namespace opencog;
 
 
 ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
+                         ,_atq(&cs.getAtomSpace())
 {
     _bank = &attentionbank(_as);
-
-    setMaxSpreadPercentage(
-                config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
-    setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
-    setHebbianMaxAllocationPercentage(
-                config().get_double("HEBBIAN_MAX_ALLOCATION_PERCENTAGE"));
-
-    // TODO
-    // Read diffusion rate from config file.
 
     // Provide a logger
     setLogger(new opencog::Logger("ImportanceDiffusionBase.log",
                                   Logger::FINE, true));
-}
-
-/*
- * Set the value of the parameter that determines how much of an atom's STI
- * is available for diffusion at each time step. An atom will not diffuse more
- * than this percentage.
- */
-void ImportanceDiffusionBase::setMaxSpreadPercentage(double percent)
-{
-    maxSpreadPercentage = percent;
 }
 
 /*
@@ -101,38 +83,13 @@ void ImportanceDiffusionBase::updateMaxSpreadPercentage()
             h = resultSet.front();
         }
         double value = std::atof(h->getName().c_str());
-        setMaxSpreadPercentage(value);
+        _atq.set_param(AttentionParamQuery::dif_spread_percentage, value);
 
 #ifdef DEBUG
         std::cout << "Diffusion percentage set to: " <<
                      maxSpreadPercentage << std::endl;
 #endif
     }
-}
-
-/*
- * Set the value of the parameter that determines how much of an atom's STI
- * will be allocated for potential diffusion to hebbian links. Note that any
- * unused STI that was available but unused for diffusion to hebbian links
- * will then be reallocated for diffusion to incident non-hebbian atoms, if
- * that option is enabled.
- */
-void ImportanceDiffusionBase::setHebbianMaxAllocationPercentage(
-        double percent)
-{
-    hebbianMaxAllocationPercentage = percent;
-}
-
-/*
- * Set the value of the parameter that determines whether diffusion will occur
- * only along hebbian links (when the parameter is True) or if diffusion will
- * occur both along hebbian links and to non-hebbian incident atoms (when the
- * parameter is False), meaning that all atoms that are in the incoming or
- * outgoing sets will be diffusion targets.
- */
-void ImportanceDiffusionBase::setSpreadHebbianOnly(bool option)
-{
-    spreadHebbianOnly = option;
 }
 
 ImportanceDiffusionBase::~ImportanceDiffusionBase()

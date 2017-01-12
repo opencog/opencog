@@ -43,16 +43,10 @@ using namespace opencog;
 using namespace std::chrono;
 
 FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
-    Agent(cs)
+    Agent(cs), _atq(&cs.getAtomSpace())
 {
     // Provide a logger
     setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE, true));
-
-    afbSize         = config().get_double("ECAN_AFB_SIZE", 0.2);
-    decay           = config().get_double("ECAN_AFB_DECAY", 0.05);
-    bottomBoundary  = config().get_int("ECAN_AFB_BOTTOM", 50);
-    minAFSize = config().get_int("MIN_AF_SIZE", 100);
-    maxAFSize = config().get_int("MAX_AF_SIZE", 500);
 
     _bank = &attentionbank(_as);
     _bank->setAttentionalFocusBoundary(bottomBoundary);
@@ -60,6 +54,12 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
 
 void FocusBoundaryUpdatingAgent::run()
 {
+        afbSize = std::stod(_atq.get_param_value(AttentionParamQuery::af_size));
+        decay = std::stod(_atq.get_param_value(AttentionParamQuery::af_decay));
+        bottomBoundary = std::stoi(_atq.get_param_value(AttentionParamQuery::af_bottom));
+        minAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_min_size));
+        maxAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_max_size));
+
         AttentionValue::sti_t afboundary = _bank->getAttentionalFocusBoundary();
 
        /*

@@ -29,6 +29,7 @@
 #include <opencog/cogserver/server/CogServer.h>
 
 #include "AFImportanceDiffusionAgent.h"
+#include "AttentionParamQuery.h"
 
 using namespace opencog;
 
@@ -44,6 +45,14 @@ AFImportanceDiffusionAgent::AFImportanceDiffusionAgent(CogServer& cs) :
 
 void AFImportanceDiffusionAgent::run()
 {
+    // Read params
+    maxSpreadPercentage = std::stod(_atq.get_param_value(
+                                    AttentionParamQuery::dif_spread_percentage));
+    hebbianMaxAllocationPercentage =std::stod(_atq.get_param_value(
+                                    AttentionParamQuery::heb_max_alloc_percentage));
+    spreadHebbianOnly = std::stoi(_atq.get_param_value(
+                                  AttentionParamQuery::dif_spread_hebonly));
+
     spreadImportance();
 
     //some sleep code
