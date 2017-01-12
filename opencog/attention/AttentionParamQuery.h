@@ -29,6 +29,8 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
 
+#include <sstream>
+
 namespace opencog
 {
     class AttentionParamQuery 
@@ -82,8 +84,10 @@ namespace opencog
                     Handle member_link = _as->add_link(MEMBER_LINK, 
                             HandleSeq{param, parent_param});
 
+                    std::ostringstream sstream;
+                    sstream << value;
                     Handle hvalue  = _as->add_node(NUMBER_NODE, 
-                            std::to_string(value));
+                                                   sstream.str());
 
                     _as->add_link(STATE_LINK,HandleSeq{param, hvalue});
                 }
