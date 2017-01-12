@@ -38,7 +38,6 @@ ADD_LIBRARY(attention SHARED
 	WARentCollectionAgent
 
 	ForgettingAgent
-	MinMaxSTIUpdatingAgent
 	FocusBoundaryUpdatingAgent
 	HebbianCreationAgent
 	HebbianUpdatingAgent

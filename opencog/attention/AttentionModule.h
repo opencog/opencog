@@ -36,7 +36,6 @@
 #include "WARentCollectionAgent.h"
 
 #include "ForgettingAgent.h"
-#include "MinMaxSTIUpdatingAgent.h"
 #include "FocusBoundaryUpdatingAgent.h"
 #include "HebbianUpdatingAgent.h"
 #include "HebbianCreationAgent.h"
@@ -59,8 +58,6 @@ private:
     Factory<WARentCollectionAgent, Agent>  waRentFactory;
 
     Factory<ForgettingAgent, Agent> forgettingFactory;
-
-    Factory<MinMaxSTIUpdatingAgent, Agent>  minMaxSTIUpdatingFactory;
 
     Factory<FocusBoundaryUpdatingAgent, Agent>  focusUpdatingFactory;
 
