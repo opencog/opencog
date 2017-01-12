@@ -58,7 +58,6 @@ private:
     HandleSeq diffusionSourceVector();
 
     void spreadImportance();
-    void diffuseAtom(Handle source);
     AttentionValue::sti_t calculateDiffusionAmount(Handle);
 
 public:
