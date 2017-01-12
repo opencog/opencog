@@ -95,6 +95,16 @@ public:
                         "Starts main ECAN agents\n",
                         "Usage: ecan-start\n", false, true)
 
+    DECLARE_CMD_REQUEST(AttentionModule, "list-ecan-param", do_list_ecan_param,
+                        "Lists all ecan parameters and their values.\n",
+                        "Usage: list-ecan-params\n", false, true)
+
+    DECLARE_CMD_REQUEST(AttentionModule, "set-ecan-param", do_set_ecan_param,
+                        "Sets the value of an ecan parameter\n",
+                        "Usage: set-ecan-param <param-name> <param-value> \n", false, true)
+
+
+
     static inline const char* id();
 
     AttentionModule(CogServer&);

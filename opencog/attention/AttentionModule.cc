@@ -23,8 +23,10 @@
  */
 
 #include "AttentionModule.h"
+#include "AttentionParamQuery.h"
 
 #include <opencog/cogserver/server/CogServer.h>
+#include <opencog/util/Config.h>
 
 #include "opencog/attention/atom_types.definitions"
 
@@ -72,6 +74,8 @@ AttentionModule::AttentionModule(CogServer& cs) :
                        boost::bind(&AttentionModule::addAFSignalHandler,
                                    this, _1, _2, _3));
     do_start_ecan_register();
+    do_list_ecan_param_register();
+    do_set_ecan_param_register();
 }
 
 AttentionModule::~AttentionModule()
@@ -88,6 +92,8 @@ AttentionModule::~AttentionModule()
     _cogserver.unregisterAgent(HebbianCreationAgent::info().id);
 
     do_start_ecan_unregister();
+    do_list_ecan_param_unregister();
+    do_set_ecan_param_unregister();
 
     addAFConnection.disconnect();
 
@@ -96,6 +102,8 @@ AttentionModule::~AttentionModule()
 
 void AttentionModule::init()
 {
+    AttentionParamQuery _atq(&_cogserver.getAtomSpace());
+    _atq.load_default_values(); // Load default ECAN param values into AS
 }
 
 std::string AttentionModule::do_start_ecan(Request *req, std::list<std::string> args)
@@ -120,8 +128,33 @@ std::string AttentionModule::do_start_ecan(Request *req, std::list<std::string> 
    // _cogserver.startAgent(_hebbianupdating_agentptr,true,"hua");
 
     return ("Started the following agents:\n" + afImportance + "\n" + waImportance +
-         "\n" + afRent + "\n" + waRent + "\n");
+           "\n" + afRent + "\n" + waRent + "\n");
 }
+
+
+std::string AttentionModule::do_list_ecan_param(Request *req, std::list<std::string> args)
+{
+    std::string response = "";
+    AttentionParamQuery _atq(&_cogserver.getAtomSpace());
+    HandleSeq hseq = _atq.get_params();
+    for(const Handle& h : hseq){
+        std::string param = h->getName();
+        response += param + "= " + _atq.get_param_value(param) + "\n"; 
+    }
+    return response;
+}
+
+std::string AttentionModule::do_set_ecan_param(Request *req, std::list<std::string> args)
+{
+    AttentionParamQuery _atq(&_cogserver.getAtomSpace());
+    auto it = args.begin();
+    std::string param = *it;
+    std::advance(it,1);
+    _atq.set_param(param, *it);
+
+   return param+"= "+_atq.get_param_value(param)+"\n";
+}
+
 
 /*
  * When an atom enters the AttentionalFocus, it is added to a concurrent_queue
