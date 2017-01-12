@@ -28,6 +28,7 @@ TARGET_LINK_LIBRARIES(attention-types
 
 # AttentionModule
 ADD_LIBRARY(attention SHARED
+	AttentionParamQuery
 	AttentionModule
 	ImportanceDiffusionBase
 	AFImportanceDiffusionAgent
