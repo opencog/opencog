@@ -190,7 +190,8 @@ void PatternMiner::startMiningWork()
 
         cur_worker_mined_pattern_num = 0;
 
-        std::cout<<"Start pattern mining work! Max gram = " + toString(this->MAX_GRAM) << ", mode = Depth_First" << std::endl;
+        std::cout << "Start pattern mining work! Max gram = "
+                  << this->MAX_GRAM << ", mode = Depth_First" << std::endl;
 
         int start_time = time(NULL);
 
