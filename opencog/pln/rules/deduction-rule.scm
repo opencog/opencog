@@ -23,8 +23,9 @@
 
 (load "formulas.scm")
 
-;; Generate the corresponding deduction rule given its link-type.
-(define (gen-deduction-rule link-type)
+;; Generate the corresponding deduction rule given its link-type and
+;; the type for each variable (the same for all 3).
+(define (gen-deduction-rule link-type var-type)
   (let* ((A (Variable "$A"))
          (B (Variable "$B"))
          (C (Variable "$C"))
@@ -32,7 +33,10 @@
          (BC (link-type B C))
          (AC (link-type A C)))
     (Bind
-      (VariableList A B C)
+      (VariableList
+        (TypedVariable A var-type)
+        (TypedVariable B var-type)
+        (TypedVariable C var-type))
       (And
         AB
         BC
@@ -47,14 +51,29 @@
             BC)))))
 
 (define deduction-inheritance-rule
-    (gen-deduction-rule InheritanceLink))
+  (let ((var-type (TypeChoice
+                    (TypeNode "ConceptNode")
+                    (TypeNode "AndLink")
+                    (TypeNode "OrLink")
+                    (TypeNode "NotLink"))))
+    (gen-deduction-rule InheritanceLink var-type)))
 
 (define deduction-implication-rule
-    (gen-deduction-rule ImplicationLink))
+  (let ((var-type (TypeChoice
+                    (TypeNode "PredicateNode")
+                    (TypeNode "LambdaLink")
+                    (TypeNode "AndLink")
+                    (TypeNode "OrLink")
+                    (TypeNode "NotLink"))))
+    (gen-deduction-rule ImplicationLink var-type)))
 
 (define deduction-subset-rule
-    (gen-deduction-rule SubsetLink))
-
+  (let ((var-type (TypeChoice
+                    (TypeNode "ConceptNode")
+                    (TypeNode "AndLink")
+                    (TypeNode "OrLink")
+                    (TypeNode "NotLink"))))
+    (gen-deduction-rule SubsetLink var-type)))
 
 (define (deduction-formula AC AB BC)
     (let*
