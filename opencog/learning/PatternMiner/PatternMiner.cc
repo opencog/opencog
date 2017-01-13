@@ -876,7 +876,9 @@ void PatternMiner::OutPutFinalPatternsToFile(unsigned int n_gram)
     // out put the n_gram patterns to a file
     ofstream resultFile;
     string fileName  = "FinalTopPatterns_" + toString(n_gram) + "gram.scm";
-    std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") final top patterns to file " + fileName << std::endl;
+    std::cout << "\nDebug: PatternMiner: writing (gram = "
+              << n_gram << ") final top patterns to file "
+              << fileName << std::endl;
 
     resultFile.open(fileName.c_str());
     vector<HTreeNode*> &patternsForThisGram = finalPatternsForGram[n_gram-1];
@@ -2345,7 +2347,8 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
     Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
     assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
 
-    std::cout<<"Debug: PatternMining start! Max gram = " + toString(this->MAX_GRAM) << ", mode = " << Pattern_mining_mode << std::endl;
+    std::cout <<"Debug: PatternMining start! Max gram = "
+              << this->MAX_GRAM << ", mode = " << Pattern_mining_mode << std::endl;
 
     int start_time = time(NULL);
 
@@ -2576,7 +2579,8 @@ std::string PatternMiner::Link2keyString(Handle& h, std::string indent, const At
 void PatternMiner::testPatternMatcher1()
 {
     originalAtomSpace->get_handles_by_type(back_inserter(allLinks), (Type) LINK, true );
-    std::cout<<"Debug: PatternMiner total link numer = "  << allLinks.size() << std::endl;
+    std::cout <<"Debug: PatternMiner total link number = "
+              << allLinks.size() << std::endl;
 
 //(BindLink (stv 1.000000 1.000000)
 //  (ListLink (stv 1.000000 1.000000)

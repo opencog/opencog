@@ -132,21 +132,24 @@ void PatternMiner::growPatternsDepthFirstTask_old()
 void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
 {
 
-    unsigned int start_index = linksPerThread * thread_index; // the start index in allLinks for current thread
-
-    unsigned int end_index; // the last index for current thread ,excluded
-    if (thread_index == THREAD_NUM - 1) // if this the last thread, it need to finish all the rest of the links
+	// The start index in allLinks for current thread
+    unsigned int start_index = linksPerThread * thread_index;
+    unsigned int end_index; // the last index for current thread (excluded)
+    if (thread_index == THREAD_NUM - 1) // if this the last thread, it
+                                        // needs to finish all the
+                                        // rest of the links
         end_index = allLinkNumber;
     else
         end_index = linksPerThread * (thread_index + 1);
 
 
-    cout<< "Start thread " << thread_index << " from " << start_index << " to " << end_index-1 << std::endl;
+    cout << "Start thread " << thread_index << " from " << start_index
+         << " to (excluded) " << end_index << std::endl;
 
     patternJsonArrays[thread_index] = json::value::array();
 
     float allLinkNumberfloat = ((float)(end_index - start_index));
-    for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++ t_cur_index)
+    for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++t_cur_index)
     {
         readNextLinkLock.lock();
         cout<< "\r" << ((float)(t_cur_index - start_index))/allLinkNumberfloat*100.0f << "% completed in Thread " + toString(thread_index) + "."; // it's not liner
@@ -164,7 +167,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         }
 
         // Add this link into observingAtomSpace
-        HandleSeq outgoingLinks,outVariableNodes;
+        HandleSeq outgoingLinks, outVariableNodes;
 
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
         Handle newLink = observingAtomSpace->add_link(originalAtomSpace->get_type(cur_link), outgoingLinks);
@@ -275,7 +278,7 @@ void PatternMiner::runPatternMinerDepthFirst()
 
 //    cur_DF_ExtractedLinks = new set<string>[MAX_GRAM];
 
-    linksPerThread = allLinkNumber/THREAD_NUM;
+    linksPerThread = allLinkNumber / THREAD_NUM;
 
     processedLinkNum = 0;
     actualProcessedLinkNum = 0;
