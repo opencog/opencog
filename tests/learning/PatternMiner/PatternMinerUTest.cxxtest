@@ -27,6 +27,7 @@
 #include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/PatternMiner/PatternMiner.h>
+#include <opencog/guile/SchemeEval.h>
 
 using namespace opencog;
 using namespace opencog::PatternMining;
@@ -34,7 +35,8 @@ using namespace opencog::PatternMining;
 class PatternMinerUTest : public CxxTest::TestSuite
 {
 private:
-	AtomSpace as;
+	AtomSpace _as;
+	SchemeEval _scm;
 
 public:
 	PatternMinerUTest();
@@ -47,11 +49,12 @@ public:
 	void testPatternMiner();
 };
 
-PatternMinerUTest::PatternMinerUTest() {}
+PatternMinerUTest::PatternMinerUTest() : _scm(&_as) {}
 PatternMinerUTest::~PatternMinerUTest() {}
 
 void PatternMinerUTest::setUp()
 {
+	// Configure Pattern Miner parameters
 	config().set("Pattern_Max_Gram", "4");
 	config().set("Enable_Frequent_Pattern", "true");
 	config().set("Enable_Interesting_Pattern", "true");
@@ -65,13 +68,23 @@ void PatternMinerUTest::setUp()
 	config().set("enable_filter_node_types_should_not_be_vars", "true");
 	config().set("node_types_should_not_be_vars", "PredicateNode");
 	config().set("Pattern_mining_mode", "Depth_First");
+
+	// Configure scheme load-paths that are common for all tests.
+	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
+	          "/opencog/learning/PatternMiner\")");
 }
 
 void PatternMinerUTest::tearDown() {}
 
 void PatternMinerUTest::testPatternMiner()
 {
-	PatternMiner pm(&as);
+	// Load ugly_male_soda-drinker_corpus.scm
+	_scm.eval("(load-from-path \"ugly_male_soda-drinker_corpus.scm\")");
+
+	// Run the pattern miner
+	PatternMiner pm(&_as);
 	pm.runPatternMiner(1);
+
+	// TODO: Test the result
 	TS_ASSERT(true);
 }
