@@ -25,7 +25,7 @@
 (cog-bind and-lambda-distribution-rule)
 
 ;; (4)
-(cog-bind lambda-grounded-construction-rule)
+(cog-bind lambda-closed-construction-rule)
 
 ;; (5)
 (cog-bind implication-construction-rule)

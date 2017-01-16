@@ -14,7 +14,7 @@
 ;; alpha-equivalence support.
 ;; ----------------------------------------------------------------------
 
-(define lambda-grounded-construction-vardecl
+(define lambda-closed-construction-vardecl
   (VariableList
      (TypedVariableLink
         (VariableNode "$V")
@@ -24,37 +24,37 @@
            (TypeNode "VariableNode")))
      (VariableNode "$B")))
 
-(define lambda-grounded-construction-pattern
+(define lambda-closed-construction-pattern
   (AndLink
      (VariableNode "$V")
      (VariableNode "$B")
      (EvaluationLink
-        (GroundedPredicateNode "scm: lambda-grounded-construction-precondition")
+        (GroundedPredicateNode "scm: lambda-closed-construction-precondition")
         (VariableNode "$B"))))
 
-(define lambda-grounded-construction-rewrite
+(define lambda-closed-construction-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: lambda-grounded-construction-formula")
+     (GroundedSchemaNode "scm: lambda-closed-construction-formula")
      (ListLink
         (QuoteLink (LambdaLink
            (UnquoteLink (VariableNode "$V"))
            (UnquoteLink (VariableNode "$B"))))
         (VariableNode "$B"))))
 
-(define lambda-grounded-construction-rule
+(define lambda-closed-construction-rule
   (BindLink
-     lambda-grounded-construction-vardecl
-     lambda-grounded-construction-pattern
-     lambda-grounded-construction-rewrite))
+     lambda-closed-construction-vardecl
+     lambda-closed-construction-pattern
+     lambda-closed-construction-rewrite))
 
-(define (lambda-grounded-construction-formula lamb body)
+(define (lambda-closed-construction-formula lamb body)
   (cog-set-tv! lamb (cog-tv body)))
 
-(define (lambda-grounded-construction-precondition atom)
+(define (lambda-closed-construction-precondition atom)
   (bool->tv (and (cog-closed? atom) (tv-positive-conf? (cog-tv atom)))))
 
 ;; Name the rule
-(define lambda-grounded-construction-rule-name
-  (DefinedSchemaNode "lambda-grounded-construction-rule"))
-(DefineLink lambda-grounded-construction-rule-name
-  lambda-grounded-construction-rule)
+(define lambda-closed-construction-rule-name
+  (DefinedSchemaNode "lambda-closed-construction-rule"))
+(DefineLink lambda-closed-construction-rule-name
+  lambda-closed-construction-rule)

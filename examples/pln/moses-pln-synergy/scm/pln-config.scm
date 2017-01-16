@@ -52,7 +52,7 @@
   (list "implication-instantiation-rule.scm"
         "implication-scope-to-implication-rule.scm"
         "and-lambda-distribution-rule.scm"
-        "lambda-grounded-construction-rule.scm"
+        "lambda-closed-construction-rule.scm"
         "implication-construction-rule.scm"
         "implication-implicant-distribution-rule.scm"
         "implication-and-lambda-factorization-rule.scm"
@@ -72,7 +72,7 @@
   (list (list implication-partial-instantiation-rule-name 1)
         (list implication-scope-to-implication-rule-name 1)
         (list and-lambda-distribution-rule-name 1)
-        (list lambda-grounded-construction-rule-name 1)
+        (list lambda-closed-construction-rule-name 1)
         (list implication-construction-rule-name 1)
         (list implication-implicant-distribution-rule-name 1)
         (list implication-and-lambda-factorization-rule-name 1)

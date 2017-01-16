@@ -281,7 +281,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind lambda-grounded-construction-rule)
+scheme@(guile-user)> (cog-bind lambda-closed-construction-rule)
 $5 = (SetLink
    (LambdaLink (stv 1 1)
       (TypedVariableLink

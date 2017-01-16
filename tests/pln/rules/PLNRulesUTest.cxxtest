@@ -74,7 +74,7 @@ public:
 	void test_and_lambda_distribution();
 	void test_implication_implicant_distribution();
 	void test_implication_construction();
-	void test_lambda_grounded_construction();
+	void test_lambda_closed_construction();
 	void test_equivalence_to_implication();
 	void test_implication_and_lambda_factorization();
 	void test_implication_implicant_conjunction();
@@ -618,20 +618,20 @@ void PLNRulesUTest::test_implication_construction()
 }
 
 /**
- * Test lambda-fully-grounded-construction-rule defined in:
- * opencog/pln/rules/lambda-fully-grounded-construction-rule.scm
+ * Test lambda-closed-construction-rule defined in:
+ * opencog/pln/rules/lambda-closed-construction-rule.scm
  */
-void PLNRulesUTest::test_lambda_grounded_construction()
+void PLNRulesUTest::test_lambda_closed_construction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-lambda.scm",
-	                "opencog/pln/rules/lambda-grounded-construction-rule.scm"});
+	                "opencog/pln/rules/lambda-closed-construction-rule.scm"});
 
 	// Apply the rule
-	Handle rule = eval.eval_h("lambda-grounded-construction-rule");
+	Handle rule = eval.eval_h("lambda-closed-construction-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
 		("(SetLink"
