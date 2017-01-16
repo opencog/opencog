@@ -91,16 +91,18 @@
 
 (define (update-link-counts sents)
 	(define (count-one-link link)
+		(define (incr-one atom)
+			(fetch-atom atom) ; get from SQL
+			(cog-atom-incr atom 1) ; increment
+			(store-atom atom) ; save to SQL
+		)
 		(let ((rel (make-lg-rel link)))
 			(begin
-				; Explicit fetch not needed; it already happens implicitly.
-				; (Assuming there are no other servers modifying SQL.)
-				; (fetch-atom rel) ; get from SQL
-				(cog-atom-incr rel 1) ; increment relation
-				(cog-atom-incr (gar rel) 1)  ; increment link type
-				(cog-atom-incr (gadr rel) 1) ; increment left word
-				(cog-atom-incr (gddr rel) 1) ; increment right work.
-				(store-atom rel) ; save to SQL
+				(incr-one rel) ; increment relation
+				(incr-one (gar rel))  ; increment link type
+				(incr-one (gadr rel)) ; increment left word
+				(incr-one (gddr rel)) ; increment right work.
+				; (store-atom rel) ; save to SQL
 			)
 		)
 	)
