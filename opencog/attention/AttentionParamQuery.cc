@@ -2,6 +2,7 @@
 #include "AttentionParamQuery.h"
 
 #include <opencog/util/Config.h>
+#include <opencog/guile/SchemeEval.h>
 
 using namespace opencog;
 
@@ -94,51 +95,8 @@ HandleSeq AttentionParamQuery::get_params(void)
 
 void AttentionParamQuery::load_default_values(void)
 {
-    set_param(af_rent_update_freq,
-            config().get_double(af_rent_update_freq, 2)); 
-    set_param(af_size,
-            config().get_double(af_size, 0.2)); 
-    set_param(af_decay,
-            config().get_double(af_decay, 0.05)); 
-    set_param(af_bottom,
-            config().get_int(af_bottom, 50)); 
-    set_param(af_min_size,
-            config().get_int(af_min_size, 100)); 
-    set_param(af_max_size,
-            config().get_int(af_max_size, 500)); 
-
-    set_param(forg_forgetting_threshold,
-            config().get_int(forg_forgetting_threshold,
-                AttentionValue::MAXLTI));
-
-    set_param(heb_maxlink,
-            config().get_double(heb_maxlink,300));
-    set_param(heb_local_farlink_ratio,
-            config().get_double(heb_local_farlink_ratio,10));
-    set_param(heb_max_alloc_percentage,
-            config().get_double(heb_max_alloc_percentage,0.5));
-
-     set_param(dif_spread_hebonly,
-            config().get_bool(dif_spread_hebonly, false));
-    set_param(dif_tournament_size,
-            config().get_int(dif_tournament_size, 5));
-    set_param(dif_spread_percentage,
-            config().get_double(dif_spread_percentage, 0.4));
-
-    set_param(rent_starting_sti_rent,
-            config().get_int(rent_starting_sti_rent, 1));
-    set_param(rent_starting_lti_rent,
-            config().get_int(rent_starting_lti_rent, 1));
-    set_param(rent_target_sti_funds,
-            config().get_int(rent_target_sti_funds, 10000));
-    set_param(rent_sti_funds_buffer,
-            config().get_int(rent_sti_funds_buffer, 10000));
-    set_param(rent_target_lti_funds,
-            config().get_int(rent_target_lti_funds, 10000));
-    set_param(rent_lti_funds_buffer,
-            config().get_int(rent_lti_funds_buffer, 10000));
-    set_param(rent_tournament_size,
-            config().get_int(rent_tournament_size, 5));
+     SchemeEval scm(_as);
+     scm.eval("(load \"default-param-values.scm\")");
 }
 
 
