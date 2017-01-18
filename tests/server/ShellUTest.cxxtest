@@ -23,6 +23,9 @@
 #include <thread>
 #include <unistd.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+
 #include <opencog/util/Config.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -90,6 +93,63 @@ void gargleblast(int tid, int reps)
 	}
 }
 
+void tik_tik_tik(int tid, int reps)
+{
+	int sock = socket(AF_INET, SOCK_STREAM, 0);
+	TS_ASSERT(0 < sock);
+
+	struct sockaddr_in server;
+	server.sin_addr.s_addr = inet_addr("127.0.0.1");
+	server.sin_family = AF_INET;
+	server.sin_port = htons(17333);
+
+	int rc = connect(sock, (struct sockaddr *)&server, sizeof(server));
+	TS_ASSERT(0 == rc);
+	rc = send(sock, "scm\n", strlen("scm\n"), 0);
+	TS_ASSERT(4 == rc);
+	char srep[1000];
+	rc = recv(sock, srep, sizeof(srep), 0);
+	TS_ASSERT(0 < rc);
+
+	for (int i=0; i<reps; i++)
+	{
+		char buf[200];
+		sprintf(buf, "(function-1 \"TICKET-%d-%d\")\n", tid+5000, i+8000);
+
+		rc = send(sock, buf, strlen(buf), 0);
+
+		int count = 0;
+		std::string reply;
+		while (1) {
+			char rep[1000];
+			rc = recv(sock, rep, sizeof(rep), MSG_DONTWAIT);
+			int norr = errno;
+			if (rc < 0 and EAGAIN != norr and EWOULDBLOCK != norr)
+			{
+				printf("Ohhh Nooo! %d %s\n", norr, strerror(norr));
+				TS_ASSERT(0);
+				break;
+			}
+			if (0 < rc) { rep[rc] = 0; reply += rep; }
+
+			if (reply.npos != reply.find("-finished")) break;
+			count ++;
+			if (10 < count) break;
+			sleep(1);
+		}
+
+		char exp[200];
+		sprintf(exp, "return-1-TICKET-%d-%d-finished", tid+5000, i+8000);
+
+		if (reply.npos == reply.find(exp))
+			printf("Failed to get expected reply; \n"
+					"expected: >>%s<<\n"
+					"got >>%s<<\n", exp, reply.c_str());
+
+		TS_ASSERT(reply.npos != reply.find(exp));
+	}
+}
+
 class ShellUTest :  public CxxTest::TestSuite
 {
 private:
@@ -130,7 +190,7 @@ public:
 		delete csrv;
 	}
 
-	void testControlD()
+	void xtestControlD()
 	{
 		int rc = system("echo '(Concept \"42\")\n' | nc -q 1 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
@@ -155,7 +215,7 @@ public:
 		usleep(50000);
 	}
 
-	void testMessaging()
+	void xtestMessaging()
 	{
 #define NT 20
 		std::thread* pangalactic[NT];
@@ -168,6 +228,34 @@ public:
 		{
 			pangalactic[j]->join();
 			delete pangalactic[j];
+		}
+		sleep(5);
+	}
+
+	void testMultiStream()
+	{
+		std::string ply = cmd_exec("echo 'scm\n"
+			// "(add-to-load-path \"/usr/local/share/opencog/scm\")\n"
+			// "(use-modules (opencog) (opencog logger))"
+			"(define (function-1 ticket) "
+			// "    (cog-logger-info \"CALLED function-1 ~s\" ticket)"
+			"    (string-append \"return-1-\" ticket \"-finished\"))\n"
+			"(define (function-2 ticket) "
+			// "    (cog-logger-info \"CALLED function-2 ~s\" ticket)"
+			"    (string-append \"return-2-\" ticket \"-finished\"))\n"
+			"\n.\n' | nc -q 5 localhost 17333");
+		if (0 == ply.size()) printf("Error: test setup failed\n");
+
+		std::thread* max_normal[NT];
+		int j;
+		for (j=0; j<NT; j++)
+		{
+			max_normal[j] = new std::thread(&tik_tik_tik, j, 60);
+		}
+		for (j=0; j<NT; j++)
+		{
+			max_normal[j]->join();
+			delete max_normal[j];
 		}
 		sleep(5);
 	}
