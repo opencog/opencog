@@ -193,8 +193,6 @@ public:
 		main_loop->join();
 		delete main_loop;
 		delete csrv;
-		// Wait for inflight packets to die.
-		sleep(1);
 	}
 
 	void testControlD()
@@ -236,7 +234,6 @@ public:
 			pangalactic[j]->join();
 			delete pangalactic[j];
 		}
-		sleep(5);
 	}
 
 	// Test streaming commands onto shared sockets.
@@ -253,7 +250,8 @@ public:
 			"(define (function-2 ticket) "
 			// "    (cog-logger-info \"CALLED function-2 ~s\" ticket)"
 			"    (string-append \"return-2-\" ticket \"-finished\"))\n"
-			"\n.\n' | nc -q 1 localhost 17333");
+			"(display \"Finished creating definitions\n\")"
+			"\n.\n' | nc -q 2 localhost 17333");
 		if (0 == ply.size()) printf("Error: test setup failed\n");
 
 		std::thread* max_normal[NT];
