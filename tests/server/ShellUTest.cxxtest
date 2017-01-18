@@ -93,8 +93,10 @@ void gargleblast(int tid, int reps)
 	}
 }
 
+// Test sending and receiving multiple commands on the same socket.
 void tik_tik_tik(int tid, int reps)
 {
+	// Open a socket to the server.
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
 	TS_ASSERT(0 < sock);
 
@@ -105,12 +107,15 @@ void tik_tik_tik(int tid, int reps)
 
 	int rc = connect(sock, (struct sockaddr *)&server, sizeof(server));
 	TS_ASSERT(0 == rc);
+
+	// Put the shell into scheme-mode.
 	rc = send(sock, "scm\n", strlen("scm\n"), 0);
 	TS_ASSERT(4 == rc);
-	char srep[1000];
+	char srep[200];
 	rc = recv(sock, srep, sizeof(srep), 0);
 	TS_ASSERT(0 < rc);
 
+	// A send+receive loop, reusing the above socket.
 	for (int i=0; i<reps; i++)
 	{
 		char buf[200];
@@ -118,6 +123,9 @@ void tik_tik_tik(int tid, int reps)
 
 		rc = send(sock, buf, strlen(buf), 0);
 
+		// Receive loop. Stalls until all of the answer has been
+		// received. We know that we got all of it, if the string
+		// "finished" appears in the answer.
 		int count = 0;
 		std::string reply;
 		while (1) {
@@ -134,8 +142,14 @@ void tik_tik_tik(int tid, int reps)
 
 			// Oops. Fatty boom boom.
 			TS_ASSERT(reply.npos == reply.find("ERROR"));
-			if (reply.npos != reply.find("ERROR")) return;
+			if (reply.npos != reply.find("ERROR"))
+			{
+				printf("Failure on thread-id=%d rep=%d\n", tid, i);
+				close(sock);
+				return;
+			}
 
+			// Look for zef side.
 			if (reply.npos != reply.find("-finished")) break;
 			count ++;
 			if (10 < count) break;
@@ -152,6 +166,9 @@ void tik_tik_tik(int tid, int reps)
 
 		TS_ASSERT(reply.npos != reply.find(exp));
 	}
+
+	// Be polite, and close up shop.
+	close(sock);
 }
 
 class ShellUTest :  public CxxTest::TestSuite
@@ -253,6 +270,9 @@ public:
 			"(display \"Finished creating definitions\n\")"
 			"\n.\n' | nc -q 2 localhost 17333");
 		if (0 == ply.size()) printf("Error: test setup failed\n");
+
+		sleep(1);  // wtf. Above initialization seems to be racing.
+		tik_tik_tik(-1, 10);
 
 		std::thread* max_normal[NT];
 		int j;
