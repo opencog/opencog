@@ -47,12 +47,6 @@ PythonShell::PythonShell()
 
 PythonShell::~PythonShell()
 {
-    // Eval an empty string as a end-of-file marker. This is needed
-    // to flush pending input in the python shell, as otherwise,
-    // there is no way to know that no more python input will
-    // arrive!
-    GenericShell::eval("");
-
     // Don't delete, its currently set to a singleton instance.
     //	if (evaluator) delete evaluator;
 }
@@ -72,13 +66,12 @@ void PythonShell::eval(const std::string &expr)
     self_destruct = false;
     GenericShell::eval(expr);
     if (selfie) {
-        self_destruct = true;
-
         // Eval an empty string as a end-of-file marker. This is needed
         // to flush pending input in the python shell, as otherwise,
         // there is no way to know that no more python input will
         // arrive!
         GenericShell::eval("");
+        self_destruct = true;
     }
 }
 
