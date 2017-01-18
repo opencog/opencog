@@ -180,6 +180,8 @@ public:
 		csrv->loadModule("libscheme-shell.so");
 		csrv->enableNetworkServer();
 		main_loop = new std::thread(&CogServer::serverLoop, csrv);
+		// Wait for the cogserver to finish initializing.
+		sleep(2);
 	}
 
 	void tearDown()
@@ -190,7 +192,7 @@ public:
 		delete csrv;
 	}
 
-	void xtestControlD()
+	void testControlD()
 	{
 		int rc = system("echo '(Concept \"42\")\n' | nc -q 1 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
@@ -215,14 +217,14 @@ public:
 		usleep(50000);
 	}
 
-	void xtestMessaging()
+	void testMessaging()
 	{
 #define NT 20
 		std::thread* pangalactic[NT];
 		int j;
 		for (j=0; j<NT; j++)
 		{
-			pangalactic[j] = new std::thread(&gargleblast, j, 60);
+			pangalactic[j] = new std::thread(&gargleblast, j, 30);
 		}
 		for (j=0; j<NT; j++)
 		{
@@ -232,6 +234,9 @@ public:
 		sleep(5);
 	}
 
+	// Test streaming commands onto shared sockets.
+	// Unlike the above test, here the socket is kept open
+	// indefinitely.
 	void testMultiStream()
 	{
 		std::string ply = cmd_exec("echo 'scm\n"
@@ -243,7 +248,7 @@ public:
 			"(define (function-2 ticket) "
 			// "    (cog-logger-info \"CALLED function-2 ~s\" ticket)"
 			"    (string-append \"return-2-\" ticket \"-finished\"))\n"
-			"\n.\n' | nc -q 5 localhost 17333");
+			"\n.\n' | nc -q 1 localhost 17333");
 		if (0 == ply.size()) printf("Error: test setup failed\n");
 
 		std::thread* max_normal[NT];
@@ -257,6 +262,5 @@ public:
 			max_normal[j]->join();
 			delete max_normal[j];
 		}
-		sleep(5);
 	}
 };
