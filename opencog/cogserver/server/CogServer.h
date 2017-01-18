@@ -220,7 +220,7 @@ public:
     /** Starts the network server and adds the default command line
      *  server socket on the port specified by the configuration
      *  parameter SERVER_PORT */
-    virtual void enableNetworkServer(void);
+    virtual void enableNetworkServer(int port=17001);
 
     /** Stops the network server and closes all the open server sockets. */
     virtual void disableNetworkServer(void);

@@ -170,10 +170,10 @@ CogServer::CogServer(AtomSpace* as) :
     agentsRunning = true;
 }
 
-void CogServer::enableNetworkServer()
+void CogServer::enableNetworkServer(int port)
 {
     if (_networkServer) return;
-    _networkServer = new NetworkServer(config().get_int("SERVER_PORT", 17001));
+    _networkServer = new NetworkServer(config().get_int("SERVER_PORT", port));
 }
 
 void CogServer::disableNetworkServer()
