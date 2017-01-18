@@ -132,6 +132,10 @@ void tik_tik_tik(int tid, int reps)
 			}
 			if (0 < rc) { rep[rc] = 0; reply += rep; }
 
+			// Oops. Fatty boom boom.
+			TS_ASSERT(reply.npos == reply.find("ERROR"));
+			if (reply.npos != reply.find("ERROR")) return;
+
 			if (reply.npos != reply.find("-finished")) break;
 			count ++;
 			if (10 < count) break;
@@ -173,12 +177,10 @@ public:
 
 	void setUp()
 	{
-		config().set("SERVER_PORT", "17333");
-
 		csrv = new CogServer();
 		csrv->loadModules();
 		csrv->loadModule("libscheme-shell.so");
-		csrv->enableNetworkServer();
+		csrv->enableNetworkServer(17333);
 		main_loop = new std::thread(&CogServer::serverLoop, csrv);
 		// Wait for the cogserver to finish initializing.
 		sleep(2);
