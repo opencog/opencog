@@ -84,6 +84,12 @@ mkCtxPre pred atom = Link "EquivalenceLink"
                                 (atom))
                         ] highTv
 
+pattern CtxPred atom <- Link "EquivalenceLink"
+                                [ _
+                                , LambdaL _ (CtxL _ (atom))
+                                ] _
+
+
 mkPropPre pred atom name = Link "EquivalenceLink"
                 [cLamdaL highTv
                     (cVN "1")
@@ -102,11 +108,11 @@ mkPropPre pred atom name = Link "EquivalenceLink"
                             (cLL [cPN ("ckaji_" ++ name) lowTv,atom])
                         )
                     )
-                ]
+                ] highTv
 
-pattern CtxPred atom <- Link "EquivalenceLink"
-                                [ _
-                                , LambdaL _ (CtxL _ (atom))
+pattern PropPred atom <- Link "EquivalenceLink"
+                                [_
+                                , LambdaL _ (AL [_,EvalL _ (LL [_,atom])])
                                 ] _
 
 isInteger s = case reads s :: [(Integer, String)] of

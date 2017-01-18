@@ -51,3 +51,17 @@ atomeseToLojban state a@(LL [_an,s]) = P.print (runReaderT preti state) s
 tvToLojban tv
     | tvMean tv > 0.5 = "go'i"
     | tvMean tv <= 0.5 = "nago'i"-}
+
+
+{-EquivalenceLink
+    EvaluationLink
+        VariableNode "var1!!!"
+        ListLink
+            VariableNode "var2"
+            ConceptNode "vo'a"
+    EvaluationLink
+        PredicateNode "sumti1"
+        ListLink "var2"
+            VariableNode "var2"
+            ConceptNode "something"
+-}
