@@ -23,34 +23,134 @@
 #include <thread>
 #include <unistd.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+
 #include <opencog/util/Config.h>
 #include <opencog/cogserver/server/CogServer.h>
 
 using namespace opencog;
 
+std::string cmd_exec(const char* cmd)
+{
+#define BUFSZ 1000
+	char buf[1000];
+	std::string result;
+	std::shared_ptr<FILE> pope(popen(cmd, "r"), pclose);
+	if (!pope) throw std::runtime_error("popen() failed!");
+	while (!feof(pope.get())) {
+		if (fgets(buf, BUFSZ, pope.get()) != NULL)
+			result += buf;
+	}
+	return result;
+}
+
 void gargleblast(int tid, int reps)
 {
 	for (int i=0; i<reps; i++)
 	{
+		int j = i+10;
 		char buf[1000];
-		sprintf(buf, "echo '(Evaluation (Predicate \"visible face\") (List (Number %d)))\n' | nc -q 1 localhost 17333", i);
-		int rc = system(buf);
-		if (rc != 0)
-			printf("Error: Create rep %d of %d in thread %d failed\n",
-				i, reps, tid);
-		TS_ASSERT_EQUALS(rc, 0);
+		sprintf(buf, "echo '(Evaluation (Predicate \"visible face\") (List (Number %d)))\n' | nc -q 1 localhost 17333", j);
+
+		std::string reso = cmd_exec(buf);
+
+		// The current reply message is exactly:
+		// opencog> Entering scheme shell; use ^D or a single . on a line by itself to exit.
+		// guile> (EvaluationLink
+		//   (PredicateNode "visible face")
+		//   (ListLink
+		//      (NumberNode "10.000000")
+		//   )
+		// )
+		//
+		// guile> 
+		// guile> ; note blank space here
+		// Which is exactly 278 chars long.
+		// If the greeting changes, then adjust for the correct size.
+
+#define CUR_MSG_SZ 278
+		if (reso.size() != CUR_MSG_SZ)
+			printf("Error: Create rep %d of %d in thread %d failed\n"
+			       "\tGot: %lu >>>%s<<<\n",
+			       i, reps, tid, reso.size(), reso.c_str());
+		TS_ASSERT_EQUALS(CUR_MSG_SZ, reso.size());
 		usleep(50000);
 
 		if (20 <= i)
 		{
-			sprintf(buf, "echo '(cog-delete (Evaluation (Predicate \"visible face\") (List (Number %d))))\n' | nc -q 1 localhost 17333", i-20);
-			rc = system(buf);
-			if (rc != 0)
-				printf("Error: Delete rep %d of %d in thread %d failed\n",
-					i, reps, tid);
-			TS_ASSERT_EQUALS(rc, 0);
+			sprintf(buf, "echo '(cog-delete (Evaluation (Predicate \"visible face\") (List (Number %d))))\n' | nc -q 1 localhost 17333", j-20);
+			std::string delo = cmd_exec(buf);
+
+#define CUR_DEL_SZ 179
+			if (delo.size() != CUR_DEL_SZ)
+				printf("Error: Create rep %d of %d in thread %d failed\n"
+				       "\tGot: %lu >>>%s<<<\n",
+				       i, reps, tid, delo.size(), delo.c_str());
+			TS_ASSERT_EQUALS(CUR_DEL_SZ, delo.size());
 		}
 		usleep(50000);
+	}
+}
+
+void tik_tik_tik(int tid, int reps)
+{
+	int sock = socket(AF_INET, SOCK_STREAM, 0);
+	TS_ASSERT(0 < sock);
+
+	struct sockaddr_in server;
+	server.sin_addr.s_addr = inet_addr("127.0.0.1");
+	server.sin_family = AF_INET;
+	server.sin_port = htons(17333);
+
+	int rc = connect(sock, (struct sockaddr *)&server, sizeof(server));
+	TS_ASSERT(0 == rc);
+	rc = send(sock, "scm\n", strlen("scm\n"), 0);
+	TS_ASSERT(4 == rc);
+	char srep[1000];
+	rc = recv(sock, srep, sizeof(srep), 0);
+	TS_ASSERT(0 < rc);
+
+	for (int i=0; i<reps; i++)
+	{
+		char buf[200];
+		sprintf(buf, "(function-1 \"TICKET-%d-%d\")\n", tid+5000, i+8000);
+
+		rc = send(sock, buf, strlen(buf), 0);
+
+		int count = 0;
+		std::string reply;
+		while (1) {
+			char rep[1000];
+			rc = recv(sock, rep, sizeof(rep), MSG_DONTWAIT);
+			int norr = errno;
+			if (rc < 0 and EAGAIN != norr and EWOULDBLOCK != norr)
+			{
+				printf("Ohhh Nooo! %d %s\n", norr, strerror(norr));
+				TS_ASSERT(0);
+				break;
+			}
+			if (0 < rc) { rep[rc] = 0; reply += rep; }
+
+			// Oops. Fatty boom boom.
+			TS_ASSERT(reply.npos == reply.find("ERROR"));
+			if (reply.npos != reply.find("ERROR")) return;
+
+			if (reply.npos != reply.find("-finished")) break;
+			count ++;
+			if (10 < count) break;
+			sleep(1);
+		}
+
+		char exp[200];
+		sprintf(exp, "return-1-TICKET-%d-%d-finished", tid+5000, i+8000);
+
+		if (reply.npos == reply.find(exp))
+			printf("Failed to get expected reply; \n"
+					"expected: >>%s<<\n"
+					"got >>%s<<\n", exp, reply.c_str());
+
+		TS_ASSERT(reply.npos != reply.find(exp));
 	}
 }
 
@@ -77,13 +177,14 @@ public:
 
 	void setUp()
 	{
-		config().set("SERVER_PORT", "17333");
-
 		csrv = new CogServer();
 		csrv->loadModules();
 		csrv->loadModule("libscheme-shell.so");
-		csrv->enableNetworkServer();
+		csrv->enableNetworkServer(17333);
 		main_loop = new std::thread(&CogServer::serverLoop, csrv);
+
+		// Wait for the cogserver to finish initializing.
+		sleep(1);
 	}
 
 	void tearDown()
@@ -126,13 +227,43 @@ public:
 		int j;
 		for (j=0; j<NT; j++)
 		{
-			pangalactic[j] = new std::thread(&gargleblast, j, 60);
+			pangalactic[j] = new std::thread(&gargleblast, j, 30);
 		}
 		for (j=0; j<NT; j++)
 		{
 			pangalactic[j]->join();
 			delete pangalactic[j];
 		}
-		sleep(5);
+	}
+
+	// Test streaming commands onto shared sockets.
+	// Unlike the above test, here the socket is kept open
+	// indefinitely.
+	void testMultiStream()
+	{
+		std::string ply = cmd_exec("echo 'scm\n"
+			// "(add-to-load-path \"/usr/local/share/opencog/scm\")\n"
+			// "(use-modules (opencog) (opencog logger))"
+			"(define (function-1 ticket) "
+			// "    (cog-logger-info \"CALLED function-1 ~s\" ticket)"
+			"    (string-append \"return-1-\" ticket \"-finished\"))\n"
+			"(define (function-2 ticket) "
+			// "    (cog-logger-info \"CALLED function-2 ~s\" ticket)"
+			"    (string-append \"return-2-\" ticket \"-finished\"))\n"
+			"(display \"Finished creating definitions\n\")"
+			"\n.\n' | nc -q 2 localhost 17333");
+		if (0 == ply.size()) printf("Error: test setup failed\n");
+
+		std::thread* max_normal[NT];
+		int j;
+		for (j=0; j<NT; j++)
+		{
+			max_normal[j] = new std::thread(&tik_tik_tik, j, 60);
+		}
+		for (j=0; j<NT; j++)
+		{
+			max_normal[j]->join();
+			delete max_normal[j];
+		}
 	}
 };
