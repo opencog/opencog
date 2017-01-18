@@ -182,8 +182,9 @@ public:
 		csrv->loadModule("libscheme-shell.so");
 		csrv->enableNetworkServer(17333);
 		main_loop = new std::thread(&CogServer::serverLoop, csrv);
+
 		// Wait for the cogserver to finish initializing.
-		sleep(2);
+		sleep(1);
 	}
 
 	void tearDown()
@@ -192,6 +193,8 @@ public:
 		main_loop->join();
 		delete main_loop;
 		delete csrv;
+		// Wait for inflight packets to die.
+		sleep(1);
 	}
 
 	void testControlD()
