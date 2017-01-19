@@ -47,6 +47,8 @@ insert = inverse . ignore
 
 iunit = inverse unit
 
+ciunit = iunit . commute
+
 addfst :: a -> Iso b (a,b)
 addfst a = inverse $ rmfst a
 
@@ -59,11 +61,14 @@ rmfst a = iunit . commute .< ignore a
 rmsnd :: a -> Iso (b,a) b
 rmsnd a = iunit .> ignore a
 
-
-choice :: (a -> Iso a b) -> (b -> Iso a b) -> Iso a b
-choice f g = Iso i j where
-    i a = apply (f a) a
-    j b = unapply (g b) b
+choice :: Eq c => [(c,Iso a b)] -> Iso (c,a) b
+choice lst = Iso f g where
+    f (c,a) = let found = F.find (\(k,_) -> c == k) lst
+              in case found of
+                Just (_,iso) -> apply iso a
+                Nothing -> Nothing
+    g b = let Just (c,iso) = F.find (\(c,iso) -> isJust $ unapply iso b) lst
+          in Just (c,fromJust $ unapply iso b)
 
 infixr 8 .>
 infixr 8 .<

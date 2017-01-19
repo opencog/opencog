@@ -25,9 +25,12 @@ loadWordLists src = do
             let (Right (selmahos,gismu,bai)) = decode bs
             return (fmap fromList selmahos,fromList gismu,bai,seed)
         False -> do
-            gismu <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getGismu)
-            cmavo <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getCmavo)
-            bai   <- runX (readDocument [] src >>> getChildren >>> getValsi >>> getBAI)
+            gismu <- runX (readDocument [] src
+                           >>> getChildren >>> getValsi >>> getGismu)
+            cmavo <- runX (readDocument [] src
+                           >>> getChildren >>> getValsi >>> getCmavo)
+            bai   <- runX (readDocument [] src
+                           >>> getChildren >>> getValsi >>> getBAI)
             (seed :: Int) <- randomIO
             let selmahos = M.fromListWith (++) $ fmap f cmavo
                 f (s,c) = (takeWhile p s,[c])
@@ -50,7 +53,7 @@ getGismu = hasAttrValue "type" ((||) <$> (== "gismu") <*>
            getAttrValue "word"
 
 isCmavo :: ArrowXml a => a XmlTree XmlTree
-isCmavo = hasAttrValue "type" (isPrefixOf "cmavo")
+isCmavo = hasAttrValue "type" (isInfixOf "cmavo")
 
 getCmavo :: ArrowXml a => a XmlTree (String,String)
 getCmavo = isCmavo

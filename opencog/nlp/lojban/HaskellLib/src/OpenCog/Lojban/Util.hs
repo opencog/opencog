@@ -53,6 +53,7 @@ cNN name    = Node "NumberNode" name noTv
 
 cLL a           = Link "ListLink"                             a     noTv
 cSL a           = Link "SetLink"                              a     noTv
+cSimL a b       = Link "SimilarityLink"                   [a,b]    noTv
 cVL a           = Link "VariableList"                         a     noTv
 cInhL tv a b    = Link "InheritanceLink"                  [a,b]     tv
 cImpL tv a b    = Link "ImplicationLink"                  [a,b]     tv
@@ -63,7 +64,7 @@ cExL tv a b     = Link "ExistsLink"                       [a,b]     tv
 cFAL tv a b     = Link "ForAllLink"                       [a,b]     tv
 cPL     a b     = Link "PutLink"                          [a,b]     noTv
 cGL     a       = Link "GetLink"                            [a]     noTv
-cAL  tv a       = Link "AndLink"                                  a tv
+cAL  tv a b     = Link "AndLink"                          [a,b]     tv
 cOL  tv a       = Link "OrLink"                                   a tv
 cNL  tv a       = Link "NotLink"                                [a] tv
 cCtxL tv a b    = Link "ContextLink"                      [a,b]     tv
@@ -89,3 +90,38 @@ pattern CtxPred atom <- Link "EquivalenceLink"
                                 ] _
 
 
+mkPropPre pred atom name = Link "EquivalenceLink"
+                [cLamdaL highTv
+                    (cVN "1")
+                    (cEvalL highTv
+                        (pred)
+                        (cLL [cVN "1"]))
+                ,cLamdaL highTv
+                    (cVN "2")
+                    (cAL highTv
+                        (cEvalL highTv
+                            (cPN "ckaji_sumit1" lowTv)
+                            (cLL [cPN ("ckaji_" ++ name) lowTv,cVN "2"])
+                        )
+                        (cEvalL highTv
+                            (cPN "ckaji_sumit2" lowTv)
+                            (cLL [cPN ("ckaji_" ++ name) lowTv,atom])
+                        )
+                    )
+                ] highTv
+
+pattern PropPred atom <- Link "EquivalenceLink"
+                                [_
+                                , LambdaL _ (AL [_,EvalL _ (LL [_,atom])])
+                                ] _
+
+isInteger s = case reads s :: [(Integer, String)] of
+  [(_, "")] -> True
+  _         -> False
+
+isDouble s = case reads s :: [(Double, String)] of
+  [(_, "")] -> True
+  _         -> False
+
+isNumeric :: String -> Bool
+isNumeric s = isInteger s || isDouble s

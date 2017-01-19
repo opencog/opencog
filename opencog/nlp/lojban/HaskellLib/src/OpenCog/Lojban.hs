@@ -33,11 +33,11 @@ initParserPrinter path = do
 
 lojbanToAtomese :: WordList -> String -> Maybe Atom
 lojbanToAtomese state text =
-    wrapAtom <$> listToMaybe (parse (runReaderT preti state) (text++" "))
+    wrapAtom <$> listToMaybe (parse (runReaderT lojban state) (text++" "))
 
 lojbanToAtomeseRaw :: WordList -> String -> Maybe (Atom,String)
 lojbanToAtomeseRaw state text =
-    listToMaybe (rawparse (runReaderT preti state) (text++" "))
+    listToMaybe (rawparse (runReaderT lojban state) (text++" "))
 
 wrapAtom :: Atom -> Atom
 wrapAtom atom@(Link "SatisfactionLink" _ _) = cLL [cAN "QuestionAnchor" , atom]
@@ -51,3 +51,17 @@ atomeseToLojban state a@(LL [_an,s]) = P.print (runReaderT preti state) s
 tvToLojban tv
     | tvMean tv > 0.5 = "go'i"
     | tvMean tv <= 0.5 = "nago'i"-}
+
+
+{-EquivalenceLink
+    EvaluationLink
+        VariableNode "var1!!!"
+        ListLink
+            VariableNode "var2"
+            ConceptNode "vo'a"
+    EvaluationLink
+        PredicateNode "sumti1"
+        ListLink "var2"
+            VariableNode "var2"
+            ConceptNode "something"
+-}
