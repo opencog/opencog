@@ -69,12 +69,6 @@ GenericShell::GenericShell(void)
 
 GenericShell::~GenericShell()
 {
-	self_destruct = true;
-
-	// It can happen that we are already canelling.
-	try { evalque.cancel(); }
-	catch (const std::exception& ex) {}
-
 	if (evalthr)
 	{
 		logger().debug("[GenericShell] dtor, wait for eval thread 0x%x.",
@@ -85,6 +79,13 @@ GenericShell::~GenericShell()
 		delete evalthr;
 		evalthr = nullptr;
 	}
+
+	self_destruct = true;
+
+	// It can happen that we are already canelling.
+	try { evalque.cancel(); }
+	catch (const std::exception& ex) {}
+
 	logger().debug("[GenericShell] dtor finished.");
 }
 
