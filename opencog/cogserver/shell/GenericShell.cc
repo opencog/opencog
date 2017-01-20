@@ -71,7 +71,7 @@ GenericShell::~GenericShell()
 {
 	self_destruct = true;
 
-	// It can happen that we are already canelling.
+	// It can happen that we already cancelled (e.g. control-D)
 	try { evalque.cancel(); }
 	catch (const std::exception& ex) {}
 
@@ -309,6 +309,7 @@ void GenericShell::line_discipline(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
+				logger().debug("[GenericShell] got user-interrupt");
 				// Discard all pending, unevaluated junk in the queue.
 				// Failure to do so will typically result in confusing
 				// the shell user.
@@ -359,6 +360,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	if ((false == _evaluator->input_pending()) and
 	    ((EOT == expr[len-1]) or ((1 == len) and ('.' == expr[0]))))
 	{
+		logger().debug("[GenericShell] got control-D; exiting shell");
 		self_destruct = true;
 		evalque.cancel();
 		if (show_prompt)
@@ -367,9 +369,9 @@ void GenericShell::line_discipline(const std::string &expr)
 	}
 
 	/*
-	 * The newline is always cut. Re-insert it; otherwise, comments
-	 * within procedures will have the effect of commenting out the
-	 * rest of the procedure, leading to garbage.
+	 * The newline was cut by the request subsystem. Re-insert it;
+	 * otherwise, comments within procedures will have the effect of
+	 * commenting out the rest of the procedure, leading to garbage.
 	 */
 	evalque.push(expr + "\n");
 }
@@ -411,6 +413,7 @@ void GenericShell::while_not_done()
 /// it is impossible to queue OOB interrupts.)
 void GenericShell::eval_loop(void)
 {
+	logger().debug("[GenericShell] enter eval loop");
 	OC_ASSERT(nullptr == _evaluator, "Bad evaluator state!");
 
 	// Per-shell evaluator.  We do this here, not in the ctor, because
@@ -441,6 +444,7 @@ void GenericShell::eval_loop(void)
 			// Note that this pop will wait until the queue
 			// becomes non-empty.
 			evalque.pop(in);
+			logger().debug("[GenericShell] start eval of '%s'", in.c_str());
 			start_eval();
 			_evaluator->begin_eval();
 			_evaluator->eval_expr(in);
@@ -458,6 +462,7 @@ void GenericShell::eval_loop(void)
 	delete pollthr;
 	pollthr = nullptr;
 	_evaluator = nullptr;
+	logger().debug("[GenericShell] exit eval loop");
 }
 
 void GenericShell::poll_loop(void)
