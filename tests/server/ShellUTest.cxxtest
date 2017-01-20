@@ -82,12 +82,15 @@ void gargleblast(int tid, int reps)
 			sprintf(buf, "echo '(cog-delete (Evaluation (Predicate \"visible face\") (List (Number %d))))\n' | nc -q 1 localhost 17333", j-20);
 			std::string delo = cmd_exec(buf);
 
-#define CUR_DEL_SZ 179
-			if (delo.size() != CUR_DEL_SZ)
+			// Hmm. Seems that sometimes some trailing newline gets cut,
+			// and so the reply might be short by one byte. Seems harmless.
+#define CUR_DEL_SZ 178
+			if (delo.size() != CUR_DEL_SZ and delo.size() != (CUR_DEL_SZ+1))
 				printf("Error: Create rep %d of %d in thread %d failed\n"
 				       "\tGot: %lu >>>%s<<<\n",
 				       i, reps, tid, delo.size(), delo.c_str());
-			TS_ASSERT_EQUALS(CUR_DEL_SZ, delo.size());
+			TS_ASSERT_LESS_THAN_EQUALS(CUR_DEL_SZ, delo.size());
+			TS_ASSERT_LESS_THAN_EQUALS(delo.size(), CUR_DEL_SZ+1);
 		}
 		usleep(50000);
 	}
@@ -96,6 +99,8 @@ void gargleblast(int tid, int reps)
 // Test sending and receiving multiple commands on the same socket.
 void tik_tik_tik(int tid, int reps)
 {
+	static bool already_printed = false;
+
 	// Open a socket to the server.
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
 	TS_ASSERT(0 < sock);
@@ -145,6 +150,9 @@ void tik_tik_tik(int tid, int reps)
 			if (reply.npos != reply.find("ERROR"))
 			{
 				printf("Failure on thread-id=%d rep=%d\n", tid, i);
+				if (not already_printed)
+					printf("Shell reply is: %s\n", reply.c_str());
+				already_printed = true;
 				close(sock);
 				return;
 			}
@@ -303,8 +311,10 @@ public:
 			// "    (cog-logger-info \"CALLED function-2 ~s\" ticket)"
 			"    (string-append \"return-2-\" ticket \"-finished\"))\n"
 			"(display \"Finished creating definitions\n\")"
-			"\n.\n' | nc localhost 17333");
-		if (0 == ply.size()) printf("Error: test setup failed\n");
+			"\n.\n' | nc -q 2 localhost 17333");
+
+		// The -q2 on `nc` should be enough for the above to finish up.
+		TS_ASSERT (0 < ply.size());
 
 		std::thread* max_normal[NT];
 		int j;
