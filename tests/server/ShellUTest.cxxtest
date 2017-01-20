@@ -215,24 +215,24 @@ public:
 	void testControlD()
 	{
 		logger().debug("BEGIN TEST: %s", __FUNCTION__);
-		int rc = system("echo '(Concept \"42\")\n' | nc -q 1 localhost 17333");
+		int rc = system("echo '(Concept \"42\")\n' | nc localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
 		// Well, I cannot figure out how to echo ctrl-D so use
 		// a dot, instead. Should do the same thing.
-		rc = system("echo 'scm\n(+ 2 2)\n.\n' | nc -q 1 localhost 17333");
+		rc = system("echo 'scm\n(+ 2 2)\n.\n' | nc localhost 17333");
 		if (rc != 0) printf("Error: second call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
-		rc = system("echo 'scm\n(Concept \"42\")\n' | nc -q 1 localhost 17333");
+		rc = system("echo 'scm\n(Concept \"42\")\n' | nc localhost 17333");
 		if (rc != 0) printf("Error: third call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
-		rc = system("echo '(+ 2 2)\n.\n' | nc -q 1 localhost 17333");
+		rc = system("echo '(+ 2 2)\n.\n' | nc localhost 17333");
 		if (rc != 0) printf("Error: fourth call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
@@ -248,11 +248,12 @@ public:
 		logger().debug("BEGIN TEST: %s", __FUNCTION__);
 		cmd_exec(
 			"echo 'scm\n (Concept \"A\")\n (sleep 1)\n (Concept \"B\")\n"
-			"(sleep 1)\n (Concept \"C\")\n' | nc -q 1 localhost 17333");
+			"(sleep 1)\n (Concept \"C\")\n' | nc localhost 17333");
 		sleep(4);
 		std::string ply = cmd_exec(
-			"echo 'scm\n (cog-prt-atomspace)' | nc -q 1 localhost 17333");
+			"echo 'scm\n (cog-prt-atomspace)' | nc localhost 17333");
 
+		// Actually, we expect exactly 205 bytes, these days....
 		printf("Received %lu bytes: %s\n", ply.size(), ply.c_str());
 		TS_ASSERT_LESS_THAN(200, ply.size());
 
@@ -298,11 +299,8 @@ public:
 			// "    (cog-logger-info \"CALLED function-2 ~s\" ticket)"
 			"    (string-append \"return-2-\" ticket \"-finished\"))\n"
 			"(display \"Finished creating definitions\n\")"
-			"\n.\n' | nc -q 2 localhost 17333");
+			"\n.\n' | nc localhost 17333");
 		if (0 == ply.size()) printf("Error: test setup failed\n");
-
-		sleep(1);  // wtf. Above initialization seems to be racing.
-		tik_tik_tik(-1, 10);
 
 		std::thread* max_normal[NT];
 		int j;
