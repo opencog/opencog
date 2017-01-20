@@ -214,6 +214,7 @@ public:
 
 	void testControlD()
 	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
 		int rc = system("echo '(Concept \"42\")\n' | nc -q 1 localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
@@ -235,10 +236,37 @@ public:
 		if (rc != 0) printf("Error: fourth call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
+		logger().debug("END TEST: %s", __FUNCTION__);
+	}
+
+	// Test draining of the shell command queue, before the shell is
+	// closed. Here, net-cat sends some long-running commands, but
+	// then closes the socket immediately. All of the commands should
+	// still run to completion, however.
+	void testDrain()
+	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
+		cmd_exec(
+			"echo 'scm\n (Concept \"A\")\n (sleep 1)\n (Concept \"B\")\n"
+			"(sleep 1)\n (Concept \"C\")\n' | nc -q 1 localhost 17333");
+		sleep(4);
+		std::string ply = cmd_exec(
+			"echo 'scm\n (cog-prt-atomspace)' | nc -q 1 localhost 17333");
+
+		printf("Received %lu bytes: %s\n", ply.size(), ply.c_str());
+		TS_ASSERT_LESS_THAN(220, ply.size());
+
+		// Expect to get all three atoms.
+		TS_ASSERT(ply.npos != ply.find("(ConceptNode \"A\")"));
+		TS_ASSERT(ply.npos != ply.find("(ConceptNode \"B\")"));
+		TS_ASSERT(ply.npos != ply.find("(ConceptNode \"C\")"));
+
+		logger().debug("END TEST: %s", __FUNCTION__);
 	}
 
 	void testMessaging()
 	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
 #define NT 20
 		std::thread* pangalactic[NT];
 		int j;
@@ -251,6 +279,7 @@ public:
 			pangalactic[j]->join();
 			delete pangalactic[j];
 		}
+		logger().debug("END TEST: %s", __FUNCTION__);
 	}
 
 	// Test streaming commands onto shared sockets.
@@ -258,6 +287,7 @@ public:
 	// indefinitely.
 	void testMultiStream()
 	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
 		std::string ply = cmd_exec("echo 'scm\n"
 			// "(add-to-load-path \"/usr/local/share/opencog/scm\")\n"
 			// "(use-modules (opencog) (opencog logger))"
@@ -285,5 +315,7 @@ public:
 			max_normal[j]->join();
 			delete max_normal[j];
 		}
+
+		logger().debug("END TEST: %s", __FUNCTION__);
 	}
 };
