@@ -254,7 +254,7 @@ public:
 			"echo 'scm\n (cog-prt-atomspace)' | nc -q 1 localhost 17333");
 
 		printf("Received %lu bytes: %s\n", ply.size(), ply.c_str());
-		TS_ASSERT_LESS_THAN(220, ply.size());
+		TS_ASSERT_LESS_THAN(200, ply.size());
 
 		// Expect to get all three atoms.
 		TS_ASSERT(ply.npos != ply.find("(ConceptNode \"A\")"));
