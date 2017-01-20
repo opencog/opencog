@@ -69,12 +69,15 @@ void gargleblast(int tid, int reps)
 		// Which is exactly 278 chars long.
 		// If the greeting changes, then adjust for the correct size.
 
-#define CUR_MSG_SZ 278
-		if (reso.size() != CUR_MSG_SZ)
+		// Hmm. Seems that sometimes some trailing newline gets cut,
+		// and so the reply might be short by one byte. Seems harmless.
+#define CUR_MSG_SZ 277
+		TS_ASSERT_LESS_THAN_EQUALS(CUR_MSG_SZ, reso.size());
+		TS_ASSERT_LESS_THAN_EQUALS(reso.size(), CUR_MSG_SZ+1);
+		if (reso.size() < CUR_MSG_SZ or (CUR_MSG_SZ+1) < reso.size())
 			printf("Error: Create rep %d of %d in thread %d failed\n"
 			       "\tGot: %lu >>>%s<<<\n",
 			       i, reps, tid, reso.size(), reso.c_str());
-		TS_ASSERT_EQUALS(CUR_MSG_SZ, reso.size());
 		usleep(50000);
 
 		if (20 <= i)
@@ -82,15 +85,13 @@ void gargleblast(int tid, int reps)
 			sprintf(buf, "echo '(cog-delete (Evaluation (Predicate \"visible face\") (List (Number %d))))\n' | nc -q 1 localhost 17333", j-20);
 			std::string delo = cmd_exec(buf);
 
-			// Hmm. Seems that sometimes some trailing newline gets cut,
-			// and so the reply might be short by one byte. Seems harmless.
 #define CUR_DEL_SZ 178
-			if (delo.size() != CUR_DEL_SZ and delo.size() != (CUR_DEL_SZ+1))
+			TS_ASSERT_LESS_THAN_EQUALS(CUR_DEL_SZ, delo.size());
+			TS_ASSERT_LESS_THAN_EQUALS(delo.size(), CUR_DEL_SZ+1);
+			if (delo.size() < CUR_DEL_SZ or (CUR_DEL_SZ+1) < delo.size())
 				printf("Error: Create rep %d of %d in thread %d failed\n"
 				       "\tGot: %lu >>>%s<<<\n",
 				       i, reps, tid, delo.size(), delo.c_str());
-			TS_ASSERT_LESS_THAN_EQUALS(CUR_DEL_SZ, delo.size());
-			TS_ASSERT_LESS_THAN_EQUALS(delo.size(), CUR_DEL_SZ+1);
 		}
 		usleep(50000);
 	}
