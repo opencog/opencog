@@ -455,6 +455,33 @@ void GenericShell::eval_loop(void)
 		}
 	}
 
+	// If we are here, then we can safely assume that the socket has
+	// been closed, that the dtor for this instance has been called.
+	// However, there may still be some remaining, unfinished work
+	// in the command queue; drain the queue, before shutting down.
+	assert(self_destruct);
+	evalque.cancel_reset();
+
+	// Nothing more will be queued, so we can safely loop over remainder
+	// of the queue, without any additional need for locking/waiting.
+	while (not evalque.is_empty())
+	{
+		// As mentioned before, do not begin the next queued expr until
+		// the last has finished. Failure to do this results in crashes.
+		poll_output();
+		while (not _eval_done)
+		{
+			usleep(10000);
+			poll_output();
+		}
+
+		evalque.pop(in);
+		logger().debug("[GenericShell] finishing; eval of '%s'", in.c_str());
+		start_eval();
+		_evaluator->begin_eval();
+		_evaluator->eval_expr(in);
+	}
+
 	// On exit, make sure the polling thread dies first.
 	// After we exit, the _evaluator will be reclaimed by the
 	// thread dtor running in the evaluator pool.
