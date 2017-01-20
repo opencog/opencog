@@ -249,9 +249,13 @@ public:
 		cmd_exec(
 			"echo 'scm\n (Concept \"A\")\n (sleep 1)\n (Concept \"B\")\n"
 			"(sleep 1)\n (Concept \"C\")\n' | nc localhost 17333");
+
+		// Wait for above to finish
 		sleep(4);
+
+		// nc -q 1 means "wait for a reply, doofus"
 		std::string ply = cmd_exec(
-			"echo 'scm\n (cog-prt-atomspace)' | nc localhost 17333");
+			"echo 'scm\n (cog-prt-atomspace)' | nc -q 1 localhost 17333");
 
 		// Actually, we expect exactly 205 bytes, these days....
 		printf("Received %lu bytes: %s\n", ply.size(), ply.c_str());
