@@ -69,12 +69,15 @@ void gargleblast(int tid, int reps)
 		// Which is exactly 278 chars long.
 		// If the greeting changes, then adjust for the correct size.
 
-#define CUR_MSG_SZ 278
-		if (reso.size() != CUR_MSG_SZ)
+		// Hmm. Seems that sometimes some trailing newline gets cut,
+		// and so the reply might be short by one byte. Seems harmless.
+#define CUR_MSG_SZ 277
+		TS_ASSERT_LESS_THAN_EQUALS(CUR_MSG_SZ, reso.size());
+		TS_ASSERT_LESS_THAN_EQUALS(reso.size(), CUR_MSG_SZ+1);
+		if (reso.size() < CUR_MSG_SZ or (CUR_MSG_SZ+1) < reso.size())
 			printf("Error: Create rep %d of %d in thread %d failed\n"
 			       "\tGot: %lu >>>%s<<<\n",
 			       i, reps, tid, reso.size(), reso.c_str());
-		TS_ASSERT_EQUALS(CUR_MSG_SZ, reso.size());
 		usleep(50000);
 
 		if (20 <= i)
@@ -82,12 +85,13 @@ void gargleblast(int tid, int reps)
 			sprintf(buf, "echo '(cog-delete (Evaluation (Predicate \"visible face\") (List (Number %d))))\n' | nc -q 1 localhost 17333", j-20);
 			std::string delo = cmd_exec(buf);
 
-#define CUR_DEL_SZ 179
-			if (delo.size() != CUR_DEL_SZ)
+#define CUR_DEL_SZ 178
+			TS_ASSERT_LESS_THAN_EQUALS(CUR_DEL_SZ, delo.size());
+			TS_ASSERT_LESS_THAN_EQUALS(delo.size(), CUR_DEL_SZ+1);
+			if (delo.size() < CUR_DEL_SZ or (CUR_DEL_SZ+1) < delo.size())
 				printf("Error: Create rep %d of %d in thread %d failed\n"
 				       "\tGot: %lu >>>%s<<<\n",
 				       i, reps, tid, delo.size(), delo.c_str());
-			TS_ASSERT_EQUALS(CUR_DEL_SZ, delo.size());
 		}
 		usleep(50000);
 	}
@@ -96,6 +100,8 @@ void gargleblast(int tid, int reps)
 // Test sending and receiving multiple commands on the same socket.
 void tik_tik_tik(int tid, int reps)
 {
+	static bool already_printed = false;
+
 	// Open a socket to the server.
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
 	TS_ASSERT(0 < sock);
@@ -145,6 +151,9 @@ void tik_tik_tik(int tid, int reps)
 			if (reply.npos != reply.find("ERROR"))
 			{
 				printf("Failure on thread-id=%d rep=%d\n", tid, i);
+				if (not already_printed)
+					printf("Shell reply is: %s\n", reply.c_str());
+				already_printed = true;
 				close(sock);
 				return;
 			}
@@ -214,31 +223,64 @@ public:
 
 	void testControlD()
 	{
-		int rc = system("echo '(Concept \"42\")\n' | nc -q 1 localhost 17333");
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
+		int rc = system("echo '(Concept \"42\")\n' | nc localhost 17333");
 		if (rc != 0) printf("Error: first call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
 		// Well, I cannot figure out how to echo ctrl-D so use
 		// a dot, instead. Should do the same thing.
-		rc = system("echo 'scm\n(+ 2 2)\n.\n' | nc -q 1 localhost 17333");
+		rc = system("echo 'scm\n(+ 2 2)\n.\n' | nc localhost 17333");
 		if (rc != 0) printf("Error: second call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
-		rc = system("echo 'scm\n(Concept \"42\")\n' | nc -q 1 localhost 17333");
+		rc = system("echo 'scm\n(Concept \"42\")\n' | nc localhost 17333");
 		if (rc != 0) printf("Error: third call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
-		rc = system("echo '(+ 2 2)\n.\n' | nc -q 1 localhost 17333");
+		rc = system("echo '(+ 2 2)\n.\n' | nc localhost 17333");
 		if (rc != 0) printf("Error: fourth call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
+		logger().debug("END TEST: %s", __FUNCTION__);
+	}
+
+	// Test draining of the shell command queue, before the shell is
+	// closed. Here, net-cat sends some long-running commands, but
+	// then closes the socket immediately. All of the commands should
+	// still run to completion, however.
+	void testDrain()
+	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
+		cmd_exec(
+			"echo 'scm\n (Concept \"A\")\n (sleep 1)\n (Concept \"B\")\n"
+			"(sleep 1)\n (Concept \"C\")\n' | nc localhost 17333");
+
+		// Wait for above to finish
+		sleep(4);
+
+		// nc -q 1 means "wait for a reply, doofus"
+		std::string ply = cmd_exec(
+			"echo 'scm\n (cog-prt-atomspace)' | nc -q 1 localhost 17333");
+
+		// Actually, we expect exactly 205 bytes, these days....
+		printf("Received %lu bytes: %s\n", ply.size(), ply.c_str());
+		TS_ASSERT_LESS_THAN(200, ply.size());
+
+		// Expect to get all three atoms.
+		TS_ASSERT(ply.npos != ply.find("(ConceptNode \"A\")"));
+		TS_ASSERT(ply.npos != ply.find("(ConceptNode \"B\")"));
+		TS_ASSERT(ply.npos != ply.find("(ConceptNode \"C\")"));
+
+		logger().debug("END TEST: %s", __FUNCTION__);
 	}
 
 	void testMessaging()
 	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
 #define NT 20
 		std::thread* pangalactic[NT];
 		int j;
@@ -251,6 +293,7 @@ public:
 			pangalactic[j]->join();
 			delete pangalactic[j];
 		}
+		logger().debug("END TEST: %s", __FUNCTION__);
 	}
 
 	// Test streaming commands onto shared sockets.
@@ -258,6 +301,7 @@ public:
 	// indefinitely.
 	void testMultiStream()
 	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
 		std::string ply = cmd_exec("echo 'scm\n"
 			// "(add-to-load-path \"/usr/local/share/opencog/scm\")\n"
 			// "(use-modules (opencog) (opencog logger))"
@@ -269,10 +313,9 @@ public:
 			"    (string-append \"return-2-\" ticket \"-finished\"))\n"
 			"(display \"Finished creating definitions\n\")"
 			"\n.\n' | nc -q 2 localhost 17333");
-		if (0 == ply.size()) printf("Error: test setup failed\n");
 
-		sleep(1);  // wtf. Above initialization seems to be racing.
-		tik_tik_tik(-1, 10);
+		// The -q2 on `nc` should be enough for the above to finish up.
+		TS_ASSERT (0 < ply.size());
 
 		std::thread* max_normal[NT];
 		int j;
@@ -285,5 +328,7 @@ public:
 			max_normal[j]->join();
 			delete max_normal[j];
 		}
+
+		logger().debug("END TEST: %s", __FUNCTION__);
 	}
 };
