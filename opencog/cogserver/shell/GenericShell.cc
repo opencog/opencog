@@ -462,6 +462,12 @@ void GenericShell::eval_loop(void)
 	assert(self_destruct);
 	evalque.cancel_reset();
 
+	// Let the polling thread die first. If we don't do this, it will
+	// interfer with the manual polling below.
+	pollthr->join();
+	delete pollthr;
+	pollthr = nullptr;
+
 	// Nothing more will be queued, so we can safely loop over remainder
 	// of the queue, without any additional need for locking/waiting.
 	while (0 < evalque.size())
@@ -491,12 +497,8 @@ void GenericShell::eval_loop(void)
 		_evaluator->eval_expr(in);
 	}
 
-	// On exit, make sure the polling thread dies first.
 	// After we exit, the _evaluator will be reclaimed by the
 	// thread dtor running in the evaluator pool.
-	pollthr->join();
-	delete pollthr;
-	pollthr = nullptr;
 	_evaluator = nullptr;
 	logger().debug("[GenericShell] exit eval loop");
 }
