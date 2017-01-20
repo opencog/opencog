@@ -464,7 +464,7 @@ void GenericShell::eval_loop(void)
 
 	// Nothing more will be queued, so we can safely loop over remainder
 	// of the queue, without any additional need for locking/waiting.
-	while (not evalque.is_empty())
+	while (0 < evalque.size())
 	{
 		// As mentioned before, do not begin the next queued expr until
 		// the last has finished. Failure to do this results in crashes.
@@ -475,7 +475,16 @@ void GenericShell::eval_loop(void)
 			poll_output();
 		}
 
-		evalque.pop(in);
+		try
+		{
+			evalque.pop(in);
+		}
+		catch (const concurrent_queue<std::string>::Canceled& ex)
+		{
+			evalque.cancel_reset();
+			continue;
+		}
+
 		logger().debug("[GenericShell] finishing; eval of '%s'", in.c_str());
 		start_eval();
 		_evaluator->begin_eval();
