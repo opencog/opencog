@@ -45,6 +45,11 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --      GOhA
 --      vo'a rule see ../Lojban.hs
 
+-- Multi Sentences Parsing
+-- ki
+-- references
+
+
 -------------------------------------------------------------------------------
 --Sumti
 -------------------------------------------------------------------------------
@@ -316,7 +321,7 @@ tenseSumti = first reorder <$> (_PU <|> _VA <|> _VIhA) <&> sumtiC <* optSelmaho 
           g (s,Just n) = (cCN n noTv,s)
 
 tenseSumtiP :: SyntaxReader (State Sumti)
-tenseSumtiP = tenseSumti <|> ptp anytense addti tenseSumti
+tenseSumtiP = tenseSumti <|> ptp (anytense `withOut` selbriAll) addti tenseSumti
     where addti = Iso (Just . f) (Just . g)
           f s = s ++ "ti "
           g s = s --TODO: Maybe remoe ti again

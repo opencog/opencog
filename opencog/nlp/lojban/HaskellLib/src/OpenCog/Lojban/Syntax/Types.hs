@@ -56,6 +56,7 @@ instance Syntax f => Syntax (ReaderT a f) where
     token  = ReaderT (const token)
     withText r = ReaderT (withText . runReaderT r)
     ptp r1 iso r2 = ReaderT (\e -> ptp (runReaderT r1 e) iso (runReaderT r2 e))
+    withOut r1 r2 = ReaderT (\e -> withOut (runReaderT r1 e) (runReaderT r2 e))
 
 $(defineIsomorphisms ''Atom)
 
