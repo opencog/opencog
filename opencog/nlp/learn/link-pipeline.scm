@@ -129,6 +129,26 @@
 )
 
 ; ---------------------------------------------------------------------
+;
+; Stupid monitoring utility that can be used to monitor how processing
+; is going so far. It counts how many sentences have been processed so
+; far. If called with a null argument, it increments the count; else it
+; just prints the count.
+(define monitor-rate
+	(let ((mtx (make-mutex))
+			(cnt 0)
+			(start-time (- (current-time) 0.000001)))
+		(lambda (msg)
+			(if (null? msg)
+				(begin
+					(lock-mutex mtx)
+					(set! cnt (+ cnt 1))
+					(unlock-mutex mtx))
+				(format #t "~A cnt=~A rate=~A\n" msg cnt
+					(/ cnt (- (current-time) start-time))))
+		)))
+
+; ---------------------------------------------------------------------
 (define-public (observe-text plain-text)
 "
  observe-text -- update word and word-pair counts by observing raw text.
@@ -150,6 +170,7 @@
 
 	(relex-parse plain-text) ;; send plain-text to server
 	(process-sents)
+	(monitor-rate '())
 )
 
 ; ---------------------------------------------------------------------
