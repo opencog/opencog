@@ -134,7 +134,7 @@
 ; is going so far. It counts how many sentences have been processed so
 ; far. If called with a null argument, it increments the count; else it
 ; just prints the count.
-(define monitor-rate
+(define-public monitor-rate
 	(let ((mtx (make-mutex))
 			(cnt 0)
 			(start-time (- (current-time) 0.000001)))
