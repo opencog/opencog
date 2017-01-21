@@ -82,17 +82,21 @@
 ; update-link-counts -- Increment word and link counts
 ;
 ; This routine updates word counts and link counts in the database.
-; Word and link counts are needed to compute mutial information (mutual
+; Word and link counts are needed to compute mutual information (mutual
 ; entropy), which is required for maximum-entropy-style learning.  The
 ; algo implemented here is trite: fetch words and relations from SQL;
-; increment the attached CountTruthValue; save back to SQL.  Note:
-; we are not directly accessing the database; we're just letting the
-; atomspace handle that semi-automatically.
+; increment the attached CountTruthValue; save back to SQL.
 
 (define (update-link-counts sents)
 	(define (count-one-link link)
 		(define (incr-one atom)
-			(fetch-atom atom) ; get from SQL
+			; If the atom doesn't yet have a count TV attached to it,
+			; then its probably a freshly created atom. Go fetch it
+			; from SQL. Otherwise, assume that what we've got here,
+			; in the atomspace, is the current copy.  This works if
+			; there is only once cogserver updating the counts.
+			(if (not (cog-ctv? (cog-tv atom)))
+				(fetch-atom atom)) ; get from SQL
 			(cog-atom-incr atom 1) ; increment
 			(store-atom atom) ; save to SQL
 		)
