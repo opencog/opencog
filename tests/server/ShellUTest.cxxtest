@@ -25,6 +25,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <time.h>
 
 #include <opencog/util/Config.h>
 #include <opencog/cogserver/server/CogServer.h>
@@ -244,6 +245,46 @@ public:
 		if (rc != 0) printf("Error: fourth call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
+		logger().debug("END TEST: %s", __FUNCTION__);
+	}
+
+	void testControlC()
+	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+		time_t start = time(0);
+
+		// The hexadecimal \x16 is ctrl-C.
+		// The interrupt should kill the sleep immediately.
+		// Elapsed time should be well under a second.
+		int rc = system("echo '(sleep 42)\n\x16' | nc localhost 17333");
+		if (rc != 0) printf("Error: first call failed\n");
+		TS_ASSERT_EQUALS(rc, 0);
+
+		time_t end = time(0);
+		TS_ASSERT_LESS_THAN (end - start, 2);
+		printf("Elapsed: %ld\n", end-start);
+
+		start = time(0);
+		// The hexadecimal \x18 is ctrl-X aka "cancel"
+		rc = system("echo '(sleep 42)\n\x18' | nc localhost 17333");
+		if (rc != 0) printf("Error: first call failed\n");
+		TS_ASSERT_EQUALS(rc, 0);
+
+		end = time(0);
+		TS_ASSERT_LESS_THAN (end - start, 2);
+		printf("Elapsed: %ld\n", end-start);
+
+		start = time(0);
+		// The hexadecimal \x1b is ctrl-[ aka "escape"
+		rc = system("echo '(sleep 42)\n\x1b' | nc localhost 17333");
+		if (rc != 0) printf("Error: first call failed\n");
+		TS_ASSERT_EQUALS(rc, 0);
+
+		end = time(0);
+		TS_ASSERT_LESS_THAN (end - start, 2);
+		printf("Elapsed: %ld\n", end-start);
+
 		logger().debug("END TEST: %s", __FUNCTION__);
 	}
 
