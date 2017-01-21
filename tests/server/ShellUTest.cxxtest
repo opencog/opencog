@@ -229,9 +229,8 @@ public:
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
 
-		// Well, I cannot figure out how to echo ctrl-D so use
-		// a dot, instead. Should do the same thing.
-		rc = system("echo 'scm\n(+ 2 2)\n.\n' | nc localhost 17333");
+		// The hexadecimal \x4 is ctrl-D.
+		rc = system("echo 'scm\n(+ 2 2)\n\x4\n' | nc localhost 17333");
 		if (rc != 0) printf("Error: second call failed\n");
 		TS_ASSERT_EQUALS(rc, 0);
 		usleep(50000);
