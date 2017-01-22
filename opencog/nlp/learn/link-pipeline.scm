@@ -97,15 +97,20 @@
 			; there is only once cogserver updating the counts.
 			(if (not (cog-ctv? (cog-tv atom)))
 				(fetch-atom atom)) ; get from SQL
-			(cog-atom-incr atom 1) ; increment
+			(cog-inc-count! atom 1) ; increment
 			(store-atom atom) ; save to SQL
 		)
 		(let ((rel (make-lg-rel link)))
 			(begin
-				(incr-one rel) ; increment relation
-				(incr-one (gar rel))  ; increment link type
+				; Evalu -- rel
+				;   Pred -- gar
+				;   List -- gdr
+				;     Left  -- gadr
+				;     Right -- gddr
 				(incr-one (gadr rel)) ; increment left word
 				(incr-one (gddr rel)) ; increment right work.
+				(incr-one (gar rel))  ; increment link type
+				(incr-one rel) ; increment relation (the evaluation link)
 				; (store-atom rel) ; save to SQL
 			)
 		)
@@ -192,7 +197,7 @@
 ; 	(get-new-parsed-sentences)
 ; )
 ;
-; (map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
+; (map-lg-links (lambda (x) (cog-inc-count! (make-lg-rel x) 1))
 ; 	(get-new-parsed-sentences)
 ; )
 ;
