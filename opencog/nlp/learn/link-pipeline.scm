@@ -170,11 +170,11 @@
 				(begin
 					(update-link-counts (list sent))
 					(delete-sentence sent)
+					(monitor-rate '())
 					(process-sents)))))
 
 	(relex-parse plain-text) ;; send plain-text to server
 	(process-sents)
-	(monitor-rate '())
 )
 
 ; ---------------------------------------------------------------------
