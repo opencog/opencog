@@ -175,6 +175,7 @@
 
 	(relex-parse plain-text) ;; send plain-text to server
 	(process-sents)
+	(gc) ;; need agressive gc to keep RAM under control.
 )
 
 ; ---------------------------------------------------------------------
