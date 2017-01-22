@@ -98,7 +98,6 @@
 			(if (not (cog-ctv? (cog-tv atom)))
 				(fetch-atom atom)) ; get from SQL
 			(cog-inc-count! atom 1) ; increment
-			(store-atom atom) ; save to SQL
 		)
 		(let ((rel (make-lg-rel link)))
 			(begin
@@ -107,11 +106,11 @@
 				;   List -- gdr
 				;     Left  -- gadr
 				;     Right -- gddr
+				(incr-one rel) ; increment relation (the evaluation link)
+				(incr-one (gar rel))  ; increment link type
 				(incr-one (gadr rel)) ; increment left word
 				(incr-one (gddr rel)) ; increment right work.
-				(incr-one (gar rel))  ; increment link type
-				(incr-one rel) ; increment relation (the evaluation link)
-				; (store-atom rel) ; save to SQL
+				(store-atom rel) ; save (recursively) to SQL
 			)
 		)
 	)
