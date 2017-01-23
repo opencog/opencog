@@ -26,7 +26,7 @@ The code consists of:
   - All the chat-related actions available for the psi-rules
 
 - external-sources.scm
-  - Can be considered as another set of available actions for the psi-rules as well, which allows the chatbot to query [DuckDuckGo] (https://duckduckgo.com) by using its [API] (https://duckduckgo.com/api) and [WolframAlpha] (http://www.wolframalpha.com/)
+  - Can be considered as another set of available actions for the psi-rules as well, which allows the chatbot to query [DuckDuckGo] (https://duckduckgo.com) by using its [API] (https://duckduckgo.com/api), [WolframAlpha] (http://www.wolframalpha.com/) and [OpenWeatherMap] (http://openweathermap.org/)
 
 - utils.scm
   - Utilities that are useful in general

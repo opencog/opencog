@@ -226,7 +226,6 @@ int main(int argc, char *argv[])
 
     // Load modules specified in config
     cogserve.loadModules();
-    cogserve.loadSCMModules();
 
     // enable the network server and run the server's main loop
     cogserve.enableNetworkServer();

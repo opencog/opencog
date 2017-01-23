@@ -28,9 +28,9 @@
 #include <math.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
-#include <opencog/util/Logger.h>
 
 namespace opencog
 {
@@ -64,8 +64,8 @@ namespace opencog
  */
 class ForgettingAgent : public Agent
 {
-
 private:
+    AttentionBank* _bank;
 
 public:
 
@@ -100,14 +100,16 @@ typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
  */
 struct ForgettingLTIThenTVAscendingSort
 {
-    ForgettingLTIThenTVAscendingSort(AtomSpace* _a) {};
+    AttentionBank* _bank;
+    ForgettingLTIThenTVAscendingSort(AtomSpace* a) :
+        _bank(&attentionbank(a)) {};
 
     bool operator()(const Handle& h1, const Handle& h2)
     {
         AttentionValue::lti_t lti1, lti2;
 
-        lti1 = h1->getAttentionValue()->getLTI();
-        lti2 = h2->getAttentionValue()->getLTI();
+        lti1 = _bank->get_lti(h1);
+        lti2 = _bank->get_lti(h2);
         if (lti1 != lti2) return lti1 < lti2;
         else {
             double tv1, tv2;

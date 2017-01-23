@@ -43,6 +43,7 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 #ifdef HAVE_CYTHON
 #include <opencog/cython/PythonEval.h>
@@ -148,6 +149,8 @@ CogServer::CogServer(AtomSpace* as) :
     else
         atomSpace = as;
 
+    attentionbank(atomSpace);
+
 #ifdef HAVE_GUILE
     // Tell scheme which atomspace to use.
     SchemeEval::init_scheme();
@@ -167,10 +170,10 @@ CogServer::CogServer(AtomSpace* as) :
     agentsRunning = true;
 }
 
-void CogServer::enableNetworkServer()
+void CogServer::enableNetworkServer(int port)
 {
     if (_networkServer) return;
-    _networkServer = new NetworkServer(config().get_int("SERVER_PORT", 17001));
+    _networkServer = new NetworkServer(config().get_int("SERVER_PORT", port));
 }
 
 void CogServer::disableNetworkServer()
@@ -255,7 +258,7 @@ bool CogServer::customLoopRun(void)
 
 void CogServer::processRequests(void)
 {
-    std::unique_lock<std::mutex> lock(processRequestsMutex);
+    std::lock_guard<std::mutex> lock(processRequestsMutex);
     while (0 < getRequestQueueSize()) {
         Request* request = popRequest();
         request->execute();
@@ -646,104 +649,12 @@ void CogServer::loadModules(std::vector<std::string> module_paths)
     }
 }
 
-#ifdef HAVE_GUILE
-
-/**
- * Load scheme code from a file.
- * The code will be loaded into a running instance of the evaluator.
- * Parsing errors will be printed to stderr.
- *
- * Return errno if file cannot be opened.
- */
-int load_scm_file(AtomSpace* as, const std::string& filename)
-{
-    SchemeEval evaluator(as);
-
-    evaluator.begin_eval();
-
-    std::string load_exp("(load \"");
-    load_exp += filename + "\")";
-    evaluator.eval_expr(load_exp.c_str());
-
-    std::string rv = evaluator.poll_result();
-    if (evaluator.eval_error()) {
-        printf("Error: %s\n", rv.c_str());
-        return 1;
-    }
-
-    return 0;
-}
-
-/**
- * Load scheme file, with the filename specified as a relative path,
- * and the search paths prepended to the relative path.  If the search
- * paths are null, a list of defaults search paths are used.
- */
-int load_scm_file_relative(AtomSpace* as, const std::string& filename)
-{
-    std::vector<std::string> search_paths;
-    // Sometimes paths are given without the "opencog" part.
-    // Also check the build directory for autogen'ed files.
-    // XXX This is fairly tacky/broken, and needs a better fix.
-    for (auto p : DEFAULT_MODULE_PATHS) {
-        search_paths.push_back(p);
-        search_paths.push_back(p + "/opencog");
-        search_paths.push_back(p + "/build");
-        search_paths.push_back(p + "/build/opencog");
-    }
-
-    int rc = 2;
-    for (const std::string& search_path : search_paths) {
-        boost::filesystem::path modulePath(search_path);
-        modulePath /= filename;
-        logger().fine("Searching path %s", modulePath.string().c_str());
-        if (boost::filesystem::exists(modulePath)) {
-            rc = load_scm_file(as, modulePath.string());
-            if (0 == rc) {
-                logger().info("Loaded %s", modulePath.string().c_str());
-                break;
-            }
-        }
-    }
-
-    if (rc)
-    {
-       logger().warn("Failed to load file %s: %d %s",
-                     filename.c_str(), rc, strerror(rc));
-    }
-    return rc;
-}
-#endif /* HAVE_GUILE */
-
-void CogServer::loadSCMModules(std::vector<std::string> module_paths)
-{
-#ifdef HAVE_GUILE
-    if (module_paths.empty()) {
-        // Sometimes paths are given without the "opencog" part.
-        for (auto p : get_module_paths()) {
-            module_paths.push_back(p);
-            module_paths.push_back(p + "/opencog");
-        }
-    }
-
-    // Load scheme modules specified in the config file
-    std::vector<std::string> scm_modules;
-    tokenize(config().get("SCM_PRELOAD", ""), std::back_inserter(scm_modules), ", ");
-
-    for (const std::string& scm_module : scm_modules)
-        load_scm_file_relative(atomSpace, scm_module);
-
-#else /* HAVE_GUILE */
-    logger().warn("Server compiled without SCM support");
-#endif /* HAVE_GUILE */
-}
-
 void CogServer::openDatabase(void)
 {
 #ifdef HAVE_PERSIST_SQL
     // No-op if the user has not configured a storage backend
     if (!config().has("STORAGE")) {
-        logger().warn("No database persistant storage configured! "
+        logger().info("No database persistant storage configured! "
                       "Use the STORAGE config keyword to define.");
         return;
     }

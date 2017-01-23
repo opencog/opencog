@@ -34,10 +34,28 @@
 
 using namespace opencog;
 
+// _max_open_sockets is the largest number of concurrently open
+// sockets we will allow in the cogserver. Currently set to 60.
+// Note that each SchemeShell (actually, SchemeEval) will open
+// another half-dozen pipes and what-not, so actually, the number
+// of open files will increase by 4 or 6 or so for each network
+// connection. With the default `ulimit -a` of 1024 open files,
+// this should work OK (including open files for the logger, the
+// databases, etc.).
+unsigned int ConsoleSocket::_max_open_sockets = 60;
+volatile unsigned int ConsoleSocket::_num_open_sockets = 0;
+std::mutex ConsoleSocket::_max_mtx;
+std::condition_variable ConsoleSocket::_max_cv;
+
 ConsoleSocket::ConsoleSocket(void)
 {
     _use_count = 0;
     _shell = nullptr;
+
+    // Block here, if there are too many concurrently-open sockets.
+    std::unique_lock<std::mutex> lck(_max_mtx);
+    _num_open_sockets++;
+    while (_max_open_sockets < _num_open_sockets) _max_cv.wait(lck);
 }
 
 ConsoleSocket::~ConsoleSocket()
@@ -58,11 +76,17 @@ ConsoleSocket::~ConsoleSocket()
     // these requests have completed.  boost:asio notices that the
     // remote socket has closed, and so decides its a good day to call
     // destructors. But of course, its not ...
-    std::unique_lock<std::mutex> lck(_mtx);
-    while (_use_count) _cv.wait(lck);
+    std::unique_lock<std::mutex> lck(_in_use_mtx);
+    while (_use_count) _in_use_cv.wait(lck);
+    lck.unlock();
 
     // If there's a shell, kill it.
     if (_shell) delete _shell;
+
+    std::unique_lock<std::mutex> mxlck(_max_mtx);
+    _num_open_sockets--;
+    _max_cv.notify_all();
+    mxlck.unlock();
 
     logger().debug("[ConsoleSocket] destructor finished");
 }
@@ -130,13 +154,6 @@ void ConsoleSocket::sendPrompt()
 
 void ConsoleSocket::OnLine(const std::string& line)
 {
-    // Hmm. Looks like most telnet agents respond with an
-    // IAC WONT CHARSET IAC DONT CHARSET
-    // Any case, just ignore CHARSET RFC 2066 negotiation
-    if (IAC == (line[0] & 0xff) and CHARSET == (line[2] & 0xff)) {
-        return;
-    }
-
     // If a shell processor has been designated, then defer all
     // processing to the shell.  In particular, avoid as much overhead
     // as possible, since the shell needs to be able to handle a
@@ -147,27 +164,16 @@ void ConsoleSocket::OnLine(const std::string& line)
         return;
     }
 
-    logger().debug("[ConsoleSocket] OnLine [%s]", line.c_str());
-
-    // parse command line
-    std::list<std::string> params;
-    tokenize(line, std::back_inserter(params), " \t\v\f");
-    logger().debug("params.size(): %d", params.size());
-    if (params.empty()) {
-        // return on empty/blank line
-        sendPrompt();
+    // Hmm. Looks like most telnet agents respond with an
+    // IAC WONT CHARSET IAC DONT CHARSET
+    // Any case, just ignore CHARSET RFC 2066 negotiation
+    if (IAC == (line[0] & 0xff) and CHARSET == (line[2] & 0xff)) {
         return;
     }
-    std::string cmdName = params.front();
-    params.pop_front();
-
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    Request* request = cogserver.createRequest(cmdName);
 
     // If the command starts with an open-paren, or a semi-colon, assume
     // its a scheme command. Pop into the scheme shell, and try again.
-    if (nullptr == request and
-        (cmdName[0] == '(' or cmdName[0] == ';'))
+    if (line[0] == '(' or line[0] == ';')
     {
         OnLine("scm");
 
@@ -179,15 +185,33 @@ void ConsoleSocket::OnLine(const std::string& line)
         }
     }
 
+    logger().debug("[ConsoleSocket] OnLine [%s]", line.c_str());
+
+    // Parse command line
+    std::list<std::string> params;
+    tokenize(line, std::back_inserter(params), " \t\v\f");
+    logger().debug("params.size(): %d", params.size());
+    if (params.empty()) {
+        // return on empty/blank line
+        sendPrompt();
+        return;
+    }
+
+    std::string cmdName = params.front();
+    params.pop_front();
+
+    CogServer& cogserver = static_cast<CogServer&>(server());
+    Request* request = cogserver.createRequest(cmdName);
+
     // Command not found.
     if (nullptr == request)
     {
         char msg[256];
         snprintf(msg, 256, "command \"%s\" not found\n", cmdName.c_str());
-        logger().warn(msg);
+        logger().debug(msg);
         Send(msg);
 
-        // try to send "help" command response
+        // Try to send "help" command response
         request = cogserver.createRequest("help");
         if (nullptr == request)
         {
@@ -199,25 +223,23 @@ void ConsoleSocket::OnLine(const std::string& line)
 
     request->set_console(this);
     request->setParameters(params);
+    bool is_shell = request->isShell();
 
-    // We only add the command to the processing queue
-    // if it hasn't disabled the line protocol
+    // Add the command to the processing queue.
+    // Caution: after the pushRequest, the request might be executed
+    // and then deleted in a different thread. It must NOT be accessed
+    // after the push!
     cogserver.pushRequest(request);
 
-    if (request->isShell())
+    if (is_shell)
     {
-        logger().debug("[ConsoleSocket] OnLine request %s is a shell",
+        logger().debug("ConsoleSocket::OnLine() request %s is a shell",
                        line.c_str());
 
-        // Force a drain of this request, because we *must* enter
+        // Force a drain of the request queue, because we *must* enter
         // shell mode before handling any additional input from the
-        // socket (since the next input is almost surely intended for
-        // the new shell, not for the cogserver one).
-        //
-        // NOTE: Calling this method for non-shell requests may
-        // cause cogserver to crash due to concurrency issues, since
-        // this runs in a separate thread (for socket handler) instead
-        // of the main thread (where the server loop runs).
+        // socket (since all subsequent input will be for the new shell,
+        // not for the cogserver command processor).
         cogserver.processRequests();
     }
 }

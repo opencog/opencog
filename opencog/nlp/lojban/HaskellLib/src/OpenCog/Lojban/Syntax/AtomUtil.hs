@@ -37,8 +37,8 @@ _ctx = ((ctx . tolist2) ||| id) . ifJustA
 _ctxold :: Iso (Atom,(Atom,[Atom])) Atom
 _ctxold = ctx . tolist2 . second _eval
 
-_ssl :: Iso (Tagged Selbri,[Sumti]) Atom
-_ssl = ssl . tolist2 . addVarNode . _frames
+_ssl :: Iso Atom Atom
+_ssl = ssl . tolist2 . addVarNode
 
 addVarNode :: Iso Atom (Atom,Atom)
 addVarNode = Iso (\a -> Just (Node "VariableNode" "$var" noTv,a))
@@ -130,6 +130,34 @@ conLink = Iso (\(s,args) -> case s of
                         Link "VariableLink" args _ -> Just ("ji",args)
                         _ -> Nothing)
 
+conLinkGIhA :: Iso (String,[Atom]) Atom
+conLinkGIhA = Iso (\(s,args) -> case s of
+                             "gi'e"  -> apply andl args
+                             "gi'a"  -> apply orl args
+                             "gi'o"  -> apply iffl args
+                             "gi'u"  -> apply limpl args
+                             "gi'i"  -> apply varl args
+                             _    -> error $ "Can't handle conLink: " ++ show s)
+              (\a -> case a of
+                        Link "OrLink"
+                            [Link "AndLink" args _
+                            ,Link "AndLink"
+                                [Link "NotLink" _arg1 _
+                                ,Link "NotLink" _arg2 _
+                                ]_
+                            ] _ -> Just ("gi'o",args)
+                        Link "OrLink"
+                            [Link "AndLink" args _
+                            ,Link "AndLink"
+                                [arg1
+                                ,Link "NotLink" _arg2 _
+                                ]_
+                            ] _ -> Just ("gi'u",args)
+                        Link "AndLink" args _ -> Just ("gi'e",args)
+                        Link "OrLink" args _ -> Just ("gi'a",args)
+                        Link "VariableLink" args _ -> Just ("gi'i",args)
+                        _ -> Nothing)
+
 linkIso :: String -> TruthVal -> Iso [Atom] Atom
 linkIso n t = link . Iso (\l -> Just (n,(l,t)))
                          (\(an,(l,at)) -> if an == n
@@ -211,10 +239,18 @@ _frame :: Iso ((TruthVal,Atom),(Atom,Tag)) Atom
 _frame = _evalTv . (id *** (_framePred *** tolist2)) . reorder
     where reorder = Iso f g
           f ((tv,s),(a,t))      = Just (tv,((s,t),(s,a)))
-          g (tv,((s,t),(_,a)))  = Just ((tv,s),(a,t))
+          g (tv,((_,t),(s,a)))  = Just ((tv,s),(a,t))
 
 _framePred :: Iso (Atom,Tag) Atom
-_framePred = predicate . isoConcat "_sumti". tolist2 .< isoDrop 23 . (inverse predicate)
+_framePred = handleVar $ node . second (first (isoConcat "_sumti". tolist2 .< isoDrop 23)) . reorder .< (inverse node)
+    where reorder = Iso (Just . f) (Just . g) where
+                f ((t,(n,tv)),tag) = (t,((n,tag),tv))
+                g (t,((n,tag),tv)) = ((t,(n,tv)),tag)
+          handleVar iso = Iso f g where
+              f (n,"?") = Just $ cVN (nodeName n)
+              f a = apply iso a
+              g (VN name) = Just (cPN name noTv,"$var")
+              g a = unapply iso a
 
 randName :: Int -> String -> String
 randName = take 20 . map chr . randomRs (33,126) . mkStdGen ... hashWithSalt

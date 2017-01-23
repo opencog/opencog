@@ -28,6 +28,9 @@ find_library(ATOMSPACE_atomspaceutils_LIBRARY atomspaceutils
 find_library(ATOMSPACE_atomutils_LIBRARY atomutils
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
+find_library(ATOMSPACE_attentionbank_LIBRARY attentionbank
+   PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
+
 find_library(ATOMSPACE_clearbox_LIBRARY clearbox
    PATH ${ATOMSPACE_LIBPATH} PATH_SUFFIXES opencog)
 
@@ -67,6 +70,7 @@ find_library(ATOMSPACE_zmqatoms_LIBRARY zmqatoms
 set(ATOMSPACE_LIBRARIES
 	${ATOMSPACE_atombase_LIBRARY}
 	${ATOMSPACE_atomcore_LIBRARY}
+	${ATOMSPACE_attentionbank_LIBRARY}
 	${ATOMSPACE_LIBRARY}
 	${ATOMSPACE_atomspaceutils_LIBRARY}
 	${ATOMSPACE_truthvalue_LIBRARY}

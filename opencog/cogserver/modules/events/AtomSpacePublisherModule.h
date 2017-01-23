@@ -32,6 +32,7 @@
 #include <tbb/task.h>
 #include <tbb/concurrent_queue.h>
 
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/util/tbb.h>
 
 #include <opencog/cogserver/server/Agent.h>
@@ -72,7 +73,7 @@ class CogServer;
  *   - TBB scheduler schedules the tasks across available processor cores
  *   - Tasks serialize the atomspace event into a standard JSON message format
  *   - Serialized output is forwarded to a TBB concurrent queue
- *   - Proxy accesses the concurrent queue using a blocking pop operation to 
+ *   - Proxy accesses the concurrent queue using a blocking pop operation to
  *     demultiplex messages and forward them to the ZeroMQ publisher socket
  **/
 class AtomSpacePublisherModule;
@@ -90,6 +91,7 @@ class AtomSpacePublisherModule : public Module
 {
     private:
         AtomSpace* as;
+        AttentionBank* _attention_bank;
         boost::signals2::connection removeAtomConnection;
         boost::signals2::connection addAtomConnection;
         boost::signals2::connection TVChangedConnection;
@@ -101,7 +103,7 @@ class AtomSpacePublisherModule : public Module
 
         // TBB
         tbb::concurrent_bounded_queue<message_t> queue;
-        
+
         // ZeroMQ
         zmq::context_t * context;
         void InitZeroMQ();

@@ -94,7 +94,7 @@ public:
         Request* pythonEvalRequest = cogserver.createRequest("py-eval");
         TS_ASSERT_DIFFERS(pythonEvalRequest, (Request*) NULL);
         pythonEvalRequest->addParameter("print 'Hello'");
-        StringRequestResult *pythonEvalRequestResult = new StringRequestResult();
+        // StringRequestResult *pythonEvalRequestResult = new StringRequestResult();
 
         // Add request to queue.
         cogserver.pushRequest(pythonEvalRequest);

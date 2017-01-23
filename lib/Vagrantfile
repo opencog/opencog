@@ -29,7 +29,6 @@ Vagrant.configure("2") do |config|
   # 64-bit machine caused a fatal issue: http://stackoverflow.com/a/22575302/1695962
   config.vm.box = "ubuntu/trusty32"
   config.vm.hostname = "cogbox"
-  config.vm.provision "shell", inline: "ln -v -s /vagrant /home/vagrant/opencog"
   config.vm.provision "shell", inline: "wget https://raw.githubusercontent.com/opencog/ocpkg/master/ocpkg -O /tmp/octool  && chmod +rx /tmp/octool"
   config.vm.provision "shell", inline: "/tmp/octool -rdpscalv"
 
@@ -42,6 +41,9 @@ Vagrant.configure("2") do |config|
 
   # Configure port for telnet access to shell
   config.vm.network "forwarded_port", guest: 17001, host: 17001
+
+  # Sync project root directory.
+  config.vm.synced_folder "../", "/home/vagrant/opencog"
 
   # Enable X-Forwarding
   config.ssh.forward_x11 = true

@@ -140,7 +140,6 @@ std::string CogServerSCM::start_server(AtomSpace* as,
 
     // Load modules specified in config
     srvr->loadModules();
-    srvr->loadSCMModules();
 
     // Enable the network server and run the server's main loop
     srvr->enableNetworkServer();

@@ -20,5 +20,7 @@ IF (HAVE_NOSETESTS)
 ENDIF (HAVE_NOSETESTS)
 
 IF (HAVE_STACK)
-    ADD_SUBDIRECTORY(lojban)
+	# Lojban is currently failing to build; see for example
+	# http://61.92.69.39:8080/job/ci-opencog-master/518/console
+	# ADD_SUBDIRECTORY(lojban)
 ENDIF (HAVE_STACK)

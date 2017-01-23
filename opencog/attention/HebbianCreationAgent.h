@@ -28,6 +28,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/cogserver/server/Agent.h>
+#include <opencog/attentionbank/AttentionBank.h>
+
+#include "AttentionParamQuery.h"
 
 namespace opencog
 {
@@ -54,11 +57,14 @@ extern concurrent_queue<Handle> newAtomsInAV;
  */
 class HebbianCreationAgent : public Agent
 {
+private:
+    AttentionParamQuery _atq;
 
 protected:
+    AttentionBank* _bank;
 
-    void addHebbian(Handle atom,Handle source);
-    double targetConjunction(Handle handle1,Handle handle2);
+    void addHebbian(Handle atom, Handle source);
+    double targetConjunction(Handle handle1, Handle handle2);
 
     unsigned int maxLinkNum;
 

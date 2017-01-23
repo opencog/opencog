@@ -317,6 +317,38 @@
 (psi-set-controlled-rule
     (psi-rule
         (list (SequentialAnd
+            (DefinedPredicate "is-openweathermap-ready?")
+            (DefinedPredicate "openweathermap-not-started?")
+            (DefinedPredicate "is-input-utterance?")
+            (DefinedPredicate "is-weather-related?")
+            (DefinedPredicate "input-type-is-interrogative?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: ask-weather") (List)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "openweathermap"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
+            (DefinedPredicate "openweathermap-finished?")
+            (DefinedPredicate "is-openweathermap-answer?")
+            (DefinedPredicate "has-not-replied-anything-yet?")
+        ))
+        (True (ExecutionOutput (GroundedSchema "scm: reply") (List openweathermap-answer)))
+        (True)
+        (stv .9 .9)
+        sociality
+        "openweathermap"
+    )
+)
+
+(psi-set-controlled-rule
+    (psi-rule
+        (list (SequentialAnd
             (DefinedPredicate "is-random-pkd-sentence-generator-ready?")
             (DefinedPredicate "random-pkd-sentence-generator-not-started?")
             (DefinedPredicate "is-input-utterance?")
@@ -473,4 +505,18 @@
         sociality
         "emotion-state"
     )
+)
+
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "input-type-is-interrogative?")
+        (DefinedPredicate "is-asking-about-how-many-visible-faces")
+        (DefinedPredicate "has-not-replied-anything-yet?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: count-and-reply")
+        (List (DefinedSchema "Num visible faces"))))
+    (True)
+    (stv .9 .9)
+    sociality
 )

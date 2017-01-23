@@ -28,6 +28,7 @@ TARGET_LINK_LIBRARIES(attention-types
 
 # AttentionModule
 ADD_LIBRARY(attention SHARED
+	AttentionParamQuery
 	AttentionModule
 	ImportanceDiffusionBase
 	AFImportanceDiffusionAgent
@@ -37,7 +38,6 @@ ADD_LIBRARY(attention SHARED
 	WARentCollectionAgent
 
 	ForgettingAgent
-	MinMaxSTIUpdatingAgent
 	FocusBoundaryUpdatingAgent
 	HebbianCreationAgent
 	HebbianUpdatingAgent
@@ -55,7 +55,12 @@ INSTALL (TARGETS attention
 
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/attention_types.scm
+	${CMAKE_CURRENT_SOURCE_DIR}/default-param-values.scm
 	DESTINATION "${DATADIR}/scm/attention"
+)
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/default-param-values.scm
+	${CMAKE_CURRENT_BINARY_DIR}/default-param-values.scm
 )
 
 INSTALL (FILES

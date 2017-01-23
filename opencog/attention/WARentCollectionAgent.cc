@@ -29,8 +29,10 @@
 #include <opencog/attention/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 #include "WARentCollectionAgent.h"
+#include "AttentionParamQuery.h"
 
 //#define DEBUG
 
@@ -38,13 +40,13 @@ using namespace opencog;
 
 WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
 {
-    _tournamentSize = config().get_int("ECAN_RENT_TOURNAMENT_SIZE", 5);
-
     // READ SLEEPING TIME HERE
     set_sleep_time(2000);
 }
 
 Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
+    _tournamentSize = std::stoi(_atq.get_param_value(AttentionParamQuery::rent_tournament_size));
+
     int sz = (_tournamentSize >  population.size() ? population.size() : _tournamentSize);
 
     if (sz <= 0)
@@ -60,10 +62,10 @@ Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
         tournament[i] = population[idx];
     }
 
-    auto result = std::max_element(tournament, tournament + (sz - 1), []
-                              (const Handle& h1, const Handle & h2)
+    auto result = std::max_element(tournament, tournament + (sz - 1),
+         [&](const Handle& h1, const Handle & h2) -> bool
     {
-        return (h1->getSTI() > h2->getSTI());
+        return _bank->get_sti(h1) > _bank->get_sti(h2);
     });
 
     return *result;
@@ -72,16 +74,16 @@ Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
 
 void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
-    AttentionValue::sti_t AFBoundarySTI = _as->get_attentional_focus_boundary();
+    AttentionValue::sti_t AFBoundarySTI = attentionbank(_as).getAttentionalFocusBoundary();
     AttentionValue::sti_t lowerSTI  = AFBoundarySTI - 15;
-    
+
     std::default_random_engine generator;
-    // randomly select a bin 
+    // randomly select a bin
     std::uniform_int_distribution<AttentionValue::sti_t> dist(lowerSTI,AFBoundarySTI);
     auto sti = dist(generator);
 
     HandleSeq candidates;
-    _as->get_handles_by_AV(std::back_inserter(candidates),sti,sti+5);
+    attentionbank(_as).get_handles_by_AV(std::back_inserter(candidates),sti,sti+5);
     if(candidates.size() > 100) candidates.resize(100); //Resize to 100 elements.
 
     if (candidates.size() == 0) return;
@@ -92,9 +94,9 @@ void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 
 void WARentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
-    for (Handle& h : targetSet) {
-        int sti = h->getAttentionValue()->getSTI();
-        int lti = h->getAttentionValue()->getLTI();
+    for (const Handle& h : targetSet) {
+        int sti = _bank->get_sti(h);
+        int lti = _bank->get_lti(h);
         int stiRent = calculate_STI_Rent();
         int ltiRent = calculate_LTI_Rent();
 
@@ -104,7 +106,7 @@ void WARentCollectionAgent::collectRent(HandleSeq& targetSet)
         if (ltiRent > lti)
             ltiRent = lti;
 
-        h->setSTI(sti - stiRent);
-        h->setLTI(lti - ltiRent);
+        _bank->set_sti(h, sti - stiRent);
+        _bank->set_lti(h, lti - ltiRent);
     }
 }

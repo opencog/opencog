@@ -27,7 +27,6 @@
 #define AFIMPORTANCEDIFFUSIONAGENT_H
 
 #include "ImportanceDiffusionBase.h"
-#include "DiffusionStat.h"
 
 namespace opencog
 {
@@ -58,11 +57,8 @@ class AFImportanceDiffusionAgent : public ImportanceDiffusionBase
 private:
     HandleSeq diffusionSourceVector();
 
-    std::chrono::time_point<hr_clock> last_spreading_time;
-    bool first_time = true;
-
     void spreadImportance();
-    void diffuseAtom(Handle source);
+    AttentionValue::sti_t calculateDiffusionAmount(Handle);
 
 public:
      AFImportanceDiffusionAgent(CogServer&);

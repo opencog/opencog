@@ -34,6 +34,7 @@
 #include <opencog/attention/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include "FocusBoundaryUpdatingAgent.h"
 
 //#define DEBUG
@@ -42,27 +43,28 @@ using namespace opencog;
 using namespace std::chrono;
 
 FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
-        Agent(cs)
+    Agent(cs), _atq(&cs.getAtomSpace())
 {
     // Provide a logger
     setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE, true));
 
-    afbSize         = config().get_double("ECAN_AFB_SIZE", 0.2);
-    decay           = config().get_double("ECAN_AFB_DECAY", 0.05);
-    bottomBoundary  = config().get_int("ECAN_AFB_BOTTOM", 50);
-    minAFSize = config().get_int("MIN_AF_SIZE", 100);
-    maxAFSize = config().get_int("MAX_AF_SIZE", 500);
-
-   _as->set_attentional_focus_boundary(bottomBoundary);
+    _bank = &attentionbank(_as);
+    _bank->setAttentionalFocusBoundary(bottomBoundary);
 }
 
 void FocusBoundaryUpdatingAgent::run()
 {
-        AttentionValue::sti_t afboundary = _as->get_attentional_focus_boundary();
+        afbSize = std::stod(_atq.get_param_value(AttentionParamQuery::af_size));
+        decay = std::stod(_atq.get_param_value(AttentionParamQuery::af_decay));
+        bottomBoundary = std::stoi(_atq.get_param_value(AttentionParamQuery::af_bottom));
+        minAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_min_size));
+        maxAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_max_size));
+
+        AttentionValue::sti_t afboundary = _bank->getAttentionalFocusBoundary();
 
        /*
-        AttentionValue::sti_t maxsti = _as->get_max_STI();
-        AttentionValue::sti_t minsti = _as->get_min_STI();
+        AttentionValue::sti_t maxsti = _bank->get_max_STI();
+        AttentionValue::sti_t minsti = _bank->get_min_STI();
 
         AttentionValue::sti_t range = maxsti - minsti;
 
@@ -71,21 +73,20 @@ void FocusBoundaryUpdatingAgent::run()
 
         afboundary = newafb * decay + (1.0 - decay) * afboundary;
 
-        afboundary = std::max(afboundary,bottomBoundary);
+        afboundary = std::max(afboundary, bottomBoundary);
 
         //printf("NewAfb: %d OldAfb: %d Afb: %d \n",newafb,oldafb,afboundary);
         */
        
         HandleSeq afset;
-        _as->get_handle_set_in_attentional_focus(std::back_inserter(afset));
+        _bank->get_handle_set_in_attentional_focus(std::back_inserter(afset));
         
-        if(afset.size() > minAFSize ){
+        if(afset.size() > minAFSize ) {
             afboundary = get_cutoff(afset);
         }
 
         // Set the AF boundary
-        _as->set_attentional_focus_boundary(afboundary);
-       
+        _bank->setAttentionalFocusBoundary(afboundary);
 }
 
 /**
@@ -99,9 +100,12 @@ void FocusBoundaryUpdatingAgent::run()
  */
 AttentionValue::sti_t FocusBoundaryUpdatingAgent::get_cutoff(HandleSeq& afset)
 {
-    auto getSTI = [](const Handle& h) { return h->getAttentionValue()->getSTI();};
-    std::sort(afset.begin(), afset.end(),[&](const Handle& h1, const Handle& h2){
-            return getSTI(h1) > getSTI(h2);
+    auto getSTI = [&](const Handle& h)->AttentionValue::sti_t {
+        return _bank->get_sti(h);
+    };
+    std::sort(afset.begin(), afset.end(),
+            [&](const Handle& h1, const Handle& h2)->bool {
+                return getSTI(h1) > getSTI(h2);
             });
     HandleSeq afAtoms = HandleSeq(afset.begin() + minAFSize, afset.begin() + maxAFSize);
 

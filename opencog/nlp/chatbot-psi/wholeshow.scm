@@ -51,6 +51,8 @@
             (lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.9))
             other)
     )
+    (psi-rule-disable "aiml" controlled-rules)
+    (psi-rule-disable "random_sentence_blogs" controlled-rules)
     (psi-rule-disable "saliency-tracking" controlled-rules)
 )
 

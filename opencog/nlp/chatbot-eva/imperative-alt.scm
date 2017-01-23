@@ -3,7 +3,7 @@
 ;
 ; Sketch of an alternate imperative-processing architecture.
 ; The stuff here does not work.  However, it is meant to be
-; a generalization or softening of the processing done in 
+; a generalization or softening of the processing done in
 ; "imperative.scm".  It is meant to be more robust, more
 ; scalable, more human-like. Its incomplete, due to some
 ; design difficulties.
@@ -57,7 +57,7 @@
 ;--------------------------------------------------------------------
 (use-modules (opencog) (opencog nlp) (opencog query) (opencog exec))
 (use-modules (opencog nlp fuzzy))
-(load "../relex2logic/rule-utils.scm")
+(use-modules (opencog nlp relex2logic))
 
 ; Must load the rulebase before running eva; see bug
 ; https://github.com/opencog/opencog/issues/2021 for details

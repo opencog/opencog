@@ -1,0 +1,1924 @@
+
+31 Dec 2016
+-----------
+
+psql en_pairs
+\dt
+
+select count(*) from atoms;
+ 18487291
+
+loadmodule libPersistModule.so
+
+sql-open learn-pairs linas asdf
+sql-open en-pairs linas asdf
+
+password authentication failed for user "linas"
+
+sql-open opencog_test opencog_tester cheese
+
+/etc/postgresql/9.6/main/pg_hba.conf looks OK...
+
+So: I have en_pairs and 
+ opencog_test | linas    | UTF8     | en_US.UTF-8 | en_US.UTF-8 | 
+but the owner of the tables is opencog_tester
+
+/var/log/postgresql/postgresql-9.6-main.log
+
+2017-01-03 16:15:50 CST [2856-1] linas@en_pairs FATAL:  password authentication
+failed for user "linas"
+2017-01-03 16:15:50 CST [2856-2] linas@en_pairs DETAIL:  User "linas" has no password
+assigned.
+
+
+2017-01-01 17:20:54 CST [4829-1] opencog_tester@opencog_test ERROR:  insert or update
+on table "atoms" violates foreign key constraint "atoms_space_fkey"
+2017-01-01 17:20:54 CST [4829-2] opencog_tester@opencog_test DETAIL:  Key (space)=(2)
+is not present in table "spaces".
+
+(use-modules (opencog persist-sql))
+(sql-open "en-pairs" "learner" "asdf")
+
+\du
+alter user learner password 'asdf';
+grant CONNECT ON DATABASE en_pairs to learner;
+grant SELECT,INSERT,UPDATE on table atoms to learner;
+
+sql-open en-pairs learner asdf
+
+it worked!
+(sql-load)
+
+18 million atoms
+
+Loaded 9045489 atoms at height 2
+Finished loading 18487291 atoms in total
+12:35 to load .. !? 18487291 atoms/755 secs = 24.5K atoms/sec
+
+psql -h localhost -U ubuntu lt_pairs 
+
+ALTER USER ubuntu PASSWORD 'asdf';
+
+========================================================
+-----------------------------------------
+lxc -- create an all-updated opencog-base
+
+lxc-start -n opencog-base --daemon
+
+time lxc-copy -n  opencog-learn -N learn-lt
+
+------------------------------------
+4 Jan 2016
+----------
+https://dumps.wikimedia.org/zhwiki/20170101/
+https://dumps.wikimedia.org/zh_yuewiki/20170101/
+https://dumps.wikimedia.org/frwiki/20170101/
+
+lynx https://dumps.wikimedia.org/ltwiki/20170101/ltwiki-20170101-pages-articles-multistream.xml.bz2
+
+time cat ltwiki-20170101-pages-articles-multistream.xml.bz2 |bunzip2 |/home/ubuntu/src/relex/src/perl/wiki-scrub.pl
+real	4m58.871s
+user	5m35.652s
+sys	0m11.700s
+
+find |wc gives 209011 total articles
+find |wc gives 178514 after cat/template removal
+
+createdb lt_pairs
+createdb lt_morph
+cat opencog/persist/sql/odbc/atom.sql | psql lt_pairs
+cat opencog/persist/sql/odbc/atom.sql | psql lt_morph
+
+=============================================================
+
+time cat zh_yuewiki-20170101-pages-articles.xml.bz2 |bunzip2 |/home/ubuntu/src/relex/src/perl/wiki-scrub.pl
+
+about 48 seconds
+find |wc gives 67363 total articles
+find |wc gives 49170 after cat/template removal
+
+apt-get install fonts-arphic-ukai fonts-arphic-uming fonts-babelstone-han
+fonts-wqy-zenhei fonts-hanazono
+
+fonts-arphic-bkai00mp
+fonts-arphic-bsmi00lp
+fonts-arphic-gbsn00lp
+fonts-arphic-gkai00mp
+
+Arghh. None of the above provide the Kangxi radicals for the terminal.
+Which I think are coming from fonts-wqy-microhei
+
+U+2F13  Kangxi Radicals,
+
+U+42AA  U+4401   CJK_Ext_A  CJK-Ext.A
+
+createdb yue_pairs
+
+cd ~/src/atomspace
+cat opencog/persist/sql/odbc/atom.sql | psql yue_pairs
+
+。。
+
+\p{Block: CJK}   
+\p{Block=CJK_Symbols_And_Punctuation} 
+\p{Punct}
+\p{InCJK}) 
+\p{Close_Punctuation}   aka \p{Pe}   (close parent)
+ \p{Final_Punctuation}   aka \p{Pf})  more quote-close or open.. things
+\p{Ps} open quote
+
+
+full stop
+
+relex-server-port relex-server-host
+
+
+; -- count-all -- Return the total number of atoms in the atomspace.
+; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
+; -- cog-prt-atomspace -- Prints all atoms in the atomspace
+; -- cog-count-atoms -- Count of the number of atoms of given type.
+; -- cog-report-counts -- Return an association list of counts.
+
+
+wtf 
+(define (foo atom) (display "duude\n")(display atom) (newline) #f) 
+
+WARNING: No known abbreviations for language 'yue', attempting fall-back
+to English version..    FIXED
+
+odbc is still logging! FIXED
+CommLog           = No in /etc/odbcinst.ini
+
+don't use "foo", it prints a warning .. better yet, don't warn! FIXED
+
+
+below is due to bug opencog/relex#248 and is now fixed.
+It  needed a new link-grammar version
+link-grammar: Error: EMPTY-WORD.zzz must be defined!
+
+link-grammar: Error: Word 'EMPTY-WORDzzz': Internal error: NULL X_node
+
+link-grammar: Error: sentence_split(): Internal error detected
+Warning: No parses found for:
+港 區 全 國 人 大 代 表 係 代 表 香 港 居 民 響 中 華 人 民 共 和 國 全 國 人 民 代 表 大 會 行 使 國 家 立 法 權 嘅 代 表 ， 名 額 36 人 （1997 年 香 港 主 權 移 交 之 後 ）。
+
+
+link-grammar: Error: EMPTY-WORD.zzz must be defined!
+
+link-grammar: Error: Word 'EMPTY-WORDzzz': Internal error: NULL X_node
+
+link-grammar: Error: sentence_split(): Internal error detected
+Warning: No parses found for:
+深 圳 習 慣 叫 特 區 範 圍 做 「 關 內 」， 而 特 區 範 圍 之 外 嘅 ，
+包 括 寶 安 區 、 龍 崗 區 同 光 明 新 區 、 坪 山 新 區 就 叫 「 關 外
+」； 由 「 關 外 」 入 特 區 叫 「 入 關 」， 反 之 係 「 出 關 」。
+
+<title>永利街</title>  contains junk yest it does...
+
+
+Started 5 Jan 2017 16:00 exactly.
+ten minutes later: 5048 atoms -- so 500 atoms per minute...
+after some halts and hiccups:
+2211 articles after 1 hour = 37 articles/minute
+18529 atoms after about 1 hour ...
+or about 8.4 atoms per article... 
+
+There are only about 48K articles, so it should conclude in 24 hours
+...!?
+
+hours later... 219127 atoms 6345 articles done ...
+Now its about 34.5 atoms per article.. whoa ... 
+
+java claims to have parsed 12424 sentences
+11459 articles processed.
+457009 atoms
+
+
+29291 articles processed 19919 remaining
+668042 atoms ...
+
+
+; -- cog-report-counts -- Return an association list of counts.
+
+(count-all)
+(cog-report-counts)
+(gc-stats)
+
+... ram usage slowly increasing...
+
+ (gc-stats)
+((gc-time-taken . 315428672862) (heap-size . 3479842816) (heap-free-size
+. 1406132224) (heap-total-allocated . 132540491040)
+(heap-allocated-since-gc . 906048240) (protected-objects . 500)
+(gc-times . 414))
+
+(gc-stats)
+((gc-time-taken . 327615529234) (heap-size . 3582787584) (heap-free-size
+. 1584795648) (heap-total-allocated . 138942040624)
+(heap-allocated-since-gc . 1123554048) (protected-objects . 500)
+(gc-times . 422))
+
+((gc-time-taken . 491224665617) (heap-size . 4601581568) (heap-free-size
+. 2257489920) (heap-total-allocated . 211782122608)
+(heap-allocated-since-gc . 399939472) (protected-objects . 500)
+(gc-times . 485))
+
+
+if (number-of-cells-collected-recently < GUILE_MIN_YIELD_X)
+  then
+    allocate-new-heap
+  else
+    run-a-collection
+
+`scm_i_gc_grow_heap_p ()' and `scm_gc_for_newcell ()'.)
+
+
+(WordSequenceLink lots of these ... 
+
+
+ gcprof procedure in the statprof library
+https://www.gnu.org/software/guile/manual/html_node/Statprof.html
+
+guile-yue> (statprof-display)
+%     cumulative   self             self     total             
+time   seconds    seconds  calls    ms/call  ms/call       name
+ 49.18  11506.88  11506.88   13516   851.35   851.35  inc
+  4.92  23397.33   1150.69      27 42618.08 866567.64  catch
+  4.92  12657.57   1150.69     215  5352.04 58872.42  cog-map-type
+  3.28    767.13    767.13    1420   540.23   540.23  char=?
+  3.28    767.13    767.13     619  1239.30  1239.30  write-char
+  3.28    767.13    767.13     372  2062.17  2062.17  memq
+  3.28    767.13    767.13     182  4214.97  4214.97  call-with-output-string
+  1.64   2684.94    383.56     182  2107.49 14752.41  tilde-dispatch
+  1.64    383.56    383.56      29 13226.30 13226.30  close-port
+  1.64    383.56    383.56     240  1598.18  1598.18  assv-ref
+...
+  0.00  12657.57      0.00     215     0.00 58872.42  cog-count-atoms
+
+above over about 24K seconds total, so accurate... ish
+
+(use-modules (statprof))
+(statprof-reset 0 50000 #t) ;
+(statprof-start)
+(do-something)
+(statprof-stop)
+(statprof-display)
+(gcprof (λ () (observe-text "1769 年 ： 伊 萬 克 雷 洛 夫 ， 俄 國 寓 言 作 家 1910 年 ： 威 廉  肖 克 利 （William Shockley）， 美 國 物 理 學 家 ， 有 份 發 明 半 導 體 ，1956 年 諾 貝 爾 物 理 獎 得 主 1915 年 ： 昂 山 ， 緬 甸 國 父 1921 年 ： 趙 無 極 ， 法 國 華 裔 畫 家 1974 年 ：Robbie Williams， 英 國 歌 手 1974 年 ： 馬 國 明 ， 香 港 無 綫 電 視 演 員 1981 年 ： 何 紫 綸 ， 香 港 模 特 兒 1990 年 ： 西 藏 第 十 一 世 班 禪 額 爾 德 尼 金 瑞 瑤 ， 台 灣 音 樂 經 理 人 1993 年 ： 宋 希 濂 ， 抗 日 戰 爭 同 國 共 內 戰 時 期 中 國 國 民 黨 將 軍 2006 年 ： 王 選 ， 中 國 計 算 機 學 者 ， 發 明 漢 字 激 光 照 排 技 術")))
+
+Maybe use it in "observe-text"? ...
+
+total time is correct...
+... its a thread thing. staprof with threads is borked.
+See comments in ./module/statprof.scm ~ Implementation notes ~
+
+
+compute-mi.scm:		(for-each inc atom-list)
+compute-mi.scm:		(define (inc atom) (set! cnt (+ cnt (tv-count
+(cog-tv atom)))))
+
+Maybe lots and lots of threads ... ? Seems to get very backed-up.
+No .. only 14 threads
+
+(hash-map->list cons (module-obarray (current-module)))
+
+(module-map (λ (sym var) sym) (resolve-interface '(guile)))
+(module-map (λ (sym var) sym) (resolve-interface '(opencog)))
+(module-map (λ (sym var) sym) (resolve-interface '(opencog learn)))
+
+who is using a module?
+(module-uses (resolve-module '(guile-user)))
+
+>>>> excellent for modules!
+http://git.net/ml/guile-user-gnu/2016-06/msg00040.html
+
+101000   26627  256 11.9 15129736 11795708 pts/6 Sl+ 18:41 516:33 guile
+-l pair-count-yue.scm
+
+
+not being split: FIXED.
+fix is
+$text =~ s/([\.?!]) *(\p{InCJK})/$1\n$2/g;
+
+呢度啲路順序係從南去到北嚟排列嘅，其中加粗咗嘅字係主幹道：美華北路.新河浦二橫路.新河浦五橫路.新慶路.煙墩路、寺右新馬路.寺貝通津.共和大街.松崗東.共和西路.中山一路.
+
+2012年，《向前走向愛走》.第四十五屆金鐘獎個人獎戲劇節目女主角獎.郭采潔官方網站.
+
+
+No database persistant storage configured! Use the STORAGE config
+keyword to define.
+
+Java gets slower and slower
+
+-------------------------
+
+(use-modules (opencog) (opencog cogserver))
+(start-cogserver "cogserver.conf")
+
+(define (inc atom) (cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (tv-count (cog-tv atom))))))
+
+(define foo (Concept "foo"))
+(define (loo) (inc foo) (loo))
+
+Hmmm
+(gc-stats)
+((gc-time-taken . 9229154858) (heap-size . 14364672) (heap-free-size . 987136)
+(heap-total-allocated . 965473792) (heap-allocated-since-gc . 4150752)
+(protected-objects . 7) (gc-times . 382))
+
+(ConceptNode "foo" (ctv 0 0 1297544))
+
+---------
+
+(gc-stats)
+((gc-time-taken . 36662444393) (heap-size . 27287552) (heap-free-size . 2043904)
+(heap-total-allocated . 6769590208) (heap-allocated-since-gc . 12259216)
+(protected-objects . 7) (gc-times . 1011))
+
+(ConceptNode "foo" (ctv 0 0 25027699))
+
+---------
+
+gc-stats)
+((gc-time-taken . 61656366381) (heap-size . 53968896) (heap-free-size . 18456576)
+(heap-total-allocated . 13686988416) (heap-allocated-since-gc . 5711392)
+(protected-objects . 7) (gc-times . 1240))
+
+(ConceptNode "foo" (ctv 0 0 38117275))
+
+-------
+Hmm looks like we are leaking tv's ... oh wait.. does it stop?
+
+(gc-stats)
+((gc-time-taken . 105993964481) (heap-size . 72843264) (heap-free-size . 29458432)
+(heap-total-allocated . 27893224720) (heap-allocated-since-gc . 9728)
+(protected-objects . 7) (gc-times . 1591))
+guile-yue> foo
+(ConceptNode "foo" (ctv 0 0 79863947))
+
+Nope ... just a temporary pause, while the free size is whittled down.
+
+(gc-stats)
+((gc-time-taken . 114596558158) (heap-size . 89620480) (heap-free-size . 33521664)
+(heap-total-allocated . 30637347648) (heap-allocated-since-gc . 7308304)
+(protected-objects . 7) (gc-times . 1654))
+guile-yue> foo
+(ConceptNode "foo" (ctv 0 0 87085578))
+
+But I don't get it .. just one byte per tv ???
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND     
+ 2603 linas     20   0  981064 160664  30904 R 123.1  0.2  17:28.70 guile       
+ 2603 linas     20   0  998888 178524  30904 R 123.7  0.2  25:52.19 guile       
+ 2603 linas     20   0  998888 178580  30904 R 128.7  0.2  40:07.75 guile       
+ 2603 linas     20   0 1038496 217948  30904 R 131.9  0.2  46:48.42 guile       
+ 2603 linas     20   0 1040744 220368  30904 R 125.2  0.2  51:08.05 guile       
+ 2603 linas     20   0 1040876 220276  30904 R 120.1  0.2  83:44.38 guile       
+ 2603 linas     20   0 1117852 297744  31132 R 118.1  0.3 172:51.42 guile       
+
+
+
+
+----------
+ 2603 linas     20   0  998888 178524  30904 R 123.7  0.2  25:52.19 guile
+Even less than that:
+(gc-stats)
+((gc-time-taken . 172622614398) (heap-size . 89620480) (heap-free-size . 36347904)
+(heap-total-allocated . 48279193696) (heap-allocated-since-gc . 4224)
+(protected-objects . 7) (gc-times . 2002))
+guile-yue> foo
+(ConceptNode "foo" (ctv 0 0 1.3901905e+08))
+
+-------------
+ 2603 linas     20   0  998888 178580  30904 R 128.7  0.2  40:07.75 guile
+(gc-stats)
+((gc-time-taken . 217265746382) (heap-size . 106405888) (heap-free-size . 4673536)
+(heap-total-allocated . 61824766864) (heap-allocated-since-gc . 59720592)
+(protected-objects . 7) (gc-times . 2265))
+guile-yue> foo
+(ConceptNode "foo" (ctv 0 0 1.7490337e+08))
+--------------
+2603 linas     20   0 1038496 217948  30904 R 131.9  0.2 46:48.42 guile
+(gc-stats)
+((gc-time-taken . 415346915596) (heap-size . 139968512) (heap-free-size . 36679680)
+(heap-total-allocated . 125921049232) (heap-allocated-since-gc . 26342512)
+(protected-objects . 7) (gc-times . 3325))
+guile-yue> foo
+(ConceptNode "foo" (ctv 0 0 3.5583169e+08))
+-------------
+ 2603 linas     20   0 1040876 220276  30904 R 120.1  0.2  83:44.38 guile       
+(gc-stats)
+((gc-time-taken . 711424805684) (heap-size . 139968512) (heap-free-size . 11227136)
+(heap-total-allocated . 225609862112) (heap-allocated-since-gc . 66243952)
+(protected-objects . 7) (gc-times . 4683))
+guile-yue> foo
+(ConceptNode "foo" (ctv 0 0 6.3894746e+08))
+
+----------------
+ 2603 linas     20   0 1117848 297520  30904 R 118.8  0.3  97:20.18 guile       
+(gc-stats)
+((gc-time-taken . 823234806093) (heap-size . 207081472) (heap-free-size . 70197248)
+(heap-total-allocated . 263246315808) (heap-allocated-since-gc . 75918272)
+(protected-objects . 7) (gc-times . 5155))
+guile-yue> foo
+(ConceptNode "foo" (ctv 0 0 7.4406271e+08))
+
+---------------------
+ 2603 linas     20   0 1117852 297744  31132 R 118.1  0.3 172:51.42 guile       
+(gc-stats)
+((gc-time-taken . 1445970832414) (heap-size . 207081472) (heap-free-size .
+63324160) (heap-total-allocated . 471514682464) (heap-allocated-since-gc . 6332752)
+(protected-objects . 7) (gc-times . 7211))
+guile-yue> foo
+(ConceptNode "foo" (ctv 0 0 1.3366125e+09))
+
+
+
+
+=========================
+
+replace call to scm_gc_register_collectable_memory by call to 
+scm_gc_register_allocation(size)
+
+
+whoa --- 
+GC Warning: Repeated allocation of very large block (appr. size 27369472):
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size 28766208):
+        May lead to memory leak and poor performance.
+Loaded 280000 atoms.
+GC Warning: Repeated allocation of very large block (appr. size 28766208):
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size 28766208):
+        May lead to memory leak and poor performance.
+        Loaded 270000 atoms.
+GC Warning: Repeated allocation of very large block (appr. size 28766208):
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size 14385152):
+        May lead to memory leak and poor performance.
+        Loaded 260000 atoms.
+
+================================
+
+fresh, guile-2.0
+ (gc-stats)
+$6 = ((gc-time-taken . 114568428) (heap-size . 14409728) (heap-free-size .
+2711552) (heap-total-allocated . 18881904) (heap-allocated-since-gc .
+1054528) (protected-objects . 137) (gc-times . 14))
+
+after half-minute:
+(gc-stats)
+((gc-time-taken . 7534031063) (heap-size . 19734528) (heap-free-size
+. 5259264) (heap-total-allocated . 939889168) (heap-allocated-since-gc .
+1657120) (protected-objects . 143) (gc-times . 326))
+guile> foo
+(ConceptNode "foo" (ctv 0 0 2520410))
+
+ 6861 101000    20   0  735404  42952  16680 R 109.9  0.0  14:33.40 guile       
+ 6861 101000    20   0  735404  42952  16680 R 114.5  0.0  44:35.68 guile       
+
+
+(gc-stats)
+((gc-time-taken . 148069551756) (heap-size . 19734528) (heap-free-size .
+2740224) (heap-total-allocated . 28219212944) (heap-allocated-since-gc .
+790384) (protected-objects . 143) (gc-times . 4930))
+guile> foo
+(ConceptNode "foo" (ctv 0 0 54310643))
+
+
+replace call to scm_gc_register_collectable_memory by call to
+scm_gc_register_allocation(size)
+
+
+   static std::atomic<size_t> _tv_pend_cnt;
+   static std::atomic<size_t> _tv_total_cnt;
+   static std::atomic<size_t> _tv_pend_sz;
+   static std::atomic<size_t> _tv_total_sz;
+
+
+(define (inc atom) (cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (tv-count (cog-tv
+atom))))))
+scheme@(guile-user)> 
+scheme@(guile-user)> (define foo (Concept "foo"))
+scheme@(guile-user)> (define (loo) (inc foo) (loo))
+scheme@(guile-user)> (loo)
+duuude its pend cnt=11425 (274200) tot=1400000 (33600000)
+duuude its pend cnt=14379 (345096) tot=1500000 (36000000)
+duuude its pend cnt=15600 (374400) tot=2200000 (52800000)
+
+duuude its pend cnt=8047 (193128) tot=48300000 (1159200000)
+duuude its pend cnt=1230 (29520) tot=49300000 (1183200000)
+duuude its pend cnt=12432 (298368) tot=49400000 (1185600000)
+duuude its pend cnt=19857 (476568) tot=50000000 (1200000000)
+(gc-stats)
+((gc-time-taken . 54370538078) (heap-size . 10948608) (heap-free-size . 1925120)
+(heap-total-allocated . 8532174704) (heap-allocated-since-gc . 10336)
+(protected-objects . 7) (gc-times . 2051))
+guile-yue> foo
+(ConceptNode "foo" (ctv 0 0 26737610))
+ 4617 linas     20   0  847596  50284  27072 R 133.2  0.1   5:26.89 guile       
+
+(ConceptNode "foo" (ctv 0 0 46416463))
+duuude its pend cnt=20565 (493560) tot=94300000 (2263200000)
+
+so -- 46M incrs but 94M take-tvs -- so two takes for each incr.
+-- one to get the value, one to set the value.
+
+
+ 4617 linas     20   0  847584  50612  27156 R 135.2  0.1  23:46.94 guile       
+
+(define (rate)
+(define shu (Concept "shu"))
+(define cnt 0)
+(define start (- (current-time) 0.1))
+(define (finc atom) 
+	(if (eq? 0 (modulo cnt 100000))
+		(begin (display "rate=")
+		(display (/ cnt (- (current-time) start))) (newline)))
+	(set! cnt (+ cnt 1))
+	(cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (tv-count (cog-tv atom))))))
+
+(define (floo) (finc shu) (floo))
+(floo)
+)
+
+(define (inc atom) (cog-set-tv! atom (cog-new-ctv 0 0 (+ 1 (tv-count (cog-tv atom))))))
+
+(define foo (Concept "foo"))
+(define (loo) (inc foo) (loo))
+
+(statprof-stop)
+(statprof-display)
+
+
+with the atomics: rate == about 145.5K/sec
+without the atomics: about 103.2K/sec !!
+again with atomics: rate == 125K/sec !! wtf .. why not as high as before?
+stop restart, rate=130K ...
+stop restart - rate= 107K ... wtf
+stop, restart = 109K
+stop restart = 107K   glargle
+again --- without atomics:
+rate = 147K   dafuq
+stop restart = 151K
+stop restart = 79K   crazy shit
+stop restart = 141K  this is so not making sense, except as a
+crazy cache-line issue.
+
+
+clean start: without atomics
+(gc-stats)
+((gc-time-taken . 845338507) (heap-size . 5963776) (heap-free-size . 421888)
+(heap-total-allocated . 73153424) (heap-allocated-since-gc . 902704)
+(protected-objects . 7) (gc-times . 65))
+
+(gc-stats)
+((gc-time-taken . 605534396784) (heap-size . 6025216) (heap-free-size . 356352)
+(heap-total-allocated . 29673578224) (heap-allocated-since-gc . 361904)
+(protected-objects . 7) (gc-times . 32428))
+
+no growth at all.
+
+
+OK, so ... a leak in sql?
+a leak in TLB!! ... no because that doesn't explain guile heap...
+unless guile heap is confused...
+
+on startup:
+(gc-stats)
+$1 = ((gc-time-taken . 170774772) (heap-size . 15364096) (heap-free-size .
+3166208) (heap-total-allocated . 18421440) (heap-allocated-since-gc .
+770768) (protected-objects . 149) (gc-times . 15))
+
+ wtf .. why no printing?
+
+
+_tv_pend_cnt++;
+_tv_pend_sz += sizeof(*tv);
+
+// _tv_total_cnt++;
+_tv_total_sz += sizeof(*tv);
+
+if (0 == ((size_t) (_tv_total_cnt.fetch_add(1))) % 100000) {
+printf("duuude its pend cnt=%lu (%lu) tot=%lu (%lu)\n",
+(size_t) _tv_pend_cnt, (size_t) _tv_pend_sz, (size_t) _tv_total_cnt,
+(size_t) _tv_total_sz);
+logger().info("duuude its pend cnt=%lu (%lu) tot=%lu (%lu)",
+(size_t) _tv_pend_cnt, (size_t) _tv_pend_sz, (size_t) _tv_total_cnt,
+(size_t) _tv_total_sz);
+}
+
+
+OK, so its not the TV ... (not the TV in guile gc)
+
+So maybe its prim environ?? Nooo not that either
+Maybe handles?? (in guile) no its not that. (not in guile gc)
+
+ well, its not the TLB...
+and not the atoms ... TLB has 400K entries, with 18MB of pairs
+atoms allocated are 466286 for 63414896 = 63MBytes but guile is
+1.6GB resident, 9.3GB virt.... wtf...
+
+each atom is 136 MB ex tv.
+
+2.9 gb resident, but 1.6M atoms for 215MB size, and 64MB of tlb contents
+what about atomspace?  only 19922 atoms in atomspace...
+heap size is 2GB ... 
+
+Maybe stub out capture-stack? it was the cuplrit before...
+Nope seems to make no difference.
+
+are we leaking SCM values somwhere?  How?
+
+misc_to_string ?  no, code audit.
+scm_to_utf8_string   no, code audit...
+
+--------------------------------------------------------------
+try guile-2.2 from git
+Great. that seg-faults... maybe some other version doesn't ...
+try 2.1.5 ? 2.1.4 ?   No, because even though it segfaulted
+it did seem to also grow.
+
+Seg-faults twice in a row, within 10 minutes wall-clock time
+(about 36 mins cpu time).
+
+---------------------------------------------------------------
+
+Try below. ... It does not leak.
+
+(use-modules (opencog) (opencog cogserver))
+(start-cogserver)
+
+(define (slu)
+(define cnt 0)
+(define start (- (current-time) 0.1))
+(define (mka) 
+	(if (eq? 0 (modulo cnt 100000))
+		(begin (display "rate=")
+		(display (/ cnt (- (current-time) start))) (newline)
+		(cog-map-type (lambda (ato) (cog-extract ato) #f) 'ListLink)
+		(cog-map-type (lambda (ato) (cog-extract ato) #f) 'ConceptNode)
+	))
+	(set! cnt (+ cnt 1))
+	(ListLink
+		(ConceptNode (string-append "concepto " (number->string cnt )))
+		(ConceptNode (string-append "glorg " (number->string cnt )))))
+
+(define (aloo) (mka) (aloo))
+(aloo)
+)
+
+(count-all)
+(cog-report-counts)
+
+(gc-stats)
+((gc-time-taken . 6660684289) (heap-size . 15646720) (heap-free-size . 3055616)
+(heap-total-allocated . 861940880) (heap-allocated-since-gc . 5203440)
+(protected-objects . 7) (gc-times . 298))
+
+((gc-time-taken . 15414762477) (heap-size . 16101376) (heap-free-size . 2859008)
+(heap-total-allocated . 2665977008) (heap-allocated-since-gc . 5064624)
+(protected-objects . 7) (gc-times . 562))
+
+rate=47.3K  (concept only)
+rate=15.7K (listlinks+concepts)
+
+---------------------------------------------------------------
+
+/tmp/bang.sh
+#!/bin/bash
+
+i=0
+while true ; do
+  let i=$i+1
+  if [ "$(($i % 2000))" -eq "0" ] ; then
+    echo loop $i
+  fi
+  echo '(display ctr)' | nc localhost 17001
+  # echo '(NumberNode ctr)' | nc 10.0.3.239 17001
+  # echo '(NumberNode' $i ')' | nc 10.0.3.239 17001
+  # echo '(NumberNode 42)' | nc localhost 17001
+echo '(ConceptNode "fooo ' $i $$ ' you too")' | nc localhost 17001 >> /dev/null
+
+done
+
+run 10 copies of above.
+--- no leak   ... and no crash...  so this is very stable. wtf.
+
+---------------------------------------------------------------
+OK, so lets try the full pipeline.
+but without updates
+
+Whoops. Its blowing up
+
+((gc-time-taken . 8772615322) (heap-size . 820801536) (heap-free-size . 90624000)
+(heap-total-allocated . 6508583904) (heap-allocated-since-gc . 84464688)
+(protected-objects . 313) (gc-times . 210))
+
+((gc-time-taken . 8772615322) (heap-size . 1179750400) (heap-free-size . 27713536)
+(heap-total-allocated . 16069320928) (heap-allocated-since-gc . 339494096)
+(protected-objects . 313) (gc-times . 255))
+
+
+what if we just do one article over and over?
+./ss-one.sh yue beta-pages/A-Z/Zyu4 localhost 17006
+
+It blows up.
+
+what if we do one sentence over and over?
+(observe-text "係 拉 丁 字 母 同 阿 剌 伯 數 字 串 字")
+
+run it once, goes from (heap-size . 5963776)  to (heap-size . 20996096)
+run 10 times: (heap-size . 28332032) 
+It still blows up....
+
+without bang.sh
+
+(define (lo)
+(define cnt 0)
+(define start (- (current-time) 0.1))
+(define (mke) 
+	(if (eq? 0 (modulo cnt 20))
+		(begin (display "rate=")
+		(display (/ cnt (- (current-time) start))) (newline)
+	))
+	(set! cnt (+ cnt 1))
+	(observe-text "係 拉 丁 字 母 同 阿 剌 伯 數 字 串 字")
+)
+
+(define (aloo) (mke) (aloo))
+(aloo)
+)
+
+Above is .. wow its stable :
+(heap-size . 21184512) (gc-times . 70)
+(heap-size . 40243200) (gc-times . 242)
+(heap-size . 40243200) (gc-times . 1458)  14:19.43 cpu
+(heap-size . 40243200) (gc-times . 2554)  23:48.49 guile 
+
+ssooo .. its something thread-related.  But just having netcat did not do the
+trick. ... using java on one thread doesn't trigger it.  Using observe-text
+does not trigger it. (ie. relex-parse, etc from one thread.)
+
+do we have zombie threads?
+
+(define x (call-with-new-thread (lambda () (observe-text " 係 拉 丁 字 母 同 阿 剌
+伯 數 字 串 字"))))
+
+(define (th)
+(define cnt 0)
+(define start (- (current-time) 0.1))
+(define (thu v) (call-with-new-thread (lambda () 
+	(observe-text " 係 拉 丁 字 母 同 阿 剌 伯 數 字 串 字"))))
+
+(define lst (list 1 2 3 4 5 6 7 8 9 0))
+(define lst (make-list 10 42))
+
+(define (mke) 
+	(define thl (map thu lst))
+	(length (all-threads))
+	(map join-thread thl)
+
+	(set! cnt (+ cnt 1))
+	(display "rate=")
+	(display (/ cnt (- (current-time) start))) (newline)
+)
+
+(define (aloo) (mke) (aloo))
+(aloo)
+)
+
+Hmmm ... above is blowing up!  but also .. its not actually threading,
+(the atoms stuff is not happening out of order...)
+either.   Oh, but it is blowing up ....
+
+(heap-size . 87683072) (gc-times . 4295)
+(heap-size . 104460288) (gc-times . 4513)
+(heap-size . 255717376) (gc-times . 4884)
+
+OK, full production system with the new guile:
+(heap-size . 481013760) (gc-times . 301)
+(heap-size . 755843072) (gc-times . 402) 11 minutes CPU
+(heap-size . 797286400) (gc-times . 530) 15 mins cpu
+(heap-size . 1285570560) (gc-times . 1713) 100 mins CPU
+(heap-size . 1546678272) (gc-times . 2251) 140 mins CPU 
+
+but is this really new? It was recompiled, but the version number is
+wrong...
+
+Again, full prduction: with guile -v
+guile (GNU Guile) 2.1.5.19-7e9395 (8 Jan 2017)
+
+(heap-size . 652918784) (gc-times . 233) ; about 8 mins CPU
+(heap-size . 737722368) (gc-times . 339) ; 12 mins CPU
+(heap-size . 1332973568) (gc-times . 1797) ; 120 mins CPU
+(heap-size . 1441443840) (gc-times . 2221) ; 151 min CPU
+(heap-size . 1521213440) (gc-times . 2441) ; 168 min cpu
+(heap-size . 1595101184) (gc-times . 3061) ; 218 min cpu
+(heap-size . 1726119936) (gc-times . 3292) ; 237 min
+(heap-size . 1960865792) (gc-times . 6698) ; 510 minn
+(heap-size . 1960865792) (gc-times . 10383) ; 805 min
+(heap-size . 2931556352) (gc-times . 14211) ; 1199 min
+(heap-size . 3302985728) (gc-times . 23278) ; 2186
+
+ 
+Much improved: an earlier result was:
+(heap-size . 4601581568) (gc-times . 485) ; almost 5GB!
+
+
+
+===========================================
+
+Non-openccog test case showing problem: bug 
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25386
+
+(define junk 0)
+(define halt #f)
+
+(define (wtf-thr)
+	(define start (- (current-time) 0.1))
+
+	; Create thread that does junk and exits.  Yes, the increment
+	; of `junk` is not protected, and its racey, but so what.
+	(define (mkthr v) (call-with-new-thread (lambda () (set! junk (+ junk 1)))))
+
+	; thread arguments
+	(define thrarg (make-list 10 0))
+
+	(define cnt 0)
+	(define (mke) 
+		; Create a limited number of threads
+		(define thr-list (map mkthr thrarg))
+		; (display (length (all-threads)))
+		(map join-thread thr-list)
+
+		; Some handy debug printing.
+		(set! cnt (+ cnt 1))
+		(if (eq? 0 (modulo cnt 500))
+			(begin
+				(display "rate=")
+				(display (/ cnt (- (current-time) start))) (newline)
+            (display "num threads=")
+            (display (length (all-threads))) (newline)
+            (display (gc-stats)) (newline) (newline)
+			)))
+
+	; tail recursive infinite loop.
+	(define (aloop) (mke) (if (not halt) (aloop)))
+
+	; while forever.
+	(aloop)
+)
+
+(call-with-new-thread wtf-thr)
+(set! halt #t)
+
+Gahh seg-faults too
+
+Thread 1 "guile" received signal SIGSEGV, Segmentation fault.
+thread_mark (addr=0x55556a3f9e00, mark_stack_ptr=<optimized out>, 
+    mark_stack_limit=0x7fffffffd350, env=<optimized out>)
+    at ../../libguile/threads.c:111
+warning: Source file is more recent than executable.
+111	/* No threads; we can just use GC_stackbottom.  */
+(gdb) bt
+#0  thread_mark (addr=0x55556a3f9e00, mark_stack_ptr=<optimized out>, 
+    mark_stack_limit=0x7fffffffd350, env=<optimized out>)
+    at ../../libguile/threads.c:111
+
+bug-guile@gnu.org 
+
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25386
+
+----------------------------------------------------
+
+
+(heap-size . 5939200)  (gc-times . 70)
+(heap-size . 45510656) (gc-times . 147)
+(heap-size . 399896576) (gc-times . 1018)
+
+(hash-map->list cons (module-obarray (current-module)))
+
+(heap-size . 183734272)  with gc inside the thread ... (gc-times . 402007)
+(heap-size . 183734272) (gc-times . 976989)
+(heap-size . 183734272) (gc-times . 1869962)
+(heap-size . 183734272) (gc-times . 8526663)
+
+stochastic gc: 
+(heap-size . 369917952) (gc-times . 40387)
+(heap-size . 428638208) (gc-times . 511116)
+(heap-size . 428638208) (gc-times . 1218770)
+(heap-size . 428638208) (gc-times . 6515758)
+
+every-17th gc:
+(heap-size . 1875902464) (gc-times . 290105)
+(heap-size . 2068840448) (gc-times . 2605562) -- 44325000 threads
+
+every 10th-gc in main loop, not in thread:
+(heap-size . 544063488) (gc-times . 113)
+(heap-size . 5151375360) (gc-times . 1113)
+(heap-size . 8322269184) (gc-times . 2113)
+Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
+
+gc must be done at thread-exit, for this plan to work!
+
+size=120MB+90MB * n
+
+(define mtx (make-mutex))
+
+   (define (mkthr v) (call-with-new-thread (lambda ()
+                (lock-mutex mtx)
+                (if (eq? 0 (modulo junk 17)) (gc))
+                (set! junk (+ junk 1))
+                (unlock-mutex mtx)
+                )))
+
+
+--------
+OK new guile-2.2 doesn't blow up any more:
+
+(heap-size . 7921664) (gc-times . 40)
+(heap-size . 14344192) (gc-times . 953)
+(heap-size . 14344192) (gc-times . 5219)  ; after 4 minutes CPU
+(heap-size . 26419200) (gc-times . 64975) ; after 77 minutes CPU
+(heap-size . 26419200) (gc-times . 133346) ; after 154 mins CPU
+(heap-size . 26419200) (gc-times . 170083) ; after 192 mins CPU
+(heap-size . 26419200) (gc-times . 249102) ; after 283 mins cpu
+(heap-size . 26419200) (gc-times . 420031) ; after 468 min cpu
+(heap-size . 26419200) (gc-times . 557039) ; after 804 mins CPU
+
+alt version: 510 threads:
+(heap-size . 10604544) (gc-times . 32)
+(heap-size . 19505152) (gc-times . 484)
+(heap-size . 35926016) (gc-times . 1761)
+(heap-size . 48238592) (gc-times . 4217)  ; after 8 minutes cpu time
+(heap-size . 48238592) (gc-times . 47902) ; after 76 mins CPU
+(heap-size . 48238592) (gc-times . 73063) ; after 114 mins CPU
+(heap-size . 65540096) (gc-times . 128094) ; after 209 mins cpu
+(heap-size . 65540096) (gc-times . 248321) ; after 399 mins
+(heap-size . 65540096) (gc-times . 344197) ; after 546 min
+
+dffe495d0de1466f62a91a6d74cc0f388e0f4f3f
+* libguile/threads.c (on_thread_exit): Lessen excess retention.
+12eb7b8256f579fab60ebe0b38eb8788c1276eb8
+
+scm_i_vm_free_stack 
+
+=================================================================
+Also 25387
+
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25387
+
+
+
+===================================================================
+
+(make-dynamic-state (current-dynamic-state))
+
+(define (ds)
+	(define cnt 0)
+	(define start (- (current-time) 0.1))
+
+	(define (mke) 
+		(define x (make-dynamic-state (current-dynamic-state)))
+	
+		(set! cnt (+ cnt 1))
+		(if (eq? 0 (modulo cnt 1000000))
+			(begin
+				(display "iter=") (display cnt) (newline)
+				(display "rate=")
+				(display (/ cnt (- (current-time) start))) (newline)
+			)))
+
+	(define (aloo) (mke) (aloo))
+	(aloo)
+)
+
+Above looks just fine.
+
+
+(count-all)
+(cog-report-counts)
+(cog-prt-atomspace)
+(length (all-threads))
+(gc-stats)
+
+====================================================================
+Bug -- split needs to put whitespace around parent, before/after commas,
+etc. and begin-end quotes  FIXED
+
+====================================================================
+Bugg- the utf8 is fucked up.   Fixed. Its a guile-2.1.5 regression
+its ok in the containers ... select * from atoms where type=110;
+(cog-get-atoms 'WordInstanceNode)
+
+but guile-2.2 fucks up. 
+(string-append "a" "係" "c") is OK.
+(Concept "係") is broken
+scm_c_eval_string
+scm_print_state
+scm_puts now does scm_c_put_latin1_chars fuuuuuck,.
+
+scm_lfwrite (s, strlen (s), port); --- again with latin1
+scm_c_put_string
+arggg
+bug-guile@gnu.org  --  bug#25397:
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25387  
+GUILE_VERSION_MINOR 1
+
+
+====================================================================
+
+call-with-new-thread
+threads.c
+
+  data = scm_gc_typed_calloc (launch_data);
+  err = scm_i_pthread_create (&id, NULL, launch_thread, data);
+
+
+scm_i_pthread_detach (scm_i_pthread_self ());
+pthread-threads.h:#define scm_i_pthread_detach                pthread_detach
+#define scm_i_pthread_self                  pthread_self
+
+
+join_thread_var  libguile/threads.x  uh no 
+
+
+(with-continuation-barrier
+(set! (thread-join-data thread) (cons cv mutex))
+
+scm_i_with_guile calls ...
+	GC_call_with_stack_base  which is from boehm
+	calls with_guile
+		calls scm_i_init_thread_for_guile calls scm_i_init_guile
+		scm_c_with_continuation_barrier
+
+scm_current_dynamic_state ()   -- save_dynamic_state  ? maybe not freed?
+
+what is in the currrent dynamic state?
+
+everything looks kosher.  best guess: copy of dyanmic state is not being gc'ed.
+SCM_USE_PTHREAD_THREADS ?? defined ?? yes.
+build/libguile/scmconfig.h:#define SCM_USE_PTHREAD_THREADS 1 
+
+GC_register_my_thread
+
+on_thread_exit ??? thread_count--; seems to be called because throead count 
+is correct ... who sets scm_i_thread_key ? .. guile init does.
+
+
+---------------------------------------------------------------
+Ongoing failure:
+If I gc after every thread, then hit this:
+
+guile: hashtab.c:137: vacuum_weak_hash_table: Assertion `removed <= len'
+failed.
+Aborted
+
+2x... once after a minute
+3x ...
+
+try 2.0.13
+autoconf flex gettext libunistring-dev libffi-dev texinfo
+
+apt-get purge guile-2.0 guile-2.0-libs
+
+---------------------------------------------------------------
+Bug --- java fucks up like this:
+above: java is runnning at 900% so its getting stuff in paralel.
+It seems to be responding slowly, though ... and guile is not running
+at high cpu .. its under 100% wtf... ah haha -- java is spinning 
+on socket wait in some way...
+
+Its messed up. Java is buggy.
+------------------------------------------------------------------
+
+Bug --- java always gives back exactly the same ... is the rand
+num generator being reset each time??? I think it is, for
+reproducibility?  No .. it was a bug. Fixed. pull req #471 in LG
+
+for morphemes, anysplit.c always sets seed=0 every call.
+
+
+anysplit.c:
+rng_uniform 
+sample_point
+use_sampling 
+
+api.c:				(rand_r(&sent->rand_state) %
+parse_options_set_repeatable_rand
+
+struct anysplit_params * anysplit;
+ set by 
+
+duuuude wtf 0 3b23e1b0 240 st=1840299789
+duuuude wtf 1 78520aa1 33 st=-895367152
+duuuude wtf 2 6372c222 322 st=1780636463
+duuuude wtf 3 5c322e38 312 st=-231201766
+duuuude wtf 4 303c3bea 146 st=-1008023999
+duuuude wtf 5 2a463357 233 st=-480833580
+
+      Linkage lkg = &sent->lnkages[in];
+      Linkage_info *lifo = &lkg->lifo;
+iindex
+sentence_parse
+
+63  70 248 277 -- birthday paradox
+
+
+
+------------------------------------
+LG:   FIXED, will be in version 5.3.14  -- LG pull req #470
+any is ignoring the last word
+no its not, its just not displaying it. so its a minor bug.
+linkage_print_diagram
+
+l->r pass removed 1
+LEFT-WALL[1] 港[2] 區[2] 全[2] 國[2] 人[2] 
+
+utf8_strlen
+
+
+------------------------
+
+BUGGGGGGGGGGG -- delete everything fails, cause  still counting in the other
+threads!! Aieee! ... 
+
+its also probably picking up the wrong sentence...
+
+use .. parse-get-relex-outputs ? Uh no
+
+(define foo
+	(let ((mtx (make-mutex)))
+		(lambda ()
+			(display mtx) (newline)
+			(format #t "duude is locked? ~A\n" (mutex-locked? mtx))
+			(format #t "duude owner ~A\n" (mutex-owner mtx))
+			(format #t "duude try ~A\n" (try-mutex mtx))
+	))
+)
+
+(use-modules (opencog))
+
+(AnchorNode "foo")
+(ListLink (AnchorNode "foo") (Concept "a"))
+(ListLink (AnchorNode "foo") (Concept "b"))
+(ListLink (AnchorNode "foo") (Concept "c"))
+
+(SentenceSequenceLink
+(WordSequenceLink
+(cog-extract-recursive sent)
+
+
+Delete (SentenceSequenceLink (sent numbernode))
+(use-modules (ice-9 receive) (srfi srfi-1) (opencog) (opencog
+atom-types))
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp learn))
+(sql-open "opencog_test" "opencog_tester" "cheese")
+(observe-text "this is a foo")
+
+
+psql -h localhost -U opencog_tester opencog_test
+
+
+PACKAGE_VERSION
+config.h:#define PACKAGE_VERSION "2.1.5.19-7e9395"
+
+Seem to have 
+
+libgc-dev
+
+dpkg -l libgc1c2
+Desired=Unknown/Install/Remove/Purge/Hold
+|
+Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+|/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+||/ Name           Version      Architecture Description
++++-==============-============-============-=================================
+ii  libgc1c2:amd64 1:7.4.2-8    amd64        conservative garbage
+collector fo
+
+---------------------------------------------------------------
+
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size
+21573632):
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size
+43147264):
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size
+9056256):
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size
+43147264):
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size
+43147264):
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size
+86290432):
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size
+7438336):
+        May lead to memory leak and poor performance.
+GC Warning: Repeated allocation of very large block (appr. size
+9588736):
+        May lead to memory leak and poor performance.
+
+
+In conclusion:
+
+(gc-stats)
+Entering scheme shell; use ^D or a single . on a line by itself to exit.
+guile-yue> ((gc-time-taken . 7077498787602) (heap-size . 15487754240)
+(heap-free-size . 3580190720) (heap-total-allocated . 900893846432)
+(heap-allocated-since-gc . 6264284448) (protected-objects . 288)
+(gc-times . 1059))
+
+15.5GB in total, 3.6GB free
+
+guile-yue> (gc)
+
+guile-yue> (gc-stats)
+((gc-time-taken . 7122988472428) (heap-size . 15487754240)
+(heap-free-size . 8725934080) (heap-total-allocated . 900895104976)
+(heap-allocated-since-gc . 1142496) (protected-objects . 288) (gc-times
+. 1060))
+
+Now its 8.7GB free, leaving 7GB in use.
+
+guile-yue> (cog-report-counts)
+((ListLink . 331150) (EvaluationLink . 331150) (AnchorNode . 1)
+(WordNode . 10720) (LinkGrammarRelationshipNode . 1) (LgConnectorNode .
+1) (LgConnMultiNode . 1) (LgConnDirNode . 2) (LgConnector . 4) (LgAnd .
+4))
+
+guile-yue> (count-all)
+673034
+
+So why is guile so splurgy?  This is just not that many atoms ... 
+is bdwgc too conservative, somehow finding the TLB stuff?
+what If I close out the TLB, does guile free it all?
+
+1244:00 start of sql-close cpu time at start
+1244:36 at stop -- so about 40 cpu-sconds, OK.
+
+((gc-time-taken . 7128743570856) (heap-size . 15487754240)
+(heap-free-size . 14163222528) (heap-total-allocated . 900991577328)
+(heap-allocated-since-gc . 172640) (protected-objects . 288) (gc-times .
+1061))
+
+whoa -- that was it:
+fre is now 14.2 out of 15.5GB so actual use is only 1.3GB 
+... for 673K atoms, so about 2KBytes/atom which is still a lot, but 
+... plausible.
+
+So bdwgc was confused about the TLB... how? why? what about atom
+creation that leaves around this handle-confusion?
+
+before sql close:
+
+ubuntu    4335  217 29.4 32768196 29150768 pts/6 Sl+ Jan11 1243:04 guile -l pair-count-yue.scm
+
+after:
+ubuntu    4335  210 28.9 32164608 28616384 pts/6 Sl+ Jan11 1244:45 guile -l pair-count-yue.scm
+
+so no shrinkage directly....
+
+(cog-map-type (lambda (ato) (cog-extract-recursive ato) #f) 'WordNode)
+(gc)
+.. fails to shrink the heap!
+
+stop the cogserver ... (gc) still no shrinkage
+
+
+void fn (char*, GC_word)
+
+GC_set_warn_proc (fn)
+https://www.hboehm.info/gc/gcinterface.html
+
+GC_warn_proc GC_set_warn_proc(GC_warn_proc p)
+
+libcord
+libgc.so -> libgc.so.1.0.3
+
+GC_current_warn_proc
+GC_default_warn_proc
+WARN
+
+
+select count(*) from atoms;
+1480054
+1522104
+
+        6: ??:0 GC_alloc_large()
+        7: ??:0 GC_generic_malloc()
+        8: ??:0 GC_core_malloc_atomic()
+        9: strings.c:165        make_wide_stringbuf()
+        10: strings.c:331       scm_i_make_wide_string()
+        11: strings.c:1165      scm_string()
+        12: vm-engine.c:763     vm_debug_engine()
+
+SCM_STRING_LENGTH_HISTOGRAM
+%stringbuf-hist
+
+        6: ??:0 GC_alloc_large()
+        7: ??:0 GC_generic_malloc()
+        8: weak-table.c:362     allocate_entries()
+        9: weak-table.c:432     is_acceptable_size_index()
+        10: weak-table.c:677    weak_table_put_x()
+        11: weak-table.c:893    scm_c_weak_table_put_x()
+        12: read.c:423  maybe_annotate_source()
+        13: gc.h:182    maybe_annotate_source()
+        14: read.c:725  scm_read_string()
+        15: read.c:476  scm_read_sexp()
+        16: read.c:1814 read_inner_expression()
+        17: read.c:476  scm_read_sexp()
+        18: read.c:1814 read_inner_expression()
+        19: read.c:1964 scm_read()
+        20: vm-engine.c:763     vm_debug_engine()
+
+scm_sys_string_dump
+scm_sys_symbol_dump
+
+scm_ilength
+
+#define SCM_CHAR(x) ((scm_t_wchar)SCM_ITAG8_DATA(x))
+
+
+Ah hah ... very long strings are ... very long strings
+from java.
+
+
+---------------------------------------------------------------
+
+
+local_id_cache
+add_id_to_cache
+get_ids
+
+maybe_create_id
+id_create_cache
+
+WordInstanceNode
+LgLinkInstanceNode
+  119 | WordInstanceNode
+  120 | WordInstanceLink
+
+  159 | LgLinkInstanceNode
+  160 | LgLinkInstanceLink
+
+how are these getting in the TLB???
+
+SQLBackingStore::getLink(Handle& h) const
+{
+
+AtomSpace::fetch_atom
+persist/guile/PersistSCM.cc
+
+fetch-atom
+fetch-incoming-set
+
+is id deadlocking on the resolve? 
+
+t1
+delete
+get table lock
+rele table lock
+  now t2 gets the table lock.
+get tlb lock  << maybe halt here?
+<<<< safe because nothing inside, so forward progress...
+relese tlb lock
+get table lock. << maybe halt here?
+
+
+t2
+add
+table lock 1
+tlb lock
+do_res
+table lock  2
+<<< should wordwar prgress cause in ssame thread.
+
+argh 201 theads
+ 201 -- do_poll_result SchemeEval.cc:655
+ 200 -- join from eval_loop GenericShell.cc:457
+ 197 -- getNodeHandle AtomTable.cc:255 
+        owenr 20950 whih is 44
+  44 -- TLB::removeAtom TLB.cc:143
+        owner is 21423 which is 179
+ 179 -- AtomTable::getNodeHandl AtomTable.cc:255
+        owner is 20950 which is 44
+
+ so TLB can't get lock cause its held by 179 
+
+but 179 is holding lock and calling do_res while holding the
+atomspace lock. called by tlb::add atom
+
+solutions(s): TLB must drop lock while doing do_res
+atomtable must fully unwindws recursive lock
+
+
+so who in 44 has it?
+AtomTable.cc:841 is hwere we are ... 
+called at line 762 with lock held at line 729  so we are at least
+one-deep. maybe more??
+
+std::unique_lock<std::recursive_mutex> 
+
+    double frac = 100.0 * extra / ((double) all.size());
+    printf("sql-stats: Examined %lu atoms in atomspace; %lu extra in TLB
+(%f percent) \n", 
+        all.size(), extra, frac);
+
+
+    double frac = 100.0 * extra / ((double) all.size());
+    printf("sql-stats: Found %lu atoms in atomspace; %lu extra in TLB
+(%f percent) \n",
+        all.size(), extra, frac);
+frac = 100.0 * extra / ((double) _store->_tlbuf.size());
+    printf("sql-stats: tlbuf size=%lu extra=%f percent\n",
+_store->_tlbuf.size(), 
+frac);
+}
+
+
+
+
+the __data.__owner member of the pthread_mutex_t 
+print mutex.__data.__owner
+
+---------------------------------------------------------------
+
+(near-startup)
+sql-stats: Atomspace holds 55484 atoms
+sql-stats: tlbuf holds 19928 atoms
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 2031 unremapped atoms (6.600585 pct)
+sql-stats: 211017858 of 211020413 uuids unused (99.998789 pct)
+
+Gaaaaackk .. this implies that 99.999 percent of calls to sql
+are wasted ! well, actually not, since the cache should stop
+the bad acting.
+
+sql-stats: Atomspace holds 420064 atoms
+sql-stats: tlbuf holds 154316 atoms
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 16398 unremapped atoms (6.627275 pct)
+sql-stats: 211339442 of 211467072 uuids unused (99.939645 pct)
+
+sql-stats: Atomspace holds 86550 atoms
+sql-stats: tlbuf holds 80674 atoms
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 59344 unremapped atoms (72.948089 pct)
+sql-stats: 212784068 of 212861833 uuids unused (99.963467 pct)
+
+
+====================================================
+clean start:
+
+sql-stats: Atomspace holds 13949 atoms
+sql-stats: tlbuf holds 5750 atoms
+num_get_nodes=18537 num_got_nodes=235 (1.267735 pct)
+num_get_links=56472 num_got_links=1116 (1.976201 pct)
+num_get_insets=0 num_get_inatoms=0
+num_node_inserts=6 num_node_updates=31444
+num_link_inserts=256 num_link_updates=20732
+Remove 21485 of 64000 (33.570312 pct) calls tlbzz=9219
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 1484 unremapped atoms (20.694464 pct)
+sql-stats: 213462841 of 213464601 uuids unused (99.999176 pct)
+
+sql-stats: Atomspace holds 31687 atoms
+sql-stats: tlbuf holds 23769 atoms
+num_get_nodes=253402 num_got_nodes=1131 (0.446326 pct)
+num_get_links=779439 num_got_links=14328 (1.838245 pct)
+num_get_insets=0 num_get_inatoms=0
+num_node_inserts=70 num_node_updates=517152
+num_link_inserts=4190 num_link_updates=340938
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 15624 unremapped atoms (66.088575 pct)
+sql-stats: 213763992 of 213783890 uuids unused (99.990692 pct)
+
+sql-stats: AtomSpace not set
+sql-stats: Atomspace holds 45225 atoms
+sql-stats: tlbuf holds 45225 atoms
+num_get_nodes=646388 num_got_nodes=1763 (0.272746 pct)
+num_get_links=1988905 num_got_links=33444 (1.681528 pct)
+num_get_insets=0 num_get_inatoms=0
+num_node_inserts=107 num_node_updates=1339311
+num_link_inserts=9898 num_link_updates=883771
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 46231 unremapped atoms (52.940099 pct)
+sql-stats: 214585523 of 214645132 uuids unused (99.972229 pct)
+
+
+sql-stats: Atomspace holds 446035 atoms
+sql-stats: tlbuf holds 212056 atoms
+num_get_nodes=1572865 num_got_nodes=2519 (0.160154 pct)
+num_get_links=4838305 num_got_links=68870 (1.423432 pct)
+num_get_insets=0 num_get_inatoms=0
+num_node_inserts=215 num_node_updates=3172207
+num_link_inserts=22422 num_link_updates=2094051
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 72188 unremapped atoms (28.542847 pct)
+sql-stats: 215438536 of 215580711 uuids unused (99.934050 pct)
+
+after 10 hours:
+sql-stats: AtomSpace not set
+sql-stats: Atomspace holds 731146 atoms
+sql-stats: tlbuf holds 725447 atoms
+num_get_nodes=20215212 num_got_nodes=6866 (0.033965 pct)
+num_get_links=61851573 num_got_links=404021 (0.653211 pct)
+num_get_insets=0 num_get_inatoms=0
+num_node_inserts=4251 num_node_updates=42211029
+num_link_inserts=307398 num_link_updates=27844955
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 411009 unremapped atoms (56.626772 pct)
+sql-stats: 240293860 of 241016540 uuids unused (99.700153 pct)
+
+20 gb resident 81 M atoms removed.
+
+Finally:
+---------
+sql-stats: Atomspace holds 726040 atoms
+sql-stats: tlbuf holds 726040 atoms
+num_get_nodes=20356005 num_got_nodes=6882 (0.033808 pct)
+num_get_links=62281852 num_got_links=405421 (0.650946 pct)
+num_get_insets=0 num_get_inatoms=0
+num_node_inserts=4264 num_node_updates=42510570
+num_link_inserts=309468 num_link_updates=28042704
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 412287 unremapped atoms (56.785714 pct)
+sql-stats: 240482670 of 241208711 uuids unused (99.698999 pct)
+
+
+((gc-time-taken . 7898668634177) (heap-size . 17208950784)
+(heap-free-size . 9361924096) (heap-total-allocated . 996784769424)
+(heap-allocated-since-gc . 1247263344) (protected-objects . 292)
+(gc-times . 1068))
+
+heap is 17.2GB!! free is 9.4GB so 7.8GB in use
+
+((gc-time-taken . 7910648760945) (heap-size . 17208950784)
+(heap-free-size . 12845494272) (heap-total-allocated . 996787132704)
+(heap-allocated-since-gc . 331136) (protected-objects . 292) (gc-times .
+1069))
+
+heap is 17.2GB!! free  12.8GB so actually only 4.4GB is needed.
+
+guile-yue> (sql-close)
+guile-yue> (gc)
+guile-yue> (gc-stats)
+((gc-time-taken . 7912464056925) (heap-size . 17208950784)
+(heap-free-size . 16106553344) (heap-total-allocated . 996792364160)
+(heap-allocated-since-gc . 164096) (protected-objects . 292) (gc-times .
+1070))
+
+free is 16.1GB so somehow the TLB was chewing up 3.3GB holding
+412287 unremapped atoms!?  How is this possible? Should I have run gc a
+bunch more times? 
+-------------------------------------------------------------
+New API:
+Very fast: in 3 minutes:
+sql-stats: Atomspace holds 113815 atoms
+sql-stats: tlbuf holds 1195 atoms
+num_get_nodes=26378 num_got_nodes=26361 (99.935552 pct)
+num_get_links=8813 num_got_links=8251 (93.623057 pct)
+num_get_insets=0 num_get_inatoms=0
+num_node_inserts=133 num_node_updates=52697
+num_link_inserts=1062 num_link_updates=16550
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 0 unremapped atoms (0.000000 pct)
+sql-stats: 0 of 1196 uuids unused (0.000000 pct)
+
+
+
+wtf...
+
+(cog-report-counts)
+((NumberNode . 46505) (ListLink . 163927) (EvaluationLink . 215741)
+(AnchorNode . 1) (WordNode . 5199) (ReferenceLink . 99275) (SentenceNode
+. 55) (ParseNode . 837) (ParseLink . 835) (WordInstanceNode . 47312)
+(WordInstanceLink . 47437) (WordSequenceLink . 47464)
+(SentenceSequenceLink . 55) (LinkGrammarRelationshipNode . 1)
+(LgConnectorNode . 1) (LgConnMultiNode . 1) (LgConnDirNode . 2)
+(LgConnector . 4) (LgAnd . 4) (LgWordCset . 46306) (LgLinkInstanceNode .
+52608) (LgLinkInstanceLink . 52715))
+
+
+Runnning
+sql-stats: Atomspace holds 687522 atoms
+sql-stats: tlbuf holds 684142 atoms
+num_get_nodes=39921257 num_got_nodes=40050951 (100.324875 pct)
+num_get_links=13354387 num_got_links=13011199 (97.430148 pct)
+num_get_insets=0 num_get_inatoms=0
+num_node_inserts=10662 num_node_updates=80083214
+num_link_inserts=673480 num_link_updates=26027646
+sql-stats: tlbuf holds 0 atoms not in atomspace (0.000000 pct)
+sql-stats: tlbuf holds 0 unremapped atoms (0.000000 pct)
+sql-stats: 0 of 684143 uuids unused (0.000000 pct)
+
+(gc-stats)
+((gc-time-taken . 49802336967563) (heap-size . 14738780160)
+(heap-free-size . 9885679616) (heap-total-allocated . 947281529744)
+(heap-allocated-since-gc . 1685837392) (protected-objects . 352)
+(gc-times . 1242))
+
+So while running: 14.7GB heap, 9.9GB free
+
+guile-yue> (cog-report-counts)
+((NumberNode . 737) (ListLink . 337776) (EvaluationLink . 338599)
+(AnchorNode . 1) (WordNode . 10670) (ReferenceLink . 1557) (SentenceNode
+. 1) (ParseNode . 16) (ParseLink . 16) (WordInstanceNode . 736)
+(WordInstanceLink . 736) (WordSequenceLink . 736) (SentenceSequenceLink
+. 1) (LinkGrammarRelationshipNode . 1) (LgConnectorNode . 1)
+(LgConnMultiNode . 1) (LgConnDirNode . 2) (LgConnector . 4) (LgAnd . 4)
+(LgWordCset . 720) (LgLinkInstanceNode . 821) (LgLinkInstanceLink .
+821))
+
+while idle:
+(cog-report-counts)
+((ListLink . 339276) (EvaluationLink . 339276) (AnchorNode . 1)
+(WordNode . 10750) (LinkGrammarRelationshipNode . 1) (LgConnectorNode .
+1) (LgConnMultiNode . 1) (LgConnDirNode . 2) (LgConnector . 4) (LgAnd .
+4))
+So the cruuft goes away.
+
+((gc-time-taken . 49831001288560) (heap-size . 14738780160)
+(heap-free-size . 5885931520) (heap-total-allocated . 956146319472)
+(heap-allocated-since-gc . 4515746160) (protected-objects . 296)
+(gc-times . 1243))
+
+Heap:free: 5.9GB wow -- lots smaller than while runing.
+Because 4.5GB alloced since last gc
+(heap-free-size . 9419513856)
+(heap-free-size . 13306900480)
+(heap-free-size . 13710024704) 
+(heap-free-size . 13740257280)  wow
+of
+(heap-size . 14738780160) 14.7 so only 1 GB needed.
+
+
+
+
+ten-word-java: 289105 bytes 2m18 backlog
+20-word java: 550294 bytes 3m12.772s
+40-word hava: 1101459 bytes: 3m15 delay
+
+
+ignoreType is not being used
+
+ Wow .. the remove is completely un-needed!  DONE
+
+The "Loaded 370000 atoms" not needed at all, if not bulk-loading. DONE
+
+this dead-locks the shell:
+(observe-test "商 餘 質 數 分 解 質 數 定 理 相 對 質 數")
+ERROR: In procedure apply-smob/1:
+ERROR: Throw to key `decoding-error' with args `("scm_from_utf8_stringn"
+"input locale conversion error" 29 #vu8(40 111 98 115 101 114 118 101 45
+116 101 115 116 32 34 229 149 134 32 233 164 152 32 232 179 170 32 230
+149 184 32 229 136 134 32 232 167 163 32 232 179 170 32 230 149 184 32
+229 174 255 237 255 253 6 10))'.
+
+ERROR: In procedure fetch-atom: Earlier version of atom has mis-matched
+UUID! (/home/ubuntu/src/atomspace/opencog/atomspaceutils/TLB.cc:85)
+
+
+---------------------------------------------------------------
+-- fix TLB tables in sql -  underway
+    (deadlock) DONE
+
+-- fix sennas bug.  DONE
+-- publish new LG DONE
+---------------------------------------------------------------
+
+The fetch not needed if in the atomspace already. Well,
+then don't fetch it!
+
+There is no TV invalidation mechanism...
+---------------------------------------------------------------
+-- fetch not requied, unless updating the TV ... !!
+   (or getting the tv...
+-- fix pgsql variant .. maybe
+-- update all lxc's.
+
+=======================================================================
+20 Jan 2017 Friday
+OK, all bugs above fixed, reinstalled the latest LG in yue,
+erase all tables, start from scratch. At 4PM exactly, wall-clock time
+to the second.
+
+at start
+$ find beta-pages |wc          49193   52687 1489227
+$ find submitted-articles |wc     24      24     629
+
+-------
+
+After 40 minutes:
+select count(*) from atoms;   111632
+Java/do-count: 1064 sentences  
+find submitted-articles |wc      205
+
+so, rate: 4.5 articles/minute, 5.9 sentences/article.
+rate: 26.6 sents/minute
+projected finish: 182 hours === 7.5 days
+
+(do-count "report-stuff") gives alternate sentence count...
+
+
+------
+
+After 4.000 hours:
+select count(*) from atoms;    454240
+Java: cnt=6533  but 6610 from do-count !! wtf.
+$ find submitted-articles |wc 919
+38.9M node insert/updates   7164 total nodes!?
+12.99 link insert/updates   447516 total links!?
+== 51946920 total stores, so that cross-checks OK
+total number of atoms also checks out (skew for measurement delay) OK
+
+so, rate: 3.73 articles/minute, 7.4 sents/article
+rate: 27.5 sents/minute
+projected finish: 220 hours = 9.1 days
+
+So the article-rate is bouncing around, but sentences/minute holds
+steady.  Numbers are checking out.
+
+-------
+
+After 8.00 hours:
+select count(*) from atoms;  666606
+Java: cnt=10787 but  do-count says cnt=11464
+$ find submitted-articles |wc 1634
+66.1M node updates
+22.0M link updates
+
+So...
+rate: 1610 / 8 hours = 201 articles/hour, 3.35 articles/minute
+rate: 11464 / 480 min = 23.9 sents/min
+
+22 minutes downtime for system upgrade....
+
+
+4 concurrent writers:
+after 15 mns: 
+write items=417737 drains=2532 fill_fraction=164.983017 concurrency=51.921801
+
+after 20 mins cpu:
+write items=616070 drains=3826 fill_fraction=161.021955 concurrency=53.232358
+
+
+12 concurrent writers:
+after 15 mins
+write items=372257 drains=1805 fill_fraction=206.236565 concurrency=53.760111
+
+after 20 mins:
+write items=539921 drains=2802 fill_fraction=192.691292 concurrency=54.867595
+
+... doesn't improve concurrency, and seems slower for total CPU, but
+that may be fucked up java.
+
+
+New code, where no atom get: (and 12 writer threads)
+
+write items=21516264 drains=167609 fill_fraction=128.371770 concurrency=4.759196
+avg drain time=0.345310 seconds; longest drain time=80.337000
+
+New code, 12 writers, and C impl of count-increment:
+write items=7817004 drains=61061 fill_fraction=128.019587 concurrency=3.714679
+avg drain time=0.517914 seconds; longest drain time=29.733000
+
+
+New code, 4 writers, and C impl of count-increment:
+drains=7186 fill_fraction=136.883245 concurrency=3.445728
+drains=25794 fill_fraction=124.202528 concurrency=3.613825
+avg drain time=0.440724 seconds; longest drain time=5.136000
+
+4 writers is not obvious worse and seems better than 12.
+
+--------------------------------------------------
+21 January -- saturday -- start from scratch, again.
+
+start at exactly 15:00
+
+after 15 mins:
+select count(*) from atoms; 66221
+find submitted* |wc  127
+
+sql-stats: total loads = 296 total stores = 4379768 ratio=14796.513514
+
+num_get_nodes=4246 num_got_nodes=296 (6.971267 pct)
+num_get_links=61974 num_got_links=0 (0.000000 pct)
+num_get_insets=0 num_get_inatoms=0 ratio=-nan
+num_node_inserts=2123 num_node_updates=3282677 ratio=1546.244465
+num_link_inserts=61974 num_link_updates=1033002 ratio=16.668313
+total stores for node=3284800 link=1094976 ratio=2.999883
+
+write items=2189854 flushes=0 flush_ratio=inf
+drains=17804 fill_fraction=122.997866 concurrency=3.866659
+avg drain time=0.418640 seconds; longest drain time=4.090000
+
+(monitor-rate "foo")
+
+------------
+18:15 -- 3hrs 15 mins later:
+find submitted* |wc gives 1025 so 
+exactly 1000 articles in 195 minutes = 5.12 articles per minute
+
+select count(*) from atoms; 482295
+total loads = 803 total stores = 55843525 
+num_node_inserts=7427 num_node_updates=41875213 ratio=5638.240609
+num_link_inserts=472298 num_link_updates=13488591 ratio=28.559492
+total stores for node=41882640 link=13960889 ratio=2.999998
+
+write items=27921766 flushes=0 flush_ratio=inf
+drains=234012 fill_fraction=119.317667 concurrency=2.665735
+avg drain time=0.348755 seconds; longest drain time=6.107000
+
+why is write-items=27.9M but total stores=55.8M ?
+
+write-items is exactly half of total stores ...
+select sum(stv_count) from atoms; gives 28995086 shortly later.
+
+they're close ... so write-items actually matches word-counting...
+so we are double-storing somehow...
+
+-------------------------------------------------
+on shutdown, at 22:30 --
+select sum(stv_count) from atoms; 62921108
+select count(*) from atoms; 861867
+
+find submitted* |wc 2314  
+
+total stores = 125995216
+write items=62997608
+
+write items=62997608 flushes=0 flush_ratio=inf
+drains=532502 fill_fraction=118.304923 concurrency=2.559669
+avg drain time=0.344836 seconds; longest drain time=6.107000
+
+Rearrange; total stores still running at 2x write-items.
+
+But ... 2 links, 3 nodes:
+  Eval link --
+     Pred node
+     List link
+        left node
+        right node
+
+so the list link is never explicitly stored.  which leaves 1 link, 3
+nodes being explicit i.e. 4 explicit stores (for 5 atoms)
+is write-items counting only the links? that would be only two, in tat
+case...  but the write items are counted in the queue.
+
+
+
+--------------------------------------------
+
+Bugs:
+if there is a store in the queue, and there is is a get for something
+in the queue, then the get will get stale data, and then try to write
+back more stale data, ad infinitum... causing the counts to be bad.
+
+well, its up to user to use the barrier, which should now work.
+
+ So .. need mechanism to fetch locally, until fully retired!
+Better yet, in scheme, just don't .. don't what? 
+don't fetch, unless stv is the default stv ...!
+
+-----------------------------------------------
+23 Jan 2017:
+------------
+Holy cow -- postgres is sooo much faster!!
+check this out:
+
+after just a few minutes:
+
+write items=94794 flushes=0 flush_ratio=inf
+drains=70 fill_fraction=1354.200000 concurrency=4.385714
+avg drain time=0.065023 seconds; longest drain time=0.623000
+
+
+fill fraction used to be only about 150, before, and average drain time
+was something like 0.3 seconds... this is a whole new ballgame!
+
+
+and also: java is fixed: the magic fix was:
+-- shut everything down every 500 sentences,
+-- run gc five times in a row,
+-- restart everything. 
+This unclogs the kitchen sink. -- java now stays up for 4+ hours,
+without tanking.
+
+-----------------
+requires libgmp-dev
+libgc-dev
+use the git version of guile
+install libpq-dev
+remove unixodbc-dev
+install new linkgrammar
+new relex...

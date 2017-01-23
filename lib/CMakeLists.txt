@@ -9,9 +9,9 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/lib/opencog-test.conf
 # json is only used by the Rest API, which cannot be built if there
 # is no TBB or ZMQ. Since its a huge memory hog, don't build it unless
 # building REST.
-IF (HAVE_REST)
+IF (HAVE_EVENT_PUBLISHING_DEPENDENCIES)
 	ADD_SUBDIRECTORY (json_spirit)
-ENDIF (HAVE_REST)
+ENDIF (HAVE_EVENT_PUBLISHING_DEPENDENCIES)
 
 # Place a default config file in a default location
 # CONFDIR normally expands to /usr/local/etc/

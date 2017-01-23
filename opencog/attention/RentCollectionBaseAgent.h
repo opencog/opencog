@@ -29,6 +29,9 @@
 
 #include <opencog/util/RandGen.h>
 #include <opencog/cogserver/server/Agent.h>
+#include <opencog/attentionbank/AttentionBank.h>
+
+#include "AttentionParamQuery.h"
 
 namespace opencog
 {
@@ -50,9 +53,12 @@ namespace opencog
 class RentCollectionBaseAgent : public Agent
 {
 private:
-     int sleep_time_ms;
+    int sleep_time_ms;
 
 protected:
+    AttentionBank* _bank;
+    AttentionParamQuery _atq;
+
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
 

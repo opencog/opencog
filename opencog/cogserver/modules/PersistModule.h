@@ -24,7 +24,7 @@
 #ifndef _OPENCOG_PERSIST_MODULE_H
 #define _OPENCOG_PERSIST_MODULE_H
 
-#include <opencog/persist/sql/odbc/SQLPersistSCM.h>
+#include <opencog/persist/sql/multi-driver/SQLPersistSCM.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Module.h>
 #include <opencog/cogserver/server/Request.h>

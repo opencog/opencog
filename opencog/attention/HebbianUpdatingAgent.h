@@ -39,6 +39,7 @@ namespace opencog
  *  @{
  */
 
+class AttentionBank;
 /**
  * This Agent randomly picks an Atom and updates all the outgoing HebbianLinks
  *
@@ -49,9 +50,8 @@ namespace opencog
  */
 class HebbianUpdatingAgent : public Agent
 {
-
 private:
-
+    AttentionBank* _bank;
     double targetConjunction(HandleSeq handles);
     void updateHebbianLinks(Handle source);
 
@@ -73,4 +73,4 @@ typedef std::shared_ptr<HebbianUpdatingAgent> HebbianUpdatingAgentPtr;
 /** @}*/
 }  // namespace
 
-#endif // _OPENCOG_IMPORTANCE_UPDATING_AGENT_H
+#endif // _OPENCOG_HEBBIAN_UPDATING_AGENT_H

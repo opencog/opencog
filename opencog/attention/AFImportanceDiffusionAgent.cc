@@ -29,6 +29,7 @@
 #include <opencog/cogserver/server/CogServer.h>
 
 #include "AFImportanceDiffusionAgent.h"
+#include "AttentionParamQuery.h"
 
 using namespace opencog;
 
@@ -44,6 +45,14 @@ AFImportanceDiffusionAgent::AFImportanceDiffusionAgent(CogServer& cs) :
 
 void AFImportanceDiffusionAgent::run()
 {
+    // Read params
+    maxSpreadPercentage = std::stod(_atq.get_param_value(
+                                    AttentionParamQuery::dif_spread_percentage));
+    hebbianMaxAllocationPercentage =std::stod(_atq.get_param_value(
+                                    AttentionParamQuery::heb_max_alloc_percentage));
+    spreadHebbianOnly = std::stoi(_atq.get_param_value(
+                                  AttentionParamQuery::dif_spread_hebonly));
+
     spreadImportance();
 
     //some sleep code
@@ -60,10 +69,7 @@ void AFImportanceDiffusionAgent::spreadImportance()
 
     // Calculate the diffusion for each source atom, and store the diffusion
     // event in a stack
-    for (Handle atomSource : diffusionSourceVector)
-    {
-        diffuseAtom(atomSource);
-    }
+    for (Handle atomSource : diffusionSourceVector) diffuseAtom(atomSource);
 
     // Now, process all of the outstanding diffusion events in the diffusion
     // stack
@@ -71,116 +77,18 @@ void AFImportanceDiffusionAgent::spreadImportance()
 }
 
 /*
- * Diffuses importance from one atom to its non-hebbian incident atoms
- * and hebbian adjacent atoms
+ * Returns the total amount of STI that the atom will diffuse
+ *
+ * Calculated as the maximum spread percentage multiplied by the atom's STI
  */
-void AFImportanceDiffusionAgent::diffuseAtom(Handle source)
+AttentionValue::sti_t AFImportanceDiffusionAgent::calculateDiffusionAmount(Handle h)
 {
-    // (1) Find the incident atoms that will be diffused to
-    HandleSeq incidentAtoms =
-            ImportanceDiffusionBase::incidentAtoms(source);
+    updateMaxSpreadPercentage();
 
-    // (2) Find the hebbian adjacent atoms that will be diffused to
-    HandleSeq hebbianAdjacentAtoms =
-            ImportanceDiffusionBase::hebbianAdjacentAtoms(source);
+    return (AttentionValue::sti_t) round(_bank->get_sti(h) * maxSpreadPercentage);
 
-    // (3) Calculate the probability vector that determines what proportion to
-    //     diffuse to each incident atom
-    std::map<Handle, double> probabilityVectorIncident =
-            ImportanceDiffusionBase::probabilityVectorIncident(
-                incidentAtoms);
-
-#ifdef DEBUG
-    std::cout << "Calculating diffusion for " << source << std::endl;
-    std::cout << "Incident probability vector contains " <<
-                 probabilityVectorIncident.size() << " atoms." << std::endl;
-#endif
-
-    // (4) Calculate the probability vector that determines what proportion to
-    //     diffuse to each hebbian adjacent atom
-    std::map<Handle, double> probabilityVectorHebbianAdjacent =
-            ImportanceDiffusionBase::probabilityVectorHebbianAdjacent(
-                source, hebbianAdjacentAtoms);
-
-#ifdef DEBUG
-    std::cout << "Hebbian adjacent probability vector contains " <<
-                 probabilityVectorHebbianAdjacent.size() << " atoms." <<
-                 std::endl;
-#endif
-
-    // (5) Combine the two probability vectors into one according to the
-    //     configuration parameters
-    std::map<Handle, double> probabilityVector = combineIncidentAdjacentVectors(
-                probabilityVectorIncident, probabilityVectorHebbianAdjacent);
-
-#ifdef DEBUG
-    std::cout << "Probability vector contains " << probabilityVector.size() <<
-                 " atoms." << std::endl;
-#endif
-
-    // (6) Calculate the total amount that will be diffused
-    AttentionValue::sti_t totalDiffusionAmount =
-            calculateDiffusionAmount(source);
-
-#ifdef DEBUG
-    std::cout << "Total diffusion amount: " << totalDiffusionAmount << std::endl;
-#endif
-
-    /* ===================================================================== */
-
-    // If there is nothing to diffuse, finish
-    if (totalDiffusionAmount == 0)
-        return;
-
-    // Used for calculating decay amount. Since we will be using per time unit
-    // decay, we need to calculated elapsed time unit since last spreading for
-    // adjusting the decay exponent.
-    opencog::ecan::chrono_d elapsed_seconds;
-    auto now = hr_clock::now();
-
-    if (first_time) {
-        elapsed_seconds = now - now;
-        last_spreading_time = now;
-    } else {
-        elapsed_seconds = now - last_spreading_time;
-    }
-
-    // Perform diffusion from the source to each atom target
-    typedef std::map<Handle, double>::iterator it_type;
-    for(it_type iterator = probabilityVector.begin();
-        iterator != probabilityVector.end(); ++iterator)
-    {
-        DiffusionEventType diffusionEvent;
-
-        // Calculate the diffusion amount using the entry in the probability
-        // vector for this particular target (stored in iterator->second)
-        diffusionEvent.amount = (AttentionValue::sti_t)
-                floor(totalDiffusionAmount * iterator->second);
-
-        // TODO Use elapsed seconds and to calculate the diffusion amount.
-        // (r_WA)^elapsed_seconds
-        // Maintain STI freq bin.
-        /*diffusionEvent.amount = (AttentionValue::sti_t)
-                floor(pow ((totalDiffusionAmount * iterator->second),elapsed_seconds));*/
-
-        diffusionEvent.source = source;
-        diffusionEvent.target = iterator->first;
-
-        // Add the diffusion event to a stack. The diffusion is stored in a
-        // stack, so that all the diffusion events can be processed after the
-        // diffusion calculations are complete. Otherwise, the diffusion
-        // amounts will be calculated in a different way than expected.
-        diffusionStack.push(diffusionEvent);
-    }
-
-
-    last_spreading_time = now;
-    first_time = false;
-
-    /* ===================================================================== */
-
-    // TODO: What if the STI values of the atoms change during these updates?
-    // This could go wrong if there were simultaneous updates in other threads.
-
-    // TODO: Support inverse hebbian links
+    // TODO: Using integers for STI values can cause strange consequences.
+    // For example, if the amount to diffuse is 0.4, it will become 0, causing
+    // no diffusion to occur.
+    //   * See: https://github.com/opencog/opencog/issues/676
 }

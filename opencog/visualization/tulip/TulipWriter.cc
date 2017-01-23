@@ -21,7 +21,6 @@
 #include <time.h>
 #include <sstream>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
 
@@ -145,7 +144,7 @@ void TulipWriter::writeNodeNames()
     myfile << "(property  0 string \"viewLabel\" " << endl;
     myfile << "  (default \"\" \"\" )" << endl;
     for (Handle h : nodeHandles) {
-        myfile << "  (node " << h << " \"" << a.get_name(h) << "\")" << endl;
+        myfile << "  (node " << h << " \"" << h->getName() << "\")" << endl;
     }
     // give not nodes the name NOT
     for (Handle h : linkHandles) {
