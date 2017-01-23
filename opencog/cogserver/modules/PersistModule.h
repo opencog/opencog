@@ -59,7 +59,8 @@ private:
 public:
     DECLARE_CMD_REQUEST(PersistModule, "sql-open", do_open,
        "Open connection to SQL storage",
-       "Usage: sql-open <dbname> <username> <auth-passwd>\n\n"
+       "Usage: sql-open <uri>\n"
+       "Usage: sql-open <dbname> <username> <passwd>\n\n"
        "Open a connection to an SQL database, for saving or restoring\n"
        "atomtable contents. If the tables needed to hold atomtable\n"
        "information do not yet exist, they will be created.",

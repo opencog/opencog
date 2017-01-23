@@ -1780,7 +1780,9 @@ after 20 mins:
 write items=539921 drains=2802 fill_fraction=192.691292 concurrency=54.867595
 
 ... doesn't improve concurrency, and seems slower for total CPU, but
-that may be fucked up java.
+that may be fucked up java. ... XXX see below: because there were only
+6 connections to postgres, so really of the 12 writers, 7 were blocked.
+(assumiong one reader thread, or more...)
 
 
 New code, where no atom get: (and 12 writer threads)
@@ -1799,6 +1801,9 @@ drains=25794 fill_fraction=124.202528 concurrency=3.613825
 avg drain time=0.440724 seconds; longest drain time=5.136000
 
 4 writers is not obvious worse and seems better than 12.
+
+Ohh .. well, turns out there were only 6 odbc connections
+available to work with.
 
 --------------------------------------------------
 21 January -- saturday -- start from scratch, again.
@@ -1906,13 +1911,48 @@ avg drain time=0.065023 seconds; longest drain time=0.623000
 fill fraction used to be only about 150, before, and average drain time
 was something like 0.3 seconds... this is a whole new ballgame!
 
+after 1/2 hour wall clock
+write items=1462482 flushes=0 flush_ratio=inf
+drains=1830 fill_fraction=799.170492 concurrency=5.049180
+avg drain time=0.080646 seconds; longest drain time=1.829000
 
+after 100 minutes
+write items=4580980 flushes=0 flush_ratio=inf
+drains=5394 fill_fraction=849.273267 concurrency=4.693919
+avg drain time=0.118629 seconds; longest drain time=70.343000
+
+after 7 hours
+write items=18375732 flushes=0 flush_ratio=inf
+drains=21386 fill_fraction=859.241186 concurrency=4.406621
+avg drain time=0.084344 seconds; longest drain time=70.343000
+
+after 13 hours:
+write items=32066762 flushes=0 flush_ratio=inf
+drains=37044 fill_fraction=865.639834 concurrency=4.370316
+avg drain time=0.077263 seconds; longest drain time=70.343000
+
+
+---------------
 and also: java is fixed: the magic fix was:
 -- shut everything down every 500 sentences,
 -- run gc five times in a row,
 -- restart everything. 
 This unclogs the kitchen sink. -- java now stays up for 4+ hours,
 without tanking.
+
+progress:
+as of 23 jan 01:50 AM have find submitted* |wc being 8198
+              2:15 AM 8299  and (monitor-rate "foo") cnt=2080 rate=0.740
+                   i.e. 0.74 sents/sec = 44 sents/minute!
+                     that's nearly double the previous rate.
+              9:15 AM 10711 -> 10711-8299=2412/(7*60+25) = 5.4 articles/min
+                            -> 325 articles/hour = 7805 articles/day
+                       cnt=18200 rate=0.65566 -> 39 sentences/minute
+              10:47 AM cnt=21430 rate=0.640945
+              12:43 PM cnt=27054 rate=0.668858
+              15:04 PM cnt=33874 rate=0.692012
+
+
 
 -----------------
 requires libgmp-dev
