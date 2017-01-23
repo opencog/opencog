@@ -29,6 +29,8 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
 
+#include <sstream>
+
 namespace opencog
 {
     class AttentionParamQuery 
@@ -39,82 +41,56 @@ namespace opencog
             Handle hget_params;
 
         public:
-            /**
-             * The representation of parameters in the atomspace
-             * will be as follows:
-             *
-             * MemberLink
-             *   Concept "$PARAMETER_i"
-             *   Concept "ECAN_PARAMS"
-             *
-             * then each paramter's value will be stored in a
-             * state link.
-             *
-             * StateLink
-             *   Concept "$PARAMETER_i"
-             *   Number   "x"  ; when boolean, x would be 0 or 1
-             */
-            AttentionParamQuery(AtomSpace* as): _as(as)
-            {
-            parent_param = _as->add_node(CONCEPT_NODE, "ECAN_PARAMS");
+            // Attentional Focus Params
+            static const std::string af_size; 
+            static const std::string af_decay;
+            static const std::string af_bottom;
+            static const std::string af_min_size;
+            static const std::string af_max_size;
+            static const std::string af_rent_update_freq;
 
-            Handle var = _as->add_node(VARIABLE_NODE, "__ECAN_PARAM__");
-            Handle member = _as->add_link(MEMBER_LINK, 
-                    HandleSeq {var, parent_param});
-            hget_params = _as->add_link(BIND_LINK, HandleSeq{member, var});
-            } 
+            // Forgetting Params
+            static const std::string forg_forgetting_threshold;
 
-            std::string get_param_value(const Handle& hparam)
-            {
-                std::string value = "";
-                HandleSeq hseq;
-                hparam->getIncomingSet(back_inserter(hseq));
-                for(Handle h : hseq){
-                    if(h->getType() == STATE_LINK ){
-                        Handle hvalue = h->getOutgoingSet()[1];
-                        std::string str = hvalue->getName();
-                        str.erase (str.find_last_not_of('0') + 1,
-                                   std::string::npos);
+            // Hebbian Link Params
+            static const std::string heb_maxlink;
+            static const std::string heb_max_alloc_percentage;
+            static const std::string heb_local_farlink_ratio;
 
-                        if(str.back() == '.') 
-                            str.pop_back();
+            // Diffusion/Spreading Params
+            static const std::string dif_spread_percentage;
+            static const std::string dif_spread_hebonly;
+            static const std::string dif_tournament_size;
 
-                        value = str;
-                    }
-                }
-                return value;
-            }
+            // Rent Params
+            static const std::string rent_starting_sti_rent;
+            static const std::string rent_starting_lti_rent;
+            static const std::string rent_target_sti_funds;
+            static const std::string rent_sti_funds_buffer;
+            static const std::string rent_target_lti_funds;
+            static const std::string rent_lti_funds_buffer;
+            static const std::string rent_tournament_size;
+
+            AttentionParamQuery(AtomSpace* as);
+
+            void load_default_values(void);
+            std::string get_param_value(const std::string& param);
+            HandleSeq get_params(void);
 
             template<class T>
-                void set_param_value(const Handle& param_name,T value)
-                {
-                    Handle hvalue = _as->add_node(NUMBER_NODE,
-                            std::to_string(value));
-                    _as->add_link(STATE_LINK,HandleSeq{param_name, hvalue});
-                }
-
-            template<class T>
-                void add_param(const std::string& param_name,T value)
+                void set_param(const std::string& param_name,T value)
                 {
                     Handle param = _as->add_node(CONCEPT_NODE, param_name);
                     Handle member_link = _as->add_link(MEMBER_LINK, 
                             HandleSeq{param, parent_param});
 
+                    std::ostringstream sstream;
+                    sstream << value;
                     Handle hvalue  = _as->add_node(NUMBER_NODE, 
-                            std::to_string(value));
+                                                   sstream.str());
 
                     _as->add_link(STATE_LINK,HandleSeq{param, hvalue});
                 }
-
-
-            HandleSeq get_params(void)
-            {
-                Handle rh = satisfying_set(_as, hget_params);
-                if (NULL != rh) rh = _as->add_atom(rh);
-
-                return rh->getOutgoingSet();
-            }
-
     }; // class
 
     /** @}*/

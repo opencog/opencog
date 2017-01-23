@@ -31,6 +31,8 @@
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/attentionbank/AttentionBank.h>
 
+#include "AttentionParamQuery.h"
+
 namespace opencog
 {
 /** \addtogroup grp_attention
@@ -55,6 +57,7 @@ private:
 
 protected:
     AttentionBank* _bank;
+    AttentionParamQuery _atq;
 
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.

@@ -42,39 +42,34 @@ Handle h1,h2,h3,h4;
 
 public:
 AttentionParamQueryUTest(): _atq(&as){
-    _atq.add_param(params[0], true);
-    _atq.add_param(params[1], 2.5f);
-    _atq.add_param(params[2], 4.5);
-    _atq.add_param(params[3], 2);
-
-    h1 = as.add_node(CONCEPT_NODE, params[0]);
-    h2 = as.add_node(CONCEPT_NODE, params[1]);
-    h3 = as.add_node(CONCEPT_NODE, params[2]);
-    h4 = as.add_node(CONCEPT_NODE, params[3]);
+    _atq.set_param(params[0], true);
+    _atq.set_param(params[1], 2.5f);
+    _atq.set_param(params[2], 4.5);
+    _atq.set_param(params[3], 2);
 }
 
 ~AttentionParamQueryUTest(){}
 
 void test_get_param_value();
-void test_set_param_value();
+void test_set_param();
 void test_get_params();
 };
 
 
 void AttentionParamQueryUTest::test_get_param_value()
 {
-    TS_ASSERT_EQUALS("1", _atq.get_param_value(h1));
-    TS_ASSERT_EQUALS("2.5", _atq.get_param_value(h2));
-    TS_ASSERT_EQUALS("4.5", _atq.get_param_value(h3));
-    TS_ASSERT_EQUALS("2", _atq.get_param_value(h4));
+    TS_ASSERT_EQUALS("1", _atq.get_param_value(params[0]));
+    TS_ASSERT_EQUALS("2.5", _atq.get_param_value(params[1]));
+    TS_ASSERT_EQUALS("4.5", _atq.get_param_value(params[2]));
+    TS_ASSERT_EQUALS("2", _atq.get_param_value(params[3]));
 }
 
-void AttentionParamQueryUTest::test_set_param_value()
+void AttentionParamQueryUTest::test_set_param()
 {
-    _atq.set_param_value(h1, false);
-    TS_ASSERT_EQUALS("0", _atq.get_param_value(h1));
-    _atq.set_param_value(h2, 4);
-    TS_ASSERT_EQUALS("4", _atq.get_param_value(h2));
+    _atq.set_param(params[0], false);
+    TS_ASSERT_EQUALS("0", _atq.get_param_value(params[0]));
+    _atq.set_param(params[1], 4);
+    TS_ASSERT_EQUALS("4", _atq.get_param_value(params[1]));
 }
 
 void AttentionParamQueryUTest::test_get_params()
@@ -87,5 +82,4 @@ void AttentionParamQueryUTest::test_get_params()
         TS_ASSERT_DIFFERS(hseq.end(), it);
     }
 }
-
 

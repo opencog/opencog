@@ -33,6 +33,7 @@
 #include <opencog/cogserver/server/CogServer.h>
 
 #include "HebbianCreationAgent.h"
+
 #ifdef DEBUG
 #undef DEBUG
 #endif
@@ -40,19 +41,21 @@
 using namespace opencog;
 
 HebbianCreationAgent::HebbianCreationAgent(CogServer& cs) :
-    Agent(cs)
+    Agent(cs), _atq(&cs.getAtomSpace())
 {
     _bank = &attentionbank(_as);
 
     // Provide a logger, but disable it initially
     setLogger(new opencog::Logger("HebbianCreationAgent.log", Logger::FINE, true));
-
-    maxLinkNum = config().get_int("ECAN_MAXLINKS", 300);
-    localToFarLinks = config().get_int("ECAN_LOCAL_FAR_LINK_RATIO", 10);
 }
 
 void HebbianCreationAgent::run()
 {
+    maxLinkNum = std::stoi(_atq.get_param_value
+                           (AttentionParamQuery::heb_maxlink));
+    localToFarLinks = std::stoi(_atq.get_param_value
+                               (AttentionParamQuery::heb_local_farlink_ratio));
+
     Handle source;
     newAtomsInAV.pop(source);
 

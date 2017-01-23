@@ -32,6 +32,7 @@
 #include <opencog/attentionbank/AttentionBank.h>
 
 #include "WARentCollectionAgent.h"
+#include "AttentionParamQuery.h"
 
 //#define DEBUG
 
@@ -39,13 +40,13 @@ using namespace opencog;
 
 WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
 {
-    _tournamentSize = config().get_int("ECAN_RENT_TOURNAMENT_SIZE", 5);
-
     // READ SLEEPING TIME HERE
     set_sleep_time(2000);
 }
 
 Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
+    _tournamentSize = std::stoi(_atq.get_param_value(AttentionParamQuery::rent_tournament_size));
+
     int sz = (_tournamentSize >  population.size() ? population.size() : _tournamentSize);
 
     if (sz <= 0)

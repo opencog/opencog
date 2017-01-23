@@ -38,9 +38,6 @@ using namespace opencog;
 WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
     ImportanceDiffusionBase(cs)
 {
-    _tournamentSize = config().get_int("ECAN_DIFFUSION_TOURNAMENT_SIZE", 5);
-    _decayPercentage  = config().get_double("ECAN_MAX_SPREAD_PERCENTAGE", 0.4);
-
     set_sleep_time(300);
 }
 
@@ -50,6 +47,12 @@ WAImportanceDiffusionAgent::~WAImportanceDiffusionAgent()
 
 void WAImportanceDiffusionAgent::run()
 {
+    // Read params
+    _tournamentSize = std::stoi(_atq.get_param_value(
+                               AttentionParamQuery::dif_spread_hebonly));
+    hebbianMaxAllocationPercentage =std::stod(_atq.get_param_value(
+                                     AttentionParamQuery::dif_tournament_size));
+
     spreadImportance();
 
     //some sleep code
