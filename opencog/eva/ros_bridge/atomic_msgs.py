@@ -156,3 +156,7 @@ class AtomicMsgs:
 		room = '(StateLink (AnchorNode "luminance")' +\
 			' (NumberNode ' + str(bright) +'))\n'
 		netcat(self.hostname,self.port,room)
+
+	def face_id(self,fid,name):
+		fc = '(make-recognized-face '+str(fid)+' "'+name+'")\n'
+		netcat(self.hostname,self.port,fc)

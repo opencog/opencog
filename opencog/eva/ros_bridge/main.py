@@ -39,6 +39,7 @@ ft = FaceTrack()
 st = SoundTrack()
 br = RoomBrightness()
 sl = SaliencyTrack()
+fc = FaceRecog()
 
 try:
 	rospy.spin()
