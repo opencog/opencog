@@ -54,7 +54,7 @@
      implication-scope-to-implication-rewrite))
 
 (define (implication-scope-to-implication-formula Impl ImplSc)
-  ((cog-merge-hi-conf-tv! Impl (cog-tv ImplSc))))
+  (cog-merge-hi-conf-tv! Impl (cog-tv ImplSc)))
 
 ;; Name the rule
 (define implication-scope-to-implication-rule-name
