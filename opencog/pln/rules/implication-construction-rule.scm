@@ -61,7 +61,7 @@
      implication-construction-rewrite))
 
 (define (implication-construction-precondition P Q)
-  (bool->tv (tv-positive-conf? (implication-construction-stv-formula P Q))))
+  (bool->tv (tv-non-null-conf? (implication-construction-stv-formula P Q))))
 
 (define (implication-construction-stv-formula P Q)
   (let* (
@@ -80,9 +80,8 @@
 
 (define (implication-construction-formula Impl P Q)
   (let ((Impl-tv (implication-construction-stv-formula P Q)))
-    (if (tv-positive-conf? Impl-tv) ; Try to avoid constructing informationless
+    (if (tv-non-null-conf? Impl-tv) ; Try to avoid constructing informationless
                                     ; knowledge
-        (cog-undefined-handle)
         (cog-merge-hi-conf-tv! Impl Impl-tv))))
 
 ;; Name the rule
