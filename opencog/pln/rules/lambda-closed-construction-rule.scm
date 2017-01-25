@@ -1,4 +1,5 @@
 ;; =====================================================================
+;; V
 ;; Body
 ;; |-
 ;; LambdaLink
@@ -8,10 +9,6 @@
 ;; Wrap a Lambda around a closed atom (that is an atom without free
 ;; variables in it) and assign to the lambda the TV of the body. So
 ;; basically it create a constant predicate or schema.
-;;
-;; Note that in practice we actually match only premises already
-;; wrapped in a LambdaLink as a workaround the current lack of
-;; alpha-equivalence support.
 ;; ----------------------------------------------------------------------
 
 (define lambda-closed-construction-vardecl
@@ -51,7 +48,7 @@
   (cog-set-tv! lamb (cog-tv body)))
 
 (define (lambda-closed-construction-precondition atom)
-  (bool->tv (and (cog-closed? atom) (tv-positive-conf? (cog-tv atom)))))
+  (bool->tv (and (cog-closed? atom) (tv-non-null-conf? (cog-tv atom)))))
 
 ;; Name the rule
 (define lambda-closed-construction-rule-name
