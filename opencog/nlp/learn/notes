@@ -1931,6 +1931,19 @@ write items=32066762 flushes=0 flush_ratio=inf
 drains=37044 fill_fraction=865.639834 concurrency=4.370316
 avg drain time=0.077263 seconds; longest drain time=70.343000
 
+after 24 hours:
+write items=56233665 flushes=0 flush_ratio=inf
+drains=67199 fill_fraction=836.822944 concurrency=4.378875
+avg drain time=0.072986 seconds; longest drain time=70.343000
+
+So this looks to be stable.
+after 3 days:
+write items=199535356 flushes=0 flush_ratio=inf
+drains=310946 fill_fraction=641.704206 concurrency=5.116091
+avg drain time=0.087041 seconds; longest drain time=70.343000
+
+so its ogt a little worse... but atomspace is much much bigger, now.
+
 
 ---------------
 and also: java is fixed: the magic fix was:
@@ -1951,6 +1964,13 @@ as of 23 jan 01:50 AM have find submitted* |wc being 8198
               10:47 AM cnt=21430 rate=0.640945
               12:43 PM cnt=27054 rate=0.668858
               15:04 PM cnt=33874 rate=0.692012
+      24 jan  01:34 AM cnt=57497 rate=0.663148
+                       18160 articles->(18160-8198)/24 = 415 articles/hour
+                       10K articles/day
+      25 Jan  12:04 PM cnt=134017 rate=0.63543
+                       27967 articles->(27967-8198)/59 = 335 articles/hour
+      26 Jan  15:26 PM cnt=196794 rate=0.63602
+                       35736 articles
 
 
 
