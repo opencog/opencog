@@ -1973,6 +1973,80 @@ as of 23 jan 01:50 AM have find submitted* |wc being 8198
                        35736 articles
 
 
+-----------------
+CentOS 5
+
+psql opencog_test -U opencog_tester -W -h localhost
+
+PGPORT=5433
+PGDATA=/home/linas/postgres/var/lib/pgsql/data
+PGLOG=/tmp/pgstartup.log
+
+postgres -c "/usr/bin/postmaster -p '$PGPORT' -D '$PGDATA' &" >> "$PGLOG" 2>&1 
+postgres -c "/usr/bin/postmaster -p 5432 -D /home/linas/postgres/var/lib/pgsq/data &" >> /home/linas/postgres/tmp/pgstartup.log 2>&1 
+
+alt: chroot /home/linas/postgres; /etc/init.d/postgresql start
+nooo dudn't work.
+
+just this:
+/home/linas/postgres/etc/init.d/postgresql start
+
+/usr/bin/postmaster -p 5432 -D /home/linas/postgres/var/lib/pgsql/data &
+>> /home/linas/postgres/tmp/pgstartup.log 2>&1 
+
+psql opencog_test -U opencog_tester -W -h localhost
+Nooooo
+look at .odbc.ini
+
+psql test-persist -p 6543
+
+CREATE TABLE Spaces (
+    space  BIGINT PRIMARY KEY,
+    parent BIGINT
+);  
+INSERT INTO Spaces VALUES (0,0); -- no space defined; raw atoms.
+INSERT INTO Spaces VALUES (1,1); -- default root
+
+ALTER TABLE atoms ADD COLUMN space INT REFERENCES spaces(space);
+
+select count(*) from atoms;
+select sum(stv_count) from atoms;
+
+
+all of these are only the ANY type:
+
+fr_pairs -- learn-fr -- 11161199 (11M) atoms, 6842302577 (6.8G) count
+                         ANY-count = 1200368900 = 1.2GB relations
+
+lt_pairs -- learn-lt --  9798103 (10M) atoms, 2873920459 (2.8G) count
+                         ANY-count = 647356630 = 0.65G relations
+
+pl_pairs -- learn-pl -- 16192701 (16M) atoms, 4331274070 (4.3G) count
+                         ANY-count = 1061898400 = 1G relations
+
+simple_pairs -- learn-simple -- empty
+pair_data -- 532 atoms, junk
+
+frwiki-20131220-pages-articles
+   find alpha-pages |wc -- 1452754 - 1.4M
+   find beta-pages |wc -- 1436278 
+   find submitted-articles |wc -- 16505
+
+plwiki-20131218-pages-articles
+   find alpha-pages | wc -- 1007645 -- 1.0M
+   find submitted-articles |wc -- 107190
+
+ltwiki-20131216-pages-articles
+   find alpha-pages | wc -- 161488 -- 161K
+   submitted-articles |wc -- 18108
+
+fr_ady : mophology pairs.
+.odbc.ini -> fr-ady
+
+relex is not spewing ady correctly -- FIXED
+
+fr-ady on 17003, ady relex on 4446
+
 
 -----------------
 requires libgmp-dev
