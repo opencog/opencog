@@ -21,4 +21,4 @@
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
-(sql-open "fr-ady" "linas" "asdf")
+(sql-open "odbc://linas:asdf/fr-ady")
