@@ -19,7 +19,9 @@
            (TypeNode "TypedVariableLink")
            (TypeNode "VariableList")
            (TypeNode "VariableNode")))
-     (VariableNode "$B")))
+     (TypedVariableLink
+        (VariableNode "$B")
+        (TypeNode "EvaluationLink"))))
 
 (define lambda-closed-construction-pattern
   (AndLink
