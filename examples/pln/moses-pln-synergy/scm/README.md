@@ -514,7 +514,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-##### (9) - Using (2) and (8) deduce that if X takes treatment-1 then X takes compound-A
+##### (9) - Using (8) and (2) deduce that if X takes treatment-1 then X takes compound-A
 
 Semi-formally
 
