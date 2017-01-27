@@ -75,9 +75,13 @@
                     (TypeNode "NotLink"))))
     (gen-deduction-rule SubsetLink var-type)))
 
-(define (deduction-formula AC AB BC)
+(define (deduction-formula conclusion . premises)
+  (if (= (length premises) 2)
     (let*
-        ((sA (cog-stv-strength (gar AB)))
+        ((AC conclusion)
+         (AB (list-ref premises 0))
+         (BC (list-ref premises 1))
+         (sA (cog-stv-strength (gar AB)))
          (cA (cog-stv-confidence (gar AB)))
          (sB (cog-stv-strength (gar BC)))
          (cB (cog-stv-confidence (gar BC)))
@@ -144,7 +148,7 @@
                                               ;; situation.
                     (cog-merge-hi-conf-tv! AC (stv sAC cAC))
                     (cog-undefined-handle))))
-          (cog-undefined-handle))))
+          (cog-undefined-handle)))))
 
 ;; Name the rules
 (define deduction-inheritance-rule-name
