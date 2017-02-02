@@ -523,6 +523,10 @@ void GenericShell::poll_loop(void)
 		if (_eval_done) usleep(10000);
 	}
 
+	// It's also possible that it reaches the dtor (turning self_destruct == true)
+	// shortly after an evaluation has just finished. It may then exit the loop
+	// above without polling the output, eventually causing the evalthr to stay
+	// in while_not_done() forever. So let's do it one more time here
 	std::string retstr(poll_output());
 	if (0 < retstr.size())
 		socket->Send(retstr);
