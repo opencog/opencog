@@ -522,6 +522,16 @@ void GenericShell::poll_loop(void)
 		// slower than this...)
 		if (_eval_done) usleep(10000);
 	}
+
+	std::string retstr(poll_output());
+	if (0 < retstr.size())
+		socket->Send(retstr);
+
+	while (not _eval_done)
+	{
+		poll_output();
+		usleep(10000);
+	}
 }
 
 void GenericShell::thread_init(void)
