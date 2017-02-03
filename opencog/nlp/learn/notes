@@ -2261,6 +2261,42 @@ cx1 - 30 jan hang after 4.4M stores
 
 155 threads
 
+155: pthread_cond_wait - multi-driver/SQLAtomStorage.cc:325
+
+Ahhh ... too many open sockets, and one is deadlocked.
+
+wait ... deadlocked in conn_pool.pop()
+in SQLAtomStorage::get_conn() SQLAtomStorage.cc:325
+
+so who is using all these conns?
+
+154: ~GenericShell 152 150 148 .. 130 .. 127
+
+153: same as 155 151 149 147 ... 131 .. 128
+
+alternates like this till 131 or so
+
+129: SchemeEval::do_poll_result SchemeEval.cc:655  86
+
+90 76: nanosleep --SQLAtomStorage::storeAtom SQLAtomStorage.cc:754
+    waiting to drain ... so its not draining ... why?
+
+25: GC25: GC
+
+24: get_conn, do_store_single --- this is the write-back handler.
+    there are 8 of these .. through 17 
+
+so .. the 8 busy writers are blocking readers, cause there are only 8
+conns total ... 
+
+works better if we double the pool...
+
+15: console list
+14: logger
+13-2: gc
+12
+
+
 
 ------------------
 very late:
