@@ -1765,7 +1765,7 @@ rate: 11464 / 480 min = 23.9 sents/min
 
 
 4 concurrent writers:
-after 15 mns: 
+after 15 mins: 
 write items=417737 drains=2532 fill_fraction=164.983017 concurrency=51.921801
 
 after 20 mins cpu:
@@ -2047,8 +2047,416 @@ relex is not spewing ady correctly -- FIXED
 
 fr-ady on 17003, ady relex on 4446
 
+Warning: Combinatorial explosion! nulls=1 cnt=2147483647
+FIXED -- hacked on LG; works-ish, but slow for long sentences.
+
+psql -p 6543 fr_ady
+select type, name,stv_count from atoms where height=0;
+
+Argh.
+after a day: guile hung; but also, no articles moved from
+split to submitted!
+
+crash: string_set_add + 0x47
+000000000003ad90 t string_set_add
+
+  e0:	84 c9                	test   %cl,%cl
+  e2:	0f 84 89 01 00 00    	je     271 <string_set_add+0x1b1>
+  e8:	48 8b 36             	mov    (%rsi),%rsi
+  eb:	49 89 f8             	mov    %rdi,%r8
+  ee:	0f b6 d1             	movzbl %cl,%edx
+  f1:	45 31 ed             	xor    %r13d,%r13d
+  f4:	0f 1f 40 00          	nopl   0x0(%rax)
+  f8:	41 c1 e5 08          	shl    $0x8,%r13d
+  fc:	49 83 c0 01          	add    $0x1,%r8
+ 100:	41 8d 44 15 00       	lea    0x0(%r13,%rdx,1),%eax
+ 105:	31 d2                	xor    %edx,%edx
+ 107:	48 f7 f6             	div    %rsi
+
+but RSI is zero
+
+liblink-grammar.so.5+0x3b6b3]  int+0x3
+000000000003b6b0 t is_capitalizable.isra.9
+
+
+PrintWriter out -- done
+outs  OutputStream  done
+in_sock  Socket  -- done
+send_sock Socket  ... is null
+
+23:30: 2159 articles
+23:43: 2535 articles : 276/13 minutes = 21 articles/min
+
+23:48  2540 articles
+23:59  2872 articles : 332 aritcles/ 11 mins = 30 articles/min! waa
+
+00:45  3651 articles
+select sum(stv_count) from atoms; 1375507899  == 1.38 G counts
+select count(*) from atoms; 7146891 == 7.1M atoms
+
+# C  [liblink-grammar.so.5+0x120d5]  print_flat_constituents+0xbd5
+# C  [liblink-grammar.so.5+0x120d5]  print_flat_constituents+0xbd5
+
+from 
+C  [liblink-grammar.so.5+0x12a25]  linkage_print_constituent_tree+0x85
+
+4180 + bd5 = 4d55
+objdump -d -F -g -S
+
+in build tree:
+0000000000011500 t print_flat_constituents
+00000000000120e0 t print_tree
+
+in build tree so:
+
+
+4ccd:
+   1207f:   31 c9                   xor    %ecx,%ecx
+   12081:   31 c0                   xor    %eax,%eax
+   12083:   e8 78 2a 01 00          callq  24b00 <feature_enabled>
+   12088:   48 85 c0                test   %rax,%rax
+   1208b:   0f 85 1f ff ff ff       jne    11fb0
+<print_flat_constituents+0xab0>
+   12091:   eb d6                   jmp    12069
+<print_flat_constituents+0xb69>
+   12093:   48 89 c3                mov    %rax,%rbx
+   12096:   48 8b 00                mov    (%rax),%rax
+   12099:   48 8b b8 98 00 00 00    mov    0x98(%rax),%rdi
+   120a0:   e8 9b 89 01 00          callq  2aa40 <post_process_new>
+   120a5:   48 89 c7                mov    %rax,%rdi
+   120a8:   48 89 bb 88 00 00 00    mov    %rdi,0x88(%rbx)
+   120af:   e9 ff f7 ff ff          jmpq   118b3
+<print_flat_constituents+0x3b3>
+   120b4:   e8 47 3e ff ff          callq  5f00 <__stack_chk_fail@plt>
+   120b9:   48 8d 3d b0 00 05 00    lea    0x500b0(%rip),%rdi        # 62170 <__func__.7560+0x8f0>
+   120c0:   31 c0                   xor    %eax,%eax
+   120c2:   e8 e9 3b ff ff          callq  5cb0 <prt_error@plt>
+   120c7:   48 8d 3d ac bf 05 00    lea    0x5bfac(%rip),%rdi        # 6e07a <_ZTSN7Minisat6SolverE+0xca>
+4d22:
+   120ce:   31 c0                   xor    %eax,%eax
+   120d0:   e8 db 3b ff ff          callq  5cb0 <prt_error@plt>
+>>>>>>>>>>>>>>>>>>>> crash here.
+   120d5:   0f 0b                   ud2
+   120d7:   48 8d 3d 0a 00 05 00    lea    0x5000a(%rip),%rdi        # 620e8 <__func__.7560+0x868>
+   120de:   eb e0                   jmp    120c0 <print_flat_constituents+0xbc0>
+
+OK
+00000000000120e0 <print_tree>:
+   120e0:   48 85 d2                test   %rdx,%rdx
+   120e3:   0f 84 ab 08 00 00       je     12994 <print_tree+0x8b4>
+   120e9:   41 57                   push   %r15
+   120eb:   41 56                   push   %r14
+   120ed:   49 89 ff                mov    %rdi,%r15
+   120f0:   41 55                   push   %r13
+
+So: 
+
+blank banshee
+I just wasn't made for these times -- beach boys -- pet sounds
+
+linkage_print_constituent_tree
+getConstituentString
+LinkGrammar.java -- wraps the C api w/static funcs
+    public static native String getConstituentString();
+LGService.java -- where the struture is restored
+if (config.isStoreConstituentString())
+
+
+finish
+Java_org_linkgrammar_LinkGrammar_close(JNIEnv *env, jclass cls)
+    public static native void close();
+
+LGService.do_finalize()
+
+allowSkippedWords
+setAllowSkippedWords
+
+linkgrammar_get_dict_version+0x0  <-- crash here twice ...
+parser.parse(sentence);
+
+parseSentence   159
+
+parser.parse(sentence);
+
+start again yue 30 Jan 22:19 
+at 22:49 -- 488 articles/30 minutes = 16 articles/minute! -- 3x faster than before.
+at 23:48 -- 796 articles in 90 minutes = 9 artciles/min
+at 00:19 -- 926 articles in 120 mins = 7.7 articles/min
+            4500 sents = 4.86 sents/article
+            22908000 stored, stv total = 18315330
+            stv/5 = 3.66M pairs or 814 pairs/sent(!)
+at 11:55 -- 4275 articles in 816 mins = 5.24 articles/min - back to old rates.
+            restart java, no noticable diference in rate: its same cpu/loadavg<F3>
+restart, and load all. Before stopping:
+            tlbuf holds 1381888 atoms Atomspace holds 1381901 atoms Hmm.
+
+restart: explicit load: 1381888 atoms in 31 cpu-secs: 44.6K atoms/sec load speed.
+at 12:13 -- restarted. Baseline: 4304 articles
+at 18:13 -- 6094-4304 = 1790/6 hrs = 4.97 articles/min
+at 00:26 -- 7547-6094 = 1453/373 mins = 3.90 articles/min
+at 12:22 -- 12376-7547 = 4829/716 mins = 6.74 articles/min (!)
+24-hour avg: 12376 - 4304 = 8072/1449min = 5.57 articles/min
+
+1 Feb 2017:
+change postgres shared_buffers = 24576MB  from 1GB previously.
+also -- change java to 2GB from 1GB
+restart at 12:31 no explicit load.
+at 14:14 -- 13926 - 12376 = 1550/103min = 15.0 articles/min(!)
+
+at 15:40 - 12:31 = 189 mins, have 
+         guile=637:07 mins, or 637/189 = 3.37 load
+         java = 50:25 = 50/189 = 0.267 load
+         postgres = 10974 secs = 182.9 mins = 182.9/189 = 0.968 load
+
+at 21:27  -- 17014 - 13926 = 3088 / 433 mins = 7.13 articles/min
+
+at 21:30 - 12:31 = 539 mins
+        guile = 1850:15 / 539 = 3.42 load
+        java  =  148:04 / 539 = 0.274 load
+        postgres = 519 / 539 = 0.963 load
+
+2 Feb 2017 -- guile crashed! no prints no dump. 
+restart at 12:05 -- 21174 articles
+        at 12:43 -- 21411 articles = 411-174/38 = 237/38 = 6.2 artciles/min
+        at 19:28 -- 23422 articles = 23422-21174/443 = 2248/443 = 5.07 arts/min
+
+ 
+
+postgres:
+ps ax |grep postgres > x
+cat  x |cut -f 4 > y
+
+
+EPOCH='jan 1 1970'
+sum=")"
+
+for i in 00:03:34 00:00:35 00:12:34
+do
+  sum="$(date -u -d "$EPOCH $i" +%s) $sum"
+done
+echo "(+" $sum| guile
+
+=====================================================================
+French pairs
+
+french pairs: start again: 22:36PM 30 Jan - find submitted* |wc 17053 
+                           12:25PM  2 Feb - find submitted* |wc 24563
+disk: 206447916 used 41097304 free
+disk  206574808 used 40970412 free  24 hours later... about 100MB more
+disk  206888724 used 40656496 free  12:25 2 Feb
+
+select count(*) from atoms;         2090064 --   2M -- 12:25PM  2 Feb
+select sum(stv_count) from atoms; 115251031 -- 115M -- 12:25PM  2 Feb
+
+
+
+guile hangs:
+cx1 - 30 jan hang after 4.4M stores 
+      31 jan hang after 42M stores
+       1 Feb hang after 33M stores -- 2000:26 cpu
+       1 Feb hang after 6.9M stores
+       2 Feb hang
+       2 Feb hang after 20M stores -- 865:47 cpu
+
+
+155 threads
+
+155: pthread_cond_wait - multi-driver/SQLAtomStorage.cc:325
+
+Ahhh ... too many open sockets, and one is deadlocked.
+
+wait ... deadlocked in conn_pool.pop()
+in SQLAtomStorage::get_conn() SQLAtomStorage.cc:325
+
+so who is using all these conns?
+
+154: ~GenericShell 152 150 148 .. 130 .. 127
+
+153: same as 155 151 149 147 ... 131 .. 128
+
+alternates like this till 131 or so
+
+129: SchemeEval::do_poll_result SchemeEval.cc:655  86
+
+90 76: nanosleep --SQLAtomStorage::storeAtom SQLAtomStorage.cc:754
+    waiting to drain ... so its not draining ... why?
+
+25: GC25: GC
+
+24: get_conn, do_store_single --- this is the write-back handler.
+    there are 8 of these .. through 17 
+
+so .. the 8 busy writers are blocking readers, cause there are only 8
+conns total ... 
+
+works better if we double the pool...
+
+15: console list
+14: logger
+13-2: gc
+12
+
+
+
+------------------
+very late:
+link-grammar: Info: Dictionary 'ady/4.0.dict': No locale definition -
+"en_US.UTF-8" will be used.
+link-grammar: Info: Dictionary 'ady/4.0.dict': No locale definition -
+"en_US.UTF-8" will be used.
+link-grammar: Error: Could not open dictionary "ady/4.0.dict"
+
+
+restart not happen until connection... OK.
+link-grammar not loaded until the next round!
+
+re.setMaxParses
+
+_is_in
+dict=0x7f053c1bb0b0
+dict=0x7f2e2c1f35a0
+local-ptd=0x7f2e2c1f3550
+
+checking for locale_t in locale.h... no
+checking for locale_t in xlocale.h... no
+
+__USE_GNU
+       semant = new AlgorithmApplier(
+         "relex.semalgpath", "relex-semantic.algs");
+
+wordnet.configfile file_properties.xml
+
+src/java/relex/morphy/MapMorphy.java:
+src/java/relex/morphy/MorphyFactory.java:
+
+               getJWNLConfigFileStream(
+                     WORDNET_PROPERTY,
+                     JWNL_FILE_PROPERTIES_XML,
+                     JWNL_DIR_PROPERTIES_XML
+               )
+
+Info: hndlr=3 recv input: "- |3-1|25-23|20-25|25-17|25-11||95-76|couleur=gris}} - |3-0|28-26|25-19|25-23|||78-68}} - |3-1|25-21|25-21|13-25|25-12||88-79|couleur=gris}} - |3-1|21-25|33-31|40537|25-15||104-83}} - |3-2|25-23|22-25|25-22|17-25|17-15|106-110|couleur=gris}} - |3-0|25-19|25-13|25-23|||75-55}}"
+
+Info: hndlr=8 recv input: "- |3-0|25-16|26-24|25-17|||76-57|couleur=gris}} - |3-1|25-22|23-25|25-20|25-20||98-87}} - |3-2|25-22|20-25|25-27|33-31|15-12|118-117|couleur=gris}} - |3-0|25-14|25-22|25-19|||75-55}} - |3-0|25-14|25-20|25-21|||75-55|couleur=gris}} - |3-0|26-24|25-18|33-31|||84-73}}"
+
+then crash
+
+"ISBN 0-380-72001-9.  http://books.google.be/books?id=FMsNAG-gresC&pg=PA144&lpg=PA144&dq=vlakfontein+Dixon+kemp&source=web&ots=8cB7anqlpV&sig=REOVNA8sQO8iTZhI-0_IHVdhySQ&hl=en&sa=X&oi=book_result&resnum=3&ct=result."
+
+
+crash again:
+C  [libc.so.6+0x7a97b]  unsigned long+0xa5b
+C  [liblink-grammar.so.5+0x3dad4]  short+0x164
+3dad4 - 164 = 3d970
+
+000000000003d970 t separate_word.isra.12
+
+if (not dict->affix_table ) jump pst anysplit
+   3dab8:   74 1a                   je     3dad4 <separate_word.isra.12+0x164>
+   3daba:   48 83 78 58 00          cmpq   $0x0,0x58(%rax)
+if (not dict->affix_table->anysplit) jump past anysplit
+   3dabf:   74 13                   je     3dad4 <separate_word.isra.12+0x164>
+   3dac1:   48 8b b5 30 ff ff ff    mov    -0xd0(%rbp),%rsi  # arg2: unsplit_word
+   3dac8:   48 8b bd 20 ff ff ff    mov    -0xe0(%rbp),%rdi  # arg1: sent
+   3dacf:   e8 4c a9 fc ff          callq  8420 <anysplit>
+   3dad4:   48 8b 95 70 ff ff ff    mov    -0x90(%rbp),%rdx  # arg3: word
+crash here
+RBP=0x00002b9ecaf2e450, RDX=0x0000000000000000
+
+call convention arg 1 2 3 in RDI RSI RDX
+
+looks like RBP is pointing into the stack... and 0x00002b9ecaf2e3c0 is
+null ...
+
+0x00002b9ecaf2e3a8:   00002b9eeef04f10 000000004bb2c580
+0x00002b9ecaf2e3b8:   00002b9e00000000 0000000000000000
+0x00002b9ecaf2e3c8:   0000000000000000 00002b9eec065490
+0x00002b9ecaf2e3d8:   fffffffe00000026 00002b9ecaf2e310
+0x00002b9ecaf2e3e8:   0000000000000001 00002b9e00737470
+
+OK, this is fine, the crash is somewhere inside of anysplit.
+
+unsplit word is.... at 0x00002b9ecaf2e450 - d0 = ...380 
+
+0x00002b9ecaf2e380: 000000004bb2c960 -- same as contents to rbx
+
+
+
+   3dadb:   48 8b b5 30 ff ff ff    mov    -0xd0(%rbp),%rsi  # arg2: unsplit_word
+   3dae2:   48 8b bd 20 ff ff ff    mov    -0xe0(%rbp),%rdi # arg1: sent
+   3dae9:   e8 a2 f8 ff ff          callq  3d390 <morpheme_split>
+   3daee:   80 bd 1f ff ff ff 00    cmpb   $0x0,-0xe1(%rbp)
+   3daf5:   89 c3                   mov    %eax,%ebx
+   3daf7:   75 2e                   jne    3db27 <separate_word.isra.12+0x1b7>
+   3daf9:   84 c0                   test   %al,%al
+
+==================================
+again
+https://sourceware.org/bugzilla/show_bug.cgi?id=21104
+
+Info: hndlr=1 sentence: "Chaussande (de) [http://gallica.bnf.fr/ark:/12148/bpt6k1120033/f177.image.r=], baron par bref pontifical de 1707, Comtat Venaissin, ANF-1969."
+*** glibc detected *** java: free(): invalid pointer: 0x0000000059551940
+***
+======= Backtrace: =========
+/lib64/libc.so.6[0x3e296714af]
+/lib64/libc.so.6(cfree+0x4b)[0x3e296757ab]
+/usr/local/lib/liblink-grammar.so.5[0x2b3a2392a7ce]
+/usr/local/lib/liblink-grammar.so.5[0x2b3a2392b396]
+/usr/local/lib/liblink-grammar.so.5(sentence_parse+0x99)[0x2b3a2392bb69]
+/usr/local/lib/liblink-grammar-java.so.5.3.15(Java_org_linkgrammar_LinkGrammar_parse+0xf5)[0x2b3a236f8995]
+[0x2b3a1690eeee]
+
+
+#5  0x00002b3a2392a7ce in wordgraph_path_free (free_final_path=true, wp=0x59551860)
+    at ../../link-grammar/api.c:937
+#6  sane_linkage_morphism (sent=sent@entry=0x586bb130, lkg=lkg@entry=0x5877b850, 
+    opts=opts@entry=0x586baef0) at ../../link-grammar/api.c:1021
+
+
+(gdb) print twp
+$1 = (Wordgraph_pathpos *) 0x59551890
+(gdb) print *twp
+$3 = {word = 0x587d7f40, same_word = 56, next_ok = 74, used = 149, path = 0x59551940}
+
+(gdb) x/16g 0x59551940
+0x59551940:	0x00000000587d6ef0	0x0000000000000000
+0x59551950:	0x0000000000001270	0x0000000000000021
+0x59551960:	0x000000005894f650	0x0000003e29954a68
+0x59551970:	0x0000000000000020	0x0000000000000040
+0x59551980:	0x00000000595516f0	0x000000005a5c82a0
+
+Hmm everything looks OK, so what's the problem???
+
+struct Wordgraph_pathpos_s
+{
+   Gword *word;      /* Position in the Wordgraph */
+   /* Only for wordgraph_flatten(). */
+   bool same_word;   /* Still the same word - issue an empty word */
+   bool next_ok;     /* OK to proceed to the next Wordgraph word */
+   bool used;        /* Debug - the word has been issued */
+   /* Only for sane_morphism(). */
+   const Gword **path; /* Linkage candidate wordgraph path */
+};
+
+wordgraph_pathpos_resize could take bigger jumps.
+
+
+wordgraph_pathpos_len
+
+len == len not counting the null.
+
+e.g. n=1 insert = 0
+memomve from 0 to 1 for 1 item
+
+
+
+
+
 
 -----------------
+postgres: change  shared_buffers = 24576MB         # min 128kB
+/etc/postgresql/9.5/main/postgresql.conf
+
 requires libgmp-dev
 libgc-dev
 use the git version of guile
