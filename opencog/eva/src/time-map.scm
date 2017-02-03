@@ -188,8 +188,8 @@
 						(VariableNode "$fid")
 						(SentenceNode sent)))
 				(Concept "sound-perception"))
-			(Get (State last-speaker (Variable "$fid")))
-		))
+		(Get (State last-speaker (Variable "$fid")))
+	))
 )
 
 ;;math
