@@ -35,14 +35,14 @@
 using namespace opencog;
 
 // _max_open_sockets is the largest number of concurrently open
-// sockets we will allow in the cogserver. Currently set to 60.
+// sockets we will allow in the cogserver. Currently set to 100.
 // Note that each SchemeShell (actually, SchemeEval) will open
 // another half-dozen pipes and what-not, so actually, the number
 // of open files will increase by 4 or 6 or so for each network
 // connection. With the default `ulimit -a` of 1024 open files,
 // this should work OK (including open files for the logger, the
 // databases, etc.).
-unsigned int ConsoleSocket::_max_open_sockets = 60;
+unsigned int ConsoleSocket::_max_open_sockets = 100;
 volatile unsigned int ConsoleSocket::_num_open_sockets = 0;
 std::mutex ConsoleSocket::_max_mtx;
 std::condition_variable ConsoleSocket::_max_cv;
