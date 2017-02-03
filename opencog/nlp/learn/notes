@@ -2219,8 +2219,28 @@ at 21:30 - 12:31 = 539 mins
 restart at 12:05 -- 21174 articles
         at 12:43 -- 21411 articles = 411-174/38 = 237/38 = 6.2 artciles/min
         at 19:28 -- 23422 articles = 23422-21174/443 = 2248/443 = 5.07 arts/min
+3 Feb   at 07:46 -- 26828 articles = 26828-23422/738 = 3406/738 = 4.62 arts/min
+           11:45 -- 27691 articles = 27691-26828/239 = 863/239 = 3.61 arts/min
 
- 
+Hmm. the rate keeps dropping...
+
+final stats for above:
+sql-stats: total loads = 1228941 total stores = 286453870 ratio=233.090010
+write items=57290774 flushes=0 flush_ratio=inf
+drains=98324 fill_fraction=582.673345 concurrency=6.286054
+avg drain time=0.109933 seconds; longest drain time=9.216000
+
+scheme@(guile-user)> (gc-stats)
+$9 = ((gc-time-taken . 19242586423) (heap-size . 5229101056) (heap-free-size .
+5109686272) (heap-total-allocated . 3874090716576) (heap-allocated-since-gc . 509440)
+(protected-objects . 301) (gc-times . 53424))
+
+select sum(stv_count) from atoms; -- 801969742 -- 802M
+select count(*) from atoms; -- 4786479 -- 4.8M
+
+
+3 Feb 2017 -- restart. All-new atomspace, all-new link-grammar
+            at 12:02PM -- 27691 articles 
 
 postgres:
 ps ax |grep postgres > x
@@ -2291,10 +2311,49 @@ conns total ...
 
 works better if we double the pool...
 
+no one seems to be waiting on postgres ... suggests that the 
+we've lost track of the number items in the queue ...
+
 15: console list
 14: logger
 13-2: gc
 12
+
+So, its idle ... and ... we've leaked:
+currently in_drain=0 num_busy=0 queue_size=0
+current conn_pool free=4 of 20
+
+
+ahhh its due to throws, which kill the put_conns ...
+
+[2017-02-03 05:44:02:785] [WARN] (34) The # of binded parameters < the #
+of parameter markers;
+Unrecognized key passed to SQLGetInfo30.
+
+[2017-02-03 05:44:02:785] [WARN]    Query was: SELECT * FROM Atoms WHERE
+type = 110 AND name = $ocp$?$ocp$ ;
+
+[2017-02-03 05:44:02:785] [ERROR] Can't perform query rc=-1
+(/home/linas/src/atomspace-git/opencog/persist/sql/multi-driver/odbcxx.cc:259)
+   Stack Trace:
+
+Query was: SELECT * FROM Atoms WHERE type = 110 AND name =
+$ocp$?,!ANY-PUNCT$ocp$ ;
+
+... need to try-catch these blocks.
+
+SELECT * FROM Atoms WHERE type = 110 AND name = $ocp$?$ocp$ ;
+Seems to be an ODBC issue ...
+
+(34) The # of binded parameters < the # of parameter markers;
+Unrecognized key passed to SQLGetInfo30.
+
+SQLBindParameter
+
+
+glurg. ODBC needs this: replace ? by &#63; what a clusterfuck
+
+Also: 
 
 
 
@@ -2464,3 +2523,6 @@ install libpq-dev
 remove unixodbc-dev
 install new linkgrammar
 new relex...
+update pair-count.scm to use URL
+(sql-open "postgres:///yue_pairs?user=ubuntu&password=asdf")
+
