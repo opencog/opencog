@@ -37,6 +37,9 @@
 		(InheritanceLink modulator-node psi-modulator-node)
 		(psi-set-value! modulator-node initial-value)
 
+		; Set the (preferred) baseline vaue as the initial value
+		(psi-set-baseline-value! modulator-node initial-value)
+
 		modulator-node
 	)
 )

@@ -256,9 +256,10 @@
 		;	prev-most-recent-ts curr-most-recent-ts)
 		(if (not (equal? prev-most-recent-ts curr-most-recent-ts))
 			(begin
-				(if verbose
+				;(if verbose
 					(format #t "\n*** Detected event occurrence: ~a  loop ~a\n"
-						event psi-updater-loop-count))
+						event psi-updater-loop-count)
+				;)
 				(set! detected-events
 					(append detected-events (list event)))
 
@@ -775,6 +776,3 @@
 	(set! psi-updater-is-running #f)
 	(cog-set-tv! updater-continue-pred (stv 0 1))
 )
-
-
-
