@@ -23,6 +23,7 @@
  */
 
 #include <iomanip>
+#include <unistd.h>
 
 #include <opencog/util/ansi.h>
 #include <opencog/cogserver/server/CogServer.h>
@@ -67,6 +68,8 @@ void BuiltinRequestsModule::registerAgentRequests()
     do_ctrld_register();
     do_dot_register();
 
+    do_stats_register();
+
     do_startAgents_register();
     do_stopAgents_register();
     do_stepAgents_register();
@@ -86,6 +89,8 @@ void BuiltinRequestsModule::unregisterAgentRequests()
     do_q_unregister();
     do_ctrld_unregister();
     do_dot_unregister();
+
+    do_stats_unregister();
 
     do_startAgents_unregister();
     do_stopAgents_unregister();
@@ -183,6 +188,30 @@ std::string BuiltinRequestsModule::do_help(Request *req, std::list<std::string> 
 std::string BuiltinRequestsModule::do_h(Request *req, std::list<std::string> args)
 {
     return do_help(req, args);
+}
+
+// ====================================================================
+// Print general info about server.
+std::string BuiltinRequestsModule::do_stats(Request *req, std::list<std::string> args)
+{
+    std::ostringstream oss;
+    ConsoleSocket* con = req->get_console();
+
+    oss << "Console use-count = " << con->get_use_count() << "\n";
+    oss << "Console max-open-sockets = " << con->get_max_open_sockets() << "\n";
+    oss << "Console curr-open-sockets = " << con->get_num_open_sockets() << "\n";
+
+    // count open file descs
+    int nfd = 0;
+    for (int j=0; j<4096; j++) {
+       int fd = dup(j);
+       if (fd < 0) continue;
+       close(fd);
+       nfd++;
+    }
+    oss << "Process num-open-fds = " << nfd << "\n";
+
+    return oss.str();
 }
 
 // ====================================================================

@@ -99,6 +99,11 @@ DECLARE_CMD_REQUEST(BuiltinRequestsModule, "h", do_h,
        "Otherwise, print verbose help for the indicated command.\n",
        false, true)
 
+DECLARE_CMD_REQUEST(BuiltinRequestsModule, "stats", do_stats,
+       "Print some diagnostic statistics about the server.",
+       "Usage: stats\n\n",
+       false, false)
+
 // I'm adding the agent control commands via the macro syntax
 // (it's much more convenient than adding several new .cc/.h files). -- Jared Wigmore
 DECLARE_CMD_REQUEST(BuiltinRequestsModule, "agents-start", do_startAgents,
