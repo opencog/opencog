@@ -186,7 +186,7 @@
 				(PredicateNode "say_face")
 					(ListLink
 						(Concept (cog-name (VariableNode "$fid")))
-						(Sentence sent)))
+						(SentenceNode sent)))
 				(Concept "sound-perception"))
 			(Get (State last-speaker (Variable "$fid")))
 		))
