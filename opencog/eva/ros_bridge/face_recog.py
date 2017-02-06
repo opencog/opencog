@@ -23,8 +23,6 @@ from atomic_msgs import AtomicMsgs
 from face_id.msg import f_id
 from face_id.msg import faces_ids
 
-logger = logging.getLogger('hr.eva_behavior.face_recog')
-
 class FaceRecog:
 	def __init__(self):
 		self.atomo = AtomicMsgs()
