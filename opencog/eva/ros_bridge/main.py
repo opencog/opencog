@@ -27,6 +27,7 @@ from face_track import FaceTrack
 from sound_track import SoundTrack
 from room_brightness import RoomBrightness
 from saliency_track import SaliencyTrack
+from face_recog import FaceRecog
 
 
 rospy.init_node("OpenCog_ROS_bridge")
