@@ -33,7 +33,10 @@ type Sumti = Tagged Atom
 type Selbri = (TruthVal,Atom) --STring represents TV
 type Tagged a = (a,Maybe Tag)
 
-type WordList = (M.Map String StringSet,StringSet,[(String,String)],Int)
+type Con = (String,Maybe (Tagged Selbri))
+type Bridi = ([Sumti],((Maybe Atom,(Maybe String,Tagged Selbri)),[Sumti]))
+
+type WordList = (M.Map String StringSet,StringSet,Iso String String,Int)
 type SyntaxReader a = forall delta. Syntax delta => ReaderT WordList delta a
 
 instance IsoFunctor f => IsoFunctor (ReaderT a f) where

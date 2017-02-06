@@ -38,7 +38,7 @@ pattern ImpL l tv <- Link "ImplicationLink" l tv
 pattern InhL l tv <- Link "InheritanceLink" l tv
 pattern SL l <- Link "SetLink" l _
 pattern SSL l <- Link "SatisfyingSetLink" [l] _
-pattern EvalL p a <- Link "EvaluationLink" [p,a] _
+pattern EvalL tv p a <- Link "EvaluationLink" [p,a] tv
 pattern CtxL c a <- Link "ContextLink" [c,a] _
 pattern SimL a b <- Link "SimilarityLink" [a,b] _
 pattern SubL a b <- Link "SubSetLink" [a,b] _
@@ -112,7 +112,7 @@ mkPropPre pred atom name = Link "EquivalenceLink"
 
 pattern PropPred atom <- Link "EquivalenceLink"
                                 [_
-                                , LambdaL _ (AL [_,EvalL _ (LL [_,atom])])
+                                , LambdaL _ (AL [_,EvalL _ _ (LL [_,atom])])
                                 ] _
 
 isInteger s = case reads s :: [(Integer, String)] of

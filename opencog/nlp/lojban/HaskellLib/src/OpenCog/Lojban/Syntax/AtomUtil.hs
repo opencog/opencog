@@ -100,6 +100,7 @@ limpl = orl . tolist2 . (andl *** andl) . reorder
     where reorder = Iso (Just . f) (Just . g)
           f [a,b] = let nb = fromJust $ apply notl [b]
                     in ([a,b],[a,nb])
+          f a = error $ show a ++ " is not a accepted value for limpl"
           g (ls,_) = ls
 
 conLink :: Iso (String,[Atom]) Atom
@@ -109,7 +110,7 @@ conLink = Iso (\(s,args) -> case s of
                              "o"  -> apply iffl args
                              "u"  -> apply limpl args
                              "ji" -> apply varl args
-                             _    -> error $ "Can handle conLink: " ++ show s)
+                             _    -> error $ "Can't handle conLink: " ++ show s)
               (\a -> case a of
                         Link "OrLink"
                             [Link "AndLink" args _
@@ -130,33 +131,34 @@ conLink = Iso (\(s,args) -> case s of
                         Link "VariableLink" args _ -> Just ("ji",args)
                         _ -> Nothing)
 
+conLinkJA :: Iso (String,[Atom]) Atom
+conLinkJA = conLink .< _JAtoA
+
 conLinkGIhA :: Iso (String,[Atom]) Atom
-conLinkGIhA = Iso (\(s,args) -> case s of
-                             "gi'e"  -> apply andl args
-                             "gi'a"  -> apply orl args
-                             "gi'o"  -> apply iffl args
-                             "gi'u"  -> apply limpl args
-                             "gi'i"  -> apply varl args
-                             _    -> error $ "Can't handle conLink: " ++ show s)
-              (\a -> case a of
-                        Link "OrLink"
-                            [Link "AndLink" args _
-                            ,Link "AndLink"
-                                [Link "NotLink" _arg1 _
-                                ,Link "NotLink" _arg2 _
-                                ]_
-                            ] _ -> Just ("gi'o",args)
-                        Link "OrLink"
-                            [Link "AndLink" args _
-                            ,Link "AndLink"
-                                [arg1
-                                ,Link "NotLink" _arg2 _
-                                ]_
-                            ] _ -> Just ("gi'u",args)
-                        Link "AndLink" args _ -> Just ("gi'e",args)
-                        Link "OrLink" args _ -> Just ("gi'a",args)
-                        Link "VariableLink" args _ -> Just ("gi'i",args)
-                        _ -> Nothing)
+conLinkGIhA = conLink .< _GIhAtoA
+
+_JAtoA :: Iso String String
+_JAtoA = mkSynonymIso [("je","e")
+                      ,("ja","a")
+                      ,("jo","o")
+                      ,("ju","u")
+                      ,("je'i","ji")]
+
+_GIhAtoA :: Iso String String
+_GIhAtoA = mkSynonymIso [("gi'e","e")
+                        ,("gi'a","a")
+                        ,("gi'o","o")
+                        ,("gi'u","u")
+                        ,("gi'i","ji")]
+
+_GAtoA :: Iso String String
+_GAtoA = mkSynonymIso [("ge","e")
+                      ,("ga","a")
+                      ,("go","o")
+                      ,("gu","u")
+                      ,("ge'i","ji")]
+
+
 
 linkIso :: String -> TruthVal -> Iso [Atom] Atom
 linkIso n t = link . Iso (\l -> Just (n,(l,t)))
@@ -194,7 +196,12 @@ number = nodeIso "VariableNode" noTv
 
 
 _frames :: Iso (Tagged Selbri,[Sumti]) Atom
-_frames = andl . mapIso _frame . isoDistribute . handleTAG
+_frames = (id ||| andl) . isSingle . mapIso _frame . isoDistribute . handleTAG
+    where isSingle = Iso (Just . f) (Just . g)
+          f [a] = Left a
+          f as  = Right as
+          g (Left a) = [a]
+          g (Right as) = as
 
 handleTAG :: Iso (Tagged Selbri,[Sumti]) (Selbri,[(Atom,Tag)])
 handleTAG = handleTAGupdater . second tagger

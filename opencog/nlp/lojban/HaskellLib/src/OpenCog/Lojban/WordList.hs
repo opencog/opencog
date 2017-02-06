@@ -1,7 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module OpenCog.Lojban.WordList where
 
-import Prelude hiding (map)
+import Prelude hiding (map,(.))
+import Control.Category ((.))
 import Text.XML.HXT.Core
 import qualified Data.Map as M
 import Data.List
@@ -12,9 +13,12 @@ import Data.Serialize
 
 import Data.ListTrie.Patricia.Set.Ord
 
+import OpenCog.Lojban.Syntax.Util
+import Control.Isomorphism.Partial (Iso)
+
 type StringSet = TrieSet Char
 
-loadWordLists :: String -> IO (M.Map String StringSet,StringSet,[(String,String)],Int)
+loadWordLists :: String -> IO (M.Map String StringSet,StringSet,Iso String String,Int)
 loadWordLists src = do
     let ser = src ++ ".dat"
     dfe <- doesFileExist ser
@@ -23,7 +27,8 @@ loadWordLists src = do
             bs <- BS.readFile ser
             (seed :: Int) <- randomIO
             let (Right (selmahos,gismu,bai)) = decode bs
-            return (fmap fromList selmahos,fromList gismu,bai,seed)
+                baiIso = mkSynonymIso bai . stripSpace
+            return (fmap fromList selmahos,fromList gismu,baiIso,seed)
         False -> do
             gismu <- runX (readDocument [] src
                            >>> getChildren >>> getValsi >>> getGismu)
@@ -35,8 +40,10 @@ loadWordLists src = do
             let selmahos = M.fromListWith (++) $ fmap f cmavo
                 f (s,c) = (takeWhile p s,[c])
                 p e = e `notElem` "1234567890*"
-                res = (fmap fromList selmahos,fromList gismu,fmap handleBAIprefix bai,seed)
-                bs = encode (selmahos,gismu,fmap handleBAIprefix bai)
+                baiMerged = fmap handleBAIprefix bai
+                baiIso = mkSynonymIso baiMerged . stripSpace
+                res = (fmap fromList selmahos,fromList gismu,baiIso,seed)
+                bs = encode (selmahos,gismu,baiMerged)
             BS.writeFile ser bs
             return res
 
