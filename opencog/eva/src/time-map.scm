@@ -185,11 +185,11 @@
 			(EvaluationLink
 				(PredicateNode "say_face")
 					(ListLink
-						(Concept (cog-name (VariableNode "$fid")))
-						(Sentence sent)))
+						(VariableNode "$fid")
+						(SentenceNode sent)))
 				(Concept "sound-perception"))
-			(Get (State last-speaker (Variable "$fid")))
-		))
+		(Get (State last-speaker (Variable "$fid")))
+	))
 )
 
 ;;math
