@@ -32,6 +32,7 @@
 #include <opencog/attentionbank/AttentionBank.h>
 
 #include "AFRentCollectionAgent.h"
+#include "AttentionParamQuery.h"
 
 #include <thread>
 //#define DEBUG
@@ -43,7 +44,6 @@ using namespace opencog;
 
 AFRentCollectionAgent::AFRentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
 {
-    update_cycle     = 1 / config().get_double("ECAN_AF_RENT_FREQUENCY", 2); // per second.
     last_update      = high_resolution_clock::now();
 }
 
@@ -65,6 +65,8 @@ void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 
 void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
 {
+    update_cycle = std::stod(_atq.get_param_value(AttentionParamQuery::af_rent_update_freq));
+
     // calculate elapsed time Et
     seconds elapsed_time = duration_cast<seconds>
                            (high_resolution_clock::now() - last_update);

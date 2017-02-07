@@ -51,31 +51,13 @@ using namespace opencog;
 
 
 ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
+                         ,_atq(&cs.getAtomSpace())
 {
     _bank = &attentionbank(_as);
-
-    setMaxSpreadPercentage(
-                config().get_double("ECAN_MAX_SPREAD_PERCENTAGE"));
-    setSpreadHebbianOnly(config().get_bool("ECAN_SPREAD_HEBBIAN_ONLY"));
-    setHebbianMaxAllocationPercentage(
-                config().get_double("HEBBIAN_MAX_ALLOCATION_PERCENTAGE"));
-
-    // TODO
-    // Read diffusion rate from config file.
 
     // Provide a logger
     setLogger(new opencog::Logger("ImportanceDiffusionBase.log",
                                   Logger::FINE, true));
-}
-
-/*
- * Set the value of the parameter that determines how much of an atom's STI
- * is available for diffusion at each time step. An atom will not diffuse more
- * than this percentage.
- */
-void ImportanceDiffusionBase::setMaxSpreadPercentage(double percent)
-{
-    maxSpreadPercentage = percent;
 }
 
 /*
@@ -101,38 +83,13 @@ void ImportanceDiffusionBase::updateMaxSpreadPercentage()
             h = resultSet.front();
         }
         double value = std::atof(h->getName().c_str());
-        setMaxSpreadPercentage(value);
+        _atq.set_param(AttentionParamQuery::dif_spread_percentage, value);
 
 #ifdef DEBUG
         std::cout << "Diffusion percentage set to: " <<
                      maxSpreadPercentage << std::endl;
 #endif
     }
-}
-
-/*
- * Set the value of the parameter that determines how much of an atom's STI
- * will be allocated for potential diffusion to hebbian links. Note that any
- * unused STI that was available but unused for diffusion to hebbian links
- * will then be reallocated for diffusion to incident non-hebbian atoms, if
- * that option is enabled.
- */
-void ImportanceDiffusionBase::setHebbianMaxAllocationPercentage(
-        double percent)
-{
-    hebbianMaxAllocationPercentage = percent;
-}
-
-/*
- * Set the value of the parameter that determines whether diffusion will occur
- * only along hebbian links (when the parameter is True) or if diffusion will
- * occur both along hebbian links and to non-hebbian incident atoms (when the
- * parameter is False), meaning that all atoms that are in the incoming or
- * outgoing sets will be diffusion targets.
- */
-void ImportanceDiffusionBase::setSpreadHebbianOnly(bool option)
-{
-    spreadHebbianOnly = option;
 }
 
 ImportanceDiffusionBase::~ImportanceDiffusionBase()
@@ -277,48 +234,16 @@ HandleSeq ImportanceDiffusionBase::diffusionSourceVector(void)
 
 #ifdef DEBUG
     std::cout << "Calculating diffusionSourceVector." << std::endl;
-    std::cout << "AF Size before removing hebbian links: " <<
-                 resultSet.size() << "\n";
+    std::cout << "Source Size before removing hebbian links: " <<
+        resultSet.size() << "\n";
 #endif
 
-    // Remove the hebbian links
-    auto it_end =
-        std::remove_if(resultSet.begin(), resultSet.end(),
-                       [=](const Handle& h)
-                       {
-                           Type type = h->getType();
+    removeHebbianLinks(resultSet);
 
 #ifdef DEBUG
-                           std::cout << "Checking atom of type: " <<
-                                        classserver().getTypeName(type) << "\n";
+    std::cout << "Sources Size after removing hebbian links: " <<
+        resultSet.size() << "\n";
 #endif
-
-                           if (type == ASYMMETRIC_HEBBIAN_LINK ||
-                               type == HEBBIAN_LINK ||
-                               type == SYMMETRIC_HEBBIAN_LINK ||
-                               type == INVERSE_HEBBIAN_LINK ||
-                               type == SYMMETRIC_INVERSE_HEBBIAN_LINK)
-                           {
-#ifdef DEBUG
-                               std::cout << "Atom is hebbian" << "\n";
-#endif
-                               return true;
-                           }
-                           else
-                           {
-#ifdef DEBUG
-                               std::cout << "Atom is not hebbian" << "\n";
-#endif
-                               return false;
-                           }
-                       });
-    resultSet.erase(it_end, resultSet.end());
-
-#ifdef DEBUG
-    std::cout << "AF Size after removing hebbian links: " <<
-    resultSet.size() << "\n";
-#endif
-
 
     return resultSet;
 }
@@ -359,6 +284,27 @@ HandleSeq ImportanceDiffusionBase::hebbianAdjacentAtoms(Handle h)
             get_target_neighbors(h, ASYMMETRIC_HEBBIAN_LINK);
 
     return resultSet;
+}
+
+void ImportanceDiffusionBase::removeHebbianLinks(HandleSeq& sources)
+{
+    auto it_end =
+        std::remove_if(sources.begin(), sources.end(),
+                [=](const Handle& h)
+                {
+                Type type = h->getType();
+
+                if (type == ASYMMETRIC_HEBBIAN_LINK ||
+                    type == HEBBIAN_LINK ||
+                    type == SYMMETRIC_HEBBIAN_LINK ||
+                    type == INVERSE_HEBBIAN_LINK ||
+                    type == SYMMETRIC_INVERSE_HEBBIAN_LINK)
+                         return true;
+                else
+                         return false;
+                });
+
+    sources.erase(it_end, sources.end());
 }
 
 /*
@@ -519,24 +465,6 @@ ImportanceDiffusionBase::combineIncidentAdjacentVectors(
 #endif
 
     return result;
-}
-
-/*
- * Returns the total amount of STI that the atom will diffuse
- *
- * Calculated as the maximum spread percentage multiplied by the atom's STI
- */
-AttentionValue::sti_t ImportanceDiffusionBase::calculateDiffusionAmount(
-        Handle h)
-{
-    updateMaxSpreadPercentage();
-
-    return (AttentionValue::sti_t) round(_bank->get_sti(h) * maxSpreadPercentage);
-
-    // TODO: Using integers for STI values can cause strange consequences.
-    // For example, if the amount to diffuse is 0.4, it will become 0, causing
-    // no diffusion to occur.
-    //   * See: https://github.com/opencog/opencog/issues/676
 }
 
 /*

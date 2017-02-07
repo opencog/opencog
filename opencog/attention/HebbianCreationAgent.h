@@ -30,6 +30,8 @@
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/attentionbank/AttentionBank.h>
 
+#include "AttentionParamQuery.h"
+
 namespace opencog
 {
 /** \addtogroup grp_attention
@@ -55,6 +57,9 @@ extern concurrent_queue<Handle> newAtomsInAV;
  */
 class HebbianCreationAgent : public Agent
 {
+private:
+    AttentionParamQuery _atq;
+
 protected:
     AttentionBank* _bank;
 

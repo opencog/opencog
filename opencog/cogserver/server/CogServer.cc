@@ -170,10 +170,10 @@ CogServer::CogServer(AtomSpace* as) :
     agentsRunning = true;
 }
 
-void CogServer::enableNetworkServer()
+void CogServer::enableNetworkServer(int port)
 {
     if (_networkServer) return;
-    _networkServer = new NetworkServer(config().get_int("SERVER_PORT", 17001));
+    _networkServer = new NetworkServer(config().get_int("SERVER_PORT", port));
 }
 
 void CogServer::disableNetworkServer()
@@ -654,7 +654,7 @@ void CogServer::openDatabase(void)
 #ifdef HAVE_PERSIST_SQL
     // No-op if the user has not configured a storage backend
     if (!config().has("STORAGE")) {
-        logger().warn("No database persistant storage configured! "
+        logger().info("No database persistant storage configured! "
                       "Use the STORAGE config keyword to define.");
         return;
     }

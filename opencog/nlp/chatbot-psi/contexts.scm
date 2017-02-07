@@ -1,4 +1,4 @@
-(use-modules (opencog) (opencog atom-types))
+(use-modules (opencog) (opencog atom-types) (opencog nlp relex2logic))
 
 (load "states.scm")
 (load "utils.scm")
@@ -94,40 +94,33 @@
 
 (define rsg-input "")
 (define (check-theme target-words)
-    (define idx '())
-    (define cnt 0)
-    (define input-wl (cog-outgoing-set (get-input-word-list)))
+    (define input-text (cog-name (get-input-text-node)))
+    (define matched-keywords '())
 
-    ; target-words is a list of strings
-    (filter
+    (for-each
         (lambda (w)
-            (if (list? (member (cog-name w) target-words))
-                (set! idx (append idx (list cnt))))
-            (set! cnt (+ cnt 1)))
-        input-wl
+            (let ((r1 (regexp-exec (make-regexp
+                          (string-append "\\b" w "\\b") regexp/icase) input-text))
+                  (r2 (regexp-exec (make-regexp
+                          (string-append "\\w+\\s+\\b" w "\\b") regexp/icase) input-text))
+                  (r3 (regexp-exec (make-regexp
+                          (string-append "\\b" w "\\b\\s+\\w+") regexp/icase) input-text)))
+                (if (not (equal? #f r1))
+                    (set! matched-keywords (append matched-keywords (list w))))
+                (if (not (equal? #f r2))
+                    (set! matched-keywords (append matched-keywords (list (match:substring r2)))))
+                (if (not (equal? #f r3))
+                    (set! matched-keywords (append matched-keywords (list (match:substring r3)))))
+            )
+        )
+        target-words
     )
 
-    (if (null? idx)
+    (if (> (length matched-keywords) 0)
+        (begin
+            (set! rsg-input (list-ref matched-keywords (random (length matched-keywords))))
+            (stv 1 1))
         (stv 0 1)
-        (let ((rand-idx (list-ref idx (random (length idx)))))
-            (if (equal? (length input-wl) 1)
-                (set! rsg-input (cog-name (car input-wl)))
-                ; Feed the keyword directly to the generator, or with the
-                ; word either before or after that keyword
-                (if (> .7 (random 1.0))
-                    (set! rsg-input (cog-name (list-ref input-wl rand-idx)))
-                    (if (equal? rand-idx 0)
-                        (set! rsg-input (string-append
-                            (cog-name (list-ref input-wl rand-idx))
-                                " " (cog-name (list-ref input-wl (+ rand-idx 1)))))
-                        (set! rsg-input (string-append
-                            (cog-name (list-ref input-wl (- rand-idx 1)))
-                                " " (cog-name (list-ref input-wl rand-idx))))
-                    )
-                )
-            )
-            (stv 1 1)
-        )
     )
 )
 
@@ -481,4 +474,28 @@
 (Define
     (DefinedPredicate "is-emotion-state-reply?")
     (any-result? emotion-state-reply)
+)
+
+(Define
+    (DefinedPredicate "is-asking-about-how-many-visible-faces")
+    (Satisfaction
+        (VariableList
+            (var-decl "$sent" "SentenceNode")
+            (var-decl "$parse" "ParseNode")
+            (var-decl "$how-inst" "WordInstanceNode")
+            (var-decl "$many-inst" "WordInstanceNode")
+            (var-decl "$ppl-inst" "WordInstanceNode"))
+        (And
+            (State input-utterance-sentence (Variable "$sent"))
+            (parse-of-sent "$parse" "$sent")
+            (word-in-parse "$how-inst" "$parse")
+            (word-in-parse "$many-inst" "$parse")
+            (word-in-parse "$ppl-inst" "$parse")
+            (Evaluation (LinkGrammarRelationship "H")
+                (List (Variable "$how-inst") (Variable "$many-inst")))
+            (word-pos "$ppl-inst" "noun")
+            (Choice (Lemma (Variable "$ppl-inst") (Word "people"))
+                    (Lemma (Variable "$ppl-inst") (Word "face")))
+        )
+    )
 )

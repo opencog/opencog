@@ -22,7 +22,7 @@
 ; stuff during development.
 ;
 ; Rule-utils needed for defintion of var-decl, etc.
-(load "../relex2logic/rule-utils.scm")
+(use-modules (opencog nlp relex2logic))
 
 ;--------------------------------------------------------------------
 ; State and state anchors. These should be thought of as work-arounds,

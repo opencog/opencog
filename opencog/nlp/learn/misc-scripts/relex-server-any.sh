@@ -4,8 +4,8 @@
 #
 # This script starts a RelEx server that listens for plain-text input
 # (for the ANY langauge) on port 4445.  The any langauge generates
-# random parses. The resultig random parse is returned in opencog format
-# on the same socket. The end of the parse is # demarcated with an 
+# random parses. The resulting random parse is returned in opencog format
+# on the same socket. The end of the parse is demarcated with an
 # ; END OF SENTENCE token.
 #
 # It is intended that this server be used entirely from within OpenCog
@@ -29,9 +29,10 @@ RELEX_OPTS="\
 	"
 
 CLASSPATH="-classpath \
-bin:\
 /usr/local/share/java/relex.jar:\
+/usr/local/share/java/opennlp-tools-1.5.3.jar:\
 /usr/local/share/java/opennlp-tools-1.5.0.jar:\
+/usr/local/share/java/maxent-3.0.3.jar:\
 /usr/local/share/java/maxent-3.0.0.jar:\
 /usr/local/share/java/maxent-2.5.2.jar:\
 /usr/local/share/java/trove.jar:\

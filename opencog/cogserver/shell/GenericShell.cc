@@ -71,7 +71,7 @@ GenericShell::~GenericShell()
 {
 	self_destruct = true;
 
-	// It can happen that we are already canelling.
+	// It can happen that we already cancelled (e.g. control-D)
 	try { evalque.cancel(); }
 	catch (const std::exception& ex) {}
 
@@ -309,6 +309,7 @@ void GenericShell::line_discipline(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
+				logger().debug("[GenericShell] got user-interrupt");
 				// Discard all pending, unevaluated junk in the queue.
 				// Failure to do so will typically result in confusing
 				// the shell user.
@@ -359,6 +360,7 @@ void GenericShell::line_discipline(const std::string &expr)
 	if ((false == _evaluator->input_pending()) and
 	    ((EOT == expr[len-1]) or ((1 == len) and ('.' == expr[0]))))
 	{
+		logger().debug("[GenericShell] got control-D; exiting shell");
 		self_destruct = true;
 		evalque.cancel();
 		if (show_prompt)
@@ -367,9 +369,9 @@ void GenericShell::line_discipline(const std::string &expr)
 	}
 
 	/*
-	 * The newline is always cut. Re-insert it; otherwise, comments
-	 * within procedures will have the effect of commenting out the
-	 * rest of the procedure, leading to garbage.
+	 * The newline was cut by the request subsystem. Re-insert it;
+	 * otherwise, comments within procedures will have the effect of
+	 * commenting out the rest of the procedure, leading to garbage.
 	 */
 	evalque.push(expr + "\n");
 }
@@ -411,6 +413,7 @@ void GenericShell::while_not_done()
 /// it is impossible to queue OOB interrupts.)
 void GenericShell::eval_loop(void)
 {
+	logger().debug("[GenericShell] enter eval loop");
 	OC_ASSERT(nullptr == _evaluator, "Bad evaluator state!");
 
 	// Per-shell evaluator.  We do this here, not in the ctor, because
@@ -441,6 +444,7 @@ void GenericShell::eval_loop(void)
 			// Note that this pop will wait until the queue
 			// becomes non-empty.
 			evalque.pop(in);
+			logger().debug("[GenericShell] start eval of '%s'", in.c_str());
 			start_eval();
 			_evaluator->begin_eval();
 			_evaluator->eval_expr(in);
@@ -451,13 +455,52 @@ void GenericShell::eval_loop(void)
 		}
 	}
 
-	// On exit, make sure the polling thread dies first.
-	// After we exit, the _evaluator will be reclaimed by the
-	// thread dtor running in the evaluator pool.
+	// If we are here, then we can safely assume that the socket has
+	// been closed, that the dtor for this instance has been called.
+	// However, there may still be some remaining, unfinished work
+	// in the command queue; drain the queue, before shutting down.
+	assert(self_destruct);
+	evalque.cancel_reset();
+
+	// Let the polling thread die first. If we don't do this, it will
+	// interfer with the manual polling below.
 	pollthr->join();
 	delete pollthr;
 	pollthr = nullptr;
+
+	// Nothing more will be queued, so we can safely loop over remainder
+	// of the queue, without any additional need for locking/waiting.
+	while (0 < evalque.size())
+	{
+		// As mentioned before, do not begin the next queued expr until
+		// the last has finished. Failure to do this results in crashes.
+		poll_output();
+		while (not _eval_done)
+		{
+			usleep(10000);
+			poll_output();
+		}
+
+		try
+		{
+			evalque.pop(in);
+		}
+		catch (const concurrent_queue<std::string>::Canceled& ex)
+		{
+			evalque.cancel_reset();
+			continue;
+		}
+
+		logger().debug("[GenericShell] finishing; eval of '%s'", in.c_str());
+		start_eval();
+		_evaluator->begin_eval();
+		_evaluator->eval_expr(in);
+	}
+
+	// After we exit, the _evaluator will be reclaimed by the
+	// thread dtor running in the evaluator pool.
 	_evaluator = nullptr;
+	logger().debug("[GenericShell] exit eval loop");
 }
 
 void GenericShell::poll_loop(void)

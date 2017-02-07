@@ -17,6 +17,7 @@ ADD_LIBRARY (builtinreqs SHARED
 )
 
 TARGET_LINK_LIBRARIES(builtinreqs
+	server
 	${ATOMSPACE_LIBRARY}
 	${COGUTIL_LIBRARY}
 )

@@ -43,16 +43,10 @@ using namespace opencog;
 using namespace std::chrono;
 
 FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
-    Agent(cs)
+    Agent(cs), _atq(&cs.getAtomSpace())
 {
     // Provide a logger
     setLogger(new opencog::Logger("FocusBoundaryUpdatingAgent.log", Logger::FINE, true));
-
-    afbSize         = config().get_double("ECAN_AFB_SIZE", 0.2);
-    decay           = config().get_double("ECAN_AFB_DECAY", 0.05);
-    bottomBoundary  = config().get_int("ECAN_AFB_BOTTOM", 50);
-    minAFSize = config().get_int("MIN_AF_SIZE", 100);
-    maxAFSize = config().get_int("MAX_AF_SIZE", 500);
 
     _bank = &attentionbank(_as);
     _bank->setAttentionalFocusBoundary(bottomBoundary);
@@ -60,8 +54,18 @@ FocusBoundaryUpdatingAgent::FocusBoundaryUpdatingAgent(CogServer& cs) :
 
 void FocusBoundaryUpdatingAgent::run()
 {
-        AttentionValue::sti_t afboundary = _bank->getAttentionalFocusBoundary();
+        afbSize = std::stod(_atq.get_param_value(AttentionParamQuery::af_size));
+        decay = std::stod(_atq.get_param_value(AttentionParamQuery::af_decay));
+        bottomBoundary = std::stoi(_atq.get_param_value(AttentionParamQuery::af_bottom));
+        minAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_min_size));
+        maxAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_max_size));
 
+        AttentionValue::sti_t afboundary = _bank->getAttentionalFocusBoundary();
+        // Let there always be K top STI valued atoms in the AF.
+        if(_bank->getTopSTIValuedHandles().size() > 0)
+            //getTopSTIVlauedHandles function returns Handles in Increasing STI
+            //order. 
+             afboundary = _bank->get_sti(_bank->getTopSTIValuedHandles()[0]);
        /*
         AttentionValue::sti_t maxsti = _bank->get_max_STI();
         AttentionValue::sti_t minsti = _bank->get_min_STI();
@@ -77,10 +81,10 @@ void FocusBoundaryUpdatingAgent::run()
 
         //printf("NewAfb: %d OldAfb: %d Afb: %d \n",newafb,oldafb,afboundary);
         */
-       
+      
+        // Make sure not too many atoms are in the AF.
         HandleSeq afset;
         _bank->get_handle_set_in_attentional_focus(std::back_inserter(afset));
-        
         if(afset.size() > minAFSize ) {
             afboundary = get_cutoff(afset);
         }

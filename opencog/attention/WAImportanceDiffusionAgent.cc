@@ -25,8 +25,10 @@
  */
 
 #include <opencog/util/Config.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/attention/atom_types.h>
 #include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/StochasticImportanceDiffusion.h>
 
 #include "WAImportanceDiffusionAgent.h"
 
@@ -36,8 +38,6 @@ using namespace opencog;
 WAImportanceDiffusionAgent::WAImportanceDiffusionAgent(CogServer& cs) :
     ImportanceDiffusionBase(cs)
 {
-    _tournamentSize = config().get_int("ECAN_DIFFUSION_TOURNAMENT_SIZE", 5);
-
     set_sleep_time(300);
 }
 
@@ -47,6 +47,12 @@ WAImportanceDiffusionAgent::~WAImportanceDiffusionAgent()
 
 void WAImportanceDiffusionAgent::run()
 {
+    // Read params
+    _tournamentSize = std::stoi(_atq.get_param_value(
+                               AttentionParamQuery::dif_spread_hebonly));
+    hebbianMaxAllocationPercentage =std::stod(_atq.get_param_value(
+                                     AttentionParamQuery::dif_tournament_size));
+
     spreadImportance();
 
     //some sleep code
@@ -107,7 +113,7 @@ void WAImportanceDiffusionAgent::spreadImportance()
 HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
 {
     HandleSeq  sources;
-    
+
     AttentionValue::sti_t AFBoundarySTI = _bank->getAttentionalFocusBoundary();
     AttentionValue::sti_t lowerSTI  =   AFBoundarySTI - 15;
 
@@ -116,7 +122,7 @@ HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
     std::uniform_int_distribution<AttentionValue::sti_t> dist(lowerSTI,AFBoundarySTI);
     auto sti = dist(generator);
     _bank->get_handles_by_AV(std::back_inserter(sources),sti,sti+5);
-    
+
     if(sources.size() > 100){ sources.resize(100); } //Resize to 100 elements.
 
 #ifdef DEBUG
@@ -125,38 +131,7 @@ HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
         sources.size() << "\n";
 #endif
 
-    // Remove the hebbian links
-    auto it_end =
-        std::remove_if(sources.begin(), sources.end(),
-                [=](const Handle& h)
-                {
-                Type type = h->getType();
-
-#ifdef DEBUG
-                std::cout << "Checking atom of type: " <<
-                classserver().getTypeName(type) << "\n";
-#endif
-
-                if (type == ASYMMETRIC_HEBBIAN_LINK ||
-                    type == HEBBIAN_LINK ||
-                    type == SYMMETRIC_HEBBIAN_LINK ||
-                    type == INVERSE_HEBBIAN_LINK ||
-                    type == SYMMETRIC_INVERSE_HEBBIAN_LINK)
-                {
-#ifdef DEBUG
-                std::cout << "Atom is hebbian" << "\n";
-#endif
-                return true;
-                }
-                else
-                {
-#ifdef DEBUG
-                    std::cout << "Atom is not hebbian" << "\n";
-#endif
-                    return false;
-                }
-                });
-    sources.erase(it_end, sources.end());
+    removeHebbianLinks(sources);
 
 #ifdef DEBUG
     std::cout << "AF Size after removing hebbian links: " <<
@@ -166,5 +141,16 @@ HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
     return sources;
 }
 
+/*
+ * Returns the total amount of STI that the atom will diffuse
+ *
+ * Calculated as the maximum spread percentage multiplied by the atom's STI
+ */
 
-
+AttentionValue::sti_t WAImportanceDiffusionAgent::calculateDiffusionAmount(Handle h)
+{
+    static ecan::StochasticDiffusionAmountCalculator sdac(_as);
+    float amount = sdac.diffusion_amount(h, _decayPercentage);
+   
+    return amount;
+}

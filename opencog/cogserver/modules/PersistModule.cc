@@ -93,24 +93,35 @@ std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 
 std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 {
-	if (args.size() != 3)
+	if (args.size() != 1 and args.size() != 3)
 		return "sql-open: Error: invalid command syntax\n"
-		       "Usage: sql-open <dbname> <username> <auth>\n";
+		       "Usage: sql-open <uri>\n"
+		       "Usage: sql-open <dbname> <username> <passwd>\n";
 
-	std::string dbname   = args.front(); args.pop_front();
-	std::string username = args.front(); args.pop_front();
-	std::string auth     = args.front(); args.pop_front();
+	std::string uri;
+	if (1 == args.size())
+	{
+		uri = args.front();
+	}
+	else
+	{
+		std::string dbname   = args.front(); args.pop_front();
+		std::string username = args.front(); args.pop_front();
+		std::string auth     = args.front(); args.pop_front();
+		uri = "postgres://" + dbname + "?user=" + username;
+		uri += "&password=" + auth;
+	}
 
 	try
 	{
-		_api->do_open(dbname, username, auth);
+		_api->do_open(uri);
 	}
 	catch (const std::exception& ex)
 	{
 		return std::string(ex.what()) + "\n";
 	}
 
-	std::string rc = "Opened \"" + dbname + "\" as user \"" + username + "\"\n"; 
+	std::string rc = "Opened \"" + uri + "\"\n";
 	return rc;
 }
 

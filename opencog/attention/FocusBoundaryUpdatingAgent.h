@@ -32,6 +32,8 @@
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Agent.h>
 
+#include "AttentionParamQuery.h"
+
 namespace opencog
 {
 /** \addtogroup grp_attention
@@ -49,6 +51,8 @@ class FocusBoundaryUpdatingAgent : public Agent
 {
 private:
     AttentionBank* _bank;
+    AttentionParamQuery _atq;
+
     double afbSize;
     double decay;
     AttentionValue::sti_t bottomBoundary;

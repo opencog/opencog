@@ -18,7 +18,7 @@ export LD_LIBRARY_PATH=/usr/local/lib/opencog/modules
 
 # Use byobu so that the scroll bars actually work
 byobu new-session -d -n 'cntl' '$SHELL'
-byobu new-window -n 'cogsrv' 'cogserver -c opencog-en.conf; $SHELL'
+byobu new-window -n 'cogsrv' 'guile -l pair-count-en.scm; $SHELL'
 sleep 2;
 
 # Relex "any" language

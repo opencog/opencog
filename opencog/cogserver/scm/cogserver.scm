@@ -2,11 +2,13 @@
 ; Opencog cogserver module
 ;
 
+; Old CentOS-based systems use lib64
+(define path "/usr/local/lib/opencog:/usr/local/lib/opencog/modules:/usr/local/lib64/opencog:/usr/local/lib64/opencog/modules")
+
 (setenv "LTDL_LIBRARY_PATH"
     (if (getenv "LTDL_LIBRARY_PATH")
-        (string-append (getenv "LTDL_LIBRARY_PATH")
-            ":/usr/local/lib/opencog:/usr/local/lib/opencog/modules")
-        "/usr/local/lib/opencog:/usr/local/lib/opencog/modules"))
+        (string-append (getenv "LTDL_LIBRARY_PATH") ":" path)
+        path))
 
 (define-module (opencog cogserver))
 
