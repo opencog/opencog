@@ -57,10 +57,10 @@ AttentionParamQuery::AttentionParamQuery(AtomSpace* as): _as(as)
     parent_param = _as->add_node(CONCEPT_NODE, "ECAN_PARAMS");
 
     Handle var = _as->add_node(VARIABLE_NODE, "__ECAN_PARAM__");
-    Handle member = _as->add_link(MEMBER_LINK, 
+    Handle member = _as->add_link(MEMBER_LINK,
             HandleSeq {var, parent_param});
     hget_params = _as->add_link(BIND_LINK, HandleSeq{member, var});
-} 
+}
 
 std::string AttentionParamQuery::get_param_value(const std::string& param)
 {
@@ -77,7 +77,7 @@ std::string AttentionParamQuery::get_param_value(const std::string& param)
             str.erase (str.find_last_not_of('0') + 1,
                     std::string::npos);
 
-            if(str.back() == '.') 
+            if(str.back() == '.')
                 str.pop_back();
             value = str;
             has_value = true;
@@ -104,7 +104,7 @@ HandleSeq AttentionParamQuery::get_params(void)
 void AttentionParamQuery::load_default_values(void)
 {
      SchemeEval scm(_as);
-     scm.eval("(load \"opencog/attention/default-param-values.scm\")");
+     scm.eval("(load \"" PROJECT_BINARY_DIR "/opencog/attention/default-param-values.scm\")");
 }
 
 
