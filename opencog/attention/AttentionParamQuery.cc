@@ -12,7 +12,7 @@ const std::string AttentionParamQuery::af_decay = "AFB_DECAY";
 const std::string AttentionParamQuery::af_bottom = "AFB_BOTTOM";
 const std::string AttentionParamQuery::af_min_size = "MIN_AF_SIZE";
 const std::string AttentionParamQuery::af_max_size = "MAX_AF_SIZE";
-const std::string AttentionParamQuery::af_rent_update_freq = "ECAN_AF_RENT_FREQUENCY";
+const std::string AttentionParamQuery::af_rent_update_freq = "AF_RENT_FREQUENCY";
 
 // Forgetting Params
 const std::string AttentionParamQuery::forg_forgetting_threshold = "ECAN_FORGET_THRESHOLD";

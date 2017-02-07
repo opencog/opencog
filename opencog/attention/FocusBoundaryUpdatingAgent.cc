@@ -61,7 +61,11 @@ void FocusBoundaryUpdatingAgent::run()
         maxAFSize = std::stoi(_atq.get_param_value(AttentionParamQuery::af_max_size));
 
         AttentionValue::sti_t afboundary = _bank->getAttentionalFocusBoundary();
-
+        // Let there always be K top STI valued atoms in the AF.
+        if(_bank->getTopSTIValuedHandles().size() > 0)
+            //getTopSTIVlauedHandles function returns Handles in Increasing STI
+            //order. 
+             afboundary = _bank->get_sti(_bank->getTopSTIValuedHandles()[0]);
        /*
         AttentionValue::sti_t maxsti = _bank->get_max_STI();
         AttentionValue::sti_t minsti = _bank->get_min_STI();
@@ -77,10 +81,10 @@ void FocusBoundaryUpdatingAgent::run()
 
         //printf("NewAfb: %d OldAfb: %d Afb: %d \n",newafb,oldafb,afboundary);
         */
-       
+      
+        // Make sure not too many atoms are in the AF.
         HandleSeq afset;
         _bank->get_handle_set_in_attentional_focus(std::back_inserter(afset));
-        
         if(afset.size() > minAFSize ) {
             afboundary = get_cutoff(afset);
         }
