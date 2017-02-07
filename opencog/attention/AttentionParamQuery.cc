@@ -68,6 +68,8 @@ std::string AttentionParamQuery::get_param_value(const std::string& param)
     std::string value = "";
     HandleSeq hseq;
     hparam->getIncomingSet(back_inserter(hseq));
+
+    bool has_value = false;
     for(Handle h : hseq){
         if(h->getType() == STATE_LINK ){
             Handle hvalue = h->getOutgoingSet()[1];
@@ -77,9 +79,15 @@ std::string AttentionParamQuery::get_param_value(const std::string& param)
 
             if(str.back() == '.') 
                 str.pop_back();
-
             value = str;
+            has_value = true;
+            break;
         }
+    }
+
+    if(not has_value){
+        throw RuntimeException(TRACE_INFO, "Parameter %s has no associated value.",
+                param.c_str());
     }
 
     return value;
