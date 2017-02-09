@@ -35,11 +35,13 @@ class AttentionUTest :  public CxxTest::TestSuite
         AtomSpace _as;
 
     public:
-        AttentionUTest() {
+        AttentionUTest()
+        {
             config().set("ECAN_MIN_AF_SIZE", "10");
         }
 
-        void testTopSTIValues() {
+        void testTopSTIValues() 
+        {
             AttentionBank _ab(&_as);
             for(int i = 0; i < 50; i++) {
                 Handle h = _as.add_node(CONCEPT_NODE, "cnode-"+ std::to_string(i));
