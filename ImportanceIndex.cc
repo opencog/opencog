@@ -209,7 +209,13 @@ HandleSeq ImportanceIndex::getTopSTIValuedHandles()
     return  topKSTIValuedHandles;
 }
 
+size_t ImportanceIndex::bin_size() const
+{
+    return _index.bin_size();
+}
+
 size_t ImportanceIndex::size(int i) const
 {
     return _index.size(i);
 }
+

@@ -75,6 +75,15 @@ public:
     static unsigned int importanceBin(short);
 
     /**
+     * Get the content of an ImportanceBin at index i.
+    */
+    template <typename OutputIterator> OutputIterator
+    getContent(size_t i,OutputIterator out) const
+    {
+            return _index.getContent(i,out);
+    }
+
+    /**
      * Get the highest bin which contains Atoms
      */
     UnorderedHandleSet getMaxBinContents();
@@ -89,6 +98,8 @@ public:
      */
      HandleSeq getTopSTIValuedHandles();
 
+    size_t bin_size(void) const;
+    
     /**
      * Get the size of the bin at the given index.
      */

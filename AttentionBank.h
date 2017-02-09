@@ -353,6 +353,12 @@ public:
     {
          return _importanceIndex.getTopSTIValuedHandles();
     }
+
+    /**
+     * Return a random atom drawn from the importanceBin.
+     */
+    Handle getRandomAtom(void);
+
     /**
      * Updates the importance index for the given atom. According to the
      * new importance of the atom, it may change importance bins.
