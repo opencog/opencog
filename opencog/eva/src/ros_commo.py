@@ -279,8 +279,15 @@ class EvaControl():
 		independent of changes in HEAD's web-ui.
 		"""
 		update =  False
-		psi_prefix = self.puta.evaluate_scm("psi-prefix-str")
-		param_name = name[len(psi_prefix) - 1:]
+
+		# Only get the psi-prefix-str once, assuming it wouldn't change
+		# over time.
+		# Otherwise this will keep sending to the cogserver (as this
+		# is part of a "keep alive" psi-rule) and waste way too
+		# much unnecessary computing power
+		if self.psi_prefix == "":
+			self.psi_prefix = self.puta.evaluate_scm("psi-prefix-str")
+		param_name = name[len(self.psi_prefix) - 1:]
 
 		# Update parameter
 		if (param_name in self.param_dict) and \
@@ -479,6 +486,7 @@ class EvaControl():
 
 		# For controlling when to push updates, for saving bandwidth.
 		self.update_parameters = False
+		self.psi_prefix = ""
 
 		# For web ui based control of openpsi contorled-psi-rules
 		try:
