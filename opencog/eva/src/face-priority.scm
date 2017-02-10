@@ -1,9 +1,6 @@
 (use-modules (opencog))
 (use-modules (ice-9 threads))
-
-(load "time-map.scm")
-(load "self-model.scm")
-(load "primitives.scm")
+(use-modules (opencog eva-model) (opencog eva-behavior))
 
 ; -----------------------------------------------------------------------------
 ; TODO: Make the set, get, & delete of properites into a utility template
