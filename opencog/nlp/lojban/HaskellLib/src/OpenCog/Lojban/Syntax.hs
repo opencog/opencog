@@ -60,11 +60,20 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --General
 ---------
 
+
 _con_BO :: SyntaxReader String -> SyntaxReader (String,Maybe(Tagged Selbri))
 _con_BO ss = (id *** isofmap toSelbri) <$> ss <*> optional (_anytense <* sepSelmaho "BO")
     where toSelbri = Iso (Just . f) (Just . g) where
               f (CN name) = ((highTv,cPN name lowTv),Nothing)
               g ((_,PN n),_) = cCN n lowTv
+
+_BO :: SyntaxReader (Tagged Selbri)
+_BO = toSelbri <$> _anytense <* sepSelmaho "BO"
+    where toSelbri = Iso (Just . f) (Just . g) where
+              f (CN name) = ((highTv,cPN name lowTv),Nothing)
+              g ((_,PN n),_) = cCN n lowTv
+
+
 -------------------------------------------------------------------------------
 --Sumti
 -------------------------------------------------------------------------------
@@ -279,8 +288,14 @@ sumtiLai = collapsState
 
 --Connective
 
-_A_BO :: SyntaxReader (State (String,Maybe (Tagged Selbri)))
-_A_BO = reorder0 <$> _con_BO (selmaho "A")
+_A :: SyntaxReader String
+_A = selmaho "A"
+
+_A_BO :: SyntaxReader (State Con)
+_A_BO = reorder0 . wrapA <$> _A <*> optional _BO
+    where wrapA = Iso (Just . f) (Just . g)
+          f (a,b) = (Just a,b)
+          g (Just a,b) = (a,b)
 
 --AndLink
 --  AndLink
@@ -295,13 +310,37 @@ sumtiC = first ((handleCon . reorder ||| id) . ifJustB)
     where reorder = Iso (\(a1,(con,a2)) -> Just (con,[a1,a2]))
                         (\(con,[a1,a2]) -> Just (a1,(con,a2)))
 
-handleCon :: Iso ((String,Maybe (Tagged Selbri)),[Atom]) (Atom)
+{-handleCon :: Iso ((String,Maybe (Tagged Selbri)),[Atom]) (Atom)
 handleCon = (andl . tolist2 . (conLink *** _frames) ||| conLink) . reorder
     where reorder = Iso (Just . f) (Just . g) where
-            f ((s,Just ts),as) = Left ((s,as),(ts,map (\x -> (x,Nothing)) as))
+          f ((s,Just ts),as) = Left ((s,as),(ts,map (\x -> (x,Nothing)) as))
             f ((s,Nothing),as) = Right (s,as)
             g (Left ((s,as),(ts,_)))= ((s,Just ts),as)
-            g (Right (s,as))        = ((s,Nothing),as)
+            g (Right (s,as))        = ((s,Nothing),as)-}
+
+handleCon :: Iso (Con,[Atom]) (Atom)
+handleCon = merge . (isofmap conLink *** isofmap (_frames .> toSumti)) . reorder
+    where reorder = Iso (Just . f) (Just . g) where
+              f ((s,ts),as)     = (eM (s,as),eM (ts,as))
+              g (Just (s,as) ,Just (ts,_))  = ((Just s,Just ts),as)
+              g (Nothing     ,Just (ts,as)) = ((Nothing,Just ts),as)
+              g (Just (s,as) ,Nothing)      = ((Just s,Nothing),as)
+          eM (Just a,b)  = Just (a,b)
+          eM (Nothing,b) = Nothing
+
+          toSumti = Iso (Just . f) (Just . g) where
+              f = map (\x -> (x,Nothing))
+              g = map (\(x,_) -> x)
+
+          merge = Iso (Just . f) (Just . g) where
+              f (Just a,Just b) = Link "AndLink" [a,b] highTv
+              f (Nothing,Just b) = b
+              f (Just a,Nothing) = a
+              f (Nothing,Nothing) = error $ "not allowed to happen."
+              g l@(EvalL _ _ _) = (Nothing,Just l)
+              g (AL [a,b@(EvalL _ _ _)]) = (Just a,Just b)
+              g l = (Just l,Nothing)
+
 
 placeholder :: SyntaxReader (State Sumti)
 placeholder = expandState . first instanceOf . handle
@@ -538,7 +577,10 @@ _GIhA ::  SyntaxReader String
 _GIhA = _GIhAtoA <$> selmaho "GIhA"
 
 _GIhA_BO :: SyntaxReader (State Con)
-_GIhA_BO = reorder0 <$> _con_BO _GIhA
+_GIhA_BO = reorder0 . wrapGIhA <$> _GIhA <*> optional _BO
+    where wrapGIhA = Iso (Just . f) (Just . g)
+          f (a,b) = (Just a,b)
+          g (Just a,b) = (a,b)
 
 --(s,(bt,(giha,bt)))
 --((s,bt),[(giha,(s,bt))])
@@ -607,8 +649,11 @@ mergeSumti = Iso f g where
                        (x:xs) -> Just ([x],(s,xs))
 
 
-_GA :: SyntaxReader (State String)
-_GA = reorder0 . _GAtoA <$> selmaho "GA"
+_GA :: SyntaxReader (State (Maybe String))
+_GA = reorder0 . wrapGA . _GAtoA <$> selmaho "GA"
+    where wrapGA = Iso (Just . f) (Just . g)
+          f a = Just a
+          g (Just a) = a
 
 bridiGA :: SyntaxReader (State Atom)
 bridiGA = first handleGA <$> _GA <&> _bridi <* sepSelmaho "GI" <&> _bridi
@@ -691,8 +736,8 @@ free = vocative <|> freeuiP <|> freeSumti <|> luP'
 _JA :: SyntaxReader String
 _JA = _JAtoA <$> selmaho "JA"
 
-_JA_BO :: SyntaxReader (String,Maybe(Tagged Selbri))
-_JA_BO = _con_BO _JA
+_JA_BO :: SyntaxReader Con
+_JA_BO = optional _JA <*> optional _BO
 
 {-_BAI_BO :: SyntaxReader Atom
 _BAI_BO = <$> baiP <* sepSelmaho "BO"
@@ -703,11 +748,13 @@ selbriToEval = Iso (Just . f) (Just . g) where
     f (tv,atom) = cEvalL tv atom (cLL [])
     g (EvalL tv p _) = (tv,p)
 
-_jufra :: SyntaxReader (Maybe (String,Maybe (Tagged Selbri)),[Atom])
+_jufra :: SyntaxReader (Maybe Con,[Atom])
 _jufra = (id *** ((handle ||| tolist1) . ifJustB))
      <$> sepSelmaho "I" *> optional _JA_BO <*> preti <*> optional _jufra
     where handle = Iso (Just . f) (Just . g) where
               f (p,(mc,(a:as))) = case mc of
+                                    Just (Nothing,Nothing) ->
+                                        (p:a:as)
                                     Just c ->
                                         let Just x = apply handleCon (c,[p,a])
                                         in (x:as)
