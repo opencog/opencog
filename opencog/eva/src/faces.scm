@@ -130,7 +130,7 @@
 	(map (lambda (x) (car (cog-outgoing-set x)))
 	(cog-chase-link 'EvaluationLink 'ListLink visible-face))))
 
-(define (show-acked-faces)
+(define-public (show-acked-faces)
 	(define acked-face (PredicateNode "acked face"))
 	(filter (lambda(y) (equal? (cog-type y) 'NumberNode))
 	(map (lambda (x) (car (cog-outgoing-set x)))
