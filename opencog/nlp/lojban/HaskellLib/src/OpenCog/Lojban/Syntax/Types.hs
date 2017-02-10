@@ -62,5 +62,3 @@ instance Syntax f => Syntax (ReaderT a f) where
     withOut r1 r2 = ReaderT (\e -> withOut (runReaderT r1 e) (runReaderT r2 e))
 
 $(defineIsomorphisms ''Atom)
-
-

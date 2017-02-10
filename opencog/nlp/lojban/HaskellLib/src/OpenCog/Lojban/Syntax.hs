@@ -398,10 +398,6 @@ handleNU = Iso f g where
                          in Just (pred,link:as)
     g (PN name,CtxPred atom : as) = Just ((atom,as),name)
 
-Link "SatisfyingSetLink"
-    [Node "VariableNode" "$X"
-    ,Link "AndLink"]
-
 handleKA :: Iso ((State Atom),String) (State Atom)
 handleKA = Iso (Just . f) (Just . g) where
     f ((atom,as),name) = let pred = cPN name lowTv
