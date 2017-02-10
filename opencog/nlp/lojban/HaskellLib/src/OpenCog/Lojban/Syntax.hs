@@ -44,6 +44,7 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --      nup
 --      GOhA
 --      vo'a rule see ../Lojban.hs
+--      make statments explicit
 
 -- argslots
 -- Synonims for tenses and gismu
@@ -60,13 +61,6 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --General
 ---------
 
-
-_con_BO :: SyntaxReader String -> SyntaxReader (String,Maybe(Tagged Selbri))
-_con_BO ss = (id *** isofmap toSelbri) <$> ss <*> optional (_anytense <* sepSelmaho "BO")
-    where toSelbri = Iso (Just . f) (Just . g) where
-              f (CN name) = ((highTv,cPN name lowTv),Nothing)
-              g ((_,PN n),_) = cCN n lowTv
-
 _BO :: SyntaxReader (Tagged Selbri)
 _BO = toSelbri <$> _anytense <* sepSelmaho "BO"
     where toSelbri = Iso (Just . f) (Just . g) where
@@ -78,6 +72,7 @@ _BO = toSelbri <$> _anytense <* sepSelmaho "BO"
 --Sumti
 -------------------------------------------------------------------------------
 
+_LE :: SyntaxReader (State String)
 _LE = reorder0 <$> selmaho "LE"
 
 --Handles anykind of LE phrases
@@ -110,6 +105,8 @@ leP = collapsState
           handleBE :: Iso (Sumti,Maybe [Sumti]) [Sumti]
           handleBE = (cons ||| tolist1) . ifJustB
 
+--Depending on the word we have a different Relation between the predicate
+-- and the resulting Concept
 leHandlers = [("le"  , genInstance "IntensionalInheritanceLink")
              ,("lo"  , genInstance "InheritanceLink"           )
              ,("lei" , massOf "IntensionalInheritanceLink"     )
@@ -120,6 +117,7 @@ leHandlers = [("le"  , genInstance "IntensionalInheritanceLink")
              ,("lo'e", genInstance "InheritanceLink"           )
              ]
 
+-- A Mass according to Lojban is a thing that has all properties of it's parts
 massOf :: String -> Iso (Atom,Int) (State Atom)
 massOf itype = instanceOf =. (first (_ssl . _frames) . addStuff <. (implicationOf *^* genInstance itype)) . reorder
 
@@ -138,12 +136,12 @@ massOf itype = instanceOf =. (first (_ssl . _frames) . addStuff <. (implicationO
 
 
 setOf :: String -> Iso (Atom,Int) (State Atom)
-setOf itype = setTypeL . tolist2 . makeSet <. genInstance itype
+setOf itype = collapsState . first ((tolist1 . setTypeL . tolist2) >. makeSet) . genInstance itype
     where makeSet = Iso (Just . f) (Just . g)
               where f a = let salt = show a
                               set  = cCN (randName 1 salt) noTv
-                          in (set,a)
-                    g (_,a) = a
+                          in (set,(set,a))
+                    g (_,(_,a)) = a
 
 --Handle anykind of LA phrase
 laP :: SyntaxReader (State Atom)
@@ -166,15 +164,17 @@ laP = handleName . first wordNode <$> withSeed (between (sepSelmaho "LA")
 
 
 
-liP :: SyntaxReader (Atom,[Atom])
-liP = sepSelmaho "LI" *> (xo <|> pa) <* optSelmaho "LOhO"
+liP :: SyntaxReader (State Atom)
+liP = reorder0 <$> sepSelmaho "LI" *> (xo <|> pa) <* optSelmaho "LOhO"
 
-xo :: SyntaxReader (State Atom)
-xo = reorder0 . varnode <$> word "xo"
+xo :: SyntaxReader Atom
+xo = varnode <$> word "xo"
 
-pa :: SyntaxReader (State Atom)
-pa = reorder0
-    . (         number       |||    concept   )
+pa_S :: SyntaxReader (State Atom)
+pa_S = reorder0 <$> pa
+
+pa :: SyntaxReader Atom
+pa =  (         number       |||    concept   )
     . (showReadIso . paToNum |^| isoConcat " ")
     . isoConcat2 <$> many1 (joiSelmaho "PA")
     where paToNum :: Iso [String] Int
@@ -198,16 +198,16 @@ zoP :: SyntaxReader (State Atom)
 zoP = instanceOf .< wordNode . ciunit <$> withSeed (mytext "zo" <*> anyWord)
 
 --KohaPharse for any kind of Pro-Noune
-kohaP :: SyntaxReader (Atom,[Atom])
-kohaP = reorder0 <$> (ma <|> koha)
+kohaP :: SyntaxReader (State Atom)
+kohaP = (reorder0 <$> ma) <|> (instanceOf <$> withSeed koha)
     where koha = concept <$> selmaho "KOhA"
           ma   = varnode <$> word "ma"
 
 luP' :: SyntaxReader Atom
 luP' = sepSelmaho "LU" *> lojban <* optSelmaho "LIhU"
 
-luP :: SyntaxReader (Atom,[Atom])
-luP = reorder0 <$> luP'
+luP :: SyntaxReader (State Atom)
+luP = instanceOf <$> withSeed luP'
 
 sumti :: SyntaxReader (State Atom)
 sumti = kohaP <|> leP <|> laP <|> liP <|> zoP <|> luP
@@ -266,15 +266,14 @@ sumtiLaiP = ptp (pa <*> selbri) id (ptp pa addLE sumtiLai) <|> sumtiLai
           g s = take (length s - 4) s
 
 sumtiLai :: SyntaxReader (State Atom)
-sumtiLai = collapsState
-           . first ((instanceWithSize ||| instanceOf) . reorder)
-           <$> withSeedState (optState pa <&> sumtiNoi)
+sumtiLai = collapsState .< ((instanceWithSize ||| reorder0) . reorder)
+           <$> withSeedState (optState pa_S <&> sumtiNoi)
 
     where reorder = Iso (Just . f) (Just . g)
               where f ((Just pa,sumti),seed)   = Left ((pa,seed),sumti)
-                    f ((Nothing,sumti),seed)   = Right (sumti,seed)
+                    f ((Nothing,sumti),seed)   = Right (sumti)
                     g (Left ((pa,seed),sumti)) = ((Just pa,sumti),seed)
-                    g (Right (sumti,seed))     = ((Nothing,sumti),seed)
+                    g (Right sumti)            = ((Nothing,sumti),4)
 
           instanceWithSize :: Iso ((Atom,Int),Atom) (State Atom)
           instanceWithSize = second (tolist2 . (sizeL *** setTypeL)) . makeSet
@@ -452,12 +451,12 @@ bridiPMI = (ptp (optional uiP <*> selbriAll) addmi bridiUI) <|> bridiUI <|> (ptp
           g s = s --TODO: Maybe remoe ti again
 
 
-_MOI :: SyntaxReader (State String)
-_MOI = reorder0 <$> selmaho  "MOI"
+_MOI :: SyntaxReader String
+_MOI = selmaho  "MOI"
 
 moiP :: SyntaxReader (State Atom)
-moiP = collapsState . first implicationOf .< first (predicate . handleMOI)
-     <$> withSeedState (pa <&> _MOI)
+moiP = implicationOf .< (predicate . handleMOI)
+     <$> withSeed (pa <*> _MOI)
     where handleMOI = Iso (Just . f) (Just . g)
           f (a,s) = let nn = nodeName a
                     in nn ++ '-':s
