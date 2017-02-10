@@ -56,7 +56,7 @@
 ;;
 ;; This function assumes that an atom can have only one location at a
 ;; time.
-(define (get-last-xyz map-name id-node elapse)
+(define-public (get-last-xyz map-name id-node elapse)
 	;
 	; get-last-locs-ato returns a SetLink holding AtLocationLinks
 	; of the form below:
