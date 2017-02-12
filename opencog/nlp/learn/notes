@@ -2186,7 +2186,7 @@ at 00:19 -- 926 articles in 120 mins = 7.7 articles/min
             22908000 stored, stv total = 18315330
             stv/5 = 3.66M pairs or 814 pairs/sent(!)
 at 11:55 -- 4275 articles in 816 mins = 5.24 articles/min - back to old rates.
-            restart java, no noticable diference in rate: its same cpu/loadavg<F3>
+            restart java, no noticable diference in rate: its same cpu/loadavg
 restart, and load all. Before stopping:
             tlbuf holds 1381888 atoms Atomspace holds 1381901 atoms Hmm.
 
@@ -2240,7 +2240,43 @@ select count(*) from atoms; -- 4786479 -- 4.8M
 
 
 3 Feb 2017 -- restart. All-new atomspace, all-new link-grammar
-            at 12:02PM -- 27691 articles 
+      at 12:18PM -- 27691 articles 
+      at 12:30 -- crash of guile, restart.
+      at 14:11 -- 28246 articles, 28246-27691/100 = 555 / 100 = 5.5 arts/min
+      at 15:47 -- 28772 articles, 28772-28246/96 = 526 / 96 = 5.48 articles/min
+      at 20:03 -- 30166 articles, 30166-28772/256 = 1394/256 = 5.45 arts/min
+4 Feb at 11:20 -- 35014 articles, 35014-30166/917 = 4848/917 = 5.29 artciles/min
+5 Feb at 00:02 -- 38511 articles; there was accidental pause of system for hours.
+      at 11:25 -- 43905 articles; 43905-38511/683 = 5394/683 = 7.90 arts/min whoa!
+6 Feb completed -- 49194 articles.
+
+sql-stats: total loads = 2013739 total stores = 741785040 ratio=368.362057
+write items=148357008 flushes=0 flush_ratio=inf
+drains=256330 fill_fraction=578.773487 concurrency=5.138489
+avg drain time=0.100850 seconds; longest drain time=10.537000
+
+select count(*) from atoms;           6927244 -- 6.9M  -- 6 Feb final
+select sum(stv_count) from atoms;  1396889746 -- 1.40G -- 6 Feb final
+
+
+cpu-ratio guile/java: 4846/425 = 11.4 at 11:20 4 Feb
+                      6732/602 = 11.2 at 00:02 5 Feb
+                      9001/786 = 11.5 at 11:30 5 Feb
+                     12532/1127 = 11.1 final 6 Feb at completion
+
+114022593 total stores in  1820 cpu-mins = 62.6K atoms/min = 1.04K sto/sec
+292674070 total stores in  4846 cpu-mins = 60.4K atoms/min = 1.01K sto/sec
+534084730 total stores in  8978 cpu-mins = 59.5K atoms/min = 991 stores/sec
+741785040 total stores in 12532 cpu-mins = 59.2K atoms/min = 987 stores/sec
+
+ vs cx1 (fr-ady):
+ 76688189 stores in  3325 cpu-mins = 23.1K stores/min = 384 stores/sec
+193457228 stores in  6838 cpu-mins = 28.3K stores/min = 472 stores/sec
+378934530 stores in 12396 cpu-mins = 30.6K stores/min = 509 stores/sec
+
+cx1 has old, inefficient kernel and/or old-ineffcient postgres (and
+crappy odbc)
+
 
 postgres:
 ps ax |grep postgres > x
@@ -2261,14 +2297,34 @@ French pairs
 
 french pairs: start again: 22:36PM 30 Jan - find submitted* |wc 17053 
                            12:25PM  2 Feb - find submitted* |wc 24563
+                           11:43AM  4 Feb - find submitted* |wc 25361
+                           11:34AM  5 Feb - find submitted* |wc 25830
+                           19:19PM 10 Feb - find submitted* |wc 27763
+
 disk: 206447916 used 41097304 free
 disk  206574808 used 40970412 free  24 hours later... about 100MB more
 disk  206888724 used 40656496 free  12:25 2 Feb
+disk  208585480 used 38959740 free  11:42 4 Feb ... 2.1GB more
+disk  208897572 used 38647648 free  00:00AM 5 feb
+disk  211829000 used 35716220 free  19:20 10 Feb
 
-select count(*) from atoms;         2090064 --   2M -- 12:25PM  2 Feb
-select sum(stv_count) from atoms; 115251031 -- 115M -- 12:25PM  2 Feb
+select count(*) from atoms;         2090064 --   2.1M -- 12:25PM  2 Feb
+select sum(stv_count) from atoms; 115251031 -- 115M   -- 12:25PM  2 Feb
+
+select count(*) from atoms;         5676118 --   5.7M -- 11:19AM  4 Feb
+select sum(stv_count) from atoms; 351323640 -- 351M   -- 11:19AM  4 Feb
+
+select count(*) from atoms;         7714679 --   7.7M -- 11:38AM  5 Feb
+select sum(stv_count) from atoms; 502509756 -- 503M   -- 11:38AM  5 Feb
+
+select count(*) from atoms;        16945084 --  16.9M -- 19:21PM 10 Feb
+select sum(stv_count) from atoms;1289249056 -- 1.29G  -- 19:21PM 10 Feb
 
 
+guile/java ratio: 6781/683  = 9.93 -- 11:19AM  4 Feb
+                  9401/1001 = 9.40 -- 00:00AM  5 Feb
+                 12433/1304 = 9.53 -- 11:40AM  5 Feb
+                 47250/4576 = 10.3 -- 19:23PM 10 Feb
 
 guile hangs:
 cx1 - 30 jan hang after 4.4M stores 
@@ -2354,6 +2410,16 @@ SQLBindParameter
 glurg. ODBC needs this: replace ? by &#63; what a clusterfuck
 
 Also: 
+
+[2017-02-08 08:16:43:154] [WARN] ODBC Driver: (1) ODBC escape convert
+error
+
+[2017-02-08 08:16:43:155] [WARN] ODCB Driver: Query was: SELECT * FROM
+Atoms WHERE type = 110 AND name = $ocp${x$ocp$ ;
+
+[2017-02-08 08:16:43:155] [ERROR] Can't perform query rc=-1
+(/home/linas/src/atomspace-git/opencog/persist/sql/multi-driver/odbcxx.cc:340)
+
 
 
 
@@ -2506,6 +2572,71 @@ len == len not counting the null.
 
 e.g. n=1 insert = 0
 memomve from 0 to 1 for 1 item
+
+=========================================================
+Arghh...
+scheme@(guile-user)> GC Warning: Repeated allocation of very large block (appr. size
+18894848):
+        May lead to memory leak and poor performance.
+*** Error in `guile': double free or corruption (out): 0x00000000623e6010 ***
+======= Backtrace: =========
+/lib/x86_64-linux-gnu/libc.so.6(+0x777e5)[0x7f3a6db117e5]
+/lib/x86_64-linux-gnu/libc.so.6(+0x7fe0a)[0x7f3a6db19e0a]
+/lib/x86_64-linux-gnu/libc.so.6(cfree+0x4c)[0x7f3a6db1d98c]
+/usr/local/lib/libguile-2.2.so.0(scm_string_to_utf8+0xd7)[0x7f3a6e0ca067]
+/usr/local/lib/libguile-2.2.so.0(scm_mkstrport+0x6b)[0x7f3a6e13d0ab]
+/usr/local/lib/libguile-2.2.so.0(+0xbc5cd)[0x7f3a6e1465cd]
+/usr/local/lib/libguile-2.2.so.0(scm_call_n+0x186)[0x7f3a6e154046]
+/usr/local/lib/libguile-2.2.so.0(scm_call_3+0x2f)[0x7f3a6e0d2eaf]
+/usr/local/lib/libguile-2.2.so.0(+0xbc5cd)[0x7f3a6e1465cd]
+/usr/local/lib/libguile-2.2.so.0(scm_call_n+0x186)[0x7f3a6e154046]
+/usr/local/lib/libguile-2.2.so.0(scm_call_3+0x2f)[0x7f3a6e0d2eaf]
+/usr/local/lib/libguile-2.2.so.0(+0xbc5cd)[0x7f3a6e1465cd]
+/usr/local/lib/libguile-2.2.so.0(scm_call_n+0x186)[0x7f3a6e154046]
+/usr/local/lib/libguile-2.2.so.0(+0xb7fd2)[0x7f3a6e141fd2]
+/usr/local/lib/opencog/libsmob.so(_ZN7opencog10SchemeEval7do_evalERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE+0xb9)[0x7f3a6539be09]
+/usr/local/lib/opencog/libsmob.so(_ZN7opencog10SchemeEval11c_wrap_evalEPv+0x1a)[0x7f3a6539beba]
+/usr/local/lib/libguile-2.2.so.0(+0x4324a)[0x7f3a6e0cd24a]
+/usr/local/lib/libguile-2.2.so.0(+0xbc5cd)[0x7f3a6e1465cd]
+/usr/local/lib/libguile-2.2.so.0(scm_call_n+0x186)[0x7f3a6e154046]
+/usr/local/lib/libguile-2.2.so.0(+0xb7fd2)[0x7f3a6e141fd2]
+/usr/local/lib/libguile-2.2.so.0(+0x43860)[0x7f3a6e0cd860]
+/usr/local/lib/libguile-2.2.so.0(scm_c_with_continuation_barrier+0x45)[0x7f3a6e0cd945]
+/usr/lib/x86_64-linux-gnu/libgc.so.1(GC_call_with_gc_active+0x77)[0x7f3a6d8438e7]
+/usr/local/lib/libguile-2.2.so.0(+0xb6ad1)[0x7f3a6e140ad1]
+/usr/lib/x86_64-linux-gnu/libgc.so.1(GC_call_with_stack_base+0x22)[0x7f3a6d83d952]
+/usr/local/lib/libguile-2.2.so.0(scm_with_guile+0x38)[0x7f3a6e140e88]
+/usr/local/lib/opencog/libsmob.so(_ZN7opencog10SchemeEval9eval_exprERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE+0x2e)[0x7f3a6539bf3e]
+/usr/local/lib/opencog/modules/libscheme-shell.so(_ZN7opencog12GenericShell9eval_loopEv+0x2ec)[0x7f3a582ea9cc]
+/usr/lib/x86_64-linux-gnu/libstdc++.so.6(+0xb8c80)[0x7f3a63f4ac80]
+/lib/x86_64-linux-gnu/libpthread.so.0(+0x76ba)[0x7f3a6de716ba]
+/lib/x86_64-linux-gnu/libc.so.6(clone+0x6d)[0x7f3a6dba082d]
+======= Memory map: ========
+00400000-00401000 r-xp 00000000 fd:00 80300005 /usr/local/bin/guile
+00600000-00601000 r--p 00000000 fd:00 80300005 /usr/local/bin/guile
+00601000-00602000 rw-p 00001000 fd:00 80300005 /usr/local/bin/guile
+01d52000-6258b000 rw-p 00000000 00:00 0                                  [heap]
+7f3870000000-7f38764e3000 rw-p 00000000 00:00 0 
+7f38764e3000-7f3878000000 ---p 00000000 00:00 0 
+7f3878000000-7f387c000000 rw-p 00000000 00:00 0 
+7f387d7bb000-7f387d7bc000 ---p 00000000 00:00 0 
+7f387d7bc000-7f387dfbc000 rw-p 00000000 00:00 0 
+7f387dfbc000-7f387dfbd000 ---p 00000000 00:00 0 
+7f387dfbd000-7f387e7bd000 rw-p 00000000 00:00 0 
+7f387e7bd000-7f387e7be000 ---p 00000000 00:00 0 
+7f387e7be000-7f387efbe000 rw-p 00000000 00:00 0 
+7f387efbe000-7f387efbf000 ---p 00000000 00:00 0 
+7f387efbf000-7f387f7bf000 rw-p 00000000 00:00 0 
+7f387f7bf000-7f387f7c0000 ---p 00000000 00:00 0 
+7f387f7c0000-7f387ffc0000 rw-p 00000000 00:00 0 
+7f387ffc0000-7f387ffc1000 ---p 00000000 00:00 0 
+7f387ffc1000-7f38807c1000 rw-p 00000000 00:00 0 
+7f38807c1000-7f38807c2000 ---p 00000000 00:00 0 
+7f38807c2000-7f3880fc2000 rw-p 00000000 00:00 0 
+7f3880fc2000-7f3880fc3000 ---p 00000000 00:00 0 
+7f3880fc3000-7f38817c3000 rw-p 00000000 00:00 0 
+7f38817c3000-7f38817c4000 ---p 00000000 00:00 0 
+7f38817c4000-7f3881fc4000 rw-p 00000000 00:00 0 
 
 
 
