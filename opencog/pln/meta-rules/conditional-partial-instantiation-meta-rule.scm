@@ -72,7 +72,7 @@
          (produced-vardecl (VariableList
                              (TypedVariable V2 V2Type)
                              (TypedVariable V3 V3Type)))
-         ;; Produced rule pattern. Just look for groudings of V2 and V3
+         ;; Produced rule pattern. Just look for groundings of V2 and V3
          (produced-pattern (And V2 V3))
          ;; Produced rule rewrite. Apply formula to calculate the TV
          ;; over the partially substituted ImplicationScope.
