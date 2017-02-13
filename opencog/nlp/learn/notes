@@ -2643,17 +2643,61 @@ scheme@(guile-user)> GC Warning: Repeated allocation of very large block (appr. 
 
 
 
+12 Feb 2017
 -----------------
-postgres: change  shared_buffers = 24576MB         # min 128kB
+postgres: change  shared_buffers = 64576MB         # min 128kB
 /etc/postgresql/9.5/main/postgresql.conf
 
-requires libgmp-dev
-libgc-dev
-use the git version of guile
-install libpq-dev
-remove unixodbc-dev
-install new linkgrammar
-new relex...
+apt-get update
+apt-get upgrade
+apt-get install autoconf-archive autoconf automake
+apt-get install libgmp-dev libgc-dev libunistring-dev libffi-dev
+apt-get install flex gettext texinfo
+git clone git://git.sv.gnu.org/guile.git
+cd guile; ./autogen.sh --no-configure;
+mkdir build; cd build; ../configure; make -j
+
+apt-get install libpq-dev
+apt-get purge unixodbc-dev
+apt-get autoremove
+install link-grammar-5.3.15
+cd relex; git pull; ant; ant install
+
 update pair-count.scm to use URL
 (sql-open "postgres:///yue_pairs?user=ubuntu&password=asdf")
+
+lynx https://dumps.wikimedia.org/zhwiki/20170101/zhwiki-20170101-pages-articles.xml.bz2
+
+time bzcat zhwiki-20170101-pages-articles.xml.bz2 |/home/ubuntu/src/relex/src/perl/wiki-scrub.pl
+
+real	39m9.964s
+user	39m15.964s
+sys	1m14.940s
+
+find wiki-stripped/* |wc 1211823
+cd wiki-stripped
+/home/ubuntu/src/relex/src/perl/wiki-clean-zh.sh
+find  |wc   1018923
+cd ..
+
+Portal:
+Draft:
+模块:
+
+mkdir alpha-pages
+cd alpha-pages
+~/src/relex/src/perl/wiki-alpha-zh.sh
+find |wc  1018946
+
+cd ../..
+cp -pr alpha-data/alpha-pages beta-pages
+
+createdb zh_pairs
+cat src/atomspace/opencog/persist/sql/multi-driver/atom.sql | psql zh_pairs
+
+cp ~/src/relex/src/split-sentences/nonbreaking_prefixes/* ~/run/nonbreaking_prefixes
+cp ~/src/relex/src/split-sentences/split-sentences.pl ~/run
+
+.... etc.
+
 

@@ -232,12 +232,12 @@ directory.  Use these as follows:
     time cat blahwiki.xml.bz2 |bunzip2 | /home/linas/src/relex/src/perl/wiki-scrub.pl
     cd wiki-stripped
     find |wc
-    /home/linas/src/relex/src/perl/wiki-clean.sh
+    /home/ubuntu/src/relex/src/perl/wiki-clean.sh
     find |wc
     cd ..
     mkdir alpha-pages
     cd alpha-pages
-    /home/linas/src/relex/src/perl/wiki-alpha.sh
+    /home/ubuntu/src/relex/src/perl/wiki-alpha.sh
 ```
 
 simple:
