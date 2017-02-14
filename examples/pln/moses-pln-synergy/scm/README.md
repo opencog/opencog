@@ -181,7 +181,7 @@ And search for the following
 ...
 ```
 
-##### (2) - Distribute the lambda in the implicant and implicand of (1)
+##### (2) - Convert the implication scope of (1) into an implication
 
 Semi-formally
 ```
