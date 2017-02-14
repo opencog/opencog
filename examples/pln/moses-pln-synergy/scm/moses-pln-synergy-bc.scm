@@ -5,7 +5,7 @@
 (use-modules (opencog logger))
 ;; (cog-logger-set-sync! #t)
 ;; (cog-logger-set-stdout! #t)
-;; (cog-logger-set-timestamp! #f)
+(cog-logger-set-timestamp! #f)
 (cog-logger-set-level! "debug")
 
 ;; Load MOSES model
