@@ -31,24 +31,25 @@
 (define update-demand (psi-demand "update demand" 1))
 (define update-demand-satisfied (True))
 
-(State (ConceptNode "saliency-tracking") (NumberNode "0"))
+(define saliency-tracking (Anchor "SaliencyTracking"))
+(define is-tracking (Concept "IsTracking"))
+(define not-tracking (Concept "NotTracking"))
+(State saliency-tracking not-tracking)
 
 (DefineLink
 	(DefinedPredicate "tracking-salient?")
-	(GreaterThan
-		(Get (State (ConceptNode "saliency-tracking")(VariableNode "$x")))
-		(NumberNode "0.5")))
+	(Equal is-tracking
+		(Get (State saliency-tracking (Variable "$x")))
+	))
 
 (DefineLink
 	(DefinedPredicate "salient-flag-off")
-  (True
-		(Put (State (ConceptNode "saliency-tracking")(Variable "$x")) (NumberNode "0")))
+	(True (Put (State saliency-tracking (Variable "$x")) not-tracking))
 )
 
 (DefineLink
 	(DefinedPredicate "salient-flag-on")
-  (True
-		(Put (State (ConceptNode "saliency-tracking")(Variable "$x")) (NumberNode "1.0")))
+	(True (Put (State saliency-tracking (Variable "$x")) is-tracking))
 )
 
 (DefineLink
