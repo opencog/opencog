@@ -726,3 +726,22 @@
 		(Concept "schema-gesture")))
 
 ;--------------------------------------------------------------------
+
+(Define
+	(DefinedSchema "reasoning-demo")
+	(List
+		(Concept "imperative")
+		(Concept "reasoning-demo")
+	))
+
+(Reference (Word "show") (DefinedPredicate "Do show demo"))
+(Reference (Word "reasoning") (DefinedSchema "reasoning-demo"))
+
+(Inheritance (DefinedPredicate "Do show demo") (Concept "pred-demo"))
+(Inheritance (DefinedSchema "reasoning-demo") (Concept "schema-demo"))
+
+(Evaluation
+	(Predicate "demo-action")
+	(List
+		(Concept "pred-demo")
+		(Concept "schema-demo")))
