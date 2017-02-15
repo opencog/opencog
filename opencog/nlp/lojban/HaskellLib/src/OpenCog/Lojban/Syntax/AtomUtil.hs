@@ -199,12 +199,25 @@ number = nodeIso "VariableNode" noTv
 
 
 _frames :: Iso (Tagged Selbri,[Sumti]) Atom
-_frames = (id ||| andl) . isSingle . mapIso _frame . isoDistribute . handleTAG
+_frames = (id ||| andl) . isSingle . mapIso (handleDA . _frame) . isoDistribute . handleTAG
     where isSingle = Iso (Just . f) (Just . g)
           f [a] = Left a
           f as  = Right as
           g (Left a) = [a]
           g (Right as) = as
+
+handleDA :: Iso Atom Atom
+handleDA = Iso (Just . f) (Just . g) where
+    f (EvalL tv ps (LL [p1,CN n]))
+        | n == "da" || n == "de" || n == "di"
+            = let i = cVN ((randName 0 (show p1)) ++ "___" ++ n)
+              in cExL tv i (cEvalL tv ps (cLL [p1,i]))
+    f a = a
+    g (ExL _ _ (EvalL tv ps (LL [p1,VN name])))
+        = let n = drop 23 name
+              da = cCN n lowTv
+          in cEvalL tv ps (cLL [p1,da])
+    g a = a
 
 handleTAG :: Iso (Tagged Selbri,[Sumti]) (Selbri,[(Atom,Tag)])
 handleTAG = handleTAGupdater . second tagger

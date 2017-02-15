@@ -33,13 +33,12 @@ import Debug.Trace
 mytrace a = traceShow a a
 mytrace2 s a = trace (s ++(' ':show a)) a
 
---TODO
+--TODO Parser
 -- FIX: pa
---      da
+--      da + quantifier
 --      is GIhA NAI correct?
 --      ZAhO explicit representation
 --      me'au
---      leP inner qunantifier
 --      tenseSumti
 --      nup
 --      GOhA
@@ -54,8 +53,10 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 -- ki
 -- references
 
-
 -- ConceptAnd/OrLink isntead of boolea and/or
+
+--TODO Printer
+-- da,de,di differentiation
 
 ---------
 --General
@@ -216,9 +217,10 @@ zoP = instanceOf .< wordNode . ciunit <$> withSeed (mytext "zo" <*> anyWord)
 
 --KohaPharse for any kind of Pro-Noune
 kohaP :: SyntaxReader (State Atom)
-kohaP = (reorder0 <$> ma) <|> (instanceOf <$> withSeed koha)
+kohaP = (reorder0 <$> (da <|> ma)) <|> (instanceOf <$> withSeed koha)
     where koha = concept <$> selmaho "KOhA"
           ma   = varnode <$> word "ma"
+          da   = concept <$> oneOfS word ["da","de","di"]
 
 luP' :: SyntaxReader Atom
 luP' = sepSelmaho "LU" *> lojban <* optSelmaho "LIhU"
@@ -354,7 +356,7 @@ handleCon = merge . (isofmap conLink *** isofmap (_frames .> toSumti)) . reorder
               g (Just (s,as) ,Just (ts,_))  = ((Just s,Just ts),as)
               g (Nothing     ,Just (ts,as)) = ((Nothing,Just ts),as)
               g (Just (s,as) ,Nothing)      = ((Just s,Nothing),as)
-          eM (Just a,b)  = Just (a,b)
+          eM (Just a,b)  = Just (a,b) --expand Maybe
           eM (Nothing,b) = Nothing
 
           toSumti = Iso (Just . f) (Just . g) where
@@ -643,23 +645,25 @@ handleGIhA = handleCon . second (tolist2 .> handleBRIDI) . reorder
 -- (((ma,ms),ts),[a])
 -- ((ma,ms),(ts,[a]))
 
+--MPU = Maybe PU
+--MNA = Maybe NA
 handleBRIDI :: Iso Bridi Atom
 handleBRIDI = handleNA
+            -- ((MNA,MCtxL)
             . second _ctx
+            -- ((MNA,(MPU,frames))
             . inverse associate
+            -- (((MNA,MPU),frames)
             . first commute
+            -- (((MPU,MNA),frames)
             . second _frames
+            -- ((MPU,MNA),(Tagged Selbri,sumti))
             . inverse associate
+            -- (((MPU,MNA),Tagged Selbri),sumti)
             . first associate
+            -- ((MPU,(MNA,Tagged Selbri)),sumti)
             . mergeSumti
-
--- ((MPU,(MNA,(Selbri,Args)))   ,Atoms)
--- (((MPU,MNA),(Selbri,Args))   ,Atoms)
--- (((MPU,MNA),frames)            ,Atoms)
--- (((MNA,MPU),frames)            ,Atoms)
--- ((MNA,(MPU,frames))            ,Atoms)
--- ((MNA,MCtxL)                 ,Atoms)
--- (bridi                       ,Atoms)
+            -- (sumit1,((MPU,(MNA,Tagged Selbri)),sumti2))
 
 handleNA :: Iso (Maybe String,Atom) Atom
 handleNA = Iso f g where
