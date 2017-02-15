@@ -76,24 +76,41 @@ _LE :: SyntaxReader (State String)
 _LE = reorder0 <$> selmaho "LE"
 
 --Handles anykind of LE phrases
--- State ((le,(s,(v,[a]))),Int)
--- State (le,((s,(v,[a])),Int))
-
 -- State ((le,(v,(s,[a]))),Int)
 -- State (le,((v,(s,[a])),Int))
+
+
+-- State ((le,(pa,(v,(s,[a])))),Int)
+-- State (le,((pa,(v,(s,[a])))),Int))
+
 leP :: SyntaxReader (State Atom)
 leP = collapsState
-      .<
-      (choice leHandlers .> first (_ssl . handleBRIDI))
       .
-      inverse associate
+      (first setWithSize ||| reorder0)
+      .
+      reorder2
+      .<
+      second (choice leHandlers .> first (_ssl . handleBRIDI))
+      .
+      reorder1
       <$> withSeedState (_LE
+                      <&> optState pa_S
                       <&> (first tolist1 <$> pureVarNode)
                       <&> selbriAll
                       <&> beP
                       <* optSelmaho "KU")
     where pureVarNode :: SyntaxReader (State Sumti)
           pureVarNode = pure ((Node "VariableNode" "$var" noTv,Nothing),[])
+
+          reorder1 = Iso (Just . f) (Just . g) where
+              f ((le,(pa,(v,(s,a)))),i) = ((pa,i),(le,((v,(s,a)),i)))
+              g ((pa,_),(le,((v,(s,a)),i))) = ((le,(pa,(v,(s,a)))),i)
+
+          reorder2 = Iso (Just . f) (Just . g) where
+              f (((Just pa,i),(a,s1)),s2) = Left (((pa,i),a),s1++s2)
+              f (((Nothing,i),(a,s1)),s2) = Right (a,s1++s2)
+              g (Left (((pa,i),a),s))     = (((Just pa,i),(a,s)),s)
+              g (Right (a,s))             = (((Nothing,0),(a,s)),s)
 
           --Handles addtional arguments in a leP
           beP :: SyntaxReader (State [Sumti])
@@ -266,24 +283,37 @@ sumtiLaiP = ptp (pa <*> selbri) id (ptp pa addLE sumtiLai) <|> sumtiLai
           g s = take (length s - 4) s
 
 sumtiLai :: SyntaxReader (State Atom)
-sumtiLai = collapsState .< ((instanceWithSize ||| reorder0) . reorder)
+sumtiLai = collapsState
+           .
+           first ((handleSubSet .> setWithSize) ||| reorder0)
+           .
+           reorder1
            <$> withSeedState (optState pa_S <&> sumtiNoi)
 
-    where reorder = Iso (Just . f) (Just . g)
-              where f ((Just pa,sumti),seed)   = Left ((pa,seed),sumti)
-                    f ((Nothing,sumti),seed)   = Right (sumti)
-                    g (Left ((pa,seed),sumti)) = ((Just pa,sumti),seed)
-                    g (Right sumti)            = ((Nothing,sumti),4)
+    where reorder1 = Iso (Just . f) (Just . g) where
+              f (((Just pa,sumti),seed),state) =
+                        case findSetType sumti state of
+                            Just t -> (Left (sumti,((pa,seed),t)),state)
+                            Nothing -> (Left (sumti,((pa,seed),sumti)),state)
+              f (((Nothing,sumti),seed),state)     = (Right sumti,state)
+              g (Left (_,((pa,seed),sumti)),state) = (((Just pa,sumti),seed),state)
+              g (Right sumti,state)                = (((Nothing,sumti),4),state)
 
-          instanceWithSize :: Iso ((Atom,Int),Atom) (State Atom)
-          instanceWithSize = second (tolist2 . (sizeL *** setTypeL)) . makeSet
-              where makeSet = Iso (Just . f) (Just . g)
-                    f ((a,i),b) = let salt = show a ++ show b
-                                      set  = cCN (randName i salt) noTv
-                                  in (set,([set,a],[set,b]))
-                    g (_,([_,a],[_,b])) = ((a,0),b)
+          handleSubSet = collapsState . first (second (tolist1 . subsetL)) . reorder2
+
+          reorder2 = Iso (Just . f) (Just . g) where
+              f (t,(s,st)) = ((s,(s,t)),st)
+              g ((s,(_,t)),st) = (t,(s,st))
 
 
+
+setWithSize :: Iso ((Atom,Int),Atom) (State Atom)
+setWithSize = second (tolist2 . (sizeL *** setTypeL)) . makeSet
+    where makeSet = Iso (Just . f) (Just . g)
+          f ((a,i),b) = let salt = show a ++ show b
+                            set  = cCN (randName i salt) noTv
+                        in (set,([set,a],[set,b]))
+          g (_,([_,a],[_,b])) = ((a,0),b)
 
 --Connective
 

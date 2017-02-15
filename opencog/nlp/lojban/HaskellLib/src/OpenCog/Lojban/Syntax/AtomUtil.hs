@@ -68,6 +68,9 @@ ssl = linkIso "SatisfyingSetLink" noTv
 setTypeL  :: Iso [Atom] Atom
 setTypeL = linkIso "SetTypeLink" noTv
 
+subsetL :: Iso (Atom,Atom) Atom
+subsetL = linkIso "SubSetLink" noTv . tolist2
+
 sizeL  :: Iso [Atom] Atom
 sizeL = linkIso "SizeLink" noTv
 
@@ -292,9 +295,16 @@ filterState = Iso f g where
     f           = apply id
     g ((a,t),s) = Just ((a,t),getDefinitons [a] s)
 
+
 getDefinitons :: [Atom] -> [Atom] -> [Atom]
 getDefinitons ns ls = if ns == nns then links else getDefinitons nns ls
-    where links = filter ff ls
-          nodes = concatMap atomGetAllNodes links
-          nns   = nub $ ns ++ nodes
-          ff l = any (`atomElem` l) ns
+    where links = filter ff ls --Get all links that contain a node from ns
+          ff l = any (`atomElem` l) ns --Check if the link contains a node from ns
+          nodes = concatMap atomGetAllNodes links --Get all Nodes from the links
+          nns   = nub $ ns ++ nodes --Remove duplicates
+
+findSetType :: Atom -> [Atom] -> Maybe Atom
+findSetType a = fmap getType . F.find f
+    where f (Link "SetTypeLink" [s,t] _) = s == a
+          f _ = False
+          getType (Link "SetTypeLink" [s,t] _) = t
