@@ -327,4 +327,13 @@
 		(lg-link "Ou" "$verb-inst" "$obj-inst") ; LINKS
 	))
 
+; Go into different demo modes: "show reasoning"
+; "show saliency tracking" etc
+(define demo-rule
+	(imperative-object-rule-template
+		(Equal (Variable "$verb") (WordNode "show"))
+		'()
+		(lg-link "Os" "$verb-inst" "$obj-inst")
+	)
+)
 ;--------------------------------------------------------------------

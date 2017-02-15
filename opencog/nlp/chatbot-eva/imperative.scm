@@ -96,6 +96,7 @@
 	(cog-bind single-word-gesture-rule)
 	(cog-bind show-rule-1)
 	(cog-bind show-rule-2)
+	(cog-bind demo-rule)
 
 	(if do-dbg-prt (begin
 		(display "The current-imperative is\n")
