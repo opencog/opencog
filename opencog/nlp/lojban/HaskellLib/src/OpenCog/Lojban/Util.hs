@@ -87,7 +87,11 @@ mkCtxPre pred atom = Link "EquivalenceLink"
 
 pattern CtxPred atom <- Link "EquivalenceLink"
                                 [ _
-                                , LambdaL _ (CtxL _ (atom))
+                                , Link "LambdaLink" [ _
+                                                    ,Link "ContextLink" [ _
+                                                                        , atom
+                                                                        ] _
+                                                    ] _
                                 ] _
 
 
@@ -113,7 +117,16 @@ mkPropPre pred atom name = Link "EquivalenceLink"
 
 pattern PropPred atom <- Link "EquivalenceLink"
                                 [_
-                                , LambdaL _ (AL [_,EvalL _ _ (LL [_,atom])])
+                                , Link "LambdaLink"
+                                    [ _
+                                    , Link "AndLink"
+                                        [_
+                                        , Link "EvaluationLink"
+                                            [ _
+                                            , Link "ListLink" [_,atom] _
+                                            ] _
+                                        ] _
+                                    ] _
                                 ] _
 
 isInteger s = case reads s :: [(Integer, String)] of
