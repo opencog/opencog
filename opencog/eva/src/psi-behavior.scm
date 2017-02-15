@@ -163,18 +163,17 @@
 	(DefinedPredicate "Say whoa!")
 	speech-demand-satisfied (stv 1 1) speech-demand)
 
-;; saliency
+;; saliency tracking
 (psi-set-controlled-rule
 	(psi-rule (list (True))
 		(DefinedPredicate "Salient:Curious")
-		salient-demand-satisfied (stv 1 1) salient-demand "saliency-tracking")
-)
-;; stop tracking
-(psi-set-controlled-rule
-	(psi-rule (list (True))
-		(DefinedPredicate "salient-flag-off")
-		salient-demand-satisfied (stv 1 1) salient-demand "not-saliency-tracking")
-)
+		salient-demand-satisfied (stv 1 1) salient-demand "saliency-tracking"))
+
+;; stop saliency tracking
+;; XXX Who is calling this?
+(psi-rule (list (True))
+	(DefinedPredicate "salient-flag-off")
+	salient-demand-satisfied (stv 1 1) salient-demand)
 
 (psi-rule (list (DefinedPredicate "Room bright?"))
 	(DefinedPredicate "Bright:happy")
