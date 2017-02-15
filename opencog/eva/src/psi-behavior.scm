@@ -23,6 +23,10 @@
 (define track-demand (psi-demand "track demand" 1))
 (define track-demand-satisfied (True))
 
+; Demand for saliency tracking
+(define salient-demand (psi-demand "salient demand" 1))
+(define salient-demand-satisfied (True))
+
 ; Demand for contorl with web-ui
 (define update-demand (psi-demand "update demand" 1))
 (define update-demand-satisfied (True))
@@ -161,14 +165,14 @@
 ;; saliency
 (psi-set-controlled-rule
 	(psi-rule (list (True))
-			(DefinedPredicate "Salient:Curious")
-			(True) (stv 0.9 0.9) face-demand "saliency-tracking")
+		(DefinedPredicate "Salient:Curious")
+		salient-demand-satisfied (stv 1 1) salient-demand "saliency-tracking")
 )
 ;; stop tracking
 (psi-set-controlled-rule
 	(psi-rule (list (True))
-			(DefinedPredicate "salient-flag-off")
-			(True) (stv 0.9 0.9) face-demand "not-saliency-tracking")
+		(DefinedPredicate "salient-flag-off")
+		salient-demand-satisfied (stv 1 1) salient-demand "not-saliency-tracking")
 )
 
 (psi-rule (list (DefinedPredicate "Room bright?"))
