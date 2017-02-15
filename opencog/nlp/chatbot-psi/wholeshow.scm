@@ -31,7 +31,7 @@
     (list
         (cons "reasoning" enable-pln-demo)
         (cons "philosophy" enable-philosophy-demo)
-        (cons "tracking" enable-saliency-demo)
+        (cons "saliency" enable-saliency-demo)
         (cons "default" enable-all-demos))
 )
 
