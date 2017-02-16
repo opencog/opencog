@@ -34,6 +34,7 @@ pattern VN name <-Node "VariableNode" name _
 
 pattern AL l <- Link "AndLink" l _
 pattern LL l <- Link "ListLink" l _
+pattern NL l <- Link "NotLink" l _
 pattern ImpL l tv <- Link "ImplicationLink" l tv
 pattern InhL l tv <- Link "InheritanceLink" l tv
 pattern SL l <- Link "SetLink" l _

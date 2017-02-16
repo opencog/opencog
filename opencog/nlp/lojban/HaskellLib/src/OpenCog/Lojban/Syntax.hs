@@ -36,7 +36,6 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --TODO Parser
 -- FIX: pa
 --      da + quantifier
---      is GIhA NAI correct?
 --      ZAhO explicit representation
 --      me'au
 --      tenseSumti
@@ -44,16 +43,15 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --      GOhA
 --      vo'a rule see ../Lojban.hs
 --      make statments explicit
+--      ge'e cai on logical conectives and else?
 
 -- argslots
 -- Synonims for tenses and gismu
 
---Post parser
--- Multi Sentences Parsing
 -- ki
 -- references
 
--- ConceptAnd/OrLink isntead of boolea and/or
+-- ConceptAnd/OrLink NotLink isntead of boolea and/or
 
 --TODO Printer
 -- da,de,di differentiation
@@ -319,8 +317,8 @@ setWithSize = second (tolist2 . (sizeL *** setTypeL)) . makeSet
 
 --Connective
 
-_A :: SyntaxReader String
-_A = selmaho "A"
+_A :: SyntaxReader (LCON)
+_A = optional (word "na") <*> selmaho "A" <*> optional (word "nai")
 
 _A_BO :: SyntaxReader (State Con)
 _A_BO = reorder0 . wrapA <$> _A <*> optional _BO
@@ -604,8 +602,10 @@ bridi_tail = selbriAll <&> stateMany sumtiAllUI
 -- ((mp,(ma,(s,a))),as)
 -- (bridi,as)
 
-_GIhA ::  SyntaxReader String
-_GIhA = _GIhAtoA <$> selmaho "GIhA"
+
+_GIhA ::  SyntaxReader LCON
+_GIhA = optional (word "na") <*> _GIhA' <*> optional (word "nai")
+    where _GIhA' = _GIhAtoA <$> selmaho "GIhA"
 
 _GIhA_BO :: SyntaxReader (State Con)
 _GIhA_BO = reorder0 . wrapGIhA <$> _GIhA <*> optional _BO
@@ -682,11 +682,11 @@ mergeSumti = Iso f g where
                        (x:xs) -> Just ([x],(s,xs))
 
 
-_GA :: SyntaxReader (State (Maybe String))
+_GA :: SyntaxReader (State (Maybe LCON))
 _GA = reorder0 . wrapGA . _GAtoA <$> selmaho "GA"
     where wrapGA = Iso (Just . f) (Just . g)
-          f a = Just a
-          g (Just a) = a
+          f a = Just (Nothing,(a,Nothing))
+          g (Just (_,(a,_))) = a
 
 bridiGA :: SyntaxReader (State Atom)
 bridiGA = first handleGA <$> _GA <&> _bridi <* sepSelmaho "GI" <&> _bridi
@@ -766,8 +766,9 @@ free = vocative <|> freeuiP <|> freeSumti <|> luP'
 
 --jufra = list <$> many1 (sepSelmaho "I" *> preti)
 
-_JA :: SyntaxReader String
-_JA = _JAtoA <$> selmaho "JA"
+_JA ::  SyntaxReader LCON
+_JA = optional (word "na") <*> _JA' <*> optional (word "nai")
+    where _JA' = _JAtoA <$> selmaho "JA"
 
 _JA_BO :: SyntaxReader Con
 _JA_BO = optional _JA <*> optional _BO
