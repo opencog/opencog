@@ -427,3 +427,15 @@
 	; return a string JSON object
 	(string-append "{" (string-join return ", ") "}")
 )
+
+; --------------------------------------------------------------
+; Baseline value functionality
+(define-public psi-baseline-value-node (Concept "psi-baseline-value"))
+
+(define-public (psi-set-baseline-value! modulator value)
+  (psi-set-value!
+    (List modulator psi-baseline-value-node) value))
+
+(define-public (psi-get-baseline-value modulator)
+  (psi-get-number-value
+    (List modulator psi-baseline-value-node)))

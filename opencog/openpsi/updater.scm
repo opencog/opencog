@@ -57,6 +57,11 @@
 ; propagate through the system after an event has occurred.
 (define psi-expression-loop-delay 4)
 
+; Rate of decay of modulators and secs toward their baseline values at each time 
+; step.
+(define decay-rate .001)
+(define decay-factor (- 1 decay-rate))
+
 ; --------------------------------------------------------------
 
 ; Todo: implement these tables in the atomspace
@@ -76,6 +81,9 @@
 ; List of entities that are antecedants in the interaction rules
 (define psi-monitored-entities '())
 (define psi-monitored-events '())
+
+; List of all modulators and sec's
+(define psi-modulators-and-secs '())
 
 (define (psi-set-expression-callback! callback)
 "
@@ -119,14 +127,15 @@
 	(if verbose (display "psi-updater-init\n"))
 
 	; Init previous value table for the monitored entities
-	(for-each (lambda (eval-link)
-				(define key (gadr eval-link))
-				(define value (psi-get-number-value key))
-				(hash-set! prev-value-table key value)
-				(set! psi-monitored-entities (append psi-monitored-entities
-												  (list key)))
-			  )
-			evals-with-change-pred)
+	(for-each 
+		(lambda (eval-link)
+			(define key (gadr eval-link))
+			(define value (psi-get-number-value key))
+			(hash-set! prev-value-table key value)
+			(set! psi-monitored-entities (append psi-monitored-entities 
+				(list key)))
+		)
+		evals-with-change-pred)
 
 	; If we are logging for debugging, then add all the modulators and
 	; sec's to the list of entities that get monitored so they will be
@@ -140,6 +149,8 @@
 
 	(set! psi-monitored-entities (delete-duplicates psi-monitored-entities))
 	(if verbose (format #t "monitored entities: ~a\n" psi-monitored-entities))
+
+	(set! psi-modulators-and-secs (append! (psi-get-modulators) (psi-get-secs)))
 
 	; Set most-recent timestamps for events
 	(set! psi-monitored-events (psi-get-monitored-events))
@@ -171,17 +182,18 @@
   At each step:
    (1) Evaluate the monitored events and set their 'event-detected' predicates
    (2) Evaluate the monitored entities and set their 'changed' predicates, and
-	   for each changed entity store it's value in a value-at-step-start (this,
-	   or otherwise storing the change magnitude, is needed because the current
-	   value of a trigger entity might change because of application of a
-	   previous rule.)
+       for each changed entity store it's value in a value-at-step-start (this,
+       or otherwise storing the change magnitude, is needed because the current
+       value of a trigger entity might change because of application of a
+       previous rule.)
    (3) Store the current value or change magnitude before firing the rules
-	   because the current value of the trigger might change as a result of a
-	   previous rule.
+       because the current value of the trigger might change as a result of a
+       previous rule.
    (4) Execute the interaction rules
-   (5) Update the previous values of the changed monitored params
-   (6) Set the previous values of the event predicates to 0, because each
-	   particular instance of an event should only fire rules at a single step.
+   (5) Decay variables toward their baseline value
+   (6) Update the previous values of the changed monitored params
+   (7) Set the previous values of the event predicates to 0, because each
+       particular instance of an event should only fire rules at a single step.
 "
 	(define changed-params '())
 	(define detected-events '())
@@ -258,7 +270,8 @@
 			(begin
 				(if verbose
 					(format #t "\n*** Detected event occurrence: ~a  loop ~a\n"
-						event psi-updater-loop-count))
+						event psi-updater-loop-count)
+				)
 				(set! detected-events
 					(append detected-events (list event)))
 
@@ -374,24 +387,39 @@
 			; else, event at loop count is already set, so check if it's time
 			; to fire off the expression callback
 			(if (= (+ event-at-loop-num psi-expression-loop-delay)
-				   psi-updater-loop-count)
+			       psi-updater-loop-count)
 				(begin
 					(if (not (unspecified? psi-expression-callback))
 						(apply psi-expression-callback '()))
 					(psi-set-value! psi-event-at-loop-num-node 0)))))
 
+	; Decay dynamic variable values toward their baselines
+	(for-each
+		(lambda (entity)
+			(define new-value)
+			(define baseline (psi-get-baseline-value entity))
+			; Calculate difference between current and baseline value
+			(define diff (- (psi-get-number-value entity) baseline))
+			(set! diff (* decay-factor diff))
+			(set! new-value (+ baseline diff))
+			(psi-set-value! entity new-value))
+		psi-modulators-and-secs
+	)
+
 	; Update prev-value-table entries for the changed (monitored) params
-	(for-each (lambda (param)
-					(define value (hash-ref value-at-step-start param))
-					(hash-set! prev-value-table param value))
-			  changed-params)
+	(for-each 
+		(lambda (param)
+			(define value (hash-ref value-at-step-start param))
+			(hash-set! prev-value-table param value))
+		changed-params)
 
 	; Update prev-value-table entries for the changed pau's
 	;(This is just for log highlighint for testing)
-	(for-each (lambda (pau)
-					(define value (hash-ref value-at-step-start pau))
-					(hash-set! prev-value-table pau value))
-			  changed-pau)
+	(for-each 
+		(lambda (pau)
+			(define value (hash-ref value-at-step-start pau))
+			(hash-set! prev-value-table pau value))
+		changed-pau)
 
 	; Set detected events value to 0, since any particular event instance
 	; should fire rules for only one step (could also do this at the beginning
@@ -443,8 +471,8 @@
 		(format #t "adjust-psi-var-level   target: ~a   trigger: ~a    loop: ~a\n"
 			target trigger psi-updater-loop-count)))
 	(let* ((current-value (psi-get-number-value target))
-		   (trigger-change (psi-get-change-magnitude trigger))
-		  )
+	       (trigger-change (psi-get-change-magnitude trigger))
+	      )
 
 		; If current value is not a number (e.g., #f for not previously set),
 		; set it to .5.
@@ -566,7 +594,7 @@
 "
   var - psi variable as Atom
   width - width of the random number adjustement range as NumberNode. Noise to
-		  add will be in the range of [-width/2, width/2]
+    add will be in the range of [-width/2, width/2]
 "
 	(define val (psi-get-number-value var))
 	(define noise)
@@ -606,20 +634,22 @@
 (define (psi-change-in? target)
 	;(display "psi-change-in? target: \n")(display target)
 	(let* ((previous (hash-ref prev-value-table target))
-		   (current (psi-get-number-value target)))
+	       (current (psi-get-number-value target)))
 
 		; If no previous value set, attempt to set it based on current
 		(if (equal? previous #f)
 			(hash-set! prev-value-table target current))
 
 		;(format #t "previous value: ~a   current value: ~a\n" previous current)
-		(if (and
+		(if
+			(and
 				; current value is defined
 				(not (equal? #f current))
 				(not (equal? #f previous))
 				(not (= previous current))
 				(not (and (equal? previous #f)
-						  (= current 0))))
+				          (= current 0)))
+			)
 			#t
 			#f
 		)
@@ -637,7 +667,7 @@
 	(define return)
 	;(format #t "psi-get-change-magnitude target: ~a" target)
 	(let* ((previous (hash-ref prev-value-table target))
-		   (current (psi-get-number-value target)))
+	       (current (psi-get-number-value target)))
 		(if (and (number? previous) (number? current))
 			(set! return (- current previous))
 			(set! return 0))
@@ -685,11 +715,12 @@
 	(if (pred? atom)
 		(set! results (append results (list atom))))
 	(if (cog-link? atom)
-		(for-each (lambda (sub-atom)
-					(set! results
-						(append (cog-filter-hypergraph pred? sub-atom) results))
-				  )
-				  (cog-outgoing-set atom)))
+		(for-each 
+			(lambda (sub-atom)
+				(set! results
+					(append (cog-filter-hypergraph pred? sub-atom) results))
+			)
+			(cog-outgoing-set atom)))
 	results
 )
 
@@ -775,6 +806,3 @@
 	(set! psi-updater-is-running #f)
 	(cog-set-tv! updater-continue-pred (stv 0 1))
 )
-
-
-

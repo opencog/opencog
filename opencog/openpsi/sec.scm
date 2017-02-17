@@ -26,6 +26,8 @@
 		sec
 		psi-sec-node)
 	(psi-set-value! sec initial-value)
+	; Set the baseline value as the initial-value
+	(psi-set-baseline-value! sec initial-value)
 
 	; For now, assuming the sec alone represents the overall system/agent state,
 	; for consi1stency with psi var representations. Code below can be used if we
