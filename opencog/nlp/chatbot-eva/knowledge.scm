@@ -734,11 +734,31 @@
 		(Concept "reasoning-demo")
 	))
 
+(Define
+	(DefinedSchema "philosophy-demo")
+	(List
+		(Concept "imperative")
+		(Concept "philosophy-demo")
+	))
+
+(Define
+	(DefinedSchema "saliency-demo")
+	(List
+		(Concept "imperative")
+		(Concept "saliency-demo")
+	))
+
 (Reference (Word "show") (DefinedPredicate "Do show demo"))
+
 (Reference (Word "reasoning") (DefinedSchema "reasoning-demo"))
+(Reference (Word "philosophy") (DefinedSchema "philosophy-demo"))
+(Reference (Word "saliency") (DefinedSchema "saliency-demo"))
 
 (Inheritance (DefinedPredicate "Do show demo") (Concept "pred-demo"))
+
 (Inheritance (DefinedSchema "reasoning-demo") (Concept "schema-demo"))
+(Inheritance (DefinedSchema "philosophy-demo") (Concept "schema-demo"))
+(Inheritance (DefinedSchema "saliency-demo") (Concept "schema-demo"))
 
 (Evaluation
 	(Predicate "demo-action")
