@@ -41,17 +41,26 @@ incomplete; its not entirely clear what the best merging algorithm might
 be, or how it will work.  Steps D and E are the new parts. Steps A-C have
 been done before, and are "well known" in the literature.
 
+All of the statistics gathering is done within the OpenCog AtomSpace,
+where counts and other statisical quantites are associated with various
+different hypergraphs.  The contents of the atomspace are saved to an
+SQL (Postgres) server for storage.  The system is fed with raw text
+using assorted ad-hoc scripts, which include both link-grammar and
+RelEx as central components of the processing pipeline. Most of the
+data analysis is performed with an assortment of scheme scripts.
 
-System Processing Steps
------------------------
-Perform these steps to make the system go.
+Thus, operating the sytem requires three basic steps:
+* Setting up the atomspace with the SQL backing store,
+* Setting up the misc scripts to feed in raw text, and
+* Processing the data after it has been collected.
 
-Processing is done with the cogserver; the large amount of data
-generated requires storing it. (Millions of atoms will be generated.
-Although these could fit into RAM, the data would be lost if the
-cogserver crashes or is rebooted. Parsing will require weeks or 
-months of CPU effort. Thus, SQL persistance is used to store the atoms.
-So, set that up:
+Each of these is described in greater detail in separate sections below.
+
+
+Setting up the AtomSpace
+------------------------
+This section describes how to set up the atomspace to collect
+statistics.  Most of this revolves around setting up postgres.
 
 1) Set up and configure postgres, as described in 
    `opencog/persist/sql/README.md`
@@ -429,7 +438,7 @@ single-word probs seem to be un-computed?
 
 Next step: Minimum Spanning Tree parsing
 ----------------------------------------
-Minimum spanning tree code is in mst-parser.scm
+Minimum spanning tree code is in `mst-parser.scm`
 
 The MST parser discovers the minimum spanning tree that connects the
 words together in a sentence.  The link-cost used is (minus) the mutual
