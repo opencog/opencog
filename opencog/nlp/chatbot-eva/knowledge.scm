@@ -726,27 +726,19 @@
 		(Concept "schema-gesture")))
 
 ;--------------------------------------------------------------------
+; JJJ
 
 (Define
 	(DefinedSchema "reasoning-demo")
-	(List
-		(Concept "imperative")
-		(Concept "reasoning-demo")
-	))
+	(List (Concept "reasoning-demo")))
 
 (Define
 	(DefinedSchema "philosophy-demo")
-	(List
-		(Concept "imperative")
-		(Concept "philosophy-demo")
-	))
+	(List (Concept "philosophy-demo")))
 
 (Define
 	(DefinedSchema "saliency-demo")
-	(List
-		(Concept "imperative")
-		(Concept "saliency-demo")
-	))
+	(List (Concept "saliency-demo")))
 
 (Reference (Word "show") (DefinedPredicate "Do show demo"))
 
