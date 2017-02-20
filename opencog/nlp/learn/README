@@ -54,14 +54,13 @@ months of CPU effort. Thus, SQL persistance is used to store the atoms.
 So, set that up:
 
 1) Set up and configure postgres, as described in 
-   `opencog/persist/sql/odbc/README`
+   `opencog/persist/sql/README.md`
 
 2) Create and initialize the database
 ```
    createdb learn-pairs
    cat atom.sql | psql learn-pairs
 ```
-   Edit and setup `~/.odbc.ini`
 
 3) Start the cogserver, verify that connections to the database work.
    (see steps 6,7,8 below, for more on how to do this.)
@@ -77,7 +76,7 @@ a) it already works; little or no new code required. b) later processing
 steps will require passing text through the link-grammar parser anyway,
 so we may as well start using it right away. So, set that up:
 
-4) Install `link-grammar-5.3.13` or newer.
+4) Install `link-grammar-5.3.15` or newer.
 5) Copy the RelEx opencog-server.sh shell script to some other name.
    Edit it, and replace the final line with this:
 ```
@@ -297,7 +296,7 @@ Wikipedia Parsing, part II
 Set up distinct databases, one for each language:
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
     cat opencog/persist/sql/odbc/atom.sql | psql foobar_pairs
-    vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
+    vi learn-fr learn-lt learn-pl learn-simple
 
 Now, build some working directories (so that we don't mess up
 alpha-pages after all that work)
@@ -328,16 +327,16 @@ alpha-pages after all that work)
 * Make sure the scripts point at the RelEx parse server.
   (The RelEx location is given in config-*.scm Make sure that its right,
   and that its loaded... i.e. is listed in opencog-*.conf)
-* Copy opencog-lang.conf to opencog build dir.
-  Start like this:    cogserver -c opencog-lang.conf 
-* Go back to the wikipedia dir, and run ./wiki-ss-lang.sh
+* Copy `opencog-lang.conf` and `pair-count-lang.scm` to opencog build dir.
+  Start like this:    `guile -l pair-count-lang.scm`
+* Go back to the wikipedia dir, and run `./wiki-ss-lang.sh`
 * Wait a few days.
 * This requires postgres 8.4 or newer, for multiple reasons. One reason
   is that older postgres don't automatically VACUUM (see "performance"
   below) The other is the list membership functions are needed.
 * Be sure to perform the postgres tuning recommendations found in 
   various online postgres peformance wikis, or in the 
-  opencog/persist/sql/README file.  See also 'Performance' section
+  `opencog/persist/sql/README.md` file.  See also 'Performance' section
   below.
 
 Some handy SQL commands:

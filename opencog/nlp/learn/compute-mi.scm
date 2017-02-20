@@ -1062,4 +1062,3 @@
 ; This should require  2x atoms per pair (eval, list)
 ; viz 178K x 2 = 360K atom loads.
 ; OK, that's good.
-
