@@ -726,7 +726,6 @@
 		(Concept "schema-gesture")))
 
 ;--------------------------------------------------------------------
-; JJJ
 
 (Define
 	(DefinedSchema "reasoning-demo")
