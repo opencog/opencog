@@ -1,9 +1,6 @@
 (use-modules (ice-9 receive))
 (use-modules (opencog) (opencog openpsi))
 
-(load "pln-reasoner.scm")
-(load "contexts.scm")
-
 ; --------------------------------------------------------------
 ; NOTE: Disable the high-level loop that integrates multiple components before
 ; disabling sub-component, i.e. (psi-halt) first. When starting do the opposite.
@@ -260,4 +257,32 @@
     (Evaluation
         (GroundedPredicate "scm: is-in-wholeshow-mode?")
         (List (Node "reasoning")))
+)
+
+(Define
+    (DefinedPredicate "Do show demo")
+    (Lambda
+        (Variable "$demo-mode")
+        (Put (DefinedPredicate "Show demo")
+             (List (Variable "$demo-mode")))
+    )
+)
+
+(define (ttt varr)
+(display "--------------------\n")
+(display varr)
+(newline)
+    (disable-all-demos)
+    (stv 1 1)
+)
+
+(Define
+    (DefinedPredicate "Show demo")
+    (Lambda
+        (Variable "$demo-mode")
+        (Evaluation
+            (GroundedPredicate "scm: ttt")
+            (List (Variable "$demo-mode"))
+        )
+    )
 )

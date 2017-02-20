@@ -739,17 +739,25 @@
 	(DefinedSchema "saliency-demo")
 	(List (Concept "saliency-demo")))
 
+(Define
+	(DefinedSchema "exit-demo")
+	(List (Concept "exit-demo")))
+
 (Reference (Word "show") (DefinedPredicate "Do show demo"))
+; For exiting a demo mode
+(Reference (Word "demo-action") (DefinedPredicate "Do show demo"))
 
 (Reference (Word "reasoning") (DefinedSchema "reasoning-demo"))
 (Reference (Word "philosophy") (DefinedSchema "philosophy-demo"))
 (Reference (Word "saliency") (DefinedSchema "saliency-demo"))
+(Reference (Word "exit") (DefinedSchema "exit-demo"))
 
 (Inheritance (DefinedPredicate "Do show demo") (Concept "pred-demo"))
 
 (Inheritance (DefinedSchema "reasoning-demo") (Concept "schema-demo"))
 (Inheritance (DefinedSchema "philosophy-demo") (Concept "schema-demo"))
 (Inheritance (DefinedSchema "saliency-demo") (Concept "schema-demo"))
+(Inheritance (DefinedSchema "exit-demo") (Concept "schema-demo"))
 
 (Evaluation
 	(Predicate "demo-action")
