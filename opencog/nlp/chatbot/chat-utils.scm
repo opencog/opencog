@@ -124,6 +124,7 @@ def call_sentiment_parse(text_node, sent_node):
   - The time in seconds since 1970-01-01 00:00:00 UTC. (current-time) gives
     such time.
 "
+; TODO use the timeserver when it is ready.
     (define query
         (Get
             (VariableList

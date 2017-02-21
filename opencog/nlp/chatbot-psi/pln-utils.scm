@@ -1,18 +1,14 @@
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 (load "states.scm")
 
-(define (search-inferred-atoms)
-  (let* (
-        (ia-query (Get (State pln-inferred-atoms (Variable "$x"))))
-        (ia (gar (cog-satisfying-set ia-query))))
-    ia))
-
 (define (get-inferred-atoms)
-  (delete-duplicates (cog-get-all-nodes (search-inferred-atoms))))
+    (let ((inferences (cog-execute!
+            (Get (Member pln-inferred-atoms (Variable "$x"))))))
 
-(define (get-inferred-names)
-  (get-names (get-inferred-atoms)))
+        (cog-outgoing-set inferences)
+    )
+)
 
 (define (get-names atom-list)
   (map cog-name atom-list))
@@ -20,17 +16,9 @@
 ;; Insert the elements of a given Set to the elements of the Set
 ;; associated to the Anchor pln-inferred-atoms
 (define (add-to-pln-inferred-atoms s)
-  (let* ((sl (cog-outgoing-set s))
-         (ia (cog-outgoing-set (search-inferred-atoms)))
-         (slia (delete-duplicates (append sl ia))))
-    (State pln-inferred-atoms (SetLink slia))))
-
-;; Return a list of pairs (inferred atom, name list)
-(define (get-assoc-inferred-names)
-  (let ((inferred-atoms-list (cog-outgoing-set (search-inferred-atoms)))
-        (gen-assoc (lambda (x) (list x (get-names (cog-get-all-nodes x)))))
-        )
-    (map gen-assoc inferred-atoms-list)))
+; FIXME: Why is it not adding somethimes?
+   (map (lambda (x) (Member pln-inferred-atoms x)) s)
+)
 
 (define (search-input-utterance-words)
   (let* ((results (cog-chase-link 'StateLink 'ListLink input-utterance-words)))
@@ -61,3 +49,91 @@
     (sort
         (map (lambda (x) (cons (random 1.0 (random-state-from-platform)) x)) l)
          (lambda (x y) (< (car x) (car y))))))
+
+;-------------------------------------------------------------------------------
+;; Code to mock the HEAD. Given a person id and its name, creates the
+;; call chat and create the following
+;;
+;; (Evaluation
+;;    (Predicate "name")
+;;    (List
+;;       (Concept person-id)
+;;       (Concept name)))
+;; (Evaluation
+;;    (Predicate "say")
+;;    (List
+;;       (Concept person-id)
+;;       (Sentence <sentence-id>)))
+(define (mock-HEAD-chat person-id name message)
+  (chat message)
+  (sleep 1)                             ; you never know
+
+  ;; Create name structure
+  (Evaluation
+     (Predicate "name")
+     (List
+        (Concept person-id)
+        (Word name)))
+
+  ;; Create say structure
+  (let* ((sentence (cog-chase-link 'ListLink 'SentenceNode (Node message))))
+    (Evaluation
+       (Predicate "say")
+       (List
+          (Concept person-id)
+          sentence))))
+
+;-------------------------------------------------------------------------------
+;; Rule to put a name on the last sentence using:
+;;
+;; 1. The state of "last-recognized-face"
+;;
+;; (State
+;;    (Anchor "last-recognized-face")
+;;    (Concept <rec-id>))
+;;
+;; 2. The state of input-utterance-sentence
+;;
+;; (State
+;;    input-utterance-sentence
+;;    (Sentence <sentence-id>))
+;;
+;; To produce
+;;
+;; (Evaluation
+;;    (Predicate "say")
+;;    (List
+;;       (Concept <rec-id>)
+;;       (Sentence <sentence-1>)))
+;;
+;; In addition to that it also produces
+;;
+;; (Evaluation
+;;    (Predicate "name")
+;;    (List
+;;       (Concept <rec-id>
+;;       (Word <name>)))
+;;
+;; with specific ids and names.
+(define (put-name-on-the-last-sentence)
+  (let ((last-sentence-id (get-last-sentence-id))
+        (last-rec-id (get-last-rec-id))
+        ;; rec-ids and names
+        (rec-id-1 "20839")
+        (name-1 "Louis"))
+    (cog-logger-info "[PLN-Reasoner] last-sentence-id = ~a" last-sentence-id)
+    (cog-logger-info "[PLN-Reasoner] last-rec-id = ~a" last-rec-id)
+    (StateLink (AnchorNode "last-recognized-face") (ConceptNode "20839"))
+    (Evaluation
+       (Predicate "name")
+          (List
+             (Concept rec-id-1)
+             (Word name-1)))
+    (if (or (null? last-sentence-id) (null? last-rec-id))
+        '()
+        (Evaluation
+           (Predicate "say")
+           (List
+              last-rec-id
+              last-sentence-id))))
+)

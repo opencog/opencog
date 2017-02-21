@@ -3,6 +3,22 @@
 (use-modules (opencog))
 
 ; -----------------------------------------------------------------------
+(define-public (load-gtwc)
+"
+  Populate the atomspace with ConceptNodes drived from Google's Trillion Word
+  Corpus.
+"
+; TODO: move this to (opencog data) module when it is created.
+    (let ((path (string-append (getenv "HOME")
+                    "/.opencog/gtwc-en-333333-words.scm")))
+        (if (file-exists? path)
+            (primitive-load path)
+            (display "The data file hasn't been downloaded.")
+        )
+    )
+)
+
+; -----------------------------------------------------------------------
 ; From TruthValue::DEFAULT_TV()
 (define default-stv (stv 1 0))
 
@@ -82,6 +98,44 @@
 )
 
 ; -----------------------------------------------------------------------
+; From TruthValue::DEFAULT_K)
+(define default-k 800)
+; We are using Google's Trillion Word Corpus
+; See github.com/opencog/external-tools/blob/master/gtwc/atomize.sh#L27
+(define total-count 1024908267229.0)
+
+(define (update-node-stv r2l-node)
+"
+  If the given r2l-node is linked to WordNode then it updates its stv by
+  copying the stv of the ConceptNodes with the same name, else returns the r2l-node with calculated stv.
+"
+    (let ((winst (cog-chase-link 'ReferenceLink 'WordInstanceNode r2l-node)))
+        (if (null? winst)
+            (let* ((name (string-downcase (cog-name r2l-node)))
+                (concept (cog-node 'ConceptNode name)))
+
+                (if (null? concept)
+                    (cog-set-tv! r2l-node
+                        (stv (/ 1 total-count) (/ 1 (+ 1 default-k))))
+                    (cog-set-tv! r2l-node (cog-tv concept))
+                )
+            )
+
+            (let* ((name (string-downcase (cog-name
+                        (word-inst-get-lemma (car winst)))))
+                (concept (cog-node 'ConceptNode name)))
+
+                (if (null? concept)
+                    (cog-set-tv! r2l-node
+                        (stv (/ 1 total-count) (/ 1 (+ 1 default-k))))
+                    (cog-set-tv! r2l-node (cog-tv concept))
+                )
+            )
+        )
+    )
+)
+
+; -----------------------------------------------------------------------
 (define-public (r2l-count sent-list)
 "
   r2l-count SENT -- maintain counts of R2L atoms for SENT-LIST.
@@ -89,39 +143,21 @@
   sent-list:
   - A list of SentenceNodes
 "
-    (define (update-tv nodes)
-        (par-map update-stv nodes)
-    )
+    (define (update-tv atom)
+        (if (cog-node? atom)
+            (update-node-stv atom)
+            ; Set all links as true.
+            (cog-set-tv! atom (stv 1 1))
+        ))
 
-    ; Increment the R2L's node count value
     (parallel-map-parses
         (lambda (p)
-            ; The preferred algorithm is
-            ; (1) get all non-abstract nodes
-            ; (2) delete duplicates
-            ; (3) get the corresponding abstract nodes
-            ; (4) update count
-            (let* ((all-nodes
-                    (append-map cog-get-all-nodes (parse-get-r2l-outputs p)))
-                    ; XXX FIXME this is undercounting since each abstract
-                    ; node can have multiple instances in a sentence.  Since
-                    ; there is no clean way to get to the abstracted node
-                    ; from an instanced node yet, such repeatition are
-                    ; ignored for now
-                    (abst-nodes (delete-duplicates
-                        (filter is-r2l-abstract? all-nodes)))
-                    (word-nodes
-                        (append-map word-inst-get-word (parse-get-words p))))
+            (let* ((r2l-outputs (parse-get-r2l-outputs p))
+                (all-nodes (delete-duplicates
+                    (append-map cog-get-all-nodes r2l-outputs))))
 
-                ; Updating all-nodes without deleting multiple occurence of
-                ; a node is made so as to count every relation an atom is
-                ; involved in as a separate observation of the concept.
-                ; This form of counting is not precise but is assumed
-                ; to be proptional to the size of the incoming-set.This is a
-                ; crude fix for the issue raised in the FIXME on abst-nodes,
-                ; above.
-                (update-tv all-nodes)
-                (update-tv word-nodes)
+                (map update-tv all-nodes)
+                (map update-tv r2l-outputs)
             )
         )
         sent-list
