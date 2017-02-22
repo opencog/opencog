@@ -744,7 +744,7 @@
 	(List (Concept "exit-demo")))
 
 (Reference (Word "show") (DefinedPredicate "Do show demo"))
-; For exiting a demo mode
+; For exiting a demo mode by saying e.g. "Exit!"
 (Reference (Word "demo-action") (DefinedPredicate "Do show demo"))
 
 (Reference (Word "reasoning") (DefinedSchema "reasoning-demo"))

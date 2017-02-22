@@ -221,35 +221,6 @@
 		)
 	))
 
-(define (start-demo-rule-template VERB-LIST LINKS)
-	(BindLink
-		(VariableList
-			(var-decl "$sent" "SentenceNode")
-			(var-decl "$parse" "ParseNode")
-			(var-decl "$verb-inst" "WordInstanceNode")
-			(var-decl "$verb" "WordNode")
-			(var-decl "$obj-inst" "WordInstanceNode")
-			(var-decl "$object" "WordNode")
-		)
-		(AndLink
-			(StateLink current-sentence (Variable "$sent"))
-			(parse-of-sent   "$parse" "$sent")
-			(word-in-parse "$verb-inst" "$parse")
-			(word-in-parse "$obj-inst" "$parse")
-			(word-lemma "$verb-inst" "$verb")
-			(word-lemma "$obj-inst" "$object")
-			(word-pos "$verb-inst" "verb")
-			VERB-LIST
-			LINKS
-		)
-		(State current-imperative
-			(ActionLink
-				(Variable "$verb")
-				(ListLink (Variable "$object"))
-		))
-	)
-)
-
 ; XXX TODO Design notes:
 ; Rather than hand-crafting a bunch of rules like the above, we should
 ; do three things:
@@ -355,6 +326,37 @@
 		'()                       ; DECL
 		(lg-link "Ou" "$verb-inst" "$obj-inst") ; LINKS
 	))
+
+;--------------------------------------------------------------------
+
+(define (start-demo-rule-template VERB-LIST LINKS)
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
+			(var-decl "$verb" "WordNode")
+			(var-decl "$obj-inst" "WordInstanceNode")
+			(var-decl "$object" "WordNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			(word-in-parse "$verb-inst" "$parse")
+			(word-in-parse "$obj-inst" "$parse")
+			(word-lemma "$verb-inst" "$verb")
+			(word-lemma "$obj-inst" "$object")
+			(word-pos "$verb-inst" "verb")
+			VERB-LIST
+			LINKS
+		)
+		(State current-imperative
+			(ActionLink
+				(Variable "$verb")
+				(ListLink (Variable "$object"))
+		))
+	)
+)
 
 ; Go into different demo modes, for example
 ; "let us show reasoning", "show saliency tracking" etc
