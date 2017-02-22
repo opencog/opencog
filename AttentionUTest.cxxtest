@@ -54,6 +54,21 @@ class AttentionUTest :  public CxxTest::TestSuite
             TS_ASSERT_EQUALS(hseq.size(), 10);
             TS_ASSERT_EQUALS(_ab.get_sti(hseq[0]), 400);
         }
+        
+        void testGetRandomAtoms() 
+        {
+            AttentionBank _ab(&_as);
+            // Check Valid atoms are selected.
+            for(int i = 0; i < 1000; i++) {
+                Handle h = _as.add_node(CONCEPT_NODE, "cnode-"+ std::to_string(i));
+                _ab.set_sti(h, i*10);
+            } 
+
+            for( int i = 0; i < 50; i++){
+            Handle h = _ab.getRandomAtom();
+            TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
+            }
+        }
 
 };
 
