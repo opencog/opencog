@@ -1062,7 +1062,48 @@ proper atomese.
 	)
 )
 
+;----------
+(define (switch-demo-mode MODE)
+	(define m (cog-name MODE))
+	(cond
+		((equal? m "reasoning-demo")
+			(enable-pln-demo)
+			(State current-demo-mode reasoning-mode)
+		)
+		((equal? m "philosophy-demo")
+			(enable-philosophy-demo)
+			(State current-demo-mode philosophy-mode)
+		)
+		((equal? m "saliency-demo")
+			(enable-saliency-demo)
+			(State current-demo-mode saliency-mode)
+		)
+		((equal? m "exit-demo")
+			(enable-all-demo)
+			(State current-demo-mode default-mode)
+		)
+	)
+	(stv 1 1)
+)
 
+(Define
+	(DefinedPredicate "Do show demo")
+	(Lambda
+		(Variable "$demo-mode")
+		(Put (DefinedPredicate "Show demo")
+			(List (Variable "$demo-mode"))))
+)
+
+(Define
+	(DefinedPredicate "Show demo")
+	(Lambda
+		(Variable "$demo-mode")
+		(Evaluation
+			(GroundedPredicate "scm: switch-demo-mode")
+			(List (Variable "$demo-mode"))
+		)
+	)
+)
 
 ;; ------------------------------------------------------------------
 *unspecified*  ; Make the load be silent
