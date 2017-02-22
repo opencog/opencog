@@ -102,26 +102,11 @@ void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
 
 void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
 {
-    std::unique_lock<std::mutex> lck(_idx_mtx);
-
     AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
-    auto pr = _atom_index.find(h);
-    if (pr != _atom_index.end()) old_av = pr->second;
-
     AttentionValuePtr new_av = createAV(
         stiValue, old_av->getLTI(), old_av->getVLTI());
-    _atom_index[h] = new_av;
-    lck.unlock();
 
-    // Get old and new bins.
-    int oldBin = ImportanceIndex::importanceBin(old_av->getSTI());
-    int newBin = ImportanceIndex::importanceBin(new_av->getSTI());
-
-    // If the atom importance has changed its bin,
-    // update the importance index.
-    if (oldBin != newBin) updateImportanceIndex(h, oldBin, newBin);
-
-    AVChanged(h, old_av, new_av);
+    change_av(h, new_av);
 }
 
 void AttentionBank::set_lti(const Handle& h, AttentionValue::lti_t ltiValue)
@@ -370,7 +355,6 @@ Handle AttentionBank::getRandomAtom()
             system_clock::now().time_since_epoch());
     MT19937RandGen rng(seed.count());
     size_t  bins = _importanceIndex.bin_size();
-
     bool empty = true;
     for(size_t i=0; i< bins-1; i++){
         if(_importanceIndex.size(i) > 0 ){
@@ -379,7 +363,7 @@ Handle AttentionBank::getRandomAtom()
         }
     }
     
-    if(empty) 
+    if(empty)
         return Handle::UNDEFINED;
 
     size_t bin = 0;
