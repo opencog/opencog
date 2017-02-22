@@ -1066,7 +1066,7 @@ proper atomese.
 
 ;----------
 (define-public (switch-demo-mode MODE)
-	(define m (cog-name MODE))
+	(define m (cog-name (gar MODE)))
 	(cond
 		((equal? m "reasoning-demo")
 			(enable-pln-demo)
