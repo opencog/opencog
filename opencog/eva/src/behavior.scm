@@ -847,7 +847,6 @@
 	(SequentialAnd
 		(True (Evaluation (GroundedPredicate "scm: print-msg")
 			(ListLink (Node "--- Saliency Tracking"))))
-		(DefinedPredicate "salient-flag-on")
 		(DefinedPredicate "look at salient point")
 		;;(DefinedPredicate "Curious");;bad one
 		))
