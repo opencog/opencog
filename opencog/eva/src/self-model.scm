@@ -1020,11 +1020,14 @@ proper atomese.
 
 (define-public (enable-saliency-demo)
 "
-  Enables the visual saliency rule only.
+  Enables the visual saliency rule.
 "
 	; Make the weight changes needed for configuration.
 	(disable-all-demos)
 	(psi-rule-enable "saliency-tracking" (psi-get-controlled-rules))
+
+	; For exiting the demo mode
+	(psi-rule-enable "chatbot_eva" (psi-get-controlled-rules))
 )
 
 (define-public (enable-philosophy-demo)
@@ -1035,16 +1038,21 @@ proper atomese.
 	(disable-all-demos)
 	(psi-rule-enable "random_sentence_pkd" (psi-get-controlled-rules))
 	(psi-rule-enable "random_sentence_kurzweil" (psi-get-controlled-rules))
+
+	; For exiting the demo mode
+	(psi-rule-enable "chatbot_eva" (psi-get-controlled-rules))
 )
 
 (define-public (enable-pln-demo)
 "
-  Enables the openpsi-pln rules and the openpsi-aiml rules only. The aiml rules
-  are enalbed b/c they are the primary chat interface.
+  Enables the openpsi-pln rule.
 "
 	; Make the weight changes needed for configuration.
 	(disable-all-demos)
 	(psi-rule-enable "select_pln_answer" (psi-get-controlled-rules))
+
+	; For exiting the demo mode
+	(psi-rule-enable "chatbot_eva" (psi-get-controlled-rules))
 )
 
 ; For debugging
