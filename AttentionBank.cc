@@ -356,7 +356,7 @@ Handle AttentionBank::getRandomAtom()
     MT19937RandGen rng(seed.count());
     size_t  bins = _importanceIndex.bin_size();
     bool empty = true;
-    for(size_t i=0; i< bins-1; i++){
+    for(size_t i=0; i< bins; i++){
         if(_importanceIndex.size(i) > 0 ){
             empty = false;
             break;
