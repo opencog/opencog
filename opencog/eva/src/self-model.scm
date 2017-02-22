@@ -1063,7 +1063,7 @@ proper atomese.
 )
 
 ;----------
-(define (switch-demo-mode MODE)
+(define-public (switch-demo-mode MODE)
 	(define m (cog-name MODE))
 	(cond
 		((equal? m "reasoning-demo")
