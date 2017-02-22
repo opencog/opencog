@@ -36,6 +36,8 @@
 
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
+(use-modules (opencog openpsi))
+(use-modules (ice-9 receive))
 
 (load "faces.scm")
 
@@ -1103,6 +1105,13 @@ proper atomese.
 			(List (Variable "$demo-mode"))
 		)
 	)
+)
+
+(Define
+	(DefinedPredicate "is-in-reasoning-mode?")
+	(Equal
+		(Set reasoning-mode)
+		(Get (State current-demo-mode (Variable "$x"))))
 )
 
 ;; ------------------------------------------------------------------
