@@ -39,6 +39,7 @@
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/FuzzyTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
+#include <opencog/truthvalue/GenericTruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cogserver/server/CogServer.h>
@@ -346,62 +347,64 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 {
     Object json;
     Object jsonDetails;
+    Type tvt = tvp->getType();
 
-    switch (tvp->getType()) {
-        case SIMPLE_TRUTH_VALUE: {
-            json.push_back(Pair("type", "simple"));
-            jsonDetails.push_back(Pair("strength", tvp->getMean()));
-            jsonDetails.push_back(Pair("count", tvp->getCount()));
-            jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
-            json.push_back(Pair("details", jsonDetails));
-            break;
-        }
 
-        case COUNT_TRUTH_VALUE: {
-            json.push_back(Pair("type", "count"));
-            jsonDetails.push_back(Pair("strength", tvp->getMean()));
-            jsonDetails.push_back(Pair("count", tvp->getCount()));
-            jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
-            json.push_back(Pair("details", jsonDetails));
-            break;
-        }
+    if (tvt == SIMPLE_TRUTH_VALUE) {
+        json.push_back(Pair("type", "simple"));
+        jsonDetails.push_back(Pair("strength", tvp->getMean()));
+        jsonDetails.push_back(Pair("count", tvp->getCount()));
+        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        json.push_back(Pair("details", jsonDetails));
+    }
+    else if (tvt == COUNT_TRUTH_VALUE) {
+        json.push_back(Pair("type", "count"));
+        jsonDetails.push_back(Pair("strength", tvp->getMean()));
+        jsonDetails.push_back(Pair("count", tvp->getCount()));
+        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        json.push_back(Pair("details", jsonDetails));
+    }
+    else if (tvt == INDEFINITE_TRUTH_VALUE) {
+        IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
+        json.push_back(Pair("type", "indefinite"));
+        jsonDetails.push_back(Pair("strength", itv->getMean()));
+        jsonDetails.push_back(Pair("L", itv->getL()));
+        jsonDetails.push_back(Pair("U", itv->getU()));
+        jsonDetails.push_back(Pair("confidence", itv->getConfidenceLevel()));
+        jsonDetails.push_back(Pair("diff", itv->getDiff()));
+        jsonDetails.push_back(Pair("symmetric", itv->isSymmetric()));
+        json.push_back(Pair("details", jsonDetails));
+    }
+    else if (tvt == PROBABILISTIC_TRUTH_VALUE) {
+        json.push_back(Pair("type", "probabilistic"));
+        jsonDetails.push_back(Pair("strength", tvp->getMean()));
+        jsonDetails.push_back(Pair("count", tvp->getCount()));
+        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        json.push_back(Pair("details", jsonDetails));
+    }
+    else if (tvt == FUZZY_TRUTH_VALUE) {
+        json.push_back(Pair("type", "fuzzy"));
+        jsonDetails.push_back(Pair("strength", tvp->getMean()));
+        jsonDetails.push_back(Pair("count", tvp->getCount()));
+        jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+        json.push_back(Pair("details", jsonDetails));
+    }
+    else if (tvt == GENERIC_TRUTH_VALUE) {
+        auto gtvp = std::dynamic_pointer_cast<const GenericTruthValue>(tvp);
 
-        case INDEFINITE_TRUTH_VALUE: {
-            IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
-            json.push_back(Pair("type", "indefinite"));
-            jsonDetails.push_back(Pair("strength", itv->getMean()));
-            jsonDetails.push_back(Pair("L", itv->getL()));
-            jsonDetails.push_back(Pair("U", itv->getU()));
-            jsonDetails.push_back(Pair("confidence", itv->getConfidenceLevel()));
-            jsonDetails.push_back(Pair("diff", itv->getDiff()));
-            jsonDetails.push_back(Pair("symmetric", itv->isSymmetric()));
-            json.push_back(Pair("details", jsonDetails));
-            break;
-        }
-
-        case PROBABILISTIC_TRUTH_VALUE: {
-            json.push_back(Pair("type", "probabilistic"));
-            jsonDetails.push_back(Pair("strength", tvp->getMean()));
-            jsonDetails.push_back(Pair("count", tvp->getCount()));
-            jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
-            json.push_back(Pair("details", jsonDetails));
-            break;
-        }
-
-        case FUZZY_TRUTH_VALUE: {
-            json.push_back(Pair("type", "fuzzy"));
-            jsonDetails.push_back(Pair("strength", tvp->getMean()));
-            jsonDetails.push_back(Pair("count", tvp->getCount()));
-            jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
-            json.push_back(Pair("details", jsonDetails));
-            break;
-        }
-
-        case GENERIC_TRUTH_VALUE:
-        case NULL_TRUTH_VALUE:
-        case NUMBER_OF_TRUTH_VALUE_TYPES: {
-            break;
-        }
+        json.push_back(Pair("type", "generic"));
+        jsonDetails.push_back(Pair("positive-evidence",
+            gtvp->getPositiveEvidence()));
+        jsonDetails.push_back(Pair("total-evidence", gtvp->getTotalEvidence()));
+        jsonDetails.push_back(Pair("frequency", gtvp->getFrequency()));
+        jsonDetails.push_back(Pair("fuzzy-strength", gtvp->getFuzzyStrength()));
+        jsonDetails.push_back(Pair("confidence", gtvp->getConfidence()));
+        jsonDetails.push_back(Pair("entropy", gtvp->getEntropy()));
+        json.push_back(Pair("details", jsonDetails));
+    }
+    else {
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid TruthValue Type parameter.");
     }
 
     return json;
