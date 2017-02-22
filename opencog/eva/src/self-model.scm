@@ -1081,7 +1081,7 @@ proper atomese.
 			(State current-demo-mode saliency-mode)
 		)
 		((equal? m "exit-demo")
-			(enable-all-demo)
+			(enable-all-demos)
 			(State current-demo-mode default-mode)
 		)
 	)
