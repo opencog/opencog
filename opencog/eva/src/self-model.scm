@@ -464,7 +464,7 @@
 ; --------------------------------------------------------
 ; Some debug prints.
 
-(define (print-msg node) 
+(define (print-msg node)
 	;(display (cog-name node)) (newline) ; XXX FIXME disable printing
 	; until blocking fix.
 	(stv 1 1))
@@ -961,6 +961,108 @@ proper atomese.
 		(True (Put (State request-eye-contact-state (Variable "$face-id"))
 			no-interaction))
 	))
+
+;------------------------------------------------------------------------------
+; For WholeShow framework -- can switch to different "demo modes" by changing
+; the weights of various psi-rules
+
+(define-public current-demo-mode (Anchor "Current Demo Mode"))
+(define default-mode (Concept "Default Mode"))
+(define reasoning-mode (Concept "Reasoning Mode"))
+(define philosophy-mode (Concept "Philosophy Mode"))
+(define saliency-mode (Concept "Saliency Mode"))
+
+(State current-demo-mode default-mode)
+
+;----------
+(define-public (enable-all-demos)
+"
+  This is the default mode. All the rules are given a weight of 0.9.
+"
+	(define controlled-rules (psi-get-controlled-rules))
+
+	; Make the weight changes needed for configuration.
+	; All rules are disabled before enabling them so as to reset all
+	; weight to 0.9.
+	(disable-all-demos)
+
+	(receive (filtered other)
+		(psi-partition-rule-with-alias "" controlled-rules)
+		(map
+			(lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.9))
+			other)
+	)
+
+	; Turn these off by default
+	(psi-rule-disable "aiml" controlled-rules)
+	(psi-rule-disable "random_sentence_blogs" controlled-rules)
+	(psi-rule-disable "saliency-tracking" controlled-rules)
+)
+
+(define-public (disable-all-demos)
+"
+  This is run when disabling all the rules, when switching between modes.
+  When disabling the rules, their weight is set to zero.
+
+  When adding new demo modes, make sure you run (psi-halt) after calling
+  this function.
+"
+	; Make the weight changes needed for configuration.
+	(receive (filtered other)
+		(psi-partition-rule-with-alias "" (psi-get-controlled-rules))
+		(map
+			(lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.0))
+			other)
+	)
+)
+
+(define-public (enable-saliency-demo)
+"
+  Enables the visual saliency rule only.
+"
+	; Make the weight changes needed for configuration.
+	(disable-all-demos)
+	(psi-rule-enable "saliency-tracking" (psi-get-controlled-rules))
+)
+
+(define-public (enable-philosophy-demo)
+"
+  Enables the random_sentence_pkd and random_sentence_blogs rules.
+"
+	; Make the weight changes needed for configuration.
+	(disable-all-demos)
+	(psi-rule-enable "random_sentence_pkd" (psi-get-controlled-rules))
+	(psi-rule-enable "random_sentence_kurzweil" (psi-get-controlled-rules))
+)
+
+(define-public (enable-pln-demo)
+"
+  Enables the openpsi-pln rules and the openpsi-aiml rules only. The aiml rules
+  are enalbed b/c they are the primary chat interface.
+"
+	; Make the weight changes needed for configuration.
+	(disable-all-demos)
+	(psi-rule-enable "select_pln_answer" (psi-get-controlled-rules))
+)
+
+; For debugging
+(define-public (show-demo-state)
+"
+  Returns an a-list with rule aliases for keys and their weights for values.
+"
+	(define result '())
+	(let ((rules (psi-get-controlled-rules)))
+		(for-each (lambda (x) (set! result
+			(assoc-set! result
+				(psi-suffix-str (cog-name (car (psi-rule-alias x))))
+				(cog-stv-strength x))))
+			rules
+		)
+		result
+	)
+)
+
+
 
 ;; ------------------------------------------------------------------
 *unspecified*  ; Make the load be silent
