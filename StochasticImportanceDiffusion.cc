@@ -55,6 +55,7 @@ void StochasticDiffusionAmountCalculator::update_bin(const Handle& h)
     }
     DiffusionRecordBin& bin = *it;
 
+    bin.index = index;
     bin.count += 1;
     // using duration_cast<seconds> implicitly or explicitly causes missing
     // fractional seconds.
