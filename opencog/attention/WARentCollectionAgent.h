@@ -29,6 +29,7 @@
 
 #include <opencog/util/RandGen.h>
 #include <opencog/cogserver/server/Agent.h>
+#include <opencog/attentionbank/StochasticImportanceDiffusion.h>
 
 #include "RentCollectionBaseAgent.h"
 
@@ -49,9 +50,7 @@ namespace opencog {
     class WARentCollectionAgent : public RentCollectionBaseAgent
     {
     private:
-        unsigned int SAMPLE_SIZE = 5;
-        unsigned int _tournamentSize;
-        Handle tournamentSelect(HandleSeq population);
+        ecan::StochasticDiffusionAmountCalculator _sdac;
 
     public:
         const ClassInfo& classinfo() const { return info(); }
