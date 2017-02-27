@@ -103,14 +103,12 @@ std::vector<DiffusionRecordBin> StochasticDiffusionAmountCalculator::
 }
 
 /**
- *  Calculates estimated current STI value of the handle after diffusion.
+ *  Calculates estimated average elapsed time since last update.
  *  @param h A handle
- *  @param decay_rate percentage decay parameter
- *  
- *  @returns the calculated current STI after diffusion.
+ *
+ *  @returns the estimated average elapsed time since last update.
  */
-float StochasticDiffusionAmountCalculator::diffused_value(const Handle& h,
-                                                          float decay_rate)
+float StochasticDiffusionAmountCalculator::elapsed_time(const Handle& h)
 {
     float average_elapsed_time = 0.0f;
 
@@ -122,5 +120,19 @@ float StochasticDiffusionAmountCalculator::diffused_value(const Handle& h,
     if (it != _bins.end())
         average_elapsed_time = (*it).size / (*it).update_rate;
 
+    return average_elapsed_time;
+}
+
+/**
+ *  Calculates estimated current STI value of the handle after diffusion.
+ *  @param h A handle
+ *  @param decay_rate percentage decay parameter
+ *
+ *  @returns the calculated current STI after diffusion.
+ */
+float StochasticDiffusionAmountCalculator::diffused_value(const Handle& h,
+                                                          float decay_rate)
+{
+    float average_elapsed_time = elapsed_time(h);
     return _ab->get_sti(h) * pow((1 - decay_rate), average_elapsed_time);
 }

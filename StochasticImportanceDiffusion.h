@@ -77,6 +77,7 @@ namespace opencog
             std::vector<DiffusionRecordBin> merge_bins(const std::vector<DiffusionRecordBin>& past,
                     std::vector<DiffusionRecordBin>& recent, float bias);
             float diffused_value(const Handle& h, float decay_rate);
+            float elapsed_time(const Handle& h);
         };
     }
 }
