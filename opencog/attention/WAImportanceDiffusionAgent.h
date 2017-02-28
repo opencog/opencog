@@ -59,7 +59,6 @@ class AtomSpace;
 class WAImportanceDiffusionAgent : public ImportanceDiffusionBase
 {
 private:
-    float  _decayPercentage;
     void spreadImportance();
     AttentionValue::sti_t calculateDiffusionAmount(Handle);
 
