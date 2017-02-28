@@ -329,7 +329,7 @@
 
 ;--------------------------------------------------------------------
 
-(define (start-demo-rule-template VERB-LIST LINKS)
+(define (demo-rule-template VERB-LIST LINKS)
 	(BindLink
 		(VariableList
 			(var-decl "$sent" "SentenceNode")
@@ -360,18 +360,10 @@
 
 ; Go into different demo modes, for example
 ; "let us show reasoning", "show saliency tracking" etc
-(define start-demo-rule
-	(start-demo-rule-template
+(define demo-rule
+	(demo-rule-template
 		(Equal (Variable "$verb") (Word "show"))
 		(lg-link "Os" "$verb-inst" "$obj-inst")
-	)
-)
-
-; Exit the demo mode by saying e.g. "exit", "exit the demo" etc
-(define exit-demo-rule
-	(imperative-action-template
-		(Word "demo-action")
-		(Equal (Variable "$verb") (Word "exit"))
 	)
 )
 

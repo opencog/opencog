@@ -515,3 +515,16 @@
     (stv .9 .9)
     sociality
 )
+
+; To exit the demo mode
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "is-in-any-demo-mode?")
+        (DefinedPredicate "is-asked-to-stop-demo?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: back-to-default-mode") (List)))
+    (True)
+    (stv .9 .9)
+    sociality
+)

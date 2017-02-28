@@ -7,6 +7,7 @@
             (DefinedPredicate "is-in-reasoning-mode?")
             (DefinedPredicate "is-input-utterance?")
             (Not (DefinedPredicate "input-is-a-question?"))
+            (Not (DefinedPredicate "is-asked-to-stop-demo?"))
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: ack-the-statement") (List)))
