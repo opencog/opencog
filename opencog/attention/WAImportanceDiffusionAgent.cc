@@ -48,39 +48,11 @@ WAImportanceDiffusionAgent::~WAImportanceDiffusionAgent()
 void WAImportanceDiffusionAgent::run()
 {
     // Read params
-    _tournamentSize = std::stoi(_atq.get_param_value(
-                               AttentionParamQuery::dif_spread_hebonly));
     hebbianMaxAllocationPercentage =std::stod(_atq.get_param_value(
                                      AttentionParamQuery::dif_tournament_size));
-
     spreadImportance();
-
     //some sleep code
     std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
-}
-
-Handle WAImportanceDiffusionAgent::tournamentSelect(HandleSeq population){
-    int sz = (_tournamentSize >  population.size() ? population.size() : _tournamentSize);
-
-    if (sz <= 0)
-        throw RuntimeException(TRACE_INFO,"PopulationSize must be >0");
-
-    Handle tournament[sz];
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0,population.size()-1);
-
-    for(int i = 0; i < sz; i++){
-        int idx = distribution(generator);
-        tournament[i] = population[idx];
-    }
-
-    auto result = std::max_element(tournament, tournament + (sz - 1),
-         [&](const Handle& h1, const Handle & h2) -> bool
-    {
-        return _bank->get_sti(h1) > _bank->get_sti(h2);
-    });
-
-    return *result;
 }
 
 /*
@@ -94,7 +66,7 @@ void WAImportanceDiffusionAgent::spreadImportance()
     if (sourceVec.size() == 0)
         return;
 
-    Handle target = tournamentSelect(sourceVec);
+    Handle target = sourceVec[0];
 
     // Check the decision function to determine if spreading will occur
     diffuseAtom(target);
@@ -112,32 +84,13 @@ void WAImportanceDiffusionAgent::spreadImportance()
  */
 HandleSeq WAImportanceDiffusionAgent::diffusionSourceVector(void)
 {
-    HandleSeq  sources;
-
-    AttentionValue::sti_t AFBoundarySTI = _bank->getAttentionalFocusBoundary();
-    AttentionValue::sti_t lowerSTI  =   AFBoundarySTI - 15;
-
-    std::default_random_engine generator;
-    // randomly select a bin 
-    std::uniform_int_distribution<AttentionValue::sti_t> dist(lowerSTI,AFBoundarySTI);
-    auto sti = dist(generator);
-    _bank->get_handles_by_AV(std::back_inserter(sources),sti,sti+5);
-
-    if(sources.size() > 100){ sources.resize(100); } //Resize to 100 elements.
-
-#ifdef DEBUG
-    std::cout << "Calculating diffusionSourceVector." << std::endl;
-    std::cout << "AF Size before removing hebbian links: " <<
-        sources.size() << "\n";
-#endif
-
-    removeHebbianLinks(sources);
-
-#ifdef DEBUG
-    std::cout << "AF Size after removing hebbian links: " <<
-        sources.size() << "\n";
-#endif
-
+    Handle h = _bank->getRandomAtom();
+    
+    if(h == Handle::UNDEFINED){
+        return HandleSeq{};
+    }
+    HandleSeq sources{h};
+    removeHebbianLinks(sources);  //XXX Do wee need this?
     return sources;
 }
 
