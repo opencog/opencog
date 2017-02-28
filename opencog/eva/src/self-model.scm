@@ -965,8 +965,8 @@ proper atomese.
 	))
 
 ;------------------------------------------------------------------------------
-; For WholeShow framework -- can switch to different "demo modes" by changing
-; the weights of various psi-rules
+; The Wholeshow framework -- can switch to different "demo modes" by changing
+; the weights of various psi-controlled-rules
 
 (define-public current-demo-mode (Anchor "Current Demo Mode"))
 (define default-mode (Concept "Default Mode"))
@@ -1065,6 +1065,9 @@ proper atomese.
 
 ;----------
 (define-public (switch-demo-mode MODE)
+"
+  To go into a specific demo mode
+"
 	(define m (cog-name (gar MODE)))
 	(cond
 		((equal? m "reasoning-demo")
@@ -1084,6 +1087,9 @@ proper atomese.
 )
 
 (define-public (back-to-default-mode)
+"
+  To exit the demo and return to the default mode
+"
 	(enable-all-demos)
 	(State current-demo-mode default-mode)
 	(stv 1 1)
