@@ -328,6 +328,9 @@
 	))
 
 ;--------------------------------------------------------------------
+; The Wholeshow framework
+; To go into different "demo modes" by changing the weights of
+; various psi-controlled-rules
 
 (define (demo-rule-template VERB-LIST LINKS)
 	(BindLink

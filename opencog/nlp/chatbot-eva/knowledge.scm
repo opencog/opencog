@@ -726,6 +726,7 @@
 		(Concept "schema-gesture")))
 
 ;--------------------------------------------------------------------
+; Knowledge for going into different demo modes
 
 (Define
 	(DefinedSchema "reasoning-demo")
@@ -739,8 +740,10 @@
 	(DefinedSchema "saliency-demo")
 	(List (Concept "saliency-demo")))
 
+; The keyword for triggering a demo
 (Reference (Word "show") (DefinedPredicate "Do show demo"))
 
+; The keywords to indicate which mode to go
 (Reference (Word "reasoning") (DefinedSchema "reasoning-demo"))
 (Reference (Word "philosophy") (DefinedSchema "philosophy-demo"))
 (Reference (Word "saliency") (DefinedSchema "saliency-demo"))

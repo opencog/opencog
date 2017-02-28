@@ -516,7 +516,8 @@
     sociality
 )
 
-; To exit the demo mode
+; Return to normal if someone says e.g. "we are done showing it" when it's in
+; a demo mode
 (psi-rule
     (list (SequentialAnd
         (DefinedPredicate "is-input-utterance?")
