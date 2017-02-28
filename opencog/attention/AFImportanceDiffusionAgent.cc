@@ -54,9 +54,6 @@ void AFImportanceDiffusionAgent::run()
                                   AttentionParamQuery::dif_spread_hebonly));
 
     spreadImportance();
-
-    //some sleep code
-    std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
 /*

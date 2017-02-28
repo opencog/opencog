@@ -51,8 +51,6 @@ void WAImportanceDiffusionAgent::run()
     hebbianMaxAllocationPercentage =std::stod(_atq.get_param_value(
                                      AttentionParamQuery::dif_tournament_size));
     spreadImportance();
-    //some sleep code
-    std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
 /*
