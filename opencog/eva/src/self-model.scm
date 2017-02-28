@@ -1025,9 +1025,6 @@ proper atomese.
 	; Make the weight changes needed for configuration.
 	(disable-all-demos)
 	(psi-rule-enable "saliency-tracking" (psi-get-controlled-rules))
-
-	; For exiting the demo mode
-	(psi-rule-enable "chatbot_eva" (psi-get-controlled-rules))
 )
 
 (define-public (enable-philosophy-demo)
@@ -1038,9 +1035,6 @@ proper atomese.
 	(disable-all-demos)
 	(psi-rule-enable "random_sentence_pkd" (psi-get-controlled-rules))
 	(psi-rule-enable "random_sentence_kurzweil" (psi-get-controlled-rules))
-
-	; For exiting the demo mode
-	(psi-rule-enable "chatbot_eva" (psi-get-controlled-rules))
 )
 
 (define-public (enable-pln-demo)
@@ -1050,9 +1044,6 @@ proper atomese.
 	; Make the weight changes needed for configuration.
 	(disable-all-demos)
 	(psi-rule-enable "select_pln_answer" (psi-get-controlled-rules))
-
-	; For exiting the demo mode
-	(psi-rule-enable "chatbot_eva" (psi-get-controlled-rules))
 )
 
 ; For debugging
@@ -1088,11 +1079,13 @@ proper atomese.
 			(enable-saliency-demo)
 			(State current-demo-mode saliency-mode)
 		)
-		((equal? m "exit-demo")
-			(enable-all-demos)
-			(State current-demo-mode default-mode)
-		)
 	)
+	(stv 1 1)
+)
+
+(define-public (back-to-default-mode)
+	(enable-all-demos)
+	(State current-demo-mode default-mode)
 	(stv 1 1)
 )
 
@@ -1114,6 +1107,18 @@ proper atomese.
 		)
 	)
 )
+
+(Define
+	(DefinedPredicate "exit-demo-mode")
+	(Evaluation
+		(GroundedPredicate "scm: back-to-default-mode")
+		(List)))
+
+(Define
+	(DefinedPredicate "is-in-any-demo-mode?")
+	(Not (Equal
+		(Set default-mode)
+		(Get (State current-demo-mode (Variable "$x"))))))
 
 (Define
 	(DefinedPredicate "is-in-reasoning-mode?")
