@@ -7,7 +7,6 @@
 (load "chatbot-psi/psi-rules.scm")
 (load "chatbot-psi/states.scm")
 (load "chatbot-psi/utils.scm")
-(load "chatbot-psi/wholeshow.scm")
 
 ;-------------------------------------------------------------------------------
 ; Temporary debug support
