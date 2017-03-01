@@ -37,7 +37,6 @@
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
 (use-modules (opencog openpsi))
-(use-modules (ice-9 receive))
 
 (load "faces.scm")
 
@@ -981,40 +980,46 @@ proper atomese.
 "
   This is the default mode. All the rules are given a weight of 0.9.
 "
-	(define controlled-rules (psi-get-controlled-rules))
-
-	; Make the weight changes needed for configuration.
-	; All rules are disabled before enabling them so as to reset all
-	; weight to 0.9.
-	(disable-all-demos)
-
-	(receive (filtered other)
-		(psi-partition-rule-with-alias "" controlled-rules)
-		(map
-			(lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.9))
-			other)
-	)
-
 	; Turn these off by default
-	(psi-rule-disable "aiml" controlled-rules)
-	(psi-rule-disable "random_sentence_blogs" controlled-rules)
-	(psi-rule-disable "saliency-tracking" controlled-rules)
+	(define rules-not-to-be-enabled
+		(map (lambda (s) (string-append psi-prefix-str s))
+		(list "aiml" "random_sentence_blogs" "saliency-tracking")))
+
+	(for-each
+		(lambda (r)
+			(if (member (cog-name (car (psi-rule-alias r))) rules-not-to-be-enabled)
+				(psi-rule-set-atomese-weight r 0)
+				(psi-rule-set-atomese-weight r 0.9)
+			))
+		(psi-get-controlled-rules)
+	)
+)
+
+; Enable only the psi-controlled-rules with the specified rule-aliases
+(define (enable-demo-rules rule-aliases)
+	(define rules-to-be-enabled
+		(map (lambda (s) (string-append psi-prefix-str s)) rule-aliases))
+
+	(for-each
+		(lambda (r)
+			(if (member (cog-name (car (psi-rule-alias r))) rules-to-be-enabled)
+				(psi-rule-set-atomese-weight r 0.9)
+				(psi-rule-set-atomese-weight r 0.0)
+			))
+		(psi-get-controlled-rules)
+	)
 )
 
 (define-public (disable-all-demos)
 "
   This is run when disabling all the rules, when switching between modes.
   When disabling the rules, their weight is set to zero.
-
   When adding new demo modes, make sure you run (psi-halt) after calling
   this function.
 "
-	; Make the weight changes needed for configuration.
-	(receive (filtered other)
-		(psi-partition-rule-with-alias "" (psi-get-controlled-rules))
-		(map
-			(lambda (psi-rule) (psi-rule-set-atomese-weight psi-rule 0.0))
-			other)
+	(for-each
+		(lambda (r) (psi-rule-set-atomese-weight r 0.0))
+		(psi-get-controlled-rules)
 	)
 )
 
@@ -1022,28 +1027,21 @@ proper atomese.
 "
   Enables the visual saliency rule.
 "
-	; Make the weight changes needed for configuration.
-	(disable-all-demos)
-	(psi-rule-enable "saliency-tracking" (psi-get-controlled-rules))
+	(enable-demo-rules (list "saliency-tracking"))
 )
 
 (define-public (enable-philosophy-demo)
 "
   Enables the random_sentence_pkd and random_sentence_blogs rules.
 "
-	; Make the weight changes needed for configuration.
-	(disable-all-demos)
-	(psi-rule-enable "random_sentence_pkd" (psi-get-controlled-rules))
-	(psi-rule-enable "random_sentence_kurzweil" (psi-get-controlled-rules))
+	(enable-demo-rules (list "random_sentence_pkd" "random_sentence_kurzweil"))
 )
 
 (define-public (enable-pln-demo)
 "
   Enables the openpsi-pln rule.
 "
-	; Make the weight changes needed for configuration.
-	(disable-all-demos)
-	(psi-rule-enable "select_pln_answer" (psi-get-controlled-rules))
+	(enable-demo-rules (list "select_pln_answer"))
 )
 
 ; For debugging
