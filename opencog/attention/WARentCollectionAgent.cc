@@ -30,6 +30,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/cogserver/server/CogServer.h>
 
 #include "WARentCollectionAgent.h"
 #include "AttentionParamQuery.h"
@@ -38,57 +39,18 @@
 
 using namespace opencog;
 
-WARentCollectionAgent::WARentCollectionAgent(CogServer& cs) : RentCollectionBaseAgent(cs)
+WARentCollectionAgent::WARentCollectionAgent(CogServer& cs):
+                       RentCollectionBaseAgent(cs), _sdac(&cs.getAtomSpace())
 {
     // READ SLEEPING TIME HERE
     set_sleep_time(2000);
 }
 
-Handle WARentCollectionAgent::tournamentSelect(HandleSeq population){
-    _tournamentSize = std::stoi(_atq.get_param_value(AttentionParamQuery::rent_tournament_size));
-
-    int sz = (_tournamentSize >  population.size() ? population.size() : _tournamentSize);
-
-    if (sz <= 0)
-        throw RuntimeException(TRACE_INFO,"PopulationSize must be >0");
-
-    Handle tournament[sz];
-
-    std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0,population.size()-1);
-
-    for(int i = 0; i < sz ; i++){
-        int idx = distribution(generator);
-        tournament[i] = population[idx];
-    }
-
-    auto result = std::max_element(tournament, tournament + (sz - 1),
-         [&](const Handle& h1, const Handle & h2) -> bool
-    {
-        return _bank->get_sti(h1) > _bank->get_sti(h2);
-    });
-
-    return *result;
-}
-
-
 void WARentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
-    AttentionValue::sti_t AFBoundarySTI = attentionbank(_as).getAttentionalFocusBoundary();
-    AttentionValue::sti_t lowerSTI  = AFBoundarySTI - 15;
-
-    std::default_random_engine generator;
-    // randomly select a bin
-    std::uniform_int_distribution<AttentionValue::sti_t> dist(lowerSTI,AFBoundarySTI);
-    auto sti = dist(generator);
-
-    HandleSeq candidates;
-    attentionbank(_as).get_handles_by_AV(std::back_inserter(candidates),sti,sti+5);
-    if(candidates.size() > 100) candidates.resize(100); //Resize to 100 elements.
-
-    if (candidates.size() == 0) return;
-
-    Handle h = tournamentSelect(candidates);
+    Handle h = _bank->getRandomAtom();
+    if(h == Handle::UNDEFINED)
+        return;
     targetSetOut.push_back(h);
 }
 
@@ -97,9 +59,13 @@ void WARentCollectionAgent::collectRent(HandleSeq& targetSet)
     for (const Handle& h : targetSet) {
         int sti = _bank->get_sti(h);
         int lti = _bank->get_lti(h);
+        
+        float last_update_time = _sdac.elapsed_time(h);
+        STIAtomRent = STIAtomRent * last_update_time;
+        LTIAtomRent = LTIAtomRent * last_update_time;
+        
         int stiRent = calculate_STI_Rent();
-        int ltiRent = calculate_LTI_Rent();
-
+        int ltiRent = calculate_LTI_Rent();  
         if (stiRent > sti)
             stiRent = sti;
 

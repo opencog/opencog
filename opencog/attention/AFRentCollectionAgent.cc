@@ -54,13 +54,6 @@ void AFRentCollectionAgent::selectTargets(HandleSeq &targetSetOut)
 {
     std::back_insert_iterator< std::vector<Handle> > out_hi(targetSetOut);
     attentionbank(_as).get_handle_set_in_attentional_focus(out_hi);
-    /* Without adding this sleep code right below the above method call,
-     * nlp-parse evaluation thread waits for minutes before it gets a chance to
-     * run.  XXX FIXME .. maybe sched_yield() would be a better choice?
-     */
-    // sched_yield();
-    std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-    //std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 void AFRentCollectionAgent::collectRent(HandleSeq& targetSet)
