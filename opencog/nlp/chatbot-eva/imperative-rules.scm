@@ -328,3 +328,46 @@
 	))
 
 ;--------------------------------------------------------------------
+; The Wholeshow framework
+; To go into different "demo modes" by changing the weights of
+; various psi-controlled-rules
+
+(define (demo-rule-template VERB-LIST LINKS)
+	(BindLink
+		(VariableList
+			(var-decl "$sent" "SentenceNode")
+			(var-decl "$parse" "ParseNode")
+			(var-decl "$verb-inst" "WordInstanceNode")
+			(var-decl "$verb" "WordNode")
+			(var-decl "$obj-inst" "WordInstanceNode")
+			(var-decl "$object" "WordNode")
+		)
+		(AndLink
+			(StateLink current-sentence (Variable "$sent"))
+			(parse-of-sent   "$parse" "$sent")
+			(word-in-parse "$verb-inst" "$parse")
+			(word-in-parse "$obj-inst" "$parse")
+			(word-lemma "$verb-inst" "$verb")
+			(word-lemma "$obj-inst" "$object")
+			(word-pos "$verb-inst" "verb")
+			VERB-LIST
+			LINKS
+		)
+		(State current-imperative
+			(ActionLink
+				(Variable "$verb")
+				(ListLink (Variable "$object"))
+		))
+	)
+)
+
+; Go into different demo modes, for example
+; "let us show reasoning", "show saliency tracking" etc
+(define demo-rule
+	(demo-rule-template
+		(Equal (Variable "$verb") (Word "show"))
+		(lg-link "Os" "$verb-inst" "$obj-inst")
+	)
+)
+
+;--------------------------------------------------------------------

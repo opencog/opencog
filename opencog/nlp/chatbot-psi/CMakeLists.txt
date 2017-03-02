@@ -13,5 +13,4 @@ ADD_GUILE_MODULE (chatbot-psi.scm
 	pln-psi-rules.scm
 	pln-reasoner.scm
 	pln-utils.scm
-	wholeshow.scm
 )

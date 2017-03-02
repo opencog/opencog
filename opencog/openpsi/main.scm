@@ -119,7 +119,7 @@
     (cog-logger-info "[OpenPsi] Taking one psi-step, loop-count = ~a"
         psi-loop-count)
 
-    ; Run the controler that updates the weight.
+    ; Run the controller that updates the weight.
     (psi-controller-update-weights)
 
     ; Do action-selection.

@@ -51,6 +51,40 @@
 (define psi-controller-demand (psi-demand "controller" .000000000))
 
 ; --------------------------------------------------------------
+; To indicate whether the weights of the psi-controlled-rules
+; are currently being updated or not, so as to avoid any sync problem.
+; Could also be used to make sure that there is only one process
+; updating the weights at a time.
+
+; The states of the psi-controller
+(define-public psi-controller (Anchor
+    (string-append psi-prefix-str "psi-controller")))
+
+(define-public psi-controller-idle
+    (Concept (string-append psi-prefix-str "psi-controller-idle")))
+
+(define-public psi-controller-busy
+    (Concept (string-append psi-prefix-str "psi-controller-busy")))
+
+(State psi-controller psi-controller-idle)
+
+; -----
+; For locking and releasing the controller
+
+(define-public (psi-controller-occupy)
+    (while (equal? psi-controller-busy
+            (gar (cog-execute! (Get (State psi-controller (Variable "$x"))))))
+        (sleep 0.5)
+    )
+
+    (State psi-controller psi-controller-busy)
+)
+
+(define-public (psi-controller-release)
+    (State psi-controller psi-controller-idle)
+)
+
+; --------------------------------------------------------------
 ; FIXME -- can we have a shorter/better name for this method?
 ;
 (define-public (psi-rule-set-atomese-weight psi-rule weight)
@@ -86,7 +120,7 @@
 "
   psi-set-controlled-rule RULE
 
-  Specify that RULE is to be controled. Controlling means modifying the
+  Specify that RULE is to be controlled. Controlling means modifying the
   weight of the rule, thus affecting the likelyhood of it being choosen.
 "
     (MemberLink psi-rule psi-controller-demand)
@@ -105,9 +139,9 @@
         (cog-execute!
         (GetLink
             (TypedVariableLink
-                (VariableNode "controled-rule")
+                (VariableNode "controlled-rule")
                 (TypeNode "ImplicationLink"))
-            (MemberLink (Variable "controled-rule") psi-controller-demand))))
+            (MemberLink (Variable "controlled-rule") psi-controller-demand))))
 )
 
 ; --------------------------------------------------------------
@@ -158,6 +192,9 @@
             )
         ))
 
+    (define psi-controller-state
+        (gar (cog-execute! (Get (State psi-controller (Variable "$x"))))))
+
     (map update-weight-from-atomese-weight
         (psi-get-rules psi-controller-demand))
 )
@@ -203,14 +240,14 @@
 )
 
 ; --------------------------------------------------------------
-; Returns a SetLink with ListLink of psi-controled-rule aliases and their
+; Returns a SetLink with ListLink of psi-controlled-rule aliases and their
 ; atomese-weight.
 (Define
     (DefinedSchema "psi-controlled-rule-state")
     (BindLink
         (VariableList
             (TypedVariableLink
-                (VariableNode "controled-rule")
+                (VariableNode "controlled-rule")
                 (TypeNode "ImplicationLink"))
             (TypedVariableLink
                 (VariableNode "psi-rule-weight")
@@ -222,10 +259,10 @@
             (EvaluationLink
                 psi-rule-name-predicate-node
                 (ListLink
-                    (Variable "controled-rule")
+                    (Variable "controlled-rule")
                     (VariableNode "psi-rule-alias")))
             (MemberLink
-                (Variable "controled-rule")
+                (Variable "controlled-rule")
                 psi-controller-demand)
             (StateLink ; FIXME should use AtTimeLink
                 (ListLink
@@ -243,7 +280,7 @@
 ; functions for filtering by tags/demands
 ;
 ;(define controller-updater
-;    (DefinedPredicateNode (string-append psi-prefix-str "controler")))
+;    (DefinedPredicateNode (string-append psi-prefix-str "controller")))
 ;
 ;(DefineLink
 ;    controller-updater
