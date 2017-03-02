@@ -49,14 +49,25 @@
              (Concept P-name)))
     )
 )
+(define (get-sureal-result-for-trail-1 semantics-list)
+"
+  Returns the first surealized ImplicationLink or nil.
 
-(define (get-sureal-result semantics-list)
+  semantics-list: A list of ImplicationLinks
+"
     (define semantics (select-highest-tv-semantics semantics-list))
 
-    ; Assuming 'semantics' is an ImplicationLink
-    (define logic (implication-to-evaluation-s2l (gar semantics) (gdr semantics)))
+    (define logic
+        ; TODO:  Remove this check once other inference-trails are
+        ; handled by different response handlers.
+        (if (equal? 'ImplicationLink (cog-type semantics))
+            (implication-to-evaluation-s2l
+                (gar semantics) (gdr semantics))
+            '()))
 
-    (define sureal-result (sureal logic))
+    ; TODO: Remove the check  once other inference-trails are handled
+    ; diffferently.
+    (define sureal-result (if (null? logic) '() (sureal logic)))
 
     (if (null? sureal-result)
         ; SuReal may give nothing because sometimes R2L generates the same pattern
@@ -71,6 +82,7 @@
             '()
             (get-sureal-result (delete semantics semantics-list))
         )
+
         (first sureal-result)
     )
 )
@@ -102,20 +114,12 @@
 "
     (if (null? impl-links)
         (State pln-answers no-result)
-        (let* ((semantics (select-highest-tv-semantics (shuffle impl-links)))
-            (logic
-                (if (equal? 'ImplicationLink (cog-type semantics))
-                    (implication-to-evaluation-s2l
-                        (gar semantics) (gdr semantics))
-                    '()))
-            (sureal-result (if (null? logic) '() (sureal logic)))
-            )
-
+        (let* ((sureal-word-list (get-sureal-result-for-trail-1 impl-links)))
             (State
                 pln-answers
-                (if (null? sureal-result)
+                (if (null? sureal-word-list)
                     no-result
-                    (List (map Word (first sureal-result)))
+                    (List (map Word sureal-word-list))
                 )
             )
         )
