@@ -36,6 +36,7 @@
 
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
+(use-modules (opencog openpsi))
 
 (load "faces.scm")
 
@@ -464,7 +465,7 @@
 ; --------------------------------------------------------
 ; Some debug prints.
 
-(define (print-msg node) 
+(define (print-msg node)
 	;(display (cog-name node)) (newline) ; XXX FIXME disable printing
 	; until blocking fix.
 	(stv 1 1))
@@ -961,6 +962,186 @@ proper atomese.
 		(True (Put (State request-eye-contact-state (Variable "$face-id"))
 			no-interaction))
 	))
+
+;------------------------------------------------------------------------------
+; The Wholeshow framework -- can switch to different "demo modes" by changing
+; the weights of various psi-controlled-rules
+
+(define-public current-demo-mode (Anchor "Current Demo Mode"))
+(define default-mode (Concept "Default Mode"))
+(define reasoning-mode (Concept "Reasoning Mode"))
+(define philosophy-mode (Concept "Philosophy Mode"))
+(define saliency-mode (Concept "Saliency Mode"))
+
+(State current-demo-mode default-mode)
+
+;----------
+(define-public (enable-all-demos)
+"
+  This is the default mode. All the rules are given a weight of 0.9.
+"
+	; Turn these off by default
+	(define rules-not-to-be-enabled
+		(map (lambda (s) (string-append psi-prefix-str s))
+		(list "aiml" "random_sentence_blogs" "saliency-tracking")))
+
+	(psi-controller-occupy)
+
+	(for-each
+		(lambda (r)
+			(if (member (cog-name (car (psi-rule-alias r))) rules-not-to-be-enabled)
+				(psi-rule-set-atomese-weight r 0)
+				(psi-rule-set-atomese-weight r 0.9)
+			))
+		(psi-get-controlled-rules)
+	)
+
+	(psi-controller-release)
+)
+
+; Enable only the psi-controlled-rules with the specified rule-aliases
+(define (enable-demo-rules rule-aliases)
+	(define rules-to-be-enabled
+		(map (lambda (s) (string-append psi-prefix-str s)) rule-aliases))
+
+	(psi-controller-occupy)
+
+	(for-each
+		(lambda (r)
+			(if (member (cog-name (car (psi-rule-alias r))) rules-to-be-enabled)
+				(psi-rule-set-atomese-weight r 0.9)
+				(psi-rule-set-atomese-weight r 0.0)
+			))
+		(psi-get-controlled-rules)
+	)
+
+	(psi-controller-release)
+)
+
+(define-public (disable-all-demos)
+"
+  This is run when disabling all the rules, when switching between modes.
+  When disabling the rules, their weight is set to zero.
+  When adding new demo modes, make sure you run (psi-halt) after calling
+  this function.
+"
+	(psi-controller-occupy)
+
+	(for-each
+		(lambda (r) (psi-rule-set-atomese-weight r 0.0))
+		(psi-get-controlled-rules)
+	)
+
+	(psi-controller-release)
+)
+
+(define-public (enable-saliency-demo)
+"
+  Enables the visual saliency rule.
+"
+	(enable-demo-rules (list "saliency-tracking"))
+)
+
+(define-public (enable-philosophy-demo)
+"
+  Enables the random_sentence_pkd and random_sentence_blogs rules.
+"
+	(enable-demo-rules (list "random_sentence_pkd" "random_sentence_kurzweil"))
+)
+
+(define-public (enable-pln-demo)
+"
+  Enables the openpsi-pln rule.
+"
+	(enable-demo-rules (list "select_pln_answer"))
+)
+
+; For debugging
+(define-public (show-demo-state)
+"
+  Returns an a-list with rule aliases for keys and their weights for values.
+"
+	(define result '())
+	(let ((rules (psi-get-controlled-rules)))
+		(for-each (lambda (x) (set! result
+			(assoc-set! result
+				(psi-suffix-str (cog-name (car (psi-rule-alias x))))
+				(cog-stv-strength x))))
+			rules
+		)
+		result
+	)
+)
+
+;----------
+(define-public (switch-demo-mode MODE)
+"
+  To go into a specific demo mode
+"
+	(define m (cog-name (gar MODE)))
+	(cond
+		((equal? m "reasoning-demo")
+			(enable-pln-demo)
+			(State current-demo-mode reasoning-mode)
+		)
+		((equal? m "philosophy-demo")
+			(enable-philosophy-demo)
+			(State current-demo-mode philosophy-mode)
+		)
+		((equal? m "saliency-demo")
+			(enable-saliency-demo)
+			(State current-demo-mode saliency-mode)
+		)
+	)
+	(stv 1 1)
+)
+
+(define-public (back-to-default-mode)
+"
+  To exit the demo and return to the default mode
+"
+	(enable-all-demos)
+	(State current-demo-mode default-mode)
+	(stv 1 1)
+)
+
+(Define
+	(DefinedPredicate "Do show demo")
+	(Lambda
+		(Variable "$demo-mode")
+		(Put (DefinedPredicate "Show demo")
+			(List (Variable "$demo-mode"))))
+)
+
+(Define
+	(DefinedPredicate "Show demo")
+	(Lambda
+		(Variable "$demo-mode")
+		(Evaluation
+			(GroundedPredicate "scm: switch-demo-mode")
+			(List (Variable "$demo-mode"))
+		)
+	)
+)
+
+(Define
+	(DefinedPredicate "exit-demo-mode")
+	(Evaluation
+		(GroundedPredicate "scm: back-to-default-mode")
+		(List)))
+
+(Define
+	(DefinedPredicate "is-in-any-demo-mode?")
+	(Not (Equal
+		(Set default-mode)
+		(Get (State current-demo-mode (Variable "$x"))))))
+
+(Define
+	(DefinedPredicate "is-in-reasoning-mode?")
+	(Equal
+		(Set reasoning-mode)
+		(Get (State current-demo-mode (Variable "$x"))))
+)
 
 ;; ------------------------------------------------------------------
 *unspecified*  ; Make the load be silent
