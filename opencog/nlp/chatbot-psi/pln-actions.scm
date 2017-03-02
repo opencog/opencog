@@ -80,7 +80,7 @@
         ; shortly in the future...
         (if (eq? 1 (length semantics-list))
             '()
-            (get-sureal-result (delete semantics semantics-list))
+            (get-sureal-result-for-trail-1 (delete semantics semantics-list))
         )
 
         (first sureal-result)
