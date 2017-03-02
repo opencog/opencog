@@ -127,7 +127,7 @@
   Fetch the semantics with the highest strength*confidence that
   contains words in common with the query
 "
-    (cog-logger-info "[PLN-Action] Started (do-pln-QA)")
+    (cog-logger-info "[PLN-Action] Started (do-pln-qa)")
 
     (State pln-qa process-started)
     ; FIXME Why doesn't the first call of (update-inferences) work?
@@ -140,7 +140,7 @@
                 (filter-using-query-words
                     inferences (get-input-utterance-names)))
         )
-        (cog-logger-info "[PLN-Action] Finishing (do-pln-QA)")
+        (cog-logger-info "[PLN-Action] Finishing (do-pln-qa)")
         (State pln-qa process-finished)
     )
 )
