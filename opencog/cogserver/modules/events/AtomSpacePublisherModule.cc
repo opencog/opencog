@@ -42,6 +42,7 @@
 #include <opencog/truthvalue/GenericTruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include "AtomSpacePublisherModule.h"
 

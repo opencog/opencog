@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include <opencog/util/ansi.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/ConsoleSocket.h>
 

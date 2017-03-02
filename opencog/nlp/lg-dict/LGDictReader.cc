@@ -24,6 +24,7 @@
  */
 
 #include <opencog/nlp/types/atom_types.h>
+#include <opencog/atoms/base/Link.h>
 
 #include "LGDictReader.h"
 
