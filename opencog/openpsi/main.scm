@@ -123,7 +123,7 @@
     (psi-controller-update-weights)
 
     ; Do action-selection.
-    (par-map
+    (map
         (lambda (d)
             (let ((updater (psi-get-updater d)))
                 ; Run the updater for the demand.
