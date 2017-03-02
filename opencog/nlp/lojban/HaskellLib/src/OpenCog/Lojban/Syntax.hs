@@ -34,7 +34,7 @@ mytrace a = traceShow a a
 mytrace2 s a = trace (s ++(' ':show a)) a
 
 --TODO Parser
--- FIX: pa
+-- FIX: pa + ki'o
 --      da + quantifier
 --      ZAhO explicit representation
 --      me'au
@@ -46,6 +46,7 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --      ge'e cai on logical conectives and else?
 --      Does SEI have implicit args
 --      What if you have SEI and UI
+--      ko -- Selbri implies/inherits from Imperative
 
 -- argslots
 -- Synonims for tenses and gismu
@@ -54,6 +55,10 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 -- references
 
 -- ConceptAnd/OrLink NotLink isntead of boolea and/or
+
+
+--Sentences To Check
+--gau ko ta akti
 
 --TODO Printer
 -- da,de,di differentiation
@@ -436,6 +441,9 @@ sumtiAllUI = withAttitude sumtiAll
 gismuP :: SyntaxReader (State Atom)
 gismuP = implicationOf .< predicate <$> withSeed gismu
 
+
+{-
+FIXME::
 tanru :: SyntaxReader (State Atom)
 tanru = handleTanru <$> gismuP
                     <&> optState tanru
@@ -445,7 +453,7 @@ tanru = handleTanru <$> gismuP
           f ((g,Nothing),s) = Right (g,s)
           g (Left (g,((t,_),s)))  = ((g,Just t),s)
           g (Right (g,s))         = ((g,Nothing),s)
-
+-}
 
 --meP :: SyntaxReader (State Atom)
 --meP =  handleME <$> selmaho "ME" <*> sumtiAll <*> optSelmaho "MEhU"
@@ -464,6 +472,24 @@ handleNU = Iso f g where
                          in Just (pred,link:as)
     g (PN name,CtxPred atom : as) = Just ((atom,as),name)
 
+{-nuIso = Iso f g where
+    f (LL ls) = let pred = findPred ls
+                    concept = 
+                in Link "MemberLink"
+                    [ concept
+                    , Link "SatisfyingSetLink"
+                        [ Link "TypedVariableLink"
+                            [ Node "VariableNode" "$C"
+                            , Node "TypeNode" "ConceptNode"
+                            ] noTv
+                            ,
+                        ] noTv
+                    ] noTv
+
+    findPred [] = error "This can't happen."
+    findPred (EvalL _ _ [a,_]:xs) = a
+    findPred (x:xs) = findPred xs
+-}
 handleKA :: Iso (State Atom,String) (State Atom)
 handleKA = Iso (Just . f) (Just . g) where
     f ((atom,as),name) = let pred = cPN name lowTv
@@ -525,7 +551,7 @@ gohaP = _MO <|> _GOhA
 
 selbri :: SyntaxReader (State (Tagged Atom))
 selbri = filterState . first commute . associate <$> optional (selmaho "SE")
-                                                 <*> (tanru <|> nuP <|> meP <|> moiP <|> gohaP)
+                                                 <*> (gismuP <|> nuP <|> meP <|> moiP <|> gohaP)
 selbriP :: SyntaxReader (State (Tagged Selbri))
 selbriP = first associate <$> _NAhE <&> selbri
 

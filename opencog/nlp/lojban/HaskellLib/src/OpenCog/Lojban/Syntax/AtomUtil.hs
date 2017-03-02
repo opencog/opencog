@@ -59,6 +59,19 @@ ctx = linkIso "ContextLink" noTv
 eval :: Iso [Atom] Atom
 eval = linkIso "EvaluationLink" noTv
 
+
+--Iso Atom Atom
+--eval . node x . listl .a pred . addAsnd arg
+
+--addAsnd :: Iso c b -> c -> Iso a (a,b)
+--addAsnd iso c = iso >. addsnd c
+
+--addAfst :: Iso c b -> c -> Iso a (b,a)
+--addAfst iso c = iso <. addfst c
+
+--(.a) :: Iso [a] a -> Iso b (a,a) -> Iso b a
+--(.a) iso1 iso2 = iso1 . tolist2 iso2
+
 evalTv :: Iso (TruthVal,[Atom]) Atom
 evalTv = linkIso2 "EvaluationLink"
 
@@ -72,7 +85,7 @@ subsetL :: Iso (Atom,Atom) Atom
 subsetL = linkIso "SubSetLink" noTv . tolist2
 
 sizeL  :: Iso [Atom] Atom
-sizeL = linkIso "SizeLink" noTv
+sizeL = linkIso "SetSizeLink" noTv
 
 iil :: Iso [Atom] Atom
 iil = linkIso "IntensionalImplicationLink" noTv
@@ -80,8 +93,8 @@ iil = linkIso "IntensionalImplicationLink" noTv
 list :: Iso [Atom] Atom
 list = linkIso "ListLink" noTv
 
-varl :: Iso [Atom] Atom
-varl = linkIso "VariableLink" noTv
+--varl :: Iso [Atom] Atom
+--varl = linkIso "VariableLink" noTv
 
 notl :: Iso [Atom] Atom
 notl = linkIso "NotLink" noTv
@@ -153,7 +166,7 @@ conLink' = Iso (\(s,args) -> case s of
                              "a"  -> apply orl  args
                              "o"  -> apply iffl args
                              "u"  -> apply u_l  args
-                             "ji" -> apply varl args
+                             --FIXME: "ji" -> apply varl args
                              "enai" -> apply anotbl args
                              "onai" -> apply xorl   args
                              "na.a" -> apply onlyif args
