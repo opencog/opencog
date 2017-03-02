@@ -985,6 +985,8 @@ proper atomese.
 		(map (lambda (s) (string-append psi-prefix-str s))
 		(list "aiml" "random_sentence_blogs" "saliency-tracking")))
 
+	(psi-controller-occupy)
+
 	(for-each
 		(lambda (r)
 			(if (member (cog-name (car (psi-rule-alias r))) rules-not-to-be-enabled)
@@ -993,12 +995,16 @@ proper atomese.
 			))
 		(psi-get-controlled-rules)
 	)
+
+	(psi-controller-release)
 )
 
 ; Enable only the psi-controlled-rules with the specified rule-aliases
 (define (enable-demo-rules rule-aliases)
 	(define rules-to-be-enabled
 		(map (lambda (s) (string-append psi-prefix-str s)) rule-aliases))
+
+	(psi-controller-occupy)
 
 	(for-each
 		(lambda (r)
@@ -1008,6 +1014,8 @@ proper atomese.
 			))
 		(psi-get-controlled-rules)
 	)
+
+	(psi-controller-release)
 )
 
 (define-public (disable-all-demos)
@@ -1017,10 +1025,14 @@ proper atomese.
   When adding new demo modes, make sure you run (psi-halt) after calling
   this function.
 "
+	(psi-controller-occupy)
+
 	(for-each
 		(lambda (r) (psi-rule-set-atomese-weight r 0.0))
 		(psi-get-controlled-rules)
 	)
+
+	(psi-controller-release)
 )
 
 (define-public (enable-saliency-demo)
