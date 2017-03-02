@@ -51,7 +51,7 @@
             (DefinedPredicate "is-input-utterance?")
             (DefinedPredicate "input-is-a-question?")
         ))
-        (True (ExecutionOutput (GroundedSchema "scm: do-pln-QA") (List)))
+        (True (ExecutionOutput (GroundedSchema "scm: do-pln-qa") (List)))
         (True)
         (stv .95 .9)
         sociality
