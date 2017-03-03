@@ -172,3 +172,8 @@ DECODED_CONNECTOR <- LINK  // with words, in place of connector letters.
 // "the intersection" in the LG code-base/documentation)
 MST_LINK_NODE <- PREDICATE_NODE "MSTLinkNode"
 MST_DISJUNCT_NODE <- PREDICATE_NODE "MSTDisjunctNode"
+
+//New Types used in the Lojban Parser
+//Might have to be moved at some point
+SET_TYPE_LINK <- ORDERED_LINK
+SET_SIZE_LINK <- ORDERED_LINK

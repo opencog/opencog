@@ -33,7 +33,11 @@ type Sumti = Tagged Atom
 type Selbri = (TruthVal,Atom) --STring represents TV
 type Tagged a = (a,Maybe Tag)
 
-type WordList = (M.Map String StringSet,StringSet,[(String,String)],Int)
+type LCON = (Maybe String,(String,Maybe String))
+type Con = (Maybe LCON,Maybe (Tagged Selbri))
+type Bridi = ([Sumti],((Maybe Atom,(Maybe String,Tagged Selbri)),[Sumti]))
+
+type WordList = (M.Map String StringSet,StringSet,Iso String String,Int)
 type SyntaxReader a = forall delta. Syntax delta => ReaderT WordList delta a
 
 instance IsoFunctor f => IsoFunctor (ReaderT a f) where
@@ -56,7 +60,6 @@ instance Syntax f => Syntax (ReaderT a f) where
     token  = ReaderT (const token)
     withText r = ReaderT (withText . runReaderT r)
     ptp r1 iso r2 = ReaderT (\e -> ptp (runReaderT r1 e) iso (runReaderT r2 e))
+    withOut r1 r2 = ReaderT (\e -> withOut (runReaderT r1 e) (runReaderT r2 e))
 
 $(defineIsomorphisms ''Atom)
-
-

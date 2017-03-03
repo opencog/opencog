@@ -33,37 +33,73 @@ import Debug.Trace
 mytrace a = traceShow a a
 mytrace2 s a = trace (s ++(' ':show a)) a
 
---TODO
--- FIX: pa
---      da
---      is GIhA NAI correct?
+--TODO Parser
+-- FIX: pa + ki'o
+--      da + quantifier
 --      ZAhO explicit representation
 --      me'au
---      leP inner qunantifier
 --      tenseSumti
 --      nup
 --      GOhA
 --      vo'a rule see ../Lojban.hs
+--      make statments explicit
+--      ge'e cai on logical conectives and else?
+--      Does SEI have implicit args
+--      What if you have SEI and UI
+--      ko -- Selbri implies/inherits from Imperative
+
+-- argslots
+-- Synonims for tenses and gismu
+
+-- ki
+-- references
+
+-- ConceptAnd/OrLink NotLink isntead of boolea and/or
+
+
+--Sentences To Check
+--gau ko ta akti
+
+--TODO Printer
+-- da,de,di differentiation
+
+---------
+--General
+---------
+
+_BO :: SyntaxReader (Tagged Selbri)
+_BO = toSelbri <$> _anytense <* sepSelmaho "BO"
+    where toSelbri = Iso (Just . f) (Just . g) where
+              f (CN name) = ((highTv,cPN name lowTv),Nothing)
+              g ((_,PN n),_) = cCN n lowTv
 
 -------------------------------------------------------------------------------
 --Sumti
 -------------------------------------------------------------------------------
 
+_LE :: SyntaxReader (State String)
 _LE = reorder0 <$> selmaho "LE"
 
 --Handles anykind of LE phrases
--- State ((le,(s,(v,[a]))),Int)
--- State (le,((s,(v,[a])),Int))
-
 -- State ((le,(v,(s,[a]))),Int)
 -- State (le,((v,(s,[a])),Int))
+
+
+-- State ((le,(pa,(v,(s,[a])))),Int)
+-- State (le,((pa,(v,(s,[a])))),Int))
+
 leP :: SyntaxReader (State Atom)
 leP = collapsState
-      .<
-      (choice leHandlers .> first (_ssl . handleBRIDI))
       .
-      inverse associate
+      (first setWithSize ||| reorder0)
+      .
+      reorder2
+      .<
+      second (choice leHandlers .> first (_ssl . handleBRIDI))
+      .
+      reorder1
       <$> withSeedState (_LE
+                      <&> optState paS
                       <&> (first tolist1 <$> pureVarNode)
                       <&> selbriAll
                       <&> beP
@@ -71,16 +107,28 @@ leP = collapsState
     where pureVarNode :: SyntaxReader (State Sumti)
           pureVarNode = pure ((Node "VariableNode" "$var" noTv,Nothing),[])
 
+          reorder1 = Iso (Just . f) (Just . g) where
+              f ((le,(pa,(v,(s,a)))),i) = ((pa,i),(le,((v,(s,a)),i)))
+              g ((pa,_),(le,((v,(s,a)),i))) = ((le,(pa,(v,(s,a)))),i)
+
+          reorder2 = Iso (Just . f) (Just . g) where
+              f (((Just pa,i),(a,s1)),s2) = Left (((pa,i),a),s1++s2)
+              f (((Nothing,i),(a,s1)),s2) = Right (a,s1++s2)
+              g (Left (((pa,i),a),s))     = (((Just pa,i),(a,s)),s)
+              g (Right (a,s))             = (((Nothing,0),(a,s)),s)
+
           --Handles addtional arguments in a leP
           beP :: SyntaxReader (State [Sumti])
           beP = (first cons <$>            sepSelmaho "BE"  *> sumtiAllUI
                             <&> stateMany (sepSelmaho "BEI" *> sumtiAllUI)
                                         <* optSelmaho "BEhO"
-                ) <|> (stateMany sumtiAllUI)
+                ) <|> stateMany sumtiAllUI
 
           handleBE :: Iso (Sumti,Maybe [Sumti]) [Sumti]
           handleBE = (cons ||| tolist1) . ifJustB
 
+--Depending on the word we have a different Relation between the predicate
+-- and the resulting Concept
 leHandlers = [("le"  , genInstance "IntensionalInheritanceLink")
              ,("lo"  , genInstance "InheritanceLink"           )
              ,("lei" , massOf "IntensionalInheritanceLink"     )
@@ -91,6 +139,7 @@ leHandlers = [("le"  , genInstance "IntensionalInheritanceLink")
              ,("lo'e", genInstance "InheritanceLink"           )
              ]
 
+-- A Mass according to Lojban is a thing that has all properties of it's parts
 massOf :: String -> Iso (Atom,Int) (State Atom)
 massOf itype = instanceOf =. (first (_ssl . _frames) . addStuff <. (implicationOf *^* genInstance itype)) . reorder
 
@@ -109,12 +158,12 @@ massOf itype = instanceOf =. (first (_ssl . _frames) . addStuff <. (implicationO
 
 
 setOf :: String -> Iso (Atom,Int) (State Atom)
-setOf itype = setTypeL . tolist2 . makeSet <. genInstance itype
+setOf itype = collapsState . first ((tolist1 . setTypeL . tolist2) >. makeSet) . genInstance itype
     where makeSet = Iso (Just . f) (Just . g)
               where f a = let salt = show a
                               set  = cCN (randName 1 salt) noTv
-                          in (set,a)
-                    g (_,a) = a
+                          in (set,(set,a))
+                    g (_,(_,a)) = a
 
 --Handle anykind of LA phrase
 laP :: SyntaxReader (State Atom)
@@ -124,7 +173,7 @@ laP = handleName . first wordNode <$> withSeed (between (sepSelmaho "LA")
                                                )
     where handleName :: Iso (Atom,Int) (State Atom)
           handleName = Iso (\(a,i) -> let na = nodeName a
-                                          name = (randName i na) ++ "___"++ na
+                                          name = randName i na ++ "___" ++ na
                                           c = cCN name lowTv
                                           pred = cPN "cmene" lowTv
                                           Just (p,ps) = apply instanceOf (pred,i)
@@ -133,19 +182,21 @@ laP = handleName . first wordNode <$> withSeed (between (sepSelmaho "LA")
                                           pt = ((highTv,p),Nothing)
                                           (Just l) = apply _frames (pt,[at,ct])
                                       in Just (c,[l]))
-                           (\(_,[EvalL _ (LL [a,_])]) -> Just (a,0))
+                           (\(_,[EvalL _ _ (LL [a,_])]) -> Just (a,0))
 
 
 
-liP :: SyntaxReader (Atom,[Atom])
-liP = sepSelmaho "LI" *> (xo <|> pa) <* optSelmaho "LOhO"
+liP :: SyntaxReader (State Atom)
+liP = reorder0 <$> sepSelmaho "LI" *> (xo <|> pa) <* optSelmaho "LOhO"
 
-xo :: SyntaxReader (State Atom)
-xo = reorder0 . varnode <$> word "xo"
+xo :: SyntaxReader Atom
+xo = varnode <$> word "xo"
 
-pa :: SyntaxReader (State Atom)
-pa = reorder0
-    . (         number       |||    concept   )
+paS :: SyntaxReader (State Atom)
+paS = reorder0 <$> pa
+
+pa :: SyntaxReader Atom
+pa =  (         number       |||    concept   )
     . (showReadIso . paToNum |^| isoConcat " ")
     . isoConcat2 <$> many1 (joiSelmaho "PA")
     where paToNum :: Iso [String] Int
@@ -169,16 +220,17 @@ zoP :: SyntaxReader (State Atom)
 zoP = instanceOf .< wordNode . ciunit <$> withSeed (mytext "zo" <*> anyWord)
 
 --KohaPharse for any kind of Pro-Noune
-kohaP :: SyntaxReader (Atom,[Atom])
-kohaP = reorder0 <$> (ma <|> koha)
+kohaP :: SyntaxReader (State Atom)
+kohaP = (reorder0 <$> (da <|> ma)) <|> (instanceOf <$> withSeed koha)
     where koha = concept <$> selmaho "KOhA"
           ma   = varnode <$> word "ma"
+          da   = concept <$> oneOfS word ["da","de","di"]
 
 luP' :: SyntaxReader Atom
 luP' = sepSelmaho "LU" *> lojban <* optSelmaho "LIhU"
 
-luP :: SyntaxReader (Atom,[Atom])
-luP = reorder0 <$> luP'
+luP :: SyntaxReader (State Atom)
+luP = instanceOf <$> withSeed luP'
 
 sumti :: SyntaxReader (State Atom)
 sumti = kohaP <|> leP <|> laP <|> liP <|> zoP <|> luP
@@ -187,11 +239,11 @@ sumti = kohaP <|> leP <|> laP <|> liP <|> zoP <|> luP
 noiP :: SyntaxReader (State Atom)
 noiP = sepSelmaho "NOI" *> bridi <* optSelmaho "KUhO"
 
-noi_short :: SyntaxReader (State Atom)
-noi_short = sepSelmaho "NOI" *> ptp selbriUI addKEhA bridi <* optSelmaho "KUhO"
+noiShort :: SyntaxReader (State Atom)
+noiShort = sepSelmaho "NOI" *> ptp selbriUI addKEhA bridi <* optSelmaho "KUhO"
     where addKEhA = Iso (Just . f) (Just . g)
-          f s = "ke'a " ++ s
-          g s = drop 4 s
+          f = (++) "ke'a "
+          g = drop 4
 
 goiP :: SyntaxReader (State Atom)
 goiP = ptp (selmaho "GOI") goiToNoi noiP
@@ -205,7 +257,7 @@ goiP = ptp (selmaho "GOI") goiToNoi noiP
 
 sumtiNoi :: SyntaxReader (State Atom)
 sumtiNoi = (kehaToSesku  ||| id) . reorder <$> sumti
-                                           <&> optState (noiP <|> noi_short <|> goiP)
+                                           <&> optState (noiP <|> noiShort <|> goiP)
     where reorder = Iso (Just . f) (Just . g)
           f ((a,Just n ),s) = Left (a,n:s)
           f ((a,Nothing),s) = Right (a,s)
@@ -238,31 +290,91 @@ sumtiLaiP = ptp (pa <*> selbri) id (ptp pa addLE sumtiLai) <|> sumtiLai
 
 sumtiLai :: SyntaxReader (State Atom)
 sumtiLai = collapsState
-           . first ((instanceWithSize ||| instanceOf) . reorder)
-           <$> withSeedState (optState pa <&> sumtiNoi)
+           .
+           first ((handleSubSet .> setWithSize) ||| reorder0)
+           .
+           reorder1
+           <$> withSeedState (optState paS <&> sumtiNoi)
 
-    where reorder = Iso (Just . f) (Just . g)
-              where f ((Just pa,sumti),seed)   = Left ((pa,seed),sumti)
-                    f ((Nothing,sumti),seed)   = Right (sumti,seed)
-                    g (Left ((pa,seed),sumti)) = ((Just pa,sumti),seed)
-                    g (Right (sumti,seed))     = ((Nothing,sumti),seed)
+    where reorder1 = Iso (Just . f) (Just . g) where
+              f (((Just pa,sumti),seed),state) =
+                        case findSetType sumti state of
+                            Just t -> (Left (sumti,((pa,seed),t)),state)
+                            Nothing -> (Left (sumti,((pa,seed),sumti)),state)
+              f (((Nothing,sumti),seed),state)     = (Right sumti,state)
+              g (Left (_,((pa,seed),sumti)),state) = (((Just pa,sumti),seed),state)
+              g (Right sumti,state)                = (((Nothing,sumti),4),state)
 
-          instanceWithSize :: Iso ((Atom,Int),Atom) (State Atom)
-          instanceWithSize = second (tolist2 . (sizeL *** setTypeL)) . makeSet
-              where makeSet = Iso (Just . f) (Just . g)
-                    f ((a,i),b) = let salt = show a ++ show b
-                                      set  = cCN (randName i salt) noTv
-                                  in (set,([set,a],[set,b]))
-                    g (_,([_,a],[_,b])) = ((a,0),b)
+          handleSubSet = collapsState . first (second (tolist1 . subsetL)) . reorder2
 
+          reorder2 = Iso (Just . f) (Just . g) where
+              f (t,(s,st)) = ((s,(s,t)),st)
+              g ((s,(_,t)),st) = (t,(s,st))
+
+
+
+setWithSize :: Iso ((Atom,Int),Atom) (State Atom)
+setWithSize = second (tolist2 . (sizeL *** setTypeL)) . makeSet
+    where makeSet = Iso (Just . f) (Just . g)
+          f ((a,i),b) = let salt = show a ++ show b
+                            set  = cCN (randName i salt) noTv
+                        in (set,([set,a],[set,b]))
+          g (_,([_,a],[_,b])) = ((a,0),b)
+
+--Connective
+
+_A :: SyntaxReader LCON
+_A = optional (word "na") <*> selmaho "A" <*> optional (word "nai")
+
+_A_BO :: SyntaxReader (State Con)
+_A_BO = reorder0 . wrapA <$> _A <*> optional _BO
+    where wrapA = Iso (Just . f) (Just . g)
+          f (a,b) = (Just a,b)
+          g (Just a,b) = (a,b)
+
+--AndLink
+--  AndLink
+--  EvaluationLink
+--      PredicateNode "tense"
+--      ListLink
 
 --This Handels Sumti connected by logical connectives
 sumtiC :: SyntaxReader (State Atom)
-sumtiC = first ( (conLink . reorder ||| id) . ifJustB)
-        <$> sumtiLaiP <&> optState (_A <&> sumtiC)
-    where _A = reorder0 <$> selmaho "A"
-          reorder = Iso (\(a1,(con,a2)) -> Just (con,[a1,a2]))
+sumtiC = first ((handleCon . reorder ||| id) . ifJustB)
+        <$> sumtiLaiP <&> optState (_A_BO <&> sumtiC)
+    where reorder = Iso (\(a1,(con,a2)) -> Just (con,[a1,a2]))
                         (\(con,[a1,a2]) -> Just (a1,(con,a2)))
+
+{-handleCon :: Iso ((String,Maybe (Tagged Selbri)),[Atom]) (Atom)
+handleCon = (andl . tolist2 . (conLink *** _frames) ||| conLink) . reorder
+    where reorder = Iso (Just . f) (Just . g) where
+          f ((s,Just ts),as) = Left ((s,as),(ts,map (\x -> (x,Nothing)) as))
+            f ((s,Nothing),as) = Right (s,as)
+            g (Left ((s,as),(ts,_)))= ((s,Just ts),as)
+            g (Right (s,as))        = ((s,Nothing),as)-}
+
+handleCon :: Iso (Con,[Atom]) Atom
+handleCon = merge . (isofmap conLink *** isofmap (_frames .> toSumti)) . reorder
+    where reorder = Iso (Just . f) (Just . g) where
+              f ((s,ts),as)     = (eM (s,as),eM (ts,as))
+              g (Just (s,as) ,Just (ts,_))  = ((Just s,Just ts),as)
+              g (Nothing     ,Just (ts,as)) = ((Nothing,Just ts),as)
+              g (Just (s,as) ,Nothing)      = ((Just s,Nothing),as)
+          eM (Just a,b)  = Just (a,b) --expand Maybe
+          eM (Nothing,b) = Nothing
+
+          toSumti = Iso (Just . f) (Just . g) where
+              f = map (\x -> (x,Nothing))
+              g = map fst
+
+          merge = Iso (Just . f) (Just . g) where
+              f (Just a,Just b) = Link "AndLink" [a,b] highTv
+              f (Nothing,Just b) = b
+              f (Just a,Nothing) = a
+              f (Nothing,Nothing) = error "not allowed to happen."
+              g l@EvalL{} = (Nothing,Just l)
+              g (AL [a,b@EvalL{}]) = (Just a,Just b)
+              g l = (Just l,Nothing)
 
 
 placeholder :: SyntaxReader (State Sumti)
@@ -303,23 +415,18 @@ modalSumti = reorder . first handleFIhO <$> (fihoP <|> baiP)
           fihoP :: SyntaxReader (State (Tagged Selbri))
           fihoP = sepSelmaho "FIhO" *> selbriUI <* optSelmaho "FEhU"
 
-          baiP :: SyntaxReader (State (Tagged Selbri))
-          baiP = ReaderT (\wl@(_,_,btf,_) -> runReaderT (bai btf) wl)
-              where bai btf = ptp syn (iso btf) selbriUI
-                    iso btf = mkSynonymIso btf . stripSpace
-                    syn     = optional (selmaho "SE") <*> selmaho "BAI"
+baiP :: SyntaxReader (State (Tagged Selbri))
+baiP = ReaderT (\wl@(_,_,btf,_) -> runReaderT (ptp _bai btf selbriUI) wl)
+  where _bai = optional (selmaho "SE") <*> selmaho "BAI"
 
 tenseSumti :: SyntaxReader (State Sumti)
-tenseSumti = first reorder <$> (_PU <|> _VA <|> _VIhA) <&> sumtiC <* optSelmaho "KU"
+tenseSumti = first reorder <$> anytense <&> sumtiC <* optSelmaho "KU"
     where reorder = Iso (Just . f) (Just . g)
           f (t,s) = (s,Just $ nodeName t)
           g (s,Just n) = (cCN n noTv,s)
 
 tenseSumtiP :: SyntaxReader (State Sumti)
-tenseSumtiP = tenseSumti <|> ptp anytense addti tenseSumti
-    where addti = Iso (Just . f) (Just . g)
-          f s = s ++ "ti "
-          g s = s --TODO: Maybe remoe ti again
+tenseSumtiP = tenseSumti <|> ptp (anytense `withOut` selbriAll) addti tenseSumti
 
 sumtiAll :: SyntaxReader (State Sumti)
 sumtiAll = filterState <$> modalSumti <|> sumtiT <|> tenseSumtiP
@@ -334,6 +441,9 @@ sumtiAllUI = withAttitude sumtiAll
 gismuP :: SyntaxReader (State Atom)
 gismuP = implicationOf .< predicate <$> withSeed gismu
 
+
+{-
+FIXME::
 tanru :: SyntaxReader (State Atom)
 tanru = handleTanru <$> gismuP
                     <&> optState tanru
@@ -343,7 +453,7 @@ tanru = handleTanru <$> gismuP
           f ((g,Nothing),s) = Right (g,s)
           g (Left (g,((t,_),s)))  = ((g,Just t),s)
           g (Right (g,s))         = ((g,Nothing),s)
-
+-}
 
 --meP :: SyntaxReader (State Atom)
 --meP =  handleME <$> selmaho "ME" <*> sumtiAll <*> optSelmaho "MEhU"
@@ -355,14 +465,32 @@ nuHandlers = [("nu"     ,handleNU)
              ,("du'u"   ,handleNU)
              ,("ka"     ,handleKA)]
 
-handleNU :: Iso ((State Atom),String) (State Atom)
+handleNU :: Iso (State Atom,String) (State Atom)
 handleNU = Iso f g where
     f ((atom,as),name) = let pred = cPN name lowTv
                              link = mkCtxPre pred atom
                          in Just (pred,link:as)
     g (PN name,CtxPred atom : as) = Just ((atom,as),name)
 
-handleKA :: Iso ((State Atom),String) (State Atom)
+{-nuIso = Iso f g where
+    f (LL ls) = let pred = findPred ls
+                    concept = 
+                in Link "MemberLink"
+                    [ concept
+                    , Link "SatisfyingSetLink"
+                        [ Link "TypedVariableLink"
+                            [ Node "VariableNode" "$C"
+                            , Node "TypeNode" "ConceptNode"
+                            ] noTv
+                            ,
+                        ] noTv
+                    ] noTv
+
+    findPred [] = error "This can't happen."
+    findPred (EvalL _ _ [a,_]:xs) = a
+    findPred (x:xs) = findPred xs
+-}
+handleKA :: Iso (State Atom,String) (State Atom)
 handleKA = Iso (Just . f) (Just . g) where
     f ((atom,as),name) = let pred = cPN name lowTv
                              link = mkPropPre pred atom name
@@ -370,27 +498,30 @@ handleKA = Iso (Just . f) (Just . g) where
     g (PN name,PropPred atom : as) = ((atom,as),name)
 
 
+--like bridiP but adds mi instead of ti
 bridiPMI :: SyntaxReader (State Atom)
-bridiPMI = (ptp (optional uiP <*> selbriAll) addmi bridiUI) <|> bridiUI <|> (ptp (optional anytense <*> selbriAll) addmi bridiUI)
+bridiPMI = ptp (optional _SOS <*> selbriAll) addmi bridiUI
+         <|> bridiUI
+         <|> ptp (optional anytense <*> selbriAll) addmi bridiUI
     where addmi = Iso (Just . f) (Just . g)
           f s = s ++ "mi "
           g s = s --TODO: Maybe remoe ti again
 
 
-_MOI :: SyntaxReader (State String)
-_MOI = reorder0 <$> selmaho  "MOI"
+_MOI :: SyntaxReader String
+_MOI = selmaho  "MOI"
 
 moiP :: SyntaxReader (State Atom)
-moiP = collapsState . first implicationOf .< first (predicate . handleMOI)
-     <$> withSeedState (pa <&> _MOI)
+moiP = implicationOf .< (predicate . handleMOI)
+     <$> withSeed (pa <*> _MOI)
     where handleMOI = Iso (Just . f) (Just . g)
           f (a,s) = let nn = nodeName a
                     in nn ++ '-':s
           g name  = let nn = takeWhile (/= '-') name
                         s  = drop 1 $ dropWhile (/= '-') name
-                    in case isNumeric nn of
-                        True  -> (fromJust $ apply number nn,s)
-                        False -> (fromJust $ apply concept nn,s)
+                    in if isNumeric nn
+                          then (fromJust $ apply number nn,s)
+                          else (fromJust $ apply concept nn,s)
 
 _ME = reorder0 <$> mytext "me"
 
@@ -420,13 +551,13 @@ gohaP = _MO <|> _GOhA
 
 selbri :: SyntaxReader (State (Tagged Atom))
 selbri = filterState . first commute . associate <$> optional (selmaho "SE")
-                                                 <*> (tanru <|> nuP <|> meP <|> moiP <|> gohaP)
+                                                 <*> (gismuP <|> nuP <|> meP <|> moiP <|> gohaP)
 selbriP :: SyntaxReader (State (Tagged Selbri))
 selbriP = first associate <$> _NAhE <&> selbri
 
 selbriUI :: SyntaxReader (State (Tagged Selbri))
-selbriUI = collapsState . first ((merge . first (second handleUI) ||| id) . reorder)
-        <$> withSeedState (selbriP <&> optState uiP)
+selbriUI = collapsState . first ((merge . first (second handleSOS) ||| id) . reorder)
+        <$> withSeedState (selbriP <&> optState _SOS)
     where reorder = Iso (Just . f) (Just . g)
               where f ((((tv,p),t),Just ui),i)    = Left  ((tv,((ui,p),i)),t)
                     f ((p,Nothing),i)             = Right (p,[])
@@ -436,32 +567,36 @@ selbriUI = collapsState . first ((merge . first (second handleUI) ||| id) . reor
               where f ((tv,(a,s)),t) = (((tv,a),t),s)
                     g (((tv,a),t),s) = ((tv,(a,s)),t)
 
-_PU :: SyntaxReader (State Atom)
-_PU = reorder0 . concept <$> selmaho "PU"
+_PU :: SyntaxReader String
+_PU = selmaho "PU"
 
-_ZI :: SyntaxReader (State Atom)
-_ZI = reorder0 . concept <$> selmaho "ZI"
+_ZI :: SyntaxReader String
+_ZI = selmaho "ZI"
 
-_VA :: SyntaxReader (State Atom)
-_VA = reorder0 . concept <$> selmaho "VA"
+_VA :: SyntaxReader String
+_VA = selmaho "VA"
 
-_VIhA :: SyntaxReader (State Atom)
-_VIhA = reorder0 . concept <$> selmaho "VIhA"
+_VIhA :: SyntaxReader String
+_VIhA = selmaho "VIhA"
 
-_FAhA :: SyntaxReader (State Atom)
-_FAhA = reorder0 . concept <$> selmaho "FAhA"
+_FAhA :: SyntaxReader String
+_FAhA = selmaho "FAhA"
 
-_ZAhO :: SyntaxReader (State Atom)
-_ZAhO = reorder0 . concept <$> selmaho "ZAhO"
+_ZAhO :: SyntaxReader String
+_ZAhO = selmaho "ZAhO"
 
-_ZEhA :: SyntaxReader (State Atom)
-_ZEhA = reorder0 . concept <$> selmaho "ZEhA"
+_ZEhA :: SyntaxReader String
+_ZEhA = selmaho "ZEhA"
 
-_CAhA :: SyntaxReader (State Atom)
-_CAhA = reorder0 . concept <$> selmaho "CAhA"
+_CAhA :: SyntaxReader String
+_CAhA = selmaho "CAhA"
+
+_anytense :: SyntaxReader Atom
+_anytense = concept <$> (_PU   <|> _ZI   <|> _VA <|> _FAhA <|> _ZAhO <|>
+                         _ZEhA <|> _VIhA <|> _CAhA)
 
 anytense :: SyntaxReader (State Atom)
-anytense = _PU <|> _ZI <|> _VA <|> _FAhA <|> _ZAhO <|> _ZEhA <|> _VIhA <|> _CAhA
+anytense = reorder0 <$> _anytense
 
 _trati :: SyntaxReader (State (Maybe Atom))
 _trati = first handleTrati
@@ -485,92 +620,83 @@ selbriAll =  _trati
 --bacru
 -------------------------------------------------------------------------------
 
-bridi_tail = selbriAll <&> stateMany sumtiAllUI
-
---bridi_tails = stateList <$> sepBy bridi_tail (sepSelmaho "GIhA")
-
---THis Handles compelte sentences
--- Remark: Handle the modal Sumti before handleBRIDI
-{-bridi :: SyntaxReader (Atom,[Atom])
-bridi = handleBRIDI . first mergeSumti <$> stateMany1 sumtiAll
-                                       <*  optext "cu"
-                                       <&> bridi_tail
--}
+--                            trati        na
+bridiTail :: SyntaxReader (State ((Maybe Atom, (Maybe String, Tagged Selbri)),[Sumti]))
+bridiTail = selbriAll <&> stateMany sumtiAllUI
 
 -- (a,(mp,(ma,(s,aa))))
 -- (mp,(ma,(s,a++aa)))
 -- ((mp,(ma,(s,a))),as)
 -- (bridi,as)
 
-_GIhA ::  SyntaxReader (State String)
-_GIhA = reorder0 <$> selmaho "GIhA"
 
-{-bridi :: SyntaxReader (State Atom)
-bridi = first (andl . mapIso (handleBRIDI) . isoDistribute)
-        <$> stateMany sumtiAll
-        <*  optext "cu"
-        <&> bridi_tails
+_GIhA ::  SyntaxReader LCON
+_GIhA = optional (word "na") <*> _GIhA' <*> optional (word "nai")
+    where _GIhA' = _GIhAtoA <$> selmaho "GIhA"
 
--}
+_GIhA_BO :: SyntaxReader (State Con)
+_GIhA_BO = reorder0 . wrapGIhA <$> _GIhA <*> optional _BO
+    where wrapGIhA = Iso (Just . f) (Just . g)
+          f (a,b) = (Just a,b)
+          g (Just a,b) = (a,b)
+
 --(s,(bt,(giha,bt)))
 --((s,bt),[(giha,(s,bt))])
 
-bridi :: SyntaxReader (State Atom)
-bridi = first (foldl handleGIhA . (handleBRIDI *** distribute) . reorder)
+_bridi :: SyntaxReader (State Atom)
+_bridi = first (foldl handleGIhA . (handleBRIDI *** distribute) . reorder)
         <$> stateMany sumtiAllUI
         <*  optext "cu"
-        <&> bridi_tail
-        <&> stateMany (_GIhA <&> bridi_tail)
+        <&> bridiTail
+        <&> stateMany (_GIhA_BO <&> bridiTail)
 
     where reorder = Iso (Just . f) (Just . g) where
             f (s,(bt,ls)) = ((s,bt),(s,ls))
             g ((s,bt),(_,ls)) = (s,(bt,ls))
           distribute = Iso (Just . f) (Just . g) where
             f (s,[]) = []
-            f (s,(giha,bt):xs) = (giha,(s,bt)):(f (s,xs))
+            f (s,(giha,bt):xs) = (giha,(s,bt)): f (s,xs)
             --g [] = Nothing -- let this fail with a bang so we notice
             g ((giha,(s,bt)):xs) = (s,(giha,bt):g' xs)
             g' [] = []
             g' ((giha,(s,bt)):xs) = (giha,bt):g' xs
 
 
-type Bridi = ([Sumti],((Maybe Atom,(Maybe String,Tagged Selbri)),[Sumti]))
-
-handleGIhA :: Iso (Atom,(String,Bridi)) (Atom)
-handleGIhA = conLinkGIhA . second (tolist2 . second handleBRIDI) . reorder
+handleGIhA :: Iso (Atom,(Con,Bridi)) Atom
+handleGIhA = handleCon . second (tolist2 .> handleBRIDI) . reorder
     where reorder = Iso (Just . f) (Just . g) where
             f (a,(giha,br)) = (giha,(a,br))
             g (giha,(a,br)) = (a,(giha,br))
-
-
 
 -- ((ma,(ms,ts)),[a])
 -- (((ma,ms),ts),[a])
 -- ((ma,ms),(ts,[a]))
 
+--MPU = Maybe PU
+--MNA = Maybe NA
 handleBRIDI :: Iso Bridi Atom
 handleBRIDI = handleNA
+            -- ((MNA,MCtxL)
             . second _ctx
+            -- ((MNA,(MPU,frames))
             . inverse associate
+            -- (((MNA,MPU),frames)
             . first commute
+            -- (((MPU,MNA),frames)
             . second _frames
+            -- ((MPU,MNA),(Tagged Selbri,sumti))
             . inverse associate
+            -- (((MPU,MNA),Tagged Selbri),sumti)
             . first associate
+            -- ((MPU,(MNA,Tagged Selbri)),sumti)
             . mergeSumti
-
--- ((MPU,(MNA,(Selbri,Args)))   ,Atoms)
--- (((MPU,MNA),(Selbri,Args))   ,Atoms)
--- (((MPU,MNA),frames)            ,Atoms)
--- (((MNA,MPU),frames)            ,Atoms)
--- ((MNA,(MPU,frames))            ,Atoms)
--- ((MNA,MCtxL)                 ,Atoms)
--- (bridi                       ,Atoms)
+            -- (sumit1,((MPU,(MNA,Tagged Selbri)),sumti2))
 
 handleNA :: Iso (Maybe String,Atom) Atom
 handleNA = Iso f g where
     f (Nothing,a)    = Just a
     f (Just n, a)    = apply _eval (cGPN n lowTv,[a])
-    g (EvalL (GPN n) a) = Just (Just n,a)
+    g (EvalL _ (GPN n) a) = Just (Just n,a)
     g a = Just (Nothing,a)
 
 --For mergin sumties before and after the selbri into a single list
@@ -582,9 +708,22 @@ mergeSumti = Iso f g where
                        [] -> Nothing
                        (x:xs) -> Just ([x],(s,xs))
 
+
+_GA :: SyntaxReader (State (Maybe LCON))
+_GA = reorder0 . wrapGA . _GAtoA <$> selmaho "GA"
+    where wrapGA = Iso (Just . f) (Just . g)
+          f a = Just (Nothing,(a,Nothing))
+          g (Just (_,(a,_))) = a
+
+bridiGA :: SyntaxReader (State Atom)
+bridiGA = first handleGA <$> _GA <&> _bridi <* sepSelmaho "GI" <&> _bridi
+    where handleGA = handleCon . (addsnd Nothing *** tolist2)
+
+bridi = bridiGA <|> _bridi
+
 bridiUI :: SyntaxReader (State Atom)
-bridiUI = collapsState . (first handleUI ||| id) . reorder . expandState
-        <$> withSeed (optState uiP <&> bridi)
+bridiUI = collapsState . (first handleSOS ||| id) . reorder . expandState
+        <$> withSeed (optState _SOS <&> bridi)
     where reorder = Iso (Just . rf) (Just . rg)
           rf (((Just ui,b),i),s)   = Left  (((ui,b),i),s)
           rf (((Nothing,b),i),s)   = Right ((b,[]),s)
@@ -592,9 +731,13 @@ bridiUI = collapsState . (first handleUI ||| id) . reorder . expandState
           rg (Right((b,_),s)     ) = (((Nothing,b),0),s)
 
 bridiP :: SyntaxReader (State Atom)
-bridiP = (ptp (uiP <*> selbriAll) addti bridiUI) <|> bridiUI <|> (ptp (anytense <*> selbriAll) addti bridiUI)
-    where addti = Iso (Just . f) (Just . g)
-          f s = s ++ "ti "
+bridiP = ptp (_SOS <*> selbriAll) addti bridiUI
+       <|> bridiUI
+       <|> ptp (anytense <*> selbriAll) addti bridiUI
+
+addti :: Iso String String
+addti = Iso (Just . f) (Just . g)
+    where f s = s ++ "ti "
           g s = s --TODO: Maybe remoe ti again
 
 preti :: SyntaxReader Atom
@@ -627,9 +770,6 @@ vocative = list . reorder <$> _COI <&> sumtiC
 
           --Does Work
           ui = ptp uiP addti (first dropTag <$> sumtiAllUI)
-          addti = Iso (Just . f) (Just . g) where
-              f s = "ti " ++ s
-              g s = drop 3 s
           dropTag = Iso (Just . f) (Just . g) where
               f (s,_) = s
               g s = (s,Nothing)
@@ -652,11 +792,67 @@ freeSumti = list . cons .< reorder <$> sumtiAllUI
 free :: SyntaxReader Atom
 free = vocative <|> freeuiP <|> freeSumti <|> luP'
 
-lojban = preti <|> free
+--jufra = list <$> many1 (sepSelmaho "I" *> preti)
+
+_JA ::  SyntaxReader LCON
+_JA = optional (word "na") <*> _JA' <*> optional (word "nai")
+    where _JA' = _JAtoA <$> selmaho "JA"
+
+_JA_BO :: SyntaxReader Con
+_JA_BO = optional _JA <*> optional _BO
+
+{-_BAI_BO :: SyntaxReader Atom
+_BAI_BO = <$> baiP <* sepSelmaho "BO"
+-}
+
+selbriToEval :: Iso Selbri Atom
+selbriToEval = Iso (Just . f) (Just . g) where
+    f (tv,atom) = cEvalL tv atom (cLL [])
+    g (EvalL tv p _) = (tv,p)
+
+_jufra :: SyntaxReader (Maybe Con,[Atom])
+_jufra = (id *** ((handle ||| tolist1) . ifJustB))
+     <$> sepSelmaho "I" *> optional _JA_BO <*> preti <*> optional _jufra
+    where handle = Iso (Just . f) (Just . g) where
+              f (p,(mc,a:as)) = case mc of
+                                    Just (Nothing,Nothing) -> p:a:as
+                                    Just c ->
+                                        let Just x = apply handleCon (c,[p,a])
+                                        in (x:as)
+                                    Nothing -> p:a:as
+              g (x:as) = case unapply handleCon x of
+                            Just (c,[p,a]) -> (p,(Just c, a : as))
+                            Nothing -> (x,(Nothing,as))
+
+jufra :: SyntaxReader Atom
+jufra = list . rmfst Nothing <$> _jufra
+
+jufmei = list . reorder <$> sepSelmaho "NIhO" *> preti
+                        <*> many1 (sepSelmaho "I" *> preti)
+    where reorder = Iso (Just . f) (Just . g) where
+            f (a,as) = a:as
+            g (a:as) = (a,as)
+
+lojban = jufmei <|> jufra <|> preti <|> free
 
 ------------------------------------
---Attitude
+--Second Order Statments
 -----------------------------------
+
+--SEI
+
+_SEI :: SyntaxReader ()
+_SEI = sepSelmaho "SEI"
+
+_SEhU :: SyntaxReader ()
+_SEhU = optSelmaho "SEhU"
+
+seiP :: SyntaxReader (State Atom)
+seiP = _SEI *> bridiP <* _SEhU
+
+type SEI = Atom
+
+--Attitude
 
 _UI :: SyntaxReader Atom
 _UI = concept <$> selmaho "UI"
@@ -686,35 +882,55 @@ naicaiToTV = mkSynonymIso [("|cai"    ,stv 1     0.9)
 uiP :: SyntaxReader (State (Atom,TruthVal))
 uiP = reorder0 <$> _UI <*> caiP
 
+type UI = (Atom,TruthVal)
+
+--TODO: What if you have booth?
+_SOS :: SyntaxReader (State (Either SEI UI))
+_SOS = inverse expandEither <$> ((left <$> seiP) <|> (right <$> uiP))
+
 withAttitude :: SyntaxReader (State Sumti) -> SyntaxReader (State Sumti)
-withAttitude syn = merge . first ((first handleUI ||| id) . reorder) . expandState
-                <$> withSeed (syn <&> optState uiP)
-    where reorder = Iso (Just . rf) (Just . rg)
-          rf (((a,mt),Just ui),i)   = Left (((ui,a),i),mt)
-          rf (((a,mt),Nothing),i)   = Right ((a,[]),mt)
-          rg (Left (((ui,a),i),mt)) = (((a,mt),Just ui),i)
-          rg (Right ((a,_),mt)    ) = (((a,mt),Nothing),0)
-          merge = Iso (Just . mf) (Just . mg)
-          mf (((a,s1),mt),s2) = ((a,mt),s1++s2)
-          mg ((a,mt),s)       = (((a,s),mt),s)
+withAttitude syn = merge . first ((first handleSOS ||| id) . reorder)
+                <$> withSeedState (syn <&> optState _SOS)
+    where reorder = Iso (Just . f) (Just . g) where
+              f (((a,mt),Just sos),i)  = Left (((sos,a),i),mt)
+              f (((a,mt),Nothing ),i)  = Right ((a,[]),mt)
+              g (Left (((ui,a),i),mt)) = (((a,mt),Just ui),i)
+              g (Right ((a,_),mt)    ) = (((a,mt),Nothing),0)
+          merge = Iso (Just . f) (Just . g) where
+              f (((a,s1),mt),s2) = ((a,mt),s1++s2)
+              g ((a,mt),s)       = (((a,s),mt),s)
 
 handleUI :: Iso (((Atom,TruthVal),Atom),Int) (State Atom)
 handleUI = second (cons . first _frames . joinState
-                        . (selbri *** (sumti1 *** (sumti2 *** sumti3))))
-                     . reorder
-    where joinState = Iso (Just . jf) (Just . jg)
-          jf ((tv,(a1,s1)),((a2,s2),((a3,s3),(a4,s4)))) = ((((tv,a1),Nothing),[a2,a3,a4]),s1++s2++s3++s4)
-          jg ((((tv,a1),_),[a2,a3,a4]),s) = ((tv,(a1,s)),((a2,s),((a3,s),(a4,s))))
-          reorder = Iso (Just . rf) (Just . rg)
-          rf (((ui,tv),a),i) = (a,((tv,((),i)),(((),i),((ui,i),(a,i)))))
-          rg (a,((tv,((),_)),(((),_),((ui,_),(_,_))))) = (((ui,tv),a),0)
-          sumti3 = first (addsnd $ Just "3") . instanceOf
-          sumti2 = first (addsnd $ Just "2") . instanceOf
-          sumti1 = first (addsnd $ Just "1") . instanceOf
-                    . first (insert (Node "ConceptNode" "mi" noTv))
-          selbri = second ( instanceOf
-                          . first (insert (Node "PredicateNode" "cinmo" noTv))
-                          )
+                  . (selbri *** (toSumti "1" *** (toSumti "2" *** toSumti "3")))
+                  )
+         . reorder
+    where joinState = Iso (Just . f) (Just . g) where
+              f ((tv,(a1,s1)),((a2,s2),((a3,s3),(a4,s4)))) =
+                ((((tv,a1),Nothing),[a2,a3,a4]),s1++s2++s3++s4)
+              g ((((tv,a1),_),[a2,a3,a4]),s) =
+                ((tv,(a1,s)),((a2,s),((a3,s),(a4,s))))
+          reorder = Iso (Just . f) (Just . g) where
+              f (((ui,tv),a),i) = (a,((tv,(cinmo,i)),((mi,i),((ui,i),(a,i)))))
+              g (a,((tv,_),(_,((ui,_),(_,_))))) = (((ui,tv),a),0)
+          mi = Node "ConceptNode" "mi" noTv
+          cinmo = Node "PredicateNode" "cinmo" noTv
+          toSumti t = first (addsnd $ Just t) . instanceOf
+          selbri = second instanceOf
+
+handleSEI :: Iso ((Atom,Atom),Int) (State Atom)
+handleSEI = tolist1 >. commute . rmsnd undefined
+
+--SOS Second Order Sentence
+handleSOS :: Iso ((Either SEI UI,Atom),Int) (State Atom)
+handleSOS = (handleSEI ||| handleUI) . expandEither . first expandEither
+
+expandEither :: Iso (Either a b,c) (Either (a,c) (b,c))
+expandEither = Iso (Just . f) (Just . g) where
+    f (Left a,b) = Left (a,b)
+    f (Right a,b) = Right (a,b)
+    g (Left (a,b)) = (Left a,b)
+    g (Right (a,b)) = (Right a,b)
 
 ------------------------------------
 --Pre Parse XXX would need to consider all words to not parse things it shouldnt'

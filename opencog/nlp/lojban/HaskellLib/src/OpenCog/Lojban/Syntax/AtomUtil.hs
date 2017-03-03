@@ -11,7 +11,7 @@ import Text.Syntax
 
 import qualified Data.Map as M
 import qualified Data.Foldable as F
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust,isJust)
 import Data.List (isSuffixOf,nub)
 import Data.Hashable
 import Data.Char (chr)
@@ -59,6 +59,19 @@ ctx = linkIso "ContextLink" noTv
 eval :: Iso [Atom] Atom
 eval = linkIso "EvaluationLink" noTv
 
+
+--Iso Atom Atom
+--eval . node x . listl .a pred . addAsnd arg
+
+--addAsnd :: Iso c b -> c -> Iso a (a,b)
+--addAsnd iso c = iso >. addsnd c
+
+--addAfst :: Iso c b -> c -> Iso a (b,a)
+--addAfst iso c = iso <. addfst c
+
+--(.a) :: Iso [a] a -> Iso b (a,a) -> Iso b a
+--(.a) iso1 iso2 = iso1 . tolist2 iso2
+
 evalTv :: Iso (TruthVal,[Atom]) Atom
 evalTv = linkIso2 "EvaluationLink"
 
@@ -68,8 +81,11 @@ ssl = linkIso "SatisfyingSetLink" noTv
 setTypeL  :: Iso [Atom] Atom
 setTypeL = linkIso "SetTypeLink" noTv
 
+subsetL :: Iso (Atom,Atom) Atom
+subsetL = linkIso "SubSetLink" noTv . tolist2
+
 sizeL  :: Iso [Atom] Atom
-sizeL = linkIso "SizeLink" noTv
+sizeL = linkIso "SetSizeLink" noTv
 
 iil :: Iso [Atom] Atom
 iil = linkIso "IntensionalImplicationLink" noTv
@@ -77,8 +93,8 @@ iil = linkIso "IntensionalImplicationLink" noTv
 list :: Iso [Atom] Atom
 list = linkIso "ListLink" noTv
 
-varl :: Iso [Atom] Atom
-varl = linkIso "VariableLink" noTv
+--varl :: Iso [Atom] Atom
+--varl = linkIso "VariableLink" noTv
 
 notl :: Iso [Atom] Atom
 notl = linkIso "NotLink" noTv
@@ -95,21 +111,66 @@ iffl = orl . tolist2 . (andl *** andl) . reorder
           f ls     = (ls,map (fromJust . apply (notl . tolist1)) ls)
           g (ls,_) = ls
 
-limpl :: Iso [Atom] Atom
-limpl = orl . tolist2 . (andl *** andl) . reorder
+u_l :: Iso [Atom] Atom
+u_l = orl . tolist2 . (andl *** andl) . reorder
     where reorder = Iso (Just . f) (Just . g)
           f [a,b] = let nb = fromJust $ apply notl [b]
                     in ([a,b],[a,nb])
+          f a = error $ show a ++ " is not a accepted value for limpl"
           g (ls,_) = ls
 
-conLink :: Iso (String,[Atom]) Atom
-conLink = Iso (\(s,args) -> case s of
+anotbl :: Iso [Atom] Atom
+anotbl = andl . tolist2 . second (notl . tolist1) . inverse tolist2
+
+onlyif :: Iso [Atom] Atom
+onlyif = orl . tolist2 . (andl *** notl) . reorder
+    where reorder = Iso (Just . f) (Just . g)
+          f [a,b] = ([a,b],[a])
+          g (a,_) = a
+
+xorl :: Iso [Atom] Atom
+xorl = orl . tolist2
+     . (myand . first mynot *** myand . second mynot)
+     . reorder
+    where reorder = Iso (Just . f) (Just . g)
+          f [a,b] = ((a,b),(a,b))
+          g ((a,b),_) = [a,b]
+          myand = andl .tolist2
+          mynot = notl . tolist1
+
+
+handleConNeg :: Iso (LCON,[Atom]) (String,[Atom])
+handleConNeg = Iso (Just . f) (Just . g)
+    where f ((mna,(s,mnai)),[a1,a2]) = let na1 = if isJust mna
+                                                 then cNL noTv a1
+                                                 else a1
+                                           na2 = if isJust mnai
+                                                 then cNL noTv a2
+                                                 else a2
+                                       in (s,[na1,na2])
+          g (s,[na1,na2]) = let (mna,a1) = case na1 of
+                                        (NL [a1]) -> (Just "na",a1)
+                                        _ -> (Nothing,na1)
+                                (mnai,a2) = case na2 of
+                                        (NL [a2]) -> (Just "nai",a2)
+                                        _ -> (Nothing,na2)
+                            in ((mna,(s,mnai)),[a1,a2])
+
+
+conLink :: Iso (LCON,[Atom]) Atom
+conLink = conLink' . handleConNeg
+
+conLink' :: Iso (String,[Atom]) Atom
+conLink' = Iso (\(s,args) -> case s of
                              "e"  -> apply andl args
-                             "a"  -> apply orl args
+                             "a"  -> apply orl  args
                              "o"  -> apply iffl args
-                             "u"  -> apply limpl args
-                             "ji" -> apply varl args
-                             _    -> error $ "Can handle conLink: " ++ show s)
+                             "u"  -> apply u_l  args
+                             --FIXME: "ji" -> apply varl args
+                             "enai" -> apply anotbl args
+                             "onai" -> apply xorl   args
+                             "na.a" -> apply onlyif args
+                             _    -> error $ "Can't handle conLink: " ++ show s)
               (\a -> case a of
                         Link "OrLink"
                             [Link "AndLink" args _
@@ -130,33 +191,36 @@ conLink = Iso (\(s,args) -> case s of
                         Link "VariableLink" args _ -> Just ("ji",args)
                         _ -> Nothing)
 
-conLinkGIhA :: Iso (String,[Atom]) Atom
-conLinkGIhA = Iso (\(s,args) -> case s of
-                             "gi'e"  -> apply andl args
-                             "gi'a"  -> apply orl args
-                             "gi'o"  -> apply iffl args
-                             "gi'u"  -> apply limpl args
-                             "gi'i"  -> apply varl args
-                             _    -> error $ "Can't handle conLink: " ++ show s)
-              (\a -> case a of
-                        Link "OrLink"
-                            [Link "AndLink" args _
-                            ,Link "AndLink"
-                                [Link "NotLink" _arg1 _
-                                ,Link "NotLink" _arg2 _
-                                ]_
-                            ] _ -> Just ("gi'o",args)
-                        Link "OrLink"
-                            [Link "AndLink" args _
-                            ,Link "AndLink"
-                                [arg1
-                                ,Link "NotLink" _arg2 _
-                                ]_
-                            ] _ -> Just ("gi'u",args)
-                        Link "AndLink" args _ -> Just ("gi'e",args)
-                        Link "OrLink" args _ -> Just ("gi'a",args)
-                        Link "VariableLink" args _ -> Just ("gi'i",args)
-                        _ -> Nothing)
+_JAtoA :: Iso String String
+_JAtoA = mkSynonymIso [("je","e")
+                      ,("ja","a")
+                      ,("jo","o")
+                      ,("ju","u")
+                      ,("jonai","onai")
+                      ,("jenai","enai")
+                      ,("naja","na.a")
+                      ,("je'i","ji")]
+
+_GIhAtoA :: Iso String String
+_GIhAtoA = mkSynonymIso [("gi'e","e")
+                        ,("gi'a","a")
+                        ,("gi'o","o")
+                        ,("gi'u","u")
+                        ,("gi'enai","enai")
+                        ,("gi'onai","onai")
+                        ,("nagi'a","na.a")
+                        ,("gi'i","ji")]
+
+_GAtoA :: Iso String String
+_GAtoA = mkSynonymIso [("ge","e")
+                      ,("ga","a")
+                      ,("go","o")
+                      ,("gu","u")
+                      ,("ganai","na.a")
+                      ,("gonai","onai")
+                      ,("ge'i","ji")]
+
+
 
 linkIso :: String -> TruthVal -> Iso [Atom] Atom
 linkIso n t = link . Iso (\l -> Just (n,(l,t)))
@@ -194,7 +258,25 @@ number = nodeIso "VariableNode" noTv
 
 
 _frames :: Iso (Tagged Selbri,[Sumti]) Atom
-_frames = andl . mapIso _frame . isoDistribute . handleTAG
+_frames = (id ||| andl) . isSingle . mapIso (handleDA . _frame) . isoDistribute . handleTAG
+    where isSingle = Iso (Just . f) (Just . g)
+          f [a] = Left a
+          f as  = Right as
+          g (Left a) = [a]
+          g (Right as) = as
+
+handleDA :: Iso Atom Atom
+handleDA = Iso (Just . f) (Just . g) where
+    f (EvalL tv ps (LL [p1,CN n]))
+        | n == "da" || n == "de" || n == "di"
+            = let i = cVN ((randName 0 (show p1)) ++ "___" ++ n)
+              in cExL tv i (cEvalL tv ps (cLL [p1,i]))
+    f a = a
+    g (ExL _ _ (EvalL tv ps (LL [p1,VN name])))
+        = let n = drop 23 name
+              da = cCN n lowTv
+          in cEvalL tv ps (cLL [p1,da])
+    g a = a
 
 handleTAG :: Iso (Tagged Selbri,[Sumti]) (Selbri,[(Atom,Tag)])
 handleTAG = handleTAGupdater . second tagger
@@ -285,9 +367,16 @@ filterState = Iso f g where
     f           = apply id
     g ((a,t),s) = Just ((a,t),getDefinitons [a] s)
 
+
 getDefinitons :: [Atom] -> [Atom] -> [Atom]
 getDefinitons ns ls = if ns == nns then links else getDefinitons nns ls
-    where links = filter ff ls
-          nodes = concatMap atomGetAllNodes links
-          nns   = nub $ ns ++ nodes
-          ff l = any (`atomElem` l) ns
+    where links = filter ff ls --Get all links that contain a node from ns
+          ff l = any (`atomElem` l) ns --Check if the link contains a node from ns
+          nodes = concatMap atomGetAllNodes links --Get all Nodes from the links
+          nns   = nub $ ns ++ nodes --Remove duplicates
+
+findSetType :: Atom -> [Atom] -> Maybe Atom
+findSetType a = fmap getType . F.find f
+    where f (Link "SetTypeLink" [s,t] _) = s == a
+          f _ = False
+          getType (Link "SetTypeLink" [s,t] _) = t

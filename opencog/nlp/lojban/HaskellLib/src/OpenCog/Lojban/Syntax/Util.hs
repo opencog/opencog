@@ -113,7 +113,6 @@ infixr 9 =.
           rf (((b,s1),(d,s2)),s3) = Just ((b,d),s1++s2++s3)
           rg ((b,d),s)            = Just (((b,s),(d,s)),s)
 
-
 infix 8 |^|
 
 (|^|) :: Iso gamma alpha -> Iso gamma beta -> Iso gamma (Either alpha beta)
@@ -265,7 +264,7 @@ withSeedState r = ReaderT (\e@(_,_,_,seed) ->
 
 ------------------------------------------------------------------------
 letter, digit :: Syntax delta => delta Char
-letter  =  subset (\x -> isLetter x || x=='\'') <$> token
+letter  =  subset (\x -> isLetter x || x=='\'' || x=='.') <$> token
 digit   =  subset isDigit <$> token
 
 anyWord :: Syntax delta => delta String
@@ -343,3 +342,4 @@ optSelmaho s = handle <$> optional (selmaho s)
     where handle = Iso f g where
             f _ = Just ()
             g () = Just Nothing
+

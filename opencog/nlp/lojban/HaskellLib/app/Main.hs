@@ -21,17 +21,17 @@ main = do
     (parser,printer) <- initParserPrinter "lojban.xml"
     mainloop parser printer
 
-camxesPath = "/home/roman/OpenCog/Lojban/ilmentufa"
+--camxesPath = "/home/roman/OpenCog/Lojban/ilmentufa"
 
 mainloop parser printer = do
     putStrLn "Please Input some Lojban to Translate"
     input <- getLine
 
-    let args = "run_camxes.js -std -m N \"" ++ input ++ "\""
+    {-let args = "run_camxes.js -std -m N \"" ++ input ++ "\""
     camxesres <-
         readCreateProcess (shell $ "node " ++ args){cwd = Just camxesPath
-                                                   ,std_out = CreatePipe} ""
-    putStrLn camxesres
+        ,std_out = CreatePipe} ""
+    putStrLn camxesres-}
 
     let res = parser input
 

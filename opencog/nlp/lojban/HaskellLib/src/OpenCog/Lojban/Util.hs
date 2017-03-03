@@ -34,11 +34,13 @@ pattern VN name <-Node "VariableNode" name _
 
 pattern AL l <- Link "AndLink" l _
 pattern LL l <- Link "ListLink" l _
+pattern NL l <- Link "NotLink" l _
 pattern ImpL l tv <- Link "ImplicationLink" l tv
 pattern InhL l tv <- Link "InheritanceLink" l tv
 pattern SL l <- Link "SetLink" l _
 pattern SSL l <- Link "SatisfyingSetLink" [l] _
-pattern EvalL p a <- Link "EvaluationLink" [p,a] _
+pattern EvalL tv p a <- Link "EvaluationLink" [p,a] tv
+pattern ExL tv p a <- Link "ExistsLink" [p,a] tv
 pattern CtxL c a <- Link "ContextLink" [c,a] _
 pattern SimL a b <- Link "SimilarityLink" [a,b] _
 pattern SubL a b <- Link "SubSetLink" [a,b] _
@@ -86,7 +88,11 @@ mkCtxPre pred atom = Link "EquivalenceLink"
 
 pattern CtxPred atom <- Link "EquivalenceLink"
                                 [ _
-                                , LambdaL _ (CtxL _ (atom))
+                                , Link "LambdaLink" [ _
+                                                    ,Link "ContextLink" [ _
+                                                                        , atom
+                                                                        ] _
+                                                    ] _
                                 ] _
 
 
@@ -112,7 +118,16 @@ mkPropPre pred atom name = Link "EquivalenceLink"
 
 pattern PropPred atom <- Link "EquivalenceLink"
                                 [_
-                                , LambdaL _ (AL [_,EvalL _ (LL [_,atom])])
+                                , Link "LambdaLink"
+                                    [ _
+                                    , Link "AndLink"
+                                        [_
+                                        , Link "EvaluationLink"
+                                            [ _
+                                            , Link "ListLink" [_,atom] _
+                                            ] _
+                                        ] _
+                                    ] _
                                 ] _
 
 isInteger s = case reads s :: [(Integer, String)] of
