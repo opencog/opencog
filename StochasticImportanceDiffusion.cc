@@ -116,10 +116,11 @@ float StochasticDiffusionAmountCalculator::elapsed_time(const Handle& h)
     auto it = std::find_if(_bins.begin(), _bins.end(),
             [index](const DiffusionRecordBin& b){ return (b.index == index); });
 
-    update_bin(h); // Update DiffusionRecordBin.
     if (it != _bins.end())
         average_elapsed_time = (*it).size / (*it).update_rate;
 
+    update_bin(h); // Update DiffusionRecordBin.
+    
     return average_elapsed_time;
 }
 
