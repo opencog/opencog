@@ -33,6 +33,8 @@
 #include <cpprest/http_listener.h>
 
 #define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Pattern.h"
@@ -69,7 +71,7 @@ struct _non_ordered_pattern
                 return true;
             else if (indexesOfSharedVars[i].size() > other.indexesOfSharedVars[i].size())
                 return false;
-            
+
             for (unsigned int j = 0; j < indexesOfSharedVars[i].size(); ++ j)
             {
                 if (indexesOfSharedVars[i][j]< other.indexesOfSharedVars[i][j])

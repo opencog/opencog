@@ -1,6 +1,8 @@
 #include <limits.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
 #include <opencog/spatial/math/Quaternion.h>

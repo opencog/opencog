@@ -29,6 +29,8 @@
 #include <opencog/attention/atom_types.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomutils/Neighbors.h>

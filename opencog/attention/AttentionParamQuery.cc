@@ -1,6 +1,7 @@
 
 #include "AttentionParamQuery.h"
 
+#include <opencog/atoms/base/Link.h>
 #include <opencog/util/Config.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -106,6 +107,3 @@ void AttentionParamQuery::load_default_values(void)
      SchemeEval scm(_as);
      scm.eval("(load \"" DATADIR "/scm/attention/default-param-values.scm\")");
 }
-
-
-

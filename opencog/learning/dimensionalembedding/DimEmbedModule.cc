@@ -30,6 +30,8 @@
 
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/exceptions.h>
@@ -65,7 +67,7 @@ DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
 DimEmbedModule::~DimEmbedModule()
 {
     logger().info("[DimEmbedModule] destructor");
-    addedAtomConnection.disconnect();   
+    addedAtomConnection.disconnect();
     removedAtomConnection.disconnect();
     tvChangedConnection.disconnect();
 }

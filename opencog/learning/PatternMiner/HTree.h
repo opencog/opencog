@@ -28,6 +28,7 @@
 #include <vector>
 
 #define DEPRECATED_ATOMSPACE_CALLS
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "Pattern.h"
