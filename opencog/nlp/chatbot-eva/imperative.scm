@@ -60,7 +60,8 @@
 					(EvaluationLink
 						(Type "DefinedPredicateNode")
 						(TypeChoice
-						   (Type "ListLink") (Type "SetLink")))))
+						   (Type "ListLink") (Type "SetLink")
+						   (Type "ConceptNode")))))
 		)
 		(AndLink
 			(ListLink current-action (Variable "$action"))
