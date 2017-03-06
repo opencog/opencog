@@ -168,9 +168,7 @@
 		(SequentialOr
 			(SequentialAnd
 				(Equal (Variable "$object-id") (Concept "salient-point"))
-				(Evaluation
-					(DefinedPredicate "look at salient point")
-					(ListLink (Variable "$object-id"))))
+				(DefinedPredicate "look at salient point"))
 			(Evaluation
 				(DefinedPredicate "Set interaction target")
 				(ListLink (Variable "$object-id")))
