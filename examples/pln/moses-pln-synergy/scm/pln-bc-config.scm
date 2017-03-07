@@ -93,10 +93,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 100000)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 300000)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
 
 ;; Complexity penalty
 (ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)
+
+;; BIT reduction parameters
+(ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 20000)
