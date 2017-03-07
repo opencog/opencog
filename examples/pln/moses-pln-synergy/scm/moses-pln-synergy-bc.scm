@@ -326,5 +326,15 @@
 )
 (pln-bc target-9)
 
+;; ;; Target (10) TODO: need to implement full conditional instantiation meta rule 
+;; (define target-10
+;;   (ImplicationLink
+;;      (PredicateNode "is-well-hydrated")
+;;      (PredicateNode "recovery-speed-of-injury-alpha")
+;;   )
+;; )
+;; (pln-bc target-10)
+
+
 ;; Final target
 ;; (pln-bc moses-model)
