@@ -83,6 +83,8 @@ class ThreadSafeFixedIntegerIndex : public FixedIntegerIndex
             return FixedIntegerIndex::size(i);
         }
 
+        Handle getRandomAtom(void);
+        
         size_t size() const;
 
         template <typename OutputIterator> OutputIterator

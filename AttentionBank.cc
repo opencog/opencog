@@ -27,13 +27,9 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/util/mt19937ar.h>
 #include "AttentionBank.h"
 
-#include <chrono>
-
 using namespace opencog;
-using namespace std::chrono;
 
 AttentionBank::AttentionBank(AtomSpace* asp) :
     _importanceIndex(*this)
@@ -351,32 +347,6 @@ AttentionBank& opencog::attentionbank(AtomSpace* asp)
 
 Handle AttentionBank::getRandomAtom()
 {
-    auto seed = duration_cast< microseconds >(
-            system_clock::now().time_since_epoch());
-    MT19937RandGen rng(seed.count());
-    size_t  bins = _importanceIndex.bin_size();
-    bool empty = true;
-    for(size_t i=0; i< bins; i++){
-        if(_importanceIndex.size(i) > 0 ){
-            empty = false;
-            break;
-        }
-    }
-    
-    if(empty)
-        return Handle::UNDEFINED;
-
-    size_t bin = 0;
-    do
-        bin = rng.randint(bins-1);  
-    while(_importanceIndex.size(bin) <= 0);
-
-    std::vector<Atom*> bin_content;
-    _importanceIndex.getContent(bin, std::back_inserter(bin_content));
-    
-    size_t idx = rng.randint(bin_content.size()-1); 
-    Atom * atom = bin_content[idx];
-
-    return atom->getHandle();
+   return _importanceIndex.getRandomAtom();
 }
 

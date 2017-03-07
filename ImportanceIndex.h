@@ -83,6 +83,11 @@ public:
             return _index.getContent(i,out);
     }
 
+    Handle getRandomAtom(void)
+    {
+        return _index.getRandomAtom();
+    }
+
     /**
      * Get the highest bin which contains Atoms
      */

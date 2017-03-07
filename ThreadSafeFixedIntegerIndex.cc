@@ -18,10 +18,13 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <chrono>
 
 #include <opencog/attentionbank/ThreadSafeFixedIntegerIndex.h>
+#include <opencog/util/mt19937ar.h>
 
 using namespace opencog;
+using namespace std::chrono;
 
 size_t ThreadSafeFixedIntegerIndex::size() const
 {
@@ -31,4 +34,39 @@ size_t ThreadSafeFixedIntegerIndex::size() const
     return cnt;
 }
 
+Handle ThreadSafeFixedIntegerIndex::getRandomAtom(void)
+{
+    auto seed = duration_cast< microseconds >(
+            system_clock::now().time_since_epoch());
+    MT19937RandGen rng(seed.count());
+    size_t  bins = bin_size();
+    bool empty = true;
+    for(size_t i=0; i< bins; i++){
+        if(size(i) > 0 ){
+            empty = false;
+            break;
+        }
+    }
+
+    if(empty)
+        return Handle::UNDEFINED;
+
+    size_t bin = 0, attempts = 0;
+    do{
+        bin = rng.randint(bins-1);  
+        attempts++;
+    }while(size(bin) <= 0 or attempts < bins);//Just making sure it won't loop forever.
+
+    std::vector<Atom*> bin_content;
+    std::lock_guard<std::mutex> lck(*_locks[bin]);
+    const AtomSet &s(idx.at(bin));
+    //In between selecting a bin and locking on the bin, the bin could be
+    //modified and thus might be empty due to changes made in another thread.
+    if(not s.size()) return Handle::UNDEFINED; //TODO instead try to find a non empty bin. 
+    size_t idx = rng.randint(bin_content.size()-1); 
+    auto it = s.begin();
+    std::advance(it,idx);
+    Atom* atom = *it;
+    return atom->getHandle();
+}
 // ================================================================
