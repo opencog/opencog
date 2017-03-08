@@ -524,7 +524,7 @@
     ;
     ; Remark that SuReal Cache is not thread-safe. So it is not supposed to be used
     ; if the sureal queries are split into several threads. If you plan to do
-    ; this (split sureal requests amongst multiple threads), just comment the
+    ; this (split sureal requests among multiple threads), just comment the
     ; call to reset-sureal-cache above and change the line below to call 'sureal'
     ; instead of 'cached-sureal'
 	(define say-able (not (null? (cached-sureal temp-set-link))))
