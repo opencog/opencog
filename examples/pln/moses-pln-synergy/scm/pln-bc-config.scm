@@ -50,10 +50,10 @@
 (add-to-load-path "../../../opencog/pln/rules/")
 
 (define rule-filenames
-  (list "implication-instantiation-rule.scm"
-        "implication-scope-distribution-rule.scm"
+  (list "conditional-partial-instantiation-meta-rule.scm"
+        "implication-scope-to-implication-rule.scm"
         "and-lambda-distribution-rule.scm"
-        "lambda-grounded-construction-rule.scm"
+        "lambda-closed-construction-rule.scm"
         "implication-construction-rule.scm"
         "implication-implicant-distribution-rule.scm"
         "implication-and-lambda-factorization-rule.scm"
@@ -70,17 +70,18 @@
 
 ; List the rules and their weights.
 (define rules
-  (list (list implication-partial-instantiation-rule-name 1)
-        (list implication-scope-distribution-rule-name 1)
-        (list and-lambda-distribution-rule-name 1)
-        (list lambda-grounded-construction-rule-name 1)
+  (list
+        (list conditional-partial-instantiation-meta-rule-name 1)
+        (list implication-scope-to-implication-rule-name 1)
+        ;; (list and-lambda-distribution-rule-name 1)
+        (list lambda-closed-construction-rule-name 1)
         (list implication-construction-rule-name 1)
         (list implication-implicant-distribution-rule-name 1)
         (list implication-and-lambda-factorization-rule-name 1)
         (list deduction-implication-rule-name 1)
-        (list implication-full-instantiation-rule-name 1)
-        (list equivalence-to-implication-rule-name 1)
-        (list implication-implicant-disjunction-rule-name 1)
+        ;; (list implication-full-instantiation-rule-name 1)
+        ;; (list equivalence-to-implication-rule-name 1)
+        ;; (list implication-implicant-disjunction-rule-name 1)
         )
   )
 
@@ -92,7 +93,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 10)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 300000)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
+
+;; Complexity penalty
+(ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)
+
+;; BIT reduction parameters
+(ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 20000)

@@ -25,7 +25,7 @@
 ;; junctor (AndLink or OrLink). For instance if junc is AndLink and N
 ;; is 2 it will generate
 ;;
-;; EquivalenceLink <1 1>
+;; EquivalenceScopeLink <1 1>
 ;;    VariableList
 ;;       TypedVariableLink
 ;;          VariableNode "$TyVs"
@@ -35,18 +35,20 @@
 ;;             TypeNode "VariableList"
 ;;       VariableNode "$Body-0"
 ;;       VariableNode "$Body-1"
-;;    LambdaLink
-;;       VariableNode "$TyVs"
-;;       AndLink
+;;    QuoteLink LambdaLink
+;;       UnquoteLink VariableNode "$TyVs"
+;;       UnquoteLink AndLink
 ;;          VariableNode "$Body-0"
 ;;          VariableNode "$Body-1"
 ;;    AndLink
-;;       LambdaLink
-;;          VariableNode "$TyVs"
-;;          VariableNode "$Body-0"
-;;       LambdaLink
-;;          VariableNode "$TyVs"
-;;          VariableNode "$Body-1"
+;;       QuoteLink LambdaLink
+;;          UnquoteLink VariableNode "$TyVs"
+;;          UnquoteLink VariableNode "$Body-0"
+;;       QuoteLink LambdaLink
+;;          UnquoteLink VariableNode "$TyVs"
+;;          UnquoteLink VariableNode "$Body-1"
+;;
+;; TODO: add quotations
 (define (gen-junc-lambda-distribution-fact junc N)
   (let* (
          ;; Build equivalence variables

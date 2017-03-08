@@ -149,7 +149,7 @@ scheme@(guile-user)> (for-each (lambda (i) (cog-bind implication-partial-instant
 scheme@(guile-user)> (cog-prt-atomspace)
 And search for the following
 ...
-   (ImplicationLink (stv 1 1)
+   (ImplicationScopeLink (stv 1 1)
       (TypedVariableLink
          (VariableNode "$X")
          (TypeNode "ConceptNode")
@@ -181,7 +181,7 @@ And search for the following
 ...
 ```
 
-##### (2) - Distribute the lambda in the implicant and implicand of (1)
+##### (2) - Convert the implication scope of (1) into an implication
 
 Semi-formally
 ```
@@ -190,7 +190,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind implication-scope-distribution-rule)
+scheme@(guile-user)> (cog-bind implication-scope-to-implication-rule)
 ...
    (ImplicationLink (stv 1 1)
       (LambdaLink
@@ -281,7 +281,7 @@ Semi-formally
 ```
 
 ```scheme
-scheme@(guile-user)> (cog-bind lambda-grounded-construction-rule)
+scheme@(guile-user)> (cog-bind lambda-closed-construction-rule)
 $5 = (SetLink
    (LambdaLink (stv 1 1)
       (TypedVariableLink
@@ -514,7 +514,7 @@ scheme@(guile-user)> (cog-bind deduction-implication-rule)
 ...
 ```
 
-##### (9) - Using (2) and (8) deduce that if X takes treatment-1 then X takes compound-A
+##### (9) - Using (8) and (2) deduce that if X takes treatment-1 then X takes compound-A
 
 Semi-formally
 
