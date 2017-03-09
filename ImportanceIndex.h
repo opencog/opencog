@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_IMPORTANCEINDEX_H
 #define _OPENCOG_IMPORTANCEINDEX_H
 
+#include <mutex>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/attentionbank/ThreadSafeFixedIntegerIndex.h>
 
@@ -43,6 +44,7 @@ private:
     AttentionBank& _bank;
     ThreadSafeFixedIntegerIndex _index;
     HandleSeq topKSTIValuedHandles; // TOP K STI values
+    std::mutex topKSTIUpdateMutex;
     int minAFSize;
 
     void updateTopStiValues(Atom* atom);

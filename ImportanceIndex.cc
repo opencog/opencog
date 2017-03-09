@@ -86,7 +86,6 @@ void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
 
     _index.remove(oldbin, atom);
     _index.insert(newbin, atom);
-    
     updateTopStiValues(atom);
 }
 
@@ -94,6 +93,7 @@ void ImportanceIndex::removeAtom(Atom* atom, int bin)
 {
     _index.remove(bin, atom);
     
+    std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
     // Also remove from topKSTIValueHandles vector
     auto it = std::find(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end()
                        , atom->getHandle());
@@ -103,6 +103,7 @@ void ImportanceIndex::removeAtom(Atom* atom, int bin)
 
 void ImportanceIndex::updateTopStiValues(Atom* atom)
 {
+    std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
     AttentionValue::sti_t sti = _bank.get_av(atom->getHandle())->getSTI();
     auto insertHandle = [this](Handle h){
         auto it = std::lower_bound(topKSTIValuedHandles.begin(),
@@ -206,6 +207,7 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
 
 HandleSeq ImportanceIndex::getTopSTIValuedHandles()
 {
+    std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
     return  topKSTIValuedHandles;
 }
 
