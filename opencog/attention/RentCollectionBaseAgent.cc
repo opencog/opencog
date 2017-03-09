@@ -45,12 +45,25 @@ RentCollectionBaseAgent::RentCollectionBaseAgent(CogServer& cs) :
     Agent(cs), _atq(&cs.getAtomSpace())
 {
     _bank = &attentionbank(_as);
-
+    load_params();
     // Provide a logger
     setLogger(new opencog::Logger("RentCollectionAgent.log", Logger::FINE, true));
 }
 
 void RentCollectionBaseAgent::run()
+{
+    load_params();
+    HandleSeq targetSet;
+    selectTargets(targetSet);
+
+    if (targetSet.size() == 0) return;
+
+    collectRent(targetSet);
+   
+    std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
+}
+
+void RentCollectionBaseAgent::load_params(void)
 {
     // init starting wages/rents. these should quickly change and reach
     // stable values, which adapt to the system dynamics
@@ -60,15 +73,6 @@ void RentCollectionBaseAgent::run()
     stiFundsBuffer = std::stoi(_atq.get_param_value(AttentionParamQuery::rent_sti_funds_buffer));
     targetLTI = std::stoi(_atq.get_param_value(AttentionParamQuery::rent_target_lti_funds));
     ltiFundsBuffer = std::stoi(_atq.get_param_value(AttentionParamQuery::rent_lti_funds_buffer));
-
-    HandleSeq targetSet;
-    selectTargets(targetSet);
-
-    if (targetSet.size() == 0) return;
-
-    collectRent(targetSet);
-   
-    std::this_thread::sleep_for(std::chrono::milliseconds(get_sleep_time()));
 }
 
 int RentCollectionBaseAgent::calculate_STI_Rent()
