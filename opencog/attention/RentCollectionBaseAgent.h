@@ -68,6 +68,8 @@ protected:
     AttentionValue::sti_t stiFundsBuffer;
     AttentionValue::lti_t ltiFundsBuffer;
 
+    void load_params(void);
+
 public:
     RentCollectionBaseAgent(CogServer& cs);
 

@@ -39,37 +39,7 @@ DECLARE_MODULE(AttentionModule)
 AttentionModule::AttentionModule(CogServer& cs) :
     Module(cs)
 {
-    // New Thread based ECAN agents.
-    _cogserver.registerAgent(AFImportanceDiffusionAgent::info().id, &afImportanceFactory);
-    _cogserver.registerAgent(WAImportanceDiffusionAgent::info().id, &waImportanceFactory);
-
-    _cogserver.registerAgent(AFRentCollectionAgent::info().id, &afRentFactory);
-    _cogserver.registerAgent(WARentCollectionAgent::info().id, &waRentFactory);
-
-    _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
-    _cogserver.registerAgent(HebbianCreationAgent::info().id,&hebbianCreationFactory);
-    _cogserver.registerAgent(FocusBoundaryUpdatingAgent::info().id,&focusUpdatingFactory);
-    _cogserver.registerAgent(HebbianUpdatingAgent::info().id,&hebbianUpdatingFactory);
-
-    _forgetting_agentptr =
-        _cogserver.createAgent(ForgettingAgent::info().id, false);
-    _hebbiancreation_agentptr =
-        _cogserver.createAgent(HebbianCreationAgent::info().id,false);
-    _focusupdating_agentptr =
-        _cogserver.createAgent(FocusBoundaryUpdatingAgent::info().id,false);
-    _hebbianupdating_agentptr =
-        _cogserver.createAgent(HebbianUpdatingAgent::info().id,false);
-
-    _afImportanceAgentPtr = _cogserver.createAgent(AFImportanceDiffusionAgent::info().id,false);
-    _waImportanceAgentPtr = _cogserver.createAgent(WAImportanceDiffusionAgent::info().id,false);
-
-    _afRentAgentPtr = _cogserver.createAgent(AFRentCollectionAgent::info().id, false);
-    _waRentAgentPtr = _cogserver.createAgent(WARentCollectionAgent::info().id, false);
-
-
-    addAFConnection = _cogserver.getAttentionBank().AddAFSignal().connect(
-                       boost::bind(&AttentionModule::addAFSignalHandler,
-                                   this, _1, _2, _3));
+    init();
     do_start_ecan_register();
     do_list_ecan_param_register();
     do_set_ecan_param_register();
@@ -100,6 +70,37 @@ void AttentionModule::init()
 {
     AttentionParamQuery _atq(&_cogserver.getAtomSpace());
     _atq.load_default_values(); // Load default ECAN param values into AS
+    // New Thread based ECAN agents.
+    _cogserver.registerAgent(AFImportanceDiffusionAgent::info().id, &afImportanceFactory);
+    _cogserver.registerAgent(WAImportanceDiffusionAgent::info().id, &waImportanceFactory);
+
+    _cogserver.registerAgent(AFRentCollectionAgent::info().id, &afRentFactory);
+    _cogserver.registerAgent(WARentCollectionAgent::info().id, &waRentFactory);
+
+    _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
+    _cogserver.registerAgent(HebbianCreationAgent::info().id,&hebbianCreationFactory);
+    _cogserver.registerAgent(FocusBoundaryUpdatingAgent::info().id,&focusUpdatingFactory);
+    _cogserver.registerAgent(HebbianUpdatingAgent::info().id,&hebbianUpdatingFactory);
+
+    _forgetting_agentptr =
+        _cogserver.createAgent(ForgettingAgent::info().id, false);
+    _hebbiancreation_agentptr =
+        _cogserver.createAgent(HebbianCreationAgent::info().id,false);
+    _focusupdating_agentptr =
+        _cogserver.createAgent(FocusBoundaryUpdatingAgent::info().id,false);
+    _hebbianupdating_agentptr =
+        _cogserver.createAgent(HebbianUpdatingAgent::info().id,false);
+
+    _afImportanceAgentPtr = _cogserver.createAgent(AFImportanceDiffusionAgent::info().id,false);
+    _waImportanceAgentPtr = _cogserver.createAgent(WAImportanceDiffusionAgent::info().id,false);
+
+    _afRentAgentPtr = _cogserver.createAgent(AFRentCollectionAgent::info().id, false);
+    _waRentAgentPtr = _cogserver.createAgent(WARentCollectionAgent::info().id, false);
+
+
+    addAFConnection = _cogserver.getAttentionBank().AddAFSignal().connect(
+            boost::bind(&AttentionModule::addAFSignalHandler,
+                this, _1, _2, _3));
 }
 
 std::string AttentionModule::do_start_ecan(Request *req, std::list<std::string> args)
