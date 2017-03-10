@@ -442,19 +442,15 @@ gismuP = implicationOf .< predicate <$> withSeed gismu
 
 
 tanru :: SyntaxReader (State Atom)
-tanru = foldl (second (cons . first _iil) . reorder . mergeState)
-          . (inverse cons) <$> many1 gismuP
-  where reorder = Iso (Just . f) (Just . g)
+tanru = foldl handleTanru
+          . (inverse cons) -- Excracts first: (State Atom, [State Atom])
+          <$> many1 gismuP -- Parses > 1 gismu
+  where handleTanru = second (cons . first _iil) -- creates IIL and adds to State
+          . reorder -- sets base gismu and a pair for _iil
+          . mergeState -- merge gismu states
+        reorder = Iso (Just . f) (Just . g)
         f ((g,t),s) = (t,((t,g),s))
         g (t,((_,g),s)) = ((g,t),s)
-{-handleTanru <$> gismuP
-                    <&> optState tanru
-    where handleTanru = (second (cons . first _iil) ||| id ) . reorder
-          reorder = Iso (Just . f) (Just . g)
-          f ((g,Just t),s)  = Left (t,((t,g),s))
-          f ((g,Nothing),s) = Right (g,s)
-          g (Left (t,((_,g),s)))  = ((g,Just t),s)
-          g (Right (g,s))         = ((g,Nothing),s) -}
 
 
 --meP :: SyntaxReader (State Atom)
