@@ -70,7 +70,7 @@ public:
 	void test_implication_full_instantiation();
 	void test_implication_full_instantiation_extra_variables();
 	void test_implication_partial_instantiation();
-	void test_implication_scope_distribution();
+	void test_implication_scope_to_implication();
 	void test_and_lambda_distribution();
 	void test_implication_implicant_distribution();
 	void test_implication_construction();
