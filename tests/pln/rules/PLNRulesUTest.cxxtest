@@ -107,7 +107,11 @@ void PLNRulesUTest::load_scm_files(std::vector<std::string> files)
 {
 	std::string hd("(load-from-path \"");
 	std::string tl("\")");
-	for (auto f: files) eval.eval(hd + f + tl);
+	for (auto f: files) {
+		string result = eval.eval(hd + f + tl);
+		logger().debug() << "[PLNRulesUTest] Loaded \"" << f << "\":"
+		                 << std::endl << result;
+	}
 }
 
 #define getarity(hand) LinkCast(hand)->getArity()
