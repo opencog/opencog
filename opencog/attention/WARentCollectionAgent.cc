@@ -43,6 +43,8 @@ WARentCollectionAgent::WARentCollectionAgent(CogServer& cs):
                        RentCollectionBaseAgent(cs), _sdac(&cs.getAtomSpace())
 {
     // READ SLEEPING TIME HERE
+    _sti_rent = STIAtomRent;
+    _lti_rent = LTIAtomRent;
     set_sleep_time(2000);
 }
 
