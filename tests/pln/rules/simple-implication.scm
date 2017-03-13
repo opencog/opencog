@@ -55,6 +55,6 @@
 
 ;; This one is to test implicant distribution
 
-(ImplicationLink
+(ImplicationLink (stv 1 1)
    (PredicateNode "P")
    (PredicateNode "Q"))

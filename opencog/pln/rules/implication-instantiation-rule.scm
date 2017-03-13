@@ -80,7 +80,7 @@
 ;;
 ;;       Let s be the strength of the Implication TV. Let Ps be the
 ;;       strength of the TV of P[V->T], and Qs, the strength of the TV of
-;;       Q[V-T] to calculate. We define the formula as follows
+;;       Q[V->T] to calculate. We define the formula as follows
 ;;
 ;;       Q(a) = s*P(a)
 ;;

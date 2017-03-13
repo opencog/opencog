@@ -293,47 +293,47 @@
 ;; )
 ;; (pln-bc target-8)
 
-;; Target (9)
-(define target-9
-   (ImplicationLink
-      (LambdaLink
-         (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-         )
-         (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-               (VariableNode "$X")
-               (ConceptNode "treatment-1")
-            )
-         )
-      )
-      (LambdaLink
-         (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-         )
-         (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-               (VariableNode "$X")
-               (ConceptNode "compound-A")
-            )
-         )
-      )
-   )
-)
-(pln-bc target-9)
-
-;; ;; Target (10) TODO: need to implement full conditional instantiation meta rule 
-;; (define target-10
-;;   (ImplicationLink
-;;      (PredicateNode "is-well-hydrated")
-;;      (PredicateNode "recovery-speed-of-injury-alpha")
-;;   )
+;; ;; Target (9)
+;; (define target-9
+;;    (ImplicationLink
+;;       (LambdaLink
+;;          (TypedVariableLink
+;;             (VariableNode "$X")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;          (EvaluationLink
+;;             (PredicateNode "take")
+;;             (ListLink
+;;                (VariableNode "$X")
+;;                (ConceptNode "treatment-1")
+;;             )
+;;          )
+;;       )
+;;       (LambdaLink
+;;          (TypedVariableLink
+;;             (VariableNode "$X")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;          (EvaluationLink
+;;             (PredicateNode "take")
+;;             (ListLink
+;;                (VariableNode "$X")
+;;                (ConceptNode "compound-A")
+;;             )
+;;          )
+;;       )
+;;    )
 ;; )
-;; (pln-bc target-10)
+;; (pln-bc target-9)
+
+;; Target (10)
+(define target-10
+  (ImplicationLink
+     (PredicateNode "is-well-hydrated")
+     (PredicateNode "recovery-speed-of-injury-alpha")
+  )
+)
+(pln-bc target-10)
 
 
 ;; Final target
