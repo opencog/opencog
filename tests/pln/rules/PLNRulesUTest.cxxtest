@@ -79,6 +79,7 @@ public:
 	void test_implication_and_lambda_factorization();
 	void test_implication_implicant_conjunction();
 	void test_implication_direct_evaluation();
+	void test_conditional_full_instantiation_meta_rule();
 };
 
 void PLNRulesUTest::tearDown()
@@ -788,6 +789,31 @@ void PLNRulesUTest::test_implication_direct_evaluation()
 		 "   (ImplicationLink"
 		 "      (PredicateNode \"Q\")"
 		 "      (PredicateNode \"P\")))");
+
+	std::cout << "results = " << results->toString();
+	std::cout << "expected = " << expected->toString();
+
+	TS_ASSERT_EQUALS(results, expected);
+}
+
+/**
+ * test implication-direct-evaluation-rule defined in:
+ * opencog/pln/rules/implication-direct-evaluation-rule.scm
+ */
+void PLNRulesUTest::test_conditional_full_instantiation_meta_rule()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as.clear();
+
+	load_scm_files({"tests/pln/rules/simple-implication-scope.scm",
+	                "opencog/pln/meta-rules/conditional-full-instantiation-meta-rule.scm"});
+
+	// Apply the rule
+	Handle rule = eval.eval_h("conditional-full-instantiation-meta-rule");
+	Handle results = bindlink(&as, rule);
+	Handle expected = eval.eval_h
+		("(SetLink)");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected = " << expected->toString();
