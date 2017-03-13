@@ -651,7 +651,9 @@ void PLNRulesUTest::test_lambda_closed_construction()
 
 	// Rather than enumerating all possible construction we just make
 	// sure the one that matters is in there.
-	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
+	std::set<Handle> sss;
+	for (auto h : results->getOutgoingSet()) sss.insert(h);
+	TS_ASSERT(is_in(expected, sss));
 }
 
 /**
