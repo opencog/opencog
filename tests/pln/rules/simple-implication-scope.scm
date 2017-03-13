@@ -1,4 +1,4 @@
-(ImplicationScope
+(ImplicationScope (stv 1 1)
   (TypedVariable
     (Variable "$X")
     (Type "ConceptNode"))

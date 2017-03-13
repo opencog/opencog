@@ -27,6 +27,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/util/Logger.h>
+#include <opencog/util/algorithm.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <cxxtest/TestSuite.h>
 #include <string>
@@ -639,17 +640,18 @@ void PLNRulesUTest::test_lambda_closed_construction()
 	Handle rule = eval.eval_h("lambda-closed-construction-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
-		("(SetLink"
-		 "   (LambdaLink"
-		 "      (VariableNode \"$X\")"
-		 "      (EvaluationLink"
-		 "         (PredicateNode \"P\")"
-		 "         (ConceptNode \"A\"))))");
+		("(LambdaLink"
+		 "   (VariableNode \"$X\")"
+		 "   (EvaluationLink"
+		 "      (PredicateNode \"P\")"
+		 "      (ConceptNode \"A\")))");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected = " << expected->toString();
 
-	TS_ASSERT_EQUALS(results, expected);
+	// Rather than enumerating all possible construction we just make
+	// sure the one that matters is in there.
+	TS_ASSERT(is_in(expected, results->getOutgoingSet()));
 }
 
 /**
@@ -708,34 +710,38 @@ void PLNRulesUTest::test_implication_and_lambda_factorization()
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
 		("(SetLink"
-		 "   (ImplicationLink"
-		 "      (AndLink"
-		 "         (LambdaLink"
-		 "            (VariableNode \"$X\")"
-		 "            (AndLink"
-		 "               (EvaluationLink"
-		 "                  (PredicateNode \"P\")"
-		 "                  (VariableNode \"$X\"))"
-		 "               (EvaluationLink"
-		 "                  (PredicateNode \"Q\")"
-		 "                  (VariableNode \"$X\"))))"
-		 "         (LambdaLink"
-		 "            (VariableNode \"$X\")"
-		 "            (EvaluationLink"
-		 "               (PredicateNode \"P\")"
-		 "               (ConceptNode \"A\"))))"
+		 "  (ImplicationLink"
+		 "    (AndLink"
 		 "      (LambdaLink"
-		 "         (VariableNode \"$X\")"
-		 "         (AndLink"
-		 "            (EvaluationLink"
-		 "               (PredicateNode \"P\")"
-		 "               (ConceptNode \"A\"))"
-		 "            (EvaluationLink"
-		 "               (PredicateNode \"P\")"
-		 "               (VariableNode \"$X\"))"
-		 "            (EvaluationLink"
-		 "               (PredicateNode \"Q\")"
-		 "               (VariableNode \"$X\"))))))");
+		 "        (VariableNode \"$X\")"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"Q\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "      )"
+		 "      (LambdaLink"
+		 "        (VariableNode \"$X\")"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"P\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "      )"
+		 "    )"
+		 "    (LambdaLink"
+		 "      (VariableNode \"$X\")"
+		 "      (AndLink"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"P\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"Q\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "      )"
+		 "    )"
+		 "  )"
+		 ")");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected = " << expected->toString();
@@ -817,7 +823,54 @@ void PLNRulesUTest::test_conditional_full_instantiation_meta_rule()
 	Handle rule = eval.eval_h("conditional-full-instantiation-meta-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
-		("(SetLink)");
+		("(SetLink"
+		 "  (BindLink"
+		 "    (TypedVariableLink"
+		 "      (VariableNode \"$X\")"
+		 "      (TypeNode \"ConceptNode\")"
+		 "    )"
+		 "    (AndLink"
+		 "      (EvaluationLink"
+		 "        (GroundedPredicateNode \"scm: gt-zero-confidence\")"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"P\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "      )"
+		 "      (EvaluationLink"
+		 "        (PredicateNode \"P\")"
+		 "        (VariableNode \"$X\")"
+		 "      )"
+		 "    )"
+		 "    (ExecutionOutputLink"
+		 "      (GroundedSchemaNode \"scm: conditional-full-instantiation-formula\")"
+		 "      (ListLink"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"Q\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "        (EvaluationLink"
+		 "          (PredicateNode \"P\")"
+		 "          (VariableNode \"$X\")"
+		 "        )"
+		 "        (ImplicationScopeLink"
+		 "          (TypedVariableLink"
+		 "            (VariableNode \"$X\")"
+		 "            (TypeNode \"ConceptNode\")"
+		 "          )"
+		 "          (EvaluationLink"
+		 "            (PredicateNode \"P\")"
+		 "            (VariableNode \"$X\")"
+		 "          )"
+		 "          (EvaluationLink"
+		 "            (PredicateNode \"Q\")"
+		 "            (VariableNode \"$X\")"
+		 "          )"
+		 "        )"
+		 "      )"
+		 "    )"
+		 "  )"
+		 ")");
 
 	std::cout << "results = " << results->toString();
 	std::cout << "expected = " << expected->toString();
