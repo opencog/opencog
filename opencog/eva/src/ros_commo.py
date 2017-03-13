@@ -461,7 +461,7 @@ class EvaControl():
 		print "**1\n"
 		try:
 			self.tf_listener.waitForTransform('camera', self.LOCATION_FRAME, \
-				rospy.Time(0), rospy.Duration(3.0))#world
+				rospy.Time(0), rospy.Duration(10.0))#world
 			print "***2\n"
 		except Exception:
 			print("No camera transforms!\n")
