@@ -51,6 +51,7 @@ namespace opencog {
     {
     private:
         ecan::StochasticDiffusionAmountCalculator _sdac;
+        unsigned int _sti_rent, _lti_rent;
 
     public:
         const ClassInfo& classinfo() const { return info(); }

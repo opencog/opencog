@@ -62,10 +62,11 @@ void FocusBoundaryUpdatingAgent::run()
 
         AttentionValue::sti_t afboundary = _bank->getAttentionalFocusBoundary();
         // Let there always be K top STI valued atoms in the AF.
-        if(_bank->getTopSTIValuedHandles().size() > 0)
+        HandleSeq hseq = _bank->getTopSTIValuedHandles();
+        if( hseq.size() > 0)
             //getTopSTIVlauedHandles function returns Handles in Increasing STI
             //order. 
-             afboundary = _bank->get_sti(_bank->getTopSTIValuedHandles()[0]);
+             afboundary = _bank->get_sti(hseq[0]);
        /*
         AttentionValue::sti_t maxsti = _bank->get_max_STI();
         AttentionValue::sti_t minsti = _bank->get_min_STI();

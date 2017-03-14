@@ -73,8 +73,8 @@ protected:
 public:
     RentCollectionBaseAgent(CogServer& cs);
 
-    int calculate_STI_Rent();
-    int calculate_LTI_Rent();
+    double calculate_STI_Rent();
+    double calculate_LTI_Rent();
 
     virtual void selectTargets(HandleSeq &targetSetOut) = 0;
     virtual void collectRent(HandleSeq& targetSet) = 0;
