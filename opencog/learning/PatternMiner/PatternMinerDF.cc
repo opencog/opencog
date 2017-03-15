@@ -80,7 +80,7 @@ void PatternMiner::growPatternsDepthFirstTask_old()
         readNextLinkLock.unlock();
 
         // if this link is listlink, ignore it
-        if (originalAtomSpace->get_type(cur_link) == opencog::LIST_LINK)
+        if (cur_link->getType() == opencog::LIST_LINK)
         {
             continue;
         }
@@ -89,8 +89,8 @@ void PatternMiner::growPatternsDepthFirstTask_old()
         HandleSeq outgoingLinks,outVariableNodes;
 
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
-        Handle newLink = observingAtomSpace->add_link(originalAtomSpace->get_type(cur_link), outgoingLinks);
-        newLink->merge(originalAtomSpace->get_TV(cur_link));
+        Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
+        newLink->merge(cur_link->getTruthValue());
 
         HandleSeq observedLinks;
         observedLinks.push_back(newLink);
@@ -161,7 +161,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         readNextLinkLock.unlock();
 
         // if this link is listlink, ignore it
-        if (originalAtomSpace->get_type(cur_link) == opencog::LIST_LINK)
+        if (cur_link->getType() == opencog::LIST_LINK)
         {
             continue;
         }
@@ -170,8 +170,8 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         HandleSeq outgoingLinks, outVariableNodes;
 
         swapOneLinkBetweenTwoAtomSpace(originalAtomSpace, observingAtomSpace, cur_link, outgoingLinks, outVariableNodes);
-        Handle newLink = observingAtomSpace->add_link(originalAtomSpace->get_type(cur_link), outgoingLinks);
-        newLink->merge(originalAtomSpace->get_TV(cur_link));
+        Handle newLink = observingAtomSpace->add_link(cur_link->getType(), outgoingLinks);
+        newLink->merge(cur_link->getTruthValue());
 
 
         // Extract all the possible patterns from this originalLink, and extend till the max_gram links, not duplicating the already existing patterns
@@ -404,7 +404,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         {
             HandleSeq outgoingLinks;
             generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
-            Handle rebindedLink = atomSpace->add_link(atomSpace->get_type(link), outgoingLinks);
+            Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
             rebindedLink->merge(TruthValue::TRUE_TV());
 
             pattern.push_back(rebindedLink);
@@ -613,11 +613,11 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 /*    // debug
     string lastGramLinksStr = "";
     for (Handle h : lastGramLinks)
-        lastGramLinksStr += _fromAtomSpace->atom_as_string(h);
+        lastGramLinksStr += h->toShortString();
 
     string inputLinksStr = "";
     for (Handle h : inputLinks)
-        inputLinksStr += _fromAtomSpace->atom_as_string(h);
+        inputLinksStr += h->toShortString();
 
         if ((inputLinksStr.find("man") != inputLinksStr.npos) && (inputLinksStr.find("soda drinker") != inputLinksStr.npos))
         {
@@ -746,7 +746,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     if (enable_filter_node_types_should_not_be_vars)
                     {
                         bool isIgnoredType = false;
-                        Type t = _fromAtomSpace->get_type(extendNode);
+                        Type t = extendNode->getType();
                         for (Type noType : node_types_should_not_be_vars)
                         {
                             if (t == noType)
@@ -782,7 +782,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                     {
                         Handle extendedHandle;
                         // if this atom is of igonred type, get its first ancestor that is not in the igonred types
-                        if (isIgnoredType (_fromAtomSpace->get_type(incomingHandle)) )
+                        if (isIgnoredType (incomingHandle->getType()) )
                         {
                             extendedHandle = getFirstNonIgnoredIncomingLink(_fromAtomSpace, incomingHandle);
                             if (extendedHandle == Handle::UNDEFINED)
@@ -792,7 +792,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                             extendedHandle = incomingHandle;
 
 
-                        string extendedHandleStr = _fromAtomSpace->atom_as_string(extendedHandle);
+                        string extendedHandleStr = extendedHandle->toShortString();
 
                         if (isInHandleSeq(extendedHandle, inputLinks))
                             continue;
@@ -872,7 +872,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
         if (enable_filter_node_types_should_not_be_vars)
         {
             bool isIgnoredType = false;
-            Type t = _fromAtomSpace->get_type(extendNode);
+            Type t = extendNode->getType();
             for (Type noType : node_types_should_not_be_vars)
             {
                 if (t == noType)
@@ -897,7 +897,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
         {
             Handle extendedHandle;
             // if this atom is of igonred type, get its first ancestor that is not in the igonred types
-            if (isIgnoredType (_fromAtomSpace->get_type(incomingHandle)) )
+            if (isIgnoredType (incomingHandle->getType()) )
             {
                 extendedHandle = getFirstNonIgnoredIncomingLink(_fromAtomSpace, incomingHandle);
                 if (extendedHandle == Handle::UNDEFINED)
@@ -907,7 +907,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance
                 extendedHandle = incomingHandle;
 
 
-            string extendedHandleStr = _fromAtomSpace->atom_as_string(extendedHandle);
+            string extendedHandleStr = extendedHandle->toShortString();
 
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
@@ -1140,7 +1140,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksDF(HandleSeq& inputLi
                 {
                     HandleSeq outgoingLinks;
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, _fromAtomSpace);
-                    Handle rebindedLink = atomSpace->add_link(atomSpace->get_type(link), outgoingLinks);
+                    Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
                     rebindedLink->merge(TruthValue::TRUE_TV());
 
                     pattern.push_back(rebindedLink);

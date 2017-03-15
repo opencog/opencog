@@ -633,7 +633,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 
     // for(Handle h : pattern)
     // {
-    //    patternToStr += _atomSpace->atom_as_string(h);
+    //    patternToStr += h->toShortString();
     //    patternToStr += "\n";
     // }
 
