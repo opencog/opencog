@@ -103,10 +103,6 @@
       meta-pattern
       meta-rewrite)))
 
-;; Return TrueTV iff A's confidence is greater than 0
-(define (gt-zero-confidence A)
-  (bool->tv (> (cog-stv-confidence A) 0)))
-
 (define (conditional-partial-instantiation-formula PImpl Impl)
   ;; For now merely put the TV of Impl on PImpl
   (cog-set-tv! PImpl (cog-tv Impl)))

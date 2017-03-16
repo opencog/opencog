@@ -85,10 +85,6 @@
       meta-pattern
       meta-rewrite)))
 
-;; Return TrueTV iff A's confidence is greater than 0
-(define (gt-zero-confidence A)
-  (bool->tv (> (cog-stv-confidence A) 0)))
-
 ;; The TV of Q is calculated as follows
 ;;
 ;;    Strength:
