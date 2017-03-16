@@ -36,11 +36,11 @@
                          (TypedVariable V VardeclT)
                          P Q))
          ;; Meta rule main clause
-         (implication (LocalQuote
+         (implication (Quote
                         (ImplicationScope
-                          V
-                          P
-                          Q)))
+                          (Unquote V)
+                          (Unquote P)
+                          (Unquote Q))))
          ;; Meta rule precondition
          (meta-precondition (Evaluation
                               (GroundedPredicate "scm: gt-zero-confidence")

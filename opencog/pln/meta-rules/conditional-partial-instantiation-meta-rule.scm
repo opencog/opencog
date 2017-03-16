@@ -53,14 +53,14 @@
                          TypedV1Type TypedV2Type TypedV3Type
                          P Q))
          ;; Meta rule main clause
-         (implication (LocalQuote
+         (implication (Quote
                         (ImplicationScope
-                          (VariableList
+                          (Unquote (VariableList
                             (TypedVariable V1 V1Type)
                             (TypedVariable V2 V2Type)
-                            (TypedVariable V3 V3Type))
-                          P
-                          Q)))
+                            (TypedVariable V3 V3Type)))
+                          (Unquote P)
+                          (Unquote Q))))
          ;; Meta rule precondition
          (meta-precondition (Evaluation
                               (GroundedPredicate "scm: gt-zero-confidence")
@@ -81,11 +81,12 @@
                             (Unquote
                               (List
                                 ;; Conclusion
-                                (LocalQuote
+                                (Quote
                                   (ImplicationScope
-                                    (TypedVariable V1 V1Type) ; only V1 remains
-                                    P
-                                    Q))
+                                    (Unquote
+                                      (TypedVariable V1 V1Type)) ; only V1 remains
+                                    (Unquote P)
+                                    (Unquote Q)))
                                 ;; Premise
                                 implication))))
          ;; Meta rule rewrite
