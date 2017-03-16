@@ -80,7 +80,7 @@
         (list implication-implicant-distribution-rule-name 1)
         (list implication-and-lambda-factorization-rule-name 1)
         (list deduction-implication-rule-name 1)
-        (list conditional-full-instantiation-meta-rule 1)
+        (list conditional-full-instantiation-meta-rule-name 1)
         ;; (list implication-full-instantiation-rule-name 1)
         ;; (list equivalence-to-implication-rule-name 1)
         ;; (list implication-implicant-disjunction-rule-name 1)
