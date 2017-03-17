@@ -44,6 +44,7 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --      GOhA
 --      vo'a rule see ../Lojban.hs
 --      make statments explicit
+--      add implicit mi in "lo nu jimpe gi'a drani"
 
 -- argslots
 -- Synonims for tenses and gismu
@@ -463,12 +464,13 @@ nuHandlers = [("nu"     ,handleNU)
              ,("du'u"   ,handleNU)
              ,("ka"     ,handleKA)]
 
+-- TODO: add random seed name once Roman finished ISO work
 handleNU :: Iso ((State Atom),String) (State Atom)
 handleNU = Iso f g where
-    f ((atom,as),name) = let pred = cPN name lowTv
-                             link = mkCtxPre pred atom
-                         in Just (pred,link:as)
-    g (PN name,CtxPred atom : as) = Just ((atom,as),name)
+    f (state,name) = let pred = cPN ("tmp_name: " ++ name) lowTv
+                         state' = mkNuLink pred state
+                     in Just (pred,state')
+    g (PN name,state) = Just (revNuLink state,name)
 
 handleKA :: Iso ((State Atom),String) (State Atom)
 handleKA = Iso (Just . f) (Just . g) where
