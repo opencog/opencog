@@ -1841,7 +1841,7 @@ unsigned int PatternMiner::getCountOfAConnectedPattern(string& connectedPatternK
         // Todo: need to decide if add this missing HtreeNode into H-Tree or not
 
         // cout << "Exception: can't find a subpattern: \n" << connectedPatternKey << std::endl;
-        if (run_as_central_server)
+        if (is_distributed)
         {
             uniqueKeyLock.unlock();
 
@@ -2249,29 +2249,25 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_or
     htree = new HTree();
     atomSpace = new AtomSpace( _originalAtomSpace);
 
-//    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+    //    unsigned int system_thread_num  = std::thread::hardware_concurrency();
 
-//    if (system_thread_num > 1)
-//        THREAD_NUM = system_thread_num - 1;
-//    else
-//        THREAD_NUM = 1;
+    //    if (system_thread_num > 1)
+    //        THREAD_NUM = system_thread_num - 1;
+    //    else
+    //        THREAD_NUM = 1;
 
-//     // use all the threads in this machine
-//     THREAD_NUM = system_thread_num;
+    //     // use all the threads in this machine
+    //     THREAD_NUM = system_thread_num;
 
     THREAD_NUM = 1;
 
-    run_as_distributed_worker = false;
-    run_as_central_server = false;
-
-
     threads = new thread[THREAD_NUM];
-
-    patternJsonArrays = new web::json::value[THREAD_NUM];
 
     int max_gram = config().get_int("Pattern_Max_Gram");
     MAX_GRAM = (unsigned int)max_gram;
     cur_gram = 0;
+
+    is_distributed = false;
 
     ignoredTypes[0] = LIST_LINK;
 

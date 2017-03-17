@@ -28,7 +28,7 @@
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/Module.h>
-#include <opencog/learning/PatternMiner/PatternMiner.h>
+#include <opencog/learning/PatternMiner/DistributedPatternMiner.h>
 
 using namespace opencog::PatternMining;
 
@@ -52,7 +52,7 @@ public:
     virtual void run();
 
 private:
-    PatternMiner* patternMiner;
+    DistributedPatternMiner* patternMiner;
 
 
 }; // class

@@ -47,8 +47,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
 
-#include "HTree.h"
-#include "PatternMiner.h"
+#include "DistributedPatternMiner.h"
 
 #include <cpprest/http_listener.h>
 #include <cpprest/http_msg.h>
@@ -72,8 +71,9 @@ bool compareHTreeNodeBySurprisingness_I(HTreeNode* node1, HTreeNode* node2);
 bool compareHTreeNodeBySurprisingness_II(HTreeNode* node1, HTreeNode* node2);
 
 
-void PatternMiner::launchCentralServer()
+void DistributedPatternMiner::launchCentralServer()
 {
+    run_as_distributed_worker = false;
     run_as_central_server = true;
 
     waitingForNewClients = false;
@@ -86,7 +86,7 @@ void PatternMiner::launchCentralServer()
 
     serverListener = new http_listener( utility::string_t("http://" + centralServerIP + ":" + centralServerPort +"/PatternMinerServer") );
 
-    serverListener->support(methods::POST, std::bind(&PatternMiner::handlePost, this,  std::placeholders::_1));
+    serverListener->support(methods::POST, std::bind(&DistributedPatternMiner::handlePost, this,  std::placeholders::_1));
 
     allWorkersStop = false;
 
@@ -153,7 +153,7 @@ void PatternMiner::launchCentralServer()
 
 }
 
-void PatternMiner::centralServerStartListening()
+void DistributedPatternMiner::centralServerStartListening()
 {
     try
     {
@@ -167,7 +167,7 @@ void PatternMiner::centralServerStartListening()
     }
 }
 
-void PatternMiner::centralServerStopListening()
+void DistributedPatternMiner::centralServerStopListening()
 {
     try
     {
@@ -181,7 +181,7 @@ void PatternMiner::centralServerStopListening()
     }
 }
 
-bool PatternMiner::checkIfAllWorkersStopWorking()
+bool DistributedPatternMiner::checkIfAllWorkersStopWorking()
 {
 
     if (allWorkers.size() == 0)
@@ -198,7 +198,7 @@ bool PatternMiner::checkIfAllWorkersStopWorking()
     return true;
 }
 
-void PatternMiner::handlePost(http_request request)
+void DistributedPatternMiner::handlePost(http_request request)
 {
     try
     {
@@ -236,7 +236,7 @@ void PatternMiner::handlePost(http_request request)
 }
 
 
-void PatternMiner::handleRegisterNewWorker(http_request request)
+void DistributedPatternMiner::handleRegisterNewWorker(http_request request)
 {
 
     try
@@ -268,7 +268,7 @@ void PatternMiner::handleRegisterNewWorker(http_request request)
 
 }
 
-void PatternMiner::handleReportWorkerStop(http_request request)
+void DistributedPatternMiner::handleReportWorkerStop(http_request request)
 {
     try
     {
@@ -307,7 +307,7 @@ void PatternMiner::handleReportWorkerStop(http_request request)
 
 //long startTime;
 //long endTime;
-void PatternMiner::handleFindNewPatterns(http_request request)
+void DistributedPatternMiner::handleFindNewPatterns(http_request request)
 {
 
 //    // check server load
@@ -364,7 +364,7 @@ void PatternMiner::handleFindNewPatterns(http_request request)
     patternQueueLock.unlock();
 }
 
-void PatternMiner::runParsePatternTaskThread()
+void DistributedPatternMiner::runParsePatternTaskThread()
 {
     static int tryToParsePatternNum = 0;
 
@@ -398,7 +398,7 @@ void PatternMiner::runParsePatternTaskThread()
     }
 }
 
-void PatternMiner::parseAPatternTask(json::value jval)
+void DistributedPatternMiner::parseAPatternTask(json::value jval)
 {
 
     try
@@ -564,7 +564,7 @@ void PatternMiner::parseAPatternTask(json::value jval)
 //(InheritanceLink )\n
 //    (VariableNode $var_1)\n
 //    (ConceptNode ugly)\n\n
-HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace *_atomSpace)
+HandleSeq DistributedPatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace *_atomSpace)
 {
 
     std::vector<std::string> strs;
@@ -643,7 +643,7 @@ HandleSeq PatternMiner::loadPatternIntoAtomSpaceFromString(string patternStr, At
 }
 
 // recursively function
-bool PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent)
+bool DistributedPatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent)
 {
     string line;
     string curIndent = parentIndent + LINE_INDENTATION;
@@ -710,7 +710,7 @@ bool PatternMiner::loadOutgoingsIntoAtomSpaceFromString(stringstream& outgoingSt
     return true;
 }
 
-void PatternMiner::centralServerEvaluateInterestingness()
+void DistributedPatternMiner::centralServerEvaluateInterestingness()
 {
     if (enable_Frequent_Pattern)
     {

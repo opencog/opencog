@@ -145,7 +145,6 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
     cout << "Start thread " << thread_index << " from " << start_index
          << " to (excluded) " << end_index << std::endl;
 
-    patternJsonArrays[thread_index] = json::value::array();
 
     float allLinkNumberfloat = ((float)(end_index - start_index));
     for(unsigned int t_cur_index = start_index; t_cur_index < end_index; ++t_cur_index)
@@ -178,9 +177,12 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         map<Handle,Handle> lastGramValueToVarMap;
         map<Handle,Handle> patternVarMap;
 
-        // vector<HTreeNode*> &allHTreeNodesCurTask is only used in distributed version
+        // allHTreeNodesCurTask is only used in distributed version;
         // is to store all the HTreeNode* mined in this current task, and release them after the task is finished.
         vector<HTreeNode*> allHTreeNodesCurTask;
+
+        // allNewMinedPatternInfo is only used in distributed version, to store all the new mined patterns in this task for sending to the server.
+        vector<MinedPatternInfo> allNewMinedPatternInfo;
 
 
         actualProcessedLinkLock.lock();
@@ -188,26 +190,10 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         actualProcessedLinkLock.unlock();
 
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
-                                                patternVarMap, false, allHTreeNodesCurTask, patternJsonArrays[thread_index]);
-
-        // release all the HTreeNodes created in this task if it's running as a distributed worker
-        if (run_as_distributed_worker)
-        {
-            // clean up the pattern atomspace, do not need to keep patterns in atomspace when run as a distributed worker
-            if (THREAD_NUM == 1)
-                atomSpace->clear(); // can only clear the atomspace when only 1 thread is used
-
-            for(unsigned int hNodeNum = 0; hNodeNum < allHTreeNodesCurTask.size(); hNodeNum ++)
-            {
-                delete (allHTreeNodesCurTask[hNodeNum]);
-            }
-        }
+                                                patternVarMap, false, allHTreeNodesCurTask, allNewMinedPatternInfo);
 
 
     }
-
-    if (patternJsonArrays[thread_index].size() > 0)
-        sendPatternsToCentralServer(patternJsonArrays[thread_index]);
 
     cout<< "\r100% completed in Thread " + toString(thread_index) + ".";
     std::cout.flush();
@@ -300,14 +286,9 @@ void PatternMiner::runPatternMinerDepthFirst()
 
 //    delete [] cur_DF_ExtractedLinks;
     delete [] threads;
-    delete [] patternJsonArrays;
 
     cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
     cout << "\nprocessedLinkNum = " << processedLinkNum << std::endl;
-
-    if (run_as_distributed_worker)
-        cout << "Totally "<< cur_worker_mined_pattern_num << " patterns found!\n";
-
 
 
 }
@@ -422,7 +403,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         HTreeNode* newHTreeNode = 0;
 
 
-        if (run_as_distributed_worker)
+        if (is_distributed)
         {
             newHTreeNode = new HTreeNode();
             returnHTreeNode = newHTreeNode;
@@ -532,10 +513,10 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 // when it's the first gram pattern: parentNode = 0, extendedNode = undefined, lastGramLinks is empty, lastGramValueToVarMap and lastGramPatternVarMap are empty
 // extendedNode is the value node in original AtomSpace
 // lastGramLinks is the original links the parentLink is extracted from
-// patternJsonArray is only used in distributed mode, to buffer the pattern jsons to send to server
+// allNewMinedPatternInfo is only used in distributed mode, to store all the new mined pattern info to send to server
 void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
                  HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
-                 bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask, json::value &patternJsonArray)
+                 bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo)
 {
 
     // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
@@ -686,24 +667,29 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             if (thisGramHTreeNode)
             {
 
-                if (run_as_distributed_worker)
+                if (is_distributed)
                 {
                     allHTreeNodesCurTask.push_back(thisGramHTreeNode);
-                    string curPatternKeyStr = unifiedPatternToKeyString(thisGramHTreeNode->pattern);
 
-                    string parentKeyStr = "";
+                    MinedPatternInfo pInfo;
+
+                    pInfo.curPatternKeyStr = unifiedPatternToKeyString(thisGramHTreeNode->pattern);
 
                     if (parentNode)
                     {
-                        parentKeyStr = unifiedPatternToKeyString(parentNode->pattern);
+                        pInfo.parentKeyString = unifiedPatternToKeyString(parentNode->pattern);
 
                     }
                     else
                     {
-                        parentKeyStr = "none";
+                        pInfo.parentKeyString = "none";
                     }
 
-                    addPatternsToJsonArrayBuf(curPatternKeyStr, parentKeyStr, extendedLinkIndex, patternJsonArray);
+                    pInfo.extendedLinkIndex = extendedLinkIndex;
+
+                    allNewMinedPatternInfo.push_back(pInfo);
+
+
                 }
                 else
                 {
@@ -807,7 +793,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
                         // extract patterns from these child
                         extendAPatternForOneMoreGramRecursively(extendedHandle,  _fromAtomSpace, extendNode, inputLinks, thisGramHTreeNode,
-                                                                valueToVarMap,patternVarMap,isNewExtendedFromVar, allHTreeNodesCurTask, patternJsonArray);
+                                                                valueToVarMap,patternVarMap,isNewExtendedFromVar, allHTreeNodesCurTask, allNewMinedPatternInfo);
                     }
 
                     nodeIndex ++;
