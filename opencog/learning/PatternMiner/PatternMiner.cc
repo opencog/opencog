@@ -41,12 +41,14 @@
 //#include <opencog/atoms/bind/BindLink.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
-#include <opencog/util/StringManipulator.h>
+#include <boost/algorithm/string.hpp>
 
 #include "PatternMiner.h"
 
 using namespace opencog::PatternMining;
 using namespace opencog;
+
+
 
 const string PatternMiner::ignoreKeyWords[] = {"this", "that","these","those","it","he", "him", "her", "she" };
 
@@ -2214,14 +2216,16 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
 {
     // "0,12|1,02|2,01|0,1,2"
 
-    vector<string> allCombinationsStrs = StringManipulator::split(componentsStr,"|");
+    vector<string> allCombinationsStrs;
+    boost::split(allCombinationsStrs, componentsStr, boost::is_any_of("|"));
 
     for (string oneCombinStr : allCombinationsStrs)
     {
         // "0,12"
         vector<vector<unsigned int>> oneCombin;
+        vector<string> allComponentStrs;
+        boost::split(allComponentStrs, oneCombinStr, boost::is_any_of(","));
 
-        vector<string> allComponentStrs = StringManipulator::split(oneCombinStr,",");
         for (string oneComponentStr : allComponentStrs)
         {
             vector<unsigned int> oneComponent;
@@ -2290,7 +2294,9 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_or
     {
         string node_types_str = config().get("node_types_should_not_be_vars");
         node_types_str.erase(std::remove(node_types_str.begin(), node_types_str.end(), ' '), node_types_str.end());
-        vector<string> typeStrs = StringManipulator::split(node_types_str,",");
+        vector<string> typeStrs;
+        boost::split(typeStrs, node_types_str, boost::is_any_of(","));
+
         for (string typestr : typeStrs)
         {
             node_types_should_not_be_vars.push_back( classserver().getType(typestr) );

@@ -44,7 +44,6 @@
 #include <opencog/embodiment/atom_types.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Config.h>
-#include <opencog/util/StringManipulator.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
 

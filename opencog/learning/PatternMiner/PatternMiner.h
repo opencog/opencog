@@ -87,6 +87,14 @@ struct _non_ordered_pattern
     }
 };
 
+//! Returns a string from the given argument by using the << operator
+template <typename T>
+std::string toString(T data)
+{
+    std::ostringstream oss;
+    oss << data;
+    return oss.str();
+}
 
 class PatternMiner
 {
@@ -352,6 +360,7 @@ public:
 
     void testPatternMatcher1();
     void testPatternMatcher2();
+
 
 
     // ---------------start distributed version of pattern miner ---------------
