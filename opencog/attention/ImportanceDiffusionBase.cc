@@ -68,28 +68,8 @@ ImportanceDiffusionBase::ImportanceDiffusionBase(CogServer& cs) : Agent(cs)
  */
 void ImportanceDiffusionBase::updateMaxSpreadPercentage()
 {
-    Handle h = _as->get_handle(CONCEPT_NODE, "CONFIG-DiffusionPercent");
-
-    if (h)
-    {
-        HandleSeq resultSet;
-        // Given the PredicateNode, walk to the NumberNode
-        h->getIncomingSet(back_inserter(resultSet));
-        h = resultSet.front();
-        if (h->isLink()) {
-            resultSet = h->getOutgoingSet();
-            h = resultSet.back();
-            resultSet = h->getOutgoingSet();
-            h = resultSet.front();
-        }
-        double value = std::atof(h->getName().c_str());
-        _atq.set_param(AttentionParamQuery::dif_spread_percentage, value);
-
-#ifdef DEBUG
-        std::cout << "Diffusion percentage set to: " <<
-                     maxSpreadPercentage << std::endl;
-#endif
-    }
+    maxSpreadPercentage = std::stod(_atq.get_param_value(
+                AttentionParamQuery::dif_spread_percentage));
 }
 
 ImportanceDiffusionBase::~ImportanceDiffusionBase()

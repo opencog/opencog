@@ -36,7 +36,7 @@
 (cog-bind implication-full-instantiation-rule)
 
 ;; (2) Distribute the scope of the implication that friends tend to be
-;; honest in the kb, applying implication-scope-distribution-rule.
+;; honest in the kb, applying implication-scope-to-implication-rule.
 ;;
 ;; Result should be:
 ;;
@@ -69,7 +69,7 @@
 ;;          (Evaluation
 ;;             (Predicate "is-honest")
 ;;             (Variable "$Y")))))
-(cog-bind implication-scope-distribution-rule)
+(cog-bind implication-scope-to-implication-rule)
 
 ;; (3) Infer the TV of the implicant of (2) using
 ;; lambda-predicate-construction-rule
@@ -151,7 +151,7 @@
 
 ;; (6) Distribute the scope of the implication that human
 ;; acquaintances tend to become friends in the kb, applying
-;; implication-scope-distribution-rule.
+;; implication-scope-to-implication-rule.
 ;;
 ;; Result should be:
 ;;
@@ -191,7 +191,7 @@
 ;;             (Variable "$Y")))))
 ;;
 ;; Actually, no need as it was inferred in (2)
-;; (cog-bind implication-scope-distribution-rule)
+;; (cog-bind implication-scope-to-implication-rule)
 
 ;; (7) Infer that honest human acquaintances tend to become friends
 ;; (more so than just human acquaintances). Apply rule

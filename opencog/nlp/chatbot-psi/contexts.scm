@@ -499,3 +499,26 @@
         )
     )
 )
+
+; Keyword: "done showing"
+(Define
+    (DefinedPredicate "is-asked-to-stop-demo?")
+    (Satisfaction
+        (VariableList
+            (var-decl "$sent" "SentenceNode")
+            (var-decl "$parse" "ParseNode")
+            (var-decl "$done" "WordInstanceNode")
+            (var-decl "$showing" "WordInstanceNode")
+        )
+        (And
+            (State input-utterance-sentence (Variable "$sent"))
+            (parse-of-sent "$parse" "$sent")
+            (word-in-parse "$done" "$parse")
+            (word-in-parse "$showing" "$parse")
+            (Reference (Variable "$done") (Word "done"))
+            (Reference (Variable "$showing") (Word "showing"))
+            (Evaluation (LinkGrammarRelationship "Pg")
+                (List (Variable "$done") (Variable "$showing")))
+        )
+    )
+)

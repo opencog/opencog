@@ -7,6 +7,7 @@
             (DefinedPredicate "is-in-reasoning-mode?")
             (DefinedPredicate "is-input-utterance?")
             (Not (DefinedPredicate "input-is-a-question?"))
+            (Not (DefinedPredicate "is-asked-to-stop-demo?"))
             (DefinedPredicate "has-not-replied-anything-yet?")
         ))
         (True (ExecutionOutput (GroundedSchema "scm: ack-the-statement") (List)))
@@ -50,7 +51,7 @@
             (DefinedPredicate "is-input-utterance?")
             (DefinedPredicate "input-is-a-question?")
         ))
-        (True (ExecutionOutput (GroundedSchema "scm: do-pln-QA") (List)))
+        (True (ExecutionOutput (GroundedSchema "scm: do-pln-qa") (List)))
         (True)
         (stv .95 .9)
         sociality

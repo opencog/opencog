@@ -19,13 +19,13 @@
           (iota 2))
 
 ;; (2)
-(cog-bind implication-scope-distribution-rule)
+(cog-bind implication-scope-to-implication-rule)
 
 ;; (3)
 (cog-bind and-lambda-distribution-rule)
 
 ;; (4)
-(cog-bind lambda-grounded-construction-rule)
+(cog-bind lambda-closed-construction-rule)
 
 ;; (5)
 (cog-bind implication-construction-rule)

@@ -6,11 +6,6 @@
 ; Define the demands
 (define sociality (psi-demand "Sociality" .8))
 
-; Define an updater for sociality
-; NOTE: It uses verbal input to update the truth-value of the controlled
-; rules.
-(psi-set-updater!  (DefinedPredicate "wholeshow-updater") sociality)
-
 ;-------------------------------------------------------------------------------
 ; Define the psi-rules
 
@@ -516,6 +511,20 @@
     ))
     (True (ExecutionOutput (GroundedSchema "scm: count-and-reply")
         (List (DefinedSchema "Num visible faces"))))
+    (True)
+    (stv .9 .9)
+    sociality
+)
+
+; Return to normal if someone says e.g. "we are done showing it" when it's in
+; a demo mode
+(psi-rule
+    (list (SequentialAnd
+        (DefinedPredicate "is-input-utterance?")
+        (DefinedPredicate "is-in-any-demo-mode?")
+        (DefinedPredicate "is-asked-to-stop-demo?")
+    ))
+    (True (ExecutionOutput (GroundedSchema "scm: back-to-default-mode") (List)))
     (True)
     (stv .9 .9)
     sociality

@@ -44,7 +44,7 @@
 ;; by higher order facts later.
 ;; -----------------------------------------------------------------------
 
-(define implication-and-lambda-factorization-variables
+(define implication-and-lambda-factorization-vardecl
   (VariableList
      (TypedVariableLink
         (VariableNode "$TyVs")
@@ -52,41 +52,51 @@
            (TypeNode "TypedVariableLink")
            (TypeNode "VariableNode")
            (TypeNode "VariableList")))
-     (VariableNode "$A1")
-     (VariableNode "$A2")))
+     ;; We intensionally restrict $A1 and $A2 to be EvaluationLink to
+     ;; ensure that we don't produce indefinitely nested AndLinks
+     (TypedVariableLink
+        (VariableNode "$A1")
+        (TypeNode "EvaluationLink"))
+     (TypedVariableLink
+        (VariableNode "$A2")
+        (TypeNode "EvaluationLink"))))
 
-(define implication-and-lambda-factorization-body
-  (QuoteLink                        ; Necessary so the AndLink doesn't
+(define implication-and-lambda-factorization-pattern
+  (LocalQuoteLink                   ; Necessary so the AndLink doesn't
                                     ; count as a connective
      (AndLink
-        (UnquoteLink
-           (LambdaLink
-              (VariableNode "$TyVs")
-              (VariableNode "$A1")))
-        (UnquoteLink
-           (LambdaLink
-              (VariableNode "$TyVs")
-              (VariableNode "$A2"))))))
+        (QuoteLink (LambdaLink
+           (UnquoteLink (VariableNode "$TyVs"))
+           (UnquoteLink (VariableNode "$A1"))))
+        (QuoteLink (LambdaLink
+           (UnquoteLink (VariableNode "$TyVs"))
+           (UnquoteLink (VariableNode "$A2")))))))
 
 (define implication-and-lambda-factorization-rewrite
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: implication-and-lambda-factorization-formula")
-     (ListLink
-        (VariableNode "$TyVs")
-        (VariableNode "$A1")
-        (VariableNode "$A2"))))
+     (ImplicationLink
+        (AndLink
+           (QuoteLink (LambdaLink
+              (UnquoteLink (VariableNode "$TyVs"))
+              (UnquoteLink (VariableNode "$A1"))))
+           (QuoteLink (LambdaLink
+              (UnquoteLink (VariableNode "$TyVs"))
+              (UnquoteLink (VariableNode "$A2")))))
+        (QuoteLink (LambdaLink
+           (UnquoteLink (VariableNode "$TyVs"))
+           (UnquoteLink (AndLink
+              (VariableNode "$A1")
+              (VariableNode "$A2"))))))))
 
 (define implication-and-lambda-factorization-rule
   (BindLink
-     implication-and-lambda-factorization-variables
-     implication-and-lambda-factorization-body
+     implication-and-lambda-factorization-vardecl
+     implication-and-lambda-factorization-pattern
      implication-and-lambda-factorization-rewrite))
 
-(define (implication-and-lambda-factorization-formula var a1 a2)
-  (let ((and-lamb (AndLink (LambdaLink var a1) (LambdaLink var a2)))
-        (lamb (LambdaLink var (cog-new-flattened-link 'AndLink a1 a2))))
-    (cog-set-tv! lamb (cog-tv and-lamb))
-    (cog-set-tv! (ImplicationLink and-lamb lamb) (stv 1 1))))
+(define (implication-and-lambda-factorization-formula Impl)
+  (cog-set-tv! Impl (stv 1 1)))
 
 ;; Name the rule
 (define implication-and-lambda-factorization-rule-name

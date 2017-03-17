@@ -199,7 +199,8 @@
     (define total-weight (accum-weight sorted-rules))
 
     ; Pick a number from 0.0 to total-weight.
-    (define cutoff (* total-weight (random:uniform)))
+    (define cutoff (* total-weight
+        (random:uniform (random-state-from-platform))))
 
     ; Recursively move through the list of rules, until the
     ; sum of the weights of the rules exceeds the cutoff.

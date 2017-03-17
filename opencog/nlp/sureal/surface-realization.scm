@@ -10,6 +10,7 @@
              (ice-9 threads) ; needed for par-map
              (ice-9 rdelim) (ice-9 regex) (ice-9 receive))
 (use-modules (opencog))
+(use-modules (opencog exec))
 (use-modules (opencog nlp)
              (opencog nlp lg-dict)
              (opencog nlp relex2logic))
@@ -59,10 +60,10 @@
 
 ;; This "cached" version of sureal is used by Microplanner.
 ;;
-;; The idea is to cache the results from the calls to SuRealPCMB, 
+;; The idea is to cache the results from the calls to SuRealPCMB,
 ;; which is the PaternMatcher callback object (see PatternMatcher documentation).
 ;;
-;; This cached version makes sense for Microplanner because it performs a lot of 
+;; This cached version makes sense for Microplanner because it performs a lot of
 ;; sureal queries with very similar inputs.
 ;;
 ;; The cache lifetime is a single call of a Microplanner query
@@ -235,4 +236,52 @@
             (equal? (cog-name-clean (car out-set)) (cog-name-clean (cadr out-set)))
         )
     )
+)
+
+; ---------------------------------------------------------------------
+(define-public (filter-for-sureal a-list)
+"
+  filter-for-sureal A-LIST
+
+  Takes a list of atoms A-LIST and returns a SetLink containing atoms that
+  sureal can process.
+"
+    (define filter-in-pattern
+        (ScopeLink
+            (TypedVariable
+                (Variable "$filter-for-sureal")
+                (TypeChoice
+                    (Signature
+                        (Inheritance
+                            (Type "ConceptNode")
+                            (Type "ConceptNode")))
+                    (Signature
+                        (Implication
+                            (Type "PredicateNode")
+                            (Type "PredicateNode")))
+                    (Signature
+                        (Evaluation
+                            (Type "PredicateNode")
+                            (List
+                                (Type "ConceptNode")
+                                (Type "ConceptNode"))))
+                    (Signature
+                        (Evaluation
+                            (Type "PredicateNode")
+                            (ListLink
+                                (Type "ConceptNode"))))
+                ))
+            ; Return atoms with the given signatures
+            (Variable "$filter-for-sureal")
+        ))
+
+    (define filter-from (SetLink  a-list))
+
+    ; Do the filtering
+    (define result (cog-execute! (MapLink filter-in-pattern filter-from)))
+
+    ; Delete the filter-from SetLink and its encompasing MapLink.
+    (cog-delete-recursive filter-from)
+
+    result
 )

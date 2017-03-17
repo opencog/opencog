@@ -60,7 +60,8 @@
 					(EvaluationLink
 						(Type "DefinedPredicateNode")
 						(TypeChoice
-						   (Type "ListLink") (Type "SetLink")))))
+						   (Type "ListLink") (Type "SetLink")
+						   (Type "ConceptNode")))))
 		)
 		(AndLink
 			(ListLink current-action (Variable "$action"))
@@ -96,6 +97,7 @@
 	(cog-bind single-word-gesture-rule)
 	(cog-bind show-rule-1)
 	(cog-bind show-rule-2)
+	(cog-bind demo-rule)
 
 	(if do-dbg-prt (begin
 		(display "The current-imperative is\n")
