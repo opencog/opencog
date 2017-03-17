@@ -177,7 +177,7 @@
 
 ;; Being well hydrated tends to speed up injury recovery
 (define being-well-hydrated-tends-to-speed-up-injury-recovery
-   (ImplicationScopeLink (stv 0.7 0.95)
+   (ImplicationScopeLink (stv 0.7 0.97)
       (TypedVariableLink
          (VariableNode "$X")
          (TypeNode "PredicateNode"))
