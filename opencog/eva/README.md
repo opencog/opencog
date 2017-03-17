@@ -97,7 +97,7 @@ Some things it currently doesn't do, but should:
  * Additional sensory systems and sensory inputs.  A perception
    synthesizer to coordinate all sensory input. High priority:
 
-  ++ Audio power envelope (half-done, see `ros_seonsors/audio_power.py`),
+  ++ Audio power envelope (half-done, see `ros_sensors/audio_power.py`),
      fundamental frequency (of voice), rising/falling tone.
      Background audio power. Length of silent pauses.  Detection
      of applause, laughter, loud voices in the background, loud
