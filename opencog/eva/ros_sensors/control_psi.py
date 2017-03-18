@@ -1,5 +1,5 @@
 #
-# control.py - Control messages issued by the operator or pupeteer
+# control_psi.py - Control messages issued by the operator or pupeteer
 # Copyright (C) 2016, 2017  Hanson Robotics
 #
 # This library is free software; you can redistribute it and/or
@@ -19,6 +19,8 @@
 
 import rospy
 from atomic_msgs import AtomicMsgs
+from dynamic_reconfigure.msg import Config
+
 
 '''
     This implements a ROS node that subscribes to a mish-mash of
@@ -28,17 +30,35 @@ from atomic_msgs import AtomicMsgs
     misc openpsi parameters).
 '''
 
-class Control:
+class ControlPsi:
 	def __init__(self):
 		self.atomo = AtomicMsgs()
-		rospy.Subscriber("/behavior_switch", String,
-			self.behavior_switch_cb)
+		rospy.Subscriber("/opencog_control/parameter_updates", Config,
+			self.openpsi_control_cb)
 
-	# The 'btree_on' and 'btree_off' data-strings shouldn't be used,
-	# as they are meant for switching on and off non-opencog demos.
-	def behavior_switch_cb(self, data):
-		if data.data == "opencog_on":
-			self.atomo.wholeshow_start()
+	# For web-ui interface
+	def openpsi_control_cb(self, data):
+		"""
+		This function is used for interactively modifying the weight of
+		openpsi rules.
+		"""
+		param_yaml = rosmsg.get_yaml_for_msg(data.doubles + data.ints)
+		self.param_list = yaml.load(param_yaml)
 
-		if data.data == "opencog_off":
-			self.atomo.wholeshow_stop()
+		for i in self.param_list:
+			# Populate the parameter dictionary
+			if i["name"] not in self.param_dict:
+				self.param_dict[i["name"]] = i["value"]
+
+			if i["name"] == "max_waiting_time":
+				scm_str = '''(StateLink
+				                 (AnchorNode "Chatbot: MaxWaitingTime")
+				                 (TimeNode %f))''' % (i["value"])
+			else:
+				scm_str = '''(StateLink
+				                 (ListLink
+				                     (ConceptNode "OpenPsi: %s")
+				                     (ConceptNode "OpenPsi: weight"))
+				                 (NumberNode %f))''' % (i["name"], i["value"])
+
+			self.atomo.evaluate_scm(scm_str)

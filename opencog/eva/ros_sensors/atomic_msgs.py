@@ -185,10 +185,15 @@ class AtomicMsgs:
 			'(NumberNode '+ str(z) + ')))\n' + \
 			'(StateLink (AnchorNode "Degree value")' + \
 			'(NumberNode '+ str(deg)+'))\n'
-		netcat(self.hostname,self.port,sal)
+		netcat(self.hostname, self.port, sal)
 
 	#room luminance <=25 - dark, <=40 - normal, >40 - bright
 	def room_brightness(self,bright):
 		room = '(StateLink (AnchorNode "luminance")' +\
 			' (NumberNode ' + str(bright) +'))\n'
-		netcat(self.hostname,self.port,room)
+		netcat(self.hostname, self.port, room)
+
+	# --------------------------------------------------------
+	# Generic
+	def evaluate_scm(self, scm_string):
+		netcat(self.hostname, self.port, scm_string)

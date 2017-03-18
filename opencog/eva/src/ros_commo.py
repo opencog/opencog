@@ -37,7 +37,6 @@ from blender_api_msgs.msg import BlinkCycle
 from blender_api_msgs.msg import SaccadeCycle
 from blender_api_msgs.msg import SomaState
 from chatbot.msg import ChatMessage
-from dynamic_reconfigure.msg import Config
 
 # Not everything has this message; don't break if it's missing.
 # i.e. create a stub if its not defined.
@@ -371,37 +370,6 @@ class EvaControl():
 	def behavior_control_callback(self, data):
 		self.control_mode = data.data
 
-	# For web-ui interface
-	def openpsi_control_cb(self, data):
-		"""
-		This function is used for interactively modifying the weight of openpsi
-		rules.
-		"""
-		param_yaml = rosmsg.get_yaml_for_msg(data.doubles + data.ints)
-		self.param_list = yaml.load(param_yaml)
-
-		for i in self.param_list:
-			# Populate the parameter dictionary
-			if i["name"] not in self.param_dict:
-				self.param_dict[i["name"]] = i["value"]
-
-			if i["name"] == "max_waiting_time":
-				scm_str = '''(StateLink
-				                 (AnchorNode "Chatbot: MaxWaitingTime")
-				                 (TimeNode %f))''' % (i["value"])
-			else:
-				scm_str = '''(StateLink
-				                 (ListLink
-				                     (ConceptNode "OpenPsi: %s")
-				                     (ConceptNode "OpenPsi: weight"))
-				                 (NumberNode %f))''' % (i["name"], i["value"])
-
-			self.puta.evaluate_scm(scm_str)
-
-	#not needed anymore
-	#def pub_snd_face_id(faceid):
-	#	self.face_sound_pub.publish(faceid)
-
 	def __init__(self):
 		# Full control by default
 		self.control_mode = 255
@@ -521,11 +489,6 @@ class EvaControl():
 
 		# Chatbot can request blinks correlated with hearing and speaking.
 		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
-
-		# ----------------
-		# chatbot-psi controls
-		rospy.Subscriber("/opencog_control/parameter_updates", Config,
-			self.openpsi_control_cb)
 
 		# ----------------
 		# Boolean flag, turn the behavior tree on and off (set it running,
