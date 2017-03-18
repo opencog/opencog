@@ -48,7 +48,6 @@ from chatbot.msg import ChatMessage
 #			self.utterance = ''
 #			self.confidence = 0
 
-from put_atoms import PutAtoms
 logger = logging.getLogger('hr.OpenCog_Eva')
 
 # ROS interfaces for the Atomese (OpenCog) Behavior Tree. Publishes
@@ -271,6 +270,7 @@ class EvaControl():
 		self.blink_pub.publish(msg)
 
 	# ----------------------------------------------------------
+
 	def update_opencog_control_parameter(self, name, value):
 		"""
 		This function is used for updating ros parameters that are used to
@@ -278,14 +278,6 @@ class EvaControl():
 		independent of changes in HEAD's web-ui.
 		"""
 		update =  False
-
-		# Only get the psi-prefix-str once, assuming it wouldn't change
-		# over time.
-		# Otherwise this will keep sending to the cogserver (as this
-		# is part of a "keep alive" psi-rule) and waste way too
-		# much unnecessary computing power
-		if self.psi_prefix == "":
-			self.psi_prefix = self.puta.evaluate_scm("psi-prefix-str")
 		param_name = name[len(self.psi_prefix) - 1:]
 
 		# Update parameter
@@ -301,7 +293,6 @@ class EvaControl():
 				return
 			self.client.update_configuration(self.param_dict)
 			self.update_parameters = False
-
 
 	# ----------------------------------------------------------
 	# Subscription callbacks
@@ -368,7 +359,6 @@ class EvaControl():
 		# Full control by default
 		self.control_mode = 255
 		self.running = True
-		self.puta = PutAtoms()
 
 		# The below will hang until roscore is started!
 		rospy.init_node("OpenCog_Eva")
@@ -405,7 +395,7 @@ class EvaControl():
 
 		# For controlling when to push updates, for saving bandwidth.
 		self.update_parameters = False
-		self.psi_prefix = ""
+		self.psi_prefix = "OpenPsi: "
 
 		# For web ui based control of openpsi contorled-psi-rules
 		try:
