@@ -121,6 +121,15 @@ class AtomicMsgs:
 		spoke = "(who-said? \"" + stt + "\")\n"
 		netcat(self.hostname, self.port, spoke)
 
+	# Affect in speech
+	# Indicate that the robot heard freindly speech
+	def affect_happy(self):
+		netcat(self.hostname, self.port, "(State chat-affect chat-happy)")
+
+	# Indicate that the robot heard negative speech
+	def affect_negative(self):
+		netcat(self.hostname, self.port, "(State chat-affect chat-negative)")
+
 	# --------------------------------------------------------
 	# Sound localization -- send 3D xyz coordinate of sound source
 	def update_sound(self, x, y, z):

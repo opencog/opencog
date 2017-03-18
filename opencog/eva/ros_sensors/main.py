@@ -21,6 +21,7 @@
 
 import logging
 import rospy
+from affect import Affect
 from audio_power import AudioPower
 from chat_track import ChatTrack
 from face_track import FaceTrack
@@ -33,6 +34,7 @@ rospy.init_node("OpenCog_ROS_bridge")
 logging.info("Starting the OpenCog ROS Bridge")
 print "Starting the OpenCog ROS Bridge"
 
+af = Affect()
 ap = AudioPower()
 ct = ChatTrack()
 ft = FaceTrack()

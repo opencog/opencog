@@ -70,14 +70,6 @@ class PutAtoms:
 	def listening_ended(self):
 		scheme_eval_h(self.atomspace, "(State chat-state chat-listen-stop)")
 
-	# Indicate that the robot heard freindly speech
-	def affect_happy(self):
-		scheme_eval_h(self.atomspace, "(State chat-affect chat-happy)")
-
-	# Indicate that the robot heard negative speech
-	def affect_negative(self):
-		scheme_eval_h(self.atomspace, "(State chat-affect chat-negative)")
-
 	# Pass the text that STT heard into opencog.
 	# Rather than setting state, we're going to trigger a script, here.
 	def perceived_text(self, text):

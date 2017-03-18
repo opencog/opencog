@@ -373,25 +373,6 @@ class EvaControl():
 		if random.random() < blink_probability:
 			self.gesture('blink', 1.0, 1, 1.0)
 
-	# The perceived emotional content of words spoken to the robot.
-	# That is, were people being rude to the robot? Polite to it? Angry
-	# with it?  We subscribe; there may be multiple publishers of this
-	# message: it might be supplied by some linguistic-processing module,
-	# or it might be supplied by an AIML-derived chatbot.
-	#
-	# emo is of type std_msgs/String
-	def language_affect_perceive_cb(self, emo):
-		rospy.loginfo('chatbot perceived emo class =' + emo.data)
-		if emo.data == "happy":
-			# behavior tree will use these predicates
-			self.puta.affect_happy()
-
-		else:
-			self.puta.affect_negative()
-
-		rospy.logwarn('publishing affect to chatbot ' + emo.data)
-		self.affect_pub.publish(emo.data)
-
 	# Turn behaviors on and off and set wholeshow configuration
 	# NOTE
 	# 1. Do not to clean visible faces as these can still be added/removed
@@ -567,10 +548,6 @@ class EvaControl():
 		# Chat infrastructure text.
 		rospy.Subscriber("chatbot_speech", ChatMessage,
 			self.chat_perceived_text_cb)
-
-		# Emotional content of words spoken to the robot.
-		rospy.Subscriber("chatbot_affect_perceive", String,
-			self.language_affect_perceive_cb)
 
 		# Chatbot can request blinks correlated with hearing and speaking.
 		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
