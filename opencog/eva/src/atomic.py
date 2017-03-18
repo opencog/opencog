@@ -135,6 +135,8 @@ def say_text(text_node):
 	evl.say_text(text)
 	return TruthValue(1, 1)
 
+# XXX FIXME this is totally wrong; this belongs in the
+# chat interface.
 def greet_recognized_face(recog_id_node):
 	text = "Hello " + recog_id_node.name
 	evl.say_text(text)

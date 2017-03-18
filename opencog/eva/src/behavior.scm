@@ -220,6 +220,8 @@
 	))
 
 ;; New recognized person sequence
+;; XXX FIXME, this includes some chat text that needs to be
+;; removed. (It says "hello" to the person.)
 (DefineLink
 	(DefinedPredicate "Interacting Sequence for recognized person")
 	(SequentialAnd
@@ -230,6 +232,8 @@
 				(DefinedSchema "Get recognized faces")))))
 		(DefinedPredicate "look at person")
 		(True (Put
+			;; XXX THis is totally wrong, this needs to be replaced
+			;; by a proper chatbot interface.
 			(DefinedPredicate "Greet recognized person")
 			(Get
 				(VariableList

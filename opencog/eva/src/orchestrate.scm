@@ -235,8 +235,9 @@
 
 ; -------------------------------------------------------------
 ; Say "Hello recog-id"
-; TODO: Add a request to chat psi-rules. That way actions of psi-rules will
-; be composable by the planner/action-orchestrator.
+; XXX FIXME this is totally wrong, this belongs in the chat interface,
+; and not here!  That is, the proper greeting needs to be assembled
+; elsewhere, and then use the standard chat interfaces!
 (DefineLink
 	(DefinedPredicate "Greet recognized person")
 	(LambdaLink
