@@ -21,18 +21,26 @@ import rospy
 from chatbot.msg import ChatMessage
 from atomic_msgs import AtomicMsgs
 
-# Thin python wrapper, to subscribe to speech-to-text ROS messages,
-# and then re-wrap these as OpenCog atoms, and forward them on into
-# the OpenCog space-time server.
-#
+'''
+Subscribe to text ROS messages, typically from the speech-to-text
+subsystem, and pass these onwards into the cogserver.
+
+Unit test by saying
+    rostopic pub --once chatbot_speech std_msgs/String "Hello Sopha!"
+'''
+
 class ChatTrack:
 
 	def __init__(self):
 		self.atomo = AtomicMsgs()
-		rospy.Subscriber("chatbot_speech", ChatMessage, self.stt_cb)
+		rospy.Subscriber("chatbot_speech", ChatMessage,
+			self.chat_perceived_text_cb)
 
 	# ---------------------------------------------------------------
 	# Speech-to-text callback
-	def stt_cb(self, msg):
+	def chat_perceived_text_cb(self, msg):
 		if msg.confidence >= 50:
+			# XXX FIXME WTF Why are there two of these????
+			# Surely one of these is enough to do the trick!
 			self.atomo.who_said(msg.utterance)
+			self.atomo.perceived_text(msg.utterance)

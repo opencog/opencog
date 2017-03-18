@@ -51,19 +51,6 @@ class PutAtoms:
 		# Get the atomspace that the scheme is using at just this moment.
 		self.atomspace = scheme_eval_as('(cog-atomspace)')
 
-		# Needed for the public define of chat-state, chat-start, etc.
-		# XXX Except that this doesn't actually make chat-state visible?
-		# WTF? But use-modules in btree.scm does work... strange.
-		scheme_eval(self.atomspace, "(use-modules (opencog exec))")
-		scheme_eval(self.atomspace, "(use-modules (opencog eva-model))")
-
-	# Pass the text that STT heard into opencog.
-	# Rather than setting state, we're going to trigger a script, here.
-	def perceived_text(self, text):
-		scheme_eval(self.atomspace,
-			'(cog-evaluate! (PutLink (DefinedPredicate "heard text")' +
-			' (SentenceNode "' + text + '")))')
-
 	# Generic function for experimentation and with use with different robots
 	# or game-worlds like minecraft.
 	def evaluate_scm(self, scm_string):

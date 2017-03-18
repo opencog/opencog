@@ -323,9 +323,6 @@ class EvaControl():
 	# The text that the STT module heard.
 	# Unit test by saying
 	#   rostopic pub --once perceived_text std_msgs/String "Look afraid!"
-	#
-	#def language_perceived_text_cb(self, text_heard):
-	#	self.puta.perceived_text(text_heard.data)
 
 	# The chat_heard message is of type chatbot/ChatMessage
 	# from chatbot.msg import ChatMessage
@@ -333,9 +330,6 @@ class EvaControl():
 		if 'shut up' in chat_heard.utterance.lower():
 			self.tts_control_pub.publish("shutup")
 			return
-
-		if chat_heard.confidence >= 50:
-			self.puta.perceived_text(chat_heard.utterance)
 
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):

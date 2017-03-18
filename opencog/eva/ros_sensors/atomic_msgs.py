@@ -1,8 +1,8 @@
 #
 # atomic_msgs.py - Send data to the cogserver/atomspace.
 #
-# Copyright (C) 2015,2016  Linas Vepstas
-# Copyright (C) 2016  Hanson Robotics
+# Copyright (C) 2015,2016,2017  Linas Vepstas
+# Copyright (C) 2016,2017  Hanson Robotics
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License v3 as
@@ -139,6 +139,13 @@ class AtomicMsgs:
 		spoke = "(who-said? \"" + stt + "\")\n"
 		netcat(self.hostname, self.port, spoke)
 
+	# Pass the text that STT heard into opencog.
+	# Rather than setting state, we're going to trigger a script, here.
+	def perceived_text(self, text):
+		netcat(self.hostname, self.port,
+			'(cog-evaluate! (PutLink (DefinedPredicate "heard text")' +
+			' (SentenceNode "' + text + '")))')
+
 	# Affect in speech
 	# Indicate that the robot heard freindly speech
 	def affect_happy(self):
@@ -149,7 +156,7 @@ class AtomicMsgs:
 		netcat(self.hostname, self.port, "(State chat-affect chat-negative)")
 
 	# --------------------------------------------------------
-	# Test-to-speech stuff
+	# Text-to-speech stuff
 	# Let atomspace know that vocalization has started or ended.
 	def vocalization_started(self):
 		netcat(self.hostname, self.port, "(State chat-state chat-start)")
