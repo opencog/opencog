@@ -353,20 +353,16 @@ class EvaControl():
 		if random.random() < blink_probability:
 			self.gesture('blink', 1.0, 1, 1.0)
 
-	# Turn behaviors on and off and set wholeshow configuration
-	# NOTE
-	# 1. Do not to clean visible faces as these can still be added/removed
-	#    while tree is paused
-	# 2. 'btree_on' and 'btree_off' data-strings shouldn't be used, as they are
+	# Turn behaviors on and off.
+	#
+	# 'btree_on' and 'btree_off' data-strings shouldn't be used, as they are
 	#    meant for switching on and off non-opencog demos.
 	def behavior_switch_callback(self, data):
 		if data.data == "opencog_on":
 			if not self.running:
-				self.puta.wholeshow_start()
 				self.running = True
 		if data.data == "opencog_off":
 			if self.running:
-				self.puta.wholeshow_stop()
 				self.look_at(0)
 				self.gaze_at(0)
 				self.running = False
@@ -520,12 +516,6 @@ class EvaControl():
 		                                  String, queue_size=1)
 
 		# String text of what the robot heard (from TTS)
-		#no longer needed as chatbot_speech is Used
-		#chatbot ai.py no longer usd so not published
-		#rospy.Subscriber("perceived_text", String,
-		#	self.language_perceived_text_cb)
-
-		# Chat infrastructure text.
 		rospy.Subscriber("chatbot_speech", ChatMessage,
 			self.chat_perceived_text_cb)
 
