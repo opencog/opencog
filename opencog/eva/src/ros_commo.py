@@ -338,26 +338,6 @@ class EvaControl():
 		if chat_heard.confidence >= 50:
 			self.puta.perceived_text(chat_heard.utterance)
 
-	# Notification from text-to-speech (TTS) module, that it has
-	# started, or stopped vocalizing.  This message might be published
-	# by either the TTS module itself, or by some external chatbot.
-	#
-	#    rostopic pub --once speech_events std_msgs/String start
-	#    rostopic pub --once speech_events std_msgs/String stop
-	def speech_event_cb(self, speech_event):
-		print('speech_event, type ' + speech_event.data)
-		if speech_event.data == "start":
-			rospy.loginfo("starting speech")
-			self.puta.vocalization_started()
-		elif speech_event.data == "stop":
-			rospy.loginfo("ending speech")
-			self.puta.vocalization_ended()
-		elif speech_event.data.startswith("duration"):
-			rospy.loginfo(
-                            "speech_event.data {}".format(speech_event.data))
-		else:
-			rospy.logerr("unknown speech_events message: " + speech_event.data)
-
 	# Chatbot requests blink.
 	def chatbot_blink_cb(self, blink):
 
@@ -551,10 +531,6 @@ class EvaControl():
 
 		# Chatbot can request blinks correlated with hearing and speaking.
 		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
-
-		# Receive messages that indicate that TTS (or chatbot) has started
-		# or finished vocalizing.
-		rospy.Subscriber("speech_events", String, self.speech_event_cb)
 
 		# ----------------
 		# chatbot-psi controls

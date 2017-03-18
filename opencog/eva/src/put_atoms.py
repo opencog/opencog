@@ -57,19 +57,6 @@ class PutAtoms:
 		scheme_eval(self.atomspace, "(use-modules (opencog exec))")
 		scheme_eval(self.atomspace, "(use-modules (opencog eva-model))")
 
-	# Let atomspace know that vocalization has started or ended.
-	def vocalization_started(self):
-		scheme_eval_h(self.atomspace, "(State chat-state chat-start)")
-
-	def vocalization_ended(self):
-		scheme_eval_h(self.atomspace, "(State chat-state chat-stop)")
-
-	def listening_started(self):
-		scheme_eval_h(self.atomspace, "(State chat-state chat-listen-start)")
-
-	def listening_ended(self):
-		scheme_eval_h(self.atomspace, "(State chat-state chat-listen-stop)")
-
 	# Pass the text that STT heard into opencog.
 	# Rather than setting state, we're going to trigger a script, here.
 	def perceived_text(self, text):

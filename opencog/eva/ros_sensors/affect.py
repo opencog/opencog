@@ -1,6 +1,6 @@
 #
 # affect.py - Emotional affect detected in spoken speech.
-# Copyright (C) 2016  Hanson Robotics
+# Copyright (C) 2015, 2017  Hanson Robotics
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public

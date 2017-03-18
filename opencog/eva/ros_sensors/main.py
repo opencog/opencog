@@ -28,6 +28,7 @@ from face_track import FaceTrack
 from sound_track import SoundTrack
 from room_brightness import RoomBrightness
 from saliency_track import SaliencyTrack
+from tts_feedback import TTSFeedback
 
 
 rospy.init_node("OpenCog_ROS_bridge")
@@ -41,6 +42,7 @@ ft = FaceTrack()
 st = SoundTrack()
 br = RoomBrightness()
 sl = SaliencyTrack()
+tf = TTSFeedback
 
 try:
 	rospy.spin()

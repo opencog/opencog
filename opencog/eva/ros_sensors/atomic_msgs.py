@@ -131,6 +131,15 @@ class AtomicMsgs:
 		netcat(self.hostname, self.port, "(State chat-affect chat-negative)")
 
 	# --------------------------------------------------------
+	# Test-to-speech stuff
+	# Let atomspace know that vocalization has started or ended.
+	def vocalization_started(self):
+		netcat(self.hostname, self.port, "(State chat-state chat-start)")
+
+	def vocalization_ended(self):
+		netcat(self.hostname, self.port, "(State chat-state chat-stop)")
+
+	# --------------------------------------------------------
 	# Sound localization -- send 3D xyz coordinate of sound source
 	def update_sound(self, x, y, z):
 		snd = "(map-sound " + str(x) + " " + str(y) + " " + str(z) + ")\n"
