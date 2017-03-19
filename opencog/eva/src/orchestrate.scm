@@ -174,6 +174,24 @@
 				(ListLink (Variable "$object-id")))
 		)))
 
+;Salient
+(DefineLink
+	(DefinedPredicate "look at salient point")
+	(SequentialAnd
+		(True (Put
+			(Evaluation (DefinedPredicate "Look at point")
+				(List (Variable "$x") (Variable "$y") (Variable "$z")))
+			(Get (State salient-loc
+				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
+		))
+		(True (Put
+			(Evaluation (DefinedPredicate "Gaze at point")
+				(List (Variable "$x") (Variable "$y") (Variable "$z")))
+			(Get (State salient-loc
+				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
+		))
+	))
+
 ; -------------------------------------------------------------
 ; Publish the current behavior.
 ; Cheap hack to allow external ROS nodes to know what we are doing.
@@ -257,24 +275,6 @@
 		(Evaluation
 			(GroundedPredicate "py: say_text")
 			(List (Variable "sentence")))
-	))
-
-;Salient
-(DefineLink
-	(DefinedPredicate "look at salient point")
-	(SequentialAnd
-		(True (Put
-			(Evaluation (DefinedPredicate "Look at point")
-				(List (Variable "$x") (Variable "$y") (Variable "$z")))
-			(Get (State salient-loc
-				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
-		))
-		(True (Put
-			(Evaluation (DefinedPredicate "Gaze at point")
-				(List (Variable "$x") (Variable "$y") (Variable "$z")))
-			(Get (State salient-loc
-				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
-		))
 	))
 
 ; -------------------------------------------------------------
