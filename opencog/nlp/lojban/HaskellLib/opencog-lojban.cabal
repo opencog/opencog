@@ -24,8 +24,9 @@ library
                        , OpenCog.Lojban.Syntax.AtomUtil
   build-depends:       base >= 4.7 && < 5
                        , opencog-atomspace
-                       , invertible-syntax
-                       , partial-isomorphisms
+                       --, invertible-syntax
+                       --, partial-isomorphisms
+                       , Iso
                        , cereal
                        , bytestring
                        , random
@@ -36,6 +37,7 @@ library
                        , hashable
                        , list-tries
                        , directory
+                       , mtl
   default-language:    Haskell2010
 
 executable lojbanChatBot

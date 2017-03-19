@@ -36,8 +36,8 @@ mainloop parser printer = do
     let res = parser input
 
     case res of
-        Just x -> printAtom x
-        Nothing -> putStrLn "Parseing Failed."
+        Right x -> printAtom x
+        Left e  -> putStrLn e
 
     mainloop parser printer
     {-case res of
