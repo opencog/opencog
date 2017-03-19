@@ -134,52 +134,13 @@
 ;    (cog-evaluate! (Put (DefinedPredicate "Publish behavior")
 ;         (ListLink (Concept "foobar joke"))))
 ;
+(delete-definition "Publish behavior")
 (DefineLink
 	(DefinedPredicate "Publish behavior")
 	(LambdaLink
 		(VariableList (Variable "$bhv"))
 		(True)
 		))
-
-; -------------------------------------------------------------
-; Request to change the soma state.
-; Takes two arguments: the requestor, and the proposed state.
-;
-; Currently, this always honors all requests.
-; Currently, the requestor is ignored.
-;
-; Some future version may deny change requests, depending on the
-; request source or on other factors.
-
-(DefineLink
-	(DefinedPredicate "Request Set Soma State")
-	(LambdaLink
-		(VariableList
-			(Variable "$requestor")
-			(Variable "$state"))
-		(True (State soma-state (Variable "$state")))
-	))
-
-; -------------------------------------------------------------
-; Request to change the facial expression state.
-; Takes two arguments: the requestor, and the proposed state.
-;
-; Currently, this always honors all requests.
-; Currently, the requestor is ignored.
-;
-; XXX Currently, this does nothing at all. Some future version may
-; deny change requests, depending on the request source or on other
-; factors.  XXX This is incompletely thought out and maybe should be
-; removed.
-
-(DefineLink
-	(DefinedPredicate "Request Set Face Expression")
-	(LambdaLink
-		(VariableList
-			(Variable "$requestor")
-			(Variable "$state"))
-		(True)
-	))
 
 ; -------------------------------------------------------------
 
