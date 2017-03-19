@@ -190,7 +190,8 @@
 ; is being said.
 
 ; Chat state. Is the robot talking (vocalizing), or not, right now?
-; NB the python code in put_atoms.py uses these defines!
+; The ROS sensor bridge needs these defines!
+;
 ; This is a state-machine, valid transitions are:
 ; listening -> started talking
 ; started talking -> talking
