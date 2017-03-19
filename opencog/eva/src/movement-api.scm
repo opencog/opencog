@@ -163,16 +163,22 @@
 ; -------------------------------------------------------------
 ; Say something. To test run,
 ; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
+(define-public (prt-say-text SENT)
+   (format #t "Saying this: ~a\n" SENT)
+   (stv 1 1))
+
+(delete-definition "Say")
 (DefineLink
 	(DefinedPredicate "Say")
 	(LambdaLink (Variable "sentence")
 		(Evaluation
-			(GroundedPredicate "py: say_text")
+			(GroundedPredicate "scm: prt-say-text")
 			(List (Variable "sentence")))
 	))
 
 ; -------------------------------------------------------------
 ; Return true if ROS is still running.
+(delete-definition "ROS is running?")
 (DefineLink
 	(DefinedPredicate "ROS is running?") (True))
 

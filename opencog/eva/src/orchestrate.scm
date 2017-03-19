@@ -302,22 +302,4 @@
 	))
 
 ; -------------------------------------------------------------
-; Say something. To test run,
-; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
-(DefineLink
-	(DefinedPredicate "Say")
-	(LambdaLink (Variable "sentence")
-		(Evaluation
-			(GroundedPredicate "py: say_text")
-			(List (Variable "sentence")))
-	))
-
-; -------------------------------------------------------------
-; Return true if ROS is still running.
-(DefineLink
-	(DefinedPredicate "ROS is running?")
-	(Evaluation
-		(GroundedPredicate "py:ros_is_running") (ListLink)))
-
-; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent

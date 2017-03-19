@@ -182,6 +182,7 @@
 ; -------------------------------------------------------------
 ; Say something. To test run,
 ; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
+(delete-definition "Say")
 (DefineLink
 	(DefinedPredicate "Say")
 	(LambdaLink (Variable "sentence")
@@ -192,6 +193,7 @@
 
 ; -------------------------------------------------------------
 ; Return true if ROS is still running.
+(delete-definition "ROS is running?")
 (DefineLink
 	(DefinedPredicate "ROS is running?")
 	(Evaluation
