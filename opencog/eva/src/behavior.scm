@@ -615,7 +615,7 @@
 							(ConceptNode "chat-pos-think"))
 
 						; ... switch to chat fast blink rate...
-						(Evaluation (GroundedPredicate "py:blink_rate")
+						(Evaluation (DefinedPredicate "Blink rate")
 							(ListLink
 								(DefinedSchema "blink chat fast mean")
 								(DefinedSchema "blink chat fast var")))
@@ -639,7 +639,7 @@
 						(Put (DefinedPredicate "Show random gesture")
 							(ConceptNode "chat-neg-think"))
 						; ... switch to chat slow blink rate...
-						(Evaluation (GroundedPredicate "py:blink_rate")
+						(Evaluation (DefinedPredicate "Blink rate")
 							(ListLink
 								(DefinedSchema "blink chat slow mean")
 								(DefinedSchema "blink chat slow var")))
@@ -654,7 +654,7 @@
 		(DefinedPredicate "Explore Saccade")
 
 		; ... switch to normal blink rate...
-		(Evaluation (GroundedPredicate "py:blink_rate")
+		(Evaluation (DefinedPredicate "Blink rate")
 			(ListLink
 				(DefinedSchema "blink normal mean")
 				(DefinedSchema "blink normal var")))
@@ -675,7 +675,7 @@
 		(DefinedPredicate "Explore Saccade")
 
 		; ... switch to normal blink rate...
-		(Evaluation (GroundedPredicate "py:blink_rate")
+		(Evaluation (DefinedPredicate "Blink rate")
 			(ListLink
 				(DefinedSchema "blink normal mean")
 				(DefinedSchema "blink normal var")))

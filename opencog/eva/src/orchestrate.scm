@@ -125,6 +125,19 @@
 	))
 
 ; -------------------------------------------------------------
+; Control the blink rate of the robot.
+
+(DefineLink
+	(DefinedPredicate "Blink rate")
+	(LambdaLink
+		(VariableList (Variable "$mean") (Variable "$var"))
+		(SequentialAndLink
+			;; Send it off to ROS to actually do it.
+			(EvaluationLink (GroundedPredicate "py: blink_rate")
+				(ListLink (Variable "$mean") (Variable "$var")))
+		)))
+
+; -------------------------------------------------------------
 ; Request robot to look at a specific coordinate point.
 ; Currently, a very thin wrapper around py:look_at_point
 
