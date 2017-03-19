@@ -5,7 +5,7 @@
 
 (define-module (opencog webui))
 
-(use-modules (opencog) (opencog atom-types))
+(use-modules (opencog) (opencog atom-types) (opencog openpsi))
 
 ;
 ; NOTE: updating of parameters is divided into steps of upating the parameter
@@ -62,6 +62,16 @@
 		(DefinedPredicate "parameter-update-is-done")
 		(DefinedPredicate "push-parameter-update")
 	))
+
+; -------------------------------------------------------------
+; Now hook it up.
+
+; Any changes to the weight for controlled-psi-rules are pushed to
+; ros dynamic-parameters. Thus the web-ui mirrors the opencog
+; wholeshow state.
+(psi-rule (list (DefinedPredicate "ROS is running?"))
+	(DefinedPredicate "update-web-ui")
+		update-demand-satisfied (stv 1 1) update-demand)
 
 ; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent
