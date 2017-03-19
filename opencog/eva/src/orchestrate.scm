@@ -193,25 +193,6 @@
 	))
 
 ; -------------------------------------------------------------
-; Publish the current behavior.
-; Cheap hack to allow external ROS nodes to know what we are doing.
-; The string name of the node is sent directly as a ROS String message
-; to the "robot_behavior" topic.
-;
-; Example usage:
-;    (cog-evaluate! (Put (DefinedPredicate "Publish behavior")
-;         (ListLink (Concept "foobar joke"))))
-;
-(DefineLink
-	(DefinedPredicate "Publish behavior")
-	(LambdaLink
-		(VariableList (Variable "$bhv"))
-		;; Send it off to ROS to actually do it.
-		(EvaluationLink (GroundedPredicate "py:publish_behavior")
-			(ListLink (Variable "$bhv")))
-		))
-
-; -------------------------------------------------------------
 ; Request to change the soma state.
 ; Takes two arguments: the requestor, and the proposed state.
 ;
@@ -279,7 +260,7 @@
 			(Concept "sleepy"))
 
 		; Finally, play the go-to-sleep animation.
-		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
+		(Evaluation (DefinedPredicate "Do go to sleep") (ListLink))
 	))
 
 ; Wake-up sequence
@@ -311,7 +292,7 @@
 		(True (DefinedSchema "set heard-something timestamp"))
 
 		; Run the wake animation.
-		(Evaluation (GroundedPredicate "py:do_wake_up") (ListLink))
+		(Evaluation (DefinedPredicate "Do wake up") (ListLink))
 
 		; Also show the wake-up expression (head shake, etc.)
 		(Put (DefinedPredicate "Show random expression")
