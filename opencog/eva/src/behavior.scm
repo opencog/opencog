@@ -232,9 +232,6 @@
 				(DefinedSchema "Get recognized faces")))))
 		(DefinedPredicate "look at person")
 		(True (Put
-			;; XXX THis is totally wrong, this needs to be replaced
-			;; by a proper chatbot interface.
-			(DefinedPredicate "Greet recognized person")
 			(Get
 				(VariableList
 					(TypedVariable

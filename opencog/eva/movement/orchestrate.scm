@@ -359,20 +359,6 @@
 		(Put (DefinedPredicate "Show random gesture")
 			(Concept "wake-up"))
 	))
-; -------------------------------------------------------------
-; Say "Hello recog-id"
-; XXX FIXME this is totally wrong, this belongs in the chat interface,
-; and not here!  That is, the proper greeting needs to be assembled
-; elsewhere, and then use the standard chat interfaces!
-(DefineLink
-	(DefinedPredicate "Greet recognized person")
-	(LambdaLink
-		(VariableList (VariableNode "face-id") (VariableNode "recog-id"))
-		(EvaluationLink
-			(GroundedPredicate "py: greet_recognized_face")
-			(ListLink
-				(VariableNode "recog-id")))))
-
 
 ; -------------------------------------------------------------
 ; Say something. To test run,
