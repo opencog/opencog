@@ -62,7 +62,7 @@
 			;; Record the expression itself
 			(TrueLink (State face-expression-state (Variable "$expr")))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:do_face_expression")
+			(EvaluationLink (DefinedPredicate "Do show facial expression")
 				(ListLink
 					(Variable "$expr")
 					(Variable "$duration")
@@ -89,52 +89,12 @@
 			;; Log the time.
 			(True (DefinedSchema "set gesture timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:do_gesture")
+			(EvaluationLink (DefinedPredicate "Do show gesture")
 				(ListLink
 					(Variable "$gest")
 					(Variable "$insensity")
 					(Variable "$repeat")
 					(Variable "$speed")))
-		)))
-
-; -------------------------------------------------------------
-; Eye-saccade control.
-; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
-(DefineLink
-	(DefinedPredicate "Conversational Saccade")
-	(LambdaLink
-		(Evaluation
-			(GroundedPredicate "py: conversational_saccade")
-			(List))
-	))
-
-(DefineLink
-	(DefinedPredicate "Listening Saccade")
-	(LambdaLink
-		(Evaluation
-			(GroundedPredicate "py: listening_saccade")
-			(List))
-	))
-
-(DefineLink
-	(DefinedPredicate "Explore Saccade")
-	(LambdaLink
-		(Evaluation
-			(GroundedPredicate "py: explore_saccade")
-			(List))
-	))
-
-; -------------------------------------------------------------
-; Control the blink rate of the robot.
-
-(DefineLink
-	(DefinedPredicate "Blink rate")
-	(LambdaLink
-		(VariableList (Variable "$mean") (Variable "$var"))
-		(SequentialAndLink
-			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py: blink_rate")
-				(ListLink (Variable "$mean") (Variable "$var")))
 		)))
 
 ; -------------------------------------------------------------

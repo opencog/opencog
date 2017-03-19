@@ -7,7 +7,7 @@
 ; The only current implementation is in the module `(opencog movement)`
 ; which connects these to ROS blender API robot animations.
 
-; Delete a definition
+; Delete the current definition, if any.
 (define (delete-definition STR)
 	(define dfn
 		(cog-get-link 'DefineLink 'DefinedPredicateNode
@@ -41,19 +41,16 @@
 ;    (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
 ;         (ListLink (Concept "happy") (Number 6) (Number 0.6))))
 ;
-(delete-definition "Show facial expression")
+(delete-definition "Do show facial expression")
 (DefineLink
-	(DefinedPredicate "Show facial expression")
+	(DefinedPredicate "Do show facial expression")
 	(LambdaLink
 		(VariableList
 			(Variable "$expr")
 			(Variable "$duration")
 			(Variable "$intensity"))
 		(SequentialAndLink
-			;; Record the time
-			(TrueLink (DefinedSchema "set expression timestamp"))
-			;; Record the expression itself
-			(TrueLink (State face-expression-state (Variable "$expr")))
+			(TrueLink)
 		)))
 
 ; -------------------------------------------------------------
@@ -64,8 +61,9 @@
 ;    (cog-evaluate! (Put (DefinedPredicate "Show gesture")
 ;         (ListLink (Concept "blink") (Number 0.8) (Number 3) (Number 1))))
 ;
+(delete-definition "Do show gesture")
 (DefineLink
-	(DefinedPredicate "Show gesture")
+	(DefinedPredicate "Do show gesture")
 	(LambdaLink
 		(VariableList
 			(Variable "$gest")
@@ -73,8 +71,7 @@
 			(Variable "$repeat")
 			(Variable "$speed"))
 		(SequentialAndLink
-			;; Log the time.
-			(True (DefinedSchema "set gesture timestamp"))
+			(True)
 		)))
 
 ; -------------------------------------------------------------
@@ -82,6 +79,11 @@
 ; Saying things should alter the saccade mode
 ;
 ; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
+
+(delete-definition "Conversational Saccade")
+(delete-definition "Listening Saccade")
+(delete-definition "Explore Saccade")
+
 (dfn-pred (DefinedPredicate "Conversational Saccade"))
 (dfn-pred (DefinedPredicate "Listening Saccade"))
 (dfn-pred (DefinedPredicate "Explore Saccade"))
@@ -89,6 +91,7 @@
 ; -------------------------------------------------------------
 ; Control the blink rate of the robot.
 
+(delete-definition "Blink rate")
 (DefineLink
 	(DefinedPredicate "Blink rate")
 	(LambdaLink

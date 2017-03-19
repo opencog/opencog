@@ -3,6 +3,13 @@
 ;
 ; Implement the movement API for ROS/blender animations.
 ;
+
+; Delete the current definition, if any.
+(define (delete-definition STR)
+	(define dfn
+		(cog-get-link 'DefineLink 'DefinedPredicateNode
+			(DefinedPredicate STR)))
+
 ; -------------------------------------------------------------
 ; Request a display of a facial expression (smile, frown, etc.)
 ; The expression name should be one of the supported blender animations.
@@ -11,6 +18,7 @@
 ;    (cog-evaluate! (Put (DefinedPredicate "Show facial expression")
 ;         (ListLink (Concept "happy") (Number 6) (Number 0.6))))
 ;
+(delete-definition "Do show facial expression")
 (DefineLink
 	(DefinedPredicate "Do show facial expression")
 	(LambdaLink
@@ -34,6 +42,7 @@
 ;    (cog-evaluate! (Put (DefinedPredicate "Show gesture")
 ;         (ListLink (Concept "blink") (Number 0.8) (Number 3) (Number 1))))
 ;
+(delete-definition "Do show gesture")
 (DefineLink
 	(DefinedPredicate "Do show gesture")
 	(LambdaLink
@@ -55,6 +64,11 @@
 ; -------------------------------------------------------------
 ; Eye-saccade control.
 ; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
+
+(delete-definition "Conversational Saccade")
+(delete-definition "Listening Saccade")
+(delete-definition "Explore Saccade")
+
 (DefineLink
 	(DefinedPredicate "Conversational Saccade")
 	(LambdaLink
@@ -82,6 +96,7 @@
 ; -------------------------------------------------------------
 ; Control the blink rate of the robot.
 
+(delete-definition "Blink rate")
 (DefineLink
 	(DefinedPredicate "Blink rate")
 	(LambdaLink
