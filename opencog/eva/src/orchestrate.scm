@@ -252,6 +252,74 @@
 	))
 
 ; -------------------------------------------------------------
+
+; Call once, to fall asleep.
+(DefineLink
+	(DefinedPredicate "Go to sleep")
+	(SequentialAnd
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Face Expression")
+			(ListLink bhv-source (ConceptNode "sleepy")))
+
+		; Proceed with the sleep animation only if the state
+		; change was approved.
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-sleeping))
+
+		(Evaluation (GroundedPredicate "scm: print-msg-time")
+			(ListLink (Node "--- Go to sleep.")
+				(Minus (TimeLink) (DefinedSchema "get bored timestamp"))))
+		(True (DefinedSchema "set sleep timestamp"))
+
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Falling asleep"))
+
+		; First, show some yawns ...
+		(Put (DefinedPredicate "Show random gesture")
+			(Concept "sleepy"))
+
+		; Finally, play the go-to-sleep animation.
+		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
+	))
+
+; Wake-up sequence
+(DefineLink
+	(DefinedPredicate "Wake up")
+	(SequentialAnd
+		; Request change soma state to being awake. Proceed only if
+		; the request is accepted.
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-awake))
+
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Face Expression")
+			(ListLink bhv-source (ConceptNode "wake-up")))
+
+		(Evaluation (GroundedPredicate "scm: print-msg-time")
+			(ListLink (Node "--- Wake up!")
+				(Minus (TimeLink) (DefinedSchema "get sleep timestamp"))))
+
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Waking up"))
+
+		; Reset the bored timestamp, as otherwise we'll fall asleep
+		; immediately (cause we're bored).
+		(True (DefinedSchema "set bored timestamp"))
+
+		; Reset the "heard something" state and timestamp.
+		(True (DefinedPredicate "Heard Something?"))
+		(True (DefinedSchema "set heard-something timestamp"))
+
+		; Run the wake animation.
+		(Evaluation (GroundedPredicate "py:do_wake_up") (ListLink))
+
+		; Also show the wake-up expression (head shake, etc.)
+		(Put (DefinedPredicate "Show random expression")
+			(Concept "wake-up"))
+		(Put (DefinedPredicate "Show random gesture")
+			(Concept "wake-up"))
+	))
+; -------------------------------------------------------------
 ; Say "Hello recog-id"
 ; XXX FIXME this is totally wrong, this belongs in the chat interface,
 ; and not here!  That is, the proper greeting needs to be assembled
