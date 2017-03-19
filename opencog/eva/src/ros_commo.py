@@ -464,7 +464,7 @@ class EvaControl():
 		self.tts_pub = rospy.Publisher("chatbot_responses", String, queue_size=1)
 
 		# Tell the chatbot what sort of affect to apply during
-		# TTS vocalization. (Huhh???)
+		# TTS vocalization. (Huhh???) XXX this needs documentation.
 		self.affect_pub = rospy.Publisher("chatbot_affect_express",
 		                                  String, queue_size=1)
 
@@ -472,6 +472,9 @@ class EvaControl():
 		self.tts_control_pub = rospy.Publisher("tts_control",
 		                                  String, queue_size=1)
 
+		# ----------------
+		# Subscriptions needed for autonomous behaviors.
+		# XXX FIXME both of these should probably be removed.
 		# String text of what the robot heard (from TTS)
 		rospy.Subscriber("chatbot_speech", ChatMessage,
 			self.chat_perceived_text_cb)
