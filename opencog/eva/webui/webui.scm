@@ -2,6 +2,11 @@
 ; webui.scm
 ;
 ; User Interface for OpenPsi control
+
+(define-module (opencog webui))
+
+(use-modules (opencog) (opencog atom-types))
+
 ;
 ; NOTE: updating of parameters is divided into steps of upating the parameter
 ; cache and then pushing the update, so as to simply syncing the values.
@@ -57,5 +62,6 @@
 		(DefinedPredicate "parameter-update-is-done")
 		(DefinedPredicate "push-parameter-update")
 	))
+
 ; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent
