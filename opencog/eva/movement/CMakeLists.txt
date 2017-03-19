@@ -4,7 +4,7 @@ INSTALL (FILES
 )
 
 INSTALL (FILES
-	orchestrate.scm
+	do-movement.scm
 	DESTINATION "${DATADIR}/scm/opencog/movement"
 )
 
