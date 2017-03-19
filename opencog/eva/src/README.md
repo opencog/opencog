@@ -31,18 +31,6 @@ Design overview
   of face locations, ad the visual servoing needed to maintain a
   steady, accurate gaze is in the `face_track` directory.
 
-* The `face_track` directory contains code for visual servoing: it
-  receives ROS messages about human face locations from the webcam
-  + pi_vision subsystem.  It calls methods in `face_atomic.py` to
-  poke face-ids (ID numbers) into the AtomSpace.
-
-  A new face (for example, face-id 123) is indicated with this message:
-  ```
-   (EvaluationLink (PredicateNode "visible face")
-             (ListLink (NumberNode "123")))
-  ```
-  See `face_track/README.md` for details.
-
 * Various behavior labels are published to the `robot_behavior` ROS
   topic, so that other ROS nodes can know what we are doing.  The
   published messages are just strings, and they are rather totally
