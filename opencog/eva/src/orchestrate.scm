@@ -98,6 +98,33 @@
 		)))
 
 ; -------------------------------------------------------------
+; Eye-saccade control.
+; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
+(DefineLink
+	(DefinedPredicate "Conversational Saccade")
+	(LambdaLink
+		(Evaluation
+			(GroundedPredicate "py: conversational_saccade")
+			(List))
+	))
+
+(DefineLink
+	(DefinedPredicate "Listening Saccade")
+	(LambdaLink
+		(Evaluation
+			(GroundedPredicate "py: listening_saccade")
+			(List))
+	))
+
+(DefineLink
+	(DefinedPredicate "Explore Saccade")
+	(LambdaLink
+		(Evaluation
+			(GroundedPredicate "py: explore_saccade")
+			(List))
+	))
+
+; -------------------------------------------------------------
 ; Request robot to look at a specific coordinate point.
 ; Currently, a very thin wrapper around py:look_at_point
 

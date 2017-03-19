@@ -552,8 +552,7 @@
 	(DefinedPredicate "Speech started")
 	(SequentialAnd
 		; Switch to face-study saccade ...
-		(Evaluation (GroundedPredicate "py:conversational_saccade")
-				(ListLink))
+		(DefinedPredicate "Conversational Saccade")
 		; ... and show one random gesture from "conversing" set.
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "conversing"))
@@ -574,8 +573,7 @@
 	(DefinedPredicate "Listening started")
 	(SequentialAnd
 		; Switch to face-study saccade ...
-		(Evaluation (GroundedPredicate "py:listening_saccade")
-				(ListLink))
+		(DefinedPredicate "Listening Saccade")
 		; ... and show one random gesture from "conversing" set.
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "listening"))
@@ -653,8 +651,7 @@
 	(DefinedPredicate "Speech ended")
 	(SequentialAnd
 		; Switch back to exploration saccade ...
-		(Evaluation (GroundedPredicate "py:explore_saccade")
-			(ListLink))
+		(DefinedPredicate "Explore Saccade")
 
 		; ... switch to normal blink rate...
 		(Evaluation (GroundedPredicate "py:blink_rate")
@@ -675,8 +672,7 @@
 	(DefinedPredicate "Listening ended")
 	(SequentialAnd
 		; Switch back to exploration saccade ...
-		(Evaluation (GroundedPredicate "py:explore_saccade")
-			(ListLink))
+		(DefinedPredicate "Explore Saccade")
 
 		; ... switch to normal blink rate...
 		(Evaluation (GroundedPredicate "py:blink_rate")
