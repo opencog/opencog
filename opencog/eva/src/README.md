@@ -65,44 +65,6 @@ Design overview
   infest the code, and new features are incomplete and half-working.
   It will be a good, long while before the code here settles down.
 
-
-Running
-=======
-The code can be run in debug mode, or in fully-integrated mode.
-
-* Debug mode: Edit `btree.scm`, locate the line referencing `atomic.py`
-  and change it to `atomic-dbg.py`.  The start guile, and, at the guile
-  prompt, say `(load "btree.scm")`  ad then `(run)`.  See the top of
-  the `btree.scm` file for more hints on debugging.
-
-* Integrated mode:
-  Change directory to your `catkin_ws` and then run `scripts/eva.sh`.
-  This will start up a byobu multiplexed terminal, and will run ROS,
-  the ros face tracker, the blender API and the opencog server
-  automatically, and will launch most of the needed behavior scripts.
-
-
-Debugging notes
-===============
-Cython modules are installed here:
-```
-`/usr/local/share/opencog/python/opencog`
-```
-
-You can get a python command-line from the cogserver, like so:
-```
-`rlwrap telnet localhost 17020`
-```
-and then enter the python interpreter by saying `py`.  You can get
-a scheme interpreter by saying `scm`.  You can telnet multiple times.
-You can also call python from scheme, and scheme from python.
-
-From the python prompt, the following should list the python
-opencog modules:
-```
-help('opencog')
-```
-
 Face tracking debug
 ===================
 Print all visible faces in the AtomSpace:
@@ -118,26 +80,12 @@ rlwrap telnet localhost 17020
 Note that if the room state changes, `(show-room-state)` will show the
 wrong state until after both cog-binds are performed!
 
-```
-rostopic pub --once /opencog/glance_at std_msgs/Int32 29
-rostopic pub --once /opencog/look_at std_msgs/Int32 29
-rostopic pub --once /opencog/gaze_at std_msgs/Int32 29
-```
-
-
-Unfinished work TODO List
-=========================
-Grep for XXX in the code:
-
-* Implement the face-study saccade.
 
 Enhancement TODO List
 =====================
 A list of random ideas.
 
 * Replace the vision processing code by something better.
-
-* Integrate with OpenPsi.
 
 * Integrate the authoring GUI.
 
@@ -173,5 +121,3 @@ A list of random ideas.
 Pending bugs:
 * (DefinedPredicateNode "Did someone leave?")  being called much much
    too often!!! ... why???
-* Psi hung ... for no apparent reason.
-  (psi-running?)    (psi-get-loop-count)

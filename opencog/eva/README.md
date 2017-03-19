@@ -166,6 +166,7 @@ as some other sketches and ideas.
 
 Running
 -------
+* Change directory to `catkin_ws`
 * Use the `scripts/eva.sh` file, after adjusting paths in it for your
   installation. Or use the below:
 
