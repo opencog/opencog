@@ -170,8 +170,8 @@ class EvaControl():
 	# Turn only the eyes towards the given target point.
 	# Coordinates: meters; x==forward, y==to Eva's left.
 	def gaze_at_point(self, x, y, z):
-		xyz1=numpy.array([x,y,z,1.0])
-		xyz=numpy.dot(self.conv_mat,xyz1)
+		xyz1 = numpy.array([x,y,z,1.0])
+		xyz = numpy.dot(self.conv_mat, xyz1)
 		trg = Target()
 		trg.x = xyz[0]
 		trg.y = xyz[1]
@@ -182,8 +182,8 @@ class EvaControl():
 	# Turn head towards the given target point.
 	# Coordinates: meters; x==forward, y==to Eva's left.
 	def look_at_point(self, x, y, z):
-		xyz1=numpy.array([x,y,z,1.0])
-		xyz=numpy.dot(self.conv_mat,xyz1)
+		xyz1 = numpy.array([x, y, z, 1.0])
+		xyz = numpy.dot(self.conv_mat, xyz1)
 		trg = Target()
 		trg.x = xyz[0]
 		trg.y = xyz[1]
@@ -195,14 +195,21 @@ class EvaControl():
 
 	# Tell the world what we are up to. This is so that other
 	# subsystems can listen in on what we are doing.
+	# XXX FIXME ... remove this?? Kino wanted this for his stuff,
+	# but I don't think it's used anywhere.
 	def publish_behavior(self, event):
 		print "----- Behavior pub: " + event
 		self.behavior_pub.publish(event)
 
 	# ----------------------------------------------------------
+
+	# Tell the TTS subsystem to vocalize a plain text-string
+	def say_text(self, text_to_say):
+		rospy.logwarn('publishing text to TTS ' + text_to_say)
+		self.tts_pub.publish(text_to_say)
+
+	# ----------------------------------------------------------
 	# Wrapper for saccade generator.
-	# This is setup entirely in python, and not in the AtomSpace,
-	# as, at this time, there are no knobs worth twiddling.
 
 	# Explore-the-room saccade when not conversing.
 	# ??? Is this exploring the room, or someone's face? I'm confused.
@@ -295,38 +302,25 @@ class EvaControl():
 			self.update_parameters = False
 
 	# ----------------------------------------------------------
-	# Subscription callbacks
-	# Get the list of available gestures.
-	def get_gestures_cb(self, msg):
-		print("Available Gestures:" + str(msg.data))
-
-	# Get the list of available facial expressions.
-	def get_expressions_cb(self, msg):
-		print("Available Facial Expressions:" + str(msg.data))
-
-	# ----------------------------------------------------------
-
-	# Tell the TTS subsystem to vocalize a plain text-string
-	def say_text(self, text_to_say):
-		rospy.logwarn('publishing text to TTS ' + text_to_say)
-		self.tts_pub.publish(text_to_say)
-
-	# The text that the STT module heard.
-	# Unit test by saying
-	#   rostopic pub --once perceived_text std_msgs/String "Look afraid!"
-
+	# Autonomous behaviors. These by-pass opencog completely
+	#
 	# The chat_heard message is of type chatbot/ChatMessage
 	# from chatbot.msg import ChatMessage
+	#
+	# Stops the robot from droning on and on.
+	# XXX surely there is a better solution than this...
 	def chat_perceived_text_cb(self, chat_heard):
 		if 'shut up' in chat_heard.utterance.lower():
 			self.tts_control_pub.publish("shutup")
 			return
 
 	# Chatbot requests blink.
+	# XXX FIXME ... which chatbot? Who published this message?
+	# How does this work? Where is the chatbot AIML/ChatScript
+	# markup for this, exactly?  This needs to be documented
+	# or removed as being unused.
 	def chatbot_blink_cb(self, blink):
 
-		# XXX currently, this by-passes the OC behavior tree.
-		# Does that matter?  Currently, probably not.
 		rospy.loginfo(blink.data + ' says blink')
 		blink_probabilities = {
 			'chat_heard' : 0.4,
@@ -336,6 +330,17 @@ class EvaControl():
 		blink_probability = blink_probabilities[blink.data]
 		if random.random() < blink_probability:
 			self.gesture('blink', 1.0, 1, 1.0)
+
+	# ----------------------------------------------------------
+	# Subscription callbacks
+
+	# Get the list of available gestures.
+	def get_gestures_cb(self, msg):
+		print("Available Gestures:" + str(msg.data))
+
+	# Get the list of available facial expressions.
+	def get_expressions_cb(self, msg):
+		print("Available Facial Expressions:" + str(msg.data))
 
 	# Turn behaviors on and off.
 	#
@@ -364,25 +369,6 @@ class EvaControl():
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
 
-		self.LOCATION_FRAME = "blender"
-		# Transform Listener. Tracks history for RECENT_INTERVAL.
-		self.tf_listener = tf.TransformListener()
-		print "**1\n"
-		try:
-			self.tf_listener.waitForTransform('camera', self.LOCATION_FRAME, \
-				rospy.Time(0), rospy.Duration(10.0))#world
-			print "***2\n"
-		except Exception:
-			print("No camera transforms!\n")
-			exit(1)
-		print "***3\n"
-		(trans,rot) = self.tf_listener.lookupTransform( \
-			self.LOCATION_FRAME, 'camera', rospy.Time(0))
-		print "***4\n"
-		a=tf.listener.TransformerROS()
-		print "***5\n"
-		self.conv_mat=a.fromTranslationRotation(trans,rot)
-		print "hello! ***********"
 		# ----------------
 		# A list of parameter names that are mirrored in opencog for controling
 		# psi-rules
@@ -402,6 +388,30 @@ class EvaControl():
 			self.client = dynamic_reconfigure.client.Client("/opencog_control", timeout=2)
 		except Exception:
 			self.client = None
+
+		# ----------------
+		# Obtain the blender-to-camera coordinate-frame conversion
+		# matrix.  XXX FIXME This is some insane hack that does not
+		# make sense.  All 3D coordinates are supposed to be in
+		# head-centered coordinates, bot for the sensory subsystem,
+		# and also for the look-at subsystem. However, someone
+		# screwed something up somewhere, and now we hack around
+		# it here. XXX This is really bad spaghetti-code programming.
+		# Fuck.
+		lstn = tf.TransformListener()
+		try:
+			print("Waiting for the camera-blender transform\n")
+			lstn.waitForTransform('camera', 'blender',
+				rospy.Time(0), rospy.Duration(10.0)) # world
+		except Exception:
+			print("No camera transforms!\n")
+			exit(1)
+
+		print("Got the camera-blender transform\n")
+		(trans,rot) = lstn.lookupTransform(
+			'blender' , 'camera', rospy.Time(0))
+		a = tf.listener.TransformerROS()
+		self.conv_mat = a.fromTranslationRotation(trans,rot)
 
 		# ----------------
 		# Get the available facial animations
@@ -440,11 +450,6 @@ class EvaControl():
 
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
-
-		#method shifted
-		#self.face_sound_pub = rospy.Publisher("/manyyears/face_id",
-		#	Int32, queue_size=1)
-
 
 		# ----------------
 		rospy.logwarn("setting up chatbot affect perceive and express links")
