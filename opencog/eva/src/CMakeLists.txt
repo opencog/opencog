@@ -11,6 +11,8 @@ INSTALL (FILES
 	behavior.scm
 	express.scm
 	primitives.scm
+	orchestrate.scm
+	movement-api.scm
 	cfg-tools.scm
 	cfg-eva.scm
 	cfg-sophia.scm
