@@ -23,10 +23,8 @@ import roslib
 import time
 import logging
 import random
-import yaml
 import tf
 import numpy
-import dynamic_reconfigure.client
 # Eva ROS message imports
 from std_msgs.msg import String, Int32
 from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
@@ -277,31 +275,6 @@ class EvaControl():
 		self.blink_pub.publish(msg)
 
 	# ----------------------------------------------------------
-
-	def update_opencog_control_parameter(self, name, value):
-		"""
-		This function is used for updating ros parameters that are used to
-		modify the weight of openpsi rules. When the changes in weight occur
-		independent of changes in HEAD's web-ui.
-		"""
-		update =  False
-		param_name = name[len(self.psi_prefix) - 1:]
-
-		# Update parameter
-		if (param_name in self.param_dict) and \
-		   (self.param_dict[param_name] != value):
-			self.param_dict[param_name] = value
-			self.update_parameters = True
-
-
-	def push_parameter_update(self):
-		if self.update_parameters and not rospy.is_shutdown():
-			if self.client is None:
-				return
-			self.client.update_configuration(self.param_dict)
-			self.update_parameters = False
-
-	# ----------------------------------------------------------
 	# Autonomous behaviors. These by-pass opencog completely
 	#
 	# The chat_heard message is of type chatbot/ChatMessage
@@ -368,26 +341,6 @@ class EvaControl():
 		# The below will hang until roscore is started!
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
-
-		# ----------------
-		# A list of parameter names that are mirrored in opencog for controling
-		# psi-rules
-		self.param_list = []
-		# Parameter dictionary that is used for updating states recorede in
-		# the atomspace. It is used to cache the atomspace values, thus updating
-		# of the dictionary is only made from opencog side (openpsi
-		# updating rule)
-		self.param_dict = {}
-
-		# For controlling when to push updates, for saving bandwidth.
-		self.update_parameters = False
-		self.psi_prefix = "OpenPsi: "
-
-		# For web ui based control of openpsi contorled-psi-rules
-		try:
-			self.client = dynamic_reconfigure.client.Client("/opencog_control", timeout=2)
-		except Exception:
-			self.client = None
 
 		# ----------------
 		# Obtain the blender-to-camera coordinate-frame conversion
