@@ -55,7 +55,7 @@ sleep 10
 
 # Run the new face-tracker.
 # tmux new-window -n 'face' '$OCBHAVE/face_track/main.py; $SHELL'
-tmux new-window -n 'fce' '../ros_sensors/main.py; $SHELL'
+tmux new-window -n 'fce' '../sensors/main.py; $SHELL'
 
 # Telnet shell
 tmux new-window -n 'tel' 'rlwrap telnet localhost 17020; $SHELL'
