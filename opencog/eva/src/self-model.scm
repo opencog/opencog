@@ -16,12 +16,14 @@
 ;    questions about what Eva is doing.
 ;
 ; Example usage:
-; Load the needed modules.
+;; Load the needed modules.
 ; (use-modules (opencog) (opencog query) (opencog exec))
-; (use-modules (opencog atom-types) (opencog python))
+; (use-modules (opencog atom-types) (opencog movement))
 ; (use-modules (opencog eva-model))
-;;;; start roscore before doing the load below.
-; (python-eval "execfile('atomic.py')")
+;
+;; If actually driving the pysical robot, then ...
+;; start roscore first, then the movement bridge:
+; (start-ros-movement-node)
 ;
 ; Examples and debugging hints:
 ; Some (but not all) state queries:
