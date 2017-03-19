@@ -386,4 +386,11 @@
 	))
 
 ; -------------------------------------------------------------
+; Return true if ROS is still running.
+(DefineLink
+	(DefinedPredicate "ROS is running?")
+	(Evaluation
+		(GroundedPredicate "py:ros_is_running") (ListLink)))
+
+; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent

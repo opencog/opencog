@@ -201,13 +201,6 @@ except:
   (change-template "Time to reset glance" "glance"
   	"time_search_glance_min" "time_search_glance_max")
 ; ----------------------------------------------------------------------
-; Return true if ROS is still running.
-(DefineLink
-	(DefinedPredicate "ROS is running?")
-	(Evaluation
-		(GroundedPredicate "py:ros_is_running") (ListLink)))
-
-; ----------------------------------------------------------------------
 ; Sigh. Perform manual garbage collection. This really should be
 ; automated. XXX TODO. (Can we get ECAN to do this for us?)
 (define-public (run-behavior-tree-gc)
