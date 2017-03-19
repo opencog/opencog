@@ -124,68 +124,7 @@
 		)))
 
 ; -------------------------------------------------------------
-; As above, but (momentarily) break eye contact, first.
-; Otherwise, the behavior tree forces eye contact to be continually
-; running, and the turn-look command is promptly over-ridden.
-; XXX FIXME, this is still broken during search for attention.
 
-(DefineLink
-	(DefinedPredicate "Look command")
-	(LambdaLink
-		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
-		(SequentialAndLink
-			(DefinedPredicate "break eye contact")
-			(EvaluationLink (DefinedPredicate "Gaze at point")
-				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
-			(EvaluationLink (DefinedPredicate "Look at point")
-				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
-		)))
-
-(DefineLink
-	(DefinedPredicate "Gaze command")
-	(LambdaLink
-		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
-		(SequentialAndLink
-			(DefinedPredicate "break eye contact")
-			(EvaluationLink (DefinedPredicate "Gaze at point")
-				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
-		)))
-
-; The language-subsystem can understand commands such as "look at me"
-; or, more generally, "look at this thing". At the moment, the only
-; thing we can look at are faces, and the "salient point"
-(DefineLink
-	(DefinedPredicate "Look-at-thing cmd")
-	(LambdaLink
-		(Variable "$object-id")
-		(SequentialOr
-			(SequentialAnd
-				(Equal (Variable "$object-id") (Concept "salient-point"))
-				(DefinedPredicate "look at salient point"))
-			(Evaluation
-				(DefinedPredicate "Set interaction target")
-				(ListLink (Variable "$object-id")))
-		)))
-
-;Salient
-(DefineLink
-	(DefinedPredicate "look at salient point")
-	(SequentialAnd
-		(True (Put
-			(Evaluation (DefinedPredicate "Look at point")
-				(List (Variable "$x") (Variable "$y") (Variable "$z")))
-			(Get (State salient-loc
-				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
-		))
-		(True (Put
-			(Evaluation (DefinedPredicate "Gaze at point")
-				(List (Variable "$x") (Variable "$y") (Variable "$z")))
-			(Get (State salient-loc
-				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
-		))
-	))
-
-; -------------------------------------------------------------
 ; Publish the current behavior.
 ; Cheap hack to allow external ROS nodes to know what we are doing.
 ; The string name of the node is sent directly as a ROS String message

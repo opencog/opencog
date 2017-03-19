@@ -140,40 +140,6 @@
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
 
-; The language-subsystem can understand commands such as "look at me"
-; or, more generally, "look at this thing". At the moment, the only
-; thing we can look at are faces, and the "salient point"
-(DefineLink
-	(DefinedPredicate "Look-at-thing cmd")
-	(LambdaLink
-		(Variable "$object-id")
-		(SequentialOr
-			(SequentialAnd
-				(Equal (Variable "$object-id") (Concept "salient-point"))
-				(DefinedPredicate "look at salient point"))
-			(Evaluation
-				(DefinedPredicate "Set interaction target")
-				(ListLink (Variable "$object-id")))
-		)))
-
-;Salient
-(DefineLink
-	(DefinedPredicate "look at salient point")
-	(SequentialAnd
-		(True (Put
-			(Evaluation (DefinedPredicate "Look at point")
-				(List (Variable "$x") (Variable "$y") (Variable "$z")))
-			(Get (State salient-loc
-				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
-		))
-		(True (Put
-			(Evaluation (DefinedPredicate "Gaze at point")
-				(List (Variable "$x") (Variable "$y") (Variable "$z")))
-			(Get (State salient-loc
-				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
-		))
-	))
-
 ; -------------------------------------------------------------
 ; Publish the current behavior.
 ; Cheap hack to allow external ROS nodes to know what we are doing.
