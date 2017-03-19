@@ -99,7 +99,7 @@
 
 ; -------------------------------------------------------------
 ; Request robot to look at a specific coordinate point.
-; Currently, a very thin wrapper around py:look_at_point
+; Currently, a very thin wrapper around "Do look at point"
 
 (DefineLink
 	(DefinedPredicate "Look at point")
@@ -109,7 +109,7 @@
 			;; Log the time.
 			; (True (DefinedSchema "set gesture timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:look_at_point")
+			(EvaluationLink (DefinedPredicate "Do look at point")
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
 
@@ -126,7 +126,7 @@
 			;; Log the time.
 			; (True (DefinedSchema "set gesture timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:gaze_at_point")
+			(EvaluationLink (GroundedPredicate "Do gaze at point")
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
 

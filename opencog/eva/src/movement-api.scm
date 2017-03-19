@@ -100,10 +100,10 @@
 
 ; -------------------------------------------------------------
 ; Request robot to look at a specific coordinate point.
-; Currently, a very thin wrapper around py:look_at_point
 
+(delete-definition "Do look at point")
 (DefineLink
-	(DefinedPredicate "Look at point")
+	(DefinedPredicate "Do look at point")
 	(LambdaLink
 		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
 		(SequentialAndLink
@@ -113,10 +113,10 @@
 ;---------------------------------------------------------------
 
 ; Request robot to turn eyes at a specific coordinate point.
-; Currently, a very thin wrapper around py:gaze_at_point
 
+(delete-definition "Do gaze at point")
 (DefineLink
-	(DefinedPredicate "Gaze at point")
+	(DefinedPredicate "Do gaze at point")
 	(LambdaLink
 		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
 		(SequentialAndLink
