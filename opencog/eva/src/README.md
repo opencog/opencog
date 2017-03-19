@@ -25,12 +25,6 @@ Design overview
   gestures.  The `behavior` component contains the primary, full
   behavior tree that controls the entire performance.
 
-* The OpenCog behaviors interface to ROS by calling the functions in
-  `atomic.py`. This file is just a "thin" wrapper around the actual ROS
-  code, which is in `ros_commo.py`.  A non-ROS, debugging-only interface
-  is in `atomic-dbg.py`; it does not import ROS, and only prints to
-  stdout. It can be used for a text-only chatbot.
-
 * The behavior tree works with visible faces based on face ID's,
   and is only interested in the visible faces, and not their locations.
   It outputs commands such as "look at face ID 42". The actual tracking
