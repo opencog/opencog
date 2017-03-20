@@ -146,7 +146,9 @@ class FaceTrack:
 
 
 	# Enable/disable Opencog face-tracking.  This is driven by the
-	# master control GUI.
+	# master control GUI. XXX FIXME -- why should this ever be disabled?
+	# OpenCog should always know about faces; perhaps it is congtrol of
+	# head and eye movements that should be disabled?
 	def behavior_control_cb(self, data):
 		# Is facetracking currently enabled?
 		facetracking = self.control_mode & self.C_FACE_TRACKING
