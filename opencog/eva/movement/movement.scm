@@ -20,17 +20,21 @@
 ;
 (define-public start-ros-movement-node
 	(python-eval "
+import os.path
 import sys
 import rosgraph
 sys.path.append('/usr/local/share/opencog/python')
 try:
     # Throw an exception if roscore is not running.
     rosgraph.Master('/rostopic').getPid()
-    execfile('atomic.py')
+    if (os.path.isfile('atomic.py')):
+        execfile('atomic.py')
+    else:
+        execfile('/usr/local/share/opencog/python/atomic.py')
     ros_is_running()
     print 'Loaded the OpenCog ROS Movement API'
 except:
-    execfile('atomic-dbg.py')
+    execfile('/usr/local/share/opencog/python/atomic-dbg.py')
     print 'Loaded the OpenCog Movement Debug API'
 "))
 
