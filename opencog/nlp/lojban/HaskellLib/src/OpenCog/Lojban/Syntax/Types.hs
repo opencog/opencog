@@ -27,7 +27,8 @@ type Sumti = Tagged Atom
 type Selbri = (TruthVal,Atom) --STring represents TV
 type Tagged a = (a,Maybe Tag)
 
-type Con = (Maybe String,Maybe (Tagged Selbri))
+type LCON = (Maybe String,(String,Maybe String))
+type Con = (Maybe LCON,Maybe (Tagged Selbri))
 type Bridi = ([Sumti],((Maybe Atom,(Maybe String,Tagged Selbri)),[Sumti]))
 
 data WordList = WordList { cmavos :: M.Map String StringSet

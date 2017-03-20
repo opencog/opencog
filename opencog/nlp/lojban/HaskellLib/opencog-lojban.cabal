@@ -43,7 +43,6 @@ library
 executable lojbanChatBot
   hs-source-dirs:      app
   main-is:             Main.hs
-  other-modules:       Main.Atoms
   build-depends:       base
                      , opencog-atomspace
                      , opencog-lojban
