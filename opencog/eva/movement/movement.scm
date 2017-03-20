@@ -8,7 +8,7 @@
 
 (use-modules (opencog) (opencog atom-types))
 
-(load "movement/orchestrate.scm")
+(load "movement/do-movement.scm")
 
 ; Try loading the python code from this directory;
 ; else go for the install directory. This is kind-of hacky;
