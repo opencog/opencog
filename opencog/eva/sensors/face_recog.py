@@ -1,5 +1,5 @@
 #
-# saliency_track.py - Sound energy and power.
+# face_recog.py - Face Recognition
 # Copyright (C) 2016  Hanson Robotics
 #
 # This library is free software; you can redistribute it and/or
@@ -30,5 +30,4 @@ class FaceRecog:
 
 	def face_cb(self, data):
 		for fc in data.faces:
-			#print "locations x="+str(x)+" y="+str(y)+" z="+str(z)+"\n"
-			self.atomo.face_id(fc.id,fc.name);
+			self.atomo.face_recognition(fc.id, fc.name);

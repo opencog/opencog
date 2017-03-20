@@ -118,7 +118,7 @@ class AtomicMsgs:
 
 	# --------------------------------------------------------
 
-	def face_recognition(self, tracker_id, rec_id):
+	def face_recognition(self, tracker_id, name):
 		'''
 		Associate a face-recognition ID with a face-tracker ID.
 
@@ -129,13 +129,7 @@ class AtomicMsgs:
 		`rec_id` is "0" for an unrecognized face and some other string
 		for a recognized face. It is currently stored as a ConceptNode.
 		'''
-		stl = "(EvaluationLink (Predicate \"name\") " + \
-			"(ListLink (ConceptNode \"" + \
-			str(tracker_id) + "\") (ConceptNode \"" + rec_id + "\")))\n"
-		netcat(self.hostname, self.port, stl)
-
-	def face_id(self,fid,name):
-		fc = '(make-recognized-face ' + str(fid) + ' "' + name + '")\n'
+		fc = '(make-recognized-face ' + str(tracker_id) + ' "' + name + '")\n'
 		netcat(self.hostname, self.port, fc)
 
 	# --------------------------------------------------------
