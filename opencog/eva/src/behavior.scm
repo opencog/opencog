@@ -220,8 +220,6 @@
 	))
 
 ;; New recognized person sequence
-;; XXX FIXME, this includes some chat text that needs to be
-;; removed. (It says "hello" to the person.)
 (DefineLink
 	(DefinedPredicate "Interacting Sequence for recognized person")
 	(SequentialAnd
@@ -231,26 +229,12 @@
 				(DefinedSchemaNode "Get recognized face's face id")
 				(DefinedSchema "Get recognized faces")))))
 		(DefinedPredicate "look at person")
-		(True (Put
-			(Get
-				(VariableList
-					(TypedVariable
-						(VariableNode "face-id")
-						(Type "ConceptNode"))
-					(TypedVariable
-						(VariableNode "recog-id")
-						(Type "ConceptNode")))
-				(EvaluationLink
-					(PredicateNode "name")
-					(ListLink
-						(VariableNode "face-id")
-						(VariableNode "recog-id"))))))
 		;TODO: Separate out room-state into separate demands that occur before
 		; or after other demands are handled. How should order of execution
 		; be represented?
 		(DefinedPredicate "Update status")
 		(Evaluation (GroundedPredicate "scm: print-msg")
-			(ListLink (Node "--- Glance at and greet new recognized person")))
+			(ListLink (Node "--- Glance at new recognized person")))
 	))
 
 ;; Respond to a new face becoming visible.
