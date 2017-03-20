@@ -126,7 +126,7 @@
 			;; Log the time.
 			; (True (DefinedSchema "set gesture timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "Do gaze at point")
+			(EvaluationLink (DefinedPredicate "Do gaze at point")
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
 
