@@ -383,7 +383,7 @@
 (State salient-loc (List (NumberNode 1.0) (NumberNode 0) (NumberNode 0)))
 
 ;; Degree of the salient point
-(define salient (AnchorNode "Salient degree"))
+(define salient-degree (AnchorNode "Salient degree"))
 (State salient-degree (Number 0))
 
 (DefineLink
