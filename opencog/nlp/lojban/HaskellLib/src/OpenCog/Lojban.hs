@@ -3,7 +3,6 @@ module OpenCog.Lojban
 ( WordList
 , initParserPrinter
 , lojbanToAtomese
-, lojbanToAtomeseRaw
 , atomeseToLojban
 , loadWordLists
 ) where
@@ -11,41 +10,40 @@ module OpenCog.Lojban
 import OpenCog.Lojban.Syntax
 import OpenCog.Lojban.Util
 import OpenCog.Lojban.WordList
-import OpenCog.Lojban.Syntax.Types (WordList)
+import OpenCog.Lojban.Syntax.Types
 
 import OpenCog.AtomSpace
 
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Reader
+import Control.Monad.RWS
 import Control.Exception
 import System.Random
 import Data.Char (chr)
 import Data.Maybe
 import qualified Data.Map as M
 
-import Text.Syntax.Parser.Naive
-import qualified Text.Syntax.Printer.Naive as P
+import Control.Monad.RWS
+import Control.Monad.Trans.Class
 
-initParserPrinter :: String -> IO (String -> Maybe Atom, Atom -> Maybe String)
+import Iso hiding (Syntax,SynIso)
+
+initParserPrinter :: String -> IO (String -> Either String Atom, Atom -> Either String String)
 initParserPrinter path = do
     wordlist <- loadWordLists path
     return (lojbanToAtomese wordlist,atomeseToLojban wordlist)
 
-lojbanToAtomese :: WordList -> String -> Maybe Atom
-lojbanToAtomese state text =
-    wrapAtom <$> listToMaybe (parse (runReaderT lojban state) (text++" "))
-
-lojbanToAtomeseRaw :: WordList -> String -> Maybe (Atom,String)
-lojbanToAtomeseRaw state text =
-    listToMaybe (rawparse (runReaderT lojban state) (text++" "))
+lojbanToAtomese :: WordList -> String -> Either String Atom
+lojbanToAtomese rstate text = wrapAtom . fst <$> evalRWST (apply lojban ()) rstate state
+    where state = State {sFlags = [],sAtoms = [],sText = text++" "}
 
 wrapAtom :: Atom -> Atom
 wrapAtom atom@(Link "SatisfactionLink" _ _) = cLL [cAN "QuestionAnchor" , atom]
 wrapAtom atom@(Link "PutLink" _ _)          = cLL [cAN "QuestionAnchor" , atom]
 wrapAtom atom                               = cLL [cAN "StatementAnchor", atom]
 
-atomeseToLojban :: WordList -> Atom -> Maybe String
-atomeseToLojban state a@(LL [_an,s]) = P.print (runReaderT preti state) s
+atomeseToLojban :: WordList -> Atom -> Either String String
+atomeseToLojban rstate a@(LL [_an,s]) = sText . fst <$> execRWST (unapply lojban s) rstate state
+    where state = State {sFlags = [],sAtoms = [],sText = ""}
 
 {-tvToLojban :: TruthVal -> String
 tvToLojban tv

@@ -14,22 +14,25 @@ import Data.Serialize
 import Data.ListTrie.Patricia.Set.Ord
 
 import OpenCog.Lojban.Syntax.Util
-import Control.Isomorphism.Partial (Iso)
+import OpenCog.Lojban.Syntax.Types
 
-type StringSet = TrieSet Char
-
-loadWordLists :: String -> IO (M.Map String StringSet,StringSet,Iso String String,Int)
+loadWordLists :: String -> IO WordList
 loadWordLists src = do
     let ser = src ++ ".dat"
     dfe <- doesFileExist ser
-    case dfe of
-        True -> do
+    if dfe
+        then (do
             bs <- BS.readFile ser
             (seed :: Int) <- randomIO
             let (Right (selmahos,gismu,bai)) = decode bs
                 baiIso = mkSynonymIso bai . stripSpace
-            return (fmap fromList selmahos,fromList gismu,baiIso,seed)
-        False -> do
+            return $ WordList {cmavos = fmap fromList selmahos
+                              ,gismus = fromList gismu
+                              ,bai = baiIso
+                              ,seed = seed
+                              }
+            )
+        else (do
             gismu <- runX (readDocument [] src
                            >>> getChildren >>> getValsi >>> getGismu)
             cmavo <- runX (readDocument [] src
@@ -42,10 +45,14 @@ loadWordLists src = do
                 p e = e `notElem` "1234567890*"
                 baiMerged = fmap handleBAIprefix bai
                 baiIso = mkSynonymIso baiMerged . stripSpace
-                res = (fmap fromList selmahos,fromList gismu,baiIso,seed)
+                res = WordList {cmavos = fmap fromList selmahos
+                               ,gismus = fromList gismu
+                               ,bai = baiIso
+                               ,seed = seed
+                               }
                 bs = encode (selmahos,gismu,baiMerged)
             BS.writeFile ser bs
-            return res
+            return res)
 
 handleBAIprefix :: (String,String) -> (String,String)
 handleBAIprefix (b,d) = if t2 `elem` se then (b,t2 ++ ' ' : nd) else (b,nd)

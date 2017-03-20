@@ -141,13 +141,22 @@ the build, will be more precise as to which parts will not be built.
 > Used by opencog/spatial/MapTool (which is now deprecated/obsolete !?)
 > http://www.ferzkopp.net/joomla/content/view/19/14/ | libsdl-gfx1.2-dev
 
+###### CppREST
+> C++ HTTP RESTful interfaces
+> Used by the Pattern miner for distributed processing (this will be
+  replaced by gearman in future releases).
+> wget https://github.com/Microsoft/cpprestsdk/archive/v2.9.0.tar.gz
+
 ###### Threading Building Blocks
 > C++ template library for parallel programming
-> Used to implement the optional REST API. (should be refactored to not use TBB)
+> Used to implement the optional REST API. (TODO: the REST API should
+  be refactored to not use TBB)
 > https://www.threadingbuildingblocks.org/download | libtbb-dev
 
 ###### ZeroMQ (version 3.2.4 or higher)
 > Asynchronous messaging library
+> Used by the event publisher library ... which is currently broken,
+  anyway, and not used anywhere ...
 > http://zeromq.org/intro:get-the-software | libzmq3-dev
 
 Building OpenCog

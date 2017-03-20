@@ -15,7 +15,7 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver: lts-7.3
+resolver: lts-8.5
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -38,14 +38,11 @@ resolver: lts-7.3
 packages:
 - '.'
 - '../HaskellLib'
-- location:
-   git: https://github.com/rTreutlein/invertible-syntax
-   commit: 5185ee11763ffcef6fe121da53db2e0da773b56e
+- location: #./../../../../../Iso/
+   git: https://github.com/rTreutlein/IsoSyntax
+   commit: 8617eadbcd7767b81b528a1fa9e44596c7252fa0
   extra-dep: true
-- location:
-   git: https://github.com/rTreutlein/partial-isomorphisms
-   commit: a8d1b86de0a1e1a85c20a25937f50a173b0a990d
-  extra-dep: true
+
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps: [opencog-atomspace-0.1.0.7,list-tries-0.6.3]

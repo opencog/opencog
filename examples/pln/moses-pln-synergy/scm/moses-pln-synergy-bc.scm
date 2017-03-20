@@ -293,40 +293,40 @@
 ;; )
 ;; (pln-bc target-8)
 
-;; Target (9)
-(define target-9
-   (ImplicationLink
-      (LambdaLink
-         (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-         )
-         (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-               (VariableNode "$X")
-               (ConceptNode "treatment-1")
-            )
-         )
-      )
-      (LambdaLink
-         (TypedVariableLink
-            (VariableNode "$X")
-            (TypeNode "ConceptNode")
-         )
-         (EvaluationLink
-            (PredicateNode "take")
-            (ListLink
-               (VariableNode "$X")
-               (ConceptNode "compound-A")
-            )
-         )
-      )
-   )
-)
-(pln-bc target-9)
+;; ;; Target (9)
+;; (define target-9
+;;    (ImplicationLink
+;;       (LambdaLink
+;;          (TypedVariableLink
+;;             (VariableNode "$X")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;          (EvaluationLink
+;;             (PredicateNode "take")
+;;             (ListLink
+;;                (VariableNode "$X")
+;;                (ConceptNode "treatment-1")
+;;             )
+;;          )
+;;       )
+;;       (LambdaLink
+;;          (TypedVariableLink
+;;             (VariableNode "$X")
+;;             (TypeNode "ConceptNode")
+;;          )
+;;          (EvaluationLink
+;;             (PredicateNode "take")
+;;             (ListLink
+;;                (VariableNode "$X")
+;;                (ConceptNode "compound-A")
+;;             )
+;;          )
+;;       )
+;;    )
+;; )
+;; (pln-bc target-9)
 
-;; ;; Target (10) TODO: need to implement full conditional instantiation meta rule 
+;; ;; Target (10)
 ;; (define target-10
 ;;   (ImplicationLink
 ;;      (PredicateNode "is-well-hydrated")
@@ -335,6 +335,68 @@
 ;; )
 ;; (pln-bc target-10)
 
+;; ;; Target (11-a)
+;; (define target-11-a
+;;   (ImplicationLink
+;;     (LambdaLink
+;;       (TypedVariableLink
+;;         (VariableNode "$X")
+;;         (TypeNode "ConceptNode")
+;;       )
+;;       (EvaluationLink
+;;         (PredicateNode "take")
+;;         (ListLink
+;;           (VariableNode "$X")
+;;           (ConceptNode "compound-A")
+;;         )
+;;       )
+;;     )
+;;     (PredicateNode "take-compound-A")
+;;   )
+;; )
+;; (pln-bc target-11-a)
+
+;; ;; Target (11-b)
+;; (define target-11-b
+;;   (ImplicationLink
+;;     (PredicateNode "take-treatment-1")
+;;     (LambdaLink
+;;       (TypedVariableLink
+;;         (VariableNode "$X")
+;;         (TypeNode "ConceptNode")
+;;       )
+;;       (EvaluationLink
+;;         (PredicateNode "take")
+;;         (ListLink
+;;           (VariableNode "$X")
+;;           (ConceptNode "treatment-1")
+;;         )
+;;       )
+;;     )
+;;   )
+;; )
+;; (pln-bc target-11-b)
+
+;; Target (12)
+(define target-12
+  (ImplicationLink
+    (PredicateNode "take-treatment-1")
+    (LambdaLink
+      (TypedVariableLink
+        (VariableNode "$X")
+        (TypeNode "ConceptNode")
+      )
+      (EvaluationLink
+        (PredicateNode "take")
+        (ListLink
+          (VariableNode "$X")
+          (ConceptNode "compound-A")
+        )
+      )
+    )
+  )
+)
+(pln-bc target-12)
 
 ;; Final target
 ;; (pln-bc moses-model)

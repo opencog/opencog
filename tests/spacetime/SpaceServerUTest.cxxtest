@@ -67,7 +67,7 @@ public:
     {
         Handle testmaphandle = testspaceserver->addOrGetSpaceMap(123456, "testmap", 1);
 
-        TS_ASSERT(testmaphandle != nullptr);
+        TS_ASSERT(nullptr != testmaphandle);
         Handle expected = testatomspace.get_node(SPACE_MAP_NODE, "testmap");
         printf("expected=%s\n got=%s\n", expected->toString().c_str(),
               testmaphandle->toString().c_str());

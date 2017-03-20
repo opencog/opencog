@@ -386,7 +386,7 @@ static Handle tag_atom_with_locs(const std::string& map_name,
             ))
         )));
     }
-    return Handle(createLink(SET_LINK, loc_links));
+    return Handle(createLink(loc_links, SET_LINK));
 }
 
 Handle PointMemorySCM::get_first_location(const string& map_name,
@@ -433,7 +433,7 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name,
     for (const time_pt& tp: tl)
         LL.push_back(timestamp_tag_atom(tp, ato));
 
-    return opencog::Handle(createLink(SET_LINK, LL));
+    return opencog::Handle(createLink(LL, SET_LINK));
 }
 
 // Get the timeline of the atom.  That is, get a sequence of
@@ -445,7 +445,7 @@ Handle PointMemorySCM::get_timeline(const string& map_name, Handle ato)
     HandleSeq LL;
     for (const time_pt& tp: tl)
         LL.push_back(timestamp_tag_atom(tp, ato));
-    return opencog::Handle(createLink(SET_LINK, LL));
+    return opencog::Handle(createLink(LL, SET_LINK));
 }
 
 bool PointMemorySCM::remove_location_ato(const string& map_name, double x, double y, double z)
