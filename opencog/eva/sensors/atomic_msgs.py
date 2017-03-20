@@ -117,7 +117,8 @@ class AtomicMsgs:
 		netcat(self.hostname, self.port, face)
 
 	# --------------------------------------------------------
-	def face_recognition(self, tracker_id, rec_id):
+
+	def face_recognition(self, tracker_id, name):
 		'''
 		Associate a face-recognition ID with a face-tracker ID.
 
@@ -128,10 +129,8 @@ class AtomicMsgs:
 		`rec_id` is "0" for an unrecognized face and some other string
 		for a recognized face. It is currently stored as a ConceptNode.
 		'''
-		stl = "(EvaluationLink (Predicate \"name\") " + \
-			"(ListLink (ConceptNode \"" + \
-			str(tracker_id) + "\") (ConceptNode \"" + rec_id + "\")))\n"
-		netcat(self.hostname, self.port, stl)
+		fc = '(make-recognized-face ' + str(tracker_id) + ' "' + name + '")\n'
+		netcat(self.hostname, self.port, fc)
 
 	# --------------------------------------------------------
 	# Speech-to-text stuff
@@ -195,7 +194,7 @@ class AtomicMsgs:
 		netcat(self.hostname, self.port, sal)
 
 	#room luminance <=25 - dark, <=40 - normal, >40 - bright
-	def room_brightness(self,bright):
+	def room_brightness(self, bright):
 		room = '(StateLink (AnchorNode "luminance")' +\
 			' (NumberNode ' + str(bright) +'))\n'
 		netcat(self.hostname, self.port, room)

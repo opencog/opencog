@@ -105,7 +105,16 @@ class FaceTrack:
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,
-	# or a face is lost.
+	# or a face is lost.  Also called for recognized faces.
+	#
+	# This callback handles recognized faces using a special message
+	# format, published on the `/camera/face_locations`. Note that
+	# there is also a different topic for recognized faces, called
+	# `/camera/face_recognition`. See the `face-recog.py` file for
+	# details. I am not sure what subsystem published which message
+	# type. XXX FIXME - figure out why there are two different
+	# face recognition subsystems, and standardize one which we
+	# should use.
 	def face_event_cb(self, data):
 		if not self.control_mode & self.C_FACE_TRACKING:
 			return
@@ -137,7 +146,9 @@ class FaceTrack:
 
 
 	# Enable/disable Opencog face-tracking.  This is driven by the
-	# master control GUI.
+	# master control GUI. XXX FIXME -- why should this ever be disabled?
+	# OpenCog should always know about faces; perhaps it is congtrol of
+	# head and eye movements that should be disabled?
 	def behavior_control_cb(self, data):
 		# Is facetracking currently enabled?
 		facetracking = self.control_mode & self.C_FACE_TRACKING

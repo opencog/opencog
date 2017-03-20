@@ -89,9 +89,12 @@
 "
   make-recognized-face FACE-ID RECOG-ID
 
-  FACE-ID is a number that represents the face ID and RECOG-ID is a string that
-  represents the recognition ID for the visible face. It returns the atomese
-  representation of the recognized face.
+  FACE-ID is a number that represents the face ID and RECOG-ID is
+  a string that represents the recognition ID for the visible face.
+  Currently, RECOG-ID is usually just a string name of the person.
+
+  This function returns the atomese representation of the recognized
+  face.
 "
 	(EvaluationLink
 		(PredicateNode "name")
