@@ -10,6 +10,8 @@
 		(cog-get-link 'DefineLink 'DefinedPredicateNode
 			(DefinedPredicate STR)))
 
+	(if (not (null? dfn)) (cog-delete (car dfn)) #f))
+
 ; -------------------------------------------------------------
 ; Request a display of a facial expression (smile, frown, etc.)
 ; The expression name should be one of the supported blender animations.
