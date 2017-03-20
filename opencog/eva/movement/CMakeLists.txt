@@ -11,5 +11,6 @@ INSTALL (FILES
 INSTALL (FILES
 	atomic.py
 	atomic-dbg.py
+	ros_commo.py
 	DESTINATION "${DATADIR}/python/"
 )
