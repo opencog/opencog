@@ -45,3 +45,8 @@ try:
 except NameError:
     execfile('/usr/local/share/opencog/python/atomic-dbg.py')
 ")
+
+; ... well, above should have loaded the debug interfaces.
+; Now check for ROS, and if it is up and running, then load
+; the ROS interfaces.
+(start-ros-movement-node)
