@@ -34,6 +34,14 @@ from dynamic_reconfigure.msg import Config
 
 class ControlPsi:
 	def __init__(self):
+		# A list of parameter names that are mirrored in opencog
+		# for controling psi-rules
+		self.param_list = []
+		# Parameter dictionary that is used for updating states
+		# recorded in the atomspace. It is used to cache the
+		# atomspace values.
+		self.param_dict = {}
+
 		self.atomo = AtomicMsgs()
 		rospy.Subscriber("/opencog_control/parameter_updates", Config,
 			self.openpsi_control_cb)
