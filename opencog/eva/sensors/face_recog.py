@@ -23,6 +23,15 @@ from atomic_msgs import AtomicMsgs
 from face_id.msg import f_id
 from face_id.msg import faces_ids
 
+# Push information about recognized faces into the atomspace.
+#
+# This listens to the `/camera/face_recognition` ROS topic. Note that
+# some ofther face-id subsystem generates face-recognition messages
+# to the `/camera/face_locations` topic, using a different message
+# format. (See the `face_track.py` file).  I am not sure what subsystem
+# publishes where, or why. XXX FIXME Figure out why tehre are two
+# different face-recognition subsystems in use, document them, and
+# standardize on the message formats used.
 class FaceRecog:
 	def __init__(self):
 		self.atomo = AtomicMsgs()

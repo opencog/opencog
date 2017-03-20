@@ -105,7 +105,16 @@ class FaceTrack:
 	# pi_vision ROS callbacks
 
 	# pi_vision ROS callback, called when a new face is detected,
-	# or a face is lost.
+	# or a face is lost.  Also called for recognized faces.
+	#
+	# This callback handles recognized faces using a special message
+	# format, published on the `/camera/face_locations`. Note that
+	# there is also a different topic for recognized faces, called
+	# `/camera/face_recognition`. See the `face-recog.py` file for
+	# details. I am not sure what subsystem published which message
+	# type. XXX FIXME - figure out why there are two different
+	# face recognition subsystems, and standardize one which we
+	# should use.
 	def face_event_cb(self, data):
 		if not self.control_mode & self.C_FACE_TRACKING:
 			return
