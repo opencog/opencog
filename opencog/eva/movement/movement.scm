@@ -6,7 +6,7 @@
 
 (define-module (opencog movement))
 
-(use-modules (opencog) (opencog atom-types))
+(use-modules (opencog) (opencog atom-types) (opencog python))
 
 (load "movement/do-movement.scm")
 
