@@ -38,6 +38,7 @@ class Control:
 	# The 'btree_on' and 'btree_off' data-strings shouldn't be used,
 	# as they are meant for switching on and off non-opencog demos.
 	def behavior_switch_cb(self, data):
+		print "Received /behavior_switch " + data.data
 		if data.data == "opencog_on":
 			self.atomo.wholeshow_start()
 

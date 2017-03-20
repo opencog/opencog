@@ -42,6 +42,7 @@ class AudioPower:
 	def audio_cb(self, data):
 		#print "SuddenChange {}".format(data.SuddenChange)
 		if data.SuddenChange:
+			print "Heard a loud bang!"
 			self.atomo.audio_bang(1.0)
 		else:
 			self.atomo.audio_bang(0.0)
