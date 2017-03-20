@@ -18,41 +18,30 @@
 ; hang, we test to see if we can talk to roscore. If we cannot, then load
 ; only the debug interfaces.
 ;
+;
 (define-public start-ros-movement-node
 	(python-eval "
 import os.path
 import sys
 import rosgraph
+# This hard-coded install path from CMakefile
 sys.path.append('/usr/local/share/opencog/python')
 try:
     # Throw an exception if roscore is not running.
     rosgraph.Master('/rostopic').getPid()
     if (os.path.isfile('atomic.py')):
-        execfile('atomic.py')
+        # Python3 does not support execfile any longer
+        # execfile('atomic.py'))
+        exec(open('atomic.py').read())
     else:
-        execfile('/usr/local/share/opencog/python/atomic.py')
+        # execfile('/usr/local/share/opencog/python/atomic.py')
+        exec(open('/usr/local/share/opencog/python/atomic.py').read())
     ros_is_running()
     print 'Loaded the OpenCog ROS Movement API'
 except:
-    execfile('/usr/local/share/opencog/python/atomic-dbg.py')
+    # execfile('/usr/local/share/opencog/python/atomic-dbg.py')
+    exec(open('/usr/local/share/opencog/python/atomic-dbg.py').read())
     print 'Loaded the OpenCog Movement Debug API'
 "))
 
-; If the ROS node hasn't been loaded yet, then load the "debug"
-; python backend. This is needed, so that various imperative
-; commands don't crash. A later load of the ROS node will harmlessly
-; over-write the python entry-points.
-;
-; Hard-coded install path from CMakefile
-(python-eval "
-# Throws an exception if do_wake_up() is not defined.
-try:
-    do_wake_up()
-except NameError:
-    execfile('/usr/local/share/opencog/python/atomic-dbg.py')
-")
-
-; ... well, above should have loaded the debug interfaces.
-; Now check for ROS, and if it is up and running, then load
-; the ROS interfaces.
 (start-ros-movement-node)
