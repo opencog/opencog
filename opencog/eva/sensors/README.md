@@ -4,10 +4,11 @@ ROS Messaging Shims
 
 The code in this directory translates sensory input (vision, sound)
 between ROS and OpenCog. It is written in python, because python
-is a very natural API for ROS; it subscribes to assorted ROS topics,
+is a very natural API for ROS. Each module subscribes to some ROS topic,
 and when ROS messages are received, these are converted into atomese
-and sent on the to cogserver.  The interface and the translation is
-rather informal, and ad hoc.
+and sent on the to cogserver.  The interface defined here, and the
+translation to atomese rather informal, ad hoc. Change it as required,
+to modernize/update.
 
 The `face_track.py` file implements a ROS node to pass information
 about the visible human faces into the opencog `spacetime` server.

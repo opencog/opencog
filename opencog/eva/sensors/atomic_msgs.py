@@ -1,8 +1,8 @@
 #
 # atomic_msgs.py - Send data to the cogserver/atomspace.
 #
-# Copyright (C) 2015,2016  Linas Vepstas
-# Copyright (C) 2016  Hanson Robotics
+# Copyright (C) 2015,2016,2017  Linas Vepstas
+# Copyright (C) 2016,2017  Hanson Robotics
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License v3 as
@@ -31,6 +31,24 @@ class AtomicMsgs:
 		self.hostname = "localhost"
 		self.port = 17020
 
+	# --------------------------------------------------------
+	# Wholeshow control -- Start and stop openpsi
+	def wholeshow_stop(self):
+		netcat(self.hostname, self.port, "(disable-all-demos)")
+		netcat(self.hostname, self.port, "(halt)")
+
+	def wholeshow_start(self):
+		netcat(self.hostname, self.port, "(enable-all-demos)")
+		# pipe stdout to /dev/null, as otherwise the the stdout pipe
+		# attached to the evaluator will fill up with messages, (which
+		# no one, i.e. python, ever fetches) and then stall.
+		# XXX FIXME .. this was needed for the old interface;
+		# I don't think it's needed any more, for this new netcat
+		# interface ....
+		netcat(self.hostname, self.port, \
+			'(set-current-output-port (%make-void-port "w"))(run)')
+
+	# --------------------------------------------------------
 	# Set the facetracking state in atomspace
 	def update_ft_state_to_atomspace(self, enabled):
 		if enabled:
@@ -121,6 +139,31 @@ class AtomicMsgs:
 		spoke = "(who-said? \"" + stt + "\")\n"
 		netcat(self.hostname, self.port, spoke)
 
+	# Pass the text that STT heard into opencog.
+	# Rather than setting state, we're going to trigger a script, here.
+	def perceived_text(self, text):
+		netcat(self.hostname, self.port,
+			'(cog-evaluate! (PutLink (DefinedPredicate "heard text")' +
+			' (SentenceNode "' + text + '")))')
+
+	# Affect in speech
+	# Indicate that the robot heard freindly speech
+	def affect_happy(self):
+		netcat(self.hostname, self.port, "(State chat-affect chat-happy)")
+
+	# Indicate that the robot heard negative speech
+	def affect_negative(self):
+		netcat(self.hostname, self.port, "(State chat-affect chat-negative)")
+
+	# --------------------------------------------------------
+	# Text-to-speech stuff
+	# Let atomspace know that vocalization has started or ended.
+	def vocalization_started(self):
+		netcat(self.hostname, self.port, "(State chat-state chat-start)")
+
+	def vocalization_ended(self):
+		netcat(self.hostname, self.port, "(State chat-state chat-stop)")
+
 	# --------------------------------------------------------
 	# Sound localization -- send 3D xyz coordinate of sound source
 	def update_sound(self, x, y, z):
@@ -142,17 +185,22 @@ class AtomicMsgs:
 
 	#saliency location
 	#Degree of the salient point
-	def saliency(self,x,y,z,deg):
-		sal = '(StateLink (AnchorNode "locations")' + \
+	def saliency(self, x, y, z, deg):
+		sal = '(StateLink (AnchorNode "Salient location")' + \
 			'(List (NumberNode '+ str(x)+ ')' + \
-			'(NumberNode '+ str(y)+ ')' + \
-			'(NumberNode '+ str(z) + ')))\n' + \
-			'(StateLink (AnchorNode "Degree value")' + \
-			'(NumberNode '+ str(deg)+'))\n'
-		netcat(self.hostname,self.port,sal)
+			'  (NumberNode '+ str(y) + ')' + \
+			'  (NumberNode '+ str(z) + ')))\n' + \
+			'(StateLink (AnchorNode "Salient degree")' + \
+			'  (NumberNode '+ str(deg) + '))\n'
+		netcat(self.hostname, self.port, sal)
 
 	#room luminance <=25 - dark, <=40 - normal, >40 - bright
 	def room_brightness(self,bright):
 		room = '(StateLink (AnchorNode "luminance")' +\
 			' (NumberNode ' + str(bright) +'))\n'
-		netcat(self.hostname,self.port,room)
+		netcat(self.hostname, self.port, room)
+
+	# --------------------------------------------------------
+	# Generic
+	def evaluate_scm(self, scm_string):
+		netcat(self.hostname, self.port, scm_string)

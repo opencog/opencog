@@ -13,37 +13,6 @@
 
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
-(use-modules (opencog python))
-
-; Try loading the python code from this directory;
-; else go for the install directory. This is kind-of hacky;
-; is there a nicer way to load stuff?
-;
-; (python-eval
-;    "import sys\nsys.path.insert(0, '/usr/local/share/opencog/python')\n")
-;
-; If roscore is not running, then the load will hang. Thus, to avoid the
-; hang, we test to see if we can talk to roscore. If we cannot, then load
-; only the debug interfaces.
-;
-(python-eval "
-import rosgraph
-try:
-    # Throw an exception if roscore is not running.
-    rosgraph.Master('/rostopic').getPid()
-    execfile('atomic.py')
-    try:
-        ros_is_running()
-    except NameError:
-        execfile('/usr/local/share/opencog/python/atomic.py')
-except:
-    execfile('atomic-dbg.py')
-    try:
-        ros_is_running()
-    except NameError:
-        execfile('/usr/local/share/opencog/python/atomic-dbg.py')
-")
-
 (use-modules (opencog eva-model))
 
 ; --------------------------------------------------------
@@ -200,13 +169,6 @@ except:
 
   (change-template "Time to reset glance" "glance"
   	"time_search_glance_min" "time_search_glance_max")
-; ----------------------------------------------------------------------
-; Return true if ROS is still running.
-(DefineLink
-	(DefinedPredicate "ROS is running?")
-	(Evaluation
-		(GroundedPredicate "py:ros_is_running") (ListLink)))
-
 ; ----------------------------------------------------------------------
 ; Sigh. Perform manual garbage collection. This really should be
 ; automated. XXX TODO. (Can we get ECAN to do this for us?)

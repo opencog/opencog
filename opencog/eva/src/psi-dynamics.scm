@@ -12,12 +12,8 @@
 (define valence-activation-level .5)
 
 (define psi-verbose #t)
-(define no-blender #f)
 
 (define single-dimension-valence #t)
-
-(if no-blender
-	(python-eval "execfile('/usr/local/share/opencog/python/atomic-dbg.py')"))
 
 (define prev-value-node (Concept "previous value"))
 (define current-sentence-node (Concept "current sentence"))

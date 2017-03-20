@@ -53,9 +53,9 @@ cd $OCBHAVE/src
 tmux new-window -n 'cog' 'guile -l btree-eva.scm; $SHELL'
 sleep 10
 
-# Run the new face-tracker.
+# Run the various sensory-input modules, including the face-tracker.
 # tmux new-window -n 'face' '$OCBHAVE/face_track/main.py; $SHELL'
-tmux new-window -n 'fce' '../ros_sensors/main.py; $SHELL'
+tmux new-window -n 'sen' '../sensors/main.py; $SHELL'
 
 # Telnet shell
 tmux new-window -n 'tel' 'rlwrap telnet localhost 17020; $SHELL'

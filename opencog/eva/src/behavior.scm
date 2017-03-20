@@ -229,27 +229,12 @@
 				(DefinedSchemaNode "Get recognized face's face id")
 				(DefinedSchema "Get recognized faces")))))
 		(DefinedPredicate "look at person")
-		(True (Put
-			(DefinedPredicate "Greet recognized person")
-			(Get
-				(VariableList
-					(TypedVariable
-						(VariableNode "face-id")
-						(Type "ConceptNode"))
-					(TypedVariable
-						(VariableNode "recog-id")
-						(Type "ConceptNode")))
-				(EvaluationLink
-					(PredicateNode "name")
-					(ListLink
-						(VariableNode "face-id")
-						(VariableNode "recog-id"))))))
 		;TODO: Separate out room-state into separate demands that occur before
 		; or after other demands are handled. How should order of execution
 		; be represented?
 		(DefinedPredicate "Update status")
 		(Evaluation (GroundedPredicate "scm: print-msg")
-			(ListLink (Node "--- Glance at and greet new recognized person")))
+			(ListLink (Node "--- Glance at new recognized person")))
 	))
 
 ;; Respond to a new face becoming visible.
@@ -456,73 +441,6 @@
 			))
 	))
 
-; Call once, to fall asleep.
-(DefineLink
-	(DefinedPredicate "Go to sleep")
-	(SequentialAnd
-		; Proceed only if we are allowed to.
-		(Put (DefinedPredicate "Request Set Face Expression")
-			(ListLink bhv-source (ConceptNode "sleepy")))
-
-		; Proceed with the sleep animation only if the state
-		; change was approved.
-		(Evaluation (DefinedPredicate "Request Set Soma State")
-			(ListLink bhv-source soma-sleeping))
-
-		(Evaluation (GroundedPredicate "scm: print-msg-time")
-			(ListLink (Node "--- Go to sleep.")
-				(Minus (TimeLink) (DefinedSchema "get bored timestamp"))))
-		(True (DefinedSchema "set sleep timestamp"))
-
-		(Put (DefinedPredicate "Publish behavior")
-			(Concept "Falling asleep"))
-
-		; First, show some yawns ...
-		(Put (DefinedPredicate "Show random gesture")
-			(Concept "sleepy"))
-
-		; Finally, play the go-to-sleep animation.
-		(Evaluation (GroundedPredicate "py:do_go_sleep") (ListLink))
-	))
-
-; Wake-up sequence
-(DefineLink
-	(DefinedPredicate "Wake up")
-	(SequentialAnd
-		; Request change soma state to being awake. Proceed only if
-		; the request is accepted.
-		(Evaluation (DefinedPredicate "Request Set Soma State")
-			(ListLink bhv-source soma-awake))
-
-		; Proceed only if we are allowed to.
-		(Put (DefinedPredicate "Request Set Face Expression")
-			(ListLink bhv-source (ConceptNode "wake-up")))
-
-		(Evaluation (GroundedPredicate "scm: print-msg-time")
-			(ListLink (Node "--- Wake up!")
-				(Minus (TimeLink) (DefinedSchema "get sleep timestamp"))))
-
-		(Put (DefinedPredicate "Publish behavior")
-			(Concept "Waking up"))
-
-		; Reset the bored timestamp, as otherwise we'll fall asleep
-		; immediately (cause we're bored).
-		(True (DefinedSchema "set bored timestamp"))
-
-		; Reset the "heard something" state and timestamp.
-		(True (DefinedPredicate "Heard Something?"))
-		(True (DefinedSchema "set heard-something timestamp"))
-
-		; Run the wake animation.
-		(Evaluation (GroundedPredicate "py:do_wake_up") (ListLink))
-
-		; Also show the wake-up expression (head shake, etc.)
-		(Put (DefinedPredicate "Show random expression")
-			(Concept "wake-up"))
-		(Put (DefinedPredicate "Show random gesture")
-			(Concept "wake-up"))
-	))
-
 ;; Collection of things to do if nothing is happening (i.e. if no faces
 ;; are visible).
 ;; -- Go to sleep if we've been bored for too long.
@@ -615,8 +533,7 @@
 	(DefinedPredicate "Speech started")
 	(SequentialAnd
 		; Switch to face-study saccade ...
-		(Evaluation (GroundedPredicate "py:conversational_saccade")
-				(ListLink))
+		(DefinedPredicate "Conversational Saccade")
 		; ... and show one random gesture from "conversing" set.
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "conversing"))
@@ -637,8 +554,7 @@
 	(DefinedPredicate "Listening started")
 	(SequentialAnd
 		; Switch to face-study saccade ...
-		(Evaluation (GroundedPredicate "py:listening_saccade")
-				(ListLink))
+		(DefinedPredicate "Listening Saccade")
 		; ... and show one random gesture from "conversing" set.
 		(Put (DefinedPredicate "Show random gesture")
 			(ConceptNode "listening"))
@@ -680,7 +596,7 @@
 							(ConceptNode "chat-pos-think"))
 
 						; ... switch to chat fast blink rate...
-						(Evaluation (GroundedPredicate "py:blink_rate")
+						(Evaluation (DefinedPredicate "Blink rate")
 							(ListLink
 								(DefinedSchema "blink chat fast mean")
 								(DefinedSchema "blink chat fast var")))
@@ -704,7 +620,7 @@
 						(Put (DefinedPredicate "Show random gesture")
 							(ConceptNode "chat-neg-think"))
 						; ... switch to chat slow blink rate...
-						(Evaluation (GroundedPredicate "py:blink_rate")
+						(Evaluation (DefinedPredicate "Blink rate")
 							(ListLink
 								(DefinedSchema "blink chat slow mean")
 								(DefinedSchema "blink chat slow var")))
@@ -716,11 +632,10 @@
 	(DefinedPredicate "Speech ended")
 	(SequentialAnd
 		; Switch back to exploration saccade ...
-		(Evaluation (GroundedPredicate "py:explore_saccade")
-			(ListLink))
+		(DefinedPredicate "Explore Saccade")
 
 		; ... switch to normal blink rate...
-		(Evaluation (GroundedPredicate "py:blink_rate")
+		(Evaluation (DefinedPredicate "Blink rate")
 			(ListLink
 				(DefinedSchema "blink normal mean")
 				(DefinedSchema "blink normal var")))
@@ -738,11 +653,10 @@
 	(DefinedPredicate "Listening ended")
 	(SequentialAnd
 		; Switch back to exploration saccade ...
-		(Evaluation (GroundedPredicate "py:explore_saccade")
-			(ListLink))
+		(DefinedPredicate "Explore Saccade")
 
 		; ... switch to normal blink rate...
-		(Evaluation (GroundedPredicate "py:blink_rate")
+		(Evaluation (DefinedPredicate "Blink rate")
 			(ListLink
 				(DefinedSchema "blink normal mean")
 				(DefinedSchema "blink normal var")))

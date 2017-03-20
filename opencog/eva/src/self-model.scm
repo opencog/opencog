@@ -16,12 +16,14 @@
 ;    questions about what Eva is doing.
 ;
 ; Example usage:
-; Load the needed modules.
+;; Load the needed modules.
 ; (use-modules (opencog) (opencog query) (opencog exec))
-; (use-modules (opencog atom-types) (opencog python))
+; (use-modules (opencog atom-types) (opencog movement))
 ; (use-modules (opencog eva-model))
-;;;; start roscore before doing the load below.
-; (python-eval "execfile('atomic.py')")
+;
+;; If actually driving the pysical robot, then ...
+;; start roscore first, then the movement bridge:
+; (start-ros-movement-node)
 ;
 ; Examples and debugging hints:
 ; Some (but not all) state queries:
@@ -190,7 +192,8 @@
 ; is being said.
 
 ; Chat state. Is the robot talking (vocalizing), or not, right now?
-; NB the python code in put_atoms.py uses these defines!
+; The ROS sensor bridge needs these defines!
+;
 ; This is a state-machine, valid transitions are:
 ; listening -> started talking
 ; started talking -> talking
@@ -251,7 +254,7 @@
 
 ; Chat affect. Is the robot happy about what its saying?
 ; Right now, there are only two affects: happy and not happy.
-; NB the python code uses these defines!
+; NB the python ROS sensor code uses these defines!
 ; XXX FIXME: Note also: we currently fail to distinguish the affect
 ; that was perceived, from our own state. There is a ROS message that
 ; informs us about what the perceived affect was: it sets this state.
@@ -376,17 +379,17 @@
 ;; instead of hard-coding it here.
 
 ;; Coordinates for the salient location
-(define salient-loc  (AnchorNode "locations"))
+(define salient-loc  (AnchorNode "Salient location"))
 (State salient-loc (List (NumberNode 1.0) (NumberNode 0) (NumberNode 0)))
 
 ;; Degree of the salient point
-(define salient (AnchorNode "Degree value"))
-(State salient (Number 0))
+(define salient-degree (AnchorNode "Salient degree"))
+(State salient-degree (Number 0))
 
 (DefineLink
 	(DefinedPredicate "saliency")
 	(GreaterThan
-		(Get (State salient (Variable"$S"))) (Number 13)))
+		(Get (State salient-degree (Variable"$S"))) (Number 13)))
 
 (DefineLink
 	(DefinedPredicate "saliency required?")

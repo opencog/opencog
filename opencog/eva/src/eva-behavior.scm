@@ -16,4 +16,6 @@
 (load "eva-behavior/cfg-eva.scm")
 (load "eva-behavior/express.scm")
 (load "eva-behavior/primitives.scm")
+(load "eva-behavior/movement-api.scm")
 (load "eva-behavior/behavior.scm")
+(load "eva-behavior/orchestrate.scm")

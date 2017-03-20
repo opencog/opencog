@@ -11,6 +11,8 @@ INSTALL (FILES
 	behavior.scm
 	express.scm
 	primitives.scm
+	orchestrate.scm
+	movement-api.scm
 	cfg-tools.scm
 	cfg-eva.scm
 	cfg-sophia.scm
@@ -20,13 +22,6 @@ INSTALL (FILES
 INSTALL (FILES
 	self-model.scm
 	faces.scm
-	orchestrate.scm
 	time-map.scm
 	DESTINATION "${DATADIR}/scm/opencog/eva-model"
-)
-
-INSTALL (FILES
-	atomic.py
-	atomic-dbg.py
-	DESTINATION "${DATADIR}/python/"
 )

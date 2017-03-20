@@ -62,7 +62,7 @@
 			;; Record the expression itself
 			(TrueLink (State face-expression-state (Variable "$expr")))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:do_face_expression")
+			(EvaluationLink (DefinedPredicate "Do show facial expression")
 				(ListLink
 					(Variable "$expr")
 					(Variable "$duration")
@@ -89,7 +89,7 @@
 			;; Log the time.
 			(True (DefinedSchema "set gesture timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:do_gesture")
+			(EvaluationLink (DefinedPredicate "Do show gesture")
 				(ListLink
 					(Variable "$gest")
 					(Variable "$insensity")
@@ -99,7 +99,7 @@
 
 ; -------------------------------------------------------------
 ; Request robot to look at a specific coordinate point.
-; Currently, a very thin wrapper around py:look_at_point
+; Currently, a very thin wrapper around "Do look at point"
 
 (DefineLink
 	(DefinedPredicate "Look at point")
@@ -109,7 +109,7 @@
 			;; Log the time.
 			; (True (DefinedSchema "set gesture timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:look_at_point")
+			(EvaluationLink (DefinedPredicate "Do look at point")
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
 
@@ -126,7 +126,7 @@
 			;; Log the time.
 			; (True (DefinedSchema "set gesture timestamp"))
 			;; Send it off to ROS to actually do it.
-			(EvaluationLink (GroundedPredicate "py:gaze_at_point")
+			(EvaluationLink (DefinedPredicate "Do gaze at point")
 				(ListLink (Variable "$x") (Variable "$y") (Variable "$z")))
 		)))
 
@@ -174,24 +174,24 @@
 				(ListLink (Variable "$object-id")))
 		)))
 
-; -------------------------------------------------------------
-; Publish the current behavior.
-; Cheap hack to allow external ROS nodes to know what we are doing.
-; The string name of the node is sent directly as a ROS String message
-; to the "robot_behavior" topic.
-;
-; Example usage:
-;    (cog-evaluate! (Put (DefinedPredicate "Publish behavior")
-;         (ListLink (Concept "foobar joke"))))
-;
+; Look at the Salient point
+(define salient-loc  (AnchorNode "Salient location"))
 (DefineLink
-	(DefinedPredicate "Publish behavior")
-	(LambdaLink
-		(VariableList (Variable "$bhv"))
-		;; Send it off to ROS to actually do it.
-		(EvaluationLink (GroundedPredicate "py:publish_behavior")
-			(ListLink (Variable "$bhv")))
+	(DefinedPredicate "look at salient point")
+	(SequentialAnd
+		(True (Put
+			(Evaluation (DefinedPredicate "Look at point")
+				(List (Variable "$x") (Variable "$y") (Variable "$z")))
+			(Get (State salient-loc
+				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
 		))
+		(True (Put
+			(Evaluation (DefinedPredicate "Gaze at point")
+				(List (Variable "$x") (Variable "$y") (Variable "$z")))
+			(Get (State salient-loc
+				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
+		))
+	))
 
 ; -------------------------------------------------------------
 ; Request to change the soma state.
@@ -234,104 +234,73 @@
 	))
 
 ; -------------------------------------------------------------
-; Say "Hello recog-id"
-; TODO: Add a request to chat psi-rules. That way actions of psi-rules will
-; be composable by the planner/action-orchestrator.
-(DefineLink
-	(DefinedPredicate "Greet recognized person")
-	(LambdaLink
-		(VariableList (VariableNode "face-id") (VariableNode "recog-id"))
-		(EvaluationLink
-			(GroundedPredicate "py: greet_recognized_face")
-			(ListLink
-				(VariableNode "recog-id")))))
 
-
-; -------------------------------------------------------------
-; Say something. To test run,
-; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
+; Call once, to fall asleep.
 (DefineLink
-	(DefinedPredicate "Say")
-	(LambdaLink (Variable "sentence")
-		(Evaluation
-			(GroundedPredicate "py: say_text")
-			(List (Variable "sentence")))
-	))
-
-;Salient
-(DefineLink
-	(DefinedPredicate "look at salient point")
+	(DefinedPredicate "Go to sleep")
 	(SequentialAnd
-		(True (Put
-			(Evaluation (DefinedPredicate "Look at point")
-				(List (Variable "$x") (Variable "$y") (Variable "$z")))
-			(Get (State salient-loc
-				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
-		))
-		(True (Put
-			(Evaluation (DefinedPredicate "Gaze at point")
-				(List (Variable "$x") (Variable "$y") (Variable "$z")))
-			(Get (State salient-loc
-				(List (Variable "$x") (Variable "$y") (Variable "$z"))))
-		))
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Face Expression")
+			(ListLink bhv-source (ConceptNode "sleepy")))
+
+		; Proceed with the sleep animation only if the state
+		; change was approved.
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-sleeping))
+
+		(Evaluation (GroundedPredicate "scm: print-msg-time")
+			(ListLink (Node "--- Go to sleep.")
+				(Minus (TimeLink) (DefinedSchema "get bored timestamp"))))
+		(True (DefinedSchema "set sleep timestamp"))
+
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Falling asleep"))
+
+		; First, show some yawns ...
+		(Put (DefinedPredicate "Show random gesture")
+			(Concept "sleepy"))
+
+		; Finally, play the go-to-sleep animation.
+		(Evaluation (DefinedPredicate "Do go to sleep") (ListLink))
 	))
 
-
-; -------------------------------------------------------------
-; For updating web-ui
-; NOTE: updating of parameters is divided into steps of upating the parameter
-; cache and then pushing the update, so as to simply syncing the values.
-; If one pushes a partial updated cache results in the publishing of the change
-; to /opencog_control/parameter_updates topic thus resulting in an undesirable
-; state in the atomspace.
-
-; Update dynamic parameter cache
+; Wake-up sequence
 (DefineLink
-    (DefinedPredicate "update-opencog-control-parameter")
-    (LambdaLink
-        (VariableList
-            (TypedVariableLink
-                (VariableNode "psi-rule-alias")
-                (TypeNode "ConceptNode"))
-            (TypedVariableLink
-                (VariableNode "psi-rule-weight")
-                (TypeNode "NumberNode")))
-        (Evaluation
-            (GroundedPredicate "py: update_opencog_control_parameter")
-            (List
-                (VariableNode "psi-rule-alias")
-                (VariableNode "psi-rule-weight")))
-    ))
-
-; Push dynamic parameter cache values
-(Define
-	(DefinedPredicate "push-parameter-update")
-	(Evaluation
-		(GroundedPredicate "py: push_parameter_update")
-		(List))
-	)
-
-; This is needed as the parameters (stored in ros_commo/param_dict)
-; may be updated by a separate thread, so doing this is to make
-; sure that the full set of parameters will only be pushed when the
-; thread has finished the update, so as to avoid having half-updated
-; set of parameters pushed (and as a result re-applied to opencog via
-; the msg being published on /opencog_control/parameter_updates)
-(Define
-	(DefinedPredicate "parameter-update-is-done")
-	(Equal
-		(Set psi-controller-idle)
-		(Get (State psi-controller (Variable "$x"))))
-)
-
-(Define
-	(DefinedPredicate "update-web-ui")
+	(DefinedPredicate "Wake up")
 	(SequentialAnd
-		(True (PutLink
-			(DefinedPredicate "update-opencog-control-parameter")
-			(DefinedSchema "psi-controlled-rule-state")))
-		(DefinedPredicate "parameter-update-is-done")
-		(DefinedPredicate "push-parameter-update")
+		; Request change soma state to being awake. Proceed only if
+		; the request is accepted.
+		(Evaluation (DefinedPredicate "Request Set Soma State")
+			(ListLink bhv-source soma-awake))
+
+		; Proceed only if we are allowed to.
+		(Put (DefinedPredicate "Request Set Face Expression")
+			(ListLink bhv-source (ConceptNode "wake-up")))
+
+		(Evaluation (GroundedPredicate "scm: print-msg-time")
+			(ListLink (Node "--- Wake up!")
+				(Minus (TimeLink) (DefinedSchema "get sleep timestamp"))))
+
+		(Put (DefinedPredicate "Publish behavior")
+			(Concept "Waking up"))
+
+		; Reset the bored timestamp, as otherwise we'll fall asleep
+		; immediately (cause we're bored).
+		(True (DefinedSchema "set bored timestamp"))
+
+		; Reset the "heard something" state and timestamp.
+		(True (DefinedPredicate "Heard Something?"))
+		(True (DefinedSchema "set heard-something timestamp"))
+
+		; Run the wake animation.
+		(Evaluation (DefinedPredicate "Do wake up") (ListLink))
+
+		; Also show the wake-up expression (head shake, etc.)
+		(Put (DefinedPredicate "Show random expression")
+			(Concept "wake-up"))
+		(Put (DefinedPredicate "Show random gesture")
+			(Concept "wake-up"))
 	))
+
 ; -------------------------------------------------------------
 *unspecified*  ; Make the load be silent

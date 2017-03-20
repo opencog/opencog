@@ -21,24 +21,32 @@
 
 import logging
 import rospy
+from affect import Affect
 from audio_power import AudioPower
 from chat_track import ChatTrack
+from control import Control
+from control_psi import ControlPsi
 from face_track import FaceTrack
 from sound_track import SoundTrack
 from room_brightness import RoomBrightness
 from saliency_track import SaliencyTrack
+from tts_feedback import TTSFeedback
 
 
 rospy.init_node("OpenCog_ROS_bridge")
 logging.info("Starting the OpenCog ROS Bridge")
 print "Starting the OpenCog ROS Bridge"
 
+co = Control()
+cp = ControlPsi()
+af = Affect()
 ap = AudioPower()
 ct = ChatTrack()
 ft = FaceTrack()
 st = SoundTrack()
 br = RoomBrightness()
 sl = SaliencyTrack()
+tf = TTSFeedback
 
 try:
 	rospy.spin()

@@ -131,11 +131,11 @@
 ;
 ; Example usage:
 ;    (cog-evaluate!
-;        (PutLink (DefinedPredicateNode "Do show expression")
+;        (PutLink (DefinedPredicateNode "Show class expression")
 ;           (ListLink (ConceptNode "positive") (ConceptNode "engaged"))))
 ;
 (DefineLink
-	(DefinedPredicateNode "Do show expression")
+	(DefinedPredicateNode "Show class expression")
 	(LambdaLink
 		(VariableList (VariableNode "$emo") (VariableNode "$expr"))
 		;; Send it off to the action-orchestrator to actually do it.
@@ -157,11 +157,11 @@
 ;
 ; Example usage:
 ;    (cog-evaluate!
-;        (PutLink (DefinedPredicateNode "Do show gesture")
+;        (PutLink (DefinedPredicateNode "Show class gesture")
 ;           (ListLink (ConceptNode "positive") (ConceptNode "nod-1"))))
 ;
 (DefineLink
-	(DefinedPredicateNode "Do show gesture")
+	(DefinedPredicateNode "Show class gesture")
 	(LambdaLink
 		(VariableList (VariableNode "$emo") (VariableNode "$gest"))
 		;; Send it off to the action orchestrator to actually do it.
@@ -200,7 +200,7 @@
 	(LambdaLink
 		(VariableNode "$emo")
 		(PutLink
-			(DefinedPredicateNode "Do show expression")
+			(DefinedPredicateNode "Show class expression")
 			(ListLink
 				(VariableNode "$emo")
 				(PutLink
@@ -215,7 +215,7 @@
 	(LambdaLink
 		(Variable "$emo")
 		(Put
-			(DefinedPredicate "Do show gesture")
+			(DefinedPredicate "Show class gesture")
 			(ListLink
 				(Variable "$emo")
 				(Put

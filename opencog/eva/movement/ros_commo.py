@@ -23,10 +23,8 @@ import roslib
 import time
 import logging
 import random
-import yaml
 import tf
 import numpy
-import dynamic_reconfigure.client
 # Eva ROS message imports
 from std_msgs.msg import String, Int32
 from blender_api_msgs.msg import AvailableEmotionStates, AvailableGestures
@@ -37,7 +35,6 @@ from blender_api_msgs.msg import BlinkCycle
 from blender_api_msgs.msg import SaccadeCycle
 from blender_api_msgs.msg import SomaState
 from chatbot.msg import ChatMessage
-from dynamic_reconfigure.msg import Config
 
 # Not everything has this message; don't break if it's missing.
 # i.e. create a stub if its not defined.
@@ -49,7 +46,6 @@ from dynamic_reconfigure.msg import Config
 #			self.utterance = ''
 #			self.confidence = 0
 
-from put_atoms import PutAtoms
 logger = logging.getLogger('hr.OpenCog_Eva')
 
 # ROS interfaces for the Atomese (OpenCog) Behavior Tree. Publishes
@@ -172,8 +168,8 @@ class EvaControl():
 	# Turn only the eyes towards the given target point.
 	# Coordinates: meters; x==forward, y==to Eva's left.
 	def gaze_at_point(self, x, y, z):
-		xyz1=numpy.array([x,y,z,1.0])
-		xyz=numpy.dot(self.conv_mat,xyz1)
+		xyz1 = numpy.array([x,y,z,1.0])
+		xyz = numpy.dot(self.conv_mat, xyz1)
 		trg = Target()
 		trg.x = xyz[0]
 		trg.y = xyz[1]
@@ -184,8 +180,8 @@ class EvaControl():
 	# Turn head towards the given target point.
 	# Coordinates: meters; x==forward, y==to Eva's left.
 	def look_at_point(self, x, y, z):
-		xyz1=numpy.array([x,y,z,1.0])
-		xyz=numpy.dot(self.conv_mat,xyz1)
+		xyz1 = numpy.array([x, y, z, 1.0])
+		xyz = numpy.dot(self.conv_mat, xyz1)
 		trg = Target()
 		trg.x = xyz[0]
 		trg.y = xyz[1]
@@ -197,14 +193,21 @@ class EvaControl():
 
 	# Tell the world what we are up to. This is so that other
 	# subsystems can listen in on what we are doing.
+	# XXX FIXME ... remove this?? Kino wanted this for his stuff,
+	# but I don't think it's used anywhere.
 	def publish_behavior(self, event):
 		print "----- Behavior pub: " + event
 		self.behavior_pub.publish(event)
 
 	# ----------------------------------------------------------
+
+	# Tell the TTS subsystem to vocalize a plain text-string
+	def say_text(self, text_to_say):
+		rospy.logwarn('publishing text to TTS ' + text_to_say)
+		self.tts_pub.publish(text_to_say)
+
+	# ----------------------------------------------------------
 	# Wrapper for saccade generator.
-	# This is setup entirely in python, and not in the AtomSpace,
-	# as, at this time, there are no knobs worth twiddling.
 
 	# Explore-the-room saccade when not conversing.
 	# ??? Is this exploring the room, or someone's face? I'm confused.
@@ -272,97 +275,25 @@ class EvaControl():
 		self.blink_pub.publish(msg)
 
 	# ----------------------------------------------------------
-	def update_opencog_control_parameter(self, name, value):
-		"""
-		This function is used for updating ros parameters that are used to
-		modify the weight of openpsi rules. When the changes in weight occur
-		independent of changes in HEAD's web-ui.
-		"""
-		update =  False
-
-		# Only get the psi-prefix-str once, assuming it wouldn't change
-		# over time.
-		# Otherwise this will keep sending to the cogserver (as this
-		# is part of a "keep alive" psi-rule) and waste way too
-		# much unnecessary computing power
-		if self.psi_prefix == "":
-			self.psi_prefix = self.puta.evaluate_scm("psi-prefix-str")
-		param_name = name[len(self.psi_prefix) - 1:]
-
-		# Update parameter
-		if (param_name in self.param_dict) and \
-		   (self.param_dict[param_name] != value):
-			self.param_dict[param_name] = value
-			self.update_parameters = True
-
-
-	def push_parameter_update(self):
-		if self.update_parameters and not rospy.is_shutdown():
-			if self.client is None:
-				return
-			self.client.update_configuration(self.param_dict)
-			self.update_parameters = False
-
-
-	# ----------------------------------------------------------
-	# Subscription callbacks
-	# Get the list of available gestures.
-	def get_gestures_cb(self, msg):
-		print("Available Gestures:" + str(msg.data))
-
-	# Get the list of available facial expressions.
-	def get_expressions_cb(self, msg):
-		print("Available Facial Expressions:" + str(msg.data))
-
-	# ----------------------------------------------------------
-
-	# Tell the TTS subsystem to vocalize a plain text-string
-	def say_text(self, text_to_say):
-		rospy.logwarn('publishing text to TTS ' + text_to_say)
-		self.tts_pub.publish(text_to_say)
-
-	# The text that the STT module heard.
-	# Unit test by saying
-	#   rostopic pub --once perceived_text std_msgs/String "Look afraid!"
+	# Autonomous behaviors. These by-pass opencog completely
 	#
-	#def language_perceived_text_cb(self, text_heard):
-	#	self.puta.perceived_text(text_heard.data)
-
 	# The chat_heard message is of type chatbot/ChatMessage
 	# from chatbot.msg import ChatMessage
+	#
+	# Stops the robot from droning on and on.
+	# XXX surely there is a better solution than this...
 	def chat_perceived_text_cb(self, chat_heard):
 		if 'shut up' in chat_heard.utterance.lower():
 			self.tts_control_pub.publish("shutup")
 			return
 
-		if chat_heard.confidence >= 50:
-			self.puta.perceived_text(chat_heard.utterance)
-
-	# Notification from text-to-speech (TTS) module, that it has
-	# started, or stopped vocalizing.  This message might be published
-	# by either the TTS module itself, or by some external chatbot.
-	#
-	#    rostopic pub --once speech_events std_msgs/String start
-	#    rostopic pub --once speech_events std_msgs/String stop
-	def speech_event_cb(self, speech_event):
-		print('speech_event, type ' + speech_event.data)
-		if speech_event.data == "start":
-			rospy.loginfo("starting speech")
-			self.puta.vocalization_started()
-		elif speech_event.data == "stop":
-			rospy.loginfo("ending speech")
-			self.puta.vocalization_ended()
-		elif speech_event.data.startswith("duration"):
-			rospy.loginfo(
-                            "speech_event.data {}".format(speech_event.data))
-		else:
-			rospy.logerr("unknown speech_events message: " + speech_event.data)
-
 	# Chatbot requests blink.
+	# XXX FIXME ... which chatbot? Who published this message?
+	# How does this work? Where is the chatbot AIML/ChatScript
+	# markup for this, exactly?  This needs to be documented
+	# or removed as being unused.
 	def chatbot_blink_cb(self, blink):
 
-		# XXX currently, this by-passes the OC behavior tree.
-		# Does that matter?  Currently, probably not.
 		rospy.loginfo(blink.data + ' says blink')
 		blink_probabilities = {
 			'chat_heard' : 0.4,
@@ -373,39 +304,27 @@ class EvaControl():
 		if random.random() < blink_probability:
 			self.gesture('blink', 1.0, 1, 1.0)
 
-	# The perceived emotional content of words spoken to the robot.
-	# That is, were people being rude to the robot? Polite to it? Angry
-	# with it?  We subscribe; there may be multiple publishers of this
-	# message: it might be supplied by some linguistic-processing module,
-	# or it might be supplied by an AIML-derived chatbot.
+	# ----------------------------------------------------------
+	# Subscription callbacks
+
+	# Get the list of available gestures.
+	def get_gestures_cb(self, msg):
+		print("Available Gestures:" + str(msg.data))
+
+	# Get the list of available facial expressions.
+	def get_expressions_cb(self, msg):
+		print("Available Facial Expressions:" + str(msg.data))
+
+	# Turn behaviors on and off.
 	#
-	# emo is of type std_msgs/String
-	def language_affect_perceive_cb(self, emo):
-		rospy.loginfo('chatbot perceived emo class =' + emo.data)
-		if emo.data == "happy":
-			# behavior tree will use these predicates
-			self.puta.affect_happy()
-
-		else:
-			self.puta.affect_negative()
-
-		rospy.logwarn('publishing affect to chatbot ' + emo.data)
-		self.affect_pub.publish(emo.data)
-
-	# Turn behaviors on and off and set wholeshow configuration
-	# NOTE
-	# 1. Do not to clean visible faces as these can still be added/removed
-	#    while tree is paused
-	# 2. 'btree_on' and 'btree_off' data-strings shouldn't be used, as they are
+	# 'btree_on' and 'btree_off' data-strings shouldn't be used, as they are
 	#    meant for switching on and off non-opencog demos.
 	def behavior_switch_callback(self, data):
 		if data.data == "opencog_on":
 			if not self.running:
-				self.puta.wholeshow_start()
 				self.running = True
 		if data.data == "opencog_off":
 			if self.running:
-				self.puta.wholeshow_stop()
 				self.look_at(0)
 				self.gaze_at(0)
 				self.running = False
@@ -414,85 +333,38 @@ class EvaControl():
 	def behavior_control_callback(self, data):
 		self.control_mode = data.data
 
-	# For web-ui interface
-	def openpsi_control_cb(self, data):
-		"""
-		This function is used for interactively modifying the weight of openpsi
-		rules.
-		"""
-		param_yaml = rosmsg.get_yaml_for_msg(data.doubles + data.ints)
-		self.param_list = yaml.load(param_yaml)
-
-		for i in self.param_list:
-			# Populate the parameter dictionary
-			if i["name"] not in self.param_dict:
-				self.param_dict[i["name"]] = i["value"]
-
-			if i["name"] == "max_waiting_time":
-				scm_str = '''(StateLink
-				                 (AnchorNode "Chatbot: MaxWaitingTime")
-				                 (TimeNode %f))''' % (i["value"])
-			else:
-				scm_str = '''(StateLink
-				                 (ListLink
-				                     (ConceptNode "OpenPsi: %s")
-				                     (ConceptNode "OpenPsi: weight"))
-				                 (NumberNode %f))''' % (i["name"], i["value"])
-
-			self.puta.evaluate_scm(scm_str)
-
-	#not needed anymore
-	#def pub_snd_face_id(faceid):
-	#	self.face_sound_pub.publish(faceid)
-
 	def __init__(self):
 		# Full control by default
 		self.control_mode = 255
 		self.running = True
-		self.puta = PutAtoms()
 
 		# The below will hang until roscore is started!
 		rospy.init_node("OpenCog_Eva")
 		print("Starting OpenCog Behavior Node")
 
-		self.LOCATION_FRAME = "blender"
-		# Transform Listener. Tracks history for RECENT_INTERVAL.
-		self.tf_listener = tf.TransformListener()
-		print "**1\n"
+		# ----------------
+		# Obtain the blender-to-camera coordinate-frame conversion
+		# matrix.  XXX FIXME This is some insane hack that does not
+		# make sense.  All 3D coordinates are supposed to be in
+		# head-centered coordinates, bot for the sensory subsystem,
+		# and also for the look-at subsystem. However, someone
+		# screwed something up somewhere, and now we hack around
+		# it here. XXX This is really bad spaghetti-code programming.
+		# Fuck.
+		lstn = tf.TransformListener()
 		try:
-			self.tf_listener.waitForTransform('camera', self.LOCATION_FRAME, \
-				rospy.Time(0), rospy.Duration(10.0))#world
-			print "***2\n"
+			print("Waiting for the camera-blender transform\n")
+			lstn.waitForTransform('camera', 'blender',
+				rospy.Time(0), rospy.Duration(10.0)) # world
 		except Exception:
 			print("No camera transforms!\n")
 			exit(1)
-		print "***3\n"
-		(trans,rot) = self.tf_listener.lookupTransform( \
-			self.LOCATION_FRAME, 'camera', rospy.Time(0))
-		print "***4\n"
-		a=tf.listener.TransformerROS()
-		print "***5\n"
-		self.conv_mat=a.fromTranslationRotation(trans,rot)
-		print "hello! ***********"
-		# ----------------
-		# A list of parameter names that are mirrored in opencog for controling
-		# psi-rules
-		self.param_list = []
-		# Parameter dictionary that is used for updating states recorede in
-		# the atomspace. It is used to cache the atomspace values, thus updating
-		# of the dictionary is only made from opencog side (openpsi
-		# updating rule)
-		self.param_dict = {}
 
-		# For controlling when to push updates, for saving bandwidth.
-		self.update_parameters = False
-		self.psi_prefix = ""
-
-		# For web ui based control of openpsi contorled-psi-rules
-		try:
-			self.client = dynamic_reconfigure.client.Client("/opencog_control", timeout=2)
-		except Exception:
-			self.client = None
+		print("Got the camera-blender transform\n")
+		(trans,rot) = lstn.lookupTransform(
+			'blender' , 'camera', rospy.Time(0))
+		a = tf.listener.TransformerROS()
+		self.conv_mat = a.fromTranslationRotation(trans,rot)
 
 		# ----------------
 		# Get the available facial animations
@@ -532,11 +404,6 @@ class EvaControl():
 		self.gaze_at_pub = rospy.Publisher("/opencog/gaze_at",
 			Int32, queue_size=1)
 
-		#method shifted
-		#self.face_sound_pub = rospy.Publisher("/manyyears/face_id",
-		#	Int32, queue_size=1)
-
-
 		# ----------------
 		rospy.logwarn("setting up chatbot affect perceive and express links")
 
@@ -550,7 +417,7 @@ class EvaControl():
 		self.tts_pub = rospy.Publisher("chatbot_responses", String, queue_size=1)
 
 		# Tell the chatbot what sort of affect to apply during
-		# TTS vocalization. (Huhh???)
+		# TTS vocalization. (Huhh???) XXX this needs documentation.
 		self.affect_pub = rospy.Publisher("chatbot_affect_express",
 		                                  String, queue_size=1)
 
@@ -558,31 +425,15 @@ class EvaControl():
 		self.tts_control_pub = rospy.Publisher("tts_control",
 		                                  String, queue_size=1)
 
+		# ----------------
+		# Subscriptions needed for autonomous behaviors.
+		# XXX FIXME both of these should probably be removed.
 		# String text of what the robot heard (from TTS)
-		#no longer needed as chatbot_speech is Used
-		#chatbot ai.py no longer usd so not published
-		#rospy.Subscriber("perceived_text", String,
-		#	self.language_perceived_text_cb)
-
-		# Chat infrastructure text.
 		rospy.Subscriber("chatbot_speech", ChatMessage,
 			self.chat_perceived_text_cb)
 
-		# Emotional content of words spoken to the robot.
-		rospy.Subscriber("chatbot_affect_perceive", String,
-			self.language_affect_perceive_cb)
-
 		# Chatbot can request blinks correlated with hearing and speaking.
 		rospy.Subscriber("chatbot_blink", String, self.chatbot_blink_cb)
-
-		# Receive messages that indicate that TTS (or chatbot) has started
-		# or finished vocalizing.
-		rospy.Subscriber("speech_events", String, self.speech_event_cb)
-
-		# ----------------
-		# chatbot-psi controls
-		rospy.Subscriber("/opencog_control/parameter_updates", Config,
-			self.openpsi_control_cb)
 
 		# ----------------
 		# Boolean flag, turn the behavior tree on and off (set it running,

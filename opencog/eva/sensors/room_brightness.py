@@ -20,13 +20,13 @@
 import rospy
 from atomic_msgs import AtomicMsgs
 
-# XXX defined in head/src/vision/room_luminance/msg
+# XXX defined in HEAD/src/vision/room_luminance/msg
 from room_luminance.msg import Luminance
 
 '''
-    This implements a ROS node that subscribes to the `/opencog/room_luminance`
-    sets brightness
-
+    This implements a ROS node that subscribes to the
+    `/opencog/room_luminance` topic and replays it to
+    the cogserver.
 '''
 
 class RoomBrightness:

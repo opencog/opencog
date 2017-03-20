@@ -135,28 +135,8 @@ def say_text(text_node):
 	evl.say_text(text)
 	return TruthValue(1, 1)
 
-def greet_recognized_face(recog_id_node):
-	text = "Hello " + recog_id_node.name
-	evl.say_text(text)
-	return TruthValue(1, 1)
-
 # Return true as long as ROS is running.
 def ros_is_running():
 	if (rospy.is_shutdown()):
 		return TruthValue(0, 1)
-	return TruthValue(1, 1)
-
-# Update dynamic paramater cache
-def update_opencog_control_parameter(name_node, value_node):
-	try:
-		name = name_node.name
-		value = float(value_node.name)
-		evl.update_opencog_control_parameter(name, value)
-		return TruthValue(1, 1)
-	except:
-		return TruthValue(0, 1)
-
-# Update dynamic parameters
-def push_parameter_update():
-	evl.push_parameter_update()
 	return TruthValue(1, 1)
