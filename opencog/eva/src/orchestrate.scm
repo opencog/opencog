@@ -174,7 +174,8 @@
 				(ListLink (Variable "$object-id")))
 		)))
 
-;Salient
+; Look at the Salient point
+(define salient-loc  (AnchorNode "Salient location"))
 (DefineLink
 	(DefinedPredicate "look at salient point")
 	(SequentialAnd

@@ -379,17 +379,17 @@
 ;; instead of hard-coding it here.
 
 ;; Coordinates for the salient location
-(define salient-loc  (AnchorNode "locations"))
+(define salient-loc  (AnchorNode "Salient location"))
 (State salient-loc (List (NumberNode 1.0) (NumberNode 0) (NumberNode 0)))
 
 ;; Degree of the salient point
-(define salient (AnchorNode "Degree value"))
-(State salient (Number 0))
+(define salient (AnchorNode "Salient degree"))
+(State salient-degree (Number 0))
 
 (DefineLink
 	(DefinedPredicate "saliency")
 	(GreaterThan
-		(Get (State salient (Variable"$S"))) (Number 13)))
+		(Get (State salient-degree (Variable"$S"))) (Number 13)))
 
 (DefineLink
 	(DefinedPredicate "saliency required?")

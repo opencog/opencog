@@ -185,13 +185,13 @@ class AtomicMsgs:
 
 	#saliency location
 	#Degree of the salient point
-	def saliency(self,x,y,z,deg):
-		sal = '(StateLink (AnchorNode "locations")' + \
+	def saliency(self, x, y, z, deg):
+		sal = '(StateLink (AnchorNode "Salient location")' + \
 			'(List (NumberNode '+ str(x)+ ')' + \
-			'(NumberNode '+ str(y)+ ')' + \
-			'(NumberNode '+ str(z) + ')))\n' + \
-			'(StateLink (AnchorNode "Degree value")' + \
-			'(NumberNode '+ str(deg)+'))\n'
+			'  (NumberNode '+ str(y) + ')' + \
+			'  (NumberNode '+ str(z) + ')))\n' + \
+			'(StateLink (AnchorNode "Salient degree")' + \
+			'  (NumberNode '+ str(deg) + '))\n'
 		netcat(self.hostname, self.port, sal)
 
 	#room luminance <=25 - dark, <=40 - normal, >40 - bright
