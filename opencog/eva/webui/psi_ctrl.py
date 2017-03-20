@@ -55,13 +55,10 @@ class PsiControl():
 		print("Starting OpenCog OpenPsi Control Node")
 
 		# ----------------
-		# A list of parameter names that are mirrored in opencog for controling
-		# psi-rules
-		self.param_list = []
-		# Parameter dictionary that is used for updating states recorede in
-		# the atomspace. It is used to cache the atomspace values, thus updating
-		# of the dictionary is only made from opencog side (openpsi
-		# updating rule)
+		# Parameter dictionary that is used for updating states
+		# recorded in the atomspace. It is used to cache the
+		# atomspace values, thus updating of the dictionary is
+		# only made from opencog side (openpsi updating rule).
 		self.param_dict = {}
 
 		# For controlling when to push updates, for saving bandwidth.
