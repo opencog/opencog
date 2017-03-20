@@ -129,4 +129,5 @@ functional alpha state in the near future.
 
 1. Syntax sugaring for rule definition.
 2. Topic selection and execution in PSI.
-   
+3. Implement the rule base and topic dynamics for the Harry bot (the simplest
+   example bot in the ChatScript codebase) and get it to work using PSI.
