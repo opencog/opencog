@@ -17,11 +17,8 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import rosmsg
 import rospy
-import roslib
 import logging
-import yaml
 import dynamic_reconfigure.client
 
 logger = logging.getLogger('hr.OpenPsi')

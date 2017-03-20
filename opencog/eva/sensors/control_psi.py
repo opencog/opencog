@@ -18,6 +18,7 @@
 # 02110-1301  USA
 
 import rospy
+import rosmsg
 from atomic_msgs import AtomicMsgs
 from dynamic_reconfigure.msg import Config
 
