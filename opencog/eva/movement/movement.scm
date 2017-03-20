@@ -10,12 +10,9 @@
 
 (load "movement/do-movement.scm")
 
-; Try loading the python code from this directory;
-; else go for the install directory. This is kind-of hacky;
-; is there a nicer way to load stuff?
-;
-; (python-eval
-;    "import sys\nsys.path.insert(0, '/usr/local/share/opencog/python')\n")
+; Try loading the python code from this directory; else got for the
+; install directory.  This assumes that the the current directory
+; is in the python sys.path.
 ;
 ; If roscore is not running, then the load will hang. Thus, to avoid the
 ; hang, we test to see if we can talk to roscore. If we cannot, then load
@@ -23,30 +20,22 @@
 ;
 (define-public start-ros-movement-node
 	(python-eval "
+import sys
 import rosgraph
+sys.path.append('/usr/local/share/opencog/python')
 try:
     # Throw an exception if roscore is not running.
     rosgraph.Master('/rostopic').getPid()
     execfile('atomic.py')
-    try:
-        ros_is_running()
-    except NameError:
-        execfile('/usr/local/share/opencog/python/atomic.py')
+    ros_is_running()
 except:
     execfile('atomic-dbg.py')
-    try:
-        ros_is_running()
-    except NameError:
-        execfile('/usr/local/share/opencog/python/atomic-dbg.py')
 "))
 
 ; If the ROS node hasn't been loaded yet, then load the "debug"
 ; python backend. This is needed, so that various imperative
 ; commands don't crash. A later load of the ROS node will harmlessly
 ; over-write the python entry-points.
-;
-; (python-eval
-;   "import sys\nsys.path.insert(0, '/usr/local/share/opencog/python')\n")
 ;
 ; Hard-coded install path from CMakefile
 (python-eval "
