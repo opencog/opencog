@@ -163,6 +163,8 @@
 ;; XXX FIXME elminiate the use of cog-execute! -- that is not how
 ;; this should be designed -- these need to be learnable; and
 ;; cog-execute prevents learning.
+;; XX This also bypasses the regular decision-making process
+;; in the behvaior tree. So this is wrong in a bunch iof different ways.
 (define (who-said? sent)
 	;;request eye contact
 
