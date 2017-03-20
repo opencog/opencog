@@ -28,8 +28,10 @@ try:
     rosgraph.Master('/rostopic').getPid()
     execfile('atomic.py')
     ros_is_running()
+    print 'Loaded the OpenCog ROS Movement API'
 except:
     execfile('atomic-dbg.py')
+    print 'Loaded the OpenCog Movement Debug API'
 "))
 
 ; If the ROS node hasn't been loaded yet, then load the "debug"
