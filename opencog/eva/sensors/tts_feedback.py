@@ -18,6 +18,7 @@
 # 02110-1301  USA
 
 import rospy
+from std_msgs.msg import String
 from atomic_msgs import AtomicMsgs
 
 '''
