@@ -5,8 +5,7 @@
 (define-module (opencog eva-model))
 
 (use-modules (opencog) (opencog atom-types)
-	(opencog query) (opencog exec) (opencog movement))
-
+	(opencog query) (opencog exec))
 
 ; Load various parts....
 (load "eva-model/faces.scm")

@@ -174,7 +174,7 @@ class EvaControl():
 		trg.x = xyz[0]
 		trg.y = xyz[1]
 		trg.z = xyz[2]
-		print "gaze at point: ", trg.x, trg.y, trg.z
+		# print "gaze at point: ", trg.x, trg.y, trg.z
 		self.gaze_pub.publish(trg)
 
 	# Turn head towards the given target point.
@@ -186,7 +186,7 @@ class EvaControl():
 		trg.x = xyz[0]
 		trg.y = xyz[1]
 		trg.z = xyz[2]
-		print "look at point: ", trg.x, trg.y, trg.z
+		# print "look at point: ", trg.x, trg.y, trg.z
 		self.turn_pub.publish(trg)
 
 	# ----------------------------------------------------------

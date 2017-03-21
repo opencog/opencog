@@ -7,6 +7,8 @@
 ; The only current implementation is in the module `(opencog movement)`
 ; which connects these to ROS blender API robot animations.
 
+(use-modules (opencog logger))
+
 ; Delete the current definition, if any.
 (define (delete-definition STR)
 	(define dfn
@@ -16,8 +18,9 @@
 	(if (not (null? dfn)) (cog-delete (car dfn)) #f))
 
 ; Printer stub
-(define-public (prt-pred-defn PRED)
-   (format #t "Called (DefinedPredicate ~a)\n" (cog-name PRED))
+(define-public (prt-pred-defn PRED . REST)
+   (cog-logger-info "Called (DefinedPredicate ~a) with args ~a\n"
+		(cog-name PRED) REST)
    (stv 1 1))
 
 ; Create a definition that is just a stub.
@@ -49,8 +52,13 @@
 			(Variable "$expr")
 			(Variable "$duration")
 			(Variable "$intensity"))
-		(SequentialAndLink
-			(TrueLink)
+		(EvaluationLink
+			(GroundedPredicate "scm: prt-pred-defn")
+			(ListLink
+				(DefinedPredicate "Do show facial expression")
+				(Variable "$expr")
+				(Variable "$duration")
+				(Variable "$intensity"))
 		)))
 
 ; -------------------------------------------------------------
@@ -70,8 +78,14 @@
 			(Variable "$insensity")
 			(Variable "$repeat")
 			(Variable "$speed"))
-		(SequentialAndLink
-			(True)
+		(EvaluationLink
+			(GroundedPredicate "scm: prt-pred-defn")
+			(ListLink
+				(DefinedPredicate "Do show gesture")
+				(Variable "$gest")
+				(Variable "$insensity")
+				(Variable "$repeat")
+				(Variable "$speed"))
 		)))
 
 ; -------------------------------------------------------------
@@ -96,7 +110,12 @@
 	(DefinedPredicate "Blink rate")
 	(LambdaLink
 		(VariableList (Variable "$mean") (Variable "$var"))
-		(True)))
+		(EvaluationLink
+			(GroundedPredicate "scm: prt-pred-defn")
+			(ListLink
+				(DefinedPredicate "Blink rate")
+				(Variable "$mean") (Variable "$var"))
+		)))
 
 ; -------------------------------------------------------------
 ; Request robot to look at a specific coordinate point.
@@ -106,8 +125,11 @@
 	(DefinedPredicate "Do look at point")
 	(LambdaLink
 		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
-		(SequentialAndLink
-			(True)
+		(EvaluationLink
+			(GroundedPredicate "scm: prt-pred-defn")
+			(ListLink
+				(DefinedPredicate "Do look at point")
+				(Variable "$x") (Variable "$y") (Variable "$z"))
 		)))
 
 ;---------------------------------------------------------------
@@ -119,8 +141,11 @@
 	(DefinedPredicate "Do gaze at point")
 	(LambdaLink
 		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
-		(SequentialAndLink
-			(True)
+		(EvaluationLink
+			(GroundedPredicate "scm: prt-pred-defn")
+			(ListLink
+				(DefinedPredicate "Do gaze at point")
+				(Variable "$x") (Variable "$y") (Variable "$z"))
 		)))
 
 ; -------------------------------------------------------------
@@ -139,8 +164,12 @@
 	(DefinedPredicate "Publish behavior")
 	(LambdaLink
 		(VariableList (Variable "$bhv"))
-		(True)
-		))
+		(EvaluationLink
+			(GroundedPredicate "scm: prt-pred-defn")
+			(ListLink
+				(DefinedPredicate "Publish behavior")
+				(Variable "$bhv"))
+		)))
 
 ; -------------------------------------------------------------
 
@@ -148,23 +177,27 @@
 (delete-definition "Do go to sleep")
 (DefineLink
 	(DefinedPredicate "Do go to sleep")
-	(SequentialAnd
-		(True)
+	(EvaluationLink
+		(GroundedPredicate "scm: prt-pred-defn")
+		(ListLink
+			(DefinedPredicate "Do go to sleep"))
 	))
 
 
 (delete-definition "Do wake up")
 (DefineLink
 	(DefinedPredicate "Do wake up")
-	(SequentialAnd
-		(True)
+	(EvaluationLink
+		(GroundedPredicate "scm: prt-pred-defn")
+		(ListLink
+			(DefinedPredicate "Do wake up"))
 	))
 
 ; -------------------------------------------------------------
 ; Say something. To test run,
 ; (cog-evaluate! (Put (DefinedPredicate "Say") (Node "this is a test"))))
 (define-public (prt-say-text SENT)
-   (format #t "Saying this: ~a\n" SENT)
+   (cog-logger-info "Saying this: ~a\n" SENT)
    (stv 1 1))
 
 (delete-definition "Say")
