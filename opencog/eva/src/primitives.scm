@@ -13,6 +13,7 @@
 
 (use-modules (opencog) (opencog query) (opencog exec))
 (use-modules (opencog atom-types))
+(use-modules (opencog logger))
 (use-modules (opencog eva-model))
 
 ; --------------------------------------------------------
@@ -21,28 +22,24 @@
 ; `(GroundedPredicate "scm: print-msg")` won't work.
 
 (define-public (print-msg node) 
-	; XXX FIXME disable printing until blocking fix.
-	(display (cog-name node)) (newline)
+	(cog-logger-info "~a\n" (cog-name node))
+	; (format #f "~a\n" (cog-name node))
 	(stv 1 1))
 (define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
 
 ; Print message, and print the current interaction face-id
 (define-public (print-msg-face node)
-	; XXX FIXME disable printing until blocking fix.
-	(display (cog-name node))
-	(display " with face id: ")
-	(display (cog-name (car (cog-outgoing-set (cog-execute!
+	(cog-logger-info "~a with face id: ~a\n"
+		(cog-name node)
+		(cog-name (car (cog-outgoing-set (cog-execute!
 			(DefinedSchemaNode "Current interaction target"))))))
-	(newline)
 	(stv 1 1))
 
 ; Print message, then print elapsed time
 (define-public (print-msg-time node time)
-	; XXX FIXME disable printing until blocking fix.
-	(display (cog-name node))
-	(display " Elapsed: ")
-	(display (cog-name time))
-	(display " seconds\n")
+	(cog-logger-info "~a Elapsed: ~a seconds\n"
+		(cog-name node)
+		(cog-name time))
 	(stv 1 1))
 
 ;; ------------------------------------------------------------------
