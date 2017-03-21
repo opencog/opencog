@@ -6,7 +6,7 @@ module OpenCog.Lojban.Syntax.Util where
 import Prelude hiding (id,(.),(<*>),(<$>),(*>),(<*),foldl)
 
 import Data.List.Split (splitOn)
-import Data.List (partition,intercalate,find)
+import Data.List (partition,intercalate,find,delete)
 import Data.Char (chr,isLetter,isDigit)
 import Data.Maybe
 import Data.Map (findWithDefault)
@@ -144,6 +144,13 @@ ifJustB = mkIso f g where
     f (a,Nothing) = Right a
     g (Left (a,b))= (a,Just b)
     g (Right a)   = (a,Nothing)
+
+expandEither :: SynIso (Either a b,c) (Either (a,c) (b,c))
+expandEither = mkIso f g where
+    f (Left a,b) = Left (a,b)
+    f (Right a,b) = Right (a,b)
+    g (Left (a,b)) = (Left a,b)
+    g (Right (a,b)) = (Right a,b)
 -------------------------------------------------------------------------------
 --SyntaxReader Util
 -------------------------------------------------------------------------------
@@ -272,3 +279,33 @@ appendAtoms i = Iso f g where
         let (a,as) = splitAt i atoms
         setAtoms as
         pure a
+
+setFlag :: SynMonad t State => Flag -> (t ME) ()
+setFlag f = modify (\s -> s {sFlags = f : sFlags s})
+
+rmFlag :: SynMonad t State => Flag -> (t ME) ()
+rmFlag f = modify (\s -> s {sFlags = delete f (sFlags s)})
+
+setFlagIso :: Flag -> SynIso a a
+setFlagIso flag = Iso f g
+    where f a = setFlag flag >> pure a
+          g a = rmFlag flag >> pure a
+
+withFlag :: Flag -> SynIso a b -> SynIso a b
+withFlag flag syn = inverse (setFlagIso flag) . syn . setFlagIso flag
+
+ifFlag :: Flag -> SynIso a a
+ifFlag flag = Iso f f where
+    f a = do
+        flags <- gets sFlags
+        if flag `elem` flags
+           then pure a
+           else lift $ Left $ "Flag: " ++ flag ++ " is not set."
+
+ifNotFlag :: Flag -> SynIso a a
+ifNotFlag flag = Iso f f where
+    f a = do
+        flags <- gets sFlags
+        if flag `elem` flags
+           then lift $ Left $ "Flag: " ++ flag ++ " is set."
+           else pure a
