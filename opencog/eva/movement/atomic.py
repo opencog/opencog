@@ -53,7 +53,7 @@ def glance_at_face(face_id_node):
 
 def look_at_face(face_id_node):
 	face_id = int(float(face_id_node.name))
-	# print "Python look at face id", face_id
+	print "Python look at face id", face_id
 	evl.look_at(face_id)
 	return TruthValue(1, 1)
 
@@ -89,7 +89,8 @@ def do_face_expression(face_expression_node, duration_node, intensity_node):
 	face_expression = face_expression_node.name
 	intensity = float(intensity_node.name)
 	duration = float(duration_node.name)
-	# print "Python facial expression: ", face_expression, " for ", duration, " int ", intensity
+	print("Python facial expression: ", face_expression, " for ",
+		duration, " int ", intensity)
 	evl.expression(face_expression, intensity, duration)
 	return TruthValue(1, 1)
 
@@ -98,35 +99,35 @@ def do_gesture(gesture_node, intensity_node, repeat_node, speed_node):
 	intensity = float(intensity_node.name)
 	repeat = float(repeat_node.name)
 	speed = float(speed_node.name)
-	# print "Python gesture: ", gesture, ", int: ", intensity, \
-	#	", rep: ", repeat, ", speed: ", speed
+	print("Python gesture: ", gesture, ", int: ", intensity,
+		", rep: ", repeat, ", speed: ", speed)
 	evl.gesture(gesture, intensity, repeat, speed)
 	return TruthValue(1, 1)
 
 def publish_behavior(event_node):
-	# print "(Behavior event:", event_node.name, ")"
+	print ("(Behavior event:", event_node.name, ")")
 	evl.publish_behavior(event_node.name)
 	return TruthValue(1, 1)
 
 def explore_saccade():
-	# print "Python: Explore Saccade"
+	print "Python: Explore Saccade"
 	evl.explore_saccade()
 	return TruthValue(1, 1)
 
 def conversational_saccade():
-	# print "Python: Conversational Saccade"
+	print "Python: Conversational Saccade"
 	evl.conversational_saccade()
 	return TruthValue(1, 1)
 
 def listening_saccade():
-	# print "Python: Listening Saccade"
+	print "Python: Listening Saccade"
 	evl.listening_saccade()
 	return TruthValue(1, 1)
 
 def blink_rate(mean_node, var_node):
 	mean = float(mean_node.name)
 	var  = float(var_node.name)
-	# print "Python: blink-rate: ", mean, " variation ", var
+	print "Python: blink-rate: ", mean, " variation ", var
 	evl.blink_rate(mean, var)
 	return TruthValue(1, 1)
 
