@@ -19,7 +19,7 @@
 ; only the debug interfaces.
 ;
 ;
-(define-public start-ros-movement-node
+(define-public (start-ros-movement-node)
 	(python-eval "
 import os.path
 import sys
