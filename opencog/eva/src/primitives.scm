@@ -22,27 +22,27 @@
 
 (define-public (print-msg node) 
 	; XXX FIXME disable printing until blocking fix.
-	; (display (cog-name node)) (newline)
+	(display (cog-name node)) (newline)
 	(stv 1 1))
 (define (print-atom atom) (format #t "~a\n" atom) (stv 1 1))
 
 ; Print message, and print the current interaction face-id
 (define-public (print-msg-face node)
 	; XXX FIXME disable printing until blocking fix.
-	;(display (cog-name node))
-	;(display " with face id: ")
-	;(display (cog-name (car (cog-outgoing-set (cog-execute!
-	;		(DefinedSchemaNode "Current interaction target"))))))
-	;(newline)
+	(display (cog-name node))
+	(display " with face id: ")
+	(display (cog-name (car (cog-outgoing-set (cog-execute!
+			(DefinedSchemaNode "Current interaction target"))))))
+	(newline)
 	(stv 1 1))
 
 ; Print message, then print elapsed time
 (define-public (print-msg-time node time)
 	; XXX FIXME disable printing until blocking fix.
-	;(display (cog-name node))
-	;(display " Elapsed: ")
-	;(display (cog-name time))
-	;(display " seconds\n")
+	(display (cog-name node))
+	(display " Elapsed: ")
+	(display (cog-name time))
+	(display " seconds\n")
 	(stv 1 1))
 
 ;; ------------------------------------------------------------------
