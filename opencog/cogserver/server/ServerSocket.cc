@@ -157,7 +157,7 @@ void ServerSocket::handle_connection(void)
             std::istream is(&b);
             std::string line;
             std::getline(is, line);
-            if (!line.empty() && line[line.length()-1] == '\r') {
+            if (not line.empty() and line[line.length()-1] == '\r') {
                 line.erase(line.end()-1);
             }
             OnLine(line);
@@ -175,6 +175,20 @@ void ServerSocket::handle_connection(void)
             }
         }
     }
+
+    // If the data sent to use is not new-line terminated, then
+    // there may still be some bytes sitting in the buffer. Get
+    // them and forward them on.  These are typically scheme
+    // strings issued from netcat, that simply did not have
+    // newlines at the end.
+    std::istream is(&b);
+    std::string line;
+    std::getline(is, line);
+    if (not line.empty() and line[line.length()-1] == '\r') {
+        line.erase(line.end()-1);
+    }
+    if (not line.empty())
+        OnLine(line);
 
     logger().debug("ServerSocket::exiting handle_connection()");
     SetCloseAndDelete();
