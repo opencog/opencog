@@ -759,10 +759,12 @@
 (DefineLink
 	(DefinedPredicate "Salient:Curious")
 	(SequentialAnd
-		(True (Evaluation (GroundedPredicate "scm: print-msg")
-			(ListLink (Node "--- Saliency Tracking"))))
+		; Disable printing, because it prints at 100x/second.
+		; XXX FIXME ... this means that this rule is c alled too often!
+		; Tracking should be autonomous, not piped through the behaviors.
+		; (True (Evaluation (GroundedPredicate "scm: print-msg")
+		;	(ListLink (Node "--- Saliency Tracking"))))
 		(DefinedPredicate "look at salient point")
-		;;(DefinedPredicate "Curious");;bad one
 		))
 
 ; Room luminance (brightness) reactions - be happy in a bright room.
