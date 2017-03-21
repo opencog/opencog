@@ -36,6 +36,9 @@
 ; Load the behavior trees.
 (use-modules (opencog eva-behavior))
 
+(use-modules (opencog movement))
+(start-ros-movement-node)
+
 ; Load the Eva personality configuration.
 ; (display %load-path)
 (add-to-load-path "../src")
