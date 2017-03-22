@@ -115,9 +115,9 @@
 			(set! y (number->string (cadr xyz-list)))
 			(set! z (number->string (caddr xyz-list)))
 			(ListLink
-				(NumberNode xx)
-				(NumberNode yy)
-				(NumberNode zz)))
+				(NumberNode x)
+				(NumberNode y)
+				(NumberNode z)))
 	)
 )
 
