@@ -148,15 +148,6 @@
 	)
 )
 
-;(define (face-at FACE-ID-NODE)
-;	(if (not(equal? (cog-name FACE-ID-NODE) "0"))
-;	 (begin
-;		(look-turn-at-face FACE-ID-NODE "gaze_at_face_point")
-;		(look-turn-at-face FACE-ID-NODE "look_at_face_point")
-;	 )
-;		(stv 0 1)
-;	)
-;)
 ; ---------------------------------------------------------------------
 ;; Below creates say atom for face if sound came from it
 ;; XXX FIXME huh? this needs documentation.
