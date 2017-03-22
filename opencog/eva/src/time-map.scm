@@ -205,7 +205,7 @@
 (define (angle_face_id_snd FACE-ID xx yy zz)
 	;; Get the xyz coords, as a list, for `face-id-node`
 	(define (get-face face-id-node e-start)
-		(get-last-xyz "faces" face-id-node (round e-start))
+		(get-last-xyz "faces" face-id-node (round e-start)))
 	(let* ((fc (get-face FACE-ID face-loc-time-span)))
 		(if (null? fc)
 			6.2831853 ; two-pi
