@@ -104,7 +104,7 @@
 		(get-last-xyz "faces" face-id-node (round e-start))
 	)
 	; Get the x,y,z coords.
-	(define xyz-list (get-face FACE-ID-NODE face-loc-time-span))
+	(define xyz-list (get-face FACE-ID face-loc-time-span))
 	(define x "0.0")
 	(define y "0.0")
 	(define z "0.0")
