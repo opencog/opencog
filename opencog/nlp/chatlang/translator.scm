@@ -6,6 +6,7 @@
              (opencog nlp)
              (opencog exec)
              (opencog openpsi)
+             (opencog movement)
              (srfi srfi-1))
 
 ;; Shared variables for all terms
@@ -33,9 +34,9 @@
   "Checks terms occur in the desired order. To be implemented."
   '())
 
-; XXX TODO
 (define (say text)
-    (Node text)
+  (display text)
+  (True (Put (DefinedPredicate "Say") (Node text)))
 )
 
 (define yakking (psi-demand "Yakking" 0.9))
