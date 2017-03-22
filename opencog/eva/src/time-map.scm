@@ -84,31 +84,22 @@
 	)
 )
 
-;; Get the xyz coords, as a list, for `face-id-node`
-(define (get-face face-id-node e-start)
-	(get-last-xyz "faces" face-id-node (round e-start))
-)
 
 ; ---------------------------------------------------------------------
-;; look-turn-at-face - Publish ROS message to turn or look at face.
+;; get-face-coords - get the 3D position of a face.
 ;;
 ;; `FACE-ID-NODE` should be a Node holding a face-id.
-;; `PY-CMD` should be the name of the python function to call to
-;;     publish the ROS message. (This is hacky, because there are
-;;     currently to scheme bindings to ROS. Alternately, this entire
-;;     routine should have been written in python... XXX FIXME.)
-;; Returns TRUE_TV if the face-id was found, else returns FALSE_TV.
 ;;
 ;; Given a face-id, this will get the last-known 3D (x,y,z) location
-;; for that face from the space server. This 3D coordinate is then
-;; published, via a python wrapper, as a ROS gaze-at or look-at command.
-;; The robot (currently, the blender model) listens to this ROS topic,
-;; and will move the robot.
+;; for that face from the space server.
 ;;
-;; The python `gaze_at_face_point` function will move only the eyes,
-;; while the python `look_at_face_point` will turn the neck+head.
+;; XXX FIXME - this needs to be a part of the space-time server.
 ;;
 (define-public (get-face-coords FACE-ID)
+	;; Get the xyz coords, as a list, for `face-id-node`
+	(define (get-face face-id-node e-start)
+		(get-last-xyz "faces" face-id-node (round e-start))
+	)
 	; Get the x,y,z coords.
 	(define xyz-list (get-face FACE-ID-NODE face-loc-time-span))
 	(define x "0.0")
@@ -209,6 +200,9 @@
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
 (define (angle_face_id_snd FACE-ID xx yy zz)
+	;; Get the xyz coords, as a list, for `face-id-node`
+	(define (get-face face-id-node e-start)
+		(get-last-xyz "faces" face-id-node (round e-start))
 	(let* ((fc (get-face FACE-ID face-loc-time-span)))
 		(if (null? fc)
 			6.2831853 ; two-pi
