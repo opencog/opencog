@@ -108,45 +108,50 @@
 ;; The python `gaze_at_face_point` function will move only the eyes,
 ;; while the python `look_at_face_point` will turn the neck+head.
 ;;
-(define (look-turn-at-face FACE-ID-NODE PY-CMD)
+(define-public (get-face-coords FACE-ID)
 	; Get the x,y,z coords.
 	(define xyz-list (get-face FACE-ID-NODE face-loc-time-span))
+	(define x "0.0")
+	(define y "0.0")
+	(define z "0.0")
 	; The list might be empty, in which case ther is no face.
 	(if (not (null? xyz-list))
-		(let* ((xx (number->string (car xyz-list)))
-				(yy (number->string (cadr xyz-list)))
-				(zz (number->string (caddr xyz-list))))
-			(python-eval
-				(string-append PY-CMD "(" xx "," yy "," zz ")"))
-			(stv 1 1)
-		)
-	)
-		; There was no location, return false.
-		(stv 0 1)
-)
-
-;; glance-at-face - Turn the eyes to look at the given face-id.
-;; look-at-face - Turn entire head to look at the given face-id.
-;; See the `look-turn-at-face` for complete documentation.
-;;
-(define (glance-at-face FACE-ID-NODE)
-	; XXX FIXME this if-check is totally bogus, but that is only
-	; because the new time-server code broke the old face-handling
-	; code. Fix the face-handling code, and this totally bogus check
-	; would not be needed. Arghhh. I despise sloppy-ass bullshit code.
-	(if (not (equal? (cog-name FACE-ID-NODE) "0"))
-		(look-turn-at-face FACE-ID-NODE "gaze_at_face_point")
-		(stv 0 1)
+		(begin
+			(set! x (number->string (car xyz-list)))
+			(set! y (number->string (cadr xyz-list)))
+			(set! z (number->string (caddr xyz-list)))
+			(ListLink
+				(NumberNode xx)
+				(NumberNode yy)
+				(NumberNode zz)))
 	)
 )
 
-(define (look-at-face FACE-ID-NODE)
-	; XXX FIXME this if-check is totally bogus, see above. Arghhh.
-	(if (not (equal? (cog-name FACE-ID-NODE) "0"))
-		(look-turn-at-face FACE-ID-NODE "look_at_face_point")
-		(stv 0 1)
-	)
-)
+(DefineLink
+	(DefinedPredicate "look-at-face")
+	(LambdaLink
+		(Variable "$face-id")
+		(Put
+			(Evaluation
+				(DefinedPredicate "Do look at point")
+				; The below returns a ListLink of 3D coords for the face.
+				(ExecutionOutputLink
+					(GroundedSchema "scm: get-face-coords")
+					(ListLink (Variable "$face-id")))
+			))))
+
+(DefineLink
+	(DefinedPredicate "glance-at-face")
+	(LambdaLink
+		(Variable "$face-id")
+		(Put
+			(Evaluation
+				(DefinedPredicate "Do gaze at point")
+				; The below returns a ListLink of 3D coords for the face.
+				(ExecutionOutputLink
+					(GroundedSchema "scm: get-face-coords")
+					(ListLink (Variable "$face-id")))
+			))))
 
 ; ---------------------------------------------------------------------
 ;; Below creates say atom for face if sound came from it
