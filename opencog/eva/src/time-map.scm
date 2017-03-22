@@ -125,27 +125,25 @@
 	(DefinedPredicate "look-at-face")
 	(LambdaLink
 		(Variable "$face-id")
-		(Put
-			(Evaluation
-				(DefinedPredicate "Do look at point")
-				; The below returns a ListLink of 3D coords for the face.
-				(ExecutionOutputLink
-					(GroundedSchema "scm: get-face-coords")
-					(ListLink (Variable "$face-id")))
-			))))
+		(Evaluation
+			(DefinedPredicate "Do look at point")
+			; The below returns a ListLink of 3D coords for the face.
+			(ExecutionOutputLink
+				(GroundedSchema "scm: get-face-coords")
+				(ListLink (Variable "$face-id")))
+		)))
 
 (DefineLink
 	(DefinedPredicate "glance-at-face")
 	(LambdaLink
 		(Variable "$face-id")
-		(Put
-			(Evaluation
-				(DefinedPredicate "Do gaze at point")
-				; The below returns a ListLink of 3D coords for the face.
-				(ExecutionOutputLink
-					(GroundedSchema "scm: get-face-coords")
-					(ListLink (Variable "$face-id")))
-			))))
+		(Evaluation
+			(DefinedPredicate "Do gaze at point")
+			; The below returns a ListLink of 3D coords for the face.
+			(ExecutionOutputLink
+				(GroundedSchema "scm: get-face-coords")
+				(ListLink (Variable "$face-id")))
+		)))
 
 ; ---------------------------------------------------------------------
 ;; Below creates say atom for face if sound came from it
