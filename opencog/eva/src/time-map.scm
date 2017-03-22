@@ -94,6 +94,9 @@
 ;; for that face from the space server.
 ;;
 ;; XXX FIXME - this needs to be a part of the space-time server.
+;; That is, the space-time server should provide a native interface
+;; for converting object-id's into 3D coordinates!  We should not
+;; have to write hacky scheme code to accomplish this.
 ;;
 (define-public (get-face-coords FACE-ID)
 	;; Get the xyz coords, as a list, for `face-id-node`
