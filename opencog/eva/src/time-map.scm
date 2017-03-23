@@ -72,7 +72,7 @@
 ;; for that face from the space server.
 ;;
 (define-public (get-face-coords FACE-ID)
-	(get-last-location "faces" FACE-ID (round e-start))
+	(get-last-location "faces" FACE-ID (round face-loc-time-span))
 )
 
 (DefineLink
