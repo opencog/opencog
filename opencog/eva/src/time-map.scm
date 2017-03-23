@@ -114,11 +114,13 @@
 			(set! x (number->string (car xyz-list)))
 			(set! y (number->string (cadr xyz-list)))
 			(set! z (number->string (caddr xyz-list)))
-			(ListLink
-				(NumberNode x)
-				(NumberNode y)
-				(NumberNode z)))
-	)
+		))
+
+	;; XXX FIXME we should throw, here, if no such face-id
+	(ListLink
+		(NumberNode x)
+		(NumberNode y)
+		(NumberNode z))
 )
 
 (DefineLink
