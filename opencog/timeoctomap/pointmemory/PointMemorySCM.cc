@@ -199,6 +199,8 @@ void PointMemorySCM::init()
     define_scheme_primitive("get-first-ato", &PointMemorySCM::get_first_time, this, "ato pointmem");// h_shi
     define_scheme_primitive("get-last-ato", &PointMemorySCM::get_last_time, this, "ato pointmem");// h_shi
     define_scheme_primitive("get-first-locs-ato", &PointMemorySCM::get_first_location, this, "ato pointmem");// h_shi
+
+    // -----------------------------------------
     define_scheme_primitive("get-last-locs-ato", &PointMemorySCM::get_last_location, this, "ato pointmem");// h_shi
     define_scheme_primitive("get-at-loc-ato", &PointMemorySCM::get_at_loc_ato, this, "ato pointmem");// h_sddd
     define_scheme_primitive("get-past-loc-ato", &PointMemorySCM::get_past_loc_ato, this, "ato pointmem");// h_siddd
@@ -304,7 +306,7 @@ bool PointMemorySCM::map_ato(const string& map_name, Handle ato,
 // Tag the atom `ato` with the timepoint `tp`, using an AtTimeLink
 static Handle timestamp_tag_atom(const time_pt& tp, const Handle& ato)
 {
-    // XXX FIXME - there should be a TimeNode c++ class that will
+    // XXX FIXME - there should be a TimeNode C++ class that will
     // store timestamps internally, and avoid or minimize this nasty
     // string conversion.
     std::time_t ttp = std::chrono::system_clock::to_time_t(tp);
