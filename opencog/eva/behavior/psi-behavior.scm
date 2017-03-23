@@ -3,11 +3,10 @@
 (use-modules (ice-9 format))
 
 
-(add-to-load-path "/usr/local/share/opencog/scm")
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog openpsi))
-(load "face-priority.scm")
+(load "eva-behavior/face-priority.scm")
 
 ;; ------------------------------------------------------------------
 ; Demand associated with faces
