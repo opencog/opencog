@@ -1,6 +1,5 @@
 INSTALL (FILES
 	eva-behavior.scm
-	eva-model.scm
 	DESTINATION "${DATADIR}/scm/opencog/"
 )
 
@@ -17,11 +16,4 @@ INSTALL (FILES
 	cfg-eva.scm
 	cfg-sophia.scm
 	DESTINATION "${DATADIR}/scm/opencog/eva-behavior"
-)
-
-INSTALL (FILES
-	self-model.scm
-	faces.scm
-	time-map.scm
-	DESTINATION "${DATADIR}/scm/opencog/eva-model"
 )
