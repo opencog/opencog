@@ -45,39 +45,6 @@
 ; the number of frames, and is set as half the size of the total buffer.
 (define face-loc-time-span 8000) ; (8000 milliseconds or 8 seconds)
 
-;; Convert from at location link to (x y z) list
-(define (space-nodes at-loc-link)
-   (cog-outgoing-set (cadr
-      (cog-outgoing-set (cadr (cog-outgoing-set at-loc-link))))))
-
-(define (loc-link-x at-loc-link)
-   (string->number (cog-name (car (space-nodes at-loc-link))))
-)
-
-(define (loc-link-y at-loc-link)
-   (string->number (cog-name (cadr (space-nodes at-loc-link))))
-)
-
-(define (loc-link-z at-loc-link)
-   (string->number (cog-name (caddr (space-nodes at-loc-link))))
-)
-
-(define (get-last-location map-name id-node elapse)
-	(gar (get-last-locs-ato map-name id-node elapse)))
-
-; ---------------------------------------------------------------------
-;; Given the atom `id-node`, this fetches the last known location
-;; (3D xyz coordinates) for that atom in the map `map-name`.
-;; The search will be made only in the most recent time interval of
-;; `elapse` millisconds.
-;;
-;; Returns a list of three floating-point numbers, or a null list
-;; if the atom is not found.
-;;
-;; This function assumes that an atom can have only one location at a
-;; time.
-(define-public (get-last-xyz map-name id-node elapse)
-	;
 	; get-last-locs-ato returns a SetLink holding AtLocationLinks
 	; of the form below:
 	;
@@ -93,17 +60,8 @@
 	; Here, `map-name` is "faces"
 	; `id-node` is "(NumberNode 42)" (the face id)
 	;
-	(let* ((loc-atom (get-last-location map-name id-node elapse))))
-		(if (not (null? loc-atom))
-			(let* ((xx (loc-link-x loc-atom))
-					(yy (loc-link-y loc-atom))
-					(zz (loc-link-z loc-atom)))
-				(list xx yy zz))
-			(list)
-		)
-	)
-)
-
+(define (get-last-location map-name id-node elapse)
+	(gar (get-last-locs-ato map-name id-node elapse)))
 
 ; ---------------------------------------------------------------------
 ;; get-face-coords - get the 3D position of a face.
@@ -196,14 +154,33 @@
 ;assuming common zero in coordinates
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
+;
+;; XXX FIXME -- this kind of crazy angle computation should be
+;; happenening in the space-time server, and not here.
+;;
 (define (angle_face_id_snd FACE-ID xx yy zz)
+	;; Convert from at location link to (x y z) list
+	(define (space-nodes at-loc-link)
+		(cog-outgoing-set (cadr
+			(cog-outgoing-set (cadr (cog-outgoing-set at-loc-link))))))
+
+	(define (loc-link-x at-loc-link)
+		(string->number (cog-name (car (space-nodes at-loc-link)))))
+	(define (loc-link-y at-loc-link)
+		(string->number (cog-name (cadr (space-nodes at-loc-link)))))
+	(define (loc-link-z at-loc-link)
+		(string->number (cog-name (caddr (space-nodes at-loc-link)))))
+
 	;; Get the xyz coords, as a list, for `face-id-node`
-	(define (get-face face-id-node e-start)
-		(get-last-xyz "faces" face-id-node (round e-start)))
-	(let* ((fc (get-face FACE-ID face-loc-time-span)))
-		(if (null? fc)
+	(let* ((loc-atom
+		(get-last-location "faces" FACE-ID (round face-loc-time-span))))
+		(if (null? loc-atom)
 			6.2831853 ; two-pi
-			(angle (car fc) (cadr fc) (caddr fc) xx yy zz)
+			(angle
+				(loc-link-x loc-atom)
+				(loc-link-y loc-atom)
+				(loc-link-z loc-atom)
+				xx yy zz)
 		)
 	)
 )
@@ -213,6 +190,9 @@
 ;;
 ;; A face is near if the sound direction is within 15 degrees of
 ;; the face.  Returns the atom for the face, or the emtpy list.
+;;
+;; XXX FIXME -- this kind of tulity needs to be in the space-time
+;; server, and not here.
 (define (face-nearest-sound xx yy zz)
 
 	; The visible faces are stored as EvaluationLinks, attached
