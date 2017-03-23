@@ -4,8 +4,9 @@
              (opencog nlp chatbot)
              (opencog openpsi))
 
-(load "translator.scm")
 (load "terms.scm")
+(load "translator.scm")
+(load "matcher.scm")
 
 ; Things we have in the AtomSpace
 (chat-concept "eat" (list "eat" "ingest" "binge and purge"))
@@ -14,21 +15,22 @@
 ; Input to the system
 (define input "I eat meat")
 
+; --------------------
+; Below should be done in chatbot-psi
+; Will do the code integration later
+
 ; Parse the input
 (define input-sent-node (car (nlp-parse input)))
 
 ; Connect the SentenceNode to the anchor
-(State (Anchor "CurrentlyProcessing") input-sent-node)
-
-; Get the words
-(define input-wl (get-word-list input-sent-node))
+(State (Anchor "Currently Processing") input-sent-node)
 
 ; --------------------
 ; Action selection
 ; TODO XXX Should be done in OpenPsi
 
 ; Find the matching rules using DualLink
-(define rules-found (psi-get-dual-match input-wl))
+(define rules-found (psi-get-dual-match (get-sent-words input-sent-node)))
 
 (define rules-satisfied
   (append-map (lambda (r)

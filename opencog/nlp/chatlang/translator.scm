@@ -18,7 +18,7 @@
 ;; Shared conditions for all terms
 (define atomese-condition-template (list (Parse (Variable "$P")
                                                 (Variable "$S"))
-                                         (State (Anchor "CurrentlyProcessing")
+                                         (State (Anchor "Currently Processing")
                                                 (Variable "$S"))))
 
 (define (process-pattern-term term atomese-pattern)
@@ -42,18 +42,7 @@
               (List (Variable "$S")
                     (List word-list))))
 
-(define (check-word-sequence sent-node word-list)
-  (define result (cog-execute! (Map word-list (Set (get-word-list sent-node)))))
-  (if (not (null? (gar result)))
-      (stv 1 1)
-      (stv 0 1))
-)
-
-(define (say text)
-  (True (Put (DefinedPredicate "Say") (Node text)))
-)
-
-(define (get-word-list sent-node)
+(define (get-sent-words sent-node)
   (List (append-map
     (lambda (w)
       ; Ignore LEFT-WALL and punctuations
@@ -62,6 +51,15 @@
           '()
           (cog-chase-link 'ReferenceLink 'WordNode w)))
     (car (sent-get-words-in-order sent-node)))))
+
+(define (check-word-sequence sent-node word-list)
+  (define result (cog-execute! (Map word-list (Set (get-sent-words sent-node)))))
+  (if (not (null? (gar result)))
+      (stv 1 1)
+      (stv 0 1)))
+
+(define (say text)
+  (True (Put (DefinedPredicate "Say") (Node text))))
 
 (define yakking (psi-demand "Yakking" 0.9))
 
