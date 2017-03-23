@@ -62,8 +62,9 @@ void ServerSocket::Send(const std::string& cmd)
         error.value() != boost::asio::error::broken_pipe and
         error.value() != boost::asio::error::bad_descriptor and
         error.value() != boost::asio::error::connection_reset)
-        logger().warn("ServerSocket::Send(): %s on thread 0x%x",
-             error.message().c_str(), pthread_self());
+        logger().warn("ServerSocket::Send(): %s on thread 0x%x\n"
+                      "Attempted to send: %s",
+             error.message().c_str(), pthread_self(), cmd.c_str());
 }
 
 // As far as I can tell, boost::asio is not actually thread-safe,
