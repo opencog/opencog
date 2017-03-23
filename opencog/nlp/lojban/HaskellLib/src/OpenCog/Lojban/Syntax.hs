@@ -229,11 +229,11 @@ zoP = instanceOf . wordNode <<< mytext "zo" &&> anyWord
 
 --KohaPharse for any kind of Pro-Noune
 kohaP :: Syntax Atom
-kohaP = da <+> ma <+> koha
+kohaP = da <+> ma <+> ko <+> koha
     where koha = concept . selmaho "KOhA"
           ma   = varnode . word "ma"
           da   = concept . oneOfS word ["da","de","di"]
-          ko   = setFlag "ko" . concept . word "ko"
+          ko   = setFlagIso "ko" . concept . word "ko"
 
 luP' :: Syntax Atom
 luP' = sepSelmaho "LU" &&> lojban <&& optSelmaho "LIhU"
@@ -624,6 +624,7 @@ _trati = handleTrati
 _NA :: Syntax String
 _NA = selmaho "NA"
 
+selbriAll :: Syntax (Maybe Atom, (Maybe String, Tagged Selbri))
 selbriAll =  _trati
          &&& optional _NA
          &&& selbriUI
@@ -634,15 +635,21 @@ selbriAll =  _trati
 
 --                            trati        na
 bridiTail :: Syntax ((Maybe Atom, (Maybe String, Tagged Selbri)),[Sumti])
-bridiTail = (selbriAll &&& many sumtiAllUI) . ifNotFlag "onlyBE"
+bridiTail = (((second.second.first.second) handleKO . selbriAll) &&& many sumtiAllUI) . ifNotFlag "onlyBE"
 
 bridiBETail :: Syntax ((Maybe Atom, (Maybe String, Tagged Selbri)),[Sumti])
-bridiBETail = selbriAll &&& beP
+bridiBETail = ((second.second.first.second) handleKO . selbriAll) &&& beP
     where beP :: Syntax [Sumti]
           beP = (cons <<<       sepSelmaho "BE"  &&> sumtiAllUI
                       &&& many (sepSelmaho "BEI" &&> sumtiAllUI)
                       <&& optSelmaho "BEhO"
                 ) <+> insert []
+
+handleKO :: SynIso Atom Atom
+handleKO = (sndToState 1 . second (tolist1 . impl) . reorder . ifFlag "ko") <+> id
+    where reorder = mkIso f g where
+            f selbri = (selbri,[selbri,cPN "Imperative" lowTv])
+            g (selbri,_) = selbri
 
 -- (a,(mp,(ma,(s,aa))))
 -- (mp,(ma,(s,a++aa)))
