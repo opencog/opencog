@@ -113,34 +113,8 @@
 ;; Given a face-id, this will get the last-known 3D (x,y,z) location
 ;; for that face from the space server.
 ;;
-;; XXX FIXME - this needs to be a part of the space-time server.
-;; That is, the space-time server should provide a native interface
-;; for converting object-id's into 3D coordinates!  We should not
-;; have to write hacky scheme code to accomplish this.
-;;
 (define-public (get-face-coords FACE-ID)
-	;; Get the xyz coords, as a list, for `face-id-node`
-	(define (get-face face-id-node e-start)
-		(get-last-xyz "faces" face-id-node (round e-start))
-	)
-	; Get the x,y,z coords.
-	(define xyz-list (get-face FACE-ID face-loc-time-span))
-	(define x "0.0")
-	(define y "0.0")
-	(define z "0.0")
-	; The list might be empty, in which case ther is no face.
-	(if (not (null? xyz-list))
-		(begin
-			(set! x (number->string (car xyz-list)))
-			(set! y (number->string (cadr xyz-list)))
-			(set! z (number->string (caddr xyz-list)))
-		))
-
-	;; XXX FIXME we should throw, here, if no such face-id
-	(ListLink
-		(NumberNode x)
-		(NumberNode y)
-		(NumberNode z))
+	(get-last-location "faces" FACE-ID (round e-start))
 )
 
 (DefineLink
