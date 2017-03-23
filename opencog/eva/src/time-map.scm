@@ -61,7 +61,13 @@
 	; `id-node` is "(NumberNode 42)" (the face id)
 	;
 (define (get-last-location map-name id-node elapse)
-	(gar (get-last-locs-ato map-name id-node elapse)))
+	(define at-loc
+		(gar (get-last-locs-ato map-name id-node elapse)))
+	(if (null? at-loc)
+		(ListLink (Number 0) (Number 0) (Number 0))
+		(gddr at-loc)
+	)
+)
 
 ; ---------------------------------------------------------------------
 ;; get-face-coords - get the 3D position of a face.
@@ -72,8 +78,7 @@
 ;; for that face from the space server.
 ;;
 (define-public (get-face-coords FACE-ID)
-	(get-last-location "faces" FACE-ID (round face-loc-time-span))
-)
+	(get-last-location "faces" FACE-ID (round face-loc-time-span)))
 
 (DefineLink
 	(DefinedPredicate "look-at-face")
