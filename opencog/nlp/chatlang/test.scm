@@ -8,10 +8,8 @@
 (load "terms.scm")
 
 ; Things we have in the AtomSpace
+(chat-concept "eat" (list "eat" "ingest" "binge and purge"))
 (chat-rule '((lemma "I") (concept "eat") (lemma "meat")) '(say "Do you really? I am a vegan."))
-(Reference (Word "eat") (Concept "eat"))
-(Reference (Word "ingest") (Concept "eat"))
-(Reference (List (Word "binge") (Word "and") (Word "purge")) (Concept "eat"))
 
 ; Input to the system
 (define input "I eat meat")
@@ -25,11 +23,13 @@
 ; Get the words
 (define input-wl (get-word-list input-sent-node))
 
+; --------------------
+; Action selection
+; TODO XXX Should be done in OpenPsi
+
 ; Find the matching rules using DualLink
 (define rules-found (psi-get-dual-match input-wl))
 
-; Action selection
-; XXX Should be done in OpenPsi
 (define rules-satisfied
   (append-map (lambda (r)
     (if (equal? (stv 1 1)

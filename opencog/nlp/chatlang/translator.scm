@@ -35,19 +35,18 @@
 (define (term-sequence-check terms)
   "Checks terms occur in the desired order. To be implemented."
   (define word-list
-    (map (lambda (w)
-      (cond ((equal? 'concept (car w)) (Glob (car (cdr w))))
-            (else (Word (car (cdr w))))))
-      terms))
+    (map (lambda (w) (cond ((equal? 'concept (car w)) (Glob (car (cdr w))))
+                           (else (Word (car (cdr w))))))
+         terms))
   (Evaluation (GroundedPredicate "scm: check-word-sequence")
               (List (Variable "$S")
                     (List word-list))))
 
-(define-public (check-word-sequence sent-node word-list)
+(define (check-word-sequence sent-node word-list)
   (define result (cog-execute! (Map word-list (Set (get-word-list sent-node)))))
   (if (not (null? (gar result)))
-    (stv 1 1)
-    (stv 0 1))
+      (stv 1 1)
+      (stv 0 1))
 )
 
 (define (say text)
@@ -60,8 +59,8 @@
       ; Ignore LEFT-WALL and punctuations
       (if (or (string-prefix? "LEFT-WALL" (cog-name w))
               (word-inst-match-pos? w "punctuation"))
-        '()
-        (cog-chase-link 'ReferenceLink 'WordNode w)))
+          '()
+          (cog-chase-link 'ReferenceLink 'WordNode w)))
     (car (sent-get-words-in-order sent-node)))))
 
 (define yakking (psi-demand "Yakking" 0.9))
@@ -74,7 +73,6 @@
                            template
                            pattern))
          (seq-check (term-sequence-check pattern)))
-
     (psi-rule
       (list (Satisfaction (VariableList (car proc-terms))
                           (And (append (cdr proc-terms) (list seq-check)))))
@@ -87,12 +85,12 @@
 (define (member-words w)
   (let ((words (string-split w #\sp)))
     (if (= 1 (length words))
-        (Word words)
+        (Word (car words))
         (List (map-in-order Word words)))))
 
 (define (chat-concept name members)
   "Lets users create named concepts with explicit membership lists."
   (let* ((c (Concept name))
-         (ref-members (append-map (lambda (m) (Reference (member-words m) c))
+         (ref-members (append-map (lambda (m) (list (Reference (member-words m) c)))
                                   members)))
-    (List (cons c ref-members))))
+    ref-members))
