@@ -103,13 +103,10 @@ functional alpha state in the near future.
 
 ### Trivial Next Steps
 
-1. The code for individual patterns and iterating over pattern sequences is
-   working, but the code for generating PSI rules needs debugging. 
-2. Once PSI rule generation is working, write an example script or unit test
-   that loads a few rules and a few sentences. Add it to the build.
-3. Write term functions for proper nouns, main subject, verb and object, and
+1. Expand the example/test script so it loads a few rules and a few sentences. 
+   Once it's working, add this folder to the cmake build files.
+2. Write term functions for proper nouns, main subject, verb and object, and
    position anchors.
-4. Write code for defining new concepts.
 
 ### Not So Trivial Next Steps
 
