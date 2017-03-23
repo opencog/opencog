@@ -794,7 +794,7 @@ proper atomese.
 			(Get (State eye-contact-state (Variable "$x")))
 			(SetLink no-interaction)))
 		(True (Put
-			(Evaluation (GroundedPredicate "scm:look-at-face")
+			(Evaluation (DefinedPredicate "look-at-face")
 				(ListLink (Variable "$face")))
 			(Get (State eye-contact-state (Variable "$x")))))
 	))
@@ -840,7 +840,7 @@ proper atomese.
 	(LambdaLink
 		(Variable "$face-id")
 		(SequentialAndLink
-			(Evaluation (GroundedPredicate "scm: glance-at-face")
+			(Evaluation (DefinedPredicate "glance-at-face")
 				(ListLink (Variable "$face-id")))
 			(True (DefinedSchemaNode "set glance timestamp"))
 			;; Mark it as acked, othwerwise, we'll keep glancing there,

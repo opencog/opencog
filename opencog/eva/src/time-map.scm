@@ -84,85 +84,77 @@
 	)
 )
 
-;; Get the xyz coords, as a list, for `face-id-node`
-(define (get-face face-id-node e-start)
-	(get-last-xyz "faces" face-id-node (round e-start))
-)
 
 ; ---------------------------------------------------------------------
-;; look-turn-at-face - Publish ROS message to turn or look at face.
+;; get-face-coords - get the 3D position of a face.
 ;;
 ;; `FACE-ID-NODE` should be a Node holding a face-id.
-;; `PY-CMD` should be the name of the python function to call to
-;;     publish the ROS message. (This is hacky, because there are
-;;     currently to scheme bindings to ROS. Alternately, this entire
-;;     routine should have been written in python... XXX FIXME.)
-;; Returns TRUE_TV if the face-id was found, else returns FALSE_TV.
 ;;
 ;; Given a face-id, this will get the last-known 3D (x,y,z) location
-;; for that face from the space server. This 3D coordinate is then
-;; published, via a python wrapper, as a ROS gaze-at or look-at command.
-;; The robot (currently, the blender model) listens to this ROS topic,
-;; and will move the robot.
+;; for that face from the space server.
 ;;
-;; The python `gaze_at_face_point` function will move only the eyes,
-;; while the python `look_at_face_point` will turn the neck+head.
+;; XXX FIXME - this needs to be a part of the space-time server.
+;; That is, the space-time server should provide a native interface
+;; for converting object-id's into 3D coordinates!  We should not
+;; have to write hacky scheme code to accomplish this.
 ;;
-(define (look-turn-at-face FACE-ID-NODE PY-CMD)
+(define-public (get-face-coords FACE-ID)
+	;; Get the xyz coords, as a list, for `face-id-node`
+	(define (get-face face-id-node e-start)
+		(get-last-xyz "faces" face-id-node (round e-start))
+	)
 	; Get the x,y,z coords.
-	(define xyz-list (get-face FACE-ID-NODE face-loc-time-span))
+	(define xyz-list (get-face FACE-ID face-loc-time-span))
+	(define x "0.0")
+	(define y "0.0")
+	(define z "0.0")
 	; The list might be empty, in which case ther is no face.
 	(if (not (null? xyz-list))
-		(let* ((xx (number->string (car xyz-list)))
-				(yy (number->string (cadr xyz-list)))
-				(zz (number->string (caddr xyz-list))))
-			(python-eval
-				(string-append PY-CMD "(" xx "," yy "," zz ")"))
-			(stv 1 1)
-		)
-	)
-		; There was no location, return false.
-		(stv 0 1)
+		(begin
+			(set! x (number->string (car xyz-list)))
+			(set! y (number->string (cadr xyz-list)))
+			(set! z (number->string (caddr xyz-list)))
+		))
+
+	;; XXX FIXME we should throw, here, if no such face-id
+	(ListLink
+		(NumberNode x)
+		(NumberNode y)
+		(NumberNode z))
 )
 
-;; glance-at-face - Turn the eyes to look at the given face-id.
-;; look-at-face - Turn entire head to look at the given face-id.
-;; See the `look-turn-at-face` for complete documentation.
-;;
-(define (glance-at-face FACE-ID-NODE)
-	; XXX FIXME this if-check is totally bogus, but that is only
-	; because the new time-server code broke the old face-handling
-	; code. Fix the face-handling code, and this totally bogus check
-	; would not be needed. Arghhh. I despise sloppy-ass bullshit code.
-	(if (not (equal? (cog-name FACE-ID-NODE) "0"))
-		(look-turn-at-face FACE-ID-NODE "gaze_at_face_point")
-		(stv 0 1)
-	)
-)
+(DefineLink
+	(DefinedPredicate "look-at-face")
+	(LambdaLink
+		(Variable "$face-id")
+		(Evaluation
+			(DefinedPredicate "Do look at point")
+			; The below returns a ListLink of 3D coords for the face.
+			(ExecutionOutputLink
+				(GroundedSchema "scm: get-face-coords")
+				(ListLink (Variable "$face-id")))
+		)))
 
-(define (look-at-face FACE-ID-NODE)
-	; XXX FIXME this if-check is totally bogus, see above. Arghhh.
-	(if (not (equal? (cog-name FACE-ID-NODE) "0"))
-		(look-turn-at-face FACE-ID-NODE "look_at_face_point")
-		(stv 0 1)
-	)
-)
+(DefineLink
+	(DefinedPredicate "glance-at-face")
+	(LambdaLink
+		(Variable "$face-id")
+		(Evaluation
+			(DefinedPredicate "Do gaze at point")
+			; The below returns a ListLink of 3D coords for the face.
+			(ExecutionOutputLink
+				(GroundedSchema "scm: get-face-coords")
+				(ListLink (Variable "$face-id")))
+		)))
 
-;(define (face-at FACE-ID-NODE)
-;	(if (not(equal? (cog-name FACE-ID-NODE) "0"))
-;	 (begin
-;		(look-turn-at-face FACE-ID-NODE "gaze_at_face_point")
-;		(look-turn-at-face FACE-ID-NODE "look_at_face_point")
-;	 )
-;		(stv 0 1)
-;	)
-;)
 ; ---------------------------------------------------------------------
 ;; Below creates say atom for face if sound came from it
 ;; XXX FIXME huh? this needs documentation.
 ;; XXX FIXME elminiate the use of cog-execute! -- that is not how
 ;; this should be designed -- these need to be learnable; and
 ;; cog-execute prevents learning.
+;; XX This also bypasses the regular decision-making process
+;; in the behvaior tree. So this is wrong in a bunch iof different ways.
 (define (who-said? sent)
 	;;request eye contact
 
@@ -211,6 +203,9 @@
 ;assuming sound was saved with co-oridinate transform applied for camera
 ;angle in radians
 (define (angle_face_id_snd FACE-ID xx yy zz)
+	;; Get the xyz coords, as a list, for `face-id-node`
+	(define (get-face face-id-node e-start)
+		(get-last-xyz "faces" face-id-node (round e-start)))
 	(let* ((fc (get-face FACE-ID face-loc-time-span)))
 		(if (null? fc)
 			6.2831853 ; two-pi

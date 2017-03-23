@@ -1,6 +1,10 @@
 ;
 ; btree.scm
 ;
+; XXX FIXME ... I think this blob of code is obsolete ... I think
+; that the current interfaces are in `btree-psi.scm`.  So remove this
+; file once we are clear on this.
+;
 ; Sophia behavior tree (for the Sophia blender model animations).
 ;
 ; Runs a set of defined behaviors that express Sophia's personality.

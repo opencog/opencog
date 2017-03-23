@@ -3,7 +3,7 @@
 ;
 ; OpenPsi dynamics control for Hanson robot
 
-(use-modules (opencog) (opencog exec) (opencog openpsi) (opencog python))
+(use-modules (opencog) (opencog exec) (opencog openpsi))
 
 ; needed for nlp parsing
 (use-modules (opencog nlp) (opencog nlp chatbot) (opencog nlp chatbot-psi))
@@ -598,26 +598,17 @@
 ;			(psi-set-value! sudden-sound-change 0))))
 
 ; Shortcuts
-(define-public v voice-width)
-(define-public p power)
-(define-public a arousal)
+(define v voice-width)
+(define p power)
+(define a arousal)
 
-(define-public n simulate-loud-noise)
-(define-public ln simulate-loud-noise)
+(define n simulate-loud-noise)
+(define ln simulate-loud-noise)
 
-(define-public nd place-neg-dialog)   ; nd neg dialog
-(define-public pd place-pos-dialog)   ; pd pos dialog
+(define nd place-neg-dialog)   ; nd neg dialog
+(define pd place-pos-dialog)   ; pd pos dialog
 
 (define s speech-giving-starts)
 (define pos positive-sentiment-dialog)
 (define neg negative-sentiment-dialog)
 (define nf new-face)
-
-
-
-
-
-
-
-
-
