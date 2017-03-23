@@ -45,6 +45,26 @@
 ; the number of frames, and is set as half the size of the total buffer.
 (define face-loc-time-span 8000) ; (8000 milliseconds or 8 seconds)
 
+;; Convert from at location link to (x y z) list
+(define (space-nodes at-loc-link)
+   (cog-outgoing-set (cadr
+      (cog-outgoing-set (cadr (cog-outgoing-set at-loc-link))))))
+
+(define (loc-link-x at-loc-link)
+   (string->number (cog-name (car (space-nodes at-loc-link))))
+)
+
+(define (loc-link-y at-loc-link)
+   (string->number (cog-name (cadr (space-nodes at-loc-link))))
+)
+
+(define (loc-link-z at-loc-link)
+   (string->number (cog-name (caddr (space-nodes at-loc-link))))
+)
+
+(define (get-last-location map-name id-node elapse)
+	(gar (get-last-locs-ato map-name id-node elapse)))
+
 ; ---------------------------------------------------------------------
 ;; Given the atom `id-node`, this fetches the last known location
 ;; (3D xyz coordinates) for that atom in the map `map-name`.
@@ -73,7 +93,7 @@
 	; Here, `map-name` is "faces"
 	; `id-node` is "(NumberNode 42)" (the face id)
 	;
-	(let* ((loc-atom (gar (get-last-locs-ato map-name id-node elapse))))
+	(let* ((loc-atom (get-last-location map-name id-node elapse))))
 		(if (not (null? loc-atom))
 			(let* ((xx (loc-link-x loc-atom))
 					(yy (loc-link-y loc-atom))
