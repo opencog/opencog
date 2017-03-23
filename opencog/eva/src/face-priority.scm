@@ -188,6 +188,10 @@
     )
 )
 
+;;
+;; XXX refactor all of this -- this si supposed to be a service provided
+;; byt the spoace-time server, instead of being in scheme spaghetti
+;; code.
 (define (distance-in-plane-yz face-id-1 face-id-2)
 "
   Distance between the two faces in the yz plane.
