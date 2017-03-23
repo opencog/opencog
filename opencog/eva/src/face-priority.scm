@@ -146,6 +146,35 @@
 (define ordinary-face-priority 0.5)
 (define highest-face-priority 1.0)
 
+;; Convert from at location link to (x y z) list
+(define (space-nodes at-loc-link)
+   (cog-outgoing-set (cadr
+      (cog-outgoing-set (cadr (cog-outgoing-set at-loc-link))))))
+
+(define (loc-link-x at-loc-link)
+   (string->number (cog-name (car (space-nodes at-loc-link))))
+)
+
+(define (loc-link-y at-loc-link)
+   (string->number (cog-name (cadr (space-nodes at-loc-link))))
+)
+
+(define (loc-link-z at-loc-link)
+   (string->number (cog-name (caddr (space-nodes at-loc-link))))
+)
+
+(define (get-last-xyz map-name id-node elapse)
+	(let* ((loc-atom (gar (get-last-locs-ato map-name id-node elapse))))
+		(if (not (null? loc-atom))
+			(let* ((xx (loc-link-x loc-atom))
+				    (yy (loc-link-y loc-atom))
+				    (zz (loc-link-z loc-atom)))
+				(list xx yy zz))
+			(list)
+		)
+	)
+)
+
 (define (get-face-coordinate-in-plane-yz face-id)
     (let ((new-x distance)
           (xyz (get-last-xyz "faces" (Number face-id) face-loc-time-span)))
@@ -159,6 +188,10 @@
     )
 )
 
+;;
+;; XXX refactor all of this -- this si supposed to be a service provided
+;; byt the spoace-time server, instead of being in scheme spaghetti
+;; code.
 (define (distance-in-plane-yz face-id-1 face-id-2)
 "
   Distance between the two faces in the yz plane.
