@@ -18,48 +18,48 @@
 	(opencog eva-model) (opencog eva-behavior))
 
 (use-modules (opencog ato pointmem)); needed for maps
-(use-modules (opencog python))
 
-(define last-speaker (ConceptNode "last person who spoke"))
-(define prev-speaker (ConceptNode "previous person who spoke"))
+(define last-speaker (Concept "last person who spoke"))
+(define prev-speaker (Concept "previous person who spoke"))
 
-(StateLink last-speaker (NumberNode "0"))
-(StateLink prev-speaker (NumberNode "0"))
+(State last-speaker (Number 0))
+(State prev-speaker (Number 0))
 
 ; --------------------------------------------------------------------
+(define facemap (SpaceMapNode "faces"))
+
 ; Create an opencog space-time map, for storing locations of faces.
-; This map will be udates every 66 millisdeconds (about 15 Hz), and
+; This map will be udates every 66 milliseconds (about 15 Hz), and
 ; will buffer 150 frames (about 10 seconds), and work with a one
 ; centimeter resolution (the native coords of the map are meters).
-(create-map "faces" 0.01 66 150)
+(create-map facemap (ListLink (Number 0.01) (Number 66) (Number 150)))
 
-; Run the map in a new thread. This will autoamtically create a new
+; Run the map in a new thread. This will automatically create a new
 ; time-slice every 66 milliseconds.
 ; XXX FIXME Is it wise to start this, just because the guile module got
 ; loaded? or should we have a distinct "start running it now" function?
-(auto-step-time-on "faces")
+(auto-step-time-on facemap)
 
 ; time-span is the amount of time in milliseconds to be considered
 ; for locating a face. The time limit for spatial memory for faces :-).
 ; The value is dependent on the frequency of update of the map and
 ; the number of frames, and is set as half the size of the total buffer.
-(define face-loc-time-span 8000) ; (8000 milliseconds or 8 seconds)
+(define face-loc-time-span (NumberNode 8000)) ; (8000 milliseconds or 8 seconds)
 
-	; get-last-locs-ato returns a SetLink holding AtLocationLinks
-	; of the form below:
-	;
-	;    (AtLocationLink
-	;      (ObjectNode "faces")
-	;      (ListLink
-	;         (NumberNode "42.000000" (av 5 0 0))
-	;         (ListLink
-	;            (NumberNode "2.005000")
-	;            (NumberNode "1.005000")
-	;            (NumberNode "0.005000"))))
-	;
-	; Here, `map-name` is "faces"
-	; `id-node` is "(NumberNode 42)" (the face id)
-	;
+; get-last-locs-ato returns a SetLink holding AtLocationLinks
+; of the form below:
+;
+;    (AtLocationLink
+;      (SpaceMapNode "faces")
+;      (ListLink
+;         (NumberNode "42.000000")
+;         (ListLink
+;            (NumberNode "2.005000")
+;            (NumberNode "1.005000")
+;            (NumberNode "0.005000"))))
+;
+; `id-node` is "(NumberNode 42)" (the face id)
+;
 (define (get-last-location map-name id-node elapse)
 	(define at-loc
 		(gar (get-last-locs-ato map-name id-node elapse)))
@@ -78,7 +78,7 @@
 ;; for that face from the space server.
 ;;
 (define-public (get-face-coords FACE-ID)
-	(get-last-location "faces" FACE-ID (round face-loc-time-span)))
+	(get-last-location facemap FACE-ID face-loc-time-span))
 
 (DefineLink
 	(DefinedPredicate "look-at-face")
@@ -177,8 +177,7 @@
 		(string->number (cog-name (caddr (space-nodes at-loc-link)))))
 
 	;; Get the xyz coords, as a list, for `face-id-node`
-	(let* ((loc-atom
-		(get-last-location "faces" FACE-ID (round face-loc-time-span))))
+	(let* ((loc-atom (get-face-coords FACE-ID)))
 		(if (null? loc-atom)
 			6.2831853 ; two-pi
 			(angle
