@@ -29,6 +29,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/NumberNode.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/timeoctomap/TimeOctomap.h>
@@ -218,14 +219,14 @@ void PointMemorySCM::init()
 #endif
 }
 
-Handle PointMemorySCM::create_map(Handle name, Handle resolution)
+Handle PointMemorySCM::create_map(Handle map_name, Handle resolution)
 {
-	HandleSeq& hs->getOutgoingSet();
+	const HandleSeq& hs = resolution->getOutgoingSet();
 
 	// XXX FIXME -- verify that these are NumberNodes.
-	double space_res_mtr = atof(hs[0]->getName());
-	int time_res_milli_sec = atoi(hs[1]->getName());
-	int time_units = atoi(hs[2]->getName());
+	double space_res_mtr = atof(hs[0]->getName().c_str());
+	int time_res_milli_sec = atoi(hs[1]->getName().c_str());
+	int time_units = atoi(hs[2]->getName().c_str());
 
 	// Reject if time units < 1
 	if (time_units < 1)
@@ -237,7 +238,7 @@ Handle PointMemorySCM::create_map(Handle name, Handle resolution)
 		throw InvalidParamException(TRACE_INFO,
 			 "Expecting positive spatial resolution");
 
-	if (name->getName().length() < 1)
+	if (map_name->getName().length() < 1)
 		throw InvalidParamException(TRACE_INFO,
 			 "Invalid map name");
 
@@ -245,8 +246,8 @@ Handle PointMemorySCM::create_map(Handle name, Handle resolution)
 	if (tsa.find(map_name->getName()) != tsa.end())
 		throw InvalidParamException(TRACE_INFO, "Map already exists");
 
-	tsa[name] = new TimeOctomap(time_units, space_res_mtr, std::chrono::milliseconds(time_res_milli_sec));
-	return name;
+	tsa[map_name] = new TimeOctomap(time_units, space_res_mtr, std::chrono::milliseconds(time_res_milli_sec));
+	return map_name;
 }
 // add point clouds later
 
@@ -307,7 +308,7 @@ Handle PointMemorySCM::map_ato(Handle map_name, Handle ato, Handle loc)
 {
 	have_map(map_name);
 	// loc should be a ListLink of three NumberNodes.
-	HandleSeq& hs = loc->getOutgoingSet();
+	const HandleSeq& hs = loc->getOutgoingSet();
 	double x = NumberNodeCast(hs[0])->get_value();
 	double y = NumberNodeCast(hs[1])->get_value();
 	double z = NumberNodeCast(hs[2])->get_value();
@@ -367,7 +368,7 @@ Handle PointMemorySCM::get_at_loc_ato(Handle map_name,
 {
 	have_map(map_name);
 	// loc should be a ListLink of three NumberNodes.
-	HandleSeq& hs = loc->getOutgoingSet();
+	const HandleSeq& hs = loc->getOutgoingSet();
 	double x = NumberNodeCast(hs[0])->get_value();
 	double y = NumberNodeCast(hs[1])->get_value();
 	double z = NumberNodeCast(hs[2])->get_value();
@@ -379,7 +380,7 @@ Handle PointMemorySCM::get_past_loc_ato(Handle map_name,
                                         Handle elapse)
 {
 	// loc should be a ListLink of three NumberNodes.
-	HandleSeq& hs = loc->getOutgoingSet();
+	const HandleSeq& hs = loc->getOutgoingSet();
 	double x = NumberNodeCast(hs[0])->get_value();
 	double y = NumberNodeCast(hs[1])->get_value();
 	double z = NumberNodeCast(hs[2])->get_value();
@@ -449,7 +450,7 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(Handle map_name,
 {
 	have_map(map_name);
 	// loc should be a ListLink of three NumberNodes.
-	HandleSeq& hs = loc->getOutgoingSet();
+	const HandleSeq& hs = loc->getOutgoingSet();
 	double x = NumberNodeCast(hs[0])->get_value();
 	double y = NumberNodeCast(hs[1])->get_value();
 	double z = NumberNodeCast(hs[2])->get_value();
@@ -480,7 +481,7 @@ Handle PointMemorySCM::remove_location_ato(Handle map_name,
 {
 	have_map(map_name);
 	// loc should be a ListLink of three NumberNodes.
-	HandleSeq& hs = loc->getOutgoingSet();
+	const HandleSeq& hs = loc->getOutgoingSet();
 	double x = NumberNodeCast(hs[0])->get_value();
 	double y = NumberNodeCast(hs[1])->get_value();
 	double z = NumberNodeCast(hs[2])->get_value();
@@ -494,7 +495,7 @@ Handle PointMemorySCM::remove_past_location_ato(Handle map_name,
                                         Handle elapse)
 {
 	// loc should be a ListLink of three NumberNodes.
-	HandleSeq& hs = loc->getOutgoingSet();
+	const HandleSeq& hs = loc->getOutgoingSet();
 	double x = NumberNodeCast(hs[0])->get_value();
 	double y = NumberNodeCast(hs[1])->get_value();
 	double z = NumberNodeCast(hs[2])->get_value();
@@ -530,7 +531,7 @@ time_pt PointMemorySCM::get_map_time(const Handle& map_name,
                                      const Handle& helapse)
 {
 	have_map(map_name);
-	int elapse = atoi(helapse->getName());
+	int elapse = atoi(helapse->getName().c_str());
 	return tsa[map_name->getName()]->get_current_time() - std::chrono::milliseconds(elapse);
 }
 
