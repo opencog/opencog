@@ -259,11 +259,14 @@
             (default-per-demand-action-selector d)
 
             ; Else run the user's selector.
-            (let ((result (cog-execute! (car as))))
-                ; Assume the results are wrapped in
-                ; a ListLink under a SetLink. Can be
-                ; expanded in the future if needed
-                (cog-outgoing-set (gar result))
+            ; Assume the results are wrapped in
+            ; a ListLink under a SetLink. Can be
+            ; expanded in the future if needed
+            (let ((result (gar (cog-execute! (car as)))))
+                (if (null? result)
+                    '()
+                    (cog-outgoing-set result)
+                )
             )
         )
     )
