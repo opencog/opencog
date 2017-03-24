@@ -3,7 +3,8 @@
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand"
   (let* ((word-list (get-sent-words sent-node))
-         (rules-matched (psi-get-dual-match word-list)))
+         (rules-matched (append (psi-get-dual-match word-list)
+                                (psi-get-exact-match word-list))))
     ; TODO: Pick the ones with the highest weight
     (List (append-map
       ; TODO: "psi-satisfiable?" doesn't work here (?)
