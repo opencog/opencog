@@ -41,6 +41,7 @@ AttentionModule::AttentionModule(CogServer& cs) :
 {
     init();
     do_start_ecan_register();
+    do_stop_ecan_register();
     do_list_ecan_param_register();
     do_set_ecan_param_register();
 }
@@ -58,6 +59,7 @@ AttentionModule::~AttentionModule()
     _cogserver.unregisterAgent(HebbianCreationAgent::info().id);
 
     do_start_ecan_unregister();
+    do_stop_ecan_unregister();
     do_list_ecan_param_unregister();
     do_set_ecan_param_unregister();
 
@@ -127,6 +129,22 @@ std::string AttentionModule::do_start_ecan(Request *req, std::list<std::string> 
            "\n" + afRent + "\n" + waRent + "\n");
 }
 
+std::string AttentionModule::do_stop_ecan(Request *req, std::list<std::string> args)
+{
+    _cogserver.stopAgent(_afImportanceAgentPtr);
+    _cogserver.stopAgent(_waImportanceAgentPtr);
+
+    _cogserver.stopAgent(_afRentAgentPtr);
+    _cogserver.stopAgent(_waRentAgentPtr);
+
+    _cogserver.stopAgent(_forgetting_agentptr);
+    _cogserver.stopAgent(_focusupdating_agentptr);
+
+    _cogserver.stopAgent(_hebbiancreation_agentptr);
+    _cogserver.stopAgent(_hebbianupdating_agentptr);
+
+    return "Stopped ECAN agents.\n";
+}
 
 std::string AttentionModule::do_list_ecan_param(Request *req, std::list<std::string> args)
 {
