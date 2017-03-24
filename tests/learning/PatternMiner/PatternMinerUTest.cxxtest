@@ -29,14 +29,19 @@
 #include <opencog/learning/PatternMiner/PatternMiner.h>
 #include <opencog/guile/SchemeEval.h>
 
+#include <vector>
+
 using namespace opencog;
 using namespace opencog::PatternMining;
+using namespace std;
 
 class PatternMinerUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
 	SchemeEval _scm;
+
+	string top3gramPatternStr;
 
 public:
 	PatternMinerUTest();
@@ -46,7 +51,7 @@ public:
 	void tearDown();
 
 	// Test extracted from opencog/learning/PatternMiner/TestPatternMinerAgent.cc
-	void testPatternMiner();
+	void test_PatternMiner();
 };
 
 PatternMinerUTest::PatternMinerUTest() : _scm(&_as) {}
@@ -72,19 +77,50 @@ void PatternMinerUTest::setUp()
 	// Configure scheme load-paths that are common for all tests.
 	_scm.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR
 	          "/opencog/learning/PatternMiner\")");
+
+	string link1 = "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode man)\n\n";
+	string link2 = "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode soda drinker)\n\n";
+	string link3 = "(InheritanceLink )\n  (VariableNode $var_1)\n  (ConceptNode ugly)\n\n";
+	top3gramPatternStr = link1 + link2 + link3;
+
 }
 
-void PatternMinerUTest::tearDown() {}
+void PatternMinerUTest::tearDown() 
+{  
 
-void PatternMinerUTest::testPatternMiner()
+}
+
+void PatternMinerUTest::test_PatternMiner()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 	// Load ugly_male_soda-drinker_corpus.scm
 	_scm.eval("(load-from-path \"ugly_male_soda-drinker_corpus.scm\")");
 
 	// Run the pattern miner
 	PatternMiner pm(&_as);
-	pm.runPatternMiner(1);
+	pm.runPatternMiner(1, false);
 
-	// TODO: Test the result
-	TS_ASSERT(true);
+	// Test the result: check the final top 3-gram pattern
+
+	vector<HTreeNode*>&  top3gramPatterns = pm.getFinalPatternsForGram(3);
+
+	string patternStr = pm.unifiedPatternToKeyString((top3gramPatterns[0])->pattern);
+	logger().info("The result top 3-gram pattern: \n%s", patternStr.c_str());
+
+	if (patternStr != top3gramPatternStr)
+	{
+		logger().info("Failed: The result top 3-gram pattern is wrong! The right one should be:\n%s", top3gramPatternStr.c_str());
+		TS_FAIL("The result top 3-gram pattern is wrong!");
+	}
+
+	if (top3gramPatterns[0]->count != 10)
+	{
+		logger().info("Failed: The result top 3-gram pattern count is wrong!");
+		TS_FAIL("The result top 3-gram pattern count is wrong!");
+	}
+
+
+
+	logger().info("End TEST: %s", __FUNCTION__);
+
 }
