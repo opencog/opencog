@@ -22,7 +22,9 @@
  */
 
 #include "BlockEntity.h"
+#include <opencog/util/StringManipulator.h>
 #include <opencog/util/Logger.h>
+
 
 using namespace opencog;
 using namespace opencog::spatial;

@@ -25,6 +25,7 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/random.h>
+#include <opencog/util/StringManipulator.h>
 
 #include <opencog/spatial/LocalSpaceMap2DUtil.h>
 #include <opencog/spatial/LocalSpaceMap2D.h>

@@ -27,6 +27,8 @@
 #include <boost/bind.hpp>
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/StringTokenizer.h>
+#include <opencog/util/StringManipulator.h>
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/AtomSpace.h>
