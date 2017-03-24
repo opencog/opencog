@@ -238,20 +238,21 @@ Handle PointMemorySCM::create_map(Handle map_name, Handle resolution)
 		throw InvalidParamException(TRACE_INFO,
 			 "Expecting positive spatial resolution");
 
-	if (map_name->getName().length() < 1)
+	const std::string& name = map_name->getName();
+	if (name.length() < 1)
 		throw InvalidParamException(TRACE_INFO,
 			 "Invalid map name");
 
 	// Reject if name already exists
-	if (tsa.find(map_name->getName()) != tsa.end())
+	if (tsa.find(name) != tsa.end())
 		throw InvalidParamException(TRACE_INFO, "Map already exists");
 
-	tsa[map_name] = new TimeOctomap(time_units, space_res_mtr, std::chrono::milliseconds(time_res_milli_sec));
+	tsa[name] = new TimeOctomap(time_units, space_res_mtr, std::chrono::milliseconds(time_res_milli_sec));
 	return map_name;
 }
 // add point clouds later
 
-void PointMemorySCM::have_map(Handle map_name)
+void PointMemorySCM::have_map(const Handle& map_name)
 {
 	if (tsa.find(map_name->getName()) == tsa.end())
 		throw InvalidParamException(TRACE_INFO, "Map does not exist");
@@ -391,20 +392,20 @@ Handle PointMemorySCM::get_past_loc_ato(Handle map_name,
 
 // Tag an atom with SetLink of locations (AtLocationLink)
 // Returns an empty SetLink if the pointlist is empty.
-static Handle tag_atom_with_locs(Handle map_name,
-                                 Handle ato,
+static Handle tag_atom_with_locs(const Handle& map_name,
+                                 const Handle& ato,
                                  const point3d_list& pl)
 {
 	HandleSeq loc_links;
 	for (const point3d& pt: pl)
 	{
 		loc_links.push_back(Handle(createLink(AT_LOCATION_LINK,
-			Handle(createNode(OBJECT_NODE, map_name)),
+			map_name,
 			Handle(createLink(LIST_LINK, ato,
 				Handle(createLink(LIST_LINK,
-					Handle(createNode(NUMBER_NODE, to_string(pt.x()))),
-					Handle(createNode(NUMBER_NODE, to_string(pt.y()))),
-					Handle(createNode(NUMBER_NODE, to_string(pt.z())))
+					Handle(createNumberNode(pt.x())),
+					Handle(createNumberNode(pt.y())),
+					Handle(createNumberNode(pt.z()))
 				))
 			))
 		)));
@@ -539,7 +540,7 @@ time_pt PointMemorySCM::get_map_time(const Handle& map_name,
 // elapse is in milliseconds (in the past)
 // For multi-map support, need to add features to main API, to provide
 // more raw data results -ve for unknown
-double
+Handle
 PointMemorySCM::get_distance_between(Handle map_name,
                                      Handle list,
                                      Handle elapse)
@@ -574,7 +575,7 @@ PointMemorySCM::get_target_is_right_left(Handle map_name,
 	const HandleSeq& hs = list->getOutgoingSet();
 	point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt,
 		hs[0], hs[1], hs[2]);
-	return Handle(createNumberNode(res.y));
+	return Handle(createNumberNode(res.y()));
 }
 
 // XXX FIXME this should just return xyz, and the above-below
@@ -588,7 +589,7 @@ PointMemorySCM::get_target_is_above_below(Handle map_name,
 	const HandleSeq& hs = list->getOutgoingSet();
 	point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt,
 		hs[0], hs[1], hs[2]);
-	return Handle(createNumberNode(res.z));
+	return Handle(createNumberNode(res.z()));
 }
 
 // XXX FIXME this should just return xyz, and the front-back
@@ -602,7 +603,7 @@ PointMemorySCM::get_target_is_front_back(Handle map_name,
 	const HandleSeq& hs = list->getOutgoingSet();
 	point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt,
 		hs[0], hs[1], hs[2]);
-	return Handle(createNumberNode(res.x));
+	return Handle(createNumberNode(res.x()));
 }
 
 void opencog_ato_pointmem_init(void)
