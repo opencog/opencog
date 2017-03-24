@@ -53,13 +53,18 @@
     (car (sent-get-words-in-order sent-node)))))
 
 (define (check-word-sequence sent-node word-list)
-  (define result (cog-execute! (Map word-list (Set (get-sent-words sent-node)))))
-  (if (not (null? (gar result)))
+  (let* ((sent-word-list (get-sent-words sent-node))
+         (map-result (cog-execute! (Map word-list (Set sent-word-list))))
+         (exact-match (equal? word-list sent-word-list)))
+  (if (or exact-match (not (null? (gar map-result))))
       (stv 1 1)
-      (stv 0 1)))
+      (stv 0 1))))
 
 (define (say text)
-  (True (Put (DefinedPredicate "Say") (Node text))))
+  " For actually saying the text and clearing the state"
+  (And (True (Put (DefinedPredicate "Say") (Node text)))
+       (True (Put (State (Anchor "Currently Processing") (Variable "$x"))
+                  (Concept "Default State")))))
 
 (define yakking (psi-demand "Yakking" 0.9))
 
