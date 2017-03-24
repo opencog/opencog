@@ -112,17 +112,15 @@ public:
 	Handle remove_all_ato(Handle, Handle ato);
 
 	////spatial query api assuming 1 ato in 1 map at 1 location.
-	//for multi-map need to add features to main api to provide more raw data results
-	//-ve for unknown
-	double get_distance_between(Handle, Handle ato1, Handle ato2, int elapse);
+	Handle get_distance_between(Handle, Handle list, Handle elapse);
 	// 2=far, 1=near, 0=touching, -1=unknown
-	int get_angular_nearness(Handle, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+	Handle get_angular_nearness(Handle, Handle, Handle elapse);
 	// 2=right, 1=left, 0=aligned, -1=unknown
-	int get_target_is_right_left(Handle, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+	Handle get_target_is_right_left(Handle, Handle, Handle elapse);
 	// 2=above, 1=below, 0=aligned, -1=unknown
-	int get_target_is_above_below(Handle, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+	Handle get_target_is_above_below(Handle, Handle, Handle elapse);
 	// 2=ahead, 1=behind, 0=aligned, -1=unknown
-	int get_target_is_front_back(Handle, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+	Handle get_target_is_front_back(Handle, Handle, Handle elapse);
 
 public:
 	PointMemorySCM();
@@ -542,48 +540,68 @@ time_pt PointMemorySCM::get_map_time(const Handle& map_name,
 // more raw data results -ve for unknown
 double
 PointMemorySCM::get_distance_between(Handle map_name,
-                                     Handle ato1, Handle ato2,
+                                     Handle list,
                                      Handle elapse)
 {
+	const HandleSeq& hs = list->getOutgoingSet();
 	time_pt tpt = get_map_time(map_name, elapse);
-	return tsa[map_name->getName()]->get_distance_between(tpt, ato1, ato2);
+	return Handle(createNumberNode(
+		tsa[map_name->getName()]->get_distance_between(tpt, hs[0], hs[1])));
 }
 
 // 2 = far, 1 = near, 0 = touching
-int
-PointMemorySCM::get_angular_nearness(Handle map_name, Handle ato_obs,
-Handle ato_tgt, Handle ato_ref, Handle elapse)
+Handle
+PointMemorySCM::get_angular_nearness(Handle map_name,
+                                     Handle list,
+                                     Handle elapse)
 {
+	const HandleSeq& hs = list->getOutgoingSet();
 	time_pt tpt = get_map_time(map_name, elapse);
-	return tsa[map_name->getName()]->get_angular_nearness(tpt, ato_obs, ato_tgt, ato_ref);
+	return Handle(createNumberNode(
+		tsa[map_name->getName()]->get_angular_nearness(tpt,
+			hs[0], hs[1], hs[2])));
 }
 
-// 2 = right, 1 = left, 0 = aligned
-int
-PointMemorySCM::get_target_is_right_left(Handle map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, Handle elapse)
+// XXX FIXME this should just return xyz, and the left-right
+// computation done elsewhere.
+Handle
+PointMemorySCM::get_target_is_right_left(Handle map_name,
+                                         Handle list,
+                                         Handle elapse)
 {
 	time_pt tpt = get_map_time(map_name, elapse);
-	point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
-	return lround(res.y());
+	const HandleSeq& hs = list->getOutgoingSet();
+	point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt,
+		hs[0], hs[1], hs[2]);
+	return Handle(createNumberNode(res.y));
 }
 
-// 2 = above, 1 = below, 0 = aligned
-int
-PointMemorySCM::get_target_is_above_below(Handle map_name, Handle
-ato_obs, Handle ato_tgt, Handle ato_ref, Handle elapse)
+// XXX FIXME this should just return xyz, and the above-below
+// computation done elsewhere.
+Handle
+PointMemorySCM::get_target_is_above_below(Handle map_name,
+                                         Handle list,
+                                         Handle elapse)
 {
 	time_pt tpt = get_map_time(map_name, elapse);
-	point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
-	return lround(res.z());
+	const HandleSeq& hs = list->getOutgoingSet();
+	point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt,
+		hs[0], hs[1], hs[2]);
+	return Handle(createNumberNode(res.z));
 }
 
-// 2 = ahead/front, 1 = behind/back, 0 = aligned
-int
-PointMemorySCM::get_target_is_front_back(Handle map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, Handle elapse)
+// XXX FIXME this should just return xyz, and the front-back
+// computation done elsewhere.
+Handle
+PointMemorySCM::get_target_is_front_back(Handle map_name,
+                                         Handle list,
+                                         Handle elapse)
 {
 	time_pt tpt = get_map_time(map_name, elapse);
-	point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
-	return lround(res.x());
+	const HandleSeq& hs = list->getOutgoingSet();
+	point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt,
+		hs[0], hs[1], hs[2]);
+	return Handle(createNumberNode(res.x));
 }
 
 void opencog_ato_pointmem_init(void)
