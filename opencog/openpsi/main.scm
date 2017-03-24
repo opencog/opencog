@@ -90,7 +90,7 @@
                (goals (psi-related-goals action))
                (context-atoms (get-context-grounding-atoms rule)))
 
-            (cog-logger-info "[OpenPsi] Starting evaluation of psi-rule ~a"
+            (cog-logger-debug "[OpenPsi] Starting evaluation of psi-rule ~a"
                 rule)
 
             ; The #t condition is for evaluatable-contexts. These are
@@ -110,13 +110,13 @@
             ; results in the achievement of the goals, even if the context of
             ; the other rules aren't not satisfied.
             (map cog-evaluate! goals)
-            (cog-logger-info "[OpenPsi] Finished evaluating of psi-rule ~a"
+            (cog-logger-debug "[OpenPsi] Finished evaluating of psi-rule ~a"
                 rule)
         ))
 
     (set! psi-loop-count (+ psi-loop-count 1))
 
-    (cog-logger-info "[OpenPsi] Taking one psi-step, loop-count = ~a"
+    (cog-logger-debug "[OpenPsi] Taking one psi-step, loop-count = ~a"
         psi-loop-count)
 
     ; Run the controller that updates the weight.
@@ -137,7 +137,7 @@
         (psi-get-all-enabled-demands)
     )
 
-    (cog-logger-info "[OpenPsi] Ending psi-step, loop-count = ~a"
+    (cog-logger-debug "[OpenPsi] Ending psi-step, loop-count = ~a"
         (psi-get-loop-count))
 
     (stv 1 1) ; For continuing psi-run loop.

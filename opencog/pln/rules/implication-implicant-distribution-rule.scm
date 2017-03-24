@@ -32,7 +32,7 @@
         (VariableNode "$P")
         (VariableNode "$Q"))
      (EvaluationLink
-        (GroundedPredicateNode "scm: non-null-confidence")
+        (GroundedPredicateNode "scm: gt-zero-confidence")
         (ImplicationLink
            (VariableNode "$P")
            (VariableNode "$Q")))))
@@ -55,10 +55,6 @@
      implication-implicant-distribution-vardecl
      implication-implicant-distribution-pattern
      implication-implicant-distribution-rewrite))
-
-;; Return true the atom has a non null confidence
-(define (non-null-confidence atom)
-  (bool->tv (> (cog-stv-confidence atom) 0)))
 
 (define (implication-implicant-distribution-formula DImpl Impl)
   (cog-merge-hi-conf-tv! DImpl (cog-tv Impl)))

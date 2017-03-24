@@ -343,45 +343,64 @@ ENDIF (PROTOBUF_FOUND
 
 MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
-# Python needed for embodiment (!?) and for PLN
-FIND_PACKAGE(PythonInterp)
+# -----------------------------------------------------------------------------
+# Python and Cython
+#
+# NOTE: Python interpreter is needed for runing python unit tests, and for
+# running the FindCython and FindCxxtest cmake modules.
+
+FIND_PACKAGE(PythonInterp 2.7)
+IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING} AND
+	3.0.0 VERSION_GREATER ${PYTHON_VERSION_STRING})
+	SET (HAVE_PY_INTERP 1)
+	MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
+ENDIF()
+
 FIND_PACKAGE(PythonLibs 2.7)
-IF(PYTHONLIBS_FOUND)
-	MESSAGE(STATUS "Python libs found.")
-ELSE(PYTHONLIBS_FOUND)
-	MESSAGE(STATUS "Python libs NOT found.")
-ENDIF(PYTHONLIBS_FOUND)
+IF (PYTHONLIBS_FOUND AND
+	2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING} AND
+	3.0.0 VERSION_GREATER ${PYTHONLIBS_VERSION_STRING})
+	SET (HAVE_PY_LIBS 1)
+	MESSAGE(STATUS "Python ${PYTHONLIBS_VERSION_STRING} libraries found.")
+ELSE()
+	MESSAGE(STATUS "Python libraries NOT found.")
+ENDIF()
 
-# Python bindings using Cython
-# Cython is used to generate bindings
-FIND_PACKAGE(Cython 0.19.0)
-IF (CYTHON_FOUND AND PYTHONLIBS_FOUND)
-	# find python destination dir for python bindings
-	ADD_DEFINITIONS(-DHAVE_CYTHON)
-	SET(HAVE_CYTHON 1)
-	EXECUTE_PROCESS(
-		COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
-		OUTPUT_VARIABLE PYTHON_DEST
-	)
+# Cython is used to generate python bindings.
+IF(HAVE_PY_INTERP)
+	FIND_PACKAGE(Cython 0.19.0)
 
-	# replace new line at end
-	STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
-	IF ("${PYTHON_DEST}" STREQUAL "")
-		MESSAGE(FATAL_ERROR "Python destination dir not found")
-	ELSE ("${PYTHON_DEST}" STREQUAL "")
-		MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
-	ENDIF ("${PYTHON_DEST}" STREQUAL "")
-ELSE (CYTHON_FOUND AND PYTHONLIBS_FOUND)
-	IF(NOT CYTHON_FOUND)
-		MESSAGE(STATUS "Cython executable not found.")
-	ENDIF(NOT CYTHON_FOUND)
-ENDIF (CYTHON_FOUND AND PYTHONLIBS_FOUND)
+	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
+		# Find python destination dir for python bindings because it may
+		# differ on each operating system.
+		ADD_DEFINITIONS(-DHAVE_CYTHON)
+		SET(HAVE_CYTHON 1)
+		EXECUTE_PROCESS(
+			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
+			OUTPUT_VARIABLE PYTHON_DEST
+		)
 
-# Nosetests will find and automatically run python tests.
-FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
-IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
-	SET(HAVE_NOSETESTS 1)
-ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
+		# Replace new line at end.
+		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
+		IF ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(FATAL_ERROR "Python destination dir not found")
+		ELSE ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+		ENDIF ("${PYTHON_DEST}" STREQUAL "")
+	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
+		IF(NOT CYTHON_FOUND)
+			MESSAGE(STATUS "Cython executable not found.")
+		ENDIF(NOT CYTHON_FOUND)
+	ENDIF (CYTHON_FOUND AND HAVE_PY_LIBS)
+
+	# Nosetests will find and automatically run python tests.
+	FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
+		SET(HAVE_NOSETESTS 1)
+	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
+ENDIF(HAVE_PY_INTERP)
+
+# -----------------------------------------------------------------------------
 
 # SDL needed for the spatial tools
 FIND_PACKAGE(SDL)

@@ -94,6 +94,7 @@ void MOSESPLNSynergyUTest::setUp()
 	eval.eval("(use-modules (opencog logger))");
 }
 
+// This takes too much memory, re-enabled when fixed.
 void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -122,7 +123,7 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 
 #define confidenceToCount(x) 800.0 * ((x) / (1.0-(x))
 	strength_t expected_strength = 0.603579;
-	confidence_t expected_confidence = 0.64125;
+	confidence_t expected_confidence = 0.65475;
 	SimpleTruthValue expected_tv(expected_strength, expected_confidence);
 	TS_ASSERT(target->getTruthValue()->operator==(expected_tv));
 }
@@ -136,7 +137,7 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_fc()
 	// eval.eval("(load \"" PROJECT_SOURCE_DIR
 	//              "examples/pln/moses-pln-synergy/scm/moses-model.scm,"
 	//              "examples/pln/moses-pln-synergy/scm/background-knowledge.scm,"
-	//              "examples/pln/moses-pln-synergy/scm/pln-config.scm");
+	//              "examples/pln/moses-pln-synergy/scm/pln-fc-config.scm");
 
 	// Handle hsources =
 	// 	al(SET_LINK,

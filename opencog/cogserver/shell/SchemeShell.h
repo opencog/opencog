@@ -38,6 +38,7 @@ class SchemeShell : public GenericShell
 {
 	protected:
 		void thread_init();
+		static std::string _prompt;
 
 	public:
 		SchemeShell(void);
