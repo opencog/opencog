@@ -29,14 +29,14 @@
         (ExecutionOutputLink
             (GroundedSchemaNode "scm: inversion-formula")
             (ListLink
+                (link-type
+                    (VariableNode "$B")
+                    (VariableNode "$A")
                 (VariableNode "$A")
                 (VariableNode "$B")
                 (link-type
                     (VariableNode "$A")
-                    (VariableNode "$B"))
-                (link-type
-                    (VariableNode "$B")
-                    (VariableNode "$A"))))))
+                    (VariableNode "$B")))))))
 
 (define inversion-inheritance-rule
     (gen-inversion-rule InheritanceLink))
@@ -47,7 +47,7 @@
 (define inversion-subset-rule
     (gen-inversion-rule SubsetLink))
 
-(define (inversion-formula A B AB BA)
+(define (inversion-formula BA A B AB)
     (let*
         ((sA (cog-stv-strength A))
          (cA (cog-stv-confidence A))
