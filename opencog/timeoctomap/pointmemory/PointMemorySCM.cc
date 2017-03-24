@@ -42,25 +42,25 @@ private:
 	static void init_in_module(void*);
 	void init(void);
 
-	// Return true if the named mape exists.
-	bool have_map(const Handle&);
+	// Check if the named map exists.
+	void have_map(const Handle&);
 
 public:
 	// Create a map
-	Handle create_map(Handle map_name,
-					Handle resolution);
+	Handle create_map(Handle map_name, Handle resolution);
 
 	// Get time resolution milli-sec
-	int get_time_res(Handle);
+	Handle get_time_res(Handle);
 	// Get space resolution meters
-	double get_space_res(Handle);
+	Handle get_space_res(Handle);
 	// Get time units
-	int get_time_units(Handle);
+	Handle get_time_units(Handle);
 	// Step time before adding atoms
 	void step_time_unit(Handle);
 	void auto_step_time_on(Handle);
 	void auto_step_time_off(Handle);
-	int is_auto_step_on(Handle);
+
+	TruthValuePtr is_auto_step_on(Handle);
 	// Add an atom at location on current time step
 	bool map_ato(Handle, Handle ato, double x, double y, double z);
 
@@ -223,76 +223,87 @@ void PointMemorySCM::init()
 
 Handle PointMemorySCM::create_map(Handle name, Handle resolution)
 {
+	HandleSeq& hs->getOutgoingSet();
 
 	// XXX FIXME -- verify that these are NumberNodes.
-	double space_res_mtr = atof(hspace_res_mtr->getName());
-	int time_res_milli_sec = atoi(htime_res_milli_sec->getName());
-	int time_units = atoi(htime_units->getName());
+	double space_res_mtr = atof(hs[0]->getName());
+	int time_res_milli_sec = atoi(hs[1]->getName());
+	int time_units = atoi(hs[2]->getName());
 
 	// Reject if time units < 1
 	if (time_units < 1)
-		return TruthValue::FALSE_TV();
+		throw InvalidParamException(TRACE_INFO,
+			 "Expecting positive time unit");
 
 	// Reject if time res, space_res <= 0
 	if (time_res_milli_sec <= 0 || space_res_mtr <= 0.0)
-		return TruthValue::FALSE_TV();
+		throw InvalidParamException(TRACE_INFO,
+			 "Expecting positive spatial resolution");
+
+	if (name->getName().length() < 1)
+		throw InvalidParamException(TRACE_INFO,
+			 "Invalid map name");
 
 	// Reject if name already exists
-	if (have_map(name)) return TruthValue::FALSE_TV();
-	if (hname->getName().length() < 1)
-		return TruthValue::FALSE_TV();
+	if (tsa.find(map_name->getName()) != tsa.end())
+		throw InvalidParamException(TRACE_INFO, "Map already exists");
 
 	tsa[name] = new TimeOctomap(time_units, space_res_mtr, std::chrono::milliseconds(time_res_milli_sec));
-	return TruthValue::TRUE_TV();
+	return name;
 }
 // add point clouds later
 
-bool PointMemorySCM::have_map(Handle map_name)
+void PointMemorySCM::have_map(Handle map_name)
 {
-	return tsa.find(map_name->getName()) != tsa.end();
+	if (tsa.find(map_name->getName()) == tsa.end())
+		throw InvalidParamException(TRACE_INFO, "Map does not exist");
 }
 
-int PointMemorySCM::get_time_res(Handle map_name)
+Handle PointMemorySCM::get_time_res(Handle map_name)
 {
-	if (not have_map(map_name)) return 0;
+	have_map(map_name);
 	duration_c dr = tsa[map_name->getName()]->get_time_resolution();
-	return chrono::duration_cast<chrono::milliseconds>(dr).count();
+	return Handle(createNumberNode(
+		chrono::duration_cast<chrono::milliseconds>(dr).count()));
 }
 
-double PointMemorySCM::get_space_res(Handle map_name)
+Handle PointMemorySCM::get_space_res(Handle map_name)
 {
-	if (not have_map(map_name)) return 0.0;
-	return tsa[map_name->getName()]->get_space_resolution();
+	have_map(map_name);
+	return Handle(createNumberNode(
+		tsa[map_name->getName()]->get_space_resolution()));
 }
 
-int PointMemorySCM::get_time_units(Handle map_name)
+Handle PointMemorySCM::get_time_units(Handle map_name)
 {
-	if (not have_map(map_name)) return 0;
-	return tsa[map_name->getName()]->get_time_units();
+	have_map(map_name);
+	return Handle(createNumberNode(
+		tsa[map_name->getName()]->get_time_units()));
 }
 
 void PointMemorySCM::step_time_unit(Handle map_name)
 {
-	if (not have_map(map_name)) return;
+	have_map(map_name);
 	tsa[map_name->getName()]->step_time_unit();
 }
 
 void PointMemorySCM::auto_step_time_on(Handle map_name)
 {
-	if (not have_map(map_name)) return;
+	have_map(map_name);
 	tsa[map_name->getName()]->auto_step_time(true);
 }
 
 void PointMemorySCM::auto_step_time_off(Handle map_name)
 {
-	if (not have_map(map_name)) return;
+	have_map(map_name);
 	tsa[map_name->getName()]->auto_step_time(false);
 }
 
-int PointMemorySCM::is_auto_step_on(Handle map_name)
+TruthValuePtr PointMemorySCM::is_auto_step_on(Handle map_name)
 {
-	if (not have_map(map_name)) return 0;
-	return (tsa[map_name->getName()]->is_auto_step_time_on()) ? 1 : 0;
+	have_map(map_name);
+	return (tsa[map_name->getName()]->is_auto_step_time_on()) ?
+		TruthValue::TRUE_TV() : TruthValue::FALSE_TV();
 }
 
 bool PointMemorySCM::map_ato(Handle map_name, Handle ato,
