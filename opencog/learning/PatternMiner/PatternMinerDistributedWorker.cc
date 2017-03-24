@@ -217,7 +217,37 @@ void DistributedPatternMiner::startMiningWork()
 
 void DistributedPatternMiner::runPatternMinerDepthFirst()
 {
-    PatternMiner::runPatternMinerDepthFirst();
+    // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
+    observingAtomSpace = new AtomSpace();
+
+//    cur_DF_ExtractedLinks = new set<string>[MAX_GRAM];
+
+    linksPerThread = allLinkNumber / THREAD_NUM;
+
+    processedLinkNum = 0;
+    actualProcessedLinkNum = 0;
+
+    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    {
+
+        threads[i] = std::thread(&DistributedPatternMiner::growPatternsDepthFirstTask,this,i);
+        // threads[i] = std::thread([this]{this->growPatternsDepthFirstTask(i);}); // using C++11 lambda-expression
+    }
+
+    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    {
+        threads[i].join();
+    }
+
+    // release allLinks
+    allLinks.clear();
+    (HandleSeq()).swap(allLinks);
+
+//    delete [] cur_DF_ExtractedLinks;
+    delete [] threads;
+
+    cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
+    cout << "\nprocessedLinkNum = " << processedLinkNum << std::endl;
 
     delete [] patternJsonArrays;
     cout << "Totally "<< cur_worker_mined_pattern_num << " patterns found!\n";
@@ -288,7 +318,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
                                                 patternVarMap, false, allHTreeNodesCurTask, allNewMinedPatternInfo);
 
-
+        cout << "test allNewMinedPatternInfo.size =  " << allNewMinedPatternInfo.size() << std::endl;
         // send new mined patterns to the server
         for (MinedPatternInfo& pInfo : allNewMinedPatternInfo)
             addPatternsToJsonArrayBuf(pInfo.curPatternKeyStr, pInfo.parentKeyString, pInfo.extendedLinkIndex, patternJsonArrays[thread_index]);
@@ -315,6 +345,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
 void DistributedPatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray)
 {
+    cout << "send pattern:" << curPatternKeyStr << std::endl;
     try
     {
 
