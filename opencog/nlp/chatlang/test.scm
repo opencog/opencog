@@ -26,20 +26,10 @@
 (State (Anchor "Currently Processing") input-sent-node)
 
 ; --------------------
-; Action selection
-; TODO XXX Should be done in OpenPsi
+; Run a psi-step and get the result
+; Right now the output of  the "Say"
+; action is written to opencog.log
+(psi-step)
 
-; Find the matching rules using DualLink
-(define rules-found (psi-get-dual-match (get-sent-words input-sent-node)))
-
-(define rules-satisfied
-  (append-map (lambda (r)
-    (if (equal? (stv 1 1)
-                (cog-evaluate! (car (psi-get-context (gar r)))))
-        ; Return the ImplicationLinks
-        (list (gar r))
-        '()))
-    rules-found))
-
-(for-each (lambda (r) (cog-evaluate! (psi-get-action r)))
-          rules-satisfied)
+; TODO: Find a better way for cleaning the state
+(State (Anchor "Currently Processing") (Concept "Default State"))
