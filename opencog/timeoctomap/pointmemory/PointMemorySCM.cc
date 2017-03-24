@@ -42,15 +42,15 @@ private:
     static void init_in_module(void*);
     void init(void);
 
+    // Return true if the named mape exists.
+    bool have_map(const Handle&);
+
 public:
     // Create a map
-    bool create_map(const Handle& map_name,
+    TruthValuePtr create_map(const Handle& map_name,
                     const Handle& space_res_mtr,
                     const Handle& time_res_milli_sec,
                     const Handle& time_units);
-
-    // Return true if the named mape exists.
-    bool have_map(const Handle&);
 
     // Get time resolution milli-sec
     int get_time_res(const Handle&);
@@ -223,7 +223,7 @@ void PointMemorySCM::init()
 #endif
 }
 
-bool PointMemorySCM::create_map(const Handle& hname,
+TruthValuePtr PointMemorySCM::create_map(const Handle& hname,
                                 const Handle& hspace_res_mtr,
                                 const Handle& htime_res_milli_sec,
                                 const Handle& htime_units)
@@ -235,19 +235,19 @@ bool PointMemorySCM::create_map(const Handle& hname,
 
     // Reject if time units < 1
     if (time_units < 1)
-        return false;
+        return TruthValue::FALSE_TV();
 
     // Reject if time res, space_res <= 0
     if (time_res_milli_sec <= 0 || space_res_mtr <= 0.0)
-        return false;
+        return TruthValue::FALSE_TV();
 
     // Reject if name already exists
-    if (have_map(name)) return false;
+    if (have_map(name)) return TruthValue::FALSE_TV();
     if (hname->getName().length() < 1)
-        return false;
+        return TruthValue::FALSE_TV();
 
     tsa[name] = new TimeOctomap(time_units, space_res_mtr, std::chrono::milliseconds(time_res_milli_sec));
-    return true;
+    return TruthValue::TRUE_TV();
 }
 // add point clouds later
 
@@ -272,38 +272,38 @@ double PointMemorySCM::get_space_res(const Handle& map_name)
 int PointMemorySCM::get_time_units(const Handle& map_name)
 {
     if (not have_map(map_name)) return 0;
-    return tsa[map_name]->get_time_units();
+    return tsa[map_name->getName()]->get_time_units();
 }
 
 void PointMemorySCM::step_time_unit(const Handle& map_name)
 {
     if (not have_map(map_name)) return;
-    tsa[map_name]->step_time_unit();
+    tsa[map_name->getName()]->step_time_unit();
 }
 
 void PointMemorySCM::auto_step_time_on(const Handle& map_name)
 {
     if (not have_map(map_name)) return;
-    tsa[map_name]->auto_step_time(true);
+    tsa[map_name->getName()]->auto_step_time(true);
 }
 
 void PointMemorySCM::auto_step_time_off(const Handle& map_name)
 {
     if (not have_map(map_name)) return;
-    tsa[map_name]->auto_step_time(false);
+    tsa[map_name->getName()]->auto_step_time(false);
 }
 
 int PointMemorySCM::is_auto_step_on(const Handle& map_name)
 {
     if (not have_map(map_name)) return 0;
-    return (tsa[map_name]->is_auto_step_time_on()) ? 1 : 0;
+    return (tsa[map_name->getName()]->is_auto_step_time_on()) ? 1 : 0;
 }
 
 bool PointMemorySCM::map_ato(const Handle& map_name, Handle ato,
                              double x, double y, double z)
 {
     if (not have_map(map_name)) return true;
-    tsa[map_name]->insert_atom(point3d(x, y, z), ato);
+    tsa[map_name->getName()]->insert_atom(point3d(x, y, z), ato);
     return true;
 }
 
@@ -335,7 +335,7 @@ Handle PointMemorySCM::get_first_time(const Handle& map_name,
     time_pt tpt = get_map_time(map_name, elapse);
 
     time_pt tp;
-    bool r = tsa[map_name]->get_oldest_time_elapse_atom_observed(ato, tpt, tp);
+    bool r = tsa[map_name->getName()]->get_oldest_time_elapse_atom_observed(ato, tpt, tp);
     if (not r) return Handle();
 
     // Make and return atTimeLink
@@ -349,7 +349,7 @@ Handle PointMemorySCM::get_last_time(const Handle& map_name,
     time_pt tpt = get_map_time(map_name, elapse);
 
     time_pt tp;
-    bool r = tsa[map_name]->get_last_time_elapse_atom_observed(ato, tpt, tp);
+    bool r = tsa[map_name->getName()]->get_last_time_elapse_atom_observed(ato, tpt, tp);
     if (not r)
         return UndefinedHandle;
 
@@ -361,7 +361,7 @@ Handle PointMemorySCM::get_at_loc_ato(const Handle& map_name,
                                       double x, double y, double z)
 {
     if (not have_map(map_name)) return Handle();
-    return tsa[map_name]->get_atom_at_location(point3d(x, y, z));
+    return tsa[map_name->getName()]->get_atom_at_location(point3d(x, y, z));
 }
 
 Handle PointMemorySCM::get_past_loc_ato(const Handle& map_name, int elapse,
@@ -369,7 +369,7 @@ Handle PointMemorySCM::get_past_loc_ato(const Handle& map_name, int elapse,
 {
     if (not have_map(map_name)) return Handle();
     time_pt tpt = get_map_time(map_name, elapse);
-    return tsa[map_name]->get_atom_at_time_by_location(tpt, point3d(x, y, z));
+    return tsa[map_name->getName()]->get_atom_at_time_by_location(tpt, point3d(x, y, z));
 }
 
 // Tag an atom with SetLink of locations (AtLocationLink)
@@ -400,7 +400,7 @@ Handle PointMemorySCM::get_first_location(const Handle& map_name,
 {
     if (not have_map(map_name)) return Handle();
     time_pt tpt = get_map_time(map_name, elapse);
-    point3d_list pl = tsa[map_name]->get_oldest_locations(ato, tpt);
+    point3d_list pl = tsa[map_name->getName()]->get_oldest_locations(ato, tpt);
     return tag_atom_with_locs(map_name, ato, pl);
 }
 
@@ -409,14 +409,14 @@ Handle PointMemorySCM::get_last_location(const Handle& map_name, Handle ato, int
 {
     if (not have_map(map_name)) return Handle();
     time_pt tpt = get_map_time(map_name, elapse);
-    point3d_list pl = tsa[map_name]->get_newest_locations(ato, tpt);
+    point3d_list pl = tsa[map_name->getName()]->get_newest_locations(ato, tpt);
     return tag_atom_with_locs(map_name, ato, pl);
 }
 
 Handle PointMemorySCM::get_locs_ato(const Handle& map_name, Handle ato)
 {
     if (not have_map(map_name)) return Handle();
-    point3d_list pl = tsa[map_name]->get_locations_of_atom(ato);
+    point3d_list pl = tsa[map_name->getName()]->get_locations_of_atom(ato);
     return tag_atom_with_locs(map_name, ato, pl);
 }
 
@@ -424,7 +424,7 @@ Handle PointMemorySCM::get_past_locs_ato(const Handle& map_name, Handle ato, int
 {
     if (not have_map(map_name)) return Handle();
     time_pt tpt = get_map_time(map_name, elapse);
-    point3d_list pl = tsa[map_name]->get_locations_of_atom_at_time(tpt, ato);
+    point3d_list pl = tsa[map_name->getName()]->get_locations_of_atom_at_time(tpt, ato);
     return tag_atom_with_locs(map_name, ato, pl);
 }
 
@@ -433,7 +433,7 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(const Handle& map_name,
               double x, double y, double z)
 {
     if (not have_map(map_name)) return Handle();
-    time_list tl = tsa[map_name]->get_times_of_atom_occurence_at_location(point3d(x, y, z), ato);
+    time_list tl = tsa[map_name->getName()]->get_times_of_atom_occurence_at_location(point3d(x, y, z), ato);
 
     HandleSeq LL;
     for (const time_pt& tp: tl)
@@ -447,7 +447,7 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(const Handle& map_name,
 Handle PointMemorySCM::get_timeline(const Handle& map_name, Handle ato)
 {
     if (not have_map(map_name)) return Handle();
-    time_list tl = tsa[map_name]->get_timeline(ato);
+    time_list tl = tsa[map_name->getName()]->get_timeline(ato);
     HandleSeq LL;
     for (const time_pt& tp: tl)
         LL.push_back(timestamp_tag_atom(tp, ato));
@@ -457,7 +457,7 @@ Handle PointMemorySCM::get_timeline(const Handle& map_name, Handle ato)
 bool PointMemorySCM::remove_location_ato(const Handle& map_name, double x, double y, double z)
 {
     if (not have_map(map_name)) return true;
-    tsa[map_name]->remove_atoms_at_location(point3d(x, y, z));
+    tsa[map_name->getName()]->remove_atoms_at_location(point3d(x, y, z));
     return true;
 }
 
@@ -466,34 +466,34 @@ bool PointMemorySCM::remove_past_location_ato(const Handle& map_name, int elapse
 {
     if (not have_map(map_name)) return true;
     time_pt tpt = get_map_time(map_name, elapse);
-    tsa[map_name]->remove_atom_at_time_by_location(tpt, point3d(x, y, z));
+    tsa[map_name->getName()]->remove_atom_at_time_by_location(tpt, point3d(x, y, z));
     return true;
 }
 
 void PointMemorySCM::remove_curr_ato(const Handle& map_name, Handle ato)
 {
     if (not have_map(map_name)) return;
-    tsa[map_name]->remove_atom_at_current_time(ato);
+    tsa[map_name->getName()]->remove_atom_at_current_time(ato);
 }
 
 void PointMemorySCM::remove_past_ato(const Handle& map_name, Handle ato, int elapse)
 {
     if (not have_map(map_name)) return;
     time_pt tpt = get_map_time(map_name, elapse);
-    tsa[map_name]->remove_atom_at_time(tpt, ato);
+    tsa[map_name->getName()]->remove_atom_at_time(tpt, ato);
 }
 
 void PointMemorySCM::remove_all_ato(const Handle& map_name, Handle ato)
 {
     if (not have_map(map_name)) return;
-    tsa[map_name]->remove_atom(ato);
+    tsa[map_name->getName()]->remove_atom(ato);
 }
 
 
 time_pt PointMemorySCM::get_map_time(const Handle& map_name, int elapse)
 {
     if (not have_map(map_name)) return time_pt();
-    return tsa[map_name]->get_current_time() - std::chrono::milliseconds(elapse);
+    return tsa[map_name->getName()]->get_current_time() - std::chrono::milliseconds(elapse);
 }
 // Spatial query api assuming 1 atom in 1 map at 1 location.
 // elapse is in milliseconds (in the past)
@@ -504,7 +504,7 @@ PointMemorySCM::get_distance_between(const Handle& map_name, Handle ato1, Handle
 {
     if (not have_map(map_name)) return 0.0;
     time_pt tpt = get_map_time(map_name, elapse);
-    return tsa[map_name]->get_distance_between(tpt, ato1, ato2);
+    return tsa[map_name->getName()]->get_distance_between(tpt, ato1, ato2);
 }
 
 // 2 = far, 1 = near, 0 = touching
@@ -513,7 +513,7 @@ PointMemorySCM::get_angular_nearness(const Handle& map_name, Handle ato_obs, Han
 {
     if (not have_map(map_name)) return -1;
     time_pt tpt = get_map_time(map_name, elapse);
-    return tsa[map_name]->get_angular_nearness(tpt, ato_obs, ato_tgt, ato_ref);
+    return tsa[map_name->getName()]->get_angular_nearness(tpt, ato_obs, ato_tgt, ato_ref);
 }
 
 // 2 = right, 1 = left, 0 = aligned
@@ -522,7 +522,7 @@ PointMemorySCM::get_target_is_right_left(const Handle& map_name, Handle ato_obs,
 {
     if (not have_map(map_name)) return -1;
     time_pt tpt = get_map_time(map_name, elapse);
-    point3d res = tsa[map_name]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
+    point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
     return lround(res.y());
 }
 
@@ -532,7 +532,7 @@ PointMemorySCM::get_target_is_above_below(const Handle& map_name, Handle ato_obs
 {
     if (not have_map(map_name)) return -1;
     time_pt tpt = get_map_time(map_name, elapse);
-    point3d res = tsa[map_name]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
+    point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
     return lround(res.z());
 }
 
@@ -542,7 +542,7 @@ PointMemorySCM::get_target_is_front_back(const Handle& map_name, Handle ato_obs,
 {
     if (not have_map(map_name)) return -1;
     time_pt tpt = get_map_time(map_name, elapse);
-    point3d res = tsa[map_name]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
+    point3d res = tsa[map_name->getName()]->get_spatial_relations(tpt, ato_obs, ato_tgt, ato_ref);
     return lround(res.x());
 }
 
