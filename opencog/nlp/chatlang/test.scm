@@ -8,38 +8,41 @@
 (load "translator.scm")
 (load "matcher.scm")
 
+; --------------------
 ; Things we have in the AtomSpace
+
+; Define a concept "eat"
 (chat-concept "eat" (list "eat" "ingest" "binge and purge"))
+
+; Should be triggered by "I eat meat" and "I ingest meat"
+; "I binge and purge meat" does not work yet
 (chat-rule '((lemma "I") (concept "eat") (lemma "meat")) '(say "Do you really? I am a vegan."))
 
-; Input to the system
-(define input "I eat meat")
+; Should be triggered by "dog" and "dogs"
+(chat-rule '((lemma "dog")) '(say "I have a cat"))
 
 ; --------------------
 ; Below should be done in chatbot-psi
 ; Will do the code integration later
+; as there are things need to be fixed first
+; in the chatbot-psi module
 
-; Parse the input
-(define input-sent-node (car (nlp-parse input)))
-
-; Connect the SentenceNode to the anchor
-(State (Anchor "Currently Processing") input-sent-node)
+; Parse and connect the input to this anchor
+; and then OpenPsi will handle the rest
+(define (chat input)
+  (let ((sent-node (car (nlp-parse input))))
+    (State (Anchor "Currently Processing") sent-node)))
 
 ; --------------------
-; Action selection
-; TODO XXX Should be done in OpenPsi
+; Test it!
 
-; Find the matching rules using DualLink
-(define rules-found (psi-get-dual-match (get-sent-words input-sent-node)))
+; Start the OpenPsi loop
+(psi-run)
 
-(define rules-satisfied
-  (append-map (lambda (r)
-    (if (equal? (stv 1 1)
-                (cog-evaluate! (car (psi-get-context (gar r)))))
-        ; Return the ImplicationLinks
-        (list (gar r))
-        '()))
-    rules-found))
+; Input to the system
+(chat "I eat meat")
 
-(for-each (lambda (r) (cog-evaluate! (psi-get-action r)))
-          rules-satisfied)
+; Note:
+; At the moment (DefinedPredicate "Say") sends the output
+; to the log file, can tail the opencog.log to see the result
+; from where guile is started, for now
