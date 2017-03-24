@@ -2341,7 +2341,7 @@ PatternMiner::~PatternMiner()
     delete atomSpace;
 }
 
-void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
+void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency, bool exit_program_after_finish)
 {
 
     thresholdFrequency = _thresholdFrequency;
@@ -2492,8 +2492,12 @@ void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency)
     std::cout<< THREAD_NUM << " threads used. \n";
     std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
 
-    std::cout << "Pattern Miner application quited!" << std::endl;
-    std::exit(EXIT_SUCCESS);
+
+    if (exit_program_after_finish)
+    {
+        std::cout << "Pattern Miner application quited!" << std::endl;
+        std::exit(EXIT_SUCCESS);
+    }
 
 //   testPatternMatcher2();
 

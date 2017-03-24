@@ -197,7 +197,6 @@ protected:
     // Return unified ordered Handle vector
     HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int &unifiedLastLinkIndex);
 
-    string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = 0);
 
     // this function is called by RebindVariableNames
     void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
@@ -338,6 +337,8 @@ public:
 
     bool checkPatternExist(const string& patternKeyStr);
 
+    string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = 0);
+
     void OutPutFrequentPatternsToFile(unsigned int n_gram);
 
     void OutPutStaticsToCsvFile(unsigned int n_gram);
@@ -352,13 +353,15 @@ public:
 
     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
-    void runPatternMiner(unsigned int _thresholdFrequency = 2);
+    void runPatternMiner(unsigned int _thresholdFrequency = 2, bool exit_program_after_finish = true);
 
     void runPatternMinerBreadthFirst();
 
     void runPatternMinerDepthFirst();
 
     void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 2);
+
+    vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){return finalPatternsForGram[gram - 1];}
 
     void testPatternMatcher1();
     void testPatternMatcher2();
