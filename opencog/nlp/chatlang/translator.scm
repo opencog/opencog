@@ -6,7 +6,7 @@
              (opencog nlp)
              (opencog exec)
              (opencog openpsi)
-             (opencog movement)
+             (opencog eva-behavior)
              (srfi srfi-1))
 
 ;; Shared variables for all terms
