@@ -29,10 +29,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-#include <cpprest/http_client.h>
-#include <cpprest/http_listener.h>
 
-#define DEPRECATED_ATOMSPACE_CALLS
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -41,10 +38,7 @@
 #include "HTree.h"
 
 using namespace std;
-using namespace web;
-using namespace web::http;
-using namespace web::http::client;
-using namespace web::http::experimental::listener;
+
 
 namespace opencog
 {
@@ -56,7 +50,6 @@ namespace PatternMining
 
 #define LINE_INDENTATION "  "
 
-#define JSON_BUF_MAX_NUM 30
 
 struct _non_ordered_pattern
 {
@@ -87,10 +80,25 @@ struct _non_ordered_pattern
     }
 };
 
+//! Returns a string from the given argument by using the << operator
+template <typename T>
+std::string toString(T data)
+{
+    std::ostringstream oss;
+    oss << data;
+    return oss.str();
+}
+
+struct MinedPatternInfo
+{
+    string curPatternKeyStr;
+    string parentKeyString;
+    unsigned int extendedLinkIndex;
+};
 
 class PatternMiner
 {
-private:
+protected:
 
     HTree* htree;
     AtomSpace* atomSpace;
@@ -112,6 +120,8 @@ private:
     unsigned int MAX_GRAM;
 
     string Pattern_mining_mode;
+
+    bool is_distributed;
 
     unsigned int cur_gram;
 
@@ -187,7 +197,6 @@ private:
     // Return unified ordered Handle vector
     HandleSeq UnifyPatternOrder(HandleSeq& inputPattern, unsigned int &unifiedLastLinkIndex);
 
-    string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = 0);
 
     // this function is called by RebindVariableNames
     void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
@@ -240,7 +249,7 @@ private:
 
     void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
                                                  HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
-                                                 bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask, web::json::value &patternJsonArray);
+                                                 bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo);
 
     bool containsLoopVariable(HandleSeq& inputPattern);
 
@@ -328,6 +337,8 @@ public:
 
     bool checkPatternExist(const string& patternKeyStr);
 
+    string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = 0);
+
     void OutPutFrequentPatternsToFile(unsigned int n_gram);
 
     void OutPutStaticsToCsvFile(unsigned int n_gram);
@@ -342,7 +353,7 @@ public:
 
     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
-    void runPatternMiner(unsigned int _thresholdFrequency = 2);
+    void runPatternMiner(unsigned int _thresholdFrequency = 2, bool exit_program_after_finish = true);
 
     void runPatternMinerBreadthFirst();
 
@@ -350,76 +361,12 @@ public:
 
     void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 2);
 
+    vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){return finalPatternsForGram[gram - 1];}
+
     void testPatternMatcher1();
     void testPatternMatcher2();
 
 
-    // ---------------start distributed version of pattern miner ---------------
-private:
-    string centralServerIP;
-    string centralServerPort;
-    string centralServerBaseURL;
-
-    web::json::value *patternJsonArrays;
-
-    unsigned int pattern_parse_thread_num; // for the central server
-    std::thread centralServerListeningThread;
-    std::thread *parsePatternTaskThreads;
-    std::mutex patternQueueLock, addRelationLock, updatePatternCountLock, modifyWorkerLock;
-
-    // map < uid, <is_still_working, processedFactsNum> >
-    map<string, std::pair<bool, unsigned int> > allWorkers;
-    bool allWorkersStop;
-
-    list<json::value> waitForParsePatternQueue;
-
-    string clientWorkerUID;
-
-    bool run_as_distributed_worker;
-    bool run_as_central_server;
-
-    http_client* httpClient;
-    http_listener* serverListener;
-
-    int cur_worker_mined_pattern_num;
-    int total_pattern_received; // in the server
-
-    bool waitingForNewClients;
-
-
-    void handlePost(http_request request);
-    void handleRegisterNewWorker(http_request request);
-    void handleReportWorkerStop(http_request request);
-    void handleFindNewPatterns(http_request request);
-
-    void runParsePatternTaskThread();
-    void parseAPatternTask(json::value jval);
-
-    bool checkIfAllWorkersStopWorking();
-
-    void notifyServerThisWorkerStop();
-
-    void startMiningWork();
-    void centralServerEvaluateInterestingness();
-
-    void addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray);
-    void sendPatternsToCentralServer(json::value &patternJsonArray);
-    HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);
-    bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
-
-
-public:
-
-    void launchADistributedWorker();
-    void launchCentralServer();
-    void centralServerStartListening();
-    void centralServerStopListening();
-
-    bool sendRequest(http_request &request, http_response &response);
-
-    void startCentralServer();
-
-    // ---------------end distributed version of pattern miner ---------------
 };
 
 }

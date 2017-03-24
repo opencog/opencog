@@ -34,6 +34,8 @@
 
 using namespace opencog;
 
+std::string ConsoleSocket::_prompt;
+
 // _max_open_sockets is the largest number of concurrently open
 // sockets we will allow in the cogserver. Currently set to 60.
 // Note that each SchemeShell (actually, SchemeEval) will open
@@ -51,6 +53,18 @@ ConsoleSocket::ConsoleSocket(void)
 {
     _use_count = 0;
     _shell = nullptr;
+
+    if (0 == _prompt.size()) {
+        if (nullptr == &config()) {
+            _prompt = "[0;32mopencog[1;32m> [0m";
+        } else {
+            // Prompt with ANSI color codes, if possible.
+            if (config().get_bool("ANSI_ENABLED", true))
+                _prompt = config().get("ANSI_PROMPT", "[0;32mopencog[1;32m> [0m");
+            else
+                _prompt = config().get("PROMPT", "opencog> ");
+        }
+    }
 
     // Block here, if there are too many concurrently-open sockets.
     std::unique_lock<std::mutex> lck(_max_mtx);
@@ -145,11 +159,7 @@ void ConsoleSocket::OnConnection()
 
 void ConsoleSocket::sendPrompt()
 {
-    // Prompt with ANSI color codes, if possible.
-    if (config().get_bool("ANSI_ENABLED", true))
-        Send(config().get("ANSI_PROMPT", "[0;32mopencog[1;32m> [0m"));
-    else
-        Send(config().get("PROMPT", "opencog> "));
+    Send(_prompt);
 }
 
 void ConsoleSocket::OnLine(const std::string& line)

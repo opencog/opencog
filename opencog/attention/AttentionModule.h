@@ -89,8 +89,13 @@ private:
 public:
 
     DECLARE_CMD_REQUEST(AttentionModule, "start-ecan", do_start_ecan,
-                        "Starts main ECAN agents\n",
-                        "Usage: ecan-start\n", false, true)
+                        "Starts  ECAN agents. use agents-active command to view a list of agents started.\n",
+                        "Usage: start-ecan\n", false, true)
+
+    DECLARE_CMD_REQUEST(AttentionModule, "stop-ecan", do_stop_ecan,
+                        "Stops all active  ECAN agents\n",
+                        "Usage: stop-ecan\n", false, true)
+
 
     DECLARE_CMD_REQUEST(AttentionModule, "list-ecan-param", do_list_ecan_param,
                         "Lists all ecan parameters and their values.\n",

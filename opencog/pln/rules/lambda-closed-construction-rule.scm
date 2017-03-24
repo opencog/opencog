@@ -13,38 +13,38 @@
 
 (define lambda-closed-construction-vardecl
   (VariableList
-     (TypedVariableLink
-        (VariableNode "$V")
-        (TypeChoice
-           (TypeNode "TypedVariableLink")
-           (TypeNode "VariableList")
-           (TypeNode "VariableNode")))
-     (TypedVariableLink
-        (VariableNode "$B")
-        (TypeNode "EvaluationLink"))))
+    (TypedVariableLink
+      (VariableNode "$V")
+      (TypeChoice
+        (TypeNode "TypedVariableLink")
+        (TypeNode "VariableList")
+        (TypeNode "VariableNode")))
+    (TypedVariableLink
+      (VariableNode "$B")
+      (TypeNode "EvaluationLink"))))
 
 (define lambda-closed-construction-pattern
   (AndLink
-     (VariableNode "$V")
-     (VariableNode "$B")
-     (EvaluationLink
-        (GroundedPredicateNode "scm: lambda-closed-construction-precondition")
-        (VariableNode "$B"))))
+    (VariableNode "$V")
+    (VariableNode "$B")
+    (EvaluationLink
+      (GroundedPredicateNode "scm: lambda-closed-construction-precondition")
+      (VariableNode "$B"))))
 
 (define lambda-closed-construction-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: lambda-closed-construction-formula")
-     (ListLink
-        (QuoteLink (LambdaLink
-           (UnquoteLink (VariableNode "$V"))
-           (UnquoteLink (VariableNode "$B"))))
-        (VariableNode "$B"))))
+    (GroundedSchemaNode "scm: lambda-closed-construction-formula")
+    (ListLink
+      (QuoteLink (LambdaLink
+        (UnquoteLink (VariableNode "$V"))
+        (UnquoteLink (VariableNode "$B"))))
+      (VariableNode "$B"))))
 
 (define lambda-closed-construction-rule
   (BindLink
-     lambda-closed-construction-vardecl
-     lambda-closed-construction-pattern
-     lambda-closed-construction-rewrite))
+    lambda-closed-construction-vardecl
+    lambda-closed-construction-pattern
+    lambda-closed-construction-rewrite))
 
 (define (lambda-closed-construction-formula lamb body)
   (cog-set-tv! lamb (cog-tv body)))

@@ -57,6 +57,8 @@ class ConsoleSocket : public ServerSocket
 private:
     GenericShell *_shell;
 
+    static std::string _prompt;
+
     // We need the use-count and the condition variables to avoid races
     // between asynchronous socket closures and unsent replies. So, for
     // example, the user may send a command, but then close the socket
@@ -148,9 +150,9 @@ public:
     /**
      * Assorted debugging utilities.
      */
-   unsigned int get_use_count() const { return _use_count; }
-   unsigned int get_max_open_sockets() const { return _max_open_sockets; }
-   unsigned int get_num_open_sockets() const { return _num_open_sockets; }
+    unsigned int get_use_count() const { return _use_count; }
+    unsigned int get_max_open_sockets() const { return _max_open_sockets; }
+    unsigned int get_num_open_sockets() const { return _num_open_sockets; }
 }; // class
 
 /** @}*/
