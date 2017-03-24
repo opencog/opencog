@@ -44,41 +44,41 @@ private:
 
 public:
     // Create a map
-    bool create_map(const std::string& map_name,
-                    double space_res_mtr,
-                    int time_res_milli_sec,
-                    int time_units);
+    bool create_map(const Handle& map_name,
+                    const Handle& space_res_mtr,
+                    const Handle& time_res_milli_sec,
+                    const Handle& time_units);
 
     // Return true if the named mape exists.
-    bool have_map(const std::string&);
+    bool have_map(const Handle&);
 
     // Get time resolution milli-sec
-    int get_time_res(const std::string&);
+    int get_time_res(const Handle&);
     // Get space resolution meters
-    double get_space_res(const std::string&);
+    double get_space_res(const Handle&);
     // Get time units
-    int get_time_units(const std::string&);
+    int get_time_units(const Handle&);
     // Step time before adding atoms
-    void step_time_unit(const std::string&);
-    void auto_step_time_on(const std::string&);
-    void auto_step_time_off(const std::string&);
-    int is_auto_step_on(const std::string&);
+    void step_time_unit(const Handle&);
+    void auto_step_time_on(const Handle&);
+    void auto_step_time_off(const Handle&);
+    int is_auto_step_on(const Handle&);
     // Add an atom at location on current time step
-    bool map_ato(const std::string&, Handle ato, double x, double y, double z);
+    bool map_ato(const Handle&, Handle ato, double x, double y, double z);
 
     // Get time of first atom in past elapsed time
-    Handle get_first_time(const std::string&, Handle ato, int elapse);
+    Handle get_first_time(const Handle&, Handle ato, int elapse);
     // Get time of last atom in past elapsed time
-    Handle get_last_time(const std::string&, Handle ato, int elapse);
+    Handle get_last_time(const Handle&, Handle ato, int elapse);
 
     // Get atom at location
-    Handle get_at_loc_ato(const std::string&, double x, double y, double z);
+    Handle get_at_loc_ato(const Handle&, double x, double y, double z);
     // Get atom at location in elapsed past
-    Handle get_past_loc_ato(const std::string&, int elapse,
+    Handle get_past_loc_ato(const Handle&, int elapse,
                             double x, double y, double z);
 
     // Get location of atom at current time
-    Handle get_locs_ato(const std::string&, Handle);//listlink atLocationLink
+    Handle get_locs_ato(const Handle&, Handle);//listlink atLocationLink
     //AtLocationLink
     //   Atom
     //   ListLink
@@ -89,44 +89,44 @@ public:
     //       NumberNode z
 
     // Get locations of atom in elapsed past
-    Handle get_past_locs_ato(const std::string&, Handle ato, int elapse);
-    Handle get_first_location(const std::string&, Handle ato, int elapse);
-    Handle get_last_location(const std::string&, Handle ato, int elapse);
+    Handle get_past_locs_ato(const Handle&, Handle ato, int elapse);
+    Handle get_first_location(const Handle&, Handle ato, int elapse);
+    Handle get_last_location(const Handle&, Handle ato, int elapse);
     //AtTimeLink
     //  TimeNode "Date Time millisec"
     //  Atom
     // Get time points of atom occuring at a location
-    Handle get_elapse_list_at_loc_ato(const std::string&, Handle ato,
+    Handle get_elapse_list_at_loc_ato(const Handle&, Handle ato,
               double x, double y, double z);//listlink atTimeLink
     // Get time points of atom occuring in map
-    Handle get_timeline(const std::string&, Handle ato);//listlink atTimeLink
+    Handle get_timeline(const Handle&, Handle ato);//listlink atTimeLink
     // Remove atom from location at currrent time
-    bool remove_location_ato(const std::string&, double x, double y, double z);
+    bool remove_location_ato(const Handle&, double x, double y, double z);
     // Remove atom from location at elapsed past time
-    bool remove_past_location_ato(const std::string&, int elapse,
+    bool remove_past_location_ato(const Handle&, int elapse,
          double x, double y, double z);
     // Remove all specific atoms from map at current time
-    void remove_curr_ato(const std::string&, Handle ato);
+    void remove_curr_ato(const Handle&, Handle ato);
     // Remove all specific atoms from map in elapsed past
-    void remove_past_ato(const std::string&, Handle ato, int elapse);
+    void remove_past_ato(const Handle&, Handle ato, int elapse);
     // Remove all specific atoms in all time points and all locations
-    void remove_all_ato(const std::string&, Handle ato);
+    void remove_all_ato(const Handle&, Handle ato);
 
     ////spatial query api assuming 1 ato in 1 map at 1 location.
     //for multi-map need to add features to main api to provide more raw data results
     //-ve for unknown
-    double get_distance_between(const std::string&, Handle ato1, Handle ato2, int elapse);
+    double get_distance_between(const Handle&, Handle ato1, Handle ato2, int elapse);
     // 2=far, 1=near, 0=touching, -1=unknown
-    int get_angular_nearness(const std::string&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+    int get_angular_nearness(const Handle&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
     // 2=right, 1=left, 0=aligned, -1=unknown
-    int get_target_is_right_left(const std::string&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+    int get_target_is_right_left(const Handle&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
     // 2=above, 1=below, 0=aligned, -1=unknown
-    int get_target_is_above_below(const std::string&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+    int get_target_is_above_below(const Handle&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
     // 2=ahead, 1=behind, 0=aligned, -1=unknown
-    int get_target_is_front_back(const std::string&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
+    int get_target_is_front_back(const Handle&, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse);
 private:
     std::map<std::string, TimeOctomap*> tsa;
-    time_pt get_map_time(const std::string&, int elapse);
+    time_pt get_map_time(const Handle&, int elapse);
 public:
     PointMemorySCM();
     ~PointMemorySCM();
@@ -223,13 +223,15 @@ void PointMemorySCM::init()
 #endif
 }
 
-bool PointMemorySCM::create_map(const string& name,
-                                double space_res_mtr,
-                                int time_res_milli_sec,
-                                int time_units)
+bool PointMemorySCM::create_map(const Handle& hname,
+                                const Handle& hspace_res_mtr,
+                                const Handle& htime_res_milli_sec,
+                                const Handle& htime_units)
 {
-    if (name.length() < 1)
-        return false;
+    // XXX FIXME -- verify that these are NumberNodes.
+    double space_res_mtr = atof(hspace_res_mtr->getName());
+    int time_res_milli_sec = atoi(htime_res_milli_sec->getName());
+    int time_units = atoi(htime_units->getName());
 
     // Reject if time units < 1
     if (time_units < 1)
@@ -241,61 +243,63 @@ bool PointMemorySCM::create_map(const string& name,
 
     // Reject if name already exists
     if (have_map(name)) return false;
+    if (hname->getName().length() < 1)
+        return false;
 
     tsa[name] = new TimeOctomap(time_units, space_res_mtr, std::chrono::milliseconds(time_res_milli_sec));
     return true;
 }
 // add point clouds later
 
-bool PointMemorySCM::have_map(const std::string& map_name)
+bool PointMemorySCM::have_map(const Handle& map_name)
 {
-    return tsa.find(map_name) != tsa.end();
+    return tsa.find(map_name->getName()) != tsa.end();
 }
 
-int PointMemorySCM::get_time_res(const string& map_name)
+int PointMemorySCM::get_time_res(const Handle& map_name)
 {
     if (not have_map(map_name)) return 0;
-    duration_c dr = tsa[map_name]->get_time_resolution();
+    duration_c dr = tsa[map_name->getName()]->get_time_resolution();
     return chrono::duration_cast<chrono::milliseconds>(dr).count();
 }
 
-double PointMemorySCM::get_space_res(const string& map_name)
+double PointMemorySCM::get_space_res(const Handle& map_name)
 {
     if (not have_map(map_name)) return 0.0;
-    return tsa[map_name]->get_space_resolution();
+    return tsa[map_name->getName()]->get_space_resolution();
 }
 
-int PointMemorySCM::get_time_units(const string& map_name)
+int PointMemorySCM::get_time_units(const Handle& map_name)
 {
     if (not have_map(map_name)) return 0;
     return tsa[map_name]->get_time_units();
 }
 
-void PointMemorySCM::step_time_unit(const string& map_name)
+void PointMemorySCM::step_time_unit(const Handle& map_name)
 {
     if (not have_map(map_name)) return;
     tsa[map_name]->step_time_unit();
 }
 
-void PointMemorySCM::auto_step_time_on(const string& map_name)
+void PointMemorySCM::auto_step_time_on(const Handle& map_name)
 {
     if (not have_map(map_name)) return;
     tsa[map_name]->auto_step_time(true);
 }
 
-void PointMemorySCM::auto_step_time_off(const string& map_name)
+void PointMemorySCM::auto_step_time_off(const Handle& map_name)
 {
     if (not have_map(map_name)) return;
     tsa[map_name]->auto_step_time(false);
 }
 
-int PointMemorySCM::is_auto_step_on(const string& map_name)
+int PointMemorySCM::is_auto_step_on(const Handle& map_name)
 {
     if (not have_map(map_name)) return 0;
     return (tsa[map_name]->is_auto_step_time_on()) ? 1 : 0;
 }
 
-bool PointMemorySCM::map_ato(const string& map_name, Handle ato,
+bool PointMemorySCM::map_ato(const Handle& map_name, Handle ato,
                              double x, double y, double z)
 {
     if (not have_map(map_name)) return true;
@@ -323,7 +327,7 @@ static Handle timestamp_tag_atom(const time_pt& tp, const Handle& ato)
     return Handle(createLink(AT_TIME_LINK, Handle(createNode(TIME_NODE, ts)), ato));
 }
 
-Handle PointMemorySCM::get_first_time(const string& map_name,
+Handle PointMemorySCM::get_first_time(const Handle& map_name,
                                      Handle ato, int elapse)
 {
     if (not have_map(map_name)) return Handle();
@@ -338,7 +342,7 @@ Handle PointMemorySCM::get_first_time(const string& map_name,
     return timestamp_tag_atom(tp, ato);
 }
 
-Handle PointMemorySCM::get_last_time(const string& map_name,
+Handle PointMemorySCM::get_last_time(const Handle& map_name,
                                     Handle ato, int elapse)
 {
     if (not have_map(map_name)) return Handle();
@@ -353,14 +357,14 @@ Handle PointMemorySCM::get_last_time(const string& map_name,
     return timestamp_tag_atom(tp, ato);
 }
 
-Handle PointMemorySCM::get_at_loc_ato(const string& map_name,
+Handle PointMemorySCM::get_at_loc_ato(const Handle& map_name,
                                       double x, double y, double z)
 {
     if (not have_map(map_name)) return Handle();
     return tsa[map_name]->get_atom_at_location(point3d(x, y, z));
 }
 
-Handle PointMemorySCM::get_past_loc_ato(const string& map_name, int elapse,
+Handle PointMemorySCM::get_past_loc_ato(const Handle& map_name, int elapse,
                             double x, double y, double z)
 {
     if (not have_map(map_name)) return Handle();
@@ -370,7 +374,7 @@ Handle PointMemorySCM::get_past_loc_ato(const string& map_name, int elapse,
 
 // Tag an atom with SetLink of locations (AtLocationLink)
 // Returns an empty SetLink if the pointlist is empty.
-static Handle tag_atom_with_locs(const std::string& map_name,
+static Handle tag_atom_with_locs(const Handle& map_name,
                                  const Handle& ato,
                                  const point3d_list& pl)
 {
@@ -391,7 +395,7 @@ static Handle tag_atom_with_locs(const std::string& map_name,
     return Handle(createLink(loc_links, SET_LINK));
 }
 
-Handle PointMemorySCM::get_first_location(const string& map_name,
+Handle PointMemorySCM::get_first_location(const Handle& map_name,
                                           Handle ato, int elapse)
 {
     if (not have_map(map_name)) return Handle();
@@ -401,7 +405,7 @@ Handle PointMemorySCM::get_first_location(const string& map_name,
 }
 
 
-Handle PointMemorySCM::get_last_location(const string& map_name, Handle ato, int elapse)
+Handle PointMemorySCM::get_last_location(const Handle& map_name, Handle ato, int elapse)
 {
     if (not have_map(map_name)) return Handle();
     time_pt tpt = get_map_time(map_name, elapse);
@@ -409,14 +413,14 @@ Handle PointMemorySCM::get_last_location(const string& map_name, Handle ato, int
     return tag_atom_with_locs(map_name, ato, pl);
 }
 
-Handle PointMemorySCM::get_locs_ato(const string& map_name, Handle ato)
+Handle PointMemorySCM::get_locs_ato(const Handle& map_name, Handle ato)
 {
     if (not have_map(map_name)) return Handle();
     point3d_list pl = tsa[map_name]->get_locations_of_atom(ato);
     return tag_atom_with_locs(map_name, ato, pl);
 }
 
-Handle PointMemorySCM::get_past_locs_ato(const string& map_name, Handle ato, int elapse)
+Handle PointMemorySCM::get_past_locs_ato(const Handle& map_name, Handle ato, int elapse)
 {
     if (not have_map(map_name)) return Handle();
     time_pt tpt = get_map_time(map_name, elapse);
@@ -424,7 +428,7 @@ Handle PointMemorySCM::get_past_locs_ato(const string& map_name, Handle ato, int
     return tag_atom_with_locs(map_name, ato, pl);
 }
 
-Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name,
+Handle PointMemorySCM::get_elapse_list_at_loc_ato(const Handle& map_name,
               Handle ato,
               double x, double y, double z)
 {
@@ -440,7 +444,7 @@ Handle PointMemorySCM::get_elapse_list_at_loc_ato(const string& map_name,
 
 // Get the timeline of the atom.  That is, get a sequence of
 // time-points, at which the atom is in the map.
-Handle PointMemorySCM::get_timeline(const string& map_name, Handle ato)
+Handle PointMemorySCM::get_timeline(const Handle& map_name, Handle ato)
 {
     if (not have_map(map_name)) return Handle();
     time_list tl = tsa[map_name]->get_timeline(ato);
@@ -450,14 +454,14 @@ Handle PointMemorySCM::get_timeline(const string& map_name, Handle ato)
     return opencog::Handle(createLink(LL, SET_LINK));
 }
 
-bool PointMemorySCM::remove_location_ato(const string& map_name, double x, double y, double z)
+bool PointMemorySCM::remove_location_ato(const Handle& map_name, double x, double y, double z)
 {
     if (not have_map(map_name)) return true;
     tsa[map_name]->remove_atoms_at_location(point3d(x, y, z));
     return true;
 }
 
-bool PointMemorySCM::remove_past_location_ato(const string& map_name, int elapse,
+bool PointMemorySCM::remove_past_location_ato(const Handle& map_name, int elapse,
          double x, double y, double z)
 {
     if (not have_map(map_name)) return true;
@@ -466,27 +470,27 @@ bool PointMemorySCM::remove_past_location_ato(const string& map_name, int elapse
     return true;
 }
 
-void PointMemorySCM::remove_curr_ato(const string& map_name, Handle ato)
+void PointMemorySCM::remove_curr_ato(const Handle& map_name, Handle ato)
 {
     if (not have_map(map_name)) return;
     tsa[map_name]->remove_atom_at_current_time(ato);
 }
 
-void PointMemorySCM::remove_past_ato(const string& map_name, Handle ato, int elapse)
+void PointMemorySCM::remove_past_ato(const Handle& map_name, Handle ato, int elapse)
 {
     if (not have_map(map_name)) return;
     time_pt tpt = get_map_time(map_name, elapse);
     tsa[map_name]->remove_atom_at_time(tpt, ato);
 }
 
-void PointMemorySCM::remove_all_ato(const string& map_name, Handle ato)
+void PointMemorySCM::remove_all_ato(const Handle& map_name, Handle ato)
 {
     if (not have_map(map_name)) return;
     tsa[map_name]->remove_atom(ato);
 }
 
 
-time_pt PointMemorySCM::get_map_time(const string& map_name, int elapse)
+time_pt PointMemorySCM::get_map_time(const Handle& map_name, int elapse)
 {
     if (not have_map(map_name)) return time_pt();
     return tsa[map_name]->get_current_time() - std::chrono::milliseconds(elapse);
@@ -496,7 +500,7 @@ time_pt PointMemorySCM::get_map_time(const string& map_name, int elapse)
 // For multi-map support, need to add features to main API, to provide
 // more raw data results -ve for unknown
 double
-PointMemorySCM::get_distance_between(const string& map_name, Handle ato1, Handle ato2, int elapse)
+PointMemorySCM::get_distance_between(const Handle& map_name, Handle ato1, Handle ato2, int elapse)
 {
     if (not have_map(map_name)) return 0.0;
     time_pt tpt = get_map_time(map_name, elapse);
@@ -505,7 +509,7 @@ PointMemorySCM::get_distance_between(const string& map_name, Handle ato1, Handle
 
 // 2 = far, 1 = near, 0 = touching
 int
-PointMemorySCM::get_angular_nearness(const string& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
+PointMemorySCM::get_angular_nearness(const Handle& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
 {
     if (not have_map(map_name)) return -1;
     time_pt tpt = get_map_time(map_name, elapse);
@@ -514,7 +518,7 @@ PointMemorySCM::get_angular_nearness(const string& map_name, Handle ato_obs, Han
 
 // 2 = right, 1 = left, 0 = aligned
 int
-PointMemorySCM::get_target_is_right_left(const string& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
+PointMemorySCM::get_target_is_right_left(const Handle& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
 {
     if (not have_map(map_name)) return -1;
     time_pt tpt = get_map_time(map_name, elapse);
@@ -524,7 +528,7 @@ PointMemorySCM::get_target_is_right_left(const string& map_name, Handle ato_obs,
 
 // 2 = above, 1 = below, 0 = aligned
 int
-PointMemorySCM::get_target_is_above_below(const string& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
+PointMemorySCM::get_target_is_above_below(const Handle& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
 {
     if (not have_map(map_name)) return -1;
     time_pt tpt = get_map_time(map_name, elapse);
@@ -534,7 +538,7 @@ PointMemorySCM::get_target_is_above_below(const string& map_name, Handle ato_obs
 
 // 2 = ahead/front, 1 = behind/back, 0 = aligned
 int
-PointMemorySCM::get_target_is_front_back(const string& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
+PointMemorySCM::get_target_is_front_back(const Handle& map_name, Handle ato_obs, Handle ato_tgt, Handle ato_ref, int elapse)
 {
     if (not have_map(map_name)) return -1;
     time_pt tpt = get_map_time(map_name, elapse);
