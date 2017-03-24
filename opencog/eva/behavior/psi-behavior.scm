@@ -6,7 +6,7 @@
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog openpsi))
-(load "eva-behavior/face-priority.scm")
+(load "face-priority.scm")
 
 ;; ------------------------------------------------------------------
 ; Demand associated with faces
