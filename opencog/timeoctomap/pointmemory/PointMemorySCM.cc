@@ -62,18 +62,17 @@ public:
 
 	TruthValuePtr is_auto_step_on(Handle);
 	// Add an atom at location on current time step
-	bool map_ato(Handle, Handle ato, double x, double y, double z);
+	void map_ato(Handle map, Handle ato, Handle loc);
 
 	// Get time of first atom in past elapsed time
-	Handle get_first_time(Handle, Handle ato, int elapse);
+	Handle get_first_time(Handle, Handle ato, Handle elapse);
 	// Get time of last atom in past elapsed time
-	Handle get_last_time(Handle, Handle ato, int elapse);
+	Handle get_last_time(Handle, Handle ato, Handle elapse);
 
 	// Get atom at location
-	Handle get_at_loc_ato(Handle, double x, double y, double z);
+	Handle get_at_loc_ato(Handle, Handle);
 	// Get atom at location in elapsed past
-	Handle get_past_loc_ato(Handle, int elapse,
-							double x, double y, double z);
+	Handle get_past_loc_ato(Handle, Handle, Handle);
 
 	// Get location of atom at current time
 	Handle get_locs_ato(Handle, Handle);//listlink atLocationLink
@@ -87,26 +86,25 @@ public:
 	//	   NumberNode z
 
 	// Get locations of atom in elapsed past
-	Handle get_past_locs_ato(Handle, Handle ato, int elapse);
-	Handle get_first_location(Handle, Handle ato, int elapse);
-	Handle get_last_location(Handle, Handle ato, int elapse);
+	Handle get_past_locs_ato(Handle, Handle ato, Handle elapse);
+	Handle get_first_location(Handle, Handle ato, Handle elapse);
+	Handle get_last_location(Handle, Handle ato, Handle elapse);
 	//AtTimeLink
 	//  TimeNode "Date Time millisec"
 	//  Atom
 	// Get time points of atom occuring at a location
 	Handle get_elapse_list_at_loc_ato(Handle, Handle ato,
-			  double x, double y, double z);//listlink atTimeLink
+			  Handle loc);//listlink atTimeLink
 	// Get time points of atom occuring in map
 	Handle get_timeline(Handle, Handle ato);//listlink atTimeLink
 	// Remove atom from location at currrent time
-	bool remove_location_ato(Handle, double x, double y, double z);
+	bool remove_location_ato(Handle, Handle loc);
 	// Remove atom from location at elapsed past time
-	bool remove_past_location_ato(Handle, int elapse,
-		 double x, double y, double z);
+	bool remove_past_location_ato(Handle, Handle, Handle);
 	// Remove all specific atoms from map at current time
 	void remove_curr_ato(Handle, Handle ato);
 	// Remove all specific atoms from map in elapsed past
-	void remove_past_ato(Handle, Handle ato, int elapse);
+	void remove_past_ato(Handle, Handle ato, Handle elapse);
 	// Remove all specific atoms in all time points and all locations
 	void remove_all_ato(Handle, Handle ato);
 
@@ -306,12 +304,15 @@ TruthValuePtr PointMemorySCM::is_auto_step_on(Handle map_name)
 		TruthValue::TRUE_TV() : TruthValue::FALSE_TV();
 }
 
-bool PointMemorySCM::map_ato(Handle map_name, Handle ato,
-							 double x, double y, double z)
+void PointMemorySCM::map_ato(Handle map_name, Handle ato, Handle loc)
 {
-	if (not have_map(map_name)) return true;
+	have_map(map_name);
+	// loc should be a ListLink of three NumberNodes.
+	HandleSeq& hs = loc->getOutgoingSet();
+	double x = NumberNodeCast(hs[0])->get_value();
+	double y = NumberNodeCast(hs[1])->get_value();
+	double z = NumberNodeCast(hs[2])->get_value();
 	tsa[map_name->getName()]->insert_atom(point3d(x, y, z), ato);
-	return true;
 }
 
 // Tag the atom `ato` with the timepoint `tp`, using an AtTimeLink
@@ -335,46 +336,62 @@ static Handle timestamp_tag_atom(const time_pt& tp, Handle ato)
 }
 
 Handle PointMemorySCM::get_first_time(Handle map_name,
-									 Handle ato, int elapse)
+									 Handle ato, Handle helapse)
 {
-	if (not have_map(map_name)) return Handle();
+	have_map(map_name);
 
+	int elapse = atoi(helapse->getName());
 	time_pt tpt = get_map_time(map_name, elapse);
 
 	time_pt tp;
 	bool r = tsa[map_name->getName()]->get_oldest_time_elapse_atom_observed(ato, tpt, tp);
-	if (not r) return Handle();
+	if (not r) return Handle(); // XXX should this throw instead?
 
 	// Make and return atTimeLink
 	return timestamp_tag_atom(tp, ato);
 }
 
 Handle PointMemorySCM::get_last_time(Handle map_name,
-									Handle ato, int elapse)
+									 Handle ato, Handle helapse)
 {
-	if (not have_map(map_name)) return Handle();
+	have_map(map_name);
+
+	int elapse = atoi(helapse->getName());
 	time_pt tpt = get_map_time(map_name, elapse);
 
 	time_pt tp;
 	bool r = tsa[map_name->getName()]->get_last_time_elapse_atom_observed(ato, tpt, tp);
 	if (not r)
-		return UndefinedHandle;
+		return UndefinedHandle; // XXX should this throw instead?
 
 	// make and return atTimeLink
 	return timestamp_tag_atom(tp, ato);
 }
 
 Handle PointMemorySCM::get_at_loc_ato(Handle map_name,
-									  double x, double y, double z)
+                             Handle loc)
 {
-	if (not have_map(map_name)) return Handle();
+	have_map(map_name);
+	// loc should be a ListLink of three NumberNodes.
+	HandleSeq& hs = loc->getOutgoingSet();
+	double x = NumberNodeCast(hs[0])->get_value();
+	double y = NumberNodeCast(hs[1])->get_value();
+	double z = NumberNodeCast(hs[2])->get_value();
 	return tsa[map_name->getName()]->get_atom_at_location(point3d(x, y, z));
 }
 
-Handle PointMemorySCM::get_past_loc_ato(Handle map_name, int elapse,
-							double x, double y, double z)
+Handle PointMemorySCM::get_past_loc_ato(Handle map_name,
+                                        Handle loc,
+                                        Handle helapse)
 {
-	if (not have_map(map_name)) return Handle();
+	have_map(map_name);
+	// loc should be a ListLink of three NumberNodes.
+	HandleSeq& hs = loc->getOutgoingSet();
+	double x = NumberNodeCast(hs[0])->get_value();
+	double y = NumberNodeCast(hs[1])->get_value();
+	double z = NumberNodeCast(hs[2])->get_value();
+	int elapse = atoi(helapse->getName());
+
 	time_pt tpt = get_map_time(map_name, elapse);
 	return tsa[map_name->getName()]->get_atom_at_time_by_location(tpt, point3d(x, y, z));
 }
@@ -403,18 +420,23 @@ static Handle tag_atom_with_locs(Handle map_name,
 }
 
 Handle PointMemorySCM::get_first_location(Handle map_name,
-										  Handle ato, int elapse)
+										  Handle ato, Handle helapse)
 {
-	if (not have_map(map_name)) return Handle();
+	have_map(map_name);
+
+	int elapse = atoi(helapse->getName());
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name->getName()]->get_oldest_locations(ato, tpt);
 	return tag_atom_with_locs(map_name, ato, pl);
 }
 
 
-Handle PointMemorySCM::get_last_location(Handle map_name, Handle ato, int elapse)
+Handle PointMemorySCM::get_last_location(Handle map_name,
+										  Handle ato, Handle helapse)
 {
-	if (not have_map(map_name)) return Handle();
+	have_map(map_name);
+
+	int elapse = atoi(helapse->getName());
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name->getName()]->get_newest_locations(ato, tpt);
 	return tag_atom_with_locs(map_name, ato, pl);
@@ -422,14 +444,17 @@ Handle PointMemorySCM::get_last_location(Handle map_name, Handle ato, int elapse
 
 Handle PointMemorySCM::get_locs_ato(Handle map_name, Handle ato)
 {
-	if (not have_map(map_name)) return Handle();
+	have_map(map_name);
 	point3d_list pl = tsa[map_name->getName()]->get_locations_of_atom(ato);
 	return tag_atom_with_locs(map_name, ato, pl);
 }
 
-Handle PointMemorySCM::get_past_locs_ato(Handle map_name, Handle ato, int elapse)
+Handle PointMemorySCM::get_past_locs_ato(Handle map_name,
+                                         Handle ato, Handle helapse)
 {
-	if (not have_map(map_name)) return Handle();
+	have_map(map_name);
+
+	int elapse = atoi(helapse->getName());
 	time_pt tpt = get_map_time(map_name, elapse);
 	point3d_list pl = tsa[map_name->getName()]->get_locations_of_atom_at_time(tpt, ato);
 	return tag_atom_with_locs(map_name, ato, pl);
