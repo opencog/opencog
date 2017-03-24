@@ -23,6 +23,7 @@
 
 
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/StringManipulator.h>
 
 #include <opencog/spatial/AStarController.h>
 #include <opencog/spatial/LocalSpaceMap2DUtil.h>
