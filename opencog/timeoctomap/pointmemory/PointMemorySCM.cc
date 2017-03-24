@@ -238,10 +238,10 @@ Handle PointMemorySCM::create_map(Handle map_name, Handle resolution)
 		throw InvalidParamException(TRACE_INFO,
 			 "Expecting positive spatial resolution");
 
-	const std::string& name = map_name->getName();
-	if (name.length() < 1)
+	// The map MUST be disambiguated, else lookups will fail.
+	if (nullptr == map_name->getAtomSpace())
 		throw InvalidParamException(TRACE_INFO,
-			 "Invalid map name");
+			 "Invalid map");
 
 	// Reject if name already exists
 	if (tsa.find(map_name) != tsa.end())
