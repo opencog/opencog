@@ -36,9 +36,10 @@
 
 ; As above, but for gestures
 (define-public (prt-face-gest PRED NAME TENS RPT SPD)
-	(format #t "Robot performs facial gesture \"~a\" at strength ~a\n"
+	(format #t "Robot performs facial gesture \"~a\" at strength ~a speed ~a\n"
 		(cog-name NAME)
-		(cog-name TENS))
+		(cog-name TENS)
+		(cog-name SPD))
 	(prt-pred-defn PRED NAME TENS RPT SPD)
 )
 

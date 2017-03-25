@@ -22,7 +22,7 @@
 (DefineLink
     (DefinedPredicateNode "yawn")
     (EvaluationLink
-        (DefinedPredicateNode "Do show gesture")
+        (DefinedPredicateNode "Show class gesture")
         (ListLink
             (ConceptNode "imperative")
             (ConceptNode "yawn-1"))))

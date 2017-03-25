@@ -617,7 +617,7 @@
 ; Gesture expression semantics (groundings) for robot control
 ;
 ; The ListLink provides the arguments to the
-; (DefinedPredicate "Do show gesture")
+; (DefinedPredicate "Show class gesture")
 ; The `gesture class` lines up with the config parameter `imperative`
 ; in the cfg-eva.scm file, which is used to control the strength and
 ; speed of the gesture (randomly chosen)
@@ -687,27 +687,27 @@
 ; must be a WordNode to make `obj-semantics-template` happy.
 ;
 ; Other verbs: "Look thoughtful"
-(ReferenceLink (Word "gesture-action") (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "act")            (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "be")             (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "look")           (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "gesture-action") (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "act")            (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "be")             (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "look")           (DefinedPredicate "Show class gesture"))
 
 ; These are more-or-less the same verbs as before, but coupled to
 ; gestures, so that "feign thoughtfulness" and "mime amusement" work
 ; for the gestures.
-(ReferenceLink (Word "dramatize")   (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "emote")       (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "enact")       (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "express")     (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "feign")       (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "impersonate") (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "mime")        (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "mimic")       (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "portray")     (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "pretend")     (DefinedPredicate "Do show gesture"))
-(ReferenceLink (Word "show")        (DefinedPredicate "Do show gesture"))
+(ReferenceLink (Word "dramatize")   (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "emote")       (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "enact")       (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "express")     (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "feign")       (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "impersonate") (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "mime")        (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "mimic")       (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "portray")     (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "pretend")     (DefinedPredicate "Show class gesture"))
+(ReferenceLink (Word "show")        (DefinedPredicate "Show class gesture"))
 
-(InheritanceLink (DefinedPredicate "Do show gesture")
+(InheritanceLink (DefinedPredicate "Show class gesture")
 	(ConceptNode "pred-gesture"))
 
 ;
