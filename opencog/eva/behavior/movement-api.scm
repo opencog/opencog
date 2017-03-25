@@ -17,7 +17,7 @@
 
 	(if (not (null? dfn)) (cog-delete (car dfn)) #f))
 
-; Printer stub
+; Printer stub -- Prints to the opencog log file.
 (define-public (prt-pred-defn PRED . REST)
    (cog-logger-info "Called (DefinedPredicate \"~a\") with args ~a\n"
 		(cog-name PRED) REST)
@@ -41,6 +41,24 @@
 		(cog-name TENS)
 		(cog-name SPD))
 	(prt-pred-defn PRED NAME TENS RPT SPD)
+)
+
+; As above, but for eye movements
+(define-public (prt-gaze-dir PRED X Y Z)
+	(format #t "Robot looks at point (~a ~a ~a)\n"
+		(cog-name X)
+		(cog-name Y)
+		(cog-name Z))
+	(prt-pred-defn PRED X Y Z)
+)
+
+; As above, but for head movements
+(define-public (prt-turn-dir PRED X Y Z)
+	(format #t "Robot turns head towards (~a ~a ~a)\n"
+		(cog-name X)
+		(cog-name Y)
+		(cog-name Z))
+	(prt-pred-defn PRED X Y Z)
 )
 
 ; Create a definition that is just a stub.
@@ -146,7 +164,7 @@
 	(LambdaLink
 		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
 		(EvaluationLink
-			(GroundedPredicate "scm: prt-pred-defn")
+			(GroundedPredicate "scm: prt-turn-dir")
 			(ListLink
 				(DefinedPredicate "Do look at point")
 				(Variable "$x") (Variable "$y") (Variable "$z"))
@@ -162,7 +180,7 @@
 	(LambdaLink
 		(VariableList (Variable "$x") (Variable "$y") (Variable "$z"))
 		(EvaluationLink
-			(GroundedPredicate "scm: prt-pred-defn")
+			(GroundedPredicate "scm: prt-gaze-dir")
 			(ListLink
 				(DefinedPredicate "Do gaze at point")
 				(Variable "$x") (Variable "$y") (Variable "$z"))
