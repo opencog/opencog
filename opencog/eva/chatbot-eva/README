@@ -48,7 +48,7 @@ also a bunch of scaffolding, that is meant to be replaced.  Large parts
 may, or may not be redesigned in the (near-term?) future.
 
 A detailed description of the current architecture is given in the
-`embodiment` directory.
+`architecture` directory.
 
 
 HOWTO
@@ -63,15 +63,12 @@ even at the guile prompt.  This version just prints (in English)
 the actions that the robot would perform.  A webcam is recommended,
 so that she can see you.
 
- * build and install both the atomspace, and opencog. Ask for help
+ * Build and install both the atomspace, and opencog. Ask for help
    if you don't know how to do this.
- * `git clone https://github.com/opencog/ros-behavior-scripting`
-   and `sudo make install`  -- This step is important, it is needed
-   for the action orchestrator!
  * Start the RelEx server on port 4444 (`git clone` relex, build it,
    and run `./opencog-server.sh` in the relex main directory.)
  * (needed only for IRC) Start the cogita IRC bridge, in the
-   irc directoy -- the `opencog/nlp/irc/cogita` binary.
+   nlp/irc directoy -- the `opencog/nlp/irc/cogita` binary.
  * Start a guile shell: just say `guile` in this directory.
  * Enter `(load "run-chatbot.scm")` at the guile prompt.
  * Talk to her via IRC.  Alternately, from the guile prompt, you
@@ -88,7 +85,9 @@ version.
  * Communications is done using ROS. You have to install ROS and
    catkin and catkin make to build the ROS messages.
 
- * Behavior control is done with OpenCog behavior trees.
+ * The bridge between opencog and ROS is in the
+   https://github.com/opencog/ros-behavior-scripting
+   repo. Download and run that.
 
 See the directory https://github.com/opencog/ros-behavior-scripting
 for additional information.  It will give pointers as to how to
@@ -98,8 +97,8 @@ install and configure the above pieces.
 General sketch
 --------------
 The discussion here assumes familiarity with the simpler "generic"
-chatbot pipeline, in the `../chatbot` directory.  You should study that
-first; otherwise the discussion here will seem disconnected and
+chatbot pipeline, in the `nlp/chatbot` directory.  You should study
+that first; otherwise the discussion here will seem disconnected and
 incomplete.
 
 The general technical intent here is to somehow associate nouns and
@@ -242,9 +241,8 @@ combining actions from multiple sources, and not just the chatbot.
 That is, other behavior trees and OpenPsi controllers may also be
 vying to express some action; the action orchestrator resolves these.
 
-The action orchestrator is implenented in the guthub
-`opencog/ros-behavior-tree` repository, and is loaded as a scheme
-module `(use-modules (opencog eva-behavior))`
+The action orchestrator is implenented in the `eva/behavior` directory,
+and is loaded as a scheme module `(use-modules (opencog eva-behavior))`
 
 
 Environment Awarenes and Self Awareness
@@ -426,5 +424,3 @@ OpenPsi:
 * Replace rules with psi-rules (or with forward chainer)
 
 * Provide simple string-matching API.
-
-
