@@ -17,7 +17,6 @@ IF (HAVE_NLP)
 	ADD_SUBDIRECTORY (relex2logic)
 	ADD_SUBDIRECTORY (aiml)
 	ADD_SUBDIRECTORY (chatbot)
-	ADD_SUBDIRECTORY (chatbot-eva)
 	ADD_SUBDIRECTORY (chatbot-psi)
 	# fuzzy depends on sureal
 	ADD_SUBDIRECTORY (fuzzy)
