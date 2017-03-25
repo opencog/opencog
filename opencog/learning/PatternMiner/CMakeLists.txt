@@ -2,7 +2,6 @@
 
 IF (HAVE_cpprest)
     ADD_LIBRARY (PatternMiner SHARED
-            Pattern
             HTree
             PatternMiner
             PatternMinerBF
@@ -21,7 +20,6 @@ IF (HAVE_cpprest)
     )
 ELSE (HAVE_cpprest)
     ADD_LIBRARY (PatternMiner SHARED
-            Pattern
             HTree
             PatternMiner
             PatternMinerBF
@@ -51,7 +49,6 @@ TARGET_LINK_LIBRARIES (TestPatternMinerAgent
 )
 
 INSTALL (FILES
-        Pattern.h
         HTree.h
         PatternMiner.h
         DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"

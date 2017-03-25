@@ -30,8 +30,6 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "Pattern.h"
-
 using namespace std;
 
 namespace opencog
