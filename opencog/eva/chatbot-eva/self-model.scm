@@ -16,8 +16,8 @@
 ; environment), so that she can also talk about that.
 ;--------------------------------------------------------------------
 
-; The primary physical self-model is in the ros-behavior-scripting
-; github repo. Use that.
+; The primary physical self-model is in the eva/model directory.
+; Use that.
 
 (use-modules (opencog eva-model))
 

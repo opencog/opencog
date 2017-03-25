@@ -257,8 +257,8 @@ The steps are:
     unclear; what is clear is that updating the self-model too early
     results in bad self-awareness.
 
-    The code for handling this is mostly in the github repo for
-    opencog/ros-behavior-scripting.  It needs to be refactored.
+    The code for handling this is mostly in the `eva/model` directory.
+    It needs to be refactored.
 
  III) Question-answering.  A prototype for question-answering was working
     earlier, but is currently broken, due to the self-model redesign.

@@ -9,8 +9,6 @@
 (use-modules (opencog nlp))
 (use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp chatbot-eva))
-
-; Load the robot model, from opencog/ros-behavior-scripting
 (use-modules (opencog eva-behavior))
 
 ; Load the Eva personality.

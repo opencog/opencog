@@ -177,8 +177,7 @@
 ; in various irritating ways, so we duplicate the above using
 ; ConceptNode, instead.
 ;
-; XXX Remove this -- the self-model should be in the
-; ros-behavior-scripting modules.
+; XXX Remove this -- It should go into the self-model file.
 
 ; Knowledge about spatial directions. Pair up words and physical
 ; directions.
@@ -384,7 +383,7 @@
 
 ; Currently supported facial animations on the Eva blender model.
 ; These must be *exactly* as named; these are sent directly to the
-; ROS beldner API:
+; ROS blender API:
 ; rostopic echo /blender_api/available_emotion_states
 ; ['irritated', 'happy', 'recoil', 'surprised', 'sad', 'confused',
 ;  'worry', 'bored', 'engaged', 'amused', 'comprehending', 'afraid']
