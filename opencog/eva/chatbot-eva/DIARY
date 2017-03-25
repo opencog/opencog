@@ -1609,3 +1609,8 @@ prints "(Eva looks to the left)"
 (define current-action (AnchorNode "*-action-*"))
 (StateLink current-action (WordNode "foobar"))
 
+(use-modules (opencog exec))
+(cog-evaluate! (Evaluation
+      (DefinedPredicate "Show class expression")
+      (List (Concept "imperative") (Concept "happy"))))
+
