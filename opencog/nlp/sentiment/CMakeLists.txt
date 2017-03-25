@@ -1,3 +1,4 @@
+ADD_GUILE_MODULE (sentiment.scm)
 
 INSTALL (FILES
 	basic_sentiment_analysis.py

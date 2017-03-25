@@ -18,8 +18,6 @@
              (opencog nlp microplanning)
              (opencog nlp relex2logic))
 
-(use-modules (opencog logger))
-
 ; -----------------------------------------------------------------------
 ; TODO: Replace these time related utilities with one from TimeMap, when it is
 ; ready.

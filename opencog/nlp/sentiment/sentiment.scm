@@ -1,9 +1,11 @@
 ;
 ; sentiment.scm
 ;
-; Sentiment analysis
+; Sentiment analysis module
 ;
 ; -----------------------------------------------------------------------
+
+(define-module (opencog nlp sentiment))
 
 (use-modules (opencog) (opencog python) (opencog exec))
 (use-modules (opencog logger))
