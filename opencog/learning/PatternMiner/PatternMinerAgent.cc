@@ -1,5 +1,5 @@
 /*
- * opencog/learning/PatternMiner/TestPatternMinerAgent.cc
+ * opencog/learning/PatternMiner/PatternMinerAgent.cc
  *
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TestPatternMinerAgent.h"
+#include "PatternMinerAgent.h"
 #include <opencog/cogserver/server/CogServer.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/util/Logger.h>
@@ -30,27 +30,27 @@
 using namespace opencog;
 
 // load/unload functions for the Module interface
-DECLARE_MODULE(TestPatternMinerModule)
+DECLARE_MODULE(PatternMinerModule)
 
-TestPatternMinerModule::TestPatternMinerModule(CogServer& cs) : Module(cs)
+PatternMinerModule::PatternMinerModule(CogServer& cs) : Module(cs)
 {
-    logger().info("[TestPatternMinerModule] constructor");
+    logger().info("[PatternMinerModule] constructor");
 }
 
-TestPatternMinerModule::~TestPatternMinerModule()
+PatternMinerModule::~PatternMinerModule()
 {
-    logger().info("[TestPatternMinerModule] destructor");
-    _cogserver.stopAllAgents(TestPatternMinerAgent::info().id);
+    logger().info("[PatternMinerModule] destructor");
+    _cogserver.stopAllAgents(PatternMinerAgent::info().id);
 }
 
-void TestPatternMinerModule::init()
+void PatternMinerModule::init()
 {
-    logger().info("[TestPatternMinerModule] init");
-    _cogserver.registerAgent(TestPatternMinerAgent::info().id, &factory);
-    _cogserver.createAgent(TestPatternMinerAgent::info().id, true);
+    logger().info("[PatternMinerModule] init");
+    _cogserver.registerAgent(PatternMinerAgent::info().id, &factory);
+    _cogserver.createAgent(PatternMinerAgent::info().id, true);
 }
 
-TestPatternMinerAgent::TestPatternMinerAgent(CogServer& cs) : Agent(cs, 100)
+PatternMinerAgent::PatternMinerAgent(CogServer& cs) : Agent(cs, 100)
 {
 //    if ( load_scm_file( cs.getAtomSpace(), "pm_test_corpus.scm" ) == 0  )
 //        logger().info( "OAC::%s - Loaded pattern miner test corpus file: '%s'",
@@ -65,16 +65,16 @@ TestPatternMinerAgent::TestPatternMinerAgent(CogServer& cs) : Agent(cs, 100)
 
     this->patternMiner = new PatternMiner(&(cs.getAtomSpace()));
 
-    logger().info("[TestPatternMinerAgent] constructor");
+    logger().info("[PatternMinerAgent] constructor");
 
 }
 
-TestPatternMinerAgent::~TestPatternMinerAgent()
+PatternMinerAgent::~PatternMinerAgent()
 {
-    logger().info("[TestPatternMinerAgent] destructor");
+    logger().info("[PatternMinerAgent] destructor");
 }
 
-void TestPatternMinerAgent::selectSubSetFromCorpus()
+void PatternMinerAgent::selectSubSetFromCorpus()
 {
     vector<string> topics;
    // topics.push_back("Neurology");
@@ -88,7 +88,7 @@ void TestPatternMinerAgent::selectSubSetFromCorpus()
     this->patternMiner->selectSubsetFromCorpus(topics, 2);
 }
 
-void TestPatternMinerAgent::run()
+void PatternMinerAgent::run()
 {
     // test, only run once
     static bool hasRun = false;

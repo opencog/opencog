@@ -39,12 +39,12 @@ ADD_DEPENDENCIES(PatternMiner embodiment_atom_types)
 ADD_DEPENDENCIES(PatternMiner spacetime_atom_types)
 
 
-ADD_LIBRARY(TestPatternMinerAgent SHARED
-	TestPatternMinerAgent
+ADD_LIBRARY(PatternMinerAgent SHARED
+        PatternMinerAgent
 )
 
 
-TARGET_LINK_LIBRARIES (TestPatternMinerAgent
+TARGET_LINK_LIBRARIES (PatternMinerAgent
 	PatternMiner
 )
 
