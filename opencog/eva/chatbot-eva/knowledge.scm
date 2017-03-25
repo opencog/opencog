@@ -61,7 +61,7 @@
 ; Syntactic structure is encoded with an EvaluationLink.
 ;--------------------------------------------------------------------
 ;
-; (DefinedPredicate "Do show expression") is defined in eva-behavior,
+; (DefinedPredicate "Show class expression") is defined in eva-behavior,
 ; so we have to import that...
 (use-modules (opencog eva-behavior))
 ;--------------------------------------------------------------------
@@ -263,7 +263,7 @@
 ; Emotional expression semantics (groundings) for robot control
 ;
 ; The ListLink provides the arguments to the
-; (DefinedPredicate "Do show expression")
+; (DefinedPredicate "Show class expression")
 ; The `expression class` lines up with the config parameter `imperative`
 ; in the cfg-eva.scm file, which is used to control the strength and
 ; duration of the expression (randomly chosen)
@@ -363,24 +363,24 @@
 ; `express-action` is used with "Smile!", "Frown!", etc.
 ; It lines up with `single-word-express-rule` and must be a WordNode
 ; so that `obj-semantics-template` works correctly.
-(ReferenceLink (Word "express-action") (DefinedPredicate "Do show expression"))
+(ReferenceLink (Word "express-action") (DefinedPredicate "Show class expression"))
 
-(ReferenceLink (WordNode "dramatize") (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "emote")   (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "enact")   (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "express") (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "feign")   (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "impersonate")(DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "mime")    (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "mimic")   (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "portray") (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "pretend") (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "show")    (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "dramatize") (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "emote")   (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "enact")   (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "express") (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "feign")   (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "impersonate")(DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "mime")    (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "mimic")   (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "portray") (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "pretend") (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "show")    (DefinedPredicate "Show class expression"))
 ; "look" is used with "Look happy!"
-(ReferenceLink (WordNode "act")     (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "be")      (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "look")    (DefinedPredicate "Do show expression"))
-(ReferenceLink (WordNode "play")    (DefinedPredicate "Do show expression"))
+(ReferenceLink (WordNode "act")     (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "be")      (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "look")    (DefinedPredicate "Show class expression"))
+(ReferenceLink (WordNode "play")    (DefinedPredicate "Show class expression"))
 
 ; Currently supported facial animations on the Eva blender model.
 ; These must be *exactly* as named; these are sent directly to the
@@ -559,7 +559,7 @@
 
 ; -----
 ; Syntactic category of robot-control facial expression imperative
-(InheritanceLink (DefinedPredicate "Do show expression")
+(InheritanceLink (DefinedPredicate "Show class expression")
 	(ConceptNode "pred-express"))
 
 ; Syntactic category of robot-control facial-expression schema.

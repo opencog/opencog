@@ -5,7 +5,7 @@
 (DefineLink
     (DefinedPredicateNode "be happy")
     (EvaluationLink
-        (DefinedPredicateNode "Do show expression")
+        (DefinedPredicateNode "Show class expression")
         (ListLink
           (ConceptNode "imperative")
           (ConceptNode "happy"))))
@@ -13,7 +13,7 @@
 (DefineLink
     (DefinedPredicateNode "happy")
     (EvaluationLink
-        (DefinedPredicateNode "Do show expression")
+        (DefinedPredicateNode "Show class expression")
         (ListLink
           (ConceptNode "imperative")
           (ConceptNode "happy"))))
