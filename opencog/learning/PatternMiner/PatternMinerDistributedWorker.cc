@@ -318,7 +318,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
                                                 patternVarMap, false, allHTreeNodesCurTask, allNewMinedPatternInfo);
 
-        cout << "test allNewMinedPatternInfo.size =  " << allNewMinedPatternInfo.size() << std::endl;
+
         // send new mined patterns to the server
         for (MinedPatternInfo& pInfo : allNewMinedPatternInfo)
             addPatternsToJsonArrayBuf(pInfo.curPatternKeyStr, pInfo.parentKeyString, pInfo.extendedLinkIndex, patternJsonArrays[thread_index]);
@@ -345,7 +345,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
 void DistributedPatternMiner::addPatternsToJsonArrayBuf(string curPatternKeyStr, string parentKeyString,  unsigned int extendedLinkIndex, json::value &patternJsonArray)
 {
-    cout << "send pattern:" << curPatternKeyStr << std::endl;
+
     try
     {
 
