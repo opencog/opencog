@@ -203,13 +203,8 @@
 		(if nlp-stimulate-parses
 			(nlp-stimulate sent-node nlp-stimulation-value))
 
-		; Call the Sentiment_eval function
-		(cog-logger-info "nlp-parse: testing Sentiment_eval")
-		(python-call-with-as "set_atomspace" (cog-atomspace))
-		(cog-evaluate!
-			(Evaluation
-				(GroundedPredicate "py: call_sentiment_parse")
-				(List (Node plain-text) sent-node)))
+		; XXX FIXME -- sentiment analysis should not be done here.
+		; (perform-sentiment-analysis plain-text sent-node)
 
 		; Track some counts needed by R2L.
 		(r2l-count sent-list)

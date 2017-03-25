@@ -6,6 +6,7 @@
 ; -----------------------------------------------------------------------
 
 (use-modules (opencog) (opencog python) (opencog exec))
+(use-modules (opencog logger))
 
 (python-eval "
 from opencog.atomspace import AtomSpace, types, TruthValue
@@ -43,3 +44,16 @@ def call_sentiment_parse(text_node, sent_node):
 
       return TruthValue(1, 1)
 ")
+
+(python-call-with-as "set_atomspace" (cog-atomspace))
+
+(define-public (perform-sentiment-analysis PLAIN-TEXT SENT)
+"
+	Call the Sentiment_eval function
+"
+	(cog-logger-info "nlp-parse: testing Sentiment_eval")
+	(cog-evaluate!
+		(Evaluation
+			(GroundedPredicate "py: call_sentiment_parse")
+			(List (Node PLAIN-TEXT) SENT)))
+)
