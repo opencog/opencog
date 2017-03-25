@@ -49,13 +49,26 @@ def call_sentiment_parse(text_node, sent_node):
 
 (python-call-with-as "set_atomspace" (cog-atomspace))
 
-(define-public (perform-sentiment-analysis PLAIN-TEXT SENT)
+(define-public (perform-sentiment-analysis SENT)
 "
-	Call the Sentiment_eval function
+	Call the Sentiment_eval function.
 "
-	(cog-logger-info "nlp-parse: testing Sentiment_eval")
+
+	; Fetch the raw input text for the sentence.
+	; Assumes it's located here:
+	;     EvaluationLink
+	;          PredicateNode "sentence-rawtext"
+	;          ListLink
+	;              SentenceNode "1234-1324-1234-1234"
+	;              SomeNode "This is the raw text of the sentence"
+	;
+	(define plain-text
+		(cog-pred-get-partner (PredicateNode "sentence-rawtext") SENT))
+
+	(cog-logger-info "Performing Sentiment Analysis")
+
 	(cog-evaluate!
 		(Evaluation
 			(GroundedPredicate "py: call_sentiment_parse")
-			(List (Node PLAIN-TEXT) SENT)))
+			(List plain-text SENT)))
 )

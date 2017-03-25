@@ -191,8 +191,13 @@
 		; SetLink! Ouch!!
 		(release-new-parsed-sents)
 
-		; Tage the sentence with the wall-clock time.
+		; Tag the sentence with the wall-clock time.
 		(sent-set-time sent-node)
+
+		; Attach the original text (relex doesn't do this for us.)
+		(EvaluationLink
+			(PredicateNode "sentence-rawtext")
+			(ListLink sent-node (Node plain-text)))
 
 		; Perform the R2L processing.
 		(r2l-parse sent-node)
@@ -202,7 +207,7 @@
 			(nlp-stimulate sent-node nlp-stimulation-value))
 
 		; XXX FIXME -- sentiment analysis should not be done here.
-		; (perform-sentiment-analysis plain-text sent-node)
+		; (perform-sentiment-analysis sent-node)
 
 		; Track some counts needed by R2L.
 		(r2l-count sent-list)
