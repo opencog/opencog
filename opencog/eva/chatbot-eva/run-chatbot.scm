@@ -7,14 +7,14 @@
 (use-modules (opencog) (opencog cogserver))
 
 (use-modules (opencog nlp))
+(use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp chatbot-eva))
 
 ; Load the robot model, from opencog/ros-behavior-scripting
 (use-modules (opencog eva-behavior))
 
 ; Load the Eva personality.
-; (display %load-path)
-; (load-from-path "opencog/eva-behavior/cfg-eva.scm")
+; (load-eva-config)
 
 (start-cogserver "../../lib/opencog-chatbot.conf")
 
@@ -40,9 +40,9 @@
 (nlp-parse "I am looking forward")
 
 ; XXX temp hack to run in module context, for debugging
-(add-to-load-path ".")
-(add-to-load-path "..")
-(load "chatbot-eva.scm")
+; (add-to-load-path ".")
+; (add-to-load-path "..")
+; (load "chatbot-eva.scm")
 
 ; Hush the output on load.
 *unspecified*
