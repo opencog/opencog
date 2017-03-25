@@ -72,7 +72,7 @@ so that she can see you.
  * Start a guile shell: just say `guile` in this directory.
  * Enter `(load "run-chatbot.scm")` at the guile prompt.
  * Talk to her via IRC.  Alternately, from the guile prompt, you
-   can say: `(process-query "Adam" "Look happy!")`
+   can say: `(grounded-talk "Adam" "Look happy!")`
 
 
 ## Embodied HOWTO
@@ -360,7 +360,7 @@ Below are examples of sentences that Eva is currently able to
 understand and respond to.  Enter these at the IRC chatbot interface,
 alternately, say this at the guile prompt:
 
-   (process-query "nick" "Look up!")
+   (grounded-talk "nick" "Look up!")
 
 where "nick" is your chat nick, and "Look up!" is a typical sentence.
 

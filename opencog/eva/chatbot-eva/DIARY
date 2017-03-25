@@ -99,7 +99,7 @@ fixed! Relex was mis-behaving and R2L was using a fragile mechanism.
 Relex failed to mark 4 of the 6 WH-words as interrogatives!
 
 ====================================================
-* (process-query 'luser "Look to the left!") crashes
+* (grounded-talk 'luser "Look to the left!") crashes
    C++-EXCEPTION' with args `("cog-fc"
 
   bug was the pre-SV-rule and definite-rule were running
@@ -109,11 +109,11 @@ Relex failed to mark 4 of the 6 WH-words as interrogatives!
 ====================================================
 
 (use-modules (opencog) (opencog nlp chatbot))
-(process-query 'luser "Linas ate a cookie.")
-(process-query 'luser "Who ate a cookie?")
+(grounded-talk 'luser "Linas ate a cookie.")
+(grounded-talk 'luser "Who ate a cookie?")
 
-(process-query 'luser "Linas ate an apple.")
-(process-query 'luser "Who ate an apple?")
+(grounded-talk 'luser "Linas ate an apple.")
+(grounded-talk 'luser "Who ate an apple?")
 
 (cog-get-atoms 'InheritanceLink)
 
@@ -215,56 +215,56 @@ bugs:
 (nlp-parse "Ronald ate some fruit.")
 (microplanning lap "declarative" *default_chunks_option* #f)
 
-(process-query 'luser "Joe ate a pie.")
-(process-query 'luser "Joe is eating a pie.")
-(process-query 'luser "Who ate a cookie?")
-(process-query "luser" "Joe ate a pear.")
-(process-query "luser" "Who ate a pear?")
+(grounded-talk 'luser "Joe ate a pie.")
+(grounded-talk 'luser "Joe is eating a pie.")
+(grounded-talk 'luser "Who ate a cookie?")
+(grounded-talk "luser" "Joe ate a pear.")
+(grounded-talk "luser" "Who ate a pear?")
 
-(process-query "luser" "Linas ate an apple.")
-(process-query "luser" "Who ate an apple?")
+(grounded-talk "luser" "Linas ate an apple.")
+(grounded-talk "luser" "Who ate an apple?")
 
-(process-query "luser" "John Kennedy died.")
-(process-query "luser" "Who died?")
+(grounded-talk "luser" "John Kennedy died.")
+(grounded-talk "luser" "Who died?")
 
-(process-query "luser" "What is the color of the ball? ")
-(process-query "luser" "What is the color of the book? ")
-(process-query "luser" "Who died?")
+(grounded-talk "luser" "What is the color of the ball? ")
+(grounded-talk "luser" "What is the color of the book? ")
+(grounded-talk "luser" "Who died?")
 
 (nlp-parse "My name is Raymond Reddington.")
-(process-query "luser" "What is your name?")
+(grounded-talk "luser" "What is your name?")
 
-(process-query "luser" "I sent the money to your boss.")
-(process-query "luser" "Who sent money to your boss?")
-(process-query "luser" "Who did you send the money to?")
+(grounded-talk "luser" "I sent the money to your boss.")
+(grounded-talk "luser" "Who sent money to your boss?")
+(grounded-talk "luser" "Who did you send the money to?")
 
-(process-query "luser" "I sang a song to her")
+(grounded-talk "luser" "I sang a song to her")
 
 
-(process-query "luser" "I sang a beautiful song to Mary")
-(process-query "luser" "Who did I sing to?")
-(process-query "luser" "I sang to Joan")
-(process-query "luser" "Who did I sing to?")
-(process-query "luser" "Who did I sing a beautiful song to?")
+(grounded-talk "luser" "I sang a beautiful song to Mary")
+(grounded-talk "luser" "Who did I sing to?")
+(grounded-talk "luser" "I sang to Joan")
+(grounded-talk "luser" "Who did I sing to?")
+(grounded-talk "luser" "Who did I sing a beautiful song to?")
 
-(process-query "luser" "Who did I sing to?")
-(process-query "luser" "The ball is red")
-(process-query "luser" "The book is blue")
+(grounded-talk "luser" "Who did I sing to?")
+(grounded-talk "luser" "The ball is red")
+(grounded-talk "luser" "The book is blue")
 
-(process-query "luser" "The ball is under the couch")
+(grounded-talk "luser" "The ball is under the couch")
 
-(process-query "luser" "John threw a green ball.")
-(process-query "luser" "Mike threw a red ball.")
+(grounded-talk "luser" "John threw a green ball.")
+(grounded-talk "luser" "Mike threw a red ball.")
 
-(process-query "luser" "Who threw a red ball?")
-(process-query "luser" "Who threw a green ball?")
-(process-query "luser" "Where is the ball?")
+(grounded-talk "luser" "Who threw a red ball?")
+(grounded-talk "luser" "Who threw a green ball?")
+(grounded-talk "luser" "Where is the ball?")
 
-(process-query "luser" "I had two chocolates")
-(process-query "luser" "how many chocolates do I have")
+(grounded-talk "luser" "I had two chocolates")
+(grounded-talk "luser" "how many chocolates do I have")
 
-(process-query "luser" "what's your name")
-(process-query "luser" "who is Raymond?")
+(grounded-talk "luser" "what's your name")
+(grounded-talk "luser" "who is Raymond?")
 
 (EvaluationLink (stv 1.0 1.0)
    (LinkGrammarRelationshipNode "Wq")
@@ -288,7 +288,7 @@ bugs:
 
 
 ====================================================
-(process-query "luser" "Look left")
+(grounded-talk "luser" "Look left")
 
 truthquery.scm
 passive.scm
@@ -322,7 +322,7 @@ France is a country
  I am from France
 Where am I from?
 
-(process-query 'luser "What nationality am I?")
+(grounded-talk 'luser "What nationality am I?")
 
 cog-atom? says #t for deleted handle...
 
@@ -383,8 +383,8 @@ cog-atom? says #t for deleted handle...
 
 (cog-bind look-rule-1)
 
-(process-query 'luser "look up")
-(process-query 'luser "look right")
+(grounded-talk 'luser "look up")
+(grounded-talk 'luser "look right")
 de
 
    (DefinedLinguisticRelationshipNode "_to-be")
@@ -996,8 +996,8 @@ MultiSpaceUTest
 (cog-evaluate! (Put (DefinedPredicate "Show expression")
    (ListLink (Concept "happy") (Number 6) (Number 0.3))))
 
-(process-query 'luser "Look left!")
-(process-query 'luser "Smile!")
+(grounded-talk 'luser "Look left!")
+(grounded-talk 'luser "Smile!")
 
 (cog-incoming-set   (DefinedPredicate "Show expression"))
 
@@ -1132,8 +1132,8 @@ dbg(str(A))
 ==============================================================
 
 (load "run-chatbot.scm")
-(process-query 'luser "Look left!")
-(process-query 'luser "where are you looking?")
+(grounded-talk 'luser "Look left!")
+(grounded-talk 'luser "where are you looking?")
 
 wh_query_process
 
@@ -1428,7 +1428,7 @@ aka
 (cog-execute! (Get (State last-speaker (Variable "$x"))))
 (cog-execute! (DefinedSchema "current-speaker"))
 
-(process-query 'luser "Look at me")
+(grounded-talk 'luser "Look at me")
 
 
 Look at me   -- done
@@ -1534,7 +1534,7 @@ him
 
 (map-ato "faces" (NumberNode 42 (av 5 0 0)) 2  1 0)
 (map-sound  2.01  -1.01 0.01)
-(process-query 'luser "Look at me")
+(grounded-talk 'luser "Look at me")
 
 (use-modules (opencog query))
  (load "imperative-rules.scm")
