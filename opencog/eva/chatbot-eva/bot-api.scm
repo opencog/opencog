@@ -55,6 +55,7 @@
         ((equal? utr (DefinedLinguisticConceptNode "InterrogativeSpeechAct"))
             (display "You made an Interrogative SpeechAct\n")
             ; (wh_query_process sent-node)
+            (self-wh-query sent-node)
         )
         ((equal? utr (DefinedLinguisticConceptNode "DeclarativeSpeechAct"))
             (display "You made a Declarative SpeechAct\n")

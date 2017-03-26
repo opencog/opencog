@@ -255,8 +255,9 @@
 		(ConceptNode "look-at-cmd")
 		(ConceptNode "schema-thing")))
 
-; XXX FIXME -- need to do the above, but for the self-model, rather
-; than the direct robot action.
+; XXX FIXME -- Implement-me, actually -- need to do the above, but for
+; the self-model, rather than the direct robot action.  The self-model
+; is not being updated by these imperatives.
 ;--------------------------------------------------------------------
 ;--------------------------------------------------------------------
 ; Emotional expression semantics (groundings) for robot control

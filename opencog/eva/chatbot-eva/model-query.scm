@@ -171,9 +171,9 @@
 	(StateLink current-sentence QUERY)
 
 	(cog-bind where-look-rule)
-	; (cog-bind what-doing-rule)
+	(cog-bind what-doing-rule)
 
-(display "duuuude bar")
+(display "Replies to questions:")
 (display (cog-incoming-set current-reply))
 
 	; hack fixme
@@ -183,7 +183,7 @@
 		)
 		; Free up anything attached to the anchor.
 		(map cog-delete (cog-incoming-set current-reply))
-(display "duuuude wfooo")
+(display "The chosen reply is:")
 		(display r2l-set)
 		(if (equal? 0 cog-arity r2l-set)
 			(list (list "Sorry I didn't understand the question.\n"))
