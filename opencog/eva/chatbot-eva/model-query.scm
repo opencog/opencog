@@ -151,6 +151,12 @@
 	)
 )
 
+; Some of the things chained to the reply-anchor are parts of rules;
+; we want to ignore these.  They will contain variables, in general.
+(define (get-grounded-replies)
+	(filter cog-grounded? (cog-incoming-set current-reply))
+)
+
 ;--------------------------------------------------------------------
 ; XXX This is broken.
 ;
@@ -175,15 +181,14 @@
 	(cog-bind what-doing-rule)
 
 (display "Replies to questions:")
-(display (cog-incoming-set current-reply))
+(display (get-grounded-replies))
 
 	; hack fixme
 ; problem here is that incoming set may have more than one.
-	(let* ((rep-lnk (cog-incoming-set current-reply))
+	(let* ((rep-lnk (get-grounded-replies))
 			(r2l-set (cog-outgoing-atom (car rep-lnk) 1))
 		)
 		; Free up anything attached to the anchor.
-		(map cog-delete (cog-incoming-set current-reply))
 (display "The chosen reply is:")
 		(display r2l-set)
 		(if (equal? 0 cog-arity r2l-set)
@@ -195,6 +200,7 @@
 			)
 		)
 	)
+	(map cog-delete-recursive (get-grounded-replies))
 )
 
 ;--------------------------------------------------------------------
