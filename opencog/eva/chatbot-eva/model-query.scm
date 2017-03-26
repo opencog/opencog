@@ -10,8 +10,14 @@
 ; Rule-utils needed for defintion of var-decl, etc.
 (use-modules (opencog nlp relex2logic))
 
+; `current-reply` holds the "semantic" (aka R2L) format of the reply.
+; `current-reply-words` holds the word-sequence of the reply.
 (define current-sentence (AnchorNode "*-eva-current-sent-*"))
 (define current-reply (AnchorNode "*-reply-*"))
+; (define current-reply-words (AnchorNode "*-reply-words-*"))
+
+(StateLink current-reply (Set))
+; (StateLink current-reply-words (List))
 
 ;--------------------------------------------------------------------
 ; Word-associations with state are already hard-coded in imperative.scm
@@ -180,8 +186,7 @@
 	(define (verbalize-reply rep-lnk)
 		(define r2l-set (cog-outgoing-atom rep-lnk 1))
 
-(display "The reply is:")
-(display r2l-set)
+(format #t "The reply is:\n~a\n" r2l-set)
 		(if (not (equal? 0 cog-arity r2l-set))
 			(let
 				((string-seq (sureal r2l-set)))
@@ -197,17 +202,23 @@
 	; (cog-bind where-look-rule)
 	(cog-bind what-doing-rule)
 
-(display "Replies to questions:")
-(display (get-grounded-replies))
+(format #t  "Replies to questions:\n~a\n" (get-grounded-replies))
 
-	; hack fixme
-; problem here is that incoming set may have more than one.
-	(if (not (find verbalize-reply (get-grounded-replies)))
-		(list (list "Sorry I didn't understand the question.\n"))
+	; There may be more than one plausible reply. We should use
+	; openpsi to pick one. XXX FIXME -- do this.
+	; Alternately, this shoud probably be done with chatscript.
+	(let ((reply-words (filter verbalize-reply (get-grounded-replies))))
+		(if (null? reply-words)
+			(set! reply-words
+				(list "Sorry I didn't understand the question.\n"))
+		)
+
+		; Free up anything attached to the anchor.
+		(map cog-delete-recursive (get-grounded-replies))
+
+(format #t "Reply words are: ~a\n" reply-words)
+		reply-words
 	)
-
-	; Free up anything attached to the anchor.
-;	(map cog-delete-recursive (get-grounded-replies))
 )
 
 ;--------------------------------------------------------------------
