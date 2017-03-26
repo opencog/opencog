@@ -174,6 +174,23 @@
   no answer is known.  QUERY should be a SentenceNode.
 "
 
+	; Small utility that converts rep-lnk to a string of words.
+	; Uses sureal to perform the conversion. The input must be
+	; of teh form that sureal can handle.
+	(define (verbalize-reply rep-lnk)
+		(define r2l-set (cog-outgoing-atom rep-lnk 1))
+
+(display "The reply is:")
+(display r2l-set)
+		(if (not (equal? 0 cog-arity r2l-set))
+			(let
+				((string-seq (sureal r2l-set)))
+				(display string-seq) (newline)
+				string-seq
+			)
+		)
+	)
+
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence QUERY)
 
@@ -185,22 +202,12 @@
 
 	; hack fixme
 ; problem here is that incoming set may have more than one.
-	(let* ((rep-lnk (get-grounded-replies))
-			(r2l-set (cog-outgoing-atom (car rep-lnk) 1))
-		)
-		; Free up anything attached to the anchor.
-(display "The chosen reply is:")
-		(display r2l-set)
-		(if (equal? 0 cog-arity r2l-set)
-			(list (list "Sorry I didn't understand the question.\n"))
-			(let
-				((string-seq (sureal r2l-set)))
-				(display string-seq) (newline)
-				string-seq
-			)
-		)
+	(if (not (find verbalize-reply (get-grounded-replies)))
+		(list (list "Sorry I didn't understand the question.\n"))
 	)
-	(map cog-delete-recursive (get-grounded-replies))
+
+	; Free up anything attached to the anchor.
+;	(map cog-delete-recursive (get-grounded-replies))
 )
 
 ;--------------------------------------------------------------------
