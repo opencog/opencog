@@ -1652,3 +1652,10 @@ what are you doing?
 (define current-reply (AnchorNode "*-reply-*"))
 
 (define (wtf x) (format #t "wtf ~a\n" x))
+
+(cog-grounded? (Variable "x"))
+(cog-grounded? (Concept "x"))
+(cog-grounded? (List (Variable "x")))
+(cog-grounded? (List (Concept "x")))
+(cog-grounded? (List (Concept "x") (List (Variable "x"))))
+

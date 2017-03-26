@@ -3,6 +3,7 @@
 ;
 ; Processing of query-questions about the robot self-model.
 ;
+(use-modules (srfi srfi-1))
 (use-modules (opencog query))
 (use-modules (opencog nlp sureal))
 
@@ -134,6 +135,21 @@
 
 
 ;--------------------------------------------------------------------
+;
+; XXX this should be moved to cog-utils. Also needs to be fixed
+; to not detect bound variables. We already have C++ code that
+; does  the right thing, here, so we should use that.
+(define (cog-grounded? EXPR)
+"
+  cog-grounded? EXPR
+
+  Return #f if EXPR contains a VariableNode, else return #t.
+"
+	(if (cog-node? EXPR)
+		(not (eq? 'VariableNode (cog-type EXPR)))
+		(not (find (lambda (x) (not (cog-grounded? x))) (cog-outgoing-set EXPR)))
+	)
+)
 
 ;--------------------------------------------------------------------
 ; XXX This is broken.
