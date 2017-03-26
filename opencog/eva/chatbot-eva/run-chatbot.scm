@@ -25,17 +25,6 @@
 (use-modules (opencog nlp relex2logic))
 ; (load-r2l-rulebase)
 ;
-; Prime the atomspace with content that sureal can use to generate
-; sentences. XXX This belongs in self-model.scm, but it screws up
-; in there for some insane reason. This needs to be fixed.  FIXME.
-(nlp-parse "I am looking to the left")
-(nlp-parse "I am looking to the right")
-(nlp-parse "I am looking up")
-(nlp-parse "I am looking upward")
-(nlp-parse "I am looking downward")
-(nlp-parse "I am looking leftwards")
-(nlp-parse "I am looking rightwards")
-(nlp-parse "I am looking forward")
 
 ; XXX temp hack to run in module context, for debugging
 ; (add-to-load-path ".")

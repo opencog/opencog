@@ -410,6 +410,14 @@ Some mappings:
 where are you looking? -> where-look-rule
 waht are you doing? -> what-doing-rule
 
+Idealized replies:
+------------------
+What are you doing?
++ I am looking at you
++ I am looking to the left
++ I am smiling
++ (makes a face) I am frowning.
+
 
 ===========================
 TODO

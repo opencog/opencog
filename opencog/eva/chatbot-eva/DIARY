@@ -1645,3 +1645,10 @@ what-doing-rule ->
 
 current-reply
 self-wh-query
+
+what are you doing?
+-- I
+
+(define current-reply (AnchorNode "*-reply-*"))
+
+(define (wtf x) (format #t "wtf ~a\n" x))

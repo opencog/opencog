@@ -135,21 +135,6 @@
 
 ;--------------------------------------------------------------------
 
-; XXX We want to prime the atomspace with several response sentences,
-; and the way to do that is to nlp-parse them here. The only problem is
-; that this trips some crazy bug.  See bug #508
-; https://github.com/opencog/atomspace/issues/508
-; and so we have to do the load in run-chatbot.scm, instead. Arghhhh.
-; XXX FIXME .. fix the above.
-;
-;(use-modules (opencog nlp relex2logic))
-; (use-modules (opencog nlp chatbot))
-; (load "../chatbot/chat-utils.scm")
-;(load-r2l-rulebase)
-;(nlp-parse "I am looking to the left")
-;(nlp-parse "I am looking to the right")
-;(nlp-parse "I am looking up")
-
 ;--------------------------------------------------------------------
 ; XXX This is broken.
 ;
@@ -170,7 +155,7 @@
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence QUERY)
 
-	(cog-bind where-look-rule)
+	; (cog-bind where-look-rule)
 	(cog-bind what-doing-rule)
 
 (display "Replies to questions:")
