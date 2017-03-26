@@ -184,17 +184,18 @@
 	; Uses sureal to perform the conversion. The input must be
 	; of teh form that sureal can handle.
 	(define (verbalize-reply rep-lnk)
-		(define r2l-set (cog-outgoing-atom rep-lnk 1))
+		(if (eq? 0 (cog-arity rep-lnk))
+			'()
+			(let ((r2l-set (cog-outgoing-atom rep-lnk 1)))
 
 (format #t "The reply is:\n~a\n" r2l-set)
-		(if (not (equal? 0 cog-arity r2l-set))
-			(let
-				((string-seq (sureal r2l-set)))
-				(display string-seq) (newline)
-				string-seq
-			)
-		)
-	)
+				(if (eq? 0 cog-arity r2l-set)
+					'()
+					(let
+						((string-seq (sureal r2l-set)))
+						(display string-seq) (newline)
+						string-seq
+					)))))
 
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence QUERY)
@@ -208,6 +209,7 @@
 	; openpsi to pick one. XXX FIXME -- do this.
 	; Alternately, this shoud probably be done with chatscript.
 	(let ((reply-words (filter verbalize-reply (get-grounded-replies))))
+(format #t "Reply words are: ~a\n" reply-words)
 		(if (null? reply-words)
 			(set! reply-words
 				(list "Sorry I didn't understand the question.\n"))
@@ -216,7 +218,6 @@
 		; Free up anything attached to the anchor.
 		(map cog-delete-recursive (get-grounded-replies))
 
-(format #t "Reply words are: ~a\n" reply-words)
 		reply-words
 	)
 )
