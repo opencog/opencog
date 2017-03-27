@@ -42,3 +42,22 @@
                   (PartOfSpeech (Variable var) (DefinedLinguisticConcept p))
                   (WordInstanceLink (Variable var) (Variable "$P")))))
     (cons v c)))
+
+(define (proper-names . w)
+  "Terms represent multi-word proper names. It must have at least two words."
+  (define w1-atoms (word (car w)))
+  (define vars (car w1-atoms))
+  (define conds (cdr w1-atoms))
+  (define var-head (gar (caar w1-atoms)))
+  (define (template w)
+    (let* ((w-atoms (word w))
+           (v (car w-atoms))
+           (c (cdr w-atoms))
+           (el (EvaluationLink (LinkGrammarRelationship "G")
+                               (ListLink var-head
+                                         (gar (car v))))))
+      (append! vars v)
+      (append! conds c (list el))
+      (set! var-head (gar (car v)))))
+  (for-each template (cdr w))
+  (cons vars conds))
