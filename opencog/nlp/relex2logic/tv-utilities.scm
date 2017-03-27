@@ -9,8 +9,7 @@
   Corpus.
 "
 ; TODO: move this to (opencog data) module when it is created.
-    (let ((path (string-append (getenv "HOME")
-                    "/.opencog/gtwc-en-333333-words.scm")))
+    (let ((path "/var/opencog/data/gtwc-en-333333-words.scm"))
         (if (file-exists? path)
             (primitive-load path)
             (display "The data file hasn't been downloaded.")
