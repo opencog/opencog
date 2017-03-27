@@ -8,7 +8,7 @@
 ;;
 ;; Wrap a Lambda around a closed atom (that is an atom without free
 ;; variables in it) and assign to the lambda the TV of the body. So
-;; basically it create a constant predicate or schema.
+;; basically create a constant predicate or schema.
 ;; ----------------------------------------------------------------------
 
 (define lambda-closed-construction-vardecl

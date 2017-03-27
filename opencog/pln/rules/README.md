@@ -1,61 +1,46 @@
-# Prototype rule definitions for rule engine based PLN implementation
+# PLN Rule definitions for the URE
 
-Implements rules in the AtomSpace using the pattern matcher for
-unification and GroundedSchemaNodes for execution of formulas written
-in Scheme.
+Implements PLN rules according to
+http://wiki.opencog.org/w/URE_Configuration_Format
 
-## Rules
+## Contents
 
-The following rules are defined for PLN:
+This folder contains PLN rules such as
 
-    - and-rule
-    - not-rule
-    - deduction-rule
-    - modus-ponens-rule
-    - Context rules:
-        - contextualize-inheritance-rule
-        - contextualize-evaluation-rule
-        - contextualize-subset-rule
-        - decontextualize-inheritance-rule
-        - decontextualize-evaluation-rule
-        - decontextualize-subset-rule
-        - context-free-to-sensitive-rule
-        (here, the exact formula is still unclear)
+- fuzzy conjunction
+- deduction
+- inversion
+- abduction
+- modus ponens
+- contextual
+etc
 
-## Additional instructions
-
-After loading the rules, you should also load this Scheme file:
-
-```
-compile-rules.scm
-```
-
-in order to compile the rules and formulas for better performance.
+the `wip` subfolder contains rules that are to be completed or removed.
 
 ## PLN Example
 
 - Load the deduction rule definitions:
 
     ```
-    reasoning/pln/rules/deduction.scm
+    opencog/pln/rules/deduction.scm
     ```
 
     Example:
 
     ```
-    (load "reasoning/pln/rules/deduction.scm")
+    (load "opencog/pln/rules/deduction.scm")
     ```
 
 - Load this file containing the data:
 
     ```
-    tests/reasoning/engine/simple-assertions.scm
+    tests/pln/rules/simple-assertions.scm
     ```
 
     Example:
 
     ```
-    (load "tests/reasoning/engine/simple-assertions.scm")
+    (load "tests/pln/rules/simple-assertions.scm")
     ```
 
 - Run this command:
@@ -92,26 +77,38 @@ in order to compile the rules and formulas for better performance.
     (ConceptNode "Peirce")
     ```
 
+There are more examples under the folder
+
+   ```
+   examples/pln
+   ```
+
 ## Relex2Logic Example
 
 The r2l subdirectory has the initial specification of the
 R2L-RuleBase for the English language.
 
+   ```
+   opencog/nlp/relex2logic/rules
+   ```
+
 To test the rules, use the following steps.
 
-- Start the cogserver
+- Start the relex server, using for instance docker
 
-- Enter the scm shell.
+   ```
+   <DOCKER_REPO>/opencog/relex/run-opencog-relex.sh
+   ```
 
-- Load the scheme files in this directory and the sub-directories using
+- Either start the cogserver and enter the scm shell, or start guile directly
+
+- Load the nlp module
 
     ```
-    (load "../path/to/scheme/files")
+    (use-modules (opencog nlp))
     ```
-
-- Start the relex server using the --relex flag (don't use the --logic flag)
 
 - In the opencog scheme shell run (relex-parse "some sentence"),
   preferably sentences on which the rules are applicable.
 
-- Run (cog-bind name-of-the-variable-which-has-BindLink-as-its-value)
+- Run (cog-bind rule-which-should-be-a-BindLink)

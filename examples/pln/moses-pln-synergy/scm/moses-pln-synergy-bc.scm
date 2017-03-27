@@ -8,6 +8,10 @@
 (cog-logger-set-timestamp! #f)
 (cog-logger-set-level! "debug")
 
+;; Set random seed
+(use-modules (opencog randgen))
+(cog-randgen-set-seed! 100)
+
 ;; Load MOSES model
 (load "moses-model.scm")
 

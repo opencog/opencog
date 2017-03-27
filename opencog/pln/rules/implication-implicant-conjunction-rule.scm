@@ -49,6 +49,11 @@
   (ExecutionOutput
      (GroundedSchema "scm: implication-implicant-conjunction-formula")
      (List
+        (Implication
+           (And
+              (Variable "$A")
+              (Variable "$B"))
+           (Variable "$C"))
         (VariableNode "$A")
         (VariableNode "$B")
         (VariableNode "$C")
@@ -57,12 +62,7 @@
            (VariableNode "$C"))
         (ImplicationLink
            (VariableNode "$B")
-           (VariableNode "$C"))
-        (Implication
-           (And
-              (Variable "$A")
-              (Variable "$B"))
-           (Variable "$C")))))
+           (VariableNode "$C")))))
 
 (define implication-implicant-conjunction-rule
   (Bind
@@ -100,7 +100,7 @@
 ;;
 ;; TODO: there is something weird, if P(C) is tiny then P(C|A,B) goes
 ;; above 1, we need to understand why. Meanwhile, we just cap at 1.
-(define (implication-implicant-conjunction-formula A B C AC BC ABC)
+(define (implication-implicant-conjunction-formula ABC A B C AC BC)
   (let* 
       ((sA (cog-stv-strength A))
        (sB (cog-stv-strength B))

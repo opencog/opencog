@@ -62,27 +62,25 @@
 
 (define and-lambda-factorization-double-implication-variables
   (VariableList
-     (TypedVariableLink
-        (VariableNode "$TyVs")
-        (TypeChoice
-           (TypeNode "TypedVariableLink")
-           (TypeNode "VariableNode")
-           (TypeNode "VariableList")))
-     (VariableNode "$A1")
-     (VariableNode "$A2")))
+    (TypedVariableLink
+      (VariableNode "$TyVs")
+      (TypeChoice
+        (TypeNode "TypedVariableLink")
+        (TypeNode "VariableNode")
+        (TypeNode "VariableList")))
+    (VariableNode "$A1")
+    (VariableNode "$A2")))
 
 (define and-lambda-factorization-double-implication-body
-  (QuoteLink                        ; Necessary so the AndLink doesn't
+  (LocalQuoteLink                   ; Necessary so the AndLink doesn't
                                     ; count as a connective
-     (AndLink
-        (UnquoteLink
-           (LambdaLink
-              (VariableNode "$TyVs")
-              (VariableNode "$A1")))
-        (UnquoteLink
-           (LambdaLink
-              (VariableNode "$TyVs")
-              (VariableNode "$A2"))))))
+    (AndLink
+      (QuoteLink (LambdaLink
+        (VariableNode "$TyVs")
+        (VariableNode "$A1")))
+      (QuoteLink (LambdaLink
+        (VariableNode "$TyVs")
+        (VariableNode "$A2"))))))
 
 (define and-lambda-factorization-double-implication-rewrite
   (ExecutionOutputLink
