@@ -129,7 +129,7 @@ configuration.
 $ guile
 scheme@(guile-user)> (load "moses-model.scm")
 scheme@(guile-user)> (load "background-knowledge.scm")
-scheme@(guile-user)> (load "pln-config.scm")
+scheme@(guile-user)> (load "pln-fc-config.scm")
 ```
 
 #### Apply rules

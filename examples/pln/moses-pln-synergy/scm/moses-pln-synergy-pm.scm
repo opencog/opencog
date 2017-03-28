@@ -8,7 +8,7 @@
 (load "background-knowledge.scm")
 
 ;; Load the PLN configuration for this demo
-(load "pln-config.scm")
+(load "pln-fc-config.scm")
 
 ;; Apply the inference rules using the pattern matcher. This only
 ;; contains the executions, see the README.md for the explanations and
@@ -25,7 +25,7 @@
 (cog-bind and-lambda-distribution-rule)
 
 ;; (4)
-(cog-bind lambda-closed-construction-rule)
+(cog-bind lambda-closed-evaluation-rule)
 
 ;; (5)
 (cog-bind implication-construction-rule)

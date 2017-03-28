@@ -1,0 +1,40 @@
+
+-- If behavior tree is halted, return her to a valid state upon
+   resumption.
+
+-- "Request Set Emo" just sets the emo state, but does not perform
+   ... should it perform an animation, too??
+   ... should all future animations pick from that set??
+
+-- btree makes chatbot not talk if it knows the answer.
+   silence chatbot by saying no affect publish
+   Huh? I guess chatbost doesn't talk if no affect is published?
+	That's right, but its short-circuited right now.
+
+-- behaviors:
+
+ * if she hears: "look at me": change who she is looking at.
+
+ * Get the look-at command to disengage eye-tracking.
+
+* For chatbot, use something other than process-query
+
+* Be able to run performances, such as these:
+   /public_ws/performances/src/runner.py
+
+* listen to a sequence of behaviors (from the runner, above)
+  and run them, but only if no other stuff is coming. Listen
+  on what topic?
+
+* Revert to normal behaviors when done conversing.
+
+
+New bugs:
+---------
+* When listening, there are no defined behaviors... See
+  (DefinedPredicate "Speech listening?")
+
+* If she thinks she is talking, but the room clears out, then
+  what?  Is it guaranteed that vocalization will stop after a while,
+  or should she force-reset?  .. Probably should force reset, to
+  pick up those animations?

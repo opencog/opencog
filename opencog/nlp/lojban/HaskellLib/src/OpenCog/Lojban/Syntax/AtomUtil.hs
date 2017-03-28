@@ -60,8 +60,8 @@ _satl = satl . tolist1 . listl . consAtoms . rmfst "xu"
 satl :: SynIso [Atom] Atom
 satl = linkIso "SatisfactionLink" noTv
 
-_iil :: SynIso (Atom,Atom) Atom
-_iil = iil . tolist2
+_iimpl :: SynIso (Atom,Atom) Atom
+_iimpl = iimpl . tolist2
 
 ctx :: SynIso [Atom] Atom
 ctx = linkIso "ContextLink" noTv
@@ -106,8 +106,11 @@ subsetL = linkIso "SubSetLink" noTv . tolist2
 sizeL  :: SynIso [Atom] Atom
 sizeL = linkIso "SetSizeLink" noTv
 
-iil :: SynIso [Atom] Atom
-iil = linkIso "IntensionalImplicationLink" noTv
+impl :: SynIso [Atom] Atom
+impl = linkIso "ImplicationLink" noTv
+
+iimpl :: SynIso [Atom] Atom
+iimpl = linkIso "IntensionalImplicationLink" noTv
 
 listl :: SynIso [Atom] Atom
 listl = linkIso "ListLink" noTv

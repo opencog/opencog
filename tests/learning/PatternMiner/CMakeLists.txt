@@ -1,6 +1,6 @@
-IF (HAVE_cpprest)
+IF (HAVE_ATOMSPACE)
 	ADD_CXXTEST(PatternMinerUTest)
 	TARGET_LINK_LIBRARIES(PatternMinerUTest
 		PatternMiner
 	)
-ENDIF (HAVE_cpprest)
+ENDIF (HAVE_ATOMSPACE)

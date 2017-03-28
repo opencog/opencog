@@ -45,7 +45,7 @@ packages:
 
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
-extra-deps: [opencog-atomspace-0.1.0.7,list-tries-0.6.3]
+extra-deps: [opencog-atomspace-0.1.0.8,list-tries-0.6.3]
 
 # Override default flag values for local packages and extra-deps
 flags: {}
@@ -70,3 +70,5 @@ extra-lib-dirs: [/usr/local/lib/opencog/]
 #
 # Allow a newer minor version of GHC than the snapshot specifies
 # compiler-check: newer-minor
+ghc-options:
+    opencog-lojban-wrapper: -lHSrts-ghc8.0.2

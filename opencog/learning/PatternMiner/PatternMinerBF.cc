@@ -82,13 +82,13 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
         ((Handle)(*varIt))->getIncomingSet(back_inserter(incomings));
 
         // debug
-        string curvarstr = originalAtomSpace->atom_as_string((Handle)(*varIt));
+        string curvarstr = ((Handle)(*varIt))->toShortString();
 
         for (Handle incomingHandle : incomings)
         {
             Handle extendedHandle;
             // if this atom is a igonred type, get its first parent that is not in the igonred types
-            if (isIgnoredType (originalAtomSpace->get_type(incomingHandle)) )
+            if (isIgnoredType (incomingHandle->getType()) )
             {
                 extendedHandle = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
                 if (extendedHandle == Handle::UNDEFINED)
@@ -98,7 +98,7 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGramBF(HandleSeq &instance
                 extendedHandle = incomingHandle;
 
             // debug
-            string extendedHandleStr = originalAtomSpace->atom_as_string(extendedHandle);
+            string extendedHandleStr = extendedHandle->toShortString();
 
             if (isInHandleSeq(extendedHandle, instance))
                 continue;
@@ -234,7 +234,7 @@ void PatternMiner::extractAllPossiblePatternsFromInputLinksBF(HandleSeq& inputLi
                 {
                     HandleSeq outgoingLinks;
                     generateALinkByChosenVariables(link, patternVarMap, outgoingLinks, originalAtomSpace);
-                    Handle rebindedLink = atomSpace->add_link(atomSpace->get_type(link), outgoingLinks);
+                    Handle rebindedLink = atomSpace->add_link(link->getType(), outgoingLinks);
                     rebindedLink->merge(TruthValue::TRUE_TV());
                     if (onlyContainVariableNodes(rebindedLink, atomSpace))
                     {
@@ -385,7 +385,7 @@ void PatternMiner::growTheFirstGramPatternsTaskBF()
         Handle cur_link = allLinks[cur_index];
 
         // if this link is listlink, ignore it
-        if (originalAtomSpace->get_type(cur_link) == opencog::LIST_LINK)
+        if (cur_link->getType() == opencog::LIST_LINK)
         {
             continue;
         }
@@ -456,14 +456,14 @@ void PatternMiner::ConstructTheFirstGramPatternsBF()
 
     for (Handle h : allDumpNodes)
     {
-        dumpFile << atomSpace->atom_as_string(h);
+        dumpFile << h->toShortString();
     }
 
     atomSpace->get_handles_by_type(back_inserter(allDumpLinks), (Type) LINK, true );
 
     for (Handle h : allDumpLinks)
     {
-        dumpFile << atomSpace->atom_as_string(h);
+        dumpFile << h->toShortString();
     }
 
     dumpFile.close();
@@ -552,14 +552,14 @@ void PatternMiner::GrowAllPatternsBF()
 
         for (Handle h : allDumpNodes)
         {
-            dumpFile << atomSpace->atom_as_string(h);
+            dumpFile << h->toShortString();
         }
 
         atomSpace->get_handles_by_type(back_inserter(allDumpLinks), (Type) LINK, true );
 
         for (Handle h : allDumpLinks)
         {
-            dumpFile << atomSpace->atom_as_string(h);
+            dumpFile << h->toShortString();
         }
 
         dumpFile.close();
@@ -574,12 +574,12 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
 
     for (Handle h : outgoingLinks)
     {
-        if (fromAtomSpace->is_node(h))
+        if (h->isNode())
         {
-           Handle new_node = toAtomSpace->add_node(fromAtomSpace->get_type(h), fromAtomSpace->get_name(h));
-           new_node->merge(fromAtomSpace->get_TV(h));
+           Handle new_node = toAtomSpace->add_node(h->getType(), h->getName());
+           new_node->merge(h->getTruthValue());
            outgoings.push_back(new_node);
-           if (fromAtomSpace->get_type(h) == VARIABLE_NODE)
+           if (h->getType() == VARIABLE_NODE)
            {
                containVar = true;
                if ( ! isInHandleSeq(new_node, outVariableNodes) ) // should not have duplicated variable nodes
@@ -591,8 +591,8 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace, At
              HandleSeq _OutgoingLinks;
              bool _containVar;
              swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes,linksWillBeDel,  _containVar);
-             Handle _link = toAtomSpace->add_link(fromAtomSpace->get_type(h), _OutgoingLinks);
-             _link->merge(fromAtomSpace->get_TV(h));
+             Handle _link = toAtomSpace->add_link(h->getType(), _OutgoingLinks);
+             _link->merge(h->getTruthValue());
              if (_containVar)
              {
                  linksWillBeDel.push_back(_link);
@@ -613,8 +613,8 @@ HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpaceBF(AtomSpace* fromAtomSpace,
         HandleSeq outgoingLinks;
         bool containVar;
         swapOneLinkBetweenTwoAtomSpaceBF(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes, linksWillBeDel,containVar);
-        Handle toLink = toAtomSpace->add_link(fromAtomSpace->get_type(link), outgoingLinks);
-        toLink->merge(fromAtomSpace->get_TV(link));
+        Handle toLink = toAtomSpace->add_link(link->getType(), outgoingLinks);
+        toLink->merge(link->getTruthValue());
         if (containVar)
             linksWillBeDel.push_back(toLink);
         outPutLinks.push_back(toLink);
@@ -683,7 +683,7 @@ void PatternMiner::findAllInstancesForGivenPatternBF(HTreeNode* HNode)
    hBindLink->merge(TruthValue::TRUE_TV());
 
 
-   string s = originalAtomSpace->atom_as_string(hBindLink);
+   string s = hBindLink->toShortString();
    // Run pattern matcher
    Handle hResultListLink = bindlink(originalAtomSpace, hBindLink);
 

@@ -29,7 +29,7 @@ import qualified Data.Map as M
 mystate s = State {sFlags = [],sAtoms = [],sText = s}
 
 init = do
-    wl <- loadWordLists "lojban.xml"
+    wl <- loadWordLists "cmavo.csv" "gismu.csv"
     return wl
 
 mpa :: WordList -> Syntax a -> String -> Either String (a,State,())

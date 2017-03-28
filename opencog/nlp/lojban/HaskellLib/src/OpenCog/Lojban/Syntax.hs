@@ -35,6 +35,9 @@ import Debug.Trace
 mytrace a = traceShow a a
 mytrace2 s a = trace (s ++(' ':show a)) a
 
+--ReadMe:
+--It is recommend to first take a look at Syntax.Types
+
 --TODO Parser
 -- FIX: pa + ki'o
 --      da + quantifier
@@ -228,10 +231,11 @@ zoP = instanceOf . wordNode <<< mytext "zo" &&> anyWord
 
 --KohaPharse for any kind of Pro-Noune
 kohaP :: Syntax Atom
-kohaP = da <+> ma <+> koha
+kohaP = da <+> ma <+> ko <+> koha
     where koha = concept . selmaho "KOhA"
           ma   = varnode . word "ma"
           da   = concept . oneOfS word ["da","de","di"]
+          ko   = setFlagIso "ko" . concept . word "ko"
 
 luP' :: Syntax Atom
 luP' = sepSelmaho "LU" &&> lojban <&& optSelmaho "LIhU"
@@ -300,7 +304,7 @@ sumtiLaiP = ptp (pa &&& selbri) id (ptp pa addLE sumtiLai) <+> sumtiLai
           g s = take (length s - 4) s
 
 sumtiLai :: Syntax Atom
-sumtiLai = ((handleSubSet .> setWithSize) ||| id)
+sumtiLai = ((handleSubSet .> setWithSize) ||| maybeinof)
            . reorder1 <<< (optional pa &&& sumtiNoi)
     where reorder1 :: SynIso (Maybe Atom,Atom) (Either (Atom,(Atom,Atom)) Atom)
           reorder1 = Iso f g where
@@ -314,6 +318,14 @@ sumtiLai = ((handleSubSet .> setWithSize) ||| id)
               g (Right sumti)         = pure (Nothing,sumti)
 
           handleSubSet = sndToState 1 . second (tolist1 . subsetL) . reorder2
+
+          maybeinof = Iso f g where
+              f a = do
+                  atoms <- gets sAtoms
+                  case getDefinitons [a] atoms of
+                      [] -> apply instanceOf a
+                      _  -> pure a              --We have a lep which is already an instance
+              g a = error "Check for lep somehow"
 
           reorder2 = mkIso f g where
               f (t,s)     = (s,(s,t))
@@ -587,6 +599,7 @@ selbri = filterState . commute  <<< optional (selmaho "SE")
                                             <+> moiP
                                             <+> gohaP)
 
+--Selbris can be tagged with a strenght modifier
 selbriP :: Syntax (Tagged Selbri)
 selbriP = associate <<< _NAhE &&& selbri
 
@@ -625,7 +638,7 @@ _CAhA = selmaho "CAhA"
 
 anytense :: Syntax Atom
 anytense = concept <<< (_PU   <+> _ZI   <+> _VA <+> _FAhA <+> _ZAhO <+>
-                         _ZEhA <+> _VIhA <+> _CAhA)
+                        _ZEhA <+> _VIhA <+> _CAhA)
 
 _trati :: Syntax (Maybe Atom)
 _trati = handleTrati
@@ -641,6 +654,7 @@ _trati = handleTrati
 _NA :: Syntax String
 _NA = selmaho "NA"
 
+selbriAll :: Syntax (Maybe Atom, (Maybe String, Tagged Selbri))
 selbriAll =  _trati
          &&& optional _NA
          &&& selbriUI
@@ -651,15 +665,21 @@ selbriAll =  _trati
 
 --                            trati        na
 bridiTail :: Syntax ((Maybe Atom, (Maybe String, Tagged Selbri)),[Sumti])
-bridiTail = selbriAll &&& many sumtiAllUI
+bridiTail = (((second.second.first.second) handleKO . selbriAll) &&& many sumtiAllUI) . ifNotFlag "onlyBE"
 
 bridiBETail :: Syntax ((Maybe Atom, (Maybe String, Tagged Selbri)),[Sumti])
-bridiBETail = selbriAll &&& beP
+bridiBETail = ((second.second.first.second) handleKO . selbriAll) &&& beP
     where beP :: Syntax [Sumti]
           beP = (cons <<<       sepSelmaho "BE"  &&> sumtiAllUI
                       &&& many (sepSelmaho "BEI" &&> sumtiAllUI)
                       <&& optSelmaho "BEhO"
-                ) <+> many sumtiAllUI
+                ) <+> insert []
+
+handleKO :: SynIso Atom Atom
+handleKO = (sndToState 1 . second (tolist1 . impl) . reorder . ifFlag "ko") <+> id
+    where reorder = mkIso f g where
+            f selbri = (selbri,[selbri,cPN "Imperative" lowTv])
+            g (selbri,_) = selbri
 
 -- (a,(mp,(ma,(s,aa))))
 -- (mp,(ma,(s,a++aa)))
@@ -695,7 +715,9 @@ _bridi = isoFoldl handleGIhA . (handleBRIDI *** distribute) . reorder
             g' [] = []
             g' ((giha,(s,bt)):xs) = (giha,bt):g' xs
 
-
+--Connect a Atom (already converted bridi) with a Bridi
+--the bridi get's turned into an Atom by handleBRIDI
+--then both atoms get added to the Connective
 handleGIhA :: SynIso (Atom,(Con,Bridi)) Atom
 handleGIhA = handleCon . second (tolist2 .> handleBRIDI) . reorder
     where reorder = mkIso f g where
@@ -769,6 +791,11 @@ addti = mkIso f g
     where f s = s ++ "ti "
           g s = s --TODO: Maybe remoe ti again
 
+--Handles questions
+--The first kind with the word "xu" is a question for the truth of a statment
+--A SatisfactionLink is used for this
+--The second with a VarNode in the Statement is a fill the blank question
+--we wrap the statment in a (Put s (Get s)) that when excuted should fill the blank
 preti :: Syntax Atom
 preti = (_satl ||| handleMa) . ifJustA <<< optional (word "xu") &&& bridiP
     where handleMa :: SynIso Atom Atom
@@ -806,6 +833,9 @@ freeuiP = reorder <<< _UI &&& caiP
           f (a,tv) = cCN (nodeName a) tv
           g c@(Node "ConceptNode" name tv) = (c,tv)
 
+--Sumti that stands free (not part of a statement)
+--We can remove it's tag
+--And pack it with the State into a list
 freeSumti ::Syntax Atom
 freeSumti = listl . consAtoms . rmsndAny Nothing . sumtiAllUI
 
@@ -877,33 +907,11 @@ _SEI = sepSelmaho "SEI"
 _SEhU :: Syntax ()
 _SEhU = optSelmaho "SEhU"
 
+--SEIs are second order Statments that can appear almost anywhere
+--This is also why they are only allowed to have BEtails
+-- sei mi jimpe do gerku == sei mi jimpe se'u do gerku
 seiP :: Syntax Atom
-seiP = _SEI &&> bridiP <&& _SEhU
-
-{-seiP :: Syntax (State Atom)
-seiP = collapsState
-      .
-      (first setWithSize ||| reorder0)
-      .
-      reorder2
-      .<
-      second (choice leHandlers .> first (_ssl . handleBRIDI))
-      .
-      reorder1
-      <<< withSeedState (_SEI
-                      &&& optState paS
-                      &&& sumtiAllUI
-                      &&& bridiBETail
-                      <&& _SEhU)
-    where reorder1 = mkIso f g where
-          f ((le,(pa,(v,(s,a)))),i) = ((pa,i),(le,((v,(s,a)),i)))
-              g ((pa,_),(le,((v,(s,a)),i))) = ((le,(pa,(v,(s,a)))),i)
-
-          reorder2 = mkIso f g where
-              f (((Just pa,i),(a,s1)),s2) = Left (((pa,i),a),s1++s2)
-              f (((Nothing,i),(a,s1)),s2) = Right (a,s1++s2)
-              g (Left (((pa,i),a),s))     = (((Just pa,i),(a,s)),s)
-              g (Right (a,s))             = (((Nothing,0),(a,s)),s)-}
+seiP = _SEI &&> withFlag "onlyBE" bridiP <&& _SEhU
 
 type SEI = Atom
 
@@ -952,12 +960,18 @@ withAttitude syn = (first handleSOS ||| id) . reorder
               g (Left ((ui,a),mt)) = ((a,mt),Just ui)
               g (Right (a,mt))     = ((a,mt),Nothing)
 
+--A UI phrase can be considered an implicit
+--statment with the predicate 'cinmo'
+--the "manage" iso add all necesary info to creat the statement
+--We just have to create instances of this with (selbri &&& mapIso toSumti)
+--before we can create the statement with _frames
+--and then add it to the State
 handleUI :: SynIso ((Atom,TruthVal),Atom) Atom
 handleUI = sndToState 1
          . second (tolist1 . _frames . (selbri *** mapIso toSumti)
                   )
-         . reorder
-    where reorder = mkIso f g where
+         . manage
+    where manage = mkIso f g where
               f ((ui,tv),a) = (a,((tv,cinmo),[(mi,"1"),(ui,"2"),(a,"3")]))
               g (a,((tv,_),[_,(ui,_),_])) = ((ui,tv),a)
 
@@ -972,10 +986,3 @@ handleSEI = fstToState 1 . first tolist1
 --SOS Second Order Sentence
 handleSOS :: SynIso (Either SEI UI,Atom) Atom
 handleSOS = (handleSEI ||| handleUI) . expandEither
-
-expandEither :: SynIso (Either a b,c) (Either (a,c) (b,c))
-expandEither = mkIso f g where
-    f (Left a,b) = Left (a,b)
-    f (Right a,b) = Right (a,b)
-    g (Left (a,b)) = (Left a,b)
-    g (Right (a,b)) = (Right a,b)

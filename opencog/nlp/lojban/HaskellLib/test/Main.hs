@@ -15,7 +15,7 @@ import System.Exit (exitFailure,exitSuccess)
 main :: IO ()
 main = do
     putStrLn "Starting Test"
-    (parser,printer) <- initParserPrinter "lojban.xml"
+    (parser,printer) <- initParserPrinter "cmavo.csv" "gismu.csv"
     sentences <- loadData
     let parsed = parMap rpar (ptest parser) sentences
     testRes <- sequence parsed
