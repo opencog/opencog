@@ -14533,7 +14533,7 @@ Results from Rohit:
 \begin_inset Graphics
 	filename images/frequency-vs-frequency-rank-words.png
 	lyxscale 30
-	width 80col%
+	width 100col%
 
 \end_inset
 
@@ -14554,7 +14554,7 @@ The log is the natural log.
 \begin_inset Graphics
 	filename images/frequency-vs-frequency-rank-wordpairs.png
 	lyxscale 50
-	width 80col%
+	width 100col%
 
 \end_inset
 
@@ -14569,7 +14569,7 @@ Below is a scatterplot for mutual information of word-paris vs rank.
 \begin_inset Graphics
 	filename images/mi-vs-frequency-rank.png
 	lyxscale 50
-	width 80col%
+	width 100col%
 
 \end_inset
 
@@ -14583,7 +14583,8 @@ number of word pairs as function of word rank
 \begin_layout Standard
 \begin_inset Graphics
 	filename images/Nth-word-frequency-regression.png
-	lyxscale 50
+	lyxscale 40
+	width 100col%
 
 \end_inset
 
@@ -15794,7 +15795,8 @@ name "fig:Four-word-sentence-clique"
 \begin_layout Plain Layout
 \align left
 \begin_inset Graphics
-	filename four-clique.eps
+	filename images/four-clique.eps
+	width 50col%
 
 \end_inset
 
@@ -15803,6 +15805,62 @@ name "fig:Four-word-sentence-clique"
 
 \begin_layout Plain Layout
 Clique of a four-word sentence.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here's another:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Planar four-word trees
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Planar-four-word-trees"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/edge-counting.eps
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The eleven planar trees connecting four words together.
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \end_inset
