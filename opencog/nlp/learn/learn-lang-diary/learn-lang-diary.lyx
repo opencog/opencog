@@ -15782,7 +15782,7 @@ words
 \align center
 \begin_inset Graphics
 	filename images/four-clique.eps
-	width 50col%
+	width 30col%
 
 \end_inset
 
@@ -15800,7 +15800,7 @@ Pair counting in planar diagrams gives different results.
 \align center
 \begin_inset Graphics
 	filename images/edge-counting.eps
-	width 60col%
+	width 40col%
 
 \end_inset
 
@@ -15813,6 +15813,7 @@ There are 33 edges grand total, and these are unequally distributed.
 \end_layout
 
 \begin_layout Standard
+\align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="7" columns="2">
 <features tabularvalignment="middle">
@@ -15972,6 +15973,7 @@ ent edges.
 \end_layout
 
 \begin_layout Standard
+\align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="2">
 <features tabularvalignment="middle">
