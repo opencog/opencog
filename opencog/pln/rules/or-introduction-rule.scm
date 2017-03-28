@@ -1,6 +1,7 @@
+;; To be replaced by fuzzy-disjunction-introduction-rule
+
 ; =====================================================================
-; OrConstructionRule
-; (http://wiki.opencog.org/w/OrConstructionRule TODO)
+; Or introduction rule
 ;
 ; For now A and B can be predicates or concepts. Note that the rule
 ; will not try to prevent mixing predicates and concepts (we need a
@@ -17,7 +18,7 @@
 ;----------------------------------------------------------------------
 
 
-(define or-construction-rule
+(define or-introduction-rule
   (BindLink
      (VariableList
         (TypedVariableLink
@@ -38,18 +39,18 @@
               (VariableNode "$A")
               (VariableNode "$B"))))
      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: or-construction-formula")
+        (GroundedSchemaNode "scm: or-introduction-formula")
         (ListLink
            (VariableNode "$A")
            (VariableNode "$B")))))
 
-(define (or-construction-formula A B)
+(define (or-introduction-formula A B)
   (cog-set-tv!
    (OrLink A B)
-   (or-construction-side-effect-free-formula A B))
+   (or-introduction-side-effect-free-formula A B))
 )
 
-(define (or-construction-side-effect-free-formula A B)
+(define (or-introduction-side-effect-free-formula A B)
   (let 
       ((sA (cog-stv-strength A))
        (sB (cog-stv-strength B))
@@ -58,8 +59,8 @@
     (stv (- (+ sA sB) (* sA sB)) (min cA cB))))
 
 ; Name the rule
-(define or-construction-rule-name
-  (DefinedSchemaNode "or-construction-rule"))
+(define or-introduction-rule-name
+  (DefinedSchemaNode "or-introduction-rule"))
 (DefineLink
-   or-construction-rule-name
-   or-construction-rule)
+   or-introduction-rule-name
+   or-introduction-rule)

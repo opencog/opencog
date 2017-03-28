@@ -604,7 +604,7 @@
 (cog-bind implication-full-instantiation-rule)
 
 ;; (17) Infer that Bob will be an amusing and honest friend. Apply the
-;; and-construction-rule over the results of (11), (12) and (16)
+;; and-introduction-rule over the results of (11), (12) and (16)
 ;;
 ;; Result should be:
 ;;
@@ -620,4 +620,4 @@
 ;;    (Evaluation
 ;;       (Predicate "is-honest")
 ;;       (Concept "Bob")))
-(cog-bind and-construction-grounded-evaluation-rule)
+(cog-bind and-introduction-grounded-evaluation-rule)

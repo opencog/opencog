@@ -63,9 +63,9 @@ public:
 	void load_scm_files(std::vector<std::string>);
 
 	void test_deduction();
-	void test_and_construction();
-	void test_or_construction();
-	void test_not_construction();
+	void test_and_introduction();
+	void test_or_introduction();
+	void test_not_introduction();
 	void test_forall_full_instantiation();
 	void test_forall_partial_instantiation();
 	void test_forall_implication_to_higher_order();
@@ -152,60 +152,60 @@ void PLNRulesUTest::test_deduction()
 }
 
 /**
- * Tests the and rule (and-construction-rule) defined in:
- * opencog/pln/rules/and-construction-rule.scm
+ * Tests the and rule (and-introduction-rule) defined in:
+ * opencog/pln/rules/and-introduction-rule.scm
  */
-void PLNRulesUTest::test_and_construction()
+void PLNRulesUTest::test_and_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
-	                "opencog/pln/rules/and-construction-rule.scm"});
+	                "opencog/pln/rules/and-introduction-rule.scm"});
 
 	// Apply the rule
-	Handle results = eval.eval_h("(cog-bind-af and-construction-rule)");
+	Handle results = eval.eval_h("(cog-bind-af and-introduction-rule)");
 
 	// It should contain 1 groundings, and(A, B)
 	TS_ASSERT_EQUALS(1, getarity(results));
 }
 
 /**
- * Tests the and rule (or-construction-rule) defined in:
- * opencog/pln/rules/or-construction-rule.scm
+ * Tests the and rule (or-introduction-rule) defined in:
+ * opencog/pln/rules/or-introduction-rule.scm
  */
-void PLNRulesUTest::test_or_construction()
+void PLNRulesUTest::test_or_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
-	                "opencog/pln/rules/or-construction-rule.scm"});
+	                "opencog/pln/rules/or-introduction-rule.scm"});
 
 	// Apply the rule
-	Handle results = eval.eval_h("(cog-bind-af or-construction-rule)");
+	Handle results = eval.eval_h("(cog-bind-af or-introduction-rule)");
 
 	// It should contain 1 groundings, or(A, B)
 	TS_ASSERT_EQUALS(1, getarity(results));
 }
 
 /**
- * Tests the not rule (not-construction-rule) defined in:
- * opencog/pln/rules/not-construction-rule.scm
+ * Tests the not rule (not-introduction-rule) defined in:
+ * opencog/pln/rules/not-introduction-rule.scm
  */
-void PLNRulesUTest::test_not_construction()
+void PLNRulesUTest::test_not_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
-	               "opencog/pln/rules/not-construction-rule.scm"});
+	               "opencog/pln/rules/not-introduction-rule.scm"});
 
 	// Apply the rule
-	Handle results = eval.eval_h("(cog-bind-af not-construction-rule)");
+	Handle results = eval.eval_h("(cog-bind-af not-introduction-rule)");
 
 	// It should contain 2 groundings, not(A), not(B)
 	TS_ASSERT_EQUALS(2, getarity(results));

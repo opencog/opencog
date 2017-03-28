@@ -30,7 +30,7 @@
 
 ;; Load the fuzzy conjunction rule
 (add-to-load-path "../../../opencog/pln/rules/")
-(load-from-path "fuzzy-conjunction-construction-rule.scm")
+(load-from-path "fuzzy-conjunction-introduction-rule.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Associate rules to the conjunction rule base ;;
@@ -39,11 +39,11 @@
 ; List the rules and their weights.
 (define rules
   (list
-        (list fuzzy-conjunction-construction-1ary-rule-name 1)
-        (list fuzzy-conjunction-construction-2ary-rule-name 1)
-        (list fuzzy-conjunction-construction-3ary-rule-name 1)
-        (list fuzzy-conjunction-construction-4ary-rule-name 1)
-        (list fuzzy-conjunction-construction-5ary-rule-name 1)
+        (list fuzzy-conjunction-introduction-1ary-rule-name 1)
+        (list fuzzy-conjunction-introduction-2ary-rule-name 1)
+        (list fuzzy-conjunction-introduction-3ary-rule-name 1)
+        (list fuzzy-conjunction-introduction-4ary-rule-name 1)
+        (list fuzzy-conjunction-introduction-5ary-rule-name 1)
         )
   )
 

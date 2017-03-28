@@ -2,7 +2,7 @@ ADD_GUILE_MODULE(
 	implication-direct-evaluation-rule.scm
 	instantiation.scm
 	implication-instantiation-rule.scm
-	and-construction-rule.scm
+	and-introduction-rule.scm
 	and-lambda-factorization-double-implication-rule.scm
 	and-simplification-rule.scm
 	deduction-rule.scm
@@ -41,12 +41,12 @@ ADD_GUILE_MODULE(
 	intensional-similarity-evaluation-rule.scm
 	member-to-inheritance-rule.scm
 	modus-ponens-rule.scm
-	not-construction-rule.scm
+	not-introduction-rule.scm
 	not-elimination-rule.scm
 	not-simplification-rule.scm
 	ontological-inheritance-rule.scm
 	or-breakdown-rule.scm
-	or-construction-rule.scm
+	or-introduction-rule.scm
 	or-elimination-rule.scm
 	or-evaluation-rule.scm
 	precise-modus-ponens-rule.scm
