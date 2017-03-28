@@ -14531,8 +14531,8 @@ Results from Rohit:
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename images/regression-word-rank-frequency.png
-	lyxscale 50
+	filename images/frequency-vs-frequency-rank-words.png
+	lyxscale 30
 	width 80col%
 
 \end_inset
@@ -14552,7 +14552,7 @@ The log is the natural log.
 
 \begin_layout Standard
 \begin_inset Graphics
-	filename images/regression-frequency-vs-frequency-rank-wordpairs.png
+	filename images/frequency-vs-frequency-rank-wordpairs.png
 	lyxscale 50
 	width 80col%
 
@@ -15784,12 +15784,6 @@ name "fig:Four-word-sentence-clique"
 \end_inset
 
 
-\begin_inset Graphics
-	filename four-clique.eps
-
-\end_inset
-
-
 \end_layout
 
 \end_inset
@@ -15798,7 +15792,17 @@ name "fig:Four-word-sentence-clique"
 \end_layout
 
 \begin_layout Plain Layout
+\align left
+\begin_inset Graphics
+	filename four-clique.eps
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Clique of a four-word sentence.
 \end_layout
 
 \end_inset
