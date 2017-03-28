@@ -90,9 +90,9 @@ handleBAIprefix (b,d) = if t2b `elem` se then (b,t2b ++ ' ' : nd) else (b,nd)
 ----------------------------------------------
 ----------------------------------------------
 
-loadWordLists :: String -> IO WordList
-loadWordLists src = do
-    let ser = src ++ ".dat"
+loadWordLists :: String -> String -> IO WordList
+loadWordLists cmavoSrc gismuSrc  = do
+    let ser = "wordlist.cache"
     dfe <- doesFileExist ser
     if dfe
         then (do
@@ -108,9 +108,9 @@ loadWordLists src = do
             )
         else (do
             (seed :: Int) <- randomIO
-            gismu <- newgetGismu "gismu.csv"
-            cmavo <- newgetCmavo "cmavo.csv"
-            bai   <- newgetBAI   "cmavo.csv"
+            gismu <- newgetGismu gismuSrc
+            cmavo <- newgetCmavo cmavoSrc
+            bai   <- newgetBAI   cmavoSrc
             let selmahos = handleCmavo cmavo
                 baiIso = handleBAI bai
                 res = WordList {cmavos = fmap fromList selmahos

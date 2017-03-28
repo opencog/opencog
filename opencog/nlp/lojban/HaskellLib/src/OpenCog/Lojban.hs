@@ -27,9 +27,10 @@ import Control.Monad.Trans.Class
 
 import Iso hiding (Syntax,SynIso)
 
-initParserPrinter :: String -> IO (String -> Either String Atom, Atom -> Either String String)
-initParserPrinter path = do
-    wordlist <- loadWordLists path
+initParserPrinter :: String -> String
+                  -> IO (String -> Either String Atom, Atom -> Either String String)
+initParserPrinter cmavoSrc gismuSrc = do
+    wordlist <- loadWordLists cmavoSrc gismuSrc
     return (lojbanToAtomese wordlist,atomeseToLojban wordlist)
 
 lojbanToAtomese :: WordList -> String -> Either String Atom

@@ -18,7 +18,7 @@ import System.Process
 
 main :: IO ()
 main = do
-    (parser,printer) <- initParserPrinter "lojban.xml"
+    (parser,printer) <- initParserPrinter "cmavo.csv" "gismu.csv"
     mainloop parser printer
 
 --camxesPath = "/home/roman/OpenCog/Lojban/ilmentufa"

@@ -302,7 +302,7 @@ sumtiLaiP = ptp (pa &&& selbri) id (ptp pa addLE sumtiLai) <+> sumtiLai
           g s = take (length s - 4) s
 
 sumtiLai :: Syntax Atom
-sumtiLai = ((handleSubSet .> setWithSize) ||| id)
+sumtiLai = ((handleSubSet .> setWithSize) ||| maybeinof)
            . reorder1 <<< (optional pa &&& sumtiNoi)
     where reorder1 :: SynIso (Maybe Atom,Atom) (Either (Atom,(Atom,Atom)) Atom)
           reorder1 = Iso f g where
@@ -316,6 +316,14 @@ sumtiLai = ((handleSubSet .> setWithSize) ||| id)
               g (Right sumti)         = pure (Nothing,sumti)
 
           handleSubSet = sndToState 1 . second (tolist1 . subsetL) . reorder2
+
+          maybeinof = Iso f g where
+              f a = do
+                  atoms <- gets sAtoms
+                  case getDefinitons [a] atoms of
+                      [] -> apply instanceOf a
+                      _  -> pure a              --We have a lep which is already an instance
+              g a = error "Check for lep somehow"
 
           reorder2 = mkIso f g where
               f (t,s)     = (s,(s,t))
