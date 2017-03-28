@@ -20,6 +20,7 @@ INSTALL (FILES
 	imperative.scm
 	imperative-rules.scm
 	knowledge.scm
+	load-sureal.scm
 	model-query.scm
 	self-model.scm
 	semantics.scm

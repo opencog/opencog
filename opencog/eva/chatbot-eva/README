@@ -396,13 +396,27 @@ as fear, disgust, boredom, smiling, surprise and a half-dozen gestures,
 including nodding, blinking and yawning.  Assorted synonmyous verbs and
 adjectives should trigger these.
 
-Self-awareness questions:
+Self-awareness questions (under construction)
 
    Where are you looking?   XXX this got broken, and the fix is hard.
       The correct fix is to wire up to the space server.
    What are you doing?
    What did you just do?
    What happened just now?
+
+
+Some mappings:
+--------------
+where are you looking? -> where-look-rule
+waht are you doing? -> what-doing-rule
+
+Idealized replies:
+------------------
+What are you doing?
++ I am looking at you
++ I am looking to the left
++ I am smiling
++ (makes a face) I am frowning.
 
 
 ===========================

@@ -3,14 +3,21 @@
 ;
 ; Processing of query-questions about the robot self-model.
 ;
+(use-modules (srfi srfi-1))
 (use-modules (opencog query))
 (use-modules (opencog nlp sureal))
 
 ; Rule-utils needed for defintion of var-decl, etc.
 (use-modules (opencog nlp relex2logic))
 
+; `current-reply` holds the "semantic" (aka R2L) format of the reply.
+; `current-reply-words` holds the word-sequence of the reply.
 (define current-sentence (AnchorNode "*-eva-current-sent-*"))
 (define current-reply (AnchorNode "*-reply-*"))
+; (define current-reply-words (AnchorNode "*-reply-words-*"))
+
+(StateLink current-reply (Set))
+; (StateLink current-reply-words (List))
 
 ;--------------------------------------------------------------------
 ; Word-associations with state are already hard-coded in imperative.scm
@@ -134,21 +141,27 @@
 
 
 ;--------------------------------------------------------------------
-
-; XXX We want to prime the atomspace with several response sentences,
-; and the way to do that is to nlp-parse them here. The only problem is
-; that this trips some crazy bug.  See bug #508
-; https://github.com/opencog/atomspace/issues/508
-; and so we have to do the load in run-chatbot.scm, instead. Arghhhh.
-; XXX FIXME .. fix the above.
 ;
-;(use-modules (opencog nlp relex2logic))
-; (use-modules (opencog nlp chatbot))
-; (load "../chatbot/chat-utils.scm")
-;(load-r2l-rulebase)
-;(nlp-parse "I am looking to the left")
-;(nlp-parse "I am looking to the right")
-;(nlp-parse "I am looking up")
+; XXX this should be moved to cog-utils. Also needs to be fixed
+; to not detect bound variables. We already have C++ code that
+; does  the right thing, here, so we should use that.
+(define (cog-grounded? EXPR)
+"
+  cog-grounded? EXPR
+
+  Return #f if EXPR contains a VariableNode, else return #t.
+"
+	(if (cog-node? EXPR)
+		(not (eq? 'VariableNode (cog-type EXPR)))
+		(not (find (lambda (x) (not (cog-grounded? x))) (cog-outgoing-set EXPR)))
+	)
+)
+
+; Some of the things chained to the reply-anchor are parts of rules;
+; we want to ignore these.  They will contain variables, in general.
+(define (get-grounded-replies)
+	(filter cog-grounded? (cog-incoming-set current-reply))
+)
 
 ;--------------------------------------------------------------------
 ; XXX This is broken.
@@ -167,32 +180,45 @@
   no answer is known.  QUERY should be a SentenceNode.
 "
 
+	; Small utility that converts rep-lnk to a string of words.
+	; Uses sureal to perform the conversion. The input must be
+	; of teh form that sureal can handle.
+	(define (verbalize-reply rep-lnk)
+		(if (eq? 0 (cog-arity rep-lnk))
+			'()
+			(let ((r2l-set (cog-outgoing-atom rep-lnk 1)))
+
+(format #t "The reply is:\n~a\n" r2l-set)
+				(if (eq? 0 cog-arity r2l-set)
+					'()
+					(let
+						((string-seq (sureal r2l-set)))
+						(display string-seq) (newline)
+						string-seq
+					)))))
+
 	; Make the current sentence visible to everyone.
 	(StateLink current-sentence QUERY)
 
-	(cog-bind where-look-rule)
-	; (cog-bind what-doing-rule)
+	; (cog-bind where-look-rule)
+	(cog-bind what-doing-rule)
 
-(display "duuuude bar")
-(display (cog-incoming-set current-reply))
+(format #t  "Replies to questions:\n~a\n" (get-grounded-replies))
 
-	; hack fixme
-; problem here is that incoming set may have more than one.
-	(let* ((rep-lnk (cog-incoming-set current-reply))
-			(r2l-set (cog-outgoing-atom (car rep-lnk) 1))
+	; There may be more than one plausible reply. We should use
+	; openpsi to pick one. XXX FIXME -- do this.
+	; Alternately, this shoud probably be done with chatscript.
+	(let ((reply-words (filter verbalize-reply (get-grounded-replies))))
+(format #t "Reply words are: ~a\n" reply-words)
+		(if (null? reply-words)
+			(set! reply-words
+				(list "Sorry I didn't understand the question.\n"))
 		)
+
 		; Free up anything attached to the anchor.
-		(map cog-delete (cog-incoming-set current-reply))
-(display "duuuude wfooo")
-		(display r2l-set)
-		(if (equal? 0 cog-arity r2l-set)
-			(list (list "Sorry I didn't understand the question.\n"))
-			(let
-				((string-seq (sureal r2l-set)))
-				(display string-seq) (newline)
-				string-seq
-			)
-		)
+		(map cog-delete-recursive (get-grounded-replies))
+
+		reply-words
 	)
 )
 

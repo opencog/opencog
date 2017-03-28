@@ -1421,7 +1421,7 @@ aka
 (map-sound  2.01  -1.01 0.01)
 
 ; The above will materialize the below in the atomsapce:
-; iun time-map.scm
+; in time-map.scm
 (define last-speaker (Concept "last person who spoke"))
 (State last-speaker (Number 42))
 
@@ -1613,4 +1613,49 @@ prints "(Eva looks to the left)"
 (cog-evaluate! (Evaluation
       (DefinedPredicate "Show class expression")
       (List (Concept "imperative") (Concept "happy"))))
+
+
+What are you looking at?
+
+    +----------------Xp---------------+
+    |       +----------Bsw----------+ |
+    |       |    +----Pg*b---+      | |
+    +---Wq--+-Rw-+SIpx+      +--MVp-+ |
+    |       |    |    |      |      | |
+LEFT-WALL what are.v you looking.v at ?
+
+    +------------Xp-----------+
+    +--------->WV-------->+   |
+    |       +-----Bsw-----+   |
+    |       |    +---I*d--+   |
+    +---Wq--+-Rw-+SIp+    |   |
+    |       |    |   |    |   |
+LEFT-WALL what do.v you see.v ?
+
+
+    +---------------Xp--------------+
+    +----->WV---->+----Pg*b---+     |
+    +---Wq--+--Qw-+SIpx+      |     |
+    |       |     |    |      |     |
+LEFT-WALL where are.v you looking.v ?
+
+--> where-look-rule
+
+what-doing-rule ->
+
+current-reply
+self-wh-query
+
+what are you doing?
+-- I
+
+(define current-reply (AnchorNode "*-reply-*"))
+
+(define (wtf x) (format #t "wtf ~a\n" x))
+
+(cog-grounded? (Variable "x"))
+(cog-grounded? (Concept "x"))
+(cog-grounded? (List (Variable "x")))
+(cog-grounded? (List (Concept "x")))
+(cog-grounded? (List (Concept "x") (List (Variable "x"))))
 
