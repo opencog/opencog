@@ -16070,7 +16070,8 @@ Count
 Note that the progressively-longer edges get less frequent.
  What is the actual distribution? First, we need a generic formula for sentences
  of length N.
- The diagram below shows how to count.
+ This is not so very easy.
+ The diagram below shows one way to count.
  
 \end_layout
 
@@ -16086,7 +16087,7 @@ Note that the progressively-longer edges get less frequent.
 \end_layout
 
 \begin_layout Standard
-Her, the star represents some planar tree connecting all of the words of
+Here, the star represents some planar tree connecting all of the words of
  a smaller sentence.
  Assume that there are 
 \begin_inset Formula $T(n)$
@@ -16097,6 +16098,36 @@ Her, the star represents some planar tree connecting all of the words of
 \end_inset
 
  words.
+ Tree diagrams of of Type A are assembled by placing two adjacent smaller
+ trees next to each other.
+ Naively, one can then count how many such pairs there are; the issue is
+ that the Type B diagram will occur mutiple times in this pairing; we would
+ rather NOT count it with this mutiplicity.
+ To avoid this problem, we should only allow pairs, such as Type A, to be
+ assembled of sub-parts of the shapes C and D.
+ Because of the over-arching arc, these can never result in double-counting.
+ However, counting only pairs results in an under-counting: graphs of Type
+ B never occur.
+ Thus, one should count pairs, triples, and so on -- graphs of Type E.
+ Now we have a way of getting the formula.
+ Define 
+\begin_inset Formula $C(n)$
+\end_inset
+
+ as the count of the number of planar trees, connecting 
+\begin_inset Formula $n$
+\end_inset
+
+ words, having an arc connecting the first and last word: i.e.
+ trees of type C or D.
+ One then has that 
+\begin_inset Formula 
+\[
+C(n)=2+
+\]
+
+\end_inset
+
  
 \end_layout
 

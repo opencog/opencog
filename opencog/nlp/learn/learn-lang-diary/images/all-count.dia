@@ -189,14 +189,14 @@
     <dia:group>
       <dia:object type="Standard - Arc" version="0" id="O4">
         <dia:attribute name="obj_pos">
-          <dia:point val="9.3,4.15"/>
+          <dia:point val="9.85,6.8"/>
         </dia:attribute>
         <dia:attribute name="obj_bb">
-          <dia:rectangle val="9.25,3.5;10.75,4.2"/>
+          <dia:rectangle val="9.8,6.15;11.3,6.85"/>
         </dia:attribute>
         <dia:attribute name="conn_endpoints">
-          <dia:point val="9.3,4.15"/>
-          <dia:point val="10.7,4.15"/>
+          <dia:point val="9.85,6.8"/>
+          <dia:point val="11.25,6.8"/>
         </dia:attribute>
         <dia:attribute name="curve_distance">
           <dia:real val="-0.60000000000000009"/>
@@ -204,14 +204,14 @@
       </dia:object>
       <dia:object type="Standard - Arc" version="0" id="O5">
         <dia:attribute name="obj_pos">
-          <dia:point val="10.7,4.15"/>
+          <dia:point val="11.25,6.8"/>
         </dia:attribute>
         <dia:attribute name="obj_bb">
-          <dia:rectangle val="10.65,3.4;12.35,4.2"/>
+          <dia:rectangle val="11.2,6.05;12.9,6.85"/>
         </dia:attribute>
         <dia:attribute name="conn_endpoints">
-          <dia:point val="10.7,4.15"/>
-          <dia:point val="12.3,4.15"/>
+          <dia:point val="11.25,6.8"/>
+          <dia:point val="12.85,6.8"/>
         </dia:attribute>
         <dia:attribute name="curve_distance">
           <dia:real val="-0.69999999999999973"/>
@@ -219,14 +219,14 @@
       </dia:object>
       <dia:object type="Standard - Arc" version="0" id="O6">
         <dia:attribute name="obj_pos">
-          <dia:point val="12.3,4.15"/>
+          <dia:point val="12.85,6.8"/>
         </dia:attribute>
         <dia:attribute name="obj_bb">
-          <dia:rectangle val="12.25,3.4;13.75,4.2"/>
+          <dia:rectangle val="12.8,6.05;14.3,6.85"/>
         </dia:attribute>
         <dia:attribute name="conn_endpoints">
-          <dia:point val="12.3,4.15"/>
-          <dia:point val="13.7,4.15"/>
+          <dia:point val="12.85,6.8"/>
+          <dia:point val="14.25,6.8"/>
         </dia:attribute>
         <dia:attribute name="curve_distance">
           <dia:real val="-0.69999999999999973"/>
@@ -234,14 +234,14 @@
       </dia:object>
       <dia:object type="Standard - Arc" version="0" id="O7">
         <dia:attribute name="obj_pos">
-          <dia:point val="13.7376,4.11441"/>
+          <dia:point val="14.2876,6.76441"/>
         </dia:attribute>
         <dia:attribute name="obj_bb">
-          <dia:rectangle val="13.6876,3.36441;15.1876,4.16441"/>
+          <dia:rectangle val="14.2376,6.01441;15.7376,6.81441"/>
         </dia:attribute>
         <dia:attribute name="conn_endpoints">
-          <dia:point val="13.7376,4.11441"/>
-          <dia:point val="15.1376,4.11441"/>
+          <dia:point val="14.2876,6.76441"/>
+          <dia:point val="15.6876,6.76441"/>
         </dia:attribute>
         <dia:attribute name="curve_distance">
           <dia:real val="-0.69999999999999973"/>
@@ -383,16 +383,16 @@
     <dia:group>
       <dia:object type="Geometric - Sharp Eight Point Star" version="1" id="O12">
         <dia:attribute name="obj_pos">
-          <dia:point val="11.9184,6.0114"/>
+          <dia:point val="11.7184,3.2114"/>
         </dia:attribute>
         <dia:attribute name="obj_bb">
-          <dia:rectangle val="11.5399,5.83749;13.7997,7.18654"/>
+          <dia:rectangle val="11.3399,3.03749;13.5997,4.38654"/>
         </dia:attribute>
         <dia:attribute name="meta">
           <dia:composite type="dict"/>
         </dia:attribute>
         <dia:attribute name="elem_corner">
-          <dia:point val="11.9184,6.0114"/>
+          <dia:point val="11.7184,3.2114"/>
         </dia:attribute>
         <dia:attribute name="elem_width">
           <dia:real val="1.5027203434452554"/>
@@ -428,16 +428,16 @@
       </dia:object>
       <dia:object type="Geometric - Sharp Eight Point Star" version="1" id="O13">
         <dia:attribute name="obj_pos">
-          <dia:point val="13.5321,6.0228"/>
+          <dia:point val="13.3321,3.2228"/>
         </dia:attribute>
         <dia:attribute name="obj_bb">
-          <dia:rectangle val="13.1536,5.84889;15.4134,7.19794"/>
+          <dia:rectangle val="12.9536,3.04889;15.2134,4.39794"/>
         </dia:attribute>
         <dia:attribute name="meta">
           <dia:composite type="dict"/>
         </dia:attribute>
         <dia:attribute name="elem_corner">
-          <dia:point val="13.5321,6.0228"/>
+          <dia:point val="13.3321,3.2228"/>
         </dia:attribute>
         <dia:attribute name="elem_width">
           <dia:real val="1.5027203434452554"/>
@@ -634,7 +634,7 @@
           <dia:point val="11.0322,12.327"/>
         </dia:attribute>
         <dia:attribute name="obj_bb">
-          <dia:rectangle val="10.9818,11.0713;15.5678,12.3774"/>
+          <dia:rectangle val="10.9818,11.0712;15.5678,12.3774"/>
         </dia:attribute>
         <dia:attribute name="conn_endpoints">
           <dia:point val="11.0322,12.327"/>
@@ -649,5 +649,233 @@
         </dia:connections>
       </dia:object>
     </dia:group>
+    <dia:object type="Geometric - Sharp Eight Point Star" version="1" id="O19">
+      <dia:attribute name="obj_pos">
+        <dia:point val="6.39354,14.4989"/>
+      </dia:attribute>
+      <dia:attribute name="obj_bb">
+        <dia:rectangle val="6.015,14.325;8.27479,15.6741"/>
+      </dia:attribute>
+      <dia:attribute name="meta">
+        <dia:composite type="dict"/>
+      </dia:attribute>
+      <dia:attribute name="elem_corner">
+        <dia:point val="6.39354,14.4989"/>
+      </dia:attribute>
+      <dia:attribute name="elem_width">
+        <dia:real val="1.5027203434452554"/>
+      </dia:attribute>
+      <dia:attribute name="elem_height">
+        <dia:real val="1.0012284815180426"/>
+      </dia:attribute>
+      <dia:attribute name="line_width">
+        <dia:real val="0.10000000000000001"/>
+      </dia:attribute>
+      <dia:attribute name="line_colour">
+        <dia:color val="#000000"/>
+      </dia:attribute>
+      <dia:attribute name="fill_colour">
+        <dia:color val="#ffffff"/>
+      </dia:attribute>
+      <dia:attribute name="show_background">
+        <dia:boolean val="true"/>
+      </dia:attribute>
+      <dia:attribute name="line_style">
+        <dia:enum val="0"/>
+        <dia:real val="1"/>
+      </dia:attribute>
+      <dia:attribute name="flip_horizontal">
+        <dia:boolean val="false"/>
+      </dia:attribute>
+      <dia:attribute name="flip_vertical">
+        <dia:boolean val="false"/>
+      </dia:attribute>
+      <dia:attribute name="subscale">
+        <dia:real val="1"/>
+      </dia:attribute>
+    </dia:object>
+    <dia:object type="Geometric - Sharp Eight Point Star" version="1" id="O20">
+      <dia:attribute name="obj_pos">
+        <dia:point val="8.04259,14.4926"/>
+      </dia:attribute>
+      <dia:attribute name="obj_bb">
+        <dia:rectangle val="7.66406,14.3187;9.92385,15.6678"/>
+      </dia:attribute>
+      <dia:attribute name="meta">
+        <dia:composite type="dict"/>
+      </dia:attribute>
+      <dia:attribute name="elem_corner">
+        <dia:point val="8.04259,14.4926"/>
+      </dia:attribute>
+      <dia:attribute name="elem_width">
+        <dia:real val="1.5027203434452554"/>
+      </dia:attribute>
+      <dia:attribute name="elem_height">
+        <dia:real val="1.0012284815180426"/>
+      </dia:attribute>
+      <dia:attribute name="line_width">
+        <dia:real val="0.10000000000000001"/>
+      </dia:attribute>
+      <dia:attribute name="line_colour">
+        <dia:color val="#000000"/>
+      </dia:attribute>
+      <dia:attribute name="fill_colour">
+        <dia:color val="#ffffff"/>
+      </dia:attribute>
+      <dia:attribute name="show_background">
+        <dia:boolean val="true"/>
+      </dia:attribute>
+      <dia:attribute name="line_style">
+        <dia:enum val="0"/>
+        <dia:real val="1"/>
+      </dia:attribute>
+      <dia:attribute name="flip_horizontal">
+        <dia:boolean val="false"/>
+      </dia:attribute>
+      <dia:attribute name="flip_vertical">
+        <dia:boolean val="false"/>
+      </dia:attribute>
+      <dia:attribute name="subscale">
+        <dia:real val="1"/>
+      </dia:attribute>
+    </dia:object>
+    <dia:object type="Geometric - Sharp Eight Point Star" version="1" id="O21">
+      <dia:attribute name="obj_pos">
+        <dia:point val="12.3877,14.4656"/>
+      </dia:attribute>
+      <dia:attribute name="obj_bb">
+        <dia:rectangle val="12.0092,14.2917;14.269,15.6408"/>
+      </dia:attribute>
+      <dia:attribute name="meta">
+        <dia:composite type="dict"/>
+      </dia:attribute>
+      <dia:attribute name="elem_corner">
+        <dia:point val="12.3877,14.4656"/>
+      </dia:attribute>
+      <dia:attribute name="elem_width">
+        <dia:real val="1.5027203434452554"/>
+      </dia:attribute>
+      <dia:attribute name="elem_height">
+        <dia:real val="1.0012284815180426"/>
+      </dia:attribute>
+      <dia:attribute name="line_width">
+        <dia:real val="0.10000000000000001"/>
+      </dia:attribute>
+      <dia:attribute name="line_colour">
+        <dia:color val="#000000"/>
+      </dia:attribute>
+      <dia:attribute name="fill_colour">
+        <dia:color val="#ffffff"/>
+      </dia:attribute>
+      <dia:attribute name="show_background">
+        <dia:boolean val="true"/>
+      </dia:attribute>
+      <dia:attribute name="line_style">
+        <dia:enum val="0"/>
+        <dia:real val="1"/>
+      </dia:attribute>
+      <dia:attribute name="flip_horizontal">
+        <dia:boolean val="false"/>
+      </dia:attribute>
+      <dia:attribute name="flip_vertical">
+        <dia:boolean val="false"/>
+      </dia:attribute>
+      <dia:attribute name="subscale">
+        <dia:real val="1"/>
+      </dia:attribute>
+    </dia:object>
+    <dia:object type="Standard - Text" version="1" id="O22">
+      <dia:attribute name="obj_pos">
+        <dia:point val="17.3072,15.0077"/>
+      </dia:attribute>
+      <dia:attribute name="obj_bb">
+        <dia:rectangle val="17.3072,14.4127;19.3872,15.1602"/>
+      </dia:attribute>
+      <dia:attribute name="text">
+        <dia:composite type="text">
+          <dia:attribute name="string">
+            <dia:string>#Type E#</dia:string>
+          </dia:attribute>
+          <dia:attribute name="font">
+            <dia:font family="sans" style="0" name="Helvetica"/>
+          </dia:attribute>
+          <dia:attribute name="height">
+            <dia:real val="0.80000000000000004"/>
+          </dia:attribute>
+          <dia:attribute name="pos">
+            <dia:point val="17.3072,15.0077"/>
+          </dia:attribute>
+          <dia:attribute name="color">
+            <dia:color val="#000000"/>
+          </dia:attribute>
+          <dia:attribute name="alignment">
+            <dia:enum val="0"/>
+          </dia:attribute>
+        </dia:composite>
+      </dia:attribute>
+      <dia:attribute name="valign">
+        <dia:enum val="3"/>
+      </dia:attribute>
+    </dia:object>
+    <dia:object type="Standard - Box" version="0" id="O23">
+      <dia:attribute name="obj_pos">
+        <dia:point val="10.0196,14.9613"/>
+      </dia:attribute>
+      <dia:attribute name="obj_bb">
+        <dia:rectangle val="9.96955,14.9113;10.2286,15.1085"/>
+      </dia:attribute>
+      <dia:attribute name="elem_corner">
+        <dia:point val="10.0196,14.9613"/>
+      </dia:attribute>
+      <dia:attribute name="elem_width">
+        <dia:real val="0.15909902576697377"/>
+      </dia:attribute>
+      <dia:attribute name="elem_height">
+        <dia:real val="0.097227182413149649"/>
+      </dia:attribute>
+      <dia:attribute name="show_background">
+        <dia:boolean val="true"/>
+      </dia:attribute>
+    </dia:object>
+    <dia:object type="Standard - Box" version="0" id="O24">
+      <dia:attribute name="obj_pos">
+        <dia:point val="10.7881,14.9524"/>
+      </dia:attribute>
+      <dia:attribute name="obj_bb">
+        <dia:rectangle val="10.7381,14.9024;10.9972,15.0922"/>
+      </dia:attribute>
+      <dia:attribute name="elem_corner">
+        <dia:point val="10.7881,14.9524"/>
+      </dia:attribute>
+      <dia:attribute name="elem_width">
+        <dia:real val="0.15909902576697377"/>
+      </dia:attribute>
+      <dia:attribute name="elem_height">
+        <dia:real val="0.089774756441743264"/>
+      </dia:attribute>
+      <dia:attribute name="show_background">
+        <dia:boolean val="true"/>
+      </dia:attribute>
+    </dia:object>
+    <dia:object type="Standard - Box" version="0" id="O25">
+      <dia:attribute name="obj_pos">
+        <dia:point val="11.5483,14.9361"/>
+      </dia:attribute>
+      <dia:attribute name="obj_bb">
+        <dia:rectangle val="11.4983,14.8861;11.7574,15.0834"/>
+      </dia:attribute>
+      <dia:attribute name="elem_corner">
+        <dia:point val="11.5483,14.9361"/>
+      </dia:attribute>
+      <dia:attribute name="elem_width">
+        <dia:real val="0.15909902576697377"/>
+      </dia:attribute>
+      <dia:attribute name="elem_height">
+        <dia:real val="0.097227182413149649"/>
+      </dia:attribute>
+      <dia:attribute name="show_background">
+        <dia:boolean val="true"/>
+      </dia:attribute>
+    </dia:object>
   </dia:layer>
 </dia:diagram>
