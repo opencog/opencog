@@ -322,7 +322,7 @@ sumtiLai = ((handleSubSet .> setWithSize) ||| maybeinof)
           maybeinof = Iso f g where
               f a = do
                   atoms <- gets sAtoms
-                  case getDefinitons [a] atoms of
+                  case getDefinitions [a] atoms of
                       [] -> apply instanceOf a
                       _  -> pure a              --We have a lep which is already an instance
               g a = error "Check for lep somehow"
@@ -491,7 +491,7 @@ gismuP = implicationOf . predicate . gismu
 
 tanru :: Syntax Atom
 tanru = isoFoldl handleTanru . (inverse cons) <<< some gismuP
-  where handleTanru = sndToState 1 . second (tolist1 . _iil) . reorder
+  where handleTanru = sndToState 1 . second (tolist1 . _iimpl) . reorder
         reorder = mkIso f g
         f (g,t) = (t,(t,g))
         g(t,(_,g)) = (g,t)
