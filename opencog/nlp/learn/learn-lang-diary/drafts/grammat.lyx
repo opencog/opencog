@@ -1,0 +1,973 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Mining Grammatical Categories
+\end_layout
+
+\begin_layout Subsection*
+20 June 2015
+\end_layout
+
+\begin_layout Standard
+Now that we have a database filled with disjunct statistics, how do we datamine
+ that for grammatical categories, which is, after all, the main point of
+ this exercise? Let me explain in several steps; at first illustrative,
+ and then, more precisely.
+ So first, consider a corpus containing these sentences:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family sans
+the big tree 
+\end_layout
+
+\begin_layout Standard
+
+\family sans
+a green tree 
+\end_layout
+
+\begin_layout Standard
+
+\family sans
+the big bush 
+\end_layout
+
+\begin_layout Standard
+
+\family sans
+a green bush
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+I want to conclude that "tree" is a lot like "bush", and the two should
+ be considered as being "similar enough to be merged into a common grammatical
+ category".
+ That is, the words "tree" and "bush" always occur in similar contexts,
+ or even the same contexts.
+ The word 
+\begin_inset Quotes eld
+\end_inset
+
+context
+\begin_inset Quotes erd
+\end_inset
+
+ here means 
+\begin_inset Quotes eld
+\end_inset
+
+the dependency parse context
+\begin_inset Quotes erd
+\end_inset
+
+, and not 
+\begin_inset Quotes eld
+\end_inset
+
+the n-gram context
+\begin_inset Quotes erd
+\end_inset
+
+.
+ More precisely, it means 
+\begin_inset Quotes eld
+\end_inset
+
+the accumulated statistics for the disjuncts obtained from MST dependency
+ parses
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Suppose the following parses were observed:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	 +---MA---+
+\end_layout
+
+\begin_layout Plain Layout
+
+	 |   +-MB-+
+\end_layout
+
+\begin_layout Plain Layout
+
+	 |   |    |
+\end_layout
+
+\begin_layout Plain Layout
+
+	the big  tree 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	 +---MC---+
+\end_layout
+
+\begin_layout Plain Layout
+
+	 |   +-MD-+
+\end_layout
+
+\begin_layout Plain Layout
+
+	 |   |    |
+\end_layout
+
+\begin_layout Plain Layout
+
+	 a green tree 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	 +---ME---+
+\end_layout
+
+\begin_layout Plain Layout
+\align left
+
+	 |   +-MF-+
+\end_layout
+
+\begin_layout Plain Layout
+
+	 |   |    |
+\end_layout
+
+\begin_layout Plain Layout
+
+	the big bush
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	 +---MG---+
+\end_layout
+
+\begin_layout Plain Layout
+
+	 |   +-MH-+
+\end_layout
+
+\begin_layout Plain Layout
+
+	 |   |    |
+\end_layout
+
+\begin_layout Plain Layout
+
+	 a green bush
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Recall that the above parses were obtained by performing a Maximum-Spanning-Tree
+ (MST) parse based on word-pair mutual information (MI).
+ The MST is obtained by considering the graph clique joining all words in
+ the sentence, and then keeping only those edges that have the greatest
+ MI between pairs of words.
+ This is the 
+\begin_inset Quotes eld
+\end_inset
+
+Yuret parse
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The Yuret parse does not have labelled edges, and so we assign arbitrary
+ (but unique!) link labels to the edges that were kept.
+ Every unique word pair gets a unique link type.
+ Then, using the standard Link Grammar theory, each link is broken into
+ a + and a - connector, and the ordered set of connectors on a word are
+ called a disjunct.
+\end_layout
+
+\begin_layout Standard
+The disjuncts extracted from the above parses would then be:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	tree: (MA- & MB-) or (MC- & MD-)
+\end_layout
+
+\begin_layout Plain Layout
+
+	bush: (ME- & MF-) or (MG- & MH-)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+No two disjuncts are alike, so naively, these seem completely uncomparable.
+ Of course, this is wrong; we need to compare the 
+\begin_inset Quotes eld
+\end_inset
+
+decoded disjunct
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+decoded disjunct
+\begin_inset Quotes erd
+\end_inset
+
+ is NOT a part of the standard Link Grammar theory, so let me explain it
+ here: it is simply the disjunct where the connector is replaced by the
+ word or word-class that it connects to.
+ For example, 
+\family typewriter
+MA-
+\family default
+ connects to the word 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+, so the 
+\begin_inset Quotes eld
+\end_inset
+
+decoded connector
+\begin_inset Quotes erd
+\end_inset
+
+ for 
+\family typewriter
+MA-
+\family default
+ is 
+\family typewriter
+$the$-
+\family default
+.
+ So, the decoded disjuncts are then:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	tree: ($the$- & $big$-) or ($a$- & $green$-)
+\end_layout
+
+\begin_layout Plain Layout
+
+	bush: ($the$- & $big$-) or ($a$- & $green$-)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now we can see that the decoded disjuncts are identical, for this example.
+ Based on this, we conclude that perhaps 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+bush
+\begin_inset Quotes erd
+\end_inset
+
+ indeed belong to the same grammatical category.
+ The remainder of the clustering algorithm is now 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+: rewrite the dictionary so that it has a single entry for both words:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+	tree bush: (MA- & MB-) or (MC- & MD-)
+\end_layout
+
+\end_inset
+
+This leaves the ME+, MF+, 
+\emph on
+etc
+\emph default
+.
+ connector dangling: thus, we need to search for all occurances of ME+ and
+ replace it by MA+, and likewise all occurances of MF+ need to be replaced
+ by MB+, and so on.
+\end_layout
+
+\begin_layout Subsubsection*
+Similarity metrics
+\end_layout
+
+\begin_layout Standard
+The above conveys the general idea, but is over-simplifies a few aspects.
+ First of all, it is very unlikely that two words will appear in sentence
+ contexts that are exactly identical.
+ Secondly, some constructions may be very common, and others, very rare;
+ that is, some disjuncts may be very common, and some very rare.
+ So, for example: suppose we read a text which used the phrase 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+the big idea
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ a lot, but we also read an obscure linguistics text that said that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+a green idea sleeps furiously
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It would probably be a mistake to lump 
+\begin_inset Quotes eld
+\end_inset
+
+idea
+\begin_inset Quotes erd
+\end_inset
+
+ in with 
+\begin_inset Quotes eld
+\end_inset
+
+tree, bush
+\begin_inset Quotes erd
+\end_inset
+
+, given that 
+\begin_inset Quotes eld
+\end_inset
+
+green idea
+\begin_inset Quotes erd
+\end_inset
+
+ is a very rare construction.
+ Thus, we need a better way of comparing collections of disjuncts.
+ 
+\end_layout
+
+\begin_layout Standard
+One obvious way is to treat a collection of decoded disjuncts as a vector
+ in a high-dimensional vector space.
+ The similarity between two vectors could be given by the cosine between
+ two vectors.
+ Alternately, perhaps the vectors could be treated as points, and similarity
+ be given by the distance between points.
+ There are other possibilities; the best choice is not obvious; several
+ need to be explored.
+\end_layout
+
+\begin_layout Standard
+Thus, for example, let 
+\begin_inset Formula $\{e_{1},e_{2},e_{3},\cdots\}$
+\end_inset
+
+ be the basis of a high-dimensional vector space.
+ For the previous example, we let 
+\begin_inset Formula $e_{1}$
+\end_inset
+
+ correspond to the decoded disjunct 
+\family typewriter
+($the$- & $big$-)
+\family default
+ while 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+ corresponds to 
+\family typewriter
+($a$- & $green$-)
+\family default
+.
+ The word 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+ is then some vector ...
+ what vector should it be? There are several choices.
+ Suppose that 
+\family typewriter
+($the$- & $big$-)
+\family default
+ was observed with a frequency 
+\begin_inset Formula $p_{1}$
+\end_inset
+
+ and that 
+\family typewriter
+($a$- & $green$-)
+\family default
+ was observed with frequncy 
+\begin_inset Formula $p_{2}$
+\end_inset
+
+.
+ The corresponding vector is then obviously 
+\begin_inset Formula $p_{1}e_{1}+p_{2}e_{2}$
+\end_inset
+
+ and we can construct another vector that corresponds to the the word 
+\begin_inset Quotes eld
+\end_inset
+
+bush
+\begin_inset Quotes erd
+\end_inset
+
+, say, for example: 
+\begin_inset Formula $q_{1}e_{1}+q_{2}e_{2}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The dot-product between 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+bush
+\begin_inset Quotes erd
+\end_inset
+
+ is then given by 
+\begin_inset Formula $p_{1}q_{1}+p_{2}q_{2}$
+\end_inset
+
+, so that the larger the product, the closer the two words are.
+ The cosine angle is 
+\begin_inset Formula $(p_{1}q_{1}+p_{2}q_{2})/\left|p\right|\left|q\right|$
+\end_inset
+
+ where 
+\begin_inset Formula $\left|p\right|=\sqrt{p_{1}^{2}+p_{2}^{2}}$
+\end_inset
+
+ and so on.
+ The closer that the cosine is to 1.0, the closer the two words are.
+ There are other possibilities: we have the Cartesian distance 
+\begin_inset Formula \[
+dist(tree,bush)=\sqrt{(p_{1}-q_{1})^{2}+(p_{2}-q_{2})^{2}}\]
+
+\end_inset
+
+ and we can contemplate 
+\emph on
+lp
+\emph default
+-metrics as well.
+\end_layout
+
+\begin_layout Standard
+None of the above metrics take into account the mutual information (MI)
+ of the disjunct.
+ This is almost surely a mistake.
+ Due to the vagaries of MST parsing, there will be many disjuncts with a
+ low MI value.
+ This is not uncommon in sentences with prepositions, where MST gives some
+ poor choices for the links to the prepositions, and thus results in disjuncts
+ with low MI values.
+ Recall, the higher the MI, the stronger the structure is.
+ Thus, perhaps a better vector for 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+ might be
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+tree=e_{1}m_{1}p_{1}+e_{2}m_{2}p_{2}\]
+
+\end_inset
+
+The above seems to be the most entropic-like in its expression.
+ However, the probabilites might weight the terms too strongly, and so a
+ weaker weighting would be the below.
+ It is not yet clear to me which of these expressions are the most 
+\begin_inset Quotes eld
+\end_inset
+
+elegant
+\begin_inset Quotes erd
+\end_inset
+
+, or which work the best...
+ 
+\begin_inset Formula \[
+tree=e_{1}(m_{1}-\log_{2}p_{1})+e_{2}(m_{2}-\log_{2}p_{2})\]
+
+\end_inset
+
+Here 
+\begin_inset Formula $m_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $m_{2}$
+\end_inset
+
+ are the mutual information of the disjuncts 
+\family typewriter
+(MA- & MB-)
+\family default
+ and 
+\family typewriter
+(MC- & MD-)
+\family default
+, respectively.
+ The last two seem to be closer to the intended spirit of the maximum entropy
+ principle.
+ There are even more possibilities, though.
+\end_layout
+
+\begin_layout Subsubsection*
+Frequency and Mutual Information
+\end_layout
+
+\begin_layout Standard
+The above section makes explicit use of the frequency and the mutual information
+ of a disjunct.
+ It is useful to define these.
+ Given a disjunct 
+\family typewriter
+(MA- & MB-)
+\family default
+ let N
+\family typewriter
+(MA- & MB-)
+\family default
+ be the number of times that this disjunct has been observed.
+ It will usually be an integer (except when obtained in certain unusual
+ situations not discussed here).
+ Let N
+\family typewriter
+(*- & *-)
+\family default
+ be the numer of times that any two-connector disjunct has been observed,
+ as long as both connectors point in the - direction.
+ That is,
+\begin_inset Formula \[
+N(*-\&*-)=\sum_{c_{1}\in-,c_{2}\in-}N(c_{1}\&c_{2})\]
+
+\end_inset
+
+the summation taking place over all connectors in the - direction.
+ The frequency of observing 
+\family typewriter
+(MA- & MB-)
+\family default
+ is then
+\begin_inset Formula \[
+p(MA-\&MB-)=\frac{N(MA-\&MB-)}{N(*-\&*-)}\]
+
+\end_inset
+
+The mutual information associated with the disjunct is then 
+\begin_inset Formula \[
+m(MA-\&MB-)=-\log_{2}\frac{p(MA-\&MB-)}{p(MA-\&*-)p(*-\&MB-)}\]
+
+\end_inset
+
+The reason for this possibly unexpected form was developed earlier in this
+ diary.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Semantics
+\end_layout
+
+\begin_layout Standard
+There is another interesting issue that arises in the above discussion:
+ the problem of syntax-semantics correspondance.
+ Consider, for example, the sentence 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+the dog treed the squirrel
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Here the word 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+ is used as a verb, meaning 
+\begin_inset Quotes eld
+\end_inset
+
+the dog chased the squirrel up into the tree
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Such sentences will cause the the word 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+ to accumulate disjuncts that the word 
+\begin_inset Quotes eld
+\end_inset
+
+bush
+\begin_inset Quotes erd
+\end_inset
+
+ will not have.
+ Likewise, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+I'm bushed
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is a verb usage that has no analogous 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+ version.
+ Thus, not only do the words 
+\begin_inset Quotes eld
+\end_inset
+
+bush
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+ have different sets of disjuncts, but the differences are hiding semantic
+ differences ...
+ 
+\end_layout
+
+\begin_layout Standard
+There are several strategies that can be used to deal with this.
+ More on this later.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Finding word pairs
+\end_layout
+
+\begin_layout Standard
+We need a good way of finding word-pairs that are likely to be related.
+ I think that perhaps the pattern matcher may be ideal for this.
+ Details are TBD...
+ but the basic idea is that the hypergraph for 
+\begin_inset Quotes eld
+\end_inset
+
+tree: (MA- & MB-)
+\begin_inset Quotes erd
+\end_inset
+
+ is connected to 
+\begin_inset Quotes eld
+\end_inset
+
+big
+\begin_inset Quotes erd
+\end_inset
+
+ because MB- is connected to 
+\begin_inset Quotes eld
+\end_inset
+
+big
+\begin_inset Quotes erd
+\end_inset
+
+, and 
+\begin_inset Quotes eld
+\end_inset
+
+big
+\begin_inset Quotes erd
+\end_inset
+
+ is connected to other lg-connectors, which in turn are connected to other
+ disjuncts, which are then connected to other words.
+ Thus, we search the local neighborhood of 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+, which causes us to dsicover the word 
+\begin_inset Quotes eld
+\end_inset
+
+big
+\begin_inset Quotes erd
+\end_inset
+
+, and then we search the neighborhood of 
+\begin_inset Quotes eld
+\end_inset
+
+big
+\begin_inset Quotes erd
+\end_inset
+
+ to find candidates such as 
+\begin_inset Quotes eld
+\end_inset
+
+bush
+\begin_inset Quotes erd
+\end_inset
+
+ which might be comparable to 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This search graph is not small, but it is not large: There may be thousands
+ of words that are two hops away from 
+\begin_inset Quotes eld
+\end_inset
+
+tree
+\begin_inset Quotes erd
+\end_inset
+
+, but not millions.
+\end_layout
+
+\begin_layout Subsubsection*
+Putting it all together
+\end_layout
+
+\begin_layout Standard
+These are the things that need to be done:
+\end_layout
+
+\begin_layout Enumerate
+compute the MI for the disjuncts
+\end_layout
+
+\begin_layout Enumerate
+pick a common noun, compute the similarity scores for that word and every
+ word that is linked to it.
+ created ranked graph of similarity.
+\end_layout
+
+\begin_layout Enumerate
+repeat step 2 for several different similarity formulas
+\end_layout
+
+\begin_layout Enumerate
+repeat steps 2,3 for several verbs, several adjectives, several adverbs,
+ several determiners, several prepositions.
+\end_layout
+
+\begin_layout Enumerate
+Write code for creating grouping words into grammatical clusters.
+\end_layout
+
+\begin_layout Enumerate
+Pick the most promising metric, and start clustering in bulk.
+\end_layout
+
+\begin_layout Standard
+Step 5 requires writing a lot of code; it can all be written before the
+ final metric has been determined.
+\end_layout
+
+\begin_layout Subsubsection*
+The end.
+\end_layout
+
+\begin_layout Standard
+That's all for now.
+ More later.
+\end_layout
+
+\end_body
+\end_document

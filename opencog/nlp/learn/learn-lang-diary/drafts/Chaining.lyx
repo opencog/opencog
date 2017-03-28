@@ -1,0 +1,551 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{url} 
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman times
+\font_sans helvet
+\font_typewriter courier
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_amsmath 2
+\use_esint 0
+\use_mhchem 0
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Rule Chaining and Parsing
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+July 2015
+\end_layout
+
+\begin_layout Abstract
+Some notes about reduction, states, rule engines, backward and forward chaining,
+ parsing and Markov networks.
+ These are all inter-related topics, but not obviously so, thus these notes.
+ In particular, a functional probabilistic chainer is of central importance
+ for OpenCog, so a clear exposition is needed if forward proress is to be
+ made.
+\end_layout
+
+\begin_layout Abstract
+The notes here are informal and just a rough draft, based on points of confusion
+ that have occured on the OpenCog mailing list.
+\end_layout
+
+\begin_layout Section*
+Intro
+\end_layout
+
+\begin_layout Standard
+The goal of this set of notes is to talk about the overall design of the
+ OpenCog forward and backwards chainers, the URE (universal rule engine)
+ and to highlight some unresolved issues.
+\end_layout
+
+\begin_layout Standard
+Consider the problem of forward-chaining, as it is commonly envisioned.
+ Its shown in the graph below:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename Diamond.eps
+	lyxscale 70
+	height 15theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, the initial contents of the atomspace is represented by 'x'; after
+ applying rule 'ra', the contents of the atomspace is represented by 'y1',
+ and so on.
+ Applying rule 'rb' to the initial state 'x' results in a 
+\emph on
+different
+\emph default
+ atomspace 'y2', 
+\emph on
+i.e.
+
+\emph default
+ an atomspace with different contents.
+\end_layout
+
+\begin_layout Standard
+The differences can be mutually exclusive.
+ Consider this example: The position 'x' could correspond to the statements
+ 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he has the ball.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, together with the statements 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Natnael is a male.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Amen is a male.
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ Based on this, the rule 'ra' could be an anaphora resolution rule that
+ takes, as pre-requeists, the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ refers to males, and suggests as output, that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Natnael
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Similarly, 'rb' is the same rule, but applied to different data, and thus
+ suggests that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Amen
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Clearly, both statements cannot be true at the same time.
+ Thus, in effect, the 
+\begin_inset Quotes eld
+\end_inset
+
+universe
+\begin_inset Quotes erd
+\end_inset
+
+ splits into two: in one universe, “
+\emph on
+he
+\emph default
+” is “
+\emph on
+Natnael”
+\emph default
+, and in the other 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Amen
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It is also useful to conclude that in universe 'y1', the association “
+\emph on
+he
+\emph default
+” is “
+\emph on
+Natnael
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ has a truth-value of 100% true and 90% confident.
+ Thus, the truth of the statements in y1 and y2 are mutually exclusive.
+ At this point, though, we are not sure which 
+\begin_inset Quotes eld
+\end_inset
+
+universe
+\begin_inset Quotes erd
+\end_inset
+
+ is correct.
+ Thus, it is reasonable to assign each universe a probability of 50%.
+\end_layout
+
+\begin_layout Standard
+There is a set of unresolved issues in the above example.
+ These are:
+\end_layout
+
+\begin_layout Itemize
+What is the right way of representing the state in 'y1' and 'y2' in the
+ atomspace, simulataneously?
+\end_layout
+
+\begin_layout Itemize
+What is the right way for assigning truth values to 'y1' and 'y2'?
+\end_layout
+
+\begin_layout Standard
+There has been the general suggestion that ContextLinks can be used to solve
+ the first issue, but the details have not been specified, and there is
+ no general agreed-upon format, yet.
+\end_layout
+
+\begin_layout Standard
+There is a third issue shown in the diagram: a confluent diamond.
+ That is, after applying rule 'ra' and then 'rd', one ends up with the same
+ 
+\begin_inset Quotes eld
+\end_inset
+
+facts
+\begin_inset Quotes erd
+\end_inset
+
+ 'z2' as one would by applying 'rb' then 're'.
+ (For example, this could happen if 'ra'='re' aand 'rb'='rd', and 'ra' and
+ 'rb' commute.) How can one 
+\begin_inset Quotes eld
+\end_inset
+
+know
+\begin_inset Quotes erd
+\end_inset
+
+ that both cases end with the same 'z2'? As a practical matter, how does
+ one identify, in the code, that one ended up in the same spot? As another
+ important related issue: what should the probability of 
+\begin_inset Quotes eld
+\end_inset
+
+universe
+\begin_inset Quotes erd
+\end_inset
+
+ 'z2' be? Should it be the sum of the probabilities of taking paths (ra,rd)
+ and (rb,re)? Should it be something else? (Does PLN have something to say
+ about this?)
+\end_layout
+
+\begin_layout Section*
+Markov Nets 
+\end_layout
+
+\begin_layout Standard
+In the above example, we start with the state 'x' and finish with multiple
+ mutually-exclusive 
+\begin_inset Quotes eld
+\end_inset
+
+universes
+\begin_inset Quotes erd
+\end_inset
+
+ 'z1', 'z2' and 'z3'.
+ Ideally, we want to assign probabilities to each of these universes, in
+ such a way that only one is likely, and the others are not.
+ That is, in 'z1', we have that 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Natnael
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ holds true, but we also had additional evidence, via rule 'rc' that perhaps
+ 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+he
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ is actually 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Amen
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, for example, if a sentence arrived that said 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+and then Amen threw the ball
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In this cae, we want to lower the probability of universe 'z1' to a very
+ low value, while raising the probability of the universe 'z3' to a very
+ high value (since 'z3' is the one where Amen has the ball).
+\end_layout
+
+\begin_layout Standard
+This implies that the distribution of probabilites between these 
+\begin_inset Quotes eld
+\end_inset
+
+aternate universes
+\begin_inset Quotes erd
+\end_inset
+
+ must be Markovian.
+ If the intial probability of the univers 'x' is 100%, then the sume of
+ the probabilities on 'y1' and 'y2' must also be 100%, and likewise, the
+ sume of 'z1', 'z2' and 'z3' must sum to 100%.
+ (I am abusing the term 'Markovian' somewhat; the precise definition is
+ different, but for the current purposes, its OK.)
+\end_layout
+
+\begin_layout Section*
+Parsing, Learning.
+\end_layout
+
+\begin_layout Standard
+I don't think we are ready, yet, with the current state of the URE code
+ in OpenCog, to deal correctly with the learning of rules, but it is appropriate
+ to start a conversation.
+ So, in the above example, we assumed some a-priori probabilities: for the
+ first pass, of who has the ball, a 50-50 split was assumed.
+ The later rules, 'rc', 'rd' etc.
+ were also assumed to impart fixed a-priori probabilities.
+ 
+\end_layout
+
+\begin_layout Standard
+But what if, for some reason, we don't have the a-priori probabilities for
+ these 'state-transition' rules? If, instead, we know that we start in state
+ 'x' and we know with 100% probability that the real world finishes in state
+ 'z1', then there several algorithms for estimating the transition probabilites
+ in moving down the graph.
+ One of these is the forward-backward algorithm.
+ This tends to be cpu-time-consuming, so there is another, simplified but
+ sometimes less accurate one, the Viterbi algorithm.
+\end_layout
+
+\begin_layout Standard
+One reason that the a-priori probabilities are not known is because we are
+ attempting to learn the state-transition rules from scratch.
+ Thus, for example, we could generate some random rule 'rx', stick it in
+ the list of rules that the URE is applying, and watch it generate garbage
+ as a result.
+ Does this garbage actually correspond to observed reality, or is it indeed,
+ junk lacking predictive power? This can, in principle, be answered by applying
+ forward-backward, or Viterbi, to estimate the transition probability of
+ rule 'rx'.
+ If this probability is small or zero, then 'rx' is a useless or false rule.
+ If it is high, then 'rx' is a valuable 'rule of thumb' tha can be applied
+ during deduction; it should be kept and added to the rule-set.
+\end_layout
+
+\begin_layout Section*
+Details
+\end_layout
+
+\begin_layout Standard
+Much of what is talked about here should go onto wiki pages.
+ In particular, details and notation for a lot of this needs to be worked
+ out.
+ Right now, it was eaaier to create a PDF.
+\end_layout
+
+\begin_layout Section*
+References
+\end_layout
+
+\begin_layout Standard
+See the following:
+\end_layout
+
+\begin_layout Itemize
+Baader & Nipkow, 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Term Rewriting and All That
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Cambridge 1998 -- Provides a good introduction to abstract rewriting systems,
+ and the concepts of reduction, unification, and some very basic proof theory.
+\end_layout
+
+\end_body
+\end_document

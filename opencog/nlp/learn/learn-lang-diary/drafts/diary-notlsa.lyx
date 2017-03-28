@@ -1,0 +1,195 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Not LSA
+\end_layout
+
+\begin_layout Subsection*
+1 July 2015
+\end_layout
+
+\begin_layout Standard
+NotLSA -- a way to do LSA-like things without actually using LSA (Latent
+ Semantic Analysis).
+ Two very low-brow approaches, maybe well-known in the industry; I have
+ no idea.
+ Both of these approaches attempt to automatically extract keywords from
+ documents.
+ What cool about this is that its ...
+ unsupervised; requires no training, and is based on very simple, proven
+ ideas.
+ Obvious, even: compute the mutual information between pairs of things ...
+ between words and documents, between words and word-pairs, etc.
+ Heh.
+ 
+\end_layout
+
+\begin_layout Standard
+But how do we do this? How do we compute the MI between a page of text,
+ and a word? No way to answer this without diving into the details.
+\end_layout
+
+\begin_layout Subsubsection*
+Text-keyword correlation
+\end_layout
+
+\begin_layout Standard
+Lets take a text, say -- 1000 pages of ..
+ something.
+ Some corpus.
+ We want to compute the mutual information between the page itself, and
+ the words on the page.
+ We do this by analogy to MI of word pairs.
+\end_layout
+
+\begin_layout Standard
+Call the 
+\begin_inset Formula $k$
+\end_inset
+
+'th page 
+\begin_inset Formula $g_{k}$
+\end_inset
+
+.
+ Count the number of times that word 
+\begin_inset Formula $w_{m}$
+\end_inset
+
+ appears on this page; let this count be 
+\begin_inset Formula $N_{mk}$
+\end_inset
+
+.
+ Define 
+\begin_inset Formula $N_{m}=\sum_{k}N_{mk}$
+\end_inset
+
+ be the total number of times that the work 
+\begin_inset Formula $w_{m}$
+\end_inset
+
+ appear in the document, and let 
+\begin_inset Formula $N=\sum_{m}N_{m}$
+\end_inset
+
+ be the total number of words in the document.
+ Then, as usual, define probabilities, so that 
+\begin_inset Formula \[
+p_{m}=P(w_{m})=N_{m}/N\]
+
+\end_inset
+
+is the frequency of observing word 
+\begin_inset Formula $w_{m}$
+\end_inset
+
+ in the entire corpus, and 
+\begin_inset Formula \[
+p_{mk}=P(w_{m}|g_{k})=N_{mk}/\sum_{m}N_{mk}\]
+
+\end_inset
+
+be the (relative) frequency of the same word on page 
+\begin_inset Formula $g_{k}$
+\end_inset
+
+.
+ Notice that the definition of 
+\begin_inset Formula $p_{mk}$
+\end_inset
+
+ is independent of the page size.
+ Pages do not all have to be of the same size.
+ Define the mutual information as 
+\begin_inset Formula \[
+\mbox{MI}(g_{k},w_{m})=-\log_{2}\frac{p_{mk}}{p_{m}}=-\log_{2}\frac{N_{mk}N}{\sum_{m}N_{mk}\sum_{k}N_{mk}}=-\log_{2}\frac{p(m,k)}{p(m,*)p(*,k)}\]
+
+\end_inset
+
+This is essentially a measure of how much more often the word 
+\begin_inset Formula $w_{m}$
+\end_inset
+
+ appears on page 
+\begin_inset Formula $g_{k}$
+\end_inset
+
+ as compared to its usual frequency.
+ The highest-MI words are essentially the topic words for the page.
+ The right-most form introduces a new notation, to make it clear that it
+ resembles the traditional pair-MI expression.
+ The notation is 
+\begin_inset Formula \[
+p(m,k)=\frac{N_{mk}}{N}\]
+
+\end_inset
+
+so that 
+\begin_inset Formula \[
+p(m,*)=\sum_{k}p(m,k)\qquad\mbox{and}\qquad p(*,k)=\sum_{m}p(m,k)\]
+
+\end_inset
+
+are the traditional-looking pair-MI values.
+ 
+\end_layout
+
+\begin_layout Standard
+TODO: -- this does not have the feature-reduction/word-combing aspects of
+ LSA...
+\end_layout
+
+\begin_layout Subsubsection*
+Variants
+\end_layout
+
+\begin_layout Standard
+Instead of working with words, we could work with word-pairs, which is a
+ stand-in for working with (named) entities.
+ Thus, we can identify if a named entity occurs in a document more often
+ than average.
+\end_layout
+
+\end_body
+\end_document

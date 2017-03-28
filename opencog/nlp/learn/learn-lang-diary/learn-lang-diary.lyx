@@ -97,12 +97,120 @@ Easier said than done.
 \end_layout
 
 \begin_layout Subsection*
-Notes on Mutual Information
+Lexical Attraction, Mutual Information, Interaction Information
 \end_layout
 
 \begin_layout Standard
-Definitions.
- Let 
+The goal here is to clarify some of the formulas used by Deniz Yuret in
+ his PhD thesis 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+Discovery of Linguistic Relations Using Lexical Attraction
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, MIT 1998 (http://www2.denizyuret.com/pub/yuretphd.pdf).
+ These formulas are vitally important, because they provide a strong tool
+ when working with text; this has been shown by Yuret in his thesis, as
+ well as by many others, as well as by my own practical exprience with using
+ them.
+\end_layout
+
+\begin_layout Standard
+Possibly the most useful formula is the one in the middle off page 40.
+ By the time that we get to it, the terms 
+\begin_inset Quotes eld
+\end_inset
+
+mutual information
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+lexical attraction
+\begin_inset Quotes erd
+\end_inset
+
+ are being used interchangably.
+ This formula states the 
+\begin_inset Formula $MI(x,y)$
+\end_inset
+
+ for two words 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+; yet it is manifestly not symmetric in 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+, since 
+\begin_inset Formula $x$
+\end_inset
+
+ is the word on the left, and 
+\begin_inset Formula $y$
+\end_inset
+
+ is the word on the right.
+ By constrast, textbook (wikipedia) definitions of MI are symmetric in thier
+ variables.
+ Below I try to dis-entangle the resulting confusion a bit, and give a more
+ correct derivation of the formula.
+ The key is to observe that the formula contains an implicit pair-wise relations
+hip between two words, and that there are actually three variables: two
+ words, and thier relationship.
+ If this implicit relationship is made explicit, then the confusion evaporates.
+ It also opens the door to talking about the MI (or interaction information
+ II) of more complex relationships, not just pair-wise ones.
+ 
+\end_layout
+
+\begin_layout Standard
+Being able to correctly write down the MI and the II for complex relationships
+ is important for NLP: relationstionships can be labelled by types (subject,
+ object) and by word classes (noun, verb), and have various dependency constrain
+ts between them.
+ Thus, we need to be able to talk both about a labelled directed graph,
+ and the entropy or mutual information contained in it's various sub-graphs.
+\end_layout
+
+\begin_layout Standard
+In defense of Yuret, he does say, on page 22, that 
+\begin_inset Quotes eld
+\end_inset
+
+lexical attraction is the likelihood of a syntactic relation.
+\begin_inset Quotes erd
+\end_inset
+
+ However, the relation starts becoming implicit by eqn 12 on page 29.
+ An unexplained leap is then made from eqn 12 to the formula on page 40.
+ The below gets fairly pedantic; this seems unavoidable to avoid confusion.
+\end_layout
+
+\begin_layout Subsubsection*
+Definitions 
+\end_layout
+
+\begin_layout Standard
+Let 
 \begin_inset Formula $P(R(w_{l},w_{r}))$
 \end_inset
 
@@ -119,7 +227,11 @@ Definitions.
 \end_inset
 
 .
- Typically, its a (link-grammar) linkage of type 
+ Typically, 
+\begin_inset Formula $R$
+\end_inset
+
+ can be a (link-grammar) linkage of type 
 \begin_inset Formula $t$
 \end_inset
 
@@ -131,30 +243,66 @@ Definitions.
 \begin_inset Formula $w_{r}$
 \end_inset
 
- on the right; however, 
+ on the right; implicitly, both 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ occur in the same sentence.
+ The goal of this discussion is to enable relations 
 \begin_inset Formula $R$
 \end_inset
 
- can be more general than that.
+ that are more general; for now, though, 
+\begin_inset Formula $R$
+\end_inset
+
+ is a word-pair occuring in a single sentence.
 \end_layout
 
 \begin_layout Standard
-The simplest model has only one type 
+The simplest dependency grammar language model has only one type 
 \begin_inset Formula $t$
 \end_inset
 
-, the ANY type, and assigns equal probabilities to all words.
- But we know all words are not equi-probable, so let 
-\begin_inset Formula $P(w)$
+, the ANY type.
+ This is the type that Yuret uses: it makes no distinction at all between
+ subject, object relations (i.e.
+ the depdencies are unlabelled), and it does not make a head-dependent distincti
+on (all dependencies are bi-directional).
+ Thus, in what follows, we do the same: initially, the relation 
+\begin_inset Formula $R(w_{l},w_{r})$
 \end_inset
 
- be the probability of observing word 
-\begin_inset Formula $w$
+ is simply the statement that the words 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ are connected by an unlabelled, un-directed edge.
+ What 
+\begin_inset Formula $R(w_{l},w_{r})$
+\end_inset
+
+ does capture is that 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ is to the left of 
+\begin_inset Formula $w_{r}$
 \end_inset
 
 .
- We know from experiece this is a Zipfian distribution.
- We are then interested in the conditional probability 
+\end_layout
+
+\begin_layout Standard
+We are then interested in the conditional probability 
 \begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
 \end_inset
 
@@ -170,19 +318,31 @@ The simplest model has only one type
 \begin_inset Formula $R=R(w_{l},w_{r})$
 \end_inset
 
-, given that the two individual words were observed.
+, given that the two individual words were observed in a sentance (in no
+ particular order).
+ Let 
+\begin_inset Formula $P(w)$
+\end_inset
+
+ be the probability of observing word 
+\begin_inset Formula $w$
+\end_inset
+
+ in a sentance (with multiplicity).
+ We know from experiece this is a Zipfian distribution; this does not matter
+ in what follows.
  From the definition of conditional probabilities, we get 
 \begin_inset Formula 
 \[
-P(R)=P(R|w_{l},w_{r})P(w_{l})P(w_{r})
+P(R,w_{l},w_{r})=P(R|w_{l},w_{r})P(w_{l},w_{r})
 \]
 
 \end_inset
 
-Or that 
+or that 
 \begin_inset Formula 
 \[
-P(R|w_{l},w_{r})=\frac{P(R)}{P(w_{l})P(w_{r})}
+P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l},w_{r})}
 \]
 
 \end_inset
@@ -194,13 +354,190 @@ Here, the relation
  encompasses several facts: that one word is to the left of the other, and
  that they are connected by a certain link-type, as well as capturing other
  'ambient' information, perhaps such as other nearby words.
+ The expression 
+\begin_inset Formula $P(R,w_{l},w_{r})$
+\end_inset
+
+ is the probability of observing both the words 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ in a sentance, as well as observing that they are related as 
+\begin_inset Formula $R(w_{l},w_{r})$
+\end_inset
+
+ in the sentence.
+ Clearly, 
+\begin_inset Formula $R$
+\end_inset
+
+ cannot occur if 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ don't, but the converse is not true: the words can appear in a sentence,
+ but fail to be related by 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ For this reason, it is 
+\begin_inset Quotes eld
+\end_inset
+
+safe
+\begin_inset Quotes erd
+\end_inset
+
+ to use the notational short-hand 
+\begin_inset Formula $P(R)=P(R(w_{l},w_{r}),w_{l},w_{r})$
+\end_inset
+
+; nothing is thrown out, because 
+\begin_inset Formula $R$
+\end_inset
+
+ already depends on 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The probability 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ is interesting, because it's definition is not enirely unambigous: we can
+ define it as the probability of observing both words in the same sentence,
+ or we can define it as the probability of observing both words, independently
+ of one-another.
+ This is a bit confusing, ansd is worth thinking about.
+ To observe two words in the same sentence, we could say that they obey
+ the relationship 
+\begin_inset Formula $S(w_{l},w_{r})$
+\end_inset
+
+ and so one must ponder the probability 
+\begin_inset Formula $P(S(w_{l},w_{r}),w_{l},w_{r})$
+\end_inset
+
+.
+ But this is not what we want, in the end; we are interested in 
+\begin_inset Formula $R$
+\end_inset
+
+ and not 
+\begin_inset Formula $S$
+\end_inset
+
+.
+ The relationship 
+\begin_inset Formula $R$
+\end_inset
+
+ includes 
+\begin_inset Formula $S$
+\end_inset
+
+ as a component: two words can only be related by 
+\begin_inset Formula $R$
+\end_inset
+
+ only if they are already related by 
+\begin_inset Formula $S$
+\end_inset
+
+.
+ Thus, the only unambiguous definition for 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ is that the two words really are un-related; i.e.
+ that we define that 
+\begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
+\end_inset
+
+.
+ This is important: we don't 
+\begin_inset Quotes eld
+\end_inset
+
+assume
+\begin_inset Quotes erd
+\end_inset
+
+ independence, we define it.
+ The goal is to capture the dependence as a part of the relation 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ Thus, we conclude with the conditional probability:
+\begin_inset Formula 
+\[
+P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}
+\]
+
+\end_inset
+
+This is the probability of observing the relationship 
+\begin_inset Formula $R$
+\end_inset
+
+ given that the individual parts of the relationship have been observed.
+\end_layout
+
+\begin_layout Subsubsection*
+Frequentism
+\end_layout
+
+\begin_layout Standard
+In order for the above to be manipulable in practice, we need to provide
+ a definition for the probabilities, and, for this, the definiton can only
+ be frequentist.
+ The frequency 
+\begin_inset Formula $P(w)$
+\end_inset
+
+ of observing a word 
+\begin_inset Formula $w$
+\end_inset
+
+ is obvious: 
+\begin_inset Formula 
+\[
+P(w)=\frac{N(w)}{N(*)}
+\]
+
+\end_inset
+
+where 
+\end_layout
+
+\begin_layout Subsubsection*
+Yuret Notation
 \end_layout
 
 \begin_layout Standard
 We need to harmonize here a little bit with the Deniz Yuret concepts and
  notation.
  He defines a probability 
-\begin_inset Formula $P(w_{l},w_{r})$
+\begin_inset Formula $\mathcal{P}(w_{l},w_{r})$
 \end_inset
 
  of seeing the ordered pair; that is, the relation 
@@ -209,54 +546,103 @@ We need to harmonize here a little bit with the Deniz Yuret concepts and
 
  is implicit.
  To make it explicit, we should write: 
-\begin_inset Formula $P(w_{l},w_{r})=P(R(w_{l},w_{r}))$
+\begin_inset Formula $\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r})|R(*,*))$
 \end_inset
 
  to indicate the relation explicitly, and to note that the order of the
  positions in the relation matter.
+ The right-hand side is the conditional probability of seeing a given word
+ pair, conditioned on seeing any word pair.
+ To avoid confusion, the cursive 
+\begin_inset Formula $\mathcal{P}$
+\end_inset
+
+ is used instead of the roman 
+\begin_inset Formula $P$
+\end_inset
+
+.
  Yuret also uses the notation 
-\begin_inset Formula $P(w_{l},*)$
+\begin_inset Formula $\mathcal{P}(w_{l},*)$
 \end_inset
 
  and 
-\begin_inset Formula $P(*,w_{r})$
+\begin_inset Formula $\mathcal{P}(*,w_{r})$
 \end_inset
 
  for wild-card summations, defined as 
 \begin_inset Formula 
 \[
-P(w_{l},*)=\sum_{w_{r}}P(w_{l},w_{r})\qquad\mbox{and}\qquad P(*,w_{r})=\sum_{w_{l}}P(w_{l},w_{r})
+\mathcal{P}(w_{l},*)=\sum_{w_{r}}\mathcal{P}(w_{l},w_{r})\qquad\mbox{and}\qquad\mathcal{P}(*,w_{r})=\sum_{w_{l}}\mathcal{P}(w_{l},w_{r})
 \]
 
 \end_inset
 
-In practical use, one quickly observes that 
-\begin_inset Formula $P(w_{l},*)$
+It is tempting to conflate 
+\begin_inset Formula $\mathcal{P}(w_{l},*)$
 \end_inset
 
- is almost equal to 
+ with 
 \begin_inset Formula $P(w_{l})$
 \end_inset
 
- but not quite, since 
-\begin_inset Formula $P(w_{l},*)$
+ but that would be wrong; not every possible word can occur on the 
+\begin_inset Formula $w_{r}$
 \end_inset
 
- is the probability of seeing 
-\begin_inset Formula $w_{l}$
+ position.
+ This suggests a different, but tempting, error, that 
+\begin_inset Formula $\mathcal{P}(w_{l},*)\le P(w_{l})$
 \end_inset
 
- within the certain relationship or pattern, which must be less than the
- prior probability of observing 
-\begin_inset Formula $w_{l}$
+.
+ This is also not the case! This comes from the fact that the frequentist
+ definitions of the two are incompatible: the denominators are not the same.
+ Viz, 
+\begin_inset Formula 
+\[
+\mathcal{P}(w_{l},w_{r})=\frac{N(w_{l},w_{r})}{N(*,*)}
+\]
+
 \end_inset
 
- in general.
- Thus, one has 
-\begin_inset Formula $P(w_{l},*)\le P(w_{l})$
+ while 
+\begin_inset Formula 
+\[
+P(w)=\frac{N(w)}{N(*)}
+\]
+
 \end_inset
 
-, which can be viewed as a conditional probability:
+so that the former is normalized by the number of times 
+\begin_inset Formula $N(*,*)$
+\end_inset
+
+ the pairs have been observed, while the later is normalized by the number
+ of times that singletons have been observed.
+ The incompatible normalizations can be understood as conditional probabilities:
+\begin_inset Formula 
+\[
+\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r})|R(*,*))=\frac{P(R(w_{l},w_{r}))}{P(R(*,*))}
+\]
+
+\end_inset
+
+That is, the Yuret probability of seeing a given word pair is actually the
+ conditional probability of seeing that pair, conditioned on seeing 
+\emph on
+any
+\emph default
+ word pair.
+ There's a chronic problem hidden here, though, 
+\end_layout
+
+\begin_layout Standard
+XXX
+\end_layout
+
+\begin_layout Standard
+which can be viewed as a conditional probability:
 \begin_inset Formula 
 \[
 P(w_{l},*)=P(R(w_{l},*))=P(R(w_{l},*)|w_{l})P(w_{l})\le P(w_{l})
@@ -268,7 +654,8 @@ In practice, then, for word-pairs, one has that
 \begin_inset Formula $P(R|w_{l})$
 \end_inset
 
- is almost equal to 1, but not quite.
+ is almost equal to 1, but not quite (this is based on actual measurements
+ for English, and should hold true for most languages).
  Inserting this into the above gives 
 \begin_inset Formula 
 \[
@@ -286,7 +673,15 @@ Re-ordering this gives
 \end_inset
 
 The right hand side above is recognizable from Yuret's work; he defines
- the mutual information as 
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+lexical attraction
+\begin_inset Quotes erd
+\end_inset
+
+ as 
 \begin_inset Formula 
 \begin{equation}
 \mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}\label{eq:Yuret's MI}
@@ -294,21 +689,76 @@ The right hand side above is recognizable from Yuret's work; he defines
 
 \end_inset
 
-so that large positive MI is associated with words that occur together only
- with themselves (e.g.
+so that large positive MI is associated with words that rarely seen one
+ without the other (e.g.
  '
 \emph on
 Northern Ireland
 \emph default
-' from his examples.) So, on the right, we have that 
+' from his examples.) Note the absence of a minus sign in the above! See
+ below for an explanation.
+ Large-MI word pairs occur when 
 \begin_inset Formula $P(w_{l},w_{r})$
 \end_inset
 
- is usually very small, and that 
+ is roughly comparable to 
 \begin_inset Formula $P(w,*)\approx P(*,w)\approx P(w)$
 \end_inset
 
- subject to the inequality given before.
+.
+ 
+\end_layout
+
+\begin_layout Standard
+It is worth reviewing Yuret's example, at this point.
+ He looks at the word pair 'Northern Ireland' and states (based on a particular
+ corpus that was analyzed) that 
+\begin_inset Formula $-\log_{2}P(\mbox{'Northern'})=12.60$
+\end_inset
+
+ and that 
+\begin_inset Formula $-\log_{2}P(\mbox{'Ireland'})=14.65$
+\end_inset
+
+ and finally that 
+\begin_inset Formula $-\log_{2}P(\mbox{'Northern'},\mbox{'Ireland'})=16.13$
+\end_inset
+
+.
+ What these numbers mean is that although either word alone occurs at a
+ rate of roughtly once in ten-thousand words, the word-pair together occurs
+ at the rate of one in thirty-thousand or so: the word pair occurs almost
+ as often as either word alone.
+ Thus, the resulting MI is very large: 
+\begin_inset Formula $\mbox{MI}=-16.13+12.60+14.65=11.12$
+\end_inset
+
+.
+ The choice of sign in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Yuret's MI"
+
+\end_inset
+
+ is such that word that co-occur have a large positive value.
+ In practice, the distribution of the MI for word-pairs runs from about
+ -15 to about +35, and, when ranked accoring to MI, the probabilites form
+ a rounded mountain-peak, two-sided, each side being linear (Zipfian) with
+ the peak at about MI=4 or 6.
+ (See my other notes for a graph.)
+\end_layout
+
+\begin_layout Standard
+Observationally, we have that 
+\begin_inset Formula $P(R(w_{l},*)|w_{l})\approx P(R(*,w_{r})|w_{r})\approx1$
+\end_inset
+
+, and thus must conclude that 
+\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
+\end_inset
+
+ is 'large'; much larger than (unconditional) word-pair frequencies.
  
 \end_layout
 
@@ -320,25 +770,29 @@ reference "eq:basic pair"
 
 \end_inset
 
- is a stranger to me.
- First, we have observationally seen that 
-\begin_inset Formula $P(R(w_{l},*)|w_{l})\approx P(R(*,w_{r})|w_{r})\approx1$
+ is a stranger to me; I have not seen any version of it in the literature.
+ It is 'nicer' than Yuret's definition, because it is manifestly symmetric
+ in 
+\begin_inset Formula $w_{l}$
 \end_inset
 
-, and thus must conclude that 
-\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
+ and 
+\begin_inset Formula $w_{r}$
 \end_inset
 
- is 'large'; much larger than (unconditional) word-pair frequencies.
- Anyway, as an equation, its kind-of nicer, since it clearly isolates the
- role of the relation, since, by defintion, we have 
+; that is, 
 \begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})=P(R(w_{l},w_{r})|w_{r},w_{l})$
 \end_inset
 
- so that it functions like a real conditional probability, rather than this
- implicit-word-order thingy that Yuret uses.
- The Yuret notation is very convenient, but sometimes obscures things.
- OK, I think I'm done with that.
+ by construction.
+ This symmetry is essentialy for making contact with the 'standard' definitions
+ of MI, which are always provided in a symmetric fashion.
+ It also helps make clear the role of a relationship; the 'standard' definitions
+ of mutual information simply talk about the MI of two random variables,
+ without any reference to any information that we might already have about
+ them, namely, that they can be involved in different relationships with
+ respect to each other or with respect to an ambient environment.
+ 
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1191,7 +1645,16 @@ key "Liu2008"
 \end_inset
 
 .
- 
+ Haitao Liu 
+\begin_inset Quotes eld
+\end_inset
+
+Dependency distance as a metric of language comprehension difficulty
+\begin_inset Quotes erd
+\end_inset
+
+, 2008, Journal of Cognitive Science, v9.2 pp 159-191 http://www.lingviko.net/JCS.pd
+f 
 \end_layout
 
 \begin_layout Itemize
@@ -1211,6 +1674,19 @@ Sentences with long dependencies are rarely spoken: Hawkins, J.
  CSLI Publications, Stanford, CA.
  Distributed by University of Chicago Press.
  
+\end_layout
+
+\begin_layout Itemize
+Dependency-length minimzation is universal: Richard Futrell, Kyle Mahowald,
+ and Edward Gibson, 
+\begin_inset Quotes eld
+\end_inset
+
+Large-scale evidence of dependency length minimization in 37 languages
+\begin_inset Quotes erd
+\end_inset
+
+ (2015), doi: 10.1073/pnas.1502134112
 \end_layout
 
 \begin_layout Standard
@@ -13247,11 +13723,7 @@ Bad grammars increase the size of the language.
 \end_layout
 
 \begin_layout Section*
-27 July 2014
-\end_layout
-
-\begin_layout Subsection*
-Consciousness
+Consciousness - 27 July 2014
 \end_layout
 
 \begin_layout Standard
@@ -13382,7 +13854,7 @@ information
 \end_layout
 
 \begin_layout Section*
-24 March 2015
+Thermodynamics - 24 March 2015
 \end_layout
 
 \begin_layout Standard
@@ -13561,7 +14033,7 @@ Information Flow: The Logic of Distributed Systems
 \end_layout
 
 \begin_layout Section*
-3 May 2015
+Linear networks - 3 May 2015
 \end_layout
 
 \begin_layout Standard
@@ -14050,7 +14522,7 @@ Baez primary result on impedence networks is that the black box is describable
 \end_layout
 
 \begin_layout Section*
-31 May 2015
+MI graphs -- 31 May 2015
 \end_layout
 
 \begin_layout Standard
@@ -15215,6 +15687,123 @@ Instead of working with words, we could work with word-pairs, which is a
  stand-in for working with (named) entities.
  Thus, we can identify if a named entity occurs in a document more often
  than average.
+\end_layout
+
+\begin_layout Section*
+Unsupervised Morphology Learning References
+\end_layout
+
+\begin_layout Standard
+Here's some:
+\end_layout
+
+\begin_layout Itemize
+John Goldsmith, 
+\begin_inset Quotes eld
+\end_inset
+
+The unsupervised learning of natural language morphology
+\begin_inset Quotes erd
+\end_inset
+
+, Journal Computational Linguistics archive Volume 27 Issue 2, June 2001
+ Pages 153-198 MIT Press http://delivery.acm.org/10.1145/980000/972668/p153-goldsmi
+th.pdf
+\end_layout
+
+\begin_layout Itemize
+John Goldsmith, 
+\begin_inset Quotes eld
+\end_inset
+
+An algorithm for unsupervised learning of morphology
+\begin_inset Quotes erd
+\end_inset
+
+ Natural Language Engineering Volume 12 / Issue 04 / December 2006, pp 353-371
+ Cambridge University Press DOI: http://dx.doi.org/10.1017/S1351324905004055
+ http://people.cs.uchicago.edu/~jagoldsm/Papers/algorithm.pdf
+\end_layout
+
+\begin_layout Itemize
+Survey Article Unsupervised Learning of Morphology Harald Hammarström Lars
+ Borin http://www.mitpressjournals.org/doi/pdf/10.1162/COLI_a_00050
+\end_layout
+
+\begin_layout Section*
+Predicate-Argument structure
+\end_layout
+
+\begin_layout Standard
+Here's one:
+\end_layout
+
+\begin_layout Itemize
+The Darwinian evolution of natural language comes from a combination of
+ Expressive FSM's and Lexical predicate-argument FSM's within the human
+ brain.
+ Shigeru Miyagawa, Robert C.
+ Berwick and Kazuo Okanoya 
+\begin_inset Quotes eld
+\end_inset
+
+The emergence of hierarchical structure in human language
+\begin_inset Quotes erd
+\end_inset
+
+ Front.
+ Psychol., 20 February 2013 | http://dx.doi.org/10.3389/fpsyg.2013.00071 http://alpha-
+leonis.lids.mit.edu/wordpress/wp-content/uploads/2014/01/shigeru-berwick-kaz-fronti
+ers13.pdf
+\end_layout
+
+\begin_layout Section*
+Edge-counting 27 March 2017
+\end_layout
+
+\begin_layout Standard
+Counting edges in a clique is not the same as counting edges in planar trees.
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Four-word sentence clique
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Four-word-sentence-clique"
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename four-clique.eps
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*

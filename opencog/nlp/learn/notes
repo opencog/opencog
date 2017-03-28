@@ -2300,6 +2300,7 @@ french pairs: start again: 22:36PM 30 Jan - find submitted* |wc 17053
                            11:43AM  4 Feb - find submitted* |wc 25361
                            11:34AM  5 Feb - find submitted* |wc 25830
                            19:19PM 10 Feb - find submitted* |wc 27763
+                           20:16PM 14 Feb - find submitted* |wc 29720
 
 disk: 206447916 used 41097304 free
 disk  206574808 used 40970412 free  24 hours later... about 100MB more
@@ -2307,24 +2308,29 @@ disk  206888724 used 40656496 free  12:25 2 Feb
 disk  208585480 used 38959740 free  11:42 4 Feb ... 2.1GB more
 disk  208897572 used 38647648 free  00:00AM 5 feb
 disk  211829000 used 35716220 free  19:20 10 Feb
+disk  213607532 used 33937688 free  20:16 14 Feb
 
 select count(*) from atoms;         2090064 --   2.1M -- 12:25PM  2 Feb
 select sum(stv_count) from atoms; 115251031 -- 115M   -- 12:25PM  2 Feb
 
-select count(*) from atoms;         5676118 --   5.7M -- 11:19AM  4 Feb
-select sum(stv_count) from atoms; 351323640 -- 351M   -- 11:19AM  4 Feb
+select count(*) from atoms;          5676118 --    5.7M -- 11:19AM  4 Feb
+select sum(stv_count) from atoms;  351323640 --  351M   -- 11:19AM  4 Feb
 
-select count(*) from atoms;         7714679 --   7.7M -- 11:38AM  5 Feb
-select sum(stv_count) from atoms; 502509756 -- 503M   -- 11:38AM  5 Feb
+select count(*) from atoms;          7714679 --    7.7M -- 11:38AM  5 Feb
+select sum(stv_count) from atoms;  502509756 --  503M   -- 11:38AM  5 Feb
 
-select count(*) from atoms;        16945084 --  16.9M -- 19:21PM 10 Feb
-select sum(stv_count) from atoms;1289249056 -- 1.29G  -- 19:21PM 10 Feb
+select count(*) from atoms;         16945084 --   16.9M -- 19:21PM 10 Feb
+select sum(stv_count) from atoms; 1289249056 -- 1.29G   -- 19:21PM 10 Feb
+
+select count(*) from atoms;         23072988 --   23.1M -- 20:20PM 14 Feb
+select sum(stv_count) from atoms; 1856669388 -- 1.86G   -- 20:20PM 14 Feb
 
 
 guile/java ratio: 6781/683  = 9.93 -- 11:19AM  4 Feb
                   9401/1001 = 9.40 -- 00:00AM  5 Feb
                  12433/1304 = 9.53 -- 11:40AM  5 Feb
                  47250/4576 = 10.3 -- 19:23PM 10 Feb
+                 22980/2340 = 9.82 -- 20:20PM 14 Feb
 
 guile hangs:
 cx1 - 30 jan hang after 4.4M stores 
