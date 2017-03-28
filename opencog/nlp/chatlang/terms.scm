@@ -37,12 +37,12 @@
 
 (define (pos w p)
   "Term with a specific POS tag (note: canonical form of word, not literal)"
-  (let* ((var (choose-var-name))
-         (v (list (TypedVariable (Variable var) (Type "WordInstanceNode"))))
-         (c (list (Lemma (Variable var) (Word w))
-                  (PartOfSpeech (Variable var) (DefinedLinguisticConcept p))
-                  (WordInstanceLink (Variable var) (Variable "$P")))))
-    (cons v c)))
+  (let* ((lemma-atomese (lemma w))
+         (var-node (gar (caar lemma-atomese))))
+    (cons (car lemma-atomese)
+          (append (cdr lemma-atomese)
+                  (list (PartOfSpeechLink var-node
+                                          (DefinedLinguisticConcept p)))))))
 
 (define (proper-names . w)
   "Terms represent multi-word proper names. It must have at least two words."
@@ -92,14 +92,16 @@
                   (car lemma-atomese))
           (append (cdr main-verb-atomese)
                   (cdr lemma-atomese)
-                  (list (Evaluation (DefinedLinguisticRelationship r)
-                                    (List (Variable "$main_verb")
-                                          var-so)))))))
+                  (list (EvaluationLink (DefinedLinguisticRelationship r)
+                                        (ListLink (Variable "$main_verb")
+                                                  var-so)))))))
 
 (define (main-verb w)
   "Term is the main verb of the sentence."
-  (main-verb-template (list (Lemma (Variable "$main_verb") (Word w))
-                            (WordInstance (Variable "$main_verb") (Variable "$P")))))
+  (main-verb-template
+    ; TODO -- need to actually get the lemma of "w" here
+    (list (LemmaLink (Variable "$main_verb") (Word w))
+          (WordInstanceLink (Variable "$main_verb") (Variable "$P")))))
 
 (define (main-subj w)
   "Term is the main subject of the sentence."
