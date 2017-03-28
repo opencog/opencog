@@ -9,7 +9,7 @@ IF (STACK_EXECUTABLE)
                     ERROR_QUIET)
     STRING(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" GHC_VERSION "${_GHCVERNO}")
 
-    IF ("${GHC_VERSION}" VERSION_EQUAL "8.0.1")
+    IF ("${GHC_VERSION}" VERSION_EQUAL "8.0.2")
         SET(STACK_FOUND TRUE)
         SET(MESSAGE_STATUS "Stack found.")
     ENDIF ()
