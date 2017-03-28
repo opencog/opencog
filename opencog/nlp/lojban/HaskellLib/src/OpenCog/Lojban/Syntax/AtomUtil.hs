@@ -42,6 +42,18 @@ _ctxold = ctx . tolist2 . second _eval
 _ssl :: SynIso Atom Atom
 _ssl = ssl . tolist2 . addfst (Node "VariableNode" "$var" noTv)
 
+_exl :: SynIso (Atom, Atom) Atom
+_exl = exl . tolist2
+
+_meml :: SynIso (Atom, Atom) Atom
+_meml = meml . tolist2
+
+_equivl :: SynIso (Atom, Atom) Atom
+_equivl = equivl . tolist2
+
+_typedvarl :: SynIso (Atom, Atom) Atom
+_typedvarl = typedvarl . tolist2
+
 _satl :: SynIso (String,Atom) Atom
 _satl = satl . tolist1 . listl . consAtoms . rmfst "xu"
 
@@ -76,6 +88,15 @@ evalTv = linkIso2 "EvaluationLink"
 ssl :: SynIso [Atom] Atom
 ssl = linkIso "SatisfyingSetLink" noTv
 
+exl :: SynIso [Atom] Atom
+exl = linkIso "ExistsLink" noTv
+
+meml :: SynIso [Atom] Atom
+meml = linkIso "MemberLink" noTv
+
+equivl :: SynIso [Atom] Atom
+equivl = linkIso "EquivalenceLink" noTv
+
 setTypeL  :: SynIso [Atom] Atom
 setTypeL = linkIso "SetTypeLink" noTv
 
@@ -91,8 +112,14 @@ iil = linkIso "IntensionalImplicationLink" noTv
 listl :: SynIso [Atom] Atom
 listl = linkIso "ListLink" noTv
 
---varl :: Iso [Atom] Atom
+--varl :: SynIso [Atom] Atom
 --varl = linkIso "VariableLink" noTv
+
+typedvarl :: SynIso [Atom] Atom
+typedvarl = linkIso "TypedVariableLink" noTv
+
+varll :: SynIso [Atom] Atom
+varll = linkIso "VariableListLink" noTv
 
 notl :: SynIso [Atom] Atom
 notl = linkIso "NotLink" noTv
@@ -367,12 +394,12 @@ filterState :: SynIso Sumti Sumti
 filterState = Iso f g where
     f       = pure
     g (a,t) = do
-        modify (\s -> s {sAtoms = getDefinitons [a] (sAtoms s)})
+        modify (\s -> s {sAtoms = getDefinitions [a] (sAtoms s)})
         pure (a,t)
 
 
-getDefinitons :: [Atom] -> [Atom] -> [Atom]
-getDefinitons ns ls = if ns == nns then links else getDefinitons nns ls
+getDefinitions :: [Atom] -> [Atom] -> [Atom]
+getDefinitions ns ls = if ns == nns then links else getDefinitions nns ls
     where links = filter ff ls --Get all links that contain a node from ns
           ff l = any (`atomElem` l) ns --Check if the link contains a node from ns
           nodes = concatMap atomGetAllNodes links --Get all Nodes from the links

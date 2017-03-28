@@ -272,3 +272,16 @@ appendAtoms i = Iso f g where
         let (a,as) = splitAt i atoms
         setAtoms as
         pure a
+
+-- Applies an iso with an empty state
+-- Assumes inverse doesn't need special state handling
+withEmptyState :: SynIso a b -> SynIso a b
+withEmptyState iso = Iso f g
+  where
+    f a = do
+       atoms <- gets sAtoms
+       setAtoms []
+       b <- apply iso a
+       pushAtoms atoms
+       pure b
+    g = unapply iso

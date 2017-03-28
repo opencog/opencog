@@ -9,6 +9,8 @@ module OpenCog.Lojban.Syntax where
 import Prelude hiding (id,(.),(<*>),(<$>),(*>),(<*),foldl)
 
 import qualified Data.List.Split as S
+import Data.List (partition)
+import qualified Data.Foldable as F (find)
 import Data.Maybe (fromJust)
 import Data.Hashable
 
@@ -21,7 +23,7 @@ import Control.Category (id,(.),(<<<),(>>>))
 
 import Iso hiding (SynIso,Syntax)
 
-import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,nodeName)
+import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,atomMap,atomElem,nodeName)
 import OpenCog.Lojban.Util
 
 import OpenCog.Lojban.Syntax.Types
@@ -475,37 +477,57 @@ gismuP :: Syntax Atom
 gismuP = implicationOf . predicate . gismu
 
 
-{-
-FIXME::
-tanru :: Syntax (State Atom)
-tanru = handleTanru <$> gismuP
-                    <&><&><&> optState tanru
-    where handleTanru = (second (cons . first _iil) ||| id ) . reorder
-          reorder = Iso (Just . f) (Just . g)
-          f ((g,Just t),s)  = Left (g,((t,g),s))
-          f ((g,Nothing),s) = Right (g,s)
-          g (Left (g,((t,_),s)))  = ((g,Just t),s)
-          g (Right (g,s))         = ((g,Nothing),s)
+tanru :: Syntax Atom
+tanru = isoFoldl handleTanru . (inverse cons) <<< some gismuP
+  where handleTanru = sndToState 1 . second (tolist1 . _iil) . reorder
+        reorder = mkIso f g
+        f (g,t) = (t,(t,g))
+        g(t,(_,g)) = (g,t)
+
+
 
 
 --meP :: Syntax (State Atom)
 --meP =  handleME <$> selmaho "ME" <*> sumtiAll <*> optSelmaho "MEhU"
 
 nuP :: Syntax Atom
-nuP = choice nuHandlers
-    . selmaho "NU" &&& bridiPMI <&& optSelmaho "KEI"
+nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiPMI <&& optSelmaho "KEI")
 
-nuHandlers = [("nu"     ,handleNU)
-,("du'u"   ,handleNU)
-,("ka"     ,handleKA)]
+nuHandlers = [handleNU . rmfst "nu"]
 
+-- Creates abstract version of atom and state
 handleNU :: SynIso Atom Atom
 handleNU = Iso f g where
-    f (atom,name) = let pred = cPN name lowTv
-                        link = mkCtxPre pred atom
-                    in Just (pred,link:as)
-    g (PN name,CtxPred atom : as) = Just ((atom,as),name)
--}
+    f atom = do
+      state <- gets sAtoms
+      seed <- asks seed
+      pred <- apply predicate (randName seed (show atom) ++ "___"++ "nu")
+      let (vns, nuState) = getNuState atom state
+      link <- apply mkLink (pred, (vns, nuState))
+      setAtoms [link]
+      pure pred
+    g (pred) = do
+      state <- gets sAtoms -- FIX: Have to get correct atom
+      let link = F.find (atomElem pred) state
+      (nuState, atom) <- case link of -- remove "is_event" atoms
+          Just (EquivL _ (MemL _ (SSL [_, ExL _ _ (AL l)])))
+            -> pure $ partition isImpl $ filter (not.atomElem (cPN "is_event" highTv)) l
+          _ -> lift $ Left $ (show pred) ++ " can't be found in state."
+      pushAtoms nuState -- TODO: instantiate VNs?
+      pure (head atom) -- should only be one. Check?
+    -- (pred, (typedPredicateVars, eventAtom:state')
+    mkLink :: SynIso (Atom, ([Atom], [Atom])) Atom
+    mkLink = _equivl
+              . first  (_evalTv . addfst highTv  . addsnd [cVN "$1"])
+              . second
+                  (_meml . addfst (cVN "$2") . ssl . tolist2 . addfst (cVN "$2")
+                    . _exl . first (varll . mapIso (_typedvarl . addsnd (cTN "PredicateNode")))
+                           . second andl)
+    isImpl :: Atom -> Bool
+    isImpl (ImpL _ _) = True
+    isImpl (InhL _ _) = True
+    isImpl _          = False
+
 
 --like bridiP but adds mi instead of ti
 bridiPMI :: Syntax Atom
@@ -560,7 +582,7 @@ gohaP = _MO <+> _GOhA
 
 selbri :: Syntax (Tagged Atom)
 selbri = filterState . commute  <<< optional (selmaho "SE")
-                                &&& (gismuP {-<+> nuP-}
+                                &&& (tanru  <+> nuP
                                             <+> meP
                                             <+> moiP
                                             <+> gohaP)
