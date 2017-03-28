@@ -61,3 +61,26 @@
       (set! var-head (gar (car v)))))
   (for-each template (cdr w))
   (cons vars conds))
+
+; This is NOT meant for external use
+; The name of the variables ("$left_wall" and "$main_verb") are fixed
+; here as they are shared with all the main subj, obj, and verb, and
+; having fixed names seems to make it clearer and easier
+(define* (main-verb-template #:optional cond-mv)
+  "The template for generating the main verb atomese, since this is needed
+   for defining main subject, verb, and object."
+  (let* ((v (list (TypedVariable (Variable "$left_wall") (Type "WordInstanceNode"))
+                  (TypedVariable (Variable "$main_verb") (Type "WordInstanceNode"))))
+         (c (list (WordInstanceLink (Variable "$left_wall") (Variable "$P"))
+                  (WordInstanceLink (Variable "$main_verb") (Variable "$P"))
+                  (EvaluationLink (LinkGrammarRelationship "WV")
+                                  (ListLink (Variable "$left_wall")
+                                            (Variable "$main_verb"))))))
+    (if cond-mv
+      (cons v (append c cond-mv))
+      (cons v c))))
+
+(define (main-verb w)
+  "Term is the main verb of the sentence."
+  (main-verb-template (list (Lemma (Variable "$main_verb") (Word w))
+                            (WordInstance (Variable "$main_verb") (Variable "$P")))))
