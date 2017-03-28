@@ -17,7 +17,7 @@ ADD_GUILE_MODULE(
 	implication-to-implication-scope-rule.scm
 	inversion-rule.scm
 	lambda-closed-construction-rule.scm
-	lambda-predicate-construction-rule.scm
+#	lambda-predicate-construction-rule.scm
 	and-lambda-distribution-rule.scm
 	and-to-context.scm
 	contextualize.scm
