@@ -1,5 +1,5 @@
-Conjunction
-===========
+Propositional
+=============
 
 Simple example showing how to calculate the TV of a fuzzy proposition
 using the backward chainer.
@@ -20,7 +20,7 @@ Optionally, set the log level to debug (can be insightful to read):
 (cog-logger-set-level! "debug")
 ```
 
-Define a conjunction to evaluate:
+Define a proposition to evaluate:
 
 ```scheme
 (define P (Predicate "P"))
