@@ -18,7 +18,7 @@
    for word mentions in the rule pattern."
   (let* ((name (choose-var-name))
          (v (list (TypedVariable (Variable name) (Type "WordInstanceNode"))))
-         ; TODO -- need to actually get the lemma of "w" here
+         ; Note: This assumes "w" is already a lemma
          (c (list (LemmaLink (Variable name) (WordNode w))
                   (WordInstanceLink (Variable name) (Variable "$P")))))
     (cons v c)))
@@ -99,7 +99,7 @@
 (define (main-verb w)
   "Term is the main verb of the sentence."
   (main-verb-template
-    ; TODO -- need to actually get the lemma of "w" here
+    ; Note: This assumes "w" is already a lemma
     (list (LemmaLink (Variable "$main_verb") (Word w))
           (WordInstanceLink (Variable "$main_verb") (Variable "$P")))))
 
@@ -116,5 +116,5 @@
   (let ((var (choose-var-name)))
     (cons (list (TypedVariable (Variable var) (Type "WordInstanceNode")))
           (list (WordInstanceLink (Variable var) (Variable "$P"))
-                ; TODO -- need to actually get the lemma of "x" here
+                ; Note: This assumes "x" is already a lemma
                 (ChoiceLink (map (lambda (x) (LemmaLink (Variable var) (Word x))) w))))))
