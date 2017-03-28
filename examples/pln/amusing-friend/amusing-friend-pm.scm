@@ -72,7 +72,7 @@
 (cog-bind implication-scope-to-implication-rule)
 
 ;; (3) Infer the TV of the implicant of (2) using
-;; lambda-predicate-construction-rule
+;; predicate-lambda-introduction-rule
 ;;
 ;; Result should be:
 ;;
@@ -89,10 +89,10 @@
 ;;       (List
 ;;          (Variable "$X")
 ;;          (Variable "$Y"))))
-(cog-bind lambda-predicate-construction-rule)
+(cog-bind predicate-lambda-introduction-rule)
 
 ;; (4) Infer the TV of the implicand of (2) using
-;; lambda-predicate-construction-rule
+;; predicate-lambda-introduction-rule
 ;;
 ;; Result should be:
 ;;
@@ -604,7 +604,7 @@
 (cog-bind implication-full-instantiation-rule)
 
 ;; (17) Infer that Bob will be an amusing and honest friend. Apply the
-;; and-construction-rule over the results of (11), (12) and (16)
+;; and-introduction-rule over the results of (11), (12) and (16)
 ;;
 ;; Result should be:
 ;;
@@ -620,4 +620,4 @@
 ;;    (Evaluation
 ;;       (Predicate "is-honest")
 ;;       (Concept "Bob")))
-(cog-bind and-construction-grounded-evaluation-rule)
+(cog-bind and-introduction-grounded-evaluation-rule)

@@ -1,6 +1,7 @@
+;; To be replaced by negation-introduction-rule 
+
 ; =====================================================================
-; NotConstructionRule
-; (http://wiki.opencog.org/w/NotConstructionRule TODO)
+; Not introduction rule
 ;
 ; A<TV1>
 ; |-
@@ -8,7 +9,7 @@
 ;    A
 ;----------------------------------------------------------------------
 
-(define not-construction-rule
+(define not-introduction-rule
   (BindLink
      (VariableList
         (TypedVariableLink
@@ -18,20 +19,20 @@
               (TypeNode "ConceptNode"))))
      (VariableNode "$A")
      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: not-construction-formula")
+        (GroundedSchemaNode "scm: not-introduction-formula")
         (ListLink
            (VariableNode "$A")))))
 
-(define (not-construction-formula A)
+(define (not-introduction-formula A)
   (cog-set-tv!
    (NotLink A)
-   (not-construction-side-effect-free-formula A))
+   (not-introduction-side-effect-free-formula A))
 )
 
 (define (negate x)
   (- 1 x))
 
-(define (not-construction-side-effect-free-formula A)
+(define (not-introduction-side-effect-free-formula A)
   (let ((sA (cog-stv-strength A))
         (cA (cog-stv-confidence A)))
     (stv (negate sA) cA)))
@@ -41,8 +42,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Name the rule
-(define not-construction-rule-name
-  (DefinedSchemaNode "not-construction-rule"))
+(define not-introduction-rule-name
+  (DefinedSchemaNode "not-introduction-rule"))
 (DefineLink
-   not-construction-rule-name
-   not-construction-rule)
+   not-introduction-rule-name
+   not-introduction-rule)

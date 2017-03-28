@@ -1,5 +1,5 @@
 ;; =============================================================================
-;; Fuzzy conjunction Rule
+;; Fuzzy conjunction introduction rule
 ;;
 ;; A1
 ;; ...
@@ -28,60 +28,62 @@
       (append (gen-variables prefix (- n 1))
               (list (gen-variable prefix (- n 1))))))
 
-;; Generate a fuzzy conjunction construction rule for an n-ary
+;; Generate a fuzzy conjunction introduction rule for an n-ary
 ;; conjunction
-(define (gen-fuzzy-conjunction-construction-rule nary)
+(define (gen-fuzzy-conjunction-introduction-rule nary)
   (let* ((variables (gen-variables "$X" nary))
          (EvaluationT (Type "EvaluationLink"))
          (InheritanceT (Type "InheritanceLink"))
-         (type (TypeChoice EvaluationT InheritanceT))
+         (OrT (Type "OrLink"))
+         (NotT (Type "NotLink"))
+         ;; Not AndLink because we'd rather have that already flattened
+         (type (TypeChoice EvaluationT InheritanceT OrT NotT))
          (gen-typed-variable (lambda (x) (TypedVariable x type)))
          (vardecl (VariableList (map gen-typed-variable variables)))
          (pattern (And variables))
          (rewrite (ExecutionOutput
-                    (GroundedSchema "scm: fuzzy-conjunction-construction-formula")
+                    (GroundedSchema "scm: fuzzy-conjunction-introduction-formula")
                     ;; We wrap the variables in Set because the order
-                    ;; doesn't matter and that way alpha-conversion
-                    ;; works better.
+                    ;; doesn't matter and this may speed up the URE.
                     (List (And variables) (Set variables)))))
     (Bind
       vardecl
       pattern
       rewrite)))
 
-(define (fuzzy-conjunction-construction-formula A S)
+(define (fuzzy-conjunction-introduction-formula A S)
   (let* ((andees (cog-outgoing-set S))
          (min-s-atom (min-element-by-key andees cog-stv-strength))
          (min-c-atom (min-element-by-key andees cog-stv-confidence))
          (min-s (cog-stv-strength min-s-atom))
          (min-c (cog-stv-confidence min-c-atom)))
-    (cog-set-tv! A (stv min-s min-c))))
+    (cog-merge-hi-conf-tv! A (stv min-s min-c))))
 
 ;; Name the rules
 ;;
 ;; Lame enumeration, maybe scheme can do better?
-(define fuzzy-conjunction-construction-1ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-construction-1ary-rule"))
+(define fuzzy-conjunction-introduction-1ary-rule-name
+  (DefinedSchema "fuzzy-conjunction-introduction-1ary-rule"))
 (DefineLink
-  fuzzy-conjunction-construction-1ary-rule-name
-  (gen-fuzzy-conjunction-construction-rule 1))
-(define fuzzy-conjunction-construction-2ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-construction-2ary-rule"))
+  fuzzy-conjunction-introduction-1ary-rule-name
+  (gen-fuzzy-conjunction-introduction-rule 1))
+(define fuzzy-conjunction-introduction-2ary-rule-name
+  (DefinedSchema "fuzzy-conjunction-introduction-2ary-rule"))
 (DefineLink
-  fuzzy-conjunction-construction-2ary-rule-name
-  (gen-fuzzy-conjunction-construction-rule 2))
-(define fuzzy-conjunction-construction-3ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-construction-3ary-rule"))
+  fuzzy-conjunction-introduction-2ary-rule-name
+  (gen-fuzzy-conjunction-introduction-rule 2))
+(define fuzzy-conjunction-introduction-3ary-rule-name
+  (DefinedSchema "fuzzy-conjunction-introduction-3ary-rule"))
 (DefineLink
-  fuzzy-conjunction-construction-3ary-rule-name
-  (gen-fuzzy-conjunction-construction-rule 3))
-(define fuzzy-conjunction-construction-4ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-construction-4ary-rule"))
+  fuzzy-conjunction-introduction-3ary-rule-name
+  (gen-fuzzy-conjunction-introduction-rule 3))
+(define fuzzy-conjunction-introduction-4ary-rule-name
+  (DefinedSchema "fuzzy-conjunction-introduction-4ary-rule"))
 (DefineLink
-  fuzzy-conjunction-construction-4ary-rule-name
-  (gen-fuzzy-conjunction-construction-rule 4))
-(define fuzzy-conjunction-construction-5ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-construction-5ary-rule"))
+  fuzzy-conjunction-introduction-4ary-rule-name
+  (gen-fuzzy-conjunction-introduction-rule 4))
+(define fuzzy-conjunction-introduction-5ary-rule-name
+  (DefinedSchema "fuzzy-conjunction-introduction-5ary-rule"))
 (DefineLink
-  fuzzy-conjunction-construction-5ary-rule-name
-  (gen-fuzzy-conjunction-construction-rule 5))
+  fuzzy-conjunction-introduction-5ary-rule-name
+  (gen-fuzzy-conjunction-introduction-rule 5))

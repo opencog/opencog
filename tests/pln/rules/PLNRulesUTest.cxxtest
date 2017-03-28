@@ -63,9 +63,9 @@ public:
 	void load_scm_files(std::vector<std::string>);
 
 	void test_deduction();
-	void test_and_construction();
-	void test_or_construction();
-	void test_not_construction();
+	void test_and_introduction();
+	void test_or_introduction();
+	void test_not_introduction();
 	void test_forall_full_instantiation();
 	void test_forall_partial_instantiation();
 	void test_forall_implication_to_higher_order();
@@ -75,8 +75,8 @@ public:
 	void test_implication_scope_to_implication();
 	void test_and_lambda_distribution();
 	void test_implication_implicant_distribution();
-	void test_implication_construction();
-	void test_lambda_closed_construction();
+	void test_implication_introduction();
+	void test_closed_lambda_introduction();
 	void test_equivalence_to_implication();
 	void test_implication_and_lambda_factorization();
 	void test_implication_implicant_conjunction();
@@ -152,60 +152,60 @@ void PLNRulesUTest::test_deduction()
 }
 
 /**
- * Tests the and rule (and-construction-rule) defined in:
- * opencog/pln/rules/and-construction-rule.scm
+ * Tests the and rule (and-introduction-rule) defined in:
+ * opencog/pln/rules/and-introduction-rule.scm
  */
-void PLNRulesUTest::test_and_construction()
+void PLNRulesUTest::test_and_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
-	                "opencog/pln/rules/and-construction-rule.scm"});
+	                "opencog/pln/rules/and-introduction-rule.scm"});
 
 	// Apply the rule
-	Handle results = eval.eval_h("(cog-bind-af and-construction-rule)");
+	Handle results = eval.eval_h("(cog-bind-af and-introduction-rule)");
 
 	// It should contain 1 groundings, and(A, B)
 	TS_ASSERT_EQUALS(1, getarity(results));
 }
 
 /**
- * Tests the and rule (or-construction-rule) defined in:
- * opencog/pln/rules/or-construction-rule.scm
+ * Tests the and rule (or-introduction-rule) defined in:
+ * opencog/pln/rules/or-introduction-rule.scm
  */
-void PLNRulesUTest::test_or_construction()
+void PLNRulesUTest::test_or_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
-	                "opencog/pln/rules/or-construction-rule.scm"});
+	                "opencog/pln/rules/or-introduction-rule.scm"});
 
 	// Apply the rule
-	Handle results = eval.eval_h("(cog-bind-af or-construction-rule)");
+	Handle results = eval.eval_h("(cog-bind-af or-introduction-rule)");
 
 	// It should contain 1 groundings, or(A, B)
 	TS_ASSERT_EQUALS(1, getarity(results));
 }
 
 /**
- * Tests the not rule (not-construction-rule) defined in:
- * opencog/pln/rules/not-construction-rule.scm
+ * Tests the not rule (not-introduction-rule) defined in:
+ * opencog/pln/rules/not-introduction-rule.scm
  */
-void PLNRulesUTest::test_not_construction()
+void PLNRulesUTest::test_not_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
-	               "opencog/pln/rules/not-construction-rule.scm"});
+	               "opencog/pln/rules/not-introduction-rule.scm"});
 
 	// Apply the rule
-	Handle results = eval.eval_h("(cog-bind-af not-construction-rule)");
+	Handle results = eval.eval_h("(cog-bind-af not-introduction-rule)");
 
 	// It should contain 2 groundings, not(A), not(B)
 	TS_ASSERT_EQUALS(2, getarity(results));
@@ -595,20 +595,20 @@ void PLNRulesUTest::test_implication_implicant_distribution()
 }
 
 /**
- * Test implication-construction-rule defined in:
- * opencog/pln/rules/implication-construction-rule.scm
+ * Test implication-introduction-rule defined in:
+ * opencog/pln/rules/implication-introduction-rule.scm
  */
-void PLNRulesUTest::test_implication_construction()
+void PLNRulesUTest::test_implication_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-predicates.scm",
-	                "opencog/pln/rules/implication-construction-rule.scm"});
+	                "opencog/pln/rules/implication-introduction-rule.scm"});
 
 	// Apply the rule
-	Handle rule = eval.eval_h("implication-construction-rule");
+	Handle rule = eval.eval_h("implication-introduction-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
 		("(SetLink"
@@ -626,20 +626,20 @@ void PLNRulesUTest::test_implication_construction()
 }
 
 /**
- * Test lambda-closed-construction-rule defined in:
- * opencog/pln/rules/lambda-closed-construction-rule.scm
+ * Test closed-lambda-introduction-rule defined in:
+ * opencog/pln/rules/closed-lambda-introduction-rule.scm
  */
-void PLNRulesUTest::test_lambda_closed_construction()
+void PLNRulesUTest::test_closed_lambda_introduction()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as.clear();
 
 	load_scm_files({"tests/pln/rules/simple-lambda.scm",
-	                "opencog/pln/rules/lambda-closed-construction-rule.scm"});
+	                "opencog/pln/rules/closed-lambda-introduction-rule.scm"});
 
 	// Apply the rule
-	Handle rule = eval.eval_h("lambda-closed-construction-rule");
+	Handle rule = eval.eval_h("closed-lambda-introduction-rule");
 	Handle results = bindlink(&as, rule);
 	Handle expected = eval.eval_h
 		("(LambdaLink"
@@ -651,7 +651,7 @@ void PLNRulesUTest::test_lambda_closed_construction()
 	std::cout << "results = " << results->toString();
 	std::cout << "expected = " << expected->toString();
 
-	// Rather than enumerating all possible construction we just make
+	// Rather than enumerating all possible constructions we just make
 	// sure the one that matters is in there.
 	std::set<Handle> sss;
 	for (auto h : results->getOutgoingSet()) sss.insert(h);

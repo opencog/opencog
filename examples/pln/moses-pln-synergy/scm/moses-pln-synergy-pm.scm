@@ -25,10 +25,10 @@
 (cog-bind and-lambda-distribution-rule)
 
 ;; (4)
-(cog-bind lambda-closed-evaluation-rule)
+(cog-bind closed-lambda-evaluation-rule)
 
 ;; (5)
-(cog-bind implication-construction-rule)
+(cog-bind implication-introduction-rule)
 
 ;; (6)
 (cog-bind implication-implicant-distribution-rule)

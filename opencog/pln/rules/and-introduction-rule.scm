@@ -1,6 +1,7 @@
+;; To be replaced by conjunction-introduction-rule.scm
+
 ; =====================================================================
-; AndConstructionRule
-; (http://wiki.opencog.org/w/AndConstructionRule TODO)
+; And introduction rule
 ;
 ; For now A and B can be predicates or concepts. Note that the rule
 ; will not try to prevent mixing predicates and concepts (we need a
@@ -22,7 +23,7 @@
 ;; Old rule. We keep for now for backward compatibility ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define and-construction-rule
+(define and-introduction-rule
   (BindLink
      (VariableList
         (TypedVariableLink
@@ -43,12 +44,12 @@
               (VariableNode "$A")
               (VariableNode "$B"))))
      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: and-construction-formula")
+        (GroundedSchemaNode "scm: and-introduction-formula")
         (ListLink
            (VariableNode "$A")
            (VariableNode "$B")))))
 
-(define (and-construction-formula A B)
+(define (and-introduction-formula A B)
   (cog-set-tv!
    (AndLink A B)
    (and-side-effect-free-formula A B))
@@ -63,11 +64,11 @@
     (stv (* sA sB) (min cA cB))))
 
 ; Name the rule
-(define and-construction-rule-name
-  (DefinedSchemaNode "and-construction-rule"))
+(define and-introduction-rule-name
+  (DefinedSchemaNode "and-introduction-rule"))
 (DefineLink
-   and-construction-rule-name
-   and-construction-rule)
+   and-introduction-rule-name
+   and-introduction-rule)
 
 ;;;;;;;;;;;;;;;
 ;; New rules ;;
@@ -78,7 +79,7 @@
 ;;
 ;; Is only used for and-ing EvaluationLinks without free variable in
 ;; them.
-(define and-construction-grounded-evaluation-rule
+(define and-introduction-grounded-evaluation-rule
   (BindLink
      (VariableList
         (TypedVariableLink
@@ -121,13 +122,13 @@
            (ListLink
               (VariableNode "$C"))))
      (ExecutionOutputLink
-        (GroundedSchemaNode "scm: and-construction-grounded-evaluation-formula")
+        (GroundedSchemaNode "scm: and-introduction-grounded-evaluation-formula")
         (ListLink
            (VariableNode "$A")
            (VariableNode "$B")
            (VariableNode "$C")))))
 
-(define (and-construction-grounded-evaluation-formula A B C)
+(define (and-introduction-grounded-evaluation-formula A B C)
   (let ((As (cog-stv-strength A))
         (Bs (cog-stv-strength B))
         (Cs (cog-stv-strength C))
@@ -155,7 +156,7 @@
       (stv 0 1)))
 
 ;; Name the rule
-(define and-construction-grounded-evaluation-rule-name
-  (DefinedSchemaNode "and-construction-grounded-evaluation-rule"))
-(DefineLink and-construction-grounded-evaluation-rule-name
-  and-construction-grounded-evaluation-rule)
+(define and-introduction-grounded-evaluation-rule-name
+  (DefinedSchemaNode "and-introduction-grounded-evaluation-rule"))
+(DefineLink and-introduction-grounded-evaluation-rule-name
+  and-introduction-grounded-evaluation-rule)

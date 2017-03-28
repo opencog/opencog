@@ -1,4 +1,6 @@
 ;; =====================================================================
+;; Predicate lambda evaluation rule
+;;
 ;; Lambda
 ;;    <variables>
 ;;    Evaluation
@@ -16,7 +18,7 @@
 ;; Evaluate the TV of Lambda around an evaluation of a predicate.
 ;; ----------------------------------------------------------------------
 
-(define lambda-predicate-evaluation-vardecl
+(define predicate-lambda-evaluation-vardecl
   (VariableList
      (TypedVariable
         (Variable "$V")
@@ -27,7 +29,7 @@
      (Variable "$P")
      (Variable "$Args")))
 
-(define lambda-predicate-evaluation-pattern
+(define predicate-lambda-evaluation-pattern
   (And
     (Quote (Lambda
       (Unquote (VariableNode "$V"))
@@ -38,9 +40,9 @@
       (GroundedPredicate "scm: gt-zero-confidence")
       (Variable "$P"))))
 
-(define lambda-predicate-evaluation-rewrite
+(define predicate-lambda-evaluation-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: lambda-predicate-evaluation-formula")
+     (GroundedSchemaNode "scm: predicate-lambda-evaluation-formula")
      (ListLink
        (Quote (Lambda
          (Unquote (VariableNode "$V"))
@@ -49,20 +51,20 @@
            (Variable "$Args"))))))
        (Variable "$P"))))
 
-(define lambda-predicate-evaluation-rule
+(define predicate-lambda-evaluation-rule
   (BindLink
-     lambda-predicate-evaluation-vardecl
-     lambda-predicate-evaluation-pattern
-     lambda-predicate-evaluation-rewrite))
+     predicate-lambda-evaluation-vardecl
+     predicate-lambda-evaluation-pattern
+     predicate-lambda-evaluation-rewrite))
 
-(define (lambda-predicate-evaluation-formula lamb pred)
+(define (predicate-lambda-evaluation-formula lamb pred)
   (let ((pred-tv (cog-tv pred)))
     (if (tv-non-null-conf? pred-tv) ; Try to avoid constructing
                                     ; informationless knowledge
         (cog-merge-hi-conf-tv! lamb pred-tv))))
 
 ;; Name the rule
-(define lambda-predicate-evaluation-rule-name
-  (DefinedSchemaNode "lambda-predicate-evaluation-rule"))
-(DefineLink lambda-predicate-evaluation-rule-name
-  lambda-predicate-evaluation-rule)
+(define predicate-lambda-evaluation-rule-name
+  (DefinedSchemaNode "predicate-lambda-evaluation-rule"))
+(DefineLink predicate-lambda-evaluation-rule-name
+  predicate-lambda-evaluation-rule)

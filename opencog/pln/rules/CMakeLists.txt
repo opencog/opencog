@@ -2,7 +2,7 @@ ADD_GUILE_MODULE(
 	implication-direct-evaluation-rule.scm
 	instantiation.scm
 	implication-instantiation-rule.scm
-	and-construction-rule.scm
+	and-introduction-rule.scm
 	and-lambda-factorization-double-implication-rule.scm
 	and-simplification-rule.scm
 	deduction-rule.scm
@@ -16,8 +16,8 @@ ADD_GUILE_MODULE(
 	implication-scope-to-implication-rule.scm
 	implication-to-implication-scope-rule.scm
 	inversion-rule.scm
-	lambda-closed-construction-rule.scm
-#	lambda-predicate-construction-rule.scm
+	closed-lambda-introduction-rule.scm
+	predicate-lambda-evaluation-rule.scm
 	and-lambda-distribution-rule.scm
 	and-to-context.scm
 	contextualize.scm
@@ -41,12 +41,12 @@ ADD_GUILE_MODULE(
 	intensional-similarity-evaluation-rule.scm
 	member-to-inheritance-rule.scm
 	modus-ponens-rule.scm
-	not-construction-rule.scm
+	not-introduction-rule.scm
 	not-elimination-rule.scm
 	not-simplification-rule.scm
 	ontological-inheritance-rule.scm
 	or-breakdown-rule.scm
-	or-construction-rule.scm
+	or-introduction-rule.scm
 	or-elimination-rule.scm
 	or-evaluation-rule.scm
 	precise-modus-ponens-rule.scm
@@ -62,11 +62,14 @@ ADD_GUILE_MODULE(
 	attraction-rule.scm
 	context-free-to-sensitive.scm
 	evaluation-implication-rule.scm
-	implication-construction-rule.scm
+	implication-introduction-rule.scm
 	inheritance-rule.scm
 	negated-subset-evaluation-rule.scm
 	or-transformation-rule.scm
 	similarity-rule.scm
+    fuzzy-conjunction-introduction-rule.scm
+    fuzzy-disjunction-introduction-rule.scm
+    negation-introduction-rule.scm
 )
 
 # TODO: The following rules are temporary hacks; remove them as the bugs are
