@@ -110,3 +110,11 @@
 (define (main-obj w)
   "Term is the main object of the sentence."
   (main-so-template w "_obj"))
+
+(define (or-choices . w)
+  "The choices available, need to match either one of them in the list."
+  (let ((var (choose-var-name)))
+    (cons (list (TypedVariable (Variable var) (Type "WordInstanceNode")))
+          (list (WordInstanceLink (Variable var) (Variable "$P"))
+                ; TODO -- need to actually get the lemma of "x" here
+                (ChoiceLink (map (lambda (x) (LemmaLink (Variable var) (Word x))) w))))))
