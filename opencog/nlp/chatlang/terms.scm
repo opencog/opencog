@@ -18,6 +18,7 @@
    for word mentions in the rule pattern."
   (let* ((name (choose-var-name))
          (v (list (TypedVariable (Variable name) (Type "WordInstanceNode"))))
+         ; TODO -- need to actually get the lemma of "w" here
          (c (list (LemmaLink (Variable name) (WordNode w))
                   (WordInstanceLink (Variable name) (Variable "$P")))))
     (cons v c)))
@@ -80,7 +81,30 @@
       (cons v (append c cond-mv))
       (cons v c))))
 
+; This is NOT meant for external use
+; To generate the common atomese representation for main subject and object
+(define (main-so-template w r)
+  "The template for generating the main subject and object atomese."
+  (let* ((main-verb-atomese (main-verb-template))
+         (lemma-atomese (lemma w))
+         (var-so (gar (caar lemma-atomese))))
+    (cons (append (car main-verb-atomese)
+                  (car lemma-atomese))
+          (append (cdr main-verb-atomese)
+                  (cdr lemma-atomese)
+                  (list (Evaluation (DefinedLinguisticRelationship r)
+                                    (List (Variable "$main_verb")
+                                          var-so)))))))
+
 (define (main-verb w)
   "Term is the main verb of the sentence."
   (main-verb-template (list (Lemma (Variable "$main_verb") (Word w))
                             (WordInstance (Variable "$main_verb") (Variable "$P")))))
+
+(define (main-subj w)
+  "Term is the main subject of the sentence."
+  (main-so-template w "_subj"))
+
+(define (main-obj w)
+  "Term is the main object of the sentence."
+  (main-so-template w "_obj"))
