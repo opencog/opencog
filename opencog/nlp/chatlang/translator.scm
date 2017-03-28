@@ -90,10 +90,14 @@
          (proc-terms (fold process-pattern-term
                            template
                            pattern))
+         ; There may be duplicates if the pattern contains any two or more
+         ; of the main-* terms, e.g. main-verb, main-subj, and main-obj
+         (var-list (delete-duplicates (car proc-terms)))
+         (cond-list (delete-duplicates (cdr proc-terms)))
          (seq-check (term-sequence-check pattern)))
     (psi-rule
-      (list (Satisfaction (VariableList (car proc-terms))
-                          (And (append (cdr proc-terms) (list seq-check)))))
+      (list (Satisfaction (VariableList var-list)
+                          (And (append cond-list (list seq-check)))))
       (primitive-eval action)
       (True)
       (stv .9 .9)
