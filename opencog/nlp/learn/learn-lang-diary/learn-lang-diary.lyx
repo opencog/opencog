@@ -15758,6 +15758,55 @@ ers13.pdf
 \end_layout
 
 \begin_layout Section*
+Edge-counting 27 March 2017
+\end_layout
+
+\begin_layout Standard
+Counting edges in a clique is not the same as counting edges in planar trees.
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Four-word sentence clique
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Four-word-sentence-clique"
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename four-clique.eps
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
 The End
 \end_layout
 
