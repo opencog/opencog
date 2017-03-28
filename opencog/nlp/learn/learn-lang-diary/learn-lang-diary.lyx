@@ -15791,7 +15791,7 @@ words
 
 \begin_layout Standard
 Pair counting in planar diagrams gives different results.
- The diagram below shows the eleven planar trees that can be formed by parsing
+ The diagram below shows the twelve planar trees that can be formed by parsing
  a sentence of four words.
  
 \end_layout
@@ -15808,7 +15808,7 @@ Pair counting in planar diagrams gives different results.
 \end_layout
 
 \begin_layout Standard
-There are 33 edges grand total, and these are unequally distributed.
+There are 36 edges grand total, and these are unequally distributed.
  The counts are: 
 \end_layout
 
@@ -15853,7 +15853,7 @@ count
 \begin_inset Text
 
 \begin_layout Plain Layout
-6
+7
 \end_layout
 
 \end_inset
@@ -15893,7 +15893,7 @@ count
 \begin_inset Text
 
 \begin_layout Plain Layout
-6
+7
 \end_layout
 
 \end_inset
@@ -15953,7 +15953,7 @@ count
 \begin_inset Text
 
 \begin_layout Plain Layout
-6
+7
 \end_layout
 
 \end_inset
@@ -15967,7 +15967,7 @@ count
 \end_layout
 
 \begin_layout Standard
-Note that the most frequent edge occurs almost twice as often as the least-frequ
+Note that the most frequent edges occur almost twice as often as the least-frequ
 ent edges.
  The distribution, by length, is:
 \end_layout
@@ -16004,7 +16004,7 @@ Count
 \begin_inset Text
 
 \begin_layout Plain Layout
-2
+1
 \end_layout
 
 \end_inset
@@ -16013,7 +16013,7 @@ Count
 \begin_inset Text
 
 \begin_layout Plain Layout
-19
+21
 \end_layout
 
 \end_inset
@@ -16024,7 +16024,7 @@ Count
 \begin_inset Text
 
 \begin_layout Plain Layout
-3
+2
 \end_layout
 
 \end_inset
@@ -16033,7 +16033,7 @@ Count
 \begin_inset Text
 
 \begin_layout Plain Layout
-10
+8
 \end_layout
 
 \end_inset
@@ -16044,7 +16044,7 @@ Count
 \begin_inset Text
 
 \begin_layout Plain Layout
-4
+3
 \end_layout
 
 \end_inset
@@ -16053,7 +16053,7 @@ Count
 \begin_inset Text
 
 \begin_layout Plain Layout
-6
+7
 \end_layout
 
 \end_inset
@@ -16064,6 +16064,40 @@ Count
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Note that the progressively-longer edges get less frequent.
+ What is the actual distribution? First, we need a generic formula for sentences
+ of length N.
+ The diagram below shows how to count.
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/all-count.eps
+	width 50col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Her, the star represents some planar tree connecting all of the words of
+ a smaller sentence.
+ Assume that there are 
+\begin_inset Formula $T(n)$
+\end_inset
+
+ such trees, connecting 
+\begin_inset Formula $n$
+\end_inset
+
+ words.
+ 
 \end_layout
 
 \begin_layout Section*
