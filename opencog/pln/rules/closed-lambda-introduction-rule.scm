@@ -1,4 +1,6 @@
 ;; =====================================================================
+;; Closed lamdba introduction rule
+;;
 ;; V
 ;; Body
 ;; |-
@@ -11,7 +13,7 @@
 ;; basically create a constant predicate or schema.
 ;; ----------------------------------------------------------------------
 
-(define lambda-closed-construction-vardecl
+(define closed-lambda-introduction-vardecl
   (VariableList
     (TypedVariableLink
       (VariableNode "$V")
@@ -23,37 +25,37 @@
       (VariableNode "$B")
       (TypeNode "EvaluationLink"))))
 
-(define lambda-closed-construction-pattern
+(define closed-lambda-introduction-pattern
   (AndLink
     (VariableNode "$V")
     (VariableNode "$B")
     (EvaluationLink
-      (GroundedPredicateNode "scm: lambda-closed-construction-precondition")
+      (GroundedPredicateNode "scm: closed-lambda-introduction-precondition")
       (VariableNode "$B"))))
 
-(define lambda-closed-construction-rewrite
+(define closed-lambda-introduction-rewrite
   (ExecutionOutputLink
-    (GroundedSchemaNode "scm: lambda-closed-construction-formula")
+    (GroundedSchemaNode "scm: closed-lambda-introduction-formula")
     (ListLink
       (QuoteLink (LambdaLink
         (UnquoteLink (VariableNode "$V"))
         (UnquoteLink (VariableNode "$B"))))
       (VariableNode "$B"))))
 
-(define lambda-closed-construction-rule
+(define closed-lambda-introduction-rule
   (BindLink
-    lambda-closed-construction-vardecl
-    lambda-closed-construction-pattern
-    lambda-closed-construction-rewrite))
+    closed-lambda-introduction-vardecl
+    closed-lambda-introduction-pattern
+    closed-lambda-introduction-rewrite))
 
-(define (lambda-closed-construction-formula lamb body)
+(define (closed-lambda-introduction-formula lamb body)
   (cog-set-tv! lamb (cog-tv body)))
 
-(define (lambda-closed-construction-precondition atom)
+(define (closed-lambda-introduction-precondition atom)
   (bool->tv (and (cog-closed? atom) (tv-non-null-conf? (cog-tv atom)))))
 
 ;; Name the rule
-(define lambda-closed-construction-rule-name
-  (DefinedSchemaNode "lambda-closed-construction-rule"))
-(DefineLink lambda-closed-construction-rule-name
-  lambda-closed-construction-rule)
+(define closed-lambda-introduction-rule-name
+  (DefinedSchemaNode "closed-lambda-introduction-rule"))
+(DefineLink closed-lambda-introduction-rule-name
+  closed-lambda-introduction-rule)

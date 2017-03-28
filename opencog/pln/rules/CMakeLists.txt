@@ -16,8 +16,8 @@ ADD_GUILE_MODULE(
 	implication-scope-to-implication-rule.scm
 	implication-to-implication-scope-rule.scm
 	inversion-rule.scm
-	lambda-closed-construction-rule.scm
-#	lambda-predicate-construction-rule.scm
+	closed-lambda-introduction-rule.scm
+	predicate-lambda-evaluation-rule.scm
 	and-lambda-distribution-rule.scm
 	and-to-context.scm
 	contextualize.scm
@@ -62,11 +62,14 @@ ADD_GUILE_MODULE(
 	attraction-rule.scm
 	context-free-to-sensitive.scm
 	evaluation-implication-rule.scm
-	implication-construction-rule.scm
+	implication-introduction-rule.scm
 	inheritance-rule.scm
 	negated-subset-evaluation-rule.scm
 	or-transformation-rule.scm
 	similarity-rule.scm
+    fuzzy-conjunction-introduction-rule.scm
+    fuzzy-disjunction-introduction-rule.scm
+    negation-introduction-rule.scm
 )
 
 # TODO: The following rules are temporary hacks; remove them as the bugs are

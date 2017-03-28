@@ -1,4 +1,6 @@
 ;; =====================================================================
+;; Closed lambda evaluation rule
+;;
 ;; LambdaLink
 ;;    V
 ;;    Body
@@ -7,13 +9,13 @@
 ;;    V
 ;;    Body
 ;;
-;; Like lambda-closed-construction-rule but merely calculate the TV of
+;; Like closed-lambda-introduction-rule but merely calculate the TV of
 ;; an existing lambda link over a closed term instead of building
 ;; one. It is a strict refinement used to not pollute the atomspace
 ;; with extranous combinations when applied in a naive forward way.
 ;; ----------------------------------------------------------------------
 
-(define lambda-closed-evaluation-vardecl
+(define closed-lambda-evaluation-vardecl
   (VariableList
     (TypedVariableLink
       (VariableNode "$V")
@@ -25,38 +27,38 @@
       (VariableNode "$B")
       (TypeNode "EvaluationLink"))))
 
-(define lambda-closed-evaluation-pattern
+(define closed-lambda-evaluation-pattern
   (AndLink
     (QuoteLink (LambdaLink
       (UnquoteLink (VariableNode "$V"))
       (UnquoteLink (VariableNode "$B"))))
     (EvaluationLink
-      (GroundedPredicateNode "scm: lambda-closed-evaluation-precondition")
+      (GroundedPredicateNode "scm: closed-lambda-evaluation-precondition")
       (VariableNode "$B"))))
 
-(define lambda-closed-evaluation-rewrite
+(define closed-lambda-evaluation-rewrite
   (ExecutionOutputLink
-    (GroundedSchemaNode "scm: lambda-closed-evaluation-formula")
+    (GroundedSchemaNode "scm: closed-lambda-evaluation-formula")
     (ListLink
       (QuoteLink (LambdaLink
         (UnquoteLink (VariableNode "$V"))
         (UnquoteLink (VariableNode "$B"))))
       (VariableNode "$B"))))
 
-(define lambda-closed-evaluation-rule
+(define closed-lambda-evaluation-rule
   (BindLink
-    lambda-closed-evaluation-vardecl
-    lambda-closed-evaluation-pattern
-    lambda-closed-evaluation-rewrite))
+    closed-lambda-evaluation-vardecl
+    closed-lambda-evaluation-pattern
+    closed-lambda-evaluation-rewrite))
 
-(define (lambda-closed-evaluation-formula lamb body)
+(define (closed-lambda-evaluation-formula lamb body)
   (cog-set-tv! lamb (cog-tv body)))
 
-(define (lambda-closed-evaluation-precondition atom)
+(define (closed-lambda-evaluation-precondition atom)
   (bool->tv (and (cog-closed? atom) (tv-non-null-conf? (cog-tv atom)))))
 
 ;; Name the rule
-(define lambda-closed-evaluation-rule-name
-  (DefinedSchemaNode "lambda-closed-evaluation-rule"))
-(DefineLink lambda-closed-evaluation-rule-name
-  lambda-closed-evaluation-rule)
+(define closed-lambda-evaluation-rule-name
+  (DefinedSchemaNode "closed-lambda-evaluation-rule"))
+(DefineLink closed-lambda-evaluation-rule-name
+  closed-lambda-evaluation-rule)

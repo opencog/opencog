@@ -113,7 +113,7 @@
               ;; TV. This covers the case where B fully confidently
               ;; tends to 1. See formulas.scm Simple Deduction
               ;; Formula comment for more explanations. This
-              ;; overlaps with the implication-construction-rule.
+              ;; overlaps with the implication-introduction-rule.
               (let ((sAC sC)
                     (cAC (* alpha cA cC)))
                 (if (and (< 1e-8 sAC) (< 1e-8 cAC)) ;; Don't create zero

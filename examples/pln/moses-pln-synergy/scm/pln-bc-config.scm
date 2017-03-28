@@ -53,8 +53,8 @@
   (list "conditional-partial-instantiation-meta-rule.scm"
         "implication-scope-to-implication-rule.scm"
         "and-lambda-distribution-rule.scm"
-        "lambda-closed-construction-rule.scm"
-        "implication-construction-rule.scm"
+        "closed-lambda-introduction-rule.scm"
+        "implication-introduction-rule.scm"
         "implication-implicant-distribution-rule.scm"
         "implication-and-lambda-factorization-rule.scm"
         "deduction-rule.scm"
@@ -75,8 +75,8 @@
         (list conditional-partial-instantiation-meta-rule-name 1)
         (list implication-scope-to-implication-rule-name 1)
         ;; (list and-lambda-distribution-rule-name 1)
-        (list lambda-closed-construction-rule-name 1)
-        (list implication-construction-rule-name 1)
+        (list closed-lambda-introduction-rule-name 1)
+        (list implication-introduction-rule-name 1)
         (list implication-implicant-distribution-rule-name 1)
         (list implication-and-lambda-factorization-rule-name 1)
         (list deduction-implication-rule-name 1)

@@ -1,5 +1,5 @@
 ;; =====================================================================
-;; Implication construction rule
+;; Implication introduction rule
 ;; 
 ;; P
 ;; Q
@@ -17,7 +17,7 @@
 ;;
 ;; ----------------------------------------------------------------------
 
-(define implication-construction-vardecl
+(define implication-introduction-vardecl
   (VariableList
      (TypedVariableLink
         (VariableNode "$P")
@@ -30,12 +30,12 @@
            (TypeNode "PredicateNode")
            (TypeNode "LambdaLink")))))
 
-(define implication-construction-pattern
+(define implication-introduction-pattern
   (AndLink
      (VariableNode "$P")
      (VariableNode "$Q")
      (EvaluationLink
-        (GroundedPredicateNode "scm: implication-construction-precondition")
+        (GroundedPredicateNode "scm: implication-introduction-precondition")
         (ListLink
            (VariableNode "$P")
            (VariableNode "$Q")))
@@ -44,9 +44,9 @@
            (VariableNode "$P")
            (VariableNode "$Q")))))
 
-(define implication-construction-rewrite
+(define implication-introduction-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: implication-construction-formula")
+     (GroundedSchemaNode "scm: implication-introduction-formula")
      (ListLink
         (ImplicationLink
            (VariableNode "$P")
@@ -54,16 +54,16 @@
         (VariableNode "$P")
         (VariableNode "$Q"))))
 
-(define implication-construction-rule
+(define implication-introduction-rule
   (BindLink
-     implication-construction-vardecl
-     implication-construction-pattern
-     implication-construction-rewrite))
+     implication-introduction-vardecl
+     implication-introduction-pattern
+     implication-introduction-rewrite))
 
-(define (implication-construction-precondition P Q)
-  (bool->tv (tv-non-null-conf? (implication-construction-stv-formula P Q))))
+(define (implication-introduction-precondition P Q)
+  (bool->tv (tv-non-null-conf? (implication-introduction-stv-formula P Q))))
 
-(define (implication-construction-stv-formula P Q)
+(define (implication-introduction-stv-formula P Q)
   (let* (
          (P-s (cog-stv-strength P))
          (P-c (cog-stv-confidence P))
@@ -78,14 +78,14 @@
                                         ; formula sucks
     (stv Impl-s Impl-c)))
 
-(define (implication-construction-formula Impl P Q)
-  (let ((Impl-tv (implication-construction-stv-formula P Q)))
+(define (implication-introduction-formula Impl P Q)
+  (let ((Impl-tv (implication-introduction-stv-formula P Q)))
     (if (tv-non-null-conf? Impl-tv) ; Try to avoid constructing informationless
                                     ; knowledge
         (cog-merge-hi-conf-tv! Impl Impl-tv))))
 
 ;; Name the rule
-(define implication-construction-rule-name
-  (DefinedSchemaNode "implication-construction-rule"))
-(DefineLink implication-construction-rule-name
-  implication-construction-rule)
+(define implication-introduction-rule-name
+  (DefinedSchemaNode "implication-introduction-rule"))
+(DefineLink implication-introduction-rule-name
+  implication-introduction-rule)

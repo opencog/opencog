@@ -1,3 +1,5 @@
+;; To be replaced by conjunction-introduction-rule.scm
+
 ; =====================================================================
 ; AndConstructionRule
 ; (http://wiki.opencog.org/w/AndConstructionRule TODO)

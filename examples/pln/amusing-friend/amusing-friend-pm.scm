@@ -72,7 +72,7 @@
 (cog-bind implication-scope-to-implication-rule)
 
 ;; (3) Infer the TV of the implicant of (2) using
-;; lambda-predicate-construction-rule
+;; predicate-lambda-introduction-rule
 ;;
 ;; Result should be:
 ;;
@@ -89,10 +89,10 @@
 ;;       (List
 ;;          (Variable "$X")
 ;;          (Variable "$Y"))))
-(cog-bind lambda-predicate-construction-rule)
+(cog-bind predicate-lambda-introduction-rule)
 
 ;; (4) Infer the TV of the implicand of (2) using
-;; lambda-predicate-construction-rule
+;; predicate-lambda-introduction-rule
 ;;
 ;; Result should be:
 ;;

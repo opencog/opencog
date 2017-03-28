@@ -1,3 +1,5 @@
+;; To be replaced by negation-introduction-rule 
+
 ; =====================================================================
 ; NotConstructionRule
 ; (http://wiki.opencog.org/w/NotConstructionRule TODO)
