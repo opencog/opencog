@@ -19,11 +19,12 @@
 (use-modules (opencog))
 (use-modules (opencog rule-engine))
 
-;XXX This is bad and broken and wrong; one should not try to bypass the
-; scheme module system like this, its just asking for carpet burns.
-(load-from-path "utilities.scm")
-(load-from-path "av-tv.scm")
-(load-from-path "opencog/rule-engine/rule-engine-utils.scm")
+;; TODO Maybe we can remove that definitely?
+;; ;XXX This is bad and broken and wrong; one should not try to bypass the
+;; ; scheme module system like this, its just asking for carpet burns.
+;; (load-from-path "utilities.scm")
+;; (load-from-path "av-tv.scm")
+;; (load-from-path "opencog/rule-engine/rule-engine-utils.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Define PLN rule-based system ;;
