@@ -112,8 +112,8 @@ AttentionValue::sti_t FocusBoundaryUpdatingAgent::get_cutoff(HandleSeq& afset)
             [&](const Handle& h1, const Handle& h2)->bool {
                 return getSTI(h1) > getSTI(h2);
             });
-    HandleSeq afAtoms = HandleSeq(afset.begin() + minAFSize, afset.begin() + maxAFSize);
-
+    HandleSeq afAtoms = HandleSeq(afset.begin() + minAFSize, 
+                        (afset.size() > maxAFSize ? afset.begin() + maxAFSize : afset.end()));
     int cut_off_index = 0;
     int biggest_diff = -1 ; // diffs are always +ve. so, its okay to initialize it with -ve number.
     constexpr int DIFF_MAGNITUDE = 0.5; // make this a parameter
