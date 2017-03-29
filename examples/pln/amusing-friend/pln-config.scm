@@ -51,7 +51,7 @@
   (list "implication-instantiation-rule.scm"
         "implication-scope-to-implication-rule.scm"
         "equivalence-to-implication-rule.scm"
-        "lambda-predicate-evaluation-rule.scm"
+        "predicate-lambda-evaluation-rule.scm"
         "inversion-rule.scm"
         "implication-implicant-conjunction-rule.scm"
         "and-lambda-factorization-double-implication-rule.scm"
