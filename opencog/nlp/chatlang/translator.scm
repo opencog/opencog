@@ -57,38 +57,16 @@
   ; TODO: Maybe there is a more elegant way to represent it in the context?
   (True (List word-list)))
 
-(define (get-word-lemma sent-node target-link-type)
+(define (get-sent-lemmas sent-node)
+  "Get the lemma of the words associate with sent-node"
   (List (append-map
     (lambda (w)
       ; Ignore LEFT-WALL and punctuations
       (if (or (string-prefix? "LEFT-WALL" (cog-name w))
               (word-inst-match-pos? w "punctuation"))
           '()
-          (cog-chase-link target-link-type 'WordNode w)))
+          (cog-chase-link 'LemmaLink 'WordNode w)))
     (car (sent-get-words-in-order sent-node)))))
-
-(define (get-sent-words sent-node)
-  "Get the words associate with sent-node"
-  (get-word-lemma sent-node 'ReferenceLink))
-
-(define (get-sent-lemmas sent-node)
-  "Get the lemma of the words associate with sent-node"
-  (get-word-lemma sent-node 'LemmaLink))
-
-(define (check-word-sequence sent-node word-list)
-  "Check if the sequence of the words associate with the
-   sentence 'sent-node' matches with word-list"
-  (let* ((sent-word-list (get-sent-words sent-node))
-         (sent-lemma-list (get-sent-lemmas sent-node))
-         (exact-match (or (equal? word-list sent-word-list)
-                          (equal? word-list sent-lemma-list)))
-         (map-result-1 (cog-execute! (Map word-list (Set sent-word-list))))
-         (map-result-2 (cog-execute! (Map word-list (Set sent-lemma-list))))
-         (dual-match (or (not (null? (gar map-result-1)))
-                         (not (null? (gar map-result-2))))))
-  (if (or exact-match dual-match)
-      (stv 1 1)
-      (stv 0 1))))
 
 (define (say text)
   "Say the text and clear the state"
