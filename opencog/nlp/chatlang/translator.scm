@@ -48,7 +48,10 @@
   (define word-list
     (map (lambda (w)
       (cond ((equal? 'concept (car w)) (Glob (cadr w)))
-             (else (Word (get-lemma (cadr w))))))
+            ; For proper names -- create WordNodes
+            ((equal? 'proper-names (car w)) (map Word (cdr w)))
+            ((not (equal? #f (string-index (cadr w) char-upper-case?))) (Word (cadr w)))
+            (else (Word (get-lemma (cadr w))))))
          terms))
   ; Wrap it using a TrueLink
   ; TODO: Maybe there is a more elegant way to represent it in the context?
