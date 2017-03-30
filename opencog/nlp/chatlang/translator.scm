@@ -48,7 +48,7 @@
   (define word-list
     (map (lambda (w)
       (cond ((equal? 'concept (car w)) (Glob (cadr w)))
-             (else (Word (cadr w)))))
+             (else (Word (get-lemma (cadr w))))))
          terms))
   ; Wrap it using a TrueLink
   ; TODO: Maybe there is a more elegant way to represent it in the context?
