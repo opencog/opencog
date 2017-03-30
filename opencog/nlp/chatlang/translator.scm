@@ -29,11 +29,21 @@
          (conds (append (cdr atomese-pattern) (cdr atomese-for-term))))
     (cons vars conds)))
 
-; XXX TODO FIXME
-; This is a temporary hack for testing purpose
-; Will think more on this and update it accordingly
 (define (term-sequence-check terms)
   "Checks terms occur in the desired order. To be implemented."
+  ; A hacky way to quickly find the lemma of a word using WordNet
+  (define (get-lemma word)
+    (let* ((cmd-string (string-append "wn " word " | grep \"Information available for .\\+\""))
+           (port (open-input-pipe cmd-string))
+           (lemma ""))
+      (do ((line (get-line port) (get-line port)))
+          ((eof-object? line))
+        (let ((l (car (last-pair (string-split line #\ )))))
+          (if (not (equal? word l))
+            (set! lemma l))))
+      (close-pipe port)
+      (if (string-null? lemma) word lemma)))
+
   (define word-list
     (map (lambda (w) (cond ((equal? 'concept (car w)) (Glob (car (cdr w))))
                            (else (Word (car (cdr w))))))
