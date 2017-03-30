@@ -30,7 +30,7 @@
     (cons vars conds)))
 
 (define (term-sequence-check terms)
-  "Checks terms occur in the desired order. To be implemented."
+  "Checks terms occur in the desired order. This will be done by using DualLink."
   ; A hacky way to quickly find the lemma of a word using WordNet
   (define (get-lemma word)
     (let* ((cmd-string (string-append "wn " word " | grep \"Information available for .\\+\""))
@@ -43,14 +43,13 @@
             (set! lemma l))))
       (close-pipe port)
       (if (string-null? lemma) word lemma)))
-
   (define word-list
     (map (lambda (w) (cond ((equal? 'concept (car w)) (Glob (car (cdr w))))
                            (else (Word (car (cdr w))))))
          terms))
-  (Evaluation (GroundedPredicate "scm: check-word-sequence")
-              (List (Variable "$S")
-                    (List word-list))))
+  ; Wrap it using a TrueLink
+  ; TODO: Maybe there is a more elegant way to represent it?
+  (True (List word-list))
 
 (define (get-word-lemma sent-node target-link-type)
   (List (append-map
