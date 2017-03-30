@@ -7,7 +7,9 @@
              (opencog exec)
              (opencog openpsi)
              (opencog eva-behavior)
-             (srfi srfi-1))
+             (srfi srfi-1)
+             (rnrs io ports)
+             (ice-9 popen))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -44,12 +46,13 @@
       (close-pipe port)
       (if (string-null? lemma) word lemma)))
   (define word-list
-    (map (lambda (w) (cond ((equal? 'concept (car w)) (Glob (car (cdr w))))
-                           (else (Word (car (cdr w))))))
+    (map (lambda (w)
+      (cond ((equal? 'concept (car w)) (Glob (cadr w)))
+             (else (Word (cadr w)))))
          terms))
   ; Wrap it using a TrueLink
-  ; TODO: Maybe there is a more elegant way to represent it?
-  (True (List word-list))
+  ; TODO: Maybe there is a more elegant way to represent it in the context?
+  (True (List word-list)))
 
 (define (get-word-lemma sent-node target-link-type)
   (List (append-map
