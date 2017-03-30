@@ -54,6 +54,8 @@ INSTALL (FILES
         DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"
 )
 
+INSTALL (TARGETS PatternMiner DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
 IF (HAVE_cpprest)
 
     ADD_LIBRARY(DistributedPatternMinerClient SHARED
@@ -78,6 +80,27 @@ IF (HAVE_cpprest)
     )
 
 ENDIF (HAVE_cpprest)
+
+# This defines the guile scheme loadable module
+
+IF (HAVE_GUILE)
+        ADD_LIBRARY (libguile-patternminer SHARED
+                PatternMinerSCM
+        )
+
+        TARGET_LINK_LIBRARIES(libguile-patternminer
+                PatternMiner
+                ${GUILE_LIBRARIES}
+        )
+
+        INSTALL (TARGETS libguile-patternminer DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
+	
+
+       
+ENDIF (HAVE_GUILE)
+
+# ------------------------------------------------------------
 
 
 

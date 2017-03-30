@@ -44,6 +44,7 @@
 (add-to-ltdl-path (string-append (getcwd) "/opencog/nlp/sureal"))
 (add-to-ltdl-path (string-append (getcwd) "/opencog/nlp/lg-dict"))
 (add-to-ltdl-path (string-append (getcwd) "/opencog/planning"))
+(add-to-ltdl-path (string-append (getcwd) "/opencog/scm/opencog/learning"))
 
 ; --------------------------------------------------------------
 ; Default guile modules loaded
