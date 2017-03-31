@@ -7,7 +7,9 @@
              (opencog exec)
              (opencog openpsi)
              (opencog eva-behavior)
-             (srfi srfi-1))
+             (srfi srfi-1)
+             (rnrs io ports)
+             (ice-9 popen))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -29,51 +31,43 @@
          (conds (append (cdr atomese-pattern) (cdr atomese-for-term))))
     (cons vars conds)))
 
-; XXX TODO FIXME
-; This is a temporary hack for testing purpose
-; Will think more on this and update it accordingly
 (define (term-sequence-check terms)
-  "Checks terms occur in the desired order. To be implemented."
+  "Checks terms occur in the desired order. This is done when we're using
+   DualLink to find the rules, see 'find-chat-rules' for details."
+  ; A hacky way to quickly find the lemma of a word using WordNet...
+  (define (get-lemma word)
+    (let* ((cmd-string (string-append "wn " word " | grep \"Information available for .\\+\""))
+           (port (open-input-pipe cmd-string))
+           (lemma ""))
+      (do ((line (get-line port) (get-line port)))
+          ((eof-object? line))
+        (let ((l (car (last-pair (string-split line #\ )))))
+          (if (not (equal? word l))
+            (set! lemma l))))
+      (close-pipe port)
+      (if (string-null? lemma) word lemma)))
   (define word-list
-    (map (lambda (w) (cond ((equal? 'concept (car w)) (Glob (car (cdr w))))
-                           (else (Word (car (cdr w))))))
+    (map (lambda (w)
+      (cond ((equal? 'concept (car w)) (Glob (cadr w)))
+            ; For proper names -- create WordNodes
+            ((equal? 'proper-names (car w)) (map Word (cdr w)))
+            ((not (equal? #f (string-index (cadr w) char-upper-case?))) (Word (cadr w)))
+            (else (Word (get-lemma (cadr w))))))
          terms))
-  (Evaluation (GroundedPredicate "scm: check-word-sequence")
-              (List (Variable "$S")
-                    (List word-list))))
+  ; Wrap it using a TrueLink
+  ; TODO: Maybe there is a more elegant way to represent it in the context?
+  (True (List word-list)))
 
-(define (get-word-lemma sent-node target-link-type)
+(define (get-sent-lemmas sent-node)
+  "Get the lemma of the words associate with sent-node"
   (List (append-map
     (lambda (w)
       ; Ignore LEFT-WALL and punctuations
       (if (or (string-prefix? "LEFT-WALL" (cog-name w))
               (word-inst-match-pos? w "punctuation"))
           '()
-          (cog-chase-link target-link-type 'WordNode w)))
+          (cog-chase-link 'LemmaLink 'WordNode w)))
     (car (sent-get-words-in-order sent-node)))))
-
-(define (get-sent-words sent-node)
-  "Get the words associate with sent-node"
-  (get-word-lemma sent-node 'ReferenceLink))
-
-(define (get-sent-lemmas sent-node)
-  "Get the lemma of the words associate with sent-node"
-  (get-word-lemma sent-node 'LemmaLink))
-
-(define (check-word-sequence sent-node word-list)
-  "Check if the sequence of the words associate with the
-   sentence 'sent-node' matches with word-list"
-  (let* ((sent-word-list (get-sent-words sent-node))
-         (sent-lemma-list (get-sent-lemmas sent-node))
-         (exact-match (or (equal? word-list sent-word-list)
-                          (equal? word-list sent-lemma-list)))
-         (map-result-1 (cog-execute! (Map word-list (Set sent-word-list))))
-         (map-result-2 (cog-execute! (Map word-list (Set sent-lemma-list))))
-         (dual-match (or (not (null? (gar map-result-1)))
-                         (not (null? (gar map-result-2))))))
-  (if (or exact-match dual-match)
-      (stv 1 1)
-      (stv 0 1))))
 
 (define (say text)
   "Say the text and clear the state"
