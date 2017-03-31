@@ -32,8 +32,9 @@
     (cons vars conds)))
 
 (define (term-sequence-check terms)
-  "Checks terms occur in the desired order. This will be done by using DualLink."
-  ; A hacky way to quickly find the lemma of a word using WordNet
+  "Checks terms occur in the desired order. This is done when we're using
+   DualLink to find the rules, see 'find-chat-rules' for details."
+  ; A hacky way to quickly find the lemma of a word using WordNet...
   (define (get-lemma word)
     (let* ((cmd-string (string-append "wn " word " | grep \"Information available for .\\+\""))
            (port (open-input-pipe cmd-string))
