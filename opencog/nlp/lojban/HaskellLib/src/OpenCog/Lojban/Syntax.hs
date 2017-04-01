@@ -490,7 +490,7 @@ gismuP = implicationOf . predicate . gismu
 
 
 tanru :: Syntax Atom
-tanru = isoFoldl handleTanru . (inverse cons) <<< some gismuP
+tanru = isoFoldl handleTanru . (inverse cons) <<< some (gismuP <+> nuP)
   where handleTanru = sndToState 1 . second (tolist1 . _iimpl) . reorder
         reorder = mkIso f g
         f (g,t) = (t,(t,g))
@@ -595,8 +595,7 @@ gohaP = _MO <+> _GOhA
 
 selbri :: Syntax (Tagged Atom)
 selbri = filterState . commute  <<< optional (selmaho "SE")
-                                &&& (tanru  <+> nuP
-                                            <+> meP
+                                &&& (tanru  <+> meP
                                             <+> moiP
                                             <+> gohaP)
 
