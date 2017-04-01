@@ -77,15 +77,24 @@ cCtxL tv a b    = Link "ContextLink"                      [a,b]     tv
 cLamdaL tv a b  = Link "LambdaLink"                       [a,b]     tv
 cMemL tv a b    = Link "MemberLink"                       [a,b]     tv
 
+getNUState atom state =
+  let (predicateVars, state') = getDUHUState atom state
+      eventAtom = atomMap (makeEvents (cCN "$2" highTv)) (head state')
+  in (predicateVars, eventAtom:state')
+  where
+    makeEvents :: Atom -> Atom -> Atom
+    makeEvents cn (EvalL tv s@(PN _) (LL [vn@(VN _), (CN _)])) =
+      cEvalL tv (cPN "is_event" highTv) (cLL [cn, vn])
+    makeEvents _ a = a
+
 -- Creates the abstract state for NU:
   -- Extracts predicate instances from atom and state, replaces them with VNs,
     -- and adds "is_event" atom
-getNuState atom state=
+getDUHUState atom state=
   let predicateNodes = nub $ (atomFold getPredicateNode [] atom) ++ (foldl getStatePredicateNode [] state) -- 1
       predicateVars = map (cVN.("$"++).show) [3..(length predicateNodes) + 2] -- 2
       state' = map (atomMap (replacePredicates (zip predicateNodes predicateVars))) (atom:state)
-      eventAtom = atomMap (makeEvents (cCN "$2" highTv)) (head state')
-  in (predicateVars, eventAtom:state')
+  in (predicateVars, state')
   where
     -- Extracts PNs from an Atom with Evaluation links following the sumti for predicate structure
     -- To be used with atomFold
@@ -103,19 +112,6 @@ getNuState atom state=
       Just vn -> vn
       Nothing -> pn
     replacePredicates _ a = a
-    makeEvents :: Atom -> Atom -> Atom
-    makeEvents cn (EvalL tv s@(PN _) (LL [vn@(VN _), (CN _)])) =
-      cEvalL tv (cPN "is_event" highTv) (cLL [cn, vn])
-    makeEvents _ a = a
-
-pattern CtxPred atom <- Link "EquivalenceLink"
-                                [ _
-                                , Link "LambdaLink" [ _
-                                                    ,Link "ContextLink" [ _
-                                                                        , atom
-                                                                        ] _
-                                                    ] _
-                                ] _
 
 
 mkPropPre pred atom name = Link "EquivalenceLink"

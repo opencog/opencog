@@ -505,16 +505,17 @@ tanru = isoFoldl handleTanru . (inverse cons) <<< some gismuP
 nuP :: Syntax Atom
 nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiPMI <&& optSelmaho "KEI")
 
-nuHandlers = [handleNU . rmfst "nu"]
+nuHandlers = [handleNU True . rmfst "nu",
+              handleNU False . rmfst "du'u"]
 
 -- Creates abstract version of atom and state
-handleNU :: SynIso Atom Atom
-handleNU = Iso f g where
+handleNU :: Bool -> SynIso Atom Atom
+handleNU isNU = Iso f g where
     f atom = do
       state <- gets sAtoms
       seed <- asks seed
-      pred <- apply predicate (randName seed (show atom) ++ "___"++ "nu")
-      let (vns, nuState) = getNuState atom state
+      pred <- apply predicate (randName seed (show atom) ++ "___"++ (if isNU then "nu" else "du'u"))
+      let (vns, nuState) = (if isNU then getNUState else getDUHUState) atom state
       link <- apply mkLink (pred, (vns, nuState))
       setAtoms [link]
       pure pred
