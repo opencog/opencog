@@ -1,5 +1,5 @@
 /*
- * opencog/learning/PatternMiner/TestPatternMinerAgent.h
+ * opencog/learning/PatternMiner/PatternMinerAgent.h
  *
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef TESTPATTERNMINERAGENT_H
-#define TESTPATTERNMINERAGENT_H
+#ifndef PatternMinerAgent_H
+#define PatternMinerAgent_H
 
 #include <opencog/cogserver/server/Agent.h>
 #include <opencog/cogserver/server/Factory.h>
@@ -37,18 +37,18 @@ namespace opencog
 
 class CogServer;
 
-class TestPatternMinerAgent : public Agent
+class PatternMinerAgent : public Agent
 {
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
-        static const ClassInfo _ci("opencog::TestPatternMinerAgent");
+        static const ClassInfo _ci("opencog::PatternMinerAgent");
         return _ci;
     }
 
-    TestPatternMinerAgent(CogServer&);
-    virtual ~TestPatternMinerAgent();
+    PatternMinerAgent(CogServer&);
+    virtual ~PatternMinerAgent();
     virtual void run();
 
 private:
@@ -58,20 +58,20 @@ private:
 
 }; // class
 
-class TestPatternMinerModule : public Module
+class PatternMinerModule : public Module
 {
 private:
 
-    Factory<TestPatternMinerAgent, Agent> factory;
+    Factory<PatternMinerAgent, Agent> factory;
 
 public:
 
-    TestPatternMinerModule(CogServer&);
-    virtual ~TestPatternMinerModule();
+    PatternMinerModule(CogServer&);
+    virtual ~PatternMinerModule();
     virtual void init();
     virtual const char* id();
 };
 
 } // namespace opencog
 
-#endif // TESTPATTERNMINERAGENT_H
+#endif // PatternMinerAgent_H

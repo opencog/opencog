@@ -39,12 +39,12 @@ ADD_DEPENDENCIES(PatternMiner embodiment_atom_types)
 ADD_DEPENDENCIES(PatternMiner spacetime_atom_types)
 
 
-ADD_LIBRARY(TestPatternMinerAgent SHARED
-	TestPatternMinerAgent
+ADD_LIBRARY(PatternMinerAgent SHARED
+        PatternMinerAgent
 )
 
 
-TARGET_LINK_LIBRARIES (TestPatternMinerAgent
+TARGET_LINK_LIBRARIES (PatternMinerAgent
 	PatternMiner
 )
 
@@ -53,6 +53,8 @@ INSTALL (FILES
         PatternMiner.h
         DESTINATION "include/${PROJECT_NAME}/learning/PatternMiner"
 )
+
+INSTALL (TARGETS PatternMiner DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 IF (HAVE_cpprest)
 
@@ -78,6 +80,27 @@ IF (HAVE_cpprest)
     )
 
 ENDIF (HAVE_cpprest)
+
+# This defines the guile scheme loadable module
+
+IF (HAVE_GUILE)
+        ADD_LIBRARY (libguile-patternminer SHARED
+                PatternMinerSCM
+        )
+
+        TARGET_LINK_LIBRARIES(libguile-patternminer
+                PatternMiner
+                ${GUILE_LIBRARIES}
+        )
+
+        INSTALL (TARGETS libguile-patternminer DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
+	
+
+       
+ENDIF (HAVE_GUILE)
+
+# ------------------------------------------------------------
 
 
 
