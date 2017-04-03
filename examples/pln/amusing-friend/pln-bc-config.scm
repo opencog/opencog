@@ -59,7 +59,7 @@
         "inversion-rule.scm"
         "implication-implicant-conjunction-rule.scm"
         ;; "and-lambda-factorization-double-implication-rule.scm"
-        ;; "deduction-rule.scm"
+        "deduction-rule.scm"
         ;; "implication-to-implication-scope-rule.scm"
         ;; "equivalence-scope-distribution-rule.scm"
         ;; "and-introduction-rule.scm"
@@ -80,7 +80,7 @@
         (list inversion-implication-rule-name 1)
         (list implication-implicant-conjunction-rule-name 1)
         ;; (list and-lambda-factorization-double-implication-rule-name 1)
-        ;; (list deduction-implication-rule-name 1)
+        (list deduction-implication-rule-name 1)
         ;; (list implication-to-implication-scope-rule-name 1)
         ;; (list equivalence-scope-distribution-rule-name 1)
         ;; (list and-introduction-grounded-evaluation-rule-name 1)
@@ -95,7 +95,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 10000)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 100000)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
