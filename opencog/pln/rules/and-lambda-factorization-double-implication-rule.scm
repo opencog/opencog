@@ -1,6 +1,8 @@
 ;; =======================================================================
 ;; AndLink Lambda Factorization Rule
 ;;
+;; WARNING: Not BC compatible.
+;;
 ;; TODO: Replace this by higher order fact
 ;;
 ;; AndLink

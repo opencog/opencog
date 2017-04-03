@@ -12,6 +12,9 @@
 ;; 2. In the Associate rules to PLN section, to add the name of the
 ;; rule and its weight (see define rules).
 
+;; TODO unify this as a single forward and backward chainer config
+;; file.
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load required modules and utils ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -44,25 +47,25 @@
 ;; Load rules ;;
 ;;;;;;;;;;;;;;;;
 
-;; Load the rules (use load for relative path w.r.t. to that file)
-(define pln-rules-dir "../../../opencog/pln/rules/")
-(define (append-rule-dir basename) (string-append pln-rules-dir basename))
-(define rule-basenames
-  (list "implication-instantiation-rule.scm"
+;; Load the rules. Either w.r.t this file path
+(add-to-load-path "../../../opencog/pln/rules/")
+(add-to-load-path "../../../opencog/pln/meta-rules/")
+
+(define rule-filenames
+  (list "conditional-full-instantiation-meta-rule.scm"
         "implication-scope-to-implication-rule.scm"
-        "equivalence-to-implication-rule.scm"
+        ;; "equivalence-to-implication-rule.scm"
         "predicate-lambda-evaluation-rule.scm"
         "inversion-rule.scm"
         "implication-implicant-conjunction-rule.scm"
-        "and-lambda-factorization-double-implication-rule.scm"
+        ;; "and-lambda-factorization-double-implication-rule.scm"
         "deduction-rule.scm"
-        "implication-to-implication-scope-rule.scm"
-        "equivalence-scope-distribution-rule.scm"
-        "and-introduction-rule.scm"
+        ;; "implication-to-implication-scope-rule.scm"
+        ;; "equivalence-scope-distribution-rule.scm"
+        ;; "and-introduction-rule.scm"
         )
   )
-(define rule-files (map append-rule-dir rule-basenames))
-(for-each load rule-files)
+(for-each load-from-path rule-filenames)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Associate rules to PLN ;;
@@ -71,16 +74,16 @@
 ; List the rules and their weights.
 (define rules
   (list (list implication-scope-to-implication-rule-name 1)
-        (list implication-full-instantiation-rule-name 1)
-        (list equivalence-to-implication-rule-name 1)
-        (list lambda-predicate-evaluation-rule-name 1)
+        (list conditional-full-instantiation-meta-rule-name 1)
+        ;; (list equivalence-to-implication-rule-name 1)
+        (list predicate-lambda-evaluation-rule-name 1)
         (list inversion-implication-rule-name 1)
         (list implication-implicant-conjunction-rule-name 1)
-        (list and-lambda-factorization-double-implication-rule-name 1)
+        ;; (list and-lambda-factorization-double-implication-rule-name 1)
         (list deduction-implication-rule-name 1)
-        (list implication-to-implication-scope-rule-name 1)
-        (list equivalence-scope-distribution-rule-name 1)
-        (list and-introduction-grounded-evaluation-rule-name 1)
+        ;; (list implication-to-implication-scope-rule-name 1)
+        ;; (list equivalence-scope-distribution-rule-name 1)
+        ;; (list and-introduction-grounded-evaluation-rule-name 1)
         )
   )
 
@@ -92,7 +95,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Termination criteria parameters
-(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 50000)
+(ure-set-num-parameter pln-rbs "URE:maximum-iterations" 100000)
 
 ;; Attention allocation (0 to disable it, 1 to enable it)
 (ure-set-fuzzy-bool-parameter pln-rbs "URE:attention-allocation" 0)
+
+;; Complexity penalty
+(ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)
+
+;; BIT reduction parameters
+(ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 20000)

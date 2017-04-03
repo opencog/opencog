@@ -48,7 +48,7 @@
 
 ;; People who told the truth about something are honest
 (define people-telling-the-truth-are-honest
-(Implication (stv 0.95 0.9)
+(ImplicationScope (stv 0.95 0.9)
    (VariableList
       (TypedVariable
          (Variable "$X")
@@ -132,8 +132,26 @@
 ;; The probability of random things (typically humans) being friends
 (Predicate "will-be-friends" (stv 0.0001 0.9))
 
+;; Because we have no way to specify the type signature of predicate
+;; "will-be-friends" (will need a better type system) we specify it
+;; indirectly by wrapping it in a lambda. The TV on the lambda can be
+;; evaluated by inference but the structure cannot.
+(Lambda
+  (VariableList
+    (TypedVariable
+      (Variable "$X")
+      (Type "ConceptNode"))
+    (TypedVariable
+      (Variable "$Y")
+     (Type "ConceptNode")))
+  (Evaluation
+    (Predicate "will-be-friends")
+    (List
+      (Variable "$X")
+      (Variable "$Y"))))
+
 ;; Friendship is symmetric
-(Implication (stv 1 1)
+(ImplicationScope (stv 1 1)
    (VariableList
       (TypedVariable
          (Variable "$X")
@@ -171,7 +189,7 @@
 ;; ;; but due to some current limitation in the type system, specifically
 ;; ;; that a Predicate cannot be declared with a certain type, we need to
 ;; ;; express that in a more convoluted way.
-;; (Implication (stv 0.9 0.9)
+;; (ImplicationScope (stv 0.9 0.9)
 ;;    (VariableList
 ;;       (TypedVariable
 ;;          (Variable "$X")
@@ -193,7 +211,7 @@
 ;; The probablity of turning acquaintance into friendship between
 ;; humans is 0.1.
 (define human-acquainted-tend-to-become-friends
-(Implication (stv 0.1 0.5)
+(ImplicationScope (stv 0.1 0.5)
    (VariableList
       (TypedVariable
          (Variable "$X")
@@ -221,7 +239,7 @@
 
 ;; Friends tend to be honest
 (define friends-tend-to-be-honest
-(Implication (stv 0.85 0.5)
+(ImplicationScope (stv 0.85 0.5)
    (VariableList
       (TypedVariable
          (Variable "$X")
@@ -270,7 +288,7 @@
 
 ;; People who told a joke to someone, somewhere, are funny   
 (define people-telling-jokes-are-funny
-(Implication (stv 0.8 0.9)
+(ImplicationScope (stv 0.8 0.9)
    (VariableList
       (TypedVariable
          (Variable "$X")
@@ -326,7 +344,6 @@
       (Concept "Jill")
       (Concept "Party")))
 
-
 ;; Bob told Jim a joke at the party.
 (Evaluation (stv 1 1)
    (Predicate "told-a-joke-at")
@@ -361,7 +378,7 @@
    )
    (Evaluation
       (Predicate "acquainted")
-      (ListLink
+      (List
          (Concept "Self")
          (Concept "Bob")
       )
@@ -372,29 +389,69 @@
 ;; Because implication-instantiation occurs on the sugar syntax, the
 ;; predicate (which should be wrapped in a Lambda) is not given. Also
 ;; of course that predicate should still be evaluated. Here we provide
-;; the adequate TV value of that predicate on the free scope form.
-(AndLink (stv 0.000128 0.89999998)
-   (EvaluationLink
-      (PredicateNode "is-honest")
-      (VariableNode "$X")
+;; the adequate TV value of that predicate on the scope-free form.
+(And (stv 0.000128 0.89999998)
+   (Evaluation
+      (Predicate "is-honest")
+      (Variable "$X")
    )
-   (EvaluationLink
-      (PredicateNode "is-honest")
-      (VariableNode "$Y")
+   (Evaluation
+      (Predicate "is-honest")
+      (Variable "$Y")
    )
-   (InheritanceLink
-      (VariableNode "$X")
-      (ConceptNode "human")
+   (Inheritance
+      (Variable "$X")
+      (Concept "human")
    )
-   (InheritanceLink
-      (VariableNode "$Y")
-      (ConceptNode "human")
+   (Inheritance
+      (Variable "$Y")
+      (Concept "human")
    )
-   (EvaluationLink
-      (PredicateNode "acquainted")
-      (ListLink
-         (VariableNode "$X")
-         (VariableNode "$Y")
+   (Evaluation
+      (Predicate "acquainted")
+      (List
+         (Variable "$X")
+         (Variable "$Y")
       )
    )
+)
+
+;; Because we have no way to infer the type signature of the term
+;; above we wrap it in a lambda
+(Lambda
+  (VariableList
+    (TypedVariable
+      (Variable "$X")
+      (Type "ConceptNode")
+    )
+    (TypedVariable
+      (Variable "$Y")
+      (Type "ConceptNode")
+    )
+  )
+  (And
+    (Evaluation
+      (Predicate "is-honest")
+      (Variable "$X")
+    )
+    (Evaluation
+      (Predicate "is-honest")
+      (Variable "$Y")
+    )
+    (Inheritance
+      (Variable "$X")
+      (Concept "human")
+    )
+    (Inheritance
+      (Variable "$Y")
+      (Concept "human")
+    )
+    (Evaluation
+      (Predicate "acquainted")
+      (List
+        (Variable "$X")
+        (Variable "$Y")
+      )
+    )
+  )
 )

@@ -29,26 +29,28 @@
      (Variable "$P")
      (Variable "$Args")))
 
+(define predicate-lambda-evaluation-clause
+  (Quote (Lambda
+    (Unquote (VariableNode "$V"))
+    (Unquote (EvaluationLink
+      (Variable "$P")
+      (Variable "$Args"))))))
+
+(define predicate-lambda-evaluation-precondition
+  (Evaluation
+    (GroundedPredicate "scm: gt-zero-confidence")
+    (Variable "$P")))
+
 (define predicate-lambda-evaluation-pattern
   (And
-    (Quote (Lambda
-      (Unquote (VariableNode "$V"))
-      (Unquote ((EvaluationLink
-        (Variable "$P")
-        (Variable "$Args"))))))
-    (Evaluation
-      (GroundedPredicate "scm: gt-zero-confidence")
-      (Variable "$P"))))
+    predicate-lambda-evaluation-clause
+    predicate-lambda-evaluation-precondition))
 
 (define predicate-lambda-evaluation-rewrite
   (ExecutionOutputLink
      (GroundedSchemaNode "scm: predicate-lambda-evaluation-formula")
      (ListLink
-       (Quote (Lambda
-         (Unquote (VariableNode "$V"))
-         (Unquote ((EvaluationLink
-           (Variable "$P")
-           (Variable "$Args"))))))
+       predicate-lambda-evaluation-clause
        (Variable "$P"))))
 
 (define predicate-lambda-evaluation-rule
