@@ -84,16 +84,16 @@ ENDIF (HAVE_cpprest)
 # This defines the guile scheme loadable module
 
 IF (HAVE_GUILE)
-        ADD_LIBRARY (libguile-patternminer SHARED
+        ADD_LIBRARY (guile-patternminer SHARED
                 PatternMinerSCM
         )
 
-        TARGET_LINK_LIBRARIES(libguile-patternminer
+        TARGET_LINK_LIBRARIES(guile-patternminer
                 PatternMiner
                 ${GUILE_LIBRARIES}
         )
 
-        INSTALL (TARGETS libguile-patternminer DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+        INSTALL (TARGETS guile-patternminer DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 	
 
