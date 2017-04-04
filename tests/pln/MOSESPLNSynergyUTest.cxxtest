@@ -47,7 +47,7 @@ private:
 public:
 	MOSESPLNSynergyUTest() : eval(&as)
 	{
-		logger().set_level(Logger::DEBUG);
+		logger().set_level(Logger::INFO);
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
 		// logger().set_sync_flag(true);
@@ -105,7 +105,7 @@ void MOSESPLNSynergyUTest::test_moses_pln_synergy_pm()
 
 	// Query the TV of the inference target, which should be
 	//
-	// (ImplicationLink (stv 0.60357851 0.64124995)
+	// (ImplicationLink (stv 0.60357851 0.65475)
 	//    (OrLink
 	//       (PredicateNode "take-treatment-1" (stv 0.1 0.80000001))
 	//       (PredicateNode "eat-lots-fruits-vegetables" (stv 0.07 0.80000001))
