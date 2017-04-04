@@ -22,7 +22,7 @@
 )
 
 ;; Define conj-bc for convenience
-(define (prop-bc target) (cog-bc target propositional-rule-base (SetLink)))
+(define (prop-bc target) (cog-bc propositional-rule-base target (List) (Set)))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
