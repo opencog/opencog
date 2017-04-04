@@ -36,8 +36,8 @@
 )
 
 ;; Define pln-fc and pln-bc for convenience 
-(define (pln-fc source) (cog-fc source pln-rbs (SetLink)))
-(define (pln-bc target) (cog-bc target pln-rbs (SetLink)))
+(define (pln-fc source) (cog-fc pln-rbs source (List) (Set)))
+(define (pln-bc target) (cog-bc pln-rbs target (List) (Set)))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
