@@ -67,7 +67,7 @@ public:
 
     void test_ui_create_concept();
     void test_create_lemma();
-//    void test_create_word();
+    void test_create_word();
 //    void test_create_concept();
 //    void test_create_pos();
 //    void test_create_main_verb();
@@ -97,6 +97,18 @@ void ChatlangUTest::test_create_lemma()
 
     auto result = scm->eval("test-result");
     TSM_ASSERT_EQUALS("Fail to create lemmas!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_word()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-word.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create words!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }

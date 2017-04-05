@@ -6,5 +6,7 @@
 
 ; Just want to see if the LemmaLink is there...
 (define test-result
-    (and (eq? (cog-type (cadr lemma)) 'LemmaLink)
-         (equal? (gdr (cadr lemma)) (WordNode "is"))))
+    (not (null? (filter (lambda (x)
+        (and (eq? (cog-type x) 'LemmaLink)
+             (equal? (gdr x) (WordNode "is"))))
+        (cdr lemma)))))
