@@ -113,13 +113,13 @@ public:
         // Test unsatisfaiability
         auto result_1_1 = _scm->eval("(psi-satisfiable? (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1_1);
+        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0.000000 1.000000)\n", result_1_1);
 
         // Check result from cache is consistent with that of the actual
         // execution.
         auto result_1_2 = _scm->eval("(satisfiable? (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1_2);
+        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0.000000 1.000000)\n", result_1_2);
 
         // Test 2:
         // Test satisfaiability
@@ -127,13 +127,13 @@ public:
         CHKERR
         auto result_2_1 = _scm->eval("(psi-satisfiable? (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2_1);
+        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1.000000 1.000000)\n", result_2_1);
 
         // Check result from cache is consistent with that of the actual
         // execution.
         auto result_2_2 = _scm->eval("(satisfiable? (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2_2);
+        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1.000000 1.000000)\n", result_2_2);
 
 
         logger().info("END TEST: %s", __FUNCTION__);
