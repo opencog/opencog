@@ -505,17 +505,22 @@ tanru = isoFoldl handleTanru . (inverse cons) <<< some (gismuP <+> nuP)
 nuP :: Syntax Atom
 nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiPMI <&& optSelmaho "KEI")
 
-nuHandlers = [handleNU True . rmfst "nu",
-              handleNU False . rmfst "du'u"]
+nuHandlers = [handleNU "nu"   . rmfst "nu",
+              handleNU "mu'e" . rmfst "mu'e",
+              handleNU "pu'u" . rmfst "pu'u",
+              handleNU "zu'o" . rmfst "zu'o",
+              handleNU "za'i" . rmfst "za'i",
+              handleNU "du'u" . rmfst "du'u"]
+              --handleKA        . rmfst "ka"]
 
 -- Creates abstract version of atom and state
-handleNU :: Bool -> SynIso Atom Atom
-handleNU isNU = Iso f g where
+handleNU :: String -> SynIso Atom Atom
+handleNU abstractor = Iso f g where
     f atom = do
       state <- gets sAtoms
       seed <- asks seed
-      pred <- apply predicate (randName seed (show atom) ++ "___"++ (if isNU then "nu" else "du'u"))
-      let (vns, nuState) = (if isNU then getNUState else getDUHUState) atom state
+      pred <- apply predicate (randName seed (show atom) ++ "___" ++ abstractor)
+      let (vns, nuState) = getNuState (getEventType abstractor) atom state
       link <- apply mkLink (pred, (vns, nuState))
       setAtoms [link]
       pure pred
@@ -524,7 +529,9 @@ handleNU isNU = Iso f g where
       let link = F.find (atomElem pred) state
       (nuState, atom) <- case link of -- remove "is_event" atoms
           Just (EquivL _ (MemL _ (SSL [_, ExL _ _ (AL l)])))
-            -> pure $ partition isImpl $ filter (not.atomElem (cPN "is_event" highTv)) l
+            -> pure $ partition isImpl $ case getEventType abstractor of
+                Just eventType -> filter (not.atomElem eventType) l
+                Nothing        -> l
           _ -> lift $ Left $ (show pred) ++ " can't be found in state."
       pushAtoms nuState -- TODO: instantiate VNs?
       pure (head atom) -- should only be one. Check?
@@ -533,14 +540,35 @@ handleNU isNU = Iso f g where
     mkLink = _equivl
               . first  (_evalTv . addfst highTv  . addsnd [cVN "$1"])
               . second
-                  (_meml . addfst (cVN "$2") . ssl . tolist2 . addfst (cVN "$2")
+                  (_meml . addfst (cVN "$1") . ssl . tolist2 . addfst (cVN "$2")
                     . _exl . first (varll . mapIso (_typedvarl . addsnd (cTN "PredicateNode")))
                            . second andl)
     isImpl :: Atom -> Bool
     isImpl (ImpL _ _) = True
     isImpl (InhL _ _) = True
     isImpl _          = False
+    -- Should be put in nuHandlers, unless there are more involved instructions
+    getEventType :: String -> Maybe Atom
+    getEventType "nu"    = (Just (cPN "is_event" highTv))
+    getEventType "mu'e"  = (Just (cPN "is_point_event" highTv))
+    getEventType "pu'u"  = (Just (cPN "is_process" highTv))
+    getEventType "zu'o"  = (Just (cPN "is_activity" highTv))
+    getEventType "za'i"  = (Just (cPN "is_state" highTv))
+    getEventType _       =  Nothing -- du'u case
 
+    -- Work-in-progress
+    handleKA :: SynIso Atom Atom
+    handleKA = Iso f g where
+      f atom = do
+        seed <- asks seed
+        let name = randName seed (show atom) ++ "___" ++ "ka"
+        pred <- apply predicate (name)
+        let link = mkPropPre pred atom name
+        pushAtom link
+        pure pred
+      g (pred) = do
+        state <- gets sAtoms
+        pure (head state)
 
 --like bridiP but adds mi instead of ti
 bridiPMI :: Syntax Atom
