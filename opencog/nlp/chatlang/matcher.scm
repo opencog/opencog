@@ -1,4 +1,12 @@
-(define (chat-find-rules sent-node)
+;; ChatLang DSL for chat authoring rules
+;;
+;; This is the custom action selector that allows OpenPsi to find the authored
+;; rules.
+;; TODO: This is not needed in the long run as the default action selector in
+;; OpenPsi should be able to know how and what kinds of rules it should be
+;; looking for at a particular point in time.
+
+(define-public (chat-find-rules sent-node)
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand"
