@@ -9,7 +9,8 @@
              (opencog eva-behavior)
              (srfi srfi-1)
              (rnrs io ports)
-             (ice-9 popen))
+             (ice-9 popen)
+             (ice-9 optargs))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -69,7 +70,7 @@
           (cog-chase-link 'LemmaLink 'WordNode w)))
     (car (sent-get-words-in-order sent-node)))))
 
-(define (say text)
+(define-public (say text)
   "Say the text and clear the state"
   (And (True (Put (DefinedPredicate "Say") (Node text)))
        (True (Put (State (Anchor "Currently Processing") (Variable "$x"))
@@ -77,7 +78,7 @@
 
 (define yakking (psi-demand "Yakking" 0.9))
 
-(define* (chat-rule pattern action #:optional name)
+(define*-public (chat-rule pattern action #:optional name)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((template (cons atomese-variable-template atomese-condition-template))
@@ -104,7 +105,7 @@
         (Word (car words))
         (List (map-in-order Word words)))))
 
-(define (chat-concept name members)
+(define-public (chat-concept name members)
   "Lets users create named concepts with explicit membership lists."
   (let* ((c (Concept name))
          (ref-members (append-map (lambda (m) (list (Reference (member-words m) c)))

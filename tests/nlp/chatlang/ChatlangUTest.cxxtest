@@ -1,0 +1,198 @@
+/*
+ * ChatlangUTest.cxxtest
+ *
+ * Copyright (C) 2017 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class ChatlangUTest : public CxxTest::TestSuite
+{
+private:
+    AtomSpace* as;
+    SchemeEval* scm;
+
+public:
+    ChatlangUTest() : as(nullptr), scm(nullptr)
+    {
+        logger().set_level(Logger::INFO);
+        logger().set_print_to_stdout_flag(true);
+    }
+
+    ~ChatlangUTest()
+    {
+        // Erase the log file if no assertions failed
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+            std::remove(logger().get_filename().c_str());
+    }
+
+    void setUp()
+    {
+        as = new AtomSpace();
+        scm = new SchemeEval(as);
+        scm->eval("(add-to-load-path \""
+                       PROJECT_SOURCE_DIR
+                       "/tests/nlp/chatlang\")");
+    }
+
+    void tearDown()
+    {
+        delete as;
+        as = nullptr;
+        delete scm;
+        scm = nullptr;
+    }
+
+    void test_ui_create_concept();
+    void test_create_lemma();
+    void test_create_word();
+    void test_create_concept();
+    void test_create_pos();
+    void test_create_main_verb();
+    void test_create_main_subj();
+    void test_create_main_obj();
+    void test_create_proper_names();
+    void test_create_or_choices();
+};
+
+void ChatlangUTest::test_ui_create_concept()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-ui-concept.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create concepts from UI!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_lemma()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-lemma.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create lemmas!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_word()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-word.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create words!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_concept()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-concept.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create concepts!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_pos()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-pos.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create part of speech!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_main_verb()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-main-verb.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_main_subj()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-main-subj.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_main_obj()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-main-obj.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_proper_names()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-proper-names.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_or_choices()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-or-choices.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}

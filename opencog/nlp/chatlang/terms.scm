@@ -5,7 +5,7 @@
 ;; specific to that term, and the cdr is the list of conditions that must be
 ;; true if the term is found in the input sentence.
 
-(define (word w)
+(define-public (word w)
   "Literal word occurrence"
   (let* ((name (choose-var-name))
          (v (list (TypedVariable (Variable name) (Type "WordInstanceNode"))))
@@ -13,7 +13,7 @@
                   (WordInstanceLink (Variable name) (Variable "$P")))))
     (cons v c)))
 
-(define (lemma w)
+(define-public (lemma w)
   "Lemma occurrence, aka canonical form of a term. This is the default
    for word mentions in the rule pattern."
   (let* ((name (choose-var-name))
@@ -23,7 +23,7 @@
                   (WordInstanceLink (Variable name) (Variable "$P")))))
     (cons v c)))
 
-(define (concept c)
+(define-public (concept c)
   "Term is a member of a given concept, including concepts created via
    chat-concept"
   (let* ((var-wi (choose-var-name))
@@ -35,7 +35,7 @@
                   (WordInstanceLink (Variable var-wi) (Variable "$P")))))
     (cons v c)))
 
-(define (pos w p)
+(define-public (pos w p)
   "Term with a specific POS tag (note: canonical form of word, not literal)"
   (let* ((lemma-atomese (lemma w))
          (var-node (gar (caar lemma-atomese))))
@@ -44,7 +44,7 @@
                   (list (PartOfSpeechLink var-node
                                           (DefinedLinguisticConcept p)))))))
 
-(define (proper-names . w)
+(define-public (proper-names . w)
   "Terms represent multi-word proper names. It must have at least two words."
   (define w1-atoms (word (car w)))
   (define vars (car w1-atoms))
@@ -96,22 +96,22 @@
                                         (ListLink (Variable "$main_verb")
                                                   var-so)))))))
 
-(define (main-verb w)
+(define-public (main-verb w)
   "Term is the main verb of the sentence."
   (main-verb-template
     ; Note: This assumes "w" is already a lemma
     (list (LemmaLink (Variable "$main_verb") (Word w))
           (WordInstanceLink (Variable "$main_verb") (Variable "$P")))))
 
-(define (main-subj w)
+(define-public (main-subj w)
   "Term is the main subject of the sentence."
   (main-so-template w "_subj"))
 
-(define (main-obj w)
+(define-public (main-obj w)
   "Term is the main object of the sentence."
   (main-so-template w "_obj"))
 
-(define (or-choices . w)
+(define-public (or-choices . w)
   "The choices available, need to match either one of them in the list."
   (let ((var (choose-var-name)))
     (cons (list (TypedVariable (Variable var) (Type "WordInstanceNode")))
