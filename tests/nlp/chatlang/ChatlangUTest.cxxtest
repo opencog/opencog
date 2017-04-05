@@ -73,8 +73,8 @@ public:
     void test_create_main_verb();
     void test_create_main_subj();
     void test_create_main_obj();
-//    void test_create_proper_names();
-//    void test_create_or_choices();
+    void test_create_proper_names();
+    void test_create_or_choices();
 };
 
 void ChatlangUTest::test_ui_create_concept()
@@ -166,6 +166,30 @@ void ChatlangUTest::test_create_main_obj()
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-main-obj.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_proper_names()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-proper-names.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_or_choices()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-or-choices.scm\")");
 
     auto result = scm->eval("test-result");
     TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
