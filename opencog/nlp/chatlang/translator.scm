@@ -52,6 +52,7 @@
       (cond ((equal? 'concept (car w)) (Glob (cadr w)))
             ; For proper names -- create WordNodes
             ((equal? 'proper-names (car w)) (map Word (cdr w)))
+            ((equal? 'or-choices (car w)) (Glob "$choices"))
             ((not (equal? #f (string-index (cadr w) char-upper-case?))) (Word (cadr w)))
             (else (Word (get-lemma (cadr w))))))
          terms))
