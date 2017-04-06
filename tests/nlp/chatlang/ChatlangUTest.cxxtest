@@ -75,6 +75,7 @@ public:
     void test_create_main_obj();
     void test_create_proper_names();
     void test_create_or_choices();
+    void test_create_chat_rule();
 };
 
 void ChatlangUTest::test_ui_create_concept()
@@ -193,6 +194,18 @@ void ChatlangUTest::test_create_or_choices()
 
     auto result = scm->eval("test-result");
     TSM_ASSERT_EQUALS("Fail to create or-choices!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_create_chat_rule()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-chat-rule.scm\")");
+
+    auto result = scm->eval("test-result");
+    TSM_ASSERT_EQUALS("Fail to create chat rules!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
