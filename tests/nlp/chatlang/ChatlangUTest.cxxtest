@@ -52,9 +52,9 @@ public:
     {
         as = new AtomSpace();
         scm = new SchemeEval(as);
-        scm->eval("(add-to-load-path \""
-                       PROJECT_SOURCE_DIR
-                       "/tests/nlp/chatlang\")");
+        scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
+        scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "\")");
+        scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/tests/nlp/chatlang\")");
     }
 
     void tearDown()
