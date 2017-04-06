@@ -156,7 +156,7 @@ void ChatlangUTest::test_create_main_subj()
     scm->eval("(load-from-path \"test-main-subj.scm\")");
 
     auto result = scm->eval("test-result");
-    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+    TSM_ASSERT_EQUALS("Fail to create main subject!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -168,7 +168,7 @@ void ChatlangUTest::test_create_main_obj()
     scm->eval("(load-from-path \"test-main-obj.scm\")");
 
     auto result = scm->eval("test-result");
-    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+    TSM_ASSERT_EQUALS("Fail to create main object!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -180,7 +180,7 @@ void ChatlangUTest::test_create_proper_names()
     scm->eval("(load-from-path \"test-proper-names.scm\")");
 
     auto result = scm->eval("test-result");
-    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+    TSM_ASSERT_EQUALS("Fail to create proper names!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -192,7 +192,7 @@ void ChatlangUTest::test_create_or_choices()
     scm->eval("(load-from-path \"test-or-choices.scm\")");
 
     auto result = scm->eval("test-result");
-    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
+    TSM_ASSERT_EQUALS("Fail to create or-choices!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
