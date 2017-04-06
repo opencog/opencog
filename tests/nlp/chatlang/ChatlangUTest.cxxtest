@@ -79,7 +79,7 @@ public:
 
 void ChatlangUTest::test_ui_create_concept()
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-ui-concept.scm\")");
 
@@ -91,7 +91,7 @@ void ChatlangUTest::test_ui_create_concept()
 
 void ChatlangUTest::test_create_lemma()
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-lemma.scm\")");
 
@@ -103,7 +103,7 @@ void ChatlangUTest::test_create_lemma()
 
 void ChatlangUTest::test_create_word()
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-word.scm\")");
 
@@ -115,7 +115,7 @@ void ChatlangUTest::test_create_word()
 
 void ChatlangUTest::test_create_concept()
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-concept.scm\")");
 
@@ -127,7 +127,7 @@ void ChatlangUTest::test_create_concept()
 
 void ChatlangUTest::test_create_pos()
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-pos.scm\")");
 
@@ -139,7 +139,7 @@ void ChatlangUTest::test_create_pos()
 
 void ChatlangUTest::test_create_main_verb()
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-main-verb.scm\")");
 
@@ -151,7 +151,7 @@ void ChatlangUTest::test_create_main_verb()
 
 void ChatlangUTest::test_create_main_subj()
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-main-subj.scm\")");
 
@@ -163,7 +163,7 @@ void ChatlangUTest::test_create_main_subj()
 
 void ChatlangUTest::test_create_main_obj()
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-main-obj.scm\")");
 
@@ -175,7 +175,7 @@ void ChatlangUTest::test_create_main_obj()
 
 void ChatlangUTest::test_create_proper_names()
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-proper-names.scm\")");
 
@@ -187,7 +187,7 @@ void ChatlangUTest::test_create_proper_names()
 
 void ChatlangUTest::test_create_or_choices()
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-or-choices.scm\")");
 
