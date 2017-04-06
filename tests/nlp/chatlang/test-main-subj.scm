@@ -5,7 +5,7 @@
 (define ms (main-subj "Ben"))
 
 ; Just want to see if the EvaluationLinks and LemmaLink are there...
-(define test-result
+(define test-main-subj-result
     (equal? 3 (length (filter (lambda (x)
         (or (and (eq? (cog-type x) 'EvaluationLink)
                  (equal? (gar x) (LinkGrammarRelationshipNode "WV")))

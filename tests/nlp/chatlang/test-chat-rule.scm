@@ -3,8 +3,6 @@
              (opencog nlp chatlang)
              (opencog openpsi))
 
-(chat-concept "watch" (list "watching" "seeing"))
-
 (define rule (chat-rule '((proper-names "John" "Doe")
                           (lemma "like")
                           (concept "watch")
@@ -21,7 +19,7 @@
 
 ; Each of the terms should have been tested already by now, here
 ; just check some trivial things... Expand it if needed
-(define test-result
+(define test-chat-rule-result
     (and (equal? (cog-type rule) 'ImplicationLink)
          (psi-rule? rule)
          ; Check if the conditions below are generated in the rule
@@ -30,7 +28,7 @@
                                     (Word "Doe")
                                     (Word "like")
                                     (Glob "watch")
-                                    (Word "movie")
+                                    (Glob "$choices")
                                     (Word "and")
                                     (Word "Tom")
                                     (Word "eat")
