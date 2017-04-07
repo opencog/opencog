@@ -5,7 +5,7 @@
 (define pn (proper-names "Hanson" "Robotics"))
 
 ; Just want to see if the EvaluationLink and ReferenceLink are there...
-(define test-result
+(define test-proper-names-result
     (equal? 3 (length (filter (lambda (x)
         (or (and (eq? (cog-type x) 'EvaluationLink)
                  (equal? (gar x) (LinkGrammarRelationshipNode "G")))

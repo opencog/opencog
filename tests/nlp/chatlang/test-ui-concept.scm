@@ -19,5 +19,5 @@
                   (WordNode "purge"))
               (ConceptNode "eat"))))
 
-(define test-result
+(define test-ui-concept-result
     (equal? concept expected-result))
