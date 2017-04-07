@@ -88,6 +88,7 @@ public:
     void test_create_proper_names();
     void test_create_or_choices();
     void test_create_chat_rule();
+    void test_chat_find_rules();
 };
 
 void ChatlangUTest::test_ui_create_concept()
@@ -218,6 +219,21 @@ void ChatlangUTest::test_create_chat_rule()
 
     auto result = scm->eval("test-chat-rule-result");
     TSM_ASSERT_EQUALS("Fail to create chat rules!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_chat_find_rules()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-chat-find-rules.scm\")");
+
+    auto result_1 = scm->eval("test-chat-find-rules-result-1");
+    TSM_ASSERT_EQUALS("Fail to find rule-1", "#t\n", result_1);
+
+    auto result_2 = scm->eval("test-chat-find-rules-result-2");
+    TSM_ASSERT_EQUALS("Fail to find rule-2", "#t\n", result_2);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
