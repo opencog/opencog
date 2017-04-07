@@ -49,6 +49,17 @@ using namespace opencog::PatternMining;
 using namespace opencog;
 
 
+bool isInStringVector(string _item, vector<string> _vector)
+{
+    for (string s : _vector)
+    {
+        if (s == _item)
+            return true;
+    }
+
+    return false;
+}
+
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector < vector<int> >& indexes)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
@@ -815,6 +826,8 @@ bool PatternMiner::isIgnoredContent(string keyword)
     return false;
 }
 
+
+
 bool PatternMiner::containIgnoredContent(Handle link )
 {
     string str = link->toShortString();
@@ -870,6 +883,30 @@ bool PatternMiner::remove_keyword_from_black_list(string _keyword)
         if ((string)(*it) == _keyword)
         {
            keyword_black_list.erase(it);
+           return true;
+        }
+    }
+
+    return false;
+}
+
+bool PatternMiner::add_keyword_to_white_list(string _keyword)
+{
+    if (isInStringVector(_keyword, keyword_white_list))
+        return false; // already exist
+
+    keyword_white_list.push_back(_keyword);
+    return true;
+}
+
+bool PatternMiner::remove_keyword_from_white_list(string _keyword)
+{
+    vector<string>::iterator it;
+    for (it = keyword_white_list.begin(); it != keyword_white_list.end(); it ++)
+    {
+        if ((string)(*it) == _keyword)
+        {
+           keyword_white_list.erase(it);
            return true;
         }
     }

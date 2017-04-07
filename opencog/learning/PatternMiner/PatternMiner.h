@@ -398,6 +398,10 @@ public:
     bool add_keyword_to_black_list(string _keyword);
     bool remove_keyword_from_black_list(string _keyword);
 
+    vector<string> get_keyword_white_list(){return keyword_white_list;}
+    bool add_keyword_to_white_list(string _keyword);
+    bool remove_keyword_from_white_list(string _keyword);
+
     // -------------------------------end filter settings----------------------
 };
 

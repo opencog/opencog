@@ -160,6 +160,36 @@ public:
         return result + get_keyword_black_list();
     }
 
+
+    string get_keyword_white_list()
+    {
+        string result =  "keyword_white_list:";
+        vector<string> white_list = patternMiner->get_keyword_white_list();
+        for (string word : white_list)
+            result +=  " " + word;
+
+        return result;
+    }
+
+    string add_keyword_to_white_list(string _keyword)
+    {
+        string result = "";
+        if (patternMiner->add_keyword_to_white_list(_keyword))
+            result += "Added!\n";
+        else
+            result +=  "Input keyword already exists in the white list!\n";
+        return result + get_keyword_white_list();
+    }
+
+    string remove_keyword_from_white_list(string _keyword)
+    {
+        string result = "";
+        if (patternMiner->remove_keyword_from_white_list(_keyword))
+            result += "Removed!\n";
+        else
+            result +=  "Input keyword does not exist in the white list!\n";
+        return result + get_keyword_white_list();
+    }
 };
 
 
