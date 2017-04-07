@@ -101,3 +101,33 @@
          (ref-members (append-map (lambda (m) (list (Reference (member-words m) c)))
                                   members)))
     ref-members))
+
+(define (get-sent-lemmas sent-node)
+  "Get the lemma of the words associate with sent-node."
+  (List (append-map
+    (lambda (w)
+      ; Ignore LEFT-WALL and punctuations
+      (if (or (string-prefix? "LEFT-WALL" (cog-name w))
+              (word-inst-match-pos? w "punctuation")
+              (null? (cog-chase-link 'LemmaLink 'WordNode w)))
+          '()
+          ; For proper names, e.g. Jessica Henwick,
+          ; RelEx converts them into a single WordNode, e.g.
+          ; (WordNode "Jessica_Henwick"). Codes below try to
+          ; split it into two WordNodes, "Jessica" and "Henwick",
+          ; so that the matcher will be able to find the rules
+          (let* ((wn (car (cog-chase-link 'LemmaLink 'WordNode w)))
+                 (name (cog-name wn)))
+            (if (integer? (string-index name #\_))
+              (map Word (string-split name  #\_))
+              (list wn)))))
+    (car (sent-get-words-in-order sent-node)))))
+
+(define-public (does-not-contain sent list-of-words)
+  "Check if the given sentence contains none of the listed words.
+   This assumes the given list of words are in their lemma forms."
+  (if (null? (lset-intersection equal?
+        (cog-outgoing-set list-of-words)
+        (cog-outgoing-set (get-sent-lemmas sent))))
+    (stv 1 1)
+    (stv 0 1)))

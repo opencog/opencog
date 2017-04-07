@@ -118,3 +118,9 @@
           (list (WordInstanceLink (Variable var) (Variable "$P"))
                 ; Note: This assumes "x" is already a lemma
                 (ChoiceLink (map (lambda (x) (LemmaLink (Variable var) (Word x))) w))))))
+
+(define-public (negation . w)
+  "The whole sentence should not contain any of these words."
+  (cons '()
+    (list (Evaluation (GroundedPredicate "scm: does-not-contain")
+      (ListLink (Variable "$S") (ListLink (map Word w)))))))
