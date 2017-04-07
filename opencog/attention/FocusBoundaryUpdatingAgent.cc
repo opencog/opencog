@@ -105,25 +105,23 @@ void FocusBoundaryUpdatingAgent::run()
  */
 AttentionValue::sti_t FocusBoundaryUpdatingAgent::get_cutoff(HandleSeq& afset)
 {
-    auto getSTI = [&](const Handle& h)->AttentionValue::sti_t {
-        return _bank->get_sti(h);
-    };
     std::sort(afset.begin(), afset.end(),
             [&](const Handle& h1, const Handle& h2)->bool {
-                return getSTI(h1) > getSTI(h2);
+                return _bank->get_sti(h1) > _bank->get_sti(h2);
             });
+
     HandleSeq afAtoms = HandleSeq(afset.begin() + minAFSize, 
-                        (afset.size() > maxAFSize ? afset.begin() + maxAFSize : afset.end()));
+                        ((int)afset.size() > maxAFSize ? afset.begin() + maxAFSize : afset.end()));
     int cut_off_index = 0;
     int biggest_diff = -1 ; // diffs are always +ve. so, its okay to initialize it with -ve number.
     constexpr int DIFF_MAGNITUDE = 0.5; // make this a parameter
     for( int i = 0 ; i < (int)afAtoms.size()-1; i++ ){
-        int diff = getSTI(afAtoms[i]) - getSTI(afAtoms[i+1]);
+        int diff = _bank->get_sti(afAtoms[i]) - _bank->get_sti(afAtoms[i+1]);
         if(diff > biggest_diff*(1 + DIFF_MAGNITUDE )) {  
             biggest_diff = diff;
             cut_off_index = i;
         }
     }
 
-    return getSTI(afAtoms[cut_off_index]);
+    return _bank->get_sti(afAtoms[cut_off_index]);
 } 
