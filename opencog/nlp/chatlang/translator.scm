@@ -66,9 +66,18 @@
     (lambda (w)
       ; Ignore LEFT-WALL and punctuations
       (if (or (string-prefix? "LEFT-WALL" (cog-name w))
-              (word-inst-match-pos? w "punctuation"))
+              (word-inst-match-pos? w "punctuation")
+              (null? (cog-chase-link 'LemmaLink 'WordNode w)))
           '()
-          (cog-chase-link 'LemmaLink 'WordNode w)))
+          ; For proper names, e.g. Jessica Henwick,
+          ; RelEx converts them into (WordNode "Jessica_Henwick")
+          ; in a LemmaLink. So here it tries to split the word
+          ; by "_" into two WordNodes "Jessica" and "Henwick"
+          (let* ((wn (car (cog-chase-link 'LemmaLink 'WordNode w)))
+                 (name (cog-name wn)))
+            (if (integer? (string-index name #\_))
+              (map Word (string-split name  #\_))
+              (list wn)))))
     (car (sent-get-words-in-order sent-node)))))
 
 (define-public (say text)
