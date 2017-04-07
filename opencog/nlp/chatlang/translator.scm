@@ -60,17 +60,6 @@
   ; TODO: Maybe there is a more elegant way to represent it in the context?
   (True (List word-list)))
 
-(define (get-sent-lemmas sent-node)
-  "Get the lemma of the words associate with sent-node"
-  (List (append-map
-    (lambda (w)
-      ; Ignore LEFT-WALL and punctuations
-      (if (or (string-prefix? "LEFT-WALL" (cog-name w))
-              (word-inst-match-pos? w "punctuation"))
-          '()
-          (cog-chase-link 'LemmaLink 'WordNode w)))
-    (car (sent-get-words-in-order sent-node)))))
-
 (define-public (say text)
   "Say the text and clear the state"
   (And (True (Put (DefinedPredicate "Say") (Node text)))
