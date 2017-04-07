@@ -54,8 +54,19 @@ public:
         scm = new SchemeEval(as);
         scm->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
         scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "\")");
-        scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/tests/nlp/chatlang\")");
+        scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/\")");
+        scm->eval("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/scm/\")");
+        scm->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/tests/nlp/chatlang/\")");
 
+        scm->eval("(setenv \"LTDL_LIBRARY_PATH\" "
+                  "\"/usr/local/lib/opencog:/usr/local/lib/opencog/modules:"
+                  PROJECT_BINARY_DIR "/opencog/spacetime:"
+                  PROJECT_BINARY_DIR "/opencog/attention:"
+                  PROJECT_BINARY_DIR "/opencog/embodiment:"
+                  PROJECT_BINARY_DIR "/opencog/nlp/types"
+         "\")");
+
+        
         // This is really really strange... we should not need to actually load
         // any of the codes like this as they are part of the chatlang module?
         // But for some reason two of the chatlang tests were failing on my
