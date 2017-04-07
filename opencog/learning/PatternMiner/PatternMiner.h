@@ -143,12 +143,15 @@ protected:
 
     unsigned int num_of_patterns_without_superpattern_cur_gram;
 
-    unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
+    unsigned int thresholdFrequency;
 
     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock,
         readNextLinkLock,actualProcessedLinkLock, curDFExtractedLinksLock, readNextPatternLock;
 
-    Type ignoredTypes[1];
+    bool use_keyword_white_list;
+    bool use_keyword_black_list;
+
+    vector<Type> ignoredLinkTypes;
 
     bool enable_Frequent_Pattern;
     bool enable_Interesting_Pattern;
@@ -303,7 +306,8 @@ protected:
 
     bool containIgnoredContent(Handle link );
 
-    const static string ignoreKeyWords[];
+    vector<string> keyword_black_list;
+    vector<string> keyword_white_list;
 
     bool splitDisconnectedLinksIntoConnectedGroups(HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups);
 
@@ -352,7 +356,7 @@ public:
 
     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
-    void runPatternMiner(unsigned int _thresholdFrequency = 2, bool exit_program_after_finish = true);
+    void runPatternMiner(bool exit_program_after_finish = true);
 
     void runPatternMinerBreadthFirst();
 
@@ -365,7 +369,36 @@ public:
     void testPatternMatcher1();
     void testPatternMatcher2();
 
+public:
+    // -------------------------------basic settings----------------------
 
+    unsigned int get_Pattern_Max_Gram(){return MAX_GRAM;}
+    void set_Pattern_Max_Gram(unsigned int _max_gram){ MAX_GRAM = _max_gram;}
+
+    bool get_Enable_Interesting_Pattern(){return enable_Interesting_Pattern;}
+    void set_Enable_Interesting_Pattern(bool _enable){enable_Interesting_Pattern = _enable;}
+
+    unsigned int get_Frequency_threshold() {return thresholdFrequency;}
+    void set_Frequency_threshold(unsigned int _Frequency_threshold) {thresholdFrequency = _Frequency_threshold;}
+
+    // -------------------------------end basic settings----------------------
+
+    // -------------------------------filter settings----------------------
+    bool get_use_keyword_black_list(){return use_keyword_black_list;}
+    void set_use_keyword_black_list(bool _use){use_keyword_black_list = _use;}
+
+    bool get_use_keyword_white_list(){return use_keyword_white_list;}
+    void set_use_keyword_white_list(bool _use){use_keyword_white_list = _use;}
+
+    vector<Type> get_Ignore_Link_Types(){return ignoredLinkTypes;}
+    bool add_Ignore_Link_Type(Type _type);
+    bool remove_Ignore_Link_Type(Type _type);
+
+    vector<string> get_keyword_black_list(){return keyword_black_list;}
+    bool add_keyword_to_black_list(string _keyword);
+    bool remove_keyword_from_black_list(string _keyword);
+
+    // -------------------------------end filter settings----------------------
 };
 
 }

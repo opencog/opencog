@@ -49,9 +49,6 @@ using namespace opencog::PatternMining;
 using namespace opencog;
 
 
-
-const string PatternMiner::ignoreKeyWords[] = {"this", "that","these","those","it","he", "him", "her", "she" };
-
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, HandleSeq& orderedHandles, vector < vector<int> >& indexes)
 {
     HandleSeq outgoingLinks = link->getOutgoingSet();
@@ -798,10 +795,83 @@ bool PatternMiner::isInHandleSeqSeq(Handle handle, HandleSeqSeq &handleSeqs)
 
 bool PatternMiner::isIgnoredType(Type type)
 {
-    for (Type t : ignoredTypes)
+    for (Type t : ignoredLinkTypes)
     {
         if (t == type)
             return true;
+    }
+
+    return false;
+}
+
+bool PatternMiner::isIgnoredContent(string keyword)
+{
+    for (string ignoreWord : keyword_black_list)
+    {
+        if (keyword == ignoreWord)
+            return true;
+    }
+
+    return false;
+}
+
+bool PatternMiner::containIgnoredContent(Handle link )
+{
+    string str = link->toShortString();
+
+    for (string ignoreWord : keyword_black_list)
+    {
+        string ignoreStr = "\"" + ignoreWord + "\"";
+        if (str.find(ignoreStr) != std::string::npos)
+            return true;
+    }
+
+    return false;
+}
+
+bool PatternMiner::add_Ignore_Link_Type(Type _type)
+{
+    if (isIgnoredType(_type))
+        return false; // already in the ignore link list
+
+    ignoredLinkTypes.push_back(_type);
+    return true;
+}
+
+bool PatternMiner::remove_Ignore_Link_Type(Type _type)
+{
+    vector<Type>::iterator it;
+    for (it = ignoredLinkTypes.begin(); it != ignoredLinkTypes.end(); it ++)
+    {
+        if ((Type)(*it) == _type)
+        {
+           ignoredLinkTypes.erase(it);
+           return true;
+        }
+    }
+
+    return false;
+}
+
+bool PatternMiner::add_keyword_to_black_list(string _keyword)
+{
+    if (isIgnoredContent(_keyword))
+        return false; // already in the ignore keyword list
+
+    keyword_black_list.push_back(_keyword);
+    return true;
+}
+
+bool PatternMiner::remove_keyword_from_black_list(string _keyword)
+{
+    vector<string>::iterator it;
+    for (it = keyword_black_list.begin(); it != keyword_black_list.end(); it ++)
+    {
+        if ((string)(*it) == _keyword)
+        {
+           keyword_black_list.erase(it);
+           return true;
+        }
     }
 
     return false;
@@ -2269,7 +2339,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_or
 
     is_distributed = false;
 
-    ignoredTypes[0] = LIST_LINK;
+    ignoredLinkTypes.push_back(LIST_LINK);
 
     enable_Frequent_Pattern = config().get_bool("Enable_Frequent_Pattern");
     enable_Interesting_Pattern = config().get_bool("Enable_Interesting_Pattern");
@@ -2278,6 +2348,22 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_or
     assert(enable_Frequent_Pattern || enable_Interesting_Pattern);
     //The options are "Interaction_Information", "surprisingness"
     assert( (interestingness_Evaluation_method == "Interaction_Information") || (interestingness_Evaluation_method == "surprisingness") );
+
+
+    thresholdFrequency = config().get_int("Frequency_threshold");
+
+    use_keyword_black_list = config().get_bool("use_keyword_black_list");
+    use_keyword_white_list = config().get_bool("use_keyword_white_list");
+
+    assert( ! (use_keyword_black_list & use_keyword_white_list) );
+
+    string keyword_black_list_str  = config().get("keyword_black_list");
+    keyword_black_list_str .erase(std::remove(keyword_black_list_str .begin(), keyword_black_list_str .end(), ' '), keyword_black_list_str .end());
+    boost::split(keyword_black_list, keyword_black_list_str , boost::is_any_of(","));
+
+    string keyword_white_list_str  = config().get("keyword_white_list");
+    keyword_white_list_str .erase(std::remove(keyword_white_list_str .begin(), keyword_white_list_str .end(), ' '), keyword_white_list_str .end());
+    boost::split(keyword_white_list, keyword_white_list_str , boost::is_any_of(","));
 
     enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
     enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
@@ -2341,10 +2427,9 @@ PatternMiner::~PatternMiner()
     delete atomSpace;
 }
 
-void PatternMiner::runPatternMiner(unsigned int _thresholdFrequency, bool exit_program_after_finish)
+void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 {
 
-    thresholdFrequency = _thresholdFrequency;
 
     Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
     assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
@@ -2958,27 +3043,4 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
     std::cout << "\nDone! The subset has been written to file:  " << fileName << std::endl ;
 }
 
-bool PatternMiner::isIgnoredContent(string keyword)
-{
-    for (string ignoreWord : ignoreKeyWords)
-    {
-        if (keyword == ignoreWord)
-            return true;
-    }
 
-    return false;
-}
-
-bool PatternMiner::containIgnoredContent(Handle link )
-{
-    string str = link->toShortString();
-
-    for (string ignoreWord : ignoreKeyWords)
-    {
-        string ignoreStr = "\"" + ignoreWord + "\"";
-        if (str.find(ignoreStr) != std::string::npos)
-            return true;
-    }
-
-    return false;
-}

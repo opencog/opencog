@@ -51,6 +51,7 @@ private:
 public:
     PatternMinerSCM();
     void run_patternminer();
+    string get_current_settings();
 };
 
 
@@ -99,7 +100,8 @@ void PatternMinerSCM::init_in_module(void* data)
  */
 void PatternMinerSCM::init()
 {
-    define_scheme_primitive("run-patternminer", &PatternMinerSCM::run_patternminer, this, "patternminer");
+    define_scheme_primitive("pm-run-patternminer", &PatternMinerSCM::run_patternminer, this, "patternminer");
+    define_scheme_primitive("pm-get-current-settings", &PatternMinerSCM::get_current_settings, this, "patternminer");
 
 }
 
@@ -119,5 +121,9 @@ void PatternMinerSCM::run_patternminer()
     patternMiner = new PatternMiner(as);
     patternMiner->runPatternMiner(1);
 
+}
+
+string PatternMinerSCM::get_current_settings()
+{
 
 }
