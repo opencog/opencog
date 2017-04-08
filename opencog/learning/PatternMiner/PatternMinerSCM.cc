@@ -30,6 +30,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/learning/PatternMiner/PatternMiner.h>
 
+#include <boost/algorithm/string.hpp>
+
 using namespace std;
 using namespace opencog::PatternMining;
 
@@ -49,10 +51,8 @@ public:
     PatternMinerSCM();
     void run_patternminer();
 
-    string get_current_settings();
-
     string get_Pattern_Max_Gram(){return "max_gram: " + patternMiner->get_Pattern_Max_Gram();}
-    string set_Pattern_Max_Gram(unsigned int _max_gram)
+    string set_Pattern_Max_Gram(int _max_gram)
     {
         patternMiner->set_Pattern_Max_Gram(_max_gram);
         return get_Pattern_Max_Gram();
@@ -66,7 +66,7 @@ public:
     }
 
     string get_Frequency_threshold() {return "Frequency_threshold: " + patternMiner->get_Frequency_threshold();}
-    string set_Frequency_threshold(unsigned int _Frequency_threshold)
+    string set_Frequency_threshold(int _Frequency_threshold)
     {
         patternMiner->set_Frequency_threshold(_Frequency_threshold);
         return get_Frequency_threshold();
@@ -97,7 +97,7 @@ public:
         return result;
     }
 
-    string add_Ignore_Link_Type(string _typeStr)
+    string add_Ignore_Link_Type(const string& _typeStr)
     {
         Type atomType = classserver().getType(_typeStr);
         if (atomType == NOTYPE)
@@ -114,7 +114,7 @@ public:
 
     }
 
-    string remove_Ignore_Link_Type(string _typeStr)
+    string remove_Ignore_Link_Type(const string& _typeStr)
     {
         Type atomType = classserver().getType(_typeStr);
         if (atomType == NOTYPE)
@@ -140,7 +140,7 @@ public:
         return result;
     }
 
-    string add_keyword_to_black_list(string _keyword)
+    string add_keyword_to_black_list(const string& _keyword)
     {
         string result = "";
         if (patternMiner->add_keyword_to_black_list(_keyword))
@@ -150,7 +150,20 @@ public:
         return result + get_keyword_black_list();
     }
 
-    string remove_keyword_from_black_list(string _keyword)
+    string add_keywords_to_black_list(const string& _keywordlist)
+    {
+        vector<string> keyword_list;
+        string keywordstr = _keywordlist;
+        keywordstr .erase(std::remove(keywordstr .begin(), keywordstr .end(), ' '), keywordstr .end());
+        boost::split(keyword_list, keywordstr , boost::is_any_of(","));
+
+        for (string keyword : keyword_list)
+            add_keyword_to_black_list(keyword);
+
+        return "Added!" + get_keyword_black_list();
+    }
+
+    string remove_keyword_from_black_list(const string& _keyword)
     {
         string result = "";
         if (patternMiner->remove_keyword_from_black_list(_keyword))
@@ -171,7 +184,7 @@ public:
         return result;
     }
 
-    string add_keyword_to_white_list(string _keyword)
+    string add_keyword_to_white_list(const string& _keyword)
     {
         string result = "";
         if (patternMiner->add_keyword_to_white_list(_keyword))
@@ -181,7 +194,20 @@ public:
         return result + get_keyword_white_list();
     }
 
-    string remove_keyword_from_white_list(string _keyword)
+    string add_keywords_to_white_list(const string& _keywordlist)
+    {
+        vector<string> keyword_list;
+        string keywordstr = _keywordlist;
+        keywordstr .erase(std::remove(keywordstr .begin(), keywordstr .end(), ' '), keywordstr .end());
+        boost::split(keyword_list, keywordstr , boost::is_any_of(","));
+
+        for (string keyword : keyword_list)
+            add_keyword_to_white_list(keyword);
+
+        return "Added!" + get_keyword_white_list();
+    }
+
+    string remove_keyword_from_white_list(const string& _keyword)
     {
         string result = "";
         if (patternMiner->remove_keyword_from_white_list(_keyword))
@@ -189,6 +215,26 @@ public:
         else
             result +=  "Input keyword does not exist in the white list!\n";
         return result + get_keyword_white_list();
+    }
+
+
+    void clear_keyword_black_list(){patternMiner->clear_keyword_white_list();}
+    void clear_keyword_white_list(){patternMiner->clear_keyword_white_list();}
+
+    string get_current_settings()
+    {
+        string result = "Current all settings:\n";
+        result += get_Pattern_Max_Gram() + "\n";
+        result += get_Enable_Interesting_Pattern() + "\n";
+        result += get_Frequency_threshold() + "\n";
+        result += get_Ignore_Link_Types() + "\n";
+        result += get_use_keyword_black_list() + "\n";
+        result += get_use_keyword_white_list() + "\n";
+        result += get_keyword_black_list() + "\n";
+        result += get_keyword_white_list() + "\n";
+
+        return result;
+
     }
 };
 
@@ -240,6 +286,28 @@ void PatternMinerSCM::init()
 {
     define_scheme_primitive("pm-run-patternminer", &PatternMinerSCM::run_patternminer, this, "patternminer");
     define_scheme_primitive("pm-get-current-settings", &PatternMinerSCM::get_current_settings, this, "patternminer");
+    define_scheme_primitive("pm-get-pattern-max-gram", &PatternMinerSCM::get_Pattern_Max_Gram, this, "patternminer");
+    define_scheme_primitive("pm-set-pattern-max-gram", &PatternMinerSCM::set_Pattern_Max_Gram, this, "patternminer");
+    define_scheme_primitive("pm-get-enable-interesting-pattern", &PatternMinerSCM::get_Enable_Interesting_Pattern, this, "patternminer");
+    define_scheme_primitive("pm-set-enable-interesting-pattern", &PatternMinerSCM::set_Enable_Interesting_Pattern, this, "patternminer");
+    define_scheme_primitive("pm-get-frequency-threshold", &PatternMinerSCM::get_Frequency_threshold, this, "patternminer");
+    define_scheme_primitive("pm-set-frequency-threshold", &PatternMinerSCM::set_Frequency_threshold, this, "patternminer");
+    define_scheme_primitive("pm-get-ignore-link-types", &PatternMinerSCM::get_Ignore_Link_Types, this, "patternminer");
+    define_scheme_primitive("pm-add-ignore-link-type", &PatternMinerSCM::add_Ignore_Link_Type, this, "patternminer");
+    define_scheme_primitive("pm-remove-ignore-link-type", &PatternMinerSCM::remove_Ignore_Link_Type, this, "patternminer");
+    define_scheme_primitive("pm-get-use-keyword-black-list", &PatternMinerSCM::get_use_keyword_black_list, this, "patternminer");
+    define_scheme_primitive("pm-get-use-keyword-white-list", &PatternMinerSCM::get_use_keyword_white_list, this, "patternminer");
+    define_scheme_primitive("pm-get-keyword-black-list", &PatternMinerSCM::get_keyword_black_list, this, "patternminer");
+    define_scheme_primitive("pm-get-keyword-white-list", &PatternMinerSCM::get_keyword_white_list, this, "patternminer");
+    define_scheme_primitive("pm-add-keyword-to-black-list", &PatternMinerSCM::add_keyword_to_black_list, this, "patternminer");
+    define_scheme_primitive("pm-add-keyword-to-black-list", &PatternMinerSCM::add_keywords_to_black_list, this, "patternminer");
+    define_scheme_primitive("pm-remove-keyword-from-black-list", &PatternMinerSCM::remove_keyword_from_black_list, this, "patternminer");
+    define_scheme_primitive("pm-add-keyword-to-white-list", &PatternMinerSCM::add_keyword_to_white_list, this, "patternminer");
+    define_scheme_primitive("pm-add-keywords-to-white-list", &PatternMinerSCM::add_keywords_to_white_list, this, "patternminer");
+    define_scheme_primitive("pm-remove-keyword-from-white-list", &PatternMinerSCM::remove_keyword_from_white_list, this, "patternminer");
+    define_scheme_primitive("pm-clear-keyword-black-list", &PatternMinerSCM::clear_keyword_black_list, this, "patternminer");
+    define_scheme_primitive("pm-clear-keyword-white-list", &PatternMinerSCM::clear_keyword_white_list, this, "patternminer");
+
 
 }
 
@@ -261,7 +329,4 @@ void PatternMinerSCM::run_patternminer()
 
 }
 
-string PatternMinerSCM::get_current_settings()
-{
 
-}
