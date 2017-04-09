@@ -842,6 +842,7 @@ bool PatternMiner::containIgnoredContent(Handle link )
     return false;
 }
 
+
 bool PatternMiner::add_Ignore_Link_Type(Type _type)
 {
     if (isIgnoredType(_type))

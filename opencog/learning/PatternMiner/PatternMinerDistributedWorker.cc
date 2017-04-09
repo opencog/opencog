@@ -284,10 +284,18 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
         readNextLinkLock.unlock();
 
-        // if this link is listlink, ignore it
-        if (cur_link->getType() == opencog::LIST_LINK)
+        // if this link is ingonre type, ignore it
+        if (isIgnoredType( cur_link->getType()))
         {
             continue;
+        }
+
+
+        if (use_keyword_black_list)
+        {
+            // if the content in this link contains content in the black list,ignore it
+            if (containIgnoredContent(cur_link))
+                continue;
         }
 
         // Add this link into observingAtomSpace
