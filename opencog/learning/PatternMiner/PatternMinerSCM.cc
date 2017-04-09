@@ -51,21 +51,33 @@ public:
     PatternMinerSCM();
     void run_patternminer();
 
-    string get_Pattern_Max_Gram(){return "max_gram: " + patternMiner->get_Pattern_Max_Gram();}
+    string get_Pattern_Max_Gram()
+    {
+        return  "max_gram: " + std::to_string( (int)(patternMiner->get_Pattern_Max_Gram()));
+    }
     string set_Pattern_Max_Gram(int _max_gram)
     {
         patternMiner->set_Pattern_Max_Gram(_max_gram);
         return get_Pattern_Max_Gram();
     }
 
-    string get_Enable_Interesting_Pattern(){return "enable_Interesting_Pattern: " + patternMiner->get_Enable_Interesting_Pattern();}
+    string get_Enable_Interesting_Pattern()
+    {
+        bool enable = patternMiner->get_Enable_Interesting_Pattern();
+
+        if (enable)
+            return "enable_Interesting_Pattern: true";
+        else
+            return "enable_Interesting_Pattern: false";
+    }
+
     string set_Enable_Interesting_Pattern(bool _enable)
     {
         patternMiner->set_Enable_Interesting_Pattern(_enable) ;
         return get_Enable_Interesting_Pattern();
     }
 
-    string get_Frequency_threshold() {return "Frequency_threshold: " + patternMiner->get_Frequency_threshold();}
+    string get_Frequency_threshold() {return "Frequency_threshold: " + std::to_string(patternMiner->get_Frequency_threshold());}
     string set_Frequency_threshold(int _Frequency_threshold)
     {
         patternMiner->set_Frequency_threshold(_Frequency_threshold);
@@ -73,14 +85,32 @@ public:
     }
 
 
-    string get_use_keyword_black_list(){return "use_keyword_black_list: " + patternMiner->get_use_keyword_black_list();}
+    string get_use_keyword_black_list()
+    {
+        bool enable = patternMiner->get_use_keyword_black_list();
+
+        if (enable)
+            return "use_keyword_black_list: true";
+        else
+            return "use_keyword_black_list: false";
+    }
+
     string set_use_keyword_black_list(bool _use)
     {
         patternMiner->set_use_keyword_black_list(_use);
         return get_use_keyword_black_list();
     }
 
-    string get_use_keyword_white_list(){return "use_keyword_white_list: " + patternMiner->get_use_keyword_white_list();}
+    string get_use_keyword_white_list()
+    {
+        bool enable = patternMiner->get_use_keyword_white_list();
+
+        if (enable)
+            return "use_keyword_white_list: true";
+        else
+            return "use_keyword_white_list: false";
+    }
+
     string set_use_keyword_white_list(bool _use)
     {
         patternMiner->set_use_keyword_white_list(_use);
@@ -284,6 +314,9 @@ void PatternMinerSCM::init_in_module(void* data)
  */
 void PatternMinerSCM::init()
 {
+    AtomSpace* as = SchemeSmob::ss_get_env_as("patten miner");
+    patternMiner = new PatternMiner(as);
+
     define_scheme_primitive("pm-run-patternminer", &PatternMinerSCM::run_patternminer, this, "patternminer");
     define_scheme_primitive("pm-get-current-settings", &PatternMinerSCM::get_current_settings, this, "patternminer");
     define_scheme_primitive("pm-get-pattern-max-gram", &PatternMinerSCM::get_Pattern_Max_Gram, this, "patternminer");
@@ -323,9 +356,7 @@ void opencog_patternminer_init(void)
 void PatternMinerSCM::run_patternminer()
 {
 
-    AtomSpace* as = SchemeSmob::ss_get_env_as("run_patternminer");
-    patternMiner = new PatternMiner(as);
-    patternMiner->runPatternMiner(1);
+    patternMiner->runPatternMiner();
 
 }
 
