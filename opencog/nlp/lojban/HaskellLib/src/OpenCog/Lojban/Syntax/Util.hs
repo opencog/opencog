@@ -280,6 +280,9 @@ appendAtoms i = Iso f g where
         setAtoms as
         pure a
 
+setSeed :: SynMonad t State => Int -> (t ME) ()
+setSeed i = modify (\s -> s {sSeed = i})
+
 setFlag :: SynMonad t State => Flag -> (t ME) ()
 setFlag f = modify (\s -> s {sFlags = f : sFlags s})
 

@@ -97,17 +97,14 @@ loadWordLists cmavoSrc gismuSrc  = do
     if dfe
         then (do
             bs <- BS.readFile ser
-            (seed :: Int) <- randomIO
             let (Right (selmahos,gismu,bai)) = decode bs
                 baiIso = handleBAI bai
             return WordList {cmavos = fmap TS.fromList selmahos
                             ,gismus = TS.fromList gismu
                             ,bai = baiIso
-                            ,seed = seed
                             }
             )
         else (do
-            (seed :: Int) <- randomIO
             gismu <- newgetGismu gismuSrc
             cmavo <- newgetCmavo cmavoSrc
             bai   <- newgetBAI   cmavoSrc
@@ -116,7 +113,6 @@ loadWordLists cmavoSrc gismuSrc  = do
                 res = WordList {cmavos = fmap fromList selmahos
                                ,gismus = gismu
                                ,bai = baiIso
-                               ,seed = seed
                                }
                 bs = encode (selmahos,TS.toList gismu,bai)
             BS.writeFile ser bs

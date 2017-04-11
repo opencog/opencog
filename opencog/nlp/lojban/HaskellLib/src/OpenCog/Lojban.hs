@@ -31,20 +31,21 @@ initParserPrinter :: String -> String
                   -> IO (String -> Either String Atom, Atom -> Either String String)
 initParserPrinter cmavoSrc gismuSrc = do
     wordlist <- loadWordLists cmavoSrc gismuSrc
-    return (lojbanToAtomese wordlist,atomeseToLojban wordlist)
+    seed <- randomIO
+    return (lojbanToAtomese wordlist seed,atomeseToLojban wordlist seed)
 
-lojbanToAtomese :: WordList -> String -> Either String Atom
-lojbanToAtomese rstate text = wrapAtom . fst <$> evalRWST (apply lojban ()) rstate state
-    where state = State {sFlags = [],sAtoms = [],sText = text++" "}
+lojbanToAtomese :: WordList -> Int -> String -> Either String Atom
+lojbanToAtomese rstate seed text = wrapAtom . fst <$> evalRWST (apply lojban ()) rstate state
+    where state = State {sFlags = [],sAtoms = [],sText = text++" ",sSeed = seed}
 
 wrapAtom :: Atom -> Atom
 wrapAtom atom@(Link "SatisfactionLink" _ _) = cLL [cAN "QuestionAnchor" , atom]
 wrapAtom atom@(Link "PutLink" _ _)          = cLL [cAN "QuestionAnchor" , atom]
 wrapAtom atom                               = cLL [cAN "StatementAnchor", atom]
 
-atomeseToLojban :: WordList -> Atom -> Either String String
-atomeseToLojban rstate a@(LL [_an,s]) = sText . fst <$> execRWST (unapply lojban s) rstate state
-    where state = State {sFlags = [],sAtoms = [],sText = ""}
+atomeseToLojban :: WordList -> Int -> Atom -> Either String String
+atomeseToLojban rstate seed a@(LL [_an,s]) = sText . fst <$> execRWST (unapply lojban s) rstate state
+    where state = State {sFlags = [],sAtoms = [],sText = "",sSeed = seed}
 
 {-tvToLojban :: TruthVal -> String
 tvToLojban tv

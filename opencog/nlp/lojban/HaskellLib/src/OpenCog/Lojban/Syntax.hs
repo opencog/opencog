@@ -165,11 +165,12 @@ sndToState i = Iso f g where
 setOf :: String -> SynIso Atom Atom
 setOf itype = sndToState 1 . second (tolist1 . setTypeL . tolist2)
             . makeSet . genInstance itype
-    where makeSet = mkIso f g
-              where f a = let salt = show a
-                              set  = cCN (randName 1 salt) noTv
-                          in (set,(set,a))
-                    g (_,(_,a)) = a
+    where makeSet = Iso f g
+              where f a = do
+                        name <- randName (show a)
+                        let set = cCN name noTv
+                        pure (set,(set,a))
+                    g (_,(_,a)) = pure a
 
 
 
@@ -181,11 +182,9 @@ laP = handleName . wordNode <<< sepSelmaho "LA"
     where handleName :: SynIso Atom Atom
           handleName = Iso f g where
               f a = do
-                  seed <- asks seed
                   p <- apply instanceOf (cPN "cmene" lowTv)
-                  let na = nodeName a
-                      name = randName seed na ++ "___" ++ na
-                      c = cCN name lowTv
+                  name <- randName (nodeName a ++ "___" ++ nodeName a)
+                  let c = cCN name lowTv
                       ct = (c,Nothing)
                       at = (a,Nothing)
                       pt = ((highTv,p),Nothing)
@@ -343,9 +342,8 @@ setWithSize :: SynIso (Atom,Atom) Atom
 setWithSize = sndToState 2 . second (tolist2 . (sizeL *** setTypeL)) . makeSet
     where makeSet = Iso f g
           f (a,b) = do
-              seed <- asks seed
-              let salt = show a ++ show b
-                  set  = cCN (randName seed salt) noTv
+              name <- randName $ show a ++ show b
+              let set = cCN name noTv
               pure (set,([set,a],[set,b]))
           g (_,([_,a],[_,b])) = pure (a,b)
 
@@ -781,7 +779,7 @@ addti = mkIso f g
 --The second with a VarNode in the Statement is a fill the blank question
 --we wrap the statment in a (Put s (Get s)) that when excuted should fill the blank
 preti :: Syntax Atom
-preti = (_satl ||| handleMa) . switchOnFlag "xu" <<< statment
+preti = handleMa <<< handleXu
     where handleMa :: SynIso Atom Atom
           handleMa = Iso f g
           f a = do
@@ -794,6 +792,25 @@ preti = (_satl ||| handleMa) . switchOnFlag "xu" <<< statment
               pure (x ? na $ all)
           g (Link "PutLink"  [LL (a:s),_] _) = setAtoms s >> pure a
           g (Link "ListLink" (a:s) _)        = setAtoms s >> pure a
+
+          --If
+          handleXu = Iso f g where
+              f () = do
+                  state0 <- get
+                  res <- apply statment ()
+                  state1 <- get
+                  flags <- gets sFlags
+                  if "xu" `elem` flags
+                     then do
+                         put state0
+                         res2 <- apply (_exl . addfst var . withFlag "handleXu" statment) ()
+                         put state1
+                         pushAtom res2
+                         apply _satl res
+                    else pure res
+              var = Node "VariableNode" "xu" noTv
+              g a = unapply statment a
+
 
 
 ------------------------------------
@@ -954,23 +971,23 @@ withAttitude syn = (first handleSOS ||| id) . reorder
 --We just have to create instances of this with (selbri &&& mapIso toSumti)
 --before we can create the statement with _frames
 --and then add it to the State
+--We have to run handleUI` even with "handleXu" to ensure the random seed stays the same
 handleUI :: SynIso ((Atom,TruthVal),Atom) Atom
-handleUI = (rmfstAny (xu,tv) ||| handleUI') . switchOnFlag "xu"
-    where xu = Node "ConceptNode" "xu" noTv
-          tv = stv 0.75  0.9
+handleUI = (handleXu ||| id) . switchOnFlag "handleXu" . handleUI'
+    where handleXu = Iso f g
+          f _ = pure $ Node "VariableNode" "xu" noTv
+          g _ = lift $ Left "Printing with handleXu flag is not allowed."
 
 handleUI' :: SynIso ((Atom,TruthVal),Atom) Atom
 handleUI' = sndToState 1
-         . second (tolist1 . _frames . (selbri *** mapIso toSumti)
+         . second (tolist1 . _frames . (selbri *** tolist1 . toSumti)
                   )
          . manage
     where manage = mkIso f g where
-              f ((ui,tv),a) = (a,((tv,cinmo),[(mi,"1"),(ui,"2"),(a,"3")]))
-              g (a,((tv,_),[_,(ui,_),_])) = ((ui,tv),a)
+              f ((ui,tv),a) = (a,((tv,ui),(a,"1")))
+              g (a,((tv,ui),_)) = ((ui,tv),a)
 
-          mi      = Node "ConceptNode" "mi" noTv
-          cinmo   = Node "PredicateNode" "cinmo" noTv
-          toSumti = instanceOf *** just
+          toSumti = id *** just
           selbri  = addsnd Nothing . second instanceOf
 
 handleSEI :: SynIso (Atom,Atom) Atom

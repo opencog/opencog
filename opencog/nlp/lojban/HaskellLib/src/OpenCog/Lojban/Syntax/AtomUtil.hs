@@ -7,6 +7,7 @@ import Prelude hiding (id,(.))
 import Control.Category (id,(.))
 import Control.Monad.Trans.Class
 import Control.Monad.RWS
+import qualified Control.Arrow as A ((***))
 
 import Iso hiding (SynIso,Syntax)
 
@@ -42,8 +43,11 @@ _ctxold = ctx . tolist2 . second _eval
 _ssl :: SynIso Atom Atom
 _ssl = ssl . tolist2 . addfst (Node "VariableNode" "$var" noTv)
 
+_exl :: SynIso (Atom, Atom) Atom
+_exl = exl . tolist2
+
 _satl :: SynIso Atom Atom
-_satl = satl . tolist1 . listl . consAtoms
+_satl = satl . tolist1
 
 satl :: SynIso [Atom] Atom
 satl = linkIso "SatisfactionLink" noTv
@@ -75,6 +79,9 @@ evalTv = linkIso2 "EvaluationLink"
 
 ssl :: SynIso [Atom] Atom
 ssl = linkIso "SatisfyingSetLink" noTv
+
+exl :: SynIso [Atom] Atom
+exl = linkIso "ExistsLink"  noTv
 
 setTypeL  :: SynIso [Atom] Atom
 setTypeL = linkIso "SetTypeLink" noTv
@@ -252,17 +259,19 @@ _frames = (id ||| andl) . isSingle . mapIso (handleDA . _frame) . isoDistribute 
           g (Right as) = as
 
 handleDA :: SynIso Atom Atom
-handleDA = mkIso f g where
+handleDA = Iso f g where
     f (EvalL tv ps (LL [p1,CN n]))
         | n == "da" || n == "de" || n == "di"
-            = let i = cVN (randName 0 (show p1) ++ "___" ++ n)
-              in cExL tv i (cEvalL tv ps (cLL [p1,i]))
-    f a = a
+            = do
+            name <- randName ((show p1) ++ "___" ++ n)
+            pure $ let i = cVN name
+                   in cExL tv i (cEvalL tv ps (cLL [p1,i]))
+    f a = pure a
     g (ExL _ _ (EvalL tv ps (LL [p1,VN name])))
         = let n = drop 23 name
               da = cCN n lowTv
-          in cEvalL tv ps (cLL [p1,da])
-    g a = a
+          in pure $ cEvalL tv ps (cLL [p1,da])
+    g a = pure a
 
 handleTAG :: SynIso (Tagged Selbri,[Sumti]) (Selbri,[(Atom,Tag)])
 handleTAG = handleTAGupdater . second tagger
@@ -329,8 +338,17 @@ _framePred = handleVar $ node . second (first (isoConcat "_sumti". tolist2 .< is
               g (VN name) = pure (cPN name noTv,"$var")
               g a = unapply iso a
 
-randName :: Int -> String -> String
-randName = take 20 . map chr . randomRs (33,126) . mkStdGen ... hashWithSalt
+
+randName :: SynMonad t State => String -> (t ME) String
+randName salt = do
+    seed1 <- gets sSeed
+    let (n,seed2) = randName' seed1 salt
+    setSeed seed2
+    pure n
+
+randName' :: Int -> String -> (String,Int)
+randName' = ((take 20 . map chr . randomRs (33,126)) A.*** (fst . random)) . split . mkStdGen ... hashWithSalt
+
 
 --Most pronouns are instances of a more general concept
 --This will create the inheritance link to show this relation
@@ -346,15 +364,13 @@ implicationOf = genInstance "ImplicationLink"
 genInstance :: String -> SynIso Atom Atom
 genInstance typeL = Iso f g where
     f a = do
-        seed <- asks seed
-        let salt = show a
-            (t,name) = if "Link" `isSuffixOf` atomType a
+        let (t,name) = if "Link" `isSuffixOf` atomType a
                    then ("ConceptNode","")
                    else (atomType a,nodeName a)
-            fullname = randName seed salt ++ "___"++ name
-            i = Node t fullname noTv
+        rndname <- randName $ show a
+        let i = Node t (rndname  ++ "___" ++ name) noTv
             l = Link typeL [i,a] highTv
-        modify (\s -> s {sAtoms = l : sAtoms s})
+        pushAtom l
         pure i
     g n = do
         atoms <- gets sAtoms
