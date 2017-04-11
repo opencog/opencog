@@ -774,7 +774,6 @@ addti = mkIso f g
           g s = s --TODO: Maybe remoe ti again
 
 --Handles questions
---The first kind with the word "xu" is a question for the truth of a statment
 --A SatisfactionLink is used for this
 --The second with a VarNode in the Statement is a fill the blank question
 --we wrap the statment in a (Put s (Get s)) that when excuted should fill the blank
@@ -805,7 +804,9 @@ preti = handleMa <<< handleXu
                          put state0
                          res2 <- apply (_exl . addfst var . withFlag "handleXu" statment) ()
                          put state1
-                         pushAtom res2
+                         case res2 of --If it's the whole sentence ingore
+                             (ExL noTv (VN "xu")(VN "xu")) -> pure ()
+                             _ -> pushAtom res2
                          apply _satl res
                     else pure res
               var = Node "VariableNode" "xu" noTv
@@ -880,7 +881,7 @@ _jufra = second ((handle ||| tolist1) . ifJustB)
                   ) <|> pure (x,(Nothing,as))
 
 jufra :: Syntax Atom
-jufra = listl . rmfstAny Nothing <<< _jufra
+jufra = listl <<< many preti
 
 jufmei = listl . reorder <<< sepSelmaho "NIhO" &&> preti
                         &&& some (sepSelmaho "I" &&> preti)
@@ -971,12 +972,14 @@ withAttitude syn = (first handleSOS ||| id) . reorder
 --We just have to create instances of this with (selbri &&& mapIso toSumti)
 --before we can create the statement with _frames
 --and then add it to the State
---We have to run handleUI` even with "handleXu" to ensure the random seed stays the same
 handleUI :: SynIso ((Atom,TruthVal),Atom) Atom
-handleUI = (handleXu ||| id) . switchOnFlag "handleXu" . handleUI'
-    where handleXu = Iso f g
+handleUI = (handleXu ||| (rmfstAny (xu,tv) ||| handleUI') . switchOnFlag "xu") . switchOnFlag "handleXu"
+    where --We also call handleUI' to keep the random seed consistent
+          handleXu = Iso f g -- . inverse (sndToState 1) . handleUI'
           f _ = pure $ Node "VariableNode" "xu" noTv
           g _ = lift $ Left "Printing with handleXu flag is not allowed."
+          xu = Node "ConceptNode" "xu" noTv
+          tv = stv 0.75  0.9
 
 handleUI' :: SynIso ((Atom,TruthVal),Atom) Atom
 handleUI' = sndToState 1

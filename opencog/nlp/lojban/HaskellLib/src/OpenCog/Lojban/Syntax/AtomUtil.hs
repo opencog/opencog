@@ -49,11 +49,11 @@ _exl = exl . tolist2
 _satl :: SynIso Atom Atom
 _satl = satl . tolist1
 
-satl :: SynIso [Atom] Atom
-satl = linkIso "SatisfactionLink" noTv
-
 _iimpl :: SynIso (Atom,Atom) Atom
 _iimpl = iimpl . tolist2
+
+satl :: SynIso [Atom] Atom
+satl = linkIso "SatisfactionLink" noTv
 
 ctx :: SynIso [Atom] Atom
 ctx = linkIso "ContextLink" noTv
