@@ -311,6 +311,9 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         map<Handle,Handle> lastGramValueToVarMap;
         map<Handle,Handle> patternVarMap;
 
+        set<string> allNewMinedPatternsCurTask;
+
+
         // allHTreeNodesCurTask is only used in distributed version;
         // is to store all the HTreeNode* mined in this current task, and release them after the task is finished.
         vector<HTreeNode*> allHTreeNodesCurTask;
@@ -324,7 +327,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         actualProcessedLinkLock.unlock();
 
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
-                                                patternVarMap, false, allHTreeNodesCurTask, allNewMinedPatternInfo);
+                                                patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo);
 
 
         // send new mined patterns to the server

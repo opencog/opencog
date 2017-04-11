@@ -185,6 +185,8 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         map<Handle,Handle> lastGramValueToVarMap;
         map<Handle,Handle> patternVarMap;
 
+        set<string> allNewMinedPatternsCurTask;
+
         // allHTreeNodesCurTask is only used in distributed version;
         // is to store all the HTreeNode* mined in this current task, and release them after the task is finished.
         vector<HTreeNode*> allHTreeNodesCurTask;
@@ -198,7 +200,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         actualProcessedLinkLock.unlock();
 
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
-                                                patternVarMap, false, allHTreeNodesCurTask, allNewMinedPatternInfo);
+                                                patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo);
 
 
     }
@@ -304,7 +306,7 @@ void PatternMiner::runPatternMinerDepthFirst()
 // extendedLinkIndex is to return the index of extendedLink's patternlink in the unified pattern so as to identify where is the extended link in this pattern
 // vector<HTreeNode*> &allHTreeNodesCurTask is only used in distributed version
 HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
-                                                                HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex)
+                                                                HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars,AtomSpace* _fromAtomSpace, unsigned int & extendedLinkIndex, set<string>& allNewMinedPatternsCurTask)
 {
     HTreeNode* returnHTreeNode = 0;
     bool skip = false;
@@ -407,9 +409,23 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         // unify the pattern
         unifiedPattern = UnifyPatternOrder(pattern, extendedLinkIndex);
 
+        string keyString = unifiedPatternToKeyString(unifiedPattern);
+
+        if (THREAD_NUM == 1) // Only check when only use one thread, because instancesUidStrings will be checked when more than one thread is used.
+        {
+            // check if this pattern has been found in current Link task
+            if (allNewMinedPatternsCurTask.find(keyString) != allNewMinedPatternsCurTask.end())
+            {
+                return returnHTreeNode;
+            }
+            else
+            {
+                allNewMinedPatternsCurTask.insert(keyString);
+            }
+        }
+
         // next, check if this pattern already exist (need lock)
         HTreeNode* newHTreeNode = 0;
-
 
         if (is_distributed)
         {
@@ -423,7 +439,8 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
         }
         else
         {
-            string keyString = unifiedPatternToKeyString(unifiedPattern);
+
+            // todo: check if it needs to check instancekeyString in distributed mode
 
             string instancekeyString = "";
             if ( (gram > 1) && (THREAD_NUM > 1) )
@@ -518,13 +535,15 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 
 }
 
+
 // when it's the first gram pattern: parentNode = 0, extendedNode = undefined, lastGramLinks is empty, lastGramValueToVarMap and lastGramPatternVarMap are empty
 // extendedNode is the value node in original AtomSpace
 // lastGramLinks is the original links the parentLink is extracted from
+// allNewMinedPatternsCurTask is to store all the pattern keystrings mined in current Link task, to avoid duplicate patterns being mined
 // allNewMinedPatternInfo is only used in distributed mode, to store all the new mined pattern info to send to server
 void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
                  HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
-                 bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo)
+                 bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo)
 {
 
     // the ground value node in the _fromAtomSpace to the variable handle in pattenmining Atomspace
@@ -670,7 +689,8 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
             }
 
             unsigned int extendedLinkIndex = 999;
-            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves, shouldNotBeVars, shouldBeVars,_fromAtomSpace, extendedLinkIndex);
+            HTreeNode* thisGramHTreeNode = extractAPatternFromGivenVarCombination(inputLinks, patternVarMap, oneOfEachSeqShouldBeVars, leaves,
+                                                                                  shouldNotBeVars, shouldBeVars,_fromAtomSpace, extendedLinkIndex, allNewMinedPatternsCurTask);
 
             if (thisGramHTreeNode)
             {
@@ -784,24 +804,25 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                         else
                             extendedHandle = incomingHandle;
 
-
-                        string extendedHandleStr = extendedHandle->toShortString();
-
                         if (isInHandleSeq(extendedHandle, inputLinks))
                             continue;
+
+                        // string extendedHandleStr = extendedHandle->toShortString();
 
                         // debug
                         // cout << "Debug: Extended link :" << extendedHandleStr << std::endl;
 
-                        if (extendedHandleStr.find("$var") != std::string::npos)
-                        {
-                           // cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
-                            continue;
-                        }
+//                        if (extendedHandleStr.find("$var") != std::string::npos)
+//                        {
+//                           // cout << "Debug: error! The extended link contines variables!" << extendedHandleStr << std::endl;
+//                            continue;
+//                        }
 
-                        // extract patterns from these child
+
+                        // extract patterns from this child
                         extendAPatternForOneMoreGramRecursively(extendedHandle,  _fromAtomSpace, extendNode, inputLinks, thisGramHTreeNode,
-                                                                valueToVarMap,patternVarMap,isNewExtendedFromVar, allHTreeNodesCurTask, allNewMinedPatternInfo);
+                                                                valueToVarMap,patternVarMap,isNewExtendedFromVar, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo);
+
                     }
 
                     nodeIndex ++;
@@ -810,8 +831,6 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 
             }
-
-
 
 
             if ( (var_num == 0) || (isLastNElementsAllTrue(indexes, n_max, var_num)))
@@ -841,6 +860,7 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
 
 }
 
+// this function is old
 // allLastGramHTreeNodes is input, allFactLinksToPatterns is output - the links fact to all its pattern HTreeNodes
 void PatternMiner::extendAllPossiblePatternsForOneMoreGramDF(HandleSeq &instance, AtomSpace* _fromAtomSpace, unsigned int gram,
      vector<HTreeNode*>& allLastGramHTreeNodes, map<HandleSeq, vector<HTreeNode*> >& allFactLinksToPatterns, vector<OrderedHandleSet>& newConnectedLinksFoundThisGram)

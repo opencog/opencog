@@ -333,7 +333,7 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-get-keyword-black-list", &PatternMinerSCM::get_keyword_black_list, this, "patternminer");
     define_scheme_primitive("pm-get-keyword-white-list", &PatternMinerSCM::get_keyword_white_list, this, "patternminer");
     define_scheme_primitive("pm-add-keyword-to-black-list", &PatternMinerSCM::add_keyword_to_black_list, this, "patternminer");
-    define_scheme_primitive("pm-add-keyword-to-black-list", &PatternMinerSCM::add_keywords_to_black_list, this, "patternminer");
+    define_scheme_primitive("pm-add-keywords-to-black-list", &PatternMinerSCM::add_keywords_to_black_list, this, "patternminer");
     define_scheme_primitive("pm-remove-keyword-from-black-list", &PatternMinerSCM::remove_keyword_from_black_list, this, "patternminer");
     define_scheme_primitive("pm-add-keyword-to-white-list", &PatternMinerSCM::add_keyword_to_white_list, this, "patternminer");
     define_scheme_primitive("pm-add-keywords-to-white-list", &PatternMinerSCM::add_keywords_to_white_list, this, "patternminer");
