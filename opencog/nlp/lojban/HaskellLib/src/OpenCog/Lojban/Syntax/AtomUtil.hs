@@ -42,8 +42,8 @@ _ctxold = ctx . tolist2 . second _eval
 _ssl :: SynIso Atom Atom
 _ssl = ssl . tolist2 . addfst (Node "VariableNode" "$var" noTv)
 
-_satl :: SynIso (String,Atom) Atom
-_satl = satl . tolist1 . listl . consAtoms . rmfst "xu"
+_satl :: SynIso Atom Atom
+_satl = satl . tolist1 . listl . consAtoms
 
 satl :: SynIso [Atom] Atom
 satl = linkIso "SatisfactionLink" noTv

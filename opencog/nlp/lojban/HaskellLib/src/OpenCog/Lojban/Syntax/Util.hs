@@ -309,3 +309,13 @@ ifNotFlag flag = Iso f f where
         if flag `elem` flags
            then lift $ Left $ "Flag: " ++ flag ++ " is set."
            else pure a
+
+switchOnFlag :: Flag -> SynIso a (Either a a)
+switchOnFlag flag = Iso f g where
+    f a = do
+        flags <- gets sFlags
+        if flag `elem` flags
+           then pure (Left a)
+           else pure (Right a)
+    g (Left a)  = setFlag flag >> pure a
+    g (Right a) = pure a

@@ -32,5 +32,11 @@ init = do
     wl <- loadWordLists "cmavo.csv" "gismu.csv"
     return wl
 
-mpa :: WordList -> Syntax a -> String -> Either String (a,State,())
-mpa wl x y = runRWST (apply x ()) wl (mystate y)
+mpag :: WordList -> Syntax a -> String -> Either String (a,State,())
+mpag wl x y = runRWST (apply x ()) wl (mystate y)
+
+mpa :: WordList -> Syntax Atom -> String -> IO ()
+mpa wl x y = do
+    case runRWST (apply x ()) wl (mystate y) of
+        Left s -> putStrLn s
+        Right (a,s,_) -> printAtom a >> P.print s

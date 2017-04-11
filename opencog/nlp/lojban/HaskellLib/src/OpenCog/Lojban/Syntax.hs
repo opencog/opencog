@@ -3,6 +3,7 @@
 {-# LANGUAGE TypeFamilies               #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE RankNTypes                 #-}
+{-# LANGUAGE LambdaCase                 #-}
 
 module OpenCog.Lojban.Syntax where
 
@@ -10,6 +11,7 @@ import Prelude hiding (id,(.),(<*>),(<$>),(*>),(<*),foldl)
 
 import qualified Data.List.Split as S
 import Data.Maybe (fromJust)
+import Data.List (isInfixOf)
 import Data.Hashable
 
 import System.Random
@@ -21,7 +23,7 @@ import Control.Category (id,(.),(<<<),(>>>))
 
 import Iso hiding (SynIso,Syntax)
 
-import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,nodeName)
+import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,nodeName,atomElem)
 import OpenCog.Lojban.Util
 
 import OpenCog.Lojban.Syntax.Types
@@ -47,9 +49,8 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --      vo'a rule see ../Lojban.hs
 --      make statments explicit
 --      ge'e cai on logical conectives and else?
---      Does SEI have implicit args
+--      Does SEI have implicit args?
 --      What if you have SEI and UI
---      ko -- Selbri implies/inherits from Imperative
 
 -- argslots
 -- Synonims for tenses and gismu
@@ -246,7 +247,14 @@ sumti = kohaP <+> leP <+> laP <+> liP <+> zoP <+> luP
 
 --This Handles relative phrases
 noiP :: Syntax Atom
-noiP = sepSelmaho "NOI" &&> bridi <&& optSelmaho "KUhO"
+noiP = sepSelmaho "NOI" &&> (hasKEhA <<< bridi) <&& optSelmaho "KUhO"
+    where hasKEhA = Iso f f
+          f a = if atomAny (\case { Link _ _ _ -> False
+                                  ; (Node _ n _) ->"ke'a" `isInfixOf` n
+                                  }) a
+                   then pure a
+                   else lift $ Left "No ke'a in bridi."
+          kea = Node "ConceptNode" "ke'a" noTv
 
 noiShort :: Syntax Atom
 noiShort = sepSelmaho "NOI" &&> ptp selbriUI addKEhA bridi <&& optSelmaho "KUhO"
@@ -265,8 +273,8 @@ goiP = ptp (selmaho "GOI") goiToNoi noiP
                                   ,("goi " ,"poi ke'a du ")]
 
 sumtiNoi :: Syntax Atom
-sumtiNoi = (kehaToSesku . sndToState 1 ||| id) . reorder <<< sumti
-                                          &&& optional (noiP <+> noiShort <+> goiP)
+sumtiNoi = (kehaToSesku . sndToState 1 ||| id) . reorder
+        <<< sumti &&& optional (noiP <+> noiShort <+> goiP)
     where reorder = mkIso f g
           f (a,Just n )    = Left (a,[n])
           f (a,Nothing)    = Right a
@@ -505,7 +513,7 @@ tanru = handleTanru <$> gismuP
 
 nuP :: Syntax Atom
 nuP = choice nuHandlers
-    . selmaho "NU" &&& bridiPMI <&& optSelmaho "KEI"
+    . selmaho "NU" &&& bridiUI <&& optSelmaho "KEI"
 
 nuHandlers = [("nu"     ,handleNU)
 ,("du'u"   ,handleNU)
@@ -518,16 +526,6 @@ handleNU = Iso f g where
                     in Just (pred,link:as)
     g (PN name,CtxPred atom : as) = Just ((atom,as),name)
 -}
-
---like bridiP but adds mi instead of ti
-bridiPMI :: Syntax Atom
-bridiPMI = ptp (optional _SOS &&& selbriAll) addmi bridiUI
-         <+> bridiUI
-         <+> ptp (optional anytense &&& selbriAll) addmi bridiUI
-    where addmi = mkIso f g
-          f s = s ++ "mi "
-          g s = s --TODO: Maybe remoe mi again
-
 
 _MOI :: Syntax String
 _MOI = selmaho "MOI"
@@ -676,14 +674,16 @@ _GIhABO = first just <<< _GIhA &&& optional _BO
 
 _bridi :: Syntax Atom
 _bridi = isoFoldl handleGIhA . (handleBRIDI *** distribute) . reorder
-        <<< many sumtiAllUI
-        <&&  optext "cu"
+        <<< (some sumtiAllUI <+> zohe)
+        <&& optext "cu"
         &&& (bridiTail <+> bridiBETail) --FIXME: what if it is a mix
         &&& many (_GIhABO &&& bridiTail)
 
     where reorder = mkIso f g where
             f (s,(bt,ls)) = ((s,bt),(s,ls))
             g ((s,bt),(_,ls)) = (s,(bt,ls))
+
+          zohe = tolist1 . insert (Node "ConceptNode" "zo'e" noTv,Nothing)
 
           distribute = mkIso f g where
             f (s,[]) = []
@@ -759,12 +759,18 @@ bridiUI :: Syntax Atom
 bridiUI = (handleSOS ||| id) . ifJustA
        <<< (optional _SOS &&& bridi)
 
-bridiP :: Syntax Atom
-bridiP = ptp (_SOS &&& selbriAll) addti bridiUI
-       <+> bridiUI
-       <+> ptp (anytense &&& selbriAll) addti bridiUI
-
 addti :: SynIso String String
+statment :: Syntax Atom
+statment = (handleSOS ||| id) . ifJustA
+  <<< optSelmaho "I" &&> optional _SOS &&& statment2
+
+statment2 :: Syntax Atom
+statment2 = isoFoldl (handleCon . reorder)
+    <<< bridi &&& many (sepSelmaho "I" &&> _JA_BO &&& bridiUI)
+    where reorder = Iso f g where
+            f (b1,(con,b2)) = pure (con,[b1,b2])
+            g (con,[b1,b2]) = pure (b1,(con,b2))
+
 addti = mkIso f g
     where f s = s ++ "ti "
           g s = s --TODO: Maybe remoe ti again
@@ -775,7 +781,7 @@ addti = mkIso f g
 --The second with a VarNode in the Statement is a fill the blank question
 --we wrap the statment in a (Put s (Get s)) that when excuted should fill the blank
 preti :: Syntax Atom
-preti = (_satl ||| handleMa) . ifJustA <<< optional (word "xu") &&& bridiP
+preti = (_satl ||| handleMa) . switchOnFlag "xu" <<< statment
     where handleMa :: SynIso Atom Atom
           handleMa = Iso f g
           f a = do
@@ -827,7 +833,11 @@ _JA = optional (word "na") &&& _JA' &&& optional (word "nai")
     where _JA' = _JAtoA <<< selmaho "JA"
 
 _JA_BO :: Syntax Con
-_JA_BO = optional _JA &&& optional _BO
+_JA_BO = handle <<< optional _JA &&& optional _BO
+    where handle = Iso f g where
+            f (Nothing,Nothing) = lift $ Left "_JA_BO empty"
+            f a = pure a
+            g = pure
 
 {-_BAI_BO :: Syntax Atom
 _BAI_BO = <$> baiP <* sepSelmaho "BO"
@@ -843,7 +853,6 @@ _jufra = second ((handle ||| tolist1) . ifJustB)
      <<< sepSelmaho "I" &&> optional _JA_BO &&& preti &&& optional _jufra
     where handle = Iso f g where
               f (p,(mc,a:as)) = case mc of
-                                    Just (Nothing,Nothing) -> pure $ p:a:as
                                     Just c -> do
                                         x <- apply handleCon (c,[p,a])
                                         pure (x:as)
@@ -854,7 +863,7 @@ _jufra = second ((handle ||| tolist1) . ifJustB)
                   ) <|> pure (x,(Nothing,as))
 
 jufra :: Syntax Atom
-jufra = listl . rmfst Nothing <<< _jufra
+jufra = listl . rmfstAny Nothing <<< _jufra
 
 jufmei = listl . reorder <<< sepSelmaho "NIhO" &&> preti
                         &&& some (sepSelmaho "I" &&> preti)
@@ -889,14 +898,15 @@ _SEhU = optSelmaho "SEhU"
 --This is also why they are only allowed to have BEtails
 -- sei mi jimpe do gerku == sei mi jimpe se'u do gerku
 seiP :: Syntax Atom
-seiP = _SEI &&> withFlag "onlyBE" bridiP <&& _SEhU
+seiP = _SEI &&> withFlag "onlyBE" bridiUI <&& _SEhU
 
 type SEI = Atom
 
 --Attitude
 
 _UI :: Syntax Atom
-_UI = concept <<< selmaho "UI"
+_UI = concept <<< (xu <+> selmaho "UI")
+    where xu = setFlagIso "xu" <<< word "xu"
 
 _CAI :: Syntax String
 _CAI = selmaho "CAI"
@@ -945,7 +955,12 @@ withAttitude syn = (first handleSOS ||| id) . reorder
 --before we can create the statement with _frames
 --and then add it to the State
 handleUI :: SynIso ((Atom,TruthVal),Atom) Atom
-handleUI = sndToState 1
+handleUI = (rmfstAny (xu,tv) ||| handleUI') . switchOnFlag "xu"
+    where xu = Node "ConceptNode" "xu" noTv
+          tv = stv 0.75  0.9
+
+handleUI' :: SynIso ((Atom,TruthVal),Atom) Atom
+handleUI' = sndToState 1
          . second (tolist1 . _frames . (selbri *** mapIso toSumti)
                   )
          . manage
