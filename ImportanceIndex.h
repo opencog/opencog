@@ -38,12 +38,13 @@ class AttentionBank;
  * Implements an index with additional routines needed for managing
  * short-term importance.  This index is thread-safe.
  */
+using HandleSTIPair = std::pair<Handle,AttentionValue::sti_t>;
 class ImportanceIndex
 {
 private:
     AttentionBank& _bank;
     ThreadSafeFixedIntegerIndex _index;
-    HandleSeq topKSTIValuedHandles; // TOP K STI values
+    std::vector<HandleSTIPair> topKSTIValuedHandles; // TOP K STI values
     std::mutex topKSTIUpdateMutex;
     int minAFSize;
 

@@ -95,30 +95,40 @@ void ImportanceIndex::removeAtom(Atom* atom, int bin)
     
     std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
     // Also remove from topKSTIValueHandles vector
-    auto it = std::find(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end()
-                       , atom->getHandle());
-    topKSTIValuedHandles.erase(it);
+    Handle h = atom->getHandle();
+    auto it = std::find_if(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end()
+            ,[&h](HandleSTIPair p){return p.first == h; });
+    if(it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
     //TODO Find the next highest STI valued atom to replace the removed one.
 }
 
 void ImportanceIndex::updateTopStiValues(Atom* atom)
 {
     std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
-    AttentionValue::sti_t sti = _bank.get_av(atom->getHandle())->getSTI();
+
     auto insertHandle = [this](Handle h){
-        auto it = std::lower_bound(topKSTIValuedHandles.begin(),
-                                   topKSTIValuedHandles.end(), h,
-                [=](const Handle& h1, const Handle& h2){
-                return _bank.get_av(h1)->getSTI() < _bank.get_av(h2)->getSTI();
+        // delete if this handle is already in the vector. TODO find efficient
+        // way of doing this.
+        auto it = std::find_if(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end()
+                ,[&h](HandleSTIPair p){return p.first == h; });
+        if(it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
+
+        HandleSTIPair p(h, _bank.get_sti(h));
+        it = std::lower_bound(topKSTIValuedHandles.begin(),
+                topKSTIValuedHandles.end(), p,
+                [=](const HandleSTIPair& hsti1, const HandleSTIPair& hsti2){
+                return hsti1.second < hsti2.second;
                 });
-        topKSTIValuedHandles.insert(it, h);
+        topKSTIValuedHandles.insert(it,HandleSTIPair(h, _bank.get_sti(h)));
     };
 
+    Handle h = atom->getHandle();
+    AttentionValue::sti_t sti = _bank.get_sti(h);
     if(static_cast<int>(topKSTIValuedHandles.size()) < minAFSize){
         insertHandle(atom->getHandle());
-    } else if (_bank.get_av(*(topKSTIValuedHandles.begin()))->getSTI() < sti) {
+    } else if (topKSTIValuedHandles.begin()->second < sti) {
         topKSTIValuedHandles.erase(topKSTIValuedHandles.begin());
-        insertHandle(atom->getHandle());
+        insertHandle(h);
     }
 }
 
@@ -208,7 +218,10 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
 HandleSeq ImportanceIndex::getTopSTIValuedHandles()
 {
     std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
-    return  topKSTIValuedHandles;
+    HandleSeq hseq;
+    for(HandleSTIPair p : topKSTIValuedHandles)
+        hseq.push_back(p.first);
+    return  hseq;
 }
 
 size_t ImportanceIndex::bin_size() const
