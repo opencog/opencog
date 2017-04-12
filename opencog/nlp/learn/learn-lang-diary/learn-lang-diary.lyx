@@ -447,15 +447,28 @@ The probability
 
  is interesting, because it's definition is not enirely unambigous: we can
  define it as the probability of observing both words in the same sentence,
- or we can define it as the probability of observing both words, independently
- of one-another.
- This is a bit confusing, and is worth thinking about.
+ or we can define it as the probability of observing both words, as if they
+ were independent of one-another.
+ Clearly, the occurances of pairs of words are correlated; suggesting the
+ firt defintion is correct.
+ The second one seems to be a dumb, brute-force assumption of independence,
+ i.e.
+ that 
+\begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+What should be done? This is a bit confusing, and is worth thinking about.
  To observe two words in the same sentence, we could say that they obey
  the relationship 
 \begin_inset Formula $S(w_{l},w_{r})$
 \end_inset
 
- and so one must ponder the probability 
+ that captures thier correlation to one-another.
+ This leads one to ponder the probability 
 \begin_inset Formula $P(S(w_{l},w_{r}),w_{l},w_{r})$
 \end_inset
 
@@ -477,7 +490,7 @@ The probability
 \begin_inset Formula $S$
 \end_inset
 
- as a component: two words can only be related by 
+ implicitly: two words can only be related by 
 \begin_inset Formula $R$
 \end_inset
 
@@ -486,12 +499,13 @@ The probability
 \end_inset
 
 .
- Thus, the only unambiguous definition for 
+ Thus, the only appropriate definition for 
 \begin_inset Formula $P(w_{l},w_{r})$
 \end_inset
 
- is that the two words really are un-related; i.e.
- that we define that 
+ that we can use is that the two words really are un-related, un-correlated,
+ independent.
+ That is, we must define 
 \begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
 \end_inset
 
@@ -550,6 +564,27 @@ P(w)=\frac{N(w)}{N(*)}
 \end_inset
 
 where 
+\begin_inset Formula $N(w)$
+\end_inset
+
+ is the count of observing word 
+\begin_inset Formula $w$
+\end_inset
+
+ and 
+\begin_inset Formula $N(*)$
+\end_inset
+
+ is the total number of words observed.
+ That is, by definition, it is the wild-card summation 
+\begin_inset Formula 
+\[
+N(*)=\sum_{w}N(w)
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection*
