@@ -17222,7 +17222,7 @@ Likewise, let
  Consulting the diagram, this has a more complex expression:
 \begin_inset Formula 
 \[
-G_{3}(n)=
+G_{3}(n)=\sum_{k=2}^{n-2}F(k)F(n-k)+\sum\sum F()F()F()...+\sum_{k=2}^{n-2}F(k)F(n-k)+...
 \]
 
 \end_inset
