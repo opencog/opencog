@@ -19,7 +19,7 @@
                           '(say "Me too")))
 
 ; Load the outputs of 'nlp-parse'
-(load "test-chat-find-rules-atomese.scm")
+(load "test-atomese.scm")
 
 ; Get the SentenceNodes from structures like:
 ; (Evaluation (Predicate "sentence-rawtext")
