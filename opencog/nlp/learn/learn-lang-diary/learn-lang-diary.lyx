@@ -15791,8 +15791,8 @@ words
 
 \begin_layout Standard
 Pair counting in planar diagrams gives different results.
- The diagram below shows the twelve planar trees that can be formed by parsing
- a sentence of four words.
+ The diagram below shows the twelve planar trees, containing no cycles,
+ that can be formed by parsing a sentence of four words.
  
 \end_layout
 
@@ -16068,7 +16068,17 @@ Count
 
 \begin_layout Standard
 Note that the progressively-longer edges get less frequent.
- What is the actual distribution? First, we need a generic formula for sentences
+\end_layout
+
+\begin_layout Standard
+If graphs with cycles are also allowed, (but no edge crossings) then, in
+ addition to the above, there are eleven more diagrams.
+ These are shown below...
+ 
+\end_layout
+
+\begin_layout Standard
+What is the actual distribution? First, we need a generic formula for sentences
  of length N.
  This is not so very easy.
  The diagram below shows one way to count.
