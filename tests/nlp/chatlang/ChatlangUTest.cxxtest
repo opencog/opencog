@@ -98,6 +98,7 @@ public:
     void test_create_main_obj();
     void test_create_proper_names();
     void test_create_or_choices();
+    void test_sentence_anchor();
     void test_negation();
     void test_create_chat_rule();
     void test_chat_find_rules();
@@ -219,6 +220,21 @@ void ChatlangUTest::test_create_or_choices()
 
     auto result = scm->eval("test-or-choices-result");
     TSM_ASSERT_EQUALS("Fail to create or-choices!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_sentence_anchor()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-sentence-anchor.scm\")");
+
+    auto result_1 = scm->eval("test-start-with-result");
+    TSM_ASSERT_EQUALS("Fail on 'start-with'!", "#t\n", result_1);
+
+    auto result_2 = scm->eval("test-end-with-result");
+    TSM_ASSERT_EQUALS("Fail on 'end-with'!", "#t\n", result_2);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
