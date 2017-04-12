@@ -49,7 +49,11 @@ private:
 
 public:
     PatternMinerSCM();
-    void run_patternminer();
+
+    void run_patternminer()
+    {
+        patternMiner->runPatternMiner();
+    }
 
     string get_Pattern_Max_Gram()
     {
@@ -266,6 +270,50 @@ public:
         return result;
 
     }
+
+    // select a subset from the current AtomSpace with a list of keywords,splitted by ','.
+    // the subset will contain max_distance connected atoms of these keywords
+    // e.g.: "dog,cat,bike,swimming pool,computer"
+    // when the max_distance, Pattern_Max_Gram will be used
+    void select_subset_from_atomspace(const string& _keywordlist, int max_distance = 0)
+    {
+        vector<string> keyword_list;
+        string keywordstr = _keywordlist;
+        keywordstr .erase(std::remove(keywordstr .begin(), keywordstr .end(), ' '), keywordstr .end());
+        boost::split(keyword_list, keywordstr , boost::is_any_of(","));
+
+        if (keyword_list.size() == 0)
+        {
+            cout << "\nError: Keyword list is empty!" << std::endl;
+            return;
+        }
+
+        if (max_distance <= 0)
+        {
+            max_distance = patternMiner->get_Pattern_Max_Gram();
+            cout <<"\n Becasue max_distance <= 0, Pattern_Max_Gram = " << max_distance << " will be used!" << std::endl;
+        }
+
+        patternMiner->selectSubsetFromCorpus(keyword_list, max_distance);
+    }
+
+    void select_whitelist_subset_from_atomspace(int max_distance = 0)
+    {
+        vector<string> keyword_list = patternMiner->get_keyword_white_list();
+        if (keyword_list.size() == 0)
+        {
+            cout << "\nError: white keyword list is empty!" << std::endl;
+            return;
+        }
+
+        if (max_distance <= 0)
+        {
+            max_distance = patternMiner->get_Pattern_Max_Gram();
+            cout <<"\n Becasue max_distance <= 0, Pattern_Max_Gram = " << max_distance << " will be used!" << std::endl;
+        }
+
+        patternMiner->selectSubsetFromCorpus(keyword_list, max_distance);
+    }
 };
 
 
@@ -340,7 +388,8 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-remove-keyword-from-white-list", &PatternMinerSCM::remove_keyword_from_white_list, this, "patternminer");
     define_scheme_primitive("pm-clear-keyword-black-list", &PatternMinerSCM::clear_keyword_black_list, this, "patternminer");
     define_scheme_primitive("pm-clear-keyword-white-list", &PatternMinerSCM::clear_keyword_white_list, this, "patternminer");
-
+    define_scheme_primitive("pm-select-subset-from-atomspace", &PatternMinerSCM::select_subset_from_atomspace, this, "patternminer");
+    define_scheme_primitive("pm-select-whitelist-subset-from-atomspace", &PatternMinerSCM::select_whitelist_subset_from_atomspace, this, "patternminer");
 
 }
 
@@ -352,12 +401,4 @@ void opencog_patternminer_init(void)
 };
 
 // --------------------------------------------------------------
-
-void PatternMinerSCM::run_patternminer()
-{
-
-    patternMiner->runPatternMiner();
-
-}
-
 

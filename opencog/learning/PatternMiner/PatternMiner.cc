@@ -2672,9 +2672,9 @@ void PatternMiner::evaluateInterestingnessTask()
     }
 }
 
+// select a subset for topics from the corpus
 void PatternMiner::selectSubsetFromCorpus(vector<string>& topics, unsigned int gram)
 {
-    // select a subset for test topics from the huge ConceptNet corpus
     _selectSubsetFromCorpus(topics,gram);
 }
 
