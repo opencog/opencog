@@ -93,7 +93,11 @@ Collection of thoughts and notes, pursuant to language learning.
 Easier said than done.
  Should be 'obvious' but its not.
  Goal: construct a set of linkage rules to model only the observed language,
- via link-grammar.
+ using Link Grammar.
+ That is, using the graphical structure implied in Link Grammar.
+ This, of course, implicitly assumes that Link Grammar provides an adequate
+ theory for describing and constraining the syntactical parsing of a natural
+ language.
 \end_layout
 
 \begin_layout Subsection*
@@ -101,8 +105,8 @@ Lexical Attraction, Mutual Information, Interaction Information
 \end_layout
 
 \begin_layout Standard
-The goal here is to clarify some of the formulas used by Deniz Yuret in
- his PhD thesis 
+The goal of this section is to clarify some of the formulas used by Deniz
+ Yuret in his PhD thesis 
 \begin_inset Quotes eld
 \end_inset
 
@@ -114,7 +118,15 @@ Discovery of Linguistic Relations Using Lexical Attraction
 \begin_inset Quotes erd
 \end_inset
 
-, MIT 1998 (http://www2.denizyuret.com/pub/yuretphd.pdf).
+, MIT 1998 (
+\begin_inset CommandInset href
+LatexCommand href
+name "http://www2.denizyuret.com/pub/yuretphd.pdf"
+target "http://www2.denizyuret.com/pub/yuretphd.pdf"
+
+\end_inset
+
+).
  These formulas are vitally important, because they provide a strong tool
  when working with text; this has been shown by Yuret in his thesis, as
  well as by many others, as well as by my own practical exprience with using
@@ -177,14 +189,14 @@ lexical attraction
 hip between two words, and that there are actually three variables: two
  words, and thier relationship.
  If this implicit relationship is made explicit, then the confusion evaporates.
- It also opens the door to talking about the MI (or interaction information
- II) of more complex relationships, not just pair-wise ones.
+ It also opens the door to talking about the MI (or the interaction information
+ InI) of more complex relationships, not just pair-wise ones.
  
 \end_layout
 
 \begin_layout Standard
-Being able to correctly write down the MI and the II for complex relationships
- is important for NLP: relationstionships can be labelled by types (subject,
+Being able to correctly write down the MI and the InI for complex relationships
+ is important for NLP: relationtionships can be labelled by types (subject,
  object) and by word classes (noun, verb), and have various dependency constrain
 ts between them.
  Thus, we need to be able to talk both about a labelled directed graph,
@@ -256,7 +268,7 @@ Let
 \begin_inset Formula $R$
 \end_inset
 
- that are more general; for now, though, 
+ that are more general than this; for now, though, 
 \begin_inset Formula $R$
 \end_inset
 
@@ -270,9 +282,9 @@ The simplest dependency grammar language model has only one type
 
 , the ANY type.
  This is the type that Yuret uses: it makes no distinction at all between
- subject, object relations (i.e.
- the depdencies are unlabelled), and it does not make a head-dependent distincti
-on (all dependencies are bi-directional).
+ subject, object relations (that is, all depdencies are unlabelled), and
+ it does not make a head-dependent distinction (all dependencies are bi-directio
+nal).
  Thus, in what follows, we do the same: initially, the relation 
 \begin_inset Formula $R(w_{l},w_{r})$
 \end_inset
@@ -286,11 +298,11 @@ on (all dependencies are bi-directional).
 \end_inset
 
  are connected by an unlabelled, un-directed edge.
- What 
+ For this simplest case, what 
 \begin_inset Formula $R(w_{l},w_{r})$
 \end_inset
 
- does capture is that 
+ does do is to capture that 
 \begin_inset Formula $w_{l}$
 \end_inset
 
@@ -299,6 +311,17 @@ on (all dependencies are bi-directional).
 \end_inset
 
 .
+ 
+\end_layout
+
+\begin_layout Standard
+In what follows, the relation 
+\begin_inset Formula $R=R(w_{l},w_{r})$
+\end_inset
+
+ refers to a generic two-word relation, and not necessarily this simplest
+ one.
+ To regain Yuret's formula, use the simplest relation, described above.
 \end_layout
 
 \begin_layout Standard
@@ -329,8 +352,8 @@ We are then interested in the conditional probability
 \end_inset
 
  in a sentance (with multiplicity).
- We know from experiece this is a Zipfian distribution; this does not matter
- in what follows.
+ We know from experiece this is a Zipfian distribution; however, this fact
+ will not be used in what follows.
  From the definition of conditional probabilities, we get 
 \begin_inset Formula 
 \[
@@ -352,8 +375,8 @@ Here, the relation
 \end_inset
 
  encompasses several facts: that one word is to the left of the other, and
- that they are connected by a certain link-type, as well as capturing other
- 'ambient' information, perhaps such as other nearby words.
+ that they are connected by a certain link-type, as well as possibly capturing
+ other 'ambient' information, perhaps such as other nearby words.
  The expression 
 \begin_inset Formula $P(R,w_{l},w_{r})$
 \end_inset
@@ -426,7 +449,7 @@ The probability
  define it as the probability of observing both words in the same sentence,
  or we can define it as the probability of observing both words, independently
  of one-another.
- This is a bit confusing, ansd is worth thinking about.
+ This is a bit confusing, and is worth thinking about.
  To observe two words in the same sentence, we could say that they obey
  the relationship 
 \begin_inset Formula $S(w_{l},w_{r})$
