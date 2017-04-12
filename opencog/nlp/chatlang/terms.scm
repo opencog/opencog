@@ -118,3 +118,31 @@
           (list (WordInstanceLink (Variable var) (Variable "$P"))
                 ; Note: This assumes "x" is already a lemma
                 (ChoiceLink (map (lambda (x) (LemmaLink (Variable var) (Word x))) w))))))
+
+(define-public (negation . w)
+  "The whole sentence should not contain any of these words."
+  (cons '()
+    (list (Evaluation (GroundedPredicate "scm: does-not-contain")
+      (ListLink (Variable "$S") (ListLink (map Word w)))))))
+
+(define-public (negation-start . w)
+  "The sentence should not start with any of the listed words."
+  (cons '()
+    (list (Evaluation (GroundedPredicate "scm: does-not-start-with")
+      (ListLink (Variable "$S") (ListLink (map Word w)))))))
+
+(define-public (negation-end . w)
+  "The sentence should not end with any of the listed words."
+  (cons '()
+    (list (Evaluation (GroundedPredicate "scm: does-not-end-with")
+      (ListLink (Variable "$S") (ListLink (map Word w)))))))
+
+(define-public (negation-between pre post . w)
+  "The sentence should not contain any of the listed words between
+   word 'pre' and 'post'."
+  (cons '()
+    (list (Evaluation (GroundedPredicate "scm: no-words-in-between")
+      (ListLink (Variable "$S")
+                (Word pre)
+                (Word post)
+                (ListLink (map Word w)))))))

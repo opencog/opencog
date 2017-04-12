@@ -101,3 +101,72 @@
          (ref-members (append-map (lambda (m) (list (Reference (member-words m) c)))
                                   members)))
     ref-members))
+
+(define (get-sent-lemmas sent-node)
+  "Get the lemma of the words associate with sent-node."
+  (List (append-map
+    (lambda (w)
+      ; Ignore LEFT-WALL and punctuations
+      (if (or (string-prefix? "LEFT-WALL" (cog-name w))
+              (word-inst-match-pos? w "punctuation")
+              (null? (cog-chase-link 'LemmaLink 'WordNode w)))
+          '()
+          ; For proper names, e.g. Jessica Henwick,
+          ; RelEx converts them into a single WordNode, e.g.
+          ; (WordNode "Jessica_Henwick"). Codes below try to
+          ; split it into two WordNodes, "Jessica" and "Henwick",
+          ; so that the matcher will be able to find the rules
+          (let* ((wn (car (cog-chase-link 'LemmaLink 'WordNode w)))
+                 (name (cog-name wn)))
+            (if (integer? (string-index name #\_))
+              (map Word (string-split name  #\_))
+              (list wn)))))
+    (car (sent-get-words-in-order sent-node)))))
+
+(define-public (does-not-contain sent list-of-words)
+  "Check if the given sentence contains any of the listed words.
+   Return true if it contains none."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "\\b" (cog-name w) "\\b") regexp/icase) sent-text))))
+          (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
+
+(define-public (does-not-start-with sent list-of-words)
+  "Check if the given sentence starts with any of the listed words.
+   Return true if it starts with none of the words."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "^" (cog-name w) "\\b") regexp/icase) sent-text))))
+          (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
+
+(define-public (does-not-end-with sent list-of-words)
+  "Check if the given sentence ends with any of the listed words.
+   Return true if it ends with none of the words."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "\\b" (cog-name w) "$") regexp/icase) sent-text))))
+          (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
+
+(define-public (no-words-in-between sent w1 w2 list-of-words)
+  "Check if the given sentence contains any of the listed words
+   between words w1 and w2.
+   Return true if it contains none."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
+        (w1-name (cog-name w1))
+        (w2-name (cog-name w2)))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "\\b" w1-name " " (cog-name w) " " w2-name "\\b")
+          regexp/icase) sent-text))))
+            (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
