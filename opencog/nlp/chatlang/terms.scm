@@ -117,7 +117,20 @@
     (cons (list (TypedVariable (Variable var) (Type "WordInstanceNode")))
           (list (WordInstanceLink (Variable var) (Variable "$P"))
                 ; Note: This assumes "x" is already a lemma
-                (ChoiceLink (map (lambda (x) (LemmaLink (Variable var) (Word x))) w))))))
+                (ChoiceLink (map (lambda (x)
+                  (LemmaLink (Variable var) (Word x))) w))))))
+
+(define-public (start-with . w)
+  "The sentence should start with the listed words."
+  (cons '()
+    (list (Evaluation (GroundedPredicate "scm: start-with")
+      (ListLink (Variable "$S") (ListLink (map Word w)))))))
+
+(define-public (end-with . w)
+  "The sentence should end with the listed words."
+  (cons '()
+    (list (Evaluation (GroundedPredicate "scm: end-with")
+      (ListLink (Variable "$S") (ListLink (map Word w)))))))
 
 (define-public (negation . w)
   "The whole sentence should not contain any of these words."
