@@ -16483,10 +16483,12 @@ Counting planar tree graphs
 \end_layout
 
 \begin_layout Standard
-First, we need a generic formula for sentences of length N.
+Let's count the number of planar tree graphs; i.e.
+ those without any loops.
+ First, we need a generic formula for sentences of length N.
  This is not so very easy.
  The diagram below shows one way to count.
- (I think what follows is correct, but might be making a mistake.
+ (I think what follows is correct, but I might be making a mistake.
  I am unaware of any literature that presents this information).
 \end_layout
 
@@ -17139,6 +17141,52 @@ The table below summarizes the first few sums:
 \begin_layout Standard
 Either I am computing this wrong, or the sequences are not in OEIS.
  Surprising!
+\end_layout
+
+\begin_layout Subsection*
+Counting planar loop graphs
+\end_layout
+
+\begin_layout Standard
+The above process can be repeated, except that this time, we consider the
+ planar graphs containing loops.
+ To get started, consider the diagram below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/all-loop.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As before, the stars represent 
+\begin_inset Quotes eld
+\end_inset
+
+domed
+\begin_inset Quotes erd
+\end_inset
+
+ diagrams.
+ The type F concatenates two domes, and put a dome over those, in turn.
+ Since both of the stars are domed, it is impossible to add any additional
+ edges to this graph.
+ So, for looped graphs constructed out of domes, Type F is all that there
+ is.
+ For three domes in a row, there are only three ways of adding edges: these
+ are shown in type G and H in this diagram.
+ Again, this exhauses all possibilities.
+ XXX that's not right, consider ome of the stars being the empty set.
+\end_layout
+
+\begin_layout Standard
+The process would then repeat: one considers an unbroken
 \end_layout
 
 \begin_layout Section*
