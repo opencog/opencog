@@ -141,7 +141,7 @@
   "The sentence should not contain any of the listed words between
    word 'pre' and 'post'."
   (cons '()
-    (list (Evaluation (GroundedPredicate "scm: does-not-contain-between")
+    (list (Evaluation (GroundedPredicate "scm: no-words-in-between")
       (ListLink (Variable "$S")
                 (Word pre)
                 (Word post)

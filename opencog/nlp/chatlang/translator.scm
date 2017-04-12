@@ -124,10 +124,49 @@
     (car (sent-get-words-in-order sent-node)))))
 
 (define-public (does-not-contain sent list-of-words)
-  "Check if the given sentence contains none of the listed words.
-   This assumes the given list of words are in their lemma forms."
-  (if (null? (lset-intersection equal?
-        (cog-outgoing-set list-of-words)
-        (cog-outgoing-set (get-sent-lemmas sent))))
-    (stv 1 1)
-    (stv 0 1)))
+  "Check if the given sentence contains any of the listed words.
+   Return true if it contains none."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "\\b" (cog-name w) "\\b") regexp/icase) sent-text))))
+          (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
+
+(define-public (does-not-start-with sent list-of-words)
+  "Check if the given sentence starts with any of the listed words.
+   Return true if it starts with none of the words."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "^" (cog-name w) "\\b") regexp/icase) sent-text))))
+          (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
+
+(define-public (does-not-end-with sent list-of-words)
+  "Check if the given sentence ends with any of the listed words.
+   Return true if it ends with none of the words."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "\\b" (cog-name w) "$") regexp/icase) sent-text))))
+          (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
+
+(define-public (no-words-in-between sent w1 w2 list-of-words)
+  "Check if the given sentence contains any of the listed words
+   between words w1 and w2.
+   Return true if it contains none."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
+        (w1-name (cog-name w1))
+        (w2-name (cog-name w2)))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "\\b" w1-name " " (cog-name w) " " w2-name "\\b")
+          regexp/icase) sent-text))))
+            (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
