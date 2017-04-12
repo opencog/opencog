@@ -123,6 +123,26 @@
               (list wn)))))
     (car (sent-get-words-in-order sent-node)))))
 
+(define-public (start-with sent list-of-words)
+  "Check if the given sentence starts with the listed word(s).
+   Return true if it contains none."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
+        (words (string-join (map cog-name (cog-outgoing-set list-of-words)) " ")))
+    (if (not (equal? #f (regexp-exec (make-regexp
+          (string-append "^" words "\\b") regexp/icase) sent-text)))
+      (stv 1 1)
+      (stv 0 1))))
+
+(define-public (end-with sent list-of-words)
+  "Check if the given sentence ends with the listed word(s).
+   Return true if it contains none."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
+        (words (string-join (map cog-name (cog-outgoing-set list-of-words)) " ")))
+    (if (not (equal? #f (regexp-exec (make-regexp
+          (string-append "\\b" words "$") regexp/icase) sent-text)))
+      (stv 1 1)
+      (stv 0 1))))
+
 (define-public (does-not-contain sent list-of-words)
   "Check if the given sentence contains any of the listed words.
    Return true if it contains none."
