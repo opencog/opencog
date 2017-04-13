@@ -511,13 +511,14 @@ nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiPMI <&& optSel
 --                    ConceptNode (stv 1.0 0.9) "$2"
 --                    VariableNode (stv 1.0 0.0) "$4"
 
-nuHandlers = [handleNU "nu"   (mkNuEvent ["fasnu"])  . rmfst "nu",
+nuHandlers = [handleNU "nu"   (mkNuEvent ["fasnu"]) . rmfst "nu",
               handleNU "mu'e" (mkNuEvent ["fasnu", "mokca"]) . rmfst "mu'e",
-              handleNU "pu'u" (mkTmpNuEvent "is_point_event"). rmfst "pu'u",
+              handleNU "pu'u" (mkTmpNuEvent "is_point_event") . rmfst "pu'u",
               handleNU "zu'o" (mkNuEvent ["zumfau"]) . rmfst "zu'o",
               handleNU "za'i" (mkNuEvent ["tcini"]) . rmfst "za'i",
               handleNU "du'u" (\_ -> id) . rmfst "du'u",
-              handleNU "ka"   (mkNuEvent ["ckaji"])  . rmfst "ka"]
+              handleNU "ka"   (mkNuEvent ["ckaji"]) . rmfst "ka",
+              handleNU "ni"   (mkNuEvent ["klani"]) . rmfst "ni"]
   where
     -- Functions that specify the type of the abstraction
     -- Note: atomNub may leave AndLink with only one atom
