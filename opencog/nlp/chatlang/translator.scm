@@ -50,6 +50,9 @@
   (define word-list
     (map (lambda (w)
       (cond ((equal? 'concept (car w)) (Glob (cadr w)))
+            ; Skip the sentence anchors, they will be handled later
+            ((equal? 'anchor-start (car w)) '())
+            ((equal? 'anchor-end (car w)) '())
             ; For proper names -- create WordNodes
             ((equal? 'proper-names (car w)) (map Word (cdr w)))
             ((equal? 'or-choices (car w)) (Glob "$choices"))
@@ -58,7 +61,7 @@
          terms))
   ; Wrap it using a TrueLink
   ; TODO: Maybe there is a more elegant way to represent it in the context?
-  (True (List word-list)))
+  (True (List (append start-with word-list end-with))))
 
 (define-public (say text)
   "Say the text and clear the state"
@@ -122,26 +125,6 @@
               (map Word (string-split name  #\_))
               (list wn)))))
     (car (sent-get-words-in-order sent-node)))))
-
-(define-public (start-with sent list-of-words)
-  "Check if the given sentence starts with the listed word(s).
-   Return true if it contains none."
-  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
-        (words (string-join (map cog-name (cog-outgoing-set list-of-words)) " ")))
-    (if (not (equal? #f (regexp-exec (make-regexp
-          (string-append "^" words "\\b") regexp/icase) sent-text)))
-      (stv 1 1)
-      (stv 0 1))))
-
-(define-public (end-with sent list-of-words)
-  "Check if the given sentence ends with the listed word(s).
-   Return true if it contains none."
-  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
-        (words (string-join (map cog-name (cog-outgoing-set list-of-words)) " ")))
-    (if (not (equal? #f (regexp-exec (make-regexp
-          (string-append "\\b" words "$") regexp/icase) sent-text)))
-      (stv 1 1)
-      (stv 0 1))))
 
 (define-public (does-not-contain sent list-of-words)
   "Check if the given sentence contains any of the listed words.

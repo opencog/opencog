@@ -1,24 +1,22 @@
 (use-modules (opencog)
              (opencog nlp)
-             (opencog nlp chatlang))
+             (opencog nlp chatlang)
+             (opencog openpsi))
 
-(load "test-atomese.scm")
+(define rule (chat-rule '((lemma "blah")
+                          (anchor-start "hi" "there")
+                          (anchor-end "bye")
+                          (word "wait"))
+                        '(say "OK")))
 
-(define sent (car (cog-chase-link 'ListLink 'SentenceNode
-    (Node "Richard eats delicious fishes"))))
+(define term-seq (cog-outgoing-set (gar (car
+    (filter (lambda (x) (equal? 'TrueLink (cog-type x)))
+            (cog-outgoing-set (gdr (car (psi-get-context rule)))))))))
 
 (define test-start-with-result
-    (if (and (equal? (start-with sent (List (map Word (list "Richard" "eats"))))
-                     (stv 1 1))
-             (equal? (start-with sent (List (map Word (list "foo" "bar"))))
-                     (stv 0 1)))
-        #t
-        #f))
+    (equal? (list-head term-seq 2)
+            (list (Word "hi") (Word "there"))))
 
 (define test-end-with-result
-    (if (and (equal? (end-with sent (List (map Word (list "fishes"))))
-                     (stv 1 1))
-             (equal? (end-with sent (List (map Word (list "bar"))))
-                     (stv 0 1)))
-        #t
-        #f))
+    (equal? (list-tail term-seq 4)
+            (list (Word "bye"))))
