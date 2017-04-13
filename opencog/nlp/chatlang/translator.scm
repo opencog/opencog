@@ -47,9 +47,15 @@
             (set! lemma l))))
       (close-pipe port)
       (if (string-null? lemma) word lemma)))
+  (define start-with '())
+  (define end-with '())
   (define word-list
     (map (lambda (w)
       (cond ((equal? 'concept (car w)) (Glob (cadr w)))
+            ; For sentence anchors, store the words so that we can append
+            ; them back to the whole word list in the correct positions
+            ((equal? 'anchor-start (car w)) (set! start-with (map Word (cdr w))) '())
+            ((equal? 'anchor-end (car w)) (set! end-with (map Word (cdr w))) '())
             ; For proper names -- create WordNodes
             ((equal? 'proper-names (car w)) (map Word (cdr w)))
             ((equal? 'or-choices (car w)) (Glob "$choices"))
@@ -58,7 +64,7 @@
          terms))
   ; Wrap it using a TrueLink
   ; TODO: Maybe there is a more elegant way to represent it in the context?
-  (True (List word-list)))
+  (True (List (append start-with word-list end-with))))
 
 (define-public (say text)
   "Say the text and clear the state"
