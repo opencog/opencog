@@ -12,6 +12,9 @@
              (ice-9 popen)
              (ice-9 optargs))
 
+(define (chatlang-prefix str) (string-append "Chatlang: " str))
+(define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
+
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
                                                        (Type "SentenceNode"))
@@ -48,20 +51,30 @@
       (close-pipe port)
       (if (string-null? lemma) word lemma)))
   (define word-list
-    (map (lambda (w)
-      (cond ((equal? 'concept (car w)) (Glob (cadr w)))
+    (append-map (lambda (w)
+      (cond ((equal? 'concept (car w)) (list (Glob (cadr w))))
             ; Skip the sentence anchors, they will be handled later
             ((equal? 'anchor-start (car w)) '())
             ((equal? 'anchor-end (car w)) '())
             ; For proper names -- create WordNodes
             ((equal? 'proper-names (car w)) (map Word (cdr w)))
-            ((equal? 'or-choices (car w)) (Glob "$choices"))
-            ((not (equal? #f (string-index (cadr w) char-upper-case?))) (Word (cadr w)))
-            (else (Word (get-lemma (cadr w))))))
+            ((equal? 'or-choices (car w)) (list (Glob "$choices")))
+            ((not (equal? #f (string-index (cadr w) char-upper-case?)))
+             (list (Word (cadr w))))
+            (else (list (Word (get-lemma (cadr w)))))))
          terms))
+  ; Append the words in 'start-with' and 'end-with' to word-list, if any
+  (set! word-list (append start-with word-list end-with))
+  ; DualLink couldn't match patterns with no constant terms in it
+  ; Mark the rules with no constant terms so that ot cam be found
+  ; easily during the matching process
+  (if (equal? (length word-list)
+              (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
+                              word-list)))
+    (Inheritance (List word-list) chatlang-no-constant))
   ; Wrap it using a TrueLink
   ; TODO: Maybe there is a more elegant way to represent it in the context?
-  (True (List (append start-with word-list end-with))))
+  (True (List word-list)))
 
 (define-public (say text)
   "Say the text and clear the state"
