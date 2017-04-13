@@ -98,6 +98,7 @@ public:
     void test_create_main_obj();
     void test_create_proper_names();
     void test_create_or_choices();
+    void test_unordered_matching();
     void test_sentence_anchor();
     void test_negation();
     void test_create_chat_rule();
@@ -224,6 +225,18 @@ void ChatlangUTest::test_create_or_choices()
     logger().info("END TEST: %s", __FUNCTION__);
 }
 
+void ChatlangUTest::test_unordered_matching()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-unordered.scm\")");
+
+    auto result = scm->eval("test-unordered-result");
+    TSM_ASSERT_EQUALS("Fail to create unordered terms!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
 void ChatlangUTest::test_sentence_anchor()
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -286,6 +299,9 @@ void ChatlangUTest::test_chat_find_rules()
 
     auto result_3 = scm->eval("test-chat-find-rules-result-3");
     TSM_ASSERT_EQUALS("Fail to find rule-3", "#t\n", result_3);
+
+    auto result_4 = scm->eval("test-chat-find-rules-result-4");
+    TSM_ASSERT_EQUALS("Fail to find rule-4", "#t\n", result_4);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }

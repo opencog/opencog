@@ -120,6 +120,14 @@
                 (ChoiceLink (map (lambda (x)
                   (LemmaLink (Variable var) (Word x))) w))))))
 
+(define-public (unordered-matching . w)
+  "Terms can be matched in the sentence in any order."
+  (fold (lambda (lem lst)
+          (cons (append (car lst) (car lem))
+                (append (cdr lst) (cdr lem))))
+        (cons '() '())
+        (map lemma w)))
+
 (define start-with '())
 (define-public (anchor-start . w)
   "The sentence should start with the listed words."

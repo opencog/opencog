@@ -59,6 +59,7 @@
             ; For proper names -- create WordNodes
             ((equal? 'proper-names (car w)) (map Word (cdr w)))
             ((equal? 'or-choices (car w)) (list (Glob "$choices")))
+            ((equal? 'unordered-matching (car w)) (list (Glob "$unordered")))
             ((not (equal? #f (string-index (cadr w) char-upper-case?)))
              (list (Word (cadr w))))
             (else (list (Word (get-lemma (cadr w)))))))

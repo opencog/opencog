@@ -24,6 +24,14 @@
                             (concept "coffee"))
                           '(say "nice")))
 
+(define rule-4 (chat-rule '((word "I")
+                            (lemma "like")
+                            (unordered-matching "sleep" "eat")
+                            (lemma "and")
+                            (lemma "go")
+                            (lemma "crazy"))
+                          '(say "cool")))
+
 ; Load the outputs of 'nlp-parse'
 (load "test-atomese.scm")
 
@@ -40,6 +48,9 @@
 (define sent-3 (car (cog-chase-link 'ListLink 'SentenceNode
     (Node "drink latte"))))
 
+(define sent-4 (car (cog-chase-link 'ListLink 'SentenceNode
+    (Node "I like eating, sleeping, and going crazy"))))
+
 ; Try to find the rules
 (State anchor sent-1)
 (define test-chat-find-rules-result-1
@@ -52,3 +63,7 @@
 (State anchor sent-3)
 (define test-chat-find-rules-result-3
     (equal? (gar (chat-find-rules sent-3)) rule-3))
+
+(State anchor sent-4)
+(define test-chat-find-rules-result-4
+    (equal? (gar (chat-find-rules sent-4)) rule-4))
