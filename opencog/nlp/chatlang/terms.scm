@@ -120,15 +120,25 @@
                 (ChoiceLink (map (lambda (x)
                   (LemmaLink (Variable var) (Word x))) w))))))
 
+(define start-with '())
 (define-public (anchor-start . w)
   "The sentence should start with the listed words."
-  (cons '()
-    (list (map Word w))))
+  (set! start-with (map Word w))
+  (fold (lambda (lem lst)
+          (cons (append (car lst) (car lem))
+                (append (cdr lst) (cdr lem))))
+    (cons '() '())
+    (map lemma w)))
 
+(define end-with '())
 (define-public (anchor-end . w)
   "The sentence should end with the listed words."
-  (cons '()
-    (list (map Word w))))
+  (set! end-with (map Word w))
+  (fold (lambda (lem lst)
+          (cons (append (car lst) (car lem))
+                (append (cdr lst) (cdr lem))))
+    (cons '() '())
+    (map lemma w)))
 
 (define-public (negation . w)
   "The whole sentence should not contain any of these words."
