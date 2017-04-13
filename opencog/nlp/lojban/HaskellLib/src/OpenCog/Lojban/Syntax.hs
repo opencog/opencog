@@ -505,90 +505,25 @@ tanru = isoFoldl handleTanru . (inverse cons) <<< some (gismuP <+> nuP)
 nuP :: Syntax Atom
 nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiPMI <&& optSelmaho "KEI")
 
-nuHandlers = [handleNU "nu"   . rmfst "nu",
-              handleNU "mu'e" . rmfst "mu'e",
-              handleNU "pu'u" . rmfst "pu'u",
-              handleNU "zu'o" . rmfst "zu'o",
-              handleNU "za'i" . rmfst "za'i",
-              handleNU "du'u" . rmfst "du'u",
-              handleKA "ka"   . rmfst "ka"]
+nuHandlers = [handleNU "nu" (Just ["fasnu"])  . rmfst "nu",
+              handleNU "mu'e" (Just ["fasnu", "mokca"]) . rmfst "mu'e",
+              --handleNU "pu'u" . rmfst "pu'u",
+              handleNU "zu'o" (Just ["zumfau"]) . rmfst "zu'o",
+              handleNU "za'i" (Just ["tcini"]) . rmfst "za'i",
+              handleNU "du'u" Nothing . rmfst "du'u",
+              handleNU "ka" (Just ["ckaji"])  . rmfst "ka"]
 
--- Creates abstract version of atom and state
-handleNU :: String -> SynIso Atom Atom
-handleNU abstractor = Iso f g where
-    f atom = do
-      state <- gets sAtoms
-      seed <- asks seed
-      let name = (randName seed (show atom) ++ "___" ++ abstractor)
-          (vns, nuState') = getNuState (getEventType' name abstractor) atom state
-          nuState = if abstractor == "nu" then (cImpL highTv (cPN ("fasnu_" ++ name) highTv) (cPN "fasnu" highTv)):nuState'
-                                          else nuState'
-      pred <- apply predicate name
-      link <- apply mkLink (pred, (vns, nuState))
-      setAtoms [link]
-      pure pred
-    g (pred) = do
-      state <- gets sAtoms -- FIX: Have to get correct atom
-      let link = F.find (atomElem pred) state
-      (nuState, atom) <- case link of -- remove "is_event" atoms
-          Just (EquivL _ (MemL _ (SSL [_, ExL _ _ (AL l)])))
-            -> pure $ partition isImpl $ case getEventType abstractor of
-                Just eventType -> filter (not.atomElem eventType) l
-                Nothing        -> l
-          _ -> lift $ Left $ (show pred) ++ " can't be found in state."
-      pushAtoms nuState -- TODO: instantiate VNs?
-      pure (head atom) -- should only be one. Check?
-    -- (pred, (typedPredicateVars, eventAtom:state')
-    mkLink :: SynIso (Atom, ([Atom], [Atom])) Atom
-    mkLink = _equivl
-              . first  (_evalTv . addfst highTv  . addsnd [cVN "$1"])
-              . second
-                  (_meml . addfst (cVN "$1") . ssl . tolist2 . addfst (cVN "$2")
-                    . _exl . first (varll . mapIso (_typedvarl . addsnd (cTN "PredicateNode")))
-                           . second andl)
-    isImpl :: Atom -> Bool
-    isImpl (ImpL _ _) = True
-    isImpl (InhL _ _) = True
-    isImpl _          = False
-    -- Should be put in nuHandlers, unless there are more involved instructions
-    -- cEvalL tv event (cLL [cn, vn])
-    --getEventType :: String -> Maybe Atom
-    getEventType' name "nu"    = Just (mkFasnu name) --(Just (\tv cn vn -> cEvalL tv (cPN "is_event" highTv) (cLL [cn, vn])))
-    getEventType' _    "mu'e"  = (Just (\tv cn vn -> cEvalL tv (cPN "is_point_event" highTv) (cLL [cn, vn])))
-    getEventType' _    "pu'u"  = (Just (\tv cn vn -> cEvalL tv (cPN "is_process" highTv) (cLL [cn, vn])))
-    getEventType' _    "zu'o"  = (Just (\tv cn vn -> cEvalL tv (cPN "is_activity" highTv) (cLL [cn, vn])))
-    getEventType' _    "za'i"  = (Just (\tv cn vn -> cEvalL tv (cPN "is_state" highTv) (cLL [cn, vn])))
-    getEventType' _    _       =  Nothing -- du'u case
-    getEventType :: String -> Maybe Atom
-    getEventType "nu"    = (Just (cPN "is_event" highTv))
-    getEventType "mu'e"  = (Just (cPN "is_point_event" highTv))
-    getEventType "pu'u"  = (Just (cPN "is_process" highTv))
-    getEventType "zu'o"  = (Just (cPN "is_activity" highTv))
-    getEventType "za'i"  = (Just (cPN "is_state" highTv))
-    getEventType _       =  Nothing -- du'u case
-    mkFasnu name tv cn vn =
-        (cAL highTv
-            [(cEvalL tv
-                (cPN "fasnu_sumti1" highTv)
-                (cLL [cPN ("fasnu_" ++ name) highTv, cn])
-            )
-            ,(cEvalL tv
-                (cPN "fasnu_sumti2" highTv)
-                (cLL [cPN ("fasnu_" ++ name) highTv, vn])
-            )]
-          )
+--As for "pu'u", "pruce" and "farvi" don't seem quite right
 
--- Work-in-progress
-handleKA :: String -> SynIso Atom Atom
-handleKA abstractor = Iso f g where
+handleNU :: String -> Maybe [String] -> SynIso Atom Atom
+handleNU abstractor nuType = Iso f g where
   f atom = do
     state <- gets sAtoms
     seed <- asks seed
     let name = randName seed (show atom) ++ "___" ++ abstractor
-        nuPred = cPN ("ckaji" ++ "_" ++ name) highTv
         pred = cPN name highTv
     link <- apply ( mkLink . addfstAny pred
-                     . second (mkNuEvent "ckaji" nuPred)
+                     . second (mkNuEvent nuType name)
                      . mkNuState . getPredVars) (atom, state)
     setAtoms [link]
     pure pred
@@ -603,11 +538,18 @@ handleKA abstractor = Iso f g where
         _ -> lift $ Left $ (show pred) ++ " can't be found in state."
     pushAtoms nuState -- TODO: instantiate VNs?
     pure (head atom) -- should only be one. Check?
-  -- partial isomorphism to get predicate nodes from atom and state
+  -- Extract predicateNodes from the atom and state
   getPredVars :: SynIso (Atom, [Atom]) (([Atom], [Atom]), [Atom])
   getPredVars = mkIso f g where
-    f (atom, state) = let predicateNodes = nub $ (atomFold getPredicateNode [] atom) ++ (foldl getStatePredicateNode [] state)
-                      in ((map (cVN.("$"++).show) [3..(length predicateNodes) + 2],predicateNodes), atom:state)
+    f (atom, state) =
+      let predicateNodes =
+            nub $ (atomFold (\ns a -> case a of (EvalL _ _ (LL (pn@(PN _):_))) -> pn:ns
+                                                a -> ns) [] atom)
+                  ++ (foldl (\ns a -> case a of (ImpL [pn@(PN _), (PN _)] _) -> pn:ns
+                                                (InhL [pn@(PN _), (PN _)] _) -> pn:ns
+                                                a -> ns) [] state)
+          predicateVars = map (cVN.("$"++).show) [3..(length predicateNodes) + 2]
+      in ((predicateVars,predicateNodes), atom:state)
     g (_, atom:state) = (atom, state) -- TODO, can't assume first atom is the atom
   mkNuState :: SynIso (([Atom], [Atom]), [Atom]) ([Atom], [Atom])
   mkNuState = Iso f g where
@@ -615,16 +557,24 @@ handleKA abstractor = Iso f g where
       nuState <- apply (mapIso (replacePredicatesIso (zip predicateNodes predicateVars))) astate
       pure (predicateVars, nuState)
     g (predicateVars, nuState) = pure ((predicateVars, predicateVars), nuState)
+    replacePredicatesIso :: [(Atom, Atom)] -> SynIso Atom Atom
     replacePredicatesIso nodeVarMap =  atomIsoMap $ mkIso f g where
       f pn@(PN _) = case lookup pn nodeVarMap of
           Just vn -> vn
           Nothing -> pn
       f a = a
       g a = a -- i.e., don't instantiate vars for now
-  mkNuEvent :: String -> Atom -> SynIso [Atom] [Atom]
-  mkNuEvent nuType nuPred = cons . addfstAny (cImpL highTv nuPred (cPN nuType highTv))
-                                . cons . first wrapNuVars . reorder
+  mkNuEvent :: Maybe [String] -> String -> SynIso [Atom] [Atom]
+  mkNuEvent Nothing _ = id
+  mkNuEvent (Just (nuType:nts)) name = isoConcat2 . tolist2 . addfstAny nuImps
+                                        . cons . first wrapNuVars . reorder
    where
+     nuPred = cPN (nuType ++ "_" ++ name) highTv
+     nuImps = (cImpL highTv nuPred (cPN nuType highTv))
+          :(case nts of
+              [] -> []
+              [nts] -> let nuSec = (cPN (nts ++ "_" ++ name) highTv)
+                       in [(cIImpL highTv nuPred nuSec), (cImpL highTv nuSec (cPN nts highTv))])
      wrapNuVars = andl . tolist2 . first (mkEval "1") . second (mkEval "2")
                        . addfstAny (cCN "$2" highTv) . atomNub . mkEvent
      mkEval num = _evalTv . addfstAny highTv . addfstAny (cPN (nuType ++ "_sumti" ++ num) highTv)
@@ -647,14 +597,6 @@ handleKA abstractor = Iso f g where
   isImpl (ImpL _ _) = True
   isImpl (InhL _ _) = True
   isImpl _          = False
-  getPredicateNode :: [Atom] -> Atom -> [Atom]
-  getPredicateNode ns (EvalL _ _ (LL (pn@(PN _):_))) = pn:ns
-  getPredicateNode ns _ = ns
-  -- Extractes specific instance PNs from state
-  getStatePredicateNode :: [Atom] -> Atom -> [Atom]
-  getStatePredicateNode ns (ImpL [pn@(PN _), (PN _)] _) = pn:ns
-  getStatePredicateNode ns (InhL [pn@(PN _), (PN _)] _) = pn:ns
-  getStatePredicateNode ns _ = ns
   -- Should be put in nuHandlers, unless there are more involved instructions
   -- cEvalL tv event (cLL [cn, vn])
   --getEventType :: String -> Maybe Atom
