@@ -15,8 +15,6 @@ IF (HAVE_cpprest)
         ${ATOMSPACE_LIBRARIES}
         ${cpprest_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
-        ssl
-        crypto
     )
 ELSE (HAVE_cpprest)
     ADD_LIBRARY (PatternMiner SHARED
@@ -30,8 +28,6 @@ ELSE (HAVE_cpprest)
         ${COGUTIL_LIBRARY}
         ${ATOMSPACE_LIBRARIES}
         ${Boost_SYSTEM_LIBRARY}
-        ssl
-        crypto
     )
 ENDIF (HAVE_cpprest)
 
