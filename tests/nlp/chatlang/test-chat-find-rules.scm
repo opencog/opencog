@@ -5,6 +5,8 @@
 
 (define anchor (Anchor "Currently Processing"))
 (chat-concept "watch" (list "watching" "seeing"))
+(chat-concept "drink" (list "drink" "consume" "sip"))
+(chat-concept "coffee" (list "espresso" "latte" "cappuccino"))
 
 (define rule-1 (chat-rule '((proper-names "James" "Gilbert")
                             (word "liked")
@@ -17,6 +19,10 @@
                             (pos "delicious" "adj")
                             (main-obj "fish"))
                           '(say "Me too")))
+
+(define rule-3 (chat-rule '((concept "drink")
+                            (concept "coffee"))
+                          '(say "nice")))
 
 ; Load the outputs of 'nlp-parse'
 (load "test-atomese.scm")
@@ -31,6 +37,9 @@
 (define sent-2 (car (cog-chase-link 'ListLink 'SentenceNode
     (Node "Richard eats delicious fishes"))))
 
+(define sent-3 (car (cog-chase-link 'ListLink 'SentenceNode
+    (Node "drink latte"))))
+
 ; Try to find the rules
 (State anchor sent-1)
 (define test-chat-find-rules-result-1
@@ -39,3 +48,7 @@
 (State anchor sent-2)
 (define test-chat-find-rules-result-2
     (equal? (gar (chat-find-rules sent-2)) rule-2))
+
+(State anchor sent-3)
+(define test-chat-find-rules-result-3
+    (equal? (gar (chat-find-rules sent-3)) rule-3))

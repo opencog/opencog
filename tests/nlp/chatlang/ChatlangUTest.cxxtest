@@ -284,5 +284,8 @@ void ChatlangUTest::test_chat_find_rules()
     auto result_2 = scm->eval("test-chat-find-rules-result-2");
     TSM_ASSERT_EQUALS("Fail to find rule-2", "#t\n", result_2);
 
+    auto result_3 = scm->eval("test-chat-find-rules-result-3");
+    TSM_ASSERT_EQUALS("Fail to find rule-3", "#t\n", result_3);
+
     logger().info("END TEST: %s", __FUNCTION__);
 }
