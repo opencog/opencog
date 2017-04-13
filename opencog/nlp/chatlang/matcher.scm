@@ -13,8 +13,10 @@
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand"
   (let* ((lemma-list (get-sent-lemmas sent-node))
+         (no-constant (cog-chase-link 'InheritanceLink 'ListLink chatlang-no-constant))
          (rules-matched (append (psi-get-dual-match lemma-list)
-                                (psi-get-exact-match lemma-list))))
+                                (psi-get-exact-match lemma-list)
+                                (append-map psi-get-exact-match no-constant))))
     (cog-logger-debug "For input:\n~aRules found:\n~a" lemma-list rules-matched)
     ; TODO: Pick the ones with the highest weight
     (List (append-map
