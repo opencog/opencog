@@ -63,10 +63,12 @@ void FocusBoundaryUpdatingAgent::run()
         AttentionValue::sti_t afboundary = _bank->getAttentionalFocusBoundary();
         // Let there always be K top STI valued atoms in the AF.
         HandleSeq hseq = _bank->getTopSTIValuedHandles();
-        if( hseq.size() > 0)
+        if( hseq.size() > 0){
             //getTopSTIVlauedHandles function returns Handles in Increasing STI
             //order. 
              afboundary = _bank->get_sti(hseq[0]);
+             _bank->setAttentionalFocusBoundary(afboundary);
+        }
        /*
         AttentionValue::sti_t maxsti = _bank->get_max_STI();
         AttentionValue::sti_t minsti = _bank->get_min_STI();
@@ -88,10 +90,8 @@ void FocusBoundaryUpdatingAgent::run()
         _bank->get_handle_set_in_attentional_focus(std::back_inserter(afset));
         if(afset.size() > minAFSize ) {
             afboundary = get_cutoff(afset);
+            _bank->setAttentionalFocusBoundary(afboundary);
         }
-
-        // Set the AF boundary
-        _bank->setAttentionalFocusBoundary(afboundary);
 }
 
 /**
@@ -105,6 +105,18 @@ void FocusBoundaryUpdatingAgent::run()
  */
 AttentionValue::sti_t FocusBoundaryUpdatingAgent::get_cutoff(HandleSeq& afset)
 {
+    // A hack to bypass some atomic_dispatch segfault. I am hypothesizing
+    // sorting might have failed due to change in STI in another thread while
+    // std::sort wants to do it atomically.
+    // so, since atomic sorting is not critical to our case, lets copy the sti
+    // values and do the sorting and cutoff calculation in a non atomic way.
+    std::vector<AttentionValue::sti_t> af_sti;
+    for(const Handle& h: afset)
+        af_sti.push_back(_bank->get_sti(h));
+
+    auto afAtoms = std::vector<AttentionValue::sti_t>(af_sti.begin() + minAFSize, 
+            ((int)af_sti.size() > maxAFSize ? af_sti.begin() + maxAFSize : af_sti.end()));
+   /**
     std::sort(afset.begin(), afset.end(),
             [&](const Handle& h1, const Handle& h2)->bool {
                 return _bank->get_sti(h1) > _bank->get_sti(h2);
@@ -112,16 +124,20 @@ AttentionValue::sti_t FocusBoundaryUpdatingAgent::get_cutoff(HandleSeq& afset)
 
     HandleSeq afAtoms = HandleSeq(afset.begin() + minAFSize, 
                         ((int)afset.size() > maxAFSize ? afset.begin() + maxAFSize : afset.end()));
+    */
+
     int cut_off_index = 0;
     int biggest_diff = -1 ; // diffs are always +ve. so, its okay to initialize it with -ve number.
     constexpr int DIFF_MAGNITUDE = 0.5; // make this a parameter
     for( int i = 0 ; i < (int)afAtoms.size()-1; i++ ){
-        int diff = _bank->get_sti(afAtoms[i]) - _bank->get_sti(afAtoms[i+1]);
+        //int diff = _bank->get_sti(afAtoms[i]) - _bank->get_sti(afAtoms[i+1]);
+        int diff = afAtoms[i] - afAtoms[i+1];
         if(diff > biggest_diff*(1 + DIFF_MAGNITUDE )) {  
             biggest_diff = diff;
             cut_off_index = i;
         }
     }
 
-    return _bank->get_sti(afAtoms[cut_off_index]);
+    //return _bank->get_sti(afAtoms[cut_off_index]);
+    return afAtoms[cut_off_index];
 } 
