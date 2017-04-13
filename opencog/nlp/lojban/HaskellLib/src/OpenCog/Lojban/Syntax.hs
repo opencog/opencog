@@ -505,25 +505,57 @@ tanru = isoFoldl handleTanru . (inverse cons) <<< some (gismuP <+> nuP)
 nuP :: Syntax Atom
 nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiPMI <&& optSelmaho "KEI")
 
-nuHandlers = [handleNU "nu" (Just ["fasnu"])  . rmfst "nu",
-              handleNU "mu'e" (Just ["fasnu", "mokca"]) . rmfst "mu'e",
-              --handleNU "pu'u" . rmfst "pu'u",
-              handleNU "zu'o" (Just ["zumfau"]) . rmfst "zu'o",
-              handleNU "za'i" (Just ["tcini"]) . rmfst "za'i",
-              handleNU "du'u" Nothing . rmfst "du'u",
-              handleNU "ka" (Just ["ckaji"])  . rmfst "ka"]
+--EvaluationLink (stv 0.75 0.9)
+--                  PredicateNode (stv 1.0 0.9) "is_event"
+--                  ListLink (stv 1.0 0.0)
+--                    ConceptNode (stv 1.0 0.9) "$2"
+--                    VariableNode (stv 1.0 0.0) "$4"
+
+nuHandlers = [handleNU "nu"   (mkNuEvent ["fasnu"])  . rmfst "nu",
+              handleNU "mu'e" (mkNuEvent ["fasnu", "mokca"]) . rmfst "mu'e",
+              handleNU "pu'u" (mkTmpNuEvent "is_point_event"). rmfst "pu'u",
+              handleNU "zu'o" (mkNuEvent ["zumfau"]) . rmfst "zu'o",
+              handleNU "za'i" (mkNuEvent ["tcini"]) . rmfst "za'i",
+              handleNU "du'u" (\_ -> id) . rmfst "du'u",
+              handleNU "ka"   (mkNuEvent ["ckaji"])  . rmfst "ka"]
+  where
+    -- Functions that specify the type of the abstraction
+    -- Note: atomNub may leave AndLink with only one atom
+    mkTmpNuEvent :: String -> String -> SynIso [Atom] [Atom]
+    mkTmpNuEvent eventName _ = cons . first (mkEval . atomNub . mkEvent) . reorder
+      where mkEval = _eval . addfst (cPN eventName highTv) . tolist2 . addfstAny (cCN "$2" highTv)
+    mkNuEvent :: [String] -> String -> SynIso [Atom] [Atom]
+    mkNuEvent (nuType:nts) name = isoConcat2 . tolist2 . addfstAny nuImps
+                                          . cons . first wrapNuVars . reorder
+     where
+       nuPred = cPN (nuType ++ "_" ++ name) highTv
+       nuImps = (cImpL highTv nuPred (cPN nuType highTv))
+            :(case nts of
+                [] -> []
+                [nts] -> let nuSec = (cPN (nts ++ "_" ++ name) highTv)
+                         in [(cIImpL highTv nuPred nuSec), (cImpL highTv nuSec (cPN nts highTv))])
+       wrapNuVars = andl . tolist2 . first (mkEval "1") . second (mkEval "2")
+                         . addfstAny (cCN "$2" highTv) . atomNub . mkEvent
+       mkEval num = _evalTv . addfstAny highTv . addfstAny (cPN (nuType ++ "_sumti" ++ num) highTv)
+                            . tolist2 . addfstAny nuPred
+    mkEvent = atomIsoMap (mkIso f id) where
+     f (EvalL _ (PN _) (LL [vn@(VN _), _])) = vn -- can be PN:CN, PN:WN, anything else?
+     f a = a
+    reorder = mkIso f g where
+     f (a:as) = (a, a:as)
+     g (_,as) = as
 
 --As for "pu'u", "pruce" and "farvi" don't seem quite right
 
-handleNU :: String -> Maybe [String] -> SynIso Atom Atom
-handleNU abstractor nuType = Iso f g where
+handleNU :: String -> (String -> SynIso [Atom] [Atom]) -> SynIso Atom Atom
+handleNU abstractor nuTypeMarker = Iso f g where
   f atom = do
     state <- gets sAtoms
     seed <- asks seed
     let name = randName seed (show atom) ++ "___" ++ abstractor
         pred = cPN name highTv
     link <- apply ( mkLink . addfstAny pred
-                     . second (mkNuEvent nuType name)
+                     . second (nuTypeMarker name)
                      . mkNuState . getPredVars) (atom, state)
     setAtoms [link]
     pure pred
@@ -564,27 +596,6 @@ handleNU abstractor nuType = Iso f g where
           Nothing -> pn
       f a = a
       g a = a -- i.e., don't instantiate vars for now
-  mkNuEvent :: Maybe [String] -> String -> SynIso [Atom] [Atom]
-  mkNuEvent Nothing _ = id
-  mkNuEvent (Just (nuType:nts)) name = isoConcat2 . tolist2 . addfstAny nuImps
-                                        . cons . first wrapNuVars . reorder
-   where
-     nuPred = cPN (nuType ++ "_" ++ name) highTv
-     nuImps = (cImpL highTv nuPred (cPN nuType highTv))
-          :(case nts of
-              [] -> []
-              [nts] -> let nuSec = (cPN (nts ++ "_" ++ name) highTv)
-                       in [(cIImpL highTv nuPred nuSec), (cImpL highTv nuSec (cPN nts highTv))])
-     wrapNuVars = andl . tolist2 . first (mkEval "1") . second (mkEval "2")
-                       . addfstAny (cCN "$2" highTv) . atomNub . mkEvent
-     mkEval num = _evalTv . addfstAny highTv . addfstAny (cPN (nuType ++ "_sumti" ++ num) highTv)
-                          . tolist2 . addfstAny nuPred
-     mkEvent = atomIsoMap (mkIso f id) where
-       f (EvalL _ (PN _) (LL [vn@(VN _), (CN _)])) = vn
-       f a = a
-     reorder = mkIso f g where
-       f (a:as) = (a, a:as)
-       g (_,as) = as
   -- (pred, (typedPredicateVars, eventAtom:state')
   mkLink :: SynIso (Atom, ([Atom], [Atom])) Atom
   mkLink = _equivl
