@@ -785,11 +785,19 @@ In practice, then, for word-pairs, one has that
 \end_layout
 
 \begin_layout Standard
-Comparing Yuret's notation to the more common notation for probabilities,
- one has that 
+Thus, Yuret's notation can be expressed either in terms of conditional probabili
+tes, as 
+\begin_inset Formula 
+\[
+\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}=\frac{P(R(w_{l},w_{r})|w_{l},w_{r})\; P(R(*,*))}{P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}
+\]
+
+\end_inset
+
+or in terms of the unconditional probabilities, as 
 \begin_inset Formula 
 \begin{equation}
-\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}=\frac{P(R(w_{l},w_{r})|w_{l},w_{r})\; P(R(*,*))}{P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}\label{eq:basic pair}
+\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}=\frac{P(R(w_{l},w_{r}),w_{l},w_{r})\; P(R(*,*))}{P(R(w_{l},*),w_{l})\ P(R(*,w_{r}),w_{r})}\label{eq:basic pair}
 \end{equation}
 
 \end_inset
@@ -891,9 +899,15 @@ reference "eq:basic pair"
 
 \end_inset
 
- is new to me; I have not seen any version of it in the literature.
- It is 'nicer' than Yuret's definition, because it is manifestly symmetric
- in 
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+nicer
+\begin_inset Quotes erd
+\end_inset
+
+ than Yuret's definition, in that it is manifestly symmetric in 
 \begin_inset Formula $w_{l}$
 \end_inset
 
@@ -901,19 +915,52 @@ reference "eq:basic pair"
 \begin_inset Formula $w_{r}$
 \end_inset
 
-; that is, 
-\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})=P(R(w_{l},w_{r})|w_{r},w_{l})$
+.
+ This symmetry is essential for making contact with the 'standard' definitions
+ of MI, which are always provided in a symmetric fashion.
+ It also helps make clear the role of the left-right relationship; eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Yuret's MI"
+
 \end_inset
 
- by construction.
- This symmetry is essentialy for making contact with the 'standard' definitions
- of MI, which are always provided in a symmetric fashion.
- It also helps make clear the role of a relationship; the 'standard' definitions
- of mutual information simply talk about the MI of two random variables,
- without any reference to any information that we might already have about
- them, namely, that they can be involved in different relationships with
- respect to each other or with respect to an ambient environment.
- 
+ is in fact the three-point interaction information
+\begin_inset Formula 
+\[
+I(R;w_{l};w_{r})=MI(w_{l},w_{r})
+\]
+
+\end_inset
+
+that is, the interaction information of three random variables: 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+, 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ and 
+\begin_inset Formula $R=R(w_{l},w_{r})$
+\end_inset
+
+.
+ In particular, Yuret's lexical attraction is specifically 
+\emph on
+not
+\emph default
+ the mutual information of two random variables; it includes a specific,
+ defined relationship between them: that one word is explicitly to the left
+ of another, as well as the 
+\begin_inset Quotes eld
+\end_inset
+
+ambient
+\begin_inset Quotes erd
+\end_inset
+
+ relation that they occur within the same sentence.
 \end_layout
 
 \begin_layout Subsubsection*
