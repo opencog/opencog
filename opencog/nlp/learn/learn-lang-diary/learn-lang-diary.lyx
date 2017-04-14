@@ -586,6 +586,10 @@ N(*)=\sum_{w}N(w)
 
 \end_inset
 
+
+\end_layout
+
+\begin_layout Standard
 The conditional probability for two words in a relation is similarly defined:
 \begin_inset Formula 
 \[
@@ -615,6 +619,22 @@ P(R,w_{l},w_{r})= & P(R|w_{l},w_{r})P(w_{l})P(w_{r})\nonumber \\
 
 That is, the probability is just the number of times the relationship was
  observed, divided by the total number of times two words are observed.
+\end_layout
+
+\begin_layout Standard
+Another interesting quantity is the probability of seeing a pair-wise relationsh
+ip, in general, independent of the actual words in the pair.
+ This may seem somewhat pointless at first, but becomes interesting when
+ a variety of different relations considered.
+ This probability is given by 
+\begin_inset Formula 
+\[
+P(R(*,*))=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(*)N(*)}=\frac{N(R(*,*))}{N(*)N(*)}
+\]
+
+\end_inset
+
+XXX Report on values of the eabove for English.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -17912,6 +17932,16 @@ x
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section*
+TODO
+\end_layout
+
+\begin_layout Standard
+Explain how mutual exclusion of concepts as performed by humans when learning
+ new concepts, resembles optimal strategies for the channel coding theorem,
+ by minimizing confusion between similar concepts.
 \end_layout
 
 \begin_layout Section*
