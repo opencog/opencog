@@ -526,9 +526,9 @@ assume
 .
  Thus, we conclude with the conditional probability:
 \begin_inset Formula 
-\[
-P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}
-\]
+\begin{equation}
+P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}\label{eq:cond-pair}
+\end{equation}
 
 \end_inset
 
@@ -545,8 +545,10 @@ Frequentism
 
 \begin_layout Standard
 In order for the above to be manipulable in practice, we need to provide
- a definition for the probabilities, and, for this, the definiton can only
+ a definition for the probabilities, and, for this, the definition can only
  be frequentist.
+ That is, the defintion is to be obtained from empircal data; from counting
+ frequencies as they occur in nature.
  The frequency 
 \begin_inset Formula $P(w)$
 \end_inset
@@ -584,7 +586,35 @@ N(*)=\sum_{w}N(w)
 
 \end_inset
 
+The conditional probability for two words in a relation is similarly defined:
+\begin_inset Formula 
+\[
+P(R|w_{l},w_{r})=\frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}
+\]
 
+\end_inset
+
+This follows from the form of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:cond-pair"
+
+\end_inset
+
+.
+ It is worth unpacking the unconditional probability.
+ It is given by
+\begin_inset Formula 
+\begin{align}
+P(R,w_{l},w_{r})= & P(R|w_{l},w_{r})P(w_{l})P(w_{r})\nonumber \\
+= & \frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}\,\frac{N(w_{l})}{N(*)}\,\frac{N(w_{r})}{N(*)}\label{eq:uncond-pair}\\
+= & \frac{N(R,w_{l},w_{r})}{N(*)N(*)}\nonumber 
+\end{align}
+
+\end_inset
+
+That is, the probability is just the number of times the relationship was
+ observed, divided by the total number of times two words are observed.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -692,46 +722,59 @@ That is, the Yuret probability of seeing a given word pair is actually the
 any
 \emph default
  word pair.
- There's a chronic problem hidden here, though, 
-\end_layout
+ The numerator of this expression is given by eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:uncond-pair"
 
-\begin_layout Standard
-XXX
-\end_layout
+\end_inset
 
-\begin_layout Standard
+, that is, 
+\begin_inset Formula $P(R(w_{l},w_{r}))=P(R(w_{l},w_{r}),w_{l},w_{r})$
+\end_inset
+
+, while the denominator is the wild-card sum:
+\begin_inset Formula 
+\[
+P(R(*,*))=\frac{N(R(*,*))}{N(*)N(*)}
+\]
+
+\end_inset
+
 which can be viewed as a conditional probability:
 \begin_inset Formula 
 \[
-P(w_{l},*)=P(R(w_{l},*))=P(R(w_{l},*)|w_{l})P(w_{l})\le P(w_{l})
+\mathcal{P}(w_{l},*)=\frac{P(R(w_{l},*))}{P(R(*,*))}=\frac{P(R(w_{l},*)|w_{l})}{P(R(*,*))}P(w_{l})\le P(w_{l})
 \]
 
 \end_inset
 
 In practice, then, for word-pairs, one has that 
-\begin_inset Formula $P(R|w_{l})$
+\begin_inset Formula $P(R|w_{l})/P(R)$
 \end_inset
 
- is almost equal to 1, but not quite (this is based on actual measurements
- for English, and should hold true for most languages).
- Inserting this into the above gives 
-\begin_inset Formula 
-\[
-P(R(w_{l},w_{r})|w_{l},w_{r})=\frac{P(R(w_{l},w_{r}))\ P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}{P(w_{l},*)P(*,w_{r})}
-\]
-
+ is almost equal to 1, but not quite.
+ That is, 
+\begin_inset Formula $P(R|w_{l})\approx P(R)$
 \end_inset
 
-Re-ordering this gives
+.
+ This can be confirmed by actual measurements for English, and should hold
+ true for most languages.
+ XXX TODO Report on this (double-check) XXX.
+\end_layout
+
+\begin_layout Standard
+Comparing Yuret's notation to the more common notation for probabilities,
+ one has that 
 \begin_inset Formula 
 \begin{equation}
-\frac{P(R(w_{l},w_{r})|w_{l},w_{r})}{P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}=\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}\label{eq:basic pair}
+\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}=\frac{P(R(w_{l},w_{r})|w_{l},w_{r})\; P(R(*,*))}{P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}\label{eq:basic pair}
 \end{equation}
 
 \end_inset
 
-The right hand side above is recognizable from Yuret's work; he defines
- the 
+The left hand side above is used by Yuret to define the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -739,10 +782,10 @@ lexical attraction
 \begin_inset Quotes erd
 \end_inset
 
- as 
+, as 
 \begin_inset Formula 
 \begin{equation}
-\mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}\label{eq:Yuret's MI}
+\mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}\label{eq:Yuret's MI}
 \end{equation}
 
 \end_inset
@@ -756,11 +799,11 @@ Northern Ireland
 ' from his examples.) Note the absence of a minus sign in the above! See
  below for an explanation.
  Large-MI word pairs occur when 
-\begin_inset Formula $P(w_{l},w_{r})$
+\begin_inset Formula $\mathcal{P}(w_{l},w_{r})$
 \end_inset
 
  is roughly comparable to 
-\begin_inset Formula $P(w,*)\approx P(*,w)\approx P(w)$
+\begin_inset Formula $\mathcal{P}(w,*)\approx\mathcal{P}(*,w)\approx P(w)$
 \end_inset
 
 .
@@ -779,7 +822,7 @@ It is worth reviewing Yuret's example, at this point.
 \end_inset
 
  and finally that 
-\begin_inset Formula $-\log_{2}P(\mbox{'Northern'},\mbox{'Ireland'})=16.13$
+\begin_inset Formula $-\log_{2}\mathcal{P}(\mbox{'Northern'},\mbox{'Ireland'})=16.13$
 \end_inset
 
 .
@@ -817,18 +860,18 @@ Observationally, we have that
 \end_inset
 
  is 'large'; much larger than (unconditional) word-pair frequencies.
- 
+ XXX double check this; the definitions have changed.XXX.
 \end_layout
 
 \begin_layout Standard
-The LHS of eqn 
+The RHS of eqn 
 \begin_inset CommandInset ref
 LatexCommand eqref
 reference "eq:basic pair"
 
 \end_inset
 
- is a stranger to me; I have not seen any version of it in the literature.
+ is new to me; I have not seen any version of it in the literature.
  It is 'nicer' than Yuret's definition, because it is manifestly symmetric
  in 
 \begin_inset Formula $w_{l}$
