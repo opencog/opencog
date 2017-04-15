@@ -224,6 +224,7 @@ Notes below are for four languages: French, Lithuanian, Polish, and
 "Simple English".  Adjust as desired.
 
 Download wikipedia database dumps:
+https://dumps.wikimedia.org/enwiki/
 https://dumps.wikimedia.org/ltwiki/
 https://dumps.wikimedia.org/frwiki/
 https://dumps.wikimedia.org/zhwiki/ (Mandarin)
@@ -271,6 +272,8 @@ find |wc gives 1764813 articles
 55K are templates
 find |wc gives 1452739 files after cat/template removal
 
+en:
+
 Wikipedia processing continues in Part II below.  But first, an interruption.
 
 
@@ -304,8 +307,7 @@ Wikipedia Parsing, part II
 --------------------------
 Set up distinct databases, one for each language:
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
-    cat opencog/persist/sql/odbc/atom.sql | psql foobar_pairs
-    vi learn-fr learn-lt learn-pl learn-simple
+    cat opencog/persist/sql/multi-driver/atom.sql | psql foobar_pairs
 
 Now, build some working directories (so that we don't mess up
 alpha-pages after all that work)
