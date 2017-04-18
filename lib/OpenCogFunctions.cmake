@@ -1,11 +1,12 @@
 # Copyright (C) 2016 OpenCog Foundation
 #
-# 1. The name of the directory and the name is the name of the module
+# 1. The name of the directory and the name of its parent directories is the
+#    name of the module.
 # 2. There must be a .scm file in the same directory as the module. This file
 #    on installation will be copied one directory above its current directory.
 #
 # Types of scm module directory structures
-# 1. Modules that doen't have any c++ code modules can exist in their separate
+# 1. Modules that don't have any c++ code modules can exist in their separate
 #    directory. Examples,
 #    * `/repo-name/opencog/some-module/some-module.scm` is imported by
 #      `(use-modules (opencog some-module ))` if `some-module.scm` has an
@@ -25,6 +26,8 @@
 #      imported by `(use-modules (opencog some-module sub-module))` if
 #      `sub-module.scm` has an expression `(define-module (opencog some-module
 #      sub-module))`
+#    Note that in the future the same could be done for python modules with
+#    `py/` or `python/` directories.
 
 # References:
 # https://www.gnu.org/software/guile/manual/guile.html#Modules-and-the-File-System
@@ -55,7 +58,7 @@ FUNCTION(PROCESS_GUILE_PATH PREFIX_DIR_PATH CURRENT_SRC_DIR BUILD_DIR MODULE_FIL
     # Clean path for specifying module paths
     # NOTE: Names of modules should be small-letters.
     # TODO: There can only be 1 folder named `scm` in path but there is no
-    # check for that add it.
+    # check for that, add it.
     STRING(REGEX MATCH
         "^(${PREFIX_DIR_PATH})/([a-z0-9/-]+)/(scm?)([a-z0-9/-]*)" ""
         ${CURRENT_SRC_DIR})
