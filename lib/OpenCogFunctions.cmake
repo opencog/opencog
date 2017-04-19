@@ -1,33 +1,4 @@
 # Copyright (C) 2016 OpenCog Foundation
-#
-# 1. The name of the directory and the name of its parent directories is the
-#    name of the module.
-# 2. There must be a .scm file in the same directory as the module. This file
-#    on installation will be copied one directory above its current directory.
-#
-# Types of scm module directory structures
-# 1. Modules that don't have any c++ code modules can exist in their separate
-#    directory. Examples,
-#    * `/repo-name/opencog/some-module/some-module.scm` is imported by
-#      `(use-modules (opencog some-module ))` if `some-module.scm` has an
-#      expression `(define-module (opencog some-module))`
-#    * `/repo-name/opencog/some-module/sub-module/sub-module.scm` is imported
-#      by `(use-modules (opencog some-module sub-module))` if `sub-module.scm`
-#      has an expression `(define-module (opencog some-module sub-module))`
-# 2. If there is a c++ code then the scheme module should be under `scm/`
-#    directory. And on installation or symlinking the `scm/` directory is
-#    escaped. If there are more than one `scm/` directories only the first in
-#    the hierarchy is escaped. As the need arises multiple `scm/` directory
-#    escpaes maybe be added in the future. Examples,
-#    * `/repo-name/opencog/some-module/scm/some-module.scm` is imported by
-#      `(use-modules (opencog some-module ))` if `some-module.scm` has an
-#      expression `(define-module (opencog some-module))`
-#    * `/repo-name/opencog/some-module/scm/sub-module/sub-module.scm` is
-#      imported by `(use-modules (opencog some-module sub-module))` if
-#      `sub-module.scm` has an expression `(define-module (opencog some-module
-#      sub-module))`
-#    Note that in the future the same could be done for python modules with
-#    `py/` or `python/` directories.
 
 # References:
 # https://www.gnu.org/software/guile/manual/guile.html#Modules-and-the-File-System
