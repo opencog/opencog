@@ -3,6 +3,7 @@ module OpenCog.Lojban.Util where
 
 import OpenCog.AtomSpace
 import Control.Applicative
+import Data.List (nub)
 
 atomFind :: (Atom -> Bool) -> Atom -> Maybe Atom
 atomFind p l@(Link t ls tv) = if p l

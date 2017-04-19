@@ -496,7 +496,7 @@ gismuP = implicationOf . predicate . gismu
 
 
 tanru :: Syntax Atom
-tanru = isoFoldl handleTanru . (inverse cons) <<< some (gismuP <+> nuP)
+tanru = isoFoldl handleTanru . (inverse cons) <<< some (gismuP) -- <+> nuP)
   where handleTanru = sndToState 1 . second (tolist1 . _iimpl) . reorder
         reorder = mkIso f g
         f (g,t) = (t,(t,g))
@@ -508,18 +508,18 @@ tanru = isoFoldl handleTanru . (inverse cons) <<< some (gismuP <+> nuP)
 --meP :: Syntax (State Atom)
 --meP =  handleME <$> selmaho "ME" <*> sumtiAll <*> optSelmaho "MEhU"
 
-nuP :: Syntax Atom
+{-nuP :: Syntax Atom
 nuP = choice nuHandlers
     . selmaho "NU" &&& bridiUI <&& optSelmaho "KEI"
 
 nuHandlers = [("nu"     ,handleNU)
-,("du'u"   ,handleNU)
-,("ka"     ,handleKA)]
+              ,("du'u"   ,handleNU)
+              ,("ka"     ,handleKA)]
 
 handleNU :: SynIso Atom Atom
 handleNU = Iso f g where
     f (atom,name) = let pred = cPN name lowTv
-                        link = mkCtxPre pred atom
+                        link = atom
                     in Just (pred,link:as)
     g (PN name,CtxPred atom : as) = Just ((atom,as),name)
 -}
