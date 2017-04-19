@@ -17,7 +17,7 @@ bool TypeFrameIndex::addFromScheme(const std::string &txt)
     bool returnValue = true;
     TypeFrame frame(txt);
     if (frame.isValid()) {
-        //frame.printForDebug();
+        // frame.printForDebug();
         TypeFrame::TypePair key = frame.at(0);
         TypePairMap::iterator it = patterns.find(key);
         TypeFramePattern *pattern = NULL;
@@ -30,7 +30,7 @@ bool TypeFrameIndex::addFromScheme(const std::string &txt)
         pattern->add(frame);
         returnValue = false;
     } else {
-        //printf("INVALID FRAME\n");
+        printf("INVALID FRAME <%s>\n", txt.c_str());
     }
 
     return returnValue;
