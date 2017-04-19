@@ -43,6 +43,15 @@ _ctxold = ctx . tolist2 . second _eval
 _ssl :: SynIso Atom Atom
 _ssl = ssl . tolist2 . addfst (Node "VariableNode" "$var" noTv)
 
+_meml :: SynIso (Atom, Atom) Atom
+_meml = meml . tolist2
+
+_equivl :: SynIso (Atom, Atom) Atom
+_equivl = equivl . tolist2
+
+_typedvarl :: SynIso (Atom, Atom) Atom
+_typedvarl = typedvarl . tolist2
+
 _exl :: SynIso (Atom, Atom) Atom
 _exl = exl . tolist2
 
@@ -82,6 +91,12 @@ ssl = linkIso "SatisfyingSetLink" noTv
 
 exl :: SynIso [Atom] Atom
 exl = linkIso "ExistsLink"  noTv
+
+meml :: SynIso [Atom] Atom
+meml = linkIso "MemberLink" noTv
+
+equivl :: SynIso [Atom] Atom
+equivl = linkIso "EquivalenceLink" noTv
 
 setTypeL  :: SynIso [Atom] Atom
 setTypeL = linkIso "SetTypeLink" noTv

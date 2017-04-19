@@ -6,7 +6,7 @@ module OpenCog.Lojban.Syntax.Util where
 import Prelude hiding (id,(.),(<*>),(<$>),(*>),(<*),foldl)
 
 import Data.List.Split (splitOn)
-import Data.List (partition,intercalate,find,delete)
+import Data.List (nub,partition,intercalate,find,delete)
 import Data.Char (chr,isLetter,isDigit)
 import Data.Maybe
 import Data.Map (findWithDefault)
@@ -21,7 +21,7 @@ import System.Random
 
 import Iso hiding (SynIso,Syntax)
 
-import OpenCog.AtomSpace (Atom)
+import OpenCog.AtomSpace (Atom(..))
 import OpenCog.Lojban.Syntax.Types
 
 import qualified Data.ListTrie.Patricia.Set.Ord as TS
@@ -34,6 +34,20 @@ mapIso :: Traversable t => SynIso a b -> SynIso (t a) (t b)
 mapIso iso = Iso f g where
     f = traverse (apply iso)
     g = traverse (unapply iso)
+
+atomIsoMap :: SynIso Atom Atom -> SynIso Atom Atom
+atomIsoMap iso = Iso f g where
+  f (Link t ls tv) = do ls' <- apply (mapIso (atomIsoMap iso)) ls
+                        apply iso $ Link t ls' tv
+  f n@(Node _ _ _) = apply iso n
+  g (Link t ls tv) = do ls' <- unapply (mapIso (atomIsoMap iso)) ls
+                        unapply iso $ Link t ls' tv
+  g n@(Node _ _ _) = unapply iso n
+
+atomNub :: SynIso Atom Atom
+atomNub = atomIsoMap (mkIso f id) where
+  f (Link t ls tv) = Link t (nub ls) tv
+  f n@(Node _ _ _) = n
 
 choice :: [SynIso (c,a) b] -> SynIso (c,a) b
 choice lst = Iso f g where
@@ -279,6 +293,17 @@ appendAtoms i = Iso f g where
         let (a,as) = splitAt i atoms
         setAtoms as
         pure a
+
+withEmptyState :: SynIso a b -> SynIso a b
+withEmptyState iso = Iso f g
+  where
+    f a = do
+       atoms <- gets sAtoms
+       setAtoms []
+       b <- apply iso a
+       pushAtoms atoms
+       pure b
+    g = unapply iso
 
 setSeed :: SynMonad t State => Int -> (t ME) ()
 setSeed i = modify (\s -> s {sSeed = i})
