@@ -1,9 +1,46 @@
-(use-modules (ice-9 readline) (ice-9 regex))
+(use-modules (ice-9 readline)
+             (ice-9 regex))
+
+(define (symbol-contains sym str)
+  "Check if a symbol contains a specific string."
+  (not (equal? #f (string-contains (symbol->string sym) str))))
+
+(define (cr pattern action)
+  "Main function for creating a behavior rule."
+  (for-each
+    (lambda (p)
+      (display "p: ")
+      (display p)
+      (cond
+        ((string? p)
+         (display " (input)"))
+        ((symbol-contains p ",")
+         (display " (comma)"))
+        ((symbol-contains p "=")
+         (display " (var)")))
+      (newline))
+    pattern)
+  (for-each
+    (lambda (a)
+      (display "a: ")
+      (display a)
+      (cond
+        ((string? a)
+         (display " (output)"))
+        ((symbol-contains a ",")
+         (display " (comma)"))
+        ((symbol-contains a "=")
+         (display " (var)"))
+        (else
+         (display " (expression)")))
+      (newline))
+    action)
+)
 
 (define (s str) (quasiquote ,str))
 ;(define (b str) (quasiquote ,str)) ; placeholder for behaviour
 
-(define (cr pattern action)
+(define (original-cr pattern action)
     (define strBuilder "")
     (define tmp "")
     (define wordtype "")
