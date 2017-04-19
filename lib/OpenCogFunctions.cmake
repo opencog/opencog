@@ -44,6 +44,17 @@ FUNCTION(PROCESS_MODULE_STRUCTURE FILE_NAME)
 ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 
 # ----------------------------------------------------------------------------
+# When cmake is run, a symlink is created at '${CMAKE_BINARY_DIR}/opencog/scm'
+# for all the files specified, following the file tree structure created when
+# installing to /usr/local/share/opencog/scm. It has two keyword arguments,
+#
+# FILES: List of files to be installed/symlinked
+#
+# MODULE_DESTINATION: The absolute path  where the files associated
+#   with the module are installed, with the exception of the
+#   MODULE_FILE(see definition at top of this file). The path for
+#   MODULE_FILE, is inferred from this argument, even if it is the only file to
+#   be installed.
 FUNCTION(ADD_GUILE_MODULE)
     # NOTE: Change PREFIX_DIR_PATH variable if a choice is made to adapt
     # guile's site-package convention.
