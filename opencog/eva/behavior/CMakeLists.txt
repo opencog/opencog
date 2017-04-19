@@ -1,13 +1,9 @@
-INSTALL (FILES
-	eva-behavior.scm
-	DESTINATION "${DATADIR}/scm/opencog/"
-)
-
 # Install the Eva and Sophia config files; however, the scheme module
 # will not load the config parameters -- that has to be done by hand.
-INSTALL (FILES
+Add_GUILE_MODULE2 (FILES
 	behavior.scm
 	express.scm
+	eva-behavior.scm
 	face-priority.scm
 	primitives.scm
 	orchestrate.scm
@@ -16,5 +12,5 @@ INSTALL (FILES
 	cfg-tools.scm
 	cfg-eva.scm
 	cfg-sophia.scm
-	DESTINATION "${DATADIR}/scm/opencog/eva-behavior"
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/eva-behavior"
 )
