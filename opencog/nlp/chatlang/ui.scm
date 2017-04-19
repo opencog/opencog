@@ -3,7 +3,7 @@
 (define (s str) (quasiquote ,str))
 ;(define (b str) (quasiquote ,str)) ; placeholder for behaviour
 
-(define (cr strRule strSay)
+(define (cr pattern action)
     (define strBuilder "")
     (define tmp "")
     (define wordtype "")
@@ -99,8 +99,8 @@
             )))
 !#
 
-    (set! strRule (string-trim strRule))
-    (if (string-match "^#" strRule)
+    (set! pattern (string-trim pattern))
+    (if (string-match "^#" pattern)
         (display "exit\n")
         ; exit if there is a comment # at start of string
         (begin
@@ -109,9 +109,9 @@
 
 ; XXX to be removed?
 #!
-(if (string-match "^.*[[:space:]]<[[:space:]].*$" strRule)
+(if (string-match "^.*[[:space:]]<[[:space:]].*$" pattern)
     (begin ; start-with <
-        (set! tmp strRule)
+        (set! tmp pattern)
         (set! tmp (string-trim (regexp-substitute #f (string-match "^.*<" tmp) 'pre "" 'post))) ; discard everything before the '<'
         (set! tmp (string-trim (regexp-substitute #f (string-match "[[:space:]]*" (string-trim tmp)) 'pre "" 'post)))
         (set! strBuilder (string-append strBuilder "(start-with \"" tmp "\"" ") " ))
@@ -120,9 +120,9 @@
     ))
 !#
 
-            ; (set! strBuilder (string-append strBuilder (string-concatenate (map my-interpret (string-split strRule #\space)))))
+            ; (set! strBuilder (string-append strBuilder (string-concatenate (map my-interpret (string-split pattern #\space)))))
 
-            ; (for-each (lambda (x)     (set! strBuilder (string-append strBuilder (string-concatenate (map my-interpret x)))
+            ; (for-each (lambda (x) (set! strBuilder (string-append strBuilder (string-concatenate (map my-interpret x)))
             (for-each
                 (lambda (x)
                     (set! x (string-trim x))
@@ -207,21 +207,21 @@
                                 (set! strBuilder (string-append strBuilder (my-interpret x)))))
                     )
                 )
-            (string-split strRule #\space))
+            (string-split pattern #\space))
 
-            ; XXX to be removed?
-            ; startwith alternate code
-            ;(if (string-match "^.*[[:space:]]<[[:space:]].*$" strRule) (begin ; start-with <
-                ;        (set! tmp strRule)
-                ;        (set! tmp (string-trim (regexp-substitute #f (string-match "^.*<" tmp) 'pre "" 'post))) ; discard everything before the '<'
-                ;        (set! tmp (string-trim (regexp-substitute #f (string-match "[[:space:]]*" (string-trim tmp)) 'pre "" 'post)))
-                ;        (set! strBuilder (string-append strBuilder "(start-with \"" tmp "\"" ") " ))
-                ;        ;(display (string-append "\n\n" strBuilder "\n\n"))
-                ;        ;(set! strBuilder (string-append strBuilder (my-interpret x))
-                ;))
+; XXX to be removed?
+; startwith alternate code
+;(if (string-match "^.*[[:space:]]<[[:space:]].*$" pattern) (begin ; start-with <
+;        (set! tmp pattern)
+;        (set! tmp (string-trim (regexp-substitute #f (string-match "^.*<" tmp) 'pre "" 'post))) ; discard everything before the '<'
+;        (set! tmp (string-trim (regexp-substitute #f (string-match "[[:space:]]*" (string-trim tmp)) 'pre "" 'post)))
+;        (set! strBuilder (string-append strBuilder "(start-with \"" tmp "\"" ") " ))
+;        ;(display (string-append "\n\n" strBuilder "\n\n"))
+;        ;(set! strBuilder (string-append strBuilder (my-interpret x))
+;))
 
             (set! strBuilder (string-append strBuilder ")\n"))
-            (set! strBuilder (string-append strBuilder "    '(say \"" strSay "\"))" ))
+            (set! strBuilder (string-append strBuilder "    '(say \"" action "\"))" ))
             (display strBuilder)
             (newline)
             ;(eval-string strBuilder)
