@@ -3,6 +3,7 @@
 {-# LANGUAGE TypeFamilies               #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE RankNTypes                 #-}
+{-# LANGUAGE LambdaCase                 #-}
 
 module OpenCog.Lojban.Syntax where
 
@@ -12,6 +13,7 @@ import qualified Data.List.Split as S
 import Data.List (partition)
 import qualified Data.Foldable as F (find)
 import Data.Maybe (fromJust)
+import Data.List (isInfixOf)
 import Data.Hashable
 
 import System.Random
@@ -23,7 +25,7 @@ import Control.Category (id,(.),(<<<),(>>>))
 
 import Iso hiding (SynIso,Syntax)
 
-import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,atomMap,atomElem,nodeName)
+import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,nodeName,atomElem)
 import OpenCog.Lojban.Util
 
 import OpenCog.Lojban.Syntax.Types
@@ -49,9 +51,8 @@ mytrace2 s a = trace (s ++(' ':show a)) a
 --      vo'a rule see ../Lojban.hs
 --      make statments explicit
 --      ge'e cai on logical conectives and else?
---      Does SEI have implicit args
+--      Does SEI have implicit args?
 --      What if you have SEI and UI
---      ko -- Selbri implies/inherits from Imperative
 
 -- argslots
 -- Synonims for tenses and gismu
@@ -166,11 +167,12 @@ sndToState i = Iso f g where
 setOf :: String -> SynIso Atom Atom
 setOf itype = sndToState 1 . second (tolist1 . setTypeL . tolist2)
             . makeSet . genInstance itype
-    where makeSet = mkIso f g
-              where f a = let salt = show a
-                              set  = cCN (randName 1 salt) noTv
-                          in (set,(set,a))
-                    g (_,(_,a)) = a
+    where makeSet = Iso f g
+              where f a = do
+                        name <- randName (show a)
+                        let set = cCN name noTv
+                        pure (set,(set,a))
+                    g (_,(_,a)) = pure a
 
 
 
@@ -182,11 +184,9 @@ laP = handleName . wordNode <<< sepSelmaho "LA"
     where handleName :: SynIso Atom Atom
           handleName = Iso f g where
               f a = do
-                  seed <- asks seed
                   p <- apply instanceOf (cPN "cmene" lowTv)
-                  let na = nodeName a
-                      name = randName seed na ++ "___" ++ na
-                      c = cCN name lowTv
+                  name <- randName (nodeName a ++ "___" ++ nodeName a)
+                  let c = cCN name lowTv
                       ct = (c,Nothing)
                       at = (a,Nothing)
                       pt = ((highTv,p),Nothing)
@@ -248,7 +248,14 @@ sumti = kohaP <+> leP <+> laP <+> liP <+> zoP <+> luP
 
 --This Handles relative phrases
 noiP :: Syntax Atom
-noiP = sepSelmaho "NOI" &&> bridi <&& optSelmaho "KUhO"
+noiP = sepSelmaho "NOI" &&> (hasKEhA <<< bridi) <&& optSelmaho "KUhO"
+    where hasKEhA = Iso f f
+          f a = if atomAny (\case { Link _ _ _ -> False
+                                  ; (Node _ n _) ->"ke'a" `isInfixOf` n
+                                  }) a
+                   then pure a
+                   else lift $ Left "No ke'a in bridi."
+          kea = Node "ConceptNode" "ke'a" noTv
 
 noiShort :: Syntax Atom
 noiShort = sepSelmaho "NOI" &&> ptp selbriUI addKEhA bridi <&& optSelmaho "KUhO"
@@ -267,8 +274,8 @@ goiP = ptp (selmaho "GOI") goiToNoi noiP
                                   ,("goi " ,"poi ke'a du ")]
 
 sumtiNoi :: Syntax Atom
-sumtiNoi = (kehaToSesku . sndToState 1 ||| id) . reorder <<< sumti
-                                          &&& optional (noiP <+> noiShort <+> goiP)
+sumtiNoi = (kehaToSesku . sndToState 1 ||| id) . reorder
+        <<< sumti &&& optional (noiP <+> noiShort <+> goiP)
     where reorder = mkIso f g
           f (a,Just n )    = Left (a,[n])
           f (a,Nothing)    = Right a
@@ -337,9 +344,8 @@ setWithSize :: SynIso (Atom,Atom) Atom
 setWithSize = sndToState 2 . second (tolist2 . (sizeL *** setTypeL)) . makeSet
     where makeSet = Iso f g
           f (a,b) = do
-              seed <- asks seed
-              let salt = show a ++ show b
-                  set  = cCN (randName seed salt) noTv
+              name <- randName $ show a ++ show b
+              let set = cCN name noTv
               pure (set,([set,a],[set,b]))
           g (_,([_,a],[_,b])) = pure (a,b)
 
@@ -503,82 +509,20 @@ tanru = isoFoldl handleTanru . (inverse cons) <<< some (gismuP <+> nuP)
 --meP =  handleME <$> selmaho "ME" <*> sumtiAll <*> optSelmaho "MEhU"
 
 nuP :: Syntax Atom
-nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiPMI <&& optSelmaho "KEI")
+nuP = choice nuHandlers
+    . selmaho "NU" &&& bridiUI <&& optSelmaho "KEI"
 
-nuHandlers = [handleNU "nu"   . rmfst "nu",
-              handleNU "mu'e" . rmfst "mu'e",
-              handleNU "pu'u" . rmfst "pu'u",
-              handleNU "zu'o" . rmfst "zu'o",
-              handleNU "za'i" . rmfst "za'i",
-              handleNU "du'u" . rmfst "du'u"]
-              --handleKA        . rmfst "ka"]
+nuHandlers = [("nu"     ,handleNU)
+,("du'u"   ,handleNU)
+,("ka"     ,handleKA)]
 
--- Creates abstract version of atom and state
-handleNU :: String -> SynIso Atom Atom
-handleNU abstractor = Iso f g where
-    f atom = do
-      state <- gets sAtoms
-      seed <- asks seed
-      pred <- apply predicate (randName seed (show atom) ++ "___" ++ abstractor)
-      let (vns, nuState) = getNuState (getEventType abstractor) atom state
-      link <- apply mkLink (pred, (vns, nuState))
-      setAtoms [link]
-      pure pred
-    g (pred) = do
-      state <- gets sAtoms -- FIX: Have to get correct atom
-      let link = F.find (atomElem pred) state
-      (nuState, atom) <- case link of -- remove "is_event" atoms
-          Just (EquivL _ (MemL _ (SSL [_, ExL _ _ (AL l)])))
-            -> pure $ partition isImpl $ case getEventType abstractor of
-                Just eventType -> filter (not.atomElem eventType) l
-                Nothing        -> l
-          _ -> lift $ Left $ (show pred) ++ " can't be found in state."
-      pushAtoms nuState -- TODO: instantiate VNs?
-      pure (head atom) -- should only be one. Check?
-    -- (pred, (typedPredicateVars, eventAtom:state')
-    mkLink :: SynIso (Atom, ([Atom], [Atom])) Atom
-    mkLink = _equivl
-              . first  (_evalTv . addfst highTv  . addsnd [cVN "$1"])
-              . second
-                  (_meml . addfst (cVN "$1") . ssl . tolist2 . addfst (cVN "$2")
-                    . _exl . first (varll . mapIso (_typedvarl . addsnd (cTN "PredicateNode")))
-                           . second andl)
-    isImpl :: Atom -> Bool
-    isImpl (ImpL _ _) = True
-    isImpl (InhL _ _) = True
-    isImpl _          = False
-    -- Should be put in nuHandlers, unless there are more involved instructions
-    getEventType :: String -> Maybe Atom
-    getEventType "nu"    = (Just (cPN "is_event" highTv))
-    getEventType "mu'e"  = (Just (cPN "is_point_event" highTv))
-    getEventType "pu'u"  = (Just (cPN "is_process" highTv))
-    getEventType "zu'o"  = (Just (cPN "is_activity" highTv))
-    getEventType "za'i"  = (Just (cPN "is_state" highTv))
-    getEventType _       =  Nothing -- du'u case
-
-    -- Work-in-progress
-    handleKA :: SynIso Atom Atom
-    handleKA = Iso f g where
-      f atom = do
-        seed <- asks seed
-        let name = randName seed (show atom) ++ "___" ++ "ka"
-        pred <- apply predicate (name)
-        let link = mkPropPre pred atom name
-        pushAtom link
-        pure pred
-      g (pred) = do
-        state <- gets sAtoms
-        pure (head state)
-
---like bridiP but adds mi instead of ti
-bridiPMI :: Syntax Atom
-bridiPMI = ptp (optional _SOS &&& selbriAll) addmi bridiUI
-         <+> bridiUI
-         <+> ptp (optional anytense &&& selbriAll) addmi bridiUI
-    where addmi = mkIso f g
-          f s = s ++ "mi "
-          g s = s --TODO: Maybe remoe mi again
-
+handleNU :: SynIso Atom Atom
+handleNU = Iso f g where
+    f (atom,name) = let pred = cPN name lowTv
+                        link = mkCtxPre pred atom
+                    in Just (pred,link:as)
+    g (PN name,CtxPred atom : as) = Just ((atom,as),name)
+-}
 
 _MOI :: Syntax String
 _MOI = selmaho "MOI"
@@ -726,14 +670,16 @@ _GIhABO = first just <<< _GIhA &&& optional _BO
 
 _bridi :: Syntax Atom
 _bridi = isoFoldl handleGIhA . (handleBRIDI *** distribute) . reorder
-        <<< many sumtiAllUI
-        <&&  optext "cu"
+        <<< (some sumtiAllUI <+> zohe)
+        <&& optext "cu"
         &&& (bridiTail <+> bridiBETail) --FIXME: what if it is a mix
         &&& many (_GIhABO &&& bridiTail)
 
     where reorder = mkIso f g where
             f (s,(bt,ls)) = ((s,bt),(s,ls))
             g ((s,bt),(_,ls)) = (s,(bt,ls))
+
+          zohe = tolist1 . insert (Node "ConceptNode" "zo'e" noTv,Nothing)
 
           distribute = mkIso f g where
             f (s,[]) = []
@@ -809,23 +755,28 @@ bridiUI :: Syntax Atom
 bridiUI = (handleSOS ||| id) . ifJustA
        <<< (optional _SOS &&& bridi)
 
-bridiP :: Syntax Atom
-bridiP = ptp (_SOS &&& selbriAll) addti bridiUI
-       <+> bridiUI
-       <+> ptp (anytense &&& selbriAll) addti bridiUI
-
 addti :: SynIso String String
+statment :: Syntax Atom
+statment = (handleSOS ||| id) . ifJustA
+  <<< optSelmaho "I" &&> optional _SOS &&& statment2
+
+statment2 :: Syntax Atom
+statment2 = isoFoldl (handleCon . reorder)
+    <<< bridi &&& many (sepSelmaho "I" &&> _JA_BO &&& bridiUI)
+    where reorder = Iso f g where
+            f (b1,(con,b2)) = pure (con,[b1,b2])
+            g (con,[b1,b2]) = pure (b1,(con,b2))
+
 addti = mkIso f g
     where f s = s ++ "ti "
           g s = s --TODO: Maybe remoe ti again
 
 --Handles questions
---The first kind with the word "xu" is a question for the truth of a statment
 --A SatisfactionLink is used for this
 --The second with a VarNode in the Statement is a fill the blank question
 --we wrap the statment in a (Put s (Get s)) that when excuted should fill the blank
 preti :: Syntax Atom
-preti = (_satl ||| handleMa) . ifJustA <<< optional (word "xu") &&& bridiP
+preti = handleMa <<< handleXu
     where handleMa :: SynIso Atom Atom
           handleMa = Iso f g
           f a = do
@@ -838,6 +789,27 @@ preti = (_satl ||| handleMa) . ifJustA <<< optional (word "xu") &&& bridiP
               pure (x ? na $ all)
           g (Link "PutLink"  [LL (a:s),_] _) = setAtoms s >> pure a
           g (Link "ListLink" (a:s) _)        = setAtoms s >> pure a
+
+          --If
+          handleXu = Iso f g where
+              f () = do
+                  state0 <- get
+                  res <- apply statment ()
+                  state1 <- get
+                  flags <- gets sFlags
+                  if "xu" `elem` flags
+                     then do
+                         put state0
+                         res2 <- apply (_exl . addfst var . withFlag "handleXu" statment) ()
+                         put state1
+                         case res2 of --If it's the whole sentence ingore
+                             (ExL noTv (VN "xu")(VN "xu")) -> pure ()
+                             _ -> pushAtom res2
+                         apply _satl res
+                    else pure res
+              var = Node "VariableNode" "xu" noTv
+              g a = unapply statment a
+
 
 
 ------------------------------------
@@ -877,7 +849,11 @@ _JA = optional (word "na") &&& _JA' &&& optional (word "nai")
     where _JA' = _JAtoA <<< selmaho "JA"
 
 _JA_BO :: Syntax Con
-_JA_BO = optional _JA &&& optional _BO
+_JA_BO = handle <<< optional _JA &&& optional _BO
+    where handle = Iso f g where
+            f (Nothing,Nothing) = lift $ Left "_JA_BO empty"
+            f a = pure a
+            g = pure
 
 {-_BAI_BO :: Syntax Atom
 _BAI_BO = <$> baiP <* sepSelmaho "BO"
@@ -893,7 +869,6 @@ _jufra = second ((handle ||| tolist1) . ifJustB)
      <<< sepSelmaho "I" &&> optional _JA_BO &&& preti &&& optional _jufra
     where handle = Iso f g where
               f (p,(mc,a:as)) = case mc of
-                                    Just (Nothing,Nothing) -> pure $ p:a:as
                                     Just c -> do
                                         x <- apply handleCon (c,[p,a])
                                         pure (x:as)
@@ -904,7 +879,7 @@ _jufra = second ((handle ||| tolist1) . ifJustB)
                   ) <|> pure (x,(Nothing,as))
 
 jufra :: Syntax Atom
-jufra = listl . rmfst Nothing <<< _jufra
+jufra = listl <<< many preti
 
 jufmei = listl . reorder <<< sepSelmaho "NIhO" &&> preti
                         &&& some (sepSelmaho "I" &&> preti)
@@ -939,14 +914,15 @@ _SEhU = optSelmaho "SEhU"
 --This is also why they are only allowed to have BEtails
 -- sei mi jimpe do gerku == sei mi jimpe se'u do gerku
 seiP :: Syntax Atom
-seiP = _SEI &&> withFlag "onlyBE" bridiP <&& _SEhU
+seiP = _SEI &&> withFlag "onlyBE" bridiUI <&& _SEhU
 
 type SEI = Atom
 
 --Attitude
 
 _UI :: Syntax Atom
-_UI = concept <<< selmaho "UI"
+_UI = concept <<< (xu <+> selmaho "UI")
+    where xu = setFlagIso "xu" <<< word "xu"
 
 _CAI :: Syntax String
 _CAI = selmaho "CAI"
@@ -995,17 +971,24 @@ withAttitude syn = (first handleSOS ||| id) . reorder
 --before we can create the statement with _frames
 --and then add it to the State
 handleUI :: SynIso ((Atom,TruthVal),Atom) Atom
-handleUI = sndToState 1
-         . second (tolist1 . _frames . (selbri *** mapIso toSumti)
+handleUI = (handleXu ||| (rmfstAny (xu,tv) ||| handleUI') . switchOnFlag "xu") . switchOnFlag "handleXu"
+    where --We also call handleUI' to keep the random seed consistent
+          handleXu = Iso f g -- . inverse (sndToState 1) . handleUI'
+          f _ = pure $ Node "VariableNode" "xu" noTv
+          g _ = lift $ Left "Printing with handleXu flag is not allowed."
+          xu = Node "ConceptNode" "xu" noTv
+          tv = stv 0.75  0.9
+
+handleUI' :: SynIso ((Atom,TruthVal),Atom) Atom
+handleUI' = sndToState 1
+         . second (tolist1 . _frames . (selbri *** tolist1 . toSumti)
                   )
          . manage
     where manage = mkIso f g where
-              f ((ui,tv),a) = (a,((tv,cinmo),[(mi,"1"),(ui,"2"),(a,"3")]))
-              g (a,((tv,_),[_,(ui,_),_])) = ((ui,tv),a)
+              f ((ui,tv),a) = (a,((tv,ui),(a,"1")))
+              g (a,((tv,ui),_)) = ((ui,tv),a)
 
-          mi      = Node "ConceptNode" "mi" noTv
-          cinmo   = Node "PredicateNode" "cinmo" noTv
-          toSumti = instanceOf *** just
+          toSumti = id *** just
           selbri  = addsnd Nothing . second instanceOf
 
 handleSEI :: SynIso (Atom,Atom) Atom

@@ -280,18 +280,8 @@ appendAtoms i = Iso f g where
         setAtoms as
         pure a
 
--- Applies an iso with an empty state
--- Assumes inverse doesn't need special state handling
-withEmptyState :: SynIso a b -> SynIso a b
-withEmptyState iso = Iso f g
-  where
-    f a = do
-       atoms <- gets sAtoms
-       setAtoms []
-       b <- apply iso a
-       pushAtoms atoms
-       pure b
-    g = unapply iso
+setSeed :: SynMonad t State => Int -> (t ME) ()
+setSeed i = modify (\s -> s {sSeed = i})
 
 setFlag :: SynMonad t State => Flag -> (t ME) ()
 setFlag f = modify (\s -> s {sFlags = f : sFlags s})
@@ -322,3 +312,13 @@ ifNotFlag flag = Iso f f where
         if flag `elem` flags
            then lift $ Left $ "Flag: " ++ flag ++ " is set."
            else pure a
+
+switchOnFlag :: Flag -> SynIso a (Either a a)
+switchOnFlag flag = Iso f g where
+    f a = do
+        flags <- gets sFlags
+        if flag `elem` flags
+           then pure (Left a)
+           else pure (Right a)
+    g (Left a)  = setFlag flag >> pure a
+    g (Right a) = pure a

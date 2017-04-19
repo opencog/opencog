@@ -54,7 +54,6 @@ type Bridi = ([Sumti],((Maybe Atom,(Maybe String,Tagged Selbri)),[Sumti]))
 data WordList = WordList { cmavos :: M.Map String StringSet
                          , gismus :: StringSet
                          , bai    :: SynIso String String
-                         , seed   :: Int
                          }
 --The State
 --sFlags : A list of flags then can be used to pass information along
@@ -64,6 +63,7 @@ type Flag = String
 data State = State { sFlags :: [Flag]
                    , sAtoms :: [Atom]
                    , sText :: String
+                   , sSeed   :: Int
                    } deriving Show
 
 --They Iso we are using

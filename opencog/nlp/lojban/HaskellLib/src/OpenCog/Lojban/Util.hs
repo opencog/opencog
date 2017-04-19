@@ -2,7 +2,19 @@
 module OpenCog.Lojban.Util where
 
 import OpenCog.AtomSpace
-import Data.List (nub, partition)
+import Control.Applicative
+
+atomFind :: (Atom -> Bool) -> Atom -> Maybe Atom
+atomFind p l@(Link t ls tv) = if p l
+                                 then Just l
+                                 else foldl (\ma a -> atomFind p a <|> ma) Nothing ls
+atomFind p n@(Node _ _ _) = if p n
+                               then Just n
+                               else Nothing
+
+atomAny :: (Atom -> Bool) -> Atom -> Bool
+atomAny p l@(Link t ls tv) = p l || any (atomAny p) ls
+atomAny p n@(Node _ _ _)   = p n
 
 mapFst :: (a -> b) -> (a,c) -> (b,c)
 mapFst f (a,c) = (f a,c)
