@@ -92,8 +92,11 @@ void SCMLoader::parseFile(std::fstream &fin,
     int inputFileCharCount = 0;
     int level = 0;
     bool inNodeName = false;
+    bool inComment = false;
     char c;
     std::string line = "";
+    std::string output1 = schemeEval->eval("(count-all)");
+    logger().info("Atom count before loading: %s", output1.c_str());
     while (fin >> std::noskipws >> c) {
         inputFileCharCount++;
         if (c == '\n') {
@@ -105,23 +108,30 @@ void SCMLoader::parseFile(std::fstream &fin,
                     logger().info("Loading file. %d%% done.", percentDone);
                 }
             }
+            inComment = false;
         } else {
-            line += c;
-            if (inNodeName) {
-                if (c == '\"') inNodeName = false;
+            if ((c == ';') || inComment) {
+                inComment = true;
             } else {
-                if (c == '\"') inNodeName = true;
-                if (c == '(') level++;
-                if (c == ')') {
-                    if (--level == 0) {
-                        if (listener != NULL) listener->beforeInserting(line);
-                        schemeEval->eval(line);
-                        line = "";
+                if ((line.length() != 0) || (c != ' ')) {
+                    line += c;
+                    if (inNodeName) {
+                        if (c == '\"') inNodeName = false;
+                    } else {
+                        if (c == '\"') inNodeName = true;
+                        if (c == '(') level++;
+                        if (c == ')') {
+                            if (--level == 0) {
+                                if (listener != NULL) listener->beforeInserting(line);
+                                schemeEval->eval(line);
+                                line = "";
+                            }
+                        }
                     }
                 }
             }
         }
     }
-    std::string output = schemeEval->eval("(count-all)");
-    logger().info("Atom count after loading: %s", output.c_str());
+    std::string output2 = schemeEval->eval("(count-all)");
+    logger().info("Atom count after loading: %s", output2.c_str());
 }
