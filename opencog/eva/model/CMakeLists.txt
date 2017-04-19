@@ -1,4 +1,4 @@
-ADD_GUILE_MODULE2 (FILES
+ADD_GUILE_MODULE (FILES
 	eva-model.scm
 	self-model.scm
 	faces.scm

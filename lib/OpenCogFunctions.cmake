@@ -44,53 +44,6 @@
 #   links above.
 
 # ----------------------------------------------------------------------------
-FUNCTION(PROCESS_GUILE_PATH PREFIX_DIR_PATH FILE_NAME)
-    # NOTE: Directory paths are not allowed as module names.
-    # Check if directory path was passed as a file name.
-    STRING(REGEX MATCH "([a-z0-9/-]+)/([a-z0-9/-]*)" "" ${FILE_NAME})
-    IF(CMAKE_MATCH_2)
-        MESSAGE(FATAL_ERROR "Only files found in "
-            "${CMAKE_CURRENT_SOURCE_DIR} are allowed")
-    ENDIF()
-
-    # Check if the file exists
-    IF(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${FILE_NAME})
-        MESSAGE(FATAL_ERROR "${FILE_NAME} file does not exist in "
-            ${CMAKE_CURRENT_SOURCE_DIR})
-    ENDIF()
-
-    # Clean path for specifying module paths
-    # NOTE: Names of modules should be small-letters.
-    # TODO: There can only be 1 folder named `scm` in path but there is no
-    # check for that, add it.
-    STRING(REGEX MATCH
-        "^(${PREFIX_DIR_PATH})/([a-z0-9/-]+)/(scm?)([a-z0-9/-]*)" ""
-        ${CMAKE_CURRENT_SOURCE_DIR})
-
-    IF(CMAKE_MATCH_0)
-        SET(CLEAN_PATH "${PREFIX_DIR_PATH}/${CMAKE_MATCH_2}${CMAKE_MATCH_4}")
-    ELSE()
-        SET(CLEAN_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-    ENDIF()
-
-    # Specify the module paths.
-    STRING(REGEX MATCH
-        "^(${PREFIX_DIR_PATH})([a-z0-9/-]+)*/([a-z0-9-]+)" ""
-        ${CLEAN_PATH})
-
-    # MODULE_NAME: it is equal to the current directory name, or the current
-    #   directory's parent-directory name if the current directory is scm.
-    # MODULE_FILE_DIR_PATH: the directory path where the MODULE_FILE is
-    #   installed.
-    # MODULE_DIR_PATH: the directory path where the files associated
-    #   with the module are installed/symlinked at, with the exception of
-    #   the MODULE_FILE.
-    SET(MODULE_NAME ${CMAKE_MATCH_3} PARENT_SCOPE)
-    SET(MODULE_FILE_DIR_PATH ${CMAKE_MATCH_2} PARENT_SCOPE)
-    SET(MODULE_DIR_PATH ${CMAKE_MATCH_2}/${CMAKE_MATCH_3} PARENT_SCOPE)
-ENDFUNCTION(PROCESS_GUILE_PATH)
-
-# ----------------------------------------------------------------------------
 # This configures the install and symlink paths for each file, passed to it,
 # based on the value of the variables MODULE_NAME, MODULE_FILE_DIR_PATH and
 # MODULE_DIR_PATH in the PARENT_SCOPE.
@@ -121,23 +74,6 @@ ENDFUNCTION(PROCESS_MODULE_STRUCTURE)
 
 # ----------------------------------------------------------------------------
 FUNCTION(ADD_GUILE_MODULE)
-    FOREACH(FILE_NAME ${ARGV})
-        PROCESS_GUILE_PATH(${CMAKE_SOURCE_DIR} ${FILE_NAME})
-        PROCESS_MODULE_STRUCTURE(${FILE_NAME})
-
-        # The install configuration isn't part of PROCESS_GUILE_PATH function
-        # so as to avoid "Command INSTALL() is not scriptable" error, when
-        # using it in symlinking scheme files during code-generation
-        # by the OPENCOG_ADD_ATOM_TYPES macro.
-        INSTALL (FILES
-            ${FILE_NAME}
-            DESTINATION ${FILE_INSTALL_PATH}
-        )
-    ENDFOREACH(FILE_NAME)
-ENDFUNCTION(ADD_GUILE_MODULE)
-
-# ----------------------------------------------------------------------------
-FUNCTION(ADD_GUILE_MODULE2)
     # NOTE: Change PREFIX_DIR_PATH variable if a choice is made to adapt
     # guile's site-package convention.
     SET(PREFIX_DIR_PATH "${DATADIR}/scm")
@@ -196,4 +132,4 @@ FUNCTION(ADD_GUILE_MODULE2)
             ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE})
         ENDIF()
     ENDIF()
-ENDFUNCTION(ADD_GUILE_MODULE2)
+ENDFUNCTION(ADD_GUILE_MODULE)

@@ -1,4 +1,4 @@
-ADD_GUILE_MODULE2 (FILES
+ADD_GUILE_MODULE (FILES
 	bot-api.scm
 	chatbot-eva.scm
 	imperative.scm

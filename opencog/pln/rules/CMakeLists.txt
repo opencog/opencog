@@ -1,4 +1,4 @@
-ADD_GUILE_MODULE(
+ADD_GUILE_MODULE(FILES
 	implication-direct-evaluation-rule.scm
 	instantiation.scm
 	implication-instantiation-rule.scm
@@ -67,13 +67,15 @@ ADD_GUILE_MODULE(
 	negated-subset-evaluation-rule.scm
 	or-transformation-rule.scm
 	similarity-rule.scm
-    fuzzy-conjunction-introduction-rule.scm
-    fuzzy-disjunction-introduction-rule.scm
-    negation-introduction-rule.scm
+	fuzzy-conjunction-introduction-rule.scm
+	fuzzy-disjunction-introduction-rule.scm
+	negation-introduction-rule.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules"
 )
 
 # TODO: The following rules are temporary hacks; remove them as the bugs are
 # fixed.
-ADD_GUILE_MODULE (
+ADD_GUILE_MODULE (FILES
 	temp-deduction-rule.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/pln/rules"
 )

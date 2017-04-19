@@ -23,4 +23,7 @@ TARGET_LINK_LIBRARIES (lg-dict
 
 INSTALL (TARGETS lg-dict DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
-ADD_GUILE_MODULE (lg-dict.scm)
+ADD_GUILE_MODULE (FILES
+	lg-dict.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/lg-dict"
+)

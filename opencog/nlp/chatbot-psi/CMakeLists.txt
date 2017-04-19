@@ -1,4 +1,5 @@
-ADD_GUILE_MODULE (chatbot-psi.scm
+ADD_GUILE_MODULE (FILES
+	chatbot-psi.scm
 	actions.scm
 	main.scm
 	chatscript.scm
@@ -15,4 +16,5 @@ ADD_GUILE_MODULE (chatbot-psi.scm
 	pln-trail-1.scm
 	pln-trail-2.scm
 	pln-utils.scm
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/chatbot-psi"
 )
