@@ -512,6 +512,7 @@ nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiPMI <&& optSel
 --                    VariableNode (stv 1.0 0.0) "$4"
 
 nuHandlers = [handleNU "du'u" (\_ -> id) . rmfst "du'u",
+              handleNU "su'u" (\_ -> id) . rmfst "su'u",
               handleNU "nu"   (mkNuEvent ["fasnu"]) . rmfst "nu",
               handleNU "mu'e" (mkNuEvent ["fasnu", "mokca"]) . rmfst "mu'e",
               handleNU "zu'o" (mkNuEvent ["zumfau"]) . rmfst "zu'o",
@@ -558,22 +559,21 @@ handleNU abstractor nuTypeMarker = Iso f g where
     seed <- asks seed
     let name = randName seed (show atom) ++ "___" ++ abstractor
         pred = cPN name highTv
-    link <- apply ( mkLink . addfstAny pred
-                     . second (nuTypeMarker name)
-                     . mkNuState . getPredVars) (atom, state)
+    link <- apply (mkLink pred name) (atom, state)
     setAtoms [link]
     pure pred
-  g (pred) = do
+  g (pred@(PN name)) = do
     state <- gets sAtoms -- FIX: Have to get correct atom
     let link = F.find (atomElem pred) state
-    (nuState, atom) <- case link of -- remove "is_event" atoms
-        Just (EquivL _ (MemL _ (SSL [_, ExL _ _ (AL l)])))
-          -> pure $ partition isImpl $ case getEventType abstractor of
-              Just eventType -> filter (not.atomElem eventType) l
-              Nothing        -> l
+    (atom, nuState) <- case link of -- remove "is_event" atoms
+        Just l -> unapply (mkLink pred name) l
         _ -> lift $ Left $ (show pred) ++ " can't be found in state."
-    pushAtoms nuState -- TODO: instantiate VNs?
-    pure (head atom) -- should only be one. Check?
+    pushAtoms nuState -- : instantiate VNs?
+    pure atom -- should only be one. Check?
+  mkLink :: Atom -> String -> SynIso (Atom, [Atom]) Atom
+  mkLink pred name = mkLink' . addfstAny pred
+                    . second (nuTypeMarker name)
+                    . mkNuState . getPredVars
   -- Extract predicateNodes from the atom and state
   getPredVars :: SynIso (Atom, [Atom]) (([Atom], [Atom]), [Atom])
   getPredVars = mkIso f g where
@@ -586,7 +586,7 @@ handleNU abstractor nuTypeMarker = Iso f g where
                                                 a -> ns) [] state)
           predicateVars = map (cVN.("$"++).show) [3..(length predicateNodes) + 2]
       in ((predicateVars,predicateNodes), atom:state)
-    g (_, atom:state) = (atom, state) -- TODO, can't assume first atom is the atom
+    g (_, atom:state) = (atom, state) -- FIX, can't assume first atom is the atom
   mkNuState :: SynIso (([Atom], [Atom]), [Atom]) ([Atom], [Atom])
   mkNuState = Iso f g where
     f ((predicateVars, predicateNodes), astate) = do
@@ -601,13 +601,13 @@ handleNU abstractor nuTypeMarker = Iso f g where
       f a = a
       g a = a -- i.e., don't instantiate vars for now
   -- (pred, (typedPredicateVars, eventAtom:state')
-  mkLink :: SynIso (Atom, ([Atom], [Atom])) Atom
-  mkLink = _equivl
-          . first  (_evalTv . addfst highTv  . addsnd [cVN "$1"])
-          . second
-              (_meml . addfst (cVN "$1") . ssl . tolist2 . addfst (cVN "$2")
-                . _exl . first (varll . mapIso (_typedvarl . addsnd (cTN "PredicateNode")))
-                       . second andl)
+  mkLink' :: SynIso (Atom, ([Atom], [Atom])) Atom
+  mkLink' = _equivl
+           . first  (_evalTv . addfst highTv  . addsnd [cVN "$1"])
+           . second
+               (_meml . addfst (cVN "$1") . ssl . tolist2 . addfst (cVN "$2")
+                 . _exl . first (varll . mapIso (_typedvarl . addsnd (cTN "PredicateNode")))
+                        . second andl)
   isImpl :: Atom -> Bool
   isImpl (ImpL _ _) = True
   isImpl (InhL _ _) = True
