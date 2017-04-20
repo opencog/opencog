@@ -45,6 +45,9 @@
         ; proper name (e.g. 'Hanson Robotics'), so check if we
         ; got a quote for the first word
         ((string-prefix? "'" txt)
+         ; The regex here assumes that words for proper names are
+         ; literally just words, no funny things like concepts
+         ; negations, choices etc
          (let ((sm (string-match "^'[a-zA-Z0-9 ]+\\b'" txt)))
            ; Check whether it's a literal or proper name
            (if (equal? #f sm)
@@ -58,12 +61,15 @@
         ; to represent unordered matching (e.g. <<like cats>>),
         ; so check if there are any angle brackets
         ((string-prefix? "<" txt)
+         ; The regex here assumes that words for unordered
+         ; matching can only be words, lemmas, and concepts
          (let ((sm (string-match "^<<[a-zA-Z0-9 '~]+>>" txt)))
            (if (equal? #f sm)
              ; Return the sentence anchor <
              "<"
              ; Return the terms for unordered matching
              (match:substring sm))))
+        ((string-prefix? ">" txt) ">")
         (else (get-first-term txt))))
 
 (define (construct-lst txt lst)
