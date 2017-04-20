@@ -25,24 +25,25 @@
   ; word (e.g. 'played) and another is to indicate a
   ; proper name (e.g. 'Hanson Robotics'), so check if we
   ; got a quote for the first word
-  (if (string-contains? txt "'")
-      (let ((sm (string-match "^'[a-zA-Z0-9 ]+\\b'" txt)))
-        ; Check whether it's a literal or proper name
-        (if (equal? #f sm)
-          ; For literals
-          (string-take txt (string-index txt #\ ))
-          ; For proper names
-          (match:substring sm)))
-      ; TODO
-      txt))
+  (cond ((string-contains? txt "'")
+         (let ((sm (string-match "^'[a-zA-Z0-9 ]+\\b'" txt)))
+           ; Check whether it's a literal or proper name
+           (if (equal? #f sm)
+             ; Return the literal
+             (string-take txt (string-index txt #\ ))
+             ; Return the proper name
+             (match:substring sm))))
+        (else txt)))
 
 (define (construct-lst txt lst)
-  "Construct a list of terms from the given text."
+  "Construct a list of terms by recursively extracting the
+   terms one by one from the given text."
   (let* ((t (extract-term (string-trim-both txt)))
-         (newtxt (string-trim (string-drop txt (string-length t)))))
+         (newtxt (string-trim (string-drop txt (string-length t))))
+         (newlst (append lst (list t))))
     (if (< 0 (string-length newtxt))
-      (construct-lst newtxt (append lst (list t)))
-      lst)))
+      (construct-lst newtxt newlst)
+      newlst)))
 
 #!
 Literal: '
