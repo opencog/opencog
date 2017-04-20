@@ -70,6 +70,16 @@
              ; Return the terms for unordered matching
              (match:substring sm))))
         ((string-prefix? ">" txt) ">")
+        ; For handling choices -- square brackets (e.g. [like love])
+        ((string-prefix? "[" txt)
+         ; The regex here assumes that the choices can only be
+         ; words, lemmas, and concepts
+         (let ((sm (string-match "^[[a-zA-Z0-9 '~]+]" txt)))
+           (if (equal? #f sm)
+             ; TODO
+             (cog-logger-error "Syntax error: ~a" txt)
+             ; Return the choices
+             (match:substring sm))))
         (else (get-first-term txt))))
 
 (define (construct-lst txt lst)
