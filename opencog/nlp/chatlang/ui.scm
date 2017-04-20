@@ -1,22 +1,86 @@
-(use-modules (ice-9 readline)
+(use-modules (opencog)
+             (opencog nlp)
+             (opencog nlp chatlang)
+             (opencog logger)
+             (ice-9 readline)
              (ice-9 regex))
 
-(define (symbol-contains sym str)
+; XXX TODO Remove me later
+(cog-logger-set-level! "debug")
+(cog-logger-set-level! "debug")
+(cog-logger-set-stdout! #t)
+
+(define (symbol-contains? sym str)
   "Check if a symbol contains a specific string."
   (not (equal? #f (string-contains (symbol->string sym) str))))
 
-(define (cr pattern action)
+(define (string-contains? str1 str2)
+  "Check if str1 contains str2."
+  (not (equal? #f (string-contains str1 str2))))
+
+(define (extract-term txt)
+  "Identify and extract the term at the beginning of the text."
+  ; Since the quote (') could be used in two different
+  ; terms, one is to indicate the literal occurrence of a
+  ; word (e.g. 'played) and another is to indicate a
+  ; proper name (e.g. 'Hanson Robotics'), so check if we
+  ; got a quote for the first word
+  (if (string-contains? txt "'")
+      (let ((sm (string-match "^'[a-zA-Z0-9 ]+\\b'" txt)))
+        ; Check whether it's a literal or proper name
+        (if (equal? #f sm)
+          ; For literals
+          (string-take txt (string-index txt #\ ))
+          ; For proper names
+          (match:substring sm)))
+      ; TODO
+      txt))
+
+(define (construct-lst txt lst)
+  "Construct a list of terms from the given text."
+  (let* ((t (extract-term (string-trim-both txt)))
+         (newtxt (string-trim (string-drop txt (string-length t)))))
+    (if (< 0 (string-length newtxt))
+      (construct-lst newtxt (append lst (list t)))
+      lst)))
+
+#!
+Literal: '
+Concept: ~
+Proper Names: '
+Negation: !
+Or Choices: [
+Unordered Matching: <<
+
+POS: ~
+Proper Names: '
+Or Choices: ]
+Unordered Matching: >>
+
+Sentence Anchors: <
+Sentence Anchors: >
+!#
+(define (interpret-text txt)
+  "Interpret the text in the pattern of the rule by firstly
+   extracting the terms from the text and interpret them
+   one by one later."
+  (let* ((terms (construct-lst (string-trim-both txt) '())))
+    (cog-logger-debug "Extracted terms: ~a" terms))
+)
+
+(define-public (cr pattern action)
   "Main function for creating a behavior rule."
   (for-each
     (lambda (p)
       (display "p: ")
       (display p)
       (cond
+        ; The text input
         ((string? p)
-         (display " (input)"))
-        ((symbol-contains p ",")
+         (interpret-text p))
+        ((symbol-contains? p ",")
          (display " (comma)"))
-        ((symbol-contains p "=")
+        ((symbol-contains? p "=")
          (display " (var)")))
       (newline))
     pattern)
@@ -27,9 +91,9 @@
       (cond
         ((string? a)
          (display " (output)"))
-        ((symbol-contains a ",")
+        ((symbol-contains? a ",")
          (display " (comma)"))
-        ((symbol-contains a "=")
+        ((symbol-contains? a "=")
          (display " (var)"))
         (else
          (display " (expression)")))
