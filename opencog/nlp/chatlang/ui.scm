@@ -14,59 +14,76 @@
   "Check if a symbol contains a specific string."
   (not (equal? #f (string-contains (symbol->string sym) str))))
 
-(define (string-contains? str1 str2)
-  "Check if str1 contains str2."
-  (not (equal? #f (string-contains str1 str2))))
+(define (get-first-term txt)
+  "Get the first term from the text by detecting the word boundry"
+  (match:substring (string-match "^['~a-zA-Z0-9]+\\b" txt)))
 
+; XXX TODO Remove me later
+; Note:
+; In front of a word:
+; Literal: '
+; Concept: ~
+; Proper Names: '
+; Negation: !
+; Or Choices: [
+; Unordered Matching: <<
+;
+; After a word:
+; POS: ~
+; Proper Names: '
+; Or Choices: ]
+; Unordered Matching: >>
+;
+; Anywhere:
+; Sentence Anchors: <
+; Sentence Anchors: >
 (define (extract-term txt)
   "Identify and extract the term at the beginning of the text."
-  ; Since the quote (') could be used in two different
-  ; terms, one is to indicate the literal occurrence of a
-  ; word (e.g. 'played) and another is to indicate a
-  ; proper name (e.g. 'Hanson Robotics'), so check if we
-  ; got a quote for the first word
-  (cond ((string-contains? txt "'")
+  (cond ; Since the quote (') could be used in two different
+        ; terms, one is to indicate the literal occurrence of a
+        ; word (e.g. 'played) and another is to indicate a
+        ; proper name (e.g. 'Hanson Robotics'), so check if we
+        ; got a quote for the first word
+        ((string-prefix? "'" txt)
          (let ((sm (string-match "^'[a-zA-Z0-9 ]+\\b'" txt)))
            ; Check whether it's a literal or proper name
            (if (equal? #f sm)
              ; Return the literal
-             (string-take txt (string-index txt #\ ))
+             (get-first-term txt)
              ; Return the proper name
              (match:substring sm))))
-        (else txt)))
+        ; Similarly angle brackets (< >) could be used in two
+        ; different terms, one is to represent sentence
+        ; anchors (e.g. "rose < I like"), and another is
+        ; to represent unordered matching (e.g. <<like cats>>),
+        ; so check if there are any angle brackets
+        ((string-prefix? "<" txt)
+         (let ((sm (string-match "^<<[a-zA-Z0-9 '~]+>>" txt)))
+           (if (equal? #f sm)
+             ; Return the sentence anchor <
+             "<"
+             ; Return the terms for unordered matching
+             (match:substring sm))))
+        (else (get-first-term txt))))
 
 (define (construct-lst txt lst)
   "Construct a list of terms by recursively extracting the
    terms one by one from the given text."
+  (cog-logger-debug "Constructing term-list from: ~a" txt)
   (let* ((t (extract-term (string-trim-both txt)))
          (newtxt (string-trim (string-drop txt (string-length t))))
          (newlst (append lst (list t))))
+    (cog-logger-debug "Term extracted: ~a" t)
     (if (< 0 (string-length newtxt))
       (construct-lst newtxt newlst)
       newlst)))
 
-#!
-Literal: '
-Concept: ~
-Proper Names: '
-Negation: !
-Or Choices: [
-Unordered Matching: <<
-
-POS: ~
-Proper Names: '
-Or Choices: ]
-Unordered Matching: >>
-
-Sentence Anchors: <
-Sentence Anchors: >
-!#
 (define (interpret-text txt)
   "Interpret the text in the pattern of the rule by firstly
    extracting the terms from the text and interpret them
    one by one later."
   (let* ((terms (construct-lst (string-trim-both txt) '())))
-    (cog-logger-debug "Extracted terms: ~a" terms))
+    (cog-logger-debug "Total ~d terms were extracted: ~a" (length terms) terms))
 )
 
 (define-public (cr pattern action)
