@@ -131,7 +131,7 @@
   (check-anchor-end (check-anchor-start terms)))
 
 (define (subterms t n)
-  "Remove the first and last n chars from a string t, and
+  "Remove the first and last n chars from the string t, and
    then tokenize it."
   (string-tokenize (substring t n (- (string-length t) n))))
 
@@ -151,10 +151,10 @@
     (lambda (t)
       (cond ((string-prefix? "'" t)
              (if (equal? #f (string-match regex-proper-names t))
-               (string-append "(word \"" (substring t 1) "\")")
+               (gen-func "word" (list (substring t 1)))
                (gen-func "proper-names" (subterms t 1))))
-            ; TODO: Handle the rest
-            (else t)))
+            ; Consider as lemma by default
+            (else (gen-func "lemma" (list t)))))
     terms))
 
 (define (interpret-text txt)
