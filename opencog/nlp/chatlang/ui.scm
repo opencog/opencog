@@ -55,7 +55,7 @@
 ; Sentence Anchors: >
 
 ; TODO: Extract Part-of-Speech as well!
-(define (extract-term txt)
+(define (extract-1st-term txt)
   "Identify and extract the term at the beginning of the text."
   (cond ; Since the quote (') could be used in two different
         ; terms, one is to indicate the literal occurrence of a
@@ -95,16 +95,16 @@
         ; just return the whole term
         (else (get-first-term txt))))
 
-(define (construct-lst txt lst)
+(define (extract-terms txt lst)
   "Construct a list of terms by recursively extracting the
    terms one by one from the given text."
   (cog-logger-debug "Constructing term-list from: ~a" txt)
-  (let* ((t (extract-term (string-trim-both txt)))
+  (let* ((t (extract-1st-term (string-trim-both txt)))
          (newtxt (string-trim (string-drop txt (string-length t))))
          (newlst (append lst (list t))))
     (cog-logger-debug "Term extracted: ~a" t)
     (if (< 0 (string-length newtxt))
-      (construct-lst newtxt newlst)
+      (extract-terms newtxt newlst)
       newlst)))
 
 (define (rearrange-terms terms)
@@ -130,40 +130,46 @@
   ; to exist in the pattern
   (check-anchor-end (check-anchor-start terms)))
 
-(define (subterms t n)
-  "Remove the first and last n chars from the string t, and
-   then tokenize it."
-  (string-tokenize (substring t n (- (string-length t) n))))
+(define (subterm t n)
+  "Remove the first and last n chars from the string t."
+  (substring t n (- (string-length t) n)))
 
-(define (gen-func func args)
+(define (gen-func func args wrap)
   "Generate a scheme function call, in the form of a string,
-   that accepts the list of strings as arguments."
+   that accepts the list of args as arguments.
+   The last argument is to indicate whether or not to
+   wrap each of the listed args by double-quotes."
   (string-append
-    (fold (lambda (t s) (string-append s " \"" t "\""))
+    (fold (lambda (t s) (if wrap (string-append s " \"" t "\"")
+                                 (string-append s " " t)))
           (string-append "(" func)
           args)
     ")"))
 
-(define (interpret-term terms)
+(define (interpret-terms terms)
   "Interpret the terms one by one, and generate the actual function
    calls."
   (map
     (lambda (t)
       (cond ((string-prefix? "'" t)
              (if (equal? #f (string-match regex-proper-names t))
-               (gen-func "word" (list (substring t 1)))
-               (gen-func "proper-names" (subterms t 1))))
+               (gen-func "word" (list (substring t 1)) #t)
+               (gen-func "proper-names" (string-tokenize (subterm t 1)) #t)))
+            ((string-prefix? "<<" t)
+             (gen-func "unordered-matching"
+               ;TODO TBC
+               (interpret-terms (extract-terms (subterm t 2) '())) #f))
             ; Consider as lemma by default
-            (else (gen-func "lemma" (list t)))))
+            (else (gen-func "lemma" (list t) #t))))
     terms))
 
 (define (interpret-text txt)
   "Interpret the text in the pattern of the rule by firstly
    extracting the terms from the text and interpret them
    one by one later."
-  (let* ((terms (construct-lst (string-trim-both txt) '()))
+  (let* ((terms (extract-terms (string-trim-both txt) '()))
          (sorted-terms (rearrange-terms terms))
-         (interp-terms (interpret-term sorted-terms)))
+         (interp-terms (interpret-terms sorted-terms)))
     (cog-logger-debug "Total ~d terms were extracted: ~a" (length terms) terms)
     (cog-logger-debug "Total ~d terms remained after rearranging: ~a"
       (length sorted-terms) sorted-terms)
