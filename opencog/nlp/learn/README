@@ -271,6 +271,15 @@ find |wc gives 1764813 articles
 55K are templates
 find |wc gives 1452739 files after cat/template removal
 
+en:
+10 hours to unpack
+find|wc gives 7495026 articles
+936K are categories
+866K are Files
+259K are Templates
+find| wc gives 5423537 files after cat/template removal
+
+
 Wikipedia processing continues in Part II below.  But first, an interruption.
 
 

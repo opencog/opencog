@@ -2646,9 +2646,6 @@ scheme@(guile-user)> GC Warning: Repeated allocation of very large block (appr. 
 
 
 
-
-
-
 12 Feb 2017
 -----------------
 postgres: change  shared_buffers = 64576MB         # min 128kB
@@ -2705,5 +2702,70 @@ cp ~/src/relex/src/split-sentences/nonbreaking_prefixes/* ~/run/nonbreaking_pref
 cp ~/src/relex/src/split-sentences/split-sentences.pl ~/run
 
 .... etc.
+
+
+===============================================================
+Again:
+sudo cgm create all linas
+sudo cgm chown all linas $(id -u) $(id -g)
+cgm movepid all linas $$
+
+14 April status:
+---------------
+ZH:
+select count(*) from atoms;  18941255
+
+14 April 2017
+-------------
+Start from scratch with English.
+
+time lxc-copy -n  opencog-learn -N learn-en
+real	6m43.362s
+wget https://dumps.wikimedia.org/enwiki/20170320/enwiki-20170320-pages-articles-multistream.xml.bz2
+2 hours 2 mins
+
+time cat enwiki-20170320-pages-articles-multistream.xml.bz2 |bunzip2
+|/home/ubuntu/src/relex/src/perl/wiki-count.pl
+Counted 955001762 lines in 17398694 pages -- 17.4M articles
+real    65m31.329s
+
+time cat enwiki-20170320-pages-articles-multistream.xml.bz2 |bunzip2 |/home/ubuntu/src/relex/src/perl/wiki-scrub.pl
+real    604m9.767s
+user    413m17.996s
+sys     13m8.680s
+
+
+find |wc gives 7495026 total articles
+real    267m1.295s
+
+find |wc gives 5423537 after cat/template removal
+
+createdb en_pairs
+cat src/atomspace/opencog/persist/sql/multi-driver/atom.sql | psql en_pairs
+
+
+----------------
+Arghh more bugs:
+* failure in LG to split punctuation
+* failure to strip regex markup.
+linkage_get_word
+UBSCRIPT_MARK
+SUBSCRIPT_DOT
+linkage_print_diagram
+DISPLAY_GUESS_MARKS
+HIDE_MORPHO  for any language.... except its set to rue for jni
+where are the square bracekts removed??????
+orig_str in java....
+feature/LinkableView.java line 286
+
+LocalLGParser.java circa line 150
+-----------------------------
+yue: 
+17006 -- 21876 submitted 27342 left
+
+
+en: java crashed:
+/home/ubuntu/run/hs_err_pid3206.log
+# C  [liblink-grammar.so.5+0x2aa00]  linkage_set_domain_names+0xe0
 
 
