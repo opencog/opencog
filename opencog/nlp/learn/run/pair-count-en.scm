@@ -20,4 +20,4 @@
 
 ; Open the database.
 ; Edit the below, setting the database name, user and password.
-(sql-open "en_pairs" "ubuntu" "asdf")
+(sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
