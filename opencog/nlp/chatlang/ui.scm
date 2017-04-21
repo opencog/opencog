@@ -99,13 +99,38 @@
       (construct-lst newtxt newlst)
       newlst)))
 
+(define (rearrange-terms terms)
+  "Check if the terms have any sentence anchors and rearrange them in
+   the intended orders."
+  (define (anchor-start terms)
+    (define starting-terms (member "<" terms))
+    ; Take all the terms after the sentence anchor "<" to the front
+    ; of the list, if any, but not including the "<" in the new list
+    (if (equal? #f starting-terms)
+      ; TODO: Add a zero-to-many-GlobNode in front of it
+      terms
+      ; TODO: Should add a zero-to-many-GlobNode in between the
+      ; starting terms and the rest?
+      (append (cdr starting-terms)
+              (take-while (lambda (x) (not (equal? "<" x))) terms))))
+  (define (anchor-end terms)
+    (if (equal? #f (member ">" terms))
+      ; TODO: Add a zero-to-many-GlobNode at the end
+      terms
+      (remove (lambda (x) (equal? ">" x)) terms)))
+  ; Should check for "<" before ">" in case both of them happen
+  ; to exist in the pattern
+  (anchor-end (anchor-start terms)))
+
 (define (interpret-text txt)
   "Interpret the text in the pattern of the rule by firstly
    extracting the terms from the text and interpret them
    one by one later."
-  (let* ((terms (construct-lst (string-trim-both txt) '())))
-    (cog-logger-debug "Total ~d terms were extracted: ~a" (length terms) terms))
-)
+  (let* ((terms (construct-lst (string-trim-both txt) '()))
+         (sorted-terms (rearrange-terms terms)))
+    (cog-logger-debug "Total ~d terms were extracted: ~a" (length terms) terms)
+    (cog-logger-debug "Total ~d terms remained after rearranging: ~a"
+      (length sorted-terms) sorted-terms)))
 
 (define-public (cr pattern action)
   "Main function for creating a behavior rule."
