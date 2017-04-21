@@ -106,7 +106,7 @@ so we may as well start using it right away. So, set that up:
    (add-to-load-path ".")
 ```
 
-7) Copy one of the `opencog-??.conf` files from the `misc-scripts`
+7) Copy one of the `opencog-??.conf` files from the `run`
    directory to your working directory. Modify as needed. This file
    specifies the cogserver port number, and the prompt to use; this
    can be changed so that it does not conflict with other cogservers
@@ -224,6 +224,7 @@ Notes below are for four languages: French, Lithuanian, Polish, and
 "Simple English".  Adjust as desired.
 
 Download wikipedia database dumps:
+https://dumps.wikimedia.org/enwiki/
 https://dumps.wikimedia.org/ltwiki/
 https://dumps.wikimedia.org/frwiki/
 https://dumps.wikimedia.org/zhwiki/ (Mandarin)
@@ -271,6 +272,15 @@ find |wc gives 1764813 articles
 55K are templates
 find |wc gives 1452739 files after cat/template removal
 
+en:
+10 hours to unpack
+find|wc gives 7495026 articles
+936K are categories
+866K are Files
+259K are Templates
+find| wc gives 5423537 files after cat/template removal
+
+
 Wikipedia processing continues in Part II below.  But first, an interruption.
 
 
@@ -304,22 +314,25 @@ Wikipedia Parsing, part II
 --------------------------
 Set up distinct databases, one for each language:
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
-    cat opencog/persist/sql/odbc/atom.sql | psql foobar_pairs
-    vi learn-fr learn-lt learn-pl learn-simple
+    cat opencog/persist/sql/multi-driver/atom.sql | psql foobar_pairs
 
 Now, build some working directories (so that we don't mess up
 alpha-pages after all that work)
 ```
     cp -pr alpha-pages beta-pages
 ```
-* Review the README file in the `opencog/nlp/learn/misc-scripts`
-  directory, and then copy the scripts into your working dir.
-* Modify as needed for chosen language. Most of these don't need
-  modification:
-  -- `run-all-servers.sh` runs (almost) all of the servers, at once,
-     in a multi-paneled byobu window. Edit this, and manually configure
-     the relex port-number to use. After starting, the batch script
-     `./wiki-ss-en.sh` needs to be started by hand.
+* Review the file `opencog/nlp/learn/run/README`, and then copy the
+  scripts into your working dir.
+* Modify as needed for chosen language. None of these need modification,
+  unless you wi9sh to run multiple langauges at once, on the same
+  machine, in which case you need to assign non-conflicting port numbers
+  for the cogserver, and possibly the relex server.
+
+  -- `run-all-servers.sh` runs (almost) all of the needed servers, for
+     one langauge, all at once, in a multi-paneled byobu window. Edit
+     this, and manually configure the relex port-number to use. After
+     starting, the batch script `./wiki-ss-<lang>.sh` needs to be
+     started by hand (for the <lang> that you want to process).
 
   -- `relex-server-any.sh` performs random-syntax parsing for languages
      that do not need morphological analysis. Edit this, and verify that
@@ -338,7 +351,8 @@ alpha-pages after all that work)
   and that its loaded... i.e. is listed in opencog-*.conf)
 * Copy `opencog-lang.conf` and `pair-count-lang.scm` to opencog build dir.
   Start like this:    `guile -l pair-count-lang.scm`
-* Go back to the wikipedia dir, and run `./wiki-ss-lang.sh`
+* Go back to the wikipedia dir (the dir that contains `beta-pages`), and
+  run `./wiki-ss-lang.sh`
 * Wait a few days.
 * This requires postgres 8.4 or newer, for multiple reasons. One reason
   is that older postgres don't automatically VACUUM (see "performance"
@@ -351,10 +365,10 @@ alpha-pages after all that work)
 Some handy SQL commands:
 ```
 SELECT count(uuid) FROM Atoms;
-select count(uuid) from  atoms where type = 77;
+select count(uuid) from  atoms where type =123;
 ```
 
-type 77 is WordNode for me; verify with
+type 123 is WordNode for me; verify with
 ```
 SELECT * FROM Typecodes;
 ```
