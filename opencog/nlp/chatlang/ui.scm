@@ -15,8 +15,11 @@
   (not (equal? #f (string-contains (symbol->string sym) str))))
 
 (define (get-first-term txt)
-  "Get the first term from the text by detecting the word boundry"
-  (match:substring (string-match "^['~a-zA-Z0-9]+\\b" txt)))
+  "Get the first term from the text."
+  (define term-no-brackets (string-match "^[!'~a-zA-Z0-9]+\\b" txt))
+  (if (equal? #f term-no-brackets)
+    (match:substring (string-match "^[![<'~a-zA-Z0-9 ]+\\b]*>*" txt))
+    (match:substring term-no-brackets)))
 
 ; XXX TODO Remove me later
 ; Note:
@@ -76,10 +79,12 @@
          ; words, lemmas, and concepts
          (let ((sm (string-match "^[[a-zA-Z0-9 '~]+]" txt)))
            (if (equal? #f sm)
-             ; TODO
+             ; TODO: Do something else other then cog-logger-error
              (cog-logger-error "Syntax error: ~a" txt)
              ; Return the choices
              (match:substring sm))))
+        ; For the rest, like negation, concept, and lemma
+        ; just return the whole term
         (else (get-first-term txt))))
 
 (define (construct-lst txt lst)
