@@ -10,6 +10,19 @@
 (cog-logger-set-level! "debug")
 (cog-logger-set-stdout! #t)
 
+; The regex here assumes that words for proper names are
+; literally just words, no funny things like concepts
+; negations, choices etc
+(define regex-proper-names "^'[a-zA-Z0-9 ]+\\b'")
+
+; The regex here assumes that words for unordered
+; matching can only be words, lemmas, and concepts
+(define regex-unordered "^<<[a-zA-Z0-9 '~]+>>")
+
+; The regex here assumes that the choices can only be
+; words, lemmas, and concepts
+(define regex-choices "^[[a-zA-Z0-9 '~]+]")
+
 (define (symbol-contains? sym str)
   "Check if a symbol contains a specific string."
   (not (equal? #f (string-contains (symbol->string sym) str))))
@@ -40,6 +53,8 @@
 ; Anywhere:
 ; Sentence Anchors: <
 ; Sentence Anchors: >
+
+; TODO: Extract Part-of-Speech as well!
 (define (extract-term txt)
   "Identify and extract the term at the beginning of the text."
   (cond ; Since the quote (') could be used in two different
@@ -48,10 +63,7 @@
         ; proper name (e.g. 'Hanson Robotics'), so check if we
         ; got a quote for the first word
         ((string-prefix? "'" txt)
-         ; The regex here assumes that words for proper names are
-         ; literally just words, no funny things like concepts
-         ; negations, choices etc
-         (let ((sm (string-match "^'[a-zA-Z0-9 ]+\\b'" txt)))
+         (let ((sm (string-match regex-proper-names txt)))
            ; Check whether it's a literal or proper name
            (if (equal? #f sm)
              ; Return the literal
@@ -64,9 +76,7 @@
         ; to represent unordered matching (e.g. <<like cats>>),
         ; so check if there are any angle brackets
         ((string-prefix? "<" txt)
-         ; The regex here assumes that words for unordered
-         ; matching can only be words, lemmas, and concepts
-         (let ((sm (string-match "^<<[a-zA-Z0-9 '~]+>>" txt)))
+         (let ((sm (string-match regex-unordered txt)))
            (if (equal? #f sm)
              ; Return the sentence anchor <
              "<"
@@ -75,15 +85,13 @@
         ((string-prefix? ">" txt) ">")
         ; For handling choices -- square brackets (e.g. [like love])
         ((string-prefix? "[" txt)
-         ; The regex here assumes that the choices can only be
-         ; words, lemmas, and concepts
-         (let ((sm (string-match "^[[a-zA-Z0-9 '~]+]" txt)))
+         (let ((sm (string-match regex-choices txt)))
            (if (equal? #f sm)
              ; TODO: Do something else other then cog-logger-error
              (cog-logger-error "Syntax error: ~a" txt)
              ; Return the choices
              (match:substring sm))))
-        ; For the rest, like negation, concept, and lemma
+        ; For the rest, like negation, concept, and lemma,
         ; just return the whole term
         (else (get-first-term txt))))
 
@@ -102,7 +110,7 @@
 (define (rearrange-terms terms)
   "Check if the terms have any sentence anchors and rearrange them in
    the intended orders."
-  (define (anchor-start terms)
+  (define (check-anchor-start terms)
     (define starting-terms (member "<" terms))
     ; Take all the terms after the sentence anchor "<" to the front
     ; of the list, if any, but not including the "<" in the new list
@@ -113,24 +121,53 @@
       ; starting terms and the rest?
       (append (cdr starting-terms)
               (take-while (lambda (x) (not (equal? "<" x))) terms))))
-  (define (anchor-end terms)
+  (define (check-anchor-end terms)
     (if (equal? #f (member ">" terms))
       ; TODO: Add a zero-to-many-GlobNode at the end
       terms
       (remove (lambda (x) (equal? ">" x)) terms)))
   ; Should check for "<" before ">" in case both of them happen
   ; to exist in the pattern
-  (anchor-end (anchor-start terms)))
+  (check-anchor-end (check-anchor-start terms)))
+
+(define (subterms t n)
+  "Remove the first and last n chars from a string t, and
+   then tokenize it."
+  (string-tokenize (substring t n (- (string-length t) n))))
+
+(define (gen-func func args)
+  "Generate a scheme function call, in the form of a string,
+   that accepts the list of strings as arguments."
+  (string-append
+    (fold (lambda (t s) (string-append s " \"" t "\""))
+          (string-append "(" func)
+          args)
+    ")"))
+
+(define (interpret-term terms)
+  "Interpret the terms one by one, and generate the actual function
+   calls."
+  (map
+    (lambda (t)
+      (cond ((string-prefix? "'" t)
+             (if (equal? #f (string-match regex-proper-names t))
+               (string-append "(word \"" (substring t 1) "\")")
+               (gen-func "proper-names" (subterms t 1))))
+            ; TODO: Handle the rest
+            (else t)))
+    terms))
 
 (define (interpret-text txt)
   "Interpret the text in the pattern of the rule by firstly
    extracting the terms from the text and interpret them
    one by one later."
   (let* ((terms (construct-lst (string-trim-both txt) '()))
-         (sorted-terms (rearrange-terms terms)))
+         (sorted-terms (rearrange-terms terms))
+         (interp-terms (interpret-term sorted-terms)))
     (cog-logger-debug "Total ~d terms were extracted: ~a" (length terms) terms)
     (cog-logger-debug "Total ~d terms remained after rearranging: ~a"
-      (length sorted-terms) sorted-terms)))
+      (length sorted-terms) sorted-terms)
+    (cog-logger-debug "Term interpretation: ~a" interp-terms)))
 
 (define-public (cr pattern action)
   "Main function for creating a behavior rule."
