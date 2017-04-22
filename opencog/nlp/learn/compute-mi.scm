@@ -108,6 +108,8 @@
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))
 (use-modules (opencog))
+(use-modules (opencog query))
+(use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
 ; Define the "things" that will be pair-summed over.
@@ -1002,7 +1004,7 @@
 ; ---------------------------------------------------------------------
 ; Temporary handy-dandy main entry point.
 
-(define (do-em-all)
+(define-public (batch-all-pairs)
 	(begin
 		(init-trace "/tmp/progress")
 		(batch-all-pair-mi (LinkGrammarRelationshipNode "ANY"))

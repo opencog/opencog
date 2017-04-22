@@ -2769,3 +2769,14 @@ en: java crashed:
 # C  [liblink-grammar.so.5+0x2aa00]  linkage_set_domain_names+0xe0
 
 
+-------------------------
+en_pairs from 2016:
+select count(*) from atoms;  18487291 atoms. == 18.5M
+select sum(stv_count) from atoms; 1775388151 = 1.77 B
+
+select sum(floatvalue[3]) from valuations where type=177;
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs?user=linas")
+(batch-all-pairs)

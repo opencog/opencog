@@ -368,22 +368,32 @@ SELECT count(uuid) FROM Atoms;
 select count(uuid) from  atoms where type =123;
 ```
 
-type 123 is WordNode for me; verify with
+type 123 is `WordNode` for me; verify with
 ```
 SELECT * FROM Typecodes;
 ```
+
+The total count accumulated is
+```
+select sum(floatvalue[3]) from valuations where type=7;
+```
+where type 7 is `CountTruthValue`.
 
 
 Mutual Information
 ------------------
 After accumulating a few million word pairs, we're ready to compute
 the mutual entropy between them.  This is done manually, by runnning
-these scripts:
+functions defined in `(opencog nlp learn)`.
 
-load:
-   compute-mi.scm  Look at it. Go to the bottom, and run (do-em-all)
+```
+	(use-modules (opencog) (opencog persist) (opencog persist-sql))
+	(use-modules (opencog nlp) (opencog nlp learn))
+	(sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
+	(batch-all-pairs)
+```
 
-If tracing is turned on, a trace file is written to /tmp/progress.
+If tracing is turned on, a trace file is written to `/tmp/progress`.
 
 Example stats and performance:
 current fr_pairs db has 16785 words and 177960 pairs.
