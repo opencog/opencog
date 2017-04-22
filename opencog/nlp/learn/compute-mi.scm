@@ -133,12 +133,11 @@
 ; The returned value is the total count.
 
 (define (get-total-atom-count atom-list)
-	(fold + 0.0
-		(map (lambda (ATOM) (tv-count (cog-tv ATOM))) atom-list))
+	(fold + 0.0 (map cog-tv-count atom-list))
 ;
 ; Below is same as above, but uses less memory(?) and runs slower(?)
 ;	(let ((cnt 0))
-;		(define (inc atom) (set! cnt (+ cnt (tv-count (cog-tv atom)))))
+;		(define (inc atom) (set! cnt (+ cnt (cog-tv-count atom))))
 ;		(for-each inc atom-list)
 ;		cnt
 ;	)
@@ -157,7 +156,7 @@
 
 (define (compute-atom-logli atom total)
 	(let* (
-			(cnt (tv-count (cog-tv atom)))
+			(cnt (cog-tv-count atom))
 			(frq (/ cnt total))
 			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 			(ln2 (* -1.4426950408889634 (log frq)))
@@ -214,10 +213,9 @@
 ; (that is, the wildcard is on the left side)
 
 (define (get_left_wildcard_count word lg_rel)
-	(define evl
+	(cog-tv-count
 		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
 	)
-	(tv-count (cog-tv evl))
 )
 
 ; ---------------------------------------------------------------------
@@ -225,10 +223,9 @@
 ; (that is, the wildcard is on the right side)
 
 (define (get_right_wildcard_count word lg_rel)
-	(define evl
+	(cog-tv-count
 		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
 	)
-	(tv-count (cog-tv evl))
 )
 
 ; ---------------------------------------------------------------------
@@ -236,11 +233,10 @@
 ; That is, get the count, for wild-cards on both the left and right.
 
 (define (get-pair-total lg_rel)
-	(tv-count (cog-tv
+	(cog-tv-count
 		(EvaluationLink lg_rel
-			(ListLink (AnyNode "left-word") (AnyNode "right-word"))
-		)
-	))
+			(ListLink (AnyNode "left-word") (AnyNode "right-word")))
+	)
 )
 
 ; ---------------------------------------------------------------------
@@ -248,10 +244,10 @@
 ; (that is, the wildcard is on the left side)
 
 (define (get_left_wildcard_logli word lg_rel)
-	(define evl
+	(cog-tv-confidence
+xxxxx
 		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
 	)
-	(tv-conf (cog-tv evl))
 )
 
 ; ---------------------------------------------------------------------
@@ -259,10 +255,10 @@
 ; (that is, the wildcard is on the right side)
 
 (define (get_right_wildcard_logli word lg_rel)
-	(define evl
+	(cog-tv-confidence
+xxxxxx
 		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
 	)
-	(tv-conf (cog-tv evl))
 )
 
 ; ---------------------------------------------------------------------
@@ -786,11 +782,11 @@
 					(righty (EvaluationLink lg_rel (ListLink word (AnyNode "right-word"))))
 				)
 				; log-likelihood for the left wildcard
-				(if (< 0 (tv-count (cog-tv lefty)))
+				(if (< 0 (cog-tv-count lefty))
 					(store-atom (compute-atom-logli lefty pair-total))
 				)
 				; log-likelihood for the right wildcard
-				(if (< 0 (tv-count (cog-tv righty)))
+				(if (< 0 (cog-tv-count righty))
 					(store-atom (compute-atom-logli righty pair-total))
 				)
 			)
@@ -854,19 +850,18 @@
 							; Compute the logli log_2 P(l,r)/P(*,*)
  							(atom (compute-atom-logli pair pair-total))
 
-							; the count truth value components
-							(atv (cog-tv->alist (cog-tv atom)))
-							(meen (assoc-ref atv 'mean))
+							; The log liklihood is the second
+							(va (cog-value atom freq-key)))
+xxxxxxxxxxxx
 							(ll (assoc-ref atv 'confidence))
-							(cnt (assoc-ref atv 'count))
 
 							; Subtract the left and right entropies to get the
 							; mutual information (at last!)
 							(mi (- (+ l-logli r-logli) ll))
-							(ntv (cog-new-ctv meen mi cnt))
+							(fvmi (FloatValue mi))
 						)
 						; Save the hard-won MI to the database.
-						(store-atom (cog-set-tv! atom ntv))
+						(store-atom (cog-set-value! atom mi-key fvmi))
 					)
 				)
 				left-evs
