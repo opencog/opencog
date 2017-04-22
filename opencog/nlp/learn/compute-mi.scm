@@ -96,10 +96,9 @@
 ;
 ;     MI(wl,wr) = -(H(wl,wr) - H(wl,*) - H(*,wr))
 ;
-; This is computed by the script batch-all-pair-mi below. Again, this
-; is stored in the "confidence" slot.  Thus, the "confidence" slot
-; stores the entropy, for the wild-card structures, and it stores the
-; mutual entropy, aka mutual information, for the pairs.
+; This is computed by the script batch-all-pair-mi below. The value is
+; stored under the key of (Predicate "*-Pair MI Key-*") as a single
+; float.
 ;
 ; That's all there's to this. The batch-all-pair-mi is the main entry
 ; point; its given at the bottom.
@@ -122,7 +121,7 @@
 (define item-type-str "WordNode")
 
 (define freq-key (PredicateNode "*-FrequencyKey-*"))
-(define mi-key (PredicateNode "*-MutualInfoKey-*"))
+(define pair-mi-key (PredicateNode "*-Pair MI Key-*"))
 
 ; get-count ATOM - return the raw observational count on ATOM.
 (define (get-count ATOM) (cog-tv-count ATOM))
@@ -149,6 +148,20 @@
 ; The log will be in position 2 of the value.
 (define (get-logli ATOM)
 	(cadr (cog-value->list (cog-value ATOM freq-key)))
+)
+
+; ----
+; set-pair-mi ATOM MI - set the mutual information on ATOM.
+;
+; MI is assumed to be the mutual-information value of a word-pair.
+; This assumption only affects the key under which the MI is stored,
+; since the MI is always relative to the relation for which one is
+; computing the MI.  In this case, its stored under a pair-MI key.
+;
+; Returns ATOM.
+;
+(define (set-pair-mi ATOM MI)
+	(cog-set-value! ATOM pair-mi-key (FloatValue MI))
 )
 
 ; ---------------------------------------------------------------------
@@ -814,7 +827,7 @@
 ; ---------------------------------------------------------------------
 ;
 ; Compute word-pair mutual information, for all word-pairs with the
-; given word being on the right.  This is a helpt routine, to split
+; given word being on the right.  This is a helper routine, to split
 ; up the double-loop over left and right words into two. This is the
 ; inner loop, looping over all left-words.
 ;
@@ -866,18 +879,15 @@
 							; Compute the logli log_2 P(l,r)/P(*,*)
  							(atom (compute-atom-logli pair pair-total))
 
-							; The log liklihood is the second
-							(va (cog-value atom freq-key)))
-xxxxxxxxxxxx
-							(ll (assoc-ref atv 'confidence))
+							; Get the log liklihood computed immediately above.
+							(ll (get-logli atom))
 
 							; Subtract the left and right entropies to get the
 							; mutual information (at last!)
 							(mi (- (+ l-logli r-logli) ll))
-							(fvmi (FloatValue mi))
 						)
 						; Save the hard-won MI to the database.
-						(store-atom (cog-set-value! atom mi-key fvmi))
+						(store-atom (set-pair-mi atom mi))
 					)
 				)
 				left-evs
@@ -934,19 +944,15 @@ xxxxxxxxxxxx
 							; Compute the logli log_2 P(l,r)/P(*,*)
  							(atom (compute-atom-logli pair pair-total))
 
-							; the count truth value components
-							(atv (cog-tv->alist (cog-tv atom)))
-							(meen (assoc-ref atv 'mean))
-							(ll (assoc-ref atv 'confidence))
-							(cnt (assoc-ref atv 'count))
+							; Get the logli computed immediately above.
+							(ll (get-logli atom))
 
 							; Subtract the left and right entropies to get the
 							; mutual information (at last!)
 							(mi (- (+ l-logli r-logli) ll))
-							(ntv (cog-new-ctv meen mi cnt))
 						)
 						; Save the hard-won MI to the database.
-						(store-atom (cog-set-tv! atom ntv))
+						(store-atom (set-pair-mi atom mi))
 					)
 				)
 				lefties
