@@ -2774,15 +2774,39 @@ en_pairs from 2016:
 select count(*) from atoms;  18487291 atoms. == 18.5M
 select sum(stv_count) from atoms; 1775388151 = 1.77 B
 
-select sum(floatvalue[3]) from valuations where type=177;
+select sum(floatvalue[3]) from valuations where type=177; CountTru
 
-select count(uuid) from  atoms where type =73;   396255
+select count(*) from  atoms where type =73;   396255 this is words
+select count(*) from  atoms where type =47;   9045489 this is pairs
+select count(*) from  atoms where type =8;    9045489 this is list links
+
+select count(*) from valuations where type=121; FloatValue
 
 
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
 (sql-open "postgres:///en_pairs?user=linas")
 (batch-all-pairs)
+
+ (load "compute-mi.scm")
+(init-trace "/tmp/progress")
+702
+(load-atoms-of-type item-type)
+(sql-stats)
+; hangs... because it is walking the TLB which has 2.4GB of uuid
+    _store->print_stats();
+(length (cog-get-atoms item-type))
+
+(define lgr (LinkGrammarRelationshipNode "ANY"))
+(fetch-incoming-set lg_rel)
+; there aren't any yet....
+
+(define word (car (cog-get-atoms item-type)))
+(compute-pair-wildcard-counts word lgr)
+
+delete all-pair-wildcard-counts
+
+
 
 
 (cog-new-value type list) string float link

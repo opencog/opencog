@@ -392,9 +392,11 @@
 ;         WordNode "word"
 ;         AnyNode "right-word"
 ;
-; This routine assumes that all relevant atoms are already in the atomspace.
-; If they're not, incorrect counts will be obtained.
-; Use the fetch-and-compute-pair-wildcard-counts below to fetch.
+; This routine assumes that all relevant atoms are already in the
+; atomspace. If they're not, incorrect counts will be obtained. Either
+; batch-fetch all word-pairs, or use the 
+; `fetch-and-compute-pair-wildcard-counts` routine, below, to fetch
+; the individual word.
 ;
 ; Returns the two wild-card EvaluationLinks
 
@@ -489,196 +491,211 @@
 	)
 )
 
-; Same as above, but using the pattern matcher. CAUTION: For large
-; datasets, this runs 50 times slower than the above! We keep the
-; code here for debugging and historical reasons !?
-(define (compute-pair-wildcard-counts-pm word lg_rel)
-
-	; Define the bind links that we'll use with the pattern matcher.
-	; left-bind has the wildcard on the left.
-	(define left-bind-link
-		(BindLink
-			; Be careful to ask for WordNode, since there are also
-			; eval links with AnyNode floating around ...
-			(TypedVariableLink
-				(VariableNode "$left-word")
-				(TypeNode item-type-str)
-			)
-			(EvaluationLink
-				lg_rel
-				(ListLink
-					(VariableNode "$left-word")
-					word
-				)
-			)
-			(EvaluationLink
-				lg_rel
-				(ListLink
-					(VariableNode "$left-word")
-					word
-				)
-			)
-		)
-	)
-	; right-bind has the wildcard on the right.
-	(define right-bind-link
-		(BindLink
-			(TypedVariableLink
-				(VariableNode "$right-word")
-				(TypeNode item-type-str)
-			)
-			(EvaluationLink
-				lg_rel
-				(ListLink
-					word
-					(VariableNode "$right-word")
-				)
-			)
-			(EvaluationLink
-				lg_rel
-				(ListLink
-					word
-					(VariableNode "$right-word")
-				)
-			)
-		)
-	)
-	(let* (
-			; lefties are those with the wildcard on the left side.
-			; XXX It would be more efficient to not use the pattern
-			; matcher here, but to instead filter the given relset.
-			; But I'm lazy, for just right now.
-			(left-list (cog-bind left-bind-link))
-			(right-list (cog-bind right-bind-link))
-			(lefties (cog-outgoing-set left-list))
-			(righties (cog-outgoing-set right-list))
-
-			; the total occurance counts
-			(left-total (get-total-atom-count lefties))
-			(right-total (get-total-atom-count righties))
-		)
-		(begin
-			; Create the two evaluation links to hold the counts.
-			(define left-star #f)
-			(define right-star #f)
-
-			(if (< 0 left-total)
-				(begin
-					(set! left-star
-						(EvaluationLink (cog-new-ctv 0 0 left-total) lg_rel
-							(ListLink (AnyNode "left-word") word)
-						)
-					)
-					; Save these hard-won counts to the database.
-					(store-atom left-star)
-				)
-			)
-			(if (< 0 right-total)
-				(begin
-					(set! right-star
-						(EvaluationLink (cog-new-ctv 0 0 right-total) lg_rel
-							(ListLink word (AnyNode "right-word"))
-						)
-					)
-					; Save these hard-won counts to the database.
-					(store-atom right-star)
-				)
-			)
-
-			; And now ... delete some of the crap we created.
-			; Don't want to pollute the atomspace.
-			(extract-hypergraph left-bind-link)
-			(extract-hypergraph right-bind-link)
-			; Note that cog-extract only goes one level deep, it does not
-			; recurse; so the below only delete the ListLink at the top.
-			(cog-extract left-list)
-			(cog-extract right-list)
-
-			; What the hell, return the two things
-			(list left-star right-star)
-		)
-	)
-)
-
-; ---------------------------------------------------------------------
-; fetch-and-compute-pair-wildcard-counts -- fetch wrapper around
-; compute-pair-wildcard-counts
-;
-; Before compute-pair-wildcard-counts can do it's stuff, we have to
-; make sure that all the relevant word-pairs are in the atomspace
-; (viz. loaded from persistant store.)  After loading and computing,
-; we delete these atoms, as they are too numerous to keep around.
-;
-(define (fetch-and-compute-pair-wildcard-counts word lg_rel)
-	(let* (
-			; inset is a list of ListLink's of word-pairs
-			(inset (cog-incoming-set (fetch-incoming-set word)))
-			; relset is a list of EvaluationLinks of word-pairs
-			(relset (append-map
-					(lambda (ll) (cog-incoming-set (fetch-incoming-set ll)))
-					inset)
-			)
-			; The main, wrapped routine.
-			(result (compute-pair-wildcard-counts word lg_rel))
-		)
-		(begin
-			; Now, delete all the crap that we fetched.
-			; OK, we want to do this: (for-each cog-extract relset)
-			; but we can't, because this would also delete the wildcard
-			; evaluation links. We want to keep those around. So ugly
-			; filter.
-			(for-each
-				(lambda (x)
-					; Returns true if either the left or right side is
-					; the any-node
-					(define (is-any? evl)
-						(define (zany atom) (equal? (cog-type atom) 'AnyNode))
-						(if (zany (gadr evl)) #t (zany (gddr evl)))
-					)
-
-					(if (not (is-any? x)) (cog-extract x))
-				)
-				relset
-			)
-
-			(for-each cog-extract inset)
-			result
-		)
-	)
-)
+;;;; Same as above, but using the pattern matcher. CAUTION: For large
+;;;; datasets, this runs 50 times slower than the above! We keep the
+;;;; code here for debugging and historical reasons !?
+;;;(define (compute-pair-wildcard-counts-pm word lg_rel)
+;;;
+;;;	; Define the bind links that we'll use with the pattern matcher.
+;;;	; left-bind has the wildcard on the left.
+;;;	(define left-bind-link
+;;;		(BindLink
+;;;			; Be careful to ask for WordNode, since there are also
+;;;			; eval links with AnyNode floating around ...
+;;;			(TypedVariableLink
+;;;				(VariableNode "$left-word")
+;;;				(TypeNode item-type-str)
+;;;			)
+;;;			(EvaluationLink
+;;;				lg_rel
+;;;				(ListLink
+;;;					(VariableNode "$left-word")
+;;;					word
+;;;				)
+;;;			)
+;;;			(EvaluationLink
+;;;				lg_rel
+;;;				(ListLink
+;;;					(VariableNode "$left-word")
+;;;					word
+;;;				)
+;;;			)
+;;;		)
+;;;	)
+;;;	; right-bind has the wildcard on the right.
+;;;	(define right-bind-link
+;;;		(BindLink
+;;;			(TypedVariableLink
+;;;				(VariableNode "$right-word")
+;;;				(TypeNode item-type-str)
+;;;			)
+;;;			(EvaluationLink
+;;;				lg_rel
+;;;				(ListLink
+;;;					word
+;;;					(VariableNode "$right-word")
+;;;				)
+;;;			)
+;;;			(EvaluationLink
+;;;				lg_rel
+;;;				(ListLink
+;;;					word
+;;;					(VariableNode "$right-word")
+;;;				)
+;;;			)
+;;;		)
+;;;	)
+;;;	(let* (
+;;;			; lefties are those with the wildcard on the left side.
+;;;			; XXX It would be more efficient to not use the pattern
+;;;			; matcher here, but to instead filter the given relset.
+;;;			; But I'm lazy, for just right now.
+;;;			(left-list (cog-bind left-bind-link))
+;;;			(right-list (cog-bind right-bind-link))
+;;;			(lefties (cog-outgoing-set left-list))
+;;;			(righties (cog-outgoing-set right-list))
+;;;
+;;;			; the total occurance counts
+;;;			(left-total (get-total-atom-count lefties))
+;;;			(right-total (get-total-atom-count righties))
+;;;		)
+;;;		(begin
+;;;			; Create the two evaluation links to hold the counts.
+;;;			(define left-star #f)
+;;;			(define right-star #f)
+;;;
+;;;			(if (< 0 left-total)
+;;;				(begin
+;;;					(set! left-star
+;;;						(EvaluationLink (cog-new-ctv 0 0 left-total) lg_rel
+;;;							(ListLink (AnyNode "left-word") word)
+;;;						)
+;;;					)
+;;;					; Save these hard-won counts to the database.
+;;;					(store-atom left-star)
+;;;				)
+;;;			)
+;;;			(if (< 0 right-total)
+;;;				(begin
+;;;					(set! right-star
+;;;						(EvaluationLink (cog-new-ctv 0 0 right-total) lg_rel
+;;;							(ListLink word (AnyNode "right-word"))
+;;;						)
+;;;					)
+;;;					; Save these hard-won counts to the database.
+;;;					(store-atom right-star)
+;;;				)
+;;;			)
+;;;
+;;;			; And now ... delete some of the crap we created.
+;;;			; Don't want to pollute the atomspace.
+;;;			(extract-hypergraph left-bind-link)
+;;;			(extract-hypergraph right-bind-link)
+;;;			; Note that cog-extract only goes one level deep, it does not
+;;;			; recurse; so the below only delete the ListLink at the top.
+;;;			(cog-extract left-list)
+;;;			(cog-extract right-list)
+;;;
+;;;			; What the hell, return the two things
+;;;			(list left-star right-star)
+;;;		)
+;;;	)
+;;;)
 
 ; ---------------------------------------------------------------------
-; Compute wildcard counts for all word-pairs, for the relation lg_rel.
-; lg_rel is a link-grammar link type.
-;
-; This loops over all words, and computes the one-sided wild-card
-; counts for these. Only the counts for the link-grammar link type
-; lg_rel are computed.
-;
-; Caution: this can take hours or days to run. Use the batch version
-; of this, its much faster.
-;
-(define (all-pair-wildcard-counts lg_rel)
-	(begin
-		(init-trace "/tmp/progress")
-		(trace-msg "Start on-demand wildcounting\n")
-		(display "Start on-demand wildcounting\n")
+;;;; fetch-and-compute-pair-wildcard-counts -- fetch wrapper around
+;;;; compute-pair-wildcard-counts
+;;;;
+;;;; Before compute-pair-wildcard-counts can do it's stuff, we have to
+;;;; make sure that all the relevant word-pairs are in the atomspace
+;;;; (viz. loaded from persistant store.)  After loading and computing,
+;;;; we delete these atoms, as they are too numerous to keep around.
+;;;;
+;;;; Unfortunately, doing this fetch-count-delete cycle, word-for-word,
+;;;; turns out to be incredibly slow when there are a few hundred-K words.
+;;;; Its much faster to just batch-fetch the needed word-pairs, and then
+;;;; batch-count them all.  This code is kept here "for historical reasons".
+;;;;
+;;;; Caution: Because this is deleting atoms, this probably should not
+;;;; be run concurrently with other atom-counting threads.
+;;;;
+;;;(define (fetch-and-compute-pair-wildcard-counts word lg_rel)
+;;;	(let* (
+;;;			; inset is a list of ListLink's of word-pairs
+;;;			(inset (cog-incoming-set (fetch-incoming-set word)))
+;;;			; relset is a list of EvaluationLinks of word-pairs
+;;;			(relset (append-map
+;;;					(lambda (ll) (cog-incoming-set (fetch-incoming-set ll)))
+;;;					inset)
+;;;			)
+;;;			; The main, wrapped routine.
+;;;			(result (compute-pair-wildcard-counts word lg_rel))
+;;;		)
+;;;		(begin
+;;;			; Now, delete from the atomspace all the crap that we fetched.
+;;;			; So, we want to do this: (for-each cog-extract relset)
+;;;			; but we can't, because this would also delete the wildcard
+;;;			; evaluation links. We want to keep those around. So ugly
+;;;			; filter.
+;;;			(for-each
+;;;				(lambda (x)
+;;;					; Returns true if either the left or right side is
+;;;					; the any-node
+;;;					(define (is-any? evl)
+;;;						(define (zany atom) (equal? (cog-type atom) 'AnyNode))
+;;;						(if (zany (gadr evl)) #t (zany (gddr evl)))
+;;;					)
+;;;
+;;;					(if (not (is-any? x)) (cog-extract x))
+;;;				)
+;;;				relset
+;;;			)
+;;;
+;;;			(for-each cog-extract inset)
+;;;			result
+;;;		)
+;;;	)
+;;;)
 
-		; Make sure all words are in the atomspace
-		(load-atoms-of-type item-type)
-		(trace-elapsed)
-		(display "Finsihed loading words\n")
-
-		; For each word, fetch the word-pairs it occurs in, compute
-		; the counts, and then delete the word-pairs. (saving teh counts).
-		(for-each
-			(lambda (word)
-				(fetch-and-compute-pair-wildcard-counts word lg_rel)
-			)
-			(cog-get-atoms item-type)
-		)
-	)
-)
+; ---------------------------------------------------------------------
+;;;; Compute wildcard counts for all word-pairs, for the relation lg_rel.
+;;;; lg_rel is a link-grammar link type.
+;;;;
+;;;; This loops over all words, and computes the one-sided wild-card
+;;;; counts for these. Only the counts for the link-grammar link type
+;;;; lg_rel are computed.
+;;;;
+;;;; Caution: this can take hours or days to run. For better speed,
+;;;; use the batch version of this, its much faster. The reason this
+;;;; routine is slow is because it fetches the needed word-pairs each
+;;;; time, then deletes them... then fetches the next set. Yuck.
+;;;; Due to the awful speed, this code is abandoned. Its kept here
+;;;; "for historical reasons".
+;;;;
+;;;; Caution: Because this is deleting atoms, this probably should not
+;;;; be run concurrently with other atom-counting threads.
+;;;;
+;;;(define (all-pair-wildcard-counts lg_rel)
+;;;	(begin
+;;;		(init-trace "/tmp/progress")
+;;;		(trace-msg "Start on-demand wildcounting\n")
+;;;		(display "Start on-demand wildcounting\n")
+;;;
+;;;		; Make sure all words are in the atomspace
+;;;		(load-atoms-of-type item-type)
+;;;		(trace-elapsed)
+;;;		(display "Finsihed loading words\n")
+;;;
+;;;		; For each word, fetch the word-pairs it occurs in, compute
+;;;		; the counts, and then delete the word-pairs. (saving teh counts).
+;;;		(for-each
+;;;			(lambda (word)
+;;;				(fetch-and-compute-pair-wildcard-counts word lg_rel)
+;;;			)
+;;;			(cog-get-atoms item-type)
+;;;		)
+;;;	)
+;;;)
 
 ; ---------------------------------------------------------------------
 ; Compute wildcard counts for all word-pairs, for the relation lg_rel.
