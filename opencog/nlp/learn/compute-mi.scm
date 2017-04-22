@@ -127,16 +127,20 @@
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
 ; the 'count' value of its CountTruthValue. This routine just fetches
-; those, and addes them up.
+; those, and adds them up.
 ;
 ; The returned value is the total count.
 
 (define (get-total-atom-count atom-list)
-	(let ((cnt 0))
-		(define (inc atom) (set! cnt (+ cnt (tv-count (cog-tv atom)))))
-		(for-each inc atom-list)
-		cnt
-	)
+	(fold + 0.0
+		(map (lambda (ATOM) (tv-count (cog-tv ATOM))) atom-list))
+;
+; Below is same as above, but uses less memory(?) and runs slower(?)
+;	(let ((cnt 0))
+;		(define (inc atom) (set! cnt (+ cnt (tv-count (cog-tv atom)))))
+;		(for-each inc atom-list)
+;		cnt
+;	)
 )
 
 ; ---------------------------------------------------------------------
