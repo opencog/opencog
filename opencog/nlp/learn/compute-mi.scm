@@ -3,7 +3,7 @@
 ;
 ; Compute the mutual information of language word pairs.
 ;
-; Copyright (c) 2013, 2014 Linas Vepstas
+; Copyright (c) 2013, 2014, 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -83,12 +83,13 @@
 ; Here, AnyNode plays the role of *.  Thus, N(*,*) is shorthand for the
 ; last of these triples.
 ;
-; Rather than computing and storing the probabilities P(wl,wr), it is
-; more convenient to store the entropy or "log likelihood" of the
-; probabilities. Thus, the quantity H(wl,*) = -log_2 P(wl,*) is computed,
-; and is stored in the "confidence" slot of the truth value. Note the
-; minus sign: the entropy H(wl,*) is positive, and gets larger, the
-; smaller P is. Note that the logarithm is base-2.  In the scripts
+; In addition to computing and storing the probabilities P(wl,wr), it
+; is convenient to also store the entropy or "log likelihood" of the
+; probabilities. Thus, the quantity H(wl,*) = -log_2 P(wl,*) is computed.
+; Both the probability, and the entropy are stored, under the key of
+; (PredicateNode "*-FrequencyKey-*").
+; Note the minus sign: the entropy H(wl,*) is positive, and gets larger,
+; the smaller P is. Note that the logarithm is base-2.  In the scripts
 ; below, the phrase 'logli' is used as a synonym for this entropy.
 ;
 ; The mutual information between a pair of words is defined as
@@ -120,6 +121,8 @@
 (define item-type 'WordNode)
 (define item-type-str "WordNode")
 
+(define freq-key (PredicateNode "*-FrequencyKey-*"))
+
 ; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
@@ -139,9 +142,11 @@
 ; ---------------------------------------------------------------------
 ; Compute log liklihood of having observed a given atom.
 ;
-; The liklihood will be stored in the atom's TV 'confidence' location.
-; The log liklihood is -log_2(frequency), with the frequency computed
-; by simply taking the atom's count value, and dividing by the total.
+; The liklihood and its log-base-2 will be stored under the key
+; (Predicate "*-FrequencyKey-*"), with the first number being the
+; frequency, which is just the atom's count value, dividing by the
+; total number of times the atom has been observed.  The log liklihood
+; is -log_2(frequency), and is stored as a convenience.
 ;
 ; This returns the atom that was provided, but now with the logli set.
 
@@ -158,11 +163,12 @@
 					rawcnt
 				)
 			)
+			(frq (/ cnt total))
 			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
-			(ln2 (* -1.4426950408889634 (log (/ cnt total))))
-			(ntv (cog-new-ctv meen ln2 cnt))
+			(ln2 (* -1.4426950408889634 (log frq)))
+			(lol (FloatValue frq ln2))
 		)
-		(cog-set-tv! atom ntv)
+		(cog-set-value! atom freq-key lol)
 	)
 )
 

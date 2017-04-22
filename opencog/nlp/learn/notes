@@ -2776,7 +2776,15 @@ select sum(stv_count) from atoms; 1775388151 = 1.77 B
 
 select sum(floatvalue[3]) from valuations where type=177;
 
+select count(uuid) from  atoms where type =73;   396255
+
+
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
 (sql-open "postgres:///en_pairs?user=linas")
 (batch-all-pairs)
+
+
+(cog-new-value type list) string float link
+(cog-set-value! atom key value)
+(cog-value atom key)
