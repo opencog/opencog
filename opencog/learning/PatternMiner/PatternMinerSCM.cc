@@ -314,6 +314,11 @@ public:
 
         patternMiner->selectSubsetFromCorpus(keyword_list, max_distance);
     }
+
+    void apply_whitelist_keyword_filter_after_mining()
+    {
+        patternMiner->applyWhiteListKeywordfilterAfterMining();
+    }
 };
 
 
@@ -390,6 +395,8 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-clear-keyword-white-list", &PatternMinerSCM::clear_keyword_white_list, this, "patternminer");
     define_scheme_primitive("pm-select-subset-from-atomspace", &PatternMinerSCM::select_subset_from_atomspace, this, "patternminer");
     define_scheme_primitive("pm-select-whitelist-subset-from-atomspace", &PatternMinerSCM::select_whitelist_subset_from_atomspace, this, "patternminer");
+    define_scheme_primitive("pm-apply-whitelist-keyword-filter-after-mining", &PatternMinerSCM::apply_whitelist_keyword_filter_after_mining, this, "patternminer");
+
 
 }
 

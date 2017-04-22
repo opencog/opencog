@@ -95,6 +95,12 @@ struct MinedPatternInfo
     unsigned int extendedLinkIndex;
 };
 
+enum QUERY_LOGIC
+{
+    OR,
+    AND
+};
+
 class PatternMiner
 {
 protected:
@@ -150,6 +156,9 @@ protected:
 
     bool use_keyword_white_list;
     bool use_keyword_black_list;
+
+    QUERY_LOGIC keyword_white_list_logic;
+
 
     vector<Type> ignoredLinkTypes;
 
@@ -331,7 +340,7 @@ protected:
 
     bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
-
+    bool containWhiteKeywords(string& str, QUERY_LOGIC logic);
 
 
 public:
@@ -342,7 +351,7 @@ public:
 
     string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = 0);
 
-    void OutPutFrequentPatternsToFile(unsigned int n_gram);
+    void OutPutFrequentPatternsToFile(unsigned int n_gram, vector < vector<HTreeNode*> >& _patternsForGram, string _fileNamebasic = "");
 
     void OutPutStaticsToCsvFile(unsigned int n_gram);
 
@@ -352,7 +361,7 @@ public:
 
     void OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II);
 
-    void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness = 0);
+    void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness, string _fileNamebasic = "");
 
     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
@@ -405,6 +414,11 @@ public:
     void clear_keyword_white_list(){keyword_white_list.clear();}
 
     // -------------------------------end filter settings----------------------
+
+    void applyWhiteListKeywordfilterAfterMining();
+
+
+
 };
 
 }
