@@ -655,15 +655,19 @@
 ; counts for these. Only the counts for the link-grammar link type
 ; lg_rel are computed.
 ;
-; Caution: this can take hours or days to run.
+; Caution: this can take hours or days to run. Use the batch version
+; of this, its much faster.
 ;
 (define (all-pair-wildcard-counts lg_rel)
 	(begin
 		(init-trace "/tmp/progress")
 		(trace-msg "Start on-demand wildcounting\n")
+		(display "Start on-demand wildcounting\n")
 
 		; Make sure all words are in the atomspace
 		(load-atoms-of-type item-type)
+		(trace-elapsed)
+		(display "Finsihed loading words\n")
 
 		; For each word, fetch the word-pairs it occurs in, compute
 		; the counts, and then delete the word-pairs. (saving teh counts).
@@ -692,13 +696,17 @@
 (define (batch-all-pair-wildcard-counts lg_rel)
 	(begin
 		(start-trace "Start batched wildcard-counting\n")
+		(display "Start batched wildcard-counting\n")
 
 		; Make sure all words are in the atomspace
 		(load-atoms-of-type item-type)
 		(trace-msg-num "In wildcard-count, num words="
 			(length (cog-get-atoms item-type)))
+		(format #t "In wildcard-count, num words=~A\n"
+			(length (cog-get-atoms item-type)))
 		; Make sure all word-pairs are in the atomspace.
 		(fetch-incoming-set lg_rel)
+		(display "Finished loading word-pairs\n")
 		; Compute the counts
 		; (for-each
 		(par-for-each
@@ -708,7 +716,10 @@
 			)
 			(cog-get-atoms item-type)
 		)
+		(trace-elapsed)
 		(trace-msg "Done with wild-card count\n")
+		(display "Done with wild-card count\n")
+		(flush-all-ports)
 	)
 )
 
@@ -996,16 +1007,19 @@
 		; Now, get the grand-total
 		(trace-elapsed)
 		(trace-msg "Going to batch-count all-pairs\n")
+		(display "Going to batch-count all-pairs\n")
 		(batch-all-pair-count lg_rel)
 		(trace-elapsed)
 
 		; Compute the left and right wildcard logli's
 		(trace-msg "Going to batch-logli wildcards\n")
+		(display "Going to batch-logli wildcards\n")
 		(batch-all-pair-wildcard-logli lg_rel)
 		(trace-elapsed)
 
 		; Enfin, the word-pair mi's
 		(start-trace "Going to do individual word-pair mi\n")
+		(display "Going to do individual word-pair mi\n")
 		; (for-each
 		(par-for-each
 			(lambda (right-word)
@@ -1015,6 +1029,7 @@
 			(cog-get-atoms item-type)
 		)
 		(trace-msg "Finished with MI batch\n")
+		(display "Finished with MI batch\n")
 		(trace-elapsed)
 	)
 )
