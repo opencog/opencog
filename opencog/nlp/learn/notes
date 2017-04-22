@@ -2788,3 +2788,8 @@ select count(uuid) from  atoms where type =73;   396255
 (cog-new-value type list) string float link
 (cog-set-value! atom key value)
 (cog-value atom key)
+(cog-value?
+cog-value->list
+cog-tv-count
+
+confidence

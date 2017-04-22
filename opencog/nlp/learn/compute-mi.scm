@@ -124,6 +124,23 @@
 (define freq-key (PredicateNode "*-FrequencyKey-*"))
 (define mi-key (PredicateNode "*-MutualInfoKey-*"))
 
+; get-count ATOM - return the raw observational count on ATOM.
+(define (get-count ATOM) (cog-tv-count ATOM))
+
+; ----
+; set-freq ATOM FREQ - set the frequency count on ATOM.
+;
+; FREQ is assumed to be some simple ratio, interpreted as a
+; probability: i.e. 0.0 < FREQ <= 1.0
+;
+; Returns ATOM.
+;
+(define (set-freq ATOM FREQ)
+	; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
+	(define ln2 (* -1.4426950408889634 (log FREQ)))
+	(cog-set-value! ATOM freq-key (FloatValue FREQ ln2))
+)
+
 ; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
@@ -133,11 +150,11 @@
 ; The returned value is the total count.
 
 (define (get-total-atom-count atom-list)
-	(fold + 0.0 (map cog-tv-count atom-list))
+	(fold + 0.0 (map get-count atom-list))
 ;
 ; Below is same as above, but uses less memory(?) and runs slower(?)
 ;	(let ((cnt 0))
-;		(define (inc atom) (set! cnt (+ cnt (cog-tv-count atom))))
+;		(define (inc atom) (set! cnt (+ cnt (get-count atom))))
 ;		(for-each inc atom-list)
 ;		cnt
 ;	)
@@ -155,15 +172,7 @@
 ; This returns the atom that was provided, but now with the logli set.
 
 (define (compute-atom-logli atom total)
-	(let* (
-			(cnt (cog-tv-count atom))
-			(frq (/ cnt total))
-			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
-			(ln2 (* -1.4426950408889634 (log frq)))
-			(lol (FloatValue frq ln2))
-		)
-		(cog-set-value! atom freq-key lol)
-	)
+	(set-freq atom (/ (get-count atom) total))
 )
 
 ; ---------------------------------------------------------------------
@@ -213,7 +222,7 @@
 ; (that is, the wildcard is on the left side)
 
 (define (get_left_wildcard_count word lg_rel)
-	(cog-tv-count
+	(get-count
 		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
 	)
 )
@@ -223,7 +232,7 @@
 ; (that is, the wildcard is on the right side)
 
 (define (get_right_wildcard_count word lg_rel)
-	(cog-tv-count
+	(get-count
 		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
 	)
 )
@@ -233,7 +242,7 @@
 ; That is, get the count, for wild-cards on both the left and right.
 
 (define (get-pair-total lg_rel)
-	(cog-tv-count
+	(get-count
 		(EvaluationLink lg_rel
 			(ListLink (AnyNode "left-word") (AnyNode "right-word")))
 	)
@@ -268,7 +277,7 @@ xxxxxx
 ; list-lnk is the ListLink we are given.  We want to find the
 ; EvaluationLink that contains it.  That EvaluationLink should have
 ; lg_rel as its predicate type, and the ListLink in the expected
-; location. That is, given ListLink, we are looking for 
+; location. That is, given ListLink, we are looking for
 ;
 ;    EvaluationLink
 ;        lg_rel
@@ -387,7 +396,7 @@ xxxxxx
 				(filter
 					(lambda (lnk)
 						(define oset (cog-outgoing-set lnk))
-						(and 
+						(and
 							(equal? item-type (cog-type (car oset)))
 							(equal? word (cadr oset))
 						)
@@ -401,7 +410,7 @@ xxxxxx
 				(filter
 					(lambda (lnk)
 						(define oset (cog-outgoing-set lnk))
-						(and 
+						(and
 							(equal? word (car oset))
 							(equal? item-type (cog-type (cadr oset)))
 						)
@@ -412,7 +421,7 @@ xxxxxx
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (filter-map 
+			(left-evs (filter-map
 					(lambda (lnk) (get-ev-link lg_rel lnk))
 					left-stars)
 			)
@@ -782,11 +791,11 @@ xxxxxx
 					(righty (EvaluationLink lg_rel (ListLink word (AnyNode "right-word"))))
 				)
 				; log-likelihood for the left wildcard
-				(if (< 0 (cog-tv-count lefty))
+				(if (< 0 (get-count lefty))
 					(store-atom (compute-atom-logli lefty pair-total))
 				)
 				; log-likelihood for the right wildcard
-				(if (< 0 (cog-tv-count righty))
+				(if (< 0 (get-count righty))
 					(store-atom (compute-atom-logli righty pair-total))
 				)
 			)
