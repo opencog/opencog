@@ -131,7 +131,9 @@
 ; set-freq ATOM FREQ - set the frequency count on ATOM.
 ;
 ; FREQ is assumed to be some simple ratio, interpreted as a
-; probability: i.e. 0.0 < FREQ <= 1.0
+; probability: i.e. 0.0 < FREQ <= 1.0.  The frequency and it's log_2
+; are stored: the log is accessed thousands of times, and so it
+; is worth caching it as a pre-computed value.
 ;
 ; Returns ATOM.
 ;
@@ -139,6 +141,14 @@
 	; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 	(define ln2 (* -1.4426950408889634 (log FREQ)))
 	(cog-set-value! ATOM freq-key (FloatValue FREQ ln2))
+)
+
+; ----
+; get-logli ATOM - get the -log_2(frequency) on ATOM.
+;
+; The log will be in position 2 of the value.
+(define (get-logli ATOM)
+	(cadr (cog-value->list (cog-value ATOM freq-key)))
 )
 
 ; ---------------------------------------------------------------------
@@ -184,7 +194,7 @@
 ; likelihood for each atom in the list, based on the total.
 ;
 ; As usual, the raw counts are obtained from the 'count' slot on a
-; CountTruthValue, and the logli is stored in the 'confidence' slot.
+; CountTruthValue, and the logli is stored as a value on the atom.
 ;
 ; This returns the atom-list, but now with the logli's set.
 
@@ -200,9 +210,8 @@
 ; ---------------------------------------------------------------------
 ; Compute the occurance logliklihoods for all words.
 ;
-; Load all word-nodes into the atomspace, first, so that an accurate
-; count of word-occurances can be obtained.  The loglikli for a given
-; word node is stored in the 'confidence' slot of the CountTruthValue.
+; Load all word-nodes into the atomspace from SQL storage, if they
+; are not already present.  This also loads the associated values.
 ;
 ; This returns the list of all word-nodes, with the logli's set.
 
@@ -253,8 +262,7 @@
 ; (that is, the wildcard is on the left side)
 
 (define (get_left_wildcard_logli word lg_rel)
-	(cog-tv-confidence
-xxxxx
+	(get-logli
 		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
 	)
 )
@@ -264,8 +272,7 @@ xxxxx
 ; (that is, the wildcard is on the right side)
 
 (define (get_right_wildcard_logli word lg_rel)
-	(cog-tv-confidence
-xxxxxx
+	(get-logli
 		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
 	)
 )
@@ -770,7 +777,7 @@ xxxxxx
 ; and also for the flipped version (exchange WordNode and AnyNode)
 ; Here, lg_rel is (LinkGrammarRelationshipNode "Blah")
 ;
-; The log likelihood is stored in the 'confidence' slot on the eval
+; The log likelihood is stored as a value on the eval
 ; link truth value (where logli's are always stored).
 ;
 ; The computation is performed "batch style", it assumes that all
