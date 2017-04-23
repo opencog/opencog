@@ -518,8 +518,8 @@ nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiUI <&& optSelm
 --                    ConceptNode (stv 1.0 0.9) "$2"
 --                    VariableNode (stv 1.0 0.0) "$4"
 
-nuHandlers = [handleNU "du'u" (\_ -> id) . rmfst "du'u",
-              handleNU "su'u" (\_ -> id) . rmfst "su'u",
+nuHandlers = [handleNU "du'u" (mkNuEventLabel "du'u") . rmfst "du'u",
+              handleNU "su'u" (mkNuEventLabel "su'u") . rmfst "su'u",
               handleNU "nu"   (mkNuEvent ["fasnu"]) . rmfst "nu",
               handleNU "mu'e" (mkNuEvent ["fasnu", "mokca"]) . rmfst "mu'e",
               handleNU "zu'o" (mkNuEvent ["zumfau"]) . rmfst "zu'o",
@@ -563,8 +563,9 @@ handleNU :: String -> (String -> SynIso [Atom] [Atom]) -> SynIso Atom Atom
 handleNU abstractor nuTypeMarker = Iso f g where
   f atom = do
     state <- gets sAtoms
-    name <- randName $ (show atom) ++ "___" ++ abstractor
-    let pred = cPN name highTv
+    rname <- randName $ (show atom)
+    let name = rname ++ "___" ++ abstractor
+        pred = cPN name highTv
     link <- apply (mkLink pred name) (atom, state)
     setAtoms [link]
     pure pred
