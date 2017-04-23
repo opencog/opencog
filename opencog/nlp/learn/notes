@@ -2881,7 +2881,50 @@ confidence
 (cog-incoming-set word)
 (define lpr (car (cog-incoming-set word)))
 (fetch-incoming-set lpr)
+(length (cog-incoming-set lgr))
+
+scheme@(guile-user)> (length (cog-incoming-set lgr))
+Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
+Aborted
+
 
 (load-atoms-of-type 'LinkGrammarRelationshipNode)
+(fetch-atom lg_rel)
+
+fetch_incoming_set_cb
+SQLAtomStorage::getIncomingSet
+tlb get uuid
+getNod
+
+h = as->fetch_atom(h);
+
+   Handle h(doGetNode(t, str));
+   Handle hg(doGetLink(t, hs));
+
+getUUID  INVALID_UUID
+
+select * from atoms where type = 89;
+
+en_pairs=> select * from atoms where type = 89;
+    uuid    | space | type | height | name | outgoing 
+------------+-------+------+--------+------+----------
+        152 |     1 |   89 |      0 | ANY  | 
+ 2439209701 |     1 |   89 |      0 | ANY  | 
+ 2439209706 |     1 |   89 |      0 | ANY  | 
+ 2439209711 |     1 |   89 |      0 | ANY  | 
+ 2439209716 |     1 |   89 |      0 | ANY  | 
+(5 rows)
+
+OK, so that's a bug .. no unique constraint
 
 
+   8: SQLAtomStorage.cc:324
+opencog::SQLAtomStorage::Response::get_all_values_cb()
+"SELECT * FROM Valuations WHERE atom = 
+
+SELECT * FROM Valuations WHERE atom = 152;
+   1 |  152 |  177 | {1,0,402733330} |             | 
+
+loading_typemap
+
+mst-parser.scm

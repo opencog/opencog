@@ -1,9 +1,10 @@
 ;
 ; Language learning module.
-; Wraps up the assoreted tools and scripts into one module.
+; Wraps up the assorted tools and scripts into one module.
 ;
 (define-module (opencog nlp learn))
 
+(load "learn/common.scm")
 (load "learn/compute-mi.scm")
 (load "learn/disjunct-mi.scm")
 (load "learn/link-pipeline.scm")

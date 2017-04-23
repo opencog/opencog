@@ -1,7 +1,7 @@
 ;
 ; mst-parser.scm
 ;
-; Minimum Spanning Tree parser.
+; Maximum Spanning Tree parser.
 ;
 ; Copyright (c) 2014 Linas Vepstas
 ;
@@ -16,7 +16,7 @@
 ; information is already avaialable from the atomspace (obtained
 ; previously).
 ;
-; The algorithm implemented is a basic minimum spanning tree algorithm.
+; The algorithm implemented is a basic maximum spanning tree algorithm.
 ; Conceptually, the graph to be spanned by the tree is a clique, with 
 ; with every word in the sentence being connected to every other word.
 ; The edge-lengths are given by the mutual information betweeen word-pairs

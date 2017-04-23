@@ -474,7 +474,7 @@ Minimum spanning tree code is in `mst-parser.scm`
 
 The MST parser discovers the minimum spanning tree that connects the
 words together in a sentence.  The link-cost used is (minus) the mutual
-information between word-pairs (so we are miximizing MI).
+information between word-pairs (so we are maximizing MI).
 
 The algorithm implemented in mst-parser.scm works. 
 
