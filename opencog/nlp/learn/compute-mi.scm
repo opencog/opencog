@@ -113,25 +113,6 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
-; Run a for-each loop in parallel. par-for-each does this, but it
-; chokes when there are more than may 50K or so elements in the list.
-; See gnu-guile bug #26616.
-; http://lists.gnu.org/archive/html/bug-guile/2017-04/msg00053.html
-; so this utility busts things up into smaller pieces.
-
-; Split the list lst into chunks of size n.
-(define (split-into-chunks n lst)
-	(if (< (length lst) n)
-		(list lst)
-		(receive (first-chunk rest) (split-at! lst n)
-			(cons first-chunk (split-into-chunks n rest)))))
-
-(define (split-par-for-each fn lst)
-	(define chunk-len (/ (length lst) 50))
-	(if (< chunk-len 50) (set! chunk-len (length lst)))
-)
-
-; ---------------------------------------------------------------------
 ; Define the "things" that will be pair-summed over.
 ; These are set as globals here, they really should be local to the
 ; environment; this should be fixed someday, if we ever do this for
@@ -746,8 +727,8 @@
 		(display "Finished loading word-pairs\n")
 
 		; Compute the counts. par-for-each
-		(for-each
-		;(par-for-each
+		; (for-each
+		(par-for-each
 			(lambda (word)
 				(compute-pair-wildcard-counts word lg_rel)
 				(trace-msg-cnt "Wildcard-count did ")
@@ -1058,8 +1039,8 @@
 		; Enfin, the word-pair mi's
 		(start-trace "Going to do individual word-pair mi\n")
 		(display "Going to do individual word-pair mi\n")
-		(for-each
-		; (par-for-each
+		; (for-each
+		(par-for-each
 			(lambda (right-word)
 				(compute-pair-mi right-word lg_rel)
 				(trace-msg-cnt "Done with pair MI cnt=")
