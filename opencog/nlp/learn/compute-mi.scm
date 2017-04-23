@@ -107,9 +107,29 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))
+(use-modules (ice-9 receive))
 (use-modules (opencog))
 (use-modules (opencog query))
 (use-modules (opencog persist))
+
+; ---------------------------------------------------------------------
+; Run a for-each loop in parallel. par-for-each does this, but it
+; chokes when there are more than may 50K or so elements in the list.
+; See gnu-guile bug #26616.
+; http://lists.gnu.org/archive/html/bug-guile/2017-04/msg00053.html
+; so this utility busts things up into smaller pieces.
+
+; Split the list lst into chunks of size n.
+(define (split-into-chunks n lst)
+	(if (< (length lst) n)
+		(list lst)
+		(receive (first-chunk rest) (split-at! lst n)
+			(cons first-chunk (split-into-chunks n rest)))))
+
+(define (split-par-for-each fn lst)
+	(define chunk-len (/ (length lst) 50))
+	(if (< chunk-len 50) (set! chunk-len (length lst)))
+)
 
 ; ---------------------------------------------------------------------
 ; Define the "things" that will be pair-summed over.
@@ -394,7 +414,7 @@
 ;
 ; This routine assumes that all relevant atoms are already in the
 ; atomspace. If they're not, incorrect counts will be obtained. Either
-; batch-fetch all word-pairs, or use the 
+; batch-fetch all word-pairs, or use the
 ; `fetch-and-compute-pair-wildcard-counts` routine, below, to fetch
 ; the individual word.
 ;
