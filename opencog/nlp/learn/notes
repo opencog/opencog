@@ -2806,6 +2806,53 @@ select count(*) from valuations where type=121; FloatValue
 
 delete all-pair-wildcard-counts
 
+      (par-for-each
+         (lambda (word)
+            (compute-pair-wildcard-counts word lgr)
+            (trace-msg-cnt "Wildcard-count did ")) al)
+
+         (cog-get-atoms item-type)
+      )
+
+(define al (take (cog-get-atoms item-type) 1000))
+
+scheme@(guile-user) [1]> ,bt
+In ice-9/threads.scm:
+   289:22  5 (loop _)
+In ice-9/futures.scm:
+   259:13  4 (touch #<future 55c59c4adb40 queued #<partial-continuation
+55c5…>)
+   243:14  3 (work)
+In unknown file:
+           2 (wait-condition-variable #t)
+While executing meta-command:
+ERROR: In procedure cdr: Wrong type argument in position 1 (expecting
+pair): ()
+
+
+(use-modules (srfi srfi-1))
+(define al (list-tabulate 100000 values))
+(define foo 0)
+(par-for-each (lambda (x) (set! foo (+ x foo))) al)
+
+^CERROR: In procedure scm-error:
+ERROR: User interrupt
+
+Entering a new prompt.  Type `,bt' for a backtrace or `,q' to continue.
+scheme@(guile-user) [1]> ,bt
+In ice-9/threads.scm:
+   289:22  5 (loop _)
+In ice-9/futures.scm:
+   265:11  4 (touch #<future 55e1984d3400 started #<procedure 55e198659f60 a…>)
+   243:14  3 (work)
+In unknown file:
+           2 (wait-condition-variable #t)
+While executing meta-command:
+ERROR: In procedure cdr: Wrong type argument in position 1 (expecting pair): ()
+scheme@(guile-user) [1]>
+
+bug#26616: Acknowledgement (guile-2.2 par-for-each hangs for large lists)
+
 
 
 
