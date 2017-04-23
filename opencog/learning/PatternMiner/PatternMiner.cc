@@ -2388,65 +2388,14 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_or
 
     threads = new thread[THREAD_NUM];
 
-    int max_gram = config().get_int("Pattern_Max_Gram");
-    MAX_GRAM = (unsigned int)max_gram;
-    cur_gram = 0;
-
     is_distributed = false;
+
+    cur_gram = 0;
 
     ignoredLinkTypes.push_back(LIST_LINK);
 
-    enable_Frequent_Pattern = config().get_bool("Enable_Frequent_Pattern");
-    enable_Interesting_Pattern = config().get_bool("Enable_Interesting_Pattern");
-    interestingness_Evaluation_method = config().get("Interestingness_Evaluation_method");
+    reSetAllSettingsFromConfig();
 
-    assert(enable_Frequent_Pattern || enable_Interesting_Pattern);
-    //The options are "Interaction_Information", "surprisingness"
-    assert( (interestingness_Evaluation_method == "Interaction_Information") || (interestingness_Evaluation_method == "surprisingness") );
-
-
-    thresholdFrequency = config().get_int("Frequency_threshold");
-
-    use_keyword_black_list = config().get_bool("use_keyword_black_list");
-    use_keyword_white_list = config().get_bool("use_keyword_white_list");
-
-    assert( ! (use_keyword_black_list & use_keyword_white_list) );
-
-    string keyword_black_list_str  = config().get("keyword_black_list");
-    keyword_black_list_str .erase(std::remove(keyword_black_list_str .begin(), keyword_black_list_str .end(), ' '), keyword_black_list_str .end());
-    boost::split(keyword_black_list, keyword_black_list_str , boost::is_any_of(","));
-
-    string keyword_white_list_str  = config().get("keyword_white_list");
-    keyword_white_list_str .erase(std::remove(keyword_white_list_str .begin(), keyword_white_list_str .end(), ' '), keyword_white_list_str .end());
-    boost::split(keyword_white_list, keyword_white_list_str , boost::is_any_of(","));
-
-
-    string keyword_white_list_logic_str = config().get("keyword_white_list_logic");
-
-    if ( (keyword_white_list_logic_str == "AND") or (keyword_white_list_logic_str == "and") or (keyword_white_list_logic_str == "And")  )
-        keyword_white_list_logic = QUERY_LOGIC::AND;
-    else
-        keyword_white_list_logic = QUERY_LOGIC::OR;
-
-    enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
-    enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
-    enable_filter_node_types_should_not_be_vars =  config().get_bool("enable_filter_node_types_should_not_be_vars");
-    enable_filter_not_inheritant_from_same_var = config().get_bool("enable_filter_not_inheritant_from_same_var");
-    enable_filter_not_all_first_outgoing_const = config().get_bool("enable_filter_not_all_first_outgoing_const");
-    enable_filter_not_same_var_from_same_predicate = config().get_bool("enable_filter_not_same_var_from_same_predicate");
-    enable_filter_first_outgoing_evallink_should_be_var = config().get_bool("enable_filter_first_outgoing_evallink_should_be_var");
-    if (enable_filter_node_types_should_not_be_vars)
-    {
-        string node_types_str = config().get("node_types_should_not_be_vars");
-        node_types_str.erase(std::remove(node_types_str.begin(), node_types_str.end(), ' '), node_types_str.end());
-        vector<string> typeStrs;
-        boost::split(typeStrs, node_types_str, boost::is_any_of(","));
-
-        for (string typestr : typeStrs)
-        {
-            node_types_should_not_be_vars.push_back( classserver().getType(typestr) );
-        }
-    }
 
     // vector < vector<HTreeNode*> > patternsForGram
     for (unsigned int i = 0; i < MAX_GRAM; ++i)
@@ -2488,6 +2437,71 @@ PatternMiner::~PatternMiner()
 {
     delete htree;
     delete atomSpace;
+}
+
+void PatternMiner::reSetAllSettingsFromConfig()
+{
+    int max_gram = config().get_int("Pattern_Max_Gram");
+    MAX_GRAM = (unsigned int)max_gram;
+
+    enable_Frequent_Pattern = config().get_bool("Enable_Frequent_Pattern");
+    enable_Interesting_Pattern = config().get_bool("Enable_Interesting_Pattern");
+    interestingness_Evaluation_method = config().get("Interestingness_Evaluation_method");
+
+    assert(enable_Frequent_Pattern || enable_Interesting_Pattern);
+    //The options are "Interaction_Information", "surprisingness"
+    assert( (interestingness_Evaluation_method == "Interaction_Information") || (interestingness_Evaluation_method == "surprisingness") );
+
+
+    thresholdFrequency = config().get_int("Frequency_threshold");
+
+    use_keyword_black_list = config().get_bool("use_keyword_black_list");
+    use_keyword_white_list = config().get_bool("use_keyword_white_list");
+
+    assert( ! (use_keyword_black_list & use_keyword_white_list) );
+
+    string keyword_black_list_str  = config().get("keyword_black_list");
+    keyword_black_list_str .erase(std::remove(keyword_black_list_str .begin(), keyword_black_list_str .end(), ' '), keyword_black_list_str .end());
+    boost::split(keyword_black_list, keyword_black_list_str , boost::is_any_of(","));
+
+    string keyword_white_list_str  = config().get("keyword_white_list");
+    keyword_white_list_str .erase(std::remove(keyword_white_list_str .begin(), keyword_white_list_str .end(), ' '), keyword_white_list_str .end());
+    boost::split(keyword_white_list, keyword_white_list_str , boost::is_any_of(","));
+
+
+    string keyword_white_list_logic_str = config().get("keyword_white_list_logic");
+
+    if ( (keyword_white_list_logic_str == "AND") or (keyword_white_list_logic_str == "and") or (keyword_white_list_logic_str == "And")  )
+        keyword_white_list_logic = QUERY_LOGIC::AND;
+    else
+        keyword_white_list_logic = QUERY_LOGIC::OR;
+
+    enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
+    enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
+    enable_filter_node_types_should_not_be_vars =  config().get_bool("enable_filter_node_types_should_not_be_vars");
+    enable_filter_not_inheritant_from_same_var = config().get_bool("enable_filter_not_inheritant_from_same_var");
+    enable_filter_not_all_first_outgoing_const = config().get_bool("enable_filter_not_all_first_outgoing_const");
+    enable_filter_not_same_var_from_same_predicate = config().get_bool("enable_filter_not_same_var_from_same_predicate");
+    enable_filter_first_outgoing_evallink_should_be_var = config().get_bool("enable_filter_first_outgoing_evallink_should_be_var");
+
+    if (enable_filter_node_types_should_not_be_vars)
+    {
+        node_types_should_not_be_vars.clear();
+        string node_types_str = config().get("node_types_should_not_be_vars");
+        node_types_str.erase(std::remove(node_types_str.begin(), node_types_str.end(), ' '), node_types_str.end());
+        vector<string> typeStrs;
+        boost::split(typeStrs, node_types_str, boost::is_any_of(","));
+
+        for (string typestr : typeStrs)
+        {
+            node_types_should_not_be_vars.push_back( classserver().getType(typestr) );
+        }
+    }
+}
+
+void PatternMiner::resetPatternMiner(bool resetAllSettingsFromConfig)
+{
+
 }
 
 void PatternMiner::runPatternMiner(bool exit_program_after_finish)

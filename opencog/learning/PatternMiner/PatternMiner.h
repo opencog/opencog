@@ -342,6 +342,8 @@ protected:
 
     bool containWhiteKeywords(string& str, QUERY_LOGIC logic);
 
+    void reSetAllSettingsFromConfig();
+
 
 public:
     PatternMiner(AtomSpace* _originalAtomSpace);
@@ -417,7 +419,7 @@ public:
 
     void applyWhiteListKeywordfilterAfterMining();
 
-
+    void resetPatternMiner(bool resetAllSettingsFromConfig);
 
 };
 
