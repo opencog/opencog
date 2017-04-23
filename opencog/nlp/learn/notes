@@ -2927,4 +2927,51 @@ SELECT * FROM Valuations WHERE atom = 152;
 
 loading_typemap
 
+(cog-new-ctv 0 0 right-total
+
+set-count   vs ctv, stv, confidence, count etc.
+AnyN
+any-left
+any-right
+
 mst-parser.scm
+
+Going to batch-logli wildcards
+Elapsed secs 53
+Going to do individual word-pair mi
+
+
+Noting for pair (When *) -- no frequency!
+no frequency's anywhere...
+(PredicateNode \"*-FrequencyKey-*\") was never stored!
+
+select * from atoms where type=53; -- the predicateNodes 
+
+wtf line 646 ... sote the keyy....
+
+Wildcard-count did 396255    compute-pair-wildcard-counts -- stores count
+Elapsed secs 11
+Done with wild-card count
+Elapsed secs 0
+Going to batch-count all-pairs
+Start all-pair-count
+Done with all-pair count -- again a count...
+Elapsed secs 130
+Going to batch-logli wildcards -- batch-all-pair-wildcard-logli
+    compute-atom-logli
+Elapsed secs 53
+Going to do individual word-pair mi
+
+(define k (PredicateNode "*-FrequencyKey-*"))
+(define w (WordNode "When"))
+(define e (EvaluationLink
+(LinkGrammarRelationshipNode "ANY")
+(ListLink  (WordNode "When") (AnyNode "right-word")))) 
+
+(cog-value e k)
+
+well ... e has no counts ... and thus no logli
+
+(length (cog-incoming-set (WordNode "When") ))
+except there are lots so wtf?
+

@@ -73,7 +73,7 @@
 ; applied. Currently, this is almost always a word-pair.
 ;
 (define (get-mi ATOM)
-	(car (cog-value->list (cog-value ATOM pair-mi-key)))
+	(car (cog-value->list (cog-value ATOM mi-key)))
 )
 
 ; ---------------------------------------------------------------------
