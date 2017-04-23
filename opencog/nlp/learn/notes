@@ -2780,7 +2780,7 @@ select count(*) from  atoms where type =73;   396255 this is words
 select count(*) from  atoms where type =47;   9045489 this is pairs
 select count(*) from  atoms where type =8;    9045489 this is list links
 
-select count(*) from valuations where type=121; FloatValue
+select count(*) from valuations where type=121;  -- FloatValue
 
 
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
@@ -2798,7 +2798,7 @@ select count(*) from valuations where type=121; FloatValue
 (length (cog-get-atoms item-type))
 
 (define lgr (LinkGrammarRelationshipNode "ANY"))
-(fetch-incoming-set lg_rel)
+(fetch-incoming-set lgr)
 ; there aren't any yet....
 
 (define word (car (cog-get-atoms item-type)))
@@ -2854,8 +2854,9 @@ scheme@(guile-user) [1]>
 bug#26616: Acknowledgement (guile-2.2 par-for-each hangs for large lists)
 
 
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
 
-
+-------
 (cog-new-value type list) string float link
 (cog-set-value! atom key value)
 (cog-value atom key)
@@ -2864,3 +2865,23 @@ cog-value->list
 cog-tv-count
 
 confidence
+
+---------
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs?user=linas")
+(load-atoms-of-type 'WordNode)
+
+(define lgr (LinkGrammarRelationshipNode "ANY"))
+(fetch-incoming-set lgr)
+(cog-incoming-set lgr)
+
+(define word (car (cog-get-atoms 'WordNode)))
+(fetch-incoming-set word)
+(cog-incoming-set word)
+(define lpr (car (cog-incoming-set word)))
+(fetch-incoming-set lpr)
+
+(load-atoms-of-type 'LinkGrammarRelationshipNode)
+
+

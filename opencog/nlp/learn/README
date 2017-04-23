@@ -62,6 +62,14 @@ Setting up the AtomSpace
 This section describes how to set up the atomspace to collect
 statistics.  Most of this revolves around setting up postgres.
 
+0) The atomspace MUST be built with guile version 2.2.2.1 or newer,
+   which can only be obtained from git: that is, by
+   `git clone git://git.sv.gnu.org/guile.git`
+   Earlier versions, including guile-2.0.11 contain a bug in the
+   parallel for-each loop `par-for-each` that causes it to hang,
+   when computing mutual information.
+   https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
+
 1) Set up and configure postgres, as described in 
    `opencog/persist/sql/README.md`
 
