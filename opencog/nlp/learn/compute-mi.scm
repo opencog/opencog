@@ -872,7 +872,7 @@
 							(mi (- (+ l-logli r-logli) ll))
 						)
 						; Save the hard-won MI to the database.
-						(store-atom (set-pair-mi atom mi))
+						(store-atom (set-mi atom mi))
 					)
 				)
 				left-evs
@@ -937,7 +937,7 @@
 							(mi (- (+ l-logli r-logli) ll))
 						)
 						; Save the hard-won MI to the database.
-						(store-atom (set-pair-mi atom mi))
+						(store-atom (set-mi atom mi))
 					)
 				)
 				lefties

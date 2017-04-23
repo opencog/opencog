@@ -8,14 +8,13 @@
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
-(use-modules (ice-9 threads))
 (use-modules (opencog))
 
 ; ---------------------------------------------------------------------
 ; Define locations where statistics will be stored.
 
 (define freq-key (PredicateNode "*-FrequencyKey-*"))
-(define pair-mi-key (PredicateNode "*-Pair MI Key-*"))
+(define mi-key (PredicateNode "*-Mutual Info Key-*"))
 
 ; get-count ATOM - return the raw observational count on ATOM.
 (define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
@@ -45,17 +44,33 @@
 )
 
 ; ----
-; set-pair-mi ATOM MI - set the mutual information on ATOM.
+; set-mi ATOM MI - set the mutual information on ATOM.
 ;
-; MI is assumed to be the mutual-information value of a word-pair.
-; This assumption only affects the key under which the MI is stored,
-; since the MI is always relative to the relation for which one is
-; computing the MI.  In this case, its stored under a pair-MI key.
+; MI is assumed to be a scheme floating-point value, holding the
+; mutual-information value appropriate for the ATOM.
+;
+; In essentially all cases, ATOM is actually an EvaluationLink that
+; is holding the structural pattern to which the mutial information
+; applied. CUrrently, this is almost always a word-pair.
 ;
 ; Returns ATOM.
 ;
-(define (set-pair-mi ATOM MI)
-	(cog-set-value! ATOM pair-mi-key (FloatValue MI))
+(define (set-mi ATOM MI)
+	(cog-set-value! ATOM mi-key (FloatValue MI))
+)
+
+; ----
+; get-mi ATOM - get the mutual information on ATOM.
+;
+; Returns a floating-point value holding the mutual information
+; for the ATOM.
+;
+; In essentially all cases, ATOM is actually an EvaluationLink that
+; is holding the structural pattern to which the mutial information
+; applied. CUrrently, this is almost always a word-pair.
+;
+(define (get-mi ATOM)
+	(car (cog-value->list (cog-value ATOM pair-mi-key)))
 )
 
 ; ---------------------------------------------------------------------
