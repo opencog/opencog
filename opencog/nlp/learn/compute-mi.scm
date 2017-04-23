@@ -420,10 +420,11 @@
 			(if (< 0 left-total)
 				(begin
 					(set! left-star
-						(EvaluationLink (cog-new-ctv 0 0 left-total) lg_rel
+						(EvaluationLink lg_rel
 							(ListLink (AnyNode "left-word") word)
 						)
 					)
+					(set-count left-star left-total)
 					; Save these hard-won counts to the database.
 					(store-atom left-star)
 				)
@@ -431,10 +432,11 @@
 			(if (< 0 right-total)
 				(begin
 					(set! right-star
-						(EvaluationLink (cog-new-ctv 0 0 right-total) lg_rel
+						(EvaluationLink lg_rel
 							(ListLink word (AnyNode "right-word"))
 						)
 					)
+					(set-count right-star right-total)
 					; Save these hard-won counts to the database.
 					(store-atom right-star)
 				)
@@ -522,9 +524,10 @@
 ;;;			(if (< 0 left-total)
 ;;;				(begin
 ;;;					(set! left-star
-;;;						(EvaluationLink (cog-new-ctv 0 0 left-total) lg_rel
-;;;							(ListLink (AnyNode "left-word") word)
-;;;						)
+;;;						(set-count
+;;;							(EvaluationLink lg_rel
+;;;								(ListLink (AnyNode "left-word") word))
+;;;						left-total)
 ;;;					)
 ;;;					; Save these hard-won counts to the database.
 ;;;					(store-atom left-star)
@@ -533,9 +536,10 @@
 ;;;			(if (< 0 right-total)
 ;;;				(begin
 ;;;					(set! right-star
-;;;						(EvaluationLink (cog-new-ctv 0 0 right-total) lg_rel
-;;;							(ListLink word (AnyNode "right-word"))
-;;;						)
+;;;						(set-count
+;;;							(EvaluationLink lg_rel
+;;;							(ListLink word (AnyNode "right-word")))
+;;;						right-total)
 ;;;					)
 ;;;					; Save these hard-won counts to the database.
 ;;;					(store-atom right-star)
@@ -748,13 +752,12 @@
 
 		; Create and save the grand-total count.
 		(store-atom
-			(EvaluationLink (cog-new-ctv 0 0 r-cnt)
-				lg_rel
-				(ListLink
-					(AnyNode "left-word")
-					(AnyNode "right-word")
-				)
-			)
+			(set-count
+				(EvaluationLink lg_rel
+					(ListLink
+						(AnyNode "left-word")
+						(AnyNode "right-word")))
+			r-cnt)
 		)
 		(trace-msg "Done with all-pair count\n")
 	)

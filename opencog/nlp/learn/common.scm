@@ -19,6 +19,9 @@
 ; get-count ATOM - return the raw observational count on ATOM.
 (define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
 
+; set-count ATOM CNT - Set the raw observational count on ATOM.
+(define (set-count ATOM CNT) (cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
+
 ; ----
 ; set-freq ATOM FREQ - set the frequency count on ATOM.
 ;
@@ -51,7 +54,7 @@
 ;
 ; In essentially all cases, ATOM is actually an EvaluationLink that
 ; is holding the structural pattern to which the mutial information
-; applied. CUrrently, this is almost always a word-pair.
+; applied. Currently, this is almost always a word-pair.
 ;
 ; Returns ATOM.
 ;
@@ -67,7 +70,7 @@
 ;
 ; In essentially all cases, ATOM is actually an EvaluationLink that
 ; is holding the structural pattern to which the mutial information
-; applied. CUrrently, this is almost always a word-pair.
+; applied. Currently, this is almost always a word-pair.
 ;
 (define (get-mi ATOM)
 	(car (cog-value->list (cog-value ATOM pair-mi-key)))
