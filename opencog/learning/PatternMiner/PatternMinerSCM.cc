@@ -52,7 +52,7 @@ public:
 
     void run_patternminer()
     {
-        patternMiner->runPatternMiner();
+        patternMiner->runPatternMiner(false);
     }
 
     string get_Pattern_Max_Gram()

@@ -142,7 +142,7 @@ void PatternMiner::growPatternsDepthFirstTask(unsigned int thread_index)
         end_index = linksPerThread * (thread_index + 1);
 
 
-    cout << "Start thread " << thread_index << " from " << start_index
+    cout << "Start thread " << thread_index << ": will process Link number from " << start_index
          << " to (excluded) " << end_index << std::endl;
 
 

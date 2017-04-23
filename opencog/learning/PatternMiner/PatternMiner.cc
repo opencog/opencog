@@ -1077,11 +1077,11 @@ void PatternMiner::OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsF
     string fileName = _fileNamebasic;
 
     if (interestingness_Evaluation_method == "Interaction_Information")
-        fileName = "Interaction_Information_" + toString(n_gram) + "gram.scm";
+        fileName += "Interaction_Information_" + toString(n_gram) + "gram.scm";
     else if (surprisingness == 1)
-        fileName = "SurprisingnessI_" + toString(n_gram) + "gram.scm";
+        fileName += "SurprisingnessI_" + toString(n_gram) + "gram.scm";
     else
-        fileName = "SurprisingnessII_" + toString(n_gram) + "gram.scm";
+        fileName += "SurprisingnessII_" + toString(n_gram) + "gram.scm";
 
     std::cout<<"\nDebug: PatternMiner: writing (gram = " + toString(n_gram) + ") interesting patterns to file " + fileName << std::endl;
 
@@ -2287,8 +2287,8 @@ void PatternMiner::calculateSurprisingness( HTreeNode* HNode, AtomSpace *_fromAt
 
             unsigned int patternE_count = getCountOfAConnectedPattern(patternEKey, unifiedPatternE);
 
-            if (patternE_count == 0)
-                cout << "Warning: In calculate II_Surprisingness, Extended Link is missing: \n" << patternEKey << std::endl;
+//            if (patternE_count == 0)
+//                cout << "Warning: In calculate II_Surprisingness, Extended Link is missing: \n" << patternEKey << std::endl;
 
             float p_ApDivByCountE = p_Ap / ( (float)(patternE_count) );
 
@@ -2422,10 +2422,11 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_or
 
 
     string keyword_white_list_logic_str = config().get("keyword_white_list_logic");
+
     if ( (keyword_white_list_logic_str == "AND") or (keyword_white_list_logic_str == "and") or (keyword_white_list_logic_str == "And")  )
-        keyword_white_list_logic_str = QUERY_LOGIC::AND;
+        keyword_white_list_logic = QUERY_LOGIC::AND;
     else
-        keyword_white_list_logic_str = QUERY_LOGIC::OR;
+        keyword_white_list_logic = QUERY_LOGIC::OR;
 
     enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
     enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
@@ -2505,6 +2506,9 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     allLinkNumber = (int)(allLinks.size());
     atomspaceSizeFloat = (float)(allLinkNumber);
 
+    std::cout << "Using " << THREAD_NUM << " threads. \n";
+    std::cout << "Corpus size: "<< allLinkNumber << " links in total. \n\n";
+
     if (Pattern_mining_mode == "Breadth_First")
         runPatternMinerBreadthFirst();
     else
@@ -2580,7 +2584,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
                     std::sort(curGramPatterns.begin(), curGramPatterns.end(),compareHTreeNodeBySurprisingness_II);
                     OutPutInterestingPatternsToFile(curGramPatterns,cur_gram,2);
 
-                    OutPutStaticsToCsvFile(cur_gram);
+                    // OutPutStaticsToCsvFile(cur_gram);
 
                     // Get the min threshold of surprisingness_II
                     int threshold_index_II;
@@ -2637,9 +2641,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     }
 
     int end_time = time(NULL);
-    printf("Pattern Mining Finish one round! Total time: %d seconds. \n", end_time - start_time);
-    std::cout<< THREAD_NUM << " threads used. \n";
-    std::cout<<"Corpus size: "<< allLinkNumber << " links in total. \n";
+    printf("\nPattern Mining Finished! Total time: %d seconds. \n", end_time - start_time);
 
 
     if (exit_program_after_finish)
@@ -2682,19 +2684,19 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
 {
     if (patternsForGram[0].size() < 1)
     {
-        std::cout<<"PatternMiner:  this filter should be applied after mining! Please run pattern miner first!" << std::endl;
+        std::cout<<"\nPatternMiner:  this filter should be applied after mining! Please run pattern miner first!" << std::endl;
         return;
     }
 
     if (keyword_white_list.size() < 1)
     {
-        std::cout<<"PatternMiner:  white key word list is empty! Please set it first!" << std::endl;
+        std::cout<<"\nPatternMiner:  white key word list is empty! Please set it first!" << std::endl;
         return;
     }
 
     string keywordlist = "";
     for (string keyword : keyword_white_list)
-        keywordlist += (keyword + "_");
+        keywordlist += (keyword + "-");
 
 
     string logic;
@@ -2703,14 +2705,17 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
     else
        logic = "AND";
 
-    cout<<"PatternMiner:  applying keyword white list (" << logic << ") filter:" << keywordlist << std::endl;
+    cout<<"\nPatternMiner:  applying keyword white list (" << logic << ") filter:" << keywordlist << std::endl;
 
-    string fileNameBasic = "WhiteKeyWord_" + logic + "_" + keywordlist;
+    string fileNameBasic = "WhiteKeyWord-" + logic + "-" + keywordlist;
 
     vector < vector<HTreeNode*> > patternsForGramFiltered;
 
     for(unsigned int gram = 1; gram <= MAX_GRAM; gram ++)
     {
+        vector<HTreeNode*> patternVector;
+        patternsForGramFiltered.push_back(patternVector);
+
         for (HTreeNode* htreeNode : patternsForGram[gram-1])
         {
             if (htreeNode->count < thresholdFrequency)
@@ -2760,7 +2765,7 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
     }
 
 
-
+    std::cout << "\napplyWhiteListKeywordfilterAfterMining finished!" << std::endl;
 
 }
 
