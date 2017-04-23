@@ -119,6 +119,10 @@
 (define item-type 'WordNode)
 (define item-type-str "WordNode")
 
+; Cache the created atoms for left an right.
+(define any-left (AnyNode "left-word"))
+(define any-right (AnyNode "right-word"))
+
 ; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
@@ -200,7 +204,7 @@
 
 (define (get_left_wildcard_count word lg_rel)
 	(get-count
-		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
+		(EvaluationLink lg_rel (ListLink any-left word))
 	)
 )
 
@@ -210,8 +214,7 @@
 
 (define (get_right_wildcard_count word lg_rel)
 	(get-count
-		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
-	)
+		(EvaluationLink lg_rel (ListLink word any-right)))
 )
 
 ; ---------------------------------------------------------------------
@@ -220,9 +223,7 @@
 
 (define (get-pair-total lg_rel)
 	(get-count
-		(EvaluationLink lg_rel
-			(ListLink (AnyNode "left-word") (AnyNode "right-word")))
-	)
+		(EvaluationLink lg_rel (ListLink any-left any-right)))
 )
 
 ; ---------------------------------------------------------------------
@@ -231,8 +232,7 @@
 
 (define (get_left_wildcard_logli word lg_rel)
 	(get-logli
-		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
-	)
+		(EvaluationLink lg_rel (ListLink any-left word)))
 )
 
 ; ---------------------------------------------------------------------
@@ -241,8 +241,7 @@
 
 (define (get_right_wildcard_logli word lg_rel)
 	(get-logli
-		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
-	)
+		(EvaluationLink lg_rel (ListLink word any-right)))
 )
 
 ; ---------------------------------------------------------------------
@@ -421,8 +420,7 @@
 				(begin
 					(set! left-star
 						(EvaluationLink lg_rel
-							(ListLink (AnyNode "left-word") word)
-						)
+							(ListLink any-left word))
 					)
 					(set-count left-star left-total)
 					; Save these hard-won counts to the database.
@@ -433,8 +431,7 @@
 				(begin
 					(set! right-star
 						(EvaluationLink lg_rel
-							(ListLink word (AnyNode "right-word"))
-						)
+							(ListLink word any-right))
 					)
 					(set-count right-star right-total)
 					; Save these hard-won counts to the database.
@@ -526,7 +523,7 @@
 ;;;					(set! left-star
 ;;;						(set-count
 ;;;							(EvaluationLink lg_rel
-;;;								(ListLink (AnyNode "left-word") word))
+;;;								(ListLink any-left word))
 ;;;						left-total)
 ;;;					)
 ;;;					; Save these hard-won counts to the database.
@@ -538,7 +535,7 @@
 ;;;					(set! right-star
 ;;;						(set-count
 ;;;							(EvaluationLink lg_rel
-;;;							(ListLink word (AnyNode "right-word")))
+;;;								(ListLink word any-right))
 ;;;						right-total)
 ;;;					)
 ;;;					; Save these hard-won counts to the database.
@@ -754,9 +751,7 @@
 		(store-atom
 			(set-count
 				(EvaluationLink lg_rel
-					(ListLink
-						(AnyNode "left-word")
-						(AnyNode "right-word")))
+					(ListLink any-left any-right))
 			r-cnt)
 		)
 		(trace-msg "Done with all-pair count\n")
@@ -795,8 +790,8 @@
 	(for-each
 		(lambda (word)
 			(let (
-					(lefty (EvaluationLink lg_rel (ListLink (AnyNode "left-word") word)))
-					(righty (EvaluationLink lg_rel (ListLink word (AnyNode "right-word"))))
+					(lefty (EvaluationLink lg_rel (ListLink any-left word)))
+					(righty (EvaluationLink lg_rel (ListLink word any-right)))
 				)
 				; log-likelihood for the left wildcard
 				(if (< 0 (get-count lefty))
