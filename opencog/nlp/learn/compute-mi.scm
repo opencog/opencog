@@ -124,7 +124,7 @@
 (define pair-mi-key (PredicateNode "*-Pair MI Key-*"))
 
 ; get-count ATOM - return the raw observational count on ATOM.
-(define (get-count ATOM) (cog-tv-count ATOM))
+(define (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
 
 ; ----
 ; set-freq ATOM FREQ - set the frequency count on ATOM.
