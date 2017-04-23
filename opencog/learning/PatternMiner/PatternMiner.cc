@@ -2518,14 +2518,14 @@ void PatternMiner::cleanUpPatternMiner()
     if (atomSpace)
         delete atomSpace;
 
-    if (originalAtomSpace)
-        delete originalAtomSpace;
+//    if (originalAtomSpace)
+//        delete originalAtomSpace;
 
     if (observingAtomSpace)
         delete observingAtomSpace;
 
-    if (threads)
-        delete threads;
+//    if (threads)
+//        delete threads;
 
     ignoredLinkTypes.clear();
 
@@ -2567,6 +2567,11 @@ void PatternMiner::resetPatternMiner(bool resetAllSettingsFromConfig)
 
     cleanUpPatternMiner();
     initPatternMiner();
+
+    if (resetAllSettingsFromConfig)
+        cout <<  "\nPatternMiner reset with all settings resetting from config file!" << std::endl;
+    else
+        cout <<  "\nPatternMiner reset, keeping all the current settings!" << std::endl;
 }
 
 void PatternMiner::runPatternMiner(bool exit_program_after_finish)
@@ -2582,7 +2587,7 @@ void PatternMiner::runPatternMiner(bool exit_program_after_finish)
     Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
     assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));
 
-    std::cout <<"Debug: PatternMining start! Max gram = "
+    std::cout <<"\nDebug: PatternMining start! Max gram = "
               << this->MAX_GRAM << ", mode = " << Pattern_mining_mode << std::endl;
 
     int start_time = time(NULL);
