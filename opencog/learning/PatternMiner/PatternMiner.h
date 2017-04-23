@@ -344,6 +344,10 @@ protected:
 
     void reSetAllSettingsFromConfig();
 
+    void initPatternMiner();
+
+    void cleanUpPatternMiner();
+
 
 public:
     PatternMiner(AtomSpace* _originalAtomSpace);

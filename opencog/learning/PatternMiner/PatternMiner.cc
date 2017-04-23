@@ -2371,42 +2371,11 @@ void PatternMiner::generateComponentCombinations(string componentsStr, vector<ve
 
 PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_originalAtomSpace)
 {
-    htree = new HTree();
-    atomSpace = new AtomSpace( _originalAtomSpace);
-
-    //    unsigned int system_thread_num  = std::thread::hardware_concurrency();
-
-    //    if (system_thread_num > 1)
-    //        THREAD_NUM = system_thread_num - 1;
-    //    else
-    //        THREAD_NUM = 1;
-
-    //     // use all the threads in this machine
-    //     THREAD_NUM = system_thread_num;
-
-    THREAD_NUM = 1;
-
-    threads = new thread[THREAD_NUM];
-
-    is_distributed = false;
-
-    cur_gram = 0;
-
-    ignoredLinkTypes.push_back(LIST_LINK);
 
     reSetAllSettingsFromConfig();
 
+    initPatternMiner();
 
-    // vector < vector<HTreeNode*> > patternsForGram
-    for (unsigned int i = 0; i < MAX_GRAM; ++i)
-    {
-        vector<HTreeNode*> patternVector;
-        patternsForGram.push_back(patternVector);
-
-        vector<HTreeNode*> finalPatternVector;
-        finalPatternsForGram.push_back(finalPatternVector);
-
-    }
 
     // define (hard coding) all the possible subcomponent combinations for 2~4 gram patterns
     string gramNcomponents[3];
@@ -2431,12 +2400,52 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_or
     }
 
     // std::cout<<"Debug: PatternMiner init finished! " + toString(THREAD_NUM) + " threads used!" << std::endl;
+
 }
 
 PatternMiner::~PatternMiner()
 {
-    delete htree;
-    delete atomSpace;
+    cleanUpPatternMiner();
+}
+
+// make sure it is called after reSetAllSettingsFromConfig
+void PatternMiner::initPatternMiner()
+{
+    htree = new HTree();
+    atomSpace = new AtomSpace(originalAtomSpace);
+
+    //    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+
+    //    if (system_thread_num > 1)
+    //        THREAD_NUM = system_thread_num - 1;
+    //    else
+    //        THREAD_NUM = 1;
+
+    //     // use all the threads in this machine
+    //     THREAD_NUM = system_thread_num;
+
+    THREAD_NUM = 1;
+
+    threads = new thread[THREAD_NUM];
+
+    is_distributed = false;
+
+    cur_gram = 0;
+
+    ignoredLinkTypes.clear();
+    ignoredLinkTypes.push_back(LIST_LINK);
+
+    // vector < vector<HTreeNode*> > patternsForGram
+    for (unsigned int i = 0; i < MAX_GRAM; ++i)
+    {
+        vector<HTreeNode*> patternVector;
+        patternsForGram.push_back(patternVector);
+
+        vector<HTreeNode*> finalPatternVector;
+        finalPatternsForGram.push_back(finalPatternVector);
+
+    }
+
 }
 
 void PatternMiner::reSetAllSettingsFromConfig()
@@ -2499,13 +2508,76 @@ void PatternMiner::reSetAllSettingsFromConfig()
     }
 }
 
-void PatternMiner::resetPatternMiner(bool resetAllSettingsFromConfig)
+// release everything
+void PatternMiner::cleanUpPatternMiner()
 {
 
+    if (htree)
+        delete htree;
+
+    if (atomSpace)
+        delete atomSpace;
+
+    if (originalAtomSpace)
+        delete originalAtomSpace;
+
+    if (observingAtomSpace)
+        delete observingAtomSpace;
+
+    if (threads)
+        delete threads;
+
+    ignoredLinkTypes.clear();
+
+    for( std::pair<string, HTreeNode*> OnePattern : keyStrToHTreeNodeMap)
+    {
+        delete ((HTreeNode*)(OnePattern.second));
+    }
+
+    std::map <string, HTreeNode*> emptykeyStrToHTreeNodeMap;
+    keyStrToHTreeNodeMap.swap(emptykeyStrToHTreeNodeMap);
+
+    unsigned int patternsForGramSize = patternsForGram.size();
+    for (unsigned int i = 0; i < patternsForGramSize; ++i)
+    {
+        std::vector<HTreeNode*> emptyVector;
+        (patternsForGram[i]).swap(emptyVector);
+    }
+
+    vector < vector<HTreeNode*> > emptypatternsForGram;
+    patternsForGram.swap(emptypatternsForGram);
+
+    unsigned int finalPatternsForGramSize = finalPatternsForGram.size();
+    for (unsigned int i = 0; i < finalPatternsForGramSize; ++i)
+    {
+        std::vector<HTreeNode*> emptyVector;
+        (finalPatternsForGram[i]).swap(emptyVector);
+    }
+
+    vector < vector<HTreeNode*> > emptyfinalPatternsForGram;
+    finalPatternsForGram.swap(emptyfinalPatternsForGram);
+
+
+}
+
+void PatternMiner::resetPatternMiner(bool resetAllSettingsFromConfig)
+{
+    if (resetAllSettingsFromConfig)
+        reSetAllSettingsFromConfig();
+
+    cleanUpPatternMiner();
+    initPatternMiner();
 }
 
 void PatternMiner::runPatternMiner(bool exit_program_after_finish)
 {
+
+    if (keyStrToHTreeNodeMap.size() > 0)
+    {
+        cleanUpPatternMiner();
+        initPatternMiner();
+    }
+
 
     Pattern_mining_mode = config().get("Pattern_mining_mode"); // option: Breadth_First , Depth_First
     assert( (Pattern_mining_mode == "Breadth_First") || (Pattern_mining_mode == "Depth_First"));

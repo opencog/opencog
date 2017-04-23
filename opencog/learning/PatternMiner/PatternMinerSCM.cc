@@ -319,6 +319,13 @@ public:
     {
         patternMiner->applyWhiteListKeywordfilterAfterMining();
     }
+
+
+    // Note: this will release all the previous pattern mining results
+    void reset_patternminer(bool resetAllSettingsFromConfig)
+    {
+        patternMiner->resetPatternMiner(resetAllSettingsFromConfig);
+    }
 };
 
 
@@ -396,6 +403,7 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-select-subset-from-atomspace", &PatternMinerSCM::select_subset_from_atomspace, this, "patternminer");
     define_scheme_primitive("pm-select-whitelist-subset-from-atomspace", &PatternMinerSCM::select_whitelist_subset_from_atomspace, this, "patternminer");
     define_scheme_primitive("pm-apply-whitelist-keyword-filter-after-mining", &PatternMinerSCM::apply_whitelist_keyword_filter_after_mining, this, "patternminer");
+    define_scheme_primitive("pm-reset-patternminer", &PatternMinerSCM::reset_patternminer, this, "patternminer");
 
 
 }
