@@ -2975,3 +2975,37 @@ well ... e has no counts ... and thus no logli
 (length (cog-incoming-set (WordNode "When") ))
 except there are lots so wtf?
 
+(define lg_rel (LinkGrammarRelationshipNode "ANY"))
+
+(define (get-total-atom-count atom-list)
+   (fold + 0.0 (map get-count atom-list))
+
+... there are no counts on any e's ... wtf ??
+
+(EvaluationLink  uuid  2434162536
+   (LinkGrammarRelationshipNode "ANY") uuid 152
+   (ListLink   uuid 2434162535 
+      (WordNode "Hear")  uuid 17490475
+      (WordNode "When")  uuiid 1537161
+   )
+)
+
+incoming set failed to load the values!!!
+also cog-value is real slowww
+
+   // Get the correct UUID; its possible that we don't know it yet.
+   UUID uuid = _tlbuf.getUUID(h);
+   if (TLB::INVALID_UUID == uuid)
+   {
+      Handle hg(doGetAtom(h));
+      uuid = _tlbuf.getUUID(hg);
+   }
+get_uuid
+_vindex
+_keyset
+std::unordered_multimap<ContentHash, Handle>
+std::unordered_map<
+#include <unordered_map>
+std::unordered_set<Handle, handle_hash>  -- kill this -- done
+HandlePair
+
