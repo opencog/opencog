@@ -2980,13 +2980,15 @@ except there are lots so wtf?
 (define (get-total-atom-count atom-list)
    (fold + 0.0 (map get-count atom-list))
 
+ (compute-pair-wildcard-counts   w lg_rel
+
 ... there are no counts on any e's ... wtf ??
 
-(EvaluationLink  uuid  2434162536
-   (LinkGrammarRelationshipNode "ANY") uuid 152
-   (ListLink   uuid 2434162535 
-      (WordNode "Hear")  uuid 17490475
-      (WordNode "When")  uuiid 1537161
+(EvaluationLink  ; uuid  2434162536
+   (LinkGrammarRelationshipNode "ANY") ; uuid 152
+   (ListLink   ; uuid 2434162535
+      (WordNode "Hear")  ; uuid 17490475
+      (WordNode "When")  ; uuiid 1537161
    )
 )
 
@@ -3009,3 +3011,30 @@ std::unordered_map<
 std::unordered_set<Handle, handle_hash>  -- kill this -- done
 HandlePair
 
+-----------------------------------------
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs?user=linas")
+(batch-all-pairs)
+(define lg_rel  (LinkGrammarRelationshipNode "ANY"))
+      (init-trace "/tmp/progress")
+(load "common.scm")
+(load "compute-mi.scm")
+ (load-atoms-of-type item-type)
+ (length (cog-get-atoms item-type))
+ (fetch-incoming-set lg_rel)
+
+ (compute-pair-wildcard-counts w lg_rel)
+
+
+(EvaluationLink (ctv 0 0 90720) ; uuid = 143501595
+   (LinkGrammarRelationshipNode "ANY") ; uuid = 152
+   (ListLink  ; uuid = 143501594
+      (AnyNode "left-word")  ; uuid = 143427138
+      (WordNode "When")  ; uuid = 1537161
+   )
+)
+elect * from valuations where atom=143501595;
+
+(store-atom left-star) took forever...
