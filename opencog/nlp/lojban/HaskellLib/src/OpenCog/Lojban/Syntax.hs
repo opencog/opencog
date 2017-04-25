@@ -7,9 +7,11 @@
 
 module OpenCog.Lojban.Syntax where
 
-import Prelude hiding (id,(.),(<*>),(<$>),(*>),(<*),foldl)
+import Prelude hiding (id,(.),(<*>),(<$>),(*>),(<*))
 
 import qualified Data.List.Split as S
+import Data.List (nub,partition)
+import qualified Data.Foldable as F (find)
 import Data.Maybe (fromJust)
 import Data.List (isInfixOf)
 import Data.Hashable
@@ -327,7 +329,7 @@ sumtiLai = ((handleSubSet .> setWithSize) ||| maybeinof)
           maybeinof = Iso f g where
               f a = do
                   atoms <- gets sAtoms
-                  case getDefinitons [a] atoms of
+                  case getDefinitions [a] atoms of
                       [] -> apply instanceOf a
                       _  -> pure a              --We have a lep which is already an instance
               g a = error "Check for lep somehow"
@@ -493,37 +495,127 @@ gismuP :: Syntax Atom
 gismuP = implicationOf . predicate . gismu
 
 
-{-
-FIXME::
-tanru :: Syntax (State Atom)
-tanru = handleTanru <$> gismuP
-                    <&><&><&> optState tanru
-    where handleTanru = (second (cons . first _iil) ||| id ) . reorder
-          reorder = Iso (Just . f) (Just . g)
-          f ((g,Just t),s)  = Left (g,((t,g),s))
-          f ((g,Nothing),s) = Right (g,s)
-          g (Left (g,((t,_),s)))  = ((g,Just t),s)
-          g (Right (g,s))         = ((g,Nothing),s)
+tanru :: Syntax Atom
+tanru = isoFoldl handleTanru . (inverse cons) <<< some (gismuP <+> nuP)
+  where handleTanru = sndToState 1 . second (tolist1 . _iimpl) . reorder
+        reorder = mkIso f g
+        f (g,t) = (t,(t,g))
+        g(t,(_,g)) = (g,t)
+
+
 
 
 --meP :: Syntax (State Atom)
 --meP =  handleME <$> selmaho "ME" <*> sumtiAll <*> optSelmaho "MEhU"
 
+
 nuP :: Syntax Atom
-nuP = choice nuHandlers
-    . selmaho "NU" &&& bridiUI <&& optSelmaho "KEI"
+nuP = withEmptyState $ choice nuHandlers . (selmaho "NU" &&& bridiUI <&& optSelmaho "KEI")
 
-nuHandlers = [("nu"     ,handleNU)
-,("du'u"   ,handleNU)
-,("ka"     ,handleKA)]
+--EvaluationLink (stv 0.75 0.9)
+--                  PredicateNode (stv 1.0 0.9) "is_event"
+--                  ListLink (stv 1.0 0.0)
+--                    ConceptNode (stv 1.0 0.9) "$2"
+--                    VariableNode (stv 1.0 0.0) "$4"
 
-handleNU :: SynIso Atom Atom
-handleNU = Iso f g where
-    f (atom,name) = let pred = cPN name lowTv
-                        link = mkCtxPre pred atom
-                    in Just (pred,link:as)
-    g (PN name,CtxPred atom : as) = Just ((atom,as),name)
--}
+nuHandlers = [handleNU "du'u" (mkNuEventLabel "du'u") . rmfst "du'u",
+              handleNU "su'u" (mkNuEventLabel "su'u") . rmfst "su'u",
+              handleNU "nu"   (mkNuEvent ["fasnu"]) . rmfst "nu",
+              handleNU "mu'e" (mkNuEvent ["fasnu", "mokca"]) . rmfst "mu'e",
+              handleNU "zu'o" (mkNuEvent ["zumfau"]) . rmfst "zu'o",
+              handleNU "za'i" (mkNuEvent ["tcini"]) . rmfst "za'i",
+              handleNU "ka"   (mkNuEvent ["ckaji"]) . rmfst "ka",
+              handleNU "ni"   (mkNuEvent ["klani"]) . rmfst "ni",
+              handleNU "si'o" (mkNuEvent ["sidbo"]) . rmfst "si'o",
+              handleNU "li'i" (mkNuEventLabel "is_experience") . rmfst "li'i",
+              handleNU "pu'u" (mkNuEventLabel "is_point_event") . rmfst "pu'u",
+              handleNU "jei"  (mkNuEventLabel "is_truth_value") . rmfst "jei"]
+  where
+    -- Functions that specify the type of the abstraction
+    -- Note: atomNub may leave AndLink with only one atom
+    mkNuEventLabel :: String -> String -> SynIso [Atom] [Atom]
+    mkNuEventLabel eventName _ = cons . first (mkEval . atomNub . mkEvent) . reorder
+      where mkEval = _eval . addfst (cPN eventName highTv) . tolist2 . addfstAny (cCN "$2" highTv)
+    mkNuEvent :: [String] -> String -> SynIso [Atom] [Atom]
+    mkNuEvent (nuType:nts) name = isoConcat2 . tolist2 . addfstAny nuImps
+                                          . cons . first wrapNuVars . reorder
+     where
+       nuPred = cPN (nuType ++ "_" ++ name) highTv
+       nuImps = (cImpL highTv nuPred (cPN nuType highTv))
+            :(case nts of
+                [] -> []
+                [nts] -> let nuSec = (cPN (nts ++ "_" ++ name) highTv)
+                         in [(cIImpL highTv nuPred nuSec), (cImpL highTv nuSec (cPN nts highTv))])
+       wrapNuVars = andl . tolist2 . first (mkEval "1") . second (mkEval "2")
+                         . addfstAny (cCN "$2" highTv) . atomNub . mkEvent
+       mkEval num = _evalTv . addfstAny highTv . addfstAny (cPN (nuType ++ "_sumti" ++ num) highTv)
+                            . tolist2 . addfstAny nuPred
+    mkEvent = atomIsoMap (mkIso f id) where
+     f (EvalL _ (PN _) (LL [vn@(VN _), _])) = vn -- can be PN:CN, PN:WN, anything else?
+     f a = a
+    reorder = mkIso f g where
+     f (a:as) = (a, a:as)
+     g (_,as) = as
+
+--As for "pu'u", "pruce" and "farvi" don't seem quite right
+
+handleNU :: String -> (String -> SynIso [Atom] [Atom]) -> SynIso Atom Atom
+handleNU abstractor nuTypeMarker = Iso f g where
+  f atom = do
+    state <- gets sAtoms
+    rname <- randName $ (show atom)
+    let name = rname ++ "___" ++ abstractor
+        pred = cPN name highTv
+    link <- apply (mkLink pred name) (atom, state)
+    setAtoms [link]
+    pure pred
+  g (pred@(PN name)) = do
+    state <- gets sAtoms -- FIX: Have to get correct atom
+    let link = F.find (atomElem pred) state
+    (atom, nuState) <- case link of -- remove "is_event" atoms
+        Just l -> unapply (mkLink pred name) l
+        _ -> lift $ Left $ (show pred) ++ " can't be found in state."
+    pushAtoms nuState -- : instantiate VNs?
+    pure atom -- should only be one. Check?
+  mkLink :: Atom -> String -> SynIso (Atom, [Atom]) Atom
+  mkLink pred name = mkLink' . addfstAny pred
+                    . second (nuTypeMarker name)
+                    . mkNuState . getPredVars
+  -- Extract predicateNodes from the atom and state
+  getPredVars :: SynIso (Atom, [Atom]) (([Atom], [Atom]), [Atom])
+  getPredVars = mkIso f g where
+    f (atom, state) =
+      let predicateNodes =
+            nub $ (atomFold (\ns a -> case a of (EvalL _ _ (LL (pn@(PN _):_))) -> pn:ns
+                                                a -> ns) [] atom)
+                  ++ (foldl (\ns a -> case a of (ImpL [pn@(PN _), (PN _)] _) -> pn:ns
+                                                (InhL [pn@(PN _), (PN _)] _) -> pn:ns
+                                                a -> ns) [] state)
+          predicateVars = map (cVN.("$"++).show) [3..(length predicateNodes) + 2]
+      in ((predicateVars,predicateNodes), atom:state)
+    g (_, atom:state) = (atom, state) -- FIX, can't assume first atom is the atom
+  mkNuState :: SynIso (([Atom], [Atom]), [Atom]) ([Atom], [Atom])
+  mkNuState = Iso f g where
+    f ((predicateVars, predicateNodes), astate) = do
+      nuState <- apply (mapIso (replacePredicatesIso (zip predicateNodes predicateVars))) astate
+      pure (predicateVars, nuState)
+    g (predicateVars, nuState) = pure ((predicateVars, predicateVars), nuState)
+    replacePredicatesIso :: [(Atom, Atom)] -> SynIso Atom Atom
+    replacePredicatesIso nodeVarMap =  atomIsoMap $ mkIso f g where
+      f pn@(PN _) = case lookup pn nodeVarMap of
+          Just vn -> vn
+          Nothing -> pn
+      f a = a
+      g a = a -- i.e., don't instantiate vars for now
+  -- (pred, (typedPredicateVars, eventAtom:state')
+  mkLink' :: SynIso (Atom, ([Atom], [Atom])) Atom
+  mkLink' = _equivl
+           . first  (_evalTv . addfst highTv  . addsnd [cVN "$1"])
+           . second
+               (_meml . addfst (cVN "$1") . ssl . tolist2 . addfst (cVN "$2")
+                 . _exl . first (varll . mapIso (_typedvarl . addsnd (cTN "PredicateNode")))
+                        . second andl)
+
 
 _MOI :: Syntax String
 _MOI = selmaho "MOI"
@@ -568,8 +660,7 @@ gohaP = _MO <+> _GOhA
 
 selbri :: Syntax (Tagged Atom)
 selbri = filterState . commute  <<< optional (selmaho "SE")
-                                &&& (gismuP {-<+> nuP-}
-                                            <+> meP
+                                &&& (tanru  <+> meP
                                             <+> moiP
                                             <+> gohaP)
 
