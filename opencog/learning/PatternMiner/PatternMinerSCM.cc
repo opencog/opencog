@@ -218,6 +218,7 @@ public:
         return result;
     }
 
+
     string add_keyword_to_white_list(const string& _keyword)
     {
         string result = "";
@@ -251,6 +252,38 @@ public:
         return result + get_keyword_white_list();
     }
 
+    string get_keyword_white_list_logic()
+    {
+        string result = "keyword_white_list_logic:";
+
+        QUERY_LOGIC logic = patternMiner->get_keyword_white_list_logic();
+        if (logic == QUERY_LOGIC::AND)
+            result += "AND";
+        else if (logic == QUERY_LOGIC::OR)
+            result += "OR";
+        else
+            result += "EXCEPTION";
+
+        return result;
+    }
+
+    string set_keyword_white_list_logic(const string& logic)
+    {
+
+        if ((logic == "AND") || (logic == "And") || (logic == "and"))
+        {
+            patternMiner->set_keyword_white_list_logic(QUERY_LOGIC::AND);
+            return get_keyword_white_list_logic();
+        }
+        else if ((logic == "OR") || (logic == "Or") || (logic == "or"))
+        {
+            patternMiner->set_keyword_white_list_logic(QUERY_LOGIC::OR);
+            return get_keyword_white_list_logic();
+        }
+        else
+            return "Exception: keyword_white_list_logic only can be AND or OR.";
+    }
+
 
     void clear_keyword_black_list(){patternMiner->clear_keyword_white_list();}
     void clear_keyword_white_list(){patternMiner->clear_keyword_white_list();}
@@ -266,6 +299,7 @@ public:
         result += get_use_keyword_white_list() + "\n";
         result += get_keyword_black_list() + "\n";
         result += get_keyword_white_list() + "\n";
+        result += get_keyword_white_list_logic() + "\n";
 
         return result;
 
@@ -394,9 +428,13 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-add-ignore-link-type", &PatternMinerSCM::add_Ignore_Link_Type, this, "patternminer");
     define_scheme_primitive("pm-remove-ignore-link-type", &PatternMinerSCM::remove_Ignore_Link_Type, this, "patternminer");
     define_scheme_primitive("pm-get-use-keyword-black-list", &PatternMinerSCM::get_use_keyword_black_list, this, "patternminer");
+    define_scheme_primitive("pm-set-use-keyword-black-list", &PatternMinerSCM::set_use_keyword_black_list, this, "patternminer");
     define_scheme_primitive("pm-get-use-keyword-white-list", &PatternMinerSCM::get_use_keyword_white_list, this, "patternminer");
+    define_scheme_primitive("pm-set-use-keyword-white-list", &PatternMinerSCM::set_use_keyword_white_list, this, "patternminer");
     define_scheme_primitive("pm-get-keyword-black-list", &PatternMinerSCM::get_keyword_black_list, this, "patternminer");
     define_scheme_primitive("pm-get-keyword-white-list", &PatternMinerSCM::get_keyword_white_list, this, "patternminer");
+    define_scheme_primitive("pm-get-keyword-white-list-logic", &PatternMinerSCM::get_keyword_white_list_logic, this, "patternminer");
+    define_scheme_primitive("pm-set-keyword-white-list-logic", &PatternMinerSCM::set_keyword_white_list_logic, this, "patternminer");
     define_scheme_primitive("pm-add-keyword-to-black-list", &PatternMinerSCM::add_keyword_to_black_list, this, "patternminer");
     define_scheme_primitive("pm-add-keywords-to-black-list", &PatternMinerSCM::add_keywords_to_black_list, this, "patternminer");
     define_scheme_primitive("pm-remove-keyword-from-black-list", &PatternMinerSCM::remove_keyword_from_black_list, this, "patternminer");

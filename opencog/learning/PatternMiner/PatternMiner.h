@@ -419,6 +419,9 @@ public:
     bool remove_keyword_from_white_list(string _keyword);
     void clear_keyword_white_list(){keyword_white_list.clear();}
 
+    QUERY_LOGIC get_keyword_white_list_logic(){return keyword_white_list_logic;}
+    void set_keyword_white_list_logic(QUERY_LOGIC logic){keyword_white_list_logic = logic;}
+
     // -------------------------------end filter settings----------------------
 
     void applyWhiteListKeywordfilterAfterMining();
