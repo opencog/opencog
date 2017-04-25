@@ -52,7 +52,7 @@
         (define focus-set
             (SetLink (parse-get-relex-outputs PARSE-NODE) INTERP-LINK))
         (define outputs
-            (unwrap-list-link (cog-fc (SetLink) r2l-rules focus-set) #t))
+            (unwrap-list-link (cog-fc r2l-rules (Set) (List) focus-set) #t))
 
         (append-map (lambda (o) (unwrap-list-link o #f)) outputs)
     )

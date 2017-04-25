@@ -82,7 +82,7 @@ setTypeL  :: Iso [Atom] Atom
 setTypeL = linkIso "SetTypeLink" noTv
 
 subsetL :: Iso (Atom,Atom) Atom
-subsetL = linkIso "SubSetLink" noTv . tolist2
+subsetL = linkIso "SubsetLink" noTv . tolist2
 
 sizeL  :: Iso [Atom] Atom
 sizeL = linkIso "SetSizeLink" noTv

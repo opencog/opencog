@@ -9,7 +9,11 @@
              (opencog eva-behavior)
              (srfi srfi-1)
              (rnrs io ports)
-             (ice-9 popen))
+             (ice-9 popen)
+             (ice-9 optargs))
+
+(define (chatlang-prefix str) (string-append "Chatlang: " str))
+(define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -47,29 +51,33 @@
       (close-pipe port)
       (if (string-null? lemma) word lemma)))
   (define word-list
-    (map (lambda (w)
-      (cond ((equal? 'concept (car w)) (Glob (cadr w)))
+    (append-map (lambda (w)
+      (cond ((equal? 'concept (car w)) (list (Glob (cadr w))))
+            ; Skip the sentence anchors, they will be handled later
+            ((equal? 'anchor-start (car w)) '())
+            ((equal? 'anchor-end (car w)) '())
             ; For proper names -- create WordNodes
             ((equal? 'proper-names (car w)) (map Word (cdr w)))
-            ((not (equal? #f (string-index (cadr w) char-upper-case?))) (Word (cadr w)))
-            (else (Word (get-lemma (cadr w))))))
+            ((equal? 'or-choices (car w)) (list (Glob "$choices")))
+            ((equal? 'unordered-matching (car w)) (list (Glob "$unordered")))
+            ((not (equal? #f (string-index (cadr w) char-upper-case?)))
+             (list (Word (cadr w))))
+            (else (list (Word (get-lemma (cadr w)))))))
          terms))
+  ; Append the words in 'start-with' and 'end-with' to word-list, if any
+  (set! word-list (append start-with word-list end-with))
+  ; DualLink couldn't match patterns with no constant terms in it
+  ; Mark the rules with no constant terms so that ot cam be found
+  ; easily during the matching process
+  (if (equal? (length word-list)
+              (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
+                              word-list)))
+    (Inheritance (List word-list) chatlang-no-constant))
   ; Wrap it using a TrueLink
   ; TODO: Maybe there is a more elegant way to represent it in the context?
   (True (List word-list)))
 
-(define (get-sent-lemmas sent-node)
-  "Get the lemma of the words associate with sent-node"
-  (List (append-map
-    (lambda (w)
-      ; Ignore LEFT-WALL and punctuations
-      (if (or (string-prefix? "LEFT-WALL" (cog-name w))
-              (word-inst-match-pos? w "punctuation"))
-          '()
-          (cog-chase-link 'LemmaLink 'WordNode w)))
-    (car (sent-get-words-in-order sent-node)))))
-
-(define (say text)
+(define-public (say text)
   "Say the text and clear the state"
   (And (True (Put (DefinedPredicate "Say") (Node text)))
        (True (Put (State (Anchor "Currently Processing") (Variable "$x"))
@@ -77,7 +85,7 @@
 
 (define yakking (psi-demand "Yakking" 0.9))
 
-(define* (chat-rule pattern action #:optional name)
+(define*-public (chat-rule pattern action #:optional name)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((template (cons atomese-variable-template atomese-condition-template))
@@ -104,9 +112,78 @@
         (Word (car words))
         (List (map-in-order Word words)))))
 
-(define (chat-concept name members)
+(define-public (chat-concept name members)
   "Lets users create named concepts with explicit membership lists."
   (let* ((c (Concept name))
          (ref-members (append-map (lambda (m) (list (Reference (member-words m) c)))
                                   members)))
     ref-members))
+
+(define (get-sent-lemmas sent-node)
+  "Get the lemma of the words associate with sent-node."
+  (List (append-map
+    (lambda (w)
+      ; Ignore LEFT-WALL and punctuations
+      (if (or (string-prefix? "LEFT-WALL" (cog-name w))
+              (word-inst-match-pos? w "punctuation")
+              (null? (cog-chase-link 'LemmaLink 'WordNode w)))
+          '()
+          ; For proper names, e.g. Jessica Henwick,
+          ; RelEx converts them into a single WordNode, e.g.
+          ; (WordNode "Jessica_Henwick"). Codes below try to
+          ; split it into two WordNodes, "Jessica" and "Henwick",
+          ; so that the matcher will be able to find the rules
+          (let* ((wn (car (cog-chase-link 'LemmaLink 'WordNode w)))
+                 (name (cog-name wn)))
+            (if (integer? (string-index name #\_))
+              (map Word (string-split name  #\_))
+              (list wn)))))
+    (car (sent-get-words-in-order sent-node)))))
+
+(define-public (does-not-contain sent list-of-words)
+  "Check if the given sentence contains any of the listed words.
+   Return true if it contains none."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "\\b" (cog-name w) "\\b") regexp/icase) sent-text))))
+          (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
+
+(define-public (does-not-start-with sent list-of-words)
+  "Check if the given sentence starts with any of the listed words.
+   Return true if it starts with none of the words."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "^" (cog-name w) "\\b") regexp/icase) sent-text))))
+          (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
+
+(define-public (does-not-end-with sent list-of-words)
+  "Check if the given sentence ends with any of the listed words.
+   Return true if it ends with none of the words."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "\\b" (cog-name w) "$") regexp/icase) sent-text))))
+          (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))
+
+(define-public (no-words-in-between sent w1 w2 list-of-words)
+  "Check if the given sentence contains any of the listed words
+   between words w1 and w2.
+   Return true if it contains none."
+  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
+        (w1-name (cog-name w1))
+        (w2-name (cog-name w2)))
+    (if (null? (filter
+      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
+        (string-append "\\b" w1-name " " (cog-name w) " " w2-name "\\b")
+          regexp/icase) sent-text))))
+            (cog-outgoing-set list-of-words)))
+      (stv 1 1)
+      (stv 0 1))))

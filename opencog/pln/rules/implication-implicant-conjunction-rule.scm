@@ -100,6 +100,9 @@
 ;;
 ;; TODO: there is something weird, if P(C) is tiny then P(C|A,B) goes
 ;; above 1, we need to understand why. Meanwhile, we just cap at 1.
+;;
+;; TODO: A, B and AC, BC could be wrapped in SetLinks (to speed up the
+;; BC).
 (define (implication-implicant-conjunction-formula ABC A B C AC BC)
   (let* 
       ((sA (cog-stv-strength A))

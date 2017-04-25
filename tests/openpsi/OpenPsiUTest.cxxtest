@@ -25,6 +25,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
+#include <opencog/truthvalue/TruthValue.h>
 
 using namespace opencog;
 
@@ -111,29 +112,29 @@ public:
 
         // Test 1:
         // Test unsatisfaiability
-        auto result_1_1 = _scm->eval("(psi-satisfiable? (rule-1))");
+        auto result_1_1 = _scm->eval_tv("(psi-satisfiable? (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1_1);
+        TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), result_1_1);
 
         // Check result from cache is consistent with that of the actual
         // execution.
-        auto result_1_2 = _scm->eval("(satisfiable? (rule-1))");
+        auto result_1_2 = _scm->eval_tv("(satisfiable? (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 0 1)", "(stv 0 1)\n", result_1_2);
+        TSM_ASSERT_EQUALS("Expected (stv 0 1)", TruthValue::FALSE_TV(), result_1_2);
 
         // Test 2:
         // Test satisfaiability
         _scm->eval("(groundable-content-1)");
         CHKERR
-        auto result_2_1 = _scm->eval("(psi-satisfiable? (rule-1))");
+        auto result_2_1 = _scm->eval_tv("(psi-satisfiable? (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2_1);
+        TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), result_2_1);
 
         // Check result from cache is consistent with that of the actual
         // execution.
-        auto result_2_2 = _scm->eval("(satisfiable? (rule-1))");
+        auto result_2_2 = _scm->eval_tv("(satisfiable? (rule-1))");
         CHKERR
-        TSM_ASSERT_EQUALS("Expected (stv 1 1)", "(stv 1 1)\n", result_2_2);
+            TSM_ASSERT_EQUALS("Expected (stv 1 1)", TruthValue::TRUE_TV(), result_2_2);
 
 
         logger().info("END TEST: %s", __FUNCTION__);

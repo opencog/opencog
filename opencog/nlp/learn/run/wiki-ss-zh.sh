@@ -5,5 +5,3 @@
 # and submit them for parsing.
 #
 time find beta-pages -type f -exec ./ss-one.sh zh {} localhost 17007 \;
-# time find beta-pages -type f -exec ./ssx.sh en \"{}\" localhost 17005 \;
-# time find beta-pages -type f -exec echo en \"{}\" localhost 17005 \;

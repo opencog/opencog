@@ -19,11 +19,12 @@
 (use-modules (opencog))
 (use-modules (opencog rule-engine))
 
-;XXX This is bad and broken and wrong; one should not try to bypass the
-; scheme module system like this, its just asking for carpet burns.
-(load-from-path "utilities.scm")
-(load-from-path "av-tv.scm")
-(load-from-path "opencog/rule-engine/rule-engine-utils.scm")
+;; TODO Maybe we can remove that definitely?
+;; ;XXX This is bad and broken and wrong; one should not try to bypass the
+;; ; scheme module system like this, its just asking for carpet burns.
+;; (load-from-path "utilities.scm")
+;; (load-from-path "av-tv.scm")
+;; (load-from-path "opencog/rule-engine/rule-engine-utils.scm")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Define PLN rule-based system ;;
@@ -36,8 +37,8 @@
 )
 
 ;; Define pln-fc and pln-bc for convenience 
-(define (pln-fc source) (cog-fc source pln-rbs (SetLink)))
-(define (pln-bc target) (cog-bc target pln-rbs (SetLink)))
+(define (pln-fc source) (cog-fc pln-rbs source (List) (Set)))
+(define (pln-bc target) (cog-bc pln-rbs target (List) (Set)))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;
@@ -50,7 +51,7 @@
   (list "implication-instantiation-rule.scm"
         "implication-scope-to-implication-rule.scm"
         "equivalence-to-implication-rule.scm"
-        "lambda-predicate-evaluation-rule.scm"
+        "predicate-lambda-evaluation-rule.scm"
         "inversion-rule.scm"
         "implication-implicant-conjunction-rule.scm"
         "and-lambda-factorization-double-implication-rule.scm"

@@ -22,7 +22,7 @@
 )
 
 ;; Define conj-bc for convenience
-(define (conj-bc target) (cog-bc target conjunction-rule-base (SetLink)))
+(define (conj-bc target) (cog-bc conjunction-rule-base target (List) (Set)))
 
 ;;;;;;;;;;;;;;;;
 ;; Load rules ;;

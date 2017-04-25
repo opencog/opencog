@@ -107,7 +107,7 @@ The probablity of turning acquaintance into friendship between humans: .01<br />
 
 			<p>;; People who told the truth about something are honest<br />
 			(define people-telling-the-truth-are-honest<br />
-			(Implication (stv 0.95 0.9)<br />
+			(ImplicationScope (stv 0.95 0.9)<br />
 			&nbsp;&nbsp; (VariableList<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
@@ -192,7 +192,7 @@ The probablity of turning acquaintance into friendship between humans: .01<br />
 			(Predicate &quot;will-be-friends&quot; (stv 0.0001 0.9))</p>
 
 			<p>;; Friendship is symmetric<br />
-			(Implication (stv 1 1)<br />
+			(ImplicationScope (stv 1 1)<br />
 			&nbsp;&nbsp; (VariableList<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
@@ -230,7 +230,7 @@ The probablity of turning acquaintance into friendship between humans: .01<br />
 			;; ;; but due to some current limitation in the type system, specifically<br />
 			;; ;; that a Predicate cannot be declared with a certain type, we need to<br />
 			;; ;; express that in a more convoluted way.<br />
-			;; (Implication (stv 0.9 0.9)<br />
+			;; (ImplicationScope (stv 0.9 0.9)<br />
 			;;&nbsp;&nbsp;&nbsp; (VariableList<br />
 			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
 			;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
@@ -252,7 +252,7 @@ The probablity of turning acquaintance into friendship between humans: .01<br />
 			<p>;; The probablity of turning acquaintance into friendship between<br />
 			;; humans is 0.1.<br />
 			(define human-acquainted-tend-to-become-friends<br />
-			(Implication (stv 0.1 0.5)<br />
+			(ImplicationScope (stv 0.1 0.5)<br />
 			&nbsp;&nbsp; (VariableList<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
@@ -280,7 +280,7 @@ The probablity of turning acquaintance into friendship between humans: .01<br />
 
 			<p>;; Friends tend to be honest<br />
 			(define friends-tend-to-be-honest<br />
-			(Implication (stv 0.85 0.5)<br />
+			(ImplicationScope (stv 0.85 0.5)<br />
 			&nbsp;&nbsp; (VariableList<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
@@ -329,7 +329,7 @@ The probablity of turning acquaintance into friendship between humans: .01<br />
 
 			<p>;; People who told a joke to someone, somewhere, are funny&nbsp;&nbsp;<br />
 			(define people-telling-jokes-are-funny<br />
-			(Implication (stv 0.8 0.9)<br />
+			(ImplicationScope (stv 0.8 0.9)<br />
 			&nbsp;&nbsp; (VariableList<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
@@ -495,7 +495,7 @@ Bob is honest.<br />
 		<tr>
 			<td style="vertical-align: top">implication-full-instantiation-rule:<br />
 			<br />
-			&nbsp;ImplicationLink<br />
+			&nbsp;ImplicationScopeLink<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
@@ -510,7 +510,7 @@ Bob is honest.<br />
 			<p>Antecedents:</p>
 
 			<p>;; People who told the truth about something are honest<br />
-			(Implication (stv 0.95 0.9)<br />
+			(ImplicationScope (stv 0.95 0.9)<br />
 			&nbsp; (VariableList<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
@@ -582,7 +582,7 @@ Distribute the scope of the implication that friends tend to be honest in the KB
 		<tr>
 			<td style="vertical-align: top">implication-scope-to-implication-rule:<br />
 			<br />
-			&nbsp; ImplicationLink<br />
+			&nbsp; ImplicationScopeLink<br />
 			&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; V<br />
 			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; P<br />
 			&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; Q<br />
@@ -602,7 +602,7 @@ Distribute the scope of the implication that friends tend to be honest in the KB
 			<br />
 			;; Friends tend to be honest<br />
 			(define friends-tend-to-be-honest<br />
-			(Implication (stv 0.85 0.5)<br />
+			(ImplicationScope (stv 0.85 0.5)<br />
 			&nbsp; (VariableList<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariable<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (Variable &quot;$X&quot;)<br />
@@ -1017,7 +1017,7 @@ Distribute the scope of the implication that human acquaintances tend to become 
 		<tr>
 			<td style="vertical-align: top">implication-scope-to-implication-rule:<br />
 			<br />
-			&nbsp; ImplicationLink<br />
+			&nbsp; ImplicationScopeLink<br />
 			&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; V<br />
 			&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; P<br />
 			&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; Q<br />
@@ -1497,7 +1497,7 @@ Bob and I will become friends.
 		<tr>
 			<td style="vertical-align: top">implication-full-instantiation-rule:<br />
 			<br />
-			&nbsp;ImplicationLink<br />
+			&nbsp;ImplicationScopeLink<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
@@ -1556,7 +1556,7 @@ Bob is funny.
 		<tr>
 			<td style="vertical-align: top">implication-full-instantiation-rule:<br />
 			<br />
-			&nbsp;ImplicationLink<br />
+			&nbsp;ImplicationScopeLink<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />
@@ -1570,7 +1570,7 @@ Bob is funny.
 			<td style="vertical-align: top">Antecedents:<br />
 			<br />
 			;; people who tell jokes are funny<br />
-			&nbsp;&nbsp; (ImplicationLink (stv 0.80000001 0.89999998)<br />
+			&nbsp;&nbsp; (ImplicationScopeLink (stv 0.80000001 0.89999998)<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableList<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (TypedVariableLink<br />
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (VariableNode &quot;$X&quot;)<br />
@@ -1809,7 +1809,7 @@ If X is funny, then X is amusing.</p>
 			<td style="vertical-align: top">
 			<p>implication-full-instantiation-rule:<br />
 			<br />
-			&nbsp;ImplicationLink<br />
+			&nbsp;ImplicationScopeLink<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; V<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; P<br />
 			&nbsp;&nbsp;&nbsp;&nbsp; Q<br />

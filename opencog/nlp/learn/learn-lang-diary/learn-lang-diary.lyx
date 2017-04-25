@@ -93,7 +93,11 @@ Collection of thoughts and notes, pursuant to language learning.
 Easier said than done.
  Should be 'obvious' but its not.
  Goal: construct a set of linkage rules to model only the observed language,
- via link-grammar.
+ using Link Grammar.
+ That is, using the graphical structure implied in Link Grammar.
+ This, of course, implicitly assumes that Link Grammar provides an adequate
+ theory for describing and constraining the syntactical parsing of a natural
+ language.
 \end_layout
 
 \begin_layout Subsection*
@@ -101,8 +105,8 @@ Lexical Attraction, Mutual Information, Interaction Information
 \end_layout
 
 \begin_layout Standard
-The goal here is to clarify some of the formulas used by Deniz Yuret in
- his PhD thesis 
+The goal of this section is to clarify some of the formulas used by Deniz
+ Yuret in his PhD thesis 
 \begin_inset Quotes eld
 \end_inset
 
@@ -114,7 +118,15 @@ Discovery of Linguistic Relations Using Lexical Attraction
 \begin_inset Quotes erd
 \end_inset
 
-, MIT 1998 (http://www2.denizyuret.com/pub/yuretphd.pdf).
+, MIT 1998 (
+\begin_inset CommandInset href
+LatexCommand href
+name "http://www2.denizyuret.com/pub/yuretphd.pdf"
+target "http://www2.denizyuret.com/pub/yuretphd.pdf"
+
+\end_inset
+
+).
  These formulas are vitally important, because they provide a strong tool
  when working with text; this has been shown by Yuret in his thesis, as
  well as by many others, as well as by my own practical exprience with using
@@ -177,14 +189,14 @@ lexical attraction
 hip between two words, and that there are actually three variables: two
  words, and thier relationship.
  If this implicit relationship is made explicit, then the confusion evaporates.
- It also opens the door to talking about the MI (or interaction information
- II) of more complex relationships, not just pair-wise ones.
+ It also opens the door to talking about the MI (or the interaction information
+ InI) of more complex relationships, not just pair-wise ones.
  
 \end_layout
 
 \begin_layout Standard
-Being able to correctly write down the MI and the II for complex relationships
- is important for NLP: relationstionships can be labelled by types (subject,
+Being able to correctly write down the MI and the InI for complex relationships
+ is important for NLP: relationtionships can be labelled by types (subject,
  object) and by word classes (noun, verb), and have various dependency constrain
 ts between them.
  Thus, we need to be able to talk both about a labelled directed graph,
@@ -256,7 +268,7 @@ Let
 \begin_inset Formula $R$
 \end_inset
 
- that are more general; for now, though, 
+ that are more general than this; for now, though, 
 \begin_inset Formula $R$
 \end_inset
 
@@ -270,9 +282,9 @@ The simplest dependency grammar language model has only one type
 
 , the ANY type.
  This is the type that Yuret uses: it makes no distinction at all between
- subject, object relations (i.e.
- the depdencies are unlabelled), and it does not make a head-dependent distincti
-on (all dependencies are bi-directional).
+ subject, object relations (that is, all depdencies are unlabelled), and
+ it does not make a head-dependent distinction (all dependencies are bi-directio
+nal).
  Thus, in what follows, we do the same: initially, the relation 
 \begin_inset Formula $R(w_{l},w_{r})$
 \end_inset
@@ -286,11 +298,11 @@ on (all dependencies are bi-directional).
 \end_inset
 
  are connected by an unlabelled, un-directed edge.
- What 
+ For this simplest case, what 
 \begin_inset Formula $R(w_{l},w_{r})$
 \end_inset
 
- does capture is that 
+ does do is to capture that 
 \begin_inset Formula $w_{l}$
 \end_inset
 
@@ -299,6 +311,17 @@ on (all dependencies are bi-directional).
 \end_inset
 
 .
+ 
+\end_layout
+
+\begin_layout Standard
+In what follows, the relation 
+\begin_inset Formula $R=R(w_{l},w_{r})$
+\end_inset
+
+ refers to a generic two-word relation, and not necessarily this simplest
+ one.
+ To regain Yuret's formula, use the simplest relation, described above.
 \end_layout
 
 \begin_layout Standard
@@ -329,8 +352,8 @@ We are then interested in the conditional probability
 \end_inset
 
  in a sentance (with multiplicity).
- We know from experiece this is a Zipfian distribution; this does not matter
- in what follows.
+ We know from experiece this is a Zipfian distribution; however, this fact
+ will not be used in what follows.
  From the definition of conditional probabilities, we get 
 \begin_inset Formula 
 \[
@@ -352,8 +375,8 @@ Here, the relation
 \end_inset
 
  encompasses several facts: that one word is to the left of the other, and
- that they are connected by a certain link-type, as well as capturing other
- 'ambient' information, perhaps such as other nearby words.
+ that they are connected by a certain link-type, as well as possibly capturing
+ other 'ambient' information, perhaps such as other nearby words.
  The expression 
 \begin_inset Formula $P(R,w_{l},w_{r})$
 \end_inset
@@ -424,15 +447,28 @@ The probability
 
  is interesting, because it's definition is not enirely unambigous: we can
  define it as the probability of observing both words in the same sentence,
- or we can define it as the probability of observing both words, independently
- of one-another.
- This is a bit confusing, ansd is worth thinking about.
+ or we can define it as the probability of observing both words, as if they
+ were independent of one-another.
+ Clearly, the occurances of pairs of words are correlated; suggesting the
+ firt defintion is correct.
+ The second one seems to be a dumb, brute-force assumption of independence,
+ i.e.
+ that 
+\begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+What should be done? This is a bit confusing, and is worth thinking about.
  To observe two words in the same sentence, we could say that they obey
  the relationship 
 \begin_inset Formula $S(w_{l},w_{r})$
 \end_inset
 
- and so one must ponder the probability 
+ that captures thier correlation to one-another.
+ This leads one to ponder the probability 
 \begin_inset Formula $P(S(w_{l},w_{r}),w_{l},w_{r})$
 \end_inset
 
@@ -454,7 +490,7 @@ The probability
 \begin_inset Formula $S$
 \end_inset
 
- as a component: two words can only be related by 
+ implicitly: two words can only be related by 
 \begin_inset Formula $R$
 \end_inset
 
@@ -463,12 +499,13 @@ The probability
 \end_inset
 
 .
- Thus, the only unambiguous definition for 
+ Thus, the only appropriate definition for 
 \begin_inset Formula $P(w_{l},w_{r})$
 \end_inset
 
- is that the two words really are un-related; i.e.
- that we define that 
+ that we can use is that the two words really are un-related, un-correlated,
+ independent.
+ That is, we must define 
 \begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
 \end_inset
 
@@ -489,9 +526,9 @@ assume
 .
  Thus, we conclude with the conditional probability:
 \begin_inset Formula 
-\[
-P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}
-\]
+\begin{equation}
+P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}\label{eq:cond-pair}
+\end{equation}
 
 \end_inset
 
@@ -508,8 +545,10 @@ Frequentism
 
 \begin_layout Standard
 In order for the above to be manipulable in practice, we need to provide
- a definition for the probabilities, and, for this, the definiton can only
+ a definition for the probabilities, and, for this, the definition can only
  be frequentist.
+ That is, the defintion is to be obtained from empircal data; from counting
+ frequencies as they occur in nature.
  The frequency 
 \begin_inset Formula $P(w)$
 \end_inset
@@ -527,6 +566,75 @@ P(w)=\frac{N(w)}{N(*)}
 \end_inset
 
 where 
+\begin_inset Formula $N(w)$
+\end_inset
+
+ is the count of observing word 
+\begin_inset Formula $w$
+\end_inset
+
+ and 
+\begin_inset Formula $N(*)$
+\end_inset
+
+ is the total number of words observed.
+ That is, by definition, it is the wild-card summation 
+\begin_inset Formula 
+\[
+N(*)=\sum_{w}N(w)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The conditional probability for two words in a relation is similarly defined:
+\begin_inset Formula 
+\[
+P(R|w_{l},w_{r})=\frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}
+\]
+
+\end_inset
+
+This follows from the form of eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:cond-pair"
+
+\end_inset
+
+.
+ It is worth unpacking the unconditional probability.
+ It is given by
+\begin_inset Formula 
+\begin{align}
+P(R,w_{l},w_{r})= & P(R|w_{l},w_{r})P(w_{l})P(w_{r})\nonumber \\
+= & \frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}\,\frac{N(w_{l})}{N(*)}\,\frac{N(w_{r})}{N(*)}\label{eq:uncond-pair}\\
+= & \frac{N(R,w_{l},w_{r})}{N(*)N(*)}\nonumber 
+\end{align}
+
+\end_inset
+
+That is, the probability is just the number of times the relationship was
+ observed, divided by the total number of times two words are observed.
+\end_layout
+
+\begin_layout Standard
+Another interesting quantity is the probability of seeing a pair-wise relationsh
+ip, in general, independent of the actual words in the pair.
+ This may seem somewhat pointless at first, but becomes interesting when
+ a variety of different relations considered.
+ This probability is given by 
+\begin_inset Formula 
+\[
+P(R(*,*))=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(*)N(*)}=\frac{N(R(*,*))}{N(*)N(*)}
+\]
+
+\end_inset
+
+XXX Report on values of the eabove for English.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -634,46 +742,67 @@ That is, the Yuret probability of seeing a given word pair is actually the
 any
 \emph default
  word pair.
- There's a chronic problem hidden here, though, 
-\end_layout
+ The numerator of this expression is given by eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:uncond-pair"
 
-\begin_layout Standard
-XXX
-\end_layout
+\end_inset
 
-\begin_layout Standard
+, that is, 
+\begin_inset Formula $P(R(w_{l},w_{r}))=P(R(w_{l},w_{r}),w_{l},w_{r})$
+\end_inset
+
+, while the denominator is the wild-card sum:
+\begin_inset Formula 
+\[
+P(R(*,*))=\frac{N(R(*,*))}{N(*)N(*)}
+\]
+
+\end_inset
+
 which can be viewed as a conditional probability:
 \begin_inset Formula 
 \[
-P(w_{l},*)=P(R(w_{l},*))=P(R(w_{l},*)|w_{l})P(w_{l})\le P(w_{l})
+\mathcal{P}(w_{l},*)=\frac{P(R(w_{l},*))}{P(R(*,*))}=\frac{P(R(w_{l},*)|w_{l})}{P(R(*,*))}P(w_{l})\le P(w_{l})
 \]
 
 \end_inset
 
 In practice, then, for word-pairs, one has that 
-\begin_inset Formula $P(R|w_{l})$
+\begin_inset Formula $P(R|w_{l})/P(R)$
 \end_inset
 
- is almost equal to 1, but not quite (this is based on actual measurements
- for English, and should hold true for most languages).
- Inserting this into the above gives 
+ is almost equal to 1, but not quite.
+ That is, 
+\begin_inset Formula $P(R|w_{l})\approx P(R)$
+\end_inset
+
+.
+ This can be confirmed by actual measurements for English, and should hold
+ true for most languages.
+ XXX TODO Report on this (double-check) XXX.
+\end_layout
+
+\begin_layout Standard
+Thus, Yuret's notation can be expressed either in terms of conditional probabili
+tes, as 
 \begin_inset Formula 
 \[
-P(R(w_{l},w_{r})|w_{l},w_{r})=\frac{P(R(w_{l},w_{r}))\ P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}{P(w_{l},*)P(*,w_{r})}
+\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}=\frac{P(R(w_{l},w_{r})|w_{l},w_{r})\; P(R(*,*))}{P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}
 \]
 
 \end_inset
 
-Re-ordering this gives
+or in terms of the unconditional probabilities, as 
 \begin_inset Formula 
 \begin{equation}
-\frac{P(R(w_{l},w_{r})|w_{l},w_{r})}{P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}=\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}\label{eq:basic pair}
+\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}=\frac{P(R(w_{l},w_{r}),w_{l},w_{r})\; P(R(*,*))}{P(R(w_{l},*),w_{l})\ P(R(*,w_{r}),w_{r})}\label{eq:basic pair}
 \end{equation}
 
 \end_inset
 
-The right hand side above is recognizable from Yuret's work; he defines
- the 
+The left hand side above is used by Yuret to define the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -681,10 +810,10 @@ lexical attraction
 \begin_inset Quotes erd
 \end_inset
 
- as 
+, as 
 \begin_inset Formula 
 \begin{equation}
-\mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}\label{eq:Yuret's MI}
+\mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}\label{eq:Yuret's MI}
 \end{equation}
 
 \end_inset
@@ -698,11 +827,11 @@ Northern Ireland
 ' from his examples.) Note the absence of a minus sign in the above! See
  below for an explanation.
  Large-MI word pairs occur when 
-\begin_inset Formula $P(w_{l},w_{r})$
+\begin_inset Formula $\mathcal{P}(w_{l},w_{r})$
 \end_inset
 
  is roughly comparable to 
-\begin_inset Formula $P(w,*)\approx P(*,w)\approx P(w)$
+\begin_inset Formula $\mathcal{P}(w,*)\approx\mathcal{P}(*,w)\approx P(w)$
 \end_inset
 
 .
@@ -721,7 +850,7 @@ It is worth reviewing Yuret's example, at this point.
 \end_inset
 
  and finally that 
-\begin_inset Formula $-\log_{2}P(\mbox{'Northern'},\mbox{'Ireland'})=16.13$
+\begin_inset Formula $-\log_{2}\mathcal{P}(\mbox{'Northern'},\mbox{'Ireland'})=16.13$
 \end_inset
 
 .
@@ -759,20 +888,26 @@ Observationally, we have that
 \end_inset
 
  is 'large'; much larger than (unconditional) word-pair frequencies.
- 
+ XXX double check this; the definitions have changed.XXX.
 \end_layout
 
 \begin_layout Standard
-The LHS of eqn 
+The RHS of eqn 
 \begin_inset CommandInset ref
 LatexCommand eqref
 reference "eq:basic pair"
 
 \end_inset
 
- is a stranger to me; I have not seen any version of it in the literature.
- It is 'nicer' than Yuret's definition, because it is manifestly symmetric
- in 
+ is 
+\begin_inset Quotes eld
+\end_inset
+
+nicer
+\begin_inset Quotes erd
+\end_inset
+
+ than Yuret's definition, in that it is manifestly symmetric in 
 \begin_inset Formula $w_{l}$
 \end_inset
 
@@ -780,19 +915,52 @@ reference "eq:basic pair"
 \begin_inset Formula $w_{r}$
 \end_inset
 
-; that is, 
-\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})=P(R(w_{l},w_{r})|w_{r},w_{l})$
+.
+ This symmetry is essential for making contact with the 'standard' definitions
+ of MI, which are always provided in a symmetric fashion.
+ It also helps make clear the role of the left-right relationship; eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Yuret's MI"
+
 \end_inset
 
- by construction.
- This symmetry is essentialy for making contact with the 'standard' definitions
- of MI, which are always provided in a symmetric fashion.
- It also helps make clear the role of a relationship; the 'standard' definitions
- of mutual information simply talk about the MI of two random variables,
- without any reference to any information that we might already have about
- them, namely, that they can be involved in different relationships with
- respect to each other or with respect to an ambient environment.
- 
+ is in fact the three-point interaction information
+\begin_inset Formula 
+\[
+I(R;w_{l};w_{r})=MI(w_{l},w_{r})
+\]
+
+\end_inset
+
+that is, the interaction information of three random variables: 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+, 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ and 
+\begin_inset Formula $R=R(w_{l},w_{r})$
+\end_inset
+
+.
+ In particular, Yuret's lexical attraction is specifically 
+\emph on
+not
+\emph default
+ the mutual information of two random variables; it includes a specific,
+ defined relationship between them: that one word is explicitly to the left
+ of another, as well as the 
+\begin_inset Quotes eld
+\end_inset
+
+ambient
+\begin_inset Quotes erd
+\end_inset
+
+ relation that they occur within the same sentence.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -15791,8 +15959,8 @@ words
 
 \begin_layout Standard
 Pair counting in planar diagrams gives different results.
- The diagram below shows the twelve planar trees that can be formed by parsing
- a sentence of four words.
+ The diagram below shows the twelve planar trees, containing no cycles,
+ that can be formed by parsing a sentence of four words.
  
 \end_layout
 
@@ -16068,11 +16236,427 @@ Count
 
 \begin_layout Standard
 Note that the progressively-longer edges get less frequent.
- What is the actual distribution? First, we need a generic formula for sentences
- of length N.
+\end_layout
+
+\begin_layout Standard
+If graphs with cycles are also allowed, (but no edge crossings) then, in
+ addition to the above, there are eleven more diagrams.
+ These are shown below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/loop-counting.eps
+	width 40col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Again, we count the number of edges, as before.
+ The 'tree' column shows he counts from before; the loop count count the
+ edges from the additional eleven diagrams; the total is just that.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+word-pair
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tree
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+loop
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+total
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(ab)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(bc)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(cd)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(ac)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(bd)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+(ad)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Likewise, the number of arcs of the given length is now given below:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Length
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Count
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+48
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+What are the actual distributions, for these two cases? Bewgine by counting
+ the number of planar trees.
+\end_layout
+
+\begin_layout Subsection*
+Counting planar tree graphs
+\end_layout
+
+\begin_layout Standard
+Let's count the number of planar tree graphs; i.e.
+ those without any loops.
+ First, we need a generic formula for sentences of length N.
  This is not so very easy.
  The diagram below shows one way to count.
- (I think what follows is correct, but might be making a mistake.
+ (I think what follows is correct, but I might be making a mistake.
  I am unaware of any literature that presents this information).
 \end_layout
 
@@ -16182,11 +16766,11 @@ It's convenient, here, to define
 \begin_inset Formula $C_{k}(n)$
 \end_inset
 
-'s requires some combinatoric magic.
+'s requires some combinatorial magic.
  The first one is 
 \begin_inset Formula 
 \[
-C_{2}(n)=\sum_{j=2}^{n-1}C(j)C(n-j+1)
+C_{2}(n)=\sum_{j=2}^{n-1}D(j)D(n-j+1)
 \]
 
 \end_inset
@@ -16194,7 +16778,7 @@ C_{2}(n)=\sum_{j=2}^{n-1}C(j)C(n-j+1)
 Next comes
 \begin_inset Formula 
 \[
-C_{3}(n)=\sum_{j=2}^{n-1}\;\sum_{m=2}^{n-j+1}C(j)C(m)C(n-j-m+2)
+C_{3}(n)=\sum_{j=2}^{n-1}\;\sum_{m=2}^{n-j+1}D(j)D(m)D(n-j-m+2)
 \]
 
 \end_inset
@@ -16725,6 +17309,686 @@ The table below summarizes the first few sums:
 \begin_layout Standard
 Either I am computing this wrong, or the sequences are not in OEIS.
  Surprising!
+\end_layout
+
+\begin_layout Subsection*
+Counting planar loop graphs
+\end_layout
+
+\begin_layout Standard
+The above process can be repeated, except that this time, we consider the
+ planar graphs containing loops.
+ To get started, consider the diagram below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/all-loop.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, the stars represent either 
+\begin_inset Quotes eld
+\end_inset
+
+domed
+\begin_inset Quotes erd
+\end_inset
+
+ diagrams, or the empty set (a set containing no words and no edges.
+ The type F concatenates two domes, and puts a dome over those, in turn.
+ Since both of the stars are domed (or empty), it is impossible to add any
+ additional edges to this graph.
+ So, for graphs constructed out of a pair domes (one or both possibly empty),
+ Type F is all that there is.
+ For three domes in a row, there are only three ways of adding edges: these
+ are shown in type G and H in this diagram.
+ Again, this exhauses all possibilities.
+ This process constructs both looped and tree diagrams.
+ The general idea is to repeat this, for sequences of four or more stars.
+\end_layout
+
+\begin_layout Standard
+The counting is similar to that before.
+ Let 
+\begin_inset Formula $F(n)$
+\end_inset
+
+ count the number of domed graphs, connecting 
+\begin_inset Formula $n$
+\end_inset
+
+ words.
+ Let 
+\begin_inset Formula $G_{2}(n)$
+\end_inset
+
+ count the number of type F graphs, made of two parts, and containing 
+\begin_inset Formula $n$
+\end_inset
+
+ words.
+ Consulting the diagram, we have
+\begin_inset Formula 
+\[
+G_{2}(n)=F(n-1)+\sum_{k=2}^{n-1}F(k)F(n-k+1)+F(n-1)
+\]
+
+\end_inset
+
+Likewise, let 
+\begin_inset Formula $G_{3}(n)$
+\end_inset
+
+ count the number of graphs of type G and H, combined.
+ Consulting the diagram, this has a more complex expression:
+\begin_inset Formula 
+\[
+G_{3}(n)=\sum_{k=2}^{n-2}F(k)F(n-k)+\sum\sum F()F()F()...+\sum_{k=2}^{n-2}F(k)F(n-k)+...
+\]
+
+\end_inset
+
+The total number of domed graphs having 
+\begin_inset Formula $n$
+\end_inset
+
+ words is then 
+\begin_inset Formula 
+\[
+F(n)=\sum_{k=2}^{n-1}G_{k}(n)
+\]
+
+\end_inset
+
+Let 
+\begin_inset Formula $S(n)$
+\end_inset
+
+ be the count of a string of domed graphs, but NOT having connecting arcs:
+ that is, graphs of type A or E.
+\end_layout
+
+\begin_layout Standard
+A table of these is given below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="8">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $n$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $L(n)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $S(n)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $F(n)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $G_{2}(n)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $G_{3}(n)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $G_{4}(n)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $G_{5}(n)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+23
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+x
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+156
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+x
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1162
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+x
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+TODO
+\end_layout
+
+\begin_layout Standard
+Explain how mutual exclusion of concepts as performed by humans when learning
+ new concepts, resembles optimal strategies for the channel coding theorem,
+ by minimizing confusion between similar concepts.
 \end_layout
 
 \begin_layout Section*
