@@ -102,7 +102,7 @@ setTypeL  :: SynIso [Atom] Atom
 setTypeL = linkIso "SetTypeLink" noTv
 
 subsetL :: SynIso (Atom,Atom) Atom
-subsetL = linkIso "SubSetLink" noTv . tolist2
+subsetL = linkIso "SubsetLink" noTv . tolist2
 
 sizeL  :: SynIso [Atom] Atom
 sizeL = linkIso "SetSizeLink" noTv

@@ -57,7 +57,7 @@ pattern EvalL tv p a <- Link "EvaluationLink" [p,a] tv
 pattern ExL tv p a <- Link "ExistsLink" [p,a] tv
 pattern CtxL c a <- Link "ContextLink" [c,a] _
 pattern SimL a b <- Link "SimilarityLink" [a,b] _
-pattern SubL a b <- Link "SubSetLink" [a,b] _
+pattern SubL a b <- Link "SubsetLink" [a,b] _
 pattern LambdaL a b <- Link "LambdaLink" [a,b] _
 pattern MemL a b <- Link "MemberLink" [a,b] _
 pattern EquivL a b <- Link "EquivalenceLink" [a,b] _
