@@ -2781,6 +2781,11 @@ select count(*) from  atoms where type =47;   9045489 this is pairs
 select count(*) from  atoms where type =8;    9045489 this is list links
 
 select count(*) from valuations where type=121;  -- FloatValue
+ select * from valuations where type != 176 and type != 177 limit 50;
+select count(*) from valuations where type != 176 and type != 177;
+
+select count(*) from valuations where key =2440463582;  -- 9672428
+select count(*) from valuations where key =2440463583;  -- 8880904
 
 
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
@@ -3016,6 +3021,8 @@ HandlePair
 (use-modules (opencog) (opencog persist) (opencog persist-sql))
 (use-modules (opencog nlp) (opencog nlp learn))
 (sql-open "postgres:///en_pairs?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver)
 (batch-all-pairs)
 (define lg_rel  (LinkGrammarRelationshipNode "ANY"))
       (init-trace "/tmp/progress")
@@ -3038,3 +3045,71 @@ HandlePair
 elect * from valuations where atom=143501595;
 
 (store-atom left-star) took forever...
+
+WordNode load took 36s, 38s
+
+9112060 in incoming set
+
+serial inc fetch= 28m11 ,  28m03
+serial inc fetch w/GIN idx= 28m39
+parallel inc fecth w/GIN idex = 38s, 28s, 29s
+parallel inc fetch no idx = 32s, 30s, 33s
+
+serial value fetch=  24m30
+parallel value fetch=  1m36, 1m35
+parallel resurse+value= 5m16, 6m47(!?), 6m47, 6m50, 7m6
+
+atomspace add = 8m51 = 531 secs, 9m02, 7m56, 7m55, 8m00, 8m21
+
+atsomapce add: added 9112060 atoms in 8m51 = 531 secs = 17.1K/sec
+well, each atom is actually 5 atoms so this is 5x faster = 86K/sec
+
+do a parallel type fetch...
+as->fetch_all_atoms_of_type(t);
+_backing_store->loadType(_atom_table, t);
+
+o_store_single_ato
+add_id_to_cache(uuid)
+   puts it in local_id_cache
+   erases from id_create_cach
+
+maybe_create_id(uuid)
+
+where is check for existance?????
+well, get_uuid() does checking()
+soo  iif in tlb then works
+
+rp.id_set ...!?
+get_ids get all id's  in 
+
+do_store_single_atom
+do_store_atom
+_write_q
+
+does tlbuf???
+
+I don'd see it being tlbuff....
+
+   UUID uuid = _tlbuf.getUUID(h);
+   if (TLB::INVALID_UUID != uuid) return uuid;
+
+
++CREATE INDEX ON Atoms USING GIN(outgoing);
+
+TODO:
+parallelize get_ids...
+actually get_ids is not needed.....
+
+XXX need to store the keys
+
+do_store_atom
+
+total stroes is miscounted!aactually, its right, values don't count.
+
+num_get_nodes=3 num_got_nodes=1 (33.333333 pct)
+num_get_links=0 num_got_links=0 (-nan pct)
+sql-stats: total loads = 19741116 total stores = 2 ratio=0.000000
+
+get_recursive is not counting what it got.
+values and valuations are not counting....
+
