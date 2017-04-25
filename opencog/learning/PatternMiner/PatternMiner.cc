@@ -2785,18 +2785,20 @@ void PatternMiner::applyWhiteListKeywordfilterAfterMining()
         return;
     }
 
-    string keywordlist = "";
-    for (string keyword : keyword_white_list)
-        keywordlist += (keyword + "-");
-
-
     string logic;
     if (keyword_white_list_logic == QUERY_LOGIC::OR)
        logic = "OR";
     else
        logic = "AND";
 
-    cout<<"\nPatternMiner:  applying keyword white list (" << logic << ") filter:" << keywordlist << std::endl;
+    string keywordlist = "";
+    cout<<"\nPatternMiner:  applying keyword white list (" << logic << ") filter: ";
+    for (string keyword : keyword_white_list)
+    {
+        keywordlist += (keyword + "-");
+        cout << keyword << " ";
+    }
+    cout << std::endl;
 
     string fileNameBasic = "WhiteKeyWord-" + logic + "-" + keywordlist;
 
@@ -3266,7 +3268,7 @@ OrderedHandleSet PatternMiner::_extendOneLinkForSubsetCorpus(OrderedHandleSet& a
 // must load the corpus before calling this function
 void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsigned int max_connection)
 {
-    std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the following topics:" << std::endl ;
+    std::cout << "\nSelecting a subset from loaded corpus in Atomspace for the following keywords within " << max_connection << " distance:" << std::endl ;
     OrderedHandleSet allSubsetLinks;
     string topicsStr = "";
 
@@ -3310,7 +3312,7 @@ void PatternMiner::_selectSubsetFromCorpus(vector<string>& subsetKeywords, unsig
 
     subsetFile.close();
 
-    std::cout << "\nDone! The subset has been written to file:  " << fileName << std::endl ;
+    std::cout << "\nDone! Subset size: " << allSubsetLinks.size() << " Links in total. The subset has been written to file:  " << fileName << std::endl ;
 }
 
 
