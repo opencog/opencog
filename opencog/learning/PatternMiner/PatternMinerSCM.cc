@@ -377,6 +377,11 @@ void PatternMinerSCM::init()
     AtomSpace* as = SchemeSmob::ss_get_env_as("patten miner");
     patternMiner = new PatternMiner(as);
 
+    //---------------Note-----------------
+    //
+    // If you get compile error here, please pull the AtomSpace and make intall it.
+    // git pull https://github.com/opencog/atomspace.git master
+    //------------------------------------
     define_scheme_primitive("pm-run-patternminer", &PatternMinerSCM::run_patternminer, this, "patternminer");
     define_scheme_primitive("pm-get-current-settings", &PatternMinerSCM::get_current_settings, this, "patternminer");
     define_scheme_primitive("pm-get-pattern-max-gram", &PatternMinerSCM::get_Pattern_Max_Gram, this, "patternminer");
