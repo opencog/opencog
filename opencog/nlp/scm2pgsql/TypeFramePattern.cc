@@ -52,21 +52,26 @@ void TypeFramePattern::recursiveAdd(TypeFrame &frame, int cursor)
     if (DEBUG) printf("RETURNING\n");
 }
 
-void TypeFramePattern::printForDebug(std::string upperPrefix)
+void TypeFramePattern::printForDebug(std::string upperIndent, std::string upperPrefix, bool showNames)
 {
     TypeVectorMap::iterator it = branches.begin();
-    /*
     if (it == branches.end()) {
-        if printf("EMPTY BRANCH: %s\n", upperPrefix.c_str());
+        printf(" ");
+    } else {
+        printf("\n");
     }
-    */
     int count = 1;
     while (it != branches.end()) {
+        std::string indent = upperIndent + "    ";
         std::string prefix = upperPrefix + "." + std::to_string(count);
         for (unsigned int i = 0; i < (*it).first.size(); i++) {
-            printf("#%s: (%d,%d) {\n", prefix.c_str(), (*it).first.at(i).first, (*it).first.at(i).second); 
-            (*it).second.at(i)->printForDebug(prefix);
-            printf("}\n");
+            if (showNames) {
+                printf("%s%s: (%s,%d) {", indent.c_str(), prefix.c_str(), classserver().getTypeName((*it).first.at(i).first).c_str(), (*it).first.at(i).second); 
+            } else {
+                printf("%s%s: (%d,%d) {", indent.c_str(), prefix.c_str(), (*it).first.at(i).first, (*it).first.at(i).second); 
+            }
+            (*it).second.at(i)->printForDebug(indent, prefix, showNames);
+            printf("%s}\n", indent.c_str());
         }
         it++;
         count++;

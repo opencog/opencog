@@ -36,14 +36,18 @@ bool TypeFrameIndex::addFromScheme(const std::string &txt)
     return returnValue;
 }
 
-void TypeFrameIndex::printForDebug()
+void TypeFrameIndex::printForDebug(bool showNames)
 {
     TypePairMap::iterator it = patterns.begin();
     int count = 1;
     while (it != patterns.end()) {
         std::string prefix = std::to_string(count);
-        printf("#%s: (%d,%d) {\n", prefix.c_str(), (*it).first.first, (*it).first.second);
-        (*it).second->printForDebug(prefix);
+        if (showNames) {
+            printf("%s: (%s,%d) {", prefix.c_str(), classserver().getTypeName((*it).first.first).c_str(), (*it).first.second);
+        } else {
+            printf("%s: (%d,%d) {", prefix.c_str(), (*it).first.first, (*it).first.second);
+        }
+        (*it).second->printForDebug("", prefix, showNames);
         printf("}\n");
         it++;
         count++;

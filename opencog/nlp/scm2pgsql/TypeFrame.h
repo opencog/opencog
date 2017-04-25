@@ -87,9 +87,6 @@ private:
     int countTargets(const std::string &txt, int begin);
     int recursiveParse(const std::string &txt, int begin);
     void error(std::string message);
-    bool fake_isLink(std::string t);
-    bool fake_isNode(std::string t);
-    int fake_getType(std::string typeName);
 
 };
 }

@@ -71,21 +71,6 @@ bool TypeFrame::buildFrameRepresentation(const string &schemeTxt)
     return false;
 }
 
-bool TypeFrame::fake_isLink(string t) {
-    return !fake_isNode(t);
-}
-
-bool TypeFrame::fake_isNode(string t) {
-    return (t == "t3");
-}
-
-int TypeFrame::fake_getType(string typeName) {
-    if (typeName == "t1") return 1;
-    if (typeName == "t2") return 2;
-    if (typeName == "t3") return 3;
-    return -1;
-}
-
 int TypeFrame::countTargets(const string &txt, int begin)
 {
 
@@ -197,6 +182,6 @@ int TypeFrame::recursiveParse(const string &txt, int begin)
 
 void TypeFrame::error(string message)
 {
-    if (DEBUG) fprintf(stderr, "Parse error. %s\n", message.c_str());
+    fprintf(stderr, "Parse error. %s\n", message.c_str());
 }
 

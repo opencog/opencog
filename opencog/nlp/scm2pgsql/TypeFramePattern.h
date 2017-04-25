@@ -45,7 +45,7 @@ public:
     TypeFramePattern();
     ~TypeFramePattern();
     void add(TypeFrame &frame);
-    void printForDebug(std::string prefix);
+    void printForDebug(std::string indent, std::string prefix, bool showNames = false);
 
 
     /*

@@ -39,7 +39,7 @@ bool loadFile(char *fileName)
     schemeEval->eval("(use-modules (opencog nlp relex2logic))");
     bool returnValue = SCMLoader::load(fileName, atomSpace, &builder);
     //bool returnValue = SCMLoader::load(fileName, atomSpace);
-    index.printForDebug();
+    index.printForDebug(true);
     return returnValue;
 }
 

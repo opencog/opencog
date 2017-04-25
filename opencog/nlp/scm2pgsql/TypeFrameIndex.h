@@ -47,7 +47,7 @@ public:
 
     bool addFromScheme(const std::string &txt);
 
-    void printForDebug();
+    void printForDebug(bool showNames = false);
 
 private:
 
