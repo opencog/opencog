@@ -3127,3 +3127,30 @@ move printing exceptiioon ot guile
 
 fetch_incoming_set false
 MultiThreadUTest
+tv-conf
+cog-tv
+
+14:37
+; (use-modules (opencog) (opencog persist) (opencog persist-sql))
+; (use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_pairs?user=linas")
+;
+; (load-atoms-of-type item-type)   ;; approx 1 minutes?
+; (define lg_any (LinkGrammarRelationshipNode "ANY"))
+; (fetch-incoming-set lg_any) ;; approx 15 minutes ?
+;
+(mst-parse-text "this is a test")
+
+ _tlbuf.addAtom(node, p->uuid); can replace!?
+line 1427
+line 378
+
+start-cost-pair is bogus!
+and subsequent crash
+
+ (define e (EvaluationLink 
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink (WordNode "this") (WordNode "test"))))
+
+ (cog-value e mi-key)
+

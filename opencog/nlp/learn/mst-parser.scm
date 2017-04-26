@@ -38,7 +38,7 @@
 ; this is easy. This also makes a vague attempt to also separate commas,
 ; periods, and other punctuation.  Returned is a list of words.
 ;
-(define (tokenize-text plain-text)
+(define-public (tokenize-text plain-text)
 	; Prefix and suffix lists taken from the link-grammar ANY
 	; language 4.0.affix file
 	(define prefix "({[<«〈（〔《【［『「``„“‘'''…...¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
@@ -60,10 +60,8 @@
 						(strip-prefix (substring word 1)) ; loop again.
 					)
 					(strip-prefli word (cdr prefli)) ; if no match, recurse.
-				)
-			)
-		)
-	)
+				))))
+
 	; Main entry point for the recursive prefix splitter
 	(define (strip-prefix word) (strip-prefli word prefix-list))
 
@@ -82,10 +80,8 @@
 						(list (string punct))
 					)
 					(strip-sufli word (cdr sufli))
-				)
-			)
-		)
-	)
+				))))
+
 	; Main entry point for the recursive splitter
 	(define (strip-affix word) (strip-sufli word suffix-list))
 
@@ -315,13 +311,8 @@
 							; bad-pair as soon as possible.
 							(if (<= so-far-mi first-mi)
 								first-choice
-								best-so-far
-							)
-						)
-					)
-					(*pick-best (cdr choice-list) curr-best)
-				)
-			)
+								best-so-far)))
+					(*pick-best (cdr choice-list) curr-best)))
 		)
 		(*pick-best choice-list bad-pair)
 	)
@@ -488,6 +479,11 @@
 )
 
 ; ---------------------------------------------------------------------
+;
+; (use-modules (opencog) (opencog persist) (opencog persist-sql))
+; (use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_pairs?user=linas")
+;
 ; (init-trace)
 ; (load-atoms-of-type item-type)
 ; (define lg_any (LinkGrammarRelationshipNode "ANY"))
