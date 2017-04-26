@@ -36,10 +36,12 @@
 
 (define (get-first-term txt)
   "Get the first term from the text."
-  (define term-no-brackets (string-match "^[!'~a-zA-Z0-9]+\\b" txt))
-  (if (equal? #f term-no-brackets)
-    (match:substring (string-match "^![[<'~a-zA-Z0-9 ]+\\b]*>*" txt))
-    (match:substring term-no-brackets)))
+  (define term-no-brackets (string-match "^[!'~_a-zA-Z0-9]+\\b" txt))
+  (define term-with-brackets (string-match "^[[!'~a-zA-Z0-9 ]+\\b]*>*" txt))
+  (cond ((not (equal? #f term-no-brackets))
+         (match:substring term-no-brackets))
+        ((not (equal? #f term-with-brackets))
+         (match:substring term-with-brackets))))
 
 ; XXX TODO Remove me later
 ; Note:
@@ -62,8 +64,7 @@
 ; Sentence Anchors: >
 ; Variable: _
 
-; TODO: Extract Part-of-Speech as well!
-(define (extract-1st-term txt)
+(define (extract txt)
   "Identify and extract the term at the beginning of the text."
   (cond ; Since the quote (') could be used in two different
         ; terms, one is to indicate the literal occurrence of a
@@ -107,7 +108,7 @@
   "Construct a list of terms by recursively extracting the
    terms one by one from the given text."
   (cog-logger-debug "Constructing term-list from: ~a" txt)
-  (let* ((term (extract-1st-term (string-trim-both txt)))
+  (let* ((term (extract (string-trim-both txt)))
          (newtxt (string-trim (string-drop txt (string-length term))))
          (newlst (append lst (list term))))
     (cog-logger-debug "Term extracted: ~a" term)
@@ -155,20 +156,29 @@
             ((string-prefix? "<<" t)
              (cons "unordered-matching"
                (interpret-terms (extract-terms (subterm t 2)))))
+            ((string-prefix? "<" t)
+             (cons "anchor-start" "<"))
+            ((string-prefix? ">" t)
+             (cons "anchor-end" ">"))
             ((string-prefix? "[" t)
              (cons "or-choices"
                (interpret-terms (extract-terms (subterm t 1)))))
-            ; TODO: negation-start, negation-end?
-;            ((and (string-prefix? "!" t)
-;                  (not (equal? #f (string-match regex-negterm t))))
-;             (cons "negation" (list (substring
-;               (match:substring (string-match regex-negterm t)) 1))))
-;            ((and (string-prefix? "!" t)
-;                  (not (equal? #f (string-match regex-neglst t))))
-;             (cons "negation" (interpret-terms (extract-terms
-;               (substring (match:substring (string-match regex-neglst t)) 1)))))
+            ; TODO: negation-start, negation-end etc?
+            ((and (string-prefix? "!" t)
+                  (not (equal? #f (string-match regex-negterm t))))
+             (cons "negation" (list (substring
+               (match:substring (string-match regex-negterm t)) 1))))
+            ((and (string-prefix? "!" t)
+                  (not (equal? #f (string-match regex-neglst t))))
+             (cons "negation" (interpret-terms (extract-terms
+               (substring (match:substring (string-match regex-neglst t)) 1)))))
             ((string-prefix? "~" t)
              (cons "concept" (list (substring t 1))))
+            ((equal? "_" t)
+             (cons "variable" "_"))
+            ((not (equal? #f (string-match "[_a-zA-Z]+~" t)))
+             (let ((ss (string-split t #\~)))
+               (cons (cadr ss) (car ss))))
             ; Consider as lemma by default
             (else (cons "lemma" (list t)))))
     terms))
@@ -178,11 +188,12 @@
    extracting the terms from the text and interpret them
    one by one later."
   (let* ((terms (extract-terms (string-trim-both txt)))
-         (sorted-terms (rearrange-terms terms))
-         (interp-terms (interpret-terms sorted-terms)))
+         (interp-terms (interpret-terms terms)))
+;         (sorted-terms (rearrange-terms terms))
+;         (interp-terms (interpret-terms sorted-terms)))
     (cog-logger-debug "Total ~d terms were extracted: ~a" (length terms) terms)
-    (cog-logger-debug "Total ~d terms remained after rearranging: ~a"
-      (length sorted-terms) sorted-terms)
+;    (cog-logger-debug "Total ~d terms remained after rearranging: ~a"
+;      (length sorted-terms) sorted-terms)
     (cog-logger-debug "Term interpretation: ~a" interp-terms)))
 
 (define-public (cr pattern action)
