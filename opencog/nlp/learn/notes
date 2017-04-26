@@ -3113,3 +3113,17 @@ sql-stats: total loads = 19741116 total stores = 2 ratio=0.000000
 get_recursive is not counting what it got.
 values and valuations are not counting....
 
+Also: type load doesn't ...? grab the TV's!?  FIXED
+
+type load needs to be conservative with recursion! DONE
+
+do-store_atom stores values recursively. It should have a flag for that.
+Documented....
+
+Also: ato->setValue() does not work for raw atoms!  so incoming is
+broken.
+RuntimeException
+move printing exceptiioon ot guile
+
+fetch_incoming_set false
+MultiThreadUTest

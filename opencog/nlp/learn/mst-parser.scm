@@ -119,7 +119,7 @@
 			(cog-link 'EvaluationLink lg_rel wpr)
 			'()))
 	(if (not (null? evl))
-		(tv-conf (cog-tv evl))
+		(get-mi evl)
 		bad-mi
 	)
 )
@@ -142,12 +142,15 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Minimum Spanning Tree parser.
+; Maximum Spanning Tree parser.
+;
 ; Given a raw-text sentence, it splits apart the sentence into distinct
 ; words, and finds an (unlabelled) dependency parse of the sentence, by
-; finding a dependency tree that minimizes minus the mutual information.
+; finding a dependency tree that maximizes the mutual information.
 ; A list of word-pairs, together with the associated mutual information,
 ; is returned.
+;
+; The M in MST normally stands for "minimum", but we want to maximize.
 ;
 ; There are many MST algorithms; the choice was made as follows:
 ; Prim is very easy; but seems too simple to give good results.
@@ -164,7 +167,11 @@
 ; the mean-dependency-distance metric needs to be re-phrased as some
 ; sort of graph entropy. Hmmm...
 ;
-; So, for now, a no-links-corss constraint is handed-coded into the algo.
+; Another idea is to apply the Dick Hudson Word Grammar landmark
+; transitivity idea, but exactly how this could work for unlabelled
+; trees has not been explored.
+;
+; So, for now, a no-links-cross constraint is handed-coded into the algo.
 ; Without it, it seems that the pair-MI scores alone give rather unruly
 ; dependencies (unclear, needs exploration).  So, in the long-run, it
 ; might be better to instead pick something that combines MI scores with 
@@ -175,7 +182,7 @@
 ; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
 ; relationships in dependency trees”, ArXiv 1304.4086
 
-(define (mst-parse-text plain-text)
+(define-public (mst-parse-text plain-text)
 	(define lg_any (LinkGrammarRelationshipNode "ANY"))
 
 	; Define a losing score.
