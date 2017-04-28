@@ -3475,11 +3475,10 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
     resultFile.open(fileName.c_str());
 
     if (resultFile.is_open())
-    {
-        std::cout << "\nCannot find file " << fileName << "!" << std::endl ;
-    }
-    else
         std::cout << "\nLoading patterns from  " << fileName << std::endl ;
+    else
+        std::cout << "\nCannot find file " << fileName << "!" << std::endl ;
+
 
     // read the first line
     string firstLine;
@@ -3509,10 +3508,11 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
     int frequency = 0;
     string lastLine = "";
     unsigned int loadedPatternNum = 0;
+    bool patternStart = false;
 
     for (std::string line; std::getline(resultFile, line); )
     {
-        if ((line == "\n") && (lastLine == "\n")) // one pattern end, load it
+        if (patternStart && (line == "") && (lastLine == "")) // one pattern end, load it
         {
             // add this new found pattern into the Atomspace
             HandleSeq patternHandleSeq = loadPatternIntoAtomSpaceFromString(patternStr, atomSpace);
@@ -3534,15 +3534,17 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
             (patternsForGram[patternHandleSeq.size()-1]).push_back(newHTreeNode);
             loadedPatternNum ++;
             patternStr = "";
+            patternStart = false;
         }
         else if (line.find("Pattern:") != string::npos) // one pattern start
         {
-            int numberStart = line.find("Frequency = ") + 1;
+            int numberStart = line.find("Frequency = ") + 12;
 
             string numStr = line.substr(numberStart, line.size() - numberStart);
             frequency = atoi(numStr.c_str());
+            patternStart = true;
         }
-        else // in the middle of one pattern
+        else if (patternStart)// in the middle of one pattern
         {
             patternStr += line;
         }
