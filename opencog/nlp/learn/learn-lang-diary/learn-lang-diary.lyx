@@ -624,8 +624,7 @@ That is, the probability is just the number of times the relationship was
 \begin_layout Standard
 Another interesting quantity is the probability of seeing a pair-wise relationsh
 ip, in general, independent of the actual words in the pair.
- This may seem somewhat pointless at first, but becomes interesting when
- a variety of different relations considered.
+ This may seem somewhat pointless, but is worth a review.
  This probability is given by 
 \begin_inset Formula 
 \[
@@ -634,7 +633,55 @@ P(R(*,*))=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(*)N(*)}=\frac{N(R(*,*))}{N
 
 \end_inset
 
-XXX Report on values of the eabove for English.
+Unfortunately, it is a bit misleading: that is because, to reasonable degree
+ of accuracy, 
+\begin_inset Formula 
+\[
+N(R(*,*))\approx0.5N(*)
+\]
+
+\end_inset
+
+This follows from the inequalities 
+\begin_inset Formula 
+\[
+N(w_{l},*)\le N(w_{l})
+\]
+
+\end_inset
+
+and likewise for the right side: the number if times that a word is observed
+ is neccesarily greater than the number of times it participates in a pair.
+ For totally random observations, of totally random sentences, we expect
+ that a word will occur on the left, or on the right, exactly half the time.
+ That is, 
+\begin_inset Formula 
+\[
+E(w,*)=E(*,w)=0.5
+\]
+
+\end_inset
+
+Of course, this cannot hold for a given human langauge: the exclamation
+ point, question mark and period occur exclusively on the right hand-side
+ of any randomly-generated pair.
+\end_layout
+
+\begin_layout Standard
+There is also another, rlated quantity, discussed in more detail, below.
+ It is given by
+\begin_inset Formula 
+\[
+\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(R,w_{l},*)N(R,*,w_{r})}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+XXX Report on values of the above for English.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -17975,6 +18022,24 @@ x
 </cell>
 </row>
 </lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+28 April 2017
+\end_layout
+
+\begin_layout Standard
+Reviewing some old results suggests that asymmetric mutual information should
+ be attempted.
+ For the results reported below, this will be defined as 
+\begin_inset Formula 
+\[
+AMI(w_{l},w_{r})=MI(w_{l},w_{r})/\log
+\]
 
 \end_inset
 
