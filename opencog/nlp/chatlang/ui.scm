@@ -6,36 +6,16 @@
              (ice-9 readline)
              (ice-9 regex))
 
-; XXX TODO Remove me later
+; ----------
+; For debugging
 (cog-logger-set-level! "debug")
 (cog-logger-set-stdout! #t)
 
-; The regex here assumes that words for proper names are
-; literally just words, no funny things like concepts
-; negations, choices etc
-(define regex-proper-names "^'[a-zA-Z0-9 ]+\\b'")
+(define filename "cr.scm")
 
-; The regex here assumes that words for unordered
-; matching can only be words, lemmas, and concepts
-(define regex-unordered "^<<[a-zA-Z0-9 '~]+>>")
-
-; The regex here assumes that the choices can only be
-; words, lemmas, and concepts
-(define regex-choices "^[[a-zA-Z0-9 '~]+]")
-
-; The regex to extract a negation term e.g. !greet or !~food etc
-(define regex-negterm "^![~'a-zA-Z0-9]+\\b")
-
-; The regex to extract the negation a list of terms
-; e.g. ![hi hey ~others]
-(define regex-neglst "^![[<'~a-zA-Z0-9 ]+\\b]*>*")
-
-(define (symbol-contains? sym str)
-  "Check if a symbol contains a specific string."
-  (not (equal? #f (string-contains (symbol->string sym) str))))
-
-(define (get-first-term txt)
-  "Get the first term from the text."
+; ----------
+(define (extract txt)
+  "Extract the first term from the text."
   (define term-no-brackets (string-match "^[!'~_a-zA-Z0-9]+\\b" txt))
   (define term-with-brackets (string-match "^[[!'~a-zA-Z0-9 ]+\\b]*>*" txt))
   (cond ((not (equal? #f term-no-brackets))
@@ -43,40 +23,19 @@
         ((not (equal? #f term-with-brackets))
          (match:substring term-with-brackets))))
 
-; XXX TODO Remove me later
-; Note:
-; In front of a word:
-; Literal: '
-; Concept: ~
-; Proper Names: '
-; Negation: !
-; Or Choices: [
-; Unordered Matching: <<
-;
-; After a word:
-; POS: ~
-; Proper Names: '
-; Or Choices: ]
-; Unordered Matching: >>
-;
-; Anywhere:
-; Sentence Anchors: <
-; Sentence Anchors: >
-; Variable: _
-
-(define (extract txt)
-  "Identify and extract the term at the beginning of the text."
+(define (extract-term txt)
+  "Identify and extract the term at the beginning of the text.
+   Return the term extracted."
   (cond ; Since the quote (') could be used in two different
         ; terms, one is to indicate the literal occurrence of a
         ; word (e.g. 'played) and another is to indicate a
         ; proper name (e.g. 'Hanson Robotics'), so check if we
         ; got a quote for the first word
         ((string-prefix? "'" txt)
-         (let ((sm (string-match regex-proper-names txt)))
-           ; Check whether it's a literal or proper name
+         (let ((sm (string-match "^'[a-zA-Z0-9 ]+\\b'" txt)))
            (if (equal? #f sm)
              ; Return the literal
-             (get-first-term txt)
+             (extract txt)
              ; Return the proper name
              (match:substring sm))))
         ; Similarly angle brackets (< >) could be used in two
@@ -85,7 +44,7 @@
         ; to represent unordered matching (e.g. <<like cats>>),
         ; so check if there are any angle brackets
         ((string-prefix? "<" txt)
-         (let ((sm (string-match regex-unordered txt)))
+         (let ((sm (string-match "^<<['~a-zA-Z0-9 ]+>>" txt)))
            (if (equal? #f sm)
              ; Return the sentence anchor <
              "<"
@@ -94,137 +53,144 @@
         ((string-prefix? ">" txt) ">")
         ; For handling choices -- square brackets (e.g. [like love])
         ((string-prefix? "[" txt)
-         (let ((sm (string-match regex-choices txt)))
+         (let ((sm (string-match "^[['~a-zA-Z0-9 ]+]" txt)))
            (if (equal? #f sm)
-             ; TODO: Do something else other then cog-logger-error
+             ; TODO: Do something else other then cog-logger-error?
              (cog-logger-error "Syntax error: ~a" txt)
              ; Return the choices
              (match:substring sm))))
         ; For the rest, like negation, concept, and lemma,
         ; just return the whole term
-        (else (get-first-term txt))))
+        (else (extract txt))))
 
-(define* (extract-terms txt #:optional (lst '()))
+(define* (identify-terms txt #:optional (lst '()))
   "Construct a list of terms by recursively extracting the
    terms one by one from the given text."
   (cog-logger-debug "Constructing term-list from: ~a" txt)
-  (let* ((term (extract (string-trim-both txt)))
+  (let* ((term (extract-term (string-trim-both txt)))
          (newtxt (string-trim (string-drop txt (string-length term))))
          (newlst (append lst (list term))))
     (cog-logger-debug "Term extracted: ~a" term)
     (if (< 0 (string-length newtxt))
-      (extract-terms newtxt newlst)
+      (identify-terms newtxt newlst)
       newlst)))
-
-(define (rearrange-terms terms)
-  "Check if the terms have any sentence anchors and rearrange them in
-   the intended orders."
-  (define (check-anchor-start terms)
-    (define starting-terms (member "<" terms))
-    ; Take all the terms after the sentence anchor "<" to the front
-    ; of the list, if any, but not including the "<" in the new list
-    (if (equal? #f starting-terms)
-      ; TODO: Add a zero-to-many-GlobNode in front of it
-      terms
-      ; TODO: Should add a zero-to-many-GlobNode in between the
-      ; starting terms and the rest?
-      (append (cdr starting-terms)
-              (take-while (lambda (x) (not (equal? "<" x))) terms))))
-  (define (check-anchor-end terms)
-    (if (equal? #f (member ">" terms))
-      ; TODO: Add a zero-to-many-GlobNode at the end
-      terms
-      (remove (lambda (x) (equal? ">" x)) terms)))
-  ; Should check for "<" before ">" in case both of them happen
-  ; to exist in the pattern
-  (check-anchor-end (check-anchor-start terms)))
 
 (define (subterm t n)
   "Remove the first and last n chars from the string t."
   (substring t n (- (string-length t) n)))
 
+(define (join-terms func terms-str)
+  "Identify the terms in a string, join them together with
+   the name of a function."
+  (string-append
+    (fold (lambda (t s) (string-join (list s t) " "))
+          (string-append "(" func)
+          (interpret-terms (identify-terms terms-str)))
+    ")"))
+
 (define (interpret-terms terms)
-  "Interpret the terms one by one, and generate the actual function
-   calls."
+  "Interpret the list of terms one by one and generate the actual
+   function calls, in the form of a string."
   (map
     (lambda (t)
-      (cond ((and (string-prefix? "'" t)
-                  (not (equal? #f (string-match regex-proper-names t))))
-             (cons "proper-names" (string-tokenize (subterm t 1))))
+      (cond ; Proper-name
+            ((and (string-prefix? "'" t)
+                  (not (equal? #f (string-match "^'[a-zA-Z0-9 ]+\\b'" t))))
+             (string-append "(proper-names " (subterm t 1) ")"))
+            ; Literal word
             ((string-prefix? "'" t)
-             (cons "word" (list (substring t 1))))
+             (string-append "(word " (substring t 1) ")"))
+            ; Unordered-matching
             ((string-prefix? "<<" t)
-             (cons "unordered-matching"
-               (interpret-terms (extract-terms (subterm t 2)))))
+             (join-terms "unordered-matching" (subterm t 2)))
+            ; Sentence anchor -- start of the sentence
             ((string-prefix? "<" t)
-             (cons "anchor-start" "<"))
+             "(anchor-start <)")
+            ; Sentence anchor -- end of the sentence
             ((string-prefix? ">" t)
-             (cons "anchor-end" ">"))
+              "(anchor-end >)")
+            ; Or-choices
             ((string-prefix? "[" t)
-             (cons "or-choices"
-               (interpret-terms (extract-terms (subterm t 1)))))
-            ; TODO: negation-start, negation-end etc?
-            ((and (string-prefix? "!" t)
-                  (not (equal? #f (string-match regex-negterm t))))
-             (cons "negation" (list (substring
-               (match:substring (string-match regex-negterm t)) 1))))
-            ((and (string-prefix? "!" t)
-                  (not (equal? #f (string-match regex-neglst t))))
-             (cons "negation" (interpret-terms (extract-terms
-               (substring (match:substring (string-match regex-neglst t)) 1)))))
+             (join-terms "or-choices" (subterm t 1)))
+            ; TODO: Need negation-start, negation-end etc?
+            ; Negation of a list of terms
+            ((string-prefix? "![" t)
+             (join-terms "negation" (substring t 2 (- (string-length t) 1))))
+            ; Negation of a concept
+            ((string-prefix? "!~" t)
+             (join-terms "negation" (substring t 1)))
+            ; Negation of a lemma
+            ((string-prefix? "!" t)
+             (string-append "(negation " t ")"))
+            ; Concept
             ((string-prefix? "~" t)
-             (cons "concept" (list (substring t 1))))
+             (string-append "(concept " (substring t 1) ")"))
+            ; Variable
+            ; TODO: There are many types of variables...
             ((equal? "_" t)
-             (cons "variable" "_"))
+             (string-append "(variable _)"))
+            ; Part of speech (POS)
             ((not (equal? #f (string-match "[_a-zA-Z]+~" t)))
              (let ((ss (string-split t #\~)))
-               (cons (cadr ss) (car ss))))
-            ; Consider as lemma by default
-            (else (cons "lemma" (list t)))))
+               (string-append "(" (cadr ss) " " (car ss))))
+            ; Lemma, the default case
+            (else (string-append "(lemma " t ")"))))
     terms))
 
 (define (interpret-text txt)
   "Interpret the text in the pattern of the rule by firstly
-   extracting the terms from the text and interpret them
+   identifying the terms from the text and interpret them
    one by one later."
-  (let* ((terms (extract-terms (string-trim-both txt)))
+  (let* ((terms (identify-terms (string-trim-both txt)))
          (interp-terms (interpret-terms terms)))
-;         (sorted-terms (rearrange-terms terms))
-;         (interp-terms (interpret-terms sorted-terms)))
     (cog-logger-debug "Total ~d terms were extracted: ~a" (length terms) terms)
-;    (cog-logger-debug "Total ~d terms remained after rearranging: ~a"
-;      (length sorted-terms) sorted-terms)
-    (cog-logger-debug "Term interpretation: ~a" interp-terms)))
+    (cog-logger-debug "Term interpretation: ~a" interp-terms)
+  interp-terms))
 
+(define (write-to-file opat oact ipat iact)
+  (define outport (open-file filename "w"))
+  (display "; (cr '" outport)
+  (display opat outport)
+  (display " '" outport)
+  (display oact outport)
+  (display "\n(chat-rule '" outport)
+  (display ipat outport)
+  (display " '" outport)
+  (display iact outport)
+  (display ")" outport)
+  (close-output-port outport))
+
+; Example:
+; (cr '("hi there") '("hey"))
 (define-public (cr pattern action)
   "Main function for creating a behavior rule."
-  (for-each
-    (lambda (p)
-      (display "p: ")
-      (display p)
-      (cond
-        ; The text input
-        ((string? p)
-         (interpret-text p))
-        ((symbol-contains? p ",")
-         (display " (comma)"))
-        ((symbol-contains? p "=")
-         (display " (var)")))
-      (newline))
-    pattern)
-  (for-each
-    (lambda (a)
-      (display "a: ")
-      (display a)
-      (cond
-        ((string? a)
-         (display " (output)"))
-        ((symbol-contains? a ",")
-         (display " (comma)"))
-        ((symbol-contains? a "=")
-         (display " (var)"))
-        (else
-         (display " (expression)")))
-      (newline))
-    action)
+  (define interp-pattern
+    (append-map
+      (lambda (p)
+        (cog-logger-debug "Interpreting pattern: ~a" p)
+        (cond
+          ; The text input
+          ((string? p)
+           (interpret-text p))
+          (else (cog-logger-debug "TODO: ~a" p))))
+      pattern))
+
+  (define interp-action
+    (map
+      (lambda (a)
+        (cog-logger-debug "Interpreting action: ~a" a)
+        (cond
+          ((string? a)
+           (string-append "(say " a ")"))
+          (else (cog-logger-debug "TODO: ~a" a))))
+      action))
+
+  (write-to-file pattern
+                 action
+                 interp-pattern
+                 interp-action)
+
+  (cog-logger-info "Rule created for ~a ~a" pattern action)
+  (cog-logger-info "Interpretation of the pattern: ~a" interp-pattern)
+  (cog-logger-info "Interpretation of the action: ~a" interp-action)
 )
