@@ -3209,8 +3209,8 @@ Maybe 4 hours
 -----------------
 Ben,
 
-Just got out of surgery for my leg; this email attempts to prove that
-the general anesthesia didn't kill too many brain cells.  Its a report
+Just got out of surgery for my broken leg; this email attempts to prove
+that the general anesthesia didn't kill too many brain cells.  Its a report
 on some the langauge-learning results.
 
 Lets dive in.
@@ -3264,10 +3264,16 @@ observed!  Bummer! The word "cats" was observed 6000 times, and this was
 not enough to discover a sentence that has "cats eat" in it.  These
 statistics are from some relatively smallish sample of WP articles, so
 lack of such a sentence is maybe not surprising. Here, childrens &
-youn-adult lit may be better.
+young-adult lit may be better.
 
-Anyway, clustering that revelas that cats, dogs, etc are similar should
+Anyway, clustering that reveals that cats, dogs, etc are similar should
 help with this, or so goes the hypothesis.
+
+The word-pair "cats cat" does occur and has an MI of 5 but is prevented
+from linking by the link-crossing constraint.  Have not attempted to
+figure out if the Dick Hudson landmark transitivity idea can be mutated
+to apply to this situation. I suppose I should think about things before
+writing about them, but not thinking is faster.
 
 Lets try again:
 
@@ -3310,4 +3316,35 @@ read, than counting zeros in a frequency).
 I had to fix a dozen bugs in brand-new SQL backend code to get this to
 work right. It all seems stable, now.
 
+==========================================
+
+   (EvaluationLink
+      (LinkGrammarRelationshipNode "ANY")
+      (ListLink
+			(AnyNode "left-word")
+			(AnyNode "right-word")))
+
+fooo  failed to store counts for lw, rw...
+
+Hmm
+total word pair counts = 4.1823518e+08
+
+(define-public (count-all-words)
+	(define total-wordcnt 0)
+   (for-each
+      (lambda (word)
+         (set! total-wordcnt (+ total-wordcnt (get-count word))))
+      (cog-get-atoms item-type))
+	total-wordcnt
+)
+836420450.0
+
+342:48 342:50
+
+(define-public (count-all-words)
+	(get-total-atom-count (cog-get-atoms item-type))
+)
+
+(get-count (WordNode "the"))
+$28 = 41658552.0
 

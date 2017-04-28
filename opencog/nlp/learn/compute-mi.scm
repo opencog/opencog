@@ -83,6 +83,15 @@
 ; Here, AnyNode plays the role of *.  Thus, N(*,*) is shorthand for the
 ; last of these triples.
 ;
+; After they've been computed, the values for N(w,*) and N(*,w) can be
+; fetched with the `get-left-count-str` and `get-right-count-str`
+; routines, below.  The value for N(*,*) can be gotten by calling
+; `total-pair-observations`.
+;
+; Similarly, N(*) can be obtained by calling `total-word-observations`.
+; The count N(w) for a fixed word w can be gotten by calling
+; `get-word-count-str`.
+;
 ; In addition to computing and storing the probabilities P(wl,wr), it
 ; is convenient to also store the entropy or "log likelihood" of the
 ; probabilities. Thus, the quantity H(wl,*) = -log_2 P(wl,*) is computed.
@@ -131,7 +140,7 @@
 ;
 ; The returned value is the total count.
 
-(define (get-total-atom-count atom-list)
+(define-public (get-total-atom-count atom-list)
 	(fold + 0.0 (map get-count atom-list))
 ;
 ; Below is same as above, but uses less memory(?) and runs slower(?)
@@ -682,7 +691,7 @@
 		(fetch-incoming-set lg_rel)
 		(display "Finished loading word-pairs\n")
 
-		; Compute the counts. par-for-each
+		; Compute the counts. par-for-each runs in parallel.
 		; (for-each
 		(par-for-each
 			(lambda (word)
@@ -723,6 +732,7 @@
 	(begin
 		(start-trace "Start all-pair-count\n")
 		; Now, loop over all words, totalling up the counts.
+		; XXX would using fold here fbe any faster?
 		(for-each
 			(lambda (word)
 				(set! l-cnt
@@ -737,6 +747,7 @@
 
 		; The left and right counts should be equal
 		; XXX TODO probably should do something more drastic here?
+		; Like throw an exception?
 		(if (not (eqv? l-cnt r-cnt))
 			(begin
 				(display "Error: word-pair-counts unequal: ")
@@ -1009,12 +1020,75 @@
 ; ---------------------------------------------------------------------
 ; Temporary handy-dandy main entry point.
 
+(define any-relation (LinkGrammarRelationshipNode "ANY")
+
 (define-public (batch-all-pairs)
 	(begin
 		(init-trace "/tmp/progress")
 
-		(batch-all-pair-mi (LinkGrammarRelationshipNode "ANY"))
+		(batch-all-pair-mi any-relation)
 	)
+)
+
+; ---------------------------------------------------------------------
+; misc utilities of research interest
+
+(define-public (total-word-observations)
+"
+  total-word-observations -- return a total of the number of times
+  any/all words were observed.  That is, return N(*) as defined
+  above, and in the diary.
+"
+   (get-total-atom-count (cog-get-atoms item-type))
+)
+
+(define-public (total-pair-observations)
+"
+  total-pair-observations -- return a total of the number of times
+  any/all word-pairs were observed. That is, return N(*,*) as defined
+  above, and in the diary.
+"
+	; Just get the previously computed amount.
+	(get-count
+		(EvaluationLink
+			(LinkGrammarRelationshipNode "ANY")
+			(ListLink
+				(AnyNode "left-word")
+				(AnyNode "right-word"))))
+)
+
+(define-public (get-left-count-str WORD-STR)
+"
+  get-left-count-str WORD-STR
+  Return the number of times that WORD-STR occurs in the left side
+  of the "ANY" relationship. That is, return N(w, *), as defined above,
+  and in the diary.  Here, w is WORD-STR, assumed to be a string.
+"
+	(get_left_wildcard_count
+		(WordNode WORD-STR)
+		(LinkGrammarRelationshipNode "ANY"))
+)
+
+(define-public (get-right-count-str WORD-STR)
+"
+  get-right-count-str WORD-STR
+  Return the number of times that WORD-STR occurs in the right side
+  of the "ANY" relationship. That is, return N(*, w), as defined above,
+  and in the diary.  Here, w is WORD-STR, assumed to be a string.
+"
+	(get_right_wildcard_count
+		(WordNode WORD-STR)
+		(LinkGrammarRelationshipNode "ANY"))
+)
+
+(define-public (get-word-count-str WORD-STR)
+"
+  get-word-count-str WORD-STR
+  Return the number of times that WORD-STR has ben observed. That is,
+  return N(w) as defined above, or in the diary. Here, w is WORD-STR,
+  assumed to be a string.
+"
+	(get-count (WordNode WORD-STR))
 )
 
 ; ---------------------------------------------------------------------
