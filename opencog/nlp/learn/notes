@@ -3154,3 +3154,160 @@ and subsequent crash
 
  (cog-value e mi-key)
 
+select * from atoms where name='this'; -- 953769
+test -- 1712336
+select * from atoms where outgoing='{953769,1712336}'; -- 29138136
+select * from atoms where outgoing='{152,29138136}'; -- 29138137
+
+select * from valuations where atom=29138137;
+
+
+all count-tvs being stored as length 2...
+fetch-atom aint getting the tv.
+
+store-atom crashed. ... cause type=-1
+store after fetch truncates
+ctv print is fuckec
+crap. Are teh datbases corrupt???
+
+also .. reload the typemap
+type_map_was_loaded = false
+classserver().getNumberOfClasses();
+
+INSERT INTO Valuations
+   (SELECT 1 AS key,  -- 1 here is the predicate node
+      uuid AS atom,
+      176 as type,
+      ARRAY[stv_mean, stv_confidence] as floatvalue
+      FROM Atoms_Backup WHERE tv_type = 1);
+
+INSERT INTO Valuations
+   (SELECT 1 AS key, -- 1 here is the predicate node
+      uuid AS atom,
+      177 as type,
+      ARRAY[stv_mean, stv_confidence, stv_count] as floatvalue
+      FROM Atoms_Backup WHERE tv_type = 2);
+
+wait .. link pipeline!???
+
+observ-ext ... load???
+
+
+the -FrequencyKey- shows {0,Infinity} ... wtf. MI is nan!!
+
+Maybe 4 hours
+
+; (use-modules (opencog) (opencog persist) (opencog persist-sql))
+; (use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_pairs?user=linas")
+;
+; (load-atoms-of-type item-type)   ;; approx 1 minutes?
+; (define lg_any (LinkGrammarRelationshipNode "ANY"))
+; (fetch-incoming-set lg_any) ;; approx 15 minutes ?
+;
+(mst-parse-text "this is a test") ; OK
+-----------------
+Ben,
+
+Just got out of surgery for my leg; this email attempts to prove that
+the general anesthesia didn't kill too many brain cells.  Its a report
+on some the langauge-learning results.
+
+Lets dive in.
+(mst-parse-text "this is a test")
+
+Raw hard-to-read result below.  Easier-to-read versions later.
+ctv holds the raw count of how many times the word was observed.
+
+((2.862118287646645 ((2 (WordNode "is" (ctv 1 0 8165736))) (3 (WordNode "a" (ctv 1 0 14691104))
+))) (2.1880378875282904 ((1 (WordNode "this" (ctv 1 0 1300681))) (2 (WordNode "is" (ctv 1 0 8165736))
+))) (2.8103625339100944 ((1 (WordNode "this" (ctv 1 0 1300681))) (4 (WordNode "test" (ctv 1 0 60328))
+))))
+
+The floating point number above and below is the Yuret MI of the word pair.
+I've ameneded
+https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/learn-lang-diary/learn-lang-diary.pdf
+pages 2-5 so that its less confusing and the formulas are accurate.
+Basically, it derives Yuret's formulas in a more rigorous
+way; if I recall, his argument was scattered, and just asserted the
+result without deriving it.  So the PDF derives it.
+
+((2.862118287646645 ((2 (WordNode "is" )) (3 (WordNode "a" ))))
+ (2.1880378875282904 ((1 (WordNode "this" )) (2 (WordNode "is" ))))
+(2.8103625339100944 ((1 (WordNode "this" )) (4 (WordNode "test" )))))
+
+Simplifying further:
+
+(((2 (WordNode "is" )) (3 (WordNode "a" )))
+ ((1 (WordNode "this" )) (2 (WordNode "is" )))
+((1 (WordNode "this" )) (4 (WordNode "test" ))))
+
+The integer is the ordinal of the word.  Note that the linkage
+"is-a" was selected over "a test" -- that's because "a test" has an
+MI of 2.0935.  This is not terribly surprising; any MI of less than
+four is pretty crappy, and these four words occur so commonly that
+the correlation between them really is quite qeak -- they're alomost
+drowning in noise.  Extracting disjuncts should strongly sharpen the
+results.  Next email.
+
+Here's a "better" example:
+
+(mst-parse-text "cats eat cat food")
+$5 = ((7.329 ((2 (WordNode "eat" (ctv 20938))) (4 (WordNode "food" (ctv 73924)))))
+(4.992 ((3 (WordNode "cat" (ctv 18408))) (4 (WordNode "food" (ctv 73924)))))
+(-1000 ((1 (WordNode "cats" (ctv 5902))) (4 (WordNode "food" (ctv 73924))))))
+
+So "eat food" has a decent MI, as expected.  Also "cat food" is decent.
+The minus-1000 means that the word pair "cats food" was never observed.
+(get-pair-mi-str "cats" "eat") = -1000 means that "cats eat" was never
+observed!  Bummer! The word "cats" was observed 6000 times, and this was
+not enough to discover a sentence that has "cats eat" in it.  These
+statistics are from some relatively smallish sample of WP articles, so
+lack of such a sentence is maybe not surprising. Here, childrens &
+youn-adult lit may be better.
+
+Anyway, clustering that revelas that cats, dogs, etc are similar should
+help with this, or so goes the hypothesis.
+
+Lets try again:
+
+(mst-parse-text "dogs eat dog food")
+((7.329 ((2 (WordNode "eat" (ctv 20938))) (4 (WordNode "food" (ctv 73924)))))
+(7.047 ((3 (WordNode "dog" (ctv 41896))) (4 (WordNode "food" (ctv 73924)))))
+(5.050 ((1 (WordNode "dogs" (ctv 14852))) (2 (WordNode "eat" (ctv 20938))
+))))
+
+Well, that's much better. Let's try something harder:
+(mst-parse-text "It is not uncommon to discover strange things")
+
+((7.515 ( (WordNode "not" ) (WordNode "uncommon" )))
+ (4.142 ( (WordNode "is" ) (WordNode "uncommon" )))
+ (4.412 ( (WordNode "It" ) (WordNode "is" )))
+ (2.739 ( (WordNode "uncommon" ) (WordNode "to" )))
+(3.529 ( (WordNode "to" ) (WordNode "discover" )))
+(0.822 ( (WordNode "to" ) (WordNode "things" )))
+(6.171 ( (WordNode "strange" ) (WordNode "things" ))))
+
+Almost right -- the stinker in there is "to things" and it has a
+terrible MI.  The correct link would have been "discover things"
+but again, this word-pair was never ever observed.
+
+That's it for now, more later.
+
+p.s. The above is obtained with code that uses values in full
+generality; so for example the normalized word frequency is stored as
+
+(Valuation
+    (WordNode "foo")
+    (PredicateNode "*-Frequency Key-*")
+    (FloatValue 0.1234567 3.018))
+
+Note that "Valuation" is like an EvaluationLink but different.
+The first number is the normalized frequency of observation N(foo) / N(all words)
+and the second number of log-base-2 of the first number (its easier to
+read, than counting zeros in a frequency).
+
+I had to fix a dozen bugs in brand-new SQL backend code to get this to
+work right. It all seems stable, now.
+
+
