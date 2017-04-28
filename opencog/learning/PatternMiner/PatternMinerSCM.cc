@@ -360,6 +360,16 @@ public:
     {
         patternMiner->resetPatternMiner(resetAllSettingsFromConfig);
     }
+
+    void run_interestingness_evaluation()
+    {
+        patternMiner->runInterestingnessEvaluation();
+    }
+
+    void load_patterns_from_result_file(const string& fileName)
+    {
+        patternMiner->loadPatternsFromResultFile(fileName);
+    }
 };
 
 
@@ -447,6 +457,8 @@ void PatternMinerSCM::init()
     define_scheme_primitive("pm-select-whitelist-subset-from-atomspace", &PatternMinerSCM::select_whitelist_subset_from_atomspace, this, "patternminer");
     define_scheme_primitive("pm-apply-whitelist-keyword-filter-after-mining", &PatternMinerSCM::apply_whitelist_keyword_filter_after_mining, this, "patternminer");
     define_scheme_primitive("pm-reset-patternminer", &PatternMinerSCM::reset_patternminer, this, "patternminer");
+    define_scheme_primitive("pm-run-interestingness-evaluation", &PatternMinerSCM::run_interestingness_evaluation, this, "patternminer");
+    define_scheme_primitive("pm-load-patterns-from-result-file", &PatternMinerSCM::load_patterns_from_result_file, this, "patternminer");
 
 
 }

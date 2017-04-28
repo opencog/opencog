@@ -348,6 +348,10 @@ protected:
 
     void cleanUpPatternMiner();
 
+    bool loadOutgoingsIntoAtomSpaceFromString(stringstream &outgoingStream, AtomSpace *_atomSpace, HandleSeq &outgoings, string parentIndent = "");
+
+    HandleSeq loadPatternIntoAtomSpaceFromString(string patternStr, AtomSpace* _atomSpace);
+
 
 public:
     PatternMiner(AtomSpace* _originalAtomSpace);
@@ -377,9 +381,14 @@ public:
 
     void runPatternMinerDepthFirst();
 
+    void runInterestingnessEvaluation();
+
     void selectSubsetFromCorpus(vector<string> &topics, unsigned int gram = 2);
 
     vector<HTreeNode*>&  getFinalPatternsForGram(unsigned int gram){return finalPatternsForGram[gram - 1];}
+
+    // only load the frequent pattern result file
+    void loadPatternsFromResultFile(string fileName);
 
     void testPatternMatcher1();
     void testPatternMatcher2();
