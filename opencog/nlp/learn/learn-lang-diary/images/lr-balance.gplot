@@ -1,0 +1,19 @@
+# set term png small color
+set term png small
+set out 'lr-balance.png'
+
+# set data style linespoints
+# set data style points
+
+#################################################
+# Used to generate the graph in the text
+#
+# set term postscript eps color
+# set out 'lr-balance.eps'
+set xrange [-0.4:0.4]
+set logscale y
+set title "left-right balance"
+set xlabel "asymmetry"
+set ylabel "Count"
+plot "lr-balance.dat" using 1:2 with lines linewidth 2
+
