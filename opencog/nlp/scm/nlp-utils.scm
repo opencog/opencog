@@ -26,7 +26,7 @@
 ; -- sent-get-interp Get all the InterpretationNodes of a sentence.
 ; -- parse-get-words        Get all words occuring in a parse.
 ; -- parse-get-words-in-order  Get all words occuring in a parse in order.
-; -- parse-get-relations    Get all RelEx relations in a parse.
+; -- parse-get-relex-relations    Get all RelEx relations in a parse.
 ; -- parse-get-relex-outputs  Get all RelEx outputs in a parse.
 ; -- parse-get-r2l-outputs  Get all R2L outputs in a parse.
 ; -- interp-get-r2l-outputs Get all R2L outputs in an Interpretation.
@@ -41,7 +41,7 @@
 ; -- word-inst-match-pos? Does word-inst have POS?
 ; -- word-inst-is-noun?   Is word instance a noun?
 ; -- word-inst-is-verb?   Is word instance a verb?
-; -- word-inst-get-relations       Get RelEx relations involving word-inst.
+; -- word-inst-get-relex-relations       Get RelEx relations involving word-inst.
 ; -- word-inst-get-head-relations  Get relations with word-inst as head.
 ; -- word-inst-get-prep-relations  Get prepositional relations for word-inst.
 ; -- word-inst-filter-relex-rels   Get filtered set of RelEx relations.
@@ -259,19 +259,19 @@
 )
 
 ; --------------------------------------------------------------------
-(define-public (parse-get-relations parse-node)
+(define-public (parse-get-relex-relations parse-node)
 "
-  parse-get-relations    Get all RelEx relations in a parse.
+  parse-get-relex-relations    Get all RelEx relations in a parse.
 
   Given a parse, return a list of all relex relations
 "
 	; Get a list of words in the parse
 	; Get a list of lists of relations for each word
-	; Conctenate will reduce the list of lists to a plain list
+	; concatenate! will reduce the list of lists to a plain list
 	; Remove duplicates
 	(delete-duplicates!
 		(concatenate!
-			(map word-inst-get-relations
+			(map word-inst-get-relex-relations
 				(parse-get-words parse-node)
 			)
 		)
@@ -516,9 +516,9 @@
 )
 
 ; ---------------------------------------------------------------------
-(define-public (word-inst-get-relations word-inst)
+(define-public (word-inst-get-relex-relations word-inst)
 "
-  word-inst-get-relations       Get RelEx relations involving word-inst
+  word-inst-get-relex-relations       Get RelEx relations involving word-inst
 
   Given a word instance, return a list of relations the word participates in.
   That is, given (WordInstanceNode 'dog'), return all _subj(*,dog)
@@ -559,7 +559,7 @@
 	; Get all relations, and filter them out.
 	(filter!
 		(lambda (rel) (head? rel word-inst))
-		(word-inst-get-relations word-inst)
+		(word-inst-get-relex-relations word-inst)
 	)
 )
 
@@ -593,7 +593,7 @@
 	; Get all relations, and filter them out.
 	(filter!
 		(lambda (rel) (head-mod? rel word-inst))
-		(word-inst-get-relations word-inst)
+		(word-inst-get-relex-relations word-inst)
 	)
 )
 
