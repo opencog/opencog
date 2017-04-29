@@ -1073,8 +1073,8 @@
 	(filter!
 		(lambda (pair)
 			(and
-				(eq? 'WordNode (cog-type (get-left-word-of-pair pair)))
-				(eq? 'WordNode (cog-type (get-left-word-of-pair pair)))))
+				(equal? 'WordNode (cog-type (get-left-word-of-pair pair)))
+				(equal? 'WordNode (cog-type (get-right-word-of-pair pair)))))
 		(cog-incoming-by-type
 			(LinkGrammarRelationshipNode "ANY")
 			'EvaluationLink))
