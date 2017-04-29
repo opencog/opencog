@@ -1003,7 +1003,7 @@
 		; Enfin, the word-pair mi's
 		(start-trace "Going to do individual word-pair mi\n")
 		(display "Going to do individual word-pair mi\n")
-		; (for-each
+		; for-each
 		(par-for-each
 			(lambda (right-word)
 				(compute-pair-mi right-word lg_rel)
@@ -1020,7 +1020,7 @@
 ; ---------------------------------------------------------------------
 ; Temporary handy-dandy main entry point.
 
-(define any-relation (LinkGrammarRelationshipNode "ANY")
+(define any-relation (LinkGrammarRelationshipNode "ANY"))
 
 (define-public (batch-all-pairs)
 	(begin
@@ -1032,6 +1032,23 @@
 
 ; ---------------------------------------------------------------------
 ; misc utilities of research interest
+
+(define-public (get-all-words)
+"
+  get-all-words - return a list holding all of the observed words
+"
+	(cog-get-atoms item-type)
+)
+
+(define-public (get-all-pairs)
+"
+  get-all-pairs - return a list holding all of the observed word-pairs
+  Caution: this can be tens of millions long!
+"
+	(cog-incoming-by-type
+		(LinkGrammarRelationshipNode "ANY")
+		'EvaluationLink)
+)
 
 (define-public (total-word-observations)
 "
@@ -1061,7 +1078,7 @@
 "
   get-left-count-str WORD-STR
   Return the number of times that WORD-STR occurs in the left side
-  of the "ANY" relationship. That is, return N(w, *), as defined above,
+  of the \"ANY\" relationship. That is, return N(w, *), as defined above,
   and in the diary.  Here, w is WORD-STR, assumed to be a string.
 "
 	(get_right_wildcard_count  ;; the wildcard is on the right.
@@ -1073,7 +1090,7 @@
 "
   get-right-count-str WORD-STR
   Return the number of times that WORD-STR occurs in the right side
-  of the "ANY" relationship. That is, return N(*, w), as defined above,
+  of the \"ANY\" relationship. That is, return N(*, w), as defined above,
   and in the diary.  Here, w is WORD-STR, assumed to be a string.
 "
 	(get_left_wildcard_count  ;; the wildcard is on the left.

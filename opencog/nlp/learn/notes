@@ -3131,13 +3131,13 @@ tv-conf
 cog-tv
 
 14:37
-; (use-modules (opencog) (opencog persist) (opencog persist-sql))
-; (use-modules (opencog nlp) (opencog nlp learn))
-; (sql-open "postgres:///en_pairs?user=linas")
-;
-; (load-atoms-of-type item-type)   ;; approx 1 minutes?
-; (define lg_any (LinkGrammarRelationshipNode "ANY"))
-; (fetch-incoming-set lg_any) ;; approx 15 minutes ?
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=linas")
+
+ (load-atoms-of-type 'WordNode)   ;; approx 1 minutes?
+ (define lg_any (LinkGrammarRelationshipNode "ANY"))
+ (fetch-incoming-set lg_any) ;; approx 15 minutes ?
 ;
 (mst-parse-text "this is a test")
 
@@ -3373,3 +3373,11 @@ $28 = 41658552.0
 			(set! x (+ x (/ 1.0 inc))))
 		hist)
 )
+
+=============================================
+
+(cog-incoming-by-type
+	(LinkGrammarRelationshipNode "ANY")
+	'EvaluationLink)
+
+get_left_wildcard_count word lg_rel)
