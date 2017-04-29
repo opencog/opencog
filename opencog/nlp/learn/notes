@@ -3382,3 +3382,14 @@ $28 = 41658552.0
 
 get_left_wildcard_count word lg_rel)
 (get-total-atom-count (get-all-pairs))
+
+(define (wtf)
+	(for-each
+		(lambda (pair)
+			(if (> 0.5 (get-count (get-left-word-of-pair pair)))
+				(format #t "wtf left of pair ~A" pair))
+			(if (> 0.5 (get-count (get-right-word-of-pair pair)))
+				(format #t "wtf right of pair ~A" pair))
+		)
+		(get-all-pairs)))
+

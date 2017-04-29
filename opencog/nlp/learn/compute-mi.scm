@@ -1114,6 +1114,75 @@
 	(get-count (WordNode WORD-STR))
 )
 
+(define-public (get-left-word-of-pair PAIR)
+"
+  get-left-word-of-pair PAIR
+  Given the EvaluationLink PAIR holding a word-pair, return the word
+  on the left.
+"
+	(gadr PAIR)
+)
+
+(define-public (get-right-word-of-pair PAIR)
+"
+  get-right-word-of-pair PAIR
+  Given the EvaluationLink PAIR holding a word-pair, return the word
+  on the right.
+"
+	(gddr PAIR)
+)
+
+(define-public (get-total-cond-prob)
+"
+  get-total-cond-prob - return the total conditional probability
+  of seeing a word-pair.  That is, return the sum over left and
+  right words w_l, w_r of  N(w_l, w_r) / (N(w_l) N(w_r))
+
+  Contrast this result with that of get-total-pair-prob
+"
+
+	; Return N(w_l, w_r) / N(w_l) N(w_r)
+	(define (term pair)
+		(let ((lw (get-left-word-of-pair pair))
+				(rw (get-right-word-of-pair pair)))
+			; Oh, hey, both left and right better be words.
+			(if (not (eq? 'WordNode (cog-type lw))) 0
+				(if (not (eq? 'WordNode (cog-type rw))) 0
+					(/ (get-count pair)
+						(* (get-count lw)) (get-count rw))))))
+
+	; textbook tail-recursive solution.
+	(define (term-sum lst cnt)
+		(if (null? lst) cnt
+			(term-sum (cdr lst) (+ cnt (term (car lst))))))
+
+	(term-sum (get-all-pairs) 0)
+)
+
+(define-public (get-total-pair-prob)
+"
+  get-total-pair-prob - return the total pair-wise conditional
+  probability of seeing a word-pair.  That is, return the sum over
+  left and right words w_l, w_r of
+      N(w_l, w_r) / (N(w_l, *) N(*, w_r))
+
+  Contrast this result with that of get-total-cond-prob
+"
+
+	; Return N(w_l, w_r) / N(w_l) N(w_r)
+	(define (term pair)
+		(/ (get-count pair)
+			(* (get-count (get-left-word-of-pair pair))
+				(get-count (get-right-word-of-pair pair)))))
+
+	; textbook tail-recursive solution.
+	(define (term-sum lst cnt)
+		(if (null? lst) cnt
+			(term-sum (cdr lst) (+ cnt (term (car lst))))))
+
+	(term-sum (get-all-pairs) 0)
+)
+
 ; ---------------------------------------------------------------------
 ; misc hand debug stuff
 ;
