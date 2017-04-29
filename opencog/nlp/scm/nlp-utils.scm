@@ -98,6 +98,10 @@
 ; Same as above, but multi-threaded -- each parse dispatched to its own
 ; thread, on a distinct CPU.
 (define-public (parallel-map-parses proc sent-or-list)
+"
+  parallel-map-parses   Call proceedure on every parse of the sentence.
+  Each parse is handled in a unique thread.
+"
 	(cog-par-chase-links-chk 'ParseLink 'ParseNode
 		proc sent-or-list 'SentenceNode)
 )

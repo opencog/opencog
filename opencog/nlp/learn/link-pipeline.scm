@@ -12,22 +12,28 @@
 ; entropy and other basic probability methods.
 ;
 ; Main entry point: (observe-text plain-text)
-; Call this entry point with exactly one sentance as plain text.
-; It will be parsed by RelEx, and the resulting link-grammar link
-; usage counts will be updated in the atomspace. The counts are
+; Call this entry point with exactly one sentance as a plain text
+; string. It will be parsed by RelEx, and the resulting link-grammar
+; link usage counts will be updated in the atomspace. The counts are
 ; flushed to the SQL database so that they're not forgotten.
 ;
 ; RelEx is used for only one reason: it prints out the required
 ; atomese format. The rule-engine in RelEx is NOT used!  This could
 ; be redesigned and XXX FIXME, it should be.
 ;
-; As of 10 December 2013, this seems to work fine. Deploying ...
-;
 ; This tracks multiple, independent counts:
 ; *) how many sentences have been observed.
 ; *) how many parses were observed.
 ; *) how many words have been observed (counting once-per-word)
 ; *) how many relationship triples have been observed.
+;
+; Sentences are counted by updating the count on `(SentenceNode "ANY")`.
+; Parses are counted by updating the count on `(ParseNode "ANY")`.
+; Words are counted by updating the count on the `WordNode` for that
+; word. It is counted with multiplicity: once for each time it occurs
+; in a parse.  That is, if a word appears twice in a parse, it is counted
+; twice.  Counts for relations are stored in the TV for the EvaluationLink.
+;
 
 (use-modules (opencog) (opencog nlp) (opencog persist))
 
@@ -63,6 +69,35 @@
 )
 
 ; ---------------------------------------------------------------------
+; update-word-counts -- update counts for sentences, parses and words,
+; for the given list of sentences.
+;
+; As explained above, the counts on `(SentenceNode "ANY")` and
+; `(ParseNode "ANY")` and on `(WordNode "foobar")` are updated.
+;
+(define (update-word-counts single-sent)
+	(define any-sent (SentenceNode "ANY"))
+	(define any-parse (ParseNode "ANY"))
+
+	; Due to a RelEx bug in parenthesis handling, the word-inst-get-word
+	; function can throw an exception. See detailed explanation furher
+	; down. Catch the excpetion, avoid counting if its thrown.
+	(define (try-count-one-word word-inst)
+		(catch 'wrong-type-arg
+			(lambda () (count-one-atom (word-inst-get-word word-inst)))
+			(lambda (key . args) #f)))
+
+	(count-one-atom any-sent)
+	(map-parses
+		(lambda (parse)
+			(count-one-atom any-parse)
+			(map-word-instances
+				try-count-one-word
+				parse))
+		(list single-sent))
+)
+
+; ---------------------------------------------------------------------
 ; map-lg-links -- loop over all link-grammar links in a list of sentences.
 ;
 ; Each link-grammar link is of the general form:
@@ -77,19 +112,13 @@
 ;
 ; Note -- as currently written, this double-counts.
 (define (map-lg-links PROC sent-list)
-	; Do each parse in it's own thread.
-	; (parallel-map-parses
 	(map-parses
 		(lambda (parse)
 			(map-word-instances
 				(lambda (word-inst)
-					(map PROC (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
-				)
-				parse
-			)
-		)
-		sent-list
-	)
+					(map PROC (cog-get-pred word-inst 'LinkGrammarRelationshipNode)))
+				parse))
+		sent-list)
 )
 
 ; ---------------------------------------------------------------------
@@ -108,10 +137,10 @@
 ; this creates and returns this:
 ;
 ;   EvaluationLink
-;      LinkGrammarRelationshipNode "FOO"
-;      ListLink
-;         WordNode "word"
-;         WordNode "bird"
+;      LinkGrammarRelationshipNode "FOO" -- gar
+;      ListLink                          -- gdr
+;         WordNode "word"                -- gadr
+;         WordNode "bird"                -- gddr
 ;
 (define (make-lg-rel lg-rel-inst)
 	(let (
@@ -132,7 +161,7 @@
 ; algo implemented here is trite: fetch words and relations from SQL;
 ; increment the attached CountTruthValue; save back to SQL.
 
-(define (update-link-counts sents)
+(define (update-link-counts single-sent)
 
 	; Due to a RelEx bug, `make-lg-rel` can throw an exception. Specifically,
 	; if the word in a sentences is a parentheis, then the ReferenceLink
@@ -148,7 +177,7 @@
 			(lambda () (count-one-atom (make-lg-rel link)))
 			(lambda (key . args) #f)))
 
-	(map-lg-links try-count-one-link sents)
+	(map-lg-links try-count-one-link (list single-sent))
 )
 
 ; ---------------------------------------------------------------------
@@ -187,7 +216,8 @@
 		(let ((sent (get-one-new-sentence)))
 			(if (null? sent) '()
 				(begin
-					(update-link-counts (list sent))
+					(update-word-counts sent)
+					(update-link-counts sent)
 					(delete-sentence sent)
 					(monitor-rate '())
 					(process-sents)))))
