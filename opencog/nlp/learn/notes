@@ -3197,13 +3197,13 @@ the -FrequencyKey- shows {0,Infinity} ... wtf. MI is nan!!
 
 Maybe 4 hours
 
-; (use-modules (opencog) (opencog persist) (opencog persist-sql))
-; (use-modules (opencog nlp) (opencog nlp learn))
-; (sql-open "postgres:///en_pairs?user=linas")
-;
-; (load-atoms-of-type item-type)   ;; approx 1 minutes?
-; (define lg_any (LinkGrammarRelationshipNode "ANY"))
-; (fetch-incoming-set lg_any) ;; approx 15 minutes ?
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=linas")
+
+ (load-atoms-of-type 'WordNode)   ;; approx 3 minutes?
+ (define lg_any (LinkGrammarRelationshipNode "ANY"))
+ (fetch-incoming-set lg_any) ;; approx 15 minutes ?
 ;
 (mst-parse-text "this is a test") ; OK
 -----------------
@@ -3394,3 +3394,7 @@ get_left_wildcard_count word lg_rel)
 		(get-all-pairs)))
 
 418235182.0
+
+(get-total-atom-count (get-all-words))
+836420450.0
+(length (get-all-pairs))

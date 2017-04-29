@@ -1138,11 +1138,11 @@
 	(get-count (WordNode WORD-STR))
 )
 
-(define-public (get-total-cond-prob)
+(define-public (get-total-cond-prob ALL-PAIRS)
 "
-  get-total-cond-prob - return the total conditional probability
-  of seeing a word-pair.  That is, return the sum over left and
-  right words w_l, w_r of  N(w_l, w_r) / (N(w_l) N(w_r))
+  get-total-cond-prob ALL-PAIRS- return the total conditional
+  probability of seeing the all word-pairs.  That is, return the
+  sum over left and right words w_l, w_r of  N(w_l, w_r) / (N(w_l) N(w_r))
 
   Contrast this result with that of get-total-pair-prob
 "
@@ -1157,10 +1157,10 @@
 		(if (null? lst) cnt
 			(term-sum (cdr lst) (+ cnt (term (car lst))))))
 
-	(term-sum (get-all-pairs) 0)
+	(term-sum ALL-PAIRS 0)
 )
 
-(define-public (get-total-pair-prob)
+(define-public (get-total-pair-prob ALL-PAIRS)
 "
   get-total-pair-prob - return the total pair-wise conditional
   probability of seeing a word-pair.  That is, return the sum over
@@ -1181,7 +1181,7 @@
 		(if (null? lst) cnt
 			(term-sum (cdr lst) (+ cnt (term (car lst))))))
 
-	(term-sum (get-all-pairs) 0)
+	(term-sum ALL-PAIRS 0)
 )
 
 ; ---------------------------------------------------------------------

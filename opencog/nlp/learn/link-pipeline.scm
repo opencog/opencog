@@ -1,13 +1,15 @@
 ;
 ; link-pipeline.scm
 ;
-; Link-grammar processing pipeline. Currently, just counts word pairs.
+; Link-grammar relation-counting pipeline.  Currently counts only
+; word-pairs (links) and not disjuncts. XXX FIXME -- should also
+; count disjuncts.
 ;
 ; Copyright (c) 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; This code is part of a language-learning effort.  The goal is to
-; observe a lot of text, and then perform clustering to min-max the
-; entropy. Right now, only the observe part is supported.
+; observe a lot of text, and then deduce a grammar from it, using
+; entropy and other basic probability methods.
 ;
 ; Main entry point: (observe-text plain-text)
 ; Call this entry point with exactly one sentance as plain text.
@@ -15,31 +17,73 @@
 ; usage counts will be updated in the atomspace. The counts are
 ; flushed to the SQL database so that they're not forgotten.
 ;
+; RelEx is used for only one reason: it prints out the required
+; atomese format. The rule-engine in RelEx is NOT used!  This could
+; be redesigned and XXX FIXME, it should be.
+;
 ; As of 10 December 2013, this seems to work fine. Deploying ...
+;
+; This tracks multiple, independent counts:
+; *) how many sentences have been observed.
+; *) how many parses were observed.
+; *) how many words have been observed (counting once-per-word)
+; *) how many relationship triples have been observed.
 
 (use-modules (opencog) (opencog nlp) (opencog persist))
-;
+
 ; ---------------------------------------------------------------------
-; map-lg-links -- loop over all link-grammar links in sentences.
+
+(define (count-one-atom ATM)
+"
+  count-one-atom ATM -- increment the count by one on ATM, and
+  update the SQL database to hold that count.
+
+  This will also automatically fetch the previous count from
+  the SQL database, so that counting will work correctly, when
+  picking up from a previous point.
+
+  Warning: this is NOT SAFE for distributed processing! That is
+  because this does NOT grab the count from the database every time,
+  so if some other process updates the database, this will miss that
+  update.
+"
+	(define (incr-one atom)
+		; If the atom doesn't yet have a count TV attached to it,
+		; then its probably a freshly created atom. Go fetch it
+		; from SQL. Otherwise, assume that what we've got here,
+		; in the atomspace, is the current copy.  This works if
+		; there is only one process updating the counts.
+		(if (not (cog-ctv? (cog-tv atom)))
+			(fetch-atom atom)) ; get from SQL
+		(cog-inc-count! atom 1) ; increment
+	)
+	(begin
+		(incr-one ATM) ; increment the count on ATM
+		(store-atom ATM)) ; save to SQL
+)
+
+; ---------------------------------------------------------------------
+; map-lg-links -- loop over all link-grammar links in a list of sentences.
 ;
 ; Each link-grammar link is of the general form:
+;
 ;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
+;      LinkGrammarRelationshipNode "FOO"
 ;      ListLink
 ;         WordInstanceNode "word@uuid"
 ;         WordInstanceNode "bird@uuid"
 ;
-; and 'proc' is invoked on each of these.
+; The PROC is a function to be invoked on each of these.
 ;
 ; Note -- as currently written, this double-counts.
-(define (map-lg-links proc sent-list)
+(define (map-lg-links PROC sent-list)
 	; Do each parse in it's own thread.
 	; (parallel-map-parses
 	(map-parses
 		(lambda (parse)
 			(map-word-instances
 				(lambda (word-inst)
-					(map proc (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
+					(map PROC (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
 				)
 				parse
 			)
@@ -51,19 +95,20 @@
 ; ---------------------------------------------------------------------
 ; make-lg-rel -- create a word-relation from a word-instance relation
 ;
-; Get the word relation correspoding to a word-instance relation.
-; That is, given this:
+; Get the word relation corresponding to a word-instance relation.
+; This simply strips off the unique word-ids from each word. So,
+; given this as input:
 ;
 ;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
+;      LinkGrammarRelationshipNode "FOO"
 ;      ListLink
 ;         WordInstanceNode "word@uuid"
 ;         WordInstanceNode "bird@uuid"
 ;
-; create this:
+; this creates and returns this:
 ;
 ;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
+;      LinkGrammarRelationshipNode "FOO"
 ;      ListLink
 ;         WordNode "word"
 ;         WordNode "bird"
@@ -88,47 +133,21 @@
 ; increment the attached CountTruthValue; save back to SQL.
 
 (define (update-link-counts sents)
-	(define (count-one-link link)
-		(define (incr-one atom)
-			; If the atom doesn't yet have a count TV attached to it,
-			; then its probably a freshly created atom. Go fetch it
-			; from SQL. Otherwise, assume that what we've got here,
-			; in the atomspace, is the current copy.  This works if
-			; there is only once cogserver updating the counts.
-			(if (not (cog-ctv? (cog-tv atom)))
-				(fetch-atom atom)) ; get from SQL
-			(cog-inc-count! atom 1) ; increment
-		)
-		(let ((rel (make-lg-rel link)))
-			(begin
-				; Evalu -- rel
-				;   Pred -- gar
-				;   List -- gdr
-				;     Left  -- gadr
-				;     Right -- gddr
-				(incr-one rel) ; increment relation (the evaluation link)
-				(incr-one (gar rel))  ; increment link type
-				(incr-one (gadr rel)) ; increment left word
-				(incr-one (gddr rel)) ; increment right work.
-				(store-atom rel) ; save (recursively) to SQL
-			)
-		)
-	)
 
-	; Under weird circumstances, the above can fail. Specifically,
-	; sometimes RelEx doesn't generate the needed (ReferenceLink
-	; connecting (WordInstanceNode "(@4bf5e341-c6b") to the desired
-	; (WordNode "(") ... Either that, some paren-counter somewhere
+	; Due to a RelEx bug, `make-lg-rel` can throw an exception. Specifically,
+	; if the word in a sentences is a parentheis, then the ReferenceLink
+	; between the spcific paren, and the general par does not get created.
+	; Viz, there is no `(ReferenceLink (WordInstanceNode "(@4bf5e341-c6b")
+	; (WordNode "("))` ... Either that, or some paren-counter somewhere
 	; gets confused. Beats me why. We should fix this. In the meanhile,
-	; we hack around this here by catching.  What happens is that the
-	; call (word-inst-get-word ...) returns nothing, so the car in
-	; make-lg-rel throws 'wrong-type-arg and everything gets borken.
+	; we hack around this here by catching the exceptioon.  What happens
+	; is that the call `word-inst-get-word` returns nothing, so the `car`
+	; in `make-lg-rel` throws 'wrong-type-arg and everything gets borken.
 	(define (try-count-one-link link)
 		(catch 'wrong-type-arg
-			(lambda () (count-one-link link))
-			(lambda (key . args) #f)
-		)
-	)
+			(lambda () (count-one-atom (make-lg-rel link)))
+			(lambda (key . args) #f)))
+
 	(map-lg-links try-count-one-link sents)
 )
 
