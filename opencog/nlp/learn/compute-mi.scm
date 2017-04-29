@@ -141,14 +141,20 @@
 ; The returned value is the total count.
 
 (define-public (get-total-atom-count atom-list)
-	(fold + 0.0 (map get-count atom-list))
-;
-; Below is same as above, but uses less memory(?) and runs slower(?)
-;	(let ((cnt 0))
-;		(define (inc atom) (set! cnt (+ cnt (get-count atom))))
-;		(for-each inc atom-list)
-;		cnt
-;	)
+	;
+	; A proceedural loop.
+	;	(let ((cnt 0))
+	;		(define (inc atom) (set! cnt (+ cnt (get-count atom))))
+	;		(for-each inc atom-list)
+	;		cnt
+	;	)
+
+	; textbook tail-recursive solution.
+	(define (hlpr lst cnt)
+		(if (null? lst) cnt
+			(hlpr (cdr lst) (+ cnt (get-count (car lst))))))
+
+	(hlpr atom-list 0)
 )
 
 ; ---------------------------------------------------------------------

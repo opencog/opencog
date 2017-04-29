@@ -3381,3 +3381,4 @@ $28 = 41658552.0
 	'EvaluationLink)
 
 get_left_wildcard_count word lg_rel)
+(get-total-atom-count (get-all-pairs))
