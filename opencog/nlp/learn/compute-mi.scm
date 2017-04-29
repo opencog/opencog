@@ -1064,7 +1064,7 @@
   of the "ANY" relationship. That is, return N(w, *), as defined above,
   and in the diary.  Here, w is WORD-STR, assumed to be a string.
 "
-	(get_left_wildcard_count
+	(get_right_wildcard_count  ;; the wildcard is on the right.
 		(WordNode WORD-STR)
 		(LinkGrammarRelationshipNode "ANY"))
 )
@@ -1076,7 +1076,7 @@
   of the "ANY" relationship. That is, return N(*, w), as defined above,
   and in the diary.  Here, w is WORD-STR, assumed to be a string.
 "
-	(get_right_wildcard_count
+	(get_left_wildcard_count  ;; the wildcard is on the left.
 		(WordNode WORD-STR)
 		(LinkGrammarRelationshipNode "ANY"))
 )
