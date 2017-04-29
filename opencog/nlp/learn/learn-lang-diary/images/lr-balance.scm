@@ -1,11 +1,19 @@
 
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs?user=linas")
+;
+(load-atoms-of-type item-type)   ;; approx 1 minutes?
+(define lg_any (LinkGrammarRelationshipNode "ANY"))
+(fetch-incoming-set lg_any) ;; approx 15 minutes ?
+
 
 ; Make a histogram of the left-right imbalance of word-pair counts.
 ; This is graphed in the diary.
 (define (mkhist)
-   (define nbins 300)
-   (define lo -1.0)
-   (define hi 1.0)
+   (define nbins 100)
+   (define lo -0.7)
+   (define hi 0.7)
    (define inc (/ nbins (- hi lo)))
 
 	; the histogram

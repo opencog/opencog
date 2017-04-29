@@ -8,12 +8,12 @@ set out 'lr-balance.png'
 #################################################
 # Used to generate the graph in the text
 #
-# set term postscript eps color
-# set out 'lr-balance.eps'
+set term postscript eps color
+set out 'lr-balance.eps'
 set xrange [-0.4:0.4]
 set logscale y
-set title "left-right balance"
+set title "Left-right word-pair asymmetry"
 set xlabel "asymmetry"
 set ylabel "Count"
-plot "lr-balance.dat" using 1:2 with lines linewidth 2
+plot "lr-balance.dat" using 1:2 with lines linewidth 2 title ""
 
