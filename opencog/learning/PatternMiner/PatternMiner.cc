@@ -1652,6 +1652,12 @@ bool PatternMiner::splitDisconnectedLinksIntoConnectedGroups(HandleSeq& inputLin
 double PatternMiner::calculateEntropyOfASubConnectedPattern(string& connectedSubPatternKey, HandleSeq& connectedSubPattern)
 {
     int count = getCountOfAConnectedPattern(connectedSubPatternKey, connectedSubPattern);
+    if (count == 0)
+    {
+        cout << "\nwarning: cannot find subpattern: \n" << connectedSubPatternKey << std::endl;
+        count = 1;
+    }
+
 
     return log2(count);
 
@@ -2846,7 +2852,9 @@ void PatternMiner::evaluateInterestingnessTask()
 
     while(true)
     {
-        readNextPatternLock.lock();
+        if (THREAD_NUM > 1)
+            readNextPatternLock.lock();
+
         cur_index ++;
 
         if ((unsigned int)cur_index < (patternsForGram[cur_gram-1]).size())
@@ -2862,14 +2870,17 @@ void PatternMiner::evaluateInterestingnessTask()
                 std::cout.flush();
             }
 
-            readNextPatternLock.unlock();
+            if (THREAD_NUM > 1)
+                readNextPatternLock.unlock();
+
             break;
 
         }
 
         HTreeNode* htreeNode = patternsForGram[cur_gram - 1][cur_index];
 
-        readNextPatternLock.unlock();
+        if (THREAD_NUM > 1)
+            readNextPatternLock.unlock();
 
         // evaluate the interestingness
         // Only effective when Enable_Interesting_Pattern is true. The options are "Interaction_Information", "surprisingness"
@@ -3546,7 +3557,10 @@ void PatternMiner::loadPatternsFromResultFile(string fileName)
         }
         else if (patternStart)// in the middle of one pattern
         {
-            patternStr += line;
+            if (line == "")
+                patternStr += "\n";
+            else
+                patternStr += (line + "\n");
         }
 
         lastLine = line;

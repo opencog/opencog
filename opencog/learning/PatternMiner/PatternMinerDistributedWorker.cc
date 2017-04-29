@@ -220,7 +220,15 @@ void DistributedPatternMiner::runPatternMinerDepthFirst()
     // observingAtomSpace is used to copy one link everytime from the originalAtomSpace
     observingAtomSpace = new AtomSpace();
 
-//    cur_DF_ExtractedLinks = new set<string>[MAX_GRAM];
+    if (THREAD_NUM > 1)
+    {
+        thread_DF_ExtractedLinks = new list<string>* [THREAD_NUM];
+        for (unsigned int ti = 0; ti < THREAD_NUM; ti ++)
+            thread_DF_ExtractedLinks[ti] = new list<string>[MAX_GRAM];
+
+        all_thread_ExtractedLinks_pergram = new set<string>[MAX_GRAM];
+    }
+
 
     linksPerThread = allLinkNumber / THREAD_NUM;
 
@@ -243,7 +251,17 @@ void DistributedPatternMiner::runPatternMinerDepthFirst()
     allLinks.clear();
     (HandleSeq()).swap(allLinks);
 
-//    delete [] cur_DF_ExtractedLinks;
+    if (THREAD_NUM > 1)
+    {
+        for (unsigned int ti = 0; ti < THREAD_NUM; ti ++)
+            delete [] (thread_DF_ExtractedLinks[ti]);
+
+        delete [] thread_DF_ExtractedLinks;
+
+        delete [] all_thread_ExtractedLinks_pergram;
+
+    }
+
     delete [] threads;
 
     cout << "\nFinished mining 1~" << MAX_GRAM << " gram patterns.\n";
@@ -266,8 +284,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
     else
         end_index = linksPerThread * (thread_index + 1);
 
-
-    cout << "Start thread " << thread_index << ": will process Link number from " << start_index
+    cout << "\nStart thread " << thread_index << ": will process Link number from " << start_index
          << " to (excluded) " << end_index << std::endl;
 
     patternJsonArrays[thread_index] = json::value::array();
@@ -327,7 +344,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         actualProcessedLinkLock.unlock();
 
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
-                                                patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo);
+                                                patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo, thread_index);
 
 
         // send new mined patterns to the server
