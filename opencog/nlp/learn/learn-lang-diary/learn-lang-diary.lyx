@@ -323,7 +323,8 @@ In what follows, the relation
 
  refers to a generic two-word relation, and not necessarily this simplest
  one.
- To regain Yuret's formula, use the simplest relation, described above.
+ To regain Yuret's formula, use the simplest relation, the ordered word-pair
+ relation, given just above.
 \end_layout
 
 \begin_layout Standard
@@ -354,8 +355,8 @@ We are then interested in the conditional probability
 \end_inset
 
  in a sentance (with multiplicity).
- We know from experiece this is a Zipfian distribution; however, this fact
- will not be used in what follows.
+ We know from experiece that this is a Zipfian distribution; however, this
+ fact will not be used in what follows.
  From the definition of conditional probabilities, we get 
 \begin_inset Formula 
 \[
@@ -452,7 +453,7 @@ The probability
  or we can define it as the probability of observing both words, as if they
  were independent of one-another.
  Clearly, the occurances of pairs of words are correlated; suggesting the
- firt defintion is correct.
+ first definition is correct.
  The second one seems to be a dumb, brute-force assumption of independence,
  i.e.
  that 
@@ -463,8 +464,9 @@ The probability
 \end_layout
 
 \begin_layout Standard
-What should be done? This is a bit confusing, and is worth thinking about.
- To observe two words in the same sentence, we could say that they obey
+Which of these two definitions should be used? This is a bit confusing,
+ and is worth thinking about.
+ When observing two words in the same sentence, we could say that they obey
  the relationship 
 \begin_inset Formula $S(w_{l},w_{r})$
 \end_inset
@@ -492,7 +494,7 @@ What should be done? This is a bit confusing, and is worth thinking about.
 \begin_inset Formula $S$
 \end_inset
 
- implicitly: two words can only be related by 
+ implicitly: two words can be related by 
 \begin_inset Formula $R$
 \end_inset
 
@@ -505,7 +507,7 @@ What should be done? This is a bit confusing, and is worth thinking about.
 \begin_inset Formula $P(w_{l},w_{r})$
 \end_inset
 
- that we can use is that the two words really are un-related, un-correlated,
+ that we can use, is that the two words really are un-related, un-correlated,
  independent.
  That is, we must define 
 \begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
@@ -521,12 +523,13 @@ assume
 \end_inset
 
  independence, we define it.
- The goal is to capture the dependence as a part of the relation 
+ The goal is to capture the dependency as a part of the relation 
 \begin_inset Formula $R$
 \end_inset
 
 .
- Thus, we conclude with the conditional probability:
+ Thus, we conclude that the correct expression for the conditional probability
+ is:
 \begin_inset Formula 
 \begin{equation}
 P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}\label{eq:cond-pair}
@@ -539,10 +542,16 @@ This is the probability of observing the relationship
 \end_inset
 
  given that the individual parts of the relationship have been observed.
+ The relation 
+\begin_inset Formula $R$
+\end_inset
+
+ includes all correlations between the two words: thier ordering as well
+ as thier co-occurance.
 \end_layout
 
 \begin_layout Subsubsection*
-Frequentism
+Frequentism - Counting words and pairs
 \end_layout
 
 \begin_layout Standard
@@ -588,11 +597,75 @@ N(*)=\sum_{w}N(w)
 
 \end_inset
 
-
+How to count words seems obvious, at first: just count them one by one in
+ a sentence.
+ But this is not the only way to count! When generating random parse trees,
+ one could count the words that occur at the end of edges: that way, the
+ word-count is exactly double the word-pair count.
+ The advantage of this is that the counts for edges and vertexes are unified
+ in a coherent way.
+ (Counting words in a sentence, without multiplicity, is also still a good
+ idea).
 \end_layout
 
 \begin_layout Standard
-The conditional probability for two words in a relation is similarly defined:
+Lets try to keep these ideas distinct.
+ Define the relation 
+\begin_inset Formula $S(w_{1},w_{2})$
+\end_inset
+
+ as being the relation that both words 
+\begin_inset Formula $w_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+ occur at the ends of an edge in the same sentence, but in arbitrary order.
+ It is symmetric: 
+\begin_inset Formula $S(w_{1},w_{2})=S(w_{2},w_{1})$
+\end_inset
+
+.
+ By this definition, one has that 
+\begin_inset Formula 
+\[
+N(S,w_{1},w_{2})=N(R,w_{1},w_{2})+N(R,w_{2},w_{1})
+\]
+
+\end_inset
+
+This is the symmetrized count.
+ It is useful to mod out one of the two words, and to consider the sum
+\begin_inset Formula 
+\[
+N(S,w)\equiv N(S,w,*)=\sum_{w_{2}}N(S,w,w_{2})
+\]
+
+\end_inset
+
+This counts how often the word 
+\begin_inset Formula $w$
+\end_inset
+
+ occurs at one end or the other of a word-pair.
+ It is a distinct count from 
+\begin_inset Formula $N(w)$
+\end_inset
+
+, which, by definition, counts only once per word in a sentence.
+\end_layout
+
+\begin_layout Standard
+XXXWhat is the correct way of counting word-pairs? How does this relate
+ to word-counts? The correct definition seems to be that, whenever a word-pair
+ is observed (once), then each of the words in the word-pair should be counted
+ as being observed.
+\end_layout
+
+\begin_layout Standard
+Likewise, the conditional probability for two words in a relation is:
 \begin_inset Formula 
 \begin{equation}
 P(R|w_{l},w_{r})=\frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}\label{eq:cond-pair-1}
@@ -686,7 +759,8 @@ reference "eq:cond-pair-1"
 
 \end_inset
 
-.This gives
+.
+ This gives
 \begin_inset Formula 
 \[
 P(R|*,*)=\sum_{w_{l},w_{r}}P(R|w_{l},w_{r})=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}
@@ -694,12 +768,11 @@ P(R|*,*)=\sum_{w_{l},w_{r}}P(R|w_{l},w_{r})=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_
 
 \end_inset
 
-This is...
+A numerical value for this, for an observation of English, is given below.
 \end_layout
 
 \begin_layout Standard
-There is also another, related quantity, discussed in more detail, below.
- It is given by
+Another, similar quantity, is the summation
 \begin_inset Formula 
 \[
 \sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(R,w_{l},*)N(R,*,w_{r})}
@@ -707,11 +780,23 @@ There is also another, related quantity, discussed in more detail, below.
 
 \end_inset
 
+This quantity is closely related to the mutual information of word pairs;
+ this relationship is developed in greater detail, below.
+\end_layout
 
+\begin_layout Subsubsection*
+Pair relations for English
 \end_layout
 
 \begin_layout Standard
-XXX Report on values of the above for English.
+This section breifly reports on data collected for English, by Rohit, GSOC
+ project, summer of 2015.
+\end_layout
+
+\begin_layout Standard
+A very small subset of wikipedia articles were observed; this subset contains
+ 400K words (exactly 396256) observed 836 million times, and x word pairs,
+ observed 420 million times (exactly 418235182).
 \end_layout
 
 \begin_layout Subsubsection*
