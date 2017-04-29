@@ -1039,6 +1039,22 @@
 ; ---------------------------------------------------------------------
 ; misc utilities of research interest
 
+(define-public (get-left-word-of-pair PAIR)
+"
+  get-left-word-of-pair PAIR -- Given the EvaluationLink PAIR holding
+  a word-pair, return the word on the left.
+"
+	(gadr PAIR)
+)
+
+(define-public (get-right-word-of-pair PAIR)
+"
+  get-right-word-of-pair PAIR -- Given the EvaluationLink PAIR holding
+  a word-pair, return the word on the right.
+"
+	(gddr PAIR)
+)
+
 (define-public (get-all-words)
 "
   get-all-words - return a list holding all of the observed words
@@ -1051,9 +1067,17 @@
   get-all-pairs - return a list holding all of the observed word-pairs
   Caution: this can be tens of millions long!
 "
-	(cog-incoming-by-type
-		(LinkGrammarRelationshipNode "ANY")
-		'EvaluationLink)
+	; The list of pairs is mostly just the incoming set of the ANY node.
+	; However, this does include some junk, sooo ... hey, both left and
+	; right better be words.
+	(filter!
+		(lambda (pair)
+			(and
+				(eq? 'WordNode (cog-type (get-left-word-of-pair pair)))
+				(eq? 'WordNode (cog-type (get-left-word-of-pair pair)))))
+		(cog-incoming-by-type
+			(LinkGrammarRelationshipNode "ANY")
+			'EvaluationLink))
 )
 
 (define-public (total-word-observations)
@@ -1114,24 +1138,6 @@
 	(get-count (WordNode WORD-STR))
 )
 
-(define-public (get-left-word-of-pair PAIR)
-"
-  get-left-word-of-pair PAIR
-  Given the EvaluationLink PAIR holding a word-pair, return the word
-  on the left.
-"
-	(gadr PAIR)
-)
-
-(define-public (get-right-word-of-pair PAIR)
-"
-  get-right-word-of-pair PAIR
-  Given the EvaluationLink PAIR holding a word-pair, return the word
-  on the right.
-"
-	(gddr PAIR)
-)
-
 (define-public (get-total-cond-prob)
 "
   get-total-cond-prob - return the total conditional probability
@@ -1140,16 +1146,11 @@
 
   Contrast this result with that of get-total-pair-prob
 "
-
 	; Return N(w_l, w_r) / N(w_l) N(w_r)
 	(define (term pair)
-		(let ((lw (get-left-word-of-pair pair))
-				(rw (get-right-word-of-pair pair)))
-			; Oh, hey, both left and right better be words.
-			(if (not (eq? 'WordNode (cog-type lw))) 0
-				(if (not (eq? 'WordNode (cog-type rw))) 0
-					(/ (get-count pair)
-						(* (get-count lw)) (get-count rw))))))
+		(/ (get-count pair)
+			(* (get-count (get-left-word-of-pair pair))
+				(get-count (get-right-word-of-pair pair)))))
 
 	; textbook tail-recursive solution.
 	(define (term-sum lst cnt)
