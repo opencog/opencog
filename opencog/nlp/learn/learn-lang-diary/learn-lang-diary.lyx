@@ -594,9 +594,9 @@ N(*)=\sum_{w}N(w)
 \begin_layout Standard
 The conditional probability for two words in a relation is similarly defined:
 \begin_inset Formula 
-\[
-P(R|w_{l},w_{r})=\frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}
-\]
+\begin{equation}
+P(R|w_{l},w_{r})=\frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}\label{eq:cond-pair-1}
+\end{equation}
 
 \end_inset
 
@@ -624,14 +624,28 @@ That is, the probability is just the number of times the relationship was
 \end_layout
 
 \begin_layout Subsubsection*
-Left-right asymmetry
+Probability of observing a relation
 \end_layout
 
 \begin_layout Standard
-Another interesting quantity is the probability of seeing a pair-wise relationsh
-ip, in general, independent of the actual words in the pair.
- This may seem somewhat pointless, but is worth a review.
- This probability is given by 
+One might ask about the probability of seeing a pair-wise relationship,
+ in general, independent of the actual words in the pair.
+ For word-pairs, this is somewhat pointless, but helps lay the groundwork
+ for later questions of a similar nature: what is the likelihood of seeing
+ some general, rather complex relation?
+\end_layout
+
+\begin_layout Standard
+There are two ways to go about this.
+ The first way doesn't work.
+ Starting with eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:uncond-pair"
+
+\end_inset
+
+, one can try to sum over all words, to get 
 \begin_inset Formula 
 \[
 P(R(*,*))=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(*)N(*)}=\frac{N(R(*,*))}{N(*)N(*)}
@@ -639,8 +653,7 @@ P(R(*,*))=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(*)N(*)}=\frac{N(R(*,*))}{N
 
 \end_inset
 
-Unfortunately, it is a bit misleading: that is because, to reasonable degree
- of accuracy, 
+Unfortunately, won't work, because, to reasonable degree of accuracy, 
 \begin_inset Formula 
 \[
 N(R(*,*))\approx0.5N(*)
@@ -648,7 +661,75 @@ N(R(*,*))\approx0.5N(*)
 
 \end_inset
 
-This follows from the inequalities 
+and the result is not a probability independent of the observational act:
+ it depends on the total number of observations performed.
+ The reason that the total number of word-pairs observed is about half of
+ the number of words observed is explored in greater detail in the next
+ section.
+ Roughly, though, one can say that a given word occurs on the left side
+ of the pair half the time, and on the right side of a pair, half the time.
+\end_layout
+
+\begin_layout Standard
+A more reasonable result is given by working with the conditional probability,
+ starting with eqns 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:cond-pair"
+
+\end_inset
+
+ or 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:cond-pair-1"
+
+\end_inset
+
+.This gives
+\begin_inset Formula 
+\[
+P(R|*,*)=\sum_{w_{l},w_{r}}P(R|w_{l},w_{r})=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}
+\]
+
+\end_inset
+
+This is...
+\end_layout
+
+\begin_layout Standard
+There is also another, related quantity, discussed in more detail, below.
+ It is given by
+\begin_inset Formula 
+\[
+\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(R,w_{l},*)N(R,*,w_{r})}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+XXX Report on values of the above for English.
+\end_layout
+
+\begin_layout Subsubsection*
+Left-right asymmetry
+\end_layout
+
+\begin_layout Standard
+This section explores how often a given word occurs on the left side of
+ a word pair, vs.
+ how often it occurs on the right.
+ This depends on the word, of course; the result is a nice log-normal??
+ 
+\end_layout
+
+\begin_layout Standard
+The liklihood of observing a word-pair containing a word is always strictly
+ less than observing a word itself.
+ That is, 
 \begin_inset Formula 
 \[
 N(w_{l},*)\le N(w_{l})
@@ -668,7 +749,7 @@ E(w,*)=E(*,w)=0.5
 
 \end_inset
 
-Of course, this cannot hold for a given human langauge: the exclamation
+Of course, this cannot hold for a given human language: the exclamation
  point, question mark and period occur exclusively on the right hand-side
  of any randomly-generated pair.
  However, for most words of the English langauge, one will observe that
@@ -680,7 +761,7 @@ N(w,*)\approx N(*,w)\approx0.5N(*)
 
 \end_inset
 
-This approximate relation will not hold for all natural langauges; for example,
+This approximate relation will not hold for all natural languages; for example,
  in Japanese, sentences usually end in a verb, and thus, for Japanse verbs
  
 \begin_inset Formula $v$
@@ -1015,23 +1096,6 @@ Note the logarithmic scale for the y-axis.
  of a double-sided Zipf-like distribution).
 \end_layout
 
-\begin_layout Standard
-There is also another, related quantity, discussed in more detail, below.
- It is given by
-\begin_inset Formula 
-\[
-\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(R,w_{l},*)N(R,*,w_{r})}
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-XXX Report on values of the above for English.
-\end_layout
-
 \begin_layout Subsubsection*
 Yuret Notation
 \end_layout
@@ -1356,6 +1420,14 @@ ambient
 \end_inset
 
  relation that they occur within the same sentence.
+\end_layout
+
+\begin_layout Subsubsection*
+Total Entropy
+\end_layout
+
+\begin_layout Standard
+Of some
 \end_layout
 
 \begin_layout Subsubsection*
