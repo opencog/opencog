@@ -3398,3 +3398,20 @@ get_left_wildcard_count word lg_rel)
 (get-total-atom-count (get-all-words))
 836420450.0
 (length (get-all-pairs))
+
+(LgWordCset 
+    (WordInstanceNode "adsf@62e9c582-1984-472b-a2f5-b61b2b0707e8")
+    (LgAnd 
+        (LgConnector 
+            (LgConnectorNode "ANY")
+            (LgConnDirNode "-")
+            (LgConnMultiNode "@")
+        )
+        (LgConnector 
+            (LgConnectorNode "ANY")
+            (LgConnDirNode "+")
+            (LgConnMultiNode "@")
+        )
+    )
+)
+

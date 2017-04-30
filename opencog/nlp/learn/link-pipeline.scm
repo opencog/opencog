@@ -5,7 +5,7 @@
 ; word-pairs (links) and not disjuncts. XXX FIXME -- should also
 ; count disjuncts.
 ;
-; Copyright (c) 2013 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2013, 2017 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; This code is part of a language-learning effort.  The goal is to
 ; observe a lot of text, and then deduce a grammar from it, using
@@ -121,8 +121,8 @@
 ; make-lg-rel -- create a word-relation from a word-instance relation
 ;
 ; Get the word relation corresponding to a word-instance relation.
-; This simply strips off the unique word-ids from each word. So,
-; given this as input:
+; This simply strips off the unique word-ids from each word. For
+; example, given this as input:
 ;
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "FOO"
@@ -146,6 +146,32 @@
 		)
 		(EvaluationLink rel-node (ListLink w-left w-right))
 	)
+)
+
+; ---------------------------------------------------------------------
+; make-word-cset -- create a word-cset from a word-instance cset
+;
+; A cset is a link-grammar connector set. This takes, as input
+; a cset that is attached to a word instance, and creates the
+; corresponding cset attached to a word. Basically, it just strips
+; off the UUID from the word-instance.
+;
+; For example, given this input:
+;
+;   LgWordCset
+;      WordInstanceNode "foobar@1233456"
+;      LgAnd ...
+;
+; this creates and returns this:
+;
+;   LgWordCset
+;      WordNode "foobar"  -- gar
+;      LgAnd ...          -- gdr
+;
+(define (make-word-cset CSET-INST)
+	(LgWordCset
+		(word-inst-get-word (gar CSET-INST))
+		(gdr CSET-INST))
 )
 
 ; ---------------------------------------------------------------------
