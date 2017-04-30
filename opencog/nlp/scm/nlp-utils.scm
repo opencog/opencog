@@ -30,6 +30,7 @@
 ; -- word-inst-get-links    Get all LG links involving word-inst.
 ; -- word-inst-get-senses   Get word senses associated with word.
 ; -- word-inst-sense-score  Get ranking score for word-inst & word-sense.
+; -- word-inst-get-cset     Get the connector-set used for a word-inst.
 ; -- word-inst-get-disjunct Get the disjunct (LgAnd) used for a word-inst.
 ; -- delete-sentence        Delete all atoms associated with a sentence.
 ; -- delete-sentences       Delete all atoms that occur in sentences.
@@ -355,6 +356,21 @@
 			(cdr (assoc 'count (cog-tv->alist (cog-tv slink))))
 		)
 	)
+)
+
+; ---------------------------------------------------------------------
+(define-public (word-inst-get-cset word-inst)
+"
+  word-inst-get-cset -- Get the connector set (LgWordCset) attached
+  to the word-inst.  For example, this returns
+
+  (LgWordCset
+      (WordInstanceNode "foobar@62e9c582-1984")
+      (LgAnd ..))
+"
+	(car (filter!
+		(lambda (x) (eq? (cog-type x) 'LgWordCset))
+		(cog-incoming-set word-inst)))
 )
 
 ; ---------------------------------------------------------------------
