@@ -365,7 +365,7 @@
   to the word-inst.  For example, this returns
 
   (LgWordCset
-      (WordInstanceNode "foobar@62e9c582-1984")
+      (WordInstanceNode 'foobar@62e9c582-1984')
       (LgAnd ..))
 "
 	(car (filter!
