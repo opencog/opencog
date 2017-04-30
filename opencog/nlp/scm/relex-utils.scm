@@ -423,7 +423,7 @@
   dictionary entries will have a subscript.
 "
 	(string-append
-		(word-inst-get-word-str word-inst)
+		(cog-name (word-inst-get-word word-inst))
 		(word-inst-get-subscript-str word-inst)
 	)
 )

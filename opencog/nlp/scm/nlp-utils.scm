@@ -27,7 +27,6 @@
 ; -- word-inst-get-parse    Return the ParseNode associated with word-inst.
 ; -- word-inst-get-number   Return the NumberNode associated with word-inst.
 ; -- word-inst-get-word     Return the WordNode associated with word-inst.
-; -- word-inst-get-word-str Return the word string assoc with word-inst.
 ; -- word-inst-get-links    Get all LG links involving word-inst.
 ; -- word-inst-get-senses   Get word senses associated with word.
 ; -- word-inst-sense-score  Get ranking score for word-inst & word-sense.
@@ -300,16 +299,6 @@
   a single atom.
 "
 	(car (cog-chase-link 'ReferenceLink 'WordNode word-inst))
-)
-
-; ---------------------------------------------------------------------
-(define-public (word-inst-get-word-str word-inst)
-"
-  word-inst-get-word-str  Return the word string assoc with word-inst
-
-  Return the word string associated with the word-instance
-"
-	(cog-name (car (word-inst-get-word word-inst)))
 )
 
 ; ---------------------------------------------------------------------

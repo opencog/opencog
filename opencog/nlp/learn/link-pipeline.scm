@@ -141,8 +141,8 @@
 (define (make-lg-rel lg-rel-inst)
 	(let (
 			(rel-node (gar lg-rel-inst))
-			(w-left  (car (word-inst-get-word (gadr lg-rel-inst))))
-			(w-right (car (word-inst-get-word (gddr lg-rel-inst))))
+			(w-left  (word-inst-get-word (gadr lg-rel-inst)))
+			(w-right (word-inst-get-word (gddr lg-rel-inst)))
 		)
 		(EvaluationLink rel-node (ListLink w-left w-right))
 	)
