@@ -1,17 +1,17 @@
 ;
 ; link-pipeline.scm
 ;
-; Link-grammar relation-counting pipeline.  Currently counts only
-; word-pairs (links) and not disjuncts. XXX FIXME -- should also
-; count disjuncts.
+; Link-grammar word and link-counting pipeline.  Currently counts
+; words, word-pairs (links), disjuncts, parses and sentences.
 ;
 ; Copyright (c) 2013, 2017 Linas Vepstas <linasvepstas@gmail.com>
 ;
-; This code is part of a language-learning effort.  The goal is to
-; observe a lot of text, and then deduce a grammar from it, using
-; entropy and other basic probability methods.
+; This code is part of the language-learning effort.  The project
+; requires that a lot of text be observed, withe the goal of deducing
+; a grammar from it, using entropy and other basic probability methods.
 ;
-; Main entry point: (observe-text plain-text)
+; Main entry point: `(observe-text plain-text)`
+;
 ; Call this entry point with exactly one sentance as a plain text
 ; string. It will be parsed by RelEx, and the resulting link-grammar
 ; link usage counts will be updated in the atomspace. The counts are
@@ -26,6 +26,7 @@
 ; *) how many parses were observed.
 ; *) how many words have been observed (counting once-per-word)
 ; *) how many relationship triples have been observed.
+; *) how many disjuncts have been observed.
 ;
 ; Sentences are counted by updating the count on `(SentenceNode "ANY")`.
 ; Parses are counted by updating the count on `(ParseNode "ANY")`.
@@ -33,7 +34,7 @@
 ; word. It is counted with multiplicity: once for each time it occurs
 ; in a parse.  That is, if a word appears twice in a parse, it is counted
 ; twice.  Counts for relations are stored in the TV for the EvaluationLink.
-;
+; Disjuncts are counted by incrementing the LgWordCset for a given word.
 
 (use-modules (opencog) (opencog nlp) (opencog persist))
 
@@ -178,13 +179,11 @@
 )
 
 ; ---------------------------------------------------------------------
-; update-link-counts -- Increment word and link counts
+; update-link-counts -- Increment link counts
 ;
-; This routine updates word counts and link counts in the database.
-; Word and link counts are needed to compute mutual information (mutual
-; entropy), which is required for maximum-entropy-style learning.  The
-; algo implemented here is trite: fetch words and relations from SQL;
-; increment the attached CountTruthValue; save back to SQL.
+; This routine updates link counts in the database. The algo is trite:
+; fetch the LG link from SQL, increment the attached CountTruthValue,
+; and save back to SQL.
 
 (define (update-link-counts single-sent)
 
@@ -203,6 +202,26 @@
 			(lambda (key . args) #f)))
 
 	(map-lg-links try-count-one-link (list single-sent))
+)
+
+; ---------------------------------------------------------------------
+; update-disjunct-counts -- Increment disjunct counts
+;
+; Just like the above, but for the disjuncts.
+
+(define (update-disjunct-counts single-sent)
+
+	(define (try-count-one-cset CSET)
+		(catch 'wrong-type-arg
+			(lambda () (count-one-atom (make-word-cset CSET)))
+			(lambda (key . args) #f)))
+
+	(map-parses
+		(lambda (parse)
+			(map-word-instances
+				(lambda (wi) (try-count-one-cset (word-inst-get-cset wi)))
+				parse))
+		(list single-sent))
 )
 
 ; ---------------------------------------------------------------------
@@ -243,6 +262,7 @@
 				(begin
 					(update-word-counts sent)
 					(update-link-counts sent)
+					(update-disjunct-counts sent)
 					(delete-sentence sent)
 					(monitor-rate '())
 					(process-sents)))))

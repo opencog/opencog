@@ -3415,3 +3415,9 @@ get_left_wildcard_count word lg_rel)
     )
 )
 
+No cset for the last word!!
+
+no DISJUNCT srcNode.get("DISJUNCT"); on last word .. line 139
+no attr on the last word
+load_senses
+config.isStoreSense
