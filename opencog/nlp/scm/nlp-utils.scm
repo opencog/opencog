@@ -330,7 +330,7 @@
 
   with the WordInstance in either the first or the second place.
 "
-	(cog-get-pred word-inst 'DefinedLinguisticRelationshipNode)
+	(cog-get-pred word-inst 'LinkGrammarRelationshipNode)
 )
 
 ; ---------------------------------------------------------------------
