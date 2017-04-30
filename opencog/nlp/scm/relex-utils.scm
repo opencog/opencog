@@ -1,9 +1,13 @@
 ;
-; nlp-utils.scm
+; relex-utils.scm
 ;
 ;;; Commentary:
 ;
-; Assorted NLP utilities.  Operations include:
+; Assorted RelEx-related utilities.  Note that RelEx is partly
+; deprecated; it only works for English, and is unlikely to be
+; developed further in the future.
+;
+; Operations include:
 ; -- looping over all RelEx relations
 ; -- get part-of-speech, lemma of word.
 ; -- get prepositions

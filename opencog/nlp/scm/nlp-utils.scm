@@ -23,11 +23,13 @@
 ; -- sent-get-interp Get all the InterpretationNodes of a sentence.
 ; -- parse-get-words        Get all words occuring in a parse.
 ; -- parse-get-words-in-order  Get all words occuring in a parse in order.
+; -- parse-get-links        Get all LG links in a parse.
 ; -- interp-get-parse       Get the Interpretation of a Parse.
 ; -- word-inst-get-parse    Return the ParseNode associated with word-inst.
 ; -- word-inst-get-number   Return the NumberNode associated with word-inst.
-; -- word-inst-get-word   Return the WordNode associated with word-inst.
-; -- word-inst-get-word-str  Return the word string assoc with word-inst.
+; -- word-inst-get-word     Return the WordNode associated with word-inst.
+; -- word-inst-get-word-str Return the word string assoc with word-inst.
+; -- word-inst-get-links    Get all LG links involving word-inst.
 ; -- word-inst-get-senses   Get word senses associated with word.
 ; -- word-inst-sense-score  Get ranking score for word-inst & word-sense.
 ; -- word-inst-get-disjunct Get the disjunct (LgAnd) used for a word-inst.
@@ -201,6 +203,32 @@
 )
 
 ; ---------------------------------------------------------------------
+
+(define-public (parse-get-links parse-node)
+"
+  parse-get-links    Get all LG links in a parse.
+
+  Given a parse, return a list of all LG links in that parse, i.e.
+  the EvaluationLinks of the form
+
+     EvaluationLink
+        LinkGrammarRelationshipNode 'foo'
+        ListLink
+           WordInstanceNode 'dog@12345'
+           WordInstanceNode 'toy@6789'
+
+"
+	; Get a list of word-instances in the parse.
+	; Get a list of lists of links for each word-instance.
+	; concatenate! will reduce the list of lists to a plain list.
+	; Remove duplicates
+	(delete-duplicates!
+		(concatenate!
+			(map word-inst-get-links
+				(parse-get-words parse-node))))
+)
+
+; ---------------------------------------------------------------------
 (define-public (sent-get-interp sent-node)
 "
   sent-get-interp - Given a SentenceNode returns a list of InterpretationNodes
@@ -281,6 +309,8 @@
   word-inst-get-word   Return the WordNode associated with word-inst
 
   Return the WordNode associated with 'word-inst'
+  TFor example given `(WordInstance 'olah@12345')`, return
+  `(WordNode 'olah')`
 "
 	(cog-chase-link 'ReferenceLink 'WordNode word-inst)
 )
@@ -293,6 +323,27 @@
   Return the word string associated with the word-instance
 "
 	(cog-name (car (word-inst-get-word word-inst)))
+)
+
+; ---------------------------------------------------------------------
+(define-public (word-inst-get-links word-inst)
+"
+  word-inst-get-links       Get LG links involving word-inst
+
+  Given a word instance, return a list of all LG links that the
+  word-instance participates in.  For example, given
+  `(WordInstanceNode 'dog@12345')`, return all EvaluationLinks
+  of the form
+
+     Evaluati`onLink
+        LinkGrammarRelationshipNode 'foo'
+        ListLink
+           WordInstanceNode 'dog@12345'
+           WordInstanceNode 'toy@6789'
+
+  with the WordInstance in either the first or the second place.
+"
+	(cog-get-pred word-inst 'DefinedLinguisticRelationshipNode)
 )
 
 ; ---------------------------------------------------------------------
