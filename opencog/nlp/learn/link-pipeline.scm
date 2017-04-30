@@ -118,11 +118,14 @@
 )
 
 ; ---------------------------------------------------------------------
-; make-lg-rel -- create a word-relation from a word-instance relation
+; make-word-link -- create a word-link from a word-instance link
 ;
-; Get the word relation corresponding to a word-instance relation.
-; This simply strips off the unique word-ids from each word. For
-; example, given this as input:
+; Get the LG word-link relation corresponding to a word-instance LG link
+; relation. An LG link is simply a single link-grammar link between two
+; words (or two word-instances, when working with a single sentence).
+;
+; This function simply strips off the unique word-ids from each word.
+; For example, given this as input:
 ;
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "FOO"
@@ -138,7 +141,7 @@
 ;         WordNode "word"                -- gadr
 ;         WordNode "bird"                -- gddr
 ;
-(define (make-lg-rel lg-rel-inst)
+(define (make-word-link lg-rel-inst)
 	(let (
 			(rel-node (gar lg-rel-inst))
 			(w-left  (word-inst-get-word (gadr lg-rel-inst)))
@@ -185,7 +188,7 @@
 
 (define (update-link-counts single-sent)
 
-	; Due to a RelEx bug, `make-lg-rel` can throw an exception. Specifically,
+	; Due to a RelEx bug, `make-word-link` can throw an exception. Specifically,
 	; if the word in a sentences is a parentheis, then the ReferenceLink
 	; between the spcific paren, and the general par does not get created.
 	; Viz, there is no `(ReferenceLink (WordInstanceNode "(@4bf5e341-c6b")
@@ -193,10 +196,10 @@
 	; gets confused. Beats me why. We should fix this. In the meanhile,
 	; we hack around this here by catching the exceptioon.  What happens
 	; is that the call `word-inst-get-word` returns nothing, so the `car`
-	; in `make-lg-rel` throws 'wrong-type-arg and everything gets borken.
+	; in `make-word-link` throws 'wrong-type-arg and everything gets borken.
 	(define (try-count-one-link link)
 		(catch 'wrong-type-arg
-			(lambda () (count-one-atom (make-lg-rel link)))
+			(lambda () (count-one-atom (make-word-link link)))
 			(lambda (key . args) #f)))
 
 	(map-lg-links try-count-one-link (list single-sent))
@@ -260,13 +263,13 @@
 ;
 ; (map-lg-links prt (get-new-parsed-sentences))
 ;
-; (map-lg-links (lambda (x) (prt (make-lg-rel x)))
+; (map-lg-links (lambda (x) (prt (make-word-link x)))
 ;    (get-new-parsed-sentences))
 ;
-; (map-lg-links (lambda (x) (prt (gddr (make-lg-rel x))))
+; (map-lg-links (lambda (x) (prt (gddr (make-word-link x))))
 ;    (get-new-parsed-sentences))
 ;
-; (map-lg-links (lambda (x) (cog-inc-count! (make-lg-rel x) 1))
+; (map-lg-links (lambda (x) (cog-inc-count! (make-word-link x) 1))
 ;    (get-new-parsed-sentences))
 ;
 ; (observe-text "abcccccccccc  defffffffffffffffff")
