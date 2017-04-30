@@ -3,7 +3,7 @@
 ;
 ; Compute the mutual information of language word pairs.
 ;
-; Copyright (c) 2013, 2014 Linas Vepstas
+; Copyright (c) 2013, 2014, 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -83,22 +83,31 @@
 ; Here, AnyNode plays the role of *.  Thus, N(*,*) is shorthand for the
 ; last of these triples.
 ;
-; Rather than computing and storing the probabilities P(wl,wr), it is
-; more convenient to store the entropy or "log likelihood" of the
-; probabilities. Thus, the quantity H(wl,*) = -log_2 P(wl,*) is computed,
-; and is stored in the "confidence" slot of the truth value. Note the
-; minus sign: the entropy H(wl,*) is positive, and gets larger, the
-; smaller P is. Note that the logarithm is base-2.  In the scripts
+; After they've been computed, the values for N(w,*) and N(*,w) can be
+; fetched with the `get-left-count-str` and `get-right-count-str`
+; routines, below.  The value for N(*,*) can be gotten by calling
+; `total-pair-observations`.
+;
+; Similarly, N(*) can be obtained by calling `total-word-observations`.
+; The count N(w) for a fixed word w can be gotten by calling
+; `get-word-count-str`.
+;
+; In addition to computing and storing the probabilities P(wl,wr), it
+; is convenient to also store the entropy or "log likelihood" of the
+; probabilities. Thus, the quantity H(wl,*) = -log_2 P(wl,*) is computed.
+; Both the probability, and the entropy are stored, under the key of
+; (PredicateNode "*-FrequencyKey-*").
+; Note the minus sign: the entropy H(wl,*) is positive, and gets larger,
+; the smaller P is. Note that the logarithm is base-2.  In the scripts
 ; below, the phrase 'logli' is used as a synonym for this entropy.
 ;
 ; The mutual information between a pair of words is defined as
 ;
 ;     MI(wl,wr) = -(H(wl,wr) - H(wl,*) - H(*,wr))
 ;
-; This is computed by the script batch-all-pair-mi below. Again, this
-; is stored in the "confidence" slot.  Thus, the "confidence" slot
-; stores the entropy, for the wild-card structures, and it stores the
-; mutual entropy, aka mutual information, for the pairs.
+; This is computed by the script batch-all-pair-mi below. The value is
+; stored under the key of (Predicate "*-Pair MI Key-*") as a single
+; float.
 ;
 ; That's all there's to this. The batch-all-pair-mi is the main entry
 ; point; its given at the bottom.
@@ -108,6 +117,7 @@
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))
 (use-modules (opencog))
+(use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
 ; Define the "things" that will be pair-summed over.
@@ -118,50 +128,48 @@
 (define item-type 'WordNode)
 (define item-type-str "WordNode")
 
+; Cache the created atoms for left an right.
+(define any-left (AnyNode "left-word"))
+(define any-right (AnyNode "right-word"))
+
 ; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
 ; the 'count' value of its CountTruthValue. This routine just fetches
-; those, and addes them up.
+; those, and adds them up.
 ;
 ; The returned value is the total count.
 
-(define (get-total-atom-count atom-list)
-	(let ((cnt 0))
-		(define (inc atom) (set! cnt (+ cnt (tv-count (cog-tv atom)))))
-		(for-each inc atom-list)
-		cnt
-	)
+(define-public (get-total-atom-count atom-list)
+	;
+	; A proceedural loop.
+	;	(let ((cnt 0))
+	;		(define (inc atom) (set! cnt (+ cnt (get-count atom))))
+	;		(for-each inc atom-list)
+	;		cnt
+	;	)
+
+	; textbook tail-recursive solution.
+	(define (hlpr lst cnt)
+		(if (null? lst) cnt
+			(hlpr (cdr lst) (+ cnt (get-count (car lst))))))
+
+	(hlpr atom-list 0)
 )
 
 ; ---------------------------------------------------------------------
 ; Compute log liklihood of having observed a given atom.
 ;
-; The liklihood will be stored in the atom's TV 'confidence' location.
-; The log liklihood is -log_2(frequency), with the frequency computed
-; by simply taking the atom's count value, and dividing by the total.
+; The liklihood and its log-base-2 will be stored under the key
+; (Predicate "*-FrequencyKey-*"), with the first number being the
+; frequency, which is just the atom's count value, dividing by the
+; total number of times the atom has been observed.  The log liklihood
+; is -log_2(frequency), and is stored as a convenience.
 ;
 ; This returns the atom that was provided, but now with the logli set.
 
 (define (compute-atom-logli atom total)
-	(let* (
-			(atv (cog-tv->alist (cog-tv atom)))
-			(meen (assoc-ref atv 'mean))
-			(rawcnt (assoc-ref atv 'count))
-			(cnt
-				(if (eq? rawcnt #f)
-					;; This is nuts, this should never happen....
-					;; But it did, due to bug on atomspace default TV code.
-					(begin (trace-msg-num "Crazy atom has no count TV!" atom) 1)
-					rawcnt
-				)
-			)
-			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
-			(ln2 (* -1.4426950408889634 (log (/ cnt total))))
-			(ntv (cog-new-ctv meen ln2 cnt))
-		)
-		(cog-set-tv! atom ntv)
-	)
+	(set-freq atom (/ (get-count atom) total))
 )
 
 ; ---------------------------------------------------------------------
@@ -173,7 +181,7 @@
 ; likelihood for each atom in the list, based on the total.
 ;
 ; As usual, the raw counts are obtained from the 'count' slot on a
-; CountTruthValue, and the logli is stored in the 'confidence' slot.
+; CountTruthValue, and the logli is stored as a value on the atom.
 ;
 ; This returns the atom-list, but now with the logli's set.
 
@@ -189,9 +197,8 @@
 ; ---------------------------------------------------------------------
 ; Compute the occurance logliklihoods for all words.
 ;
-; Load all word-nodes into the atomspace, first, so that an accurate
-; count of word-occurances can be obtained.  The loglikli for a given
-; word node is stored in the 'confidence' slot of the CountTruthValue.
+; Load all word-nodes into the atomspace from SQL storage, if they
+; are not already present.  This also loads the associated values.
 ;
 ; This returns the list of all word-nodes, with the logli's set.
 
@@ -211,10 +218,9 @@
 ; (that is, the wildcard is on the left side)
 
 (define (get_left_wildcard_count word lg_rel)
-	(define evl
-		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
+	(get-count
+		(EvaluationLink lg_rel (ListLink any-left word))
 	)
-	(tv-count (cog-tv evl))
 )
 
 ; ---------------------------------------------------------------------
@@ -222,10 +228,8 @@
 ; (that is, the wildcard is on the right side)
 
 (define (get_right_wildcard_count word lg_rel)
-	(define evl
-		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
-	)
-	(tv-count (cog-tv evl))
+	(get-count
+		(EvaluationLink lg_rel (ListLink word any-right)))
 )
 
 ; ---------------------------------------------------------------------
@@ -233,11 +237,8 @@
 ; That is, get the count, for wild-cards on both the left and right.
 
 (define (get-pair-total lg_rel)
-	(tv-count (cog-tv
-		(EvaluationLink lg_rel
-			(ListLink (AnyNode "left-word") (AnyNode "right-word"))
-		)
-	))
+	(get-count
+		(EvaluationLink lg_rel (ListLink any-left any-right)))
 )
 
 ; ---------------------------------------------------------------------
@@ -245,10 +246,8 @@
 ; (that is, the wildcard is on the left side)
 
 (define (get_left_wildcard_logli word lg_rel)
-	(define evl
-		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
-	)
-	(tv-conf (cog-tv evl))
+	(get-logli
+		(EvaluationLink lg_rel (ListLink any-left word)))
 )
 
 ; ---------------------------------------------------------------------
@@ -256,10 +255,8 @@
 ; (that is, the wildcard is on the right side)
 
 (define (get_right_wildcard_logli word lg_rel)
-	(define evl
-		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
-	)
-	(tv-conf (cog-tv evl))
+	(get-logli
+		(EvaluationLink lg_rel (ListLink word any-right)))
 )
 
 ; ---------------------------------------------------------------------
@@ -269,7 +266,7 @@
 ; list-lnk is the ListLink we are given.  We want to find the
 ; EvaluationLink that contains it.  That EvaluationLink should have
 ; lg_rel as its predicate type, and the ListLink in the expected
-; location. That is, given ListLink, we are looking for 
+; location. That is, given ListLink, we are looking for
 ;
 ;    EvaluationLink
 ;        lg_rel
@@ -364,9 +361,11 @@
 ;         WordNode "word"
 ;         AnyNode "right-word"
 ;
-; This routine assumes that all relevant atoms are already in the atomspace.
-; If they're not, incorrect counts will be obtained.
-; Use the fetch-and-compute-pair-wildcard-counts below to fetch.
+; This routine assumes that all relevant atoms are already in the
+; atomspace. If they're not, incorrect counts will be obtained. Either
+; batch-fetch all word-pairs, or use the
+; `fetch-and-compute-pair-wildcard-counts` routine, below, to fetch
+; the individual word.
 ;
 ; Returns the two wild-card EvaluationLinks
 
@@ -388,7 +387,7 @@
 				(filter
 					(lambda (lnk)
 						(define oset (cog-outgoing-set lnk))
-						(and 
+						(and
 							(equal? item-type (cog-type (car oset)))
 							(equal? word (cadr oset))
 						)
@@ -402,7 +401,7 @@
 				(filter
 					(lambda (lnk)
 						(define oset (cog-outgoing-set lnk))
-						(and 
+						(and
 							(equal? word (car oset))
 							(equal? item-type (cog-type (cadr oset)))
 						)
@@ -413,7 +412,7 @@
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (filter-map 
+			(left-evs (filter-map
 					(lambda (lnk) (get-ev-link lg_rel lnk))
 					left-stars)
 			)
@@ -435,10 +434,10 @@
 			(if (< 0 left-total)
 				(begin
 					(set! left-star
-						(EvaluationLink (cog-new-ctv 0 0 left-total) lg_rel
-							(ListLink (AnyNode "left-word") word)
-						)
+						(EvaluationLink lg_rel
+							(ListLink any-left word))
 					)
+					(set-count left-star left-total)
 					; Save these hard-won counts to the database.
 					(store-atom left-star)
 				)
@@ -446,10 +445,10 @@
 			(if (< 0 right-total)
 				(begin
 					(set! right-star
-						(EvaluationLink (cog-new-ctv 0 0 right-total) lg_rel
-							(ListLink word (AnyNode "right-word"))
-						)
+						(EvaluationLink lg_rel
+							(ListLink word any-right))
 					)
+					(set-count right-star right-total)
 					; Save these hard-won counts to the database.
 					(store-atom right-star)
 				)
@@ -461,192 +460,213 @@
 	)
 )
 
-; Same as above, but using the pattern matcher. CAUTION: For large
-; datasets, this runs 50 times slower than the above! We keep the
-; code here for debugging and historical reasons !?
-(define (compute-pair-wildcard-counts-pm word lg_rel)
-
-	; Define the bind links that we'll use with the pattern matcher.
-	; left-bind has the wildcard on the left.
-	(define left-bind-link
-		(BindLink
-			; Be careful to ask for WordNode, since there are also
-			; eval links with AnyNode floating around ...
-			(TypedVariableLink
-				(VariableNode "$left-word")
-				(TypeNode item-type-str)
-			)
-			(EvaluationLink
-				lg_rel
-				(ListLink
-					(VariableNode "$left-word")
-					word
-				)
-			)
-			(EvaluationLink
-				lg_rel
-				(ListLink
-					(VariableNode "$left-word")
-					word
-				)
-			)
-		)
-	)
-	; right-bind has the wildcard on the right.
-	(define right-bind-link
-		(BindLink
-			(TypedVariableLink
-				(VariableNode "$right-word")
-				(TypeNode item-type-str)
-			)
-			(EvaluationLink
-				lg_rel
-				(ListLink
-					word
-					(VariableNode "$right-word")
-				)
-			)
-			(EvaluationLink
-				lg_rel
-				(ListLink
-					word
-					(VariableNode "$right-word")
-				)
-			)
-		)
-	)
-	(let* (
-			; lefties are those with the wildcard on the left side.
-			; XXX It would be more efficient to not use the pattern
-			; matcher here, but to instead filter the given relset.
-			; But I'm lazy, for just right now.
-			(left-list (cog-bind left-bind-link))
-			(right-list (cog-bind right-bind-link))
-			(lefties (cog-outgoing-set left-list))
-			(righties (cog-outgoing-set right-list))
-
-			; the total occurance counts
-			(left-total (get-total-atom-count lefties))
-			(right-total (get-total-atom-count righties))
-		)
-		(begin
-			; Create the two evaluation links to hold the counts.
-			(define left-star #f)
-			(define right-star #f)
-
-			(if (< 0 left-total)
-				(begin
-					(set! left-star
-						(EvaluationLink (cog-new-ctv 0 0 left-total) lg_rel
-							(ListLink (AnyNode "left-word") word)
-						)
-					)
-					; Save these hard-won counts to the database.
-					(store-atom left-star)
-				)
-			)
-			(if (< 0 right-total)
-				(begin
-					(set! right-star
-						(EvaluationLink (cog-new-ctv 0 0 right-total) lg_rel
-							(ListLink word (AnyNode "right-word"))
-						)
-					)
-					; Save these hard-won counts to the database.
-					(store-atom right-star)
-				)
-			)
-
-			; And now ... delete some of the crap we created.
-			; Don't want to pollute the atomspace.
-			(extract-hypergraph left-bind-link)
-			(extract-hypergraph right-bind-link)
-			; Note that cog-extract only goes one level deep, it does not
-			; recurse; so the below only delete the ListLink at the top.
-			(cog-extract left-list)
-			(cog-extract right-list)
-
-			; What the hell, return the two things
-			(list left-star right-star)
-		)
-	)
-)
-
-; ---------------------------------------------------------------------
-; fetch-and-compute-pair-wildcard-counts -- fetch wrapper around
-; compute-pair-wildcard-counts
-;
-; Before compute-pair-wildcard-counts can do it's stuff, we have to
-; make sure that all the relevant word-pairs are in the atomspace
-; (viz. loaded from persistant store.)  After loading and computing,
-; we delete these atoms, as they are too numerous to keep around.
-;
-(define (fetch-and-compute-pair-wildcard-counts word lg_rel)
-	(let* (
-			; inset is a list of ListLink's of word-pairs
-			(inset (cog-incoming-set (fetch-incoming-set word)))
-			; relset is a list of EvaluationLinks of word-pairs
-			(relset (append-map
-					(lambda (ll) (cog-incoming-set (fetch-incoming-set ll)))
-					inset)
-			)
-			; The main, wrapped routine.
-			(result (compute-pair-wildcard-counts word lg_rel))
-		)
-		(begin
-			; Now, delete all the crap that we fetched.
-			; OK, we want to do this: (for-each cog-extract relset)
-			; but we can't, because this would also delete the wildcard
-			; evaluation links. We want to keep those around. So ugly
-			; filter.
-			(for-each
-				(lambda (x)
-					; Returns true if either the left or right side is
-					; the any-node
-					(define (is-any? evl)
-						(define (zany atom) (equal? (cog-type atom) 'AnyNode))
-						(if (zany (gadr evl)) #t (zany (gddr evl)))
-					)
-
-					(if (not (is-any? x)) (cog-extract x))
-				)
-				relset
-			)
-
-			(for-each cog-extract inset)
-			result
-		)
-	)
-)
+;;;; Same as above, but using the pattern matcher. CAUTION: For large
+;;;; datasets, this runs 50 times slower than the above! We keep the
+;;;; code here for debugging and historical reasons !?
+;;;(define (compute-pair-wildcard-counts-pm word lg_rel)
+;;;
+;;;	; Define the bind links that we'll use with the pattern matcher.
+;;;	; left-bind has the wildcard on the left.
+;;;	(define left-bind-link
+;;;		(BindLink
+;;;			; Be careful to ask for WordNode, since there are also
+;;;			; eval links with AnyNode floating around ...
+;;;			(TypedVariableLink
+;;;				(VariableNode "$left-word")
+;;;				(TypeNode item-type-str)
+;;;			)
+;;;			(EvaluationLink
+;;;				lg_rel
+;;;				(ListLink
+;;;					(VariableNode "$left-word")
+;;;					word
+;;;				)
+;;;			)
+;;;			(EvaluationLink
+;;;				lg_rel
+;;;				(ListLink
+;;;					(VariableNode "$left-word")
+;;;					word
+;;;				)
+;;;			)
+;;;		)
+;;;	)
+;;;	; right-bind has the wildcard on the right.
+;;;	(define right-bind-link
+;;;		(BindLink
+;;;			(TypedVariableLink
+;;;				(VariableNode "$right-word")
+;;;				(TypeNode item-type-str)
+;;;			)
+;;;			(EvaluationLink
+;;;				lg_rel
+;;;				(ListLink
+;;;					word
+;;;					(VariableNode "$right-word")
+;;;				)
+;;;			)
+;;;			(EvaluationLink
+;;;				lg_rel
+;;;				(ListLink
+;;;					word
+;;;					(VariableNode "$right-word")
+;;;				)
+;;;			)
+;;;		)
+;;;	)
+;;;	(let* (
+;;;			; lefties are those with the wildcard on the left side.
+;;;			; XXX It would be more efficient to not use the pattern
+;;;			; matcher here, but to instead filter the given relset.
+;;;			; But I'm lazy, for just right now.
+;;;			(left-list (cog-bind left-bind-link))
+;;;			(right-list (cog-bind right-bind-link))
+;;;			(lefties (cog-outgoing-set left-list))
+;;;			(righties (cog-outgoing-set right-list))
+;;;
+;;;			; the total occurance counts
+;;;			(left-total (get-total-atom-count lefties))
+;;;			(right-total (get-total-atom-count righties))
+;;;		)
+;;;		(begin
+;;;			; Create the two evaluation links to hold the counts.
+;;;			(define left-star #f)
+;;;			(define right-star #f)
+;;;
+;;;			(if (< 0 left-total)
+;;;				(begin
+;;;					(set! left-star
+;;;						(set-count
+;;;							(EvaluationLink lg_rel
+;;;								(ListLink any-left word))
+;;;						left-total)
+;;;					)
+;;;					; Save these hard-won counts to the database.
+;;;					(store-atom left-star)
+;;;				)
+;;;			)
+;;;			(if (< 0 right-total)
+;;;				(begin
+;;;					(set! right-star
+;;;						(set-count
+;;;							(EvaluationLink lg_rel
+;;;								(ListLink word any-right))
+;;;						right-total)
+;;;					)
+;;;					; Save these hard-won counts to the database.
+;;;					(store-atom right-star)
+;;;				)
+;;;			)
+;;;
+;;;			; And now ... delete some of the crap we created.
+;;;			; Don't want to pollute the atomspace.
+;;;			(extract-hypergraph left-bind-link)
+;;;			(extract-hypergraph right-bind-link)
+;;;			; Note that cog-extract only goes one level deep, it does not
+;;;			; recurse; so the below only delete the ListLink at the top.
+;;;			(cog-extract left-list)
+;;;			(cog-extract right-list)
+;;;
+;;;			; What the hell, return the two things
+;;;			(list left-star right-star)
+;;;		)
+;;;	)
+;;;)
 
 ; ---------------------------------------------------------------------
-; Compute wildcard counts for all word-pairs, for the relation lg_rel.
-; lg_rel is a link-grammar link type.
-;
-; This loops over all words, and computes the one-sided wild-card
-; counts for these. Only the counts for the link-grammar link type
-; lg_rel are computed.
-;
-; Caution: this can take hours or days to run.
-;
-(define (all-pair-wildcard-counts lg_rel)
-	(begin
-		(init-trace "/tmp/progress")
-		(trace-msg "Start on-demand wildcounting\n")
+;;;; fetch-and-compute-pair-wildcard-counts -- fetch wrapper around
+;;;; compute-pair-wildcard-counts
+;;;;
+;;;; Before compute-pair-wildcard-counts can do it's stuff, we have to
+;;;; make sure that all the relevant word-pairs are in the atomspace
+;;;; (viz. loaded from persistant store.)  After loading and computing,
+;;;; we delete these atoms, as they are too numerous to keep around.
+;;;;
+;;;; Unfortunately, doing this fetch-count-delete cycle, word-for-word,
+;;;; turns out to be incredibly slow when there are a few hundred-K words.
+;;;; Its much faster to just batch-fetch the needed word-pairs, and then
+;;;; batch-count them all.  This code is kept here "for historical reasons".
+;;;;
+;;;; Caution: Because this is deleting atoms, this probably should not
+;;;; be run concurrently with other atom-counting threads.
+;;;;
+;;;(define (fetch-and-compute-pair-wildcard-counts word lg_rel)
+;;;	(let* (
+;;;			; inset is a list of ListLink's of word-pairs
+;;;			(inset (cog-incoming-set (fetch-incoming-set word)))
+;;;			; relset is a list of EvaluationLinks of word-pairs
+;;;			(relset (append-map
+;;;					(lambda (ll) (cog-incoming-set (fetch-incoming-set ll)))
+;;;					inset)
+;;;			)
+;;;			; The main, wrapped routine.
+;;;			(result (compute-pair-wildcard-counts word lg_rel))
+;;;		)
+;;;		(begin
+;;;			; Now, delete from the atomspace all the crap that we fetched.
+;;;			; So, we want to do this: (for-each cog-extract relset)
+;;;			; but we can't, because this would also delete the wildcard
+;;;			; evaluation links. We want to keep those around. So ugly
+;;;			; filter.
+;;;			(for-each
+;;;				(lambda (x)
+;;;					; Returns true if either the left or right side is
+;;;					; the any-node
+;;;					(define (is-any? evl)
+;;;						(define (zany atom) (equal? (cog-type atom) 'AnyNode))
+;;;						(if (zany (gadr evl)) #t (zany (gddr evl)))
+;;;					)
+;;;
+;;;					(if (not (is-any? x)) (cog-extract x))
+;;;				)
+;;;				relset
+;;;			)
+;;;
+;;;			(for-each cog-extract inset)
+;;;			result
+;;;		)
+;;;	)
+;;;)
 
-		; Make sure all words are in the atomspace
-		(load-atoms-of-type item-type)
-
-		; For each word, fetch the word-pairs it occurs in, compute
-		; the counts, and then delete the word-pairs. (saving teh counts).
-		(for-each
-			(lambda (word)
-				(fetch-and-compute-pair-wildcard-counts word lg_rel)
-			)
-			(cog-get-atoms item-type)
-		)
-	)
-)
+; ---------------------------------------------------------------------
+;;;; Compute wildcard counts for all word-pairs, for the relation lg_rel.
+;;;; lg_rel is a link-grammar link type.
+;;;;
+;;;; This loops over all words, and computes the one-sided wild-card
+;;;; counts for these. Only the counts for the link-grammar link type
+;;;; lg_rel are computed.
+;;;;
+;;;; Caution: this can take hours or days to run. For better speed,
+;;;; use the batch version of this, its much faster. The reason this
+;;;; routine is slow is because it fetches the needed word-pairs each
+;;;; time, then deletes them... then fetches the next set. Yuck.
+;;;; Due to the awful speed, this code is abandoned. Its kept here
+;;;; "for historical reasons".
+;;;;
+;;;; Caution: Because this is deleting atoms, this probably should not
+;;;; be run concurrently with other atom-counting threads.
+;;;;
+;;;(define (all-pair-wildcard-counts lg_rel)
+;;;	(begin
+;;;		(init-trace "/tmp/progress")
+;;;		(trace-msg "Start on-demand wildcounting\n")
+;;;		(display "Start on-demand wildcounting\n")
+;;;
+;;;		; Make sure all words are in the atomspace
+;;;		(load-atoms-of-type item-type)
+;;;		(trace-elapsed)
+;;;		(display "Finsihed loading words\n")
+;;;
+;;;		; For each word, fetch the word-pairs it occurs in, compute
+;;;		; the counts, and then delete the word-pairs. (saving teh counts).
+;;;		(for-each
+;;;			(lambda (word)
+;;;				(fetch-and-compute-pair-wildcard-counts word lg_rel)
+;;;			)
+;;;			(cog-get-atoms item-type)
+;;;		)
+;;;	)
+;;;)
 
 ; ---------------------------------------------------------------------
 ; Compute wildcard counts for all word-pairs, for the relation lg_rel.
@@ -664,14 +684,20 @@
 (define (batch-all-pair-wildcard-counts lg_rel)
 	(begin
 		(start-trace "Start batched wildcard-counting\n")
+		(display "Start batched wildcard-counting\n")
 
 		; Make sure all words are in the atomspace
 		(load-atoms-of-type item-type)
 		(trace-msg-num "In wildcard-count, num words="
 			(length (cog-get-atoms item-type)))
+		(format #t "In wildcard-count, num words=~A\n"
+			(length (cog-get-atoms item-type)))
+
 		; Make sure all word-pairs are in the atomspace.
 		(fetch-incoming-set lg_rel)
-		; Compute the counts
+		(display "Finished loading word-pairs\n")
+
+		; Compute the counts. par-for-each runs in parallel.
 		; (for-each
 		(par-for-each
 			(lambda (word)
@@ -680,7 +706,10 @@
 			)
 			(cog-get-atoms item-type)
 		)
+		(trace-elapsed)
 		(trace-msg "Done with wild-card count\n")
+		(display "Done with wild-card count\n")
+		(flush-all-ports)
 	)
 )
 
@@ -709,6 +738,7 @@
 	(begin
 		(start-trace "Start all-pair-count\n")
 		; Now, loop over all words, totalling up the counts.
+		; XXX would using fold here fbe any faster?
 		(for-each
 			(lambda (word)
 				(set! l-cnt
@@ -723,6 +753,7 @@
 
 		; The left and right counts should be equal
 		; XXX TODO probably should do something more drastic here?
+		; Like throw an exception?
 		(if (not (eqv? l-cnt r-cnt))
 			(begin
 				(display "Error: word-pair-counts unequal: ")
@@ -735,13 +766,10 @@
 
 		; Create and save the grand-total count.
 		(store-atom
-			(EvaluationLink (cog-new-ctv 0 0 r-cnt)
-				lg_rel
-				(ListLink
-					(AnyNode "left-word")
-					(AnyNode "right-word")
-				)
-			)
+			(set-count
+				(EvaluationLink lg_rel
+					(ListLink any-left any-right))
+			r-cnt)
 		)
 		(trace-msg "Done with all-pair count\n")
 	)
@@ -762,7 +790,7 @@
 ; and also for the flipped version (exchange WordNode and AnyNode)
 ; Here, lg_rel is (LinkGrammarRelationshipNode "Blah")
 ;
-; The log likelihood is stored in the 'confidence' slot on the eval
+; The log likelihood is stored as a value on the eval
 ; link truth value (where logli's are always stored).
 ;
 ; The computation is performed "batch style", it assumes that all
@@ -779,15 +807,15 @@
 	(for-each
 		(lambda (word)
 			(let (
-					(lefty (EvaluationLink lg_rel (ListLink (AnyNode "left-word") word)))
-					(righty (EvaluationLink lg_rel (ListLink word (AnyNode "right-word"))))
+					(lefty (EvaluationLink lg_rel (ListLink any-left word)))
+					(righty (EvaluationLink lg_rel (ListLink word any-right)))
 				)
 				; log-likelihood for the left wildcard
-				(if (< 0 (tv-count (cog-tv lefty)))
+				(if (< 0 (get-count lefty))
 					(store-atom (compute-atom-logli lefty pair-total))
 				)
 				; log-likelihood for the right wildcard
-				(if (< 0 (tv-count (cog-tv righty)))
+				(if (< 0 (get-count righty))
 					(store-atom (compute-atom-logli righty pair-total))
 				)
 			)
@@ -799,7 +827,7 @@
 ; ---------------------------------------------------------------------
 ;
 ; Compute word-pair mutual information, for all word-pairs with the
-; given word being on the right.  This is a helpt routine, to split
+; given word being on the right.  This is a helper routine, to split
 ; up the double-loop over left and right words into two. This is the
 ; inner loop, looping over all left-words.
 ;
@@ -851,19 +879,15 @@
 							; Compute the logli log_2 P(l,r)/P(*,*)
  							(atom (compute-atom-logli pair pair-total))
 
-							; the count truth value components
-							(atv (cog-tv->alist (cog-tv atom)))
-							(meen (assoc-ref atv 'mean))
-							(ll (assoc-ref atv 'confidence))
-							(cnt (assoc-ref atv 'count))
+							; Get the log liklihood computed immediately above.
+							(ll (get-logli atom))
 
 							; Subtract the left and right entropies to get the
 							; mutual information (at last!)
 							(mi (- (+ l-logli r-logli) ll))
-							(ntv (cog-new-ctv meen mi cnt))
 						)
 						; Save the hard-won MI to the database.
-						(store-atom (cog-set-tv! atom ntv))
+						(store-atom (set-mi atom mi))
 					)
 				)
 				left-evs
@@ -872,81 +896,77 @@
 	)
 )
 
-; Same as above, but uses pattern matcher. CAUTION: this is a LOT
-; slower than the above!
-(define (compute-pair-mi-pm right-word lg_rel)
-
-	; Define the bind link that we'll use with the pattern matcher.
-	; left-bind has the wildcard on the left.
-	(define left-bind-link
-		(BindLink
-			; Be careful to ask for WordNode, since there are also
-			; eval links with AnyNode floating around ...
-			(TypedVariableLink
-				(VariableNode "$left-word")
-				(TypeNode item-type-str)
-			)
-			(EvaluationLink lg_rel
-				(ListLink (VariableNode "$left-word") right-word)
-			)
-			(EvaluationLink lg_rel
-				(ListLink (VariableNode "$left-word") right-word)
-			)
-		)
-	)
-
-	; Get the word-pair grand-total
-	(define pair-total (get-pair-total lg_rel))
-
-	(let* (
-			; lefties are those with the wildcard on the left side.
-			; XXX It would be more efficient to not use the pattern
-			; matcher here, but to instead filter the given relset.
-			; But I'm lazy, for just right now.
-			(left-list (cog-bind left-bind-link))
-			(lefties (cog-outgoing-set left-list))
-		)
-		(begin
-			(for-each
-
-				; This lambda sets the mutual information for each word-pair.
-				(lambda (pair)
-					(let* (
-							; the left-word of the word-pair
-							(left-word (gadr pair))
-							(r-logli (get_right_wildcard_logli left-word lg_rel))
-							(l-logli (get_left_wildcard_logli right-word lg_rel))
-
-							; Compute the logli log_2 P(l,r)/P(*,*)
- 							(atom (compute-atom-logli pair pair-total))
-
-							; the count truth value components
-							(atv (cog-tv->alist (cog-tv atom)))
-							(meen (assoc-ref atv 'mean))
-							(ll (assoc-ref atv 'confidence))
-							(cnt (assoc-ref atv 'count))
-
-							; Subtract the left and right entropies to get the
-							; mutual information (at last!)
-							(mi (- (+ l-logli r-logli) ll))
-							(ntv (cog-new-ctv meen mi cnt))
-						)
-						; Save the hard-won MI to the database.
-						(store-atom (cog-set-tv! atom ntv))
-					)
-				)
-				lefties
-			)
-
-			; And now ... delete some of the crap we created.
-			; Don't want to pollute the atomspace.
-			(extract-hypergraph left-bind-link)
-			; Note that cog-extract only goes one level deep, it does not
-			; recurse; so the below only delete the ListLink at the top.
-			(cog-extract left-list)
-		)
-	)
-)
+;;;; Same as above, but uses pattern matcher. CAUTION: this is a LOT
+;;;; slower than the above!
+;;;(define (compute-pair-mi-pm right-word lg_rel)
+;;;
+;;;	; Define the bind link that we'll use with the pattern matcher.
+;;;	; left-bind has the wildcard on the left.
+;;;	(define left-bind-link
+;;;		(BindLink
+;;;			; Be careful to ask for WordNode, since there are also
+;;;			; eval links with AnyNode floating around ...
+;;;			(TypedVariableLink
+;;;				(VariableNode "$left-word")
+;;;				(TypeNode item-type-str)
+;;;			)
+;;;			(EvaluationLink lg_rel
+;;;				(ListLink (VariableNode "$left-word") right-word)
+;;;			)
+;;;			(EvaluationLink lg_rel
+;;;				(ListLink (VariableNode "$left-word") right-word)
+;;;			)
+;;;		)
+;;;	)
+;;;
+;;;	; Get the word-pair grand-total
+;;;	(define pair-total (get-pair-total lg_rel))
+;;;
+;;;	(let* (
+;;;			; lefties are those with the wildcard on the left side.
+;;;			; XXX It would be more efficient to not use the pattern
+;;;			; matcher here, but to instead filter the given relset.
+;;;			; But I'm lazy, for just right now.
+;;;			(left-list (cog-bind left-bind-link))
+;;;			(lefties (cog-outgoing-set left-list))
+;;;		)
+;;;		(begin
+;;;			(for-each
+;;;
+;;;				; This lambda sets the mutual information for each word-pair.
+;;;				(lambda (pair)
+;;;					(let* (
+;;;							; the left-word of the word-pair
+;;;							(left-word (gadr pair))
+;;;							(r-logli (get_right_wildcard_logli left-word lg_rel))
+;;;							(l-logli (get_left_wildcard_logli right-word lg_rel))
+;;;
+;;;							; Compute the logli log_2 P(l,r)/P(*,*)
+;;; 							(atom (compute-atom-logli pair pair-total))
+;;;
+;;;							; Get the logli computed immediately above.
+;;;							(ll (get-logli atom))
+;;;
+;;;							; Subtract the left and right entropies to get the
+;;;							; mutual information (at last!)
+;;;							(mi (- (+ l-logli r-logli) ll))
+;;;						)
+;;;						; Save the hard-won MI to the database.
+;;;						(store-atom (set-mi atom mi))
+;;;					)
+;;;				)
+;;;				lefties
+;;;			)
+;;;
+;;;			; And now ... delete some of the crap we created.
+;;;			; Don't want to pollute the atomspace.
+;;;			(extract-hypergraph left-bind-link)
+;;;			; Note that cog-extract only goes one level deep, it does not
+;;;			; recurse; so the below only delete the ListLink at the top.
+;;;			(cog-extract left-list)
+;;;		)
+;;;	)
+;;;)
 
 ; ---------------------------------------------------------------------
 ;
@@ -976,17 +996,20 @@
 		; Now, get the grand-total
 		(trace-elapsed)
 		(trace-msg "Going to batch-count all-pairs\n")
+		(display "Going to batch-count all-pairs\n")
 		(batch-all-pair-count lg_rel)
 		(trace-elapsed)
 
 		; Compute the left and right wildcard logli's
 		(trace-msg "Going to batch-logli wildcards\n")
+		(display "Going to batch-logli wildcards\n")
 		(batch-all-pair-wildcard-logli lg_rel)
 		(trace-elapsed)
 
 		; Enfin, the word-pair mi's
 		(start-trace "Going to do individual word-pair mi\n")
-		; (for-each
+		(display "Going to do individual word-pair mi\n")
+		; for-each
 		(par-for-each
 			(lambda (right-word)
 				(compute-pair-mi right-word lg_rel)
@@ -995,6 +1018,7 @@
 			(cog-get-atoms item-type)
 		)
 		(trace-msg "Finished with MI batch\n")
+		(display "Finished with MI batch\n")
 		(trace-elapsed)
 	)
 )
@@ -1002,11 +1026,162 @@
 ; ---------------------------------------------------------------------
 ; Temporary handy-dandy main entry point.
 
-(define (do-em-all)
+(define any-relation (LinkGrammarRelationshipNode "ANY"))
+
+(define-public (batch-all-pairs)
 	(begin
 		(init-trace "/tmp/progress")
-		(batch-all-pair-mi (LinkGrammarRelationshipNode "ANY"))
+
+		(batch-all-pair-mi any-relation)
 	)
+)
+
+; ---------------------------------------------------------------------
+; misc utilities of research interest
+
+(define-public (get-left-word-of-pair PAIR)
+"
+  get-left-word-of-pair PAIR -- Given the EvaluationLink PAIR holding
+  a word-pair, return the word on the left.
+"
+	(gadr PAIR)
+)
+
+(define-public (get-right-word-of-pair PAIR)
+"
+  get-right-word-of-pair PAIR -- Given the EvaluationLink PAIR holding
+  a word-pair, return the word on the right.
+"
+	(gddr PAIR)
+)
+
+(define-public (get-all-words)
+"
+  get-all-words - return a list holding all of the observed words
+"
+	(cog-get-atoms item-type)
+)
+
+(define-public (get-all-pairs)
+"
+  get-all-pairs - return a list holding all of the observed word-pairs
+  Caution: this can be tens of millions long!
+"
+	; The list of pairs is mostly just the incoming set of the ANY node.
+	; However, this does include some junk, sooo ... hey, both left and
+	; right better be words.
+	(filter!
+		(lambda (pair)
+			(and
+				(equal? 'WordNode (cog-type (get-left-word-of-pair pair)))
+				(equal? 'WordNode (cog-type (get-right-word-of-pair pair)))))
+		(cog-incoming-by-type
+			(LinkGrammarRelationshipNode "ANY")
+			'EvaluationLink))
+)
+
+(define-public (total-word-observations)
+"
+  total-word-observations -- return a total of the number of times
+  any/all words were observed.  That is, return N(*) as defined
+  above, and in the diary.
+"
+   (get-total-atom-count (cog-get-atoms item-type))
+)
+
+(define-public (total-pair-observations)
+"
+  total-pair-observations -- return a total of the number of times
+  any/all word-pairs were observed. That is, return N(*,*) as defined
+  above, and in the diary.
+"
+	; Just get the previously computed amount.
+	(get-count
+		(EvaluationLink
+			(LinkGrammarRelationshipNode "ANY")
+			(ListLink
+				(AnyNode "left-word")
+				(AnyNode "right-word"))))
+)
+
+(define-public (get-left-count-str WORD-STR)
+"
+  get-left-count-str WORD-STR
+  Return the number of times that WORD-STR occurs in the left side
+  of the \"ANY\" relationship. That is, return N(w, *), as defined above,
+  and in the diary.  Here, w is WORD-STR, assumed to be a string.
+"
+	(get_right_wildcard_count  ;; the wildcard is on the right.
+		(WordNode WORD-STR)
+		(LinkGrammarRelationshipNode "ANY"))
+)
+
+(define-public (get-right-count-str WORD-STR)
+"
+  get-right-count-str WORD-STR
+  Return the number of times that WORD-STR occurs in the right side
+  of the \"ANY\" relationship. That is, return N(*, w), as defined above,
+  and in the diary.  Here, w is WORD-STR, assumed to be a string.
+"
+	(get_left_wildcard_count  ;; the wildcard is on the left.
+		(WordNode WORD-STR)
+		(LinkGrammarRelationshipNode "ANY"))
+)
+
+(define-public (get-word-count-str WORD-STR)
+"
+  get-word-count-str WORD-STR
+  Return the number of times that WORD-STR has ben observed. That is,
+  return N(w) as defined above, or in the diary. Here, w is WORD-STR,
+  assumed to be a string.
+"
+	(get-count (WordNode WORD-STR))
+)
+
+(define-public (get-total-cond-prob ALL-PAIRS)
+"
+  get-total-cond-prob ALL-PAIRS- return the total conditional
+  probability of seeing the all word-pairs.  That is, return the
+  sum over left and right words w_l, w_r of  N(w_l, w_r) / (N(w_l) N(w_r))
+
+  Contrast this result with that of get-total-pair-prob
+"
+	; Return N(w_l, w_r) / N(w_l) N(w_r)
+	(define (term pair)
+		(/ (get-count pair)
+			(* (get-count (get-left-word-of-pair pair))
+				(get-count (get-right-word-of-pair pair)))))
+
+	; textbook tail-recursive solution.
+	(define (term-sum lst cnt)
+		(if (null? lst) cnt
+			(term-sum (cdr lst) (+ cnt (term (car lst))))))
+
+	(term-sum ALL-PAIRS 0)
+)
+
+(define-public (get-total-pair-prob ALL-PAIRS)
+"
+  get-total-pair-prob - return the total pair-wise conditional
+  probability of seeing a word-pair.  That is, return the sum over
+  left and right words w_l, w_r of
+      N(w_l, w_r) / (N(w_l, *) N(*, w_r))
+
+  Contrast this result with that of get-total-cond-prob
+"
+
+	; Return N(w_l, w_r) / N(w_l) N(w_r)
+	(define (term pair)
+		(/ (get-count pair)
+			(* (get-count (get-left-word-of-pair pair))
+				(get-count (get-right-word-of-pair pair)))))
+
+	; textbook tail-recursive solution.
+	(define (term-sum lst cnt)
+		(if (null? lst) cnt
+			(term-sum (cdr lst) (+ cnt (term (car lst))))))
+
+	(term-sum ALL-PAIRS 0)
 )
 
 ; ---------------------------------------------------------------------

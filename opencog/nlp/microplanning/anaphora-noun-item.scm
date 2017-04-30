@@ -57,7 +57,7 @@
 
 		(cond ; if already a pronoun, change it to the base form
 		      (is-pronoun
-			(rebase-pronoun (word-inst-get-word-str word-inst))
+			(rebase-pronoun (cog-name (word-inst-get-word word-inst)))
 		      )
 		      ((and is-human is-male)
 			"he"

@@ -1,5 +1,6 @@
 ADD_GUILE_MODULE (FILES
 	learn.scm
+	common.scm
 	compute-mi.scm
 	disjunct-mi.scm
 	link-pipeline.scm

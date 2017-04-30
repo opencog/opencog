@@ -2646,9 +2646,6 @@ scheme@(guile-user)> GC Warning: Repeated allocation of very large block (appr. 
 
 
 
-
-
-
 12 Feb 2017
 -----------------
 postgres: change  shared_buffers = 64576MB         # min 128kB
@@ -2707,3 +2704,739 @@ cp ~/src/relex/src/split-sentences/split-sentences.pl ~/run
 .... etc.
 
 
+===============================================================
+Again:
+sudo cgm create all linas
+sudo cgm chown all linas $(id -u) $(id -g)
+cgm movepid all linas $$
+
+14 April status:
+---------------
+ZH:
+select count(*) from atoms;  18941255
+
+14 April 2017
+-------------
+Start from scratch with English.
+
+time lxc-copy -n  opencog-learn -N learn-en
+real	6m43.362s
+wget https://dumps.wikimedia.org/enwiki/20170320/enwiki-20170320-pages-articles-multistream.xml.bz2
+2 hours 2 mins
+
+time cat enwiki-20170320-pages-articles-multistream.xml.bz2 |bunzip2
+|/home/ubuntu/src/relex/src/perl/wiki-count.pl
+Counted 955001762 lines in 17398694 pages -- 17.4M articles
+real    65m31.329s
+
+time cat enwiki-20170320-pages-articles-multistream.xml.bz2 |bunzip2 |/home/ubuntu/src/relex/src/perl/wiki-scrub.pl
+real    604m9.767s
+user    413m17.996s
+sys     13m8.680s
+
+
+find |wc gives 7495026 total articles
+real    267m1.295s
+
+find |wc gives 5423537 after cat/template removal
+
+createdb en_pairs
+cat src/atomspace/opencog/persist/sql/multi-driver/atom.sql | psql en_pairs
+
+
+----------------
+Arghh more bugs:
+* failure in LG to split punctuation
+* failure to strip regex markup.
+linkage_get_word
+UBSCRIPT_MARK
+SUBSCRIPT_DOT
+linkage_print_diagram
+DISPLAY_GUESS_MARKS
+HIDE_MORPHO  for any language.... except its set to rue for jni
+where are the square bracekts removed??????
+orig_str in java....
+feature/LinkableView.java line 286
+
+LocalLGParser.java circa line 150
+-----------------------------
+yue: 
+17006 -- 21876 submitted 27342 left
+
+
+en: java crashed:
+/home/ubuntu/run/hs_err_pid3206.log
+# C  [liblink-grammar.so.5+0x2aa00]  linkage_set_domain_names+0xe0
+
+
+-------------------------
+en_pairs from 2016:
+select count(*) from atoms;  18487291 atoms. == 18.5M
+select sum(stv_count) from atoms; 1775388151 = 1.77 B
+
+select sum(floatvalue[3]) from valuations where type=177; CountTru
+
+select count(*) from  atoms where type =73;   396255 this is words
+select count(*) from  atoms where type =47;   9045489 this is pairs
+select count(*) from  atoms where type =8;    9045489 this is list links
+
+select count(*) from valuations where type=121;  -- FloatValue
+ select * from valuations where type != 176 and type != 177 limit 50;
+select count(*) from valuations where type != 176 and type != 177;
+
+select count(*) from valuations where key =2440463582;  -- 9672428
+select count(*) from valuations where key =2440463583;  -- 8880904
+
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs?user=linas")
+(batch-all-pairs)
+
+ (load "compute-mi.scm")
+(init-trace "/tmp/progress")
+702
+(load-atoms-of-type item-type)
+(sql-stats)
+; hangs... because it is walking the TLB which has 2.4GB of uuid
+    _store->print_stats();
+(length (cog-get-atoms item-type))
+
+(define lgr (LinkGrammarRelationshipNode "ANY"))
+(fetch-incoming-set lgr)
+; there aren't any yet....
+
+(define word (car (cog-get-atoms item-type)))
+(compute-pair-wildcard-counts word lgr)
+
+delete all-pair-wildcard-counts
+
+      (par-for-each
+         (lambda (word)
+            (compute-pair-wildcard-counts word lgr)
+            (trace-msg-cnt "Wildcard-count did ")) al)
+
+         (cog-get-atoms item-type)
+      )
+
+(define al (take (cog-get-atoms item-type) 1000))
+
+scheme@(guile-user) [1]> ,bt
+In ice-9/threads.scm:
+   289:22  5 (loop _)
+In ice-9/futures.scm:
+   259:13  4 (touch #<future 55c59c4adb40 queued #<partial-continuation
+55c5…>)
+   243:14  3 (work)
+In unknown file:
+           2 (wait-condition-variable #t)
+While executing meta-command:
+ERROR: In procedure cdr: Wrong type argument in position 1 (expecting
+pair): ()
+
+
+(use-modules (srfi srfi-1))
+(define al (list-tabulate 100000 values))
+(define foo 0)
+(par-for-each (lambda (x) (set! foo (+ x foo))) al)
+
+^CERROR: In procedure scm-error:
+ERROR: User interrupt
+
+Entering a new prompt.  Type `,bt' for a backtrace or `,q' to continue.
+scheme@(guile-user) [1]> ,bt
+In ice-9/threads.scm:
+   289:22  5 (loop _)
+In ice-9/futures.scm:
+   265:11  4 (touch #<future 55e1984d3400 started #<procedure 55e198659f60 a…>)
+   243:14  3 (work)
+In unknown file:
+           2 (wait-condition-variable #t)
+While executing meta-command:
+ERROR: In procedure cdr: Wrong type argument in position 1 (expecting pair): ()
+scheme@(guile-user) [1]>
+
+bug#26616: Acknowledgement (guile-2.2 par-for-each hangs for large lists)
+
+
+https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
+
+-------
+(cog-new-value type list) string float link
+(cog-set-value! atom key value)
+(cog-value atom key)
+(cog-value?
+cog-value->list
+cog-tv-count
+
+confidence
+
+---------
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs?user=linas")
+(load-atoms-of-type 'WordNode)
+
+(define lgr (LinkGrammarRelationshipNode "ANY"))
+(fetch-incoming-set lgr)
+(cog-incoming-set lgr)
+
+(define word (car (cog-get-atoms 'WordNode)))
+(fetch-incoming-set word)
+(cog-incoming-set word)
+(define lpr (car (cog-incoming-set word)))
+(fetch-incoming-set lpr)
+(length (cog-incoming-set lgr))
+
+scheme@(guile-user)> (length (cog-incoming-set lgr))
+Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
+Aborted
+
+
+(load-atoms-of-type 'LinkGrammarRelationshipNode)
+(fetch-atom lg_rel)
+
+fetch_incoming_set_cb
+SQLAtomStorage::getIncomingSet
+tlb get uuid
+getNod
+
+h = as->fetch_atom(h);
+
+   Handle h(doGetNode(t, str));
+   Handle hg(doGetLink(t, hs));
+
+getUUID  INVALID_UUID
+
+select * from atoms where type = 89;
+
+en_pairs=> select * from atoms where type = 89;
+    uuid    | space | type | height | name | outgoing 
+------------+-------+------+--------+------+----------
+        152 |     1 |   89 |      0 | ANY  | 
+ 2439209701 |     1 |   89 |      0 | ANY  | 
+ 2439209706 |     1 |   89 |      0 | ANY  | 
+ 2439209711 |     1 |   89 |      0 | ANY  | 
+ 2439209716 |     1 |   89 |      0 | ANY  | 
+(5 rows)
+
+OK, so that's a bug .. no unique constraint
+
+
+   8: SQLAtomStorage.cc:324
+opencog::SQLAtomStorage::Response::get_all_values_cb()
+"SELECT * FROM Valuations WHERE atom = 
+
+SELECT * FROM Valuations WHERE atom = 152;
+   1 |  152 |  177 | {1,0,402733330} |             | 
+
+loading_typemap
+
+(cog-new-ctv 0 0 right-total
+
+set-count   vs ctv, stv, confidence, count etc.
+AnyN
+any-left
+any-right
+
+mst-parser.scm
+
+Going to batch-logli wildcards
+Elapsed secs 53
+Going to do individual word-pair mi
+
+
+Noting for pair (When *) -- no frequency!
+no frequency's anywhere...
+(PredicateNode \"*-FrequencyKey-*\") was never stored!
+
+select * from atoms where type=53; -- the predicateNodes 
+
+wtf line 646 ... sote the keyy....
+
+Wildcard-count did 396255    compute-pair-wildcard-counts -- stores count
+Elapsed secs 11
+Done with wild-card count
+Elapsed secs 0
+Going to batch-count all-pairs
+Start all-pair-count
+Done with all-pair count -- again a count...
+Elapsed secs 130
+Going to batch-logli wildcards -- batch-all-pair-wildcard-logli
+    compute-atom-logli
+Elapsed secs 53
+Going to do individual word-pair mi
+
+(define k (PredicateNode "*-FrequencyKey-*"))
+(define w (WordNode "When"))
+(define e (EvaluationLink
+(LinkGrammarRelationshipNode "ANY")
+(ListLink  (WordNode "When") (AnyNode "right-word")))) 
+
+(cog-value e k)
+
+well ... e has no counts ... and thus no logli
+
+(length (cog-incoming-set (WordNode "When") ))
+except there are lots so wtf?
+
+(define lg_rel (LinkGrammarRelationshipNode "ANY"))
+
+(define (get-total-atom-count atom-list)
+   (fold + 0.0 (map get-count atom-list))
+
+ (compute-pair-wildcard-counts   w lg_rel
+
+... there are no counts on any e's ... wtf ??
+
+(EvaluationLink  ; uuid  2434162536
+   (LinkGrammarRelationshipNode "ANY") ; uuid 152
+   (ListLink   ; uuid 2434162535
+      (WordNode "Hear")  ; uuid 17490475
+      (WordNode "When")  ; uuiid 1537161
+   )
+)
+
+incoming set failed to load the values!!!
+also cog-value is real slowww
+
+   // Get the correct UUID; its possible that we don't know it yet.
+   UUID uuid = _tlbuf.getUUID(h);
+   if (TLB::INVALID_UUID == uuid)
+   {
+      Handle hg(doGetAtom(h));
+      uuid = _tlbuf.getUUID(hg);
+   }
+get_uuid
+_vindex
+_keyset
+std::unordered_multimap<ContentHash, Handle>
+std::unordered_map<
+#include <unordered_map>
+std::unordered_set<Handle, handle_hash>  -- kill this -- done
+HandlePair
+
+-----------------------------------------
+
+(use-modules (opencog) (opencog persist) (opencog persist-sql))
+(use-modules (opencog nlp) (opencog nlp learn))
+(sql-open "postgres:///en_pairs?user=linas")
+(use-modules (opencog cogserver))
+(start-cogserver)
+(batch-all-pairs)
+(define lg_rel  (LinkGrammarRelationshipNode "ANY"))
+      (init-trace "/tmp/progress")
+(load "common.scm")
+(load "compute-mi.scm")
+ (load-atoms-of-type item-type)
+ (length (cog-get-atoms item-type))
+ (fetch-incoming-set lg_rel)
+
+ (compute-pair-wildcard-counts w lg_rel)
+
+
+(EvaluationLink (ctv 0 0 90720) ; uuid = 143501595
+   (LinkGrammarRelationshipNode "ANY") ; uuid = 152
+   (ListLink  ; uuid = 143501594
+      (AnyNode "left-word")  ; uuid = 143427138
+      (WordNode "When")  ; uuid = 1537161
+   )
+)
+elect * from valuations where atom=143501595;
+
+(store-atom left-star) took forever...
+
+WordNode load took 36s, 38s
+
+9112060 in incoming set
+
+serial inc fetch= 28m11 ,  28m03
+serial inc fetch w/GIN idx= 28m39
+parallel inc fecth w/GIN idex = 38s, 28s, 29s
+parallel inc fetch no idx = 32s, 30s, 33s
+
+serial value fetch=  24m30
+parallel value fetch=  1m36, 1m35
+parallel resurse+value= 5m16, 6m47(!?), 6m47, 6m50, 7m6
+
+atomspace add = 8m51 = 531 secs, 9m02, 7m56, 7m55, 8m00, 8m21
+
+atsomapce add: added 9112060 atoms in 8m51 = 531 secs = 17.1K/sec
+well, each atom is actually 5 atoms so this is 5x faster = 86K/sec
+
+do a parallel type fetch...
+as->fetch_all_atoms_of_type(t);
+_backing_store->loadType(_atom_table, t);
+
+o_store_single_ato
+add_id_to_cache(uuid)
+   puts it in local_id_cache
+   erases from id_create_cach
+
+maybe_create_id(uuid)
+
+where is check for existance?????
+well, get_uuid() does checking()
+soo  iif in tlb then works
+
+rp.id_set ...!?
+get_ids get all id's  in 
+
+do_store_single_atom
+do_store_atom
+_write_q
+
+does tlbuf???
+
+I don'd see it being tlbuff....
+
+   UUID uuid = _tlbuf.getUUID(h);
+   if (TLB::INVALID_UUID != uuid) return uuid;
+
+
++CREATE INDEX ON Atoms USING GIN(outgoing);
+
+TODO:
+parallelize get_ids...
+actually get_ids is not needed.....
+
+XXX need to store the keys
+
+do_store_atom
+
+total stroes is miscounted!aactually, its right, values don't count.
+
+num_get_nodes=3 num_got_nodes=1 (33.333333 pct)
+num_get_links=0 num_got_links=0 (-nan pct)
+sql-stats: total loads = 19741116 total stores = 2 ratio=0.000000
+
+get_recursive is not counting what it got.
+values and valuations are not counting....
+
+Also: type load doesn't ...? grab the TV's!?  FIXED
+
+type load needs to be conservative with recursion! DONE
+
+do-store_atom stores values recursively. It should have a flag for that.
+Documented....
+
+Also: ato->setValue() does not work for raw atoms!  so incoming is
+broken.
+RuntimeException
+move printing exceptiioon ot guile
+
+fetch_incoming_set false
+MultiThreadUTest
+tv-conf
+cog-tv
+
+14:37
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=linas")
+
+ (load-atoms-of-type 'WordNode)   ;; approx 1 minutes?
+ (define lg_any (LinkGrammarRelationshipNode "ANY"))
+ (fetch-incoming-set lg_any) ;; approx 15 minutes ?
+;
+(mst-parse-text "this is a test")
+
+ _tlbuf.addAtom(node, p->uuid); can replace!?
+line 1427
+line 378
+
+start-cost-pair is bogus!
+and subsequent crash
+
+ (define e (EvaluationLink 
+   (LinkGrammarRelationshipNode "ANY")
+   (ListLink (WordNode "this") (WordNode "test"))))
+
+ (cog-value e mi-key)
+
+select * from atoms where name='this'; -- 953769
+test -- 1712336
+select * from atoms where outgoing='{953769,1712336}'; -- 29138136
+select * from atoms where outgoing='{152,29138136}'; -- 29138137
+
+select * from valuations where atom=29138137;
+
+
+all count-tvs being stored as length 2...
+fetch-atom aint getting the tv.
+
+store-atom crashed. ... cause type=-1
+store after fetch truncates
+ctv print is fuckec
+crap. Are teh datbases corrupt???
+
+also .. reload the typemap
+type_map_was_loaded = false
+classserver().getNumberOfClasses();
+
+INSERT INTO Valuations
+   (SELECT 1 AS key,  -- 1 here is the predicate node
+      uuid AS atom,
+      176 as type,
+      ARRAY[stv_mean, stv_confidence] as floatvalue
+      FROM Atoms_Backup WHERE tv_type = 1);
+
+INSERT INTO Valuations
+   (SELECT 1 AS key, -- 1 here is the predicate node
+      uuid AS atom,
+      177 as type,
+      ARRAY[stv_mean, stv_confidence, stv_count] as floatvalue
+      FROM Atoms_Backup WHERE tv_type = 2);
+
+wait .. link pipeline!???
+
+observ-ext ... load???
+
+
+the -FrequencyKey- shows {0,Infinity} ... wtf. MI is nan!!
+
+Maybe 4 hours
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=linas")
+
+ (load-atoms-of-type 'WordNode)   ;; approx 3 minutes?
+ (define lg_any (LinkGrammarRelationshipNode "ANY"))
+ (fetch-incoming-set lg_any) ;; approx 15 minutes ?
+;
+(mst-parse-text "this is a test") ; OK
+-----------------
+Ben,
+
+Just got out of surgery for my broken leg; this email attempts to prove
+that the general anesthesia didn't kill too many brain cells.  Its a report
+on some the langauge-learning results.
+
+Lets dive in.
+(mst-parse-text "this is a test")
+
+Raw hard-to-read result below.  Easier-to-read versions later.
+ctv holds the raw count of how many times the word was observed.
+
+((2.862118287646645 ((2 (WordNode "is" (ctv 1 0 8165736))) (3 (WordNode "a" (ctv 1 0 14691104))
+))) (2.1880378875282904 ((1 (WordNode "this" (ctv 1 0 1300681))) (2 (WordNode "is" (ctv 1 0 8165736))
+))) (2.8103625339100944 ((1 (WordNode "this" (ctv 1 0 1300681))) (4 (WordNode "test" (ctv 1 0 60328))
+))))
+
+The floating point number above and below is the Yuret MI of the word pair.
+I've ameneded
+https://github.com/opencog/opencog/tree/master/opencog/nlp/learn/learn-lang-diary/learn-lang-diary.pdf
+pages 2-5 so that its less confusing and the formulas are accurate.
+Basically, it derives Yuret's formulas in a more rigorous
+way; if I recall, his argument was scattered, and just asserted the
+result without deriving it.  So the PDF derives it.
+
+((2.862118287646645 ((2 (WordNode "is" )) (3 (WordNode "a" ))))
+ (2.1880378875282904 ((1 (WordNode "this" )) (2 (WordNode "is" ))))
+(2.8103625339100944 ((1 (WordNode "this" )) (4 (WordNode "test" )))))
+
+Simplifying further:
+
+(((2 (WordNode "is" )) (3 (WordNode "a" )))
+ ((1 (WordNode "this" )) (2 (WordNode "is" )))
+((1 (WordNode "this" )) (4 (WordNode "test" ))))
+
+The integer is the ordinal of the word.  Note that the linkage
+"is-a" was selected over "a test" -- that's because "a test" has an
+MI of 2.0935.  This is not terribly surprising; any MI of less than
+four is pretty crappy, and these four words occur so commonly that
+the correlation between them really is quite qeak -- they're alomost
+drowning in noise.  Extracting disjuncts should strongly sharpen the
+results.  Next email.
+
+Here's a "better" example:
+
+(mst-parse-text "cats eat cat food")
+$5 = ((7.329 ((2 (WordNode "eat" (ctv 20938))) (4 (WordNode "food" (ctv 73924)))))
+(4.992 ((3 (WordNode "cat" (ctv 18408))) (4 (WordNode "food" (ctv 73924)))))
+(-1000 ((1 (WordNode "cats" (ctv 5902))) (4 (WordNode "food" (ctv 73924))))))
+
+So "eat food" has a decent MI, as expected.  Also "cat food" is decent.
+The minus-1000 means that the word pair "cats food" was never observed.
+(get-pair-mi-str "cats" "eat") = -1000 means that "cats eat" was never
+observed!  Bummer! The word "cats" was observed 6000 times, and this was
+not enough to discover a sentence that has "cats eat" in it.  These
+statistics are from some relatively smallish sample of WP articles, so
+lack of such a sentence is maybe not surprising. Here, childrens &
+young-adult lit may be better.
+
+Anyway, clustering that reveals that cats, dogs, etc are similar should
+help with this, or so goes the hypothesis.
+
+The word-pair "cats cat" does occur and has an MI of 5 but is prevented
+from linking by the link-crossing constraint.  Have not attempted to
+figure out if the Dick Hudson landmark transitivity idea can be mutated
+to apply to this situation. I suppose I should think about things before
+writing about them, but not thinking is faster.
+
+Lets try again:
+
+(mst-parse-text "dogs eat dog food")
+((7.329 ((2 (WordNode "eat" (ctv 20938))) (4 (WordNode "food" (ctv 73924)))))
+(7.047 ((3 (WordNode "dog" (ctv 41896))) (4 (WordNode "food" (ctv 73924)))))
+(5.050 ((1 (WordNode "dogs" (ctv 14852))) (2 (WordNode "eat" (ctv 20938))
+))))
+
+Well, that's much better. Let's try something harder:
+(mst-parse-text "It is not uncommon to discover strange things")
+
+((7.515 ( (WordNode "not" ) (WordNode "uncommon" )))
+ (4.142 ( (WordNode "is" ) (WordNode "uncommon" )))
+ (4.412 ( (WordNode "It" ) (WordNode "is" )))
+ (2.739 ( (WordNode "uncommon" ) (WordNode "to" )))
+(3.529 ( (WordNode "to" ) (WordNode "discover" )))
+(0.822 ( (WordNode "to" ) (WordNode "things" )))
+(6.171 ( (WordNode "strange" ) (WordNode "things" ))))
+
+Almost right -- the stinker in there is "to things" and it has a
+terrible MI.  The correct link would have been "discover things"
+but again, this word-pair was never ever observed.
+
+That's it for now, more later.
+
+p.s. The above is obtained with code that uses values in full
+generality; so for example the normalized word frequency is stored as
+
+(Valuation
+    (WordNode "foo")
+    (PredicateNode "*-Frequency Key-*")
+    (FloatValue 0.1234567 3.018))
+
+Note that "Valuation" is like an EvaluationLink but different.
+The first number is the normalized frequency of observation N(foo) / N(all words)
+and the second number of log-base-2 of the first number (its easier to
+read, than counting zeros in a frequency).
+
+I had to fix a dozen bugs in brand-new SQL backend code to get this to
+work right. It all seems stable, now.
+
+==========================================
+
+   (EvaluationLink
+      (LinkGrammarRelationshipNode "ANY")
+      (ListLink
+			(AnyNode "left-word")
+			(AnyNode "right-word")))
+
+fooo  failed to store counts for lw, rw...
+
+Hmm
+total word pair counts = 4.1823518e+08
+
+(define-public (count-all-words)
+	(define total-wordcnt 0)
+   (for-each
+      (lambda (word)
+         (set! total-wordcnt (+ total-wordcnt (get-count word))))
+      (cog-get-atoms item-type))
+	total-wordcnt
+)
+836420450.0
+
+342:48 342:50
+
+(define-public (count-all-words)
+	(get-total-atom-count (cog-get-atoms item-type))
+)
+
+(get-count (WordNode "the"))
+$28 = 41658552.0
+
+(define (mkhist)
+	(define nbins 100)
+	(define lo -0.7)
+	(define hi 0.7)
+	(define inc (/ nbins (- hi lo)))
+	(define hist (make-array 0 nbins))
+	(define (rat w) (/ (- (get-left-count-str w) (get-right-count-str w)) (get-word-count-str w)))
+
+	(define x lo)
+
+	(for-each (lambda (w)
+			(define bin (round (* inc (- (rat (cog-name w)) lo))))
+
+			(if (nan? bin) (set! bin 0))
+				(set! bin (inexact->exact bin))
+			(if (>= bin nbins) (set! bin (- nbins 1)))
+			(if (< bin 0) (set! bin 0))
+			(array-set! hist (+ 1 (array-ref hist bin)) bin))
+		(cog-get-atoms 'WordNode))
+
+	(array-for-each (lambda (cnt)
+			(format #t "~A	~A\n" x cnt)
+			(set! x (+ x (/ 1.0 inc))))
+		hist)
+)
+
+=============================================
+
+(cog-incoming-by-type
+	(LinkGrammarRelationshipNode "ANY")
+	'EvaluationLink)
+
+get_left_wildcard_count word lg_rel)
+(get-total-atom-count (get-all-pairs))
+
+(define (wtf)
+	(for-each
+		(lambda (pair)
+			(if (> 0.5 (get-count (get-left-word-of-pair pair)))
+				(format #t "wtf left of pair ~A" pair))
+			(if (> 0.5 (get-count (get-right-word-of-pair pair)))
+				(format #t "wtf right of pair ~A" pair))
+		)
+		(get-all-pairs)))
+
+418235182.0
+
+(get-total-atom-count (get-all-words))
+836420450.0
+(length (get-all-pairs))
+
+(LgWordCset 
+    (WordInstanceNode "adsf@62e9c582-1984-472b-a2f5-b61b2b0707e8")
+    (LgAnd 
+        (LgConnector 
+            (LgConnectorNode "ANY")
+            (LgConnDirNode "-")
+            (LgConnMultiNode "@")
+        )
+        (LgConnector 
+            (LgConnectorNode "ANY")
+            (LgConnDirNode "+")
+            (LgConnMultiNode "@")
+        )
+    )
+)
+
+No cset for the last word!!
+
+no DISJUNCT srcNode.get("DISJUNCT"); on last word .. line 139
+no attr on the last word
+load_senses
+config.isStoreSense
+
+ERROR: Throw to key `C++-EXCEPTION' with args `("fetch-atom" "Error:
+get_uuid(): cannot find (WordNode \"abcccccccccc\" (ctv 1.000000
+0.000000 4.000000)) ; [8608664669745395561][1]\n\n
+(/home/linas/src/novamente/src/atomspace-git/opencog/persist/sql/multi-driver/SQLAtomStorage.cc:934)\nFunction
+args:\n((EvaluationLink\n   (LinkGrammarRelationshipNode \"ANY\")\n
+(ListLink\n      (WordNode \"###LEFT-WALL###\" (ctv 1 0 19431131))\n
+(WordNode \"abcccccccccc\" (ctv 1 0 4))\n   )\n)\n)")'.
+
+
+(fetch-atom (Word "asdfasdfasdf"))
+(fetch-atom (EvaluationLink (LinkGrammarRelationshipNode "ANY")
+    (ListLink (Word "###LEFT-WALL###") (Word "asdfasdfqewr"))))
+
+(fetch-atom (ListLink (Word "###LEFT-WALL###") (Word "asdfasdfqewr")))
+
+SQLAtomStorage::doGetLink
+IOException
+ fixed in commit 327fc6c0a3c8b4b62ac80a61e2fdfc6971190c30

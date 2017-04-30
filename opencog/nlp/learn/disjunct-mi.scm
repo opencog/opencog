@@ -202,7 +202,7 @@
 	(/ (get-disjunct-count disjunct) (length (disjuncts-same-sign-number disjunct disjunct-list))))
 
 ;This function will calculate the mutual information for the given disjunct
-(define (get-mi disjunct disjunct-list)
+(define (get-dj-mi disjunct disjunct-list)
 	(define disjunct-word (cog-name (car (cog-outgoing-set disjunct))))
 	(define (disjunct-filter? x)
 		(if (equal? disjunct-word (cog-name (car (cog-outgoing-set x))))
@@ -218,5 +218,5 @@
 
 ;Do this for all disjuncts
 (define (do-em-all-disjuncts disjunct-list)
-	(map (lambda (x) (get-mi x disjunct-list)) disjunct-list))
+	(map (lambda (x) (get-dj-mi x disjunct-list)) disjunct-list))
 

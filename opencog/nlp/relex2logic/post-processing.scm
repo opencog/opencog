@@ -159,7 +159,7 @@
 (define (create-unique-word-name word)
 	(define (create-new-name w)
 		(define tail-name (random-UUID))
-		(string-append (word-inst-get-word-str (r2l-get-word-inst w)) "@" tail-name)
+		(string-append (cog-name (word-inst-get-word (r2l-get-word-inst w))) "@" tail-name)
 	)
 	(define new-name (create-new-name word))
 

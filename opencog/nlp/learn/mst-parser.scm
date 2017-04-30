@@ -1,7 +1,7 @@
 ;
 ; mst-parser.scm
 ;
-; Minimum Spanning Tree parser.
+; Maximum Spanning Tree parser.
 ;
 ; Copyright (c) 2014 Linas Vepstas
 ;
@@ -16,8 +16,8 @@
 ; information is already avaialable from the atomspace (obtained
 ; previously).
 ;
-; The algorithm implemented is a basic minimum spanning tree algorithm.
-; Conceptually, the graph to be spanned by the tree is a clique, with 
+; The algorithm implemented is a basic maximum spanning tree algorithm.
+; Conceptually, the graph to be spanned by the tree is a clique, with
 ; with every word in the sentence being connected to every other word.
 ; The edge-lengths are given by the mutual information betweeen word-pairs
 ; (although perhaps other metrics are possible; see below).
@@ -38,7 +38,7 @@
 ; this is easy. This also makes a vague attempt to also separate commas,
 ; periods, and other punctuation.  Returned is a list of words.
 ;
-(define (tokenize-text plain-text)
+(define-public (tokenize-text plain-text)
 	; Prefix and suffix lists taken from the link-grammar ANY
 	; language 4.0.affix file
 	(define prefix "({[<«〈（〔《【［『「``„“‘'''…...¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
@@ -60,10 +60,8 @@
 						(strip-prefix (substring word 1)) ; loop again.
 					)
 					(strip-prefli word (cdr prefli)) ; if no match, recurse.
-				)
-			)
-		)
-	)
+				))))
+
 	; Main entry point for the recursive prefix splitter
 	(define (strip-prefix word) (strip-prefli word prefix-list))
 
@@ -82,10 +80,8 @@
 						(list (string punct))
 					)
 					(strip-sufli word (cdr sufli))
-				)
-			)
-		)
-	)
+				))))
+
 	; Main entry point for the recursive splitter
 	(define (strip-affix word) (strip-sufli word suffix-list))
 
@@ -110,7 +106,7 @@
 	; We take care here to not actually create the atoms,
 	; if they aren't already in the atomspace. cog-node returns
 	; nil if the atoms can't be found.
-	(define wpr 
+	(define wpr
 		(if (and (not (null? left-word)) (not (null? right-word)))
 			(cog-link 'ListLink left-word right-word)
 			'()))
@@ -119,22 +115,26 @@
 			(cog-link 'EvaluationLink lg_rel wpr)
 			'()))
 	(if (not (null? evl))
-		(tv-conf (cog-tv evl))
+		(get-mi evl)
 		bad-mi
 	)
 )
 
 ; ---------------------------------------------------------------------
-; Return the mutual information for a pair of words.
-;
-; The pair of words are presumed to be connected by the relationship
-; lg_rel.  The left and right words are presumed to be strings.
-; If the word-pair cannot be found, then a default value of -1000 is
-; returned.
 
-(define (get-pair-mi-str lg_rel left-word-str right-word-str)
+(define-public (get-pair-mi-str left-word-str right-word-str)
+"
+  get-pair-mi-str LEFT-WORD-STRING RIGHT-WORD-STRING
+  Return the mutual information for a pair of words.
 
-	(get-pair-mi lg_rel
+  The left and right words are presumed to be strings.  If the word-
+  pair cannot be found, then a default value of -1000 is returned.
+
+  This is the most basic kind of MI for a pair, it assumes nothing
+  more than the relation that both occured in the  same sentence, and
+  that the left word is to the left of the right.
+"
+	(get-pair-mi (LinkGrammarRelationshipNode "ANY")
 		(cog-node 'WordNode left-word-str)
 		(cog-node 'WordNode right-word-str)
 	)
@@ -142,12 +142,15 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Minimum Spanning Tree parser.
+; Maximum Spanning Tree parser.
+;
 ; Given a raw-text sentence, it splits apart the sentence into distinct
 ; words, and finds an (unlabelled) dependency parse of the sentence, by
-; finding a dependency tree that minimizes minus the mutual information.
+; finding a dependency tree that maximizes the mutual information.
 ; A list of word-pairs, together with the associated mutual information,
 ; is returned.
+;
+; The M in MST normally stands for "minimum", but we want to maximize.
 ;
 ; There are many MST algorithms; the choice was made as follows:
 ; Prim is very easy; but seems too simple to give good results.
@@ -164,18 +167,22 @@
 ; the mean-dependency-distance metric needs to be re-phrased as some
 ; sort of graph entropy. Hmmm...
 ;
-; So, for now, a no-links-corss constraint is handed-coded into the algo.
+; Another idea is to apply the Dick Hudson Word Grammar landmark
+; transitivity idea, but exactly how this could work for unlabelled
+; trees has not been explored.
+;
+; So, for now, a no-links-cross constraint is handed-coded into the algo.
 ; Without it, it seems that the pair-MI scores alone give rather unruly
 ; dependencies (unclear, needs exploration).  So, in the long-run, it
-; might be better to instead pick something that combines MI scores with 
+; might be better to instead pick something that combines MI scores with
 ; mean-dependency-distance or with hubbiness. See, for example:
 ; Haitao Liu (2008) “Dependency distance as a metric of language
-; comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191. 
+; comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
 ; or also:
 ; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
 ; relationships in dependency trees”, ArXiv 1304.4086
 
-(define (mst-parse-text plain-text)
+(define-public (mst-parse-text plain-text)
 	(define lg_any (LinkGrammarRelationshipNode "ANY"))
 
 	; Define a losing score.
@@ -201,7 +208,7 @@
 	;
 	; The left-word is assumed to be an list, consisting of an ID, and
 	; a WordNode; thus the WordNode is the cadr of the left-word.
-	; The word-list is likewise assumed to be a list of numbered WordNodes.   
+	; The word-list is likewise assumed to be a list of numbered WordNodes.
 	;
 	; to-do: might be better to use values for the return value....
 	(define (pick-best-cost-left-pair lg_rel left-word word-list)
@@ -223,14 +230,14 @@
 	)
 
 	; Given a right-word, and a list of words to the left of it, pick
-	; a word from the list that has the highest-MI attachment to the 
+	; a word from the list that has the highest-MI attachment to the
 	; right word.  Return a list containing that cost and the selected
 	; word-pair (i.e. the chosen left-word, and the specified right-word).
 	; The search is made over word pairs united by lg_rel.
 	;
 	; The right-word is assumed to be an list, consisting of an ID, and
 	; a WordNode; thus the WordNode is the cadr of the right-word.
-	; The word-list is likewise assumed to be a list of numbered WordNodes.   
+	; The word-list is likewise assumed to be a list of numbered WordNodes.
 	;
 	; to-do: might be better to use values for the return value....
 	(define (pick-best-cost-right-pair lg_rel right-word word-list)
@@ -275,7 +282,7 @@
 		)
 	)
 
-	; Set-subtraction. 
+	; Set-subtraction.
 	; Given set-a and set-b, return set-a with all elts of set-b removed.
 	; It is assumed that equal? can be used to compare elements.  This
 	; should work fine for sets of ordinal-numbered words, and also for
@@ -308,13 +315,8 @@
 							; bad-pair as soon as possible.
 							(if (<= so-far-mi first-mi)
 								first-choice
-								best-so-far
-							)
-						)
-					)
-					(*pick-best (cdr choice-list) curr-best)
-				)
-			)
+								best-so-far)))
+					(*pick-best (cdr choice-list) curr-best)))
 		)
 		(*pick-best choice-list bad-pair)
 	)
@@ -411,7 +413,7 @@
 		)
 	)
 		
-	; Find the maximum spanning tree. 
+	; Find the maximum spanning tree.
 	; word-list is the list of unconnected words, to be added to the tree.
 	; graph-links is a list of edges found so far, joining things together.
 	; nected-words is a list words that are part of the tree.
@@ -427,7 +429,7 @@
 	;
 	; The graph-links are assumed to be a set of MI-costed word-pairs.
 	; That is, an float-point MI value, followed by a pair of words.
-	; 
+	;
 	(define (*pick-em lg_rel word-list graph-links nected-words)
 
 		;(trace-msg (list "----------------------- \nenter pick-em with wordlist="
@@ -481,6 +483,11 @@
 )
 
 ; ---------------------------------------------------------------------
+;
+; (use-modules (opencog) (opencog persist) (opencog persist-sql))
+; (use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_pairs?user=linas")
+;
 ; (init-trace)
 ; (load-atoms-of-type item-type)
 ; (define lg_any (LinkGrammarRelationshipNode "ANY"))
