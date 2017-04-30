@@ -38,7 +38,7 @@
 ; Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
 
-(use-modules (ice-9 receive) (srfi srfi-1))
+(use-modules (srfi srfi-1))
 
 ; --------------------------------------------------------------------
 (define-public (parse-get-relex-relations parse-node)
