@@ -267,7 +267,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         end_index = linksPerThread * (thread_index + 1);
 
 
-    cout << "Start thread " << thread_index << " from " << start_index
+    cout << "Start thread " << thread_index << ": will process Link number from " << start_index
          << " to (excluded) " << end_index << std::endl;
 
     patternJsonArrays[thread_index] = json::value::array();
@@ -284,10 +284,18 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
 
         readNextLinkLock.unlock();
 
-        // if this link is listlink, ignore it
-        if (cur_link->getType() == opencog::LIST_LINK)
+        // if this link is ingonre type, ignore it
+        if (isIgnoredType( cur_link->getType()))
         {
             continue;
+        }
+
+
+        if (use_keyword_black_list)
+        {
+            // if the content in this link contains content in the black list,ignore it
+            if (containIgnoredContent(cur_link))
+                continue;
         }
 
         // Add this link into observingAtomSpace
@@ -303,6 +311,9 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         map<Handle,Handle> lastGramValueToVarMap;
         map<Handle,Handle> patternVarMap;
 
+        set<string> allNewMinedPatternsCurTask;
+
+
         // allHTreeNodesCurTask is only used in distributed version;
         // is to store all the HTreeNode* mined in this current task, and release them after the task is finished.
         vector<HTreeNode*> allHTreeNodesCurTask;
@@ -316,7 +327,7 @@ void DistributedPatternMiner::growPatternsDepthFirstTask(unsigned int thread_ind
         actualProcessedLinkLock.unlock();
 
         extendAPatternForOneMoreGramRecursively(newLink, observingAtomSpace, Handle::UNDEFINED, lastGramLinks, 0, lastGramValueToVarMap,
-                                                patternVarMap, false, allHTreeNodesCurTask, allNewMinedPatternInfo);
+                                                patternVarMap, false, allNewMinedPatternsCurTask, allHTreeNodesCurTask, allNewMinedPatternInfo);
 
 
         // send new mined patterns to the server

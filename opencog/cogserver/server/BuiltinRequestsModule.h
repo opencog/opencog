@@ -25,7 +25,6 @@
 #ifndef _OPENCOG_BUILTIN_REQUESTS_MODULE_H
 #define _OPENCOG_BUILTIN_REQUESTS_MODULE_H
 
-#include <opencog/cogserver/server/SleepRequest.h>
 #include <opencog/cogserver/server/Factory.h>
 #include <opencog/cogserver/server/ListRequest.h>
 #include <opencog/cogserver/server/LoadModuleRequest.h>
@@ -49,7 +48,6 @@ class BuiltinRequestsModule : public Module
 private:
 
     Factory<ListRequest, Request>         listFactory;
-    Factory<SleepRequest, Request>        sleepFactory;
     Factory<ShutdownRequest, Request>     shutdownFactory;
     Factory<LoadModuleRequest, Request>   loadmoduleFactory;
     Factory<UnloadModuleRequest, Request> unloadmoduleFactory;

@@ -724,7 +724,7 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
             // Finished mining gram patterns; output to file
             std::cout<<"gram = " + toString(gram) + ": " + toString((patternsForGram[gram-1]).size()) + " patterns found! ";
 
-            OutPutFrequentPatternsToFile(gram);
+            OutPutFrequentPatternsToFile(gram, patternsForGram);
 
             std::cout<< std::endl;
         }
@@ -759,7 +759,7 @@ void DistributedPatternMiner::centralServerEvaluateInterestingness()
             {
                 // sort by interaction information
                 std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
-                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram);
+                OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 0);
             }
             else if (interestingness_Evaluation_method == "surprisingness")
             {

@@ -95,6 +95,12 @@ struct MinedPatternInfo
     unsigned int extendedLinkIndex;
 };
 
+enum QUERY_LOGIC
+{
+    OR,
+    AND
+};
+
 class PatternMiner
 {
 protected:
@@ -143,12 +149,18 @@ protected:
 
     unsigned int num_of_patterns_without_superpattern_cur_gram;
 
-    unsigned int thresholdFrequency; // patterns with a frequency lower than thresholdFrequency will be neglected, not grow next gram pattern from them
+    unsigned int thresholdFrequency;
 
     std::mutex uniqueKeyLock, patternForLastGramLock, removeAtomLock, patternMatcherLock, addNewPatternLock, calculateIILock,
         readNextLinkLock,actualProcessedLinkLock, curDFExtractedLinksLock, readNextPatternLock;
 
-    Type ignoredTypes[1];
+    bool use_keyword_white_list;
+    bool use_keyword_black_list;
+
+    QUERY_LOGIC keyword_white_list_logic;
+
+
+    vector<Type> ignoredLinkTypes;
 
     bool enable_Frequent_Pattern;
     bool enable_Interesting_Pattern;
@@ -248,12 +260,12 @@ protected:
 
     void extendAPatternForOneMoreGramRecursively(const Handle &extendedLink, AtomSpace* _fromAtomSpace, const Handle &extendedNode, const HandleSeq &lastGramLinks,
                                                  HTreeNode* parentNode, const map<Handle,Handle> &lastGramValueToVarMap, const map<Handle,Handle> &lastGramPatternVarMap,
-                                                 bool isExtendedFromVar, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo);
+                                                 bool isExtendedFromVar, set<string>& allNewMinedPatternsCurTask, vector<HTreeNode*> &allHTreeNodesCurTask, vector<MinedPatternInfo> &allNewMinedPatternInfo);
 
     bool containsLoopVariable(HandleSeq& inputPattern);
 
     HTreeNode* extractAPatternFromGivenVarCombination(HandleSeq &inputLinks, map<Handle,Handle> &patternVarMap, HandleSeqSeq &oneOfEachSeqShouldBeVars, HandleSeq &leaves,
-                                                      HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars, AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex);
+                                                      HandleSeq &shouldNotBeVars, HandleSeq &shouldBeVars, AtomSpace *_fromAtomSpace, unsigned int &extendedLinkIndex, set<string>& allNewMinedPatternsCurTask);
 
     void findAllInstancesForGivenPatternInNestedAtomSpace(HTreeNode* HNode);
 
@@ -303,7 +315,8 @@ protected:
 
     bool containIgnoredContent(Handle link );
 
-    const static string ignoreKeyWords[];
+    vector<string> keyword_black_list;
+    vector<string> keyword_white_list;
 
     bool splitDisconnectedLinksIntoConnectedGroups(HandleSeq& inputLinks, HandleSeqSeq& outputConnectedGroups);
 
@@ -327,7 +340,13 @@ protected:
 
     bool filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShouldBeVars, HandleSeq& leaves, HandleSeq& shouldNotBeVars, HandleSeq& shouldBeVars,AtomSpace* _atomSpace);
 
+    bool containWhiteKeywords(string& str, QUERY_LOGIC logic);
 
+    void reSetAllSettingsFromConfig();
+
+    void initPatternMiner();
+
+    void cleanUpPatternMiner();
 
 
 public:
@@ -338,7 +357,7 @@ public:
 
     string unifiedPatternToKeyString(HandleSeq& inputPattern , const AtomSpace *atomspace = 0);
 
-    void OutPutFrequentPatternsToFile(unsigned int n_gram);
+    void OutPutFrequentPatternsToFile(unsigned int n_gram, vector < vector<HTreeNode*> >& _patternsForGram, string _fileNamebasic = "");
 
     void OutPutStaticsToCsvFile(unsigned int n_gram);
 
@@ -348,11 +367,11 @@ public:
 
     void OutPutHighSurprisingILowSurprisingnessIIPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, float min_surprisingness_I, float max_surprisingness_II);
 
-    void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness = 0);
+    void OutPutInterestingPatternsToFile(vector<HTreeNode*> &patternsForThisGram, unsigned int n_gram, int surprisingness, string _fileNamebasic = "");
 
     void OutPutFinalPatternsToFile(unsigned int n_gram);
 
-    void runPatternMiner(unsigned int _thresholdFrequency = 2, bool exit_program_after_finish = true);
+    void runPatternMiner(bool exit_program_after_finish = true);
 
     void runPatternMinerBreadthFirst();
 
@@ -365,6 +384,49 @@ public:
     void testPatternMatcher1();
     void testPatternMatcher2();
 
+public:
+    // -------------------------------basic settings----------------------
+
+    unsigned int get_Pattern_Max_Gram(){return MAX_GRAM;}
+    void set_Pattern_Max_Gram(unsigned int _max_gram){ MAX_GRAM = _max_gram;}
+
+    bool get_Enable_Interesting_Pattern(){return enable_Interesting_Pattern;}
+    void set_Enable_Interesting_Pattern(bool _enable){enable_Interesting_Pattern = _enable;}
+
+    unsigned int get_Frequency_threshold() {return thresholdFrequency;}
+    void set_Frequency_threshold(unsigned int _Frequency_threshold) {thresholdFrequency = _Frequency_threshold;}
+
+    // -------------------------------end basic settings----------------------
+
+    // -------------------------------filter settings----------------------
+    bool get_use_keyword_black_list(){return use_keyword_black_list;}
+    void set_use_keyword_black_list(bool _use){use_keyword_black_list = _use;}
+
+    bool get_use_keyword_white_list(){return use_keyword_white_list;}
+    void set_use_keyword_white_list(bool _use){use_keyword_white_list = _use;}
+
+    vector<Type> get_Ignore_Link_Types(){return ignoredLinkTypes;}
+    bool add_Ignore_Link_Type(Type _type);
+    bool remove_Ignore_Link_Type(Type _type);
+
+    vector<string> get_keyword_black_list(){return keyword_black_list;}
+    bool add_keyword_to_black_list(string _keyword);
+    bool remove_keyword_from_black_list(string _keyword);
+    void clear_keyword_black_list(){keyword_black_list.clear();}
+
+    vector<string> get_keyword_white_list(){return keyword_white_list;}
+    bool add_keyword_to_white_list(string _keyword);
+    bool remove_keyword_from_white_list(string _keyword);
+    void clear_keyword_white_list(){keyword_white_list.clear();}
+
+    QUERY_LOGIC get_keyword_white_list_logic(){return keyword_white_list_logic;}
+    void set_keyword_white_list_logic(QUERY_LOGIC logic){keyword_white_list_logic = logic;}
+
+    // -------------------------------end filter settings----------------------
+
+    void applyWhiteListKeywordfilterAfterMining();
+
+    void resetPatternMiner(bool resetAllSettingsFromConfig);
 
 };
 
