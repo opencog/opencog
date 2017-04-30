@@ -511,7 +511,7 @@ HTreeNode* PatternMiner::extractAPatternFromGivenVarCombination(HandleSeq &input
 }
 
 // call existInOneThreadExtractedLinks and existInAllThreadExtractedLinks before this call function
-// only keep 30 per thread per gram, should be enough
+// only keep 60 per thread per gram, should be enough
 void PatternMiner::addThreadExtractedLinks(unsigned int _gram, unsigned int cur_thread_index, string _extractedLinkUIDs)
 {
     threadExtractedLinksLock.lock();
@@ -520,7 +520,7 @@ void PatternMiner::addThreadExtractedLinks(unsigned int _gram, unsigned int cur_
 
     all_thread_ExtractedLinks_pergram[_gram - 1].insert(_extractedLinkUIDs);
 
-    if ((thread_DF_ExtractedLinks[cur_thread_index][_gram - 1]).size() > 30)
+    if ((thread_DF_ExtractedLinks[cur_thread_index][_gram - 1]).size() > 60)
     {
         set<string>::iterator uidIt = all_thread_ExtractedLinks_pergram[_gram - 1].find((thread_DF_ExtractedLinks[cur_thread_index][_gram - 1]).front());
         if (uidIt != all_thread_ExtractedLinks_pergram[_gram - 1].end())
@@ -865,7 +865,10 @@ void PatternMiner::extendAPatternForOneMoreGramRecursively(const Handle &extende
                             if (! existInOneThreadExtractedLinks(cur_pattern_gram + 1, thread_index, instancekeyString))
                             {
                                 if (existInAllThreadExtractedLinks(cur_pattern_gram + 1, instancekeyString))
+                                {
+                                    // cout << "existInOneThreadExtractedLinks: \n" << instancekeyString << std::endl;
                                     continue;
+                                }
                                 else
                                     addThreadExtractedLinks(cur_pattern_gram + 1, thread_index, instancekeyString);
                             }

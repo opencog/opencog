@@ -2398,18 +2398,6 @@ void PatternMiner::initPatternMiner()
     htree = new HTree();
     atomSpace = new AtomSpace(originalAtomSpace);
 
-    //    unsigned int system_thread_num  = std::thread::hardware_concurrency();
-
-    //    if (system_thread_num > 1)
-    //        THREAD_NUM = system_thread_num - 1;
-    //    else
-    //        THREAD_NUM = 1;
-
-    //     // use all the threads in this machine
-    //     THREAD_NUM = system_thread_num;
-
-    THREAD_NUM = 1;
-
     threads = new thread[THREAD_NUM];
 
     is_distributed = false;
@@ -2445,6 +2433,15 @@ void PatternMiner::reSetAllSettingsFromConfig()
     //The options are "Interaction_Information", "surprisingness"
     assert( (interestingness_Evaluation_method == "Interaction_Information") || (interestingness_Evaluation_method == "surprisingness") );
 
+    THREAD_NUM = config().get_int("Max_thread_num");
+    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+    if (THREAD_NUM > system_thread_num - 1)
+    {
+        cout << "\nThere is only " << system_thread_num << " cores in this machine, so the Max_thread_num = "
+             << THREAD_NUM << " will not be used." << system_thread_num - 1 << " threads will be used instead." << std::endl;
+
+        THREAD_NUM = system_thread_num - 1;
+    }
 
     thresholdFrequency = config().get_int("Frequency_threshold");
 
