@@ -110,14 +110,10 @@
 ;
 ; The PROC is a function to be invoked on each of these.
 ;
-; Note -- as currently written, this double-counts.
 (define (map-lg-links PROC sent-list)
 	(map-parses
 		(lambda (parse)
-			(map-word-instances
-				(lambda (word-inst)
-					(map PROC (cog-get-pred word-inst 'LinkGrammarRelationshipNode)))
-				parse))
+			(map PROC (parse-get-links (parse))))
 		sent-list)
 )
 
