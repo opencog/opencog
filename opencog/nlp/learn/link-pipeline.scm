@@ -238,11 +238,9 @@
 ;    (get-new-parsed-sentences))
 ;
 ; (map-lg-links (lambda (x) (prt (gddr (make-lg-rel x))))
-; 	(get-new-parsed-sentences)
-; )
+;    (get-new-parsed-sentences))
 ;
 ; (map-lg-links (lambda (x) (cog-inc-count! (make-lg-rel x) 1))
-; 	(get-new-parsed-sentences)
-; )
+;    (get-new-parsed-sentences))
 ;
 ; (observe-text "abcccccccccc  defffffffffffffffff")
