@@ -6,15 +6,14 @@
 ; Assorted NLP utilities.  Operations include:
 ; -- looping over all sentences in a document
 ; -- looping over all parses of a sentence (map-parses)
-; -- looping over all words in a sentence (map-word-node)
+; -- looping over all words in a sentence (map-word-instances)
 ; -- get word of word instance. (word-inst-get-word)
 ; -- get word senses
 ; -- deleting all atoms pertaining to a sentence
 ;
 ; The function names that can be found here are:
 ; -- map-parses   Call proceedure on every parse of the sentence.
-; -- map-word-instances   Call proc on each word-instance of parse.
-; -- map-word-node        Call proc on the word-node associated to word-inst.
+; -- map-word-instances     Call proc on each word-instance of parse.
 ; -- document-get-sentences Get senteces in document.
 ; -- sentence-get-parses    Get parses of a sentence.
 ; -- sentence-get-utterance-type  Get the speech act of a sentence.
@@ -100,22 +99,6 @@
 "
 	(cog-map-chase-links-chk 'WordInstanceLink 'WordInstanceNode
 		proc parse-or-list 'ParseNode)
-)
-
-; ---------------------------------------------------------------------
-(define-public (map-word-node proc word-inst)
-"
-  map-word-node        Call proc on the word-node associated to word-inst.
-
-  map-word-node proc word-inst
-  Call proceedure 'proc' on the word-node associated to 'word-inst'
-
-  Expected input is a WordInstanceNode, which serves as an anchor
-  to a word instance. The WordInstanceNode is connnected via a ReferenceLink
-  to the actual word node.
-"
-	(cog-map-chase-links-chk 'ReferenceLink 'WordNode
-		proc word-inst 'WordInstanceNode)
 )
 
 ; ---------------------------------------------------------------------
@@ -298,7 +281,9 @@
 "
   word-inst-get-number   Return the NumberNode associated with word-inst
 
-  Return the NumberNode associated with 'word-inst'
+  Return the NumberNode associated with 'word-inst'. This number is
+  the ordinal of the word in the sentence.  There can only ever be one
+  such ordinal per WordInstance, so this returns a single atom.
 "
 	(car (cog-chase-link 'WordSequenceLink 'NumberNode word-inst))
 )
@@ -306,13 +291,15 @@
 ; ---------------------------------------------------------------------
 (define-public (word-inst-get-word word-inst)
 "
-  word-inst-get-word   Return the WordNode associated with word-inst
+  word-inst-get-word  -- Return the WordNode associated with word-inst
 
-  Return the WordNode associated with 'word-inst'
-  TFor example given `(WordInstance 'olah@12345')`, return
-  `(WordNode 'olah')`
+  Return the WordNode associated with 'word-inst'. For example, given
+  `(WordInstance 'olah@12345')`, return `(WordNode 'olah')`
+
+  There can only ever be one WordNode per WordInstance, so this returns
+  a single atom.
 "
-	(cog-chase-link 'ReferenceLink 'WordNode word-inst)
+	(car (cog-chase-link 'ReferenceLink 'WordNode word-inst))
 )
 
 ; ---------------------------------------------------------------------

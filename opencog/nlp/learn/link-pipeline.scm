@@ -235,8 +235,7 @@
 ; (map-lg-links prt (get-new-parsed-sentences))
 ;
 ; (map-lg-links (lambda (x) (prt (make-lg-rel x)))
-; 	(get-new-parsed-sentences)
-; )
+;    (get-new-parsed-sentences))
 ;
 ; (map-lg-links (lambda (x) (prt (gddr (make-lg-rel x))))
 ; 	(get-new-parsed-sentences)
