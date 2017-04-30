@@ -113,7 +113,7 @@
 (define (map-lg-links PROC sent-list)
 	(map-parses
 		(lambda (parse)
-			(map PROC (parse-get-links (parse))))
+			(map PROC (parse-get-links parse)))
 		sent-list)
 )
 
