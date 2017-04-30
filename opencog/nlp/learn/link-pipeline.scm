@@ -274,7 +274,10 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Some generic hand-testing code for this stuff:
+; Some notes for hand-testing the code up above:
+;
+; (sql-open "postgres:///en_pairs?user=linas")
+; (use-relex-server "127.0.0.1" 4445)
 ;
 ; (define (prt x) (display x))
 ;

@@ -3421,3 +3421,22 @@ no DISJUNCT srcNode.get("DISJUNCT"); on last word .. line 139
 no attr on the last word
 load_senses
 config.isStoreSense
+
+ERROR: Throw to key `C++-EXCEPTION' with args `("fetch-atom" "Error:
+get_uuid(): cannot find (WordNode \"abcccccccccc\" (ctv 1.000000
+0.000000 4.000000)) ; [8608664669745395561][1]\n\n
+(/home/linas/src/novamente/src/atomspace-git/opencog/persist/sql/multi-driver/SQLAtomStorage.cc:934)\nFunction
+args:\n((EvaluationLink\n   (LinkGrammarRelationshipNode \"ANY\")\n
+(ListLink\n      (WordNode \"###LEFT-WALL###\" (ctv 1 0 19431131))\n
+(WordNode \"abcccccccccc\" (ctv 1 0 4))\n   )\n)\n)")'.
+
+
+(fetch-atom (Word "asdfasdfasdf"))
+(fetch-atom (EvaluationLink (LinkGrammarRelationshipNode "ANY")
+    (ListLink (Word "###LEFT-WALL###") (Word "asdfasdfqewr"))))
+
+(fetch-atom (ListLink (Word "###LEFT-WALL###") (Word "asdfasdfqewr")))
+
+SQLAtomStorage::doGetLink
+IOException
+ fixed in commit 327fc6c0a3c8b4b62ac80a61e2fdfc6971190c30
