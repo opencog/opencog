@@ -181,10 +181,65 @@
 ;
 ; Note that this might throw an exception...
 ;
+; The structures that get created and incremented are of the form
+;
+;     EvaluationLink
+;         PredicateNode "*-Sentence Word Pair-*"
+;         ListLink
+;             WordNode "lefty"  -- or whatever words these are.
+;             WordNode "righty"
+;
+;     ExecutionLink
+;         SchemaNode "*-Pair Distance-*"
+;         ListLink
+;             WordNode "lefty"
+;             WordNode "righty"
+;         NumberNode 3
+;
+; Here, the NumberNode encdes the distance between the words. It is always
+; at least one -- i.e. it is the diffference between their ordinals.
+;
 (define (update-pair-counts PARSE)
 
+	(define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
+	(define pair-dist (SchemaNode "*-Pair Distance-*"))
+
+	; Get the scheme-number of the word-sequence number
+	(define (get-number word-inst)
+		(string->number (cog-name (word-inst-get-number word-inst))))
+
+	; Create and count a word-pair, and the distance.
+	(define (count-one-pair left-word right-word)
+		(define pare (ListLink left-word right-word))
+		(define dist (- (get-number right-word) (get-number left-word)))
+
+		(count-one-atom (EvaluationLink pair-pred pare))
+		(count-one-atom (ExecutionLink pair-dist pare (NumberNode dist))))
+
+	; Create pairs from `first`, and each word in the list in `rest`,
+	; and increment counts on these pairs.
+	(define (count-pairs first rest)
+		(if (not (null? rest))
+			(begin
+				(count-one-pair first (car rest))
+				(count-pairs first (cdr rest)))))
+
+	; Iterate over all of the words in the word-list, making pairs.
+	(define (make-pairs word-list)
+		(if (not (null? word-list))
+			(begin
+				(count-pairs (car word-list) (cdr word-list))
+				(make-pairs (cdr word-list)))))
+
+	; If this function throws, then it will be here, so all counting
+	; will be skipped, if any one word fails.
 	(define word-seq (make-word-sequence PARSE))
+
+	; What the heck. Go ahead and count these, too.
 	(for-each count-one-atom word-seq)
+
+	; Count the pairs, too.
+	(make-pairs word-seq)
 )
 
 ; ---------------------------------------------------------------------
