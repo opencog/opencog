@@ -2,7 +2,8 @@
 ; link-pipeline.scm
 ;
 ; Link-grammar word and link-counting pipeline.  Currently counts
-; words, word-pairs (links), disjuncts, parses and sentences.
+; words, several kinds of word-pairs (links, and order-relations),
+; and also disjuncts, parses and sentences.
 ;
 ; Copyright (c) 2013, 2017 Linas Vepstas <linasvepstas@gmail.com>
 ;
@@ -25,7 +26,10 @@
 ; *) how many sentences have been observed.
 ; *) how many parses were observed.
 ; *) how many words have been observed (counting once-per-word)
-; *) how many relationship triples have been observed.
+; *) how many word-order pairs have been observed.
+; *) the distance between words in the above pairs.
+; *) how many times a word appears first in a sentence.
+; *) how many link-relationship triples have been observed.
 ; *) how many disjuncts have been observed.
 ;
 ; Sentences are counted by updating the count on `(SentenceNode "ANY")`.
@@ -33,8 +37,37 @@
 ; Words are counted by updating the count on the `WordNode` for that
 ; word. It is counted with multiplicity: once for each time it occurs
 ; in a parse.  That is, if a word appears twice in a parse, it is counted
-; twice.  Counts for relations are stored in the TV for the EvaluationLink.
-; Disjuncts are counted by incrementing the LgWordCset for a given word.
+; twice.
+;
+; Word-pairs show up, and are counted in four different ways. First,
+; a count is made if two words appear, left-right ordered, in the same
+; sentence. This count is stored in the CountTV for the EvaluationLink
+; on (PredicateNode "*-Sentence Word Pair-*").  A second count is
+; maintained for this same pair, but including the distance between the
+; two words. This is on (PredicateNode "*-Pair Distance-*").  In
+; conjuction with these counts, it becomes interesting to see which
+; words occur at the starts of sentences.
+;
+; Word-pairs are also designated by means of Link Grammar parses of a
+; sentence. A Link Grammar parse creates a list of typed links between
+; pairs of words in the sentence. Each such link is counted once, for
+; each time that it occurs.  These counts are maintained in the CountTV
+; on the EvaluationLink for the LinkGrammarRelationshipNode for that
+; word-pair.  In addition, a count is maintained of the length of that
+; link.
+;
+; For the initial stages of the langauge-learning project, the parses
+; are produced by the "any" langauge parser, which produces random planar
+; trees.  This creates a sampling of word-pairs that is different than
+; merely having them show up in the same sentence.  That is, a covering
+; of a sentence by random trees does not produce the same edge statistics
+; as a clique of edges drawn between all words. This is explored further
+; in the diary, in a section devoted to this topic.
+;
+; The Link Grammar parse also produces and reports the disjuncts that were
+; used for each word. These are useful in and of themselves; they indicate
+; the hubbiness (link-multiplicity) of each word. The disjunct counts are
+; maintained on the LgWordCset for a given word.
 
 (use-modules (opencog) (opencog nlp) (opencog persist))
 
