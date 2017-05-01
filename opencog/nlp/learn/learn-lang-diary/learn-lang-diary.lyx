@@ -328,7 +328,7 @@ In what follows, the relation
 \end_layout
 
 \begin_layout Standard
-We are then interested in the conditional probability 
+The quantity of interest is the conditional probability 
 \begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
 \end_inset
 
@@ -346,18 +346,106 @@ We are then interested in the conditional probability
 
 , given that the two individual words were observed in a sentance (in no
  particular order).
- Let 
+ To work with this quantity, some care must be taken with three related
+ probabilities.
+ One is 
 \begin_inset Formula $P(w)$
+\end_inset
+
+, the probability of observing the word 
+\begin_inset Formula $w$
+\end_inset
+
+ in the data sample.
+ Another is 
+\begin_inset Formula $P(t,w)$
+\end_inset
+
+, the probability of observing the word 
+\begin_inset Formula $w$
+\end_inset
+
+ in a sentence 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ This differs from 
+\begin_inset Formula $P(w)$
+\end_inset
+
+ because the word may occur more than once.
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $P(t,w)$
 \end_inset
 
  be the probability of observing word 
 \begin_inset Formula $w$
 \end_inset
 
- in a sentance (with multiplicity).
- We know from experiece that this is a Zipfian distribution; however, this
- fact will not be used in what follows.
- From the definition of conditional probabilities, we get 
+ in a block of text 
+\begin_inset Formula $t$
+\end_inset
+
+; the block of text will be a sentence, in what follows.
+ To make this precise, give it a frequentist definition:
+\begin_inset Formula 
+\[
+P(t,w)=\frac{N(w)}{Nt}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $N(w)$
+\end_inset
+
+ is the number of times a word 
+\begin_inset Formula $w$
+\end_inset
+
+ was observed in a data sample, and 
+\begin_inset Formula $Nt$
+\end_inset
+
+ is the number of sentences in that same sample.
+ This is distinct from 
+\begin_inset Formula $P(w)$
+\end_inset
+
+ the probability of observing the word 
+\begin_inset Formula $w$
+\end_inset
+
+ in the sample: in particular, a word can occur two or more times in a sentence.
+ Thus, 
+\begin_inset Formula $P(t,w)$
+\end_inset
+
+ counts the word 
+\begin_inset Formula $w$
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+with multiplicity
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+XXX
+\end_layout
+
+\begin_layout Standard
+From the definition of conditional probabilities, we get 
 \begin_inset Formula 
 \[
 P(R,w_{l},w_{r})=P(R|w_{l},w_{r})P(w_{l},w_{r})
@@ -655,6 +743,11 @@ This counts how often the word
 \end_inset
 
 , which, by definition, counts only once per word in a sentence.
+\end_layout
+
+\begin_layout Standard
+TODO graphs P(w), P(t,w), etc.
+ show zipf
 \end_layout
 
 \begin_layout Standard
