@@ -43,7 +43,7 @@
 ; sentence. This count is stored in the CountTV for the EvaluationLink
 ; on (PredicateNode "*-Sentence Word Pair-*").  A second count is
 ; maintained for this same pair, but including the distance between the
-; two words. This is on (PredicateNode "*-Pair Distance-*").  Since
+; two words. This is on (SchemaNode "*-Pair Distance-*").  Since
 ; sentences always start with LEFT-WALL, this can be used to reconstruct
 ; the typical word-order in a sentence.
 ;
@@ -144,7 +144,14 @@
 			(word-inst-get-word word-inst)
 			(NumberNode (- (get-number word-inst) wall-no))))
 
-	(map-word-instances make-ordered-word PARSE)
+	; Ahhh .. later code will be easier, if we return the list in
+	; sequential order. So, define a compare function and sort it.
+	(define (get-no seq-lnk)
+		(string->number (cog-name (gdr seq-lnk))))
+
+	(sort (map-word-instances make-ordered-word PARSE)
+		(lambda (wa wb)
+			(< (get-no wa) (get-no wb))))
 )
 
 ; ---------------------------------------------------------------------
