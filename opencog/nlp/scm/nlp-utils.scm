@@ -160,6 +160,8 @@
 (define-public (sent-get-interp sent-node)
 "
   sent-get-interp - Given a SentenceNode returns a list of InterpretationNodes
+
+  XXX fix-me -- might this not be parse-dependent???
 "
     (parse-get-interp (car (sentence-get-parses sent-node)))
 )
@@ -248,7 +250,7 @@
   Specifically, if the word in a sentence is a parenthesis, then the
   ReferenceLink between the specific paren, and the general paren does
   not get created.  Viz, there is no `(ReferenceLink (WordInstanceNode
-  "(@4bf5e341-c6b") (WordNode "("))`. Some paren-counter somewhere is
+  '(@4bf5e341-c6b') (WordNode '('))`. Some paren-counter somewhere is
   broken and gets confused. Beats me where. It should be fixed. In the
   meanhile, a 'wrong-type-arg exception is thrown, when the `car` below
   dereferences the empty list. Callers of this function may want to

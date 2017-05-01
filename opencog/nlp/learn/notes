@@ -3705,3 +3705,9 @@ thus all users of map-parses might be broken
 map-parses
 parallel-map-parses
 map-word-instances
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=linas")
+ (use-relex-server "127.0.0.1" 4445)
+
