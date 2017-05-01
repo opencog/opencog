@@ -248,7 +248,7 @@
 )
 
 ; ---------------------------------------------------------------------
-; map-lg-links -- loop over all link-grammar links in a list of sentences.
+; for-each-lg-link -- loop over all link-grammar links in a sentence.
 ;
 ; Each link-grammar link is of the general form:
 ;
@@ -260,11 +260,11 @@
 ;
 ; The PROC is a function to be invoked on each of these.
 ;
-(define (map-lg-links PROC sent-list)
-	(map-parses
+(define (for-each-lg-link PROC SENT)
+	(for-each
 		(lambda (parse)
-			(map PROC (parse-get-links parse)))
-		sent-list)
+			(for-each PROC (parse-get-links parse)))
+		(sentence-get-parses SENT))
 )
 
 ; ---------------------------------------------------------------------
@@ -344,7 +344,7 @@
 			(lambda () (count-one-atom (make-word-link link)))
 			(lambda (key . args) #f)))
 
-	(map-lg-links try-count-one-link (list single-sent))
+	(for-each-lg-link try-count-one-link (list single-sent))
 )
 
 ; ---------------------------------------------------------------------
@@ -426,15 +426,15 @@
 ; (relex-parse "this is")
 ; (get-new-parsed-sentences)
 ;
-; (map-lg-links prt (get-new-parsed-sentences))
+; (for-each-lg-link prt (get-new-parsed-sentences))
 ;
-; (map-lg-links (lambda (x) (prt (make-word-link x)))
+; (for-each-lg-link (lambda (x) (prt (make-word-link x)))
 ;    (get-new-parsed-sentences))
 ;
-; (map-lg-links (lambda (x) (prt (gddr (make-word-link x))))
+; (for-each-lg-link (lambda (x) (prt (gddr (make-word-link x))))
 ;    (get-new-parsed-sentences))
 ;
-; (map-lg-links (lambda (x) (cog-inc-count! (make-word-link x) 1))
+; (for-each-lg-link (lambda (x) (cog-inc-count! (make-word-link x) 1))
 ;    (get-new-parsed-sentences))
 ;
 ; (observe-text "abcccccccccc  defffffffffffffffff")
