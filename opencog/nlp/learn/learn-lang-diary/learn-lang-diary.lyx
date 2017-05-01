@@ -536,11 +536,11 @@ Frequentism - Counting words and pairs
 \end_layout
 
 \begin_layout Standard
-In order for the above to be manipulable in practice, we need to provide
- a definition for the probabilities, and, for this, the definition can only
- be frequentist.
- That is, the defintion is to be obtained from empircal data; from counting
- frequencies as they occur in nature.
+In order to be usable, a computable definition for the probabilities must
+ be given.
+ For this, the definition can only be frequentist.
+ That is, the probabilities are to be obtained from empircal data; from
+ counting frequencies as they occur in data samples taken from nature.
  The frequency 
 \begin_inset Formula $P(w)$
 \end_inset
@@ -578,39 +578,58 @@ N(*)=\sum_{w}N(w)
 
 \end_inset
 
-How to count words seems obvious, at first: just count them one by one in
- a sentence.
- But this is not the only way to count! When generating random parse trees,
- one could count the words that occur at the end of edges: that way, the
- word-count is exactly double the word-pair count.
- The advantage of this is that the counts for edges and vertexes are unified
- in a coherent way.
- (Counting words in a sentence, without multiplicity, is also still a good
- idea).
-\end_layout
+How to count words is not entirely obvious, so even these defintions need
+ care.
+ There are several ways in which one can count words.
+ One way is to simply count how many times a word occurs in the block of
+ sample text.
+ Another way is to count how many times a word occurs in parses of the sample
+ text.
+ These are not the same! For example, if a parse connects words by edges
+ (by dependency-grammar relations), then one can count each word once, for
+ each time that it occurs at the end of an edge.
+ In this counting, the word-count is exactly double the word-pair count.
+ A word is then counted multiple times, if it participates in multiple edges.
+ If the sample text is parsed multiple times, then addtional counts can
+ result that way.
+ To maintain consistency with the defintions given in the previous section,
+ 
+\begin_inset Formula $P(w)$
+\end_inset
 
-\begin_layout Standard
-xxx
+ is defined to be the number of times that the word 
+\begin_inset Formula $w$
+\end_inset
+
+ occurs in the data sample, and independent of any other relations that
+ 
+\begin_inset Formula $w$
+\end_inset
+
+ might be engaged in.
+ For now, it is assumed that the segmentation of the text sample into words
+ is unambiguous.
+ 
 \end_layout
 
 \begin_layout Standard
 Let 
-\begin_inset Formula $P(t,w)$
+\begin_inset Formula $P(S(w),w)$
 \end_inset
 
  be the probability of observing word 
 \begin_inset Formula $w$
 \end_inset
 
- in a block of text 
-\begin_inset Formula $t$
+ in any sentence 
+\begin_inset Formula $S$
 \end_inset
 
-; the block of text will be a sentence, in what follows.
- To make this precise, give it a frequentist definition:
+.
+ This can be computed as
 \begin_inset Formula 
 \[
-P(t,w)=\frac{N(w)}{Nt}
+P(S,w)=\frac{N(w)}{NS}
 \]
 
 \end_inset
@@ -624,36 +643,190 @@ where
 \end_inset
 
  was observed in a data sample, and 
-\begin_inset Formula $Nt$
+\begin_inset Formula $NS$
 \end_inset
 
  is the number of sentences in that same sample.
- This is distinct from 
-\begin_inset Formula $P(w)$
+ Note that
+\begin_inset Formula 
+\[
+P(S,w)=\frac{N(w)}{N(*)}\,\frac{N(*)}{NS}=P(w)L(S)
+\]
+
 \end_inset
 
- the probability of observing the word 
-\begin_inset Formula $w$
+with 
+\begin_inset Formula $L(S)$
 \end_inset
 
- in the sample: in particular, a word can occur two or more times in a sentence.
- Thus, 
-\begin_inset Formula $P(t,w)$
+ being the average sentence length.
+ 
+\end_layout
+
+\begin_layout Standard
+Three different word-pair relationships are interesting.
+ First, define the relation 
+\begin_inset Formula $S(w_{1},w_{2})$
 \end_inset
 
- counts the word 
-\begin_inset Formula $w$
+ as being the relation that both words 
+\begin_inset Formula $w_{1}$
 \end_inset
 
+ and 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+ occur in the same sentence, but in arbitrary order.
+ It is symmetric: 
+\begin_inset Formula $S(w_{1},w_{2})=S(w_{2},w_{1})$
+\end_inset
+
+.
+ Define 
+\begin_inset Formula $A(w_{l},w_{r})$
+\end_inset
+
+ as being the relation that both words 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ occur in the same sentence, and that 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ is to the left of 
+\begin_inset Formula $w_{r}.$
+\end_inset
+
+ By this definition, the counts for the two are related: one has that 
+\begin_inset Formula 
+\[
+N(S,w_{1},w_{2})=N(A,w_{1},w_{2})+N(A,w_{2},w_{1})
+\]
+
+\end_inset
+
+This is the symmetrized count.
+\end_layout
+
+\begin_layout Standard
+Neither of 
+\begin_inset Formula $S$
+\end_inset
+
+ or 
+\begin_inset Formula $A$
+\end_inset
+
+ is yet the relation 
+\begin_inset Formula $R(w_{l},w_{r})$
+\end_inset
+
+ mentioned above, which is defined as being the relation that both words
+ 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ occur in the same sentence, that 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ is to the left of 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+, and, most importantly, that there is a link-grammar link (of type 
+\begin_inset Quotes eld
+\end_inset
+
+R
+\begin_inset Quotes erd
+\end_inset
+
+) connecting the two.
+ Observe that although 
+\begin_inset Formula $A$
+\end_inset
+
+ can be deduced from 
+\begin_inset Formula $S$
+\end_inset
+
+, there is no simple or obvious relation between 
+\begin_inset Formula $S$
+\end_inset
+
+ and 
+\begin_inset Formula $R$
+\end_inset
+
+; these are essentially independent relations.
+\end_layout
+
+\begin_layout Standard
+Initially, there is only one link relation 
+\begin_inset Quotes eld
+\end_inset
+
+R
+\begin_inset Quotes erd
+\end_inset
+
+ between two words: this is the 
+\begin_inset Quotes eld
+\end_inset
+
+ANY
+\begin_inset Quotes erd
+\end_inset
+
+ link-type.
+ However, in general, 
+\begin_inset Quotes eld
+\end_inset
+
+R
+\begin_inset Quotes erd
+\end_inset
+
+ can be other kinds of link-types.
+ Note that 
+\begin_inset Quotes eld
+\end_inset
+
+R
+\begin_inset Quotes erd
+\end_inset
+
+ can also have a head-tail dependency order: either 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ or 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ can be the head-word of a directional link.
+ Thus, there are three different symmetrizations that can be obtained from
  
 \begin_inset Quotes eld
 \end_inset
 
-with multiplicity
+R
 \begin_inset Quotes erd
 \end_inset
 
-.
+: by failing to make a left-right distinction, byt failing to make a head-tail
+ distinction, and failing to do either.
 \end_layout
 
 \begin_layout Standard
@@ -661,9 +834,8 @@ XXX
 \end_layout
 
 \begin_layout Standard
-Lets try to keep these ideas distinct.
- Define the relation 
-\begin_inset Formula $S(w_{1},w_{2})$
+Define the relation 
+\begin_inset Formula $E(w_{1},w_{2})$
 \end_inset
 
  as being the relation that both words 
@@ -676,14 +848,14 @@ Lets try to keep these ideas distinct.
 
  occur at the ends of an edge in the same sentence, but in arbitrary order.
  It is symmetric: 
-\begin_inset Formula $S(w_{1},w_{2})=S(w_{2},w_{1})$
+\begin_inset Formula $E(w_{1},w_{2})=E(w_{2},w_{1})$
 \end_inset
 
 .
  By this definition, one has that 
 \begin_inset Formula 
 \[
-N(S,w_{1},w_{2})=N(R,w_{1},w_{2})+N(R,w_{2},w_{1})
+N(E,w_{1},w_{2})=N(R,w_{1},w_{2})+N(R,w_{2},w_{1})
 \]
 
 \end_inset
@@ -692,7 +864,7 @@ This is the symmetrized count.
  It is useful to mod out one of the two words, and to consider the sum
 \begin_inset Formula 
 \[
-N(S,w)\equiv N(S,w,*)=\sum_{w_{2}}N(S,w,w_{2})
+N(E,w)\equiv N(E,w,*)=\sum_{w_{2}}N(E,w,w_{2})
 \]
 
 \end_inset
