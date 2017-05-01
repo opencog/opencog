@@ -304,7 +304,7 @@ nal).
 \begin_inset Formula $R(w_{l},w_{r})$
 \end_inset
 
- does do is to capture that 
+ does is to capture that 
 \begin_inset Formula $w_{l}$
 \end_inset
 
@@ -328,8 +328,8 @@ In what follows, the relation
 \end_layout
 
 \begin_layout Standard
-The quantity of interest is the conditional probability 
-\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
+The quantity of interest is the (unconditional) probability 
+\begin_inset Formula $P(R(w_{l},w_{r}),w_{l},w_{r})$
 \end_inset
 
  of observing the two words 
@@ -344,10 +344,9 @@ The quantity of interest is the conditional probability
 \begin_inset Formula $R=R(w_{l},w_{r})$
 \end_inset
 
-, given that the two individual words were observed in a sentance (in no
- particular order).
- To work with this quantity, some care must be taken with three related
- probabilities.
+.
+ To work with this quantity, some care must be taken with the notation for
+ several related probabilities.
  One is 
 \begin_inset Formula $P(w)$
 \end_inset
@@ -358,23 +357,240 @@ The quantity of interest is the conditional probability
 
  in the data sample.
  Another is 
-\begin_inset Formula $P(t,w)$
+\begin_inset Formula $P(S(w),w)$
 \end_inset
 
 , the probability of observing the word 
 \begin_inset Formula $w$
 \end_inset
 
- in a sentence 
-\begin_inset Formula $t$
+ in a sentence.
+ The notation 
+\begin_inset Formula $S(w)$
 \end_inset
 
-.
- This differs from 
+ is used to indicate that the word 
+\begin_inset Formula $w$
+\end_inset
+
+ is in some relation 
+\begin_inset Formula $S$
+\end_inset
+
+; in this example, specifically, that it is in a sentence.
+ More generally, 
+\begin_inset Formula $S$
+\end_inset
+
+ can indicate some, any single-word relation: some ambient interaction of
+ the word with other factors in the data sample.
+ Using 
+\begin_inset Formula $S$
+\end_inset
+
+ to denote sentence, the probability 
+\begin_inset Formula $P(S(w),w)$
+\end_inset
+
+ differs from 
 \begin_inset Formula $P(w)$
 \end_inset
 
- because the word may occur more than once.
+ because the word 
+\begin_inset Formula $w$
+\end_inset
+
+ may occur more than once in a sentence.
+ The ratio between these two can be interpreted as the number of words in
+ a sentence - the average sentence length.
+ Finally, there is the quantity 
+\begin_inset Formula $P(S(w_{1},w_{2}),w_{1},w_{2})$
+\end_inset
+
+ that the two words occur in the same sentence.
+ Again, 
+\begin_inset Formula $S(w_{1},w_{2})$
+\end_inset
+
+ denotes a relation between the two words; it differs from 
+\begin_inset Formula $R(w_{1},w_{2})$
+\end_inset
+
+ in that the word-order does not matter.
+\end_layout
+
+\begin_layout Standard
+With the above notation, it is now safe to write (to define) the unconditional
+ probability of observing two words as 
+\begin_inset Formula 
+\[
+P(w_{1},w_{2})=P(w_{1})P(w_{2})
+\]
+
+\end_inset
+
+That is, instead of assuming independence of two random variables, we define
+ them to be so.
+ By definition, the two are uncorrelated.
+ If there was some correlation (relation) 
+\begin_inset Formula $C(w_{1},w_{2})$
+\end_inset
+
+ between them, then one should write this explicitly, as 
+\begin_inset Formula $P(C,w_{1},w_{2})=P(C(w_{1},w_{2}),w_{1},w_{2})$
+\end_inset
+
+.
+ The notation here allows the various needed probabilities to be defined
+ without ambiguity.
+ 
+\end_layout
+
+\begin_layout Standard
+Assumptions of independent variables are now replaced by a notational infrastrct
+ure.
+ Note, in particular, that if one uses a frequentist defintion for the probabili
+ties (as will be done in what follows), then the probabilities are not independe
+nt of the data sample from which they are drawn.
+ Thus, all probabilities here have an implicit dependence on the data sample.
+ This dependency is not explicitly shown.
+ Some care must be taken to use the same data sample throughout.
+ 
+\end_layout
+
+\begin_layout Standard
+The above notation allows the definition of conditional probabilites, in
+ the conventional sense.
+ For example, one has that 
+\begin_inset Formula 
+\[
+P(R,w_{l},w_{r})=P(R|w_{l},w_{r})P(w_{l},w_{r})
+\]
+
+\end_inset
+
+or that 
+\begin_inset Formula 
+\[
+P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l},w_{r})}
+\]
+
+\end_inset
+
+as the conditional probability of observing the relation 
+\begin_inset Formula $R$
+\end_inset
+
+, given that it's component parts are observed.
+ From the earlier definitions, the denominator factors, and so we conclude
+ that the correct expression for the conditional probability is:
+\begin_inset Formula 
+\begin{equation}
+P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}\label{eq:cond-pair}
+\end{equation}
+
+\end_inset
+
+This is the probability of observing the relationship 
+\begin_inset Formula $R$
+\end_inset
+
+ given that the individual parts of the relationship have been observed.
+ The relation 
+\begin_inset Formula $R$
+\end_inset
+
+ includes all correlations between the two words: thier ordering as well
+ as thier co-occurance in a sentence.
+ 
+\end_layout
+
+\begin_layout Standard
+Take care, however: 
+\begin_inset Formula $P(R|w_{l},w_{r})$
+\end_inset
+
+ is NOT the probability of seeing 
+\begin_inset Formula $R$
+\end_inset
+
+, given that 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ occur in the same sentence.
+ This would instead by given by 
+\begin_inset Formula $P(R,w_{l},w_{r})/P(S,w_{l},w_{r})$
+\end_inset
+
+.
+ This is an entirely different.
+\end_layout
+
+\begin_layout Subsubsection*
+Frequentism - Counting words and pairs
+\end_layout
+
+\begin_layout Standard
+In order for the above to be manipulable in practice, we need to provide
+ a definition for the probabilities, and, for this, the definition can only
+ be frequentist.
+ That is, the defintion is to be obtained from empircal data; from counting
+ frequencies as they occur in nature.
+ The frequency 
+\begin_inset Formula $P(w)$
+\end_inset
+
+ of observing a word 
+\begin_inset Formula $w$
+\end_inset
+
+ is obvious: 
+\begin_inset Formula 
+\[
+P(w)=\frac{N(w)}{N(*)}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $N(w)$
+\end_inset
+
+ is the count of observing word 
+\begin_inset Formula $w$
+\end_inset
+
+ and 
+\begin_inset Formula $N(*)$
+\end_inset
+
+ is the total number of words observed.
+ That is, by definition, it is the wild-card summation 
+\begin_inset Formula 
+\[
+N(*)=\sum_{w}N(w)
+\]
+
+\end_inset
+
+How to count words seems obvious, at first: just count them one by one in
+ a sentence.
+ But this is not the only way to count! When generating random parse trees,
+ one could count the words that occur at the end of edges: that way, the
+ word-count is exactly double the word-pair count.
+ The advantage of this is that the counts for edges and vertexes are unified
+ in a coherent way.
+ (Counting words in a sentence, without multiplicity, is also still a good
+ idea).
+\end_layout
+
+\begin_layout Standard
+xxx
 \end_layout
 
 \begin_layout Standard
@@ -442,258 +658,6 @@ with multiplicity
 
 \begin_layout Standard
 XXX
-\end_layout
-
-\begin_layout Standard
-From the definition of conditional probabilities, we get 
-\begin_inset Formula 
-\[
-P(R,w_{l},w_{r})=P(R|w_{l},w_{r})P(w_{l},w_{r})
-\]
-
-\end_inset
-
-or that 
-\begin_inset Formula 
-\[
-P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l},w_{r})}
-\]
-
-\end_inset
-
-Here, the relation 
-\begin_inset Formula $R$
-\end_inset
-
- encompasses several facts: that one word is to the left of the other, and
- that they are connected by a certain link-type, as well as possibly capturing
- other 'ambient' information, perhaps such as other nearby words.
- The expression 
-\begin_inset Formula $P(R,w_{l},w_{r})$
-\end_inset
-
- is the probability of observing both the words 
-\begin_inset Formula $w_{l}$
-\end_inset
-
- and 
-\begin_inset Formula $w_{r}$
-\end_inset
-
- in a sentance, as well as observing that they are related as 
-\begin_inset Formula $R(w_{l},w_{r})$
-\end_inset
-
- in the sentence.
- Clearly, 
-\begin_inset Formula $R$
-\end_inset
-
- cannot occur if 
-\begin_inset Formula $w_{l}$
-\end_inset
-
- and 
-\begin_inset Formula $w_{r}$
-\end_inset
-
- don't, but the converse is not true: the words can appear in a sentence,
- but fail to be related by 
-\begin_inset Formula $R$
-\end_inset
-
-.
- For this reason, it is 
-\begin_inset Quotes eld
-\end_inset
-
-safe
-\begin_inset Quotes erd
-\end_inset
-
- to use the notational short-hand 
-\begin_inset Formula $P(R)=P(R(w_{l},w_{r}),w_{l},w_{r})$
-\end_inset
-
-; nothing is thrown out, because 
-\begin_inset Formula $R$
-\end_inset
-
- already depends on 
-\begin_inset Formula $w_{l}$
-\end_inset
-
- and 
-\begin_inset Formula $w_{r}$
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Standard
-The probability 
-\begin_inset Formula $P(w_{l},w_{r})$
-\end_inset
-
- is interesting, because it's definition is not enirely unambigous: we can
- define it as the probability of observing both words in the same sentence,
- or we can define it as the probability of observing both words, as if they
- were independent of one-another.
- Clearly, the occurances of pairs of words are correlated; suggesting the
- first definition is correct.
- The second one seems to be a dumb, brute-force assumption of independence,
- i.e.
- that 
-\begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-Which of these two definitions should be used? This is a bit confusing,
- and is worth thinking about.
- When observing two words in the same sentence, we could say that they obey
- the relationship 
-\begin_inset Formula $S(w_{l},w_{r})$
-\end_inset
-
- that captures thier correlation to one-another.
- This leads one to ponder the probability 
-\begin_inset Formula $P(S(w_{l},w_{r}),w_{l},w_{r})$
-\end_inset
-
-.
- But this is not what we want, in the end; we are interested in 
-\begin_inset Formula $R$
-\end_inset
-
- and not 
-\begin_inset Formula $S$
-\end_inset
-
-.
- The relationship 
-\begin_inset Formula $R$
-\end_inset
-
- includes 
-\begin_inset Formula $S$
-\end_inset
-
- implicitly: two words can be related by 
-\begin_inset Formula $R$
-\end_inset
-
- only if they are already related by 
-\begin_inset Formula $S$
-\end_inset
-
-.
- Thus, the only appropriate definition for 
-\begin_inset Formula $P(w_{l},w_{r})$
-\end_inset
-
- that we can use, is that the two words really are un-related, un-correlated,
- independent.
- That is, we must define 
-\begin_inset Formula $P(w_{l},w_{r})=P(w_{l})P(w_{r})$
-\end_inset
-
-.
- This is important: we don't 
-\begin_inset Quotes eld
-\end_inset
-
-assume
-\begin_inset Quotes erd
-\end_inset
-
- independence, we define it.
- The goal is to capture the dependency as a part of the relation 
-\begin_inset Formula $R$
-\end_inset
-
-.
- Thus, we conclude that the correct expression for the conditional probability
- is:
-\begin_inset Formula 
-\begin{equation}
-P(R|w_{l},w_{r})=\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}\label{eq:cond-pair}
-\end{equation}
-
-\end_inset
-
-This is the probability of observing the relationship 
-\begin_inset Formula $R$
-\end_inset
-
- given that the individual parts of the relationship have been observed.
- The relation 
-\begin_inset Formula $R$
-\end_inset
-
- includes all correlations between the two words: thier ordering as well
- as thier co-occurance.
-\end_layout
-
-\begin_layout Subsubsection*
-Frequentism - Counting words and pairs
-\end_layout
-
-\begin_layout Standard
-In order for the above to be manipulable in practice, we need to provide
- a definition for the probabilities, and, for this, the definition can only
- be frequentist.
- That is, the defintion is to be obtained from empircal data; from counting
- frequencies as they occur in nature.
- The frequency 
-\begin_inset Formula $P(w)$
-\end_inset
-
- of observing a word 
-\begin_inset Formula $w$
-\end_inset
-
- is obvious: 
-\begin_inset Formula 
-\[
-P(w)=\frac{N(w)}{N(*)}
-\]
-
-\end_inset
-
-where 
-\begin_inset Formula $N(w)$
-\end_inset
-
- is the count of observing word 
-\begin_inset Formula $w$
-\end_inset
-
- and 
-\begin_inset Formula $N(*)$
-\end_inset
-
- is the total number of words observed.
- That is, by definition, it is the wild-card summation 
-\begin_inset Formula 
-\[
-N(*)=\sum_{w}N(w)
-\]
-
-\end_inset
-
-How to count words seems obvious, at first: just count them one by one in
- a sentence.
- But this is not the only way to count! When generating random parse trees,
- one could count the words that occur at the end of edges: that way, the
- word-count is exactly double the word-pair count.
- The advantage of this is that the counts for edges and vertexes are unified
- in a coherent way.
- (Counting words in a sentence, without multiplicity, is also still a good
- idea).
 \end_layout
 
 \begin_layout Standard
