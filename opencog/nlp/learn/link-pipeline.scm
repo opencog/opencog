@@ -149,7 +149,7 @@
 	(define (get-no seq-lnk)
 		(string->number (cog-name (gdr seq-lnk))))
 
-	(sort (map-word-instances make-ordered-word PARSE)
+	(sort (map make-ordered-word (parse-get-words PARSE))
 		(lambda (wa wb)
 			(< (get-no wa) (get-no wb))))
 )
@@ -177,9 +177,7 @@
 	(map-parses
 		(lambda (parse)
 			(count-one-atom any-parse)
-			(map-word-instances
-				try-count-one-word
-				parse))
+			(map try-count-one-word (parse-get-words parse)))
 		(list single-sent))
 )
 
@@ -363,9 +361,8 @@
 
 	(map-parses
 		(lambda (parse)
-			(map-word-instances
-				(lambda (wi) (try-count-one-cset (word-inst-get-cset wi)))
-				parse))
+			(map (lambda (wi) (try-count-one-cset (word-inst-get-cset wi)))
+				(parse-get-words parse)))
 		(list single-sent))
 )
 

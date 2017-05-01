@@ -4,16 +4,13 @@
 ;;; Commentary:
 ;
 ; Assorted NLP utilities.  Operations include:
-; -- looping over all sentences in a document
-; -- looping over all parses of a sentence (map-parses)
-; -- looping over all words in a sentence (map-word-instances)
-; -- get word of word instance. (word-inst-get-word)
-; -- get word senses
+; -- getting the various parses of a sentence
+; -- getting the words in a parse
+; -- getting assorted word properties
 ; -- deleting all atoms pertaining to a sentence
 ;
 ; The function names that can be found here are:
 ; -- map-parses   Call proceedure on every parse of the sentence.
-; -- map-word-instances     Call proc on each word-instance of parse.
 ; -- document-get-sentences Get senteces in document.
 ; -- sentence-get-parses    Get parses of a sentence.
 ; -- sentence-get-utterance-type  Get the speech act of a sentence.
@@ -82,23 +79,6 @@
 "
 	(cog-par-chase-links-chk 'ParseLink 'ParseNode
 		proc sent-or-list 'SentenceNode)
-)
-
-; ---------------------------------------------------------------------
-(define-public (map-word-instances proc parse-or-list)
-"
-  map-word-instances PROC PARSE -- Call PROC on each word-instance of PARSE.
-
-  Return a list of items, produced by calling PROC on each word-instance
-  in the parse.
-
-  Expected input is a ParseNode or a list of ParseNodes. These serve
-  as anchors to all of the word instances in a parse. The word instances
-  can be found by back-tracking through the WordInstanceLink to the
-  individual words, which is what this method does.
-"
-	(cog-map-chase-links-chk 'WordInstanceLink 'WordInstanceNode
-		proc parse-or-list 'ParseNode)
 )
 
 ; ---------------------------------------------------------------------
@@ -223,10 +203,10 @@
 ; ---------------------------------------------------------------------
 (define-public (parse-get-words parse-node)
 "
-  parse-get-words - Given a parse, return a list of all words in the parse
+  parse-get-words - Return a list of all word-instances in the parse.
 
   Given a parse, return all word instances in arbitary order
-  This version is faster than the in order version.
+  This version is faster than the ordered version.
 "
 	(cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node)
 )

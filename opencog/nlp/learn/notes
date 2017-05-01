@@ -3697,3 +3697,11 @@ scm_init_guile ()
 Done creating 120 threads
 
 
+argh  this is broken:
+cog-map-chase-links-chk
+cog-par-chase-links-chk
+
+thus all users of map-parses might be broken
+map-parses
+parallel-map-parses
+map-word-instances
