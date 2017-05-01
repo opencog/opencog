@@ -178,7 +178,8 @@
 ; ---------------------------------------------------------------------
 (define-public (sent-get-words-in-order sent-node)
 "
-  sent-get-words-in-order - Given a sentence, return a list of all words in order
+  sent-get-words-in-order - Given a sentence, return a list of all
+  of the word-instances in each parse, in order.
 
   Given a sentence, return all word instances in order
 "
@@ -231,22 +232,19 @@
 )
 
 ; ---------------------------------------------------------------------
-(define-public (parse-get-words-in-order parse-node)
+(define-public (parse-get-words-in-order PARSE)
 "
-  parse-get-words-in-order - Given a parse, return a list of all words in the parse in order
-
-  Given a parse, return all word instances in order
-
-  XXX FIXME this is a very complicated, very inefficient implementation
-  there is a much easier way to get this.
+  parse-get-words-in-order - Given PARSE, return a list of all word
+  instances in the parse, in sequential order.
 "
-	(define word-inst-list (cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
-	(define number-list (map word-inst-get-number word-inst-list))
+	; Get the scheme-number of the word-sequence numbe
+	(define (get-number word-inst)
+		(string->number (cog-name (word-inst-get-number word-inst))))
+
 	(define (less-than word-inst-1 word-inst-2)
-		(define index-1 (list-index (lambda (a-node) (equal? word-inst-1 a-node)) word-inst-list))
-		(define index-2 (list-index (lambda (a-node) (equal? word-inst-2 a-node)) word-inst-list))
-		(< (string->number (cog-name (list-ref number-list index-1))) (string->number (cog-name (list-ref number-list index-2)))))
-	(sort word-inst-list less-than)
+		(< (get-number word-inst-1) (get-number word-inst-2)))
+
+	(sort (parse-get-words PARSE) less-than)
 )
 
 ; --------------------------------------------------------------------
