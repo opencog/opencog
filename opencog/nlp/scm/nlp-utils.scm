@@ -10,7 +10,6 @@
 ; -- deleting all atoms pertaining to a sentence
 ;
 ; The function names that can be found here are:
-; -- map-parses   Call proceedure on every parse of the sentence.
 ; -- document-get-sentences Get senteces in document.
 ; -- sentence-get-parses    Get parses of a sentence.
 ; -- sentence-get-utterance-type  Get the speech act of a sentence.
@@ -49,52 +48,17 @@
 (use-modules (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
-(define-public (map-parses proc sent-or-list)
+(define-public (document-get-sentences DOCO)
 "
-  map-parses   Call proceedure on every parse of the sentence.
+  document-get-sentences DOCO -- Get senteces in document DOCO
 
-  map-parses proc sent
-  Call proceedure 'proc' on every parse of the sentence 'sent'
-
-  Expected input is a SentenceNode, or possibly a list of SentenceNodes.
-  Each SentenceNode serves as an anchor to all of the parses of a sentence.
-  It is connected via ParseLink's to each of the individual parses of the
-  sentence. This routine backtracks over the ParseNode to find these.
-
-  The recursion will stop if proc returns something other than #f. This
-  routine returns the last value that stopped the recursion. (In other
-  words, this is not really a map, but something kind-of weird -- XXX
-  this should probably be fixed -- TODO)
+  Given a document DOCO, return a list of sentences in that document.
+  Throws an error if DOCO is not a DocumentNode
 "
-	(cog-map-chase-links-chk 'ParseLink 'ParseNode
-		proc sent-or-list 'SentenceNode)
-)
-
-; Same as above, but multi-threaded -- each parse dispatched to its own
-; thread, on a distinct CPU.
-(define-public (parallel-map-parses proc sent-or-list)
-"
-  parallel-map-parses   Call proceedure on every parse of the sentence.
-  Each parse is handled in a unique thread.
-"
-	(cog-par-chase-links-chk 'ParseLink 'ParseNode
-		proc sent-or-list 'SentenceNode)
-)
-
-; ---------------------------------------------------------------------
-(define-public (document-get-sentences doco)
-"
-  document-get-sentences Get senteces in document.
-
-  document-get-sentences doco
-
-  Given a document, return a list of sentences in that document
-  Throws an error if doco is not a DocumentNode
-"
-	(if (eq? (cog-type doco) 'DocumentNode)
-		(cog-get-reference doco)
+	(if (eq? (cog-type DOCO) 'DocumentNode)
+		(cog-get-reference DOCO)
 		(throw 'wrong-atom-type 'document-get-sentences
-			"Error: expecting DocumentNode:" doco)
+			"Error: expecting DocumentNode:" DOCO)
 	)
 )
 

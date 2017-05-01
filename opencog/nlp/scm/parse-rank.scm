@@ -297,7 +297,7 @@
 	; (display mi-edge-list) (newline)
 
 	; Score each of the parses in the sentence
-	(map-parses score-one-parse sent-node)
+	(for-each score-one-parse (sentence-get-parses sent-node))
 	#f
 )
 

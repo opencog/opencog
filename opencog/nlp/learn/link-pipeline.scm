@@ -174,11 +174,11 @@
 			(lambda (key . args) #f)))
 
 	(count-one-atom any-sent)
-	(map-parses
+	(for-each
 		(lambda (parse)
 			(count-one-atom any-parse)
-			(map try-count-one-word (parse-get-words parse)))
-		(list single-sent))
+			(for-each try-count-one-word (parse-get-words parse)))
+		(sentence-get-parses single-sent))
 )
 
 ; ---------------------------------------------------------------------
@@ -352,18 +352,18 @@
 ;
 ; Just like the above, but for the disjuncts.
 
-(define (update-disjunct-counts single-sent)
+(define (update-disjunct-counts SENT)
 
 	(define (try-count-one-cset CSET)
 		(catch 'wrong-type-arg
 			(lambda () (count-one-atom (make-word-cset CSET)))
 			(lambda (key . args) #f)))
 
-	(map-parses
+	(for-each
 		(lambda (parse)
 			(map (lambda (wi) (try-count-one-cset (word-inst-get-cset wi)))
 				(parse-get-words parse)))
-		(list single-sent))
+		(sentence-get-parses SENT))
 )
 
 ; ---------------------------------------------------------------------
