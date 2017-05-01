@@ -67,7 +67,7 @@
 ; used for each word. These are useful in and of themselves; they indicate
 ; the hubbiness (link-multiplicity) of each word. The disjunct counts are
 ; maintained on the LgWordCset for a given word.
-
+;
 (use-modules (opencog) (opencog nlp) (opencog persist))
 (use-modules (srfi srfi-1))
 
@@ -120,6 +120,9 @@
 ;
 ; when the sentence was "this is some foo".
 ;
+; Due to a RelEx bug in parenthesis handling, the `word-inst-get-word`
+; function used here can throw an exception. See documentation.
+;
 (define (make-word-sequence PARSE)
 
 	; Get the scheme-number of the word-sequence number
@@ -131,15 +134,15 @@
 		(define no (get-number word-inst))
 		(if (< no lim) no lim))
 
-	; Get the number of teh first word in the sentence (the left-wall)
-	(define first-no (fold least 9e99 (parse-get-words PARSE)))
+	; Get the number of the first word in the sentence (the left-wall)
+	(define wall-no (fold least 9e99 (parse-get-words PARSE)))
 
 	; Convert a word-instance sequence number into a word sequence
 	; number, starting with LEFT-WALL at zero.
 	(define (make-ordered-word word-inst)
 		(WordSequenceLink
 			(word-inst-get-word word-inst)
-			(NumberNode (- (get-number word-inst) first-no))))
+			(NumberNode (- (get-number word-inst) wall-no))))
 
 	(map-word-instances make-ordered-word PARSE)
 )
@@ -155,9 +158,9 @@
 	(define any-sent (SentenceNode "ANY"))
 	(define any-parse (ParseNode "ANY"))
 
-	; Due to a RelEx bug in parenthesis handling, the word-inst-get-word
-	; function can throw an exception. See detailed explanation furher
-	; down. Catch the excpetion, avoid counting if its thrown.
+	; Due to a RelEx bug in parenthesis handling, the `word-inst-get-word`
+	; function can throw an exception. See documentation. Catch the
+	; exception, avoid counting if its thrown.
 	(define (try-count-one-word word-inst)
 		(catch 'wrong-type-arg
 			(lambda () (count-one-atom (word-inst-get-word word-inst)))
@@ -171,6 +174,17 @@
 				try-count-one-word
 				parse))
 		(list single-sent))
+)
+
+; ---------------------------------------------------------------------
+; update-pair-counts -- count occurances of word-pairs in a parse.
+;
+; Note that this might throw an exception...
+;
+(define (update-pair-counts PARSE)
+
+	(define word-seq (make-word-sequence PARSE))
+	(for-each count-one-atom word-seq)
 )
 
 ; ---------------------------------------------------------------------
@@ -262,15 +276,9 @@
 
 (define (update-link-counts single-sent)
 
-	; Due to a RelEx bug, `make-word-link` can throw an exception. Specifically,
-	; if the word in a sentences is a parentheis, then the ReferenceLink
-	; between the spcific paren, and the general par does not get created.
-	; Viz, there is no `(ReferenceLink (WordInstanceNode "(@4bf5e341-c6b")
-	; (WordNode "("))` ... Either that, or some paren-counter somewhere
-	; gets confused. Beats me why. We should fix this. In the meanhile,
-	; we hack around this here by catching the exceptioon.  What happens
-	; is that the call `word-inst-get-word` returns nothing, so the `car`
-	; in `make-word-link` throws 'wrong-type-arg and everything gets borken.
+	; Due to a RelEx bug, `make-word-link` can throw an exception.  See
+	; the documentation for `word-inst-get-word` for details. Look for
+	; this exception, and avoid it, if possible.
 	(define (try-count-one-link link)
 		(catch 'wrong-type-arg
 			(lambda () (count-one-atom (make-word-link link)))

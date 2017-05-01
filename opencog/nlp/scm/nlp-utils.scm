@@ -298,7 +298,17 @@
   `(WordInstance 'olah@12345')`, return `(WordNode 'olah')`
 
   There can only ever be one WordNode per WordInstance, so this returns
-  a single atom.
+  a single atom.  However ...
+
+  However, due to a RelEx bug, this function might throw an exception.
+  Specifically, if the word in a sentence is a parenthesis, then the
+  ReferenceLink between the specific paren, and the general paren does
+  not get created.  Viz, there is no `(ReferenceLink (WordInstanceNode
+  "(@4bf5e341-c6b") (WordNode "("))`. Some paren-counter somewhere is
+  broken and gets confused. Beats me where. It should be fixed. In the
+  meanhile, a 'wrong-type-arg exception is thrown, when the `car` below
+  dereferences the empty list. Callers of this function may want to
+  catch this exception.
 "
 	(car (cog-chase-link 'ReferenceLink 'WordNode word-inst))
 )
