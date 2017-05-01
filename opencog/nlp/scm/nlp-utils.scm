@@ -87,10 +87,10 @@
 ; ---------------------------------------------------------------------
 (define-public (map-word-instances proc parse-or-list)
 "
-  map-word-instances   Call proc on each word-instance of parse.
+  map-word-instances PROC PARSE -- Call PROC on each word-instance of PARSE.
 
-  map-word-instances proc parse
-  Call proceedure 'proc' on each word-instance of 'parse'
+  Return a list of items, produced by calling PROC on each word-instance
+  in the parse.
 
   Expected input is a ParseNode or a list of ParseNodes. These serve
   as anchors to all of the word instances in a parse. The word instances
@@ -236,6 +236,9 @@
   parse-get-words-in-order - Given a parse, return a list of all words in the parse in order
 
   Given a parse, return all word instances in order
+
+  XXX FIXME this is a very complicated, very inefficient implementation
+  there is a much easier way to get this.
 "
 	(define word-inst-list (cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
 	(define number-list (map word-inst-get-number word-inst-list))

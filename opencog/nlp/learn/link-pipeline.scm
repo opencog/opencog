@@ -28,7 +28,6 @@
 ; *) how many words have been observed (counting once-per-word)
 ; *) how many word-order pairs have been observed.
 ; *) the distance between words in the above pairs.
-; *) how many times a word appears first in a sentence.
 ; *) how many link-relationship triples have been observed.
 ; *) how many disjuncts have been observed.
 ;
@@ -44,9 +43,9 @@
 ; sentence. This count is stored in the CountTV for the EvaluationLink
 ; on (PredicateNode "*-Sentence Word Pair-*").  A second count is
 ; maintained for this same pair, but including the distance between the
-; two words. This is on (PredicateNode "*-Pair Distance-*").  In
-; conjuction with these counts, it becomes interesting to see which
-; words occur at the starts of sentences.
+; two words. This is on (PredicateNode "*-Pair Distance-*").  Since
+; sentences always start with LEFT-WALL, this can be used to reconstruct
+; the typical word-order in a sentence.
 ;
 ; Word-pairs are also designated by means of Link Grammar parses of a
 ; sentence. A Link Grammar parse creates a list of typed links between
@@ -70,6 +69,7 @@
 ; maintained on the LgWordCset for a given word.
 
 (use-modules (opencog) (opencog nlp) (opencog persist))
+(use-modules (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
 
@@ -100,6 +100,48 @@
 	(begin
 		(incr-one ATM) ; increment the count on ATM
 		(store-atom ATM)) ; save to SQL
+)
+
+; ---------------------------------------------------------------------
+; make-word-sequence -- extract the sequence of words in a parse.
+;
+; The parser proves a numbered sequence of word-instances, for example:
+;
+;    (WordSequenceLink
+;         (WordInstanceNode "foo@9023e177")
+;         (NumberNode "4567"))
+;
+; This returns the corresponding structures, for words, starting with
+; the left-wall at number zero.  Thus, this would return
+;
+;    (WordSequenceLink
+;         (WordNode "foo")
+;         (NumberNode "4"))
+;
+; when the sentence was "this is some foo".
+;
+(define (make-word-sequence PARSE)
+
+	; Get the scheme-number of the word-sequence number
+	(define (get-number word-inst)
+		(string->number (cog-name (word-inst-get-number word-inst))))
+
+	; A comparison function, for use as kons in fold
+	(define (least word-inst lim)
+		(define no (get-number word-inst))
+		(if (< no lim) no lim))
+
+	; Get the number of teh first word in the sentence (the left-wall)
+	(define first-no (fold least 9e99 (parse-get-words PARSE)))
+
+	; Convert a word-instance sequence number into a word sequence
+	; number, starting with LEFT-WALL at zero.
+	(define (make-ordered-word word-inst)
+		(WordSequenceLink
+			(word-inst-get-word word-inst)
+			(NumberNode (- (get-number word-inst) first-no))))
+
+	(map-word-instances make-ordered-word PARSE)
 )
 
 ; ---------------------------------------------------------------------
