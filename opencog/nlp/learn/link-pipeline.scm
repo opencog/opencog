@@ -204,7 +204,7 @@
 ; Here, the NumberNode encdes the distance between the words. It is always
 ; at least one -- i.e. it is the diffference between their ordinals.
 ;
-(define (update-pair-counts PARSE)
+(define (update-pair-counts-once PARSE)
 
 	(define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
 	(define pair-dist (SchemaNode "*-Pair Distance-*"))
@@ -245,6 +245,12 @@
 
 	; Count the pairs, too.
 	(make-pairs word-seq)
+)
+
+(define (update-pair-counts SENT)
+	; In most cases, all parses return the same words in the same order.
+	; Thus, counting only requires us to look at only one parse.
+	(update-pair-counts-once (car (sentence-get-parses SENT)))
 )
 
 ; ---------------------------------------------------------------------
@@ -361,7 +367,7 @@
 
 	(for-each
 		(lambda (parse)
-			(map (lambda (wi) (try-count-one-cset (word-inst-get-cset wi)))
+			(for-each (lambda (wi) (try-count-one-cset (word-inst-get-cset wi)))
 				(parse-get-words parse)))
 		(sentence-get-parses SENT))
 )
@@ -396,15 +402,26 @@
  it parsed, and then updates the counts for the observed words and word
  pairs.
 "
+	; try-catch wrapper around the coutners. Due to a buggy RelEx
+	; (see documentation for `word-inst-get-word`), the function
+	; `update-pair-counts` might throw.  If it does throw, then
+	; avoid doing any counting at all for this sentence.
+	(define (update-counts sent)
+		(catch 'wrong-type-arg
+			(lambda () (begin
+				(update-pair-counts sent)
+				(update-word-counts sent)
+				(update-link-counts sent)
+				(update-disjunct-counts sent)))
+			(lambda (key . args) #f)))
+
 	; Loop -- process any that we find. This will typically race
 	; against other threads, but I think that's OK.
 	(define (process-sents)
 		(let ((sent (get-one-new-sentence)))
 			(if (null? sent) '()
 				(begin
-					(update-word-counts sent)
-					(update-link-counts sent)
-					(update-disjunct-counts sent)
+					(update-counts sent)
 					(delete-sentence sent)
 					(monitor-rate '())
 					(process-sents)))))
