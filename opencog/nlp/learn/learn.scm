@@ -6,6 +6,7 @@
 
 (load "learn/common.scm")
 (load "learn/compute-mi.scm")
+(load "learn/base-stats.scm") ; load after compute-mi.scm
 (load "learn/disjunct-mi.scm")
 (load "learn/link-pipeline.scm")
 (load "learn/make-disjuncts.scm")
