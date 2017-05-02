@@ -3440,3 +3440,274 @@ args:\n((EvaluationLink\n   (LinkGrammarRelationshipNode \"ANY\")\n
 SQLAtomStorage::doGetLink
 IOException
  fixed in commit 327fc6c0a3c8b4b62ac80a61e2fdfc6971190c30
+
+arghhh, last checkpoint: 24304265 24M distinct words
+select sum(floatvalue[3]) from valuations where type=7;
+
+gives 1914173302 == 1.9G observations
+
+single-quote -- leading
+semicolon -- leading
+foobar
+sql-stats should print name of the DB and the login user.<F4>
+/home/ubuntu/run/hs_err_pid31730.log
+but only when sock is dropped...
+bug https://github.com/opencog/atomspace/issues/1054
+
+
+Using bdwgc as of 
+0f4244e130541a591d638c98f820b6b49e915ac0
+Author: Ivan Maidanski <ivmai@mail.ru>
+Date:   Thu Jan 12 00:58:41 2017 +0300
+
+
+stack below seen twice 3 4
+#0  0x00007ffff762c350 in pthread_kill ()
+   from /lib/x86_64-linux-gnu/libpthread.so.0
+#1  0x00007ffff785f490 in GC_suspend_all () at pthread_stop_world.c:640
+#2  0x00007ffff785f564 in GC_stop_world () at pthread_stop_world.c:748
+#3  0x00007ffff784b19e in GC_stopped_mark (
+    stop_func=stop_func@entry=0x7ffff784aca0 <GC_never_stop_func>)
+    at alloc.c:650
+#4  0x00007ffff784bd19 in GC_try_to_collect_inner (
+    stop_func=0x7ffff784aca0 <GC_never_stop_func>) at alloc.c:488
+#5  0x00007ffff784bf9a in GC_try_to_collect_general (
+    stop_func=stop_func@entry=0x0, force_unmap=force_unmap@entry=0)
+    at alloc.c:1064
+#6  0x00007ffff784c06d in GC_gcollect () at alloc.c:1088
+#7  0x00007ffff7b06529 in scm_i_gc (what=<synthetic pointer>)
+    at ../../libguile/gc.c:266
+#8  scm_gc () at ../../libguile/gc.c:255
+#9  0x00005555555551f2 in Eval::~Eval() ()
+
+
+stack below seen twice.3 
+#0  0x00007ffff762c350 in pthread_kill ()
+   from /lib/x86_64-linux-gnu/libpthread.so.0
+#1  0x00007ffff785f6fb in GC_start_world () at pthread_stop_world.c:990
+#2  0x00007ffff784b2d6 in GC_stopped_mark (
+    stop_func=stop_func@entry=0x7ffff784aca0 <GC_never_stop_func>)
+    at alloc.c:728
+#3  0x00007ffff784bd19 in GC_try_to_collect_inner (
+    stop_func=0x7ffff784aca0 <GC_never_stop_func>) at alloc.c:488
+#4  0x00007ffff784bf9a in GC_try_to_collect_general (
+    stop_func=stop_func@entry=0x0, force_unmap=force_unmap@entry=0)
+    at alloc.c:1064
+#5  0x00007ffff784c06d in GC_gcollect () at alloc.c:1088
+#6  0x00007ffff7b06529 in scm_i_gc (what=<synthetic pointer>)
+    at ../../libguile/gc.c:266
+#7  scm_gc () at ../../libguile/gc.c:255
+#8  0x00005555555551f2 in Eval::~Eval() ()
+
+==============================================
+latest bdwgc does this:
+#0  GC_push_all_eager (bottom=<optimized out>, 
+    top=top@entry=0x7ffff43f7000 <error: Cannot access memory at address
+0x7ffff43f7000>) at mark.c:1599
+#1  0x00007ffff7855625 in GC_push_all_stack (bottom=<optimized out>, 
+    top=top@entry=0x7ffff43f7000 <error: Cannot access memory at address
+0x7ffff43f7000>) at mark.c:1609
+#2  0x00007ffff78568aa in GC_push_all_stack_sections (lo=<optimized
+out>, 
+    lo@entry=0x7ffff43f56c0 <error: Cannot access memory at address
+0x7ffff43f56c0>, 
+    hi=hi@entry=0x7ffff43f7000 <error: Cannot access memory at address
+0x7ffff43f7000>, traced_stack_sect=<optimized out>) at mark_rts.c:565
+#3  0x00007ffff785f2fd in GC_push_all_stacks () at
+pthread_stop_world.c:557
+#4  0x00007ffff7855bcf in GC_mark_some (
+    cold_gc_frame=0x7fffe43d5d00 "\274ǧ\367\377\177") at mark.c:343
+#5  0x00007ffff784b20d in GC_stopped_mark (
+    stop_func=stop_func@entry=0x7ffff784aca0 <GC_never_stop_func>)
+    at alloc.c:702
+#6  0x00007ffff784bd19 in GC_try_to_collect_inner (
+    stop_func=0x7ffff784aca0 <GC_never_stop_func>) at alloc.c:488
+#7  0x00007ffff784bf9a in GC_try_to_collect_general (
+    stop_func=stop_func@entry=0x0, force_unmap=force_unmap@entry=0)
+    at alloc.c:1064
+#8  0x00007ffff784c06d in GC_gcollect () at alloc.c:1088
+#9  0x00007ffff7b06529 in scm_i_gc (what=<synthetic pointer>)
+    at ../../libguile/gc.c:266
+#10 scm_gc () at ../../libguile/gc.c:255
+#11 0x00005555555551f2 in Eval::~Eval() ()
+
+
+apt-cache show libgc-dev
+libgc-dev_7.4.2-8_amd64.deb
+git tag
+gc7_4_2
+gc7_4_4
+gc7_6_0 <---  try this one -- notpe still bad.
+
+
+    txt="Error: get_uuid(): cannot find (ListLink\n  (WordNode \"Hume\"
+(ctv 1.000000 0.000000 16.000000)) ; [1287745831931189139][1]\n
+(WordNode \",\" (ctv 1.000000 0.000000 64.000000)) ;
+[7731950238383222497][1]\n"...)
+
+            result = RAISE_SIGNAL(p, GC_sig_thr_restart);
+
+
+Guess  some of the threads are exiting when gc runs...
+
+for (p = GC_threads[i]; p != 0; p = p -> next) {
+p 
+
+#define RAISE_SIGNAL(t, sig) pthread_kill(THREAD_SYSTEM_ID(t), sig)
+#define THREAD_SYSTEM_ID(t) (t)->id
+
+ohhh 7.6 sometimes deadlocks...
+
+------------------ done iteration 14
+Done creating 120 threads
+
+Thread 1917 "a.out" received signal SIGSEGV, Segmentation fault.
+[Switching to Thread 0x7fffc639b700 (LWP 27872)]
+0x00007ffff762d350 in pthread_kill ()
+   from /lib/x86_64-linux-gnu/libpthread.so.0
+(gdb) bt
+#0  0x00007ffff762d350 in pthread_kill ()
+   from /lib/x86_64-linux-gnu/libpthread.so.0
+#1  0x00007ffff785fe70 in GC_suspend_all () at pthread_stop_world.c:640
+#2  0x00007ffff785ff44 in GC_stop_world () at pthread_stop_world.c:748
+
+(igdb) up
+#1  0x00007ffff785fe70 in GC_suspend_all () at pthread_stop_world.c:640
+640	              result = RAISE_SIGNAL(p, GC_sig_suspend);
+(gdb) print p
+$1 = (GC_thread) 0x7ffff7a7d380 <first_thread>
+(gdb) print i
+$2 = 0
+(gdb) print p->id
+$3 = 140737198868224
+(gdb) print /x p->id
+$4 = 0x7fffeebec700
+
+Sooo.. p->id  is not self.
+
+(gdb) print /x p->next
+$5 = 0x0
+
+(gdb) print GC_threads[1]
+$6 = (volatile GC_thread) 0x0
+
+(gdb) print /x self
+$10 = 0x7fffc639b700   -- yes this agreees with gdb message on top.
+
+(gdb) info thr --  lists all the threads. ...  0x7fffeebec700 is not listed,
+its not a valid thread.
+
+sure looks like bdwgc is failing to keep GC_threads[0] accurate.!!
+
+(gdb) print p->flags
+$11 = 6 '\006'
+
+include/private/pthread_support.h
+#       define FINISHED 1       /* Thread has exited.
+#       define DETACHED 2       /* Thread is treated as detached.
+                                /* Thread may really be detached, or
+                                /* it may have been explicitly
+                                /* registered, in which case we can
+                                /* deallocate its GC_Thread_Rep once
+                                /* it unregisters itself, since it
+                                /* may not return a GC pointer.
+#       define MAIN_THREAD 4    /* True for the original thread only.
+
+but its not teh main thread::: .. p is neoither of the below:
+(gdb) info thr
+  Id   Target Id         Frame 
+  1    Thread 0x7ffff7fc7300 (LWP 24666) "a.out" 0x00007ffff762767d in pthread_join () from /lib/x86_64-linux-gnu/libpthread.so.0
+* 1917 Thread 0x7fffc639b700 (LWP 27872) "a.out" 0x00007ffff762d350 in pthread_kill () from /lib/x86_64-linux-gnu/libpthread.so.0
+
+(gdb) print *p
+$12 = {next = 0x0, id = 140737198868224, stop_info = {last_stop_count = 1545, 
+    stack_ptr = 0x7fffeebeb6c0 <error: Cannot access memory at address 0x7fffeebeb6c0>}, flags = 6 '\006', thread_blocked = 0 '\000', finalizer_skipped = 0, 
+  finalizer_nested = 0 '\000', stack_end = 0x0, altstack = 0x0, 
+  altstack_size = 0, stack = 0x0, stack_size = 0, traced_stack_sect = 0x0, 
+  status = 0x0, tlfs = {_freelists = {{0x1, 0xbd, 0x555555818520, 
+        0x55555591f5d0, 0x5555557ff500, 0x3d, 0x1, 0x1, 0x1, 0x65, 
+        0x1 <repeats 14 times>, 0x1a}, {0x1, 0x5555559242d0, 0x55555587d820, 
+        0x555555908540, 0x10, 0x3d, 0x5555558ff2a0, 0xb9, 0x1c, 0xb, 0x0, 0x1, 
+        0x1, 0x1, 0x1, 0x1, 0x555555927d00, 0x1, 0x14, 0x1, 0x1, 0x1, 0x1, 
+        0x1, 0x1}, {0x1 <repeats 25 times>}}, gcj_freelists = {
+      0xffffffffffffffff, 0x1 <repeats 24 times>}}}
+
+
+new thread handled at line 538
+threa delete on 572
+GC_delete_thread  line 550
+but also ... GC_delete_gc_thread line 592
+
+GC_delete_thread called from only one place:
+GC_unregister_my_thread_inner
+called from two places:
+   GC_unregister_my_thread
+   GC_thread_exit_proc  -- not called by guile
+
+pthread_start.c:    pthread_cleanup_push(GC_thread_exit_proc, me);
+
+
+scm_gc is NOT being called in guile mode.!!  Example 1
+but fixing this does not cure the bug.
+
+threads.c:    GC_unregister_my_thread ();
+
+libguile/gc.c
+
+static void on_thread_exit (void *v)
+calls GC_unregister_my_thread() but only if t->needs_unregister) is set
+called by init_thread_key 
+by scm_i_init_thread_for_guile
+by scm_init_guile()
+
+Hmm   scm_i_with_guile no longer calls scm_init_guile()
+but with_guile() does call scm_i_init_thread_for_guile
+which does call init....
+
+maybe the exit handler is still running.... when the gc is called.
+
+except the thread should remain valid until all of the exit handlers
+have returned.  So maybe a thread handler did not run? ??
+
+
+Program terminated with signal SIGSEGV, Segmentation fault.
+#0  0x00007f19e496f350 in pthread_kill ()
+   from /lib/x86_64-linux-gnu/libpthread.so.0
+[Current thread is 1 (Thread 0x7f19aa6a7700 (LWP 7486))]
+
+sconew not being called !  
+GC_register_my_thread
+print notin
+print nxt
+
+x /150xg &board
+
+[Current thread is 1 (Thread 0x7f7aa3a6d700 (LWP 25905))]
+
+ print p
+$3 = (GC_thread) 0x7f7abb142380 <first_thread>
+
+(gdb) print /x p->id
+$5 = 0x7f7ab7a95700  this is the first thread....
+
+Needs_unreg was not set!!
+scm_init_guile ()
+
+------------------ done iteration 540
+Done creating 120 threads
+
+
+argh  this is broken:
+cog-map-chase-links-chk
+cog-par-chase-links-chk
+
+thus all users of map-parses might be broken
+map-parses
+parallel-map-parses
+map-word-instances
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=linas")
+ (use-relex-server "127.0.0.1" 4445)
+

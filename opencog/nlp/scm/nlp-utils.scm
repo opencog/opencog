@@ -4,16 +4,12 @@
 ;;; Commentary:
 ;
 ; Assorted NLP utilities.  Operations include:
-; -- looping over all sentences in a document
-; -- looping over all parses of a sentence (map-parses)
-; -- looping over all words in a sentence (map-word-instances)
-; -- get word of word instance. (word-inst-get-word)
-; -- get word senses
+; -- getting the various parses of a sentence
+; -- getting the words in a parse
+; -- getting assorted word properties
 ; -- deleting all atoms pertaining to a sentence
 ;
 ; The function names that can be found here are:
-; -- map-parses   Call proceedure on every parse of the sentence.
-; -- map-word-instances     Call proc on each word-instance of parse.
 ; -- document-get-sentences Get senteces in document.
 ; -- sentence-get-parses    Get parses of a sentence.
 ; -- sentence-get-utterance-type  Get the speech act of a sentence.
@@ -52,69 +48,17 @@
 (use-modules (srfi srfi-1))
 
 ; ---------------------------------------------------------------------
-(define-public (map-parses proc sent-or-list)
+(define-public (document-get-sentences DOCO)
 "
-  map-parses   Call proceedure on every parse of the sentence.
+  document-get-sentences DOCO -- Get senteces in document DOCO
 
-  map-parses proc sent
-  Call proceedure 'proc' on every parse of the sentence 'sent'
-
-  Expected input is a SentenceNode, or possibly a list of SentenceNodes.
-  Each SentenceNode serves as an anchor to all of the parses of a sentence.
-  It is connected via ParseLink's to each of the individual parses of the
-  sentence. This routine backtracks over the ParseNode to find these.
-
-  The recursion will stop if proc returns something other than #f. This
-  routine returns the last value that stopped the recursion. (In other
-  words, this is not really a map, but something kind-of weird -- XXX
-  this should probably be fixed -- TODO)
+  Given a document DOCO, return a list of sentences in that document.
+  Throws an error if DOCO is not a DocumentNode
 "
-	(cog-map-chase-links-chk 'ParseLink 'ParseNode
-		proc sent-or-list 'SentenceNode)
-)
-
-; Same as above, but multi-threaded -- each parse dispatched to its own
-; thread, on a distinct CPU.
-(define-public (parallel-map-parses proc sent-or-list)
-"
-  parallel-map-parses   Call proceedure on every parse of the sentence.
-  Each parse is handled in a unique thread.
-"
-	(cog-par-chase-links-chk 'ParseLink 'ParseNode
-		proc sent-or-list 'SentenceNode)
-)
-
-; ---------------------------------------------------------------------
-(define-public (map-word-instances proc parse-or-list)
-"
-  map-word-instances   Call proc on each word-instance of parse.
-
-  map-word-instances proc parse
-  Call proceedure 'proc' on each word-instance of 'parse'
-
-  Expected input is a ParseNode or a list of ParseNodes. These serve
-  as anchors to all of the word instances in a parse. The word instances
-  can be found by back-tracking through the WordInstanceLink to the
-  individual words, which is what this method does.
-"
-	(cog-map-chase-links-chk 'WordInstanceLink 'WordInstanceNode
-		proc parse-or-list 'ParseNode)
-)
-
-; ---------------------------------------------------------------------
-(define-public (document-get-sentences doco)
-"
-  document-get-sentences Get senteces in document.
-
-  document-get-sentences doco
-
-  Given a document, return a list of sentences in that document
-  Throws an error if doco is not a DocumentNode
-"
-	(if (eq? (cog-type doco) 'DocumentNode)
-		(cog-get-reference doco)
+	(if (eq? (cog-type DOCO) 'DocumentNode)
+		(cog-get-reference DOCO)
 		(throw 'wrong-atom-type 'document-get-sentences
-			"Error: expecting DocumentNode:" doco)
+			"Error: expecting DocumentNode:" DOCO)
 	)
 )
 
@@ -178,7 +122,8 @@
 ; ---------------------------------------------------------------------
 (define-public (sent-get-words-in-order sent-node)
 "
-  sent-get-words-in-order - Given a sentence, return a list of all words in order
+  sent-get-words-in-order - Given a sentence, return a list of all
+  of the word-instances in each parse, in order.
 
   Given a sentence, return all word instances in order
 "
@@ -215,6 +160,8 @@
 (define-public (sent-get-interp sent-node)
 "
   sent-get-interp - Given a SentenceNode returns a list of InterpretationNodes
+
+  XXX fix-me -- might this not be parse-dependent???
 "
     (parse-get-interp (car (sentence-get-parses sent-node)))
 )
@@ -222,28 +169,28 @@
 ; ---------------------------------------------------------------------
 (define-public (parse-get-words parse-node)
 "
-  parse-get-words - Given a parse, return a list of all words in the parse
+  parse-get-words - Return a list of all word-instances in the parse.
 
   Given a parse, return all word instances in arbitary order
-  This version is faster than the in order version.
+  This version is faster than the ordered version.
 "
 	(cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node)
 )
 
 ; ---------------------------------------------------------------------
-(define-public (parse-get-words-in-order parse-node)
+(define-public (parse-get-words-in-order PARSE)
 "
-  parse-get-words-in-order - Given a parse, return a list of all words in the parse in order
+  parse-get-words-in-order - Given PARSE, return a list of all word
+  instances in the parse, in sequential order.
+"
+	; Get the scheme-number of the word-sequence numbe
+	(define (get-number word-inst)
+		(string->number (cog-name (word-inst-get-number word-inst))))
 
-  Given a parse, return all word instances in order
-"
-	(define word-inst-list (cog-chase-link 'WordInstanceLink 'WordInstanceNode parse-node))
-	(define number-list (map word-inst-get-number word-inst-list))
 	(define (less-than word-inst-1 word-inst-2)
-		(define index-1 (list-index (lambda (a-node) (equal? word-inst-1 a-node)) word-inst-list))
-		(define index-2 (list-index (lambda (a-node) (equal? word-inst-2 a-node)) word-inst-list))
-		(< (string->number (cog-name (list-ref number-list index-1))) (string->number (cog-name (list-ref number-list index-2)))))
-	(sort word-inst-list less-than)
+		(< (get-number word-inst-1) (get-number word-inst-2)))
+
+	(sort (parse-get-words PARSE) less-than)
 )
 
 ; --------------------------------------------------------------------
@@ -297,7 +244,17 @@
   `(WordInstance 'olah@12345')`, return `(WordNode 'olah')`
 
   There can only ever be one WordNode per WordInstance, so this returns
-  a single atom.
+  a single atom.  However ...
+
+  However, due to a RelEx bug, this function might throw an exception.
+  Specifically, if the word in a sentence is a parenthesis, then the
+  ReferenceLink between the specific paren, and the general paren does
+  not get created.  Viz, there is no `(ReferenceLink (WordInstanceNode
+  '(@4bf5e341-c6b') (WordNode '('))`. Some paren-counter somewhere is
+  broken and gets confused. Beats me where. It should be fixed. In the
+  meanhile, a 'wrong-type-arg exception is thrown, when the `car` below
+  dereferences the empty list. Callers of this function may want to
+  catch this exception.
 "
 	(car (cog-chase-link 'ReferenceLink 'WordNode word-inst))
 )
@@ -408,23 +365,23 @@
 	; Purge stuff associated with a single word-instance.
 	; Expects wi to be a WordInstanceNode.
 	; Calling extract-recursive will blow away most of the junk
-	; that the WordInstance appear in, but a few have to be removed
-	; manually. These are:
+	; that the WordInstance appear in, but this will leave behind
+	; dangling LgLinkInstances and occasional unused NumberNodes.
+	; These have to be removed manually.
 	;
-	; The WordInstances that appear in LgLinkInstances:
+	; The LgLinkInstances appear like so:
+	;
 	;     EvaluationLink
 	;           LgLinkInstanceNode
 	;           ListLink
 	;               WordInstanceNode
 	;               WordInstanceNode
 	;
-	; and so we have to track those down and extract them.
+	; while the NumberNodes as
 	;
-	; They also appear in WordSequenceLinks:
 	;     WordSequenceLink
 	;         WordInstanceNode
 	;         NumberNode
-	; and so we need to get rid of the NumberNode's too.
 	;
 	; The extract-recursive will blow away everything else --
 	; the LemmaLinks, ReferenceLinks, etc.
@@ -434,23 +391,21 @@
 			(lambda (x)
 				(if (eq? 'ListLink (cog-type x))
 					(for-each extract-link-instance
-						(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x))
-				)
-				; Extract the NumberNode
+						(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x)))
+
+				; Extract the NumberNode, but only if it's not used.
 				(if (eq? 'WordSequenceLink (cog-type x))
 					(let ((oset (cog-outgoing-set x)))
 						(cog-extract x)
-						(cog-extract (cadr oset)))
-				)
-			)
-			(cog-incoming-set wi)
-		)
+						(cog-extract (cadr oset)))))
+			(cog-incoming-set wi))
 		(cog-extract-recursive wi)
 	)
 
 	; Purge, recusively, all of the word-instances in the parse.
 	; This is expecting 'parse' to be a ParseNode.
 	; The following is expected:
+	;
 	;      WordInstanceLink
 	;           WordInstanceNode
 	;           ParseNode
@@ -459,9 +414,7 @@
 		(for-each
 			(lambda (x)
 				(if (eq? 'WordInstanceLink (cog-type x))
-					(extract-word-instance (car (cog-outgoing-set x)))
-				)
-			)
+					(extract-word-instance (car (cog-outgoing-set x)))))
 			(cog-incoming-set parse)
 		)
 		(cog-extract-recursive parse)
@@ -469,6 +422,7 @@
 
 	; For each parse of the sentence, extract the parse
 	; This is expecting a structure
+	;
 	;     ParseLink
 	;         ParseNode     car of the outgoing set
 	;         SentenceNode
@@ -478,7 +432,8 @@
 				; The car will be a ParseNode
 				(extract-parse (car (cog-outgoing-set x)))
 			)
-			; Extract the NumberNode
+
+			; Extract the NumberNode, but only if it's not used.
 			(if (eq? 'SentenceSequenceLink (cog-type x))
 				(let ((oset (cog-outgoing-set x)))
 					(cog-extract x)
