@@ -397,9 +397,9 @@ The quantity of interest is the (unconditional) probability
 \end_inset
 
 .
- To work with this quantity, some care must be taken with the notation for
- several related probabilities.
- One is 
+ To correctly understand and work with this quantity, some care must be
+ taken with the notation for several related probabilities.
+ First, one has 
 \begin_inset Formula $P(w)$
 \end_inset
 
@@ -408,58 +408,11 @@ The quantity of interest is the (unconditional) probability
 \end_inset
 
  in the data sample.
- Another is 
-\begin_inset Formula $P(S(w),w)$
-\end_inset
-
-, the probability of observing the word 
-\begin_inset Formula $w$
-\end_inset
-
- in a sentence.
- The notation 
-\begin_inset Formula $S(w)$
-\end_inset
-
- is used to indicate that the word 
-\begin_inset Formula $w$
-\end_inset
-
- is in some relation 
-\begin_inset Formula $S$
-\end_inset
-
-; in this example, specifically, that it is in a sentence.
- More generally, 
-\begin_inset Formula $S$
-\end_inset
-
- can indicate some, any single-word relation: some ambient interaction of
- the word with other factors in the data sample.
- Using 
-\begin_inset Formula $S$
-\end_inset
-
- to denote sentence, the probability 
-\begin_inset Formula $P(S(w),w)$
-\end_inset
-
- differs from 
-\begin_inset Formula $P(w)$
-\end_inset
-
- because the word 
-\begin_inset Formula $w$
-\end_inset
-
- may occur more than once in a sentence.
- The ratio between these two can be interpreted as the number of words in
- a sentence - the average sentence length.
- Finally, there is the quantity 
+ Next, one has 
 \begin_inset Formula $P(S(w_{1},w_{2}),w_{1},w_{2})$
 \end_inset
 
- that the two words occur in the same sentence.
+, the probability that the two words occur in the same sentence.
  Again, 
 \begin_inset Formula $S(w_{1},w_{2})$
 \end_inset
@@ -469,22 +422,21 @@ The quantity of interest is the (unconditional) probability
 \end_inset
 
  in that the word-order does not matter.
-\end_layout
-
-\begin_layout Standard
-With the above notation, it is now safe to write (to define) the unconditional
- probability of observing two words as 
-\begin_inset Formula 
-\[
-P(w_{1},w_{2})=P(w_{1})P(w_{2})
-\]
-
+ A third kind of pair relation is the unconditional probability of observing
+ two words, which can be 
+\emph on
+defined
+\emph default
+ as 
+\begin_inset Formula $P(w_{1},w_{2})=P(w_{1})P(w_{2})$
 \end_inset
 
-That is, instead of assuming independence of two random variables, we define
- them to be so.
- By definition, the two are uncorrelated.
- If there was some correlation (relation) 
+.
+ In this case, instead of assuming independence of two random variables,
+ we define them to be so.
+ This is possible, because we have a notation for specifying when there
+ is a correlation.
+ That is, if there was some correlation (relation) 
 \begin_inset Formula $C(w_{1},w_{2})$
 \end_inset
 
@@ -499,11 +451,11 @@ That is, instead of assuming independence of two random variables, we define
 \end_layout
 
 \begin_layout Standard
-Assumptions of independent variables are now replaced by a notational infrastrct
-ure.
- Note, in particular, that if one uses a frequentist defintion for the probabili
-ties (as will be done in what follows), then the probabilities are not independe
-nt of the data sample from which they are drawn.
+Thus, assumptions of independent variables are now replaced by a notational
+ infrastrcture.
+ Note, in particular, that if one uses a frequentist definition for the
+ probabilities (as will be done in what follows), then the probabilities
+ are not independent of the data sample from which they are drawn.
  Thus, all probabilities here have an implicit dependence on the data sample.
  This dependency is not explicitly shown.
  Some care must be taken to use the same data sample throughout.
@@ -511,7 +463,7 @@ nt of the data sample from which they are drawn.
 \end_layout
 
 \begin_layout Standard
-The above notation allows the definition of conditional probabilites, in
+The above notation allows the definition of conditional probabilities, in
  the conventional sense.
  For example, one has that 
 \begin_inset Formula 
