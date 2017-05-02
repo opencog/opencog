@@ -940,7 +940,7 @@ then counts the average number of relations per sentence.
 \begin_inset Formula $F(S,*)-1\le F(R|S,*,*)$
 \end_inset
 
- wiHow much different this is thanth 
+ with 
 \begin_inset Formula $F(S,*)$
 \end_inset
 
@@ -1042,6 +1042,166 @@ This can be interpreted as a kind-of centrality.
  to the number of words.
  If the parse-tree contains cycles, then there may be more relations than
  there are words.
+\end_layout
+
+\begin_layout Subsubsection*
+Yuret's Mutual Information
+\end_layout
+
+\begin_layout Standard
+Deniz Yuret introduces the concept of 
+\begin_inset Quotes eld
+\end_inset
+
+lexical attraction
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It is reviewed breifly, here.
+ He defines a probability 
+\begin_inset Formula $\mathcal{P}(w_{l},w_{r})$
+\end_inset
+
+ of seeing an ordered pair; as compared to the above, the relation 
+\begin_inset Formula $R$
+\end_inset
+
+ is implicit.
+ To make it explicit, one should write: 
+\begin_inset Formula 
+\begin{equation}
+\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r}),w_{l},w_{r})\label{eq:Yuret-prob}
+\end{equation}
+
+\end_inset
+
+which indicates the relation explicitly, as well as noting that the order
+ of the positions in the relation matter.
+ To avoid confusion, the cursive 
+\begin_inset Formula $\mathcal{P}$
+\end_inset
+
+ is used for the Yuret notation, instead of the roman 
+\begin_inset Formula $P$
+\end_inset
+
+ which is reserved for the defintions above.
+ Yuret also uses the notation 
+\begin_inset Formula $\mathcal{P}(w_{l},*)$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathcal{P}(*,w_{r})$
+\end_inset
+
+ for wild-card summations, defined as 
+\begin_inset Formula 
+\[
+\mathcal{P}(w_{l},*)=\sum_{w_{r}}\mathcal{P}(w_{l},w_{r})\qquad\mbox{and}\qquad\mathcal{P}(*,w_{r})=\sum_{w_{l}}\mathcal{P}(w_{l},w_{r})
+\]
+
+\end_inset
+
+It is tempting to conflate 
+\begin_inset Formula $\mathcal{P}(w_{l},*)$
+\end_inset
+
+ with 
+\begin_inset Formula $P(w_{l})$
+\end_inset
+
+ but that would be wrong; not every possible word can occur on the 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ position.
+ This suggests a different, but tempting, error, that 
+\begin_inset Formula $\mathcal{P}(w_{l},*)\le P(w_{l})$
+\end_inset
+
+.
+ This is also not the case! A word might occur more frequently as the left
+ side of a pair, than it does all by itself in the sample text.
+ This follows from the frequentist definitions; the denominators for the
+ two probabilities are not compatible; they do not range over the same universe.
+\end_layout
+
+\begin_layout Standard
+Yuret defines the 
+\begin_inset Quotes eld
+\end_inset
+
+lexical attraction
+\begin_inset Quotes erd
+\end_inset
+
+ as 
+\begin_inset Formula 
+\begin{equation}
+\mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}\label{eq:Yuret's MI}
+\end{equation}
+
+\end_inset
+
+so that large positive MI is associated with words that rarely seen one
+ without the other (e.g.
+ '
+\emph on
+Northern Ireland
+\emph default
+' from his examples.) Note the absence of a minus sign in the above! See
+ below for an explanation.
+ Large-MI word pairs occur when 
+\begin_inset Formula $\mathcal{P}(w_{l},w_{r})$
+\end_inset
+
+ is roughly comparable to 
+\begin_inset Formula $\mathcal{P}(w,*)\approx\mathcal{P}(*,w)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+It is worth reviewing Yuret's example, at this point.
+ He looks at the word pair 'Northern Ireland' and states (based on a particular
+ corpus that was analyzed) that 
+\begin_inset Formula $-\log_{2}P(\mbox{'Northern'})=12.60$
+\end_inset
+
+ and that 
+\begin_inset Formula $-\log_{2}P(\mbox{'Ireland'})=14.65$
+\end_inset
+
+ and finally that 
+\begin_inset Formula $-\log_{2}\mathcal{P}(\mbox{'Northern'},\mbox{'Ireland'})=16.13$
+\end_inset
+
+.
+ What these numbers mean is that although either word alone occurs at a
+ rate of roughtly once in ten-thousand words, the word-pair together occurs
+ at the rate of one in thirty-thousand or so: the word pair occurs almost
+ as often as either word alone.
+ Thus, the resulting MI is very large: 
+\begin_inset Formula $\mbox{MI}=-16.13+12.60+14.65=11.12$
+\end_inset
+
+.
+ The choice of sign in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:Yuret's MI"
+
+\end_inset
+
+ is such that words that co-occur have a large positive value.
+ In practice, the distribution of the MI for word-pairs runs from about
+ -15 to about +35, and, when ranked accoring to MI, the probabilites form
+ a rounded mountain-peak, two-sided, each side being linear (Zipfian) with
+ the peak at about MI=4 or 6.
+ (See my other notes for a graph.)
 \end_layout
 
 \begin_layout Subsubsection*
@@ -1490,383 +1650,11 @@ Observe that the y-axis is drawn with a logarithmic scale.
 \end_layout
 
 \begin_layout Subsubsection*
-Yuret Notation
-\end_layout
-
-\begin_layout Standard
-We need to harmonize here a little bit with the Deniz Yuret concepts and
- notation.
- He defines a probability 
-\begin_inset Formula $\mathcal{P}(w_{l},w_{r})$
-\end_inset
-
- of seeing the ordered pair; that is, the relation 
-\begin_inset Formula $R$
-\end_inset
-
- is implicit.
- To make it explicit, we should write: 
-\begin_inset Formula $\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r})|R(*,*))$
-\end_inset
-
- to indicate the relation explicitly, and to note that the order of the
- positions in the relation matter.
- The right-hand side is the conditional probability of seeing a given word
- pair, conditioned on seeing any word pair.
- To avoid confusion, the cursive 
-\begin_inset Formula $\mathcal{P}$
-\end_inset
-
- is used instead of the roman 
-\begin_inset Formula $P$
-\end_inset
-
-.
- Yuret also uses the notation 
-\begin_inset Formula $\mathcal{P}(w_{l},*)$
-\end_inset
-
- and 
-\begin_inset Formula $\mathcal{P}(*,w_{r})$
-\end_inset
-
- for wild-card summations, defined as 
-\begin_inset Formula 
-\[
-\mathcal{P}(w_{l},*)=\sum_{w_{r}}\mathcal{P}(w_{l},w_{r})\qquad\mbox{and}\qquad\mathcal{P}(*,w_{r})=\sum_{w_{l}}\mathcal{P}(w_{l},w_{r})
-\]
-
-\end_inset
-
-It is tempting to conflate 
-\begin_inset Formula $\mathcal{P}(w_{l},*)$
-\end_inset
-
- with 
-\begin_inset Formula $P(w_{l})$
-\end_inset
-
- but that would be wrong; not every possible word can occur on the 
-\begin_inset Formula $w_{r}$
-\end_inset
-
- position.
- This suggests a different, but tempting, error, that 
-\begin_inset Formula $\mathcal{P}(w_{l},*)\le P(w_{l})$
-\end_inset
-
-.
- This is also not the case! This comes from the fact that the frequentist
- definitions of the two are incompatible: the denominators are not the same.
- Viz, 
-\begin_inset Formula 
-\[
-\mathcal{P}(w_{l},w_{r})=\frac{N(w_{l},w_{r})}{N(*,*)}
-\]
-
-\end_inset
-
- while 
-\begin_inset Formula 
-\[
-P(w)=\frac{N(w)}{N(*)}
-\]
-
-\end_inset
-
-so that the former is normalized by the number of times 
-\begin_inset Formula $N(*,*)$
-\end_inset
-
- the pairs have been observed, while the later is normalized by the number
- of times that singletons have been observed.
- The incompatible normalizations can be understood as conditional probabilities:
-\begin_inset Formula 
-\[
-\mathcal{P}(w_{l},w_{r})=P(R(w_{l},w_{r})|R(*,*))=\frac{P(R(w_{l},w_{r}))}{P(R(*,*))}
-\]
-
-\end_inset
-
-That is, the Yuret probability of seeing a given word pair is actually the
- conditional probability of seeing that pair, conditioned on seeing 
-\emph on
-any
-\emph default
- word pair.
- The numerator of this expression is given by eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:uncond-pair"
-
-\end_inset
-
-, that is, 
-\begin_inset Formula $P(R(w_{l},w_{r}))=P(R(w_{l},w_{r}),w_{l},w_{r})$
-\end_inset
-
-, while the denominator is the wild-card sum:
-\begin_inset Formula 
-\[
-P(R(*,*))=\frac{N(R(*,*))}{N(*)N(*)}
-\]
-
-\end_inset
-
-which can be viewed as a conditional probability:
-\begin_inset Formula 
-\[
-\mathcal{P}(w_{l},*)=\frac{P(R(w_{l},*))}{P(R(*,*))}=\frac{P(R(w_{l},*)|w_{l})}{P(R(*,*))}P(w_{l})\le P(w_{l})
-\]
-
-\end_inset
-
-In practice, then, for word-pairs, one has that 
-\begin_inset Formula $P(R|w_{l})/P(R)$
-\end_inset
-
- is almost equal to 1, but not quite.
- That is, 
-\begin_inset Formula $P(R|w_{l})\approx P(R)$
-\end_inset
-
-.
- This can be confirmed by actual measurements for English, and should hold
- true for most languages.
- XXX TODO Report on this (double-check) XXX.
-\end_layout
-
-\begin_layout Standard
-Thus, Yuret's notation can be expressed either in terms of conditional probabili
-tes, as 
-\begin_inset Formula 
-\[
-\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}=\frac{P(R(w_{l},w_{r})|w_{l},w_{r})\; P(R(*,*))}{P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}
-\]
-
-\end_inset
-
-or in terms of the unconditional probabilities, as 
-\begin_inset Formula 
-\begin{equation}
-\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}=\frac{P(R(w_{l},w_{r}),w_{l},w_{r})\; P(R(*,*))}{P(R(w_{l},*),w_{l})\ P(R(*,w_{r}),w_{r})}\label{eq:basic pair}
-\end{equation}
-
-\end_inset
-
-The left hand side above is used by Yuret to define the 
-\begin_inset Quotes eld
-\end_inset
-
-lexical attraction
-\begin_inset Quotes erd
-\end_inset
-
-, as 
-\begin_inset Formula 
-\begin{equation}
-\mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{\mathcal{P}(w_{l},w_{r})}{\mathcal{P}(w_{l},*)\mathcal{P}(*,w_{r})}\label{eq:Yuret's MI}
-\end{equation}
-
-\end_inset
-
-so that large positive MI is associated with words that rarely seen one
- without the other (e.g.
- '
-\emph on
-Northern Ireland
-\emph default
-' from his examples.) Note the absence of a minus sign in the above! See
- below for an explanation.
- Large-MI word pairs occur when 
-\begin_inset Formula $\mathcal{P}(w_{l},w_{r})$
-\end_inset
-
- is roughly comparable to 
-\begin_inset Formula $\mathcal{P}(w,*)\approx\mathcal{P}(*,w)\approx P(w)$
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Standard
-It is worth reviewing Yuret's example, at this point.
- He looks at the word pair 'Northern Ireland' and states (based on a particular
- corpus that was analyzed) that 
-\begin_inset Formula $-\log_{2}P(\mbox{'Northern'})=12.60$
-\end_inset
-
- and that 
-\begin_inset Formula $-\log_{2}P(\mbox{'Ireland'})=14.65$
-\end_inset
-
- and finally that 
-\begin_inset Formula $-\log_{2}\mathcal{P}(\mbox{'Northern'},\mbox{'Ireland'})=16.13$
-\end_inset
-
-.
- What these numbers mean is that although either word alone occurs at a
- rate of roughtly once in ten-thousand words, the word-pair together occurs
- at the rate of one in thirty-thousand or so: the word pair occurs almost
- as often as either word alone.
- Thus, the resulting MI is very large: 
-\begin_inset Formula $\mbox{MI}=-16.13+12.60+14.65=11.12$
-\end_inset
-
-.
- The choice of sign in eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:Yuret's MI"
-
-\end_inset
-
- is such that word that co-occur have a large positive value.
- In practice, the distribution of the MI for word-pairs runs from about
- -15 to about +35, and, when ranked accoring to MI, the probabilites form
- a rounded mountain-peak, two-sided, each side being linear (Zipfian) with
- the peak at about MI=4 or 6.
- (See my other notes for a graph.)
-\end_layout
-
-\begin_layout Standard
-Observationally, we have that 
-\begin_inset Formula $P(R(w_{l},*)|w_{l})\approx P(R(*,w_{r})|w_{r})\approx1$
-\end_inset
-
-, and thus must conclude that 
-\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
-\end_inset
-
- is 'large'; much larger than (unconditional) word-pair frequencies.
- XXX double check this; the definitions have changed.XXX.
-\end_layout
-
-\begin_layout Standard
-The RHS of eqn 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "eq:basic pair"
-
-\end_inset
-
- is 
-\begin_inset Quotes eld
-\end_inset
-
-nicer
-\begin_inset Quotes erd
-\end_inset
-
- than Yuret's definition, in that it is manifestly symmetric in 
-\begin_inset Formula $w_{l}$
-\end_inset
-
- and 
-\begin_inset Formula $w_{r}$
-\end_inset
-
-.
- This symmetry is essential for making contact with the 'standard' definitions
- of MI, which are always provided in a symmetric fashion.
- It also helps make clear the role of the left-right relationship; eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:Yuret's MI"
-
-\end_inset
-
- is in fact the three-point interaction information
-\begin_inset Formula 
-\[
-I(R;w_{l};w_{r})=MI(w_{l},w_{r})
-\]
-
-\end_inset
-
-that is, the interaction information of three random variables: 
-\begin_inset Formula $w_{l}$
-\end_inset
-
-, 
-\begin_inset Formula $w_{r}$
-\end_inset
-
- and 
-\begin_inset Formula $R=R(w_{l},w_{r})$
-\end_inset
-
-.
- In particular, Yuret's lexical attraction is specifically 
-\emph on
-not
-\emph default
- the mutual information of two random variables; it includes a specific,
- defined relationship between them: that one word is explicitly to the left
- of another, as well as the 
-\begin_inset Quotes eld
-\end_inset
-
-ambient
-\begin_inset Quotes erd
-\end_inset
-
- relation that they occur within the same sentence.
-\end_layout
-
-\begin_layout Subsubsection*
 Total Entropy
 \end_layout
 
 \begin_layout Standard
 Of some
-\end_layout
-
-\begin_layout Subsubsection*
-Update 14 Jan 2014
-\end_layout
-
-\begin_layout Standard
-OK, The LHS of equation 
-\begin_inset CommandInset ref
-LatexCommand eqref
-reference "eq:basic pair"
-
-\end_inset
-
- then demonstrates how to obtain conditional entropies in general.
- Thus, given an 
-\begin_inset Formula $n$
-\end_inset
-
--point relation 
-\begin_inset Formula $R(x_{1},x_{2,}\cdots,x_{n})$
-\end_inset
-
- one computes first the unconditional probability 
-\begin_inset Formula $P(R(x_{1},x_{2,}\cdots,x_{n}))$
-\end_inset
-
-.
- The conditional probability is then obtained as usual:
-\begin_inset Formula 
-\[
-P(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n})=\frac{P(R(x_{1},x_{2,}\cdots,x_{n}))}{P(x_{1})P(x_{2})\cdots P(x_{n})}
-\]
-
-\end_inset
-
-The entropy is then built recursively by normalizing by the probability
- of wild-card relations:
-\begin_inset Formula 
-\begin{equation}
-MI(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n}))=\log_{2}\frac{P(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n}))}{P(R(*,x_{2,}\cdots,x_{n})\,|\, x_{2,}\cdots,x_{n}))\, P(R(x_{1},*,\cdots,x_{n})\,|\, x_{1},x_{3,}\cdots,x_{n}))\cdots}\label{eq:Relation MI}
-\end{equation}
-
-\end_inset
-
-(Right? We're not dividing by multiple *'s here, yes?) 
 \end_layout
 
 \begin_layout Section*
