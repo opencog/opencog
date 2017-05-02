@@ -81,25 +81,77 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Abstract
-Collection of thoughts and notes, pursuant to language learning.
- Organized in mostly chronological order.
- Mostly; some of the sections, including the first, are heavily expaded
- and revised long after the posted date.
+The language-learning effort involves research and software development
+ to implement the ideas described in ArXiv abs/1401.3372
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goertzel2014"
+
+\end_inset
+
+.
+ This document contains supplementary notes and a loosely-organized semi-chronol
+ogical diary of results.
 \end_layout
 
 \begin_layout Section*
-31 December 2013
+Introduction
 \end_layout
 
 \begin_layout Standard
-Easier said than done.
- Should be 'obvious' but its not.
- Goal: construct a set of linkage rules to model only the observed language,
- using Link Grammar.
- That is, using the graphical structure implied in Link Grammar.
- This, of course, implicitly assumes that Link Grammar provides an adequate
- theory for describing and constraining the syntactical parsing of a natural
- language.
+The language-learning effort involves research and software development
+ to implement the ideas described in in ArXiv abs/1401.3372
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goertzel2014"
+
+\end_inset
+
+.
+ This document contains supplementary notes and a loosely-organized semi-chronol
+ogical diary of results.
+\end_layout
+
+\begin_layout Standard
+The initial stages of this work require the extraction of word-pair probabilitie
+s from raw text, and the use of these to induce a Link Grammar
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991,Sleator1993"
+
+\end_inset
+
+.
+ This extends prior work on MST parsers
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+, by inducing link types for word-pair relations.
+\end_layout
+
+\begin_layout Standard
+Later stages further extend beyond what is possible with Link Grammar by
+ inducing synonymous words and phrases.
+ The goal here is to unifiy into a consistent framework various techniques
+ for unsupervised semantic discovery that have already been proven in narrower
+ contexts
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Poon2009,Lin1998,Lin2001"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The first section of this document is a review of various defintions of
+ probabilites that can be obtained from natural langauge text.
+ This is followed by a roughly chronological diary of further observaions
+ and results.
 \end_layout
 
 \begin_layout Subsection*
@@ -136,7 +188,7 @@ target "http://www2.denizyuret.com/pub/yuretphd.pdf"
 \end_layout
 
 \begin_layout Standard
-Possibly the most useful formula is the one in the middle off page 40.
+Possibly the most useful formula is the one in the middle of page 40.
  By the time that we get to it, the terms 
 \begin_inset Quotes eld
 \end_inset
