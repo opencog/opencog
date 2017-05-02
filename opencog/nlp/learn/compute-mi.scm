@@ -133,6 +133,23 @@
 (define any-right (AnyNode "right-word"))
 
 ; ---------------------------------------------------------------------
+
+(define-public (fetch-all-words)
+"
+  fetch-all-words - fetch all WordNodes from the database backend.
+"
+	(load-atoms-of-type item-type)
+)
+
+(define-public (get-all-words)
+"
+  get-all-words - return a list holding all of the observed words
+  This does NOT fetch the words from the backing store.
+"
+	(cog-get-atoms item-type)
+)
+
+; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
 ; the 'count' value of its CountTruthValue. This routine just fetches
@@ -205,8 +222,8 @@
 (define (compute-all-word-freqs)
 	(begin
 		; Make sure that all word-nodes are in the atom table.
-		(load-atoms-of-type item-type)
-		(compute-all-logli (cog-get-atoms item-type))
+		(fetch-all-words)
+		(compute-all-logli (get-all-words))
 	)
 )
 
@@ -653,7 +670,7 @@
 ;;;		(display "Start on-demand wildcounting\n")
 ;;;
 ;;;		; Make sure all words are in the atomspace
-;;;		(load-atoms-of-type item-type)
+;;;		(fetch-all-words)
 ;;;		(trace-elapsed)
 ;;;		(display "Finsihed loading words\n")
 ;;;
@@ -663,7 +680,7 @@
 ;;;			(lambda (word)
 ;;;				(fetch-and-compute-pair-wildcard-counts word lg_rel)
 ;;;			)
-;;;			(cog-get-atoms item-type)
+;;;			(get-all-words)
 ;;;		)
 ;;;	)
 ;;;)
@@ -687,11 +704,11 @@
 		(display "Start batched wildcard-counting\n")
 
 		; Make sure all words are in the atomspace
-		(load-atoms-of-type item-type)
+		(fetch-all-words)
 		(trace-msg-num "In wildcard-count, num words="
-			(length (cog-get-atoms item-type)))
+			(length (get-all-words)))
 		(format #t "In wildcard-count, num words=~A\n"
-			(length (cog-get-atoms item-type)))
+			(length (get-all-words)))
 
 		; Make sure all word-pairs are in the atomspace.
 		(fetch-incoming-set lg_rel)
@@ -704,7 +721,7 @@
 				(compute-pair-wildcard-counts word lg_rel)
 				(trace-msg-cnt "Wildcard-count did ")
 			)
-			(cog-get-atoms item-type)
+			(get-all-words)
 		)
 		(trace-elapsed)
 		(trace-msg "Done with wild-card count\n")
@@ -748,7 +765,7 @@
 					(+ r-cnt (get_right_wildcard_count word lg_rel))
 				)
 			)
-			(cog-get-atoms item-type)
+			(get-all-words)
 		)
 
 		; The left and right counts should be equal
@@ -820,7 +837,7 @@
 				)
 			)
 		)
-		(cog-get-atoms item-type)
+		(get-all-words)
 	)
 )
 
@@ -1015,7 +1032,7 @@
 				(compute-pair-mi right-word lg_rel)
 				(trace-msg-cnt "Done with pair MI cnt=")
 			)
-			(cog-get-atoms item-type)
+			(get-all-words)
 		)
 		(trace-msg "Finished with MI batch\n")
 		(display "Finished with MI batch\n")
@@ -1055,13 +1072,6 @@
 	(gddr PAIR)
 )
 
-(define-public (get-all-words)
-"
-  get-all-words - return a list holding all of the observed words
-"
-	(cog-get-atoms item-type)
-)
-
 (define-public (get-all-pairs)
 "
   get-all-pairs - return a list holding all of the observed word-pairs
@@ -1083,10 +1093,11 @@
 (define-public (total-word-observations)
 "
   total-word-observations -- return a total of the number of times
-  any/all words were observed.  That is, return N(*) as defined
-  above, and in the diary.
+  any/all words were observed.  That is, compute and return N(*),
+  as defined above, and in the diary.  This does NOT work from a
+  cached value.  Also, this does NOT fetch atoms from the database!
 "
-   (get-total-atom-count (cog-get-atoms item-type))
+   (get-total-atom-count (get-all-words))
 )
 
 (define-public (total-pair-observations)
@@ -1191,7 +1202,7 @@
 ; (define y (LinkGrammarRelationshipNode "ANY"))
 ; (fetch-and-compute-pair-wildcard-counts x y)
 ;
-; (load-atoms-of-type 'WordNode)
+; (fetch-all-words)
 ; (define wc (cog-count-atoms 'WordNode))
 ; (length (cog-get-atoms 'WordNode))
 ; (define wc (get-total-atom-count (cog-get-atoms 'WordNode)))

@@ -3711,3 +3711,42 @@ map-word-instances
  (sql-open "postgres:///en_pairs?user=linas")
  (use-relex-server "127.0.0.1" 4445)
 
+==========================================
+
+again: using the rohit data:
+
+select count(*) from atoms where type=73; gives 396K unique words.
+select count(8) from atoms where type=47; gives number fo evluation
+links which is 9672K  but 2*396K of these are anynodes, so really only
+9672-792=8880K unique word-pairs.
+which were observed 
+
+en_pairs=> select * from atoms where type=74;
+   uuid    | space | type | height |    name    | outgoing 
+-----------+-------+------+--------+------------+----------
+ 143427138 |     1 |   74 |      0 | left-word  | 
+ 143427163 |     1 |   74 |      0 | right-word | 
+
+en_pairs=> select * from atoms where outgoing='{143427138,143427163}';
+   uuid    | space | type | height | name |       outgoing        
+-----------+-------+------+--------+------+-----------------------
+ 143670792 |     1 |    8 |      1 |      | {143427138,143427163}
+
+en_pairs=> select * from atoms where outgoing='{152,143670792}';
+   uuid    | space | type | height | name |    outgoing     
+-----------+-------+------+--------+------+-----------------
+ 143670793 |     1 |   47 |      2 |      | {152,143670792}
+
+en_pairs=> select * from valuations where atom=143670793;
+ key |   atom    | type |   floatvalue    | stringvalue | linkvalue 
+-----+-----------+------+-----------------+-------------+-----------
+   1 | 143670793 |  177 | {0,0,418235182} |             | 
+
+So 418M observations of word-pairs.
+
+ALTER DATABASE en_pairs RENAME TO en_pairs_rohit;
+
+=========================================================
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=ubuntu")
