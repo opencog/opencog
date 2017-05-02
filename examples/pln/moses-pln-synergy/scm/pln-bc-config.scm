@@ -50,7 +50,7 @@
 (add-to-load-path "../../../opencog/pln/rules/")
 
 (define rule-filenames
-  (list "conditional-partial-instantiation-meta-rule.scm"
+  (list "predicate-logic/conditional-partial-instantiation-meta-rule.scm"
         "implication-scope-to-implication-rule.scm"
         "and-lambda-distribution-rule.scm"
         "closed-lambda-introduction-rule.scm"
@@ -104,4 +104,4 @@
 (ure-set-num-parameter pln-rbs "URE:BC:complexity-penalty" 1)
 
 ;; BIT reduction parameters
-(ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 20000)
+(ure-set-num-parameter pln-rbs "URE:BC:maximum-bit-size" 100000)
