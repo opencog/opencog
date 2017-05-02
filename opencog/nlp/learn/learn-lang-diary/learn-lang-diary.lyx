@@ -594,7 +594,7 @@ How to count words is not entirely obvious, so even these defintions need
  result that way.
  To maintain consistency with the defintions given in the previous section,
  
-\begin_inset Formula $P(w)$
+\begin_inset Formula $N(w)$
 \end_inset
 
  is defined to be the number of times that the word 
@@ -614,10 +614,10 @@ How to count words is not entirely obvious, so even these defintions need
 
 \begin_layout Standard
 Let 
-\begin_inset Formula $P(S(w),w)$
+\begin_inset Formula $F(S(w),w)$
 \end_inset
 
- be the probability of observing word 
+ be the number of times (frequency) of observing word 
 \begin_inset Formula $w$
 \end_inset
 
@@ -629,7 +629,7 @@ Let
  This can be computed as
 \begin_inset Formula 
 \[
-P(S,w)=\frac{N(w)}{NS}
+F(S,w)=\frac{N(w)}{NS}
 \]
 
 \end_inset
@@ -647,19 +647,42 @@ where
 \end_inset
 
  is the number of sentences in that same sample.
- Note that
+ This counts with 
+\begin_inset Quotes eld
+\end_inset
+
+multiplicity
+\begin_inset Quotes erd
+\end_inset
+
+, in that 
+\begin_inset Formula $w$
+\end_inset
+
+ can appear in a sentence more than once.
+ That is, 
+\begin_inset Formula $F$
+\end_inset
+
+ is not a probability, rather, it is an expectation value of the number
+ of times that a word is observed.
+ This can be made explicit, by writing
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \[
-P(S,w)=\frac{N(w)}{N(*)}\,\frac{N(*)}{NS}=P(w)L(S)
+F(S,w)=\frac{N(w)}{N(*)}\,\frac{N(*)}{NS}=P(w)L(S)
 \]
 
 \end_inset
 
 with 
-\begin_inset Formula $L(S)$
+\begin_inset Formula $L(S)=F(S,*)$
 \end_inset
 
- being the average sentence length.
+ being the average sentence length (the expectation value of the number
+ of words in a sentence).
  
 \end_layout
 
@@ -825,8 +848,138 @@ R
 \begin_inset Quotes erd
 \end_inset
 
-: by failing to make a left-right distinction, byt failing to make a head-tail
+: by failing to make a left-right distinction, by failing to make a head-tail
  distinction, and failing to do either.
+\end_layout
+
+\begin_layout Standard
+The definition for the probability of observing a relation can be taken
+ to be 
+\begin_inset Formula 
+\begin{equation}
+P(R,w_{l},w_{r})=\frac{N(R,w_{l},w_{r})}{N(R,*,*)}\label{eq:prob-relation}
+\end{equation}
+
+\end_inset
+
+where
+\begin_inset Formula 
+\[
+N(R,*,*)=\sum_{w_{l},w_{r}}N(R,w_{l},w_{r})
+\]
+
+\end_inset
+
+This can be roughly understood as being the conditional probability of observing
+ the relation 
+\begin_inset Formula $R(w_{l},w_{r})$
+\end_inset
+
+ between two specific words, given that the relation 
+\begin_inset Formula $R$
+\end_inset
+
+ between any two words was seen.
+\end_layout
+
+\begin_layout Standard
+Is it possible to define the unconditional probability 
+\begin_inset Formula $P(R,*,*)$
+\end_inset
+
+ of seeing the relationship? The least confusing path to this is to define
+ it in terms of the probability 
+\begin_inset Formula $P(S,w_{1},w_{2})$
+\end_inset
+
+ of seeing two words in the same sentence.
+ This probability is defined just as in eqn 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:prob-relation"
+
+\end_inset
+
+; that is, 
+\begin_inset Formula $P(S,w_{1},w_{2})=N(S,w_{1},w_{2})/N(S,*,*)$
+\end_inset
+
+.
+ From this, one can define the frequency of seeing a relation in a sentence,
+ as
+\begin_inset Formula 
+\[
+F(R|S,w_{1},w_{2})=\frac{P(R,w_{1},w_{2})}{P(S,w_{1},w_{2})}
+\]
+
+\end_inset
+
+That this is an expectation value is made clear by noting that, when any
+ of words appear multiple times in one sentence, then the relation can appear
+ multiple times, as well.
+ The sum
+\begin_inset Formula 
+\[
+F(R|S,*,*)=\sum_{w_{l},w_{r}}F(R|S,w_{l},w_{r})
+\]
+
+\end_inset
+
+then counts the average number of relations per sentence.
+ For the any-type ordered-pair relation, clearly one must have that there
+ are at least as many relations as there are words in the sentence, minus
+ one, since each word must appear in at least one (distinct) relation.
+ That is, 
+\begin_inset Formula $L(S)-1\le F(R|S,*,*)$
+\end_inset
+
+ with 
+\begin_inset Formula $L(S)$
+\end_inset
+
+ the expected length of a sentence.
+ Similarly, 
+\end_layout
+
+\begin_layout Standard
+XXX
+\end_layout
+
+\begin_layout Standard
+Tt is worth unpacking the unconditional probability.
+ It is given by
+\begin_inset Formula 
+\begin{align}
+P(R,w_{l},w_{r})= & P(R|w_{l},w_{r})P(w_{l})P(w_{r})\nonumber \\
+= & \frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}\,\frac{N(w_{l})}{N(*)}\,\frac{N(w_{r})}{N(*)}\label{eq:uncond-pair}\\
+= & \frac{N(R,w_{l},w_{r})}{N(*)N(*)}\nonumber 
+\end{align}
+
+\end_inset
+
+That is, the probability is just the number of times the relationship was
+ observed, divided by the total number of times two words are observed.
+\end_layout
+
+\begin_layout Subsubsection*
+Pair relations for English
+\end_layout
+
+\begin_layout Standard
+This section breifly reports on data collected for English, by Rohit, GSOC
+ project, summer of 2015.
+\end_layout
+
+\begin_layout Standard
+A very small subset of wikipedia articles were observed; this subset contains
+ 400K words (exactly 396256) observed 836 million times, and x word pairs,
+ observed 420 million times (exactly 418235182).
+\end_layout
+
+\begin_layout Standard
+Graphs.
+ TODO.TODO graphs P(w), P(t,w), etc.
+ show zipf
 \end_layout
 
 \begin_layout Standard
@@ -881,153 +1034,6 @@ This counts how often the word
 , which, by definition, counts only once per word in a sentence.
 \end_layout
 
-\begin_layout Standard
-TODO graphs P(w), P(t,w), etc.
- show zipf
-\end_layout
-
-\begin_layout Standard
-XXXWhat is the correct way of counting word-pairs? How does this relate
- to word-counts? The correct definition seems to be that, whenever a word-pair
- is observed (once), then each of the words in the word-pair should be counted
- as being observed.
-\end_layout
-
-\begin_layout Standard
-Likewise, the conditional probability for two words in a relation is:
-\begin_inset Formula 
-\begin{equation}
-P(R|w_{l},w_{r})=\frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}\label{eq:cond-pair-1}
-\end{equation}
-
-\end_inset
-
-This follows from the form of eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:cond-pair"
-
-\end_inset
-
-.
- It is worth unpacking the unconditional probability.
- It is given by
-\begin_inset Formula 
-\begin{align}
-P(R,w_{l},w_{r})= & P(R|w_{l},w_{r})P(w_{l})P(w_{r})\nonumber \\
-= & \frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}\,\frac{N(w_{l})}{N(*)}\,\frac{N(w_{r})}{N(*)}\label{eq:uncond-pair}\\
-= & \frac{N(R,w_{l},w_{r})}{N(*)N(*)}\nonumber 
-\end{align}
-
-\end_inset
-
-That is, the probability is just the number of times the relationship was
- observed, divided by the total number of times two words are observed.
-\end_layout
-
-\begin_layout Subsubsection*
-Probability of observing a relation
-\end_layout
-
-\begin_layout Standard
-One might ask about the probability of seeing a pair-wise relationship,
- in general, independent of the actual words in the pair.
- For word-pairs, this is somewhat pointless, but helps lay the groundwork
- for later questions of a similar nature: what is the likelihood of seeing
- some general, rather complex relation?
-\end_layout
-
-\begin_layout Standard
-There are two ways to go about this.
- The first way doesn't work.
- Starting with eqn 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:uncond-pair"
-
-\end_inset
-
-, one can try to sum over all words, to get 
-\begin_inset Formula 
-\[
-P(R(*,*))=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(*)N(*)}=\frac{N(R(*,*))}{N(*)N(*)}
-\]
-
-\end_inset
-
-Unfortunately, won't work, because, to reasonable degree of accuracy, 
-\begin_inset Formula 
-\[
-N(R(*,*))\approx0.5N(*)
-\]
-
-\end_inset
-
-and the result is not a probability independent of the observational act:
- it depends on the total number of observations performed.
- The reason that the total number of word-pairs observed is about half of
- the number of words observed is explored in greater detail in the next
- section.
- Roughly, though, one can say that a given word occurs on the left side
- of the pair half the time, and on the right side of a pair, half the time.
-\end_layout
-
-\begin_layout Standard
-A more reasonable result is given by working with the conditional probability,
- starting with eqns 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:cond-pair"
-
-\end_inset
-
- or 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:cond-pair-1"
-
-\end_inset
-
-.
- This gives
-\begin_inset Formula 
-\[
-P(R|*,*)=\sum_{w_{l},w_{r}}P(R|w_{l},w_{r})=\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}
-\]
-
-\end_inset
-
-A numerical value for this, for an observation of English, is given below.
-\end_layout
-
-\begin_layout Standard
-Another, similar quantity, is the summation
-\begin_inset Formula 
-\[
-\sum_{w_{l},w_{r}}\frac{N(R,w_{l},w_{r})}{N(R,w_{l},*)N(R,*,w_{r})}
-\]
-
-\end_inset
-
-This quantity is closely related to the mutual information of word pairs;
- this relationship is developed in greater detail, below.
-\end_layout
-
-\begin_layout Subsubsection*
-Pair relations for English
-\end_layout
-
-\begin_layout Standard
-This section breifly reports on data collected for English, by Rohit, GSOC
- project, summer of 2015.
-\end_layout
-
-\begin_layout Standard
-A very small subset of wikipedia articles were observed; this subset contains
- 400K words (exactly 396256) observed 836 million times, and x word pairs,
- observed 420 million times (exactly 418235182).
-\end_layout
-
 \begin_layout Subsubsection*
 Left-right asymmetry
 \end_layout
@@ -1037,7 +1043,7 @@ This section explores how often a given word occurs on the left side of
  a word pair, vs.
  how often it occurs on the right.
  This depends on the word, of course; the result is a nice log-normal??
- 
+ XXX no its not, its not a parabola...
 \end_layout
 
 \begin_layout Standard
