@@ -210,13 +210,13 @@
 	(define pair-dist (SchemaNode "*-Pair Distance-*"))
 
 	; Get the scheme-number of the word-sequence number
-	(define (get-number word-inst)
-		(string->number (cog-name (word-inst-get-number word-inst))))
+	(define (get-no seq-lnk)
+		(string->number (cog-name (gdr seq-lnk))))
 
 	; Create and count a word-pair, and the distance.
-	(define (count-one-pair left-word right-word)
-		(define pare (ListLink left-word right-word))
-		(define dist (- (get-number right-word) (get-number left-word)))
+	(define (count-one-pair left-seq right-seq)
+		(define pare (ListLink (gar left-seq) (gar right-seq)))
+		(define dist (- (get-no right-seq) (get-no left-seq)))
 
 		(count-one-atom (EvaluationLink pair-pred pare))
 		(count-one-atom (ExecutionLink pair-dist pare (NumberNode dist))))
