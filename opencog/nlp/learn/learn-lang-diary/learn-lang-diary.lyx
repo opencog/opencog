@@ -887,8 +887,9 @@ Is it possible to define the unconditional probability
 \begin_inset Formula $P(R,*,*)$
 \end_inset
 
- of seeing the relationship? The least confusing path to this is to define
- it in terms of the probability 
+ of seeing the relationship? The path to the answer is not entirely straight-for
+ward.
+ First consdier the probability 
 \begin_inset Formula $P(S,w_{1},w_{2})$
 \end_inset
 
@@ -914,10 +915,16 @@ F(R|S,w_{1},w_{2})=\frac{P(R,w_{1},w_{2})}{P(S,w_{1},w_{2})}
 
 \end_inset
 
-That this is an expectation value is made clear by noting that, when any
- of words appear multiple times in one sentence, then the relation can appear
- multiple times, as well.
- The sum
+This gives the expectation value of seeing the relation 
+\begin_inset Formula $R$
+\end_inset
+
+ in a sentence, given that the two words are already known to be in the
+ sentence.
+ That this is an expectation value should be clear, as the relation might
+ appear multiple times in one sentence (e.g.
+ if one of the words is repeated).
+  The sum
 \begin_inset Formula 
 \[
 F(R|S,*,*)=\sum_{w_{l},w_{r}}F(R|S,w_{l},w_{r})
@@ -930,35 +937,111 @@ then counts the average number of relations per sentence.
  are at least as many relations as there are words in the sentence, minus
  one, since each word must appear in at least one (distinct) relation.
  That is, 
-\begin_inset Formula $L(S)-1\le F(R|S,*,*)$
+\begin_inset Formula $F(S,*)-1\le F(R|S,*,*)$
 \end_inset
 
- with 
-\begin_inset Formula $L(S)$
+ wiHow much different this is thanth 
+\begin_inset Formula $F(S,*)$
 \end_inset
 
  the expected length of a sentence.
- Similarly, 
+ 
 \end_layout
 
 \begin_layout Standard
-XXX
-\end_layout
-
-\begin_layout Standard
-Tt is worth unpacking the unconditional probability.
- It is given by
+Similarly, one can consider the ratio
 \begin_inset Formula 
-\begin{align}
-P(R,w_{l},w_{r})= & P(R|w_{l},w_{r})P(w_{l})P(w_{r})\nonumber \\
-= & \frac{N(R,w_{l},w_{r})}{N(w_{l})N(w_{r})}\,\frac{N(w_{l})}{N(*)}\,\frac{N(w_{r})}{N(*)}\label{eq:uncond-pair}\\
-= & \frac{N(R,w_{l},w_{r})}{N(*)N(*)}\nonumber 
-\end{align}
+\[
+F(S,w_{1},w_{2})=\frac{P(S,w_{1},w_{2})}{P(w_{1})P(w_{2})}
+\]
 
 \end_inset
 
-That is, the probability is just the number of times the relationship was
- observed, divided by the total number of times two words are observed.
+which captures the frequency at which two words are seen in the same sentence.
+ The summation 
+\begin_inset Formula $F(S,*,*)$
+\end_inset
+
+ then counts how many pairs are seen per sentence.
+ Assuming that the counting was performed with a uniform distribution, this
+ should then equal the number of edges in a clique.
+ That is, for a sentence of length 
+\begin_inset Formula $m$
+\end_inset
+
+, there should be 
+\begin_inset Formula $m(m-1)/2$
+\end_inset
+
+ word-pairs (edges) counted for that sentence.
+ This should hold approximately, on average, so that 
+\begin_inset Formula $F(S,*,*)\approx F(S,*)(F(S,*)-1)/2$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+From the development above, it should be clear that it is not really possible
+ to define a quantity 
+\begin_inset Formula $P(R,*,*)$
+\end_inset
+
+ that is the 
+\begin_inset Quotes eld
+\end_inset
+
+probability of seeing a relation
+\begin_inset Quotes erd
+\end_inset
+
+.
+ We can count the number 
+\begin_inset Formula $N(R,*,*)$
+\end_inset
+
+ of times the relation occurs in a data sample.
+ We can count the average number of times the relation is seen in a sentence.
+ However, as long as the relation occurs at least once in the data sample,
+ one would have to say that the 
+\begin_inset Quotes eld
+\end_inset
+
+probability of seeing the relation in the data sample
+\begin_inset Quotes erd
+\end_inset
+
+ is one.
+ The problem is one of normalization: there is no universe, of which 
+\begin_inset Formula $N(R,*,*)$
+\end_inset
+
+ is a fractional measure.
+\end_layout
+
+\begin_layout Standard
+That said, once can still consider an interesting ratio:
+\begin_inset Formula 
+\[
+F(R,*,*)=\sum_{w_{l},w_{r}}F(R,w_{l},w_{r})=\sum_{w_{l},w_{r}}\frac{P(R,w_{l},w_{r})}{P(w_{l})P(w_{r})}
+\]
+
+\end_inset
+
+This can be interpreted as a kind-of centrality.
+ So, for example, for the any-pair relation, every word in the data sample
+ must participate in at least one such pair-relation, and thus, we expect
+ that 
+\begin_inset Formula $F(R,*,*)\approx1$
+\end_inset
+
+.
+ The precise value is related to the tree-parse that is being used to generate
+ the any-relation.
+ If the (random) parse-tree is acyclic, then the number of edges is comparable
+ to the number of words.
+ If the parse-tree contains cycles, then there may be more relations than
+ there are words.
 \end_layout
 
 \begin_layout Subsubsection*
