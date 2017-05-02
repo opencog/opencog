@@ -365,23 +365,23 @@
 	; Purge stuff associated with a single word-instance.
 	; Expects wi to be a WordInstanceNode.
 	; Calling extract-recursive will blow away most of the junk
-	; that the WordInstance appear in, but a few have to be removed
-	; manually. These are:
+	; that the WordInstance appear in, but this will leave behind
+	; dangling LgLinkInstances and occasional unused NumberNodes.
+	; These have to be removed manually.
 	;
-	; The WordInstances that appear in LgLinkInstances:
+	; The LgLinkInstances appear like so:
+	;
 	;     EvaluationLink
 	;           LgLinkInstanceNode
 	;           ListLink
 	;               WordInstanceNode
 	;               WordInstanceNode
 	;
-	; and so we have to track those down and extract them.
+	; while the NumberNodes as
 	;
-	; They also appear in WordSequenceLinks:
 	;     WordSequenceLink
 	;         WordInstanceNode
 	;         NumberNode
-	; and so we need to get rid of the NumberNode's too.
 	;
 	; The extract-recursive will blow away everything else --
 	; the LemmaLinks, ReferenceLinks, etc.
@@ -391,23 +391,21 @@
 			(lambda (x)
 				(if (eq? 'ListLink (cog-type x))
 					(for-each extract-link-instance
-						(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x))
-				)
-				; Extract the NumberNode
+						(cog-chase-link 'EvaluationLink 'LgLinkInstanceNode x)))
+
+				; Extract the NumberNode, but only if it's not used.
 				(if (eq? 'WordSequenceLink (cog-type x))
 					(let ((oset (cog-outgoing-set x)))
 						(cog-extract x)
-						(cog-extract (cadr oset)))
-				)
-			)
-			(cog-incoming-set wi)
-		)
+						(cog-extract (cadr oset)))))
+			(cog-incoming-set wi))
 		(cog-extract-recursive wi)
 	)
 
 	; Purge, recusively, all of the word-instances in the parse.
 	; This is expecting 'parse' to be a ParseNode.
 	; The following is expected:
+	;
 	;      WordInstanceLink
 	;           WordInstanceNode
 	;           ParseNode
@@ -416,9 +414,7 @@
 		(for-each
 			(lambda (x)
 				(if (eq? 'WordInstanceLink (cog-type x))
-					(extract-word-instance (car (cog-outgoing-set x)))
-				)
-			)
+					(extract-word-instance (car (cog-outgoing-set x)))))
 			(cog-incoming-set parse)
 		)
 		(cog-extract-recursive parse)
@@ -426,6 +422,7 @@
 
 	; For each parse of the sentence, extract the parse
 	; This is expecting a structure
+	;
 	;     ParseLink
 	;         ParseNode     car of the outgoing set
 	;         SentenceNode
@@ -435,7 +432,8 @@
 				; The car will be a ParseNode
 				(extract-parse (car (cog-outgoing-set x)))
 			)
-			; Extract the NumberNode
+
+			; Extract the NumberNode, but only if it's not used.
 			(if (eq? 'SentenceSequenceLink (cog-type x))
 				(let ((oset (cog-outgoing-set x)))
 					(cog-extract x)
