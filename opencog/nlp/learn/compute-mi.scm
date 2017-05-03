@@ -579,10 +579,10 @@
 ; already been computed.
 ;
 ;
-(define (compute-pair-mi right-word lg_rel)
+(define (compute-pair-mi right-word GET-PAIR GET-PAIR-TOTAL lg_rel)
 
 	; Get the word-pair grand-total
-	(define pair-total (get-pair-total lg_rel))
+	(define pair-total (get-count (GET-PAIR-TOTAL)))
 
 	(let* (
 			; list-links are all the ListLinks in which the word appears
@@ -601,9 +601,8 @@
 			)
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (concatenate! (map!
-					(lambda (lnk) (get-any-pair-link lnk))
-					left-stars)))
+			(left-evs (concatenate!
+					(map! (lambda (lnk) (GET-PAIR lnk)) left-stars)))
 		)
 		(begin
 			(for-each
@@ -700,7 +699,7 @@
 	; for-each
 	(par-for-each
 		(lambda (word)
-			(compute-pair-mi word lg_rel)
+			(compute-pair-mi word GET-PAIR GET-PAIR-TOTAL lg_rel)
 			(trace-msg-cnt "Done with pair MI cnt=")
 		)
 		all-the-words
