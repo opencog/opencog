@@ -238,24 +238,26 @@
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-; Word-pair stuff below.
 ; ---------------------------------------------------------------------
-; Get the left wild-card count for word and lg_rel.
-; (that is, the wildcard is on the left side)
+; Random-tree parse word-pair count access routines.
+; ---------------------------------------------------------------------
+; Get the left wild-card count for `word`, for the
+; LG link type "ANY". (the wildcard is on the left side)
 
-(define (get_left_wildcard_count word lg_rel)
+(define (get-any-left-wildcard-count word)
 	(get-count
-		(EvaluationLink lg_rel (ListLink any-left word))
-	)
+		(EvaluationLink any-pair-pred
+			(ListLink any-left word)))
 )
 
 ; ---------------------------------------------------------------------
-; Get the right wild-card count for word and lg_rel.
-; (that is, the wildcard is on the right side)
+; Get the right wild-card count for `word`, for the
+; LG link type "ANY". (the wildcard is on the left side)
 
-(define (get_right_wildcard_count word lg_rel)
+(define (get-any-right-wildcard-count word)
 	(get-count
-		(EvaluationLink lg_rel (ListLink word any-right)))
+		(EvaluationLink any-pair-pred
+		(ListLink word any-right)))
 )
 
 ; ---------------------------------------------------------------------
@@ -326,6 +328,34 @@
 	)
 )
 
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; Clique-based-counting word-pair access methods.
+; ---------------------------------------------------------------------
+; Get the left wild-card count for `word`, for the
+; clique-based counts. (the wildcard is on the left side)
+
+(define (get-clique-left-wildcard-count word)
+	(get-count
+		(EvaluationLink pair-pred
+			(ListLink any-left word)))
+)
+
+; ---------------------------------------------------------------------
+; Get the right wild-card count for `word`, for the
+; clique-based counts. (the wildcard is on the left side)
+
+(define (get-clique-right-wildcard-count word)
+	(get-count
+		(EvaluationLink pair-pred
+		(ListLink word any-right)))
+)
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Compute the left and right word-pair wildcard counts.
 ; That is, compute the summations N(w,*) and N(*,w) where * denotes
@@ -768,10 +798,10 @@
 		(for-each
 			(lambda (word)
 				(set! l-cnt
-					(+ l-cnt (get_left_wildcard_count word lg_rel))
+					(+ l-cnt (get-any-left-wildcard-count word))
 				)
 				(set! r-cnt
-					(+ r-cnt (get_right_wildcard_count word lg_rel))
+					(+ r-cnt (get-any-right-wildcard-count word))
 				)
 			)
 			(get-all-words)
@@ -1052,13 +1082,11 @@
 ; ---------------------------------------------------------------------
 ; Temporary handy-dandy main entry point.
 
-(define any-relation (LinkGrammarRelationshipNode "ANY"))
-
 (define-public (batch-all-pairs)
 	(begin
 		(init-trace "/tmp/progress")
 
-		(batch-all-pair-mi any-relation)
+		(batch-all-pair-mi any-pair-pred)
 	)
 )
 
@@ -1094,9 +1122,7 @@
 			(and
 				(equal? 'WordNode (cog-type (get-left-word-of-pair pair)))
 				(equal? 'WordNode (cog-type (get-right-word-of-pair pair)))))
-		(cog-incoming-by-type
-			(LinkGrammarRelationshipNode "ANY")
-			'EvaluationLink))
+		(cog-incoming-by-type any-pair-pred 'EvaluationLink))
 )
 
 (define-public (total-word-observations)
@@ -1117,8 +1143,7 @@
 "
 	; Just get the previously computed amount.
 	(get-count
-		(EvaluationLink
-			(LinkGrammarRelationshipNode "ANY")
+		(EvaluationLink any-pair-pred
 			(ListLink
 				(AnyNode "left-word")
 				(AnyNode "right-word"))))
@@ -1131,9 +1156,8 @@
   of the \"ANY\" relationship. That is, return N(w, *), as defined above,
   and in the diary.  Here, w is WORD-STR, assumed to be a string.
 "
-	(get_right_wildcard_count  ;; the wildcard is on the right.
-		(WordNode WORD-STR)
-		(LinkGrammarRelationshipNode "ANY"))
+	;; the wildcard is on the right.
+	(get-any-right-wildcard-count (WordNode WORD-STR))
 )
 
 (define-public (get-right-count-str WORD-STR)
@@ -1143,9 +1167,8 @@
   of the \"ANY\" relationship. That is, return N(*, w), as defined above,
   and in the diary.  Here, w is WORD-STR, assumed to be a string.
 "
-	(get_left_wildcard_count  ;; the wildcard is on the left.
-		(WordNode WORD-STR)
-		(LinkGrammarRelationshipNode "ANY"))
+	;; the wildcard is on the left.
+	(get-any-left-wildcard-count (WordNode WORD-STR))
 )
 
 (define-public (get-word-count-str WORD-STR)

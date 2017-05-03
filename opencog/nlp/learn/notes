@@ -3750,3 +3750,15 @@ ALTER DATABASE en_pairs RENAME TO en_pairs_rohit;
  (use-modules (opencog) (opencog persist) (opencog persist-sql))
  (use-modules (opencog nlp) (opencog nlp learn))
  (sql-open "postgres:///en_pairs?user=ubuntu")
+
+(fetch-all-words)
+(length (get-all-words)) 65021 
+(total-word-observations) 7181662.0 7.2M
+(PredicateNode "*-Sentence Word Pair-*")
+(SchemaNode "*-Pair Distance-*")o
+   (define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
+   (define pair-dist (SchemaNode "*-Pair Distance-*"))
+
+(length (cog-incoming-set pair-pred))
+(get-total-atom-count (cog-incoming-set pair-pred))
+

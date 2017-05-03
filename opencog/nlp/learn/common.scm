@@ -18,6 +18,7 @@
 
 ; These are used to store/maintain counts for clique-pair counting.
 ; See `link-pipeline.scm` for usage.
+(define any-pair-pred (LinkGrammarRelationshipNode "ANY"))
 (define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
 (define pair-dist (SchemaNode "*-Pair Distance-*"))
 
