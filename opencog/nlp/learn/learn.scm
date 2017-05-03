@@ -11,3 +11,4 @@
 (load "learn/link-pipeline.scm")
 (load "learn/make-disjuncts.scm")
 (load "learn/mst-parser.scm")
+(load "learn/word-pair-mi.scm")
