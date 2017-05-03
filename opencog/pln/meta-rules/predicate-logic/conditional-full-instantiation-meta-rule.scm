@@ -104,67 +104,67 @@
       meta-pattern
       meta-rewrite)))
 
-;; (define conditional-full-instantiation-inheritance-meta-rule
-;;   (let* ((X (Variable "$X"))
-;;          (A (Variable "$A"))
-;;          (B (Variable "$B"))
-;;          (ConceptT (Type "ConceptNode"))
-;;          ;; Meta rule variable declaration
-;;          (meta-vardecl (VariableList
-;;                          (TypedVariable A ConceptT)
-;;                          (TypedVariable B ConceptT)))
-;;          ;; Meta rule main clause
-;;          (inheritance (Inheritance A B))
-;;          ;; Meta rule precondition
-;;          (meta-precondition (Evaluation
-;;                               (GroundedPredicate "scm: gt-zero-confidence")
-;;                               inheritance))
-;;          ;; Meta rule pattern
-;;          (meta-pattern (And inheritance meta-precondition))
+(define conditional-full-instantiation-inheritance-meta-rule
+  (let* ((X (Variable "$X"))
+         (A (Variable "$A"))
+         (B (Variable "$B"))
+         (ConceptT (Type "ConceptNode"))
+         ;; Meta rule variable declaration
+         (meta-vardecl (VariableList
+                         (TypedVariable A ConceptT)
+                         (TypedVariable B ConceptT)))
+         ;; Meta rule main clause
+         (inheritance (Inheritance A B))
+         ;; Meta rule precondition
+         (meta-precondition (Evaluation
+                              (GroundedPredicate "scm: gt-zero-confidence")
+                              inheritance))
+         ;; Meta rule pattern
+         (meta-pattern (And inheritance meta-precondition))
 
-;;          ;; Produced rule variable declaration. A and B will now be
-;;          ;; content rather than variables.
-;;          (produced-vardecl X)
-;;          (produced-clause (Member X A))
-;;          ;; Produced rule preconditions. A and A(X) must have a positive confidence
-;;          (produced-precondition-1 (Evaluation
-;;                                     (GroundedPredicate "scm: gt-zero-confidence")
-;;                                     A))
-;;          (produced-precondition-2 (Evaluation
-;;                                     (GroundedPredicate "scm: gt-zero-confidence")
-;;                                     (Member X A)))
-;;          ;; Produced rule pattern. Look for groundings of P that meet
-;;          ;; the precondition.
-;;          (produced-pattern (And
-;;                              produced-clause
-;;                              produced-precondition-1
-;;                              produced-precondition-2))
-;;          ;; Produced rule rewrite. Apply formula to calculate the TV
-;;          ;; over B(X).
-;;          (produced-rewrite (ExecutionOutput
-;;                             (GroundedSchema "scm: conditional-full-instantiation-formula")
-;;                             (Unquote
-;;                               (List
-;;                                 ;; Conclusion
-;;                                 (Member X B)
-;;                                 ;; Premises. Both P and the
-;;                                 ;; implication are required to
-;;                                 ;; calculate the TV over Q.
-;;                                 (Member X A)
-;;                                 inheritance))))
-;;          ;; Meta rule rewrite
-;;          (meta-rewrite (Quote (Bind
-;;                           (Unquote produced-vardecl)
-;;                           (Unquote produced-pattern)
-;;                           produced-rewrite ; the Unquote appears
-;;                                            ; inside it, to avoid
-;;                                            ; running the
-;;                                            ; ExecutionOutput
-;;                           ))))
-;;     (Bind
-;;       meta-vardecl
-;;       meta-pattern
-;;       meta-rewrite)))
+         ;; Produced rule variable declaration. A and B will now be
+         ;; content rather than variables.
+         (produced-vardecl X)
+         (produced-clause (Member X A))
+         ;; Produced rule preconditions. A and A(X) must have a positive confidence
+         (produced-precondition-1 (Evaluation
+                                    (GroundedPredicate "scm: gt-zero-confidence")
+                                    A))
+         (produced-precondition-2 (Evaluation
+                                    (GroundedPredicate "scm: gt-zero-confidence")
+                                    (Member X A)))
+         ;; Produced rule pattern. Look for groundings of P that meet
+         ;; the precondition.
+         (produced-pattern (And
+                             produced-clause
+                             produced-precondition-1
+                             produced-precondition-2))
+         ;; Produced rule rewrite. Apply formula to calculate the TV
+         ;; over B(X).
+         (produced-rewrite (ExecutionOutput
+                            (GroundedSchema "scm: conditional-full-instantiation-formula")
+                            (Unquote
+                              (List
+                                ;; Conclusion
+                                (Member X B)
+                                ;; Premises. Both P and the
+                                ;; implication are required to
+                                ;; calculate the TV over Q.
+                                (Member X A)
+                                inheritance))))
+         ;; Meta rule rewrite
+         (meta-rewrite (Quote (Bind
+                          (Unquote produced-vardecl)
+                          (Unquote produced-pattern)
+                          produced-rewrite ; the Unquote appears
+                                           ; inside it, to avoid
+                                           ; running the
+                                           ; ExecutionOutput
+                          ))))
+    (Bind
+      meta-vardecl
+      meta-pattern
+      meta-rewrite)))
 
 ;; The TV of Q is calculated as follows
 ;;
@@ -299,8 +299,8 @@
 (DefineLink conditional-full-instantiation-implication-scope-meta-rule-name
   conditional-full-instantiation-implication-scope-meta-rule)
 
-;; ;; Name the inheritance meta rule
-;; (define conditional-full-instantiation-inheritance-meta-rule-name
-;;   (DefinedSchemaNode "conditional-full-instantiation-inheritance-meta-rule"))
-;; (DefineLink conditional-full-instantiation-inheritance-meta-rule-name
-;;   conditional-full-instantiation-inheritance-meta-rule)
+;; Name the inheritance meta rule
+(define conditional-full-instantiation-inheritance-meta-rule-name
+  (DefinedSchemaNode "conditional-full-instantiation-inheritance-meta-rule"))
+(DefineLink conditional-full-instantiation-inheritance-meta-rule-name
+  conditional-full-instantiation-inheritance-meta-rule)
