@@ -120,15 +120,7 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
-; Define the "things" that will be pair-summed over.
-; These are set as globals here, they really should be local to the
-; environment; this should be fixed someday, if we ever do this for
-; non-word types.
 
-(define item-type 'WordNode)
-(define item-type-str "WordNode")
-
-; Cache the created atoms for left an right.
 (define any-left (AnyNode "left-word"))
 (define any-right (AnyNode "right-word"))
 
@@ -138,7 +130,7 @@
 "
   fetch-all-words - fetch all WordNodes from the database backend.
 "
-	(load-atoms-of-type item-type)
+	(load-atoms-of-type 'WordNode)
 )
 
 (define-public (get-all-words)
@@ -146,7 +138,7 @@
   get-all-words - return a list holding all of the observed words
   This does NOT fetch the words from the backing store.
 "
-	(cog-get-atoms item-type)
+	(cog-get-atoms 'WordNode)
 )
 
 (define-public (fetch-any-pairs)
@@ -167,35 +159,35 @@
 )
 
 ; ---------------------------------------------------------------------
-; return all the ListLinks of arity two in which the word appears
-(define (get-word-pairs word)
+; Return all of the ListLinks of arity two in which the ITEM appears
+(define (get-item-pairs ITEM)
 	(filter
 		(lambda (lnk) (equal? 2 (cog-arity lnk)))
-		(cog-incoming-by-type word 'ListLink))
+		(cog-incoming-by-type ITEM 'ListLink))
 )
 
-; The left-stars have the word in the right slot and
-; have some WordNode (item-type) in the left slot.
-; We must check for WordNode in this spot, as some of
-; these ListLinks may have AnyNode in that slot.
-(define (get-left-stars word list-links)
+; The left-stars have the item in the right slot and have some other
+; item (of ITEM-TYPE) in the left slot. We must check for ITEM-TYPE
+; in this spot, as some of these ListLinks may have AnyNode (or
+; something else) in that slot.
+(define (get-left-stars word list-of-pairs ITEM-TYPE)
 	(filter
 		(lambda (lnk)
 			(define oset (cog-outgoing-set lnk))
 			(and
-				(equal? item-type (cog-type (car oset)))
+				(equal? ITEM-TYPE (cog-type (car oset)))
 				(equal? word (cadr oset))))
-		list-links)
+		list-of-pairs)
 )
 
-(define (get-right-stars word list-links)
+(define (get-right-stars word list-of-pairs ITEM-TYPE)
 	(filter
 		(lambda (lnk)
 			(define oset (cog-outgoing-set lnk))
 			(and
 				(equal? word (car oset))
-				(equal? item-type (cog-type (cadr oset))))
-		list-links)
+				(equal? ITEM-TYPE (cog-type (cadr oset))))
+		list-of-pairs)
 )
 
 ; ---------------------------------------------------------------------
@@ -435,22 +427,22 @@
 ;
 ; Returns the two wild-card EvaluationLinks
 
-(define (compute-pair-wildcard-counts word
-	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD)
+(define (compute-pair-wildcard-counts ITEM
+	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD ITEM-TYPE)
 
 	(let* (
-			; list-links are all the ListLinks in which the word appears
-			(list-links (get-word-pairs word))
+			; list-links are all the ListLinks in which the ITEM appears
+			(list-links (get-item-pairs ITEM))
 
-			; The left-stars have the word in the right slot and
-			; have some WordNode (item-type) in the left slot.
-			; We must check for WordNode in this spot, as some of
-			; these ListLinks may have AnyNode in that slot.
-			(left-stars (get-left-stars word list-links))
+			; The left-stars have the item in the right slot and
+			; have some other ITEM-TYPE in the left slot. We must
+			; check for ITEM-TYPE in this spot, as some of these
+			; ListLinks may have AnyNode in that slot.
+			(left-stars (get-left-stars ITEM list-links ITEM-TYPE))
 
-			; The right-stars have the word in the left slot and
-			; have some WordNode (item-type) in the right slot.
-			(right-stars (get-right-stars word list-links))
+			; The right-stars have the item in the left slot and
+			; have some other ITEM-TYPE in the right slot.
+			(right-stars (get-right-stars ITEM list-links ITEM-TYPE))
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
@@ -466,10 +458,10 @@
 		)
 
 		(if (< 0 left-total)
-			(store-atom (set-count (GET-LEFT-WILD word) left-total)))
+			(store-atom (set-count (GET-LEFT-WILD ITEM) left-total)))
 
 		(if (< 0 right-total)
-			(store-atom (set-count (GET-RIGHT-WILD word) right-total)))
+			(store-atom (set-count (GET-RIGHT-WILD ITEM) right-total)))
 	)
 )
 
@@ -578,7 +570,7 @@
 ;
 ;
 (define (compute-pair-mi right-word GET-PAIR
-	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ITEM-TYPE)
 
 	; Get the word-pair grand-total
 	(define pair-total (get-count (GET-PAIR-TOTAL)))
@@ -586,7 +578,7 @@
 	(let* (
 			; left-stars are all the ListLinks in which the right-word
 			; appears on the right (and anything on the left)
-			(left-stars (get-left-stars (get-word-pairs right-word)))
+			(left-stars (get-left-stars (get-item-pairs right-word) ITEM-TYPE))
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
@@ -655,7 +647,7 @@ xxx
 ; the atomspace provides.
 ;
 (define (batch-all-pair-mi GET-PAIR
-	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL all-singletons)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ITEM-TYPE all-singletons)
 
 	(trace-msg-num "Start batching, num words="
 		(length all-singletons))
@@ -667,7 +659,7 @@ xxx
 	(par-for-each
 		(lambda (word)
 			(compute-pair-wildcard-counts word
-				GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD)
+				GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD ITEM-TYPE)
 			(trace-msg-cnt "Wildcard-count did ")
 		)
 		all-singletons
@@ -697,7 +689,7 @@ xxx
 	(par-for-each
 		(lambda (word)
 			(compute-pair-mi word GET-PAIR
-				GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
+				GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ITEM-TYPE)
 			(trace-msg-cnt "Done with pair MI cnt=")
 		)
 		all-singletons
@@ -729,6 +721,7 @@ xxx
 			get-any-left-wildcard
 			get-any-right-wildcard
 			get-any-pair
+			'WordNode
 			(get-all-words))
 	)
 )
