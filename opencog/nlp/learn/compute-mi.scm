@@ -286,52 +286,28 @@
 (define (get-any-pair-link PAIR)
 	(get-pair-link 'EvaluationLink any-pair-pred PAIR)
 
-; Get the left wild-card count for `word`, for the
-; LG link type "ANY". (the wildcard is on the left side)
+; Get the atom that holds the left wild-card count for `word`,
+; for the LG link type "ANY". (the wildcard is on the left side)
 
-(define (get-any-left-wildcard-count word)
-	(get-count
-		(EvaluationLink any-pair-pred
-			(ListLink any-left word)))
+(define (get-any-left-wildcard word)
+	(EvaluationLink any-pair-pred (ListLink any-left word))
 )
 
-; Setter for the above.
-(define (set-any-left-wildcard-count WORD TOTAL)
-	(store-atom
-		(set-count
-			(EvaluationLink any-pair-pred
-				(ListLink any-left WORD))
-			TOTAL))
+(define (get-any-right-wildcard word)
+	(EvaluationLink any-pair-pred (ListLink word any-right))
 )
 
 ; ---------------------------------------------------------------------
-; Get the right wild-card count for `word`, for the
-; LG link type "ANY". (the wildcard is on the left side)
-
-(define (get-any-right-wildcard-count word)
-	(get-count
-		(EvaluationLink any-pair-pred
-		(ListLink word any-right)))
-)
-
-; Setter for the above.
-(define (set-any-right-wildcard-count WORD TOTAL)
-	(store-atom
-		(set-count
-			(EvaluationLink any-pair-pred
-				(ListLink WORD any-right))
-			TOTAL))
-)
-
-; ---------------------------------------------------------------------
-; Get the total word-pair count for lg_rel.
+; Get the total word-pair count.
 ; That is, get the count, for wild-cards on both the left and right.
 
-(define (get-pair-total lg_rel)
+(define (get-any-pair-total)
 	(get-count
-		(EvaluationLink lg_rel (ListLink any-left any-right)))
+		(EvaluationLink any-pair-pred
+			 (ListLink any-left any-right)))
 )
 
+;; Setter, for the above.
 (define (set-any-pair-total TOTAL)
 	; Create and save the grand-total count.
 	(store-atom
@@ -371,41 +347,25 @@
 (define (get-clique-pair-link PAIR)
 	(get-pair-link 'EvaluationLink pair-pred PAIR)
 
-; Get the left wild-card count for `word`, for the
-; clique-based counts. (the wildcard is on the left side)
+; Get the atom that holds the left wild-card count for `word`,
+; for the clique-based counts. (the wildcard is on the left side)
 
-(define (get-clique-left-wildcard-count word)
-	(get-count
-		(EvaluationLink pair-pred
-			(ListLink any-left word)))
+(define (get-clique-left-wildcard word)
+	(EvaluationLink pair-pred (ListLink any-left word))
 )
 
-(define (set-clique-left-wildcard-count WORD TOTAL)
-	(store-atom
-		(set-count
-			(EvaluationLink pair-pred
-				(ListLink any-left WORD))
-			TOTAL))
+(define (get-clique-right-wildcard word)
+	(EvaluationLink pair-pred (ListLink word any-right))
 )
 
 ; ---------------------------------------------------------------------
-; Get the right wild-card count for `word`, for the
-; clique-based counts. (the wildcard is on the left side)
-
-(define (get-clique-right-wildcard-count word)
+(define (get-clique-pair-total)
 	(get-count
 		(EvaluationLink pair-pred
-		(ListLink word any-right)))
+			 (ListLink any-left any-right)))
 )
 
-(define (set-clique-right-wildcard-count WORD TOTAL)
-	(store-atom
-		(set-count
-			(EvaluationLink pair-pred
-				(ListLink WORD any-right))
-			TOTAL))
-)
-
+;; Setter, for the above.
 (define (set-clique-pair-total TOTAL)
 	; Create and save the grand-total count.
 	(store-atom
@@ -490,7 +450,7 @@
 ; Returns the two wild-card EvaluationLinks
 
 (define (compute-pair-wildcard-counts word
-	GET-PAIR SET-LEFT-TOTAL SET-RIGHT-TOTAL)
+	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD)
 
 	(let* (
 			; list-links are all the ListLinks in which the word appears
@@ -547,10 +507,10 @@
 		)
 
 		(if (< 0 left-total)
-			(SET-LEFT-WILD word left-total))
+			(store-atom (set-count (GET-LEFT-WILD word) left-total)))
 
 		(if (< 0 right-total)
-			(SET-RIGHT-WILD word right-total))
+			(store-atom (set-count (GET-RIGHT-WILD word) right-total)))
 	)
 )
 
@@ -783,10 +743,10 @@
 		(for-each
 			(lambda (word)
 				(set! l-cnt
-					(+ l-cnt (GET-LEFT-WILD word))
+					(+ l-cnt (get-count (GET-LEFT-WILD word)))
 				)
 				(set! r-cnt
-					(+ r-cnt (GET-RIGHT-WILD word))
+					(+ r-cnt (get-count (GET-RIGHT-WILD word)))
 				)
 			)
 			(get-all-words)
@@ -833,10 +793,12 @@
 ; words in the atomspace; missing words will cause the corresponding
 ; pairs to be missed.
 
-(define (batch-all-pair-wildcard-logli lg_rel)
+(define (batch-all-pair-wildcard-logli
+	GET-PAIR-TOTAL
+	 lg_rel)
 
 	; Get the word-pair grand-total
-	(define pair-total (get-pair-total lg_rel))
+	(define pair-total (GET-PAIR-TOTAL))
 
 	; For each wild-card pair associated with the word,
 	; obtain the log likelihood.
@@ -951,9 +913,10 @@
 ; in order to get the flexibility that the atomspace provides.
 ;
 (define (batch-all-pair-mi
-	GET-PAIR SET-LEFT-TOTAL SET-RIGHT-TOTAL
-	GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL
+	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL
 	lg_rel)
+
+(define GET-PAIR-TOTAL get-any-pair-total)
 
 	(define all-the-words (get-all-words))
 
@@ -967,7 +930,7 @@
 	(par-for-each
 		(lambda (word)
 			(compute-pair-wildcard-counts word
-				GET-PAIR SET-LEFT-TOTAL SET-RIGHT-TOTAL)
+				GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD)
 			(trace-msg-cnt "Wildcard-count did ")
 		)
 		all-the-words
@@ -986,7 +949,10 @@
 	; Compute the left and right wildcard logli's
 	(trace-msg "Going to batch-logli wildcards\n")
 	(display "Going to batch-logli wildcards\n")
-	(batch-all-pair-wildcard-logli lg_rel)
+	(batch-all-pair-wildcard-logli
+		GET-PAIR-TOTAL
+		GET-LEFT-WILD GET-RIGHT-WILD
+		 lg_rel)
 	(trace-elapsed)
 
 	; Enfin, the word-pair mi's
@@ -1024,10 +990,8 @@
 
 		(batch-all-pair-mi
 			get-any-pair-link
-			set-any-left-wildcard-count
-			set-any-right-wildcard-count
-			get-any-left-wildcard-count
-			get-any-right-wildcard-count
+			get-any-left-wildcard
+			get-any-right-wildcard
 			set-any-pair-total
  any-pair-pred)
 	)
@@ -1100,7 +1064,7 @@
   and in the diary.  Here, w is WORD-STR, assumed to be a string.
 "
 	;; the wildcard is on the right.
-	(get-any-right-wildcard-count (WordNode WORD-STR))
+	(get-count (get-any-right-wildcard (WordNode WORD-STR)))
 )
 
 (define-public (get-right-count-str WORD-STR)
@@ -1111,7 +1075,7 @@
   and in the diary.  Here, w is WORD-STR, assumed to be a string.
 "
 	;; the wildcard is on the left.
-	(get-any-left-wildcard-count (WordNode WORD-STR))
+	(get-count (get-any-left-wildcard (WordNode WORD-STR)))
 )
 
 (define-public (get-word-count-str WORD-STR)
