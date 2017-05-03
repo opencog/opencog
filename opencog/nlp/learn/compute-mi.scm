@@ -170,11 +170,8 @@
 ; return all the ListLinks of arity two in which the word appears
 (define (get-word-pairs word)
 	(filter
-		(lambda (lnk) (and
-				(equal? 'ListLink (cog-type lnk))
-				(equal? 2 (cog-arity lnk))))
-		(cog-incoming-set-by-type word))
-xxxxxxx
+		(lambda (lnk) (equal? 2 (cog-arity lnk)))
+		(cog-incoming-by-type word 'ListLink))
 )
 
 ; The left-stars have the word in the right slot and
@@ -467,32 +464,11 @@ xxxxxxx
 			; have some WordNode (item-type) in the left slot.
 			; We must check for WordNode in this spot, as some of
 			; these ListLinks may have AnyNode in that slot.
-			(left-stars
-				(filter
-					(lambda (lnk)
-						(define oset (cog-outgoing-set lnk))
-						(and
-							(equal? item-type (cog-type (car oset)))
-							(equal? word (cadr oset))
-						)
-					)
-					list-links
-				)
-			)
+			(left-stars (get-left-stars word list-links))
+
 			; The right-stars have the word in the left slot and
 			; have some WordNode (item-type) in the right slot.
-			(right-stars
-				(filter
-					(lambda (lnk)
-						(define oset (cog-outgoing-set lnk))
-						(and
-							(equal? word (car oset))
-							(equal? item-type (cog-type (cadr oset)))
-						)
-					)
-					list-links
-				)
-			)
+			(right-stars (get-right-stars word list-links))
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
@@ -616,20 +592,10 @@ xxxxxxx
 	(define pair-total (get-count (GET-PAIR-TOTAL)))
 
 	(let* (
-			; list-links are all the ListLinks in which the word appears
-			(left-stars
-				(filter
-					(lambda (lnk)
-						(define oset (cog-outgoing-set lnk))
-						(and
-							(equal? 'ListLink (cog-type lnk))
-							(equal? item-type (cog-type (car oset)))
-							(equal? right-word (cadr oset))
-						)
-					)
-					(cog-incoming-set right-word)
-				)
-			)
+			; left-stars are all the ListLinks in which the right-word
+			; appears on the right (and anything on the left)
+			(left-stars (get-left-stars (get-word-pairs right-word)))
+
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
 			(left-evs (concatenate!

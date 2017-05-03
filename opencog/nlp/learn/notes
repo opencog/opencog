@@ -3784,4 +3784,14 @@ get-any-pair-link-> GET-PAIR
 get-word-pairs
 
 cog-incoming-by-type
+.scm:		(par-map get-endpoint (cog-filter link-type 
+utilities.scm:
+cog-map-chase-link dead
+cog-map-chase-link-dbg   used by ppars ranker
+cog-map-chase-links-chk  used by cog-chase-link-chk
+cog-chase-link-chk   used by  nlp-utils
+
+cog-map-apply-link  dead used by cog-get-link
+cog-get-link used by 
+cog-get-pred
 
