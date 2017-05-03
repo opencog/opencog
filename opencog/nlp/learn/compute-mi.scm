@@ -931,78 +931,6 @@
 	)
 )
 
-;;;; Same as above, but uses pattern matcher. CAUTION: this is a LOT
-;;;; slower than the above!
-;;;(define (compute-pair-mi-pm right-word lg_rel)
-;;;
-;;;	; Define the bind link that we'll use with the pattern matcher.
-;;;	; left-bind has the wildcard on the left.
-;;;	(define left-bind-link
-;;;		(BindLink
-;;;			; Be careful to ask for WordNode, since there are also
-;;;			; eval links with AnyNode floating around ...
-;;;			(TypedVariableLink
-;;;				(VariableNode "$left-word")
-;;;				(TypeNode item-type-str)
-;;;			)
-;;;			(EvaluationLink lg_rel
-;;;				(ListLink (VariableNode "$left-word") right-word)
-;;;			)
-;;;			(EvaluationLink lg_rel
-;;;				(ListLink (VariableNode "$left-word") right-word)
-;;;			)
-;;;		)
-;;;	)
-;;;
-;;;	; Get the word-pair grand-total
-;;;	(define pair-total (get-pair-total lg_rel))
-;;;
-;;;	(let* (
-;;;			; lefties are those with the wildcard on the left side.
-;;;			; XXX It would be more efficient to not use the pattern
-;;;			; matcher here, but to instead filter the given relset.
-;;;			; But I'm lazy, for just right now.
-;;;			(left-list (cog-bind left-bind-link))
-;;;			(lefties (cog-outgoing-set left-list))
-;;;		)
-;;;		(begin
-;;;			(for-each
-;;;
-;;;				; This lambda sets the mutual information for each word-pair.
-;;;				(lambda (pair)
-;;;					(let* (
-;;;							; the left-word of the word-pair
-;;;							(left-word (gadr pair))
-;;;							(r-logli (get_right_wildcard_logli left-word lg_rel))
-;;;							(l-logli (get_left_wildcard_logli right-word lg_rel))
-;;;
-;;;							; Compute the logli log_2 P(l,r)/P(*,*)
-;;;							(atom (compute-atom-logli pair pair-total))
-;;;
-;;;							; Get the logli computed immediately above.
-;;;							(ll (get-logli atom))
-;;;
-;;;							; Subtract the left and right entropies to get the
-;;;							; mutual information (at last!)
-;;;							(mi (- (+ l-logli r-logli) ll))
-;;;						)
-;;;						; Save the hard-won MI to the database.
-;;;						(store-atom (set-mi atom mi))
-;;;					)
-;;;				)
-;;;				lefties
-;;;			)
-;;;
-;;;			; And now ... delete some of the crap we created.
-;;;			; Don't want to pollute the atomspace.
-;;;			(extract-hypergraph left-bind-link)
-;;;			; Note that cog-extract only goes one level deep, it does not
-;;;			; recurse; so the below only delete the ListLink at the top.
-;;;			(cog-extract left-list)
-;;;		)
-;;;	)
-;;;)
-
 ; ---------------------------------------------------------------------
 ;
 ; Compute the mutual information between all pairs related by lg_rel.
@@ -1035,8 +963,6 @@
 		(length all-the-words))
 
 	; First, get the left and right wildcard counts.
-	(trace-msg "Going to batch-wildcard count\n")
-
 	; (for-each
 	(par-for-each
 		(lambda (word)
@@ -1068,8 +994,8 @@
 	(display "Going to do individual word-pair mi\n")
 	; for-each
 	(par-for-each
-		(lambda (right-word)
-			(compute-pair-mi right-word lg_rel)
+		(lambda (word)
+			(compute-pair-mi word lg_rel)
 			(trace-msg-cnt "Done with pair MI cnt=")
 		)
 		all-the-words
