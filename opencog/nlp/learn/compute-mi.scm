@@ -269,6 +269,16 @@
 		(EvaluationLink lg_rel (ListLink any-left any-right)))
 )
 
+(define (set-any-pair-total TOTAL)
+	; Create and save the grand-total count.
+	(store-atom
+		(set-count
+			(EvaluationLink any-pair-pred
+				(ListLink any-left any-right))
+		TOTAL)
+	)
+)
+
 ; ---------------------------------------------------------------------
 ; Get the left wild-card logli for word and lg_rel.
 ; (that is, the wildcard is on the left side)
@@ -350,6 +360,16 @@
 	(get-count
 		(EvaluationLink pair-pred
 		(ListLink word any-right)))
+)
+
+(define (set-clique-pair-total TOTAL)
+	; Create and save the grand-total count.
+	(store-atom
+		(set-count
+			(EvaluationLink pair-pred
+				(ListLink any-left any-right))
+		TOTAL)
+	)
 )
 
 ; ---------------------------------------------------------------------
@@ -770,25 +790,17 @@
 )
 
 ; ---------------------------------------------------------------------
-; Compute the total number of observed word-pairs for the link-grammar
-; link (relation) lg_rel.
-;
-; The resulting total count is stored as the count on the EvaluationLink
-; for the structure
-;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "Blah"
-;      ListLink
-;         AnyNode "left-word"
-;         AnyNode "right-word"
-;
-; where lg_rel is (LinkGrammarRelationshipNode "Blah")
+; Compute the total number of observed word-pairs, using the left
+; and right wild-card count access methods.  The resulting total count
+; is stored using the STORE-PAIR-TOTAL function.
 ;
 ; The computation is performed batch-style. This function assumes that
 ; all word-pairs are already loaded in the atom table; it will get
 ; incorrect counts if this is not the case.
 ;
-(define (batch-all-pair-count lg_rel)
+(define (batch-all-pair-count
+	GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL)
+
 	(define l-cnt 0)
 	(define r-cnt 0)
 	(begin
@@ -798,10 +810,10 @@
 		(for-each
 			(lambda (word)
 				(set! l-cnt
-					(+ l-cnt (get-any-left-wildcard-count word))
+					(+ l-cnt (GET-LEFT-WILD word))
 				)
 				(set! r-cnt
-					(+ r-cnt (get-any-right-wildcard-count word))
+					(+ r-cnt (GET-RIGHT-WILD word))
 				)
 			)
 			(get-all-words)
@@ -821,12 +833,7 @@
 		)
 
 		; Create and save the grand-total count.
-		(store-atom
-			(set-count
-				(EvaluationLink lg_rel
-					(ListLink any-left any-right))
-			r-cnt)
-		)
+		(SET-PAIR-TOTAL r-cnt)
 		(trace-msg "Done with all-pair count\n")
 	)
 )
@@ -1053,7 +1060,10 @@
 		(trace-elapsed)
 		(trace-msg "Going to batch-count all-pairs\n")
 		(display "Going to batch-count all-pairs\n")
-		(batch-all-pair-count lg_rel)
+		(batch-all-pair-count
+			get-any-left-wildcard-count
+			get-any-right-wildcard-count
+			set-any-pair-total)
 		(trace-elapsed)
 
 		; Compute the left and right wildcard logli's
