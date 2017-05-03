@@ -31,23 +31,34 @@
 namespace opencog
 {
 
+// XXX 
+typedef std::pair<Type, Arity> TypePair;
+
 /**
  *
  */
-class TypeFrame 
+class TypeFrame: public std::vector<TypePair>
 {
 
 public:
 
-    typedef std::pair<Type, Arity> TypePair;
+    TypeFrame(const std::string &schemeRepresentation);
+    TypeFrame();
+    ~TypeFrame();
 
-    class TypeVector: public std::vector<TypeFrame::TypePair> {
-        bool operator <(TypeVector &other)
-        {
-            TypeVector::iterator it1 = this->begin();    
-            TypeVector::iterator it2 = other.begin();    
-            while (it1 < this->end()) {
-                if (it2 == other.end()) return false;
+    static TypePair STAR_PATTERN;
+    static std::string STAR_NODE_NAME;
+    static TypeFrame EMPTY_PATTERN;
+    struct LessThan {
+        bool operator()(const TypeFrame &a, const TypeFrame &b) const {
+            //printf("OPERATOR LESSTHAN\n");
+            //a.printForDebug("", "", true);
+            //b.printForDebug("", "", true);
+            TypeFrame::const_iterator it1 = a.begin();    
+            TypeFrame::const_iterator it2 = b.begin();    
+            int cursor = 0;
+            while (it1 < a.end()) {
+                if (it2 == b.end()) return false;
                 if ((*it1).first < (*it2).first) {
                     return true;
                 } else if ((*it1).first > (*it2).first) {
@@ -57,36 +68,65 @@ public:
                         return true;
                     } else if ((*it1).second > (*it2).second) {
                         return false;
+                    } else {
+                        bool check1 = a.nodeNameDefined(cursor);
+                        bool check2 = b.nodeNameDefined(cursor);
+                        //printf("INNER CHECK\n");
+                        //printf("cursor: %d\n", cursor);
+                        //printf("check1: %s\n", (check1 ? "true" : "false"));
+                        //printf("check2: %s\n", (check2 ? "true" : "false"));
+                        if (!check1 && check2) {
+                            return true;
+                        } else if (check1 && !check2) {
+                            return false;
+                        } else if (check1 && check2) {
+                            int comp = a.nodeNameAt(cursor).compare(b.nodeNameAt(cursor));
+                            if (comp < 0) {
+                                return true;
+                            } else if (comp > 0) {
+                                return false;
+                            }
+                        }
                     }
                 }
                 it1++;
                 it2++;
+                cursor++;
             }
-            return (it2 != other.end());
+            return (it2 != b.end());
         }
     };
 
-    TypeFrame(const std::string &schemeRepresentation);
-    ~TypeFrame();
+    /*
+    bool operator<(TypeFrame &other)
+    {
+    }
+    */
 
-    bool isValid();
-    TypeVector buildSignatureVector(int cursor);
-    int size();
-    TypePair at(int pos);
-    void printForDebug();
-    
+    bool lessThan(TypeFrame &other) const;
+    bool isValid() const;
+    TypeFrame buildSignature(int cursor);
+    bool nodeNameDefined(int pos) const;
+    std::string nodeNameAt(int pos) const;
+    void setNodeNameAt(int pos, std::string name);
+    void append(TypeFrame &other);
+    void pickAndPushBack(TypeFrame &other, int pos);
+    void printForDebug(std::string prefix = "", std::string suffix = "", bool showNames = false) const;
 
 private:
 
+    typedef std::map<int, std::string> NodeNameMap;
+
     bool DEBUG = false;
     bool validInstance;
-    std::vector<TypePair> parse;
+    NodeNameMap nodeNameMap;
 
     bool buildFrameRepresentation(const std::string &schemeRepresentation);
 
     int countTargets(const std::string &txt, int begin);
     int recursiveParse(const std::string &txt, int begin);
     void error(std::string message);
+    void check();
 
 };
 }

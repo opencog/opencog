@@ -110,7 +110,7 @@ void SCMLoader::parseFile(std::fstream &fin,
             }
             inComment = false;
         } else {
-            if ((c == ';') || inComment) {
+            if (((! inNodeName) && (c == ';')) || inComment) {
                 inComment = true;
             } else {
                 if ((line.length() != 0) || (c != ' ')) {

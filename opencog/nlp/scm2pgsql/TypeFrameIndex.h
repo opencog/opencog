@@ -24,8 +24,8 @@
 #ifndef _OPENCOG_TYPEFRAMEINDEX_H
 #define _OPENCOG_TYPEFRAMEINDEX_H
 
-#include "TypeFramePattern.h"
 #include <string>
+#include "TypeFrame.h"
 
 namespace opencog
 {
@@ -38,20 +38,27 @@ class TypeFrameIndex
 
 public:
 
-    typedef std::map<TypeFrame::TypePair, TypeFramePattern *> TypePairMap;
-
     TypeFrameIndex();
 
     // TODO Implement this
     ~TypeFrameIndex();
 
-    bool addFromScheme(const std::string &txt);
-
-    void printForDebug(bool showNames = false);
+    bool addFromScheme(const std::string &txt, int offset);
+    bool addFrame(TypeFrame &frame, int offset);
+    void buildSubPatternsIndex();
 
 private:
 
-    TypePairMap patterns;
+    typedef std::set<int> IntegerSet;
+    typedef std::map<TypeFrame, IntegerSet, TypeFrame::LessThan> PatternMap;
+
+    bool DEBUG = false;
+    std::vector<TypeFrame> frames;
+    PatternMap occurrenceSet;
+
+    void addPatternOccurrence(TypeFrame &pattern, int pos);
+    std::vector<TypeFrame> computeSubPatterns(TypeFrame &baseFrame, int cursor);
+    void printForDebug(bool showNodeNames = false);
 };
 
 }

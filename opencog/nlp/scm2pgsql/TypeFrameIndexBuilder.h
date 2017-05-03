@@ -48,6 +48,7 @@ public:
 private:
 
     TypeFrameIndex *index;
+    int lastOffset;
 };
 
 }

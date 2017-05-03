@@ -26,6 +26,7 @@
 
 #include "PatternBranch.h"
 #include "TypeFrame.h"
+#include "TypeFrameIndex.h"
 #include <vector>
 #include <string>
 
@@ -33,6 +34,7 @@ namespace opencog
 {
 
 class PatternBranch;
+class TypeFrameIndex;
 
 /**
  *
@@ -42,33 +44,25 @@ class TypeFramePattern
 
 public:
 
+    std::vector<int> occurrences;
+
     TypeFramePattern();
     ~TypeFramePattern();
-    void add(TypeFrame &frame);
+    void add(TypeFrame &frame, int offset);
+    void buildSubPatternsIndex(TypeFrameIndex *index, TypeFrame &pattern);
     void printForDebug(std::string indent, std::string prefix, bool showNames = false);
-
-
-    /*
-    typedef std::map<std::pair<Type, Arity>, 
-             TypeFramePattern *, 
-             struct 
-             {
-                bool operator()(const std::pair<Type, Arity> &a, const std::pair<Type, Arity> &b) const {
-                    (a.first < b.first) or ((a.first == b.first) and (a.second < b.second))
-                }
-             }> BranchMap;
-             */
-
 
 private:
 
     typedef std::vector<class TypeFramePattern *> BranchVector;
-    typedef std::map<TypeFrame::TypeVector, BranchVector> TypeVectorMap;
+    typedef std::map<TypeFrame, BranchVector> TypeFrameMap;
+    typedef std::map<std::string, class TypeFramePattern *> NodeNameMap;
 
-    void recursiveAdd(TypeFrame &frame, int cursor);
     bool DEBUG = false;
+    TypeFrameMap linkBranches;
+    NodeNameMap nodeBranches;
 
-    TypeVectorMap branches;
+    void recursiveAdd(TypeFrame &frame, int offset, int cursor);
 };
 
 }

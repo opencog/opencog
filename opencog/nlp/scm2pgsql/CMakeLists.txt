@@ -3,8 +3,6 @@ ADD_LIBRARY (scmloader SHARED
 	PGStorageDelegate
 	TypeFrameIndexBuilder
 	TypeFrameIndex
-	TypeFramePattern
-	PatternBranch
 	TypeFrame
 )
 
@@ -38,8 +36,6 @@ INSTALL (FILES
 	SCMLoaderCallback.h
 	TypeFrame.h
 	TypeFrameIndex.h
-	TypeFramePattern.h
-	PatternBranch.h
 	TypeFrameIndexBuilder.h
 	DESTINATION "include/${PROJECT_NAME}/nlp/scm2pgsql"
 )
