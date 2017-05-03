@@ -475,7 +475,7 @@
 ; incorrect counts if this is not the case.
 ;
 (define (batch-all-pair-count
-	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ALL-WORDS)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ALL-WORDS)
 
 	(define l-cnt 0)
 	(define r-cnt 0)
@@ -496,7 +496,7 @@
 	)
 
 	; Create and save the grand-total count.
-	(store-atom (set-count (GET-PAIR-TOTAL) r-cnt))
+	(store-atom (set-count (GET-WILD-WILD) r-cnt))
 	(trace-msg "Done with all-pair count\n")
 )
 
@@ -523,7 +523,7 @@
 ; The wild-card counts will be fetched from the above atoms; the
 ; computed log-liklihood will be stored on the aove atoms.
 ;
-; The GET-PAIR-TOTAL function should return the atom holding
+; The GET-WILD-WILD function should return the atom holding
 ; the total wildcard count (i.e. N(R, *,*))
 ;
 ; The computation is performed "batch style", it loops over the list
@@ -532,10 +532,10 @@
 ; is performed.
 
 (define (batch-all-pair-wildcard-logli
-	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ALL-WORDS)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ALL-WORDS)
 
 	; Get the word-pair grand-total
-	(define pair-total (get-count (GET-PAIR-TOTAL)))
+	(define pair-total (get-count (GET-WILD-WILD)))
 
 	; For each wild-card pair associated with the word,
 	; obtain the log likelihood.
@@ -570,10 +570,10 @@
 ;
 ;
 (define (compute-pair-mi right-word GET-PAIR
-	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ITEM-TYPE)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE)
 
 	; Get the word-pair grand-total
-	(define pair-total (get-count (GET-PAIR-TOTAL)))
+	(define pair-total (get-count (GET-WILD-WILD)))
 
 	(let* (
 			; left-stars are all the ListLinks in which the right-word
@@ -625,13 +625,23 @@
 ; the access functions provided as arguments.
 ;
 ; The `all-singletons` argument should be a list of all items over
-; which the pairs will be computed.
+; which the pairs will be computed. Every item in this list should
+; be of ITEM-TYPE.
 ;
 ; The GET-PAIR argument should be a function that returns all atoms
-; that hold counts for a pair (ListLink left right). 
-xxx
-
-
+; that hold counts for a pair (ListLink left-item right-item). The
+; algorithm uses a doubley-nested loop to walk over all pairs, in
+; a sparse-matrix fashion: The outer loop is over all all items,
+; the inner loop is over the incoming set of the items, that incoming
+; set being composed of ListLinks that hold pairs. The ITEM-TYPE
+; is used for filtering, to make sure that only valid pairs are
+; accessed.
+;
+; Partial sums of counts, i.e. the N(w,*) and N(*,w) explained up top,
+; are stored with the atoms that GET-LEFT-WILD and GET-RIGHT-WILD
+; provide. The GET-WILD-WILD function returns the atom where N(*,*) is
+; stored.
+;
 ; The wild-card entropies and MI values are written back to the database
 ; as soon as they are computed, so as not to be lost.  The double-nested
 ; sums are distributed over all CPU cores, using guile's par-for-each,
@@ -647,7 +657,7 @@ xxx
 ; the atomspace provides.
 ;
 (define (batch-all-pair-mi GET-PAIR
-	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ITEM-TYPE all-singletons)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE all-singletons)
 
 	(trace-msg-num "Start batching, num words="
 		(length all-singletons))
@@ -672,14 +682,14 @@ xxx
 	(trace-msg "Going to batch-count all-pairs\n")
 	(display "Going to batch-count all-pairs\n")
 	(batch-all-pair-count
-		 GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL all-singletons)
+		 GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
 	(trace-elapsed)
 
 	; Compute the left and right wildcard logli's
 	(trace-msg "Going to batch-logli wildcards\n")
 	(display "Going to batch-logli wildcards\n")
 	(batch-all-pair-wildcard-logli
-		GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL all-singletons)
+		GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
 	(trace-elapsed)
 
 	; Enfin, the word-pair mi's
@@ -689,7 +699,7 @@ xxx
 	(par-for-each
 		(lambda (word)
 			(compute-pair-mi word GET-PAIR
-				GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ITEM-TYPE)
+				GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE)
 			(trace-msg-cnt "Done with pair MI cnt=")
 		)
 		all-singletons
