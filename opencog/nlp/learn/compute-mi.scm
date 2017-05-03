@@ -297,25 +297,11 @@
 	(EvaluationLink any-pair-pred (ListLink word any-right))
 )
 
-; ---------------------------------------------------------------------
-; Get the total word-pair count.
-; That is, get the count, for wild-cards on both the left and right.
+; Get the atom that holds the total word-pair count.
+; This has wild-cards on both the left and right.
 
-(define (get-any-pair-total)
-	(get-count
-		(EvaluationLink any-pair-pred
-			 (ListLink any-left any-right)))
-)
-
-;; Setter, for the above.
-(define (set-any-pair-total TOTAL)
-	; Create and save the grand-total count.
-	(store-atom
-		(set-count
-			(EvaluationLink any-pair-pred
-				(ListLink any-left any-right))
-		TOTAL)
-	)
+(define (get-any-pair)
+	(EvaluationLink any-pair-pred (ListLink any-left any-right))
 )
 
 ; ---------------------------------------------------------------------
@@ -358,22 +344,8 @@
 	(EvaluationLink pair-pred (ListLink word any-right))
 )
 
-; ---------------------------------------------------------------------
-(define (get-clique-pair-total)
-	(get-count
-		(EvaluationLink pair-pred
-			 (ListLink any-left any-right)))
-)
-
-;; Setter, for the above.
-(define (set-clique-pair-total TOTAL)
-	; Create and save the grand-total count.
-	(store-atom
-		(set-count
-			(EvaluationLink pair-pred
-				(ListLink any-left any-right))
-		TOTAL)
-	)
+(define (get-clique-pair)
+	(EvaluationLink pair-pred (ListLink any-left any-right))
 )
 
 ; ---------------------------------------------------------------------
@@ -732,7 +704,7 @@
 ; incorrect counts if this is not the case.
 ;
 (define (batch-all-pair-count
-	GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
 
 	(define l-cnt 0)
 	(define r-cnt 0)
@@ -766,7 +738,7 @@
 		)
 
 		; Create and save the grand-total count.
-		(SET-PAIR-TOTAL r-cnt)
+		(store-atom (set-count (GET-PAIR-TOTAL) r-cnt))
 		(trace-msg "Done with all-pair count\n")
 	)
 )
@@ -798,7 +770,7 @@
 	 lg_rel)
 
 	; Get the word-pair grand-total
-	(define pair-total (GET-PAIR-TOTAL))
+	(define pair-total (get-count (GET-PAIR-TOTAL)))
 
 	; For each wild-card pair associated with the word,
 	; obtain the log likelihood.
@@ -913,10 +885,8 @@
 ; in order to get the flexibility that the atomspace provides.
 ;
 (define (batch-all-pair-mi
-	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL
+	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL
 	lg_rel)
-
-(define GET-PAIR-TOTAL get-any-pair-total)
 
 	(define all-the-words (get-all-words))
 
@@ -943,7 +913,7 @@
 	(trace-msg "Going to batch-count all-pairs\n")
 	(display "Going to batch-count all-pairs\n")
 	(batch-all-pair-count
-		 GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL)
+		 GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
 	(trace-elapsed)
 
 	; Compute the left and right wildcard logli's
@@ -992,7 +962,7 @@
 			get-any-pair-link
 			get-any-left-wildcard
 			get-any-right-wildcard
-			set-any-pair-total
+			get-any-pair
  any-pair-pred)
 	)
 )
