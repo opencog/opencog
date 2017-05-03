@@ -109,6 +109,18 @@
 ; stored under the key of (Predicate "*-Pair MI Key-*") as a single
 ; float.
 ;
+; The pair-counting infrastructure here is generic, because there
+; are several different ways of counting pairs. The counting is done
+; in `link-pipeline.scm`.  One can: count pairs using an
+; all-possible-pair approach; this is called "clique counting".
+; One can count pairs by parsing with a random grammar, this is called
+; "link-type-any" counting. Finally, one can do either of the above,
+; and track the lengths of the links, and restrict to those links
+; less than a given length.  In this last case, the lengths are
+; stored in ExecutionLinks, not EvaluationLinks, and a SchemaNode
+; instead of a PredicateNode is used to identify where the counts
+; are held. The code below should work fine with each of these types.
+;
 ; That's all there's to this. The batch-all-pair-mi is the main entry
 ; point; its given at the bottom.
 ;
@@ -118,45 +130,6 @@
 (use-modules (ice-9 threads))
 (use-modules (opencog))
 (use-modules (opencog persist))
-
-; ---------------------------------------------------------------------
-
-(define any-left (AnyNode "left-word"))
-(define any-right (AnyNode "right-word"))
-
-; ---------------------------------------------------------------------
-
-(define-public (fetch-all-words)
-"
-  fetch-all-words - fetch all WordNodes from the database backend.
-"
-	(load-atoms-of-type 'WordNode)
-)
-
-(define-public (get-all-words)
-"
-  get-all-words - return a list holding all of the observed words
-  This does NOT fetch the words from the backing store.
-"
-	(cog-get-atoms 'WordNode)
-)
-
-(define-public (fetch-any-pairs)
-"
-  fetch-any-pairs -- fetch all counts for link-grammar ANY links
-  from the database.
-"
-	(fetch-incoming-set any-pair-pred)
-)
-
-(define-public (fetch-clique-pairs)
-"
-  fetch-clique-pairs -- fetch all counts for clique-pairs from the
-  database.
-"
-	(fetch-incoming-set pair-pred)
-	(fetch-incoming-set pair-dist)
-)
 
 ; ---------------------------------------------------------------------
 ; Return all of the ListLinks of arity two in which the ITEM appears
@@ -297,61 +270,6 @@
 				(equal? PRED (car oset))
 				(equal? PAIR (cadr oset))))
 		(cog-incoming-set PAIR)))
-)
-
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; Random-tree parse word-pair count access routines.
-; ---------------------------------------------------------------------
-;
-; Given a ListLink holding a word-pair, return the corresponding
-; link that holds the count for that word-pair.
-(define (get-any-pair-link PAIR)
-	(get-pair-link 'EvaluationLink any-pair-pred PAIR)
-
-; Get the atom that holds the left wild-card count for `word`,
-; for the LG link type "ANY". (the wildcard is on the left side)
-
-(define (get-any-left-wildcard word)
-	(EvaluationLink any-pair-pred (ListLink any-left word))
-)
-
-(define (get-any-right-wildcard word)
-	(EvaluationLink any-pair-pred (ListLink word any-right))
-)
-
-; Get the atom that holds the total word-pair count.
-; This has wild-cards on both the left and right.
-
-(define (get-any-pair)
-	(EvaluationLink any-pair-pred (ListLink any-left any-right))
-)
-
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-; Clique-based-counting word-pair access methods.
-; ---------------------------------------------------------------------
-
-; Given a ListLink holding a word-pair, return the corresponding
-; link that holds the count for that word-pair.
-(define (get-clique-pair-link PAIR)
-	(get-pair-link 'EvaluationLink pair-pred PAIR)
-
-; Get the atom that holds the left wild-card count for `word`,
-; for the clique-based counts. (the wildcard is on the left side)
-
-(define (get-clique-left-wildcard word)
-	(EvaluationLink pair-pred (ListLink any-left word))
-)
-
-(define (get-clique-right-wildcard word)
-	(EvaluationLink pair-pred (ListLink word any-right))
-)
-
-(define (get-clique-pair)
-	(EvaluationLink pair-pred (ListLink any-left any-right))
 )
 
 ; ---------------------------------------------------------------------
@@ -710,7 +628,131 @@
 )
 
 ; ---------------------------------------------------------------------
-; Temporary handy-dandy main entry point.
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; Random-tree parse word-pair count access routines.
+; ---------------------------------------------------------------------
+
+(define any-left (AnyNode "left-word"))
+(define any-right (AnyNode "right-word"))
+
+;
+; Given a ListLink holding a word-pair, return the corresponding
+; link that holds the count for that word-pair.
+;
+(define (get-any-pair-link PAIR)
+	(get-pair-link 'EvaluationLink any-pair-pred PAIR)
+
+; Get the atom that holds the left wild-card count for `word`,
+; for the LG link type "ANY". (the wildcard is on the left side)
+
+(define (get-any-left-wildcard word)
+	(EvaluationLink any-pair-pred (ListLink any-left word))
+)
+
+(define (get-any-right-wildcard word)
+	(EvaluationLink any-pair-pred (ListLink word any-right))
+)
+
+; Get the atom that holds the total word-pair count.
+; This has wild-cards on both the left and right.
+
+(define (get-any-pair)
+	(EvaluationLink any-pair-pred (ListLink any-left any-right))
+)
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; Clique-based-counting word-pair access methods.
+; ---------------------------------------------------------------------
+
+; Given a ListLink holding a word-pair, return the corresponding
+; link that holds the count for that word-pair.
+;
+(define (get-clique-pair-link PAIR)
+	(get-pair-link 'EvaluationLink pair-pred PAIR)
+
+; Get the atom that holds the left wild-card count for `word`,
+; for the clique-based counts. (the wildcard is on the left side)
+
+(define (get-clique-left-wildcard word)
+	(EvaluationLink pair-pred (ListLink any-left word))
+)
+
+(define (get-clique-right-wildcard word)
+	(EvaluationLink pair-pred (ListLink word any-right))
+)
+
+(define (get-clique-pair)
+	(EvaluationLink pair-pred (ListLink any-left any-right))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (get-all-words)
+"
+  get-all-words - return a list holding all of the observed words
+  This does NOT fetch the words from the backing store.
+"
+	(cog-get-atoms 'WordNode)
+)
+
+(define-public (fetch-all-words)
+"
+  fetch-all-words - fetch all WordNodes from the database backend.
+"
+	(load-atoms-of-type 'WordNode)
+)
+
+(define-public (fetch-any-pairs)
+"
+  fetch-any-pairs -- fetch all counts for link-grammar ANY links
+  from the database.
+"
+	(fetch-incoming-set any-pair-pred)
+)
+
+(define-public (fetch-clique-pairs)
+"
+  fetch-clique-pairs -- fetch all counts for clique-pairs from the
+  database.
+"
+	(fetch-incoming-set pair-pred)
+	(fetch-incoming-set pair-dist)
+)
+
+(define (fetch-words-once)
+	(define done #f)
+	(if (not done) (begin (fetch-all-words) (set! done #t)))
+)
+
+; ---------------------------------------------------------------------
+; Handy-dandy main entry points.
+
+(define-public (batch-all-pairs)
+	(begin
+		(init-trace "/tmp/progress")
+
+		; Make sure all words are in the atomspace
+		(fetch-all-words)
+		(trace-msg "Done loading words, now loading pairs")
+		(display "Done loading words, now loading pairs")
+
+		; Make sure all word-pairs are in the atomspace.
+		(fetch-any-pairs)
+		(trace-msg "Finished loading word-pairs\n")
+		(display "Finished loading word-pairs\n")
+
+		(batch-all-pair-mi
+			get-any-pair-link
+			get-any-left-wildcard
+			get-any-right-wildcard
+			get-any-pair
+			'WordNode
+			(get-all-words))
+	)
+)
 
 (define-public (batch-all-pairs)
 	(begin
