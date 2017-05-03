@@ -347,13 +347,13 @@
 ; ---------------------------------------------------------------------
 ; Compute the total number of observed word-pairs, using the left
 ; and right wild-card count access methods.  The resulting total count
-; is stored using the STORE-PAIR-TOTAL function.
+; is stored on the GET-WILD-WILD atom.
 ;
 ; The computation is performed batch-style. This function assumes that
 ; all word-pairs are already loaded in the atom table; it will get
 ; incorrect counts if this is not the case.
 ;
-(define (batch-all-pair-count
+(define (count-all-pairs
 	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ALL-WORDS)
 
 	(define l-cnt 0)
@@ -370,7 +370,7 @@
 
 	; The left and right counts should be equal!
 	(if (not (eqv? l-cnt r-cnt))
-		(throw 'bad-summation 'batch-all-pair-count
+		(throw 'bad-summation 'count-all-pairs
 			(format #f "Error: word-pair-counts unequal: ~A ~A\n" l-cnt r-cnt))
 	)
 
@@ -539,11 +539,13 @@
 (define (batch-all-pair-mi GET-PAIR
 	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE all-singletons)
 
-	(define msg (format #f "Start batching, num words=~A\n"
+	(define msg (format #f "Start counting, num words=~A\n"
 			(length all-singletons))
 	(trace-msg msg)
+	(display msg)
 
 	; First, get the left and right wildcard counts.
+	; That is, compute N(w,*) and N(*,w)
 	; (for-each
 	(par-for-each
 		(lambda (word)
@@ -554,26 +556,26 @@
 		all-singletons
 	)
 	(trace-elapsed)
-	(trace-msg "Done with wild-card count\n")
-	(display "Done with wild-card count\n")
+	(trace-msg "Done with wild-card counts N(*,w) and N(w,*)\n")
+	(display "Done with wild-card count N(*,w) and N(w,*)\n")
 
 	; Now, get the grand-total
-	(trace-msg "Going to batch-count all-pairs\n")
-	(display "Going to batch-count all-pairs\n")
-	(batch-all-pair-count
+	(count-all-pairs
 		 GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
 	(trace-elapsed)
+	(trace-msg "Done computing N(*,*)\n")
+	(display "Done computing N(*,*)\n")
 
 	; Compute the left and right wildcard logli's
-	(trace-msg "Going to batch-logli wildcards\n")
-	(display "Going to batch-logli wildcards\n")
 	(batch-all-pair-wildcard-logli
 		GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
 	(trace-elapsed)
+	(trace-msg "Done computing -log N(w,*)/N(*,*) and v.v.\n")
+	(display "Done computing -log N(w,*)/N(*,*) and v.v.\n")
 
 	; Enfin, the word-pair mi's
-	(start-trace "Going to do individual word-pair mi\n")
-	(display "Going to do individual word-pair mi\n")
+	(start-trace "Going to do individual word-pair MI\n")
+	(display "Going to do individual word-pair MI\n")
 	; for-each
 	(par-for-each
 		(lambda (word)
@@ -583,8 +585,8 @@
 		)
 		all-singletons
 	)
-	(trace-msg "Finished with MI batch\n")
-	(display "Finished with MI batch\n")
+	(trace-msg "Finished with MI computations\n")
+	(display "Finished with MI computations\n")
 	(trace-elapsed)
 )
 
