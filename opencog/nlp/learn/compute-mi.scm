@@ -509,26 +509,35 @@
 )
 
 ; ---------------------------------------------------------------------
-; Compute the log-liklihood for all wild-card wordpairs, for lg_rel.
-; lg_rel is a link-gramar link (LinkGrammarRelationshipNode)
+; Compute the log-liklihood for all wild-card wordpairs.
 ;
-; This computes the logliklihood for all wild-card pairs of the form:
+; This assumes that wild-card word-pair counts have already been
+; performed. This takes three functions as an argument, and a list
+; of words.
 ;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "Blah"
+; The GET-LEFT-WILD and GET-RIGHT-WILD functions should return
+; an atom of the general form:
+;
+;   FooBarEvaluationLink
+;      FooPredicateNode "Blah"
 ;      ListLink
 ;         WordNode "some-word"
 ;         AnyNode "right-word"
 ;
 ; and also for the flipped version (exchange WordNode and AnyNode)
-; Here, lg_rel is (LinkGrammarRelationshipNode "Blah")
+; For example, FooBarEvaluationLink can be EvaluationLink, and
+; FooPredicateNode can be LinkGrammarRelationshipNode "ANY".
 ;
-; The log likelihood is stored as a value on the eval
-; link truth value (where logli's are always stored).
+; The wild-card counts will be fetched from the above atoms; the
+; computed log-liklihood will be stored on the aove atoms.
 ;
-; The computation is performed "batch style", it assumes that all
-; words in the atomspace; missing words will cause the corresponding
-; pairs to be missed.
+; The GET-PAIR-TOTAL function should return the atom holding
+; the total wildcard count (i.e. N(R, *,*))
+;
+; The computation is performed "batch style", it loops over the list
+; of words in ALL-WORDS; it assumes that assumes that all wild-card
+; counts are up-to-date in the atomspace; no fetching from the database
+; is performed.
 
 (define (batch-all-pair-wildcard-logli
 	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ALL-WORDS)
@@ -569,7 +578,7 @@
 ;
 ;
 (define (compute-pair-mi right-word GET-PAIR
-	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL lg_rel)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
 
 	; Get the word-pair grand-total
 	(define pair-total (get-count (GET-PAIR-TOTAL)))
@@ -593,7 +602,7 @@
 				(let* (
 						; the left-word of the word-pair
 						(left-word (gadr pair))
-xxxxxxxxx
+
 						(r-logli (get-logli (GET-RIGHT-WILD left-word)))
 
 						; Compute the logli log_2 P(l,r)/P(*,*)
@@ -617,33 +626,41 @@ xxxxxxxxx
 
 ; ---------------------------------------------------------------------
 ;
-; Compute the mutual information between all pairs related by lg_rel.
+; Compute the mutual information between all pairs.
 ;
-; The mutual information is defined and computed as described in the
-; overview, up top. It is computed only for those pairs that are related
-; by the relationship lg_rel.  The computation is done in 'batch' form;
-; the required pairs are automatically fetched from SQL backend storage
-; in the course of computation.  The wild-card entropies and MI values
-; are written back to the database as soon as they are computed, so as
-; not to be lost.  The double-nested sums are distributed over all CPU
-; cores, using guile's par-for-each, and can thus be very CPU intensive.
-; Running this script can take hours, or longer (days?) depending on the
-; size of the dataset.  Due to the current nature of the design of the
-; atomspace, this script is not very efficient; if you just need to
-; count things, writing custom scripts that do NOT use the atomspace would
-; almost surely be faster.  We put up with the performance overhead here
-; in order to get the flexibility that the atomspace provides.
+; The mutual information between pairs is described in the overview,
+; up top of this file. The access to the pairs is governed by the
+; the access functions provided as arguments.
 ;
-(define (batch-all-pair-mi
-	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL
-	lg_rel)
+; The `all-singletons` argument should be a list of all items over
+; which the pairs will be computed.
+;
+; The GET-PAIR argument should be a function that returns all atoms
+; that hold counts for a pair (ListLink left right). 
+xxx
 
-	(define all-the-words (get-all-words))
+
+; The wild-card entropies and MI values are written back to the database
+; as soon as they are computed, so as not to be lost.  The double-nested
+; sums are distributed over all CPU cores, using guile's par-for-each,
+; and can thus be very CPU intensive.
+;
+; Running this script can take hours, or longer (days?) depending on the
+; size of the dataset.  This script wasn't really designed to be
+; efficient; instead, the goal to to allow general, generic knowledge
+; representation.  You can compute MI between any kind of thing.
+; If you just need to count one thing, writing custom scripts that do
+; NOT use the atomspace would almost surely be faster.  We put up with
+; the performance overhead here in order to get the flexibility that
+; the atomspace provides.
+;
+(define (batch-all-pair-mi GET-PAIR
+	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL all-singletons)
 
 	(trace-msg-num "Start batching, num words="
-		(length all-the-words))
+		(length all-singletons))
 	(format #t "Start batching, num words=~A\n"
-		(length all-the-words))
+		(length all-singletons))
 
 	; First, get the left and right wildcard counts.
 	; (for-each
@@ -653,7 +670,7 @@ xxxxxxxxx
 				GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD)
 			(trace-msg-cnt "Wildcard-count did ")
 		)
-		all-the-words
+		all-singletons
 	)
 	(trace-elapsed)
 	(trace-msg "Done with wild-card count\n")
@@ -663,14 +680,14 @@ xxxxxxxxx
 	(trace-msg "Going to batch-count all-pairs\n")
 	(display "Going to batch-count all-pairs\n")
 	(batch-all-pair-count
-		 GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL all-the-words)
+		 GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL all-singletons)
 	(trace-elapsed)
 
 	; Compute the left and right wildcard logli's
 	(trace-msg "Going to batch-logli wildcards\n")
 	(display "Going to batch-logli wildcards\n")
 	(batch-all-pair-wildcard-logli
-		GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL all-the-words)
+		GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL all-singletons)
 	(trace-elapsed)
 
 	; Enfin, the word-pair mi's
@@ -680,10 +697,10 @@ xxxxxxxxx
 	(par-for-each
 		(lambda (word)
 			(compute-pair-mi word GET-PAIR
-				GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL lg_rel)
+				GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
 			(trace-msg-cnt "Done with pair MI cnt=")
 		)
-		all-the-words
+		all-singletons
 	)
 	(trace-msg "Finished with MI batch\n")
 	(display "Finished with MI batch\n")
@@ -712,7 +729,7 @@ xxxxxxxxx
 			get-any-left-wildcard
 			get-any-right-wildcard
 			get-any-pair
- any-pair-pred)
+			(get-all-words))
 	)
 )
 
