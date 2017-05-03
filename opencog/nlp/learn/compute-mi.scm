@@ -149,6 +149,14 @@
 	(cog-get-atoms item-type)
 )
 
+(define-public (fetch-any-pairs)
+"
+  fetch-any-pairs -- fetch all counts for link-grammar ANY links
+  from the database.
+"
+	(fetch-incoming-set any-pair-pred)
+)
+
 (define-public (fetch-clique-pairs)
 "
   fetch-clique-pairs -- fetch all counts for clique-pairs from the
@@ -755,42 +763,6 @@
 ;;;)
 
 ; ---------------------------------------------------------------------
-; Compute wildcard counts for all word-pairs, for the relation lg_rel.
-; lg_rel is a link-grammar link type.
-;
-; This loops over all words, and computes the one-sided wild-card
-; counts for these. Only the counts for the link-grammar link type
-; lg_rel are computed.
-;
-; The computation is done batch-style; all word-pairs are pulled into
-; the atomspace first, and then the sums are taken. This can blow up
-; RAM usage.
-;
-
-(define (batch-all-pair-wildcard-counts ALL-WORDS
-	GET-PAIR SET-LEFT-TOTAL SET-RIGHT-TOTAL)
-	(begin
-		(start-trace "Start batched wildcard-counting\n")
-		(display "Start batched wildcard-counting\n")
-
-		; Compute the counts. par-for-each runs in parallel.
-		; (for-each
-		(par-for-each
-			(lambda (word)
-				(compute-pair-wildcard-counts word
-					GET-PAIR SET-LEFT-TOTAL SET-RIGHT-TOTAL)
-				(trace-msg-cnt "Wildcard-count did ")
-			)
-			ALL-WORDS
-		)
-		(trace-elapsed)
-		(trace-msg "Done with wild-card count\n")
-		(display "Done with wild-card count\n")
-		(flush-all-ports)
-	)
-)
-
-; ---------------------------------------------------------------------
 ; Compute the total number of observed word-pairs, using the left
 ; and right wild-card count access methods.  The resulting total count
 ; is stored using the STORE-PAIR-TOTAL function.
@@ -1051,60 +1023,60 @@
 ; in order to get the flexibility that the atomspace provides.
 ;
 (define (batch-all-pair-mi
+	GET-PAIR SET-LEFT-TOTAL SET-RIGHT-TOTAL
 	GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL
 	lg_rel)
 
-	; Make sure all words are in the atomspace
-	(fetch-all-words)
-	(begin
-		(define all-the-words (get-all-words))
+	(define all-the-words (get-all-words))
 
-		(trace-msg-num "In wildcard-count, num words="
-			(length all-the-words))
-		(format #t "In wildcard-count, num words=~A\n"
-			(length all-the-words))
+	(trace-msg-num "Start batching, num words="
+		(length all-the-words))
+	(format #t "Start batching, num words=~A\n"
+		(length all-the-words))
 
-		; Make sure all word-pairs are in the atomspace.
-		(fetch-incoming-set lg_rel)
-		(display "Finished loading word-pairs\n")
+	; First, get the left and right wildcard counts.
+	(trace-msg "Going to batch-wildcard count\n")
 
-		; First, get the left and right wildcard counts.
-		(trace-msg "Going to batch-wildcard count\n")
-		(batch-all-pair-wildcard-counts
-			all-the-words
-			get-any-pair-link
-			set-any-left-wildcard-count
-			set-any-right-wildcard-count)
-
-		; Now, get the grand-total
-		(trace-elapsed)
-		(trace-msg "Going to batch-count all-pairs\n")
-		(display "Going to batch-count all-pairs\n")
-		(batch-all-pair-count
-			 GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL)
-		(trace-elapsed)
-
-		; Compute the left and right wildcard logli's
-		(trace-msg "Going to batch-logli wildcards\n")
-		(display "Going to batch-logli wildcards\n")
-		(batch-all-pair-wildcard-logli lg_rel)
-		(trace-elapsed)
-
-		; Enfin, the word-pair mi's
-		(start-trace "Going to do individual word-pair mi\n")
-		(display "Going to do individual word-pair mi\n")
-		; for-each
-		(par-for-each
-			(lambda (right-word)
-				(compute-pair-mi right-word lg_rel)
-				(trace-msg-cnt "Done with pair MI cnt=")
-			)
-			all-the-words
+	; (for-each
+	(par-for-each
+		(lambda (word)
+			(compute-pair-wildcard-counts word
+				GET-PAIR SET-LEFT-TOTAL SET-RIGHT-TOTAL)
+			(trace-msg-cnt "Wildcard-count did ")
 		)
-		(trace-msg "Finished with MI batch\n")
-		(display "Finished with MI batch\n")
-		(trace-elapsed)
+		all-the-words
 	)
+	(trace-elapsed)
+	(trace-msg "Done with wild-card count\n")
+	(display "Done with wild-card count\n")
+
+	; Now, get the grand-total
+	(trace-msg "Going to batch-count all-pairs\n")
+	(display "Going to batch-count all-pairs\n")
+	(batch-all-pair-count
+		 GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL)
+	(trace-elapsed)
+
+	; Compute the left and right wildcard logli's
+	(trace-msg "Going to batch-logli wildcards\n")
+	(display "Going to batch-logli wildcards\n")
+	(batch-all-pair-wildcard-logli lg_rel)
+	(trace-elapsed)
+
+	; Enfin, the word-pair mi's
+	(start-trace "Going to do individual word-pair mi\n")
+	(display "Going to do individual word-pair mi\n")
+	; for-each
+	(par-for-each
+		(lambda (right-word)
+			(compute-pair-mi right-word lg_rel)
+			(trace-msg-cnt "Done with pair MI cnt=")
+		)
+		all-the-words
+	)
+	(trace-msg "Finished with MI batch\n")
+	(display "Finished with MI batch\n")
+	(trace-elapsed)
 )
 
 ; ---------------------------------------------------------------------
@@ -1114,7 +1086,20 @@
 	(begin
 		(init-trace "/tmp/progress")
 
+		; Make sure all words are in the atomspace
+		(fetch-all-words)
+		(trace-msg "Done loading words, now loading pairs")
+		(display "Done loading words, now loading pairs")
+
+		; Make sure all word-pairs are in the atomspace.
+		(fetch-any-pairs)
+		(trace-msg "Finished loading word-pairs\n")
+		(display "Finished loading word-pairs\n")
+
 		(batch-all-pair-mi
+			get-any-pair-link
+			set-any-left-wildcard-count
+			set-any-right-wildcard-count
 			get-any-left-wildcard-count
 			get-any-right-wildcard-count
 			set-any-pair-total
