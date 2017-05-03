@@ -465,13 +465,11 @@
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (concatenate! (map!
-					(lambda (lnk) (GET-PAIR lnk))
-					left-stars)))
+			(left-evs (concatenate!
+					(map!  (lambda (lnk) (GET-PAIR lnk)) left-stars)))
 
-			(right-evs (concatenate! (map!
-					(lambda (lnk) (GET-PAIR lnk))
-					right-stars)))
+			(right-evs (concatenate!
+					(map!  (lambda (lnk) (GET-PAIR lnk)) right-stars)))
 
 			; The total occurance counts
 			(left-total (get-total-atom-count left-evs))
@@ -503,7 +501,6 @@
 
 	(start-trace "Start all-pair-count\n")
 	; Now, loop over all words, totalling up the counts.
-	; XXX would using fold here fbe any faster?
 	(for-each
 		(lambda (word)
 			(set! l-cnt (+ l-cnt (get-count (GET-LEFT-WILD word))))
@@ -511,17 +508,10 @@
 		)
 		ALL-WORDS)
 
-	; The left and right counts should be equal
-	; XXX TODO probably should do something more drastic here?
-	; Like throw an exception?
+	; The left and right counts should be equal!
 	(if (not (eqv? l-cnt r-cnt))
-		(begin
-			(display "Error: word-pair-counts unequal: ")
-			(display l-cnt)
-			(display " ")
-			(display r-cnt)
-			(display "\n")
-		)
+		(throw 'bad-summation 'batch-all-pair-count
+			(format #f "Error: word-pair-counts unequal: ~A ~A\n" l-cnt r-cnt))
 	)
 
 	; Create and save the grand-total count.
