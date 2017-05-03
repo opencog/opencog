@@ -37,4 +37,13 @@
 	(get-count (fetch-atom (ParseNode "ANY")))
 )
 
+(define-public (avg-sentence-length)
+"
+  avg-sentence-length -- get expected value for the number of words
+  in the sentence.
+"
+	; Each word is counted once, in every parse.
+	(/ (total-word-observations) (get-parse-count))
+)
+
 ; ---------------------------------------------------------------------
