@@ -179,10 +179,11 @@
 ;; The SQL loads are slow, so don't repeat them, if they are
 ;; not needed.
 (define call-only-once
-	(let ((done #f))
+	(let ((called '()))
 		(lambda (func)
-			(if (not done) (func))
-			(set! done #t)))
+			(if (not (member func called))
+				(begin (func)
+					(set! called (cons func called))))))
 )
 
 ; ---------------------------------------------------------------------
