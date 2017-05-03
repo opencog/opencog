@@ -642,6 +642,7 @@
 ;
 (define (get-any-pair-link PAIR)
 	(get-pair-link 'EvaluationLink any-pair-pred PAIR)
+)
 
 ; Get the atom that holds the left wild-card count for `word`,
 ; for the LG link type "ANY". (the wildcard is on the left side)
@@ -672,6 +673,7 @@
 ;
 (define (get-clique-pair-link PAIR)
 	(get-pair-link 'EvaluationLink pair-pred PAIR)
+)
 
 ; Get the atom that holds the left wild-card count for `word`,
 ; for the clique-based counts. (the wildcard is on the left side)
