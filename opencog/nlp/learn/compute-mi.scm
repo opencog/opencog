@@ -250,6 +250,15 @@
 			(ListLink any-left word)))
 )
 
+; Setter for the above.
+(define (set-any-left-wildcard-count WORD TOTAL)
+	(store-atom
+		(set-count
+			(EvaluationLink any-pair-pred
+				(ListLink any-left WORD))
+			TOTAL))
+)
+
 ; ---------------------------------------------------------------------
 ; Get the right wild-card count for `word`, for the
 ; LG link type "ANY". (the wildcard is on the left side)
@@ -258,6 +267,15 @@
 	(get-count
 		(EvaluationLink any-pair-pred
 		(ListLink word any-right)))
+)
+
+; Setter for the above.
+(define (set-any-right-wildcard-count WORD TOTAL)
+	(store-atom
+		(set-count
+			(EvaluationLink any-pair-pred
+				(ListLink WORD any-right))
+			TOTAL))
 )
 
 ; ---------------------------------------------------------------------
@@ -352,6 +370,14 @@
 			(ListLink any-left word)))
 )
 
+(define (set-clique-left-wildcard-count WORD TOTAL)
+	(store-atom
+		(set-count
+			(EvaluationLink pair-pred
+				(ListLink any-left WORD))
+			TOTAL))
+)
+
 ; ---------------------------------------------------------------------
 ; Get the right wild-card count for `word`, for the
 ; clique-based counts. (the wildcard is on the left side)
@@ -360,6 +386,14 @@
 	(get-count
 		(EvaluationLink pair-pred
 		(ListLink word any-right)))
+)
+
+(define (set-clique-right-wildcard-count WORD TOTAL)
+	(store-atom
+		(set-count
+			(EvaluationLink pair-pred
+				(ListLink WORD any-right))
+			TOTAL))
 )
 
 (define (set-clique-pair-total TOTAL)
@@ -445,7 +479,8 @@
 ;
 ; Returns the two wild-card EvaluationLinks
 
-(define (compute-pair-wildcard-counts word lg_rel)
+(define (compute-pair-wildcard-counts word
+	SET-LEFT-TOTAL SET-RIGHT-TOTAL lg_rel)
 
 	(let* (
 			; list-links are all the ListLinks in which the word appears
@@ -502,37 +537,11 @@
 			(right-total (get-total-atom-count right-evs))
 		)
 
-		(begin
-			; Create the two evaluation links to hold the counts.
-			(define left-star #f)
-			(define right-star #f)
+		(if (< 0 left-total)
+			(SET-LEFT-WILD word left-total))
 
-			(if (< 0 left-total)
-				(begin
-					(set! left-star
-						(EvaluationLink lg_rel
-							(ListLink any-left word))
-					)
-					(set-count left-star left-total)
-					; Save these hard-won counts to the database.
-					(store-atom left-star)
-				)
-			)
-			(if (< 0 right-total)
-				(begin
-					(set! right-star
-						(EvaluationLink lg_rel
-							(ListLink word any-right))
-					)
-					(set-count right-star right-total)
-					; Save these hard-won counts to the database.
-					(store-atom right-star)
-				)
-			)
-
-			; What the hell, return the two star-counts
-			(list left-star right-star)
-		)
+		(if (< 0 right-total)
+			(SET-RIGHT-WILD word right-total))
 	)
 )
 
@@ -777,7 +786,10 @@
 		; (for-each
 		(par-for-each
 			(lambda (word)
-				(compute-pair-wildcard-counts word lg_rel)
+				(compute-pair-wildcard-counts word
+					set-any-left-wildcard-count
+					set-any-right-wildcard-count
+					lg_rel)
 				(trace-msg-cnt "Wildcard-count did ")
 			)
 			(get-all-words)
@@ -940,7 +952,7 @@
 							(l-logli (get_left_wildcard_logli right-word lg_rel))
 
 							; Compute the logli log_2 P(l,r)/P(*,*)
- 							(atom (compute-atom-logli pair pair-total))
+							(atom (compute-atom-logli pair pair-total))
 
 							; Get the log liklihood computed immediately above.
 							(ll (get-logli atom))
@@ -1005,7 +1017,7 @@
 ;;;							(l-logli (get_left_wildcard_logli right-word lg_rel))
 ;;;
 ;;;							; Compute the logli log_2 P(l,r)/P(*,*)
-;;; 							(atom (compute-atom-logli pair pair-total))
+;;;							(atom (compute-atom-logli pair pair-total))
 ;;;
 ;;;							; Get the logli computed immediately above.
 ;;;							(ll (get-logli atom))
@@ -1050,7 +1062,9 @@
 ; almost surely be faster.  We put up with the performance overhead here
 ; in order to get the flexibility that the atomspace provides.
 ;
-(define (batch-all-pair-mi lg_rel)
+(define (batch-all-pair-mi
+	GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL
+	lg_rel)
 	(begin
 		; First, get the left and right wildcard counts.
 		(trace-msg "Going to batch-wildcard count\n")
@@ -1061,9 +1075,7 @@
 		(trace-msg "Going to batch-count all-pairs\n")
 		(display "Going to batch-count all-pairs\n")
 		(batch-all-pair-count
-			get-any-left-wildcard-count
-			get-any-right-wildcard-count
-			set-any-pair-total)
+			 GET-LEFT-WILD GET-RIGHT-WILD SET-PAIR-TOTAL)
 		(trace-elapsed)
 
 		; Compute the left and right wildcard logli's
@@ -1096,7 +1108,11 @@
 	(begin
 		(init-trace "/tmp/progress")
 
-		(batch-all-pair-mi any-pair-pred)
+		(batch-all-pair-mi
+			get-any-left-wildcard-count
+			get-any-right-wildcard-count
+			set-any-pair-tota)
+ any-pair-pred)
 	)
 )
 
