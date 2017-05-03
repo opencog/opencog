@@ -540,13 +540,13 @@
 	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE all-singletons)
 
 	(define msg (format #f "Start counting, num words=~A\n"
-			(length all-singletons))
+			(length all-singletons)))
 	(trace-msg msg)
 	(display msg)
 
 	; First, get the left and right wildcard counts.
 	; That is, compute N(w,*) and N(*,w)
-	; (for-each
+	; for-each
 	(par-for-each
 		(lambda (word)
 			(compute-pair-wildcard-counts word
