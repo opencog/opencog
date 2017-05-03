@@ -766,8 +766,7 @@
 ; pairs to be missed.
 
 (define (batch-all-pair-wildcard-logli
-	GET-PAIR-TOTAL
-	 lg_rel)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
 
 	; Get the word-pair grand-total
 	(define pair-total (get-count (GET-PAIR-TOTAL)))
@@ -777,8 +776,8 @@
 	(for-each
 		(lambda (word)
 			(let (
-					(lefty (EvaluationLink lg_rel (ListLink any-left word)))
-					(righty (EvaluationLink lg_rel (ListLink word any-right)))
+					(lefty (GET-LEFT-WILD word))
+					(righty (GET-RIGHT-WILD word))
 				)
 				; log-likelihood for the left wildcard
 				(if (< 0 (get-count lefty))
@@ -920,9 +919,7 @@
 	(trace-msg "Going to batch-logli wildcards\n")
 	(display "Going to batch-logli wildcards\n")
 	(batch-all-pair-wildcard-logli
-		GET-PAIR-TOTAL
-		GET-LEFT-WILD GET-RIGHT-WILD
-		 lg_rel)
+		GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
 	(trace-elapsed)
 
 	; Enfin, the word-pair mi's
