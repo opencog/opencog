@@ -167,6 +167,41 @@
 )
 
 ; ---------------------------------------------------------------------
+; return all the ListLinks of arity two in which the word appears
+(define (get-word-pairs word)
+	(filter
+		(lambda (lnk) (and
+				(equal? 'ListLink (cog-type lnk))
+				(equal? 2 (cog-arity lnk))))
+		(cog-incoming-set-by-type word))
+xxxxxxx
+)
+
+; The left-stars have the word in the right slot and
+; have some WordNode (item-type) in the left slot.
+; We must check for WordNode in this spot, as some of
+; these ListLinks may have AnyNode in that slot.
+(define (get-left-stars word list-links)
+	(filter
+		(lambda (lnk)
+			(define oset (cog-outgoing-set lnk))
+			(and
+				(equal? item-type (cog-type (car oset)))
+				(equal? word (cadr oset))))
+		list-links)
+)
+
+(define (get-right-stars word list-links)
+	(filter
+		(lambda (lnk)
+			(define oset (cog-outgoing-set lnk))
+			(and
+				(equal? word (car oset))
+				(equal? item-type (cog-type (cadr oset))))
+		list-links)
+)
+
+; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
 ; the 'count' value of its CountTruthValue. This routine just fetches
@@ -426,12 +461,8 @@
 
 	(let* (
 			; list-links are all the ListLinks in which the word appears
-			(list-links
-				(filter
-					(lambda (lnk) (equal? 'ListLink (cog-type lnk)))
-					(cog-incoming-set word)
-				)
-			)
+			(list-links (get-word-pairs word))
+
 			; The left-stars have the word in the right slot and
 			; have some WordNode (item-type) in the left slot.
 			; We must check for WordNode in this spot, as some of

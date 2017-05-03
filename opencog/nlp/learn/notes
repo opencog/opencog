@@ -3769,3 +3769,19 @@ set-any-pair-total
 set-any-left-wildcard-count
 set-any-right-wildcard-count
 get-any-pair-link
+batch-all-pair-wildcard-counts
+get-all-words
+
+batch-all-pair-wildcard-logli
+get-pair-total
+
+GET-LEFT-WILD
+(store-atom
+      (set-count GET-LEFT-WILD TOTAL))
+batch-all-pair-wildcard-logli
+compute-pair-mi
+get-any-pair-link-> GET-PAIR
+get-word-pairs
+
+cog-incoming-by-type
+
