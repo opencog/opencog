@@ -539,10 +539,9 @@
 (define (batch-all-pair-mi GET-PAIR
 	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE all-singletons)
 
-	(trace-msg-num "Start batching, num words="
-		(length all-singletons))
-	(format #t "Start batching, num words=~A\n"
-		(length all-singletons))
+	(define msg (format #f "Start batching, num words=~A\n"
+			(length all-singletons))
+	(trace-msg msg)
 
 	; First, get the left and right wildcard counts.
 	; (for-each

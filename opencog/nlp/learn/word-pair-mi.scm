@@ -11,6 +11,7 @@
 ; The scripts below compute the Yuret-style lexical attraction between
 ; pairs of words.  They make use of the generic API for computing
 ; mutual information between ordered pairs in some relation.
+; See `compute-mi.scm` for more detail about what is computed, and how.
 ;
 ; One structure, among several, in which the pair counts are held,
 ; is of the form
