@@ -704,43 +704,37 @@
 ; incorrect counts if this is not the case.
 ;
 (define (batch-all-pair-count
-	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ALL-WORDS)
 
 	(define l-cnt 0)
 	(define r-cnt 0)
-	(begin
-		(start-trace "Start all-pair-count\n")
-		; Now, loop over all words, totalling up the counts.
-		; XXX would using fold here fbe any faster?
-		(for-each
-			(lambda (word)
-				(set! l-cnt
-					(+ l-cnt (get-count (GET-LEFT-WILD word)))
-				)
-				(set! r-cnt
-					(+ r-cnt (get-count (GET-RIGHT-WILD word)))
-				)
-			)
-			(get-all-words)
-		)
 
-		; The left and right counts should be equal
-		; XXX TODO probably should do something more drastic here?
-		; Like throw an exception?
-		(if (not (eqv? l-cnt r-cnt))
-			(begin
-				(display "Error: word-pair-counts unequal: ")
-				(display l-cnt)
-				(display " ")
-				(display r-cnt)
-				(display "\n")
-			)
+	(start-trace "Start all-pair-count\n")
+	; Now, loop over all words, totalling up the counts.
+	; XXX would using fold here fbe any faster?
+	(for-each
+		(lambda (word)
+			(set! l-cnt (+ l-cnt (get-count (GET-LEFT-WILD word))))
+			(set! r-cnt (+ r-cnt (get-count (GET-RIGHT-WILD word))))
 		)
+		ALL-WORDS)
 
-		; Create and save the grand-total count.
-		(store-atom (set-count (GET-PAIR-TOTAL) r-cnt))
-		(trace-msg "Done with all-pair count\n")
+	; The left and right counts should be equal
+	; XXX TODO probably should do something more drastic here?
+	; Like throw an exception?
+	(if (not (eqv? l-cnt r-cnt))
+		(begin
+			(display "Error: word-pair-counts unequal: ")
+			(display l-cnt)
+			(display " ")
+			(display r-cnt)
+			(display "\n")
+		)
 	)
+
+	; Create and save the grand-total count.
+	(store-atom (set-count (GET-PAIR-TOTAL) r-cnt))
+	(trace-msg "Done with all-pair count\n")
 )
 
 ; ---------------------------------------------------------------------
@@ -766,7 +760,7 @@
 ; pairs to be missed.
 
 (define (batch-all-pair-wildcard-logli
-	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
+	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL ALL-WORDS)
 
 	; Get the word-pair grand-total
 	(define pair-total (get-count (GET-PAIR-TOTAL)))
@@ -775,22 +769,18 @@
 	; obtain the log likelihood.
 	(for-each
 		(lambda (word)
-			(let (
-					(lefty (GET-LEFT-WILD word))
-					(righty (GET-RIGHT-WILD word))
-				)
+			(let ((lefty (GET-LEFT-WILD word))
+					(righty (GET-RIGHT-WILD word)))
+
 				; log-likelihood for the left wildcard
 				(if (< 0 (get-count lefty))
-					(store-atom (compute-atom-logli lefty pair-total))
-				)
+					(store-atom (compute-atom-logli lefty pair-total)))
+
 				; log-likelihood for the right wildcard
 				(if (< 0 (get-count righty))
-					(store-atom (compute-atom-logli righty pair-total))
-				)
-			)
-		)
-		(get-all-words)
-	)
+					(store-atom (compute-atom-logli righty pair-total)))))
+
+		ALL-WORDS)
 )
 
 ; ---------------------------------------------------------------------
@@ -912,14 +902,14 @@
 	(trace-msg "Going to batch-count all-pairs\n")
 	(display "Going to batch-count all-pairs\n")
 	(batch-all-pair-count
-		 GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
+		 GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL all-the-words)
 	(trace-elapsed)
 
 	; Compute the left and right wildcard logli's
 	(trace-msg "Going to batch-logli wildcards\n")
 	(display "Going to batch-logli wildcards\n")
 	(batch-all-pair-wildcard-logli
-		GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL)
+		GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL all-the-words)
 	(trace-elapsed)
 
 	; Enfin, the word-pair mi's
