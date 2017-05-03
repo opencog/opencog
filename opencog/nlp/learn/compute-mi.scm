@@ -239,8 +239,54 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
+; get-pair-link returns either #f or a single link of type
+; LNK-TYPE that contains the given PRED and PAIR.
+;
+; PAIR is usually a ListLink of word-pairs.
+; PRED is usually (PredicateNode "*-Sentence Word Pair-*")
+;                 or (SchemaNode "*-Pair Distance-*")
+;                 or (LinkGrammarRelationshopNode "ANY")
+; LNK-TYPE is usually EvaluationLink or ExecutationLink
+;
+; PAIR is the atom (ListLink) we are given.  We want to find the
+; LNK-TYPE that contains it.  That LNK-TYPE should have
+; PRED as its predicate type, and the ListLink in the expected
+; location. That is, given ListLink, we are looking for
+;
+; The result of this search is either #f or the EvaluationLink
+
+(define (get-pair-link LNK-TYPE PRED PAIR)
+
+	; As described above, but the linkset is a scheme list which
+	; should be of length zero or one.
+	(define (get-linkset PAIR)
+		(filter
+			(lambda (evl)
+				(define oset (cog-outgoing-set evl))
+				(and
+					(equal? LNK-TYPE (cog-type evl))
+					(equal? PRED (car oset))
+					(equal? PAIR (cadr oset))))
+			(cog-incoming-set PAIR)))
+
+	(define linkset (get-linkset PAIR))
+
+	(and
+		(not (null? linkset))
+		(car linkset))
+)
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ; Random-tree parse word-pair count access routines.
 ; ---------------------------------------------------------------------
+;
+; Given a ListLink holding a word-pair, return the corresponding
+; link that holds the count for that word-pair.
+(define (get-any-link PAIR)
+	(get-pair-link 'EvaluationLink any-pair-pred PAIR)
+
 ; Get the left wild-card count for `word`, for the
 ; LG link type "ANY". (the wildcard is on the left side)
 
@@ -316,51 +362,16 @@
 )
 
 ; ---------------------------------------------------------------------
-; get-ev-link returns either #f or the EvaluationLink that contains
-; the given lg_rel and ListLink.
-;
-; list-lnk is the ListLink we are given.  We want to find the
-; EvaluationLink that contains it.  That EvaluationLink should have
-; lg_rel as its predicate type, and the ListLink in the expected
-; location. That is, given ListLink, we are looking for
-;
-;    EvaluationLink
-;        lg_rel
-;        ListLink
-;
-; The result of this search is either #f or the EvaluationLink
-
-(define (get-ev-link lg_rel list-lnk)
-
-	; As described above, but the linkset is a scheme list which
-	; should be of length zero or one.
-	(define (get-ev-linkset list-lnk)
-		(filter
-			(lambda (evl)
-				(define oset (cog-outgoing-set evl))
-				(and
-					(equal? 'EvaluationLink (cog-type evl))
-					(equal? lg_rel (car oset))
-					(equal? list-lnk (cadr oset))
-				)
-			)
-			(cog-incoming-set list-lnk)
-		)
-	)
-
-	(define ev-linkset (get-ev-linkset list-lnk))
-
-	(and
-		(not (null? ev-linkset))
-		(car ev-linkset)
-	)
-)
-
-; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Clique-based-counting word-pair access methods.
 ; ---------------------------------------------------------------------
+
+; Given a ListLink holding a word-pair, return the corresponding
+; link that holds the count for that word-pair.
+(define (get-clique-link PAIR)
+	(get-pair-link 'EvaluationLink pair-pred PAIR)
+
 ; Get the left wild-card count for `word`, for the
 ; clique-based counts. (the wildcard is on the left side)
 
@@ -480,7 +491,7 @@
 ; Returns the two wild-card EvaluationLinks
 
 (define (compute-pair-wildcard-counts word
-	SET-LEFT-TOTAL SET-RIGHT-TOTAL lg_rel)
+	GET-PAIR SET-LEFT-TOTAL SET-RIGHT-TOTAL)
 
 	(let* (
 			; list-links are all the ListLinks in which the word appears
@@ -524,11 +535,11 @@
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
 			(left-evs (filter-map
-					(lambda (lnk) (get-ev-link lg_rel lnk))
+					(lambda (lnk) (GET-PAIR lnk))
 					left-stars)
 			)
 			(right-evs (filter-map
-					(lambda (lnk) (get-ev-link lg_rel lnk))
+					(lambda (lnk) (GET-PAIR lnk))
 					right-stars)
 			)
 
@@ -787,9 +798,9 @@
 		(par-for-each
 			(lambda (word)
 				(compute-pair-wildcard-counts word
+					get-any-link
 					set-any-left-wildcard-count
-					set-any-right-wildcard-count
-					lg_rel)
+					set-any-right-wildcard-count)
 				(trace-msg-cnt "Wildcard-count did ")
 			)
 			(get-all-words)
@@ -936,7 +947,7 @@
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
 			(left-evs (filter-map
-					(lambda (lnk) (get-ev-link lg_rel lnk))
+					(lambda (lnk) (get-any-link lnk))
 					left-stars)
 			)
 		)
