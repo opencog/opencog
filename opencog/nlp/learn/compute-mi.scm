@@ -149,6 +149,15 @@
 	(cog-get-atoms item-type)
 )
 
+(define-public (fetch-clique-pairs)
+"
+  fetch-clique-pairs -- fetch all counts for clique-pairs from the
+  database.
+"
+	(fetch-incoming-set pair-pred)
+	(fetch-incoming-set pair-dist)
+)
+
 ; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in

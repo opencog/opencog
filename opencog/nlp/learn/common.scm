@@ -16,6 +16,11 @@
 (define freq-key (PredicateNode "*-FrequencyKey-*"))
 (define mi-key (PredicateNode "*-Mutual Info Key-*"))
 
+; These are used to store/maintain counts for clique-pair counting.
+; See `link-pipeline.scm` for usage.
+(define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
+(define pair-dist (SchemaNode "*-Pair Distance-*"))
+
 ; get-count ATOM - return the raw observational count on ATOM.
 (define-public (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
 
