@@ -3762,3 +3762,10 @@ ALTER DATABASE en_pairs RENAME TO en_pairs_rohit;
 (length (cog-incoming-set pair-pred))
 (get-total-atom-count (cog-incoming-set pair-pred))
 
+get-any-left-wildcard-count
+get-any-right-wildcard-count
+set-any-pair-total
+
+set-any-left-wildcard-count
+set-any-right-wildcard-count
+get-any-pair-link
