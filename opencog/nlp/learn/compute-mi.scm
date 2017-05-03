@@ -1,50 +1,52 @@
 ;
 ; compute-mi.scm
 ;
-; Compute the mutual information of language word pairs.
+; Compute the mutual information of pairs of items.
 ;
 ; Copyright (c) 2013, 2014, 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below are concerned with counting "things" and pairs of
-; "things", and computing the mutual information of pairs. In the
-; desription that follows, it will be assumed that the "things" are
-; words, just to keep things simple.  However, the scripts are general,
-; and are not limited to just words.
+; The scripts below are concerned with counting "items" and pairs of
+; "items", and computing the mutual information of the pairs. In the
+; current usage, the "items" are always WordNodes, and the pairs are
+; word-pairs obtained from lingistic analysis.  However, these scripts
+; are general, and work for any kind of pairs, not just words.
 ;
-; It is presumed that a database of counts of word-pairs has been already
-; generated; these scripts work off of those counts. Typically, the word
+; It is presumed that a database of counts of pairs has been already
+; generated; these scripts work off of those counts. Typically, the
 ; pairs are obtained from parsing some language.  We say "database" here,
 ; instead of "atomspace", because the scripts will automatically fetch the
 ; needed data from the (SQL) persistence backend, as  needed.  This
 ; allows long-running and parallel-parsing efforts.
 ;
-; It is assumed that all word-pair observations are stored as the
-; "count" portion of the CountTruthValue on the EvaluationLink below:
+; It is assumed that all the count of all pair observations are stored
+; as the "count" portion of the CountTruthValue on some link. For
+; example, some (not not all!) of the linguistic word-pairs are stored
+; as
 ;
 ;   EvaluationLink
-;      LinkGrammarRelationshipNode "Blah"
+;      LinkGrammarRelationshipNode "ANY"
 ;      ListLink
 ;         WordNode "some-word"
 ;         WordNode "other-word"
 ;
-; The type 'WordNode is configurable; see item-type, below. The name of
-; the EvaluationLink does not need to be LinkGrammarRelationshipNode,
-; it can be anything, and is usually passed as the lg_rel paramter to
-; most of these routines.
+; In the general case, the 'WordNode is actually of ITEM-TYPE.
+; The actual atom holding the count is obtained by calling an
+; access function: i.e. given the ListLink holding a pair, the
+; GET-PAIR function returns the atom holding the count.
 ;
-; Let N(wl,wr) denote the number of times that the word-pair (wl, wr) has
+; Let N(wl,wr) denote the number of times that the pair (wl, wr) has
 ; actually been observed; that is, N("some-word", "other-word") for the
-; example link above.  Properly speaking, this count is conditioned on
-; the LinkGrammarRelationshipNode "Blah", so the correct notation would
-; be N(wl, wr | rel)  with rel the relationship.  In what follows, the
+; example above.  Properly speaking, this count is conditioned on the
+; LinkGrammarRelationshipNode "ANY", so the correct notation would be
+; N(rel, wl, wr) with `rel` the relationship.  In what follows, the
 ; relationship is always assumed to be the same, and is thus dropped.
-; (the relationship is passed as the lg_rel parameter everywhere).
+; (the relationship is provided throught the GET-PAIR functiion).
 ;
-; The mutual information for a word-pair is defined as follows:  Given
-; two words, wl and wr, define three probabilities:
+; The mutual information for a pair is defined as follows:  Given
+; two items, wl and wr, define three probabilities:
 ;
 ;    P(wl,wr) = N(wl,wr) / N(*,*)
 ;    P(wl,*)  = N(wl,*)  / N(*,*)
@@ -57,25 +59,27 @@
 ;    N(*,wr) = Sum_wl N(wl,wr)
 ;    N(*,*) = Sum_wl Sum_wr N(wl,wr)
 ;
-; These sums are computed, for a given word, by compute-pair-wildcard-counts
-; below, and are computed for all words by batch-all-pair-wildcard-counts
+; These sums are computed, for a given item, by compute-pair-wildcard-counts
+; below, and are computed for all items by batch-all-pair-wildcard-counts.
 ; The resulting counts are stored as the 'count' value on the
-; CountTruthValue on the EvaluationLink for structures of the form:
+; CountTruthValue on the atoms provided by the GET-LEFT-WILD, the
+; GET-RIGHT-WILD and the GET-WILD-WILD functions. For example, for word-pair
+; counts, these will be the atoms
 ;
 ;   EvaluationLink
-;      LinkGrammarRelationshipNode "Blah"
+;      LinkGrammarRelationshipNode "ANY"
 ;      ListLink
 ;         AnyNode "left-word"
 ;         WordNode "bird"
 ;
 ;   EvaluationLink
-;      LinkGrammarRelationshipNode "Blah"
+;      LinkGrammarRelationshipNode "ANY"
 ;      ListLink
 ;         WordNode "word"
 ;         AnyNode "right-word"
 ;
 ;   EvaluationLink
-;      LinkGrammarRelationshipNode "Blah"
+;      LinkGrammarRelationshipNode "ANY"
 ;      ListLink
 ;         AnyNode "left-word"
 ;         AnyNode "right-word"
@@ -101,7 +105,7 @@
 ; the smaller P is. Note that the logarithm is base-2.  In the scripts
 ; below, the phrase 'logli' is used as a synonym for this entropy.
 ;
-; The mutual information between a pair of words is defined as
+; The mutual information between a pair of items is defined as
 ;
 ;     MI(wl,wr) = -(H(wl,wr) - H(wl,*) - H(*,wr))
 ;
