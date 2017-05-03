@@ -828,9 +828,16 @@ The way that the statistics are collected for
 \end_inset
 
  edges.
- The reason for this is demnostrated in depth, in the section 
+ The reason for this is demonstrated in depth, in the section 
 \begin_inset CommandInset ref
-LatexCommand eqref
+LatexCommand nameref
+reference "sec:Edge-counting"
+
+\end_inset
+
+ 
+\begin_inset CommandInset ref
+LatexCommand vpageref
 reference "sec:Edge-counting"
 
 \end_inset
@@ -1267,19 +1274,67 @@ This section reports on data collected for a small sample of English sentences,
 \end_layout
 
 \begin_layout Standard
-There were xxx unique words observed in the dataset.
+There were xxx unique words observed in the dataset
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Obtained with (fetch-all-words)(length (get-all-words))
+\end_layout
+
+\end_inset
+
+.
  This number is fairly large, as it includes not only common nouns, but
  also surnames, geographical location names, and a variety of foreign-language
  words, as would be observed in typical wikipedia articles.
+ These words were observed for a total of XXX times
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(total-word-observations)
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
-These were observed in XXX sentences 
+These were observed in XXX sentences
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(get-sentence-count)
 \end_layout
 
-\begin_layout Standard
-Number of unique words: xxx.
- Number of word observations 
+\end_inset
+
+ with XXX parses per sentence
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(/ (get-parse-count) (get-sentence-count))
+\end_layout
+
+\end_inset
+
+.
+ On average, there were XXX words per sentence
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(avg-sentence-length)
+\end_layout
+
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
