@@ -159,7 +159,7 @@
 			(define oset (cog-outgoing-set lnk))
 			(and
 				(equal? word (car oset))
-				(equal? ITEM-TYPE (cog-type (cadr oset))))
+				(equal? ITEM-TYPE (cog-type (cadr oset)))))
 		list-of-pairs)
 )
 
@@ -722,7 +722,7 @@
 	(fetch-incoming-set pair-dist)
 )
 
-(define (fetch-words-once)
+(define-public (fetch-words-once)
 	(define done #f)
 	(if (not done) (begin (fetch-all-words) (set! done #t)))
 )
