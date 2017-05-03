@@ -456,23 +456,24 @@
 ; already been computed.
 ;
 ;
-(define (compute-pair-mi right-word GET-PAIR
-	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE)
+(define (compute-pair-mi RIGHT-ITEM
+	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE)
 
 	; Get the word-pair grand-total
 	(define pair-total (get-count (GET-WILD-WILD)))
 
 	(let* (
-			; left-stars are all the ListLinks in which the right-word
+			; left-stars are all the ListLinks in which the RIGHT-ITEM
 			; appears on the right (and anything on the left)
-			(left-stars (get-left-stars (get-item-pairs right-word) ITEM-TYPE))
+			(left-stars (get-left-stars RIGHT-ITEM
+					(get-item-pairs RIGHT-ITEM) ITEM-TYPE))
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
 			(left-evs (concatenate!
 					(map! (lambda (lnk) (GET-PAIR lnk)) left-stars)))
 
-			(l-logli (get-logli (GET-LEFT-WILD right-word)))
+			(l-logli (get-logli (GET-LEFT-WILD RIGHT-ITEM)))
 		)
 		(for-each
 
