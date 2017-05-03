@@ -3795,3 +3795,5 @@ cog-map-apply-link  dead used by cog-get-link
 cog-get-link used by 
 cog-get-pred
 
+(define bar (let ((done #f))
+	(lambda () (format #t "duude ~A\n" done) (set! done #t))))

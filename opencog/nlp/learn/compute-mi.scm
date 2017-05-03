@@ -641,7 +641,7 @@
 ; Given a ListLink holding a word-pair, return the corresponding
 ; link that holds the count for that word-pair.
 ;
-(define (get-any-pair-link PAIR)
+(define (get-any-pair PAIR)
 	(get-pair-link 'EvaluationLink any-pair-pred PAIR)
 )
 
@@ -659,7 +659,7 @@
 ; Get the atom that holds the total word-pair count.
 ; This has wild-cards on both the left and right.
 
-(define (get-any-pair)
+(define (get-any-wild-wild)
 	(EvaluationLink any-pair-pred (ListLink any-left any-right))
 )
 
@@ -672,7 +672,7 @@
 ; Given a ListLink holding a word-pair, return the corresponding
 ; link that holds the count for that word-pair.
 ;
-(define (get-clique-pair-link PAIR)
+(define (get-clique-pair PAIR)
 	(get-pair-link 'EvaluationLink pair-pred PAIR)
 )
 
@@ -687,7 +687,7 @@
 	(EvaluationLink pair-pred (ListLink word any-right))
 )
 
-(define (get-clique-pair)
+(define (get-clique-wild-wild)
 	(EvaluationLink pair-pred (ListLink any-left any-right))
 )
 
@@ -725,61 +725,64 @@
 	(fetch-incoming-set pair-dist)
 )
 
-(define-public (fetch-words-once)
-	(define done #f)
-	(if (not done) (begin (fetch-all-words) (set! done #t)))
+;; Call the function only once, ever.
+;; The SQL loads are slow, so don't repeat them, if they are
+;; not needed.
+(define call-only-once
+	(let ((done #f))
+		(lambda (func)
+			(if (not done) (func))
+			(set! done #t)))
 )
 
 ; ---------------------------------------------------------------------
 ; Handy-dandy main entry points.
 
-(define-public (batch-all-pairs)
-	(begin
-		(init-trace "/tmp/progress")
+(define-public (batch-any-pairs)
+	(init-trace "/tmp/progress")
 
-		; Make sure all words are in the atomspace
-		(fetch-all-words)
-		(trace-msg "Done loading words, now loading pairs")
-		(display "Done loading words, now loading pairs")
+	; Make sure all words are in the atomspace
+	(call-only-once fetch-all-words)
+	(trace-msg "Done loading words, now loading any-pairs")
+	(display "Done loading words, now loading any-pairs")
 
-		; Make sure all word-pairs are in the atomspace.
-		(fetch-any-pairs)
-		(trace-msg "Finished loading word-pairs\n")
-		(display "Finished loading word-pairs\n")
+	; Make sure all word-pairs are in the atomspace.
+	(call-only-once fetch-any-pairs)
+	(trace-msg "Finished loading any-word-pairs\n")
+	(display "Finished loading any-word-pairs\n")
 
-		(batch-all-pair-mi
-			get-any-pair-link
-			get-any-left-wildcard
-			get-any-right-wildcard
-			get-any-pair
-			'WordNode
-			(get-all-words))
-	)
+	(batch-all-pair-mi
+		get-any-pair
+		get-any-left-wildcard
+		get-any-right-wildcard
+		get-any-wild-wild
+		'WordNode
+		(get-all-words))
 )
 
-(define-public (batch-all-pairs)
-	(begin
-		(init-trace "/tmp/progress")
 
-		; Make sure all words are in the atomspace
-		(fetch-all-words)
-		(trace-msg "Done loading words, now loading pairs")
-		(display "Done loading words, now loading pairs")
+(define-public (batch-clique-pairs)
+	(init-trace "/tmp/progress")
 
-		; Make sure all word-pairs are in the atomspace.
-		(fetch-any-pairs)
-		(trace-msg "Finished loading word-pairs\n")
-		(display "Finished loading word-pairs\n")
+	; Make sure all words are in the atomspace
+	(call-only-once fetch-all-words)
+	(trace-msg "Done loading words, now loading pairs")
+	(display "Done loading words, now loading pairs")
 
-		(batch-all-pair-mi
-			get-any-pair-link
-			get-any-left-wildcard
-			get-any-right-wildcard
-			get-any-pair
-			'WordNode
-			(get-all-words))
-	)
+	; Make sure all word-pairs are in the atomspace.
+	(call-only-once fetch-clique-pairs)
+	(trace-msg "Finished loading clique-word-pairs\n")
+	(display "Finished loading clique-word-pairs\n")
+
+	(batch-all-pair-mi
+		get-clique-pair
+		get-clique-left-wildcard
+		get-clique-right-wildcard
+		get-clique-wild-wild
+		'WordNode
+		(get-all-words))
 )
+
 
 ; ---------------------------------------------------------------------
 ; misc unit-test-by-hand stuff
