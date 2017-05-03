@@ -337,24 +337,6 @@
 )
 
 ; ---------------------------------------------------------------------
-; Get the left wild-card logli for word and lg_rel.
-; (that is, the wildcard is on the left side)
-
-(define (get_left_wildcard_logli word lg_rel)
-	(get-logli
-		(EvaluationLink lg_rel (ListLink any-left word)))
-)
-
-; ---------------------------------------------------------------------
-; Get the right wild-card logli for word and lg_rel.
-; (that is, the wildcard is on the right side)
-
-(define (get_right_wildcard_logli word lg_rel)
-	(get-logli
-		(EvaluationLink lg_rel (ListLink word any-right)))
-)
-
-; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Clique-based-counting word-pair access methods.
@@ -586,7 +568,8 @@
 ; already been computed.
 ;
 ;
-(define (compute-pair-mi right-word GET-PAIR GET-PAIR-TOTAL lg_rel)
+(define (compute-pair-mi right-word GET-PAIR
+	GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL lg_rel)
 
 	; Get the word-pair grand-total
 	(define pair-total (get-count (GET-PAIR-TOTAL)))
@@ -600,34 +583,34 @@
 			; That is, they have the wild-card in the left-hand slot.
 			(left-evs (concatenate!
 					(map! (lambda (lnk) (GET-PAIR lnk)) left-stars)))
+
+			(l-logli (get-logli (GET-LEFT-WILD right-word)))
 		)
-		(begin
-			(for-each
+		(for-each
 
-				; This lambda sets the mutual information for each word-pair.
-				(lambda (pair)
-					(let* (
-							; the left-word of the word-pair
-							(left-word (gadr pair))
-							(r-logli (get_right_wildcard_logli left-word lg_rel))
-							(l-logli (get_left_wildcard_logli right-word lg_rel))
+			; This lambda sets the mutual information for each word-pair.
+			(lambda (pair)
+				(let* (
+						; the left-word of the word-pair
+						(left-word (gadr pair))
+xxxxxxxxx
+						(r-logli (get-logli (GET-RIGHT-WILD left-word)))
 
-							; Compute the logli log_2 P(l,r)/P(*,*)
-							(atom (compute-atom-logli pair pair-total))
+						; Compute the logli log_2 P(l,r)/P(*,*)
+						(atom (compute-atom-logli pair pair-total))
 
-							; Get the log liklihood computed immediately above.
-							(ll (get-logli atom))
+						; Get the log liklihood computed immediately above.
+						(ll (get-logli atom))
 
-							; Subtract the left and right entropies to get the
-							; mutual information (at last!)
-							(mi (- (+ l-logli r-logli) ll))
-						)
-						; Save the hard-won MI to the database.
-						(store-atom (set-mi atom mi))
+						; Subtract the left and right entropies to get the
+						; mutual information (at last!)
+						(mi (- (+ l-logli r-logli) ll))
 					)
+					; Save the hard-won MI to the database.
+					(store-atom (set-mi atom mi))
 				)
-				left-evs
 			)
+			left-evs
 		)
 	)
 )
@@ -696,7 +679,8 @@
 	; for-each
 	(par-for-each
 		(lambda (word)
-			(compute-pair-mi word GET-PAIR GET-PAIR-TOTAL lg_rel)
+			(compute-pair-mi word GET-PAIR
+				GET-LEFT-WILD GET-RIGHT-WILD GET-PAIR-TOTAL lg_rel)
 			(trace-msg-cnt "Done with pair MI cnt=")
 		)
 		all-the-words
