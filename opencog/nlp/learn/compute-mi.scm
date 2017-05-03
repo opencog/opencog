@@ -239,8 +239,8 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-; get-pair-link returns either #f or a single link of type
-; LNK-TYPE that contains the given PRED and PAIR.
+; get-pair-link returns a list of atoms of type LNK-TYPE that contains
+; the given PRED and PAIR.
 ;
 ; PAIR is usually a ListLink of word-pairs.
 ; PRED is usually (PredicateNode "*-Sentence Word Pair-*")
@@ -257,23 +257,14 @@
 
 (define (get-pair-link LNK-TYPE PRED PAIR)
 
-	; As described above, but the linkset is a scheme list which
-	; should be of length zero or one.
-	(define (get-linkset PAIR)
-		(filter
-			(lambda (evl)
-				(define oset (cog-outgoing-set evl))
-				(and
-					(equal? LNK-TYPE (cog-type evl))
-					(equal? PRED (car oset))
-					(equal? PAIR (cadr oset))))
-			(cog-incoming-set PAIR)))
-
-	(define linkset (get-linkset PAIR))
-
-	(and
-		(not (null? linkset))
-		(car linkset))
+	(filter!
+		(lambda (evl)
+			(define oset (cog-outgoing-set evl))
+			(and
+				(equal? LNK-TYPE (cog-type evl))
+				(equal? PRED (car oset))
+				(equal? PAIR (cadr oset))))
+		(cog-incoming-set PAIR)))
 )
 
 ; ---------------------------------------------------------------------
@@ -284,7 +275,7 @@
 ;
 ; Given a ListLink holding a word-pair, return the corresponding
 ; link that holds the count for that word-pair.
-(define (get-any-link PAIR)
+(define (get-any-pair-link PAIR)
 	(get-pair-link 'EvaluationLink any-pair-pred PAIR)
 
 ; Get the left wild-card count for `word`, for the
@@ -369,7 +360,7 @@
 
 ; Given a ListLink holding a word-pair, return the corresponding
 ; link that holds the count for that word-pair.
-(define (get-clique-link PAIR)
+(define (get-clique-pair-link PAIR)
 	(get-pair-link 'EvaluationLink pair-pred PAIR)
 
 ; Get the left wild-card count for `word`, for the
@@ -534,14 +525,13 @@
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (filter-map
+			(left-evs (concatenate! (map!
 					(lambda (lnk) (GET-PAIR lnk))
-					left-stars)
-			)
-			(right-evs (filter-map
+					left-stars)))
+
+			(right-evs (concatenate! (map!
 					(lambda (lnk) (GET-PAIR lnk))
-					right-stars)
-			)
+					right-stars)))
 
 			; The total occurance counts
 			(left-total (get-total-atom-count left-evs))
@@ -798,7 +788,7 @@
 		(par-for-each
 			(lambda (word)
 				(compute-pair-wildcard-counts word
-					get-any-link
+					get-any-pair-link
 					set-any-left-wildcard-count
 					set-any-right-wildcard-count)
 				(trace-msg-cnt "Wildcard-count did ")
@@ -946,10 +936,9 @@
 			)
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (filter-map
-					(lambda (lnk) (get-any-link lnk))
-					left-stars)
-			)
+			(left-evs (concatenate! (map!
+					(lambda (lnk) (get-any-pair-link lnk))
+					left-stars)))
 		)
 		(begin
 			(for-each
@@ -1122,7 +1111,7 @@
 		(batch-all-pair-mi
 			get-any-left-wildcard-count
 			get-any-right-wildcard-count
-			set-any-pair-tota)
+			set-any-pair-total
  any-pair-pred)
 	)
 )
