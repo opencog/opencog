@@ -15,11 +15,11 @@
 ; One structure, among several, in which the pair counts are held,
 ; is of the form
 ;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "some-word"
-;         WordNode "other-word"
+;     EvaluationLink
+;         LinkGrammarRelationshipNode "ANY"
+;         ListLink
+;             WordNode "some-word"
+;             WordNode "other-word"
 ;
 ; After they've been computed, the values for N(w,*) and N(*,w) can be
 ; fetched with the `get-left-count-str` and `get-right-count-str`
@@ -28,20 +28,20 @@
 ;
 ; The counting done in `link-pipeline.scm` keeps track of several
 ; different types of pair information.  Besides the above, it also
-; counts
+; counts these things:
 ;
-;   EvaluationLink
-;      LinkGrammarRelationshipNode "ANY"
-;      ListLink
-;         WordNode "some-word"
-;         WordNode "other-word"
+;     EvaluationLink
+;         PredicateNode "*-Sentence Word Pair-*"
+;         ListLink
+;             WordNode "lefty"
+;             WordNode "righty"
 ;
-;   ExecutionLink
-;      SchemaNode "ANY"
-;      ListLink
-;         WordNode "some-word"
-;         WordNode "other-word"
-;      NumberNode 42
+;     ExecutionLink
+;         SchemaNode "*-Pair Distance-*"
+;         ListLink
+;             WordNode "lefty"
+;             WordNode "righty"
+;         NumberNode 3
 ;
 ; ---------------------------------------------------------------------
 ;
@@ -51,8 +51,6 @@
 (define any-left (AnyNode "left-word"))
 (define any-right (AnyNode "right-word"))
 
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; get-pair-link returns a list of atoms of type LNK-TYPE that contains
 ; the given PRED and PAIR.
@@ -82,6 +80,8 @@
 		(cog-incoming-set PAIR))
 )
 
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Random-tree parse word-pair count access routines.
 ;
@@ -138,6 +138,8 @@
 	(EvaluationLink pair-pred (ListLink any-left any-right))
 )
 
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
 (define-public (get-all-words)

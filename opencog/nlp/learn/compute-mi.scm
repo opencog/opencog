@@ -8,18 +8,23 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below are concerned with counting "items" and pairs of
-; "items", and computing the mutual information of the pairs. In the
-; current usage, the "items" are always WordNodes, and the pairs are
+; The scripts below compute the mutual information held in pairs
+; of "items".  The "items" can be any atoms, all of the same atom-type,
+; arranged in ordered pairs via a ListLink.  For example,
+;
+;     ListLink
+;          SomeAtom "left-side"
+;          SomeAtom "right-hand-part"
+;
+; In the current usage, the SomeAtom is a WordNode, and the pairs are
 ; word-pairs obtained from lingistic analysis.  However, these scripts
 ; are general, and work for any kind of pairs, not just words.
 ;
 ; It is presumed that a database of counts of pairs has been already
-; generated; these scripts work off of those counts. Typically, the
-; pairs are obtained from parsing some language.  We say "database" here,
-; instead of "atomspace", because the scripts will automatically fetch the
-; needed data from the (SQL) persistence backend, as  needed.  This
-; allows long-running and parallel-parsing efforts.
+; generated; these scripts work off of those counts.  We say "database",
+; instead of "atomspace", because the scripts will automatically store
+; the resulting counts in the (SQL) persistence backend, as they are
+; computed.  This simplifies data management a little bit.
 ;
 ; It is assumed that all the count of all pair observations are stored
 ; as the "count" portion of the CountTruthValue on some link. For
@@ -109,20 +114,7 @@
 ; stored under the key of (Predicate "*-Pair MI Key-*") as a single
 ; float.
 ;
-; The pair-counting infrastructure here is generic, because there
-; are several different ways of counting pairs. The counting is done
-; in `link-pipeline.scm`.  One can: count pairs using an
-; all-possible-pair approach; this is called "clique counting".
-; One can count pairs by parsing with a random grammar, this is called
-; "link-type-any" counting. Finally, one can do either of the above,
-; and track the lengths of the links, and restrict to those links
-; less than a given length.  In this last case, the lengths are
-; stored in ExecutionLinks, not EvaluationLinks, and a SchemaNode
-; instead of a PredicateNode is used to identify where the counts
-; are held. The code below should work fine with each of these types.
-;
-; That's all there's to this. The batch-all-pair-mi is the main entry
-; point; its given at the bottom.
+; That's all there's to this.
 ;
 ; ---------------------------------------------------------------------
 ;
