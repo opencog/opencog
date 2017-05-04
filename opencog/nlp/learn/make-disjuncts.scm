@@ -122,37 +122,38 @@
 )
 
 ; ---------------------------------------------------------------------
-; make-pseudo-disjuncts - create "decoded" disjuncts.
-;
-; Given an MST parse of a sentence, return a list of "decoded"
-; disjuncts for each word in the sentence.
-;
-; It is the nature of MST parses that the links between the words
-; have no labels: the links are of the "any" type. We'd like to
-; disover thier types, and we begin by creating pseudo-disjuncts.
-; These resemble ordinary disjuncts, except that the connectors
-; are replaced by the words that they connect to.
-;
-; So, for example, given the MST parse
-;    (mst-parse-testaof "The game is played on a level playing field")
-; the word "playing" might get this connector set
-;
-;   (LgWordCset
-;      (WordNode "playing")
-;      (LgAnd
-;         (PseudoConnector
-;            (WordNode "level")
-;            (LgConnDirNode "-"))
-;         (PseudoConnector
-;            (WordNode "field")
-;            (LgConnDirNode "+"))))
-;
-; Grammatically-speaking, this is not a good connector, but it does
-; show the general idea: that there was a link level<-->playing and
-; a link playing<-->field.
-;
 
 (define-public (make-pseudo-disjuncts MST-PARSE)
+"
+  make-pseudo-disjuncts - create 'decoded' disjuncts.
+
+  Given an MST parse of a sentence, return a list of 'decoded'
+  disjuncts for each word in the sentence.
+
+  It is the nature of MST parses that the links between the words
+  have no labels: the links are of the 'any' type. We'd like to
+  disover thier types, and we begin by creating pseudo-disjuncts.
+  These resemble ordinary disjuncts, except that the connectors
+  are replaced by the words that they connect to.
+
+  So, for example, given the MST parse
+     (mst-parse-text 'The game is played on a level playing field')
+  the word 'playing' might get this connector set:
+
+    (LgWordCset
+       (WordNode 'playing')
+       (LgAnd
+          (PseudoConnector
+             (WordNode 'level')
+             (LgConnDirNode '-'))
+          (PseudoConnector
+             (WordNode 'field')
+             (LgConnDirNode '+'))))
+
+  Grammatically-speaking, this is not a good connector, but it does
+  show the general idea: that there was a link level<-->playing and
+  a link playing<-->field.
+"
 	; Discard links with bad MI values; anything less than
 	; -50 is bad. Heck, anything under minus ten...
 	(define good-links (filter
