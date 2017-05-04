@@ -1,4 +1,26 @@
-;This is the MST module for creating MSTLinkNodes.
+;
+; make-disjuncts.scm
+;
+; Compute the disjuncts, obtained from an MST parse of a sentence.
+;
+; Copyright (c) 2015, 2016 Rohit
+;
+; ---------------------------------------------------------------------
+; OVERVIEW
+; --------
+; After an sentence has been parsed with the MST parser, the links
+; between words in the parse can be interpreted as Link Grammar links.
+; There are two possible interpretations that can be given to these
+; links: they are either "ANY" links, that connect between any words,
+; or they are links capable of connecting ONLY those two words.
+; In the later case, the link-name can be thought of as the
+; concatenation of the two words it connects.
+;
+; In either case, once can work "backwards", and obtain the efective
+; disjunct on each word, that would have lead to the given MST parse.
+; The scripts in this file compute the disjunct.
+; ---------------------------------------------------------------------
+
 (use-modules (srfi srfi-1))
 
 ;Defines letters of the alphabet to be used in constructing a name for the 
