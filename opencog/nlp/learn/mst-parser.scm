@@ -199,12 +199,14 @@
 
 	; Given a list of strings, create a numbered list of word-nodes.
 	; The numbering provides a unique ID, needed for the graph algos.
+	; i.e. if the same word appears twice in a sentence, we need to
+	; distinguish these two.  The id does this.
 	(define (str-list->numbered-word-list word-strs)
 		(define cnt 0)
 		(map
 			(lambda (str)
 				(set! cnt (+ cnt 1))
-				(list cnt (cog-node 'WordNode str))
+				(list cnt (WordNode str))
 			)
 			word-strs
 		)
@@ -521,6 +523,22 @@
 (define (mst-link-get-wordpair lnk)
 	(ListLink (mst-link-get-left-word lnk) (mst-link-get-right-word lnk))
 )
+
+; Get the left seq-word in the link. The seq-word holds both the
+; sequence number, and the word in it.
+(define (mst-link-get-left-seq lnk)
+	(define (get-pr lnk) (cadr lnk))
+	(car (get-pr lnk)))
+
+(define (mst-link-get-right-seq lnk)
+	(define (get-pr lnk) (cadr lnk))
+	(cadr (get-pr lnk)))
+
+; Get the index number out of the sequenced word.
+(define (mst-seq-get-index seq) (car seq))
+
+; Get the word from the sequenced word.
+(define (mst-seq-get-word seq) (cadr seq))
 
 ; ---------------------------------------------------------------------
 ;

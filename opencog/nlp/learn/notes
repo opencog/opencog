@@ -3992,6 +3992,19 @@ reserve_upto(uuid)
 getMaxUUID
 
 (make-narrow-links (mst-parse-text "The game is played on a level playing field"))
+
+(LgWordCset 
+    (WordInstanceNode "foo@e5bfab2f-b3b1-4cf1-ae89-89aaa47bf871")
+    (LgAnd 
+        (LgConnector 
+            (LgConnectorNode "ANY")
+            (LgConnDirNode "-")
+        )
+    )
+)
+
+(unfold
+
 =========================================================
 (sql-open "postgres:///en_snapshot?user=ubuntu")
 Start counting, num words=106696

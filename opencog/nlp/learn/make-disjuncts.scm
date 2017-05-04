@@ -106,6 +106,10 @@
 ;
 ; Example usage:  (make-narrow-links (mst-parse-text "this is a test"))
 ;
+; XXX I think this code is actually useless. Which means that everything
+; else up above is also useless. So maybe delete from beginging of file
+; to about here.
+;
 (define (make-narrow-links mst-parse)
 	(map
 		; Create narrow links from MST-links
@@ -115,6 +119,48 @@
 			; -50 is bad. Heck, anything under minus ten...
 			(lambda (mlink) (< -50 (mst-link-get-mi mlink)))
 			mst-parse))
+)
+
+; ---------------------------------------------------------------------
+
+(define (make-pseudo-disjuncts MST-PARSE)
+	; Discard links with bad MI values; anything less than
+	; -50 is bad. Heck, anything under minus ten...
+	(define good-links (filter
+		(lambda (mlink) (< -50 (mst-link-get-mi mlink)))
+		MST-PARSE))
+
+	; Create a list of all of the words in the sentence.
+	(define seq-list (delete-duplicates!
+		(fold
+			(lambda (mlnk lst)
+				(cons (mst-link-get-left-seq mlnk)
+					(cons (mst-link-get-right-seq mlnk) lst)))
+			'()
+			good-links)))
+
+	; Return #t if word appears on the left side of mst-lnk
+	(define (is-on-left-side? wrd mlnk)
+		(equal? wrd (mst-link-get-left-word mlnk)))
+	(define (is-on-right-side? wrd mlnk)
+		(equal? wrd (mst-link-get-right-word mlnk)))
+
+	; Given a word, and the mst-parse linkset, create a shorter
+	; linkset which holds only the right-going (coming-from-left)
+	; links.
+	(define (mk-left-linkset seq mparse)
+		(define wrd (mst-seq-get-word seq))
+		(filter
+			(lambda (mlnk) (is-on-left-side? wrd mlnk))
+			mparse))
+
+	(define (mk-right-linkset seq mparse)
+		(define wrd (mst-seq-get-word seq))
+		(filter
+			(lambda (mlnk) (is-on-right-side? wrd mlnk))
+			mparse))
+
+	; Given a word, the the links, create a pseudo-disjunct
 )
 
 ; ---------------------------------------------------------------------
