@@ -142,6 +142,7 @@
 	(init-trace "/tmp/progress")
 
 	; Make sure all words are in the atomspace
+	(start-tace "Begin loading words\n")
 	(call-only-once fetch-all-words)
 	(trace-elapsed)
 	(trace-msg "Done loading words, now loading any-pairs\n")
@@ -166,12 +167,15 @@
 	(init-trace "/tmp/progress")
 
 	; Make sure all words are in the atomspace
+	(start-tace "Begin loading words\n")
 	(call-only-once fetch-all-words)
+	(trace-elapsed)
 	(trace-msg "Done loading words, now loading clique pairs\n")
 	(display "Done loading words, now loading clique pairs\n")
 
 	; Make sure all word-pairs are in the atomspace.
 	(call-only-once fetch-clique-pairs)
+	(trace-elapsed)
 	(trace-msg "Finished loading clique-word-pairs\n")
 	(display "Finished loading clique-word-pairs\n")
 

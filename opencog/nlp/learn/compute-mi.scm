@@ -519,8 +519,8 @@
 	(count-all-pairs
 		 GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
 	(trace-elapsed)
-	(trace-msg "Done computing N(*,*)\n")
-	(display "Done computing N(*,*)\n")
+	(trace-msg "Done computing N(*,*), start computing log P(*,w)\n")
+	(display "Done computing N(*,*), start computing log P(*,w)\n")
 
 	; Compute the left and right wildcard logli's
 	(batch-all-pair-wildcard-logli
@@ -541,9 +541,9 @@
 		)
 		all-singletons
 	)
+	(trace-elapsed)
 	(trace-msg "Finished with MI computations\n")
 	(display "Finished with MI computations\n")
-	(trace-elapsed)
 )
 
 ; ---------------------------------------------------------------------
