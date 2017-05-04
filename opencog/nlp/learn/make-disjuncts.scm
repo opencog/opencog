@@ -146,21 +146,54 @@
 		(equal? wrd (mst-link-get-right-word mlnk)))
 
 	; Given a word, and the mst-parse linkset, create a shorter
-	; linkset which holds only the right-going (coming-from-left)
-	; links.
-	(define (mk-left-linkset seq mparse)
+	; seq-list which holds only the words linked to the right.
+	(define (mk-right-seqlist seq mparse)
 		(define wrd (mst-seq-get-word seq))
-		(filter
-			(lambda (mlnk) (is-on-left-side? wrd mlnk))
-			mparse))
+		(map mst-link-get-right-seq
+			(filter
+				(lambda (mlnk) (is-on-left-side? wrd mlnk))
+				mparse)))
 
-	(define (mk-right-linkset seq mparse)
+	(define (mk-left-seqlist seq mparse)
 		(define wrd (mst-seq-get-word seq))
-		(filter
-			(lambda (mlnk) (is-on-right-side? wrd mlnk))
-			mparse))
+		(map mst-link-get-left-seq
+			(filter
+				(lambda (mlnk) (is-on-right-side? wrd mlnk))
+				mparse)))
+
+	; Sort a seq-list into ascending order
+	(define (sort-seqlist seq-list)
+		(sort seq-list
+			(lambda (sa sb)
+				(< (mst-seq-get-index sa) (mst-seq-get-index sb)))))
 
 	; Given a word, the the links, create a pseudo-disjunct
+	(define (mk-pseudo seq mlist)
+		(define lefts (sort-seqlist (mk-left-seqlist seq mlist)))
+		(define rights (sort-seqlist (mk-right-seqlist seq mlist)))
+
+		; Create a bogus connector name out of the word.
+		(define (mk-name seqword)
+			(string-append "$-"
+				(cog-name (mst-seq-get-word seqword)) "-$"))
+
+		; Create a list of left-connectors
+		(define left-cnc
+			(map (lambda (sw)
+					(LgConnector
+						(LgConnectorNode (mk-name sw))
+						(LgConnDirNode "-")))
+			lefts))
+
+		(define right-cnc
+			(map (lambda (sw)
+					(LgConnector
+						(LgConnectorNode (mk-name sw))
+						(LgConnDirNode "+")))
+			rights))
+
+		(LgAnd (append left-cnc right-cnc))
+	)
 )
 
 ; ---------------------------------------------------------------------
