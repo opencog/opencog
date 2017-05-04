@@ -53,46 +53,10 @@
 (define any-right (AnyNode "right-word"))
 
 ; ---------------------------------------------------------------------
-; get-pair-link returns a list of atoms of type LNK-TYPE that contains
-; the given PRED and PAIR.
-;
-; PAIR is usually a ListLink of word-pairs.
-; PRED is usually (PredicateNode "*-Sentence Word Pair-*")
-;                 or (SchemaNode "*-Pair Distance-*")
-;                 or (LinkGrammarRelationshopNode "ANY")
-; LNK-TYPE is usually EvaluationLink or ExecutationLink
-;
-; PAIR is the atom (ListLink) we are given.  We want to find the
-; LNK-TYPE that contains it.  That LNK-TYPE should have
-; PRED as its predicate type, and the ListLink in the expected
-; location. That is, given ListLink, we are looking for
-;
-; The result of this search is either #f or the EvaluationLink
-
-(define (get-pair-link LNK-TYPE PRED PAIR)
-
-	(filter!
-		(lambda (evl)
-			(define oset (cog-outgoing-set evl))
-			(and
-				(equal? LNK-TYPE (cog-type evl))
-				(equal? PRED (car oset))
-				(equal? PAIR (cadr oset))))
-		(cog-incoming-set PAIR))
-)
-
-; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Random-tree parse word-pair count access routines.
 ;
-; Given a ListLink holding a word-pair, return the corresponding
-; link that holds the count for that word-pair.
-;
-(define (get-any-pair PAIR)
-	(get-pair-link 'EvaluationLink any-pair-pred PAIR)
-)
-
 ; Get the atom that holds the left wild-card count for `word`,
 ; for the LG link type "ANY". (the wildcard is on the left side)
 
@@ -116,13 +80,6 @@
 ; ---------------------------------------------------------------------
 ; Clique-based-counting word-pair access methods.
 ; ---------------------------------------------------------------------
-
-; Given a ListLink holding a word-pair, return the corresponding
-; link that holds the count for that word-pair.
-;
-(define (get-clique-pair PAIR)
-	(get-pair-link 'EvaluationLink pair-pred PAIR)
-)
 
 ; Get the atom that holds the left wild-card count for `word`,
 ; for the clique-based counts. (the wildcard is on the left side)
