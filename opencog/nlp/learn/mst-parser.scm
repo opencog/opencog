@@ -96,6 +96,8 @@
 ; The source of mutual information is given by GET-PAIR, which should
 ; be a function that, when given a (ListLink (WordNode)(WordNode)),
 ; returns an atom that holds the MI for that pair.
+; (XXX for historical reasons, it returns a list. The ist is needed
+; when its used for counting, but is not needed here. Fixme!?)
 ;
 ; The left and right words are presumed to be WordNodes, or nil.
 ; If either word is nill, or if the word-pair cannot be found, then a
@@ -115,7 +117,7 @@
 			'()))
 	(define evl
 		(if (not (null? wpr))
-			(GET-PAIR wpr)
+			(car (GET-PAIR wpr))
 			'()))
 	(if (not (null? evl))
 		(get-mi evl)
