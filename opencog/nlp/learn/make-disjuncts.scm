@@ -3,7 +3,8 @@
 ;
 ; Compute the disjuncts, obtained from an MST parse of a sentence.
 ;
-; Copyright (c) 2015, 2016 Rohit
+; Copyright (c) 2015 Rohit Shinde
+; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -23,26 +24,24 @@
 
 (use-modules (srfi srfi-1))
 
-;Defines letters of the alphabet to be used in constructing a name for the 
-;node.
-(define letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-;The function which actually constructs a name for the node.
-;Input: Integer
-;Output: Name 
-;Eg:- 1 --> A, 2--> B
-(define (number->letters num)
-  (unfold-right negative?
-                (lambda (i) (string-ref letters (remainder i 26)))
-                (lambda (i) (- (quotient i 26) 1))
-                num))
 
-;This function calls number->letters function and prepends an 'M' to the 
-;generated name.
-;Input: Integer
-;Output: 1--> MA, 2--> MB
+; Convert an integer into a string of letters. Useful for creating
+; link-names.  This prepends the letter "M" to all names, so that
+; all MST link-names start with this letter.
+; Example:  0 --> MA, 1 --> MB
 (define (number->tag num)
-  (list->string (cons #\M (number->letters num))))
+
+	; Convert number to a list of letters.
+	(define (number->letters num)
+		(define letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+		(unfold-right negative?
+			(lambda (i) (string-ref letters (remainder i 26)))
+			(lambda (i) (- (quotient i 26) 1))
+			num))
+
+	(list->string (cons #\M (number->letters num)))
+)
 
 ;This is a counter which will increment by 1 automatically on every call.
 (define (make-counter . x)
