@@ -443,13 +443,13 @@
 						)
 						; Save the hard-won MI to the database.
 						(store-atom (set-mi atom mi))
-					)
-				(lambda (key . args) #f))) ; catch handler
+					))
+				(lambda (key . args) #f)) ; catch handler
 			)
 			left-evs
 		)
-	)
-	(lambda (key . args) #f))) ; catch handler
+	))
+	(lambda (key . args) #f)) ; catch handler
 )
 
 ; ---------------------------------------------------------------------
