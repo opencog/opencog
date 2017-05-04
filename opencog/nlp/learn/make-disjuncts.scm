@@ -75,32 +75,28 @@
 
 ; ---------------------------------------------------------------------
 
-;This function returns the atom which has the MSTLinkNode from the given set
-;of incoming atoms for a given atom. In short, this function checks whether
-;the EvaluationLink already exists or is there a need to create a new
-;EvaluationLink. If the EvaluationLink exists, then that atoms is returned
-;and the calling function will increment its CTV.
-(define (get-mst-node in)
-	(define temp (car in))
-	(define outgoingset (cog-outgoing-set (car in)))
-	(define node (car outgoingset))
-	(if (eq? 'MSTLinkNode (cog-type node))
-		temp
-		(if (pair? (cdr in))
-			(get-mst-node (cdr in))
-			'())))
+; get-narrow-link -- create a "narrow" link between two words.
+;
+; Given a word-pair (ListLink (WordNode) (WordNode) this will
+; return the corresponding stucture
+;
+;     EvaluationLink
+;          MSTLinkNode "MXYZ"
+;          ListLink
+;              WordNode "foo"
+;              WordNode "bar"
+;
+; such that the "MXYZ" value is used only for this particular word-pair.
 
-;This function creates an EvaluationLink for each word pair which has not been
-;seen previously.
-(define (create-evaluation-link wp)
-	(define x (mst-link-get-left-word wp))
-	(define y (mst-link-get-right-word wp))
-	(define ll (cog-link 'ListLink x y))
-	(define incoming (cog-incoming-set ll))
-	(define mstnode (get-mst-node incoming))
-	(if (null? mstnode)
-		(EvaluationLink (MSTLinkNode (number->tag (counter))) (ListLink x y))
-		(cog-atom-incr mstnode 1)))
+(define (get-narrow-link word-pair)
+	(define mlink (cog-get-link 'EvaluationLink 'MSTLinkNode word-pair))
+	(if (null? mlink)
+		(Evaluation (MSTLink (number->tag (counter))) word-pair)
+		(car mlink))
+)
+
+(define (create-evaluation-link mst-lnk)
+	(get-link (mst-link-get-wordpair mst-lnk))
 
 ;Applies the map function to create MST nodes for all the word pairs. It 
 ;creates nodes for only those word pairs which have a mutual information not 
