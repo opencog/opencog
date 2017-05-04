@@ -98,27 +98,26 @@
 )
 
 ; ---------------------------------------------------------------------
-(define (create-evaluation-link mst-lnk)
-	(get-link (mst-link-get-wordpair mst-lnk))
 
-;Applies the map function to create MST nodes for all the word pairs. It 
-;creates nodes for only those word pairs which have a mutual information not 
-;equal to -1000
-(define (create-MST-nodes text)
-	;The parse of any given sentence.
-	(define (parse text) (mst-parse-text text))
+; Create "narrow" links for each link from an MST parse.
+; No link is created if the MI of the MST parse is invalid.
+; (i.e. if the MST parse had to use large negative MI's during
+; the parse.)
+;
+; Example usage:  (make-narrow-links (mst-parse-text "this is a test"))
+;
+(define (make-narrow-links mst-parse)
+	(map
+		; Create narrow links from MST-links
+		(lambda (mst-lnk) (get-narrow-link (mst-link-get-wordpair mst-lnk)))
+		(filter
+			; discard links with bad MI values; anything less than
+			; -50 is bad. Heck, anything under minus ten...
+			(lambda (mlink) (< -50 (mst-link-get-mi mlink)))
+			mst-parse))
+)
 
-	;Get the mutual information of the word pair.
-	(define (get-mutual-information wp) (car wp))
-	;This function is used by the higher-order-function filter to selectively apply
-	;the create-evaluation-link function to only those word pairs which do not 
-	;have a mutual information of -1000.
-	(define (criteria? wp)
-		(if (= -1000 (get-mutual-information wp))
-			#f
-			#t))
-	(map create-evaluation-link (filter criteria? (parse text)) ))
-
+; ---------------------------------------------------------------------
 ;This function will return a list of disjuncts related to that word.
 ;For example, let the sentence be "The game is played on a level playing field".
 ;Now, MST nodes are created for this sentence. The word "game" is passed along
