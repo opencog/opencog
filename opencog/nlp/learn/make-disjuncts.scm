@@ -44,6 +44,24 @@
 
 ; ---------------------------------------------------------------------
 
+; Implement the djb2 hash function.  STR is the string to hash,
+; and MOD is the modulo to which the result should be taken.
+; Example:
+;  (string->hash "abc漢字def" 666667)
+;
+(define (string->hash STR MOD)
+	(fold
+		(lambda (n hash)
+			(remainder (+ (* 33 hash) n) MOD))
+		0
+		(map char->integer (string->list STR)))
+)
+
+; ---------------------------------------------------------------------
+
+
+; ---------------------------------------------------------------------
+
 ; Round the float to the nearest integer, returning an exact integer.
 (define (float->int f) (rationalize (inexact->exact f) 1/2))
 
@@ -95,6 +113,7 @@
 		(car mlink))
 )
 
+; ---------------------------------------------------------------------
 (define (create-evaluation-link mst-lnk)
 	(get-link (mst-link-get-wordpair mst-lnk))
 
