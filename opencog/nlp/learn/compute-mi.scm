@@ -454,6 +454,12 @@
 	; Get the word-pair grand-total
 	(define pair-total (get-count (GET-WILD-WILD)))
 
+	; Either of the get-loglis below will throw an exception, if
+	; the particular word-pair doesn't have any counts. This is rare,
+	; but can happen: e.g. (Any "left-word") (Word "###LEFT-WALL###")
+	; will have zero counts.  This would have an infinite logli
+	; an an infinite MI. So we skip this, with a try-catch block.
+	(catch #t (lambda ()
 	(let* (
 			; left-stars are all the ListLinks in which the RIGHT-ITEM
 			; appears on the right (and anything on the left)
@@ -471,29 +477,32 @@
 
 			; This lambda sets the mutual information for each word-pair.
 			(lambda (pair)
-				(let* (
-						; the left-word of the word-pair
-						(left-word (gadr pair))
+				(catch #t (lambda ()
+					(let* (
+							; the left-word of the word-pair
+							(left-word (gadr pair))
 
-						(r-logli (get-logli (GET-RIGHT-WILD left-word)))
+							(r-logli (get-logli (GET-RIGHT-WILD left-word)))
 
-						; Compute the logli log_2 P(l,r)/P(*,*)
-						(atom (compute-atom-logli pair pair-total))
+							; Compute the logli log_2 P(l,r)/P(*,*)
+							(atom (compute-atom-logli pair pair-total))
 
-						; Get the log liklihood computed immediately above.
-						(ll (get-logli atom))
+							; Get the log liklihood computed immediately above.
+							(ll (get-logli atom))
 
-						; Subtract the left and right entropies to get the
-						; mutual information (at last!)
-						(mi (- (+ l-logli r-logli) ll))
+							; Subtract the left and right entropies to get the
+							; mutual information (at last!)
+							(mi (- (+ l-logli r-logli) ll))
+						)
+						; Save the hard-won MI to the database.
+						(store-atom (set-mi atom mi))
 					)
-					; Save the hard-won MI to the database.
-					(store-atom (set-mi atom mi))
-				)
+				(lambda (key . args) #f))) ; catch handler
 			)
 			left-evs
 		)
 	)
+	(lambda (key . args) #f))) ; catch handler
 )
 
 ; ---------------------------------------------------------------------
@@ -570,8 +579,8 @@
 	(batch-all-pair-wildcard-logli
 		GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
 	(trace-elapsed)
-	(trace-msg "Done computing -log N(w,*)/N(*,*) and v.v.\n")
-	(display "Done computing -log N(w,*)/N(*,*) and v.v.\n")
+	(trace-msg "Done computing -log N(w,*)/N(*,*) and <-->\n")
+	(display "Done computing -log N(w,*)/N(*,*) and <-->\n")
 
 	; Enfin, the word-pair mi's
 	(start-trace "Going to do individual word-pair MI\n")

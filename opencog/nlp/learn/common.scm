@@ -48,6 +48,8 @@
 ; get-logli ATOM - get the -log_2(frequency) on ATOM.
 ;
 ; The log will be in position 2 of the value.
+; This will throw an exception if no value has been recorded
+; for this atom.
 (define (get-logli ATOM)
 	(cadr (cog-value->list (cog-value ATOM freq-key)))
 )

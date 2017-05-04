@@ -1,4 +1,179 @@
 
+8 Aug 2015
+----------
+
+# select * from typecodes where typename='WordNode';
+ type | typename 
+------+----------
+   73 | WordNode
+
+select * from typecodes where typename='ListLink';
+ type | typename 
+------+----------
+    8 | ListLink
+
+select * from typecodes where typename='EvaluationLink';
+ type |    typename    
+------+----------------
+   47 | EvaluationLink
+
+en_pairs=# select * from typecodes where typename='AnyNode';
+ type | typename 
+------+----------
+   74 | AnyNode
+
+
+
+select uuid,stv_count,name from atoms where type=73 and name='Northern';
+  uuid   | stv_count |   name   
+---------+-----------+----------
+ 1018149 |      9426 | Northern
+
+select uuid,stv_count,name from atoms where type=73 and name='Ireland';
+  uuid   | stv_count |  name   
+---------+-----------+---------
+ 1018155 |     12288 | Ireland
+
+select sum(stv_count) from atoms where type=73;
+   sum    
+----------
+ 78615971
+
+that is, N(*) = 78615971
+
+
+So we conclude that -log_2 P(Northern) = -log_2 (9426 / 78615971)
+= -log_2 (1.1989930137732446e-4) = 13.025889126989188
+
+-log_2(Ireland) = -log_2(12288 / 78615971)
+= -log_2(1.563041178999112e-4) = 12.643356592283384
+
+
+
+
+select uuid, stv_count from atoms where type=8 and outgoing='{1018149, 1018155}';
+  uuid   | stv_count 
+---------+-----------
+ 1023156 |         0
+
+any==152
+select * from typecodes where type=89;
+ type |          typename           
+------+-----------------------------
+   89 | LinkGrammarRelationshipNode
+
+
+select uuid,type,stv_count from atoms where type=89;
+ uuid | type | stv_count 
+------+------+-----------
+  152 |   89 |  23830549
+
+
+select uuid,stv_confidence, stv_count from atoms where type=47 and outgoing='{152, 1023156}';
+  uuid   | stv_confidence | stv_count 
+---------+----------------+-----------
+ 1023157 |      10.743062 |      1314
+
+
+So N(Northern, Ireland) = 1314
+
+Next ...
+select uuid,name from atoms where type=74;
+   uuid    |    name    
+-----------+------------
+ 143427138 | left-word
+ 143427163 | right-word
+
+select uuid, stv_count from atoms where type=8 and outgoing='{143427138, 143427163}';
+   uuid    | stv_count 
+-----------+-----------
+ 143670792 |         0
+
+select uuid,stv_confidence,stv_count from atoms where type=47 and outgoing='{152, 143670792}';
+   uuid    | stv_confidence | stv_count 
+-----------+----------------+-----------
+ 143670793 |              0 |  39333063
+
+
+So N(*,*) = 39333063
+
+So P(Northern, Ireland) = 1314 / 39333063 = 3.340700926342807e-5
+
+-log_2 P(Northern, Ireland) = 14.869489642136607
+
+
+Get (Northern,*)
+select uuid, stv_count from atoms where type=8 and outgoing='{1018149, 143427163}';
+
+143526182 == uuid of above
+select uuid,stv_confidence,stv_count from atoms where type=47 and outgoing='{152, 143526182}';
+   uuid    | stv_confidence | stv_count 
+-----------+----------------+-----------
+ 143526183 |      12.992029 |      4828
+
+So N(Northern,*) = 4828
+
+P(Northern,*) = 4828 / 39333063 = 1.227466063347266e-4
+
+-log_2 P(Northern,*) = 12.992029241703914  agrees with above.
+
+Get (*, Ireland)
+select uuid, stv_count from atoms where type=8 and outgoing='{143427138, 1018155}';
+
+uuid=143526120
+
+select uuid,stv_confidence,stv_count from atoms where type=47 and outgoing='{152,143526120}';
+   uuid    | stv_confidence | stv_count 
+-----------+----------------+-----------
+ 143526121 |      12.620522 |      6246
+
+
+So: N(*, Ireland) = 6246
+P(*, Ireland) = 6246 / 39333063 = 1.58797701567254e-4
+
+-log_2 P(*, Ireland) = 12.620522348438364
+
+MI(Northern, Ireland) = 
+log_2 P(Northern, Ireland) - log_2 P(Northern,*) - log_2 P(*, Ireland)
+
+= - 14.869489642136607 + 12.992029241703914 + 12.620522348438364
+= 10.743061948005671 agrees with SQL
+
+Next:
+P(Northern,*) = 4828 / 39333063 = 1.227466063347266e-4
+
+P(Northern) = (9426 / 78615971) = 1.1989930137732446e-4
+
+So P(Northern,*) < P(Northern)  aiiieeeee false!
+and 
+P(R(Northern,*)|Northern) ==
+P(Northern,*) / P(Northern) = 
+
+P(*, Ireland) = 6246 / 39333063 = 1.58797701567254e-4
+
+P(Ireland) = (12288 / 78615971) = 1.563041178999112e-4
+
+
+P(R(*, Ireland) | Ireland) ==
+  P(*, Ireland) / P(Ireland)
+
+So P(R(Northern, Ireland) | Northern, Ireland) is huge!! >> 1
+
+
+
+So N(*,*) = 39333063
+
+N(*) = 78615971
+
+P(R(*,*)) = 39333063 / 78615971 = 0.5003189873467314
+
+log_2 ((R,*,*)) = 0.9990798905456042
+
+Strange ... I expect more pairs than words ... !?
+
+Is the 1/2 an accident due to the parse-damange?
+
+
 31 Dec 2016
 -----------
 
@@ -3797,3 +3972,18 @@ cog-get-pred
 
 (define bar (let ((done #f))
 	(lambda () (format #t "duude ~A\n" done) (set! done #t))))
+
+(AnyNode \"left-word\") (WordNode \"###LEFT-WALL###\"
+
+get-logli
+      (catch #t
+         (lambda () (xxxxx))
+         (lambda (key . args) #f)))
+
+
+=========================================================
+(sql-open "postgres:///en_snapshot?user=ubuntu")
+Start counting, num words=106696
+
+
+num words=106696

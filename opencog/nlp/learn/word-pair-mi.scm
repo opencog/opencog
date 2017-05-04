@@ -194,11 +194,13 @@
 
 	; Make sure all words are in the atomspace
 	(call-only-once fetch-all-words)
+	(trace-elapsed)
 	(trace-msg "Done loading words, now loading any-pairs\n")
 	(display "Done loading words, now loading any-pairs\n")
 
 	; Make sure all word-pairs are in the atomspace.
 	(call-only-once fetch-any-pairs)
+	(trace-elapsed)
 	(trace-msg "Finished loading any-word-pairs\n")
 	(display "Finished loading any-word-pairs\n")
 
