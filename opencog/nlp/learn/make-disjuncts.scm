@@ -59,37 +59,23 @@
 
 ; ---------------------------------------------------------------------
 
-
-; ---------------------------------------------------------------------
-
-; Round the float to the nearest integer, returning an exact integer.
-(define (float->int f) (rationalize (inexact->exact f) 1/2))
-
-; Create an incrementing counter, stored at KEY on ATOM.
-; Every time the counter is called, it will increment by one.
-; The current counter value is stored as a value, and thus
-; can be saved to the database, and restored from there.
-; The goal here is that we do NOT want to loose track of the
-; current value of the counter, over multiple sessions.
-(define (make-counter ATOM KEY)
-	(lambda ()
-		(define anch ATOM)
-		(define key KEY)
-		(define ctr
-			(catch #t
-				(lambda ()
-					(float->int (car (cog-value->list (cog-value anch key)))))
-				(lambda (key . args) 0)))
-		(cog-set-value! anch key (FloatValue (+ ctr 1)))
-		ctr)
+; Create a link-label for a word-pair. The label is created by
+; hashing together the two strings of the two words. The djb2
+; hash function is used, the label is always consists of upper-case
+; ASCII letters.  Yes, there may be hash collisions, but I think
+; that (a) this is probably rare, (b) mostly doesn't matter.
+; Its been adjusted so that the labels are always 10 chars or fewer
+; in length, and the birthday-paradox chances of a hash collision
+; are about 1 in a few million (sqrt (1<<43)).
+;
+(define (word-pair->label word-pair)
+	; ash is `arithmetic-shift`, so maxlen is about 8 chars
+	(define maxlen (- (ash 1 43) 3158534883327))
+	(define hl (string->hash (cog-name (gar word-pair)) maxlen))
+	(define hr (string->hash (cog-name (gdr word-pair)) maxlen))
+	(define ph (remainder (+ (* 33 hl) hr) maxlen))
+	(number->tag ph)
 )
-
-(define (clear-counter ATOM KEY)
-	(cog-set-value! ATOM KEY (FloatValue 0))
-)
-
-(define counter (make-counter
-	(Anchor "MST data") (Predicate "link count")))
 
 ; ---------------------------------------------------------------------
 
@@ -105,12 +91,10 @@
 ;              WordNode "bar"
 ;
 ; such that the "MXYZ" value is used only for this particular word-pair.
+; The label is computed by hashing.
 
 (define (get-narrow-link word-pair)
-	(define mlink (cog-get-link 'EvaluationLink 'MSTLinkNode word-pair))
-	(if (null? mlink)
-		(Evaluation (MSTLink (number->tag (counter))) word-pair)
-		(car mlink))
+	(Evaluation (MSTLink (word-pair->label word-pair)) word-pair)
 )
 
 ; ---------------------------------------------------------------------
