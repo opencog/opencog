@@ -3990,6 +3990,8 @@ wow 32 gigs to load all pairs!
 tlb.clear()
 reserve_upto(uuid)
 getMaxUUID
+
+(make-narrow-links (mst-parse-text "The game is played on a level playing field"))
 =========================================================
 (sql-open "postgres:///en_snapshot?user=ubuntu")
 Start counting, num words=106696
