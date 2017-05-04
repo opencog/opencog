@@ -85,3 +85,28 @@
 )
 
 ; ---------------------------------------------------------------------
+; Compute log liklihood of having observed a given atom.
+;
+; The liklihood and its log-base-2 will be stored under the key
+; (Predicate "*-FrequencyKey-*"), with the first number being the
+; frequency, which is just the atom's count value, dividing by the
+; total number of times the atom has been observed.  The log liklihood
+; is -log_2(frequency), and is stored as a convenience.
+;
+; This returns the atom that was provided, but now with the logli set.
+
+(define (compute-atom-logli atom total)
+	(set-freq atom (/ (get-count atom) total))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (get-all-words)
+"
+  get-all-words - return a list holding all of the observed words
+  This does NOT fetch the words from the backing store.
+"
+	(cog-get-atoms 'WordNode)
+)
+
+; ---------------------------------------------------------------------
