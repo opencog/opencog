@@ -96,10 +96,10 @@
       (cond ; Group of words / phrase
             ((and (string-prefix? "'" t)
                   (not (equal? #f (string-match "^'[a-zA-Z0-9 ]+\\b'" t))))
-             (string-append "(phrase " (subterm t 1) ")"))
+             (string-append "(phrase \"" (subterm t 1) "\")"))
             ; Literal word
             ((string-prefix? "'" t)
-             (string-append "(word " (substring t 1) ")"))
+             (string-append "(word \"" (substring t 1) "\")"))
             ; Unordered-matching
             ((string-prefix? "<<" t)
              (join-terms "unordered-matching" (subterm t 2)))
@@ -124,7 +124,7 @@
              (string-append "(negation " t ")"))
             ; Concept
             ((string-prefix? "~" t)
-             (string-append "(concept " (substring t 1) ")"))
+             (string-append "(concept \"" (substring t 1) "\")"))
             ; Variable
             ; TODO: There are many types of variables...
             ((equal? "_" t)
@@ -134,7 +134,7 @@
              (let ((ss (string-split t #\~)))
                (string-append "(" (cadr ss) " " (car ss) ")")))
             ; Lemma, the default case
-            (else (string-append "(lemma " t ")"))))
+            (else (string-append "(lemma \"" t "\")"))))
     terms))
 
 (define (interpret-text txt)
