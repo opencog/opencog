@@ -192,8 +192,15 @@
 						(LgConnDirNode "+")))
 			rights))
 
-		(LgAnd (append left-cnc right-cnc))
+		; return the connector-set
+		(LgWordCset
+			(mst-seq-get-word seq)
+			(LgAnd (append left-cnc right-cnc)))
 	)
+
+	(map
+		(lambda (seq) (mk-pseudo seq MST-PARSE))
+		seq-list)
 )
 
 ; ---------------------------------------------------------------------
