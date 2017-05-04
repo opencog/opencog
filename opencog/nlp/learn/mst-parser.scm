@@ -497,6 +497,28 @@
 )
 
 ; ---------------------------------------------------------------------
+; The MST parser returns a list of word-pair links, tagged with the
+; mutual information between that word-pair. The functions below
+; unpack each data strcture.
+;
+; Hmm. Should we be using goops for this?
+
+; Get the mutual informattion of the link.
+(define (mst-link-get-mi lnk) (car lnk))
+
+; Get the word-pair of the link. This includes misc extraneous markup,
+; including the word indexes in the sentence.
+(define (mst-link-get-wordpair lnk) (cadr lnk))
+
+; Get the left word in the link. This returns the WordNode.
+(define (mst-link-get-left-word lnk)
+	(cadr (car (mst-link-get-wordpair lnk))
+
+; Get the right word in the link. This returns the WordNode.
+(define (mst-link-get-right-word lnk)
+	(cadr (cadr (mst-link-get-wordpair lnk))
+
+; ---------------------------------------------------------------------
 ;
 ; (use-modules (opencog) (opencog persist) (opencog persist-sql))
 ; (use-modules (opencog nlp) (opencog nlp learn))

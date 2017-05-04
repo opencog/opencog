@@ -24,8 +24,7 @@
 
 (use-modules (srfi srfi-1))
 
-
-
+; ---------------------------------------------------------------------
 ; Convert an integer into a string of letters. Useful for creating
 ; link-names.  This prepends the letter "M" to all names, so that
 ; all MST link-names start with this letter.
@@ -43,6 +42,7 @@
 	(list->string (cons #\M (number->letters num)))
 )
 
+; ---------------------------------------------------------------------
 ;This is a counter which will increment by 1 automatically on every call.
 (define (make-counter . x)
    ; validate argument
@@ -60,25 +60,7 @@
 ;make-counter is defined as counter to make its purpose clear.
 (define counter (make-counter))
 
-;The word pair has mutual information also embedded in it. This function strips
-;that away and keeps only the two wordnodes.
-;Input: Word-pair
-;Output: Word-pair without the mutual information
-(define (actual-wp wp) (car (cdr wp)))
-
-;Get the first wordnode in the wordpair.
-(define (first-wordnode wp) (car (actual-wp wp)))
-
-;Get the second wordnode in the wordpair.
-(define (second-wordnode wp) (car (cdr (actual-wp wp))))
-
-;The wordnodes also have some superfluous information. This function removes
-;that for the first wordnode.
-(define (get-first-word wp) (car (cdr (first-wordnode wp))))
-
-;The wordnodes also have some superfluous information. This function removes
-;that for the second wordnode.
-(define (get-second-word wp) (car (cdr (second-wordnode wp))))
+; ---------------------------------------------------------------------
 
 ;This function returns the atom which has the MSTLinkNode from the given set
 ;of incoming atoms for a given atom. In short, this function checks whether 
@@ -98,8 +80,8 @@
 ;This function creates an EvaluationLink for each word pair which has not been
 ;seen previously.
 (define (create-evaluation-link wp)
-	(define x (get-first-word wp))
-	(define y (get-second-word wp))
+	(define x (mst-link-get-left-word wp))
+	(define y (mst-link-get-right-word wp))
 	(define ll (cog-link 'ListLink x y))
 	(define incoming (cog-incoming-set ll))
 	(define mstnode (get-mst-node incoming))
