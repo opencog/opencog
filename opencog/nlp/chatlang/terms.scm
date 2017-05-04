@@ -23,6 +23,14 @@
                   (WordInstanceLink (Variable name) (Variable "$P")))))
     (cons v c)))
 
+(define-public (phrase w)
+  "Occurrence of a phrase or a group of words."
+  (fold (lambda (wd lst)
+          (cons (append (car lst) (car wd))
+                (append (cdr lst) (cdr wd))))
+        (cons '() '())
+        (map word (string-split w #\ ))))
+
 (define-public (concept c)
   "Term is a member of a given concept, including concepts created via
    chat-concept"
@@ -43,25 +51,6 @@
           (append (cdr lemma-atomese)
                   (list (PartOfSpeechLink var-node
                                           (DefinedLinguisticConcept p)))))))
-
-(define-public (proper-names . w)
-  "Terms represent multi-word proper names. It must have at least two words."
-  (define w1-atoms (word (car w)))
-  (define vars (car w1-atoms))
-  (define conds (cdr w1-atoms))
-  (define var-head (gar (caar w1-atoms)))
-  (define (template w)
-    (let* ((w-atoms (word w))
-           (v (car w-atoms))
-           (c (cdr w-atoms))
-           (el (EvaluationLink (LinkGrammarRelationship "G")
-                               (ListLink var-head
-                                         (gar (car v))))))
-      (append! vars v)
-      (append! conds c (list el))
-      (set! var-head (gar (car v)))))
-  (for-each template (cdr w))
-  (cons vars conds))
 
 ; This is NOT meant for external use
 ; The name of the variables ("$left_wall" and "$main_verb") are fixed

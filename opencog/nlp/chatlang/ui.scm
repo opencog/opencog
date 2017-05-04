@@ -28,15 +28,15 @@
    Return the term extracted."
   (cond ; Since the quote (') could be used in two different
         ; terms, one is to indicate the literal occurrence of a
-        ; word (e.g. 'played) and another is to indicate a
-        ; proper name (e.g. 'Hanson Robotics'), so check if we
+        ; word (e.g. 'played) and another is to indicate a group
+        ; of words (e.g. 'Hanson Robotics'), so check if we
         ; got a quote for the first word
         ((string-prefix? "'" txt)
          (let ((sm (string-match "^'[a-zA-Z0-9 ]+\\b'" txt)))
            (if (equal? #f sm)
              ; Return the literal
              (extract txt)
-             ; Return the proper name
+             ; Return the group of words
              (match:substring sm))))
         ; Similarly angle brackets (< >) could be used in two
         ; different terms, one is to represent sentence
@@ -93,10 +93,10 @@
    function calls, in the form of a string."
   (map
     (lambda (t)
-      (cond ; Proper-name
+      (cond ; Group of words / phrase
             ((and (string-prefix? "'" t)
                   (not (equal? #f (string-match "^'[a-zA-Z0-9 ]+\\b'" t))))
-             (string-append "(proper-names " (subterm t 1) ")"))
+             (string-append "(phrase " (subterm t 1) ")"))
             ; Literal word
             ((string-prefix? "'" t)
              (string-append "(word " (substring t 1) ")"))
@@ -132,7 +132,7 @@
             ; Part of speech (POS)
             ((not (equal? #f (string-match "[_a-zA-Z]+~" t)))
              (let ((ss (string-split t #\~)))
-               (string-append "(" (cadr ss) " " (car ss))))
+               (string-append "(" (cadr ss) " " (car ss) ")")))
             ; Lemma, the default case
             (else (string-append "(lemma " t ")"))))
     terms))

@@ -56,8 +56,8 @@
             ; Skip the sentence anchors, they will be handled later
             ((equal? 'anchor-start (car w)) '())
             ((equal? 'anchor-end (car w)) '())
-            ; For proper names -- create WordNodes
-            ((equal? 'proper-names (car w)) (map Word (cdr w)))
+            ; For phrases -- create WordNodes
+            ((equal? 'phrase (car w)) (map Word (cdr w)))
             ((equal? 'or-choices (car w)) (list (Glob "$choices")))
             ((equal? 'unordered-matching (car w)) (list (Glob "$unordered")))
             ((not (equal? #f (string-index (cadr w) char-upper-case?)))
