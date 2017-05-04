@@ -25,7 +25,7 @@
 ; This tracks multiple, independent counts:
 ; *) how many sentences have been observed.
 ; *) how many parses were observed.
-; *) how many words have been observed (counting once-per-word)
+; *) how many words have been observed (counting once-per-word-per-parse)
 ; *) how many word-order pairs have been observed.
 ; *) the distance between words in the above pairs.
 ; *) how many link-relationship triples have been observed.
@@ -205,9 +205,6 @@
 ; at least one -- i.e. it is the diffference between their ordinals.
 ;
 (define (update-pair-counts-once PARSE)
-
-	(define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
-	(define pair-dist (SchemaNode "*-Pair Distance-*"))
 
 	; Get the scheme-number of the word-sequence number
 	(define (get-no seq-lnk)

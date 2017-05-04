@@ -3711,3 +3711,89 @@ map-word-instances
  (sql-open "postgres:///en_pairs?user=linas")
  (use-relex-server "127.0.0.1" 4445)
 
+==========================================
+
+again: using the rohit data:
+
+select count(*) from atoms where type=73; gives 396K unique words.
+select count(8) from atoms where type=47; gives number fo evluation
+links which is 9672K  but 2*396K of these are anynodes, so really only
+9672-792=8880K unique word-pairs.
+which were observed 
+
+en_pairs=> select * from atoms where type=74;
+   uuid    | space | type | height |    name    | outgoing 
+-----------+-------+------+--------+------------+----------
+ 143427138 |     1 |   74 |      0 | left-word  | 
+ 143427163 |     1 |   74 |      0 | right-word | 
+
+en_pairs=> select * from atoms where outgoing='{143427138,143427163}';
+   uuid    | space | type | height | name |       outgoing        
+-----------+-------+------+--------+------+-----------------------
+ 143670792 |     1 |    8 |      1 |      | {143427138,143427163}
+
+en_pairs=> select * from atoms where outgoing='{152,143670792}';
+   uuid    | space | type | height | name |    outgoing     
+-----------+-------+------+--------+------+-----------------
+ 143670793 |     1 |   47 |      2 |      | {152,143670792}
+
+en_pairs=> select * from valuations where atom=143670793;
+ key |   atom    | type |   floatvalue    | stringvalue | linkvalue 
+-----+-----------+------+-----------------+-------------+-----------
+   1 | 143670793 |  177 | {0,0,418235182} |             | 
+
+So 418M observations of word-pairs.
+
+ALTER DATABASE en_pairs RENAME TO en_pairs_rohit;
+
+=========================================================
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs?user=ubuntu")
+
+(fetch-all-words)
+(length (get-all-words)) 65021 
+(total-word-observations) 7181662.0 7.2M
+(PredicateNode "*-Sentence Word Pair-*")
+(SchemaNode "*-Pair Distance-*")o
+   (define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
+   (define pair-dist (SchemaNode "*-Pair Distance-*"))
+
+(length (cog-incoming-set pair-pred))
+(get-total-atom-count (cog-incoming-set pair-pred))
+
+get-any-left-wildcard-count
+get-any-right-wildcard-count
+set-any-pair-total
+
+set-any-left-wildcard-count
+set-any-right-wildcard-count
+get-any-pair-link
+batch-all-pair-wildcard-counts
+get-all-words
+
+batch-all-pair-wildcard-logli
+get-pair-total
+
+GET-LEFT-WILD
+(store-atom
+      (set-count GET-LEFT-WILD TOTAL))
+batch-all-pair-wildcard-logli
+compute-pair-mi
+get-any-pair-link-> GET-PAIR
+get-word-pairs
+
+cog-incoming-by-type
+.scm:		(par-map get-endpoint (cog-filter link-type 
+utilities.scm:
+cog-map-chase-link dead
+cog-map-chase-link-dbg   used by ppars ranker
+cog-map-chase-links-chk  used by cog-chase-link-chk
+cog-chase-link-chk   used by  nlp-utils
+
+cog-map-apply-link  dead used by cog-get-link
+cog-get-link used by 
+cog-get-pred
+
+(define bar (let ((done #f))
+	(lambda () (format #t "duude ~A\n" done) (set! done #t))))
