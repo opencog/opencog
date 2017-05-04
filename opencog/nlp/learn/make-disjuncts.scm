@@ -43,28 +43,41 @@
 )
 
 ; ---------------------------------------------------------------------
-;This is a counter which will increment by 1 automatically on every call.
-(define (make-counter . x)
-   ; validate argument
-   (let ((count (if (and
-                     (not (null? x))
-                     (integer? (car x)))
-                    (car x)
-                    1)))
-   ; return counter closure  
-     (lambda ()
-       (let ((current-count count))
-         (set! count (+ 1 count))
-         current-count))))
 
-;make-counter is defined as counter to make its purpose clear.
-(define counter (make-counter))
+; Round the float to the nearest integer, returning an exact integer.
+(define (float->int f) (rationalize (inexact->exact f) 1/2))
+
+; Create an incrementing counter, stored at KEY on ATOM.
+; Every time the counter is called, it will increment by one.
+; The current counter value is stored as a value, and thus
+; can be saved to the database, and restored from there.
+; The goal here is that we do NOT want to loose track of the
+; current value of the counter, over multiple sessions.
+(define (make-counter ATOM KEY)
+	(lambda ()
+		(define anch ATOM)
+		(define key KEY)
+		(define ctr
+			(catch #t
+				(lambda ()
+					(float->int (car (cog-value->list (cog-value anch key)))))
+				(lambda (key . args) 0)))
+		(cog-set-value! anch key (FloatValue (+ ctr 1)))
+		ctr)
+)
+
+(define (clear-counter ATOM KEY)
+	(cog-set-value! ATOM KEY (FloatValue 0))
+)
+
+(define counter (make-counter
+	(Anchor "MST data") (Predicate "link count")))
 
 ; ---------------------------------------------------------------------
 
 ;This function returns the atom which has the MSTLinkNode from the given set
-;of incoming atoms for a given atom. In short, this function checks whether 
-;the EvaluationLink already exists or is there a need to create a new 
+;of incoming atoms for a given atom. In short, this function checks whether
+;the EvaluationLink already exists or is there a need to create a new
 ;EvaluationLink. If the EvaluationLink exists, then that atoms is returned
 ;and the calling function will increment its CTV.
 (define (get-mst-node in)
