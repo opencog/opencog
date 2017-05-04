@@ -64,8 +64,8 @@
         (else (extract txt))))
 
 (define* (identify-terms txt #:optional (lst '()))
-  "Construct a list of terms by recursively extracting the
-   terms one by one from the given text."
+  "Construct a list of terms by recursively extracting the terms
+   one by one from the given text."
   (cog-logger-debug "Constructing term-list from: ~a" txt)
   (let* ((term (extract-term (string-trim-both txt)))
          (newtxt (string-trim (string-drop txt (string-length term))))
@@ -80,8 +80,8 @@
   (substring t n (- (string-length t) n)))
 
 (define (join-terms func terms-str)
-  "Identify the terms in a string, join them together with
-   the name of a function."
+  "Identify the terms in a string, join them together with the name
+   of a function."
   (string-append
     (fold (lambda (t s) (string-join (list s t) " "))
           (string-append "(" func)
@@ -138,9 +138,8 @@
     terms))
 
 (define (interpret-text txt)
-  "Interpret the text in the pattern of the rule by firstly
-   identifying the terms from the text and interpret them
-   one by one later."
+  "Interpret the text in the pattern of the rule by firstly identifying
+   the terms from the text and interpret them one by one later."
   (let* ((terms (identify-terms (string-trim-both txt)))
          (interp-terms (interpret-terms terms)))
     (cog-logger-debug "Total ~d terms were extracted: ~a" (length terms) terms)
@@ -148,6 +147,7 @@
   interp-terms))
 
 (define (write-to-file opat oact ipat iact)
+  "Write the rule to a file, including both the original and interpreted form."
   (define outport (open-file filename "w"))
   (display "; (cr '" outport)
   (display opat outport)
@@ -160,10 +160,15 @@
   (display ")" outport)
   (close-output-port outport))
 
-; Example:
-; (cr '("hi there") '("hey"))
 (define-public (cr pattern action)
-  "Main function for creating a behavior rule."
+  "Main function for creating a behavior rule.
+   For verbal behavior, enclose the text in double quotes.
+
+   Example Usage:
+     (cr '(\"hi there\") '(\"hey\"))
+
+   will create a rule -- if the input is \"hi there\",
+   say \"hey\"."
   (define interp-pattern
     (append-map
       (lambda (p)
@@ -194,3 +199,28 @@
   (cog-logger-info "Interpretation of the pattern: ~a" interp-pattern)
   (cog-logger-info "Interpretation of the action: ~a" interp-action)
 )
+
+(define (member-words w)
+  "Extract the members of the concept."
+  (let ((words (string-split w #\sp)))
+    (if (= 1 (length words))
+        (if (string-prefix? "~" (car words))
+          (Concept (car words))
+          (Word (car words)))
+        (List (map-in-order Word words)))))
+
+(define-public (chat-concept name . members)
+  "Create named concepts with explicit membership lists.
+
+   The first argument is the name of the concept, and the rest is the
+   list of words and/or concepts that will be a member of the concept.
+
+   Example Usage:
+     (chat-concept \"eat\" \"ingest\" \"binge and purge\" \"~swallow\")
+
+   will create a concept with the word \"ingest\", the phrase
+   \"binge and purge\", and the concept \"swallow\" as its members."
+  (let* ((c (Concept name))
+         (ref-members (append-map (lambda (m) (list (Reference (member-words m) c)))
+                                  members)))
+    ref-members))

@@ -106,19 +106,6 @@
       yakking
       name)))
 
-(define (member-words w)
-  (let ((words (string-split w #\sp)))
-    (if (= 1 (length words))
-        (Word (car words))
-        (List (map-in-order Word words)))))
-
-(define-public (chat-concept name members)
-  "Lets users create named concepts with explicit membership lists."
-  (let* ((c (Concept name))
-         (ref-members (append-map (lambda (m) (list (Reference (member-words m) c)))
-                                  members)))
-    ref-members))
-
 (define (get-sent-lemmas sent-node)
   "Get the lemma of the words associate with sent-node."
   (List (append-map
