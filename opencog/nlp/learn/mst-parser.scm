@@ -500,10 +500,8 @@
 ; (use-modules (opencog nlp) (opencog nlp learn))
 ; (sql-open "postgres:///en_pairs?user=linas")
 ;
-; (init-trace)
-; (load-atoms-of-type item-type)
-; (define lg_any (LinkGrammarRelationshipNode "ANY"))
-; (fetch-incoming-set lg_any)
+; (fetch-all-words)
+; (fetch-any-pairs)
 ; (mst-parse-text "faire un test")
 ; (mst-parse-text "Elle jouit notamment du monopole de la restauration ferroviaire")
 ;

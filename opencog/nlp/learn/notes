@@ -3981,6 +3981,9 @@ get-logli
          (lambda (key . args) #f)))
 
 
+(start-trace msg)
+
+get-any-pair  get-clique-pair
 =========================================================
 (sql-open "postgres:///en_snapshot?user=ubuntu")
 Start counting, num words=106696
