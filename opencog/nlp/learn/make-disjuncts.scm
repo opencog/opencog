@@ -172,23 +172,18 @@
 		(define lefts (sort-seqlist (mk-left-seqlist seq mlist)))
 		(define rights (sort-seqlist (mk-right-seqlist seq mlist)))
 
-		; Create a bogus connector name out of the word.
-		(define (mk-name seqword)
-			(string-append "$-"
-				(cog-name (mst-seq-get-word seqword)) "-$"))
-
 		; Create a list of left-connectors
 		(define left-cnc
 			(map (lambda (sw)
-					(LgConnector
-						(LgConnectorNode (mk-name sw))
+					(PseudoConnector
+						(mst-seq-get-word sw)
 						(LgConnDirNode "-")))
 			lefts))
 
 		(define right-cnc
 			(map (lambda (sw)
-					(LgConnector
-						(LgConnectorNode (mk-name sw))
+					(PseudoConnector
+						(mst-seq-get-word sw)
 						(LgConnDirNode "+")))
 			rights))
 
