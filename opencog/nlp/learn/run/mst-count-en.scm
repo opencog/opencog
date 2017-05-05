@@ -23,4 +23,4 @@
 (fetch-all-words)
 
 ; Load up the word-pairs -- this can take over half an hour!
-(fetch-clique-pairs)
+(fetch-any-pairs)

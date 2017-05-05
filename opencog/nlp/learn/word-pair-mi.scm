@@ -106,7 +106,7 @@
 "
 	(define start-time (current-time))
 	(load-atoms-of-type 'WordNode)
-	(format #t "Elapsed time to load words: ~A secs"
+	(format #t "Elapsed time to load words: ~A secs\n"
 		(- (current-time) start-time))
 )
 
@@ -117,7 +117,7 @@
 "
 	(define start-time (current-time))
 	(fetch-incoming-set any-pair-pred)
-	(format #t "Elapsed time to ANY-link pairs: ~A secs"
+	(format #t "Elapsed time to ANY-link pairs: ~A secs\n"
 		(- (current-time) start-time))
 )
 
@@ -128,12 +128,12 @@
 "
 	(define start-time (current-time))
 	(fetch-incoming-set pair-pred)
-	(format #t "Elapsed time to load clique pairs: ~A secs"
+	(format #t "Elapsed time to load clique pairs: ~A secs\n"
 		(- (current-time) start-time))
 
 	(set! start-time (current-time))
 	(fetch-incoming-set pair-dist)
-	(format #t "Elapsed time to load clique-pair distances: ~A secs"
+	(format #t "Elapsed time to load clique-pair distances: ~A secs\n"
 		(- (current-time) start-time))
 )
 
