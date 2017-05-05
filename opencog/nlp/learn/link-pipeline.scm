@@ -399,7 +399,7 @@
  it parsed, and then updates the counts for the observed words and word
  pairs.
 "
-	; try-catch wrapper around the coutners. Due to a buggy RelEx
+	; try-catch wrapper around the counters. Due to a buggy RelEx
 	; (see documentation for `word-inst-get-word`), the function
 	; `update-pair-counts` might throw.  If it does throw, then
 	; avoid doing any counting at all for this sentence.

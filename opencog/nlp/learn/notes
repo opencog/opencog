@@ -4005,6 +4005,14 @@ getMaxUUID
 
 (unfold
 
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs_rohit?user=linas")
+ (fetch-all-words)
+ (fetch-any-pairs)
+
+
+
 =========================================================
 (sql-open "postgres:///en_snapshot?user=ubuntu")
 Start counting, num words=106696

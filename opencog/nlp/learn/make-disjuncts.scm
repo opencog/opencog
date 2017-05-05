@@ -228,4 +228,20 @@
 		seq-list)
 )
 
-; ---------------------------------------------------------------------
+;  ---------------------------------------------------------------------
+
+(define-public (observe-mst plain-text)
+"
+  observe-mst -- update pseduo-disjunct counts by observing raw text.
+
+  This is the second part of the learning algo: simply count how
+  often pseudo-disjuncts show up.
+"
+	; The count-one-atom function fetches from the SQL database,
+	; increments the count by one, and stores the result back
+	(for-each
+		(lambda (dj) (count-one-atom dj))
+		(make-pseudo-disjuncts (mst-parse-text plain-text))
+	)
+)
+;  ---------------------------------------------------------------------
