@@ -181,59 +181,6 @@
 )
 
 ; ---------------------------------------------------------------------
-; Compute log liklihood of having observed a given atom.
-;
-; The liklihood and its log-base-2 will be stored under the key
-; (Predicate "*-FrequencyKey-*"), with the first number being the
-; frequency, which is just the atom's count value, dividing by the
-; total number of times the atom has been observed.  The log liklihood
-; is -log_2(frequency), and is stored as a convenience.
-;
-; This returns the atom that was provided, but now with the logli set.
-
-(define (compute-atom-logli atom total)
-	(set-freq atom (/ (get-count atom) total))
-)
-
-; ---------------------------------------------------------------------
-; Compute the occurance logliklihoods for a list of atoms.
-;
-; This sums up the occurance-count over the entire list of atoms,
-; and uses that as the normalization for the probability frequency
-; for the individual atoms in the list. It then computes the log_2
-; likelihood for each atom in the list, based on the total.
-;
-; As usual, the raw counts are obtained from the 'count' slot on a
-; CountTruthValue, and the logli is stored as a value on the atom.
-;
-; This returns the atom-list, but now with the logli's set.
-
-(define (compute-all-logli atom-list)
-	(let ((total (get-total-atom-count atom-list)))
-		(map
-			(lambda (atom) (compute-atom-logli atom total))
-			atom-list
-		)
-	)
-)
-
-; ---------------------------------------------------------------------
-; Compute the occurance logliklihoods for all words.
-;
-; Load all word-nodes into the atomspace from SQL storage, if they
-; are not already present.  This also loads the associated values.
-;
-; This returns the list of all word-nodes, with the logli's set.
-
-(define (compute-all-word-freqs)
-	(begin
-		; Make sure that all word-nodes are in the atom table.
-		(fetch-all-words)
-		(compute-all-logli (get-all-words))
-	)
-)
-
-; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -454,6 +401,12 @@
 	; Get the word-pair grand-total
 	(define pair-total (get-count (GET-WILD-WILD)))
 
+	; Either of the get-loglis below will throw an exception, if
+	; the particular word-pair doesn't have any counts. This is rare,
+	; but can happen: e.g. (Any "left-word") (Word "###LEFT-WALL###")
+	; will have zero counts.  This would have an infinite logli
+	; an an infinite MI. So we skip this, with a try-catch block.
+	(catch #t (lambda ()
 	(let* (
 			; left-stars are all the ListLinks in which the RIGHT-ITEM
 			; appears on the right (and anything on the left)
@@ -471,29 +424,32 @@
 
 			; This lambda sets the mutual information for each word-pair.
 			(lambda (pair)
-				(let* (
-						; the left-word of the word-pair
-						(left-word (gadr pair))
+				(catch #t (lambda ()
+					(let* (
+							; the left-word of the word-pair
+							(left-word (gadr pair))
 
-						(r-logli (get-logli (GET-RIGHT-WILD left-word)))
+							(r-logli (get-logli (GET-RIGHT-WILD left-word)))
 
-						; Compute the logli log_2 P(l,r)/P(*,*)
-						(atom (compute-atom-logli pair pair-total))
+							; Compute the logli log_2 P(l,r)/P(*,*)
+							(atom (compute-atom-logli pair pair-total))
 
-						; Get the log liklihood computed immediately above.
-						(ll (get-logli atom))
+							; Get the log liklihood computed immediately above.
+							(ll (get-logli atom))
 
-						; Subtract the left and right entropies to get the
-						; mutual information (at last!)
-						(mi (- (+ l-logli r-logli) ll))
-					)
-					; Save the hard-won MI to the database.
-					(store-atom (set-mi atom mi))
-				)
+							; Subtract the left and right entropies to get the
+							; mutual information (at last!)
+							(mi (- (+ l-logli r-logli) ll))
+						)
+						; Save the hard-won MI to the database.
+						(store-atom (set-mi atom mi))
+					))
+				(lambda (key . args) #f)) ; catch handler
 			)
 			left-evs
 		)
-	)
+	))
+	(lambda (key . args) #f)) ; catch handler
 )
 
 ; ---------------------------------------------------------------------
@@ -563,15 +519,15 @@
 	(count-all-pairs
 		 GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
 	(trace-elapsed)
-	(trace-msg "Done computing N(*,*)\n")
-	(display "Done computing N(*,*)\n")
+	(trace-msg "Done computing N(*,*), start computing log P(*,w)\n")
+	(display "Done computing N(*,*), start computing log P(*,w)\n")
 
 	; Compute the left and right wildcard logli's
 	(batch-all-pair-wildcard-logli
 		GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
 	(trace-elapsed)
-	(trace-msg "Done computing -log N(w,*)/N(*,*) and v.v.\n")
-	(display "Done computing -log N(w,*)/N(*,*) and v.v.\n")
+	(trace-msg "Done computing -log N(w,*)/N(*,*) and <-->\n")
+	(display "Done computing -log N(w,*)/N(*,*) and <-->\n")
 
 	; Enfin, the word-pair mi's
 	(start-trace "Going to do individual word-pair MI\n")
@@ -585,9 +541,9 @@
 		)
 		all-singletons
 	)
+	(trace-elapsed)
 	(trace-msg "Finished with MI computations\n")
 	(display "Finished with MI computations\n")
-	(trace-elapsed)
 )
 
 ; ---------------------------------------------------------------------

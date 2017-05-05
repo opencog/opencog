@@ -1,257 +1,247 @@
-;This is the MST module for creating MSTLinkNodes.
+;
+; make-disjuncts.scm
+;
+; Compute the disjuncts, obtained from an MST parse of a sentence.
+;
+; Copyright (c) 2015 Rohit Shinde
+; Copyright (c) 2017 Linas Vepstas
+;
+; ---------------------------------------------------------------------
+; OVERVIEW
+; --------
+; After an sentence has been parsed with the MST parser, the links
+; between words in the parse can be interpreted as Link Grammar links.
+; There are two possible interpretations that can be given to these
+; links: they are either "ANY" links, that connect between any words,
+; or they are links capable of connecting ONLY those two words.
+; In the later case, the link-name can be thought of as the
+; concatenation of the two words it connects.
+;
+; In either case, once can work "backwards", and obtain the efective
+; disjunct on each word, that would have lead to the given MST parse.
+; The scripts in this file compute the disjunct.
+; ---------------------------------------------------------------------
+
 (use-modules (srfi srfi-1))
 
-;Defines letters of the alphabet to be used in constructing a name for the 
-;node.
-(define letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-;The function which actually constructs a name for the node.
-;Input: Integer
-;Output: Name 
-;Eg:- 1 --> A, 2--> B
-(define (number->letters num)
-  (unfold-right negative?
-                (lambda (i) (string-ref letters (remainder i 26)))
-                (lambda (i) (- (quotient i 26) 1))
-                num))
-
-;This function calls number->letters function and prepends an 'M' to the 
-;generated name.
-;Input: Integer
-;Output: 1--> MA, 2--> MB
+; ---------------------------------------------------------------------
+; Convert an integer into a string of letters. Useful for creating
+; link-names.  This prepends the letter "T" to all names, so that
+; all MST link-names start with this letter.
+; Example:  0 --> TA, 1 --> TB
 (define (number->tag num)
-  (list->string (cons #\M (number->letters num))))
 
-;This is a counter which will increment by 1 automatically on every call.
-(define (make-counter . x)
-   ; validate argument
-   (let ((count (if (and
-                     (not (null? x))
-                     (integer? (car x)))
-                    (car x)
-                    1)))
-   ; return counter closure  
-     (lambda ()
-       (let ((current-count count))
-         (set! count (+ 1 count))
-         current-count))))
+	; Convert number to a list of letters.
+	(define (number->letters num)
+		(define letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+		(unfold-right negative?
+			(lambda (i) (string-ref letters (remainder i 26)))
+			(lambda (i) (- (quotient i 26) 1))
+			num))
 
-;make-counter is defined as counter to make its purpose clear.
-(define counter (make-counter))
+	(list->string (cons #\T (number->letters num)))
+)
 
-;The word pair has mutual information also embedded in it. This function strips
-;that away and keeps only the two wordnodes.
-;Input: Word-pair
-;Output: Word-pair without the mutual information
-(define (actual-wp wp) (car (cdr wp)))
+; ---------------------------------------------------------------------
 
-;Get the first wordnode in the wordpair.
-(define (first-wordnode wp) (car (actual-wp wp)))
+; Implement the djb2 hash function.  STR is the string to hash,
+; and MOD is the modulo to which the result should be taken.
+; Example:
+;  (string->hash "abc漢字def" 666667)
+;
+(define (string->hash STR MOD)
+	(fold
+		(lambda (n hash)
+			(remainder (+ (* 33 hash) n) MOD))
+		0
+		(map char->integer (string->list STR)))
+)
 
-;Get the second wordnode in the wordpair.
-(define (second-wordnode wp) (car (cdr (actual-wp wp))))
+; ---------------------------------------------------------------------
 
-;The wordnodes also have some superfluous information. This function removes
-;that for the first wordnode.
-(define (get-first-word wp) (car (cdr (first-wordnode wp))))
+; Create a link-label for a word-pair. The label is created by
+; hashing together the two strings of the two words. The djb2
+; hash function is used, the label is always consists of upper-case
+; ASCII letters.  Yes, there may be hash collisions, but I think
+; that (a) this is probably rare, (b) mostly doesn't matter.
+; Its been adjusted so that the labels are always 10 chars or fewer
+; in length, and the birthday-paradox chances of a hash collision
+; are about 1 in a few million (sqrt (1<<43)).
+;
+(define (word-pair->label word-pair)
+	; ash is `arithmetic-shift`, so maxlen is about 8 chars
+	(define maxlen (- (ash 1 43) 3158534883327))
+	(define hl (string->hash (cog-name (gar word-pair)) maxlen))
+	(define hr (string->hash (cog-name (gdr word-pair)) maxlen))
+	(define ph (remainder (+ (* 33 hl) hr) maxlen))
+	(number->tag ph)
+)
 
-;The wordnodes also have some superfluous information. This function removes
-;that for the second wordnode.
-(define (get-second-word wp) (car (cdr (second-wordnode wp))))
+; ---------------------------------------------------------------------
 
-;This function returns the atom which has the MSTLinkNode from the given set
-;of incoming atoms for a given atom. In short, this function checks whether 
-;the EvaluationLink already exists or is there a need to create a new 
-;EvaluationLink. If the EvaluationLink exists, then that atoms is returned
-;and the calling function will increment its CTV.
-(define (get-mst-node in)
-	(define temp (car in))
-	(define outgoingset (cog-outgoing-set (car in)))
-	(define node (car outgoingset))
-	(if (eq? 'MSTLinkNode (cog-type node))
-		temp
-		(if (pair? (cdr in))
-			(get-mst-node (cdr in))
-			'())))
+; get-narrow-link -- create a "narrow" link between two words.
+;
+; Given a word-pair (ListLink (WordNode) (WordNode) this will
+; return the corresponding stucture
+;
+;     EvaluationLink
+;          MSTLinkNode "TXYZ"
+;          ListLink
+;              WordNode "foo"
+;              WordNode "bar"
+;
+; such that the "TXYZ" value is used only for this particular word-pair.
+; The label is computed by hashing.
 
-;This function creates an EvaluationLink for each word pair which has not been
-;seen previously.
-(define (create-evaluation-link wp)
-	(define x (get-first-word wp))
-	(define y (get-second-word wp))
-	(define ll (cog-link 'ListLink x y))
-	(define incoming (cog-incoming-set ll))
-	(define mstnode (get-mst-node incoming))
-	(if (null? mstnode)
-		(EvaluationLink (MSTLinkNode (number->tag (counter))) (ListLink x y))
-		(cog-atom-incr mstnode 1)))
+(define (get-narrow-link word-pair)
+	(Evaluation (MSTLink (word-pair->label word-pair)) word-pair)
+)
 
-;Applies the map function to create MST nodes for all the word pairs. It 
-;creates nodes for only those word pairs which have a mutual information not 
-;equal to -1000
-(define (create-MST-nodes text)
-	;The parse of any given sentence.
-	(define (parse text) (mst-parse-text text))
+; ---------------------------------------------------------------------
 
-	;Get the mutual information of the word pair.
-	(define (get-mutual-information wp) (car wp))
-	;This function is used by the higher-order-function filter to selectively apply
-	;the create-evaluation-link function to only those word pairs which do not 
-	;have a mutual information of -1000.
-	(define (criteria? wp)
-		(if (= -1000 (get-mutual-information wp))
-			#f
-			#t))
-	(map create-evaluation-link (filter criteria? (parse text)) ))
+; Create "narrow" links for each link from an MST parse.
+; No link is created if the MI of the MST parse is invalid.
+; (i.e. if the MST parse had to use large negative MI's during
+; the parse.)
+;
+; Example usage:  (make-narrow-links (mst-parse-text "this is a test"))
+;
+; XXX I think this code is actually useless. Which means that everything
+; else up above is also useless. So maybe delete from beginging of file
+; to about here.
+;
+(define (make-narrow-links mst-parse)
+	(map
+		; Create narrow links from MST-links
+		(lambda (mst-lnk) (get-narrow-link (mst-link-get-wordpair mst-lnk)))
+		(filter
+			; discard links with bad MI values; anything less than
+			; -50 is bad. Heck, anything under minus ten...
+			(lambda (mlink) (< -50 (mst-link-get-mi mlink)))
+			mst-parse))
+)
 
-;This function will return a list of disjuncts related to that word.
-;For example, let the sentence be "The game is played on a level playing field".
-;Now, MST nodes are created for this sentence. The word "game" is passed along
-;with the MST nodes to this function. It will return the following output:
-;((played.MB+) (The.MD-) (is.ME+)) because game is paired with these words in the
-;EvaluationLink nodes.
-(define (get-related-words-disjuncts word nodes)
-	;This function will return the first word present in the ListLink component of 
-	;an EvaluationLink.
-	(define (get-first-evaluation-word outset)
-		(cog-name (car (cog-outgoing-set (car (cdr outset))))))
-	;This function will return the second word present in the ListLink component of  
-	;an EvaluationLink.
-	(define (get-second-evaluation-word outset)
-		(cog-name (car (cdr (cog-outgoing-set (car (cdr outset)))))))
-	;This function will give the name of the MSTNode which exists in a given 
-	;Evaluation Link.
-	(define (get-MST-name outset)
-		(cog-name (car outset)))
+; ---------------------------------------------------------------------
 
-	(if (not (null? nodes))
-		(let* (
-				[node (car nodes)]
-				[outset (cog-outgoing-set node)]
-				[linkname (get-MST-name outset)]
-				[firstword (get-first-evaluation-word outset)]
-				[secondword (get-second-evaluation-word outset)])
-		(if (equal? word firstword)
-			(if (null? nodes)
-				'()
-				(cons (cons secondword (string-append linkname "+")) (get-related-words-disjuncts word (cdr nodes))))
-			(if (equal? word secondword)
-				(if (null? nodes)
-					'()
-					(cons (cons firstword (string-append linkname "-")) (get-related-words-disjuncts word (cdr nodes))))
-				(if (null? nodes)
-					'()
-					(get-related-words-disjuncts word (cdr nodes))))))
-		'()))
+(define-public (make-pseudo-disjuncts MST-PARSE)
+"
+  make-pseudo-disjuncts - create 'decoded' disjuncts.
 
-;This function will take a list of word connector lists like these: 
-;((played . MB+) (The . MD-) (is . ME+))
-;The sentence is "The game is played on a level playing field"
-;According to the order of the words in the sentence, the above list would
-;be arranged. The output if the word connector list is passed to this function
-;is: ((The . MD-) (is . ME+) (played . MB+))
-;Note: The sentence in this function must be a list of words in the sentence.
-(define (arrange-disjuncts-in-order wordconnectorlist sentence)
-	(if (not (null? sentence))
-		(let ([word (car sentence)])
-			(cons (get-wordconnector-from-list wordconnectorlist word) (arrange-disjuncts-in-order wordconnectorlist (cdr sentence))))
-		'()))
+  Given an MST parse of a sentence, return a list of 'decoded'
+  disjuncts for each word in the sentence.
 
-;A word connector list is this: (played.MB+). It consists of the disjunct along
-;with the word for which the disjunct is meant. 
-;This function will get a word connector from the given list of word connectors.
-;It takes as input a word connector list like this: ((played . MB+) (The . MD-) (is . ME+))
-;and a word. It searches for the word in this list and returns the whole 
-;word connector.
-;This function is used as follows:
-;The sentence is scanned from left to right and for each word, its word connector is
-;gotten so that the word connector list is arranged in order. This makes it easier
-;to arrange disjuncts in the order of the sentence.
-(define (get-wordconnector-from-list wordconnectorlist word)
-	(if (not (null? wordconnectorlist))
-		(let* ([firstdisjunct (car wordconnectorlist)]
-			   [firstdisjunctword (car firstdisjunct)])
-			(if (equal? word firstdisjunctword)
-				firstdisjunct
-				(get-wordconnector-from-list (cdr wordconnectorlist) word)))
-		'()))
+  It is the nature of MST parses that the links between the words
+  have no labels: the links are of the 'any' type. We'd like to
+  disover thier types, and we begin by creating pseudo-disjuncts.
+  These resemble ordinary disjuncts, except that the connectors
+  are replaced by the words that they connect to.
 
-;Given a list of disjuncts, it will create MSTConnector atoms and return a list
-;of such atoms. This is useful because it is difficult otherwise to create 
-;atoms for LgWordCset. 
-(define (create-connector-atoms disjuncts)
-	;This function returns the connector of the disjunct. Eg:- "MC+" will return MC
-	(define (get-disjunct-connector disjunct)
-		(substring disjunct 0 (- (string-length disjunct) 1)))
-	;This function returns the sign of the disjunct. Eg:- "MC+" will return +
-	(define (get-disjunct-sign disjunct)
-		(substring disjunct (- (string-length disjunct) 1)))
-	(if (not (null? disjuncts))
-		(let* (
-				[disjunct (car disjuncts)])
-			(cons
-				(MSTConnector
-					(LgConnectorNode (get-disjunct-connector disjunct))
-					(LgConnDirNode (get-disjunct-sign disjunct))) (create-connector-atoms (cdr disjuncts))))
-		'()))
+  So, for example, given the MST parse
+     (mst-parse-text 'The game is played on a level playing field')
+  the word 'playing' might get this connector set:
 
-;This function will create the LgWordCset atom which will have a WordNode and 
-;also the disjuncts for that given WordNode.
-(define (create-disjunct word disjuncts)
-	(if (not (null? (create-connector-atoms disjuncts)))
-		(store-atom (cog-atom-incr (LgWordCset
-							(WordNode word)
-							(LgAnd
-								(create-connector-atoms disjuncts))) 1))
-		'()))
+    (LgWordCset
+       (WordNode 'playing')
+       (LgAnd
+          (PseudoConnector
+             (WordNode 'level')
+             (LgConnDirNode '-'))
+          (PseudoConnector
+             (WordNode 'field')
+             (LgConnDirNode '+'))))
 
-;This function extracts the disjuncts for the given sentence for each and every
-;word present in the sentence. It returns a list of disjuncts for a sentence. 
-;Each disjunct in the disjunctslist is a list itself. It corresponds to a word
-;in the input sentence.
-(define (loop-over-words words nodes)
-	(if (not (null? words))
-		(cons (get-related-words-disjuncts (car words) nodes) (loop-over-words (cdr words) nodes))
-		'()))
+  Grammatically-speaking, this is not a good connector, but it does
+  show the general idea: that there was a link level<-->playing and
+  a link playing<-->field.
+"
+	; Discard links with bad MI values; anything less than
+	; -50 is bad. Heck, anything under minus ten...
+	(define good-links (filter
+		(lambda (mlink) (< -50 (mst-link-get-mi mlink)))
+		MST-PARSE))
 
-;This procedure is called by the make-disjuncts procedure. It is mainly written
-;so that I can recursively call this procedure itself to make new LgWordCset
-;atoms.
-(define (pseudo-make-disjuncts words disjunctslist)
-	(if (not (null? words))
-		(let (
-			[word (car words)]
-			[disjuncts (car disjunctslist)])
-			(if (not (null? disjuncts))
-				(create-disjunct word (get-only-disjuncts disjuncts)))
-			(pseudo-make-disjuncts (cdr words) (cdr disjunctslist)))))
+	; Create a list of all of the words in the sentence.
+	(define seq-list (delete-duplicates!
+		(fold
+			(lambda (mlnk lst)
+				(cons (mst-link-get-left-seq mlnk)
+					(cons (mst-link-get-right-seq mlnk) lst)))
+			'()
+			good-links)))
 
-;The disjuncts are in the following form: ((the . MB+) (played. MC-))
-;This function will give the output: (MB+ MC-)
-(define (get-only-disjuncts disjuncts)
-	(if (not (null? disjuncts))
-		(let ([disjunct (car disjuncts)])
-			(cons (cdr disjunct) (get-only-disjuncts (cdr disjuncts))))
-		'()))
+	; Return #t if word appears on the left side of mst-lnk
+	(define (is-on-left-side? wrd mlnk)
+		(equal? wrd (mst-link-get-left-word mlnk)))
+	(define (is-on-right-side? wrd mlnk)
+		(equal? wrd (mst-link-get-right-word mlnk)))
 
-;This function takes as input the list of disjuncts for each word and arrangs them in order.
-(define (arrange-all-disjuncts-in-order dl sentence)
-	(define (notnull? x)
-		(if (not (null? x))
-			#t
-			#f))
-	(if (not (null? dl))
-		(cons (filter  notnull? (arrange-disjuncts-in-order (car dl) sentence)) (arrange-all-disjuncts-in-order (cdr dl) sentence))
-		'()))
+	; Given a word, and the mst-parse linkset, create a shorter
+	; seq-list which holds only the words linked to the right.
+	(define (mk-right-seqlist seq mparse)
+		(define wrd (mst-seq-get-word seq))
+		(map mst-link-get-right-seq
+			(filter
+				(lambda (mlnk) (is-on-left-side? wrd mlnk))
+				mparse)))
 
-;This is the final procedure which (directly or indirectly) uses all the
-;procedures described above. It takes as input any text, and creates
-;the LgWordCset atoms along with the appropriate MSTConnector atoms.
-(define (make-disjuncts sentence)
-	(define (get-sentence-words sentence)
-		(string-split sentence #\ ))
-	(define nodes (create-MST-nodes sentence))
-	(define words (get-sentence-words sentence))
-	(define listofdisjuncts (loop-over-words words nodes))
-	(pseudo-make-disjuncts words (arrange-all-disjuncts-in-order listofdisjuncts words)))
+	(define (mk-left-seqlist seq mparse)
+		(define wrd (mst-seq-get-word seq))
+		(map mst-link-get-left-seq
+			(filter
+				(lambda (mlnk) (is-on-right-side? wrd mlnk))
+				mparse)))
 
+	; Sort a seq-list into ascending order
+	(define (sort-seqlist seq-list)
+		(sort seq-list
+			(lambda (sa sb)
+				(< (mst-seq-get-index sa) (mst-seq-get-index sb)))))
+
+	; Given a word, the the links, create a pseudo-disjunct
+	(define (mk-pseudo seq mlist)
+		(define lefts (sort-seqlist (mk-left-seqlist seq mlist)))
+		(define rights (sort-seqlist (mk-right-seqlist seq mlist)))
+
+		; Create a list of left-connectors
+		(define left-cnc
+			(map (lambda (sw)
+					(PseudoConnector
+						(mst-seq-get-word sw)
+						(LgConnDirNode "-")))
+			lefts))
+
+		(define right-cnc
+			(map (lambda (sw)
+					(PseudoConnector
+						(mst-seq-get-word sw)
+						(LgConnDirNode "+")))
+			rights))
+
+		; return the connector-set
+		(LgWordCset
+			(mst-seq-get-word seq)
+			(LgAnd (append left-cnc right-cnc)))
+	)
+
+	(map
+		(lambda (seq) (mk-pseudo seq MST-PARSE))
+		seq-list)
+)
+
+;  ---------------------------------------------------------------------
+
+(define-public (observe-mst plain-text)
+"
+  observe-mst -- update pseduo-disjunct counts by observing raw text.
+
+  This is the second part of the learning algo: simply count how
+  often pseudo-disjuncts show up.
+"
+	; The count-one-atom function fetches from the SQL database,
+	; increments the count by one, and stores the result back
+	(for-each
+		(lambda (dj) (count-one-atom dj))
+		(make-pseudo-disjuncts (mst-parse-text plain-text))
+	)
+)
+;  ---------------------------------------------------------------------

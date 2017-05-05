@@ -53,46 +53,10 @@
 (define any-right (AnyNode "right-word"))
 
 ; ---------------------------------------------------------------------
-; get-pair-link returns a list of atoms of type LNK-TYPE that contains
-; the given PRED and PAIR.
-;
-; PAIR is usually a ListLink of word-pairs.
-; PRED is usually (PredicateNode "*-Sentence Word Pair-*")
-;                 or (SchemaNode "*-Pair Distance-*")
-;                 or (LinkGrammarRelationshopNode "ANY")
-; LNK-TYPE is usually EvaluationLink or ExecutationLink
-;
-; PAIR is the atom (ListLink) we are given.  We want to find the
-; LNK-TYPE that contains it.  That LNK-TYPE should have
-; PRED as its predicate type, and the ListLink in the expected
-; location. That is, given ListLink, we are looking for
-;
-; The result of this search is either #f or the EvaluationLink
-
-(define (get-pair-link LNK-TYPE PRED PAIR)
-
-	(filter!
-		(lambda (evl)
-			(define oset (cog-outgoing-set evl))
-			(and
-				(equal? LNK-TYPE (cog-type evl))
-				(equal? PRED (car oset))
-				(equal? PAIR (cadr oset))))
-		(cog-incoming-set PAIR))
-)
-
-; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Random-tree parse word-pair count access routines.
 ;
-; Given a ListLink holding a word-pair, return the corresponding
-; link that holds the count for that word-pair.
-;
-(define (get-any-pair PAIR)
-	(get-pair-link 'EvaluationLink any-pair-pred PAIR)
-)
-
 ; Get the atom that holds the left wild-card count for `word`,
 ; for the LG link type "ANY". (the wildcard is on the left side)
 
@@ -117,13 +81,6 @@
 ; Clique-based-counting word-pair access methods.
 ; ---------------------------------------------------------------------
 
-; Given a ListLink holding a word-pair, return the corresponding
-; link that holds the count for that word-pair.
-;
-(define (get-clique-pair PAIR)
-	(get-pair-link 'EvaluationLink pair-pred PAIR)
-)
-
 ; Get the atom that holds the left wild-card count for `word`,
 ; for the clique-based counts. (the wildcard is on the left side)
 
@@ -143,19 +100,14 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-(define-public (get-all-words)
-"
-  get-all-words - return a list holding all of the observed words
-  This does NOT fetch the words from the backing store.
-"
-	(cog-get-atoms 'WordNode)
-)
-
 (define-public (fetch-all-words)
 "
   fetch-all-words - fetch all WordNodes from the database backend.
 "
+	(define start-time (current-time))
 	(load-atoms-of-type 'WordNode)
+	(format #t "Elapsed time to load words: ~A secs\n"
+		(- (current-time) start-time))
 )
 
 (define-public (fetch-any-pairs)
@@ -163,7 +115,10 @@
   fetch-any-pairs -- fetch all counts for link-grammar ANY links
   from the database.
 "
+	(define start-time (current-time))
 	(fetch-incoming-set any-pair-pred)
+	(format #t "Elapsed time to ANY-link pairs: ~A secs\n"
+		(- (current-time) start-time))
 )
 
 (define-public (fetch-clique-pairs)
@@ -171,8 +126,15 @@
   fetch-clique-pairs -- fetch all counts for clique-pairs from the
   database.
 "
+	(define start-time (current-time))
 	(fetch-incoming-set pair-pred)
+	(format #t "Elapsed time to load clique pairs: ~A secs\n"
+		(- (current-time) start-time))
+
+	(set! start-time (current-time))
 	(fetch-incoming-set pair-dist)
+	(format #t "Elapsed time to load clique-pair distances: ~A secs\n"
+		(- (current-time) start-time))
 )
 
 ;; Call the function only once, ever.
@@ -193,12 +155,15 @@
 	(init-trace "/tmp/progress")
 
 	; Make sure all words are in the atomspace
+	(start-trace "Begin loading words\n")
 	(call-only-once fetch-all-words)
+	(trace-elapsed)
 	(trace-msg "Done loading words, now loading any-pairs\n")
 	(display "Done loading words, now loading any-pairs\n")
 
 	; Make sure all word-pairs are in the atomspace.
 	(call-only-once fetch-any-pairs)
+	(trace-elapsed)
 	(trace-msg "Finished loading any-word-pairs\n")
 	(display "Finished loading any-word-pairs\n")
 
@@ -215,12 +180,15 @@
 	(init-trace "/tmp/progress")
 
 	; Make sure all words are in the atomspace
+	(start-trace "Begin loading words\n")
 	(call-only-once fetch-all-words)
+	(trace-elapsed)
 	(trace-msg "Done loading words, now loading clique pairs\n")
 	(display "Done loading words, now loading clique pairs\n")
 
 	; Make sure all word-pairs are in the atomspace.
 	(call-only-once fetch-clique-pairs)
+	(trace-elapsed)
 	(trace-msg "Finished loading clique-word-pairs\n")
 	(display "Finished loading clique-word-pairs\n")
 
@@ -233,6 +201,43 @@
 		(get-all-words))
 )
 
+; ---------------------------------------------------------------------
+; Compute the occurance logliklihoods for a list of atoms.
+;
+; This sums up the occurance-count over the entire list of atoms,
+; and uses that as the normalization for the probability frequency
+; for the individual atoms in the list. It then computes the log_2
+; likelihood for each atom in the list, based on the total.
+;
+; As usual, the raw counts are obtained from the 'count' slot on a
+; CountTruthValue, and the logli is stored as a value on the atom.
+;
+; This returns the atom-list, but now with the logli's set.
+
+(define (compute-all-logli atom-list)
+	(let ((total (get-total-atom-count atom-list)))
+		(map
+			(lambda (atom) (compute-atom-logli atom total))
+			atom-list
+		)
+	)
+)
+
+; ---------------------------------------------------------------------
+; Compute the occurance logliklihoods for all words.
+;
+; Load all word-nodes into the atomspace from SQL storage, if they
+; are not already present.  This also loads the associated values.
+;
+; This returns the list of all word-nodes, with the logli's set.
+
+(define (compute-all-word-freqs)
+	(begin
+		; Make sure that all word-nodes are in the atom table.
+		(call-only-once fetch-all-words)
+		(compute-all-logli (get-all-words))
+	)
+)
 
 ; ---------------------------------------------------------------------
 ; misc unit-test-by-hand stuff

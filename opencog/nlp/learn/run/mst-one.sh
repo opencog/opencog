@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# ss-one.sh <lang> <filename> <cogserver-host> <cogserver-port>
+# mst-one.sh <lang> <filename> <cogserver-host> <cogserver-port>
 #
 # Support script for batch parsing of wikipedia articles.
 # Sentence-split one file, submit it, via perl script, to the parser.
 # When done, move the file over to a 'finished' directory.
 #
 # Example usage:
-#    ./ss-one.sh en Barbara localhost 17001
+#    ./mst-one.sh en Barbara localhost 17001
 #
 
 # Set up assorted constants needed to run.
@@ -23,8 +23,8 @@ splitter=/usr/local/bin/split-sentences.pl
 splitter=./split-sentences.pl
 
 splitdir=split-articles
-subdir=submitted-articles
-observe="observe-text"
+subdir=mst-articles
+observe="observe-mst"
 
 # Punt if the cogserver has crashed. The grep is looking for the
 # uniquely-named config file.
@@ -33,14 +33,8 @@ observe="observe-text"
 # 	exit 1
 # fi
 # Alternate cogserver test: use netcat to ping it.
-haveping=`echo foo | nc $coghost $cogport`
+haveping=`echo foo | nc -N $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
-	exit 1
-fi
-
-# Punt if relex or link-grammar have crashed.
-haveserver=`ps aux |grep relex |grep linkgram`
-if [[ -z "$haveserver" ]] ; then
 	exit 1
 fi
 
@@ -49,7 +43,7 @@ fi
 base=`echo $filename | cut -d \/ -f 1`
 rest=`echo $filename | cut -d \/ -f 2-6`
 
-echo "Processing file >>>$rest<<<"
+echo "MST-Processing file >>>$rest<<<"
 
 # Create directories if missing
 mkdir -p $(dirname "$splitdir/$rest")
@@ -67,12 +61,8 @@ cat "$splitdir/$rest" | ./submit-one.pl $coghost $cogport $observe
 # if [[ -z "$haveserver" ]] ; then
 # 	exit 1
 # fi
-haveping=`echo foo | nc $coghost $cogport`
+haveping=`echo foo | nc -N $coghost $cogport`
 if [[ $? -ne 0 ]] ; then
-	exit 1
-fi
-haveserver=`ps aux |grep relex |grep linkgram`
-if [[ -z "$haveserver" ]] ; then
 	exit 1
 fi
 

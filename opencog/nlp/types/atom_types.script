@@ -74,9 +74,6 @@ FEATURE_LINK <- ORDERED_LINK
 // This is NOT a connector, its a pair of connected connectors.
 LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX"
 
-// XXX TODO -- name should be shortened to LG_DISJUNCT_NODE
-LINK_GRAMMAR_DISJUNCT_NODE <- PREDICATE_NODE       // e.g. "S- O+ "
-
 // ---------------------------------------------------------------
 // Used to represent RelEx dependency relations
 DEFINED_LINGUISTIC_CONCEPT_NODE <- FEATURE_NODE
@@ -165,15 +162,14 @@ LG_LINK_INSTANCE_LINK <- LIST_LINK
 // have MST as part of thier name.
 //
 MST_CONNECTOR <- LINK "MSTConnector"  // analogous to LG_CONNECTOR
-DECODED_CONNECTOR <- LINK  // with words, in place of connector letters.
+PSEUDO_CONNECTOR <- LINK  // with words, in place of connector letters.
 
 // Analogous to LG_LINK_NODE and LG_DISJUNCT_NODE
 // The LINK_NODE is a pair of connected connectors (i.e. what is called
 // "the intersection" in the LG code-base/documentation)
 MST_LINK_NODE <- PREDICATE_NODE "MSTLinkNode"
-MST_DISJUNCT_NODE <- PREDICATE_NODE "MSTDisjunctNode"
 
-//New Types used in the Lojban Parser
-//Might have to be moved at some point
+// ---------------------------------------------------------------
+// Types used in the Lojban Parser
 SET_TYPE_LINK <- ORDERED_LINK
 SET_SIZE_LINK <- ORDERED_LINK
