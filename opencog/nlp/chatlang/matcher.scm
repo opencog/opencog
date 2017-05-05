@@ -10,7 +10,7 @@
 
 (define globs '())
 (define (ground-globs pattern input)
-  "Use MapLink to ground the GlobNodes in the pattern and save them in 'globs'"
+  "Use MapLink to ground the GlobNodes in the pattern and save them in 'globs'."
   ; For example, if the pattern is:
   ;   (ListLink (WordNode "A") (GlobNode "$x"))
   ;

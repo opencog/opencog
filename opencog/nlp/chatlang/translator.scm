@@ -30,8 +30,18 @@
 (define (process-pattern-term term atomese-pattern)
   "Process a single term -- calls the term function and appends the new
    variables and conditions to the existing pair."
-  (let* ((atomese-for-term (primitive-eval term))
-         (vars (append (car atomese-pattern) (car atomese-for-term)))
+  (define atomese-for-term
+    (cond ((equal? 'lemma (car term))
+           (lemma (symbol->string (cadr term))))
+          ((equal? 'word (car term))
+           (word (symbol->string (cadr term))))
+          ((equal? 'phrase (car term))
+           (phrase (symbol->string (cadr term))))
+          ((equal? 'concept (car term))
+           (concept (symbol->string (cadr term))))
+          ; TODO
+          (else (cons '() '()))))
+  (let* ((vars (append (car atomese-pattern) (car atomese-for-term)))
          (conds (append (cdr atomese-pattern) (cdr atomese-for-term))))
     (cons vars conds)))
 
@@ -174,3 +184,23 @@
             (cog-outgoing-set list-of-words)))
       (stv 1 1)
       (stv 0 1))))
+
+(define (get-members concept)
+  "Get the members of a concept. VariableNodes will be ignored, and
+   recursive calls will be made in case there are nested concepts."
+  (append-map
+    (lambda (g)
+      (cond ((eq? 'ConceptNode (cog-type g)) (get-members g))
+            ((eq? 'VariableNode (cog-type g)) '())
+            (else (list g))))
+    (cog-outgoing-set
+      (cog-execute! (Get (Reference (Variable "$x") concept))))))
+
+(define-public (chatlang-concept? globnode concept)
+  "Check if the grounded value of the GlobNode is actually a member
+   of the concept."
+  (define grd (assoc-ref globs (cog-name globnode)))
+  (define membs (get-members concept))
+  (if (not (equal? #f (member grd membs)))
+    (stv 1 1)
+    (stv 0 1)))

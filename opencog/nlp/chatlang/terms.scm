@@ -24,7 +24,8 @@
     (cons v c)))
 
 (define-public (phrase w)
-  "Occurrence of a phrase or a group of words."
+  "Occurrence of a phrase or a group of words. All the words are assumed
+   to be literal / non-canonical."
   (fold (lambda (wd lst)
           (cons (append (car lst) (car wd))
                 (append (cdr lst) (cdr wd))))
@@ -34,14 +35,10 @@
 (define-public (concept c)
   "Term is a member of a given concept, including concepts created via
    chat-concept"
-  (let* ((var-wi (choose-var-name))
-         (var-w (choose-var-name))
-         (v (list (TypedVariable (Variable var-wi) (Type "WordInstanceNode"))
-                  (TypedVariable (Variable var-w) (Type "WordNode"))))
-         (c (list (ReferenceLink (Variable var-w) (Concept c))
-                  (ReferenceLink (Variable var-wi) (Variable var-w))
-                  (WordInstanceLink (Variable var-wi) (Variable "$P")))))
-    (cons v c)))
+  (cons '()
+        (Evaluation (GroundedPredicate "scm: chatlang-concept?")
+                    (List (Glob (choose-var-name))
+                          (Concept c)))))
 
 (define-public (pos w p)
   "Term with a specific POS tag (note: canonical form of word, not literal)"
