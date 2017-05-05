@@ -4016,6 +4016,7 @@ getMaxUUID
 =========================================================
 (sql-open "postgres:///en_snapshot?user=ubuntu")
 Start counting, num words=106696
+num words=106696
 
 select count(*) from atoms where type=123;  -- 123 is wordNode
 
@@ -4036,6 +4037,30 @@ select count(*) from atoms where outgoing[1]='29';
 gives ... 12956699
 30 gives ... 26174210   ... wtf!?
 
+after loading clique only: 37925105 atoms = 38M/51G = 1.35KB/atom
+
+(ListLink (WordNode "playing") (WordNode "field"))
+zero
+
+(ListLink (WordNode "day") (WordNode "field"))
+1 and 1 at 30
+Lincoln
+the
+which
 
 
-num words=106696
+115 | LgWordCset
+2440463600
+   1 | 2440463600 |  177 | {1,0,12}   |             | 
+2440463720   {636276,2440463719}
+2440463718   {107,2440463716}
+2440463717   {101,2440463715}
+2440463714   {1748714,2440463710}
+2440463669  {2440463611,2440463599}
+
+
+19741227 = 19.8M atoms / 30G = 1.52KB/atom
+
+echo "" | ./submit-one.pl localhost 17001 observe-mst
+
+
