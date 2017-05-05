@@ -4064,3 +4064,21 @@ which
 echo "" | ./submit-one.pl localhost 17001 observe-mst
 
 
+(mst-parse-text "Area: total: 29,743 km² country comparison to the world: 149. land: 28,454 km² water: 1,289 km² Area comparative Australia comparative: about one third (33%) the size of Tasmania.")
+
+freshie (0 ())
+28 words
+
+74  -- 34
+108 -- 32
+140 -- 30
+170 -- 28
+198 -- 26
+224 -- 24
+248 -- 
+270
+269
+290
+
+bad-pair in max-of-pair-list
+

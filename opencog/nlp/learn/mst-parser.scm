@@ -340,25 +340,33 @@
 	; The returned list is a list of costed-pairs.
 	;
 	; It is presumed that the brk-word does not occur in the word-list.
+	;
+	; This only returns connections, if tehre are any. This might return
+	; the empty list, if there are no connections at all.
 	(define (connect-word GET-PAIR brk-word word-list)
 		; The ordinal number of the break-word.
 		(define brk-num (car brk-word))
 		; The WordNode of the break-word
 		(define brk-node (cadr brk-word))
-		(map
+
+		(filter-map
 			(lambda (word)
 				; try-num is the ordinal number of the trial word.
 				(define try-num (car word))
 				; try-node is the actual WordNode of the trial word.
 				(define try-node (cadr word))
+
+				; ordered pairs, the left-right order matters.
 				(if (< try-num brk-num)
+
 					; returned value: the MI value for the pair, then the pair.
-					(list (get-pair-mi GET-PAIR try-node brk-node)
-						(list word brk-word)
-					)
-					(list (get-pair-mi GET-PAIR brk-node try-node)
-						(list brk-word word)
-					)
+					(let ((mi (get-pair-mi GET-PAIR try-node brk-node)))
+						(if (< -1e10 mi)
+							(list mi (list word brk-word)) #f))
+
+					(let ((mi (get-pair-mi GET-PAIR brk-node try-node)))
+						(if (< -1e10 mi)
+							(list mi (list brk-word word)) #f))
 				)
 			)
 			word-list
@@ -371,6 +379,8 @@
 	; an ordinal number denoting sentence order.  The graph-words is a
 	; set of words that are already a part of the spanning tree.
 	; It is assumed that these two sets have no words in common.
+	;
+	; This might return an empty list, if tehre are no connections!
 	(define (connect-to-graph GET-PAIR bare-words graph-words)
 		(append-map
 			(lambda (grph-word) (connect-word GET-PAIR grph-word bare-words))
@@ -410,7 +420,8 @@
 		(if (not (cross-any? best graph-pairs))
 			best
 			; Else, remove best from list, and try again.
-			(pick-no-cross-best (set-sub candidates (list best)) graph-pairs)
+			(pick-no-cross-best
+				(set-sub candidates (list best)) graph-pairs)
 		)
 	)
 
@@ -447,17 +458,19 @@
 		;(trace-msg (list "----------------------- \nenter pick-em with wordlist="
 		;	word-list "\nand graph-links=" graph-links "\nand nected=" nected-words "\n"))
 
-		; If word-list is null, then we are done. Otherwise, trawl.
-		(if (null? word-list)
+		; Generate a set of possible links between unconnected words,
+		; and the connected graph. This list might be empty
+		(define trial-pairs (connect-to-graph GET-PAIR word-list nected-words))
+
+		; Find the best link that doesn't cross existing links.
+		(define best (pick-no-cross-best trial-pairs graph-links))
+
+		; There is no such "best link" i.e. we've never obseved it
+		; and so have no MI for it, then we are done.  That is, none
+		; of the remaining words can be connected to the existing graph.
+		(if (> -1e10 (car best))
 			graph-links
 			(let* (
-					; Generate a set of possible links
-					(trial-pairs (connect-to-graph GET-PAIR word-list nected-words))
-					; (ja (trace-msg (list "trial pairs=" trial-pairs "\n")))
-
-					; Find the best link that doesn't cross existing links.
-					(best (pick-no-cross-best trial-pairs graph-links))
-					; (jb (trace-msg (list "best-pair=" best "\n")))
 
 					; Add the best to the list of graph-links.
 					(bigger-graph (append graph-links (list best)))
@@ -472,8 +485,12 @@
 					; Add the freshly-connected word to the cnoonected-list
 					(more-nected (append nected-words (list fresh-word)))
 				)
-				; recurse
-				(*pick-em GET-PAIR shorter-list bigger-graph more-nected)
+
+				; If word-list is null, then we are done. Otherwise, trawl.
+				(if (null? shorter-list)
+					bigger-graph
+					(*pick-em GET-PAIR shorter-list bigger-graph more-nected)
+				)
 			)
 		)
 	)
