@@ -104,7 +104,10 @@
 "
   fetch-all-words - fetch all WordNodes from the database backend.
 "
+	(define start-time (current-time))
 	(load-atoms-of-type 'WordNode)
+	(format #t "Elapsed time to load words: ~A secs"
+		(- (current-time) start-time))
 )
 
 (define-public (fetch-any-pairs)
@@ -112,7 +115,10 @@
   fetch-any-pairs -- fetch all counts for link-grammar ANY links
   from the database.
 "
+	(define start-time (current-time))
 	(fetch-incoming-set any-pair-pred)
+	(format #t "Elapsed time to ANY-link pairs: ~A secs"
+		(- (current-time) start-time))
 )
 
 (define-public (fetch-clique-pairs)
@@ -120,8 +126,15 @@
   fetch-clique-pairs -- fetch all counts for clique-pairs from the
   database.
 "
+	(define start-time (current-time))
 	(fetch-incoming-set pair-pred)
+	(format #t "Elapsed time to load clique pairs: ~A secs"
+		(- (current-time) start-time))
+
+	(set! start-time (current-time))
 	(fetch-incoming-set pair-dist)
+	(format #t "Elapsed time to load clique-pair distances: ~A secs"
+		(- (current-time) start-time))
 )
 
 ;; Call the function only once, ever.

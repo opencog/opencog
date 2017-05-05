@@ -4017,5 +4017,25 @@ getMaxUUID
 (sql-open "postgres:///en_snapshot?user=ubuntu")
 Start counting, num words=106696
 
+select count(*) from atoms where type=123;  -- 123 is wordNode
+
+   85 | SchemaNode
+   88 | PredicateNode
+  123 | WordNode
+  142 | LinkGrammarRelationshipNode
+
+
+ uuid | space | type | height |          name          | outgoing 
+------+-------+------+--------+------------------------+----------
+   29 |     1 |   88 |      0 | *-Sentence Word Pair-* | 
+   30 |     1 |   85 |      0 | *-Pair Distance-* | 
+  141 |     1 |  142 |      0 | ANY  | 
+
+
+select count(*) from atoms where outgoing[1]='29';
+gives ... 12956699
+30 gives ... 26174210   ... wtf!?
+
+
 
 num words=106696
