@@ -3,7 +3,6 @@ ADD_GUILE_MODULE (FILES
 	base-stats.scm
 	common.scm
 	compute-mi.scm
-	disjunct-mi.scm
 	link-pipeline.scm
 	make-disjuncts.scm
 	mst-parser.scm
