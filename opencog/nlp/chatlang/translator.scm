@@ -31,13 +31,13 @@
    variables and conditions to the existing pair."
   (define atomese-for-term
     (cond ((equal? 'lemma (car TERM))
-           (lemma (cadr TERM)))
+           (lemma (cdr TERM)))
           ((equal? 'word (car TERM))
-           (word (cadr TERM)))
+           (word (cdr TERM)))
           ((equal? 'phrase (car TERM))
-           (phrase (cadr TERM)))
+           (phrase (cdr TERM)))
           ((equal? 'concept (car TERM))
-           (concept (cadr TERM)))
+           (concept (cdr TERM)))
           ; TODO
           (else (cons '() '()))))
   (define vars (append (car ATOMESE) (car atomese-for-term)))
@@ -52,7 +52,7 @@
   (let* ((template (cons atomese-variable-template atomese-condition-template))
          (proc-terms (fold process-pattern-term
                            template
-                           pattern)))
+                           PATTERN)))
     proc-terms))
 
 (define (get-members CONCEPT)

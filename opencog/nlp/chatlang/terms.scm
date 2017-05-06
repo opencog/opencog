@@ -32,6 +32,6 @@
 (define-public (concept STR)
   "Occurrence of a concept."
   (cons '()  ; No variable declaration
-        (Evaluation (GroundedPredicate "scm: chatlang-concept?")
-                    (List (Glob (choose-var-name))
-                          (Concept STR)))))
+        (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
+                          (List (Glob (choose-var-name))
+                                (Concept STR))))))
