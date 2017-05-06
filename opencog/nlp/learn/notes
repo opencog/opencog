@@ -4105,8 +4105,8 @@ bad-pair in max-of-pair-list
  (fetch-all-words)
  (length (get-all-words))
 396262
- (fetch-pseudo-connectors (get-all-words))
- (length (filter-words-with-connectors  (get-all-words)))
+ (fetch-pseudo-csets (get-all-words))
+ (length (filter-words-with-csets  (get-all-words)))
 30127
 
 425186

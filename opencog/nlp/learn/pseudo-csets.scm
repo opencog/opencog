@@ -51,16 +51,16 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-(define-public (fetch-pseudo-connectors WORD-LIST)
+(define-public (fetch-pseudo-csets WORD-LIST)
 "
-  fetch-pseudo-cpnnectors WORD-LIST - fetch (from the database)
-  all pseudo-connectors for all of the WordNodes in the WORD-LIST.
+  fetch-pseudo-csets WORD-LIST - fetch (from the database)
+  all pseudo-csets for all of the WordNodes in the WORD-LIST.
 "
 	(define (fetch-one WORD)
 		(fetch-incoming-by-type WORD 'LgWordCset))
 
 	(define start-time (current-time))
-	; (for-each fetch-one WORD-LIST)
+	; (for-each fetch-one WORD-LIST) ; this is wyyyyy too slow!
 	(load-atoms-of-type 'LgWordCset)
 	(format #t "Elapsed time to load words: ~A secs\n"
 		(- (current-time) start-time))
@@ -68,12 +68,12 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (filter-words-with-connectors WORD-LIST)
+(define-public (filter-words-with-csets WORD-LIST)
 "
-  filter-words-with-connectors WORD-LIST - Return the subset of
-  the WORD-LIST that has connectors
+  filter-words-with-csets WORD-LIST - Return the subset of
+  the WORD-LIST that has pseudo-csets on them.
 "
-	(filter
+	(filter!
 		(lambda (wrd)
 			(not (null? (cog-incoming-by-type wrd 'LgWordCset))))
 		WORD-LIST)
@@ -85,7 +85,8 @@
 "
   cset-vec-support WORD - compute the pseudo-cset vector support for WORD
   The support of a sparse vector is the number of basis elements that
-  are non-zero.
+  are non-zero.  In this case, its simply the number of disjuncts
+  attached to the word.
 "
 	(length (cog-incoming-by-type WORD 'LgWordCset))
 )
@@ -116,8 +117,8 @@
   dot product between WORD-A and WORD-B
 "
 	; If the connector-set for WORD-B exists, then get its count.
-	(define (get-cset-count LGAND)
-		(define cset (cog-link 'LgWordCset WORD-B LGAND))
+	(define (get-cset-count DISJUNCT)
+		(define cset (cog-link 'LgWordCset WORD-B DISJUNCT))
 		(if (null? cset) 0 (get-count cset))
 	)
 
@@ -141,6 +142,34 @@
 	(define deno (* (cset-vec-len WORD-A) (cset-vec-len WORD-B)))
 
 	(if (eqv? 0.0 deno) 0.0 (/ (cset-vec-prod WORD-A WORD-B) deno))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (cset-support WORD-LIST)
+"
+  cset-support WORD-LIST - Return all of the disjuncts in use
+  in the space of all cset-vectors in the WORD-LIST.
+"
+	(define all-csets
+		(append-map!
+			(lambda (wrd) (cog-incoming-by-type wrd 'LgWordCset))
+			WORD-LIST))
+
+	(delete-duplicates!
+		(map
+			(lambda (cset) (gdr cset))
+			all-csets))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (cset-dimension WORD-LIST)
+"
+  cset-dimension WORD-LIST - Return the dimension (size of support)
+  of the space ov all cset-vectors in the WORD-LIST.
+"
+	(length (cset-support))
 )
 
 ; ---------------------------------------------------------------------
