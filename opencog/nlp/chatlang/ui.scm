@@ -1,3 +1,5 @@
+;; ChatLang DSL for chat authoring rules
+
 (use-modules (opencog)
              (opencog nlp)
              (opencog nlp chatlang)
