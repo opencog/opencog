@@ -56,13 +56,26 @@
   all pseudo-connectors for all of the WordNodes in the WORD-LIST.
 "
 	(define (fetch-one WORD)
-		; (fetch-incoming-by-type WORD 'LgWordCset))
-		(fetch-incoming-set WORD))
+		(fetch-incoming-by-type WORD 'LgWordCset))
 
 	(define start-time (current-time))
-	(for-each fetch-one WORD-LIST)
+	; (for-each fetch-one WORD-LIST)
+	(load-atoms-of-type 'LgWordCset)
 	(format #t "Elapsed time to load words: ~A secs\n"
 		(- (current-time) start-time))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (filter-words-with-connectors WORD-LIST)
+"
+  filter-words-with-connectors WORD-LIST - Return the subset of
+  the WORD-LIST that has connectors
+"
+	(filter
+		(lambda (wrd)
+			(not (null? (cog-incoming-by-type wrd 'LgWordCset))))
+		WORD-LIST)
 )
 
 ; ---------------------------------------------------------------------
