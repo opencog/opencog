@@ -87,6 +87,25 @@
 )
 
 ; ---------------------------------------------------------------------
+
+(define-public (verify-clique-pair-sums PAIR-LIST)
+"
+  This checks consistency of the two formats. It should not throw.
+
+  Example usage: (verify-clique-pair-sums (get-all-clique-pairs))
+"
+	(define cnt 0)
+	(for-each
+		(lambda (PAIR)
+			(set! cnt (+ cnt 1))
+			(if (not (eqv? (count-dist-pair PAIR) (count-clique-pair PAIR)))
+				(throw 'bad-count 'foobar PAIR)
+				(format #t "Its OK ~A\n" cnt)
+			))
+		PAIR-LIST)
+)
+
+; ---------------------------------------------------------------------
 ; misc utilities of research interest
 
 (define-public (get-left-word-of-pair PAIR)
@@ -124,7 +143,8 @@
 (define-public (get-all-clique-pairs)
 "
   get-all-clique-pairs - return a list holding all of the observed
-  word-pairs Caution: this can be tens of millions long!
+  word-pairs. Caution: this can be tens of millions long, and take
+  dozens of minutes to compute!
 "
 	; The list of pairs is mostly just the incoming set of the ANY node.
 	; However, this does include some junk, sooo ... hey, both left and
