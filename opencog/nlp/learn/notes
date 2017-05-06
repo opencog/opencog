@@ -4150,4 +4150,26 @@ $40 = 0.05184758473652128
 scheme@(guile-user)> (cset-vec-cosine (Word "run") (Word "look"))
 $42 = 0.05283524652572603
 
+cheme@(guile-user)> (cset-vec-cosine (Word "wide") (Word "narrow"))
+$56 = 0.06262242910851494
+scheme@(guile-user)> (cset-vec-cosine (Word "wide") (Word "look"))
+$58 = 0.0
+scheme@(guile-user)> (cset-vec-cosine (Word "wide") (Word "ball"))
+$59 = 0.02449979787750126
+scheme@(guile-user)> (cset-vec-cosine (Word "wide") (Word "the"))
+$60 = 0.04718158900583385
+
+scheme@(guile-user)> (cset-vec-cosine (Word "ball") (Word "it"))
+$63 = 0.009201177048960233
+scheme@(guile-user)> (cset-vec-cosine (Word "wide") (Word "it"))
+$61 = 0.005522960959398417
+
+scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "it"))
+$62 = 0.01926824360790382
+
+scheme@(guile-user)> (cset-vec-cosine (Word "it") (Word "she"))
+$70 = 0.1885493638629482
+scheme@(guile-user)> (cset-vec-cosine (Word "it") (Word "he"))
+$71 = 0.4527656594627214
+scheme@(guile-user)>
 

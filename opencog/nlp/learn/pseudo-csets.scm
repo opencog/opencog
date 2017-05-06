@@ -138,8 +138,9 @@
   cset-vec-cosine WORD-A WORD-B - compute the pseudo-cset vector
   cosine distance between WORD-A and WORD-B
 "
-	(/ (cset-vec-prod WORD-A WORD-B)
-		(* (cset-vec-len WORD-A) (cset-vec-len WORD-B)))
+	(define deno (* (cset-vec-len WORD-A) (cset-vec-len WORD-B)))
+
+	(if (eqv? 0.0 deno) 0.0 (/ (cset-vec-prod WORD-A WORD-B) deno))
 )
 
 ; ---------------------------------------------------------------------
