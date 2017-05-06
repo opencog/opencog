@@ -58,7 +58,11 @@
 
 (define-public (count-dist-pair PAIR)
 "
-  Return sum over all counts of the distance pairs
+  Return sum over all counts of the distance pairs.
+  This should, in all cases, return the same value as
+  `count-clique-pair`, above, since the sum over distances
+  should equal the total number of observations. This can be
+  checked with the `verify-clique-pair-sums` function below.
 "
 	(fold
 		(lambda (ex sum) (+ (get-count ex) sum))
