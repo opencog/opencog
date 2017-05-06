@@ -4048,6 +4048,22 @@ Lincoln
 the
 which
 
+   (ListLink (Word "the" ) (Word "field" ))
+(cog-chase-link
+(cog-get-link 'EvaluationLink PAIR (Pred
+
+
+(define cnt 0)
+(for-each
+	(lambda (PAIR)
+		(set! cnt (+ cnt 1))
+		(if (not (eqv? (count-dist-pair PAIR) (count-clique-pair PAIR)))
+			(throw 'bad-count 'foobar PAIR)
+			(format #t "Its OK ~A\n" cnt)
+		))
+	(get-all-pairs))
+
+
 
 115 | LgWordCset
 2440463600
@@ -4081,4 +4097,5 @@ freshie (0 ())
 290
 
 bad-pair in max-of-pair-list
+
 

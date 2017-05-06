@@ -20,7 +20,7 @@
 (define-public (get-sentence-count)
 "
   get-sentence-count -- get the number of sentences observed.
-  This does fetch the count from the database. 
+  This does fetch the count from the database.
 
   This count is maintained by the link-pipeline code.
 "
@@ -30,7 +30,7 @@
 (define-public (get-parse-count)
 "
   get-parse-count -- get the number of parses observed.
-  This does fetch the count from the database. 
+  This does fetch the count from the database.
 
   This count is maintained by the link-pipeline code.
 "
@@ -47,21 +47,60 @@
 )
 
 ; ---------------------------------------------------------------------
+
+(define-public (count-clique-pair PAIR)
+"
+  Return count for the clique-pair PAIR
+"
+	(define evl (cog-link 'EvaluationLink pair-pred PAIR))
+	(if (null? evl) 0 (get-count evl))
+)
+
+(define-public (count-dist-pair PAIR)
+"
+  Return sum over all counts of the distance pairs
+"
+	(fold
+		(lambda (ex sum) (+ (get-count ex) sum))
+		0
+		(filter
+			(lambda (lnk) (equal? pair-dist (gar lnk)))
+				(cog-incoming-by-type PAIR 'ExecutionLink)))
+)
+
+(define-public (avg-dist-pair PAIR)
+"
+  Return average distance over all counts of the distance pairs
+"
+	(define (get-dist exl)
+		(string->number (cog-name (caddr (cog-outgoing-set exl))))
+	)
+	(/
+		(fold
+			(lambda (ex sum) (+ (* (get-count ex) (get-dist ex)) sum))
+			0
+			(filter
+				(lambda (lnk) (equal? pair-dist (gar lnk)))
+					(cog-incoming-by-type PAIR 'ExecutionLink)))
+
+		(count-dist-pair PAIR))
+)
+
+; ---------------------------------------------------------------------
 ; misc utilities of research interest
-; XXX not everything below is correct!   Use with caution!
 
 (define-public (get-left-word-of-pair PAIR)
 "
-  get-left-word-of-pair PAIR -- Given the EvaluationLink PAIR holding
-  a word-pair, return the word on the left.
+  get-left-word-of-pair PAIR -- Given an EvaluationLink PAIR
+  holding a word-pair, return the word on the left.
 "
 	(gadr PAIR)
 )
 
 (define-public (get-right-word-of-pair PAIR)
 "
-  get-right-word-of-pair PAIR -- Given the EvaluationLink PAIR holding
-  a word-pair, return the word on the right.
+  get-right-word-of-pair PAIR -- Given the EvaluationLink PAIR
+  holding a word-pair, return the word on the right.
 "
 	(gddr PAIR)
 )
@@ -80,6 +119,22 @@
 				(equal? 'WordNode (cog-type (get-left-word-of-pair pair)))
 				(equal? 'WordNode (cog-type (get-right-word-of-pair pair)))))
 		(cog-incoming-by-type any-pair-pred 'EvaluationLink))
+)
+
+(define-public (get-all-clique-pairs)
+"
+  get-all-clique-pairs - return a list holding all of the observed
+  word-pairs Caution: this can be tens of millions long!
+"
+	; The list of pairs is mostly just the incoming set of the ANY node.
+	; However, this does include some junk, sooo ... hey, both left and
+	; right better be words.
+	(filter!
+		(lambda (pair)
+			(and
+				(equal? 'WordNode (cog-type (get-left-word-of-pair pair)))
+				(equal? 'WordNode (cog-type (get-right-word-of-pair pair)))))
+		(cog-incoming-by-type pair-pred 'EvaluationLink))
 )
 
 (define-public (total-word-observations)
@@ -143,6 +198,7 @@
   get-total-cond-prob ALL-PAIRS -- return the total conditional
   probability of seeing the all word-pairs.  That is, return the
   sum over left and right words w_l, w_r of  N(w_l, w_r) / (N(w_l) N(w_r))
+XXXX this is wrong because its incorrectly normalized.
 
   Contrast this result with that of get-total-pair-prob
 "
@@ -167,6 +223,7 @@
   left and right words w_l, w_r of
       N(w_l, w_r) / (N(w_l, *) N(*, w_r))
 
+XXXX this is wrong because its incorrectly normalized.
   Contrast this result with that of get-total-cond-prob
 "
 
