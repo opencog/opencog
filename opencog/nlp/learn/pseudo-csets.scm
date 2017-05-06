@@ -44,6 +44,7 @@
 ;
 ; ---------------------------------------------------------------------
 ;
+(use-modules (srfi srfi-1))
 (use-modules (opencog))
 (use-modules (opencog persist))
 
@@ -80,6 +81,17 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (cset-vec-support WORD)
+"
+  cset-vec-support WORD - compute the pseudo-cset vector support for WORD
+  The support of a sparse vector is the number of basis elements that
+  are non-zero.
+"
+	(length (cog-incoming-by-type WORD 'LgWordCset))
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (cset-vec-len WORD)
 "
   cset-vec-len WORD - compute the pseudo-cset vector length for WORD
@@ -91,7 +103,7 @@
 				(define cnt (get-count cset))
 				(+ sum (* cnt cnt)))
 			0
-		(cog-incoming-by-type WORD 'LgWordCSet)))
+		(cog-incoming-by-type WORD 'LgWordCset)))
 
 	(sqrt sumsq)
 )
@@ -116,7 +128,7 @@
 			(define b-cnt (get-cset-count (gdr cset)))
 			(+ sum (* a-cnt b-cnt)))
 		0
-		(cog-incoming-by-type WORD-A 'LgWordCSet))
+		(cog-incoming-by-type WORD-A 'LgWordCset))
 )
 
 ; ---------------------------------------------------------------------

@@ -4105,3 +4105,11 @@ bad-pair in max-of-pair-list
  (fetch-all-words)
  (length (get-all-words))
  (fetch-pseudo-connectors (get-all-words))
+ (length (filter-words-with-connectors  (get-all-words)))
+
+425186
+(cset-vec-len (Word "the"))
+
+(
+   (length (cog-incoming-by-type WORD 'LgWordCset))
+
