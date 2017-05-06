@@ -4104,12 +4104,50 @@ bad-pair in max-of-pair-list
  (sql-open "postgres:///en_pairs_mst?user=linas")
  (fetch-all-words)
  (length (get-all-words))
+396262
  (fetch-pseudo-connectors (get-all-words))
  (length (filter-words-with-connectors  (get-all-words)))
+30127
 
 425186
+(cset-vec-support (Word "the"))
 (cset-vec-len (Word "the"))
 
 (
+
    (length (cog-incoming-by-type WORD 'LgWordCset))
+
+(define n 0)
+(for-each
+	(lambda (cset) 
+		(set! n (+ 1 n)))
+	(cog-incoming-by-type (Word "the") 'LgWordCset))
+
+scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "a"))
+$30 = 0.1554007744026141
+scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "this"))
+$31 = 0.3083725359820755
+scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "that"))
+$32 = 0.01981486048876119
+scheme@(guile-user)> (cset-vec-cosine (Word "this") (Word "that"))
+$33 = 0.14342403062507977
+scheme@(guile-user)>
+scheme@(guile-user)> (cset-vec-cosine (Word "this") (Word "these"))
+$34 = 0.23100101197144984
+scheme@(guile-user)> (cset-vec-cosine (Word "this") (Word "those"))
+$35 = 0.1099725424243773
+scheme@(guile-user)> (cset-vec-cosine (Word "these") (Word "those"))
+$36 = 0.13577971016706158
+
+scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "ball"))
+$37 = 2.3964597196461594e-4
+scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "jump"))
+$38 = 0.0
+scheme@(guile-user)> (cset-vec-cosine (Word "ball") (Word "jump"))
+$39 = 0.0
+scheme@(guile-user)> (cset-vec-cosine (Word "run") (Word "jump"))
+$40 = 0.05184758473652128
+scheme@(guile-user)> (cset-vec-cosine (Word "run") (Word "look"))
+$42 = 0.05283524652572603
+
 
