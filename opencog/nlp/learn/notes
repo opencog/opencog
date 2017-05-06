@@ -4156,7 +4156,7 @@ to it. Each disjunct has a count of the number of times it has been
 observed.  Thus, this set of disjuncts can be imagined to be a vector
 in a high-dimensional vector space, which each disjunct being a single
 basis element.  The similarity of two words can be taken to be the
-cosine-distance between the disjunct-vectors (or pick another,
+cosine-similariy between the disjunct-vectors (or pick another,
 different metric, as you please.)
 
 Below are a set of examples, for English, on a somewhat smmall dataset.
@@ -4166,58 +4166,62 @@ Thus, most words will have only a copule of disjuncts on them,
 which may have been seen only a couple of times. its important, at
 this stage, to limit oneself to only the most popular words.
 
-guile> (cset-observations (get-all-words))
-436595.0
+We expect the determiners "the" and "a" to be similar, and they are:
+(cset-vec-cosine (Word "the") (Word "a")) = 0.1554007744026141
 
-l2-norm
+Even more similar:
+(cset-vec-cosine (Word "the") (Word "this")) = 0.3083725359820755
 
-scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "a"))
-$30 = 0.1554007744026141
-scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "this"))
-$31 = 0.3083725359820755
-scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "that"))
-$32 = 0.01981486048876119
-scheme@(guile-user)> (cset-vec-cosine (Word "this") (Word "that"))
-$33 = 0.14342403062507977
-scheme@(guile-user)>
-scheme@(guile-user)> (cset-vec-cosine (Word "this") (Word "these"))
-$34 = 0.23100101197144984
-scheme@(guile-user)> (cset-vec-cosine (Word "this") (Word "those"))
-$35 = 0.1099725424243773
-scheme@(guile-user)> (cset-vec-cosine (Word "these") (Word "those"))
-$36 = 0.13577971016706158
+Not very similar at all:
+(cset-vec-cosine (Word "the") (Word "that")) = 0.01981486048876119
 
-scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "ball"))
-$37 = 2.3964597196461594e-4
-scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "jump"))
-$38 = 0.0
-scheme@(guile-user)> (cset-vec-cosine (Word "ball") (Word "jump"))
-$39 = 0.0
-scheme@(guile-user)> (cset-vec-cosine (Word "run") (Word "jump"))
-$40 = 0.05184758473652128
-scheme@(guile-user)> (cset-vec-cosine (Word "run") (Word "look"))
-$42 = 0.05283524652572603
+Oh hey this and that are similar. Notice the triangle with "the".
+(cset-vec-cosine (Word "this") (Word "that")) = 0.14342403062507977
 
-cheme@(guile-user)> (cset-vec-cosine (Word "wide") (Word "narrow"))
-$56 = 0.06262242910851494
-scheme@(guile-user)> (cset-vec-cosine (Word "wide") (Word "look"))
-$58 = 0.0
-scheme@(guile-user)> (cset-vec-cosine (Word "wide") (Word "ball"))
-$59 = 0.02449979787750126
-scheme@(guile-user)> (cset-vec-cosine (Word "wide") (Word "the"))
-$60 = 0.04718158900583385
+Some more results
+ (cset-vec-cosine (Word "this") (Word "these")) = 0.23100101197144984
+ (cset-vec-cosine (Word "this") (Word "those")) = 0.1099725424243773
+ (cset-vec-cosine (Word "these") (Word "those")) = 0.13577971016706158
 
-scheme@(guile-user)> (cset-vec-cosine (Word "ball") (Word "it"))
-$63 = 0.009201177048960233
-scheme@(guile-user)> (cset-vec-cosine (Word "wide") (Word "it"))
-$61 = 0.005522960959398417
+We expect that determiners, nouns and verbs to all be very differrent
+from one-another. And they are:
+ (cset-vec-cosine (Word "the") (Word "ball")) = 2.3964597196461594e-4
+ (cset-vec-cosine (Word "the") (Word "jump")) = 0.0
+ (cset-vec-cosine (Word "ball") (Word "jump")) = 0.0
 
-scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "it"))
-$62 = 0.01926824360790382
+We expect verbs to be similar, and they sort-of are.
+ (cset-vec-cosine (Word "run") (Word "jump")) = 0.05184758473652128
+ (cset-vec-cosine (Word "run") (Word "look")) = 0.05283524652572603
 
-scheme@(guile-user)> (cset-vec-cosine (Word "it") (Word "she"))
-$70 = 0.1885493638629482
-scheme@(guile-user)> (cset-vec-cosine (Word "it") (Word "he"))
-$71 = 0.4527656594627214
-scheme@(guile-user)>
+Since this is a sampling from wikipedia, there will be very few
+"action" verbs, unless the sample accidentally contains articles
+about sports. A "common sense" corpus, or a corpus that talks about
+what people do, could/should improve the above verbs.  These are
+very basic to human behavior, but are rare in most writing.
 
+I'm thinking that a corpus of children's lit, and young-adult-lit
+would be much better for these kinds of things.
+
+An adjective.
+ (cset-vec-cosine (Word "wide") (Word "narrow")) = 0.06262242910851494
+ (cset-vec-cosine (Word "wide") (Word "look")) = 0.0
+ (cset-vec-cosine (Word "wide") (Word "ball")) = 0.02449979787750126
+ (cset-vec-cosine (Word "wide") (Word "the")) = 0.04718158900583385
+
+ (cset-vec-cosine (Word "heavy") (Word "wide")) = 0.05752237416355278
+
+Here's a set of antonyms!
+ (cset-vec-cosine (Word "heavy") (Word "light")) = 0.16760038078849773
+
+A pronoun
+ (cset-vec-cosine (Word "ball") (Word "it")) = 0.009201177048960233
+ (cset-vec-cosine (Word "wide") (Word "it")) = 0.005522960959398417
+
+ (cset-vec-cosine (Word "the") (Word "it")) = 0.01926824360790382
+
+Wow!! In English, "it" is usually a male!
+ (cset-vec-cosine (Word "it") (Word "she")) = 0.1885493638629482
+ (cset-vec-cosine (Word "it") (Word "he")) = 0.4527656594627214
+
+I can post the database on mondy, let me know when you're ready to
+receive it.

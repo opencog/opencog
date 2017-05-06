@@ -1,14 +1,14 @@
 ;
 ; pseudo-csets.scm
 ;
-; Compute the cosine distance between two pseuo-connector-sets.
+; Compute the cosine-similarity between two pseudo-connector-sets.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below compute the cosine-distance between pseudo
+; The scripts below compute the cosine-similarity between pseudo
 ; connector-set vectors.
 ;
 ; An example connector-set, for the word "playing", illustrating
@@ -43,9 +43,9 @@
 ; tens-of-millions.
 ;
 ; As vectors, dot-products can be taken. The most interesting of these
-; is the cosine distance between two words. This distance indicates how
+; is the cosine similarity between two words. This quantity indicates how
 ; similar two words are, grammatically-speaking. Other vector measures
-; are interesting, including lp-products, the Tanimoto metric, the
+; are interesting, including lp-similarity, the Tanimoto metric, the
 ; Otsuka-Ochiai coefficient, and so on.
 ;
 ; ---------------------------------------------------------------------
@@ -179,7 +179,7 @@
 (define-public (cset-vec-cosine WORD-A WORD-B)
 "
   cset-vec-cosine WORD-A WORD-B - compute the pseudo-cset vector
-  cosine distance between WORD-A and WORD-B
+  cosine similarity between WORD-A and WORD-B
 "
 	(define deno (* (cset-vec-len WORD-A) (cset-vec-len WORD-B)))
 
