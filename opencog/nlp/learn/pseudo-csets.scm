@@ -27,20 +27,26 @@
 ;             (WordNode "field")
 ;             (LgConnDirNode "+"))))
 ;
+; The `LgAnd` part of this structure is refered to as the
+; pseudo-disjunct, in that it resembles a normal linkgrammar
+; disjunct, but has word appearing where connectors should be.
+;
 ; Any given word may have dozens or hundreds or thousands of these
 ; connector sets. The totality of these sets, for a given, fixed word
-; form a vector.  The `LgAnd` is a basis element, and the raw
+; form a vector.  The disjunct is a basis element, and the raw
 ; observational count on the `LgWordCset` is the magnitude of the
 ; of the vector in that basis direction.
 ;
-; Note that these vectors are sparse: if a particular `LgAnd` is
+; Note that these vectors are sparse: if a particular disjunct is
 ; missing, then the associated count is zero.  Note that the dimension
-; of the vector-space is extremely high: its strictly larger than the
-; number of observed word-pairs, which is tens-of-millions.
+; of the vector-space is extremely high, possibly in the
+; tens-of-millions.
 ;
 ; As vectors, dot-products can be taken. The most interesting of these
 ; is the cosine distance between two words. This distance indicates how
-; similar two words are, grammatically-speaking. 
+; similar two words are, grammatically-speaking. Other vector measures
+; are interesting, including lp-products, the Tanimoto metric, the
+; Otsuka-Ochiai coefficient, and so on.
 ;
 ; ---------------------------------------------------------------------
 ;

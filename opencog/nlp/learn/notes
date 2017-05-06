@@ -4127,6 +4127,50 @@ bad-pair in max-of-pair-list
 		(set! n (+ 1 n)))
 	(cog-incoming-by-type (Word "the") 'LgWordCset))
 
+Ben, Ruiting,
+
+For your enjoyment: I have some very preliminary results on word
+similarity.  They look pretty nice, even thogh based on a fairly
+small number of observations. 
+
+If you've been watching TV instead of reading email, here's the story
+so far: Starting from a large text corpus, the mutual information (MI)
+of word-pairs are counted. This MI is used to perform a maximum
+spanning-tree (MST) parse (of a different subset of) the corpus. From each
+parse, a pseudo-disjunct is extracted for each word.  The
+pseudo-disjunct is like a real LG disjunct, except that each connector
+in the disjunct is the word at the far end of the link.
+
+So, for example, in in idealized world, the MST parse of the sentence
+"Ben ate pizza" would prodouce the parse Ben <--> ate <--> pizza and
+from this, we can extract the psuedo-disjunct (Ben- pizza+) on the
+word "ate".  Similarly, the sentence "Ben puked pizza" should produce
+the disjunct (Ben- pizza+) on the word "puke".  Since these two 
+disjuncts are the same, we can conclude that the two words "ate"
+and "puke" are very similar to each other.  Considering all of the
+other disjuncts that arise in this example, we can conclude that these
+are the only two words that are similar.
+
+Note that a given word may have very many psuedo-disjuncts attached
+to it. Each disjunct has a count of the number of times it has been
+observed.  Thus, this set of disjuncts can be imagined to be a vector
+in a high-dimensional vector space, which each disjunct being a single
+basis element.  The similarity of two words can be taken to be the
+cosine-distance between the disjunct-vectors (or pick another,
+different metric, as you please.)
+
+Below are a set of examples, for English, on a somewhat smmall dataset.
+Collected over a few days, it contains just under half-a-million 
+observations of disjuncts, distributed across about 30K words.
+Thus, most words will have only a copule of disjuncts on them, 
+which may have been seen only a couple of times. its important, at
+this stage, to limit oneself to only the most popular words.
+
+guile> (cset-observations (get-all-words))
+436595.0
+
+l2-norm
+
 scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "a"))
 $30 = 0.1554007744026141
 scheme@(guile-user)> (cset-vec-cosine (Word "the") (Word "this"))
