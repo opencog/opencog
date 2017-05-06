@@ -33,6 +33,11 @@
 ; observational count on the `LgWordCset` is the magnitude of the
 ; of the vector in that basis direction.
 ;
+; Note that these vectors are sparse: if a particular `LgAnd` is
+; missing, then the associated count is zero.  Note that the dimension
+; of the vector-space is extremely high: its strictly larger than the
+; number of observed word-pairs, which is tens-of-millions.
+;
 ; As vectors, dot-products can be taken. The most interesting of these
 ; is the cosine distance between two words. This distance indicates how
 ; similar two words are, grammatically-speaking. 
@@ -45,15 +50,60 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-(define-public (fetch-pseudo-connectors)
+(define-public (fetch-pseudo-connectors WORD-LIST)
 "
-  fetch-pseudo-cpnnectors - fetch all pseudo-connectors for all
-  WordNodes from the database backend.
+  fetch-pseudo-cpnnectors WORD-LIST - fetch (from the database)
+  all pseudo-connectors for all of the WordNodes in the WORD-LIST.
 "
+	(define (fetch-one WORD)
+		; (fetch-incoming-by-type WORD 'LgWordCset))
+		(fetch-incoming-set WORD))
+
 	(define start-time (current-time))
-	(load-atoms-of-type 'WordNode)
+	(for-each fetch-one WORD-LIST)
 	(format #t "Elapsed time to load words: ~A secs\n"
 		(- (current-time) start-time))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (cset-vec-len WORD)
+"
+  cset-vec-len WORD - compute the pseudo-cset vector length for WORD
+"
+	; sum of the square of the counts
+	(define sumsq
+		(fold
+			(lambda (cset sum)
+				(define cnt (get-count cset))
+				(+ sum (* cnt cnt)))
+			0
+		(cog-incoming-by-type WORD 'LgWordCSet)))
+
+	(sqrt sumsq)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (cset-vec-prod WORD-A WORD-B)
+"
+  cset-vec-prod WORD-A WORD-B - compute the pseudo-cset vector
+  dot product between WORD-A and WORD-B
+"
+	; If the connector-set for WORD-B exists, then get its count.
+	(define (get-cset-count LGAND)
+		(define cset (cog-link 'LgWordCset WORD-B LGAND))
+		(if (null? cset) 0 (get-count cset))
+	)
+
+	; Loop over all connectors for WORD-A
+	(fold
+		(lambda (cset sum)
+			(define a-cnt (get-count cset))
+			(define b-cnt (get-cset-count (gdr cset)))
+			(+ sum (* a-cnt b-cnt)))
+		0
+		(cog-incoming-by-type WORD-A 'LgWordCSet))
 )
 
 ; ---------------------------------------------------------------------
