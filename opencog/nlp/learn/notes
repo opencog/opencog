@@ -4099,3 +4099,9 @@ freshie (0 ())
 bad-pair in max-of-pair-list
 
 
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs_mst?user=linas")
+ (fetch-all-words)
+ (length (get-all-words))
+ (fetch-pseudo-connectors (get-all-words))
