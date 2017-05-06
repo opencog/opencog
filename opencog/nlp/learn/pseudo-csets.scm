@@ -86,16 +86,33 @@
   cset-vec-support WORD - compute the pseudo-cset vector support for WORD
   The support of a sparse vector is the number of basis elements that
   are non-zero.  In this case, its simply the number of disjuncts
-  attached to the word.
+  attached to the word.  Equivalently, this is the l_0 norm of the
+  vector (the l_p norm for p=0).
 "
 	(length (cog-incoming-by-type WORD 'LgWordCset))
 )
 
 ; ---------------------------------------------------------------------
 
+(define-public (cset-vec-observations WORD)
+"
+  cset-vec-len WORD - compute the number of observations of
+  the disjuncts for WORD. Equivalently, this is the l_1 norm of the
+  vector (the l_p norm for p=1).
+"
+	; sum of the counts
+	(fold
+		(lambda (cset sum) (+ (get-count cset) sum))
+		0
+	(cog-incoming-by-type WORD 'LgWordCset))
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (cset-vec-len WORD)
 "
-  cset-vec-len WORD - compute the pseudo-cset vector length for WORD
+  cset-vec-len WORD - compute the pseudo-cset vector length for WORD.
+  Equivalently, this is the l_2 norm of the vector (the l_p norm for p=2).
 "
 	; sum of the square of the counts
 	(define sumsq
@@ -107,6 +124,25 @@
 		(cog-incoming-by-type WORD 'LgWordCset)))
 
 	(sqrt sumsq)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (cset-vec-lp-norm P WORD)
+"
+  cset-vec-lp-norm P WORD - compute the l_p norm of the pseudo-cset
+  vector for WORD.
+"
+	; sum of the powers of the counts
+	(define sum
+		(fold
+			(lambda (cset sum)
+				(define cnt (get-count cset))
+				(+ sum (expt cnt P)))
+			0
+		(cog-incoming-by-type WORD 'LgWordCset)))
+
+	(expt sum (/ 1 P))
 )
 
 ; ---------------------------------------------------------------------
@@ -146,10 +182,27 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (cset-observations WORD-LIST)
+"
+  cset-observations WORD-LIST - Return the number of times that
+  all of the disjuncts in the WORD-LIST have been observed.
+"
+	(fold
+		(lambda (word sum) (+ (cset-vec-observations word) sum))
+		0
+		WORD-LIST)
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (cset-support WORD-LIST)
 "
   cset-support WORD-LIST - Return all of the disjuncts in use
-  in the space of all cset-vectors in the WORD-LIST.
+  in the space of all cset-vectors in the WORD-LIST.  Equivalently,
+  return all of the basis vectors in the space.  One disjunct is
+  just one basis element.
+
+  Caution: this can take a very long time!
 "
 	(define all-csets
 		(append-map!
@@ -157,7 +210,7 @@
 			WORD-LIST))
 
 	(delete-duplicates!
-		(map
+		(map!
 			(lambda (cset) (gdr cset))
 			all-csets))
 )
@@ -168,6 +221,8 @@
 "
   cset-dimension WORD-LIST - Return the dimension (size of support)
   of the space ov all cset-vectors in the WORD-LIST.
+
+  Caution: this can take a very long time!
 "
 	(length (cset-support))
 )

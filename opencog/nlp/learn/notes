@@ -4109,6 +4109,10 @@ bad-pair in max-of-pair-list
  (length (filter-words-with-csets  (get-all-words)))
 30127
 
+ (cset-observations (get-all-words))
+436595.0
+
+
 425186
 (cset-vec-support (Word "the"))
 (cset-vec-len (Word "the"))
