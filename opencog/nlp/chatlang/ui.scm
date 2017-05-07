@@ -57,7 +57,15 @@
                (cog-logger-error "Syntax error: ~a" TXT)
                ; Return the choices
                (match:substring sm))))
-        ; For the rest, like negation, concept, and lemma,
+        ; For handling negations
+        ((string-prefix? "!" TXT)
+         (let ((sm (string-match "^!'[a-zA-Z0-9 ]+\\b'" TXT)))
+            (if (equal? #f sm)
+                ; Return negation of a term or a list of terms
+                (extract TXT)
+                ; Return the negation of a phrase
+                (match:substring sm))))
+        ; For the rest, like concept and lemma,
         ; just return the whole term
         (else (extract TXT))))
 
@@ -113,10 +121,13 @@
                    (substring t 2 (- (string-length t) 1))))))
           ; Negation of a concept
           ((string-prefix? "!~" t)
-           (cons 'negation (substring t 1)))
+           (cons 'negation (interpret-terms (list (substring t 1)))))
+          ; Negation of a word or phrase
+          ((string-prefix? "!'" t)
+           (cons 'negation (interpret-terms (list (substring t 1)))))
           ; Negation of a lemma
           ((string-prefix? "!" t)
-           (cons 'negation t))
+           (cons 'negation (interpret-terms (list (substring t 1)))))
           ; Concept
           ((string-prefix? "~" t)
            (cons 'concept (substring t 1)))
