@@ -4228,3 +4228,15 @@ I can post the database on mondy, let me know when you're ready to
 receive it.
 
 above dataset has 200183 (200K) disjuncts in it
+
+SIMILARITY_LINK
+
+ac
+
+scheme@(guile-user)> (batch-sim (Word "him") ac)
+terminate called after throwing an instance of
+'opencog::RuntimeException'
+  what():  Failed to execute!
+(/home/linas/src/novamente/src/atomspace-git/opencog/persist/sql/multi-driver/ll-pg-cxx.cc:113)
+Aborted
+
