@@ -48,6 +48,18 @@
 ; are interesting, including lp-similarity, the Tanimoto metric, the
 ; Otsuka-Ochiai coefficient, and so on.
 ;
+; Not implemented: the Pearson R.  There is both a theoretical and a
+; practical difficulty with it. The theoretical difficulty is that
+; wen never expect connector sets to be correlated, with have a
+; different mean offset!  This doesn't make sense, because when a
+; disjunct is not seen, it literally isn't there; it does NOT get
+; folded into a mean-value offset.  The practical difficulty is that
+; computing the vector mean requires knowning the total dimensionality
+; of the space, which can be gotten by computing
+;   (length (cset-support get-all-words))
+; but this can take hours to compute.  Its also huge: about 200K
+; for my "small" dataset; millions in the large one.
+;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
@@ -102,7 +114,7 @@
 
 (define-public (cset-vec-observations WORD)
 "
-  cset-vec-len WORD - compute the number of observations of
+  cset-vec-observations WORD - compute the number of observations of
   the disjuncts for WORD. Equivalently, this is the l_1 norm of the
   vector (the l_p norm for p=1).
 "
