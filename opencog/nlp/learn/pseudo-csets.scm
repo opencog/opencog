@@ -162,8 +162,8 @@
 
 (define-public (cset-vec-lp-norm P WORD)
 "
-  cset-vec-lp-norm P WORD - compute the l_p norm of the pseudo-cset
-  vector for WORD.
+  cset-vec-lp-norm P WORD - compute the Banach space l_p norm of
+  the pseudo-cset vector for WORD.
 "
 	; sum of the powers of the counts
 	(define sum
@@ -173,6 +173,49 @@
 				(+ sum (expt cnt P)))
 			0
 			(get-cset-vec WORD)))
+
+	(expt sum (/ 1 P))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (cset-vec-lp-dist P WORD-A WORD-B)
+"
+  cset-vec-lp-dist P WORD-A WORD-B - compute the Banache space l_p
+  distance between the pseudo-cset vector for WORD-A and WORD-B.
+
+  This is a real metric.  Recall, for p=2, this is just the
+  Eucliden distance metric, and for p=1, this is the 'Mahnatten
+  distance'.
+
+  As a metric for measuring the similarity of connector-set vectors,
+  this is terrible, because any word that has a lot of observations
+  on it will be a long vector, and thus distant from the origin.
+  By contrast, any words that have only a few observations will all
+  be near the origin, and thus close to one-another, no matter how
+  different thier disjuncts are.
+"
+	; Get the common non-zero entries of the two vectors.
+	(define disjuncts (delete-duplicates! (append!
+		(map! (lambda (cset) (gdr cset)) (get-cset-vec WORD-A))
+		(map! (lambda (cset) (gdr cset)) (get-cset-vec WORD-B)))))
+
+	; Get the count for DISJUNCT on WORD, if it exists (is non-zero)
+	(define (get-cset-count WORD DISJUNCT)
+		(define cset (cog-link 'LgWordCset WORD DISJUNCT))
+		(if (null? cset) 0 (get-count cset))
+	)
+
+	; sum of the powers of the counts
+	(define sum
+		(fold
+			(lambda (dj sum)
+				(define cnt-a (get-cset-count WORD-A dj))
+				(define cnt-b (get-cset-count WORD-B dj))
+				(define adiff (abs (- cnt-a cnt-b)))
+				(+ sum (expt adiff P)))
+			0
+			disjuncts))
 
 	(expt sum (/ 1 P))
 )
@@ -238,7 +281,8 @@
 "
 	; Get the common non-zero entries of the two vectors.
 	(define disjuncts (delete-duplicates! (append!
-		(map! (lambda (cset) (gdr cset)) (get-cset-vec WORD-A)))))
+		(map! (lambda (cset) (gdr cset)) (get-cset-vec WORD-A))
+		(map! (lambda (cset) (gdr cset)) (get-cset-vec WORD-B)))))
 
 	; Get the count for DISJUNCT on WORD, if it exists (is non-zero)
 	(define (get-cset-count WORD DISJUNCT)
