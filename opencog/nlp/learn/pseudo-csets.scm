@@ -288,6 +288,8 @@
   Caution: this can take a very long time!  Last time, this took
   3-4 hours to return a list of length 200K for 430K observations
   distributed across 30K words.
+
+  For practical use, use `(get-all-disjuncts)` below.
 "
 	(define all-csets
 		(append-map!
@@ -298,6 +300,26 @@
 		(map!
 			(lambda (cset) (gdr cset))
 			all-csets))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (get-all-disjuncts)
+"
+  get-all-disjuncts -- Return all of the disjuncts in the atomspace.
+  Caution: this performs almost no sanity checks, and so could
+  easily return junk, if there are other LgAnd's in the atomspace.
+
+  The sanity check would be to make sure that the LgAnd has the desired
+  form, i.e. consisting entirely of PseudoDisjuncts.
+"
+	(define all-djs '())
+
+	(cog-map-type
+		(lambda (dj) (set! all-djs (cons dj all-djs)) #f)
+		'LgAnd)
+
+	all-djs
 )
 
 ; ---------------------------------------------------------------------
