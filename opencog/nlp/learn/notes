@@ -4240,3 +4240,28 @@ terminate called after throwing an instance of
 (/home/linas/src/novamente/src/atomspace-git/opencog/persist/sql/multi-driver/ll-pg-cxx.cc:113)
 Aborted
 
+
+[2017-05-07 17:01:27:152] [WARN] PQresult message: ERROR:  duplicate key
+value violates unique constraint "atoms_uuid_idx"
+DETAIL:  Key (uuid)=(2441253852) already exists.
+
+[2017-05-07 17:01:27:152] [WARN] PQ query was: INSERT INTO Atoms (uuid,
+space, type, height, outgoing) VALUES (2441253852, 1, 43, 1, '{1888882,
+127137759}');
+
+
+dohhh Need to reserve some uuid's!
+
+
+[2017-05-04 17:31:29:122] [ERROR] There is no value for key
+(PredicateNode "link count") ; [8812231717367445517][1]
+ on atom (AnchorNode "MST data") ; [1539316140051770629][1]
+
+createdb -T en_pairs_mst -e en_pairs_sim "forked from en_pairs_mst, holds similarity data"
+
+COMMENT ON DATABASE en_pairs_mst IS 'forked from en_pairs_rohit, holds disjunct data';
+
+COMMENT ON DATABASE en_pairs_rohit IS 'forked from en_pairs_2016, converted to modern format';
+
+COMMENT ON DATABASE en_pairs_2016 IS 'Rohits original pair data; old format; missing correct word-counts';
+
