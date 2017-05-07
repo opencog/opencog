@@ -45,8 +45,7 @@
 ; As vectors, dot-products can be taken. The most interesting of these
 ; is the cosine similarity between two words. This quantity indicates how
 ; similar two words are, grammatically-speaking. Other vector measures
-; are interesting, including lp-similarity, the Tanimoto metric, the
-; Otsuka-Ochiai coefficient, and so on.
+; are interesting, including lp-similarity, etc.
 ;
 ; Not implemented: the Pearson R.  There is both a theoretical and a
 ; practical difficulty with it. The theoretical difficulty is that
@@ -59,6 +58,10 @@
 ;   (length (cset-support get-all-words))
 ; but this can take hours to compute.  Its also huge: about 200K
 ; for my "small" dataset; millions in the large one.
+;
+; Also not implemented: Tanimoto metric. The formula for this gives
+; an actual metric only when the vectors are bit-vectors, and we don't
+; have bit-vectors, so I am not implementing this.
 ;
 ; ---------------------------------------------------------------------
 ;
@@ -86,6 +89,17 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (get-cset-vec WORD)
+"
+  get-cset-vec WORD - Return the vector of pseudo-connector sets
+  for the WORD.
+"
+	; Currently, its as simple as this...
+	(cog-incoming-by-type WORD 'LgWordCset)
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (filter-words-with-csets WORD-LIST)
 "
   filter-words-with-csets WORD-LIST - Return the subset of
@@ -93,7 +107,7 @@
 "
 	(filter!
 		(lambda (wrd)
-			(not (null? (cog-incoming-by-type wrd 'LgWordCset))))
+			(not (null? (get-cset-vec wrd))))
 		WORD-LIST)
 )
 
@@ -107,7 +121,7 @@
   attached to the word.  Equivalently, this is the l_0 norm of the
   vector (the l_p norm for p=0).
 "
-	(length (cog-incoming-by-type WORD 'LgWordCset))
+	(length (get-cset-vec WORD))
 )
 
 ; ---------------------------------------------------------------------
@@ -122,7 +136,7 @@
 	(fold
 		(lambda (cset sum) (+ (get-count cset) sum))
 		0
-	(cog-incoming-by-type WORD 'LgWordCset))
+		(get-cset-vec WORD))
 )
 
 ; ---------------------------------------------------------------------
@@ -139,7 +153,7 @@
 				(define cnt (get-count cset))
 				(+ sum (* cnt cnt)))
 			0
-		(cog-incoming-by-type WORD 'LgWordCset)))
+			(get-cset-vec WORD)))
 
 	(sqrt sumsq)
 )
@@ -158,7 +172,7 @@
 				(define cnt (get-count cset))
 				(+ sum (expt cnt P)))
 			0
-		(cog-incoming-by-type WORD 'LgWordCset)))
+			(get-cset-vec WORD)))
 
 	(expt sum (/ 1 P))
 )
@@ -183,7 +197,7 @@
 			(define b-cnt (get-cset-count (gdr cset)))
 			(+ sum (* a-cnt b-cnt)))
 		0
-		(cog-incoming-by-type WORD-A 'LgWordCset))
+		(get-cset-vec WORD-A))
 )
 
 ; ---------------------------------------------------------------------
@@ -216,6 +230,40 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (cset-vec-jaccard WORD-A WORD-B)
+"
+  cset-vec-jaccard WORD-A WORD-B - compute the pseudo-cset vector
+  Jaccard distance between WORD-A and WORD-B. The Jaccard distance
+  is defined as dist = 1 - sim where sim = sum min(a,b)/ sum max(a,b)
+"
+	; Get the common non-zero entries of the two vectors.
+	(define disjuncts (delete-duplicates! (append!
+		(map! (lambda (cset) (gdr cset)) (get-cset-vec WORD-A)))))
+
+	; Get the count for DISJUNCT on WORD, if it exists (is non-zero)
+	(define (get-cset-count WORD DISJUNCT)
+		(define cset (cog-link 'LgWordCset WORD DISJUNCT))
+		(if (null? cset) 0 (get-count cset))
+	)
+
+	; Sum over the min of all pairs
+	(define sum-inf 0)
+	; Sum over the max of all pairs
+	(define sum-sup 0)
+
+	(for-each
+		(lambda (dj)
+			(define cnt-a (get-cset-count WORD-A dj))
+			(define cnt-b (get-cset-count WORD-B dj))
+			(set! sum-inf (+ sum-inf (min cnt-a cnt-b)))
+			(set! sum-sup (+ sum-sup (max cnt-a cnt-b))))
+		disjuncts)
+
+	(- 1.0 (/ sum-inf sum-sup))
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (cset-observations WORD-LIST)
 "
   cset-observations WORD-LIST - Return the number of times that
@@ -243,7 +291,7 @@
 "
 	(define all-csets
 		(append-map!
-			(lambda (wrd) (cog-incoming-by-type wrd 'LgWordCset))
+			(lambda (wrd) (get-cset-vec wrd))
 			WORD-LIST))
 
 	(delete-duplicates!
