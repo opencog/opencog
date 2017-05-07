@@ -43,6 +43,8 @@
            (choices (cdr TERM)))
           ((equal? 'unordered-matching (car TERM))
            (unordered-matching (cdr TERM)))
+          ((equal? 'negation (car TERM))
+           (negation (cdr TERM)))
           ; TODO
           (else (cons '() '()))))
   (define vars (append (car ATOMESE) (car atomese-for-term)))
@@ -102,3 +104,6 @@
   (if (not (equal? #f (member grd (append chs cpts))))
       (stv 1 1)
       (stv 0 1)))
+
+; TODO: chatlang-unordered-match?
+; TODO: chatlang-negation?

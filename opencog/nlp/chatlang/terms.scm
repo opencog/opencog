@@ -65,3 +65,9 @@
         (list (Evaluation (GroundedPredicate "scm: chatlang-unordered-matching?")
                           (List (Glob (choose-var-name))
                                 (List (terms-to-atomese TERMS)))))))
+
+(define-public (negation TERMS)
+  "Absent of a term or a list of terms (words/lemmas/phrase/concepts)."
+  (cons '()  ; No variable declaration
+        (list (Evaluation (GroundedPredicate "scm: chatlang-negation?")
+                          (List (terms-to-atomese TERMS))))))
