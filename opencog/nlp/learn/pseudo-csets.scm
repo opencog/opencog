@@ -8,8 +8,8 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The scripts below compute the cosine-similarity between pseudo
-; connector-set vectors.
+; The scripts below compute the cosine-similarity (and other similarity
+; meaasures) between pseudo ; connector-set vectors.
 ;
 ; An example connector-set, for the word "playing", illustrating
 ; that it can connect to the word "level" on the left, and "field"
@@ -257,6 +257,14 @@
 
 ; ---------------------------------------------------------------------
 
+(define (get-angle SIM)
+	(define pi 3.14159265358979)
+
+	; Stupid-ass guile return a small imaginary number when taking
+	; the arccos of 1.0. WTF.  So we need to take he real part!!
+	(* 2.0 (/ (real-part (acos SIM)) pi))
+)
+
 (define-public (cset-vec-cos-dist WORD-A WORD-B)
 "
   cset-vec-cos-dist WORD-A WORD-B - compute the pseudo-cset vector
@@ -264,11 +272,7 @@
   is defined as dist = 2*arccos(cossim) / pi.  The cosine distance
   obeys the triangle inequality.
 "
-	(define pi 3.14159265358979)
-
-	; Stupid-ass guile return a small imaginary number when taking
-	; the arccos of 1.0. WTF.  So we need to take he real part!!
-	(* 2.0 (/ (real-part (acos (cset-vec-cosine WORD-A WORD-B))) pi))
+	(get-angle (cset-vec-cosine WORD-A WORD-B))
 )
 
 ; ---------------------------------------------------------------------
