@@ -105,4 +105,8 @@
 ; (length ad)
 ; 291637
 ;
-; (batch-sim-pairs ac)
+; (define firm (filter (lambda (wrd) (< 8.0 (cset-vec-len wrd))) ac))
+; (length firm)
+; 1985
+;
+; (batch-sim-pairs firm)

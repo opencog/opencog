@@ -382,7 +382,7 @@
 ; (fetch-pseudo-csets (get-all-words))
 ; (define ac (filter-words-with-csets (get-all-words)))
 ; (length ac)
-; 30127  now 37178
+; 30127  now 37413
 ; (define ad (get-all-disjuncts))
 ; (length ad)
 ; 200183 now 288267

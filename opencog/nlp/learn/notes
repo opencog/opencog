@@ -4265,3 +4265,18 @@ COMMENT ON DATABASE en_pairs_rohit IS 'forked from en_pairs_2016, converted to m
 
 COMMENT ON DATABASE en_pairs_2016 IS 'Rohits original pair data; old format; missing correct word-counts';
 
+(define ac (filter-words-with-csets (get-all-words)))
+
+(cset-vec-len
+(cset-vec-observations
+
+(define lens (map (lambda (wrd) (cons (cset-vec-len wrd) wrd)) ac))
+
+(define slens (sort lens (lambda (a b) (> (car a) (car b)))))
+
+(define obs (map (lambda (wrd) (cons (cset-vec-observations wrd) wrd)) ac))
+
+(define sobs (sort obs (lambda (a b) (> (car a) (car b)))))
+
+
+(define firm (filter (lambda (wrd) (< 8.0 (cset-vec-len wrd))) ac))
