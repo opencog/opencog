@@ -188,6 +188,22 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (cset-vec-cos-dist WORD-A WORD-B)
+"
+  cset-vec-cos-dist WORD-A WORD-B - compute the pseudo-cset vector
+  cosine distance between WORD-A and WORD-B. The cosine distance
+  is defined as dist = 2*arccos(cossim) / pi.  The cosine distance
+  obeys the triangle inequality.
+"
+	(define pi 3.14159265358979)
+
+	; Stupid-ass guile return a small imaginary number when taking
+	; the arccos of 1.0. WTF.  So we need to take he real part!!
+	(* 2.0 (/ (real-part (acos (cset-vec-cosine WORD-A WORD-B))) pi))
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (cset-observations WORD-LIST)
 "
   cset-observations WORD-LIST - Return the number of times that
@@ -206,9 +222,12 @@
   cset-support WORD-LIST - Return all of the disjuncts in use
   in the space of all cset-vectors in the WORD-LIST.  Equivalently,
   return all of the basis vectors in the space.  One disjunct is
-  just one basis element.
+  just one basis element.  The length of this list is the total
+  dimension of the space.
 
-  Caution: this can take a very long time!
+  Caution: this can take a very long time!  Last time, this took
+  3-4 hours to return a list of length 200K for 430K observations
+  distributed across 30K words.
 "
 	(define all-csets
 		(append-map!
@@ -219,18 +238,6 @@
 		(map!
 			(lambda (cset) (gdr cset))
 			all-csets))
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (cset-dimension WORD-LIST)
-"
-  cset-dimension WORD-LIST - Return the dimension (size of support)
-  of the space ov all cset-vectors in the WORD-LIST.
-
-  Caution: this can take a very long time!
-"
-	(length (cset-support))
 )
 
 ; ---------------------------------------------------------------------

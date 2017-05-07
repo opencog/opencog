@@ -4222,6 +4222,9 @@ A pronoun
 Wow!! In English, "it" is usually a male!
  (cset-vec-cosine (Word "it") (Word "she")) = 0.1885493638629482
  (cset-vec-cosine (Word "it") (Word "he")) = 0.4527656594627214
+ (cset-vec-cosine (Word "he") (Word "she")) = 0.1877589816088902
 
 I can post the database on mondy, let me know when you're ready to
 receive it.
+
+above dataset has 200183 (200K) disjuncts in it
