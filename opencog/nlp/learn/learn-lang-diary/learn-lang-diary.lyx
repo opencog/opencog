@@ -18265,9 +18265,12 @@ The `en_snapshot` dataset
 \end_inset
 
 .
- It is a medium-sized sample; it was collected over the course of a few
- days.
- 
+ It was collected over the course of a few days, and so should be considered
+ to be a medium-sized sample: larger ones, collected over weeks or months,
+ are possible, as well as smaller samples collected over a few hours.
+ Note that the current atomspace infrastructure does have some serious performan
+ce limitations: the atomspace is designed to be a very general-purpose hypergrap
+h tool, and not a fast statistics-collecting tool.
 \end_layout
 
 \begin_layout Standard
@@ -18290,7 +18293,8 @@ Obtained with (fetch-all-words)(length (get-all-words))
 status open
 
 \begin_layout Plain Layout
-(total-word-observations)
+(get-total-atom-count (get-all-words)) which is the same as (total-word-observat
+ions)
 \end_layout
 
 \end_inset
@@ -18332,6 +18336,30 @@ status open
 
 .
  
+\end_layout
+
+\begin_layout Standard
+There were 9376710 (about 9M) unique 'clique pairs' observed
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(fetch-clique-pairs) (length (get-all-clique-pairs))
+\end_layout
+
+\end_inset
+
+ for a total of XXX observations
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+(get-total-atom-count (get-all-clique-pairs))
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -18774,7 +18802,7 @@ Of some
 \end_layout
 
 \begin_layout Subsubsection*
-Asymmetric Mutual Infromation
+Asymmetric Mutual Information
 \end_layout
 
 \begin_layout Standard
@@ -18789,6 +18817,14 @@ AMI(w_{l},w_{r})=MI(w_{l},w_{r})/\log
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section*
+Connector Sets 7 May 2017
+\end_layout
+
+\begin_layout Standard
+Some graphs showing connector sets.
 \end_layout
 
 \begin_layout Section*
