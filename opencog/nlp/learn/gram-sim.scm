@@ -29,7 +29,10 @@
 (define cos-key (PredicateNode "*-Cosine Distance Key-*"))
 
 ; If the similarity is less than this, it is not saved.
-(define cutoff 0.05)
+; The current value is chosen by gut-feel, based on the current
+; dataset, which is small/crappy.  The appropriate value is
+; likely to be strongly dataset-dependent.
+(define cutoff 0.5)
 
 ; Define the atom at which the cosine similarity value will be stored.
 (define (sim-pair WORD-A WORD-B) (SimilarityLink WORD-A WORD-B))
@@ -38,10 +41,13 @@
 ; words in the word-list
 (define (batch-sim WORD WORD-LIST)
 
+	(define num-checked 0)
 	(define num-stored 0)
 
 	(define (store-sim WORD-A WORD-B SIM)
 		(set! num-stored (+ num-stored 1))
+		(format #t "~A ~A Similarity ~A <--> ~A = ~A\n"
+			num-checked num-stored (cog-name WORD-A) (cog-name WORD-B) SIM)
 		(store-atom
 			(cog-set-value!
 				(sim-pair WORD-A WORD-B) cos-key
@@ -50,7 +56,9 @@
 	(for-each
 		(lambda (wrd)
 			(define sim (cset-vec-cosine WORD wrd))
-			(if (< cutoff sim) (store-sim WORD wrd sim)))
+			(set! num-checked (+ num-checked 1))
+			(if (and (< cutoff sim) (not (equal? WORD wrd)))
+				(store-sim WORD wrd sim)))
 		WORD-LIST)
 
 	; print some progress info.
@@ -96,5 +104,5 @@
 ; (define ad (get-all-disjuncts))
 ; (length ad)
 ; 291637
-
 ;
+; (batch-sim-pairs ac)
