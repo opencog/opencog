@@ -2,6 +2,8 @@
 ;;
 ;; Assorted functions for translating individual terms into Atomese fragments.
 
+(use-modules (ice-9 optargs))
+
 (define-public (word STR)
   "Literal word occurrence."
   (let* ((name (choose-var-name))
@@ -29,16 +31,16 @@
         (cons '() '())
         (map word (string-split STR #\ ))))
 
-(define-public (concept STR)
+(define*-public (concept STR #:optional (var (choose-var-name)))
   "Occurrence of a concept."
   (cons '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
-                          (List (Glob (choose-var-name))
+                          (List (Glob var)
                                 (Concept STR))))))
 
 (define (terms-to-atomese TERMS)
   "Helper function to convert a list of terms into atomese.
-   For use of choices and unordered-matching."
+   For use of choices, unordered-matching and negation."
   (map (lambda (t) (cond ((equal? 'word (car t))
                           (Word (cdr t)))
                          ((equal? 'lemma (car t))
@@ -49,21 +51,21 @@
                           (Concept (cdr t)))))
        TERMS))
 
-(define-public (choices TERMS)
+(define*-public (choices TERMS #:optional (var (choose-var-name)))
   "Occurrence of a list of choices. Existence of either one of
    the words/lemmas/phrases/concepts in the list will be considered
    as a match."
   (cons '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
-                          (List (Glob (choose-var-name))
+                          (List (Glob var)
                                 (List (terms-to-atomese TERMS)))))))
 
-(define-public (unordered-matching TERMS)
+(define*-public (unordered-matching TERMS #:optional (var (choose-var-name)))
   "Occurrence of a list of terms (words/lemmas/phrases/concepts)
    that can be matched in any orders."
   (cons '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: chatlang-unordered-matching?")
-                          (List (Glob (choose-var-name))
+                          (List (Glob var)
                                 (List (terms-to-atomese TERMS)))))))
 
 (define-public (negation TERMS)

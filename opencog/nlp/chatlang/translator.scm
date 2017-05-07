@@ -29,27 +29,77 @@
 
 (define (process-pattern-term TERM ATOMESE)
   "Process a single term -- calls the term function and appends the new
-   variables and conditions to the existing pair."
+   variables and conditions to the existing pair.
+   The atomese are in the form of: ((A B) C)
+   where A is the variable declaration, B is the condition, C is the
+   term sequence."
+  (define no-var-cond (cons '() '()))
   (define atomese-for-term
     (cond ((equal? 'lemma (car TERM))
-           (lemma (cdr TERM)))
+           (cons (lemma (cdr TERM))
+                 (list (Word (get-lemma (cdr TERM))))))
           ((equal? 'word (car TERM))
-           (word (cdr TERM)))
+           (cons (word (cdr TERM))
+                 (list (Word (cdr TERM)))))
           ((equal? 'phrase (car TERM))
-           (phrase (cdr TERM)))
+           (cons (phrase (cdr TERM))
+                 (map Word (string-split (cdr TERM) #\ ))))
           ((equal? 'concept (car TERM))
-           (concept (cdr TERM)))
+           (let ((var (choose-var-name)))
+                (cons (concept (cdr TERM) var)
+                      (list (Glob var)))))
           ((equal? 'choices (car TERM))
-           (choices (cdr TERM)))
+           (let ((var (choose-var-name)))
+                (cons (choices (cdr TERM) var)
+                      (list (Glob var)))))
           ((equal? 'unordered-matching (car TERM))
-           (unordered-matching (cdr TERM)))
+           (let ((var (choose-var-name)))
+                (cons (unordered-matching (cdr TERM) var)
+                      (list (Glob var)))))
           ((equal? 'negation (car TERM))
-           (negation (cdr TERM)))
+           (cons (negation (cdr TERM))
+                 '()))
+          ((equal? 'anchor-start (car TERM))
+           (cons no-var-cond (list "<")))
+          ((equal? 'anchor-end (car TERM))
+           (cons no-var-cond (list ">")))
           ; TODO
-          (else (cons '() '()))))
-  (define vars (append (car ATOMESE) (car atomese-for-term)))
-  (define conds (append (cdr ATOMESE) (cdr atomese-for-term)))
-  (cons vars conds))
+          (else (cons no-var-cond '()))))
+  (define vars (append (caar ATOMESE) (caar atomese-for-term)))
+  (define conds (append (cdar ATOMESE) (cdar atomese-for-term)))
+  (define seq (append (cdr ATOMESE) (cdr atomese-for-term)))
+  (cons (cons vars conds) seq))
+
+(define (term-sequence-check SEQ)
+  "Checks terms occur in the desired order. This is done when we're using
+   DualLink to find the rules, see 'find-chat-rules' for details."
+  (let* ((no-start-anchor? (equal? #f (member "<" SEQ)))
+         (no-end-anchor? (equal? #f (member ">" SEQ)))
+         (start-with (if no-start-anchor? '() (cdr (member "<" SEQ))))
+         (end-with (if no-end-anchor?
+                       '()
+                       (take-while (lambda (t) (not (equal? ">" t))) SEQ)))
+         (new-seq (cond ((and (not (null? start-with)) (not (null? end-with)))
+                         (append start-with end-with))
+                        ; TODO: Append a zero-to-many-GlobNode at the end
+                        ((not (null? start-with))
+                         (append start-with
+                                 (take-while (lambda (t) (not (equal? "<" t))) SEQ)))
+                        ; TODO: Append a zero-to-many-GlobNode at the beginning
+                        ((not (null? end-with))
+                         (append (cdr (member ">" SEQ)) end-with))
+                        ; TODO: Append zero-to-many-GlobNodes
+                        (else SEQ))))
+  ; DualLink couldn't match patterns with no constant terms in it
+  ; Mark the rules with no constant terms so that ot cam be found
+  ; easily during the matching process
+  (if (equal? (length new-seq)
+              (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
+                              new-seq)))
+    (Inheritance (List new-seq) chatlang-no-constant))
+  ; Wrap it using a TrueLink
+  ; TODO: Maybe there is a more elegant way to represent it in the context?
+  (True (List new-seq))))
 
 (define yakking (psi-demand "Yakking" 0.9))
 
@@ -58,9 +108,11 @@
    and action is a quoted list of actions or a single action."
   (let* ((template (cons atomese-variable-template atomese-condition-template))
          (proc-terms (fold process-pattern-term
-                           template
-                           PATTERN)))
-    proc-terms))
+                           (cons template '())
+                           PATTERN))
+         (var-cond (car proc-terms))
+         (term-seq (term-sequence-check (cdr proc-terms))))
+    term-seq))
 
 (define (get-lemma WORD)
   "A hacky way to quickly find the lemma of a word using WordNet."
