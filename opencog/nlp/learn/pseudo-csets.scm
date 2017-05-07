@@ -9,7 +9,7 @@
 ; OVERVIEW
 ; --------
 ; The scripts below compute the cosine-similarity (and other similarity
-; meaasures) between pseudo ; connector-set vectors.
+; meaasures) between pseudo-connector-set vectors.
 ;
 ; An example connector-set, for the word "playing", illustrating
 ; that it can connect to the word "level" on the left, and "field"
@@ -371,3 +371,21 @@
 )
 
 ; ---------------------------------------------------------------------
+; Example usage:
+;
+; (use-modules (opencog) (opencog persist) (opencog persist-sql))
+; (use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_pairs_mst?user=linas")
+; (fetch-all-words)
+; (length (get-all-words))
+; 396262
+; (fetch-pseudo-csets (get-all-words))
+; (define ac (filter-words-with-csets (get-all-words)))
+; (length ac)
+; 30127  now 37178
+; (define ad (get-all-disjuncts))
+; (length ad)
+; 200183 now 288267
+;
+; (cset-vec-cosine (Word "this") (Word "that"))
+; (cset-vec-cosine (Word "he") (Word "she"))
