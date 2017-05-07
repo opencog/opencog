@@ -35,3 +35,23 @@
         (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
                           (List (Glob (choose-var-name))
                                 (Concept STR))))))
+
+(define-public (choices TERMS)
+  "Occurrence of a list of choices. Existence of either one of
+   the words/lemmas/phrase/concepts in the list will be considered
+   as a match."
+  (define chs
+    (map (lambda (t)
+      (cond ((equal? 'word (car t))
+             (Word (cdr t)))
+            ((equal? 'lemma (car t))
+             (Word (get-lemma (cdr t))))
+            ((equal? 'phrase (car t))
+             (List (map Word (string-split (cdr t) #\ ))))
+            ((equal? 'concept (car t))
+             (Concept (cdr t)))))
+      TERMS))
+  (cons '()  ; No variable declaration
+        (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
+                          (List (Glob (choose-var-name))
+                                (List chs))))))

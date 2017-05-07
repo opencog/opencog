@@ -9,6 +9,7 @@
              (opencog eva-behavior)
              (srfi srfi-1)
              (rnrs io ports)
+             (ice-9 popen)
              (ice-9 optargs))
 
 (define (chatlang-prefix STR) (string-append "Chatlang: " STR))
@@ -38,6 +39,8 @@
            (phrase (cdr TERM)))
           ((equal? 'concept (car TERM))
            (concept (cdr TERM)))
+          ((equal? 'choices (car TERM))
+           (choices (cdr TERM)))
           ; TODO
           (else (cons '() '()))))
   (define vars (append (car ATOMESE) (car atomese-for-term)))
@@ -54,6 +57,19 @@
                            template
                            PATTERN)))
     proc-terms))
+
+(define (get-lemma WORD)
+  "A hacky way to quickly find the lemma of a word using WordNet."
+  (let* ((cmd-string (string-append "wn " WORD " | grep \"Information available for .\\+\""))
+         (port (open-input-pipe cmd-string))
+         (lemma ""))
+    (do ((line (get-line port) (get-line port)))
+        ((eof-object? line))
+      (let ((l (car (last-pair (string-split line #\ )))))
+        (if (not (equal? WORD l))
+          (set! lemma l))))
+    (close-pipe port)
+    (if (string-null? lemma) WORD lemma)))
 
 (define (get-members CONCEPT)
   "Get the members of a concept. VariableNodes will be ignored, and
@@ -72,5 +88,15 @@
   (define grd (assoc-ref globs (cog-name GLOB)))
   (define membs (get-members CONCEPT))
   (if (not (equal? #f (member grd membs)))
+      (stv 1 1)
+      (stv 0 1)))
+
+(define-public (chatlang-choices? GLOB CHOICES)
+  "Check if the grounded value of the GlobNode is actually a member
+   of the list of choices."
+  (define grd (assoc-ref globs (cog-name GLOB)))
+  (define chs (cog-outgoing-set CHOICES))
+  (define cpts (append-map get-members (cog-filter 'ConceptNode chs)))
+  (if (not (equal? #f (member grd (append chs cpts))))
       (stv 1 1)
       (stv 0 1)))
