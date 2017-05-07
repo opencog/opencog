@@ -18824,7 +18824,99 @@ Connector Sets 7 May 2017
 \end_layout
 
 \begin_layout Standard
-Some graphs showing connector sets.
+Some results on connector sets, preceeded by an explanation of what they
+ are.
+\end_layout
+
+\begin_layout Subsection*
+Recap
+\end_layout
+
+\begin_layout Standard
+The story so far: Starting from a large text corpus, the mutual information
+ (MI) of word-pairs are counted.
+ This MI is used to perform a maximum spanning-tree (MST) parse (of a different
+ subset of) the corpus.
+ From each parse, a pseudo-disjunct is extracted for each word.
+ The pseudo-disjunct is like a real LG disjunct, except that each connector
+ in the disjunct is the word at the far end of the link.
+\end_layout
+
+\begin_layout Standard
+So, for example, in in idealized world, the MST parse of the sentence "Ben
+ ate pizza" would prodouce the parse Ben <--> ate <--> pizza and from this,
+ we can extract the pseudo-disjunct (Ben- pizza+) on the word "ate".
+ Similarly, the sentence "Ben puked pizza" should produce the disjunct (Ben-
+ pizza+) on the word "puked".
+ Since these two disjuncts are the same, we can conclude that the two words
+ "ate" and "puked" are very similar to each other.
+ Considering all of the other disjuncts that arise in this example, we can
+ conclude that these are the only two words that are similar.
+\end_layout
+
+\begin_layout Standard
+Any given word will have many psuedo-disjuncts attached to it.
+ Each disjunct has a count of the number of times it has been observed.
+ Thus, this set of disjuncts can be imagined to be a vector in a high-dimensiona
+l vector space, which each disjunct being a single basis element.
+ The similarity of two words can be taken to be the cosine-similariy between
+ the disjunct-vectors.
+\end_layout
+
+\begin_layout Standard
+The next section examines similarity; but first, we characterize the nature
+ of these vectors.
+\end_layout
+
+\begin_layout Subsection*
+Connector set distribution
+\end_layout
+
+\begin_layout Standard
+Some disjuncts will be observed far more often than others.
+ Some words will have far more observations of disjuncts on them, than others.
+\end_layout
+
+\begin_layout Standard
+First, we begin with a graph showing the number of observations of disjuncts
+ on each word, ranked in order.
+ As can be seen, this follows a classic Zipf distribution.
+ The green line is an eyeballed, approximate fit, of exponent -1.1.
+ The dataset shows 37413 words that have disjuncts attached to them.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-observations.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first ten words in this ranking are: "the" "," "." "of" "and" "in" "to"
+ "a" "was".
+ This ordering probably closely resembles how often these words appear,
+ overall, in the input corpus.
+ Unfortunately, this particular dataset does not include counts for the
+ word occurances.
+\end_layout
+
+\begin_layout Standard
+lengths
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/ranked-lengths.eps
+	width 60text%
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section*
