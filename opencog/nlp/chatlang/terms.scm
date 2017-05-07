@@ -36,22 +36,32 @@
                           (List (Glob (choose-var-name))
                                 (Concept STR))))))
 
+(define (terms-to-atomese TERMS)
+  "Helper function to convert a list of terms into atomese.
+   For use of choices and unordered-matching."
+  (map (lambda (t) (cond ((equal? 'word (car t))
+                          (Word (cdr t)))
+                         ((equal? 'lemma (car t))
+                          (Word (get-lemma (cdr t))))
+                         ((equal? 'phrase (car t))
+                          (List (map Word (string-split (cdr t) #\ ))))
+                         ((equal? 'concept (car t))
+                          (Concept (cdr t)))))
+       TERMS))
+
 (define-public (choices TERMS)
   "Occurrence of a list of choices. Existence of either one of
-   the words/lemmas/phrase/concepts in the list will be considered
+   the words/lemmas/phrases/concepts in the list will be considered
    as a match."
-  (define chs
-    (map (lambda (t)
-      (cond ((equal? 'word (car t))
-             (Word (cdr t)))
-            ((equal? 'lemma (car t))
-             (Word (get-lemma (cdr t))))
-            ((equal? 'phrase (car t))
-             (List (map Word (string-split (cdr t) #\ ))))
-            ((equal? 'concept (car t))
-             (Concept (cdr t)))))
-      TERMS))
   (cons '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: chatlang-choices?")
                           (List (Glob (choose-var-name))
-                                (List chs))))))
+                                (List (terms-to-atomese TERMS)))))))
+
+(define-public (unordered-matching TERMS)
+  "Occurrence of a list of terms (words/lemmas/phrases/concepts)
+   that can be matched in any orders."
+  (cons '()  ; No variable declaration
+        (list (Evaluation (GroundedPredicate "scm: chatlang-unordered-matching?")
+                          (List (Glob (choose-var-name))
+                                (List (terms-to-atomese TERMS)))))))

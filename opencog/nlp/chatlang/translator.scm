@@ -41,6 +41,8 @@
            (concept (cdr TERM)))
           ((equal? 'choices (car TERM))
            (choices (cdr TERM)))
+          ((equal? 'unordered-matching (car TERM))
+           (unordered-matching (cdr TERM)))
           ; TODO
           (else (cons '() '()))))
   (define vars (append (car ATOMESE) (car atomese-for-term)))
@@ -83,7 +85,7 @@
       (cog-execute! (Get (Reference (Variable "$x") CONCEPT))))))
 
 (define-public (chatlang-concept? GLOB CONCEPT)
-  "Check if the grounded value of the GlobNode is actually a member
+  "Check if the value grounded for the GlobNode is actually a member
    of the concept."
   (define grd (assoc-ref globs (cog-name GLOB)))
   (define membs (get-members CONCEPT))
@@ -92,7 +94,7 @@
       (stv 0 1)))
 
 (define-public (chatlang-choices? GLOB CHOICES)
-  "Check if the grounded value of the GlobNode is actually a member
+  "Check if the value grounded for the GlobNode is actually a member
    of the list of choices."
   (define grd (assoc-ref globs (cog-name GLOB)))
   (define chs (cog-outgoing-set CHOICES))
