@@ -18879,7 +18879,19 @@ Some disjuncts will be observed far more often than others.
 
 \begin_layout Standard
 First, we begin with a graph showing the number of observations of disjuncts
- on each word, ranked in order.
+ on each word, ranked in order
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Obtained by running (print-ts-rank sorted-obs outport) from the disjunct-stats.sc
+m file, on the en_pairs_sim database.
+ 
+\end_layout
+
+\end_inset
+
+.
  As can be seen, this follows a classic Zipf distribution.
  The green line is an eyeballed, approximate fit, of exponent -1.1.
  The dataset shows 37413 words that have disjuncts attached to them.
@@ -18906,10 +18918,34 @@ The first ten words in this ranking are: "the" "," "." "of" "and" "in" "to"
 \end_layout
 
 \begin_layout Standard
-lengths
+A different distribution arises by looking at the ranked lengths of the
+ vectors
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Obtained by running (print-ts-rank sorted-lengths outport) from the disjunct-sta
+ts.scm file on the en_pairs_sim database.
+ 
+\end_layout
+
+\end_inset
+
+.
+ Here, the length is computed using the Eucliden distance.
+ The length of a vector is thus longer not only when more disjuncts have
+ been observed, but also when most of the observations are made of only
+ a small handful of disjuncts.
+ That is, the length should be longer, if the word is less grammatically
+ flexible.
+ So for example, prepositions tend to be very flexible; adjectives, not
+ so much.
+ Thus, we expect adjectives to appear higher-up on this ranking list, than
+ the observation-based list.
 \end_layout
 
 \begin_layout Standard
+\align center
 \begin_inset Graphics
 	filename images/ranked-lengths.eps
 	width 60text%
@@ -18917,6 +18953,10 @@ lengths
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+length squared...
 \end_layout
 
 \begin_layout Section*
