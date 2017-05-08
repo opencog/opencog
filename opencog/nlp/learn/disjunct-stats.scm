@@ -60,6 +60,18 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
+; A sorted list of the support of a word.
+; The support is simply how many basis elements of a vector are
+; non-zero.  Equivalently, it is the size of the set of unique
+; disjuncts associated with a word (counted without multiplicity).
+
+(define sorted-support (score-and-rank cset-vec-support all-cset-words))
+
+(let ((outport (open-file "/tmp/ranked-support.dat" "w")))
+	(print-ts-rank sorted-support outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the cset length
 (define sorted-lengths (score-and-rank cset-vec-len all-cset-words)
 
