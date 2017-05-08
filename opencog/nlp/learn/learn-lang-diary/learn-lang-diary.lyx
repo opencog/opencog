@@ -18869,7 +18869,7 @@ The next section examines similarity; but first, we characterize the nature
 \end_layout
 
 \begin_layout Subsection*
-Connector set distribution
+Disjunct-Set size distribution
 \end_layout
 
 \begin_layout Standard
@@ -18924,7 +18924,7 @@ ce with words in a given parse.
 \end_layout
 
 \begin_layout Subsection*
-Ranked Connector-set RMS Size
+Ranked Disjunct-Set RMS Size
 \end_layout
 
 \begin_layout Standard
@@ -18942,7 +18942,7 @@ ts.scm file on the en_pairs_sim database.
 \end_inset
 
 .
- Here, the length
+ Here, the RMS size
 \begin_inset Foot
 status collapsed
 
@@ -18975,16 +18975,18 @@ length
 
 \end_inset
 
- is computed using the Eucliden distance.
- The length of a vector is thus longer not only when more disjuncts have
+ is computed by taking the root-mean-square of the counts on each disjunct
+ in the set.
+ The RMS size of the set is thus larger not only when more disjuncts have
  been observed, but also when most of the observations are made of only
  a small handful of disjuncts.
- That is, the length should be longer, if the word is less grammatically
- flexible.
+ That is, the RMS size should be relatively larger, if the word is less
+ grammatically flexible.
  So for example, prepositions tend to be very flexible; adjectives, not
  so much.
  Thus, we expect adjectives to appear higher-up on this ranking list, than
  the observation-based list.
+ But this is not really the case.
 \end_layout
 
 \begin_layout Standard
@@ -18999,16 +19001,27 @@ length
 \end_layout
 
 \begin_layout Standard
-The first ten words of the length-list are: "." "and" "," "in" "the" ")"
+The first ten words of the RMS-size-list are: "." "and" "," "in" "the" ")"
  "(" "of" "as" "to".
  Not that interesting: these are all words that were observed a lot in the
  text.
 \end_layout
 
+\begin_layout Subsection*
+Mean-square to size ratio
+\end_layout
+
 \begin_layout Standard
-More intesting is the ratio of length-squared to num-observations.
- These will be words that have relatively few disjuncts on them, or at least,
- few that matter much, that rise abbove the level of noise.
+More intesting is the ratio of mean-square size to the total size.
+ This seems like the interesting ratio, because the Zipf exponent of -0.6
+ would be doubled, when working with mean-square sizes, thus making the
+ two rankings comparable.
+\end_layout
+
+\begin_layout Standard
+Words high in this score will be words that have relatively few disjuncts
+ on them, or at least, few that matter much, that rise above the level of
+ noise.
  The first ten on this list are (after excluding all words with fewer than
  100 observations): "It" "According" "He" ")" "and" "(" "United" "as" "."
  "well".
