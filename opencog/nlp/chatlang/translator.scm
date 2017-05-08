@@ -101,6 +101,18 @@
   ; TODO: Maybe there is a more elegant way to represent it in the context?
   (True (List new-seq))))
 
+(define-public (say text)
+  "Say the text and clear the state"
+  ; TODO: Something simplier?
+  (And (True (Put (DefinedPredicate "Say") (Node text)))
+       (True (Put (State (Anchor "Currently Processing") (Variable "$x"))
+                  (Concept "Default State")))))
+
+(define (process-action ACTION)
+  "Process a single action -- converting it into atomese."
+  (cond ((equal? 'say (car ACTION))
+         (say (cdr ACTION)))))
+
 (define yakking (psi-demand "Yakking" 0.9))
 
 (define*-public (chat-rule PATTERN ACTION #:optional NAME)
@@ -110,9 +122,18 @@
          (proc-terms (fold process-pattern-term
                            (cons template '())
                            PATTERN))
-         (var-cond (car proc-terms))
-         (term-seq (term-sequence-check (cdr proc-terms))))
-    term-seq))
+         (var-list (caar proc-terms))
+         (cond-list (cdar proc-terms))
+         (term-seq (term-sequence-check (cdr proc-terms)))
+         (action (process-action ACTION)))
+    (psi-rule
+      (list (Satisfaction (VariableList var-list)
+                          (And (append cond-list (list term-seq)))))
+      action
+      (True)
+      (stv .9 .9)
+      yakking
+      NAME)))
 
 (define (get-lemma WORD)
   "A hacky way to quickly find the lemma of a word using WordNet."
