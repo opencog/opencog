@@ -6,10 +6,19 @@
 ;; OpenPsi should be able to know how and what kinds of rules it should be
 ;; looking for at a particular point in time.
 
-(use-modules (opencog logger))
+(use-modules (opencog logger)
+             (opencog exec))
+
+(define (get-term-seq RULE)
+  ; TODO
+  (gar (car (cog-filter 'TrueLink (cog-outgoing-set (gdr (gaaar RULE)))))))
 
 (define globs '())
-(define (ground-globs pattern input)
+(define-public (show-globs)
+  "For debugging only."
+  (display globs) (newline))
+
+(define (ground-globs PATTERN INPUT)
   "Use MapLink to ground the GlobNodes in the pattern and save them in 'globs'."
   ; For example, if the pattern is:
   ;   (ListLink (WordNode "A") (GlobNode "$x"))
@@ -26,19 +35,24 @@
   ;     (ListLink ...)  ; GlobNode-1
   ;     (ListLink ...)  ; GlobNode-2
   ;     ...))
-  (define grds (cog-execute! (Map pattern (Set input))))
+  (define grds (cog-execute! (Map PATTERN (Set INPUT))))
+
   (for-each
     (lambda (gn grd)
-      (set! globs (assoc-set! globs (cog-name gn) grd)))
-    (cog-filter 'GlobNode (cog-outgoing-set pattern))
-    ; TODO: There may be more than one possible groundings?
-    (cog-outgoing-set (gar grds))))
+      (set! globs (assoc-set! globs (cog-name gn)
+        ; If the grounging is a list of words, save the whole list
+        ; otherwise, just get the word
+        (if (equal? 1 (cog-arity grd)) (gar grd) grd))))
+    (cog-filter 'GlobNode (cog-outgoing-set PATTERN))
 
-(define-public (chat-find-rules sent-node)
+    ; TODO: There may be more than one possible groundings?
+    (cog-outgoing-set grds)))
+
+(define-public (chat-find-rules SENT)
   "The action selector. It first searches for the rules using DualLink,
    and then does the filtering by evaluating the context of the rules.
    Eventually returns a list of weighted rules that can satisfy the demand"
-  (let* ((input-lemmas (get-sent-lemmas sent-node))
+  (let* ((input-lemmas (sent-get-lemmas-in-order SENT))
          (no-constant (append-map psi-get-exact-match
            (cog-chase-link 'InheritanceLink 'ListLink chatlang-no-constant)))
          (dual-match (psi-get-dual-match input-lemmas))
@@ -48,11 +62,15 @@
 
     ; Clear any previous groundings before grounding the above GlobNodes
     (set! globs '())
-    (if (not (null? dual-match)) (ground-globs dual-match input-lemmas))
-    (if (not (null? no-constant)) (ground-globs no-constant input-lemmas))
+    (if (not (null? dual-match))
+        (for-each (lambda (r) (ground-globs (get-term-seq r) input-lemmas))
+                  dual-match))
+    (if (not (null? no-constant))
+        (for-each (lambda (r) (ground-globs (get-term-seq r) input-lemmas))
+                  no-constant))
     (cog-logger-debug "GlobNode groundings: ~a" globs)
 
-    ; TODO: Pick the ones with the highest weight
+    ; TODO: Pick the one with the highest weight
     (List (append-map
       ; TODO: "psi-satisfiable?" doesn't work here (?)
       (lambda (r)

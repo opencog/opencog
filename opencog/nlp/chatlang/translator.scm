@@ -135,6 +135,27 @@
       yakking
       NAME)))
 
+(define (sent-get-lemmas-in-order SENT)
+  "Get the lemma of the words associate with sent-node."
+  (List (append-map
+    (lambda (w)
+      ; Ignore LEFT-WALL and punctuations
+      (if (or (string-prefix? "LEFT-WALL" (cog-name w))
+              (word-inst-match-pos? w "punctuation")
+              (null? (cog-chase-link 'LemmaLink 'WordNode w)))
+          '()
+          ; For proper names, e.g. Jessica Henwick,
+          ; RelEx converts them into a single WordNode, e.g.
+          ; (WordNode "Jessica_Henwick"). Codes below try to
+          ; split it into two WordNodes, "Jessica" and "Henwick",
+          ; so that the matcher will be able to find the rules
+          (let* ((wn (car (cog-chase-link 'LemmaLink 'WordNode w)))
+                 (name (cog-name wn)))
+            (if (integer? (string-index name #\_))
+              (map Word (string-split name  #\_))
+              (list wn)))))
+    (car (sent-get-words-in-order SENT)))))
+
 (define (get-lemma WORD)
   "A hacky way to quickly find the lemma of a word using WordNet."
   (let* ((cmd-string (string-append "wn " WORD " | grep \"Information available for .\\+\""))
