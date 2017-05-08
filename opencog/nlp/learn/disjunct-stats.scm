@@ -224,3 +224,42 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; Entropies.
+
+(define total-word-count (cset-observations all-cset-words))
+
+; Get the "word entropy".
+(define word-entropy
+	(fold
+		(lambda (word sum)
+			(define pword (/ (cset-vec-observations word) total-word-count))
+			(- sum (* pword (log pword))))
+		0
+		all-cset-words))
+
+(define word-entropy-bits (/ word-entropy (log 2.0)))
+
+; A lot like cset-vec-observations but takes the log
+; Returns the entropy of all th disjuncts attached to the word,
+; the entropy measured in nats.
+(define (cset-vec-disjunct-entropy WORD)
+   ; sum of the counts
+   (fold
+      (lambda (cset sum)
+			(define pdj (/ (get-count cset) total-word-count))
+			(- sum (* pdj (log pdj))))
+      0
+      (get-cset-vec WORD))
+)
+
+(define disjunct-entropy
+	(fold
+		(lambda (word sum) (+ sum  (cset-vec-disjunct-entropy word)))
+		0
+		all-cset-words))
+
+(define disjunct-entropy-bits (/ disjunct-entropy (log 2.0)))
+
+; ---------------------------------------------------------------------
