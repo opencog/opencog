@@ -312,6 +312,31 @@
 
 ; ---------------------------------------------------------------------
 
+; Return the disjunct of the CSET
+(define (cset-get-disjunct CSET) (gdr CSET))
+
+; Count the number of connectors in the disjunct.
+; But the disjunct is just an LgAnd of a bunch of connectors,
+; so this is easy.
+(define (dj-connectors DISJUNCT) (length (cog-outgoing-set DISJUNCT)))
+
+(define-public (cset-vec-connectors WORD)
+"
+  cset-vec-connectors WORD - compute the total number of
+  observations of connectors on the word.  Recall that each disjunct
+  is made of one or more connectors.
+"
+	(define (con-count cset)
+		(* (get-count cset) (dj-connectors (cset-get-disjunct cset))))
+	; sum of the counts
+	(fold
+		(lambda (cset sum) (+ (con-count cset) sum))
+		0
+		(get-cset-vec WORD))
+)
+
+; ---------------------------------------------------------------------
+
 (define-public (cset-observations WORD-LIST)
 "
   cset-observations WORD-LIST - Return the number of times that

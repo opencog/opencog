@@ -87,7 +87,7 @@
 	(define len (cset-vec-len wrd))
 	(/ (* len len) (cset-vec-observations wrd)))
 
-; The legnth vs observation ranking; but discard everything
+; The length vs observation ranking; but discard everything
 ; with a small number of observations.
 (define sorted-lensq-norm
 	(score-and-rank lensq-vs-obs
@@ -128,6 +128,34 @@
 	(close outport))
 
 ;
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; Hubbbiness.
+
+(define (avg-con-count wrd)
+	(/ (cset-vec-connectors wrd) (cset-vec-observations wrd)))
+
+; Rank by average disjunct size; but discard everything
+; with a small number of observations.
+(define sorted-avg-connectors
+	(score-and-rank avg-con-count
+		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+			all-cset-words)))
+
+(define sorted-avg-connectors
+	(score-and-rank avg-con-count all-cset-words))
+
+(define sorted-avg-connectors
+	(score-and-rank avg-con-count
+		(filter (lambda (wrd) (< 300 (cset-vec-observations wrd)))
+			all-cset-words)))
+
+(let ((outport (open-file "/tmp/ranked-avg-connectors.dat" "w")))
+	(print-ts-rank sorted-avg-connectors outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
 ; Distributions for two particular words.
@@ -194,7 +222,5 @@
 (let ((outport (open-file "/tmp/ranked-dj-counts.dat" "w")))
 	(print-dj-acc outport)
 	(close outport))
-
-
 
 ; ---------------------------------------------------------------------
