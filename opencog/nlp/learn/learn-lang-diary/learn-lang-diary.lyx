@@ -19186,12 +19186,308 @@ The fifth most frequent disjunct is grammatical garbage: noise from bad
 \end_inset
 
  or about 9 dB.
- The total length of this vector is 125.9 and so clearly, the first disjunct
- accounts for most of the length (
-\begin_inset Formula $108^{2}/126^{2}=73\%$
+ These first four disjuncts really pull up the average, which is quite low,
+ given this skew: the average number of observations pero disjunct for 
+\begin_inset Quotes eld
 \end_inset
 
-) and the second and third disjuncts accounting for another 10% each.
+United
+\begin_inset Quotes erd
+\end_inset
+
+ is 2.96.
+\end_layout
+
+\begin_layout Standard
+The corresponding table for 
+\begin_inset Quotes eld
+\end_inset
+
+It
+\begin_inset Quotes erd
+\end_inset
+
+ is
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+disjunct
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+number of observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+is+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+216
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+was+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+197
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+has+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+55
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+was+ was+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+is+ was+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This also is much as expected: 
+\begin_inset Quotes eld
+\end_inset
+
+It
+\begin_inset Quotes erd
+\end_inset
+
+ is a sentence opener, and the three sentence types it opens are 
+\begin_inset Quotes eld
+\end_inset
+
+It is
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+It was
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+It has
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The fourth and fifth disjuncts are grammatical garbage.
+ The average number of disjucnt observations is 3.03, almost identical to
+ that for 
+\begin_inset Quotes eld
+\end_inset
+
+United
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The skewness appears to be very sharp.
+ This suggests that we should not waste time looking at mean-square variations
+ in the average, although we'll do this anyway.
+ But first, its worth graphing the skewness directly.
+ Again, this is done on a log-log graph, in a Zipfian way.
+\end_layout
+
+\begin_layout Subsection*
+Disjunct count distribution
+\end_layout
+
+\begin_layout Standard
+The graph below shows the distribution of the disjunct observations on the
+ two words 
+\begin_inset Quotes eld
+\end_inset
+
+United
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+It
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Indeed, it looks Zipfian; since we know that all but the first three or
+ four disjuncts are noise, this graph illustrates 
+\begin_inset Quotes eld
+\end_inset
+
+pink noise
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+1/f noise
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-dj-united.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Can one get a smoother distribution by summing together these two graphs?
+ Sure...
+ and one can sum together not just these two words, but all words (that
+ have been observed at least 100 times).
+ That graph is shown below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-dj-counts.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Its kind of a strange graph.
+ Yes, this graph does imply that there is at least one word that has more
+ than ten-thousand (unique, different) disjuncts on it!
+\end_layout
+
+\begin_layout Subsection*
+Disjunct Support Distribution
+\end_layout
+
+\begin_layout Standard
+adf
+\end_layout
+
+\begin_layout Standard
+asdf
 \end_layout
 
 \begin_layout Subsection*
