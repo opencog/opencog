@@ -92,11 +92,24 @@
 (define-public (get-cset-vec WORD)
 "
   get-cset-vec WORD - Return the vector of pseudo-connector sets
-  for the WORD.
+  for the WORD. WORD can either be a WordNode, in which case all
+  of the csets for that word are returned, or it can be a disjunct,
+  in which case all the csets for that disjunct are returned.
 "
 	; Currently, its as simple as this...
 	(cog-incoming-by-type WORD 'LgWordCset)
 )
+
+; Return the word of the CSET
+(define (cset-get-word CSET) (gar CSET))
+
+; Return the disjunct of the CSET
+(define (cset-get-disjunct CSET) (gdr CSET))
+
+; Return the cset, if it exists.  If it does not exist, return the
+; empty list '()
+(define (have-cset? WORD DISJUNCT)
+	(cog-link 'LgWordCset WORD DISJUNCT))
 
 ; ---------------------------------------------------------------------
 
@@ -197,12 +210,12 @@
 "
 	; Get the common non-zero entries of the two vectors.
 	(define disjuncts (delete-duplicates! (append!
-		(map! (lambda (cset) (gdr cset)) (get-cset-vec WORD-A))
-		(map! (lambda (cset) (gdr cset)) (get-cset-vec WORD-B)))))
+		(map! cset-get-disjunct (get-cset-vec WORD-A))
+		(map! cset-get-disjunct (get-cset-vec WORD-B)))))
 
 	; Get the count for DISJUNCT on WORD, if it exists (is non-zero)
 	(define (get-cset-count WORD DISJUNCT)
-		(define cset (cog-link 'LgWordCset WORD DISJUNCT))
+		(define cset (have-cset? WORD DISJUNCT))
 		(if (null? cset) 0 (get-count cset))
 	)
 
@@ -229,7 +242,7 @@
 "
 	; If the connector-set for WORD-B exists, then get its count.
 	(define (get-cset-count DISJUNCT)
-		(define cset (cog-link 'LgWordCset WORD-B DISJUNCT))
+		(define cset (have-cset? WORD-B DISJUNCT))
 		(if (null? cset) 0 (get-count cset))
 	)
 
@@ -237,7 +250,7 @@
 	(fold
 		(lambda (cset sum)
 			(define a-cnt (get-count cset))
-			(define b-cnt (get-cset-count (gdr cset)))
+			(define b-cnt (get-cset-count (cset-get-disjunct cset)))
 			(+ sum (* a-cnt b-cnt)))
 		0
 		(get-cset-vec WORD-A))
@@ -285,12 +298,12 @@
 "
 	; Get the common non-zero entries of the two vectors.
 	(define disjuncts (delete-duplicates! (append!
-		(map! (lambda (cset) (gdr cset)) (get-cset-vec WORD-A))
-		(map! (lambda (cset) (gdr cset)) (get-cset-vec WORD-B)))))
+		(map! cset-get-disjunct (get-cset-vec WORD-A))
+		(map! cset-get-disjunct (get-cset-vec WORD-B)))))
 
 	; Get the count for DISJUNCT on WORD, if it exists (is non-zero)
 	(define (get-cset-count WORD DISJUNCT)
-		(define cset (cog-link 'LgWordCset WORD DISJUNCT))
+		(define cset (have-cset? WORD DISJUNCT))
 		(if (null? cset) 0 (get-count cset))
 	)
 
@@ -311,10 +324,6 @@
 )
 
 ; ---------------------------------------------------------------------
-
-; Return the disjunct of the CSET
-(define (cset-get-disjunct CSET) (gdr CSET))
-
 ; Count the number of connectors in the disjunct.
 ; But the disjunct is just an LgAnd of a bunch of connectors,
 ; so this is easy.
@@ -371,7 +380,7 @@
 
 	(delete-duplicates!
 		(map!
-			(lambda (cset) (gdr cset))
+			(lambda (cset) (cset-get-disjunct cset))
 			all-csets))
 )
 
@@ -410,7 +419,7 @@
 ; 30127  now 37413
 ; (define ad (get-all-disjuncts))
 ; (length ad)
-; 200183 now 288267
+; 200183 now 291637
 ;
 ; (cset-vec-cosine (Word "this") (Word "that"))
 ; (cset-vec-cosine (Word "he") (Word "she"))
