@@ -18864,8 +18864,218 @@ l vector space, which each disjunct being a single basis element.
 \end_layout
 
 \begin_layout Standard
-The next section examines similarity; but first, we characterize the nature
- of these vectors.
+Equivalently, the set of disjuncts can be thought of as a weighted set:
+ each disjunct has a weight, corresponding to the number of times it has
+ been observed.
+ A weighted set is more or less the same thing as a vector, and are treated
+ as the same, in what follows.
+ Note that the disjunct vectors are sparse: for any given word, almost all
+ coefficients will have a count of zero.
+ For example, the dataset that will be examined next has over a quarter
+ of a million different pseudo-disjuncts in it; most words have fewer than
+ a hundred dsjuncts on them.
+\end_layout
+
+\begin_layout Standard
+The nature of the disjunct sets are characterized first, followed by an
+ examination of similarity.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Terminology
+\end_layout
+
+\begin_layout Standard
+It is useful to introduce some notation for counting words, disjuncts, and
+ connectors.
+ Let 
+\begin_inset Formula $N(w)$
+\end_inset
+
+ be the number of times that the word 
+\begin_inset Formula $w$
+\end_inset
+
+ has been observed, in the dataset.
+ Let 
+\begin_inset Formula $N(d,w)$
+\end_inset
+
+ be the number of times that the disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+ has been observed on word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ The pair 
+\begin_inset Formula $(d,w)$
+\end_inset
+
+ is refered to as a 
+\begin_inset Quotes eld
+\end_inset
+
+connector set
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+cset
+\begin_inset Quotes erd
+\end_inset
+
+ in the text below.
+ Thus, for a word 
+\begin_inset Formula $w$
+\end_inset
+
+, there is a set 
+\begin_inset Formula $(*,w)=\left\{ (d,w)|N(d,w)>0\right\} $
+\end_inset
+
+ of associated csets, and similarly, for a disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+, there is a set 
+\begin_inset Formula $(d,*)=\left\{ (d,w)|N(d,w)>0\right\} $
+\end_inset
+
+ of associated csets.
+ The primary contents of the database are the counts 
+\begin_inset Formula $N(d,w)$
+\end_inset
+
+ and everthing else of interest in this section can be obtained from this.
+\end_layout
+
+\begin_layout Standard
+Every time a word is observed in an MST parse, a disjunct is extracted for
+ it; thus, word observations and disjunct observations are on one-to-one
+ correspondance.
+ In notation:
+\begin_inset Formula 
+\[
+\sum_{d}N(d,w)=N(*,w)=N(w)
+\]
+
+\end_inset
+
+Similarly, the total number of times that a disjunct was observed is just
+\begin_inset Formula 
+\[
+N(d,*)=\sum_{w}N(d,w)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Frequncies can be obtained by dividing by the total number of observations,
+ so that 
+\begin_inset Formula $p(d,w)=N(d,w)/N(*)$
+\end_inset
+
+ and 
+\begin_inset Formula $p(w)=N(w)/N(*)$
+\end_inset
+
+ with 
+\begin_inset Formula $N(*)=\sum_{w}N(w)$
+\end_inset
+
+ the total number of observations of words.
+\end_layout
+
+\begin_layout Standard
+A single disjunct is always composed of a fixed number of connectors, independen
+tly of any observations; let 
+\begin_inset Formula $C(d,c)$
+\end_inset
+
+ be the number of times that connector 
+\begin_inset Formula $c$
+\end_inset
+
+ appears in disjunct 
+\begin_inset Formula $d$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $C(d,c)$
+\end_inset
+
+ is almost always either zero or one; however, a connector can appear more
+ than once in a disjuct, so this count can rise to 2 or 3 or very rarely
+ higher.
+\end_layout
+
+\begin_layout Subsection*
+Dataset characterization
+\end_layout
+
+\begin_layout Standard
+The following charts and analyses are derived from a single dataset, a relativel
+y small dataset, taken as a snapshot during counting.
+ Its called 'en_pairs_sim'.
+ It contains 37413 words that have disjuncts attached to them.
+ These words have been observed a total of 661104 times, for an average
+ of 17.6 observations per word.
+ This dataset contains 291637 different, unique disjuncts, for an average
+ of 2.27 observations per disjunct.
+\end_layout
+
+\begin_layout Standard
+The total word-entropy for the dataset is defined as
+\begin_inset Formula 
+\[
+H_{word}=\sum_{w}p(w)\log p(w)
+\]
+
+\end_inset
+
+and was measured to be 
+\begin_inset Formula $H_{word}=10.28$
+\end_inset
+
+ bits.
+ The connector-set entropy is much higher.
+ It is defined as
+\begin_inset Formula 
+\[
+H_{cset}=\sum_{d,w}p(d,w)\log p(d,w)
+\]
+
+\end_inset
+
+and is measured to be 
+\begin_inset Formula $H_{cset}=18.30$
+\end_inset
+
+ bits.
+ The disjunct entropy is dual to the word entropy:
+\begin_inset Formula 
+\[
+H_{disjunct}=\sum_{d}p(d,*)\log p(d,*)
+\]
+
+\end_inset
+
+and is measured to be 
+\begin_inset Formula $H_{disjunct}=16.01$
+\end_inset
+
+ bits.
 \end_layout
 
 \begin_layout Subsection*
@@ -18894,7 +19104,7 @@ m file, on the en_pairs_sim database.
 .
  As can be seen, this follows the canonical Zipf distribution.
  The green line is an eyeballed, approximate fit, of exponent -1.1.
- The dataset shows 37413 words that have disjuncts attached to them.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -18967,7 +19177,7 @@ Computed with the sorted-avg list in disjunct-stats.scm
 
  Words with fewer than 100 observations have been excluded, so as to minimize
  the spurious noise.
- Note that although the line is straight in thise log-log graph, the Zipf
+ Note that although the line is straight in this log-log graph, the Zipf
  exponent is approximately -1/4.
 \end_layout
 
@@ -20397,7 +20607,7 @@ Other measures are needed.
  One could contemplate the ratio of the mean-square size to the support.
  Another possbility would be this, minus the average-squared, which would
  give the mean-square deviation from the average.
- Neither of these variations are prticularly illuminating; they seem to
+ Neither of these variations are particularly illuminating; they seem to
  offer up more of the same.
 \end_layout
 
@@ -20406,7 +20616,7 @@ Hubbiness
 \end_layout
 
 \begin_layout Standard
-asdf
+Hubbiness can be defined as the average number of connectors per disjunct
 \end_layout
 
 \begin_layout Subsection*
