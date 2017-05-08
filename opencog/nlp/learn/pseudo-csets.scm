@@ -211,7 +211,7 @@
   Eucliden distance metric, and for p=1, this is the 'Mahnatten
   distance'.
 
-  ITEM can be either a WordNode or a disjunct (LgAnd)
+  ITEM can be either a WordNode or a disjunct (LgAnd of pseudo-connectors).
 
   As a metric for measuring the similarity of connector-set vectors,
   this is terrible, because any word that has a lot of observations
@@ -224,7 +224,7 @@
 	(define get-base (if word-base cset-get-disjunct cset-get-word))
 
 	; Get the common non-zero entries of the two vectors.
-	(define bases 
+	(define bases
 		(delete-duplicates! (append!
 			(map! get-base (get-cset-vec ITEM-A))
 			(map! get-base (get-cset-vec ITEM-B)))))
@@ -259,37 +259,47 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-prod WORD-A WORD-B)
+(define-public (cset-vec-prod ITEM-A ITEM-B)
 "
-  cset-vec-prod WORD-A WORD-B - compute the pseudo-cset vector
-  dot product between WORD-A and WORD-B
+  cset-vec-prod ITEM-A ITEM-B - compute the pseudo-cset vector
+  dot product between ITEM-A and ITEM-B
+
+  ITEMs can be either WordNodes or disjuncts (LgAnd of pseudo-connectors).
 "
-	; If the connector-set for WORD-B exists, then get its count.
-	(define (get-cset-count DISJUNCT)
-		(define cset (have-cset? WORD-B DISJUNCT))
-		(if (null? cset) 0 (get-count cset))
+	(define word-base (equal? (cog-type ITEM-A) 'WordNode))
+	(define get-base (if word-base cset-get-disjunct cset-get-word))
+
+	; If the connector-set for ITEM-B exists, then get its count.
+	(define (get-other-count cset)
+		(define other-cset
+			(if word-base
+				(have-cset? ITEM-B (cset-get-disjunct cset))
+				(have-cset? (cset-get-word cset) ITEM-B)))
+		(if (null? other-cset) 0 (get-count other-cset))
 	)
 
-	; Loop over all connectors for WORD-A
+	; Loop over all connectors for ITEM-A
 	(fold
 		(lambda (cset sum)
 			(define a-cnt (get-count cset))
-			(define b-cnt (get-cset-count (cset-get-disjunct cset)))
+			(define b-cnt (get-other-count cset))
 			(+ sum (* a-cnt b-cnt)))
 		0
-		(get-cset-vec WORD-A))
+		(get-cset-vec ITEM-A))
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-cosine WORD-A WORD-B)
+(define-public (cset-vec-cosine ITEM-A ITEM-B)
 "
-  cset-vec-cosine WORD-A WORD-B - compute the pseudo-cset vector
-  cosine similarity between WORD-A and WORD-B
-"
-	(define deno (* (cset-vec-len WORD-A) (cset-vec-len WORD-B)))
+  cset-vec-cosine ITEM-A ITEM-B - compute the pseudo-cset vector
+  cosine similarity between ITEM-A and ITEM-B
 
-	(if (eqv? 0.0 deno) 0.0 (/ (cset-vec-prod WORD-A WORD-B) deno))
+  ITEMs can be either WordNodes or disjuncts (LgAnd of pseudo-connectors).
+"
+	(define deno (* (cset-vec-len ITEM-A) (cset-vec-len ITEM-B)))
+
+	(if (eqv? 0.0 deno) 0.0 (/ (cset-vec-prod ITEM-A ITEM-B) deno))
 )
 
 ; ---------------------------------------------------------------------
@@ -302,14 +312,16 @@
 	(* 2.0 (/ (real-part (acos SIM)) pi))
 )
 
-(define-public (cset-vec-cos-dist WORD-A WORD-B)
+(define-public (cset-vec-cos-dist ITEM-A ITEM-B)
 "
-  cset-vec-cos-dist WORD-A WORD-B - compute the pseudo-cset vector
-  cosine distance between WORD-A and WORD-B. The cosine distance
+  cset-vec-cos-dist ITEM-A ITEM-B - compute the pseudo-cset vector
+  cosine distance between ITEM-A and ITEM-B. The cosine distance
   is defined as dist = 2*arccos(cossim) / pi.  The cosine distance
   obeys the triangle inequality.
+
+  ITEMs can be either WordNodes or disjuncts (LgAnd of pseudo-connectors).
 "
-	(get-angle (cset-vec-cosine WORD-A WORD-B))
+	(get-angle (cset-vec-cosine ITEM-A ITEM-B))
 )
 
 ; ---------------------------------------------------------------------
@@ -319,6 +331,10 @@
   cset-vec-jaccard WORD-A WORD-B - compute the pseudo-cset vector
   Jaccard distance between WORD-A and WORD-B. The Jaccard distance
   is defined as dist = 1 - sim where sim = sum min(a,b)/ sum max(a,b)
+
+  XXX FIXME this algo is currently written so that it works for
+  words only; but it could be made to work for disjuncts, too.
+  See the implementation for the lp-distance for the basic outline.
 "
 	; Get the common non-zero entries of the two vectors.
 	(define disjuncts (delete-duplicates! (append!
@@ -353,11 +369,17 @@
 ; so this is easy.
 (define (dj-connectors DISJUNCT) (length (cog-outgoing-set DISJUNCT)))
 
-(define-public (cset-vec-connectors WORD)
+(define-public (cset-vec-connectors ITEM)
 "
-  cset-vec-connectors WORD - compute the total number of
-  observations of connectors on the word.  Recall that each disjunct
-  is made of one or more connectors.
+  cset-vec-connectors ITEM - compute the total number of observations
+  of connectors on the ITEM.  Recall that each disjunct is made of
+  one or more connectors.  ITEM can be either a word or a disjunct.
+  if ITEM is a word, then the total is for all of the observations of
+  connectors in disjuncts attached to that word.  If ITEM is a disjunct,
+  then the total is for all of the observations of connectors in
+  words that contain that disjunct.  This definition is symmetric,
+  as counts are stored in cset's, and this merely totals up and weights
+  with respect to the items on the other side of ITEM.
 "
 	(define (con-count cset)
 		(* (get-count cset) (dj-connectors (cset-get-disjunct cset))))
@@ -365,7 +387,7 @@
 	(fold
 		(lambda (cset sum) (+ (con-count cset) sum))
 		0
-		(get-cset-vec WORD))
+		(get-cset-vec ITEM))
 )
 
 ; ---------------------------------------------------------------------
