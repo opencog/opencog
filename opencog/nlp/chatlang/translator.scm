@@ -6,7 +6,8 @@
              (opencog nlp)
              (opencog exec)
              (opencog openpsi)
-             (opencog eva-behavior)
+; XXX Testing
+;             (opencog eva-behavior)
              (srfi srfi-1)
              (rnrs io ports)
              (ice-9 popen)
@@ -33,42 +34,43 @@
    The atomese are in the form of: ((A B) C)
    where A is the variable declaration, B is the condition, C is the
    term sequence."
-  (define no-var-cond (cons '() '()))
-  (define atomese-for-term
-    (cond ((equal? 'lemma (car TERM))
-           (cons (lemma (cdr TERM))
-                 (list (Word (get-lemma (cdr TERM))))))
-          ((equal? 'word (car TERM))
-           (cons (word (cdr TERM))
-                 (list (Word (cdr TERM)))))
-          ((equal? 'phrase (car TERM))
-           (cons (phrase (cdr TERM))
-                 (map Word (string-split (cdr TERM) #\ ))))
-          ((equal? 'concept (car TERM))
-           (let ((var (choose-var-name)))
-                (cons (concept (cdr TERM) var)
-                      (list (Glob var)))))
-          ((equal? 'choices (car TERM))
-           (let ((var (choose-var-name)))
-                (cons (choices (cdr TERM) var)
-                      (list (Glob var)))))
-          ((equal? 'unordered-matching (car TERM))
-           (let ((var (choose-var-name)))
-                (cons (unordered-matching (cdr TERM) var)
-                      (list (Glob var)))))
-          ((equal? 'negation (car TERM))
-           (cons (negation (cdr TERM))
-                 '()))
-          ((equal? 'anchor-start (car TERM))
-           (cons no-var-cond (list "<")))
-          ((equal? 'anchor-end (car TERM))
-           (cons no-var-cond (list ">")))
-          ; TODO
-          (else (cons no-var-cond '()))))
-  (define vars (append (caar ATOMESE) (caar atomese-for-term)))
-  (define conds (append (cdar ATOMESE) (cdar atomese-for-term)))
-  (define seq (append (cdr ATOMESE) (cdr atomese-for-term)))
-  (cons (cons vars conds) seq))
+  (let* ((no-var-cond (cons '() '()))
+         ; Use the lemma of a word for the term-seq
+         (atomese-for-term
+           (cond ((equal? 'lemma (car TERM))
+                  (cons (lemma (cdr TERM))
+                        (list (Word (get-lemma (cdr TERM))))))
+                 ((equal? 'word (car TERM))
+                  (cons (word (cdr TERM))
+                        (list (Word (get-lemma (cdr TERM))))))
+                 ((equal? 'phrase (car TERM))
+                  (cons (phrase (cdr TERM))
+                        (map Word (string-split (cdr TERM) #\ ))))
+                 ((equal? 'concept (car TERM))
+                  (let ((var (choose-var-name)))
+                       (cons (concept (cdr TERM) var)
+                             (list (Glob var)))))
+                 ((equal? 'choices (car TERM))
+                  (let ((var (choose-var-name)))
+                       (cons (choices (cdr TERM) var)
+                             (list (Glob var)))))
+                 ((equal? 'unordered-matching (car TERM))
+                  (let ((var (choose-var-name)))
+                       (cons (unordered-matching (cdr TERM) var)
+                             (list (Glob var)))))
+                 ((equal? 'negation (car TERM))
+                  (cons (negation (cdr TERM))
+                        '()))
+                 ((equal? 'anchor-start (car TERM))
+                  (cons no-var-cond (list "<")))
+                 ((equal? 'anchor-end (car TERM))
+                  (cons no-var-cond (list ">")))
+                 ; TODO
+                 (else (cons no-var-cond '()))))
+         (vars (append (caar ATOMESE) (caar atomese-for-term)))
+         (conds (append (cdar ATOMESE) (cdar atomese-for-term)))
+         (seq (append (cdr ATOMESE) (cdr atomese-for-term))))
+  (cons (cons vars conds) seq)))
 
 (define (term-sequence-check SEQ)
   "Checks terms occur in the desired order. This is done when we're using
@@ -101,12 +103,18 @@
   ; TODO: Maybe there is a more elegant way to represent it in the context?
   (True (List new-seq))))
 
-(define-public (say text)
+(define-public (say TXT)
   "Say the text and clear the state"
   ; TODO: Something simplier?
-  (And (True (Put (DefinedPredicate "Say") (Node text)))
+;  (And (True (Put (DefinedPredicate "Say") (Node TXT)))
+; XXX Testing
+(And (Evaluation (GroundedPredicate "scm: sss") (List (Node TXT)))
        (True (Put (State (Anchor "Currently Processing") (Variable "$x"))
                   (Concept "Default State")))))
+
+; XXX Testing
+(define-public (sss TTT)
+(display (cog-name TTT)) (newline) (stv 1 1))
 
 (define (process-action ACTION)
   "Process a single action -- converting it into atomese."
