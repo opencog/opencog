@@ -18,7 +18,7 @@
 		(map (lambda (wrd) (cons (SCORE-FN wrd) wrd)) WORD-LIST)
 		(lambda (a b) (> (car a) (car b)))))
 
-; Return string holding tab-separated table of rankings
+; Print to port a tab-separated table of rankings
 (define (print-ts-rank scrs port)
 	(define cnt 0)
 	(for-each
@@ -51,7 +51,7 @@
 ; Compute the average number of observations per disjunct.
 ; Discard anything with less than 100 observations.
 (define sorted-avg
-	(score-and-rank avg-obs 
+	(score-and-rank avg-obs
 	 	 (filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
 			all-cset-words)))
 
@@ -67,6 +67,7 @@
 	(print-ts-rank sorted-lengths outport)
 	(close outport))
 
+; ---------------------------------------------------------------------
 ; Consider, for example, the length-squared, divided by the number
 ; of observations.
 (define (lensq-vs-obs wrd)
@@ -84,3 +85,73 @@
 	(print-ts-rank sorted-lensq-norm outport)
 	(close outport))
 
+; ---------------------------------------------------------------------
+;
+; Distributions for two particular words.
+
+(define dj-united (score-and-rank get-count
+		(get-cset-vec (Word "United"))))
+
+(define dj-it (score-and-rank get-count
+		(get-cset-vec (Word "It"))))
+
+; Print to port a tab-separated table of rankings
+(define (print-ts-dj-rank cset-a cset-b port)
+	(define idx 0)
+	(for-each
+		(lambda (pra prb)
+			(set! idx (+ idx 1))
+			(format port "~A	~A	~A\n" idx (car pra) (car prb)))
+		cset-a cset-b))
+
+(let ((outport (open-file "/tmp/ranked-dj-united.dat" "w")))
+	(print-ts-dj-rank dj-united dj-it outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
+; Sum over distributions
+
+; Create and zero out array.
+(define dj-sum (make-array 0 312500))
+
+; Create a ranked list of disjuncts for WORD
+(define (make-ranked-dj-list WORD)
+	(score-and-rank get-count (get-cset-vec WORD)))
+
+; Accumulate the disjunct counts for WORD, into dj-sum
+(define (accum-dj-counts WORD)
+	(define idx 0)
+	(for-each
+		(lambda (pr)
+			(array-set! dj-sum (+ (car pr) (array-ref dj-sum idx)) idx)
+			(set! idx (+ idx 1)))
+		(make-ranked-dj-list WORD)))
+
+; Accumulate the disjunct counts for all the words in the word-list
+(define (accum-dj-all WORD-LIST)
+	(for-each
+		(lambda (word) (accum-dj-counts word))
+		WORD-LIST))
+
+; Accumulate all, but only for those with 100 or more observations.
+(accum-dj-all
+	(filter
+		(lambda (word) (< 100 (cset-vec-observations word)))
+		all-cset-words))
+
+(define (print-dj-acc port)
+	(define idx 0)
+	(for-each
+		(lambda (cnt)
+			(set! idx (+ idx 1))
+			(if (< 0 cnt)
+				(format port "~A	~A\n" idx cnt)))
+		(array->list dj-sum)))
+
+(let ((outport (open-file "/tmp/ranked-dj-counts.dat" "w")))
+	(print-dj-acc outport)
+	(close outport))
+
+
+
+; ---------------------------------------------------------------------
