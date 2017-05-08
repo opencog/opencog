@@ -63,10 +63,20 @@
 (define*-public (unordered-matching TERMS #:optional (var (choose-var-name)))
   "Occurrence of a list of terms (words/lemmas/phrases/concepts)
    that can be matched in any orders."
-  (cons '()  ; No variable declaration
-        (list (Evaluation (GroundedPredicate "scm: chatlang-unordered-matching?")
-                          (List (Glob var)
-                                (List (terms-to-atomese TERMS)))))))
+  (fold (lambda (t lst)
+                (cons (append (car lst) (car t))
+                      (append (cdr lst) (cdr t))))
+        (cons '() '())
+        (map (lambda (t)
+          (cond ((equal? 'word (car t))
+                 (word (cdr t)))
+                ((equal? 'lemma (car t))
+                 (lemma (cdr t)))
+                ((equal? 'phrase (car t))
+                 (phrase (cdr t)))
+                ((equal? 'concept (car t))
+                 (concept (cdr t)))))
+          TERMS)))
 
 (define-public (negation TERMS)
   "Absent of a term or a list of terms (words/lemmas/phrase/concepts)."
