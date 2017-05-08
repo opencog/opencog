@@ -18,14 +18,12 @@ library
   exposed-modules:     OpenCog.Lojban
   other-modules:       OpenCog.Lojban.Syntax
                        , OpenCog.Lojban.Util
-                       , OpenCog.Lojban.WordList
                        , OpenCog.Lojban.Syntax.Types
                        , OpenCog.Lojban.Syntax.Util
                        , OpenCog.Lojban.Syntax.AtomUtil
   build-depends:       base >= 4.7 && < 5
                        , opencog-atomspace
-                       --, invertible-syntax
-                       --, partial-isomorphisms
+                       , lojban
                        , Iso
                        , cereal
                        , bytestring
@@ -33,14 +31,11 @@ library
                        , containers
                        , unordered-containers
                        , transformers
-                       , hxt
                        , split
                        , hashable
                        , list-tries
                        , directory
                        , mtl
-                       , cassava
-                       , vector
   default-language:    Haskell2010
 
 executable lojbanChatBot

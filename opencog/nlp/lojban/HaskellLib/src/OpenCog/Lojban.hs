@@ -1,15 +1,15 @@
 {-# LANGUAGE LambdaCase                 #-}
 module OpenCog.Lojban
-( WordList
-, initParserPrinter
+( initParserPrinter
 , lojbanToAtomese
 , atomeseToLojban
 , loadWordLists
 ) where
 
+import Lojban
+
 import OpenCog.Lojban.Syntax
 import OpenCog.Lojban.Util
-import OpenCog.Lojban.WordList
 import OpenCog.Lojban.Syntax.Types
 
 import OpenCog.AtomSpace
@@ -34,7 +34,7 @@ initParserPrinter cmavoSrc gismuSrc = do
     seed <- randomIO
     return (lojbanToAtomese wordlist seed,atomeseToLojban wordlist seed)
 
-lojbanToAtomese :: WordList -> Int -> String -> Either String Atom
+lojbanToAtomese :: (WordList State) -> Int -> String -> Either String Atom
 lojbanToAtomese rstate seed text = wrapAtom . fst <$> evalRWST (apply lojban ()) rstate state
     where state = State {sFlags = [],sAtoms = [],sText = text++" ",sSeed = seed}
 
@@ -43,25 +43,6 @@ wrapAtom atom@(Link "SatisfactionLink" _ _) = cLL [cAN "QuestionAnchor" , atom]
 wrapAtom atom@(Link "PutLink" _ _)          = cLL [cAN "QuestionAnchor" , atom]
 wrapAtom atom                               = cLL [cAN "StatementAnchor", atom]
 
-atomeseToLojban :: WordList -> Int -> Atom -> Either String String
+atomeseToLojban :: (WordList State) -> Int -> Atom -> Either String String
 atomeseToLojban rstate seed a@(LL [_an,s]) = sText . fst <$> execRWST (unapply lojban s) rstate state
     where state = State {sFlags = [],sAtoms = [],sText = "",sSeed = seed}
-
-{-tvToLojban :: TruthVal -> String
-tvToLojban tv
-    | tvMean tv > 0.5 = "go'i"
-    | tvMean tv <= 0.5 = "nago'i"-}
-
-
-{-EquivalenceLink
-    EvaluationLink
-        VariableNode "var1!!!"
-        ListLink
-            VariableNode "var2"
-            ConceptNode "vo'a"
-    EvaluationLink
-        PredicateNode "sumti1"
-        ListLink "var2"
-            VariableNode "var2"
-            ConceptNode "something"
--}

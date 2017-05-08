@@ -6,12 +6,13 @@ module OpenCog.Lojban.Syntax.Util where
 import Prelude hiding (id,(.),(<*>),(<$>),(*>),(<*),foldl)
 
 import Data.List.Split (splitOn)
-import Data.List (nub,partition,intercalate,find,delete)
+import Data.List (intercalate,find,delete)
 import Data.Char (chr,isLetter,isDigit)
 import Data.Maybe
 import Data.Map (findWithDefault)
 
 import Control.Category
+import Control.Arrow
 import Control.Applicative hiding (many,some,optional)
 import Control.Monad
 import Control.Monad.RWS.Class
@@ -19,7 +20,8 @@ import Control.Monad.Trans.Class
 
 import System.Random
 
-import Iso hiding (SynIso,Syntax)
+import Iso
+import Syntax hiding (SynIso,Syntax)
 
 import OpenCog.AtomSpace (Atom(..))
 import OpenCog.Lojban.Syntax.Types
@@ -34,20 +36,6 @@ mapIso :: Traversable t => SynIso a b -> SynIso (t a) (t b)
 mapIso iso = Iso f g where
     f = traverse (apply iso)
     g = traverse (unapply iso)
-
-atomIsoMap :: SynIso Atom Atom -> SynIso Atom Atom
-atomIsoMap iso = Iso f g where
-  f (Link t ls tv) = do ls' <- apply (mapIso (atomIsoMap iso)) ls
-                        apply iso $ Link t ls' tv
-  f n@(Node _ _ _) = apply iso n
-  g (Link t ls tv) = do ls' <- unapply (mapIso (atomIsoMap iso)) ls
-                        unapply iso $ Link t ls' tv
-  g n@(Node _ _ _) = unapply iso n
-
-atomNub :: SynIso Atom Atom
-atomNub = atomIsoMap (mkIso f id) where
-  f (Link t ls tv) = Link t (nub ls) tv
-  f n@(Node _ _ _) = n
 
 choice :: [SynIso (c,a) b] -> SynIso (c,a) b
 choice lst = Iso f g where
@@ -79,65 +67,8 @@ infix 8 |^|
 showReadIso :: (Read a, Show a) => SynIso a String
 showReadIso = mkIso show read
 
-partitionIso :: (a -> Bool) -> SynIso [a] ([a],[a])
-partitionIso p = mkIso f g where
-    f = partition p
-    g = uncurry (++)
-
-isoConcat :: String -> SynIso [String] String
-isoConcat x = mkIso (intercalate x) (splitOn x)
-
-isoConcat2 :: SynIso [[a]] [a]
-isoConcat2 = mkIso f g where
-    f = concat
-    g = map (: [])
-
-isoDrop :: Int -> SynIso String String
-isoDrop i = mkIso (drop i) id
-
-isoReverse :: SynIso [a] [a]
-isoReverse = mkIso reverse reverse
-
-stripSpace :: SynIso String String
-stripSpace = mkIso f g where
-    f [] = []
-    f (' ':xs) = f xs
-    f (x:xs) = x : f xs
-    g x = x
-
---For converting elements or tuples into lists
---Lists are needed as arguments to form Link Atoms
-tolist1 :: Show a => SynIso a [a]
-tolist1 = Iso f g where
-    f a   = pure [a]
-    g [a] = pure a
-    g a   = lift $ Left $ "Expecting List with exaclty two elements but got" ++ show a
-
-tolist2 :: Show a => SynIso (a,a) [a]
-tolist2 = Iso f g where
-    f (a,b) = pure [a,b]
-    g [a,b] = pure (a,b)
-    g a     = lift $ Left $ "Expecting List with exaclty two elements but got" ++ show a
-
-isoZip :: SynIso ([a],[b]) [(a,b)]
-isoZip = mkIso (uncurry zip) unzip
-
-isoDistribute :: SynIso (a,[b]) [(a,b)]
-isoDistribute = isoZip . reorder
-    where reorder = Iso f g
-          f (a,b)   = pure (replicate (length b) a,b)
-          g (a:_,b) = pure (a,b)
-          g ([],_)  = lift $ Left "Got Empty list but need at least 1 elem."
-
-
-mkSynonymIso :: (Eq a, Show a, Eq b, Show b) => [(a,b)] -> SynIso a b
-mkSynonymIso ls = Iso f g where
-    f e = case snd `fmap` find (\(a,b) -> a == e) ls of
-            Just r -> pure r
-            Nothing -> lift $ Left $ "No synoyme for " ++ show e
-    g e = case fst `fmap` find (\(a,b) -> b == e) ls of
-            Just r -> pure r
-            Nothing -> lift $ Left $ "No synoyme for " ++ show e
+isoIntercalate :: String -> SynIso [String] String
+isoIntercalate x = mkIso (intercalate x) (splitOn x)
 
 try :: SynIso a a -> SynIso a a
 try iso = Iso f g where
@@ -158,95 +89,6 @@ ifJustB = mkIso f g where
     f (a,Nothing) = Right a
     g (Left (a,b))= (a,Just b)
     g (Right a)   = (a,Nothing)
-
-expandEither :: SynIso (Either a b,c) (Either (a,c) (b,c))
-expandEither = mkIso f g where
-    f (Left a,b) = Left (a,b)
-    f (Right a,b) = Right (a,b)
-    g (Left (a,b)) = (Left a,b)
-    g (Right (a,b)) = (Right a,b)
--------------------------------------------------------------------------------
---SyntaxReader Util
--------------------------------------------------------------------------------
-
-letter, digit :: Syntax Char
-letter = token (\x -> isLetter x || x=='\'' || x=='.')
-digit  = token isDigit
-
-anyWord :: Syntax String
-anyWord = some letter <&& sepSpace
-
---any :: Syntax String
---any = many token
-
-word :: String -> Syntax String
-word s = string s <&& sepSpace
-
-mytext :: String -> Syntax ()
-mytext s = text s <&& sepSpace
-
---For text that is both optional and should be parsed into ()
-optext :: String -> Syntax ()
-optext t = (text t <&& sepSpace) <+> (text "" <&& optSpace)
-
---Handles 1 of many options from a list
-oneOfS :: (a -> Syntax b) -> [a] -> Syntax b
-oneOfS f = foldr ((<+>) . f) zeroArrow
-
-{-multipleOf :: StringSet -> Syntax [String]
-multipleOf ss = isoReverse . memberIso2 ss . anyWord
-
-memberIso2 :: StringSet -> SynIso String [String]
-memberIso2 sss = Iso (f sss [] []) g where
-    f ss [] erg [] = Just erg
-    f ss l erg [] = if TS.member l ss
-                       then Just (l:erg)
-                     else Nothing
-    f ss l erg (x:xs) = let key= l++[x]
-                            ns = TS.lookupPrefix key ss
-                        in case TS.size ns of
-                            0 -> if TS.member l ss
-                                    then f sss [] (l:erg) (x:xs)
-                                      else Nothing
-                              1 -> if TS.member key ns
-                                      then f sss [] (key:erg) xs
-                                      else f ns key erg xs
-                              _ -> f ns key erg xs
-    g ls = Just $ concat ls --FIXME
--}
-
-gismu :: Syntax String
-gismu = Iso f f . anyWord
-    where f word = do
-                gismu <- asks gismus
-                if TS.member word gismu
-                    then pure word
-                    else lift $ Left $ "'" ++ word ++ "' is not a gismu"
-
-selmaho :: String -> Syntax String
-selmaho s = _selmaho s . anyWord
-
-_selmaho :: String -> SynIso String String
-_selmaho s = Iso f f
-    where f word = do
-            cmavo <- asks cmavos
-            let selmaho = findWithDefault TS.empty s cmavo
-            if TS.member word selmaho
-                then pure word
-                else lift $ Left $ "'" ++ word ++ "' is not a cmavo of class: " ++ s
-
-{-joiSelmaho :: String -> Syntax [String]
-joiSelmaho s = ReaderT (\(cmavo,_,_,_) -> multipleOf (findWithDefault TS.empty s cmavo))
--}
-
-sepSelmaho :: String -> Syntax ()
-sepSelmaho s = ignoreAny "sepSelmaho FIXME" . selmaho s
-
-optSelmaho :: String -> Syntax ()
-optSelmaho s = handle . optional (selmaho s)
-    where handle = Iso f g where
-            f _ = pure ()
-            g () = pure Nothing
 
 -------------------------------------------------------------------------------
 --State Helpers

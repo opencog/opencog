@@ -4,12 +4,13 @@ module OpenCog.Lojban.Syntax.AtomUtil where
 
 import Prelude hiding (id,(.))
 
-import Control.Category (id,(.))
+import Control.Category
+import Control.Arrow
 import Control.Monad.Trans.Class
 import Control.Monad.RWS
-import qualified Control.Arrow as A ((***))
 
-import Iso hiding (SynIso,Syntax)
+import Iso
+import Syntax hiding (SynIso,Syntax)
 
 import qualified Data.Map as M
 import qualified Data.Foldable as F
@@ -26,6 +27,8 @@ import OpenCog.AtomSpace (Atom(..),noTv,TruthVal(..),stv,atomType
 import OpenCog.Lojban.Syntax.Types
 import OpenCog.Lojban.Syntax.Util
 import OpenCog.Lojban.Util
+
+import Lojban.Syntax.Util
 
 --Various semi-isos to easily transfrom Certain Atom types
 _eval :: SynIso (Atom,[Atom]) Atom
@@ -349,7 +352,7 @@ node = mkIso f g where
     g (Node t n tv) = (t,(n,tv))
 
 _framePred :: SynIso (Atom,Tag) Atom
-_framePred = handleVar $ node . second (first (isoConcat "_sumti". tolist2 .< isoDrop 23)) . reorder .< inverse node
+_framePred = handleVar $ node . second (first (isoIntercalate "_sumti". tolist2 .< isoDrop 23)) . reorder .< inverse node
     where reorder = mkIso f g where
                 f ((t,(n,tv)),tag) = (t,((n,tag),tv))
                 g (t,((n,tag),tv)) = ((t,(n,tv)),tag)
@@ -368,7 +371,10 @@ randName salt = do
     pure n
 
 randName' :: Int -> String -> (String,Int)
-randName' = ((take 20 . map chr . randomRs (33,126)) A.*** (fst . random)) . split . mkStdGen ... hashWithSalt
+randName' = ((take 20 . map chr . filter pred . randomRs (33,126)) *** (fst . random)) . split . mkStdGen ... hashWithSalt
+    where pred i = (i >= 48 && i <= 57)
+                    || (i >= 65 && i <= 90)
+                    || (i >= 97 && i <= 122)
 
 
 --Most pronouns are instances of a more general concept
@@ -423,3 +429,17 @@ findSetType a = fmap getType . F.find f
     where f (Link "SetTypeLink" [s,t] _) = s == a
           f _ = False
           getType (Link "SetTypeLink" [s,t] _) = t
+
+atomIsoMap :: SynIso Atom Atom -> SynIso Atom Atom
+atomIsoMap iso = Iso f g where
+  f (Link t ls tv) = do ls' <- apply (mapIso (atomIsoMap iso)) ls
+                        apply iso $ Link t ls' tv
+  f n@(Node _ _ _) = apply iso n
+  g (Link t ls tv) = do ls' <- unapply (mapIso (atomIsoMap iso)) ls
+                        unapply iso $ Link t ls' tv
+  g n@(Node _ _ _) = unapply iso n
+
+atomNub :: SynIso Atom Atom
+atomNub = atomIsoMap (mkIso f id) where
+  f (Link t ls tv) = Link t (nub ls) tv
+  f n@(Node _ _ _) = n

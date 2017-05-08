@@ -18,12 +18,18 @@ import Data.Hashable
 
 import System.Random
 
+import Control.Category
+import Control.Arrow hiding (left,right)
 import Control.Applicative hiding (many,some,optional)
 import Control.Monad.RWS
 import Control.Monad.Trans.Class
-import Control.Category (id,(.),(<<<),(>>>))
 
-import Iso hiding (SynIso,Syntax)
+import Iso
+import Syntax hiding (SynIso,Syntax)
+
+
+import Lojban
+import Lojban.Syntax.Util
 
 import OpenCog.AtomSpace (Atom(..),TruthVal(..),noTv,stv,atomFold,nodeName,atomElem)
 import OpenCog.Lojban.Util
@@ -206,7 +212,7 @@ xo = varnode <<< word "xo"
 
 pa :: Syntax Atom
 pa =  (         number       |||    concept   )
-    . (showReadIso . paToNum |^| isoConcat " ")
+    . (showReadIso . paToNum |^| isoIntercalate " ")
     <<< some (selmaho "PA")
     where paToNum :: SynIso [String] Int
           paToNum = isoFoldl (digitsToNum . second paToDigit) . addfst 0
@@ -536,8 +542,8 @@ nuHandlers = [handleNU "du'u" (mkNuEventLabel "du'u") . rmfst "du'u",
     mkNuEventLabel eventName _ = cons . first (mkEval . atomNub . mkEvent) . reorder
       where mkEval = _eval . addfst (cPN eventName highTv) . tolist2 . addfstAny (cCN "$2" highTv)
     mkNuEvent :: [String] -> String -> SynIso [Atom] [Atom]
-    mkNuEvent (nuType:nts) name = isoConcat2 . tolist2 . addfstAny nuImps
-                                          . cons . first wrapNuVars . reorder
+    mkNuEvent (nuType:nts) name = isoConcat . tolist2 . addfstAny nuImps
+                                            . cons . first wrapNuVars . reorder
      where
        nuPred = cPN (nuType ++ "_" ++ name) highTv
        nuImps = (cImpL highTv nuPred (cPN nuType highTv))
@@ -1023,8 +1029,8 @@ _NAI :: Syntax String
 _NAI = selmaho "NAI"
 
 caiP :: Syntax TruthVal
-caiP = naicaiToTV . isoConcat "|" . tolist2 <<< (_NAI <+> insert "")
-                                            &&& (_CAI <+> insert "")
+caiP = naicaiToTV . isoIntercalate "|" . tolist2 <<< (_NAI <+> insert "")
+                                                 &&& (_CAI <+> insert "")
 
 naicaiToTV :: SynIso String TruthVal
 naicaiToTV = mkSynonymIso [("|cai"    ,stv 1     0.9)
@@ -1088,4 +1094,4 @@ handleSEI = fstToState 1 . first tolist1
 
 --SOS Second Order Sentence
 handleSOS :: SynIso (Either SEI UI,Atom) Atom
-handleSOS = (handleSEI ||| handleUI) . expandEither
+handleSOS = (handleSEI ||| handleUI) . distribute

@@ -6,9 +6,13 @@ resolver: lts-8.5
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
-- location: #./../../../../../Iso/
+- location:
+   git: https://github.com/rTreutlein/LojbanValidator
+   commit: cf4ba1fb96ea4555d90dac75390bf5c95b5a47b5
+  extra-dep: true
+- location:
    git: https://github.com/rTreutlein/IsoSyntax
-   commit: 8617eadbcd7767b81b528a1fa9e44596c7252fa0
+   commit: 98a7ed254b3670f2869ee35cfae4a491a7376e99
   extra-dep: true
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)

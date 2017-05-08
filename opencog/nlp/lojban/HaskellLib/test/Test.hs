@@ -1,11 +1,13 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Test where
 
 import Prelude hiding (id,(.),(<*>),(<$>),pure,(*>),(<*),foldl,print)
 import qualified Prelude as P
 
+import Lojban
+
 import OpenCog.Lojban
 import OpenCog.Lojban.Util
-import OpenCog.Lojban.WordList
 import OpenCog.Lojban.Syntax
 import OpenCog.Lojban.Syntax.Util
 import OpenCog.Lojban.Syntax.Types
@@ -26,16 +28,16 @@ import qualified Data.Map as M
 
 --import Text.XML.HXT.Core
 
-mystate s = State {sFlags = [],sAtoms = [],sText = s}
+mystate s = State {sFlags = [],sAtoms = [],sText = s,sSeed = 0}
 
-init = do
-    wl <- loadWordLists "cmavo.csv" "gismu.csv"
+loadwl = do
+    (wl :: WordList State) <- loadWordLists "cmavo.csv" "gismu.csv"
     return wl
 
-mpag :: WordList -> Syntax a -> String -> Either String (a,State,())
+mpag :: WordList State -> Syntax a -> String -> Either String (a,State,())
 mpag wl x y = runRWST (apply x ()) wl (mystate y)
 
-mpa :: WordList -> Syntax Atom -> String -> IO ()
+mpa :: WordList State -> Syntax Atom -> String -> IO ()
 mpa wl x y = do
     case runRWST (apply x ()) wl (mystate y) of
         Left s -> putStrLn s
