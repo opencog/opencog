@@ -18924,75 +18924,48 @@ ce with words in a given parse.
 \end_layout
 
 \begin_layout Subsection*
-Ranked Disjunct-Set RMS Size
+Ranked average observations per disjunct
 \end_layout
 
 \begin_layout Standard
-A different distribution arises by looking at the ranked RMS sizes of the
- disjunct sets
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-Obtained by running (print-ts-rank sorted-lengths outport) from the disjunct-sta
-ts.scm file on the en_pairs_sim database.
- 
+A more interesting distribution arises by looking at the average number
+ of observations per disjunct (per word).
+ That is, a single word may have hundreds of disjuncts, observed thousands
+ of times; what is the average number of times that a disjunct is observed?
 \end_layout
 
-\end_inset
-
-.
- Here, the RMS size
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
-The word 
+\begin_layout Standard
+This number gives a hint of how 
 \begin_inset Quotes eld
 \end_inset
 
-length
+narrow
 \begin_inset Quotes erd
 \end_inset
 
- can be used to describe the root-mean-square size of the set of disjuncts
- associated with a word.
- That is, each element of the set is a disjunct, and that disjunct has a
- count, the number of times it has been observed.
- The root-mean-square of these counts can be taken as the set-size.
- But this set can also be interpreted as a vector, and so the RMS size is
- the same thing as the Euclidean length of the vector.
- Thus, the word 
-\begin_inset Quotes eld
-\end_inset
-
-length
-\begin_inset Quotes erd
-\end_inset
-
- is sometimes used for the RMS size; they're the same thing.
+ the grammatical usage of a word is.
+ If the average is high, it means that the word just does not have very
+ many disjuncts on it; the few that it does have are observed a lot.
+ Recall that these disjuncts (pseudo-disjuncts) connect to individual words,
+ and not to word-classes.
+ Thus, if a disjunct is seen a lot, it probably connects to another word,
+ forming a high-MI pair.
+ This can be explicitly seen in the example further below.
 \end_layout
 
-\end_inset
-
- is computed by taking the root-mean-square of the counts on each disjunct
- in the set.
- The RMS size of the set is thus larger not only when more disjuncts have
- been observed, but also when most of the observations are made of only
- a small handful of disjuncts.
- That is, the RMS size should be relatively larger, if the word is less
- grammatically flexible.
- So for example, prepositions tend to be very flexible; adjectives, not
- so much.
- Thus, we expect adjectives to appear higher-up on this ranking list, than
- the observation-based list.
- But this is not really the case.
+\begin_layout Standard
+A graph of the ranked average number of observations, per disjunct, per
+ word, is shown below.
+ Words with fewer than 100 observations have been excluded, so as to minimize
+ the spurious noise.
+ Note that although the line is straight in thise log-log graph, the Zipf
+ exponent is approximately -1/4.
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-lengths.eps
+	filename images/ranked-avg.eps
 	width 60text%
 
 \end_inset
@@ -19001,35 +18974,15 @@ length
 \end_layout
 
 \begin_layout Standard
-The first ten words of the RMS-size-list are: "." "and" "," "in" "the" ")"
- "(" "of" "as" "to".
- Not that interesting: these are all words that were observed a lot in the
- text.
-\end_layout
-
-\begin_layout Subsection*
-Mean-square to size ratio
+The first ten on this list are "According" "Gestalt" "Cao" "Berger" "2015"
+ "It" "U.S" "United" "However" "y".
+ Unsurprisingly, most of these are all capitalized, suggesting that they
+ are either part of a proper name, or that perhaps they begin a sentence.
+ 
 \end_layout
 
 \begin_layout Standard
-More intesting is the ratio of mean-square size to the total size.
- This seems like the interesting ratio, because the Zipf exponent of -0.6
- would be doubled, when working with mean-square sizes, thus making the
- two rankings comparable.
-\end_layout
-
-\begin_layout Standard
-Words high in this score will be words that have relatively few disjuncts
- on them, or at least, few that matter much, that rise above the level of
- noise.
- The first ten on this list are (after excluding all words with fewer than
- 100 observations): "It" "According" "He" ")" "and" "(" "United" "as" "."
- "well".
- Note that most are capitalized: that means that these words appeared at
- the begining of sentences; the way in which the can link to what follows
- is fairly constrainted, and thus it is no surprise that these have only
- a few disjuncts on them.
- Notable is the appearance of 
+For example, the appearance of 
 \begin_inset Quotes eld
 \end_inset
 
@@ -19037,7 +18990,7 @@ United
 \begin_inset Quotes erd
 \end_inset
 
-: this is almost surely due to the high-MI pair 
+ is almost surely due to the high-MI pair 
 \begin_inset Quotes eld
 \end_inset
 
@@ -19239,6 +19192,115 @@ The fifth most frequent disjunct is grammatical garbage: noise from bad
 \end_inset
 
 ) and the second and third disjuncts accounting for another 10% each.
+\end_layout
+
+\begin_layout Subsection*
+Ranked Disjunct-Set RMS Size
+\end_layout
+
+\begin_layout Standard
+A different distribution arises by looking at the ranked RMS sizes of the
+ disjunct sets
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Obtained by running (print-ts-rank sorted-lengths outport) from the disjunct-sta
+ts.scm file on the en_pairs_sim database.
+ 
+\end_layout
+
+\end_inset
+
+.
+ Here, the RMS size
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The word 
+\begin_inset Quotes eld
+\end_inset
+
+length
+\begin_inset Quotes erd
+\end_inset
+
+ can be used to describe the root-mean-square size of the set of disjuncts
+ associated with a word.
+ That is, each element of the set is a disjunct, and that disjunct has a
+ count, the number of times it has been observed.
+ The root-mean-square of these counts can be taken as the set-size.
+ But this set can also be interpreted as a vector, and so the RMS size is
+ the same thing as the Euclidean length of the vector.
+ Thus, the word 
+\begin_inset Quotes eld
+\end_inset
+
+length
+\begin_inset Quotes erd
+\end_inset
+
+ is sometimes used for the RMS size; they're the same thing.
+\end_layout
+
+\end_inset
+
+ is computed by taking the root-mean-square of the counts on each disjunct
+ in the set.
+ The RMS size of the set is thus larger not only when more disjuncts have
+ been observed, but also when most of the observations are made of only
+ a small handful of disjuncts.
+ That is, the RMS size should be relatively larger, if the word is less
+ grammatically flexible.
+ So for example, prepositions tend to be very flexible; adjectives, not
+ so much.
+ Thus, we expect adjectives to appear higher-up on this ranking list, than
+ the observation-based list.
+ But this is not really the case.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-lengths.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first ten words of the RMS-size-list are: "." "and" "," "in" "the" ")"
+ "(" "of" "as" "to".
+ Not that interesting: these are all words that were observed a lot in the
+ text.
+\end_layout
+
+\begin_layout Subsection*
+Mean-square to size ratio
+\end_layout
+
+\begin_layout Standard
+More intesting is the ratio of mean-square size to the total size.
+ This seems like the interesting ratio, because the Zipf exponent of -0.6
+ would be doubled, when working with mean-square sizes, thus making the
+ two rankings comparable.
+\end_layout
+
+\begin_layout Standard
+Words high in this score will be words that have relatively few disjuncts
+ on them, or at least, few that matter much, that rise above the level of
+ noise.
+ The first ten on this list are (after excluding all words with fewer than
+ 100 observations): "It" "According" "He" ")" "and" "(" "United" "as" "."
+ "well".
+ Note that most are capitalized: that means that these words appeared at
+ the begining of sentences; the way in which the can link to what follows
+ is fairly constrainted, and thus it is no surprise that these have only
+ a few disjuncts on them.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -19935,6 +19997,10 @@ United
 
 \begin_layout Standard
 highest ranked dependents!
+\end_layout
+
+\begin_layout Standard
+hubbiness too
 \end_layout
 
 \begin_layout Section*
