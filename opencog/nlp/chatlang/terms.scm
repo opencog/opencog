@@ -17,8 +17,8 @@
    for word mentions in the rule pattern."
   (let* ((name (choose-var-name))
          (v (list (TypedVariable (Variable name) (Type "WordInstanceNode"))))
-         ; Note: This assumes "w" is already a lemma
-         (c (list (LemmaLink (Variable name) (WordNode STR))
+         ; Note: This converts STR to its lemma
+         (c (list (LemmaLink (Variable name) (WordNode (get-lemma STR)))
                   (WordInstanceLink (Variable name) (Variable "$P")))))
     (cons v c)))
 
@@ -40,7 +40,7 @@
 
 (define (terms-to-atomese TERMS)
   "Helper function to convert a list of terms into atomese.
-   For use of choices, unordered-matching and negation."
+   For use of choices and negation."
   (map (lambda (t) (cond ((equal? 'word (car t))
                           (Word (cdr t)))
                          ((equal? 'lemma (car t))
