@@ -20,18 +20,18 @@ plot "ranked-lengths.dat" using 1:2 with lines linewidth 2 title "", \
      "ranked-lengths.dat" using 1:(1000/$1 ** 0.65) with lines linewidth 2 title "rank^-0.65"
 
 #################################################
-# Used to generate the connector-set ranking graphs.
+# Used to generate the word ranking graphs.
 #
 set term postscript eps color
-set out 'ranked-observations.eps'
+set out 'ranked-word-obs.eps'
 set yrange [1:100000]
 set logscale x
 set logscale y
-set title "Ranking by total number of observations of disjuncts"
+set title "Number of observations of words"
 set xlabel "Rank"
-set ylabel "Number of Observations of Disjuncts"
-plot "ranked-observations.dat" using 1:2 with lines linewidth 2 title "", \
-     "ranked-observations.dat" using 1:(90000/$1 ** 1.1) with lines linewidth 2 title "rank^-1.1"
+set ylabel "Number of observations of Words"
+plot "ranked-word-obs.dat" using 1:2 with lines linewidth 2 title "", \
+     "ranked-word-obs.dat" using 1:(90000/$1 ** 1.1) with lines linewidth 2 title "rank^-1.1"
 
 
 #################################################

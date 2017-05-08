@@ -19079,12 +19079,13 @@ and is measured to be
 \end_layout
 
 \begin_layout Subsection*
-Disjunct-Set size distribution
+Connector-set distribution
 \end_layout
 
 \begin_layout Standard
-Some disjuncts will be observed far more often than others.
- Some words will have far more observations of disjuncts on them, than others.
+Some connector-sets will be observed far more often than others.
+ Likewise for te two sides of the connector-set: some words will have far
+ more observations, and some disjuncts will be seen more often.
 \end_layout
 
 \begin_layout Standard
@@ -19110,7 +19111,7 @@ m file, on the en_pairs_sim database.
 \begin_layout Standard
 \align center
 \begin_inset Graphics
-	filename images/ranked-observations.eps
+	filename images/ranked-word-obs.eps
 	width 60text%
 
 \end_inset
@@ -20625,6 +20626,10 @@ highest ranked dependents!
 
 \begin_layout Standard
 s too
+\end_layout
+
+\begin_layout Standard
+also 
 \end_layout
 
 \begin_layout Section*
