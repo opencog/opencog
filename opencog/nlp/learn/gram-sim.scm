@@ -62,9 +62,10 @@
 		WORD-LIST)
 
 	; print some progress info.
-	(format #t "Word ~A had ~A sims on ~A (~A pct)\n"
-		(cog-name WORD) num-stored (length WORD-LIST)
-		(/ (* 100.0 num-stored) (length WORD-LIST)))
+	(if (not (null? WORD-LIST))
+		(format #t "Word ~A had ~A sims on ~A (~A pct)\n"
+			(cog-name WORD) num-stored (length WORD-LIST)
+			(/ (* 100.0 num-stored) (length WORD-LIST))))
 )
 
 ; ---------------------------------------------------------------------

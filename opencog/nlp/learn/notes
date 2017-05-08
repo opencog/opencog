@@ -4280,3 +4280,47 @@ COMMENT ON DATABASE en_pairs_2016 IS 'Rohits original pair data; old format; mis
 
 
 (define firm (filter (lambda (wrd) (< 8.0 (cset-vec-len wrd))) ac))
+
+*) count words during MST
+err this can be reconstructed by taking:
+   counts of disjuncts  based on counts of csets .... 
+so never mind....
+
+what are teh most comon disjuncts???
+
+(filter (lambda (cset) (< 10 (get-count cset)))
+	(cog-incoming-by-type (Word "United") 'LgWordCset))
+
+156 ... 125.888
+
+5  41.44827196747233 "and"
+8  31.658516707416464 "as"
+10  30.140583554376658 "well"
+11  29.969530201342277 "in"
+18  18.805788982259568 "first"
+21  17.254613233923575 "is"
+22  16.742203742203742 "also"
+23  15.386776859504135 "can"
+24  15.359470949456778 "on"
+25  14.910157559503853 "at"
+26  14.424603174603176 "been"
+31  13.231375985977214 "but"
+32  13.122743682310471 "part"
+34  12.835568802781918 "with"
+35  12.835051546391755 "old"
+36  12.726962457337885 "same"
+38  11.925403225806452 "one"
+39  11.611694152923539 "which"
+43  10.856905158069885 "not"
+
+(filter (lambda (cset) (< 5 (get-count cset)))
+	(cog-incoming-by-type (Word "Gestalt") 'LgWordCset))
+
+(.+) 34
+(of -)  14
+
+(is+) 216
+was+ 197
+(has+ 55
+was+ was+ 12
+is+ was+ 10
