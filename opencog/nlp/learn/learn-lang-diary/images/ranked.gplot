@@ -33,6 +33,22 @@ set ylabel "Number of Observations of Disjuncts"
 plot "ranked-observations.dat" using 1:2 with lines linewidth 2 title "", \
      "ranked-observations.dat" using 1:(90000/$1 ** 1.1) with lines linewidth 2 title "rank^-1.1"
 
+
+#################################################
+# Used to generate the connector-set ranking graphs.
+#
+set term postscript eps color
+set out 'ranked-support.eps'
+set xrange [1:20000]
+set yrange [1:20000]
+set logscale x
+set logscale y
+set title "Ranking by the size of the support of the disjunct set"
+set xlabel "Rank"
+set ylabel "Size of of the support (size of the set)"
+plot "ranked-support.dat" using 1:2 with lines linewidth 2 title "", \
+     "ranked-support.dat" using 1:(20000/$1 ** 1) with lines linewidth 2 title "rank^-1"
+
 #################################################
 # Used to generate the connector-set ranking graphs.
 #
