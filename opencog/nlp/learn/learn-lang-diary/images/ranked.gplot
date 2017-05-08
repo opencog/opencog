@@ -17,7 +17,7 @@ set title "Ranking by RMS size of the set of disjuncts"
 set xlabel "Rank"
 set ylabel "RMS size of Disjunct Set"
 plot "ranked-lengths.dat" using 1:2 with lines linewidth 2 title "", \
-     "ranked-lengths.dat" using 1:(1100/$1 ** 0.6) with lines linewidth 2 title "rank^-0.6"
+     "ranked-lengths.dat" using 1:(1000/$1 ** 0.65) with lines linewidth 2 title "rank^-0.65"
 
 #################################################
 # Used to generate the connector-set ranking graphs.

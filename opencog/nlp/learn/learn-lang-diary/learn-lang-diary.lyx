@@ -19637,7 +19637,7 @@ length
  so much.
  Thus, we expect adjectives to appear higher-up on this ranking list, than
  the observation-based list.
- But this is not really the case.
+ And this might be true, relatively, but certainly not true absolutely.
 \end_layout
 
 \begin_layout Standard
@@ -19656,6 +19656,23 @@ The first ten words of the RMS-size-list are: "." "and" "," "in" "the" ")"
  "(" "of" "as" "to".
  Not that interesting: these are all words that were observed a lot in the
  text.
+ The RMS size is dominated by the total number of observations of a word
+ in text.
+ Some other quantity is needed.
+\end_layout
+
+\begin_layout Standard
+Note that the graph above is Zipfian, but the slope is approximately -0.65.
+ The green line is an 
+\begin_inset Quotes eld
+\end_inset
+
+eyeball
+\begin_inset Quotes erd
+\end_inset
+
+ fit.
+ Why the slope is approximately 2/3rds of the canonical slope is not clear.
 \end_layout
 
 \begin_layout Subsection*
@@ -19664,7 +19681,7 @@ Mean-square to size ratio
 
 \begin_layout Standard
 More intesting is the ratio of mean-square size to the total size.
- This seems like the interesting ratio, because the Zipf exponent of -0.6
+ This seems like the interesting ratio, because the Zipf exponent of -0.65
  would be doubled, when working with mean-square sizes, thus making the
  two rankings comparable.
 \end_layout
@@ -20363,7 +20380,7 @@ It is surprising because, grammatically, we expect most of these words to
  We expect them to be diffuse, not sharp: we expect that these would have
  a large number of observations smeared over a large variety of disjuncts,
  instead of having their weight concentrated in only one or two disjuncts,
- teh way that 
+ the way that 
 \begin_inset Quotes eld
 \end_inset
 
@@ -20376,11 +20393,28 @@ United
 \end_layout
 
 \begin_layout Standard
+Other measures are needed.
+ One could contemplate the ratio of the mean-square size to the support.
+ Another possbility would be this, minus the average-squared, which would
+ give the mean-square deviation from the average.
+ Neither of these variations are prticularly illuminating; they seem to
+ offer up more of the same.
+\end_layout
+
+\begin_layout Subsection*
+Hubbiness
+\end_layout
+
+\begin_layout Standard
+asdf
+\end_layout
+
+\begin_layout Subsection*
 highest ranked dependents!
 \end_layout
 
 \begin_layout Standard
-hubbiness too
+s too
 \end_layout
 
 \begin_layout Section*
