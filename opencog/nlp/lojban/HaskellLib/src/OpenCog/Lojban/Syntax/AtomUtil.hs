@@ -335,7 +335,10 @@ _framePred = handleVar $ node . second (first (isoConcat "_sumti". tolist2 .< is
               g a = unapply iso a
 
 randName :: Int -> String -> String
-randName = take 20 . map chr . randomRs (33,126) . mkStdGen ... hashWithSalt
+randName = take 20 . map chr . filter pred . randomRs (48,122) . mkStdGen ... hashWithSalt
+    where pred i = (i >= 48 && i <= 57)
+                    || (i >= 65 && i <= 90)
+                    || (i >= 97 && i <= 122)
 
 --Most pronouns are instances of a more general concept
 --This will create the inheritance link to show this relation
