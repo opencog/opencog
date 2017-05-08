@@ -230,36 +230,42 @@
 
 (define total-word-count (cset-observations all-cset-words))
 
-; Get the "word entropy".
-(define word-entropy
+; Get the "partial entropy".
+(define (partial-entropy LIST)
 	(fold
-		(lambda (word sum)
-			(define pword (/ (cset-vec-observations word) total-word-count))
-			(- sum (* pword (log pword))))
+		(lambda (item sum)
+			(define pitem (/ (cset-vec-observations item) total-word-count))
+			(- sum (* pitem (log pitem))))
 		0
-		all-cset-words))
+		LIST))
 
+; Get the "word entropy".
+(define word-entropy (partial-entropy all-cset-words))
 (define word-entropy-bits (/ word-entropy (log 2.0)))
 
-; A lot like cset-vec-observations but takes the log
-; Returns the entropy of all th disjuncts attached to the word,
+(define all-disjuncts (get-all-disjuncts))
+(define disjunct-entropy (partial-entropy all-disjuncts))
+(define disjunct-entropy-bits (/ disjunct-entropy (log 2.0)))
+
+; A lot like cset-vec-observations, but takes the log
+; Returns the entropy of all the csets attached,
 ; the entropy measured in nats.
-(define (cset-vec-disjunct-entropy WORD)
+(define (cset-vec-entropy WORD)
    ; sum of the counts
    (fold
       (lambda (cset sum)
-			(define pdj (/ (get-count cset) total-word-count))
-			(- sum (* pdj (log pdj))))
+			(define pcset (/ (get-count cset) total-word-count))
+			(- sum (* pcset (log pcset))))
       0
       (get-cset-vec WORD))
 )
 
-(define disjunct-entropy
+(define cset-entropy
 	(fold
-		(lambda (word sum) (+ sum  (cset-vec-disjunct-entropy word)))
+		(lambda (word sum) (+ sum  (cset-vec-entropy word)))
 		0
 		all-cset-words))
 
-(define disjunct-entropy-bits (/ disjunct-entropy (log 2.0)))
+(define cset-entropy-bits (/ cset-entropy (log 2.0)))
 
 ; ---------------------------------------------------------------------

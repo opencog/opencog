@@ -89,15 +89,15 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (get-cset-vec WORD)
+(define-public (get-cset-vec ITEM)
 "
-  get-cset-vec WORD - Return the vector of pseudo-connector sets
-  for the WORD. WORD can either be a WordNode, in which case all
+  get-cset-vec ITEM - Return the vector of pseudo-connector sets
+  for the ITEM. ITEM can either be a WordNode, in which case all
   of the csets for that word are returned, or it can be a disjunct,
   in which case all the csets for that disjunct are returned.
 "
 	; Currently, its as simple as this...
-	(cog-incoming-by-type WORD 'LgWordCset)
+	(cog-incoming-by-type ITEM 'LgWordCset)
 )
 
 ; Return the word of the CSET
@@ -116,7 +116,9 @@
 (define-public (filter-words-with-csets WORD-LIST)
 "
   filter-words-with-csets WORD-LIST - Return the subset of
-  the WORD-LIST that has pseudo-csets on them.
+  the WORD-LIST that has pseudo-csets on them.  This is useful,
+  because not all words in the dataset might have csets on them,
+  so far.
 "
 	(filter!
 		(lambda (wrd)
@@ -126,38 +128,44 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-support WORD)
+(define-public (cset-vec-support ITEM)
 "
-  cset-vec-support WORD - compute the pseudo-cset vector support for WORD
+  cset-vec-support ITEM - compute the pseudo-cset vector support for ITEM
+  ITEM can be either a WordNode or a disjunct (LgAnd)
+
   The support of a sparse vector is the number of basis elements that
   are non-zero.  In this case, its simply the number of disjuncts
   attached to the word.  Equivalently, this is the l_0 norm of the
   vector (the l_p norm for p=0).
 "
-	(length (get-cset-vec WORD))
+	(length (get-cset-vec ITEM))
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-observations WORD)
+(define-public (cset-vec-observations ITEM)
 "
-  cset-vec-observations WORD - compute the number of observations of
-  the disjuncts for WORD. Equivalently, this is the l_1 norm of the
+  cset-vec-observations ITEM - compute the number of observations of
+  the disjuncts for ITEM. Equivalently, this is the l_1 norm of the
   vector (the l_p norm for p=1).
+
+  ITEM can be either a WordNode or a disjunct (LgAnd)
 "
 	; sum of the counts
 	(fold
 		(lambda (cset sum) (+ (get-count cset) sum))
 		0
-		(get-cset-vec WORD))
+		(get-cset-vec ITEM))
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-len WORD)
+(define-public (cset-vec-len ITEM)
 "
-  cset-vec-len WORD - compute the pseudo-cset vector length for WORD.
+  cset-vec-len ITEM - compute the pseudo-cset vector length for ITEM.
   Equivalently, this is the l_2 norm of the vector (the l_p norm for p=2).
+
+  ITEM can be either a WordNode or a disjunct (LgAnd)
 "
 	; sum of the square of the counts
 	(define sumsq
@@ -166,17 +174,19 @@
 				(define cnt (get-count cset))
 				(+ sum (* cnt cnt)))
 			0
-			(get-cset-vec WORD)))
+			(get-cset-vec ITEM)))
 
 	(sqrt sumsq)
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-lp-norm P WORD)
+(define-public (cset-vec-lp-norm P ITEM)
 "
-  cset-vec-lp-norm P WORD - compute the Banach space l_p norm of
-  the pseudo-cset vector for WORD.
+  cset-vec-lp-norm P ITEM - compute the Banach space l_p norm of
+  the pseudo-cset vector for ITEM.
+
+  ITEM can be either a WordNode or a disjunct (LgAnd)
 "
 	; sum of the powers of the counts
 	(define sum
@@ -185,21 +195,23 @@
 				(define cnt (get-count cset))
 				(+ sum (expt cnt P)))
 			0
-			(get-cset-vec WORD)))
+			(get-cset-vec ITEM)))
 
 	(expt sum (/ 1 P))
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-vec-lp-dist P WORD-A WORD-B)
+(define-public (cset-vec-lp-dist P ITEM-A ITEM-B)
 "
-  cset-vec-lp-dist P WORD-A WORD-B - compute the Banache space l_p
-  distance between the pseudo-cset vector for WORD-A and WORD-B.
+  cset-vec-lp-dist P ITEM-A ITEM-B - compute the Banache space l_p
+  distance between the pseudo-cset vector for ITEM-A and ITEM-B.
 
   This is a real metric.  Recall, for p=2, this is just the
   Eucliden distance metric, and for p=1, this is the 'Mahnatten
   distance'.
+
+  ITEM can be either a WordNode or a disjunct (LgAnd)
 
   As a metric for measuring the similarity of connector-set vectors,
   this is terrible, because any word that has a lot of observations
@@ -208,10 +220,14 @@
   be near the origin, and thus close to one-another, no matter how
   different thier disjuncts are.
 "
+	(define word-base (equal? (cog-type ITEM-A) 'WordNode))
+	(define get-base (if word-base cset-get-disjunct cset-get-word))
+
 	; Get the common non-zero entries of the two vectors.
-	(define disjuncts (delete-duplicates! (append!
-		(map! cset-get-disjunct (get-cset-vec WORD-A))
-		(map! cset-get-disjunct (get-cset-vec WORD-B)))))
+	(define bases 
+		(delete-duplicates! (append!
+			(map! get-base (get-cset-vec ITEM-A))
+			(map! get-base (get-cset-vec ITEM-B)))))
 
 	; Get the count for DISJUNCT on WORD, if it exists (is non-zero)
 	(define (get-cset-count WORD DISJUNCT)
@@ -219,16 +235,24 @@
 		(if (null? cset) 0 (get-count cset))
 	)
 
+	(define (cnt-a it)
+		(if word-base
+			(lambda (it) (get-cset-count ITEM-A it))
+			(lambda (it) (get-cset-count it ITEM-A))
+
+	(define (cnt-b it)
+		(if word-base
+			(lambda (it) (get-cset-count ITEM-B it))
+			(lambda (it) (get-cset-count it ITEM-B))
+
 	; sum of the powers of the counts
 	(define sum
 		(fold
-			(lambda (dj sum)
-				(define cnt-a (get-cset-count WORD-A dj))
-				(define cnt-b (get-cset-count WORD-B dj))
-				(define adiff (abs (- cnt-a cnt-b)))
+			(lambda (it sum)
+				(define adiff (abs (- (cnt-a it) (cnt-b it))))
 				(+ sum (expt adiff P)))
 			0
-			disjuncts))
+			bases))
 
 	(expt sum (/ 1 P))
 )
