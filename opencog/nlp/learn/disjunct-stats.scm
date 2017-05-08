@@ -52,7 +52,7 @@
 ; Discard anything with less than 100 observations.
 (define sorted-avg
 	(score-and-rank avg-obs
-	 	 (filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
 			all-cset-words)))
 
 (let ((outport (open-file "/tmp/ranked-avg.dat" "w")))
@@ -73,6 +73,7 @@
 
 ; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the cset length
+
 (define sorted-lengths (score-and-rank cset-vec-len all-cset-words)
 
 (let ((outport (open-file "/tmp/ranked-lengths.dat" "w")))
@@ -90,13 +91,43 @@
 ; with a small number of observations.
 (define sorted-lensq-norm
 	(score-and-rank lensq-vs-obs
-	 	 (filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
 			all-cset-words)))
 
 (let ((outport (open-file "/tmp/ranked-sqlen-norm.dat" "w")))
 	(print-ts-rank sorted-lensq-norm outport)
 	(close outport))
 
+; ---------------------------------------------------------------------
+; RMS deviation from mean.
+;  sum_i (x-a)^2 = sum_i x^2 - 2a sum_i x + a^2 sum_i
+; but now divide by N = sum_i, again, to get
+;  sum_i (x-a)^2 = <x^2> - a^2
+;
+(define (avg-obs WORD)
+	(/ (cset-vec-observations WORD) (cset-vec-support WORD)))
+
+(define (meansq-obs WORD)
+	(define len (cset-vec-len WORD))
+	(/ (* len len) (cset-vec-support WORD)))
+
+(define (rms-deviation WORD)
+	(define avg (avg-obs WORD))
+	(sqrt (- (meansq-obs WORD) (* avg avg))))
+
+; Compute the RMS deviation from the average number of observations
+; per disjunct.
+; Discard anything with less than 100 observations.
+(define sorted-rms
+	(score-and-rank rms-deviation
+		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+			all-cset-words)))
+
+(let ((outport (open-file "/tmp/ranked-rms.dat" "w")))
+	(print-ts-rank sorted-rms outport)
+	(close outport))
+
+;
 ; ---------------------------------------------------------------------
 ;
 ; Distributions for two particular words.
