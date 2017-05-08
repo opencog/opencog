@@ -202,6 +202,52 @@
 
 ; ---------------------------------------------------------------------
 
+(define-public (get-total-cset-count)
+"
+  get-total-cset-count -- return the total number of observations
+  of all connector-sets in the system.
+"
+	; XXX FIXME, this is somewhat sloppy in it's counting, it
+	; does not verify that all atoms that are 'LgWordCsets are
+	; valid word+psuedo-disjunct pairs.  Other garbage could
+	; sneak in.
+	(define tot 0)
+	(cog-map-type
+		(lambda (cset) (set! tot (+ tot (get-count cset))) #f)
+		'LgWordCset)
+	tot
+)
+
+
+(define total-cset-count 0)
+(define-public (cset-vec-entropy ITEM)
+"
+  cset-vec-entropy -- return the entropy for the subset of
+  connector-sets associated with ITEM.  ITEM can be either a
+  WordNode or a disjunct. A loop is performed over all of the
+  csets associated with that item, and the entropy for each
+  cset is summed up.
+
+  The returned entropy is in nats. Divide by log 2 to get bits.
+"
+	; total number of observations of csets in the system.
+	; XXX there might be a more elegant way to handle this.
+	(if (eqv? 0 total-cset-count)
+		(set! total-cset-count (get-total-cset-count)))
+
+   ; sum of the counts
+   (fold
+      (lambda (cset sum)
+			(define cset-freq (/ (get-count cset) total-cset-count))
+			(- sum (* cset-freq (log cset-freq))))
+      0
+      (get-cset-vec ITEM))
+)
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+
 (define-public (cset-vec-lp-dist P ITEM-A ITEM-B)
 "
   cset-vec-lp-dist P ITEM-A ITEM-B - compute the Banache space l_p
@@ -392,15 +438,17 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (cset-observations WORD-LIST)
+(define-public (cset-observations ITEM-LIST)
 "
-  cset-observations WORD-LIST - Return the number of times that
-  all of the disjuncts in the WORD-LIST have been observed.
+  cset-observations ITEM-LIST - Return the number of times that
+  all of the connector-sets in the ITEM-LIST have been observed.
+
+  The ITEM-LIST can be a mixture of WordNodes and disjuncts.
 "
 	(fold
-		(lambda (word sum) (+ (cset-vec-observations word) sum))
+		(lambda (item sum) (+ (cset-vec-observations item) sum))
 		0
-		WORD-LIST)
+		ITEM-LIST)
 )
 
 ; ---------------------------------------------------------------------

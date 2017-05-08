@@ -4324,3 +4324,16 @@ was+ 197
 (has+ 55
 was+ was+ 12
 is+ was+ 10
+
+get-cset-vec
+ad   cset-vec-observations
+(define disjunct-entropy
+(define total-cset-count (cset-observations all-cset-words))
+(define all-cset-words (filter-words-with-csets (get-all-words)))
+
+(define total-cset-count 0)
+(cog-map-type 
+	(lambda (cset) 
+		(set! total-cset-count (+ total-cset-count (get-count cset))) #f)
+	'LgWordCset)
+

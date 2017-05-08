@@ -228,13 +228,16 @@
 ; ---------------------------------------------------------------------
 ; Entropies.
 
-(define total-word-count (cset-observations all-cset-words))
+; Several ways of counting the same thing. Thse should all
+; give the same result.
+(define total-cset-count (cset-observations all-cset-words))
+(define total-cset-count (get-total-cset-count))
 
 ; Get the "partial entropy".
 (define (partial-entropy LIST)
 	(fold
 		(lambda (item sum)
-			(define pitem (/ (cset-vec-observations item) total-word-count))
+			(define pitem (/ (cset-vec-observations item) total-cset-count))
 			(- sum (* pitem (log pitem))))
 		0
 		LIST))
@@ -246,19 +249,6 @@
 (define all-disjuncts (get-all-disjuncts))
 (define disjunct-entropy (partial-entropy all-disjuncts))
 (define disjunct-entropy-bits (/ disjunct-entropy (log 2.0)))
-
-; A lot like cset-vec-observations, but takes the log
-; Returns the entropy of all the csets attached,
-; the entropy measured in nats.
-(define (cset-vec-entropy WORD)
-   ; sum of the counts
-   (fold
-      (lambda (cset sum)
-			(define pcset (/ (get-count cset) total-word-count))
-			(- sum (* pcset (log pcset))))
-      0
-      (get-cset-vec WORD))
-)
 
 (define cset-entropy
 	(fold
