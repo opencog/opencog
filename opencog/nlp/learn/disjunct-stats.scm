@@ -19,28 +19,44 @@
 		(lambda (a b) (> (car a) (car b)))))
 
 ; Print to port a tab-separated table of rankings
-(define (print-ts-rank scrs port)
+(define (print-ts-rank-fn scrs port fn-str)
 	(define cnt 0)
 	(for-each
 		(lambda (pr)
 			(set! cnt (+ cnt 1))
-			(format port "~A	~A	\"~A\"\n" cnt (car pr) (cog-name (cdr pr))))
+			(format port "~A	~A	\"~A\"\n" cnt (car pr) (fn-str (cdr pr))))
 		scrs))
 
+(define (print-ts-rank scrs port)
+	(print-ts-rank-fn scrs port cog-name))
+
 ; ---------------------------------------------------------------------
-; A list of all words that have csets.
+; A list of all words that have csets. (Not all of the words
+; in the database got tagged with a cset)
 (define all-cset-words (filter-words-with-csets (get-all-words)))
 
+; A list of all disjucnts (appearing in all csets)
+(define all-disjuncts (get-all-disjuncts))
+
 ; ---------------------------------------------------------------------
-; A sorted list of score-word pairs, where the score is the cset
-; observations. Note that the score is *identical* to the number of
-; times that the word was observed during MSt parsing. That is because
-; exactly one disjunct is extracted per word, per MST parse.
-(define sorted-obs (score-and-rank cset-vec-observations all-cset-words)
+; A sorted list of score-word pairs, where the score is the count
+; of the cset observations. Note that this score is *identical* to the
+; number of times that the word was observed during MST parsing. That is
+; because exactly one disjunct is extracted per word, per MST parse.
+(define sorted-word-obs (score-and-rank cset-vec-observations all-cset-words)
 
 ; Print above to a file, so that it can be graphed.
-(let ((outport (open-file "/tmp/ranked-observations.dat" "w")))
-	(print-ts-rank sorted-obs outport)
+(let ((outport (open-file "/tmp/ranked-word-obs.dat" "w")))
+	(print-ts-rank sorted-word-obs outport)
+	(close outport))
+
+; A sorted list of score-disjunct pairs, where the score is the count
+; of the cset observations.
+(define sorted-dj-obs (score-and-rank cset-vec-observations all-disjuncts))
+
+; Print above to a file, so that it can be graphed.
+(let ((outport (open-file "/tmp/ranked-dj-obs.dat" "w")))
+	(print-ts-rank-fn sorted-dj-obs outport get-disjunct-string)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -246,7 +262,6 @@
 (define word-entropy (partial-entropy all-cset-words))
 (define word-entropy-bits (/ word-entropy (log 2.0)))
 
-(define all-disjuncts (get-all-disjuncts))
 (define disjunct-entropy (partial-entropy all-disjuncts))
 (define disjunct-entropy-bits (/ disjunct-entropy (log 2.0)))
 

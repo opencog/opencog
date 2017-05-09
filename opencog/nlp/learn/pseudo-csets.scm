@@ -100,11 +100,35 @@
 	(cog-incoming-by-type ITEM 'LgWordCset)
 )
 
-; Return the word of the CSET
-(define (cset-get-word CSET) (gar CSET))
+(define-public (cset-get-word CSET)
+"
+  Return the word of the CSET
+"
+	(gar CSET))
 
-; Return the disjunct of the CSET
-(define (cset-get-disjunct CSET) (gdr CSET))
+(define-public (cset-get-disjunct CSET)
+"
+  Return the disjunct of the CSET
+"
+	(gdr CSET))
+
+(define-public (get-word-string WORD)
+"
+  Get the string rep for the word.
+"
+	(cog-name WORD))
+
+(define-public (get-disjunct-string DISJUNCT)
+"
+  Get a string representation for the disjunct
+  XXX TODO remove trailing blank.
+"
+	(string-concatenate
+		(map
+			(lambda (cntor) (string-append
+					(cog-name (gar cntor)) (cog-name (gdr cntor)) " "))
+			(cog-outgoing-set DISJUNCT)))
+)
 
 ; Return the cset, if it exists.  If it does not exist, return the
 ; empty list '()
