@@ -14,3 +14,5 @@
 (load "learn/base-stats.scm") ; load after compute-mi.scm
 (load "learn/mst-parser.scm")
 (load "learn/make-disjuncts.scm")
+(load "learn/pseudo-csets.scm")
+(load "learn/gram-sim.scm")

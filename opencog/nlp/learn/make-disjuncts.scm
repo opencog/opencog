@@ -141,14 +141,14 @@
   the word 'playing' might get this connector set:
 
     (LgWordCset
-       (WordNode 'playing')
+       (WordNode \"playing\")
        (LgAnd
           (PseudoConnector
-             (WordNode 'level')
-             (LgConnDirNode '-'))
+             (WordNode \"level\")
+             (LgConnDirNode \"-\"))
           (PseudoConnector
-             (WordNode 'field')
-             (LgConnDirNode '+'))))
+             (WordNode \"field\")
+             (LgConnDirNode \"+\"))))
 
   Grammatically-speaking, this is not a good connector, but it does
   show the general idea: that there was a link level<-->playing and

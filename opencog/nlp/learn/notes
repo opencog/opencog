@@ -4048,6 +4048,22 @@ Lincoln
 the
 which
 
+   (ListLink (Word "the" ) (Word "field" ))
+(cog-chase-link
+(cog-get-link 'EvaluationLink PAIR (Pred
+
+
+(define cnt 0)
+(for-each
+	(lambda (PAIR)
+		(set! cnt (+ cnt 1))
+		(if (not (eqv? (count-dist-pair PAIR) (count-clique-pair PAIR)))
+			(throw 'bad-count 'foobar PAIR)
+			(format #t "Its OK ~A\n" cnt)
+		))
+	(get-all-pairs))
+
+
 
 115 | LgWordCset
 2440463600
@@ -4081,4 +4097,255 @@ freshie (0 ())
 290
 
 bad-pair in max-of-pair-list
+
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs_mst?user=linas")
+ (fetch-all-words)
+ (length (get-all-words))
+396262
+ (fetch-pseudo-csets (get-all-words))
+ (length (filter-words-with-csets  (get-all-words)))
+30127
+
+ (cset-observations (get-all-words))
+436595.0
+
+
+425186
+(cset-vec-support (Word "the"))
+(cset-vec-len (Word "the"))
+
+(
+
+   (length (cog-incoming-by-type WORD 'LgWordCset))
+
+(define n 0)
+(for-each
+	(lambda (cset) 
+		(set! n (+ 1 n)))
+	(cog-incoming-by-type (Word "the") 'LgWordCset))
+
+Ben, Ruiting,
+
+For your enjoyment: I have some very preliminary results on word
+similarity.  They look pretty nice, even thogh based on a fairly
+small number of observations. 
+
+If you've been watching TV instead of reading email, here's the story
+so far: Starting from a large text corpus, the mutual information (MI)
+of word-pairs are counted. This MI is used to perform a maximum
+spanning-tree (MST) parse (of a different subset of) the corpus. From each
+parse, a pseudo-disjunct is extracted for each word.  The
+pseudo-disjunct is like a real LG disjunct, except that each connector
+in the disjunct is the word at the far end of the link.
+
+So, for example, in in idealized world, the MST parse of the sentence
+"Ben ate pizza" would prodouce the parse Ben <--> ate <--> pizza and
+from this, we can extract the psuedo-disjunct (Ben- pizza+) on the
+word "ate".  Similarly, the sentence "Ben puked pizza" should produce
+the disjunct (Ben- pizza+) on the word "puke".  Since these two 
+disjuncts are the same, we can conclude that the two words "ate"
+and "puke" are very similar to each other.  Considering all of the
+other disjuncts that arise in this example, we can conclude that these
+are the only two words that are similar.
+
+Note that a given word may have very many psuedo-disjuncts attached
+to it. Each disjunct has a count of the number of times it has been
+observed.  Thus, this set of disjuncts can be imagined to be a vector
+in a high-dimensional vector space, which each disjunct being a single
+basis element.  The similarity of two words can be taken to be the
+cosine-similariy between the disjunct-vectors (or pick another,
+different metric, as you please.)
+
+Below are a set of examples, for English, on a somewhat smmall dataset.
+Collected over a few days, it contains just under half-a-million 
+observations of disjuncts, distributed across about 30K words.
+Thus, most words will have only a copule of disjuncts on them, 
+which may have been seen only a couple of times. its important, at
+this stage, to limit oneself to only the most popular words.
+
+We expect the determiners "the" and "a" to be similar, and they are:
+(cset-vec-cosine (Word "the") (Word "a")) = 0.1554007744026141
+
+Even more similar:
+(cset-vec-cosine (Word "the") (Word "this")) = 0.3083725359820755
+
+Not very similar at all:
+(cset-vec-cosine (Word "the") (Word "that")) = 0.01981486048876119
+
+Oh hey this and that are similar. Notice the triangle with "the".
+(cset-vec-cosine (Word "this") (Word "that")) = 0.14342403062507977
+
+Some more results
+ (cset-vec-cosine (Word "this") (Word "these")) = 0.23100101197144984
+ (cset-vec-cosine (Word "this") (Word "those")) = 0.1099725424243773
+ (cset-vec-cosine (Word "these") (Word "those")) = 0.13577971016706158
+
+We expect that determiners, nouns and verbs to all be very differrent
+from one-another. And they are:
+ (cset-vec-cosine (Word "the") (Word "ball")) = 2.3964597196461594e-4
+ (cset-vec-cosine (Word "the") (Word "jump")) = 0.0
+ (cset-vec-cosine (Word "ball") (Word "jump")) = 0.0
+
+We expect verbs to be similar, and they sort-of are.
+ (cset-vec-cosine (Word "run") (Word "jump")) = 0.05184758473652128
+ (cset-vec-cosine (Word "run") (Word "look")) = 0.05283524652572603
+
+Since this is a sampling from wikipedia, there will be very few
+"action" verbs, unless the sample accidentally contains articles
+about sports. A "common sense" corpus, or a corpus that talks about
+what people do, could/should improve the above verbs.  These are
+very basic to human behavior, but are rare in most writing.
+
+I'm thinking that a corpus of children's lit, and young-adult-lit
+would be much better for these kinds of things.
+
+An adjective.
+ (cset-vec-cosine (Word "wide") (Word "narrow")) = 0.06262242910851494
+ (cset-vec-cosine (Word "wide") (Word "look")) = 0.0
+ (cset-vec-cosine (Word "wide") (Word "ball")) = 0.02449979787750126
+ (cset-vec-cosine (Word "wide") (Word "the")) = 0.04718158900583385
+
+ (cset-vec-cosine (Word "heavy") (Word "wide")) = 0.05752237416355278
+
+Here's a set of antonyms!
+ (cset-vec-cosine (Word "heavy") (Word "light")) = 0.16760038078849773
+
+A pronoun
+ (cset-vec-cosine (Word "ball") (Word "it")) = 0.009201177048960233
+ (cset-vec-cosine (Word "wide") (Word "it")) = 0.005522960959398417
+
+ (cset-vec-cosine (Word "the") (Word "it")) = 0.01926824360790382
+
+Wow!! In English, "it" is usually a male!
+ (cset-vec-cosine (Word "it") (Word "she")) = 0.1885493638629482
+ (cset-vec-cosine (Word "it") (Word "he")) = 0.4527656594627214
+ (cset-vec-cosine (Word "he") (Word "she")) = 0.1877589816088902
+
+I can post the database on mondy, let me know when you're ready to
+receive it.
+
+above dataset has 200183 (200K) disjuncts in it
+
+SIMILARITY_LINK
+
+ac
+
+scheme@(guile-user)> (batch-sim (Word "him") ac)
+terminate called after throwing an instance of
+'opencog::RuntimeException'
+  what():  Failed to execute!
+(/home/linas/src/novamente/src/atomspace-git/opencog/persist/sql/multi-driver/ll-pg-cxx.cc:113)
+Aborted
+
+
+[2017-05-07 17:01:27:152] [WARN] PQresult message: ERROR:  duplicate key
+value violates unique constraint "atoms_uuid_idx"
+DETAIL:  Key (uuid)=(2441253852) already exists.
+
+[2017-05-07 17:01:27:152] [WARN] PQ query was: INSERT INTO Atoms (uuid,
+space, type, height, outgoing) VALUES (2441253852, 1, 43, 1, '{1888882,
+127137759}');
+
+
+dohhh Need to reserve some uuid's!
+
+
+[2017-05-04 17:31:29:122] [ERROR] There is no value for key
+(PredicateNode "link count") ; [8812231717367445517][1]
+ on atom (AnchorNode "MST data") ; [1539316140051770629][1]
+
+createdb -T en_pairs_mst -e en_pairs_sim "forked from en_pairs_mst, holds similarity data"
+
+COMMENT ON DATABASE en_pairs_mst IS 'forked from en_pairs_rohit, holds disjunct data';
+
+COMMENT ON DATABASE en_pairs_rohit IS 'forked from en_pairs_2016, converted to modern format';
+
+COMMENT ON DATABASE en_pairs_2016 IS 'Rohits original pair data; old format; missing correct word-counts';
+
+(define ac (filter-words-with-csets (get-all-words)))
+
+(cset-vec-len
+(cset-vec-observations
+
+(define lens (map (lambda (wrd) (cons (cset-vec-len wrd) wrd)) ac))
+
+(define slens (sort lens (lambda (a b) (> (car a) (car b)))))
+
+(define obs (map (lambda (wrd) (cons (cset-vec-observations wrd) wrd)) ac))
+
+(define sobs (sort obs (lambda (a b) (> (car a) (car b)))))
+
+
+(define firm (filter (lambda (wrd) (< 8.0 (cset-vec-len wrd))) ac))
+
+*) count words during MST
+err this can be reconstructed by taking:
+   counts of disjuncts  based on counts of csets .... 
+so never mind....
+
+what are teh most comon disjuncts???
+
+(filter (lambda (cset) (< 10 (get-count cset)))
+	(cog-incoming-by-type (Word "United") 'LgWordCset))
+
+156 ... 125.888
+
+5  41.44827196747233 "and"
+8  31.658516707416464 "as"
+10  30.140583554376658 "well"
+11  29.969530201342277 "in"
+18  18.805788982259568 "first"
+21  17.254613233923575 "is"
+22  16.742203742203742 "also"
+23  15.386776859504135 "can"
+24  15.359470949456778 "on"
+25  14.910157559503853 "at"
+26  14.424603174603176 "been"
+31  13.231375985977214 "but"
+32  13.122743682310471 "part"
+34  12.835568802781918 "with"
+35  12.835051546391755 "old"
+36  12.726962457337885 "same"
+38  11.925403225806452 "one"
+39  11.611694152923539 "which"
+43  10.856905158069885 "not"
+
+(filter (lambda (cset) (< 5 (get-count cset)))
+	(cog-incoming-by-type (Word "Gestalt") 'LgWordCset))
+
+(.+) 34
+(of -)  14
+
+(is+) 216
+was+ 197
+(has+ 55
+was+ was+ 12
+is+ was+ 10
+
+get-cset-vec
+ad   cset-vec-observations
+(define disjunct-entropy
+(define total-cset-count (cset-observations all-cset-words))
+(define all-cset-words (filter-words-with-csets (get-all-words)))
+
+(define total-cset-count 0)
+(cog-map-type 
+	(lambda (cset) 
+		(set! total-cset-count (+ total-cset-count (get-count cset))) #f)
+	'LgWordCset)
+
+7.984991833299495  bits total MI bits
+
+(cset-vec-mi (Word "United"))  7.116097374166928
+is the relative(?) MI to the disjuncts in the word.
+(is how much MI this word contributes to the total MI)
+(and its slightly below average)
+
+(cset-vec-frequency (Word "United"))
+
+(/ (log (cset-vec-frequency (Word "United"))) (log 2))
+-10.48276867673862  is the entropy for that word, only.
 
