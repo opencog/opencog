@@ -66,6 +66,8 @@ namespace opencog
             OpencogOcTreeNode(const OpencogOcTreeNode& rhs);
             ~OpencogOcTreeNode(){}
             OpencogOcTreeNode& operator=(const OpencogOcTreeNode& rhs);
+
+#ifdef NEED_OBSOLETE_OCTREE_API
             // children
             inline OpencogOcTreeNode* getChild(unsigned int i)
             {
@@ -84,6 +86,7 @@ namespace opencog
                 children[i] = new OpencogOcTreeNode();
                 return true;
             }
+#endif
 
             void setBlock(const Handle& block)
             {
