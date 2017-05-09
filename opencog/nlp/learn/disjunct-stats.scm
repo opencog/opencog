@@ -285,7 +285,9 @@
 (define cset-entropy-bits (/ cset-entropy (log 2.0)))
 
 ; A sloppy, slow, wasteful algorithm
-(define total-mi
+(define (get-total-mi-slow)
+	(define prog 0)
+	(define prog-len (length all-csets))
 	(fold
 		(lambda (cset sum)
 			(define word (cset-get-word cset))
@@ -294,10 +296,41 @@
 			(define p-dj (cset-vec-frequency dj))
 			(define p-cset (get-cset-frequency cset))
 
+			(set! prog (+ prog 1))
+			(if (eqv? 0 (modulo prog 100))
+				(format #t "doing ~A of ~A\n" prog prog-len))
 			(+ sum (* p-cset (log (/ p-cset (* p-word p-dj)))))
 		)
 		0
 		all-csets))
+
+(define slow-total-mi (get-total-mi-slow))
+
+; A much faster, optimized version
+(define (get-total-mi)
+	(define prog 0)
+	(define prog-len (length all-cset-words))
+	(define n-tot (get-stashed-count))
+	(define sum 0)
+	(for-each
+		(lambda (word)
+			(define n-word (cset-vec-observations word))
+			(set! prog (+ prog 1))
+			(if (eqv? 0 (modulo prog 100))
+				(format #t "doing ~A of ~A\n" prog prog-len))
+			(for-each
+				(lambda (cset)
+					(define dj (cset-get-disjunct cset))
+					(define n-dj (cset-vec-observations dj))
+					(define n-cset (get-count cset))
+					(set! sum
+						(+ sum (* n-cset (log (/ (* n-cset n-tot) (* n-word n-dj)))))
+				))
+				(get-cset-vec word)))
+		all-cset-words)
+	sum)
+
+(define total-mi (get-total-mi))
 
 (define total-mi-bits (/ total-mi (log 2.0)))
 
