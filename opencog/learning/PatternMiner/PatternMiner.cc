@@ -1454,16 +1454,19 @@ bool PatternMiner::filters(HandleSeq& inputLinks, HandleSeqSeq& oneOfEachSeqShou
     {
         extractAllNodesInLink(inputLinks[i],allNodesInEachLink[i], _atomSpace);
 
-        if (enable_filter_not_inheritant_from_same_var)
+        if (enable_filter_links_of_same_type_not_share_second_outgoing)
         {
-            // filter: Any two InheritanceLinks should not share their secondary outgoing nodes
-            if ((inputLinks[i])->getType() == INHERITANCE_LINK)
+            for (Type t : same_link_types_not_share_second_outgoing)
             {
-                Handle secondOutgoing = inputLinks[i]->getOutgoingSet()[1];
-                if (all2ndOutgoingsOfInherlinks.find(secondOutgoing) == all2ndOutgoingsOfInherlinks.end())
-                    all2ndOutgoingsOfInherlinks.insert(secondOutgoing);
-                else
-                    return true;
+                // filter: Any two Links of the same type in the  should not share their secondary outgoing nodes
+                if (((inputLinks[i])->getType() == t))
+                {
+                    Handle secondOutgoing = inputLinks[i]->getOutgoingSet()[1];
+                    if (all2ndOutgoingsOfInherlinks.find(secondOutgoing) == all2ndOutgoingsOfInherlinks.end())
+                        all2ndOutgoingsOfInherlinks.insert(secondOutgoing);
+                    else
+                        return true;
+                }
             }
         }
 
@@ -1697,6 +1700,7 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
     double II = sign * log2(HNode->count);
 //    std::cout << "H(curpattern) = log" << HNode->count << "="  << II << " sign=" << sign << std::endl;
 
+    double biggestEntroy = 0.0;
 
     for (int gram = maxgram-1; gram > 0; gram --)
     {
@@ -1744,6 +1748,9 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 //                     cout << "a splitted part: " << connectedSubPatternKey;
                      double h = calculateEntropyOfASubConnectedPattern(connectedSubPatternKey, unifiedConnectedSubPattern);
                      II += sign*h;
+
+                     if (h > biggestEntroy)
+                         biggestEntroy = h;
 //                     cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
 
                  }
@@ -1754,6 +1761,9 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 //                 std::cout<< " is connected! \n" ;
                  double h =calculateEntropyOfASubConnectedPattern(subPatternKey, unifiedSubPattern);
                  II += sign*h;
+
+                 if (h > biggestEntroy)
+                     biggestEntroy = h;
 //                 cout << "sign="<<sign << " h =" << h << std::endl << std::endl;
              }
 
@@ -1769,7 +1779,11 @@ void PatternMiner::calculateInteractionInformation(HTreeNode* HNode)
 
     }
 
-    HNode->interactionInformation = II;
+    // Normalize the interaction information
+    if (biggestEntroy > FLOAT_MIN_DIFF)
+        HNode->interactionInformation = II / biggestEntroy;
+    else
+        HNode->interactionInformation = 0.0;
 //    std::cout<< "\n total II = " << II << "\n" ;
 
 }
@@ -2469,7 +2483,7 @@ void PatternMiner::reSetAllSettingsFromConfig()
     enable_filter_leaves_should_not_be_vars = config().get_bool("enable_filter_leaves_should_not_be_vars");
     enable_filter_links_should_connect_by_vars = config().get_bool("enable_filter_links_should_connect_by_vars");
     enable_filter_node_types_should_not_be_vars =  config().get_bool("enable_filter_node_types_should_not_be_vars");
-    enable_filter_not_inheritant_from_same_var = config().get_bool("enable_filter_not_inheritant_from_same_var");
+    enable_filter_links_of_same_type_not_share_second_outgoing = config().get_bool("enable_filter_links_of_same_type_not_share_second_outgoing");
     enable_filter_not_all_first_outgoing_const = config().get_bool("enable_filter_not_all_first_outgoing_const");
     enable_filter_not_same_var_from_same_predicate = config().get_bool("enable_filter_not_same_var_from_same_predicate");
     enable_filter_first_outgoing_evallink_should_be_var = config().get_bool("enable_filter_first_outgoing_evallink_should_be_var");
@@ -2485,6 +2499,20 @@ void PatternMiner::reSetAllSettingsFromConfig()
         for (string typestr : typeStrs)
         {
             node_types_should_not_be_vars.push_back( classserver().getType(typestr) );
+        }
+    }
+
+    if (enable_filter_links_of_same_type_not_share_second_outgoing)
+    {
+        same_link_types_not_share_second_outgoing.clear();
+        string link_types_str = config().get("same_link_types_not_share_second_outgoing");
+        link_types_str.erase(std::remove(link_types_str.begin(), link_types_str.end(), ' '), link_types_str.end());
+        vector<string> typeStrs;
+        boost::split(typeStrs, link_types_str, boost::is_any_of(","));
+
+        for (string typestr : typeStrs)
+        {
+            same_link_types_not_share_second_outgoing.push_back( classserver().getType(typestr) );
         }
     }
 }
@@ -2655,7 +2683,7 @@ void PatternMiner::runInterestingnessEvaluation()
         if (interestingness_Evaluation_method == "Interaction_Information")
         {
             // sort by interaction information
-            std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
+            // std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByInteractionInformation);
             OutPutInterestingPatternsToFile(patternsForGram[cur_gram-1], cur_gram, 0);
         }
         else if (interestingness_Evaluation_method == "surprisingness")

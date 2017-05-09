@@ -140,12 +140,13 @@ protected:
 
     bool enable_filter_leaves_should_not_be_vars;
     bool enable_filter_links_should_connect_by_vars;
-    bool enable_filter_not_inheritant_from_same_var;
+    bool enable_filter_links_of_same_type_not_share_second_outgoing;
     bool enable_filter_not_same_var_from_same_predicate;
     bool enable_filter_not_all_first_outgoing_const;
     bool enable_filter_first_outgoing_evallink_should_be_var;
     bool enable_filter_node_types_should_not_be_vars;
     vector<Type> node_types_should_not_be_vars;
+    vector<Type> same_link_types_not_share_second_outgoing;
 
     unsigned int num_of_patterns_without_superpattern_cur_gram;
 
