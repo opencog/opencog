@@ -161,8 +161,8 @@ PointMemorySCM::~PointMemorySCM()
  */
 void* PointMemorySCM::init_in_guile(void* self)
 {
-	scm_c_define_module("opencog ato pointmem", init_in_module, self);
-	scm_c_use_module("opencog ato pointmem");
+	scm_c_define_module("opencog pointmem", init_in_module, self);
+	scm_c_use_module("opencog pointmem");
 	return NULL;
 }
 
@@ -183,39 +183,39 @@ void PointMemorySCM::init_in_module(void* data)
 void PointMemorySCM::init()
 {
 #ifdef HAVE_GUILE
-	define_scheme_primitive("create-map", &PointMemorySCM::create_map, this, "ato pointmem");// b_sdii
-	define_scheme_primitive("get-time-res", &PointMemorySCM::get_time_res, this, "ato pointmem");// i_s
-	define_scheme_primitive("get-space-res", &PointMemorySCM::get_space_res, this, "ato pointmem");// d_s
-	define_scheme_primitive("get-time-units", &PointMemorySCM::get_time_units, this, "ato pointmem");// i_s
-	define_scheme_primitive("step-time-unit", &PointMemorySCM::step_time_unit, this, "ato pointmem");// v_s
-	define_scheme_primitive("auto-step-time-on", &PointMemorySCM::auto_step_time_on, this, "ato pointmem");// v_s
-	define_scheme_primitive("auto-step-time-off", &PointMemorySCM::auto_step_time_off, this, "ato pointmem");// v_s
-	define_scheme_primitive("is-auto-step-on", &PointMemorySCM::is_auto_step_on, this, "ato pointmem");// i_s
-	define_scheme_primitive("map-ato", &PointMemorySCM::map_ato, this, "ato pointmem");// b_shddd
-	define_scheme_primitive("get-first-ato", &PointMemorySCM::get_first_time, this, "ato pointmem");// h_shi
-	define_scheme_primitive("get-last-ato", &PointMemorySCM::get_last_time, this, "ato pointmem");// h_shi
-	define_scheme_primitive("get-first-locs-ato", &PointMemorySCM::get_first_location, this, "ato pointmem");// h_shi
+	define_scheme_primitive("cog-pointmem-create-map", &PointMemorySCM::create_map, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-time-res", &PointMemorySCM::get_time_res, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-space-res", &PointMemorySCM::get_space_res, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-time-units", &PointMemorySCM::get_time_units, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-step-time-unit", &PointMemorySCM::step_time_unit, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-auto-step-time-on", &PointMemorySCM::auto_step_time_on, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-auto-step-time-off", &PointMemorySCM::auto_step_time_off, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-is-auto-step-on", &PointMemorySCM::is_auto_step_on, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-map-atom", &PointMemorySCM::map_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-first-atom", &PointMemorySCM::get_first_time, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-last-atom", &PointMemorySCM::get_last_time, this, "pointmem");
 
 	// -----------------------------------------
-	define_scheme_primitive("get-last-locs-ato", &PointMemorySCM::get_last_location, this, "ato pointmem");// h_shi
-	define_scheme_primitive("get-at-loc-ato", &PointMemorySCM::get_at_loc_ato, this, "ato pointmem");// h_sddd
-	define_scheme_primitive("get-past-loc-ato", &PointMemorySCM::get_past_loc_ato, this, "ato pointmem");// h_siddd
-	define_scheme_primitive("get-locs-ato", &PointMemorySCM::get_locs_ato, this, "ato pointmem");// h_sh
-	define_scheme_primitive("get-past-locs-ato", &PointMemorySCM::get_past_locs_ato, this, "ato pointmem");// h_shi
-	define_scheme_primitive("get-elapse-list-at-loc-ato", &PointMemorySCM::get_elapse_list_at_loc_ato, this, "ato pointmem");// h_shddd
-	define_scheme_primitive("get-elapse-list-ato", &PointMemorySCM::get_timeline, this, "ato pointmem");// h_sh
-	define_scheme_primitive("remove-location-ato", &PointMemorySCM::remove_location_ato, this, "ato pointmem");// b_sddd
-	define_scheme_primitive("remove-past-location-ato", &PointMemorySCM::remove_past_location_ato, this, "ato pointmem");// b_siddd
-	define_scheme_primitive("remove-curr-ato", &PointMemorySCM::remove_curr_ato, this, "ato pointmem");// v_sh
-	define_scheme_primitive("remove-past-ato", &PointMemorySCM::remove_past_ato, this, "ato pointmem");// v_shi
-	define_scheme_primitive("remove-all-ato", &PointMemorySCM::remove_all_ato, this, "ato pointmem");// v_sh
+	define_scheme_primitive("cog-pointmem-get-first-locs-of-atom", &PointMemorySCM::get_first_location, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-last-locs-of-atom", &PointMemorySCM::get_last_location, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-at-loc-atom", &PointMemorySCM::get_at_loc_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-past-loc-of-atom", &PointMemorySCM::get_past_loc_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-locs-of-atom", &PointMemorySCM::get_locs_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-past-locs-of-atom", &PointMemorySCM::get_past_locs_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-elapsed-list-at-loc", &PointMemorySCM::get_elapse_list_at_loc_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-elapsed-list", &PointMemorySCM::get_timeline, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-remove-location-of-atom", &PointMemorySCM::remove_location_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-remove-past-location-of-atom", &PointMemorySCM::remove_past_location_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-remove-curr-atom", &PointMemorySCM::remove_curr_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-remove-past-atom", &PointMemorySCM::remove_past_ato, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-remove-all-atoms", &PointMemorySCM::remove_all_ato, this, "pointmem");
 
 	// spatial query
-	define_scheme_primitive("get-dist-ato", &PointMemorySCM::get_distance_between, this, "ato pointmem");// d_shhi
-	define_scheme_primitive("get-angular-nearness-ato", &PointMemorySCM::get_angular_nearness, this, "ato pointmem");// i_shhhi
-	define_scheme_primitive("get-right-left-of-ato", &PointMemorySCM::get_target_is_right_left, this, "ato pointmem");// i_shhhi
-	define_scheme_primitive("get-above-below-of-ato", &PointMemorySCM::get_target_is_above_below, this, "ato pointmem");// i_shhhi
-	define_scheme_primitive("get-front-back-of-ato", &PointMemorySCM::get_target_is_front_back, this, "ato pointmem");// i_shhhi
+	define_scheme_primitive("cog-pointmem-get-dist-to-atom", &PointMemorySCM::get_distance_between, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-angular-nearness-to-atom", &PointMemorySCM::get_angular_nearness, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-right-left-of-atom", &PointMemorySCM::get_target_is_right_left, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-above-below-of-atom", &PointMemorySCM::get_target_is_above_below, this, "pointmem");
+	define_scheme_primitive("cog-pointmem-get-front-back-of-atom", &PointMemorySCM::get_target_is_front_back, this, "pointmem");
 #endif
 }
 
