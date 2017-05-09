@@ -19037,6 +19037,20 @@ tly of any observations; let
  is almost always either zero or one; however, a connector can appear more
  than once in a disjuct, so this count can rise to 2 or 3 or very rarely
  higher.
+ The wildcard sum 
+\begin_inset Formula $C(d,*)=\sum_{c}C(d,c)$
+\end_inset
+
+ is the total number of connectors in the disjunct.
+ It is also useful to define 
+\begin_inset Formula $C(d,+)$
+\end_inset
+
+ and 
+\begin_inset Formula $C(d,-)$
+\end_inset
+
+ as the total number of right-linking and left-linking connectors.
 \end_layout
 
 \begin_layout Subsection*
@@ -20801,7 +20815,8 @@ Other measures are needed.
 
 .
  Another possbility would be this, minus the average-squared, which would
- give the mean-square deviation from the average, specifically
+ give the second moment, aka, the mean-square deviation from the average,
+ specifically
 \begin_inset Formula 
 \[
 \frac{\sum_{d}N(d,w)^{2}}{\left|(*,w)\right|}-\left[\frac{N(*,w)}{\left|(*,w)\right|}\right]^{2}=\frac{1}{\left|(*,w)\right|}\sum_{d}\left[N(d,w)-\frac{N(*,w)}{\left|(*,w)\right|}\right]^{2}
@@ -21409,11 +21424,46 @@ At the other extreme, the ten words with the lowest MI are: "The" "a" "to"
 \end_layout
 
 \begin_layout Subsection*
-Hubbiness
+Vertex degrees and hubiness
 \end_layout
 
 \begin_layout Standard
-Hubbiness can be defined as the average number of connectors per disjunct
+Vertex degrees can be defined as the average number of connectors per disjunct.
+ In principle, the vertex degree is an excellent indicator of the part of
+ speech.
+ For example, determiners, adjectives and adverbs typically have a degree
+ of one: they have one connector, which is modifying the noun (or verb)
+ that they act on.
+ By contrast, nouns typically have a degree of two: one connector to attach
+ to a verb, another to a modifier, and that's it.
+ Verbs have a degree of three: one connector to a subject, one to a direct
+ object, a third to an indirect object or a modifier.
+ Of course, nouns might have two or more modifiers, or maybe zero modifiers;
+ verbs are also quite variable, but the general concept of vertex degree
+ is appealing.
+ Closely related to this is the idea of 
+\begin_inset Quotes eld
+\end_inset
+
+hubiness
+\begin_inset Quotes erd
+\end_inset
+
+, which can be defined as the second moment of the degree.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, its worth looking at this.
+ Define the average degree as
+\begin_inset Formula 
+\[
+K(w)=\sum_{d,c}N(d,w)C(d,c)
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
