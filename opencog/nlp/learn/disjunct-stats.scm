@@ -284,4 +284,21 @@
 
 (define cset-entropy-bits (/ cset-entropy (log 2.0)))
 
+; A sloppy, slow, wasteful algorithm
+(define total-mi
+	(fold
+		(lambda (cset sum)
+			(define word (cset-get-word cset))
+			(define dj (cset-get-disjunct cset))
+			(define p-word (cset-vec-frequency word))
+			(define p-dj (cset-vec-frequency dj))
+			(define p-cset (get-cset-frequency cset))
+
+			(+ sum (* p-cset (log (/ p-cset (* p-word p-dj)))))
+		)
+		0
+		all-csets))
+
+(define total-mi-bits (/ total-mi (log 2.0)))
+
 ; ---------------------------------------------------------------------

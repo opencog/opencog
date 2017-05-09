@@ -251,8 +251,31 @@
 	tot
 )
 
-
 (define total-cset-count 0)
+(define (get-stashed-count)
+	; total number of observations of csets in the system.
+	; XXX there might be a more elegant way to handle this.
+	(if (eqv? 0 total-cset-count)
+		(set! total-cset-count (get-total-cset-count)))
+	total-cset-count
+)
+
+(define-public (get-cset-frequency CSET)
+"
+  get-cset-frequency -- Return the frequency (probability) with which
+  CSET has been observed.
+"
+	(/ (get-count CSET) (get-stashed-count))
+)
+
+(define-public (cset-vec-frequency ITEM)
+"
+  cset-vec-frequency -- Return the frequency (probability) with which
+  ITEM has been observed.
+"
+	(/ (cset-vec-observations ITEM) (get-stashed-count))
+)
+
 (define-public (cset-vec-entropy ITEM)
 "
   cset-vec-entropy -- return the entropy for the subset of
@@ -263,15 +286,10 @@
 
   The returned entropy is in nats. Divide by log 2 to get bits.
 "
-	; total number of observations of csets in the system.
-	; XXX there might be a more elegant way to handle this.
-	(if (eqv? 0 total-cset-count)
-		(set! total-cset-count (get-total-cset-count)))
-
    ; sum of the counts
    (fold
       (lambda (cset sum)
-			(define cset-freq (/ (get-count cset) total-cset-count))
+			(define cset-freq (get-cset-frequency cset))
 			(- sum (* cset-freq (log cset-freq))))
       0
       (get-cset-vec ITEM))
