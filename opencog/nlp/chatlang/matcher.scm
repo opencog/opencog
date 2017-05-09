@@ -82,7 +82,7 @@
 
 (Define
   (DefinedSchema "Get Current Input")
-  (Get (State (Anchor "Currently Processing")
+  (Get (State chatlang-anchor
               (Variable "$x"))))
 
 (Define

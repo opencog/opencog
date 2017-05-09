@@ -79,7 +79,7 @@ up with the following context structure:
   (TypedVariable (Variable "$var4") (Type "WordInstanceNode"))) ;; meat
  (And
   (Parse (Variable "$P") (Variable "$S"))
-  (State (Anchor "CurrentlyProcessing") (Variable "$S"))
+  (State (Anchor "Chatlang: Currently Processing") (Variable "$S"))
   (WordInstance (Variable "$var1") (Variable "$P")) ;; I
   (Lemma (Variable "$var1") (Word "I"))
   (WordInstance (Variable "$var2") (Variable "$P")) ;; ~eat

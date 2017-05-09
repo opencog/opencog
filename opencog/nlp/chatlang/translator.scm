@@ -15,6 +15,7 @@
 
 (define (chatlang-prefix STR) (string-append "Chatlang: " STR))
 (define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
+(define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -25,7 +26,7 @@
 ;; Shared conditions for all terms
 (define atomese-condition-template (list (Parse (Variable "$P")
                                                 (Variable "$S"))
-                                         (State (Anchor "Currently Processing")
+                                         (State chatlang-anchor
                                                 (Variable "$S"))))
 
 (define (process-pattern-term TERM ATOMESE)
@@ -108,7 +109,7 @@
 ;  (And (True (Put (DefinedPredicate "Say") (Node TXT)))
 ; XXX Testing
 (And (Evaluation (GroundedPredicate "scm: sss") (List (Node TXT)))
-       (True (Put (State (Anchor "Currently Processing") (Variable "$x"))
+       (True (Put (State chatlang-anchor (Variable "$x"))
                   (Concept "Default State")))))
 
 ; XXX Testing
@@ -190,21 +191,40 @@
 (define-public (chatlang-concept? GLOB CONCEPT)
   "Check if the value grounded for the GlobNode is actually a member
    of the concept."
-  (define grd (assoc-ref globs (cog-name GLOB)))
-  (define membs (get-members CONCEPT))
-  (if (not (equal? #f (member grd membs)))
-      (stv 1 1)
-      (stv 0 1)))
+  (let ((grd (assoc-ref globs (cog-name GLOB)))
+        (membs (get-members CONCEPT)))
+       (if (not (equal? #f (member grd membs)))
+           (stv 1 1)
+           (stv 0 1))))
 
 (define-public (chatlang-choices? GLOB CHOICES)
   "Check if the value grounded for the GlobNode is actually a member
    of the list of choices."
-  (define grd (assoc-ref globs (cog-name GLOB)))
-  (define chs (cog-outgoing-set CHOICES))
-  (define cpts (append-map get-members (cog-filter 'ConceptNode chs)))
-  (if (not (equal? #f (member grd (append chs cpts))))
-      (stv 1 1)
-      (stv 0 1)))
+  (let* ((grd (assoc-ref globs (cog-name GLOB)))
+         (chs (cog-outgoing-set CHOICES))
+         (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
+        (if (not (equal? #f (member grd (append chs cpts))))
+            (stv 1 1)
+            (stv 0 1))))
 
-; TODO: chatlang-unordered-match?
-; TODO: chatlang-negation?
+(define (text-contains? TXT TERM)
+  "Check if TXT contains TERM."
+  (define (contains? txt term)
+    (not (equal? #f (regexp-exec
+      (make-regexp (string-append "\\b" term "\\b") regexp/icase) txt))))
+  (cond ((equal? 'WordNode (cog-type TERM))
+         (contains? TXT (cog-name TERM)))
+        ((equal? 'ListLink (cog-type TERM))
+         (contains? TXT (string-join (map cog-name (cog-outgoing-set TERM)) " ")))
+        ((equal? 'ConceptNode (cog-type TERM))
+         (not (null? (filter (lambda (t) (text-contains? TXT t))
+                             (get-members TERM)))))))
+
+(define-public (chatlang-negation? . TERMS)
+  "Check if the input sentence has none of the terms specified."
+  (let* ; Get the raw text input
+        ((sent (car (cog-chase-link 'StateLink 'SentenceNode chatlang-anchor)))
+         (itxt (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+        (if (null? (filter (lambda (t) (text-contains? itxt t)) TERMS))
+            (stv 1 1)
+            (stv 0 1))))
