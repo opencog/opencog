@@ -35,6 +35,21 @@ plot "ranked-word-obs.dat" using 1:2 with lines linewidth 2 title "", \
 
 
 #################################################
+# Used to generate the disjunct ranking graphs.
+#
+set term postscript eps color
+set out 'ranked-dj-obs.eps'
+set xrange [1:100000]
+set yrange [1:14000]
+set logscale x
+set logscale y
+set title "Number of observations of disjuncts"
+set xlabel "Rank"
+set ylabel "Number of observations of disjuncts"
+plot "ranked-dj-obs.dat" using 1:2 with lines linewidth 2 title "", \
+     "ranked-dj-obs.dat" using 1:(14000/$1 ** 0.85) with lines linewidth 2 title "rank^-0.85"
+
+#################################################
 # Used to generate the connector-set ranking graphs.
 #
 set term postscript eps color

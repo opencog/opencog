@@ -19033,6 +19033,9 @@ y small dataset, taken as a snapshot during counting.
  of 17.6 observations per word.
  This dataset contains 291637 different, unique disjuncts, for an average
  of 2.27 observations per disjunct.
+ The period appears 32536 times, suggesting that this many sentences were
+ observed.
+ Each sentnece thus has an average of 20.3 words per sentence.
 \end_layout
 
 \begin_layout Standard
@@ -19089,30 +19092,46 @@ Some connector-sets will be observed far more often than others.
 \end_layout
 
 \begin_layout Standard
-First, we begin with a graph showing the number of observations of disjuncts
- on each word, ranked in order
+Two graphs, dual to one-another.
+ The one on the right shows 
+\begin_inset Formula $N(*,w)$
+\end_inset
+
+, ranked by count.
+ The one on the left shows 
+\begin_inset Formula $N(d,*)$
+\end_inset
+
+, also ranked.
 \begin_inset Foot
 status collapsed
 
 \begin_layout Plain Layout
-Obtained by running (print-ts-rank sorted-obs outport) from the disjunct-stats.sc
-m file, on the en_pairs_sim database.
- 
+Obtained by running (print-ts-rank sorted-word-obs outport) from the disjunct-st
+ats.scm file, on the en_pairs_sim database.
+ The second one prints sorted-dj-obs.
 \end_layout
 
 \end_inset
 
 .
- As can be seen, this follows the canonical Zipf distribution.
+ The first follows the canonical Zipf distribution.
  The green line is an eyeballed, approximate fit, of exponent -1.1.
- 
+ The second has an exponent of -0.85.
 \end_layout
 
 \begin_layout Standard
 \align center
 \begin_inset Graphics
 	filename images/ranked-word-obs.eps
-	width 60text%
+	width 45text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/ranked-dj-obs.eps
+	width 45text%
 
 \end_inset
 
@@ -19120,18 +19139,23 @@ m file, on the en_pairs_sim database.
 \end_layout
 
 \begin_layout Standard
-The first ten words in this ranking are: "the" "," "." "of" "and" "in" "to"
- "a" "was".
- This ordering is identical to how often these words appear, overall, in
- the MST-parsed corpus.
- That is because exactly one observation of a disjunct is made for each
- observation of a word in an MST parse: disjuncts are in one-to-one corresponden
-ce with words in a given parse.
- Thus, the graph above is identical to the word-frequency graph for the
- MST-parsed corpus.
- (With one minor exception: if the MST corpus contains words that cannot
- be linked, they are ignored.
- This should happen only infrequently, for rare words).
+The first ten words in the word ranking are: "the" "," "." "of" "and" "in"
+ "to" "a" "was".
+ This is the ranking of how often these words appear, overall, in the MST-parsed
+ corpus.
+ The number of periods should be equal to the number of sentences in the
+ corpus; commas and the word 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+ can appear more than once in a sentence.
+ The first ten pseudo-disjuncts in the disjunct-ranking are ".+ " "the- "
+ "the+ " ",+ " ",- " "of+ " "of- " "a- " "and+ " "and- ".
+ The duality between these counts shold be obvious.
 \end_layout
 
 \begin_layout Subsection*
