@@ -4349,3 +4349,24 @@ is the relative(?) MI to the disjuncts in the word.
 (/ (log (cset-vec-frequency (Word "United"))) (log 2))
 -10.48276867673862  is the entropy for that word, only.
 
+"Cao" "Award" "x" "y" "Prime" "we" "per" "Division" "League" "Game"
+
+(define cao (get-cset-vec (Word "Cao")))
+
+34 (length cao)
+
+(filter (lambda (cset) (< 10 (get-count cset))) cao)
+
+18  ,- Cao- Cao+  garbage !!
+
+8 Grammy- for+ Best+
+7 Academy- for+ Best+
+
+23 Minister+
+5 the- Minister+
+3 as- Minister+
+3 Governor-General- Minister+
+
+
+ "The" "a" "to" "in" "of" "and" "the" "," "."
+
