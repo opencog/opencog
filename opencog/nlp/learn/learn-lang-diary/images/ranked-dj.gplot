@@ -6,7 +6,7 @@
 # set data style points
 
 #################################################
-# Used to generate the connector-set ranking graphs.
+# Used to generate the disjunct ranking graphs.
 #
 set term postscript eps color
 set out 'ranked-dj-counts.eps'

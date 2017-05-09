@@ -19030,12 +19030,14 @@ y small dataset, taken as a snapshot during counting.
  Its called 'en_pairs_sim'.
  It contains 37413 words that have disjuncts attached to them.
  These words have been observed a total of 661104 times, for an average
- of 17.6 observations per word.
+ of 661104/37413 = 17.6 observations per word.
  This dataset contains 291637 different, unique disjuncts, for an average
- of 2.27 observations per disjunct.
+ of 661104/291637 = 2.27 observations per disjunct.
  The period appears 32536 times, suggesting that this many sentences were
  observed.
- Each sentnece thus has an average of 20.3 words per sentence.
+ Each sentnece thus has an average of 661104/32536 = 20.3 words per sentence.
+ The dataset contains 446204 unique connector-sets, for an average of 661104/446
+204 = 1.48 observations per cset.
 \end_layout
 
 \begin_layout Standard
@@ -19156,6 +19158,102 @@ the
  The first ten pseudo-disjuncts in the disjunct-ranking are ".+ " "the- "
  "the+ " ",+ " ",- " "of+ " "of- " "a- " "and+ " "and- ".
  The duality between these counts shold be obvious.
+\end_layout
+
+\begin_layout Standard
+The ranking of connector sets is shown below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-cset-obs.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The top-ten connector-sets are ".: )-" "and: ,-" "in: the+" "(: )+" ",: and+"
+ "the: of-" "of: the+" "): .+" "He: was+".
+ These are hard to read, so, decoded: the first is a parenthesis followed
+ by a period.
+ The second is a comma, followed by 
+\begin_inset Quotes eld
+\end_inset
+
+and
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The third is the word-pair 
+\begin_inset Quotes eld
+\end_inset
+
+in the
+\begin_inset Quotes erd
+\end_inset
+
+.
+ All the others are pairs, also.
+ Written in order: 
+\begin_inset Quotes eld
+\end_inset
+
+()
+\begin_inset Quotes erd
+\end_inset
+
+ (presumably with other text between the parens) 
+\begin_inset Quotes eld
+\end_inset
+
+, and
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+of the
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+of the
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+) .
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+He was
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Curiously the 1st and 8th give the same pair, as do 2nd and 5th, and the
+ 6th and 7th.
+ This makes sense: if one word-disjunct pair is observed a lot, the converse
+ should be also.
+ This duality might be behind the slope of slightly less than -0.6 in the
+ graph.
 \end_layout
 
 \begin_layout Subsection*
