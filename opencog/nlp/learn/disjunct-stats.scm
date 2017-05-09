@@ -306,26 +306,8 @@
 
 (define slow-total-mi (get-total-mi-slow))
 
-; Get partial MI for word.
-(define (cset-vec-mi WORD)
-	(define n-tot (get-stashed-count))
-	(define sum 0)
-	(define n-word (cset-vec-observations WORD))
-	(for-each
-		(lambda (cset)
-			(define dj (cset-get-disjunct cset))
-			(define n-dj (cset-vec-observations dj))
-			(define n-cset (get-count cset))
-			(set! sum
-				(+ sum (* n-cset (log (/ (* n-cset n-tot) (* n-word n-dj)))))
-		))
-		(get-cset-vec WORD))
-	; (/ sum n-tot)
-	(/ sum n-word)
-)
-
 ; A much faster, optimized version
-(define (get-total-mi)
+(define (get-total-mi-bits)
 	(define prog 0)
 	(define prog-len (length all-cset-words))
 	(define sum 0)
@@ -334,14 +316,12 @@
 			(set! prog (+ prog 1))
 			(if (eqv? 0 (modulo prog 100))
 				(format #t "doing ~A of ~A\n" prog prog-len))
-			(set! sum (+ sum (cset-vec-mi word))))
+			(set! sum (+ sum (cset-vec-word-mi word))))
 		all-cset-words)
 	sum
 )
 
-(define total-mi (get-total-mi))
-
-(define total-mi-bits (/ total-mi (log 2.0)))
+(define total-mi-bits (get-total-mi-bits))
 
 ; ---------------------------------------------------------------------
 ; Rank words according to the MI between them and thier disjuncts

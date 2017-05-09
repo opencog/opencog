@@ -295,6 +295,33 @@
       (get-cset-vec ITEM))
 )
 
+(define (cset-vec-word-mi WORD)
+"
+	cset-vec-word-mi - get the fractional mutual information between
+   the word and all of it's disjuncts. This is defined as
+      MI(w) = (1/p(w)) sum_d p(d,w) log_2 p(d,w)/[p(d,*) p(*,w)]
+   This is defined "fractionally", so that the MI of the dataset
+   as a whole can be written as
+     MI = sum_w p(w) MI(w)
+
+   Note this function returns MI in units of bits. i.e. log-2
+"
+	(define n-tot (get-stashed-count))
+	(define sum 0)
+	(define n-word (cset-vec-observations WORD))
+	(for-each
+		(lambda (cset)
+			(define dj (cset-get-disjunct cset))
+			(define n-dj (cset-vec-observations dj))
+			(define n-cset (get-count cset))
+			(set! sum
+				(+ sum (* n-cset (log (/ (* n-cset n-tot) (* n-word n-dj)))))
+		))
+		(get-cset-vec WORD))
+	; (/ sum n-tot)
+	(/ sum (* n-word (log 2)))
+)
+
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
