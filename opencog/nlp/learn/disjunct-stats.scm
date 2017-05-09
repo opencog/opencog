@@ -325,11 +325,20 @@
 
 ; ---------------------------------------------------------------------
 ; Rank words according to the MI between them and thier disjuncts
-(define sorted-word-mi (score-and-rank cset-vec-mi all-cset-words)
+(define sorted-word-mi (score-and-rank cset-vec-word-mi all-cset-words)
+
+; Like above, but high-ferequency only
+(define sorted-word-mi-hi-p (score-and-rank cset-vec-word-mi
+		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+			all-cset-words)))
 
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-word-mi.dat" "w")))
 	(print-ts-rank sorted-word-mi outport)
+	(close outport))
+
+(let ((outport (open-file "/tmp/ranked-word-mi-hi-p.dat" "w")))
+	(print-ts-rank sorted-word-mi-hi-p outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
