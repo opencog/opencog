@@ -21434,6 +21434,14 @@ s too
 also 
 \end_layout
 
+\begin_layout Subsection*
+Similarity
+\end_layout
+
+\begin_layout Standard
+two kinds: cosine, and 3-point MI (and jaccard...?)
+\end_layout
+
 \begin_layout Section*
 TODO
 \end_layout
