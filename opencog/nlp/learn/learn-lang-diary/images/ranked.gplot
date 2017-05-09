@@ -95,3 +95,15 @@ plot "ranked-avg.dat" using 1:2 with lines linewidth 2 title "", \
      "ranked-avg.dat" using 1:(5/$1 ** 0.25) with lines linewidth 2 title "rank^-0.25"
 
 unset ytics
+
+#################################################
+# Used to generate the disjunct ranking graphs.
+#
+set term postscript eps color
+set out 'ranked-word-mi-hi-p.eps'
+set logscale x
+set title "MI of word"
+set xlabel "Rank"
+set ylabel "MI of word"
+plot "ranked-word-mi-hi-p.dat" using 1:2 with lines linewidth 2 title ""
+
