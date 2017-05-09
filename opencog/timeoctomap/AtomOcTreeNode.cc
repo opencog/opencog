@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <bitset>
+
 #include "AtomOcTreeNode.h"
 #include "opencog/util/oc_assert.h"
 
