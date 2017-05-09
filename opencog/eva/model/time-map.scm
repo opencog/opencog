@@ -32,13 +32,13 @@
 ; This map will be udates every 66 milliseconds (about 15 Hz), and
 ; will buffer 150 frames (about 10 seconds), and work with a one
 ; centimeter resolution (the native coords of the map are meters).
-(create-map facemap (ListLink (Number 0.01) (Number 66) (Number 150)))
+(cog-pointmem-create-map facemap (ListLink (Number 0.01) (Number 66) (Number 150)))
 
 ; Run the map in a new thread. This will automatically create a new
 ; time-slice every 66 milliseconds.
 ; XXX FIXME Is it wise to start this, just because the guile module got
 ; loaded? or should we have a distinct "start running it now" function?
-(auto-step-time-on facemap)
+(cog-pointmem-auto-step-time-on facemap)
 
 ; time-span is the amount of time in milliseconds to be considered
 ; for locating a face. The time limit for spatial memory for faces :-).
@@ -46,7 +46,7 @@
 ; the number of frames, and is set as half the size of the total buffer.
 (define face-loc-time-span (NumberNode 8000)) ; (8000 milliseconds or 8 seconds)
 
-; get-last-locs-ato returns a SetLink holding AtLocationLinks
+; cog-pointmem-get-last-locs-of-atom returns a SetLink holding AtLocationLinks
 ; of the form below:
 ;
 ;    (AtLocationLink
@@ -62,7 +62,7 @@
 ;
 (define (get-last-location map-name id-node elapse)
 	(define at-loc
-		(gar (get-last-locs-ato map-name id-node elapse)))
+		(gar (cog-pointmem-get-last-locs-of-atom map-name id-node elapse)))
 	(if (null? at-loc)
 		(ListLink (Number 0) (Number 0) (Number 0))
 		(gddr at-loc)
