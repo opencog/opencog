@@ -89,4 +89,7 @@
             (close-pipe port)
         )
     )
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )

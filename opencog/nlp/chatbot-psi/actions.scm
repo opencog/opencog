@@ -41,6 +41,9 @@
     (begin-thread
         (imperative-process (get-input-sent-node))
     )
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )
 
 (define (call-fuzzy)
@@ -64,6 +67,9 @@
             (State fuzzy process-finished)
         )
     )
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )
 
 (define (call-aiml)
@@ -79,6 +85,9 @@
             (State aiml process-finished)
         )
     )
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )
 
 (define (call-emotion-state-response)
@@ -111,6 +120,9 @@
     (define num (cog-name (cog-execute! schema)))
     (define num-no-dot (string-take num (string-index num #\.)))
     (apply say (text2wordnodes (string-append "I see " num-no-dot)))
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )
 
 (define-public (say . words)
@@ -160,12 +172,16 @@
     )
 
     (reset-all-chatbot-states)
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )
 
 (define (reply anchor)
     (let ((ans-in-words (cog-chase-link 'StateLink 'ListLink anchor)))
         (if (null? ans-in-words)
-            '()
+            ; Return for the GroundedSchemaNode
+            (Set)
             (apply say (cog-outgoing-set (car ans-in-words)))
         )
     )

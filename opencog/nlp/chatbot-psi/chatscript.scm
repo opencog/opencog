@@ -43,6 +43,9 @@
 
         (shutdown s 2)
     )
+
+    ; Return for the GroundedSchemaNode
+    (Set)
 )
 
 ; Initial setup for the ChatScript server, to load different set of rules for
