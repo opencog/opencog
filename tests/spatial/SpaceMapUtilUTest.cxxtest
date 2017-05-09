@@ -6,7 +6,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/spacetime/atom_types.h>
-#include <opencog/spatial/3DSpaceMap/OctomapOcTree.h>
+#include <opencog/spatial/3DSpaceMap/OpencogOcTree.h>
 #include <opencog/spatial/3DSpaceMap/EntityRecorder.h>
 #include <opencog/spatial/3DSpaceMap/SpaceMapUtil.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
@@ -49,7 +49,7 @@ public:
     void testGetBoundingBox_CommonUseCase_GetCorrectBox()
     {
         AtomSpace as;
-        OctomapOcTree spaceMap("testmap", 1);
+        OpencogOcTree spaceMap("testmap", 1);
         EntityRecorder entityRecorder;
 
         Handle entity = as.add_node(ENTITY_NODE, "block1");
@@ -85,7 +85,7 @@ public:
     {
         //case1: single block
         AtomSpace as;
-        OctomapOcTree spaceMap("testmap", 1);
+        OpencogOcTree spaceMap("testmap", 1);
         spaceMap.setAgentHeight(1);
 
         BlockVector testpos(1, 2, 4);
@@ -114,7 +114,7 @@ public:
     {
         //case2: single block which is water, cannot stand on water
         AtomSpace as;
-        OctomapOcTree spaceMap("testmap", 1);
+        OpencogOcTree spaceMap("testmap", 1);
         spaceMap.setAgentHeight(1);
 
         BlockVector testpos(1, 2, 4);
@@ -143,7 +143,7 @@ public:
         // case3: two block which z coord is close ( distance < agentHeight)
         // so it's not standable
         AtomSpace as;
-        OctomapOcTree spaceMap("testmap", 1);
+        OpencogOcTree spaceMap("testmap", 1);
         BlockVector testpos(1, 2, 4);
         // make agent height be 2, higher than distance
         spaceMap.setAgentHeight(2);
