@@ -34,7 +34,7 @@
 #ifndef OPENCOG_OCTOMAP_OCTREE_H
 #define OPENCOG_OCTOMAP_OCTREE_H
 
-// OctomapOcTree
+// OpencogOcTree
 // It's a class inheriting the OcTree in octomap
 // We just add the block handle in each node and add some helper functions
 // Note: When there's no OctreeNode in given position,
@@ -59,22 +59,21 @@ namespace opencog
 {
     namespace spatial
     {
-
-        class OctomapOcTreeNode : public OcTreeNode
+        class OpencogOcTreeNode : public OcTreeNode
         {
         public:
-            OctomapOcTreeNode() : OcTreeNode(), mblockHandle(Handle::UNDEFINED){}
-            OctomapOcTreeNode(const OctomapOcTreeNode& rhs);
-            ~OctomapOcTreeNode(){}
-            OctomapOcTreeNode& operator=(const OctomapOcTreeNode& rhs);
+            OpencogOcTreeNode() : OcTreeNode(), mblockHandle(Handle::UNDEFINED){}
+            OpencogOcTreeNode(const OpencogOcTreeNode& rhs);
+            ~OpencogOcTreeNode(){}
+            OpencogOcTreeNode& operator=(const OpencogOcTreeNode& rhs);
             // children
-            inline OctomapOcTreeNode* getChild(unsigned int i)
+            inline OpencogOcTreeNode* getChild(unsigned int i)
             {
-                return static_cast<OctomapOcTreeNode*> (OcTreeNode::getChild(i));
+                return static_cast<OpencogOcTreeNode*> (OcTreeNode::getChild(i));
             }
-            inline const OctomapOcTreeNode* getChild(unsigned int i) const
+            inline const OpencogOcTreeNode* getChild(unsigned int i) const
             {
-                return static_cast<const OctomapOcTreeNode*> (OcTreeNode::getChild(i));
+                return static_cast<const OpencogOcTreeNode*> (OcTreeNode::getChild(i));
             }
 
             bool createChild(unsigned int i)
@@ -82,7 +81,7 @@ namespace opencog
                 if (children == NULL) {
                     allocChildren();
                 }
-                children[i] = new OctomapOcTreeNode();
+                children[i] = new OpencogOcTreeNode();
                 return true;
             }
 
@@ -96,26 +95,26 @@ namespace opencog
                 return mblockHandle;
             }
 
-            void cloneNodeRecur(const OctomapOcTreeNode& rhs);
+            void cloneNodeRecur(const OpencogOcTreeNode& rhs);
         private:
             Handle mblockHandle;
         };
 
         // tree definition
-        class OctomapOcTree : public OccupancyOcTreeBase <OctomapOcTreeNode> {
+        class OpencogOcTree : public OccupancyOcTreeBase <OpencogOcTreeNode> {
 
         public:
             // Default constructor, sets resolution of leafs
-            OctomapOcTree(const std::string& mapName, const double resolution);
-            ~OctomapOcTree(){}
+            OpencogOcTree(const std::string& mapName, const double resolution);
+            ~OpencogOcTree(){}
 
             // virtual constructor: creates a new object of same type
             // (Covariant return type requires an up-to-date compiler)
-            OctomapOcTree* create() const {return new OctomapOcTree(resolution); }
+            OpencogOcTree* create() const {return new OpencogOcTree(resolution); }
 
-            std::string getTreeType() const {return "OctomapOcTree";}
+            std::string getTreeType() const {return "OpencogOcTree";}
             // deep clone this octree3DMapManager and return the new instance
-            OctomapOcTree* clone() const;
+            OpencogOcTree* clone() const;
 
             inline string getMapName() const {return mMapName;}
             inline float getAgentHeight() const {return mAgentHeight;}
@@ -139,8 +138,8 @@ namespace opencog
 
 
             // set node block handle at given key or coordinate. Replaces previous block handle.
-            OctomapOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& block);
-            OctomapOcTreeNode* setNodeBlock(const point3d& pos, const Handle& block);
+            OpencogOcTreeNode* setNodeBlock(const double& x, const double& y,const double& z, const Handle& block);
+            OpencogOcTreeNode* setNodeBlock(const point3d& pos, const Handle& block);
 
             //  check if the block is out of octree's max size
             bool checkIsOutOfRange(const BlockVector& pos) const;
@@ -164,8 +163,8 @@ namespace opencog
             // functions for save/load map in persist/, but haven't implemented yet. Keep it to make code compiled.
             void save(FILE* fp ){};
             void load(FILE* fp ){};
-            static std::string toString(const OctomapOcTree& map ){return string("");}
-            static OctomapOcTree* fromString(const std::string& map ){return NULL;}
+            static std::string toString(const OpencogOcTree& map ){return string("");}
+            static OpencogOcTree* fromString(const std::string& map ){return NULL;}
 
         protected:
 
@@ -174,11 +173,11 @@ namespace opencog
              * ends up in the classIDMapping only once
              */
 
-        OctomapOcTree(double resolution): OccupancyOcTreeBase<OctomapOcTreeNode>(resolution){}
+        OpencogOcTree(double resolution): OccupancyOcTreeBase<OpencogOcTreeNode>(resolution){}
             class StaticMemberInitializer{
             public:
                 StaticMemberInitializer() {
-                    OctomapOcTree* tree = new OctomapOcTree(0.1);
+                    OpencogOcTree* tree = new OpencogOcTree(0.1);
                     AbstractOcTree::registerTreeType(tree);
                 }
             };
@@ -195,7 +194,7 @@ namespace opencog
             map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
 
             // this constructor is only used for clone
-            OctomapOcTree(const OctomapOcTree&);
+            OpencogOcTree(const OpencogOcTree&);
         };
 
     } // end namespace
