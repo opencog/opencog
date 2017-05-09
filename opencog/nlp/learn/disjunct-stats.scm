@@ -306,32 +306,50 @@
 
 (define slow-total-mi (get-total-mi-slow))
 
+; Get partial MI for word.
+(define (cset-vec-mi WORD)
+	(define n-tot (get-stashed-count))
+	(define sum 0)
+	(define n-word (cset-vec-observations WORD))
+	(for-each
+		(lambda (cset)
+			(define dj (cset-get-disjunct cset))
+			(define n-dj (cset-vec-observations dj))
+			(define n-cset (get-count cset))
+			(set! sum
+				(+ sum (* n-cset (log (/ (* n-cset n-tot) (* n-word n-dj)))))
+		))
+		(get-cset-vec WORD))
+	; (/ sum n-tot)
+	(/ sum n-word)
+)
+
 ; A much faster, optimized version
 (define (get-total-mi)
 	(define prog 0)
 	(define prog-len (length all-cset-words))
-	(define n-tot (get-stashed-count))
 	(define sum 0)
 	(for-each
 		(lambda (word)
-			(define n-word (cset-vec-observations word))
 			(set! prog (+ prog 1))
 			(if (eqv? 0 (modulo prog 100))
 				(format #t "doing ~A of ~A\n" prog prog-len))
-			(for-each
-				(lambda (cset)
-					(define dj (cset-get-disjunct cset))
-					(define n-dj (cset-vec-observations dj))
-					(define n-cset (get-count cset))
-					(set! sum
-						(+ sum (* n-cset (log (/ (* n-cset n-tot) (* n-word n-dj)))))
-				))
-				(get-cset-vec word)))
+			(set! sum (+ sum (cset-vec-mi word))))
 		all-cset-words)
-	sum)
+	sum
+)
 
 (define total-mi (get-total-mi))
 
 (define total-mi-bits (/ total-mi (log 2.0)))
+
+; ---------------------------------------------------------------------
+; Rank words according to the MI between them and thier disjuncts
+(define sorted-word-mi (score-and-rank cset-vec-mi all-cset-words)
+
+; Print above to a file, so that it can be graphed.
+(let ((outport (open-file "/tmp/ranked-word-mi.dat" "w")))
+	(print-ts-rank sorted-word-mi outport)
+	(close outport))
 
 ; ---------------------------------------------------------------------

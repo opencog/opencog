@@ -4337,3 +4337,15 @@ ad   cset-vec-observations
 		(set! total-cset-count (+ total-cset-count (get-count cset))) #f)
 	'LgWordCset)
 
+7.984991833299495  bits total MI bits
+
+(cset-vec-mi (Word "United"))  7.116097374166928
+is the relative(?) MI to the disjuncts in the word.
+(is how much MI this word contributes to the total MI)
+(and its slightly below average)
+
+(cset-vec-frequency (Word "United"))
+
+(/ (log (cset-vec-frequency (Word "United"))) (log 2))
+-10.48276867673862  is the entropy for that word, only.
+
