@@ -24,78 +24,22 @@ TypeFrame::~TypeFrame()
 {
 }
 
-bool TypeFrame::lessThan(TypeFrame &other) const
-{
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-printf("OPERATOR LESSTHAN\n");
-printForDebug("", "", true);
-other.printForDebug("", "", true);
-    TypeFrame::const_iterator it1 = this->begin();    
-    TypeFrame::const_iterator it2 = other.begin();    
-    int cursor = 0;
-    while (it1 < this->end()) {
-        if (it2 == other.end()) return false;
-        if ((*it1).first < (*it2).first) {
-            return true;
-        } else if ((*it1).first > (*it2).first) {
-            return false;
-        } else {
-            if ((*it1).second < (*it2).second) {
-                return true;
-            } else if ((*it1).second > (*it2).second) {
-                return false;
-            } else {
-                bool check1 = nodeNameDefined(cursor);
-                bool check2 = other.nodeNameDefined(cursor);
-printf("INNER CHECK\n");
-printf("cursor: %d\n", cursor);
-printf("check1: %s\n", (check1 ? "true" : "false"));
-printf("check2: %s\n", (check2 ? "true" : "false"));
-                if (!check1 && check2) {
-                    return true;
-                } else if (check1 && !check2) {
-                    return false;
-                } else if (check1 && check2) {
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
-                    int comp = nodeNameAt(cursor).compare(other.nodeNameAt(cursor));
-                    if (comp < 0) {
-                        return true;
-                    } else if (comp > 0) {
-                        return false;
-                    }
-                }
-            }
-        }
-        it1++;
-        it2++;
-        cursor++;
-    }
-    return (it2 != other.end());
-}
-
 bool TypeFrame::isValid() const
 {
     return validInstance;
 }
 
-bool TypeFrame::nodeNameDefined(int pos) const
+bool TypeFrame::nodeNameDefined(unsigned int pos) const
 {
     return (nodeNameMap.find(pos) != nodeNameMap.end());
 }
 
-std::string TypeFrame::nodeNameAt(int pos) const
+bool TypeFrame::typeAtEqualsTo(unsigned int pos, const std::string &typeName) const
+{
+    return (classserver().getTypeName(at(pos).first).compare(typeName) == 0);
+}
+
+std::string TypeFrame::nodeNameAt(unsigned int pos) const
 {
     std::string answer = "";
     NodeNameMap::const_iterator it = nodeNameMap.find(pos);
@@ -107,7 +51,7 @@ std::string TypeFrame::nodeNameAt(int pos) const
     return answer;
 }
 
-void TypeFrame::setNodeNameAt(int pos, std::string name)
+void TypeFrame::setNodeNameAt(unsigned int pos, std::string name)
 {
     nodeNameMap.insert(NodeNameMap::value_type(pos, name));
 }
@@ -122,7 +66,7 @@ void TypeFrame::append(TypeFrame &other)
     }
 }
 
-void TypeFrame::pickAndPushBack(TypeFrame &other, int pos)
+void TypeFrame::pickAndPushBack(const TypeFrame &other, unsigned int pos)
 {
     push_back(other.at(pos));
     if (other.nodeNameDefined(pos)) {
@@ -130,17 +74,14 @@ void TypeFrame::pickAndPushBack(TypeFrame &other, int pos)
     }
 }
 
-TypeFrame TypeFrame::buildSignature(int cursor)
+std::vector<int> TypeFrame::getArgumentsPosition(unsigned int cursor) const
 {
-    TypeFrame answer;
+    std::vector<int> answer;
 
     int nargs = at(cursor).second;
     while (nargs > 0) {
         cursor++;
-        answer.push_back(at(cursor));
-        if (nodeNameDefined(cursor)) {
-            answer.setNodeNameAt(answer.size() - 1, nodeNameAt(cursor));
-        }
+        answer.push_back(cursor);
         nargs--;
         if (nargs > 0) {
             int skip = at(cursor).second;
@@ -150,6 +91,143 @@ TypeFrame TypeFrame::buildSignature(int cursor)
                 skip--;
             }
         }
+    }
+
+    return answer;
+}
+
+TypeFrame TypeFrame::buildSignature(unsigned int cursor)
+{
+    TypeFrame answer;
+
+    std::vector<int> argPos = getArgumentsPosition(cursor);
+    for (unsigned int i = 0; i < argPos.size(); i++) {
+        answer.push_back(at(argPos.at(i)));
+        if (nodeNameDefined(argPos.at(i))) {
+            answer.setNodeNameAt(answer.size() - 1, nodeNameAt(argPos.at(i)));
+        }
+    }
+
+    return answer;
+}
+
+bool TypeFrame::isStarPattern(const TypePair &pair)
+{
+    return ((pair.first == STAR_PATTERN.first) && (pair.second == STAR_PATTERN.second));
+}
+
+bool TypeFrame::subFrameEqual(unsigned int cursor, const TypeFrame &other, unsigned int otherCursor)
+{
+    bool answer = true;
+
+    int numArgs = 1;
+    while (numArgs > 0) {
+        if ((cursor == size()) || (otherCursor == other.size())) {
+            answer = false;
+            break;
+        }
+        if ((at(cursor).first != other.at(otherCursor).first) || (at(cursor).second != other.at(otherCursor).second)) {
+            answer = false;
+            break;
+        }
+        numArgs--;
+        numArgs += at(cursor).second;
+        cursor++;
+        otherCursor++;
+    }
+
+    return answer;
+}
+
+bool TypeFrame::subFramesEqual(unsigned int cursorA, unsigned int cursorB)
+{
+    bool answer = true;
+
+    int numArgs = 1;
+    while (numArgs > 0) {
+        if ((cursorA == size()) || (cursorB == size())) {
+            answer = false;
+            break;
+        }
+        if ((at(cursorA).first != at(cursorB).first) || (at(cursorA).second != at(cursorB).second)) {
+            answer = false;
+            break;
+        }
+        numArgs--;
+        numArgs += at(cursorA).second;
+        cursorA++;
+        cursorB++;
+    }
+
+    return answer;
+}
+
+unsigned int TypeFrame::getNextAtomPos(unsigned int cursor)
+{
+    int nargs = 1;
+    while (nargs > 0) {
+        if (cursor >= size()) {
+            cursor = -1;
+            break;
+        }
+        nargs--;
+        nargs += at(cursor).second;
+        cursor++;
+    }
+
+    return cursor;
+}
+
+bool TypeFrame::match(std::vector<int> &mapping, const TypeFrame &pattern)
+{
+    bool answer = true;
+    unsigned int patternCursor = 0;
+    unsigned int cursor = 0;
+
+    mapping.clear();
+    while (patternCursor < pattern.size()) {
+        if (cursor >= size()) {
+            answer = false;
+            break;
+        }
+        if (isStarPattern(pattern.at(patternCursor))) {
+            mapping.push_back(cursor);
+            patternCursor++;
+            cursor = getNextAtomPos(cursor);
+        } else {
+            if ((at(cursor).first != pattern.at(patternCursor).first) || 
+                (at(cursor).second != pattern.at(patternCursor).second) || 
+                (pattern.nodeNameDefined(patternCursor) && (pattern.nodeNameAt(patternCursor).compare(nodeNameAt(cursor)) != 0))
+               ) {
+                answer = false;
+                break;
+            } else {
+                mapping.push_back(cursor);
+                patternCursor++;
+                cursor++;
+            }
+        }
+    }
+
+    if (cursor < size()) answer = false;
+    if (! answer) mapping.clear();
+
+    return answer;
+}
+
+bool TypeFrame::match(std::vector<int> &mapping, const TypeFrame &pattern, const IntPairVector &constraints)
+{
+    bool answer = true;
+
+    if (match(mapping, pattern)) {
+        for (unsigned int i = 0; i < constraints.size(); i++) {
+            if (! subFramesEqual(mapping.at(constraints.at(i).first), mapping.at(constraints.at(i).second))) {
+                answer = false;
+                break;
+            }
+        }
+    } else {
+        answer = false;
     }
 
     return answer;
@@ -193,7 +271,7 @@ bool TypeFrame::buildFrameRepresentation(const string &schemeTxt)
     return false;
 }
 
-int TypeFrame::countTargets(const string &txt, int begin)
+int TypeFrame::countTargets(const string &txt, unsigned int begin)
 {
 
     int answer = 0;
@@ -222,7 +300,7 @@ int TypeFrame::countTargets(const string &txt, int begin)
     }
 }
 
-int TypeFrame::recursiveParse(const string &txt, int begin)
+int TypeFrame::recursiveParse(const string &txt, unsigned int begin)
 {
     if (txt.at(begin) != '(') {
         fprintf(stderr, "Expected \'(\' at index %d of string %s\n", begin, txt.c_str());

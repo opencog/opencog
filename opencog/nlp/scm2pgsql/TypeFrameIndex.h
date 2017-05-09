@@ -38,27 +38,47 @@ class TypeFrameIndex
 
 public:
 
+    typedef std::set<int> IntegerSet;
+
+private:
+
+    typedef std::map<std::string, IntegerSet> StringMap;
+    typedef std::vector<std::pair<int, int>> IntPairVector;
+    typedef std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> IntPairPairVector;
+    typedef std::map<TypeFrame, IntegerSet, TypeFrame::LessThan> PatternMap;
+    typedef std::pair<int, std::vector<int>> ResultPair;
+
+    bool DEBUG = true;
+    bool TOPLEVEL_ONLY = true;
+    std::vector<TypeFrame> frames;
+    PatternMap occurrenceSet;
+    IntegerSet occurrenceUniverse;
+
+    void query(std::vector<ResultPair> &result, TypeFrame &keyExpression, StringMap &variableOccurrences, const TypeFrame &queryFrame, int cursor);
+    void addPatternOccurrence(TypeFrame &pattern, int pos);
+    std::vector<TypeFrame> computeSubPatterns(TypeFrame &baseFrame, int cursorn, int pos);
+    void selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor);
+    void buildConstraints(IntPairVector &constraints, StringMap &variableOccurrences);
+    void buildJointConstraints(IntPairPairVector &constraints, std::vector<StringMap> &variableOccurrences);
+    void buildQueryTerm(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor);
+    void printForDebug(bool showNodeNames = false);
+    void printRecursionResult(std::vector<ResultPair> &v);
+
+
+public:
+
     TypeFrameIndex();
 
     // TODO Implement this
     ~TypeFrameIndex();
 
-    bool addFromScheme(const std::string &txt, int offset);
+    bool addFromScheme(const std::string &scm, int offset);
+    void query(IntegerSet &result, const std::string &queryScm);
+    void query(IntegerSet &result, const TypeFrame &queryFrame);
+
     bool addFrame(TypeFrame &frame, int offset);
+    TypeFrame getFrameAt(int index);
     void buildSubPatternsIndex();
-
-private:
-
-    typedef std::set<int> IntegerSet;
-    typedef std::map<TypeFrame, IntegerSet, TypeFrame::LessThan> PatternMap;
-
-    bool DEBUG = false;
-    std::vector<TypeFrame> frames;
-    PatternMap occurrenceSet;
-
-    void addPatternOccurrence(TypeFrame &pattern, int pos);
-    std::vector<TypeFrame> computeSubPatterns(TypeFrame &baseFrame, int cursor);
-    void printForDebug(bool showNodeNames = false);
 };
 
 }

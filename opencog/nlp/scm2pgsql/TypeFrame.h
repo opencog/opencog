@@ -40,6 +40,25 @@ typedef std::pair<Type, Arity> TypePair;
 class TypeFrame: public std::vector<TypePair>
 {
 
+private:
+
+    typedef std::map<int, std::string> NodeNameMap;
+    typedef std::vector<std::pair<int, int>> IntPairVector;
+
+
+    bool DEBUG = false;
+    bool validInstance;
+    NodeNameMap nodeNameMap;
+
+    bool isStarPattern(const TypePair &pair);
+    bool subFrameEqual(unsigned int cursor, const TypeFrame &other, unsigned int otherCursor);
+    unsigned int getNextAtomPos(unsigned int cursor);
+    bool buildFrameRepresentation(const std::string &schemeRepresentation);
+    int countTargets(const std::string &txt, unsigned int begin);
+    int recursiveParse(const std::string &txt, unsigned int begin);
+    void error(std::string message);
+    void check();
+
 public:
 
     TypeFrame(const std::string &schemeRepresentation);
@@ -105,28 +124,18 @@ public:
 
     bool lessThan(TypeFrame &other) const;
     bool isValid() const;
-    TypeFrame buildSignature(int cursor);
-    bool nodeNameDefined(int pos) const;
-    std::string nodeNameAt(int pos) const;
-    void setNodeNameAt(int pos, std::string name);
+    std::vector<int> getArgumentsPosition(unsigned int cursor) const;
+    TypeFrame buildSignature(unsigned int cursor);
+    bool nodeNameDefined(unsigned int pos) const;
+    std::string nodeNameAt(unsigned int pos) const;
+    void setNodeNameAt(unsigned int pos, std::string name);
+    bool typeAtEqualsTo(unsigned int pos, const std::string &typeName) const;
     void append(TypeFrame &other);
-    void pickAndPushBack(TypeFrame &other, int pos);
+    void pickAndPushBack(const TypeFrame &other, unsigned int pos);
+    bool match(std::vector<int> &mapping, const TypeFrame &pattern);
+    bool match(std::vector<int> &mapping, const TypeFrame &pattern, const IntPairVector &constraints);
+    bool subFramesEqual(unsigned int cursorA, unsigned int cursorB);
     void printForDebug(std::string prefix = "", std::string suffix = "", bool showNames = false) const;
-
-private:
-
-    typedef std::map<int, std::string> NodeNameMap;
-
-    bool DEBUG = false;
-    bool validInstance;
-    NodeNameMap nodeNameMap;
-
-    bool buildFrameRepresentation(const std::string &schemeRepresentation);
-
-    int countTargets(const std::string &txt, int begin);
-    int recursiveParse(const std::string &txt, int begin);
-    void error(std::string message);
-    void check();
 
 };
 }
