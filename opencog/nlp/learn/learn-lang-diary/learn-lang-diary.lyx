@@ -20074,11 +20074,14 @@ Mean-square to size ratio
 \begin_layout Standard
 More intesting is the ratio of mean-square size to the total size.
  In formulas, by ranking according to 
-\begin_inset Formula $\sqrt{\sum_{d}N(d,w)^{2}}/N(*,w)$
+\begin_inset Formula 
+\[
+\frac{\sqrt{\sum_{d}N^{2}(d,w)}}{N(*,w)}=\frac{\sqrt{\sum_{d}p^{2}(d,w)}}{p(*,w)}
+\]
+
 \end_inset
 
-.
- This seems like the interesting ratio, because the Zipf exponent of -0.65
+This seems like the interesting ratio, because the Zipf exponent of -0.65
  would be doubled, when working with mean-square sizes, thus making the
  two rankings comparable.
 \end_layout
@@ -20811,18 +20814,42 @@ Neither of these variations seem promising; they seem to offer up more of
 \end_layout
 
 \begin_layout Subsection*
-Entropy
+Mutual Information
 \end_layout
 
 \begin_layout Standard
-Perhaps its best to leave well-enough alone, but a quick look at the entropy
- ranking could be interesting.
- This assigns a score of 
-\begin_inset Formula $\sum_{d}N(d,w)\log N(d,w)$
+Another interesting item is a mutual-information ranking.
+ It is given by the (fractional) mutual information between a word, and
+ all of it's disjuncts:
+\begin_inset Formula 
+\[
+MI(w)=\frac{1}{p(w)}\sum_{d}p(d,w)\log_{2}\frac{p(d,w)}{p(d,*)p(*,w)}
+\]
+
 \end_inset
 
- to each word.
- The top-ten in this ranking are...
+This is written in the 
+\begin_inset Quotes eld
+\end_inset
+
+fractional
+\begin_inset Quotes erd
+\end_inset
+
+ style, so that the total MI of the entire dataset can be written as
+\begin_inset Formula 
+\[
+MI=\sum_{w}p(w)MI(w)
+\]
+
+\end_inset
+
+That is, 
+\begin_inset Formula $MI(w)$
+\end_inset
+
+ is the fractional contribution of the word to the total MI.
+ The total MI for the dataset is measured to be 7.985 bits.
 \end_layout
 
 \begin_layout Subsection*
@@ -20831,6 +20858,12 @@ Hubbiness
 
 \begin_layout Standard
 Hubbiness can be defined as the average number of connectors per disjunct
+\end_layout
+
+\begin_layout Standard
+Yuck.
+ We need verbs, desperately! wikipedia sucks is the story here; we need
+ kids lit.
 \end_layout
 
 \begin_layout Subsection*
