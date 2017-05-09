@@ -16,7 +16,8 @@
              (opencog nlp)
              (opencog nlp fuzzy)
              (opencog nlp microplanning)
-             (opencog nlp relex2logic))
+             (opencog nlp relex2logic)
+             (opencog exec))
 
 ; -----------------------------------------------------------------------
 ; TODO: Replace these time related utilities with one from TimeMap, when it is

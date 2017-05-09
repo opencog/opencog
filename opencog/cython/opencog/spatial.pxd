@@ -19,22 +19,22 @@ cdef extern from "opencog/spatial/3DSpaceMap/Block3DMapUtil.h" namespace "openco
         double z
 
 
-cdef extern from "opencog/spatial/3DSpaceMap/OctomapOcTree.h" namespace "opencog::spatial":
+cdef extern from "opencog/spatial/3DSpaceMap/OpencogOcTree.h" namespace "opencog::spatial":
 
-    cdef cppclass cOctomapOcTreeNode "opencog::spatial::OctomapOcTreeNode":
+    cdef cppclass cOpencogOcTreeNode "opencog::spatial::OpencogOcTreeNode":
         float getLogOdds()
 
-    cdef cppclass cOctomapOcTree "opencog::spatial::OctomapOcTree":
-        cOctomapOcTree(string, double)
+    cdef cppclass cOpencogOcTree "opencog::spatial::OpencogOcTree":
+        cOpencogOcTree(string, double)
 
-        #OctomapOcTree Inherited Interface
+        #OpencogOcTree Inherited Interface
 
         float getOccupancyThresLog()
         void setOccupancyThres(float)
 
-        cOctomapOcTreeNode* search(float, float, float)
+        cOpencogOcTreeNode* search(float, float, float)
 
-        #OctomapOcTree Interface
+        #OpencogOcTree Interface
 
         cHandle getBlock(cBlockVector, float)
 
@@ -63,5 +63,5 @@ cdef extern from "opencog/spatial/3DSpaceMap/EntityRecorder.h" namespace "openco
         cHandle getEntity(cBlockVector)
 
 cdef extern from "opencog/spatial/3DSpaceMap/SpaceMapUtil.h" namespace "opencog::spatial":
-    bool checkStandableWithProb(cAtomSpace, cOctomapOcTree, cBlockVector, float)
-    cBlockVector getNearFreePointAtDistance(cAtomSpace, cOctomapOcTree, cBlockVector, int, cBlockVector, bool)
+    bool checkStandableWithProb(cAtomSpace, cOpencogOcTree, cBlockVector, float)
+    cBlockVector getNearFreePointAtDistance(cAtomSpace, cOpencogOcTree, cBlockVector, int, cBlockVector, bool)

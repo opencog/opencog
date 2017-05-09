@@ -3,7 +3,7 @@
 #include <octomap/octomap_types.h>
 #include <octomap/OcTreeKey.h>
 #include <opencog/util/exceptions.h>
-#include "OctomapOcTree.h"
+#include "OpencogOcTree.h"
 
 using namespace opencog;
 using namespace opencog::spatial;
@@ -20,32 +20,32 @@ BlockVector point3dToBlockVector(point3d pos)
     return BlockVector(pos.x(), pos.y(), pos.z());
 }
 
-void OctomapOcTreeNode::cloneNodeRecur(const OctomapOcTreeNode& rhs)
+void OpencogOcTreeNode::cloneNodeRecur(const OpencogOcTreeNode& rhs)
 {
     mblockHandle = rhs.mblockHandle;
     if (rhs.hasChildren()) {
         for (unsigned i = 0; i<8; ++i) {
             if (rhs.children[i]) {
-                OctomapOcTreeNode* thisChild = static_cast<OctomapOcTreeNode*>(this->children[i]);
-                thisChild->cloneNodeRecur(*(static_cast<OctomapOcTreeNode*>(rhs.children[i])));
+                OpencogOcTreeNode* thisChild = static_cast<OpencogOcTreeNode*>(this->children[i]);
+                thisChild->cloneNodeRecur(*(static_cast<OpencogOcTreeNode*>(rhs.children[i])));
             }
         }
     }
 
 }
 
-OctomapOcTreeNode::OctomapOcTreeNode(const OctomapOcTreeNode& rhs): OcTreeNode(rhs)
+OpencogOcTreeNode::OpencogOcTreeNode(const OpencogOcTreeNode& rhs): OcTreeNode(rhs)
 {
     this->cloneNodeRecur(rhs);
 }
 
-OctomapOcTreeNode& OctomapOcTreeNode::operator=(const OctomapOcTreeNode& rhs)
+OpencogOcTreeNode& OpencogOcTreeNode::operator=(const OpencogOcTreeNode& rhs)
 {
     this->cloneNodeRecur(rhs);
     return *this;
 }
 
-OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const double& x,
+OpencogOcTreeNode* OpencogOcTree::setNodeBlock(const double& x,
                                                const double& y,
                                                const double& z,
                                                const Handle& block)
@@ -55,9 +55,9 @@ OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const double& x,
 }
 
 
-OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const point3d& pos, const Handle& block)
+OpencogOcTreeNode* OpencogOcTree::setNodeBlock(const point3d& pos, const Handle& block)
 {
-    OctomapOcTreeNode* n = search(pos);
+    OpencogOcTreeNode* n = search(pos);
     if (n != NULL) {
         // add/remove record in atom->position map
         Handle oldBlock = n->getBlock();
@@ -75,14 +75,14 @@ OctomapOcTreeNode* OctomapOcTree::setNodeBlock(const point3d& pos, const Handle&
     return n;
 }
 
-Handle OctomapOcTree::getBlock(const BlockVector& pos) const
+Handle OpencogOcTree::getBlock(const BlockVector& pos) const
 {
     return getBlock(pos, occ_prob_thres_log);
 }
 
-Handle OctomapOcTree::getBlock(const BlockVector& pos, const float logOddsOccupancyThreshold) const
+Handle OpencogOcTree::getBlock(const BlockVector& pos, const float logOddsOccupancyThreshold) const
 {
-    OctomapOcTreeNode* blocknode = this->search(pos.x, pos.y, pos.z);
+    OpencogOcTreeNode* blocknode = this->search(pos.x, pos.y, pos.z);
     if (blocknode == NULL ||
         blocknode->getLogOdds() < logOddsOccupancyThreshold) {
         return Handle::UNDEFINED;
@@ -92,23 +92,23 @@ Handle OctomapOcTree::getBlock(const BlockVector& pos, const float logOddsOccupa
 }
 
 
-bool OctomapOcTree::checkIsOutOfRange(const BlockVector& pos) const
+bool OpencogOcTree::checkIsOutOfRange(const BlockVector& pos) const
 {
     OcTreeKey key;
     return !coordToKeyChecked(pos.x, pos.y, pos.z, key);
 }
 
-bool OctomapOcTree::checkBlockInPos(const Handle& block, const BlockVector& pos) const
+bool OpencogOcTree::checkBlockInPos(const Handle& block, const BlockVector& pos) const
 {
     return checkBlockInPos(block, pos, occ_prob_thres_log);
 }
 
 
-bool OctomapOcTree::checkBlockInPos(const Handle& block,
+bool OpencogOcTree::checkBlockInPos(const Handle& block,
                                     const BlockVector& pos,
                                     const float logOddsOccupancyThreshold) const
 {
-    OctomapOcTreeNode* blocknode = this->search(pos.x, pos.y, pos.z);
+    OpencogOcTreeNode* blocknode = this->search(pos.x, pos.y, pos.z);
     if (blocknode == NULL ||
         blocknode->getLogOdds() < logOddsOccupancyThreshold ||
         blocknode->getBlock() != block) {
@@ -118,39 +118,39 @@ bool OctomapOcTree::checkBlockInPos(const Handle& block,
     }
 }
 
-OctomapOcTree::OctomapOcTree(const std::string& mapName,const double resolution):
-    OccupancyOcTreeBase<OctomapOcTreeNode>(resolution),
+OpencogOcTree::OpencogOcTree(const std::string& mapName,const double resolution):
+    OccupancyOcTreeBase<OpencogOcTreeNode>(resolution),
     mMapName(mapName)
 {
     //set default agent height as 1
     mAgentHeight = 1;
 }
 
-OctomapOcTree* OctomapOcTree::clone() const
+OpencogOcTree* OpencogOcTree::clone() const
 {
-    OctomapOcTree* cloneMap = new OctomapOcTree(*this);
+    OpencogOcTree* cloneMap = new OpencogOcTree(*this);
     return cloneMap;
 }
 
 
-void OctomapOcTree::addSolidUnitBlock(const Handle& block, BlockVector pos)
+void OpencogOcTree::addSolidUnitBlock(const Handle& block, BlockVector pos)
 {
     setUnitBlock(block, pos, getOccupancyThresLog());
 }
 
 
-void OctomapOcTree::removeSolidUnitBlock(const Handle blockHandle)
+void OpencogOcTree::removeSolidUnitBlock(const Handle blockHandle)
 {
     auto it = mAllUnitAtomsToBlocksMap.find(blockHandle);
     if (mAllUnitAtomsToBlocksMap.end() == it)
         throw opencog::NotFoundException(TRACE_INFO,
-             "OctomapOcTree::removeSolidUnitBlock");
+             "OpencogOcTree::removeSolidUnitBlock");
 
     BlockVector pos = it->second;
-    OctomapOcTreeNode* n = search(pos.x, pos.y, pos.z);
+    OpencogOcTreeNode* n = search(pos.x, pos.y, pos.z);
     if (NULL == n)
         throw opencog::NotFoundException(TRACE_INFO,
-             "OctomapOcTree::removeSolidUnitBlock");
+             "OpencogOcTree::removeSolidUnitBlock");
 
     float curLogOdds = n->getLogOdds();
     float thres = getOccupancyThresLog();
@@ -167,18 +167,18 @@ void OctomapOcTree::removeSolidUnitBlock(const Handle blockHandle)
 }
 
 
-void OctomapOcTree::setUnitBlock(const Handle& block, BlockVector pos, float updateLogOddsOccupancy)
+void OpencogOcTree::setUnitBlock(const Handle& block, BlockVector pos, float updateLogOddsOccupancy)
 {
     this->updateNode(pos.x, pos.y, pos.z, float(updateLogOddsOccupancy));
     this->setNodeBlock(pos.x, pos.y, pos.z, block);
 }
 
-BlockVector OctomapOcTree::getBlockLocation(const Handle& block) const
+BlockVector OpencogOcTree::getBlockLocation(const Handle& block) const
 {
     return getBlockLocation(block, this->getOccupancyThresLog());
 }
 
-BlockVector OctomapOcTree::getBlockLocation(const Handle& block, float logOddsOccupancyThreshold) const
+BlockVector OpencogOcTree::getBlockLocation(const Handle& block, float logOddsOccupancyThreshold) const
 {
     auto it = mAllUnitAtomsToBlocksMap.find(block);
     if(it == mAllUnitAtomsToBlocksMap.end()) {
@@ -196,8 +196,8 @@ BlockVector OctomapOcTree::getBlockLocation(const Handle& block, float logOddsOc
 
 // this constructor is only used for clone
 
-OctomapOcTree::OctomapOcTree(const OctomapOcTree& rhs):
-    OccupancyOcTreeBase <OctomapOcTreeNode>(rhs),
+OpencogOcTree::OpencogOcTree(const OpencogOcTree& rhs):
+    OccupancyOcTreeBase <OpencogOcTreeNode>(rhs),
     mMapName(rhs.mMapName),
     mAgentHeight(rhs.mAgentHeight),
     mAllUnitAtomsToBlocksMap(rhs.mAllUnitAtomsToBlocksMap)
