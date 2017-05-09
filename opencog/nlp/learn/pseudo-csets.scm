@@ -121,13 +121,22 @@
 (define-public (get-disjunct-string DISJUNCT)
 "
   Get a string representation for the disjunct
-  XXX TODO remove trailing blank.
+  XXX TODO remove leading blank.
 "
 	(string-concatenate
 		(map
-			(lambda (cntor) (string-append
-					(cog-name (gar cntor)) (cog-name (gdr cntor)) " "))
+			(lambda (cntor) (string-append " "
+					(cog-name (gar cntor)) (cog-name (gdr cntor))))
 			(cog-outgoing-set DISJUNCT)))
+)
+
+(define-public (get-cset-string CSET)
+"
+  Get a string representation for the connector-set
+"
+	(string-append
+		(get-word-string (cset-get-word CSET)) ":"
+		(get-disjunct-string (cset-get-disjunct CSET)) ";")
 )
 
 ; Return the cset, if it exists.  If it does not exist, return the
@@ -520,6 +529,26 @@
 		'LgAnd)
 
 	all-djs
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (get-all-csets)
+"
+  get-all-csets -- Return all of the connector-sets in the atomspace.
+  Caution: this performs almost no sanity checks, and so could
+  easily return junk, if there are other LgWordCsets's in the atomspace.
+
+  The sanity check would be to make sure that the LgAnd has the desired
+  form, i.e. consisting entirely of PseudoDisjuncts.
+"
+	(define all-csets '())
+
+	(cog-map-type
+		(lambda (cset) (set! all-csets (cons cset all-csets)) #f)
+		'LgWordCset)
+
+	all-csets
 )
 
 ; ---------------------------------------------------------------------

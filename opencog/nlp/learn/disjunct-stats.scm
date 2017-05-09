@@ -38,6 +38,8 @@
 ; A list of all disjucnts (appearing in all csets)
 (define all-disjuncts (get-all-disjuncts))
 
+(define all-csets (get-all-csets))
+
 ; ---------------------------------------------------------------------
 ; A sorted list of score-word pairs, where the score is the count
 ; of the cset observations. Note that this score is *identical* to the
@@ -57,6 +59,15 @@
 ; Print above to a file, so that it can be graphed.
 (let ((outport (open-file "/tmp/ranked-dj-obs.dat" "w")))
 	(print-ts-rank-fn sorted-dj-obs outport get-disjunct-string)
+	(close outport))
+
+; A sorted list of score-cset pairs, where the score is the count
+; of the cset observations.
+(define sorted-cset-obs (score-and-rank get-count all-csets))
+
+; Print above to a file, so that it can be graphed.
+(let ((outport (open-file "/tmp/ranked-cset-obs.dat" "w")))
+	(print-ts-rank-fn sorted-cset-obs outport get-cset-string)
 	(close outport))
 
 ; ---------------------------------------------------------------------
