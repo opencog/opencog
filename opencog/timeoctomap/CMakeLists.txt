@@ -21,5 +21,4 @@ INSTALL (FILES
 	DESTINATION "include/${PROJECT_NAME}/timeoctomap"
 )
 
-# All of the bindings here are obsolete; do not build them.
-# ADD_SUBDIRECTORY (pointmemory)
+ADD_SUBDIRECTORY (pointmemory)

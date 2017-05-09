@@ -17,7 +17,7 @@
 (use-modules (opencog) (opencog atom-types)
 	(opencog eva-model) (opencog eva-behavior))
 
-(use-modules (opencog ato pointmem)); needed for maps
+(use-modules (opencog pointmem)); needed for maps
 
 (define last-speaker (Concept "last person who spoke"))
 (define prev-speaker (Concept "previous person who spoke"))
