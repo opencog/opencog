@@ -14,8 +14,9 @@
              (ice-9 optargs))
 
 (define (chatlang-prefix STR) (string-append "Chatlang: " STR))
-(define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
 (define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
+(define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
+(define chatlang-term-seq (Node (chatlang-prefix "term seq")))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -99,8 +100,8 @@
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
                               new-seq)))
     (Inheritance (List new-seq) chatlang-no-constant))
-  ; Wrap it using a TrueLink
-  ; TODO: Maybe there is a more elegant way to represent it in the context?
+  ; TODO: Wrap it using an TrueLink for now, use something better instead?
+  (Inheritance (List new-seq) chatlang-term-seq)
   (True (List new-seq))))
 
 (define-public (say TXT)
@@ -217,14 +218,14 @@
         ((equal? 'ListLink (cog-type TERM))
          (contains? TXT (string-join (map cog-name (cog-outgoing-set TERM)) " ")))
         ((equal? 'ConceptNode (cog-type TERM))
-         (not (null? (filter (lambda (t) (text-contains? TXT t))
-                             (get-members TERM)))))))
+         (any (lambda (t) (text-contains? TXT t))
+              (get-members TERM)))))
 
 (define-public (chatlang-negation? . TERMS)
   "Check if the input sentence has none of the terms specified."
   (let* ; Get the raw text input
         ((sent (car (cog-chase-link 'StateLink 'SentenceNode chatlang-anchor)))
          (itxt (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
-        (if (null? (filter (lambda (t) (text-contains? itxt t)) TERMS))
-            (stv 1 1)
-            (stv 0 1))))
+        (if (any (lambda (t) (text-contains? itxt t)) TERMS)
+            (stv 0 1)
+            (stv 1 1))))

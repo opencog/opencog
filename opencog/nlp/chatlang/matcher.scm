@@ -10,8 +10,17 @@
              (opencog exec))
 
 (define (get-term-seq RULE)
-  ; TODO
-  (gar (car (cog-filter 'TrueLink (cog-outgoing-set (gdr (gaaar RULE)))))))
+  "Find the term-seq in the context of the psi-rule.
+   Assumes there is only one such in the context.
+   Assumes RULE is a MemberLink."
+  (car (filter
+    (lambda (t) (let ((node (cog-chase-link 'InheritanceLink 'Node t)))
+                     (if (and (not (null? node))
+                              (any (lambda (n) (equal? chatlang-term-seq n))
+                                   node))
+                         #t
+                         #f)))
+    (map gar (cog-filter 'TrueLink (cog-outgoing-set (gdr (gaaar RULE))))))))
 
 (define globs '())
 (define-public (show-globs)
