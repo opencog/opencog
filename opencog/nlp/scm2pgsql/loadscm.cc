@@ -40,19 +40,26 @@ bool loadFile(char *fileName)
     bool returnValue = SCMLoader::load(fileName, atomSpace, &builder);
     //bool returnValue = SCMLoader::load(fileName, atomSpace);
     index.buildSubPatternsIndex();
-    TypeFrameIndex::IntegerSet result;
+    std::vector<TypeFrameIndex::ResultPair> result;
 
     std::string query2 = "(AndLink (InheritanceLink (VariableNode \"V2\") (VariableNode \"V3\")) (SimilarityLink (VariableNode \"V1\") (VariableNode \"V2\")))";
     std::string query6 = "(AndLink (InheritanceLink (VariableNode \"V2\") (VariableNode \"V2\")) (SimilarityLink (VariableNode \"V1\") (VariableNode \"V2\")))";
 
-    std::string query = query2;
+    std::string query = query6;
 
     index.query(result, query);
-    printf("Query: %s\nQuery result:\n", query.c_str());
-    for (TypeFrameIndex::IntegerSet::iterator it = result.begin(); it != result.end(); it++) {
-        printf("%d: ", (*it));
-        index.getFrameAt(*it).printForDebug("", "\n", true);
+    printf("Query: %s\n", query.c_str());
+    for (unsigned int i = 0; i < result.size(); i++) {
+        printf("Query solution %u\n" , i);
+        for (TypeFrameIndex::TypeFrameSet::iterator it = result.at(i).first.begin(); it != result.at(i).first.end(); it++) {
+            (*it).printForDebug("", "\n", true);
+        }
+        for (TypeFrameIndex::VarMapping::iterator it = result.at(i).second.begin(); it != result.at(i).second.end(); it++) {
+            printf("%s = ", (*it).first.c_str());
+            (*it).second.printForDebug("", "\n", true);
+        }
     }
+
     return returnValue;
 }
 

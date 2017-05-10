@@ -149,7 +149,10 @@ bool TypeFrame::subFramesEqual(unsigned int cursorA, unsigned int cursorB)
             answer = false;
             break;
         }
-        if ((at(cursorA).first != at(cursorB).first) || (at(cursorA).second != at(cursorB).second)) {
+        if ((at(cursorA).first != at(cursorB).first) || 
+            (at(cursorA).second != at(cursorB).second) ||
+            (nodeNameDefined(cursorA) != nodeNameDefined(cursorB)) ||
+            (nodeNameDefined(cursorA) && (nodeNameAt(cursorA).compare(nodeNameAt(cursorB)) != 0))) {
             answer = false;
             break;
         }
@@ -222,6 +225,45 @@ bool TypeFrame::match(std::vector<int> &mapping, const TypeFrame &pattern, const
     if (match(mapping, pattern)) {
         for (unsigned int i = 0; i < constraints.size(); i++) {
             if (! subFramesEqual(mapping.at(constraints.at(i).first), mapping.at(constraints.at(i).second))) {
+                answer = false;
+                break;
+            }
+        }
+    } else {
+        answer = false;
+    }
+
+    return answer;
+}
+
+TypeFrame TypeFrame::subFrameAt(int pos)
+{
+    TypeFrame answer;
+
+    int numArgs = 1;
+    while (numArgs > 0) {
+        answer.push_back(at(pos));
+        if (nodeNameDefined(pos)) {
+            answer.setNodeNameAt(answer.size() - 1, nodeNameAt(pos));
+        }
+        numArgs--;
+        numArgs += at(pos).second;
+        pos++;
+    }
+
+    return answer;
+}
+
+bool TypeFrame::equals(const TypeFrame &other) const
+{
+    bool answer = true;
+
+    if (other.size() == size()) {
+        for (unsigned int i = 0; i < size(); i++) {
+            if ((at(i).first != other.at(i).first) || 
+                (at(i).second != other.at(i).second) ||
+                (nodeNameDefined(i) != other.nodeNameDefined(i)) || 
+                (nodeNameDefined(i) && (nodeNameAt(i).compare(other.nodeNameAt(i)) != 0))) {
                 answer = false;
                 break;
             }

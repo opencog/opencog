@@ -241,7 +241,7 @@ void TypeFrameIndex::buildSubPatternsIndex()
     printForDebug(true);
 }
 
-void TypeFrameIndex::query(IntegerSet &result, const std::string &queryScm)
+void TypeFrameIndex::query(std::vector<ResultPair> &result, const std::string &queryScm)
 {
     TypeFrame queryFrame(queryScm);
     queryFrame.printForDebug("query: ", "\n", true);
@@ -284,25 +284,6 @@ void TypeFrameIndex::buildConstraints(IntPairVector &constraints, StringMap &var
     }
 }
 
-void TypeFrameIndex::buildJointConstraints(IntPairPairVector &constraints, std::vector<StringMap> &variableOccurrences)
-{
-    constraints.clear();
-    for (unsigned int i = 0; i < variableOccurrences.size(); i++) {
-        for (unsigned int j = i + 1; j < variableOccurrences.size(); j++) {
-            for (StringMap::iterator it1 = variableOccurrences.at(i).begin(); it1 != variableOccurrences.at(i).end(); it1++) {
-                StringMap::iterator it2 = variableOccurrences.at(j).find((*it1).first);
-                if (it2 != variableOccurrences.at(j).end()) {
-                    for (IntegerSet::iterator it3 = (*it1).second.begin(); it3 != (*it1).second.end(); it3++) {
-                        for (IntegerSet::iterator it4 = (*it2).second.begin(); it4 != (*it2).second.end(); it4++) {
-                            constraints.push_back(std::make_pair(std::make_pair(i, *it3), std::make_pair(j, *it4)));
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 void TypeFrameIndex::buildQueryTerm(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor)
 {
     selectCurrentElement(answer, variableOccurrences, baseFrame, cursor);
@@ -323,27 +304,68 @@ void TypeFrameIndex::buildQueryTerm(TypeFrame &answer, StringMap &variableOccurr
     }
 }
 
-void TypeFrameIndex::query(IntegerSet &result, const TypeFrame &queryFrame)
+void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &queryFrame)
 {
-    std::vector<ResultPair> recursionResult;
     TypeFrame keyExpression;
-    StringMap variableOccurrences;
 
-    query(recursionResult, keyExpression, variableOccurrences, queryFrame, 0);
+    query(result, keyExpression, queryFrame, 0);
+}
 
-    result.clear();
-    for (unsigned int i = 0; i < recursionResult.size(); i++) {
-        result.insert(recursionResult.at(i).first);
+bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapping &map2)
+{
+    bool answer = true;
+
+    if (DEBUG) {
+        printf("TypeFrameIndex::compatibleVarMappings()\n");
+        printVarMapping(map1);
+        printf("\n");
+        printVarMapping(map2);
+    }
+
+    for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); it1++) {
+        VarMapping::const_iterator it2 = map2.find((*it1).first);
+        if ((it2 != map2.end()) && (! (*it1).second.equals((*it2).second))) {
+            answer = false;
+            if (DEBUG) {
+                printf("Failed at %s\n", (*it1).first.c_str());
+            }
+            break;
+        }
+    }
+
+    return answer;
+}
+
+void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2)
+{
+    for (TypeFrameSet::const_iterator it = set1.begin(); it != set1.end(); it++) {
+        answer.insert(*it);
+    }
+    for (TypeFrameSet::const_iterator it = set2.begin(); it != set2.end(); it++) {
+        answer.insert(*it);
     }
 }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpression, StringMap &variableOccurrences, const TypeFrame &queryFrame, int cursor)
+void TypeFrameIndex::varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2)
+{
+    for (VarMapping::const_iterator it = map1.begin(); it != map1.end(); it++) {
+        answer.insert(*it);
+    }
+    for (VarMapping::const_iterator it = map2.begin(); it != map2.end(); it++) {
+        answer.insert(*it);
+    }
+}
+
+//void TypeFrameIndex::recurseQueryOnEachClause()
+//{
+//}
+
+void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpression, const TypeFrame &queryFrame, int cursor)
 {
     if (DEBUG) queryFrame.printForDebug("Query frame: ", "\n", true);
     if (DEBUG) printf("Cursor: %d\n", cursor);
     answer.clear();
     keyExpression.clear();
-    variableOccurrences.clear();
     unsigned int arity = queryFrame.at(cursor).second;
     std::vector<int> argPos = queryFrame.getArgumentsPosition(cursor);
 
@@ -351,72 +373,56 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
         if (DEBUG) printf("Head is AND\n");
         std::vector<std::vector<ResultPair>> recursionQueryResult(arity);
         std::vector<TypeFrame> recursionKeyExpression(arity);
-        std::vector<StringMap> recursionVariables(arity);
         keyExpression.pickAndPushBack(queryFrame, cursor);
         for (unsigned int i = 0; i < arity; i++) {
-            query(recursionQueryResult.at(i), recursionKeyExpression.at(i), recursionVariables.at(i), queryFrame, argPos.at(i));
+            query(recursionQueryResult.at(i), recursionKeyExpression.at(i), queryFrame, argPos.at(i));
         }
         for (unsigned int i = 0; i < arity; i++) {
             if (DEBUG) {
                 printf("recursion key[%d]: ", i);
                 recursionKeyExpression.at(i).printForDebug("", "\n", true);
             }
-            int offset = keyExpression.size();
-            for (StringMap::iterator it1 = recursionVariables.at(i).begin(); it1 != recursionVariables.at(i).end(); it1++) {
-                std::string key = (*it1).first;
-                if (variableOccurrences.find(key) == variableOccurrences.end()) {
-                    IntegerSet newSet;
-                    variableOccurrences.insert(StringMap::value_type(key, newSet));
-                }
-                for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); it2++) {
-                    variableOccurrences.find(key)->second.insert((*it2) + offset);
-                }
-            }
             keyExpression.append(recursionKeyExpression.at(i));
         }
         keyExpression.printForDebug("Resulting key: ", "\n", true);
-        IntPairPairVector jointConstraints;
-        buildJointConstraints(jointConstraints, recursionVariables);
+
         if (DEBUG) {
-            printf("Joint constraints:\n");
-        }
-        IntegerSet invalidResults;
-        for (unsigned int j = 0; j < jointConstraints.size(); j++) {
-            int index1 = jointConstraints.at(j).first.first;
-            int index2 = jointConstraints.at(j).second.first;
-            int pos1 = jointConstraints.at(j).first.second;
-            int pos2 = jointConstraints.at(j).second.second;
-            if (DEBUG) {
-                printf("(%d, %d) == (%d, %d)\n", index1, pos1, index2, pos2);
-            }
-            for (unsigned int m = 0; m < recursionQueryResult.at(index1).size(); m++) {
-                unsigned int candidate1 = recursionQueryResult.at(index1).at(m).first;
-                for (unsigned int n = 0; n < recursionQueryResult.at(index2).size(); n++) {
-                    unsigned int candidate2 = recursionQueryResult.at(index2).at(n).first;
-                    if ((candidate1 == candidate2) && (! frames.at(candidate1).subFramesEqual(recursionQueryResult.at(index1).at(m).second.at(pos1), recursionQueryResult.at(index2).at(n).second.at(pos2)))) {
-                        invalidResults.insert(candidate1);
-                        if (DEBUG) {
-                            printf("Invalid candidate: %d\n", candidate1);
-                        }
-                    }
-                }
-            }
-        }
-        for (unsigned int i = 0; i < arity; i++) {
-            if (DEBUG) {
+            for (unsigned int i = 0; i < arity; i++) {
                 printf("Recursion result [%u]:\n", i);
                 printRecursionResult(recursionQueryResult.at(i));
             }
-            for (unsigned int j = 0; j < recursionQueryResult.at(i).size(); j++) {
-                if (invalidResults.find(recursionQueryResult.at(i).at(j).first) == invalidResults.end()) {
-                    std::vector<int> newMap;
-                    for (unsigned int k = 0; k < recursionQueryResult.at(i).at(j).second.size(); k++) {
-                        newMap.push_back(recursionQueryResult.at(i).at(j).second.at(k) + argPos.at(i));
+        }
+
+        std::vector<ResultPair> aux[2];
+        int src = 0;
+        int tgt = 1;
+        for (unsigned int j = 0; j < recursionQueryResult.at(0).size(); j++) {
+            //printf("Copying to tgt %d\n", tgt);
+            aux[tgt].push_back(recursionQueryResult.at(0).at(j));
+        }
+        for (unsigned int i = 1; i < arity; i++) {
+            src = i % 2;
+            tgt = 1 - src;
+            aux[tgt].clear();
+            //printf("Clear tgt %d\n", tgt);
+            for (unsigned int a = 0; a < aux[src].size(); a++) {
+                for (unsigned int b = 0; b < recursionQueryResult.at(i).size(); b++) {
+                    if (compatibleVarMappings(aux[src].at(a).second, recursionQueryResult.at(i).at(b).second)) {
+                        TypeFrameSet newSet;
+                        VarMapping newMapping;
+                        typeFrameSetUnion(newSet, aux[src].at(a).first, recursionQueryResult.at(i).at(b).first);
+                        varMappingUnion(newMapping, aux[src].at(a).second, recursionQueryResult.at(i).at(b).second);
+                        aux[tgt].push_back(std::make_pair(newSet, newMapping));
+                        //printf("Set tgt %d\n", tgt);
                     }
-                    answer.push_back(std::make_pair(recursionQueryResult.at(i).at(j).first, newMap));
                 }
             }
         }
+        for (unsigned int i = 0; i < aux[tgt].size(); i++) {
+            //printf("Copying from tgt %d\n", tgt);
+            answer.push_back(aux[tgt].at(i));
+        }
+
         if (DEBUG) {
             printf("Answer:\n");
             printRecursionResult(answer);
@@ -428,10 +434,11 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
     } else {
         if (DEBUG) printf("Head is query term\n");
         IntPairVector constraints;
+        StringMap variableOccurrences;
         buildQueryTerm(keyExpression, variableOccurrences, queryFrame, cursor);
         buildConstraints(constraints, variableOccurrences);
         if (DEBUG) {
-            keyExpression.printForDebug("Query term: ", "\n", true);
+            keyExpression.printForDebug("Key: ", "\n", true);
             for (StringMap::iterator it1 = variableOccurrences.begin(); it1 != variableOccurrences.end(); it1++) {
                 printf("%s: ", (*it1).first.c_str());
                 for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); it2++) {
@@ -448,30 +455,46 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
             for (IntegerSet::iterator it2 = (*it1).second.begin(); it2 != (*it1).second.end(); it2++) {
                 std::vector<int> mapping;
                 if (frames.at(*it2).match(mapping, keyExpression, constraints)) {
-                    answer.push_back(std::make_pair(*it2, mapping));
+                    VarMapping varMap;
+                    TypeFrameSet frameSet;
+                    for (StringMap::iterator it = variableOccurrences.begin(); it != variableOccurrences.end(); it++) {
+                        varMap.insert(VarMapping::value_type((*it).first, frames.at(*it2).subFrameAt(*((*it).second.begin()))));
+                    }
+                    frameSet.insert(frames.at(*it2));
+                    answer.push_back(std::make_pair(frameSet, varMap));
                 }
             }
         }
     }
 }
 
-void TypeFrameIndex::printRecursionResult(std::vector<ResultPair> &v)
+void TypeFrameIndex::printVarMapping(const VarMapping &map) const
 {
-    for (unsigned int i = 0; i < v.size(); i++) {
-        printf("%d [", v.at(i).first);
-        for (unsigned int j = 0; j < v.at(i).second.size(); j++) {
-            printf("%d", v.at(i).second.at(j));
-            if (j != (v.at(i).second.size() - 1)) {
-                printf(" ");
-            }
-        }
-        printf("]\n");
+    for (VarMapping::const_iterator it = map.begin(); it != map.end(); it++) {
+        printf("%s = ", (*it).first.c_str());
+        (*it).second.printForDebug("", "\n", true);
     }
 }
 
-void TypeFrameIndex::printForDebug(bool showNodeNames)
+void TypeFrameIndex::printTypeFrameSet(const TypeFrameSet &set) const
 {
-    PatternMap::iterator it1 = occurrenceSet.begin();
+    for (TypeFrameSet::const_iterator it = set.begin(); it != set.end(); it++) {
+        (*it).printForDebug("", "\n", true);
+    }
+}
+
+void TypeFrameIndex::printRecursionResult(const std::vector<ResultPair> &v) const
+{
+    for (unsigned int i = 0; i < v.size(); i++) {
+        printf("Solution %u\n" , i);
+        printTypeFrameSet(v.at(i).first);
+        printVarMapping(v.at(i).second);
+    }
+}
+
+void TypeFrameIndex::printForDebug(bool showNodeNames) const
+{
+    PatternMap::const_iterator it1 = occurrenceSet.begin();
     while (it1 != occurrenceSet.end()) {
         (*it1).first.printForDebug("[", "]: ", showNodeNames);
         IntegerSet::iterator it2 = (*it1).second.begin();

@@ -39,6 +39,9 @@ class TypeFrameIndex
 public:
 
     typedef std::set<int> IntegerSet;
+    typedef std::set<TypeFrame> TypeFrameSet;
+    typedef std::map<std::string, TypeFrame> VarMapping;
+    typedef std::pair<TypeFrameSet, VarMapping> ResultPair;
 
 private:
 
@@ -46,7 +49,6 @@ private:
     typedef std::vector<std::pair<int, int>> IntPairVector;
     typedef std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> IntPairPairVector;
     typedef std::map<TypeFrame, IntegerSet, TypeFrame::LessThan> PatternMap;
-    typedef std::pair<int, std::vector<int>> ResultPair;
 
     bool DEBUG = true;
     bool TOPLEVEL_ONLY = true;
@@ -54,15 +56,22 @@ private:
     PatternMap occurrenceSet;
     IntegerSet occurrenceUniverse;
 
-    void query(std::vector<ResultPair> &result, TypeFrame &keyExpression, StringMap &variableOccurrences, const TypeFrame &queryFrame, int cursor);
+    void query(std::vector<ResultPair> &result, TypeFrame &keyExpression, const TypeFrame &queryFrame, int cursor);
     void addPatternOccurrence(TypeFrame &pattern, int pos);
     std::vector<TypeFrame> computeSubPatterns(TypeFrame &baseFrame, int cursorn, int pos);
     void selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor);
     void buildConstraints(IntPairVector &constraints, StringMap &variableOccurrences);
     void buildJointConstraints(IntPairPairVector &constraints, std::vector<StringMap> &variableOccurrences);
     void buildQueryTerm(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor);
-    void printForDebug(bool showNodeNames = false);
-    void printRecursionResult(std::vector<ResultPair> &v);
+    bool compatibleVarMappings(const VarMapping &map1, const VarMapping &map2);
+    void typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2);
+    void varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2);
+
+    void printForDebug(bool showNodeNames = false) const;
+    void printRecursionResult(const std::vector<ResultPair> &v) const;
+    void printVarMapping(const VarMapping &map) const;
+    void printTypeFrameSet(const TypeFrameSet &set) const;
+
 
 
 public:
@@ -73,8 +82,8 @@ public:
     ~TypeFrameIndex();
 
     bool addFromScheme(const std::string &scm, int offset);
-    void query(IntegerSet &result, const std::string &queryScm);
-    void query(IntegerSet &result, const TypeFrame &queryFrame);
+    void query(std::vector<ResultPair> &result, const std::string &queryScm);
+    void query(std::vector<ResultPair> &result, const TypeFrame &queryFrame);
 
     bool addFrame(TypeFrame &frame, int offset);
     TypeFrame getFrameAt(int index);

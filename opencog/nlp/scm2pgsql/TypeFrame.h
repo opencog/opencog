@@ -126,6 +126,7 @@ public:
     bool isValid() const;
     std::vector<int> getArgumentsPosition(unsigned int cursor) const;
     TypeFrame buildSignature(unsigned int cursor);
+    bool equals(const TypeFrame &other) const;
     bool nodeNameDefined(unsigned int pos) const;
     std::string nodeNameAt(unsigned int pos) const;
     void setNodeNameAt(unsigned int pos, std::string name);
@@ -135,6 +136,7 @@ public:
     bool match(std::vector<int> &mapping, const TypeFrame &pattern);
     bool match(std::vector<int> &mapping, const TypeFrame &pattern, const IntPairVector &constraints);
     bool subFramesEqual(unsigned int cursorA, unsigned int cursorB);
+    TypeFrame subFrameAt(int pos);
     void printForDebug(std::string prefix = "", std::string suffix = "", bool showNames = false) const;
 
 };
