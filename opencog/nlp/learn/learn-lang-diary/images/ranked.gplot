@@ -119,4 +119,4 @@ set title "Ranking by avgerage number of connectors"
 set xlabel "Rank"
 set ylabel "Average number of connetors"
 plot "ranked-avg-connectors.dat" using 1:2 with lines linewidth 2 title "", \
-     "ranked-avg-connectors.dat" using 1:(10/$1 ** 0.25) with lines linewidth 2 title "rank^-0.25"
+     "ranked-avg-connectors.dat" using 1:(7/$1 ** 0.2) with lines linewidth 2 title "rank^-0.2"

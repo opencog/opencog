@@ -21581,20 +21581,56 @@ Veterans+ of+ Treasury+ Treasury+
 
 \begin_layout Standard
 The list continues in a similar way, for quite a while.
+ The green line suggests that if some 30 or so pathological cases are ignored,
+ the system settles down to a more respectable behavior.
+ Entries 30 through 50 in the rankings are "Bay" "Street" "Island" "of"
+ "century" "right" "Game" "Georgian" "or" "a" ";" "near" "Party" "team"
+ "law" "Australia" "her" "research" "Church" "east" "Government".
  Notable is a preponderance of capitalized words, suggesting more tables
- of various sorts, and an almost complete lack of verbs.
+ of various sorts, and a complete lack of verbs.
+ A spot-check of words like 
+\begin_inset Quotes eld
+\end_inset
+
+team
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+law
+\begin_inset Quotes erd
+\end_inset
+
+ shows that the pathological behavior continues.
+ Several conclusions are possible.
+\end_layout
+
+\begin_layout Standard
+One conclusion is that there is a severe shortage of verbs in Wikipedia
+ articles, and this makes sense: its primarily descriptive, rather than
+ active: running, jumping, hitting, putting, mixing, giving, setting are
+ not the kinds of verbs that are required to describe a typical encyclopedia
+ topic.
  
 \end_layout
 
 \begin_layout Standard
-This suggests that there is a severe shortage of verbs in Wikipdia articles,
- and this makes sense: its primarily descriptive, rather than active: running,
- jumping, hitting, putting, mixing, giving, setting are not the kinds of
- verbs that are required to describe a typical encyclopedia topic.
+Another conclusion is that perhaps the number of observations of pairs are
+ insufficient to get deep, reliable MST parsing.
+ Junk links get used because there were not enough appropriate word-pairs
+ seen to give a good-quality MST parse.
+ A related conclusion is that the connector-set dataset is also too thin:
+ The grammatially reasonable connectors are observed not even a few dozen
+ times, barely pushing them out of the noise-floor of onesie-twosie observations
+ of junk.
+ 
 \end_layout
 
 \begin_layout Standard
-This suggests that there is an urgent need for non-Wikipedia content.
+So: bigger datasets, and an urgent need for non-Wikipedia content.
  Fiction, and presumably teen fiction should be filled with the kinds of
  active verbs describing human motions and actions, and should be absent
  of tables and lists masquerading as sentences.
@@ -21632,18 +21668,6 @@ Given the earlier Zipfian results on the average degree
 
  to some ten or twenty percent.
  
-\end_layout
-
-\begin_layout Subsection*
-highest ranked dependents!
-\end_layout
-
-\begin_layout Standard
-s too
-\end_layout
-
-\begin_layout Standard
-also 
 \end_layout
 
 \begin_layout Subsection*
