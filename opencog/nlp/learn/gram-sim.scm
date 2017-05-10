@@ -38,7 +38,17 @@
 (define (sim-pair WORD-A WORD-B) (SimilarityLink WORD-A WORD-B))
 
 ; ---------------------------------------------------------------------
-; Public API for fetching the btached results
+; Public API for fetching the batched results
+
+(define-public (fetch-all-sims)
+"
+  fetch-all-simss - fetch all SimilarityLinks from the database backend.
+"
+	(define start-time (current-time))
+	(load-atoms-of-type 'SimilarityLink)
+	(format #t "Elapsed time to load sims: ~A secs\n"
+		(- (current-time) start-time))
+)
 
 (define (pair-sim WORD-A WORD-B)
 	(cog-link 'SimilarityLink WORD-A WORD-B))

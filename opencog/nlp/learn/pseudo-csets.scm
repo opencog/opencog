@@ -100,6 +100,16 @@
 	(cog-incoming-by-type ITEM 'LgWordCset)
 )
 
+(define-public (sort-cset-vec ITEM)
+"
+  sort-cset-vec ITEM - Return the vector of pseudo-connector sets
+  for the ITEM, in sorted order of the number of observations.
+"
+	(sort (get-cset-vec ITEM)
+		(lambda (a b)
+			(> (get-count a) (get-count b))))
+)
+
 (define-public (cset-get-word CSET)
 "
   Return the word of the CSET
@@ -143,6 +153,22 @@
 ; empty list '()
 (define (have-cset? WORD DISJUNCT)
 	(cog-link 'LgWordCset WORD DISJUNCT))
+
+(define-public (print-cset-list PORT LIST)
+"
+  print-cset-list PORT LIST -- print a list of connector sets to PORT.
+
+  The list is pretty-printed, with the number of observations,
+  the word, and the disjuncts.
+"
+	(for-each
+		(lambda (cset)
+			(format PORT "~A	~A	~A\n"
+				(get-count cset)
+				(cog-name (cset-get-word cset))
+				(get-disjunct-string (cset-get-disjunct cset))))
+		LIST)
+)
 
 ; ---------------------------------------------------------------------
 

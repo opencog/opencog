@@ -4419,5 +4419,44 @@ store-sim
  (use-modules (opencog) (opencog persist) (opencog persist-sql))
  (use-modules (opencog nlp) (opencog nlp learn))
  (sql-open "postgres:///en_pairs_sim?user=linas")
+ (use-modules (opencog cogserver))
+ (start-cogserver "opencog2.conf")
  (fetch-all-words)
+(fetch-pseudo-csets (get-all-words))
+
+70 74 128
+
+95  0.953598053136202  'conjunction .. accordance'
+
+504  0.868429815807705  'in .. from'
+633  0.8549756852697713  'in .. at'
+637  0.8545553489854567  'In .. By'
+643  0.8540378312493768  'in .. After'
+740  0.846034030453443  'canal .. swamp'
+
+
+754  0.843837363738534  'at .. At'
+757  0.8436223414042503  'in .. In'
+818  0.838269351079866  'in .. on'
+840  0.8366056647469058  'creation .. existence'
+878  0.8332692184393486  'e.g .. i.e'
+965  0.8265058609938521  'and .. but'
+969  0.8264399296782371  'in .. With'
+971  0.8263325988164274  'in .. inside'
+
+
+canal -- 68 dj 
+
+(define (prt-sim sim port)
+   (format port "~A  '~A .. ~A'\n" (sim-cosine sim)
+      (cog-name (gar sim)) (cog-name (gdr sim))))
+
+get-disjunct-string
+
+20.0  canal  the-
+8.0  canal  the- .+
+5.0  canal  the- ,+
+
+14.0  swamp  the-
+3.0  swamp  the- .+
 

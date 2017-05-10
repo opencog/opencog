@@ -275,7 +275,7 @@
 ; ---------------------------------------------------------------------
 ; Entropies.
 
-; Several ways of counting the same thing. Thse should all
+; Several ways of counting the same thing. These should all
 ; give the same result.
 (define total-cset-count (cset-observations all-cset-words))
 (define total-cset-count (get-total-cset-count))
