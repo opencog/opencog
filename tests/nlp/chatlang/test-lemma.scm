@@ -8,5 +8,5 @@
 (define test-lemma-result
     (not (null? (filter (lambda (x)
         (and (eq? (cog-type x) 'LemmaLink)
-             (equal? (gdr x) (WordNode "is"))))
+             (equal? (gdr x) (WordNode "be"))))
         (cdr lemma)))))
