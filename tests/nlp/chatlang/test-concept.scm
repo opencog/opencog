@@ -4,7 +4,7 @@
 
 (define concept (concept "drink"))
 
-; Just want to see if the EvaluationLink is there...
+; Check the EvaluationLink created
 (define test-concept-result
     (let ((c (car (cdr concept))))
         (and (eq? (cog-type c) 'EvaluationLink)
