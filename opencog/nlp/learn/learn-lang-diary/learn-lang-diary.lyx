@@ -21671,11 +21671,83 @@ Given the earlier Zipfian results on the average degree
 \end_layout
 
 \begin_layout Subsection*
-Similarity
+Cosine Similarity
+\end_layout
+
+\begin_layout Standard
+The cosine similarity between two vectors is simply thier inner product.
+ In this case, given two words 
+\begin_inset Formula $w_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{2}$
+\end_inset
+
+, it is given by 
+\begin_inset Formula 
+\[
+\mbox{sim}(w_{1},w_{2})=\frac{\sum_{d}N(d,w_{1})N(d,w_{2})}{\mbox{len}(w_{1})\mbox{len}(w_{2})}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\mbox{len}(w)$
+\end_inset
+
+ is the root-mean-square length (Eucliden length) of the connector-set vector:
+\begin_inset Formula 
+\[
+\mbox{len}(w)=\sqrt{\sum_{d}N^{2}(d,w)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The current dataset being analyzed contains 1985 words whose length is greater
+ than 8; the ranking-by-length was already shown up above, in a previous
+ graph.
+ The similarity between all pairs of these was computed; this resulted in
+ 15809 pairs with a cosine similarity of greater than 0.5.
+ These can be sorted and ranked.
+ They are shown below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-sims.eps
+	width 60text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Well, that's new! The similarity ranking is very well fit by a cubic! In
+ the above, the green line is given by 
+\begin_inset Formula $1-\log^{3}(rank)/1800$
+\end_inset
+
+ and it fits the tailing end of the distribution so well, that the red data
+ line is almost completely hidden under the green line!
+\end_layout
+
+\begin_layout Standard
+The top-ten simialrity pairs are: 
 \end_layout
 
 \begin_layout Standard
 two kinds: cosine, and 3-point MI (and jaccard...?)
+\end_layout
+
+\begin_layout Standard
+
 \end_layout
 
 \begin_layout Section*
