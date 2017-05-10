@@ -18833,6 +18833,130 @@ This is a report on a small dataset of disjuncts and connector sets, extracted
 \end_layout
 
 \begin_layout Subsection*
+Summary of results
+\end_layout
+
+\begin_layout Standard
+The primary results reported below are these:
+\end_layout
+
+\begin_layout Standard
+* Most scores and metrics that can be assigned to connector sets give a
+ (scale-free) Zipfian ranking distribution, and are thus fairly boring.
+\end_layout
+
+\begin_layout Standard
+* The greater the average number of observations per disjunct, the more
+ grammatically acceptable (accurate) the disjunct seems to be.
+ This is good news: it means that the general technique is not generating
+ ungrammatical garbage.
+\end_layout
+
+\begin_layout Standard
+* Connector sets can be given a mutual information score.
+ The ranking distribution for this is not at all Zipfian.
+ The MI score seems to be quite good at identifying words that participate
+ in idioms, set phrases and institutional phrases.
+\end_layout
+
+\begin_layout Standard
+* The average number of connectors per disjunct, which should have indicated
+ the part-of-speech that the word belongs to, fails to do this.
+ This seems to be due to the small size of the dataset, the fact that it
+ is polluted with lists and tables, masquerading as sentences (its a Wikipedia
+ sample), and that there seem the be very few verbs in the sample (Wikipedia
+ articles describe concepts and events, using the copula to describe them:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+is
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+has
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+was
+\begin_inset Quotes erd
+\end_inset
+
+, and is almost devoid of narrative verbs: 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+jumped
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+hit
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+ate
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+thought
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+took
+\begin_inset Quotes erd
+\end_inset
+
+.) The WP sources need to be supplemented with narrative texts, ideally from
+ young-adult literature.
+\end_layout
+
+\begin_layout Standard
+* Cosine similarity applied to connector sets seems to be an effective way
+ of determining the grammatical similarity of words.
+ This is despite the fact that closer examination reveals that the dataset
+ is quite thin and poor, and the similarity is based on scant evidence.
+ Despite the scant evidence, the similarity scores do seem to distinguish
+ different kinds of nouns quite well.
+ A big surprise is that it also seems to cluster prepositions quite well.
+ There seem to be few or no verbs in the dataset, as already noted.
+ It seems that even small datasets are sufficient to get started with grammatica
+l similarity clustering, but much larger samples are needed for discovering
+ more sophisticaed grammar.
+\end_layout
+
+\begin_layout Subsection*
 Recap
 \end_layout
 
@@ -19777,7 +19901,7 @@ It has
 
 .
  The fourth and fifth disjuncts are grammatical garbage.
- The average number of disjucnt observations is 3.03, almost identical to
+ The average number of disjunct observations is 3.03, almost identical to
  that for 
 \begin_inset Quotes eld
 \end_inset
