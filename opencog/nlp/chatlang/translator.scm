@@ -12,8 +12,10 @@
              (ice-9 popen)
              (ice-9 optargs))
 
-(define (chatlang-prefix str) (string-append "Chatlang: " str))
+(define-public (chatlang-prefix STR) (string-append "Chatlang: " STR))
+(define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
 (define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
+(define chatlang-term-seq (Node (chatlang-prefix "term seq")))
 
 ;; Shared variables for all terms
 (define atomese-variable-template (list (TypedVariable (Variable "$S")
@@ -24,102 +26,118 @@
 ;; Shared conditions for all terms
 (define atomese-condition-template (list (Parse (Variable "$P")
                                                 (Variable "$S"))
-                                         (State (Anchor "Currently Processing")
+                                         (State chatlang-anchor
                                                 (Variable "$S"))))
 
-(define (process-pattern-term term atomese-pattern)
+(define (process-pattern-term TERM ATOMESE)
   "Process a single term -- calls the term function and appends the new
-   variables and conditions to the existing pair."
-  (let* ((atomese-for-term (primitive-eval term))
-         (vars (append (car atomese-pattern) (car atomese-for-term)))
-         (conds (append (cdr atomese-pattern) (cdr atomese-for-term))))
-    (cons vars conds)))
+   variables and conditions to the existing pair.
+   The atomese are in the form of: ((A B) C)
+   where A is the variable declaration, B is the condition, C is the
+   term sequence."
+  (let* ((no-var-cond (cons '() '()))
+         ; Use the lemma of a word for the term-seq
+         (atomese-for-term
+           (cond ((equal? 'lemma (car TERM))
+                  (cons (lemma (cdr TERM))
+                        (list (Word (get-lemma (cdr TERM))))))
+                 ((equal? 'word (car TERM))
+                  (cons (word (cdr TERM))
+                        (list (Word (get-lemma (cdr TERM))))))
+                 ((equal? 'phrase (car TERM))
+                  (cons (phrase (cdr TERM))
+                        (map Word (string-split (cdr TERM) #\ ))))
+                 ((equal? 'concept (car TERM))
+                  (let ((var (choose-var-name)))
+                       (cons (concept (cdr TERM) var)
+                             (list (Glob var)))))
+                 ((equal? 'choices (car TERM))
+                  (let ((var (choose-var-name)))
+                       (cons (choices (cdr TERM) var)
+                             (list (Glob var)))))
+                 ((equal? 'unordered-matching (car TERM))
+                  (cons (unordered-matching (cdr TERM))
+                        (list (Glob (choose-var-name)))))
+                 ((equal? 'negation (car TERM))
+                  (cons (negation (cdr TERM))
+                        '()))
+                 ((equal? 'anchor-start (car TERM))
+                  (cons no-var-cond (list "<")))
+                 ((equal? 'anchor-end (car TERM))
+                  (cons no-var-cond (list ">")))
+                 ; TODO
+                 (else (cons no-var-cond '()))))
+         (vars (append (caar ATOMESE) (caar atomese-for-term)))
+         (conds (append (cdar ATOMESE) (cdar atomese-for-term)))
+         (seq (append (cdr ATOMESE) (cdr atomese-for-term))))
+  (cons (cons vars conds) seq)))
 
-(define (term-sequence-check terms)
+(define (term-sequence-check SEQ)
   "Checks terms occur in the desired order. This is done when we're using
    DualLink to find the rules, see 'find-chat-rules' for details."
-  ; A hacky way to quickly find the lemma of a word using WordNet...
-  (define (get-lemma word)
-    (let* ((cmd-string (string-append "wn " word " | grep \"Information available for .\\+\""))
-           (port (open-input-pipe cmd-string))
-           (lemma ""))
-      (do ((line (get-line port) (get-line port)))
-          ((eof-object? line))
-        (let ((l (car (last-pair (string-split line #\ )))))
-          (if (not (equal? word l))
-            (set! lemma l))))
-      (close-pipe port)
-      (if (string-null? lemma) word lemma)))
-  (define word-list
-    (append-map (lambda (w)
-      (cond ((equal? 'concept (car w)) (list (Glob (cadr w))))
-            ; Skip the sentence anchors, they will be handled later
-            ((equal? 'anchor-start (car w)) '())
-            ((equal? 'anchor-end (car w)) '())
-            ; For proper names -- create WordNodes
-            ((equal? 'proper-names (car w)) (map Word (cdr w)))
-            ((equal? 'or-choices (car w)) (list (Glob "$choices")))
-            ((equal? 'unordered-matching (car w)) (list (Glob "$unordered")))
-            ((not (equal? #f (string-index (cadr w) char-upper-case?)))
-             (list (Word (cadr w))))
-            (else (list (Word (get-lemma (cadr w)))))))
-         terms))
-  ; Append the words in 'start-with' and 'end-with' to word-list, if any
-  (set! word-list (append start-with word-list end-with))
+  (let* ((no-start-anchor? (equal? #f (member "<" SEQ)))
+         (no-end-anchor? (equal? #f (member ">" SEQ)))
+         (start-with (if no-start-anchor? '() (cdr (member "<" SEQ))))
+         (end-with (if no-end-anchor?
+                       '()
+                       (take-while (lambda (t) (not (equal? ">" t))) SEQ)))
+         (new-seq (cond ((and (not (null? start-with)) (not (null? end-with)))
+                         (append start-with end-with))
+                        ; TODO: Append a zero-to-many-GlobNode at the end
+                        ((not (null? start-with))
+                         (append start-with
+                                 (take-while (lambda (t) (not (equal? "<" t))) SEQ)))
+                        ; TODO: Append a zero-to-many-GlobNode at the beginning
+                        ((not (null? end-with))
+                         (append (cdr (member ">" SEQ)) end-with))
+                        ; TODO: Append zero-to-many-GlobNodes
+                        (else SEQ))))
   ; DualLink couldn't match patterns with no constant terms in it
   ; Mark the rules with no constant terms so that ot cam be found
   ; easily during the matching process
-  (if (equal? (length word-list)
+  (if (equal? (length new-seq)
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
-                              word-list)))
-    (Inheritance (List word-list) chatlang-no-constant))
-  ; Wrap it using a TrueLink
-  ; TODO: Maybe there is a more elegant way to represent it in the context?
-  (True (List word-list)))
+                              new-seq)))
+    (Inheritance (List new-seq) chatlang-no-constant))
+  ; TODO: Wrap it using an TrueLink for now, use something better instead?
+  (Inheritance (List new-seq) chatlang-term-seq)
+  (True (List new-seq))))
 
-(define-public (say text)
+(define-public (say TXT)
   "Say the text and clear the state"
-  (And (True (Put (DefinedPredicate "Say") (Node text)))
-       (True (Put (State (Anchor "Currently Processing") (Variable "$x"))
+  ; TODO: Something simplier?
+  (And (True (Put (DefinedPredicate "Say") (Node TXT)))
+       (True (Put (State chatlang-anchor (Variable "$x"))
                   (Concept "Default State")))))
+
+(define (process-action ACTION)
+  "Process a single action -- converting it into atomese."
+  (cond ((equal? 'say (car ACTION))
+         (say (cdr ACTION)))))
 
 (define yakking (psi-demand "Yakking" 0.9))
 
-(define*-public (chat-rule pattern action #:optional name)
+(define*-public (chat-rule PATTERN ACTION #:optional NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((template (cons atomese-variable-template atomese-condition-template))
          (proc-terms (fold process-pattern-term
-                           template
-                           pattern))
-         ; There may be duplicates if the pattern contains any two or more
-         ; of the main-* terms, e.g. main-verb, main-subj, and main-obj
-         (var-list (delete-duplicates (car proc-terms)))
-         (cond-list (delete-duplicates (cdr proc-terms)))
-         (seq-check (term-sequence-check pattern)))
+                           (cons template '())
+                           PATTERN))
+         (var-list (caar proc-terms))
+         (cond-list (cdar proc-terms))
+         (term-seq (term-sequence-check (cdr proc-terms)))
+         (action (process-action ACTION)))
     (psi-rule
       (list (Satisfaction (VariableList var-list)
-                          (And (append cond-list (list seq-check)))))
-      (primitive-eval action)
+                          (And (append cond-list (list term-seq)))))
+      action
       (True)
       (stv .9 .9)
       yakking
-      name)))
+      NAME)))
 
-(define (member-words w)
-  (let ((words (string-split w #\sp)))
-    (if (= 1 (length words))
-        (Word (car words))
-        (List (map-in-order Word words)))))
-
-(define-public (chat-concept name members)
-  "Lets users create named concepts with explicit membership lists."
-  (let* ((c (Concept name))
-         (ref-members (append-map (lambda (m) (list (Reference (member-words m) c)))
-                                  members)))
-    ref-members))
-
-(define (get-sent-lemmas sent-node)
+(define (sent-get-lemmas-in-order SENT)
   "Get the lemma of the words associate with sent-node."
   (List (append-map
     (lambda (w)
@@ -138,52 +156,69 @@
             (if (integer? (string-index name #\_))
               (map Word (string-split name  #\_))
               (list wn)))))
-    (car (sent-get-words-in-order sent-node)))))
+    (car (sent-get-words-in-order SENT)))))
 
-(define-public (does-not-contain sent list-of-words)
-  "Check if the given sentence contains any of the listed words.
-   Return true if it contains none."
-  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
-    (if (null? (filter
-      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
-        (string-append "\\b" (cog-name w) "\\b") regexp/icase) sent-text))))
-          (cog-outgoing-set list-of-words)))
-      (stv 1 1)
-      (stv 0 1))))
+(define (get-lemma WORD)
+  "A hacky way to quickly find the lemma of a word using WordNet."
+  (let* ((cmd-string (string-append "wn " WORD " | grep \"Information available for .\\+\""))
+         (port (open-input-pipe cmd-string))
+         (lemma ""))
+    (do ((line (get-line port) (get-line port)))
+        ((eof-object? line))
+      (let ((l (car (last-pair (string-split line #\ )))))
+        (if (not (equal? WORD l))
+          (set! lemma l))))
+    (close-pipe port)
+    (if (string-null? lemma) WORD lemma)))
 
-(define-public (does-not-start-with sent list-of-words)
-  "Check if the given sentence starts with any of the listed words.
-   Return true if it starts with none of the words."
-  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
-    (if (null? (filter
-      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
-        (string-append "^" (cog-name w) "\\b") regexp/icase) sent-text))))
-          (cog-outgoing-set list-of-words)))
-      (stv 1 1)
-      (stv 0 1))))
+(define (get-members CONCEPT)
+  "Get the members of a concept. VariableNodes will be ignored, and
+   recursive calls will be made in case there are nested concepts."
+  (append-map
+    (lambda (g)
+      (cond ((eq? 'ConceptNode (cog-type g)) (get-members g))
+            ((eq? 'VariableNode (cog-type g)) '())
+            (else (list g))))
+    (cog-outgoing-set
+      (cog-execute! (Get (Reference (Variable "$x") CONCEPT))))))
 
-(define-public (does-not-end-with sent list-of-words)
-  "Check if the given sentence ends with any of the listed words.
-   Return true if it ends with none of the words."
-  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
-    (if (null? (filter
-      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
-        (string-append "\\b" (cog-name w) "$") regexp/icase) sent-text))))
-          (cog-outgoing-set list-of-words)))
-      (stv 1 1)
-      (stv 0 1))))
+(define-public (chatlang-concept? GLOB CONCEPT)
+  "Check if the value grounded for the GlobNode is actually a member
+   of the concept."
+  (let ((grd (assoc-ref globs (cog-name GLOB)))
+        (membs (get-members CONCEPT)))
+       (if (not (equal? #f (member grd membs)))
+           (stv 1 1)
+           (stv 0 1))))
 
-(define-public (no-words-in-between sent w1 w2 list-of-words)
-  "Check if the given sentence contains any of the listed words
-   between words w1 and w2.
-   Return true if it contains none."
-  (let ((sent-text (cog-name (car (cog-chase-link 'ListLink 'Node sent))))
-        (w1-name (cog-name w1))
-        (w2-name (cog-name w2)))
-    (if (null? (filter
-      (lambda (w) (not (equal? #f (regexp-exec (make-regexp
-        (string-append "\\b" w1-name " " (cog-name w) " " w2-name "\\b")
-          regexp/icase) sent-text))))
-            (cog-outgoing-set list-of-words)))
-      (stv 1 1)
-      (stv 0 1))))
+(define-public (chatlang-choices? GLOB CHOICES)
+  "Check if the value grounded for the GlobNode is actually a member
+   of the list of choices."
+  (let* ((grd (assoc-ref globs (cog-name GLOB)))
+         (chs (cog-outgoing-set CHOICES))
+         (cpts (append-map get-members (cog-filter 'ConceptNode chs))))
+        (if (not (equal? #f (member grd (append chs cpts))))
+            (stv 1 1)
+            (stv 0 1))))
+
+(define (text-contains? TXT TERM)
+  "Check if TXT contains TERM."
+  (define (contains? txt term)
+    (not (equal? #f (regexp-exec
+      (make-regexp (string-append "\\b" term "\\b") regexp/icase) txt))))
+  (cond ((equal? 'WordNode (cog-type TERM))
+         (contains? TXT (cog-name TERM)))
+        ((equal? 'ListLink (cog-type TERM))
+         (contains? TXT (string-join (map cog-name (cog-outgoing-set TERM)) " ")))
+        ((equal? 'ConceptNode (cog-type TERM))
+         (any (lambda (t) (text-contains? TXT t))
+              (get-members TERM)))))
+
+(define-public (chatlang-negation? . TERMS)
+  "Check if the input sentence has none of the terms specified."
+  (let* ; Get the raw text input
+        ((sent (car (cog-chase-link 'StateLink 'SentenceNode chatlang-anchor)))
+         (itxt (cog-name (car (cog-chase-link 'ListLink 'Node sent)))))
+        (if (any (lambda (t) (text-contains? itxt t)) TERMS)
+            (stv 0 1)
+            (stv 1 1))))

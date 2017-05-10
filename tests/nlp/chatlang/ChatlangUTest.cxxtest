@@ -66,12 +66,13 @@ public:
                   PROJECT_BINARY_DIR "/opencog/nlp/types"
          "\")");
 
-        
         // This is really really strange... we should not need to actually load
         // any of the codes like this as they are part of the chatlang module?
         // But for some reason two of the chatlang tests were failing on my
         // computer because somehow the definitions of the functions were not found??
         // How did the rest pass with the exact same setup? Makes no sense to me...
+        scm->eval("(load \"" PROJECT_SOURCE_DIR
+                   "/opencog/nlp/chatlang/ui.scm\")");
         scm->eval("(load \"" PROJECT_SOURCE_DIR
                    "/opencog/nlp/chatlang/terms.scm\")");
         scm->eval("(load \"" PROJECT_SOURCE_DIR
@@ -91,18 +92,12 @@ public:
     void test_ui_create_concept();
     void test_create_lemma();
     void test_create_word();
+    void test_create_phrase();
     void test_create_concept();
-    void test_create_pos();
-    void test_create_main_verb();
-    void test_create_main_subj();
-    void test_create_main_obj();
-    void test_create_proper_names();
-    void test_create_or_choices();
+    void test_create_choices();
     void test_unordered_matching();
-    void test_sentence_anchor();
     void test_negation();
     void test_create_chat_rule();
-    void test_chat_find_rules();
 };
 
 void ChatlangUTest::test_ui_create_concept()
@@ -141,6 +136,18 @@ void ChatlangUTest::test_create_word()
     logger().info("END TEST: %s", __FUNCTION__);
 }
 
+void ChatlangUTest::test_create_phrase()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-phrase.scm\")");
+
+    auto result = scm->eval("test-phrase-result");
+    TSM_ASSERT_EQUALS("Fail to create phrases!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
 void ChatlangUTest::test_create_concept()
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -153,74 +160,14 @@ void ChatlangUTest::test_create_concept()
     logger().info("END TEST: %s", __FUNCTION__);
 }
 
-void ChatlangUTest::test_create_pos()
+void ChatlangUTest::test_create_choices()
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-    scm->eval("(load-from-path \"test-pos.scm\")");
+    scm->eval("(load-from-path \"test-choices.scm\")");
 
-    auto result = scm->eval("test-pos-result");
-    TSM_ASSERT_EQUALS("Fail to create part of speech!", "#t\n", result);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
-void ChatlangUTest::test_create_main_verb()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-main-verb.scm\")");
-
-    auto result = scm->eval("test-main-verb-result");
-    TSM_ASSERT_EQUALS("Fail to create main verb!", "#t\n", result);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
-void ChatlangUTest::test_create_main_subj()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-main-subj.scm\")");
-
-    auto result = scm->eval("test-main-subj-result");
-    TSM_ASSERT_EQUALS("Fail to create main subject!", "#t\n", result);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
-void ChatlangUTest::test_create_main_obj()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-main-obj.scm\")");
-
-    auto result = scm->eval("test-main-obj-result");
-    TSM_ASSERT_EQUALS("Fail to create main object!", "#t\n", result);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
-void ChatlangUTest::test_create_proper_names()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-proper-names.scm\")");
-
-    auto result = scm->eval("test-proper-names-result");
-    TSM_ASSERT_EQUALS("Fail to create proper names!", "#t\n", result);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
-void ChatlangUTest::test_create_or_choices()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-or-choices.scm\")");
-
-    auto result = scm->eval("test-or-choices-result");
-    TSM_ASSERT_EQUALS("Fail to create or-choices!", "#t\n", result);
+    auto result = scm->eval("test-choices-result");
+    TSM_ASSERT_EQUALS("Fail to create choices!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -237,38 +184,14 @@ void ChatlangUTest::test_unordered_matching()
     logger().info("END TEST: %s", __FUNCTION__);
 }
 
-void ChatlangUTest::test_sentence_anchor()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-sentence-anchor.scm\")");
-
-    auto result_1 = scm->eval("test-start-with-result");
-    TSM_ASSERT_EQUALS("Fail on 'start-with'!", "#t\n", result_1);
-
-    auto result_2 = scm->eval("test-end-with-result");
-    TSM_ASSERT_EQUALS("Fail on 'end-with'!", "#t\n", result_2);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
 void ChatlangUTest::test_negation()
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
 
     scm->eval("(load-from-path \"test-negation.scm\")");
 
-    auto result_1 = scm->eval("test-result-1");
-    TSM_ASSERT_EQUALS("Fail on 'does-not-contain'!", "#t\n", result_1);
-
-    auto result_2 = scm->eval("test-result-2");
-    TSM_ASSERT_EQUALS("Fail on 'does-not-start-with'!", "#t\n", result_2);
-
-    auto result_3 = scm->eval("test-result-3");
-    TSM_ASSERT_EQUALS("Fail on 'does-not-end-with'!", "#t\n", result_3);
-
-    auto result_4 = scm->eval("test-result-4");
-    TSM_ASSERT_EQUALS("Fail on 'no-words-in-between'!", "#t\n", result_4);
+    auto result = scm->eval("test-negation-result");
+    TSM_ASSERT_EQUALS("Fail to create negations!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -281,27 +204,6 @@ void ChatlangUTest::test_create_chat_rule()
 
     auto result = scm->eval("test-chat-rule-result");
     TSM_ASSERT_EQUALS("Fail to create chat rules!", "#t\n", result);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-
-void ChatlangUTest::test_chat_find_rules()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-chat-find-rules.scm\")");
-
-    auto result_1 = scm->eval("test-chat-find-rules-result-1");
-    TSM_ASSERT_EQUALS("Fail to find rule-1", "#t\n", result_1);
-
-    auto result_2 = scm->eval("test-chat-find-rules-result-2");
-    TSM_ASSERT_EQUALS("Fail to find rule-2", "#t\n", result_2);
-
-    auto result_3 = scm->eval("test-chat-find-rules-result-3");
-    TSM_ASSERT_EQUALS("Fail to find rule-3", "#t\n", result_3);
-
-    auto result_4 = scm->eval("test-chat-find-rules-result-4");
-    TSM_ASSERT_EQUALS("Fail to find rule-4", "#t\n", result_4);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
