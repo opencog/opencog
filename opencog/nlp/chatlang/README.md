@@ -11,7 +11,7 @@ Let's look at an example. The ChatScript rule
 
 ```
 s: (I ~eat meat) Do you really? I am a vegan.
-``` 
+```
 
 would look like this, in the final version of the DSL:
 
@@ -23,10 +23,10 @@ would look like this, in the final version of the DSL:
 but that requires code for syntax sugaring and parsing, which isn't there
 yet. This parser would generate the following version of the same rule:
 
-``` 
+```
 (chat-rule '((lemma "I") (concept "eat") (lemma "meat"))
            '(say "Do you really? I am a vegan."))
-``` 
+```
 
 and executing the `chat-rule` function should create a PSI rule like this:
 
@@ -47,7 +47,7 @@ three components:
 2. A set of variables and conditions specific to each term.
 3. By default, a check for term order (rule terms are matched in order unless
    unordered match is explicitly called for).
-   
+
 So the context template is something like:
 
 ```
@@ -103,7 +103,7 @@ functional alpha state in the near future.
 
 ### Trivial Next Steps
 
-1. Expand the example/test script so it loads a few rules and a few sentences. 
+1. Expand the example/test script so it loads a few rules and a few sentences.
    Once it's working, add this folder to the cmake build files.
 2. Write term functions for proper nouns, main subject, verb and object, and
    position anchors.
@@ -121,7 +121,7 @@ functional alpha state in the near future.
    takes that as an input (as we do with TypedVariables).
 4. Test the use of non-verbal perceptions and actions. In principle these should
    just work, to the extent that they work under current OpenPSI dynamics.
-   
+
 ### Major Next Steps
 
 1. Syntax sugaring for rule definition.

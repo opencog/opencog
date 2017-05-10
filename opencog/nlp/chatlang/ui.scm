@@ -53,8 +53,8 @@
         ((string-prefix? "[" TXT)
          (let ((sm (string-match "^[['~a-zA-Z0-9 ]+]" TXT)))
            (if (equal? #f sm)
-               ; TODO: Do something else other then cog-logger-error?
-               (cog-logger-error "Syntax error: ~a" TXT)
+               ; Don't know what this is, treat it as default
+               (extract TXT)
                ; Return the choices
                (match:substring sm))))
         ; For handling negations
@@ -65,27 +65,24 @@
                 (extract TXT)
                 ; Return the negation of a phrase
                 (match:substring sm))))
-        ; For the rest, like concept and lemma,
+        ; For the rest -- concept and lemma,
         ; just return the whole term
         (else (extract TXT))))
 
 (define* (identify-terms TXT #:optional (LST '()))
-  "Construct a list of terms by recursively extracting the terms
-   one by one from the given text."
+  "Construct a list of terms by extracting the terms one by one
+   recursively from the given text."
   (cog-logger-debug "Constructing term-list from: ~a" TXT)
-
   (let* ((term (extract-term (string-trim-both TXT)))
          (newtxt (string-trim (string-drop TXT (string-length term))))
          (newlst (append LST (list term))))
-
     (cog-logger-debug "Term extracted: ~a" term)
-
     (if (< 0 (string-length newtxt))
         (identify-terms newtxt newlst)
         newlst)))
 
 (define (subterm STR NUM)
-  "Remove the first and last n chars from the string."
+  "Remove the first and last NUM chars from STR."
   (substring STR NUM (- (string-length STR) NUM)))
 
 (define (interpret-terms TERMS)
@@ -131,8 +128,9 @@
           ; Concept
           ((string-prefix? "~" t)
            (cons 'concept (substring t 1)))
+          ; TODO
+          ; ----
           ; Variable
-          ; TODO: There are many types of variables...
           ; ((equal? "_" t)
           ;  (string-append "(variable _)"))
           ; Part of speech (POS)
@@ -148,10 +146,8 @@
    the terms from the text and interpret them one by one later."
   (define terms (identify-terms (string-trim-both TXT)))
   (define interp-terms (interpret-terms terms))
-
   (cog-logger-debug "Total ~d terms were extracted: ~a" (length terms) terms)
   (cog-logger-debug "Term interpretation: ~a" interp-terms)
-
   interp-terms)
 
 (define-public (cr PATTERN ACTION)
@@ -170,7 +166,7 @@
         (cond ; The text input
               ((string? p)
                (interpret-text p))
-              (else (cog-logger-debug "TODO: ~a" p))))
+              (else (cog-logger-info "Feature not supported: ~a" p))))
       PATTERN))
 
   (define interp-action
@@ -180,13 +176,13 @@
         (cond ; The text output
               ((string? a)
                (cons 'say a))
-              (else (cog-logger-debug "TODO: ~a" a))))
+              (else (cog-logger-info "Feature not supported: ~a" a))))
       ACTION))
 
   (cog-logger-info "Interpretation of the pattern: ~a" interp-pattern)
   (cog-logger-info "Interpretation of the action: ~a" interp-action)
 
-  ; Now create the actual psi-rule
+  ; Now convert into atomese and create the actual psi-rule
   (chat-rule interp-pattern interp-action))
 
 (define (member-words STR)

@@ -6,14 +6,13 @@
              (opencog nlp)
              (opencog exec)
              (opencog openpsi)
-; XXX Testing
-;             (opencog eva-behavior)
+             (opencog eva-behavior)
              (srfi srfi-1)
              (rnrs io ports)
              (ice-9 popen)
              (ice-9 optargs))
 
-(define (chatlang-prefix STR) (string-append "Chatlang: " STR))
+(define-public (chatlang-prefix STR) (string-append "Chatlang: " STR))
 (define chatlang-anchor (Anchor (chatlang-prefix "Currently Processing")))
 (define chatlang-no-constant (Node (chatlang-prefix "No constant terms")))
 (define chatlang-term-seq (Node (chatlang-prefix "term seq")))
@@ -107,15 +106,9 @@
 (define-public (say TXT)
   "Say the text and clear the state"
   ; TODO: Something simplier?
-;  (And (True (Put (DefinedPredicate "Say") (Node TXT)))
-; XXX Testing
-(And (Evaluation (GroundedPredicate "scm: sss") (List (Node TXT)))
+  (And (True (Put (DefinedPredicate "Say") (Node TXT)))
        (True (Put (State chatlang-anchor (Variable "$x"))
                   (Concept "Default State")))))
-
-; XXX Testing
-(define-public (sss TTT)
-(display (cog-name TTT)) (newline) (stv 1 1))
 
 (define (process-action ACTION)
   "Process a single action -- converting it into atomese."
