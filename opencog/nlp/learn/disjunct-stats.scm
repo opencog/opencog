@@ -157,7 +157,10 @@
 ;
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-; Hubbbiness.
+; Vertex degrees and hubiness.
+; The vertex degree is the same thing as the number of connectors
+; on a disjunct.
+; Hubiness is the second moment of the vertex degree.
 
 (define (avg-con-count wrd)
 	(/ (cset-vec-connectors wrd) (cset-vec-observations wrd)))
@@ -172,13 +175,26 @@
 (define sorted-avg-connectors
 	(score-and-rank avg-con-count all-cset-words))
 
-(define sorted-avg-connectors
-	(score-and-rank avg-con-count
-		(filter (lambda (wrd) (< 300 (cset-vec-observations wrd)))
-			all-cset-words)))
-
 (let ((outport (open-file "/tmp/ranked-avg-connectors.dat" "w")))
 	(print-ts-rank sorted-avg-connectors outport)
+	(close outport))
+
+; ----
+; Second moment is sum (c^2/n) - (sum c/n)^2
+; RMS is sqrt (sum (c^2/n) - (sum c/n)^2)
+(define (moment-con-count wrd)
+	(define meansq
+		(/ (cset-vec-lp-connectors wrd 2) (cset-vec-observations wrd)))
+	(define avg (avg-con-count wrd))
+	(sqrt (- meansq (* avg avg))))
+
+(define sorted-hub-connectors
+	(score-and-rank moment-con-count
+		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+			all-cset-words)))
+
+(let ((outport (open-file "/tmp/ranked-hub-connectors.dat" "w")))
+	(print-ts-rank sorted-hub-connectors outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -207,7 +223,11 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
-; Sum over distributions
+; Sum over distributions. Basically, above gave two ranking
+; distributions, one for each word.  They can be averaged together
+; to get a smoother graph.  Here, we create a ranking for each
+; word, and then average them all together. This is kind of hokey,
+; in the end, but whatever.
 
 ; Create and zero out array.
 (define dj-sum (make-array 0 312500))

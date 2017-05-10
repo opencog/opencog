@@ -493,6 +493,42 @@
 ; so this is easy.
 (define (dj-connectors DISJUNCT) (length (cog-outgoing-set DISJUNCT)))
 
+; Count number of plus and minus connectors.
+; DIR should be (LgConnDirNode "+") or (LgConnDirNode "-")
+; Assumes that the direction is held in the second slot...
+(define (dj-connectors-dir DISJUNCT DIR)
+	(fold
+		(lambda (con sum)
+			(if (equal? (gdr con) DIR) (+ sum 1) sum))
+		0
+		(cog-outgoing-set DISJUNCT)))
+
+(define-public (cset-vec-lp-connectors ITEM P)
+"
+  cset-vec-lp-connectors ITEM - compute the total number of
+  observations of the lp-moment of the connectors on the ITEM.
+  Specifically, the sum (#connectors)^p.   Note the 1/p root
+  is NOT taken!  You probably want to deivce by the number of
+  observations first, and then take the 1/p power.
+  See cset-vec-connectors for more details.
+"
+	(define (num-conn cset)
+		(dj-connectors (cset-get-disjunct cset)))
+
+	(define (con-count cset)
+		(* (get-count cset) (expt (num-conn cset) P)))
+
+	; sum of the counts
+	(define sum
+		(fold
+			(lambda (cset sum) (+ (con-count cset) sum))
+			0
+			(get-cset-vec ITEM)))
+
+	; (expt sum (/ 1.0 P))
+	sum
+)
+
 (define-public (cset-vec-connectors ITEM)
 "
   cset-vec-connectors ITEM - compute the total number of observations
@@ -505,8 +541,20 @@
   as counts are stored in cset's, and this merely totals up and weights
   with respect to the items on the other side of ITEM.
 "
+	(cset-vec-lp-connectors ITEM 1)
+)
+
+(define-public (cset-vec-connectors-dir ITEM DIR)
+"
+  cset-vec-connectors-dir ITEM DIR - compute the total number of
+  observations of connectors on the ITEM, but only if the the
+  connector goes in direction DIR.  The DIR should be either
+  (LgConnDirNode "+") or (LgConnDirNode "-").
+
+  ITEM can be either a WordNode, or a disjunct (LgAnd).
+"
 	(define (con-count cset)
-		(* (get-count cset) (dj-connectors (cset-get-disjunct cset))))
+		(* (get-count cset) (dj-connectors-dir (cset-get-disjunct cset) DIR)))
 	; sum of the counts
 	(fold
 		(lambda (cset sum) (+ (con-count cset) sum))
