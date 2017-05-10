@@ -107,3 +107,16 @@ set xlabel "Rank"
 set ylabel "MI of word"
 plot "ranked-word-mi-hi-p.dat" using 1:2 with lines linewidth 2 title ""
 
+
+#################################################
+# Used to generate the vertex-degree ranking graphs.
+#
+set term postscript eps color
+set out 'ranked-avg-connectors.eps'
+set logscale x
+set logscale y
+set title "Ranking by avgerage number of connectors"
+set xlabel "Rank"
+set ylabel "Average number of connetors"
+plot "ranked-avg-connectors.dat" using 1:2 with lines linewidth 2 title "", \
+     "ranked-avg-connectors.dat" using 1:(10/$1 ** 0.25) with lines linewidth 2 title "rank^-0.25"

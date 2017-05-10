@@ -19041,7 +19041,8 @@ tly of any observations; let
 \begin_inset Formula $C(d,*)=\sum_{c}C(d,c)$
 \end_inset
 
- is the total number of connectors in the disjunct.
+ is the total number of connectors in the disjunct; it is the vertex degree
+ of all edges connecting to that disjunct.
  It is also useful to define 
 \begin_inset Formula $C(d,+)$
 \end_inset
@@ -21463,13 +21464,130 @@ K(w)=\sum_{d,c}N(d,w)C(d,c)
 
 \end_inset
 
+This is graphed, below, for all words that have at least 100 observations.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/ranked-avg-connectors.eps
+	width 60text%
+
+\end_inset
+
 
 \end_layout
 
 \begin_layout Standard
-Yuck.
- We need verbs, desperately! wikipedia sucks is the story here; we need
- kids lit.
+This graph is unexpected; in part, having an average number of conectors
+ that exceed 5 or 6 is intuitively surprising.
+ What's happening here? The first ten items in the ranking are: "-" "de"
+ "y" ":" "(" ")" "General" "Department" "x" "Act".
+ 
+\end_layout
+
+\begin_layout Standard
+Consider 
+\begin_inset Quotes eld
+\end_inset
+
+de
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There are 12 observations of the disjunct 
+\begin_inset Quotes eld
+\end_inset
+
+Janeiro+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There are 9 observations of the disjunct 
+\begin_inset Quotes eld
+\end_inset
+
+la+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There are 51 observations of a disjunct that has 117 connectors on it!!
+ This starts out as 
+\begin_inset Quotes eld
+\end_inset
+
+Diego- Francisco- Francisco- Alonso- Carlos- Fernández- Carlos-
+\begin_inset Quotes erd
+\end_inset
+
+ and ends with 
+\begin_inset Quotes eld
+\end_inset
+
+Figueroa+ (+ (+ y+
+\begin_inset Quotes erd
+\end_inset
+
+ suggesting that there were possibly 51 really bad parses of a very long
+ table of Spanish kings, which was mistaken for being a single sentence.
+ Clearly, its junk; its frequently-occuring junk, which suggests that the
+ table was repeatedly included in maybe 51 different wikiepdia pages.
+ 
+\end_layout
+
+\begin_layout Standard
+Similarly, 
+\begin_inset Quotes eld
+\end_inset
+
+Department
+\begin_inset Quotes erd
+\end_inset
+
+ has 18 observations of a disjunct with 41 connnectors on it.
+ It starts with 
+\begin_inset Quotes eld
+\end_inset
+
+Education- Education- Health- Services- Services- Immigration-
+\begin_inset Quotes erd
+\end_inset
+
+ and ends with 
+\begin_inset Quotes eld
+\end_inset
+
+Veterans+ of+ Treasury+ Treasury+
+\begin_inset Quotes erd
+\end_inset
+
+, again suggesting a bad parse of a table mistken for a sentence, and included
+ in 18 different wikipedia pages.
+ 
+\end_layout
+
+\begin_layout Standard
+The list continues in a similar way, for quite a while.
+ Notable is a preponderance of capitalized words, suggesting more tables
+ of various sorts, and an almost complete lack of verbs.
+ 
+\end_layout
+
+\begin_layout Standard
+This suggests that there is a severe shortage of verbs in Wikipdia articles,
+ and this makes sense: its primarily descriptive, rather than active: running,
+ jumping, hitting, putting, mixing, giving, setting are not the kinds of
+ verbs that are required to describe a typical encyclopedia topic.
+\end_layout
+
+\begin_layout Standard
+This suggests that there is an urgent need for non-Wikipedia content.
+ Fiction, and presumably teen fiction should be filled with the kinds of
+ active verbs describing human motions and actions, and should be absent
+ of tables and lists masquerading as sentences.
 \end_layout
 
 \begin_layout Subsection*
