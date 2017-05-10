@@ -22,13 +22,15 @@ copy the output folder to here (where that README.md is located)
 
 ```bash
 cp all-sumo-labeled-kb.scm <HERE>
+cp output/sumo/Merge.scm <HERE>
 cd <HERE>
 ```
 
-You can now launch guile and load SUMO into the atomspace
+You can now launch guile and load SUMO into the atomspace (for now
+`Merge.scm` rather than `all-sumo-labeled-kb.scm`)
 
 ```bash
-guile --no-auto-compile -l all-sumo-labeled-kb.scm
+guile --no-auto-compile -l Merge.scm
 ```
 
 ### Calling the Backward Chainer

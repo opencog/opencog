@@ -1,4 +1,4 @@
-;; Execute step by step inference to prove that an SUMO Organization
+;; Execute step by step inference to prove that a SUMO Organization
 ;; has at least one member.
 ;;
 ;; The reasoning goes as follows
