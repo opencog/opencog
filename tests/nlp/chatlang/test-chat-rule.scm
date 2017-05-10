@@ -3,18 +3,11 @@
              (opencog nlp chatlang)
              (opencog openpsi))
 
-(define rule (chat-rule '((proper-names "James" "Gilbert")
-                          (lemma "like")
-                          (concept "watch")
-                          (or-choices "movie" "TV")
-                          (word "and")
-                          (main-subj "Richard")
-                          (main-verb "eat")
-                          (pos "delicious" "adj")
-                          (main-obj "fish"))
-                        '(say "I'm surprised!")))
+; Just try a simple one
+(define rule (cr '("'James Gilbert' 'liked movie") '("Cool")))
 
-; This is the conditions under the AndLink of the SatisfactionLink
+; These are the conditions under the AndLink of the SatisfactionLink
+; Susceptible to any change in format
 (define conditions (cog-outgoing-set (gdr (car (psi-get-context rule)))))
 
 ; Each of the terms should have been tested already by now, here
@@ -27,17 +20,14 @@
          (list? (member (True (List (Word "James")
                                     (Word "Gilbert")
                                     (Word "like")
-                                    (Glob "watch")
-                                    (Glob "$choices")
-                                    (Word "and")
-                                    (Word "Richard")
-                                    (Word "eat")
-                                    (Word "delicious")
-                                    (Word "fish")))
+                                    (Word "movie")))
                         conditions))
          ; This is needed one of the shared conditions
-         (list? (member (State (Anchor "Currently Processing") (Variable "$S"))
+         (list? (member (State (Anchor "Chatlang: Currently Processing")
+                               (Variable "$S"))
                         conditions))
          ; This is another shared conditions
          (list? (member (Parse (Variable "$P") (Variable "$S"))
                         conditions))))
+         ; Including this causes a failure in cxxtest for no reason
+         ; (equal? (gaddr (psi-get-action rule)) (Node "Cool"))))

@@ -72,6 +72,8 @@ public:
         // computer because somehow the definitions of the functions were not found??
         // How did the rest pass with the exact same setup? Makes no sense to me...
         scm->eval("(load \"" PROJECT_SOURCE_DIR
+                   "/opencog/nlp/chatlang/ui.scm\")");
+        scm->eval("(load \"" PROJECT_SOURCE_DIR
                    "/opencog/nlp/chatlang/terms.scm\")");
         scm->eval("(load \"" PROJECT_SOURCE_DIR
                    "/opencog/nlp/chatlang/translator.scm\")");
@@ -95,8 +97,7 @@ public:
     void test_create_choices();
     void test_unordered_matching();
     void test_negation();
-//    void test_create_chat_rule();
-//    void test_chat_find_rules();
+    void test_create_chat_rule();
 };
 
 void ChatlangUTest::test_ui_create_concept()
@@ -206,25 +207,3 @@ void ChatlangUTest::test_create_chat_rule()
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
-/*
-void ChatlangUTest::test_chat_find_rules()
-{
-    logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-    scm->eval("(load-from-path \"test-chat-find-rules.scm\")");
-
-    auto result_1 = scm->eval("test-chat-find-rules-result-1");
-    TSM_ASSERT_EQUALS("Fail to find rule-1", "#t\n", result_1);
-
-    auto result_2 = scm->eval("test-chat-find-rules-result-2");
-    TSM_ASSERT_EQUALS("Fail to find rule-2", "#t\n", result_2);
-
-    auto result_3 = scm->eval("test-chat-find-rules-result-3");
-    TSM_ASSERT_EQUALS("Fail to find rule-3", "#t\n", result_3);
-
-    auto result_4 = scm->eval("test-chat-find-rules-result-4");
-    TSM_ASSERT_EQUALS("Fail to find rule-4", "#t\n", result_4);
-
-    logger().info("END TEST: %s", __FUNCTION__);
-}
-*/
