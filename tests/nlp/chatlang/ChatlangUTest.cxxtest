@@ -94,7 +94,7 @@ public:
     void test_create_concept();
     void test_create_choices();
     void test_unordered_matching();
-//    void test_negation();
+    void test_negation();
 //    void test_create_chat_rule();
 //    void test_chat_find_rules();
 };
@@ -166,7 +166,7 @@ void ChatlangUTest::test_create_choices()
     scm->eval("(load-from-path \"test-choices.scm\")");
 
     auto result = scm->eval("test-choices-result");
-    TSM_ASSERT_EQUALS("Fail to create or-choices!", "#t\n", result);
+    TSM_ASSERT_EQUALS("Fail to create choices!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -189,21 +189,12 @@ void ChatlangUTest::test_negation()
 
     scm->eval("(load-from-path \"test-negation.scm\")");
 
-    auto result_1 = scm->eval("test-result-1");
-    TSM_ASSERT_EQUALS("Fail on 'does-not-contain'!", "#t\n", result_1);
-
-    auto result_2 = scm->eval("test-result-2");
-    TSM_ASSERT_EQUALS("Fail on 'does-not-start-with'!", "#t\n", result_2);
-
-    auto result_3 = scm->eval("test-result-3");
-    TSM_ASSERT_EQUALS("Fail on 'does-not-end-with'!", "#t\n", result_3);
-
-    auto result_4 = scm->eval("test-result-4");
-    TSM_ASSERT_EQUALS("Fail on 'no-words-in-between'!", "#t\n", result_4);
+    auto result = scm->eval("test-negation-result");
+    TSM_ASSERT_EQUALS("Fail to create negations!", "#t\n", result);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
-/*
+
 void ChatlangUTest::test_create_chat_rule()
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -215,7 +206,7 @@ void ChatlangUTest::test_create_chat_rule()
 
     logger().info("END TEST: %s", __FUNCTION__);
 }
-
+/*
 void ChatlangUTest::test_chat_find_rules()
 {
     logger().info("BEGIN TEST: %s", __FUNCTION__);
