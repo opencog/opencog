@@ -4367,6 +4367,40 @@ is the relative(?) MI to the disjuncts in the word.
 3 as- Minister+
 3 Governor-General- Minister+
 
-
  "The" "a" "to" "in" "of" "and" "the" "," "."
+
+ "Bay" "Street" "Island" "of" "century" "right" "Game" "Georgian" "or" "a" ";" "near" "Party" "team" "law" "Australia" "her" "research" "Church" "east" "Government"
+
+--------------------------------------------------------------
+
+1985 words of length > 8
+all pairs of above with cosine > 0.5
+
+23993 pairs, but some are junk
+15809 good pairs.
+
+store-sim
+ (sim-pair WORD-A WORD-B) cos-key
+            (FloatValue SIM (get-angle SIM)))
+(define (sim-pair WORD-A WORD-B) (SimilarityLink WORD-A WORD-B))
+(define cos-key (PredicateNode "*-Cosine Distance Key-*"))
+
+
+(define all-sims '())
+(cog-map-type
+	(lambda (sim)  (set! all-sims (cons sim all-sims)) #f)
+	'SimilarityLink)
+
+(define (cosine-of-sim SIM)
+	(car (cog-value->list (cog-value SIM cos-key))))
+
+(define good-sims
+(filter
+	(lambda (sim)
+		(< 0.5 (car (cog-value->list (cog-value sim cos-key)))))
+	all-sims))
+
+
+(map (lambda (sim) (sim-cosine sim)) (take ranked-sims 20))
+	
 

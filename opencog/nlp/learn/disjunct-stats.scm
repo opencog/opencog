@@ -362,3 +362,40 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; Similarity.  Cosine distance.
+
+(define cos-key (PredicateNode "*-Cosine Distance Key-*"))
+
+(define all-sims '())
+(cog-map-type
+	(lambda (sim)  (set! all-sims (cons sim all-sims)) #f)
+	'SimilarityLink)
+
+(define good-sims
+	(filter
+		(lambda (sim) (and
+				(< 0.5 (sim-cosine sim))
+				(< 8 (cset-vec-len (gar sim)))
+				(< 8 (cset-vec-len (gdr sim)))))
+		all-sims))
+
+(define ranked-sims
+	(sort good-sims
+		(lambda (a b) (> (sim-cosine a) (sim-cosine b)))))
+
+(define (prt-sim sim port)
+	(format port "~A	'~A .. ~A'\n" (sim-cosine sim)
+		(cog-name (gar sim)) (cog-name (gdr sim))))
+
+(let ((outport (open-file "/tmp/ranked-sims.dat" "w")))
+	(define cnt 0)
+	(for-each (lambda (sim)
+			(set! cnt (+ cnt 1))
+			(format outport "~A	" cnt)
+			(prt-sim sim outport))
+		ranked-sims)
+	(close outport))
+
+; ---------------------------------------------------------------------
