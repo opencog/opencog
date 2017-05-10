@@ -18824,8 +18824,12 @@ Connector Sets 7 May 2017
 \end_layout
 
 \begin_layout Standard
-Some results on connector sets, preceeded by an explanation of what they
- are.
+This is a report on a small dataset of disjuncts and connector sets, extracted
+ from MST parses of a batch of sentences.
+ First, a recap of what these are, then a characterization of teh database
+ contents, and finally, a short report on the grammatical similarity of
+ words in the dataset.
+ 
 \end_layout
 
 \begin_layout Subsection*
