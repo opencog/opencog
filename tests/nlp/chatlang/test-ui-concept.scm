@@ -3,7 +3,7 @@
              (opencog nlp chatlang))
 
 (define concept
-    (chat-concept "eat" (list "eat" "ingest" "binge and purge")))
+    (create-concept "eat" "eat" "ingest" "binge and purge"))
 
 (define expected-result
     (list (ReferenceLink
