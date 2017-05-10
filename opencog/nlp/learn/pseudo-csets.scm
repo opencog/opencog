@@ -300,7 +300,7 @@
 	cset-vec-word-mi - get the fractional mutual information between
    the word and all of it's disjuncts. This is defined as
       MI(w) = (1/p(w)) sum_d p(d,w) log_2 p(d,w)/[p(d,*) p(*,w)]
-   This is defined "fractionally", so that the MI of the dataset
+   This is defined 'fractionally', so that the MI of the dataset
    as a whole can be written as
      MI = sum_w p(w) MI(w)
 
@@ -362,12 +362,12 @@
 	(define (cnt-a it)
 		(if word-base
 			(lambda (it) (get-cset-count ITEM-A it))
-			(lambda (it) (get-cset-count it ITEM-A))
+			(lambda (it) (get-cset-count it ITEM-A))))
 
 	(define (cnt-b it)
 		(if word-base
 			(lambda (it) (get-cset-count ITEM-B it))
-			(lambda (it) (get-cset-count it ITEM-B))
+			(lambda (it) (get-cset-count it ITEM-B))))
 
 	; sum of the powers of the counts
 	(define sum
@@ -549,7 +549,7 @@
   cset-vec-connectors-dir ITEM DIR - compute the total number of
   observations of connectors on the ITEM, but only if the the
   connector goes in direction DIR.  The DIR should be either
-  (LgConnDirNode "+") or (LgConnDirNode "-").
+  (LgConnDirNode \"+\") or (LgConnDirNode \"-\").
 
   ITEM can be either a WordNode, or a disjunct (LgAnd).
 "

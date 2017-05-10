@@ -4404,3 +4404,20 @@ store-sim
 (map (lambda (sim) (sim-cosine sim)) (take ranked-sims 20))
 	
 
+ 'Poir .. Perls'
+ 'Poir .. Sevan'
+ 'Sevan .. Perls'
+ 'Sevan .. Ruins'
+ 'Ruins .. Perls'
+ 'Poir .. Ruins'
+ 'Gongora .. Perls'
+  'Poir .. Gongora'
+  'Gongora .. Sevan'
+  'Gongora .. Ruins'
+  'Poir .. Gag'
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs_sim?user=linas")
+ (fetch-all-words)
+
