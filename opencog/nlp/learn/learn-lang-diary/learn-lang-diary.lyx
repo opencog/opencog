@@ -21459,12 +21459,22 @@ Thus, its worth looking at this.
  Define the average degree as
 \begin_inset Formula 
 \[
-K(w)=\sum_{d,c}N(d,w)C(d,c)
+K(w)=\frac{\sum_{d,c}N(d,w)C(d,c)}{N(*,w)}
 \]
 
 \end_inset
 
 This is graphed, below, for all words that have at least 100 observations.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Computed with sorted-avg-connectors in disjunct-stats.scm 
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -21588,6 +21598,40 @@ This suggests that there is an urgent need for non-Wikipedia content.
  Fiction, and presumably teen fiction should be filled with the kinds of
  active verbs describing human motions and actions, and should be absent
  of tables and lists masquerading as sentences.
+\end_layout
+
+\begin_layout Subsection*
+Hubiness
+\end_layout
+
+\begin_layout Standard
+Similar to the above, hubiness can be defined as the second moment of the
+ connector count:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+hub(w)=\frac{\sum_{d,c}N(d,w)C^{2}(d,c)}{N(*,w)}-K^{2}(w)
+\]
+
+\end_inset
+
+Given the earlier Zipfian results on the average degree 
+\begin_inset Formula $K(w)$
+\end_inset
+
+, it should be no surprise that a ranked listing of words by hubiness is
+ very nearly identical to the listing for average degree.
+ This is, after all, what the scale-free naure of the Zipfian distribution
+ really means.
+ Not only is the ranking nearly the same, but one also has the aproximate
+ equality 
+\begin_inset Formula $hub(w)\approx2K(w)$
+\end_inset
+
+ to some ten or twenty percent.
+ 
 \end_layout
 
 \begin_layout Subsection*
