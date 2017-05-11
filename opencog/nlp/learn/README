@@ -30,7 +30,7 @@ C) Use a Minimum-Spanning-Tree algorithm to obtain provisional parses
    (Independently of step A)
 D) Extract linkage disjuncts from the parses, and count their frequency.
 E) Use maximum-entropy principles to merge similar linkage disjuncts.
-   This will also result in sets of similar words. Presumably, the 
+   This will also result in sets of similar words. Presumably, the
    sets will roughly correspond to nouns, verbs, adjectives, and so-on.
 
 Currently, the software implements steps A, B, C and D. Step E is
@@ -65,6 +65,12 @@ Setting up the AtomSpace
 This section describes how to set up the atomspace to collect
 statistics.  Most of this revolves around setting up postgres.
 
+0.0) Optional. If you plan to run the pipeline on multiple
+   different languages, it can be convenient, for various reasons,
+   to run the processing in an LXC container. If you already know
+   LXC, then do it. If not, or this is your first time, then don't
+   bother.
+
 0) The atomspace MUST be built with guile version 2.2.2.1 or newer,
    which can only be obtained from git: that is, by
    `git clone git://git.sv.gnu.org/guile.git`
@@ -73,10 +79,11 @@ statistics.  Most of this revolves around setting up postgres.
    when computing mutual information.
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
 
-1) Set up and configure postgres, as described in 
+1) Set up and configure postgres, as described in
    `opencog/persist/sql/README.md`
 
-2) Create and initialize the database
+2) Create and initialize the database. Pick any name you want;
+   here it is `learn-pairs`.
 ```
    createdb learn-pairs
    cat atom.sql | psql learn-pairs
@@ -91,21 +98,20 @@ doing this, at the moment, is to parse the text with link-grammar and
 RelEx, using the "any" language.  This pseudo-language will link any
 word to any other, and is simply a convenient way of extracting word
 pairs from text.  Although this might seem to be a very convoluted way
-of extracting word pairs, it actually "make sense", for two reasons:
+of extracting word pairs, it actually "makes sense", for two reasons:
 a) it already works; little or no new code required. b) later processing
 steps will require passing text through the link-grammar parser anyway,
-so we may as well start using it right away. So, set that up:
+so we may as well start using it right away. (RelEx is used only to
+convert link-grammar output to "atomese"; a stripped-down version of
+RelEx could be created that does only this, or maybe a native
+link-grammar server could be written.)
+
+So, set up the text-ingestion pipeline:
 
 4) Install `link-grammar-5.3.15` or newer.
-5) Copy the RelEx opencog-server.sh shell script to some other name.
-   Edit it, and replace the final line with this:
-```
-   java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --lang any -n 16 --link
-```
-   Run the new shell script.
 
-   The above tells relex to use the 'any' language, and return up to 16
-   different parses. This should generate plenty of word-pairs.
+5) Install the current version of RelEx. The current version has
+   assorted bugfixes that are required to get a working system.
 
 6) Create/edit the `~/.guile` file and add the following content:
 ```
@@ -118,22 +124,34 @@ so we may as well start using it right away. So, set that up:
 ```
 
 7) Copy one of the `opencog-??.conf` files from the `run`
-   directory to your working directory. Modify as needed. This file
-   specifies the cogserver port number, and the prompt to use; this
-   can be changed so that it does not conflict with other cogservers
-   that might be running at the same time.
+   directory to your working directory. A choice of default files
+   for different languages are provided, or you can create your
+   own.  This file specifies the cogserver port number, and the
+   prompt to use; the defaults are set up so that there are no
+   conflicts, so that you can run multiple languages at the same
+   time.
 
-8) Chose the corresponding `learn-pairs-??.scm` file, and review and
-   edit the configuration as necessary. It contains the database 
-   credentials.
+8) Chose the corresponding `learn-pairs-??.scm` file, copy it from
+   the `run` directory to your working directory. Review and edit
+   the configuration as necessary. It contains the database
+   credentials -- that's probably the only thing you need to change.
 
-9) Start the cogserver, as follows:
+9) Start the various servers. Eventually, you can use the
+   `run-all-servers.sh` file in the `run` directory to do this;
+   it creates a byobu session with different servers in different
+   terminals, where you can keep an eye on them. However, the
+   first time through, it is better to do all this by hand. So:
+
+9a) Start `run/relex-server-any.sh` in a terminal.
+
+9b) Start the cogserver, in another terminal, as follows:
 ```
    guile -l learn-pairs-??.scm
 ```
    There are other ways of starting the cogserver; the above is handy.
 
-10) Verify that the language processing pipeline works:
+10) Verify that the language processing pipeline works. In a third
+   terminal, try this:
 ```
    telnet localhost 17002  # or wherever your cogserver is configured.
    guile> (observe-text "this is a test")
@@ -151,37 +169,57 @@ so we may as well start using it right away. So, set that up:
    RelEx for parsing, counts the returned word-pairs, and stores them in
    the database.
 
-8) Verify that the above resulted in data sent to the SQL database. So:
+10a) Verify that the above resulted in data sent to the SQL database.
+   Log into the database, and check:
 ```
    psql learn-pairs
    learn-pairs=# SELECT * FROM atoms;
    learn-pairs=# SELECT COUNT(*) FROM atoms;
+   learn-pairs=# SELECT * FROM valuations;
 ```
    The above shows that the database now contains word-counts for
-   pair-wise linkages for the above sentences.
+   pair-wise linkages for the above sentences. If the above are empty,
+   something is wrong. Go to step zero.
 
-9) Get ready to feed it text.  For example, parse wikipedia.
+11) Get ready to feed it text. It would be best to get text that
+  consists of narrative literature, adventure and young-adult novels,
+  newspaper stories. These contain a good mix of common nouns and verbs,
+  which is needed for conversational natural language.
+
+  Turns out that Wikipedia is a poor choice for a dataset. That's
+  because the "encyclopedic style" means it contains few pronouns,
+  and few action-verbs (hit, jump, push, take, sing, love) because
+  its mostly describing objects and events (is, has, was). It also
+  contains large numbers of product names, model numbers, geographical
+  place names, and foreign langauge words, which do little or nothing
+  for learning grammar. Finally, it has large numbers of tables and
+  lists of dates, awards, ceremonies, locations, sports-league names,
+  battles, etc. that get mistaken for sentences, and leads to unusual
+  deductions of grammar.  Thus, it turns out Wikipedia is a bad choice
+  for learning text.
+
+  That said, there are a bunch of scripts for dealing with wikipedia.
+  Thus, the steps are these:
    a) Download lang-wiki-pages-articles for some lanugage lang.
    b) See 'Wikipedia processing' section below. Do the stuff there.
    c) See the section 'Sentence Splitting'. Set that up.
    d) See Wikipedia 'Processing, part II' below.
 
-10) After doing at least several days worth of parsing  (i.e. at least
+12) After doing at least several days worth of parsing  (i.e. at least
    hundreds of articles, tens of thousands of sentences) the word-pair
    mutual information can be extracted. Do the stuff in section "Mutual
    Information" section below.
 
-11) MST parsing can now be started. See below.
+13) Using the extracted mutual information for word-pairs, the MST
+   parsing step can be started. See below. Run this for several days.
+   At the end of this, you will have a bunch of statistics on
+   "pseudo-connector sets": pairs which associate a word to a
+   disjunct of pseudo-connectors.
+
+14) Perform clustering research.  You're on your own, now.
 
 That's all for now, folks!
 
-
-Misc TODO
----------
-* Remove the NLP_HACK from persist/sql/PersistModule.cc
-* Optimize the scm scripts to not pound the database so hard.
-  (How? Lots of word pushes, but really, there's not much repeat
-  traffic ...) Not sure this is much of a problem, any more.
 
 DONE
 ----
@@ -192,7 +230,7 @@ DONE
   works for English sentences.  Probably something simple will do ...
   Done: copied one from moses-smt and put it into a relex subdirectory
 * Raw psql seems not to be utf8.  Were the tables created wrong,
-  or is this a client bug? 
+  or is this a client bug?
   Fixed: turned out to be a guile-related bug.
 * Handle database write asynchronously: have a thread collect
   up the atoms, and write them. Maybe even multiple threads.
@@ -201,11 +239,11 @@ DONE
 * Can we start a guile thread for each incoming sentence?
   Threading will require more subtle sentence cleanup.
   No. The main guile bug, opened 5 years ago, is still not fixed.
-* Table counts need to be more than 32-bit. Looks like the 
+* Table counts need to be more than 32-bit. Looks like the
   any-language goes hog-wild and creates huge counts for just
   one sentence ... is this desired?  Anyway, they'll overflow...
   Done. atoms.sql now uses bigint 64-bit uuids.
-* Investigate crash: while writing truuth value, stv_confidence 
+* Investigate crash: while writing truuth value, stv_confidence
   was pure virtual (circa line 920 of AtomStorage.cc) There's some
   kind of smart-pointer race. See "Crash" section below.
   Done. Ran for a month without issues.
@@ -213,7 +251,7 @@ DONE
 
 Misc Notes about batch processing
 ----------------------------------
-The relex parse is extreely fast, the cogserver part is extremely slow ... 
+The relex parse is extreely fast, the cogserver part is extremely slow ...
 Non-linear, even.
 4-word sentence: 53 parses, 3-4 seconds elapsed
 
@@ -226,7 +264,7 @@ cogserver runs at 56% cpu for a while then drops to 26% cpu
 2 minutes elapsed.  Same CPU usage as above...
 
 Solution: 999 parses are not needed.  Asorted tuning was done since
-the above was written. 
+the above was written.
 
 
 Wikipedia processing
@@ -368,8 +406,8 @@ alpha-pages after all that work)
 * This requires postgres 8.4 or newer, for multiple reasons. One reason
   is that older postgres don't automatically VACUUM (see "performance"
   below) The other is the list membership functions are needed.
-* Be sure to perform the postgres tuning recommendations found in 
-  various online postgres peformance wikis, or in the 
+* Be sure to perform the postgres tuning recommendations found in
+  various online postgres peformance wikis, or in the
   `opencog/persist/sql/README.md` file.  See also 'Performance' section
   below.
 
@@ -435,7 +473,7 @@ fixes, avoiding the pattern matcher, has added another 50x per
 improvement.  The rate is strongly dependent on the size of the
 dataset.
 
-For dataset (fr_pairs) with 225K words, 5M pairs: 
+For dataset (fr_pairs) with 225K words, 5M pairs:
 Current rate is 150 words/sec or 9K words/min.
 
 XXX !??? After wild-card count finshes, there is a 5563 second 
