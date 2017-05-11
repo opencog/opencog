@@ -91,64 +91,6 @@
 )
 
 ; ---------------------------------------------------------------------
-
-(define-public (get-pair-mi GET-PAIR left-word right-word)
-"
-  get-pair-mi GET-PAIR LEFT-WORD RIGHT-WORD --
-         Return the mutual information for a pair of words.
-
-  The source of mutual information is given by GET-PAIR, which should
-  be a function that, when given a (ListLink (WordNode)(WordNode)),
-  returns an atom that holds the MI for that pair.  The user is
-  strongly discouraged from calling GET-PAIR directly, to avoid
-  unintended side-effects (such as the creation of bogus atoms).
-
-  The left and right words are presumed to be WordNodes, or nil.
-  If either word is nil, or if the word-pair cannot be found, then a
-  default value of -1e40 is returned.
-"
-	; Define a losing score.
-	(define bad-mi -1e40)
-
-	; We take care here to not actually create the atoms,
-	; if they aren't already in the atomspace. cog-node returns
-	; nil if the atoms can't be found.
-	(define wpr
-		(if (and (not (null? left-word)) (not (null? right-word)))
-			(cog-link 'ListLink left-word right-word)
-			'()))
-	(define evl
-		(if (not (null? wpr))
-			(GET-PAIR wpr)
-			'()))
-	(if (not (null? evl))
-		(get-mi evl)
-		bad-mi
-	)
-)
-
-; ---------------------------------------------------------------------
-
-(define-public (get-pair-mi-str left-word-str right-word-str)
-"
-  get-pair-mi-str LEFT-WORD-STRING RIGHT-WORD-STRING
-  Return the mutual information for a pair of words.
-
-  The left and right words are presumed to be strings.  If the word-
-  pair cannot be found, then a default value of -1000 is returned.
-
-  This is the most basic kind of MI for a pair, it assumes nothing
-  more than the relation that both occured in the  same sentence, and
-  that the left word is to the left of the right.
-"
-	(get-pair-mi
-		get-any-pair  ; use the random-tree MI, for now.
-		(cog-node 'WordNode left-word-str)
-		(cog-node 'WordNode right-word-str)
-	)
-)
-
-; ---------------------------------------------------------------------
 ;
 ; Maximum Spanning Tree parser.
 ;
