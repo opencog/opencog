@@ -4591,3 +4591,4 @@ move base-stats.scm to pair-stats.scm -- DONE
 
 Cannot connect to database: FATAL:  remaining connection slots are reserved for non-replication superuser connections
 
+get-clique-pair get-any-pair

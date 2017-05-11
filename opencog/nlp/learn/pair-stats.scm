@@ -71,6 +71,7 @@
 (define (count-clique-pair PAIR)
 "
   Return count for the clique-pair PAIR
+  PAIR should be a ListLink of two words.
 "
 	(define evl (cog-link 'EvaluationLink pair-pred PAIR))
 	(if (null? evl) 0 (get-count evl))
@@ -83,6 +84,8 @@
   `count-clique-pair`, above, since the sum over distances
   should equal the total number of observations. This can be
   checked with the `verify-clique-pair-sums` function below.
+
+  PAIR should be a ListLink of two words.
 "
 	(fold
 		(lambda (ex sum) (+ (get-count ex) sum))
@@ -94,7 +97,8 @@
 
 (define (avg-dist-pair PAIR)
 "
-  Return average distance over all counts of the distance pairs
+  Return average distance over all counts of the distance pairs.
+  PAIR should be a ListLink of two words.
 "
 	(define (get-dist exl)
 		(string->number (cog-name (caddr (cog-outgoing-set exl))))
@@ -202,40 +206,56 @@
    (get-total-atom-count (get-all-words))
 )
 
-(define-public (total-pair-observations)
+(define-public (total-pair-observations GET-PAIR)
 "
-  total-pair-observations -- return a total of the number of times
-  any/all word-pairs were observed. That is, return N(*,*) as defined
-  above, and in the diary.
+  total-pair-observations GET-PAIR -- return a total of the number
+  of times that word-pairs were observed. That is, return N(*,*),
+  as defined above, and in the diary.
+
+  The argument GET-PAIR indicates what kind of pairs to count,
+  as there are several kinds that are being tracked.  Currently,
+  the only valid values for GET-PAIR are `get-any-pair` and
+  `get-clique-pair`.
 "
 	; Just get the previously computed amount.
-	(get-count
-		(EvaluationLink any-pair-pred
-			(ListLink
-				(AnyNode "left-word")
-				(AnyNode "right-word"))))
+	(get-count GET-PAIR (ListLink any-left any-right))
 )
 
-(define-public (get-left-count-str WORD-STR)
+(define-public (get-pair-frequency GET-PAIR LEFT-ITEM RIGHT-ITEM)
 "
-  get-left-count-str WORD-STR
-  Return the number of times that WORD-STR occurs in the left side
-  of the \"ANY\" relationship. That is, return N(w, *), as defined above,
-  and in the diary.  Here, w is WORD-STR, assumed to be a string.
+  get-pair-frequency GET-PAIR LEFT-ITEM RIGHT-ITEM -- return the
+  frequency of observing the pair (LEFT-ITEM, RIGHT-ITEM).
+  Return zero if the pair has not been observed.
+
+  Currrently, the two ITEMs should be WordNodes, and GET-PAIR
+  should be a function that returns the atom where the precomputed
+  counts are stored.
+
+  Currently, the only valid values for GET-PAIR are `get-any-pair`
+  and `get-clique-pair`.
 "
+	(define cnt
+		(safety-wrap
+			(lambda (pr) (get-count (GET-PAIR pr)))
+			 WORD-A WORD-B))
+	(if cnt (/ cnt (total-pair-observations GET-PAIR)) 0)
+)
+
+(define-public (get-left-observations GET-PAIR ITEM)
+"
+  get-left-observations GET-PAIR ITEM
+  Return the number of times that ITEM occurs in the left side
+  of the GET-PAIR relationship. That is, return the summed
+  count N(w, *), as defined above, and in the diary.
+
+  Currently, ITEM is assumed to be a WordNode.
+
+  Currently, the only valid values for GET-PAIR are `get-any-pair`
+  and `get-clique-pair`.
+"
+	(define pair (cog-link 'ListLink ITEM any-right))
 	;; the wildcard is on the right.
-	(get-count (get-any-right-wildcard (WordNode WORD-STR)))
-)
-
-(define-public (get-right-count-str WORD-STR)
-"
-  get-right-count-str WORD-STR
-  Return the number of times that WORD-STR occurs in the right side
-  of the \"ANY\" relationship. That is, return N(*, w), as defined above,
-  and in the diary.  Here, w is WORD-STR, assumed to be a string.
-"
-	;; the wildcard is on the left.
-	(get-count (get-any-left-wildcard (WordNode WORD-STR)))
+	(get-count GET-PAIR (ListLink ITEM any-right))
 )
 
 (define-public (get-word-count-str WORD-STR)
