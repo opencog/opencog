@@ -59,6 +59,8 @@
 ;
 ; Get the atom that holds the left wild-card count for `word`,
 ; for the LG link type "ANY". (the wildcard is on the left side)
+; This *creates* the atom, if it does not already exist, and thus
+; is not intended for public use!
 
 (define (get-any-left-wildcard word)
 	(EvaluationLink any-pair-pred (ListLink any-left word))
@@ -168,7 +170,7 @@
 	(display "Finished loading any-word-pairs\n")
 
 	(batch-all-pair-mi
-		get-any-pair
+		internal-any-pair
 		get-any-left-wildcard
 		get-any-right-wildcard
 		get-any-wild-wild
@@ -193,7 +195,7 @@
 	(display "Finished loading clique-word-pairs\n")
 
 	(batch-all-pair-mi
-		get-clique-pair
+		internal-clique-pair
 		get-clique-left-wildcard
 		get-clique-right-wildcard
 		get-clique-wild-wild

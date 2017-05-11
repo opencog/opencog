@@ -145,6 +145,12 @@
 	(cog-link 'EvaluationLink any-pair-pred PAIR)
 )
 
+; Internal-use version of above, not for the public.
+(define (internal-any-pair PAIR)
+	(define pr (get-any-pair PAIR))
+	(if (null? pr) '() (list pr))
+)
+
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -153,13 +159,20 @@
 
 (define-public (get-clique-pair PAIR)
 "
-  get-clique-pair PAIR -- Given a ListLink holding a word-pair, return
+  clique-pair PAIR -- Given a ListLink holding a word-pair, return
   the corresponding 'clique-counting' style link that holds the count
   for that word-pair. Return the empty list, if there is no count for
   the word-pair.
 "
 	(cog-link 'EvaluationLink pair-pred PAIR)
 )
+
+; Internal-use version of above, not for the public.
+(define (internal-clique-pair PAIR)
+	(define pr (get-clique-pair PAIR))
+	(if (null? pr) '() (list pr))
+)
+
 ; ---------------------------------------------------------------------
 
 (define-public (get-all-words)
