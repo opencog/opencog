@@ -221,7 +221,6 @@ So, set up the text-ingestion pipeline:
 That's all for now, folks!
 
 
-
 Wikipedia processing
 --------------------
 Notes below are for four languages: French, Lithuanian, Polish, and
@@ -293,19 +292,20 @@ Sentence Splitting
 Raw text needs to be split up into sentences.  Some distant future day,
 opencog will do this automatically. For now, we hack it.
 
-The sentence splitter needs to work for any language.
-Maybe use NLTK ? ... OK, but not today, ... you can experiment.
-
-Here's a simple one, easy-to-use:
+Currently, splitting is done with the `split-sentences.pl` perl script
+in the `run` directory.  It was stolen from the `moses-smt` package.
 https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
-Has french, polish, latvian, more.  Its LGPL. It has been copied over
-into RelEx, for now. (Its should be here, I guess, not in relex!?)
+It splits french, polish, latvian, and more.  Its LGPL.
 
-Verify that it works: e.g.
+You can verify that it works, like so:
 ```
-   cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
+   cat text-file | run/split-sentences.pl -l en > x
 ```
-Some typical sentence-splitting concerns:
+Replace `en` by the language of your choice.
+
+Some typical sentence-splitting concerns that the above script seems
+to mostly handle correctly:
+
 A question mark or exclamation mark always ends a sentence.  A period
 followed by an upper-case letter generally ends a sentence, but there
 are a number of exceptions.  For example, if the period is part of an
