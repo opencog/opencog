@@ -39,7 +39,7 @@ class TypeFrameIndex
 public:
 
     typedef std::set<int> IntegerSet;
-    typedef std::set<TypeFrame> TypeFrameSet;
+    typedef std::set<TypeFrame, TypeFrame::LessThan> TypeFrameSet;
     typedef std::map<std::string, TypeFrame> VarMapping;
     typedef std::pair<TypeFrameSet, VarMapping> ResultPair;
 
@@ -50,13 +50,18 @@ private:
     typedef std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> IntPairPairVector;
     typedef std::map<TypeFrame, IntegerSet, TypeFrame::LessThan> PatternMap;
 
-    bool DEBUG = true;
+    static const int OPERATOR_NOP;
+    static const int OPERATOR_AND;
+    static const int OPERATOR_OR;
+    static const int OPERATOR_NOT;
+
+    bool DEBUG = false;
     bool TOPLEVEL_ONLY = true;
     std::vector<TypeFrame> frames;
     PatternMap occurrenceSet;
     IntegerSet occurrenceUniverse;
 
-    void query(std::vector<ResultPair> &result, TypeFrame &keyExpression, const TypeFrame &queryFrame, int cursor);
+    void query(std::vector<ResultPair> &result, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor);
     void addPatternOccurrence(TypeFrame &pattern, int pos);
     std::vector<TypeFrame> computeSubPatterns(TypeFrame &baseFrame, int cursorn, int pos);
     void selectCurrentElement(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor);
@@ -64,6 +69,7 @@ private:
     void buildJointConstraints(IntPairPairVector &constraints, std::vector<StringMap> &variableOccurrences);
     void buildQueryTerm(TypeFrame &answer, StringMap &variableOccurrences, const TypeFrame &baseFrame, int cursor);
     bool compatibleVarMappings(const VarMapping &map1, const VarMapping &map2);
+    bool isForbiddenMapping(const VarMapping &mapping, const std::vector<VarMapping> &forbiddenVector);
     void typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2);
     void varMappingUnion(VarMapping &answer, const VarMapping &map1, const VarMapping &map2);
 

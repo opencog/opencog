@@ -3,6 +3,11 @@
 
 using namespace opencog;
 
+const int TypeFrameIndex::OPERATOR_NOP = 0;
+const int TypeFrameIndex::OPERATOR_AND = 1;
+const int TypeFrameIndex::OPERATOR_OR = 2;
+const int TypeFrameIndex::OPERATOR_NOT = 3;
+
 TypeFrameIndex::TypeFrameIndex() 
 {
 }
@@ -21,8 +26,10 @@ bool TypeFrameIndex::addFrame(TypeFrame &frame, int offset)
     bool exitStatus = true;
     if (frame.isValid()) {
         frames.push_back(frame);
-        printf("%d: ", offset);
-        frame.printForDebug("", "\n", true);
+        if (DEBUG) {
+            printf("%d: ", offset);
+            frame.printForDebug("", "\n", true);
+        }
         exitStatus = false;
     } else {
         printf("DISCARDING INVALID FRAME (offset = %d)\n", offset);
@@ -238,13 +245,13 @@ void TypeFrameIndex::buildSubPatternsIndex()
             }
         }
     }
-    printForDebug(true);
+    if (DEBUG) printForDebug(true);
 }
 
 void TypeFrameIndex::query(std::vector<ResultPair> &result, const std::string &queryScm)
 {
     TypeFrame queryFrame(queryScm);
-    queryFrame.printForDebug("query: ", "\n", true);
+    if (DEBUG) queryFrame.printForDebug("NEW QUERY: ", "\n", true);
     query(result, queryFrame);
 }
 
@@ -307,28 +314,34 @@ void TypeFrameIndex::buildQueryTerm(TypeFrame &answer, StringMap &variableOccurr
 void TypeFrameIndex::query(std::vector<ResultPair> &result, const TypeFrame &queryFrame)
 {
     TypeFrame keyExpression;
+    std::vector<VarMapping> forbiddenMappings;
+    int headLogicOperator;
 
-    query(result, keyExpression, queryFrame, 0);
+    query(result, keyExpression, forbiddenMappings, headLogicOperator, queryFrame, 0);
 }
 
 bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapping &map2)
 {
     bool answer = true;
 
+    /*
     if (DEBUG) {
         printf("TypeFrameIndex::compatibleVarMappings()\n");
         printVarMapping(map1);
         printf("\n");
         printVarMapping(map2);
     }
+    */
 
     for (VarMapping::const_iterator it1 = map1.begin(); it1 != map1.end(); it1++) {
         VarMapping::const_iterator it2 = map2.find((*it1).first);
         if ((it2 != map2.end()) && (! (*it1).second.equals((*it2).second))) {
             answer = false;
+            /*
             if (DEBUG) {
                 printf("Failed at %s\n", (*it1).first.c_str());
             }
+            */
             break;
         }
     }
@@ -338,11 +351,12 @@ bool TypeFrameIndex::compatibleVarMappings(const VarMapping &map1, const VarMapp
 
 void TypeFrameIndex::typeFrameSetUnion(TypeFrameSet &answer, const TypeFrameSet &set1, const TypeFrameSet &set2)
 {
-    for (TypeFrameSet::const_iterator it = set1.begin(); it != set1.end(); it++) {
-        answer.insert(*it);
+    answer.clear();
+    for (TypeFrameSet::const_iterator it1 = set1.begin(); it1 != set1.end(); it1++) {
+        answer.insert(*it1);
     }
-    for (TypeFrameSet::const_iterator it = set2.begin(); it != set2.end(); it++) {
-        answer.insert(*it);
+    for (TypeFrameSet::const_iterator it2 = set2.begin(); it2 != set2.end(); it2++) {
+        answer.insert(*it2);
     }
 }
 
@@ -356,26 +370,50 @@ void TypeFrameIndex::varMappingUnion(VarMapping &answer, const VarMapping &map1,
     }
 }
 
-//void TypeFrameIndex::recurseQueryOnEachClause()
-//{
-//}
+bool TypeFrameIndex::isForbiddenMapping(const VarMapping &mapping, const std::vector<VarMapping> &forbiddenVector)
+{
+    bool answer = false;
+    for (unsigned int i = 0; i < forbiddenVector.size(); i++) {
+        bool match = true;
+        for (VarMapping::const_iterator it1 = forbiddenVector.at(i).begin(); it1 != forbiddenVector.at(i).end(); it1++) {
+            VarMapping::const_iterator it2 = mapping.find((*it1).first);
+            if ((it2 != mapping.end()) && (! (*it1).second.equals((*it2).second))) {
+                match = false;
+                break;
+            }
+        }
+        if (match) {
+            answer = true;
+            break;
+        }
+    }
 
-void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpression, const TypeFrame &queryFrame, int cursor)
+    return answer;
+}
+
+void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpression, std::vector<VarMapping> &forbiddenMappings, int &logicOperator, const TypeFrame &queryFrame, int cursor)
 {
     if (DEBUG) queryFrame.printForDebug("Query frame: ", "\n", true);
     if (DEBUG) printf("Cursor: %d\n", cursor);
     answer.clear();
     keyExpression.clear();
+    forbiddenMappings.clear();
     unsigned int arity = queryFrame.at(cursor).second;
     std::vector<int> argPos = queryFrame.getArgumentsPosition(cursor);
+    std::vector<std::vector<ResultPair>> recursionQueryResult(arity);
+    std::vector<TypeFrame> recursionKeyExpression(arity);
+    std::vector<std::vector<VarMapping>> recursionForbiddenMappings(arity);
+    std::vector<int> recursionHeadLogicOperator(arity);
+    bool AndFlag = queryFrame.typeAtEqualsTo(cursor, "AndLink");
+    bool OrFlag = queryFrame.typeAtEqualsTo(cursor, "OrLink");
+    bool NotFlag = queryFrame.typeAtEqualsTo(cursor, "NotLink");
+    if (DEBUG) printf("Head is %s\n", (AndFlag ? "AND" : (OrFlag ? "OR" : (NotFlag ? "NOT" : "LEAF EXPRESSION"))));
 
-    if (queryFrame.typeAtEqualsTo(cursor, "AndLink")) {
-        if (DEBUG) printf("Head is AND\n");
-        std::vector<std::vector<ResultPair>> recursionQueryResult(arity);
-        std::vector<TypeFrame> recursionKeyExpression(arity);
+    if (AndFlag || OrFlag || NotFlag) {
+        // Recursive call on each clause
         keyExpression.pickAndPushBack(queryFrame, cursor);
         for (unsigned int i = 0; i < arity; i++) {
-            query(recursionQueryResult.at(i), recursionKeyExpression.at(i), queryFrame, argPos.at(i));
+            query(recursionQueryResult.at(i), recursionKeyExpression.at(i), recursionForbiddenMappings.at(i), recursionHeadLogicOperator.at(i), queryFrame, argPos.at(i));
         }
         for (unsigned int i = 0; i < arity; i++) {
             if (DEBUG) {
@@ -384,55 +422,151 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
             }
             keyExpression.append(recursionKeyExpression.at(i));
         }
-        keyExpression.printForDebug("Resulting key: ", "\n", true);
-
         if (DEBUG) {
+            keyExpression.printForDebug("Resulting key: ", "\n", true);
             for (unsigned int i = 0; i < arity; i++) {
                 printf("Recursion result [%u]:\n", i);
                 printRecursionResult(recursionQueryResult.at(i));
             }
         }
+    }
 
-        std::vector<ResultPair> aux[2];
-        int src = 0;
-        int tgt = 1;
-        for (unsigned int j = 0; j < recursionQueryResult.at(0).size(); j++) {
-            //printf("Copying to tgt %d\n", tgt);
-            aux[tgt].push_back(recursionQueryResult.at(0).at(j));
+    if (AndFlag) {
+        if (DEBUG) printf("Start processing AND\n");
+        logicOperator = OPERATOR_AND;
+        for (unsigned int i = 0; i < arity; i++) {
+            for (unsigned int j = 0; j < recursionForbiddenMappings.at(i).size(); j++) {
+                if (DEBUG) {
+                    printf("(AND) Adding forbidden mapping:\n");
+                    printVarMapping(recursionQueryResult.at(i).at(j).second);
+                }
+                forbiddenMappings.push_back(recursionForbiddenMappings.at(i).at(j));
+            }
         }
-        for (unsigned int i = 1; i < arity; i++) {
-            src = i % 2;
-            tgt = 1 - src;
-            aux[tgt].clear();
-            //printf("Clear tgt %d\n", tgt);
-            for (unsigned int a = 0; a < aux[src].size(); a++) {
-                for (unsigned int b = 0; b < recursionQueryResult.at(i).size(); b++) {
-                    if (compatibleVarMappings(aux[src].at(a).second, recursionQueryResult.at(i).at(b).second)) {
-                        TypeFrameSet newSet;
-                        VarMapping newMapping;
-                        typeFrameSetUnion(newSet, aux[src].at(a).first, recursionQueryResult.at(i).at(b).first);
-                        varMappingUnion(newMapping, aux[src].at(a).second, recursionQueryResult.at(i).at(b).second);
-                        aux[tgt].push_back(std::make_pair(newSet, newMapping));
-                        //printf("Set tgt %d\n", tgt);
+        std::vector<std::vector<ResultPair>> cleanRecursionQueryResult(arity);
+        for (unsigned int i = 0; i < arity; i++) {
+            if (DEBUG) printf("Branch: %u\n", i);
+            for (unsigned int j = 0; j < recursionQueryResult.at(i).size(); j++) {
+                if (! isForbiddenMapping(recursionQueryResult.at(i).at(j).second, forbiddenMappings)) {
+                    cleanRecursionQueryResult.at(i).push_back(recursionQueryResult.at(i).at(j));
+                    if (DEBUG) {
+                        printf("Pushing:\n");
+                        printTypeFrameSet(recursionQueryResult.at(i).at(j).first);
+                    }
+                } else {
+                    if (DEBUG) {
+                        printf("Forbidden:\n");
+                        printTypeFrameSet(recursionQueryResult.at(i).at(j).first);
                     }
                 }
             }
         }
-        for (unsigned int i = 0; i < aux[tgt].size(); i++) {
-            //printf("Copying from tgt %d\n", tgt);
-            answer.push_back(aux[tgt].at(i));
-        }
+        std::vector<ResultPair> aux[2];
+        int src = 0;
+        int tgt = 1;
 
-        if (DEBUG) {
-            printf("Answer:\n");
-            printRecursionResult(answer);
+        unsigned int baseBranch = 0;
+        bool selectedFlag = false;
+        for (unsigned int i = 0; i < arity; i++) {
+            if (recursionHeadLogicOperator.at(i) != OPERATOR_NOT) {
+                baseBranch = i;
+                selectedFlag = true;
+                for (unsigned int j = 0; j < cleanRecursionQueryResult.at(baseBranch).size(); j++) {
+                    aux[tgt].push_back(cleanRecursionQueryResult.at(baseBranch).at(j));
+                    if (DEBUG) {
+                        printf("(AND) Adding solution to result:\n");
+                        printTypeFrameSet(cleanRecursionQueryResult.at(baseBranch).at(j).first);
+                        printVarMapping(cleanRecursionQueryResult.at(baseBranch).at(j).second);
+                    }
+                }
+                break;
+            }
         }
-    } else if (queryFrame.typeAtEqualsTo(cursor, "OrLink")) {
-        if (DEBUG) printf("Head is OR\n");
-    } else if (queryFrame.typeAtEqualsTo(cursor, "NotLink")) {
-        if (DEBUG) printf("Head is NOT\n");
+        // TODO: raise an exception if selectedFlag == false
+        int switchCount = 1;
+        for (unsigned int i = 0; i < arity; i++) {
+            if (selectedFlag && (i != baseBranch) && (recursionHeadLogicOperator.at(i) != OPERATOR_NOT)) {
+                src = switchCount++ % 2;
+                tgt = 1 - src;
+                aux[tgt].clear();
+                TypeFrameSet newSet;
+                for (unsigned int b = 0; b < cleanRecursionQueryResult.at(i).size(); b++) {
+                    for (unsigned int a = 0; a < aux[src].size(); a++) {
+                        if (compatibleVarMappings(aux[src].at(a).second, cleanRecursionQueryResult.at(i).at(b).second)) {
+                            TypeFrameSet newSet;
+                            VarMapping newMapping;
+                            typeFrameSetUnion(newSet, aux[src].at(a).first, cleanRecursionQueryResult.at(i).at(b).first);
+                            varMappingUnion(newMapping, aux[src].at(a).second, cleanRecursionQueryResult.at(i).at(b).second);
+                            if (DEBUG) {
+                                printf("(AND) Adding solution to result:\n");
+                                printf("Base:\n");
+                                printTypeFrameSet(aux[src].at(a).first);
+                                printVarMapping(aux[src].at(a).second);
+                                printf("Adding:\n");
+                                printTypeFrameSet(cleanRecursionQueryResult.at(i).at(b).first);
+                                printVarMapping(cleanRecursionQueryResult.at(i).at(b).second);
+                                printf("Union:\n");
+                                printTypeFrameSet(newSet);
+                                printVarMapping(newMapping);
+                            }
+                            aux[tgt].push_back(std::make_pair(newSet, newMapping));
+                        } else {
+                            if (DEBUG) {
+                                printf("(AND) rejecting non-compatible var maps:\n");
+                                printVarMapping(aux[src].at(a).second);
+                                printf("-\n");
+                                printVarMapping(cleanRecursionQueryResult.at(i).at(b).second);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (unsigned int j = 0; j < aux[tgt].size(); j++) {
+            answer.push_back(aux[tgt].at(j));
+        }
+    } else if (OrFlag) {
+        if (DEBUG) printf("Start processing OR\n");
+        logicOperator = OPERATOR_OR;
+        for (unsigned int i = 0; i < arity; i++) {
+            for (unsigned int j = 0; j < recursionQueryResult.at(i).size(); j++) {
+                if (! isForbiddenMapping(recursionQueryResult.at(i).at(j).second, recursionForbiddenMappings.at(i))) {
+                    if (DEBUG) {
+                        printf("(OR) Adding solution to result:\n");
+                        printTypeFrameSet(recursionQueryResult.at(i).at(j).first);
+                        printVarMapping(recursionQueryResult.at(i).at(j).second);
+                    }
+                    answer.push_back(recursionQueryResult.at(i).at(j));
+                } else {
+                    if (DEBUG) {
+                        printf("(OR) Rejecting solution:\n");
+                        printTypeFrameSet(recursionQueryResult.at(i).at(j).first);
+                        printVarMapping(recursionQueryResult.at(i).at(j).second);
+                    }
+                }
+            }
+        }
+    } else if (NotFlag) {
+        if (DEBUG) printf("Start processing NOT\n");
+        logicOperator = OPERATOR_NOT;
+        // arity is 1
+        for (unsigned int j = 0; j < recursionQueryResult.at(0).size(); j++) {
+            if (DEBUG) {
+                printf("(NOT) Adding solution to result:\n");
+                printTypeFrameSet(recursionQueryResult.at(0).at(j).first);
+                printVarMapping(recursionQueryResult.at(0).at(j).second);
+            }
+            answer.push_back(recursionQueryResult.at(0).at(j));
+            if (! isForbiddenMapping(recursionQueryResult.at(0).at(j).second, recursionForbiddenMappings.at(0))) {
+                if (DEBUG) {
+                    printf("(NOT) Adding forbidden mapping:\n");
+                    printVarMapping(recursionQueryResult.at(0).at(j).second);
+                }
+                forbiddenMappings.push_back(recursionQueryResult.at(0).at(j).second);
+            }
+        }
     } else {
-        if (DEBUG) printf("Head is query term\n");
+        logicOperator = OPERATOR_NOP;
         IntPairVector constraints;
         StringMap variableOccurrences;
         buildQueryTerm(keyExpression, variableOccurrences, queryFrame, cursor);
@@ -461,10 +595,19 @@ void TypeFrameIndex::query(std::vector<ResultPair> &answer, TypeFrame &keyExpres
                         varMap.insert(VarMapping::value_type((*it).first, frames.at(*it2).subFrameAt(*((*it).second.begin()))));
                     }
                     frameSet.insert(frames.at(*it2));
+                    if (DEBUG) {
+                        printf("(LEAF) Adding solution to result:\n");
+                        printTypeFrameSet(frameSet);
+                        printVarMapping(varMap);
+                    }
                     answer.push_back(std::make_pair(frameSet, varMap));
                 }
             }
         }
+    }
+    if (DEBUG) {
+        printf("Answer:\n");
+        printRecursionResult(answer);
     }
 }
 
