@@ -10,7 +10,7 @@
 (load "learn/common.scm")
 (load "learn/link-pipeline.scm")
 (load "learn/compute-mi.scm")
-(load "learn/word-pair-mi.scm")
+(load "learn/batch-word-pair.scm")
 (load "learn/base-stats.scm") ; load after compute-mi.scm
 (load "learn/mst-parser.scm")
 (load "learn/make-disjuncts.scm")

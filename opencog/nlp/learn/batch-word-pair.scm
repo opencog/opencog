@@ -1,7 +1,7 @@
 ;
-; word-pair-mi.scm
+; batch-word-pair.scm
 ;
-; Compute the mutual information of pairs of nautral-language words.
+; Batch-compute the mutual information of pairs of nautral-language words.
 ;
 ; Copyright (c) 2013, 2014, 2017 Linas Vepstas
 ;
@@ -12,6 +12,8 @@
 ; pairs of words.  They make use of the generic API for computing
 ; mutual information between ordered pairs in some relation.
 ; See `compute-mi.scm` for more detail about what is computed, and how.
+; They are designed to run in as a batch, and may take hours to
+; complete. The results are stored in the database, for future reference.
 ;
 ; One structure, among several, in which the pair counts are held,
 ; is of the form
