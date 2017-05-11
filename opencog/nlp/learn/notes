@@ -4562,13 +4562,16 @@ disjunct-entropy-bits 16.48346995957877
 cset-entropy-bits 18.958440018522307
 MI is 7.878671010614585
 
+all connectors ...
+(length (get-all-pseudo-connectors)) 81557
+
 
 
 wtf:
 (length all-disjuncts) 225396 
 wiki-mst-en.sh is running
-why is get_nodes bad?
-why is total stores for node =0?
+why is get_nodes bad? because no nodes are being created. so that OK.
+why is total stores for node =0?  just like above. its OK.
 
 postgres:///en_pairs_mst?user=linas  is the ongoing accumulation of mst stats...
 
@@ -4577,6 +4580,7 @@ guile -l mst-count-en.scm
 1071 secs for pairs
 results size is 32G for 19741168 atoms
 1213 secs for csets
+
 
 fix message -- done
 add  sql-clear-stats -- done

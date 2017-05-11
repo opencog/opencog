@@ -632,6 +632,16 @@
 
 ; ---------------------------------------------------------------------
 
+; return a list of all atoms of TYPE
+(define (get-all-type TYPE)
+	(define all-atoms '())
+	(cog-map-type
+		(lambda (atom) (set! all-atoms (cons atom all-atoms)) #f)
+		TYPE)
+	all-atoms
+)
+
+
 (define-public (get-all-disjuncts)
 "
   get-all-disjuncts -- Return all of the disjuncts in the atomspace.
@@ -641,13 +651,7 @@
   The sanity check would be to make sure that the LgAnd has the desired
   form, i.e. consisting entirely of PseudoDisjuncts.
 "
-	(define all-djs '())
-
-	(cog-map-type
-		(lambda (dj) (set! all-djs (cons dj all-djs)) #f)
-		'LgAnd)
-
-	all-djs
+	(get-all-type 'LgAnd)
 )
 
 ; ---------------------------------------------------------------------
@@ -661,13 +665,17 @@
   The sanity check would be to make sure that the LgAnd has the desired
   form, i.e. consisting entirely of PseudoDisjuncts.
 "
-	(define all-csets '())
+	(get-all-type 'LgWordCset)
+)
 
-	(cog-map-type
-		(lambda (cset) (set! all-csets (cons cset all-csets)) #f)
-		'LgWordCset)
+; ---------------------------------------------------------------------
 
-	all-csets
+(define-public (get-all-pseudo-connectors)
+"
+  get-all-pseudo-connectors -- Return all of the pseudo-connectors
+  in the atomspace.
+"
+	(get-all-type 'PseudoConnector)
 )
 
 ; ---------------------------------------------------------------------
