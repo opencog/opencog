@@ -4566,7 +4566,6 @@ all connectors ...
 (length (get-all-pseudo-connectors)) 81557
 
 
-
 wtf:
 (length all-disjuncts) 225396 
 wiki-mst-en.sh is running
@@ -4588,8 +4587,7 @@ add  sql-clear-stats -- done
 ./mst-one.sh en gamma-pages/G/Gzhelian localhost 17001
 
 
-TODO
-move base-stats.scm to pair-stats.scm
+move base-stats.scm to pair-stats.scm -- DONE
 
 Cannot connect to database: FATAL:  remaining connection slots are reserved for non-replication superuser connections
 

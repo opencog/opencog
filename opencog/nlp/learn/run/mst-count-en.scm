@@ -27,5 +27,6 @@
 (display "Fetch all word-pairs. This may over half-an-hour!\n")
 (fetch-any-pairs)
 
-; Clear the sql cache
+; Clear the sql cache and the stats counters
 (sql-clear-cache)
+(sql-clear-stats)

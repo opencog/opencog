@@ -310,15 +310,17 @@
   csets associated with that item, and the entropy for each
   cset is summed up.
 
-  The returned entropy is in nats. Divide by log 2 to get bits.
+  The returned entropy is in bits, i.e. computerd with log_2.
 "
    ; sum of the counts
-   (fold
-      (lambda (cset sum)
-			(define cset-freq (get-cset-frequency cset))
-			(- sum (* cset-freq (log cset-freq))))
-      0
-      (get-cset-vec ITEM))
+	(define nats
+		(fold
+			(lambda (cset sum)
+				(define cset-freq (get-cset-frequency cset))
+				(- sum (* cset-freq (log cset-freq))))
+			0
+			(get-cset-vec ITEM)))
+	(/ nats (log 2.0))
 )
 
 (define (cset-vec-word-mi WORD)
