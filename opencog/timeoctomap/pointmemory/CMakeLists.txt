@@ -17,5 +17,5 @@ INSTALL (TARGETS point_memory
 
 ADD_GUILE_MODULE (FILES
 	pointmem.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/ato/pointmem"
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/pointmem"
 )
