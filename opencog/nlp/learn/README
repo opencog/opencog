@@ -317,8 +317,10 @@ person's initial, and is not considered the end of a sentence.
 Wikipedia Parsing, part II
 --------------------------
 Set up distinct databases, one for each language:
+```
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
     cat opencog/persist/sql/multi-driver/atom.sql | psql foobar_pairs
+```
 
 Now, build some working directories (so that we don't mess up
 alpha-pages after all that work)
@@ -328,7 +330,7 @@ alpha-pages after all that work)
 * Review the file `opencog/nlp/learn/run/README`, and then copy the
   scripts into your working dir.
 * Modify as needed for chosen language. None of these need modification,
-  unless you wi9sh to run multiple langauges at once, on the same
+  unless you wish to run multiple langauges at once, on the same
   machine, in which case you need to assign non-conflicting port numbers
   for the cogserver, and possibly the relex server.
 
@@ -353,8 +355,8 @@ alpha-pages after all that work)
 * Make sure the scripts point at the RelEx parse server.
   (The RelEx location is given in config-*.scm Make sure that its right,
   and that its loaded... i.e. is listed in opencog-*.conf)
-* Copy `opencog-lang.conf` and `pair-count-lang.scm` to opencog build dir.
-  Start like this:    `guile -l pair-count-lang.scm`
+* Copy `opencog-lang.conf` and `pair-count-lang.scm` to your working
+  directory.  Start the cogserver: `guile -l pair-count-lang.scm `
 * Go back to the wikipedia dir (the dir that contains `beta-pages`), and
   run `./wiki-ss-lang.sh`
 * Wait a few days.
@@ -384,8 +386,8 @@ select sum(floatvalue[3]) from valuations where type=7;
 where type 7 is `CountTruthValue`.
 
 
-Mutual Information
-------------------
+Mutual Information of Word Pairs
+--------------------------------
 After accumulating a few million word pairs, we're ready to compute
 the mutual entropy between them.  This is done manually, by runnning
 functions defined in `(opencog nlp learn)`.
@@ -398,6 +400,8 @@ functions defined in `(opencog nlp learn)`.
 ```
 
 If tracing is turned on, a trace file is written to `/tmp/progress`.
+Batch-counting might take hours or longer, depending on your dataset
+size.
 
 Example stats and performance:
 current fr_pairs db has 16785 words and 177960 pairs.
@@ -421,13 +425,6 @@ So this is just under 1KB per atom.
 typical atom size: 4820384 / 35444 = 136 Bytes/atom
 this is NOT counting indexes, etc.)
 
-Wild-card pair-count was taking about 30 per minute.  After extensive
-bug fixing and tuning in the cogserver, its now running at hundreds
-per minute (maybe 10x faster than before).  An additional round of
-fixes, avoiding the pattern matcher, has added another 50x per
-improvement.  The rate is strongly dependent on the size of the
-dataset.
-
 For dataset (fr_pairs) with 225K words, 5M pairs:
 Current rate is 150 words/sec or 9K words/min.
 
@@ -441,11 +438,8 @@ This is fast, takes a couple of minutes.
 Next: batch-logli takes 540 seconds for 225K words
 
 Finally, an MI compute stage.
-We are now up to about 250 per minute on wild-card, that's an 8x speedup!
-That's on the small dataset, on the large dataset, that 8 per minute.
-Ouch.  Rewrite w/o pattern matcher, get: 60 words/sec = 3.6K per minute
-Thats another 500x speedup... 500x wow.  This rate is per-word, not
-per word-pair.
+Current rate is 60 words/sec = 3.6K per minute.
+This rate is per-word, not per word-pair.
 
 ... at first. Then there are long pauses, which seem to be related to
 SQL queue flushing.  The rate then drops to about half at 30 words/sec
@@ -458,37 +452,31 @@ select count(uuid) from atoms where type = 77; gives  226030 (226K words)
 select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
 select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
 
+The core code for batch-counting is in `compute-mi.scm` and the
+specific code for word-pairs is in `batch-word-pair.scm`.  Both
+of these files need to be ported to an OO system.
 
-XXX
-single-word probs seem to be un-computed?
 
-
-
-Next step: Minimum Spanning Tree parsing
-----------------------------------------
-Minimum spanning tree code is in `mst-parser.scm`
-
+Minimum Spanning Tree parsing
+-------------------------------
 The MST parser discovers the minimum spanning tree that connects the
 words together in a sentence.  The link-cost used is (minus) the mutual
-information between word-pairs (so we are maximizing MI).
+information between word-pairs (so we are maximizing MI). Thus, MST
+parsing cannot be started before the above steps to compute word-pair
+MI have been accomplished.
 
-The algorithm implemented in mst-parser.scm works. 
+Minimum spanning tree code is in `mst-parser.scm`. The current version
+works well.
 
-Here's what's not yet implemented: The next step is to pick apart the
-parse, back into link-grammar style disjuncts, and store these in the
-atom space.  This is to be followed by a second parse phase, so that
-we now MST-parse gobs and gobs of text.
 
-One a bunch of statistics are accumulated for these super-fine-grained
-disjuncts, the next step is to coarse-grain them, by clustering together
-similar ones.  The goal is that clusters will auto-rediscover link-grammar
-links. 
+
 
 TODO List
 =========
 * Fix crash at linkage_set_domain_names+0xe0
 * Create OO system for generic pair statistics.
 * Rework pipeline to use literary English sources.
+* Count single-word probabilities.
 * Resume work on morphology.
 
 DONE
@@ -559,14 +547,14 @@ The below is arithmeticaly correct, but theoretically garbage.
 
 (WordNode "famille") entropy H=11.185
 
-H(*, famille) = 11.195548 
+H(*, famille) = 11.195548
 H(famille, *) = 11.174561
 
 MI(et, famille) = -5.2777815
 H(et, *) = 5.5696678
 P(et, *) = 0.021055372363972875
 
-thus: 
+thus:
 H(et, famille) = -MI(et, famille) + H(famille, *) + H(et, *) = 22.0220103
 P(et, famille) = 2.348087815164205e-7
 
@@ -597,7 +585,7 @@ MI(de, famille) * P(de, famille) + MI(et, famille) * P(et, famille) =  0.0012169
 
 MI(de+et, famille) * P(de+et, famille) = 1.476159343e-4
 
-Oh, wait ... 
+Oh, wait ...
 H(de, famille) * P(de, famille) + H(et, famille) * P(et, famille) =  0.001223328
 
 H(de+et, famille) * P(de+et, famille) = 0.00122097099
@@ -636,9 +624,9 @@ H(d'une, *) = 9.792551
 H(la) = 5.6536283
 H(la, *) = 5.5858526
 
-sa  
+sa
 est
-de 
+de
 H(d'une) = 9.7960119
 H(un) = 7.1578913
 H(et) = 5.5862331
@@ -662,7 +650,7 @@ Change in entropy is diff of the two: -4.7734297e-5
 
 -----
 repeat, for vielle+nouveaux
-H(*, famille) = 11.195548 
+H(*, famille) = 11.195548
 
 H(nouveaux, *) = 13.974219
 P(nouveaux, *) = 6.213565989765264e-5
@@ -808,7 +796,7 @@ All new crash. Note:
 1) This is with the old scheme singleton-instance.
 2) This one received when defining a function with an unbound variable
    in it.  It should have just been a standard stack trace, but wasn't.
-3) Sometimes, when doing this, and parser is running, I get 
+3) Sometimes, when doing this, and parser is running, I get
 
 [2013-12-26 22:50:57:680] [ERROR] Caught signal 11 (Segmentation fault) on thread 47486186035520
         Stack Trace:
@@ -865,7 +853,7 @@ d 47820857940288
         Stack Trace:
         2: CogServerMain.cc:91  _Z7sighandi()
         3: sigaction.c:0        __restore_rt()
-        4: ??:0 strlen()  
+        4: ??:0 strlen()
         5: strings.c:1518       scm_from_stringn()
         6: strports.c:517       scm_c_eval_string()
         7: vm-i-system.c:855    vm_regular_engine()
@@ -873,7 +861,7 @@ d 47820857940288
         9: SchemeEval.cc:433    opencog::SchemeEval::do_eval(std::string const&)
         10: SchemeEval.cc:392   opencog::SchemeEval::c_wrap_eval(void*)
 
-Got exactly above, again 21 Jan. 
+Got exactly above, again 21 Jan.
 
 Preceeded a few minutes earlier by below.
 
@@ -932,9 +920,9 @@ Again, same exact trace:
 [2014-01-22 07:42:21:675] [ERROR] Caught signal 11
 * Again, same exact trace .. again, only for french. Why is french different???
 * Again, same exact trace ..  22 Jan
-* Again, same exact trace ..  23 Jan  Only in french ... wtf ... 
-* Again, same exact trace ..  23 Jan  Only in french ... wtf ... 
-* Again, same exact trace ..  24 Jan  Only in french ... wtf ... 
+* Again, same exact trace ..  23 Jan  Only in french ... wtf ...
+* Again, same exact trace ..  23 Jan  Only in french ... wtf ...
+* Again, same exact trace ..  24 Jan  Only in french ... wtf ...
 * Again, handle=480036842 ptr is null .. why?
 
 
@@ -1177,9 +1165,9 @@ Solution! (setlocale LC_ALL "") every time a new thread is created.
 
 Performance
 -----------
-Performance seems to suck: 
+Performance seems to suck:
 -- two parsers, each takes maybe 4% cpu time total. Load avg of about 0.03
--- each parser runs 4 async write threads pushing atoms to postgres. 
+-- each parser runs 4 async write threads pushing atoms to postgres.
    each one complains about it taking too long to flush the write queues.
 -- postmaster is running 10 threads, load-avg of about 2.00  so about
    2 cpu's at 100%
@@ -1194,7 +1182,7 @@ So, take a tcpdump:
 -- this gets one response from server, about 96 bytes long.
 -- then one more req, one more repsonse, seems to be a 'were'done' mesg
    or something ...  which I guess is due to SQLFreeHandle(SQL_HANDLE_STMT ???
--- time delta in seconds, of tcpdump of traffic packets, between update, and 
+-- time delta in seconds, of tcpdump of traffic packets, between update, and
    response from server:
    0.0006  0.0002 0.0002 0.0002 0.028 (yow!!) 0.001 0.0002
 
@@ -1236,12 +1224,12 @@ Anyway ... performance measured as of 27 Dec 2013:
 
 Takes about 105 millisecs to clear 90 eval-links from the write-back
 queues. This each eval-link is 5 atoms (eval, defind, list, word, word)
-so this works out to 5*90 atoms /0.105 seconds = 4.3KAtoms/sec 
-which is still pretty pathetic... 
+so this works out to 5*90 atoms /0.105 seconds = 4.3KAtoms/sec
+which is still pretty pathetic...
 
 
 
-Misc 
+Misc
 ----
 Change load-atoms to return a count?
 
@@ -1255,14 +1243,14 @@ How about using a reader-writer lock?
 ----------------------------------
 
 boost::shared_lock  for reading,
-unique_lock for writing ... 
+unique_lock for writing ...
 
-upgrade_lock<shared_mutex> lock(workerAccess); 
+upgrade_lock<shared_mutex> lock(workerAccess);
         upgrade_to_unique_lock<shared_mutex> uniqueLock(lock);
 
 
 
-shared_mutex 
+shared_mutex
 write uses:  unique_lock<shared_mutex>
 readers use shared_lock<shared_mutex>
 
