@@ -117,7 +117,7 @@
 			'()))
 	(define evl
 		(if (not (null? wpr))
-			(car (GET-PAIR wpr))
+			(GET-PAIR wpr)
 			'()))
 	(if (not (null? evl))
 		(get-mi evl)
