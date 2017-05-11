@@ -4519,6 +4519,8 @@ MI(fast, {hosrse, car}) =
    (EvaluationLink any-pair-pred (ListLink any-left any-right))
 )
 
-get-any-pair PAIR -- public OK
+get-any-pair PAIR -- public OK defined in common.scm
 get-clique-pair PAIR --public OK
 
+kill get-pair-mi-str 
+make get-pair-mi public. done
