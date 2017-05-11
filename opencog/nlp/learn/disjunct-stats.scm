@@ -326,7 +326,8 @@
 
 (define slow-total-mi (get-total-mi-slow))
 
-; A much faster, optimized version
+; A much faster, optimized version. Still takes tens of minutes
+; to run.
 (define (get-total-mi-bits)
 	(define prog 0)
 	(define prog-len (length all-cset-words))
@@ -342,6 +343,10 @@
 )
 
 (define total-mi-bits (get-total-mi-bits))
+
+; The in-a-jiffy version which needs no new computations:
+(define total-mi-bits
+	(- (word-entropy-bits disjunct-entropy-bits) cset-entropy-bits)
 
 ; ---------------------------------------------------------------------
 ; Rank words according to the MI between them and thier disjuncts

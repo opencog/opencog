@@ -7,7 +7,7 @@
 ;
 ; ---------------------------------------------------------------------
 ; The statistics reported here are those collected via the code
-; in `link-pipeline.scm` and computed in `sompute-mi.scm`.  Therefore
+; in `link-pipeline.scm` and computed in `compute-mi.scm`.  Therefore
 ; structure defintions there and here need to be maintained
 ; consistently.
 ; ---------------------------------------------------------------------

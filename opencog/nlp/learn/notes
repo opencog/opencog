@@ -4542,3 +4542,24 @@ get-clique-pair PAIR --public OK
 
 kill get-pair-mi-str 
 make get-pair-mi public. done
+
+move base-stats.scm to pair-stats.scm
+
+(define all-cset-words (filter-words-with-csets (get-all-words)))
+(define all-disjuncts (get-all-disjuncts))
+(define all-csets (get-all-csets))
+(define total-cset-count (get-total-cset-count))
+
+(- (+ 10.280666542033556 16.00578269190252) 18.301457400661953)
+
+
+wtf:
+(length all-disjuncts) 225396 
+wiki-mst-en.sh is running
+why is get_nodes bad?
+why is total stores for node =0?
+
+guile -l mst-count-en.scm
+
+
+
