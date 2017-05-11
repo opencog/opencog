@@ -100,7 +100,7 @@
 ; when its used for counting, but is not needed here. Fixme!?)
 ;
 ; The left and right words are presumed to be WordNodes, or nil.
-; If either word is nill, or if the word-pair cannot be found, then a
+; If either word is nil, or if the word-pair cannot be found, then a
 ; default value of -1e40 is returned.
 
 (define (get-pair-mi GET-PAIR left-word right-word)

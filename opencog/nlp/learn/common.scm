@@ -131,46 +131,18 @@
 )
 
 ; ---------------------------------------------------------------------
-
-; get-pair-link returns a list of atoms of type LNK-TYPE that contains
-; the given PRED and PAIR.  This is used to obtain the atom that holds
-; item-pair statistics, given a list-link holding the actual pair.
-;
-; PAIR is usually a ListLink of word-pairs.
-; PRED is usually (PredicateNode "*-Sentence Word Pair-*")
-;                 or (SchemaNode "*-Pair Distance-*")
-;                 or (LinkGrammarRelationshopNode "ANY")
-; LNK-TYPE is usually EvaluationLink or ExecutationLink
-;
-; PAIR is the atom (ListLink) we are given.  We want to find the
-; LNK-TYPE that contains it.  That LNK-TYPE should have
-; PRED as its predicate type, and the ListLink in the expected
-; location. That is, given ListLink, we are looking for
-;
-; The result of this search is either #f or the EvaluationLink
-
-(define (get-pair-link LNK-TYPE PRED PAIR)
-
-	(filter!
-		(lambda (evl)
-			(define oset (cog-outgoing-set evl))
-			(and
-				(equal? LNK-TYPE (cog-type evl))
-				(equal? PRED (car oset))
-				(equal? PAIR (cadr oset))))
-		(cog-incoming-set PAIR))
-)
-
-; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Random-tree parse word-pair count access routines.
 ;
-; Given a ListLink holding a word-pair, return the corresponding
-; link that holds the count for that word-pair.
-;
-(define (get-any-pair PAIR)
-	(get-pair-link 'EvaluationLink any-pair-pred PAIR)
+(define-public (get-any-pair PAIR)
+"
+  get-any-pair PAIR -- Given a ListLink holding a word-pair, return
+  the corresponding 'ANY' link-type link that holds the count for
+  that word-pair.  Return the empty list, if there is no count for
+  the word-pair.
+"
+	(cog-link 'EvaluationLink any-pair-pred PAIR)
 )
 
 ; ---------------------------------------------------------------------
@@ -179,11 +151,14 @@
 ; Clique-based-counting word-pair access methods.
 ; ---------------------------------------------------------------------
 
-; Given a ListLink holding a word-pair, return the corresponding
-; link that holds the count for that word-pair.
-;
-(define (get-clique-pair PAIR)
-	(get-pair-link 'EvaluationLink pair-pred PAIR)
+(define-public (get-clique-pair PAIR)
+"
+  get-clique-pair PAIR -- Given a ListLink holding a word-pair, return
+  the corresponding 'clique-counting' style link that holds the count
+  for that word-pair. Return the empty list, if there is no count for
+  the word-pair.
+"
+	(cog-link 'EvaluationLink pair-pred PAIR)
 )
 ; ---------------------------------------------------------------------
 

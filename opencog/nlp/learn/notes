@@ -4460,3 +4460,65 @@ get-disjunct-string
 14.0  swamp  the-
 3.0  swamp  the- .+
 
+
+18.0  creation  the- of+
+10.0  existence  the- of+
+
+627  in  the+
+75  in  a+
+61  in  which+
+49  in  the+ the+
+36  in  used-
+33  in  his+
+32  in  order+
+31  in  United+
+27  in  gallantry-
+26  in  born-
+23  in  role-
+
+8338 -- in
+2185 from
+
+155  from  the+
+20  from  :+ :+ :+ :+ :+ :+ :+ :+ :+ :+ 0+ 0+ 0+ 0+ 0+ 0+ 0+ 0+ 0+ 0+
+18  from  a+
+9  from  derived-
+9  from  until+
+9  from  degree-
+8  from  his+
+8  from  comes-
+8  from  away-
+7.0  from  time+
+7.0  from  the+ the+
+
+get-pair-mi
+get-pair-mi-str ("
+
+MI(fast, horse) = 5.258979
+MI(fast, car) = 3.805734
+
+
+MI(fast, {hosrse, car}) = 
+  p(fast,horse) log p(fast, horse) / p(fast,*) p(*,horse)
++
+  p(fast,car) log p(fast, car) / p(fast,*) p(*,car)
+
+(get-left-wild-prob GETTER WORD)
+(get-left-wild-log-prob GETTER WORD)
+(get-pair-prob GETTER WORD WORD)
+
+(get-logli ATOM)
+
+(define (get-left-wild-prob GETTER WORD)
+	(EvaluationLink any-pair-pred (ListLink any-left word))
+(define (get-any-wild-wild)
+   (EvaluationLink any-pair-pred (ListLink any-left any-right))
+)
+
+(define (get-any-wild-wild)
+   (EvaluationLink any-pair-pred (ListLink any-left any-right))
+)
+
+get-any-pair PAIR -- public OK
+get-clique-pair PAIR --public OK
+
