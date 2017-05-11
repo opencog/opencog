@@ -91,20 +91,22 @@
 )
 
 ; ---------------------------------------------------------------------
-; Return the mutual information for a pair of words.
-;
-; The source of mutual information is given by GET-PAIR, which should
-; be a function that, when given a (ListLink (WordNode)(WordNode)),
-; returns an atom that holds the MI for that pair.
-; (XXX for historical reasons, it returns a list. The ist is needed
-; when its used for counting, but is not needed here. Fixme!?)
-;
-; The left and right words are presumed to be WordNodes, or nil.
-; If either word is nil, or if the word-pair cannot be found, then a
-; default value of -1e40 is returned.
 
-(define (get-pair-mi GET-PAIR left-word right-word)
+(define-public (get-pair-mi GET-PAIR left-word right-word)
+"
+  get-pair-mi GET-PAIR LEFT-WORD RIGHT-WORD --
+         Return the mutual information for a pair of words.
 
+  The source of mutual information is given by GET-PAIR, which should
+  be a function that, when given a (ListLink (WordNode)(WordNode)),
+  returns an atom that holds the MI for that pair.  The user is
+  strongly discouraged from calling GET-PAIR directly, to avoid
+  unintended side-effects (such as the creation of bogus atoms).
+
+  The left and right words are presumed to be WordNodes, or nil.
+  If either word is nil, or if the word-pair cannot be found, then a
+  default value of -1e40 is returned.
+"
 	; Define a losing score.
 	(define bad-mi -1e40)
 
