@@ -20,7 +20,12 @@
 (sql-open "postgres:///en_pairs?user=ubuntu&password=asdf")
 
 ; Load up the words
+(display "Fetch all words from database. This may take several minutes.\n")
 (fetch-all-words)
 
 ; Load up the word-pairs -- this can take over half an hour!
+(display "Fetch all word-pairs. This may over half-an-hour!\n")
 (fetch-any-pairs)
+
+; Clear the sql cache
+(sql-clear-cache)

@@ -8,6 +8,9 @@
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
+
+(use-modules (srfi srfi-1))
+
 ; ---------------------------------------------------------------------
 ; Ranking and printing utilities
 ;

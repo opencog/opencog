@@ -4543,14 +4543,25 @@ get-clique-pair PAIR --public OK
 kill get-pair-mi-str 
 make get-pair-mi public. done
 
-move base-stats.scm to pair-stats.scm
 
 (define all-cset-words (filter-words-with-csets (get-all-words)))
 (define all-disjuncts (get-all-disjuncts))
 (define all-csets (get-all-csets))
 (define total-cset-count (get-total-cset-count))
 
+in the en_pairs sim: MI is  7.9849918332741225
 (- (+ 10.280666542033556 16.00578269190252) 18.301457400661953)
+
+in en_pairs_mst:
+(length all-cset-words) 49423
+(length all-disjuncts) 486824  + 73 more
+(length all-csets) 749337 + 118 more
+total-cset-count 1154809  + 235 more
+word-entropy-bits 10.353641069558124
+disjunct-entropy-bits 16.48346995957877
+cset-entropy-bits 18.958440018522307
+MI is 7.878671010614585
+
 
 
 wtf:
@@ -4559,7 +4570,22 @@ wiki-mst-en.sh is running
 why is get_nodes bad?
 why is total stores for node =0?
 
+postgres:///en_pairs_mst?user=linas  is the ongoing accumulation of mst stats...
+
 guile -l mst-count-en.scm
+335 secs for words
+1071 secs for pairs
+results size is 32G for 19741168 atoms
+1213 secs for csets
+
+fix message -- done
+add  sql-clear-stats -- done
+
+./mst-one.sh en gamma-pages/G/Gzhelian localhost 17001
 
 
+TODO
+move base-stats.scm to pair-stats.scm
+
+Cannot connect to database: FATAL:  remaining connection slots are reserved for non-replication superuser connections
 

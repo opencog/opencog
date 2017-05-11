@@ -83,7 +83,7 @@
 	(define start-time (current-time))
 	; (for-each fetch-one WORD-LIST) ; this is wyyyyy too slow!
 	(load-atoms-of-type 'LgWordCset)
-	(format #t "Elapsed time to load words: ~A secs\n"
+	(format #t "Elapsed time to load csets: ~A secs\n"
 		(- (current-time) start-time))
 )
 
@@ -682,10 +682,10 @@
 ; (fetch-pseudo-csets (get-all-words))
 ; (define ac (filter-words-with-csets (get-all-words)))
 ; (length ac)
-; 30127  now 37413
+; 49423  (now 37413 in en_pairs_sim)
 ; (define ad (get-all-disjuncts))
 ; (length ad)
-; 200183 now 291637
+; 486824 (now 291637 in en_pairs_sim)
 ;
 ; (cset-vec-cosine (Word "this") (Word "that"))
 ; (cset-vec-cosine (Word "he") (Word "she"))

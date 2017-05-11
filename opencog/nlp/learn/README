@@ -2,7 +2,7 @@
                    Language Learning
                    -----------------
              Linas Vepstas December 2013
-                 Updated January 2017
+                 Updated May 2017
 
 Current project, under construction.  See the [language learning wiki]
 (http://wiki.opencog.org/w/Language_learning)
@@ -22,8 +22,8 @@ diary-like notes about system configurtion and operation. A diary of
 scientific notes and results is in the `learn-lang-diary` directory.
 
 The basic algorithmic steps, as implemented so far, are as follows:
-A) Ingest a lot of raw text, such as Wikipedia articles, and count the
-   occurance of nearby word-pairs.
+A) Ingest a lot of raw text, such as novels and narrative literature,
+   and count the occurance of nearby word-pairs.
 B) Compute the mutual information (mutual entropy) between the word-pairs.
 C) Use a Minimum-Spanning-Tree algorithm to obtain provisional parses
    of sentences.  This requires ingesting a lot of raw text, again.
@@ -33,13 +33,16 @@ E) Use maximum-entropy principles to merge similar linkage disjuncts.
    This will also result in sets of similar words. Presumably, the 
    sets will roughly correspond to nouns, verbs, adjectives, and so-on.
 
-Currently, the software implements steps A & B, and part of step C.
-The automation of step C for large-scale parsing is not yet done. 
-Steps D & E are planned. The remainder of step C and all of step D
-are technically straight-forward.  The theoretical details step E are
-incomplete; its not entirely clear what the best merging algorithm might
-be, or how it will work.  Steps D and E are the new parts. Steps A-C have
-been done before, and are "well known" in the literature.
+Currently, the software implements steps A, B, C and D. Step E is
+a topic of current research; its not entirely clear what the best
+merging algorithm might be, or how it will work.
+
+Steps A-C are "well-known" in the academic literature, with results
+reported by many resaeachers over the last two decades. The results
+from Steps D & E are new, and have never been published before.
+(Results from Step D can be found in the file, in this directory
+`learn-lang-diary/drafts/connector-sets.lyx`, the PDF of which
+was posted to the mailing lists)
 
 All of the statistics gathering is done within the OpenCog AtomSpace,
 where counts and other statisical quantites are associated with various
