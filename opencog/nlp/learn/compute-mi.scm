@@ -419,7 +419,6 @@
 			; That is, they have the wild-card in the left-hand slot.
 			(left-evs (concatenate!
 					(map! (lambda (lnk) (GET-PAIR lnk)) left-stars)))
-xxxxxxxxxxxxxxx
 
 			(l-logli (get-logli (GET-LEFT-WILD RIGHT-ITEM)))
 		)
