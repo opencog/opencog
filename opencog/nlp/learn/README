@@ -221,51 +221,6 @@ So, set up the text-ingestion pipeline:
 That's all for now, folks!
 
 
-DONE
-----
-* Make sure that link-parser fully randomizes linkage choices for
-  long sentences. Done. See the rand_state and predictable_rand
-  flags in version 4.8.3.
-* Need a mutli-language sentence splitter; the maxent splitter only
-  works for English sentences.  Probably something simple will do ...
-  Done: copied one from moses-smt and put it into a relex subdirectory
-* Raw psql seems not to be utf8.  Were the tables created wrong,
-  or is this a client bug?
-  Fixed: turned out to be a guile-related bug.
-* Handle database write asynchronously: have a thread collect
-  up the atoms, and write them. Maybe even multiple threads.
-  This is OK due to the atomptr design.
-  Done.  Not just one, but multiple writers.
-* Can we start a guile thread for each incoming sentence?
-  Threading will require more subtle sentence cleanup.
-  No. The main guile bug, opened 5 years ago, is still not fixed.
-* Table counts need to be more than 32-bit. Looks like the
-  any-language goes hog-wild and creates huge counts for just
-  one sentence ... is this desired?  Anyway, they'll overflow...
-  Done. atoms.sql now uses bigint 64-bit uuids.
-* Investigate crash: while writing truuth value, stv_confidence
-  was pure virtual (circa line 920 of AtomStorage.cc) There's some
-  kind of smart-pointer race. See "Crash" section below.
-  Done. Ran for a month without issues.
-
-
-Misc Notes about batch processing
-----------------------------------
-The relex parse is extreely fast, the cogserver part is extremely slow ...
-Non-linear, even.
-4-word sentence: 53 parses, 3-4 seconds elapsed
-
-5-word sentence, 373 parses,
-32 second elapsed,
-postgres runs at 36% cpu
-cogserver runs at 56% cpu for a while then drops to 26% cpu
-
-8-word sentence, max of 999 parses,
-2 minutes elapsed.  Same CPU usage as above...
-
-Solution: 999 parses are not needed.  Asorted tuning was done since
-the above was written.
-
 
 Wikipedia processing
 --------------------
@@ -476,7 +431,7 @@ dataset.
 For dataset (fr_pairs) with 225K words, 5M pairs:
 Current rate is 150 words/sec or 9K words/min.
 
-XXX !??? After wild-card count finshes, there is a 5563 second 
+XXX !??? After wild-card count finshes, there is a 5563 second
 pause before batch counting starts. cogserver runs at 100%.
 WTF is this? Garbage collection? Flushing of SQL queues?
 
@@ -528,6 +483,58 @@ One a bunch of statistics are accumulated for these super-fine-grained
 disjuncts, the next step is to coarse-grain them, by clustering together
 similar ones.  The goal is that clusters will auto-rediscover link-grammar
 links. 
+
+TODO List
+=========
+* Fix crash at linkage_set_domain_names+0xe0
+* Create OO system for generic pair statistics.
+* Rework pipeline to use literary English sources.
+* Resume work on morphology.
+
+DONE
+----
+* Make sure that link-parser fully randomizes linkage choices for
+  long sentences. Done. See the rand_state and predictable_rand
+  flags in version 4.8.3.
+* Need a mutli-language sentence splitter; the maxent splitter only
+  works for English sentences.  Probably something simple will do ...
+  Done: copied one from moses-smt and put it into a relex subdirectory
+* Raw psql seems not to be utf8.  Were the tables created wrong,
+  or is this a client bug?
+  Fixed: turned out to be a guile-related bug.
+* Handle database write asynchronously: have a thread collect
+  up the atoms, and write them. Maybe even multiple threads.
+  This is OK due to the atomptr design.
+  Done.  Not just one, but multiple writers.
+* Can we start a guile thread for each incoming sentence?
+  Threading will require more subtle sentence cleanup.
+  No. The main guile bug, opened 5 years ago, is still not fixed.
+* Table counts need to be more than 32-bit. Looks like the
+  any-language goes hog-wild and creates huge counts for just
+  one sentence ... is this desired?  Anyway, they'll overflow...
+  Done. atoms.sql now uses bigint 64-bit uuids.
+* Investigate crash: while writing truuth value, stv_confidence
+  was pure virtual (circa line 920 of AtomStorage.cc) There's some
+  kind of smart-pointer race. See "Crash" section below.
+  Done. Ran for a month without issues.
+
+
+Misc Notes about batch processing
+----------------------------------
+The relex parse is extreely fast, the cogserver part is extremely slow ...
+Non-linear, even.
+4-word sentence: 53 parses, 3-4 seconds elapsed
+
+5-word sentence, 373 parses,
+32 second elapsed,
+postgres runs at 36% cpu
+cogserver runs at 56% cpu for a while then drops to 26% cpu
+
+8-word sentence, max of 999 parses,
+2 minutes elapsed.  Same CPU usage as above...
+
+Solution: 999 parses are not needed.  Asorted tuning was done since
+the above was written.
 
 
 Some typical entropies for word-pairs
