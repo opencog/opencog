@@ -299,13 +299,11 @@
 (define disjunct-entropy (partial-entropy all-disjuncts))
 (define disjunct-entropy-bits (/ disjunct-entropy (log 2.0)))
 
-(define cset-entropy
+(define cset-entropy-bits
 	(fold
 		(lambda (word sum) (+ sum  (cset-vec-entropy word)))
 		0
 		all-cset-words))
-
-(define cset-entropy-bits (/ cset-entropy (log 2.0)))
 
 ; A sloppy, slow, wasteful algorithm
 (define (get-total-mi-slow)

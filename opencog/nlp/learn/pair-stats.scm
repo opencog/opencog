@@ -52,7 +52,23 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (count-clique-pair PAIR)
+; Call the function FUNC on the word-pair, but only if the
+; word-pair exists. This prevents garbaging up the atomspace
+; with bogus word-pair lists.
+(define (safety-wrap FUNC WORD-A WORD-B)
+	(define pair
+		(if
+			(and
+				(not (null? WORD-A))
+				(not (null? WORD-B)))
+			(cog-link 'ListLink WORD-A WORD-B)
+			'()))
+	(if (not (null? pair))
+		(FUNC pair)
+		#f)
+)
+
+(define (count-clique-pair PAIR)
 "
   Return count for the clique-pair PAIR
 "
@@ -60,7 +76,7 @@
 	(if (null? evl) 0 (get-count evl))
 )
 
-(define-public (count-dist-pair PAIR)
+(define (count-dist-pair PAIR)
 "
   Return sum over all counts of the distance pairs.
   This should, in all cases, return the same value as
@@ -76,7 +92,7 @@
 				(cog-incoming-by-type PAIR 'ExecutionLink)))
 )
 
-(define-public (avg-dist-pair PAIR)
+(define (avg-dist-pair PAIR)
 "
   Return average distance over all counts of the distance pairs
 "
@@ -94,11 +110,22 @@
 		(count-dist-pair PAIR))
 )
 
+(define-public (avg-dist-word-pair WORD-A WORD-B)
+"
+  Return average distance over all counts of the distance pairs
+"
+	(define dist (safety-wrap avg-dist-pair WORD-A WORD-B))
+	(if dist dist 1e40)
+)
+
 ; ---------------------------------------------------------------------
 
 (define-public (verify-clique-pair-sums PAIR-LIST)
 "
-  This checks consistency of the two formats. It should not throw.
+  This checks consistency of the the clique-pair total count, with
+  the subcounts of each pair, accodring to the distance between
+  the words. The sum of the subtotals should equal the total.
+  It should not throw.
 
   Example usage: (verify-clique-pair-sums (get-all-clique-pairs))
 "
