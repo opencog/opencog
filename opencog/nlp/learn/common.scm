@@ -193,7 +193,7 @@
 (define-public (get-pair-logli GET-PAIR left-word right-word)
 "
   get-pair-logli GET-PAIR LEFT-WORD RIGHT-WORD --
-         Return the -log P(left, right) for the probability
+         Return the -log_2 P(left, right) for the probability
   P(left,right) of having observed a pair of words.
 
   Currently, the only valid values for GET-PAIR are get-any-pair
@@ -232,7 +232,8 @@
 (define-public (get-pair-mi GET-PAIR left-word right-word)
 "
   get-pair-mi GET-PAIR LEFT-WORD RIGHT-WORD --
-         Return the mutual information for a pair of words.
+         Return the mutual information for a pair of words. The
+  returned value will be in bits (i.e. using log_2 in calculations)
 
   Currently, the only valid values for GET-PAIR are get-any-pair
   and get-clique-pair.
@@ -272,7 +273,8 @@
 (define-public (get-pair-mi-str left-word-str right-word-str)
 "
   get-pair-mi-str LEFT-WORD-STRING RIGHT-WORD-STRING
-  Return the mutual information for a pair of words.
+  Return the mutual information for a pair of words. The MI value
+  will be given in bits (i.e. log_2 of the ratio of probabilites)
 
   The left and right words are presumed to be strings.  If the word-
   pair cannot be found, then a default value of -1000 is returned.
@@ -291,7 +293,7 @@
 (define-public (get-left-wild-logli GET-PAIR right-word)
 "
   get-left-wild-logli GET-PAIR RIGHT-WORD --
-         Return the -log p(*,word) i.e. where the left word was
+         Return the -log_2 p(*,word) i.e. where the left word was
   summed over.
 
   Currently, the only valid values for GET-PAIR are get-any-pair
@@ -307,7 +309,7 @@
 (define-public (get-right-wild-logli GET-PAIR left-word)
 "
   get-right-wild-logli GET-PAIR LEFT-WORD --
-         Return the -log p(word,*) i.e. where the right word was
+         Return the -log_2 p(word,*) i.e. where the right word was
   summed over.
 
   Currently, the only valid values for GET-PAIR are get-any-pair

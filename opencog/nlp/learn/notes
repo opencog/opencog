@@ -4497,11 +4497,29 @@ get-pair-mi-str ("
 MI(fast, horse) = 5.258979
 MI(fast, car) = 3.805734
 
+(get-pair-logli get-any-pair (Word "fast") (Word "horse"))
+-log P(fast, horse) = 24.054777  P = 5.7383969102974027e-8
+-log P(fast, car) = 23.832385  P = 6.694794440144226e-8
 
-MI(fast, {hosrse, car}) = 
+
+-log P(*, horse) = 14.383531  P = 4.6787056718009e-5
+-log P(*, car) = 12.707894    P = 1.4946610743515038e-4
+-log P(fast, *) =  14.930225  P = 3.2029815202410256e-5
+
+
+MI(fast, {hosrse, car}) = linear interploation of the two. 
+  [
   p(fast,horse) log p(fast, horse) / p(fast,*) p(*,horse)
 +
-  p(fast,car) log p(fast, car) / p(fast,*) p(*,car)
+  p(fast,car) log p(fast, car) / p(fast,*) p(*,car) ] 
+   / [p(fast,horse) + p(fast,car)]
+
+= [ p(fast,horse) 5.258979 + p(fast,car) 3.805734] /
+     1.2433191350441628e-7
+= 5.565671566878678e-7 / 1.2433191350441628e-7 
+= 4.476462567015012
+
+
 
 (get-left-wild-prob GETTER WORD)
 (get-left-wild-log-prob GETTER WORD)
