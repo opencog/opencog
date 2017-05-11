@@ -22,6 +22,9 @@
 (define pair-pred (PredicateNode "*-Sentence Word Pair-*"))
 (define pair-dist (SchemaNode "*-Pair Distance-*"))
 
+(define any-left (AnyNode "left-word"))
+(define any-right (AnyNode "right-word"))
+
 ; get-count ATOM - return the raw observational count on ATOM.
 (define-public (get-count ATOM) (cog-tv-count (cog-tv ATOM)))
 

@@ -49,11 +49,6 @@
 (use-modules (opencog))
 (use-modules (opencog persist))
 
-(define any-left (AnyNode "left-word"))
-(define any-right (AnyNode "right-word"))
-
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Random-tree parse word-pair count access routines.
 ;
