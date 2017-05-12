@@ -468,13 +468,14 @@ y small dataset, taken as a snapshot during counting.
  Each sentnece thus has an average of 661104/32536 = 20.3 words per sentence.
  The dataset contains 446204 unique connector-sets, for an average of 661104/446
 204 = 1.48 observations per cset.
+ It is this last number that makes this dataset feel thin and sparse.
 \end_layout
 
 \begin_layout Standard
 The total word-entropy for the dataset is defined as
 \begin_inset Formula 
 \[
-H_{word}=\sum_{w}p(w)\log p(w)
+H_{word}=\sum_{w}p(w)\log_{2}p(w)
 \]
 
 \end_inset
@@ -484,11 +485,22 @@ and was measured to be
 \end_inset
 
  bits.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This and the following entropies were measured with the word-entropy-bits,
+ disjunctentropy-bits, etc.
+ functions in disjunct-stats.scm 
+\end_layout
+
+\end_inset
+
  The connector-set entropy is much higher.
  It is defined as
 \begin_inset Formula 
 \[
-H_{cset}=\sum_{d,w}p(d,w)\log p(d,w)
+H_{cset}=\sum_{d,w}p(d,w)\log_{2}p(d,w)
 \]
 
 \end_inset
@@ -501,13 +513,26 @@ and is measured to be
  The disjunct entropy is dual to the word entropy:
 \begin_inset Formula 
 \[
-H_{disjunct}=\sum_{d}p(d,*)\log p(d,*)
+H_{disjunct}=\sum_{d}p(d,*)\log_{2}p(d,*)
 \]
 
 \end_inset
 
 and is measured to be 
 \begin_inset Formula $H_{disjunct}=16.01$
+\end_inset
+
+ bits.
+ The total mutual information between the words and disjuncts is then 
+\begin_inset Formula 
+\[
+MI_{cset}=-\sum_{d,w}p(d,w)\log_{2}\frac{p(d,w)}{p(d,*)p(*,w)}=-\left(H_{cset}-H_{word}-H_{disjunct}\right)
+\]
+
+\end_inset
+
+and is measured to be 
+\begin_inset Formula $MI_{cset}=7.985$
 \end_inset
 
  bits.
@@ -587,7 +612,7 @@ the
  can appear more than once in a sentence.
  The first ten pseudo-disjuncts in the disjunct-ranking are ".+ " "the- "
  "the+ " ",+ " ",- " "of+ " "of- " "a- " "and+ " "and- ".
- The duality between these counts shold be obvious.
+ The duality between these counts should be obvious.
 \end_layout
 
 \begin_layout Standard
