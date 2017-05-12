@@ -155,7 +155,7 @@
     (define (stimulate x) (cog-stimulate x STIMULUS))
     (let* ((word-inst-list
                 (append-map parse-get-words (sentence-get-parses SENT)))
-           (word-list (append-map (map word-inst-get-word word-inst-list))))
+           (word-list (map word-inst-get-word word-inst-list)))
         (map stimulate word-inst-list)
         (map stimulate word-list)
     )
