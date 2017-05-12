@@ -512,7 +512,7 @@ To perform MST parsing in bulk:
   scripts; they will pick up where they left off.
 
 
-Exploring Connector-sets
+Exploring Connector-Sets
 -------------------------
 Once you have a database with some fair number of connector sets in it,
 you can start exploring.
@@ -569,6 +569,68 @@ you can start exploring.
   the summary report. It is NOT loaded automatically: in this case,
   just cut-n-paste from that file, to the guile prompt, to get it to
   do things.
+
+Precomputed LXC containers
+--------------------------
+For your computing pleasure, there are some LXC containers that you
+can download that have a fully-configured, functioning system on them.
+The set of available containers will change over time.  The first one
+actually has a bunch of bugs and other problems with it, but it's
+enough to do some basic work. The steps are:
+
+* Make sure you have some relatively modern Linux system handy.
+
+* Install lxc on it. Like so:
+```
+  sudo apt-get install lxc
+```
+
+* Download a container from
+  https://linas.org/lxc-nlp-containers/
+
+* The following describe root-owned containers. You can also have
+  user-owned containers, if you know how to do that.
+
+* Go to the directory `/var/lib/lxc/lxc`.  You may need to create
+  this directory.  Unpack the file you downloaded above, in this
+  directory. Do this as root. Do NOT change the ownership of the
+  files!  Avoid changing the datestamps on the files.
+
+* Type in: `sudo lxc-ls -f` You should see a display similar to this:
+```
+NAME           STATE   AUTOSTART GROUPS IPV4      IPV6
+simil-en       STOPPED 0         -      -         -
+```
+
+* Start the contianer by saying `lxc-start -n simil-en`. Give it
+  5 or 10 or 30 seconds to boot up. Then `lxc-ls -f` again. You
+  should see the below. It ay take a minute for the IPV4 address to
+  show up. You will proably get a different IP than the one shown.
+```
+NAME           STATE   AUTOSTART GROUPS IPV4      IPV6
+simil-en       RUNNING 0         -      10.0.3.89 -
+```
+
+* You can now `ssh` into this container, just as if it were some
+  other machine on your network.  It more-or-less is another machine
+  on your network.
+```
+  ssh ubuntu@10.0.3.89
+```
+  The password is `asdfasdf`.
+
+* The run-scripts are in the `run` directory.  The opencog sources
+  are in the `src` directory. You can `git pull; cmake..; make` these
+  if you wish. Or not. Its all set up already.  Pull only if you need
+  to get the latest.
+
+  (For example, this README file, that you are reading, is in
+  `/home/ubuntu/src/opencog/opencog/nlp/learn/README`. Right now.)
+
+* You can now hop directly to the section "Exploring Connector-Sets"
+  above, and just go for it.  Everything should be set and done.
+  Well, you do need to start guile, of course, etc.
+
 
 
 That's all for now!
