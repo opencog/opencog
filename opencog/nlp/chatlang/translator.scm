@@ -36,13 +36,14 @@
    where A is the variable declaration, B is the condition, C is the
    term sequence."
   (let* ((no-var-cond (cons '() '()))
-         ; Use the lemma of a word for the term-seq
          (atomese-for-term
            (cond ((equal? 'lemma (car TERM))
                   (cons (lemma (cdr TERM))
+                        ; Use the lemma of a word for the term-seq
                         (list (Word (get-lemma (cdr TERM))))))
                  ((equal? 'word (car TERM))
                   (cons (word (cdr TERM))
+                        ; Use the lemma of a word for the term-seq
                         (list (Word (get-lemma (cdr TERM))))))
                  ((equal? 'phrase (car TERM))
                   (cons (phrase (cdr TERM))
@@ -64,9 +65,7 @@
                  ((equal? 'anchor-start (car TERM))
                   (cons no-var-cond (list "<")))
                  ((equal? 'anchor-end (car TERM))
-                  (cons no-var-cond (list ">")))
-                 ; TODO
-                 (else (cons no-var-cond '()))))
+                  (cons no-var-cond (list ">")))))
          (vars (append (caar ATOMESE) (caar atomese-for-term)))
          (conds (append (cdar ATOMESE) (cdar atomese-for-term)))
          (seq (append (cdr ATOMESE) (cdr atomese-for-term))))
@@ -99,12 +98,13 @@
               (length (filter (lambda (x) (equal? 'GlobNode (cog-type x)))
                               new-seq)))
     (Inheritance (List new-seq) chatlang-no-constant))
-  ; TODO: Wrap it using an TrueLink for now, use something better instead?
+  ; To locate it easily
   (Inheritance (List new-seq) chatlang-term-seq)
+  ; TODO: Wrap it using an TrueLink for now, use something better instead?
   (True (List new-seq))))
 
 (define-public (say TXT)
-  "Say the text and clear the state"
+  "Say the text and clear the state."
   ; TODO: Something simplier?
   (And (True (Put (DefinedPredicate "Say") (Node TXT)))
        (True (Put (State chatlang-anchor (Variable "$x"))
@@ -117,7 +117,7 @@
 
 (define yakking (psi-demand "Yakking" 0.9))
 
-(define*-public (chat-rule PATTERN ACTION #:optional NAME)
+(define* (chat-rule PATTERN ACTION #:optional NAME)
   "Top level translation function. Pattern is a quoted list of terms,
    and action is a quoted list of actions or a single action."
   (let* ((template (cons atomese-variable-template atomese-condition-template))
