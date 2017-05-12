@@ -123,6 +123,12 @@ AttentionValue::sti_t FocusBoundaryUpdatingAgent::get_cutoff(HandleSeq& afset)
     auto afSTIValues = std::vector<AttentionValue::sti_t>(af_sti.begin() + minAFSize, 
             ((int)af_sti.size() > maxAFSize ? af_sti.begin() + maxAFSize : af_sti.end()));
 
+    // If there is no natural boundary, find it amongst the minAFSize atoms.
+    if(afSTIValues[0] == afSTIValues[afSTIValues.size()]){
+        afSTIValues = std::vector<AttentionValue::sti_t>(af_sti.begin(), af_sti.begin() + minAFSize);
+    }
+
+
     int cut_off_index = 0;
     AttentionValue::sti_t biggest_diff = -1.0f ; // diffs are always +ve. so, its okay to initialize it with -ve number.
     constexpr AttentionValue::sti_t DIFF_MAGNITUDE = 0.5f; // make this a parameter
