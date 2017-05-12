@@ -468,7 +468,45 @@ MI have been accomplished.
 Minimum spanning tree code is in `mst-parser.scm`. The current version
 works well.
 
+To perform MST parsing in bulk:
+* Copy `run/mst-count-en.scm`, `run/opencog-en.conf`. `run/mst-one.sh`
+  and `run/wiki-mst-en.sh` to yor working directory.
 
+* Edit `opencog-en.conf` and select a port number that does not
+  conflict with your other servers.  Make the same change to
+  `wiki-mst-en.sh`
+
+* (Optional) Make a copy of your word-pair database, "just in case".
+  You can copy databases by saying:
+````
+  createdb -T old_dbname  new_dbname
+```
+
+* Edit `mst-count-en.scm` and set the correct database login
+  credentials. (Maybe to the new_dbname you crate above.)
+
+* Edit `wiki-mst-en.sh` and change the directory `gamma-pages` to
+  whatever directory holds your source text (or move your text to
+  the `gamma-pages` directory).
+
+* Start the cogserver by saying
+```
+  guile -l mst-count-en.scm
+```
+  Wait 10 to 30+ minutes for the guile prompt to appear.  This script
+  opens a connection to the databases, and then loads all word-pairs
+  into the atomspace.  This can take a long time, depending on the
+  size of the database. The word-pairs are needed to get the pair-costs
+  needed to perform the MST parse.
+
+* Once the above has finished loading, the parse script can be
+  started. Run the `wiki-mst-en.sh` in a terminal, and wait a few days
+  for data to accumulate.  Once this is done, you can move to the next
+  step, which is exploring the resulting connector-set (disjunct)
+  database.
+
+Exploring cponnector-sets
+-------------------------
 
 
 TODO List
