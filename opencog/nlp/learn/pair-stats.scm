@@ -218,7 +218,7 @@
   `get-clique-pair`.
 "
 	; Just get the previously computed amount.
-	(get-count GET-PAIR (ListLink any-left any-right))
+	(get-count (GET-PAIR (ListLink any-left any-right)))
 )
 
 (define-public (get-pair-frequency GET-PAIR LEFT-ITEM RIGHT-ITEM)
@@ -237,7 +237,7 @@
 	(define cnt
 		(safety-wrap
 			(lambda (pr) (get-count (GET-PAIR pr)))
-			 WORD-A WORD-B))
+			 LEFT-ITEM RIGHT-ITEM))
 	(if cnt (/ cnt (total-pair-observations GET-PAIR)) 0)
 )
 
@@ -255,7 +255,7 @@
 "
 	(define pair (cog-link 'ListLink ITEM any-right))
 	;; the wildcard is on the right.
-	(get-count GET-PAIR (ListLink ITEM any-right))
+	(get-count (GET-PAIR (ListLink ITEM any-right)))
 )
 
 (define-public (get-word-count-str WORD-STR)
