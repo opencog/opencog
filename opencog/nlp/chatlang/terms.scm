@@ -4,7 +4,7 @@
 
 (use-modules (ice-9 optargs))
 
-(define-public (word STR)
+(define (word STR)
   "Literal word occurrence."
   (let* ((name (choose-var-name))
          (v (list (TypedVariable (Variable name) (Type "WordInstanceNode"))))
@@ -12,7 +12,7 @@
                   (WordInstanceLink (Variable name) (Variable "$P")))))
     (cons v c)))
 
-(define-public (lemma STR)
+(define (lemma STR)
   "Lemma occurrence, aka canonical form of a term. This is the default
    for word mentions in the rule pattern."
   (let* ((name (choose-var-name))
@@ -22,7 +22,7 @@
                   (WordInstanceLink (Variable name) (Variable "$P")))))
     (cons v c)))
 
-(define-public (phrase STR)
+(define (phrase STR)
   "Occurrence of a phrase or a group of words.
    All the words are assumed to be literal / non-canonical."
   (fold (lambda (wd lst)
@@ -31,7 +31,7 @@
         (cons '() '())
         (map word (string-split STR #\ ))))
 
-(define*-public (concept STR #:optional (var (choose-var-name)))
+(define* (concept STR #:optional (var (choose-var-name)))
   "Occurrence of a concept."
   (cons '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: chatlang-concept?")
@@ -51,7 +51,7 @@
                           (Concept (cdr t)))))
        TERMS))
 
-(define*-public (choices TERMS #:optional (var (choose-var-name)))
+(define* (choices TERMS #:optional (var (choose-var-name)))
   "Occurrence of a list of choices. Existence of either one of
    the words/lemmas/phrases/concepts in the list will be considered
    as a match."
@@ -60,7 +60,7 @@
                           (List (Glob var)
                                 (List (terms-to-atomese TERMS)))))))
 
-(define-public (unordered-matching TERMS)
+(define (unordered-matching TERMS)
   "Occurrence of a list of terms (words/lemmas/phrases/concepts)
    that can be matched in any orders."
   (fold (lambda (t lst)
@@ -78,7 +78,7 @@
                  (concept (cdr t)))))
           TERMS)))
 
-(define-public (negation TERMS)
+(define (negation TERMS)
   "Absent of a term or a list of terms (words/phrases/concepts)."
   (cons '()  ; No variable declaration
         (list (Evaluation (GroundedPredicate "scm: chatlang-negation?")

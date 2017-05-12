@@ -98,6 +98,7 @@ public:
     void test_unordered_matching();
     void test_negation();
     void test_create_chat_rule();
+    void test_chat_find_rules();
 };
 
 void ChatlangUTest::test_ui_create_concept()
@@ -204,6 +205,54 @@ void ChatlangUTest::test_create_chat_rule()
 
     auto result = scm->eval("test-chat-rule-result");
     TSM_ASSERT_EQUALS("Fail to create chat rules!", "#t\n", result);
+
+    logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ChatlangUTest::test_chat_find_rules()
+{
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    scm->eval("(load-from-path \"test-chat-find-rules.scm\")");
+
+    auto result_1 = scm->eval("test-result-1");
+    TSM_ASSERT_EQUALS("Fail to find rule 1!", "#t\n", result_1);
+
+    auto result_2 = scm->eval("test-result-2");
+    TSM_ASSERT_EQUALS("Fail to find rule 2!", "#t\n", result_2);
+
+    auto result_3 = scm->eval("test-result-3");
+    TSM_ASSERT_EQUALS("Fail on test 3!", "#t\n", result_3);
+
+    auto result_4 = scm->eval("test-result-4");
+    TSM_ASSERT_EQUALS("Fail to find rule 3!", "#t\n", result_4);
+
+    auto result_5 = scm->eval("test-result-5");
+    TSM_ASSERT_EQUALS("Fail to find rule 3!", "#t\n", result_5);
+
+    auto result_6 = scm->eval("test-result-6");
+    TSM_ASSERT_EQUALS("Fail to find rule 3!", "#t\n", result_6);
+
+    auto result_7 = scm->eval("test-result-7");
+    TSM_ASSERT_EQUALS("Fail on test 7!", "#t\n", result_7);
+
+    auto result_8 = scm->eval("test-result-8");
+    TSM_ASSERT_EQUALS("Fail to find rule 4!", "#t\n", result_8);
+
+    auto result_9 = scm->eval("test-result-9");
+    TSM_ASSERT_EQUALS("Fail to find rule 4!", "#t\n", result_9);
+
+    auto result_10 = scm->eval("test-result-10");
+    TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_10);
+
+    auto result_11 = scm->eval("test-result-11");
+    TSM_ASSERT_EQUALS("Fail to find rule 5!", "#t\n", result_11);
+
+    auto result_12 = scm->eval("test-result-1");
+    TSM_ASSERT_EQUALS("Fail to find rule 6!", "#t\n", result_12);
+
+    auto result_13 = scm->eval("test-result-1");
+    TSM_ASSERT_EQUALS("Fail to find rule 7!", "#t\n", result_13);
 
     logger().info("END TEST: %s", __FUNCTION__);
 }

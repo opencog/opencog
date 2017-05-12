@@ -3,67 +3,61 @@
              (opencog nlp chatlang)
              (opencog exec))
 
-(define anchor (Anchor "Currently Processing"))
-(chat-concept "watch" (list "watching" "seeing"))
-(chat-concept "drink" (list "drink" "consume" "sip"))
-(chat-concept "coffee" (list "espresso" "latte" "cappuccino"))
-
-(define rule-1 (chat-rule '((proper-names "James" "Gilbert")
-                            (word "liked")
-                            (concept "watch")
-                            (or-choices "movie" "TV"))
-                          '(say "Not anymore?")))
-
-(define rule-2 (chat-rule '((main-subj "Richard")
-                            (main-verb "eat")
-                            (pos "delicious" "adj")
-                            (main-obj "fish"))
-                          '(say "Me too")))
-
-(define rule-3 (chat-rule '((concept "drink")
-                            (concept "coffee"))
-                          '(say "nice")))
-
-(define rule-4 (chat-rule '((word "I")
-                            (lemma "like")
-                            (unordered-matching "sleep" "eat")
-                            (lemma "and")
-                            (lemma "go")
-                            (lemma "crazy"))
-                          '(say "cool")))
-
-; Load the outputs of 'nlp-parse'
-(load "test-atomese.scm")
-
+; Utils
+; -----
 ; Get the SentenceNodes from structures like:
 ; (Evaluation (Predicate "sentence-rawtext")
 ;             (List (Sentence "sentence@1234")
-;                   (Node "James Gilbert liked watching TV")))
-(define sent-1 (car (cog-chase-link 'ListLink 'SentenceNode
-    (Node "James Gilbert liked watching TV"))))
+;                   (Node "this is a test")))
+(define (get-sent-node TXT)
+    (car (cog-chase-link 'ListLink 'SentenceNode (Node TXT))))
 
-(define sent-2 (car (cog-chase-link 'ListLink 'SentenceNode
-    (Node "Richard eats delicious fishes"))))
+(define (chat TXT)
+    (define sent (get-sent-node TXT))
+    (State (Anchor "Chatlang: Currently Processing") sent)
+    (chat-find-rules sent))
 
-(define sent-3 (car (cog-chase-link 'ListLink 'SentenceNode
-    (Node "drink latte"))))
+; The rules
+; ---------
+; Simplest case
+(define rule-1 (cr '("hey") '("woah")))
 
-(define sent-4 (car (cog-chase-link 'ListLink 'SentenceNode
-    (Node "I like eating, sleeping, and going crazy"))))
+; Phrase, lemma, and word
+(define rule-2 (cr '("'John Smith' 'ate lunch") '("he did")))
+
+; Concept
+(create-concept "foo" "swallow")
+(create-concept "eat" "ingest" "binge and purge" "~foo")
+(define rule-3 (cr '("you ~eat food") '("of course")))
+
+; Choices, and a rule with no constant
+(define rule-4 (cr '("[hi hello]") '("nice to meet you")))
+(define rule-5 (cr '("it says ['one two' ~foo]") '("I see")))
+
+; Unordered matching
+(define rule-6 (cr '("<<apples love oranges>> no") '("what?")))
+
+; Sentence anchor
+(define rule-7 (cr '("they like it < I think") '("good to know")))
+
+; TODO: Negation
+
+; The test
+; --------
+; Load the outputs of 'nlp-parse'
+(load "test-atomese.scm")
 
 ; Try to find the rules
-(State anchor sent-1)
-(define test-chat-find-rules-result-1
-    (equal? (gar (chat-find-rules sent-1)) rule-1))
-
-(State anchor sent-2)
-(define test-chat-find-rules-result-2
-    (equal? (gar (chat-find-rules sent-2)) rule-2))
-
-(State anchor sent-3)
-(define test-chat-find-rules-result-3
-    (equal? (gar (chat-find-rules sent-3)) rule-3))
-
-(State anchor sent-4)
-(define test-chat-find-rules-result-4
-    (equal? (gar (chat-find-rules sent-4)) rule-4))
+(define test-result-1 (equal? (gar (chat "hey")) rule-1))
+(define test-result-2 (equal? (gar (chat "John Smith ate lunch")) rule-2))
+(define test-result-3 (equal? (gar (chat "John Smith eats lunch")) '()))
+(define test-result-4 (equal? (gar (chat "you ingest food")) rule-3))
+(define test-result-5 (equal? (gar (chat "you binge and purge food")) rule-3))
+(define test-result-6 (equal? (gar (chat "you swallow food")) rule-3))
+(define test-result-7 (equal? (gar (chat "you eat food")) '()))
+(define test-result-8 (equal? (gar (chat "hi")) rule-4))
+(define test-result-9 (equal? (gar (chat "hello")) rule-4))
+(define test-result-10 (equal? (gar (chat "it says one two")) rule-5))
+(define test-result-11 (equal? (gar (chat "it says swallow")) rule-5))
+(define test-result-12 (equal? (gar (chat "oranges love apples no?")) rule-6))
+(define test-result-13 (equal? (gar (chat "I think they like it")) rule-7))
