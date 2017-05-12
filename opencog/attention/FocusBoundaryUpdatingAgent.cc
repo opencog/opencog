@@ -113,6 +113,11 @@ AttentionValue::sti_t FocusBoundaryUpdatingAgent::get_cutoff(HandleSeq& afset)
     std::vector<AttentionValue::sti_t> af_sti;
     for(const Handle& h: afset)
         af_sti.push_back(_bank->get_sti(h));
+    
+    std::sort(af_sti.begin(), af_sti.end(),
+            [&](const AttentionValue::sti_t& sti1,
+                const AttentionValue::sti_t& sti2)->bool {
+            return sti1 > sti2;
             });
 
     auto afSTIValues = std::vector<AttentionValue::sti_t>(af_sti.begin() + minAFSize, 
