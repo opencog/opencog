@@ -14,15 +14,17 @@ git clone git@github.com:opencog/external-tools.git
 then convert the kif files into scheme (it's gonna take a while)
 
 ```bash
-cd SUMO_importer
+cd external-tools/SUMO_importer
 ./sumo-opencog.sh
 ```
 
 copy the output folder to here (where that README.md is located)
 
 ```bash
-cp all-sumo-labeled-kb.scm <HERE>
-cp output/sumo/Merge.scm <HERE>
+cd <HERE>
+cp <EXTERNAL-TOOLS>/SUMO_importer/all-sumo-labeled-kb.scm .
+cp <EXTERNAL-TOOLS>/SUMO_importer/sumo/output/Merge.scm .
+cp -r <EXTERNAL-TOOLS>/SUMO_importer/sumo/output/tests .
 cd <HERE>
 ```
 
