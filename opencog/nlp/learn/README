@@ -2,7 +2,7 @@
                    Language Learning
                    -----------------
              Linas Vepstas December 2013
-                 Updated January 2017
+                 Updated May 2017
 
 Current project, under construction.  See the [language learning wiki]
 (http://wiki.opencog.org/w/Language_learning)
@@ -22,24 +22,27 @@ diary-like notes about system configurtion and operation. A diary of
 scientific notes and results is in the `learn-lang-diary` directory.
 
 The basic algorithmic steps, as implemented so far, are as follows:
-A) Ingest a lot of raw text, such as Wikipedia articles, and count the
-   occurance of nearby word-pairs.
+A) Ingest a lot of raw text, such as novels and narrative literature,
+   and count the occurance of nearby word-pairs.
 B) Compute the mutual information (mutual entropy) between the word-pairs.
 C) Use a Minimum-Spanning-Tree algorithm to obtain provisional parses
    of sentences.  This requires ingesting a lot of raw text, again.
    (Independently of step A)
 D) Extract linkage disjuncts from the parses, and count their frequency.
 E) Use maximum-entropy principles to merge similar linkage disjuncts.
-   This will also result in sets of similar words. Presumably, the 
+   This will also result in sets of similar words. Presumably, the
    sets will roughly correspond to nouns, verbs, adjectives, and so-on.
 
-Currently, the software implements steps A & B, and part of step C.
-The automation of step C for large-scale parsing is not yet done. 
-Steps D & E are planned. The remainder of step C and all of step D
-are technically straight-forward.  The theoretical details step E are
-incomplete; its not entirely clear what the best merging algorithm might
-be, or how it will work.  Steps D and E are the new parts. Steps A-C have
-been done before, and are "well known" in the literature.
+Currently, the software implements steps A, B, C and D. Step E is
+a topic of current research; its not entirely clear what the best
+merging algorithm might be, or how it will work.
+
+Steps A-C are "well-known" in the academic literature, with results
+reported by many resaeachers over the last two decades. The results
+from Steps D & E are new, and have never been published before.
+(Results from Step D can be found in the file, in this directory
+`learn-lang-diary/drafts/connector-sets.lyx`, the PDF of which
+was posted to the mailing lists)
 
 All of the statistics gathering is done within the OpenCog AtomSpace,
 where counts and other statisical quantites are associated with various
@@ -56,11 +59,23 @@ Thus, operating the sytem requires three basic steps:
 
 Each of these is described in greater detail in separate sections below.
 
+If you are lazy, you can just hop to the end, to the section titled
+"Precomputed LXC containers", and grab one of those.  It will have
+everything in it, up to the last step.  Of course, you won't know what
+to do with it, if you don't read the below. Its not a magic "get smart"
+pill. You've got a lot of RTFM in front of you.
+
 
 Setting up the AtomSpace
 ------------------------
 This section describes how to set up the atomspace to collect
 statistics.  Most of this revolves around setting up postgres.
+
+0.0) Optional. If you plan to run the pipeline on multiple
+   different languages, it can be convenient, for various reasons,
+   to run the processing in an LXC container. If you already know
+   LXC, then do it. If not, or this is your first time, then don't
+   bother.
 
 0) The atomspace MUST be built with guile version 2.2.2.1 or newer,
    which can only be obtained from git: that is, by
@@ -70,10 +85,11 @@ statistics.  Most of this revolves around setting up postgres.
    when computing mutual information.
    https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26616
 
-1) Set up and configure postgres, as described in 
+1) Set up and configure postgres, as described in
    `opencog/persist/sql/README.md`
 
-2) Create and initialize the database
+2) Create and initialize the database. Pick any name you want;
+   here it is `learn-pairs`.
 ```
    createdb learn-pairs
    cat atom.sql | psql learn-pairs
@@ -88,21 +104,20 @@ doing this, at the moment, is to parse the text with link-grammar and
 RelEx, using the "any" language.  This pseudo-language will link any
 word to any other, and is simply a convenient way of extracting word
 pairs from text.  Although this might seem to be a very convoluted way
-of extracting word pairs, it actually "make sense", for two reasons:
+of extracting word pairs, it actually "makes sense", for two reasons:
 a) it already works; little or no new code required. b) later processing
 steps will require passing text through the link-grammar parser anyway,
-so we may as well start using it right away. So, set that up:
+so we may as well start using it right away. (RelEx is used only to
+convert link-grammar output to "atomese"; a stripped-down version of
+RelEx could be created that does only this, or maybe a native
+link-grammar server could be written.)
+
+So, set up the text-ingestion pipeline:
 
 4) Install `link-grammar-5.3.15` or newer.
-5) Copy the RelEx opencog-server.sh shell script to some other name.
-   Edit it, and replace the final line with this:
-```
-   java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --lang any -n 16 --link
-```
-   Run the new shell script.
 
-   The above tells relex to use the 'any' language, and return up to 16
-   different parses. This should generate plenty of word-pairs.
+5) Install the current version of RelEx. The current version has
+   assorted bugfixes that are required to get a working system.
 
 6) Create/edit the `~/.guile` file and add the following content:
 ```
@@ -115,22 +130,34 @@ so we may as well start using it right away. So, set that up:
 ```
 
 7) Copy one of the `opencog-??.conf` files from the `run`
-   directory to your working directory. Modify as needed. This file
-   specifies the cogserver port number, and the prompt to use; this
-   can be changed so that it does not conflict with other cogservers
-   that might be running at the same time.
+   directory to your working directory. A choice of default files
+   for different languages are provided, or you can create your
+   own.  This file specifies the cogserver port number, and the
+   prompt to use; the defaults are set up so that there are no
+   conflicts, so that you can run multiple languages at the same
+   time.
 
-8) Chose the corresponding `learn-pairs-??.scm` file, and review and
-   edit the configuration as necessary. It contains the database 
-   credentials.
+8) Chose the corresponding `learn-pairs-??.scm` file, copy it from
+   the `run` directory to your working directory. Review and edit
+   the configuration as necessary. It contains the database
+   credentials -- that's probably the only thing you need to change.
 
-9) Start the cogserver, as follows:
+9) Start the various servers. Eventually, you can use the
+   `run-all-servers.sh` file in the `run` directory to do this;
+   it creates a byobu session with different servers in different
+   terminals, where you can keep an eye on them. However, the
+   first time through, it is better to do all this by hand. So:
+
+9a) Start `run/relex-server-any.sh` in a terminal.
+
+9b) Start the cogserver, in another terminal, as follows:
 ```
    guile -l learn-pairs-??.scm
 ```
    There are other ways of starting the cogserver; the above is handy.
 
-10) Verify that the language processing pipeline works:
+10) Verify that the language processing pipeline works. In a third
+   terminal, try this:
 ```
    telnet localhost 17002  # or wherever your cogserver is configured.
    guile> (observe-text "this is a test")
@@ -148,82 +175,59 @@ so we may as well start using it right away. So, set that up:
    RelEx for parsing, counts the returned word-pairs, and stores them in
    the database.
 
-8) Verify that the above resulted in data sent to the SQL database. So:
+10a) Verify that the above resulted in data sent to the SQL database.
+   Log into the database, and check:
 ```
    psql learn-pairs
    learn-pairs=# SELECT * FROM atoms;
    learn-pairs=# SELECT COUNT(*) FROM atoms;
+   learn-pairs=# SELECT * FROM valuations;
 ```
    The above shows that the database now contains word-counts for
-   pair-wise linkages for the above sentences.
+   pair-wise linkages for the above sentences. If the above are empty,
+   something is wrong. Go to step zero.
 
-9) Get ready to feed it text.  For example, parse wikipedia.
+11) Get ready to feed it text. It would be best to get text that
+  consists of narrative literature, adventure and young-adult novels,
+  newspaper stories. These contain a good mix of common nouns and verbs,
+  which is needed for conversational natural language.
+
+  Turns out that Wikipedia is a poor choice for a dataset. That's
+  because the "encyclopedic style" means it contains few pronouns,
+  and few action-verbs (hit, jump, push, take, sing, love) because
+  its mostly describing objects and events (is, has, was). It also
+  contains large numbers of product names, model numbers, geographical
+  place names, and foreign langauge words, which do little or nothing
+  for learning grammar. Finally, it has large numbers of tables and
+  lists of dates, awards, ceremonies, locations, sports-league names,
+  battles, etc. that get mistaken for sentences, and leads to unusual
+  deductions of grammar.  Thus, it turns out Wikipedia is a bad choice
+  for learning text.
+
+  That said, there are a bunch of scripts for dealing with wikipedia.
+  Thus, the steps are these:
    a) Download lang-wiki-pages-articles for some lanugage lang.
    b) See 'Wikipedia processing' section below. Do the stuff there.
    c) See the section 'Sentence Splitting'. Set that up.
    d) See Wikipedia 'Processing, part II' below.
 
-10) After doing at least several days worth of parsing  (i.e. at least
+12) After doing at least several days worth of parsing  (i.e. at least
    hundreds of articles, tens of thousands of sentences) the word-pair
    mutual information can be extracted. Do the stuff in section "Mutual
    Information" section below.
 
-11) MST parsing can now be started. See below.
+   If the parsing is interrupted, you can restart the various scripts;
+   they will automatically pick up where they left off.
+
+13) Using the extracted mutual information for word-pairs, the MST
+   parsing step can be started. See below. Run this for several days.
+   At the end of this, you will have a bunch of statistics on
+   "pseudo-connector sets": pairs which associate a word to a
+   disjunct of pseudo-connectors.
+
+14) Perform clustering research.  You're on your own, now.
 
 That's all for now, folks!
-
-
-Misc TODO
----------
-* Remove the NLP_HACK from persist/sql/PersistModule.cc
-* Optimize the scm scripts to not pound the database so hard.
-  (How? Lots of word pushes, but really, there's not much repeat
-  traffic ...) Not sure this is much of a problem, any more.
-
-DONE
-----
-* Make sure that link-parser fully randomizes linkage choices for
-  long sentences. Done. See the rand_state and predictable_rand
-  flags in version 4.8.3.
-* Need a mutli-language sentence splitter; the maxent splitter only
-  works for English sentences.  Probably something simple will do ...
-  Done: copied one from moses-smt and put it into a relex subdirectory
-* Raw psql seems not to be utf8.  Were the tables created wrong,
-  or is this a client bug? 
-  Fixed: turned out to be a guile-related bug.
-* Handle database write asynchronously: have a thread collect
-  up the atoms, and write them. Maybe even multiple threads.
-  This is OK due to the atomptr design.
-  Done.  Not just one, but multiple writers.
-* Can we start a guile thread for each incoming sentence?
-  Threading will require more subtle sentence cleanup.
-  No. The main guile bug, opened 5 years ago, is still not fixed.
-* Table counts need to be more than 32-bit. Looks like the 
-  any-language goes hog-wild and creates huge counts for just
-  one sentence ... is this desired?  Anyway, they'll overflow...
-  Done. atoms.sql now uses bigint 64-bit uuids.
-* Investigate crash: while writing truuth value, stv_confidence 
-  was pure virtual (circa line 920 of AtomStorage.cc) There's some
-  kind of smart-pointer race. See "Crash" section below.
-  Done. Ran for a month without issues.
-
-
-Misc Notes about batch processing
-----------------------------------
-The relex parse is extreely fast, the cogserver part is extremely slow ... 
-Non-linear, even.
-4-word sentence: 53 parses, 3-4 seconds elapsed
-
-5-word sentence, 373 parses,
-32 second elapsed,
-postgres runs at 36% cpu
-cogserver runs at 56% cpu for a while then drops to 26% cpu
-
-8-word sentence, max of 999 parses,
-2 minutes elapsed.  Same CPU usage as above...
-
-Solution: 999 parses are not needed.  Asorted tuning was done since
-the above was written. 
 
 
 Wikipedia processing
@@ -297,19 +301,20 @@ Sentence Splitting
 Raw text needs to be split up into sentences.  Some distant future day,
 opencog will do this automatically. For now, we hack it.
 
-The sentence splitter needs to work for any language.
-Maybe use NLTK ? ... OK, but not today, ... you can experiment.
-
-Here's a simple one, easy-to-use:
+Currently, splitting is done with the `split-sentences.pl` perl script
+in the `run` directory.  It was stolen from the `moses-smt` package.
 https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
-Has french, polish, latvian, more.  Its LGPL. It has been copied over
-into RelEx, for now. (Its should be here, I guess, not in relex!?)
+It splits french, polish, latvian, and more.  Its LGPL.
 
-Verify that it works: e.g.
+You can verify that it works, like so:
 ```
-   cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
+   cat text-file | run/split-sentences.pl -l en > x
 ```
-Some typical sentence-splitting concerns:
+Replace `en` by the language of your choice.
+
+Some typical sentence-splitting concerns that the above script seems
+to mostly handle correctly:
+
 A question mark or exclamation mark always ends a sentence.  A period
 followed by an upper-case letter generally ends a sentence, but there
 are a number of exceptions.  For example, if the period is part of an
@@ -321,8 +326,10 @@ person's initial, and is not considered the end of a sentence.
 Wikipedia Parsing, part II
 --------------------------
 Set up distinct databases, one for each language:
+```
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
     cat opencog/persist/sql/multi-driver/atom.sql | psql foobar_pairs
+```
 
 Now, build some working directories (so that we don't mess up
 alpha-pages after all that work)
@@ -332,7 +339,7 @@ alpha-pages after all that work)
 * Review the file `opencog/nlp/learn/run/README`, and then copy the
   scripts into your working dir.
 * Modify as needed for chosen language. None of these need modification,
-  unless you wi9sh to run multiple langauges at once, on the same
+  unless you wish to run multiple langauges at once, on the same
   machine, in which case you need to assign non-conflicting port numbers
   for the cogserver, and possibly the relex server.
 
@@ -357,16 +364,16 @@ alpha-pages after all that work)
 * Make sure the scripts point at the RelEx parse server.
   (The RelEx location is given in config-*.scm Make sure that its right,
   and that its loaded... i.e. is listed in opencog-*.conf)
-* Copy `opencog-lang.conf` and `pair-count-lang.scm` to opencog build dir.
-  Start like this:    `guile -l pair-count-lang.scm`
+* Copy `opencog-lang.conf` and `pair-count-lang.scm` to your working
+  directory.  Start the cogserver: `guile -l pair-count-lang.scm `
 * Go back to the wikipedia dir (the dir that contains `beta-pages`), and
   run `./wiki-ss-lang.sh`
 * Wait a few days.
 * This requires postgres 8.4 or newer, for multiple reasons. One reason
   is that older postgres don't automatically VACUUM (see "performance"
   below) The other is the list membership functions are needed.
-* Be sure to perform the postgres tuning recommendations found in 
-  various online postgres peformance wikis, or in the 
+* Be sure to perform the postgres tuning recommendations found in
+  various online postgres peformance wikis, or in the
   `opencog/persist/sql/README.md` file.  See also 'Performance' section
   below.
 
@@ -388,8 +395,8 @@ select sum(floatvalue[3]) from valuations where type=7;
 where type 7 is `CountTruthValue`.
 
 
-Mutual Information
-------------------
+Mutual Information of Word Pairs
+--------------------------------
 After accumulating a few million word pairs, we're ready to compute
 the mutual entropy between them.  This is done manually, by runnning
 functions defined in `(opencog nlp learn)`.
@@ -402,6 +409,8 @@ functions defined in `(opencog nlp learn)`.
 ```
 
 If tracing is turned on, a trace file is written to `/tmp/progress`.
+Batch-counting might take hours or longer, depending on your dataset
+size.
 
 Example stats and performance:
 current fr_pairs db has 16785 words and 177960 pairs.
@@ -425,17 +434,10 @@ So this is just under 1KB per atom.
 typical atom size: 4820384 / 35444 = 136 Bytes/atom
 this is NOT counting indexes, etc.)
 
-Wild-card pair-count was taking about 30 per minute.  After extensive
-bug fixing and tuning in the cogserver, its now running at hundreds
-per minute (maybe 10x faster than before).  An additional round of
-fixes, avoiding the pattern matcher, has added another 50x per
-improvement.  The rate is strongly dependent on the size of the
-dataset.
-
-For dataset (fr_pairs) with 225K words, 5M pairs: 
+For dataset (fr_pairs) with 225K words, 5M pairs:
 Current rate is 150 words/sec or 9K words/min.
 
-XXX !??? After wild-card count finshes, there is a 5563 second 
+XXX !??? After wild-card count finshes, there is a 5563 second
 pause before batch counting starts. cogserver runs at 100%.
 WTF is this? Garbage collection? Flushing of SQL queues?
 
@@ -445,11 +447,8 @@ This is fast, takes a couple of minutes.
 Next: batch-logli takes 540 seconds for 225K words
 
 Finally, an MI compute stage.
-We are now up to about 250 per minute on wild-card, that's an 8x speedup!
-That's on the small dataset, on the large dataset, that 8 per minute.
-Ouch.  Rewrite w/o pattern matcher, get: 60 words/sec = 3.6K per minute
-Thats another 500x speedup... 500x wow.  This rate is per-word, not
-per word-pair.
+Current rate is 60 words/sec = 3.6K per minute.
+This rate is per-word, not per word-pair.
 
 ... at first. Then there are long pauses, which seem to be related to
 SQL queue flushing.  The rate then drops to about half at 30 words/sec
@@ -462,31 +461,248 @@ select count(uuid) from atoms where type = 77; gives  226030 (226K words)
 select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
 select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
 
+The core code for batch-counting is in `compute-mi.scm` and the
+specific code for word-pairs is in `batch-word-pair.scm`.  Both
+of these files need to be ported to an OO system.
 
-XXX
-single-word probs seem to be un-computed?
 
-
-
-Next step: Minimum Spanning Tree parsing
-----------------------------------------
-Minimum spanning tree code is in `mst-parser.scm`
-
+Minimum Spanning Tree parsing
+-------------------------------
 The MST parser discovers the minimum spanning tree that connects the
 words together in a sentence.  The link-cost used is (minus) the mutual
-information between word-pairs (so we are maximizing MI).
+information between word-pairs (so we are maximizing MI). Thus, MST
+parsing cannot be started before the above steps to compute word-pair
+MI have been accomplished.
 
-The algorithm implemented in mst-parser.scm works. 
+Minimum spanning tree code is in `mst-parser.scm`. The current version
+works well.
 
-Here's what's not yet implemented: The next step is to pick apart the
-parse, back into link-grammar style disjuncts, and store these in the
-atom space.  This is to be followed by a second parse phase, so that
-we now MST-parse gobs and gobs of text.
+To perform MST parsing in bulk:
+* Copy `run/mst-count-en.scm`, `run/opencog-en.conf`. `run/mst-one.sh`
+  and `run/wiki-mst-en.sh` to yor working directory.
 
-One a bunch of statistics are accumulated for these super-fine-grained
-disjuncts, the next step is to coarse-grain them, by clustering together
-similar ones.  The goal is that clusters will auto-rediscover link-grammar
-links. 
+* Edit `opencog-en.conf` and select a port number that does not
+  conflict with your other servers.  Make the same change to
+  `wiki-mst-en.sh`
+
+* (Optional) Make a copy of your word-pair database, "just in case".
+  You can copy databases by saying:
+````
+  createdb -T old_dbname  new_dbname
+```
+
+* Edit `mst-count-en.scm` and set the correct database login
+  credentials. (Maybe to the new_dbname you crate above.)
+
+* Edit `wiki-mst-en.sh` and change the directory `gamma-pages` to
+  whatever directory holds your source text (or move your text to
+  the `gamma-pages` directory).
+
+* Start the cogserver by saying
+```
+  guile -l mst-count-en.scm
+```
+  Wait 10 to 30+ minutes for the guile prompt to appear.  This script
+  opens a connection to the databases, and then loads all word-pairs
+  into the atomspace.  This can take a long time, depending on the
+  size of the database. The word-pairs are needed to get the pair-costs
+  needed to perform the MST parse.
+
+* Once the above has finished loading, the parse script can be
+  started. Run the `wiki-mst-en.sh` in a terminal, and wait a few days
+  for data to accumulate.  Once this is done, you can move to the next
+  step, which is exploring the resulting connector-set (disjunct)
+  database.
+
+* If parsing is stopped for any reason, you can just re-run these
+  scripts; they will pick up where they left off.
+
+
+Exploring Connector-Sets
+-------------------------
+Once you have a database with some fair number of connector sets in it,
+you can start exploring.
+
+* (optional) Make a copy of the MST database created above.
+
+* Do not run the connector-set code at the same time (on the same
+  database) as the MST parser. For one, if you are actively updating
+  the counts, then the connector-set counting will get confused.
+  Also, if you have two cogservers writing to the same database
+  at the same time, the issueing of UUID's will get confused, and
+  one or both the servers will crash, and possible database corruption
+  may occur.  It is possible to have multiple writers (and I've done
+  this before, any years ago), but this takes additonal configuration,
+  and a miscellany of coding changes and a couple of enhancements, to
+  keep things in sync.
+
+* So, assuming a clean start: just start `guile` by hand, and enter
+  the following commands (by hand). They load the full disjunct/
+  connector-set database into the atomspace; it needs to be loaded
+  in order to get access to the cosine-distance tool.
+```
+  (use-modules (opencog) (opencog persist) (opencog persist-sql))
+  (use-modules (opencog nlp) (opencog nlp learn))
+  (sql-open "postgres:///en_pairs_mst?user=linas")
+  (fetch-all-words)
+  (length (get-all-words))
+  ; This reports 396262 for one my DB's has.
+  (fetch-pseudo-csets (get-all-words))
+  (define all-cset-words (filter-words-with-csets (get-all-words)))
+  (length all-cset-words)
+  ; This reports 37413 in for my `en_pairs_sim`.
+  (define all-disjuncts (get-all-disjuncts))
+  (length all-disjuncts)
+  ; This reports 291637 in for my `en_pairs_sim`.
+
+```
+  You can now play games:
+```
+ (cset-vec-cosine (Word "this") (Word "that"))
+ (cset-vec-cosine (Word "he") (Word "she"))
+
+```
+  Recall that subroutine documentation can be gotten by typing
+  `,apropos` or `,a` for short at the guile command line.  Docs
+  for individual routines can be read by saying `,describe subr-name`
+  or `,d` for short.
+
+  The `pseudo-csets.scm` file contains code for this stuff. Any routine
+  that is `define-public` can be invoked at the guile prompt. Most are
+  safe.  If its not `define-public`, you should not call it by hand.
+
+  The `disjunct-stats.scm` file contains ad-hoc code used to prepare
+  the summary report. It is NOT loaded automatically: in this case,
+  just cut-n-paste from that file, to the guile prompt, to get it to
+  do things.
+
+Precomputed LXC containers
+--------------------------
+For your computing pleasure, there are some LXC containers that you
+can download that have a fully-configured, functioning system on them.
+The set of available containers will change over time.  The first one
+actually has a bunch of bugs and other problems with it, but it's
+enough to do some basic work. The steps are:
+
+* Make sure you have some relatively modern Linux system handy.
+
+* Install lxc on it. Like so:
+```
+  sudo apt-get install lxc
+```
+
+* Download a container from
+  https://linas.org/lxc-nlp-containers/
+
+* The following describe root-owned containers. You can also have
+  user-owned containers, if you know how to do that.
+
+* Go to the directory `/var/lib/lxc/lxc`.  You may need to create
+  this directory.  Unpack the file you downloaded above, in this
+  directory. Do this as root. Do NOT change the ownership of the
+  files!  Avoid changing the datestamps on the files.
+
+* Type in: `sudo lxc-ls -f` You should see a display similar to this:
+```
+NAME           STATE   AUTOSTART GROUPS IPV4      IPV6
+simil-en       STOPPED 0         -      -         -
+```
+
+* Start the contianer by saying `lxc-start -n simil-en`. Give it
+  5 or 10 or 30 seconds to boot up. Then `lxc-ls -f` again. You
+  should see the below. It ay take a minute for the IPV4 address to
+  show up. You will proably get a different IP than the one shown.
+```
+NAME           STATE   AUTOSTART GROUPS IPV4      IPV6
+simil-en       RUNNING 0         -      10.0.3.89 -
+```
+
+* You can now `ssh` into this container, just as if it were some
+  other machine on your network.  It more-or-less is another machine
+  on your network.
+```
+  ssh ubuntu@10.0.3.89
+```
+  The password is `asdfasdf`.
+
+* The run-scripts are in the `run` directory.  The opencog sources
+  are in the `src` directory. You can `git pull; cmake..; make` these
+  if you wish. Or not. Its all set up already.  Pull only if you need
+  to get the latest.
+
+  (For example, this README file, that you are reading, is in
+  `/home/ubuntu/src/opencog/opencog/nlp/learn/README`. Right now.)
+
+* You can now hop directly to the section "Exploring Connector-Sets"
+  above, and just go for it.  Everything should be set and done.
+  Well, you do need to start guile, of course, etc.
+
+
+
+That's all for now!
+-------------------
+The next step is to cluster the pseudo-disjuncts into clusters, and
+thereby extract grammar. There is no code for this, so far. You're
+on your own.
+
+Everything below this point consists of personal notes, of work-items
+of stuff that still needs doing. You can ignore the rest of this file.
+It will eventually get cleaned up.
+
+
+TODO List
+=========
+* Fix crash at linkage_set_domain_names+0xe0
+* Create OO system for generic pair statistics.
+* Rework pipeline to use literary English sources.
+* Count single-word probabilities.
+* Resume work on morphology.
+* Create an LXC container for public use.
+
+DONE
+----
+* Make sure that link-parser fully randomizes linkage choices for
+  long sentences. Done. See the rand_state and predictable_rand
+  flags in version 4.8.3.
+* Need a mutli-language sentence splitter; the maxent splitter only
+  works for English sentences.  Probably something simple will do ...
+  Done: copied one from moses-smt and put it into a relex subdirectory
+* Raw psql seems not to be utf8.  Were the tables created wrong,
+  or is this a client bug?
+  Fixed: turned out to be a guile-related bug.
+* Handle database write asynchronously: have a thread collect
+  up the atoms, and write them. Maybe even multiple threads.
+  This is OK due to the atomptr design.
+  Done.  Not just one, but multiple writers.
+* Can we start a guile thread for each incoming sentence?
+  Threading will require more subtle sentence cleanup.
+  No. The main guile bug, opened 5 years ago, is still not fixed.
+* Table counts need to be more than 32-bit. Looks like the
+  any-language goes hog-wild and creates huge counts for just
+  one sentence ... is this desired?  Anyway, they'll overflow...
+  Done. atoms.sql now uses bigint 64-bit uuids.
+* Investigate crash: while writing truuth value, stv_confidence
+  was pure virtual (circa line 920 of AtomStorage.cc) There's some
+  kind of smart-pointer race. See "Crash" section below.
+  Done. Ran for a month without issues.
+
+
+Misc Notes about batch processing
+----------------------------------
+The relex parse is extreely fast, the cogserver part is extremely slow ...
+Non-linear, even.
+4-word sentence: 53 parses, 3-4 seconds elapsed
+
+5-word sentence, 373 parses,
+32 second elapsed,
+postgres runs at 36% cpu
+cogserver runs at 56% cpu for a while then drops to 26% cpu
+
+8-word sentence, max of 999 parses,
+2 minutes elapsed.  Same CPU usage as above...
+
+Solution: 999 parses are not needed.  Asorted tuning was done since
+the above was written.
 
 
 Some typical entropies for word-pairs
@@ -511,14 +727,14 @@ The below is arithmeticaly correct, but theoretically garbage.
 
 (WordNode "famille") entropy H=11.185
 
-H(*, famille) = 11.195548 
+H(*, famille) = 11.195548
 H(famille, *) = 11.174561
 
 MI(et, famille) = -5.2777815
 H(et, *) = 5.5696678
 P(et, *) = 0.021055372363972875
 
-thus: 
+thus:
 H(et, famille) = -MI(et, famille) + H(famille, *) + H(et, *) = 22.0220103
 P(et, famille) = 2.348087815164205e-7
 
@@ -549,7 +765,7 @@ MI(de, famille) * P(de, famille) + MI(et, famille) * P(et, famille) =  0.0012169
 
 MI(de+et, famille) * P(de+et, famille) = 1.476159343e-4
 
-Oh, wait ... 
+Oh, wait ...
 H(de, famille) * P(de, famille) + H(et, famille) * P(et, famille) =  0.001223328
 
 H(de+et, famille) * P(de+et, famille) = 0.00122097099
@@ -588,9 +804,9 @@ H(d'une, *) = 9.792551
 H(la) = 5.6536283
 H(la, *) = 5.5858526
 
-sa  
+sa
 est
-de 
+de
 H(d'une) = 9.7960119
 H(un) = 7.1578913
 H(et) = 5.5862331
@@ -614,7 +830,7 @@ Change in entropy is diff of the two: -4.7734297e-5
 
 -----
 repeat, for vielle+nouveaux
-H(*, famille) = 11.195548 
+H(*, famille) = 11.195548
 
 H(nouveaux, *) = 13.974219
 P(nouveaux, *) = 6.213565989765264e-5
@@ -746,491 +962,7 @@ select * from atoms where uuid=5592759;
 541
 
 
-
-
-
-
 ======================================================================
-Crashes and bugs
-
-
-Crash 2
--------
-All new crash. Note:
-1) This is with the old scheme singleton-instance.
-2) This one received when defining a function with an unbound variable
-   in it.  It should have just been a standard stack trace, but wasn't.
-3) Sometimes, when doing this, and parser is running, I get 
-
-[2013-12-26 22:50:57:680] [ERROR] Caught signal 11 (Segmentation fault) on thread 47486186035520
-        Stack Trace:
-        2: CogServerMain.cc:92  _Z7sighandi()
-        3: sigaction.c:0        __restore_rt()
-        4: ??:0   std::string::append(std::string const&)
-        5: basic_string.h:290     std::string::_M_data() const
-        6: SchemeEval.cc:381      opencog::SchemeEval::c_wrap_eval(void*)
-line 381 is  self->answer = self->do_eval(*(self->pexpr));
-So maybe p is null, or self->pexpr is null..
-...
-        7: continuations.c:511  c_body()
-        8: vm-i-system.c:855    vm_regular_engine()
-        9: eval.c:508   scm_call_4()
-        10: continuations.c:456 scm_i_with_continuation_barrier()
-        11: continuations.c:550 scm_c_with_continuation_barrier()
-        12: pthread_support.c:1272      GC_call_with_gc_active()
-        13: threads.c:937       with_guile_and_parent()
-        14: misc.c:1835 GC_call_with_stack_base()
-        15: threads.c:959       scm_with_guile()
-        16: SchemeEval.cc:372     opencog::SchemeEval::eval(std::string const&)
-        17: basic_string.h:536  ~basic_string()
-        18: GenericShell.cc:157   opencog::GenericShell::eval(std::string const&, opencog::ConsoleSocket*)
-        19: ConsoleSocket.cc:232          opencog::ConsoleSocket::OnLine(std::string const&)
-        20: basic_string.h:536  ~basic_string()
-        21: thread.cpp:0        thread_proxy()
-        22: pthread_create.c:0  start_thread()
-        23: ??:0        __clone()
-
-again 7 Jan 2014 but this time its different:
-
-[2014-01-07 00:58:32:234] [ERROR] Caught signal 11 (Segmentation fault) on threa
-d 47389012408640
-        Stack Trace:
-        2: CogServerMain.cc:91  _Z7sighandi()
-        3: sigaction.c:0        __restore_rt()
-        4: vm-i-system.c:887    vm_regular_engine()
-        5: eval.c:508   scm_call_4()
-        6: backtrace.c:163      scm_display_error()
-        7: inline.h:131 scm_puts()
-        8: vm-i-system.c:855    vm_regular_engine()
-        9: eval.c:508   scm_call_4()
-        10: SchemeEval.cc:433     opencog::SchemeEval::do_eval(std::string const&)
-        11: SchemeEval.cc:392     opencog::SchemeEval::c_wrap_eval(void*)
-        12: continuations.c:511 c_body()
-        13: vm-i-system.c:855   vm_regular_engine()
-        14: eval.c:508  scm_call_4()
-
-19 Jan 2014: again: same but different:
-
-[2014-01-19 06:06:32:335] [ERROR] Caught signal 11 (Segmentation fault)
-on threa
-d 47820857940288
-        Stack Trace:
-        2: CogServerMain.cc:91  _Z7sighandi()
-        3: sigaction.c:0        __restore_rt()
-        4: ??:0 strlen()  
-        5: strings.c:1518       scm_from_stringn()
-        6: strports.c:517       scm_c_eval_string()
-        7: vm-i-system.c:855    vm_regular_engine()
-        8: eval.c:508   scm_call_4()
-        9: SchemeEval.cc:433    opencog::SchemeEval::do_eval(std::string const&)
-        10: SchemeEval.cc:392   opencog::SchemeEval::c_wrap_eval(void*)
-
-Got exactly above, again 21 Jan. 
-
-Preceeded a few minutes earlier by below.
-
-opencog-fr> Backtrace:
-In ice-9/boot-9.scm:
- 157: 6 [catch #t #<catch-closure 25dd04e0> ...]
-In unknown file:
-   ?: 5 [apply-smob/1 #<catch-closure 25dd04e0>]
-In ice-9/boot-9.scm:
- 157: 4 [catch #t #<catch-closure 25d2ff20> ...]
-In unknown file:
-   ?: 3 [apply-smob/1 #<catch-closure 25d2ff20>]
-   ?: 2 [call-with-input-string "(observe-text \"Hvozdnica est un village de Slovaquie situé dans la région de \u017dilina.\")\n" ...]
-In ice-9/boot-9.scm:
- 102: 1 [#<procedure cfebf00 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
-In unknown file:
-   ?: 0 [apply-smob/1 #<catch-closure 25d2fee0> encoding-error ...]
-ERROR: In procedure apply-smob/1:
-ERROR: In procedure scm_to_stringn: Error while printing exception.
-ABORT: encoding-error
-Backtrace:
-In ice-9/boot-9.scm:
- 157: 6 [catch #t #<catch-closure 174c8ac0> ...]
-In unknown file:
-   ?: 5 [apply-smob/1 #<catch-closure 174c8ac0>]
-In ice-9/boot-9.scm:
- 157: 4 [catch #t #<catch-closure ac0b5e0> ...]
-In unknown file:
-   ?: 3 [apply-smob/1 #<catch-closure ac0b5e0>]
-   ?: 2 [call-with-input-string "(observe-text \"Hvozdnica est un village de Slovaquie situé dans la région de \u017dilina.\")\n" ...]
-In ice-9/boot-9.scm:
- 102: 1 [#<procedure a82f4c0 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
-In unknown file:
-   ?: 0 [apply-smob/1 #<catch-closure ac0b5a0> encoding-error ...]
-
-ERROR: In procedure apply-smob/1:
-ERROR: In procedure scm_to_stringn: Error while printing exception.
-ABORT: encoding-error
-
-
-Crash 6
--------
-All new 21 jan 2014
-
-[2014-01-21 20:30:03:348] [ERROR] Caught signal 11 (Segmentation fault) on thread 47570270030144
-        Stack Trace:
-        2: CogServerMain.cc:91  _Z7sighandi()
-        3: sigaction.c:0        __restore_rt()
-        4: ??:0   std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > opencog::Atom::getIncomingSet<std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > >(std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > >)
-        5: AtomSpaceImpl.cc:402 opencog::AtomSpaceImpl::getIncoming(opencog::H
-andle)
-        6: ??:0   opencog::AtomSpace::getIncoming(opencog::Handle)
-        7: SchemeSmobNew.cc:538   opencog::SchemeSmob::ss_delete(scm_u
-
-Again, same exact trace:
-[2014-01-22 07:42:21:675] [ERROR] Caught signal 11
-* Again, same exact trace .. again, only for french. Why is french different???
-* Again, same exact trace ..  22 Jan
-* Again, same exact trace ..  23 Jan  Only in french ... wtf ... 
-* Again, same exact trace ..  23 Jan  Only in french ... wtf ... 
-* Again, same exact trace ..  24 Jan  Only in french ... wtf ... 
-* Again, handle=480036842 ptr is null .. why?
-
-
-But this time without the weirdo message:
-terminate called after throwing an instance of 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
-  what():  boost shared_lock has no mutex: Operation not permitted
-
-WTF ... where is the above shared_lock coming from????
-
-
-
-Crash 7
--------
-[2014-01-22 10:18:24:103] [ERROR] Caught signal 11 (Segmentation fault)
-on thread 47155674880320
-        Stack Trace:
-        2: CogServerMain.cc:91  _Z7sighandi()
-        3: sigaction.c:0        __restore_rt()
-        4: ConsoleSocket.cc:211 opencog::ConsoleSocket::OnLine(std::string const&)
-
-
-
-
-
-Irritation 4
-------------
-Occasionally see this:
-
-In ice-9/boot-9.scm:
- 157: 6 [catch #t #<catch-closure 294a63c0> ...]
-
-   ?: 3 [apply-smob/1 #<catch-closure 294a62a0>]
-   ?: 2 [call-with-input-string "(observe-text \"Cheopso piramid\u0117, arba Did
-\u017eioji Gizos piramid\u0117 \u2013 Egipto piramid\u0117, faraono Cheopso kapa
-s.\")\n" ...]
-In ice-9/boot-9.scm:
- 102: 1 [#<procedure 193e5c80 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encodi
-ng-error ...]
-
------------
-another:
- "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
-
-Andrzej Gąsiorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord Wydawnictwo Oskar, Gdańsk 2010 r.
-
-In ice-9/boot-9.scm:
- 102: 1 [#<procedure 3db5240 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
-In unknown file:
-   ?: 0 [apply-smob/1 #<catch-closure 3be53c40> encoding-error ...]
-
-ABORT: encoding-error
-
-ERROR: In procedure scm_to_stringn: Error while printing exception.
-
-
-Crash 8
--------
-[2015-07-17 12:37:57:428] [ERROR] Caught signal 11 (Segmentation fault) on
-thread 140537051608832
-        Stack Trace:
-        2: basic_string.h:539   ~basic_string()
-        3: CogServerMain.cc:79  _Z7sighandi()
-        4: ??:0 killpg()
-        5: ??:0 scm_make_vm()
-        6: ??:0 GC_mark_from()
-        7: ??:0 GC_mark_some()
-        8: ??:0 GC_stopped_mark()
-        9: ??:0 GC_try_to_collect_inner()
-        10: ??:0        GC_collect_or_expand()
-        11: ??:0        GC_allocobj()
-        12: ??:0        GC_generic_malloc_inner()
-        13: ??:0        GC_register_finalizer_inner()
-        14: ??:0        scm_closedir()
-        15: ??:0        scm_i_new_smob()
-        16: smob.h:91   scm_new_smob()
-        17: ??:0        scm_vm_engine()
-        18: ??:0        scm_call_1()
-        19: ??:0        scm_vm_engine()
-        20: ??:0        scm_call_3()
-        21: ??:0        scm_vm_engine()
-        22: ??:0        scm_call_1()
-        23: ??:0        scm_vm_engine()
-        24: ??:0        scm_call_3()
-        25: ??:0        scm_vm_engine()
-        26: ??:0        scm_call_4()
-        27: SchemeEval.cc:606     opencog::SchemeEval::do_eval(std::string
-const&)
-        28: SchemeEval.cc:535     opencog::SchemeEval::c_wrap_eval(void*)
-        29: ??:0        scm_at_abort()
-        30: ??:0        scm_vm_engine()
-        31: ??:0        scm_call_4()
-        32: ??:0        scm_at_abort()
-        33: ??:0        scm_c_with_continuation_barrier()
-        34: ??:0        GC_call_with_gc_active()
-        35: ??:0        scm_current_processor_count()
-        36: ??:0        GC_call_with_stack_base()
-        37: ??:0        scm_with_guile()
-        38: SchemeEval.cc:502     opencog::SchemeEval::eval_expr(std::string
-const&)
-        39: basic_string.h:293    std::string::_M_data() const
-        40: ??:0
-std::this_thread::__sleep_for(std::chrono::duration<long, std::ratio<1l, 1l>
->, std::chrono::duration<long, std::ratio<1l, 1000000000l> >)
-        41: ??:0        start_thread()
-        42: ??:0        clone()
-
-
-Garbage 9
----------
-submit-one: The town has an area of 88 km², population (2003) is 158,000, and is
-located 20 km north of downtown Hồ Chí Minh City, on the left bank of the Saigon River,
-upstream from Hồ Chí Minh City.
-duuude before nectcat open 27
-opencog-en> Backtrace:
-In ice-9/boot-9.scm:
- 157: 6 [catch #t #<catch-closure 195d220> ...]
-In unknown file:
-   ?: 5 [apply-smob/1 #<catch-closure 195d220>]
-In ice-9/boot-9.scm:
- 157: 4 [catch #t #<catch-closure 195d0e0> ...]
-   ?: 5 [apply-smob/1 #<catch-closure 1959f00>]
-In ice-9/boot-9.scm:
- 157: 4 [catch #t #<catch-closure 1959dc0> ...]
-In unknown file:
-   ?: 3 [apply-smob/1 #<catch-closure 1959dc0>]
-   ?: 2 [call-with-input-string "(observe-text \"Although this town is an
-administratively separate town, it is considered as part of the H\u1ed3 Chí Minh City
-Metropolitan Area since this town is bordered by H\u1ed3 Chí Minh City\u2019s urban
-area.\")\n" ...]
-In ice-9/boot-9.scm:
- 102: 1 [#<procedure 1addf40 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error
-...]
-In unknown file:
-   ?: 0 [apply-smob/1 #<catch-closure 1959d80> encoding-error ...]
-
-
-/bin/bash ./ss-one.sh en beta-pages/T/Thủ Dầu Một lo
-
-
-So -- looks like netcat is sending correct text, but by the time
-observe-text gets it, it has been garbled. Why?
-Well, nlp/scm/processing-utils.scm prints it ungarbled.
-
-OK, so this fails:
-(define sss (socket PF_INET SOCK_STREAM 0))
-(connect sss AF_INET (inet-pton AF_INET "127.0.0.1") 7777)
-(display "SmålandSmåland" sss)
-
-prints garbage
-
-(set-port-encoding! sss "utf-8")
-does not fix it.
-(use-modules (rnrs bytevectors))
-(send sss (string->utf8 "Hòa Phú Tân Mỹ")) does not work
-
-
-Ahhh ... (string->utf8 "Småland") prints
-#vu8(83 109 63 108 97 110 100)
-which is what netcat receives
-
-å should be c3 a5  U+00E5
-
-guile-git is broken
-guile-2.0.9 shell works great.
-cogserver linked to guile-2.0.9 is broken
-... but is fixed by using (set-port-encoding! sss "utf-8")
-Yayyy!
-
-
-Boo ...
-submit-one: Phú Mỹ.
-(observe-text \"Phú M\u1ef9.\")
-
-ditto for Phú Thọ.
-Chánh Nghĩa.
-Hiệp Thành
-Thủ Dầu Một
-Hồ Chí Minh
-
-(relex-parse "Ćićolina\n")
-(x-sock-io "Ćićolina\n")
-(x-sock-io "Thủ Dầu Một\n")
-
-(define (x-sock-io sent-txt)
-   (let ((s (socket PF_INET SOCK_STREAM 0)))
-      (connect s AF_INET (inet-pton AF_INET "10.70.70.2") 7777)
-      (set-port-encoding! s "utf-8")
-
-      (display sent-txt s)
-      (system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
-      (close-port s)))
-
-(setlocale LC_ALL "")
-
-(set-port-encoding! (current-input-port) "utf-8")
-(display "Ćićolina\n")
-(define x "Ćićolina\n")   breaks  on cogserver for guile-2.0.9 but
-(define x "Thủ Dầu Một\n")  as above
-(define x "Småland\n") ... works!!
-(define x "Hòa Phú Phú Tân\n")  ... works  !!!
-(define x "x\u0106i\u0107olina\\n") works
-
-Ć is U+0106  c4 86
-ć is U+0107  c4 87
-
-what is bizarre is that the above is exactly inverted for
-the guile-2.1 shell:
-sending the  "working" ones sends garbage, sending the failing ones goes through.
-(ditto for just simply printing....)
-
-both define/display seem to work fine in the guile-2.0.9 shell...
-and define/display seem to work well for the cogserver-2.1 shell. WTF.
-so is it due to a shared-library mis-match?  Caching of compiled files?
-
-(display "SmålandSmåland\n")
-(display "Ćićolina\n")
-(display "Thủ Dầu Một\n")
-(display "Hòa Phú Phú Tân\n")
-
-Avoiding preload of all scheme does not fix it.
-Clearling the guile compiler cache does not fix it.
-
-[call-with-input-string "(define x \"\u0106i\u0107olina\\n\")\n" ...]
-
-ERROR: In procedure call-with-input-string:
-ERROR: Throw to key `encoding-error' with args `("scm_to_stringn" "cannot convert wide
-string to output locale" 84 #f #f)'.
-
-(define x "\u0106i\u0107olina\n")
-
-%default-port-encoding is a fluid ....
-make fluid with default ...
-make dynamic state (with parent ....)
-
-Solution! (setlocale LC_ALL "") every time a new thread is created.
-
-
-
-
-
-Performance
------------
-Performance seems to suck: 
--- two parsers, each takes maybe 4% cpu time total. Load avg of about 0.03
--- each parser runs 4 async write threads pushing atoms to postgres. 
-   each one complains about it taking too long to flush the write queues.
--- postmaster is running 10 threads, load-avg of about 2.00  so about
-   2 cpu's at 100%
--- vmstat shows 500 blks per second written. This is low...
--- top shows maybe 0.2% wait state. So its not disk-bound.
--- what is taking so long?
-
-So, take a tcpdump:
--- a typical tcpdump packet:
-   UPDATE Atoms SET tv_type = 2, stv_mean = 0 , stv_confidence = 0, stv_count = 54036 WHERE uuid = 367785;
-   its maybe 226 bytes long.
--- this gets one response from server, about 96 bytes long.
--- then one more req, one more repsonse, seems to be a 'were'done' mesg
-   or something ...  which I guess is due to SQLFreeHandle(SQL_HANDLE_STMT ???
--- time delta in seconds, of tcpdump of traffic packets, between update, and 
-   response from server:
-   0.0006  0.0002 0.0002 0.0002 0.028 (yow!!) 0.001 0.0002
-
--- so it looks like about every 8-10 packets are replied to fairly quick,
-   then there's one that takes 0.025 seconds to reply.... stair-steps in
-   response time like this all the way through the capture.
-
-Wild guess:
--- Hmm ... this seems to be related to the commit delay in postgresql.conf
-   Change commit_delay to 1 second
-   change wal_bufers to 32MB since its mostly update traffic.
-   change checkpoint_segments to 32 (each one takes up 16MB of disk space.)
-
--- Making these changes has no obvious effect ... bummer.
-
-I don't get it; performance sucks and I don't see why.  Or rather: postmaster
-is chewing up vast amounts of cpu time for no apparent reason...
-
-
-select * from pg_stat_user_tables;
-select * from pg_stat_all_tables;
-select * from pg_statio_user_tables;
-select * from pg_database;
-
-pg_stat_user_indexes
-pg_stat_all_indexes
-
-select * from pg_catalog.pg_stat_activity;
-select * from pg_catalog.pg_locks;
-
-
--- WOW!!!   VACUUM ANALYZE; had a huge effect!!
-
--- vacuum tells em to do following:
-   change max_fsm_pages to 600K
-   chage max_fsm_relations to 10K
-
-Anyway ... performance measured as of 27 Dec 2013:
-
-Takes about 105 millisecs to clear 90 eval-links from the write-back
-queues. This each eval-link is 5 atoms (eval, defind, list, word, word)
-so this works out to 5*90 atoms /0.105 seconds = 4.3KAtoms/sec 
-which is still pretty pathetic... 
-
-
-
-Misc 
-----
-Change load-atoms to return a count?
-
-gdb:
----
-handle SIGPWR nostop noprint
-handle SIGXCPU nostop noprint
-
-
-How about using a reader-writer lock?
-----------------------------------
-
-boost::shared_lock  for reading,
-unique_lock for writing ... 
-
-upgrade_lock<shared_mutex> lock(workerAccess); 
-        upgrade_to_unique_lock<shared_mutex> uniqueLock(lock);
-
-
-
-shared_mutex 
-write uses:  unique_lock<shared_mutex>
-readers use shared_lock<shared_mutex>
-
-writer does:
-
-  // get upgradable access
-  boost::upgrade_lock<boost::shared_mutex> lock(_access);
-
-  // get exclusive access
-  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
-  // now we have exclusive access
-}
-
-am using boost-1.49 on cray
-
-------------------------------------------
 
 Setup, July 2015
 ----------------

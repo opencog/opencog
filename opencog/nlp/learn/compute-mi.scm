@@ -40,7 +40,9 @@
 ; In the general case, the 'WordNode is actually of ITEM-TYPE.
 ; The actual atom holding the count is obtained by calling an
 ; access function: i.e. given the ListLink holding a pair, the
-; GET-PAIR function returns the atom holding the count.
+; GET-PAIR function returns a list of atoms holding the count.
+; It is presumed that the total count is the sum over the counts
+; all atoms in the list.
 ;
 ; Let N(wl,wr) denote the number of times that the pair (wl, wr) has
 ; actually been observed; that is, N("some-word", "other-word") for the
@@ -48,7 +50,7 @@
 ; LinkGrammarRelationshipNode "ANY", so the correct notation would be
 ; N(rel, wl, wr) with `rel` the relationship.  In what follows, the
 ; relationship is always assumed to be the same, and is thus dropped.
-; (the relationship is provided throught the GET-PAIR functiion).
+; (the relationship is provided through the GET-PAIR functiion).
 ;
 ; The mutual information for a pair is defined as follows:  Given
 ; two items, wl and wr, define three probabilities:
@@ -465,9 +467,15 @@
 ; be of ITEM-TYPE.
 ;
 ; The GET-PAIR argument should be a function that returns all atoms
-; that hold counts for a pair (ListLink left-item right-item). The
-; algorithm uses a doubley-nested loop to walk over all pairs, in
-; a sparse-matrix fashion: The outer loop is over all all items,
+; that hold counts for a pair (ListLink left-item right-item). It
+; should return a list (possibly the empty list).  Note that in some
+; cases, the list may be longer than just one item, e.g. for schemas
+; that count link lengths.  In thise case, the total count for the
+; pair is taken to be the sum of the individual counts on all the
+; atoms in the list.
+;
+; The algorithm uses a doubley-nested loop to walk over all pairs,
+; in a sparse-matrix fashion: The outer loop is over all all items,
 ; the inner loop is over the incoming set of the items, that incoming
 ; set being composed of ListLinks that hold pairs. The ITEM-TYPE
 ; is used for filtering, to make sure that only valid pairs are

@@ -37,6 +37,59 @@
 ; Define the atom at which the cosine similarity value will be stored.
 (define (sim-pair WORD-A WORD-B) (SimilarityLink WORD-A WORD-B))
 
+; ---------------------------------------------------------------------
+; Public API for fetching the batched results
+
+(define-public (fetch-all-sims)
+"
+  fetch-all-simss - fetch all SimilarityLinks from the database backend.
+"
+	(define start-time (current-time))
+	(load-atoms-of-type 'SimilarityLink)
+	(format #t "Elapsed time to load sims: ~A secs\n"
+		(- (current-time) start-time))
+)
+
+(define (pair-sim WORD-A WORD-B)
+	(cog-link 'SimilarityLink WORD-A WORD-B))
+
+(define-public (sim-cosine SIM)
+"
+  sim-cosine SIM - return the precomputed cosine similarity for
+  the SimilarlityLink for two objects.
+"
+	(car (cog-value->list (cog-value SIM cos-key)))
+)
+
+(define-public (sim-angle-dist SIM)
+"
+  sim-angle-dist SIM - return the precomputed angular distance
+  (arc-cos of the cosine similarity) for the SimilarityLink of
+  two items.
+"
+	(cadr (cog-value->list (cog-value SIM cos-key)))
+)
+
+(define-public (word-pair-sim-cosine WORD-A WORD-B)
+"
+  word-pair-sim-cosine WORD-A WORD-B - return the precomputed cosine
+  similarity for WORD-A and WORD-B, if it exists; else return 0.0
+"
+	(define siml (pair-sim WORD-A WORD-B))
+	(if (null? siml) 0.0 (sim-cosine siml))
+)
+
+(define-public (word-pair-sim-angle-dist WORD-A WORD-B)
+"
+  word-pair-sim-angle-dist WORD-A WORD-B - return the precomputed angular
+  distance (arc-cos of the cosine similarity) for WORD-A and WORD-B,
+  if it exists; else return 1.0
+"
+	(define siml (pair-sim WORD-A WORD-B))
+	(if (null? siml) 1.0 (sim-angle-dist siml))
+)
+
+; ---------------------------------------------------------------------
 ; Compute and store the similarity between the WORD, and the other
 ; words in the word-list
 (define (batch-sim WORD WORD-LIST)

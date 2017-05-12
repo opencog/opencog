@@ -8,6 +8,9 @@
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
+
+(use-modules (srfi srfi-1))
+
 ; ---------------------------------------------------------------------
 ; Ranking and printing utilities
 ;
@@ -157,7 +160,10 @@
 ;
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-; Hubbbiness.
+; Vertex degrees and hubiness.
+; The vertex degree is the same thing as the number of connectors
+; on a disjunct.
+; Hubiness is the second moment of the vertex degree.
 
 (define (avg-con-count wrd)
 	(/ (cset-vec-connectors wrd) (cset-vec-observations wrd)))
@@ -172,13 +178,26 @@
 (define sorted-avg-connectors
 	(score-and-rank avg-con-count all-cset-words))
 
-(define sorted-avg-connectors
-	(score-and-rank avg-con-count
-		(filter (lambda (wrd) (< 300 (cset-vec-observations wrd)))
-			all-cset-words)))
-
 (let ((outport (open-file "/tmp/ranked-avg-connectors.dat" "w")))
 	(print-ts-rank sorted-avg-connectors outport)
+	(close outport))
+
+; ----
+; Second moment is sum (c^2/n) - (sum c/n)^2
+; RMS is sqrt (sum (c^2/n) - (sum c/n)^2)
+(define (moment-con-count wrd)
+	(define meansq
+		(/ (cset-vec-lp-connectors wrd 2) (cset-vec-observations wrd)))
+	(define avg (avg-con-count wrd))
+	(sqrt (- meansq (* avg avg))))
+
+(define sorted-hub-connectors
+	(score-and-rank moment-con-count
+		(filter (lambda (wrd) (< 100 (cset-vec-observations wrd)))
+			all-cset-words)))
+
+(let ((outport (open-file "/tmp/ranked-hub-connectors.dat" "w")))
+	(print-ts-rank sorted-hub-connectors outport)
 	(close outport))
 
 ; ---------------------------------------------------------------------
@@ -207,7 +226,11 @@
 	(close outport))
 
 ; ---------------------------------------------------------------------
-; Sum over distributions
+; Sum over distributions. Basically, above gave two ranking
+; distributions, one for each word.  They can be averaged together
+; to get a smoother graph.  Here, we create a ranking for each
+; word, and then average them all together. This is kind of hokey,
+; in the end, but whatever.
 
 ; Create and zero out array.
 (define dj-sum (make-array 0 312500))
@@ -255,7 +278,7 @@
 ; ---------------------------------------------------------------------
 ; Entropies.
 
-; Several ways of counting the same thing. Thse should all
+; Several ways of counting the same thing. These should all
 ; give the same result.
 (define total-cset-count (cset-observations all-cset-words))
 (define total-cset-count (get-total-cset-count))
@@ -276,13 +299,11 @@
 (define disjunct-entropy (partial-entropy all-disjuncts))
 (define disjunct-entropy-bits (/ disjunct-entropy (log 2.0)))
 
-(define cset-entropy
+(define cset-entropy-bits
 	(fold
 		(lambda (word sum) (+ sum  (cset-vec-entropy word)))
 		0
 		all-cset-words))
-
-(define cset-entropy-bits (/ cset-entropy (log 2.0)))
 
 ; A sloppy, slow, wasteful algorithm
 (define (get-total-mi-slow)
@@ -306,7 +327,8 @@
 
 (define slow-total-mi (get-total-mi-slow))
 
-; A much faster, optimized version
+; A much faster, optimized version. Still takes tens of minutes
+; to run.
 (define (get-total-mi-bits)
 	(define prog 0)
 	(define prog-len (length all-cset-words))
@@ -322,6 +344,10 @@
 )
 
 (define total-mi-bits (get-total-mi-bits))
+
+; The in-a-jiffy version which needs no new computations:
+(define total-mi-bits
+	(- (word-entropy-bits disjunct-entropy-bits) cset-entropy-bits)
 
 ; ---------------------------------------------------------------------
 ; Rank words according to the MI between them and thier disjuncts
@@ -339,6 +365,43 @@
 
 (let ((outport (open-file "/tmp/ranked-word-mi-hi-p.dat" "w")))
 	(print-ts-rank sorted-word-mi-hi-p outport)
+	(close outport))
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; Similarity.  Cosine distance.
+
+(define cos-key (PredicateNode "*-Cosine Distance Key-*"))
+
+(define all-sims '())
+(cog-map-type
+	(lambda (sim)  (set! all-sims (cons sim all-sims)) #f)
+	'SimilarityLink)
+
+(define good-sims
+	(filter
+		(lambda (sim) (and
+				(< 0.5 (sim-cosine sim))
+				(< 8 (cset-vec-len (gar sim)))
+				(< 8 (cset-vec-len (gdr sim)))))
+		all-sims))
+
+(define ranked-sims
+	(sort good-sims
+		(lambda (a b) (> (sim-cosine a) (sim-cosine b)))))
+
+(define (prt-sim sim port)
+	(format port "~A	'~A .. ~A'\n" (sim-cosine sim)
+		(cog-name (gar sim)) (cog-name (gdr sim))))
+
+(let ((outport (open-file "/tmp/ranked-sims.dat" "w")))
+	(define cnt 0)
+	(for-each (lambda (sim)
+			(set! cnt (+ cnt 1))
+			(format outport "~A	" cnt)
+			(prt-sim sim outport))
+		ranked-sims)
 	(close outport))
 
 ; ---------------------------------------------------------------------

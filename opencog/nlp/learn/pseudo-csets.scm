@@ -83,7 +83,7 @@
 	(define start-time (current-time))
 	; (for-each fetch-one WORD-LIST) ; this is wyyyyy too slow!
 	(load-atoms-of-type 'LgWordCset)
-	(format #t "Elapsed time to load words: ~A secs\n"
+	(format #t "Elapsed time to load csets: ~A secs\n"
 		(- (current-time) start-time))
 )
 
@@ -98,6 +98,16 @@
 "
 	; Currently, its as simple as this...
 	(cog-incoming-by-type ITEM 'LgWordCset)
+)
+
+(define-public (sort-cset-vec ITEM)
+"
+  sort-cset-vec ITEM - Return the vector of pseudo-connector sets
+  for the ITEM, in sorted order of the number of observations.
+"
+	(sort (get-cset-vec ITEM)
+		(lambda (a b)
+			(> (get-count a) (get-count b))))
 )
 
 (define-public (cset-get-word CSET)
@@ -143,6 +153,22 @@
 ; empty list '()
 (define (have-cset? WORD DISJUNCT)
 	(cog-link 'LgWordCset WORD DISJUNCT))
+
+(define-public (print-cset-list PORT LIST)
+"
+  print-cset-list PORT LIST -- print a list of connector sets to PORT.
+
+  The list is pretty-printed, with the number of observations,
+  the word, and the disjuncts.
+"
+	(for-each
+		(lambda (cset)
+			(format PORT "~A	~A	~A\n"
+				(get-count cset)
+				(cog-name (cset-get-word cset))
+				(get-disjunct-string (cset-get-disjunct cset))))
+		LIST)
+)
 
 ; ---------------------------------------------------------------------
 
@@ -284,15 +310,17 @@
   csets associated with that item, and the entropy for each
   cset is summed up.
 
-  The returned entropy is in nats. Divide by log 2 to get bits.
+  The returned entropy is in bits, i.e. computerd with log_2.
 "
    ; sum of the counts
-   (fold
-      (lambda (cset sum)
-			(define cset-freq (get-cset-frequency cset))
-			(- sum (* cset-freq (log cset-freq))))
-      0
-      (get-cset-vec ITEM))
+	(define nats
+		(fold
+			(lambda (cset sum)
+				(define cset-freq (get-cset-frequency cset))
+				(- sum (* cset-freq (log cset-freq))))
+			0
+			(get-cset-vec ITEM)))
+	(/ nats (log 2.0))
 )
 
 (define (cset-vec-word-mi WORD)
@@ -300,7 +328,7 @@
 	cset-vec-word-mi - get the fractional mutual information between
    the word and all of it's disjuncts. This is defined as
       MI(w) = (1/p(w)) sum_d p(d,w) log_2 p(d,w)/[p(d,*) p(*,w)]
-   This is defined "fractionally", so that the MI of the dataset
+   This is defined 'fractionally', so that the MI of the dataset
    as a whole can be written as
      MI = sum_w p(w) MI(w)
 
@@ -362,12 +390,12 @@
 	(define (cnt-a it)
 		(if word-base
 			(lambda (it) (get-cset-count ITEM-A it))
-			(lambda (it) (get-cset-count it ITEM-A))
+			(lambda (it) (get-cset-count it ITEM-A))))
 
 	(define (cnt-b it)
 		(if word-base
 			(lambda (it) (get-cset-count ITEM-B it))
-			(lambda (it) (get-cset-count it ITEM-B))
+			(lambda (it) (get-cset-count it ITEM-B))))
 
 	; sum of the powers of the counts
 	(define sum
@@ -493,6 +521,42 @@
 ; so this is easy.
 (define (dj-connectors DISJUNCT) (length (cog-outgoing-set DISJUNCT)))
 
+; Count number of plus and minus connectors.
+; DIR should be (LgConnDirNode "+") or (LgConnDirNode "-")
+; Assumes that the direction is held in the second slot...
+(define (dj-connectors-dir DISJUNCT DIR)
+	(fold
+		(lambda (con sum)
+			(if (equal? (gdr con) DIR) (+ sum 1) sum))
+		0
+		(cog-outgoing-set DISJUNCT)))
+
+(define-public (cset-vec-lp-connectors ITEM P)
+"
+  cset-vec-lp-connectors ITEM - compute the total number of
+  observations of the lp-moment of the connectors on the ITEM.
+  Specifically, the sum (#connectors)^p.   Note the 1/p root
+  is NOT taken!  You probably want to deivce by the number of
+  observations first, and then take the 1/p power.
+  See cset-vec-connectors for more details.
+"
+	(define (num-conn cset)
+		(dj-connectors (cset-get-disjunct cset)))
+
+	(define (con-count cset)
+		(* (get-count cset) (expt (num-conn cset) P)))
+
+	; sum of the counts
+	(define sum
+		(fold
+			(lambda (cset sum) (+ (con-count cset) sum))
+			0
+			(get-cset-vec ITEM)))
+
+	; (expt sum (/ 1.0 P))
+	sum
+)
+
 (define-public (cset-vec-connectors ITEM)
 "
   cset-vec-connectors ITEM - compute the total number of observations
@@ -505,8 +569,20 @@
   as counts are stored in cset's, and this merely totals up and weights
   with respect to the items on the other side of ITEM.
 "
+	(cset-vec-lp-connectors ITEM 1)
+)
+
+(define-public (cset-vec-connectors-dir ITEM DIR)
+"
+  cset-vec-connectors-dir ITEM DIR - compute the total number of
+  observations of connectors on the ITEM, but only if the the
+  connector goes in direction DIR.  The DIR should be either
+  (LgConnDirNode \"+\") or (LgConnDirNode \"-\").
+
+  ITEM can be either a WordNode, or a disjunct (LgAnd).
+"
 	(define (con-count cset)
-		(* (get-count cset) (dj-connectors (cset-get-disjunct cset))))
+		(* (get-count cset) (dj-connectors-dir (cset-get-disjunct cset) DIR)))
 	; sum of the counts
 	(fold
 		(lambda (cset sum) (+ (con-count cset) sum))
@@ -558,6 +634,16 @@
 
 ; ---------------------------------------------------------------------
 
+; return a list of all atoms of TYPE
+(define (get-all-type TYPE)
+	(define all-atoms '())
+	(cog-map-type
+		(lambda (atom) (set! all-atoms (cons atom all-atoms)) #f)
+		TYPE)
+	all-atoms
+)
+
+
 (define-public (get-all-disjuncts)
 "
   get-all-disjuncts -- Return all of the disjuncts in the atomspace.
@@ -567,13 +653,7 @@
   The sanity check would be to make sure that the LgAnd has the desired
   form, i.e. consisting entirely of PseudoDisjuncts.
 "
-	(define all-djs '())
-
-	(cog-map-type
-		(lambda (dj) (set! all-djs (cons dj all-djs)) #f)
-		'LgAnd)
-
-	all-djs
+	(get-all-type 'LgAnd)
 )
 
 ; ---------------------------------------------------------------------
@@ -587,13 +667,17 @@
   The sanity check would be to make sure that the LgAnd has the desired
   form, i.e. consisting entirely of PseudoDisjuncts.
 "
-	(define all-csets '())
+	(get-all-type 'LgWordCset)
+)
 
-	(cog-map-type
-		(lambda (cset) (set! all-csets (cons cset all-csets)) #f)
-		'LgWordCset)
+; ---------------------------------------------------------------------
 
-	all-csets
+(define-public (get-all-pseudo-connectors)
+"
+  get-all-pseudo-connectors -- Return all of the pseudo-connectors
+  in the atomspace.
+"
+	(get-all-type 'PseudoConnector)
 )
 
 ; ---------------------------------------------------------------------
@@ -608,10 +692,10 @@
 ; (fetch-pseudo-csets (get-all-words))
 ; (define ac (filter-words-with-csets (get-all-words)))
 ; (length ac)
-; 30127  now 37413
+; 49423  (now 37413 in en_pairs_sim)
 ; (define ad (get-all-disjuncts))
 ; (length ad)
-; 200183 now 291637
+; 486824 (now 291637 in en_pairs_sim)
 ;
 ; (cset-vec-cosine (Word "this") (Word "that"))
 ; (cset-vec-cosine (Word "he") (Word "she"))

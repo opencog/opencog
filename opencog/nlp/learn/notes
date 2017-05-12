@@ -1,4 +1,479 @@
 
+======================================================================
+Crashes and bugs 2013, 2014
+
+
+Crash 2
+-------
+All new crash. Note:
+1) This is with the old scheme singleton-instance.
+2) This one received when defining a function with an unbound variable
+   in it.  It should have just been a standard stack trace, but wasn't.
+3) Sometimes, when doing this, and parser is running, I get
+
+[2013-12-26 22:50:57:680] [ERROR] Caught signal 11 (Segmentation fault) on thread 47486186035520
+        Stack Trace:
+        2: CogServerMain.cc:92  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ??:0   std::string::append(std::string const&)
+        5: basic_string.h:290     std::string::_M_data() const
+        6: SchemeEval.cc:381      opencog::SchemeEval::c_wrap_eval(void*)
+line 381 is  self->answer = self->do_eval(*(self->pexpr));
+So maybe p is null, or self->pexpr is null..
+...
+        7: continuations.c:511  c_body()
+        8: vm-i-system.c:855    vm_regular_engine()
+        9: eval.c:508   scm_call_4()
+        10: continuations.c:456 scm_i_with_continuation_barrier()
+        11: continuations.c:550 scm_c_with_continuation_barrier()
+        12: pthread_support.c:1272      GC_call_with_gc_active()
+        13: threads.c:937       with_guile_and_parent()
+        14: misc.c:1835 GC_call_with_stack_base()
+        15: threads.c:959       scm_with_guile()
+        16: SchemeEval.cc:372     opencog::SchemeEval::eval(std::string const&)
+        17: basic_string.h:536  ~basic_string()
+        18: GenericShell.cc:157   opencog::GenericShell::eval(std::string const&, opencog::ConsoleSocket*)
+        19: ConsoleSocket.cc:232          opencog::ConsoleSocket::OnLine(std::string const&)
+        20: basic_string.h:536  ~basic_string()
+        21: thread.cpp:0        thread_proxy()
+        22: pthread_create.c:0  start_thread()
+        23: ??:0        __clone()
+
+again 7 Jan 2014 but this time its different:
+
+[2014-01-07 00:58:32:234] [ERROR] Caught signal 11 (Segmentation fault) on threa
+d 47389012408640
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: vm-i-system.c:887    vm_regular_engine()
+        5: eval.c:508   scm_call_4()
+        6: backtrace.c:163      scm_display_error()
+        7: inline.h:131 scm_puts()
+        8: vm-i-system.c:855    vm_regular_engine()
+        9: eval.c:508   scm_call_4()
+        10: SchemeEval.cc:433     opencog::SchemeEval::do_eval(std::string const&)
+        11: SchemeEval.cc:392     opencog::SchemeEval::c_wrap_eval(void*)
+        12: continuations.c:511 c_body()
+        13: vm-i-system.c:855   vm_regular_engine()
+        14: eval.c:508  scm_call_4()
+
+19 Jan 2014: again: same but different:
+
+[2014-01-19 06:06:32:335] [ERROR] Caught signal 11 (Segmentation fault)
+on threa
+d 47820857940288
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ??:0 strlen()
+        5: strings.c:1518       scm_from_stringn()
+        6: strports.c:517       scm_c_eval_string()
+        7: vm-i-system.c:855    vm_regular_engine()
+        8: eval.c:508   scm_call_4()
+        9: SchemeEval.cc:433    opencog::SchemeEval::do_eval(std::string const&)
+        10: SchemeEval.cc:392   opencog::SchemeEval::c_wrap_eval(void*)
+
+Got exactly above, again 21 Jan.
+
+Preceeded a few minutes earlier by below.
+
+opencog-fr> Backtrace:
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 25dd04e0> ...]
+In unknown file:
+   ?: 5 [apply-smob/1 #<catch-closure 25dd04e0>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 25d2ff20> ...]
+In unknown file:
+   ?: 3 [apply-smob/1 #<catch-closure 25d2ff20>]
+   ?: 2 [call-with-input-string "(observe-text \"Hvozdnica est un village de Slovaquie situé dans la région de \u017dilina.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure cfebf00 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 25d2fee0> encoding-error ...]
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure scm_to_stringn: Error while printing exception.
+ABORT: encoding-error
+Backtrace:
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 174c8ac0> ...]
+In unknown file:
+   ?: 5 [apply-smob/1 #<catch-closure 174c8ac0>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure ac0b5e0> ...]
+In unknown file:
+   ?: 3 [apply-smob/1 #<catch-closure ac0b5e0>]
+   ?: 2 [call-with-input-string "(observe-text \"Hvozdnica est un village de Slovaquie situé dans la région de \u017dilina.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure a82f4c0 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure ac0b5a0> encoding-error ...]
+
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure scm_to_stringn: Error while printing exception.
+ABORT: encoding-error
+
+
+Crash 6
+-------
+All new 21 jan 2014
+
+[2014-01-21 20:30:03:348] [ERROR] Caught signal 11 (Segmentation fault) on thread 47570270030144
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ??:0   std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > opencog::Atom::getIncomingSet<std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > >(std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > >)
+        5: AtomSpaceImpl.cc:402 opencog::AtomSpaceImpl::getIncoming(opencog::H
+andle)
+        6: ??:0   opencog::AtomSpace::getIncoming(opencog::Handle)
+        7: SchemeSmobNew.cc:538   opencog::SchemeSmob::ss_delete(scm_u
+
+Again, same exact trace:
+[2014-01-22 07:42:21:675] [ERROR] Caught signal 11
+* Again, same exact trace .. again, only for french. Why is french different???
+* Again, same exact trace ..  22 Jan
+* Again, same exact trace ..  23 Jan  Only in french ... wtf ...
+* Again, same exact trace ..  23 Jan  Only in french ... wtf ...
+* Again, same exact trace ..  24 Jan  Only in french ... wtf ...
+* Again, handle=480036842 ptr is null .. why?
+
+
+But this time without the weirdo message:
+terminate called after throwing an instance of 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
+  what():  boost shared_lock has no mutex: Operation not permitted
+
+WTF ... where is the above shared_lock coming from????
+
+
+
+Crash 7
+-------
+[2014-01-22 10:18:24:103] [ERROR] Caught signal 11 (Segmentation fault)
+on thread 47155674880320
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ConsoleSocket.cc:211 opencog::ConsoleSocket::OnLine(std::string const&)
+
+
+
+
+
+Irritation 4
+------------
+Occasionally see this:
+
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 294a63c0> ...]
+
+   ?: 3 [apply-smob/1 #<catch-closure 294a62a0>]
+   ?: 2 [call-with-input-string "(observe-text \"Cheopso piramid\u0117, arba Did
+\u017eioji Gizos piramid\u0117 \u2013 Egipto piramid\u0117, faraono Cheopso kapa
+s.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 193e5c80 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encodi
+ng-error ...]
+
+-----------
+another:
+ "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
+
+Andrzej Gąsiorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord Wydawnictwo Oskar, Gdańsk 2010 r.
+
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 3db5240 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 3be53c40> encoding-error ...]
+
+ABORT: encoding-error
+
+ERROR: In procedure scm_to_stringn: Error while printing exception.
+
+
+Crash 8
+-------
+[2015-07-17 12:37:57:428] [ERROR] Caught signal 11 (Segmentation fault) on
+thread 140537051608832
+        Stack Trace:
+        2: basic_string.h:539   ~basic_string()
+        3: CogServerMain.cc:79  _Z7sighandi()
+        4: ??:0 killpg()
+        5: ??:0 scm_make_vm()
+        6: ??:0 GC_mark_from()
+        7: ??:0 GC_mark_some()
+        8: ??:0 GC_stopped_mark()
+        9: ??:0 GC_try_to_collect_inner()
+        10: ??:0        GC_collect_or_expand()
+        11: ??:0        GC_allocobj()
+        12: ??:0        GC_generic_malloc_inner()
+        13: ??:0        GC_register_finalizer_inner()
+        14: ??:0        scm_closedir()
+        15: ??:0        scm_i_new_smob()
+        16: smob.h:91   scm_new_smob()
+        17: ??:0        scm_vm_engine()
+        18: ??:0        scm_call_1()
+        19: ??:0        scm_vm_engine()
+        20: ??:0        scm_call_3()
+        21: ??:0        scm_vm_engine()
+        22: ??:0        scm_call_1()
+        23: ??:0        scm_vm_engine()
+        24: ??:0        scm_call_3()
+        25: ??:0        scm_vm_engine()
+        26: ??:0        scm_call_4()
+        27: SchemeEval.cc:606     opencog::SchemeEval::do_eval(std::string
+const&)
+        28: SchemeEval.cc:535     opencog::SchemeEval::c_wrap_eval(void*)
+        29: ??:0        scm_at_abort()
+        30: ??:0        scm_vm_engine()
+        31: ??:0        scm_call_4()
+        32: ??:0        scm_at_abort()
+        33: ??:0        scm_c_with_continuation_barrier()
+        34: ??:0        GC_call_with_gc_active()
+        35: ??:0        scm_current_processor_count()
+        36: ??:0        GC_call_with_stack_base()
+        37: ??:0        scm_with_guile()
+        38: SchemeEval.cc:502     opencog::SchemeEval::eval_expr(std::string
+const&)
+        39: basic_string.h:293    std::string::_M_data() const
+        40: ??:0
+std::this_thread::__sleep_for(std::chrono::duration<long, std::ratio<1l, 1l>
+>, std::chrono::duration<long, std::ratio<1l, 1000000000l> >)
+        41: ??:0        start_thread()
+        42: ??:0        clone()
+
+
+Garbage 9
+---------
+submit-one: The town has an area of 88 km², population (2003) is 158,000, and is
+located 20 km north of downtown Hồ Chí Minh City, on the left bank of the Saigon River,
+upstream from Hồ Chí Minh City.
+duuude before nectcat open 27
+opencog-en> Backtrace:
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 195d220> ...]
+In unknown file:
+   ?: 5 [apply-smob/1 #<catch-closure 195d220>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 195d0e0> ...]
+   ?: 5 [apply-smob/1 #<catch-closure 1959f00>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 1959dc0> ...]
+In unknown file:
+   ?: 3 [apply-smob/1 #<catch-closure 1959dc0>]
+   ?: 2 [call-with-input-string "(observe-text \"Although this town is an
+administratively separate town, it is considered as part of the H\u1ed3 Chí Minh City
+Metropolitan Area since this town is bordered by H\u1ed3 Chí Minh City\u2019s urban
+area.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 1addf40 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error
+...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 1959d80> encoding-error ...]
+
+
+/bin/bash ./ss-one.sh en beta-pages/T/Thủ Dầu Một lo
+
+
+So -- looks like netcat is sending correct text, but by the time
+observe-text gets it, it has been garbled. Why?
+Well, nlp/scm/processing-utils.scm prints it ungarbled.
+
+OK, so this fails:
+(define sss (socket PF_INET SOCK_STREAM 0))
+(connect sss AF_INET (inet-pton AF_INET "127.0.0.1") 7777)
+(display "SmålandSmåland" sss)
+
+prints garbage
+
+(set-port-encoding! sss "utf-8")
+does not fix it.
+(use-modules (rnrs bytevectors))
+(send sss (string->utf8 "Hòa Phú Tân Mỹ")) does not work
+
+
+Ahhh ... (string->utf8 "Småland") prints
+#vu8(83 109 63 108 97 110 100)
+which is what netcat receives
+
+å should be c3 a5  U+00E5
+
+guile-git is broken
+guile-2.0.9 shell works great.
+cogserver linked to guile-2.0.9 is broken
+... but is fixed by using (set-port-encoding! sss "utf-8")
+Yayyy!
+
+
+Boo ...
+submit-one: Phú Mỹ.
+(observe-text \"Phú M\u1ef9.\")
+
+ditto for Phú Thọ.
+Chánh Nghĩa.
+Hiệp Thành
+Thủ Dầu Một
+Hồ Chí Minh
+
+(relex-parse "Ćićolina\n")
+(x-sock-io "Ćićolina\n")
+(x-sock-io "Thủ Dầu Một\n")
+
+(define (x-sock-io sent-txt)
+   (let ((s (socket PF_INET SOCK_STREAM 0)))
+      (connect s AF_INET (inet-pton AF_INET "10.70.70.2") 7777)
+      (set-port-encoding! s "utf-8")
+
+      (display sent-txt s)
+      (system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
+      (close-port s)))
+
+(setlocale LC_ALL "")
+
+(set-port-encoding! (current-input-port) "utf-8")
+(display "Ćićolina\n")
+(define x "Ćićolina\n")   breaks  on cogserver for guile-2.0.9 but
+(define x "Thủ Dầu Một\n")  as above
+(define x "Småland\n") ... works!!
+(define x "Hòa Phú Phú Tân\n")  ... works  !!!
+(define x "x\u0106i\u0107olina\\n") works
+
+Ć is U+0106  c4 86
+ć is U+0107  c4 87
+
+what is bizarre is that the above is exactly inverted for
+the guile-2.1 shell:
+sending the  "working" ones sends garbage, sending the failing ones goes through.
+(ditto for just simply printing....)
+
+both define/display seem to work fine in the guile-2.0.9 shell...
+and define/display seem to work well for the cogserver-2.1 shell. WTF.
+so is it due to a shared-library mis-match?  Caching of compiled files?
+
+(display "SmålandSmåland\n")
+(display "Ćićolina\n")
+(display "Thủ Dầu Một\n")
+(display "Hòa Phú Phú Tân\n")
+
+Avoiding preload of all scheme does not fix it.
+Clearling the guile compiler cache does not fix it.
+
+[call-with-input-string "(define x \"\u0106i\u0107olina\\n\")\n" ...]
+
+ERROR: In procedure call-with-input-string:
+ERROR: Throw to key `encoding-error' with args `("scm_to_stringn" "cannot convert wide
+string to output locale" 84 #f #f)'.
+
+(define x "\u0106i\u0107olina\n")
+
+%default-port-encoding is a fluid ....
+make fluid with default ...
+make dynamic state (with parent ....)
+
+Solution! (setlocale LC_ALL "") every time a new thread is created.
+
+======================================================================
+Jan-Feb 2014
+
+Performance
+-----------
+Performance seems to suck:
+-- two parsers, each takes maybe 4% cpu time total. Load avg of about 0.03
+-- each parser runs 4 async write threads pushing atoms to postgres.
+   each one complains about it taking too long to flush the write queues.
+-- postmaster is running 10 threads, load-avg of about 2.00  so about
+   2 cpu's at 100%
+-- vmstat shows 500 blks per second written. This is low...
+-- top shows maybe 0.2% wait state. So its not disk-bound.
+-- what is taking so long?
+
+So, take a tcpdump:
+-- a typical tcpdump packet:
+   UPDATE Atoms SET tv_type = 2, stv_mean = 0 , stv_confidence = 0, stv_count = 54036 WHERE uuid = 367785;
+   its maybe 226 bytes long.
+-- this gets one response from server, about 96 bytes long.
+-- then one more req, one more repsonse, seems to be a 'were'done' mesg
+   or something ...  which I guess is due to SQLFreeHandle(SQL_HANDLE_STMT ???
+-- time delta in seconds, of tcpdump of traffic packets, between update, and
+   response from server:
+   0.0006  0.0002 0.0002 0.0002 0.028 (yow!!) 0.001 0.0002
+
+-- so it looks like about every 8-10 packets are replied to fairly quick,
+   then there's one that takes 0.025 seconds to reply.... stair-steps in
+   response time like this all the way through the capture.
+
+Wild guess:
+-- Hmm ... this seems to be related to the commit delay in postgresql.conf
+   Change commit_delay to 1 second
+   change wal_bufers to 32MB since its mostly update traffic.
+   change checkpoint_segments to 32 (each one takes up 16MB of disk space.)
+
+-- Making these changes has no obvious effect ... bummer.
+
+I don't get it; performance sucks and I don't see why.  Or rather: postmaster
+is chewing up vast amounts of cpu time for no apparent reason...
+
+
+select * from pg_stat_user_tables;
+select * from pg_stat_all_tables;
+select * from pg_statio_user_tables;
+select * from pg_database;
+
+pg_stat_user_indexes
+pg_stat_all_indexes
+
+select * from pg_catalog.pg_stat_activity;
+select * from pg_catalog.pg_locks;
+
+
+-- WOW!!!   VACUUM ANALYZE; had a huge effect!!
+
+-- vacuum tells em to do following:
+   change max_fsm_pages to 600K
+   chage max_fsm_relations to 10K
+
+Anyway ... performance measured as of 27 Dec 2013:
+
+Takes about 105 millisecs to clear 90 eval-links from the write-back
+queues. This each eval-link is 5 atoms (eval, defind, list, word, word)
+so this works out to 5*90 atoms /0.105 seconds = 4.3KAtoms/sec
+which is still pretty pathetic...
+
+gdb:
+---
+handle SIGPWR nostop noprint
+handle SIGXCPU nostop noprint
+
+
+How about using a reader-writer lock?
+----------------------------------
+
+boost::shared_lock  for reading,
+unique_lock for writing ...
+
+upgrade_lock<shared_mutex> lock(workerAccess);
+        upgrade_to_unique_lock<shared_mutex> uniqueLock(lock);
+
+
+shared_mutex
+write uses:  unique_lock<shared_mutex>
+readers use shared_lock<shared_mutex>
+
+writer does:
+
+  // get upgradable access
+  boost::upgrade_lock<boost::shared_mutex> lock(_access);
+
+  // get exclusive access
+  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+  // now we have exclusive access
+}
+
+am using boost-1.49 on cray
+
+======================================================================
+======================================================================
+
 8 Aug 2015
 ----------
 
@@ -4349,3 +4824,246 @@ is the relative(?) MI to the disjuncts in the word.
 (/ (log (cset-vec-frequency (Word "United"))) (log 2))
 -10.48276867673862  is the entropy for that word, only.
 
+"Cao" "Award" "x" "y" "Prime" "we" "per" "Division" "League" "Game"
+
+(define cao (get-cset-vec (Word "Cao")))
+
+34 (length cao)
+
+(filter (lambda (cset) (< 10 (get-count cset))) cao)
+
+18  ,- Cao- Cao+  garbage !!
+
+8 Grammy- for+ Best+
+7 Academy- for+ Best+
+
+23 Minister+
+5 the- Minister+
+3 as- Minister+
+3 Governor-General- Minister+
+
+ "The" "a" "to" "in" "of" "and" "the" "," "."
+
+ "Bay" "Street" "Island" "of" "century" "right" "Game" "Georgian" "or" "a" ";" "near" "Party" "team" "law" "Australia" "her" "research" "Church" "east" "Government"
+
+--------------------------------------------------------------
+
+1985 words of length > 8
+all pairs of above with cosine > 0.5
+
+23993 pairs, but some are junk
+15809 good pairs.
+
+store-sim
+ (sim-pair WORD-A WORD-B) cos-key
+            (FloatValue SIM (get-angle SIM)))
+(define (sim-pair WORD-A WORD-B) (SimilarityLink WORD-A WORD-B))
+(define cos-key (PredicateNode "*-Cosine Distance Key-*"))
+
+
+(define all-sims '())
+(cog-map-type
+	(lambda (sim)  (set! all-sims (cons sim all-sims)) #f)
+	'SimilarityLink)
+
+(define (cosine-of-sim SIM)
+	(car (cog-value->list (cog-value SIM cos-key))))
+
+(define good-sims
+(filter
+	(lambda (sim)
+		(< 0.5 (car (cog-value->list (cog-value sim cos-key)))))
+	all-sims))
+
+
+(map (lambda (sim) (sim-cosine sim)) (take ranked-sims 20))
+	
+
+ 'Poir .. Perls'
+ 'Poir .. Sevan'
+ 'Sevan .. Perls'
+ 'Sevan .. Ruins'
+ 'Ruins .. Perls'
+ 'Poir .. Ruins'
+ 'Gongora .. Perls'
+  'Poir .. Gongora'
+  'Gongora .. Sevan'
+  'Gongora .. Ruins'
+  'Poir .. Gag'
+
+ (use-modules (opencog) (opencog persist) (opencog persist-sql))
+ (use-modules (opencog nlp) (opencog nlp learn))
+ (sql-open "postgres:///en_pairs_sim?user=linas")
+ (use-modules (opencog cogserver))
+ (start-cogserver "opencog2.conf")
+ (fetch-all-words)
+(fetch-pseudo-csets (get-all-words))
+
+70 74 128
+
+95  0.953598053136202  'conjunction .. accordance'
+
+504  0.868429815807705  'in .. from'
+633  0.8549756852697713  'in .. at'
+637  0.8545553489854567  'In .. By'
+643  0.8540378312493768  'in .. After'
+740  0.846034030453443  'canal .. swamp'
+
+
+754  0.843837363738534  'at .. At'
+757  0.8436223414042503  'in .. In'
+818  0.838269351079866  'in .. on'
+840  0.8366056647469058  'creation .. existence'
+878  0.8332692184393486  'e.g .. i.e'
+965  0.8265058609938521  'and .. but'
+969  0.8264399296782371  'in .. With'
+971  0.8263325988164274  'in .. inside'
+
+
+canal -- 68 dj 
+
+(define (prt-sim sim port)
+   (format port "~A  '~A .. ~A'\n" (sim-cosine sim)
+      (cog-name (gar sim)) (cog-name (gdr sim))))
+
+get-disjunct-string
+
+20.0  canal  the-
+8.0  canal  the- .+
+5.0  canal  the- ,+
+
+14.0  swamp  the-
+3.0  swamp  the- .+
+
+
+18.0  creation  the- of+
+10.0  existence  the- of+
+
+627  in  the+
+75  in  a+
+61  in  which+
+49  in  the+ the+
+36  in  used-
+33  in  his+
+32  in  order+
+31  in  United+
+27  in  gallantry-
+26  in  born-
+23  in  role-
+
+8338 -- in
+2185 from
+
+155  from  the+
+20  from  :+ :+ :+ :+ :+ :+ :+ :+ :+ :+ 0+ 0+ 0+ 0+ 0+ 0+ 0+ 0+ 0+ 0+
+18  from  a+
+9  from  derived-
+9  from  until+
+9  from  degree-
+8  from  his+
+8  from  comes-
+8  from  away-
+7.0  from  time+
+7.0  from  the+ the+
+
+get-pair-mi
+get-pair-mi-str ("
+
+MI(fast, horse) = 5.258979
+MI(fast, car) = 3.805734
+
+(get-pair-logli get-any-pair (Word "fast") (Word "horse"))
+-log P(fast, horse) = 24.054777  P = 5.7383969102974027e-8
+-log P(fast, car) = 23.832385  P = 6.694794440144226e-8
+
+
+-log P(*, horse) = 14.383531  P = 4.6787056718009e-5
+-log P(*, car) = 12.707894    P = 1.4946610743515038e-4
+-log P(fast, *) =  14.930225  P = 3.2029815202410256e-5
+
+
+MI(fast, {hosrse, car}) = linear interploation of the two. 
+  [
+  p(fast,horse) log p(fast, horse) / p(fast,*) p(*,horse)
++
+  p(fast,car) log p(fast, car) / p(fast,*) p(*,car) ] 
+   / [p(fast,horse) + p(fast,car)]
+
+= [ p(fast,horse) 5.258979 + p(fast,car) 3.805734] /
+     1.2433191350441628e-7
+= 5.565671566878678e-7 / 1.2433191350441628e-7 
+= 4.476462567015012
+
+
+
+(get-left-wild-prob GETTER WORD)
+(get-left-wild-log-prob GETTER WORD)
+(get-pair-prob GETTER WORD WORD)
+
+(get-logli ATOM)
+
+(define (get-left-wild-prob GETTER WORD)
+	(EvaluationLink any-pair-pred (ListLink any-left word))
+(define (get-any-wild-wild)
+   (EvaluationLink any-pair-pred (ListLink any-left any-right))
+)
+
+(define (get-any-wild-wild)
+   (EvaluationLink any-pair-pred (ListLink any-left any-right))
+)
+
+get-any-pair PAIR -- public OK defined in common.scm
+get-clique-pair PAIR --public OK
+
+kill get-pair-mi-str 
+make get-pair-mi public. done
+
+
+(define all-cset-words (filter-words-with-csets (get-all-words)))
+(define all-disjuncts (get-all-disjuncts))
+(define all-csets (get-all-csets))
+(define total-cset-count (get-total-cset-count))
+
+in the en_pairs sim: MI is  7.9849918332741225
+(- (+ 10.280666542033556 16.00578269190252) 18.301457400661953)
+
+in en_pairs_mst:
+(length all-cset-words) 49423
+(length all-disjuncts) 486824  + 73 more
+(length all-csets) 749337 + 118 more
+total-cset-count 1154809  + 235 more
+word-entropy-bits 10.353641069558124
+disjunct-entropy-bits 16.48346995957877
+cset-entropy-bits 18.958440018522307
+MI is 7.878671010614585
+
+all connectors ...
+(length (get-all-pseudo-connectors)) 81557
+
+
+wtf:
+(length all-disjuncts) 225396 
+wiki-mst-en.sh is running
+why is get_nodes bad? because no nodes are being created. so that OK.
+why is total stores for node =0?  just like above. its OK.
+
+postgres:///en_pairs_mst?user=linas  is the ongoing accumulation of mst stats...
+
+guile -l mst-count-en.scm
+335 secs for words
+1071 secs for pairs
+results size is 32G for 19741168 atoms
+1213 secs for csets
+
+
+fix message -- done
+add  sql-clear-stats -- done
+
+./mst-one.sh en gamma-pages/G/Gzhelian localhost 17001
+
+
+move base-stats.scm to pair-stats.scm -- DONE
+
+Cannot connect to database: FATAL:  remaining connection slots are reserved for non-replication superuser connections
+
+get-clique-pair get-any-pair

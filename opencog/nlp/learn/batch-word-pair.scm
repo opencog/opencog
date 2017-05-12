@@ -1,7 +1,7 @@
 ;
-; word-pair-mi.scm
+; batch-word-pair.scm
 ;
-; Compute the mutual information of pairs of nautral-language words.
+; Batch-compute the mutual information of pairs of nautral-language words.
 ;
 ; Copyright (c) 2013, 2014, 2017 Linas Vepstas
 ;
@@ -12,6 +12,8 @@
 ; pairs of words.  They make use of the generic API for computing
 ; mutual information between ordered pairs in some relation.
 ; See `compute-mi.scm` for more detail about what is computed, and how.
+; They are designed to run in as a batch, and may take hours to
+; complete. The results are stored in the database, for future reference.
 ;
 ; One structure, among several, in which the pair counts are held,
 ; is of the form
@@ -49,16 +51,13 @@
 (use-modules (opencog))
 (use-modules (opencog persist))
 
-(define any-left (AnyNode "left-word"))
-(define any-right (AnyNode "right-word"))
-
-; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ; Random-tree parse word-pair count access routines.
 ;
 ; Get the atom that holds the left wild-card count for `word`,
 ; for the LG link type "ANY". (the wildcard is on the left side)
+; This *creates* the atom, if it does not already exist, and thus
+; is not intended for public use!
 
 (define (get-any-left-wildcard word)
 	(EvaluationLink any-pair-pred (ListLink any-left word))
@@ -168,7 +167,7 @@
 	(display "Finished loading any-word-pairs\n")
 
 	(batch-all-pair-mi
-		get-any-pair
+		internal-any-pair
 		get-any-left-wildcard
 		get-any-right-wildcard
 		get-any-wild-wild
@@ -193,7 +192,7 @@
 	(display "Finished loading clique-word-pairs\n")
 
 	(batch-all-pair-mi
-		get-clique-pair
+		internal-clique-pair
 		get-clique-left-wildcard
 		get-clique-right-wildcard
 		get-clique-wild-wild
