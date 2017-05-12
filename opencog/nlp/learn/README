@@ -210,6 +210,9 @@ So, set up the text-ingestion pipeline:
    mutual information can be extracted. Do the stuff in section "Mutual
    Information" section below.
 
+   If the parsing is interrupted, you can restart the various scripts;
+   they will automatically pick up where they left off.
+
 13) Using the extracted mutual information for word-pairs, the MST
    parsing step can be started. See below. Run this for several days.
    At the end of this, you will have a bunch of statistics on
@@ -505,8 +508,78 @@ To perform MST parsing in bulk:
   step, which is exploring the resulting connector-set (disjunct)
   database.
 
-Exploring cponnector-sets
+* If parsing is stopped for any reason, you can just re-run these
+  scripts; they will pick up where they left off.
+
+
+Exploring Connector-sets
 -------------------------
+Once you have a database with some fair number of connector sets in it,
+you can start exploring.
+
+* (optional) Make a copy of the MST database created above.
+
+* Do not run the connector-set code at the same time (on the same
+  database) as the MST parser. For one, if you are actively updating
+  the counts, then the connector-set counting will get confused.
+  Also, if you have two cogservers writing to the same database
+  at the same time, the issueing of UUID's will get confused, and
+  one or both the servers will crash, and possible database corruption
+  may occur.  It is possible to have multiple writers (and I've done
+  this before, any years ago), but this takes additonal configuration,
+  and a miscellany of coding changes and a couple of enhancements, to
+  keep things in sync.
+
+* So, assuming a clean start: just start `guile` by hand, and enter
+  the following commands (by hand). They load the full disjunct/
+  connector-set database into the atomspace; it needs to be loaded
+  in order to get access to the cosine-distance tool.
+```
+  (use-modules (opencog) (opencog persist) (opencog persist-sql))
+  (use-modules (opencog nlp) (opencog nlp learn))
+  (sql-open "postgres:///en_pairs_mst?user=linas")
+  (fetch-all-words)
+  (length (get-all-words))
+  ; This reports 396262 for one my DB's has.
+  (fetch-pseudo-csets (get-all-words))
+  (define all-cset-words (filter-words-with-csets (get-all-words)))
+  (length all-cset-words)
+  ; This reports 37413 in for my `en_pairs_sim`.
+  (define all-disjuncts (get-all-disjuncts))
+  (length all-disjuncts)
+  ; This reports 291637 in for my `en_pairs_sim`.
+
+```
+  You can now play games:
+```
+ (cset-vec-cosine (Word "this") (Word "that"))
+ (cset-vec-cosine (Word "he") (Word "she"))
+
+```
+  Recall that subroutine documentation can be gotten by typing
+  `,apropos` or `,a` for short at the guile command line.  Docs
+  for individual routines can be read by saying `,describe subr-name`
+  or `,d` for short.
+
+  The `pseudo-csets.scm` file contains code for this stuff. Any routine
+  that is `define-public` can be invoked at the guile prompt. Most are
+  safe.  If its not `define-public`, you should not call it by hand.
+
+  The `disjunct-stats.scm` file contains ad-hoc code used to prepare
+  the summary report. It is NOT loaded automatically: in this case,
+  just cut-n-paste from that file, to the guile prompt, to get it to
+  do things.
+
+
+That's all for now!
+-------------------
+The next step is to cluster the pseudo-disjuncts into clusters, and
+thereby extract grammar. There is no code for this, so far. You're
+on your own.
+
+Everything below this point consists of personal notes, of work-items
+of stuff that still needs doing. You can ignore the rest of this file.
+It will eventually get cleaned up.
 
 
 TODO List
