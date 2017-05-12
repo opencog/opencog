@@ -59,6 +59,12 @@ Thus, operating the sytem requires three basic steps:
 
 Each of these is described in greater detail in separate sections below.
 
+If you are lazy, you can just hop to the end, to the section titled
+"Precomputed LXC containers", and grab one of those.  It will have
+everything in it, up to the last step.  Of course, you won't know what
+to do with it, if you don't read the below. Its not a magic "get smart"
+pill. You've got a lot of RTFM in front of you.
+
 
 Setting up the AtomSpace
 ------------------------
