@@ -166,7 +166,7 @@
     (do ((line (get-line port) (get-line port)))
         ((eof-object? line))
       (let ((l (car (last-pair (string-split line #\ )))))
-        (if (not (equal? WORD l))
+        (if (not (equal? (string-downcase WORD) l))
           (set! lemma l))))
     (close-pipe port)
     (if (string-null? lemma) WORD lemma)))
