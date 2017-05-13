@@ -134,6 +134,25 @@
 (define (make-pair-wild LLOBJ)
 	(let ((llobj LLOBJ))
 
+		; Return a list of all of the atoms that might ever appear on
+		; the left-hand-side of a pair.  This is the set of items x
+		; for which 0 < N(x,y) for some item y, and N(x,y) the count
+		; of ever having observed the pair (x,y).
+		;
+		; Actually, we cheat, for performance reasons. Instead of
+		; computing the set desribed above, we just *assume* that
+		; every atom of 'left-type is a part of the support. We may
+		; regret this cheat, someday, but for now it works. It's
+		; certainly faster than computing the correct thing.
+		;
+		; Actually, if someone needs something better, they can
+		; overload this method.
+		(define (get-left-support)
+			(cog-get-atoms (llobj 'left-type)))
+
+		(define (get-right-support)
+			(cog-get-atoms (llobj 'right-type)))
+
 		; Return a list of all pairs with the ITEM on the right side,
 		; and an object of type (LLOBJ 'left-type) on the left. The
 		; pairs are just ListLink's (of arity two). That it, it returns
@@ -171,6 +190,8 @@
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
+			((left-support)     (get-left-support))
+			((right-support)    (get-right-support))
 			((left-stars)       (apply get-left-stars args))
 			((right-stars)      (apply get-right-stars args))
 			(else (apply llobj (cons message args))))
@@ -241,7 +262,7 @@
 			((set-left-wild-count)  (apply set-left-wild-count args))
 			((right-wild-count)     (apply get-right-wild-count args))
 			((set-right-wild-count) (apply set-right-wild-count args))
-			((wild-wild-count)      (apply get-wild-wild-count args))
+			((wild-wild-count)      (get-wild-wild-count))
 			((set-wild-wild-count)  (apply set-wild-wild-count args))
 			(else (apply llobj (cons message args))))
 		)))

@@ -227,7 +227,8 @@
 	(display "Finished loading any-word-pairs\n")
 
 	(batch-all-pair-mi
-		(make-pair-wild (make-pair-count-get-set (make-any-link)))
+		(make-compute-count
+			(make-pair-wild (make-pair-count-get-set (make-any-link))))
 		(get-all-words))
 )
 
@@ -248,7 +249,8 @@
 	(display "Finished loading clique-word-pairs\n")
 
 	(batch-all-pair-mi
-		(make-pair-wild (make-pair-count-get-set (make-clique-pair)))
+		(make-compute-count
+			(make-pair-wild (make-pair-count-get-set (make-clique-pair))))
 		(get-all-words))
 )
 

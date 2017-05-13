@@ -138,11 +138,13 @@
 (define (make-compute-count CNTOBJ)
 	(let ((cntobj CNTOBJ))
 
-		; Compute the left-side wild-card count.
+		; Compute the left-side wild-card count. This is the number
+		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
+		; of times that the pair (x,y) was observed.
 		; This returns the count, or zero, if the pair was never observed.
 		(define (compute-left-count ITEM)
 			(fold
-				(lambda (pr sum) (cntobj 'pair-count pr))
+				(lambda (pr sum) (+ sum (cntobj 'pair-count pr)))
 				0
 				(cntobj 'left-stars ITEM)))
 
@@ -155,11 +157,10 @@
 			(if (< 0 cnt)
 				(cntobj 'set-left-wild-count ITEM cnt)))
 
-		; Compute the right-side wild-card count.
-		; This returns the count, or zero, if the pair was never observed.
+		; Compute the right-side wild-card count N(x,*).
 		(define (compute-right-count ITEM)
 			(fold
-				(lambda (pr sum) (cntobj 'pair-count pr))
+				(lambda (pr sum) (+ sum (cntobj 'pair-count pr)))
 				0
 				(cntobj 'right-stars ITEM)))
 
@@ -172,6 +173,52 @@
 			(if (< 0 cnt)
 				(cntobj 'set-right-wild-count ITEM cnt)))
 
+		; Compute the total number of times that all pairs have been
+		; observed. In formulas, return
+		;     N(*,*) = sum_x N(x,*) = sum_x sum_y N(x,y)
+		;
+		; This method assumes that the partial wild-card counts have
+		; been previously computed and cached.  That is, it assumes that
+		; the 'right-wild-count returns a valid value, which really
+		; should be the same value as 'compute-right-count on this object.
+		(define (compute-total-count-from-left)
+			(fold
+				;;; (lambda (item sum) (+ sum (compute-right-count item)))
+				(lambda (item sum) (+ sum (cntobj 'right-wild-count item)))
+				0
+				(cntobj 'left-support)))
+
+		; Compute the total number of times that all pairs have been
+		; observed. That is, return N(*,*) = sum_y N(*,y). Note that
+		; this should give exactly the same result as the above; however,
+		; the order in which the sums are performed is distinct, and
+		; thus any differences indicate a bug.
+		(define (compute-total-count-from-right)
+			(fold
+				;;; (lambda (item sum) (+ sum (compute-left-count item)))
+				(lambda (item sum) (+ sum (cntobj 'left-wild-count item)))
+				0
+				(cntobj 'right-support)))
+
+		; Compute the total number of times that all pairs have been
+		; observed. That is, return N(*,*).  Throws an error if the
+		; left and right summations fail to agree.
+		(define (compute-total-count)
+			(define l-cnt (compute-total-count-from-left))
+			(define r-cnt (compute-total-count-from-right))
+
+			; The left and right counts should be equal!
+			(if (not (eqv? l-cnt r-cnt))
+				(throw 'bad-summation 'count-all-pairs
+					(format #f "Error: pair-counts unequal: ~A ~A\n" l-cnt r-cnt)))
+			l-cnt)
+
+		; Compute and cache the total observation count for all pairs.
+		; This returns the atom holding the cached count.
+		(define (cache-total-count)
+			(define cnt (compute-total-count))
+			(cntobj 'set-wild-wild-count cnt))
+
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -179,6 +226,8 @@
 				((cache-left-count)      (apply cache-left-count args))
 				((compute-right-count)   (apply compute-right-count args))
 				((cache-right-count)     (apply cache-right-count args))
+				((compute-total-count)   (compute-total-count))
+				((cache-total-count)     (cache-total-count))
 				(else (apply cntobj (cons message args))))
 			)))
 
@@ -290,40 +339,6 @@
 )
 
 ; ---------------------------------------------------------------------
-; Compute the total number of observed word-pairs, using the left
-; and right wild-card count access methods.  The resulting total count
-; is stored on the GET-WILD-WILD atom.
-;
-; The computation is performed batch-style. This function assumes that
-; all word-pairs are already loaded in the atom table; it will get
-; incorrect counts if this is not the case.
-;
-(define (count-all-pairs OBJ ALL-WORDS)
-
-	(define l-cnt 0)
-	(define r-cnt 0)
-
-	(start-trace "Start all-pair-count\n")
-	; Now, loop over all words, totalling up the counts.
-	(for-each
-		(lambda (word)
-			(set! l-cnt (+ l-cnt (OBJ 'left-wild-count word)))
-			(set! r-cnt (+ r-cnt (OBJ 'right-wild-count word)))
-		)
-		ALL-WORDS)
-
-	; The left and right counts should be equal!
-	(if (not (eqv? l-cnt r-cnt))
-		(throw 'bad-summation 'count-all-pairs
-			(format #f "Error: word-pair-counts unequal: ~A ~A\n" l-cnt r-cnt))
-	)
-
-	; Create and save the grand-total count.
-	(store-atom (OBJ 'set-wild-wild-count r-cnt))
-	(trace-msg "Done with all-pair count\n")
-)
-
-; ---------------------------------------------------------------------
 ; Compute the log-liklihood for all wild-card wordpairs.
 ;
 ; This assumes that wild-card word-pair counts have already been
@@ -409,8 +424,7 @@
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (concatenate!
-					(map! (lambda (lnk) (OBJ 'item-pairs lnk)) left-stars)))
+			(left-evs (map! (lambda (lnk) (OBJ 'item-pair lnk)) left-stars))
 
 			(l-logli (get-logli (OBJ 'left-wildcard RIGHT-ITEM)))
 		)
@@ -506,8 +520,8 @@
 	(trace-msg "Done with wild-card counts N(*,w) and N(w,*)\n")
 	(display "Done with wild-card count N(*,w) and N(w,*)\n")
 
-	; Now, get the grand-total
-	(count-all-pairs OBJ all-singletons)
+	; Now, compute the grand-total
+	(store-atom (OBJ 'cache-total-count))
 	(trace-elapsed)
 	(trace-msg "Done computing N(*,*), start computing log P(*,w)\n")
 	(display "Done computing N(*,*), start computing log P(*,w)\n")
