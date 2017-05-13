@@ -253,18 +253,19 @@
 		(define (set-wild-wild-count CNT)
 			(set-pair-count (llobj 'wild-wild) CNT))
 
-	; Methods on this class.
-	(lambda (message . args)
-		(case message
-			((pair-count)           (apply get-pair-count args))
-			((set-pair-count)       (apply set-pair-count args))
-			((left-wild-count)      (apply get-left-wild-count args))
-			((set-left-wild-count)  (apply set-left-wild-count args))
-			((right-wild-count)     (apply get-right-wild-count args))
-			((set-right-wild-count) (apply set-right-wild-count args))
-			((wild-wild-count)      (get-wild-wild-count))
-			((set-wild-wild-count)  (apply set-wild-wild-count args))
-			(else (apply llobj (cons message args))))
-		)))
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((pair-count)           (apply get-pair-count args))
+				((set-pair-count)       (apply set-pair-count args))
+				((left-wild-count)      (apply get-left-wild-count args))
+				((set-left-wild-count)  (apply set-left-wild-count args))
+				((right-wild-count)     (apply get-right-wild-count args))
+				((set-right-wild-count) (apply set-right-wild-count args))
+				((wild-wild-count)      (get-wild-wild-count))
+				((set-wild-wild-count)  (apply set-wild-wild-count args))
+				(else (apply llobj (cons message args))))
+		))
+)
 
 ; ---------------------------------------------------------------------

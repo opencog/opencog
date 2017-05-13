@@ -231,8 +231,8 @@
 				((compute-total-count)   (compute-total-count))
 				((cache-total-count)     (cache-total-count))
 				(else (apply cntobj (cons message args))))
-			)))
-
+			))
+)
 
 ; ---------------------------------------------------------------------
 ;
@@ -254,8 +254,14 @@
 		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
 		; of times that the pair (x,y) was observed.
 		; This returns the count, or zero, if the pair was never observed.
-		(define (compute-left-freq ITEM))
-	)
+		(define (compute-left-freq ITEM) cntobj)
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((compute-left-freq) (apply compute-left-freq args))
+				(else (apply cntobj (cons message args))))
+		))
 )
 
 ; ---------------------------------------------------------------------
