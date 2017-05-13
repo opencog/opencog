@@ -128,13 +128,14 @@
 ; ---------------------------------------------------------------------
 ;
 ; Extend the CNTOBJ with additional methods to compute wildcard counts
-; for pairs, and store the results in the count-object. The CNTOBJ
-; needs to be an object implementing methods to get wild-card lists,
-; i.e. the 'left-stars and 'right-stars methods, and also implementing
-; setters, sot that the wild-card counts can be cached. That is, the
-; object must also have the 'set-left-wild-count, 'set-right-wild-count
-; and 'set-wild-wild-count methods on it.
-
+; for pairs, and store the results in the count-object.
+;
+; The CNTOBJ needs to be an object implementing methods to get wild-card
+; lists, i.e. the 'left-stars and 'right-stars methods, and also
+; implementing setters, so that the wild-card counts can be cached.
+; That is, the object must also have the 'set-left-wild-count,
+; 'set-right-wild-count and 'set-wild-wild-count methods on it.
+;
 (define (make-compute-count CNTOBJ)
 	(let ((cntobj CNTOBJ))
 
@@ -232,6 +233,30 @@
 				(else (apply cntobj (cons message args))))
 			)))
 
+
+; ---------------------------------------------------------------------
+;
+; Extend the CNTOBJ with additional methods to compute observation
+; frequencies and entropies for pairs, including partial-sum entropies
+; (mutual information) for the left and right side of each pair.
+; This will also cache the results of these computations in a
+; standardized location.
+;
+; The CNTOBJ needs to be an object implementing methods to get pair
+; observation counts, and wild-card counts (which must hold valid
+; values). Specifically, it must have the 'pair-count, 'left-wild-count,
+; 'right-wild-count and 'wild-wild-count methods on it.
+
+(define (make-compute-freq CNTOBJ)
+	(let ((cntobj CNTOBJ))
+
+		; Compute the left-side wild-card count. This is the number
+		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
+		; of times that the pair (x,y) was observed.
+		; This returns the count, or zero, if the pair was never observed.
+		(define (compute-left-freq ITEM))
+	)
+)
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -478,6 +503,9 @@
 ;
 (define (batch-all-pair-mi OBJ all-singletons)
 
+	; decorate the object with methods that can compute things.
+	(define comp-obj (make-compute-count OBJ))
+
 	(define msg (format #f "Start counting, num words=~A\n"
 			(length all-singletons)))
 	(trace-msg msg)
@@ -488,7 +516,7 @@
 	; for-each
 	(par-for-each
 		(lambda (word)
-			(compute-pair-wildcard-counts OBJ word)
+			(compute-pair-wildcard-counts comp-obj word)
 			(trace-msg-cnt "Wildcard-count did ")
 		)
 		all-singletons
@@ -498,7 +526,7 @@
 	(display "Done with wild-card count N(*,w) and N(w,*)\n")
 
 	; Now, compute the grand-total
-	(store-atom (OBJ 'cache-total-count))
+	(store-atom (comp-obj 'cache-total-count))
 	(trace-elapsed)
 	(trace-msg "Done computing N(*,*), start computing log P(*,w)\n")
 	(display "Done computing N(*,*), start computing log P(*,w)\n")
