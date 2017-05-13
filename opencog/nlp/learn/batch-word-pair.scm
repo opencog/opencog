@@ -269,6 +269,13 @@
 ; ---------------------------------------------------------------------
 ; misc unit-test-by-hand stuff
 ;
+; (use-modules (opencog) (opencog persist) (opencog persist-sql))
+; (use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_snapshot?user=linas
+; (use-modules (opencog cogserver))
+; (start-cogserver "opencog2.conf")
+; (fetch-all-words)
+;
 ; (define x (WordNode "famille"))
 ; (define y (LinkGrammarRelationshipNode "ANY"))
 ; (fetch-and-compute-pair-wildcard-counts x y)

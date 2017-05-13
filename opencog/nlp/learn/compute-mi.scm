@@ -357,7 +357,7 @@
 ; counts are up-to-date in the atomspace; no fetching from the database
 ; is performed.
 
-(define (batch-all-pair-wildcard-logli OBJ)
+(define (batch-all-pair-wildcard-logli OBJ ALL-WORDS)
 
 	; Get the word-pair grand-total
 	(define pair-total (get-count (OBJ 'get-wild-wild)))
