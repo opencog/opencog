@@ -126,38 +126,6 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
-; Return all of the ListLinks of arity two in which the ITEM appears
-(define (get-item-pairs ITEM)
-	(filter
-		(lambda (lnk) (equal? 2 (cog-arity lnk)))
-		(cog-incoming-by-type ITEM 'ListLink))
-)
-
-; The left-stars have the item in the right slot and have some other
-; item (of ITEM-TYPE) in the left slot. We must check for ITEM-TYPE
-; in this spot, as some of these ListLinks may have AnyNode (or
-; something else) in that slot.
-(define (get-left-stars word list-of-pairs ITEM-TYPE)
-	(filter
-		(lambda (lnk)
-			(define oset (cog-outgoing-set lnk))
-			(and
-				(equal? ITEM-TYPE (cog-type (car oset)))
-				(equal? word (cadr oset))))
-		list-of-pairs)
-)
-
-(define (get-right-stars word list-of-pairs ITEM-TYPE)
-	(filter
-		(lambda (lnk)
-			(define oset (cog-outgoing-set lnk))
-			(and
-				(equal? word (car oset))
-				(equal? ITEM-TYPE (cog-type (cadr oset)))))
-		list-of-pairs)
-)
-
-; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
 ; the 'count' value of its CountTruthValue. This routine just fetches
@@ -258,18 +226,11 @@
 (define (compute-pair-wildcard-counts OBJ ITEM)
 
 	(let* (
-			; list-links are all the ListLinks in which the ITEM appears
-			(list-links (get-item-pairs ITEM))
-
 			; The left-stars have the item in the right slot and
-			; have some other (OBJ 'left-type) in the left slot. We must
-			; check for the correct type in this spot, as some of these
-			; ListLinks may have something else, e.g. AnyNode in that slot.
-			(left-stars (get-left-stars ITEM list-links (OBJ 'left-type)))
-
-			; The right-stars have the item in the left slot and
-			; have some other (OBJ 'right-type) in the right slot.
-			(right-stars (get-right-stars ITEM list-links (OBJ 'right-type)))
+			; have some other (OBJ 'left-type) in the left slot.
+			; The rioght stars are teh other way around.
+			(left-stars (OBJ 'left-stars ITEM))
+			(right-stars (OBJ 'right-stars ITEM))
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
@@ -408,8 +369,7 @@
 	(let* (
 			; left-stars are all the ListLinks in which the RIGHT-ITEM
 			; appears on the right (and anything on the left)
-			(left-stars (get-left-stars RIGHT-ITEM
-					(get-item-pairs RIGHT-ITEM) (OBJ 'right-type)))
+			(left-stars (OBJ 'left-stars RIGHT-ITEM))
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.

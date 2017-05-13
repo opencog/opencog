@@ -121,9 +121,12 @@
 			(define want-type (LLOBJ 'left-type))
 			(filter
 				(lambda (lnk)
+					(define oset (cog-outgoing-set lnk))
 					(and
-						(equal? 2 (cog-arity lnk)
-						(equal? want-type (cog-type (gar lnk))))))
+						(equal? 2 (cog-arity lnk))
+						(equal? want-type (cog-type (car oset)))
+						(equal? ITEM (cadr oset))
+					))
 				(cog-incoming-by-type ITEM 'ListLink)))
 
 		; Same as above, but on the right.
@@ -131,9 +134,12 @@
 			(define want-type (LLOBJ 'right-type))
 			(filter
 				(lambda (lnk)
+					(define oset (cog-outgoing-set lnk))
 					(and
-						(equal? 2 (cog-arity lnk)
-						(equal? want-type (cog-type (gadr lnk))))))
+						(equal? 2 (cog-arity lnk))
+						(equal? ITEM (car oset))
+						(equal? want-type (cog-type (cadr oset)))
+					))
 				(cog-incoming-by-type ITEM 'ListLink)))
 
 	; Methods on this class.
