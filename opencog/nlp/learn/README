@@ -137,7 +137,7 @@ So, set up the text-ingestion pipeline:
    conflicts, so that you can run multiple languages at the same
    time.
 
-8) Chose the corresponding `learn-pairs-??.scm` file, copy it from
+8) Chose the corresponding `pair-count-??.scm` file, copy it from
    the `run` directory to your working directory. Review and edit
    the configuration as necessary. It contains the database
    credentials -- that's probably the only thing you need to change.
@@ -152,7 +152,7 @@ So, set up the text-ingestion pipeline:
 
 9b) Start the cogserver, in another terminal, as follows:
 ```
-   guile -l learn-pairs-??.scm
+   guile -l pair-count-??.scm
 ```
    There are other ways of starting the cogserver; the above is handy.
 
