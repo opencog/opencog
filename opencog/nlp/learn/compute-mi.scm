@@ -151,7 +151,9 @@
 		; making it convient to persist (store) this cache in
 		; the database.
 		(define (cache-left-count ITEM)
-			(cntobj 'set-left-wild-count ITEM (compute-left-count ITEM)))
+			(define cnt (compute-left-count ITEM))
+			(if (< 0 cnt)
+				(cntobj 'set-left-wild-count ITEM cnt)))
 
 		; Compute the right-side wild-card count.
 		; This returns the count, or zero, if the pair was never observed.
@@ -166,7 +168,9 @@
 		; making it convient to persist (store) this cache in
 		; the database.
 		(define (cache-right-count ITEM)
-			(cntobj 'set-right-wild-count ITEM (compute-right-count ITEM)))
+			(define cnt (compute-right-count ITEM))
+			(if (< 0 cnt)
+				(cntobj 'set-right-wild-count ITEM cnt)))
 
 		; Methods on this class.
 		(lambda (message . args)
@@ -278,32 +282,11 @@
 
 (define (compute-pair-wildcard-counts OBJ ITEM)
 
-	(let* (
-			; The left-stars have the item in the right slot and
-			; have some other (OBJ 'left-type) in the left slot.
-			; The rioght stars are teh other way around.
-			(left-stars (OBJ 'left-stars ITEM))
-			(right-stars (OBJ 'right-stars ITEM))
+	(define lefty (OBJ 'cache-left-count ITEM))
+	(define righty (OBJ 'cache-right-count ITEM))
 
-			; left-evs are the EvaluationLinks above the left-stars
-			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (concatenate!
-					(map!  (lambda (lnk) (OBJ 'item-pairs lnk)) left-stars)))
-
-			(right-evs (concatenate!
-					(map!  (lambda (lnk) (OBJ 'item-pairs lnk)) right-stars)))
-
-			; The total occurance counts
-			(left-total (get-total-atom-count left-evs))
-			(right-total (get-total-atom-count right-evs))
-		)
-
-		(if (< 0 left-total)
-			(store-atom (OBJ 'set-left-wild-count ITEM left-total)))
-
-		(if (< 0 right-total)
-			(store-atom (OBJ 'set-right-wild-count ITEM right-total)))
-	)
+	(if (not (null? lefty)) (store-atom lefty))
+	(if (not (null? righty)) (store-atom righty))
 )
 
 ; ---------------------------------------------------------------------
