@@ -143,14 +143,14 @@
 
 	; Methods on this class.
 	(lambda (message . args)
-		(apply (case message
-				((pair-count) get-pair-count)
-				((set-pair-count) set-pair-count)
-				((left-wild-count) get-left-wild-count)
-				((set-left-wild-count) set-left-wild-count)
-				((right-wild-count) get-right-wild-count)
-				((set-right-wild-count) set-right-wild-count)
-				((wild-wild-count) get-wild-wild-count)
-				((set-wild-wild-count) set-wild-wild-count)
-				(else (llobj message)))
-			args))))
+		(case message
+			((pair-count)           (apply get-pair-count args))
+			((set-pair-count)       (apply set-pair-count args))
+			((left-wild-count)      (apply get-left-wild-count args))
+			((set-left-wild-count)  (apply set-left-wild-count args))
+			((right-wild-count)     (apply get-right-wild-count args))
+			((set-right-wild-count) (apply set-right-wild-count args))
+			((wild-wild-count)      (apply get-wild-wild-count args))
+			((set-wild-wild-count)  (apply set-wild-wild-count args))
+			(else (llobj message)))
+		)))
