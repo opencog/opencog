@@ -262,14 +262,14 @@
 			(list-links (get-item-pairs ITEM))
 
 			; The left-stars have the item in the right slot and
-			; have some other ITEM-TYPE in the left slot. We must
-			; check for ITEM-TYPE in this spot, as some of these
-			; ListLinks may have AnyNode in that slot.
-			(left-stars (get-left-stars ITEM list-links (OBJ 'item-type)))
+			; have some other (OBJ 'left-type) in the left slot. We must
+			; check for the correct type in this spot, as some of these
+			; ListLinks may have something else, e.g. AnyNode in that slot.
+			(left-stars (get-left-stars ITEM list-links (OBJ 'left-type)))
 
 			; The right-stars have the item in the left slot and
-			; have some other ITEM-TYPE in the right slot.
-			(right-stars (get-right-stars ITEM list-links (OBJ 'item-type)))
+			; have some other (OBJ 'right-type) in the right slot.
+			(right-stars (get-right-stars ITEM list-links (OBJ 'right-type)))
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
@@ -409,7 +409,7 @@
 			; left-stars are all the ListLinks in which the RIGHT-ITEM
 			; appears on the right (and anything on the left)
 			(left-stars (get-left-stars RIGHT-ITEM
-					(get-item-pairs RIGHT-ITEM) (OBJ 'item-type)))
+					(get-item-pairs RIGHT-ITEM) (OBJ 'right-type)))
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
@@ -461,6 +461,7 @@
 ; The `all-singletons` argument should be a list of all items over
 ; which the pairs will be computed. Every item in this list should
 ; be of  (OBJ 'item-type)
+; XXX FIXME .. which ones .. left or right????? XXX
 ;
 ; The algorithm uses a doubley-nested loop to walk over all pairs,
 ; in a sparse-matrix fashion: The outer loop is over all all items,

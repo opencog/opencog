@@ -58,7 +58,8 @@
 ; with an LG link-type of "ANY", in an EvaluationLink.
 (define (make-any-link) 
 	(let () 
-		(define (get-type) 'WordNode)
+		(define (get-left-type) 'WordNode)
+		(define (get-right-type) 'WordNode)
 
 		; Return the atom holding the count.
 		(define (get-pair PAIR)
@@ -81,11 +82,12 @@
 	; Methods on the object
 	(lambda (message . args) 
 		(apply (case message 
+				((left-type) get-left-type)
+				((right-type) get-right-type)
 				((get-pair) get-pair) 
 				((get-left-wildcard) get-left-wildcard) 
 				((get-right-wildcard) get-right-wildcard) 
 				((get-wild-wild) get-wild-wild) 
-				((get-type) get-type)
 				(else (error "Bad method call on ANY-link"))) 
 			args)))) 
 
@@ -102,7 +104,8 @@
 ;
 (define (make-clique-pair) 
 	(let () 
-		(define (get-type) 'WordNode)
+		(define (get-left-type) 'WordNode)
+		(define (get-right-type) 'WordNode)
 
 		; Return the atom holding the count.
 		(define (get-pair PAIR)
@@ -125,12 +128,13 @@
 	; Methods on the object
 	(lambda (message . args) 
 		(apply (case message 
+				((left-type) get-left-type)
+				((right-type) get-right-type)
 				((get-pair) get-pair) 
 				((get-left-wildcard) get-left-wildcard) 
 				((get-right-wildcard) get-right-wildcard) 
 				((get-wild-wild) get-wild-wild) 
-				((get-type) get-type)
-				(else (error "Bad method call on ANY-link"))) 
+				(else (error "Bad method call on clique-pair"))) 
 			args)))) 
 
 
