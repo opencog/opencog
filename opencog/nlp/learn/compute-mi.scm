@@ -285,10 +285,10 @@
 		)
 
 		(if (< 0 left-total)
-			(store-atom (set-count (OBJ 'left-wildcard ITEM) left-total)))
+			(store-atom (OBJ 'set-left-wild-count ITEM left-total)))
 
 		(if (< 0 right-total)
-			(store-atom (set-count (OBJ 'right-wildcard ITEM) right-total)))
+			(store-atom (OBJ 'set-right-wild-count ITEM right-total)))
 	)
 )
 
@@ -310,8 +310,8 @@
 	; Now, loop over all words, totalling up the counts.
 	(for-each
 		(lambda (word)
-			(set! l-cnt (+ l-cnt (get-count (OBJ 'left-wildcard word))))
-			(set! r-cnt (+ r-cnt (get-count (OBJ 'right-wildcard word))))
+			(set! l-cnt (+ l-cnt (OBJ 'left-wild-count word)))
+			(set! r-cnt (+ r-cnt (OBJ 'right-wild-count word)))
 		)
 		ALL-WORDS)
 
@@ -322,7 +322,7 @@
 	)
 
 	; Create and save the grand-total count.
-	(store-atom (set-count (OBJ 'wild-wild) r-cnt))
+	(store-atom (OBJ 'set-wild-wild-count r-cnt))
 	(trace-msg "Done with all-pair count\n")
 )
 
@@ -360,7 +360,7 @@
 (define (batch-all-pair-wildcard-logli OBJ ALL-WORDS)
 
 	; Get the word-pair grand-total
-	(define pair-total (get-count (OBJ 'wild-wild)))
+	(define pair-total (OBJ 'wild-wild-count))
 
 	; For each wild-card pair associated with the word,
 	; obtain the log likelihood.
@@ -397,7 +397,7 @@
 (define (compute-pair-mi OBJ RIGHT-ITEM)
 
 	; Get the word-pair grand-total
-	(define pair-total (get-count (OBJ 'wild-wild)))
+	(define pair-total (OBJ 'wild-wild-count))
 
 	; Either of the get-loglis below will throw an exception, if
 	; the particular word-pair doesn't have any counts. This is rare,

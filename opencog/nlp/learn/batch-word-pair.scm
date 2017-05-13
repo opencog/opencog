@@ -226,7 +226,9 @@
 	(trace-msg "Finished loading any-word-pairs\n")
 	(display "Finished loading any-word-pairs\n")
 
-	(batch-all-pair-mi (make-any-link) (get-all-words))
+	(batch-all-pair-mi
+		(make-pair-count-get-set (make-any-link))
+		(get-all-words))
 )
 
 (define-public (batch-clique-pairs)
@@ -245,7 +247,9 @@
 	(trace-msg "Finished loading clique-word-pairs\n")
 	(display "Finished loading clique-word-pairs\n")
 
-	(batch-all-pair-mi (make-clique-pair) (get-all-words))
+	(batch-all-pair-mi
+		(make-pair-count-get-set (make-clique-pair))
+		(get-all-words))
 )
 
 ; ---------------------------------------------------------------------
