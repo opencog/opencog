@@ -151,11 +151,12 @@
 		; Compute and cache the left-side wild-card counts.
 		; This returns the atom holding the cached count, thus
 		; making it convient to persist (store) this cache in
-		; the database.
+		; the database. It returns nil if the count was zero.
 		(define (cache-left-count ITEM)
 			(define cnt (compute-left-count ITEM))
 			(if (< 0 cnt)
-				(cntobj 'set-left-wild-count ITEM cnt)))
+				(cntobj 'set-left-wild-count ITEM cnt)
+				'()))
 
 		; Compute the right-side wild-card count N(x,*).
 		(define (compute-right-count ITEM)
@@ -165,13 +166,13 @@
 				(cntobj 'right-stars ITEM)))
 
 		; Compute and cache the right-side wild-card counts.
-		; This returns the atom holding the cached count, thus
-		; making it convient to persist (store) this cache in
-		; the database.
+		; This returns the atom holding the cached count, or nil
+		; if the count was zero.
 		(define (cache-right-count ITEM)
 			(define cnt (compute-right-count ITEM))
 			(if (< 0 cnt)
-				(cntobj 'set-right-wild-count ITEM cnt)))
+				(cntobj 'set-right-wild-count ITEM cnt)
+				'()))
 
 		; Compute the total number of times that all pairs have been
 		; observed. In formulas, return
