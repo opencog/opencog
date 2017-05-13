@@ -99,8 +99,59 @@
 ;
 ; ---------------------------------------------------------------------
 ;
+; Extend the LLOBJ with addtional methods to get wild-card lists,
+; that is, lists of all pairs with a specific item on the left,
+; or on the right.  This generates these lists in a generic way,
+; that probably work for most kinds of pairs. However, you can
+; overload them with custom getters, if you wish.
+
+(define (make-pair-wild LLOBJ)
+	(let ((llobj LLOBJ))
+
+		; Return a list of all pairs with the ITEM on the right side,
+		; and an object of type (LLOBJ 'left-type) on the left. The
+		; pairs are just ListLink's (of arity two). That it, it returns
+		; a list of atoms of the form
+		;
+		;    ListLink
+		;         (LLOBJ 'left-type)
+		;         ITEM
+		;
+		(define (get-left-stars ITEM)
+			(define want-type (LLOBJ 'left-type))
+			(filter
+				(lambda (lnk)
+					(and
+						(equal? 2 (cog-arity lnk)
+						(equal? want-type (cog-type (gar lnk))))))
+				(cog-incoming-by-type ITEM 'ListLink)))
+
+		; Same as above, but on the right.
+		(define (get-right-stars ITEM)
+			(define want-type (LLOBJ 'right-type))
+			(filter
+				(lambda (lnk)
+					(and
+						(equal? 2 (cog-arity lnk)
+						(equal? want-type (cog-type (gadr lnk))))))
+				(cog-incoming-by-type ITEM 'ListLink)))
+
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((left-stars)       (apply get-left-stars args))
+			((right-stars)      (apply get-right-stars args))
+			(else (apply llobj (cons message args))))
+		)))
+
+; ---------------------------------------------------------------------
+;
 ; Extend the LLOBJ with additional methods to get and set
-; various values on the objects.
+; the count values for wild-card counts, and total counts.
+; Basically, this decorates the class with additional methods
+; that get and set these counts in "standardized" places.
+; Other classes can overload these methods; these just provide
+; a reasonable default.
 ;
 (define (make-pair-count-get-set LLOBJ)
 	(let ((llobj LLOBJ))
@@ -152,5 +203,5 @@
 			((set-right-wild-count) (apply set-right-wild-count args))
 			((wild-wild-count)      (apply get-wild-wild-count args))
 			((set-wild-wild-count)  (apply set-wild-wild-count args))
-			(else (llobj message)))
+			(else (apply llobj (cons message args))))
 		)))
