@@ -40,12 +40,18 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Example low-level API object. It has only five methods; these
+; Example low-level API class. It has only six methods; these
 ; return pair-atoms on which counts are stored as values.
 ; Higher-evel objects use this object to fetch counts, store them
 ; into the database, or to return various statistics.
 ;
+; The `make-pair-count-get-set` class, below, is a typical user
+; of this class; it provides getters and setters for teh counts.
+;
 ; See `make-any-link` for a working example.
+;
+; When called, this will create a new instance of the class
+; i.e. will create a new object.
 ;
 ;  (define (make-ll-object-api-example)
 ;     (let ()
@@ -70,8 +76,8 @@
 ;        ; Return the atom holding the N(*,*) count
 ;        (define (get-wild-wild) "foobar")
 ;
-;     ; Methods on the object. To call these, quote the method name.
-;     ; Example: (OBJ 'get-left-wildcard WORD) calls the
+;     ; Methods on the class. To call these, quote the method name.
+;     ; Example: (OBJ 'left-wildcard WORD) calls the
 ;     ; get-left-wildcard method, passing WORD as the argument.
 ;     (lambda (message . args)
 ;        (apply (case message
@@ -87,29 +93,24 @@
 ;
 ; ---------------------------------------------------------------------
 ;
+; Extend the LLOBJ with additional methods to get and set
+; various values on the objects.
 ;
-(define (make-pair-object-api-example)
-	(let ()
-		; Return the atom holding the count.
-		(define (get-pair PAIR) "foobar")
+(define (make-pair-count-get-set LLOBJ)
+	(let ((llobj LLOBJ))
 
-		; Return a list of atoms hold the count.
-		(define (get-pairs PAIR) "foobar")
+		; Return the return the raw observational count on ATOM.
+		(define (get-cnt PAIR)
+			(cog-tv-count (cog-tv (llobj 'item-pair PAIR))))
 
-		(define (get-left-wildcard WORD) "foobar")
+		; Set the raw observational count on PAIR
+		(define (set-cnt PAIR CNT)
+			(cog-set-tv! (llobj 'item-pair PAIR) (cog-new-ctv 0 0 CNT)))
 
-		(define (get-right-wildcard WORD) "foobar")
-
-		(define (get-wild-wild) "foobar")
-
-	; Methods on the object
-	; Example: (OBJ 'get-left-wildcard WORD) calls the
-	; get-left-wildcard method, passing WORD as the object.
+	; Methods on this class.
 	(lambda (message . args)
 		(apply (case message
-				((get-pair) get-pair)
-				((get-left-wildcard) get-left-wildcard)
-				((get-right-wildcard) get-right-wildcard)
-				((get-wild-wild) get-wild-wild)
-				(else (error "Bad method call on ANY-link")))
+				((get-count) get-cnt)
+				((set-count) set-cnt)
+				(else (llobj message)))
 			args))))
