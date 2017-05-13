@@ -56,8 +56,8 @@
 ;
 ; This implements a word-pair object, where the two words are connected
 ; with an LG link-type of "ANY", in an EvaluationLink.
-(define (make-any-link) 
-	(let () 
+(define (make-any-link)
+	(let ()
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 
@@ -80,16 +80,17 @@
 			(get-pair (ListLink any-left any-right)))
 
 	; Methods on the object
-	(lambda (message . args) 
-		(apply (case message 
+	(lambda (message . args)
+		(apply (case message
 				((left-type) get-left-type)
 				((right-type) get-right-type)
-				((get-pair) get-pair) 
-				((get-left-wildcard) get-left-wildcard) 
-				((get-right-wildcard) get-right-wildcard) 
-				((get-wild-wild) get-wild-wild) 
-				(else (error "Bad method call on ANY-link"))) 
-			args)))) 
+				((item-pair) get-pair)
+				((item-pairs) get-pairs)
+				((left-wildcard) get-left-wildcard)
+				((right-wildcard) get-right-wildcard)
+				((wild-wild) get-wild-wild)
+				(else (error "Bad method call on ANY-link:" message)))
+			args))))
 
 
 ; ---------------------------------------------------------------------
@@ -102,8 +103,8 @@
 ; The counts are stored on EvaluationLinks with the predicate
 ; (PredicateNode "*-Sentence Word Pair-*")
 ;
-(define (make-clique-pair) 
-	(let () 
+(define (make-clique-pair)
+	(let ()
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 
@@ -126,16 +127,17 @@
 			(get-pair (ListLink any-left any-right)))
 
 	; Methods on the object
-	(lambda (message . args) 
-		(apply (case message 
+	(lambda (message . args)
+		(apply (case message
 				((left-type) get-left-type)
 				((right-type) get-right-type)
-				((get-pair) get-pair) 
-				((get-left-wildcard) get-left-wildcard) 
-				((get-right-wildcard) get-right-wildcard) 
-				((get-wild-wild) get-wild-wild) 
-				(else (error "Bad method call on clique-pair"))) 
-			args)))) 
+				((item-pair) get-pair)
+				((item-pairs) get-pairs)
+				((left-wildcard) get-left-wildcard)
+				((right-wildcard) get-right-wildcard)
+				((wild-wild) get-wild-wild)
+				(else (error "Bad method call on clique-pair:" message)))
+			args))))
 
 
 

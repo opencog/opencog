@@ -70,21 +70,24 @@
 ;        ; Return the atom holding the N(*,*) count
 ;        (define (get-wild-wild) "foobar")
 ;
-;     ; Methods on the object
+;     ; Methods on the object. To call these, quote the method name.
 ;     ; Example: (OBJ 'get-left-wildcard WORD) calls the
-;     ; get-left-wildcard method, passing WORD as the object.
+;     ; get-left-wildcard method, passing WORD as the argument.
 ;     (lambda (message . args)
 ;        (apply (case message
 ;              ((left-type) get-left-type)
 ;              ((right-type) get-right-type)
-;              ((get-pair) get-pair)
-;              ((get-left-wildcard) get-left-wildcard)
-;              ((get-right-wildcard) get-right-wildcard)
-;              ((get-wild-wild) get-wild-wild)
+;              ((item-pair) get-pair)
+;              ((left-wildcard) get-left-wildcard)
+;              ((right-wildcard) get-right-wildcard)
+;              ((wild-wild) get-wild-wild)
 ;              (else (error "Bad method call on low-level API")))
 ;           args))))
-
-
+;
+;
+; ---------------------------------------------------------------------
+;
+;
 (define (make-pair-object-api-example)
 	(let ()
 		; Return the atom holding the count.

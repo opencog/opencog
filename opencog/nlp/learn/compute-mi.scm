@@ -274,10 +274,10 @@
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
 			(left-evs (concatenate!
-					(map!  (lambda (lnk) (OBJ 'get-pairs lnk)) left-stars)))
+					(map!  (lambda (lnk) (OBJ 'item-pairs lnk)) left-stars)))
 
 			(right-evs (concatenate!
-					(map!  (lambda (lnk) (OBJ 'get-pairs lnk)) right-stars)))
+					(map!  (lambda (lnk) (OBJ 'item-pairs lnk)) right-stars)))
 
 			; The total occurance counts
 			(left-total (get-total-atom-count left-evs))
@@ -285,10 +285,10 @@
 		)
 
 		(if (< 0 left-total)
-			(store-atom (set-count (OBJ 'get-left-wildcard ITEM) left-total)))
+			(store-atom (set-count (OBJ 'left-wildcard ITEM) left-total)))
 
 		(if (< 0 right-total)
-			(store-atom (set-count (OBJ 'get-right-wildcard ITEM) right-total)))
+			(store-atom (set-count (OBJ 'right-wildcard ITEM) right-total)))
 	)
 )
 
@@ -310,8 +310,8 @@
 	; Now, loop over all words, totalling up the counts.
 	(for-each
 		(lambda (word)
-			(set! l-cnt (+ l-cnt (get-count (OBJ 'get-left-wildcard word))))
-			(set! r-cnt (+ r-cnt (get-count (OBJ 'get-right-wildcard word))))
+			(set! l-cnt (+ l-cnt (get-count (OBJ 'left-wildcard word))))
+			(set! r-cnt (+ r-cnt (get-count (OBJ 'right-wildcard word))))
 		)
 		ALL-WORDS)
 
@@ -322,7 +322,7 @@
 	)
 
 	; Create and save the grand-total count.
-	(store-atom (set-count (OBJ 'get-wild-wild) r-cnt))
+	(store-atom (set-count (OBJ 'wild-wild) r-cnt))
 	(trace-msg "Done with all-pair count\n")
 )
 
@@ -360,14 +360,14 @@
 (define (batch-all-pair-wildcard-logli OBJ ALL-WORDS)
 
 	; Get the word-pair grand-total
-	(define pair-total (get-count (OBJ 'get-wild-wild)))
+	(define pair-total (get-count (OBJ 'wild-wild)))
 
 	; For each wild-card pair associated with the word,
 	; obtain the log likelihood.
 	(for-each
 		(lambda (word)
-			(let ((lefty (OBJ 'get-left-wildcard word))
-					(righty (OBJ 'get-right-wildcard word)))
+			(let ((lefty (OBJ 'left-wildcard word))
+					(righty (OBJ 'right-wildcard word)))
 
 				; log-likelihood for the left wildcard
 				(if (< 0 (get-count lefty))
@@ -397,7 +397,7 @@
 (define (compute-pair-mi OBJ RIGHT-ITEM)
 
 	; Get the word-pair grand-total
-	(define pair-total (get-count (OBJ 'get-wild-wild)))
+	(define pair-total (get-count (OBJ 'wild-wild)))
 
 	; Either of the get-loglis below will throw an exception, if
 	; the particular word-pair doesn't have any counts. This is rare,
@@ -414,9 +414,9 @@
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
 			(left-evs (concatenate!
-					(map! (lambda (lnk) (OBJ 'get-pair lnk)) left-stars)))
+					(map! (lambda (lnk) (OBJ 'item-pairs lnk)) left-stars)))
 
-			(l-logli (get-logli (OBJ 'get-left-wild RIGHT-ITEM)))
+			(l-logli (get-logli (OBJ 'left-wildcard RIGHT-ITEM)))
 		)
 		(for-each
 
@@ -427,7 +427,7 @@
 							; the left-word of the word-pair
 							(left-word (gadr pair))
 
-							(r-logli (get-logli (OBJ 'get-right-wild left-word)))
+							(r-logli (get-logli (OBJ 'right-wildcard left-word)))
 
 							; Compute the logli log_2 P(l,r)/P(*,*)
 							(atom (compute-atom-logli pair pair-total))
