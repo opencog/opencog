@@ -27,17 +27,25 @@
 ; some object-oriented OO API's for pairs, which the algos can assume,
 ; and the different types of pairs can implement.
 ;
+; The object-system being used here is a roll-your-own type system,
+; really quite simple, as it's well-suited for the desired task.
+; It's simple, and minimal. The reasons for this are explained here:
+;    http://community.schemewiki.org/?object-oriented-programming
+; Basically, "object-oriented programming" is a mish-mash of more
+; than half-a-dozen distinct concepts, almost all of which are
+; not needed for this particular project.  The only thing we need
+; is the ability to decorate objects with additional methods, kind-of
+; like class inheritance, except that we really really need dynamic
+; inheritance, i.e. arbitrary base classes, rather than a single,
+; static base class, and so its totally unlike C++ inheritance, which
+; is static, and a lot like C++ templates, which are dynamic.
+;
+; The object system here is almost identical to this one:
+;    http://community.schemewiki.org/?simple-object
+; Read this URL to understand what is happening here.
+;
 ; There are several API's here. The lowest-level ones are listed first.
 ;
-; The GET-PAIR argument should be a function that returns all atoms
-; that hold counts for a pair (ListLink left-item right-item). It
-; should return a list (possibly the empty list).  Note that in some
-; cases, the list may be longer than just one item, e.g. for schemas
-; that count link lengths.  In thise case, the total count for the
-; pair is taken to be the sum of the individual counts on all the
-; atoms in the list.
-
-
 ; ---------------------------------------------------------------------
 ;
 ; Example low-level API class. It has only six methods; these
@@ -68,6 +76,17 @@
 ;        ; Return the atom holding the count, creating it if
 ;        ; it does not yet exist.
 ;        (define (make-pair PAIR) "foobar")
+;
+; The get-pairs method should be a function that returns all atoms
+; that hold counts for a pair (ListLink left-item right-item). It
+; should return a list (possibly the empty list).  Note that in some
+; cases, the list may be longer than just one item, e.g. for schemas
+; that count link lengths.  In thise case, the total count for the
+; pair is taken to be the sum of the individual counts on all the
+; atoms in the list.
+;
+; XXX except this is a bad idea, and will be removed in some later
+; version.
 ;
 ;        ; Return a list of atoms hold the count.
 ;        (define (get-pairs PAIR) "foobar")
@@ -104,6 +123,13 @@
 ; or on the right.  This generates these lists in a generic way,
 ; that probably work for most kinds of pairs. However, you can
 ; overload them with custom getters, if you wish.
+;
+; Here, the LLOBJ is expected to be an object, with methods for
+; 'left-type and 'right-type on it, just as described above.
+;
+; The lists of pairs will be lists of ListLink's, with the desired
+; item on the left or right, and an atom of 'left-type or 'right-type
+; on the other side.
 
 (define (make-pair-wild LLOBJ)
 	(let ((llobj LLOBJ))
@@ -159,17 +185,23 @@
 ; Other classes can overload these methods; these just provide
 ; a reasonable default.
 ;
+; Here, the LLOBJ is expected to be an object, with methods for
+; 'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
+; on it, in the form documented above for the "low-level API class".
+;
 (define (make-pair-count-get-set LLOBJ)
 	(let ((llobj LLOBJ))
 
 		; Return the raw observational count on PAIR.
 		; If the PAIR does not exist (was not oberved) return 0.
 		(define (get-pair-count PAIR)
-			(define pr (llobj 'item-pair PAIR))
-			(if (null? pr) 0
-				(cog-tv-count (cog-tv pr))))
+			(fold
+				(lambda (pr sum) (cog-tv-count (cog-tv pr)))
+				0
+				(llobj 'item-pairs PAIR)))
 
 		; Set the raw observational count on PAIR
+		; Return the atom that holds this count.
 		(define (set-pair-count PAIR CNT)
 			(cog-set-tv! (llobj 'make-pair PAIR) (cog-new-ctv 0 0 CNT)))
 
@@ -182,10 +214,12 @@
 			(get-pair-count (llobj 'right-wildcard ITEM)))
 
 		; Set the left wildcard count
+		; Return the atom that holds this count.
 		(define (set-left-wild-count ITEM CNT)
 			(set-pair-count (llobj 'left-wildcard ITEM) CNT))
 
 		; Set the right wildcard count
+		; Return the atom that holds this count.
 		(define (set-right-wild-count ITEM CNT)
 			(set-pair-count (llobj 'right-wildcard ITEM) CNT))
 
@@ -194,9 +228,9 @@
 			(get-pair-count (llobj 'wild-wild)))
 
 		; Set the wildcard-wildcard count
+		; Return the atom that holds this count.
 		(define (set-wild-wild-count CNT)
 			(set-pair-count (llobj 'wild-wild) CNT))
-
 
 	; Methods on this class.
 	(lambda (message . args)
@@ -211,3 +245,5 @@
 			((set-wild-wild-count)  (apply set-wild-wild-count args))
 			(else (apply llobj (cons message args))))
 		)))
+
+; ---------------------------------------------------------------------

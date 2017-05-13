@@ -126,6 +126,59 @@
 (use-modules (opencog persist))
 
 ; ---------------------------------------------------------------------
+;
+; Extend the CNTOBJ with additional methods to compute wildcard counts
+; for pairs, and store the results in the count-object. The CNTOBJ
+; needs to be an object implementing methods to get wild-card lists,
+; i.e. the 'left-stars and 'right-stars methods, and also implementing
+; setters, sot that the wild-card counts can be cached. That is, the
+; object must also have the 'set-left-wild-count, 'set-right-wild-count
+; and 'set-wild-wild-count methods on it.
+
+(define (make-compute-count CNTOBJ)
+	(let ((cntobj CNTOBJ))
+
+		; Compute the left-side wild-card count.
+		; This returns the count, or zero, if the pair was never observed.
+		(define (compute-left-count ITEM)
+			(fold
+				(lambda (pr sum) (cntobj 'pair-count pr))
+				0
+				(cntobj 'left-stars ITEM)))
+
+		; Compute and cache the left-side wild-card counts.
+		; This returns the atom holding the cached count, thus
+		; making it convient to persist (store) this cache in
+		; the database.
+		(define (cache-left-count ITEM)
+			(cntobj 'set-left-wild-count ITEM (compute-left-count ITEM)))
+
+		; Compute the right-side wild-card count.
+		; This returns the count, or zero, if the pair was never observed.
+		(define (compute-right-count ITEM)
+			(fold
+				(lambda (pr sum) (cntobj 'pair-count pr))
+				0
+				(cntobj 'right-stars ITEM)))
+
+		; Compute and cache the right-side wild-card counts.
+		; This returns the atom holding the cached count, thus
+		; making it convient to persist (store) this cache in
+		; the database.
+		(define (cache-right-count ITEM)
+			(cntobj 'set-right-wild-count ITEM (compute-right-count ITEM)))
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((compute-left-count)    (apply compute-left-count args))
+				((cache-left-count)      (apply cache-left-count args))
+				((compute-right-count)   (apply compute-right-count args))
+				((cache-right-count)     (apply cache-right-count args))
+				(else (apply cntobj (cons message args))))
+			)))
+
+; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
 ; the 'count' value of its CountTruthValue. This routine just fetches
