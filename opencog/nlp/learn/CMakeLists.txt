@@ -10,5 +10,6 @@ ADD_GUILE_MODULE (FILES
 	pair-object-api.scm
 	pair-stats.scm
 	pseudo-csets.scm
+	singletons.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/nlp/learn"
 )
