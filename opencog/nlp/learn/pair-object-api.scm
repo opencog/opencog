@@ -1,7 +1,7 @@
 ;
 ; pair-object-api.scm
 ;
-; Define OO API's for pairs of things.
+; Define object-oriented class API's for pairs of things.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -61,8 +61,13 @@
 ;        (define (get-left-type) 'WordNode)
 ;        (define (get-right-type) 'WordNode)
 ;
-;        ; Return the atom holding the count.
+;        ; Return the atom holding the count, if it exists,
+;        ; else return nil.
 ;        (define (get-pair PAIR) "foobar")
+;
+;        ; Return the atom holding the count, creating it if
+;        ; it does not yet exist.
+;        (define (make-pair PAIR) "foobar")
 ;
 ;        ; Return a list of atoms hold the count.
 ;        (define (get-pairs PAIR) "foobar")
@@ -84,6 +89,7 @@
 ;              ((left-type) get-left-type)
 ;              ((right-type) get-right-type)
 ;              ((item-pair) get-pair)
+;              ((make-pair) make-pair)
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
 ;              ((wild-wild) get-wild-wild)
@@ -99,18 +105,52 @@
 (define (make-pair-count-get-set LLOBJ)
 	(let ((llobj LLOBJ))
 
-		; Return the return the raw observational count on ATOM.
-		(define (get-cnt PAIR)
-			(cog-tv-count (cog-tv (llobj 'item-pair PAIR))))
+		; Return the raw observational count on PAIR.
+		; If the PAIR does not exist (was not oberved) return 0.
+		(define (get-pair-count PAIR)
+			(define pr (llobj 'item-pair PAIR))
+			(if (null? pr) 0
+				(cog-tv-count (cog-tv pr))))
 
 		; Set the raw observational count on PAIR
-		(define (set-cnt PAIR CNT)
-			(cog-set-tv! (llobj 'item-pair PAIR) (cog-new-ctv 0 0 CNT)))
+		(define (set-pair-count PAIR CNT)
+			(cog-set-tv! (llobj 'make-pair PAIR) (cog-new-ctv 0 0 CNT)))
+
+		; Get the left wildcard count
+		(define (get-left-wild-count ITEM)
+			(get-pair-count (llobj 'left-wildcard ITEM)))
+
+		; Get the right wildcard count
+		(define (get-right-wild-count ITEM)
+			(get-pair-count (llobj 'right-wildcard ITEM)))
+
+		; Set the left wildcard count
+		(define (set-left-wild-count ITEM CNT)
+			(set-pair-count (llobj 'left-wildcard ITEM) CNT))
+
+		; Set the right wildcard count
+		(define (set-right-wild-count ITEM CNT)
+			(set-pair-count (llobj 'right-wildcard ITEM) CNT))
+
+		; Get the wildcard-wildcard count
+		(define (get-wild-wild-count)
+			(get-pair-count (llobj 'wild-wild)))
+
+		; Set the wildcard-wildcard count
+		(define (set-wild-wild-count CNT)
+			(set-pair-count (llobj 'wild-wild) CNT))
+
 
 	; Methods on this class.
 	(lambda (message . args)
 		(apply (case message
-				((get-count) get-cnt)
-				((set-count) set-cnt)
+				((pair-count) get-pair-count)
+				((set-pair-count) set-pair-count)
+				((left-wild-count) get-left-wild-count)
+				((set-left-wild-count) set-left-wild-count)
+				((right-wild-count) get-right-wild-count)
+				((set-right-wild-count) set-right-wild-count)
+				((wild-wild-count) get-wild-wild-count)
+				((set-wild-wild-count) set-wild-wild-count)
 				(else (llobj message)))
 			args))))

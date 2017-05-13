@@ -61,18 +61,25 @@
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 
-		; Return the atom holding the count.
+		; Return the atom holding the count, if it exists, else
+		; return nil.
 		(define (get-pair PAIR)
 			(cog-link 'EvaluationLink any-pair-pred PAIR))
+
+		; Create an atom to hold the count (if it doesn't exist already).
+		(define (make-pair PAIR)
+			(EvaluationLink any-pair-pred PAIR))
 
 		; Return a list of atoms hold the count.
 		(define (get-pairs PAIR)
 			(define pr (get-pair PAIR))
 			(if (null? pr) '() (list pr)))
 
+		; Caution: this unconditionally creates the wildcard pair!
 		(define (get-left-wildcard WORD)
 			(get-pair (ListLink any-left WORD)))
 
+		; Caution: this unconditionally creates the wildcard pair!
 		(define (get-right-wildcard WORD)
 			(get-pair (ListLink WORD any-right)))
 
@@ -85,6 +92,7 @@
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((item-pair) get-pair)
+				((make-pair) make-pair)
 				((item-pairs) get-pairs)
 				((left-wildcard) get-left-wildcard)
 				((right-wildcard) get-right-wildcard)
@@ -108,9 +116,14 @@
 		(define (get-left-type) 'WordNode)
 		(define (get-right-type) 'WordNode)
 
-		; Return the atom holding the count.
+		; Return the atom holding the count, if it exists, else
+		; return nil.
 		(define (get-pair PAIR)
 			(cog-link 'EvaluationLink pair-pred PAIR))
+
+		; Create an atom to hold the count (if it doesn't exist already).
+		(define (make-pair PAIR)
+			(EvaluationLink pair-pred PAIR))
 
 		; Return a list of atoms hold the count.
 		(define (get-pairs PAIR)
@@ -132,6 +145,7 @@
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((item-pair) get-pair)
+				((make-pair) make-pair)
 				((item-pairs) get-pairs)
 				((left-wildcard) get-left-wildcard)
 				((right-wildcard) get-right-wildcard)
