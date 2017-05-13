@@ -54,25 +54,41 @@
 ; ---------------------------------------------------------------------
 ; Random-tree parse word-pair count access routines.
 ;
-; Get the atom that holds the left wild-card count for `word`,
-; for the LG link type "ANY". (the wildcard is on the left side)
-; This *creates* the atom, if it does not already exist, and thus
-; is not intended for public use!
+; This implements a word-pair object, where the two words are connected
+; with an LG link-type of "ANY", in an EvaluationLink.
+(define (make-any-link) 
+	(let () 
+		(define (get-type) 'WordNode)
 
-(define (get-any-left-wildcard word)
-	(EvaluationLink any-pair-pred (ListLink any-left word))
-)
+		; Return the atom holding the count.
+		(define (get-pair PAIR)
+			(cog-link 'EvaluationLink any-pair-pred PAIR))
 
-(define (get-any-right-wildcard word)
-	(EvaluationLink any-pair-pred (ListLink word any-right))
-)
+		; Return a list of atoms hold the count.
+		(define (get-pairs PAIR)
+			(define pr (get-pair PAIR))
+			(if (null? pr) '() (list pr)))
 
-; Get the atom that holds the total word-pair count.
-; This has wild-cards on both the left and right.
+		(define (get-left-wildcard WORD)
+			(get-pair (ListLink any-left WORD)))
 
-(define (get-any-wild-wild)
-	(EvaluationLink any-pair-pred (ListLink any-left any-right))
-)
+		(define (get-right-wildcard WORD)
+			(get-pair (ListLink WORD any-right)))
+
+		(define (get-wild-wild)
+			(get-pair (ListLink any-left any-right)))
+
+	; Methods on the object
+	(lambda (message . args) 
+		(apply (case message 
+				((get-pair) get-pair) 
+				((get-left-wildcard) get-left-wildcard) 
+				((get-right-wildcard) get-right-wildcard) 
+				((get-wild-wild) get-wild-wild) 
+				((get-type) get-type)
+				(else (error "Bad method call on ANY-link"))) 
+			args)))) 
+
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -80,20 +96,44 @@
 ; Clique-based-counting word-pair access methods.
 ; ---------------------------------------------------------------------
 
-; Get the atom that holds the left wild-card count for `word`,
-; for the clique-based counts. (the wildcard is on the left side)
+; Object for getting word-pair counts, obtained from clique counting.
+; The counts are stored on EvaluationLinks with the predicate
+; (PredicateNode "*-Sentence Word Pair-*")
+;
+(define (make-clique-pair) 
+	(let () 
+		(define (get-type) 'WordNode)
 
-(define (get-clique-left-wildcard word)
-	(EvaluationLink pair-pred (ListLink any-left word))
-)
+		; Return the atom holding the count.
+		(define (get-pair PAIR)
+			(cog-link 'EvaluationLink pair-pred PAIR))
 
-(define (get-clique-right-wildcard word)
-	(EvaluationLink pair-pred (ListLink word any-right))
-)
+		; Return a list of atoms hold the count.
+		(define (get-pairs PAIR)
+			(define pr (get-pair PAIR))
+			(if (null? pr) '() (list pr)))
 
-(define (get-clique-wild-wild)
-	(EvaluationLink pair-pred (ListLink any-left any-right))
-)
+		(define (get-left-wildcard WORD)
+			(get-pair (ListLink any-left WORD)))
+
+		(define (get-right-wildcard WORD)
+			(get-pair (ListLink WORD any-right)))
+
+		(define (get-wild-wild)
+			(get-pair (ListLink any-left any-right)))
+
+	; Methods on the object
+	(lambda (message . args) 
+		(apply (case message 
+				((get-pair) get-pair) 
+				((get-left-wildcard) get-left-wildcard) 
+				((get-right-wildcard) get-right-wildcard) 
+				((get-wild-wild) get-wild-wild) 
+				((get-type) get-type)
+				(else (error "Bad method call on ANY-link"))) 
+			args)))) 
+
+
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -166,13 +206,7 @@
 	(trace-msg "Finished loading any-word-pairs\n")
 	(display "Finished loading any-word-pairs\n")
 
-	(batch-all-pair-mi
-		internal-any-pair
-		get-any-left-wildcard
-		get-any-right-wildcard
-		get-any-wild-wild
-		'WordNode
-		(get-all-words))
+	(batch-all-pair-mi (make-any-link) (get-all-words))
 )
 
 (define-public (batch-clique-pairs)
@@ -191,13 +225,7 @@
 	(trace-msg "Finished loading clique-word-pairs\n")
 	(display "Finished loading clique-word-pairs\n")
 
-	(batch-all-pair-mi
-		internal-clique-pair
-		get-clique-left-wildcard
-		get-clique-right-wildcard
-		get-clique-wild-wild
-		'WordNode
-		(get-all-words))
+	(batch-all-pair-mi (make-clique-pair) (get-all-words))
 )
 
 ; ---------------------------------------------------------------------

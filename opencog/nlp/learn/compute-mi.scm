@@ -255,8 +255,7 @@
 ;
 ; Returns the two wild-card EvaluationLinks
 
-(define (compute-pair-wildcard-counts ITEM
-	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD ITEM-TYPE)
+(define (compute-pair-wildcard-counts OBJ ITEM)
 
 	(let* (
 			; list-links are all the ListLinks in which the ITEM appears
@@ -266,19 +265,19 @@
 			; have some other ITEM-TYPE in the left slot. We must
 			; check for ITEM-TYPE in this spot, as some of these
 			; ListLinks may have AnyNode in that slot.
-			(left-stars (get-left-stars ITEM list-links ITEM-TYPE))
+			(left-stars (get-left-stars ITEM list-links (OBJ 'item-type)))
 
 			; The right-stars have the item in the left slot and
 			; have some other ITEM-TYPE in the right slot.
-			(right-stars (get-right-stars ITEM list-links ITEM-TYPE))
+			(right-stars (get-right-stars ITEM list-links (OBJ 'item-type)))
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
 			(left-evs (concatenate!
-					(map!  (lambda (lnk) (GET-PAIR lnk)) left-stars)))
+					(map!  (lambda (lnk) (OBJ 'get-pairs lnk)) left-stars)))
 
 			(right-evs (concatenate!
-					(map!  (lambda (lnk) (GET-PAIR lnk)) right-stars)))
+					(map!  (lambda (lnk) (OBJ 'get-pairs lnk)) right-stars)))
 
 			; The total occurance counts
 			(left-total (get-total-atom-count left-evs))
@@ -286,10 +285,10 @@
 		)
 
 		(if (< 0 left-total)
-			(store-atom (set-count (GET-LEFT-WILD ITEM) left-total)))
+			(store-atom (set-count (OBJ 'get-left-wildcard ITEM) left-total)))
 
 		(if (< 0 right-total)
-			(store-atom (set-count (GET-RIGHT-WILD ITEM) right-total)))
+			(store-atom (set-count (OBJ 'get-right-wildcard ITEM) right-total)))
 	)
 )
 
@@ -302,8 +301,7 @@
 ; all word-pairs are already loaded in the atom table; it will get
 ; incorrect counts if this is not the case.
 ;
-(define (count-all-pairs
-	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ALL-WORDS)
+(define (count-all-pairs OBJ ALL-WORDS)
 
 	(define l-cnt 0)
 	(define r-cnt 0)
@@ -312,8 +310,8 @@
 	; Now, loop over all words, totalling up the counts.
 	(for-each
 		(lambda (word)
-			(set! l-cnt (+ l-cnt (get-count (GET-LEFT-WILD word))))
-			(set! r-cnt (+ r-cnt (get-count (GET-RIGHT-WILD word))))
+			(set! l-cnt (+ l-cnt (get-count (OBJ 'get-left-wildcard word))))
+			(set! r-cnt (+ r-cnt (get-count (OBJ 'get-right-wildcard word))))
 		)
 		ALL-WORDS)
 
@@ -324,7 +322,7 @@
 	)
 
 	; Create and save the grand-total count.
-	(store-atom (set-count (GET-WILD-WILD) r-cnt))
+	(store-atom (set-count (OBJ 'get-wild-wild) r-cnt))
 	(trace-msg "Done with all-pair count\n")
 )
 
@@ -359,18 +357,17 @@
 ; counts are up-to-date in the atomspace; no fetching from the database
 ; is performed.
 
-(define (batch-all-pair-wildcard-logli
-	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ALL-WORDS)
+(define (batch-all-pair-wildcard-logli OBJ)
 
 	; Get the word-pair grand-total
-	(define pair-total (get-count (GET-WILD-WILD)))
+	(define pair-total (get-count (OBJ 'get-wild-wild)))
 
 	; For each wild-card pair associated with the word,
 	; obtain the log likelihood.
 	(for-each
 		(lambda (word)
-			(let ((lefty (GET-LEFT-WILD word))
-					(righty (GET-RIGHT-WILD word)))
+			(let ((lefty (OBJ 'get-left-wildcard word))
+					(righty (OBJ 'get-right-wildcard word)))
 
 				; log-likelihood for the left wildcard
 				(if (< 0 (get-count lefty))
@@ -397,11 +394,10 @@
 ; already been computed.
 ;
 ;
-(define (compute-pair-mi RIGHT-ITEM
-	GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE)
+(define (compute-pair-mi OBJ RIGHT-ITEM)
 
 	; Get the word-pair grand-total
-	(define pair-total (get-count (GET-WILD-WILD)))
+	(define pair-total (get-count (OBJ 'get-wild-wild)))
 
 	; Either of the get-loglis below will throw an exception, if
 	; the particular word-pair doesn't have any counts. This is rare,
@@ -413,14 +409,14 @@
 			; left-stars are all the ListLinks in which the RIGHT-ITEM
 			; appears on the right (and anything on the left)
 			(left-stars (get-left-stars RIGHT-ITEM
-					(get-item-pairs RIGHT-ITEM) ITEM-TYPE))
+					(get-item-pairs RIGHT-ITEM) (OBJ 'item-type)))
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
 			(left-evs (concatenate!
-					(map! (lambda (lnk) (GET-PAIR lnk)) left-stars)))
+					(map! (lambda (lnk) (OBJ 'get-pair lnk)) left-stars)))
 
-			(l-logli (get-logli (GET-LEFT-WILD RIGHT-ITEM)))
+			(l-logli (get-logli (OBJ 'get-left-wild RIGHT-ITEM)))
 		)
 		(for-each
 
@@ -431,7 +427,7 @@
 							; the left-word of the word-pair
 							(left-word (gadr pair))
 
-							(r-logli (get-logli (GET-RIGHT-WILD left-word)))
+							(r-logli (get-logli (OBJ 'get-right-wild left-word)))
 
 							; Compute the logli log_2 P(l,r)/P(*,*)
 							(atom (compute-atom-logli pair pair-total))
@@ -460,19 +456,11 @@
 ;
 ; The mutual information between pairs is described in the overview,
 ; up top of this file. The access to the pairs is governed by the
-; the access functions provided as arguments.
+; the methods on the assed object.
 ;
 ; The `all-singletons` argument should be a list of all items over
 ; which the pairs will be computed. Every item in this list should
-; be of ITEM-TYPE.
-;
-; The GET-PAIR argument should be a function that returns all atoms
-; that hold counts for a pair (ListLink left-item right-item). It
-; should return a list (possibly the empty list).  Note that in some
-; cases, the list may be longer than just one item, e.g. for schemas
-; that count link lengths.  In thise case, the total count for the
-; pair is taken to be the sum of the individual counts on all the
-; atoms in the list.
+; be of  (OBJ 'item-type)
 ;
 ; The algorithm uses a doubley-nested loop to walk over all pairs,
 ; in a sparse-matrix fashion: The outer loop is over all all items,
@@ -500,8 +488,7 @@
 ; the performance overhead here in order to get the flexibility that
 ; the atomspace provides.
 ;
-(define (batch-all-pair-mi GET-PAIR
-	GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE all-singletons)
+(define (batch-all-pair-mi OBJ all-singletons)
 
 	(define msg (format #f "Start counting, num words=~A\n"
 			(length all-singletons)))
@@ -513,8 +500,7 @@
 	; for-each
 	(par-for-each
 		(lambda (word)
-			(compute-pair-wildcard-counts word
-				GET-PAIR GET-LEFT-WILD GET-RIGHT-WILD ITEM-TYPE)
+			(compute-pair-wildcard-counts OBJ word)
 			(trace-msg-cnt "Wildcard-count did ")
 		)
 		all-singletons
@@ -524,15 +510,13 @@
 	(display "Done with wild-card count N(*,w) and N(w,*)\n")
 
 	; Now, get the grand-total
-	(count-all-pairs
-		 GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
+	(count-all-pairs OBJ all-singletons)
 	(trace-elapsed)
 	(trace-msg "Done computing N(*,*), start computing log P(*,w)\n")
 	(display "Done computing N(*,*), start computing log P(*,w)\n")
 
 	; Compute the left and right wildcard logli's
-	(batch-all-pair-wildcard-logli
-		GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD all-singletons)
+	(batch-all-pair-wildcard-logli OBJ all-singletons)
 	(trace-elapsed)
 	(trace-msg "Done computing -log N(w,*)/N(*,*) and <-->\n")
 	(display "Done computing -log N(w,*)/N(*,*) and <-->\n")
@@ -543,8 +527,7 @@
 	; for-each
 	(par-for-each
 		(lambda (word)
-			(compute-pair-mi word GET-PAIR
-				GET-LEFT-WILD GET-RIGHT-WILD GET-WILD-WILD ITEM-TYPE)
+			(compute-pair-mi OBJ word)
 			(trace-msg-cnt "Done with pair MI cnt=")
 		)
 		all-singletons
