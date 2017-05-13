@@ -231,30 +231,6 @@
 				(else (apply cntobj (cons message args))))
 			)))
 
-; ---------------------------------------------------------------------
-; Count the total number of times that the atoms in the atom-list have
-; been observed.  The observation-count for a single atom is stored in
-; the 'count' value of its CountTruthValue. This routine just fetches
-; those, and adds them up.
-;
-; The returned value is the total count.
-
-(define-public (get-total-atom-count atom-list)
-	;
-	; A proceedural loop.
-	;	(let ((cnt 0))
-	;		(define (inc atom) (set! cnt (+ cnt (get-count atom))))
-	;		(for-each inc atom-list)
-	;		cnt
-	;	)
-
-	; textbook tail-recursive solution.
-	(define (hlpr lst cnt)
-		(if (null? lst) cnt
-			(hlpr (cdr lst) (+ cnt (get-count (car lst))))))
-
-	(hlpr atom-list 0)
-)
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
