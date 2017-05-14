@@ -132,7 +132,12 @@
 ; on the other side.
 
 (define (make-pair-wild LLOBJ)
-	(let ((llobj LLOBJ))
+	(let ((llobj LLOBJ)
+			(l-supp '())
+			(r-supp '())
+			(l-stars '())
+			(r-stars '())
+		)
 
 		; Return a list of all of the atoms that might ever appear on
 		; the left-hand-side of a pair.  This is the set of items x
@@ -148,52 +153,70 @@
 		; Actually, if someone needs something better, they can
 		; overload this method.
 		(define (get-left-support)
-			(cog-get-atoms (llobj 'left-type)))
+			(if (null? l-supp)
+				(set! l-supp (cog-get-atoms (llobj 'left-type))))
+			l-supp)
 
 		(define (get-right-support)
-			(cog-get-atoms (llobj 'right-type)))
+			(if (null? r-supp)
+				(set! r-supp (cog-get-atoms (llobj 'right-type))))
+			r-supp)
+
+		(define (get-left-support-size) (length (get-left-support))
+		(define (get-right-support-size) (length (get-right-support))
 
 		; Return a list of all pairs with the ITEM on the right side,
 		; and an object of type (LLOBJ 'left-type) on the left. The
-		; pairs are just ListLink's (of arity two). That it, it returns
+		; pairs are just ListLink's (of arity two). That is, it returns
 		; a list of atoms of the form
 		;
 		;    ListLink
 		;         (LLOBJ 'left-type)
 		;         ITEM
 		;
+		; Locally caches the value, so as not to waste time
+		; recomputing it.
 		(define (get-left-stars ITEM)
 			(define want-type (LLOBJ 'left-type))
-			(filter
-				(lambda (lnk)
-					(define oset (cog-outgoing-set lnk))
-					(and
-						(equal? 2 (cog-arity lnk))
-						(equal? want-type (cog-type (car oset)))
-						(equal? ITEM (cadr oset))
-					))
-				(cog-incoming-by-type ITEM 'ListLink)))
+			(if (null? l-stars)
+				(set! l-stars
+					(filter
+						(lambda (lnk)
+							(define oset (cog-outgoing-set lnk))
+							(and
+								(equal? 2 (cog-arity lnk))
+								(equal? want-type (cog-type (car oset)))
+								(equal? ITEM (cadr oset))
+							))
+						(cog-incoming-by-type ITEM 'ListLink))))
+			l-stars)
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
 			(define want-type (LLOBJ 'right-type))
-			(filter
-				(lambda (lnk)
-					(define oset (cog-outgoing-set lnk))
-					(and
-						(equal? 2 (cog-arity lnk))
-						(equal? ITEM (car oset))
-						(equal? want-type (cog-type (cadr oset)))
-					))
-				(cog-incoming-by-type ITEM 'ListLink)))
+			(if (null? r-stars)
+				(set! r-stars
+					(filter
+						(lambda (lnk)
+							(define oset (cog-outgoing-set lnk))
+							(and
+								(equal? 2 (cog-arity lnk))
+								(equal? ITEM (car oset))
+								(equal? want-type (cog-type (cadr oset)))
+							))
+						(cog-incoming-by-type ITEM 'ListLink))))
+			r-stars)
+
 
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((left-support)     (get-left-support))
-			((right-support)    (get-right-support))
-			((left-stars)       (apply get-left-stars args))
-			((right-stars)      (apply get-right-stars args))
+			((left-support)       (get-left-support))
+			((right-support)      (get-right-support))
+			((left-support-size)  (get-left-support-size))
+			((right-support-size) (get-right-support-size))
+			((left-stars)         (apply get-left-stars args))
+			((right-stars)        (apply get-right-stars args))
 			(else (apply llobj (cons message args))))
 		)))
 

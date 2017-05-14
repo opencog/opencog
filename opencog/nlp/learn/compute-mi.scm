@@ -149,7 +149,7 @@
 				0
 				(cntobj 'left-stars ITEM)))
 
-		; Compute and cache the left-side wild-card counts.
+		; Compute and cache the left-side wild-card counts N(*,y).
 		; This returns the atom holding the cached count, thus
 		; making it convient to persist (store) this cache in
 		; the database. It returns nil if the count was zero.
@@ -166,7 +166,7 @@
 				0
 				(cntobj 'right-stars ITEM)))
 
-		; Compute and cache the right-side wild-card counts.
+		; Compute and cache the right-side wild-card counts N(x,*).
 		; This returns the atom holding the cached count, or nil
 		; if the count was zero.
 		(define (cache-right-count ITEM)
@@ -174,6 +174,17 @@
 			(if (< 0 cnt)
 				(cntobj 'set-right-wild-count ITEM cnt)
 				'()))
+
+		; Compute and cache all of the left-side wild-card counts.
+		; This computes N(*,y) for all y, in parallel.
+		;
+		; This method returns a list of all of the atoms holding
+		; those counts; handy for storing in a database.
+		(define (cache-all-lefts)
+			(par-map cache-left-count (cntobj 'right-support)))
+
+		(define (cache-all-rights)
+			(par-map cache-right-count (cntobj 'left-support)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. In formulas, return
@@ -539,26 +550,31 @@
 ;
 (define (batch-all-pair-mi OBJ all-singletons)
 
-	; Decorate the object with methods that can compute things.
-	(define comp-obj
-		(make-compute-count
-			(make-pair-count-api OBJ)))
+	; Decorate the object with a counting API.
+	(define obj-get-set-api (make-pair-count-api OBJ))
 
-	(define msg (format #f "Start counting, num words=~A\n"
-			(length all-singletons)))
-	(trace-msg msg)
-	(display msg)
+	; Decorate the object with methods that can compute counts.
+	(define count-obj (make-compute-count obj-get-set-api))
+
+	; Decorate the object with methods that can compute frequencies.
+	(define freq-obj (make-compute-freq obj-get-set-api))
+
+	(format #t "Start counting\n")
+
+	(format #t "Support: num left=~A num right=~A\n"
+			(OBJ 'left-support-size)
+			(OBJ 'right-support-size))
 
 	; First, get the left and right wildcard counts.
-	; That is, compute N(w,*) and N(*,w)
-	; for-each
-	(par-for-each
-		(lambda (word)
-			(compute-pair-wildcard-counts comp-obj word)
-			(trace-msg-cnt "Wildcard-count did ")
-		)
-		all-singletons
-	)
+	; That is, compute N(w,*) and N(*,w) for all w.
+	(for-each
+		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
+		(count-obj 'cache-all-left))
+
+	(for-each
+		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
+		(count-obj 'cache-all-right))
+
 	(trace-elapsed)
 	(trace-msg "Done with wild-card counts N(*,w) and N(w,*)\n")
 	(display "Done with wild-card count N(*,w) and N(w,*)\n")
