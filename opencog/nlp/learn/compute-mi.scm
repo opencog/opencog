@@ -451,7 +451,8 @@
 	(define count-obj (make-compute-count obj-get-set-api))
 
 	; Decorate the object with methods that can compute frequencies.
-	(define freq-obj (make-compute-freq obj-get-set-api))
+	(define freq-obj (make-compute-freq
+		(make-pair-freq-api obj-get-set-api)))
 
 	(format #t "Start counting\n")
 
@@ -472,7 +473,9 @@
 	(store-atom (count-obj 'cache-total-count))
 	(trace-elapsed)
 	(trace-msg "Done computing N(*,*), start computing log P(*,w)\n")
-	(display "Done computing N(*,*), start computing log P(*,w)\n")
+	(format #t "Done computing N(*,*) total-count=~A\n"
+		(obj-get-set-api 'wild-wild-count))
+	(display "Start computing log P(*,w)\n")
 
 	; Compute the left and right wildcard frequencies and
 	; log-frequencies.
@@ -481,6 +484,7 @@
 		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
 		(freq-obj 'cache-all-left-freqs))
 
+	(display "Done with P(*,w)\n")
 	(for-each
 		(lambda (atom) (if (not (null? atom)) (store-atom atom)))
 		(freq-obj 'cache-all-right-freqs))
