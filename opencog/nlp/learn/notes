@@ -5139,3 +5139,5 @@ pair-counts unequal: 2133920.0 1168749.0\n")'
 3) left-stars returns junk fixed
 
 (define mave-1 (map (lambda (w) (cons (ob 'left-wild-count w) w)) aw))
+
+pair-counts unequal: 34692424.0 34689203.0\n")'.

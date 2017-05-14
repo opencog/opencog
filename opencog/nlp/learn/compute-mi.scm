@@ -321,7 +321,7 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((init-freqs)            (init))
+				((init-freq)             (init))
 				((compute-left-freq)     (apply compute-left-freq args))
 				((compute-right-freq)    (apply compute-right-freq args))
 				((cache-left-freq)       (apply cache-left-freq args))
