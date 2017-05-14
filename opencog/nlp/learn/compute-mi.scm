@@ -354,7 +354,7 @@
 
 (define (batch-all-pair-wildcard-logli OBJ ALL-WORDS)
 
-xxxxxxxxxxxxx
+; xxxxxxxxxxxxx
 	; Get the word-pair grand-total
 	(define pair-total (OBJ 'wild-wild-count))
 

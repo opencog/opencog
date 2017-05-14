@@ -162,8 +162,8 @@
 				(set! r-supp (cog-get-atoms (llobj 'right-type))))
 			r-supp)
 
-		(define (get-left-support-size) (length (get-left-support))
-		(define (get-right-support-size) (length (get-right-support))
+		(define (get-left-support-size) (length (get-left-support)))
+		(define (get-right-support-size) (length (get-right-support)))
 
 		; Return a list of all pairs with the ITEM on the right side,
 		; and an object of type (LLOBJ 'left-type) on the left. The
