@@ -5067,3 +5067,38 @@ move base-stats.scm to pair-stats.scm -- DONE
 Cannot connect to database: FATAL:  remaining connection slots are reserved for non-replication superuser connections
 
 get-clique-pair get-any-pair
+
+(display-backtrace (fluid-ref the-last-stack))
+
+Throw to key `bad-summation' with args `(count-all-pairs "Error:
+pair-counts unequal: 5974976.0 5754410.0\n")'.
+pair-counts unequal: 5974600.0 5761584.0\n")'. afer redoing the left!
+pair-counts unequal: 5974600.0 5761584.0\n")'  afer doing left 2x
+pair-counts unequal: 5974976.0 5761682.0\n")' after redoing right.
+pair-counts unequal: 5974976.0 5761682.0\n")' after right 2x
+pair-counts unequal: 5974600.0 5761584.0\n") after redoing  left
+
+(define aw (get-all-words))
+
+(ob 'left-stars)
+
+(define save-1 (map (lambda (w) (cons (ob 'left-wild-count w) w)) aw))
+
+(length (cob 'cache-all-left-counts))
+
+(for-each
+	(lambda (a b) (if (not (equal? a b)) (error "aiiide ~A ~A" a b)))
+	save-1 save-2)
+
+ERROR: aiiide ~A ~A (54.0 . (WordNode "d'Urville")
+) (56.0 . (WordNode "d'Urville")
+)
+
+So... recomputing the right counts changed the left-count on above....
+
+wtf.... (ob 'left-wildcard w) is empty....
+
+set-pair-count calls make-pair
+set-left-wild-count calls set-pair-count with 'left-wildcard  which is null
+
+foobar confused about which pari si which

@@ -39,6 +39,12 @@
 ; inheritance, i.e. arbitrary base classes, rather than a single,
 ; static base class, and so its totally unlike C++ inheritance, which
 ; is static, and a lot like C++ templates, which are dynamic.
+; Basically, what is needed, and what is implemented here is called
+; "parametric polymorphism".
+;
+; From what I can tell, tiny-CLOS and thus GOOPS does not support
+; parametric polymorphism... !?? and so I go it alone. The system here
+; is really really simple...
 ;
 ; The object system here is almost identical to this one:
 ;    http://community.schemewiki.org/?simple-object
@@ -242,45 +248,51 @@
 (define (make-pair-count-api LLOBJ)
 	(let ((llobj LLOBJ))
 
+		(define (get-count ATOM)
+			(cog-tv-count (cog-tv ATOM)))
+
+		(define (set-count ATOM CNT)
+			(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
+
 		; Return the raw observational count on PAIR.
 		; If the PAIR does not exist (was not oberved) return 0.
 		(define (get-pair-count PAIR)
 			(fold
-				(lambda (pr sum) (cog-tv-count (cog-tv pr)))
+				(lambda (pr sum) (+ sum (get-count pr)))
 				0
 				(llobj 'item-pairs PAIR)))
 
 		; Set the raw observational count on PAIR
 		; Return the atom that holds this count.
 		(define (set-pair-count PAIR CNT)
-			(cog-set-tv! (llobj 'make-pair PAIR) (cog-new-ctv 0 0 CNT)))
+			(set-count (llobj 'make-pair PAIR) CNT))
 
 		; Get the left wildcard count
 		(define (get-left-wild-count ITEM)
-			(get-pair-count (llobj 'left-wildcard ITEM)))
+			(get-count (llobj 'left-wildcard ITEM)))
 
 		; Get the right wildcard count
 		(define (get-right-wild-count ITEM)
-			(get-pair-count (llobj 'right-wildcard ITEM)))
+			(get-count (llobj 'right-wildcard ITEM)))
 
 		; Set the left wildcard count
 		; Return the atom that holds this count.
 		(define (set-left-wild-count ITEM CNT)
-			(set-pair-count (llobj 'left-wildcard ITEM) CNT))
+			(set-count (llobj 'left-wildcard ITEM) CNT))
 
 		; Set the right wildcard count
 		; Return the atom that holds this count.
 		(define (set-right-wild-count ITEM CNT)
-			(set-pair-count (llobj 'right-wildcard ITEM) CNT))
+			(set-count (llobj 'right-wildcard ITEM) CNT))
 
 		; Get the wildcard-wildcard count
 		(define (get-wild-wild-count)
-			(get-pair-count (llobj 'wild-wild)))
+			(get-count (llobj 'wild-wild)))
 
 		; Set the wildcard-wildcard count
 		; Return the atom that holds this count.
 		(define (set-wild-wild-count CNT)
-			(set-pair-count (llobj 'wild-wild) CNT))
+			(set-count (llobj 'wild-wild) CNT))
 
 		; Methods on this class.
 		(lambda (message . args)
@@ -326,7 +338,7 @@
 		; If the PAIR does not exist (was not oberved) return 0.
 		(define (get-pair-freq PAIR)
 			(fold
-				(lambda (pr sum) (get-freq pr))
+				(lambda (pr sum) (+ sum (get-freq pr)))
 				0
 				(llobj 'item-pairs PAIR)))
 
@@ -337,21 +349,21 @@
 
 		; Get the left wildcard frequency
 		(define (get-left-wild-freq ITEM)
-			(get-pair-freq (llobj 'left-wildcard ITEM)))
+			(get-freq (llobj 'left-wildcard ITEM)))
 
 		; Get the right wildcard frequency
 		(define (get-right-wild-freq ITEM)
-			(get-pair-freq (llobj 'right-wildcard ITEM)))
+			(get-freq (llobj 'right-wildcard ITEM)))
 
 		; Set the left wildcard frequency.
 		; Return the atom that holds this value.
 		(define (set-left-wild-freq ITEM FREQ)
-			(set-pair-freq (llobj 'left-wildcard ITEM) FREQ))
+			(set-freq (llobj 'left-wildcard ITEM) FREQ))
 
 		; Set the right wildcard frequency.
 		; Return the atom that holds this value.
 		(define (set-right-wild-freq ITEM FREQ)
-			(set-pair-freq (llobj 'right-wildcard ITEM) FREQ))
+			(set-freq (llobj 'right-wildcard ITEM) FREQ))
 
 		; Methods on this class.
 		(lambda (message . args)

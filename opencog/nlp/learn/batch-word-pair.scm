@@ -115,11 +115,11 @@
 
 		; Caution: this unconditionally creates the wildcard pair!
 		(define (get-left-wildcard WORD)
-			(get-pair (ListLink any-left WORD)))
+			(make-pair (ListLink any-left WORD)))
 
 		; Caution: this unconditionally creates the wildcard pair!
 		(define (get-right-wildcard WORD)
-			(get-pair (ListLink WORD any-right)))
+			(make-pair (ListLink WORD any-right)))
 
 		(define (get-wild-wild)
 			(get-pair (ListLink any-left any-right)))
@@ -169,10 +169,10 @@
 			(if (null? pr) '() (list pr)))
 
 		(define (get-left-wildcard WORD)
-			(get-pair (ListLink any-left WORD)))
+			(make-pair (ListLink any-left WORD)))
 
 		(define (get-right-wildcard WORD)
-			(get-pair (ListLink WORD any-right)))
+			(make-pair (ListLink WORD any-right)))
 
 		(define (get-wild-wild)
 			(get-pair (ListLink any-left any-right)))
